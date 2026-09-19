@@ -1,0 +1,47 @@
+=== Oracle cost per target, three engines, same verdicts (symmetrised u / F_u, K_1) ===
+
+| n | m | ℓ | v | |F| | Q_enum | Q_word | Q/Q_enum | deg | targets | reference | agree | brute (bit ops) | F4 (bit ops) | crossbred (bit ops) | xb/brute | xb/F4 | D | k | kernel | filters | xb wall |
+|--:|--:|--:|--:|----:|-------:|-------:|---------:|----:|--------:|:----------|:-----:|----------------:|-------------:|--------------------:|---------:|------:|--:|--:|-------:|--------:|--------:|
+probe n=5 m=3 v=1 deg=1 |F_u|=1 ell=1 eqs=5
+| 5 | 3 | 1 | 1 | 1 | 0 | — | — | 1 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+probe n=7 m=3 v=10 deg=4 |F_u|=29 ell=4 eqs=7
+| 7 | 3 | 4 | 10 | 29 | 406 | — | — | 4 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+probe n=9 m=3 v=7 deg=4 |F_u|=13 ell=3 eqs=9
+| 9 | 3 | 3 | 7 | 13 | 78 | — | — | 4 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+probe n=11 m=3 v=1 deg=1 |F_u|=1 ell=1 eqs=11
+| 11 | 3 | 1 | 1 | 1 | 0 | — | — | 1 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+skip n=13 m=3: no KoblitzCurve K_1
+probe n=15 m=3 v=13 deg=4 |F_u|=61 ell=5 eqs=15
+| 15 | 3 | 5 | 13 | 61 | 1830 | — | — | 4 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+probe n=17 m=3 v=25 deg=4 |F_u|=409 ell=9 eqs=17
+| 17 | 3 | 9 | 25 | 409 | 83436 | — | — | 4 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+probe n=19 m=3 v=1 deg=1 |F_u|=1 ell=1 eqs=19
+| 19 | 3 | 1 | 1 | 1 | 0 | — | — | 1 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+probe n=23 m=3 v=34 deg=4 |F_u|=4141 ell=12 eqs=23
+| 23 | 3 | 12 | 34 | 4141 | 8571870 | — | — | 4 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+skip n=25 m=3: no KoblitzCurve K_1
+skip n=27 m=3: no KoblitzCurve K_1
+probe n=29 m=3 v=1 deg=1 |F_u|=1 ell=1 eqs=29
+| 29 | 3 | 1 | 1 | 1 | 0 | — | — | 1 | — | probe | — | — | — | — | — | — | — | — | — | — | probe only |
+skip n=31 m=3: no KoblitzCurve K_1
+skip n=33 m=3: no KoblitzCurve K_1
+skip n=35 m=3: no KoblitzCurve K_1
+skip n=37 m=3: no KoblitzCurve K_1
+
+X1/X3 unit: Q_word is 64-bit word XORs per target (extraction + search).
+Q_enum is C(|F|, m-1) word-ops at one word-op per pair (m=3) or point (m=2);
+that undercounts enumeration, so Q/Q_enum is conservative against an advance.
+`--sym` uses |F_u| and ℓ = dim V from divisor_for_dimension(n, (n+1)/m).
+
+The `agree` column is the correctness gate, and it has two strengths.
+  `exhaustive, ==` : crossbred's root set equals exhaustive search's, exactly.
+  `F4 capped, ⊆`   : past v = 24 exhaustive search does not fit, and F4+splitting
+                     runs under its default max_solutions cap, so its list is a
+                     prefix of the root set.  The check is then two one-sided
+                     ones: every crossbred root verifies against the original
+                     equations, and every root F4 found is one crossbred found.
+A row that does not say `yes` is not a result.
+
+What this prices is the decomposition oracle only.  Relation collection stays
+Θ(2^n) with any oracle polynomial in the factor base — see
+RESEARCH_SEMAEV_DECOMPOSITION.md, `What this does not buy`.

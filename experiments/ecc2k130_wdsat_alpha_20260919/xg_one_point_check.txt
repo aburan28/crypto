@@ -1,0 +1,13 @@
+# WDSat Gaussian-elimination mode (-x -b) against the frozen symmetry_on
+# configuration (-b), on three rejection instances from anf/. Not a fit
+# (three points, one target each); a footnote to RESEARCH_ECC2K130_BEST.md §4.
+# Same host, same widened binary (sha256 bbe7c019...), one process at a time.
+# columns: instance  flags  wall_s  answer  conflicts
+n19l6_t0 -b     0.39   UNSAT 44620
+n19l6_t0 -x -b  5.88   UNSAT 29963
+n21l7_t0 -b     4.19   UNSAT 350605
+n21l7_t0 -x -b  69.70  UNSAT 272273
+n24l8_t1 -b     48.20  UNSAT 2807319
+n24l8_t1 -x -b  821.41 UNSAT 2375159
+# conflicts per sorted triple with -x -b: 0.655, 0.761, 0.840 (rising toward 1)
+# two-point slope l=6..8 with -x -b: 3.15 in conflicts, 3.56 in wall

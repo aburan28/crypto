@@ -55,6 +55,22 @@ def streamingProducts(baseSize, relations, groupOrder, summands=3):
     return relations * (1.0 / hits) * pairs * PRODUCTS_PER_PAIR
 
 
+def tableProducts(baseSize, relations, groupOrder, summands=3):
+    """Field products to collect `relations` from a stored pair-sum table.
+
+    Setup stores every unordered pair sum once.  Each later trial computes
+    |F| remainders R − P_k and looks them up.  Hash/compare work is not
+    charged.  At leading order with Frobenius relations |F|/n this is
+    60·#G / (n |F|), a factor |F| below streaming, still generic 3SUM.
+    """
+    hits = expectedYield(baseSize, summands, groupOrder)
+    if hits <= 0:
+        return float('inf')
+    setup = combinations(baseSize, 2) * PRODUCTS_PER_AFFINE_ADD
+    probes = relations * (1.0 / hits) * baseSize * PRODUCTS_PER_AFFINE_ADD
+    return setup + probes
+
+
 def sScore(operations, subgroupOrder):
     return operations / math.sqrt(subgroupOrder)
 
@@ -110,6 +126,35 @@ def pairDecomposeLookup(curve, lookup, target, summands=3):
             if t == pi or t == pj or t == curve.neg(pi) or t == curve.neg(pj):
                 continue
             return (pi, pj, t)
+    return None
+
+
+def pairDecomposeTable(curve, lookup, target, summands=3):
+    """True pair table: C(|F|,2) sums stored, then |F| remainder lookups.
+
+    Distinct from pairDecomposeLookup, which still walks every pair per
+    target and only tests the remainder against the factor base.
+    """
+    if target is None or summands != 3:
+        return None
+    points = list(lookup)
+    n = len(points)
+    table = {}
+    for i in range(n):
+        for j in range(i + 1, n):
+            if points[i] == curve.neg(points[j]):
+                continue
+            partial = curve.add(points[i], points[j])
+            if partial is None:
+                continue
+            table.setdefault(partial, []).append((i, j))
+    for k in range(n):
+        remainder = curve.add(target, curve.neg(points[k]))
+        if remainder is None:
+            continue
+        for i, j in table.get(remainder, ()):
+            if k != i and k != j:
+                return (points[i], points[j], points[k])
     return None
 
 
@@ -198,9 +243,12 @@ def rhoProducts(rhoLog2=RHO_LOG2, productsPerIter=RHO_PRODUCTS_PER_ITER):
 
 def projectAttack(baseSize, relations, subgroupOrder, curveOrder, rhoLog2=RHO_LOG2):
     products = streamingProducts(baseSize, relations, curveOrder)
+    table = tableProducts(baseSize, relations, curveOrder)
     rho = rhoProducts(rhoLog2)
     s = sScore(products, subgroupOrder)
+    sTable = sScore(table, subgroupOrder)
     sRho = sScore(rho, subgroupOrder)
+    finite = products < float('inf') and table < float('inf')
     return {
         'base_size': baseSize,
         'relations_charged': relations,
@@ -209,17 +257,23 @@ def projectAttack(baseSize, relations, subgroupOrder, curveOrder, rhoLog2=RHO_LO
         'expected_yield_per_target': expectedYield(baseSize, 3, curveOrder),
         'streaming_field_products': products,
         'log2_streaming_field_products': log2(products) if products < float('inf') else None,
+        'table_field_products': table,
+        'log2_table_field_products': log2(table) if table < float('inf') else None,
         'S': s if products < float('inf') else None,
+        'table_S': sTable if table < float('inf') else None,
         'S_rho': sRho,
         'rho_field_products': rho,
         'log2_rho_field_products': log2(rho),
         'rho_products_per_iteration': RHO_PRODUCTS_PER_ITER,
         'ratio_to_rho': (products / rho) if products < float('inf') else None,
         'log2_ratio_to_rho': (log2(products) - log2(rho)) if products < float('inf') else None,
+        'table_ratio_to_rho': (table / rho) if table < float('inf') else None,
+        'table_log2_ratio_to_rho': (log2(table) - log2(rho)) if table < float('inf') else None,
+        'table_ratio_to_streaming': (table / products) if finite and products else None,
         'products_per_affine_add': PRODUCTS_PER_AFFINE_ADD,
         'products_per_pair': PRODUCTS_PER_PAIR,
         'class': 'engineering',
-        'note': 'GPU pair-add throughput changes wall-clock, not S; the product law is the floor',
+        'note': 'GPU pair-add throughput changes wall-clock, not S; a pair table cuts S by ~|F| and is still generic 3SUM',
     }
 
 

@@ -1,0 +1,15 @@
+schema_version = "1.1"
+[task]
+name = "crypto/ecc2k130-crossbred-alpha"
+description = "Replay Crossbred α freezes and measure chained m=4 FFD"
+[agent]
+user = "researcher"
+timeout_sec = 3600
+[verifier]
+user = "root"
+timeout_sec = 1800
+[environment]
+cpus = 2
+memory_mb = 8192
+storage_mb = 20480
+allow_internet = false

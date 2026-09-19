@@ -44,7 +44,8 @@ def runToyDlp():
 
 def runGpu(binary, rawPath):
     cmd = [binary, '--weight', '2', '--planted', '8', '--search-generator',
-           '--cpu', '--bench-points', '2048', '--bench-steps', '4096',
+           '--cpu', '--table', '--table-probe-steps', '4096',
+           '--bench-points', '2048', '--bench-steps', '4096',
            '--json', rawPath]
     print('+', ' '.join(cmd), flush=True)
     subprocess.check_call(cmd)
@@ -100,6 +101,12 @@ def merge(toy, gpu):
         seconds = None
         if occupiedAdds and products < float('inf'):
             seconds = (products / pairs.PRODUCTS_PER_AFFINE_ADD) / occupiedAdds
+        table = gpu.get('pair_table') or {}
+        probeRate = table.get('probe_adds_per_second') or 0
+        tableProducts = projection.get('table_field_products')
+        tableSeconds = None
+        if probeRate and tableProducts and tableProducts < float('inf'):
+            tableSeconds = (tableProducts / pairs.PRODUCTS_PER_AFFINE_ADD) / probeRate
         out['practicality'] = {
             'gpu_pairs_per_second': pairRate,
             'cpu_pairs_per_second': cpuRate,
@@ -108,7 +115,10 @@ def merge(toy, gpu):
             'microbench_affine_adds_per_second': addRate,
             'projected_streaming_seconds': seconds,
             'projected_streaming_log2_seconds': pairs.log2(seconds) if seconds else None,
-            'note': 'wall-clock at the occupied pair-scan rate; not the metric',
+            'table_probe_adds_per_second': probeRate or None,
+            'projected_table_seconds': tableSeconds,
+            'projected_table_log2_seconds': pairs.log2(tableSeconds) if tableSeconds else None,
+            'note': 'wall-clock at the occupied pair-scan or table-probe rate; not the metric',
         }
     return out
 
@@ -135,6 +145,11 @@ def main():
     summary = merge(toy, gpu)
     summary['elapsed_s'] = time.time() - t0
     out = os.path.join(HERE, 'summary.json')
+    if os.path.isfile(out):
+        with open(out) as f:
+            previous = json.load(f)
+        if 'sat' in previous:
+            summary['sat'] = previous['sat']
     with open(out, 'w') as f:
         json.dump(summary, f, indent=2, sort_keys=True)
         f.write('\n')

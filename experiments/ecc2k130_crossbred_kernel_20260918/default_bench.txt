@@ -1,0 +1,50 @@
+
+=== Crossbred space by (D, k), K_0 / F_2^9, m = 2 ===
+
+unknowns v = 12, equations = 9, ℓ = 6
+
+|  D |  k | rows | cols | bad | kernel | filters | word ops |
+|---:|---:|-----:|-----:|----:|-------:|--------:|---------:|
+|  2 |  2 |    9 |   49 |  24 |      0 |       0 |       13 |
+|  2 |  3 |    9 |   49 |  18 |      0 |       0 |       14 |
+|  2 |  4 |    9 |   49 |  12 |      0 |       0 |       15 |
+|  2 |  5 |    9 |   49 |   6 |      2 |       0 |       17 |
+|  2 |  6 |    9 |   49 |   0 |      9 |       0 |        0 |
+|  2 |  7 |    9 |   49 |   0 |      9 |       0 |        0 |
+|  3 |  2 |  117 |  259 | 219 |      0 |       0 |     5040 |
+|  3 |  3 |  117 |  259 | 198 |      0 |       0 |     4370 |
+|  3 |  4 |  117 |  259 | 172 |      1 |       0 |     4625 |
+|  3 |  5 |  117 |  259 | 141 |     26 |       0 |     3450 |
+|  3 |  6 |  117 |  259 | 105 |     63 |       0 |      712 |
+|  3 |  7 |  117 |  259 |  70 |     72 |       0 |      627 |
+|  4 |  2 |  711 |  764 | 720 |     12 |       0 |   925106 |
+|  4 |  3 |  711 |  764 | 687 |     52 |       0 |   990374 |
+|  4 |  4 |  711 |  764 | 637 |     91 |       0 |  1041172 |
+|  4 |  5 |  711 |  764 | 566 |    197 |       0 |   740580 |
+|  4 |  6 |  711 |  764 | 470 |    294 |       0 |   509485 |
+|  4 |  7 |  711 |  764 | 360 |    403 |       0 |   356150 |
+
+=== Oracle cost per target, three engines, same verdicts ===
+
+| n | m | ℓ | v | deg | targets | reference | agree | brute (bit ops) | F4 (bit ops) | crossbred (bit ops) | xb/brute | xb/F4 | D | k | kernel | filters | xb wall |
+|--:|--:|--:|--:|----:|--------:|:----------|:-----:|----------------:|-------------:|--------------------:|---------:|------:|--:|--:|-------:|--------:|--------:|
+| 9 | 2 | 6 | 12 | 2 | 12 | exhaustive, == | yes | 902144 | 27529653 | 108117 | 0.120 | 0.004 | 2 | 6 | 9 | 0 | 0.1 ms |
+| 13 | 2 | 12 | 24 | 2 | 12 | exhaustive, == | yes | 18570980010 | 10393078458 | 24350101 | 0.001 | 0.002 | 2 | 12 | 13 | 0 | 7.3 ms |
+| 7 | 3 | 3 | 16 | 3 | 11 | exhaustive, == | yes | 20000395 | 25174603 | 320436 | 0.016 | 0.013 | 3 | 6 | 15 | 0 | 0.2 ms |
+| 9 | 3 | 6 | 27 | 3 | 12 | F4 capped, ⊆ | yes | — | 1294445989 | 30338821 | — | 0.023 | 3 | 12 | 23 | 0 | 56.6 ms |
+
+Unit: bit operations, one 64-bit word XOR = 64 bit ops.
+Boundary: exhaustive search over the Boolean system, 2^v · (total monomials).
+
+The `agree` column is the correctness gate, and it has two strengths.
+  `exhaustive, ==` : crossbred's root set equals exhaustive search's, exactly.
+  `F4 capped, ⊆`   : past v = 24 exhaustive search does not fit, and F4+splitting
+                     runs under its default max_solutions cap, so its list is a
+                     prefix of the root set.  The check is then two one-sided
+                     ones: every crossbred root verifies against the original
+                     equations, and every root F4 found is one crossbred found.
+A row that does not say `yes` is not a result.
+
+What this prices is the decomposition oracle only.  Relation collection stays
+Θ(2^n) with any oracle polynomial in the factor base — see
+RESEARCH_SEMAEV_DECOMPOSITION.md, `What this does not buy`.

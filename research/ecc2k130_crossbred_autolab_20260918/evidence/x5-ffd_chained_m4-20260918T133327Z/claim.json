@@ -1,0 +1,72 @@
+{
+  "beat_id": "x5.ffd_chained_m4",
+  "class": "measurement",
+  "falsifier": "FFD max grows with n at m=4",
+  "finished_utc": "2026-09-18T13:33:27.429507+00:00",
+  "host": "ip-172-31-19-103",
+  "log_sha256": "84d90b3720226977bc791e2205a5a87a082071d268d46d8639a3e9eebd6cb3bc",
+  "m4_ffd_grows_with_n": false,
+  "m4_ffd_maxima": [
+    3,
+    3
+  ],
+  "note": "Smoke at 4 draws on the chained x-system. Incumbent FFD max=3 on chained m\u22653. Promotion needs 16 draws. Not the missing chained symmetrised S3.",
+  "rows": [
+    {
+      "deg": 3,
+      "ell": 6,
+      "eqs": 18,
+      "ffd_max": 3,
+      "ffd_min": 3,
+      "m": 3,
+      "mean_syz_d2": 0.0,
+      "n": 9,
+      "no_fall": 0,
+      "trials": 4,
+      "vars": 27
+    },
+    {
+      "deg": 3,
+      "ell": 6,
+      "eqs": 27,
+      "ffd_max": 3,
+      "ffd_min": 3,
+      "m": 4,
+      "mean_syz_d2": 0.0,
+      "n": 9,
+      "no_fall": 0,
+      "trials": 4,
+      "vars": 42
+    },
+    {
+      "deg": 3,
+      "ell": 4,
+      "eqs": 30,
+      "ffd_max": 3,
+      "ffd_min": 3,
+      "m": 3,
+      "mean_syz_d2": 0.0,
+      "n": 15,
+      "no_fall": 0,
+      "trials": 4,
+      "vars": 27
+    },
+    {
+      "deg": 3,
+      "ell": 4,
+      "eqs": 45,
+      "ffd_max": 3,
+      "ffd_min": 3,
+      "m": 4,
+      "mean_syz_d2": 0.0,
+      "n": 15,
+      "no_fall": 0,
+      "trials": 4,
+      "vars": 46
+    }
+  ],
+  "run_id": "x5-ffd_chained_m4-20260918T133327Z",
+  "started_utc": "2026-09-18T13:33:27.178587+00:00",
+  "status": "PASS",
+  "task_id": "TASK-ECC2K130-CROSSBRED-AUTOLAB-20260918"
+}

@@ -28,6 +28,18 @@ class AccountingTests(unittest.TestCase):
     def test_expected_yield_matches_binomial(self):
         self.assertAlmostEqual(pairs.expectedYield(10, 3, 1000), 120 / 1000.0)
 
+    def test_pair_table_is_one_over_base_times_streaming(self):
+        base = 8384
+        relations = base / 131.0
+        stream = pairs.streamingProducts(base, relations, pairs.ORDER_131)
+        table = pairs.tableProducts(base, relations, pairs.ORDER_131)
+        self.assertGreater(stream, table)
+        self.assertAlmostEqual(stream / table / base, 1.0, delta=0.05)
+        self.assertGreater(pairs.log2(table) - pairs.log2(pairs.rhoProducts()), 50)
+        projection = pairs.projectAttack(base, relations, pairs.R_131, pairs.ORDER_131)
+        self.assertEqual(projection['class'], 'engineering')
+        self.assertAlmostEqual(projection['table_ratio_to_streaming'] * base, 1.0, delta=0.05)
+
 
 class PairOracleTests(unittest.TestCase):
     def test_planted_triple_at_degree_5(self):
@@ -55,6 +67,20 @@ class PairOracleTests(unittest.TestCase):
         curve = curves.Curve(onb)
         # Re-verify the recovered scalar in a fresh field object.
         self.assertTrue(curves.isPrimeBig(int(report['subgroup_order'])))
+
+    def test_pair_table_recovers_planted_triple_at_degree_5(self):
+        meter = engine.Ledger()
+        context = engine.setup(5, 4, 3, meter)
+        onb, curve, ell, generator, eigen, reps, lookup, _, _ = context
+        points = list(lookup)
+        triple = (points[0], points[2], points[4])
+        target = curve.add(curve.add(triple[0], triple[1]), triple[2])
+        found = pairs.pairDecomposeTable(curve, lookup, target)
+        self.assertIsNotNone(found)
+        got = None
+        for p in found:
+            got = curve.add(got, p)
+        self.assertEqual(got, target)
 
 
 if __name__ == '__main__':

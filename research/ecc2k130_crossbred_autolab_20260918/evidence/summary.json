@@ -1,0 +1,107 @@
+{
+  "schema": "ecc2k130_crossbred_autolab/v1",
+  "task_id": "TASK-ECC2K130-CROSSBRED-AUTOLAB-20260918",
+  "host": "ip-172-31-19-103",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "class": "measurement",
+  "question": "Does the local AutoLab replay X1/X3, refuse a mixed-frame alpha fit, and report whether chained-x or chained-sym FFD grows at m=4?",
+  "boundaries": {
+    "rho_products_log2": 63.22,
+    "product_law_floor_log2": 136.91,
+    "success": "OLS slope of log2(Q/Q_enum) vs ell <= -0.5 (alpha <= 1.5) over >=4 agreeing m=3 rungs with |F| >= 3 in one frame",
+    "x5_falsifier": "FFD max grows with n at m=4 on ell > 1"
+  },
+  "beats": [
+    {
+      "beat_id": "smoke.x1_n5",
+      "status": "PASS",
+      "class": "accounting",
+      "evidence": "evidence/smoke-x1_n5-20260918T133313Z/claim.json",
+      "Q_over_Q_enum": 80.243,
+      "frozen_Q_over_Q_enum": 83.248,
+      "rel_err": 0.036,
+      "filters": 0,
+      "agree": true,
+      "note": "T4 D=3 k=8, 12 targets vs freeze 11. Within protocol rel_tol=0.05. Not a new alpha."
+    },
+    {
+      "beat_id": "replay.x3_k1_n7",
+      "status": "PASS",
+      "class": "accounting",
+      "evidence": "evidence/replay-x3_k1_n7-20260918T133319Z/claim.json",
+      "Q_over_Q_enum": 4.653,
+      "frozen_Q_over_Q_enum": 4.653,
+      "filters": 0,
+      "agree": true
+    },
+    {
+      "beat_id": "fit.alpha",
+      "status": "PASS",
+      "class": "measurement",
+      "evidence": "evidence/fit-alpha-20260918T133307Z/claim.json",
+      "fit": null,
+      "x1_rungs": 2,
+      "x3_rungs": 2,
+      "note": "OLS is per frame. Mixing chained X1 with symmetrised X3 is inadmissible. A two-point sketch is not a fit."
+    },
+    {
+      "beat_id": "x5.ffd_chained_m4",
+      "status": "PASS",
+      "class": "measurement",
+      "evidence": "evidence/x5-ffd_chained_m4-20260918T133327Z/claim.json",
+      "protocol": "ffd_summary factor_index=0 d_max=3 seed=0x5EED FFD_TRIALS=4",
+      "m4_ffd_grows_with_n": false,
+      "m4_ffd_maxima": [3, 3],
+      "draws": 4,
+      "note": "Chained x-system. Agrees with the scaling-target incumbent FFD max=3 on chained m>=3. Superseded as a smoke by the 16-draw promotion."
+    },
+    {
+      "beat_id": "x5.ffd_chained_m4_16",
+      "status": "PASS",
+      "class": "measurement",
+      "evidence": "evidence/x5-ffd_chained_m4_16-20260918T160221Z/claim.json",
+      "protocol": "ffd_summary factor_index=0 d_max=3 seed=0x5EED FFD_TRIALS=16",
+      "m4_ffd_grows_with_n": false,
+      "m4_ffd_maxima": [3, 3],
+      "draws": 16,
+      "note": "16-draw promotion of chained-x. FFD max=3 at n=9 and n=15, m=4. Does not grow. Not the chained symmetrised S3."
+    },
+    {
+      "beat_id": "x5.ffd_chained_sym_m4_smoke",
+      "status": "PASS",
+      "class": "measurement",
+      "evidence": "evidence/x5-ffd_chained_sym_m4_smoke-20260918T160220Z/claim.json",
+      "protocol": "build_chained_symmetrised_system; divisor_for_dimension(n,(n+1)/m); d_max=4 seed=0x5EED FFD_TRIALS=4 a=0",
+      "n_vars": "m(ell-1)+(m-2)n+(m-1)",
+      "m4_ffd_grows_with_n": false,
+      "m4_ffd_maxima": [4, 4],
+      "m4_ffd_maxima_including_ell_1": [2, 4, 4],
+      "draws": 4,
+      "rows": [
+        {"n": 7, "ell": 1, "vars": 17, "deg": 1, "ffd_max": 2, "trials": 4, "class": "accounting"},
+        {"n": 9, "ell": 3, "vars": 29, "deg": 3, "ffd_max": 4, "trials": 4},
+        {"n": 15, "ell": 3, "vars": 41, "deg": 3, "ffd_max": 4, "trials": 4}
+      ],
+      "note": "n=7 ell=1 has no FB bits; interior S3 collapses to degree 1. H1 is read from ell>1: FFD=4 at n=9 and n=15. Four draws is a smoke; 16-draw promotion agrees."
+    },
+    {
+      "beat_id": "x5.ffd_chained_sym_m4",
+      "status": "PASS",
+      "class": "measurement",
+      "evidence": "evidence/x5-ffd_chained_sym_m4-20260918T160221Z/claim.json",
+      "protocol": "build_chained_symmetrised_system; divisor_for_dimension(n,(n+1)/m); d_max=4 seed=0x5EED FFD_TRIALS=16 a=0",
+      "n_vars": "m(ell-1)+(m-2)n+(m-1)",
+      "m4_ffd_grows_with_n": false,
+      "m4_ffd_maxima": [4, 4],
+      "m4_ffd_maxima_including_ell_1": [2, 4, 4],
+      "draws": 16,
+      "rows": [
+        {"n": 7, "ell": 1, "vars": 17, "deg": 1, "ffd_max": 2, "trials": 16, "class": "accounting"},
+        {"n": 9, "ell": 3, "vars": 29, "deg": 3, "ffd_max": 4, "trials": 16},
+        {"n": 15, "ell": 3, "vars": 41, "deg": 3, "ffd_max": 4, "trials": 16}
+      ],
+      "note": "16-draw promotion. H1 (FFD growing with n at m=4, ell>1) is not met. Not an advance against the product-law floor. Not unchained S4."
+    }
+  ],
+  "verdict": "No alpha. Chained-x FFD max=3 at n=9 and n=15 over 16 draws, does not grow. Chained-sym FFD max=4 at n=9 and n=15 (ell=3) over 16 draws, does not grow; n=7 ell=1 is a degree-1 collapse, not H1. Product-law floor untouched. Harbor not required."
+}

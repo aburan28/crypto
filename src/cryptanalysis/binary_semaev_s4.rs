@@ -441,6 +441,59 @@ impl S4System {
     }
 }
 
+/// The system in WDSat's ANF input form: one numbering with the `3l`
+/// x-variables first and the `6l − 3` e-variables after them, one row
+/// per correspondence coefficient (`e_{i,d} ⊕ σ_{i,d} = 0`) and one
+/// per descended Semaev equation. Variables are 1-based; a monomial of
+/// degree `k > 1` is written `.k v₁ … v_k`; WDSat rows have odd parity,
+/// so `T` is appended exactly when the polynomial's constant is zero.
+/// Same bytes as `examples/koblitz_pdp_export.rs` writes.
+pub fn wdsat_anf(system: &S4System) -> String {
+    let n_x = system.n_x_vars();
+    let mut rows: Vec<(Vec<Vec<u32>>, bool)> = Vec::new();
+    for (i, coefficients) in system.correspondence.iter().enumerate() {
+        for (degree, sigma) in coefficients.iter().enumerate() {
+            let mut monomials: Vec<Vec<u32>> = sigma
+                .monomials()
+                .filter(|m| !m.is_empty())
+                .cloned()
+                .collect();
+            monomials.push(vec![n_x + system.e_var(i, degree)]);
+            rows.push((monomials, sigma.has_constant()));
+        }
+    }
+    for equation in &system.semaev {
+        let monomials = equation
+            .monomials()
+            .filter(|m| !m.is_empty())
+            .map(|m| m.iter().map(|v| n_x + *v).collect())
+            .collect();
+        rows.push((monomials, equation.has_constant()));
+    }
+    let active: Vec<&(Vec<Vec<u32>>, bool)> = rows
+        .iter()
+        .filter(|(monomials, constant)| *constant || !monomials.is_empty())
+        .collect();
+    let n_vars = n_x + system.n_e_vars();
+    let mut out = format!("p cnf {n_vars} {}\n", active.len());
+    for (monomials, constant) in active {
+        out.push('x');
+        for monomial in monomials {
+            if monomial.len() > 1 {
+                out.push_str(&format!(" .{}", monomial.len()));
+            }
+            for variable in monomial {
+                out.push_str(&format!(" {}", variable + 1));
+            }
+        }
+        if !constant {
+            out.push_str(" T");
+        }
+        out.push_str(" 0\n");
+    }
+    out
+}
+
 // ── Building the system ─────────────────────────────────────────────
 
 /// **Weil-descend the symmetrised Semaev `S₄`** for target x-coordinate
@@ -655,6 +708,32 @@ mod tests {
         let y3 = F2mElement::from_bit_positions(&[3], n);
         let (e1, e2, e3) = elementary_symmetric_3(&y1, &y2, &y3, &irr);
         assert!(!symmetrised_s4_eval(&e1, &e2, &e3, &x_r, &irr).is_zero());
+    }
+
+    /// The ANF export names every variable of both spaces once, has one
+    /// row per correspondence coefficient and per Semaev equation, and
+    /// every row carries odd parity (`T` present iff the constant is 0).
+    #[test]
+    fn wdsat_anf_has_the_reference_shape() {
+        let (n, l, irr, x_r, _) = corpus_n19l6();
+        let system = weil_descend_s4(n, l, &irr, &F2mElement::one(n), &x_r);
+        let anf = wdsat_anf(&system);
+        let mut lines = anf.lines();
+        let header = lines.next().unwrap();
+        let n_vars = 9 * l - 3;
+        let n_rows = n + 6 * l - 3;
+        assert_eq!(header, format!("p cnf {n_vars} {n_rows}"));
+        let rows: Vec<&str> = lines.collect();
+        assert_eq!(rows.len(), n_rows as usize);
+        for row in rows {
+            assert!(row.starts_with('x') && row.ends_with(" 0"));
+            let ids: Vec<u32> = row[1..row.len() - 2]
+                .split_whitespace()
+                .filter(|t| !t.starts_with('.') && *t != "T")
+                .map(|t| t.parse().unwrap())
+                .collect();
+            assert!(ids.iter().all(|&v| (1..=n_vars).contains(&v)));
+        }
     }
 
     /// Squaring must be exactly relocation: same coefficients, moved

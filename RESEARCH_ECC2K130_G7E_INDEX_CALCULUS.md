@@ -10,7 +10,13 @@ already priced in `RESEARCH_ECC2K130_DECOMPOSITION.md`. Wall-clock moves;
 the ratio to the floor does not. The work is an engineering calibration
 of that oracle in the packed type-II normal-basis arithmetic the rho
 client already uses, plus verified planted decompositions and two toy
-discrete logs recovered by the same algorithm on the CPU.
+discrete logs recovered by the same algorithm on the CPU. CryptoMiniSat
+on this host's CPU recovers the same toy logs and loses to pair
+enumeration on planted triples; SAT internals stay uncalibrated and do
+not enter `S`. A stored weight-2 pair table cuts the product count by
+`|F|` and is still `2^53.62` times rho. How this oracle sits next to the
+other IC threads on this curve is
+[`RESEARCH_ECC2K130_IC_SYNTHESIS.md`](RESEARCH_ECC2K130_IC_SYNTHESIS.md).
 
 ## 1. The boundary, stated before measuring
 
@@ -125,14 +131,66 @@ products/iteration, measured on this SKU. `S = products / √r` with
 The measured row is the Frobenius-accounting row, run. Its ratio to the
 floor is 1. The GPU does not appear in the product column.
 
+**Pair table, stated before measuring.** Streaming re-pays `C(|F|, 2)`
+affine adds on every target. A stored table of those pair sums pays it
+once, then `|F|` remainder adds per target. Weight 2 at `|F| = 8384` is
+`C(8384, 2) = 35,141,536` entries, under 1 GiB at 28 bytes, so it fits
+in 96 GiB; a weight-4 table does not. Charging `|F|/131` Frobenius
+relations, the counting identity is
+
+```
+C(|F|, 2)·10  +  (|F|/131)·(#E / C(|F|, 3))·|F|·10
+    ≈  60·#E / (131 |F|)
+```
+
+At `|F| = 8384` that is `2^116.84` field products, `S = 5.70×10^{15}`,
+`2^53.62` times rho, a factor `|F|` below the streaming row. Class:
+engineering. It is generic 3SUM with memory, not a sub-quadratic oracle.
+Falsification is unchanged: still `2^{70}` below `C(|F|, 2)` per target
+on a base with `m · log2 |F| ≥ 131`.
+
+| Variant | log2 products | S | vs rho | vs streaming | Correctness | Class |
+|---|---:|---:|---:|---:|---|---|
+| Pair-table identity, `\|F\|=8384` | 116.84 | `5.70×10^{15}` | `2^+53.62` | `2^-13.03` | derived | accounting |
+| Pair table, G7e, `\|F\|=8384` | 116.84 | `5.70×10^{15}` | `2^+53.62` | `2^-13.03` | 8/8 planted; 0 hits on the generator | engineering |
+
+The measured table row sits on its counting identity. Ratio to that
+identity is 1. Ratio to rho is still `2^53.62`. Frozen receipt:
+`ecc2k130/benchmarks/indexcalc-g7e/summary.json` `gpu.pair_table`.
+
 **Practicality, not the metric.** On this RTX PRO 6000 Blackwell
 (`sm_120`, 97,252 MiB) the occupied pair scan did `3.5141536×10^7`
-pairs in 12.73 ms (`2.76×10^9` pairs/s). The same scan on the eight
-host cores took 40.23 s, a **3161×** wall-clock speedup and an
-engineering constant. At that occupied rate a streaming logarithm is
-still `2^{94.2}` seconds. A 2048-point add microbench, too small to
-fill the device, measured only `2.52×10^8` affine adds/s and is not
-the rate used above.
+pairs in 12.71 ms (`2.77×10^9` pairs/s). The same scan on the eight
+host cores took 42.79 s, a **3368×** wall-clock speedup. The pair table
+stored 35,137,344 sums (938 MiB); GPU fill 6.12 ms, host sort 6.28 s;
+occupied remainder probes `1.29×10^9` /s. At that probe rate a
+table-amortized logarithm is still `2^{83.3}` seconds. A 2048-point add
+microbench, too small to fill the device, measured only `2.52×10^8`
+affine adds/s and is not the rate used above.
+
+SAT does not get a row in that table. Its conflict counts have no
+measured conversion to field products, so putting them in `S` would be
+relabelling. The diagnostic below is wall-clock on this host, frozen in
+`ecc2k130/benchmarks/indexcalc-g7e/sat.json` (pycryptosat 5.14.7,
+python-sat 1.9.dev15, PEP 668 venv). Type-II ONB exists
+only for degrees with `2m+1` prime and `ord_{2m+1}(2) ∈ {m, 2m}`; the
+ladder is 5, 9, 11, 23.
+
+| Cell | Result | Correctness | Class |
+|---|---|---|---|
+| Growth `m=5`, `k=3`, `w=3` | 5/5 solved, median 0.0018 s, 507 gates | planted, 0 unsat, 0 spurious | engineering |
+| Growth `m=9` | 5/5 solved, median 0.096 s, 1587 gates | planted, 0 unsat, 0 spurious | engineering |
+| Growth `m=11` | 5/5 solved, median 1.25 s, 2311 gates | planted, 0 unsat, 0 spurious | engineering |
+| Growth `m=23` | 0/1, budget at 30.05 s, 8029 gates | timeout, 0 unsat | engineering |
+| SAT DLP `n=5` | complete in 22 ms, scalar 8 | `[k]P = Q` | correctness |
+| SAT DLP `n=9` | complete in 1.07 s, scalar 112 | `[k]P = Q` | correctness |
+| Pair vs SAT, `n=9`, `w=2`, 16 planted triples | pair 16/16, median 0.362 ms; SAT 14/16 lifted, median 82.5 ms | pair hits verified; 2 SAT models spurious | engineering |
+
+Unbounded SAT is about **228×** slower than pair lookup on the same
+planted triples, and two SAT models failed to lift. The e2e DLP oracle
+uses a tighter 0.25 s / 2000-conflict budget; it still recovered the
+two toy logs because yield at these sizes is high. Neither fact moves
+the `n=131` product-law floor. Ratio to the floor remains 1.
 
 ## 4. How to run
 
@@ -143,12 +201,20 @@ make -C ecc2k130 indexcalc-cuda ARCH='-gencode arch=compute_120,code=sm_120'
 make -C ecc2k130 test-indexcalc-pairs
 make -C ecc2k130 test-indexcalc-cuda
 python3 ecc2k130/benchmarks/indexcalc-g7e/run.py
+python3 -m venv ~/ic-venv
+~/ic-venv/bin/pip install -r ecc2k130/benchmarks/indexcalc-g7e/requirements-sat.txt
+~/ic-venv/bin/python ecc2k130/codegen/testdecomp.py
+~/ic-venv/bin/python ecc2k130/benchmarks/indexcalc-g7e/run_sat.py
 ```
 
 `--skip-gpu` on `run.py` still recovers the degree-5 and degree-9
 logs. `--from-raw` rebuilds `summary.json` from a frozen
-`raw-gpu.json`. The CUDA self-test is a packed-add differential against
-`Ref` and one planted triple at weight 2.
+`raw-gpu.json`. `run.py` passes `--table` so the same process builds
+the weight-2 pair-sum table and probes it. The CUDA self-test is a
+packed-add differential against `Ref`, one planted streaming triple,
+and one planted table probe. `run_sat.py` writes `sat.json` and patches
+`summary.json['sat']`; it does not use the GPU. System Python on this
+host is PEP 668, so the venv is required.
 
 ## 5. Classification
 
@@ -156,16 +222,21 @@ logs. `--from-raw` rebuilds `summary.json` from a frozen
 |---|---|---|
 | Pair enumeration vs SAT/RR on the same base | engineering | already measured in the RR panel; GPU repeats it |
 | Packed ONB affine add on sm_120 | engineering | same algorithm, different device |
-| Toy DLP at `n = 5, 9` | correctness | known-answer logs, not an ECC2K-130 result |
-| Quoting pairs/second as `S` | relabelling | forbidden; wall-clock is a footnote |
+| Toy DLP at `n = 5, 9` (pairs and SAT) | correctness | known-answer logs, not an ECC2K-130 result |
+| SAT growth 5/9/11 and timeout at 23 | engineering | same Semaev encoding, host CPU; floor flat |
+| Unbounded SAT vs pair lookup at `n=9` | engineering | SAT 228× slower; 2/16 spurious; floor flat |
+| Pair table vs streaming at `\|F\|=8384` | engineering | S falls by `\|F\|`; still generic 3SUM; rho ratio `2^53.62` |
+| Quoting pairs/second or SAT seconds as `S` | relabelling | forbidden; wall-clock is a footnote |
 
 Nothing in this thread is an advance against the floor.
 
 ## 6. What this is not
 
-Not a discrete logarithm of the Certicom challenge. Not a SAT, F₄, or
-Riemann–Roch solver. Not a pair *table*: 96 GiB holds a weight-2 table
-and not a weight-9 table, and weight 2 has expected yield `2^{-90}` per
-target. Not a claim that G7e capacity was previously unavailable for
-rho — the rho client already runs here; this is the first IC oracle
-that uses the same field code on the same chip.
+Not a discrete logarithm of the Certicom challenge. Not an F₄ or
+Riemann–Roch solver. SAT *was* run on this host; it does not beat pair
+enumeration and it does not enter the product unit. A weight-2 pair
+*table* was run: 938 MiB, 8/8 planted, and still `2^53.62` times rho.
+A weight-4 table does not fit, and weight 2 has expected yield
+`2^{-90}` per target. Not a claim that G7e capacity was previously
+unavailable for rho — the rho client already runs here; this is the
+first IC oracle that uses the same field code on the same chip.

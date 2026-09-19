@@ -1,0 +1,61 @@
+{
+  "beat_id": "fit.alpha",
+  "class": "measurement",
+  "finished_utc": "2026-09-18T13:33:07.661563+00:00",
+  "fit": {
+    "class": "measurement",
+    "fit": null,
+    "frames": {
+      "x1": {
+        "class": "measurement",
+        "fit": null,
+        "n_rungs": 2,
+        "reason": "fewer than four usable rungs"
+      },
+      "x3": {
+        "class": "measurement",
+        "fit": null,
+        "n_rungs": 2,
+        "reason": "fewer than four usable rungs"
+      }
+    },
+    "reason": "no frame has four usable rungs"
+  },
+  "host": "ip-172-31-19-103",
+  "log_sha256": null,
+  "note": "Frozen X1+X3 only, OLS per frame. Mixing frames is inadmissible. A two-point sketch is not a fit.",
+  "run_id": "fit-alpha-20260918T133307Z",
+  "rungs": [
+    {
+      "Q_over_Q_enum": 83.248,
+      "a": null,
+      "ell": 4,
+      "frame": "x1",
+      "n": 5
+    },
+    {
+      "Q_over_Q_enum": 319.222,
+      "a": null,
+      "ell": 6,
+      "frame": "x1",
+      "n": 9
+    },
+    {
+      "Q_over_Q_enum": 4.653,
+      "a": 1,
+      "ell": 4,
+      "frame": "x3",
+      "n": 7
+    },
+    {
+      "Q_over_Q_enum": 6.409,
+      "a": 1,
+      "ell": 5,
+      "frame": "x3",
+      "n": 15
+    }
+  ],
+  "started_utc": "2026-09-18T13:33:07.661419+00:00",
+  "status": "PASS",
+  "task_id": "TASK-ECC2K130-CROSSBRED-AUTOLAB-20260918"
+}

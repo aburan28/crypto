@@ -1,0 +1,6 @@
+X4 protocol m=3 seed=0x5eed0004 a=1 n=[5, 17, 19] control=true
+ n ell |Fu|   adm  agree   trials   C(F,2)   Lambda    ratio reductions     ok note
+ 5 skip (|F_u|<3 or ell=1 or no view)
+17   9  409   yes  12/12       11  83436.0   7.0022  39.6793      25511    yes verified
+19 skip (|F_u|<3 or ell=1 or no view)
+{"protocol":"X4-2026-09-18","rows":[{"a":1,"n":5,"reason":"prepare_symmetrised_attack returned None","skip":true},{"a":1,"admissible":true,"agree_completed":12,"agree_disagree":0,"agree_ok":12,"c_enum":83436.0,"direct_relation":false,"ell":9,"enumerate":{"lambda":8.91192626953125,"linear_algebra_ns":28343,"ratio":50.50091552734375,"trials":14,"verified":true,"wall_ns":74852479},"floor":"m/n","fu":409,"infeasible_branches":12685,"lambda":7.002227783203125,"linear_algebra_ns":34305,"m":3,"n":17,"note":"verified","orbits":13,"rank_checks":1,"ratio":39.679290771484375,"reductions":25511,"relation_collection_ns":16433621499,"relations":11,"sample_found":12,"setup_ns":14344203,"trials":11,"unit":"lambda = trials * C(|F_u|, m-1) / 2^n","verified":true,"view_ell":17,"wall_ns":16433983123},{"a":1,"n":19,"reason":"prepare_symmetrised_attack returned None","skip":true}]}

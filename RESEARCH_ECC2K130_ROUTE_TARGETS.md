@@ -6,6 +6,8 @@
 (why those and not others).
 **Frame inherited from** [`RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md`](RESEARCH_ECC2K130_DECOMPOSITION_TARGETS.md)
 §"The shared boundary" and [`AGENTS.md`](AGENTS.md).
+Which of X1–X6 can run together, and which stacks are already closed, is
+[`RESEARCH_ECC2K130_IC_SYNTHESIS.md`](RESEARCH_ECC2K130_IC_SYNTHESIS.md).
 
 Six experiments, each with a boundary derived before anything is run, a
 primary metric in one unit, and a falsifier specific enough that a run
@@ -150,6 +152,54 @@ repository to bend the oracle exponent.
 
 **Depends on** X2.
 
+### T4 — `(D, k)` selection rule, fixed before X1
+
+Written here so the X1 run cannot choose parameters with hindsight.
+
+On the probe system (generator times 7), with `SearchOptions::default()`
+(`max_enumerated_bits = 22`, `max_kernel_dim = 12`, `max_rows = 20_000`):
+
+1. For `D` from the system degree to degree+2, then for `k` from 2 to
+   `min(v, 22) − 1` (the search engine's hard cap, not an 18-variable
+   accident), extract at `target_degree = 1`.
+2. Accept a pair only if extraction succeeds, `kernel_dim ≥ v − k`,
+   `0 < v − k ≤ 64`, and `solve_crossbred` on that probe does **not**
+   set `exhausted`.
+3. Take the first accepted pair in that order: smallest `D`, then
+   smallest `k`.
+4. Apply the same `(D, k)` to every target of the rung. A target that
+   then has `kernel_dim < v − k` or `exhausted` fails `agree`.
+
+The previous loop capped `k` at `v.min(18)`, so at `n = 13`, `m = 3`,
+`v = 49` it never tried `k ≥ 18` and fell through to `D = 4`, `k = 2`,
+which is not a result. That cap is part of the rule being replaced, not
+a finding about Crossbred.
+
+`Q` per target is `word_ops + transform_word_ops + filter_word_ops +
+solve_row_ops`. `Q_enum` is `C(|F|, m−1)` word-ops with **one word-op
+per pair** (or per point at `m = 2`). That undercounts enumeration, so
+it is conservative for an advance claim: it makes `Q / Q_enum` larger.
+
+**Frozen, 2026-09-18.** Receipt
+`experiments/ecc2k130_crossbred_x1_20260918/`. T4 is applied. **No
+fit:** only two agreeing `m = 3` rungs have `|F| ≥ 3`. The two-point
+sketch of `log₂(Q / Q_enum)` vs `ℓ` has slope `+0.97` (`α ≈ 2.97`);
+that is not a least-squares fit and is **not a result**. `Q / Q_enum`
+is already `83` and `319` against a conservative pair count. Route 1's
+chained `α` measurement is blocked on the missing rungs. Next is X3.
+
+| n | m | ℓ | v | \|F\| | Q_enum | Q_word | Q/Q_enum | D | k | kernel | filters | agree | usable | Class |
+|--:|--:|--:|--:|------:|-------:|-------:|---------:|--:|--:|-------:|--------:|:-----:|:-----:|:--|
+| 5 | 3 | 4 | 17 | 21 | 210 | 17482 | 83.248 | 3 | 8 | 52 | 0 | yes | yes | measurement |
+| 7 | 3 | 3 | 16 | 1 | 0 | 5006 | — | 3 | 6 | 15 | 0 | yes | no (`\|F\|=1`) | measurement |
+| 9 | 3 | 6 | 27 | 55 | 1485 | 474044 | 319.222 | 3 | 12 | 23 | 0 | yes | yes | measurement |
+| 13 | 3 | 12 | 49 | — | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+| 15 | 3 | 4 | 27 | 1 | 0 | 157321 | — | 3 | 8 | 25 | 0 | yes | no (`\|F\|=1`) | measurement |
+| 19 | 3 | — | — | — | — | — | — | — | — | — | — | — | no | no decomposition system |
+| 23 | 3 | 11 | 56 | — | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+
+`n = 11, 17, 21` have no `KoblitzCurve` at `a = 0`.
+
 ## X2 — Where does a crossbred space exist at all?
 
 **Question.** `extract_crossbred` returns nothing when the left kernel
@@ -165,9 +215,32 @@ strictly cheaper than enumerating the whole system.
 **Falsifier.** No crossbred space at `m = 3` beyond the toy rungs → X1
 is moot; record the `(D, k)` frontier and close Route 1.
 
-**Cost.** Minutes. `crossbred_bench` already sweeps this and prints
-`kernel` and `filters` columns; what is missing is that **nobody has
-written the output down**.
+**Frozen, 2026-09-18.** Receipt
+`experiments/ecc2k130_crossbred_kernel_20260918/`. The falsifier is
+**not** met: a determining space exists at `m = 3` through `n = 9`
+(`ℓ = 6`, `v = 27`, `D = 3`, `k = 12`, `kernel = 23`, `agree = yes`) and
+at `m = 2` through `n = 13` (`ℓ = 12`, `v = 24`). Route 1 stays open
+only as far as X3: X1 (above) could not fit `α` on the chained systems.
+
+Every printed cell has **`filters = 0`**, including the `(D, k)` sweep
+at `K_0/F_2^9`, `m = 2`. The GPU search phase advertised in the routes
+note has no bitwise filters to AND on these systems.
+
+| n | m | ℓ | v | D | k | kernel | filters | agree | xb/F4 | Class |
+|--:|--:|--:|--:|--:|--:|-------:|--------:|:-----:|------:|:--|
+| 5 | 2 | 4 | 8 | 2 | 4 | 4 | 0 | yes | 0.015 | measurement |
+| 5 | 3 | 4 | 17 | 3 | 8 | 52 | 0 | yes | 0.065 | measurement |
+| 7 | 3 | 3 | 16 | 3 | 6 | 15 | 0 | yes | 0.013 | measurement |
+| 9 | 2 | 6 | 12 | 2 | 6 | 9 | 0 | yes | 0.004 | measurement |
+| 9 | 3 | 6 | 27 | 3 | 12 | 23 | 0 | yes | 0.023 | measurement |
+| 13 | 2 | 12 | 24 | 2 | 12 | 13 | 0 | yes | 0.002 | measurement |
+| 13 | 3 | 12 | 49 | 4 | 2 | 25 | 0 | **NO** | 1150 | not a result |
+
+`n = 11, m = 3` and `n = 17, m = 2` produced no row (`KoblitzCurve::new`
+or the factor base returned `None`). The `n = 13, m = 3` row extracted a
+kernel but failed the correctness gate; the printed `k = 2` does not
+satisfy `kernel ≥ v − k` on the last target (`25 < 47`). It is not a
+rung for X1.
 
 **Depends on** nothing. Do this first.
 
@@ -186,6 +259,46 @@ the symmetrised systems are *too small* for the technique — worth
 recording either way.
 
 **Depends on** X2's method, not its result.
+
+**Protocol, frozen before the run, 2026-09-18.** Same T4 rule, same
+`Q / C(|F|, 2)` metric and the same slope falsifier as X1, on the
+`u`-frame. Written here so the X3 run cannot choose a divisor or a
+curve family with hindsight.
+
+1. Curve `K_a` with `a` given (`--a`, default `0`). Skip the rung if
+   `KoblitzCurve::new` returns `None`.
+2. Divisor `divisor_for_dimension(n, (n+1).div_ceil(m))`, then
+   `F_u = build_symmetrised_factor_base`. This is the paired-oracle
+   convention, not chosen per rung.
+3. System `build_symmetrised_system`. `|F|` is `|F_u|`. The fit axis is
+   `ℓ = dim V`.
+4. `Q_enum = C(|F_u|, m−1)` at one word-op per pair (same conservative
+   convention as X1).
+5. A fit requires ≥4 agreeing `m = 3` rungs with `|F_u| ≥ 3`.
+6. Additional falsifier: no determining space on any such rung.
+
+Command: `cargo run --release --example crossbred_bench -- --sym --no-sweep …`
+
+**Frozen, 2026-09-18.** Receipt
+`experiments/ecc2k130_crossbred_x3_20260918/`. T4 is applied. **No
+fit:** only two agreeing `m = 3` rungs have `|F_u| ≥ 3`, both on `K_1`.
+The additional falsifier (no determining space at all) is **not** met.
+`Q / Q_enum` is already `4.65` and `6.41` against a conservative pair
+count. Every priced cell has `filters = 0`. Route 2 cannot produce `α`
+on this divisor convention.
+
+| a | n | m | ℓ | v | \|F_u\| | Q_enum | Q_word | Q/Q_enum | D | k | kernel | filters | agree | usable | Class |
+|--:|--:|--:|--:|--:|--------:|-------:|-------:|---------:|--:|--:|-------:|--------:|:-----:|:-----:|:--|
+| 1 | 7 | 3 | 4 | 10 | 29 | 406 | 1889 | 4.653 | 4 | 9 | 7 | 0 | yes | yes | measurement |
+| 1 | 9 | 3 | 3 | 7 | 13 | 78 | 380 | 4.872 | 4 | 2 | 1 | 0 | **NO** | no | not a result |
+| 1 | 15 | 3 | 5 | 13 | 61 | 1830 | 11728 | 6.409 | 4 | 11 | 5 | 0 | yes | yes | measurement |
+| 1 | 17 | 3 | 9 | 25 | 409 | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+| 0 | 23 | 3 | 12 | 34 | 4049 | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+| 0 | 31 | 3 | 11 | 31 | 2357 | — | — | — | — | — | — | — | — | no | not a result (no determining space) |
+
+`K_0` has `|F_u| = 1` at `n = 5, 7, 9, 13, 15, 19`. A two-point sketch
+between `K_1` `n = 7` and `n = 15` has slope `+0.46` (`α ≈ 2.46`); that
+is not a fit.
 
 ## X4 — The symmetrised oracle end to end: advance or engineering?
 
@@ -238,6 +351,54 @@ printed beside any ratio.
 
 **Depends on** the merged `frobenius_view_of_symmetrised`.
 
+**Protocol, frozen before the run, 2026-09-18.** Written so X4 cannot
+choose a curve, divisor, or accounting after seeing a cell.
+
+1. `m = 3`. `K_a` with `a` given; skip if `KoblitzCurve::new` is `None`.
+2. Divisor `divisor_for_dimension(n, (n+1).div_ceil(m))`, then
+   `F_u = build_symmetrised_factor_base` and
+   `fb = frobenius_view_of_symmetrised`. Skip the rung if the view is
+   `None`, if `|F_u| < 3`, or if `ell = 1` (no factor-base bits; the
+   system is not an `m = 3` Semaev instance).
+3. Oracle `DecompositionStrategy::Symmetrised`: unchained symmetrised
+   `S_{m+1}` via `symmetrised_groebner_decompose`, indices mapped
+   through `symmetrised_index_map`. That is not chained `S₃` and not
+   unchained `S₄` relabelled as a strategy.
+4. Matched control: `DecompositionStrategy::Enumerate` on the same
+   view, same seed, same `m`. A rung is usable only if every sampled
+   target the algebraic arm completes agrees with Enumerate
+   (found/refuted), and the recovered log satisfies `[k]P = Q`.
+5. Pipeline: `allow_direct_relation = false`, `stop_on_verified_rank =
+   true`, `collapse_negation = true`, seed `0x5EED_0004`. Price setup
+   (`F_u` + view), target generation (`trials`), oracle (reductions /
+   infeasible branches), lifting, verification, linear algebra
+   (`linear_algebra_ns`, rank checks), scalar recovery.
+6. **Unit.** `Λ = trials · C(|F_u|, m−1) / 2^n` — the enumerative
+   envelope of this base, the unit the product-law floor is written in.
+   Algebraic reductions stay a stage diagnostic until a word-op →
+   group-op conversion (T3) exists; wall-clock is a footnote.
+7. **Ratio to the floor.** `Λ · n / m`. Slope of `log₂(Λ · n / m)`
+   against `n` over ≥4 usable rungs. Slope consistent with zero is
+   **engineering**. A decrease is **advance**. Mixing K0 with K1 is
+   inadmissible (different frames, as X1/X3).
+8. K0 `F_u` is one point at the small E1 rungs (`n = 13, 19` among
+   them). Those cells are skips, not a change of divisor. Usable rungs
+   are expected on `K_1` first (`n = 7, 9, 15, …`).
+
+Changing (1)–(7) after seeing a cell is inadmissible.
+
+**Measurement, 2026-09-18**, host `ip-172-31-19-103`, cited from
+[`experiments/ecc2k130_symmetrised_x4_20260918/summary.json`](experiments/ecc2k130_symmetrised_x4_20260918/summary.json).
+T7 holds: 12/12 sampled targets agree with Enumerate on every priced
+rung. Three usable rungs recovered a verified log (`n = 7, 15, 17`).
+`n = 9` agreed 12/12 as refutations and both oracles collected zero
+relations in 20,000 trials. `n = 5, 11, 19` skip; `n = 13` has no
+curve; `n = 23` was started and killed with no cell. No least-squares
+fit: the protocol needs ≥4 usable rungs. The three ratios
+(`29.60`, `5.03`, `39.68`) are not flat and do not decrease through
+the last rung. Predicted class remains engineering; it is not a
+result. Algebraic reductions stay a stage diagnostic (T3 still open).
+
 ## X5 — `m = 4` via a chained symmetrised `S₃`
 
 **Question.** The conditional theory wants `m ≈ n^{1/3} ≈ 5.1` at
@@ -280,33 +441,80 @@ rather than whether to read more.
 
 | # | task | gates | cost |
 |---|---|---|---|
-| T1 | Run `crossbred_bench` over the ladder; freeze the output under `experiments/` | X2, X1 | minutes |
-| T2 | Write X2's `(D, k, kernel_dim)` frontier into this note | X1, X3 | short |
+| T1 | Run `crossbred_bench` over the ladder; freeze the output under `experiments/` | **done** 2026-09-18, `experiments/ecc2k130_crossbred_kernel_20260918/` | minutes |
+| T2 | Write X2's `(D, k, kernel_dim)` frontier into this note | **done** (X2 above); chained X1 has no fourth usable rung | short |
 | T3 | Measure the word-op → group-op conversion factor and record it (`AGENTS.md` §2) | X1's absolute column | short |
-| T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | X1 admissibility | short |
-| T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | Route 1 verdict | hours |
-| T6 | X3: repeat T5 on the symmetrised systems | Route 2 verdict | hours |
-| T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |
-| T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
-| T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | Route 4 verdict | medium |
+| T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | **done** (T4 above); implemented in `examples/crossbred_bench.rs` | short |
+| T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
+| T6 | X3: repeat T5 on the symmetrised systems | **blocked** 2026-09-18: only two usable `m = 3` rungs | hours |
+| T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | **done** 2026-09-18: 12/12 on every priced K1 rung | medium |
+| T8 | X4: ladder end-to-end with every phase priced | **blocked** 2026-09-18: three usable K1 rungs (`n = 7, 15, 17`), not four | days |
+| T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | **done** 2026-09-18 FFD; `ell>1` max=4 at `n=9,15`, does not grow. Solve-under-64 still open | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |
 | T11 | Scoreboard rows for whatever X1–X5 return, with class chips set by §3 | every claim | rides each PR |
+| T12 | Toy-suite rho parity: PairTable + SubgroupOrbits vs signed-Frobenius rho in exclusive group ops, all-cases `α ≤ 1` | **closed, negative** 2026-09-19: the iteration-1 gate (mean `α` 0.76–0.91) was an accounting error, the window's `|F| − 1` additions per probe were unpriced. Corrected, toy cells `α` 16–23, twelve-rung ladder to `2^{39}` `α` 8–600, 108/108 verified. Class accounting; parity claim withdrawn. Iterations 4–5 (batch 8, `|F| = ⌈(2r)^{1/3}⌉`) are the remaining engineering and do not reach the gate | hours |
+| T13 | X7: fit the `F_2` SAT oracle's exponent `α` on WDSat (published solver for the descended `S₄`) over ≥4 rungs, every answer verified, beside pairs-and-solve on the same targets; abandon at `α ≥ 1.9` | **closed** 2026-09-19: `α = 2.998` in conflicts (`3.31` in products) over `l = 5..9`, one conflict per sorted triple, 30/30 verified, 215×–5,112× slower than pairs-and-solve (`α = 2.13`). Prediction `α ≈ 3` confirmed. Parity needs `α ≈ 0.4–0.6`. [`RESEARCH_ECC2K130_BEST.md`](RESEARCH_ECC2K130_BEST.md) §3–§4 | hours |
 
 T11 is not a follow-up: `AGENTS.md` §7 says the page update rides in the
 commit that lands the measurement, and "the page is out of date" is not
 a state this repository has.
 
+Replay of the X1/X3 freezes, the per-frame `α` refusal, chained-`x`
+FFD, and chained-symmetrised `S₃` FFD live in
+[`research/ecc2k130_crossbred_autolab_20260918/`](research/ecc2k130_crossbred_autolab_20260918/).
+Harbor is not required. The chained *symmetrised* `S₃` builder is in
+`build_chained_symmetrised_system`; do not relabel the chained-`x` arm
+as that polynomial. X5 FFD beats are measured.
+
+First run, 2026-09-18, host `ip-172-31-19-103`, cited from
+[`research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json`](research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json):
+
+| beat | status | class | number |
+|---|---|---|---|
+| `smoke.x1_n5` | PASS | accounting | `Q/C = 80.243` vs freeze `83.248` (within 5%); `filters = 0` |
+| `replay.x3_k1_n7` | PASS | accounting | `Q/C = 4.653` exact; `filters = 0` |
+| `fit.alpha` | PASS | measurement | no fit; 2 chained + 2 `K_1` rungs; frames not mixed |
+| `x5.ffd_chained_m4` | PASS | measurement | FFD max = 3 at `n = 9` and `n = 15`, `m = 4`, 4 draws; does not grow |
+| `x5.ffd_chained_m4_16` | PASS | measurement | same cells, 16 draws; still max = 3, does not grow |
+| `x5.ffd_chained_sym_m4_smoke` | PASS | measurement | `ell>1` FFD max = 4 at `n = 9,15`; `n = 7` `ell = 1` is a degree-1 collapse |
+| `x5.ffd_chained_sym_m4` | PASS | measurement | 16-draw promotion: `ell>1` FFD max = 4 at `n = 9` and `n = 15`, does not grow |
+
+H1 (FFD growing with `n` at `m = 4` on `ell > 1`) is **not** met on
+either arm. Mixing the `n = 7` `ell = 1` row into the growth flag is
+accounting: that system has no factor-base bits and is not an `m = 4`
+Semaev chain. `d_max = 4` on the symmetrised arm is why a fall at 4 is
+visible; the `x`-arm's frozen `d_max = 3` would have recorded it as no
+fall. Neither number is an advance against the product-law floor.
+
+**Accounting, stated before the chained-sym measurement.** The sketch
+`4(ℓ−1)+1+n` in §8.5 undercounts. The production analog of chaining
+`S₃` is `m−1` links and `m−2` free intermediates, so
+`n_vars = m(ℓ−1) + (m−2)n + (m−1)` (one parity bit per link). At
+`m = 4` that is `4(ℓ−1)+2n+3`. Measured: `n = 9` `ℓ = 3` → 29 vars
+(sketch would have said 18); `n = 15` `ℓ = 3` → 41 vars (sketch 24).
+The AutoLab beats used this count, `d_max = 4`, and
+`divisor_for_dimension(n, (n+1)/m)`. Changing those after seeing a cell
+is inadmissible.
+
 ## What would count as finishing this thread
 
 Any one of:
 
-- **`α` measured over ≥4 rungs**, whatever its value. A number closes
-  Route 1 either way; the current state is that nobody has one.
+- **`α` measured over ≥4 rungs**, whatever its value. X1 and X3 are
+  frozen: neither frame can supply four usable `m = 3` rungs, so
+  Crossbred cannot produce `α` under the frozen protocols. That number
+  is now "no fit", not a missing measurement.
 - **X4 classified.** Engineering or advance, labelled by the §3 test and
-  not by how the 350× felt.
-- **H1 falsified at `m = 4`** — a first fall degree that grows, which
-  would matter to the FFD controversy directly and is the one place
-  where this repository's measurements are the state of the art.
+  not by how the 350× felt. **Blocked** 2026-09-18: three usable K1
+  rungs (`n = 7, 15, 17`) recovered `[k]P = Q` with Enumerate agreement;
+  `n = 9` collected nothing; no fourth rung. Receipt
+  [`experiments/ecc2k130_symmetrised_x4_20260918/`](experiments/ecc2k130_symmetrised_x4_20260918/).
+  The predicted class remains engineering and is not confirmed.
+- **H1 at `m = 4`.** Measured: chained-`x` FFD max = 3 and chained-sym
+  FFD max = 4 at `n = 9` and `n = 15` over 16 draws, neither grows on
+  `ell > 1`. That is a measurement, not an advance, and it does not
+  close the FFD controversy by growth. A later size where FFD *does*
+  grow would still be H1.
 
 None of these threatens a deployed curve, and none is claimed to. The
 `α ≤ 0.38` row of the scale table is what that would take, and nothing

@@ -1090,8 +1090,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><span class="chip">engineering</span>
         The cheapest three-summand oracle this repository has (exhaustive pair
         enumeration) now runs in the packed type-II ONB arithmetic of the rho
-        client, on one RTX PRO 6000 Blackwell. The product-law floor does not
-        move. Frozen receipt:
+        client, on one RTX PRO 6000 Blackwell. A stored weight-2 pair table
+        fits and cuts S by |F|; it is still 2^53.62 times rho. Frozen receipt:
         <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/indexcalc-g7e/summary.json"><code>ecc2k130/benchmarks/indexcalc-g7e/summary.json</code></a>;
         note
         <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_G7E_INDEX_CALCULUS.md"><code>RESEARCH_ECC2K130_G7E_INDEX_CALCULUS.md</code></a>.</p>
@@ -1132,16 +1132,1146 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
           <td class="n"><strong>2^+66.66</strong></td><td class="n"><strong>2^+0.00</strong></td>
           <td>8/8 planted 3-sums verified on device against Ref; 0 hits on the generator, matching yield 3.6×10<sup>−29</sup>; CPU pair-enum DLP recovered at n=5 and n=9</td>
           <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Pair-table identity, |F| = 8,384</td>
+          <td class="n">116.84</td><td class="n">5.70×10^{15}</td><td class="n">2^+53.62</td>
+          <td class="n">2^−13.03 vs streaming</td>
+          <td>derived: C(|F|,2)·10 setup + |F| remainder adds per target; generic 3SUM with memory</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td><strong>Pair table, G7e, |F| = 8,384</strong> <em>(measured)</em></td>
+          <td class="n"><strong>116.84</strong></td><td class="n"><strong>5.70×10^{15}</strong></td>
+          <td class="n"><strong>2^+53.62</strong></td><td class="n"><strong>2^−13.03 vs streaming</strong></td>
+          <td>8/8 planted 3-sums verified on device against Ref; 0 hits on the generator; 35,137,344 sums stored (938 MiB)</td>
+          <td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table>
-    <p>Occupied pair scan: 2.76×10<sup>9</sup> pairs/s (35,141,536 pairs in
-      12.73&nbsp;ms). Same scan on eight host cores: 40.23&nbsp;s, 3161×
-      wall-clock. At the occupied rate a streaming logarithm is still
-      2<sup>94.2</sup> seconds. Wall-clock is a practicality note, not S.
-      No full-DLP at n=131 is claimed.</p>
+    <p>Occupied pair scan: 2.77×10<sup>9</sup> pairs/s (35,141,536 pairs in
+      12.71&nbsp;ms). Same scan on eight host cores: 42.79&nbsp;s, 3368×
+      wall-clock. Pair table: 35,137,344 sums in 938&nbsp;MiB, GPU fill 6.12&nbsp;ms,
+      host sort 6.28&nbsp;s, remainder probes 1.29×10<sup>9</sup>/s. A table-amortized
+      logarithm is still 2<sup>83.3</sup> seconds. Wall-clock is a practicality
+      note, not S. No full-DLP at n=131 is claimed.</p>
+    <p>SAT on this host CPU (CryptoMiniSat 5.14.7, python-sat 1.9.dev15; not
+      the GPU). Conflict counts have no measured conversion to field products,
+      so SAT is not a row in the product table. Frozen receipt:
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/indexcalc-g7e/sat.json"><code>ecc2k130/benchmarks/indexcalc-g7e/sat.json</code></a>.
+      Type-II ONB degrees only: 5, 9, 11, 23.</p>
+    <table>
+      <caption>SAT diagnostic on the G7e host, wall-clock, not the product unit.
+        Cited from <code>ecc2k130/benchmarks/indexcalc-g7e/sat.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">Cell</th>
+        <th scope="col">Result</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Growth m=5, k=3, w=3</td>
+          <td>5/5 solved, median 0.0018&nbsp;s, 507 gates</td>
+          <td>planted; 0 unsat; 0 spurious</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Growth m=9</td>
+          <td>5/5 solved, median 0.096&nbsp;s, 1587 gates</td>
+          <td>planted; 0 unsat; 0 spurious</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Growth m=11</td>
+          <td>5/5 solved, median 1.25&nbsp;s, 2311 gates</td>
+          <td>planted; 0 unsat; 0 spurious</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Growth m=23</td>
+          <td>0/1, budget at 30.05&nbsp;s, 8029 gates</td>
+          <td>timeout; 0 unsat</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>SAT DLP n=5</td>
+          <td>complete in 22&nbsp;ms, scalar 8</td>
+          <td>[k]P = Q</td>
+          <td><span class="chip">correctness</span></td></tr>
+        <tr><td>SAT DLP n=9</td>
+          <td>complete in 1.07&nbsp;s, scalar 112</td>
+          <td>[k]P = Q</td>
+          <td><span class="chip">correctness</span></td></tr>
+        <tr><td>Pair vs unbounded SAT, n=9, w=2, 16 planted triples</td>
+          <td>pair 16/16, median 0.362&nbsp;ms; SAT 14/16 lifted, median 82.5&nbsp;ms (228× slower)</td>
+          <td>pair hits verified; 2 SAT models spurious</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table>
+    <p>The n=131 product-law floor is untouched. Ratio to that floor remains
+      2^+0.00. Quoting SAT seconds as S is relabelling.</p>
   </div>
 
-  <div class="panel" id="ec-baseline-20260914">
+  <div class="panel" id="ecc2k130-best-20260919">
+    <div class="panel-head">
+      <h2>ECC2K-130: the best pipeline, the parity condition, and the F<sub>2</sub> SAT oracle's exponent (X7)</h2>
+      <p><span class="chip">measurement</span>
+        The cheapest measured ECC2K-130 pipeline is the G7e stack
+        (type-II ONB × HW-2 even-trace base × Frobenius collapse ×
+        stored pair table, <code>|F| = 8384</code>):
+        <code>2<sup>116.84</sup></code> products, <code>2<sup>53.62</sup>×</code> rho,
+        tight against its counting identity. Parity needs a decomposition
+        oracle whose per-call cost is <code>Q = 2<sup>αl</sup></code> with
+        <code>α ≈ 0.4–0.6</code> at <code>l = 45</code>; a stored table is
+        <code>α = 1</code> and <code>2<sup>21.65</sup>×</code> rho at best.
+        X7 measured WDSat, the published solver for the Weil-descended
+        symmetrised <code>S₄</code>, on five rungs <code>l = 5..9</code>
+        beside the in-repo pairs-and-solve oracle on the same targets:
+        <b><code>α = 2.998</code> in conflicts</b>, one conflict per sorted
+        triple on every rejection, 30/30 answers verified, 215× to 5,112×
+        slower than pairs-and-solve and widening. Pre-registered
+        prediction <code>α ≈ 3</code> confirmed; abandonment condition
+        <code>α ≥ 1.9</code> met. An F<sub>2</sub> SAT oracle does not
+        make this pipeline capable of rho parity. Note
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_BEST.md"><code>RESEARCH_ECC2K130_BEST.md</code></a>.
+        Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_wdsat_alpha_20260919/"><code>experiments/ecc2k130_wdsat_alpha_20260919/</code></a>.</p>
+    </div>
+    <p>Unit: field products in <code>F<sub>2<sup>n</sup></sub></code>. For the
+      pipeline rows, <code>S = products / √r</code> with
+      <code>√r = 2<sup>64.5</sup></code>, rho at the measured 5.3125
+      products per iteration, affine addition at 10 (frozen G7e
+      receipt). For the oracle rows, per-call cost of a
+      <em>rejection</em>, median over 5–6 uniform targets per rung; WDSat
+      wall seconds are converted at the measured ns per
+      <code>F<sub>2<sup>n</sup></sub></code> multiplication on the same host
+      in the same run, and the conflict count is listed beside it as a
+      count. Frame for the parity condition:
+      <code>G<sub>IC</sub>/G<sub>rho</sub> = 6 · 2<sup>131−2l</sup> · Q / (131 · 2<sup>63.22</sup>)</code>,
+      which reproduces the frozen streaming figure
+      <code>2<sup>66.66</sup></code>. The <code>l = 45</code> column is an
+      extrapolation from the fitted exponent and is marked so.</p>
+    <table>
+      <caption>Pipeline rows cited from
+        <code>ecc2k130/benchmarks/indexcalc-g7e/summary.json</code>;
+        scale rows derived in the note's §2.</caption>
+      <thead><tr>
+        <th scope="col">Variant</th>
+        <th scope="col" class="n">log₂ products</th>
+        <th scope="col" class="n">S</th>
+        <th scope="col" class="n">vs rho</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Pollard rho <code>⟨−1⟩×⟨π⟩</code> <em>(reference)</em></td>
+          <td class="n">63.22</td><td class="n">0.411</td><td class="n">2<sup>0</sup></td>
+          <td>shipping client</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>Product-law floor, streaming pairs, any <code>|F|</code></td>
+          <td class="n">136.91</td><td class="n">2<sup>72.4</sup></td><td class="n">2<sup>+73.69</sup></td>
+          <td>derived</td><td><span class="chip">floor</span></td></tr>
+        <tr><td>Streaming pairs + Frobenius collapse, G7e, <code>|F| = 8384</code></td>
+          <td class="n">129.87</td><td class="n">4.78×10<sup>19</sup></td><td class="n">2<sup>+66.66</sup></td>
+          <td>8/8 planted; 0 generator hits</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td><b>Pair table, G7e, <code>|F| = 8384</code> — best measured</b></td>
+          <td class="n"><b>116.84</b></td><td class="n"><b>5.70×10<sup>15</sup></b></td><td class="n"><b>2<sup>+53.62</sup></b></td>
+          <td>8/8 planted; 0 generator hits; 35,137,344 sums</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>Stored pair table at <code>l = 45</code>, <code>α = 1</code> <em>(identity; memory 2<sup>89</sup> entries)</em></td>
+          <td class="n">84.87</td><td class="n">2<sup>20.4</sup></td><td class="n">2<sup>+21.65</sup></td>
+          <td>derived</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>Parity condition: oracle <code>Q = 2<sup>26.67</sup></code> products at <code>l = 45</code>, <code>α = 0.59</code></td>
+          <td class="n">63.22</td><td class="n">0.411</td><td class="n">2<sup>0</sup></td>
+          <td>condition, not a method</td><td><span class="chip">floor</span></td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>X7 oracle ladder, host <code>ip-172-31-19-103</code>, 2026-09-19,
+        from <code>experiments/ecc2k130_wdsat_alpha_20260919/summary.json</code>.
+        WDSat pinned at upstream <code>61c6ff3f</code> via the frozen suite's
+        manifest, static limits widened (diff in receipt), flags
+        <code>-n -l -m 3 -b</code> (the frozen <code>symmetry_on</code>
+        configuration). Six solver processes concurrent; pairs-and-solve
+        alone. Every WDSat SAT witness zeroes <code>f₃</code>; every UNSAT
+        agrees with exhaustive pairs-and-solve. <code>l = 10</code> not
+        completed (75–90 min per rejection at the fitted rate, past the
+        3,600 s timeout; stopped log retained).</caption>
+      <thead><tr>
+        <th scope="col" class="n">n</th>
+        <th scope="col" class="n">l</th>
+        <th scope="col" class="n">|F|</th>
+        <th scope="col" class="n">sorted triples</th>
+        <th scope="col" class="n">WDSat conflicts (rejection median)</th>
+        <th scope="col" class="n">per triple</th>
+        <th scope="col" class="n">WDSat log₂ products</th>
+        <th scope="col" class="n">pairs-and-solve log₂ products</th>
+        <th scope="col" class="n">WDSat / pairs</th>
+        <th scope="col">Verified</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="n">15</td><td class="n">5</td><td class="n">32</td><td class="n">5,984</td><td class="n">5,510</td><td class="n">0.921</td><td class="n">23.33</td><td class="n">15.58</td><td class="n">215×</td><td>6/6 (6 rejections)</td></tr>
+        <tr><td class="n">19</td><td class="n">6</td><td class="n">64</td><td class="n">45,760</td><td class="n">43,953</td><td class="n">0.961</td><td class="n">26.39</td><td class="n">17.70</td><td class="n">414×</td><td>6/6 (5 + 1 hit)</td></tr>
+        <tr><td class="n">21</td><td class="n">7</td><td class="n">128</td><td class="n">357,760</td><td class="n">350,976</td><td class="n">0.981</td><td class="n">29.61</td><td class="n">19.82</td><td class="n">882×</td><td>6/6 (5 + 1 hit)</td></tr>
+        <tr><td class="n">24</td><td class="n">8</td><td class="n">256</td><td class="n">2,829,056</td><td class="n">2,806,146</td><td class="n">0.992</td><td class="n">33.29</td><td class="n">21.95</td><td class="n">2,593×</td><td>6/6 (5 + 1 hit)</td></tr>
+        <tr><td class="n">27</td><td class="n">9</td><td class="n">512</td><td class="n">22,500,864</td><td class="n">22,400,825</td><td class="n">0.996</td><td class="n">36.41</td><td class="n">24.09</td><td class="n">5,112×</td><td>6/6 (5 + 1 hit)</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>Exponent panel: least squares of log₂(rejection median) on
+        <code>l</code>, five rungs. The <code>l = 45</code> columns are
+        extrapolations resting on the fitted <code>α</code>. Parity in this
+        frame is <code>log₂ Q = 26.67</code>.</caption>
+      <thead><tr>
+        <th scope="col">Arm</th>
+        <th scope="col">unit</th>
+        <th scope="col" class="n">α</th>
+        <th scope="col" class="n">log₂ intercept</th>
+        <th scope="col" class="n">log₂ Q at l = 45 <em>(extrap.)</em></th>
+        <th scope="col" class="n">vs rho at l = 45 <em>(extrap.)</em></th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Pair enumeration <em>(identity, <code>2<sup>2l</sup>·10</code>)</em></td><td>products</td><td class="n">2</td><td class="n">3.32</td><td class="n">93.3</td><td class="n">2<sup>+66.65</sup></td><td><span class="chip">floor</span></td></tr>
+        <tr><td>Pairs-and-solve <em>(measured)</em></td><td>products</td><td class="n">2.128</td><td class="n">4.93</td><td class="n">100.7</td><td class="n">2<sup>+74.0</sup></td><td><span class="chip">measurement</span></td></tr>
+        <tr><td>WDSat <code>-b</code> <em>(measured)</em></td><td>conflicts</td><td class="n"><b>2.998</b></td><td class="n">−2.56</td><td class="n">132.3</td><td class="n">≥ 2<sup>+105.7</sup> at one product per conflict</td><td><span class="chip">measurement</span></td></tr>
+        <tr><td>WDSat <code>-b</code> <em>(measured)</em></td><td>products</td><td class="n">3.307</td><td class="n">6.66</td><td class="n">155.5</td><td class="n">2<sup>+128.8</sup></td><td><span class="chip">measurement</span></td></tr>
+        <tr><td>WDSat <code>-x -b</code> <em>(three points, not a fit)</em></td><td>conflicts</td><td class="n">≈3.15</td><td class="n">—</td><td class="n">—</td><td class="n">0.655 → 0.840 per triple, rising</td><td><span class="chip">measurement</span></td></tr>
+        <tr><td>Stored pair table <em>(identity)</em></td><td>products</td><td class="n">1</td><td class="n">3.32</td><td class="n">48.3</td><td class="n">2<sup>+21.65</sup></td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>Parity <em>(condition)</em></td><td>products</td><td class="n">0.59</td><td class="n">0</td><td class="n">26.67</td><td class="n">2<sup>0</sup></td><td><span class="chip">floor</span></td></tr>
+      </tbody>
+    </table>
+    <p>Reading the panel: the three F<sub>2</sub> SAT solvers this
+      repository has measured on Weil-descended Semaev systems (in-repo
+      CDCL to <code>l = 8</code>, CryptoMiniSat at <code>n = 9</code>, WDSat
+      to <code>l = 9</code> with and without XOR-Gauss) all spend one
+      conflict per candidate tuple. The descended <code>S₄</code> binds
+      only once all three abscissae are nearly fixed, so there is no
+      partial assignment to refute early. The SAT route is closed as an
+      exponent lever; the n=131 product-law floor and the page verdict
+      are unchanged.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-ic-synthesis-20260918">
+    <div class="panel-head">
+      <h2>ECC2K-130 index-calculus combinations</h2>
+      <p><span class="chip">accounting</span>
+        A map of the IC threads on this curve, not a new oracle. GPU pairs,
+        the weight-2 table, SAT, and Frobenius compose and still sit on the
+        product law. The only row below rho does not recover
+        <code>log<sub>P</sub>(Q)</code>. Two Crossbred frames are measured
+        and neither produced <code>α</code>. X5 FFD at <code>m = 4</code>
+        does not grow on either arm. X4 has three usable K<sub>1</sub>
+        rungs and no slope. One experiment remains compatible
+        (CM/τ survey). None has a fitted
+        <code>α</code>. Note
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_IC_SYNTHESIS.md"><code>RESEARCH_ECC2K130_IC_SYNTHESIS.md</code></a>.
+        Frozen receipts as in the G7e panel plus
+        <code>RESEARCH_ECC2K130_RELATION_SWEEPS.md</code> §5.6.</p>
+    </div>
+    <p>Unit: field products. Rho conversion on this SKU: 5.3125 products per
+      walk iteration. <code>S = products / √r</code>, √r = 2<sup>64.5</sup>.
+      The MITM row was published in rho-step equivalents as 2<sup>67.287</sup>;
+      multiplying by 5.3125 converts the unit and leaves the ratio to rho
+      unchanged. Memory on that row is still charged at zero (1,011&nbsp;EB).
+      Homogeneous <code>S</code> is 2<sup>59.17 − 64.5</sup> from that converted
+      log<sub>2</sub>, so the column is consistent with the other rows; the
+      ratio 2<sup>−4.05</sup> is the column
+      <code>RESEARCH_ECC2K130_RELATION_SWEEPS.md</code> §5.6 supports against
+      rho. SAT, the conditional FFD formula, residual walks on
+      <code>E(F<sub>p³</sub>)</code>, and Crossbred word-ops do not enter this
+      table: they have no measured conversion into field products on this
+      instance.</p>
+    <table>
+      <caption>ECC2K-130 index-calculus combinations in the field-product unit.
+        G7e rows cited from
+        <code>ecc2k130/benchmarks/indexcalc-g7e/summary.json</code>;
+        MITM and homogeneous rows from
+        <code>RESEARCH_ECC2K130_RELATION_SWEEPS.md</code> §5.6.</caption>
+      <thead><tr>
+        <th scope="col">Variant</th>
+        <th scope="col" class="n">log<sub>2</sub> products</th>
+        <th scope="col" class="n">S</th>
+        <th scope="col" class="n">Ratio to rho</th>
+        <th scope="col" class="n">Ratio to floor</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Pollard rho, ⟨−1⟩×⟨π⟩ <em>(reference)</em></td>
+          <td class="n">63.22</td><td class="n">0.411</td><td class="n">2^+0.00</td>
+          <td class="n">—</td><td>shipping client on this SKU</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>Product-law floor, m = 3, any |F|</td>
+          <td class="n">136.91</td><td class="n">2^{72.4}</td><td class="n">2^+73.69</td>
+          <td class="n">2^+0.00</td><td>derived</td>
+          <td><span class="chip">floor</span></td></tr>
+        <tr><td>+ Frobenius collapse |F|/131</td>
+          <td class="n">129.87</td><td class="n">4.78×10<sup>19</sup></td><td class="n">2^+66.66</td>
+          <td class="n">2^+0.00</td><td>derived</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>Streaming pairs, G7e, |F| = 8,384</td>
+          <td class="n">129.87</td><td class="n">4.78×10<sup>19</sup></td>
+          <td class="n">2^+66.66</td><td class="n">2^+0.00</td>
+          <td>8/8 planted; 0 generator hits, yield 3.6×10<sup>−29</sup></td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Pair-table identity, |F| = 8,384</td>
+          <td class="n">116.84</td><td class="n">5.70×10<sup>15</sup></td><td class="n">2^+53.62</td>
+          <td class="n">2^−13.03 vs streaming</td>
+          <td>derived: generic 3SUM with memory</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>Pair table, G7e, |F| = 8,384</td>
+          <td class="n">116.84</td><td class="n">5.70×10<sup>15</sup></td>
+          <td class="n">2^+53.62</td><td class="n">2^−13.03 vs streaming</td>
+          <td>8/8 planted; 0 generator hits; 35,137,344 sums</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Honest MITM logarithm, memory free</td>
+          <td class="n">69.70</td><td class="n">36.7</td>
+          <td class="n">2^+6.48</td><td class="n">—</td>
+          <td>6/6 planted logs on analogues; 1,011 EB uncharged</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>Homogeneous relations, m = 28</td>
+          <td class="n">59.17</td><td class="n">0.025</td>
+          <td class="n">2^−4.05</td><td class="n">—</td>
+          <td>relations determine nothing</td>
+          <td><span class="chip relabel">relabelling</span></td></tr>
+      </tbody>
+    </table>
+    <p>Open combinations, predicted engineering unless a fitted
+      <code>α ≤ 1.5</code> is produced: a second literature pass on CM/τ
+      for index calculus (X6). Chained Crossbred (X1/X2) and symmetrised
+      Crossbred (X3) are measured: a determining space exists, <code>α</code>
+      does not fit on either frame. X4 is measured on three usable
+      K<sub>1</sub> rungs and has no slope (protocol wants four). X5 FFD at
+      <code>m = 4</code> is
+      measured: chained-<code>x</code> max = 3 and chained-sym max = 4
+      at <code>n = 9</code> and <code>n = 15</code> over 16 draws, neither
+      grows (H1 not met). GPU acceleration of Crossbred's
+      search phase is admissible only after some frame has an
+      <code>α</code>. The only coherent
+      factor-base stack is already the G7e one: type-II ONB, Hamming-weight-2
+      even-trace, orbit collapse, pair enum or table. Subspace, quasi-subfield,
+      polynomial-basis weight-2, and GHS covers do not compose with it
+      (divisor degrees of <code>t<sup>131</sup> − 1</code> are
+      {0,1,130,131} only). Closed: Joux–Vitse and GHS at prime
+      <code>n</code>, Wagner on elliptic addition, extension-field base
+      change, pairs-and-solve as a Koblitz speed-up, SAT as a cheaper
+      <code>n = 131</code> oracle, Yokoyama as a shield. The 500×-or-worse
+      rho verdict above is unchanged. No full-DLP at n=131 is claimed.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-crossbred-kernel-20260918">
+    <div class="panel-head">
+      <h2>Crossbred kernel frontier on K<sub>0</sub></h2>
+      <p><span class="chip">engineering</span>
+        X2 of the route-target note, frozen. A determining Crossbred space
+        exists past the toys at <code>m = 3</code> through <code>n = 9</code>
+        and at <code>m = 2</code> through <code>n = 13</code>. Every printed
+        cell has <code>filters = 0</code>. The bench here reports bit
+        operations against Boolean brute/F4; the X1 panel is the
+        <code>Q / C(|F|, 2)</code> attempt, and it produced no fit. Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_crossbred_kernel_20260918/summary.json"><code>experiments/ecc2k130_crossbred_kernel_20260918/summary.json</code></a>.</p>
+    </div>
+    <p>Unit: bit operations (64-bit word XOR = 64 bit ops). Not the
+      field-product <code>S</code> of the panels above. A row with
+      <code>agree = NO</code> is not a result.</p>
+    <table>
+      <caption>Crossbred space on K<sub>0</sub> Frobenius-base Semaev systems.
+        Cited from
+        <code>experiments/ecc2k130_crossbred_kernel_20260918/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">n</th>
+        <th scope="col" class="n">m</th>
+        <th scope="col" class="n">ℓ</th>
+        <th scope="col" class="n">v</th>
+        <th scope="col" class="n">D</th>
+        <th scope="col" class="n">k</th>
+        <th scope="col" class="n">kernel</th>
+        <th scope="col" class="n">filters</th>
+        <th scope="col">agree</th>
+        <th scope="col" class="n">xb/F4</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>5</td><td class="n">2</td><td class="n">4</td><td class="n">8</td>
+          <td class="n">2</td><td class="n">4</td><td class="n">4</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.015</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>5</td><td class="n">3</td><td class="n">4</td><td class="n">17</td>
+          <td class="n">3</td><td class="n">8</td><td class="n">52</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.065</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>7</td><td class="n">3</td><td class="n">3</td><td class="n">16</td>
+          <td class="n">3</td><td class="n">6</td><td class="n">15</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.013</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>9</td><td class="n">2</td><td class="n">6</td><td class="n">12</td>
+          <td class="n">2</td><td class="n">6</td><td class="n">9</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.004</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>9</td><td class="n">3</td><td class="n">6</td><td class="n">27</td>
+          <td class="n">3</td><td class="n">12</td><td class="n">23</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.023</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>13</td><td class="n">2</td><td class="n">12</td><td class="n">24</td>
+          <td class="n">2</td><td class="n">12</td><td class="n">13</td><td class="n">0</td>
+          <td>yes</td><td class="n">0.002</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>13</td><td class="n">3</td><td class="n">12</td><td class="n">49</td>
+          <td class="n">4</td><td class="n">2</td><td class="n">25</td><td class="n">0</td>
+          <td>NO</td><td class="n">1150</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+      </tbody>
+    </table>
+    <p>X1 is the next panel. Do not GPU the search phase while
+      <code>filters = 0</code>. The product-law floor and the 500×-or-worse
+      rho verdict are unchanged.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-crossbred-x1-20260918">
+    <div class="panel-head">
+      <h2>Crossbred X1: no α fit on chained m = 3</h2>
+      <p><span class="chip">measurement</span>
+        T4 selection applied. X1 asked for a least-squares slope of
+        <code>log<sub>2</sub>(Q / C(|F|, 2))</code> vs <code>ℓ</code> over
+        ≥4 agreeing <code>m = 3</code> rungs with <code>|F| ≥ 3</code>.
+        Only two such rungs exist. No fit, no advance. Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_crossbred_x1_20260918/summary.json"><code>experiments/ecc2k130_crossbred_x1_20260918/summary.json</code></a>.</p>
+    </div>
+    <p>Unit: 64-bit word XORs. <code>Q_enum = C(|F|, 2)</code> at one
+      word-op per pair (undercounts enumeration, so the ratio is conservative
+      against an advance). Not the field-product <code>S</code> of the
+      panels above. Boundary stated before the run: success
+      <code>α ≤ 1.5</code>, falsifier <code>α ≥ 1.9</code>.</p>
+    <table>
+      <caption>Chained K<sub>0</sub> Semaev systems under T4. Cited from
+        <code>experiments/ecc2k130_crossbred_x1_20260918/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">n</th>
+        <th scope="col" class="n">ℓ</th>
+        <th scope="col" class="n">v</th>
+        <th scope="col" class="n">|F|</th>
+        <th scope="col" class="n">Q_enum</th>
+        <th scope="col" class="n">Q_word</th>
+        <th scope="col" class="n">Q/Q_enum</th>
+        <th scope="col" class="n">D</th>
+        <th scope="col" class="n">k</th>
+        <th scope="col">agree</th>
+        <th scope="col">usable</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>5</td><td class="n">4</td><td class="n">17</td><td class="n">21</td>
+          <td class="n">210</td><td class="n">17482</td><td class="n">83.248</td>
+          <td class="n">3</td><td class="n">8</td><td>yes</td><td>yes</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>7</td><td class="n">3</td><td class="n">16</td><td class="n">1</td>
+          <td class="n">0</td><td class="n">5006</td><td class="n">—</td>
+          <td class="n">3</td><td class="n">6</td><td>yes</td><td>no</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>9</td><td class="n">6</td><td class="n">27</td><td class="n">55</td>
+          <td class="n">1485</td><td class="n">474044</td><td class="n">319.222</td>
+          <td class="n">3</td><td class="n">12</td><td>yes</td><td>yes</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>13</td><td class="n">12</td><td class="n">49</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>15</td><td class="n">4</td><td class="n">27</td><td class="n">1</td>
+          <td class="n">0</td><td class="n">157321</td><td class="n">—</td>
+          <td class="n">3</td><td class="n">8</td><td>yes</td><td>no</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>19</td><td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>23</td><td class="n">11</td><td class="n">56</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+      </tbody>
+    </table>
+    <p>A two-point sketch between <code>n = 5</code> and <code>n = 9</code>
+      gives slope <code>+0.97</code> (<code>α ≈ 2.97</code>). That is not a
+      fit. Next is X3 on the symmetrised <code>u</code>-frame (following
+      panel). The product-law floor and the 500×-or-worse rho verdict
+      are unchanged.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-crossbred-x3-20260918">
+    <div class="panel-head">
+      <h2>Crossbred X3: no α fit on the symmetrised u-frame</h2>
+      <p><span class="chip">measurement</span>
+        Protocol frozen before the run (paired-oracle <code>F<sub>u</sub></code>,
+        T4 selection, same slope falsifier as X1). Only two usable
+        <code>m = 3</code> rungs with <code>|F<sub>u</sub>| ≥ 3</code>, both
+        on <code>K<sub>1</sub></code>. No fit, no advance. Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_crossbred_x3_20260918/summary.json"><code>experiments/ecc2k130_crossbred_x3_20260918/summary.json</code></a>.</p>
+    </div>
+    <p>Unit: 64-bit word XORs. <code>Q_enum = C(|F<sub>u</sub>|, 2)</code>
+      at one word-op per pair. Axis <code>ℓ = dim V</code>.
+      <code>K<sub>0</sub></code> is degenerate (<code>|F<sub>u</sub>| = 1</code>)
+      on every small rung under the frozen divisor. Every priced cell has
+      <code>filters = 0</code>.</p>
+    <table>
+      <caption>Symmetrised systems under T4. Cited from
+        <code>experiments/ecc2k130_crossbred_x3_20260918/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">K<sub>a</sub></th>
+        <th scope="col">n</th>
+        <th scope="col" class="n">ℓ</th>
+        <th scope="col" class="n">v</th>
+        <th scope="col" class="n">|F<sub>u</sub>|</th>
+        <th scope="col" class="n">Q_enum</th>
+        <th scope="col" class="n">Q_word</th>
+        <th scope="col" class="n">Q/Q_enum</th>
+        <th scope="col" class="n">D</th>
+        <th scope="col" class="n">k</th>
+        <th scope="col">agree</th>
+        <th scope="col">usable</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>1</td><td>7</td><td class="n">4</td><td class="n">10</td>
+          <td class="n">29</td><td class="n">406</td><td class="n">1889</td>
+          <td class="n">4.653</td><td class="n">4</td><td class="n">9</td>
+          <td>yes</td><td>yes</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>1</td><td>9</td><td class="n">3</td><td class="n">7</td>
+          <td class="n">13</td><td class="n">78</td><td class="n">380</td>
+          <td class="n">4.872</td><td class="n">4</td><td class="n">2</td>
+          <td>NO</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>1</td><td>15</td><td class="n">5</td><td class="n">13</td>
+          <td class="n">61</td><td class="n">1830</td><td class="n">11728</td>
+          <td class="n">6.409</td><td class="n">4</td><td class="n">11</td>
+          <td>yes</td><td>yes</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>1</td><td>17</td><td class="n">9</td><td class="n">25</td>
+          <td class="n">409</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>0</td><td>23</td><td class="n">12</td><td class="n">34</td>
+          <td class="n">4049</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>0</td><td>31</td><td class="n">11</td><td class="n">31</td>
+          <td class="n">2357</td><td class="n">—</td><td class="n">—</td>
+          <td class="n">—</td><td class="n">—</td><td class="n">—</td>
+          <td>—</td><td>no</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+      </tbody>
+    </table>
+    <p>A two-point sketch between <code>n = 7</code> and <code>n = 15</code>
+      gives slope <code>+0.46</code> (<code>α ≈ 2.46</code>). That is not a
+      fit. Crossbred cannot produce <code>α</code> on either the chained
+      or the symmetrised frame under the frozen protocols. X5 FFD at
+      <code>m = 4</code> is measured and does not grow. X4 has three
+      usable K<sub>1</sub> rungs and no slope. The
+      product-law floor and the 500×-or-worse rho verdict are unchanged.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-crossbred-autolab-20260918">
+    <div class="panel-head">
+      <h2>Crossbred AutoLab: no α, FFD at m=4 does not grow</h2>
+      <p><span class="chip">measurement</span>
+        Local control plane, Harbor not required. Replays of frozen X1/X3
+        match. OLS is per frame and still has no fit. Chained-<code>x</code>
+        FFD at <code>m = 4</code> is 3 at <code>n = 9</code> and
+        <code>n = 15</code> over 16 draws. Chained symmetrised
+        <code>S<sub>3</sub></code> FFD at <code>m = 4</code> is 4 at those
+        <code>n</code> with <code>ℓ = 3</code>; <code>n = 7</code>
+        <code>ℓ = 1</code> is a degree-1 collapse, not H1. Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json"><code>research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json</code></a>.</p>
+    </div>
+    <p>Unit: X1/X3 in 64-bit word XORs with
+      <code>Q_enum = C(|F|, 2)</code>; X5 in first-fall degree. Chained-
+      <code>x</code> uses <code>ffd_summary</code> factor index 0,
+      <code>d_max = 3</code>; chained-sym uses
+      <code>build_chained_symmetrised_system</code>,
+      <code>d_max = 4</code> (interior links are degree 3), divisor
+      <code>(n+1)/m</code>, seed <code>0x5EED</code>. Not the field-product
+      <code>S</code> of the panels above. Success still requires
+      <code>α ≤ 1.5</code> over four rungs in one frame. H1 is FFD growing
+      with <code>n</code> at <code>m = 4</code> on <code>ell &gt; 1</code>.
+      The product-law floor is untouched.</p>
+    <table>
+      <caption>AutoLab runs 2026-09-18 on
+        <code>ip-172-31-19-103</code>. Cited from
+        <code>research/ecc2k130_crossbred_autolab_20260918/evidence/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">Beat</th>
+        <th scope="col">Status</th>
+        <th scope="col">Number</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><code>smoke.x1_n5</code></td><td>PASS</td>
+          <td>Q/C 80.243 vs freeze 83.248 (within 5%); filters = 0</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td><code>replay.x3_k1_n7</code></td><td>PASS</td>
+          <td>Q/C 4.653 exact; filters = 0</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td><code>fit.alpha</code></td><td>PASS</td>
+          <td>no fit; 2 chained + 2 K<sub>1</sub> rungs; frames not mixed</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td><code>x5.ffd_chained_m4</code></td><td>PASS</td>
+          <td>FFD max = 3 at n = 9 and n = 15, m = 4, 4 draws; does not grow</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td><code>x5.ffd_chained_m4_16</code></td><td>PASS</td>
+          <td>same cells, 16 draws; still max = 3, does not grow</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td><code>x5.ffd_chained_sym_m4_smoke</code></td><td>PASS</td>
+          <td>ell&gt;1 FFD max = 4 at n = 9,15; n = 7 ell = 1 is degree 1</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td><code>x5.ffd_chained_sym_m4</code></td><td>PASS</td>
+          <td>16 draws; ell&gt;1 FFD max = 4 at n = 9 and n = 15, does not grow</td>
+          <td><span class="chip">measurement</span></td></tr>
+      </tbody>
+    </table>
+    <p>A two-point sketch is still not a fit. GPU search stays off
+      (<code>filters = 0</code>). Mixing <code>ell = 1</code> into the
+      growth flag is accounting, not H1. X4 has three usable
+      K<sub>1</sub> rungs and no slope. The 500×-or-worse rho verdict
+      is unchanged.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-x4-e2e-20260918">
+    <div class="panel-head">
+      <h2>X4: symmetrised oracle end-to-end, no slope</h2>
+      <p><span class="chip">measurement</span>
+        Unchained symmetrised <code>S<sub>m+1</sub></code> through
+        collection on K<sub>1</sub>. Protocol frozen before the run.
+        T7 holds: 12/12 sampled targets agree with Enumerate.
+        Three usable rungs recovered <code>[k]P = Q</code>. A slope
+        needs four. Predicted class engineering is not confirmed.
+        Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_symmetrised_x4_20260918/summary.json"><code>experiments/ecc2k130_symmetrised_x4_20260918/summary.json</code></a>.</p>
+    </div>
+    <p>Unit: enumerative envelope
+      <code>Λ = trials · C(|F_u|, m−1) / 2<sup>n</sup></code>,
+      ratio <code>Λ · n / m</code> to the floor <code>m/n</code>.
+      Algebraic reductions are a stage diagnostic (T3 still open).
+      Wall-clock is a footnote. Mixing K<sub>0</sub> with K<sub>1</sub>
+      is inadmissible. Not the field-product <code>S</code> of the
+      panels above. The product-law floor is untouched.</p>
+    <table>
+      <caption>X4 on K<sub>1</sub>, <code>m = 3</code>, seed
+        <code>0x5EED_0004</code>, host <code>ip-172-31-19-103</code>.
+        Cited from
+        <code>experiments/ecc2k130_symmetrised_x4_20260918/summary.json</code>.</caption>
+      <thead><tr>
+        <th scope="col">n</th>
+        <th scope="col" class="n">ℓ</th>
+        <th scope="col" class="n">|F<sub>u</sub>|</th>
+        <th scope="col" class="n">trials</th>
+        <th scope="col" class="n">Λ</th>
+        <th scope="col" class="n">Λ·n/m</th>
+        <th scope="col">agree</th>
+        <th scope="col">[k]P=Q</th>
+        <th scope="col">Enumerate</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>7</td><td class="n">4</td><td class="n">29</td>
+          <td class="n">4</td><td class="n">12.6875</td>
+          <td class="n">29.60</td>
+          <td>12/12</td><td>yes</td><td>yes, 4 trials</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>9</td><td class="n">3</td><td class="n">13</td>
+          <td class="n">20,000</td><td class="n">3046.88</td>
+          <td class="n">9140.63</td>
+          <td>12/12</td><td>no</td><td>no, 0 relations</td>
+          <td><span class="chip relabel">not a result</span></td></tr>
+        <tr><td>15</td><td class="n">5</td><td class="n">61</td>
+          <td class="n">18</td><td class="n">1.0052</td>
+          <td class="n">5.03</td>
+          <td>12/12</td><td>yes</td><td>yes, 18 trials</td>
+          <td><span class="chip">measurement</span></td></tr>
+        <tr><td>17</td><td class="n">9</td><td class="n">409</td>
+          <td class="n">11</td><td class="n">7.0022</td>
+          <td class="n">39.68</td>
+          <td>12/12</td><td>yes</td><td>yes, 14 trials</td>
+          <td><span class="chip">measurement</span></td></tr>
+      </tbody>
+    </table>
+    <p>Skips: <code>n = 5, 11, 19</code> (<code>prepare</code> returned
+      none); <code>n = 13</code> (no curve). <code>n = 23</code> was
+      started and killed with no cell. The three usable ratios are not
+      flat and do not decrease through the last rung. That is not a
+      fit. Linear algebra is priced on every completed rung
+      (<code>linear_algebra_ns</code> in the receipt). No α, no
+      rho-beating claim.</p>
+  </div>
+
+  <div class="panel" id="ecc2k130-rho-parity-20260918">
+    <div class="panel-head">
+      <h2>Toy-suite rho parity: PairTable vs signed-Frobenius rho</h2>
+      <p><span class="chip">accounting</span>
+        The iteration-1 parity claim on this panel (mean
+        <code>α</code> 0.76–0.91) was an accounting error and is
+        withdrawn. A windowed <code>m = 3</code> probe forms
+        <code>R − P<sub>k</sub></code> for every summand in its
+        window with the same batched point addition the table build
+        is charged for; iterations 0–2 charged the probe one addition
+        and the window nothing, and descent had the same hole.
+        Charged (iteration 3), the five toy cells cost 16–23× rho and
+        a twelve-rung ladder from <code>2<sup>11</sup></code> to
+        <code>2<sup>39</sup></code> costs 8× to 612× rho on every
+        rung. Two engineering rounds after the correction (batch 8;
+        <code>|F| = ⌈(2r)<sup>1/3</sup>⌉</code>) bring the range to
+        4.8–218×. Gate unmet on every rung; thread closed negative.
+        Not n=131. Note
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_RHO_PARITY.md"><code>RESEARCH_ECC2K130_RHO_PARITY.md</code></a>
+        §10–§13. Receipts
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_rho_parity_20260918/"><code>experiments/ecc2k130_rho_parity_20260918/</code></a>.</p>
+    </div>
+    <p>Unit: exclusive group operations
+      <code>G</code> = point additions + binary-method additions of
+      every charged scalar multiplication,
+      <code>S = G / √r</code>,
+      <code>α = G<sub>IC</sub> / G<sub>rho</sub></code>.
+      The gate is mean <code>α ≤ 1</code> and no verified pair
+      <code>α &gt; 1</code> on every useful cell. From iteration 3
+      the summand additions (<code>trials × window</code> in
+      collection, <code>trials × |F|</code> in descent) are in
+      <code>G<sub>IC</sub></code>; the uncorrected subtotal stays in
+      each receipt as <code>g_ic_before_summand_correction</code>.
+      Wall-clock is a footnote. Mixing this unit with the
+      Valgrind-instruction tournament win is inadmissible.</p>
+    <table>
+      <caption>Host <code>ip-172-31-19-103</code>, 2026-09-18/19.
+        Five toy cells. Iteration 0 and 1 rows are as originally
+        reported (uncorrected, before marks, not deleted); their
+        corrected <code>α</code> is derived from the same receipts.
+        Iteration 3 row from
+        <code>iteration-3/summary.json</code>, iteration 4 from
+        <code>iteration-4/summary.json</code>.
+        <code>G<sub>IC</sub></code> is constant per cell;
+        <code>G<sub>rho</sub></code> is the range across three
+        targets × three repetitions.</caption>
+      <thead><tr>
+        <th scope="col">Variant</th>
+        <th scope="col">Cell</th>
+        <th scope="col" class="n">G</th>
+        <th scope="col" class="n">S</th>
+        <th scope="col" class="n">α vs rho</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n13a0</td><td class="n">548–555</td>
+          <td class="n">12.24–12.40</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
+          <td>n13a0</td><td class="n">685</td>
+          <td class="n">15.31</td><td class="n">1.241</td>
+          <td>9/9 verified; corrected α 22.6</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
+          <td>n13a0</td><td class="n">503</td>
+          <td class="n">11.24</td><td class="n">0.911</td>
+          <td>9/9 verified; corrected α 22.2</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n13a0</td><td class="n">12,269</td>
+          <td class="n">274.14</td><td class="n">22.2 (22.1–22.4)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n13a0</td><td class="n">3,544</td>
+          <td class="n">79.19</td><td class="n">6.4 (6.4–6.5)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n17a1</td><td class="n">869–951</td>
+          <td class="n">3.39–3.71</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
+          <td>n17a1</td><td class="n">978</td>
+          <td class="n">3.82</td><td class="n">1.063</td>
+          <td>9/9 verified; corrected α 20.2</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
+          <td>n17a1</td><td class="n">706</td>
+          <td class="n">2.76</td><td class="n">0.767</td>
+          <td>9/9 verified; corrected α 19.9</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n17a1</td><td class="n">18,322</td>
+          <td class="n">71.54</td><td class="n">19.9 (19.3–21.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n17a1</td><td class="n">5,287</td>
+          <td class="n">20.64</td><td class="n">5.7 (5.6–6.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n19a0</td><td class="n">897–903</td>
+          <td class="n">2.48–2.50</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
+          <td>n19a0</td><td class="n">1,069</td>
+          <td class="n">2.95</td><td class="n">1.187</td>
+          <td>9/9 verified; corrected α 23.1</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
+          <td>n19a0</td><td class="n">765</td>
+          <td class="n">2.11</td><td class="n">0.850</td>
+          <td>9/9 verified; corrected α 22.7</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n19a0</td><td class="n">20,461</td>
+          <td class="n">56.56</td><td class="n">22.7 (22.7–22.8)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n19a0</td><td class="n">5,889</td>
+          <td class="n">16.28</td><td class="n">6.5 (6.5–6.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n19a1</td><td class="n">988–1,106</td>
+          <td class="n">1.93–2.16</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
+          <td>n19a1</td><td class="n">1,093</td>
+          <td class="n">2.13</td><td class="n">1.054</td>
+          <td>9/9 verified; corrected α 20.1</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
+          <td>n19a1</td><td class="n">789</td>
+          <td class="n">1.54</td><td class="n">0.761</td>
+          <td>9/9 verified; corrected α 19.8</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n19a1</td><td class="n">20,485</td>
+          <td class="n">39.98</td><td class="n">19.8 (18.5–20.7)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n19a1</td><td class="n">5,915</td>
+          <td class="n">11.54</td><td class="n">5.7 (5.3–6.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n23a0</td><td class="n">1,474–1,670</td>
+          <td class="n">1.02–1.15</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>PairTable, two-pass (iteration 0, uncorrected)</td>
+          <td>n23a0</td><td class="n">1,931</td>
+          <td class="n">1.33</td><td class="n">1.238</td>
+          <td>9/9 verified; corrected α 16.5</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass (iteration 1, uncorrected)</td>
+          <td>n23a0</td><td class="n">1,241</td>
+          <td class="n">0.86</td><td class="n">0.796</td>
+          <td>9/9 verified; corrected α 16.1</td>
+          <td><span class="chip">superseded</span></td></tr>
+        <tr><td>PairTable, one-pass, summands charged (iteration 3)</td>
+          <td>n23a0</td><td class="n">25,097</td>
+          <td class="n">17.34</td><td class="n">16.1 (15.0–17.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>+ collection batch 8 (iteration 4)</td>
+          <td>n23a0</td><td class="n">7,460</td>
+          <td class="n">5.15</td><td class="n">4.8 (4.5–5.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table>
+    <p>Corrected, no toy cell is within 4.8× of rho. The one-pass
+      table (iteration 0 → 1) was worth 1–3% of the corrected
+      <code>G<sub>IC</sub></code>; the batch-8 stop (iteration 4) is
+      worth 3–4× on these cells because a 64-probe batch scans
+      <code>64 × (|F| − 1)</code> summands for about
+      <code>K + 2</code> relations it needs.</p>
+    <div class="table-scroll"><table>
+      <caption>The ladder, iterations 3–5, host
+        <code>ip-172-31-19-103</code>, 2026-09-19, cited from
+        <code>experiments/ecc2k130_rho_parity_20260918/iteration-{3,4,5}/summary.json</code>.
+        Twelve Koblitz cells ordered by <code>log₂ r</code>. All 108
+        pairs verified on both arms in every iteration.
+        <code>G<sub>IC</sub></code> is the mean over nine pairs (it
+        varies per target on the upper rungs through descent);
+        <code>G<sub>rho</sub></code> is the range. On the eight rungs
+        below n37a0 the sampler's eight-orbit minimum makes the
+        iteration-5 base identical to iteration 4, so those rows are
+        the same measurement and not evidence for the recipe.</caption>
+      <thead><tr>
+        <th scope="col">Variant</th>
+        <th scope="col">Cell</th>
+        <th scope="col" class="n">G</th>
+        <th scope="col" class="n">S</th>
+        <th scope="col" class="n">α vs rho, mean (min–max)</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n13a0 (log₂ r 11.0)</td><td class="n">548–555</td>
+          <td class="n">12.2–12.4</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 182, t = 1</td>
+          <td>n13a0</td><td class="n">12,269</td>
+          <td class="n">274</td><td class="n">22.2 (22.1–22.4)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 182, t = 1</td>
+          <td>n13a0</td><td class="n">3,544</td>
+          <td class="n">79.2</td><td class="n">6.4 (6.4–6.5)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 182, t = 1</td>
+          <td>n13a0</td><td class="n">3,544</td>
+          <td class="n">79.2</td><td class="n">6.4 (6.4–6.5)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n29a1 (log₂ r 15.4)</td><td class="n">822–852</td>
+          <td class="n">3.99–4.13</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 464, t = 1</td>
+          <td>n29a1</td><td class="n">31,132</td>
+          <td class="n">151</td><td class="n">37.4 (36.5–37.9)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 464, t = 1</td>
+          <td>n29a1</td><td class="n">12,610</td>
+          <td class="n">61.2</td><td class="n">15.1 (14.8–15.3)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 464, t = 1</td>
+          <td>n29a1</td><td class="n">12,610</td>
+          <td class="n">61.2</td><td class="n">15.1 (14.8–15.3)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n17a1 (log₂ r 16.0)</td><td class="n">869–951</td>
+          <td class="n">3.39–3.71</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 272, t = 1</td>
+          <td>n17a1</td><td class="n">18,322</td>
+          <td class="n">71.5</td><td class="n">19.9 (19.3–21.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 272, t = 1</td>
+          <td>n17a1</td><td class="n">5,287</td>
+          <td class="n">20.6</td><td class="n">5.7 (5.6–6.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 272, t = 1</td>
+          <td>n17a1</td><td class="n">5,287</td>
+          <td class="n">20.6</td><td class="n">5.7 (5.6–6.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n19a0 (log₂ r 17.0)</td><td class="n">897–903</td>
+          <td class="n">2.48–2.5</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 304, t = 1</td>
+          <td>n19a0</td><td class="n">20,461</td>
+          <td class="n">56.6</td><td class="n">22.7 (22.7–22.8)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 304, t = 1</td>
+          <td>n19a0</td><td class="n">5,889</td>
+          <td class="n">16.3</td><td class="n">6.5 (6.5–6.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 304, t = 1</td>
+          <td>n19a0</td><td class="n">5,889</td>
+          <td class="n">16.3</td><td class="n">6.5 (6.5–6.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n19a1 (log₂ r 18.0)</td><td class="n">988–1,106</td>
+          <td class="n">1.93–2.16</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 304, t = 1</td>
+          <td>n19a1</td><td class="n">20,485</td>
+          <td class="n">40</td><td class="n">19.8 (18.5–20.7)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 304, t = 1</td>
+          <td>n19a1</td><td class="n">5,915</td>
+          <td class="n">11.5</td><td class="n">5.7 (5.3–6.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 304, t = 1</td>
+          <td>n19a1</td><td class="n">5,915</td>
+          <td class="n">11.5</td><td class="n">5.7 (5.3–6.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n31a0 (log₂ r 20.5)</td><td class="n">1,164–1,301</td>
+          <td class="n">0.97–1.08</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 496, t = 1</td>
+          <td>n31a0</td><td class="n">33,310</td>
+          <td class="n">27.8</td><td class="n">27.1 (25.6–28.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 496, t = 1</td>
+          <td>n31a0</td><td class="n">9,527</td>
+          <td class="n">7.94</td><td class="n">7.8 (7.3–8.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 496, t = 1</td>
+          <td>n31a0</td><td class="n">9,527</td>
+          <td class="n">7.94</td><td class="n">7.8 (7.3–8.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n23a0 (log₂ r 21.0)</td><td class="n">1,474–1,670</td>
+          <td class="n">1.02–1.15</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 368, t = 2</td>
+          <td>n23a0</td><td class="n">25,097</td>
+          <td class="n">17.3</td><td class="n">16.1 (15.0–17.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 368, t = 2</td>
+          <td>n23a0</td><td class="n">7,460</td>
+          <td class="n">5.15</td><td class="n">4.8 (4.5–5.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 368, t = 2</td>
+          <td>n23a0</td><td class="n">7,460</td>
+          <td class="n">5.15</td><td class="n">4.8 (4.5–5.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n39a0 (log₂ r 26.0)</td><td class="n">3,499–4,600</td>
+          <td class="n">0.422–0.555</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 624, t = 5</td>
+          <td>n39a0</td><td class="n">44,453</td>
+          <td class="n">5.37</td><td class="n">11.3 (9.8–12.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 624, t = 5</td>
+          <td>n39a0</td><td class="n">24,596</td>
+          <td class="n">2.97</td><td class="n">6.2 (5.4–7.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 624, t = 5</td>
+          <td>n39a0</td><td class="n">24,596</td>
+          <td class="n">2.97</td><td class="n">6.2 (5.4–7.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n37a0 (log₂ r 27.8)</td><td class="n">4,952–6,686</td>
+          <td class="n">0.326–0.44</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 592, t = 7</td>
+          <td>n37a0</td><td class="n">46,921</td>
+          <td class="n">3.09</td><td class="n">8.4 (6.7–9.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 592, t = 7</td>
+          <td>n37a0</td><td class="n">42,407</td>
+          <td class="n">2.79</td><td class="n">7.6 (6.0–8.8)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 1,184, t = 6</td>
+          <td>n37a0</td><td class="n">68,485</td>
+          <td class="n">4.51</td><td class="n">12.2 (10.7–13.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n43a1 (log₂ r 32.1)</td><td class="n">13,368–18,921</td>
+          <td class="n">0.196–0.278</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 688, t = 8</td>
+          <td>n43a1</td><td class="n">514,405</td>
+          <td class="n">7.55</td><td class="n">31.2 (25.1–35.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 688, t = 8</td>
+          <td>n43a1</td><td class="n">478,775</td>
+          <td class="n">7.03</td><td class="n">29.0 (23.1–32.9)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 2,752, t = 15</td>
+          <td>n43a1</td><td class="n">259,748</td>
+          <td class="n">3.81</td><td class="n">15.9 (13.6–19.3)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n47a1 (log₂ r 36.6)</td><td class="n">18,113–96,225</td>
+          <td class="n">0.0554–0.294</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 752, t = 8</td>
+          <td>n47a1</td><td class="n">21,956,488</td>
+          <td class="n">67.2</td><td class="n">611.7 (225.0–1260.9)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 752, t = 8</td>
+          <td>n47a1</td><td class="n">22,106,848</td>
+          <td class="n">67.7</td><td class="n">615.8 (226.6–1269.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 6,016, t = 41</td>
+          <td>n47a1</td><td class="n">2,260,191</td>
+          <td class="n">6.92</td><td class="n">61.8 (23.5–125.0)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Signed-Frobenius rho <em>(reference)</em></td>
+          <td>n41a0 (log₂ r 39.0)</td><td class="n">41,444–72,529</td>
+          <td class="n">0.0559–0.0978</td><td class="n">1</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">baseline</span></td></tr>
+        <tr><td>6n recipe, batch 64 (iteration 3), |F| = 656, t = 8</td>
+          <td>n41a0</td><td class="n">28,241,615</td>
+          <td class="n">38.1</td><td class="n">532.1 (300.9–759.2)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">accounting</span></td></tr>
+        <tr><td>6n recipe, batch 8 (iteration 4), |F| = 656, t = 8</td>
+          <td>n41a0</td><td class="n">28,424,411</td>
+          <td class="n">38.3</td><td class="n">535.4 (303.4–763.6)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>⌈(2r)<sup>1/3</sup>⌉ recipe, batch 8 (iteration 5), |F| = 10,496, t = 80</td>
+          <td>n41a0</td><td class="n">11,886,436</td>
+          <td class="n">16</td><td class="n">217.7 (163.8–286.1)</td>
+          <td>9/9 verified</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>Exponents</strong> (least squares of
+      <code>log₂ mean G</code> on <code>log₂ r</code>, all twelve
+      rungs / top four rungs): iteration 3 IC 0.40 / 0.88, iteration
+      4 IC 0.48 / 0.90, iteration 5 IC 0.40 / 0.66; rho 0.27 / 0.32
+      in every iteration (rho's fixed setup dominates its walk below
+      <code>log₂ r ≈ 26</code>, and n41a0's three targets finished in
+      0.56× the expected walk, so the top-four rho slope is low and
+      noisy). Reference slope 0.5.</p>
+    <p><strong>Model and extrapolation, not a measurement.</strong>
+      With the window charged, one addition buys one table lookup
+      that hits with probability <code>|F|²/(2r)</code>, so
+      <code>G<sub>IC</sub> ≈ |F|²/(4n) + (relations)·2r/|F|²</code>.
+      Iteration 5 sized <code>|F|</code> at the minimiser for
+      <code>relations = K + 1</code> and measured 2–4× more relations
+      than that (coupon-collector coverage of the <code>K</code>
+      orbits, about <code>K ln K / 3</code>), which is why its
+      collection came in 4–7× above the model and n37a0 got worse.
+      At the model optimum <code>α ≈ 1.34 · r<sup>1/6</sup> / √n</code>,
+      below 1 only for <code>r &lt; (n/1.8)³</code>, under every rung
+      here; at <code>n = 131</code> it is about
+      <code>3.5 × 10<sup>5</sup></code>. Recovering the full
+      relation-count factor would move the best upper rung from 16×
+      to roughly 4×, not to 1×. The thread is closed negative in this
+      unit; the Valgrind-instruction tournament win is a different
+      unit and is neither confirmed nor contradicted by this.</p>
+  </div>
+
+<div class="panel" id="ec-baseline-20260914">
     <div class="panel-head">
       <h2>Imported EC index-calculus baseline</h2>
       <p>Class <span class="chip">accounting</span>. Unmodified WDSat on selected

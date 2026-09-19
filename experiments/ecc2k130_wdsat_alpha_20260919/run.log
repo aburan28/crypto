@@ -1,0 +1,72 @@
+wdsat oracle alpha: solver=/tmp/wdsat-wide/wdsat_solver sha256=bbe7c01980d16d06 max_l=9 targets/rung=6 timeout=3600s jobs=6 seed=0x5a70001
+  n   l   t   class     confl  confl/trip     wdsat s     pairs s    ratio  check
+ 15   5   0   UNSAT      5522       0.923       0.041     0.00028    144.0  agrees with exhaustive pairs
+ 15   5   1   UNSAT      5497       0.919       0.061     0.00028    217.6  agrees with exhaustive pairs
+ 15   5   2   UNSAT      5450       0.911       0.061     0.00029    208.3  agrees with exhaustive pairs
+ 15   5   3   UNSAT      5453       0.911       0.041     0.00028    143.9  agrees with exhaustive pairs
+ 15   5   4   UNSAT      5529       0.924       0.061     0.00030    204.6  agrees with exhaustive pairs
+ 15   5   5   UNSAT      5547       0.927       0.061     0.00028    214.8  agrees with exhaustive pairs
+ 19   6   0   UNSAT     44620       0.975       0.546     0.00130    420.3  agrees with exhaustive pairs
+ 19   6   1   UNSAT     43953       0.961       0.561     0.00131    428.2  agrees with exhaustive pairs
+ 19   6   2   UNSAT     44114       0.964       0.390     0.00129    301.6  agrees with exhaustive pairs
+ 19   6   3     SAT     41961       0.917       0.375     0.00030   1230.4  witness zeroes f3
+ 19   6   4   UNSAT     43738       0.956       0.542     0.00131    414.4  agrees with exhaustive pairs
+ 19   6   5   UNSAT     43858       0.958       0.536     0.00131    408.0  agrees with exhaustive pairs
+ 21   7   0   UNSAT    350605       0.980       4.794     0.00578    829.8  agrees with exhaustive pairs
+ 21   7   1   UNSAT    351602       0.983       5.031     0.00570    883.4  agrees with exhaustive pairs
+ 21   7   2     SAT    168140       0.470       1.725     0.00034   5063.3  witness zeroes f3
+ 21   7   3   UNSAT    350976       0.981       5.680     0.00570    995.9  agrees with exhaustive pairs
+ 21   7   4   UNSAT    350810       0.981       4.161     0.00568    733.1  agrees with exhaustive pairs
+ 21   7   5   UNSAT    351268       0.982       5.714     0.00570   1001.8  agrees with exhaustive pairs
+ 24   8   0     SAT   1997694       0.706      38.340     0.00514   7452.1  witness zeroes f3
+ 24   8   1   UNSAT   2807319       0.992      67.251     0.02482   2710.0  agrees with exhaustive pairs
+ 24   8   2   UNSAT   2807117       0.992      63.767     0.02485   2566.3  agrees with exhaustive pairs
+ 24   8   3   UNSAT   2806146       0.992      50.995     0.02496   2043.5  agrees with exhaustive pairs
+ 24   8   4   UNSAT   2805838       0.992      69.403     0.02487   2790.8  agrees with exhaustive pairs
+ 24   8   5   UNSAT   2803770       0.991      64.474     0.02487   2592.3  agrees with exhaustive pairs
+ 27   9   0   UNSAT  22402254       0.996     616.271     0.12062   5109.0  agrees with exhaustive pairs
+ 27   9   1     SAT   4278855       0.190     111.911     0.06019   1859.4  witness zeroes f3
+ 27   9   2   UNSAT  22397126       0.995     624.159     0.12056   5177.3  agrees with exhaustive pairs
+ 27   9   3   UNSAT  22400825       0.996     595.539     0.12044   4944.9  agrees with exhaustive pairs
+ 27   9   4   UNSAT  22393860       0.995     531.869     0.12039   4417.8  agrees with exhaustive pairs
+ 27   9   5   UNSAT  22417416       0.996     634.886     0.12085   5253.4  agrees with exhaustive pairs
+{
+  "pairs_and_solve_mul_equivalents": {
+    "alpha": 2.1279536988328958,
+    "log2_intercept": 4.93275707945582,
+    "log2_q_at_l45_extrapolated": 100.69067352693614,
+    "rungs": 5
+  },
+  "pairs_and_solve_wall": {
+    "alpha": 2.171622814749234,
+    "log2_intercept": -22.641235244463722,
+    "log2_q_at_l45_extrapolated": 75.0817914192518,
+    "rungs": 5
+  },
+  "reference": {
+    "enumeration_alpha": 2.0,
+    "l_at_n131": 45.0,
+    "linear_oracle_alpha": 1.0,
+    "parity_alpha_at_n131": 0.38
+  },
+  "rule": "least squares of log2(median over rejection instances) on l over complete rungs; null below four rungs",
+  "wdsat_conflicts": {
+    "alpha": 2.997517032075521,
+    "log2_intercept": -2.5606992788341962,
+    "log2_q_at_l45_extrapolated": 132.32756716456424,
+    "rungs": 5
+  },
+  "wdsat_mul_equivalents": {
+    "alpha": 3.307119575987728,
+    "log2_intercept": 6.655800342016796,
+    "log2_q_at_l45_extrapolated": 155.47618126146455,
+    "rungs": 5
+  },
+  "wdsat_wall": {
+    "alpha": 3.3507886919040657,
+    "log2_intercept": -20.91819198190275,
+    "log2_q_at_l45_extrapolated": 129.8672991537802,
+    "rungs": 5
+  }
+}
+all_verified = true

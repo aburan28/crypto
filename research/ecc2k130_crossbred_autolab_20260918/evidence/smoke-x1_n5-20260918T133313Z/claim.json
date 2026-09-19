@@ -1,0 +1,30 @@
+{
+  "beat_id": "smoke.x1_n5",
+  "class": "accounting",
+  "expect": {
+    "Q_over_Q_enum": 83.248,
+    "agree": true,
+    "m": 3,
+    "n": 5,
+    "rel_tol": 0.05
+  },
+  "finished_utc": "2026-09-18T13:33:13.348404+00:00",
+  "host": "ip-172-31-19-103",
+  "log_sha256": "ce5e8c9babd02dca3d0431a00828152b37727e7b4b25636443adbe9a1e40bf6b",
+  "row": {
+    "F": 21,
+    "Q_enum": 210,
+    "Q_over_Q_enum": 80.243,
+    "Q_word": 16851,
+    "agree": true,
+    "ell": 4,
+    "filters": 0,
+    "m": 3,
+    "n": 5,
+    "v": 17
+  },
+  "run_id": "smoke-x1_n5-20260918T133313Z",
+  "started_utc": "2026-09-18T13:33:13.176957+00:00",
+  "status": "PASS",
+  "task_id": "TASK-ECC2K130-CROSSBRED-AUTOLAB-20260918"
+}

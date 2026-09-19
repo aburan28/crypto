@@ -1,0 +1,80 @@
+{
+  "beat_id": "x5.ffd_chained_sym_m4",
+  "class": "measurement",
+  "falsifier": "FFD max grows with n at m=4",
+  "finished_utc": "2026-09-18T16:02:26.030801+00:00",
+  "host": "ip-172-31-19-103",
+  "log_sha256": "91c52a23721d03a024e92b5d3424de3fbf0e13ded85c9dd567dfae569790703c",
+  "m4_ell_eq_1": [
+    {
+      "deg": 1,
+      "ell": 1,
+      "eqs": 21,
+      "ffd_max": 2,
+      "ffd_min": 2,
+      "m": 4,
+      "mean_syz_d2": 223.44,
+      "n": 7,
+      "no_fall": 0,
+      "trials": 16,
+      "vars": 17
+    }
+  ],
+  "m4_ffd_grows_with_n": false,
+  "m4_ffd_grows_with_n_including_ell_1": true,
+  "m4_ffd_maxima": [
+    4,
+    4
+  ],
+  "m4_ffd_maxima_including_ell_1": [
+    2,
+    4,
+    4
+  ],
+  "note": "16-draw promotion of the chained symmetrised S3. H1 is FFD growing with n.",
+  "rows": [
+    {
+      "deg": 1,
+      "ell": 1,
+      "eqs": 21,
+      "ffd_max": 2,
+      "ffd_min": 2,
+      "m": 4,
+      "mean_syz_d2": 223.44,
+      "n": 7,
+      "no_fall": 0,
+      "trials": 16,
+      "vars": 17
+    },
+    {
+      "deg": 3,
+      "ell": 3,
+      "eqs": 27,
+      "ffd_max": 4,
+      "ffd_min": 4,
+      "m": 4,
+      "mean_syz_d2": 0.0,
+      "n": 9,
+      "no_fall": 0,
+      "trials": 16,
+      "vars": 29
+    },
+    {
+      "deg": 3,
+      "ell": 3,
+      "eqs": 45,
+      "ffd_max": 4,
+      "ffd_min": 4,
+      "m": 4,
+      "mean_syz_d2": 0.0,
+      "n": 15,
+      "no_fall": 0,
+      "trials": 16,
+      "vars": 41
+    }
+  ],
+  "run_id": "x5-ffd_chained_sym_m4-20260918T160221Z",
+  "started_utc": "2026-09-18T16:02:21.604919+00:00",
+  "status": "PASS",
+  "task_id": "TASK-ECC2K130-CROSSBRED-AUTOLAB-20260918"
+}

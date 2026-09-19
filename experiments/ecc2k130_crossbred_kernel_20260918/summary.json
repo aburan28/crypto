@@ -1,0 +1,83 @@
+{
+  "schema": "ecc2k130_crossbred_kernel/v1",
+  "question": "Where does a crossbred space exist at all on K_0 decomposition systems?",
+  "class": "measurement",
+  "unit": "bit operations; 64-bit word XOR = 64 bit ops; not field products",
+  "boundary": "kernel_dim > 0 with k < m*ell; agree=yes required",
+  "falsifier": "no crossbred space at m=3 beyond toy rungs",
+  "falsifier_met": false,
+  "source_commit": "82c846b6c1e3e4b0412502b8304a168daa4fad40",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "host": "ip-172-31-19-103",
+  "command": "cargo run --release --example crossbred_bench",
+  "notes": [
+    "filters=0 on every printed cell, including the (D,k) sweep at n=9 m=2",
+    "xb/brute and xb/F4 are not Q/C(|F|,m-1); X1 is not fitted here",
+    "n=11 m=3 and n=17 m=2 produced no oracle row (curve or factor base None)"
+  ],
+  "sweep_n9_m2": {
+    "v": 12,
+    "equations": 9,
+    "ell": 6,
+    "filters_nonzero_cells": 0,
+    "first_determining_cell": { "D": 2, "k": 6, "kernel": 9, "v_minus_k": 6 }
+  },
+  "oracle_rows": [
+    {
+      "n": 5, "m": 2, "ell": 4, "v": 8, "deg": 2, "targets": 11,
+      "reference": "exhaustive, ==", "agree": true,
+      "D": 2, "k": 4, "kernel": 4, "filters": 0,
+      "xb_over_brute": 0.691, "xb_over_f4": 0.015,
+      "class": "measurement"
+    },
+    {
+      "n": 5, "m": 3, "ell": 4, "v": 17, "deg": 3, "targets": 11,
+      "reference": "exhaustive, ==", "agree": true,
+      "D": 3, "k": 8, "kernel": 52, "filters": 0,
+      "xb_over_brute": 0.026, "xb_over_f4": 0.065,
+      "class": "measurement"
+    },
+    {
+      "n": 7, "m": 3, "ell": 3, "v": 16, "deg": 3, "targets": 11,
+      "reference": "exhaustive, ==", "agree": true,
+      "D": 3, "k": 6, "kernel": 15, "filters": 0,
+      "xb_over_brute": 0.016, "xb_over_f4": 0.013,
+      "class": "measurement"
+    },
+    {
+      "n": 9, "m": 2, "ell": 6, "v": 12, "deg": 2, "targets": 12,
+      "reference": "exhaustive, ==", "agree": true,
+      "D": 2, "k": 6, "kernel": 9, "filters": 0,
+      "xb_over_brute": 0.120, "xb_over_f4": 0.004,
+      "class": "measurement"
+    },
+    {
+      "n": 9, "m": 3, "ell": 6, "v": 27, "deg": 3, "targets": 12,
+      "reference": "F4 capped, ⊆", "agree": true,
+      "D": 3, "k": 12, "kernel": 23, "filters": 0,
+      "xb_over_brute": null, "xb_over_f4": 0.023,
+      "class": "measurement"
+    },
+    {
+      "n": 13, "m": 2, "ell": 12, "v": 24, "deg": 2, "targets": 12,
+      "reference": "exhaustive, ==", "agree": true,
+      "D": 2, "k": 12, "kernel": 13, "filters": 0,
+      "xb_over_brute": 0.001, "xb_over_f4": 0.002,
+      "class": "measurement"
+    },
+    {
+      "n": 13, "m": 3, "ell": 12, "v": 49, "deg": 3, "targets": 12,
+      "reference": "F4 capped, ⊆", "agree": false,
+      "D": 4, "k": 2, "kernel": 25, "filters": 0,
+      "xb_over_brute": null, "xb_over_f4": 1150.131,
+      "xb_wall_ms": 4050.5,
+      "class": "not a result",
+      "note": "kernel extracted but agree=NO; printed k=2 does not satisfy kernel >= v-k on the last target (25 < 47)"
+    }
+  ],
+  "largest_agreeing": {
+    "m2": { "n": 13, "ell": 12, "v": 24 },
+    "m3": { "n": 9, "ell": 6, "v": 27 }
+  },
+  "x1_status": "not fitted: only three agreeing m=3 rungs (n=5,7,9); bench ratios are vs Boolean brute/F4, not vs C(|F|,2)"
+}
