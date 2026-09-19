@@ -11,3 +11,6 @@ B200_CLMAD=0 bash benchmarks/b200/run-modal.sh   # software arm only (skip valid
 
 `make bench-b200-modal` is the bench half; `make validate-b200-modal` is
 the planted-log half. Workers stay automatic.
+
+Shipping-arm receipt (this directory): median **8.821857 B/s**, 0.584 of
+the 6000 reference. See [../../B200.md](../../B200.md).

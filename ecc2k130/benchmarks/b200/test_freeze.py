@@ -120,6 +120,41 @@ class FreezeTests(unittest.TestCase):
         self.assertIn("/tmp/ecc2k130-b200", script)
         self.assertNotIn('tee "$OUTDIR/', script)
 
+    def test_parses_spinner_split_identity(self):
+        mangled = """
+repeat 1/3: 8821.857 M it/s (complete)
+repeat 2/3: 8823.243 M it/s (complete)
+repeat 3/3: 8810.542 M it/s (complete)
+"gpu": "NVIDIA B200",
+"cc": "100",
+"packedClmad": true,
+device: NVIDIA B200, 148 SMs, 2 block(s) of 256 packed threads
+packed native
+carryless multiply: 1
+packed kernel: 102 registers/thread, 0 local bytes/thread
+backend cuda-packed131: 75776 threads x 16 slots
+"sourceSha256":
+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+"binarySha256":
+"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+"cudaImageVersion": "13.3.1"
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "m.log"
+            dst = Path(tmp) / "out.json"
+            src.write_text(mangled)
+            r = subprocess.run(
+                ["python3", str(FREEZE), "clmad", str(src), str(dst)],
+                cwd=ROOT, capture_output=True, text=True,
+            )
+            self.assertEqual(r.returncode, 0, r.stderr)
+            out = json.loads(dst.read_text())
+            self.assertEqual(out["sms"], 148)
+            self.assertTrue(out["packedClmad"])
+            self.assertAlmostEqual(out["medianB"], 8.821857)
+            self.assertEqual(out["automaticThreads"], 75776)
+            self.assertEqual(out["parsedFrom"], "modal-log")
+
 
 if __name__ == "__main__":
     unittest.main()
