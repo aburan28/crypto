@@ -280,8 +280,11 @@ button:disabled { opacity: 0.55; cursor: progress; }
 .odds-chart { margin-top: 12px; }
 /* Odds chart is drawn to be read at phone width: no forced min-width, so the
    dates under the curve stay in view instead of living off-screen to the right. */
-.odds-chart.chart { overflow: visible; }
-.odds-chart svg {
+.chart.odds-chart { overflow: visible; }
+/* Specificity has to beat `.chart svg` below, which sets min-width: 560px;
+   a bare `.odds-chart svg` ties and loses on source order, leaving the curve
+   560px wide and spilling out of the card on a phone. */
+.chart.odds-chart svg {
   min-width: 0;
   width: 100%;
   max-width: 100%;

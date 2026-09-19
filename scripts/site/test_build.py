@@ -367,7 +367,10 @@ class BuildTests(unittest.TestCase):
         self.assertIn('label(gx, H - 22, xLabel(work, mark), "middle", "tick")', page)
         self.assertIn('label(gx + 4, y(p) - 6, mark, "start", "tick")', page)
         css = read(os.path.join(self.out, "status", "style.css"))
-        self.assertIn(".odds-chart svg", css)
+        # The override has to outrank `.chart svg { min-width: 560px }`; a bare
+        # `.odds-chart svg` ties on specificity and loses on source order,
+        # which pushed the curve out past the card edge on a phone.
+        self.assertIn(".chart.odds-chart svg", css)
         self.assertIn("min-width: 0", css)
         # Walk forest fits the column on a phone. A 640px min-width made the
         # caption lay out at that width, so every line clipped; the SVG
