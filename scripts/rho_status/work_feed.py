@@ -52,6 +52,7 @@ import math
 import os
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
@@ -108,9 +109,29 @@ def feed_url(stack=DEFAULT_STACK, region=DEFAULT_REGION, account=None):
     return "https://%s-status-%s.s3.%s.amazonaws.com/status.json" % (stack, account, region)
 
 
-def fetch(url, timeout=FETCH_TIMEOUT_S):
-    with urllib.request.urlopen(url, timeout=timeout) as response:  # nosec B310 - https only
-        return json.loads(response.read().decode("utf-8"))
+# One S3 GET that fails on a runner is almost always a blip, and when this
+# document is the only source the page has, one blip must not cost a publish.
+# The environment overrides exist for the offline tests, which exercise the
+# unreachable case and should not wait nine seconds to do it.
+FETCH_ATTEMPTS = int(os.environ.get("RHO_WORK_FEED_ATTEMPTS", "3"))
+FETCH_BACKOFF_S = float(os.environ.get("RHO_WORK_FEED_BACKOFF_S", "3"))
+
+
+def fetch(url, timeout=FETCH_TIMEOUT_S, attempts=None, backoff_s=None):
+    """The feed document, retried a few times before the caller hears of it."""
+    attempts = FETCH_ATTEMPTS if attempts is None else max(1, int(attempts))
+    backoff_s = FETCH_BACKOFF_S if backoff_s is None else backoff_s
+    last = None
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as response:  # nosec B310 - https only
+                return json.loads(response.read().decode("utf-8"))
+        except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
+            last = err
+            if attempt < attempts:
+                print("work feed fetch %d/%d failed (%s); retrying" % (attempt, attempts, err))
+                time.sleep(backoff_s * attempt)
+    raise last
 
 
 def work_block(feed, campaign, now=None, max_age_s=MAX_FEED_AGE_S):

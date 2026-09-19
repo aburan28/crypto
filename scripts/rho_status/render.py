@@ -130,6 +130,21 @@ def measure_rate(points, window_s=RATE_WINDOW_S, min_span_s=MIN_RATE_SPAN_S,
     }
 
 
+def stamp_published(snapshot, now=None):
+    """Record when the publishing job wrote this document.
+
+    `generated_at` is when the source counted -- the walker's query, or the
+    ingest host's write, which may be up to its --status-every old when the
+    hop is down. Without a second stamp a reader cannot tell a publisher that
+    stopped from a source that did: Pages froze on an 11:25Z snapshot for 17
+    hours on 2026-09-18 and the page had one sentence for both. The dashboard
+    prints both and says which one is behind.
+    """
+    now = now or datetime.now(timezone.utc)
+    snapshot["published_at"] = now.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return snapshot["published_at"]
+
+
 def apply_rate(snapshot, rate):
     """Attach a measured rate to the snapshot, or clear a stale one. True when set."""
     if rate is None:
@@ -201,6 +216,7 @@ def main(argv=None):
     )
     if args.status_out:
         apply_rate(snapshot, rate)
+        stamp_published(snapshot)
         with open(args.status_out, "w", encoding="utf-8") as fh:
             json.dump(snapshot, fh, indent=2, sort_keys=True)
             fh.write("\n")
