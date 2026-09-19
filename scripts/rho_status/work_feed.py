@@ -25,14 +25,22 @@ is a secret for the same reason). It is derived at run time from the calling
 identity, the same `<stack>-status-<account>` convention infra.sh uses, or
 given outright in RHO_WORK_FEED_URL.
 
-Fail-soft on purpose. A feed that is missing, unreachable, stale,
-unparseable or from another campaign leaves the snapshot exactly as
-snapshot.py wrote it and exits 0: the pages already say they have no
-iteration count for that case, and losing the walk total must not also lose
-the 15-minute point publication.
+Fail-soft on purpose when merging into a walker snapshot. A feed that is
+missing, unreachable, stale, unparseable or from another campaign leaves
+that snapshot exactly as snapshot.py wrote it and exits 0: the pages
+already say they have no iteration count for that case, and losing the
+walk total must not also lose the 15-minute point publication.
+
+`--as-snapshot` is the other mode: the walker hop is down, so this file
+*is* the publication. The ingest host already writes the same counts to
+the status bucket every `--status-every` seconds. Republish that document
+(without `per_slot`) rather than failing the job and leaving Pages on a
+snapshot whose `generated_at` is a day old. Fail hard if the feed cannot
+be read: there is nothing else to publish.
 
 Usage:
     python3 scripts/rho_status/work_feed.py --status docs/ecc2k130-status/status.json
+    python3 scripts/rho_status/work_feed.py --as-snapshot --status docs/ecc2k130-status/status.json
     RHO_WORK_FEED_URL=https://host/status.json python3 scripts/rho_status/work_feed.py --status s.json
 """
 
@@ -44,11 +52,12 @@ import math
 import os
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
-from snapshot import DEFAULT_CAMPAIGN, assert_public
+from snapshot import DEFAULT_CAMPAIGN, assert_public, iso, normalize, write_snapshot_file
 
 # The feed is rewritten continuously by the ingest host, so an hour without a
 # rewrite means that host stopped, not that the walk did. Publishing a frozen
@@ -100,17 +109,43 @@ def feed_url(stack=DEFAULT_STACK, region=DEFAULT_REGION, account=None):
     return "https://%s-status-%s.s3.%s.amazonaws.com/status.json" % (stack, account, region)
 
 
-def fetch(url, timeout=FETCH_TIMEOUT_S):
-    with urllib.request.urlopen(url, timeout=timeout) as response:  # nosec B310 - https only
-        return json.loads(response.read().decode("utf-8"))
+# One S3 GET that fails on a runner is almost always a blip, and when this
+# document is the only source the page has, one blip must not cost a publish.
+# The environment overrides exist for the offline tests, which exercise the
+# unreachable case and should not wait nine seconds to do it.
+FETCH_ATTEMPTS = int(os.environ.get("RHO_WORK_FEED_ATTEMPTS", "3"))
+FETCH_BACKOFF_S = float(os.environ.get("RHO_WORK_FEED_BACKOFF_S", "3"))
 
 
-def work_block(feed, campaign, now=None):
+def fetch(url, timeout=FETCH_TIMEOUT_S, attempts=None, backoff_s=None):
+    """The feed document, retried a few times before the caller hears of it."""
+    attempts = FETCH_ATTEMPTS if attempts is None else max(1, int(attempts))
+    backoff_s = FETCH_BACKOFF_S if backoff_s is None else backoff_s
+    last = None
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(url, timeout=timeout) as response:  # nosec B310 - https only
+                return json.loads(response.read().decode("utf-8"))
+        except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
+            last = err
+            if attempt < attempts:
+                print("work feed fetch %d/%d failed (%s); retrying" % (attempt, attempts, err))
+                time.sleep(backoff_s * attempt)
+    raise last
+
+
+def work_block(feed, campaign, now=None, max_age_s=MAX_FEED_AGE_S):
     """The publishable part of the feed, or None when it says nothing usable.
 
     Returns the iteration total the workers checkpointed, how many slots are
     behind it, and when the feed was written -- enough for a reader to see
     what the figure is and how current, and nothing per-worker beyond a count.
+
+    `max_age_s` is how old a total may be when it is overlaid on a *fresh*
+    walker snapshot. None disables that check: the feed is the snapshot, so
+    a two-hour-old ingest document is still the current one, and the page
+    reads freshness from `generated_at` rather than from us dropping the
+    total.
     """
     if not isinstance(feed, dict) or feed.get("campaign_id") != campaign:
         return None
@@ -128,7 +163,7 @@ def work_block(feed, campaign, now=None):
         return None
     now = now or datetime.now(timezone.utc)
     age = (now - generated).total_seconds()
-    if age > MAX_FEED_AGE_S:
+    if max_age_s is not None and age > max_age_s:
         return None
     slots = work.get("per_slot") or []
     walking = [
@@ -184,9 +219,57 @@ def ingest_block(feed):
     }
 
 
-def merge_work(status, feed, campaign, now=None):
+def snapshot_from_feed(feed, campaign, now=None):
+    """A public Pages snapshot built from the ingest host's status.json.
+
+    The ingest document is already aggregates: campaign counts, a 48-hour
+    hourly series, checkpointed work. It also carries `work.per_slot`, which
+    names every walker's slot and run and must not be published. per_worker
+    is empty: that table is DISTINCT worker_id from the DP heap, which this
+    feed does not have. The GPU card still reads walking_slots from work.
+    """
+    if not isinstance(feed, dict) or feed.get("campaign_id") != campaign:
+        return None
+    generated = parse_time(feed.get("generated_at"))
+    if generated is None:
+        return None
+    if feed.get("dps") is None:
+        return None
+    ingest = feed.get("ingest") if isinstance(feed.get("ingest"), dict) else {}
+    snapshot = normalize(
+        {
+            "campaign_id": feed.get("campaign_id") or campaign,
+            "curve_id": feed.get("curve_id"),
+            "dp_mask_bits": feed.get("dp_mask_bits"),
+            "campaign_created_at": feed.get("campaign_created_at"),
+            "dps": feed.get("dps"),
+            "workers": 0,
+            "first_dp_at": feed.get("first_dp_at"),
+            "last_dp_at": feed.get("last_dp_at"),
+            "dps_last_hour": feed.get("dps_last_hour"),
+            "dps_last_day": feed.get("dps_last_day"),
+            "collisions": feed.get("collisions"),
+            "latest_collision_at": feed.get("latest_collision_at"),
+            "per_worker": [],
+            "hourly": feed.get("hourly") or [],
+            "ingest_outstanding": ingest.get("outstanding_objects"),
+            "ingest_unrecognised": ingest.get("unrecognised_objects"),
+        },
+        campaign,
+        "ingest-status-feed",
+    )
+    # normalize() stamps now(); the page's stale banner is about this field,
+    # so it has to be when the ingest host counted, not when we copied it.
+    snapshot["generated_at"] = iso(generated)
+    snapshot["query_driver"] = "ingest-feed"
+    merge_work(snapshot, feed, campaign, now=now, max_age_s=None)
+    assert_public(snapshot)
+    return snapshot
+
+
+def merge_work(status, feed, campaign, now=None, max_age_s=MAX_FEED_AGE_S):
     """Attach the feed's iteration total to the snapshot. True when it did."""
-    block = work_block(feed, campaign, now=now)
+    block = work_block(feed, campaign, now=now, max_age_s=max_age_s)
     if block is None:
         return False
     status["work"] = block
@@ -210,16 +293,36 @@ def main(argv=None):
     parser.add_argument("--feed-url", default=os.environ.get("RHO_WORK_FEED_URL", ""))
     parser.add_argument("--stack", default=os.environ.get("RHO_STACK", DEFAULT_STACK))
     parser.add_argument("--region", default=os.environ.get("AWS_DEFAULT_REGION", DEFAULT_REGION))
+    parser.add_argument(
+        "--as-snapshot",
+        action="store_true",
+        help="write a full public snapshot from the ingest feed; fail if it cannot",
+    )
     args = parser.parse_args(argv)
 
     url = args.feed_url or feed_url(args.stack, args.region)
     if not url:
         print("no work feed URL and no AWS identity to derive one; leaving snapshot as it is")
-        return 0
+        return 1 if args.as_snapshot else 0
     try:
         feed = fetch(url)
     except (urllib.error.URLError, OSError, ValueError, TimeoutError) as err:
         print("work feed unreadable (%s); leaving snapshot as it is" % err)
+        return 1 if args.as_snapshot else 0
+
+    if args.as_snapshot:
+        snapshot = snapshot_from_feed(feed, args.campaign)
+        if snapshot is None:
+            print("ingest feed is not a usable %s snapshot" % args.campaign, file=sys.stderr)
+            return 1
+        write_snapshot_file(args.status, snapshot)
+        generated = parse_time(snapshot.get("generated_at"))
+        now = datetime.now(timezone.utc)
+        age = int(max(0.0, (now - generated).total_seconds())) if generated else -1
+        print(
+            "wrote ingest-feed snapshot: dps=%d state=%s generated_at=%s age=%ds"
+            % (snapshot["dps"], snapshot["state"], snapshot["generated_at"], age)
+        )
         return 0
 
     with open(args.status, encoding="utf-8") as fh:

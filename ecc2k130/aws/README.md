@@ -425,7 +425,10 @@ every boot after it.
   via [`.github/workflows/ecc2k130-status.yml`](../../.github/workflows/ecc2k130-status.yml).
   That job uses IAM user `ecc2k130-status-gha` access keys stored as
   GitHub secrets (`scripts/rho_status/gha_iam_user.sh`) and hops through
-  the tagged `rho-ecc2k-walker` host. It does not open RDS to the internet.
+  the tagged `rho-ecc2k-walker` host. If that instance is not running, it
+  republishes the ingest host's `status.json` from the status bucket
+  instead of leaving Pages on the last successful hop. It does not open
+  RDS to the internet.
 * `status.py` sums live workers' rates, each slot's checkpointed iterations ×
   **that slot's own** walk count (survives restarts), uploaded points, and the
   fraction of 2^60.9. The walk count is not a campaign constant: a checkpoint
@@ -598,18 +601,22 @@ ingest, held this ingest behind itself for the rest of the attempt, timed out,
 rolled back, and left `ready` false for the next run to repeat. The page stayed
 on its 11:25Z snapshot throughout — the backfill meant to unstick it was also
 what kept the store from moving. The fleet never stopped: S3 had fresh objects
-the whole time. It is chunked by hour now, each hour one absolute upsert
-(`ON CONFLICT DO UPDATE SET dps = EXCLUDED.dps`), committed as it goes and
-resumable from a cursor, taking no lock on the table and safe to run beside the
-trigger because one statement is one snapshot. `scripts/rho_status/test_rollup_postgres.py`
-runs that against a real server, including the case that matters: the backfill
-completes while another session holds `ROW EXCLUSIVE`.
+the whole time. It is chunked by hour now (#450, #454), one committed
+transaction per hour under `REPEATABLE READ` with a 15 s `lock_timeout` and no
+lock on the table, resumable from `backfill_through`, and the page publishes an
+index-only fallback count before the backfill rather than after it — so a rollup
+that is still filling costs the page accuracy on the hourly series, not its
+existence.
 
-Clearing a stuck rollup needs one run of the backfill without the 900 s hop
-ceiling, because the Pages job only reaches the backfill while `ready` is false
-and only a completed backfill clears it. `scripts/rho_status/complete_rollup.sh up`
-does that from a short-lived host in this subnet under this instance profile,
-and terminates itself when the rollup is ready.
+`scripts/rho_status/test_rollup_postgres.py` runs that against a real server,
+because none of it is a claim about the text of the SQL: that an hour rebuilt
+over the trigger's own work counts each row once, that a spent budget leaves a
+cursor the next call finishes, that the published document matches the table's
+own histogram, that the fallback count and the rollup agree, and the one that
+matters — the backfill completes while another session holds `ROW EXCLUSIVE`,
+where the first shape waits out its timeout. It skips where there is no
+Postgres, so it is a no-op in CI and a real check on any host that can reach
+one.
 
 While a snapshot runs, this program is not ingesting — the loop is
 pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh

@@ -1,0 +1,102 @@
+[four_weight_two] 4262 abscissae -> 4262 representatives, 18,160,382 signed pairs
+[four_weight_two]   1,580,000/18,160,382 ( 8.70%) kept=1,580,000 elapsed=    30s eta=   316s
+[four_weight_two]   3,040,000/18,160,382 (16.74%) kept=3,040,000 elapsed=    60s eta=   300s
+[four_weight_two]   4,580,000/18,160,382 (25.22%) kept=4,580,000 elapsed=    91s eta=   268s
+[four_weight_two]   6,060,000/18,160,382 (33.37%) kept=6,060,000 elapsed=   121s eta=   241s
+[four_weight_two]   7,700,000/18,160,382 (42.40%) kept=7,700,000 elapsed=   151s eta=   205s
+[four_weight_two]   9,160,000/18,160,382 (50.44%) kept=9,160,000 elapsed=   181s eta=   178s
+[four_weight_two]   10,780,000/18,160,382 (59.36%) kept=10,780,000 elapsed=   211s eta=   145s
+[four_weight_two]   12,340,000/18,160,382 (67.95%) kept=12,340,000 elapsed=   241s eta=   114s
+[four_weight_two]   13,840,000/18,160,382 (76.21%) kept=13,840,000 elapsed=   271s eta=    85s
+[four_weight_two]   15,380,000/18,160,382 (84.69%) kept=15,380,000 elapsed=   302s eta=    55s
+[four_weight_two]   16,920,000/18,160,382 (93.17%) kept=16,920,000 elapsed=   332s eta=    24s
+[four_weight_two] done: 940 candidates | 0 four-distinct | 338 repeated (338 Frobenius) | 602 false positives
+{
+  "name": "four_weight_two",
+  "description": "the complete weight-two support",
+  "abscissae_supplied": 4262,
+  "representatives": 4262,
+  "signed_pairs_total": 18160382,
+  "signed_pairs_consumed": 18160382,
+  "complete": true,
+  "elapsed_seconds": 357.168,
+  "pair_rate_per_second": 50845.5,
+  "keys_stored": 18160382,
+  "key_bytes": 145283056,
+  "digest_bits": 38,
+  "digest_collision_groups": 940,
+  "candidates_checked": 940,
+  "false_positive_candidates": 602,
+  "relations_four_distinct": 0,
+  "relations_repeated_summand": 338,
+  "relations_frobenius_characteristic": 338,
+  "relations_repeated_not_frobenius": 0,
+  "log2_predicted_digest_collisions": 9.229,
+  "log2_predicted_genuine_collisions": -82.771,
+  "log2_expected_relations_by_counting": -85.356
+}
+[four_weight_two_frobenius_stable] 1090 abscissae -> 1090 representatives, 1,187,010 signed pairs
+[four_weight_two_frobenius_stable] done: 93 candidates | 0 four-distinct | 88 repeated (88 Frobenius) | 5 false positives
+{
+  "name": "four_weight_two_frobenius_stable",
+  "description": "the sigma-stable i<j<=65 part of the weight-two support",
+  "abscissae_supplied": 1090,
+  "representatives": 1090,
+  "signed_pairs_total": 1187010,
+  "signed_pairs_consumed": 1187010,
+  "complete": true,
+  "elapsed_seconds": 19.3,
+  "pair_rate_per_second": 61501.8,
+  "keys_stored": 1187010,
+  "key_bytes": 9496080,
+  "digest_bits": 38,
+  "digest_collision_groups": 93,
+  "candidates_checked": 93,
+  "false_positive_candidates": 5,
+  "relations_four_distinct": 0,
+  "relations_repeated_summand": 88,
+  "relations_frobenius_characteristic": 88,
+  "relations_repeated_not_frobenius": 0,
+  "log2_predicted_digest_collisions": 1.358,
+  "log2_predicted_genuine_collisions": -90.642,
+  "log2_expected_relations_by_counting": -93.225
+}
+[four_random_matched] 4262 abscissae -> 4262 representatives, 18,160,382 signed pairs
+[four_random_matched]   1,440,000/18,160,382 ( 7.93%) kept=1,440,000 elapsed=    30s eta=   352s
+[four_random_matched]   2,880,000/18,160,382 (15.86%) kept=2,880,000 elapsed=    61s eta=   322s
+[four_random_matched]   4,200,000/18,160,382 (23.13%) kept=4,200,000 elapsed=    91s eta=   301s
+[four_random_matched]   5,520,000/18,160,382 (30.40%) kept=5,520,000 elapsed=   121s eta=   277s
+[four_random_matched]   6,940,000/18,160,382 (38.22%) kept=6,940,000 elapsed=   151s eta=   244s
+[four_random_matched]   8,360,000/18,160,382 (46.03%) kept=8,360,000 elapsed=   181s eta=   213s
+[four_random_matched]   9,800,000/18,160,382 (53.96%) kept=9,800,000 elapsed=   212s eta=   180s
+[four_random_matched]   11,320,000/18,160,382 (62.33%) kept=11,320,000 elapsed=   242s eta=   146s
+[four_random_matched]   12,620,000/18,160,382 (69.49%) kept=12,620,000 elapsed=   272s eta=   119s
+[four_random_matched]   13,980,000/18,160,382 (76.98%) kept=13,980,000 elapsed=   303s eta=    90s
+[four_random_matched]   15,320,000/18,160,382 (84.36%) kept=15,320,000 elapsed=   333s eta=    62s
+[four_random_matched]   16,640,000/18,160,382 (91.63%) kept=16,640,000 elapsed=   363s eta=    33s
+[four_random_matched]   18,040,000/18,160,382 (99.34%) kept=18,040,000 elapsed=   393s eta=     3s
+[four_random_matched] done: 645 candidates | 0 four-distinct | 0 repeated (0 Frobenius) | 645 false positives
+{
+  "name": "four_random_matched",
+  "description": "uniform random abscissae, size matched",
+  "abscissae_supplied": 4262,
+  "representatives": 4262,
+  "signed_pairs_total": 18160382,
+  "signed_pairs_consumed": 18160382,
+  "complete": true,
+  "elapsed_seconds": 396.043,
+  "pair_rate_per_second": 45854.6,
+  "keys_stored": 18160382,
+  "key_bytes": 145283056,
+  "digest_bits": 38,
+  "digest_collision_groups": 645,
+  "candidates_checked": 645,
+  "false_positive_candidates": 645,
+  "relations_four_distinct": 0,
+  "relations_repeated_summand": 0,
+  "relations_frobenius_characteristic": 0,
+  "relations_repeated_not_frobenius": 0,
+  "log2_predicted_digest_collisions": 9.229,
+  "log2_predicted_genuine_collisions": -82.771,
+  "log2_expected_relations_by_counting": -85.356
+}

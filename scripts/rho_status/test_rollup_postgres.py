@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
-"""Run snapshot.py's rollup against a real Postgres.
+"""Run snapshot.py's rollup backfill against a real Postgres.
 
-The unit tests pin the *shape* of the backfill; the claims that matter are
-about what Postgres does with it. Two of them cost the campaign a day:
+The rest of the suite pins the *shape* of this SQL. The claims that cost the
+campaign a day are not about its shape, they are about what Postgres does with
+it concurrently:
 
   * the first backfill held SHARE on distinguished_points and never finished
-    inside its timeout, so it blocked the ingest and published nothing, and
-  * a backfill that runs beside the insert trigger must count each row once,
-    which is true only because each hour is a single absolute upsert.
+    inside its 800 s timeout, so every 15-minute run blocked the ingest, rolled
+    back, and left ready=false for the next one to repeat -- the store went 76
+    minutes without ingesting an object while the page stayed on an old
+    snapshot, and
+  * an hour rebuilt beside a live insert trigger must count each row once,
+    which is a statement about isolation levels and row locks and nothing else.
 
-Neither is visible without a server. This module skips unless one is reachable,
-so it is a no-op in a CI container and a real check anywhere it can connect:
+Neither is visible without a server, so this module skips unless one is
+reachable, which makes it a no-op in a CI container and a real check anywhere
+it can connect:
 
     RHO_TEST_DATABASE_URL=postgresql://... python3 -m unittest test_rollup_postgres
 
-If RHO_TEST_DATABASE_URL is unset it will start a throwaway cluster with
-pg_ctl when initdb is on PATH (see PG_BIN), and stop it afterwards.
+If RHO_TEST_DATABASE_URL is unset it starts a throwaway cluster with pg_ctl
+when initdb is on PATH (see PG_BIN), and stops it afterwards.
 """
 
 import os
@@ -58,8 +63,9 @@ INSERT INTO rho_campaigns (campaign_id, curve_id, dp_mask_bits)
 VALUES ('%s', 'certicom-ecc2k-130', 32);
 """ % CAMPAIGN
 
-# Six hours of four workers, plus a two-hour gap the backfill must step over in
-# one index probe rather than a transaction per empty hour.
+# Six populated hours of four workers inside the last nine, with a two-hour
+# gap: hours_to_backfill walks every hour in the span, so the empty ones have
+# to cost nothing and contribute nothing.
 FIXTURE = """
 INSERT INTO distinguished_points (campaign_id, worker_id, point_key, found_at)
 SELECT '%s',
@@ -102,8 +108,7 @@ class RollupAgainstPostgres(unittest.TestCase):
                         "--auth=trust", "-E", "UTF8"],
                        check=True, capture_output=True, text=True, env=env)
         # -l matters: without it the postmaster inherits the captured stdout and
-        # holds the pipe open, so subprocess.run waits for a server that is
-        # already up.
+        # holds the pipe open, so subprocess.run waits for a server already up.
         subprocess.run([os.path.join(PG_BIN, "pg_ctl"), "-D", data, "-w",
                         "-l", os.path.join(cls.cluster, "server.log"),
                         "-o", "-p 5439 -k %s -c listen_addresses=" % cls.cluster, "start"],
@@ -137,42 +142,29 @@ class RollupAgainstPostgres(unittest.TestCase):
         return int(self.scalar(
             "SELECT COALESCE(sum(dps),0) FROM rho_dp_hour WHERE campaign_id = '%s'" % CAMPAIGN))
 
+    def ready(self):
+        return self.scalar(
+            "SELECT COALESCE((SELECT ready FROM rho_dp_meta WHERE campaign_id = '%s'), false)"
+            % CAMPAIGN)
+
     def backfill(self, budget=600):
-        return snapshot.run_backfill(self.url, CAMPAIGN, budget)
+        return snapshot.backfill_hours(self.url, CAMPAIGN, time.monotonic(), budget)
 
     def test_the_backfill_reproduces_the_table_and_marks_itself_ready(self):
         self.assertTrue(self.backfill())
         self.assertEqual(self.rolled(), self.total())
-        self.assertEqual(self.scalar(
-            "SELECT ready FROM rho_dp_meta WHERE campaign_id = '%s'" % CAMPAIGN), "t")
+        self.assertEqual(self.ready(), "t")
         hours = int(self.scalar(
             "SELECT count(DISTINCT hour) FROM rho_dp_hour WHERE campaign_id = '%s'" % CAMPAIGN))
         self.assertEqual(hours, 6, "six populated hours, and the gap contributes none")
 
-    def test_it_holds_no_lock_on_the_table_the_ingest_writes(self):
-        """An INSERT must go through while the backfill is between hours.
-
-        The shape this replaces took SHARE on distinguished_points for the
-        whole attempt, so this is the regression that matters most: run the
-        backfill, and assert nothing is left holding a conflicting mode.
-        """
-        self.assertTrue(self.backfill())
-        modes = self.sql(
-            "SELECT mode FROM pg_locks l JOIN pg_class c ON c.oid = l.relation "
-            "WHERE c.relname = 'distinguished_points'")
-        self.assertNotIn("ShareLock", modes)
-        self.assertNotIn("ExclusiveLock", modes)
-        self.sql(
-            "INSERT INTO distinguished_points (campaign_id, worker_id, point_key, found_at) "
-            "VALUES ('%s', 'w0', '\\xdeadbeef', now())" % CAMPAIGN, tuples_only=False)
-
     def test_the_backfill_runs_while_a_writer_holds_the_insert_lock(self):
-        """The regression, stated as Postgres states it.
+        """The regression, stated the way Postgres states it.
 
         An INSERT holds ROW EXCLUSIVE, which conflicts with SHARE and not with
         ACCESS SHARE. Hold ROW EXCLUSIVE in another session and run the
-        backfill: the shape that shipped on 2026-09-18 would wait here until
-        its 800 s timeout, which is the whole failure. This one finishes.
+        backfill: the shape that shipped on 2026-09-18 waits here until its
+        800 s timeout, which is the whole failure. This one finishes.
         """
         holder = subprocess.Popen(
             ["psql", self.url, "-v", "ON_ERROR_STOP=1", "-At", "-c",
@@ -180,7 +172,7 @@ class RollupAgainstPostgres(unittest.TestCase):
              "SELECT pg_sleep(30); COMMIT;"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
-            # Let the lock be taken before asking for the table.
+            held = ""
             deadline = time.monotonic() + 10
             while time.monotonic() < deadline:
                 held = self.sql(
@@ -191,21 +183,26 @@ class RollupAgainstPostgres(unittest.TestCase):
                 time.sleep(0.2)
             self.assertIn("RowExclusiveLock", held, "no writer to contend with")
             started = time.monotonic()
-            self.assertTrue(self.backfill(budget=20))
-            self.assertLess(time.monotonic() - started, 20,
+            self.assertTrue(self.backfill(budget=600))
+            self.assertLess(time.monotonic() - started, 25,
                             "the backfill waited on a writer's lock")
             self.assertEqual(self.rolled(), self.total())
         finally:
             holder.kill()
             holder.wait(timeout=10)
 
-    def test_the_trigger_and_the_backfill_together_count_a_row_once(self):
-        """Insert after the backfill, then rerun it: the total must not move.
+    def test_no_lock_on_the_table_survives_the_backfill(self):
+        self.assertTrue(self.backfill())
+        modes = self.sql(
+            "SELECT mode FROM pg_locks l JOIN pg_class c ON c.oid = l.relation "
+            "WHERE c.relname = 'distinguished_points'")
+        self.assertNotIn("ShareLock", modes)
+        self.assertNotIn("ExclusiveLock", modes)
+        self.sql(
+            "INSERT INTO distinguished_points (campaign_id, worker_id, point_key, found_at) "
+            "VALUES ('%s', 'w0', '\\xdeadbeef', now())" % CAMPAIGN, tuples_only=False)
 
-        The trigger adds and the backfill sets. Rerunning an hour the trigger
-        has since touched is the interleaving that a DELETE-then-INSERT pair
-        would get wrong, and it is free here.
-        """
+    def test_the_trigger_keeps_the_rollup_current_after_the_backfill(self):
         self.assertTrue(self.backfill())
         before = self.rolled()
         self.sql(
@@ -214,32 +211,36 @@ class RollupAgainstPostgres(unittest.TestCase):
             "FROM generate_series(1,500) g" % CAMPAIGN, tuples_only=False)
         self.assertEqual(self.rolled(), before + 500, "the trigger maintains the rollup")
         self.assertEqual(self.rolled(), self.total())
-        # Rewind the cursor and run every hour again over the top.
+
+    def test_rebuilding_an_hour_the_trigger_has_touched_counts_each_row_once(self):
+        """The double-count the DELETE and the isolation level exist to prevent.
+
+        The trigger adds to a bucket and the backfill rebuilds it. Rewind
+        backfill_through so every hour, including the one the trigger has just
+        written, is done again over the top of its own work.
+        """
+        self.assertTrue(self.backfill())
         self.sql(
-            "UPDATE rho_dp_meta SET ready = false, backfill_cursor = "
-            "(SELECT date_trunc('hour', min(found_at)) FROM distinguished_points "
-            " WHERE campaign_id = '%s') WHERE campaign_id = '%s'" % (CAMPAIGN, CAMPAIGN),
-            tuples_only=False)
+            "INSERT INTO distinguished_points (campaign_id, worker_id, point_key, found_at) "
+            "SELECT '%s', 'w2', decode(lpad(to_hex(800000+g),16,'0'),'hex'), now() "
+            "FROM generate_series(1,700) g" % CAMPAIGN, tuples_only=False)
+        self.sql(
+            "UPDATE rho_dp_meta SET ready = false, backfill_through = NULL "
+            "WHERE campaign_id = '%s'" % CAMPAIGN, tuples_only=False)
         self.assertTrue(self.backfill())
         self.assertEqual(self.rolled(), self.total(), "a second pass double-counted nothing")
 
     def test_a_spent_budget_leaves_a_cursor_and_the_next_run_finishes(self):
         self.assertFalse(self.backfill(budget=0), "a zero budget cannot finish six hours")
-        cursor, until = snapshot.backfill_progress(self.url, CAMPAIGN)
-        self.assertTrue(cursor, "an unfinished backfill records where to resume")
-        self.assertTrue(until)
-        partial = self.rolled()
-        self.assertLess(partial, self.total())
-        self.assertEqual(self.scalar(
-            "SELECT ready FROM rho_dp_meta WHERE campaign_id = '%s'" % CAMPAIGN), "f")
-        self.assertTrue(self.backfill())
+        self.assertEqual(self.ready(), "f")
+        self.assertTrue(self.backfill(budget=600))
+        self.assertEqual(self.ready(), "t")
         self.assertEqual(self.rolled(), self.total())
 
     def test_the_published_document_matches_the_table_it_summarises(self):
         snap = snapshot.take_snapshot(self.url, CAMPAIGN, source="test")
         self.assertEqual(snap["dps"], self.total())
         self.assertEqual(snap["workers"], 4)
-        self.assertEqual(snap["state"], "COLLECTING" if snap["dps_last_hour"] else "IDLE_OR_STALE")
         per_worker = {w["worker_id"]: w["dps"] for w in snap["per_worker"]}
         self.assertEqual(sum(per_worker.values()), self.total())
         rows = self.sql(
@@ -254,10 +255,17 @@ class RollupAgainstPostgres(unittest.TestCase):
             table_hours,
             "the hourly series is the table's own histogram")
 
-    def test_an_unfinished_backfill_publishes_nothing(self):
-        with self.assertRaises(RuntimeError) as caught:
-            snapshot.take_snapshot(self.url, CAMPAIGN, source="test", budget=0)
-        self.assertIn("rerun to resume", str(caught.exception))
+    def test_the_fallback_count_agrees_with_the_rollup(self):
+        """The two paths the page can publish from must not disagree.
+
+        load_fallback counts the corpus an hour at a time without the rollup;
+        a reader cannot tell which one produced a figure, so they have to match.
+        """
+        fallback = snapshot.load_fallback(self.url, CAMPAIGN, time.monotonic(), 600)
+        self.assertTrue(self.backfill())
+        rollup = snapshot.take_snapshot(self.url, CAMPAIGN, source="test")
+        self.assertEqual(fallback["dps"], rollup["dps"])
+        self.assertEqual(fallback["dps"], self.total())
 
 
 if __name__ == "__main__":

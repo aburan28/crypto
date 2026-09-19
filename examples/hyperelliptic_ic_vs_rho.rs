@@ -27,17 +27,20 @@ use crypto_lib::prime_hyperelliptic::{FpPoly, HyperellipticCurveP, MumfordDiviso
 /// Genus 3: `C : y² = x⁷ + x³ + c x + 1`.
 fn curve_over(p: u64, c: u64, genus: u32) -> HyperellipticCurveP {
     let p = BigUint::from(p);
-    let coeffs = if genus == 2 {
-        vec![
+    // Degree 2g+1 in every case, so the curve has one point at infinity and
+    // Cantor arithmetic applies uniformly.  Genus 4 needs degree 9; the
+    // earlier `else` branch hardcoded degree 7 and so silently produced a
+    // genus-3 curve whatever `genus` said.
+    let coeffs = match genus {
+        2 => vec![
             BigUint::from(c) % &p,
             BigUint::from(1u32),
             BigUint::from(2u32),
             BigUint::from(3u32),
             BigUint::zero(),
             BigUint::from(1u32),
-        ]
-    } else {
-        vec![
+        ],
+        3 => vec![
             BigUint::one(),
             BigUint::from(c) % &p,
             BigUint::zero(),
@@ -46,7 +49,20 @@ fn curve_over(p: u64, c: u64, genus: u32) -> HyperellipticCurveP {
             BigUint::zero(),
             BigUint::zero(),
             BigUint::one(),
-        ]
+        ],
+        4 => vec![
+            BigUint::one(),
+            BigUint::from(c) % &p,
+            BigUint::zero(),
+            BigUint::one(),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::zero(),
+            BigUint::one(),
+        ],
+        g => panic!("no model for genus {g}; degree must be 2g+1"),
     };
     let f = FpPoly::from_coeffs(coeffs, p.clone());
     HyperellipticCurveP::new(p, f, genus)
@@ -122,8 +138,13 @@ fn main() {
     // skipped rather than silently mis-measured.
     let primes2 = [41u64, 61, 101, 151, 211, 251];
     // Genus 3 reaches the same group size at a much smaller p, since
-    // #Jac ~ p^3.
-    let primes3 = [23u64, 31, 41, 61, 101];
+    // #Jac ~ p^3.  Round five extends this upward: the pre-registered
+    // exponent test needs at least four p per genus, and the two rows that
+    // fell below 1 were the only ones with N > 10^5.
+    let primes3 = [23u64, 31, 41, 61, 101, 151, 211];
+    // Genus 4: #Jac ~ p^4, so these are already the largest groups measured
+    // anywhere in this note.
+    let primes4 = [17u64, 23, 31, 41, 61];
 
     println!(
         "Genus 2: C : y^2 = x^5 + 3x^3 + 2x^2 + x + c.  Genus 3: y^2 = x^7 + x^3 + cx + 1;\n\
@@ -155,7 +176,7 @@ fn main() {
         "IC/flr"
     );
 
-    for (genus, primes) in [(2u32, &primes2[..]), (3u32, &primes3[..])] {
+    for (genus, primes) in [(2u32, &primes2[..]), (3u32, &primes3[..]), (4u32, &primes4[..])] {
         println!("\n--- genus {genus} ---");
         for &p in primes {
             // Flushed per line: this example is long-running and its
