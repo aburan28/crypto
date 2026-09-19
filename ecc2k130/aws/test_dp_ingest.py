@@ -536,6 +536,30 @@ class CheckpointWork(unittest.TestCase):
         self.assertFalse(slots[0]["retired"])
 
 
+class WalkRate(unittest.TestCase):
+    def test_measures_between_two_publishes(self):
+        previous = {
+            "generated_at": "2026-09-19T12:00:00Z",
+            "work": {"iterations": 1000},
+        }
+        current = {
+            "generated_at": "2026-09-19T12:10:00Z",
+            "work": {"iterations": 1600},
+        }
+        rate = dp_ingest.walkRateBetween(current, previous)
+        self.assertAlmostEqual(rate["iterations_per_second"], 1.0)
+        self.assertEqual(rate["window_seconds"], 600)
+        self.assertEqual(rate["iterations_from"], 1000)
+        self.assertEqual(rate["iterations_to"], 1600)
+
+    def test_refuses_backwards_totals_and_short_windows(self):
+        base = {"generated_at": "2026-09-19T12:00:00Z", "work": {"iterations": 1000}}
+        self.assertIsNone(dp_ingest.walkRateBetween(
+            {"generated_at": "2026-09-19T12:00:30Z", "work": {"iterations": 900}}, base))
+        self.assertIsNone(dp_ingest.walkRateBetween(
+            {"generated_at": "2026-09-19T12:04:00Z", "work": {"iterations": 1100}}, base))
+
+
 class Defaults(unittest.TestCase):
     def test_status_every_default_is_three_minutes(self):
         import argparse

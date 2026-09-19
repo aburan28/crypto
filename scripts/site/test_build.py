@@ -185,6 +185,28 @@ class BuildTests(unittest.TestCase):
             self.assertIn('CAMPAIGN = "ecc2k-130";', page, name)
         self.assertIn("EXPECTED_ITERATIONS_LOG2 = 60.9;", dashboard)
 
+    def test_pages_load_the_live_feed_before_the_pages_snapshot(self):
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        landing = read(os.path.join(self.out, "index.html"))
+        for name, page in (("dashboard", dashboard), ("landing", landing)):
+            self.assertIn("LIVE_FEED_URL", page, name)
+            self.assertIn("ecc2k130-status-", page, name)
+            self.assertIn("status.json", page, name)
+        self.assertIn("loadStatus", dashboard)
+        self.assertIn('label: "live feed"', dashboard)
+        self.assertIn('label: "Pages snapshot"', dashboard)
+        load = dashboard[dashboard.index("async function loadStatus"):dashboard.index("async function load()")]
+        self.assertLess(
+            load.index("LIVE_FEED_URL"),
+            load.index('./status.json"'),
+            "the dashboard tries the live feed before the Pages copy",
+        )
+        self.assertLess(
+            landing.index("fetchStatus(LIVE_FEED_URL)"),
+            landing.index('fetchStatus("./status.json")'),
+            "the landing page tries the live feed before the Pages copy",
+        )
+
     def test_both_pages_read_the_measured_rate_through_one_shared_block(self):
         # Two pages render the same snapshot's rate, so a fix applied to one
         # copy and not the other publishes two different walk rates for one
