@@ -49,7 +49,7 @@ def decode(value):
     if not value:
         return ""
     try:
-        return base64.b64decode(value).decode("utf-8", "replace")
+        return base64.b64decode(value, validate=True).decode("utf-8", "replace")
     except Exception:
         # Console-entered user-data is not always base64; read it as text.
         return value if isinstance(value, str) else ""
