@@ -1264,7 +1264,15 @@ class Worker:
             metaPath = None
             if self.contract:
                 metaPath = delta + ".json"
-                writeJson(metaPath, envelope(delta, self.contract, "dp", owner=self.owner, offset=offset))
+                # producedAt travels as an extra field, so verifyEnvelope --
+                # which compares only the keys envelope() recomputes -- is
+                # unaffected. It gives the ingest a campaign fact for found_at
+                # instead of the object's S3 LastModified, which is storage
+                # metadata that a copy, a replication or a lifecycle transition
+                # rewrites, silently moving points between hourly buckets.
+                writeJson(metaPath, envelope(delta, self.contract, "dp", owner=self.owner,
+                                             offset=offset,
+                                             producedAt=int(time.time())))
             entry = self.spoolDelta(delta, key, slot, offset, metaPath)
             self.enforceSpoolBudget()
             try:
