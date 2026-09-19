@@ -3,6 +3,7 @@ import hashlib
 import os
 import re
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -109,6 +110,31 @@ class ModalSyncTests(unittest.TestCase):
             self.assertTrue(result["checkpoint_uploaded"])
             self.assertEqual(got[0], "ckpt/curve131-run1.hdr")
             self.assertTrue(got[0].endswith(".hdr"))
+
+    def test_missing_header_does_not_refetch_the_full_checkpoint_every_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state = modal_sync.state_path(131, 1, tmp)
+            modal_sync.save_state(state, {
+                "checkpoint_sha256": "abc",
+                "checkpoint_key": "ckpt/slot-90001/abc.ck",
+                "full_checkpoint_check": time.time(),
+            })
+            got = []
+
+            def fake_get(volume, remote, local):
+                got.append(remote)
+                return False
+
+            original = modal_sync.modal_volume_get
+            modal_sync.modal_volume_get = fake_get
+            try:
+                result = modal_sync.sync_checkpoint(
+                    None, "bucket", "vol", 131, 1, tmp, dry_run=True)
+            finally:
+                modal_sync.modal_volume_get = original
+            self.assertEqual(got, ["ckpt/curve131-run1.hdr"])
+            self.assertFalse(result["checkpoint_uploaded"])
+            self.assertEqual(result["checkpoint_key"], "ckpt/slot-90001/abc.ck")
 
     def test_parse_run_ids(self):
         self.assertEqual(modal_sync.parse_run_ids("1,2, 3"), [1, 2, 3])

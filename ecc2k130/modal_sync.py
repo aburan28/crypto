@@ -201,8 +201,10 @@ def sync_checkpoint(s3, bucket, volume, curve, run_id, state_dir, dry_run=False)
 
     Prefer the 40-byte `.hdr` sidecar: ingest's checkpointWork only reads the
     first 40 bytes, and hashing/uploading the 370MB walk state every sync pass
-    is how a 60s cadence still left the page idle.
+    is how a 60s cadence still left the page idle. If the sidecar is missing,
+    fall back to the full file at most once per FULL_CHECKPOINT_RETRY_S.
     """
+    FULL_CHECKPOINT_RETRY_S = 300
     state_file = state_path(curve, run_id, state_dir)
     state = load_state(state_file)
     remote_ck = remote_checkpoint(curve, run_id)
@@ -214,16 +216,24 @@ def sync_checkpoint(s3, bucket, volume, curve, run_id, state_dir, dry_run=False)
         local_ck = os.path.join(tmp, os.path.basename(remote_ck))
         if modal_volume_get(volume, remote_hdr, local_hdr):
             local, remote = local_hdr, remote_hdr
-        elif modal_volume_get(volume, remote_ck, local_ck):
-            local, remote = local_ck, remote_ck
         else:
-            log("no checkpoint yet at %s or %s on volume %s"
-                % (remote_hdr, remote_ck, volume))
-            return dict(checkpoint_uploaded=False, checkpoint_key=None)
+            last_full = float(state.get("full_checkpoint_check") or 0)
+            if state.get("checkpoint_sha256") and (time.time() - last_full) < FULL_CHECKPOINT_RETRY_S:
+                log("no status header yet at %s; not re-fetching the 370MB checkpoint"
+                    % remote_hdr)
+                return dict(checkpoint_uploaded=False, checkpoint_key=state.get("checkpoint_key"))
+            if not modal_volume_get(volume, remote_ck, local_ck):
+                log("no checkpoint yet at %s or %s on volume %s"
+                    % (remote_hdr, remote_ck, volume))
+                return dict(checkpoint_uploaded=False, checkpoint_key=None)
+            local, remote = local_ck, remote_ck
+            state["full_checkpoint_check"] = time.time()
 
         digest = sha256_file(local)
         if state.get("checkpoint_sha256") == digest:
             log("checkpoint %s unchanged (%d bytes)" % (remote, os.path.getsize(local)))
+            if remote == remote_ck and not dry_run:
+                save_state(state_file, state)
             return dict(checkpoint_uploaded=False, checkpoint_key=state.get("checkpoint_key"))
 
         key = checkpoint_key(slot, local)
