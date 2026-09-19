@@ -59,8 +59,15 @@ class ModalSyncTests(unittest.TestCase):
         script = Path(__file__).with_name("run.sh").read_text()
         self.assertIn("CHECKPOINT_EVERY=${CHECKPOINT_EVERY:-60}", script)
         self.assertIn("SYNC_INTERVAL=${SYNC_INTERVAL:-15}", script)
+        self.assertIn("VERIFY=${VERIFY:-0}", script)
         self.assertIn("--checkpoint-every \"$CHECKPOINT_EVERY\"", script)
+        self.assertIn("--verify $VERIFY", script)
         self.assertIn('--watch "$SYNC_INTERVAL"', script)
+
+    def test_modal_search_defaults_verify_off(self):
+        src = Path(__file__).with_name("modal_app.py").read_text()
+        self.assertIn("verify: int = 0, checkpoint_every: int = 60)", src)
+        self.assertIn("packed=False, verify=0):", src)
 
     def test_checkpoint_header_roundtrip(self):
         blob = modal_sync.pack_checkpoint_header(2, 131, 385024, 16, 1, 1, 6439936)
