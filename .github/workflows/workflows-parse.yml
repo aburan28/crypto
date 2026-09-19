@@ -1,0 +1,27 @@
+name: Workflow files parse
+# A workflow GitHub cannot parse does not fail the way a failing step does. It
+# produces a run with no jobs, named after the file path instead of the
+# workflow, and the checks inside it stop happening silently. polynomial-reuse
+# spent four days in that state on main -- red on every push, its redis-cache
+# correctness tests not running once -- because a `--lib module::` filter left a
+# plain YAML scalar ending in a colon. This job reports that as a test failure
+# with a file and a line, on the pull request that introduces it.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/test_workflows_parse.py'
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet pyyaml
+      - run: python3 -B scripts/test_workflows_parse.py -v
