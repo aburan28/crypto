@@ -452,7 +452,7 @@ rather than whether to read more.
 | T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | **done** 2026-09-18 FFD; `ell>1` max=4 at `n=9,15`, does not grow. Solve-under-64 still open | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |
 | T11 | Scoreboard rows for whatever X1–X5 return, with class chips set by §3 | every claim | rides each PR |
-| T12 | Toy-suite rho parity: PairTable + SubgroupOrbits vs signed-Frobenius rho in exclusive group ops, all-cases `α ≤ 1` | **done** 2026-09-18: iteration 1 one-pass table, 45/45 verified, mean `α` 0.76–0.91, max 0.918, class engineering. Not n=131 | hours |
+| T12 | Toy-suite rho parity: PairTable + SubgroupOrbits vs signed-Frobenius rho in exclusive group ops, all-cases `α ≤ 1` | **closed, negative** 2026-09-19: the iteration-1 gate (mean `α` 0.76–0.91) was an accounting error, the window's `|F| − 1` additions per probe were unpriced. Corrected, toy cells `α` 16–23, twelve-rung ladder to `2^{39}` `α` 8–600, 108/108 verified. Class accounting; parity claim withdrawn. Iterations 4–5 (batch 8, `|F| = ⌈(2r)^{1/3}⌉`) are the remaining engineering and do not reach the gate | hours |
 
 T11 is not a follow-up: `AGENTS.md` §7 says the page update rides in the
 commit that lands the measurement, and "the page is out of date" is not
