@@ -306,7 +306,7 @@ semantics, not in the sense that they are free.
    generated from the same IR the CUDA client is built from and checked against
    the same field model, so the "derived" numbers in §3 describe a design that
    exists rather than one that might.
-2. **Synthesis.** [`hdl/ecc/aws/`](../hdl/ecc/aws) already has Vivado scripts
+2. **Synthesis.** [`hdl/ecc/aws/`](../hdl/ecc/aws/) already has Vivado scripts
    that bring back utilisation and timing from an AWS build instance. Running
    them on one generated multiplier replaces the two biggest uncertainties —
    packing quality (§2) and clock (§4) — with measurements, and costs one

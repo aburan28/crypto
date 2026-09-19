@@ -7,7 +7,7 @@ but the field layer is generic over any odd modulus below 2^256.
 
 Companion documents:
 
-- [`OPTIMIZATION_BLACKWELL.md`](OPTIMIZATION_BLACKWELL.md) — the cost
+- [`OPTIMIZATION_BLACKWELL.md`](./OPTIMIZATION_BLACKWELL.md) — the cost
   model, static measurements on `sm_90`/`sm_100`/`sm_120`, and what to tune.
 - [`../../docs/ecc_fpga_cost_model.md`](../../docs/ecc_fpga_cost_model.md) —
   how this compares with the VHDL engine in `hdl/ecc/`.

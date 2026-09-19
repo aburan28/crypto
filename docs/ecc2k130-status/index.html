@@ -14,16 +14,16 @@
 <meta property="og:description" content="Iterations per second and distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 15 minutes. Counts only: no walk coefficients, no point keys.">
 <meta property="og:url" content="https://aburan28.github.io/crypto/status/">
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to status</a>
 
 <header class="topbar">
   <nav aria-label="Site">
-    <a href="..">Overview</a>
+    <a href="../">Overview</a>
     <a href="../scoreboard/">Scoreboard</a>
-    <a href="." aria-current="page">Campaign status</a>
+    <a href="./" aria-current="page">Campaign status</a>
     <a href="https://github.com/aburan28/crypto">Repository</a>
   </nav>
 </header>
@@ -48,8 +48,8 @@
     <p class="banner UNREACHABLE">
       This dashboard renders two JSON files in the browser, so it needs
       JavaScript. Without it, read the data directly:
-      <a href="status.json">status.json</a> and
-      <a href="history.json">history.json</a>.
+      <a href="./status.json">status.json</a> and
+      <a href="./history.json">history.json</a>.
     </p>
   </noscript>
 
@@ -209,7 +209,7 @@
           <button type="button" id="forest-play">Play the walks</button>
           <button type="button" id="forest-reset">Reset view</button>
         </div>
-        <img src="walk-forest.svg" width="1000" height="900" loading="lazy"
+        <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
              alt="Walk trails on the ECC2K-130 curve drawn as separate meandering chains of hollow nodes, each ending at a filled green node, none of them touching.">
         <p class="forest-readout mono" id="forest-readout"></p>
       </div>
@@ -409,15 +409,15 @@ make gpu
     <h2>What this page does and does not claim</h2>
     <p id="claim"></p>
     <p>
-      Raw data: <a href="status.json">status.json</a> ·
-      <a href="history.json">history.json</a>. How the snapshot is taken,
+      Raw data: <a href="./status.json">status.json</a> ·
+      <a href="./history.json">history.json</a>. How the snapshot is taken,
       and what is deliberately withheld:
       <a href="https://github.com/aburan28/crypto/blob/main/scripts/rho_status/README.md">scripts/rho_status/README.md</a>.
     </p>
   </footer>
 </main>
 
-<script src="walk-forest.js" defer></script>
+<script src="./walk-forest.js" defer></script>
 <script>
 (function () {
   "use strict";

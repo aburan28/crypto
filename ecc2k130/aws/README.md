@@ -301,7 +301,7 @@ python3 merge.py --work /data/merge-v2 --s3 s3://ecc2k130-<account>/dp/ --campai
 ./fleet.sh down                  # workers checkpoint on the way out
 ```
 
-FPGAs join the same campaign: [`hdl/ecc2k130/aws/`](../../hdl/ecc2k130/aws)
+FPGAs join the same campaign: [`hdl/ecc2k130/aws/`](../../hdl/ecc2k130/aws/)
 builds an F2 image of the VHDL engine and runs an F2 fleet whose workers are
 this `worker.py` with `ECC_CLIENT` pointing at the FPGA host program. Same
 bucket, same slots, same `dp/`; step 5 does not change.
@@ -421,7 +421,7 @@ every boot after it.
 
 ## Monitoring
 
-* Public hourly DP counts (GitHub Pages): [`docs/ecc2k130-status/`](../../docs/ecc2k130-status)
+* Public hourly DP counts (GitHub Pages): [`docs/ecc2k130-status/`](../../docs/ecc2k130-status/)
   via [`.github/workflows/ecc2k130-status.yml`](../../.github/workflows/ecc2k130-status.yml).
   That job uses IAM user `ecc2k130-status-gha` access keys stored as
   GitHub secrets (`scripts/rho_status/gha_iam_user.sh`) and hops through

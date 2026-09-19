@@ -330,7 +330,7 @@ or an ECC2K-130 solve.
 
 ## Skills
 
-Canonical skill sources are under [skills](skills). Installed names:
+Canonical skill sources are under [skills](skills/). Installed names:
 
 - `$ic-propose-candidates`: concrete hypotheses and bounded candidate changes.
 - `$ic-run-tournament`: freeze, execute, resume and finish a local round.

@@ -71,7 +71,7 @@ A GPU-oriented client for the Certicom binary-curve challenges: Pollard rho with
 a Frobenius-based iteration function, bitsliced, with the field arithmetic
 emitted by a code generator.
 
-The same iteration function exists in VHDL in [`hdl/ecc2k130/`](../hdl/ecc2k130):
+The same iteration function exists in VHDL in [`hdl/ecc2k130/`](../hdl/ecc2k130/):
 a Karatsuba GF(2^131) multiplier in this normal basis, a step unit that does
 `R + sigma^j(R)` in `5 + 5/W` multiplies by sharing one eight-multiply
 inversion across a batch of `W` walks (the same Montgomery trick as this
