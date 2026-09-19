@@ -9,6 +9,8 @@
 #   ./run.sh fanout              the same across several GPUs at once
 #   ./run.sh merge               scan the corpus for collisions
 #   ./run.sh sync                copy new volume DPs into the campaign bucket
+#   ./run.sh sync-loop           keep syncing every Modal run until stopped
+#   ./run.sh ensure-sync         start sync-loop in tmux when it is not running
 #   ./run.sh ingest              copy s3://bucket/dp/ into Postgres (any host)
 #
 # A container has a finite life, so a real search is a loop: each pass runs for
@@ -84,7 +86,7 @@ cd "$(dirname "$0")"
 
 cmd=${1:-search}
 case "$cmd" in
-    validate|prewarm|bench|search|fanout|merge|sync|ingest) ;;
+    validate|prewarm|bench|search|fanout|merge|sync|sync-loop|ensure-sync|ingest) ;;
     *) sed -n '3,11p' "$0"; exit 1 ;;
 esac
 
@@ -123,6 +125,7 @@ bench)
     ;;
 
 search)
+    "$0" ensure-sync || true
     if [ "${PREWARM:-1}" != 0 ]; then
         prewarm_modal
     fi
@@ -164,6 +167,7 @@ fanout)
     # Independent searchers, each with its own run id so their seed spaces stay
     # disjoint, each loading the others' corpora so a cross-worker collision is
     # caught as it happens rather than in the merge afterwards.
+    "$0" ensure-sync || true
     if [ "${PREWARM:-1}" != 0 ]; then
         prewarm_modal
     fi
@@ -183,6 +187,27 @@ merge)
 
 sync)
     python3 modal_sync.py --curve "$CURVE" --run-id "$RUNID" ${ECC_BUCKET:+--bucket "$ECC_BUCKET"}
+    ;;
+
+sync-loop)
+    # Discover every curve*-run*.bin on the Modal volume each pass so fanout
+    # workers need no sync configuration. Failures are logged and retried.
+    python3 modal_sync.py --curve "$CURVE" --all-runs --watch "${SYNC_INTERVAL:-120}" \
+        ${SYNC_RUN_IDS:+--run-ids "$SYNC_RUN_IDS"} \
+        ${ECC_BUCKET:+--bucket "$ECC_BUCKET"}
+    ;;
+
+ensure-sync)
+    SESSION=${MODAL_SYNC_SESSION:-ecc2k130-modal-sync}
+    LOG=${MODAL_SYNC_LOG:-/tmp/ecc2k130-modal-sync.log}
+    TMUX=(tmux -f /exec-daemon/tmux.portal.conf)
+    if "${TMUX[@]}" has-session -t "=$SESSION" 2>/dev/null; then
+        echo "sync loop already running in tmux session $SESSION"
+        exit 0
+    fi
+    "${TMUX[@]}" new-session -d -s "$SESSION" -c "$(dirname "$0")" -- "${SHELL:-bash}" -l -c \
+        "while true; do ./run.sh sync-loop 2>&1 || sleep 30; done | tee -a $LOG"
+    echo "started sync loop in tmux session $SESSION (log: $LOG)"
     ;;
 
 ingest)

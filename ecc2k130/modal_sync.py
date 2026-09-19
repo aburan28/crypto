@@ -28,6 +28,7 @@ MODAL_SLOT_BASE = 90000
 ORBIT_KEY_RE = re.compile(
     r"^dp/(slot-\d+)/([0-9a-f]{32})-(\d+)-([0-9a-f]{64})\.bin$"
 )
+CORPUS_RE = re.compile(r"^dp/curve(\d+)-run(\d+)\.bin$")
 
 
 def log(msg):
@@ -100,6 +101,31 @@ def orbit_key(slot, run_id, offset, delta_path):
     sid = stream_id(run_id)
     return "dp/slot-%05d/%s-%016d-%s.bin" % (
         slot, sid, offset, sha256_file(delta_path))
+
+
+def parse_run_ids(text):
+    if not text:
+        return []
+    return sorted({int(part.strip()) for part in text.split(",") if part.strip()})
+
+
+def discover_run_ids(volume, curve):
+    """Run ids with a corpus on the Modal volume for this curve."""
+    proc = subprocess.run(
+        ["modal", "volume", "ls", volume, "dp/"],
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        err = (proc.stderr or proc.stdout or "").strip()
+        raise RuntimeError("modal volume ls failed: " + err)
+    run_ids = []
+    for line in (proc.stdout or "").splitlines():
+        line = line.strip()
+        match = CORPUS_RE.match(line)
+        if match and int(match.group(1)) == curve:
+            run_ids.append(int(match.group(2)))
+    return sorted(set(run_ids))
 
 
 def modal_volume_get(volume, remote, local):
@@ -210,12 +236,40 @@ def sync_once(s3, bucket, volume, curve, run_id, state_dir, dry_run=False):
                     pending=True, **ckpt)
 
 
+def run_ids_for_pass(args):
+    """Which Modal run ids to sync on this pass."""
+    if args.all_runs:
+        discovered = discover_run_ids(args.volume, args.curve)
+        extra = parse_run_ids(args.run_ids)
+        return sorted(set(discovered) | set(extra))
+    if args.run_ids:
+        return parse_run_ids(args.run_ids)
+    return [args.run_id]
+
+
+def sync_pass(s3, bucket, volume, curve, run_ids, state_dir, dry_run=False):
+    """Sync every run id once. Failures are logged and skipped."""
+    results = {}
+    for run_id in run_ids:
+        try:
+            results[run_id] = sync_once(
+                s3, bucket, volume, curve, run_id, state_dir, dry_run=dry_run)
+        except Exception as exc:
+            log("sync run %d failed: %s: %s" % (run_id, type(exc).__name__, exc))
+            results[run_id] = {"error": str(exc), "run_id": run_id}
+    return results
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--volume", default=os.environ.get("ECC_MODAL_VOLUME", "ecc2k130"))
     ap.add_argument("--bucket", default="", help="defaults to ECC_BUCKET or ecc2k130-<account>")
     ap.add_argument("--curve", type=int, default=int(os.environ.get("CURVE", "131")))
     ap.add_argument("--run-id", type=int, default=int(os.environ.get("RUNID", "1")))
+    ap.add_argument("--run-ids", default=os.environ.get("SYNC_RUN_IDS", ""),
+                    help="comma-separated run ids; with --all-runs, merged with discovery")
+    ap.add_argument("--all-runs", action="store_true",
+                    help="discover every curve*-run*.bin on the Modal volume each pass")
     ap.add_argument("--state-dir", default=os.environ.get("ECC_MODAL_SYNC_STATE",
                                                           os.path.join(tempfile.gettempdir(),
                                                                        "ecc2k130-modal-sync")))
@@ -230,17 +284,27 @@ def main(argv=None):
         import boto3
         s3 = boto3.client("s3")
 
-    log("syncing curve %d run %d from volume %s to s3://%s/dp/"
-        % (args.curve, args.run_id, args.volume, bucket))
-
     while True:
-        result = sync_once(s3, bucket, args.volume, args.curve, args.run_id,
-                             args.state_dir, dry_run=args.dry_run)
+        try:
+            run_ids = run_ids_for_pass(args)
+        except Exception as exc:
+            log("run discovery failed: %s: %s" % (type(exc).__name__, exc))
+            run_ids = parse_run_ids(args.run_ids) or [args.run_id]
+        if not run_ids:
+            log("no run ids to sync for curve %d on volume %s" % (args.curve, args.volume))
+        else:
+            log("syncing curve %d runs %s from volume %s to s3://%s/dp/"
+                % (args.curve, ",".join(str(r) for r in run_ids), args.volume, bucket))
+            results = sync_pass(
+                s3, bucket, args.volume, args.curve, run_ids, args.state_dir, dry_run=args.dry_run)
+            if args.watch <= 0:
+                print(json.dumps(results, indent=2))
+                return 0
+            for run_id, result in results.items():
+                if result.get("uploaded_records") or result.get("checkpoint_uploaded"):
+                    print(json.dumps({run_id: result}, indent=2), flush=True)
         if args.watch <= 0:
-            print(json.dumps(result, indent=2))
             return 0
-        if result["uploaded_records"]:
-            print(json.dumps(result, indent=2), flush=True)
         time.sleep(args.watch)
 
 

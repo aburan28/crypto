@@ -53,6 +53,23 @@ class ModalSyncTests(unittest.TestCase):
     def test_remote_checkpoint_path(self):
         self.assertEqual(modal_sync.remote_checkpoint(131, 1), "ckpt/curve131-run1.ck")
 
+    def test_parse_run_ids(self):
+        self.assertEqual(modal_sync.parse_run_ids("1,2, 3"), [1, 2, 3])
+        self.assertEqual(modal_sync.parse_run_ids(""), [])
+
+    def test_discover_run_ids_from_volume_listing(self):
+        class Proc:
+            returncode = 0
+            stdout = "dp/curve131-run2.bin\ndp/curve131-run1.bin\ndp/curve97-run1.bin\n"
+            stderr = ""
+
+        original = modal_sync.subprocess.run
+        modal_sync.subprocess.run = lambda *a, **k: Proc()
+        try:
+            self.assertEqual(modal_sync.discover_run_ids("ecc2k130", 131), [1, 2])
+        finally:
+            modal_sync.subprocess.run = original
+
 
 if __name__ == "__main__":
     raise SystemExit(unittest.main())
