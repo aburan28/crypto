@@ -3,7 +3,7 @@
 Two things live here. `synth.tcl` is the out-of-context synthesis probe
 that brings back LUT, FF and Fmax for the engine's modules, spending nothing
 on an FPGA. Everything else turns the engine into an F2 image and runs it
-as part of the campaign in [`ecc2k130/aws/`](../../../ecc2k130/aws/):
+as part of the campaign in [`ecc2k130/aws/`](../../../ecc2k130/aws):
 the same bucket, the same slot registry, the same `dp/` corpus, the same
 `merge.py`, with F2 instances and GPU instances side by side.
 

@@ -1,6 +1,6 @@
 //! Degree-bounded F4 over a small prime field `F_p`.
 //!
-//! The coordinate thread (`RESEARCH_EXOTIC_COORDINATES.md` §12.4, §13.5)
+//! The coordinate thread (`research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md` §12.4, §13.5)
 //! ended on systems the repo's Buchberger (`groebner_f4::buchberger`, a
 //! textbook Buchberger over `BigUint` field elements) could not finish:
 //! three or four unknowns over `F₂₉` or `F₃₁`, equations of total degree

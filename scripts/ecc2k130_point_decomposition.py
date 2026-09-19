@@ -823,7 +823,7 @@ def cost_cell(m: int, l: float, n: int, split: int = 1, frobenius: bool = False)
     `split = v` tabulates the sums of every `v`-subset of the base once and
     enumerates the remaining `m - v` per target.  `v = 1` is the oracle this
     repository has actually built and measured: walk `C(|F|, m-1)` sub-tuples and
-    root-find the last summand inside the subspace (`RESEARCH_SEMAEV_DECOMPOSITION.md`,
+    root-find the last summand inside the subspace (`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`,
     "Don't enumerate triples"), with only `O(|F|)` memory.  `v >= 2` buys speed
     with a table, and `v = m` tabulates every `m`-subset sum -- at which point the
     table is a baby-step table and the method is a generic algorithm in costume.

@@ -243,7 +243,7 @@ def main():
     text += ['','## Evidence','',
              '- [Frozen contract](contract.json), [unit and boundary](calibration.json), [candidates](candidates.json).',
              '- [Decision](decision.json), [independent audit](audit.json), [reporting data](measurements.json).',
-             '- [Raw job receipts and profiles](runs/), [source manifest](source-manifest.json).',
+             '- [Raw job receipts and profiles](runs), [source manifest](source-manifest.json).',
              '- [Operating commands and skills](' + Path(__import__('os').path.relpath(Path(__file__).resolve().parent/'OPERATIONS.md',root)).as_posix() + ').','']
     if (root.parent/'round-0001').is_dir():
         text += ['The earlier snapshot/build attempt is retained under `../round-0001`.']

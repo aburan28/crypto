@@ -44,7 +44,7 @@
 //! computed from `G, [α]G` (that is the CDH problem).  Cheon's algorithm
 //! is therefore a statement about protocols that leak powers of the
 //! secret, not about the ECDLP itself.  See
-//! `RESEARCH_TORSION_AUXILIARY_INPUTS.md` for the measured accounting
+//! `research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md` for the measured accounting
 //! against Pollard rho.
 //!
 //! ## History of this module

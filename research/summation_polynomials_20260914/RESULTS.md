@@ -109,7 +109,7 @@ All 15 Gaudry unit tests pass for the retained implementation, including direct
 termwise specialization checks over every element of F_(7³), sampled larger-field
 inputs, zero/base-field targets, symbolic S4 identities, border retries, independent
 MITM equivalence and dense/sparse/large-prime scalar recovery. [Test log](gaudry-tests.log).
-All source variants and their hashes are preserved under [sources/](sources/).
+All source variants and their hashes are preserved under [sources/](sources).
 [selection.json](selection.json) records the default and its source hash.
 
 The current shared checkout also passes `cargo check --lib`. Build commands,

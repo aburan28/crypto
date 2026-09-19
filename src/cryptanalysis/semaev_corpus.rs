@@ -33,7 +33,7 @@
 //! [`tests::corpus_labels_match_exhaustive_search`] re-derives the
 //! latter rather than trusting it.
 //!
-//! See `RESEARCH_TRIMOSKA_BENCHMARKS.md` for the full review.
+//! See `research/notes/ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md` for the full review.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev_s4::{elementary_symmetric_3, symmetrised_s4_eval};
@@ -834,7 +834,7 @@ mod tests {
     /// Only the SAT direction is asserted.  Refuting a `-U` instance
     /// means exhausting the search space, and this solver cannot yet do
     /// that in reasonable time for any corpus family — see
-    /// `RESEARCH_SAT_SEMAEV.md`.  Nothing breaks symmetry, so every
+    /// `research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`.  Nothing breaks symmetry, so every
     /// solution is also found in all `3!` orderings, and the Gauss-
     /// Jordan pass is rebuilt from scratch at each fixpoint.
     #[test]

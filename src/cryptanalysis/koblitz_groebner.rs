@@ -364,7 +364,7 @@ pub fn sym_semaev_s3(
 /// — which is the whole reason it is here.  Fixing `x₁` to a constant
 /// leaves a system in the `2ℓ` unknowns of `x₂` and `x₃` alone, and
 /// that is the object
-/// [`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md)
+/// [`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`](../../research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md)
 /// names as the one route to a sub-`2^{2ℓ}` decomposition oracle.
 ///
 /// Any of `x₁, x₂, x₃` may be a [`SymElement::constant`]; the degree of

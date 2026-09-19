@@ -5,7 +5,7 @@ Karatsuba GF(2^131) multiplier in the permuted type-II optimal normal
 basis, a step unit that computes `R + sigma^j(R)` for a batch of walks
 around it with one shared inversion, and a sequencer that runs many walks
 through the step unit and reports distinguished points. It is the hardware
-counterpart of the GPU client in [`ecc2k130/`](../../ecc2k130/): same
+counterpart of the GPU client in [`ecc2k130/`](../../ecc2k130): same
 field, same basis, same iteration function, same distinguished-point rule,
 and the same oracle — every vector the testbenches check against comes from
 the client's own field model in `ecc2k130/codegen/`.

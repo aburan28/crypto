@@ -1,5 +1,5 @@
 //! **Self-Tate pairing over `F_p` and its link to the EDS multiplier**
-//! (program item 2 / §5.5 of `RESEARCH_EDS_RESIDUE.md`).
+//! (program item 2 / §5.5 of `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`).
 //!
 //! For a point `P` of order `r` with embedding degree 1 (`r | p−1`), the
 //! reduced Tate–Lichtenbaum pairing lands in `μ_r ⊂ F_p^*`.  This module

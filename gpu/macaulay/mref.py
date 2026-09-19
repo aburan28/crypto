@@ -14,7 +14,7 @@ independent implementation rather than against the kernel's own logic.
 `226 x 286 over F_p` is the Macaulay matrix of the symmetrised-`S4`
 solve in `src/cryptanalysis/gaudry_cubic.rs`, at the degree-10
 regularity bound and after Macaulay's row selection --- see
-`RESEARCH_RESIDUAL_WALKS.md` 11.6.  One residual of an index-calculus
+`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` 11.6.  One residual of an index-calculus
 run produces exactly one such matrix, they are all the same shape over
 the same `p`, and there are thousands of them per run and no data
 dependence between them.  That is the batched-LU shape.

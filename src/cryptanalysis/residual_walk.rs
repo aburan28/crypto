@@ -80,7 +80,7 @@
 //!
 //! The numbers behind these predictions are collected by
 //! `examples/residual_walk_bench.rs` and discussed in
-//! `RESEARCH_RESIDUAL_WALKS.md`.
+//! `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`.
 //!
 //! # Scope
 //!

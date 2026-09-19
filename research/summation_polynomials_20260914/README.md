@@ -18,7 +18,7 @@ relation yield are unchanged. Classification is engineering, with a separately
 identified accounting correction. No normalized-cost or generic-group advance
 is implied by a faster specialization routine.
 
-Six implementations are frozen under [sources/](sources/):
+Six implementations are frozen under [sources/](sources):
 
 | Variant | Change relative to the previous allocation-optimized Gaudry code |
 |---|---|

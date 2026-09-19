@@ -35,8 +35,8 @@ SCHEMA = "koblitz_stage37_repeat_result.v1"
 SEAL_SCHEMA = "koblitz_stage37_repeat_result_seal.v1"
 
 EXPECTED_SOURCE_DELTA = [
-    "RESEARCH_AUTOLAB_LOG.md",
-    "RESEARCH_QUASI_SUBFIELD.md",
+    "research/notes/index-calculus/RESEARCH_AUTOLAB_LOG.md",
+    "research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md",
     "examples/quasi_subfield_census.rs",
     "examples/quasi_subfield_reach.rs",
     "src/cryptanalysis/mod.rs",

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Every index-calculus variant built for the elliptic-curve discrete logarithm in this repository, scored in operations per root-n against Pollard rho and a generic-group floor.">
 <!--
-  Standalone build of the cost ledger in RESEARCH_RESIDUAL_WALKS.md §§9-11.
+  Standalone build of the cost ledger in research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md §§9-11.
   Open it directly in a browser; it loads two webfont families from Google
   Fonts and needs nothing else.  Every figure on the page is taken from the
   frozen experiment JSON in experiments/; see the footer for the conversion
@@ -1592,7 +1592,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
   </section>
 
   <footer>
-    <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
+    <p>Source: <code>research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
       with the pair-only cells from <code>gaudry_cubic_bench --pair-only</code> and the closed routes
       from <code>examples/fixed_x1_oracle.rs</code> and <code>examples/blocked_macaulay_bench.rs</code>.
@@ -2747,7 +2747,7 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <!-- BEGIN auxiliary-inputs-20260918 -->
 <section class="panel" id="auxiliary-inputs-20260918">
 <div class="panel-head"><h2>Auxiliary inputs and torsion points against rho <span class="chip advance">advance, DLPwAI only</span></h2>
-<p>Frozen source: <code>research/torsion_auxiliary_inputs_20260918/results/*.json</code>, tables in its <code>RESULTS.md</code>; note <code>RESEARCH_TORSION_AUXILIARY_INPUTS.md</code>. Unit S = ops / &radic;p, affine additions, every phase charged, medians over three planted secrets, every row verified. Rows marked DLPwAI were handed <code>[&alpha;^d]G</code> (or <code>[&alpha;^i]G</code>, i &le; 2d) by the problem and are scored against that problem's generic floor &radic;(p/d); no row that sees only G and [&alpha;]G moved, as the &Omega;(&radic;p) floor requires. The torsion-embedding route (an auxiliary curve's [d]-map in place of F<sub>p</sub><sup>*</sup>) is closed by measurement. No index-calculus row exists: the inputs' logarithms are polynomially related and the relation matrix is linear.</p></div>
+<p>Frozen source: <code>research/torsion_auxiliary_inputs_20260918/results/*.json</code>, tables in its <code>RESULTS.md</code>; note <code>research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md</code>. Unit S = ops / &radic;p, affine additions, every phase charged, medians over three planted secrets, every row verified. Rows marked DLPwAI were handed <code>[&alpha;^d]G</code> (or <code>[&alpha;^i]G</code>, i &le; 2d) by the problem and are scored against that problem's generic floor &radic;(p/d); no row that sees only G and [&alpha;]G moved, as the &Omega;(&radic;p) floor requires. The torsion-embedding route (an auxiliary curve's [d]-map in place of F<sub>p</sub><sup>*</sup>) is closed by measurement. No index-calculus row exists: the inputs' logarithms are polynomially related and the relation matrix is linear.</p></div>
 <div class="table-scroll"><table>
 <caption>p &minus; 1 case, d &asymp; p<sup>1/2</sup>, inputs G, [&alpha;]G, [&alpha;<sup>d</sup>]G. Fitted exponents over seven sizes (24&ndash;48 bits): rho 0.487, comb 0.231, naive 0.297, kangaroo 0.310.</caption>
 <thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho</th><th>ops / &radic;(p/d)</th><th>Verified</th><th>Class</th></tr></thead><tbody>

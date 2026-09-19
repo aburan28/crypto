@@ -21,7 +21,7 @@ the products are 60% of the walk's ALU, and they are the floor.
 The new evidence is a **per-routine static profile of the table walk**, made
 with the exact compiler behind the tree's measured receipts (nvcc 13.3.73)
 and no GPU. Everything below is from
-[benchmarks/throughput-20b/](benchmarks/throughput-20b/); the toolchain that
+[benchmarks/throughput-20b/](benchmarks/throughput-20b); the toolchain that
 produced it, which needs neither a card nor a system CUDA install, is in
 [toolchain.txt](benchmarks/throughput-20b/toolchain.txt) there.
 

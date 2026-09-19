@@ -32,7 +32,7 @@
 //! is a speedup only if `c < 1`, and survives to cryptographic size only if
 //! `c` does not drift upward with `N`.
 //!
-//! Gate **G-R1** (pre-registered, `RESEARCH_DEGREE_REDUCTION.md`):
+//! Gate **G-R1** (pre-registered, `research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md`):
 //! *supported* if the best hybrid beats `2^N` enumeration at every measured
 //! `N` **and** the collapse fraction `c` is non-increasing in `N`;
 //! *killed* if the margin is negative and worsening, or `c` rises toward 1;

@@ -1,6 +1,6 @@
 # Auxiliary inputs and torsion points against Pollard rho: frozen contract
 
-Companion to [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](../../RESEARCH_TORSION_AUXILIARY_INPUTS.md),
+Companion to [`research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md`](../notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md),
 which carries the tables, the reading and the verdict.  This file is the
 contract: what is measured, in what unit, against which boundaries, and
 what would count as success.  It was written before the sweeps in
@@ -56,8 +56,10 @@ Two ratio columns: `S / S_rho` (the multiple of the reference) and
 | `torsion_embedding_honest` | `G, …, [α^{d²}]G`, `d \| #E'(F_p)` | Kim–Cheon elliptic embedding with the only computable comparison (pairwise) |
 | `torsion_embedding_oracle_quotient` | same + `α` | the same route handed the exponent quotient for free: shows the `√δ` birthday count is real and the division is the wall |
 
-Sizes: `p` of 24–48 bits for `p − 1` (d ≈ p^{1/2}), 24–44 bits for
-`p + 1` (d ≈ p^{1/3}), 14–20 bits for the torsion route (d ≈ p^{1/4}, the
+Sizes: `p` of 24–48 bits for `p − 1` (d ≈ p^{1/2}), 24–40 bits for
+`p + 1` (d ≈ p^{1/3}; a 44-bit run was started three times and lost to
+container restarts each time, so it is not in the tables), 14–20 bits
+for the torsion route (d ≈ p^{1/4}, the
 `d²` auxiliary inputs and the degree-`d²` division polynomials cap it).
 Three planted secrets per size; the reference runs on the same three.
 
@@ -90,7 +92,7 @@ seeds, or reporting exponentiations as if they were group operations.
 
 ```
 python3 run.py --bits 24 28 32 36 40 44 48 --cases p-1 --seeds 3 --rho-seeds 3 --rho-cap-bits 48
-python3 run.py --bits 24 28 32 36 40 44    --cases p+1 --seeds 3 --rho-seeds 3 --rho-cap-bits 44
+python3 run.py --bits 24 28 32 36 40       --cases p+1 --seeds 3 --rho-seeds 3 --rho-cap-bits 40
 python3 torsion_embedding.py --bits 14 16 18 20 --seeds 3
 python3 report.py > RESULTS.md
 ```
