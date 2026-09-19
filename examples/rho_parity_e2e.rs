@@ -67,9 +67,36 @@ const LADDER_CELLS: [Cell; 12] = [
     Cell { a: 0, n: 41 },
 ];
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Recipe {
+    /// `SubgroupOrbits { seed: 43, points: 6n }`, iterations 0–4.
+    SixN,
+    /// `points = ⌈(2r)^{1/3}⌉`, the minimiser of
+    /// `|F|²/(4n) + (K+1)·2r/|F|²` once the window is charged
+    /// (protocol §12). The sampler's eight-orbit batch is its floor.
+    CubeRoot,
+}
+
 struct Caps {
     max_trials: usize,
     rho_iterations: u64,
+    /// Trials per collection batch; the system is tried after each.
+    batch: u64,
+    recipe: Recipe,
+}
+
+fn recipe_name(recipe: Recipe) -> &'static str {
+    match recipe {
+        Recipe::SixN => "6n",
+        Recipe::CubeRoot => "cbrt",
+    }
+}
+
+fn recipe_points(recipe: Recipe, curve: &KoblitzCurve, r: u64) -> usize {
+    match recipe {
+        Recipe::SixN => recipe_floor(curve.n),
+        Recipe::CubeRoot => ((2.0 * r as f64).cbrt().ceil() as usize).max(1),
+    }
 }
 
 fn cell_name(cell: &Cell) -> String {
@@ -189,10 +216,10 @@ fn run_ic(
 ) -> Result<(bool, u64, serde_json::Value, u128), String> {
     let max_trials = caps.max_trials;
     let started = Instant::now();
-    let floor = recipe_floor(curve.n);
+    let r = curve.subgroup_order.to_u64_digits()[0];
+    let floor = recipe_points(caps.recipe, curve, r);
     let fb = build_subgroup_orbit_factor_base(curve, FB_SEED, floor)
         .map_err(|e| format!("factor base: {e}"))?;
-    let r = curve.subgroup_order.to_u64_digits()[0];
     let r_bits = curve.subgroup_order.bits() as u32;
     let k = fb.unknowns();
     let rows = PairSumTable::optimal_folded_rows(k, fb.points.len(), r);
@@ -215,7 +242,7 @@ fn run_ic(
     let mut batches = 0u64;
     let mut outcome = None;
     while trials < max_trials as u64 && outcome.is_none() {
-        let count = (PRECOMPUTE_BATCH_TRIALS as u64).min(max_trials as u64 - trials);
+        let count = caps.batch.min(max_trials as u64 - trials);
         let (rels, report) = collector.collect(RelationWorkUnit {
             seed: ALGORITHM_SEED,
             start: trials,
@@ -288,15 +315,34 @@ fn main() {
     } else {
         &CELLS
     };
+    let args: Vec<String> = env::args().collect();
+    let flag_value = |name: &str| {
+        args.iter()
+            .position(|a| a == name)
+            .and_then(|i| args.get(i + 1).cloned())
+    };
+    let batch = flag_value("--batch")
+        .map(|v| v.parse::<u64>().expect("--batch takes a trial count"))
+        .unwrap_or(PRECOMPUTE_BATCH_TRIALS as u64)
+        .max(1);
+    let recipe = match flag_value("--recipe").as_deref() {
+        None | Some("6n") => Recipe::SixN,
+        Some("cbrt") => Recipe::CubeRoot,
+        Some(other) => panic!("unknown recipe {other}; use 6n or cbrt"),
+    };
     let caps = if ladder {
         Caps {
             max_trials: LADDER_MAX_TRIALS,
             rho_iterations: LADDER_RHO_ITERATIONS,
+            batch,
+            recipe,
         }
     } else {
         Caps {
             max_trials: MAX_TRIALS,
             rho_iterations: RHO_ITERATIONS,
+            batch,
+            recipe,
         }
     };
     let out = env::args()
@@ -305,8 +351,11 @@ fn main() {
         .map(PathBuf::from);
 
     println!(
-        "rho-parity protocol seed={ALGORITHM_SEED:#x} fb_seed={FB_SEED} quick={quick} ladder={ladder} max_trials={} rho_cap={}",
-        caps.max_trials, caps.rho_iterations
+        "rho-parity protocol seed={ALGORITHM_SEED:#x} fb_seed={FB_SEED} quick={quick} ladder={ladder} max_trials={} rho_cap={} batch={} recipe={}",
+        caps.max_trials,
+        caps.rho_iterations,
+        caps.batch,
+        recipe_name(caps.recipe)
     );
     let header = format!(
         "{:>8} {:>4} {:>4} {:>8} {:>10} {:>10} {:>8} {:>6} {:>6} {}",
@@ -501,6 +550,8 @@ fn main() {
         "quick": quick,
         "ladder": ladder,
         "caps": {"max_trials": caps.max_trials, "rho_iterations_per_restart": caps.rho_iterations},
+        "collection_batch": caps.batch,
+        "recipe": recipe_name(caps.recipe),
         "unit": "exclusive group operations (adds + binary-method scalar muls); summand additions charged from iteration 3",
         "class": "accounting",
         "n131_claim": false,

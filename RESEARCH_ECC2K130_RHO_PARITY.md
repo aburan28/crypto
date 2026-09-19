@@ -309,3 +309,160 @@ crossing as a measurement.
 cargo run --release --example rho_parity_e2e -- --ladder \
   --out experiments/ecc2k130_rho_parity_20260918/iteration-2
 ```
+
+**Measured 2026-09-19**, host `ip-172-31-19-103`, cited from
+[`iteration-2/summary.json`](experiments/ecc2k130_rho_parity_20260918/iteration-2/summary.json).
+108/108 pairs verified on both arms. Under the iteration 0–2
+accounting the gate **fails on three of twelve rungs**: n29a1 (mean
+`α` 1.245), n47a1 (2.18, max 4.44), n41a0 (1.89, max 2.57). Slopes
+over twelve rungs: IC 0.273, rho 0.265. The prediction "gate holds on
+every rung" is falsified, and the collection model it rested on
+(`2rK/|F|³` probes) was wrong by the factor that §10 identifies. The
+iteration-2 numbers are superseded by §10 and are kept as the before
+mark; they are not the thread's result.
+
+## 10. Iteration 3, the accounting correction (measured 2026-09-19)
+
+**What was wrong.** A windowed `m = 3` probe `R` forms `R − P_k` for
+every `P_k` in its window before it looks anything up
+(`PairSumTable::witnesses_fast_window`, one `add_many` over the
+window). Those are point additions: the same batched affine addition
+the table build is charged one operation per output for. §4 charged
+the probe one addition and the window nothing. The descent probe does
+the same over the whole base (`decompose_fast(state, 3)`, blockwise,
+stopping at its first witness). So iterations 0–2 dropped
+`trials × window` additions from collection and about
+`trials × |F|` from descent. `AGENTS.md` §6: a ratio improved by
+dropping a cost from the budget does not count. The tournament's
+Valgrind unit never had this hole, which is one reason its win and
+this unit's must not be mixed.
+
+**Correction.** `G_IC` now includes `collection_trials × window` and
+`descent_trials × |F|`. The descent term overstates by at most one
+scan (the successful probe stops early); on every rung that is under
+`|F|` operations against a `G_IC` in the tens of thousands. The
+uncorrected subtotal is kept in every receipt as
+`g_ic_before_summand_correction`. Nothing else changed: same seeds,
+recipe, rows, window, caps, code hash for the arithmetic.
+
+**Class: accounting.** Numbers changed, the algorithm did not. No gain
+is claimed for iterations 0–2; their gates are withdrawn. Because the
+counts needed for the correction (`collection_trials`, `window`,
+`descent_trials`, `factor_base_size`) are in the frozen receipts of
+iterations 0, 1 and 2, the corrected `α` for those runs is derived
+from them and is identical to the iteration-3 rerun, which is
+deterministic on the same seeds.
+
+Cited from
+[`iteration-3/summary.json`](experiments/ecc2k130_rho_parity_20260918/iteration-3/summary.json).
+108/108 pairs verified on both arms. `G_IC` is constant per cell;
+`G_rho` is the mean over nine pairs.
+
+| Cell | `log₂ r` | `|F|` | `t` | table | collection summands | descent summands | `G_IC` | `S_IC` | `G_rho` | `S_rho` | mean `α` | min–max `α` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| n13a0 | 10.97 | 182 | 1 | 182 | 11,584 | 182 | 12,269 | 274.1 | 552 | 12.33 | 22.2 | 22.1–22.4 |
+| n29a1 | 15.37 | 464 | 1 | 464 | 29,632 | 464 | 31,132 | 151.1 | 833 | 4.04 | 37.4 | 36.5–37.9 |
+| n17a1 | 16.00 | 272 | 1 | 272 | 17,344 | 272 | 18,322 | 71.5 | 922 | 3.60 | 19.9 | 19.3–21.1 |
+| n19a0 | 17.00 | 304 | 1 | 304 | 19,392 | 304 | 20,461 | 56.6 | 900 | 2.49 | 22.7 | 22.7–22.8 |
+| n19a1 | 18.00 | 304 | 1 | 304 | 19,392 | 304 | 20,485 | 40.0 | 1,039 | 2.03 | 19.8 | 18.5–20.7 |
+| n31a0 | 20.46 | 496 | 1 | 496 | 31,680 | 496 | 33,310 | 27.8 | 1,230 | 1.03 | 27.1 | 25.6–28.6 |
+| n23a0 | 21.00 | 368 | 2 | 690 | 23,488 | 368 | 25,097 | 17.3 | 1,563 | 1.08 | 16.1 | 15.0–17.0 |
+| n39a0 | 26.03 | 624 | 5 | 2,340 | 39,872 | 1,456 | 44,453 | 5.37 | 3,992 | 0.48 | 11.3 | 9.8–12.7 |
+| n37a0 | 27.78 | 592 | 7 | 2,590 | 37,824 | 5,723 | 46,921 | 3.09 | 5,681 | 0.37 | 8.4 | 6.7–9.6 |
+| n43a1 | 32.11 | 688 | 8 | 3,096 | 439,680 | 69,259 | 514,405 | 7.55 | 16,700 | 0.25 | 31.2 | 25.1–35.6 |
+| n47a1 | 36.64 | 752 | 8 | 3,384 | 21,052,032 | 825,195 | 21,956,488 | 67.2 | 58,516 | 0.18 | 611.7 | 225–1,261 |
+| n41a0 | 39.00 | 656 | 8 | 2,952 | 21,253,440 | 6,886,469 | 28,241,615 | 38.1 | 57,538 | 0.08 | 532.1 | 301–759 |
+
+Gate: **fails on every rung.** Best rung n37a0 at `α = 8.4`. Fitted
+slopes over the twelve rungs: `G_IC ∝ r^{0.40}`, `G_rho ∝ r^{0.27}`
+(rho's fixed setup still dominates its walk below `log₂ r ≈ 26`; on
+the top four rungs alone rho's slope is `0.49`). Corrected iteration
+0 and 1 on the five toy cells: mean `α` 16.5–23.1 and 16.1–22.7. The
+one-pass table was worth 1–3% of the corrected `G_IC`, not the 20–40%
+the uncorrected figure showed.
+
+**Corrected answer to the §1 question: no.** In exclusive group
+operations the production pair-table pipeline costs 8× to 600× matched
+rho on every Koblitz cell from `2^{11}` to `2^{39}`, and the
+iteration-1 "parity" was the window's additions going unpriced.
+
+## 11. Iteration 4, collection batch of 8 (frozen before the run)
+
+**Why.** With the window charged, a collection batch is
+`64 × (|F| − 1)` additions whatever the system needs. On the rungs
+below `2^{27}` every probe decomposes and the solver needs about
+`K + 2` relations; the first batch of 64 buys 50-odd relations it
+never uses. Trying the system after every 8 probes stops there
+instead. This is a runner granularity, not a change to `B`, `m`, the
+window, the row rule, the seeds or the accounting; each stride
+multiplication per batch is still charged.
+
+**Prediction.** Cells whose 64-probe batch yielded `≥ 16` relations
+(n13a0 through n39a0) fall to 16–24 trials, so their `G_IC` drops by
+about 4× and `α` lands between 4 and 10. n37a0 (10 relations in 64)
+and the three rungs above it are unchanged within one batch. Gate
+still fails on every rung. Class: **engineering**.
+
+```bash
+cargo run --release --example rho_parity_e2e -- --ladder --batch 8 \
+  --out experiments/ecc2k130_rho_parity_20260918/iteration-4
+```
+
+## 12. Iteration 5, `|F|` sized by `r` (frozen before the run)
+
+**Model, from the corrected accounting.** With the full folded table
+(`t = K`) and the window charged, one addition buys one lookup that
+hits with probability `|F|²/(2r)`, so
+
+```
+G_IC ≈ |F|²/(4n)  +  (K+1) · 2r/|F|²  +  K · 1.5 · bits(r)  +  descent
+       table         collection             certification
+```
+
+with `K ≈ |F|/(2n)`. The first two terms are minimised at
+`|F|* = (2r)^{1/3}`, where `G_IC ≈ 3(2r)^{2/3}/(4n)`. The 6n recipe
+puts `|F|` at 656 on n41a0 where `|F|*` is 10,322, and pays for it in
+collection, which is 30× the table there.
+
+**Recipe change.** `points = ⌈(2r)^{1/3}⌉` in place of `6n`, same
+sampler, same seed 43. The sampler adds eight orbits per round, so
+on rungs where `|F|*` is below eight orbits the base is the same
+eight-orbit minimum as before and this iteration changes nothing.
+Batch 8 from §11 is kept. `B` changes, so the counting floor per cell
+changes with it by construction; the row states its `|F|`, and no
+ratio to the old floor is quoted.
+
+**Public parameters, derived before any target is solved**
+(`build_subgroup_orbit_factor_base(kc, 43, ⌈(2r)^{1/3}⌉)`,
+`optimal_folded_rows`, `build_folded_rows`; all target-independent):
+
+| Cell | `⌈(2r)^{1/3}⌉` | `|F|` | `K` | `t` | table adds | model collection | model `G_IC` |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| n13a0 … n31a0, n23a0, n39a0 | 16–516 | unchanged | 7–8 | as before | as before | as before | as before |
+| n37a0 | 773 | 1,184 | 16 | 6 | 5,994 | 9,178 | ≈ 17,200 |
+| n43a1 | 2,103 | 2,752 | 32 | 15 | 32,250 | 56,386 | ≈ 93,100 |
+| n47a1 | 5,978 | 6,016 | 64 | 41 | 169,576 | 440,432 | ≈ 620,000 |
+| n41a0 | 10,322 | 10,496 | 128 | 80 | 580,560 | 1,498,165 | ≈ 2,097,000 |
+
+**Prediction.** Against the iteration-3 measured `G_rho`: n37a0
+`α ≈ 3.0`, n43a1 `≈ 5.6`, n47a1 `≈ 10.6`, n41a0 `≈ 36`; the eight
+lower rungs equal iteration 4. Gate fails on every rung. Class:
+**engineering** against the rho reference (α falls, the method does
+nothing a generic algorithm cannot).
+
+**Extrapolation, marked as such.** At the model optimum the ratio to
+rho's walk is `α ≈ 1.34 · r^{1/6} / √n`. It is below 1 only for
+`r < (n/1.8)³`, which is `2^{8.5}` at `n = 13` and `2^{13.5}` at
+`n = 41`, under every rung here. At `n = 131`, `r ≈ 2^{129}` it is
+about `3.5 × 10^5`. This rests on the `r^{2/3}` cost of the pair
+table, and on the measured slopes below, not on a measurement at
+degree 131.
+
+**Inadmissible.** Reading the eight unchanged rungs as evidence for
+the recipe. Quoting the extrapolation as a measurement. Reporting
+iteration 5 without the iteration-3 rows beside it.
+
+```bash
+cargo run --release --example rho_parity_e2e -- --ladder --batch 8 --recipe cbrt \
+  --out experiments/ecc2k130_rho_parity_20260918/iteration-5
+```
