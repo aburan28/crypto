@@ -1199,6 +1199,144 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       2^+0.00. Quoting SAT seconds as S is relabelling.</p>
   </div>
 
+  <div class="panel" id="ecc2k130-best-20260919">
+    <div class="panel-head">
+      <h2>ECC2K-130: the best pipeline, the parity condition, and the F<sub>2</sub> SAT oracle's exponent (X7)</h2>
+      <p><span class="chip">measurement</span>
+        The cheapest measured ECC2K-130 pipeline is the G7e stack
+        (type-II ONB × HW-2 even-trace base × Frobenius collapse ×
+        stored pair table, <code>|F| = 8384</code>):
+        <code>2<sup>116.84</sup></code> products, <code>2<sup>53.62</sup>×</code> rho,
+        tight against its counting identity. Parity needs a decomposition
+        oracle whose per-call cost is <code>Q = 2<sup>αl</sup></code> with
+        <code>α ≈ 0.4–0.6</code> at <code>l = 45</code>; a stored table is
+        <code>α = 1</code> and <code>2<sup>21.65</sup>×</code> rho at best.
+        X7 measured WDSat, the published solver for the Weil-descended
+        symmetrised <code>S₄</code>, on five rungs <code>l = 5..9</code>
+        beside the in-repo pairs-and-solve oracle on the same targets:
+        <b><code>α = 2.998</code> in conflicts</b>, one conflict per sorted
+        triple on every rejection, 30/30 answers verified, 215× to 5,112×
+        slower than pairs-and-solve and widening. Pre-registered
+        prediction <code>α ≈ 3</code> confirmed; abandonment condition
+        <code>α ≥ 1.9</code> met. An F<sub>2</sub> SAT oracle does not
+        make this pipeline capable of rho parity. Note
+        <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_ECC2K130_BEST.md"><code>RESEARCH_ECC2K130_BEST.md</code></a>.
+        Receipt
+        <a href="https://github.com/aburan28/crypto/blob/main/experiments/ecc2k130_wdsat_alpha_20260919/"><code>experiments/ecc2k130_wdsat_alpha_20260919/</code></a>.</p>
+    </div>
+    <p>Unit: field products in <code>F<sub>2<sup>n</sup></sub></code>. For the
+      pipeline rows, <code>S = products / √r</code> with
+      <code>√r = 2<sup>64.5</sup></code>, rho at the measured 5.3125
+      products per iteration, affine addition at 10 (frozen G7e
+      receipt). For the oracle rows, per-call cost of a
+      <em>rejection</em>, median over 5–6 uniform targets per rung; WDSat
+      wall seconds are converted at the measured ns per
+      <code>F<sub>2<sup>n</sup></sub></code> multiplication on the same host
+      in the same run, and the conflict count is listed beside it as a
+      count. Frame for the parity condition:
+      <code>G<sub>IC</sub>/G<sub>rho</sub> = 6 · 2<sup>131−2l</sup> · Q / (131 · 2<sup>63.22</sup>)</code>,
+      which reproduces the frozen streaming figure
+      <code>2<sup>66.66</sup></code>. The <code>l = 45</code> column is an
+      extrapolation from the fitted exponent and is marked so.</p>
+    <table>
+      <caption>Pipeline rows cited from
+        <code>ecc2k130/benchmarks/indexcalc-g7e/summary.json</code>;
+        scale rows derived in the note's §2.</caption>
+      <thead><tr>
+        <th scope="col">Variant</th>
+        <th scope="col" class="n">log₂ products</th>
+        <th scope="col" class="n">S</th>
+        <th scope="col" class="n">vs rho</th>
+        <th scope="col">Correctness</th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Pollard rho <code>⟨−1⟩×⟨π⟩</code> <em>(reference)</em></td>
+          <td class="n">63.22</td><td class="n">0.411</td><td class="n">2<sup>0</sup></td>
+          <td>shipping client</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>Product-law floor, streaming pairs, any <code>|F|</code></td>
+          <td class="n">136.91</td><td class="n">2<sup>72.4</sup></td><td class="n">2<sup>+73.69</sup></td>
+          <td>derived</td><td><span class="chip">floor</span></td></tr>
+        <tr><td>Streaming pairs + Frobenius collapse, G7e, <code>|F| = 8384</code></td>
+          <td class="n">129.87</td><td class="n">4.78×10<sup>19</sup></td><td class="n">2<sup>+66.66</sup></td>
+          <td>8/8 planted; 0 generator hits</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td><b>Pair table, G7e, <code>|F| = 8384</code> — best measured</b></td>
+          <td class="n"><b>116.84</b></td><td class="n"><b>5.70×10<sup>15</sup></b></td><td class="n"><b>2<sup>+53.62</sup></b></td>
+          <td>8/8 planted; 0 generator hits; 35,137,344 sums</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>Stored pair table at <code>l = 45</code>, <code>α = 1</code> <em>(identity; memory 2<sup>89</sup> entries)</em></td>
+          <td class="n">84.87</td><td class="n">2<sup>20.4</sup></td><td class="n">2<sup>+21.65</sup></td>
+          <td>derived</td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>Parity condition: oracle <code>Q = 2<sup>26.67</sup></code> products at <code>l = 45</code>, <code>α = 0.59</code></td>
+          <td class="n">63.22</td><td class="n">0.411</td><td class="n">2<sup>0</sup></td>
+          <td>condition, not a method</td><td><span class="chip">floor</span></td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>X7 oracle ladder, host <code>ip-172-31-19-103</code>, 2026-09-19,
+        from <code>experiments/ecc2k130_wdsat_alpha_20260919/summary.json</code>.
+        WDSat pinned at upstream <code>61c6ff3f</code> via the frozen suite's
+        manifest, static limits widened (diff in receipt), flags
+        <code>-n -l -m 3 -b</code> (the frozen <code>symmetry_on</code>
+        configuration). Six solver processes concurrent; pairs-and-solve
+        alone. Every WDSat SAT witness zeroes <code>f₃</code>; every UNSAT
+        agrees with exhaustive pairs-and-solve. <code>l = 10</code> not
+        completed (75–90 min per rejection at the fitted rate, past the
+        3,600 s timeout; stopped log retained).</caption>
+      <thead><tr>
+        <th scope="col" class="n">n</th>
+        <th scope="col" class="n">l</th>
+        <th scope="col" class="n">|F|</th>
+        <th scope="col" class="n">sorted triples</th>
+        <th scope="col" class="n">WDSat conflicts (rejection median)</th>
+        <th scope="col" class="n">per triple</th>
+        <th scope="col" class="n">WDSat log₂ products</th>
+        <th scope="col" class="n">pairs-and-solve log₂ products</th>
+        <th scope="col" class="n">WDSat / pairs</th>
+        <th scope="col">Verified</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="n">15</td><td class="n">5</td><td class="n">32</td><td class="n">5,984</td><td class="n">5,510</td><td class="n">0.921</td><td class="n">23.33</td><td class="n">15.58</td><td class="n">215×</td><td>6/6 (6 rejections)</td></tr>
+        <tr><td class="n">19</td><td class="n">6</td><td class="n">64</td><td class="n">45,760</td><td class="n">43,953</td><td class="n">0.961</td><td class="n">26.39</td><td class="n">17.70</td><td class="n">414×</td><td>6/6 (5 + 1 hit)</td></tr>
+        <tr><td class="n">21</td><td class="n">7</td><td class="n">128</td><td class="n">357,760</td><td class="n">350,976</td><td class="n">0.981</td><td class="n">29.61</td><td class="n">19.82</td><td class="n">882×</td><td>6/6 (5 + 1 hit)</td></tr>
+        <tr><td class="n">24</td><td class="n">8</td><td class="n">256</td><td class="n">2,829,056</td><td class="n">2,806,146</td><td class="n">0.992</td><td class="n">33.29</td><td class="n">21.95</td><td class="n">2,593×</td><td>6/6 (5 + 1 hit)</td></tr>
+        <tr><td class="n">27</td><td class="n">9</td><td class="n">512</td><td class="n">22,500,864</td><td class="n">22,400,825</td><td class="n">0.996</td><td class="n">36.41</td><td class="n">24.09</td><td class="n">5,112×</td><td>6/6 (5 + 1 hit)</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>Exponent panel: least squares of log₂(rejection median) on
+        <code>l</code>, five rungs. The <code>l = 45</code> columns are
+        extrapolations resting on the fitted <code>α</code>. Parity in this
+        frame is <code>log₂ Q = 26.67</code>.</caption>
+      <thead><tr>
+        <th scope="col">Arm</th>
+        <th scope="col">unit</th>
+        <th scope="col" class="n">α</th>
+        <th scope="col" class="n">log₂ intercept</th>
+        <th scope="col" class="n">log₂ Q at l = 45 <em>(extrap.)</em></th>
+        <th scope="col" class="n">vs rho at l = 45 <em>(extrap.)</em></th>
+        <th scope="col">Class</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Pair enumeration <em>(identity, <code>2<sup>2l</sup>·10</code>)</em></td><td>products</td><td class="n">2</td><td class="n">3.32</td><td class="n">93.3</td><td class="n">2<sup>+66.65</sup></td><td><span class="chip">floor</span></td></tr>
+        <tr><td>Pairs-and-solve <em>(measured)</em></td><td>products</td><td class="n">2.128</td><td class="n">4.93</td><td class="n">100.7</td><td class="n">2<sup>+74.0</sup></td><td><span class="chip">measurement</span></td></tr>
+        <tr><td>WDSat <code>-b</code> <em>(measured)</em></td><td>conflicts</td><td class="n"><b>2.998</b></td><td class="n">−2.56</td><td class="n">132.3</td><td class="n">≥ 2<sup>+105.7</sup> at one product per conflict</td><td><span class="chip">measurement</span></td></tr>
+        <tr><td>WDSat <code>-b</code> <em>(measured)</em></td><td>products</td><td class="n">3.307</td><td class="n">6.66</td><td class="n">155.5</td><td class="n">2<sup>+128.8</sup></td><td><span class="chip">measurement</span></td></tr>
+        <tr><td>WDSat <code>-x -b</code> <em>(three points, not a fit)</em></td><td>conflicts</td><td class="n">≈3.15</td><td class="n">—</td><td class="n">—</td><td class="n">0.655 → 0.840 per triple, rising</td><td><span class="chip">measurement</span></td></tr>
+        <tr><td>Stored pair table <em>(identity)</em></td><td>products</td><td class="n">1</td><td class="n">3.32</td><td class="n">48.3</td><td class="n">2<sup>+21.65</sup></td><td><span class="chip">extrapolation</span></td></tr>
+        <tr><td>Parity <em>(condition)</em></td><td>products</td><td class="n">0.59</td><td class="n">0</td><td class="n">26.67</td><td class="n">2<sup>0</sup></td><td><span class="chip">floor</span></td></tr>
+      </tbody>
+    </table>
+    <p>Reading the panel: the three F<sub>2</sub> SAT solvers this
+      repository has measured on Weil-descended Semaev systems (in-repo
+      CDCL to <code>l = 8</code>, CryptoMiniSat at <code>n = 9</code>, WDSat
+      to <code>l = 9</code> with and without XOR-Gauss) all spend one
+      conflict per candidate tuple. The descended <code>S₄</code> binds
+      only once all three abscissae are nearly fixed, so there is no
+      partial assignment to refute early. The SAT route is closed as an
+      exponent lever; the n=131 product-law floor and the page verdict
+      are unchanged.</p>
+  </div>
+
   <div class="panel" id="ecc2k130-ic-synthesis-20260918">
     <div class="panel-head">
       <h2>ECC2K-130 index-calculus combinations</h2>

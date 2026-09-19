@@ -1,0 +1,32 @@
+wdsat oracle alpha: solver=/tmp/wdsat-wide/wdsat_solver sha256=bbe7c01980d16d06 max_l=10 targets/rung=6 timeout=3600s jobs=6 seed=0x5a70001
+  n   l   t   class     confl  confl/trip     wdsat s     pairs s    ratio  check
+ 15   5   0   UNSAT      5522       0.923       0.061     0.00027    222.7  agrees with exhaustive pairs
+ 15   5   1   UNSAT      5497       0.919       0.061     0.00044    137.9  agrees with exhaustive pairs
+ 15   5   2   UNSAT      5450       0.911       0.061     0.00027    223.6  agrees with exhaustive pairs
+ 15   5   3   UNSAT      5453       0.911       0.041     0.00027    150.6  agrees with exhaustive pairs
+ 15   5   4   UNSAT      5529       0.924       0.061     0.00028    217.7  agrees with exhaustive pairs
+ 15   5   5   UNSAT      5547       0.927       0.042     0.00028    149.9  agrees with exhaustive pairs
+ 19   6   0   UNSAT     44620       0.975       0.552     0.00131    421.5  agrees with exhaustive pairs
+ 19   6   1   UNSAT     43953       0.961       0.552     0.00133    414.3  agrees with exhaustive pairs
+ 19   6   2   UNSAT     44114       0.964       0.390     0.00134    291.9  agrees with exhaustive pairs
+ 19   6   3     SAT     41961       0.917       0.380     0.00030   1247.8  witness zeroes f3
+ 19   6   4   UNSAT     43738       0.956       0.566     0.00132    429.2  agrees with exhaustive pairs
+ 19   6   5   UNSAT     43858       0.958       0.541     0.00131    413.9  agrees with exhaustive pairs
+ 21   7   0   UNSAT    350605       0.980       5.088     0.00568    895.9  agrees with exhaustive pairs
+ 21   7   1   UNSAT    351602       0.983       5.876     0.00569   1033.5  agrees with exhaustive pairs
+ 21   7   2     SAT    168140       0.470       2.626     0.00034   7769.8  witness zeroes f3
+ 21   7   3   UNSAT    350976       0.981       4.224     0.00568    744.3  agrees with exhaustive pairs
+ 21   7   4   UNSAT    350810       0.981       4.133     0.00569    726.4  agrees with exhaustive pairs
+ 21   7   5   UNSAT    351268       0.982       5.684     0.00557   1021.0  agrees with exhaustive pairs
+ 24   8   0     SAT   1997694       0.706      47.251     0.00515   9175.3  witness zeroes f3
+ 24   8   1   UNSAT   2807319       0.992      65.185     0.02491   2616.3  agrees with exhaustive pairs
+ 24   8   2   UNSAT   2807117       0.992      45.891     0.02493   1841.0  agrees with exhaustive pairs
+ 24   8   3   UNSAT   2806146       0.992      45.557     0.02475   1840.4  agrees with exhaustive pairs
+ 24   8   4   UNSAT   2805838       0.992      62.631     0.02475   2530.7  agrees with exhaustive pairs
+ 24   8   5   UNSAT   2803770       0.991      62.818     0.02482   2531.2  agrees with exhaustive pairs
+ 27   9   0   UNSAT  22402254       0.996     540.498     0.12069   4478.5  agrees with exhaustive pairs
+ 27   9   1     SAT   4278855       0.190     111.518     0.06033   1848.4  witness zeroes f3
+ 27   9   2   UNSAT  22397126       0.995     491.729     0.12061   4077.1  agrees with exhaustive pairs
+ 27   9   3   UNSAT  22400825       0.996     659.173     0.12065   5463.6  agrees with exhaustive pairs
+ 27   9   4   UNSAT  22393860       0.995     676.753     0.12060   5611.3  agrees with exhaustive pairs
+ 27   9   5   UNSAT  22417416       0.996     507.808     0.12054   4212.8  agrees with exhaustive pairs

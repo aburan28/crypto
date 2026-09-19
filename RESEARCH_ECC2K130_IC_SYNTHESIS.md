@@ -36,6 +36,13 @@ cost 16–23× rho and a twelve-rung ladder to `2^{39}` costs 8× to 600×
 rho on every rung, 108/108 verified. Class accounting; the parity
 claim is withdrawn. The product-law floor at degree 131 is unchanged.
 
+Which of these is the *best* measured pipeline, what parity would
+require of its oracle, and whether an `F_2` SAT solver supplies it, is
+answered in [`RESEARCH_ECC2K130_BEST.md`](RESEARCH_ECC2K130_BEST.md):
+the G7e pair table at `2^{53.62}×` rho; an oracle exponent
+`α ≈ 0.4–0.6`; and no, WDSat measures `α = 2.998` (X7, five rungs,
+verified).
+
 Companion map: [`RESEARCH_ECC2K130_ROUTES.md`](RESEARCH_ECC2K130_ROUTES.md)
 and [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md)
 (what to try next, as X1–X6). Measured G7e oracles:
@@ -238,6 +245,7 @@ Reading the table:
 | Item | Why it is not a row | What it is | Class if forced |
 |---|---|---|---|
 | SAT growth `m=5,9,11` and toy DLP `n=5,9` | Conflicts have no measured conversion to field products | Diagnostic; pair lookup 228× faster on 16 planted triples at `n=9` | engineering |
+| WDSat oracle exponent, X7 (`RESEARCH_ECC2K130_BEST.md` §4) | Per-call `Q`, not a pipeline total; its `l = 45` figure is an extrapolation | `α = 2.998` in conflicts over `l = 5..9`, one conflict per sorted triple, 30/30 verified; 215×–5,112× slower than pairs-and-solve. Closes SAT as an exponent lever | measurement |
 | Conditional FFD formula at `n=131` (`2^{86}`) | Literature bit-complexity, gated on `D_reg = D_ff + o(1)` | Extrapolation, `2^{25}` short of rho even if granted | extrapolation |
 | Residual-walk `S ≈ 200×–265×` at `2^{50}` | Different curve `E(F_{p³})` | Phase-pricing lesson: LA can dominate | accounting |
 | Crossbred `word_ops` | Conversion factor to group ops is **unmeasured** (`AGENTS.md` §2) | X1 frozen 2026-09-18: no `α` fit (two usable rungs); X2 frozen | unmeasured |

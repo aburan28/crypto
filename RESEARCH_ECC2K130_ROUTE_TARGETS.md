@@ -453,6 +453,7 @@ rather than whether to read more.
 | T10 | X6: second literature pass | Route 5 verdict | one run |
 | T11 | Scoreboard rows for whatever X1–X5 return, with class chips set by §3 | every claim | rides each PR |
 | T12 | Toy-suite rho parity: PairTable + SubgroupOrbits vs signed-Frobenius rho in exclusive group ops, all-cases `α ≤ 1` | **closed, negative** 2026-09-19: the iteration-1 gate (mean `α` 0.76–0.91) was an accounting error, the window's `|F| − 1` additions per probe were unpriced. Corrected, toy cells `α` 16–23, twelve-rung ladder to `2^{39}` `α` 8–600, 108/108 verified. Class accounting; parity claim withdrawn. Iterations 4–5 (batch 8, `|F| = ⌈(2r)^{1/3}⌉`) are the remaining engineering and do not reach the gate | hours |
+| T13 | X7: fit the `F_2` SAT oracle's exponent `α` on WDSat (published solver for the descended `S₄`) over ≥4 rungs, every answer verified, beside pairs-and-solve on the same targets; abandon at `α ≥ 1.9` | **closed** 2026-09-19: `α = 2.998` in conflicts (`3.31` in products) over `l = 5..9`, one conflict per sorted triple, 30/30 verified, 215×–5,112× slower than pairs-and-solve (`α = 2.13`). Prediction `α ≈ 3` confirmed. Parity needs `α ≈ 0.4–0.6`. [`RESEARCH_ECC2K130_BEST.md`](RESEARCH_ECC2K130_BEST.md) §3–§4 | hours |
 
 T11 is not a follow-up: `AGENTS.md` §7 says the page update rides in the
 commit that lands the measurement, and "the page is out of date" is not

@@ -43,7 +43,15 @@ use std::time::{Duration, Instant};
 const TARGET_SEED: u64 = 0x5A7_0001;
 /// `n ≈ 3l`, so a uniform target decomposes with probability near
 /// `1/3!` on every rung and both classes occur.
-const LADDER: &[(u32, u32)] = &[(15, 5), (19, 6), (21, 7), (24, 8), (27, 9), (30, 10), (33, 11)];
+const LADDER: &[(u32, u32)] = &[
+    (15, 5),
+    (19, 6),
+    (21, 7),
+    (24, 8),
+    (27, 9),
+    (30, 10),
+    (33, 11),
+];
 const M: u32 = 3;
 /// Route-target scale: `l` at `n = 131`, `m = 3`, and the `α` parity needs.
 const L_131: f64 = 45.0;
@@ -70,13 +78,18 @@ fn parse_args() -> Args {
         out: value("--out").map(PathBuf::from),
         max_l: value("--max-l").map_or(9, |v| v.parse().expect("--max-l")),
         targets: value("--targets").map_or(6, |v| v.parse().expect("--targets")),
-        timeout: Duration::from_secs(value("--timeout").map_or(3600, |v| v.parse().expect("--timeout"))),
+        timeout: Duration::from_secs(
+            value("--timeout").map_or(3600, |v| v.parse().expect("--timeout")),
+        ),
         jobs: value("--jobs").map_or(6, |v| v.parse().expect("--jobs")),
     }
 }
 
 fn sha256_file(path: &Path) -> String {
-    let out = Command::new("sha256sum").arg(path).output().expect("sha256sum");
+    let out = Command::new("sha256sum")
+        .arg(path)
+        .output()
+        .expect("sha256sum");
     String::from_utf8_lossy(&out.stdout)
         .split_whitespace()
         .next()
@@ -130,7 +143,17 @@ struct SolverRun {
 fn run_wdsat(solver: &Path, anf: &Path, n: u32, l: u32, timeout: Duration) -> SolverRun {
     let started = Instant::now();
     let mut child = Command::new(solver)
-        .args(["-i", anf.to_str().unwrap(), "-n", &n.to_string(), "-l", &l.to_string(), "-m", &M.to_string(), "-b"])
+        .args([
+            "-i",
+            anf.to_str().unwrap(),
+            "-n",
+            &n.to_string(),
+            "-l",
+            &l.to_string(),
+            "-m",
+            &M.to_string(),
+            "-b",
+        ])
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()
@@ -156,9 +179,26 @@ fn run_wdsat(solver: &Path, anf: &Path, n: u32, l: u32, timeout: Duration) -> So
     }
     let wall_s = started.elapsed().as_secs_f64();
     let out = reader.join().unwrap_or_default();
-    let lines: Vec<&str> = out.lines().map(str::trim).filter(|s| !s.is_empty()).collect();
+    let lines: Vec<&str> = out
+        .lines()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .collect();
     if timed_out {
-        return SolverRun { status: "TIMEOUT".into(), conflicts: None, wall_s, assignment: None, stdout_tail: out.chars().rev().take(200).collect::<String>().chars().rev().collect() };
+        return SolverRun {
+            status: "TIMEOUT".into(),
+            conflicts: None,
+            wall_s,
+            assignment: None,
+            stdout_tail: out
+                .chars()
+                .rev()
+                .take(200)
+                .collect::<String>()
+                .chars()
+                .rev()
+                .collect(),
+        };
     }
     let conflicts = lines.last().and_then(|s| s.parse::<u64>().ok());
     // WDSat prints `UNSAT` or the satisfying assignment as one line of
@@ -168,27 +208,46 @@ fn run_wdsat(solver: &Path, anf: &Path, n: u32, l: u32, timeout: Duration) -> So
         .iter()
         .find(|s| s.len() == n_vars && s.bytes().all(|b| b == b'0' || b == b'1'))
         .map(|s| s.to_string());
-    let status = if lines.iter().any(|s| *s == "UNSAT") {
+    let status = if lines.contains(&"UNSAT") {
         "UNSAT"
     } else if assignment.is_some() {
         "SAT"
     } else {
         "UNKNOWN"
     };
-    SolverRun { status: status.into(), conflicts, wall_s, assignment, stdout_tail: lines.iter().rev().take(3).rev().map(|s| s.to_string()).collect::<Vec<_>>().join(" | ") }
+    SolverRun {
+        status: status.into(),
+        conflicts,
+        wall_s,
+        assignment,
+        stdout_tail: lines
+            .iter()
+            .rev()
+            .take(3)
+            .rev()
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>()
+            .join(" | "),
+    }
 }
 
 fn bits_to_u64(bits: &[u8]) -> u64 {
-    bits.iter().enumerate().fold(0u64, |acc, (j, &b)| acc | (u64::from(b == b'1') << j))
+    bits.iter()
+        .enumerate()
+        .fold(0u64, |acc, (j, &b)| acc | (u64::from(b == b'1') << j))
 }
 
-fn median(xs: &mut Vec<f64>) -> Option<f64> {
+fn median(xs: &mut [f64]) -> Option<f64> {
     if xs.is_empty() {
         return None;
     }
     xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let k = xs.len();
-    Some(if k % 2 == 1 { xs[k / 2] } else { (xs[k / 2 - 1] + xs[k / 2]) / 2.0 })
+    Some(if k % 2 == 1 {
+        xs[k / 2]
+    } else {
+        (xs[k / 2 - 1] + xs[k / 2]) / 2.0
+    })
 }
 
 fn slope(points: &[(f64, f64)]) -> Option<f64> {
@@ -213,7 +272,10 @@ fn intercept(points: &[(f64, f64)], s: f64) -> f64 {
 fn main() {
     let args = parse_args();
     let solver_sha = sha256_file(&args.solver);
-    let hostname = fs::read_to_string("/etc/hostname").unwrap_or_default().trim().to_string();
+    let hostname = fs::read_to_string("/etc/hostname")
+        .unwrap_or_default()
+        .trim()
+        .to_string();
     let code_hash = Command::new("git")
         .args(["rev-parse", "HEAD"])
         .output()
@@ -236,8 +298,8 @@ fn main() {
         args.jobs
     );
     println!(
-        "{:>3} {:>3} {:>3} {:>7} {:>9} {:>11} {:>11} {:>11} {:>8}  {}",
-        "n", "l", "t", "class", "confl", "confl/trip", "wdsat s", "pairs s", "ratio", "check"
+        "{:>3} {:>3} {:>3} {:>7} {:>9} {:>11} {:>11} {:>11} {:>8}  check",
+        "n", "l", "t", "class", "confl", "confl/trip", "wdsat s", "pairs s", "ratio"
     );
 
     let mut rungs = Vec::new();
@@ -277,14 +339,28 @@ fn main() {
             let witness = decompose(xr, l, &gf);
             let pairs_s = started.elapsed().as_secs_f64();
             if let Some(w) = witness {
-                assert_eq!(eval_f3(w[0], w[1], w[2], xr, &gf), 0, "pairs-and-solve witness must zero f3");
+                assert_eq!(
+                    eval_f3(w[0], w[1], w[2], xr, &gf),
+                    0,
+                    "pairs-and-solve witness must zero f3"
+                );
             }
-            preps.push(Prep { t, x_r, xr, anf: path, pairs_s, pairs_witness: witness });
+            preps.push(Prep {
+                t,
+                x_r,
+                xr,
+                anf: path,
+                pairs_s,
+                pairs_witness: witness,
+            });
         }
 
         // WDSat arm, `jobs` processes at a time.
         let mut runs: Vec<Option<SolverRun>> = (0..preps.len()).map(|_| None).collect();
-        for chunk in (0..preps.len()).collect::<Vec<_>>().chunks(args.jobs.max(1)) {
+        for chunk in (0..preps.len())
+            .collect::<Vec<_>>()
+            .chunks(args.jobs.max(1))
+        {
             let results: Vec<(usize, SolverRun)> = std::thread::scope(|s| {
                 let handles: Vec<_> = chunk
                     .iter()
@@ -310,9 +386,13 @@ fn main() {
         let mut sat_pairs = Vec::new();
         let mut rung_ok = true;
         let mut timeouts = 0usize;
-        for (p, r) in preps.iter().zip(runs.into_iter()) {
+        for (p, r) in preps.iter().zip(runs) {
             let r = r.unwrap();
-            let expected = if p.pairs_witness.is_some() { "SAT" } else { "UNSAT" };
+            let expected = if p.pairs_witness.is_some() {
+                "SAT"
+            } else {
+                "UNSAT"
+            };
             let mut check = String::new();
             let mut ok = r.status == expected;
             if r.status == "TIMEOUT" {
@@ -332,7 +412,11 @@ fn main() {
                         ];
                         let zero = eval_f3(xs[0], xs[1], xs[2], p.xr, &gf) == 0;
                         ok &= zero;
-                        check.push_str(if zero { "witness zeroes f3" } else { "WITNESS FAILS f3" });
+                        check.push_str(if zero {
+                            "witness zeroes f3"
+                        } else {
+                            "WITNESS FAILS f3"
+                        });
                         wd_witness = Some(xs);
                     }
                     _ => {
@@ -341,7 +425,11 @@ fn main() {
                     }
                 }
             } else if r.status == "UNSAT" {
-                check.push_str(if ok { "agrees with exhaustive pairs" } else { "DISAGREES with pairs" });
+                check.push_str(if ok {
+                    "agrees with exhaustive pairs"
+                } else {
+                    "DISAGREES with pairs"
+                });
             }
             if !ok {
                 rung_ok = false;
@@ -357,7 +445,11 @@ fn main() {
                 r.wall_s,
                 p.pairs_s,
                 ratio,
-                if check.is_empty() { r.stdout_tail.clone() } else { check.clone() }
+                if check.is_empty() {
+                    r.stdout_tail.clone()
+                } else {
+                    check.clone()
+                }
             );
             if ok && r.status == "UNSAT" {
                 unsat_confl.push(r.conflicts.unwrap() as f64);
@@ -449,7 +541,11 @@ fn main() {
     println!("all_verified = {all_ok}");
     if let Some(dir) = &args.out {
         fs::create_dir_all(dir).expect("out dir");
-        fs::write(dir.join("summary.json"), serde_json::to_vec_pretty(&summary).unwrap()).expect("summary");
+        fs::write(
+            dir.join("summary.json"),
+            serde_json::to_vec_pretty(&summary).unwrap(),
+        )
+        .expect("summary");
     }
     fs::remove_dir_all(&tmp_dir).ok();
 }
