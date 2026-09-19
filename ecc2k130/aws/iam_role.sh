@@ -32,11 +32,15 @@ else
     }' >/dev/null
     echo "created role $ROLE"
 fi
+# The delete is bin/.building only: bootstrap.sh claims that key with
+# if-none-match as a build lock and releases it on exit, and a lock it cannot
+# release costs every later worker a 20-minute wait and a duplicate build.
 aws iam put-role-policy --role-name "$ROLE" --policy-name campaign --policy-document "{
   \"Version\": \"2012-10-17\",
   \"Statement\": [
     {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
-    {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"}
+    {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"},
+    {\"Effect\": \"Allow\", \"Action\": [\"s3:DeleteObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/bin/.building\"}
   ]
 }"
 aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore

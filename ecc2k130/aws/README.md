@@ -203,6 +203,42 @@ resident blocks per SM (minBlocks 4) cost 34%
    DynamoDB in testing; if `iam:CreateRole` is also denied, run `infra.sh`
    once with an administrator profile (`AWS_PROFILE=admin ./infra.sh`) or
    create the role by hand with the policy printed in the script.
+
+   **Do not take the `WORKER_AWS_*` fallback to avoid this.** When the profile
+   cannot be created, `infra.sh` could write static keys into user-data
+   instead, and because `iam:CreateRole` was denied for weeks, that is what it
+   did: on 2026-09-19 a long-lived key for an IAM user with
+   AdministratorAccess sat in **38 launch-template versions in us-west-2, 10
+   in us-east-1 and 8 in us-east-2**, plus the user-data of two stopped hosts.
+   User-data is not a secret store. Every process on the instance reads it
+   through IMDS, so does anything that gets a shell in a container on it, and
+   so does any principal in the account with
+   `ec2:DescribeLaunchTemplateVersions` — a far larger set than the people who
+   are meant to hold the campaign's keys, and the blast radius was the whole
+   account rather than one bucket.
+
+   All four templates now carry `IamInstanceProfile: ecc2k130-worker` and no
+   credentials; the tainted versions are deleted and the stopped hosts' user-data
+   is cleared. `bootstrap.sh` already supported both paths — it copies
+   `/var/lib/ecc2k130/aws-creds.env` into the unit environment only if that file
+   exists — so removing the 17-line preamble left the remaining 390 lines
+   byte-identical to this repository's `bootstrap.sh`, which is how the change
+   could be made without a launch to test it. The role is scoped to
+   `s3:ListBucket` on the bucket, `s3:GetObject`/`s3:PutObject` on its objects,
+   and `s3:DeleteObject` on `bin/.building` alone; each of those was checked with
+   `iam simulate-principal-policy`, including that a delete of a `dp/` object or
+   of `campaign.json` comes back `implicitDeny`.
+
+   The fallback now refuses unless `ALLOW_USERDATA_CREDENTIALS=1` is set, and
+   six other launchers here (`launch_mix.sh`, `launch_quota.sh`,
+   `launch_spot_all.sh`, `launch_g6.sh`, `fleet-cpu.sh`, `ingest_host.sh`) still
+   have their own version of it. `./audit_userdata.py` is the backstop: it sweeps
+   every launch-template version and every running or stopped instance in
+   us-west-2, us-east-1 and us-east-2, names where a credential is without
+   printing it, and exits non-zero so it can gate a deployment. It reports 0
+   places as of this commit. **Any key that was in user-data should be treated as
+   disclosed and rotated** — that part needs the account owner, because the
+   campaign's tooling authenticates with it.
 3. **Region.** G7e is offered in us-west-2, us-east-1 and us-east-2 (not
    eu-west-1). Spot pools differ by AZ by 2–3×; the fleet spreads over every
    default subnet and lets `price-capacity-optimized` choose.

@@ -121,7 +121,22 @@ if [ "${SKIP_IAM:-0}" = 1 ]; then
         PROFILE_OK=1
         echo "instance profile $PROFILE is visible"
     elif [ -n "${WORKER_AWS_ACCESS_KEY_ID:-}" ] && [ -n "${WORKER_AWS_SECRET_ACCESS_KEY:-}" ]; then
-        echo "instance profile $PROFILE missing; embedding WORKER_AWS_* keys in user-data"
+        # This fallback is how a long-lived key for an IAM user with
+        # AdministratorAccess ended up in 38 launch-template versions across
+        # three regions, readable through IMDS by every process on every worker
+        # and by any principal holding ec2:DescribeLaunchTemplateVersions. It
+        # now needs saying out loud, because the reason it was reached -- a
+        # caller without iam:CreateRole -- is a one-line fix by comparison.
+        if [ "${ALLOW_USERDATA_CREDENTIALS:-0}" != 1 ]; then
+            echo "instance profile $PROFILE is missing and WORKER_AWS_* keys were provided." >&2
+            echo "Writing them into user-data publishes them to every worker; prefer the profile:" >&2
+            echo "  AWS_PROFILE=admin ./iam_role.sh \${USER:-adam}" >&2
+            echo "If you really mean to, set ALLOW_USERDATA_CREDENTIALS=1, use a key scoped to" >&2
+            echo "this bucket alone, and run ./audit_userdata.py afterwards to see what you left." >&2
+            exit 1
+        fi
+        echo "ALLOW_USERDATA_CREDENTIALS=1: embedding WORKER_AWS_* keys in user-data"
+        echo "  these are readable on every instance and by ec2:DescribeLaunchTemplateVersions" >&2
     else
         echo "instance profile $PROFILE is not usable and WORKER_AWS_* keys were not provided." >&2
         echo "run: AWS_PROFILE=admin ./iam_role.sh adam" >&2
@@ -139,11 +154,16 @@ else
         }' >/dev/null
         echo "created role $ROLE"
     fi
+    # bin/.building is the build lock bootstrap.sh claims with if-none-match and
+    # releases on exit. Without the delete it cannot be released, every later
+    # worker waits the full 20 minutes for a publish that never comes and then
+    # builds anyway, so the one object it may delete is that lock and nothing else.
     aws iam put-role-policy --role-name "$ROLE" --policy-name campaign --policy-document "{
       \"Version\": \"2012-10-17\",
       \"Statement\": [
         {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
-        {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"}$TABLE_STATEMENT
+        {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"},
+        {\"Effect\": \"Allow\", \"Action\": [\"s3:DeleteObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/bin/.building\"}$TABLE_STATEMENT
       ]
     }"
     aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
