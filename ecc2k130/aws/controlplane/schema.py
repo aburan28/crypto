@@ -149,6 +149,30 @@ CREATE TABLE IF NOT EXISTS rho_controlplane_migrations (
 ADVISORY_LOCK_KEY = 0x5209_3130
 
 
+def _lostTheCreateRace(exc):
+    """True when `CREATE TABLE IF NOT EXISTS` lost a race with another host.
+
+    Postgres checks whether the table exists and inserts into the catalog in
+    two steps that are not atomic, so two hosts creating the same table at the
+    same moment leave one of them holding a unique violation on a `pg_catalog`
+    index instead of the no-op it asked for.  The table is there either way,
+    which is all the caller wanted.  Only ever applied to the migration
+    table's own statement, where there is no other unique constraint to
+    confuse this with.
+    """
+    if type(exc).__name__ in ("DuplicateTable", "DuplicateObject", "UniqueViolation"):
+        return True
+    return "already exists" in str(exc).lower()
+
+
+def _ensureMigrationTable(db):
+    try:
+        db.run(MIGRATION_TABLE)
+    except Exception as exc:
+        if not _lostTheCreateRace(exc):
+            raise
+
+
 def migrate(db, now=None, log=None):
     """Apply every migration the database has not seen.  Idempotent.
 
@@ -158,15 +182,21 @@ def migrate(db, now=None, log=None):
     """
     now = int(now if now is not None else time.time())
     applied = []
-    db.run(MIGRATION_TABLE)
     locked = False
     if db.dialect == "postgres":
+        # Taken before the migration table is created, not after: a rollout
+        # runs this on every host at once, and `CREATE TABLE IF NOT EXISTS`
+        # is not itself safe against a concurrent one (see
+        # `_lostTheCreateRace`).  Everything that touches the schema has to be
+        # inside the lock for the lock to mean anything.
+        #
         # Session-level, released by the unlock below or by the connection
         # dying, which is the behaviour wanted if the migrating host is the
         # thing that fails.
         db.run("SELECT pg_advisory_lock(?)", (ADVISORY_LOCK_KEY,), fetch="one")
         locked = True
     try:
+        _ensureMigrationTable(db)
         done = {row[0] for row in db.fetchAll("SELECT id FROM rho_controlplane_migrations")}
         for ident, statements in MIGRATIONS:
             if ident in done:
@@ -195,6 +225,9 @@ def migrate(db, now=None, log=None):
 
 def pending(db):
     """Migration ids this database has not applied."""
-    db.run(MIGRATION_TABLE)
+    # Not under the advisory lock: this is a read, and `doctor` calls it on
+    # every host.  It still has to survive the create race above, because a
+    # rollout is exactly when somebody runs it.
+    _ensureMigrationTable(db)
     done = {row[0] for row in db.fetchAll("SELECT id FROM rho_controlplane_migrations")}
     return [ident for ident, _ in MIGRATIONS if ident not in done]

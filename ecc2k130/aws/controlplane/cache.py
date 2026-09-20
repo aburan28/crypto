@@ -167,14 +167,29 @@ class Cache:
             return NullCache()
         import redis  # lazy
 
+        kw = {}
+        try:
+            # redis-py 6 and later retry connection failures ten times with
+            # backoff *by default*, which turns one unreachable cluster into
+            # seconds of stall on a path whose whole promise is one timeout:
+            # measured at 4.5s per call against a refused port, against the
+            # 0.5s this sets.  `retry_on_timeout=False` does not turn that off
+            # and is deprecated; a Retry with no attempts does.
+            from redis.backoff import NoBackoff
+            from redis.retry import Retry
+
+            kw["retry"] = Retry(NoBackoff(), 0)
+        except ImportError:                       # redis-py 4, where it is the default
+            kw["retry_on_timeout"] = False
+
         client = redis.Redis.from_url(
             config.redisUrl,
             socket_timeout=REDIS_TIMEOUT_SECONDS,
             socket_connect_timeout=REDIS_TIMEOUT_SECONDS,
             # No retries and no reconnect-on-timeout storm: the caller has a
             # database that can answer, and it is one hop away.
-            retry_on_timeout=False,
             health_check_interval=30,
+            **kw,
         )
         return cls(client, campaign=config.campaign)
 
