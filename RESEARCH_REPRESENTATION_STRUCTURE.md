@@ -1,7 +1,13 @@
-# Where exploitable structure can come from: the embedding pattern, and why murmurations are not an instance
+# Where exploitable structure can come from: the transfer pattern, and why murmurations are not an instance
 
 **Status:** position note, no measurement.  Prices *admissibility* of a
 proposed direction, not the cost of an attack.
+**Revision 2 (2026-09-20): falsifier F4 fired.**  The pattern as first
+stated — "embedding into an abelian variety of dimension ≥ 2" — was too
+narrow, and two attacks already catalogued in this repository violate it.
+§2.4 states the corrected pattern, §3 the corrected test (R2 restated,
+R5 added), §9 the audit that found it.  **The verdict on murmurations is
+unchanged** and does not depend on the repaired clause; see §4.4.
 **Companions:** [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](./RESEARCH_ECDLP_STATE_OF_THE_ART.md) §8,
 [`RESEARCH_DIEM_DESCENT.md`](./RESEARCH_DIEM_DESCENT.md),
 [`RESEARCH_ECC2K130_HYPERELLIPTIC.md`](./RESEARCH_ECC2K130_HYPERELLIPTIC.md),
@@ -11,14 +17,18 @@ proposed direction, not the cost of an attack.
 
 Shoup's generic-group lower bound forces any subexponential ECDLP attack
 to consume *representation-level* structure.  Every attack that has ever
-actually done so shares one architecture: it embeds the 1-dimensional
-problem into a higher-dimensional abelian variety, and the embedding is
-licensed by a **specific published algebraic object**.  Weil descent is
-licensed by a subfield; the SIDH break is licensed by a torsion-point
-image.
+actually done so shares one architecture: it **transfers the problem into
+a different algebraic category that carries a non-generic algorithm**, and
+the transfer is licensed by a **specific published algebraic object**.
+Weil descent is licensed by a subfield and lands in an abelian variety of
+dimension `n`; the SIDH break is licensed by a torsion-point image and
+lands in abelian surfaces; **MOV/Frey–Rück is licensed by a small
+embedding degree and lands in `F_{q^k}^*`; SSSA is licensed by trace 1 and
+lands in `(Z_p, +)`.**  The last two are *not* higher-dimensional abelian
+varieties, which is why the first statement of this note was wrong (§9).
 
 Murmurations are not an instance of this pattern, for three independent
-reasons, any one of which is sufficient: they have no embedding, no
+reasons, any one of which is sufficient: they offer no transfer, no
 consumable published object, and their payload is the Frobenius trace,
 which SEA already computes in polynomial time.  This note states the
 pattern precisely enough that the next proposed handle can be checked
@@ -49,10 +59,16 @@ so far meant, and a test for whether a candidate qualifies.
 
 ---
 
-## 2. The embedding pattern
+## 2. The transfer pattern
 
-Both of the genuine structural breaks in the elliptic-curve world have
-the same shape.  Stating it as a template:
+> **Note (rev. 2).**  §2 originally read "the embedding pattern" and
+> required a target of **dimension ≥ 2**.  That was falsified by the
+> audit in §9.  The original wording is kept in §9.1 so the correction is
+> legible; §2.4 states the repaired pattern.  §2.1–§2.3 below are
+> unchanged and remain correct as far as they go — they are two instances,
+> not the whole class.
+
+Stating the first version as a template, as it was written:
 
 1. A hardness claim is made about a **1-dimensional** object (a curve,
    an isogeny between curves).
@@ -62,6 +78,9 @@ the same shape.  Stating it as a template:
    analogue**.
 4. The attack is a computation with those tools.  *No 1-dimensional
    algorithm is improved at any point.*
+
+Steps 1 and 4 survive intact.  Step 2 is too narrow and step 3 inherits
+its error.
 
 ### 2.1 Instance: Weil descent (GHS / Diem / Gaudry)
 
@@ -168,20 +187,94 @@ discovery that isogenies are weak.
 
 ---
 
+### 2.4 The corrected pattern: transfer, not dimension
+
+Two attacks catalogued in
+[`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](./RESEARCH_ECDLP_STATE_OF_THE_ART.md)
+§3 satisfy steps 1, 3 and 4 while flatly violating step 2.  Both are real,
+both are subexponential or better, and one of them is *shipped and
+demonstrated in this repository* (`RESEARCH_EDS_RESIDUE.md` §5.10 runs an
+end-to-end MOV attack recovering `k`).
+
+- **MOV / Frey–Rück.**  Licensed by a small embedding degree `k`.  The
+  pairing transfers `E(F_q)[r]` into `μ_r ⊂ F_{q^k}^*` — the multiplicative
+  group of a finite field, *dimension 1 as an algebraic group, and not an
+  abelian variety at all*.  The new tool is finite-field index calculus,
+  which has no analogue on the curve.  Subexponential.
+- **Anomalous / SSSA (Smart, Semaev, Satoh–Araki).**  Licensed by trace 1
+  (`#E = p`).  The `p`-adic elliptic logarithm transfers into `(Z_p, +)`,
+  the *additive* group, where the discrete logarithm is division.
+  **Polynomial time.**
+
+So the invariant is not dimension.  It is a **change of category**:
+
+1. A hardness claim about a group `G` whose only published interface is
+   its own element encoding.
+2. A **specific published datum** licensing a computable homomorphism
+   `G ⟶ H` into a *different algebraic category*.
+3. `H` carries an algorithm with **no generic-group analogue** — index
+   calculus, splitting tests, lattice reduction, or plain division.
+4. The attack is a computation in `H`.  *No algorithm on `G` is improved
+   at any point.*
+
+Higher-dimensional abelian varieties are one family of targets, not the
+defining feature.  The full catalogue of targets actually used:
+
+| attack | licensing datum | target category `H` | algorithm in `H` |
+|:--|:--|:--|:--|
+| GHS / Diem | subfield `F_q ⊂ F_{q^n}` | abelian variety, dim `n` | index calculus |
+| SIDH break | torsion images `φ(P), φ(Q)` | abelian varieties, dim 2/4/8 | splitting of p.p. surfaces |
+| **MOV / Frey–Rück** | small embedding degree `k` | `F_{q^k}^*` | finite-field index calculus |
+| **SSSA anomalous** | trace 1, `#E = p` | `(Z_p, +)` | division |
+| **HNP / nonce bias** | published `(r, s)` + bias | lattice in `Z^d` | LLL / BKZ |
+
+The HNP row is the one §7.1 already gestured at, now stated as an instance
+rather than an analogy.  It is also the row that makes the category-change
+reading unavoidable: a lattice is not a variety of any dimension.
+
+**What the correction does *not* change.**  R1 is untouched and is still
+the scarce resource — every row has a licensing datum, and prime-field
+ECDLP publishes none of them.  §2.3's specificity argument is untouched.
+The murmuration verdict is untouched (§4.4).
+
 ## 3. The admissibility test
 
-From §2, a candidate structural handle must exhibit all four.  This is
+From §2.4, a candidate structural handle must exhibit all five.  This is
 the table this note exists to provide.
 
-| # | requirement | GHS/Diem | SIDH break | murmurations |
-|--:|:--|:--:|:--:|:--:|
-| R1 | a **consumable published object** beyond the group element itself | subfield | torsion images | **none** |
-| R2 | an **embedding** into a category with strictly more machinery | Weil restriction, dim `n` | Kani, dim 2/4/8 | **none** |
-| R3 | tools in the target category with **no 1-dim analogue** | factor base / index calculus | splitting of p.p. surfaces | **none** |
-| R4 | payload **not already computable** in poly time | relations → logarithm | the secret isogeny | **fails: it is `a_q`** |
+| # | requirement | GHS/Diem | SIDH break | MOV | SSSA | murmurations |
+|--:|:--|:--:|:--:|:--:|:--:|:--:|
+| R1 | a **consumable published object** beyond the group element itself | subfield | torsion images | embedding degree `k` | trace 1 | **none** |
+| R2 | a computable **homomorphism into a different algebraic category** | Weil restriction | Kani | pairing | `p`-adic elliptic log | **none** |
+| R3 | an algorithm in the target with **no generic-group analogue** | index calculus | splitting of p.p. surfaces | finite-field index calculus | division | **none** |
+| R4 | payload **not already computable** in poly time | relations → logarithm | the secret isogeny | the logarithm | the logarithm | **fails: it is `a_q`** |
+| R5 | the handle is available **at cryptographic parameters**, not only in a toy regime | yes, for composite `n` | yes, at SIDH's own `p` | yes, when `k` small | yes, when `t = 1` | n/a — fails earlier |
 
-`R4` is the decisive row and is worth isolating, because it survives
-even if someone manufactures `R1`–`R3`.
+Two rows deserve isolating.
+
+**R4 is decisive against murmurations** and survives even if someone
+manufactures R1–R3, because it does not depend on any claim about
+murmurations — only on what a Frobenius trace is (§4.1).
+
+**R5 is new in revision 2**, and it is the row this repository is
+unusually well placed to enforce, because it is where measured threads
+die.  `RESEARCH_ECC2K130_RR_SOLVER_PANEL.md` §9 is the worked example: the
+Weil descent of `S₄` in the `V`-basis yields a genuine `F_2`-linear
+`NO`-certificate — poly(`d`), no search, "the only thing in this whole
+thread that is not a search" — and it satisfies R1, R2 and R3 outright.
+It then dies on R5.  The certificate exists only while the `S₄` value set
+spans a proper subspace of `F_2^131`, which saturates at `d = 7`;
+decompositions do not begin to exist until `d = 45`.  The cheap regime and
+the useful regime do not overlap, and the gap is `2^38` in factor-base
+size.  That note names the general form — the Kosters–Yeo failure mode:
+the descended system is massively overdetermined (`131` equations in
+`3d ≤ 18` unknowns), so it collapses at a degree far below any real
+solving degree, *for reasons having nothing to do with the ECDLP*, and the
+collapse necessarily disappears exactly when `d` grows enough for the
+problem to become interesting.
+
+A handle that satisfies R1–R4 but fails R5 is not a weaker result than one
+that satisfies all five.  It is a different thing: a theorem about a toy.
 
 ---
 
@@ -252,6 +345,33 @@ whose output is a discrete logarithm.
 
 ---
 
+### 4.4 The verdict survives the correction (rev. 2)
+
+The audit of §9 widened R2 from "embedding into dimension ≥ 2" to "any
+computable homomorphism into a different algebraic category".  That is a
+*weaker* requirement, so it is worth stating explicitly that murmurations
+do not slip through it.
+
+They do not, and not narrowly:
+
+- **R2 is now easy to satisfy and they still fail it.**  MOV needed only a
+  pairing; SSSA only a `p`-adic logarithm; HNP only a lattice
+  construction.  None of these is higher-dimensional and all are
+  homomorphisms computable from published data.  A murmuration supplies no
+  map of any kind — it supplies a correlation coefficient between a trace
+  vector and a global invariant.  There is no candidate `H` to name.
+- **R4 is untouched by the correction.**  §4.1 does not mention dimension,
+  embeddings, or categories.  It observes that the payload is `a_q`, that
+  SEA computes `a_q` in polynomial time, and that `a_q` is in the parameter
+  set.  Widening R2 does not make a public quantity secret.
+
+So the correction cost the note its stated pattern and cost it nothing on
+the question the note was written to answer.  That asymmetry is itself
+worth recording: the murmuration verdict never rested on the clause that
+turned out to be wrong.
+
+---
+
 ## 5. The one place a bridge could be built, and why it terminates
 
 Stated so it is dismissed deliberately rather than by omission.
@@ -271,7 +391,7 @@ It still terminates, for a reason specific to the correspondence:
 And that structure is the basis of a *different cryptosystem* (CSIDH and
 descendants), not an attack on this one.  Turning class-group data into
 a discrete logarithm on the curve would require a further step that
-nobody has proposed, and that would itself have to satisfy R1–R4.
+nobody has proposed, and that would itself have to satisfy R1–R5.
 
 `RESEARCH_SECP256K1_CM.md` and `RESEARCH_ISOGENY_CLASS_SEARCH.md` are
 the existing local measurements on the CM/isogeny side; neither found a
@@ -296,16 +416,31 @@ This note's conclusion is **falsified** by exhibiting any one of:
   correlation, with the correlation exhibited numerically over at least
   four dyadic ranges.
 - **F3.** A morphism from any global-arithmetic datum of a CM lift into
-  a category where `E(F_q)`-logarithms are computable, satisfying R1–R4
+  a category where `E(F_q)`-logarithms are computable, satisfying R1–R5
   of §3.
-- **F4.** Any counterexample to the embedding pattern itself: a
+- **F4. FIRED, 2026-09-20 (§9).**  As stated in revision 1: *any
   subexponential attack on a 1-dimensional DLP that consumes
-  representation-level structure **without** an embedding into
-  dimension ≥ 2.  This would not rescue murmurations but would
-  invalidate the test they are being judged by, which matters more.
+  representation-level structure without an embedding into dimension ≥ 2.*
+  MOV/Frey–Rück and SSSA both qualify, and both were already catalogued in
+  this repository when revision 1 was written.  The test was repaired
+  rather than abandoned; the replacement follows.
+- **F4′ (replacement).**  A subexponential attack on a DLP that consumes
+  representation-level structure **without any computable homomorphism out
+  of the group** — i.e. one that beats `√n` while working entirely inside
+  the original encoding, improving a generic algorithm rather than
+  escaping to another category.  This is a strictly weaker target than F4
+  and correspondingly harder to hit; nothing known approaches it.
+- **F5 (new, from R5).**  A handle satisfying R1–R4 whose regime of
+  availability provably overlaps cryptographic parameters, where every
+  measured instance in this repository so far has had the two regimes
+  disjoint.  `RESEARCH_ECC2K130_RR_SOLVER_PANEL.md` §9 is the template for
+  what refutation would have to look like: not a better constant, but the
+  span staying proper at the existence threshold, measured *at* that
+  threshold.
 
 **Abandonment condition:** none needed — the thread is not open.  This
-note is the reason not to open it.  If F1–F4 remain unexhibited, no
+note is the reason not to open it.  (F4 firing did not open it: the
+correction went to the test, not to the verdict — §4.4.)  If F1–F4 remain unexhibited, no
 further work is warranted, and a future proposal to revisit should be
 required to address §4.1 in its first paragraph.
 
@@ -326,7 +461,7 @@ required to address §4.1 in its first paragraph.
 ## 7. What this suggests instead
 
 The pattern of §2 is prescriptive, not just descriptive.  If exploitable
-structure exists for prime-field curves, it satisfies R1–R4, and the
+structure exists for prime-field curves, it satisfies R1–R5, and the
 scarce resource is **R1: a consumable published object**.  Prime-field
 ECDLP publishes very little — curve coefficients, a base point, an
 order.  That poverty is the security argument, stated correctly.
@@ -337,9 +472,13 @@ but:
 1. **Which deployed protocols publish more than the group element?**
    This is the SIDH lesson applied forward.  ECDSA publishes `(r, s)`
    per signature; that is why HNP/nonce-leakage is the practically
-   dangerous class (`RESEARCH_GLV_HNP.md`, `RESEARCH_HNP_LANDSCAPE.md`),
-   and it is the same phenomenon: auxiliary published data, consumed by
-   a tool (lattices) with no generic-group analogue.
+   dangerous class (`RESEARCH_GLV_HNP.md`, `RESEARCH_HNP_LANDSCAPE.md`).
+   Revision 2 promotes this from analogy to **instance**: it is row five
+   of §2.4's table, with a lattice as the target category and LLL/BKZ as
+   the algorithm with no generic-group analogue.  The five rows of that
+   table are five different `H`, and only R1 is common to all of them —
+   which is the argument for looking at what protocols publish rather
+   than at what mathematics exists.
 2. **Can a subfield be simulated?**  Already the repo's standing
    question — hidden isogenies, generalised-Mersenne structure
    (`RESEARCH_PKM_CRITERION.md`, `RESEARCH_NIST_SOLINAS_STRUCTURE.md`),
@@ -379,9 +518,91 @@ but:
 - D. Robert, *Breaking SIDH in polynomial time*, EUROCRYPT 2023
   (ePrint 2022/1038).
 
+**Transfers out of the curve (the F4 counterexamples)**
+- A. Menezes, T. Okamoto, S. Vanstone, *Reducing elliptic curve logarithms
+  to logarithms in a finite field*, IEEE Trans. Inf. Theory 39 (1993).
+- G. Frey, H.-G. Rück, *A remark concerning m-divisibility and the discrete
+  logarithm in the divisor class group of curves*, Math. Comp. 62 (1994).
+- N. Smart, *The discrete logarithm problem on elliptic curves of trace
+  one*, J. Cryptology 12 (1999).
+- T. Satoh, K. Araki, *Fermat quotients and the polynomial time discrete
+  log algorithm for anomalous elliptic curves*, Comment. Math. Univ. St.
+  Pauli 47 (1998).
+- I. Semaev, *Evaluation of discrete logarithms in a group of p-torsion
+  points of an elliptic curve in characteristic p*, Math. Comp. 67 (1998).
+
 **Murmurations**
 - Y.-H. He, K.-H. Lee, T. Oliver, A. Pozdnyakov, *Murmurations of
   elliptic curves*, arXiv 2204.10140 (2022).
 - N. Zubrilina, *Murmurations*, arXiv 2310.07681 — the density theorem
   making the phenomenon precise in the weight/conductor aspect.
 - A. Sutherland, computational data and LMFDB support.
+
+---
+
+## 9. Audit log
+
+### 9.1 F4 audit, 2026-09-20
+
+**Scope.**  The revision-1 pattern was checked against the attacks this
+repository has already measured or catalogued, looking specifically for a
+counterexample to the pattern rather than for support of it.  Notes read:
+`RESEARCH_ECC2K130_RR_SOLVER_PANEL.md` (all sections), `RESEARCH_EDS_RESIDUE.md`
+(§1–§2.3, §6), `RESEARCH_QUASI_SUBFIELD.md` (§1–§2),
+`RESEARCH_ECDLP_STATE_OF_THE_ART.md` (§3, §3a).
+
+**Result: F4 fired.**  Revision 1 §2 claimed the licensing datum must
+license a map into an abelian variety of **dimension ≥ 2**.  Two
+counterexamples, both already in `RESEARCH_ECDLP_STATE_OF_THE_ART.md` §3
+at the time revision 1 was written:
+
+| counterexample | target | dimension | speed |
+|:--|:--|:--|:--|
+| MOV / Frey–Rück | `μ_r ⊂ F_{q^k}^*` | 1, and not an abelian variety | subexponential |
+| SSSA anomalous | `(Z_p, +)` | 1, additive | **polynomial** |
+
+`RESEARCH_EDS_RESIDUE.md` §5.10 ships a working end-to-end MOV attack on
+supersingular `y² = x³ + x`, so the counterexample is not merely
+catalogued here — it is *executable in this repository*.  The error was
+mine and was avoidable by reading §3 of the companion note before
+generalising from two examples.  Corrected in §2.4.
+
+**Classified** by `AGENTS.md` §3 as an **accounting** correction: the
+stated pattern was wrong, the conclusion it was used to reach was not
+(§4.4).  Recorded rather than silently repaired, per §6 of that rule.
+
+### 9.2 Confirming instances found by the same audit
+
+Two threads turned out to be sharp, *measured* confirmations of the
+repaired pattern.  Neither was written with it in mind, which is what
+makes them worth citing.
+
+**The Riemann–Roch solver panel** is the strongest confirmation in the
+repository, precisely because it is a negative result.  Nine rounds built
+genuinely representation-level machinery — a Riemann–Roch encoding in
+`L(4O)`, an `F_2`-subspace factor base, two SAT-driven solvers — that
+stays *inside* the original category, improving how the curve's own
+structure is searched.  It works: 32/32 matched slots against 0/32 for
+the Semaev controls, 28 verified relations on the real ECC2K-130 curve.
+And it is worth nothing, by its own measurement: brute-force pair
+enumeration is `0.494×` its cost, and the encoding is `Θ(|F|²)` with a
+fitted constant near two *in the wrong direction*.  Its §8 states the
+moral exactly — "the falsification target needs a different *exponent*;
+nine rounds produced constants."  That is F4′ attempted in earnest and
+failing, with numbers.
+
+**The EDS / elliptic-net thread** is the same finding by a different
+route.  Division polynomials and the Legendre sequence of EDS values are
+about as representation-level as a handle can get, and stay in dimension
+one.  Its scorecard: the residues are **"information-tight but
+algorithmically inert"** — they pin `k` in `~log₂ m` bits, and yield no
+sub-`√m` algorithm.  The bias-distinguisher hope is explicitly *refuted*.
+Meanwhile the one thing in that note that does break a curve is §5.10's
+MOV attack — which leaves the category. Within a single thread: the
+in-category handle is inert, the category-changing one is an attack.
+
+**The subspace-structure oracle** (`RR_SOLVER_PANEL` §9) supplied R5, as
+described in §3.  It is the one place in the repository where a genuine
+category change (Weil descent) was achieved on the real curve and still
+paid nothing — because it was available only at `d ≤ 6` and needed
+`d = 45`.

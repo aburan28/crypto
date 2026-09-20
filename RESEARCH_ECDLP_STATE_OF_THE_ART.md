@@ -346,10 +346,15 @@ provisional** until proceedings are confirmed.
    some newly-discovered arithmetic phenomenon bears on ECDLP. The recurring 2024–2026
    instance is *murmurations* of elliptic curves. See
    [`RESEARCH_REPRESENTATION_STRUCTURE.md`](./RESEARCH_REPRESENTATION_STRUCTURE.md) for the
-   admissibility test any such proposal must pass (R1–R4), derived from the only two
-   architectures that have ever worked — Weil descent and the Kani-based SIDH break — and
-   for why murmurations fail it at every requirement, decisively at R4: the payload is the
-   Frobenius trace, already polynomial-time via SEA and already in the parameter set.
+   admissibility test any such proposal must pass (R1–R5), derived from the transfers that
+   have actually worked — Weil descent, the Kani-based SIDH break, and (per that note's own
+   F4 audit) **MOV/Frey–Rück and SSSA from §3 above**, which transfer to `F_{q^k}^*` and
+   `(Z_p, +)` rather than to any higher-dimensional variety — and for why murmurations fail
+   it at every requirement, decisively at R4: the payload is the Frobenius trace, already
+   polynomial-time via SEA and already in the parameter set. R5 (the handle must exist at
+   cryptographic parameters, not only in a toy regime) is drawn from the Weil-descent
+   `NO`-certificate in `RESEARCH_ECC2K130_RR_SOLVER_PANEL.md` §9, which is real and expires
+   at `d = 6` against an existence threshold of `d = 45`.
 
 ---
 
