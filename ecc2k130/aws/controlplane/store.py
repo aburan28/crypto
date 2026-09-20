@@ -40,9 +40,11 @@ def sha256Bytes(data):
 class ObjectStore:
     """S3 under one bucket and prefix."""
 
-    def __init__(self, bucket, prefix="", client=None):
+    def __init__(self, bucket, prefix="", client=None, endpoint="", region=""):
         self.bucket = bucket
         self.prefix = prefix.strip("/")
+        self.endpoint = endpoint or ""
+        self.region = region or ""
         self._client = client
         self._lock = threading.Lock()
 
@@ -51,7 +53,8 @@ class ObjectStore:
         config = config or Config.fromEnv()
         if not config.bucket:
             raise RuntimeError("ECC_BUCKET is not set")
-        return cls(config.bucket, config.prefix)
+        return cls(config.bucket, config.prefix, endpoint=config.s3Endpoint,
+                   region=config.s3Region)
 
     @property
     def client(self):
@@ -59,8 +62,38 @@ class ObjectStore:
             if self._client is None:
                 import boto3  # lazy
 
-                self._client = boto3.client("s3")
+                kw = {}
+                if self.region:
+                    kw["region_name"] = self.region
+                if self.endpoint:
+                    # A non-AWS endpoint is addressed by path: a bucket name
+                    # in the hostname needs DNS that a MinIO on a private
+                    # network does not have.  Real S3 keeps boto3's default.
+                    from botocore.config import Config as BotoConfig
+
+                    kw["endpoint_url"] = self.endpoint
+                    kw["config"] = BotoConfig(s3={"addressing_style": "path"})
+                self._client = boto3.client("s3", **kw)
             return self._client
+
+    def ensureBucket(self):
+        """Create the bucket if it is missing.  For an S3-compatible endpoint.
+
+        Never called against real S3 by anything in this package: a deployed
+        bucket is made by Terraform with versioning and a lifecycle policy,
+        and a control plane that can conjure its own corpus bucket is a
+        control plane that will silently write a campaign into the wrong one.
+        """
+        if not self.endpoint:
+            raise RuntimeError("refusing to create a bucket outside a configured endpoint")
+        try:
+            self.client.head_bucket(Bucket=self.bucket)
+            return False
+        except Exception as exc:
+            if not _isNotFound(exc):
+                raise
+        self.client.create_bucket(Bucket=self.bucket)
+        return True
 
     def key(self, name):
         name = str(name).lstrip("/")

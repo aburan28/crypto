@@ -76,6 +76,8 @@ class Config:
     dbConnectTimeout: int = 30
     dbStatementTimeoutMs: int = 15000
     redisUrl: str = ""
+    s3Endpoint: str = ""
+    s3Region: str = ""
     cacheEnabled: bool = True
     leaseSeconds: int = LEASE_SECONDS
 
@@ -104,6 +106,12 @@ class Config:
             # rediss:// means TLS, which is how the ElastiCache cluster is
             # configured; a redis:// URL against it simply will not connect.
             redisUrl=get("RHO_REDIS_URL") or get("INDEXCALC_REDIS_URL"),
+            # An S3-compatible endpoint: MinIO in the integration environment,
+            # and what an on-premises object store or GCS's S3 interoperability
+            # API would be pointed at.  Empty means real S3, which is what
+            # every deployed host uses.
+            s3Endpoint=get("ECC_S3_ENDPOINT"),
+            s3Region=get("ECC_S3_REGION") or get("AWS_REGION") or get("AWS_DEFAULT_REGION"),
             cacheEnabled=_flag(env, "RHO_CACHE", True),
             leaseSeconds=_int(env, "RHO_LEASE_SECONDS", LEASE_SECONDS),
         )
