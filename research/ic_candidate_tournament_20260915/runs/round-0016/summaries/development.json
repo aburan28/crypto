@@ -1,0 +1,77 @@
+{
+  "comparisons": [
+    {
+      "candidate": "scan_io",
+      "candidate_over_baseline": 0.8865027607203351,
+      "ci95": [
+        0.8580531190794003,
+        0.9183438373478218
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9646985969895473,
+      "native_wall_ci95": [
+        0.9242778623187351,
+        1.0014218644601365
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9185225830081613,
+        "n17a1": 0.9064938655341067,
+        "n19a0": 0.9759729206826531,
+        "n23a0": 1.006914816926738,
+        "n23a1": 0.9730148782127545,
+        "n31a0": 1.0123838138337655
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 18,
+      "per_cell": {
+        "n13a0": 0.9422541696152688,
+        "n17a1": 0.916048949680251,
+        "n19a0": 0.911156287253093,
+        "n23a0": 0.8580541287521161,
+        "n23a1": 0.8491266044880489,
+        "n31a0": 0.8470592619603631
+      },
+      "speedup": 1.1280280720022144
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 41.495075371999974,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.1979246114448296,
+    "ci95": [
+      0.9803669177799269,
+      1.3921138376801503
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 6,
+    "native_wall_candidate_over_baseline": 1.0183432441223736,
+    "native_wall_ci95": [
+      0.9730108717268896,
+      1.0602641976090668
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.027285574148575,
+      "n17a1": 1.0201838085484636,
+      "n19a0": 1.0699708589530728,
+      "n23a0": 0.9373368532032615,
+      "n23a1": 1.0136305925481213,
+      "n31a0": 1.0467624898384194
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 18,
+    "per_cell": {
+      "n13a0": 1.2444741580781977,
+      "n17a1": 1.412930189662171,
+      "n19a0": 1.418325803624496,
+      "n23a0": 0.7979604725056192,
+      "n23a1": 1.0507016451804743,
+      "n31a0": 1.4132973449046036
+    },
+    "speedup": 0.8347770723183401
+  },
+  "runs": 162,
+  "stage": "development",
+  "verified_runs": 162
+}
