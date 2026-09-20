@@ -90,7 +90,7 @@ formulation, both arms on the identical equations.
 | n | formulation | arm | decided / 8 | witnesses verified | bad | conflicts, median |
 |--:|:--|:--|--:|--:|--:|--:|
 | 9 | norm | WDSat, `-x` (Gaussian) | **8** | 8 | 0 | **62** |
-| 9 | norm | WDSat, plain | **8** | 8 | 0 | 79,151 |
+| 9 | norm | WDSat, plain | **8** | 8 | 0 | 79,151.5 |
 | 9 | norm | CryptoMiniSat | 8 | 8 | 0 | not reported |
 | 9 | incidence | WDSat, `-x` | **0** | — | — | did not run (§4.2) |
 | 9 | incidence | WDSat, plain | **0** | — | — | did not run (§4.2) |
@@ -102,7 +102,7 @@ At `n = 5` every arm decides every instance and every witness verifies,
 ### 4.1 Gaussian elimination is worth three orders of magnitude
 
 The one clean positive. On RR-norm at `n = 9`, XORGAUSS cuts the median
-conflict count from **79,151 to 62**, a factor of **1,277**; at `n = 5` the
+conflict count from **79,151.5 to 62**, a factor of **1,277**; at `n = 5` the
 same comparison is `488 → 18`, a factor of 27. Both arms are the same
 binary on the same instance with `-x` on and off, which is exactly the
 paired comparison the frozen S4 suite makes, so the measurement means
