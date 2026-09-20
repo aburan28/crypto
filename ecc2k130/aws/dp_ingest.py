@@ -1115,6 +1115,99 @@ def publishStatus(conn, s3, bucket, statusBucket, ingest=None, snapshot=None,
     return payload
 
 
+class StatusPublisher:
+    """Publish status.json on its own cadence, never blocked by an ingest pass.
+
+    The main loop used to be pass-then-publish. Status and metrics only ran
+    after `onePass` returned, so a slow `pending()` aggregate or a stuck
+    object drain froze the public feed for as long as the pass took — the
+    page sat on IDLE_OR_STALE with a generated_at that did not move, which
+    is indistinguishable from a dead ingest host. This thread owns the
+    cadence: it re-reads checkpoints from S3 every `--status-every` seconds
+    and refreshes the SQL rollup on `--snapshot-every`, using the latest
+    ingest health the main loop has handed it.
+    """
+
+    def __init__(self, connect, s3, bucket, statusBucket, status_every=180.0,
+                 snapshot_every=0.0):
+        self.connect = connect
+        self.s3 = s3
+        self.bucket = bucket
+        self.statusBucket = statusBucket
+        self.status_every = max(1.0, float(status_every))
+        self.snapshot_every = float(snapshot_every)
+        self._lock = threading.Lock()
+        self._ingest = {}
+        self._snapshot = None
+        self._snap_at = 0.0
+        self._wake = threading.Event()
+        self._stop = threading.Event()
+        self._thread = None
+
+    def update_ingest(self, ingest):
+        with self._lock:
+            self._ingest = dict(ingest or {})
+
+    def kick(self):
+        """Publish as soon as the thread is free (caught-up / collision)."""
+        self._wake.set()
+
+    def start(self):
+        if self._thread is not None:
+            return
+        self._thread = threading.Thread(
+            target=self._loop, name="status-publisher", daemon=True)
+        self._thread.start()
+
+    def stop(self, timeout=5.0):
+        self._stop.set()
+        self._wake.set()
+        thread = self._thread
+        if thread is not None:
+            thread.join(timeout=timeout)
+
+    def publish_once(self):
+        """One publish on the calling thread (for --once and tests)."""
+        self._publish()
+
+    def _loop(self):
+        # First publish immediately so a restart is not silent for status_every.
+        self._publish()
+        while not self._stop.is_set():
+            self._wake.wait(timeout=self.status_every)
+            self._wake.clear()
+            if self._stop.is_set():
+                return
+            self._publish()
+
+    def _publish(self):
+        with self._lock:
+            ingest = dict(self._ingest)
+            snapshot = self._snapshot
+            snap_at = self._snap_at
+        try:
+            need_sql = (
+                snapshot is None
+                or self.snapshot_every <= 0
+                or time.time() - snap_at >= self.snapshot_every
+            )
+            if need_sql:
+                with self.connect() as conn:
+                    snapshot = campaignSnapshot(conn)
+                snap_at = time.time()
+                with self._lock:
+                    self._snapshot = snapshot
+                    self._snap_at = snap_at
+            publishStatus(
+                None, self.s3, self.bucket, self.statusBucket,
+                ingest, snapshot=snapshot,
+                source="sql" if need_sql else "cached",
+            )
+        except Exception as exc:
+            # Publishing is a view; never let it stop the ingest or the thread.
+            log("status publish failed: %s: %s" % (type(exc).__name__, exc))
+
+
 def pending(conn, s3, bucket, prefix="dp/"):
     """Objects in the bucket that the store does not have, oldest first.
 
@@ -1155,13 +1248,11 @@ def onePass(connect, s3, bucket, threads=6, prefix="dp/", limit=PASS_OBJECTS):
     pass; the next slice skips it so a poison prefix cannot pin the bound
     window on the same oldest keys.
 
-    A pass is *bounded* rather than "everything outstanding". Status and
-    metrics are published between passes, so an unbounded pass publishes
-    nothing for as long as the drain takes: on 2026-09-17 that was a
-    four-thousand-object backlog and a page frozen on IDLE_OR_STALE for the
-    half hour it took to clear, which is indistinguishable from the outage it
-    was recovering from. `outstanding` stays the whole backlog, not this
-    slice, so the number a reader sees is the one that matters.
+    A pass is *bounded* rather than "everything outstanding". Status used to
+    publish only between passes, so an unbounded drain froze the page for as
+    long as it took; `StatusPublisher` now owns that cadence on its own
+    thread. `outstanding` stays the whole backlog, not this slice, so the
+    number a reader sees is the one that matters.
     """
     with connect() as probe:
         todo, newest, unrecognised = pending(probe, s3, bucket, prefix)
@@ -1274,18 +1365,19 @@ def main(argv=None):
                     help="publish outstanding/lag/unrecognised here as CloudWatch metrics")
     ap.add_argument("--pass-objects", type=int,
                     default=int(os.environ.get("RHO_PASS_OBJECTS", PASS_OBJECTS)),
-                    help="objects per pass; status and metrics are published "
-                         "between passes, so this bounds how long the page can "
-                         "stay stale while a backlog drains (0 = unbounded)")
+                    help="objects per pass; status publishes on its own thread "
+                         "so a long drain no longer freezes the feed "
+                         "(0 = unbounded)")
     ap.add_argument("--no-index", dest="index", action="store_false",
                     help="do not create the found_at index at startup")
     ap.add_argument("--status-every", type=float,
                     default=float(os.environ.get("RHO_STATUS_EVERY", "180")),
-                    help="seconds between status.json writes. The SQL half "
-                         "reads the maintained counters rather than the points "
-                         "table; walker liveness is an S3 list. Both can run "
-                         "at this cadence. The page's Actions job runs every "
-                         "3 minutes and reads this copy from the status bucket.")
+                    help="seconds between status.json writes on the publisher "
+                         "thread. The SQL half reads the maintained counters "
+                         "rather than the points table; walker liveness is an "
+                         "S3 list. Both keep moving while a pass runs. The "
+                         "page's Actions job runs every 3 minutes and reads "
+                         "this copy from the status bucket.")
     ap.add_argument("--snapshot-every", type=float,
                     default=float(os.environ.get("RHO_SNAPSHOT_EVERY", "0")),
                     help="seconds between rollup reads. 0 (the default) reads "
@@ -1365,47 +1457,56 @@ def main(argv=None):
                            if newest else "none",
                            len(unrecognised)))
                     return 0
-            published, wasBehind = 0.0, False
-            snapshot, snapAt = None, 0.0
-            while True:
-                _, objects, ingest = onePass(connect, s3, args.bucket, args.threads,
-                                             args.prefix, args.pass_objects)
-                if args.metric_namespace:
-                    publishMetrics(args.metric_namespace, ingest)
-                behind = bool(ingest.get("outstanding"))
-                # Rate-limited, except for the pass that finishes a drain:
-                # "caught up" is the one transition a reader is waiting for.
-                # A collision ends the campaign, so it does not wait out the
-                # rate limit: it is published on the pass that found it.
-                due = (time.time() - published >= args.status_every
-                       or (wasBehind and not behind)
-                       or bool(ingest.get("collisions")))
-                wasBehind = behind
-                if args.status_bucket and (due or args.once):
-                    try:
-                        need_sql = (snapshot is None
-                                    or args.snapshot_every <= 0
-                                    or time.time() - snapAt >= args.snapshot_every)
-                        if need_sql:
+
+            publisher = None
+            if args.status_bucket and not args.once:
+                publisher = StatusPublisher(
+                    connect, s3, args.bucket, args.status_bucket,
+                    status_every=args.status_every,
+                    snapshot_every=args.snapshot_every,
+                )
+                publisher.start()
+            wasBehind = False
+            try:
+                while True:
+                    _, objects, ingest = onePass(
+                        connect, s3, args.bucket, args.threads,
+                        args.prefix, args.pass_objects)
+                    if args.metric_namespace:
+                        publishMetrics(args.metric_namespace, ingest)
+                    behind = bool(ingest.get("outstanding"))
+                    caught_up = wasBehind and not behind
+                    wasBehind = behind
+                    if publisher is not None:
+                        publisher.update_ingest(ingest)
+                        # A drain that finishes, or a collision, is the
+                        # transition a reader is waiting for — do not wait
+                        # out the rest of status_every.
+                        if caught_up or bool(ingest.get("collisions")):
+                            publisher.kick()
+                    elif args.status_bucket:
+                        # --once: one synchronous publish after the pass.
+                        try:
                             with connect() as conn:
                                 snapshot = campaignSnapshot(conn)
-                            snapAt = time.time()
-                        publishStatus(None, s3, args.bucket, args.status_bucket,
-                                      ingest, snapshot=snapshot,
-                                      source="sql" if need_sql else "cached")
-                        published = time.time()
-                    except Exception as exc:
-                        # Publishing is a view; never let it stop the ingest.
-                        log("status publish failed: %s: %s" % (type(exc).__name__, exc))
-                if args.once:
-                    return 0
-                # A backlog is drained as fast as the database allows rather
-                # than one pass per interval: the interval exists to keep an
-                # idle ingest cheap, not to rate-limit catching up.  A pass
-                # that added nothing is not a backlog -- it is a retry -- and
-                # sleeping 0 while a poison object stays outstanding is how
-                # one failed row busy-loops the host.
-                time.sleep(0.0 if objects else args.interval)
+                            publishStatus(
+                                None, s3, args.bucket, args.status_bucket,
+                                ingest, snapshot=snapshot, source="sql")
+                        except Exception as exc:
+                            log("status publish failed: %s: %s"
+                                % (type(exc).__name__, exc))
+                    if args.once:
+                        return 0
+                    # A backlog is drained as fast as the database allows rather
+                    # than one pass per interval: the interval exists to keep an
+                    # idle ingest cheap, not to rate-limit catching up.  A pass
+                    # that added nothing is not a backlog -- it is a retry -- and
+                    # sleeping 0 while a poison object stays outstanding is how
+                    # one failed row busy-loops the host.
+                    time.sleep(0.0 if objects else args.interval)
+            finally:
+                if publisher is not None:
+                    publisher.stop()
         except KeyboardInterrupt:
             return 0
         except Exception as exc:  # a failover is a retry, never an outage

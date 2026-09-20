@@ -614,9 +614,13 @@ read the rollup. This program's `--status-every` (default 180 s) still buys
 room for the count query until an ingest-host deploy starts reading the
 same tables.
 
-While a snapshot runs, this program is not ingesting — the loop is
-pass, publish, pass — so `--status-every` matches the 3-minute Actions
-refresh cadence, with this copy in the status bucket as what the job reads
+While a snapshot runs, this program used to stop ingesting — the loop was
+pass, publish, pass — so a slow `pending()` aggregate or a long drain froze
+`status.json` for as long as the pass took. Status now publishes on its own
+`StatusPublisher` thread every `--status-every` (default 180 s), re-reading
+checkpoints from S3 and the rollup from Postgres while the main loop keeps
+ingesting. `--status-every` still matches the 3-minute Actions refresh
+cadence, with this copy in the status bucket as what the job reads
 when the walker hop is down. The corpus-wide per-object
 aggregate in `pending()` is the other scan, and it is cached for half an hour
 (`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`

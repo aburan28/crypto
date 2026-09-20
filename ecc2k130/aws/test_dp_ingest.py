@@ -14,9 +14,11 @@ both key shapes are points, and anything unreadable is counted out loud.
 
 import datetime
 import io
+import json
 import os
 import struct
 import sys
+import time
 import unittest
 from unittest import mock
 
@@ -1040,6 +1042,125 @@ class WalkRate(unittest.TestCase):
         })
         self.assertNotIn("per_slot", public["work"])
         self.assertEqual(public["work"]["walking_slots"], 1)
+
+
+class StatusPublisherTests(unittest.TestCase):
+    """Status must keep moving while an ingest pass is stuck."""
+
+    def test_publish_once_writes_without_waiting_for_a_pass(self):
+        puts = []
+
+        class BucketS3:
+            def get_object(self, **kw):
+                raise KeyError("none yet")
+
+            def put_object(self, **kw):
+                puts.append(kw)
+
+            def get_paginator(self, name):
+                class Pages:
+                    def paginate(self, **kw):
+                        return iter([])
+                return Pages()
+
+            def list_objects_v2(self, **kw):
+                return {}
+
+        snapshot = {
+            "curve_id": 131, "dp_mask_bits": 32, "campaign_created_at": None,
+            "dps": 7, "dps_last_hour": 0, "dps_last_day": 0,
+            "first_dp_at": None, "last_dp_at": None, "collisions": 0,
+            "latest_collision_at": None, "hourly": [],
+        }
+
+        class Conn:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def cursor(self):
+                raise AssertionError("publish_once should use the cached snapshot")
+
+        publisher = dp_ingest.StatusPublisher(
+            connect=lambda: Conn(),
+            s3=BucketS3(),
+            bucket="bucket",
+            statusBucket="status",
+            status_every=30.0,
+            snapshot_every=0.0,
+        )
+        publisher._snapshot = snapshot
+        publisher._snap_at = time.time()
+        publisher.update_ingest({"outstanding": 3, "unrecognised": 0, "newest": time.time()})
+        with mock.patch.object(dp_ingest, "campaignSnapshot", return_value=snapshot):
+            publisher.publish_once()
+        self.assertEqual(len(puts), 1)
+        body = json.loads(puts[0]["Body"].decode())
+        self.assertEqual(body["dps"], 7)
+        self.assertEqual(body["ingest"]["outstanding_objects"], 3)
+
+    def test_kick_publishes_without_waiting_out_the_interval(self):
+        puts = []
+
+        class BucketS3:
+            def get_object(self, **kw):
+                raise KeyError("none yet")
+
+            def put_object(self, **kw):
+                puts.append(time.time())
+
+            def list_objects_v2(self, **kw):
+                return {}
+
+        snapshot = {
+            "curve_id": 131, "dp_mask_bits": 32, "campaign_created_at": None,
+            "dps": 1, "dps_last_hour": 0, "dps_last_day": 0,
+            "first_dp_at": None, "last_dp_at": None, "collisions": 0,
+            "latest_collision_at": None, "hourly": [],
+        }
+
+        class Conn:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        # Long interval: without kick(), a second publish would not arrive in time.
+        publisher = dp_ingest.StatusPublisher(
+            connect=lambda: Conn(),
+            s3=BucketS3(),
+            bucket="bucket",
+            statusBucket="status",
+            status_every=30.0,
+            snapshot_every=0.0,
+        )
+        with mock.patch.object(dp_ingest, "campaignSnapshot", return_value=snapshot):
+            publisher.start()
+            deadline = time.time() + 2.0
+            while not puts and time.time() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(puts, "first publish on start never arrived")
+            before = len(puts)
+            publisher.kick()
+            deadline = time.time() + 2.0
+            while len(puts) <= before and time.time() < deadline:
+                time.sleep(0.01)
+            publisher.stop(timeout=2.0)
+        self.assertGreater(len(puts), before, "kick must publish without waiting out status_every")
+
+    def test_main_wires_the_publisher_thread(self):
+        path = os.path.join(os.path.dirname(__file__), "dp_ingest.py")
+        with open(path, encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertIn("class StatusPublisher", source)
+        self.assertIn("publisher.start()", source)
+        self.assertIn("publisher.update_ingest(ingest)", source)
+        # The old pass-then-publish gate must not come back: it is what froze
+        # the feed whenever onePass ran long.
+        self.assertNotIn("time.time() - published >= args.status_every", source)
 
 
 class Defaults(unittest.TestCase):
