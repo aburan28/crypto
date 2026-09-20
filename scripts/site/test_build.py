@@ -65,6 +65,8 @@ class BuildTests(unittest.TestCase):
             "status/walk-forest.json",
             "status/walk-forest-gf2-23.json",
             "status/walk-forest.js",
+            "status/how.html",
+            "status/rho-toy.js",
             "status/status.json",
             "status/history.json",
             "status.json",
@@ -185,6 +187,20 @@ class BuildTests(unittest.TestCase):
             self.assertIn('CAMPAIGN = "ecc2k-130";', page, name)
         self.assertIn("EXPECTED_ITERATIONS_LOG2 = 60.9;", dashboard)
 
+    def test_pages_merge_the_live_feed_with_the_pages_snapshot(self):
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        landing = read(os.path.join(self.out, "index.html"))
+        for name, page in (("dashboard", dashboard), ("landing", landing)):
+            self.assertIn("LIVE_FEED_URL", page, name)
+            self.assertIn("function mergeSnapshots", page, name)
+            self.assertIn("function attachRateFromHistory", page, name)
+        self.assertIn("loadStatus", dashboard)
+        how = read(os.path.join(self.out, "status", "how.html"))
+        self.assertIn("rho-toy.js", how)
+        self.assertIn("ecc2k130/examples/rho_toy.py", how)
+        toy = read(os.path.join(self.out, "status", "rho-toy.js"))
+        self.assertIn("global.RhoToy", toy)
+
     def test_both_pages_read_the_measured_rate_through_one_shared_block(self):
         # Two pages render the same snapshot's rate, so a fix applied to one
         # copy and not the other publishes two different walk rates for one
@@ -207,6 +223,7 @@ class BuildTests(unittest.TestCase):
             "function measuredRate",
             "function walkingSlots",
             "function formatRate",
+            "function campaignDisplayState",
         ):
             self.assertIn(name, dashboard, name)
         # B it/s is the unit the campaign quotes a GPU in (ecc2k130/aws/README.md).
@@ -229,6 +246,7 @@ class BuildTests(unittest.TestCase):
         self.assertIn('id="live-gpus"', landing)
         self.assertIn(">GPUs running<", landing)
         self.assertIn("walkingSlots(status)", landing)
+        self.assertIn("campaignDisplayState(status)", landing)
         self.assertNotIn("live-workers", landing)
         # Lifetime contributors stay in the workers table, not the GPU card.
         self.assertIn('id="workers-note"', dashboard)
@@ -343,7 +361,10 @@ class BuildTests(unittest.TestCase):
         self.assertIn('label(gx, H - 22, xLabel(work, mark), "middle", "tick")', page)
         self.assertIn('label(gx + 4, y(p) - 6, mark, "start", "tick")', page)
         css = read(os.path.join(self.out, "status", "style.css"))
-        self.assertIn(".odds-chart svg", css)
+        # The override has to outrank `.chart svg { min-width: 560px }`; a bare
+        # `.odds-chart svg` ties on specificity and loses on source order,
+        # which pushed the curve out past the card edge on a phone.
+        self.assertIn(".chart.odds-chart svg", css)
         self.assertIn("min-width: 0", css)
         # Walk forest fits the column on a phone. A 640px min-width made the
         # caption lay out at that width, so every line clipped; the SVG
@@ -589,7 +610,7 @@ class BuildTests(unittest.TestCase):
 
     def test_sitemap_and_robots_point_at_the_published_urls(self):
         sitemap = read(os.path.join(self.out, "sitemap.xml"))
-        for path in ("/", "/scoreboard/", "/status/"):
+        for path in ("/", "/scoreboard/", "/status/", "/status/how.html"):
             self.assertIn("<loc>%s%s</loc>" % (BASE_URL, path), sitemap)
         self.assertIn("<lastmod>2026-01-01</lastmod>", sitemap)
         self.assertIn("Sitemap: %s/sitemap.xml" % BASE_URL, read(os.path.join(self.out, "robots.txt")))

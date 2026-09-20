@@ -7,6 +7,7 @@ answers are known.  Each defect that once produced plausible output has a
 test here that fails if it comes back.
 """
 
+import math
 import random
 import sys
 from itertools import combinations, product
@@ -23,7 +24,9 @@ from normalbasis import (NormalSupport, conjugates,          # noqa: E402
                          find_normal_elements, is_normal)
 from planted import frobenius_scalar, recover_planted        # noqa: E402
 from run_four_point_orbit import is_identity_relation         # noqa: E402
-from target_boundary import cost as logarithm_cost            # noqa: E402
+from target_boundary import (cost as logarithm_cost,          # noqa: E402
+                             family_floor)
+from necklaces import cost_per_representative, necklaces      # noqa: E402
 from validate_amortised_attack import (aggregate as amortised_aggregate,  # noqa: E402
                                        attack as amortised_attack)
 from validate_target_model import (_signed_subset_sums,       # noqa: E402
@@ -369,6 +372,56 @@ def test_amortised_attack_recovers_a_planted_logarithm():
         assert out["recovered_d"] == out["planted_d"]
         assert out["unknowns"] == out["orbits"] + 1
         assert out["relations"] == out["unknowns"]
+
+
+def test_sigma_class_representatives_are_enumerable_at_constant_cost():
+    """Discharges the assumption the build cost rested on.
+
+    Storing one entry per sigma-orbit is only a saving if the
+    representatives can be enumerated proportionally to their number. The
+    count must be exactly C(T*m, d)/m -- m is prime and d < m, so no subset
+    is fixed by a non-trivial rotation -- and the work per representative
+    must stay bounded rather than growing like m.
+    """
+    seen = []
+    for m, tracks, d in ((13, 1, 5), (17, 1, 8), (19, 1, 9), (23, 1, 11),
+                         (11, 2, 5), (13, 2, 6)):
+        count, _ = necklaces(m, tracks, d, emit=False)
+        assert count == math.comb(tracks * m, d) // m, (m, tracks, d)
+        per = cost_per_representative(m, tracks, d)
+        assert per < 40, (m, tracks, d, per)
+        seen.append((m, per))
+    # flat in m at comparable density, not growing like m
+    single = [p for mm, p in seen[:4]]
+    assert max(single) - min(single) < 6, single
+
+
+def test_cost_does_not_raise_on_lopsided_large_configurations():
+    """Regression: 2**build overflowed a float exactly where the optimiser looks.
+
+    The search prefers the most lopsided split, which is where the stored
+    side is largest. An unguarded exponentiation turned part of the search
+    space into an exception rather than a result.
+    """
+    for T, n, s in ((200000, 60, 59), (50000, 60, 59), (120000, 48, 47)):
+        r = logarithm_cost(T, n, s)
+        assert r is not None
+        assert r["log2_total_cost"] > 0          # log2 figures always present
+        assert "S" in r and "memory_exabytes" in r   # may be None, must exist
+
+
+def test_parity_with_rho_is_below_the_family_floor():
+    """The whole family is bounded away from the reference, not merely observed to be.
+
+    total = 2*sqrt(K1 * U * C(n,s) * r) with U >= 2 and C(n,s) >= 2, so no
+    support size, relation length, split or table layout reaches rho.
+    """
+    f = family_floor()
+    assert f["parity_reachable"] is False
+    assert f["log2_floor_vs_rho"] > 0
+    # the best configuration found must respect its own floor
+    best = logarithm_cost(2, 12, 11, quotient_table=True)
+    assert best["log2_total_cost"] >= f["log2_floor"]
 
 
 def test_logarithm_cost_is_monotone_in_the_obvious_places():

@@ -5,7 +5,7 @@
 //! cargo run --release --example koblitz_scaling_bench -- --json # machine-readable
 //! ```
 //!
-//! See `RESEARCH_KOBLITZ_SCALING_TARGET.md` for what the numbers are
+//! See `research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md` for what the numbers are
 //! for and which of them a run is trying to move.
 
 use crypto_lib::cryptanalysis::koblitz_bench::{

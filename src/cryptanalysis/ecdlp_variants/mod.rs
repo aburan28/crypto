@@ -49,6 +49,20 @@
 //!
 //! # Scope
 //!
+//! # A faster path
+//!
+//! Every solver here uses the crate's general arithmetic — [`BigUint`]
+//! coordinates and a `HashMap` keyed by coordinate bytes — because the
+//! point is to state the algorithms readably and count their operations
+//! exactly.  That costs an allocation per field operation and another per
+//! table probe.  When the *time* matters rather than the exposition,
+//! [`crate::cryptanalysis::bsgs_fast`] is the same algorithm over
+//! single-word Montgomery arithmetic and a flat x-keyed table, with the
+//! chains spread across cores: measured at 6.3× to 10.9× this module on
+//! the same instances, and it carries the interval and many-target modes
+//! this one does not.  It is capped at curves whose prime and order fit a
+//! word; above that, or for operation counts, stay here.
+//!
 //! These are all `O(√n)` (BSGS family: deterministic; Gaudry–Schost:
 //! randomised, low-memory) — exponential in the bit length, so they
 //! are demonstrated on small curves (a few-thousand- to ~100k-order

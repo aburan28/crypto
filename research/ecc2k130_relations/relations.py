@@ -44,6 +44,7 @@ from __future__ import annotations
 import itertools
 import random
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -206,7 +207,8 @@ def solve_s3_last(E: Koblitz, pairs):
 
 
 def three_point_relations(E: Koblitz, base_x, *, allow_repeats=True,
-                          chunk=20000, progress=None, budget_pairs=None):
+                          chunk=20000, progress=None, budget_pairs=None,
+                          budget_seconds=None):
     """Every homogeneous three-point relation with all abscissae in `base_x`.
 
     Enumerates unordered pairs (with repetition when `allow_repeats`), solves
@@ -214,7 +216,9 @@ def three_point_relations(E: Koblitz, base_x, *, allow_repeats=True,
     Returned triples are sorted abscissa triples, deduplicated.
 
     This is a *complete* search over the base, not a sample: if it returns
-    nothing, the base has no three-point relation, full stop.
+    nothing, the base has no three-point relation, full stop.  Either budget
+    (`budget_pairs`, `budget_seconds` of wall clock) stops the sweep at a
+    chunk boundary, and the returned `complete` flag then says so.
     """
     xs = sorted(set(base_x))
     member = set(xs)
@@ -222,6 +226,7 @@ def three_point_relations(E: Koblitz, base_x, *, allow_repeats=True,
     found = set()
     seen_pairs = 0
     total_pairs = n * (n + 1) // 2 if allow_repeats else n * (n - 1) // 2
+    started = time.time()
 
     def pair_stream():
         for i in range(n):
@@ -239,6 +244,8 @@ def three_point_relations(E: Koblitz, base_x, *, allow_repeats=True,
             if progress:
                 progress(seen_pairs, len(found))
             if budget_pairs and seen_pairs >= budget_pairs:
+                return sorted(found), seen_pairs, seen_pairs >= total_pairs
+            if budget_seconds and time.time() - started > budget_seconds:
                 return sorted(found), seen_pairs, seen_pairs >= total_pairs
     if buf:
         seen_pairs += len(buf)

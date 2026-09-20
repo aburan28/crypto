@@ -94,6 +94,8 @@ class BootstrapContract(unittest.TestCase):
     def test_launch_spot_all_is_discovered_spot_only(self):
         script = (HERE / "launch_spot_all.sh").read_text()
         self.assertIn("g7e.2xlarge,g7.2xlarge,g6e.2xlarge,g6.2xlarge,g4dn.2xlarge", script)
+        self.assertIn('CHEAP:-0', script)
+        self.assertIn("CHEAP=1", script)
         self.assertIn('MarketType":"spot"', script)
         self.assertIn("describe-regions --all-regions", script)
         self.assertIn("opted-in", script)

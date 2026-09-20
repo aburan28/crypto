@@ -1,7 +1,7 @@
 """
 GLV-HNP Phase 2, Thread 20: is lambda/n really the predictor of LLL success?
 
-Background (RESEARCH_AUTOLAB_LOG.md, 2026-07-26 run #1):
+Background (research/notes/index-calculus/RESEARCH_AUTOLAB_LOG.md, 2026-07-26 run #1):
   The Phase-2 GLV lattice attack recovered d for curves with lam/n in
   {0.53, 0.66, 0.34} but failed (LLL and BKZ-40 alike) for p=2677,
   n=2647, lam=185 (lam/n=0.07).  That run proposed "lam/n threshold".
@@ -419,7 +419,7 @@ print("=" * 78)
 
 SEEDS = [42, 1234, 9999, 555, 31337]
 
-# Historical Phase-2 curves (from RESEARCH_AUTOLAB_LOG.md 2026-06-15 / 2026-07-26)
+# Historical Phase-2 curves (from research/notes/index-calculus/RESEARCH_AUTOLAB_LOG.md 2026-06-15 / 2026-07-26)
 HIST = [
     # label,             p,    b, n,    lam,  K1, m
     ("8-bit/199",        211,  2, 199,  106,  2,  6),

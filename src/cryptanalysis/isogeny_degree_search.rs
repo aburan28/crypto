@@ -78,7 +78,7 @@
 //! ## The second structural result: there is nowhere to walk *to*
 //!
 //! The only lever known to lower `D*` on these systems is **L1**,
-//! subfield structure (`RESEARCH_DEGREE_REDUCTION.md` §2: Subfield mean
+//! subfield structure (`research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` §2: Subfield mean
 //! `D*` 2.04 vs Random 3.53).  A curve over `F_{2^n}` has that structure
 //! iff it is `F_{2^n}`-isomorphic to one defined over a proper subfield,
 //! which for ordinary curves means `j(E') ∈ F_{2^d}` for some `d | n`,

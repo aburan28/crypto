@@ -10,7 +10,7 @@
 //!
 //! This module produces those numbers reproducibly, so the question can
 //! be worked as an optimisation target rather than an opinion.  See
-//! `RESEARCH_KOBLITZ_SCALING_TARGET.md` for the pre-registered
+//! `research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md` for the pre-registered
 //! hypotheses these measurements are meant to settle.
 //!
 //! ## Two measurements, two reachable ranges
@@ -665,7 +665,7 @@ pub fn subspace_ladder(n_max: u32, max_ell: u32) -> Vec<(u32, u32)> {
 ///
 /// The first fall degree is what the Petit–Quisquater complexity
 /// argument is stated in; the solving degree is what the linear algebra
-/// actually costs.  `RESEARCH_DREG_MEASUREMENT.md` says why the gap
+/// actually costs.  `research/notes/index-calculus/RESEARCH_DREG_MEASUREMENT.md` says why the gap
 /// between them is the measurement worth having, and
 /// `control_solve_mean` is the null object that says whether any of it
 /// is structure rather than shape.

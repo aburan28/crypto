@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Assemble the published GitHub Pages site for aburan28/crypto.
 
-The ECC2K-130 workflow uploads the directory this script writes, every 15
+The ECC2K-130 workflow uploads the directory this script writes, every 3
 minutes.
 Everything it publishes already exists in the repository; the script only
 copies and lays out, so the repository file stays canonical (AGENTS.md §7)
@@ -82,6 +82,8 @@ PAGES = (
     ("docs/ecc2k130-status/walk-forest.json", "status/walk-forest.json"),
     ("docs/ecc2k130-status/walk-forest-gf2-23.json", "status/walk-forest-gf2-23.json"),
     ("docs/ecc2k130-status/walk-forest.js", "status/walk-forest.js"),
+    ("docs/ecc2k130-status/how.html", "status/how.html"),
+    ("docs/ecc2k130-status/rho-toy.js", "status/rho-toy.js"),
 )
 
 # Snapshot data, published twice: beside the dashboard and at the root.
@@ -91,7 +93,7 @@ DATA = (
 )
 
 # Pages worth listing for crawlers. Data files and the 404 stay out.
-SITEMAP = ("/", "/scoreboard/", "/scoreboard/performance-gains.html", "/scoreboard/algorithm-lab.html", "/status/")
+SITEMAP = ("/", "/scoreboard/", "/scoreboard/performance-gains.html", "/scoreboard/algorithm-lab.html", "/status/", "/status/how.html")
 
 
 def copy(src_rel: str, dest_rel: str, out_dir: str, root: str = ROOT) -> str:

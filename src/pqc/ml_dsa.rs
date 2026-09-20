@@ -125,8 +125,13 @@ const ZETAS: [i32; N] = {
     out
 };
 
-/// Montgomery-style reduction not used: we operate in plain i64 and reduce
-/// modulo q with `barrett`-like step where needed.
+/// Multiply two coefficients mod q.
+///
+/// No Montgomery form and no Barrett step: this widens to `i64` and reduces
+/// with a plain `rem_euclid`, which the compiler lowers to a multiply-shift
+/// pair because q is a constant. That is the readable choice and it is what
+/// this module is for; `pqc::fast::ml_dsa` is the Montgomery version, and
+/// `docs/pqc-speed.md` measures what the difference is worth (45% of signing).
 #[inline]
 fn fqmul(a: i32, b: i32) -> i32 {
     let prod = (a as i64) * (b as i64);

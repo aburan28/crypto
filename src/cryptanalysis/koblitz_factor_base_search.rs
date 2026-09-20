@@ -52,7 +52,7 @@
 //! verified discrete logarithms: the base this module's `T` selects costs
 //! `22.41×` the one [`SearchOptions::solve_cost_targets`] selects, and the
 //! rank correlation between `T` and measured cost across the six bases is
-//! `ρ = −0.83`.  See `RESEARCH_FACTOR_BASE_SOLVE_COST.md` §6, and
+//! `ρ = −0.83`.  See `research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md` §6, and
 //! `examples/groebner_base_sweep.rs` for the sweep that scores the second
 //! factor directly.
 //!
@@ -61,7 +61,7 @@
 //! *subset* of its span is carried by the SAT domain trie instead and is
 //! left unmeasured rather than priced on the span.  Free and unmeasured:
 //! `ker g(σ) ⊆ ker Tr` exactly when `(x+1) ∤ g`, which doubles the yield
-//! (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1) for the price of a
+//! (`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1) for the price of a
 //! divisibility test.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -571,7 +571,7 @@ pub struct SearchOptions {
     /// measurement means what it did.  A trial is paid whether or not it
     /// succeeds and the Gröbner system carries `m·ℓ` unknowns, so the
     /// two orders can differ by an order of magnitude — see
-    /// `RESEARCH_FACTOR_BASE_SOLVE_COST.md`.
+    /// `research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`.
     ///
     /// Only linear-subspace candidates can be priced: the summation
     /// polynomial is Weil-restricted over the subspace basis, so a base
@@ -634,7 +634,7 @@ pub struct Candidate {
     /// `m·dim + (m − 2)·n` — Boolean unknowns of the algebraic system.
     pub sat_variables: usize,
     /// Whether the abscissa subspace lies inside `ker Tr`, which doubles
-    /// the yield (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1).  Decided
+    /// the yield (`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1).  Decided
     /// by a divisibility, not by solving: `ker g(σ) ⊆ ker Tr` exactly
     /// when `(x+1) ∤ g`, and equivalently every abscissa has trace zero.
     pub trace_zero: bool,
@@ -710,7 +710,7 @@ impl SearchReport {
 /// a word-XOR count of `10^6`.
 ///
 /// A trace-zero base breaks a tie because it yields twice for nothing
-/// (`RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1); the remaining ties go to
+/// (`research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md` §3.1); the remaining ties go to
 /// the smaller base, which is the cheaper one to materialise and to
 /// solve over.
 pub fn rank_candidates(candidates: &mut [Candidate]) {
@@ -1185,7 +1185,7 @@ mod tests {
 
     /// Coverage alone ranks the bases of `K_1/2^15` backwards.
     ///
-    /// The point of `RESEARCH_FACTOR_BASE_SOLVE_COST.md`: expected trials
+    /// The point of `research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`: expected trials
     /// sees the relation columns and the coverage and not the `m·ℓ`
     /// unknowns of the Weil-restricted summation system, so it climbs the
     /// dimension ladder collecting yield while paying an order of
@@ -1443,7 +1443,7 @@ mod tests {
         // the subspace grows while the Weil-restricted system carries
         // m·ℓ unknowns and does not, so the trials-optimal base is one
         // the oracle is an order of magnitude slower on
-        // (RESEARCH_FACTOR_BASE_SOLVE_COST.md).  Ranking by measured
+        // (research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).  Ranking by measured
         // stage cost must put a six-dimensional base first; ranking by
         // trials alone must not.
         let kc = KoblitzCurve::new(1, 15).unwrap();

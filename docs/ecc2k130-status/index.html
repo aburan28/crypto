@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ECC2K-130 campaign status · aburan28/crypto</title>
-<meta name="description" content="Aggregates from the Certicom ECC2K-130 distinguished-point collection, refreshed every 15 minutes: iterations per second, point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
+<meta name="description" content="Aggregates from the Certicom ECC2K-130 distinguished-point collection, refreshed every 3 minutes: iterations per second, point counts, per-worker yield, collisions, and the claim boundary the numbers sit inside.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0b1020">
 <link rel="canonical" href="https://aburan28.github.io/crypto/status/">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ECC2K-130 campaign status">
-<meta property="og:description" content="Iterations per second and distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 15 minutes. Counts only: no walk coefficients, no point keys.">
+<meta property="og:description" content="Iterations per second and distinguished-point aggregates for the Certicom ECC2K-130 Pollard rho campaign, refreshed every 3 minutes. Counts only: no walk coefficients, no point keys.">
 <meta property="og:url" content="https://aburan28.github.io/crypto/status/">
 <meta name="twitter:card" content="summary">
 <link rel="stylesheet" href="./style.css">
@@ -24,6 +24,7 @@
     <a href="../">Overview</a>
     <a href="../scoreboard/">Scoreboard</a>
     <a href="./" aria-current="page">Campaign status</a>
+    <a href="./how.html">How the walk works</a>
     <a href="https://github.com/aburan28/crypto">Repository</a>
   </nav>
 </header>
@@ -33,14 +34,19 @@
   <h1>Campaign status</h1>
   <p class="sub">
     Read-only snapshot of the shared <span class="mono">ecc2k-130</span>
-    distinguished-point table, refreshed every 15 minutes. The page publishes
-    counts only &mdash; walk
+    distinguished-point table. The browser loads the live feed from the
+    campaign store and the GitHub Pages copy together, and keeps whichever
+    fields each one actually has: counts from the store, walk rate from the
+    snapshot history when the live document is missing it. Refresh is every
+    minute. The page publishes counts only &mdash; walk
     coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
     the private store and never reach this page.
   </p>
   <p class="sub">
     Adding hardware to the walk: <a href="#h-contribute">contribute compute</a>
-    &mdash; <a href="https://github.com/aburan28/cairn/releases/latest">download
+    &mdash; <a href="./how.html">how the walk works</a>, as a toy that recovers
+    <span class="mono">k</span> in the browser &mdash;
+    <a href="https://github.com/aburan28/cairn/releases/latest">download
     cairn</a> for the paid piecework path, or run the client itself.
   </p>
 
@@ -378,7 +384,7 @@ make gpu
     <h2 id="h-history">Snapshot history</h2>
     <p class="note">
       Every snapshot the publishing Action has posted in the last seven
-      days, newest first. It runs every 15 minutes. The iterations column is
+      days, newest first. It runs every 3 minutes. The iterations column is
       the walkers' checkpoint sum at each snapshot, so the rate at the top of
       the page is the difference between two of these rows over the time
       between them &mdash; the arithmetic is here to be redone.
@@ -409,7 +415,9 @@ make gpu
     <h2>What this page does and does not claim</h2>
     <p id="claim"></p>
     <p>
-      Raw data: <a href="./status.json">status.json</a> ·
+      Raw data:
+      <a id="live-feed-link" href="https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/status.json">live feed</a>
+      · <a href="./status.json">status.json</a> ·
       <a href="./history.json">history.json</a>. How the snapshot is taken,
       and what is deliberately withheld:
       <a href="https://github.com/aburan28/crypto/blob/main/scripts/rho_status/README.md">scripts/rho_status/README.md</a>.
@@ -424,10 +432,20 @@ make gpu
 
   var HOUR_MS = 3600 * 1000;
   var REFRESH_MS = 60 * 1000;
-  // The publishing Action runs every 15 minutes, so an hour is four missed
-  // runs: late enough that GitHub's scheduler jitter does not trip it, early
-  // enough to say so before the counts are badly out of date.
-  var STALE_AFTER_MS = HOUR_MS;
+  // The publishing Action runs every 3 minutes, but the snapshot it
+  // publishes is only as fresh as its source: when the walker hop is down
+  // the source is the ingest host's feed, rewritten every 3 minutes
+  // (dp_ingest.py --status-every), so at publish time the snapshot can
+  // already be a few minutes old. Ninety minutes is many missed feed
+  // writes, or thirty missed Action runs: late
+  // enough that neither cadence trips it, early enough to say so before
+  // the counts are badly out of date. test_rho_status.py pins it to both.
+  var STALE_AFTER_MS = 90 * 60 * 1000;
+  // The ingest host writes this document from rho-dp every ~3 minutes. CORS
+  // on the status bucket allows this origin to read it directly, so the page
+  // does not wait on the GitHub Actions publish cadence for current counts.
+  var LIVE_FEED_URL =
+    "https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/status.json";
   // Cap on the bars in the per-hour chart. Seven days of UTC hours, matching
   // the interval the snapshot query buckets over — a window in the data, not
   // in the publish cadence, so it does not move when the cron does.
@@ -454,7 +472,8 @@ make gpu
     IDLE_OR_STALE: "Store has points, but none in the last hour.",
     EMPTY: "Campaign row exists; no distinguished points yet.",
     COLLISION_RECORDED: "Collision recorded in the DP table — not independently verified here.",
-    UNREACHABLE: "Snapshot missing or unreachable."
+    UNREACHABLE: "Snapshot missing or unreachable.",
+    INGEST_BEHIND: "The fleet is walking, but the store is behind on ingest. Last-hour counts are about the ingest, not the walk."
   };
 
   var el = function (id) { return document.getElementById(id); };
@@ -467,7 +486,7 @@ make gpu
     return isFinite(n) ? n.toLocaleString("en-US") : "—";
   }
 
-  // --- mirrored block: docs/site/index.html carries these four functions
+  // --- mirrored block: docs/site/index.html carries these five functions
   // verbatim, and scripts/site/test_build.py fails if the two copies differ
   // by a byte. Both pages read one snapshot, so both must read it the same.
   // What the campaign counts for itself. work_feed.py puts the sum of the
@@ -492,7 +511,17 @@ make gpu
   function walkingSlots(status) {
     if (!status || !status.work) return null;
     var slots = Number(status.work.walking_slots);
-    return isFinite(slots) && slots >= 0 ? slots : null;
+    if (isFinite(slots) && slots >= 0) return slots;
+    var rows = status.work.per_slot;
+    if (!Array.isArray(rows)) return null;
+    var n = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      if (!row || row.retired) continue;
+      var age = Number(row.checkpoint_age_s);
+      if (isFinite(age) && age <= 1800) n++;
+    }
+    return n;
   }
 
   // Billions of iterations per second is the campaign's own unit: it is what
@@ -504,6 +533,23 @@ make gpu
     if (rate >= 1e9) return (rate / 1e9).toFixed(1) + " B it/s";
     if (rate >= 1e6) return (rate / 1e6).toFixed(1) + " M it/s";
     return Math.round(rate).toLocaleString("en-US") + " it/s";
+  }
+
+  // COLLECTING in the snapshot is "points in the hour before generated_at".
+  // The banner says "in the last hour", which is wall-clock. A 16-hour-old
+  // snapshot with a non-zero last-hour count is idle, not collecting.
+  function campaignDisplayState(status) {
+    var recorded = status && status.state;
+    if (recorded === "COLLISION_RECORDED" || recorded === "INGEST_BEHIND" || recorded === "UNREACHABLE") {
+      return recorded;
+    }
+    var last = status && status.last_dp_at;
+    if (last) {
+      var at = Date.parse(String(last));
+      if (isFinite(at) && (Date.now() - at) <= 3600 * 1000) return "COLLECTING";
+    }
+    if (status && Number(status.dps) > 0) return "IDLE_OR_STALE";
+    return recorded || "EMPTY";
   }
   // --- end mirrored block ---
 
@@ -901,12 +947,14 @@ make gpu
     el("gpus-foot").textContent = parts.join(" · ");
   }
 
-  function drawWorkers(workers, snapshotAt) {
+  function drawWorkers(workers, snapshotAt, source) {
     var body = el("workers-body");
     var note = el("workers-note");
     body.textContent = "";
     if (!workers.length) {
-      emptyRow(body, 5, "No workers have reported points.");
+      emptyRow(body, 5, source === "ingest-status-feed"
+        ? "Per-worker counts need the walker hop; this snapshot is from the ingest feed."
+        : "No workers have reported points.");
       note.textContent = "";
       return;
     }
@@ -959,6 +1007,7 @@ make gpu
       ["Latest point", timeCell(status.last_dp_at, true), false],
       ["Latest collision", status.latest_collision_at ? timeCell(status.latest_collision_at, true) : "none recorded", false],
       ["Snapshot generated", timeCell(status.generated_at, true), false],
+      ["Published to Pages", status.published_at ? timeCell(status.published_at, true) : "not stamped", false],
       ["Snapshot source", status.source || "—", true],
       ["Schema version", status.schema_version === undefined ? "—" : String(status.schema_version), true]
     ];
@@ -1281,10 +1330,16 @@ make gpu
       return;
     }
     var generated = parseTime(status && status.generated_at);
+    var published = parseTime(status && status.published_at);
     var parts = [];
     if (generated) parts.push("Snapshot " + utc(generated, true) + " (" + ago(generated) + ")");
     else parts.push("Snapshot time not published");
+    // Two clocks: when the source counted, and when the publishing job
+    // wrote the file. A publisher that stopped and a source that stopped
+    // look identical on the first one and different on the second.
+    if (published) parts.push("published " + ago(published));
     if (loadedAt) parts.push("fetched " + ago(loadedAt));
+    if (status && status._fetch_label) parts.push("via " + status._fetch_label);
     text.textContent = parts.join(" · ");
   }
 
@@ -1294,16 +1349,105 @@ make gpu
     return response.json();
   }
 
+  function generatedMs(status) {
+    var t = Date.parse(String(status && status.generated_at || ""));
+    return isFinite(t) ? t : 0;
+  }
+
+  function mergeSnapshots(live, pages) {
+    if (!live && !pages) return null;
+    if (!live) return pages;
+    if (!pages) return live;
+    var newer = generatedMs(live) >= generatedMs(pages) ? live : pages;
+    var older = newer === live ? pages : live;
+    var out = {};
+    var key;
+    for (key in older) out[key] = older[key];
+    for (key in newer) out[key] = newer[key];
+    out.work = {};
+    if (older.work) for (key in older.work) out.work[key] = older.work[key];
+    if (newer.work) for (key in newer.work) out.work[key] = newer.work[key];
+    if (walkingSlots({ work: out.work }) === null && walkingSlots(older) !== null) {
+      out.work.walking_slots = walkingSlots(older);
+    }
+    if (!out.walk_rate && older.walk_rate) out.walk_rate = older.walk_rate;
+    if (!(out.per_worker && out.per_worker.length) && older.per_worker && older.per_worker.length) {
+      out.per_worker = older.per_worker;
+    }
+    out._fetch_label = (live._fetch_label || "live feed") + " + " + (pages._fetch_label || "Pages snapshot");
+    return out;
+  }
+
+  function attachRateFromHistory(status, history) {
+    if (!status || measuredRate(status) !== null) return status;
+    var iterations = reportedIterations(status);
+    if (iterations === null) return status;
+    var points = (history && history.points) || [];
+    var samples = [];
+    var i;
+    for (i = 0; i < points.length; i++) {
+      var it = Number(points[i].iterations);
+      var at = Date.parse(String(points[i].generated_at || ""));
+      if (isFinite(it) && it > 0 && isFinite(at)) {
+        samples.push({ at: at, iterations: it, stamp: points[i].generated_at });
+      }
+    }
+    var now = Date.parse(String(status.generated_at || ""));
+    if (isFinite(now)) samples.push({ at: now, iterations: iterations, stamp: status.generated_at });
+    samples.sort(function (a, b) { return a.at - b.at; });
+    if (samples.length < 2) return status;
+    var latest = samples[samples.length - 1];
+    var windowMs = 3600 * 1000;
+    var base = null;
+    for (i = 0; i < samples.length - 1; i++) {
+      if (latest.at - samples[i].at <= windowMs) { base = samples[i]; break; }
+    }
+    if (!base) base = samples[samples.length - 2];
+    var span = (latest.at - base.at) / 1000;
+    if (span < 600 || latest.iterations < base.iterations) return status;
+    status.walk_rate = {
+      iterations_per_second: (latest.iterations - base.iterations) / span,
+      window_seconds: Math.round(span),
+      measured_from: base.stamp,
+      measured_to: latest.stamp,
+      iterations_from: base.iterations,
+      iterations_to: latest.iterations,
+      method: "difference of checkpointed iteration totals between two snapshots"
+    };
+    return status;
+  }
+
+  async function loadStatus() {
+    var live = null;
+    var pages = null;
+    var errors = [];
+    try {
+      live = await fetchJSON(LIVE_FEED_URL);
+      live._fetch_label = "live feed";
+    } catch (err) {
+      errors.push("live feed: " + err.message);
+    }
+    try {
+      pages = await fetchJSON("./status.json");
+      pages._fetch_label = "Pages snapshot";
+    } catch (err) {
+      errors.push("Pages snapshot: " + err.message);
+    }
+    var status = mergeSnapshots(live, pages);
+    if (!status) throw new Error(errors.join("; ") || "no snapshot");
+    return status;
+  }
+
   var lastStatus = null;
   var historyLoaded = false;
 
   async function load() {
     var status;
     try {
-      status = await fetchJSON("./status.json");
+      status = await loadStatus();
     } catch (err) {
-      setBanner("UNREACHABLE", "Could not read status.json (" + err.message + ").");
-      tickFreshness(lastStatus, "status.json unavailable · last try " + utc(new Date(), true));
+      setBanner("UNREACHABLE", "Could not read the live feed or Pages snapshot (" + err.message + ").");
+      tickFreshness(lastStatus, "status unavailable · last try " + utc(new Date(), true));
       placeholderTables("No data — the snapshot could not be read.");
       return;
     }
@@ -1320,13 +1464,30 @@ make gpu
     } catch (err) {
       historyError = err.message;
     }
+    attachRateFromHistory(status, history);
 
     var generated = parseTime(status.generated_at);
+    var published = parseTime(status.published_at);
     var snapshotAge = generated ? Date.now() - generated.getTime() : null;
+    var publishedAge = published ? Date.now() - published.getTime() : null;
     var stale = snapshotAge !== null && snapshotAge > STALE_AFTER_MS;
-    setBanner(status.state, stale
-      ? "The publishing job last ran " + ago(generated) + ", so these counts are not current."
-      : "");
+    var displayState = campaignDisplayState(status);
+    var extra = "";
+    if (stale) {
+      extra = "This snapshot is " + ago(generated) + " old, so these counts are not current.";
+      // Say which half of the pipeline is behind. The publisher stamps every
+      // file it writes; a fresh stamp on a stale snapshot means it ran and
+      // found nothing newer at either source, an old stamp means it did not run.
+      if (publishedAge !== null && publishedAge <= STALE_AFTER_MS) {
+        extra += " The publisher ran " + ago(published) + " and neither the walker hop nor the ingest feed had anything newer.";
+      } else if (published) {
+        extra += " The publisher itself last wrote this page " + ago(published) + ".";
+      }
+    } else if (displayState === "IDLE_OR_STALE") {
+      var lastPoint = parseTime(status.last_dp_at);
+      if (lastPoint) extra = "Latest point " + ago(lastPoint) + ".";
+    }
+    setBanner(displayState, extra);
 
     el("dps").textContent = num(status.dps);
     drawOperations(status);
@@ -1377,7 +1538,7 @@ make gpu
         emptyRow(historyBody, 7, "Could not read history.json (" + historyError + ").");
       }
     }
-    drawWorkers(status.per_worker || [], generated);
+    drawWorkers(status.per_worker || [], generated, status.source);
     drawCampaign(status);
 
     if (historyError) {

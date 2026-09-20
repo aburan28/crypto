@@ -8,7 +8,7 @@
 //!
 //! `D*` is — up to `O(1)` — the Huang–Kosters–Yeo last fall degree and
 //! the Gröbner solving degree (Clegg–Edmonds–Impagliazzo). The proposal's
-//! prediction #1 (`RESEARCH_FFD_PROOF_COMPLEXITY.md` §6) is that `D*`
+//! prediction #1 (`research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §6) is that `D*`
 //! climbs with `n` while the first fall degree stays roughly flat.
 //!
 //! ```bash

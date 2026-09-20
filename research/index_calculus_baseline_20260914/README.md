@@ -10,8 +10,8 @@ For the fixed target used by subsequent iterations, use the
 60 inputs, two configurations and three repetitions, with saved raw results,
 an explicit algebraic-only rejection control, and a comparison command.
 
-The repository already has the [corpus audit](../../RESEARCH_TRIMOSKA_BENCHMARKS.md),
-[F4 notes](../../RESEARCH_GROEBNER_F4.md), [Koblitz experiments](../../RESEARCH_KOBLITZ_SCALING_TARGET.md),
+The repository already has the [corpus audit](../notes/ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md),
+[F4 notes](../notes/index-calculus/RESEARCH_GROEBNER_F4.md), [Koblitz experiments](../notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md),
 and [Nagao comparison](../nagao_relations/solver_09/README.md). Use those runners for
 subsequent matched experiments; this directory freezes an independent control and
 an accounting contract. The [scoreboard](../../docs/index-calculus-scoreboard.html#ec-baseline-20260914)

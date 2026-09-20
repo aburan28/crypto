@@ -24,7 +24,7 @@ derived rather than measured.  It comes in two kinds, and a thread
 normally has one of each:
 
 - A **floor**: a lower bound from a counting or generic-group argument.
-  Example from `RESEARCH_RESIDUAL_WALKS.md`: a generic algorithm's
+  Example from `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`: a generic algorithm's
   expected relation yield from `P` residuals is at most `γP²/2n`, so the
   count factor obeys `κ_total ≥ √(2(B+1)/γ)`.  That floor moves only
   with the factor-base size `B` and the automorphism order `γ`, so it
@@ -231,7 +231,7 @@ existing EC2 key-pair name **`meow34`** when launching the instance.
 
 ## Worked example
 
-`RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
+`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
 rule, end to end: §9.6 states the boundary and the target, §9.7 freezes
 the baseline table, §10.6 classifies every lever tried against the
 floor, §11.5 and §11.6 are an engineering ledger with the class of each

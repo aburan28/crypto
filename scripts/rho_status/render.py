@@ -21,13 +21,13 @@ import os
 from datetime import datetime, timezone
 
 # Seven days of snapshots at the publish cadence in ecc2k130-status.yml
-# (96 a day, every 15 minutes). This is a count, so it tracks the cron: at a
+# (480 a day, every 3 minutes). This is a count, so it tracks the cron: at a
 # slower cadence it covers more than a week, at a faster one less.
-HISTORY_LIMIT = 672
+HISTORY_LIMIT = 3360
 
 # Smoothing window for the walk rate. A slot's iteration total only moves when
-# it checkpoints, every 600 s, so a rate taken across a single 15-minute
-# publish interval steps with which slots happened to land inside it. An hour
+# it checkpoints, every 600 s, so a rate taken across a single publish
+# interval steps with which slots happened to land inside it. An hour
 # covers every slot several times over and still reports the fleet that is
 # running now rather than the campaign's average.
 RATE_WINDOW_S = 3600
@@ -130,6 +130,21 @@ def measure_rate(points, window_s=RATE_WINDOW_S, min_span_s=MIN_RATE_SPAN_S,
     }
 
 
+def stamp_published(snapshot, now=None):
+    """Record when the publishing job wrote this document.
+
+    `generated_at` is when the source counted -- the walker's query, or the
+    ingest host's write, which may be up to its --status-every old when the
+    hop is down. Without a second stamp a reader cannot tell a publisher that
+    stopped from a source that did: Pages froze on an 11:25Z snapshot for 17
+    hours on 2026-09-18 and the page had one sentence for both. The dashboard
+    prints both and says which one is behind.
+    """
+    now = now or datetime.now(timezone.utc)
+    snapshot["published_at"] = now.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return snapshot["published_at"]
+
+
 def apply_rate(snapshot, rate):
     """Attach a measured rate to the snapshot, or clear a stale one. True when set."""
     if rate is None:
@@ -201,6 +216,7 @@ def main(argv=None):
     )
     if args.status_out:
         apply_rate(snapshot, rate)
+        stamp_published(snapshot)
         with open(args.status_out, "w", encoding="utf-8") as fh:
             json.dump(snapshot, fh, indent=2, sort_keys=True)
             fh.write("\n")

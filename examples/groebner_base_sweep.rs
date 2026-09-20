@@ -36,7 +36,7 @@
 //! ## Why the choice is narrow, and at ECC2K-130 empty
 //!
 //! An `F_2`-subspace of `F_{2^n}` is Frobenius-stable exactly when it is
-//! `ker g(σ)` for a divisor `g` of `t^n − 1` (`RESEARCH_QUASI_SUBFIELD.md`
+//! `ker g(σ)` for a divisor `g` of `t^n − 1` (`research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md`
 //! §3), so the candidates are the divisors, and their dimensions are the
 //! sums of cyclotomic coset sizes.  At `n = 131` the order of `2` mod
 //! `131` is `130`: `t^131 − 1 = (t+1)·(irreducible of degree 130)`, and

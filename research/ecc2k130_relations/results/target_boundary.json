@@ -7,6 +7,15 @@
   "memory_charged": false,
   "measured_rate_factor": 0.84,
   "decomposition_model": "P = 2^n C(B,n) / r, measured in results/target_decomposition.json",
+  "family_floor": {
+    "K1": 0.265358,
+    "min_unknowns": 2,
+    "min_split_multiplicity": 2,
+    "log2_floor": 65.543,
+    "log2_floor_vs_rho": 4.734,
+    "parity_reachable": false,
+    "statement": "Every configuration in this family costs at least 2^65.54. The rho reference is 2^60.809. Parity sits 2^-4.73 below the floor, so it is not reachable by any choice of support size, relation length, split or table layout -- the constant would have to fall by 26.6x, and it is pinned by the probe cost and the group structure."
+  },
   "best_logarithm_cost": {
     "orbits": 2,
     "support_size": 262,

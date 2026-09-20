@@ -4,7 +4,7 @@ hesse_33_walk_falsifier.py — Exp U
 
 (3,3)-isogeny walk falsifier for j=0 CM curves (secp256k1-type).
 
-Goal: Confirm Block B5 of PAPER_STRUCTURAL_COMPLETENESS.md empirically
+Goal: Confirm Block B5 of research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md empirically
 for the degree-(3,3) case. The main theorem predicts that walking the
 (3,3)-isogeny graph from E×E_t (product of a j=0 CM elliptic curve and
 its twist) never produces a Jacobian with DLP cheaper than O(sqrt(p)).

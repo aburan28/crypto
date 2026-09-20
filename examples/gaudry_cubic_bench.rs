@@ -1,7 +1,7 @@
 //! **Gaudry-style index calculus on `E(F_{p³})` versus rho — measurement.**
 //!
 //! Companion to `crypto_lib::cryptanalysis::gaudry_cubic` and §11 of
-//! `RESEARCH_RESIDUAL_WALKS.md`.  For each prime `p ≡ 1 (mod 3)` it
+//! `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`.  For each prime `p ≡ 1 (mod 3)` it
 //! generates a prime-order curve over `F_{p³}`, the subspace factor
 //! base `{P : x(P) ∈ F_p}`, collects triple decompositions with the
 //! Weil-restricted `S₃` meet-in-the-middle oracle until `d` is
