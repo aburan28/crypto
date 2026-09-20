@@ -103,6 +103,7 @@ pub mod binary_semaev;
 pub mod binary_semaev_s4;
 pub mod bleichenbacher;
 pub mod boolean;
+pub mod bsgs_fast;
 pub mod boomerang;
 pub mod canonical_lift;
 pub mod cga_hnc;
