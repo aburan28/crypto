@@ -1164,6 +1164,37 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="wdsat-ic-unification-20260920">
+    <div class="panel-head">
+      <h2>WDSat as an IC decomposition oracle</h2>
+      <p>Class <span class="chip">engineering</span>. The Semaev / Weil system used by
+        native CDCL is emitted in Trimoska ANF and solved by an external WDSat binary
+        through <code>DecompositionStrategy::Wdsat</code> /
+        <code>ic run --solver wdsat</code>. Same algebraic question as
+        <code>--solver sat</code>; ratio to the free-oracle floor is unchanged.
+        ECC2K-130 sits in the prime-degree family; full-size attack costs are not moved.
+        Note: <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_WDSAT_IC_UNIFICATION.md">RESEARCH_WDSAT_IC_UNIFICATION.md</a>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Planted two-summand agreement on <code>K_1/F_2^7</code> (prime degree),
+        identical Frobenius-invariant factor base, independent group lift.
+        WDSat pin <code>61c6ff3</code> via the frozen baseline builder.</caption>
+      <thead><tr><th scope="col">Variant</th><th scope="col">Planted lift</th>
+        <th scope="col">Agrees with native SAT</th><th scope="col">S / rho / floor</th>
+        <th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><td>Native <code>--solver sat</code></td><td>yes</td><td>—</td>
+          <td>Unmeasured (stage oracle)</td><td>Reference</td></tr>
+        <tr><td><code>--solver wdsat</code></td><td>yes</td><td>yes</td>
+          <td>Unmeasured (floor ratio flat)</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td><code>--solver mq-fes</code> (Gray-code FES; LIP6 MQ inspiration)</td><td>yes</td><td>yes</td>
+          <td>Unmeasured (floor ratio flat; <code>m=2</code> only)</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
   <div class="panel" id="ec-regression-v2">
     <div class="panel-head">
       <h2>Frozen WDSat regression target</h2>

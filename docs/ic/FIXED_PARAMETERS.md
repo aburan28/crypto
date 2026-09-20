@@ -67,6 +67,15 @@ watchdog covering encoding, solving and lifting; timeout is never reported as
 unsatisfiability. SAT requires a Hamming-weight factor-base recipe. It uses Linux
 `fork`. Run without Python `-O`, because the underlying arithmetic uses assertions.
 
+The Semaev / Trimoska WDSat oracle for Frobenius-invariant subspace
+bases lives on the Rust ladder (`ic run --solver wdsat --wdsat-binary
+PATH`), not in this ONB / Hamming-weight fixed workflow. See
+[`RESEARCH_WDSAT_IC_UNIFICATION.md`](../../RESEARCH_WDSAT_IC_UNIFICATION.md).
+ECC2K-130's field is prime-degree (`n = 131`); the unified Semaev path
+applies to that family on toys. Full-size `n = 131` remains bounded by
+the free-oracle floor in
+[`RESEARCH_ECC2K130_DECOMPOSITION.md`](../../RESEARCH_ECC2K130_DECOMPOSITION.md).
+
 ## What is stored
 
 `campaign.sqlite3` is the durable record, with full SQLite transactions and

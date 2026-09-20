@@ -871,9 +871,12 @@ mod f4_counters {
     pub(super) static ROWS: AtomicU64 = AtomicU64::new(0);
     pub(super) static COLS: AtomicU64 = AtomicU64::new(0);
     pub(super) static WORD_OPS: AtomicU64 = AtomicU64::new(0);
-    pub(super) const ALL: [&AtomicU64; 8] = [
-        &CALLS, &OVERSIZE, &BUILD_NS, &REDUCE_NS, &READBACK_NS, &ROWS, &COLS, &WORD_OPS,
-    ];
+
+    pub(super) fn all() -> [&'static AtomicU64; 8] {
+        [
+            &CALLS, &OVERSIZE, &BUILD_NS, &REDUCE_NS, &READBACK_NS, &ROWS, &COLS, &WORD_OPS,
+        ]
+    }
 }
 
 /// The F4 stage profile since the last [`f4_profile_reset`].
@@ -894,7 +897,7 @@ pub fn f4_profile() -> F4Profile {
 /// Clear the F4 stage profile.  Not synchronised against concurrent
 /// solving: reset before the work, read after it.
 pub fn f4_profile_reset() {
-    for counter in f4_counters::ALL {
+    for counter in f4_counters::all() {
         counter.store(0, std::sync::atomic::Ordering::Relaxed);
     }
 }
