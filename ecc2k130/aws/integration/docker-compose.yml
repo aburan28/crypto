@@ -40,13 +40,18 @@ services:
       timeout: 3s
       retries: 30
 
+  # From quay.io, not Docker Hub: `minio/minio` there refuses anonymous pulls
+  # (a token request for it answers 401), which is what failed the first run
+  # of this workflow.  quay is MinIO's own registry and answers 200 for the
+  # same image, linux/amd64 among its platforms.
+  #
   # The only unpinned image here: MinIO publishes dated release tags rather
   # than a stable series, and the S3 surface this uses -- put, head, get,
   # list_objects_v2 with a continuation token -- has been the same for years.
   # `services.sh` waits on its health endpoint rather than on a healthcheck
   # inside the container, because what matters is that it answers from here.
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:latest
     command: server /data --address ":9000"
     environment:
       MINIO_ROOT_USER: ecc2k130
