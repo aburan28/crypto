@@ -1225,5 +1225,107 @@ class DatabaseUrl(unittest.TestCase):
         self.assertIn("rho-dp.example.com", url)
 
 
+class LambdaHandler(unittest.TestCase):
+    """The scheduled-invocation wrapper. It must add no rules of its own."""
+
+    def test_every_flag_it_builds_is_one_dp_ingest_accepts(self):
+        # The point of this test is that it goes through the REAL parser. A
+        # flag renamed in dp_ingest.py has to fail here, in a second, rather
+        # than on the first scheduled invocation after a deploy.
+        import ingest_lambda
+
+        for env in (
+            {},
+            {"RHO_INGEST_INDEX": "1"},
+            {"RHO_INGEST_PREFIX": "dp/slot-00140/"},
+            {"RHO_INGEST_INDEX": "1", "RHO_INGEST_PREFIX": "dp/slot-00002/"},
+        ):
+            argv = ingest_lambda.build_argv(env)
+            with mock.patch.dict(os.environ, {"RHO_BUCKET": "b"}, clear=False):
+                parser = self._parser()
+                try:
+                    args = parser.parse_args(argv)
+                except SystemExit:  # argparse exits on an unknown flag
+                    self.fail("dp_ingest rejects argv %r built from env %r" % (argv, env))
+            self.assertTrue(args.once, "a scheduled pass must be --once")
+
+    def _parser(self):
+        # dp_ingest builds its parser inside main(), so borrow it by running
+        # main() up to parse_args with a sentinel that stops it there.
+        import argparse
+
+        captured = {}
+        real = argparse.ArgumentParser.parse_args
+
+        def capture(self, argv=None, namespace=None):
+            captured["parser"] = self
+            raise _StopParsing()
+
+        argparse.ArgumentParser.parse_args = capture
+        try:
+            dp_ingest.main(["--once"])
+        except _StopParsing:
+            pass
+        except SystemExit:
+            pass
+        finally:
+            argparse.ArgumentParser.parse_args = real
+        self.assertIn("parser", captured, "could not borrow dp_ingest's parser")
+        return captured["parser"]
+
+    def test_index_is_skipped_unless_asked_for(self):
+        import ingest_lambda
+
+        # A daemon creates the found_at index once at startup. A function that
+        # starts every two minutes must not try, except on the first run
+        # against a new store.
+        self.assertIn("--no-index", ingest_lambda.build_argv({}))
+        self.assertNotIn("--no-index", ingest_lambda.build_argv({"RHO_INGEST_INDEX": "1"}))
+        # Only real affirmatives count, so a stray "0" or "false" in the
+        # function's environment does not quietly re-enable it.
+        for falsey in ("0", "false", "no", "", "off"):
+            self.assertIn("--no-index", ingest_lambda.build_argv({"RHO_INGEST_INDEX": falsey}))
+
+    def test_it_restates_no_configuration_dp_ingest_already_reads(self):
+        import ingest_lambda
+
+        # If this wrapper started passing --bucket or --threads it would
+        # become a second place the ingest is configured, which is the drift
+        # controlplane/README.md records as having cost a corrupted run id.
+        argv = ingest_lambda.build_argv({"RHO_BUCKET": "b", "RHO_INGEST_THREADS": "12"})
+        for flag in ("--bucket", "--status-bucket", "--threads",
+                     "--pass-objects", "--metric-namespace", "--interval"):
+            self.assertNotIn(flag, argv, "%s belongs to dp_ingest's env defaults" % flag)
+
+    def test_a_successful_pass_returns_rc_zero(self):
+        import ingest_lambda
+
+        with mock.patch.object(dp_ingest, "main", return_value=0) as main:
+            result = ingest_lambda.handler({}, None)
+        self.assertEqual(result["rc"], 0)
+        self.assertEqual(main.call_args[0][0], ingest_lambda.build_argv())
+
+    def test_a_failed_pass_raises_so_the_errors_metric_sees_it(self):
+        import ingest_lambda
+
+        # Returning quietly on failure is how a scheduled function becomes as
+        # silent as the dead instance it replaces.
+        with mock.patch.object(dp_ingest, "main", return_value=1):
+            with self.assertRaises(RuntimeError) as caught:
+                ingest_lambda.handler({}, None)
+        self.assertIn("rc=1", str(caught.exception))
+
+    def test_an_exception_inside_the_pass_is_not_swallowed(self):
+        import ingest_lambda
+
+        with mock.patch.object(dp_ingest, "main", side_effect=OSError("RDS unreachable")):
+            with self.assertRaises(OSError):
+                ingest_lambda.handler({}, None)
+
+
+class _StopParsing(Exception):
+    pass
+
+
 if __name__ == "__main__":
     unittest.main()

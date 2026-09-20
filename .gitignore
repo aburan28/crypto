@@ -83,3 +83,8 @@ hdl/ecc2k130/aws/cl_ecc2k130/build/checkpoints/
 hdl/ecc2k130/aws/cl_ecc2k130/build/reports/
 hdl/ecc2k130/aws/cl_ecc2k130/build/src_post_encryption/
 hdl/ecc2k130/aws/cl_ecc2k130/build/constraints/generated_cl_clocks_aws.xdc
+
+# Build artifacts from ecc2k130/aws/ingest_lambda.sh package (vendored wheels
+# plus a 5 MB zip; rebuilt on demand and never a source of truth).
+ecc2k130/aws/build/
+ecc2k130/aws/ingest_lambda.zip

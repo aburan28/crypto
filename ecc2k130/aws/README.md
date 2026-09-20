@@ -518,6 +518,43 @@ publishing `status.json` to the status bucket and its journal to
 Use this when EC2 is available and you prefer a private RDS endpoint with no
 public IP allowlisting.
 
+**Scheduled Lambda (no host).** `./ingest_lambda.sh up` deploys the same
+program as a Lambda on a two-minute EventBridge schedule, running one
+`--once` pass per invocation. The ingest loop never needed a resident
+process: the three properties below — idempotent, no state outside the
+database, bounded passes — are exactly what makes a scheduled invocation
+equivalent to a daemon, and they were already true.
+
+```bash
+./ingest_lambda.sh preflight   # FIRST: can the VPC reach S3/Secrets/CloudWatch?
+./ingest_lambda.sh package     # vendor psycopg, build a 5 MB zip
+./ingest_lambda.sh up          # function + role + schedule, idempotent
+./ingest_lambda.sh status      # schedule, errors, feed age, backlog
+./ingest_lambda.sh down        # disable the schedule
+```
+
+`preflight` is not optional and is the one step that can reject the whole
+approach: a function in a private subnet reaches S3, Secrets Manager and
+CloudWatch only through a NAT gateway or VPC endpoints, where the EC2 host
+got there by living in the VPC with an instance profile. It reports what is
+missing and what to add; setting `DATABASE_URL` removes the Secrets Manager
+leg entirely.
+
+Cut over with both running — concurrent ingesters are safe, so overlapping
+proves the new path before the old one goes away — then
+`./ingest_host.sh retire <id>`. Rollback is `./ingest_lambda.sh down &&
+./ingest_host.sh up`, with no code revert, because neither `ingest.sh` nor
+`ingest_host.sh` changed.
+
+Reserved concurrency is 1 and the schedule retries 0 times. A trigger that
+arrives mid-pass is therefore dropped rather than queued, which is harmless —
+the next tick resumes from `dp_ingest_progress` — so **`Throttles` is expected
+while a backlog drains and must not be alarmed on.** Alarm on `Errors`, and
+above all on the age of the published `status.json`
+(`scripts/rho_status/check_feed_age.py`): removing the host removes "the box
+died", but a scheduled function failing on every invocation is exactly as
+quiet unless something is watching the number itself.
+
 **The store is a derived view.** `dp/` is the corpus, `merge.py` is what
 searches it for collisions, and `distinguished_points` can be dropped and
 rebuilt from S3 without losing anything. That is what makes the deployment
