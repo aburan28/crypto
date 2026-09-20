@@ -57,7 +57,7 @@
 //! ## Worked example
 //!
 //! ```
-//! use crypto::cryptanalysis::sat::{Solver, SolveResult};
+//! use crypto_lib::cryptanalysis::sat::{Solver, SolveResult};
 //!
 //! let mut s = Solver::new(3);
 //! // (x1 ∨ x2) ∧ (¬x1 ∨ x3) ∧ (¬x2 ∨ ¬x3)
