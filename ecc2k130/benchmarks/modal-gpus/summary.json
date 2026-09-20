@@ -1,0 +1,303 @@
+{
+  "kind": "modal GPU packed-walk survey",
+  "unit": "B complete scalar updates / s",
+  "class": "engineering",
+  "geometry": {
+    "batch": 16,
+    "threads": 256,
+    "minBlocks": 2,
+    "steps": 1024,
+    "launches": 32,
+    "repeats": 3,
+    "workers": "automatic",
+    "cudaImageVersion": "13.3.1",
+    "packedClmadDefault": 1,
+    "topClmad": 0
+  },
+  "reference": {
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "modal": "RTX-PRO-6000",
+    "medianB": 15.115792,
+    "sms": 188,
+    "workers": 385024,
+    "receipt": "ecc2k130/benchmarks/top-clmad/summary.json",
+    "collectingB": 14.1,
+    "pricePerSecond": 0.000842,
+    "priceSource": "https://modal.com/pricing (2026-09-19)"
+  },
+  "skipAliases": {
+    "A100": "Modal may upgrade A100 to A100-80GB; measure A100-40GB and A100-80GB.",
+    "H100": "Modal may upgrade H100 to H200; measure H100! to pin Hopper 80 GB.",
+    "B200+": "Modal may run B200+ on B300; measure B200 and B300."
+  },
+  "rows": [
+    {
+      "modal": "RTX-PRO-6000",
+      "label": "RTX PRO 6000 shipping, 385k workers",
+      "medianB": 15.115792,
+      "workers": 385024,
+      "sms": 188,
+      "ratioToPrior": 1.0,
+      "ratioTo6000": 1.0,
+      "trillionItPerDollar": 17.95224703087886,
+      "class": "reference",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/top-clmad/summary.json"
+    },
+    {
+      "modal": "T4",
+      "label": "T4 CLMAD=0",
+      "gpu": "Tesla T4",
+      "medianB": 0.5412899999999999,
+      "ratesM": [
+        550.092,
+        541.29,
+        537.082
+      ],
+      "sms": 40,
+      "automaticThreads": 20480,
+      "registers": 128,
+      "ratioToPrior": 0.16830497535292888,
+      "ratioTo6000": 0.03580956922402742,
+      "trillionItPerDollar": 3.300548780487804,
+      "perSmM": 13.53225,
+      "modalApp": "ap-HnfK9biXIa79CvQA58Q4Mt",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/T4.json"
+    },
+    {
+      "modal": "L4",
+      "label": "L4 CLMAD=1",
+      "gpu": "NVIDIA L4",
+      "medianB": 2.5609699999999997,
+      "ratesM": [
+        2578.22,
+        2560.97,
+        2545.809
+      ],
+      "sms": 58,
+      "automaticThreads": 29696,
+      "registers": 94,
+      "ratioToPrior": 0.5491657448325428,
+      "ratioTo6000": 0.16942347446961428,
+      "trillionItPerDollar": 11.535900900900899,
+      "perSmM": 44.15465517241379,
+      "modalApp": "ap-j6vKWdJmiTrGYl0gu9vPMn",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/L4.json"
+    },
+    {
+      "modal": "A10",
+      "label": "A10 CLMAD=1",
+      "gpu": "NVIDIA A10",
+      "medianB": 2.423276,
+      "ratesM": [
+        2434.609,
+        2423.276,
+        2404.652
+      ],
+      "sms": 72,
+      "automaticThreads": 36864,
+      "registers": 94,
+      "ratioToPrior": 0.4185981712958797,
+      "ratioTo6000": 0.16031419326225183,
+      "trillionItPerDollar": 7.919202614379085,
+      "perSmM": 33.65661111111111,
+      "modalApp": "ap-yUgWVfFYPA86TldZbX85Wj",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/A10.json"
+    },
+    {
+      "modal": "L40S",
+      "label": "L40S CLMAD=1",
+      "gpu": "NVIDIA L40S",
+      "medianB": 8.696036,
+      "ratesM": [
+        8777.159,
+        8696.036,
+        8631.708
+      ],
+      "sms": 142,
+      "automaticThreads": 72704,
+      "registers": 94,
+      "ratioToPrior": 0.7616578573242389,
+      "ratioTo6000": 0.5752947645746911,
+      "trillionItPerDollar": 16.044346863468636,
+      "perSmM": 61.23969014084507,
+      "modalApp": "ap-IXpS5030y8Dt96m6Uxg84Y",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/L40S.json"
+    },
+    {
+      "modal": "A100-40GB",
+      "label": "A100-40GB CLMAD=1",
+      "gpu": "NVIDIA A100-SXM4-40GB",
+      "medianB": 4.617559,
+      "ratesM": [
+        4586.574,
+        4623.558,
+        4617.559
+      ],
+      "sms": 108,
+      "automaticThreads": 55296,
+      "registers": 94,
+      "ratioToPrior": 0.5317599682553236,
+      "ratioTo6000": 0.3054791306998667,
+      "trillionItPerDollar": 7.920341337907376,
+      "perSmM": 42.755175925925926,
+      "modalApp": "ap-FwDmAoBYdBXL5bJ696HG7Q",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/A100-40GB.json"
+    },
+    {
+      "modal": "A100-80GB",
+      "label": "A100-80GB CLMAD=1",
+      "gpu": "NVIDIA A100-SXM4-80GB",
+      "medianB": 4.6317070000000005,
+      "ratesM": [
+        4630.832,
+        4640.396,
+        4631.707
+      ],
+      "sms": 108,
+      "automaticThreads": 55296,
+      "registers": 94,
+      "ratioToPrior": 0.5333892576766123,
+      "ratioTo6000": 0.3064151054737985,
+      "trillionItPerDollar": 6.6739293948126805,
+      "perSmM": 42.886175925925926,
+      "modalApp": "ap-eBJmY6u2a7FcUWiDoZI4ay",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/A100-80GB.json"
+    },
+    {
+      "modal": "RTX-PRO-6000",
+      "label": "RTX-PRO-6000 CLMAD=1",
+      "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "medianB": 14.470284,
+      "ratesM": [
+        14467.907,
+        14470.64,
+        14470.284
+      ],
+      "sms": 188,
+      "automaticThreads": 96256,
+      "registers": 104,
+      "ratioToPrior": 0.957295787081484,
+      "ratioTo6000": 0.957295787081484,
+      "trillionItPerDollar": 17.185610451306413,
+      "perSmM": 76.96959574468084,
+      "modalApp": "ap-H91F5mhJhxcD4q0UFno4kU",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/RTX-PRO-6000.json"
+    },
+    {
+      "modal": "H100!",
+      "label": "H100! CLMAD=1",
+      "gpu": "NVIDIA H100 80GB HBM3",
+      "medianB": 7.539836,
+      "ratesM": [
+        7537.462,
+        7539.836,
+        7541.653
+      ],
+      "sms": 132,
+      "automaticThreads": 67584,
+      "registers": 94,
+      "ratioToPrior": 0.7104195600885685,
+      "ratioTo6000": 0.4988052230409098,
+      "trillionItPerDollar": 6.87314129443938,
+      "perSmM": 57.1199696969697,
+      "modalApp": "ap-5XfegYVjcNjFjf8rVbeSvn",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/H100-pin.json"
+    },
+    {
+      "modal": "H200",
+      "label": "H200 CLMAD=1",
+      "gpu": "NVIDIA H200",
+      "medianB": 7.6315290000000005,
+      "ratesM": [
+        7631.529,
+        7621.905,
+        7642.799
+      ],
+      "sms": 132,
+      "automaticThreads": 67584,
+      "registers": 94,
+      "ratioToPrior": 0.7190590717070177,
+      "ratioTo6000": 0.5048712631134379,
+      "trillionItPerDollar": 6.051965900079303,
+      "perSmM": 57.81461363636364,
+      "modalApp": "ap-9dnaI248uh4wJcBUaR8swa",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/H200.json"
+    },
+    {
+      "modal": "B200",
+      "label": "B200 CLMAD=1",
+      "gpu": "NVIDIA B200",
+      "medianB": 8.840089,
+      "ratesM": [
+        8840.089,
+        8846.067,
+        8839.115
+      ],
+      "sms": 148,
+      "automaticThreads": 75776,
+      "registers": 102,
+      "ratioToPrior": 0.7428854699272949,
+      "ratioTo6000": 0.5848247316448917,
+      "trillionItPerDollar": 5.092217165898618,
+      "perSmM": 59.73033108108108,
+      "modalApp": "ap-zSAroEZ9bIxx0mpguVpw4d",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/B200.json"
+    },
+    {
+      "modal": "B300",
+      "label": "B300 CLMAD=1",
+      "gpu": "NVIDIA B300 SXM6 AC",
+      "medianB": 7.574599,
+      "ratesM": [
+        7571.369,
+        7574.599,
+        7575.82
+      ],
+      "sms": 148,
+      "automaticThreads": 75776,
+      "registers": 102,
+      "ratioToPrior": 0.6365387879721367,
+      "ratioTo6000": 0.5011050032972139,
+      "trillionItPerDollar": 3.841074543610548,
+      "perSmM": 51.179722972972975,
+      "modalApp": "ap-qw3FaHKz9gAZnBsDrCPKBO",
+      "class": "engineering",
+      "valid": true,
+      "receipt": "ecc2k130/benchmarks/modal-gpus/B300.json"
+    }
+  ],
+  "receipts": [
+    "ecc2k130/benchmarks/modal-gpus/T4.json",
+    "ecc2k130/benchmarks/modal-gpus/L4.json",
+    "ecc2k130/benchmarks/modal-gpus/A10.json",
+    "ecc2k130/benchmarks/modal-gpus/L40S.json",
+    "ecc2k130/benchmarks/modal-gpus/A100-40GB.json",
+    "ecc2k130/benchmarks/modal-gpus/A100-80GB.json",
+    "ecc2k130/benchmarks/modal-gpus/RTX-PRO-6000.json",
+    "ecc2k130/benchmarks/modal-gpus/H100-pin.json",
+    "ecc2k130/benchmarks/modal-gpus/H200.json",
+    "ecc2k130/benchmarks/modal-gpus/B200.json",
+    "ecc2k130/benchmarks/modal-gpus/B300.json"
+  ]
+}

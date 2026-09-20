@@ -18,6 +18,7 @@ import hashlib
 import json
 import os
 import re
+import struct
 import subprocess
 import sys
 import tempfile
@@ -25,6 +26,8 @@ import time
 
 RECORD_BYTES = 32
 MODAL_SLOT_BASE = 90000
+CKPT_MAGIC = b"ECC2K130"
+CKPT_HEADER_BYTES = 40
 ORBIT_KEY_RE = re.compile(
     r"^dp/(slot-\d+)/([0-9a-f]{32})-(\d+)-([0-9a-f]{64})\.bin$"
 )
@@ -93,6 +96,57 @@ def remote_checkpoint(curve, run_id):
     return "ckpt/curve%d-run%d.ck" % (curve, run_id)
 
 
+def remote_checkpoint_header(curve, run_id):
+    """40-byte sidecar. Ingest only reads the header; the 370MB walk state stays on the volume."""
+    return "ckpt/curve%d-run%d.hdr" % (curve, run_id)
+
+
+def pack_checkpoint_header(version, m, threads, batch, lanes, run_id, iter_base):
+    return struct.pack("<8s6IQ", CKPT_MAGIC, int(version), int(m), int(threads),
+                       int(batch), int(lanes), int(run_id), int(iter_base))
+
+
+def unpack_checkpoint_header(blob):
+    if len(blob) < CKPT_HEADER_BYTES or blob[:8] != CKPT_MAGIC:
+        return None
+    version, m, threads, batch, lanes, run_id = struct.unpack_from("<6I", blob, 8)
+    iter_base, = struct.unpack_from("<Q", blob, 32)
+    return dict(version=version, m=m, threads=threads, batch=batch,
+                lanes=lanes, runId=run_id, iterBase=iter_base)
+
+
+def read_checkpoint_header(path):
+    try:
+        with open(path, "rb") as fh:
+            return unpack_checkpoint_header(fh.read(CKPT_HEADER_BYTES))
+    except OSError:
+        return None
+
+
+def write_checkpoint_header_file(path, header):
+    """Atomic 40-byte file. Same layout as the start of a real checkpoint."""
+    if isinstance(header, dict):
+        blob = pack_checkpoint_header(
+            header["version"], header["m"], header["threads"], header["batch"],
+            header["lanes"], header["runId"], header["iterBase"])
+    else:
+        blob = header
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as fh:
+        fh.write(blob)
+        fh.flush()
+        os.fsync(fh.fileno())
+    os.replace(tmp, path)
+    return blob
+
+
+def iter_base_from_progress(resume_iter_base, pass_iters, walks):
+    """Client progress counts (iterBase - start) * walks; invert that."""
+    if int(walks) <= 0:
+        return int(resume_iter_base)
+    return int(resume_iter_base) + int(pass_iters) // int(walks)
+
+
 def checkpoint_key(slot, ckpt_path):
     return "ckpt/slot-%05d/%s.ck" % (slot, sha256_file(ckpt_path))
 
@@ -143,20 +197,43 @@ def modal_volume_get(volume, remote, local):
 
 
 def sync_checkpoint(s3, bucket, volume, curve, run_id, state_dir, dry_run=False):
-    """Upload the Modal checkpoint when its content hash changes."""
+    """Upload the Modal checkpoint when its content hash changes.
+
+    Prefer the 40-byte `.hdr` sidecar: ingest's checkpointWork only reads the
+    first 40 bytes, and hashing/uploading the 370MB walk state every sync pass
+    is how a 60s cadence still left the page idle. If the sidecar is missing,
+    fall back to the full file at most once per FULL_CHECKPOINT_RETRY_S.
+    """
+    FULL_CHECKPOINT_RETRY_S = 300
     state_file = state_path(curve, run_id, state_dir)
     state = load_state(state_file)
-    remote = remote_checkpoint(curve, run_id)
+    remote_ck = remote_checkpoint(curve, run_id)
+    remote_hdr = remote_checkpoint_header(curve, run_id)
     slot = slot_for_run(run_id)
 
     with tempfile.TemporaryDirectory(prefix="ecc-modal-ckpt-") as tmp:
-        local = os.path.join(tmp, os.path.basename(remote))
-        if not modal_volume_get(volume, remote, local):
-            log("no checkpoint yet at %s on volume %s" % (remote, volume))
-            return dict(checkpoint_uploaded=False, checkpoint_key=None)
+        local_hdr = os.path.join(tmp, os.path.basename(remote_hdr))
+        local_ck = os.path.join(tmp, os.path.basename(remote_ck))
+        if modal_volume_get(volume, remote_hdr, local_hdr):
+            local, remote = local_hdr, remote_hdr
+        else:
+            last_full = float(state.get("full_checkpoint_check") or 0)
+            if state.get("checkpoint_sha256") and (time.time() - last_full) < FULL_CHECKPOINT_RETRY_S:
+                log("no status header yet at %s; not re-fetching the 370MB checkpoint"
+                    % remote_hdr)
+                return dict(checkpoint_uploaded=False, checkpoint_key=state.get("checkpoint_key"))
+            if not modal_volume_get(volume, remote_ck, local_ck):
+                log("no checkpoint yet at %s or %s on volume %s"
+                    % (remote_hdr, remote_ck, volume))
+                return dict(checkpoint_uploaded=False, checkpoint_key=None)
+            local, remote = local_ck, remote_ck
+            state["full_checkpoint_check"] = time.time()
 
         digest = sha256_file(local)
         if state.get("checkpoint_sha256") == digest:
+            log("checkpoint %s unchanged (%d bytes)" % (remote, os.path.getsize(local)))
+            if remote == remote_ck and not dry_run:
+                save_state(state_file, state)
             return dict(checkpoint_uploaded=False, checkpoint_key=state.get("checkpoint_key"))
 
         key = checkpoint_key(slot, local)
@@ -167,11 +244,13 @@ def sync_checkpoint(s3, bucket, volume, curve, run_id, state_dir, dry_run=False)
                 import boto3
                 s3 = boto3.client("s3")
             s3.upload_file(local, bucket, key)
-            log("uploaded checkpoint to s3://%s/%s" % (bucket, key))
+            log("uploaded checkpoint (%d bytes) to s3://%s/%s"
+                % (os.path.getsize(local), bucket, key))
         state.update(checkpoint_sha256=digest,
                      checkpoint_key=key,
                      checkpoint_sync=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                     checkpoint_slot=slot)
+                     checkpoint_slot=slot,
+                     checkpoint_remote=remote)
         if not dry_run:
             save_state(state_file, state)
         return dict(checkpoint_uploaded=True, checkpoint_key=key)
