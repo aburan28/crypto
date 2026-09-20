@@ -1,6 +1,6 @@
 {
   "budget_seconds": 10.0,
-  "generated": "2026-09-20T12:03:23Z",
+  "generated": "2026-09-20T12:30:29Z",
   "host": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
   "note": "equations only; WDSat ANF mode takes no OR-clauses, so the domain constraints are withheld from both arms",
   "python": "3.11.15",
@@ -18,8 +18,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 2.5692,
+        "seconds": 2.5827,
         "witness_verified": true
       },
       "formulation": "incidence",
@@ -39,7 +40,7 @@
         "equations": 4856,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0037,
+        "seconds": 0.0039,
         "vars": 4874
       },
       "witnesses": [
@@ -70,8 +71,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 1.5067,
+        "seconds": 1.5157,
         "witness_verified": true
       },
       "formulation": "incidence",
@@ -91,7 +93,7 @@
         "equations": 4874,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0036,
+        "seconds": 0.0035,
         "vars": 4892
       },
       "witnesses": [
@@ -122,8 +124,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.3982,
+        "seconds": 0.3967,
         "witness_verified": true
       },
       "formulation": "incidence",
@@ -135,7 +138,7 @@
         "equations": 4857,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0043,
+        "seconds": 0.0035,
         "vars": 4875
       },
       "wdsat_xg": {
@@ -143,7 +146,7 @@
         "equations": 4857,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0038,
+        "seconds": 0.0037,
         "vars": 4875
       },
       "witnesses": [
@@ -174,8 +177,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.366,
+        "seconds": 0.4117,
         "witness_verified": true
       },
       "formulation": "incidence",
@@ -195,7 +199,7 @@
         "equations": 4868,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0038,
+        "seconds": 0.0036,
         "vars": 4886
       },
       "witnesses": [
@@ -226,8 +230,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 2.0202,
+        "seconds": 2.0534,
         "witness_verified": true
       },
       "formulation": "incidence",
@@ -239,7 +244,7 @@
         "equations": 4878,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0036,
+        "seconds": 0.0035,
         "vars": 4896
       },
       "wdsat_xg": {
@@ -278,8 +283,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.5861,
+        "seconds": 0.6178,
         "witness_verified": true
       },
       "formulation": "incidence",
@@ -291,7 +297,7 @@
         "equations": 4861,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0036,
+        "seconds": 0.0034,
         "vars": 4879
       },
       "wdsat_xg": {
@@ -330,8 +336,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "timeout",
         "sat": null,
-        "seconds": 4.8643
+        "seconds": 4.9647
       },
       "formulation": "incidence",
       "free_vars": 162,
@@ -342,7 +349,7 @@
         "equations": 4864,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0035,
+        "seconds": 0.0036,
         "vars": 4882
       },
       "wdsat_xg": {
@@ -350,7 +357,7 @@
         "equations": 4864,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0037,
+        "seconds": 0.0036,
         "vars": 4882
       },
       "witnesses": [
@@ -381,6 +388,7 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
         "seconds": 1.147,
         "witness_verified": true
@@ -402,7 +410,7 @@
         "equations": 4851,
         "outcome": "error:rc=-11",
         "sat": null,
-        "seconds": 0.0036,
+        "seconds": 0.0035,
         "vars": 4869
       },
       "witnesses": [
@@ -433,8 +441,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.1949,
+        "seconds": 0.1896,
         "witness_verified": true
       },
       "formulation": "norm",
@@ -446,7 +455,7 @@
         "equations": 3928,
         "outcome": "sat",
         "sat": true,
-        "seconds": 0.7316,
+        "seconds": 1.4867,
         "vars": 3937,
         "witness_verified": true
       },
@@ -455,7 +464,7 @@
         "equations": 3928,
         "outcome": "sat",
         "sat": true,
-        "seconds": 3.5145,
+        "seconds": 4.2085,
         "vars": 3937,
         "witness_verified": true
       },
@@ -487,8 +496,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.7479,
+        "seconds": 0.7302,
         "witness_verified": true
       },
       "formulation": "norm",
@@ -500,7 +510,7 @@
         "equations": 3949,
         "outcome": "sat",
         "sat": true,
-        "seconds": 1.8088,
+        "seconds": 0.6474,
         "vars": 3958,
         "witness_verified": true
       },
@@ -509,7 +519,7 @@
         "equations": 3949,
         "outcome": "sat",
         "sat": true,
-        "seconds": 1.8149,
+        "seconds": 2.3991,
         "vars": 3958,
         "witness_verified": true
       },
@@ -541,8 +551,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.2338,
+        "seconds": 0.2341,
         "witness_verified": true
       },
       "formulation": "norm",
@@ -554,7 +565,7 @@
         "equations": 3936,
         "outcome": "sat",
         "sat": true,
-        "seconds": 1.0914,
+        "seconds": 1.1339,
         "vars": 3945,
         "witness_verified": true
       },
@@ -563,7 +574,7 @@
         "equations": 3936,
         "outcome": "sat",
         "sat": true,
-        "seconds": 3.401,
+        "seconds": 2.0023,
         "vars": 3945,
         "witness_verified": true
       },
@@ -595,8 +606,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.2873,
+        "seconds": 0.2882,
         "witness_verified": true
       },
       "formulation": "norm",
@@ -608,7 +620,7 @@
         "equations": 3961,
         "outcome": "sat",
         "sat": true,
-        "seconds": 0.8091,
+        "seconds": 0.8729,
         "vars": 3970,
         "witness_verified": true
       },
@@ -617,7 +629,7 @@
         "equations": 3961,
         "outcome": "sat",
         "sat": true,
-        "seconds": 2.0394,
+        "seconds": 1.9551,
         "vars": 3970,
         "witness_verified": true
       },
@@ -649,8 +661,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.0894,
+        "seconds": 0.0911,
         "witness_verified": true
       },
       "formulation": "norm",
@@ -662,7 +675,7 @@
         "equations": 3978,
         "outcome": "sat",
         "sat": true,
-        "seconds": 0.6784,
+        "seconds": 0.7364,
         "vars": 3987,
         "witness_verified": true
       },
@@ -671,7 +684,7 @@
         "equations": 3978,
         "outcome": "sat",
         "sat": true,
-        "seconds": 2.0405,
+        "seconds": 1.6437,
         "vars": 3987,
         "witness_verified": true
       },
@@ -703,8 +716,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.4755,
+        "seconds": 0.469,
         "witness_verified": true
       },
       "formulation": "norm",
@@ -716,7 +730,7 @@
         "equations": 3944,
         "outcome": "sat",
         "sat": true,
-        "seconds": 0.5897,
+        "seconds": 0.5971,
         "vars": 3953,
         "witness_verified": true
       },
@@ -725,7 +739,7 @@
         "equations": 3944,
         "outcome": "sat",
         "sat": true,
-        "seconds": 1.9908,
+        "seconds": 2.0816,
         "vars": 3953,
         "witness_verified": true
       },
@@ -757,8 +771,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 1.1152,
+        "seconds": 1.1569,
         "witness_verified": true
       },
       "formulation": "norm",
@@ -770,7 +785,7 @@
         "equations": 3947,
         "outcome": "sat",
         "sat": true,
-        "seconds": 0.8201,
+        "seconds": 0.8372,
         "vars": 3956,
         "witness_verified": true
       },
@@ -779,7 +794,7 @@
         "equations": 3947,
         "outcome": "sat",
         "sat": true,
-        "seconds": 1.9017,
+        "seconds": 1.6594,
         "vars": 3956,
         "witness_verified": true
       },
@@ -811,8 +826,9 @@
       },
       "cryptominisat": {
         "conflicts": null,
+        "outcome": "sat",
         "sat": true,
-        "seconds": 0.3686,
+        "seconds": 0.4058,
         "witness_verified": true
       },
       "formulation": "norm",
@@ -824,7 +840,7 @@
         "equations": 3918,
         "outcome": "sat",
         "sat": true,
-        "seconds": 1.5856,
+        "seconds": 1.6398,
         "vars": 3927,
         "witness_verified": true
       },
@@ -833,7 +849,7 @@
         "equations": 3918,
         "outcome": "sat",
         "sat": true,
-        "seconds": 2.9923,
+        "seconds": 2.0716,
         "vars": 3927,
         "witness_verified": true
       },

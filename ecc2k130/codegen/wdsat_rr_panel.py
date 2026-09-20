@@ -269,6 +269,9 @@ def main():
             cms = runCryptoMiniSat(prog, roots, assign, f, args.budget)
             row['cryptominisat'] = {
                 'sat': cms['sat'],
+                'outcome': ('sat' if cms['sat'] is True
+                            else 'unsat' if cms['sat'] is False
+                            else 'timeout'),
                 'conflicts': cms['conflicts'],
                 'seconds': round(cms['seconds'], 4),
             }
@@ -315,11 +318,17 @@ def report(row):
         e = row.get(name)
         if e is None:
             return '%-14s   —' % name
-        state = e.get('outcome') or ('SAT' if e['sat'] else 'UNSAT')
+        # `sat` is a tri-state and the missing case is the important one:
+        # CryptoMiniSat's solve_limited returns None when the conflict or
+        # time budget expires, which is neither a model nor a refutation.
+        # Deriving the label with `if e['sat'] else 'UNSAT'` printed those
+        # non-decisions as disproofs.
         if e['sat'] is True:
             state = 'SAT'
         elif e['sat'] is False:
             state = 'UNSAT'
+        else:
+            state = e.get('outcome') or 'undecided'
         wit = e.get('witness_verified')
         mark = '' if wit is None else (' witness ok' if wit else ' WITNESS BAD')
         return '%-14s %-8s conflicts %-8s %6.2fs%s' % (

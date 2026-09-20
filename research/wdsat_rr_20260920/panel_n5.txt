@@ -3,7 +3,7 @@ n=5 incidence target 0
    wdsat_plain    SAT      conflicts 51425      0.25s witness ok
    cryptominisat  SAT      conflicts None       0.05s witness ok
 n=5 incidence target 1
-   wdsat_xg       SAT      conflicts 19         0.09s witness ok
+   wdsat_xg       SAT      conflicts 19         0.10s witness ok
    wdsat_plain    SAT      conflicts 1201       0.09s witness ok
    cryptominisat  SAT      conflicts None       0.05s witness ok
 n=5 incidence target 2
@@ -11,8 +11,8 @@ n=5 incidence target 2
    wdsat_plain    SAT      conflicts 41137      0.23s witness ok
    cryptominisat  SAT      conflicts None       0.06s witness ok
 n=5 incidence target 3
-   wdsat_xg       SAT      conflicts 37         0.10s witness ok
-   wdsat_plain    SAT      conflicts 34159      0.19s witness ok
+   wdsat_xg       SAT      conflicts 37         0.11s witness ok
+   wdsat_plain    SAT      conflicts 34159      0.20s witness ok
    cryptominisat  SAT      conflicts None       0.04s witness ok
 n=5 norm target 0
    wdsat_xg       SAT      conflicts 20         0.07s witness ok
@@ -27,7 +27,7 @@ n=5 norm target 2
    wdsat_plain    SAT      conflicts 485        0.06s witness ok
    cryptominisat  SAT      conflicts None       0.03s witness ok
 n=5 norm target 3
-   wdsat_xg       SAT      conflicts 18         0.06s witness ok
+   wdsat_xg       SAT      conflicts 18         0.07s witness ok
    wdsat_plain    SAT      conflicts 491        0.06s witness ok
    cryptominisat  SAT      conflicts None       0.03s witness ok
 

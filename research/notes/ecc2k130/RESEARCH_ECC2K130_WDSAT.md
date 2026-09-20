@@ -201,7 +201,23 @@ being models with `p_i = x_R` that the ANF no longer forbids. Those are
 counted as bad witnesses rather than quietly dropped. The full witness set
 restores 7 of 7.
 
-### 4.5 Independently corroborated on the parity convention
+### 4.5 A third bug, found in review
+
+`Cursor Bugbot` caught one the witness gate could not: the panel's
+*display* derived its label as `'SAT' if sat else 'UNSAT'`, and
+CryptoMiniSat's `solve_limited` returns `None` when its budget expires.
+So a non-decision printed as a refutation — on exactly the one instance
+that matters, incidence target 6 at `n = 9`, where the frozen artifact
+claimed `UNSAT` for a run that had proved nothing.
+
+The counts were never wrong: `tally` tests `sat is not None` and has
+always reported CryptoMiniSat at 7 of 8 on incidence, which is what §4's
+table says. The defect was confined to the per-row line, and the frozen
+artifacts have been regenerated. A tri-state whose third case is "we do
+not know" is worth writing out rather than leaning on truthiness, which
+is what the fix does.
+
+### 4.6 Independently corroborated on the parity convention
 
 While this round was being built, `main` landed
 `src/cryptanalysis/wdsat_oracle.rs`, a Rust WDSat oracle for the **Semaev /
