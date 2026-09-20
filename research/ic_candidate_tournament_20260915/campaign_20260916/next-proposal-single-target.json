@@ -1,11 +1,11 @@
 {
   "candidates": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/next-candidates-single-target.json",
-  "baseline_source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017/source_candidates/orbits/source",
+  "baseline_source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0018b/source",
   "target_count": 1,
   "require_native_progress": true,
   "panel": {
     "cells": "13a0,17a1,19a0,23a0,23a1,31a0",
     "holdout_cells": "19a1,29a1"
   },
-  "next_step": "Use this source (it carries .cargo/config.toml), preserve target count, gates and the eight-cell panel, and choose a new seed. The certificate format is now orbit representatives (oracle.py accepts both). The open cell is n23a1, which loses on the collection -- about twelve probes at ~100,000 instructions each on a two- or three-row pair table -- and no format change reaches it; round 0018 is about that collection."
+  "next_step": "Use this source (it carries .cargo/config.toml), preserve target count, gates and the eight-cell panel, and choose a new seed. oracle.py now accepts two certificate formats and two column conventions; a report declares which it uses and may not carry both. Round 0018 measured the pair-table row rule at every row count and found the shipped rule already optimal at seven of eight cells, so that is closed. What round 0018 leaves open is the native instrument: its own A/A control cells, where an arm provably does nothing, are the place to read what the native gate can and cannot resolve before spending another round on a sub-5% native effect."
 }

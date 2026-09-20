@@ -1,1549 +1,1908 @@
 {
-  "panel": "single-target (one public target per cold job)",
-  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008",
-  "objective": "rho",
-  "status": "retained",
-  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/source",
-  "worker": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/worker",
-  "lineage": "round-0006 tiny (parity) -> round-0007 tiny2 (strict win) -> round-0008 tiny2 + per-target descent certificate (re-measured under the merged checker)",
-  "patches": [
-    "campaign_20260916/round6-tiny.patch",
-    "campaign_20260916/round7-tiny2.patch",
-    "campaign_20260916/round8-tiny2_cert.patch",
-    "campaign_20260916/round9-fastcurve.patch (shared-phase baseline, both arms)"
+ "beats_rho_instructions_point": true,
+ "beats_rho_strict": true,
+ "beats_rho_strict_definition": "Winner/rho upper paired 95% limits and every cell ratio < 1 in both instructions and native process wall, on confirmation and replay. beats_rho alone is the confirmation point estimate of rho/winner exceeding one.",
+ "certified_descents_per_job": 1,
+ "config": {
+  "batch_trials": 1,
+  "linear_algebra": "sparse",
+  "max_trials": 4096,
+  "solver": "pair_table",
+  "summands": 3
+ },
+ "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/decision.json",
+ "lineage": "round-0006 tiny (parity) -> round-0007 tiny2 (strict win) -> round-0008 tiny2 + per-target descent certificate (re-measured under the merged checker)",
+ "objective": "rho",
+ "panel": "single-target (one public target per cold job)",
+ "patches": [
+  "campaign_20260916/round6-tiny.patch",
+  "campaign_20260916/round7-tiny2.patch",
+  "campaign_20260916/round8-tiny2_cert.patch",
+  "campaign_20260916/round9-fastcurve.patch (shared-phase baseline, both arms)"
+ ],
+ "rho_parity": true,
+ "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008",
+ "round_0007_winner_over_rho_confirmation": {
+  "candidate_over_baseline": 0.7375680581311627,
+  "ci95": [
+   0.7065693377992373,
+   0.7643545073767521
   ],
-  "config": {
-    "batch_trials": 1,
-    "linear_algebra": "sparse",
-    "max_trials": 4096,
-    "solver": "pair_table",
-    "summands": 3
+  "native_wall_candidate_over_baseline": 0.9460598053948923,
+  "native_wall_ci95": [
+   0.9292926395602298,
+   0.9639483494225052
+  ],
+  "native_wall_per_cell": {
+   "n13a0": 0.9774927352044602,
+   "n17a1": 0.9316817195958474,
+   "n19a0": 0.9358348268649307,
+   "n19a1": 0.9391988935236824,
+   "n23a0": 0.946793065046991
   },
-  "target_count": 1,
-  "source_manifest_sha256": "179ca7b82433aa4e334e9f37b1d63cd60b8e02174ee70c3c9bbcc0f4aa7e1229",
-  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/decision.json",
-  "certified_descents_per_job": 1,
-  "rho_parity": true,
+  "per_cell": {
+   "n13a0": 0.7820081093833084,
+   "n17a1": 0.6834455173978907,
+   "n19a0": 0.7525527319931457,
+   "n19a1": 0.7344727374163605,
+   "n23a0": 0.7388950028923285
+  }
+ },
+ "round_0009": {
   "beats_rho_instructions_point": true,
-  "beats_rho_strict": true,
-  "beats_rho_strict_definition": "Winner/rho upper paired 95% limits and every cell ratio < 1 in both instructions and native process wall, on confirmation and replay. beats_rho alone is the confirmation point estimate of rho/winner exceeding one.",
+  "beats_rho_strict": false,
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009/decision.json",
+  "note": "beats_rho_strict is false only because the n13a0 native cell ratio was 1.017 on confirmation (0.960 on replay); the instruction result and the aggregate native intervals are below one on both stages. Round-0008 remains the strict-win record.",
+  "patch_from_round_0008_source": "campaign_20260916/round9-fastcurve.patch",
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009",
+  "source_manifest_sha256": "8a7f4b5f087687a91fe2b1d7a35513bbd23beddb5d5db0d1e11683f7ab6c9c1c",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009/source",
+  "status": "retained",
+  "what_changed": "shared curve construction and target lift in tested single-word arithmetic for both arms (baseline source); IC pipeline unchanged from round-0008",
   "winner_over_rho_confirmation": {
-    "candidate_over_baseline": 0.7379328801398639,
-    "ci95": [
-      0.7144337379505753,
-      0.7571723061927793
-    ],
-    "native_wall_candidate_over_baseline": 0.9355169234914339,
-    "native_wall_ci95": [
-      0.9124104876677653,
-      0.9609791776155655
-    ],
-    "per_cell": {
-      "n13a0": 0.7641457210540794,
-      "n17a1": 0.6952862034221112,
-      "n19a0": 0.7544193214959648,
-      "n19a1": 0.7351888473725469,
-      "n23a0": 0.7425621322363283
-    },
-    "native_wall_per_cell": {
-      "n13a0": 0.9671464607379644,
-      "n17a1": 0.9024184124721857,
-      "n19a0": 0.9479810741091628,
-      "n19a1": 0.9397058515338313,
-      "n23a0": 0.9216508936992227
-    }
+   "candidate_over_baseline": 0.5511340753946584,
+   "ci95": [
+    0.5279422621731197,
+    0.5880928655396426
+   ],
+   "native_wall_candidate_over_baseline": 0.9406340813167371,
+   "native_wall_ci95": [
+    0.9131071744076471,
+    0.9811067742684935
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 1.0166933121048904,
+    "n17a1": 0.9343557813751293,
+    "n19a0": 0.9203316888982354,
+    "n19a1": 0.9213891995382123,
+    "n23a0": 0.914142317684615
+   },
+   "per_cell": {
+    "n13a0": 0.625084560085864,
+    "n17a1": 0.5373629964168879,
+    "n19a0": 0.5376957559880087,
+    "n19a1": 0.5281304846399776,
+    "n23a0": 0.533091726966566
+   }
   },
   "winner_over_rho_replay": {
-    "candidate_over_baseline": 0.7379318706154145,
+   "candidate_over_baseline": 0.5511342758310446,
+   "ci95": [
+    0.5279408400938557,
+    0.5880942826604277
+   ],
+   "native_wall_candidate_over_baseline": 0.932298684693216,
+   "native_wall_ci95": [
+    0.9041124782345309,
+    0.9580971485046996
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9600221595183,
+    "n17a1": 0.9572287882538876,
+    "n19a0": 0.9335593986606175,
+    "n19a1": 0.922797716075961,
+    "n23a0": 0.8896719168381959
+   },
+   "per_cell": {
+    "n13a0": 0.6250857271678759,
+    "n17a1": 0.5373607768088041,
+    "n19a0": 0.537698758857707,
+    "n19a1": 0.52813013183802,
+    "n23a0": 0.5330912819540148
+   }
+  }
+ },
+ "round_0010": {
+  "ablation_patch": "campaign_20260916/round10-lean_stdprobe.patch",
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": true,
+  "controls_over_incumbent": {
+   "lean_stdprobe": {
+    "confirmation": {
+     "candidate_over_baseline": 1.0001845721743994,
+     "ci95": [
+      1.000155459142974,
+      1.0002122173321193
+     ],
+     "native_wall_candidate_over_baseline": 0.9989346885373246,
+     "native_wall_ci95": [
+      0.9892947273897202,
+      1.0098311728526428
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9952373653599247,
+      "n17a1": 1.0060586815584387,
+      "n19a0": 0.9895084933461605,
+      "n19a1": 0.9962399069116277,
+      "n23a0": 1.007748187587689
+     }
+    },
+    "replay": {
+     "candidate_over_baseline": 1.0001848368565145,
+     "ci95": [
+      1.0001555325415479,
+      1.000212914544703
+     ],
+     "native_wall_candidate_over_baseline": 0.9888582705372337,
+     "native_wall_ci95": [
+      0.9742747790726526,
+      1.002356963962982
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9839234338779977,
+      "n17a1": 0.998685421770915,
+      "n19a0": 0.991593021222676,
+      "n19a1": 0.9712265633580938,
+      "n23a0": 0.9991397168037505
+     }
+    }
+   }
+  },
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0010/decision.json",
+  "median_complete_job_confirmation": {
+   "incumbent": {
+    "instructions": 4027247.5,
+    "native_ms": 2.409,
+    "receipts": 180
+   },
+   "rho": {
+    "instructions": 7676099.0,
+    "native_ms": 2.855,
+    "receipts": 180
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "patch_from_round_0009_source": "campaign_20260916/round10-lean.patch",
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0010",
+  "source_manifest_sha256": "877bbb8691292b3794431982f420b2bb25d37dc6003dae6e267a21e6b10158cd",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0010/source",
+  "status": "retained",
+  "what_changed": "shared: static-pie executable via a sealed .cargo/config.toml, C entry point instead of the std runtime start-up; IC-only: one CPUID instead of the std feature cache; evaluator: child spawned without a fork of the evaluator, caps by prlimit before job delivery",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.5346624865440454,
+   "ci95": [
+    0.5105630570377481,
+    0.5644617225225833
+   ],
+   "native_wall_candidate_over_baseline": 0.8445499233149926,
+   "native_wall_ci95": [
+    0.8122502019521926,
+    0.8814419030825967
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9112218118676495,
+    "n17a1": 0.8582991858340581,
+    "n19a0": 0.822408082000687,
+    "n19a1": 0.838703213278324,
+    "n23a0": 0.796467667169495
+   },
+   "per_cell": {
+    "n13a0": 0.5940999642800143,
+    "n17a1": 0.50264610550215,
+    "n19a0": 0.5243329107948228,
+    "n19a1": 0.5150284236065066,
+    "n23a0": 0.5417992570831595
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.5346621649406178,
+   "ci95": [
+    0.5105627651894524,
+    0.5644610150682358
+   ],
+   "native_wall_candidate_over_baseline": 0.8664787515716449,
+   "native_wall_ci95": [
+    0.830718721524484,
+    0.9077701942818931
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9410039941380839,
+    "n17a1": 0.866453235313653,
+    "n19a0": 0.8439925202094634,
+    "n19a1": 0.8744410509441747,
+    "n23a0": 0.8116781510085833
+   },
+   "per_cell": {
+    "n13a0": 0.5940998952104518,
+    "n17a1": 0.5026451419801475,
+    "n19a0": 0.5243319467292973,
+    "n19a1": 0.5150287583586547,
+    "n23a0": 0.5417993731949624
+   }
+  }
+ },
+ "round_0011": {
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": true,
+  "challenger_patch": "campaign_20260916/round11-fastio.patch",
+  "controls_over_incumbent": {
+   "wordfield_fastio": {
+    "confirmation": {
+     "candidate_over_baseline": 0.9651319464152477,
+     "ci95": [
+      0.961419111236677,
+      0.9692427079756427
+     ],
+     "native_wall_candidate_over_baseline": 0.9982264448261488,
+     "native_wall_ci95": [
+      0.9879807450130413,
+      1.0085522527464297
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9934260994561228,
+      "n17a1": 0.9916022703128715,
+      "n19a0": 0.9972034538383813,
+      "n19a1": 1.0032745019422462,
+      "n23a0": 1.0057006426927024
+     }
+    },
+    "replay": {
+     "candidate_over_baseline": 0.9651318225289642,
+     "ci95": [
+      0.9614186694052944,
+      0.9692429653906838
+     ],
+     "native_wall_candidate_over_baseline": 0.9885354548345516,
+     "native_wall_ci95": [
+      0.97814333641208,
+      0.9987623995398056
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9841485915238027,
+      "n17a1": 0.9794844805774194,
+      "n19a0": 0.9967412984335072,
+      "n19a1": 0.9960886443494988,
+      "n23a0": 0.986330755121268
+     }
+    }
+   }
+  },
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011/decision.json",
+  "median_complete_job_confirmation": {
+   "incumbent": {
+    "instructions": 2140198.5,
+    "native_ms": 1.982,
+    "receipts": 180
+   },
+   "rho": {
+    "instructions": 4706035.0,
+    "native_ms": 2.297,
+    "receipts": 180
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "patch_from_round_0010_source": "campaign_20260916/round11-wordfield.patch",
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011",
+  "source_manifest_sha256": "54672220b4818be8513516d2a8e090126c2e98fbc421ba9d8e1772474e64c5bd",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011/source",
+  "status": "retained",
+  "what_changed": "shared: the general binary-field arithmetic word-level and bit-exact (square by bit spreading, carry-less products, word-level reduction; the old code kept as the test reference), one fast curve per job for point count, generator search, eigenvalue check and target lift, the sparse irreducible tabulated, the eigenvalue root in one word, one cached CPUID probe for every field; challenger wordfield_fastio (IC-only serialisation) not promoted: 0.9651 of the incumbent instructions but native upper limit 1.0086 on confirmation",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.47964826003077676,
+   "ci95": [
+    0.449811117682557,
+    0.5216987948093519
+   ],
+   "native_wall_candidate_over_baseline": 0.8653413883939344,
+   "native_wall_ci95": [
+    0.8396219005399979,
+    0.8919422901900026
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9122935574572911,
+    "n17a1": 0.866480058695467,
+    "n19a0": 0.8628252294018971,
+    "n19a1": 0.8642410969970695,
+    "n23a0": 0.8231641542900774
+   },
+   "per_cell": {
+    "n13a0": 0.566144102078552,
+    "n17a1": 0.4472916978165497,
+    "n19a0": 0.4462154198104479,
+    "n19a1": 0.474221624976117,
+    "n23a0": 0.4737733347215376
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.479647463803581,
+   "ci95": [
+    0.4498091000263744,
+    0.5216984655363398
+   ],
+   "native_wall_candidate_over_baseline": 0.8653898507179522,
+   "native_wall_ci95": [
+    0.8454206772431005,
+    0.8883025400214984
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9067623135363625,
+    "n17a1": 0.8525074575210183,
+    "n19a0": 0.854529271189148,
+    "n19a1": 0.8739939891660131,
+    "n23a0": 0.8406823881783385
+   },
+   "per_cell": {
+    "n13a0": 0.5661422085604447,
+    "n17a1": 0.44729263683508697,
+    "n19a0": 0.44621332603494446,
+    "n19a1": 0.47422155246633696,
+    "n23a0": 0.4737722878450881
+   }
+  }
+ },
+ "round_0012": {
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": true,
+  "challenger_patch": "campaign_20260916/round12-fastio.patch",
+  "controls_over_incumbent": {
+   "arena_fastio": {
+    "confirmation": {
+     "candidate_over_baseline": 0.954132046741485,
+     "ci95": [
+      0.9487283946328573,
+      0.960167020225172
+     ],
+     "native_wall_candidate_over_baseline": 1.007766853173474,
+     "native_wall_ci95": [
+      0.9903726365238592,
+      1.0270724892190246
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 1.0017143645500697,
+      "n17a1": 1.0012987409495349,
+      "n19a0": 1.0018986432671655,
+      "n19a1": 1.035404768152843,
+      "n23a0": 0.9989846792449357
+     }
+    },
+    "replay": {
+     "candidate_over_baseline": 0.9541320997030339,
+     "ci95": [
+      0.9487269800971505,
+      0.9601673397462499
+     ],
+     "native_wall_candidate_over_baseline": 0.9999963245473455,
+     "native_wall_ci95": [
+      0.9882338965796592,
+      1.0144058421329114
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9932441920816648,
+      "n17a1": 0.9993535421706898,
+      "n19a0": 1.019039650310495,
+      "n19a1": 0.9971739021066758,
+      "n23a0": 0.991413531738102
+     }
+    }
+   }
+  },
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012/decision.json",
+  "median_complete_job_confirmation": {
+   "incumbent": {
+    "instructions": 1670482.0,
+    "native_ms": 1.155,
+    "receipts": 180
+   },
+   "rho": {
+    "instructions": 3944991.0,
+    "native_ms": 1.448,
+    "receipts": 180
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "patches_from_round_0011_source": [
+   "campaign_20260916/round12-musl.patch",
+   "campaign_20260916/round12-arena.patch"
+  ],
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012",
+  "source_manifest_sha256": "1ba4b4c1aba04e85aa48318c9b8794e3335db853d391f0b0ec0a1df72a92efba",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012/source",
+  "status": "retained",
+  "what_changed": "shared: the executable linked statically against musl without relocations (round12-musl.patch, cargo config only) and the worker serving every heap request from a bump-pointer arena in zero pages of the executable (round12-arena.patch); library source identical to round-0011; challenger arena_fastio (IC-only serialisation) not promoted again: 0.9541 of the incumbent instructions but native upper limit 1.0271 on confirmation; ablation controls arena_glibc (link only) 1.0589 instructions and 1.7657 native of the incumbent at selection, musl_sysalloc (allocator only) 1.4157 instructions and 1.2278 native at development",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.436926797163521,
+   "ci95": [
+    0.4069034566370304,
+    0.48145735501622794
+   ],
+   "native_wall_candidate_over_baseline": 0.798770598737747,
+   "native_wall_ci95": [
+    0.7667779157944749,
+    0.8318517878456885
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8573882431474522,
+    "n17a1": 0.8065158843545619,
+    "n19a0": 0.7966106435652626,
+    "n19a1": 0.781424811073584,
+    "n23a0": 0.7554167393685867
+   },
+   "per_cell": {
+    "n13a0": 0.5295425329496932,
+    "n17a1": 0.4036921612691539,
+    "n19a0": 0.41370930256069954,
+    "n19a1": 0.4222089982202027,
+    "n23a0": 0.42645132679651465
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.4369275867744142,
+   "ci95": [
+    0.40690298023525534,
+    0.4814550806508336
+   ],
+   "native_wall_candidate_over_baseline": 0.7914360476384587,
+   "native_wall_ci95": [
+    0.7557909440653447,
+    0.8270206925674652
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8569783877896574,
+    "n17a1": 0.7927965440932707,
+    "n19a0": 0.7907892475669126,
+    "n19a1": 0.7801485245842248,
+    "n23a0": 0.7408144950325363
+   },
+   "per_cell": {
+    "n13a0": 0.5295411841390774,
+    "n17a1": 0.40369031416720363,
+    "n19a0": 0.4137114514808026,
+    "n19a1": 0.42220884262737524,
+    "n23a0": 0.42645615974257134
+   }
+  }
+ },
+ "round_0013": {
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": true,
+  "challenger_patches": [
+   "campaign_20260916/round13-canon.patch",
+   "campaign_20260916/round13-fastio.patch"
+  ],
+  "controls_over_incumbent": {
+   "ld_ic": {
+    "confirmation": {
+     "candidate_over_baseline": 0.9221004420079083,
+     "ci95": [
+      0.9105500658173483,
+      0.9341019412100591
+     ],
+     "native_wall_candidate_over_baseline": 1.0198827963255803,
+     "native_wall_ci95": [
+      1.0000254421497812,
+      1.0442689454686955
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 1.0226701590118126,
+      "n17a1": 1.037760725227264,
+      "n19a0": 1.0319718844730705,
+      "n19a1": 0.9986962342160127,
+      "n23a0": 1.0088282575945933
+     }
+    },
+    "replay": {
+     "candidate_over_baseline": 0.9220999510736116,
+     "ci95": [
+      0.9105490067434208,
+      0.9341016996685284
+     ],
+     "native_wall_candidate_over_baseline": 0.9919230472971841,
+     "native_wall_ci95": [
+      0.9780062880551139,
+      1.0084014917031505
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.999461000847435,
+      "n17a1": 0.9820503812187287,
+      "n19a0": 0.9904277266588992,
+      "n19a1": 0.9861568472915904,
+      "n23a0": 1.0016626972060918
+     }
+    }
+   }
+  },
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0013/decision.json",
+  "median_complete_job_confirmation": {
+   "incumbent": {
+    "instructions": 1282562.0,
+    "native_ms": 1.156,
+    "receipts": 180
+   },
+   "rho": {
+    "instructions": 1716228.5,
+    "native_ms": 1.27,
+    "receipts": 180
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "patches_from_round_0012_source": [
+   "campaign_20260916/round13-ld.patch"
+  ],
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0013",
+  "source_manifest_sha256": "533855aa94edf4008c13d78c931a2ad86262a215ad7eee7ba6a4d0544ae43cf3",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0013/source",
+  "status": "retained",
+  "what_changed": "shared: the general scalar_mul and the single-word FastCurve::mul/mul_u64 in Lopez-Dahab projective coordinates, one inversion per product (round13-ld.patch), tested against the affine double-and-add kept as the reference; rho's setup (its jump table and walk starts) is scalar products, so rho gained more than the IC arm and every ratio moved toward one: the margins of rounds 0007-0012 included rho's affine setup. The strict win still holds on every cell. Challenger ld_ic (IC-only: orbit name from the longest zero run, plus the serialisation change) not promoted: 0.9221 of the incumbent instructions but native upper limit 1.0443 on confirmation (1.0199 point); ld_canon alone 0.9758 at selection, not provisional.",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.7696743535304328,
+   "ci95": [
+    0.7147839637637708,
+    0.8370425765657616
+   ],
+   "native_wall_candidate_over_baseline": 0.9097722891309724,
+   "native_wall_ci95": [
+    0.8894023669954111,
+    0.931344422318841
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8854436198236544,
+    "n17a1": 0.8945746887855794,
+    "n19a0": 0.922990060543596,
+    "n19a1": 0.9200964124597864,
+    "n23a0": 0.9265217990540452
+   },
+   "per_cell": {
+    "n13a0": 0.7909440919085615,
+    "n17a1": 0.6840048241225771,
+    "n19a0": 0.7283155187532868,
+    "n19a1": 0.7972142968711916,
+    "n23a0": 0.8598753207529097
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.7696753523524816,
+   "ci95": [
+    0.7147697917530964,
+    0.837057854302903
+   ],
+   "native_wall_candidate_over_baseline": 0.9206148201267645,
+   "native_wall_ci95": [
+    0.8982663875921412,
+    0.9480279891495028
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9079316984358168,
+    "n17a1": 0.9145678631972657,
+    "n19a0": 0.8988699275382414,
+    "n19a1": 0.9185126763292231,
+    "n23a0": 0.9645809681462236
+   },
+   "per_cell": {
+    "n13a0": 0.7909409598483471,
+    "n17a1": 0.6839837628834294,
+    "n19a0": 0.7283351993553943,
+    "n19a1": 0.7972167070659771,
+    "n23a0": 0.8598849471664519
+   }
+  }
+ },
+ "round_0014": {
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": true,
+  "challenger_patches": [
+   "campaign_20260916/round14-canon.patch",
+   "campaign_20260916/round14-fastio.patch"
+  ],
+  "controls_over_incumbent": {
+   "lto_ic": {
+    "confirmation": {
+     "candidate_over_baseline": 0.9225562258060885,
+     "ci95": [
+      0.9107643639553631,
+      0.9347381523917084
+     ],
+     "native_wall_candidate_over_baseline": 0.9947099546809592,
+     "native_wall_ci95": [
+      0.9724278145334377,
+      1.0163456747616106
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9997634299094936,
+      "n17a1": 0.9689235466018998,
+      "n19a0": 1.0123372972491862,
+      "n19a1": 0.988655664764905,
+      "n23a0": 1.004442932507873
+     }
+    },
+    "replay": {
+     "candidate_over_baseline": 0.9225560541513951,
+     "ci95": [
+      0.9107638679764328,
+      0.9347376630798303
+     ],
+     "native_wall_candidate_over_baseline": 1.0021728352941925,
+     "native_wall_ci95": [
+      0.9824597644938334,
+      1.0256454230034049
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 1.035482475973274,
+      "n17a1": 0.990551237955292,
+      "n19a0": 0.9792565352256115,
+      "n19a1": 1.003226109035785,
+      "n23a0": 1.003224500842044
+     }
+    }
+   }
+  },
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014/decision.json",
+  "median_complete_job_confirmation": {
+   "incumbent": {
+    "instructions": 1270805.0,
+    "native_ms": 1.143,
+    "receipts": 180
+   },
+   "rho": {
+    "instructions": 1635293.0,
+    "native_ms": 1.222,
+    "receipts": 180
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "patches_from_round_0013_source": [
+   "campaign_20260916/round14-lto.patch",
+   "campaign_20260916/round14-arena-tests.patch"
+  ],
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014",
+  "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014/source",
+  "status": "retained",
+  "what_changed": "shared: the worker built as one optimisation unit (fat LTO, one codegen unit, dead sections dropped at link time), which removes a quarter of the executable text without changing a line of source or a byte of any report, plus a tests-only fix to the arena tests. Both arms got faster and rho slightly more so, as pre-registered, so the winner/rho ratios are slightly worse than round-0013's while beats_rho_strict still holds on every cell; the strict-win record stays with round-0013. Challenger lto_ic (orbit naming from the longest zero run plus the serialisation change) not promoted a fourth time: 0.9226 of the incumbent instructions but native upper limit 1.0163 on confirmation; lto_canon alone 0.9772 at selection with native upper limit 1.08.",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.7817766252204564,
+   "ci95": [
+    0.7199868031943767,
+    0.8600593236734697
+   ],
+   "native_wall_candidate_over_baseline": 0.9424118300650626,
+   "native_wall_ci95": [
+    0.912629257744672,
+    0.9715184462908083
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.895166998788727,
+    "n17a1": 0.9463219399306364,
+    "n19a0": 0.9293438545369769,
+    "n19a1": 0.9712408978237551,
+    "n23a0": 0.972203724300982
+   },
+   "per_cell": {
+    "n13a0": 0.8020211560462687,
+    "n17a1": 0.7118282360822756,
+    "n19a0": 0.7126809934052354,
+    "n19a1": 0.7858927783433217,
+    "n23a0": 0.9132588618012915
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.781779549842553,
+   "ci95": [
+    0.7199903911091349,
+    0.8600633389135146
+   ],
+   "native_wall_candidate_over_baseline": 0.9284422715079564,
+   "native_wall_ci95": [
+    0.9049721702559972,
+    0.9623543289813028
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9113019485464247,
+    "n17a1": 0.9203394283350191,
+    "n19a0": 0.9167061395339992,
+    "n19a1": 0.9074457664535301,
+    "n23a0": 0.9888112102516553
+   },
+   "per_cell": {
+    "n13a0": 0.8020158697161288,
+    "n17a1": 0.7118239063378277,
+    "n19a0": 0.7126880935538176,
+    "n19a1": 0.7858981111867614,
+    "n23a0": 0.9132722234023708
+   }
+  }
+ },
+ "round_0015": {
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": true,
+  "challenger_patches": [
+   "campaign_20260916/round15-scan.patch",
+   "campaign_20260916/round15-fastio.patch"
+  ],
+  "controls_over_incumbent": {
+   "scan_io": {
+    "confirmation": {
+     "candidate_over_baseline": 0.9059186019795286,
+     "ci95": [
+      0.8802267702126854,
+      0.9272348324360442
+     ],
+     "native_wall_candidate_over_baseline": 0.9924621829274088,
+     "native_wall_ci95": [
+      0.9785179757065511,
+      1.0072720504423012
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9989141205872248,
+      "n17a1": 0.9832052860456189,
+      "n19a0": 0.9812371103727203,
+      "n19a1": 0.99847772991855,
+      "n23a0": 1.000656755208664
+     }
+    },
+    "replay": {
+     "candidate_over_baseline": 0.905918447711432,
+     "ci95": [
+      0.8802271356458237,
+      0.9272320115753816
+     ],
+     "native_wall_candidate_over_baseline": 0.9956769497956646,
+     "native_wall_ci95": [
+      0.9830374110402569,
+      1.0104572197358597
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9981470093105134,
+      "n17a1": 0.9933235798231203,
+      "n19a0": 0.9847073982792586,
+      "n19a1": 1.0113902282888496,
+      "n23a0": 0.9910168916172433
+     }
+    }
+   }
+  },
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015/decision.json",
+  "median_complete_job_confirmation": {
+   "incumbent": {
+    "instructions": 1291509.0,
+    "native_ms": 1.084,
+    "receipts": 180
+   },
+   "rho": {
+    "instructions": 1850374.0,
+    "native_ms": 1.186,
+    "receipts": 180
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "patches_from_round_0014_source": [],
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015",
+  "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015/source",
+  "status": "retained",
+  "what_changed": "nothing shared: the baseline is the round-0014 winner source unchanged (its source manifest hash is identical), so the incumbent measures the same executable on fresh fixtures. The IC-only challenger scan_io (orbit name from the longest circular run of zeros, the block scan keeping only each rest's abscissa, and the report serialisation change) reached 0.9059 [0.8802, 0.9272] of the incumbent instructions, the largest IC-only step the campaign has measured, and was still not promoted: native upper limit 1.0073 on confirmation and 1.0105 on replay, exactly as the pre-registration predicted from the process floor. scan alone measured 0.9642 at selection with native upper limit 1.0119. Development also recorded two dropped changes: reduction by folding a sparse modulus is 22-47% worse than the byte tables, and dropping the bounds check on those tables is a wash.",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.7372254710447864,
+   "ci95": [
+    0.6627607474515894,
+    0.8325954872020435
+   ],
+   "native_wall_candidate_over_baseline": 0.9245543066828708,
+   "native_wall_ci95": [
+    0.9034237860884715,
+    0.9502974853533789
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9031038162960503,
+    "n17a1": 0.9148486644174064,
+    "n19a0": 0.9157294753257335,
+    "n19a1": 0.9260361461247276,
+    "n23a0": 0.9642287165993544
+   },
+   "per_cell": {
+    "n13a0": 0.7928947564983542,
+    "n17a1": 0.6886047850886027,
+    "n19a0": 0.6461981017812877,
+    "n19a1": 0.684888326585378,
+    "n23a0": 0.9012196118698091
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.7372294803775452,
+   "ci95": [
+    0.6627657681259977,
+    0.8326116460823377
+   ],
+   "native_wall_candidate_over_baseline": 0.9156624594233596,
+   "native_wall_ci95": [
+    0.8886201722807316,
+    0.9563789203616806
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8991836892550887,
+    "n17a1": 0.8990771591816419,
+    "n19a0": 0.8853320277258658,
+    "n19a1": 0.9105923333849517,
+    "n23a0": 0.987646424994156
+   },
+   "per_cell": {
+    "n13a0": 0.7929001650716976,
+    "n17a1": 0.6885931690317117,
+    "n19a0": 0.6462076852053098,
+    "n19a1": 0.6848841994084518,
+    "n23a0": 0.9012452388804256
+   }
+  }
+ },
+ "round_0016": {
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": false,
+  "cells_where_the_winner_loses_to_rho": {
+   "instructions": {
+    "n23a1": 1.0655652095395407,
+    "n29a1": 1.030925246907129
+   },
+   "native": {
+    "n23a1": 1.0586257995453932,
+    "n29a1": 1.0904880344351338,
+    "n31a0": 1.0187427668107298
+   }
+  },
+  "challenger_patches": [
+   "campaign_20260916/round15-scan.patch",
+   "campaign_20260916/round15-fastio.patch"
+  ],
+  "controls_over_incumbent": {
+   "scan_io": {
+    "confirmation": {
+     "candidate_over_baseline": 0.8872690528573522,
+     "ci95": [
+      0.86443096699722,
+      0.9093386210939163
+     ],
+     "native_wall_candidate_over_baseline": 0.9780434377558893,
+     "native_wall_ci95": [
+      0.960814677461623,
+      0.9947467695163384
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.971609579694721,
+      "n17a1": 0.9765996263169431,
+      "n19a0": 0.9792514177703967,
+      "n19a1": 0.9857335804096767,
+      "n23a0": 1.016220503231187,
+      "n23a1": 0.9646245204251439,
+      "n29a1": 0.9505737086050502,
+      "n31a0": 0.9810044939963461
+     }
+    },
+    "replay": {
+     "candidate_over_baseline": 0.8872703726659092,
+     "ci95": [
+      0.8644310955934759,
+      0.9093410947506849
+     ],
+     "native_wall_candidate_over_baseline": 0.9870630056558192,
+     "native_wall_ci95": [
+      0.972057558633584,
+      1.0034028800015453
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9600623382693132,
+      "n17a1": 1.0033390686693617,
+      "n19a0": 0.9912130695545174,
+      "n19a1": 0.9823889938045406,
+      "n23a0": 0.9851076708164385,
+      "n23a1": 0.973367148868979,
+      "n29a1": 1.0231825640257608,
+      "n31a0": 0.9791468262326045
+     }
+    }
+   }
+  },
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016/decision.json",
+  "headline": "beats_rho_strict is FALSE on the widened panel, for the first time since round 0013. The same receipts restricted to the legacy five cells still pass it. The strict win was a property of the panel, not of the algorithm.",
+  "legacy_five_cell_subset_of_these_receipts": {
+   "cells": [
+    "n13a0",
+    "n17a1",
+    "n19a0",
+    "n19a1",
+    "n23a0"
+   ],
+   "incumbent_over_rho": {
+    "candidate_over_baseline": 0.767441000826205,
     "ci95": [
-      0.7144328577963271,
-      0.7571684930212431
+     0.7012914895717608,
+     0.855889186367098
     ],
-    "native_wall_candidate_over_baseline": 0.9413978774377383,
+    "native_wall_candidate_over_baseline": 0.9340533740904756,
     "native_wall_ci95": [
-      0.9266864038465168,
-      0.9545396471783393
+     0.9117856762213744,
+     0.965254188565241
     ],
-    "per_cell": {
-      "n13a0": 0.764143910004793,
-      "n17a1": 0.6952844745859409,
-      "n19a0": 0.7544153524909061,
-      "n19a1": 0.7351890621972519,
-      "n23a0": 0.7425643488923614
-    },
     "native_wall_per_cell": {
-      "n13a0": 0.9486139168609361,
-      "n17a1": 0.9500954897544966,
-      "n19a0": 0.9437923850841066,
-      "n19a1": 0.9417154641879998,
-      "n23a0": 0.9230243423034147
+     "n13a0": 0.9115260986251638,
+     "n17a1": 0.930176179021046,
+     "n19a0": 0.9297204427141912,
+     "n19a1": 0.9230185798476568,
+     "n23a0": 0.9771501952681292
+    },
+    "per_cell": {
+     "n13a0": 0.7891099022162837,
+     "n17a1": 0.7248216405450234,
+     "n19a0": 0.6692179141950286,
+     "n19a1": 0.7745923196593695,
+     "n23a0": 0.8978744225205727
     }
-  },
-  "round_0007_winner_over_rho_confirmation": {
-    "candidate_over_baseline": 0.7375680581311627,
+   },
+   "purpose": "the same frozen receipts restricted to the rounds 0006-0015 panel, so the eight-cell verdict and the five-cell one are read side by side",
+   "scan_io_over_incumbent": {
+    "candidate_over_baseline": 0.9055858786101901,
     "ci95": [
-      0.7065693377992373,
-      0.7643545073767521
+     0.8792845267591635,
+     0.9271128142999386
     ],
-    "native_wall_candidate_over_baseline": 0.9460598053948923,
+    "native_wall_candidate_over_baseline": 0.9857573208664466,
     "native_wall_ci95": [
-      0.9292926395602298,
-      0.9639483494225052
+     0.9675006179808505,
+     1.0065477009436978
     ],
-    "per_cell": {
-      "n13a0": 0.7820081093833084,
-      "n17a1": 0.6834455173978907,
-      "n19a0": 0.7525527319931457,
-      "n19a1": 0.7344727374163605,
-      "n23a0": 0.7388950028923285
-    },
     "native_wall_per_cell": {
-      "n13a0": 0.9774927352044602,
-      "n17a1": 0.9316817195958474,
-      "n19a0": 0.9358348268649307,
-      "n19a1": 0.9391988935236824,
-      "n23a0": 0.946793065046991
+     "n13a0": 0.971609579694721,
+     "n17a1": 0.9765996263169431,
+     "n19a0": 0.9792514177703967,
+     "n19a1": 0.9857335804096767,
+     "n23a0": 1.016220503231187
+    },
+    "per_cell": {
+     "n13a0": 0.9403441879423585,
+     "n17a1": 0.9156684737635247,
+     "n19a0": 0.9113309848077052,
+     "n19a1": 0.9029391835972258,
+     "n23a0": 0.8595842821750695
     }
-  },
-  "round_0009": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009",
-    "status": "retained",
-    "what_changed": "shared curve construction and target lift in tested single-word arithmetic for both arms (baseline source); IC pipeline unchanged from round-0008",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009/source",
-    "patch_from_round_0008_source": "campaign_20260916/round9-fastcurve.patch",
-    "source_manifest_sha256": "8a7f4b5f087687a91fe2b1d7a35513bbd23beddb5d5db0d1e11683f7ab6c9c1c",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": false,
-    "note": "beats_rho_strict is false only because the n13a0 native cell ratio was 1.017 on confirmation (0.960 on replay); the instruction result and the aggregate native intervals are below one on both stages. Round-0008 remains the strict-win record.",
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.5511340753946584,
-      "ci95": [
-        0.5279422621731197,
-        0.5880928655396426
-      ],
-      "native_wall_candidate_over_baseline": 0.9406340813167371,
-      "native_wall_ci95": [
-        0.9131071744076471,
-        0.9811067742684935
-      ],
-      "per_cell": {
-        "n13a0": 0.625084560085864,
-        "n17a1": 0.5373629964168879,
-        "n19a0": 0.5376957559880087,
-        "n19a1": 0.5281304846399776,
-        "n23a0": 0.533091726966566
-      },
-      "native_wall_per_cell": {
-        "n13a0": 1.0166933121048904,
-        "n17a1": 0.9343557813751293,
-        "n19a0": 0.9203316888982354,
-        "n19a1": 0.9213891995382123,
-        "n23a0": 0.914142317684615
-      }
-    },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.5511342758310446,
-      "ci95": [
-        0.5279408400938557,
-        0.5880942826604277
-      ],
-      "native_wall_candidate_over_baseline": 0.932298684693216,
-      "native_wall_ci95": [
-        0.9041124782345309,
-        0.9580971485046996
-      ],
-      "per_cell": {
-        "n13a0": 0.6250857271678759,
-        "n17a1": 0.5373607768088041,
-        "n19a0": 0.537698758857707,
-        "n19a1": 0.52813013183802,
-        "n23a0": 0.5330912819540148
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9600221595183,
-        "n17a1": 0.9572287882538876,
-        "n19a0": 0.9335593986606175,
-        "n19a1": 0.922797716075961,
-        "n23a0": 0.8896719168381959
-      }
-    }
-  },
-  "round_0010": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0010",
-    "status": "retained",
-    "what_changed": "shared: static-pie executable via a sealed .cargo/config.toml, C entry point instead of the std runtime start-up; IC-only: one CPUID instead of the std feature cache; evaluator: child spawned without a fork of the evaluator, caps by prlimit before job delivery",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0010/source",
-    "patch_from_round_0009_source": "campaign_20260916/round10-lean.patch",
-    "ablation_patch": "campaign_20260916/round10-lean_stdprobe.patch",
-    "source_manifest_sha256": "877bbb8691292b3794431982f420b2bb25d37dc6003dae6e267a21e6b10158cd",
-    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0010/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": true,
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.5346624865440454,
-      "ci95": [
-        0.5105630570377481,
-        0.5644617225225833
-      ],
-      "native_wall_candidate_over_baseline": 0.8445499233149926,
-      "native_wall_ci95": [
-        0.8122502019521926,
-        0.8814419030825967
-      ],
-      "per_cell": {
-        "n13a0": 0.5940999642800143,
-        "n17a1": 0.50264610550215,
-        "n19a0": 0.5243329107948228,
-        "n19a1": 0.5150284236065066,
-        "n23a0": 0.5417992570831595
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9112218118676495,
-        "n17a1": 0.8582991858340581,
-        "n19a0": 0.822408082000687,
-        "n19a1": 0.838703213278324,
-        "n23a0": 0.796467667169495
-      }
-    },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.5346621649406178,
-      "ci95": [
-        0.5105627651894524,
-        0.5644610150682358
-      ],
-      "native_wall_candidate_over_baseline": 0.8664787515716449,
-      "native_wall_ci95": [
-        0.830718721524484,
-        0.9077701942818931
-      ],
-      "per_cell": {
-        "n13a0": 0.5940998952104518,
-        "n17a1": 0.5026451419801475,
-        "n19a0": 0.5243319467292973,
-        "n19a1": 0.5150287583586547,
-        "n23a0": 0.5417993731949624
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9410039941380839,
-        "n17a1": 0.866453235313653,
-        "n19a0": 0.8439925202094634,
-        "n19a1": 0.8744410509441747,
-        "n23a0": 0.8116781510085833
-      }
-    },
-    "controls_over_incumbent": {
-      "lean_stdprobe": {
-        "confirmation": {
-          "candidate_over_baseline": 1.0001845721743994,
-          "ci95": [
-            1.000155459142974,
-            1.0002122173321193
-          ],
-          "native_wall_candidate_over_baseline": 0.9989346885373246,
-          "native_wall_ci95": [
-            0.9892947273897202,
-            1.0098311728526428
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9952373653599247,
-            "n17a1": 1.0060586815584387,
-            "n19a0": 0.9895084933461605,
-            "n19a1": 0.9962399069116277,
-            "n23a0": 1.007748187587689
-          }
-        },
-        "replay": {
-          "candidate_over_baseline": 1.0001848368565145,
-          "ci95": [
-            1.0001555325415479,
-            1.000212914544703
-          ],
-          "native_wall_candidate_over_baseline": 0.9888582705372337,
-          "native_wall_ci95": [
-            0.9742747790726526,
-            1.002356963962982
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9839234338779977,
-            "n17a1": 0.998685421770915,
-            "n19a0": 0.991593021222676,
-            "n19a1": 0.9712265633580938,
-            "n23a0": 0.9991397168037505
-          }
-        }
-      }
-    },
-    "median_complete_job_confirmation": {
-      "incumbent": {
-        "instructions": 4027247.5,
-        "native_ms": 2.409,
-        "receipts": 180
-      },
-      "rho": {
-        "instructions": 7676099.0,
-        "native_ms": 2.855,
-        "receipts": 180
-      }
-    }
-  },
-  "strict_win_record": "round-0013",
-  "round_0011": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011",
-    "status": "retained",
-    "what_changed": "shared: the general binary-field arithmetic word-level and bit-exact (square by bit spreading, carry-less products, word-level reduction; the old code kept as the test reference), one fast curve per job for point count, generator search, eigenvalue check and target lift, the sparse irreducible tabulated, the eigenvalue root in one word, one cached CPUID probe for every field; challenger wordfield_fastio (IC-only serialisation) not promoted: 0.9651 of the incumbent instructions but native upper limit 1.0086 on confirmation",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011/source",
-    "patch_from_round_0010_source": "campaign_20260916/round11-wordfield.patch",
-    "challenger_patch": "campaign_20260916/round11-fastio.patch",
-    "source_manifest_sha256": "54672220b4818be8513516d2a8e090126c2e98fbc421ba9d8e1772474e64c5bd",
-    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": true,
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.47964826003077676,
-      "ci95": [
-        0.449811117682557,
-        0.5216987948093519
-      ],
-      "native_wall_candidate_over_baseline": 0.8653413883939344,
-      "native_wall_ci95": [
-        0.8396219005399979,
-        0.8919422901900026
-      ],
-      "per_cell": {
-        "n13a0": 0.566144102078552,
-        "n17a1": 0.4472916978165497,
-        "n19a0": 0.4462154198104479,
-        "n19a1": 0.474221624976117,
-        "n23a0": 0.4737733347215376
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9122935574572911,
-        "n17a1": 0.866480058695467,
-        "n19a0": 0.8628252294018971,
-        "n19a1": 0.8642410969970695,
-        "n23a0": 0.8231641542900774
-      }
-    },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.479647463803581,
-      "ci95": [
-        0.4498091000263744,
-        0.5216984655363398
-      ],
-      "native_wall_candidate_over_baseline": 0.8653898507179522,
-      "native_wall_ci95": [
-        0.8454206772431005,
-        0.8883025400214984
-      ],
-      "per_cell": {
-        "n13a0": 0.5661422085604447,
-        "n17a1": 0.44729263683508697,
-        "n19a0": 0.44621332603494446,
-        "n19a1": 0.47422155246633696,
-        "n23a0": 0.4737722878450881
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9067623135363625,
-        "n17a1": 0.8525074575210183,
-        "n19a0": 0.854529271189148,
-        "n19a1": 0.8739939891660131,
-        "n23a0": 0.8406823881783385
-      }
-    },
-    "controls_over_incumbent": {
-      "wordfield_fastio": {
-        "confirmation": {
-          "candidate_over_baseline": 0.9651319464152477,
-          "ci95": [
-            0.961419111236677,
-            0.9692427079756427
-          ],
-          "native_wall_candidate_over_baseline": 0.9982264448261488,
-          "native_wall_ci95": [
-            0.9879807450130413,
-            1.0085522527464297
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9934260994561228,
-            "n17a1": 0.9916022703128715,
-            "n19a0": 0.9972034538383813,
-            "n19a1": 1.0032745019422462,
-            "n23a0": 1.0057006426927024
-          }
-        },
-        "replay": {
-          "candidate_over_baseline": 0.9651318225289642,
-          "ci95": [
-            0.9614186694052944,
-            0.9692429653906838
-          ],
-          "native_wall_candidate_over_baseline": 0.9885354548345516,
-          "native_wall_ci95": [
-            0.97814333641208,
-            0.9987623995398056
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9841485915238027,
-            "n17a1": 0.9794844805774194,
-            "n19a0": 0.9967412984335072,
-            "n19a1": 0.9960886443494988,
-            "n23a0": 0.986330755121268
-          }
-        }
-      }
-    },
-    "median_complete_job_confirmation": {
-      "incumbent": {
-        "instructions": 2140198.5,
-        "native_ms": 1.982,
-        "receipts": 180
-      },
-      "rho": {
-        "instructions": 4706035.0,
-        "native_ms": 2.297,
-        "receipts": 180
-      }
-    }
-  },
-  "round_0012": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012",
-    "status": "retained",
-    "what_changed": "shared: the executable linked statically against musl without relocations (round12-musl.patch, cargo config only) and the worker serving every heap request from a bump-pointer arena in zero pages of the executable (round12-arena.patch); library source identical to round-0011; challenger arena_fastio (IC-only serialisation) not promoted again: 0.9541 of the incumbent instructions but native upper limit 1.0271 on confirmation; ablation controls arena_glibc (link only) 1.0589 instructions and 1.7657 native of the incumbent at selection, musl_sysalloc (allocator only) 1.4157 instructions and 1.2278 native at development",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012/source",
-    "patches_from_round_0011_source": [
-      "campaign_20260916/round12-musl.patch",
-      "campaign_20260916/round12-arena.patch"
+   },
+   "scan_io_over_rho": {
+    "candidate_over_baseline": 0.6949837330146825,
+    "ci95": [
+     0.6385755749688302,
+     0.7602338646900942
     ],
-    "challenger_patch": "campaign_20260916/round12-fastio.patch",
-    "source_manifest_sha256": "1ba4b4c1aba04e85aa48318c9b8794e3335db853d391f0b0ec0a1df72a92efba",
-    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": true,
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.436926797163521,
-      "ci95": [
-        0.4069034566370304,
-        0.48145735501622794
-      ],
-      "native_wall_candidate_over_baseline": 0.798770598737747,
-      "native_wall_ci95": [
-        0.7667779157944749,
-        0.8318517878456885
-      ],
-      "per_cell": {
-        "n13a0": 0.5295425329496932,
-        "n17a1": 0.4036921612691539,
-        "n19a0": 0.41370930256069954,
-        "n19a1": 0.4222089982202027,
-        "n23a0": 0.42645132679651465
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.8573882431474522,
-        "n17a1": 0.8065158843545619,
-        "n19a0": 0.7966106435652626,
-        "n19a1": 0.781424811073584,
-        "n23a0": 0.7554167393685867
-      }
+    "native_wall_candidate_over_baseline": 0.9207499515896921,
+    "native_wall_ci95": [
+     0.8946021079442085,
+     0.9636374733614804
+    ],
+    "native_wall_per_cell": {
+     "n13a0": 0.8856474895659641,
+     "n17a1": 0.9084097088408755,
+     "n19a0": 0.9104300616579927,
+     "n19a1": 0.9098504094978858,
+     "n23a0": 0.9930000631678308
     },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.4369275867744142,
-      "ci95": [
-        0.40690298023525534,
-        0.4814550806508336
-      ],
-      "native_wall_candidate_over_baseline": 0.7914360476384587,
-      "native_wall_ci95": [
-        0.7557909440653447,
-        0.8270206925674652
-      ],
-      "per_cell": {
-        "n13a0": 0.5295411841390774,
-        "n17a1": 0.40369031416720363,
-        "n19a0": 0.4137114514808026,
-        "n19a1": 0.42220884262737524,
-        "n23a0": 0.42645615974257134
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.8569783877896574,
-        "n17a1": 0.7927965440932707,
-        "n19a0": 0.7907892475669126,
-        "n19a1": 0.7801485245842248,
-        "n23a0": 0.7408144950325363
-      }
-    },
-    "controls_over_incumbent": {
-      "arena_fastio": {
-        "confirmation": {
-          "candidate_over_baseline": 0.954132046741485,
-          "ci95": [
-            0.9487283946328573,
-            0.960167020225172
-          ],
-          "native_wall_candidate_over_baseline": 1.007766853173474,
-          "native_wall_ci95": [
-            0.9903726365238592,
-            1.0270724892190246
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 1.0017143645500697,
-            "n17a1": 1.0012987409495349,
-            "n19a0": 1.0018986432671655,
-            "n19a1": 1.035404768152843,
-            "n23a0": 0.9989846792449357
-          }
-        },
-        "replay": {
-          "candidate_over_baseline": 0.9541320997030339,
-          "ci95": [
-            0.9487269800971505,
-            0.9601673397462499
-          ],
-          "native_wall_candidate_over_baseline": 0.9999963245473455,
-          "native_wall_ci95": [
-            0.9882338965796592,
-            1.0144058421329114
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9932441920816648,
-            "n17a1": 0.9993535421706898,
-            "n19a0": 1.019039650310495,
-            "n19a1": 0.9971739021066758,
-            "n23a0": 0.991413531738102
-          }
-        }
-      }
-    },
-    "median_complete_job_confirmation": {
-      "incumbent": {
-        "instructions": 1670482.0,
-        "native_ms": 1.155,
-        "receipts": 180
-      },
-      "rho": {
-        "instructions": 3944991.0,
-        "native_ms": 1.448,
-        "receipts": 180
-      }
+    "per_cell": {
+     "n13a0": 0.7420349101968453,
+     "n17a1": 0.6636963253486355,
+     "n19a0": 0.6098790207943138,
+     "n19a1": 0.6994097567339124,
+     "n23a0": 0.7717987409657016
     }
+   }
   },
-  "round_0013": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0013",
-    "status": "retained",
-    "what_changed": "shared: the general scalar_mul and the single-word FastCurve::mul/mul_u64 in Lopez-Dahab projective coordinates, one inversion per product (round13-ld.patch), tested against the affine double-and-add kept as the reference; rho's setup (its jump table and walk starts) is scalar products, so rho gained more than the IC arm and every ratio moved toward one: the margins of rounds 0007-0012 included rho's affine setup. The strict win still holds on every cell. Challenger ld_ic (IC-only: orbit name from the longest zero run, plus the serialisation change) not promoted: 0.9221 of the incumbent instructions but native upper limit 1.0443 on confirmation (1.0199 point); ld_canon alone 0.9758 at selection, not provisional.",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0013/source",
-    "patches_from_round_0012_source": [
-      "campaign_20260916/round13-ld.patch"
+  "median_complete_job_confirmation": {
+   "incumbent": {
+    "instructions": 1948049.5,
+    "native_ms": 1.262,
+    "receipts": 288
+   },
+   "rho": {
+    "instructions": 1996379.0,
+    "native_ms": 1.286,
+    "receipts": 288
+   },
+   "scan_io": {
+    "instructions": 1723525.0,
+    "native_ms": 1.242,
+    "receipts": 288
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "panel": {
+   "cells": [
+    "n13a0",
+    "n17a1",
+    "n19a0",
+    "n23a0",
+    "n23a1",
+    "n31a0"
+   ],
+   "changed_from": "five cells (n13a0, n17a1, n19a0, n23a0 + n19a1 holdout), rounds 0006-0015",
+   "confirmation_cases": 96,
+   "holdout_cells": [
+    "n19a1",
+    "n29a1"
+   ]
+  },
+  "patches_from_round_0015_source": [],
+  "rho_over_winner": 1.192874511885588,
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016",
+  "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016/source",
+  "status": "retained",
+  "what_changed": "no source in either arm: both are the byte-identical trees round 0015 sealed, so every difference from round 0015 belongs to the panel or to fresh fixtures. The PANEL changed, for the first time since round 0006. tournament.py gained --cells and --holdout-cells (defaults reproduce the rounds 0006-0015 panel exactly) and this round ran eight confirmation cells instead of five, adding n23a1 (subgroup 4,196,903, twice the largest cell previously tested), n31a0 at the highest usable degree, and n29a1 as a second holdout. A census of every (degree, curve_a) pair the worker admits found seventeen usable cells; degrees 21, 25 and 27 have no usable subgroup at either a, so 31 is the top of the family rather than the next rung.",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.83831114676035,
+   "ci95": [
+    0.747866139139291,
+    0.9420452776988771
+   ],
+   "native_wall_candidate_over_baseline": 0.9778805273908171,
+   "native_wall_ci95": [
+    0.9338506276887212,
+    1.0288208398184095
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.9115260986251638,
+    "n17a1": 0.930176179021046,
+    "n19a0": 0.9297204427141912,
+    "n19a1": 0.9230185798476568,
+    "n23a0": 0.9771501952681292,
+    "n23a1": 1.0586257995453932,
+    "n29a1": 1.0904880344351338,
+    "n31a0": 1.0187427668107298
+   },
+   "per_cell": {
+    "n13a0": 0.7891099022162837,
+    "n17a1": 0.7248216405450234,
+    "n19a0": 0.6692179141950286,
+    "n19a1": 0.7745923196593695,
+    "n23a0": 0.8978744225205727,
+    "n23a1": 1.0655652095395407,
+    "n29a1": 1.030925246907129,
+    "n31a0": 0.8340838840882753
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.8383035602647319,
+   "ci95": [
+    0.7478521099449237,
+    0.9420334329845709
+   ],
+   "native_wall_candidate_over_baseline": 0.9482313595668521,
+   "native_wall_ci95": [
+    0.9034677107711173,
+    0.998022604447831
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8800337267085385,
+    "n17a1": 0.8840341704741222,
+    "n19a0": 0.8745305913470791,
+    "n19a1": 0.9285570259066868,
+    "n23a0": 0.9466652944297197,
+    "n23a1": 1.0368196167152641,
+    "n29a1": 1.026445481165334,
+    "n31a0": 1.0268972933367952
+   },
+   "per_cell": {
+    "n13a0": 0.7891033898065052,
+    "n17a1": 0.7248043755393284,
+    "n19a0": 0.6692109464713168,
+    "n19a1": 0.774597503738729,
+    "n23a0": 0.89784175517525,
+    "n23a1": 1.06556513560274,
+    "n29a1": 1.0309144940292703,
+    "n31a0": 0.8340924561542631
+   }
+  }
+ },
+ "round_0017": {
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": true,
+  "cells_where_the_winner_does_not_beat_rho": {
+   "instructions": {},
+   "native": {}
+  },
+  "challenger_over_rho": {
+   "confirmation": {
+    "candidate_over_baseline": 0.6701522838381438,
+    "ci95": [
+     0.6050138439420483,
+     0.7442917796278755
     ],
-    "challenger_patches": [
-      "campaign_20260916/round13-canon.patch",
-      "campaign_20260916/round13-fastio.patch"
+    "native_wall_candidate_over_baseline": 0.8999213316900765,
+    "native_wall_ci95": [
+     0.8755174917468866,
+     0.9265554550177799
     ],
-    "source_manifest_sha256": "533855aa94edf4008c13d78c931a2ad86262a215ad7eee7ba6a4d0544ae43cf3",
-    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0013/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": true,
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.7696743535304328,
-      "ci95": [
-        0.7147839637637708,
-        0.8370425765657616
-      ],
-      "native_wall_candidate_over_baseline": 0.9097722891309724,
-      "native_wall_ci95": [
-        0.8894023669954111,
-        0.931344422318841
-      ],
-      "per_cell": {
-        "n13a0": 0.7909440919085615,
-        "n17a1": 0.6840048241225771,
-        "n19a0": 0.7283155187532868,
-        "n19a1": 0.7972142968711916,
-        "n23a0": 0.8598753207529097
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.8854436198236544,
-        "n17a1": 0.8945746887855794,
-        "n19a0": 0.922990060543596,
-        "n19a1": 0.9200964124597864,
-        "n23a0": 0.9265217990540452
-      }
+    "native_wall_per_cell": {
+     "n13a0": 0.8869214373043575,
+     "n17a1": 0.8647967922436917,
+     "n19a0": 0.8814202823585174,
+     "n19a1": 0.8909197823505127,
+     "n23a0": 0.9177634469855377,
+     "n23a1": 0.9501903102169236,
+     "n29a1": 0.9472535364080005,
+     "n31a0": 0.8645854410915679
     },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.7696753523524816,
-      "ci95": [
-        0.7147697917530964,
-        0.837057854302903
-      ],
-      "native_wall_candidate_over_baseline": 0.9206148201267645,
-      "native_wall_ci95": [
-        0.8982663875921412,
-        0.9480279891495028
-      ],
-      "per_cell": {
-        "n13a0": 0.7909409598483471,
-        "n17a1": 0.6839837628834294,
-        "n19a0": 0.7283351993553943,
-        "n19a1": 0.7972167070659771,
-        "n23a0": 0.8598849471664519
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9079316984358168,
-        "n17a1": 0.9145678631972657,
-        "n19a0": 0.8988699275382414,
-        "n19a1": 0.9185126763292231,
-        "n23a0": 0.9645809681462236
-      }
-    },
-    "controls_over_incumbent": {
-      "ld_ic": {
-        "confirmation": {
-          "candidate_over_baseline": 0.9221004420079083,
-          "ci95": [
-            0.9105500658173483,
-            0.9341019412100591
-          ],
-          "native_wall_candidate_over_baseline": 1.0198827963255803,
-          "native_wall_ci95": [
-            1.0000254421497812,
-            1.0442689454686955
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 1.0226701590118126,
-            "n17a1": 1.037760725227264,
-            "n19a0": 1.0319718844730705,
-            "n19a1": 0.9986962342160127,
-            "n23a0": 1.0088282575945933
-          }
-        },
-        "replay": {
-          "candidate_over_baseline": 0.9220999510736116,
-          "ci95": [
-            0.9105490067434208,
-            0.9341016996685284
-          ],
-          "native_wall_candidate_over_baseline": 0.9919230472971841,
-          "native_wall_ci95": [
-            0.9780062880551139,
-            1.0084014917031505
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.999461000847435,
-            "n17a1": 0.9820503812187287,
-            "n19a0": 0.9904277266588992,
-            "n19a1": 0.9861568472915904,
-            "n23a0": 1.0016626972060918
-          }
-        }
-      }
-    },
-    "median_complete_job_confirmation": {
-      "incumbent": {
-        "instructions": 1282562.0,
-        "native_ms": 1.156,
-        "receipts": 180
-      },
-      "rho": {
-        "instructions": 1716228.5,
-        "native_ms": 1.27,
-        "receipts": 180
-      }
+    "per_cell": {
+     "n13a0": 0.7146103817095697,
+     "n17a1": 0.5795572127946431,
+     "n19a0": 0.6016408723334783,
+     "n19a1": 0.5914149119278143,
+     "n23a0": 0.7422015744320458,
+     "n23a1": 0.7764647248519635,
+     "n29a1": 0.8349502607394383,
+     "n31a0": 0.5737049146048522
     }
-  },
-  "round_0014": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014",
-    "status": "retained",
-    "what_changed": "shared: the worker built as one optimisation unit (fat LTO, one codegen unit, dead sections dropped at link time), which removes a quarter of the executable text without changing a line of source or a byte of any report, plus a tests-only fix to the arena tests. Both arms got faster and rho slightly more so, as pre-registered, so the winner/rho ratios are slightly worse than round-0013's while beats_rho_strict still holds on every cell; the strict-win record stays with round-0013. Challenger lto_ic (orbit naming from the longest zero run plus the serialisation change) not promoted a fourth time: 0.9226 of the incumbent instructions but native upper limit 1.0163 on confirmation; lto_canon alone 0.9772 at selection with native upper limit 1.08.",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014/source",
-    "patches_from_round_0013_source": [
-      "campaign_20260916/round14-lto.patch",
-      "campaign_20260916/round14-arena-tests.patch"
+   },
+   "replay": {
+    "candidate_over_baseline": 0.6701518017187397,
+    "ci95": [
+     0.6050133930998162,
+     0.7442945697451894
     ],
-    "challenger_patches": [
-      "campaign_20260916/round14-canon.patch",
-      "campaign_20260916/round14-fastio.patch"
+    "native_wall_candidate_over_baseline": 0.8917617829659437,
+    "native_wall_ci95": [
+     0.8704528927757559,
+     0.9165578402001413
     ],
-    "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
-    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0014/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": true,
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.7817766252204564,
-      "ci95": [
-        0.7199868031943767,
-        0.8600593236734697
-      ],
-      "native_wall_candidate_over_baseline": 0.9424118300650626,
-      "native_wall_ci95": [
-        0.912629257744672,
-        0.9715184462908083
-      ],
-      "per_cell": {
-        "n13a0": 0.8020211560462687,
-        "n17a1": 0.7118282360822756,
-        "n19a0": 0.7126809934052354,
-        "n19a1": 0.7858927783433217,
-        "n23a0": 0.9132588618012915
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.895166998788727,
-        "n17a1": 0.9463219399306364,
-        "n19a0": 0.9293438545369769,
-        "n19a1": 0.9712408978237551,
-        "n23a0": 0.972203724300982
-      }
+    "native_wall_per_cell": {
+     "n13a0": 0.8597784866307968,
+     "n17a1": 0.8850798045399932,
+     "n19a0": 0.8580305816278647,
+     "n19a1": 0.8800088626607423,
+     "n23a0": 0.8978012685129719,
+     "n23a1": 0.9330010666240753,
+     "n29a1": 0.9413796800621089,
+     "n31a0": 0.8826831953480134
     },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.781779549842553,
-      "ci95": [
-        0.7199903911091349,
-        0.8600633389135146
-      ],
-      "native_wall_candidate_over_baseline": 0.9284422715079564,
-      "native_wall_ci95": [
-        0.9049721702559972,
-        0.9623543289813028
-      ],
-      "per_cell": {
-        "n13a0": 0.8020158697161288,
-        "n17a1": 0.7118239063378277,
-        "n19a0": 0.7126880935538176,
-        "n19a1": 0.7858981111867614,
-        "n23a0": 0.9132722234023708
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9113019485464247,
-        "n17a1": 0.9203394283350191,
-        "n19a0": 0.9167061395339992,
-        "n19a1": 0.9074457664535301,
-        "n23a0": 0.9888112102516553
-      }
-    },
-    "controls_over_incumbent": {
-      "lto_ic": {
-        "confirmation": {
-          "candidate_over_baseline": 0.9225562258060885,
-          "ci95": [
-            0.9107643639553631,
-            0.9347381523917084
-          ],
-          "native_wall_candidate_over_baseline": 0.9947099546809592,
-          "native_wall_ci95": [
-            0.9724278145334377,
-            1.0163456747616106
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9997634299094936,
-            "n17a1": 0.9689235466018998,
-            "n19a0": 1.0123372972491862,
-            "n19a1": 0.988655664764905,
-            "n23a0": 1.004442932507873
-          }
-        },
-        "replay": {
-          "candidate_over_baseline": 0.9225560541513951,
-          "ci95": [
-            0.9107638679764328,
-            0.9347376630798303
-          ],
-          "native_wall_candidate_over_baseline": 1.0021728352941925,
-          "native_wall_ci95": [
-            0.9824597644938334,
-            1.0256454230034049
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 1.035482475973274,
-            "n17a1": 0.990551237955292,
-            "n19a0": 0.9792565352256115,
-            "n19a1": 1.003226109035785,
-            "n23a0": 1.003224500842044
-          }
-        }
-      }
-    },
-    "median_complete_job_confirmation": {
-      "incumbent": {
-        "instructions": 1270805.0,
-        "native_ms": 1.143,
-        "receipts": 180
-      },
-      "rho": {
-        "instructions": 1635293.0,
-        "native_ms": 1.222,
-        "receipts": 180
-      }
+    "per_cell": {
+     "n13a0": 0.7146169147948592,
+     "n17a1": 0.5795553304507837,
+     "n19a0": 0.6016351031422642,
+     "n19a1": 0.5914135452331818,
+     "n23a0": 0.7421999971045488,
+     "n23a1": 0.7764653283790162,
+     "n29a1": 0.8349485799613817,
+     "n31a0": 0.5737069865038368
     }
+   }
   },
-  "round_0015": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015",
-    "status": "retained",
-    "what_changed": "nothing shared: the baseline is the round-0014 winner source unchanged (its source manifest hash is identical), so the incumbent measures the same executable on fresh fixtures. The IC-only challenger scan_io (orbit name from the longest circular run of zeros, the block scan keeping only each rest's abscissa, and the report serialisation change) reached 0.9059 [0.8802, 0.9272] of the incumbent instructions, the largest IC-only step the campaign has measured, and was still not promoted: native upper limit 1.0073 on confirmation and 1.0105 on replay, exactly as the pre-registration predicted from the process floor. scan alone measured 0.9642 at selection with native upper limit 1.0119. Development also recorded two dropped changes: reduction by folding a sparse modulus is 22-47% worse than the byte tables, and dropping the bounds check on those tables is a wash.",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015/source",
-    "patches_from_round_0014_source": [],
-    "challenger_patches": [
-      "campaign_20260916/round15-scan.patch",
-      "campaign_20260916/round15-fastio.patch"
-    ],
-    "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
-    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": true,
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.7372254710447864,
-      "ci95": [
-        0.6627607474515894,
-        0.8325954872020435
-      ],
-      "native_wall_candidate_over_baseline": 0.9245543066828708,
-      "native_wall_ci95": [
-        0.9034237860884715,
-        0.9502974853533789
-      ],
-      "per_cell": {
-        "n13a0": 0.7928947564983542,
-        "n17a1": 0.6886047850886027,
-        "n19a0": 0.6461981017812877,
-        "n19a1": 0.684888326585378,
-        "n23a0": 0.9012196118698091
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9031038162960503,
-        "n17a1": 0.9148486644174064,
-        "n19a0": 0.9157294753257335,
-        "n19a1": 0.9260361461247276,
-        "n23a0": 0.9642287165993544
-      }
+  "challenger_patches": [
+   "campaign_20260916/round17-orbits.patch",
+   "campaign_20260916/round17-rows.patch",
+   "campaign_20260916/round17-oracle-orbits.patch"
+  ],
+  "controls_over_incumbent": {
+   "orbits": {
+    "confirmation": {
+     "candidate_over_baseline": 0.8318637727900098,
+     "ci95": [
+      0.8109124358379497,
+      0.8512556961461358
+     ],
+     "native_wall_candidate_over_baseline": 0.9417149107684725,
+     "native_wall_ci95": [
+      0.9172232193663789,
+      0.9640014454071378
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.98625539163118,
+      "n17a1": 0.9734721197968563,
+      "n19a0": 0.9300960597470063,
+      "n19a1": 0.958427696576417,
+      "n23a0": 0.9281100046369305,
+      "n23a1": 0.9635741426506138,
+      "n29a1": 0.9190069809897177,
+      "n31a0": 0.8793304356554104
+     }
     },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.7372294803775452,
-      "ci95": [
-        0.6627657681259977,
-        0.8326116460823377
-      ],
-      "native_wall_candidate_over_baseline": 0.9156624594233596,
-      "native_wall_ci95": [
-        0.8886201722807316,
-        0.9563789203616806
-      ],
-      "per_cell": {
-        "n13a0": 0.7929001650716976,
-        "n17a1": 0.6885931690317117,
-        "n19a0": 0.6462076852053098,
-        "n19a1": 0.6848841994084518,
-        "n23a0": 0.9012452388804256
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.8991836892550887,
-        "n17a1": 0.8990771591816419,
-        "n19a0": 0.8853320277258658,
-        "n19a1": 0.9105923333849517,
-        "n23a0": 0.987646424994156
-      }
+    "development": {
+     "candidate_over_baseline": 0.8329507523416695,
+     "ci95": [
+      0.8093158183148812,
+      0.8577503041688865
+     ],
+     "native_wall_candidate_over_baseline": 0.9619940135395713,
+     "native_wall_ci95": [
+      0.9261666752294395,
+      0.9996488769053589
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9849390543084994,
+      "n17a1": 0.9691248013854836,
+      "n19a0": 0.9154127206823891,
+      "n23a0": 0.9624087326557157,
+      "n23a1": 0.9342722162148847,
+      "n31a0": 1.008777108449595
+     }
     },
-    "controls_over_incumbent": {
-      "scan_io": {
-        "confirmation": {
-          "candidate_over_baseline": 0.9059186019795286,
-          "ci95": [
-            0.8802267702126854,
-            0.9272348324360442
-          ],
-          "native_wall_candidate_over_baseline": 0.9924621829274088,
-          "native_wall_ci95": [
-            0.9785179757065511,
-            1.0072720504423012
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9989141205872248,
-            "n17a1": 0.9832052860456189,
-            "n19a0": 0.9812371103727203,
-            "n19a1": 0.99847772991855,
-            "n23a0": 1.000656755208664
-          }
-        },
-        "replay": {
-          "candidate_over_baseline": 0.905918447711432,
-          "ci95": [
-            0.8802271356458237,
-            0.9272320115753816
-          ],
-          "native_wall_candidate_over_baseline": 0.9956769497956646,
-          "native_wall_ci95": [
-            0.9830374110402569,
-            1.0104572197358597
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9981470093105134,
-            "n17a1": 0.9933235798231203,
-            "n19a0": 0.9847073982792586,
-            "n19a1": 1.0113902282888496,
-            "n23a0": 0.9910168916172433
-          }
-        }
-      }
+    "replay": {
+     "candidate_over_baseline": 0.8318631333867211,
+     "ci95": [
+      0.8109130057632855,
+      0.851253748873149
+     ],
+     "native_wall_candidate_over_baseline": 0.9286891199475101,
+     "native_wall_ci95": [
+      0.9090602217322241,
+      0.9458509142129178
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9632303669577954,
+      "n17a1": 0.9401887495478118,
+      "n19a0": 0.9399789616086022,
+      "n19a1": 0.9403839758685345,
+      "n23a0": 0.9161598435486604,
+      "n23a1": 0.9379346200493387,
+      "n29a1": 0.9066351037416159,
+      "n31a0": 0.8871926649124969
+     }
     },
-    "median_complete_job_confirmation": {
-      "incumbent": {
-        "instructions": 1291509.0,
-        "native_ms": 1.084,
-        "receipts": 180
-      },
-      "rho": {
-        "instructions": 1850374.0,
-        "native_ms": 1.186,
-        "receipts": 180
-      }
+    "selection": {
+     "candidate_over_baseline": 0.8340030168155106,
+     "ci95": [
+      0.8106714315006416,
+      0.8589104438638393
+     ],
+     "native_wall_candidate_over_baseline": 0.9525687640882387,
+     "native_wall_ci95": [
+      0.9312484939232455,
+      0.9775737776937312
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9754732188001086,
+      "n17a1": 0.9327087705236558,
+      "n19a0": 0.9676496496773959,
+      "n23a0": 0.9370050730273178,
+      "n23a1": 0.9781963583315766,
+      "n31a0": 0.9258283588293824
+     }
     }
-  },
-  "strict_win_record_note": "Cross-round ratios carry fresh-fixture variation at least as large as the differences between the recent rounds, so the record is not a precise ranking. The round-0014 winner source, unchanged and with an identical source-manifest hash, measured winner/rho 0.7818 instructions and 0.9424 native in round-0014 and 0.7372 and 0.9246 in round-0015 -- the same executable, different fixtures. Round-0013 holds the record on the native metric (0.9098) and round-0015 shows the lowest instruction ratio (0.7372); neither dominates, and the record is left where it was rather than moved on a difference this measurement cannot separate from fixture draw. Round 0016 widened the panel to eight cells and beats_rho_strict came back FALSE: the winner loses to rho outright at n23a1 (instructions 1.0656) and at n29a1 (native 1.0905), and the panel-wide native upper limit is 1.0288. The same receipts restricted to the legacy five cells still pass strictly (native 0.9341, upper 0.9653, every cell below one), so every strict-win record above -- round 0013 included -- is scoped to that five-cell panel and must not be restated at family level. The record pointer is left at round-0013 because it names the best five-cell measurement, not because the claim survives a wider panel. Round 0017 is the first strict win on the eight-cell panel; strict_win_record (five cells) is left at round-0013 because five-cell and eight-cell ratios are not comparable, and strict_win_record_eight_cells names the eight-cell record separately.",
-  "round_0016": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016",
-    "status": "retained",
-    "panel": {
-      "cells": [
-        "n13a0",
-        "n17a1",
-        "n19a0",
-        "n23a0",
-        "n23a1",
-        "n31a0"
-      ],
-      "holdout_cells": [
-        "n19a1",
-        "n29a1"
-      ],
-      "confirmation_cases": 96,
-      "changed_from": "five cells (n13a0, n17a1, n19a0, n23a0 + n19a1 holdout), rounds 0006-0015"
+   },
+   "orbits_rows": {
+    "development": {
+     "candidate_over_baseline": 0.8670735138198276,
+     "ci95": [
+      0.8124345362230612,
+      0.9731011996571056
+     ],
+     "native_wall_candidate_over_baseline": 0.9567207639416999,
+     "native_wall_ci95": [
+      0.9199587745469006,
+      0.9976173212402502
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.955400341451988,
+      "n17a1": 0.9674043632130813,
+      "n19a0": 0.9309357441537307,
+      "n23a0": 0.9346943483016436,
+      "n23a1": 0.9974663358388192,
+      "n31a0": 0.9559390309851619
+     }
     },
-    "what_changed": "no source in either arm: both are the byte-identical trees round 0015 sealed, so every difference from round 0015 belongs to the panel or to fresh fixtures. The PANEL changed, for the first time since round 0006. tournament.py gained --cells and --holdout-cells (defaults reproduce the rounds 0006-0015 panel exactly) and this round ran eight confirmation cells instead of five, adding n23a1 (subgroup 4,196,903, twice the largest cell previously tested), n31a0 at the highest usable degree, and n29a1 as a second holdout. A census of every (degree, curve_a) pair the worker admits found seventeen usable cells; degrees 21, 25 and 27 have no usable subgroup at either a, so 31 is the top of the family rather than the next rung.",
-    "headline": "beats_rho_strict is FALSE on the widened panel, for the first time since round 0013. The same receipts restricted to the legacy five cells still pass it. The strict win was a property of the panel, not of the algorithm.",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016/source",
-    "patches_from_round_0015_source": [],
-    "challenger_patches": [
-      "campaign_20260916/round15-scan.patch",
-      "campaign_20260916/round15-fastio.patch"
-    ],
-    "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
-    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": false,
-    "rho_over_winner": 1.192874511885588,
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.83831114676035,
-      "ci95": [
-        0.747866139139291,
-        0.9420452776988771
-      ],
-      "native_wall_candidate_over_baseline": 0.9778805273908171,
-      "native_wall_ci95": [
-        0.9338506276887212,
-        1.0288208398184095
-      ],
-      "per_cell": {
-        "n13a0": 0.7891099022162837,
-        "n17a1": 0.7248216405450234,
-        "n19a0": 0.6692179141950286,
-        "n19a1": 0.7745923196593695,
-        "n23a0": 0.8978744225205727,
-        "n23a1": 1.0655652095395407,
-        "n29a1": 1.030925246907129,
-        "n31a0": 0.8340838840882753
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.9115260986251638,
-        "n17a1": 0.930176179021046,
-        "n19a0": 0.9297204427141912,
-        "n19a1": 0.9230185798476568,
-        "n23a0": 0.9771501952681292,
-        "n23a1": 1.0586257995453932,
-        "n29a1": 1.0904880344351338,
-        "n31a0": 1.0187427668107298
-      }
-    },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.8383035602647319,
-      "ci95": [
-        0.7478521099449237,
-        0.9420334329845709
-      ],
-      "native_wall_candidate_over_baseline": 0.9482313595668521,
-      "native_wall_ci95": [
-        0.9034677107711173,
-        0.998022604447831
-      ],
-      "per_cell": {
-        "n13a0": 0.7891033898065052,
-        "n17a1": 0.7248043755393284,
-        "n19a0": 0.6692109464713168,
-        "n19a1": 0.774597503738729,
-        "n23a0": 0.89784175517525,
-        "n23a1": 1.06556513560274,
-        "n29a1": 1.0309144940292703,
-        "n31a0": 0.8340924561542631
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.8800337267085385,
-        "n17a1": 0.8840341704741222,
-        "n19a0": 0.8745305913470791,
-        "n19a1": 0.9285570259066868,
-        "n23a0": 0.9466652944297197,
-        "n23a1": 1.0368196167152641,
-        "n29a1": 1.026445481165334,
-        "n31a0": 1.0268972933367952
-      }
-    },
-    "cells_where_the_winner_loses_to_rho": {
-      "instructions": {
-        "n23a1": 1.0655652095395407,
-        "n29a1": 1.030925246907129
-      },
-      "native": {
-        "n23a1": 1.0586257995453932,
-        "n29a1": 1.0904880344351338,
-        "n31a0": 1.0187427668107298
-      }
-    },
-    "legacy_five_cell_subset_of_these_receipts": {
-      "cells": [
-        "n13a0",
-        "n17a1",
-        "n19a0",
-        "n19a1",
-        "n23a0"
-      ],
-      "purpose": "the same frozen receipts restricted to the rounds 0006-0015 panel, so the eight-cell verdict and the five-cell one are read side by side",
-      "incumbent_over_rho": {
-        "candidate_over_baseline": 0.767441000826205,
-        "ci95": [
-          0.7012914895717608,
-          0.855889186367098
-        ],
-        "native_wall_candidate_over_baseline": 0.9340533740904756,
-        "native_wall_ci95": [
-          0.9117856762213744,
-          0.965254188565241
-        ],
-        "native_wall_per_cell": {
-          "n13a0": 0.9115260986251638,
-          "n17a1": 0.930176179021046,
-          "n19a0": 0.9297204427141912,
-          "n19a1": 0.9230185798476568,
-          "n23a0": 0.9771501952681292
-        },
-        "per_cell": {
-          "n13a0": 0.7891099022162837,
-          "n17a1": 0.7248216405450234,
-          "n19a0": 0.6692179141950286,
-          "n19a1": 0.7745923196593695,
-          "n23a0": 0.8978744225205727
-        }
-      },
-      "scan_io_over_incumbent": {
-        "candidate_over_baseline": 0.9055858786101901,
-        "ci95": [
-          0.8792845267591635,
-          0.9271128142999386
-        ],
-        "native_wall_candidate_over_baseline": 0.9857573208664466,
-        "native_wall_ci95": [
-          0.9675006179808505,
-          1.0065477009436978
-        ],
-        "native_wall_per_cell": {
-          "n13a0": 0.971609579694721,
-          "n17a1": 0.9765996263169431,
-          "n19a0": 0.9792514177703967,
-          "n19a1": 0.9857335804096767,
-          "n23a0": 1.016220503231187
-        },
-        "per_cell": {
-          "n13a0": 0.9403441879423585,
-          "n17a1": 0.9156684737635247,
-          "n19a0": 0.9113309848077052,
-          "n19a1": 0.9029391835972258,
-          "n23a0": 0.8595842821750695
-        }
-      },
-      "scan_io_over_rho": {
-        "candidate_over_baseline": 0.6949837330146825,
-        "ci95": [
-          0.6385755749688302,
-          0.7602338646900942
-        ],
-        "native_wall_candidate_over_baseline": 0.9207499515896921,
-        "native_wall_ci95": [
-          0.8946021079442085,
-          0.9636374733614804
-        ],
-        "native_wall_per_cell": {
-          "n13a0": 0.8856474895659641,
-          "n17a1": 0.9084097088408755,
-          "n19a0": 0.9104300616579927,
-          "n19a1": 0.9098504094978858,
-          "n23a0": 0.9930000631678308
-        },
-        "per_cell": {
-          "n13a0": 0.7420349101968453,
-          "n17a1": 0.6636963253486355,
-          "n19a0": 0.6098790207943138,
-          "n19a1": 0.6994097567339124,
-          "n23a0": 0.7717987409657016
-        }
-      }
-    },
-    "controls_over_incumbent": {
-      "scan_io": {
-        "confirmation": {
-          "candidate_over_baseline": 0.8872690528573522,
-          "ci95": [
-            0.86443096699722,
-            0.9093386210939163
-          ],
-          "native_wall_candidate_over_baseline": 0.9780434377558893,
-          "native_wall_ci95": [
-            0.960814677461623,
-            0.9947467695163384
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.971609579694721,
-            "n17a1": 0.9765996263169431,
-            "n19a0": 0.9792514177703967,
-            "n19a1": 0.9857335804096767,
-            "n23a0": 1.016220503231187,
-            "n23a1": 0.9646245204251439,
-            "n29a1": 0.9505737086050502,
-            "n31a0": 0.9810044939963461
-          }
-        },
-        "replay": {
-          "candidate_over_baseline": 0.8872703726659092,
-          "ci95": [
-            0.8644310955934759,
-            0.9093410947506849
-          ],
-          "native_wall_candidate_over_baseline": 0.9870630056558192,
-          "native_wall_ci95": [
-            0.972057558633584,
-            1.0034028800015453
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9600623382693132,
-            "n17a1": 1.0033390686693617,
-            "n19a0": 0.9912130695545174,
-            "n19a1": 0.9823889938045406,
-            "n23a0": 0.9851076708164385,
-            "n23a1": 0.973367148868979,
-            "n29a1": 1.0231825640257608,
-            "n31a0": 0.9791468262326045
-          }
-        }
-      }
-    },
-    "median_complete_job_confirmation": {
-      "incumbent": {
-        "instructions": 1948049.5,
-        "native_ms": 1.262,
-        "receipts": 288
-      },
-      "scan_io": {
-        "instructions": 1723525.0,
-        "native_ms": 1.242,
-        "receipts": 288
-      },
-      "rho": {
-        "instructions": 1996379.0,
-        "native_ms": 1.286,
-        "receipts": 288
-      }
+    "selection": {
+     "candidate_over_baseline": 0.8479586132443782,
+     "ci95": [
+      0.8155332081002954,
+      0.8852597250142603
+     ],
+     "native_wall_candidate_over_baseline": 0.9748447904347233,
+     "native_wall_ci95": [
+      0.9395731103592915,
+      1.00848268925069
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9574843309526629,
+      "n17a1": 0.9553609119620798,
+      "n19a0": 0.9795721826090882,
+      "n23a0": 0.9966054504256115,
+      "n23a1": 1.0337960757403704,
+      "n31a0": 0.9296492558593492
+     }
     }
-  },
-  "round_0017": {
-    "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017",
-    "status": "orbits",
-    "winner": "orbits",
-    "panel": {
-      "cells": [
-        "n13a0",
-        "n17a1",
-        "n19a0",
-        "n23a0",
-        "n23a1",
-        "n31a0"
-      ],
-      "holdout_cells": [
-        "n19a1",
-        "n29a1"
-      ],
-      "confirmation_cases": 96
-    },
-    "what_changed": "the certificate, not the algorithm: orbits is the round-0015 scan_io challenger with the factor base named by its orbit representatives (factor_base_orbits) and the checker regenerating the flat base with its own Frobenius and negation (round17-oracle-orbits.patch, additive). orbits_rows adds the pair-table row rule weighted at the measured 680/380 build/scan cost, which moves n23a1 from three rows to two. scan_io rides unchanged as a control. The incumbent is the round-0016 retained source unchanged.",
-    "headline": "beats_rho_strict=True; winner=orbits; cells where the winner is at or above rho: {'instructions': {}, 'native': {}}",
-    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017/source",
-    "challenger_patches": [
-      "campaign_20260916/round17-orbits.patch",
-      "campaign_20260916/round17-rows.patch",
-      "campaign_20260916/round17-oracle-orbits.patch"
-    ],
-    "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
-    "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
-    "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017/decision.json",
-    "rho_parity": true,
-    "beats_rho_instructions_point": true,
-    "beats_rho_strict": true,
-    "rho_over_winner": 1.4921981527433272,
-    "winner_over_rho_confirmation": {
-      "candidate_over_baseline": 0.6701522838381438,
-      "ci95": [
-        0.6050138439420483,
-        0.7442917796278755
-      ],
-      "native_wall_candidate_over_baseline": 0.8999213316900765,
-      "native_wall_ci95": [
-        0.8755174917468866,
-        0.9265554550177799
-      ],
-      "per_cell": {
-        "n13a0": 0.7146103817095697,
-        "n17a1": 0.5795572127946431,
-        "n19a0": 0.6016408723334783,
-        "n19a1": 0.5914149119278143,
-        "n23a0": 0.7422015744320458,
-        "n23a1": 0.7764647248519635,
-        "n29a1": 0.8349502607394383,
-        "n31a0": 0.5737049146048522
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.8869214373043575,
-        "n17a1": 0.8647967922436917,
-        "n19a0": 0.8814202823585174,
-        "n19a1": 0.8909197823505127,
-        "n23a0": 0.9177634469855377,
-        "n23a1": 0.9501903102169236,
-        "n29a1": 0.9472535364080005,
-        "n31a0": 0.8645854410915679
-      }
-    },
-    "winner_over_rho_replay": {
-      "candidate_over_baseline": 0.6701518017187397,
-      "ci95": [
-        0.6050133930998162,
-        0.7442945697451894
-      ],
-      "native_wall_candidate_over_baseline": 0.8917617829659437,
-      "native_wall_ci95": [
-        0.8704528927757559,
-        0.9165578402001413
-      ],
-      "per_cell": {
-        "n13a0": 0.7146169147948592,
-        "n17a1": 0.5795553304507837,
-        "n19a0": 0.6016351031422642,
-        "n19a1": 0.5914135452331818,
-        "n23a0": 0.7421999971045488,
-        "n23a1": 0.7764653283790162,
-        "n29a1": 0.8349485799613817,
-        "n31a0": 0.5737069865038368
-      },
-      "native_wall_per_cell": {
-        "n13a0": 0.8597784866307968,
-        "n17a1": 0.8850798045399932,
-        "n19a0": 0.8580305816278647,
-        "n19a1": 0.8800088626607423,
-        "n23a0": 0.8978012685129719,
-        "n23a1": 0.9330010666240753,
-        "n29a1": 0.9413796800621089,
-        "n31a0": 0.8826831953480134
-      }
-    },
-    "cells_where_the_winner_does_not_beat_rho": {
-      "instructions": {},
-      "native": {}
-    },
-    "legacy_five_cell_subset_of_these_receipts": {
-      "cells": [
-        "n13a0",
-        "n17a1",
-        "n19a0",
-        "n19a1",
-        "n23a0"
-      ],
-      "winner_over_rho": {
-        "candidate_over_baseline": 0.6423672959211109,
-        "ci95": [
-          0.5846353665039983,
-          0.7094425462471318
-        ],
-        "native_wall_candidate_over_baseline": 0.8881990905491595,
-        "native_wall_ci95": [
-          0.8680446598529111,
-          0.9094497481756659
-        ],
-        "native_wall_per_cell": {
-          "n13a0": 0.8869214373043575,
-          "n17a1": 0.8647967922436917,
-          "n19a0": 0.8814202823585174,
-          "n19a1": 0.8909197823505127,
-          "n23a0": 0.9177634469855377
-        },
-        "per_cell": {
-          "n13a0": 0.7146103817095697,
-          "n17a1": 0.5795572127946431,
-          "n19a0": 0.6016408723334783,
-          "n19a1": 0.5914149119278143,
-          "n23a0": 0.7422015744320458
-        }
-      }
-    },
-    "challenger_over_rho": {
-      "confirmation": {
-        "candidate_over_baseline": 0.6701522838381438,
-        "ci95": [
-          0.6050138439420483,
-          0.7442917796278755
-        ],
-        "native_wall_candidate_over_baseline": 0.8999213316900765,
-        "native_wall_ci95": [
-          0.8755174917468866,
-          0.9265554550177799
-        ],
-        "per_cell": {
-          "n13a0": 0.7146103817095697,
-          "n17a1": 0.5795572127946431,
-          "n19a0": 0.6016408723334783,
-          "n19a1": 0.5914149119278143,
-          "n23a0": 0.7422015744320458,
-          "n23a1": 0.7764647248519635,
-          "n29a1": 0.8349502607394383,
-          "n31a0": 0.5737049146048522
-        },
-        "native_wall_per_cell": {
-          "n13a0": 0.8869214373043575,
-          "n17a1": 0.8647967922436917,
-          "n19a0": 0.8814202823585174,
-          "n19a1": 0.8909197823505127,
-          "n23a0": 0.9177634469855377,
-          "n23a1": 0.9501903102169236,
-          "n29a1": 0.9472535364080005,
-          "n31a0": 0.8645854410915679
-        }
-      },
-      "replay": {
-        "candidate_over_baseline": 0.6701518017187397,
-        "ci95": [
-          0.6050133930998162,
-          0.7442945697451894
-        ],
-        "native_wall_candidate_over_baseline": 0.8917617829659437,
-        "native_wall_ci95": [
-          0.8704528927757559,
-          0.9165578402001413
-        ],
-        "per_cell": {
-          "n13a0": 0.7146169147948592,
-          "n17a1": 0.5795553304507837,
-          "n19a0": 0.6016351031422642,
-          "n19a1": 0.5914135452331818,
-          "n23a0": 0.7421999971045488,
-          "n23a1": 0.7764653283790162,
-          "n29a1": 0.8349485799613817,
-          "n31a0": 0.5737069865038368
-        },
-        "native_wall_per_cell": {
-          "n13a0": 0.8597784866307968,
-          "n17a1": 0.8850798045399932,
-          "n19a0": 0.8580305816278647,
-          "n19a1": 0.8800088626607423,
-          "n23a0": 0.8978012685129719,
-          "n23a1": 0.9330010666240753,
-          "n29a1": 0.9413796800621089,
-          "n31a0": 0.8826831953480134
-        }
-      }
-    },
-    "controls_over_incumbent": {
-      "scan_io": {
-        "development": {
-          "candidate_over_baseline": 0.885920257324233,
-          "ci95": [
-            0.8579412615345378,
-            0.9174436864988459
-          ],
-          "native_wall_candidate_over_baseline": 0.9892402776443733,
-          "native_wall_ci95": [
-            0.9578599877150158,
-            1.0254813150618864
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9885955370376153,
-            "n17a1": 1.0316026815614974,
-            "n19a0": 0.9671230800458737,
-            "n23a0": 1.0020067457370074,
-            "n23a1": 0.9510756037508088,
-            "n31a0": 0.9970391263379709
-          }
-        }
-      },
-      "orbits": {
-        "development": {
-          "candidate_over_baseline": 0.8329507523416695,
-          "ci95": [
-            0.8093158183148812,
-            0.8577503041688865
-          ],
-          "native_wall_candidate_over_baseline": 0.9619940135395713,
-          "native_wall_ci95": [
-            0.9261666752294395,
-            0.9996488769053589
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9849390543084994,
-            "n17a1": 0.9691248013854836,
-            "n19a0": 0.9154127206823891,
-            "n23a0": 0.9624087326557157,
-            "n23a1": 0.9342722162148847,
-            "n31a0": 1.008777108449595
-          }
-        },
-        "selection": {
-          "candidate_over_baseline": 0.8340030168155106,
-          "ci95": [
-            0.8106714315006416,
-            0.8589104438638393
-          ],
-          "native_wall_candidate_over_baseline": 0.9525687640882387,
-          "native_wall_ci95": [
-            0.9312484939232455,
-            0.9775737776937312
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9754732188001086,
-            "n17a1": 0.9327087705236558,
-            "n19a0": 0.9676496496773959,
-            "n23a0": 0.9370050730273178,
-            "n23a1": 0.9781963583315766,
-            "n31a0": 0.9258283588293824
-          }
-        },
-        "confirmation": {
-          "candidate_over_baseline": 0.8318637727900098,
-          "ci95": [
-            0.8109124358379497,
-            0.8512556961461358
-          ],
-          "native_wall_candidate_over_baseline": 0.9417149107684725,
-          "native_wall_ci95": [
-            0.9172232193663789,
-            0.9640014454071378
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.98625539163118,
-            "n17a1": 0.9734721197968563,
-            "n19a0": 0.9300960597470063,
-            "n19a1": 0.958427696576417,
-            "n23a0": 0.9281100046369305,
-            "n23a1": 0.9635741426506138,
-            "n29a1": 0.9190069809897177,
-            "n31a0": 0.8793304356554104
-          }
-        },
-        "replay": {
-          "candidate_over_baseline": 0.8318631333867211,
-          "ci95": [
-            0.8109130057632855,
-            0.851253748873149
-          ],
-          "native_wall_candidate_over_baseline": 0.9286891199475101,
-          "native_wall_ci95": [
-            0.9090602217322241,
-            0.9458509142129178
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9632303669577954,
-            "n17a1": 0.9401887495478118,
-            "n19a0": 0.9399789616086022,
-            "n19a1": 0.9403839758685345,
-            "n23a0": 0.9161598435486604,
-            "n23a1": 0.9379346200493387,
-            "n29a1": 0.9066351037416159,
-            "n31a0": 0.8871926649124969
-          }
-        }
-      },
-      "orbits_rows": {
-        "development": {
-          "candidate_over_baseline": 0.8670735138198276,
-          "ci95": [
-            0.8124345362230612,
-            0.9731011996571056
-          ],
-          "native_wall_candidate_over_baseline": 0.9567207639416999,
-          "native_wall_ci95": [
-            0.9199587745469006,
-            0.9976173212402502
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.955400341451988,
-            "n17a1": 0.9674043632130813,
-            "n19a0": 0.9309357441537307,
-            "n23a0": 0.9346943483016436,
-            "n23a1": 0.9974663358388192,
-            "n31a0": 0.9559390309851619
-          }
-        },
-        "selection": {
-          "candidate_over_baseline": 0.8479586132443782,
-          "ci95": [
-            0.8155332081002954,
-            0.8852597250142603
-          ],
-          "native_wall_candidate_over_baseline": 0.9748447904347233,
-          "native_wall_ci95": [
-            0.9395731103592915,
-            1.00848268925069
-          ],
-          "native_wall_per_cell": {
-            "n13a0": 0.9574843309526629,
-            "n17a1": 0.9553609119620798,
-            "n19a0": 0.9795721826090882,
-            "n23a0": 0.9966054504256115,
-            "n23a1": 1.0337960757403704,
-            "n31a0": 0.9296492558593492
-          }
-        }
-      }
-    },
-    "median_complete_job_confirmation": {
-      "incumbent": {
-        "instructions": 1867436.5,
-        "native_ms": 1.231,
-        "receipts": 288
-      },
-      "orbits": {
-        "instructions": 1536482.0,
-        "native_ms": 1.139,
-        "receipts": 288
-      },
-      "rho": {
-        "instructions": 2123921.0,
-        "native_ms": 1.24,
-        "receipts": 288
-      }
+   },
+   "scan_io": {
+    "development": {
+     "candidate_over_baseline": 0.885920257324233,
+     "ci95": [
+      0.8579412615345378,
+      0.9174436864988459
+     ],
+     "native_wall_candidate_over_baseline": 0.9892402776443733,
+     "native_wall_ci95": [
+      0.9578599877150158,
+      1.0254813150618864
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9885955370376153,
+      "n17a1": 1.0316026815614974,
+      "n19a0": 0.9671230800458737,
+      "n23a0": 1.0020067457370074,
+      "n23a1": 0.9510756037508088,
+      "n31a0": 0.9970391263379709
+     }
     }
+   }
   },
-  "strict_win_record_eight_cells": "round-0017"
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017/decision.json",
+  "headline": "beats_rho_strict=True; winner=orbits; cells where the winner is at or above rho: {'instructions': {}, 'native': {}}",
+  "legacy_five_cell_subset_of_these_receipts": {
+   "cells": [
+    "n13a0",
+    "n17a1",
+    "n19a0",
+    "n19a1",
+    "n23a0"
+   ],
+   "winner_over_rho": {
+    "candidate_over_baseline": 0.6423672959211109,
+    "ci95": [
+     0.5846353665039983,
+     0.7094425462471318
+    ],
+    "native_wall_candidate_over_baseline": 0.8881990905491595,
+    "native_wall_ci95": [
+     0.8680446598529111,
+     0.9094497481756659
+    ],
+    "native_wall_per_cell": {
+     "n13a0": 0.8869214373043575,
+     "n17a1": 0.8647967922436917,
+     "n19a0": 0.8814202823585174,
+     "n19a1": 0.8909197823505127,
+     "n23a0": 0.9177634469855377
+    },
+    "per_cell": {
+     "n13a0": 0.7146103817095697,
+     "n17a1": 0.5795572127946431,
+     "n19a0": 0.6016408723334783,
+     "n19a1": 0.5914149119278143,
+     "n23a0": 0.7422015744320458
+    }
+   }
+  },
+  "median_complete_job_confirmation": {
+   "incumbent": {
+    "instructions": 1867436.5,
+    "native_ms": 1.231,
+    "receipts": 288
+   },
+   "orbits": {
+    "instructions": 1536482.0,
+    "native_ms": 1.139,
+    "receipts": 288
+   },
+   "rho": {
+    "instructions": 2123921.0,
+    "native_ms": 1.24,
+    "receipts": 288
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "panel": {
+   "cells": [
+    "n13a0",
+    "n17a1",
+    "n19a0",
+    "n23a0",
+    "n23a1",
+    "n31a0"
+   ],
+   "confirmation_cases": 96,
+   "holdout_cells": [
+    "n19a1",
+    "n29a1"
+   ]
+  },
+  "rho_over_winner": 1.4921981527433272,
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017",
+  "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017/source",
+  "status": "orbits",
+  "what_changed": "the certificate, not the algorithm: orbits is the round-0015 scan_io challenger with the factor base named by its orbit representatives (factor_base_orbits) and the checker regenerating the flat base with its own Frobenius and negation (round17-oracle-orbits.patch, additive). orbits_rows adds the pair-table row rule weighted at the measured 680/380 build/scan cost, which moves n23a1 from three rows to two. scan_io rides unchanged as a control. The incumbent is the round-0016 retained source unchanged.",
+  "winner": "orbits",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.6701522838381438,
+   "ci95": [
+    0.6050138439420483,
+    0.7442917796278755
+   ],
+   "native_wall_candidate_over_baseline": 0.8999213316900765,
+   "native_wall_ci95": [
+    0.8755174917468866,
+    0.9265554550177799
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8869214373043575,
+    "n17a1": 0.8647967922436917,
+    "n19a0": 0.8814202823585174,
+    "n19a1": 0.8909197823505127,
+    "n23a0": 0.9177634469855377,
+    "n23a1": 0.9501903102169236,
+    "n29a1": 0.9472535364080005,
+    "n31a0": 0.8645854410915679
+   },
+   "per_cell": {
+    "n13a0": 0.7146103817095697,
+    "n17a1": 0.5795572127946431,
+    "n19a0": 0.6016408723334783,
+    "n19a1": 0.5914149119278143,
+    "n23a0": 0.7422015744320458,
+    "n23a1": 0.7764647248519635,
+    "n29a1": 0.8349502607394383,
+    "n31a0": 0.5737049146048522
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.6701518017187397,
+   "ci95": [
+    0.6050133930998162,
+    0.7442945697451894
+   ],
+   "native_wall_candidate_over_baseline": 0.8917617829659437,
+   "native_wall_ci95": [
+    0.8704528927757559,
+    0.9165578402001413
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8597784866307968,
+    "n17a1": 0.8850798045399932,
+    "n19a0": 0.8580305816278647,
+    "n19a1": 0.8800088626607423,
+    "n23a0": 0.8978012685129719,
+    "n23a1": 0.9330010666240753,
+    "n29a1": 0.9413796800621089,
+    "n31a0": 0.8826831953480134
+   },
+   "per_cell": {
+    "n13a0": 0.7146169147948592,
+    "n17a1": 0.5795553304507837,
+    "n19a0": 0.6016351031422642,
+    "n19a1": 0.5914135452331818,
+    "n23a0": 0.7421999971045488,
+    "n23a1": 0.7764653283790162,
+    "n29a1": 0.8349485799613817,
+    "n31a0": 0.5737069865038368
+   }
+  }
+ },
+ "round_0018b": {
+  "beats_rho_instructions_point": true,
+  "beats_rho_strict": false,
+  "cells_where_the_winner_does_not_beat_rho": {
+   "instructions": {
+    "n23a1": 1.0231222850821338
+   },
+   "native": {
+    "n23a1": 1.0062830313848707,
+    "n29a1": 1.0093027306775213
+   }
+  },
+  "challenger_over_rho": {
+   "confirmation": {
+    "candidate_over_baseline": 0.6867688354630321,
+    "ci95": [
+     0.6031209689499781,
+     0.7911210994126626
+    ],
+    "native_wall_candidate_over_baseline": 0.8825348058403502,
+    "native_wall_ci95": [
+     0.8520768601635375,
+     0.9187378443186442
+    ],
+    "native_wall_per_cell": {
+     "n13a0": 0.8535009108272679,
+     "n17a1": 0.8638604455411782,
+     "n19a0": 0.8251690034508021,
+     "n19a1": 0.8495526248730283,
+     "n23a0": 0.9130092479118582,
+     "n23a1": 0.9840821542774316,
+     "n29a1": 0.9094869622183339,
+     "n31a0": 0.8713065087882831
+    },
+    "per_cell": {
+     "n13a0": 0.6863461469149538,
+     "n17a1": 0.5623520730121472,
+     "n19a0": 0.5530373415866516,
+     "n19a1": 0.6057633837408491,
+     "n23a0": 0.7557413145523578,
+     "n23a1": 1.0111803124560803,
+     "n29a1": 0.784969792908929,
+     "n31a0": 0.638000391071958
+    }
+   },
+   "replay": {
+    "candidate_over_baseline": 0.6867671874171805,
+    "ci95": [
+     0.6031186036164004,
+     0.7911142916822589
+    ],
+    "native_wall_candidate_over_baseline": 0.8821159820331486,
+    "native_wall_ci95": [
+     0.8547791956043607,
+     0.9178635190874673
+    ],
+    "native_wall_per_cell": {
+     "n13a0": 0.8579977544630004,
+     "n17a1": 0.8430022435803696,
+     "n19a0": 0.8437644575308543,
+     "n19a1": 0.8566666857797125,
+     "n23a0": 0.9025944947018684,
+     "n23a1": 0.9833990039197131,
+     "n29a1": 0.9045613727661199,
+     "n31a0": 0.8733675569412969
+    },
+    "per_cell": {
+     "n13a0": 0.686340999017039,
+     "n17a1": 0.5623492419617693,
+     "n19a0": 0.5530350157103634,
+     "n19a1": 0.6057647308036708,
+     "n23a0": 0.7557209736747743,
+     "n23a1": 1.0111816945468157,
+     "n29a1": 0.7849717116596916,
+     "n31a0": 0.6380121452633352
+    }
+   }
+  },
+  "challenger_patches": [
+   "campaign_20260916/round18-block.patch",
+   "campaign_20260916/round18-column.patch",
+   "campaign_20260916/round18-oracle-convention.patch"
+  ],
+  "controls_over_incumbent": {
+   "block": {
+    "development": {
+     "candidate_over_baseline": 0.9906402246523662,
+     "ci95": [
+      0.9817918788762047,
+      0.9984376006251332
+     ],
+     "native_wall_candidate_over_baseline": 0.9817426987163468,
+     "native_wall_ci95": [
+      0.9559130993426452,
+      1.0077829863467256
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9380569799831571,
+      "n17a1": 0.9688110269621885,
+      "n19a0": 0.9792015876972885,
+      "n23a0": 0.9967841179293929,
+      "n23a1": 1.0147477490129437,
+      "n31a0": 0.9946870701998878
+     }
+    }
+   },
+   "both": {
+    "confirmation": {
+     "candidate_over_baseline": 0.9652427225715534,
+     "ci95": [
+      0.9447861520682,
+      0.9828364947029525
+     ],
+     "native_wall_candidate_over_baseline": 0.9613015113362429,
+     "native_wall_ci95": [
+      0.9287884482361082,
+      0.9895212225026307
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9898472954051375,
+      "n17a1": 1.0001766678403397,
+      "n19a0": 0.9531887932241107,
+      "n19a1": 0.9869764504973845,
+      "n23a0": 0.9874883244028791,
+      "n23a1": 0.9779377407597883,
+      "n29a1": 0.9011042322334911,
+      "n31a0": 0.8997630559122601
+     }
+    },
+    "development": {
+     "candidate_over_baseline": 0.9731630462814391,
+     "ci95": [
+      0.9529883513739578,
+      0.9872892638087668
+     ],
+     "native_wall_candidate_over_baseline": 0.9525042666538694,
+     "native_wall_ci95": [
+      0.9183774135940744,
+      0.9754282295003959
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9559823074615657,
+      "n17a1": 0.9439507713904866,
+      "n19a0": 0.9664465216468552,
+      "n23a0": 0.9735002627458116,
+      "n23a1": 0.9810632038790801,
+      "n31a0": 0.89658504443583
+     }
+    },
+    "replay": {
+     "candidate_over_baseline": 0.9652429763156918,
+     "ci95": [
+      0.9447862969738965,
+      0.9828370633361269
+     ],
+     "native_wall_candidate_over_baseline": 0.9739048156083139,
+     "native_wall_ci95": [
+      0.9474579023676643,
+      0.9972703716405226
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9950658074040515,
+      "n17a1": 0.992592505761306,
+      "n19a0": 1.0041370540913555,
+      "n19a1": 0.985191787901533,
+      "n23a0": 0.971472480100714,
+      "n23a1": 1.0026128967935442,
+      "n29a1": 0.9328298435802919,
+      "n31a0": 0.9116524712355921
+     }
+    },
+    "selection": {
+     "candidate_over_baseline": 0.970909176371272,
+     "ci95": [
+      0.9531412300199242,
+      0.9869924768900188
+     ],
+     "native_wall_candidate_over_baseline": 0.9580857094621574,
+     "native_wall_ci95": [
+      0.9351397768108141,
+      0.9808977505013977
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9560111430326389,
+      "n17a1": 0.953197845846064,
+      "n19a0": 0.9908669059307836,
+      "n23a0": 0.9543680061753865,
+      "n23a1": 0.9779145179205814,
+      "n31a0": 0.9178000538153201
+     }
+    }
+   },
+   "column": {
+    "development": {
+     "candidate_over_baseline": 0.9827351748863093,
+     "ci95": [
+      0.9688682161375979,
+      0.9931205308519304
+     ],
+     "native_wall_candidate_over_baseline": 0.9594187146810005,
+     "native_wall_ci95": [
+      0.9207899476419109,
+      0.9938647349146282
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9100182340460813,
+      "n17a1": 0.9786087598821034,
+      "n19a0": 0.9343387671300083,
+      "n23a0": 0.9864182101351925,
+      "n23a1": 1.0166991343746137,
+      "n31a0": 0.9346134293544306
+     }
+    },
+    "selection": {
+     "candidate_over_baseline": 0.9832465151519157,
+     "ci95": [
+      0.97086194533702,
+      0.9929733898259364
+     ],
+     "native_wall_candidate_over_baseline": 0.9534542798179994,
+     "native_wall_ci95": [
+      0.9279991597109949,
+      0.978516238489968
+     ],
+     "native_wall_per_cell": {
+      "n13a0": 0.9782423074000122,
+      "n17a1": 0.919359239645335,
+      "n19a0": 0.9678214414878507,
+      "n23a0": 0.970237380178972,
+      "n23a1": 0.9724189625288354,
+      "n31a0": 0.9148310310417904
+     }
+    }
+   }
+  },
+  "decision": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0018b/decision.json",
+  "headline": "beats_rho_strict=False; winner=incumbent; cells where the winner is at or above rho: {'instructions': {'n23a1': 1.0231222850821338}, 'native': {'n23a1': 1.0062830313848707, 'n29a1': 1.0093027306775213}}",
+  "median_complete_job_confirmation": {
+   "both": {
+    "instructions": 1427459.0,
+    "native_ms": 0.941,
+    "receipts": 288
+   },
+   "incumbent": {
+    "instructions": 1497069.5,
+    "native_ms": 0.976,
+    "receipts": 288
+   },
+   "rho": {
+    "instructions": 2027255.0,
+    "native_ms": 1.068,
+    "receipts": 288
+   }
+  },
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "panel": {
+   "cells": [
+    "n13a0",
+    "n17a1",
+    "n19a0",
+    "n23a0",
+    "n23a1",
+    "n31a0"
+   ],
+   "confirmation_cases": 96,
+   "holdout_cells": [
+    "n19a1",
+    "n29a1"
+   ]
+  },
+  "rho_over_winner": 1.4054841639993305,
+  "rho_parity": true,
+  "round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0018b",
+  "source_manifest_sha256": "69de47e30a267e93ab6da91903217062f2e2d3fbe9d6963e17700f77f33c3bd6",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0018b/source",
+  "status": "retained",
+  "what_changed": "two disjoint levers, both found by measurement and each with its own arm. block lowers the scan block's clamp ceiling from 64 to 16: the rule's shape is unchanged and so is every cell whose own value is already at or below 16, which is why n13a0, n17a1, n19a0 and n29a1 are an A/A control carried inside a live arm. column makes a column the orbit representative itself rather than [h] of it -- the representative is already in the order-r subgroup, so the second cofactor multiplication scaled every column by a constant and the row and the descent carried a matching constant -- and declares column_convention: representative, which round18-oracle-convention.patch teaches the checker to read additively. both is the two together. The pair-table row rule was measured first and left alone: it sits at the measured optimum at seven of eight cells, n23a1 included.",
+  "winner": "incumbent",
+  "winner_over_rho_confirmation": {
+   "candidate_over_baseline": 0.7114985893220469,
+   "ci95": [
+    0.6205792973445925,
+    0.818802940810528
+   ],
+   "native_wall_candidate_over_baseline": 0.9180624345566625,
+   "native_wall_ci95": [
+    0.8759967505844022,
+    0.9648840696231857
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8622551324726669,
+    "n17a1": 0.8637078561395497,
+    "n19a0": 0.8656931442298138,
+    "n19a1": 0.8607628119646604,
+    "n23a0": 0.9245772586363921,
+    "n23a1": 1.0062830313848707,
+    "n29a1": 1.0093027306775213,
+    "n31a0": 0.9683732879039747
+   },
+   "per_cell": {
+    "n13a0": 0.7038528839464155,
+    "n17a1": 0.5663354383848265,
+    "n19a0": 0.5591330588529893,
+    "n19a1": 0.6211970554726284,
+    "n23a0": 0.7869207133188287,
+    "n23a1": 1.0231222850821338,
+    "n29a1": 0.849877156847227,
+    "n31a0": 0.6932302047605725
+   }
+  },
+  "winner_over_rho_replay": {
+   "candidate_over_baseline": 0.7114966948928793,
+   "ci95": [
+    0.6205716505803323,
+    0.8188008542100041
+   ],
+   "native_wall_candidate_over_baseline": 0.9057517407203364,
+   "native_wall_ci95": [
+    0.8682743715265772,
+    0.9466055105523463
+   ],
+   "native_wall_per_cell": {
+    "n13a0": 0.8622522732454881,
+    "n17a1": 0.8492933793952006,
+    "n19a0": 0.8402881400431711,
+    "n19a1": 0.869543063898675,
+    "n23a0": 0.92909939621583,
+    "n23a1": 0.9808361802094517,
+    "n29a1": 0.9696960051088472,
+    "n31a0": 0.9580049245713046
+   },
+   "per_cell": {
+    "n13a0": 0.7038465546581611,
+    "n17a1": 0.5663325026418766,
+    "n19a0": 0.5591316860911758,
+    "n19a1": 0.6211968673328941,
+    "n23a0": 0.7868995266593874,
+    "n23a1": 1.0231241259841208,
+    "n29a1": 0.8498804587278318,
+    "n31a0": 0.6932419016486677
+   }
+  }
+ },
+ "source_manifest_sha256": "179ca7b82433aa4e334e9f37b1d63cd60b8e02174ee70c3c9bbcc0f4aa7e1229",
+ "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/source",
+ "status": "retained",
+ "strict_win_record": "round-0013",
+ "strict_win_record_eight_cells": "round-0017",
+ "strict_win_record_eight_cells_replication": {
+  "n23a1_instructions": {
+   "round_0017": 0.95,
+   "round_0018b": 1.0231222850821338
+  },
+  "reading": "the same executable, the same eight-cell panel and gates, a different fixture draw; beats_rho_strict true in round 0017 and false in round 0018b",
+  "round": "round-0018b",
+  "same_executable": true,
+  "seed_round_0017": 2026091717,
+  "seed_round_0018b": 2026091818,
+  "status": "did not replicate",
+  "winner_over_rho_instructions": {
+   "round_0017": 0.6702,
+   "round_0018b": 0.7114985893220469
+  }
+ },
+ "strict_win_record_note": "Cross-round ratios carry fresh-fixture variation at least as large as the differences between the recent rounds, so the record is not a precise ranking. The round-0014 winner source, unchanged and with an identical source-manifest hash, measured winner/rho 0.7818 instructions and 0.9424 native in round-0014 and 0.7372 and 0.9246 in round-0015 -- the same executable, different fixtures. Round-0013 holds the record on the native metric (0.9098) and round-0015 shows the lowest instruction ratio (0.7372); neither dominates, and the record is left where it was rather than moved on a difference this measurement cannot separate from fixture draw. Round 0016 widened the panel to eight cells and beats_rho_strict came back FALSE: the winner loses to rho outright at n23a1 (instructions 1.0656) and at n29a1 (native 1.0905), and the panel-wide native upper limit is 1.0288. The same receipts restricted to the legacy five cells still pass strictly (native 0.9341, upper 0.9653, every cell below one), so every strict-win record above -- round 0013 included -- is scoped to that five-cell panel and must not be restated at family level. The record pointer is left at round-0013 because it names the best five-cell measurement, not because the claim survives a wider panel. Round 0017 is the first strict win on the eight-cell panel; strict_win_record (five cells) is left at round-0013 because five-cell and eight-cell ratios are not comparable, and strict_win_record_eight_cells names the eight-cell record separately. Round 0018b (scan-block ceiling and the representative column convention) does not hold beats_rho_strict on eight cells; cells at or above rho: {'instructions': {'n23a1': 1.0231222850821338}, 'native': {'n23a1': 1.0062830313848707, 'n29a1': 1.0093027306775213}}. Read that with round 0018b's main result, which is about the record rather than about the new arms: the incumbent in round 0018b is byte-identical to round 0017's promoted winner, and under a fresh seed (2026091818 against 2026091717) the same executable measures 0.7115 [0.6206, 0.8188] against rho with n23a1 at 1.0231, where round 0017 measured 0.6702 [0.6050, 0.7443] with n23a1 at 0.950. Instructions are deterministic, so that difference is the fixture draw alone. ROUND-0017'S EIGHT-CELL STRICT WIN THEREFORE DOES NOT REPLICATE UNDER A FRESH SEED, and n23a1 is where it breaks; round 0017's own RESULTS.md had already warned that 0.950 at n23a1 was not a stable per-cell number. strict_win_record_eight_cells is left naming round-0017 because that round's receipts say what they say and are immutable, but the record must be read as seed-dependent and not as a property of the executable or of the panel.",
+ "target_count": 1,
+ "winner_over_rho_confirmation": {
+  "candidate_over_baseline": 0.7379328801398639,
+  "ci95": [
+   0.7144337379505753,
+   0.7571723061927793
+  ],
+  "native_wall_candidate_over_baseline": 0.9355169234914339,
+  "native_wall_ci95": [
+   0.9124104876677653,
+   0.9609791776155655
+  ],
+  "native_wall_per_cell": {
+   "n13a0": 0.9671464607379644,
+   "n17a1": 0.9024184124721857,
+   "n19a0": 0.9479810741091628,
+   "n19a1": 0.9397058515338313,
+   "n23a0": 0.9216508936992227
+  },
+  "per_cell": {
+   "n13a0": 0.7641457210540794,
+   "n17a1": 0.6952862034221112,
+   "n19a0": 0.7544193214959648,
+   "n19a1": 0.7351888473725469,
+   "n23a0": 0.7425621322363283
+  }
+ },
+ "winner_over_rho_replay": {
+  "candidate_over_baseline": 0.7379318706154145,
+  "ci95": [
+   0.7144328577963271,
+   0.7571684930212431
+  ],
+  "native_wall_candidate_over_baseline": 0.9413978774377383,
+  "native_wall_ci95": [
+   0.9266864038465168,
+   0.9545396471783393
+  ],
+  "native_wall_per_cell": {
+   "n13a0": 0.9486139168609361,
+   "n17a1": 0.9500954897544966,
+   "n19a0": 0.9437923850841066,
+   "n19a1": 0.9417154641879998,
+   "n23a0": 0.9230243423034147
+  },
+  "per_cell": {
+   "n13a0": 0.764143910004793,
+   "n17a1": 0.6952844745859409,
+   "n19a0": 0.7544153524909061,
+   "n19a1": 0.7351890621972519,
+   "n23a0": 0.7425643488923614
+  }
+ },
+ "worker": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0008/worker"
 }

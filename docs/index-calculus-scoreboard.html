@@ -3049,5 +3049,45 @@ No row is an advance: relation collection stays &Theta;(2<sup>n</sup>) with any 
 factor base, and this prices a decomposition oracle.</p>
 </section>
 <!-- END wdsat-rr-20260920 -->
+<!-- BEGIN ic-tournament-round-0018b -->
+<section class="panel" id="ic-tournament-round-0018b">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0018b/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0018b/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0018b/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,010</td><td>1</td><td>0.6854</td><td>1.906e+05</td><td>18/18</td><td>reference</td></tr>
+<tr><td>block</td><td>2,989</td><td>0.9929</td><td>0.6805</td><td>1.892e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>both</td><td>2,941</td><td>0.9769</td><td>0.6695</td><td>1.862e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>column</td><td>2,963</td><td>0.9842</td><td>0.6745</td><td>1.875e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,393</td><td>1.459</td><td>1</td><td>unmeasured</td><td>18/18</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,851</td><td>1</td><td>0.6957</td><td>1.804e+05</td><td>54/54</td><td>reference</td></tr>
+<tr><td>block</td><td>2,824</td><td>0.9906</td><td>0.6892</td><td>1.788e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>both</td><td>2,774</td><td>0.9732</td><td>0.677</td><td>1.756e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>column</td><td>2,801</td><td>0.9827</td><td>0.6837</td><td>1.773e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,098</td><td>1.437</td><td>1</td><td>unmeasured</td><td>54/54</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,191</td><td>1</td><td>0.7115</td><td>1.808e+05</td><td>288/288</td><td>reference</td></tr>
+<tr><td>both</td><td>3,080</td><td>0.9652</td><td>0.6868</td><td>1.745e+05</td><td>288/288</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,484</td><td>1.405</td><td>1</td><td>unmeasured</td><td>288/288</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>0.9825</td><td>1</td><td>reference</td><td>0.9181</td><td>288/288</td></tr>
+<tr><td>both</td><td>0.9445</td><td>0.9613</td><td>[0.9287884482361082, 0.9895212225026307]</td><td>0.8825</td><td>288/288</td></tr>
+<tr><td>rho</td><td>1.07</td><td>1.089</td><td>[1.0364127152056637, 1.1417471154435965]</td><td>1</td><td>288/288</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0018b -->
 </body>
 </html>

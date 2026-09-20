@@ -273,13 +273,157 @@ Against its six pre-registered predictions, in order: **(1) confirmed** — on a
 
 Prediction 4's failure is the round's honest caveat. Development measured `orbits` at 1.005 of `scan_io`'s wall at n23a1 on four fixtures, and the cell flipped on twelve fresh ones under a new seed; the margin there (0.950 confirmation, upper limit for the panel 0.9266) is real on these fixtures and larger than the ±4% per-cell spread the A/A control shows, but cross-round fixture variation at a single cell is of the same order, and no reader should take 0.950 at n23a1 as a stable per-cell number. What is stable is the panel: eight cells, both metrics, both stages, upper limits 0.7443 and 0.9266.
 
+## Round 0018: two levers that work, and a strict win that does not replicate
+
+Round 0018 ([pre-registration](ROUND18-single-target.md), [report](../runs/round-0018b/REPORT.md),
+`--objective rho`, seed 2026091818, the round-0016/0017 eight-cell panel) took
+the n23a1 collection that round 0017 handed forward. It killed the hypothesis
+it was given, measured two levers it found instead, ran twice because the
+first run used the wrong baseline, and ended by refuting a claim of its own
+campaign. **Retained: the incumbent.**
+
+### What was killed before anything was built
+
+Round 0017 found its `orbits_rows` arm badly wrong — two pair-table rows cost
+1.272x three at n23a1 against a predicted 0.973x — which invites the
+conclusion that the shipped row rule is wrong in the same direction. It is
+not. Sweeping every row count at every cell
+([round18_row_sweep.py](round18_row_sweep.py), with
+[a probe patch](round18-rows-probe.patch) making the count settable and the
+probe first checked byte-identical to the frozen worker) puts the shipped
+choice at the measured optimum at **seven of eight cells, n23a1 included**;
+the one miss is n23a0, where three rows beat two by 1.0%, inside the A/A
+control's per-cell spread. The sweep reproduces round 0017's number from the
+other side: two rows cost 1.307x three at n23a1 here against 1.272x there.
+Cost of finding out: one probe build and about fifteen minutes.
+
+### The two levers
+
+`decompose` scans the base in blocks, each paying one batch inversion and
+discarded on an early exit, so the rule sizes a block at about one expected
+witness, `chunk = (1/hit + 1).clamp(8, 64)`. That ceiling binds at exactly two
+cells — the rule asks 71 at n23a0 and 102 at n23a1 — and the obvious reading,
+that the cap is too low, is wrong: at n23a1 the block the rule asks for costs
+**1.040x** what 16 costs ([round18_block_sweep.py](round18_block_sweep.py)).
+A single fixed block is a wash ([round18_block_grid.py](round18_block_grid.py):
+the best constant on the development cells is 12, at 0.9910, and it makes
+n13a0 and n29a1 worse), so **`block`** ([patch](round18-block.patch)) leaves the
+rule's shape alone and lowers the ceiling to 16, chosen on the development
+cells alone ([round18_ceiling_choice.py](round18_ceiling_choice.py)) and
+recorded as marginal: 12, 16 and 24 sit within 0.1% of each other. What is not
+marginal is that anything at or below 32 beats 64, and that a ceiling can only
+lower a block, so no cell can regress.
+
+**`column`** ([patch](round18-column.patch)) drops a cofactor multiplication
+applied to a point that is already in the subgroup. `TinyIc::new` projects each
+sampled point with `[h]` and closes its abscissa under Frobenius, so every
+orbit representative is already in the order-`r` subgroup; forming the column
+as `[h]rep` scaled every column by a constant and the row (`h*a`) and the
+descent (`invmod(h*b)`, `sum - h*a`) each carried a matching constant.
+Dropping all four leaves the same logarithms and saves `K` scalar
+multiplications by the cofactor per job — nothing where `h` is 2 or 4, most of
+the base phase where `h` is 12,646 (n29a1) or 1,492 (n31a0). The report
+declares `column_convention: representative`, which the checker amendment
+([oracle patch](round18-oracle-convention.patch), additive) reads: a base point
+is then located by itself and its row reads `sum coeff*log == a`; a report
+without the key is read exactly as before; an unknown value is refused. Under
+the new convention every base point must carry a column, where the old one
+excused a point whose `[h]` image is the identity — strictly stronger. The
+amendment was admitted only after it was attacked at n29a1, where the two
+conventions differ by a factor of 12,646: stripping the label, relabelling a
+legacy report as `representative` and relabelling in the other direction are
+each refused, as are a column logarithm, a relation scalar, a recovered
+logarithm and an orbit representative's coordinates each moved by one; and 280
+frozen round-0016 and round-0017 profiles sampled at random still verify
+unchanged.
+
+**`both`** is the two together. All 2,340 trials verified, every logarithm
+certified, audit status VERIFIED over 2,340 receipts and 452 source files.
+
+| both / incumbent | confirmation | replay |
+|---|---|---|
+| instructions | 0.9652 [0.9448, 0.9828] | 0.9652 [0.9448, 0.9828] |
+| native wall | 0.9613 [0.9288, 0.9895] | 0.9739 [0.9475, 0.9973] |
+
+Every cell inside 1.10; largest gains at n31a0 (0.9203) and n29a1 (0.9236),
+smallest at n17a1 (0.9930). Against rho, `both` is below one at every cell in
+both metrics **except n23a1 on instructions, at 1.0112**, and that single cell
+is why nothing was promoted: the objective is `rho`, and a challenger must beat
+matched rho strictly everywhere.
+
+### The result that matters, which the round did not set out to find
+
+The incumbent here is **byte-identical to round 0017's promoted winner**. On
+this seed it measures 0.7115 [0.6206, 0.8188] against rho with n23a1 at
+**1.0231**. Round 0017 measured the same executable at 0.6702 [0.6050, 0.7443]
+with n23a1 at **0.950**. Instructions are deterministic, so the whole of that
+difference is the fixture draw.
+
+**Round 0017's eight-cell strict win does not replicate under a fresh seed**,
+and n23a1 is where it breaks. Round 0017's own entry above had already said
+that no reader should take 0.950 at n23a1 as a stable per-cell number; this is
+that warning cashed out. `strict_win_record_eight_cells` still names round
+0017, because those receipts are immutable and say what they say, but the
+record is **seed-dependent** and is not a property of the executable or of the
+panel. `rho_parity` does still hold here, in both metrics on both stages.
+
+### Predictions, in the order they were checked
+
+**2 confirmed.** `block` is a no-op where it provably cannot act: 1.00026,
+1.00018, 1.00013 at n13a0, n17a1, n19a0 against a prediction of 1.000 within
+0.001. **3 confirmed** — `both` over the incumbent at 0.9652, inside the
+predicted 0.95–0.975, with the largest gains near 0.92 at n31a0 and n29a1 and
+the smallest above 0.98 at n17a1. **4 confirmed on what could be tested**:
+among the six development cells the ranking by `column`'s gain is exactly the
+ranking by cofactor, all three `h=4` cells ahead of both `h=2` cells.
+**6 confirmed, and its caveat earned** — both gates passed, but the replay
+native upper limit cleared one by 0.27% (0.9973) and this round's own A/A
+control returned a native panel interval of [0.9609, 1.034] against the
+challenger's point estimate of 0.9613; the instruction side carries no such
+caveat, reproducing to 1.0000034 [0.9999975, 1.0000117]. **7 falsified** —
+`beats_rho_strict` does not hold on all eight cells.
+
+**5, and part of 4, were not testable, and that is a fault in the
+pre-registration rather than a result.** Single-lever arms run only in
+development and selection, which exclude the holdout cells, so `block` at
+n19a1 and `column` at n29a1 — the two cells those predictions name — were never
+measured. Round 0017's prediction 2 hit the same wall for the same reason. A
+prediction about a holdout cell has to be written about an arm that reaches
+confirmation.
+
+### The run that was thrown away, and kept
+
+The first attempt ([runs/round-0018](../runs/round-0018)) ran all 2,340 trials
+and verified every one, against the wrong incumbent: `prepare` was given
+`runs/round-0017/source`, which is round 0017's *incumbent*, not its promoted
+winner at `runs/round-0017/source_candidates/orbits/source` — the path this
+campaign's own `next-proposal-single-target.json` names. Its incumbent worker
+hashes to `7ca9953d…` against the winner's `e9f263b8…` and its source carries
+no `factor_base_orbits` at all, so every arm-versus-incumbent number in it
+conflates this round's levers with round 0017's certificate. Prediction 2 is
+what caught it: the three cells where `block` cannot act read 0.876, 0.847 and
+0.852 instead of 1.000.
+
+The record is kept and superseded rather than deleted. The preflight that was
+supposed to prevent exactly this ([round18_preflight.sh](round18_preflight.sh))
+checked nine contract fields and all three candidate worker hashes, and never
+checked the baseline those arms are measured against; it now verifies that the
+incumbent hashes to the round-0017 winner and that the baseline source carries
+the orbit certificate, and it refuses on either.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.
 
 The parity rule was declared before measurement: both candidate/rho upper paired 95% limits and every curve-cell ratio must be at most 1.10, in instructions and native time, on confirmation and replay. The full decisions contain the replay evidence.
 
-**Every strict-win statement above is scoped to the five-cell panel that produced it.** Rounds 0006 to 0015 all ran the cells `n13a0, n17a1, n19a0, n23a0` with `n19a1` added in confirmation and replay — a panel that was inherited, never chosen. Round 0016 ran the same executables on eight cells and `beats_rho_strict` came back false, with the winner losing to rho outright at `n23a1` and `n29a1`; the same receipts restricted to the legacy five still pass. Read the strict claims as "strictly below rho on those five cells", which is what was measured, and not as a statement about the Koblitz family or about every curve the worker admits. **Round 0017 then restored the strict claim on all eight cells** — winner/rho 0.6702 [0.6050, 0.7443] instructions and 0.8999 [0.8755, 0.9266] native on confirmation, every cell below one in both metrics on both stages — with the certificate named by orbit representatives. That claim is scoped to those eight cells and to this checker's second certificate format, both stated in the round's pre-registration; it is still not a statement about the family.
+**Every strict-win statement above is scoped to the five-cell panel that produced it.** Rounds 0006 to 0015 all ran the cells `n13a0, n17a1, n19a0, n23a0` with `n19a1` added in confirmation and replay — a panel that was inherited, never chosen. Round 0016 ran the same executables on eight cells and `beats_rho_strict` came back false, with the winner losing to rho outright at `n23a1` and `n29a1`; the same receipts restricted to the legacy five still pass. Read the strict claims as "strictly below rho on those five cells", which is what was measured, and not as a statement about the Koblitz family or about every curve the worker admits. **Round 0018b then failed to replicate that restoration under a fresh seed**: the same executable, the
+same panel and the same gates, seed 2026091818 instead of 2026091717, gives winner/rho 0.7115 [0.6206,
+0.8188] on instructions with n23a1 at 1.0231 rather than 0.950, and `beats_rho_strict` false. Instructions
+are deterministic, so that is the fixture draw alone. Read every eight-cell strict claim below as scoped to
+its own seed as well as to its panel.
+
+**Round 0017 then restored the strict claim on all eight cells** — winner/rho 0.6702 [0.6050, 0.7443] instructions and 0.8999 [0.8755, 0.9266] native on confirmation, every cell below one in both metrics on both stages — with the certificate named by orbit representatives. That claim is scoped to those eight cells and to this checker's second certificate format, both stated in the round's pre-registration; it is still not a statement about the family.
 
 These are implementation improvements in fixed-compiler Valgrind amd64 guest instructions and matched native wall time. Kernel/device and external-audit work are outside the instruction count. No arithmetic-complexity, broader-family, or cryptographic-size claim follows. The K-instruction rank floor is deliberately weak.
 
