@@ -250,6 +250,7 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testpolystateaudit.py'
 	python3 -m unittest discover -s codegen -p 'testdirectbuild.py'
 	python3 -m unittest discover -s codegen -p 'testnativebench.py'
+	python3 -m unittest discover -s codegen -p 'testirschedule.py'
 
 # The iteration exploits an automorphism group of order 2m, and the usual price
 # for that is fruitless cycles.  This iteration cannot have them -- it is
@@ -296,6 +297,9 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_status_walks.py -v
 	python3 -m unittest discover -s aws -p test_fleet_roll.py -v
 	python3 -m unittest discover -s aws -p test_rollout.py -v
+	python3 -m unittest discover -s aws -p test_dp_ingest.py -v
+	python3 -m unittest discover -s aws -p test_worker_spool.py -v
+	python3 -m unittest discover -s aws -p test_controlplane.py -v
 
 certify-local: ecc2k130-cpu build/test-production
 	python3 aws/certify.py --output build/certification-local.json
@@ -552,6 +556,50 @@ bench-g6-modal:
 bench-g6e-modal:
 	$(MAKE) bench-ada-modal ADA_GPU=L40S
 
+# Datacenter Blackwell B200 (Modal), sm_100. Same arithmetic/storage preset as
+# the RTX PRO 6000; workers stay automatic — 385,024 is a 188-SM occupancy
+# and has no claim on a 148-SM part. See B200.md. B200_CLMAD=0 is the
+# software-product before-arm.
+B200_CLMAD ?= 1
+B200_ENV = ECC_GPU=B200 ECC_CUDA_VERSION=13.3.1 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=$(B200_CLMAD) ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
+                 ECC_PACKED_SHARED_SIGMA=1 \
+                 ECC_PACKED_TOP_CLMAD=0
+
+bench-b200-modal:
+	$(B200_ENV) $(MODAL) run modal_app.py::bench --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3
+
+validate-b200-modal:
+	$(B200_ENV) $(MODAL) run modal_app.py::validate --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2
+
+# Per-SM occupancy: several wave multipliers of automatic workers on one
+# allocation. See benchmarks/per-sm/WAVES.md. WAVES_GPU selects the part;
+# default is the campaign 6000. Does not change the shipping 385,024 preset.
+WAVES_GPU ?= RTX-PRO-6000
+WAVES_LIST ?= 1,4,6,8
+WAVES_ENV = ECC_GPU=$(WAVES_GPU) ECC_CUDA_VERSION=13.3.1 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
+                 ECC_PACKED_SHARED_SIGMA=1 \
+                 ECC_PACKED_TOP_CLMAD=0
+
+bench-waves-modal:
+	$(WAVES_ENV) $(MODAL) run modal_app.py::waves --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3 --wave-list $(WAVES_LIST)
+
 # Turing T4 (EC2 g4dn), sm_75. Software product only; see T4-G4DN.md.
 T4_ENV = ECC_GPU=T4 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
@@ -565,6 +613,27 @@ T4_ENV = ECC_GPU=T4 ECC_CUDA_VERSION=13.3.1 \
 
 bench-g4dn-modal:
 	$(T4_ENV) $(MODAL) run modal_app.py::bench --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3
+
+# One matched packed-walk recipe on any Modal GPU type. Workers stay
+# automatic. SURVEY_CLMAD defaults on; T4 must pass 0 (no clmad on sm_75).
+# See benchmarks/modal-gpus/SURVEY.md. Do not pass --workers: 385,024 is a
+# 188-SM occupancy.
+SURVEY_GPU ?= L40S
+SURVEY_CLMAD ?= 1
+SURVEY_ENV = ECC_GPU=$(SURVEY_GPU) ECC_CUDA_VERSION=13.3.1 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=$(SURVEY_CLMAD) ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
+                 ECC_PACKED_SHARED_SIGMA=1 \
+                 ECC_PACKED_TOP_CLMAD=0
+
+bench-modal-gpu:
+	$(SURVEY_ENV) $(MODAL) run modal_app.py::bench --packed \
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3
 
@@ -625,4 +694,4 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean

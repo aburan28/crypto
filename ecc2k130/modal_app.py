@@ -31,6 +31,7 @@ import json
 import os
 import pathlib
 import re
+import select
 import signal
 import struct
 import subprocess
@@ -146,17 +147,21 @@ if PACKED_COMPACT_STATE == "1" and (PACKED_STATE_TILE != "256" or any(value != "
         (PACKED_POLY_STATE, PACKED_POLY_CHAIN, PACKED_CACHE_DENOM))):
     raise ValueError("ECC_PACKED_COMPACT_STATE=1 requires TILE256, polynomial state, polynomial chains and denominator cache")
 
-# Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
-# H200, B200 and B300; append ":n" for several of them.
+# Valid values include T4, L4, A10, L40S, A100, A100-40GB, A100-80GB,
+# RTX-PRO-6000, H100, H100!, H200, B200, B200+ and B300; append ":n" for
+# several of them. H100! / A100-40GB / B200 pin the SKU against Modal's
+# automatic upgrades (H100→H200, A100→A100-80GB, B200→B300).
 DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
 
 # Compute capability per Modal GPU type.  sm_120 is the Blackwell workstation
 # part (RTX PRO 6000), sm_100 is B200/B300, sm_90 is H100/H200, sm_89 is
-# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4.
+# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4. Modal B300 reports
+# compute capability 10.3; the survey image still bakes sm_100, which ran.
 GPU_ARCH = {
     "T4": "75", "L4": "89", "L40S": "89", "A10": "86", "A10G": "86",
-    "A100": "80", "A100-80GB": "80", "H100": "90", "H200": "90",
-    "B200": "100", "B300": "100", "RTX-PRO-6000": "120",
+    "A100": "80", "A100-40GB": "80", "A100-80GB": "80",
+    "H100": "90", "H100!": "90", "H200": "90",
+    "B200": "100", "B200+": "100", "B300": "100", "RTX-PRO-6000": "120",
 }
 ALL_ARCHES = ("80", "89", "90", "100", "120")
 
@@ -171,7 +176,10 @@ def archesFor(gpu):
     GPU can run.  An unrecognised name falls back to the full set rather than
     guessing, since a missing architecture is a runtime failure, not a slow
     build."""
-    arch = GPU_ARCH.get(gpu.split(":")[0].strip())
+    key = gpu.split(":")[0].strip()
+    arch = GPU_ARCH.get(key)
+    if arch is None and key.endswith(("!", "+")):
+        arch = GPU_ARCH.get(key.rstrip("!+"))
     return (arch,) if arch else ALL_ARCHES
 
 
@@ -627,6 +635,91 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
     return info
 
 
+def parseWaveList(text):
+    """Positive integer wave counts, comma-separated, order preserved."""
+    waves = []
+    for part in text.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        n = int(part)
+        if n < 1:
+            raise ValueError("waves must be positive integers, got %r" % part)
+        waves.append(n)
+    if not waves:
+        raise ValueError("waves is empty")
+    return waves
+
+
+def parsePackedLaunch(text):
+    """SM count and automatic worker count from one packed client dump."""
+    sms = re.search(r"(\d+) SMs", text)
+    resident = re.search(
+        r"(\d+) block\(s\) of (\d+) packed threads resident per SM", text)
+    threads = re.search(r"backend cuda-packed131: (\d+) threads", text)
+    if not (sms and resident and threads):
+        raise ValueError("packed launch identity missing from:\n" + text[-2000:])
+    return {
+        "sms": int(sms.group(1)),
+        "residentBlocks": int(resident.group(1)),
+        "blockThreads": int(resident.group(2)),
+        "automaticThreads": int(threads.group(1)),
+    }
+
+
+@app.function(image=image, gpu=DEFAULT_GPU, timeout=4 * HOUR)
+def runWaves(batch=32, threads=256, leaf=0, minBlocks=2, steps=1024, launches=32,
+             repeats=3, packed=True, waves="1,4,6,8", preferL1=False):
+    """One allocation, several oversubscribed grids.
+
+    Automatic occupancy is one wave: SMs × resident blocks × block threads.
+    The shipping 6000 preset is four waves. This measures that multiplier on
+    the same GPU, same binary, without a rebuild between rows.
+    """
+    if not packed:
+        raise ValueError("runWaves is the packed-walk occupancy sweep")
+    if leaf:
+        raise ValueError("packed arithmetic requires leaf=0")
+    waveList = parseWaveList(waves)
+    info = dict(gpu=gpuName(), cc=computeCapability(), batch=batch,
+                threads=threads, leaf=leaf, minBlocks=minBlocks,
+                steps=steps, launches=launches, repeats=repeats,
+                packed=True, waves=waveList, preferL1=preferL1)
+    ok, log = buildFor(batch, threads, leaf, minBlocks=minBlocks)
+    info["buildLog"] = log
+    if not ok:
+        return dict(info, valid=False, error=log)
+    info["identity"] = benchmarkIdentity(True)
+    probe = ("./ecc2k130 --curve 131 --bench --packed --steps 1 --launches 1 "
+             "--verify 0")
+    rc, out = sh(probe, timeout=600)
+    if rc != 0:
+        return dict(info, valid=False, error=out, probe=out)
+    launch = parsePackedLaunch(out)
+    info.update(launch)
+    info["probe"] = out
+    print("automatic occupancy: %d threads on %d SMs (%d x %d resident)"
+          % (launch["automaticThreads"], launch["sms"],
+             launch["residentBlocks"], launch["blockThreads"]), flush=True)
+    rows = []
+    for wave in waveList:
+        workers = launch["automaticThreads"] * wave
+        print("=== wave %d: %d workers ===" % (wave, workers), flush=True)
+        measured = measureBench(steps, launches, workers, preferL1, repeats, True)
+        row = dict(wave=wave, workers=workers, **measured)
+        if launch["sms"] and measured.get("valid"):
+            row["perSmM"] = measured["rate"] / launch["sms"]
+            row["medianB"] = measured["rate"] / 1000.0
+        rows.append(row)
+        if not measured.get("valid"):
+            break
+    info["rows"] = rows
+    info["valid"] = bool(rows) and all(r.get("valid") for r in rows)
+    validRows = [r for r in rows if r.get("valid")]
+    info["best"] = max(validRows, key=lambda r: r["rate"]) if validRows else None
+    return info
+
+
 def autotuneConfigs(batches, threadCounts, leaves, minBlocksList, configs,
                     knobs=(False, False, False)):
     """The (leaf, batch, threads, minBlocks, streamKarat, smemSpill, globalCg)
@@ -922,6 +1015,60 @@ def corpusCount(path):
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
     r"(?:\s+(\d+)\s+dropped)?")
+RESUME_RE = re.compile(r"resumed from .* at iteration (\d+)")
+# Status ingest only needs the 40-byte checkpoint header. The walk-state file
+# on this geometry is ~370MB, so a 60s full-file cadence still left the page
+# idle: volume commits raced, and sync hashed the blob every pass. The sidecar
+# is what the feed polls; the full file still lands for resume.
+STATUS_HEADER_S = 15
+VOLUME_COMMIT_S = 15
+PROGRESS_PRINT_S = 15
+
+
+CKPT_MAGIC = b"ECC2K130"
+CKPT_HEADER_BYTES = 40
+
+
+def packCheckpointHeader(version, m, threads, batch, lanes, runId, iterBase):
+    return struct.pack("<8s6IQ", CKPT_MAGIC, int(version), int(m), int(threads),
+                       int(batch), int(lanes), int(runId), int(iterBase))
+
+
+def unpackCheckpointHeader(blob):
+    if len(blob) < CKPT_HEADER_BYTES or blob[:8] != CKPT_MAGIC:
+        return None
+    version, m, threads, batch, lanes, runId = struct.unpack_from("<6I", blob, 8)
+    iterBase, = struct.unpack_from("<Q", blob, 32)
+    return dict(version=version, m=m, threads=threads, batch=batch,
+                lanes=lanes, runId=runId, iterBase=iterBase)
+
+
+def readCheckpointHeader(path):
+    try:
+        with open(path, "rb") as fh:
+            return unpackCheckpointHeader(fh.read(CKPT_HEADER_BYTES))
+    except OSError:
+        return None
+
+
+def writeCheckpointHeaderFile(path, header):
+    blob = (packCheckpointHeader(header["version"], header["m"], header["threads"],
+                                 header["batch"], header["lanes"], header["runId"],
+                                 header["iterBase"])
+            if isinstance(header, dict) else header)
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as fh:
+        fh.write(blob)
+        fh.flush()
+        os.fsync(fh.fileno())
+    os.replace(tmp, path)
+    return blob
+
+
+def iterBaseFromProgress(resumeIterBase, passIters, walks):
+    if int(walks) <= 0:
+        return int(resumeIterBase)
+    return int(resumeIterBase) + int(passIters) // int(walks)
 
 
 def parseProgress(line):
@@ -932,6 +1079,39 @@ def parseProgress(line):
     return {"seconds": float(m.group(1)), "rate": float(m.group(2)),
             "iters": int(m.group(3)), "dp": int(m.group(4)), "stored": int(m.group(5)),
             "dropped": int(m.group(6)) if m.group(6) else 0}
+
+
+def parseResumeIterBase(line):
+    m = RESUME_RE.search(line)
+    return int(m.group(1)) if m else None
+
+
+def waitForLine(proc, timeout):
+    """Read one client line, or None on timeout. Commits must not wait on stdout."""
+    if proc.stdout is None:
+        return None
+    ready, _, _ = select.select([proc.stdout], [], [], max(0.0, timeout))
+    if not ready:
+        return None
+    return proc.stdout.readline()
+
+
+def defaultStatusHeader(curve, threads, batch, runId, packed):
+    return dict(version=2 if packed else 1, m=int(curve), threads=int(threads),
+                batch=int(batch), lanes=1 if packed else 32, runId=int(runId),
+                iterBase=0)
+
+
+def tryCommitVolume(volume, ckFile):
+    """Skip while the client is still writing the 370MB tmp; retry conflicts."""
+    if ckFile and os.path.exists(ckFile + ".tmp"):
+        return False
+    try:
+        volume.commit()
+        return True
+    except Exception as exc:
+        print("  volume commit failed: %s: %s" % (type(exc).__name__, exc), flush=True)
+        return False
 
 
 def humanRate(r):
@@ -966,7 +1146,7 @@ def humanBytes(n):
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=300, resume=True, loadMax=50000000, packed=False, verify=4):
+              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
@@ -988,6 +1168,16 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     so a recovered logarithm can be checked against it."""
     if packed and (curve != 131 or leaf):
         raise ValueError('packed search requires curve=131 and leaf=0')
+    if int(verify) > 0:
+        # --verify N replays the first N reports through the CPU reference
+        # before they are written. At dp-weight 32 that is ~2^32 scalar steps
+        # per point, and the GPU sits idle while it runs. That is why the
+        # recycled 6000s printed "resumed from" and then produced no DPs:
+        # the first report never finished verifying. validate/ still uses a
+        # budget; campaign collection does not.
+        print("WARNING: --verify %d replays reports on the CPU; campaign "
+              "collection uses --verify 0 so the walk is not stalled"
+              % int(verify), flush=True)
     backendFlag = ' --packed' if packed else ''
     if rebuild:
         ok, log = buildFor(batch, threads, leaf)
@@ -1045,55 +1235,84 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     lines = []
     solved = None
     started = time.time()
-    lastCommit = started
+    # Stagger the two GPUs on one volume so their commits do not collide.
+    lastCommit = started - (int(runId) % 2) * (VOLUME_COMMIT_S / 2.0)
     lastReport = started
     last = None
     stopped = ""
+    hdrFile = f"/data/ckpt/curve{curve}-run{runId}.hdr"
+    header = readCheckpointHeader(ckFile) or defaultStatusHeader(
+        curve, workerThreads, batch, runId, packed)
+    resumeIterBase = int(header.get("iterBase", 0) or 0)
+    lastWrittenIter = None
+    lastHdrAt = 0.0
     # A container's output is the only window into a run that will outlive the
     # terminal that started it, so summarise on a fixed clock rather than
     # relaying the client's own line every two seconds.
     expected = 2.0 ** CURVE_FACTS[curve][1] if curve in CURVE_FACTS else 0.0
-    print(f"progress every 60 s; corpus {dpFile}"
+    print(f"progress every {PROGRESS_PRINT_S} s; status header every {STATUS_HEADER_S} s; "
+          f"checkpoint every {int(checkpointEvery)} s; corpus {dpFile}"
           + (f", checkpoint {ckFile}" if resume else ""), flush=True)
+
+    def pulse(now):
+        nonlocal lastCommit, lastReport, lastWrittenIter, lastHdrAt
+        # Rewrite the 40-byte sidecar when iterBase moves, at most every
+        # STATUS_HEADER_S; commit is a separate clock because two GPUs share
+        # the volume.
+        moved = header is not None and int(header["iterBase"]) != lastWrittenIter
+        if moved and (lastWrittenIter is None or now - lastHdrAt >= STATUS_HEADER_S):
+            writeCheckpointHeaderFile(hdrFile, header)
+            lastWrittenIter = int(header["iterBase"])
+            lastHdrAt = now
+        if now - lastCommit >= VOLUME_COMMIT_S:
+            lastCommit = now if tryCommitVolume(volume, ckFile) else now - VOLUME_COMMIT_S + 5
+        if now - lastReport >= PROGRESS_PRINT_S:
+            lastReport = now
+            if last:
+                frac = (" (%.3f%% of 2^%.1f)" % (100.0 * last["iters"] / expected,
+                                                 CURVE_FACTS[curve][1])) if expected else ""
+                drop = ("  %s DROPPED" % humanCount(last["dropped"])) if last["dropped"] else ""
+                print("[%s] %s M it/s  %s iters%s  %s dp  %s distinct  "
+                      "corpus %s  %s left%s"
+                      % (humanTime(now - started), humanRate(last["rate"]),
+                         humanCount(last["iters"]), frac,
+                         humanCount(last["dp"]), humanCount(last["stored"]),
+                         humanBytes(os.path.getsize(dpFile) if os.path.exists(dpFile) else 0),
+                         humanTime(deadline - now), drop), flush=True)
+            else:
+                print("[%s] no progress line yet (still starting up?)"
+                      % humanTime(now - started), flush=True)
+
     try:
         while proc.poll() is None:
-            line = proc.stdout.readline()
-            if not line:
-                break
-            lines.append(line.rstrip())
-            if "k = " in line:
-                solved = line.strip()
-            prog = parseProgress(line)
-            if prog:
-                last = prog
-            # Anything that is not a progress line is an event -- a collision, a
-            # verification failure, a checkpoint warning -- and is worth showing
-            # as it happens rather than only in the tail at the end.
-            elif line.strip():
-                print("  " + line.rstrip(), flush=True)
             now = time.time()
-            if now - lastReport >= 60:
-                lastReport = now
-                if last:
-                    frac = (" (%.3f%% of 2^%.1f)" % (100.0 * last["iters"] / expected,
-                                                     CURVE_FACTS[curve][1])) if expected else ""
-                    drop = ("  %s DROPPED" % humanCount(last["dropped"])) if last["dropped"] else ""
-                    print("[%s] %s M it/s  %s iters%s  %s dp  %s distinct  "
-                          "corpus %s  %s left%s"
-                          % (humanTime(now - started), humanRate(last["rate"]),
-                             humanCount(last["iters"]), frac,
-                             humanCount(last["dp"]), humanCount(last["stored"]),
-                             humanBytes(os.path.getsize(dpFile) if os.path.exists(dpFile) else 0),
-                             humanTime(deadline - now), drop), flush=True)
-                else:
-                    print("[%s] no progress line yet (still starting up?)"
-                          % humanTime(now - started), flush=True)
-            # Commit on a clock, not on a line count: the client's output rate
-            # depends on the launch size, so counting lines would space the
-            # commits arbitrarily far apart on a quiet run.
-            if now - lastCommit > 60:
-                volume.commit()
-                lastCommit = now
+            wait = min(5.0, max(0.0, deadline - now))
+            for stamp, every in ((lastCommit, VOLUME_COMMIT_S),
+                                 (lastReport, PROGRESS_PRINT_S)):
+                wait = min(wait, max(0.0, stamp + every - now))
+            line = waitForLine(proc, wait)
+            now = time.time()
+            if line:
+                lines.append(line.rstrip())
+                if "k = " in line:
+                    solved = line.strip()
+                resumed = parseResumeIterBase(line)
+                if resumed is not None:
+                    resumeIterBase = resumed
+                    header["iterBase"] = resumed
+                prog = parseProgress(line)
+                if prog:
+                    last = prog
+                    header["iterBase"] = iterBaseFromProgress(
+                        resumeIterBase, prog["iters"], walks)
+                # Anything that is not a progress line is an event -- a collision, a
+                # verification failure, a checkpoint warning -- and is worth showing
+                # as it happens rather than only in the tail at the end.
+                elif line.strip():
+                    print("  " + line.rstrip(), flush=True)
+            elif line == "":
+                break
+            pulse(now)
             if now > deadline:
                 stopped = "deadline"
                 break
@@ -1115,9 +1334,11 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
                 stopped = "killed before it could checkpoint"
                 proc.kill()
                 proc.wait(timeout=60)
+    if header is not None:
+        writeCheckpointHeaderFile(hdrFile, header)
     # Commit last, so the checkpoint the client just wrote is part of the
     # snapshot rather than the one before it.
-    volume.commit()
+    tryCommitVolume(volume, ckFile)
     return {"gpu": name, "distinguishedPoints": corpusCount(dpFile), "file": dpFile,
             "checkpoint": ckFile if os.path.exists(ckFile) else None,
             "checkpointBytes": os.path.getsize(ckFile) if os.path.exists(ckFile) else 0,
@@ -1275,6 +1496,22 @@ def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
 
 
 @app.local_entrypoint()
+def waves(gpu: str = "", batch: int = 16, threads: int = 256, leaf: int = 0,
+          min_blocks: int = 2, steps: int = 1024, launches: int = 32,
+          repeats: int = 3, packed: bool = True, wave_list: str = "1,4,6,8",
+          prefer_l1: bool = False):
+    """Oversubscribed-grid sweep on one packed binary. --wave-list is 1,4,6,8."""
+    r = onGpu(runWaves, gpu).remote(batch=batch, threads=threads, leaf=leaf,
+                                    minBlocks=min_blocks, steps=steps,
+                                    launches=launches, repeats=repeats,
+                                    packed=packed, waves=wave_list,
+                                    preferL1=prefer_l1)
+    print(json.dumps(r, indent=2))
+    if not r.get("valid"):
+        raise RuntimeError("wave sweep did not complete successfully")
+
+
+@app.local_entrypoint()
 def autotune(gpu: str = "", batches: str = "8,16,32,64",
              thread_counts: str = "64,128,256", leaves: str = "0,17,33,66",
              min_blocks_list: str = "2,4,8", configs: str = "",
@@ -1354,22 +1591,27 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
            threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
+           verify: int = 0, checkpoint_every: int = 60):
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dp_weight,
-                                     runId=run_id, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
+                                     runId=run_id, walksTarget=walks, loadMax=load_max,
+                                     packed=packed, verify=verify,
+                                     checkpointEvery=checkpoint_every)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
+           verify: int = 0, checkpoint_every: int = 60):
     """Run `count` independent searchers, each with its own run id so their
     seeds never collide, then merge what they produced."""
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
+                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max,
+                      packed=packed, verify=verify, checkpointEvery=checkpoint_every)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))

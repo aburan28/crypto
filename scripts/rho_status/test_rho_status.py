@@ -200,7 +200,9 @@ class WorkflowTests(unittest.TestCase):
         ingest = os.path.join(ROOT, "ecc2k130", "aws", "dp_ingest.py")
         with open(ingest, encoding="utf-8") as fh:
             source = fh.read()
-        every = re.search(r'"--status-every", type=float, default=([\d.]+)', source)
+        every = re.search(r'RHO_STATUS_EVERY", "([\d.]+)"', source)
+        if every is None:
+            every = re.search(r'"--status-every", type=float, default=([\d.]+)', source)
         self.assertIsNotNone(every, "--status-every default not found in dp_ingest.py")
         feed_minutes = float(every.group(1)) / 60
         self.assertGreaterEqual(
@@ -736,6 +738,15 @@ class WorkFeedTests(unittest.TestCase):
         self.assertEqual(block["slots"], 4)
         # Retired, and stale by three missed checkpoints, are both not walking.
         self.assertEqual(block["walking_slots"], 2)
+
+    def test_takes_walking_slots_when_the_feed_has_already_stripped_per_slot(self):
+        feed = work_feed()
+        del feed["work"]["per_slot"]
+        feed["work"]["slots"] = 4
+        feed["work"]["walking_slots"] = 2
+        block = work_block(feed, "ecc2k-130")
+        self.assertEqual(block["walking_slots"], 2)
+        self.assertEqual(block["slots"], 4)
 
     def test_merges_into_a_snapshot_without_publishing_anything_private(self):
         snapshot = {"campaign_id": "ecc2k-130", "dps": 1}

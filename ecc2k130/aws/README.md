@@ -154,6 +154,15 @@ resident blocks per SM (minBlocks 4) cost 34%
   A slot whose checkpoint the client refuses (exit 6) is *retired*, never
   restarted from its start points: that would walk the same seeds again and
   re-report points already in the corpus.
+  A third registry lives in RDS Postgres -- the database the dashboard
+  already runs -- and is chosen with `ECC_SLOT_BACKEND=rds`: a claim is then
+  one conditional `UPDATE`, and every lease carries a fence token that
+  rejects writes from an owner the slot has moved past, which no lease length
+  can do on its own. See [`controlplane/README.md`](controlplane/README.md)
+  for the invariants it keeps across RDS, ElastiCache and S3. The live
+  campaign is unchanged: switching an existing fleet is a cutover, and a
+  cutover two backends could both serve during is the double claim the
+  registry exists to prevent.
 * **Checkpoints.** The client writes one every `checkpointEvery` seconds and
   on SIGTERM. The supervisor uploads a hard-link snapshot after every tick.
   A replacement worker resumes whichever of the local or S3 checkpoint is
@@ -476,10 +485,38 @@ every boot after it.
 ### The store's ingest path (`dp_ingest.py`)
 
 The public dashboard reads Postgres (`rho-dp`), not S3, so something has to
-copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does, on its own instance
-(`Name=rho-dp-ingest`), as a systemd unit with `Restart=always`, publishing
-`status.json` to the status bucket and its journal to
+copy `s3://$BUCKET/dp/` into it. `dp_ingest.py` does that work; how it is
+deployed is a separate question.
+
+**General path (any host).** From a machine with AWS credentials and a route
+to Postgres, run:
+
+```bash
+cd ecc2k130/aws
+./ingest.sh ensure-access    # once per new egress IP: opens rho-dp to this /32
+./ingest.sh                  # poll forever
+./ingest.sh once             # one pass, then exit
+./ingest.sh pending          # backlog report, writes nothing
+```
+
+Or from the Modal tree: `./run.sh ingest` (same script; sets
+`INGEST_ENSURE_ACCESS=1` to add this host's egress /32 before connecting).
+Set `DATABASE_URL` to skip Secrets Manager, or `RHO_DB_HOST` plus the
+`rho/dp-rds` secret (connections use `sslmode=require` by default). Requires
+the same IAM scope as the ingest instance profile: read `dp/`, read the
+secret, write the status bucket. Multiple ingesters at once are safe.
+
+From outside the VPC, `rho-dp` must be publicly reachable (`ensure-access`
+enables that and opens the RDS security group). Hosts with unstable egress
+(Cloud Agents, some NAT pools) may need several /32 rules over time; the
+VPC ingest host avoids that.
+
+**VPC host (classic deployment).** `./ingest_host.sh up` launches
+`Name=rho-dp-ingest` inside the VPC as a systemd unit with `Restart=always`,
+publishing `status.json` to the status bucket and its journal to
 `s3://$BUCKET/logs/rho-ingest-<instance>/ingest.log` every two minutes.
+Use this when EC2 is available and you prefer a private RDS endpoint with no
+public IP allowlisting.
 
 **The store is a derived view.** `dp/` is the corpus, `merge.py` is what
 searches it for collisions, and `distinguished_points` can be dropped and
@@ -573,13 +610,14 @@ for this program's own `publishStatus`. The Pages snapshot no longer is:
 once and installs a statement-level insert trigger on
 `distinguished_points`, so the ingest's existing `INSERT ... SELECT` keeps
 the buckets current without a code deploy on this host. Later Pages runs
-read the rollup. This program's 30-minute `--status-every` still buys room
-for the 142 s count query until an ingest-host deploy starts reading the
+read the rollup. This program's `--status-every` (default 180 s) still buys
+room for the count query until an ingest-host deploy starts reading the
 same tables.
 
 While a snapshot runs, this program is not ingesting — the loop is
-pass, publish, pass — so `--status-every` is 1800 s and the page's own refresh
-is the 15-minute Actions job, with this copy as the second one. The corpus-wide per-object
+pass, publish, pass — so `--status-every` matches the 3-minute Actions
+refresh cadence, with this copy in the status bucket as what the job reads
+when the walker hop is down. The corpus-wide per-object
 aggregate in `pending()` is the other scan, and it is cached for half an hour
 (`COUNTS_TTL`) because it answers a question about the pre-`dp_ingest_progress`
 era, which stopped growing when that table appeared.

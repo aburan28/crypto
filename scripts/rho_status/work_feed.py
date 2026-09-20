@@ -166,19 +166,31 @@ def work_block(feed, campaign, now=None, max_age_s=MAX_FEED_AGE_S):
     if max_age_s is not None and age > max_age_s:
         return None
     slots = work.get("per_slot") or []
-    walking = [
-        slot
-        for slot in slots
-        if isinstance(slot, dict)
-        and not slot.get("retired")
-        and isinstance(slot.get("checkpoint_age_s"), (int, float))
-        and slot["checkpoint_age_s"] <= FRESH_CHECKPOINT_S
-    ]
+    if slots:
+        walking = [
+            slot
+            for slot in slots
+            if isinstance(slot, dict)
+            and not slot.get("retired")
+            and isinstance(slot.get("checkpoint_age_s"), (int, float))
+            and slot["checkpoint_age_s"] <= FRESH_CHECKPOINT_S
+        ]
+        n_slots = len(slots)
+        walking_slots = len(walking)
+    else:
+        try:
+            n_slots = int(work.get("slots") or 0)
+        except (TypeError, ValueError):
+            n_slots = 0
+        try:
+            walking_slots = int(work.get("walking_slots") or 0)
+        except (TypeError, ValueError):
+            walking_slots = 0
     block = {
         "iterations": iterations,
         "iterations_log2": round(math.log2(iterations), 6),
-        "slots": len(slots),
-        "walking_slots": len(walking),
+        "slots": n_slots,
+        "walking_slots": walking_slots,
         "feed_generated_at": feed.get("generated_at"),
         "feed_age_seconds": int(max(0.0, age)),
         "method": work.get("method") or "sum of the slots' checkpointed iteration bases",
