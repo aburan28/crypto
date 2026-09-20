@@ -1,0 +1,443 @@
+{
+  "budget_seconds": 10.0,
+  "generated": "2026-09-20T12:08:09Z",
+  "host": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+  "note": "equations only; WDSat ANF mode takes no OR-clauses, so the domain constraints are withheld from both arms",
+  "python": "3.11.15",
+  "rows": [
+    {
+      "config": {
+        "__MAX_ANF_ID__": 1632,
+        "__MAX_BUFFER_SIZE__": 32420,
+        "__MAX_DEGREE__": 3,
+        "__MAX_EQ_SIZE__": 4,
+        "__MAX_EQ__": 6000,
+        "__MAX_ID__": 2181,
+        "__MAX_XEQ_SIZE__": 2181,
+        "__MAX_XEQ__": 3242
+      },
+      "cryptominisat": {
+        "conflicts": null,
+        "sat": true,
+        "seconds": 0.0466,
+        "witness_verified": true
+      },
+      "formulation": "incidence",
+      "free_vars": 90,
+      "n": 5,
+      "target": 0,
+      "wdsat_plain": {
+        "conflicts": 51425,
+        "equations": 1621,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.2454,
+        "vars": 1631,
+        "witness_verified": true
+      },
+      "wdsat_xg": {
+        "conflicts": 47,
+        "equations": 1621,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.1097,
+        "vars": 1631,
+        "witness_verified": true
+      },
+      "witnesses": [
+        "ub",
+        "up0",
+        "up1",
+        "up2",
+        "ud01",
+        "ud02",
+        "ud12",
+        "ur0",
+        "ur1",
+        "ur2"
+      ],
+      "xr": 21,
+      "yr": 28
+    },
+    {
+      "config": {
+        "__MAX_ANF_ID__": 1637,
+        "__MAX_BUFFER_SIZE__": 32520,
+        "__MAX_DEGREE__": 3,
+        "__MAX_EQ_SIZE__": 4,
+        "__MAX_EQ__": 6000,
+        "__MAX_ID__": 2186,
+        "__MAX_XEQ_SIZE__": 2186,
+        "__MAX_XEQ__": 3252
+      },
+      "cryptominisat": {
+        "conflicts": null,
+        "sat": true,
+        "seconds": 0.0492,
+        "witness_verified": true
+      },
+      "formulation": "incidence",
+      "free_vars": 90,
+      "n": 5,
+      "target": 1,
+      "wdsat_plain": {
+        "conflicts": 1201,
+        "equations": 1626,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.0858,
+        "vars": 1636,
+        "witness_verified": true
+      },
+      "wdsat_xg": {
+        "conflicts": 19,
+        "equations": 1626,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.092,
+        "vars": 1636,
+        "witness_verified": true
+      },
+      "witnesses": [
+        "ub",
+        "up0",
+        "up1",
+        "up2",
+        "ud01",
+        "ud02",
+        "ud12",
+        "ur0",
+        "ur1",
+        "ur2"
+      ],
+      "xr": 30,
+      "yr": 12
+    },
+    {
+      "config": {
+        "__MAX_ANF_ID__": 1643,
+        "__MAX_BUFFER_SIZE__": 32640,
+        "__MAX_DEGREE__": 3,
+        "__MAX_EQ_SIZE__": 4,
+        "__MAX_EQ__": 6000,
+        "__MAX_ID__": 2192,
+        "__MAX_XEQ_SIZE__": 2192,
+        "__MAX_XEQ__": 3264
+      },
+      "cryptominisat": {
+        "conflicts": null,
+        "sat": true,
+        "seconds": 0.0564,
+        "witness_verified": true
+      },
+      "formulation": "incidence",
+      "free_vars": 90,
+      "n": 5,
+      "target": 2,
+      "wdsat_plain": {
+        "conflicts": 41137,
+        "equations": 1632,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.2293,
+        "vars": 1642,
+        "witness_verified": true
+      },
+      "wdsat_xg": {
+        "conflicts": 38,
+        "equations": 1632,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.1052,
+        "vars": 1642,
+        "witness_verified": true
+      },
+      "witnesses": [
+        "ub",
+        "up0",
+        "up1",
+        "up2",
+        "ud01",
+        "ud02",
+        "ud12",
+        "ur0",
+        "ur1",
+        "ur2"
+      ],
+      "xr": 29,
+      "yr": 9
+    },
+    {
+      "config": {
+        "__MAX_ANF_ID__": 1629,
+        "__MAX_BUFFER_SIZE__": 32360,
+        "__MAX_DEGREE__": 3,
+        "__MAX_EQ_SIZE__": 4,
+        "__MAX_EQ__": 6000,
+        "__MAX_ID__": 2178,
+        "__MAX_XEQ_SIZE__": 2178,
+        "__MAX_XEQ__": 3236
+      },
+      "cryptominisat": {
+        "conflicts": null,
+        "sat": true,
+        "seconds": 0.0415,
+        "witness_verified": true
+      },
+      "formulation": "incidence",
+      "free_vars": 90,
+      "n": 5,
+      "target": 3,
+      "wdsat_plain": {
+        "conflicts": 34159,
+        "equations": 1618,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.1932,
+        "vars": 1628,
+        "witness_verified": true
+      },
+      "wdsat_xg": {
+        "conflicts": 37,
+        "equations": 1618,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.1034,
+        "vars": 1628,
+        "witness_verified": true
+      },
+      "witnesses": [
+        "ub",
+        "up0",
+        "up1",
+        "up2",
+        "ud01",
+        "ud02",
+        "ud12",
+        "ur0",
+        "ur1",
+        "ur2"
+      ],
+      "xr": 29,
+      "yr": 20
+    },
+    {
+      "config": {
+        "__MAX_ANF_ID__": 1335,
+        "__MAX_BUFFER_SIZE__": 30000,
+        "__MAX_DEGREE__": 3,
+        "__MAX_EQ_SIZE__": 4,
+        "__MAX_EQ__": 6000,
+        "__MAX_ID__": 1759,
+        "__MAX_XEQ_SIZE__": 1759,
+        "__MAX_XEQ__": 2658
+      },
+      "cryptominisat": {
+        "conflicts": null,
+        "sat": true,
+        "seconds": 0.0297,
+        "witness_verified": true
+      },
+      "formulation": "norm",
+      "free_vars": 75,
+      "n": 5,
+      "target": 0,
+      "wdsat_plain": {
+        "conflicts": 710,
+        "equations": 1329,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.0591,
+        "vars": 1334,
+        "witness_verified": true
+      },
+      "wdsat_xg": {
+        "conflicts": 20,
+        "equations": 1329,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.0713,
+        "vars": 1334,
+        "witness_verified": true
+      },
+      "witnesses": [
+        "ub",
+        "up0",
+        "up1",
+        "up2",
+        "ud01",
+        "ud02",
+        "ud12",
+        "ur0",
+        "ur1",
+        "ur2"
+      ],
+      "xr": 21,
+      "yr": 28
+    },
+    {
+      "config": {
+        "__MAX_ANF_ID__": 1333,
+        "__MAX_BUFFER_SIZE__": 30000,
+        "__MAX_DEGREE__": 3,
+        "__MAX_EQ_SIZE__": 4,
+        "__MAX_EQ__": 6000,
+        "__MAX_ID__": 1757,
+        "__MAX_XEQ_SIZE__": 1757,
+        "__MAX_XEQ__": 2654
+      },
+      "cryptominisat": {
+        "conflicts": null,
+        "sat": true,
+        "seconds": 0.0418,
+        "witness_verified": true
+      },
+      "formulation": "norm",
+      "free_vars": 75,
+      "n": 5,
+      "target": 1,
+      "wdsat_plain": {
+        "conflicts": 218,
+        "equations": 1327,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.0616,
+        "vars": 1332,
+        "witness_verified": true
+      },
+      "wdsat_xg": {
+        "conflicts": 15,
+        "equations": 1327,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.0654,
+        "vars": 1332,
+        "witness_verified": true
+      },
+      "witnesses": [
+        "ub",
+        "up0",
+        "up1",
+        "up2",
+        "ud01",
+        "ud02",
+        "ud12",
+        "ur0",
+        "ur1",
+        "ur2"
+      ],
+      "xr": 30,
+      "yr": 12
+    },
+    {
+      "config": {
+        "__MAX_ANF_ID__": 1340,
+        "__MAX_BUFFER_SIZE__": 30000,
+        "__MAX_DEGREE__": 3,
+        "__MAX_EQ_SIZE__": 4,
+        "__MAX_EQ__": 6000,
+        "__MAX_ID__": 1764,
+        "__MAX_XEQ_SIZE__": 1764,
+        "__MAX_XEQ__": 2668
+      },
+      "cryptominisat": {
+        "conflicts": null,
+        "sat": true,
+        "seconds": 0.0311,
+        "witness_verified": true
+      },
+      "formulation": "norm",
+      "free_vars": 75,
+      "n": 5,
+      "target": 2,
+      "wdsat_plain": {
+        "conflicts": 485,
+        "equations": 1334,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.0639,
+        "vars": 1339,
+        "witness_verified": true
+      },
+      "wdsat_xg": {
+        "conflicts": 18,
+        "equations": 1334,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.0722,
+        "vars": 1339,
+        "witness_verified": true
+      },
+      "witnesses": [
+        "ub",
+        "up0",
+        "up1",
+        "up2",
+        "ud01",
+        "ud02",
+        "ud12",
+        "ur0",
+        "ur1",
+        "ur2"
+      ],
+      "xr": 29,
+      "yr": 9
+    },
+    {
+      "config": {
+        "__MAX_ANF_ID__": 1326,
+        "__MAX_BUFFER_SIZE__": 30000,
+        "__MAX_DEGREE__": 3,
+        "__MAX_EQ_SIZE__": 4,
+        "__MAX_EQ__": 6000,
+        "__MAX_ID__": 1750,
+        "__MAX_XEQ_SIZE__": 1750,
+        "__MAX_XEQ__": 2640
+      },
+      "cryptominisat": {
+        "conflicts": null,
+        "sat": true,
+        "seconds": 0.0305,
+        "witness_verified": true
+      },
+      "formulation": "norm",
+      "free_vars": 75,
+      "n": 5,
+      "target": 3,
+      "wdsat_plain": {
+        "conflicts": 491,
+        "equations": 1320,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.056,
+        "vars": 1325,
+        "witness_verified": true
+      },
+      "wdsat_xg": {
+        "conflicts": 18,
+        "equations": 1320,
+        "outcome": "sat",
+        "sat": true,
+        "seconds": 0.0629,
+        "vars": 1325,
+        "witness_verified": true
+      },
+      "witnesses": [
+        "ub",
+        "up0",
+        "up1",
+        "up2",
+        "ud01",
+        "ud02",
+        "ud12",
+        "ur0",
+        "ur1",
+        "ur2"
+      ],
+      "xr": 29,
+      "yr": 20
+    }
+  ],
+  "unit": "conflicts (each solver own counter); seconds is a practicality note",
+  "wdsat_src": "/tmp/ec-baseline-cache/vendor/WDSat/src"
+}

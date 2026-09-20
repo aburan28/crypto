@@ -315,7 +315,7 @@
       exponent matching the derived law. That is a toy-size result
       (<code>p ≤ 251</code>) whose reference needed correcting, not a statement about
       any deployed curve. The newer binary-field solver, the
-      Crossbred decomposition oracle and the
+      Crossbred decomposition oracle, the WDSat Riemann-Roch panel and the
       parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
@@ -2894,5 +2894,47 @@ produced a single filter</strong>, so on these systems Crossbred is Macaulay pre
 2<sup>k</sup> linear solves, paid per target &mdash; which is what the decaying wall-clock margin measures.</p>
 </section>
 <!-- END crossbred-20260920 -->
+<section class="panel" id="wdsat-rr-20260920">
+<h2>The Riemann&ndash;Roch encodings in front of WDSat: one engine win, one tool ceiling</h2>
+<p>WDSat is the Weil-descent SAT solver this repository vendors for the frozen S4 regression; the
+Riemann&ndash;Roch incidence and norm frontends had never been put in front of it. New ANF exporter
+(<code>ecc2k130/codegen/wdsat.py</code>) and matched suite. Frozen source:
+<a href="https://github.com/aburan28/crypto/blob/main/research/wdsat_rr_20260920/panel_n9.txt">n = 9 panel</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/wdsat_rr_20260920/ceiling.txt">solver ceiling probe</a>.
+Write-up: <code>research/notes/ecc2k130/RESEARCH_ECC2K130_WDSAT.md</code>.
+<strong>Not a run of the frozen S4 regression</strong> &mdash; a different encoding is a different
+instance family and, because WDSat's structures are statically allocated, a differently compiled
+binary, so AGENTS.md &sect;8's equivalent-suite route applies.</p>
+<div class="table-scroll"><table>
+<caption>Eight targets per formulation at n = 9, ten-second budget, both arms on the identical
+equations. Unit: conflicts, each solver's own counter. A timeout is neither a model nor a refutation;
+a crash is neither, and is reported as neither.</caption>
+<thead><tr><th>Variant</th><th>Full-DLP S</th><th>Cost / rho</th><th>Decided / 8</th><th>Conflicts, median</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>RR norm &mdash; WDSat, Gaussian (<code>-x</code>)</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td><strong>62</strong></td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>RR norm &mdash; WDSat, plain</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td>79,151</td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">paired control</span></td></tr>
+<tr><td>RR norm &mdash; CryptoMiniSat</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td>not reported by the binding</td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">reference</span></td></tr>
+<tr><td>RR incidence &mdash; WDSat, either configuration</td><td>&mdash;</td><td>&mdash;</td><td><strong>0</strong></td><td>&mdash;</td><td>SIGSEGV before any output; instance exceeds the static allocation</td><td><span class="chip">does not reach the solver</span></td></tr>
+<tr><td>RR incidence &mdash; CryptoMiniSat</td><td>Uncalibrated</td><td>Uncalibrated</td><td>7</td><td>not reported by the binding</td><td>7/7 witnesses reconstruct; 0 invalid</td><td><span class="chip">reference</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>The reusable boundary: WDSat's static allocation, measured with a one-variable trivially
+satisfiable probe so nothing about an encoding is involved. monomials_to_column is
+__MAX_ANF_ID__ &times; (__MAX_ID__+1) &times; (__MAX_DEGREE__&minus;1) of uint_fast64_t.</caption>
+<thead><tr><th>__MAX_ANF_ID__</th><th>__MAX_ID__</th><th>Product (M entries)</th><th>Result</th></tr></thead><tbody>
+<tr><td>3,938</td><td>5,314</td><td>20.9</td><td>runs (RR norm at n = 9 sits here)</td></tr>
+<tr><td>4,300</td><td>5,314</td><td>22.9</td><td>runs</td></tr>
+<tr><td>4,500</td><td>5,314</td><td>23.9</td><td>SIGSEGV</td></tr>
+<tr><td>4,875</td><td>6,656</td><td>32.5</td><td>SIGSEGV (RR incidence at n = 9 sits here)</td></tr>
+</tbody></table></div>
+<p><strong>Two things this round did not get.</strong> Its pre-registered success condition asked WDSat to
+decide an RR-incidence instance CryptoMiniSat leaves undecided; incidence does not reach the solver at
+all, so the condition is unmeetable and the round is abandoned on its own terms for that formulation.
+And the declared unit is unavailable on the reference arm &mdash; <code>pysat</code> reports no conflict
+count for CryptoMiniSat &mdash; so the cross-solver comparison in conflicts <em>cannot be made</em>; only the
+within-WDSat pairing is claimed, and seconds are not promoted to the metric to paper over the gap.
+No row is an advance: relation collection stays &Theta;(2<sup>n</sup>) with any oracle polynomial in the
+factor base, and this prices a decomposition oracle.</p>
+</section>
+<!-- END wdsat-rr-20260920 -->
 </body>
 </html>
