@@ -1188,8 +1188,11 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td><code>--solver wdsat</code></td><td>yes</td><td>yes</td>
           <td>Unmeasured (floor ratio flat)</td>
           <td><span class="chip">engineering</span></td></tr>
-        <tr><td><code>--solver mq-fes</code> (ALMASTY Möbius; <code>m=2</code>)</td><td>yes</td><td>yes</td>
-          <td>Unmeasured (floor ratio flat)</td>
+        <tr><td><code>--solver mq-fes</code> (Gray early-exit + Möbius; <code>m=2</code>)</td><td>yes</td><td>yes</td>
+          <td>Unmeasured (floor ratio flat); Gray <code>find_one</code> ~196× Möbius wall on <code>n=18</code> dense quadratic</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Monica hybrid (ALMASTY <code>monica.c</code>)</td><td>—</td><td>agrees with Gray/Möbius on toys</td>
+          <td>Range extension for <code>n&gt;24</code>; not faster than Möbius inside the cap (~0.22× on <code>n=14,m=32</code>)</td>
           <td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table></div>

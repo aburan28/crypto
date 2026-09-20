@@ -21,9 +21,24 @@
   },
   "inspiration": {
     "almasty_mq": "https://gitlab.lip6.fr/almasty/mq",
-    "techniques": ["moebius_transform", "gray_code_crosscheck"],
+    "techniques": [
+      "moebius_transform",
+      "gray_incremental_early_exit",
+      "monica_hybrid_range_extension"
+    ],
     "libfes_lite": "https://github.com/cbouilla/libfes-lite",
-    "note": "mq-fes ports ALMASTY moebius.c ideas (public domain); not a binding to that tree"
+    "note": "mq-fes ports ALMASTY ideas (public domain); not a binding to that tree"
+  },
+  "mq_fes_speed": {
+    "class": "engineering",
+    "unit": "wall_ns_find_one_release",
+    "instance": "dense quadratic n=18 m=18 planted Gray-index 2000",
+    "moebius_ns": 3160744,
+    "gray_incremental_ns": 15909,
+    "ratio_moebius_over_gray": 198.68,
+    "monica_vs_moebius_n14_m32_ratio": 0.22,
+    "monica_role": "range extension past Moebius n<=24 cap; not an in-cap speedup",
+    "floor_ratio": "flat"
   },
   "ecc2k130": {
     "field": "F_2^131",

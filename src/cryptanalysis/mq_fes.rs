@@ -6,11 +6,11 @@
 //!
 //! - **Moebius transform** (`moebius.c`) — pack ANF coefficients into a
 //!   `2^n` table and convert to the truth table in `O(n·2^n)`; zeros are
-//!   solutions.  This is the default solver below.
-//! - **Monica / libfes-style Gray codes** (`monica.c`, `ffs.h`) — the
-//!   Crossbred hybrid that guesses outer variables and enumerates the
-//!   rest; not yet wired as a Semaev strategy (cubic chains stay on SAT /
-//!   WDSat).
+//!   solutions.  Fallback when Monica does not apply.
+//! - **Monica** (`monica.c`, `ffs.h`) — striped-down Crossbred: linearise
+//!   `v ≈ √(2m)` variables and FFS-enumerate the rest.  Preferred when the
+//!   cost model says it beats Möbius (see [`crate::cryptanalysis::mq_monica`]).
+//!   Cubic chained systems still stay on SAT / WDSat.
 //!
 //! Also informed by Bouillaguet’s
 //! [`libfes-lite`](https://github.com/cbouilla/libfes-lite).  This is a
@@ -161,14 +161,125 @@ pub fn moebius_find_all(forms: &[QuadraticForm], max_solutions: usize) -> Option
     Some(out)
 }
 
-/// First common zero via Möbius, or `None` if the space is empty / too large.
+/// Which quadratic FES backend produced a result.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FesBackend {
+    Monica,
+    Moebius,
+}
+
+/// Prefer Möbius for `n ≤ 24`; Monica only when Möbius refuses / cost model wins.
+pub fn fes_find_all_auto(
+    forms: &[QuadraticForm],
+    max_solutions: usize,
+) -> Option<(Vec<u64>, FesBackend)> {
+    if forms.is_empty() {
+        return Some((vec![0], FesBackend::Moebius));
+    }
+    let n = forms[0].n;
+    let m = forms.len();
+    if n > 24 || crate::cryptanalysis::mq_monica::monica_beats_moebius(n, m) {
+        if let Some(roots) = crate::cryptanalysis::mq_monica::monica_find_all(forms, max_solutions)
+        {
+            return Some((roots, FesBackend::Monica));
+        }
+    }
+    moebius_find_all(forms, max_solutions).map(|r| (r, FesBackend::Moebius))
+}
+
+/// First common zero via incremental Gray (early exit), else Möbius / Monica.
 pub fn fes_find_one(forms: &[QuadraticForm]) -> Option<u64> {
+    if forms.is_empty() {
+        return Some(0);
+    }
+    if let Some(x) = gray_incremental_find_one(forms) {
+        return Some(x);
+    }
+    // Gray refused (too large): try Monica, then Möbius.
+    let n = forms[0].n;
+    let m = forms.len();
+    if n > 24 || crate::cryptanalysis::mq_monica::monica_beats_moebius(n, m) {
+        if let Some(roots) = crate::cryptanalysis::mq_monica::monica_find_all(forms, 1) {
+            return roots.into_iter().next();
+        }
+    }
     moebius_find_all(forms, 1)?.into_iter().next()
 }
 
-/// Every common zero via Möbius (empty on capacity refusal).
+/// Every common zero via the auto-selected backend (empty on capacity refusal).
 pub fn fes_find_all(forms: &[QuadraticForm], max_solutions: usize) -> Vec<u64> {
-    moebius_find_all(forms, max_solutions).unwrap_or_default()
+    fes_find_all_auto(forms, max_solutions)
+        .map(|(r, _)| r)
+        .unwrap_or_default()
+}
+
+/// Incremental Gray-code enumeration with packed equation bits.
+///
+/// Each step flips one variable and updates the packed truth value in
+/// `O(#eqs)` bit operations — cheaper than rebuilding, and able to
+/// **stop at the first zero**.  That early exit is the lever that can beat a
+/// full Möbius transform when a solution exists and is not pathologically late.
+pub fn gray_incremental_find_all(
+    forms: &[QuadraticForm],
+    max_solutions: usize,
+) -> Option<Vec<u64>> {
+    if forms.is_empty() {
+        return Some(vec![0]);
+    }
+    let n = forms[0].n;
+    let m = forms.len();
+    if n > 28 || m > 64 || forms.iter().any(|f| f.n != n) {
+        return None;
+    }
+    // Derivative table: flipping bit `k` XORs `deriv[k]` into the packed value,
+    // then `deriv[j] ^= quad_mask[k][j]` for each j (standard degree-2 FES).
+    let mut deriv = vec![0u64; n];
+    let mut quad_mask = vec![vec![0u64; n]; n];
+    let mut value = 0u64;
+    for (eq, form) in forms.iter().enumerate() {
+        let bit = 1u64 << eq;
+        if form.constant {
+            value ^= bit;
+        }
+        for i in 0..n {
+            if form.linear[i] {
+                deriv[i] ^= bit;
+            }
+            for j in 0..i {
+                if form.quad[i][j] {
+                    quad_mask[i][j] ^= bit;
+                    quad_mask[j][i] ^= bit;
+                }
+            }
+        }
+    }
+    let mut out = Vec::new();
+    let mut point = 0u64;
+    let limit = 1u64 << n;
+    for step in 0..limit {
+        if value == 0 {
+            out.push(point);
+            if out.len() >= max_solutions {
+                break;
+            }
+        }
+        let flip = (step + 1).trailing_zeros() as usize;
+        if flip >= n {
+            break;
+        }
+        value ^= deriv[flip];
+        for j in 0..n {
+            if j != flip {
+                deriv[j] ^= quad_mask[flip][j];
+            }
+        }
+        point ^= 1u64 << flip;
+    }
+    Some(out)
+}
+
+pub fn gray_incremental_find_one(forms: &[QuadraticForm]) -> Option<u64> {
+    gray_incremental_find_all(forms, 1)?.into_iter().next()
 }
 
 /// Naive Gray-code re-evaluation — retained as an independent check on
@@ -253,11 +364,17 @@ pub fn mq_fes_decompose(
         }
     };
     stats.solver_calls = 1;
-    let roots = match moebius_find_all(&forms, 64) {
-        Some(roots) => roots,
-        None => {
-            stats.exhausted = true;
-            return (None, stats);
+    // Prefer incremental Gray so a successful lift can stop before a full
+    // Möbius transform; fall back to the auto all-roots backend otherwise.
+    let roots = if let Some(roots) = gray_incremental_find_all(&forms, 64) {
+        roots
+    } else {
+        match fes_find_all_auto(&forms, 64) {
+            Some((roots, _)) => roots,
+            None => {
+                stats.exhausted = true;
+                return (None, stats);
+            }
         }
     };
     if roots.is_empty() {
@@ -373,5 +490,120 @@ mod tests {
         a.sort_unstable();
         b.sort_unstable();
         assert_eq!(a, b);
+    }
+
+    #[test]
+    fn gray_incremental_agrees_with_moebius() {
+        let rows = [
+            AnfRow {
+                monomials: vec![vec![0, 1], vec![2], vec![4]],
+                constant: true,
+            },
+            AnfRow {
+                monomials: vec![vec![1, 3], vec![0, 4], vec![2, 3]],
+                constant: false,
+            },
+            AnfRow {
+                monomials: vec![vec![0, 2], vec![1], vec![3, 4]],
+                constant: true,
+            },
+        ];
+        let forms: Vec<_> = rows
+            .iter()
+            .map(|r| QuadraticForm::from_anf_row(r, 5).unwrap())
+            .collect();
+        let mut a = gray_incremental_find_all(&forms, 1024).unwrap();
+        let mut b = moebius_find_all(&forms, 1024).unwrap();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn gray_early_exit_beats_moebius_find_one_wall() {
+        // Plant a solution early in Gray order so early exit pays, while
+        // Möbius still pays the full n·2^n transform.  n=18 keeps both fast.
+        let n = 18usize;
+        let m = 18usize;
+        let gray_index: u64 = 2_000; // well below 2^18
+        let planted = gray_index ^ (gray_index >> 1);
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            let probe = QuadraticForm {
+                n,
+                constant: false,
+                linear: linear.clone(),
+                quad: quad.clone(),
+            };
+            // Adjust constant so eval(planted) == false.
+            let constant = probe.eval(planted);
+            forms.push(QuadraticForm {
+                n,
+                constant,
+                linear,
+                quad,
+            });
+        }
+        assert!(forms.iter().all(|f| !f.eval(planted)));
+
+        let t0 = std::time::Instant::now();
+        let g = gray_incremental_find_one(&forms).expect("gray");
+        let gray_ns = t0.elapsed().as_nanos();
+        let t1 = std::time::Instant::now();
+        let mbi = moebius_find_all(&forms, 1).unwrap().into_iter().next();
+        let moebius_ns = t1.elapsed().as_nanos();
+        assert!(forms.iter().all(|f| !f.eval(g)));
+        assert!(mbi.is_some() && forms.iter().all(|f| !f.eval(mbi.unwrap())));
+        // Multiple roots are expected; Gray returns the first in Gray order,
+        // Möbius the first in binary order — only require both be zeros.
+        let ratio = moebius_ns as f64 / gray_ns.max(1) as f64;
+        eprintln!(
+            "gray_early_vs_moebius n={n}: gray={gray_ns}ns moebius={moebius_ns}ns ratio={ratio:.2} gray_sol={g:#x} moebius_sol={:#x}",
+            mbi.unwrap()
+        );
+        assert!(
+            ratio >= 1.5,
+            "expected incremental Gray find_one ≥1.5× Möbius, got {ratio:.3}"
+        );
+    }
+
+    #[test]
+    fn monica_extends_past_moebius_cap() {
+        // n=26 exceeds Möbius' n≤24 table; Monica must still run.
+        let n = 26usize;
+        let m = 64usize;
+        assert!(n > 24);
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let constant = eq % 5 == 0;
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 3 + i) % 4) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq + i + j) % 11) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant,
+                linear,
+                quad,
+            });
+        }
+        assert!(moebius_find_all(&forms, 1).is_none());
+        let roots = crate::cryptanalysis::mq_monica::monica_find_all(&forms, 4);
+        assert!(roots.is_some(), "Monica should accept n=26");
+        for x in roots.unwrap() {
+            assert!(forms.iter().all(|f| !f.eval(x)), "bad Monica root {x:#x}");
+        }
     }
 }

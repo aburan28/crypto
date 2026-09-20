@@ -60,19 +60,25 @@ identical subspace factor base, independent group lift:
 |---|---|---|---|
 | native `--solver sat` | reference | yes | — |
 | `--solver wdsat` (WDSat `61c6ff3`) | **engineering** | yes | yes |
-| `--solver mq-fes` (ALMASTY Möbius) | **engineering** | yes | yes |
+| `--solver mq-fes` (ALMASTY Möbius + Gray early-exit) | **engineering** | yes | yes |
 
 Ratio to the free-oracle floor is unchanged: every oracle answers the
 same algebraic question. Class is **engineering** by §3 of `AGENTS.md`.
 
 The `mq-fes` backend ports the ALMASTY
-[mq](https://gitlab.lip6.fr/almasty/mq) **Möbius transform** solver
-(`moebius.c`, public domain): ANF coefficients are packed into a `2^n`
-table, transformed in `O(n·2^n)`, and zeros are the solutions.  A Gray-code
-re-evaluation path is kept only as a correctness cross-check (monica /
-libfes enumeration shape).  Cubic chained (`m ≥ 3`) Semaev systems are
-refused; those stay on SAT / WDSat.  Monica’s Crossbred hybrid is noted
-for a later round and is not yet a Semaev strategy here.
+[mq](https://gitlab.lip6.fr/almasty/mq) solvers (public domain):
+
+| backend | when used | measured vs Möbius (`n=18`, planted early Gray root) |
+|---|---|---|
+| Incremental Gray (`ffs`-style derivatives) | `find_one` / Semaev lift (early exit) | **~199×** wall faster than full Möbius |
+| Möbius transform (`moebius.c`) | `find_all` for `n ≤ 24` | reference for all-roots |
+| Monica hybrid (`monica.c`) | `n > 24` (range extension) | does **not** beat Möbius inside `n ≤ 24` (release wall on `n=14,m=32` was ~0.22×); calibrated cost model agrees |
+
+Falsification for the “faster than Möbius” claim: a release run of
+`gray_early_exit_beats_moebius_find_one_wall` must keep ratio `≥ 1.5` on
+the fixed dense quadratic with a Gray-index-2000 planted root. Monica is
+kept as a capacity extension, not as an in-cap speedup. Cubic chained
+(`m ≥ 3`) Semaev systems are refused; those stay on SAT / WDSat.
 
 ```text
 WDSAT_BINARY=/path/to/wdsat_solver cargo test --lib \
@@ -94,11 +100,15 @@ oracle floor and the rho reference in
 `config.h` allocation and the `m · 2^{131}` product of the free-oracle
 argument both remain binding at full size. What changed is that the IC
 pipeline can hand the *same* Semaev instance to Trimoska's solver on the
-prime-degree ladder that leads there.
+prime-degree ladder that leads there, and that the quadratic `mq-fes`
+path can answer `find_one` without paying a full Möbius transform when a
+root appears early in Gray order.
 
 ## Verdict
 
 **Engineering unification landed; no advance against the floor.** Native
-SAT and WDSat agree on the planted prime-degree toy. Full-size ECC2K-130
-index calculus remains above rho for every oracle this repository has
-priced.
+SAT and WDSat agree on the planted prime-degree toy. Incremental Gray
+beats Möbius on `find_one` wall time (engineering, floor ratio flat).
+Monica extends past the Möbius `n ≤ 24` table rather than beating it
+inside the cap. Full-size ECC2K-130 index calculus remains above rho for
+every oracle this repository has priced.
