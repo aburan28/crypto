@@ -1,0 +1,4 @@
+{
+  "name": "crypto",
+  "install": "rustup update stable && rustup default stable && cargo build --release"
+}
