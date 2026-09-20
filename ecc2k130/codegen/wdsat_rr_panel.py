@@ -315,11 +315,12 @@ def report(row):
         e = row.get(name)
         if e is None:
             return '%-14s   —' % name
-        state = e.get('outcome') or ('SAT' if e['sat'] else 'UNSAT')
         if e['sat'] is True:
             state = 'SAT'
         elif e['sat'] is False:
             state = 'UNSAT'
+        else:
+            state = e.get('outcome') or 'undecided'
         wit = e.get('witness_verified')
         mark = '' if wit is None else (' witness ok' if wit else ' WITNESS BAD')
         return '%-14s %-8s conflicts %-8s %6.2fs%s' % (
