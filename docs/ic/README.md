@@ -100,7 +100,7 @@ group before it becomes a relation:
 - sat: the same system, CDCL with native parity rows;
 - wdsat: the same Semaev system emitted as Trimoska ANF and solved by an
   external WDSat binary (`--wdsat-binary PATH`). See
-  [`RESEARCH_WDSAT_IC_UNIFICATION.md`](../RESEARCH_WDSAT_IC_UNIFICATION.md).
+  [`RESEARCH_WDSAT_IC_UNIFICATION.md`](../../research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md).
   Requires a capacity-sufficient build of
   [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
   baseline builder is
