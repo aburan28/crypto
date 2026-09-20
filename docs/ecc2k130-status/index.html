@@ -1354,6 +1354,11 @@ make gpu
     return isFinite(t) ? t : 0;
   }
 
+  function publishedMs(status) {
+    var t = Date.parse(String(status && status.published_at || ""));
+    return isFinite(t) ? t : 0;
+  }
+
   function mergeSnapshots(live, pages) {
     if (!live && !pages) return null;
     if (!live) return pages;
@@ -1374,6 +1379,16 @@ make gpu
     if (!(out.per_worker && out.per_worker.length) && older.per_worker && older.per_worker.length) {
       out.per_worker = older.per_worker;
     }
+    // published_at is when a publisher wrote the file, not when the source
+    // counted. A healthy Pages job on a frozen ingest feed must keep its
+    // fresher stamp: otherwise the banner blames the publisher for a dead
+    // feed (2026-09-20: live and Pages shared generated_at, live won, and
+    // a four-hour-old ingest published_at made a minute-old Action look dead).
+    var livePub = publishedMs(live);
+    var pagesPub = publishedMs(pages);
+    if (pagesPub > livePub) out.published_at = pages.published_at;
+    else if (livePub > 0) out.published_at = live.published_at;
+    else if (pages.published_at) out.published_at = pages.published_at;
     out._fetch_label = (live._fetch_label || "live feed") + " + " + (pages._fetch_label || "Pages snapshot");
     return out;
   }
@@ -1471,6 +1486,19 @@ make gpu
     var snapshotAge = generated ? Date.now() - generated.getTime() : null;
     var publishedAge = published ? Date.now() - published.getTime() : null;
     var stale = snapshotAge !== null && snapshotAge > STALE_AFTER_MS;
+    // "Walking now" fields inside the document are relative to generated_at.
+    // Past STALE_AFTER they are not current — drop them rather than paint a
+    // frozen walking_slots / walk_rate as live (the 2026-09-20 freeze showed
+    // 4 slots and 2.9 B it/s for hours after the feed stopped).
+    if (stale) {
+      if (status.work && typeof status.work === "object") {
+        status.work = Object.assign({}, status.work, { walking_slots: 0 });
+      }
+      if (status.walk_rate) {
+        status = Object.assign({}, status);
+        delete status.walk_rate;
+      }
+    }
     var displayState = campaignDisplayState(status);
     var extra = "";
     if (stale) {

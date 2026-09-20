@@ -30,8 +30,15 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     // TableWalk so device and re-walk share one table by construction.
     const Solver<CfgF131> *sol = nullptr;
 
+#if ECC_PHASE_PROFILE
+    double profWarpSteps = 0;
+#endif
     PackedCudaEngine() { P = {}; }
     ~PackedCudaEngine() override {
+#if ECC_PHASE_PROFILE
+        cudaDeviceSynchronize();
+        if (profWarpSteps > 0) eccPacked131::phaseProfileReport(profWarpSteps);
+#endif
 #if ECC_PACKED_L2_PERSIST
         cudaFree(fieldBlob);
 #else
@@ -136,7 +143,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
 #endif
     }
 #endif
-    static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM *
+    static constexpr int denominatorFields = ECC_PACKED_CACHE_DENOM * (1 - ECC_TABLE_TAG_DENOM) *
         (1 + ECC_PACKED_POLY_CHAIN * (1 - ECC_PACKED_POLY_STATE));
     const char *name() const { return "cuda-packed131"; }
     u64 walksPerLaunch() const { return u64(P.threads) * BATCH; }
@@ -230,14 +237,14 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         P.x = fieldBlob;
         P.y = fieldBlob + physicalFieldCount();
         P.pchain = fieldBlob + 2 * physicalFieldCount();
-#if ECC_PACKED_CACHE_DENOM
+#if ECC_PACKED_CACHE_DENOM && !ECC_TABLE_TAG_DENOM
         denominators = fieldBlob + 3 * physicalFieldCount();
 #endif
         applyPackedL2Persist(fieldBlob, bytes * size_t(persistFieldCount()));
 #else
         CUDA_CHECK(cudaMalloc(&P.x, bytes)); CUDA_CHECK(cudaMalloc(&P.y, bytes));
         CUDA_CHECK(cudaMalloc(&P.pchain, bytes));
-#if ECC_PACKED_CACHE_DENOM
+#if ECC_PACKED_CACHE_DENOM && !ECC_TABLE_TAG_DENOM
         CUDA_CHECK(cudaMalloc(&denominators, bytes * denominatorFields));
 #endif
 #endif
@@ -335,6 +342,9 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         eccPacked131::walk<<<(P.threads + ECC_THREADS - 1) / ECC_THREADS, ECC_THREADS,
                              dynamicSharedBytes()>>>(P, denominators);
         CUDA_CHECK(cudaGetLastError());
+#if ECC_PHASE_PROFILE
+        profWarpSteps += double(P.threads / 32) * P.steps;
+#endif
 #if ECC_PROFILE_RANGE
         CUDA_CHECK(cudaDeviceSynchronize());
         CUDA_CHECK(cudaProfilerStop());

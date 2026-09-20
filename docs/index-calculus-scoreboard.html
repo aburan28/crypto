@@ -314,7 +314,8 @@
       <code>N</code> = 2<sup>24</sup> on the conservative accounting — with a fitted
       exponent matching the derived law. That is a toy-size result
       (<code>p ≤ 251</code>) whose reference needed correcting, not a statement about
-      any deployed curve. The newer binary-field solver and
+      any deployed curve. The newer binary-field solver, the
+      Crossbred decomposition oracle, the WDSat Riemann-Roch panel and the
       parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
@@ -322,7 +323,10 @@
       <div class="fact">
         <dt>The unit</dt>
         <dd>S = ops / &radic;n</dd>
-        <p>Group operations per square root of the group order, so rho is flat at every size.</p>
+        <p>Group operations per square root of the group order, so rho is flat at every size.
+          Counted end to end across every phase &mdash; setup, relation finding, the
+          decomposition oracle and linear algebra &mdash; because end-to-end speed is the
+          measure of speed: a phase-only crossover is a diagnostic, not a win.</p>
       </div>
       <div class="fact">
         <dt>Boundary 1 · the floor</dt>
@@ -1188,8 +1192,11 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td><code>--solver wdsat</code></td><td>yes</td><td>yes</td>
           <td>Unmeasured (floor ratio flat)</td>
           <td><span class="chip">engineering</span></td></tr>
-        <tr><td><code>--solver mq-fes</code> (Gray-code FES; LIP6 MQ inspiration)</td><td>yes</td><td>yes</td>
-          <td>Unmeasured (floor ratio flat; <code>m=2</code> only)</td>
+        <tr><td><code>--solver mq-fes</code> (libfes FFS Gray + Möbius; <code>m=2</code>)</td><td>yes</td><td>yes</td>
+          <td>Unmeasured (floor ratio flat); FFS Gray <code>find_one</code> ~273× Möbius, ~33× prior O(n)/step Gray on <code>n=18</code></td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Monica hybrid (ALMASTY <code>monica.c</code>)</td><td>—</td><td>agrees with Gray/Möbius on toys</td>
+          <td>Range extension for <code>n&gt;24</code>; not faster than Möbius inside the cap (~0.22× on <code>n=14,m=32</code>)</td>
           <td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table></div>
@@ -2961,5 +2968,86 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0017 -->
+<section class="panel" id="crossbred-20260920">
+<h2>Crossbred as a decomposition oracle: fastest oracle, still loses the pipeline</h2>
+<p>Joux&ndash;Vitse Crossbred wired into Koblitz index calculus as
+<code>DecompositionStrategy::Crossbred</code> (Route 1 of the ECC2K-130 routes note,
+whose metric and falsifier were declared before this run). Two phases, two units, because
+the oracle result and the pipeline result point opposite ways. Frozen source:
+<a href="https://github.com/aburan28/crypto/blob/main/research/crossbred_20260920/oracle_ladder.txt">oracle ladder</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/crossbred_20260920/e2e_panel.txt">end-to-end panel</a>.
+Write-up: <code>research/notes/ecc2k130/RESEARCH_ECC2K130_CROSSBRED.md</code>.</p>
+<div class="table-scroll"><table>
+<caption>Oracle phase. Unit: bit operations, one 64-bit word XOR = 64 bit ops. Boundary: exhaustive
+search over the Boolean system, 2<sup>v</sup>&middot;T. The declared metric is the wall-clock
+xb/F4 ratio at m = 3; the falsifier was xb/F4 &ge; 1 and does not fire.</caption>
+<thead><tr><th>Variant</th><th>n / m</th><th>xb/brute</th><th>xb/F4 (bit ops)</th><th>xb/F4 (wall)</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>Exhaustive search over the system</td><td>&mdash;</td><td>1</td><td>&mdash;</td><td>&mdash;</td><td>Reference root set where it fits</td><td><span class="chip">boundary</span></td></tr>
+<tr><td>Matrix-F4 at the deciding degree</td><td>9/2, 13/2, 7/3, 9/3</td><td>&mdash;</td><td>1</td><td>1</td><td>Certificate never contradicts the reference</td><td><span class="chip">reference</span></td></tr>
+<tr><td>Crossbred, best (D, k) per rung</td><td>9/2, 13/2, 7/3, 9/3</td><td>0.120 / 0.001 / 0.016 / &mdash;</td><td>0.004 / 0.002 / 0.013 / 0.023</td><td>0.021 / 0.053 / 0.040 / <strong>0.696</strong></td><td>Root-set equality where exhaustive fits; two one-sided checks past v = 24; all rows agree</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>&nbsp;&nbsp;&mdash; margin vs. size</td><td>m = 3: n 7 &rarr; 9</td><td>&mdash;</td><td>&mdash;</td><td>0.040 &rarr; 0.696, rising</td><td>Two rungs; no exponent fitted</td><td><span class="chip">shrinking; one rung decides</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Whole pipeline, strategy the only variable: same curve, factor base, m, seed, trial cap and
+linear algebra, with the generic aG+bQ=O shortcut counted and skipped. Unit: relations per second
+over relation-collection time. Reference arm is exhaustive enumeration &mdash; the null object.
+S against the group order is <strong>uncalibrated</strong> here: this prices a phase, not a full
+priced attack, and does not belong in the normalized rho claim.</caption>
+<thead><tr><th>Variant</th><th>Full-DLP S</th><th>Cost / rho</th><th>relations/s, n=9 m=2</th><th>relations/s, n=9 m=3</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>Enumerate (null object)</td><td>Uncalibrated</td><td>Uncalibrated</td><td>51,103.0</td><td>21,330.5</td><td>Planted scalar recovered on every row</td><td><span class="chip">reference</span></td></tr>
+<tr><td>Crossbred</td><td>Uncalibrated</td><td>Uncalibrated</td><td>4,672.2 (0.09&times;)</td><td>11.8 (0.0006&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">engineering at m = 2; worst arm at m = 3</span></td></tr>
+<tr><td>Gr&ouml;bner</td><td>Uncalibrated</td><td>Uncalibrated</td><td>613.9 (0.01&times;)</td><td>32.3 (0.0015&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">prior arm</span></td></tr>
+<tr><td>SAT</td><td>Uncalibrated</td><td>Uncalibrated</td><td>1,654.1 (0.03&times;)</td><td>51.9 (0.0024&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">prior arm</span></td></tr>
+<tr><td>Reading the oracle win as a pipeline win</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="chip relabel">relabelling &mdash; named so it is not claimed later</span></td></tr>
+</tbody></table></div>
+<p>No row is an advance. The floor is &Theta;(2<sup>n</sup>) relation collection with any oracle
+polynomial in the factor base, and every arm sits against it identically; a faster oracle buys reach,
+not an exponent. One structural finding carries the whole round: <strong>no (D, k) in the sweep
+produced a single filter</strong>, so on these systems Crossbred is Macaulay preprocessing in front of
+2<sup>k</sup> linear solves, paid per target &mdash; which is what the decaying wall-clock margin measures.</p>
+</section>
+<!-- END crossbred-20260920 -->
+<section class="panel" id="wdsat-rr-20260920">
+<h2>The Riemann&ndash;Roch encodings in front of WDSat: one engine win, one tool ceiling</h2>
+<p>WDSat is the Weil-descent SAT solver this repository vendors for the frozen S4 regression; the
+Riemann&ndash;Roch incidence and norm frontends had never been put in front of it. New ANF exporter
+(<code>ecc2k130/codegen/wdsat.py</code>) and matched suite. Frozen source:
+<a href="https://github.com/aburan28/crypto/blob/main/research/wdsat_rr_20260920/panel_n9.txt">n = 9 panel</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/wdsat_rr_20260920/ceiling.txt">solver ceiling probe</a>.
+Write-up: <code>research/notes/ecc2k130/RESEARCH_ECC2K130_WDSAT.md</code>.
+<strong>Not a run of the frozen S4 regression</strong> &mdash; a different encoding is a different
+instance family and, because WDSat's structures are statically allocated, a differently compiled
+binary, so AGENTS.md &sect;8's equivalent-suite route applies.</p>
+<div class="table-scroll"><table>
+<caption>Eight targets per formulation at n = 9, ten-second budget, both arms on the identical
+equations. Unit: conflicts, each solver's own counter. A timeout is neither a model nor a refutation;
+a crash is neither, and is reported as neither.</caption>
+<thead><tr><th>Variant</th><th>Full-DLP S</th><th>Cost / rho</th><th>Decided / 8</th><th>Conflicts, median</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>RR norm &mdash; WDSat, Gaussian (<code>-x</code>)</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td><strong>62</strong></td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>RR norm &mdash; WDSat, plain</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td>79,151.5</td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">paired control</span></td></tr>
+<tr><td>RR norm &mdash; CryptoMiniSat</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td>not reported by the binding</td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">reference</span></td></tr>
+<tr><td>RR incidence &mdash; WDSat, either configuration</td><td>&mdash;</td><td>&mdash;</td><td><strong>0</strong></td><td>&mdash;</td><td>SIGSEGV before any output; instance exceeds the static allocation</td><td><span class="chip">does not reach the solver</span></td></tr>
+<tr><td>RR incidence &mdash; CryptoMiniSat</td><td>Uncalibrated</td><td>Uncalibrated</td><td>7</td><td>not reported by the binding</td><td>7/7 witnesses reconstruct; 0 invalid</td><td><span class="chip">reference</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>The reusable boundary: WDSat's static allocation, measured with a one-variable trivially
+satisfiable probe so nothing about an encoding is involved. monomials_to_column is
+__MAX_ANF_ID__ &times; (__MAX_ID__+1) &times; (__MAX_DEGREE__&minus;1) of uint_fast64_t.</caption>
+<thead><tr><th>__MAX_ANF_ID__</th><th>__MAX_ID__</th><th>Product (M entries)</th><th>Result</th></tr></thead><tbody>
+<tr><td>3,938</td><td>5,314</td><td>20.9</td><td>runs (RR norm at n = 9 sits here)</td></tr>
+<tr><td>4,300</td><td>5,314</td><td>22.9</td><td>runs</td></tr>
+<tr><td>4,500</td><td>5,314</td><td>23.9</td><td>SIGSEGV</td></tr>
+<tr><td>4,875</td><td>6,656</td><td>32.5</td><td>SIGSEGV (RR incidence at n = 9 sits here)</td></tr>
+</tbody></table></div>
+<p><strong>Two things this round did not get.</strong> Its pre-registered success condition asked WDSat to
+decide an RR-incidence instance CryptoMiniSat leaves undecided; incidence does not reach the solver at
+all, so the condition is unmeetable and the round is abandoned on its own terms for that formulation.
+And the declared unit is unavailable on the reference arm &mdash; <code>pysat</code> reports no conflict
+count for CryptoMiniSat &mdash; so the cross-solver comparison in conflicts <em>cannot be made</em>; only the
+within-WDSat pairing is claimed, and seconds are not promoted to the metric to paper over the gap.
+No row is an advance: relation collection stays &Theta;(2<sup>n</sup>) with any oracle polynomial in the
+factor base, and this prices a decomposition oracle.</p>
+</section>
+<!-- END wdsat-rr-20260920 -->
 </body>
 </html>

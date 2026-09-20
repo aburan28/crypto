@@ -1,10 +1,19 @@
 # 20 B/s on one RTX PRO 6000, priced
 
+> **Superseded by [ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md): 20.078
+> B/s median, verified, on one RTX PRO 6000.** The static profile below
+> priced the ALU pipe at 96–100%; the card's own counters (THROUGHPUT-29B §5)
+> and a phase profile put the kernel on the carry-less unit at ~78% of its
+> rate, starved by a 28 KB L1 (two blocks' tables in shared memory) and by a
+> denominator round trip the reverse pass did not need. The same 33 CLMADs per
+> update, one 512-thread block per SM, tag-rebuilt denominators, inlined and
+> software-pipelined products: +15.3% over the 17.41 B/s row of §7.
+
 Question: can the g7e client be pushed from the measured 16.56 B/s of the table
 walk ([ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) §6) to 20 B complete
 scalar updates per second on one RTX PRO 6000?
 
-Answer: **not on this RTX PRO 6000.** The verified median tops out at
+Answer as written in this note: **not on this RTX PRO 6000.** The verified median tops out at
 **17.298 B/s** (table walk + byte pivot + pair-ILP + L2 persist + slot
 unroll 2) against a 20 B/s target and a 22–25 B/s one-add floor. Pair-ILP
 was priced at ~9% if ptxas dual-issued and measured +0.9%. Persist, the

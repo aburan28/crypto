@@ -60,6 +60,22 @@ finish; then relations/second end to end.
 **Falsifier.** `xb/F4 ≥ 1` across the ladder with no `(D, k)` choice
 doing better → the route is closed and the note says so.
 
+**Run on 2026-09-20; the route stays open, narrowly.**
+[`RESEARCH_ECC2K130_CROSSBRED.md`](RESEARCH_ECC2K130_CROSSBRED.md) does both
+halves. (a) The ladder is written up: `xb/F4 = 0.023` in bit operations at
+`m = 3`, `0.696` in the wall clock this route asked for, correctness gate
+`yes` on every row, so the falsifier does not fire. (b)
+`DecompositionStrategy::Crossbred` exists and reaches relation collection.
+Three findings temper it. The wall-clock margin **shrinks with size**
+(`0.040 → 0.696` over one rung of `n` at `m = 3`), so one more rung decides
+the route. **No `(D, k)` produced a single filter**, which is the structural
+reason: without filters the method is Macaulay preprocessing in front of `2^k`
+linear solves, and the preprocessing is paid per target. And end to end
+Crossbred is the best algebraic arm at `m = 2` but the **worst** at `m = 3`,
+where exhaustive enumeration beats every algebraic oracle by `1800×`. The GPU
+bonus below survives, and is worth nothing while the margin is heading for
+`1.0`.
+
 **Bonus, and the reason this ranks first.** Crossbred's search phase is
 `2^k` independent points with no shared state and a bitwise AND against
 a precomputed table per point — by the module's own account, the one

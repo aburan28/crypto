@@ -105,8 +105,11 @@ group before it becomes a relation:
   [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
   baseline builder is
   `research/index_calculus_baseline_20260914/pilot/build_pilot.py`.
-- mq-fes: Gray-code exhaustive search over quadratic Semaev ANF (`m = 2`
-  only), inspired by LIP6/ALMASTY MQ / libfes-lite.
+- mq-fes: ALMASTY/libfes-inspired quadratic Semaev solver (`m = 2` only) —
+  libfes FFS Gray (`L=4` unroll) for early-exit `find_one`, Möbius for
+  all-roots when `n ≤ 24`, Monica hybrid past that
+  (<https://gitlab.lip6.fr/almasty/mq>,
+  <https://github.com/cbouilla/libfes-lite>).
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation
@@ -742,6 +745,13 @@ unsuccessful. Clap usage errors use its standard nonzero exit status.
 
     cargo test --release --test ic_framework --test ic_progress
     cargo test --release --lib koblitz_
+
+The end-to-end pipeline is gated in CI as well: `ic-e2e-benchmark.yml` runs
+the whole method plus the in-process ρ baseline on three frozen ledger rungs
+and fails closed on an unverified logarithm, a drifted seeded counter, or a
+regressed same-host end-to-end wall ratio. What it checks, what passing
+does not claim, and how to re-freeze after a deliberate change are in
+[`ci/README.md`](ci/README.md).
 
 Tests cover named profiles, custom prime curves, generated-fixture
 round trips, reproducibility, malformed and ambiguous parameters,

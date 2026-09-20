@@ -147,7 +147,7 @@ fn main() {
     println!();
     println!(
         "| n | m | ℓ | v | deg | targets | reference | agree | brute (bit ops) | F4 (bit ops) | \
-         crossbred (bit ops) | xb/brute | xb/F4 | D | k | kernel | filters | xb wall |"
+         crossbred (bit ops) | xb/brute | xb/F4 | D | k | kernel | filters | xb wall | F4 wall | xb/F4 wall |"
     );
     println!(
         "|--:|--:|--:|--:|----:|--------:|:----------|:-----:|----------------:|-------------:|\
@@ -233,6 +233,8 @@ fn main() {
         let mut agree = true;
         let mut targets = 0u32;
         let mut wall = std::time::Duration::ZERO;
+        let mut f4_wall = std::time::Duration::ZERO;
+        let mut brute_wall = std::time::Duration::ZERO;
 
         for t in 1..=12u32 {
             let point = kc.mul(&g, &BigUint::from(t * 7 + 1));
@@ -261,7 +263,9 @@ fn main() {
             // two-sided — it is the completeness half that is capped,
             // not the soundness half.
             let (roots, exact) = if brute_ok {
+                let tb = Instant::now();
                 let (roots, bops) = brute_force(&sys.equations, v);
+                brute_wall += tb.elapsed();
                 brute_ops += bops;
                 (roots, true)
             } else {
@@ -277,7 +281,9 @@ fn main() {
                 (roots, false)
             };
 
+            let tf = Instant::now();
             let (refuted, fops, _) = f4_verdict(&sys.equations, v, 4);
+            f4_wall += tf.elapsed();
             f4_ops += fops * BITS_PER_WORD_OP;
             // F4's certificate must not contradict the reference.
             if refuted && !roots.is_empty() {
@@ -341,7 +347,7 @@ fn main() {
         };
         println!(
             "| {n} | {m} | {} | {v} | {sys_deg} | {targets} | {} | {} | {} | {} | {x} | {} | {} \
-             | {deg} | {k} | {kernel} | {filters} | {:.1} ms |",
+             | {deg} | {k} | {kernel} | {filters} | {:.1} ms | {:.1} ms | {} |",
             fb.ell,
             if brute_ok {
                 "exhaustive, =="
@@ -354,6 +360,12 @@ fn main() {
             ratio(x, b),
             ratio(x, f),
             wall.as_secs_f64() * 1000.0 / targets as f64,
+            f4_wall.as_secs_f64() * 1000.0 / targets as f64,
+            if f4_wall.as_secs_f64() > 0.0 {
+                format!("{:.3}", wall.as_secs_f64() / f4_wall.as_secs_f64())
+            } else {
+                "—".to_string()
+            },
         );
     }
 

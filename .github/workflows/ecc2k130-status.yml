@@ -167,3 +167,23 @@ jobs:
           path: _site
       - id: deploy
         uses: actions/deploy-pages@v4
+
+      - name: Check the snapshot we just published is current
+        # Last, and after the deploy, on purpose. Every other step in this job
+        # fails soft so a view problem never freezes the dashboard; the page
+        # renders a stale banner honestly, and an old number labelled old
+        # beats a page that stopped deploying. So this only decides the colour
+        # of the run.
+        #
+        # It exists because a green run here used to mean "I copied a file",
+        # not "the campaign is being counted". On 2026-09-20 the ingest host
+        # stopped at 04:53Z and this workflow published that frozen snapshot
+        # 802 times, green, for hours. This is the one assertion that fails
+        # whatever the cause -- dead host, expired credential, RDS failover,
+        # or an object key shape nobody recognises.
+        #
+        # Drop to `--warn-only` to silence it without reverting, e.g. during a
+        # planned ingest migration.
+        run: |
+          python3 scripts/rho_status/check_feed_age.py \
+            --status docs/ecc2k130-status/status.json

@@ -67,6 +67,23 @@
 #if ECC_TABLE_ADDEND_GLOBAL && ECC_TABLE_GLOBAL
 #error "ECC_TABLE_ADDEND_GLOBAL is the hybrid smem path; do not combine with ECC_TABLE_GLOBAL"
 #endif
+// ECC_TABLE_TAG_DENOM=1: the reverse pass rebuilds d = x + x_T from the step
+// tag instead of reading the denominator the forward pass stored.  The tag is
+// already in memory -- twSelect pushes it into the low 16 bits of hist, which
+// pass 2 has to read anyway to stay a class function -- so the denominator
+// field (17 bytes stored in pass 1, 17 loaded in pass 2) disappears from the
+// per-update traffic, and the persisting blob shrinks from x/y/pchain/denom to
+// x/y/pchain, which fits this SKU's 80 MiB persisting-L2 window.  The price is
+// one hist load and one 5-word table read per update in the reverse pass.
+#ifndef ECC_TABLE_TAG_DENOM
+#define ECC_TABLE_TAG_DENOM 0
+#endif
+#if ECC_TABLE_TAG_DENOM != 0 && ECC_TABLE_TAG_DENOM != 1
+#error "ECC_TABLE_TAG_DENOM must be 0 or 1"
+#endif
+#if ECC_TABLE_TAG_DENOM && !ECC_WALK_TABLE
+#error "ECC_TABLE_TAG_DENOM requires ECC_WALK_TABLE"
+#endif
 
 namespace eccPacked131 {
 
@@ -183,8 +200,11 @@ TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
 
 // The whole selection for one point: (h, k, eps) after the cycle rule, with
 // the history advanced.  x is in the normal basis, yp in the polynomial basis.
-TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
-                                             unsigned long long *hist, const uint32_t *shared) {
+// The history is passed by value and returned so a caller that already holds
+// it (the fused schedule reads hist for the denominator tag) does not load it
+// twice; twSelect below is the in-memory form.
+TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
+                            unsigned long long *hist, const uint32_t *shared) {
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
     const int k = twPhase(x, hw, bytes + 4 * (TW_PHASE_OFF - TW_SEL0), shared + (TW_INV_OFF - TW_SEL0));
     const int p = twPivot(x, k, shared + (TW_MASK_OFF - TW_SEL0), bytes + 4 * (TW_MAX_OFF - TW_SEL0),
@@ -198,6 +218,13 @@ TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
         tag = eccTag(h, k, eps);
     }
     *hist = eccHistPush(old, tag);
+    return tag;
+}
+TW_FN unsigned twSelect(const P131 &x, const P131 &yp, int hw,
+                        unsigned long long *hist, const uint32_t *shared) {
+    unsigned long long h = *hist;
+    const unsigned tag = twSelectHist(x, yp, hw, &h, shared);
+    *hist = h;
     return tag;
 }
 
@@ -224,6 +251,23 @@ TW_FN void twAddend(unsigned tag, const P131 &xp, const P131 &yp,
     const uint32_t tx = top & 7u;
     d->v[4] = xp.v[4] ^ tx;
     e->v[4] = yp.v[4] ^ (top >> 3) ^ (tx & negMask);
+}
+
+// d = x + x_T alone, for the reverse pass under ECC_TABLE_TAG_DENOM: the same
+// table entry twAddend reads, without the y half.
+TW_FN void twDenominator(unsigned tag, const P131 &xp, const uint32_t *shared, P131 *d) {
+#if ECC_TABLE_PIVOT_BYTES
+    const int h = eccTagH(tag);
+    const uint32_t *kbase = shared + eccTagK(tag) * TW_KWORDS;
+    const uint32_t *t = kbase + h * TW_ENTRY;
+    const uint32_t top = (kbase[TW_H * TW_ENTRY + (h >> 2)] >> ((h & 3) * 8)) & 7u;
+#else
+    const uint32_t *t = shared + (eccTagK(tag) * TW_H + eccTagH(tag)) * TW_ENTRY;
+    const uint32_t top = t[8] & 7u;
+#endif
+#pragma unroll
+    for (int i = 0; i < 4; ++i) d->v[i] = xp.v[i] ^ t[i];
+    d->v[4] = xp.v[4] ^ top;
 }
 
 // Host: fill the flat constant buffer from the reference walk.
