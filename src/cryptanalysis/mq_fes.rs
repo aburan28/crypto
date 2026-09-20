@@ -213,13 +213,215 @@ pub fn fes_find_all(forms: &[QuadraticForm], max_solutions: usize) -> Vec<u64> {
         .unwrap_or_default()
 }
 
-/// Incremental Gray-code enumeration with packed equation bits.
+/// Triangular index of the monomial `x_i x_j` with `i < j` (libfes `idxq`).
+#[inline]
+fn idxq(i: usize, j: usize) -> usize {
+    debug_assert!(i < j);
+    j * (j - 1) / 2 + i
+}
+
+/// Bitner–Ehrlich–Reingold focus pointers (`libfes-lite` / ALMASTY `ffs.h`).
+#[derive(Clone, Debug)]
+struct Ffs {
+    focus: [i32; 34],
+    stack: [i32; 33],
+    sp: i32,
+    k1: i32,
+    k2: i32,
+}
+
+impl Ffs {
+    fn reset(n: usize) -> Self {
+        let mut focus = [0i32; 34];
+        for j in 0..=32 {
+            focus[j] = j as i32;
+        }
+        let mut stack = [0i32; 33];
+        stack[0] = (n + 1) as i32;
+        Self {
+            focus,
+            stack,
+            sp: 1,
+            k1: (n + 1) as i32,
+            k2: -1,
+        }
+    }
+
+    #[inline]
+    fn step(&mut self) {
+        let j = self.focus[0];
+        self.focus[0] = 0;
+        self.focus[j as usize] = self.focus[(j + 1) as usize];
+        self.focus[(j + 1) as usize] = j + 1;
+        self.k1 = j;
+        self.sp -= j;
+        self.k2 = self.stack[(self.sp - 1) as usize];
+        self.stack[self.sp as usize] = j;
+        self.sp += 1;
+    }
+}
+
+/// Incremental Gray-code enumeration — **libfes-lite O(1) per step**.
 ///
-/// Each step flips one variable and updates the packed truth value in
-/// `O(#eqs)` bit operations — cheaper than rebuilding, and able to
-/// **stop at the first zero**.  That early exit is the lever that can beat a
-/// full Möbius transform when a solution exists and is not pathologically late.
+/// Bouillaguet / ALMASTY / libfes-lite: after a one-time setup that pads two
+/// fictive variables, each Gray step is
+///
+/// ```text
+///     Fl[1+k1] ^= Fq[idxq(k1, k2)];
+///     Fl[0]    ^= Fl[1+k1];
+/// ```
+///
+/// so the hot loop no longer walks all `n` derivatives.  For `n ≥ 4` the
+/// search uses a 16-way unrolled chunk (`L = 4`) matching
+/// `feslite_generic_enum_1x32`.  Early exit on the first common zero still
+/// applies.  Inspired by <https://github.com/cbouilla/libfes-lite>
+/// (`generic_minimal.c`, `generic_1x32.c`) and ALMASTY `ffs.h`.
 pub fn gray_incremental_find_all(
+    forms: &[QuadraticForm],
+    max_solutions: usize,
+) -> Option<Vec<u64>> {
+    if forms.is_empty() {
+        return Some(vec![0]);
+    }
+    let n = forms[0].n;
+    let m = forms.len();
+    if n == 0 || n > 32 || m > 64 || forms.iter().any(|f| f.n != n) {
+        return None;
+    }
+
+    // Stack tables: Fq through fictive n+1 is at most idxq(0,34)=561; Fl ≤ 34.
+    let mut fq = [0u64; 561];
+    let mut fl = [0u64; 34];
+
+    for (eq, form) in forms.iter().enumerate() {
+        let bit = 1u64 << eq;
+        if form.constant {
+            fl[0] ^= bit;
+        }
+        for i in 0..n {
+            if form.linear[i] {
+                fl[1 + i] ^= bit;
+            }
+            for j in 0..i {
+                if form.quad[i][j] {
+                    fq[idxq(j, i)] ^= bit;
+                }
+            }
+        }
+    }
+
+    for i in 0..n {
+        fq[idxq(i, n)] = 0;
+    }
+    fq[idxq(0, n + 1)] = 0;
+    for i in 1..n {
+        fq[idxq(i, n + 1)] = fq[idxq(i - 1, i)];
+    }
+    fq[idxq(n, n + 1)] = 0;
+
+    let mut out = Vec::new();
+    if n >= 4 {
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
+    } else {
+        gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
+    }
+    Some(out)
+}
+
+/// libfes `generic_minimal`: one FFS step per point.
+fn gray_ffs_minimal(
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    let mut ffs = Ffs::reset(n);
+    ffs.step();
+    let upto = (1u64 << n) - 1;
+    let mut i = 0u64;
+    loop {
+        if fl[0] == 0 {
+            out.push(i ^ (i >> 1));
+            if out.len() >= max_solutions {
+                return;
+            }
+        }
+        let a = (1 + ffs.k1) as usize;
+        let b = idxq(ffs.k1 as usize, ffs.k2 as usize);
+        fl[a] ^= fq[b];
+        fl[0] ^= fl[a];
+        ffs.step();
+        if i == upto {
+            return;
+        }
+        i += 1;
+    }
+}
+
+#[inline(always)]
+fn step2(fq: &[u64; 561], fl: &mut [u64; 34], a: usize, b: usize, index: u64, out: &mut Vec<u64>, max_solutions: usize) -> bool {
+    if fl[0] == 0 {
+        out.push(index ^ (index >> 1));
+        if out.len() >= max_solutions {
+            return true;
+        }
+    }
+    fl[a] ^= fq[b];
+    fl[0] ^= fl[a];
+    false
+}
+
+/// libfes `generic_1x32` / `UNROLLED_CHUNK`: 16 Gray steps per FFS advance.
+fn gray_ffs_unrolled_l4(
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    const L: usize = 4;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+        // Hard-coded 16-step Gray chunk (libfes UNROLLED_CHUNK).
+        if step2(fq, fl, 1, alpha, base, out, max_solutions)
+            || step2(fq, fl, 2, alpha + 1, base + 1, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 2, out, max_solutions)
+            || step2(fq, fl, 3, alpha + 2, base + 3, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 4, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 5, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 6, out, max_solutions)
+            || step2(fq, fl, 4, alpha + 3, base + 7, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 8, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 9, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 10, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 11, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 12, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 13, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 14, out, max_solutions)
+            || step2(fq, fl, beta, gamma, base + 15, out, max_solutions)
+        {
+            return;
+        }
+    }
+}
+
+pub fn gray_incremental_find_one(forms: &[QuadraticForm]) -> Option<u64> {
+    gray_incremental_find_all(forms, 1)?.into_iter().next()
+}
+
+/// Previous O(n)-per-step Gray update — kept for regression / speed comparison.
+pub fn gray_on_step_find_all(
     forms: &[QuadraticForm],
     max_solutions: usize,
 ) -> Option<Vec<u64>> {
@@ -231,8 +433,6 @@ pub fn gray_incremental_find_all(
     if n > 28 || m > 64 || forms.iter().any(|f| f.n != n) {
         return None;
     }
-    // Derivative table: flipping bit `k` XORs `deriv[k]` into the packed value,
-    // then `deriv[j] ^= quad_mask[k][j]` for each j (standard degree-2 FES).
     let mut deriv = vec![0u64; n];
     let mut quad_mask = vec![vec![0u64; n]; n];
     let mut value = 0u64;
@@ -276,10 +476,6 @@ pub fn gray_incremental_find_all(
         point ^= 1u64 << flip;
     }
     Some(out)
-}
-
-pub fn gray_incremental_find_one(forms: &[QuadraticForm]) -> Option<u64> {
-    gray_incremental_find_all(forms, 1)?.into_iter().next()
 }
 
 /// Naive Gray-code re-evaluation — retained as an independent check on
@@ -514,9 +710,54 @@ mod tests {
             .collect();
         let mut a = gray_incremental_find_all(&forms, 1024).unwrap();
         let mut b = moebius_find_all(&forms, 1024).unwrap();
+        let mut c = gray_on_step_find_all(&forms, 1024).unwrap();
         a.sort_unstable();
         b.sort_unstable();
+        c.sort_unstable();
         assert_eq!(a, b);
+        assert_eq!(a, c);
+    }
+
+    #[test]
+    fn gray_ffs_beats_on_step_full_enum_wall() {
+        // Full enumeration (no early exit): O(1)/step FFS vs O(n)/step update.
+        let n = 18usize;
+        let m = 18usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let t0 = std::time::Instant::now();
+        let mut ffs = gray_incremental_find_all(&forms, usize::MAX).expect("ffs");
+        let ffs_ns = t0.elapsed().as_nanos();
+        let t1 = std::time::Instant::now();
+        let mut on = gray_on_step_find_all(&forms, usize::MAX).expect("on");
+        let on_ns = t1.elapsed().as_nanos();
+        ffs.sort_unstable();
+        on.sort_unstable();
+        assert_eq!(ffs, on);
+        let ratio = on_ns as f64 / ffs_ns.max(1) as f64;
+        eprintln!(
+            "gray_ffs_vs_on_step n={n} full_enum: ffs={ffs_ns}ns on_step={on_ns}ns ratio={ratio:.2} sols={}",
+            ffs.len()
+        );
+        assert!(
+            ratio >= 1.5,
+            "expected FFS Gray ≥1.5× O(n)-step Gray, got {ratio:.3}"
+        );
     }
 
     #[test]
