@@ -25,7 +25,16 @@
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
 #   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
+#   TABLE_TAG_DENOM  reverse pass rebuilds d from the tag in hist; no
+#                    denominator field (default 0; ONE-BLOCK-GEOMETRY.md)
+#   TABLE_FUSED  one fused pass per step, alternating slot order (default 0)
+#   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
+#                      selection (default 0)
+#   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
+#   PHASE_PROFILE  clock64() timing of the walk's three phases, at exit
 #   ARCH     CUDA architectures
+#
+# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md.
 
 MODAL   ?= modal
 NVCC    ?= nvcc
@@ -86,6 +95,20 @@ TABLE_PIVOT_BYTES ?= 0
 TABLE_GLOBAL ?= 0
 # Hybrid: selection tables in shared, addend table in global.
 TABLE_ADDEND_GLOBAL ?= 0
+# Reverse pass rebuilds the denominator from the step tag in hist instead of
+# loading the 17-byte field the forward pass stored (no denominator field).
+TABLE_TAG_DENOM ?= 0
+# One fused pass per step: the reverse pass of step s runs step s+1's
+# selection and chain product on the point it just produced (needs TAG_DENOM).
+TABLE_FUSED ?= 0
+TABLE_FUSED_PIPE ?= 0
+# clock64() phase timing of the two-pass walk, printed at exit (diagnostic).
+PHASE_PROFILE ?= 0
+# Forward pass software-pipelined: slot k's products issue before slot k+1's
+# selection (needs TAG_DENOM; two-pass kernel only).
+TABLE_PIPE_SELECT ?= 0
+# Reverse pass issues the chain product before lambda's.
+PACKED_CHAIN_FIRST ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -179,6 +202,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
+       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
@@ -539,6 +563,21 @@ bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
+
+# The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
+# 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
+# from the step tag, the products inlined, the forward pass software-pipelined.
+# Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
+gpu-rtx-pro6000-20b:
+	$(MAKE) -B ecc2k130 ARCH="-gencode arch=compute_120,code=sm_120" \
+	    BATCH=16 THREADS=512 MINBLOCKS=1 \
+	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=1 \
+	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
+	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 
 # Ada preset for the EC2 g6 (L4) and g6e (L40S) instance types, both sm_89.
 # It is the RTX PRO 6000 arithmetic/storage preset. CLMAD is on: the
