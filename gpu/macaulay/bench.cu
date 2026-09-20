@@ -216,7 +216,7 @@ static void throughput() {
         cudaFree(d_piv);
         cudaFree(d_rank);
     }
-    printf("\nCompare against the CPU: RESEARCH_RESIDUAL_WALKS.md section 11.6\n");
+    printf("\nCompare against the CPU: research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md section 11.6\n");
     printf("measures one residual at 0.88e6 F_p multiplications, of which the\n");
     printf("Macaulay step is 57%%.  Convert with the residual rate of the run\n");
     printf("being compared; do not quote matrices/s on its own.\n");

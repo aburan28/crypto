@@ -1,6 +1,6 @@
 /* pairtable.cuh -- the |F|^2 meet-in-the-middle pair table, on the GPU.
  *
- * `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`, under *Distributed relation
+ * `research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`, under *Distributed relation
  * collection*, measures where the wall-clock of a collection worker
  * actually goes:
  *

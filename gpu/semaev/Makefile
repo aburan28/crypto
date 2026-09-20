@@ -19,7 +19,7 @@ ARCH     ?= sm_90
 NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
 
 # n = 3l keeps the decomposition probability near 1/3! as the factor
-# base grows, which is the ladder RESEARCH_SEMAEV_DECOMPOSITION.md runs.
+# base grows, which is the ladder research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md runs.
 L   ?= 5
 YES ?= 4
 NO  ?= 4

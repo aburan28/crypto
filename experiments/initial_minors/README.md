@@ -1,7 +1,7 @@
 # initial_minors — testing the Mahalanobis–Abdullah–Mallick conjecture
 
 Pure-Python (no numpy/sympy/Sage) experiments for §4 of
-[`RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md`](../../RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md).
+[`research/notes/index-calculus/RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md`](../../research/notes/index-calculus/RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md).
 
 The "minors" method solves ECDLP by searching for a vanishing minor of the
 matrix `M[i][j] = φ_j(R_i)`, `R_i = a_iP + b_iQ`, where `φ_j` is the

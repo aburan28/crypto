@@ -2,7 +2,7 @@
 GLV-HNP Phase 2, Thread 23: make the planted vector lambda_1 by projecting
 the d-column out of the lattice.
 
-Background (RESEARCH_AUTOLAB_LOG.md, 2026-07-29, Thread 20 / exp T5):
+Background (research/notes/index-calculus/RESEARCH_AUTOLAB_LOG.md, 2026-07-29, Thread 20 / exp T5):
   The Phase-2 lattice of `glv_hnp_phase2_20bit.py:263` uses scales
   (S_K1, S_D, S_K2, S_KANNAN) = (n//K1, 1, n//K2, n) and carries an explicit
   d-column.  Because the basis contains the rows n*S_K1*e_i, the vector

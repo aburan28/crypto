@@ -27,7 +27,7 @@
 //! row-space is exactly the Polynomial-Calculus refutation degree, which
 //! equals (up to the usual `O(1)`) the Huang–Kosters–Yeo **last fall
 //! degree** and the Gröbner solving degree.  See
-//! `RESEARCH_FFD_PROOF_COMPLEXITY.md` §2.
+//! `research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §2.
 //!
 //! ## What this measures, operationally
 //!

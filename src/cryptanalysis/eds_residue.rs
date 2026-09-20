@@ -1,7 +1,7 @@
 //! **Elliptic divisibility sequences, elliptic nets, and the EDS-Residue
 //! handle on the ECDLP** (Shipsey 2000, Stange 2007, Lauter–Stange 2008).
 //!
-//! This module is the runnable companion to `RESEARCH_EDS_RESIDUE.md`.  It
+//! This module is the runnable companion to `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`.  It
 //! builds the elliptic divisibility sequence (EDS) `W_{E,P}(n)` attached to
 //! a point `P` on a short-Weierstrass curve over `F_p`, and measures the
 //! structures that the Lauter–Stange equivalence chain hangs on:
@@ -545,7 +545,7 @@ pub fn format_report(r: &EdsReport) -> String {
 // ── EDS-Residue χ-localisation (rank-1, decimation identity) ────────────────
 //
 // The genuine 2-D net is blocked on Stange's mixed initial seeds (see
-// RESEARCH_EDS_RESIDUE.md §5.3).  But the EDS-Residue question — how much the
+// research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md §5.3).  But the EDS-Residue question — how much the
 // quadratic-residuosity of EDS terms leaks about the discrete log — is
 // answerable in rank 1, fully canonically, via the decimation identity
 //
@@ -1315,7 +1315,7 @@ pub fn reduce_and_analyze(seq: &[BigInt], p: u64) -> Option<BridgeReduction> {
 // χ(B) = χ(−1)·χ(W(r+1))·χ(W(r−1)),  χ(A) = χ(−1)·χ(W(r−1)).
 // The remaining genuinely-open step — expressing these without computing the
 // O(r) sequence at all — runs through B² = −W(r+1)/W(r−1), conjecturally a
-// self-pairing (Tate/Frey–Rück) value; see RESEARCH_EDS_RESIDUE.md §5.5.
+// self-pairing (Tate/Frey–Rück) value; see research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md §5.5.
 
 /// Closed-form multiplier characters `(χ(A), χ(B))` computed directly from the
 /// sequence values `W(2), W(r+1), W(r+2)` via `(CF)` — no inversion to recover

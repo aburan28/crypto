@@ -63,7 +63,7 @@
 //!
 //! Building a key-recovery attack on top (Rønjom 2017's 5-round
 //! result) is structurally a matter of layering byte-position
-//! filters across many yoyo iterations; that is `DEFERRED.md`
+//! filters across many yoyo iterations; that is `docs/DEFERRED.md`
 //! material.
 
 use super::reduced::ReducedAes128;

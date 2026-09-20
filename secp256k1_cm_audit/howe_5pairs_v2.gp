@@ -187,7 +187,7 @@ print("");
 print("  For secp256k1 pair (0,3): b=7, h^3=-1, so the cover is y^2=x^6-49.");
 print("  BLOCKED: This degenerate case needs the THETA FUNCTION or MESTRE approach");
 print("  to find the correct non-trivial (2,2)-isogeny.");
-print("  See RESEARCH_MESTRE_HOWE.md for alternative reconstruction algorithms.");
+print("  See research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md for alternative reconstruction algorithms.");
 print("");
 
 \\ ================================================================

@@ -1,7 +1,7 @@
 //! # P-256 isogeny-cover probe (Phase 1, toy size).
 //!
 //! Phase-1 implementation of the proposal in
-//! `RESEARCH_P256_ISOGENY_COVER.md`: at a tiny "P-256-shaped" prime
+//! `research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md`: at a tiny "P-256-shaped" prime
 //! `p_toy ≈ 2^8`, sweep ordinary prime-order curves `E/F_{p_toy}`
 //! and search for a **genus-2 curve `C/F_{p_toy}` whose Jacobian
 //! is `F_p`-isogenous to `E × E^twist`** with an additional

@@ -27,7 +27,7 @@
 //! without an argument: `2^k` independent points, no shared state, and
 //! the per-point work is a bitwise AND against a precomputed table.
 //!
-//! `RESEARCH_RESIDUAL_WALKS.md` §11.7 names the Joux–Vitse family as
+//! `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` §11.7 names the Joux–Vitse family as
 //! one of the two things that cut the index-calculus constant by orders
 //! of magnitude.  This is the Boolean half of that family, measured in
 //! the same units as everything else: `word_ops` on both phases, so a

@@ -33,7 +33,7 @@
 //! not an end-to-end ECDLP speedup and is not reported as one: the
 //! stage is one phase of relation collection, which is one phase of the
 //! attack, and the decomposition-oracle cost at `n = 131` is bounded
-//! below by the counting argument in `RESEARCH_ECC2K130_DECOMPOSITION.md`
+//! below by the counting argument in `research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md`
 //! §5 regardless of how fast one Macaulay matrix reduces.
 
 use crypto_lib::cryptanalysis::koblitz_groebner::{
