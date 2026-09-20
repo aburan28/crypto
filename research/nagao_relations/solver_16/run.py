@@ -8,6 +8,7 @@ weil.py, frozen with the contract.
 """
 import argparse
 import hashlib
+import os
 import json
 import platform
 import random
@@ -114,13 +115,15 @@ def main():
         'pycryptosat': pycryptosat.__version__, 'python': platform.python_version(), 'platform': platform.platform(),
         'field_poly_terms': list(terms), 'git_head': subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=HERE, capture_output=True, text=True).stdout.strip(),
     }
-    raw = HERE / 'raw.jsonl'
+    # A second process may run another solver family concurrently; it writes
+    # to its own file (SOLVER16_RAW) which is appended to raw.jsonl afterwards.
+    raw = HERE / os.environ.get('SOLVER16_RAW', 'raw.jsonl')
     done = set()
-    if raw.exists():
-        for line in raw.read_text().splitlines():
-            if line.strip():
-                r = json.loads(line)
-                done.add(r['cell'])
+    for known in {HERE / 'raw.jsonl', raw}:
+        if known.exists():
+            for line in known.read_text().splitlines():
+                if line.strip():
+                    done.add(json.loads(line)['cell'])
     stream = raw.open('a')
 
     def emit(rec):

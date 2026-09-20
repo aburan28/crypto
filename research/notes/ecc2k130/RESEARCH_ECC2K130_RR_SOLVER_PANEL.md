@@ -461,3 +461,62 @@ already names: an oracle that beats exhaustive search over its own candidate
 set by `2^{70.19 + log₂ m}`.  Being 17 % cheaper per candidate, and beating
 Semaev on every matched slot, is not that — it is a better constant on a
 candidate count that the product law holds fixed.
+
+## 11. The SAT route, measured: the regime ends at `d = 7` (`solver_16`)
+
+§8 left one opening and §9 closed the linear half of it. `solver_16`
+([`research/nagao_relations/solver_16/RESULTS.md`](../../nagao_relations/solver_16/RESULTS.md),
+contract frozen with its prediction before the run) closes the other half:
+whether an XOR-native SAT solver on the Weil-descended system does anything a
+generic `Θ(|F|²)` search does not, and whether the Riemann–Roch *encoding* of
+that system — the function coefficients kept as variables, which is the thing
+this thread is named after — helps it.  Both encodings were compiled to F₂ in a
+polynomial basis with `V = {deg x < d}` (Trimoska's layout, which is what keeps
+S′4 to `9d − 3` variables) on the real curve, and given to CryptoMiniSat with
+native XOR clauses and to WDSat, with pair enumeration as the null object and
+every witness re-derived in the group.
+
+| `d` | pairs `C(A,2)` | S′4 / CryptoMiniSat, uniform exhaustion (conflicts, mean of 4) | / pairs | RR / CryptoMiniSat, matched | plain WDSat, decisions / `2^{3d}/3!` |
+|--:|--:|--:|--:|:--|--:|
+| 4–6 | 45 / 136 / 561 | **1** | ≈ 0 | `d = 5`: 35,163 (**3.5 × 10⁴×**); `d = 6`: 38–43 s vs 0.01 s | 4/4, 2/4 refuted at init; else 0.999 |
+| 7 | 2,701 | **839** | 0.31 | censored at 300 s (S′4: 0.03 s) | 1.000–1.002 |
+| 8 | 8,515 | **312,231** | 36.7 | censored | 1.000–1.001 |
+| 9 | 31,626 | censored, 300 s (7.5 s at `d = 8`) | > budget | — | — |
+| 10 | 134,421 | censored | > budget | — | — |
+
+- **Below `d = 7` the solver finds §9's certificate by itself.**  One conflict
+  per uniform target under CryptoMiniSat; zero decisions (`UNSAT on XORGAUSS
+  init`) under WDSat on 10 of 12.  This is the linear NO-certificate, from the
+  solver's side.
+- **From `d = 7` the search is super-quadratic in `|F|` and already worse
+  than pair enumeration at `d = 8`.**  One dimension costs 370× in conflicts
+  where it costs 3.2× in pairs; the next dimension is out of budget.  The
+  contract's falsifier (slope < 1.8 per dimension over ≥ 4 complete sizes)
+  is unmet: five complete sizes exist and their least-squares slope is 4.62
+  with a residual standard error of 4.38, because the data are two regimes,
+  not a power law.
+- **The RR encoding is S′4 with the linear part hidden.**  `b + b² = r + e1`
+  and `c² + b² = r·e3` are F₂-linear in the coefficients, so `(a, b)` are
+  affine in `(e1, e3)` plus a bit — the prediction written into the contract.
+  Measured: RR costs 3.5 × 10⁴× the conflicts at `d = 5`, 4.4–7.8 × 10³× the
+  time at `d = 6`, and is censored at `d = 7`.  The coefficient block does not
+  help the solver; it hides the certificate from it.
+- **Plain WDSat is brute force** — `2^{3d}/3!` to 0.2 % on every exhaustion —
+  and **WDSat's `-x` mode is incomplete at `n = 131`**: it declared a
+  decomposable target UNSAT in 1 of 16 audit cells (and in the pilot), while
+  accepting the same triple when its abscissae are supplied as unit clauses.
+  The `-x` conflict figures in
+  [`RESEARCH_ECC2K130_WDSAT.md`](RESEARCH_ECC2K130_WDSAT.md) §4.1 were all
+  taken on SAT instances, where an incomplete search that reaches a witness is
+  indistinguishable from a complete one; they stand as first-solution costs
+  and not as exhaustion costs.
+
+Correctness: 161 cells, zero errors, every witness verified, none degenerate,
+every complete planted enumeration recovering all six permutations, no uniform
+instance ever producing a relation.  Classification: a measured negative with
+a named, measured obstruction — the saturation of the S₄ value-set span at
+`d = 7` (§9) and the super-quadratic growth of the SAT search above it — which
+closes the SAT route on this descended system and the coefficient encoding
+under SAT, and nothing wider.  What it does not speak to is an encoding whose
+value set stays in a proper subspace at `d = 45`, or a factor base that is not
+an F₂-subspace; those are the two axes left.
