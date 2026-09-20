@@ -131,6 +131,9 @@ def wall_of(report: dict[str, Any]) -> dict[str, float | bool]:
     ic = vs["ic"]
     ic_whole = float(ic["precompute_seconds"]) + float(ic["pair_table_seconds"]) + float(ic["descent_seconds_total"])
     rho_total = float(vs["rho"]["seconds_total"])
+    # Derived from the timings gated here, not read off the report's verdict:
+    # correctness is enforced separately, so the crossover is the timing alone.
+    crossover = ic_whole < rho_total
     return {
         "ic_whole_process_seconds": ic_whole,
         "ic_precompute_seconds": float(ic["precompute_seconds"]) + float(ic["pair_table_seconds"]),
@@ -139,7 +142,8 @@ def wall_of(report: dict[str, Any]) -> dict[str, float | bool]:
         "whole_process_ratio": (rho_total / ic_whole) if ic_whole > 0 else math.inf,
         "charged_ratio": float(vs["ratio"]["charged"]),
         "amortised_ratio": float(vs["ratio"]["amortised"]),
-        "whole_process_crossover": bool(vs["verdict"]["whole_process_crossover"]),
+        "whole_process_crossover": crossover,
+        "reported_whole_process_crossover": bool(vs["verdict"]["whole_process_crossover"]),
     }
 
 
@@ -394,6 +398,11 @@ def check_rung(params: str, ref: dict[str, Any], m: dict[str, Any], tolerance: f
         )
     if ref["wall"]["whole_process_crossover"] and not m["wall"]["whole_process_crossover"]:
         problems.append("this rung crossed rho end to end when frozen and no longer does")
+    if m["wall"]["whole_process_crossover"] != m["wall"]["reported_whole_process_crossover"]:
+        problems.append(
+            f"the report's whole_process_crossover verdict ({m['wall']['reported_whole_process_crossover']}) disagrees "
+            f"with its own timings ({m['wall']['whole_process_crossover']}); the evidence is inconsistent"
+        )
     return {
         "params": params,
         "name": m["name"],

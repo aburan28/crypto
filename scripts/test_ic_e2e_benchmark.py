@@ -158,6 +158,13 @@ class CheckRungTests(unittest.TestCase):
         self.assertTrue(r["ok"], r["problems"])
         self.assertGreater(r["wall"]["now"]["whole_process_ratio"], r["wall"]["frozen"]["whole_process_ratio"])
 
+    def test_verdict_inconsistent_with_timings_fails(self) -> None:
+        rep = synthetic_report()
+        rep["stages"][4]["vs_rho"]["verdict"]["whole_process_crossover"] = False  # timings say True
+        r = bench.check_rung(PARAMS, self.ref, bench.measure(rep), 0.5, 3.0)
+        self.assertFalse(r["ok"])
+        self.assertTrue(any("inconsistent" in p for p in r["problems"]))
+
     def test_changed_parameter_file_fails(self) -> None:
         rep = synthetic_report()
         rep["params_digest"] = "cd" * 32
