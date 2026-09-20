@@ -65,11 +65,14 @@ identical subspace factor base, independent group lift:
 Ratio to the free-oracle floor is unchanged: every oracle answers the
 same algebraic question. Class is **engineering** by §3 of `AGENTS.md`.
 
-The `mq-fes` backend is a study-library Gray-code exhaustive search over
-quadratic Boolean systems, inspired by
-[ALMASTY / mq](https://gitlab.lip6.fr/almasty/mq) and
-[libfes-lite](https://github.com/cbouilla/libfes-lite).  It refuses cubic
-chained (`m ≥ 3`) Semaev systems; those stay on SAT / WDSat.
+The `mq-fes` backend ports the ALMASTY
+[mq](https://gitlab.lip6.fr/almasty/mq) **Möbius transform** solver
+(`moebius.c`, public domain): ANF coefficients are packed into a `2^n`
+table, transformed in `O(n·2^n)`, and zeros are the solutions.  A Gray-code
+re-evaluation path is kept only as a correctness cross-check (monica /
+libfes enumeration shape).  Cubic chained (`m ≥ 3`) Semaev systems are
+refused; those stay on SAT / WDSat.  Monica’s Crossbred hybrid is noted
+for a later round and is not yet a Semaev strategy here.
 
 ```text
 WDSAT_BINARY=/path/to/wdsat_solver cargo test --lib \

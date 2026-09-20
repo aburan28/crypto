@@ -21,8 +21,9 @@
   },
   "inspiration": {
     "almasty_mq": "https://gitlab.lip6.fr/almasty/mq",
+    "techniques": ["moebius_transform", "gray_code_crosscheck"],
     "libfes_lite": "https://github.com/cbouilla/libfes-lite",
-    "note": "mq-fes is a study-library Gray-code port of the FES idea, not a binding to those trees"
+    "note": "mq-fes ports ALMASTY moebius.c ideas (public domain); not a binding to that tree"
   },
   "ecc2k130": {
     "field": "F_2^131",
