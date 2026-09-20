@@ -124,7 +124,16 @@ ECC_PREFIX=                                       # optional key prefix
 RHO_CAMPAIGN=ecc2k-130
 RHO_CACHE=0                                       # run with no cache (the control)
 ECC_LOCAL_STORE=<dir>                             # rehearsal: SQLite + a directory
+ECC_S3_ENDPOINT=http://127.0.0.1:9010             # an S3-compatible endpoint
+ECC_S3_REGION=us-east-1                           # or AWS_REGION
 ```
+
+`ECC_S3_ENDPOINT` is empty on every deployed host, which means real S3. Set it
+and the client is built against that endpoint with path-style addressing,
+which is what MinIO needs and what an on-premises store or GCS's S3
+interoperability API would be pointed at. Only MinIO and moto are tested (see
+`integration/`); nothing here claims GCS works until something runs against
+it.
 
 An absent setting is an absent component, not an error. With no
 `RHO_REDIS_URL` the coordinator reads Postgres for everything it would have
@@ -195,16 +204,36 @@ almost always one of them being down and the other two being fine.
 
 ## Tests
 
+Two suites, and the split between them is deliberate.
+
 ```bash
-python3 -m unittest discover -s aws -p test_controlplane.py -v
+python3 -m unittest discover -s aws -p test_controlplane.py -v   # anywhere
+make -C ecc2k130 test-integration                                # real services
 ```
 
-No network, no AWS SDK, no Redis: the SQL runs against SQLite (which takes the
-same `ON CONFLICT`, `RETURNING` and `INSERT ... SELECT ... WHERE EXISTS`
-forms), the cache runs against a fake with the failure modes that matter, and
-one test asserts in a clean subprocess that importing the package pulls in
-neither `redis` nor `boto3`. The lease races are run with threads, not
-asserted about.
+The first has no network, no AWS SDK and no Redis: the SQL runs against SQLite
+(which takes the same `ON CONFLICT`, `RETURNING` and `INSERT ... SELECT ...
+WHERE EXISTS` forms), the cache runs against a fake with the failure modes
+that matter, and one test asserts in a clean subprocess that importing the
+package pulls in neither `redis` nor `boto3`. The lease races are run with
+threads, not asserted about. It must keep passing on a laptop with nothing
+installed, which is why it is the one wired into `make test-production`.
+
+The second runs against real Postgres, real Redis and a real S3 endpoint
+(`integration/`). It re-runs the first suite's own test bodies against those
+services — same assertions, different fixtures — and adds what a substitute
+cannot show. Two bugs it found on its first run, both of them invisible to
+SQLite and a fake:
+
+* `migrate()` created its own bookkeeping table *before* taking the advisory
+  lock. `CREATE TABLE IF NOT EXISTS` is not atomic in Postgres, so a rollout
+  running `migrate` on every host at once left one of them holding a unique
+  violation on `pg_type`. The lock is now taken first.
+* redis-py 6 and later retry a failed connection **ten times with backoff by
+  default**. A cluster that was not there cost 4.5 seconds per call against
+  the 0.5 the package sets and documents — on the claim path, three times over
+  before the cooldown had seen enough failures to skip. `Cache.fromEnv` now
+  builds the client with no retries, and a test asserts the bound.
 
 ## Not here
 

@@ -137,10 +137,21 @@ class _Operational(Exception):
 
 # ---------------------------------------------------------------------------
 class SlotTests(unittest.TestCase):
+    campaign = "test"
+
     def setUp(self):
         self.clock = Clock()
         self.db = database()
-        self.slots = PostgresSlots(self.db, campaign="test", clock=self.clock)
+        self.slots = PostgresSlots(self.db, campaign=self.campaign, clock=self.clock)
+
+    def freshDatabase(self):
+        """A second handle on the same engine, closed by the test that opens it.
+
+        The threaded race below needs connections of its own rather than the
+        fixture's, and `test_integration.py` overrides this to hand back a
+        handle on the real Postgres so that race runs where it matters.
+        """
+        return database(os.path.join(tempfile.mkdtemp(), "slots.db"))
 
     def test_first_claim_creates_slot_zero_with_fence_one(self):
         slot, fence = self.slots.claimLease("worker-a", gpuInfo())
@@ -219,7 +230,7 @@ class SlotTests(unittest.TestCase):
 
     def test_an_ada_worker_does_not_take_an_untagged_blackwell_slot(self):
         self.db.run("INSERT INTO rho_slots (campaign_id, slot, state, lease_until, fence) "
-                    "VALUES ('test', 0, 'idle', 0, 3)")
+                    "VALUES (?, 0, 'idle', 0, 3)", (self.campaign,))
         ada = workerInfo(gpu=0, gpuName="NVIDIA L40S", gpuFamily="g6e", instance="i-ada")
         slot, _ = self.slots.claimLease("worker-ada", ada)
         self.assertNotEqual(slot, 0)
@@ -231,9 +242,8 @@ class SlotTests(unittest.TestCase):
         no slots to resume (so they race on creation) and once with every slot
         expired (so they race on the conditional UPDATE).
         """
-        path = os.path.join(tempfile.mkdtemp(), "slots.db")
-        db = database(path)
-        slots = PostgresSlots(db, campaign="test", clock=self.clock)
+        db = self.freshDatabase()
+        slots = PostgresSlots(db, campaign=self.campaign, clock=self.clock)
         got, errors = [], []
         lock = threading.Lock()
 
@@ -417,13 +427,15 @@ class _Pipeline:
 
 
 class CacheTests(unittest.TestCase):
+    campaign = "test"
+
     def setUp(self):
         self.clock = Clock()
         self.redis = FakeRedis(self.clock)
-        self.cache = Cache(self.redis, campaign="test", clock=self.clock)
+        self.cache = Cache(self.redis, campaign=self.campaign, clock=self.clock)
 
     def test_keys_carry_a_hash_tag_so_one_campaign_lands_on_one_shard(self):
-        self.assertTrue(self.cache.key("fleet").startswith("rho:{test}:"))
+        self.assertTrue(self.cache.key("fleet").startswith("rho:{%s}:" % self.campaign))
 
     def test_a_dead_cluster_stops_being_called_after_a_few_failures(self):
         self.redis.fail = TimeoutError("timed out")
@@ -495,18 +507,20 @@ class CacheTests(unittest.TestCase):
 
 # ---------------------------------------------------------------------------
 class CoordinatorTests(unittest.TestCase):
+    campaign = "test"
+
     def setUp(self):
         self.clock = Clock()
         self.db = database()
         self.root = tempfile.mkdtemp()
         self.store = LocalObjectStore(os.path.join(self.root, "s3"))
         self.redis = FakeRedis(self.clock)
-        self.cache = Cache(self.redis, campaign="test", clock=self.clock)
-        self.coord = Coordinator(self.db, self.store, self.cache, campaign="test",
+        self.cache = Cache(self.redis, campaign=self.campaign, clock=self.clock)
+        self.coord = Coordinator(self.db, self.store, self.cache, campaign=self.campaign,
                                  owner="worker-a", clock=self.clock)
 
     def other(self, owner="worker-b"):
-        return Coordinator(self.db, self.store, self.cache, campaign="test",
+        return Coordinator(self.db, self.store, self.cache, campaign=self.campaign,
                            owner=owner, clock=self.clock)
 
     def test_an_object_is_in_s3_before_it_is_in_the_ledger(self):
@@ -516,7 +530,10 @@ class CoordinatorTests(unittest.TestCase):
         self.assertEqual(row["records"], 2)
         self.assertEqual(self.store.getBytes("dp/slot-00000/a-0.bin"), b"x" * 64)
         ledger = self.coord.objects(slot=lease.slot)
-        self.assertEqual([o["objectKey"] for o in ledger], ["dp/slot-00000/a-0.bin"])
+        # The ledger holds the store's key, prefix and all: it is what a
+        # merge will ask the bucket for.
+        self.assertEqual([o["objectKey"] for o in ledger],
+                         [self.store.key("dp/slot-00000/a-0.bin")])
 
     def test_re_uploading_the_same_object_does_not_double_count(self):
         lease = self.coord.acquire(gpuInfo())

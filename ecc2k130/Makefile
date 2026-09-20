@@ -301,6 +301,25 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_worker_spool.py -v
 	python3 -m unittest discover -s aws -p test_controlplane.py -v
 
+# The control plane against real Postgres, Redis and S3 rather than SQLite, a
+# fake and a directory.  `services.sh` brings the three up (docker compose
+# where there is a daemon, the host's own binaries where there is not), and
+# takes them down again whether the suite passed or failed.
+#
+# Not part of `test` or `test-production`: those must pass on a laptop with no
+# services and no network, which is what test_controlplane.py is for.
+test-integration:
+	aws/integration/services.sh up
+	@set -a; . build/integration/env; set +a; \
+	  python3 -m unittest discover -s aws -p test_integration.py -v; rc=$$?; \
+	  aws/integration/services.sh down; \
+	  exit $$rc
+
+# The clients production imports lazily.  Separate from the target above so
+# that a run cannot quietly install into somebody's system python.
+test-integration-deps:
+	python3 -m pip install -r aws/integration/requirements.txt
+
 certify-local: ecc2k130-cpu build/test-production
 	python3 aws/certify.py --output build/certification-local.json
 
