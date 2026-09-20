@@ -2157,6 +2157,11 @@ pub enum DecompositionStrategy {
     /// ([`crate::cryptanalysis::wdsat_oracle`]).  Requires
     /// [`KoblitzIcOptions::wdsat_binary`].
     Wdsat,
+    /// Quadratic Semaev systems (`m = 2`) solved by Gray-code exhaustive
+    /// search over the Boolean unknowns
+    /// ([`crate::cryptanalysis::mq_fes`]), inspired by LIP6/ALMASTY MQ /
+    /// libfes-lite.  Refuses cubic chained systems.
+    MqFes,
 }
 
 /// Packed identity of a point for hashing and sorting, in one `u64`:
@@ -5152,6 +5157,12 @@ fn koblitz_index_calculus_dlp_observed(
                     );
                     RelationAttemptOutcome::Sat(idxs, stats)
                 }
+                DecompositionStrategy::MqFes => {
+                    let (idxs, stats) = crate::cryptanalysis::mq_fes::mq_fes_decompose(
+                        kc, fb, &index_of, &field, target, opts.m,
+                    );
+                    RelationAttemptOutcome::Sat(idxs, stats)
+                }
             }
         };
         // Targets are drawn serially above and consumed in order below,
@@ -6659,6 +6670,12 @@ fn decompose_once(
             };
             crate::cryptanalysis::wdsat_oracle::wdsat_decompose(
                 kc, fb, index_of, field, target, opts.m, &wopts,
+            )
+            .0
+        }
+        DecompositionStrategy::MqFes => {
+            crate::cryptanalysis::mq_fes::mq_fes_decompose(
+                kc, fb, index_of, field, target, opts.m,
             )
             .0
         }

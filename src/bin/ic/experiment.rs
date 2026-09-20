@@ -110,6 +110,8 @@ pub enum Solver {
     PairTable,
     /// Trimoska WDSat on the same Semaev ANF as `sat`.
     Wdsat,
+    /// Gray-code FES on quadratic Semaev ANF (LIP6 MQ / libfes inspiration).
+    MqFes,
 }
 impl Solver {
     pub fn name(self) -> &'static str {
@@ -119,6 +121,7 @@ impl Solver {
             Self::Enumerate => "enumerate",
             Self::PairTable => "pair-table",
             Self::Wdsat => "wdsat",
+            Self::MqFes => "mq-fes",
         }
     }
     fn strategy(self) -> DecompositionStrategy {
@@ -128,6 +131,7 @@ impl Solver {
             Self::Enumerate => DecompositionStrategy::Enumerate,
             Self::PairTable => DecompositionStrategy::PairTable,
             Self::Wdsat => DecompositionStrategy::Wdsat,
+            Self::MqFes => DecompositionStrategy::MqFes,
         }
     }
 }

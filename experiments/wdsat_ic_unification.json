@@ -16,7 +16,13 @@
     "planted": true,
     "native_sat_lifted": true,
     "wdsat_lifted": true,
+    "mq_fes_lifted": true,
     "indices_agree_after_sort": true
+  },
+  "inspiration": {
+    "almasty_mq": "https://gitlab.lip6.fr/almasty/mq",
+    "libfes_lite": "https://github.com/cbouilla/libfes-lite",
+    "note": "mq-fes is a study-library Gray-code port of the FES idea, not a binding to those trees"
   },
   "ecc2k130": {
     "field": "F_2^131",

@@ -84,7 +84,7 @@ The following knobs are recorded in each run report:
 - factor-base: a recipe file written by `ic search`, replacing factor-index;
 - summands: factor-base points per relation, 2 (default), 3, or 4;
 - max-trials: 1 through 1000000;
-- solver: groebner, sat, enumerate, pair-table, or wdsat;
+- solver: groebner, sat, enumerate, pair-table, wdsat, or mq-fes;
 - batch: targets decomposed per parallel batch (0 = CPU count);
 - control: legacy accounting, see below.
 
@@ -105,6 +105,8 @@ group before it becomes a relation:
   [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
   baseline builder is
   `research/index_calculus_baseline_20260914/pilot/build_pilot.py`.
+- mq-fes: Gray-code exhaustive search over quadratic Semaev ANF (`m = 2`
+  only), inspired by LIP6/ALMASTY MQ / libfes-lite.
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation

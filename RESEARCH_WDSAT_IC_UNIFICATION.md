@@ -60,9 +60,16 @@ identical subspace factor base, independent group lift:
 |---|---|---|---|
 | native `--solver sat` | reference | yes | — |
 | `--solver wdsat` (WDSat `61c6ff3`) | **engineering** | yes | yes |
+| `--solver mq-fes` (Gray-code FES) | **engineering** | yes | yes |
 
-Ratio to the free-oracle floor is unchanged: the oracle still answers the
+Ratio to the free-oracle floor is unchanged: every oracle answers the
 same algebraic question. Class is **engineering** by §3 of `AGENTS.md`.
+
+The `mq-fes` backend is a study-library Gray-code exhaustive search over
+quadratic Boolean systems, inspired by
+[ALMASTY / mq](https://gitlab.lip6.fr/almasty/mq) and
+[libfes-lite](https://github.com/cbouilla/libfes-lite).  It refuses cubic
+chained (`m ≥ 3`) Semaev systems; those stay on SAT / WDSat.
 
 ```text
 WDSAT_BINARY=/path/to/wdsat_solver cargo test --lib \

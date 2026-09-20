@@ -169,6 +169,7 @@ pub mod md5_hashclash_ffi;
 pub mod ml_rho_walks;
 pub mod modular_polynomial;
 pub mod mov_attack;
+pub mod mq_fes;
 pub mod multi_key_hnp;
 pub mod nonanom_formal_log;
 pub mod orbit_homology;
