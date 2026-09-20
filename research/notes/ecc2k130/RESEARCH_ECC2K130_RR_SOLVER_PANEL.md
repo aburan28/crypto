@@ -519,4 +519,11 @@ a named, measured obstruction — the saturation of the S₄ value-set span at
 closes the SAT route on this descended system and the coefficient encoding
 under SAT, and nothing wider.  What it does not speak to is an encoding whose
 value set stays in a proper subspace at `d = 45`, or a factor base that is not
-an F₂-subspace; those are the two axes left.
+an F₂-subspace.  The first of those is closed by counting (`solver_16`
+§7.1): a linear certificate needs the 131 descended equations to be linearly
+dependent as polynomials, which generic F₂ coefficients forbid once the
+monomial count exceeds 131 by a few — i.e. for any degree-≥ 2 encoding in
+≥ 17 unknown bits, whatever auxiliaries it introduces.  What remains is an
+encoding that is *linear* after a preprocessing cheaper than `|F|²`, which is
+a statement about the group law on `V` and not about solvers, and the
+non-subspace factor base, on which nothing algebraic here is defined.
