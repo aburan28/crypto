@@ -205,6 +205,7 @@ fn main() {
             weil_charts: plan,
             allow_direct_relation: false,
             collapse_projected_orbits: true,
+            crossbred: None,
             relation_batch_size: 1,
             ..Default::default()
         };

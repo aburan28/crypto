@@ -314,7 +314,8 @@
       <code>N</code> = 2<sup>24</sup> on the conservative accounting — with a fitted
       exponent matching the derived law. That is a toy-size result
       (<code>p ≤ 251</code>) whose reference needed correcting, not a statement about
-      any deployed curve. The newer binary-field solver and
+      any deployed curve. The newer binary-field solver, the
+      Crossbred decomposition oracle and the
       parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
@@ -2854,5 +2855,44 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <p>What a leak would buy on standard curves (<code>results/curve_divisors.md</code>): the largest divisor of n&minus;1 below 2<sup>32</sup> is 18,051,648 on secp256k1, 4.26&middot;10<sup>9</sup> on P-256, 2<sup>32</sup> on BLS12-381 and 4.29&middot;10<sup>9</sup> on BN254, so a protocol publishing 2<sup>32</sup> powers hands over a 2<sup>12</sup>&ndash;2<sup>16</sup> exponent-side reduction; Curve25519's &ell;&minus;1 has nothing above 132. The 2<sup>256</sup> extrapolation with d &asymp; 2<sup>128</sup> (&asymp; 21&middot;2<sup>64</sup> operations) rests on the 0.231 exponent and on a leak no protocol provides; it is marked as extrapolation.</p>
 </section>
 <!-- END auxiliary-inputs-20260918 -->
+<section class="panel" id="crossbred-20260920">
+<h2>Crossbred as a decomposition oracle: fastest oracle, still loses the pipeline</h2>
+<p>Joux&ndash;Vitse Crossbred wired into Koblitz index calculus as
+<code>DecompositionStrategy::Crossbred</code> (Route 1 of the ECC2K-130 routes note,
+whose metric and falsifier were declared before this run). Two phases, two units, because
+the oracle result and the pipeline result point opposite ways. Frozen source:
+<a href="https://github.com/aburan28/crypto/blob/main/research/crossbred_20260920/oracle_ladder.txt">oracle ladder</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/crossbred_20260920/e2e_panel.txt">end-to-end panel</a>.
+Write-up: <code>research/notes/ecc2k130/RESEARCH_ECC2K130_CROSSBRED.md</code>.</p>
+<div class="table-scroll"><table>
+<caption>Oracle phase. Unit: bit operations, one 64-bit word XOR = 64 bit ops. Boundary: exhaustive
+search over the Boolean system, 2<sup>v</sup>&middot;T. The declared metric is the wall-clock
+xb/F4 ratio at m = 3; the falsifier was xb/F4 &ge; 1 and does not fire.</caption>
+<thead><tr><th>Variant</th><th>n / m</th><th>xb/brute</th><th>xb/F4 (bit ops)</th><th>xb/F4 (wall)</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>Exhaustive search over the system</td><td>&mdash;</td><td>1</td><td>&mdash;</td><td>&mdash;</td><td>Reference root set where it fits</td><td><span class="chip">boundary</span></td></tr>
+<tr><td>Matrix-F4 at the deciding degree</td><td>9/2, 13/2, 7/3, 9/3</td><td>&mdash;</td><td>1</td><td>1</td><td>Certificate never contradicts the reference</td><td><span class="chip">reference</span></td></tr>
+<tr><td>Crossbred, best (D, k) per rung</td><td>9/2, 13/2, 7/3, 9/3</td><td>0.120 / 0.001 / 0.016 / &mdash;</td><td>0.004 / 0.002 / 0.013 / 0.023</td><td>0.021 / 0.053 / 0.040 / <strong>0.696</strong></td><td>Root-set equality where exhaustive fits; two one-sided checks past v = 24; all rows agree</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>&nbsp;&nbsp;&mdash; margin vs. size</td><td>m = 3: n 7 &rarr; 9</td><td>&mdash;</td><td>&mdash;</td><td>0.040 &rarr; 0.696, rising</td><td>Two rungs; no exponent fitted</td><td><span class="chip">shrinking; one rung decides</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Whole pipeline, strategy the only variable: same curve, factor base, m, seed, trial cap and
+linear algebra, with the generic aG+bQ=O shortcut counted and skipped. Unit: relations per second
+over relation-collection time. Reference arm is exhaustive enumeration &mdash; the null object.
+S against the group order is <strong>uncalibrated</strong> here: this prices a phase, not a full
+priced attack, and does not belong in the normalized rho claim.</caption>
+<thead><tr><th>Variant</th><th>Full-DLP S</th><th>Cost / rho</th><th>relations/s, n=9 m=2</th><th>relations/s, n=9 m=3</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>Enumerate (null object)</td><td>Uncalibrated</td><td>Uncalibrated</td><td>51,103.0</td><td>21,330.5</td><td>Planted scalar recovered on every row</td><td><span class="chip">reference</span></td></tr>
+<tr><td>Crossbred</td><td>Uncalibrated</td><td>Uncalibrated</td><td>4,672.2 (0.09&times;)</td><td>11.8 (0.0006&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">engineering at m = 2; worst arm at m = 3</span></td></tr>
+<tr><td>Gr&ouml;bner</td><td>Uncalibrated</td><td>Uncalibrated</td><td>613.9 (0.01&times;)</td><td>32.3 (0.0015&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">prior arm</span></td></tr>
+<tr><td>SAT</td><td>Uncalibrated</td><td>Uncalibrated</td><td>1,654.1 (0.03&times;)</td><td>51.9 (0.0024&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">prior arm</span></td></tr>
+<tr><td>Reading the oracle win as a pipeline win</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="chip relabel">relabelling &mdash; named so it is not claimed later</span></td></tr>
+</tbody></table></div>
+<p>No row is an advance. The floor is &Theta;(2<sup>n</sup>) relation collection with any oracle
+polynomial in the factor base, and every arm sits against it identically; a faster oracle buys reach,
+not an exponent. One structural finding carries the whole round: <strong>no (D, k) in the sweep
+produced a single filter</strong>, so on these systems Crossbred is Macaulay preprocessing in front of
+2<sup>k</sup> linear solves, paid per target &mdash; which is what the decaying wall-clock margin measures.</p>
+</section>
+<!-- END crossbred-20260920 -->
 </body>
 </html>
