@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "experiment": "wdsat_ic_unification",
+  "note": "RESEARCH_WDSAT_IC_UNIFICATION.md",
+  "class": "engineering",
+  "boundary": {
+    "reference": "Pollard rho on the same Koblitz subgroup; ECC2K-130 reference 2^60.8090",
+    "floor": "free-oracle floor for m-summand subspace factor bases; unchanged by SAT engine choice"
+  },
+  "wdsat_pin": "61c6ff3f49445af2729274819edb27b85a89efc1",
+  "agreement": {
+    "curve": "K_1",
+    "degree": 7,
+    "prime_degree": true,
+    "summands": 2,
+    "planted": true,
+    "native_sat_lifted": true,
+    "wdsat_lifted": true,
+    "indices_agree_after_sort": true
+  },
+  "ecc2k130": {
+    "field": "F_2^131",
+    "prime_degree": true,
+    "claim": "same Semaev family; full-size attack cost not moved"
+  }
+}

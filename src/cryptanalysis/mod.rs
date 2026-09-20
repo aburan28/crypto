@@ -211,6 +211,7 @@ pub mod tls12_kdf;
 pub mod tls13_kdf;
 pub mod visual_demos;
 pub mod visualize;
+pub mod wdsat_oracle;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,

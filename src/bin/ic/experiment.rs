@@ -108,6 +108,8 @@ pub enum Solver {
     Enumerate,
     /// Meet-in-the-middle over a precomputed pair-sum table.
     PairTable,
+    /// Trimoska WDSat on the same Semaev ANF as `sat`.
+    Wdsat,
 }
 impl Solver {
     pub fn name(self) -> &'static str {
@@ -116,6 +118,7 @@ impl Solver {
             Self::Sat => "sat",
             Self::Enumerate => "enumerate",
             Self::PairTable => "pair-table",
+            Self::Wdsat => "wdsat",
         }
     }
     fn strategy(self) -> DecompositionStrategy {
@@ -124,6 +127,7 @@ impl Solver {
             Self::Sat => DecompositionStrategy::Sat,
             Self::Enumerate => DecompositionStrategy::Enumerate,
             Self::PairTable => DecompositionStrategy::PairTable,
+            Self::Wdsat => DecompositionStrategy::Wdsat,
         }
     }
 }
@@ -256,6 +260,12 @@ pub struct RunArgs {
     pub max_trials: u32,
     #[arg(long,value_enum,default_value_t=Solver::Groebner)]
     pub solver: Solver,
+    /// Path to a WDSat `wdsat_solver` binary; required for `--solver wdsat`.
+    #[arg(long)]
+    pub wdsat_binary: Option<PathBuf>,
+    /// Soft wall-clock budget for one WDSat child process, in milliseconds.
+    #[arg(long, default_value_t = 5_000)]
+    pub wdsat_timeout_ms: u64,
     /// Targets decomposed per batch (in parallel); 0 selects the CPU count.
     #[arg(long,default_value_t=0,value_parser=clap::value_parser!(u32).range(0..=4096))]
     pub batch: u32,
@@ -279,6 +289,8 @@ impl Default for RunArgs {
             summands: 2,
             max_trials: 20_000,
             solver: Solver::Groebner,
+            wdsat_binary: None,
+            wdsat_timeout_ms: 5_000,
             batch: 0,
             control: false,
         }
@@ -902,6 +914,9 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
     if args.max_trials == 0 || args.max_trials > 1_000_000 {
         return Err("trial limit must be 1..=1000000".into());
     }
+    if args.solver == Solver::Wdsat && args.wdsat_binary.is_none() {
+        return Err("--solver wdsat requires --wdsat-binary".into());
+    }
     let spec = factor_base_spec(&args)?;
     if !quiet {
         println!(
@@ -936,6 +951,8 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         stop_on_verified_rank: !args.control,
         allow_direct_relation: false,
         relation_batch_size: batch,
+        wdsat_binary: args.wdsat_binary.clone(),
+        wdsat_timeout_ms: args.wdsat_timeout_ms,
         ..KoblitzIcOptions::default()
     };
     let mut stages = Vec::new();

@@ -84,7 +84,7 @@ The following knobs are recorded in each run report:
 - factor-base: a recipe file written by `ic search`, replacing factor-index;
 - summands: factor-base points per relation, 2 (default), 3, or 4;
 - max-trials: 1 through 1000000;
-- solver: groebner, sat, enumerate, or pair-table;
+- solver: groebner, sat, enumerate, pair-table, or wdsat;
 - batch: targets decomposed per parallel batch (0 = CPU count);
 - control: legacy accounting, see below.
 
@@ -97,7 +97,14 @@ group before it becomes a relation:
   sums built once per run — one lookup per target for two summands,
   `|F|` for three, `|F|²` for four (16 bytes per table entry);
 - groebner: the Weil-restricted Semaev system reduced by matrix-F4;
-- sat: the same system, CDCL with native parity rows.
+- sat: the same system, CDCL with native parity rows;
+- wdsat: the same Semaev system emitted as Trimoska ANF and solved by an
+  external WDSat binary (`--wdsat-binary PATH`). See
+  [`RESEARCH_WDSAT_IC_UNIFICATION.md`](../RESEARCH_WDSAT_IC_UNIFICATION.md).
+  Requires a capacity-sufficient build of
+  [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
+  baseline builder is
+  `research/index_calculus_baseline_20260914/pilot/build_pilot.py`.
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation
