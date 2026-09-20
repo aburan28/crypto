@@ -83,6 +83,42 @@ targets and carry exactly the caveats of
 The charged ρ/IC column is advisory and is not gated: on its own it is the
 stage number this gate was built not to be fooled by.
 
+## Run history: the paired interval a runtime claim needs
+
+`AGENTS.md` §8 lets a *runtime* claim stand only on paired baseline/candidate
+reruns on matched hardware with a 95 % interval that excludes no improvement.
+Each passing CI run is one such paired rerun (rho and IC in the same process,
+same runner image), and `scripts/ic_e2e_history.py` keeps them:
+
+```bash
+gh run download <run-id> --dir /tmp/art            # the workflow's artifact
+python3 scripts/ic_e2e_history.py add --run-dir /tmp/art/ic-e2e-benchmark-<run-id> \
+    --run-id <run-id> --url https://github.com/aburan28/crypto/actions/runs/<run-id>
+python3 scripts/ic_e2e_history.py report --runs docs/ic/ci/runs/*.json \
+    --reference docs/ic/ci/ic-e2e-reference-v4.json
+```
+
+`add` writes a compact record (host, `ic` hash, commit, per-rung counters and
+whole-process seconds) to `docs/ic/ci/runs/<run-id>.json` and never overwrites;
+`report` pools only runs whose counters are identical to each other and to the
+frozen reference — different counters are a different algorithm — and gives,
+per rung, the per-run rho/IC ratios, a t-based 95 % interval, and the same for
+rho − IC in seconds. The rung's claim "faster than rho end to end" is set only
+with at least three runs and both intervals excluding no improvement. It is a
+statement about wall time on that runner; `S` stays null.
+
+Current history (four runs on the `ubuntu-latest` image, see `runs/`):
+
+| rung | log₂ r | runs | rho/IC per run | 95 % CI | runtime claim |
+|:--|--:|--:|:--|:--|:--|
+| `k0n31` | 20.5 | 4 | 0.036, 0.036, 0.037, 0.037 | [0.036, 0.037] | no (IC slower) |
+| `k0n41-subgroup` | 39.0 | 4 | 2.228, 2.234, 2.256, 2.206 | **[2.198, 2.264]** | faster than rho, end to end |
+| `k0n53-subgroup` | 44.3 | 4 | 1.996, 2.064, 2.034, 2.004 | **[1.976, 2.074]** | faster than rho, end to end |
+| `k0n61-subgroup-wide` | 47.2 | 2 | 1.774, 1.696 | [1.242, 2.227] | not yet (n < 3) |
+
+Add each new passing run's artifact; the table above is regenerated from the
+`report` output, not edited by hand.
+
 ## Running it locally
 
 ```bash
