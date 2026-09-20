@@ -110,7 +110,8 @@ pub enum Solver {
     PairTable,
     /// Trimoska WDSat on the same Semaev ANF as `sat`.
     Wdsat,
-    /// Gray-code FES on quadratic Semaev ANF (LIP6 MQ / libfes inspiration).
+    /// ALMASTY-inspired quadratic Semaev FES (`m = 2`): Gray early-exit,
+    /// Möbius all-roots, Monica past `n = 24`.
     MqFes,
 }
 impl Solver {
@@ -557,6 +558,7 @@ pub(crate) fn ic_options_with_descent(
         strategy: strategy.strategy(),
         collapse_negation: true,
         collapse_projected_orbits: true,
+        crossbred: None,
         allow_direct_relation: false,
         max_trials: max_trials as usize,
         seed,
@@ -952,6 +954,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         seed: args.seed,
         collapse_negation: !args.control,
         collapse_projected_orbits: !args.control,
+        crossbred: None,
         stop_on_verified_rank: !args.control,
         allow_direct_relation: false,
         relation_batch_size: batch,
