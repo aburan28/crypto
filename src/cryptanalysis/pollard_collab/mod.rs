@@ -48,6 +48,10 @@
 //!   git, rsync — whatever replicates files).
 //! - [`net`]: TCP gossip; each node listens and syncs with the peers
 //!   it knows, exchanging exactly the check-ins the other side lacks.
+//! - [`coordinator`]: one hub with a URL — agents dial out to it and
+//!   it pushes back down the same socket (the *reverse channel*), so
+//!   a fleet behind NAT needs no inbound reachability.  Meant for a
+//!   hub on an EC2 instance; see `deploy/rho-coordinator/`.
 //! - [`cairn`]: a paid network.  Points go out as commit–reveal claims
 //!   on a cairn *piecework* objective and the objective's log comes back
 //!   as the DP table, so every accepted point is paid and every node
@@ -60,11 +64,14 @@
 //! crypto cryptanalysis rho-collab work  --job job.json --node alice --mailbox ./shared
 //! crypto cryptanalysis rho-collab work  --job job.json --node bob --listen 0.0.0.0:7000 --peer alice:7000
 //! crypto cryptanalysis rho-collab status --job job.json --mailbox ./shared
+//! crypto cryptanalysis rho-collab coordinator --job job.json --listen 0.0.0.0:8080 --token-file tok
+//! RHO_COORDINATOR_URL=http://hub:8080 crypto cryptanalysis rho-collab work --node carol
 //! crypto cryptanalysis rho-collab work  --job nums-50-rho.json --node carol \
 //!     --cairn http://127.0.0.1:8080 --objective sha256:… --submitter carol
 //! ```
 
 pub mod cairn;
+pub mod coordinator;
 pub mod job;
 pub mod mailbox;
 pub mod net;
@@ -72,6 +79,10 @@ pub mod state;
 pub mod walk;
 pub mod worker;
 
+pub use coordinator::{
+    fetch_job, fetch_status, sync_once, Coordinator, CoordinatorConfig, CoordinatorUrl, Frame,
+    HubStats, HubStatus, ReverseChannel,
+};
 pub use job::{demo_curve, JobContext, JobSpec, DEMO_CURVES, PROTOCOL_VERSION};
 pub use mailbox::Mailbox;
 pub use net::{sync_with_peer, Message, PeerServer, SyncReport};

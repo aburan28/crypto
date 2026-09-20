@@ -1,0 +1,42 @@
+# An agent.  Needs no inbound rule, no public address and no job file:
+# it dials the coordinator, and the job document comes back down the
+# same connection.  Identical on an EC2 worker, a spot instance, a
+# laptop behind NAT and a container.
+#
+#   cp rho-agent.service /etc/systemd/system/
+#   systemctl edit rho-agent   # or write /etc/rho/agent.env
+#   systemctl enable --now rho-agent
+#
+# /etc/rho/agent.env:
+#   RHO_COORDINATOR_URL=http://hub.internal:8080
+#   RHO_COORDINATOR_TOKEN=…            # 0600, root:rho
+#   RHO_NODE=%H                        # anything unique per machine
+[Unit]
+Description=Pollard rho collaboration agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=rho
+Group=rho
+WorkingDirectory=/var/lib/rho
+EnvironmentFile=/etc/rho/agent.env
+# %H is the hostname: lanes check in as <node>.<lane>, so every
+# machine in the fleet needs a name no other machine uses.
+ExecStart=/usr/local/bin/crypto cryptanalysis rho-collab work \
+    --node ${RHO_NODE} \
+    --threads ${RHO_THREADS} \
+    --sync-secs 30
+Restart=always
+RestartSec=10
+# Walking is the whole workload; leave room for the rest of the box.
+Nice=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+StateDirectory=rho
+ReadWritePaths=/var/lib/rho
+
+[Install]
+WantedBy=multi-user.target

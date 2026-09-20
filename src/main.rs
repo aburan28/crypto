@@ -389,6 +389,21 @@ enum RhoCollabOp {
         /// Stop each lane after this many walkers (0 = until solved).
         #[arg(long, default_value_t = 0)]
         max_walkers: u64,
+        /// Coordinator URL (`http://host:port`), e.g. the hub on an
+        /// EC2 instance.  The agent dials out and holds the connection
+        /// open; the hub pushes everyone else's check-ins back down it,
+        /// so no inbound rule or public address is needed here.
+        /// Falls back to $RHO_COORDINATOR_URL.
+        #[arg(long)]
+        coordinator: Option<String>,
+        /// Bearer token for the coordinator.  Falls back to
+        /// $RHO_COORDINATOR_TOKEN; prefer `--token-file` on a shared box,
+        /// where a command line is world-readable.
+        #[arg(long)]
+        token: Option<String>,
+        /// Read the coordinator token from this file (first line).
+        #[arg(long, conflicts_with = "token")]
+        token_file: Option<std::path::PathBuf>,
         /// A cairn node (`http://host:port`, running `cairn serve
         /// --queue`).  Every distinguished point is committed and revealed
         /// as a claim on `--objective`, and the objective's log is merged
@@ -419,6 +434,46 @@ enum RhoCollabOp {
         #[arg(long)]
         cairn_state: Option<std::path::PathBuf>,
     },
+    /// Run the hub agents dial out to: serves the job, merges their
+    /// check-ins, and pushes everyone's back down the connection each
+    /// agent opened.  This is the process that runs on the EC2 instance.
+    Coordinator {
+        /// Job document to serve (default: `<mailbox>/job.json`).
+        #[arg(long)]
+        job: Option<std::path::PathBuf>,
+        /// Address to bind, e.g. `0.0.0.0:8080` (or `127.0.0.1:8080`
+        /// with a TLS terminator in front).
+        #[arg(long, default_value = "0.0.0.0:8080")]
+        listen: String,
+        /// Require this bearer token.  Falls back to
+        /// $RHO_COORDINATOR_TOKEN; prefer `--token-file`.
+        #[arg(long)]
+        token: Option<String>,
+        /// Read the required bearer token from this file (first line).
+        #[arg(long, conflicts_with = "token")]
+        token_file: Option<std::path::PathBuf>,
+        /// Refuse to start without a token.  Set it when the bind
+        /// address is reachable from outside the host.
+        #[arg(long)]
+        require_token: bool,
+        /// Mirror every accepted check-in into this directory, and
+        /// reload it at start: the log then outlives the instance.
+        #[arg(long)]
+        mailbox: Option<std::path::PathBuf>,
+        /// Also gossip with these TCP peers (a second hub, a laptop).
+        #[arg(long = "peer")]
+        peers: Vec<String>,
+        /// Seconds between status lines.
+        #[arg(long, default_value_t = 15)]
+        report_secs: u64,
+        /// Seconds a silent claim stays live (reporting only; agents
+        /// apply their own).
+        #[arg(long, default_value_t = 120)]
+        lease_secs: u64,
+        /// Stop after this many seconds (0 = run forever).
+        #[arg(long, default_value_t = 0)]
+        max_seconds: u64,
+    },
     /// Show merged progress from a mailbox, peers, and/or a cairn log.
     Status {
         #[arg(long)]
@@ -427,6 +482,13 @@ enum RhoCollabOp {
         mailbox: Option<std::path::PathBuf>,
         #[arg(long = "peer")]
         peers: Vec<String>,
+        /// Ask a coordinator instead of (or besides) a mailbox.
+        #[arg(long)]
+        coordinator: Option<String>,
+        #[arg(long)]
+        token: Option<String>,
+        #[arg(long, conflicts_with = "token")]
+        token_file: Option<std::path::PathBuf>,
         /// Read the objective's accepted points from this cairn node.
         #[arg(long, requires = "objective")]
         cairn: Option<String>,
@@ -542,6 +604,10 @@ fn cmd_rho_collab(op: RhoCollabOp) {
     use crypto_lib::cryptanalysis::pollard_collab::cairn::{
         wall_clock, CairnConfig, CairnTransport, Submitter,
     };
+    use crypto_lib::cryptanalysis::pollard_collab::coordinator::{
+        fetch_status, sync_once, Coordinator, CoordinatorConfig, CoordinatorUrl, ReverseChannel,
+        TOKEN_ENV, URL_ENV,
+    };
     use crypto_lib::cryptanalysis::pollard_collab::{
         demo_curve, run_lane, sync_with_peer, JobSpec, LaneOptions, Mailbox, PeerServer,
         SharedState, DEMO_CURVES,
@@ -571,6 +637,36 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             (None, Some(d)) => Mailbox::read_job(d).unwrap_or_else(|e| die(e)),
             (None, None) => die("pass --job <file> or --mailbox <dir>"),
         }
+    }
+
+    /// The coordinator token: the flag, then the file, then the
+    /// environment — so a fleet image can carry none of the three and
+    /// pick it up from the instance's unit file.
+    fn resolve_token(
+        token: &Option<String>,
+        token_file: &Option<std::path::PathBuf>,
+    ) -> Option<String> {
+        if let Some(t) = token {
+            return Some(t.clone());
+        }
+        if let Some(p) = token_file {
+            let text =
+                std::fs::read_to_string(p).unwrap_or_else(|e| die(format!("{}: {e}", p.display())));
+            let t = text.lines().next().unwrap_or("").trim().to_string();
+            if t.is_empty() {
+                die(format!("{}: empty token file", p.display()));
+            }
+            return Some(t);
+        }
+        std::env::var(TOKEN_ENV).ok().filter(|t| !t.is_empty())
+    }
+
+    /// The coordinator URL: the flag, then `$RHO_COORDINATOR_URL`.
+    fn resolve_url(url: &Option<String>) -> Option<CoordinatorUrl> {
+        let raw = url
+            .clone()
+            .or_else(|| std::env::var(URL_ENV).ok().filter(|u| !u.is_empty()))?;
+        Some(CoordinatorUrl::parse(&raw).unwrap_or_else(|e| die(e)))
     }
 
     /// Open the cairn transport the flags describe, if `--cairn` was given.
@@ -708,6 +804,9 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             sync_secs,
             max_seconds,
             max_walkers,
+            coordinator,
+            token,
+            token_file,
             cairn,
             objective,
             submitter,
@@ -716,7 +815,25 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             cairn_epoch_secs,
             cairn_state,
         } => {
-            let spec = load_spec(&job, &mailbox);
+            let hub_url = resolve_url(&coordinator);
+            let hub_token = hub_url
+                .as_ref()
+                .and_then(|_| resolve_token(&token, &token_file));
+            // An agent pointed at a hub needs nothing else: the job
+            // document comes down the same URL, so a fleet image can
+            // be baked once and aimed with one environment variable.
+            let spec = match (&job, &mailbox, &hub_url) {
+                (None, None, Some(u)) => {
+                    let spec = crypto_lib::cryptanalysis::pollard_collab::coordinator::fetch_job(
+                        u,
+                        hub_token.as_deref(),
+                    )
+                    .unwrap_or_else(|e| die(e));
+                    eprintln!("[hub] job fetched from {}", u.host_port);
+                    spec
+                }
+                _ => load_spec(&job, &mailbox),
+            };
             let ctx = Arc::new(spec.build().unwrap_or_else(|e| die(e)));
             let state = Arc::new(Mutex::new(SharedState::new(&ctx)));
             let cairn_state = cairn_state.or_else(|| {
@@ -758,6 +875,29 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                 eprintln!("[collab] mailbox {}: merged {n} check-ins", d.display());
                 Arc::new(Mutex::new(mb))
             });
+            // The reverse channel: this agent dials the hub and keeps
+            // the socket open.  Started before the lanes so the first
+            // check-in already has somewhere to go; it connects in the
+            // background, so an unreachable hub delays no walking.
+            let hub = hub_url.map(|url| {
+                let token = hub_token;
+                eprintln!(
+                    "[hub] {} · dialling out as {node}{}",
+                    url.host_port,
+                    if token.is_some() {
+                        ""
+                    } else {
+                        " · no token (the hub must be on a private network)"
+                    }
+                );
+                Arc::new(ReverseChannel::start(
+                    url,
+                    token,
+                    node.clone(),
+                    Arc::clone(&ctx),
+                    Arc::clone(&state),
+                ))
+            });
             let _server = listen.as_ref().map(|addr| {
                 let s = PeerServer::start(addr, Arc::clone(&ctx), Arc::clone(&state))
                     .unwrap_or_else(|e| die(format!("listen {addr}: {e}")));
@@ -796,6 +936,23 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                         eprintln!("[collab] mailbox relay failed: {e}");
                     }
                 }
+                if let Some(h) = &hub {
+                    // Nothing to drive: the channel thread pushes and
+                    // merges on its own.  This only reports it.
+                    let st = h.stats();
+                    if verbose {
+                        match (st.connected, &st.last_error) {
+                            (true, _) => eprintln!(
+                                "[hub] connected · received {} sent {} rejected {} (connects {})",
+                                st.received, st.sent, st.rejected, st.connects
+                            ),
+                            (false, Some(e)) => {
+                                eprintln!("[hub] disconnected, retrying: {e}")
+                            }
+                            (false, None) => eprintln!("[hub] connecting…"),
+                        }
+                    }
+                }
                 if let Some(c) = &cairn {
                     let mut st = state.lock().unwrap();
                     let mut c = c.lock().unwrap();
@@ -831,6 +988,7 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                     let state = Arc::clone(&state);
                     let stop = Arc::clone(&stop);
                     let mbox = mbox.clone();
+                    let hub = hub.clone();
                     let cairn = cairn.clone();
                     let opts = LaneOptions {
                         checkin_every,
@@ -844,6 +1002,9 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                             &state,
                             &opts,
                             &mut |ci| {
+                                if let Some(h) = &hub {
+                                    h.publish(ci);
+                                }
                                 if let Some(mb) = &mbox {
                                     if let Err(e) = mb.lock().unwrap().publish(ci) {
                                         eprintln!("[collab] publish failed: {e}");
@@ -911,7 +1072,15 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             for h in handles {
                 let _ = h.join();
             }
-            // Final exchange so peers learn the outcome.
+            // Final exchange so peers learn the outcome.  The channel
+            // is drained explicitly: its queue lives in this process,
+            // so exiting with it non-empty would drop the last
+            // check-ins — including the one carrying the solution.
+            if let Some(h) = &hub {
+                if !h.flush(Duration::from_secs(10)) {
+                    eprintln!("[hub] warning: check-ins still queued at exit (hub unreachable)");
+                }
+            }
             do_sync(false);
             let st = state.lock().unwrap();
             if let Some(c) = &cairn {
@@ -939,16 +1108,163 @@ fn cmd_rho_collab(op: RhoCollabOp) {
             }
         }
 
+        RhoCollabOp::Coordinator {
+            job,
+            listen,
+            token,
+            token_file,
+            require_token,
+            mailbox,
+            peers,
+            report_secs,
+            lease_secs,
+            max_seconds,
+        } => {
+            let spec = load_spec(&job, &mailbox);
+            let ctx = Arc::new(spec.build().unwrap_or_else(|e| die(e)));
+            let state = Arc::new(Mutex::new(SharedState::new(&ctx)));
+            let token = resolve_token(&token, &token_file);
+            if token.is_none() && require_token {
+                die("--require-token was set but no token was given (--token, --token-file, or $RHO_COORDINATOR_TOKEN)");
+            }
+            if token.is_none() && !listen.starts_with("127.") && !listen.starts_with("localhost") {
+                eprintln!(
+                    "[hub] warning: binding {listen} with no token — anyone who can reach it can \
+                     read the job and write to the log.  Pass --token-file, or bind 127.0.0.1 \
+                     behind a TLS terminator."
+                );
+            }
+
+            // Durability: the hub's log is in memory, and an EC2
+            // instance is replaceable by design.  A mailbox directory
+            // on an attached volume (or anything that replicates one)
+            // is reloaded at start and written on every accepted
+            // check-in, so a replacement hub resumes the campaign
+            // instead of starting the DP table from empty.
+            let mbox = mailbox.as_ref().map(|d| {
+                let mut mb = Mailbox::open(d).unwrap_or_else(|e| die(e));
+                mb.write_job(&spec).unwrap_or_else(|e| die(e));
+                let (n, rej) = mb
+                    .sync(&ctx, &mut state.lock().unwrap())
+                    .unwrap_or_else(|e| die(e));
+                eprintln!(
+                    "[hub] mailbox {}: reloaded {n} check-in(s), {rej} rejected",
+                    d.display()
+                );
+                Arc::new(Mutex::new(mb))
+            });
+            let hook: Option<crypto_lib::cryptanalysis::pollard_collab::coordinator::OnCheckIn> =
+                mbox.clone().map(|mb| {
+                    Box::new(move |ci: &_| {
+                        if let Err(e) = mb.lock().unwrap().publish(ci) {
+                            eprintln!("[hub] mailbox write failed: {e}");
+                        }
+                    })
+                        as crypto_lib::cryptanalysis::pollard_collab::coordinator::OnCheckIn
+                });
+
+            let hub = Coordinator::start(
+                listen.as_str(),
+                Arc::clone(&ctx),
+                &spec,
+                Arc::clone(&state),
+                CoordinatorConfig {
+                    token,
+                    ..CoordinatorConfig::default()
+                },
+                lease_secs,
+                hook,
+            )
+            .unwrap_or_else(|e| die(format!("listen {listen}: {e}")));
+            println!("job id:      {}", ctx.job_id);
+            println!("listening:   {}", hub.local_addr());
+            println!("agents use:  --coordinator {}", hub.url());
+            println!("routes:      /healthz /v1/job /v1/status /v1/sync /v1/channel");
+
+            let start = Instant::now();
+            let tick = Duration::from_secs(report_secs.max(1));
+            let mut last = Instant::now();
+            loop {
+                std::thread::sleep(Duration::from_millis(250));
+                let solved = state.lock().unwrap().solution.is_some();
+                let timed_out = max_seconds > 0 && start.elapsed().as_secs() >= max_seconds;
+                if last.elapsed() >= tick || solved || timed_out {
+                    last = Instant::now();
+                    for p in &peers {
+                        if let Err(e) = sync_with_peer(p.as_str(), &ctx, &state) {
+                            eprintln!("[hub] peer {p}: {e}");
+                        }
+                    }
+                    let h = hub.stats();
+                    let p = {
+                        let st = state.lock().unwrap();
+                        st.progress(
+                            &ctx,
+                            crypto_lib::cryptanalysis::pollard_collab::state::now_secs(),
+                            lease_secs,
+                        )
+                    };
+                    eprintln!(
+                        "[hub] {:>7.0}s  agents {:>3}  steps {:>12}  ({:>5.1}%)  DPs {:>8}  units done {}  accepted {}  pushed {}  rejected {}  401s {}",
+                        start.elapsed().as_secs_f64(),
+                        h.agents,
+                        p.steps,
+                        100.0 * p.fraction,
+                        p.dps_stored,
+                        p.units_completed,
+                        h.accepted,
+                        h.pushed,
+                        h.rejected,
+                        h.unauthorized,
+                    );
+                }
+                if timed_out {
+                    break;
+                }
+                if solved {
+                    // Stay up a little so agents still walking learn
+                    // the answer from the channel they hold open.
+                    let st = state.lock().unwrap();
+                    if let Some(x) = &st.solution {
+                        println!("solution: {}", x.to_str_radix(16));
+                        println!("verified: {}", ctx.g.scalar_mul(x, &ctx.a) == ctx.q);
+                    }
+                    drop(st);
+                    std::thread::sleep(Duration::from_secs(5));
+                    break;
+                }
+            }
+        }
+
         RhoCollabOp::Status {
             job,
             mailbox,
             peers,
+            coordinator,
+            token,
+            token_file,
             cairn,
             objective,
             json,
             lease_secs,
         } => {
-            let spec = load_spec(&job, &mailbox);
+            let hub_url = resolve_url(&coordinator);
+            let hub_token = hub_url
+                .as_ref()
+                .and_then(|_| resolve_token(&token, &token_file));
+            // With a coordinator and no local job file, the hub serves
+            // the job too, so `status --coordinator URL` needs nothing
+            // else on disk.
+            let spec = match (&job, &mailbox, &hub_url) {
+                (None, None, Some(u)) => {
+                    crypto_lib::cryptanalysis::pollard_collab::coordinator::fetch_job(
+                        u,
+                        hub_token.as_deref(),
+                    )
+                    .unwrap_or_else(|e| die(e))
+                }
+                _ => load_spec(&job, &mailbox),
+            };
             let ctx = spec.build().unwrap_or_else(|e| die(e));
             let state = Mutex::new(SharedState::new(&ctx));
             if let Some(d) = &mailbox {
@@ -965,6 +1281,23 @@ fn cmd_rho_collab(op: RhoCollabOp) {
                         r.accepted_dps, r.rejected_dps
                     ),
                     Err(e) => eprintln!("[cairn] {e}"),
+                }
+            }
+            if let Some(u) = &hub_url {
+                match sync_once(u, hub_token.as_deref(), &ctx, &state) {
+                    Ok((n, rej)) => eprintln!("[hub] merged {n} check-in(s), {rej} rejected"),
+                    Err(e) => eprintln!("[hub] {e}"),
+                }
+                match fetch_status(u, hub_token.as_deref()) {
+                    Ok(h) => eprintln!(
+                        "[hub] agents connected {} · channels {} · accepted {} · pushed {} · rejected {}",
+                        h.hub.agents,
+                        h.hub.channels_total,
+                        h.hub.accepted,
+                        h.hub.pushed,
+                        h.hub.rejected
+                    ),
+                    Err(e) => eprintln!("[hub] status: {e}"),
                 }
             }
             for p in &peers {

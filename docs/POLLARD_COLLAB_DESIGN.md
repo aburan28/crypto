@@ -139,7 +139,7 @@ never collide.
 
 ## 7. Transports
 
-The state and the messages are transport-agnostic. Three transports ship:
+The state and the messages are transport-agnostic. Four transports ship:
 
 **Mailbox** (`mailbox.rs`). A directory:
 
@@ -170,6 +170,49 @@ in a few rounds. The topology is the operator's choice: everyone syncing with
 one well-known node is the simplest; a ring or a mesh removes the single
 point of failure. A node that listens is *not* a coordinator — it holds no
 state the others lack, and losing it loses nothing that was gossiped.
+
+**Coordinator** (`coordinator.rs`). One hub with a URL, and agents that
+only ever dial *out*. The TCP gossip above assumes every node can accept a
+connection; on a cloud fleet almost none can — private subnets, NAT, spot
+instances, containers with no inbound rule — while exactly one host is
+reachable by everybody. So the hub listens and the agents connect to it:
+
+```
+GET /v1/channel HTTP/1.1          ← opened by the agent
+Upgrade: rho-collab/1
+HTTP/1.1 101 Switching Protocols  → then one JSON frame per line, both ways
+
+agent → hub   hello {job_id, peer, known}
+hub   → agent batch {checkins, known, solution}     also unprompted, later
+agent → hub   push  {checkins}   ← what its lanes found
+hub   → agent ack   {accepted, rejected}
+either        ping  {}           ← keepalive through idle proxy timeouts
+```
+
+The upgrade is the WebSocket move, which is what gets it through an ALB or
+nginx, and the socket is used in *both* directions afterwards: the hub
+pushes other agents' DPs and the solution down a connection it could never
+have opened. That reverse direction is what buys the fleet the same
+convergence the mesh had, with the reachability the mesh did not have.
+
+Beside the channel the hub serves `GET /v1/job` (so an agent configured with
+only a URL fetches the job document), `GET /v1/status`, `POST /v1/sync` (a
+one-shot pull-push for `status` and for anything that cannot hold a socket
+open) and an unauthenticated `GET /healthz` for a load balancer.
+
+What it is *not* is an authority. It holds the same CRDT, verifies every DP
+on arrival with the same two scalar multiplications, and hands out no work:
+units are still chosen by each agent under §6. Losing it is the partition
+row of §8 — agents keep walking and reconverge — and a restart is not an
+empty table when `--mailbox` points somewhere durable, because every
+accepted check-in is mirrored there and reloaded at start. The bearer token
+it takes is access control, not integrity: it keeps an unauthenticated
+stranger from flooding the log, while §10's trust model is unchanged for
+everyone who has it. Plain HTTP only, deliberately — TLS belongs in the
+terminator in front, and the client refuses an `https://` URL rather than
+downgrading it silently. `deploy/rho-coordinator/` has the systemd units,
+the nginx configuration with the upgrade headers the channel needs, and the
+EC2 user-data.
 
 **cairn** (`cairn.rs`). A paid network rather than a peer: a
 [cairn](https://github.com/aburan28/cairn) node serving a *piecework*
@@ -235,6 +278,8 @@ contributor, and every claim was accepted and paid.
 | peer on a different job | rejected by job id |
 | forged DP | rejected on verification, counted per node |
 | forged progress | at worst a unit is skipped until its lease expires and someone resumes it; the DP table is unaffected |
+| coordinator restarts or is replaced | agents' channels reconnect with exponential backoff (1 s → 30 s) and re-push; with `--mailbox` the hub reloads its log, otherwise it refills from the agents' next pushes |
+| agent loses its channel | it keeps walking its claimed unit and queues check-ins; they go up when the channel returns, and are flushed before the process exits |
 | network partition | each side keeps working its own units (index ranges are disjoint by construction); the DP tables merge when the partition heals, and any cross-partition collision is found then |
 
 ## 9. Cost and tuning

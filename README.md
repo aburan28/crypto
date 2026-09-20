@@ -692,6 +692,32 @@ crypto cryptanalysis rho-collab work --mailbox /tmp/collab --node bob
 crypto cryptanalysis rho-collab status --mailbox /tmp/collab
 ```
 
+Or run it as a fleet, which is the shape a cloud deployment actually has:
+the workers are behind NAT or in private subnets and cannot accept
+connections, while one host — an EC2 instance — can be reached by all of
+them.  `rho-collab coordinator` is that host.  Agents **dial out** to its
+URL and it pushes everyone else's points and the solution back down the
+connection each agent opened (a *reverse channel*, an HTTP upgrade so it
+passes through an ALB or nginx), so no agent needs an inbound rule, a public
+address, or even a copy of the job document:
+
+```bash
+# On the EC2 instance (bind loopback and put TLS in front — see deploy/).
+crypto cryptanalysis rho-collab coordinator --job job.json --listen 0.0.0.0:8080 \
+    --token-file /etc/rho/token --mailbox /var/lib/rho/log
+
+# On every agent, anywhere.  The URL is the whole configuration.
+export RHO_COORDINATOR_URL=https://rho.example.com RHO_COORDINATOR_TOKEN=…
+crypto cryptanalysis rho-collab work --node "$(hostname)" --threads "$(nproc)"
+crypto cryptanalysis rho-collab status --coordinator "$RHO_COORDINATOR_URL"
+```
+
+The hub is a rendezvous, not an authority: it verifies every point the way an
+agent does, assigns no work, and losing it only costs reachability — agents
+keep walking and reconverge when it returns.  Systemd units, the nginx
+configuration and EC2 user-data are in
+[`deploy/rho-coordinator/`](./deploy/rho-coordinator/).
+
 Or get paid for it: a [cairn](https://github.com/aburan28/cairn) node
 ([download](https://github.com/aburan28/cairn/releases/latest), or
 `curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh`)

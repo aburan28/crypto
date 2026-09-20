@@ -1,0 +1,44 @@
+# The hub.  One instance, one job document, one URL for the fleet.
+#
+#   install -m 0755 target/release/crypto /usr/local/bin/crypto
+#   install -d -o rho -g rho /var/lib/rho
+#   install -m 0600 -o rho -g rho token /etc/rho/token
+#   cp rho-coordinator.service /etc/systemd/system/
+#   systemctl enable --now rho-coordinator
+#
+# It binds loopback: TLS and the public port belong to the terminator
+# in front (nginx.conf here, or an ALB with a target group on 8080).
+[Unit]
+Description=Pollard rho collaboration coordinator
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=rho
+Group=rho
+WorkingDirectory=/var/lib/rho
+ExecStart=/usr/local/bin/crypto cryptanalysis rho-collab coordinator \
+    --job /var/lib/rho/job.json \
+    --listen 127.0.0.1:8080 \
+    --token-file /etc/rho/token \
+    --require-token \
+    --mailbox /var/lib/rho/log \
+    --report-secs 30
+Restart=always
+RestartSec=5
+# The log in /var/lib/rho/log is what makes a restart cheap: the hub
+# reloads it and the campaign resumes with its DP table intact.
+StateDirectory=rho
+# Hardening: it needs a port, a token file and one directory.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/rho
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+MemoryMax=4G
+
+[Install]
+WantedBy=multi-user.target
