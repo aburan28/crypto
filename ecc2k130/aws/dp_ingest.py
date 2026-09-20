@@ -28,6 +28,14 @@ history and are the reason this is a file rather than a shell one-liner:
     `dp_ingest_hourly` are maintained by the insert itself, in the transaction
     that adds the points, so they cannot drift from what they summarise and a
     publish reads one row and 48 more.
+  * **It refuses what does not match its own commit marker.** The worker
+    writes `<object>.bin.json` after the payload, carrying a sha256 and a
+    record count; `merge.py` verifies it over the same corpus and this program
+    did not. A truncated read self-heals, because the object stays short of
+    its S3 size and is retried, but a body corrupted in place does not, and
+    once stored it is indistinguishable from real points to the collision
+    check above. Absent for legacy keys, which is why a missing marker is not
+    an error.
   * **It reports the collision it is uniquely placed to see.** The unique key
     that makes re-ingest harmless is the same constraint that defines a
     collision: two walks reaching one distinguished point from different
@@ -53,12 +61,17 @@ maps to `point_key = k0||k1||k2` as stored — literally bytes 8..32 of the reco
 `walk_seed` the seed big-endian. `--verify` checks that against points the old
 ingester already wrote before this program is trusted to add any.
 
-`found_at` is taken from the object's upload time rather than the wall clock at
+`found_at` is taken from the object's own time rather than the wall clock at
 insert. The old watcher used insert time, which is the same thing while it
 keeps pace and a lie when it does not: catching up on a backlog would stack a
 million points into the hour the catch-up ran and leave a spike in the
-published hourly chart that no GPU ever produced. The upload time is also
-stable across re-ingest, so a repeated object cannot move a bucket.
+published hourly chart that no GPU ever produced. The object's time is also
+stable across re-ingest, so a repeated object cannot move a bucket -- provided
+it is the producer's. `producedAt` in the `.bin.json` commit marker is that;
+`LastModified` is storage metadata, and a copy, a replication or a lifecycle
+transition rewrites it, moving points between hourly buckets without a walker
+doing anything. The marker wins where it carries one, the listing time stands
+where it does not.
 
 Two object-key shapes live under `dp/`, and both must be read:
 
@@ -90,6 +103,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import json
 import math
 import os
@@ -305,51 +319,77 @@ def ensureFoundAtIndex(conn):
         conn.autocommit = previous
 
 
-COUNTS_TTL = 1800.0
-_counts = {"at": 0.0, "map": {}}
+PROGRESS_MARK = "progress_backfilled"
 
 
-def ingestedCounts(conn, ttl=COUNTS_TTL):
-    """Rows already present per worker_id, and objects recorded as complete.
+def ingestedObjects(conn):
+    """Objects the store records as complete: `{object_key: records}`.
 
-    Two sources because the corpus has two eras.  Objects this program ingested
-    have a `dp_ingest_progress` row and that is authoritative.  Objects the
-    previous ingester wrote have no such row, so they are recognised by their row
-    count under the matching worker_id.
+    This used to be two sources, because the corpus has two eras. Objects this
+    program ingested have a `dp_ingest_progress` row. Objects the previous
+    ingester wrote have none, and were recognised instead by counting rows per
+    `worker_id` over the whole table -- 124 M rows grouped into 113 k on
+    2026-09-17, three minutes before a pass could read its first object, and
+    growing with the corpus. A 30-minute cache hid how often it ran; it did not
+    change what it cost, and it was the last question this program asked of
+    `distinguished_points` outside an insert.
 
-    The count alone is not sufficient, which is the whole reason the table
-    exists: a point already stored under some *other* worker_id -- an earlier
-    era attributed points to `gpu-i-<instance>-slot-N` rather than the object
-    name -- is skipped by `ON CONFLICT DO NOTHING`, so the count under this
-    object's own worker_id never reaches its record count and the object would
-    be re-ingested on every pass forever.  Harmless for correctness, but it
-    means the backlog never converges.
-
-    The progress table is read every pass and is small.  The per-worker counts
-    are not: `worker_id` is one value per *object*, so that aggregate groups
-    the whole corpus -- 124 M rows into 113 k groups on 2026-09-17, three
-    minutes before the first object of a pass could be read, and growing with
-    the corpus.  It is also answering a question about an era that stopped
-    growing when this table appeared, so it is cached for `ttl` seconds.  A
-    stale entry costs a re-ingest of one already-stored object, which
-    `ON CONFLICT DO NOTHING` makes a no-op.
+    `backfillProgress` answers that question once and writes the rows the old
+    ingester never wrote, so both eras now live in the same small table and a
+    pass reads only this.
     """
-    now = time.time()
     with conn.cursor() as cur:
-        if not _counts["map"] or now - _counts["at"] >= ttl:
-            cur.execute(
-                "SELECT worker_id, count(*) FROM distinguished_points "
-                "WHERE campaign_id = %s AND worker_id LIKE 'dp-slot-%%' GROUP BY worker_id",
-                (CAMPAIGN,))
-            _counts["map"] = {row[0]: int(row[1]) for row in cur.fetchall()}
-            _counts["at"] = now
-            log("refreshed per-object row counts: %d objects known to the store"
-                % len(_counts["map"]))
         cur.execute(
             "SELECT object_key, records FROM dp_ingest_progress WHERE campaign_id = %s",
             (CAMPAIGN,))
-        done = {row[0]: int(row[1]) for row in cur.fetchall()}
-    return _counts["map"], done
+        return {row[0]: int(row[1]) for row in cur.fetchall()}
+
+
+def backfillProgress(conn, s3, bucket, prefix="dp/"):
+    """Give the previous ingester's objects the progress rows they never had.
+
+    Runs once, recorded in `dp_ingest_meta` beside the vacuum and rollup marks.
+    The per-worker aggregate cannot be inverted -- `worker_id` is the object key
+    with its slashes turned into dashes, and slot names contain dashes, so the
+    key cannot be recovered from it -- and the bucket is the list of keys, so
+    this pairs the two the same way `pending` used to on every pass.
+
+    Only objects the store holds *in full* get a row. A partially ingested one
+    is left without, so the next pass re-reads it, which is a no-op for the
+    records already there. An object whose points were stored under some other
+    era's worker_id (`gpu-i-<instance>-slot-N`) never reaches its record count
+    and gets no row here either; it is re-ingested once, and that pass writes
+    its row. Under the old scheme it was re-ingested on *every* pass forever,
+    which is the non-convergence the progress table was added to fix.
+    """
+    with conn.cursor() as cur:
+        cur.execute(META_DDL)
+        cur.execute("SELECT 1 FROM dp_ingest_meta WHERE key = %s", (PROGRESS_MARK,))
+        if cur.fetchone() is not None:
+            return 0
+        log("pairing the corpus with the bucket once to record what the previous "
+            "ingester already stored; no pass reads the points table after this")
+        started = time.time()
+        cur.execute(
+            "SELECT worker_id, count(*) FROM distinguished_points "
+            "WHERE campaign_id = %s AND worker_id LIKE 'dp-slot-%%' GROUP BY worker_id",
+            (CAMPAIGN,))
+        counts = {row[0]: int(row[1]) for row in cur.fetchall()}
+        objects, _ = s3Objects(s3, bucket, prefix)
+        written = 0
+        for key, records, _ in objects:
+            if counts.get(workerId(key), 0) >= records:
+                cur.execute(
+                    "INSERT INTO dp_ingest_progress (campaign_id, object_key, records) "
+                    "VALUES (%s, %s, %s) ON CONFLICT (campaign_id, object_key) "
+                    "DO NOTHING", (CAMPAIGN, key, records))
+                written += cur.rowcount
+        cur.execute("INSERT INTO dp_ingest_meta (key) VALUES (%s) "
+                    "ON CONFLICT (key) DO NOTHING", (PROGRESS_MARK,))
+    conn.commit()
+    log("recorded %d already-stored object(s) in %.0fs from %d worker groups"
+        % (written, time.time() - started, len(counts)))
+    return written
 
 
 # Every figure the snapshot publishes except the checkpoint work was a
@@ -616,12 +656,63 @@ def recordCollisions(cur, found):
     return stored
 
 
+def readEnvelope(s3, bucket, key):
+    """The `.bin.json` commit marker beside an object, or None.
+
+    The worker writes it *after* the payload, so its presence means the object
+    is complete. It carries the producer's own sha256, record count and (since
+    this change) producedAt. Until now the ingest ignored it entirely: merge.py
+    verified it over the same corpus and this program did not, so a body that
+    came back corrupted was accepted into the store that collision detection
+    reads. Absent for the legacy key shape and for anything uploaded before the
+    contract path, which is why nothing here treats a missing one as an error.
+    """
+    try:
+        raw = s3.get_object(Bucket=bucket, Key=key + ".json")["Body"].read()
+        manifest = json.loads(raw.decode("utf-8"))
+        return manifest if isinstance(manifest, dict) else None
+    except Exception:
+        return None
+
+
+def checkEnvelope(key, body, manifest):
+    """Refuse a body that does not match its own commit marker.
+
+    Truncation already self-heals -- a short read records fewer records than
+    the object's S3 size, so the object stays outstanding and is retried -- but
+    a body corrupted in place does not, and is indistinguishable from real
+    points once stored. Raising here leaves the object outstanding and logged
+    rather than letting it into the corpus.
+    """
+    if not manifest:
+        return
+    want = manifest.get("sha256")
+    if want:
+        got = hashlib.sha256(body).hexdigest()
+        if got != want:
+            raise ValueError("%s: body does not match its manifest sha256 "
+                             "(%s != %s)" % (key, got, want))
+    want = manifest.get("records")
+    if isinstance(want, int) and want != len(body) // RECORD_BYTES:
+        raise ValueError("%s: manifest says %d records, body carries %d"
+                         % (key, want, len(body) // RECORD_BYTES))
+
+
 def ingestObject(conn, s3, bucket, key, found_at):
     """Insert every record of one object.
 
     Returns (rows added, records seen, collisions found).
     """
     body = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
+    manifest = readEnvelope(s3, bucket, key)
+    checkEnvelope(key, body, manifest)
+    # The producer's own clock, where it recorded one. found_at from the
+    # caller is the object's S3 LastModified for the orbit key shape, and that
+    # is storage metadata: a copy, a replication or a lifecycle transition
+    # rewrites it and silently moves points between hourly buckets.
+    produced = manifest.get("producedAt") if manifest else None
+    if isinstance(produced, int) and produced > 0:
+        found_at = time.strftime("%Y-%m-%d %H:%M:%S+00", time.gmtime(produced))
     whole = len(body) - len(body) % RECORD_BYTES
     wid = workerId(key)
     added = 0
@@ -684,9 +775,9 @@ def verify(conn, s3, bucket, sample=64):
     means a resumed ingest lands in the same key space, which is the only
     property collision detection depends on.
     """
-    counts, _ = ingestedCounts(conn)
+    done = ingestedObjects(conn)
     objects, _ = s3Objects(s3, bucket)
-    complete = [(k, n) for k, n, _ in objects if counts.get(workerId(k), 0) == n]
+    complete = [(k, n) for k, n, _ in objects if done.get(k, 0) == n]
     if not complete:
         log("verify: no fully-ingested object to compare against")
         return False
@@ -1122,13 +1213,13 @@ def pending(conn, s3, bucket, prefix="dp/"):
     that being behind and being unable to read are two different, reported
     numbers rather than one silence.
     """
-    counts, done = ingestedCounts(conn)
+    done = ingestedObjects(conn)
     objects, unrecognised = s3Objects(s3, bucket, prefix)
     todo, newest = [], 0
     for key, records, when in objects:
         newest = max(newest, when)
-        have = counts.get(workerId(key), 0)
-        if done.get(key, -1) >= records or have >= records:
+        have = done.get(key, 0)
+        if have >= records:
             continue
         todo.append((key, records, when, have))
     if unrecognised:
@@ -1339,6 +1430,7 @@ def main(argv=None):
                 # --pending promises to write nothing, and the DDL is a write.
                 if not (args.verify or args.pending):
                     ensureCollisions(conn)
+                    backfillProgress(conn, s3, args.bucket, args.prefix)
                     with conn.cursor() as cur:
                         ensureRollup(cur, force=recount_once)
                     conn.commit()
