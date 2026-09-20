@@ -105,8 +105,8 @@ group before it becomes a relation:
   [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
   baseline builder is
   `research/index_calculus_baseline_20260914/pilot/build_pilot.py`.
-- mq-fes: Gray-code exhaustive search over quadratic Semaev ANF (`m = 2`
-  only), inspired by LIP6/ALMASTY MQ / libfes-lite.
+- mq-fes: ALMASTY Möbius-transform exhaustive search over quadratic Semaev
+  ANF (`m = 2` only), from <https://gitlab.lip6.fr/almasty/mq>.
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation
