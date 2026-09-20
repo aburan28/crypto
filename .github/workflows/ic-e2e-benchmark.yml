@@ -1,7 +1,7 @@
 name: ic end-to-end benchmark
 # Runs the whole index-calculus method (select → collect → logs → solve) with
 # the signed-Frobenius ρ baseline in the same process on the frozen ledger
-# rungs, then gates the reports against docs/ic/ci/ic-e2e-reference-v1.json:
+# rungs, then gates the reports against the reference named in IC_E2E_REFERENCE:
 # every target verified by both methods, every seeded counter identical, the
 # same-host ρ/IC end-to-end wall ratio within tolerance, and any rung that
 # crossed ρ end to end when frozen still crossing.  See docs/ic/ci/README.md.
@@ -28,7 +28,7 @@ concurrency:
   group: ic-e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v1.json
+  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v2.json
   IC_E2E_OUTPUT: /tmp/ic-e2e
 jobs:
   e2e-benchmark:
