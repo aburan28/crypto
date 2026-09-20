@@ -319,6 +319,8 @@ fn main() {
         allow_direct_relation: false,
         collapse_projected_orbits: true,
         crossbred: None,
+        wdsat_binary: None,
+        wdsat_timeout_ms: 5_000,
         linear_algebra: crypto_lib::cryptanalysis::koblitz_index_calculus::LinearAlgebra::Dense,
     };
     let solve_start = Instant::now();

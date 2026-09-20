@@ -2166,6 +2166,16 @@ pub enum DecompositionStrategy {
     /// a decomposition oracle only: relation collection stays `Θ(2^n)`
     /// with any oracle polynomial in the factor base.
     Crossbred,
+    /// Same Semaev / Weil-restriction system as [`Self::Sat`], emitted in
+    /// Trimoska ANF and solved by an external WDSat binary
+    /// ([`crate::cryptanalysis::wdsat_oracle`]).  Requires
+    /// [`KoblitzIcOptions::wdsat_binary`].
+    Wdsat,
+    /// Quadratic Semaev systems (`m = 2`) solved by ALMASTY-inspired FES
+    /// ([`crate::cryptanalysis::mq_fes`]; <https://gitlab.lip6.fr/almasty/mq>):
+    /// incremental Gray early-exit, Möbius all-roots, Monica past `n = 24`.
+    /// Refuses cubic chained systems.
+    MqFes,
 }
 
 /// Packed identity of a point for hashing and sorting, in one `u64`:
@@ -4600,6 +4610,11 @@ pub struct KoblitzIcOptions {
     /// Native-XOR/CNF, branching, domain, trace, and conflict controls
     /// for [`DecompositionStrategy::Sat`].
     pub sat_options: SatDecompositionOptions,
+    /// Path to a WDSat `wdsat_solver` binary for
+    /// [`DecompositionStrategy::Wdsat`].  Ignored by every other strategy.
+    pub wdsat_binary: Option<std::path::PathBuf>,
+    /// Soft wall-clock budget for one WDSat child process.
+    pub wdsat_timeout_ms: u64,
     /// Identify `P` and `-P` as one signed Frobenius relation unknown.
     /// Disable only for a matched Frobenius-only control.
     pub collapse_negation: bool,
@@ -4658,6 +4673,8 @@ impl Default for KoblitzIcOptions {
             max_models: 64,
             sat_macaulay_degree: Some(2),
             sat_options: SatDecompositionOptions::default(),
+            wdsat_binary: None,
+            wdsat_timeout_ms: 5_000,
             collapse_negation: true,
             stop_on_verified_rank: true,
             relation_batch_size: 1,
@@ -5232,6 +5249,36 @@ fn koblitz_index_calculus_dlp_observed(
                         opts.max_models,
                         opts.sat_macaulay_degree,
                         opts.sat_options,
+                    );
+                    RelationAttemptOutcome::Sat(idxs, stats)
+                }
+                DecompositionStrategy::Wdsat => {
+                    let binary = match &opts.wdsat_binary {
+                        Some(path) => path.clone(),
+                        None => {
+                            return RelationAttemptOutcome::Sat(
+                                None,
+                                SatDecompositionStats {
+                                    exhausted: true,
+                                    ..SatDecompositionStats::default()
+                                },
+                            )
+                        }
+                    };
+                    let wopts = crate::cryptanalysis::wdsat_oracle::WdsatSolveOptions {
+                        binary,
+                        work_dir: None,
+                        timeout: std::time::Duration::from_millis(opts.wdsat_timeout_ms),
+                        keep_anf: None,
+                    };
+                    let (idxs, stats) = crate::cryptanalysis::wdsat_oracle::wdsat_decompose(
+                        kc, fb, &index_of, &field, target, opts.m, &wopts,
+                    );
+                    RelationAttemptOutcome::Sat(idxs, stats)
+                }
+                DecompositionStrategy::MqFes => {
+                    let (idxs, stats) = crate::cryptanalysis::mq_fes::mq_fes_decompose(
+                        kc, fb, &index_of, &field, target, opts.m,
                     );
                     RelationAttemptOutcome::Sat(idxs, stats)
                 }
@@ -6742,6 +6789,25 @@ fn decompose_once(
                 opts.max_models,
                 opts.sat_macaulay_degree,
                 opts.sat_options,
+            )
+            .0
+        }
+        DecompositionStrategy::Wdsat => {
+            let binary = opts.wdsat_binary.as_ref()?;
+            let wopts = crate::cryptanalysis::wdsat_oracle::WdsatSolveOptions {
+                binary: binary.clone(),
+                work_dir: None,
+                timeout: std::time::Duration::from_millis(opts.wdsat_timeout_ms),
+                keep_anf: None,
+            };
+            crate::cryptanalysis::wdsat_oracle::wdsat_decompose(
+                kc, fb, index_of, field, target, opts.m, &wopts,
+            )
+            .0
+        }
+        DecompositionStrategy::MqFes => {
+            crate::cryptanalysis::mq_fes::mq_fes_decompose(
+                kc, fb, index_of, field, target, opts.m,
             )
             .0
         }

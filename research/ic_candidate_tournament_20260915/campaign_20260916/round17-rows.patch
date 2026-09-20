@@ -1,0 +1,18 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -1167,8 +1167,14 @@
+             let rest = (orbits - rows) as f64 / orbits as f64;
+             1.0 - rest * rest
+         };
++        // Round 0015 measured a stored entry at about 680 instructions and a
++        // scanned rest at about 380, so a built entry is weighted at their
++        // ratio rather than at one. The rule is otherwise unchanged and still
++        // decided before any probe is drawn; on the round-0016 panel it moves
++        // one cell, n23a1, from three rows to two, and leaves every other cell.
++        const BUILD_OVER_SCAN: f64 = 680.0 / 380.0;
+         let expected_work = |rows: usize| {
+-            (rows * size) as f64 + (orbits as f64 + TABLE_PROBES) / (lambda_pairs * coverage(rows)).max(1e-12)
++            BUILD_OVER_SCAN * (rows * size) as f64 + (orbits as f64 + TABLE_PROBES) / (lambda_pairs * coverage(rows)).max(1e-12)
+         };
+         let table_rows = (1..=orbits)
+             .min_by(|&a, &b| expected_work(a).total_cmp(&expected_work(b)))

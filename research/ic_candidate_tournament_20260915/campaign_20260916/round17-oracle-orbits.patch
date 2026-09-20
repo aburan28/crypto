@@ -1,0 +1,36 @@
+diff --git a/research/ic_candidate_tournament_20260915/oracle.py b/research/ic_candidate_tournament_20260915/oracle.py
+index a7e2076..4f2352b 100644
+--- a/research/ic_candidate_tournament_20260915/oracle.py
++++ b/research/ic_candidate_tournament_20260915/oracle.py
+@@ -148,7 +148,30 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
+                 'solutions':[s['recovered'] for s in sorted(solutions,key=lambda s:s['index'])]}
+     require(report.get('rejected_relations') == 0, 'rejected relation in run')
+     require(report.get('summands') == summands, 'changed summand count')
+-    base = [c.decode(p) for p in report['factor_base']]
++    if 'factor_base_orbits' in report:
++        # Round-0016 format: the worker reports one representative point per
++        # signed Frobenius orbit and this checker regenerates the flat base in
++        # the worker's own order -- for each representative R, in the order
++        # reported: +R, -R, +Frob(R), -Frob(R), ..., +Frob^(n-1)(R), -Frob^(n-1)(R).
++        # Relation and descent indices address that flat list, exactly as they
++        # addressed the fully listed base, and the base hash below is over the
++        # same points, so a report in either format verifies to the same
++        # certificate. The expansion is this file's own frob/neg, not the
++        # worker's; equivalence to the fully listed form was checked on every
++        # cell of round 0016 before the format was admitted.
++        require('factor_base' not in report, 'both factor-base formats in one report')
++        reps = [c.decode(p) for p in report['factor_base_orbits']]
++        require(reps and all(p is not None for p in reps), 'invalid orbit representatives')
++        base = []
++        for rep in reps:
++            q = rep
++            for _ in range(c.n):
++                base.append(q)
++                base.append(c.neg(q))
++                q = c.frob(q)
++            require(q == rep, 'orbit representative does not close under Frobenius')
++    else:
++        base = [c.decode(p) for p in report['factor_base']]
+     require(base and all(p is not None for p in base) and len(set(base)) == len(base), 'invalid factor base')
+     logs = report.get('column_logs', [])
+     require(len(logs) == report.get('columns') and len(logs) > 1, 'missing/nontrivial log matrix')

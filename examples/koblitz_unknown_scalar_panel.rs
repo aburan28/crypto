@@ -540,6 +540,8 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         allow_direct_relation: false,
         collapse_projected_orbits: true,
         crossbred: None,
+        wdsat_binary: None,
+        wdsat_timeout_ms: 5_000,
         linear_algebra: LinearAlgebra::Dense,
     };
     let solve_started = Instant::now();

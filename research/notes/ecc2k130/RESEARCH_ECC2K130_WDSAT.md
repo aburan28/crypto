@@ -201,6 +201,22 @@ being models with `p_i = x_R` that the ANF no longer forbids. Those are
 counted as bad witnesses rather than quietly dropped. The full witness set
 restores 7 of 7.
 
+### 4.5 Independently corroborated on the parity convention
+
+While this round was being built, `main` landed
+`src/cryptanalysis/wdsat_oracle.rs`, a Rust WDSat oracle for the **Semaev /
+Weil-restriction** system. It is a different encoding family from the two
+here and the two lines are complementary, not duplicated: that module puts
+the Semaev system in front of WDSat inside the Rust pipeline, this one puts
+the Riemann-Roch incidence and norm encodings in front of it from
+`ecc2k130/codegen`, where those encodings live.
+
+It is worth reading for one reason beyond that. Its emitter arrived at the
+same parity convention independently -- "WDSat ANF rows have odd parity.
+Emit `T` exactly when the ..." -- which is a second, separately derived
+confirmation of §4.4's first bug, and the sort of corroboration a format
+trap like that deserves.
+
 ## 6. Classification
 
 By `AGENTS.md` §3:

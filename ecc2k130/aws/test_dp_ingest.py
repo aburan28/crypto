@@ -1177,6 +1177,125 @@ class WalkRate(unittest.TestCase):
         self.assertEqual(public["work"]["walking_slots"], 1)
 
 
+class StatusPublisherTests(unittest.TestCase):
+    """Status must keep moving while an ingest pass is stuck."""
+
+    def test_publish_once_writes_without_waiting_for_a_pass(self):
+        puts = []
+
+        class BucketS3:
+            def get_object(self, **kw):
+                raise KeyError("none yet")
+
+            def put_object(self, **kw):
+                puts.append(kw)
+
+            def get_paginator(self, name):
+                class Pages:
+                    def paginate(self, **kw):
+                        return iter([])
+                return Pages()
+
+            def list_objects_v2(self, **kw):
+                return {}
+
+        snapshot = {
+            "curve_id": 131, "dp_mask_bits": 32, "campaign_created_at": None,
+            "dps": 7, "dps_last_hour": 0, "dps_last_day": 0,
+            "first_dp_at": None, "last_dp_at": None, "collisions": 0,
+            "latest_collision_at": None, "hourly": [],
+        }
+
+        class Conn:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def cursor(self):
+                raise AssertionError("publish_once should use the cached snapshot")
+
+        publisher = dp_ingest.StatusPublisher(
+            connect=lambda: Conn(),
+            s3=BucketS3(),
+            bucket="bucket",
+            statusBucket="status",
+            status_every=30.0,
+            snapshot_every=0.0,
+        )
+        publisher._snapshot = snapshot
+        publisher._snap_at = time.time()
+        publisher.update_ingest({"outstanding": 3, "unrecognised": 0, "newest": time.time()})
+        with mock.patch.object(dp_ingest, "campaignSnapshot", return_value=snapshot):
+            publisher.publish_once()
+        self.assertEqual(len(puts), 1)
+        body = json.loads(puts[0]["Body"].decode())
+        self.assertEqual(body["dps"], 7)
+        self.assertEqual(body["ingest"]["outstanding_objects"], 3)
+
+    def test_kick_publishes_without_waiting_out_the_interval(self):
+        puts = []
+
+        class BucketS3:
+            def get_object(self, **kw):
+                raise KeyError("none yet")
+
+            def put_object(self, **kw):
+                puts.append(time.time())
+
+            def list_objects_v2(self, **kw):
+                return {}
+
+        snapshot = {
+            "curve_id": 131, "dp_mask_bits": 32, "campaign_created_at": None,
+            "dps": 1, "dps_last_hour": 0, "dps_last_day": 0,
+            "first_dp_at": None, "last_dp_at": None, "collisions": 0,
+            "latest_collision_at": None, "hourly": [],
+        }
+
+        class Conn:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        # Long interval: without kick(), a second publish would not arrive in time.
+        publisher = dp_ingest.StatusPublisher(
+            connect=lambda: Conn(),
+            s3=BucketS3(),
+            bucket="bucket",
+            statusBucket="status",
+            status_every=30.0,
+            snapshot_every=0.0,
+        )
+        with mock.patch.object(dp_ingest, "campaignSnapshot", return_value=snapshot):
+            publisher.start()
+            deadline = time.time() + 2.0
+            while not puts and time.time() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(puts, "first publish on start never arrived")
+            before = len(puts)
+            publisher.kick()
+            deadline = time.time() + 2.0
+            while len(puts) <= before and time.time() < deadline:
+                time.sleep(0.01)
+            publisher.stop(timeout=2.0)
+        self.assertGreater(len(puts), before, "kick must publish without waiting out status_every")
+
+    def test_main_wires_the_publisher_thread(self):
+        path = os.path.join(os.path.dirname(__file__), "dp_ingest.py")
+        with open(path, encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertIn("class StatusPublisher", source)
+        self.assertIn("publisher.start()", source)
+        self.assertIn("publisher.update_ingest(ingest)", source)
+        # The old pass-then-publish gate must not come back: it is what froze
+        # the feed whenever onePass ran long.
+        self.assertNotIn("time.time() - published >= args.status_every", source)
+
+
 class Defaults(unittest.TestCase):
     def test_status_every_default_is_three_minutes(self):
         import argparse
@@ -1223,6 +1342,108 @@ class DatabaseUrl(unittest.TestCase):
                 url = dp_ingest.databaseUrl()
         self.assertIn("sslmode=require", url)
         self.assertIn("rho-dp.example.com", url)
+
+
+class LambdaHandler(unittest.TestCase):
+    """The scheduled-invocation wrapper. It must add no rules of its own."""
+
+    def test_every_flag_it_builds_is_one_dp_ingest_accepts(self):
+        # The point of this test is that it goes through the REAL parser. A
+        # flag renamed in dp_ingest.py has to fail here, in a second, rather
+        # than on the first scheduled invocation after a deploy.
+        import ingest_lambda
+
+        for env in (
+            {},
+            {"RHO_INGEST_INDEX": "1"},
+            {"RHO_INGEST_PREFIX": "dp/slot-00140/"},
+            {"RHO_INGEST_INDEX": "1", "RHO_INGEST_PREFIX": "dp/slot-00002/"},
+        ):
+            argv = ingest_lambda.build_argv(env)
+            with mock.patch.dict(os.environ, {"RHO_BUCKET": "b"}, clear=False):
+                parser = self._parser()
+                try:
+                    args = parser.parse_args(argv)
+                except SystemExit:  # argparse exits on an unknown flag
+                    self.fail("dp_ingest rejects argv %r built from env %r" % (argv, env))
+            self.assertTrue(args.once, "a scheduled pass must be --once")
+
+    def _parser(self):
+        # dp_ingest builds its parser inside main(), so borrow it by running
+        # main() up to parse_args with a sentinel that stops it there.
+        import argparse
+
+        captured = {}
+        real = argparse.ArgumentParser.parse_args
+
+        def capture(self, argv=None, namespace=None):
+            captured["parser"] = self
+            raise _StopParsing()
+
+        argparse.ArgumentParser.parse_args = capture
+        try:
+            dp_ingest.main(["--once"])
+        except _StopParsing:
+            pass
+        except SystemExit:
+            pass
+        finally:
+            argparse.ArgumentParser.parse_args = real
+        self.assertIn("parser", captured, "could not borrow dp_ingest's parser")
+        return captured["parser"]
+
+    def test_index_is_skipped_unless_asked_for(self):
+        import ingest_lambda
+
+        # A daemon creates the found_at index once at startup. A function that
+        # starts every two minutes must not try, except on the first run
+        # against a new store.
+        self.assertIn("--no-index", ingest_lambda.build_argv({}))
+        self.assertNotIn("--no-index", ingest_lambda.build_argv({"RHO_INGEST_INDEX": "1"}))
+        # Only real affirmatives count, so a stray "0" or "false" in the
+        # function's environment does not quietly re-enable it.
+        for falsey in ("0", "false", "no", "", "off"):
+            self.assertIn("--no-index", ingest_lambda.build_argv({"RHO_INGEST_INDEX": falsey}))
+
+    def test_it_restates_no_configuration_dp_ingest_already_reads(self):
+        import ingest_lambda
+
+        # If this wrapper started passing --bucket or --threads it would
+        # become a second place the ingest is configured, which is the drift
+        # controlplane/README.md records as having cost a corrupted run id.
+        argv = ingest_lambda.build_argv({"RHO_BUCKET": "b", "RHO_INGEST_THREADS": "12"})
+        for flag in ("--bucket", "--status-bucket", "--threads",
+                     "--pass-objects", "--metric-namespace", "--interval"):
+            self.assertNotIn(flag, argv, "%s belongs to dp_ingest's env defaults" % flag)
+
+    def test_a_successful_pass_returns_rc_zero(self):
+        import ingest_lambda
+
+        with mock.patch.object(dp_ingest, "main", return_value=0) as main:
+            result = ingest_lambda.handler({}, None)
+        self.assertEqual(result["rc"], 0)
+        self.assertEqual(main.call_args[0][0], ingest_lambda.build_argv())
+
+    def test_a_failed_pass_raises_so_the_errors_metric_sees_it(self):
+        import ingest_lambda
+
+        # Returning quietly on failure is how a scheduled function becomes as
+        # silent as the dead instance it replaces.
+        with mock.patch.object(dp_ingest, "main", return_value=1):
+            with self.assertRaises(RuntimeError) as caught:
+                ingest_lambda.handler({}, None)
+        self.assertIn("rc=1", str(caught.exception))
+
+    def test_an_exception_inside_the_pass_is_not_swallowed(self):
+        import ingest_lambda
+
+        with mock.patch.object(dp_ingest, "main", side_effect=OSError("RDS unreachable")):
+            with self.assertRaises(OSError):
+                ingest_lambda.handler({}, None)
+
+
+class _StopParsing(Exception):
+    pass
 
 
 if __name__ == "__main__":

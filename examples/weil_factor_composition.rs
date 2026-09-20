@@ -206,6 +206,8 @@ fn main() {
             allow_direct_relation: false,
             collapse_projected_orbits: true,
             crossbred: None,
+        wdsat_binary: None,
+        wdsat_timeout_ms: 5_000,
             relation_batch_size: 1,
             ..Default::default()
         };

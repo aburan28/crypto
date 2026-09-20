@@ -173,6 +173,8 @@ pub mod ml_rho_walks;
 pub mod mlwe;
 pub mod modular_polynomial;
 pub mod mov_attack;
+pub mod mq_fes;
+pub mod mq_monica;
 pub mod multi_key_hnp;
 pub mod nonanom_formal_log;
 pub mod orbit_homology;
@@ -215,6 +217,7 @@ pub mod tls12_kdf;
 pub mod tls13_kdf;
 pub mod visual_demos;
 pub mod visualize;
+pub mod wdsat_oracle;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,

@@ -323,7 +323,10 @@
       <div class="fact">
         <dt>The unit</dt>
         <dd>S = ops / &radic;n</dd>
-        <p>Group operations per square root of the group order, so rho is flat at every size.</p>
+        <p>Group operations per square root of the group order, so rho is flat at every size.
+          Counted end to end across every phase &mdash; setup, relation finding, the
+          decomposition oracle and linear algebra &mdash; because end-to-end speed is the
+          measure of speed: a phase-only crossover is a diagnostic, not a win.</p>
       </div>
       <div class="fact">
         <dt>Boundary 1 · the floor</dt>
@@ -1163,6 +1166,40 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         and <a href="https://github.com/aburan28/crypto/blob/main/research/index_calculus_baseline_20260914/ec_index_calculus_contract.json">contract</a>.
         Existing attack verdicts and exponents are unchanged.</p>
     </div>
+  </div>
+
+  <div class="panel" id="wdsat-ic-unification-20260920">
+    <div class="panel-head">
+      <h2>WDSat as an IC decomposition oracle</h2>
+      <p>Class <span class="chip">engineering</span>. The Semaev / Weil system used by
+        native CDCL is emitted in Trimoska ANF and solved by an external WDSat binary
+        through <code>DecompositionStrategy::Wdsat</code> /
+        <code>ic run --solver wdsat</code>. Same algebraic question as
+        <code>--solver sat</code>; ratio to the free-oracle floor is unchanged.
+        ECC2K-130 sits in the prime-degree family; full-size attack costs are not moved.
+        Note: <a href="https://github.com/aburan28/crypto/blob/main/RESEARCH_WDSAT_IC_UNIFICATION.md">RESEARCH_WDSAT_IC_UNIFICATION.md</a>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Planted two-summand agreement on <code>K_1/F_2^7</code> (prime degree),
+        identical Frobenius-invariant factor base, independent group lift.
+        WDSat pin <code>61c6ff3</code> via the frozen baseline builder.</caption>
+      <thead><tr><th scope="col">Variant</th><th scope="col">Planted lift</th>
+        <th scope="col">Agrees with native SAT</th><th scope="col">S / rho / floor</th>
+        <th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><td>Native <code>--solver sat</code></td><td>yes</td><td>—</td>
+          <td>Unmeasured (stage oracle)</td><td>Reference</td></tr>
+        <tr><td><code>--solver wdsat</code></td><td>yes</td><td>yes</td>
+          <td>Unmeasured (floor ratio flat)</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td><code>--solver mq-fes</code> (libfes FFS Gray + Möbius; <code>m=2</code>)</td><td>yes</td><td>yes</td>
+          <td>Unmeasured (floor ratio flat); FFS Gray <code>find_one</code> ~273× Möbius, ~33× prior O(n)/step Gray on <code>n=18</code></td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Monica hybrid (ALMASTY <code>monica.c</code>)</td><td>—</td><td>agrees with Gray/Möbius on toys</td>
+          <td>Range extension for <code>n&gt;24</code>; not faster than Möbius inside the cap (~0.22× on <code>n=14,m=32</code>)</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table></div>
   </div>
 
   <div class="panel" id="ec-regression-v2">
@@ -2855,6 +2892,82 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <p>What a leak would buy on standard curves (<code>results/curve_divisors.md</code>): the largest divisor of n&minus;1 below 2<sup>32</sup> is 18,051,648 on secp256k1, 4.26&middot;10<sup>9</sup> on P-256, 2<sup>32</sup> on BLS12-381 and 4.29&middot;10<sup>9</sup> on BN254, so a protocol publishing 2<sup>32</sup> powers hands over a 2<sup>12</sup>&ndash;2<sup>16</sup> exponent-side reduction; Curve25519's &ell;&minus;1 has nothing above 132. The 2<sup>256</sup> extrapolation with d &asymp; 2<sup>128</sup> (&asymp; 21&middot;2<sup>64</sup> operations) rests on the 0.231 exponent and on a leak no protocol provides; it is marked as extrapolation.</p>
 </section>
 <!-- END auxiliary-inputs-20260918 -->
+<!-- BEGIN ic-tournament-round-0016 -->
+<section class="panel" id="ic-tournament-round-0016">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0016/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0016/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0016/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,374</td><td>1</td><td>0.813</td><td>2.136e+05</td><td>18/18</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>2,997</td><td>0.8882</td><td>0.7221</td><td>1.897e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,151</td><td>1.23</td><td>1</td><td>unmeasured</td><td>18/18</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,531</td><td>1</td><td>0.8348</td><td>2.235e+05</td><td>54/54</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>3,130</td><td>0.8865</td><td>0.74</td><td>1.981e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,230</td><td>1.198</td><td>1</td><td>unmeasured</td><td>54/54</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,869</td><td>1</td><td>0.8383</td><td>2.192e+05</td><td>288/288</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>3,433</td><td>0.8873</td><td>0.7438</td><td>1.945e+05</td><td>288/288</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,616</td><td>1.193</td><td>1</td><td>unmeasured</td><td>288/288</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.252</td><td>1</td><td>reference</td><td>0.9779</td><td>288/288</td></tr>
+<tr><td>scan_io</td><td>1.225</td><td>0.978</td><td>[0.960814677461623, 0.9947467695163384]</td><td>0.9564</td><td>288/288</td></tr>
+<tr><td>rho</td><td>1.281</td><td>1.023</td><td>[0.9721719623543028, 1.07094965995282]</td><td>1</td><td>288/288</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0016 -->
+<!-- BEGIN ic-tournament-round-0017 -->
+<section class="panel" id="ic-tournament-round-0017">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>promoted: orbits</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0017/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0017/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0017/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,383</td><td>1</td><td>0.8969</td><td>2.141e+05</td><td>18/18</td><td>reference</td></tr>
+<tr><td>orbits</td><td>2,815</td><td>0.8321</td><td>0.7464</td><td>1.782e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>orbits_rows</td><td>2,828</td><td>0.8359</td><td>0.7497</td><td>1.79e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>2,993</td><td>0.8847</td><td>0.7935</td><td>1.894e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3,771</td><td>1.115</td><td>1</td><td>unmeasured</td><td>18/18</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,462</td><td>1</td><td>0.9226</td><td>2.191e+05</td><td>54/54</td><td>reference</td></tr>
+<tr><td>orbits</td><td>2,884</td><td>0.833</td><td>0.7685</td><td>1.825e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>orbits_rows</td><td>3,002</td><td>0.8671</td><td>0.8</td><td>1.9e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>3,067</td><td>0.8859</td><td>0.8174</td><td>1.941e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3,752</td><td>1.084</td><td>1</td><td>unmeasured</td><td>54/54</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,821</td><td>1</td><td>0.8056</td><td>2.165e+05</td><td>288/288</td><td>reference</td></tr>
+<tr><td>orbits</td><td>3,178</td><td>0.8319</td><td>0.6702</td><td>1.801e+05</td><td>288/288</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,743</td><td>1.241</td><td>1</td><td>unmeasured</td><td>288/288</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.193</td><td>1</td><td>reference</td><td>0.9556</td><td>288/288</td></tr>
+<tr><td>orbits</td><td>1.124</td><td>0.9417</td><td>[0.9172232193663789, 0.9640014454071378]</td><td>0.8999</td><td>288/288</td></tr>
+<tr><td>rho</td><td>1.249</td><td>1.046</td><td>[1.0092476671270958, 1.0831044142392454]</td><td>1</td><td>288/288</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0017 -->
 <section class="panel" id="crossbred-20260920">
 <h2>Crossbred as a decomposition oracle: fastest oracle, still loses the pipeline</h2>
 <p>Joux&ndash;Vitse Crossbred wired into Koblitz index calculus as
