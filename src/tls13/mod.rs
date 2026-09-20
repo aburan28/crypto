@@ -30,7 +30,7 @@
 //! ## Example
 //!
 //! ```
-//! use crypto::tls13::connection::{drive_handshake, TlsClient, TlsServer};
+//! use crypto_lib::tls13::connection::{drive_handshake, TlsClient, TlsServer};
 //! let mut client = TlsClient::new();
 //! let mut server = TlsServer::new();
 //! drive_handshake(&mut client, &mut server).unwrap();

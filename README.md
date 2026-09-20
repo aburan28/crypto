@@ -330,6 +330,65 @@ The same machinery powers every other attack's test output — run any
 | `pqc::bike`                  | BIKE (QC-MDPC code-based)                | NIST round-3                       |
 | `pqc::csidh`                 | CSIDH (isogeny-based) — group action     | Castryck–Lange–Martindale–Panny–Renes 2018 |
 | `pqc::x_wing`                | X-Wing hybrid (X25519 + ML-KEM)          | draft-connolly-cfrg-xwing-kem      |
+| `pqc::fast::ml_kem`          | ML-KEM-512/768/1024, speed-oriented      | Differentially tested against `pqc::ml_kem` |
+| `pqc::fast::ml_dsa`          | ML-DSA-65, speed-oriented                | Differentially tested against `pqc::ml_dsa` |
+| `pqc::fast::keccak`          | Unrolled Keccak-f[1600] and its sponges  | 2.4x the reference SHA3-256        |
+| `pqc::fast::isogeny`         | SQIsign-scale F_p² and 2-power isogenies | p = 3·2³²⁴ − 1, 326 bits; a 2³²⁴-isogeny in 1.8 ms |
+
+Every scheme in the table is reachable from the command line:
+
+```bash
+# What is here, and what parameters each one runs at
+crypto pqc list
+
+# Run one scheme end to end (keygen, use, and a negative check), or all 25
+crypto pqc run --scheme ml-kem-768
+crypto pqc run --scheme all
+
+# The guided tour, with commentary
+crypto pqc
+
+# The speed-oriented implementations: self-tests, benchmarks, a real
+# 2^324-isogeny walk
+crypto pqc-fast selftest
+crypto pqc-fast bench
+crypto pqc-fast isogeny --op chain
+```
+
+`pqc run` is a check, not a demo: a KEM must agree on the shared secret *and*
+give a different one for a tampered ciphertext; a signature must verify its own
+output *and* reject a tampered one. Measured costs for the `fast` modules are in
+[`docs/pqc-speed.md`](docs/pqc-speed.md).
+
+### Cryptanalysis of ML-KEM and ML-DSA
+
+Lattice-attack estimates at real parameters, working sieves, and the
+implementation attacks that actually recover keys. Full write-up in
+[`docs/mlwe-cryptanalysis.md`](docs/mlwe-cryptanalysis.md).
+
+| Module                          | What it does                                                            |
+|---------------------------------|-------------------------------------------------------------------------|
+| `cryptanalysis::mlwe::cost`     | BKZ profiles (GSA, q-ary z-shape, simulator) and five SVP cost models   |
+| `cryptanalysis::mlwe::primal`   | Primal uSVP, two independent conditions; the ML-DSA MSIS forgery side   |
+| `cryptanalysis::mlwe::dual`     | Dual, MATZOV-style dual, Ducas–Pulles and Pouly–Shen regime diagnostics |
+| `cryptanalysis::mlwe::hybrid`   | Guessing hybrids — and why they do not pay at these parameters          |
+| `cryptanalysis::mlwe::sieve`    | Gauss, Nguyen–Vidick and bucketed sieves; progressive BKZ               |
+| `cryptanalysis::ml_kem_pco`     | **Full ML-KEM key recovery** from decapsulation leakage, in 8 queries   |
+| `cryptanalysis::ml_dsa_leakage` | **Full ML-DSA-65 `s1` recovery** from 4 leaky signatures, then a forgery |
+| `cryptanalysis::ml_dsa_fault`   | **Full `s1` recovery** from one faulted signature; three faults         |
+
+```bash
+crypto mlwe margins                  # every set against its NIST category floor
+crypto mlwe estimate --scheme ml-kem-768 --model gate-count --tours
+crypto mlwe kem-pco --param 512      # recover an ML-KEM key and decapsulate with it
+crypto mlwe dsa-leak --per-poly 64   # recover ML-DSA s1 and forge
+crypto mlwe dsa-fault --fault all    # three faults on the rejection loop
+```
+
+Two things the estimators are arranged to prevent, both of which produced wrong
+numbers before they were caught: quoting a dual cost without its
+contradictory-regime diagnostic, and pairing one attack's cost model with
+another's success condition. The doc explains both.
 
 ### Zero-knowledge / commitments
 

@@ -851,6 +851,87 @@ fn unpack_sk(sk: &[u8]) -> UnpackedSk {
 /// `rnd` is the "hedge" randomness: for deterministic signatures pass
 /// `[0u8; 32]`, for randomized/hedged signatures pass 32 fresh random bytes.
 pub fn ml_dsa_65_sign(sk: &MlDsaSecretKey, msg: &[u8], rnd: &[u8; SEED_BYTES]) -> Vec<u8> {
+    sign_impl(sk, msg, rnd, None)
+        .expect("signing without a forced nonce always terminates")
+        .0
+}
+
+// ── Research hooks for cryptanalysis ─────────────────────────────────────────
+//
+// The three `pub(crate)` items below are not part of the library's public
+// surface. They exist so `crate::cryptanalysis::ml_dsa_leakage` and
+// `crate::cryptanalysis::ml_dsa_fault` can attack *this* signer rather than a
+// re-implementation written to be attackable. Nothing outside the crate can
+// reach them, and the signing path they share with `ml_dsa_65_sign` is the
+// same code, not a copy.
+
+/// Signing internals that a side channel or fault would expose.
+///
+/// Coefficients are centred: `y` in `(-γ₁, γ₁]`, `c` in `{-1, 0, 1}`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct SignTrace {
+    /// The masking vector actually used, `ℓ` polynomials.
+    pub y: Vec<Vec<i32>>,
+    /// The signature's `z = y + c·s1`, `ℓ` polynomials.
+    pub z: Vec<Vec<i32>>,
+    /// The challenge polynomial, `τ` nonzero coefficients.
+    pub c: Vec<i32>,
+    /// The rejection counter at the accepted iteration.
+    pub kappa: u16,
+    /// How many loop iterations the signature took.
+    pub attempts: u32,
+}
+
+/// `ml_dsa_65_sign`, also returning what happened inside.
+pub(crate) fn ml_dsa_65_sign_traced(
+    sk: &MlDsaSecretKey,
+    msg: &[u8],
+    rnd: &[u8; SEED_BYTES],
+) -> (Vec<u8>, SignTrace) {
+    sign_impl(sk, msg, rnd, None).expect("signing without a forced nonce always terminates")
+}
+
+/// Sign with the masking vector supplied rather than expanded from `ρ''`.
+///
+/// This models a fault that freezes the nonce — the randomness register stuck,
+/// the counter not advancing, a replayed `ρ''`. Returns `None` when the forced
+/// nonce fails one of the rejection checks, which is what a real faulted device
+/// would do: produce nothing on that attempt. A single attempt only; retrying
+/// would re-expand `y` and defeat the point.
+pub(crate) fn ml_dsa_65_sign_with_forced_nonce(
+    sk: &MlDsaSecretKey,
+    msg: &[u8],
+    rnd: &[u8; SEED_BYTES],
+    y: &[Vec<i32>],
+) -> Option<(Vec<u8>, SignTrace)> {
+    sign_impl(sk, msg, rnd, Some(y))
+}
+
+/// The secret vectors `(s1, s2)` as centred coefficients, for scoring an
+/// attack's output against the truth.
+pub(crate) fn ml_dsa_65_secret_vectors(sk: &MlDsaSecretKey) -> (Vec<Vec<i32>>, Vec<Vec<i32>>) {
+    let unp = unpack_sk(&sk.0);
+    (
+        unp.s1.0.iter().map(|p| p.0.to_vec()).collect(),
+        unp.s2.0.iter().map(|p| p.0.to_vec()).collect(),
+    )
+}
+
+/// The number of polynomials in `s1` / `z`, and in `s2` / `t`.
+pub(crate) const ML_DSA_65_L: usize = L;
+pub(crate) const ML_DSA_65_K: usize = K;
+/// `q`, `γ₁`, `η`, `τ` for the attack modules.
+pub(crate) const ML_DSA_65_Q: i32 = Q;
+pub(crate) const ML_DSA_65_GAMMA1: i32 = GAMMA1;
+pub(crate) const ML_DSA_65_ETA: i32 = ETA;
+pub(crate) const ML_DSA_65_TAU: usize = TAU;
+
+fn sign_impl(
+    sk: &MlDsaSecretKey,
+    msg: &[u8],
+    rnd: &[u8; SEED_BYTES],
+    force_y: Option<&[Vec<i32>]>,
+) -> Option<(Vec<u8>, SignTrace)> {
     let unp = unpack_sk(&sk.0);
 
     // mu = SHAKE256(tr || msg, 64)
@@ -876,9 +957,28 @@ pub fn ml_dsa_65_sign(sk: &MlDsaSecretKey, msg: &[u8], rnd: &[u8; SEED_BYTES]) -
     polyveck_ntt(&mut t0_hat);
 
     let mut kappa: u16 = 0;
+    let mut attempts: u32 = 0;
     loop {
-        // Sample mask y with coefficients in (-γ₁, γ₁].
-        let y = expand_mask(&rho_prime_prime, kappa);
+        attempts += 1;
+        // Sample mask y with coefficients in (-γ₁, γ₁] — unless a caller has
+        // forced one, in which case that is the fault being modelled.
+        let y = match force_y {
+            Some(fy) => {
+                assert_eq!(fy.len(), L, "forced nonce must have ℓ polynomials");
+                let mut v = PolyVecL::zero();
+                for i in 0..L {
+                    assert_eq!(
+                        fy[i].len(),
+                        N,
+                        "forced nonce polynomials must have 256 coefficients"
+                    );
+                    v.0[i].0.copy_from_slice(&fy[i]);
+                }
+                v
+            }
+            None => expand_mask(&rho_prime_prime, kappa),
+        };
+        let used_kappa = kappa;
         kappa += L as u16;
 
         // w = A · NTT(y), then inverse NTT.
@@ -925,6 +1025,11 @@ pub fn ml_dsa_65_sign(sk: &MlDsaSecretKey, msg: &[u8], rnd: &[u8; SEED_BYTES]) -
             }
         }
         if !z_ok {
+            // A forced nonce gets one attempt: re-expanding y would defeat the
+            // fault being modelled, so a rejected forced nonce produces nothing.
+            if force_y.is_some() {
+                return None;
+            }
             continue;
         }
 
@@ -950,6 +1055,11 @@ pub fn ml_dsa_65_sign(sk: &MlDsaSecretKey, msg: &[u8], rnd: &[u8; SEED_BYTES]) -
             }
         }
         if !r0_ok {
+            // A forced nonce gets one attempt: re-expanding y would defeat the
+            // fault being modelled, so a rejected forced nonce produces nothing.
+            if force_y.is_some() {
+                return None;
+            }
             continue;
         }
 
@@ -969,6 +1079,11 @@ pub fn ml_dsa_65_sign(sk: &MlDsaSecretKey, msg: &[u8], rnd: &[u8; SEED_BYTES]) -
             }
         }
         if !ct0_ok {
+            // A forced nonce gets one attempt: re-expanding y would defeat the
+            // fault being modelled, so a rejected forced nonce produces nothing.
+            if force_y.is_some() {
+                return None;
+            }
             continue;
         }
 
@@ -985,6 +1100,11 @@ pub fn ml_dsa_65_sign(sk: &MlDsaSecretKey, msg: &[u8], rnd: &[u8; SEED_BYTES]) -
             }
         }
         if total_hints > OMEGA {
+            // A forced nonce gets one attempt: re-expanding y would defeat the
+            // fault being modelled, so a rejected forced nonce produces nothing.
+            if force_y.is_some() {
+                return None;
+            }
             continue;
         }
 
@@ -1007,7 +1127,14 @@ pub fn ml_dsa_65_sign(sk: &MlDsaSecretKey, msg: &[u8], rnd: &[u8; SEED_BYTES]) -
             hint_bytes[OMEGA + i] = k_ptr as u8;
         }
         sig.extend_from_slice(&hint_bytes);
-        return sig;
+        let trace = SignTrace {
+            y: y.0.iter().map(|p| p.0.to_vec()).collect(),
+            z: z.0.iter().map(|p| p.0.to_vec()).collect(),
+            c: c.0.to_vec(),
+            kappa: used_kappa,
+            attempts,
+        };
+        return Some((sig, trace));
     }
 }
 
@@ -1116,6 +1243,209 @@ pub fn ml_dsa_65_verify(pk: &MlDsaPublicKey, msg: &[u8], sig: &[u8]) -> bool {
     let c_tilde_prime = shake256(&ch_in, C_TILDE_BYTES);
 
     c_tilde_prime.as_slice() == c_tilde
+}
+
+/// Parse a signature into its challenge polynomial and `z` vector.
+///
+/// Both are public — `z` is stored in the signature and `c` is `SampleInBall`
+/// of the stored `c̃` — so an attacker reads them off without any leakage at
+/// all. The cryptanalysis modules take them from here rather than from a
+/// signing trace, so that what they consume is exactly what an observer has.
+pub(crate) fn ml_dsa_65_signature_parts(sig: &[u8]) -> Option<(Vec<i32>, Vec<Vec<i32>>)> {
+    if sig.len() != SIG_BYTES {
+        return None;
+    }
+    let c = sample_in_ball(&sig[0..C_TILDE_BYTES]);
+    let z = (0..L)
+        .map(|i| {
+            let off = C_TILDE_BYTES + i * POLYZ_PACKED;
+            unpack_z(&sig[off..off + POLYZ_PACKED]).0.to_vec()
+        })
+        .collect();
+    Some((c.0.to_vec(), z))
+}
+
+// ── Universal forgery from s1 alone ──────────────────────────────────────────
+
+/// Forge a signature on `msg` knowing only `s1` (and the public key).
+///
+/// `pub(crate)`: the payload of [`crate::cryptanalysis::ml_dsa_leakage`] and
+/// [`crate::cryptanalysis::ml_dsa_fault`], which recover `s1` and then call this
+/// to demonstrate that recovery is a break rather than a curiosity. It lives
+/// here because it needs the module's `ExpandA`, `HighBits`, `UseHint` and
+/// packing helpers, not because signing and forging belong together.
+///
+/// # Why `s1` is enough, without `s2` or `t0`
+///
+/// This is the part that surprises people, so it is worth spelling out. The
+/// verifier recomputes
+///
+/// ```text
+/// A·z - c·t1·2^d
+/// ```
+///
+/// and a forger who knows `s1` can predict that value exactly, because
+///
+/// ```text
+/// A·s1 = t - s2 = (t1·2^d + t0) - s2   ⟹   A·s1 - t1·2^d = t0 - s2
+/// ```
+///
+/// and the left-hand side is computable from `s1` and the public key. So
+/// `g := t0 - s2` — the one combination of the two remaining secrets that the
+/// verification equation actually involves — is *free*. Neither `t0` nor `s2` is
+/// needed on its own.
+///
+/// The forgery then follows the signing loop: pick a mask `y`, take
+/// `w1 = HighBits(A·y)`, derive `c`, set `z = y + c·s1`, and choose the hint
+/// bits so the verifier's `UseHint` lands back on `w1`. The hint is chosen by
+/// trying both values rather than by `MakeHint`, which makes it correct by
+/// construction against whatever the verifier does.
+///
+/// Returns `None` if `max_attempts` rejection-loop iterations all fail, which
+/// with a sound `s1` does not happen — the loop's acceptance probability is the
+/// same as honest signing's.
+pub(crate) fn ml_dsa_65_forge_from_s1(
+    pk: &MlDsaPublicKey,
+    s1: &[Vec<i32>],
+    msg: &[u8],
+    seed: &[u8],
+    max_attempts: u32,
+) -> Option<Vec<u8>> {
+    if pk.0.len() != PUBKEY_BYTES || s1.len() != L {
+        return None;
+    }
+    let mut rho = [0u8; SEED_BYTES];
+    rho.copy_from_slice(&pk.0[0..SEED_BYTES]);
+    let mut t1 = PolyVecK::zero();
+    for i in 0..K {
+        let off = SEED_BYTES + i * POLYT1_PACKED;
+        t1.0[i] = unpack_t1(&pk.0[off..off + POLYT1_PACKED]);
+    }
+
+    let mut s1_vec = PolyVecL::zero();
+    for i in 0..L {
+        if s1[i].len() != N {
+            return None;
+        }
+        for j in 0..N {
+            s1_vec.0[i].0[j] = s1[i][j].rem_euclid(Q);
+        }
+    }
+    let a_hat = expand_a(&rho);
+    let mut s1_hat = s1_vec.clone();
+    polyvecl_ntt(&mut s1_hat);
+
+    // g = A·s1 - t1·2^d = t0 - s2, the only combination verification needs.
+    let mut as1 = matrix_vector_mul(&a_hat, &s1_hat);
+    polyveck_inv_ntt(&mut as1);
+    let mut t1_shift = PolyVecK::zero();
+    for i in 0..K {
+        for j in 0..N {
+            t1_shift.0[i].0[j] = (t1.0[i].0[j] << D).rem_euclid(Q);
+        }
+    }
+    let g = polyveck_sub(&as1, &t1_shift);
+    let mut g_hat = g.clone();
+    polyveck_ntt(&mut g_hat);
+
+    let tr = shake256(&pk.0, TR_BYTES);
+    let mut mu_in = Vec::with_capacity(TR_BYTES + msg.len());
+    mu_in.extend_from_slice(&tr);
+    mu_in.extend_from_slice(msg);
+    let mu = shake256(&mu_in, 64);
+
+    let mut kappa: u16 = 0;
+    for _ in 0..max_attempts {
+        let y = expand_mask(seed, kappa);
+        kappa += L as u16;
+
+        let mut y_hat = y.clone();
+        polyvecl_ntt(&mut y_hat);
+        let mut w = matrix_vector_mul(&a_hat, &y_hat);
+        polyveck_inv_ntt(&mut w);
+
+        let mut w1 = PolyVecK::zero();
+        for i in 0..K {
+            for j in 0..N {
+                w1.0[i].0[j] = high_bits(w.0[i].0[j]);
+            }
+        }
+
+        let mut ch_in = Vec::with_capacity(64 + K * POLYW1_PACKED);
+        ch_in.extend_from_slice(&mu);
+        for i in 0..K {
+            ch_in.extend_from_slice(&pack_w1(&w1.0[i]));
+        }
+        let c_tilde = shake256(&ch_in, C_TILDE_BYTES);
+        let c = sample_in_ball(&c_tilde);
+        let mut c_hat = c.clone();
+        ntt(&mut c_hat);
+
+        let mut cs1 = PolyVecL::zero();
+        for i in 0..L {
+            cs1.0[i] = poly_pointwise(&c_hat, &s1_hat.0[i]);
+        }
+        polyvecl_inv_ntt(&mut cs1);
+        let z = polyvecl_add(&y, &cs1);
+        if (0..L).any(|i| poly_inf_norm(&z.0[i]) >= GAMMA1 - BETA) {
+            continue;
+        }
+
+        // What the verifier will compute: A·z - c·t1·2^d = w + c·g.
+        let mut cg = PolyVecK::zero();
+        for i in 0..K {
+            cg.0[i] = poly_pointwise(&c_hat, &g_hat.0[i]);
+        }
+        polyveck_inv_ntt(&mut cg);
+        let az = polyveck_add(&w, &cg);
+
+        // Pick each hint bit so UseHint reproduces w1. Trying both values is
+        // correct against whatever the verifier does, which MakeHint is only
+        // correct for when the low-bits bound held.
+        let mut hints = vec![[0u8; N]; K];
+        let mut total = 0usize;
+        let mut ok = true;
+        for i in 0..K {
+            for j in 0..N {
+                let target = w1.0[i].0[j];
+                if use_hint(0, az.0[i].0[j]) == target {
+                    hints[i][j] = 0;
+                } else if use_hint(1, az.0[i].0[j]) == target {
+                    hints[i][j] = 1;
+                    total += 1;
+                } else {
+                    ok = false;
+                    break;
+                }
+            }
+            if !ok {
+                break;
+            }
+        }
+        if !ok || total > OMEGA {
+            continue;
+        }
+
+        let mut sig = Vec::with_capacity(SIG_BYTES);
+        sig.extend_from_slice(&c_tilde);
+        for i in 0..L {
+            sig.extend_from_slice(&pack_z(&z.0[i]));
+        }
+        let mut hint_bytes = vec![0u8; OMEGA + K];
+        let mut k_ptr = 0usize;
+        for i in 0..K {
+            for j in 0..N {
+                if hints[i][j] == 1 {
+                    hint_bytes[k_ptr] = j as u8;
+                    k_ptr += 1;
+                }
+            }
+            hint_bytes[OMEGA + i] = k_ptr as u8;
+        }
+        sig.extend_from_slice(&hint_bytes);
+        return Some(sig);
+    }
+    None
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
