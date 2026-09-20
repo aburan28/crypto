@@ -3,7 +3,11 @@
 on every round-0017 confirmation fixture, then measure Ir and native wall per
 cell for each arm against the incumbent and against rho.
 
-    python3 campaign_20260916/round18_measure.py [reps]
+    python3 campaign_20260916/round18_measure.py ARM_DIR [reps]
+
+ARM_DIR holds the three arm workers built from the trees
+`round18_candidates.py` writes -- either as `ARM_DIR/<arm>` or in the cargo
+layout `ARM_DIR/<arm>/target/.../examples/ic_tournament_worker`.
 
 Arms, all built from `runs/round-0017/source_candidates/orbits/source`:
   block   -- round18-block.patch: the scan block's clamp ceiling, 64 -> 16.
@@ -36,9 +40,7 @@ sys.path.insert(0, str(ROOT))
 import tournament as T  # noqa: E402
 from oracle import verify  # noqa: E402
 
-SCRATCH = Path('/tmp/claude-0/-home-user/d851d573-3be8-5245-8e4e-603b7615435c/scratchpad')
-ARMS = {a: SCRATCH / f'arm18-{a}/target/x86_64-unknown-linux-musl/release/examples/ic_tournament_worker'
-        for a in ('block', 'column', 'both')}
+ARM_NAMES = ('block', 'column', 'both')
 INCUMBENT = ROOT / 'runs/round-0017/source_candidates/orbits/worker'
 RHO = ROOT / 'runs/round-0017/worker'
 FIXTURES = ROOT / 'runs/round-0017/fixtures.json'
@@ -66,7 +68,24 @@ def run(binary, job, env):
 
 
 def main():
-    reps = int(sys.argv[1]) if len(sys.argv) > 1 else 5
+    if len(sys.argv) < 2:
+        raise SystemExit('usage: round18_measure.py ARM_DIR [reps]')
+    arm_dir = Path(sys.argv[1]).resolve()
+    # One directory holding the three arm workers, however they were built:
+    # either <dir>/<arm> or the cargo layout <dir>/arm18-<arm>/target/.../examples/.
+    arms = {}
+    for a in ARM_NAMES:
+        for cand in (arm_dir / a,
+                     arm_dir / f'arm18-{a}',
+                     arm_dir / a / 'target/x86_64-unknown-linux-musl/release/examples/ic_tournament_worker',
+                     arm_dir / f'arm18-{a}/target/x86_64-unknown-linux-musl/release/examples/ic_tournament_worker'):
+            if cand.is_file():
+                arms[a] = cand
+                break
+        else:
+            raise SystemExit(f'no worker for arm {a!r} under {arm_dir}')
+    ARMS = arms
+    reps = int(sys.argv[2]) if len(sys.argv) > 2 else 5
     fx = json.loads(FIXTURES.read_text())['confirmation']
     cfg = json.loads(CANDIDATES.read_text())[0]['config']
     env = T.child_env()

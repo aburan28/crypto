@@ -74,11 +74,18 @@ fi
 echo "  baseline source carries the orbit-representative certificate"
 
 # The workers the tournament built must be the binaries development measured.
-BIN=/tmp/claude-0/-home-user/d851d573-3be8-5245-8e4e-603b7615435c/scratchpad/bin18
+# ROUND18_ARM_BINS, when set, holds the arm workers the development
+# measurement ran, so the tournament's own builds can be checked against them.
+# Unset is not a failure -- the check is skipped and says so -- because the
+# binaries are build outputs and are not committed.
+BIN="${ROUND18_ARM_BINS:-}"
+if [ -z "$BIN" ]; then
+  echo "  (ROUND18_ARM_BINS unset: not comparing built workers to the measured binaries)"
+fi
 for a in block column both; do
   w="runs/round-0018b/source_candidates/$a/worker"
   m="$BIN/arm18-$a"
-  if [ -f "$w" ] && [ -f "$m" ]; then
+  if [ -n "$BIN" ] && [ -f "$w" ] && [ -f "$m" ]; then
     if [ "$(sha256sum < "$w" | cut -d' ' -f1)" = "$(sha256sum < "$m" | cut -d' ' -f1)" ]; then
       echo "  $a worker: identical to the binary development measured"
     else
