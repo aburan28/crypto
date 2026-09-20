@@ -746,6 +746,13 @@ unsuccessful. Clap usage errors use its standard nonzero exit status.
     cargo test --release --test ic_framework --test ic_progress
     cargo test --release --lib koblitz_
 
+The end-to-end pipeline is gated in CI as well: `ic-e2e-benchmark.yml` runs
+the whole method plus the in-process ρ baseline on three frozen ledger rungs
+and fails closed on an unverified logarithm, a drifted seeded counter, or a
+regressed same-host end-to-end wall ratio. What it checks, what passing
+does not claim, and how to re-freeze after a deliberate change are in
+[`ci/README.md`](ci/README.md).
+
 Tests cover named profiles, custom prime curves, generated-fixture
 round trips, reproducibility, malformed and ambiguous parameters,
 resource reporting, a degree-11 synthetic run under both accountings,
