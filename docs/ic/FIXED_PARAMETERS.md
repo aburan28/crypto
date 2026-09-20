@@ -70,7 +70,7 @@ unsatisfiability. SAT requires a Hamming-weight factor-base recipe. It uses Linu
 The Semaev / Trimoska WDSat oracle for Frobenius-invariant subspace
 bases lives on the Rust ladder (`ic run --solver wdsat --wdsat-binary
 PATH`), not in this ONB / Hamming-weight fixed workflow. See
-[`RESEARCH_WDSAT_IC_UNIFICATION.md`](../../RESEARCH_WDSAT_IC_UNIFICATION.md).
+[`RESEARCH_WDSAT_IC_UNIFICATION.md`](../../research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md).
 ECC2K-130's field is prime-degree (`n = 131`); the unified Semaev path
 applies to that family on toys. Full-size `n = 131` remains bounded by
 the free-oracle floor in

@@ -4,9 +4,9 @@
 `DecompositionStrategy::Wdsat` in `koblitz_index_calculus.rs`,
 `ic run --solver wdsat --wdsat-binary PATH`
 **Related:** [`RESEARCH_TRIMOSKA_BENCHMARKS.md`](RESEARCH_TRIMOSKA_BENCHMARKS.md),
-[`RESEARCH_SAT_SEMAEV.md`](RESEARCH_SAT_SEMAEV.md),
+[`RESEARCH_SAT_SEMAEV.md`](../index-calculus/RESEARCH_SAT_SEMAEV.md),
 [`RESEARCH_ECC2K130_DECOMPOSITION.md`](RESEARCH_ECC2K130_DECOMPOSITION.md),
-[`research/index_calculus_baseline_20260914/`](research/index_calculus_baseline_20260914/)
+[`research/index_calculus_baseline_20260914/`](../../index_calculus_baseline_20260914/)
 
 ## Boundary (stated before measuring)
 
