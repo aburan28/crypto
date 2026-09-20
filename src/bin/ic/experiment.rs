@@ -110,7 +110,7 @@ pub enum Solver {
     PairTable,
     /// Trimoska WDSat on the same Semaev ANF as `sat`.
     Wdsat,
-    /// Gray-code FES on quadratic Semaev ANF (LIP6 MQ / libfes inspiration).
+    /// ALMASTY Möbius FES on quadratic Semaev ANF (`m = 2` only).
     MqFes,
 }
 impl Solver {

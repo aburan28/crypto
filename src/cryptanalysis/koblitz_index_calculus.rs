@@ -2157,10 +2157,10 @@ pub enum DecompositionStrategy {
     /// ([`crate::cryptanalysis::wdsat_oracle`]).  Requires
     /// [`KoblitzIcOptions::wdsat_binary`].
     Wdsat,
-    /// Quadratic Semaev systems (`m = 2`) solved by Gray-code exhaustive
-    /// search over the Boolean unknowns
-    /// ([`crate::cryptanalysis::mq_fes`]), inspired by LIP6/ALMASTY MQ /
-    /// libfes-lite.  Refuses cubic chained systems.
+    /// Quadratic Semaev systems (`m = 2`) solved by the ALMASTY Möbius
+    /// transform over the Boolean unknowns
+    /// ([`crate::cryptanalysis::mq_fes`]; <https://gitlab.lip6.fr/almasty/mq>).
+    /// Refuses cubic chained systems.
     MqFes,
 }
 
