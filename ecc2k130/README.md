@@ -7,6 +7,18 @@ including a browser copy of the toy:
 
 # ECC2K-130 and ECC2K-95
 
+**20.078 B complete scalar walk iterations/s median on one RTX PRO 6000
+Blackwell** with `make gpu-rtx-pro6000-20b`
+([ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md)): the table walk in one
+512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt from
+the step tag instead of stored, products inlined and the forward pass
+software-pipelined. 300/300 device reports re-walked, the same distinguished
+points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
+the tree's previous best configuration rebuilt in the same session on the same
+card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
+22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
+serial inversion (§7 there). The campaign default below is unchanged.
+
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
 [native carryless multiplication](NATIVE-CARRYLESS.md) and the
