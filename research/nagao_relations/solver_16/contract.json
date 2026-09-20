@@ -20,14 +20,43 @@
     "rho_reference": "S = 0.077 at 2^60.8 group operations (RESEARCH_ECC2K130_RR_SOLVER_PANEL.md section 1). No S, Lambda or rho ratio is computed from this panel and none would be meaningful at d << 45."
   },
   "panel": {
-    "d_values_cms_s4": [4, 5, 6, 7, 8, 9, 10],
-    "d_values_cms_rr": [5, 6, 7, 8],
-    "d_values_wdsat_plain_s4": [5, 6, 7, 8],
-    "d_values_wdsat_xg_audit_s4": [5, 6, 7, 8],
-    "targets_per_d": {"uniform": 4, "planted": 4},
+    "d_values_cms_s4": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "d_values_cms_rr": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "d_values_wdsat_plain_s4": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "d_values_wdsat_xg_audit_s4": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "targets_per_d": {
+      "uniform": 4,
+      "planted": 4
+    },
     "seed": 20260920161,
     "seed_note": "Fresh. Pilot and calibration used 20260920, 777 and 4242 and are development data (pilot.json); no pilot target is reused.",
-    "modes": {"uniform": "single decision (UNSAT proof = exhaustion of the candidate space)", "planted": "first solution, then enumeration by blocking each found abscissa triple until UNSAT, up to 64 witnesses"},
+    "modes": {
+      "uniform": "single decision (UNSAT proof = exhaustion of the candidate space)",
+      "planted": "first solution, then enumeration by blocking each found abscissa triple until UNSAT, up to 64 witnesses"
+    },
     "budget_seconds_per_solve": 300,
     "budget_note": "Wall budget on a 4-vCPU x86_64 Linux host; a TIMEOUT is censored, retained, and never read as negative evidence (AGENTS.md section 6 of the parent contract)."
   },
@@ -41,6 +70,18 @@
     "Reporting wall time as the headline; conflicts and decisions are the units, wall time a practicality note.",
     "Treating the planted stratum as a yield estimate."
   ],
-  "deliverables": ["raw.jsonl (one record per solver cell, append-only)", "summary.json", "RESULTS.md with the single table and the classification", "a new section in research/notes/ecc2k130/RESEARCH_ECC2K130_RR_SOLVER_PANEL.md", "pilot.json retained as development data"],
-  "classification_rule": "By AGENTS.md section 3 of the crypto repository: an exponent below 2 in |F| for a complete solver would be an ADVANCE candidate pending independent replication; a lower constant at the same exponent is ENGINEERING; a lower headline count with a higher total is RELABELLING; a changed number with an unchanged algorithm is ACCOUNTING. The expected outcome is a measured negative with a named, measured obstruction (the saturation of the S4 value-set span at d = 7 and the super-quadratic growth of the SAT search beyond it), which under the inventor protocol is a closure of the exact tested scope and nothing wider."
+  "deliverables": [
+    "raw.jsonl (one record per solver cell, append-only)",
+    "summary.json",
+    "RESULTS.md with the single table and the classification",
+    "a new section in research/notes/ecc2k130/RESEARCH_ECC2K130_RR_SOLVER_PANEL.md",
+    "pilot.json retained as development data"
+  ],
+  "classification_rule": "By AGENTS.md section 3 of the crypto repository: an exponent below 2 in |F| for a complete solver would be an ADVANCE candidate pending independent replication; a lower constant at the same exponent is ENGINEERING; a lower headline count with a higher total is RELABELLING; a changed number with an unchanged algorithm is ACCOUNTING. The expected outcome is a measured negative with a named, measured obstruction (the saturation of the S4 value-set span at d = 7 and the super-quadratic growth of the SAT search beyond it), which under the inventor protocol is a closure of the exact tested scope and nothing wider.",
+  "predecessor_and_position": {
+    "predecessor": "research/notes/ecc2k130/RESEARCH_ECC2K130_WDSAT.md (#498, merged 2026-09-20): the RR incidence and norm encodings exported from the circuit IR (full-field ONB Weil restriction, thousands of variables) in front of WDSat and CryptoMiniSat at n = 5 and n = 9. Its section 7 names three things that would make another round worth running: (1) a subspace factor base of dimension l in Trimoska's layout so the instance fits under WDSat's ~23 M monomials_to_column ceiling; (2) a conflict counter for the CryptoMiniSat arm so the cross-solver comparison can be made in the declared unit; (3) __FIND_ALL_SOLUTIONS__ so the oracle is priced on every root.",
+    "how_this_round_answers_them": "(1) weil.py descends in a polynomial basis with V = {deg x < d}: S'4 is 9d-3 variables and RR (b eliminated) is 3d+132, both orders of magnitude under the ceiling, and it runs on the real n = 131 curve rather than a toy field. (2) cmsConflictBracket recovers a deterministic conflict count for CryptoMiniSat by bisection on confl_limit, so the primary unit is available on the complete solver. (3) planted instances are enumerated to UNSAT (WDSat FIND_ALL builds; CryptoMiniSat by blocking clauses).",
+    "what_this_round_adds_that_the_predecessor_could_not_see": "The predecessor's WDSat figures are all from SAT instances, where an incomplete search that happens to reach a witness looks identical to a complete one. The pilot here shows WDSat -x is incomplete at n = 131 (false UNSAT on a decomposable target with -b; 4 of 6 permutations without), so its 1,277x conflict reduction on RR-norm cannot be read as an exhaustion cost; this round treats -x as an audit only and measures exhaustion with a solver shown complete on every planted instance.",
+    "exporter_note": "ecc2k130/codegen/wdsat.py exports an ir.Prog circuit; weil.py writes ANF from exact symbolic Boolean polynomials and needs no circuit. The parity convention (emit T exactly when the polynomial's constant term is 0, so the asserted XOR-to-one clause states p = 0) is the same one the predecessor's section 4.4 and wdsat_oracle.rs arrived at, and is checked here by reproducing Trimoska's published instance."
+  }
 }
