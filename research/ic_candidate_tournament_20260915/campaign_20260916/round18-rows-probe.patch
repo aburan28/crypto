@@ -1,0 +1,32 @@
+Probe build only: override the pair-table row count from the environment so the
+true cost of `t` rows can be measured at every cell.  NEVER a tournament arm --
+a measured arm's row count is a fixed function of the public parameters,
+decided before any probe is drawn, and an environment variable is neither.
+With `IC_TABLE_ROWS` unset the shipped rule is bit-for-bit unchanged.
+
+Apply to a copy of `runs/round-0017/source_candidates/orbits/source`:
+
+    patch -d /tmp/probe18 -p1 -i "$PWD/campaign_20260916/round18-rows-probe.patch"
+
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -1173,6 +1173,19 @@
+         let table_rows = (1..=orbits)
+             .min_by(|&a, &b| expected_work(a).total_cmp(&expected_work(b)))
+             .unwrap_or(orbits);
++        // PROBE BUILD ONLY (round 0018).  Measures the true cost of a given
++        // row count.  `chunk` below is derived from `table_rows`, so the
++        // override flows into the scan block exactly as a shipped rule would.
++        // Never present in a tournament arm: a measured arm's row count is a
++        // fixed function of the public parameters, not of the environment.
++        let table_rows = match std::env::var("IC_TABLE_ROWS") {
++            Ok(v) => v
++                .parse::<usize>()
++                .ok()
++                .filter(|t| (1..=orbits).contains(t))
++                .unwrap_or(table_rows),
++            Err(_) => table_rows,
++        };
+         let mut table = PairTable::with_capacity(table_rows * size);
+         let mut sums: Vec<FastPoint> = Vec::with_capacity(size);
+         let mut dens = Vec::with_capacity(size);
