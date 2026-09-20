@@ -28,7 +28,7 @@ concurrency:
   group: ic-e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v3.json
+  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v4.json
   IC_E2E_OUTPUT: /tmp/ic-e2e
 jobs:
   e2e-benchmark:
