@@ -107,14 +107,14 @@ rho − IC in seconds. The rung's claim "faster than rho end to end" is set only
 with at least three runs and both intervals excluding no improvement. It is a
 statement about wall time on that runner; `S` stays null.
 
-Current history (four runs on the `ubuntu-latest` image, see `runs/`):
+Current history (5 runs on the `ubuntu-latest` image, see `runs/`):
 
 | rung | log₂ r | runs | rho/IC per run | 95 % CI | runtime claim |
 |:--|--:|--:|:--|:--|:--|
-| `k0n31` | 20.5 | 4 | 0.036, 0.036, 0.037, 0.037 | [0.036, 0.037] | no (IC slower) |
-| `k0n41-subgroup` | 39.0 | 4 | 2.228, 2.234, 2.256, 2.206 | **[2.198, 2.264]** | faster than rho, end to end |
-| `k0n53-subgroup` | 44.3 | 4 | 1.996, 2.064, 2.034, 2.004 | **[1.976, 2.074]** | faster than rho, end to end |
-| `k0n61-subgroup-wide` | 47.2 | 2 | 1.774, 1.696 | [1.242, 2.227] | not yet (n < 3) |
+| `k0n31` | 20.5 | 5 | 0.036, 0.036, 0.037, 0.037, 0.038 | [0.036, 0.037] | no (IC slower) |
+| `k0n41-subgroup` | 39.0 | 5 | 2.228, 2.234, 2.256, 2.206, 2.251 | **[2.210, 2.260]** | faster than rho, end to end |
+| `k0n53-subgroup` | 44.3 | 5 | 1.996, 2.064, 2.034, 2.004, 1.957 | **[1.961, 2.062]** | faster than rho, end to end |
+| `k0n61-subgroup-wide` | 47.2 | 3 | 1.774, 1.696, 1.784 | **[1.632, 1.871]** | faster than rho, end to end |
 
 Add each new passing run's artifact; the table above is regenerated from the
 `report` output, not edited by hand.
