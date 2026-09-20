@@ -60,7 +60,7 @@ identical subspace factor base, independent group lift:
 |---|---|---|---|
 | native `--solver sat` | reference | yes | — |
 | `--solver wdsat` (WDSat `61c6ff3`) | **engineering** | yes | yes |
-| `--solver mq-fes` (Gray-code FES) | **engineering** | yes | yes |
+| `--solver mq-fes` (ALMASTY Möbius) | **engineering** | yes | yes |
 
 Ratio to the free-oracle floor is unchanged: every oracle answers the
 same algebraic question. Class is **engineering** by §3 of `AGENTS.md`.
