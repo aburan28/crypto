@@ -70,15 +70,17 @@ The `mq-fes` backend ports the ALMASTY
 
 | backend | when used | measured vs Möbius (`n=18`, planted early Gray root) |
 |---|---|---|
-| Incremental Gray (`ffs`-style derivatives) | `find_one` / Semaev lift (early exit) | **~199×** wall faster than full Möbius |
+| Incremental Gray (libfes FFS, `L=4` unroll) | `find_one` / Semaev lift (early exit) | **~273×** wall faster than full Möbius; **~33×** vs prior O(n)/step Gray on full `n=18` enum |
 | Möbius transform (`moebius.c`) | `find_all` for `n ≤ 24` | reference for all-roots |
 | Monica hybrid (`monica.c`) | `n > 24` (range extension) | does **not** beat Möbius inside `n ≤ 24` (release wall on `n=14,m=32` was ~0.22×); calibrated cost model agrees |
 
 Falsification for the “faster than Möbius” claim: a release run of
 `gray_early_exit_beats_moebius_find_one_wall` must keep ratio `≥ 1.5` on
-the fixed dense quadratic with a Gray-index-2000 planted root. Monica is
-kept as a capacity extension, not as an in-cap speedup. Cubic chained
-(`m ≥ 3`) Semaev systems are refused; those stay on SAT / WDSat.
+the fixed dense quadratic with a Gray-index-2000 planted root. Falsification
+for the Gray speedup itself: `gray_ffs_beats_on_step_full_enum_wall` must
+keep FFS/`L=4` ≥ 1.5× the prior O(n)-per-step Gray on full `n=18` enum.
+Monica is kept as a capacity extension, not as an in-cap speedup. Cubic
+chained (`m ≥ 3`) Semaev systems are refused; those stay on SAT / WDSat.
 
 ```text
 WDSAT_BINARY=/path/to/wdsat_solver cargo test --lib \

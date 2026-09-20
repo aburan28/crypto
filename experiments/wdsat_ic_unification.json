@@ -31,14 +31,19 @@
   },
   "mq_fes_speed": {
     "class": "engineering",
-    "unit": "wall_ns_find_one_release",
-    "instance": "dense quadratic n=18 m=18 planted Gray-index 2000",
-    "moebius_ns": 3160744,
-    "gray_incremental_ns": 15909,
-    "ratio_moebius_over_gray": 198.68,
+    "unit": "wall_ns_release",
+    "instance_find_one": "dense quadratic n=18 m=18 planted Gray-index 2000",
+    "moebius_ns": 3459704,
+    "gray_ffs_l4_find_one_ns": 12675,
+    "ratio_moebius_over_gray_find_one": 272.95,
+    "instance_full_enum": "dense quadratic n=18 m=18 no early exit",
+    "gray_ffs_l4_full_ns": 121930,
+    "gray_on_step_full_ns": 4069116,
+    "ratio_on_step_over_ffs": 33.37,
     "monica_vs_moebius_n14_m32_ratio": 0.22,
     "monica_role": "range extension past Moebius n<=24 cap; not an in-cap speedup",
-    "floor_ratio": "flat"
+    "floor_ratio": "flat",
+    "technique": "libfes-lite FFS O(1)/step + L=4 unrolled chunk"
   },
   "ecc2k130": {
     "field": "F_2^131",

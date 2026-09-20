@@ -105,9 +105,11 @@ group before it becomes a relation:
   [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
   baseline builder is
   `research/index_calculus_baseline_20260914/pilot/build_pilot.py`.
-- mq-fes: ALMASTY-inspired quadratic Semaev solver (`m = 2` only) from
-  <https://gitlab.lip6.fr/almasty/mq> — incremental Gray for early-exit
-  `find_one`, Möbius for all-roots when `n ≤ 24`, Monica hybrid past that.
+- mq-fes: ALMASTY/libfes-inspired quadratic Semaev solver (`m = 2` only) —
+  libfes FFS Gray (`L=4` unroll) for early-exit `find_one`, Möbius for
+  all-roots when `n ≤ 24`, Monica hybrid past that
+  (<https://gitlab.lip6.fr/almasty/mq>,
+  <https://github.com/cbouilla/libfes-lite>).
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation
