@@ -466,6 +466,31 @@ the part that needed a test: on a binary curve `−P = (x, x+y)`, so `P`
 and `−P` share an abscissa and a single bit of `y` separates them only
 when `x` is odd. Comparing `y` against `x+y` separates them always.
 
+**The folded key, `pt_canon`.** The CPU side stores one entry per
+*signed Frobenius orbit* rather than one per pair, which at `n = 61` is
+`2n` times fewer entries and buys a base `√(2n)` times wider at the same
+memory. The key that names an orbit is `pt_canon`, and it is the same
+function `koblitz_fast::FrobeniusCanon::canon` is: `π` is a squaring
+only in a *polynomial* basis, and in a normal basis `{β, β², β⁴, …}` it
+is a one-bit cyclic rotation of the coordinate word, so the orbit of `x`
+is the set of rotations of that word and the least rotation names it.
+Nothing is squared and nothing is reduced.
+
+The basis change is **host data**, uploaded from
+`FrobeniusCanon::tables()`, not rediscovered on the device. The normal
+element comes from a randomised search, so a device that searched for
+its own would find a different basis and name the same orbits
+differently — valid on its own, and unable to read a table the CPU
+built. `n ≤ 62` is the ceiling, so the fold does not reach `ecc2k95`.
+
+**What is keyed is not yet what is stored.** `pairtable_kernel` takes
+the tables and keys by orbit when given them, but it still emits one
+entry per pair: the table is the same size and merely named
+differently. The fold's actual saving needs the base sorted by orbit
+host-side and one entry per signed orbit, and then the orbit tag that
+makes summand recovery `O(n)` instead of `O(|F|)`. Both are the next
+steps.
+
 `make test` runs `test_pt_*` for every curve: batch inversion against
 one-at-a-time inversion (with a planted zero, which every real row has
 at `j = i`), every row of a 48-point triangle against unbatched
