@@ -335,6 +335,10 @@ def s3_binary_numeric(x, y, z, a6):
     return (x * x + y * y) * z * z + x * y * z + x * x * y * y + a6
 
 
+def s3_binary_symmetric_numeric(s, t, z, a6):
+    return s * s * z * z + t * z + t * t + a6
+
+
 class BinaryCell:
     def __init__(self, k):
         self.k = k
@@ -369,6 +373,11 @@ class BinaryCell:
         self.pair_u = {(x, y): [u for u in self.field
                                 if s3_binary_numeric(x, y, u, self.a6) == 0]
                        for x in self.roots for y in self.roots}
+        self.image_u = {(s, t): [u for u in self.field
+                                 if s3_binary_symmetric_numeric(s, t, u, self.a6) == 0]
+                        for s, t in self.pair_image}
+        assert all(self.pair_u[(x, y)] == self.image_u[(x + y, x * y)]
+                   for x in self.roots for y in self.roots)
         self.lifts = {x: [self.curve(x, y) for y in self.field
                           if y * y + x * y == x**3 + self.a6]
                       for x in self.roots}
@@ -444,6 +453,22 @@ class BinaryCell:
                         ordered.append(xs + (u, v))
         symmetric = {(x1 + x2, x1 * x2, x3 + x4, x3 * x4, u, v)
                      for x1, x2, x3, x4, u, v in ordered}
+        independently_symmetric = {
+            (s1, t1, s2, t2, u, v)
+            for s1, t1 in self.pair_image
+            for s2, t2 in self.pair_image
+            for u in self.image_u[(s1, t1)]
+            for v in self.image_u[(s2, t2)]
+            if s3_binary_numeric(u, v, target, self.a6) == 0
+        }
+        assert symmetric == independently_symmetric
+        recovered = set()
+        for s1, t1, s2, t2, u, v in symmetric:
+            for x1, x2 in ordered_quadratic_roots(self.field, s1, t1):
+                for x3, x4 in ordered_quadratic_roots(self.field, s2, t2):
+                    recovered.add((x1, x2, x3, x4, u, v))
+        assert recovered == set(ordered)
+
         chain_x = {row[:4] for row in ordered}
         finite_group_x, full_group_x = set(), set()
         for xs in itertools.product(self.roots, repeat=4):
@@ -465,5 +490,6 @@ class BinaryCell:
             "full_group_coverage": len(chain_x) / len(full_group_x) if full_group_x else 1.0,
             "root_set_sha256": _stable_hash(normalized),
             "presentation_equivalence": True,
+            "root_recovery": True,
             "nondegenerate_group_equivalence": True,
         }
