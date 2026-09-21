@@ -1214,7 +1214,11 @@ class Worker:
         """
         if slot is None or entry.get("slot") != slot:
             return
-        if int(entry.get("offset", -1)) != int(self.state.get("dpOffset", 0)):
+        # A v2 cut starts at the file's header, not at 0, so a fresh or
+        # just-rotated file's dpOffset of 0 names the same place as an entry
+        # at head -- the same reading merge.py gives a committed offset.
+        reading = max(int(self.state.get("dpOffset", 0)), int(entry.get("head", 0)))
+        if int(entry.get("offset", -1)) != reading:
             return
         self.state["dpOffset"] = int(entry["offset"]) + entryRecordBytes(entry)
         # Cumulative across dp file rotations, so the dashboard's count
