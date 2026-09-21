@@ -611,6 +611,18 @@ meter.  Collection is the measured single-target bottleneck: its folded
 pair-table build used 0.317 s wall and 3.259 core-seconds, while the exact
 17,000-probe relation unit used 0.487 s wall and 4.472 core-seconds.
 
+The single-target successor removes the folded builder's duplicate
+arithmetic pass.  Its count pass retains a six-byte scatter token per
+stored pair; table shapes needing more than 48 token bits use the previous
+recomputation path.  Five matched current-head pairs kept the exact same
+588-relation hash and verified scalar in every run.  Median pair-build
+wall fell from 0.313 s to 0.205 s (0.656x), pair-build CPU from 3.227 to
+2.120 core-seconds (0.659x), full IC wall from 1.225 to 1.105 s (0.901x),
+and whole-process CPU from 12.269 to 11.213 core-seconds (0.914x).  The
+charged trade is memory: median peak RSS rose from 93.9 MB to 125.9 MB
+(1.331x).  A full hash cache was rejected at 2.519x RSS, and a five-byte
+filter variant was rejected after slowing the relation unit by 3.1%.
+
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
 verified the published point in all five fresh runs.  The selected
@@ -634,8 +646,9 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 103 processes, 318.047 sequential wall-seconds,
-1,184.891 core-seconds and a 139.9 MB maximum RSS.
+campaign contains 157 processes, 474.072 sequential wall-seconds,
+1,829.274 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+a rejected uncompressed-cache run).
 
 With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
 median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
