@@ -1,8 +1,9 @@
 // Orbit witnesses for a corpus: the claim artifact a cairn piecework node pays.
 //
 // The client records only (seed, canonical endpoint), which is all a collision
-// needs and is deliberately not checkable: reproducing one costs the 2^25.27
-// steps that produced it, and a canonical name on its own is free to invent --
+// needs and is deliberately not checkable: reproducing one costs the steps
+// that produced it -- 2^28.41 at the campaign's weight 32, 2^25.27 at the
+// weight 34 a cairn job allows -- and a canonical name is free to invent --
 // any low-weight bit string rotated to its least rotation is a syntactically
 // perfect orbit name.  So a corpus record is worth nothing to anybody who did
 // not walk it.
