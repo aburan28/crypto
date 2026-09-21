@@ -2045,14 +2045,42 @@ the probe and batching the inversion together would take the inner step
 from some 1565 ns to 212.
 
 It is quadratic in the base and the least used, which is presumably why
-it was never blocked. *Least used* is the operative half: no parameter
-set or recorded run in this repository asks for `m = 4` — 698 places ask
-for 3 and 110 for 2 — and nothing sets `max_m`, so no sweep reaches it
-either. This is a correction to what the note claimed the arm costs, not
-a change worth making until something runs it — **accounting** by
-`AGENTS.md` §3, and a stage diagnostic by §2: the inner step of one
-enumeration arm, on no path any run takes, so nothing here is a
-speedup.
+it was never blocked. *Least used* is still true — no parameter set or
+recorded run in this repository asks for `m = 4`, 698 places ask for 3
+and 110 for 2, and nothing sets `max_m`, so no sweep reaches it either.
+
+**It is fixed now anyway.** The arm takes two batched inversions a row
+rather than one and then a row of single ones: the pair sums are one
+`add_many` slice as they always were, and the rests `R − (P_k + P_l)`
+are a second. It keys the row with `keys_of` and prefetches ahead of the
+probe, which is the shape the `m = 3` arm already had. Measured on the
+arm itself — `witnesses_fast` with `m = 4` and a sink that never stops,
+at `n = 61` on `|F| = 976`, where the group is large enough that a
+target has no witnesses at all and the figure is the walk rather than
+the recovery:
+
+| the `m = 4` arm, a `(k, l)` | ns |
+|---|---|
+| before | **1155.5** |
+| after | **123** [115 – 129] |
+
+**9.4×**, and the 1030 ns that went is the Fermat inversion the same
+binary measures alone at 1019 — which is the cross-check that says the
+gain is the thing it was supposed to be and not a measurement artefact.
+
+The isolation matters and was not free to find: at `n = 19` the same
+base decomposes a target tens of thousands of ways, and the `|F|`-long
+compact recovery each hit pays swamps the difference entirely — before
+and after came back 2452 against 2429, a 1% apart, and the fix looked
+like nothing. What the arm costs per `(k, l)` and what a *hit* costs are
+different questions, and the second one drowns the first at any degree
+small enough for hits to be common.
+
+**Engineering** by `AGENTS.md` §3, not an advance: the ratio to the
+floor does not move, and neither does any `S` — nothing runs `m = 4`, so
+no measured end-to-end number changes at all. A stage diagnostic by §2:
+the inner step of one enumeration arm, so the 9.4× is not a speedup and
+no scoreboard row follows.
 
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its

@@ -81,4 +81,45 @@ fn main() {
          so the inversion is {:.1}x the cost the note named",
         (add_ns - add_many_ns) / 104.0
     );
+
+    // And the arm itself, which is the figure that matters: the `m = 4`
+    // scan with a sink that never stops, so the whole `|F|²/2` walk
+    // happens and the number is a true per-`(k, l)` cost.  A smaller
+    // degree than the rest of this file, because the walk is quadratic
+    // and the table has to be built — but not so small that the group
+    // is crowded.  At `n = 19` a base this wide decomposes almost every
+    // target tens of thousands of ways, and the `|F|`-long compact
+    // recovery each hit pays then swamps the walk this is measuring;
+    // at `n = 61` the group is far larger than `|F|⁴`, so a target has
+    // essentially none and what is left is the walk itself — the
+    // arithmetic and the probe, which is where the inversion sits.
+    // That isolation is the point: with hits in the stream the
+    // `|F|`-long compact recovery each one pays swamps the difference
+    // this is measuring.
+    let small = KoblitzCurve::new(0, 61).expect("curve");
+    let fb = build_subgroup_orbit_factor_base(&small, 5, 400).expect("base");
+    let width = fb.points.len();
+    let table = PairSumTable::build(&small, &fb).expect("table");
+    let sc = FastCurve::new(&small.curve).expect("fast curve");
+    let sg = sc.lift(small.generator());
+    let pairs_walked = width * (width + 1) / 2;
+    let mut walked = 0usize;
+    let mut found = 0usize;
+    let start = Instant::now();
+    for t in 1u64..=4 {
+        let target = sc.mul_u64(sg, t * 7_700_017 + 3);
+        table.witnesses_fast(target, 4, &mut |_| {
+            found += 1;
+            true
+        });
+        walked += pairs_walked;
+    }
+    let arm_ns = start.elapsed().as_secs_f64() * 1e9 / walked as f64;
+    println!();
+    println!(
+        "  the m = 4 arm at n = {}, |F| = {width} ({} tier), 4 targets:\n  \
+         {arm_ns:8.1} ns a (k, l)   [{walked} walked, {found} witnesses]",
+        small.n,
+        table.tier()
+    );
 }
