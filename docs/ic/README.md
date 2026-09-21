@@ -902,6 +902,11 @@ against 3.3×.
   `add_many`'s **68**, which is twelve times the lone-probe penalty the
   note used to name as that arm's problem.  No shipped parameter set
   asks for `m = 4`, so it is a correction rather than a change.
+- The three bullets above are **stage diagnostics** (`AGENTS.md` §2):
+  each prices one slice — a probe, a key, an inversion — so none is a
+  speedup, and the ones that correct an earlier figure are
+  **accounting** by §3.  The method's speed is its `S` column, whole and
+  cold; none of this moves it, so none of it is a scoreboard row.
 
 - `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
   whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over

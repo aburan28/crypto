@@ -1966,6 +1966,13 @@ fused; split, the lookups are adjacent and independent and do overlap.
 Chunk 1 is measured too and comes back at 1.00x on the folded table, so
 the figure is the blocking and not the buffer the chunked loop uses.
 
+Everything in this subsection is a **stage diagnostic** under `AGENTS.md`
+§2: probe cost is one slice of the pipeline, so none of these ratios is
+a speedup and none may be quoted as one. The method's speed is its `S`
+column, cold and whole, and nothing here moves it. By §3 the change is
+**accounting** — the numbers below correct what earlier rounds claimed
+this cost; the algorithm is unchanged, and no gain is claimed.
+
 **The compact table is not the control this wants.** It differs from the
 folded one in the key *and* in the lookup, and the two cannot be told
 apart by comparing them. The control that holds the lookup fixed is to
@@ -2042,7 +2049,10 @@ it was never blocked. *Least used* is the operative half: no parameter
 set or recorded run in this repository asks for `m = 4` — 698 places ask
 for 3 and 110 for 2 — and nothing sets `max_m`, so no sweep reaches it
 either. This is a correction to what the note claimed the arm costs, not
-a change worth making until something runs it.
+a change worth making until something runs it — **accounting** by
+`AGENTS.md` §3, and a stage diagnostic by §2: the inner step of one
+enumeration arm, on no path any run takes, so nothing here is a
+speedup.
 
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its

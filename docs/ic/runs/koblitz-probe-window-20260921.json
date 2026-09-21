@@ -1,5 +1,7 @@
 {
   "what": "Why blocking the folded table's probe pays, and what the m = 4 arm actually costs per (k, l). Two corrections to claims this repository already published.",
+  "class": "accounting, by AGENTS.md section 3: the numbers changed and the algorithm did not. Both findings correct what earlier rounds claimed a cost was; no gain is claimed.",
+  "stage_diagnostic": "Every ratio in this record prices one slice of the pipeline - a probe, a key, a field inversion - so by AGENTS.md section 2 none of them is a speedup and none may be quoted as one. The method's speed is its S column, cold and end to end. Nothing here moves S, adds a variant, or changes a ratio to the floor or to rho, so there is no scoreboard row for this.",
   "host": "Intel Xeon @ 2.80GHz, Cascade Lake-SP (32 KiB L1d/core, 1 MiB L2/core, 33 MiB L3, AVX-512 + VNNI, no VBMI); 4 cores, 15 GiB. Reorder buffer 224 entries, scheduler 97.",
   "probe_window_sweep": {
     "harness": "examples/probe_window_sweep.rs, n = 61, folded |F| = 183488 (0.64 GiB, 138074720 pairs)",
