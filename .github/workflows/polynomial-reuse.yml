@@ -9,6 +9,8 @@ on:
       - 'src/cryptanalysis/f4_rref_tests.rs'
       - 'src/cryptanalysis/weil_charts.rs'
       - 'examples/weil_factor_composition.rs'
+      - 'examples/preprocessing_cost.rs'
+      - 'examples/gb_probe.rs'
       - 'research/weil_factor_composition_20260914/**'
       - 'research/f4_linear_algebra_20260914/contract.json'
       - 'src/cryptanalysis/pq_groebner_f2.rs'
@@ -38,6 +40,16 @@ jobs:
       - run: 'cargo test --release --features redis-cache --lib koblitz_groebner::'
       - run: 'cargo test --release --features redis-cache --lib weil_charts::'
       - run: cargo check --release --features redis-cache --example weil_factor_composition
+      # The cost harnesses assert nothing and so cannot flake; they are run,
+      # not just compiled, because a harness that builds but no longer
+      # produces numbers is the failure worth catching. gb_probe takes its
+      # default point only -- the Buchberger engine has no interrupt hook and
+      # the next point up does not terminate.
+      - run: cargo check --release --features redis-cache --example preprocessing_cost --example gb_probe
+      - run: cargo run --release --features redis-cache --example preprocessing_cost
+        env:
+          IC_TEST_REDIS_URL: redis://127.0.0.1:6379/0
+      - run: cargo run --release --example gb_probe
       - run: cargo test --release --features redis-cache --lib redis_cross_client -- --ignored
         env:
           IC_TEST_REDIS_URL: redis://127.0.0.1:6379/0
