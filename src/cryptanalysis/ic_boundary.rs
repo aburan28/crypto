@@ -3275,7 +3275,11 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
     // The unit's conversion ratios come from the repository, not from
     // what this host happened to measure a moment ago; see
     // `PINNED_CALIBRATION`.  `priced` is what every phase below is
-    // converted with, `calib` stays as the host note.
+    // converted with, `calib` stays as the host note — which is why the
+    // rebinding to `priced` happens *after* the instance is built, below:
+    // shadowing it here made `calibration_measured` a second copy of the
+    // pinned table, so every prime row claimed the host had measured
+    // exactly what the repository pinned.
     let mut priced = calib.clone();
     let pinned = priced.pin("prime", inst.name.as_str());
     let mut out = RegimeInstance {
@@ -4569,6 +4573,35 @@ mod tests {
         let inst = roster_prime_instance(12).unwrap();
         let res = run_prime_instance(&inst, &cfg);
         assert!(res.rho_verified_all, "{:?}", res.rho);
+        // `bench-12bit` is in the pinned table, so this row prices with
+        // the repository's ratios — and must still report what the host
+        // measured.  The two came out identical once, because the pinned
+        // copy was bound over `calib` before the instance was built, so
+        // the "host note" was a second copy of the pinned values and a
+        // reader would have concluded the host measured exactly what the
+        // repository pinned.  Moving that rebinding is the fix; this is
+        // the assertion that keeps it moved.
+        assert!(!res.calibration_pinned.pinned.is_empty(), "{:?}", res.calibration_pinned);
+        let priced = &res.calibration;
+        let host = &res.calibration_measured;
+        assert_eq!(priced.ns_per_add, host.ns_per_add, "pinning must not touch ns_per_add");
+        let moved = [
+            (priced.ns_per_sqrt, host.ns_per_sqrt),
+            (priced.ns_per_legendre, host.ns_per_legendre),
+            (priced.ns_per_inversion, host.ns_per_inversion),
+        ]
+        .iter()
+        .filter(|(a, b)| a.is_some() && a != b)
+        .count()
+            + usize::from(priced.ns_per_double != host.ns_per_double)
+            + usize::from(priced.ns_per_lookup != host.ns_per_lookup)
+            + usize::from(priced.ns_per_row_op != host.ns_per_row_op);
+        assert!(
+            moved > 0,
+            "every pinned unit priced at exactly the host's measurement, which means the host \
+             note is a copy of the pinned table rather than the measurement: priced {priced:?} \
+             host {host:?}"
+        );
         // Eight rungs, plus the balanced row wherever `#E^{1/3}` differs
         // from the `2^{⌈bits/3⌉}` rule by more than a tenth.
         assert!((8..=9).contains(&res.variants.len()), "{}", res.variants.len());
