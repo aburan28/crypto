@@ -1,7 +1,7 @@
 name: ic end-to-end benchmark
 # Runs the whole index-calculus method (select → collect → logs → solve) with
-# the signed-Frobenius ρ baseline in the same process on the frozen ledger
-# rungs, then gates the reports against the reference named in IC_E2E_REFERENCE:
+# the signed-Frobenius ρ baseline in the same process on four frozen ledger
+# rungs (n = 31, 41, 53, 61), then gates the reports against the reference named in IC_E2E_REFERENCE:
 # every target verified by both methods, every seeded counter identical, the
 # same-host ρ/IC end-to-end wall ratio within tolerance, and any rung that
 # crossed ρ end to end when frozen still crossing.  See docs/ic/ci/README.md.
@@ -15,6 +15,8 @@ on:
       - "docs/ic/ci/**"
       - "scripts/ic_e2e_benchmark.py"
       - "scripts/test_ic_e2e_benchmark.py"
+      - "scripts/ic_e2e_history.py"
+      - "scripts/test_ic_e2e_history.py"
       - ".github/workflows/ic-e2e-benchmark.yml"
   workflow_dispatch:
     inputs:
@@ -28,7 +30,7 @@ concurrency:
   group: ic-e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v2.json
+  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v4.json
   IC_E2E_OUTPUT: /tmp/ic-e2e
 jobs:
   e2e-benchmark:
@@ -39,8 +41,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Gate self-tests
-        run: python -m unittest discover -s scripts -p 'test_ic_e2e_benchmark.py'
+      - name: Gate and history self-tests
+        run: |
+          python -m unittest discover -s scripts -p 'test_ic_e2e_benchmark.py'
+          python -m unittest discover -s scripts -p 'test_ic_e2e_history.py'
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -54,7 +58,8 @@ jobs:
             --output "$IC_E2E_OUTPUT" \
             --params docs/ic/params/k0n31.json \
                      docs/ic/params/k0n41-subgroup.json \
-                     docs/ic/params/k0n53-subgroup.json
+                     docs/ic/params/k0n53-subgroup.json \
+                     docs/ic/params/k0n61-subgroup-wide.json
       - name: Gate against the frozen reference
         if: always()
         run: |
