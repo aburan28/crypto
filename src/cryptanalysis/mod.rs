@@ -159,6 +159,7 @@ pub mod polynomial_reuse;
 pub mod weil_charts;
 pub mod algebra_cache;
 pub mod koblitz_index_calculus;
+pub mod koblitz_isogeny_cost;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
 pub mod koblitz_sparse_la;
