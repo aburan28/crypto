@@ -2171,6 +2171,11 @@ pub struct GaudryReport {
     pub lp_mean_merge_depth: f64,
     /// The cap in force, echoed so a row states its own configuration.
     pub lp_max_merge_level: u8,
+    /// Multiplications the **eliminator** spent merging pivots, separated
+    /// from the solve.  A merge-level cap trades one against the other --
+    /// it makes the matrix sparser and the eliminator busier -- so lumping
+    /// them in `la_ops` hides which way the trade went.
+    pub lp_merge_ops: u64,
     pub la_unknowns: usize,
     pub la_rows: usize,
     pub la_avg_weight: f64,
@@ -2659,6 +2664,9 @@ pub fn run_gaudry_opts(
     let mut eliminator = LargePrimeEliminator::with_cap(small, n, opts.max_merge_level);
     let mut full_rels: Vec<SparseRel> = Vec::new();
     let mut la_ops = 0u64;
+    // The eliminator's share of `la_ops`, tracked alongside it so the solve's
+    // share is the difference.
+    let mut merge_ops = 0u64;
     let mut la_attempts = 0u64;
     let mut next_attempt = unknowns;
     let mut la_rows_used = 0usize;
@@ -2698,6 +2706,7 @@ pub fn run_gaudry_opts(
         lp_abandoned: 0,
         lp_mean_merge_depth: 0.0,
         lp_max_merge_level: opts.max_merge_level,
+        lp_merge_ops: 0,
         la_unknowns: unknowns,
         la_rows: 0,
         la_avg_weight: 0.0,
@@ -2813,7 +2822,9 @@ pub fn run_gaudry_opts(
             let full = if lp_count == 0 {
                 Some(rel)
             } else {
+                let before = la_ops;
                 let f = eliminator.feed(rel, &mut la_ops);
+                merge_ops += la_ops - before;
                 if f.is_some() {
                     rep.lp_full_relations += 1;
                 }
@@ -2903,6 +2914,7 @@ pub fn run_gaudry_opts(
     rep.precompute_fp_muls = precompute_muls;
     rep.solve_stats = stats;
     rep.la_ops = la_ops + system.ops();
+    rep.lp_merge_ops = merge_ops;
     rep.lp_abandoned = eliminator.abandoned;
     rep.lp_mean_merge_depth = eliminator.mean_merge_depth();
     rep.la_rows = la_rows_used;
