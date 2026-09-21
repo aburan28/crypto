@@ -49,6 +49,10 @@ those before.
 
 ## If a release fails
 
+Pull requests touching `release.yml`, `Cargo.toml` or `ecc2k130/Makefile`
+build every artifact as a dry run and stop short of publishing, so the
+macOS and Windows legs are proven before a merge can turn a release red.
+
 The `release` job requires all four build jobs, so a failure publishes
 nothing rather than a partial set. The matrix is `fail-fast: false`, so one
 platform breaking still tells you about the other three in the same run.

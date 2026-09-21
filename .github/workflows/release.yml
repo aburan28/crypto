@@ -6,6 +6,14 @@ name: Release
 on:
   push:
     branches: [main]
+  # Dry run on pull requests that touch what the build consumes, so the
+  # macOS and Windows legs are proven before a merge can turn a release
+  # red. The `release` job is skipped for these; nothing is published.
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'Cargo.toml'
+      - 'ecc2k130/Makefile'
   workflow_dispatch:
 
 concurrency:
@@ -182,6 +190,8 @@ jobs:
 
   release:
     needs: [meta, rust, native, cuda]
+    # Dry runs build and stage everything, then stop short of publishing.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
