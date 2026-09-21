@@ -645,6 +645,18 @@ core-seconds (0.939x) and full-process CPU to 0.985x.  The exact current
 one-core replay used 6.744 s for IC against 1.602 s for rho, leaving IC
 4.21 times slower.  Sixteen lanes were rejected after regressing both
 one-core and default-thread relation time.
+The workflow also used to rebuild the same public cofactor-projected
+signed-Frobenius predicate in selection, logs, and solve.  A bound
+`ProjectedFactorBase` now constructs and charges it once in selection,
+then reuses exact clones; it carries no logarithm labels.  Over five
+matched one-worker pairs, logs fell from 0.925 to 0.155 s (0.167x), solve
+from 0.790 to 0.019 s (0.024x), full IC from 6.834 to 6.086 s (0.889x),
+and whole-process CPU from 9.157 to 7.634 core-seconds (0.832x), with
+selection unchanged and RSS slightly lower.  At default threads, full IC
+fell from 1.066 to 0.971 s and whole-process CPU to 0.842x.  The exact
+one-core replay used 6.005 s for IC against 1.576 s for rho, leaving IC
+3.81 times slower; the exact default-thread replay used 0.969 s for IC
+against 1.571 s for rho.
 
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
@@ -669,8 +681,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 204 processes, 838.207 sequential wall-seconds,
-2,298.015 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+campaign contains 226 processes, 959.787 sequential wall-seconds,
+2,497.775 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
 a rejected uncompressed-cache run).
 
 Before the cached builder, five fresh scalar-blind repeats with

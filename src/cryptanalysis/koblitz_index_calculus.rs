@@ -4702,6 +4702,63 @@ struct ProjectedSignedOrbitMap {
     representatives: Vec<BinaryPoint>,
 }
 
+/// One algebraic projection of a factor base into signed Frobenius
+/// columns, reusable by relation linear algebra and individual-log
+/// descent.
+///
+/// Constructing the map cofactor-multiplies every factor-base point and
+/// canonicalises its signed Frobenius orbit.  A workflow that needs the
+/// column count, factor-base logs and a target descent should pay that
+/// public, target-independent predicate cost once.  The curve, base and
+/// opaque map stay bound together here so callers cannot accidentally
+/// reuse a projection with a different base.
+pub struct ProjectedFactorBase<'a> {
+    kc: &'a KoblitzCurve,
+    fb: &'a FrobeniusFactorBase,
+    map: ProjectedSignedOrbitMap,
+}
+
+impl<'a> ProjectedFactorBase<'a> {
+    /// Build and bind the projected signed-orbit predicate.
+    pub fn new(kc: &'a KoblitzCurve, fb: &'a FrobeniusFactorBase) -> Self {
+        Self {
+            kc,
+            fb,
+            map: projected_signed_orbit_map(kc, fb),
+        }
+    }
+
+    /// Nonzero signed-Frobenius columns after cofactor projection.
+    pub fn columns(&self) -> usize {
+        self.map.representatives.len()
+    }
+
+    /// Start a relation-fed factor-base logarithm solve using this map.
+    pub fn log_solver<'b>(
+        &'b self,
+        opts: &'b KoblitzIcOptions,
+    ) -> Option<FactorBaseLogSolver<'b>> {
+        FactorBaseLogSolver::with_projected(self.kc, self.fb, opts, &self.map)
+    }
+
+    /// Start a target descent using the same projected columns.
+    pub fn individual_log_solver<'b>(
+        &'b self,
+        table: &'b FactorBaseLogTable,
+        opts: &'b KoblitzIcOptions,
+        pair: Option<&'b PairSumTable>,
+    ) -> Option<IndividualLogSolver<'b>> {
+        IndividualLogSolver::with_projected(
+            self.kc,
+            self.fb,
+            table,
+            opts,
+            pair,
+            &self.map,
+        )
+    }
+}
+
 /// Build the quotient factor-base columns after public cofactor projection.
 ///
 /// The ordinary factor-base orbit table can contain several columns whose
@@ -7543,8 +7600,17 @@ impl<'a> LogSystem<'a> {
         fb: &'a FrobeniusFactorBase,
         opts: &'a KoblitzIcOptions,
     ) -> Option<Self> {
-        let r = &kc.subgroup_order;
         let projected = projected_signed_orbit_map(kc, fb);
+        Self::with_projected(kc, fb, opts, projected)
+    }
+
+    fn with_projected(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+        projected: ProjectedSignedOrbitMap,
+    ) -> Option<Self> {
+        let r = &kc.subgroup_order;
         let n_cols = projected.representatives.len();
         if n_cols == 0 {
             return None;
@@ -7754,6 +7820,25 @@ impl<'a> FactorBaseLogSolver<'a> {
         opts: &'a KoblitzIcOptions,
     ) -> Option<Self> {
         let system = LogSystem::new(kc, fb, opts)?;
+        Self::with_system(kc, fb, opts, system)
+    }
+
+    fn with_projected(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+        projected: &ProjectedSignedOrbitMap,
+    ) -> Option<Self> {
+        let system = LogSystem::with_projected(kc, fb, opts, projected.clone())?;
+        Self::with_system(kc, fb, opts, system)
+    }
+
+    fn with_system(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        opts: &'a KoblitzIcOptions,
+        system: LogSystem<'a>,
+    ) -> Option<Self> {
         let report = LogTableReport {
             sparse: system.sparse_opts.is_some(),
             columns: system.n_cols,
@@ -7928,6 +8013,17 @@ impl<'a> IndividualLogSolver<'a> {
         pair: Option<&'a PairSumTable>,
     ) -> Option<Self> {
         let projected = projected_signed_orbit_map(kc, fb);
+        Self::with_projected(kc, fb, table, opts, pair, &projected)
+    }
+
+    fn with_projected(
+        kc: &'a KoblitzCurve,
+        fb: &'a FrobeniusFactorBase,
+        table: &FactorBaseLogTable,
+        opts: &'a KoblitzIcOptions,
+        pair: Option<&'a PairSumTable>,
+        projected: &ProjectedSignedOrbitMap,
+    ) -> Option<Self> {
         if projected.representatives.len() != table.columns.len() {
             return None;
         }
@@ -7950,7 +8046,7 @@ impl<'a> IndividualLogSolver<'a> {
             fb,
             opts,
             pair,
-            projected,
+            projected: projected.clone(),
             column_log,
             index_of: fb.index_map(),
             field: FieldStructure::new(kc.n, &kc.curve.irreducible),
@@ -9971,6 +10067,42 @@ mod tests {
         // Corrupt one logarithm; verification must catch it.
         table.columns[0].1 = (&table.columns[0].1 + BigUint::one()) % &kc.subgroup_order;
         assert!(!table.verify(&kc));
+    }
+
+    #[test]
+    fn a_projected_factor_base_reuses_the_exact_log_and_descent_columns() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = KoblitzIcOptions {
+            m: 2,
+            descent_m: Some(2),
+            strategy: DecompositionStrategy::PairTable,
+            collapse_negation: true,
+            collapse_projected_orbits: true,
+            allow_direct_relation: false,
+            max_trials: 20_000,
+            ..KoblitzIcOptions::default()
+        };
+        let projected = ProjectedFactorBase::new(&kc, &fb);
+        assert_eq!(projected.columns(), projected_signed_orbit_count(&kc, &fb));
+        assert_eq!(
+            projected.log_solver(&opts).unwrap().columns(),
+            FactorBaseLogSolver::new(&kc, &fb, &opts).unwrap().columns()
+        );
+
+        let (table, report) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+        assert!(report.verified && table.verify(&kc));
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let shared = projected
+            .individual_log_solver(&table, &opts, Some(&pair))
+            .unwrap();
+        let fresh = IndividualLogSolver::new(&kc, &fb, &table, &opts, Some(&pair)).unwrap();
+        let q = kc.mul(kc.generator(), &BigUint::from(53u32));
+        let (shared_log, shared_report) = shared.solve(&q).unwrap();
+        let (fresh_log, fresh_report) = fresh.solve(&q).unwrap();
+        assert_eq!(shared_log, fresh_log);
+        assert_eq!(shared_report.log, fresh_report.log);
+        assert_eq!(shared_report.trials, fresh_report.trials);
     }
 
     #[test]
