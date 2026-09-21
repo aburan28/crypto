@@ -2389,25 +2389,20 @@ pub struct PipelineOutcome {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TargetSource {
     /// `R = [a]G + [b]Q` with fresh random `a, b` every trial: two
-    /// scalar multiplications and one addition per target.
+    /// scalar multiplications and one addition per target, and the guard
+    /// below.
     Random,
+    /// The same draw without the guard, so a target the run has already
+    /// seen is decomposed again.  For the diagnostic of §10.2 only.
+    RandomUnguarded,
     /// An r-adding walk `R ← R + J_{h(R)}` over 16 jumps
     /// `J_j = [a_j]G + [b_j]Q` with the coefficients tracked modulo `r`:
-    /// one addition per target after the jumps are set up.  A guard (one
-    /// hash insert per step, counted and priced as a lookup) restarts the
-    /// walk from a fresh random point **with a fresh jump table** when it
-    /// meets any earlier target, and after `4√r + 2^16` steps regardless,
-    /// so no target is ever presented twice and no two segments share a
-    /// step function: two segments under one step function merge like
-    /// rho's walks, and a repeated decomposable target with different
-    /// coefficients pins the logarithm as a collision would, which is a
-    /// generic search and not index calculus (see `WalkSharedJumps`).
+    /// one addition per target after the jumps are set up, a fresh jump
+    /// table at every restart, and the guard below.
     Walk,
     /// The walk as the Round-2 ladder first ran it: one jump table for
-    /// every segment and the guard cleared at each restart.  Kept, behind
-    /// `--walk-shared-jumps`, for the diagnostic that measures the merge
-    /// effect; the `repeated_column_rows` and `pinned_by_repeated_row`
-    /// counters of the linear-algebra phase show it.
+    /// every segment and no guard, so segments merge as rho's walks do.
+    /// For the diagnostic of §10.2 only.
     WalkSharedJumps,
 }
 
@@ -2415,12 +2410,28 @@ impl TargetSource {
     pub fn name(&self) -> &'static str {
         match self {
             TargetSource::Random => "random",
+            TargetSource::RandomUnguarded => "random_unguarded",
             TargetSource::Walk => "walk",
             TargetSource::WalkSharedJumps => "walk_shared_jumps",
         }
     }
     pub fn is_walk(&self) -> bool {
-        !matches!(self, TargetSource::Random)
+        matches!(self, TargetSource::Walk | TargetSource::WalkSharedJumps)
+    }
+    /// **Whether a target the run has already decomposed is skipped.**
+    ///
+    /// Presenting one group element twice hands the elimination two rows
+    /// with the same factor-base part and different `(a, b)`, which pins
+    /// the logarithm by itself: `a₁ + b₁d = a₂ + b₂d`.  That is a generic
+    /// collision resolved through the factor base, not a relation, and it
+    /// arrives after about `√r` targets whatever the oracle costs — so a
+    /// run that takes it is measuring rho with extra steps.  A repeat
+    /// carries no relation information either (its factor-base part is
+    /// one the matrix already holds), so skipping it costs the relation
+    /// search nothing.  The guard is one hash insert per target, counted
+    /// and priced as a lookup.
+    pub fn is_guarded(&self) -> bool {
+        matches!(self, TargetSource::Random | TargetSource::Walk)
     }
 }
 
@@ -2497,30 +2508,27 @@ fn collect_and_solve<G: CountedGroup>(
     let (mut repeated_column_rows, mut pinned_by_repeated_row) = (0u64, false);
 
     // The walk: jumps with known coefficients, the current point with
-    // its coefficients, and the guard.
+    // its coefficients.  The guard is shared by both target sources.
     let jump_count = 16usize;
     let shared_jumps = targets == TargetSource::WalkSharedJumps;
+    let guarded = targets.is_guarded();
     let mut jumps: Vec<(G::Elt, u64, u64)> = Vec::new();
     let mut walk_point = g.identity();
     let (mut wa, mut wb) = (0u64, 0u64);
     let mut walk_fresh = true;
     let segment_cap = ((r as f64).sqrt() * 4.0) as u64 + 65_536;
     let mut segment_steps = 0u64;
-    let mut seen: FastMap<()> = fast_map(0);
-    let (mut walk_steps, mut walk_restarts, mut walk_cycles, mut guard_probes, mut walk_jumps) =
+    let mut seen: FastMap<()> = fast_map(if guarded { 1 << 12 } else { 0 });
+    let (mut walk_steps, mut walk_restarts, mut repeats_skipped, mut guard_probes, mut walk_jumps) =
         (0u64, 0u64, 0u64, 0u64, 0u64);
     if shared_jumps {
         jumps = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, jump_count);
         walk_jumps += jump_count as u64;
     }
-    if targets.is_walk() {
-        seen = fast_map((segment_cap as usize).min(1 << 22));
-    }
 
     while trials < max_trials {
         let (point, a, b) = match targets {
-            TargetSource::Random => {
-                trials += 1;
+            TargetSource::Random | TargetSource::RandomUnguarded => {
                 let a = rng.gen_range(1..r);
                 let b = rng.gen_range(1..r);
                 let ag = g.mul(&mut rel.group_ops, generator, a);
@@ -2546,9 +2554,6 @@ fn collect_and_solve<G: CountedGroup>(
                     walk_fresh = false;
                     walk_restarts += 1;
                     segment_steps = 0;
-                    if shared_jumps {
-                        seen.clear();
-                    }
                 } else {
                     let hsh = mix(g.key(&walk_point));
                     let j = ((hsh >> 24) % jump_count as u64) as usize;
@@ -2564,16 +2569,21 @@ fn collect_and_solve<G: CountedGroup>(
                     direct_skipped += 1;
                     continue;
                 }
-                guard_probes += 1;
-                if seen.insert(g.key(&walk_point), ()).is_some() {
-                    walk_cycles += 1;
-                    walk_fresh = true;
-                    continue;
-                }
-                trials += 1;
                 (walk_point, wa, wb)
             }
         };
+        trials += 1;
+        // The guard: a target this run has already decomposed carries no
+        // relation the matrix does not hold, and taking it again would
+        // pin the logarithm by collision rather than by relation.
+        if guarded {
+            guard_probes += 1;
+            if seen.insert(g.key(&point), ()).is_some() {
+                repeats_skipped += 1;
+                walk_fresh = true;
+                continue;
+            }
+        }
         let Some(summands) = oracle(&mut rel.group_ops, &mut ctr, point) else {
             continue;
         };
@@ -2637,12 +2647,12 @@ fn collect_and_solve<G: CountedGroup>(
     rel.count("canonicalisations", ctr.canonicalisations);
     rel.count("frobfold_mismatches", ctr.frobfold_mismatches);
     rel.count("direct_relations_skipped", direct_skipped);
+    rel.count("repeated_targets_skipped", repeats_skipped);
+    rel.count("target_guard_probes", guard_probes);
     if targets.is_walk() {
         rel.count("walk_jumps", walk_jumps);
         rel.count("walk_steps", walk_steps);
         rel.count("walk_restarts", walk_restarts);
-        rel.count("walk_cycles", walk_cycles);
-        rel.count("walk_guard_probes", guard_probes);
     }
     la.wall_ns = la_ns;
     la.count("row_ops", gauss.row_ops);
@@ -2751,7 +2761,7 @@ fn price_phase(phase: &mut PhaseCost, calib: &Calibration) {
     gae += conv("inversions", calib.ns_per_inversion);
     gae += conv("frobenius_maps", calib.ns_per_frobenius);
     gae += conv("canonicalisations", calib.ns_per_canon);
-    gae += conv("walk_guard_probes", Some(calib.ns_per_lookup));
+    gae += conv("target_guard_probes", Some(calib.ns_per_lookup));
     phase.gae = gae;
 }
 
@@ -2892,11 +2902,11 @@ pub struct BoundaryConfig {
     /// Run a two-summand row on a binary base when it is admissible and
     /// its exact trials floor is at most `max_trials` over this divisor.
     pub m2_floor_divisor: u64,
-    /// Run the walk rows with one jump table for every segment and the
-    /// guard cleared at each restart (the walk as the Round-2 ladder first
-    /// ran it), for the merge diagnostic; the default draws fresh jumps
-    /// per segment and never presents a target twice.
-    pub walk_shared_jumps: bool,
+    /// Run every row without the repeat guard, and the walk rows with one
+    /// jump table for every segment: the targets as the ladder drew them
+    /// before §10.2 of the note, for the diagnostic that measures what
+    /// that cost.  The default guards both sources.
+    pub unguarded_targets: bool,
 }
 
 impl Default for BoundaryConfig {
@@ -2919,7 +2929,7 @@ impl Default for BoundaryConfig {
             rho_cap_multiple: 64.0,
             max_folded_table_pairs: 1 << 23,
             m2_floor_divisor: 4,
-            walk_shared_jumps: false,
+            unguarded_targets: false,
         }
     }
 }
@@ -2927,10 +2937,19 @@ impl Default for BoundaryConfig {
 impl BoundaryConfig {
     /// The target source of the walk rows.
     pub fn walk_source(&self) -> TargetSource {
-        if self.walk_shared_jumps {
+        if self.unguarded_targets {
             TargetSource::WalkSharedJumps
         } else {
             TargetSource::Walk
+        }
+    }
+
+    /// The target source of the rows that draw `[a]G + [b]Q` per trial.
+    pub fn random_source(&self) -> TargetSource {
+        if self.unguarded_targets {
+            TargetSource::RandomUnguarded
+        } else {
+            TargetSource::Random
         }
     }
 
@@ -3093,17 +3112,17 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
             out.rho.push(rho);
         }
 
-        use TargetSource::Random;
+        let random = cfg.random_source();
         let walk = cfg.walk_source();
         let variants: Vec<(&str, Oracle, TargetSource)> = vec![
-            ("semaev_s3_roots_m2", Oracle::SemaevS3Roots, Random),
-            ("direct_subtraction_m2", Oracle::Subtract, Random),
-            ("mitm_m2", Oracle::Mitm { table: &table, m: 2 }, Random),
-            ("mitm_m3", Oracle::Mitm { table: &table, m: 3 }, Random),
+            ("semaev_s3_roots_m2", Oracle::SemaevS3Roots, random),
+            ("direct_subtraction_m2", Oracle::Subtract, random),
+            ("mitm_m2", Oracle::Mitm { table: &table, m: 2 }, random),
+            ("mitm_m3", Oracle::Mitm { table: &table, m: 3 }, random),
             // Round 2: the negation-folded table, then walk targets on it.
-            ("mitm_m2_negfold", Oracle::Mitm { table: &table_neg, m: 2 }, Random),
+            ("mitm_m2_negfold", Oracle::Mitm { table: &table_neg, m: 2 }, random),
             ("mitm_m2_negfold_walk", Oracle::Mitm { table: &table_neg, m: 2 }, walk),
-            ("mitm_m3_negfold", Oracle::Mitm { table: &table_neg, m: 3 }, Random),
+            ("mitm_m3_negfold", Oracle::Mitm { table: &table_neg, m: 3 }, random),
             ("mitm_m3_negfold_walk", Oracle::Mitm { table: &table_neg, m: 3 }, walk),
         ];
         for (name, oracle, targets) in variants {
@@ -3508,16 +3527,16 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
             out.rho.push(rho);
         }
 
-        use TargetSource::Random;
+        let random = cfg.random_source();
         let walk = cfg.walk_source();
         let mut variants: Vec<(String, Oracle, TargetSource)> = vec![(
             format!("mitm_m{m_used}"),
             Oracle::Mitm { table: &table, m: m_used },
-            Random,
+            random,
         )];
         if let Some(o) = &s4 {
             if inst.n <= cfg.s4_max_degree {
-                variants.push(("semaev_s4_pairs_and_solve_m3".into(), Oracle::SemaevS4 { oracle: o }, Random));
+                variants.push(("semaev_s4_pairs_and_solve_m3".into(), Oracle::SemaevS4 { oracle: o }, random));
             }
         }
         // Round 2: the negation-folded table, walk targets, and the
@@ -3525,7 +3544,7 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
         variants.push((
             format!("mitm_m{m_used}_negfold"),
             Oracle::Mitm { table: &table_neg, m: m_used },
-            Random,
+            random,
         ));
         variants.push((
             format!("mitm_m{m_used}_negfold_walk"),
@@ -3533,7 +3552,7 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
             walk,
         ));
         if m2_row {
-            variants.push(("mitm_m2_negfold".into(), Oracle::Mitm { table: &table_neg, m: 2 }, Random));
+            variants.push(("mitm_m2_negfold".into(), Oracle::Mitm { table: &table_neg, m: 2 }, random));
             variants.push(("mitm_m2_negfold_walk".into(), Oracle::Mitm { table: &table_neg, m: 2 }, walk));
         }
         for (name, oracle, targets) in variants {
@@ -3758,13 +3777,13 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             out.rho.push(plain);
         }
 
-        use TargetSource::Random;
+        let random = cfg.random_source();
         let walk = cfg.walk_source();
         let mut variants: Vec<(String, &FactorBase<FastPoint>, Oracle, TargetSource, ExactCeiling)> = vec![(
             format!("mitm_m{m_used}_signed_orbit_columns"),
             &folded,
             Oracle::Mitm { table: &table, m: m_used },
-            Random,
+            random,
             exact_of(m_used),
         )];
         if n <= cfg.koblitz_no_fold_max_degree {
@@ -3772,7 +3791,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
                 format!("mitm_m{m_used}_abscissa_columns_control"),
                 &unfolded,
                 Oracle::Mitm { table: &table, m: m_used },
-                Random,
+                random,
                 exact_of(m_used),
             ));
         }
@@ -3781,7 +3800,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
                 "semaev_s4_pairs_and_solve_m3_signed_orbit_columns".into(),
                 &folded,
                 Oracle::SemaevS4 { oracle: o },
-                Random,
+                random,
                 exact_m3,
             ));
         }
@@ -3792,7 +3811,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             format!("mitm_m{m_used}_signed_orbit_columns_negfold"),
             &folded,
             Oracle::Mitm { table: &table_neg, m: m_used },
-            Random,
+            random,
             exact_of(m_used),
         ));
         if let Some(tf) = &table_frob {
@@ -3800,7 +3819,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
                 format!("mitm_m{m_used}_signed_orbit_columns_frobfold"),
                 &folded,
                 Oracle::MitmFrobenius { table: tf, m: m_used },
-                Random,
+                random,
                 exact_of(m_used),
             ));
             variants.push((
@@ -4280,13 +4299,52 @@ mod tests {
         assert_eq!(walk.relations.get("walk_jumps"), 16 * walk.relations.get("walk_restarts"));
         let random = res.variants.iter().find(|v| v.name == "mitm_m2_negfold").unwrap();
         assert!(walk.relations.group_ops.scalar_mults < random.relations.group_ops.scalar_mults);
-        // No target is ever presented twice, so no row can repeat an
-        // earlier row's column part with different coefficients: the walk
-        // is a relation search, not a collision search.
+        // No target is ever presented twice, on either source, so no row
+        // can repeat an earlier row's factor-base part with different
+        // coefficients: every row is a relation search, not a collision
+        // search.  Every row is guarded and the guard is priced.
         for v in &res.variants {
+            assert_eq!(v.targets, if v.name.ends_with("_walk") { "walk" } else { "random" });
             assert_eq!(v.linear_algebra.get("repeated_column_rows"), 0, "{}", v.name);
             assert_eq!(v.linear_algebra.get("pinned_by_repeated_row"), 0, "{}", v.name);
+            assert!(v.relations.get("target_guard_probes") >= v.trials, "{}", v.name);
         }
+    }
+
+    #[test]
+    fn an_unguarded_draw_pins_the_logarithm_by_a_repeated_target() {
+        // Unguarded, a run ends the moment it decomposes one group
+        // element twice, which is a collision and not a relation.  The
+        // rate is about one run in four whatever the size: a two-summand
+        // search draws `T ≈ K/p` targets, of which `T²/2r` pairs collide
+        // and a fraction `p` of those are decomposable, so the expected
+        // number of repeated rows is `K²/(2rp)`, and with `p ≈ F²/2r` and
+        // `K = F/2` that is `1/4`.  Twenty-four seeds leave a 0.3% chance
+        // of seeing none.  Guarded, there are never any.
+        let inst = roster_prime_instance(18).unwrap();
+        let curve = &inst.curve;
+        let fb = prime_factor_base(&inst, 16);
+        let table = PairTable::build_negation_folded(curve, &fb);
+        let g = inst.generator_point();
+        let mut ops = GroupOps::default();
+        let d = 30_011 % inst.r;
+        let q = curve.mul(&mut ops, g, d);
+        let oracle = Oracle::Mitm { table: &table, m: 2 };
+        let (mut unguarded_repeats, mut guarded_repeats) = (0u64, 0u64);
+        for seed in 1..=24u64 {
+            for (source, repeats) in [
+                (TargetSource::RandomUnguarded, &mut unguarded_repeats),
+                (TargetSource::Random, &mut guarded_repeats),
+            ] {
+                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, |o, c, p| {
+                    decompose_prime(curve, &fb, &oracle, o, c, p)
+                });
+                assert_eq!(out.recovered, Some(d), "{source:?} seed {seed}");
+                *repeats += out.linear_algebra.get("repeated_column_rows");
+            }
+        }
+        assert!(unguarded_repeats > 0, "an unguarded draw repeats a target in about one run in four");
+        assert_eq!(guarded_repeats, 0, "a guarded draw never decomposes one element twice");
     }
 
     #[test]
