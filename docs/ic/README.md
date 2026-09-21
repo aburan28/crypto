@@ -602,6 +602,15 @@ Frobenius squarings and one rebuild.  Fresh and resumed materialisation
 report the same deterministic counts; process CPU, RSS and select wall
 remain charged separately.
 
+Every workflow stage now carries a process-CPU delta and the cumulative
+process RSS high-water mark at its end.  On the current scalar-blind
+replay, select/setup used 1.057 core-seconds, relation collection 7.776,
+logs/verification/LA 1.051, target solve 0.904 and rho 1.581.  Their
+12.369-core-second sum is within 0.012 seconds of the 12.380 whole-process
+meter.  Collection is the measured single-target bottleneck: its folded
+pair-table build used 0.317 s wall and 3.259 core-seconds, while the exact
+17,000-probe relation unit used 0.487 s wall and 4.472 core-seconds.
+
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
 verified the published point in all five fresh runs.  The selected
@@ -625,8 +634,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 101 processes, 311.140 sequential wall-seconds,
-1,159.243 core-seconds and a 139.9 MB maximum RSS.
+campaign contains 103 processes, 318.047 sequential wall-seconds,
+1,184.891 core-seconds and a 139.9 MB maximum RSS.
 
 With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
 median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times

@@ -1039,12 +1039,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         p.solver.name()
     ));
 
+    // Selection includes curve construction: leaving setup before the first
+    // stage made the phase CPU totals smaller than the whole-process charge.
+    let t0 = Instant::now();
+    let select_resource_start = experiment::resource_snapshot();
     let c = experiment::curve(p.curve.degree, p.curve.curve_a, p.curve.subfield, p.curve.curve_b)?;
     let mut stage_reports: Vec<Value> = Vec::new();
     let mut overall_failed: Option<String> = None;
 
     // ── Stage 1: select ────────────────────────────────────────────
-    let t0 = Instant::now();
     let mut select_ran = false;
     let (spec, fb, selection_cost): (
         FactorBaseSpec,
@@ -1133,12 +1136,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         state.select.elapsed_seconds = t0.elapsed().as_secs_f64();
         write_atomic(&state_path, &state)?;
     }
+    if let Some(report) = stage_reports.last_mut() {
+        report["elapsed_seconds"] = json!(t0.elapsed().as_secs_f64());
+        report["resources"] = experiment::resource_delta(select_resource_start);
+    }
     if args.stop_after == Some(Stage::Select) {
         return Ok(finish(&p, &state, &args, stage_reports, factor_base_summary, None, None, begin, "stopped"));
     }
 
     // ── Stage 2: collect (work units) ──────────────────────────────
     let t1 = Instant::now();
+    let collect_resource_start = experiment::resource_snapshot();
     let ic = experiment::with_linear_algebra(
         experiment::ic_options_with_descent(
             p.solver,
@@ -1181,6 +1189,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let mut relations_now = 0usize;
     let mut trials_now = 0u64;
     let mut summands_scanned_now = 0u64;
+    let mut pair_table_build_seconds = 0.0f64;
+    let mut pair_table_build_resources: Option<Value> = None;
+    let mut relation_unit_seconds = 0.0f64;
+    let mut relation_unit_resources: Option<Value> = None;
     if !wanted.is_empty() {
         say(&format!(
             "[2/4] collect: running {} work unit(s) of {} probes ({} already present) …",
@@ -1191,12 +1203,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     }
     if !wanted.is_empty() {
         if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+            let pair_begin = Instant::now();
+            let pair_resource_start = experiment::resource_snapshot();
             pair = Some(
                 build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?,
             );
+            pair_table_build_seconds = pair_begin.elapsed().as_secs_f64();
+            pair_table_build_resources = Some(experiment::resource_delta(pair_resource_start));
         }
         let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
             .ok_or("factor base cannot decompose with this summand count")?;
+        let relation_resource_start = experiment::resource_snapshot();
         for &u in &wanted {
             let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u)?;
             say(&format!(
@@ -1209,11 +1226,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             relations_now += doc.relations.len();
             trials_now += doc.count;
             summands_scanned_now += doc.summands_scanned;
+            relation_unit_seconds += doc.elapsed_seconds;
             units.insert(u, doc);
             state.units_collected = units.len();
             state.relations_collected = units.values().map(|d| d.relations.len()).sum();
             write_atomic(&state_path, &state)?;
         }
+        relation_unit_resources = Some(experiment::resource_delta(relation_resource_start));
     }
     state.units_collected = units.len();
     state.relations_collected = units.values().map(|d| d.relations.len()).sum();
@@ -1227,6 +1246,8 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     write_atomic(&state_path, &state)?;
     let trials_total: u64 = units.values().map(|d| d.count).sum();
     let summands_scanned_total: u64 = units.values().map(|d| d.summands_scanned).sum();
+    let collect_elapsed = t1.elapsed().as_secs_f64();
+    let collect_resources = experiment::resource_delta(collect_resource_start);
     stage_reports.push(json!({"stage":"collect",
         "status":if state.collect.status == StageStatus::Complete {"complete"} else {"partial"},
         "ran":units_ran > 0,"worker":worker_mode,
@@ -1237,7 +1258,11 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         "summands_scanned_now":summands_scanned_now,
         "trials_total":trials_total,"relations_total":state.relations_collected,
         "summands_scanned_total":summands_scanned_total,
-        "elapsed_seconds":t1.elapsed().as_secs_f64()}));
+        "pair_table_build_seconds":pair_table_build_seconds,
+        "pair_table_build_resources":pair_table_build_resources,
+        "relation_unit_seconds":relation_unit_seconds,
+        "relation_unit_resources":relation_unit_resources,
+        "elapsed_seconds":collect_elapsed,"resources":collect_resources}));
     if units_ran == 0 {
         say(&format!(
             "[2/4] collect: reused {} unit(s), {} relations from {} probes",
@@ -1260,6 +1285,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
 
     // ── Stage 3: logs (merge, verify, solve) ───────────────────────
     let t2 = Instant::now();
+    let logs_resource_start = experiment::resource_snapshot();
     let table = if logs_done {
         let doc: LogTableDocument = read_json(&logs_path)?;
         let table = log_table_from_doc(&c, &doc)?;
@@ -1400,6 +1426,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             }
         }
     };
+    if let Some(report) = stage_reports.last_mut() {
+        report["elapsed_seconds"] = json!(t2.elapsed().as_secs_f64());
+        report["resources"] = experiment::resource_delta(logs_resource_start);
+    }
     let Some(table) = table else {
         return Ok(finish(&p, &state, &args, stage_reports, with_tier(factor_base_summary, pair.as_ref()), None, overall_failed, begin, "failed"));
     };
@@ -1409,6 +1439,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
 
     // ── Stage 3: solve (per-target resumable) ──────────────────────
     let t2 = Instant::now();
+    let solve_resource_start = experiment::resource_snapshot();
     let mut solutions: SolutionsDocument = if sol_path.exists() {
         let d: SolutionsDocument = read_json(&sol_path)?;
         if d.params_digest != digest || !same_curve(d.degree, d.curve_a, d.subfield, d.curve_b, &c) {
@@ -1499,14 +1530,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         reason: (!all_verified).then(|| format!("{} of {} targets unsolved", p.targets.len() - state.solved_targets, p.targets.len())),
     };
     write_atomic(&state_path, &state)?;
+    let solve_elapsed = t2.elapsed().as_secs_f64();
+    let solve_resources = experiment::resource_delta(solve_resource_start);
     stage_reports.push(json!({"stage":"solve","status":if all_verified{"complete"}else{"failed"},"ran":true,
         "targets":p.targets.len(),"already_solved":already.len(),"solved_now":solved_now,"failed_now":failed_now,
         "pair_table_seconds":pair_table_seconds,
-        "elapsed_seconds":t2.elapsed().as_secs_f64()}));
+        "elapsed_seconds":solve_elapsed,"resources":solve_resources}));
 
     // ── Baseline: signed-Frobenius ρ on the same targets, same process ──
     if p.baseline.rho {
         let t3 = Instant::now();
+        let baseline_resource_start = experiment::resource_snapshot();
         say(&format!("[ρ]   baseline: signed-Frobenius rho on {} targets …", p.targets.len()));
         let mut rows = Vec::with_capacity(p.targets.len());
         let (mut rho_seconds, mut rho_iterations, mut rho_verified) = (0.0f64, 0u64, 0usize);
@@ -1547,6 +1581,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let ic_amortised = (precompute + pair_table_seconds + descent_total) / targets;
         let rho_per_target = rho_seconds / targets;
         let ratio = |ic: f64| if ic > 0.0 { rho_per_target / ic } else { f64::INFINITY };
+        let baseline_elapsed = t3.elapsed().as_secs_f64();
         let vs_rho = json!({
             "n":c.n,"subgroup_order":c.subgroup_order.to_string(),"targets":p.targets.len(),
             "claim_boundary":if p.targets.iter().any(|target| target.public_hash_seed.is_some()) {
@@ -1570,9 +1605,11 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 "amortised_crossover":all_verified && rho_verified == p.targets.len() && ic_amortised < rho_per_target,
                 "whole_process_crossover":all_verified && rho_verified == p.targets.len() && precompute + pair_table_seconds + descent_total < rho_seconds},
             "targets_detail":rows,
-            "elapsed_seconds":t3.elapsed().as_secs_f64()});
+            "elapsed_seconds":baseline_elapsed});
         write_atomic(&args.dir.join(BASELINE_FILE), &vs_rho)?;
-        stage_reports.push(json!({"stage":"baseline","status":"complete","ran":true,"vs_rho":vs_rho}));
+        stage_reports.push(json!({"stage":"baseline","status":"complete","ran":true,
+            "elapsed_seconds":baseline_elapsed,
+            "resources":experiment::resource_delta(baseline_resource_start),"vs_rho":vs_rho}));
         say(&format!(
             "[ρ]   baseline: rho {:.4}s/target ({} verified) vs descent {:.4}s/target, amortised {:.4}s/target — charged ratio {:.1}×, amortised {:.2}×",
             rho_per_target, rho_verified, ic_charged, ic_amortised, ratio(ic_charged), ratio(ic_amortised)
