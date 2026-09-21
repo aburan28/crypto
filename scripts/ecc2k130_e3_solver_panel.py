@@ -44,15 +44,26 @@ SOLVERS = ("groebner", "sat", "enumerate", "pair-table", "wdsat")
 # order 2003, so every one of these is a legal `--known-log`.
 TARGETS = (53, 211, 499, 887, 1289, 1613, 1987)
 
-# What counts as "one unit of solver output" for each solver, so that the
-# ratio below is work per call rather than work per run.
+# The per-call unit for each solver.  `trials` is the oracle-call counter --
+# every attempt to decompose a target, successful or not -- so dividing by it
+# gives the price of one call, which is the quantity section 3.2 leans on.
+# Where a solver exposes a hardware-independent operation count that is the
+# metric and cpu seconds are a practicality note; where it does not, seconds
+# are all there is and are labelled as such.
 UNIT = {
-    "groebner": ("f4_word_ops", "f4_reductions", "F4 word operations per F4 reduction"),
-    "sat": ("f4_word_ops", "independent_relations", "solver operations per independent relation"),
-    "enumerate": (None, None, "cpu seconds for the whole fixed sweep"),
-    "pair-table": (None, None, "cpu seconds for the whole fixed sweep"),
-    "wdsat": (None, None, "not exercised: --solver wdsat requires --wdsat-binary"),
+    "groebner": ("f4_word_ops", "F4 word operations per oracle call"),
+    "sat": ("sat_conflicts", "SAT conflicts per oracle call"),
+    "enumerate": (None, "cpu seconds per oracle call (wall clock, no operation counter)"),
+    "pair-table": (None, "cpu seconds per oracle call (wall clock, no operation counter)"),
+    "wdsat": (None, "not exercised: --solver wdsat requires --wdsat-binary"),
 }
+
+# Counters copied verbatim out of every run, so the artefact carries the
+# denominators as well as the ratios.
+KEEP = ("trials", "relations", "independent_relations", "dependent_relations",
+        "f4_word_ops", "f4_reductions", "sat_calls", "sat_conflicts",
+        "pair_table_entries", "verification_failures", "factor_base_points",
+        "columns")
 
 
 def one_run(solver: str, known_log: int, degree: int, summands: int) -> dict:
@@ -68,15 +79,11 @@ def one_run(solver: str, known_log: int, degree: int, summands: int) -> dict:
         return {"known_log": known_log, "status": d.get("status", "?"),
                 "message": (d.get("message") or "")[:200]}
     c, r = d.get("counts", {}), d.get("result", {})
-    return {
-        "known_log": known_log,
-        "status": "complete",
-        "verified": r.get("verified"),
-        "f4_word_ops": c.get("f4_word_ops"),
-        "f4_reductions": c.get("f4_reductions"),
-        "independent_relations": c.get("independent_relations"),
-        "cpu_seconds": d.get("resources", {}).get("cpu_seconds"),
-    }
+    out = {"known_log": known_log, "status": "complete",
+           "verified": r.get("verified"),
+           "cpu_seconds": d.get("resources", {}).get("cpu_seconds")}
+    out.update({k: c.get(k) for k in KEEP})
+    return out
 
 
 def spread(values) -> float:
@@ -92,7 +99,7 @@ def panel(degree: int, summands: int) -> dict:
     for solver in SOLVERS:
         runs = [one_run(solver, k, degree, summands) for k in TARGETS]
         done = [r for r in runs if r["status"] == "complete"]
-        num, den, unit = UNIT[solver]
+        num, unit = UNIT[solver]
         row = {"unit": unit, "runs": runs,
                "completed": len(done), "attempted": len(runs),
                "all_verified": bool(done) and all(r["verified"] for r in done)}
@@ -101,17 +108,22 @@ def panel(degree: int, summands: int) -> dict:
             out[solver] = row
             continue
         row["exercised"] = True
-        totals = [r[num] for r in done] if num else [r["cpu_seconds"] for r in done]
+        # `trials` counts oracle calls, failures included.  When it equals the
+        # relation count no call failed, and then the ratio below cannot be
+        # hiding a shift in the failure rate.
+        row["oracle_calls"] = [r["trials"] for r in done]
+        row["no_call_failed"] = all(r["trials"] == r["relations"] for r in done)
+        totals = [r[num] if num else r["cpu_seconds"] for r in done]
+        row["total_min"], row["total_max"] = min(totals), max(totals)
         row["total_spread_percent"] = round(spread(totals), 1)
-        if num and den:
-            per = [r[num] / r[den] for r in done if r[den]]
-            row["per_call"] = [round(x, 3) for x in per]
-            row["per_call_min"] = round(min(per), 3)
-            row["per_call_max"] = round(max(per), 3)
-            row["per_call_mean"] = round(statistics.fmean(per), 3)
-            row["per_call_spread_percent"] = round(spread(per), 1)
-        else:
-            row["per_call_spread_percent"] = row["total_spread_percent"]
+        per = [(r[num] if num else r["cpu_seconds"]) / r["trials"]
+               for r in done if r["trials"]]
+        row["per_call"] = [round(x, 6) for x in per]
+        row["per_call_min"] = round(min(per), 6)
+        row["per_call_max"] = round(max(per), 6)
+        row["per_call_mean"] = round(statistics.fmean(per), 6)
+        row["per_call_spread_percent"] = round(spread(per), 1)
+        row["metric_is_operation_count"] = num is not None
         out[solver] = row
     return out
 
@@ -131,8 +143,11 @@ def main() -> None:
             print(f"{name:11s} not exercised ({row['unit']})")
             continue
         print(f"{name:11s} {row['unit']}")
-        print(f"            per call spread {row['per_call_spread_percent']:5.1f}%"
-              f"   whole-run total spread {row['total_spread_percent']:6.1f}%")
+        print(f"            per call {row['per_call_min']:g} .. {row['per_call_max']:g} "
+              f"(spread {row['per_call_spread_percent']:.1f}%)   "
+              f"whole-run total spread {row['total_spread_percent']:.1f}%   "
+              f"calls {min(row['oracle_calls'])}-{max(row['oracle_calls'])}"
+              f"{'' if row['no_call_failed'] else '   SOME CALLS FAILED'}")
 
     report = {
         "schema": "ecc2k130_e3_solver_panel/v1",
@@ -149,12 +164,16 @@ def main() -> None:
         "degree": args.degree,
         "summands": args.summands,
         "targets": list(TARGETS),
-        "caveat": "the ratio is work per unit of solver output -- an F4 "
-                  "reduction, an independent relation -- not strictly per "
-                  "call, because the counters do not separate calls that "
-                  "failed to decompose from calls that succeeded.  The "
-                  "whole-run totals swing because a run decides how many "
-                  "relations to collect, which is not a property of the target.",
+        "denominator": "counts.trials -- every attempt to decompose a "
+                       "target, successful or not.  `no_call_failed` records "
+                       "whether trials equalled the relation count, which is "
+                       "what rules out a ratio kept flat by a shifting failure "
+                       "rate.  The whole-run totals swing because a run "
+                       "decides how many relations to collect, which is not a "
+                       "property of the target.",
+        "unit_caveat": "enumerate and pair-table expose no operation counter, "
+                       "so their rows are cpu seconds -- a practicality note "
+                       "under AGENTS.md section 6, never the metric.",
         "solvers": solvers,
     }
     OUT.write_text(json.dumps(report, indent=2) + "\n")
