@@ -1189,6 +1189,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let mut relations_now = 0usize;
     let mut trials_now = 0u64;
     let mut summands_scanned_now = 0u64;
+    let mut pair_table_build_seconds = 0.0f64;
+    let mut pair_table_build_resources: Option<Value> = None;
+    let mut relation_unit_seconds = 0.0f64;
+    let mut relation_unit_resources: Option<Value> = None;
     if !wanted.is_empty() {
         say(&format!(
             "[2/4] collect: running {} work unit(s) of {} probes ({} already present) …",
@@ -1199,12 +1203,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     }
     if !wanted.is_empty() {
         if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
+            let pair_begin = Instant::now();
+            let pair_resource_start = experiment::resource_snapshot();
             pair = Some(
                 build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?,
             );
+            pair_table_build_seconds = pair_begin.elapsed().as_secs_f64();
+            pair_table_build_resources = Some(experiment::resource_delta(pair_resource_start));
         }
         let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
             .ok_or("factor base cannot decompose with this summand count")?;
+        let relation_resource_start = experiment::resource_snapshot();
         for &u in &wanted {
             let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u)?;
             say(&format!(
@@ -1217,11 +1226,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             relations_now += doc.relations.len();
             trials_now += doc.count;
             summands_scanned_now += doc.summands_scanned;
+            relation_unit_seconds += doc.elapsed_seconds;
             units.insert(u, doc);
             state.units_collected = units.len();
             state.relations_collected = units.values().map(|d| d.relations.len()).sum();
             write_atomic(&state_path, &state)?;
         }
+        relation_unit_resources = Some(experiment::resource_delta(relation_resource_start));
     }
     state.units_collected = units.len();
     state.relations_collected = units.values().map(|d| d.relations.len()).sum();
@@ -1247,6 +1258,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         "summands_scanned_now":summands_scanned_now,
         "trials_total":trials_total,"relations_total":state.relations_collected,
         "summands_scanned_total":summands_scanned_total,
+        "pair_table_build_seconds":pair_table_build_seconds,
+        "pair_table_build_resources":pair_table_build_resources,
+        "relation_unit_seconds":relation_unit_seconds,
+        "relation_unit_resources":relation_unit_resources,
         "elapsed_seconds":collect_elapsed,"resources":collect_resources}));
     if units_ran == 0 {
         say(&format!(
