@@ -2968,52 +2968,109 @@ impl PairSumTable {
             suffix[o + 1] = suffix[o + 1].max(suffix[o]);
         }
         let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
-        let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
-            let mut sums = Vec::with_capacity(n_points);
-            let mut scratch = BatchScratch::default();
+        let mut row_start = Vec::with_capacity(reps.len() + 1);
+        row_start.push(0usize);
+        for &(orbit, _) in &reps {
+            let from = suffix[orbit as usize] as usize;
+            row_start.push(row_start.last().copied().unwrap() + n_points - from);
+        }
+        let total = *row_start.last().unwrap();
+        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let present_mask = (1u64 << filter_bits) - 1;
+        // Keep only the bits the scatter pass consumes: the bucket and
+        // enough low hash bits for both the presence filter and stored
+        // rest.  Six bytes cover the folded, tagged tables this tier is
+        // intended for (44 bits at the retained n=53 width).  Wider
+        // shapes fall back to recomputation rather than silently losing
+        // key bits or growing an unbounded temporary.
+        let payload_bits = filter_bits.max(if tagged { 16 } else { 32 });
+        let payload_mask = (1u64 << payload_bits) - 1;
+        let token_bits = bucket_bits + payload_bits;
+        let mut cached: Option<Vec<[u8; 6]>> =
+            (token_bits <= 48).then(|| vec![[0; 6]; total]);
+        let cache_slots = cached.as_mut().map(|v| v.as_mut_ptr() as usize);
+        (0..reps.len()).into_par_iter().for_each(|r| {
             let (orbit, rep) = reps[r];
             let from = suffix[orbit as usize] as usize;
+            let len = n_points - from;
+            let mut sums = Vec::with_capacity(len);
+            let mut scratch = BatchScratch::default();
             curve.add_many(points[rep], &by_orbit[from..], &mut sums, &mut scratch);
-            for &p in &sums {
-                f(Self::canon_key_with(&curve, canon.as_ref(), p), orbit);
-            }
-        };
-        (0..reps.len()).into_par_iter().for_each(|r| {
-            each_row(r, &mut |key, _| {
-                let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
+            assert_eq!(sums.len(), len, "folded pair row length");
+            for (offset, p) in sums.into_iter().enumerate() {
+                let hash = pair_filter_hash(Self::canon_key_with(&curve, canon.as_ref(), p));
+                if let Some(slots) = cache_slots {
+                    let bucket = hash >> bucket_shift;
+                    let token = (bucket << payload_bits) | (hash & payload_mask);
+                    let b = token.to_le_bytes();
+                    // SAFETY: every parallel row owns the disjoint range
+                    // `row_start[r]..row_start[r + 1]`, sized from the
+                    // same suffix passed to `add_many`.
+                    unsafe {
+                        *(slots as *mut [u8; 6]).add(row_start[r] + offset) =
+                            [b[0], b[1], b[2], b[3], b[4], b[5]];
+                    }
+                }
+                let bucket = (hash >> bucket_shift) as usize;
                 counts[bucket + 1].fetch_add(1, Ordering::Relaxed);
-            });
+            }
         });
         let mut bucket_start: Vec<u32> = counts.iter().map(|c| c.load(Ordering::Relaxed)).collect();
         for b in 0..buckets {
             bucket_start[b + 1] += bucket_start[b];
         }
         let total = bucket_start[buckets] as usize;
+        if total != row_start.last().copied().unwrap() {
+            return None;
+        }
         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
         let mut rests = vec![0u32; total];
-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
-        let present_mask = (1u64 << filter_bits) - 1;
         let words = (1usize << filter_bits) / 64;
         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
         let slots = rests.as_mut_ptr() as usize;
-        (0..reps.len()).into_par_iter().for_each(|r| {
-            each_row(r, &mut |key, orbit| {
-                let bucket = (pair_filter_hash(key) >> bucket_shift) as usize;
-                let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
-                // SAFETY: `slot` is this pair's own index, handed out
-                // once by the bucket's cursor and inside the run the
-                // counting pass measured for that bucket.
-                unsafe {
-                    *(slots as *mut u32).add(slot) = if tagged {
-                        Self::tagged_rest(key, orbit)
-                    } else {
-                        Self::compact_rest(key)
-                    };
+        let scatter = |bucket: usize, low_hash: u64, orbit: u32| {
+            let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
+            // SAFETY: `slot` is this pair's own index, handed out
+            // once by the bucket's cursor and inside the run the
+            // counting pass measured for that bucket.
+            unsafe {
+                *(slots as *mut u32).add(slot) = if tagged {
+                    Self::tagged_rest_from_hash(low_hash, orbit)
+                } else {
+                    low_hash as u32
+                };
+            }
+            let h = (low_hash & present_mask) as usize;
+            present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+        };
+        if let Some(cached) = cached {
+            (0..reps.len()).into_par_iter().for_each(|r| {
+                let orbit = reps[r].0;
+                for token in &cached[row_start[r]..row_start[r + 1]] {
+                    let value = u64::from_le_bytes([
+                        token[0], token[1], token[2], token[3], token[4], token[5], 0, 0,
+                    ]);
+                    let bucket = (value >> payload_bits) as usize;
+                    scatter(bucket, value, orbit);
                 }
-                let h = (pair_filter_hash(key) & present_mask) as usize;
-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
             });
-        });
+        } else {
+            (0..reps.len()).into_par_iter().for_each(|r| {
+                let (orbit, rep) = reps[r];
+                let from = suffix[orbit as usize] as usize;
+                let mut sums = Vec::with_capacity(n_points - from);
+                let mut scratch = BatchScratch::default();
+                curve.add_many(points[rep], &by_orbit[from..], &mut sums, &mut scratch);
+                for p in sums {
+                    let hash = pair_filter_hash(Self::canon_key_with(
+                        &curve,
+                        canon.as_ref(),
+                        p,
+                    ));
+                    scatter((hash >> bucket_shift) as usize, hash, orbit);
+                }
+            });
+        }
         let present: Vec<u64> = present_atomic
             .iter()
             .map(|w| w.load(Ordering::Relaxed))
@@ -3093,8 +3150,8 @@ impl PairSumTable {
     /// Still no false negatives: the hash is computed the same way on
     /// both sides, and the group has the last word either way.
     #[inline]
-    fn tagged_rest(key: u64, orbit: u32) -> u32 {
-        (orbit << 16) | (pair_filter_hash(key) as u32 & 0xffff)
+    fn tagged_rest_from_hash(hash: u64, orbit: u32) -> u32 {
+        (orbit << 16) | (hash as u32 & 0xffff)
     }
 
     /// Largest orbit count a tag can name.
@@ -3421,7 +3478,8 @@ impl PairSumTable {
     /// of each candidate orbit rather than the whole base.
     ///
     /// The stored word names the signed orbit one summand lies in
-    /// ([`Self::tagged_rest`]), so the search is over that orbit alone.
+    /// ([`Self::tagged_rest_from_hash`]), so the search is over that
+    /// orbit alone.
     /// It is still the group that decides: `target − P` is a base point
     /// or it is not, so a tag that came from a sixteen-bit collision
     /// costs this walk and yields nothing.
