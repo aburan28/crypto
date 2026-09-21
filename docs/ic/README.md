@@ -917,10 +917,30 @@ against 3.3×.
   **74 ns** a base point, and the canonicalisation measured alone is
   **76** — so the fold's cost in the descent is the canon and nothing
   else.  Read it down the columns: blocking buys the folded table
-  **1.83×** and the compact table, the control, **1.35×**, which is what
-  says the cause is the key's length.
+  **1.83×** and the compact table **1.35×**.
   `docs/ic/runs/koblitz-probe-shape-20260913.json` records it, and what
   it does not claim.
+- `examples/probe_window_sweep.rs` then asks *why* blocking pays, with
+  the control that comparison lacks: the folded table canonicalised with
+  `k` rotations instead of `n`, so the lookup is held fixed and only the
+  key's length moves.  The gain does not scale with the key — it
+  **steps**, doubling between `k = 8` and `k = 10` and flat on either
+  side, which at six uops a rotation puts the knee at **82 to 94 uops**
+  against this host's **97-entry scheduler**.  So the capacity that
+  binds is the scheduler, not the 224-entry ROB; the `x < best` branch
+  is a `cmovb` and never mispredicted; and TLB pressure was never a
+  competing hypothesis, since it sets how big the exposed round trip is
+  rather than whether it is exposed.
+- `examples/m4_inversion_cost.rs` prices the `m = 4` arm's unbatched
+  `FastCurve::add`: a Fermat inversion at **1300 ns** a `(k, l)` against
+  `add_many`'s **68**, which is twelve times the lone-probe penalty the
+  note used to name as that arm's problem.  No shipped parameter set
+  asks for `m = 4`, so it is a correction rather than a change.
+- The three bullets above are **stage diagnostics** (`AGENTS.md` §2):
+  each prices one slice — a probe, a key, an inversion — so none is a
+  speedup, and the ones that correct an earlier figure are
+  **accounting** by §3.  The method's speed is its `S` column, whole and
+  cold; none of this moves it, so none of it is a scoreboard row.
 
 - `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
   whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over

@@ -3507,13 +3507,19 @@ impl PairSumTable {
                 // enough that consecutive probes' memory round trips do
                 // not overlap when the two are fused.  Split, the
                 // lookups are adjacent and independent and do overlap.
-                // A compact table, whose key is a `pack`, gains a third
-                // where this gains four fifths, which is what says the
-                // cause is the length of the key; which resource the
-                // length exhausts is not established.
-                // `examples/koblitz_orbit_fold_width.rs` measures the
-                // sweep, `docs/ic/runs/koblitz-probe-shape-20260913.json`
-                // records it.  Do not unroll this back into a single
+                // The cause is a capacity, and it is the *scheduler*
+                // rather than the reorder buffer.  Cut the rotation
+                // count to `k` and the gap does not scale with it — it
+                // steps, doubling between `k = 8` and `k = 10`, which
+                // at six uops a rotation is 82 to 94 uops, against this
+                // host's 97-entry scheduler and 224-entry ROB.  The key
+                // is one dependent chain, so its uops wait in the
+                // scheduler and fill the smaller structure first.  Not
+                // a branch: `x < best` is a `cmovb`.
+                // `examples/probe_window_sweep.rs` is that sweep,
+                // `examples/koblitz_orbit_fold_width.rs` the shapes,
+                // `docs/ic/runs/koblitz-probe-window-20260921.json`
+                // records both.  Do not unroll this back into a single
                 // loop.
                 const BLOCK: usize = 1024;
                 const LOOKAHEAD: usize = 32;

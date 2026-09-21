@@ -1962,20 +1962,58 @@ Why a block helps this much is worth stating, because the reason is not
 the one the code's comment gave. The key is some 76 ns of dependent work
 before the address it will load is even known, which is long enough that
 consecutive probes' memory round trips do not overlap when the two are
-fused; split, the lookups are adjacent and independent and do overlap. A
-compact table is the control: its key is a `pack`, nine nanoseconds, its
-probes already overlap, and that is why blocking buys it a third where
-it buys the folded table four fifths. Chunk 1 is measured too and comes
-back at 1.00x on the folded table, so the figure is the blocking and not
-the buffer the chunked loop uses.
+fused; split, the lookups are adjacent and independent and do overlap.
+Chunk 1 is measured too and comes back at 1.00x on the folded table, so
+the figure is the blocking and not the buffer the chunked loop uses.
 
-Which *microarchitectural* resource the long key exhausts is not settled
-here. Reorder-buffer capacity fits, and so would the data-dependent
-branch in the rotation's `x < best`, and a 128 MiB filter walked at
-random misses the TLB on most probes; nothing measured separates them,
-and the compact control speaks only to the key's length being the cause,
-not to the mechanism by which length costs. What it does settle is that
-the block must stay.
+Everything in this subsection is a **stage diagnostic** under `AGENTS.md`
+§2: probe cost is one slice of the pipeline, so none of these ratios is
+a speedup and none may be quoted as one. The method's speed is its `S`
+column, cold and whole, and nothing here moves it. By §3 the change is
+**accounting** — the numbers below correct what earlier rounds claimed
+this cost; the algorithm is unchanged, and no gain is claimed.
+
+**The compact table is not the control this wants.** It differs from the
+folded one in the key *and* in the lookup, and the two cannot be told
+apart by comparing them. The control that holds the lookup fixed is to
+canonicalise with `k` rotations instead of `n` on the folded table
+itself: the key is then wrong, which does not matter, because it is
+spread over the same range and the filter turns away the same fraction.
+`examples/probe_window_sweep.rs` does that. What it finds is not a gain
+proportional to the key's length but a **step**:
+
+| `k` | uops a key | key alone | fused − blocked |
+|---|---|---|---|
+| 2 | 46 | 8.9 ns | 95 ns |
+| 4 – 8 | 58 – 82 | 9.3 – 12.2 | 76 – 78 |
+| **10** | **94** | 14.2 | **147** |
+| 12 – 61 | 106 – 400 | 16.2 – 69.0 | 142 – 152 |
+
+Between `k = 8` and `k = 10` the gap doubles, and on either side of that
+it is flat: from `k = 10` to `k = 61` the key grows five times in time
+and four in uops while the gap does not move. The knee is at **82 to 94
+uops**, reproducible across runs, and the rotation is `lea, shr, or,
+and, cmp, cmovb` — six uops a step, which is where those counts come
+from.
+
+So the mechanism is a capacity, and the sweep says *which* capacity.
+This host is a Cascade Lake Xeon: a 224-entry reorder buffer and a
+**97-entry scheduler**. The knee sits on the scheduler, not the ROB —
+the key is one long dependent chain, so its uops wait in the scheduler
+rather than merely occupying the ROB, and it is the smaller structure
+that fills first. Two of the three candidates this note used to leave
+open are now closed: the `x < best` branch is a **`cmovb`** — disassemble
+`canon_key_with` and look — so there is no branch to mispredict; and TLB
+pressure was never a competing hypothesis, since page walks lengthen the
+round trip in *both* loops and so govern how big the exposed cost is,
+not whether it is exposed.
+
+What the sweep does not settle is the residual: at `k = 2` the key costs
+the same nine nanoseconds as a `pack` and blocking still buys 95 ns,
+where the compact table's gap is 32. Key cost held equal, the two tables
+still differ three-fold, so that part is the lookup structure or the
+16 KiB of canon tables in a 32 KiB L1, and nothing here separates those.
+What all of it settles is that the block must stay.
 
 This is a different thing from interleaving lanes, which is measured
 elsewhere in this note and buys the rotation nothing: interleaving fills
@@ -1987,9 +2025,34 @@ makes blocking pay.
 
 One arm still probes one at a time: `m = 4` walks every second half
 `R − (P_k + P_l)` and calls `pairs_for` on each, so it pays the 265
-rather than the 145. It is quadratic in the base and the least used,
-which is presumably why it was never blocked; blocking it is the same
-change the `m = 3` arm already carries.
+rather than the 145. That is the smaller half of what it does one at a
+time, and naming only it was a mistake. The line above the probe is
+`self.curve.add(target, self.curve.neg(pair))`, and `FastCurve::add`
+calls `Gf2::inv` — a Fermat inversion, `n − 1` squarings and as many
+multiplications — once per `(k, l)`, where the `m = 3` arm's `add_many`
+amortises one inversion over a whole block by Montgomery's trick.
+`examples/m4_inversion_cost.rs` prices them at `n = 61`:
+
+| per `(k, l)` | ns |
+|---|---|
+| `Gf2::inv` alone | 1257 |
+| `FastCurve::add`, what `m = 4` does | **1300** |
+| `add_many` 1024 wide, what `m = 3` does | **68** |
+
+The unbatched inversion is **1232 ns a pair, nineteen times the batched
+step and about twelve times the probe penalty named above**. Blocking
+the probe and batching the inversion together would take the inner step
+from some 1565 ns to 212.
+
+It is quadratic in the base and the least used, which is presumably why
+it was never blocked. *Least used* is the operative half: no parameter
+set or recorded run in this repository asks for `m = 4` — 698 places ask
+for 3 and 110 for 2 — and nothing sets `max_m`, so no sweep reaches it
+either. This is a correction to what the note claimed the arm costs, not
+a change worth making until something runs it — **accounting** by
+`AGENTS.md` §3, and a stage diagnostic by §2: the inner step of one
+enumeration arm, on no path any run takes, so nothing here is a
+speedup.
 
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
