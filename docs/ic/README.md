@@ -589,9 +589,15 @@ XORs, exact), CDCL SAT (conflicts), enumeration, meet in the middle,
 `S₄` — per target on the Koblitz Semaev systems, with each system's
 unknowns, equations, degree, Macaulay profile and first fall degree.
 
-The frozen run and its reading are in
+The frozen run (`runs/ic-boundary-ledger-2026-09-21.json`) and its
+reading are in
 [`RESEARCH_IC_BOUNDARY_LEDGER.md`](../../RESEARCH_IC_BOUNDARY_LEDGER.md);
-the report JSON carries the Markdown tables under `markdown`.
+the report JSON carries the Markdown tables under `markdown`.  The
+scripts in `tools/` render a report into the note's tables
+(`boundary_ledger_tables.py`), the scoreboard's rows
+(`boundary_scoreboard_rows.py`) and the ledger twin's records
+(`boundary_ledger_update.py`), so a new run updates the three places
+`AGENTS.md` §7 requires without numbers being typed.
 
 ## A benchmark corpus: `ic corpus`
 
