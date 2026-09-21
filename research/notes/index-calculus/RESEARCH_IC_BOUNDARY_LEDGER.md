@@ -1453,10 +1453,31 @@ without folding its table, and the ladder runs rows of exactly that
 shape, so a single fold in both terms is the wrong model for them.  On
 the prime and binary ladders both folds are one and nothing changes.
 
-**The law is derived for two summands**, and the `vs family` column on
-an `m = 3` row therefore reads "how this row compares with the best
-*two-summand* member of the family on the same instance" — a common mark
-across the ledger, not that row's own optimum.
+**Three summands obey the same law, with a worse constant.**  The
+`vs family` column on an `m = 3` row reads "how this row compares with
+the best *two-summand* member on the same instance", which is a common
+mark and not that row's own optimum.  But the `m = 3` family's own
+optimum is worth deriving, because it says whether the summand count is
+a way out.  It is not.  An `m = 3` row builds the same pair table,
+`F²/(4t)`; a target costs `F` probes rather than one, since the oracle
+subtracts each base point and looks the remainder up; and a target
+decomposes with `p₃ = C(F+2,3)/#E ≈ F³/6#E`.  So its relation term is
+
+```text
+    F · ρ·K · 6#E/F³  =  3ρ·#E/(kF)
+```
+
+with `ρ` the relations needed per column — `1/2` for the first cycle of
+a graph, about `0.82` for the 2-core of a 3-uniform hypergraph.  That is
+the *same* `1/F` shape as the two-summand term with a coefficient three
+to five times larger, so the `m = 3` optimum sits at the same
+`F ∝ (#E·t/k)^{1/3}` and costs roughly two to three times more.  The
+exponent does not move.
+
+**So nothing inside this family changes the exponent** — not the base
+size, not the two folds, not the summand count.  They move the constant
+in front of `r^{1/6}` and nothing else, which is what §11.3 turns into a
+statement about crossovers.
 
 **And it is a model, not a bound.**  The `K/2` is the first-cycle
 threshold for a simple graph; the factor-base graph is a *multi*graph,
