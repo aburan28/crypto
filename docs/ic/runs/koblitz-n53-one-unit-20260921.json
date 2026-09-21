@@ -972,5 +972,196 @@
   "single_target_params": "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json",
   "parallel_command": "target/release/ic workflow --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json --dir /tmp/k0n53-public-unknown",
   "single_core_command": "RAYON_NUM_THREADS=1 target/release/ic workflow --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json --dir /tmp/k0n53-public-unknown-1c"
+ },
+ "single_target_parameter_diagnostics": {
+  "factor_base_width": {
+   "runs": [
+    {
+     "requested_points": 28000,
+     "actual_points": 28832,
+     "columns": 272,
+     "trials": 30000,
+     "summands_scanned": 26340000,
+     "relations": 514,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.349707625,
+     "total_core_seconds_through_logs": 10.323213,
+     "peak_rss_bytes": 69419008
+    },
+    {
+     "requested_points": 32000,
+     "actual_points": 32224,
+     "columns": 304,
+     "trials": 23000,
+     "summands_scanned": 23000000,
+     "relations": 533,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.284185208,
+     "total_core_seconds_through_logs": 9.693131,
+     "peak_rss_bytes": 84361216
+    },
+    {
+     "requested_points": 34000,
+     "actual_points": 34768,
+     "columns": 328,
+     "trials": 20000,
+     "summands_scanned": 21200000,
+     "relations": 623,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.377180708,
+     "total_core_seconds_through_logs": 10.159604,
+     "peak_rss_bytes": 95125504
+    },
+    {
+     "requested_points": 38000,
+     "actual_points": 38160,
+     "columns": 360,
+     "trials": 15500,
+     "summands_scanned": 18445000,
+     "relations": 610,
+     "rank_complete": true,
+     "wall_seconds_through_logs": 1.4142715,
+     "total_core_seconds_through_logs": 10.281957,
+     "peak_rss_bytes": 101842944
+    },
+    {
+     "requested_points": 40000,
+     "actual_points": 40704,
+     "columns": 384,
+     "trials": 14500,
+     "summands_scanned": 18154000,
+     "relations": 665,
+     "rank_complete": true,
+     "wall_seconds_through_logs": 1.47783825,
+     "total_core_seconds_through_logs": 11.249419,
+     "peak_rss_bytes": 110706688
+    },
+    {
+     "requested_points": 44000,
+     "actual_points": 44096,
+     "columns": 416,
+     "trials": 12000,
+     "summands_scanned": 16536000,
+     "relations": 711,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.582017917,
+     "total_core_seconds_through_logs": 12.004864000000001,
+     "peak_rss_bytes": 139853824
+    }
+   ],
+   "selected_requested_points": 36000,
+   "reading": "The adjacent complete 38k and 40k arms used more process CPU; narrower and 44k trial budgets were already comparable or dearer before reaching rank."
+  },
+  "collection_window": {
+   "runs": [
+    {
+     "collection_window": 768,
+     "trials": 25500,
+     "summands_scanned": 19584000,
+     "relations": 630,
+     "rank_complete": true,
+     "wall_seconds_through_logs": 1.391681583,
+     "total_core_seconds_through_logs": 10.200708,
+     "peak_rss_bytes": 98418688
+    },
+    {
+     "collection_window": 1536,
+     "trials": 12750,
+     "summands_scanned": 19584000,
+     "relations": 583,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.365107375,
+     "total_core_seconds_through_logs": 9.965024,
+     "peak_rss_bytes": 93552640
+    },
+    {
+     "collection_window": 2048,
+     "trials": 9750,
+     "summands_scanned": 19968000,
+     "relations": 586,
+     "rank_complete": true,
+     "wall_seconds_through_logs": 1.3971969579999999,
+     "total_core_seconds_through_logs": 10.21921,
+     "peak_rss_bytes": 98582528
+    }
+   ],
+   "selected_window": 1139,
+   "reading": "The complete 768 and 2048 controls used more CPU. The 1536 control did not reach rank at a slightly larger scan budget."
+  },
+  "reusable_window_scratch_rejected": {
+   "pairs": [
+    {
+     "pair": 1,
+     "candidate_over_reference_wall": 0.8930395529490298,
+     "candidate_over_reference_core_seconds": 0.9675965863862716,
+     "candidate_over_reference_peak_rss": 0.9590268886043534,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_wall": 0.9836442285169329,
+     "candidate_over_reference_core_seconds": 0.9934477691153607,
+     "candidate_over_reference_peak_rss": 0.9838497033618985,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_wall": 1.0290471377784425,
+     "candidate_over_reference_core_seconds": 1.0004089572463628,
+     "candidate_over_reference_peak_rss": 0.9880239520958084,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_wall": 1.044118944977704,
+     "candidate_over_reference_core_seconds": 1.0117489643744821,
+     "candidate_over_reference_peak_rss": 0.9659391534391535,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_wall": 1.0209758230880999,
+     "candidate_over_reference_core_seconds": 1.0036824699132145,
+     "candidate_over_reference_peak_rss": 0.9994937563280459,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 6,
+     "candidate_over_reference_wall": 0.9561396686989238,
+     "candidate_over_reference_core_seconds": 0.9865581356446824,
+     "candidate_over_reference_peak_rss": 0.9751749416861046,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 7,
+     "candidate_over_reference_wall": 1.0044478209990977,
+     "candidate_over_reference_core_seconds": 1.0075840912281324,
+     "candidate_over_reference_peak_rss": 1.0016633399866932,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 8,
+     "candidate_over_reference_wall": 0.9898169051775313,
+     "candidate_over_reference_core_seconds": 1.0012155777199254,
+     "candidate_over_reference_peak_rss": 0.9721561969439728,
+     "identical_relations_scalar_and_verification": true
+    }
+   ],
+   "median_candidate_over_reference_wall": 0.9971323630883144,
+   "median_candidate_over_reference_core_seconds": 1.0008122674831441,
+   "median_candidate_over_reference_peak_rss": 0.9795123225240016,
+   "wall_wins": 4,
+   "core_wins": 3,
+   "rss_wins": 7,
+   "decision": "rejected_speed_neutral_memory_only"
+  }
+ },
+ "science_process_accounting": {
+  "processes": 98,
+  "sequential_wall_seconds": 307.394369585,
+  "total_core_seconds": 1144.929042,
+  "peak_rss_bytes": 139853824,
+  "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count diagnostic, factor-base-width diagnostic, collection-window diagnostic, and rejected reusable-scratch A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
+  "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
  }
 }

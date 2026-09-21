@@ -614,6 +614,14 @@ core-seconds on the IC side, so it does not cross rho.  The selected-run
 ratio applies only once the public profile is fixed; amortisation must
 name and count later targets explicitly.
 
+Adjacent factor-base widths and collection windows did not reduce the
+complete rank-producing core cost.  Reusing window scratch preserved
+every relation hash and scalar across eight matched pairs but was speed
+neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
+selection, validation and rejected diagnostics, the retained science
+campaign contains 98 processes, 307.394 sequential wall-seconds,
+1,144.929 core-seconds and a 139.9 MB maximum RSS.
+
 With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
 median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
 slower, with 10.984 total process core-seconds, 68.5 MB peak RSS and a
