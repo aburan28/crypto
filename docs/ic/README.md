@@ -622,6 +622,12 @@ and whole-process CPU from 12.269 to 11.213 core-seconds (0.914x).  The
 charged trade is memory: median peak RSS rose from 93.9 MB to 125.9 MB
 (1.331x).  A full hash cache was rejected at 2.519x RSS, and a five-byte
 filter variant was rejected after slowing the relation unit by 3.1%.
+The same exact binaries over five matched one-worker pairs cut the
+single-core pair build from 2.585 to 1.256 s (0.486x), full IC wall from
+8.449 to 7.095 s (0.841x), and whole-process CPU from 10.791 to 9.424
+core-seconds (0.875x).  Median RSS rose from 69.6 to 108.0 MB (1.538x).
+Same-process rho remained faster: rho/IC improved from 0.187 to 0.223,
+leaving IC about 4.49 times slower on one core.
 
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
@@ -646,12 +652,13 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 157 processes, 474.072 sequential wall-seconds,
-1,829.274 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+campaign contains 167 processes, 576.140 sequential wall-seconds,
+1,930.454 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
 a rejected uncompressed-cache run).
 
-With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
-median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
+Before the cached builder, five fresh scalar-blind repeats with
+`RAYON_NUM_THREADS=1` used a median 8.570 s for full IC against 1.599 s
+for rho: IC was 5.362 times
 slower, with 10.984 total process core-seconds, 68.5 MB peak RSS and a
 1.008 wall/core ratio.  A one-pass 2/4/6/8/10/12/14-thread diagnostic
 first crossed wall at eight threads; no thread count produced a
