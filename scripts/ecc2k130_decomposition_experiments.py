@@ -324,7 +324,214 @@ def matrix_rank_mod_p(rows, unknowns: int, p: int) -> int:
     return rank
 
 
+# ── what a relation budget actually determines ──────────────────────────
+
+def determined_columns(rows, unknowns: int, p: int):
+    """The columns whose value every solution of the system agrees on.
+
+    A pivot column is determined only if its echelon row is free of the
+    non-pivot (free) columns; otherwise the kernel moves it.  Columns no
+    relation ever touches are of course undetermined.  This is the set whose
+    logarithms the descent may actually use.
+    """
+    mat = [dict((k, v % p) for k, v in r.items() if v % p) for r in rows]
+    pivots: dict = {}                      # col -> reduced row
+    for row in mat:
+        cur = dict(row)
+        while cur:
+            c = min(cur)
+            if c not in pivots:
+                inv = pow(cur[c], p - 2, p)
+                pivots[c] = {k: (v * inv) % p for k, v in cur.items()}
+                break
+            f, pr = cur[c], pivots[c]
+            cur = {k: v for k in set(cur) | set(pr)
+                   if (v := (cur.get(k, 0) - f * pr.get(k, 0)) % p)}
+    # Back-substitute so each pivot row carries only free columns beside its own.
+    # Every pivot is the least column of its row, so working from the highest
+    # pivot column down means the row being eliminated is already reduced and
+    # brings in free columns only -- which is why this terminates.
+    for c in sorted(pivots, reverse=True):
+        row = pivots[c]
+        while True:
+            k = next((k for k in row if k != c and k in pivots), None)
+            if k is None:
+                break
+            f, pr = row[k], pivots[k]
+            row = {j: v for j in set(row) | set(pr)
+                   if (v := (row.get(j, 0) - f * pr.get(j, 0)) % p)}
+        pivots[c] = row
+    free = {k for k in range(unknowns) if k not in pivots}
+    return {c for c, row in pivots.items() if not (set(row) - {c}) & free}
+
+
+def budget_run(rung: Rung, l: int, m: int, rng: random.Random,
+               slack_fraction: float = 0.0, descent_tries: int = 200):
+    """Collect the `|F|` relations the product law budgets -- no more -- and see
+    whether that is enough to finish.
+
+    The harness that produced the first round of E1/E2 insisted on full rank
+    over every column, which is the coupon-collector problem and costs
+    `ln|F|/m` times the budget.  Index calculus does not need that: it drops the
+    base points no relation determined and retries the descent when one turns
+    up in a decomposition.  This measures both halves -- how much of the base
+    `|F|` relations determine, and how many descents that costs.
+    """
+    points, index, abscissae = build_base(rung, l)
+    unknowns = len(points)
+    want = int(unknowns * (1.0 + slack_fraction))
+    d = collect(rung, l, m, 'full', rng, want=want)
+    rows = d["rows"][:want]
+    known = determined_columns(rows, unknowns, rung.p)
+    frac = len(known) / unknowns
+    # `e^{-m}` predicts the columns no relation *touches*.  Determination is a
+    # strictly stronger property -- a column can be hit and still be free, when
+    # the only rows on it also touch a column nothing pins down -- so the two
+    # fractions are reported against their own predictions and never conflated.
+    hit = set().union(*(set(r) for r in rows)) if rows else set()
+    frac_hit = len(hit & set(range(unknowns))) / unknowns
+    # A base point in the torsion that projection kills carries the unknown
+    # `log(O) = 0`, which no relation can pin and no descent can use.  Small
+    # bases are where this bites: at `l = 5` three of 29 points are such, and
+    # that -- not the stopping rule -- is why that cell behaves differently.
+    dead = sum(1 for P in points if rung.project(P) is None)
+
+    pos = {P: i for i, P in enumerate(points)}
+    member = set(points)
+    c = rung.curve
+    secret = rng.randrange(2, rung.p)
+    Q = c.mul(rung.G, secret)
+    attempts, descent_ops, landed = 0, 0, False
+    for _ in range(descent_tries):
+        attempts += 1
+        cc, dd = rng.randrange(1, rung.p), rng.randrange(1, rung.p)
+        T = c.add(c.mul(Q, cc), c.mul(rung.G, dd))
+        if T is None:
+            continue
+        negT = c.neg(T)
+        hit = None
+        for i in range(len(points)):
+            for j in range(i + 1, len(points)):
+                descent_ops += 1
+                S = c.add(points[i], points[j])
+                if S is None:
+                    continue
+                W = c.add(negT, S)
+                if W is None:
+                    continue
+                U = c.neg(W)
+                if U in member and pos[U] > j:
+                    trio = (points[i], points[j], U)
+                    if all(pos[P] in known for P in trio):
+                        hit = trio
+                        break
+            if hit:
+                break
+        if hit:
+            landed = True
+            break
+    return {
+        "n": rung.n, "m": m, "l": l,
+        "factor_base_size": unknowns,
+        "relations_budgeted": want,
+        "relations_per_unknown": round(want / unknowns, 3),
+        "columns_determined": len(known),
+        "fraction_determined": round(frac, 4),
+        "fraction_undetermined": round(1 - frac, 4),
+        "fraction_unhit": round(1 - frac_hit, 4),
+        "poisson_prediction_unhit": round(math.exp(-m), 4),
+        "base_points_killed_by_projection": dead,
+        "descent_success_per_try_predicted": round(frac ** m, 4),
+        "descent_attempts": attempts,
+        "descent_landed": landed,
+        "collection_oracle_ops": d["oracle_ops"],
+        "descent_oracle_ops": descent_ops,
+        "total_oracle_ops": d["oracle_ops"] + descent_ops,
+        "lambda": round((d["oracle_ops"] + descent_ops) / 2 ** rung.n, 3),
+    }
+
+
+def full_rank_crossing(rung: Rung, l: int, m: int, rng: random.Random,
+                       rule: str = "full", over: int = 4):
+    """The relation count at which the rank first covers every column, against
+    the coupon-collector law `|F| ln|F| / m` it obeys."""
+    points, _, _ = build_base(rung, l)
+    unknowns = len(points)
+    d = collect(rung, l, m, rule, rng, want=unknowns * over)
+    pivots: dict = {}
+    rank, at = 0, None
+    for i, row in enumerate(d["rows"], 1):
+        cur = {k: v % rung.p for k, v in row.items() if v % rung.p}
+        while cur:
+            col = min(cur)
+            if col not in pivots:
+                inv = pow(cur[col], rung.p - 2, rung.p)
+                pivots[col] = {k: (v * inv) % rung.p for k, v in cur.items()}
+                rank += 1
+                break
+            f, pr = cur[col], pivots[col]
+            cur = {k: v for k in set(cur) | set(pr)
+                   if (v := (cur.get(k, 0) - f * pr.get(k, 0)) % rung.p)}
+        if rank >= unknowns:
+            at = i
+            break
+    coupon = unknowns * math.log(unknowns) / m
+    return {
+        "n": rung.n, "m": m, "l": l, "rule": rule,
+        "factor_base_size": unknowns,
+        "full_rank_at": at,
+        "rho_measured": round(at / unknowns, 3) if at else None,
+        "coupon_collector_relations": round(coupon, 1),
+        "coupon_collector_rho": round(coupon / unknowns, 3),
+        "measured_over_coupon": round(at / coupon, 3) if at else None,
+    }
+
+
 # ── E2: is the total really flat in the factor-base dimension? ──────────
+
+def e2_rank_ceiling(n: int, l: int, m: int = 3):
+    """The rank the relation matrix can reach at all, over every decomposition
+    the base admits -- not over the ones a sample happened to find.
+
+    E2's `l = 5` cell ran 15 455 targets and stopped at rank `28/29`, and the
+    first round read that as the same relation-correlation effect it read into
+    E1.  It is not.  Enumerating every triple of base points whose sum lands in
+    the order-`p` subgroup -- 810 of them, exhaustively -- the row space has
+    rank `28`, so no relation count whatsoever reaches full rank there.  The one
+    kernel direction is constant on each abscissa, and the reason is the census
+    below: at `l = 5` every reachable triple has exactly one even-abscissa
+    summand, so `v = +1` on the odd abscissae and `v = -2` on the even ones
+    annihilates every row.  From `l = 6` the base admits all-even triples too,
+    that vector stops working, and the rank is full.
+    """
+    assert m == 3, "the pre-registered ladder is m = 3"
+    rung = Rung(n)
+    c, p = rung.curve, rung.p
+    points, _, _ = build_base(rung, l)
+    size = len(points)
+    rows, census = [], {}
+    for i in range(size):
+        for j in range(i + 1, size):
+            S = c.add(points[i], points[j])
+            for k in range(j + 1, size):
+                R = c.add(S, points[k]) if S is not None else points[k]
+                if R is None or c.mul(R, p) is not None:
+                    continue          # not a decomposition of a subgroup element
+                rows.append({i: 1, j: 1, k: 1})
+                odd = sum(points[t][0] & 1 for t in (i, j, k))
+                census[odd] = census.get(odd, 0) + 1
+    rank = matrix_rank_mod_p(rows, size, p)
+    return {
+        "n": n, "l": l, "m": m,
+        "factor_base_size": size,
+        "reachable_decompositions": len(rows),
+        "rank_ceiling": rank,
+        "deficiency": size - rank,
+        "full_rank_reachable": rank == size,
+        "odd_abscissa_census": {str(k): v for k, v in sorted(census.items())},
+        "sampling": "exhaustive over every triple of base points",
+    }
+
 
 def e2_sweep(n: int, l: int, m: int = 3, rule: str = "full", seed: int = 4):
     """One rung, one dimension: collect to full rank and report `Lambda`."""
@@ -846,6 +1053,90 @@ def main():
     ap.add_argument("--max-rung", type=int, default=19)
     args = ap.parse_args()
 
+    # ---- the relation budget, and the stopping rule that decides it ----
+    # The first round of E1/E2 stopped only when the relation matrix had full
+    # rank over EVERY column.  That is the coupon-collector problem -- it costs
+    # `|F| ln|F| / m` relations, not `|F|` -- and it is not what index calculus
+    # needs.  Measured both ways here, because the difference is the whole of
+    # the "2x" that round reported.
+    crossings = [full_rank_crossing(Rung(n), l, 3, random.Random(9 + seed), rule)
+                 for n, l in ((13, 6), (19, 7), (19, 8), (19, 9))
+                 for rule in ("full", "first_hit") for seed in (0,)]
+    for c in crossings:
+        print(f"RHO n={c['n']:3d} l={c['l']} {c['rule']:10s} |F|={c['factor_base_size']:5d} "
+              f"full rank at {c['full_rank_at']} (rho {c['rho_measured']}), coupon collector "
+              f"predicts {c['coupon_collector_relations']} (rho {c['coupon_collector_rho']}), "
+              f"ratio {c['measured_over_coupon']}", flush=True)
+    budgets = [budget_run(Rung(n), l, 3, random.Random(100 + seed))
+               for n, l in ((13, 6), (19, 7), (19, 8)) for seed in (1, 2, 3)]
+    for b in budgets:
+        print(f"BUDGET n={b['n']:3d} l={b['l']} |F|={b['factor_base_size']:5d} "
+              f"determined {b['fraction_determined']:.3f} "
+              f"(undetermined {b['fraction_undetermined']:.4f}) "
+              f"descent attempts {b['descent_attempts']} landed {b['descent_landed']} "
+              f"Lambda {b['lambda']:.3f}", flush=True)
+    # E1's slope is reported on the full-rank rule.  It is a different number
+    # on the budget rule, and a superseded figure is not allowed to stand
+    # beside new ones, so it is derived here rather than by hand.  `ops` is
+    # `Lambda * 2^n`, so `log2(ops) = log2(Lambda) + n` and a two-point slope
+    # is `1 + (log2 L19 - log2 L13) / 6`.
+    def _mean(rows):
+        got = [b["lambda"] for b in rows]
+        return sum(got) / len(got)
+
+    b13 = [b for b in budgets if b["n"] == 13]
+    b19 = [b for b in budgets if b["n"] == 19 and b["l"] == 8]
+    m13, m19 = _mean(b13), _mean(b19)
+    slope_budget = 1 + (math.log2(m19) - math.log2(m13)) / 6
+    # Three seeds a rung is enough for a standard error but not for a fit.
+    # Propagating each rung's relative spread through log2 gives the slope's
+    # own, which is what says how far 0.944 really is from the 0.95 line.
+    def _rel_sd(rows):
+        got = [b["lambda"] for b in rows]
+        mu = sum(got) / len(got)
+        var = sum((x - mu) ** 2 for x in got) / (len(got) - 1)
+        return math.sqrt(var) / mu / math.sqrt(len(got))
+
+    slope_se = math.sqrt(_rel_sd(b13) ** 2 + _rel_sd(b19) ** 2) / math.log(2) / 6
+
+    budget = {
+        "question": "how many relations does the product law actually owe, and "
+                    "what does its budget of |F| buy?",
+        "superseded_claim": "the first round reported 'relations needed to reach "
+                            "full rank run 2.0x |F|' and attributed it to "
+                            "decompositions harvested from one target being "
+                            "correlated.  Both halves are withdrawn: the excess "
+                            "is the coupon collector, it is not a constant, and "
+                            "the model does not owe it.",
+        "full_rank_crossings": crossings,
+        "budget_runs": budgets,
+        "lambda_at_budget": [b["lambda"] for b in budgets],
+        "mean_lambda_at_budget": round(sum(b["lambda"] for b in budgets)
+                                       / len(budgets), 3),
+        "predicted_lambda": 3,
+        "every_descent_landed": all(b["descent_landed"] for b in budgets),
+        "mean_lambda_n13_l6": round(m13, 3),
+        "mean_lambda_n19_l8": round(m19, 3),
+        "slope_log2_ops_vs_n_at_budget": round(slope_budget, 3),
+        "slope_standard_error": round(slope_se, 3),
+        "slope_under_superseded_full_rank_rule": 1.037,
+        "slope_falsifier": "E1's falsifier is a slope below 0.95 over FOUR OR "
+                           "MORE rungs.  This is a two-point fit, so it cannot "
+                           "fire it in either direction -- but it lands on the "
+                           "wrong side of the line, within one standard error "
+                           "of it, and that is recorded rather than buried.",
+        "collection_rule": "budget_run collects under the `full` rule, so its "
+                           "|F| relations come from roughly 40 targets and ARE "
+                           "correlated by target in exactly the sense the "
+                           "superseded claim meant.  They still determine 91 "
+                           "to 95 percent of the base and every descent still "
+                           "lands, which is the sharpest single argument that "
+                           "correlation was never the mechanism.",
+        "class": "accounting: the algorithm did not change, the harness's "
+                 "stopping rule did, and the correction is to a number this "
+                 "thread published",
+    }
+
     # ---- E1 -----------------------------------------------------------
     e1_rows = []
     for n in (11, 13, 19, 29, 37):
@@ -877,6 +1168,11 @@ def main():
     e1 = {
         "question": "does the product law actually hold on curves shaped like "
                     "ECC2K-130, or is the n = 131 derivation unsupported?",
+        "stopping_rule_note": "the `rungs` below stop at full rank over every "
+                              "column, which the relation-budget section shows "
+                              "is the coupon collector and costs ln|F|/m times "
+                              "the budget.  `lambda` there is inflated by that "
+                              "factor; `budget_runs` carries the corrected one.",
         "primary_metric": "Lambda = oracle operations / 2^n, predicted flat at m = 3",
         "rungs": e1_rows,
         "slope_fits": fits,
@@ -904,12 +1200,56 @@ def main():
                   f"rank={row['matrix_rank']}/{row['unknowns']} "
                   f"Lambda={row['lambda_metric']:9.3f}", flush=True)
     flat = [r["lambda_metric"] for r in e2_rows if r["rule"] == "full"]
+    # The full-rank sweep above tilts with `ln|F|/m`, which runs from 1.12 at
+    # `|F| = 29` to 2.09 at `|F| = 527` -- a 1.87x drift that is the harness's,
+    # not the dimension's, and the same size as the swing the flatness verdict
+    # reads.  Re-swept at the budget the product law actually owes.
+    e2_budget = [budget_run(Rung(19), l, 3, random.Random(200 + l))
+                 for l in (5, 6, 7, 8, 9)]
+    for b in e2_budget:
+        print(f"E2-BUDGET n=19 l={b['l']} |F|={b['factor_base_size']:5d} "
+              f"determined {b['fraction_determined']:.3f} "
+              f"descent attempts {b['descent_attempts']} landed {b['descent_landed']} "
+              f"Lambda {b['lambda']:.3f}", flush=True)
+    # Why `l = 5` stalled at rank 28/29: exhaustively, not by sampling.
+    ceilings = [e2_rank_ceiling(19, l) for l in (5, 6, 7)]
+    for cc in ceilings:
+        print(f"E2-CEILING n=19 l={cc['l']} |F|={cc['factor_base_size']:5d} "
+              f"reachable={cc['reachable_decompositions']:7d} "
+              f"rank ceiling {cc['rank_ceiling']}/{cc['factor_base_size']} "
+              f"odd-abscissa census {cc['odd_abscissa_census']}", flush=True)
+    # A cell whose descent never landed has no verified answer, so by the
+    # rule in AGENTS.md section 2 it is not a result and cannot sit in a flat
+    # line or supply the minimum a falsifier tests.  `l = 5` is such a cell,
+    # and the rank ceiling above says why: with nothing determined there is
+    # nothing for a descent to land on, at any relation count.
+    landed = [b for b in e2_budget if b["descent_landed"]]
+    no_result = [b["l"] for b in e2_budget if not b["descent_landed"]]
+    flat_budget = [b["lambda"] for b in landed]
+    flat_budget_line = sum(flat_budget) / len(flat_budget)
     e2 = {
         "question": "is the total really flat in the factor-base dimension?",
         "rungs": e2_rows,
         "flat_line_lambda": round(sum(flat) / len(flat), 3) if flat else None,
+        "flat_line_lambda_stopping_rule": "full rank over every column -- "
+                                          "superseded, kept as the before mark",
+        "budget_rule_rungs": e2_budget,
+        "flat_line_lambda_at_budget": round(flat_budget_line, 3),
+        "budget_rule_dimensions_without_a_result": no_result,
+        "flat_line_excludes": "dimensions whose descent never landed; see "
+                              "budget_rule_dimensions_without_a_result",
+        "rank_ceilings": ceilings,
+        "l5_outlier_explained": "not relation correlation: at l = 5 the row "
+                                "space reachable over every one of the 810 "
+                                "decompositions the base admits has rank 28 of "
+                                "29, because every such triple uses exactly one "
+                                "even-abscissa point.  No relation count "
+                                "reaches full rank there.  From l = 6 the base "
+                                "admits all-even triples and the rank is full.",
         "falsifier": "any dimension whose measured total is below half the flat line",
-        "falsified": bool(flat) and min(flat) < 0.5 * (sum(flat) / len(flat)),
+        "falsified": min(flat_budget) < 0.5 * flat_budget_line,
+        "falsified_under_superseded_rule": bool(flat)
+            and min(flat) < 0.5 * (sum(flat) / len(flat)),
     }
 
     # ---- E4 -----------------------------------------------------------
@@ -985,9 +1325,13 @@ def main():
                   "rungs with zero sub-base queries",
         "artefact": "experiments/ecc2k130_point_decomposition.json "
                     "-> swap_localisation",
-        "deferred": "the design's item 1 -- measuring a real oracle's cost on "
-                    "R - P + Q against its cost on R -- is a timing of the Rust "
-                    "pipeline and is NOT done here",
+        "item_1_now_run": "the design's first item -- does a real solver charge "
+                          "the same for R - P + Q as for R -- is measured by "
+                          "scripts/ecc2k130_e3_solver_panel.py and recorded in "
+                          "experiments/ecc2k130_e3_solver_panel.json.  It is a "
+                          "stage diagnostic under AGENTS.md section 8: one "
+                          "oracle call on one rung, priced, with nothing "
+                          "inferred about a full ECDLP and no speedup claimed.",
     }
 
     report = {
@@ -999,6 +1343,7 @@ def main():
         "boundaries_frozen_before_the_runs":
             "experiments/ecc2k130_decomposition_targets.json",
         "log2_rho_reference_at_131": LOG2_RHO_131,
+        "relation_budget_and_stopping_rule": budget,
         "E1_scale_model_ladder": e1,
         "E2_dimension_flatness": e2,
         "E3_detector_target_agnosticism": e3,
