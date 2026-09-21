@@ -353,6 +353,111 @@
    "summands_scanned": 19363000,
    "relations": 588,
    "reason": "Seeds 6, 8 and 9 were complete at 17000 after all candidates failed at 16000; seed 6 had the lowest measured process CPU among the complete 17000-probe candidates."
+  },
+  "boundary_refinement": {
+   "runs": [
+    {
+     "trials": 16500,
+     "complete": false,
+     "relations": 575,
+     "summands_scanned": 18793500,
+     "wall_seconds_through_logs": 1.3709875,
+     "total_core_seconds_through_logs": 9.851629,
+     "peak_rss_bytes": 95633408
+    },
+    {
+     "trials": 16750,
+     "complete": true,
+     "relations": 584,
+     "summands_scanned": 19078250,
+     "wall_seconds_through_logs": 1.350960666,
+     "total_core_seconds_through_logs": 9.898622,
+     "peak_rss_bytes": 99565568
+    },
+    {
+     "trials": 16625,
+     "complete": false,
+     "relations": 579,
+     "summands_scanned": 18935875,
+     "wall_seconds_through_logs": 1.366930667,
+     "total_core_seconds_through_logs": 9.898954,
+     "peak_rss_bytes": 98549760
+    },
+    {
+     "trials": 16688,
+     "complete": false,
+     "relations": 581,
+     "summands_scanned": 19007632,
+     "wall_seconds_through_logs": 1.410835416,
+     "total_core_seconds_through_logs": 10.669747999999998,
+     "peak_rss_bytes": 99598336
+    },
+    {
+     "trials": 16720,
+     "complete": true,
+     "relations": 583,
+     "summands_scanned": 19044080,
+     "wall_seconds_through_logs": 1.420280917,
+     "total_core_seconds_through_logs": 10.08068,
+     "peak_rss_bytes": 97878016
+    },
+    {
+     "trials": 16704,
+     "complete": true,
+     "relations": 583,
+     "summands_scanned": 19025856,
+     "wall_seconds_through_logs": 1.3940352919999999,
+     "total_core_seconds_through_logs": 10.032223,
+     "peak_rss_bytes": 101072896
+    },
+    {
+     "trials": 16696,
+     "complete": true,
+     "relations": 583,
+     "summands_scanned": 19016744,
+     "wall_seconds_through_logs": 1.361360625,
+     "total_core_seconds_through_logs": 9.949406999999999,
+     "peak_rss_bytes": 95666176
+    },
+    {
+     "trials": 16692,
+     "complete": true,
+     "relations": 582,
+     "summands_scanned": 19012188,
+     "wall_seconds_through_logs": 1.52276425,
+     "total_core_seconds_through_logs": 10.442402000000001,
+     "peak_rss_bytes": 99680256
+    },
+    {
+     "trials": 16690,
+     "complete": true,
+     "relations": 582,
+     "summands_scanned": 19009910,
+     "wall_seconds_through_logs": 1.385620708,
+     "total_core_seconds_through_logs": 9.921273000000001,
+     "peak_rss_bytes": 98779136
+    },
+    {
+     "trials": 16689,
+     "complete": true,
+     "relations": 582,
+     "summands_scanned": 19008771,
+     "wall_seconds_through_logs": 1.383295667,
+     "total_core_seconds_through_logs": 10.656043,
+     "peak_rss_bytes": 98926592
+    }
+   ],
+   "exact_first_complete_trial": 16689,
+   "last_incomplete_trial": 16688,
+   "deployed_trials": 17000,
+   "deployed_cushion_trials": 311
+  },
+  "resource_envelope": {
+   "processes": 45,
+   "sequential_wall_seconds": 77.959835877,
+   "total_core_seconds": 484.310223,
+   "peak_rss_bytes": 106856448,
+   "accounting": "Target-independent parameter selection is not hidden in the selected operational run. Charge this envelope once when treating seed 6 and the 17k budget as newly discovered for a first-ever target; amortize it only across explicitly counted later targets."
   }
  },
  "change": {
@@ -754,5 +859,118 @@
    "whole_process_wall_crossover": true
   },
   "reading": "The scalar-blind one-target run loses to automorphism rho after full precompute on one core. The 32-target batch crosses in wall and total core because the same precompute is amortized. Neither result is an asymptotic or SOTA claim."
+ },
+ "thread_count_diagnostic": {
+  "runs": [
+   {
+    "rayon_threads": 2,
+    "whole_process_wall_seconds": 6.807835,
+    "combined_total_core_seconds": 11.038026,
+    "peak_rss_bytes": 68567040,
+    "ic_total_wall_seconds": 4.448300166999999,
+    "rho_wall_seconds": 1.8737533750000002,
+    "rho_over_ic_wall_ratio": 0.42122907732274006,
+    "whole_process_wall_crossover": false
+   },
+   {
+    "rayon_threads": 4,
+    "whole_process_wall_seconds": 4.278391167,
+    "combined_total_core_seconds": 11.092269,
+    "peak_rss_bytes": 74842112,
+    "ic_total_wall_seconds": 2.397185915,
+    "rho_wall_seconds": 1.600075542,
+    "rho_over_ic_wall_ratio": 0.6674807873631278,
+    "whole_process_wall_crossover": false
+   },
+   {
+    "rayon_threads": 6,
+    "whole_process_wall_seconds": 3.588938041,
+    "combined_total_core_seconds": 11.478723,
+    "peak_rss_bytes": 79478784,
+    "ic_total_wall_seconds": 1.766992833,
+    "rho_wall_seconds": 1.602986167,
+    "rho_over_ic_wall_ratio": 0.9071831741832538,
+    "whole_process_wall_crossover": false
+   },
+   {
+    "rayon_threads": 8,
+    "whole_process_wall_seconds": 3.373483417,
+    "combined_total_core_seconds": 12.404684999999999,
+    "peak_rss_bytes": 86491136,
+    "ic_total_wall_seconds": 1.5684129159999998,
+    "rho_wall_seconds": 1.610805625,
+    "rho_over_ic_wall_ratio": 1.0270290486437184,
+    "whole_process_wall_crossover": true
+   },
+   {
+    "rayon_threads": 10,
+    "whole_process_wall_seconds": 3.259618833,
+    "combined_total_core_seconds": 12.349103999999999,
+    "peak_rss_bytes": 92225536,
+    "ic_total_wall_seconds": 1.4417963340000002,
+    "rho_wall_seconds": 1.6452781669999998,
+    "rho_over_ic_wall_ratio": 1.1411307742997767,
+    "whole_process_wall_crossover": true
+   },
+   {
+    "rayon_threads": 12,
+    "whole_process_wall_seconds": 3.106184208,
+    "combined_total_core_seconds": 12.294357,
+    "peak_rss_bytes": 94371840,
+    "ic_total_wall_seconds": 1.315637709,
+    "rho_wall_seconds": 1.599625834,
+    "rho_over_ic_wall_ratio": 1.215855872066677,
+    "whole_process_wall_crossover": true
+   },
+   {
+    "rayon_threads": 14,
+    "whole_process_wall_seconds": 3.094736791,
+    "combined_total_core_seconds": 12.244561,
+    "peak_rss_bytes": 99024896,
+    "ic_total_wall_seconds": 1.319634834,
+    "rho_wall_seconds": 1.601606167,
+    "rho_over_ic_wall_ratio": 1.2136737571145382,
+    "whole_process_wall_crossover": true
+   }
+  ],
+  "minimum_threads_with_observed_wall_crossover": 8,
+  "fastest_crossing_threads": 12,
+  "reading": "This is a one-pass diagnostic on the scalar-blind target, not an independent selection panel. The default 14 logical-thread run remains the operational profile; lower thread counts reduce concurrency but do not create a one-target core-second crossover."
+ },
+ "single_target_primary_accounting": {
+  "selected_parallel_operational": {
+   "ic_wall_seconds": 1.379810167,
+   "rho_wall_seconds": 1.5893485410000001,
+   "ic_over_rho_wall_ratio": 0.8463181787599997,
+   "whole_process_wall_wins": 4,
+   "repeats": 5,
+   "ic_only_total_core_seconds": 10.572973999999999
+  },
+  "forced_single_core_operational": {
+   "ic_wall_seconds": 8.570362959,
+   "rho_wall_seconds": 1.5993101250000001,
+   "ic_over_rho_wall_ratio": 5.362484050045578,
+   "whole_process_total_core_seconds": 10.983716,
+   "peak_rss_bytes": 68501504
+  },
+  "parameter_selection_envelope": {
+   "processes": 45,
+   "sequential_wall_seconds": 77.959835877,
+   "total_core_seconds": 484.310223,
+   "peak_rss_bytes": 106856448,
+   "accounting": "Target-independent parameter selection is not hidden in the selected operational run. Charge this envelope once when treating seed 6 and the 17k budget as newly discovered for a first-ever target; amortize it only across explicitly counted later targets."
+  },
+  "discovery_charged_first_target": {
+   "parallel_ic_plus_selection_sequential_wall_seconds": 79.339646044,
+   "parallel_ic_plus_selection_total_core_seconds": 494.883197,
+   "rho_wall_seconds": 1.5893485410000001,
+   "full_discovery_charged_crossover": false
+  },
+  "scope": "The operational run charges algebraic factor-base materialization, pair-table predicate construction, relation collection, verification, sparse linear algebra, descent, memory and process CPU. The separate selection envelope charges the research-time search that fixed relation seed 6 and the 17k budget."
+ },
+ "reproduction": {
+  "single_target_params": "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json",
+  "parallel_command": "target/release/ic workflow --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json --dir /tmp/k0n53-public-unknown",
+  "single_core_command": "RAYON_NUM_THREADS=1 target/release/ic workflow --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json --dir /tmp/k0n53-public-unknown-1c"
  }
 }

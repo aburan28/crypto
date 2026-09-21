@@ -586,26 +586,48 @@ seeds found that seed 6 certifies every one of the 344 orbit columns in
 one 17000-probe unit.  Against the preceding seed-1/26000-probe profile,
 three alternating-order pairs gave median candidate/reference ratios of
 0.840 wall, 0.824 total core-seconds and 0.981 peak RSS; charged work fell
-to 19,363,000 summand scans and 588 verified relations.  A fresh
-32-target holdout recovered every target and spent 1.662 s in IC against
-28.356 s in signed-Frobenius rho, a 17.06-fold amortised wall advantage.
+to 19,363,000 summand scans and 588 verified relations.  The exact first
+complete prefix is trial 16689; the profile keeps a 311-probe cushion.
+
+The primary control is the single scalar-blind target in
+`docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json`:
+
+    target/release/ic workflow \
+      --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json \
+      --dir /tmp/k0n53-public-unknown
 
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
-verified the published point in all five fresh runs.  Whole-process IC
-won 4/5 wall comparisons, with medians of 1.380 s IC and 1.589 s rho,
-but IC alone still used 10.573 core-seconds.  The wall crossover is not
-a total-compute crossover.  `docs/ic/runs/koblitz-n53-one-unit-20260921.json`
-records the seed screen, repeats, resources and remaining gate failures.
-This is a bounded engineering improvement, not a SOTA claim.
+verified the published point in all five fresh runs.  The selected
+operational profile charges base materialisation, pair-table predicate
+construction, relation collection and verification, sparse linear
+algebra, descent, process CPU and peak RSS.  It won 4/5 whole-process
+wall comparisons, with medians of 1.380 s IC and 1.589 s rho, but IC
+alone still used 10.573 core-seconds.  The wall crossover is not a
+total-compute crossover.
+
+The parameter search is retained and charged separately rather than
+made free: 45 through-logs processes used 77.960 sequential wall-seconds,
+484.310 core-seconds and at most 106.9 MB RSS.  Charging that discovery
+to a first-ever single target gives 79.340 s wall and 494.883
+core-seconds on the IC side, so it does not cross rho.  The selected-run
+ratio applies only once the public profile is fixed; amortisation must
+name and count later targets explicitly.
 
 With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
 median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
 slower, with 10.984 total process core-seconds, 68.5 MB peak RSS and a
-1.008 wall/core ratio.  The independent 32-target one-thread holdout
-amortised the same precompute: 8.819 s IC against 32.916 s rho, a 3.732
-times wall advantage, with 32/32 targets verified.  The batch crossover
-does not repair the single-target or total-compute loss.
+1.008 wall/core ratio.  A one-pass 2/4/6/8/10/12/14-thread diagnostic
+first crossed wall at eight threads; no thread count produced a
+single-target core crossover.  As a secondary amortisation control, the
+independent 32-target one-thread holdout spent 8.819 s in IC against
+32.916 s in rho, with 32/32 verified.  The batch result does not repair
+the single-target loss.
+
+`docs/ic/runs/koblitz-n53-one-unit-20260921.json` records the seed
+screen, discovery envelope, thread diagnostic, repeats, resources and
+remaining gate failures.  This is a bounded engineering improvement,
+not a SOTA claim.
 
 **`descent_summands`** lets the descent ask for a different number of
 summands than collection, which shares only the base and its pair table.
