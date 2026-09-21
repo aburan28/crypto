@@ -645,6 +645,11 @@ core-seconds (0.939x) and full-process CPU to 0.985x.  The exact current
 one-core replay used 6.744 s for IC against 1.602 s for rho, leaving IC
 4.21 times slower.  Sixteen lanes were rejected after regressing both
 one-core and default-thread relation time.
+Applying the same lanes inside table construction cut one-core pair-build
+CPU to 0.897x but slowed the following relation unit to 1.025x; the
+one-core IC gain was only 0.993x and default-thread process CPU was
+neutral.  That variant was rejected and the scalar table-build path
+retained.
 The workflow also used to rebuild the same public cofactor-projected
 signed-Frobenius predicate in selection, logs, and solve.  A bound
 `ProjectedFactorBase` now constructs and charges it once in selection,
@@ -693,8 +698,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 250 processes, 1,077.276 sequential wall-seconds,
-2,685.844 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+campaign contains 272 processes, 1,180.147 sequential wall-seconds,
+2,849.796 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
 a rejected uncompressed-cache run).
 
 Before the cached builder, five fresh scalar-blind repeats with
