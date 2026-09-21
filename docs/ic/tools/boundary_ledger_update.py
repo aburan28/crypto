@@ -25,6 +25,11 @@ ROUND = int(next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--round=
 EXTRA_EVIDENCE = [a.split("=", 1)[1] for a in sys.argv if a.startswith("--evidence=")]
 ROUND_LABEL = f" (Round {ROUND})" if ROUND > 1 else ""
 NOTE = "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+# What each round added, for the Koblitz vs_rho block's reading line.
+ROUND_READING = {
+    2: "; Round 2 keeps every first-round row as its before mark and adds the folded-table, walk-target and balanced-base rungs",
+    3: "; Round 3 keeps the same rows and makes the walk's restart cost one group operation instead of thirty-two scalar multiplications, adds the base at the family optimum on the prime and binary ladders, and reports every row's ratio to the family shape law S_family = 0.75 (#E t/k)^(2/3) / (t sqrt r)",
+}
 
 def mean(xs):
     xs = [x for x in xs if x is not None and not (isinstance(x, float) and math.isnan(x))]
@@ -206,7 +211,7 @@ if rows:
         ("automorphism_discount", "signed Frobenius walk, A=2n, measured (koblitz_signed_frobenius_rho_reference)"),
         ("by_instance", [OrderedDict([("instance", r["instance"]), ("log2_r", r["log2_r"]), ("cofactor", r["cofactor"]), ("variant", r["variant"]), ("table", r["table"]), ("targets", r["targets"]), ("signed_points", r["signed_points"]), ("columns", r["columns"]), ("S", r["S"]), ("rho_S", r["rho_S_mean"]), ("S_over_rho", r["S_over_rho"]), ("S_over_floor", r["S_over_floor"]), ("yield_over_ceiling_exact", r["yield_over_ceiling_exact"]), ("verified", r["verified_all"]), ("rho_verified", r["rho_verified_all"])]) for r in rows]),
         ("total_exponent_fits", fits_of("koblitz", "total")),
-        ("reading", "single-target whole-process counts on a materialised base; the n=53 record above is a wall-clock charged class and is unchanged" + ("; Round 2 keeps every first-round row as its before mark and adds the folded-table, walk-target and balanced-base rungs" if ROUND > 1 else "")),
+        ("reading", "single-target whole-process counts on a materialised base; the n=53 record above is a wall-clock charged class and is unchanged" + ROUND_READING.get(ROUND, "")),
     ])
     evidence(st)
 
