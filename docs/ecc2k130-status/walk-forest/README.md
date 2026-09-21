@@ -87,7 +87,19 @@ python3 scripts/site/walk_forest.py \
 them on a canvas in place of the figure: drag to pan, wheel or pinch to
 zoom, hover a node for the walk it is on and how far along it sits, click a
 node to light every path through it to its distinguished point, and play the
-walks to watch each set off along its trail. The graphs carry the static
+walks to run them all at once on one clock of iterations, each lighting its
+trail in its own colour until it reaches the rim.
+
+Both are drawn as a circle. Every distinguished point sits on the rim and
+every walk comes in to it from inside, as far from the rim as it had
+iterations still to go (the cap, or the longest walk when there is none, is
+the hub), so a seed sits as deep as its walk was long. Each walk has an
+equal slice of the circle, in the order of its start in a depth-first pass
+over its tree, so walks that merge sit side by side and join without
+crossing, and a node several walks share sits at the mean of their slices.
+Colour follows the slice. A small swirl, the same for every trail, bends the
+spokes into arcs. The trails file lists the walks shortest first, so on the
+challenge curve the seeds spiral in. The graphs carry the static
 figure's own layout, so the two agree and the page computes no layout; a
 graph is byte-identical to what its trails export to, and the tests check
 that. Without JavaScript, or if a graph fails to load, the figure stays.

@@ -3,10 +3,14 @@
 // The static figure (walk-forest.svg) is drawn by scripts/site/walk_forest.py
 // from the committed trails; this loads the same forest exported as a graph
 // (walk-forest.json, and walk-forest-gf2-23.json for the test curve where
-// trails merge) with the same layout, and puts it on a canvas: drag to pan,
-// wheel or pinch to zoom, hover a node to see which walk it is on and how far
-// along, click a node to light up every path through it to its distinguished
-// point, and press play to watch the walkers move along their trails.
+// trails merge) with the same layout, and puts it on a canvas. The layout is
+// a circle: every distinguished point on the rim, every walk coming in to it
+// from as far inside as it had iterations to go, each in its own colour.
+// Drag to pan, wheel or pinch to zoom, hover a node to see which walk it is
+// on and how far along, click a node to light up every path through it to
+// its distinguished point, and press play to run every walk at once on one
+// clock of iterations, each lighting its trail as it goes and arriving at
+// the rim when its walk did.
 //
 // Progressive enhancement: the <img> stays until the graph has loaded and
 // drawn, and stays if it cannot. Nothing here fetches anything but the two
@@ -19,20 +23,24 @@
   if (!host || !window.fetch || !document.createElement("canvas").getContext) return;
 
   var COLORS = {
-    edge: "#5b6788",
-    edgeDim: "#2a3354",
+    edgeDim: "#232b47",
     node: "#141a2f",
-    ring: "#d3dbee",
-    ringDim: "#4a5478",
+    ringDim: "#343d5e",
+    guide: "#2a3354",
+    tick: "#7d89aa",
     dp: "#4fe8ae",
     dpDim: "#2b6d55",
-    seed: "#a7b3d0",
     walkA: "#f8cd78",
     walkB: "#6f92ff",
     walker: "#ffffff",
     label: "#e8edf7",
-    labelBg: "rgba(11, 16, 32, 0.92)"
+    bg: "#0b1020"
   };
+
+  // One pass of every walk, rim to hub, takes this long however deep the
+  // circle is; a walk's speed in iterations is the same for all of them.
+  var PLAY_MS = 9000;
+  var ARRIVE_MS = 700;
 
   var DATASETS = [
     { key: "real", file: "./walk-forest.json", label: "ECC2K-130, real walks" },
@@ -60,16 +68,19 @@
   var selected = -1;
   var lit = null;            // Set of node indices on the selected paths
   var litEdges = null;       // Set of "a-b" keys
-  var walkers = null;        // per walk: position along its node list, or null when idle
+  var clock = null;          // iterations elapsed while playing, else null
+  var started = 0;           // performance.now() at iteration 0
+  var arrived = null;        // per walk: time it reached the rim, or 0
   var playing = false;
-  var frame = 0;
   var needsDraw = true;
   var succ = null, preds = null, walkOf = null, posOf = null;
+  var owner = null;          // per node: the first walk through it, whose colour it takes
+  var hue = null, hueDim = null, hueNode = null;
 
   function size() {
     var rect = host.getBoundingClientRect();
     var w = Math.max(300, Math.floor(rect.width));
-    var h = Math.max(320, Math.min(900, Math.round(w * 0.82)));
+    var h = Math.max(320, Math.min(860, Math.round(w * 0.92)));
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     canvas.style.width = w + "px";
@@ -80,7 +91,7 @@
   function fit() {
     if (!graph) return;
     var w = canvas.width / dpr, h = canvas.height / dpr;
-    var pad = 24;
+    var pad = 16;
     view.k = Math.min((w - 2 * pad) / Math.max(graph.width, 1), (h - 2 * pad) / Math.max(graph.height, 1));
     view.x = (w - graph.width * view.k) / 2;
     view.y = (h - graph.height * view.k) / 2;
@@ -97,18 +108,25 @@
     preds = new Array(g.nodes.length);
     walkOf = new Array(g.nodes.length);
     posOf = new Array(g.nodes.length);
+    owner = new Array(g.nodes.length);
     var i;
-    for (i = 0; i < g.nodes.length; i++) { succ[i] = -1; preds[i] = []; walkOf[i] = []; posOf[i] = []; }
+    for (i = 0; i < g.nodes.length; i++) { succ[i] = -1; preds[i] = []; walkOf[i] = []; posOf[i] = []; owner[i] = -1; }
     for (i = 0; i < g.edges.length; i++) {
       succ[g.edges[i][0]] = g.edges[i][1];
       preds[g.edges[i][1]].push(g.edges[i][0]);
     }
+    hue = []; hueDim = []; hueNode = [];
     for (var w = 0; w < g.walks.length; w++) {
       var nodes = g.walks[w].nodes;
       for (var p = 0; p < nodes.length; p++) {
         walkOf[nodes[p]].push(w);
         posOf[nodes[p]].push(p);
+        if (owner[nodes[p]] < 0) owner[nodes[p]] = w;
       }
+      var h = g.walks[w].hue;
+      hue.push("hsl(" + h + " 72% 66%)");
+      hueDim.push("hsl(" + h + " 30% 30%)");
+      hueNode.push("hsl(" + h + " 60% 80%)");
     }
   }
 
@@ -134,7 +152,53 @@
     return { nodes: nodes, edges: edges };
   }
 
-  function draw() {
+  // Where walk w stands after t iterations: the index of the last node it
+  // has passed and the fraction of the way to the next. Nodes sit every
+  // `every` iterations except the last, which is wherever the walk ended.
+  function standing(w, t) {
+    var walk = graph.walks[w];
+    var last = walk.nodes.length - 1;
+    if (t >= walk.steps) return { i: last, f: 0, done: true };
+    var every = graph.every || 1;
+    var i = Math.min(last - 1, Math.floor(t / every));
+    var span = i + 1 < last ? every : walk.steps - i * every;
+    return { i: i, f: Math.max(0, Math.min(1, (t - i * every) / span)), done: false };
+  }
+
+  function lerp(a, b, f) {
+    var pa = toScreen(a), pb = toScreen(b);
+    return [pa[0] + (pb[0] - pa[0]) * f, pa[1] + (pb[1] - pa[1]) * f];
+  }
+
+  function drawGuides(w, h) {
+    var c = graph.circle;
+    if (!c) return;
+    var cx = c.rim * view.k + view.x, cy = c.rim * view.k + view.y;
+    ctx.lineWidth = 1;
+    for (var q = 0; q < c.rings; q++) {
+      var r = (c.rim - (c.rim - c.hub) * q / c.rings) * view.k;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+      ctx.strokeStyle = q === 0 ? COLORS.dpDim : COLORS.guide;
+      ctx.stroke();
+    }
+    // Labels only when the rings are far enough apart to hold them.
+    if ((c.rim - c.hub) / c.rings * view.k < 76) return;
+    ctx.font = "11px ui-monospace, Menlo, monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = COLORS.bg;
+    ctx.fillStyle = COLORS.tick;
+    for (var q2 = 1; q2 < c.rings; q2++) {
+      var r2 = (c.rim - (c.rim - c.hub) * q2 / c.rings) * view.k;
+      var text = Math.floor(c.depth * q2 / c.rings).toLocaleString("en-US") + " to go";
+      ctx.strokeText(text, cx + r2, cy);
+      ctx.fillText(text, cx + r2, cy);
+    }
+  }
+
+  function draw(now) {
     needsDraw = false;
     if (!graph) return;
     var w = canvas.width, h = canvas.height;
@@ -143,21 +207,29 @@
     var k = view.k;
     var r = Math.max(1.2, Math.min(4, 2.6 * k));
     var rDp = Math.max(1.8, Math.min(6, 3.6 * k));
-    var dim = lit !== null;
-    var i, a, b, pa, pb;
+    var dim = lit !== null || clock !== null;
+    var i, a, b, pa, pb, wk;
 
-    // Edges, plain first, lit on top.
+    drawGuides(w, h);
+
+    // Edges in their walk's colour, faded while a path is lit or the walks
+    // are playing; a stride two walks share takes the first one's colour.
     ctx.lineWidth = Math.max(0.6, Math.min(2, 1.1 * k));
-    ctx.strokeStyle = dim ? COLORS.edgeDim : COLORS.edge;
-    ctx.beginPath();
-    for (i = 0; i < graph.edges.length; i++) {
-      a = graph.edges[i][0]; b = graph.edges[i][1];
-      if (dim && litEdges.has(a + "-" + b)) continue;
-      pa = toScreen(a); pb = toScreen(b);
-      ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]);
+    ctx.lineCap = "round";
+    for (wk = 0; wk < graph.walks.length; wk++) {
+      var nodes = graph.walks[wk].nodes;
+      ctx.strokeStyle = dim ? (clock !== null ? hueDim[wk] : COLORS.edgeDim) : hue[wk];
+      ctx.beginPath();
+      for (i = 0; i + 1 < nodes.length; i++) {
+        a = nodes[i]; b = nodes[i + 1];
+        if (owner[a] !== wk) continue;
+        if (lit !== null && litEdges.has(a + "-" + b)) continue;
+        pa = toScreen(a); pb = toScreen(b);
+        ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]);
+      }
+      ctx.stroke();
     }
-    ctx.stroke();
-    if (dim) {
+    if (lit !== null) {
       ctx.lineWidth = Math.max(1.4, Math.min(3.5, 2.4 * k));
       ctx.strokeStyle = COLORS.walkA;
       ctx.beginPath();
@@ -168,7 +240,7 @@
         ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]);
       }
       ctx.stroke();
-    } else if (graph.highlights.length) {
+    } else if (clock === null && graph.highlights.length) {
       // The static figure's meetings, in its colours.
       var cls = [["a", COLORS.walkA], ["b", COLORS.walkB], ["shared", COLORS.dp]];
       ctx.lineWidth = Math.max(1.2, Math.min(3, 2.4 * k));
@@ -186,38 +258,76 @@
       }
     }
 
-    // Nodes: hollow for orbits, filled for distinguished points.
+    // Playing: each walk's trail so far, bright in its colour.
+    var heads = null;
+    if (clock !== null) {
+      heads = [];
+      ctx.lineWidth = Math.max(1.2, Math.min(3, 2 * k));
+      for (wk = 0; wk < graph.walks.length; wk++) {
+        var walkNodes = graph.walks[wk].nodes;
+        var s = standing(wk, clock);
+        ctx.strokeStyle = hue[wk];
+        ctx.beginPath();
+        var p0 = toScreen(walkNodes[0]);
+        ctx.moveTo(p0[0], p0[1]);
+        for (i = 1; i <= s.i; i++) {
+          var pi = toScreen(walkNodes[i]);
+          ctx.lineTo(pi[0], pi[1]);
+        }
+        var head = s.done ? toScreen(walkNodes[s.i]) : lerp(walkNodes[s.i], walkNodes[s.i + 1], s.f);
+        ctx.lineTo(head[0], head[1]);
+        ctx.stroke();
+        heads.push(s.done ? null : head);
+      }
+    }
+
+    // Nodes: hollow in their walk's colour, filled green on the rim.
     ctx.lineWidth = Math.max(0.6, Math.min(1.6, 1.1 * k));
     for (i = 0; i < graph.nodes.length; i++) {
       var n = graph.nodes[i];
       var p2 = toScreen(i);
       if (p2[0] < -8 || p2[1] < -8 || p2[0] > w / dpr + 8 || p2[1] > h / dpr + 8) continue;
-      var isLit = !dim || lit.has(i);
+      var isLit = lit === null ? clock === null : lit.has(i);
       ctx.beginPath();
       if (n[3]) {
+        var home = clock !== null && walkOf[i].some(function (x) { return arrived[x] > 0; });
         ctx.arc(p2[0], p2[1], rDp, 0, 2 * Math.PI);
-        ctx.fillStyle = isLit ? COLORS.dp : COLORS.dpDim;
+        ctx.fillStyle = isLit || home ? COLORS.dp : COLORS.dpDim;
         ctx.fill();
       } else {
         ctx.arc(p2[0], p2[1], r, 0, 2 * Math.PI);
         ctx.fillStyle = COLORS.node;
         ctx.fill();
-        ctx.strokeStyle = isLit ? COLORS.ring : COLORS.ringDim;
+        ctx.strokeStyle = isLit ? hueNode[owner[i]] : COLORS.ringDim;
         ctx.stroke();
       }
     }
 
-    // Walkers: a bright dot per walk still on its way.
-    if (walkers) {
-      ctx.fillStyle = COLORS.walker;
-      for (i = 0; i < walkers.length; i++) {
-        if (walkers[i] === null) continue;
-        var nodes = graph.walks[i].nodes;
-        var at = Math.min(walkers[i], nodes.length - 1);
-        var p3 = toScreen(nodes[at]);
-        ctx.beginPath();
-        ctx.arc(p3[0], p3[1], rDp + 1, 0, 2 * Math.PI);
-        ctx.fill();
+    // Walkers, and a ring spreading from each distinguished point as its
+    // walk arrives.
+    if (heads) {
+      for (wk = 0; wk < heads.length; wk++) {
+        if (heads[wk]) {
+          ctx.beginPath();
+          ctx.arc(heads[wk][0], heads[wk][1], rDp + 1.5, 0, 2 * Math.PI);
+          ctx.fillStyle = hue[wk];
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(heads[wk][0], heads[wk][1], Math.max(1.2, rDp - 1), 0, 2 * Math.PI);
+          ctx.fillStyle = COLORS.walker;
+          ctx.fill();
+        } else if (arrived[wk] && now - arrived[wk] < ARRIVE_MS) {
+          var age = (now - arrived[wk]) / ARRIVE_MS;
+          var nodes2 = graph.walks[wk].nodes;
+          var pd = toScreen(nodes2[nodes2.length - 1]);
+          ctx.beginPath();
+          ctx.arc(pd[0], pd[1], rDp + 2 + 14 * age, 0, 2 * Math.PI);
+          ctx.strokeStyle = COLORS.dp;
+          ctx.globalAlpha = 1 - age;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
       }
     }
 
@@ -267,53 +377,65 @@
   function summary() {
     var c = graph.counts;
     return graph.title + ": " + c.walks + " walks, " + c.nodes.toLocaleString("en-US") + " nodes, " +
-      c.distinguished + " distinguished points, " + c.meetings + " meetings" +
+      c.distinguished + " distinguished points on the rim, " + c.meetings + " meetings" +
       (graph.every > 1 ? ", one node every " + graph.every.toLocaleString("en-US") + " iterations" : "") +
-      ". Drag to pan, wheel to zoom, hover a node, click one to light its paths.";
+      ". Distance in from the rim is iterations still to go. Drag to pan, wheel to zoom, hover a node, click one to light its paths.";
   }
 
   function select_(i) {
     selected = i;
     if (i < 0) { lit = null; litEdges = null; }
     else { var t = pathsThrough(i); lit = t.nodes; litEdges = t.edges; }
-    setReadout(i < 0 ? summary() : describe(i));
+    if (clock === null) setReadout(i < 0 ? summary() : describe(i));
     needsDraw = true;
   }
 
   // --- animation ------------------------------------------------------
+  // Every walk sets off from its seed at iteration 0 and moves at the same
+  // number of iterations per second, so the short walks reach the rim first
+  // and the order they arrive in is the order they finished.
+  function depth() {
+    return (graph.circle && graph.circle.depth) || graph.counts.longest;
+  }
   function play() {
     if (!graph) return;
-    walkers = [];
-    for (var i = 0; i < graph.walks.length; i++) walkers.push(0);
+    select_(-1);
+    arrived = [];
+    for (var i = 0; i < graph.walks.length; i++) arrived.push(0);
+    clock = 0;
+    started = performance.now();
     playing = true;
-    frame = 0;
     playButton.textContent = "Stop";
     needsDraw = true;
   }
   function stop() {
     playing = false;
-    walkers = null;
-    playButton.textContent = "Play the walks";
+    clock = null;
+    arrived = null;
+    if (playButton) playButton.textContent = "Play the walks";
+    if (graph) setReadout(selected < 0 ? summary() : describe(selected));
     needsDraw = true;
   }
-  function tick() {
-    if (playing && walkers) {
-      frame++;
-      // Two nodes per frame keeps a 100-node trail under a second; each walk
-      // starts a little after the last so the eye can follow them setting off.
-      var stagger = Math.floor(frame / 2);
-      var alive = 0;
-      for (var i = 0; i < walkers.length; i++) {
-        if (walkers[i] === null) continue;
-        if (i > stagger) { alive++; continue; }
-        walkers[i] += 2;
-        if (walkers[i] >= graph.walks[i].nodes.length - 1) walkers[i] = null;
-        else alive++;
+  function tick(now) {
+    if (playing) {
+      var total = depth();
+      clock = Math.min(total, (now - started) / PLAY_MS * total);
+      var home = 0;
+      for (var i = 0; i < graph.walks.length; i++) {
+        if (clock >= graph.walks[i].steps) {
+          if (!arrived[i]) arrived[i] = now;
+          home++;
+        }
       }
+      setReadout("iteration " + Math.floor(clock).toLocaleString("en-US") + " of " + total.toLocaleString("en-US") +
+        " · " + home + " of " + graph.walks.length + " walks at their distinguished point");
       needsDraw = true;
-      if (!alive) { playing = false; playButton.textContent = "Play the walks"; }
+      if (clock >= total && now - started > PLAY_MS + ARRIVE_MS) {
+        playing = false;
+        playButton.textContent = "Play again";
+      }
     }
-    if (needsDraw) draw();
+    if (needsDraw) draw(now);
     window.requestAnimationFrame(tick);
   }
 
@@ -351,6 +473,7 @@
   });
   canvas.addEventListener("pointerup", function (e) {
     if (dragging && !dragging.moved) {
+      if (clock !== null && !playing) stop();
       var rect = canvas.getBoundingClientRect();
       var i = nearest(e.clientX - rect.left, e.clientY - rect.top);
       select_(i === selected ? -1 : i);
