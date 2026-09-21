@@ -977,13 +977,16 @@ make gpu
     return isFinite(n) && n >= 0 ? n : null;
   }
 
-  function drawWorkers(workers, snapshotAt, source) {
+  function drawWorkers(workers, snapshotAt, status) {
     var body = el("workers-body");
     var note = el("workers-note");
     body.textContent = "";
     if (!workers.length) {
-      var text = String(source || "");
+      var text = String((status && status.source) || "");
       var ingestOnly = text.indexOf("dp_ingest") !== -1 || text === "ingest-status-feed";
+      // Live ingest omits per_worker even when the store holds points.
+      // Do not read that as "no workers" (272M DPs, 2026-09-21).
+      if (!ingestOnly && Number(status && status.dps) > 0) ingestOnly = true;
       emptyRow(body, 5, ingestOnly
         ? "Per-worker counts need the walker hop; this snapshot is from the ingest feed."
         : "No workers have reported points.");
@@ -1627,7 +1630,7 @@ make gpu
         emptyRow(historyBody, 7, "Could not read history.json (" + historyError + ").");
       }
     }
-    drawWorkers(status.per_worker || [], generated, status.source);
+    drawWorkers(status.per_worker || [], generated, status);
     drawCampaign(status);
 
     if (historyError) {

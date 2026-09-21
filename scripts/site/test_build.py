@@ -290,6 +290,7 @@ class BuildTests(unittest.TestCase):
         dashboard = read(os.path.join(self.out, "status", "index.html"))
         self.assertIn('indexOf("dp_ingest")', dashboard)
         self.assertIn("ingest-status-feed", dashboard)
+        self.assertIn("Number(status && status.dps) > 0", dashboard)
         self.assertIn("Per-worker counts need the walker hop", dashboard)
 
     def test_pages_prefer_the_counted_iteration_total_over_the_derived_one(self):
