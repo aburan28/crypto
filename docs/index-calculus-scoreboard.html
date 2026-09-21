@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Every index-calculus variant built for the elliptic-curve discrete logarithm in this repository, scored in operations per root-n against Pollard rho and a generic-group floor.">
 <!--
-  Standalone build of the cost ledger in research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md §§9-11.
-  Open it directly in a browser; it loads two webfont families from Google
-  Fonts and needs nothing else.  Every figure on the page is taken from the
-  frozen experiment JSON in experiments/; see the footer for the conversion
+  Standalone build of the cost ledgers in
+  research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (three regimes on one
+  axis, frozen run in docs/ic/runs/) and research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md
+  §§9-11 (experiments/).  Open it directly in a browser; it loads two webfont
+  families from Google Fonts and needs nothing else.  Every figure on the page
+  is taken from the frozen experiment JSON; see the footer for the conversion
   factors and for which numbers are extrapolations rather than measurements.
 -->
 <style>
@@ -307,8 +309,12 @@
     <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
     <h1>Index Calculus Scoreboard</h1>
     <p class="verdict">The calibrated index-calculus families below are scored against
-      their generic-group floor and matched Pollard rho reference. On elliptic curves the
-      500×-or-worse rho verdict is unchanged. It is no longer blanket, though: on
+      their generic-group floor and matched Pollard rho reference. On elliptic curves nothing
+      measured end to end is below rho: the residual-walk thread's 500×-or-worse verdict on
+      E(F<sub>p</sub><sup>3</sup>) is unchanged, and the three-regime ledger that heads the page
+      puts the best whole-pipeline variant at 14.5× rho on a 23-bit prime-order curve, 89× on a
+      24-bit random binary curve and 300× on a 39-bit Koblitz subgroup, every fitted exponent
+      above rho's one half. It is no longer blanket, though: on
       hyperelliptic Jacobians at genus 3 and 4 index calculus measures
       <strong>below</strong> a real distinguished-point rho — 0.21 at
       <code>N</code> = 2<sup>24</sup> on the conservative accounting — with a fitted
@@ -329,14 +335,19 @@
           measure of speed: a phase-only crossover is a diagnostic, not a win.</p>
       </div>
       <div class="fact">
-        <dt>Boundary 1 · the floor</dt>
-        <dd>&kappa; &ge; &radic;(2(B+1)/&gamma;)</dd>
-        <p>Generic relation yield is at most &gamma;P&sup2;/2n, which bounds the count factor from below.</p>
+        <dt>Boundary 1 · the floors</dt>
+        <dd>S &ge; &radic;(&pi;/2A)</dd>
+        <p>A generic algorithm needs &radic;(&pi;n/2A) operations with A automorphisms: 0.886 with negation, &radic;(&pi;/4n) on a Koblitz curve. The residual-walk panels use the count floor &kappa; &ge; &radic;(2(B+1)/&gamma;).</p>
       </div>
       <div class="fact">
         <dt>Boundary 2 · the reference</dt>
-        <dd>rho, S &asymp; 1.3</dd>
-        <p>Measured 1.2 to 1.8 across four group sizes on the same instances and accounting.</p>
+        <dd>rho, counted</dd>
+        <p>S &asymp; 1.3 on E(F<sub>p</sub><sup>3</sup>) with the residual-walk accounting; 0.20 to 23 on the three-regime ledger with the setup inside, the walk alone 0.13 to 4.2.</p>
+      </div>
+      <div class="fact">
+        <dt>Closest to rho</dt>
+        <dd>14.5&times; at 2<sup>23.4</sup></dd>
+        <p>Meet in the middle, m = 3, prime field, every phase counted; exponent 0.60 against rho's one half, so the gap widens.</p>
       </div>
     </dl>
   </header>
@@ -348,14 +359,135 @@
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
 
+  <!-- ============ THREE REGIMES ON ONE AXIS ============ -->
+  <div class="panel" id="boundary-ledger">
+    <div class="panel-head">
+      <h2>Three regimes on one axis</h2>
+      <p>A generic prime-field curve, a random binary curve and a Koblitz curve, each solving the
+        same planted logarithm end to end with every phase inside the count &mdash; factor base,
+        targets, decomposition oracle, pair table, elimination, verification &mdash; priced in
+        group-addition equivalents per &radic;r against the generic floor &radic;(&pi;/2A) and a
+        counted Pollard rho on the same instance. Native counts are exact; the conversion factors
+        are measured on the host and stored in the run. Rows are the largest instance of each
+        regime, plus the largest Koblitz rung on which the control was run; the full ladder and
+        the fits are in <code>research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md</code>.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <caption>Frozen source: <code>docs/ic/runs/ic-boundary-ledger-2026-09-21.json</code>
+          (<code>ic boundary --oracles</code>). Means over three targets; rho over eight walks per
+          target. Every logarithm on the board recovered and verified as [d]G = Q. The Koblitz
+          reference and floor use all 2n signed-Frobenius automorphisms; the prime and binary
+          references use none, so their &ldquo;vs rho&rdquo; is generous to index calculus by
+          &radic;2.</caption>
+        <thead>
+          <tr>
+            <th scope="col">Variant</th>
+            <th scope="col" class="n">S</th>
+            <th scope="col" class="n">vs rho</th>
+            <th scope="col" class="n">vs floor</th>
+            <th scope="col">Correct</th>
+            <th scope="col">Class</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="group"><td colspan="6">Prime field, generic curve &middot; generated-24bit-10935329 &middot; r = 2<sup>23.4</sup> &middot; rho S = 3.93 &middot; floor S = 0.886</td></tr>
+          <tr><td>Semaev S&#8323; roots, m = 2</td><td class="n">4,349</td><td class="n">1,107&times;</td><td class="n">4,907&times;</td><td>yes</td><td title="baseline: one square root per base abscissa per target"><span class="chip">baseline</span></td></tr>
+          <tr><td>Direct subtraction, m = 2</td><td class="n">1,715</td><td class="n">436&times;</td><td class="n">1,935&times;</td><td>yes</td><td title="accounting: the same enumeration, priced by additions instead of square roots"><span class="chip">accounting</span></td></tr>
+          <tr><td>Meet in the middle, m = 2</td><td class="n">232</td><td class="n">59.1&times;</td><td class="n">262&times;</td><td>yes</td><td title="engineering: memory for time, ratio to the counting boundary unmoved"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 3</td><td class="n">56.8</td><td class="n">14.5&times;</td><td class="n">64.1&times;</td><td>yes</td><td title="engineering: memory for time, one probe per subtraction; the best row on this ledger"><span class="chip">engineering</span></td></tr>
+          <tr class="group"><td colspan="6">Binary field, random curve &middot; random-binary-n27-b845462 &middot; r = 2<sup>24.4</sup> &middot; rho S = 2.31 &middot; floor S = 0.886</td></tr>
+          <tr><td>Meet in the middle, m = 3</td><td class="n">206</td><td class="n">89.0&times;</td><td class="n">232&times;</td><td>yes</td><td title="baseline: the table pipeline on the random binary curve"><span class="chip">baseline</span></td></tr>
+          <tr><td>S&#8324; pairs-and-solve, m = 3</td><td class="n">105,198</td><td class="n">45,471&times;</td><td class="n">118,703&times;</td><td>yes</td><td title="relabelling: the pair table's memory is paid back as a per-target loop over |F|²/2 pairs; S rises 510×"><span class="chip relabel">relabelling</span></td></tr>
+          <tr class="group"><td colspan="6">Koblitz curve, signed-Frobenius reference &middot; K_1 / GF(2^23) &middot; r = 2<sup>22.0</sup> &middot; rho S = 0.89 &middot; floor S = 0.185</td></tr>
+          <tr><td>Same base, one column per abscissa (control)</td><td class="n">203</td><td class="n">227&times;</td><td class="n">1,096&times;</td><td>yes</td><td title="baseline: the random-binary pipeline on the Koblitz curve"><span class="chip">baseline</span></td></tr>
+          <tr><td>Meet in the middle, signed-orbit columns</td><td class="n">188</td><td class="n">210&times;</td><td class="n">1,017&times;</td><td>yes</td><td title="advance, count: K falls 438 → 20 and the trials 348 → 18; S moves 7% because the factor base is 99.6% of it"><span class="chip advance">advance, count</span></td></tr>
+          <tr class="group"><td colspan="6">Koblitz curve, signed-Frobenius reference &middot; K_0 / GF(2^41) &middot; r = 2<sup>39.0</sup> &middot; rho S = 0.20 &middot; floor S = 0.138</td></tr>
+          <tr><td>Meet in the middle, signed-orbit columns</td><td class="n">58.8</td><td class="n">300&times;</td><td class="n">425&times;</td><td>yes</td><td title="advance, count: the same fold; the base is capped at 6,000 points here, so relations are 71% of the cost"><span class="chip advance">advance, count</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend" style="padding-top:0">
+      <span>class by the AGENTS.md &sect;3 test: advance = the count boundary moved &middot; engineering = S fell, ratio flat &middot; relabelling = work left the headline &middot; accounting = only the numbers changed</span>
+      <span>every fitted total exponent is above rho&rsquo;s one half, so all three gaps widen with size</span>
+      <span>rho&rsquo;s setup is inside its S and dominates below 2<sup>20</sup>, so &ldquo;vs rho&rdquo; flatters index calculus at small sizes; &ldquo;vs floor&rdquo; does not</span>
+    </div>
+  </div>
+
+  <!-- ============ LEDGER EXPONENTS + ORACLES ============ -->
+  <div class="duo">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>The exponents, per regime</h2>
+        <p>Fitted growth of the whole cost in the subgroup order over each ladder,
+          <code>ops &prop; r<sup>&alpha;</sup></code>, from the run&rsquo;s <code>fits</code>. Rho&rsquo;s one
+          half is the reference mark; its measured 0.25&ndash;0.30 here is its unamortised setup.
+          Anything to the right of one half loses as the group grows, whatever its constant.</p>
+      </div>
+      <div class="exp">
+        <div class="erow"><div class="name">prime: rho reference</div><div class="track"><i class="dot" style="left:3.7%" title="r^0.27 (R² 0.90, 8 sizes)"></i></div><div class="num">0.27</div></div>
+        <div class="erow"><div class="name">prime: Meet in the middle, m = 3</div><div class="track"><i class="dot" style="left:54.0%" title="r^0.60 (R² 0.98, 8 sizes)"></i></div><div class="num">0.60</div></div>
+        <div class="erow"><div class="name">prime: Meet in the middle, m = 2</div><div class="track"><i class="dot" style="left:63.4%" title="r^0.66 (R² 1.00, 8 sizes)"></i></div><div class="num">0.66</div></div>
+        <div class="erow"><div class="name">prime: Direct subtraction, m = 2</div><div class="track"><i class="dot" style="left:92.4%" title="r^0.85 (R² 0.99, 8 sizes)"></i></div><div class="num">0.85</div></div>
+        <div class="erow"><div class="name">prime: Semaev S&#8323; roots, m = 2</div><div class="track"><i class="dot" style="left:100.0%" title="r^0.91 (R² 0.96, 8 sizes)"></i></div><div class="num">0.91</div></div>
+        <div class="erow"><div class="name">binary: rho reference</div><div class="track"><i class="dot" style="left:8.0%" title="r^0.30 (R² 0.97, 5 sizes)"></i></div><div class="num">0.30</div></div>
+        <div class="erow"><div class="name">binary: Meet in the middle, m = 3</div><div class="track"><i class="dot" style="left:57.5%" title="r^0.62 (R² 0.99, 5 sizes)"></i></div><div class="num">0.62</div></div>
+        <div class="erow"><div class="name">binary: S&#8324; pairs-and-solve, m = 3</div><div class="track"><i class="dot" style="left:100.0%" title="r^1.06 (R² 0.99, 5 sizes), off the axis"></i></div><div class="num">1.06</div></div>
+        <div class="erow"><div class="name">Koblitz: signed-Frobenius rho</div><div class="track"><i class="dot" style="left:0.6%" title="r^0.25 (R² 0.92, 11 sizes)"></i></div><div class="num">0.25</div></div>
+        <div class="erow"><div class="name">Koblitz: Meet in the middle, signed-orbit columns</div><div class="track"><i class="dot" style="left:45.2%" title="r^0.54 (R² 0.71 over 10 rungs; 0.51, R² 0.98 over the cofactor ≤ 4 rungs)"></i></div><div class="num">0.54</div></div>
+        <div class="erow"><div class="name">Koblitz: one column per abscissa (control)</div><div class="track"><i class="dot" style="left:77.4%" title="r^0.75 (R² 0.59 over 7 rungs; 0.62, R² 0.99 over the cofactor ≤ 4 rungs)"></i></div><div class="num">0.75</div></div>
+        <div class="exp-axis">
+          <div></div>
+          <div class="ticks">
+            <b style="left:0">0.25</b>
+            <b class="rho-flag">rho 0.50</b>
+            <b style="left:100%">0.90</b>
+          </div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>What one target costs each decomposition oracle</h2>
+        <p>Per-target price, in group-addition equivalents, of every oracle on the same Koblitz
+          Semaev systems, the algebraic ones included although none finishes a logarithm at these
+          sizes. Matrix-F4 is counted in 64-bit word XORs, exactly; SAT in conflicts; both converted
+          at the host&rsquo;s measured factors. First fall degree 2 on every m = 2 system and 3 on
+          every m = 3 one.</p>
+      </div>
+      <div class="ledger">
+        <div class="lrow"><div class="name"><strong>n = 23, m = 2</strong> &middot; 22 unknowns, 23 equations, first fall degree 2, hit rate 0.5</div><div class="num">GAE / target</div></div>
+        <div class="lrow"><div class="name">Meet in the middle, one probe</div><div class="num">0.51</div><div class="lbar"><i style="width:8.4%"></i></div></div>
+        <div class="lrow"><div class="name">Enumeration of the base</div><div class="num">1,310</div><div class="lbar"><i style="width:48.5%"></i></div></div>
+        <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 6.8&times;10<sup>7</sup> word XORs found, 2.3&times;10<sup>8</sup> refuted</div><div class="num">2.0&times;10<sup>5</sup></div><div class="lbar"><i style="width:74.1%"></i></div></div>
+        <div class="lrow"><div class="name">CDCL with native parity rows &middot; 29,000 conflicts found, 188,000 refuted</div><div class="num">1.3&times;10<sup>7</sup></div><div class="lbar"><i style="width:95.4%"></i></div></div>
+        <div class="lrow"><div class="name"><strong>n = 15, m = 3</strong> &middot; 30 unknowns, 30 equations, first fall degree 3, hit rate 0.38</div><div class="num"></div></div>
+        <div class="lrow"><div class="name">Meet in the middle</div><div class="num">24.7</div><div class="lbar"><i style="width:28.1%"></i></div></div>
+        <div class="lrow"><div class="name">Enumeration of the base</div><div class="num">467</div><div class="lbar"><i style="width:43.2%"></i></div></div>
+        <div class="lrow"><div class="name">S&#8324; pairs-and-solve</div><div class="num">1,118</div><div class="lbar"><i style="width:47.6%"></i></div></div>
+        <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 1.7&times;10<sup>8</sup> word XORs found, 1.7&times;10<sup>9</sup> refuted</div><div class="num">2.4&times;10<sup>6</sup></div><div class="lbar"><i style="width:86.8%"></i></div></div>
+        <div class="lrow"><div class="name">CDCL &middot; no answer on 8 of 8 targets at 200,000 conflicts</div><div class="num">&ge; 4.0&times;10<sup>7</sup></div><div class="lbar"><i style="width:100%"></i></div></div>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span>bars on a log<sub>10</sub> scale from 0.1 to 3&times;10<sup>7</sup> group additions</span>
+        <span>zero disagreements between oracles on every target of every cell</span>
+        <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 9.2&times;10<sup>3</sup>, 49&times; the whole measured cost of the tabled fold &mdash; an extrapolation</span>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ MAIN CHART ============ -->
   <div class="panel">
     <div class="panel-head">
-      <h2>Cost relative to Pollard rho</h2>
+      <h2>Cost relative to Pollard rho: the residual-walk thread</h2>
       <p>Each bar is one variant's total operation count divided by rho's, on the same curves with the
         same accounting: precomputation, table setup, relation verification, oracle work and linear
         algebra all inside the number. Logarithmic axis. Where two rounds of tuning were measured,
-        the hairline marks where the variant started.</p>
+        the hairline marks where the variant started. These are the E(F<sub>p</sub>) and
+        E(F<sub>p</sub><sup>3</sup>) cells of <code>RESEARCH_RESIDUAL_WALKS.md</code>; the
+        three-regime ledger above is a separate run with its own reference.</p>
     </div>
 
     <div class="chart-scroll">
@@ -855,6 +987,15 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
   <div class="notes">
     <div class="note">
       <h3>What was actually found</h3>
+      <p><strong>Three regimes now share one axis.</strong> A generic prime-field curve, a random
+        binary curve and a Koblitz curve solve the same planted logarithm with every phase counted:
+        the table pipeline is 14.5&times;, 89&times; and 300&times; the counted rho at the largest
+        sizes, its exponents 0.60, 0.62 and 0.54 against one half, and the algebraic oracles are
+        three to five orders of magnitude behind a pair-table probe per target. The Frobenius fold
+        is a real count advance &mdash; 2n fewer unknowns &mdash; worth 7% of S at n = 23 because the
+        factor base is 99.6% of the cost. The counting ceiling on relation yield turned out loose by
+        the index of any subgroup that contains the base (exactly 2 on the trace-zero bases); an
+        accounting correction, no S moved (<code>research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md</code>).</p>
       <p><strong>The walk hypothesis is closed.</strong> Collision search over partial decompositions
         cannot beat independent sampling, because the relation yield is bounded by a counting
         argument. Every lever tried left the ratio to that floor between 1.00 and 1.07.</p>
@@ -1679,6 +1820,13 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
   </section>
 
   <footer>
+    <p>Three-regime ledger: <code>research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md</code> with the frozen run
+      <code>docs/ic/runs/ic-boundary-ledger-2026-09-21.json</code> (<code>ic boundary --oracles</code>,
+      1,855 s on one host). Every native count in it is exact and converted at factors measured on
+      the run's host and stored in the run: 0.5 ns per word XOR against 140 to 721 ns per curve
+      addition. Its wall columns are practicality notes; the projected oracle-driven relation phases
+      are extrapolations; and the rows it feeds this page are regenerated by
+      <code>docs/ic/tools/boundary_scoreboard_rows.py</code>, never typed.</p>
     <p>Source: <code>research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
       with the pair-only cells from <code>gaudry_cubic_bench --pair-only</code> and the closed routes

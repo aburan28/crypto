@@ -648,10 +648,13 @@ Headline empirical findings (most recent):
 | Boomerang decay (ToySpn r=1..4)     | ~8 bits/round| 5.05     | 0.990 | empirical signature |
 
 See also [`docs/ECDLP_ATTACK_MATRIX.md`](docs/ECDLP_ATTACK_MATRIX.md) for the
-attack/curve-family applicability matrix, and
+attack/curve-family applicability matrix,
 [`docs/ic/BOUNDARY_TARGETS.md`](docs/ic/BOUNDARY_TARGETS.md) for the
 per-stage index-calculus records agents should try to beat (binary / Koblitz /
-prime).
+prime), and [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md)
+for the operation-counted boundary ledger of all three regimes (`ic boundary`),
+which supersedes the wall-clock exponents in the table above as the reference
+for index calculus.
 
 ---
 
@@ -942,6 +945,7 @@ so points on this curve are not payable through it until that lands.
 - [`SECURITY.md`](SECURITY.md) — structural limitations + recommended alternatives.
 - [`AGENTS.md`](AGENTS.md) — how cryptanalysis progress is reported here: state a boundary, put every variant in one table in one unit, and classify each change by whether the ratio to that boundary moved.
 - [`docs/index-calculus-scoreboard.html`](docs/index-calculus-scoreboard.html) — one-page visual scoreboard of the ECDLP cost ledger: every index-calculus variant against Pollard rho and the generic-group floor, the solve-constant ledger, and the fitted exponents. Open it in a browser, or read the published copy at [/scoreboard/](https://aburan28.github.io/crypto/scoreboard/).
+- [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) — the three regimes of index calculus (generic prime field, generic binary field, Koblitz) run end to end on the same planted logarithms and priced phase by phase in one unit — group-addition equivalents per `√r`, exact native counts with host-measured conversions — against the generic floor `√(π/2A)` and a counted Pollard rho on the same instance; the decomposition oracles (enumeration, meet in the middle, `S₄` pairs-and-solve, matrix-F4, CDCL SAT) priced per target with each system's first fall degree; fitted exponents per phase; and the boundaries the next rounds iterate against (`ic boundary`, `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`). The companion `ic corpus` writes Trimoska-style Weil-descended `S₄` instances with certified labels for Magma, XOR-aware SAT solvers and ANF tools (`docs/ic/corpus/`).
 - [`RESEARCH.md`](./RESEARCH.md) — research notes.
 - [`research/notes/cm-isogeny/RESEARCH_P256.md`](research/notes/cm-isogeny/RESEARCH_P256.md) — P-256 specific structural studies.
 - [`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`](research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md) — finding points vs finding relations: collision search over partial factor-base decompositions, measured against Pollard rho (`experiments/20_residual_walk_panel.*`); optimisation ledger, frozen baseline and tuned scoreboards (`experiments/20_residual_walk_{baseline,tuned}.json`, `scripts/residual_walk_scoreboard.py`); round 3 on the count factor: signed-pair seeding and `j = 0` automorphism folding (`experiments/20_residual_walk_{seeded,structure}.json`); the S₃/S₄ decomposition oracles and Gaudry's subspace setting on E(F_{p³}) (`experiments/20_residual_walk_{oracle,s4,mitm3}.json`, `experiments/21_gaudry_cubic.json`); Gaudry's O(1) three-unknown S₄ solve and its measured constant `C₃` (`experiments/21_gaudry_cubic_groebner.json`), the `C₃` optimisation ledger (`experiments/21_gaudry_cubic_c3.json`, §11.5–11.6), and the linear algebra: dense vs sparse Wiedemann with filtering, and the double-large-prime variation measured at `n^{4/9}` (`experiments/21_gaudry_cubic_la.json`, §11.7).
