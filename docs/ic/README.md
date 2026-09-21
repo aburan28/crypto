@@ -635,6 +635,16 @@ with native `PRFM PLDL1KEEP` reduced the one-core relation unit from
 core-seconds (0.995x), with 5/5 identical relation hashes and essentially
 flat RSS.  Other architectures retain their existing prefetch or no-op
 paths.
+The next successor interleaves eight independent normal-basis rotation
+chains instead of canonicalizing one point at a time.  Over five matched
+one-worker pairs, relation-unit wall fell from 3.901 to 3.566 s (0.915x),
+full IC from 7.090 to 6.757 s (0.953x), and whole-process CPU from 9.414
+to 9.084 core-seconds (0.964x), all winning 5/5 with flat memory.  At
+the default thread count, relation-unit CPU fell from 4.397 to 4.133
+core-seconds (0.939x) and full-process CPU to 0.985x.  The exact current
+one-core replay used 6.744 s for IC against 1.602 s for rho, leaving IC
+4.21 times slower.  Sixteen lanes were rejected after regressing both
+one-core and default-thread relation time.
 
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
@@ -659,8 +669,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 179 processes, 683.360 sequential wall-seconds,
-2,045.455 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+campaign contains 204 processes, 838.207 sequential wall-seconds,
+2,298.015 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
 a rejected uncompressed-cache run).
 
 Before the cached builder, five fresh scalar-blind repeats with
