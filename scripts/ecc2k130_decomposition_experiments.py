@@ -68,9 +68,17 @@ class Rung:
     #: multiplication a lookup stop fitting in memory -- `2^29` entries is the
     #: allocation that killed the first attempt at the `n = 29` rung -- and
     #: without them a curve addition costs an inversion by exponentiation,
-    #: roughly three orders of magnitude slower.  That, not the oracle work, is
-    #: what keeps the ladder's upper rungs out of reach of this harness.
-    MAX_TABLE_DEGREE = 20
+    #: roughly three orders of magnitude slower.
+    #:
+    #: Raised from 20 to 23 once the cost was measured rather than guessed:
+    #: `Rung(23)` builds in 9.7 s at 0.73 GB peak resident and then runs at
+    #: 4.7 million curve additions a second, so the whole `n = 23` rung costs
+    #: seconds of oracle work.  It stops at 23 because the next rung that is a
+    #: rung at all (see `is_scale_model_rung`) is `n = 41`, whose table would be
+    #: `2^41` entries and whose oracle budget is `~6.6 x 10^12` operations --
+    #: out of reach of this harness by a wide margin, and of the Rust pipeline
+    #: too at the factor-base dimensions it will materialise.
+    MAX_TABLE_DEGREE = 23
 
     def __init__(self, n: int, tables: bool | None = None):
         self.n = n
@@ -94,6 +102,15 @@ class Rung:
         # which is the distortion the design flagged in advance.
         self.p_torsion_rank = 2 if (self.order // self.exponent) % self.p == 0 else 1
         self.usable_end_to_end = self.p_torsion_rank == 1
+        # A *rung* needs more than a cyclic subgroup: it needs that subgroup to
+        # be nearly the whole curve, or `n` does not mean what the ladder's
+        # x-axis says it means.  `#E = 4r` is the ECC2K-130 shape and every rung
+        # this ladder uses has it.  `n = 29` does not -- its largest prime
+        # factor is 16 067, a cofactor of 33 412 -- so a "2^29 rung" would be a
+        # `2^14` logarithm wearing a `2^29` label, and fitting a slope through
+        # it would measure the cofactors rather than the method.
+        self.cofactor = self.order // self.p
+        self.is_scale_model_rung = self.usable_end_to_end and self.cofactor <= 8
         self.proj_scalar = self.exponent // self.p
         self.G = self._generator() if self.usable_end_to_end else None
 
@@ -915,6 +932,45 @@ def e5_dispersion(n: int, m: int, l: int):
 
 # ── E1: the scale-model ladder, end to end ──────────────────────────────
 
+def rung_census(lo: int = 11, hi: int = 61, m: int = 3):
+    """Which degrees are rungs at all, and why the design's list was wrong.
+
+    E1 pre-registered the ladder `11, 13, 19, 29, 37` and the first round
+    reported the missing upper rungs as a *tooling* shortfall -- "`n = 29` and
+    `n = 37` need the Rust pipeline".  They do not.  They are not rungs.
+
+    A rung has to carry a subgroup that is nearly the whole curve, because the
+    ladder's x-axis is `n` and its unit is `ops / 2^n`.  Every usable rung has
+    `#E = 4r`, the ECC2K-130 shape.  At `n = 29` the largest prime factor of
+    `#E` is `16 067` against a cofactor of `33 412`: the logarithm there is a
+    `2^14` problem, and a slope fitted through it would be reading cofactors.
+
+    Censused over `11 <= n <= 61`, exactly four degrees qualify -- 13, 19, 23
+    and 41 -- and `n = 41` costs `~6.6 x 10^12` oracle operations, so three of
+    the four are reachable.  The four-rung falsifier E1 wrote for itself cannot
+    be fired on this curve family at any size this repository can run.
+    """
+    out = []
+    for n in range(lo, hi + 1):
+        order = DEC.curve_order(n)
+        prime = max(DEC.prime_factors(order))
+        cofactor = order // prime
+        row = {
+            "n": n,
+            "curve_order": order,
+            "largest_prime": prime,
+            "log2_largest_prime": round(math.log2(prime), 2),
+            "cofactor": cofactor,
+            "is_scale_model_rung": cofactor <= 8,
+        }
+        if cofactor <= 8:
+            row["ladder_dimension"] = ladder_dimension(n, m)
+            row["predicted_oracle_operations"] = float(f"{m * 2.0 ** n:.3g}")
+            row["reachable_in_this_harness"] = n <= Rung.MAX_TABLE_DEGREE
+        out.append(row)
+    return out
+
+
 def ladder_dimension(n: int, m: int = 3) -> int:
     """`l = ceil((n + log2 m!)/m)`, the design's own choice.  It rounds up, so
     the base oversaturates and every target decomposes several times over."""
@@ -979,6 +1035,25 @@ def run_e1_rung(n: int, m: int = 3, rule: str = "full", seed: int = 20260913,
     `2^11`.  Rungs run this way are labelled with `l_is_design_value = False`.
     """
     rng = random.Random(seed + n)
+    # Checked before the `Rung` is built, because building one at `n = 29` or
+    # `n = 37` means field arithmetic without tables for a rung that is going
+    # to be thrown away.  A degree whose subgroup is a small part of the curve
+    # is not a rung at this ladder's x-axis; see `rung_census`.
+    order = DEC.curve_order(n)
+    prime = max(DEC.prime_factors(order))
+    cofactor = order // prime
+    if cofactor > 8:
+        return {
+            "n": n, "m": m, "rule": rule, "l": ladder_dimension(n, m),
+            "curve_order": order, "largest_prime": prime,
+            "log2_largest_prime": round(math.log2(prime), 2),
+            "cofactor": cofactor,
+            "excluded": f"not a scale-model rung: the largest prime subgroup "
+                        f"has order 2^{math.log2(prime):.1f} against a curve of "
+                        f"2^{n}, a cofactor of {cofactor}.  Fitting a slope "
+                        f"through it would measure cofactors, not the method.",
+            "is_scale_model_rung": False,
+        }
     rung = Rung(n)
     if not rung.usable_end_to_end:
         return {
@@ -1050,7 +1125,7 @@ def least_squares_slope(xs, ys):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--max-rung", type=int, default=19)
+    ap.add_argument("--max-rung", type=int, default=23)
     args = ap.parse_args()
 
     # ---- the relation budget, and the stopping rule that decides it ----
@@ -1139,15 +1214,15 @@ def main():
 
     # ---- E1 -----------------------------------------------------------
     e1_rows = []
-    for n in (11, 13, 19, 29, 37):
+    for n in (11, 13, 19, 23, 29, 37):
         if n > args.max_rung:
             continue
         for rule in ("full", "first_hit", "folded"):
             row = run_e1_rung(n, rule=rule)
             e1_rows.append(row)
             if "excluded" in row:
-                print(f"E1 n={n:3d} {rule:10s} EXCLUDED ({row['group_shape']})",
-                      flush=True)
+                why = row.get("group_shape") or f"cofactor {row['cofactor']}"
+                print(f"E1 n={n:3d} {rule:10s} EXCLUDED ({why})", flush=True)
             else:
                 print(f"E1 n={n:3d} {rule:10s} l={row['l']} |F|={row['factor_base_size']:5d} "
                       f"targets={row['targets']:5d} rels={row['relations']:5d} "
