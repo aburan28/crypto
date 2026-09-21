@@ -260,6 +260,18 @@ def main():
         check("--replay catches a tampered witness", r.returncode != 0,
               "exit %d" % r.returncode)
 
+    # A --skip at or past the end is an empty slice, not an error and not a
+    # 2^64-wide one.  The parallel replay sizes itself as limit - first, both
+    # unsigned, so this boundary is the one the serial loop used to handle for
+    # free and the rewrite had to be told about.
+    edges = True
+    for sk in (records - 1, records, records + 1, records * 4):
+        rr = run(["./build/witness", "--curve", str(CURVE), "--instance", str(INSTANCE),
+                  "--dp-weight", str(DPW), "--corpus", corpus, "--job", job,
+                  "--skip", str(sk), "--quiet"])
+        edges = edges and rr.returncode == 0
+    check("a --skip past the corpus is an empty slice", edges)
+
     # A corpus record whose orbit the replay does not reach is a disagreement
     # about the walk, and nothing after it is worth claiming.
     bad = os.path.join(tmp, "bad.bin")
