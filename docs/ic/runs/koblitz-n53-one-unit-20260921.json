@@ -740,7 +740,7 @@
   "core_cost_reading": "IC-only total core-seconds are measured directly. The one-target rho is single-threaded, but its process CPU was not sampled as a separate report field; the whole-process wall crossover is not a core-second crossover."
  },
  "gates": {
-  "algebraic_factor_base_and_charged_resources": "partial_pass",
+  "algebraic_factor_base_and_charged_resources": "partial_pass_native_selection_counts_added_licensed_magma_missing",
   "same_instance_solver_matrix": "not_run_here",
   "wall_core_memory_reporting": "partial_pass_current_single_core_refresh_added_magma_missing",
   "n31_n41_larger_pdp_scaling": "not_run_here",
@@ -1157,11 +1157,70 @@
   }
  },
  "science_process_accounting": {
-  "processes": 98,
-  "sequential_wall_seconds": 307.394369585,
-  "total_core_seconds": 1144.929042,
+  "processes": 101,
+  "sequential_wall_seconds": 311.139654002,
+  "total_core_seconds": 1159.24267,
   "peak_rss_bytes": 139853824,
   "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count diagnostic, factor-base-width diagnostic, collection-window diagnostic, and rejected reusable-scratch A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
+ },
+ "current_head_selection_cost_replay": {
+  "source_commit": "1f82245f",
+  "binary_blake3": "47defaee523d35deb5e806842afe43154f1d29ff3c39cab4b7d6d83c3659e61d",
+  "fresh_complete_single_target": {
+   "whole_process_wall_seconds": 3.185437667,
+   "whole_process_total_core_seconds": 12.221167,
+   "peak_rss_bytes": 102318080,
+   "selection_cost": {
+    "abscissae_drawn": 695,
+    "cofactor_multiplications": 344,
+    "frobenius_squarings": 18232,
+    "lifts_found": 344,
+    "rebuilds": 1
+   },
+   "factor_base_summary_selection_cost": {
+    "abscissae_drawn": 695,
+    "cofactor_multiplications": 344,
+    "frobenius_squarings": 18232,
+    "lifts_found": 344,
+    "rebuilds": 1
+   },
+   "trials": 17000,
+   "summands_scanned": 19363000,
+   "relations": 588,
+   "linear_algebra_seconds": 0.001688,
+   "ic_total_wall_seconds": 1.369710207,
+   "rho_wall_seconds": 1.614627292,
+   "rho_over_ic_wall_ratio": 1.178809418042104,
+   "recovered_scalar": 7892094459170,
+   "verified": true
+  },
+  "fresh_and_resumed_select_only": {
+   "fresh": {
+    "ran": true,
+    "selection_cost": {
+     "abscissae_drawn": 695,
+     "cofactor_multiplications": 344,
+     "frobenius_squarings": 18232,
+     "lifts_found": 344,
+     "rebuilds": 1
+    },
+    "process_cpu_seconds": 1.0625419999999999,
+    "peak_rss_bytes": 22708224
+   },
+   "resumed": {
+    "ran": false,
+    "selection_cost": {
+     "abscissae_drawn": 695,
+     "cofactor_multiplications": 344,
+     "frobenius_squarings": 18232,
+     "lifts_found": 344,
+     "rebuilds": 1
+    },
+    "process_cpu_seconds": 1.029919,
+    "peak_rss_bytes": 22986752
+   }
+  },
+  "reading": "The workflow now emits native subgroup-orbit construction counts on fresh and resumed materialization. Timing already charged selection wall and process resources; these counters expose what that phase did without changing the base or solver."
  }
 }

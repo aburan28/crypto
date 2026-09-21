@@ -57,8 +57,8 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     FactorBaseLogTable,
     solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
     IndividualLogSolver,
-    FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
-    ProbeBudget,
+    FactorBaseSelectionCost, FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions,
+    KoblitzSignedRhoOptions, PairSumTable, ProbeBudget,
     RelationCollector, RelationWorkUnit,
 };
 use num_bigint::BigUint;
@@ -1046,15 +1046,19 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     // ── Stage 1: select ────────────────────────────────────────────
     let t0 = Instant::now();
     let mut select_ran = false;
-    let (spec, fb): (FactorBaseSpec, FrobeniusFactorBase) =
+    let (spec, fb, selection_cost): (
+        FactorBaseSpec,
+        FrobeniusFactorBase,
+        Option<FactorBaseSelectionCost>,
+    ) =
         if state.select.status == StageStatus::Complete && fb_path.exists() {
             let doc: FactorBaseDocument = read_json(&fb_path)?;
             if !doc.matches(&c) {
                 return Err("factor_base.json does not belong to this curve".into());
             }
-            let fb = experiment::materialize(&c, &doc.spec)?;
+            let (fb, cost) = experiment::materialize_with_selection_cost(&c, &doc.spec)?;
             say(&format!("[1/4] select: reused {}", FACTOR_BASE_FILE));
-            (doc.spec, fb)
+            (doc.spec, fb, cost)
         } else {
             select_ran = true;
             let (spec, search_report) = match &p.factor_base {
@@ -1072,7 +1076,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                         "elapsed_ms":report.elapsed_ms,"top":top})))
                 }
             };
-            let fb = experiment::materialize(&c, &spec)?;
+            let (fb, cost) = experiment::materialize_with_selection_cost(&c, &spec)?;
             let doc = FactorBaseDocument {
                 schema_version: 1,
                 degree: c.n,
@@ -1098,12 +1102,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 fb.points.len(),
                 fb.unknowns()
             ));
-            (spec, fb)
+            (spec, fb, cost)
         };
     if !select_ran {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":false}));
     } else if stage_reports.last().map_or(true, |v| v["stage"] != "select") {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":true}));
+    }
+    if let (Some(cost), Some(report)) = (selection_cost, stage_reports.last_mut()) {
+        report["selection_cost"] = json!(cost);
     }
     let columns = crypto_lib::cryptanalysis::koblitz_index_calculus::projected_signed_orbit_count(&c, &fb);
     if let Some(window) = p.collection_window {
@@ -1114,7 +1121,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             ));
         }
     }
-    let factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
+    let mut factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
+    if let Some(cost) = selection_cost {
+        factor_base_summary["selection_cost"] = json!(cost);
+    }
     // Projecting the materialized base into signed Frobenius columns is
     // part of constructing its usable predicate. It used to sit between
     // the select and collect timers, which omitted one complete orbit-map

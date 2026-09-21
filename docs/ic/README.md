@@ -596,6 +596,12 @@ The primary control is the single scalar-blind target in
       --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json \
       --dir /tmp/k0n53-public-unknown
 
+The select report now exposes its native algebraic-construction counts:
+695 abscissae drawn, 344 lifts, 344 cofactor multiplications, 18,232
+Frobenius squarings and one rebuild.  Fresh and resumed materialisation
+report the same deterministic counts; process CPU, RSS and select wall
+remain charged separately.
+
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
 verified the published point in all five fresh runs.  The selected
@@ -619,8 +625,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 98 processes, 307.394 sequential wall-seconds,
-1,144.929 core-seconds and a 139.9 MB maximum RSS.
+campaign contains 101 processes, 311.140 sequential wall-seconds,
+1,159.243 core-seconds and a 139.9 MB maximum RSS.
 
 With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
 median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
