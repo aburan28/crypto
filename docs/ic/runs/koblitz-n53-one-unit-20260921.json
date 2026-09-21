@@ -1157,11 +1157,11 @@
   }
  },
  "science_process_accounting": {
-  "processes": 103,
-  "sequential_wall_seconds": 318.046582585,
-  "total_core_seconds": 1184.8914760000002,
-  "peak_rss_bytes": 139853824,
-  "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count diagnostic, factor-base-width diagnostic, collection-window diagnostic, and rejected reusable-scratch A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
+  "processes": 167,
+  "sequential_wall_seconds": 576.140431798,
+  "total_core_seconds": 1930.4536230000003,
+  "peak_rss_bytes": 245972992,
+  "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count, width and window diagnostics, and accepted or rejected single-target build-cache/cutoff A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
  },
  "current_head_selection_cost_replay": {
@@ -1299,5 +1299,263 @@
   "verified": true,
   "rho_over_ic_wall_ratio": 1.2354096675370514,
   "reading": "Stage CPU deltas reconcile to the top-level process total. Collection now separates pair-table construction from the relation unit; RSS fields remain cumulative process high-water marks, not phase-local allocation peaks or deltas."
+ },
+ "single_target_folded_pair_build_cache": {
+  "source_commit": "41a18055",
+  "instance": "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json",
+  "scope": "one public-hash unknown-scalar n=53 target; factor base and relation stream remain target independent",
+  "mechanism": "The first folded-table pass caches only a six-byte (bucket, rest/filter payload) token per stored pair. The scatter pass consumes that token instead of recomputing every batched group addition, canonical key and hash. Shapes needing more than 48 token bits retain the previous exact recomputation path.",
+  "matched_current_head_ab": {
+   "pairs": 5,
+   "reference_binary_blake3": "f9931bdeb1d4e8ed4c0fa8a965b6575ca39e3c13a4c58ddba57f1e3a330b0af9",
+   "candidate_binary_blake3": "1f755360db7b15583081885dab915096263a51d87085cc12e5df26f6ab4f2423",
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "relations_each": 588,
+   "recovered_scalar_each": 7892094459170,
+   "verified": "5/5 reference and 5/5 candidate",
+   "medians": {
+    "whole_wall": {
+     "reference": 2.927214,
+     "candidate": 2.824792584,
+     "candidate_over_reference": 0.9663173346326838,
+     "candidate_wins": "5/5"
+    },
+    "whole_cpu": {
+     "reference": 12.269107,
+     "candidate": 11.212644000000001,
+     "candidate_over_reference": 0.9138657983387849,
+     "candidate_wins": "5/5"
+    },
+    "rss": {
+     "reference": 93863936,
+     "candidate": 125943808,
+     "candidate_over_reference": 1.3311223599231978,
+     "candidate_wins": "0/5"
+    },
+    "ic_wall": {
+     "reference": 1.2253485830000002,
+     "candidate": 1.104550751,
+     "candidate_over_reference": 0.9012940990640652,
+     "candidate_wins": "5/5"
+    },
+    "collect_wall": {
+     "reference": 0.809552208,
+     "candidate": 0.698563042,
+     "candidate_over_reference": 0.8629005456310236,
+     "candidate_wins": "5/5"
+    },
+    "collect_cpu": {
+     "reference": 7.686039999999999,
+     "candidate": 6.5958749999999995,
+     "candidate_over_reference": 0.8589578401016787,
+     "candidate_wins": "5/5"
+    },
+    "pair_wall": {
+     "reference": 0.312825708,
+     "candidate": 0.204674792,
+     "candidate_over_reference": 0.6563315924935856,
+     "candidate_wins": "5/5"
+    },
+    "pair_cpu": {
+     "reference": 3.2270900000000005,
+     "candidate": 2.1198509999999997,
+     "candidate_over_reference": 0.6594469747463527,
+     "candidate_wins": "5/5"
+    },
+    "unit_wall": {
+     "reference": 0.428932042,
+     "candidate": 0.427741083,
+     "candidate_over_reference": 0.993433983185616,
+     "candidate_wins": "3/5"
+    },
+    "unit_cpu": {
+     "reference": 4.4066149999999995,
+     "candidate": 4.433644000000001,
+     "candidate_over_reference": 1.0061337330354483,
+     "candidate_wins": "2/5"
+    }
+   },
+   "per_pair": [
+    {
+     "pair": 1,
+     "candidate_over_reference_whole_wall": 0.9684944024956095,
+     "candidate_over_reference_whole_cpu": 0.9138657983387849,
+     "candidate_over_reference_peak_rss": 1.3311223599231978,
+     "candidate_over_reference_ic_wall": 0.9259798609471844,
+     "candidate_over_reference_pair_build_wall": 0.6819087798363541,
+     "candidate_over_reference_pair_build_cpu": 0.6598577221853532,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_whole_wall": 0.9850301057592646,
+     "candidate_over_reference_whole_cpu": 0.9128958631494865,
+     "candidate_over_reference_peak_rss": 1.3087495809587664,
+     "candidate_over_reference_ic_wall": 0.9012940990640652,
+     "candidate_over_reference_pair_build_wall": 0.6258501440027217,
+     "candidate_over_reference_pair_build_cpu": 0.6457199570130971,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_whole_wall": 0.9391215043778235,
+     "candidate_over_reference_whole_cpu": 0.9145688083226087,
+     "candidate_over_reference_peak_rss": 1.355731922398589,
+     "candidate_over_reference_ic_wall": 0.8587362429878055,
+     "candidate_over_reference_pair_build_wall": 0.6459540819282978,
+     "candidate_over_reference_pair_build_cpu": 0.6429090495438544,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_whole_wall": 0.9587266402874755,
+     "candidate_over_reference_whole_cpu": 0.9055065477882062,
+     "candidate_over_reference_peak_rss": 1.2622653934804082,
+     "candidate_over_reference_ic_wall": 0.899873899801131,
+     "candidate_over_reference_pair_build_wall": 0.6656193134868571,
+     "candidate_over_reference_pair_build_cpu": 0.6700215984059941,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_whole_wall": 0.9663173346326838,
+     "candidate_over_reference_whole_cpu": 0.9210328836483372,
+     "candidate_over_reference_peak_rss": 1.3865915889494984,
+     "candidate_over_reference_ic_wall": 0.9150666454390186,
+     "candidate_over_reference_pair_build_wall": 0.6563315924935856,
+     "candidate_over_reference_pair_build_cpu": 0.6594469747463527,
+     "identical_relation_hash_scalar_and_verification": true
+    }
+   ],
+   "reading": "The selected cache wins pair-build wall and CPU in 5/5 pairs, IC wall in 5/5 and whole-process CPU in 5/5. Median peak RSS rises because the temporary is charged while the final table is allocated."
+  },
+  "current_head_exact_replay": {
+   "binary_blake3": "1f755360db7b15583081885dab915096263a51d87085cc12e5df26f6ab4f2423",
+   "whole_process_wall_seconds": 2.8364157089999997,
+   "whole_process_cpu_seconds": 11.202145,
+   "peak_rss_bytes": 127008768,
+   "ic_wall_seconds": 1.127869875,
+   "rho_over_ic_wall_ratio": 1.4029829540398,
+   "pair_table_build_wall_seconds": 0.207145375,
+   "pair_table_build_cpu_seconds": 2.070487,
+   "relation_unit_wall_seconds": 0.447126625,
+   "relation_unit_cpu_seconds": 4.441728,
+   "relations": 588,
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "recovered_scalar": 7892094459170,
+   "verified": true
+  },
+  "rejected_controls": {
+   "exact_16689_trial_cutoff": {
+    "pairs": 5,
+    "relations_each": 582,
+    "verified": "5/5",
+    "recovered_scalar_each": 7892094459170,
+    "median_candidate_over_reference_whole_cpu": 1.000885755793955,
+    "median_candidate_over_reference_ic_wall": 0.9883746403634575,
+    "decision": "not_selected_speed_neutral_core_cost; retain the 311-probe rank cushion"
+   },
+   "uncompressed_per_row_hash_cache": {
+    "pairs": 5,
+    "median_candidate_over_reference_ic_wall": 0.8980041379410932,
+    "median_candidate_over_reference_whole_cpu": 0.8984290895193938,
+    "median_candidate_over_reference_peak_rss": 2.518537158194934,
+    "decision": "rejected_excessive_peak_memory; motivated the packed flat token cache"
+   },
+   "five_byte_token_with_changed_presence_index": {
+    "pairs": 5,
+    "median_candidate_over_reference_ic_wall": 0.9182327259926287,
+    "median_candidate_over_reference_whole_cpu": 0.9148888256003703,
+    "median_candidate_over_reference_peak_rss": 1.2625843279709392,
+    "median_candidate_over_reference_relation_unit_cpu": 1.031091267951328,
+    "decision": "rejected_relation_scan_regression; selected cache preserves the original filter index"
+   }
+  },
+  "matched_one_core_ab": {
+   "rayon_threads": 1,
+   "pairs": 5,
+   "reference_binary_blake3": "f9931bdeb1d4e8ed4c0fa8a965b6575ca39e3c13a4c58ddba57f1e3a330b0af9",
+   "candidate_binary_blake3": "1f755360db7b15583081885dab915096263a51d87085cc12e5df26f6ab4f2423",
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "relations_each": 588,
+   "recovered_scalar_each": 7892094459170,
+   "verified": "5/5 reference and 5/5 candidate",
+   "medians": {
+    "whole_wall": {
+     "reference": 10.861958666,
+     "candidate": 9.492750667,
+     "candidate_over_reference": 0.8760623574403428,
+     "candidate_wins": "5/5"
+    },
+    "whole_cpu": {
+     "reference": 10.790745000000001,
+     "candidate": 9.423986,
+     "candidate_over_reference": 0.8751629472342681,
+     "candidate_wins": "5/5"
+    },
+    "rss": {
+     "reference": 69599232,
+     "candidate": 108003328,
+     "candidate_over_reference": 1.53771577205013,
+     "candidate_wins": "0/5"
+    },
+    "ic_wall": {
+     "reference": 8.449269334,
+     "candidate": 7.095287293,
+     "candidate_over_reference": 0.8406164995620371,
+     "candidate_wins": "5/5"
+    },
+    "rho_wall": {
+     "reference": 1.581422292,
+     "candidate": 1.583953334,
+     "candidate_over_reference": 1.0018318427751112,
+     "candidate_wins": "2/5"
+    },
+    "rho_over_ic": {
+     "reference": 0.1873963430593733,
+     "candidate": 0.22287829277375096,
+     "candidate_over_reference": 1.191780435408708,
+     "candidate_wins": "0/5"
+    },
+    "collect_wall": {
+     "reference": 6.582021708,
+     "candidate": 5.230204792,
+     "candidate_over_reference": 0.7968208385932908,
+     "candidate_wins": "5/5"
+    },
+    "collect_cpu": {
+     "reference": 6.556474,
+     "candidate": 5.207322,
+     "candidate_over_reference": 0.7963996230924338,
+     "candidate_wins": "5/5"
+    },
+    "pair_wall": {
+     "reference": 2.584509625,
+     "candidate": 1.256495583,
+     "candidate_over_reference": 0.4859673028598084,
+     "candidate_wins": "5/5"
+    },
+    "pair_cpu": {
+     "reference": 2.57916,
+     "candidate": 1.254304,
+     "candidate_over_reference": 0.48599579827365863,
+     "candidate_wins": "5/5"
+    },
+    "unit_wall": {
+     "reference": 3.92329925,
+     "candidate": 3.91645125,
+     "candidate_over_reference": 0.9986509417496867,
+     "candidate_wins": "3/5"
+    },
+    "unit_cpu": {
+     "reference": 3.9169909999999994,
+     "candidate": 3.9100509999999997,
+     "candidate_over_reference": 0.998546711066602,
+     "candidate_wins": "3/5"
+    }
+   },
+   "reading": "With one Rayon worker the eliminated second arithmetic pass is fully exposed: pair-build CPU and wall are approximately halved, IC wall falls 15.9% and whole-process CPU falls 12.5%. The candidate remains slower than same-process rho: median rho/IC is 0.2229, or IC/rho about 4.49."
+  },
+  "claim_boundary": "A measured one-instance engineering speedup with an explicit memory trade. It does not change the seven-gate SOTA verdict, asymptotic exponent, missing licensed Magma comparison or missing independent review."
  }
 }
