@@ -599,6 +599,14 @@ a total-compute crossover.  `docs/ic/runs/koblitz-n53-one-unit-20260921.json`
 records the seed screen, repeats, resources and remaining gate failures.
 This is a bounded engineering improvement, not a SOTA claim.
 
+With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
+median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
+slower, with 10.984 total process core-seconds, 68.5 MB peak RSS and a
+1.008 wall/core ratio.  The independent 32-target one-thread holdout
+amortised the same precompute: 8.819 s IC against 32.916 s rho, a 3.732
+times wall advantage, with 32/32 targets verified.  The batch crossover
+does not repair the single-target or total-compute loss.
+
 **`descent_summands`** lets the descent ask for a different number of
 summands than collection, which shares only the base and its pair table.
 Collection wants few probes (each costs two scalar multiplications) so
