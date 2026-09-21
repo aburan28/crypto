@@ -1380,9 +1380,12 @@ def main():
     # section 0.5 retracted: 535 relations reach rank 494, so the rung retries
     # and the collection alone is 353 s a pass.  It runs in the budget table
     # instead, which is the rule the slope is fitted on.  `29` and `37` stay so
-    # that their exclusion is recorded rather than silently dropped.
+    # that their exclusion is recorded rather than silently dropped: the
+    # `--max-rung` gate keeps an expensive field out of a truncated run, and a
+    # non-rung never builds one -- `run_e1_rung` rejects it first -- so the gate
+    # applies to rungs only and lets the non-rungs through to be recorded.
     for n in (11, 13, 19, 29, 37):
-        if n > args.max_rung:
+        if n > args.max_rung and rung_census(n, n)[0]["is_scale_model_rung"]:
             continue
         for rule in ("full", "first_hit", "folded"):
             row = run_e1_rung(n, rule=rule)
