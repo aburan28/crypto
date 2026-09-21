@@ -71,6 +71,13 @@ pub struct BoundaryArgs {
     /// Targets per oracle cell.
     #[arg(long)]
     pub oracle_targets: Option<usize>,
+    /// Draw targets without the repeat guard, and the walk rows with one
+    /// jump table for every segment: the targets as the ladder drew them
+    /// before the note's §10.2.  A run then pins the logarithm the moment
+    /// it decomposes one group element twice, which is a generic
+    /// collision and not a relation.  For that diagnostic only.
+    #[arg(long)]
+    pub unguarded_targets: bool,
 }
 
 fn host() -> Value {
@@ -124,6 +131,7 @@ pub fn run(args: BoundaryArgs, json: bool) -> Result<Value, String> {
     if let Some(v) = args.s4_max_degree {
         cfg.s4_max_degree = v;
     }
+    cfg.unguarded_targets = args.unguarded_targets;
     for &b in &cfg.prime_bits {
         if !(8..=32).contains(&b) {
             return Err(format!("prime ladder bits must lie in 8..=32, got {b}"));

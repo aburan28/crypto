@@ -48,8 +48,8 @@ use crate::cryptanalysis::ic_boundary::lift_abscissae;
 use crate::cryptanalysis::ic_boundary::{
     calibrate_binary_instance, calibrate_s4, census_hits, choose_koblitz_base, decompose_mitm,
     generic_floor_ops, generic_floor_s, koblitz_factor_base, koblitz_instance_best,
-    BinaryGroup, Calibration, ColumnFold, CountedGroup, FactorBase, GroupOps, OracleCounters,
-    PairTable,
+    BinaryGroup, Calibration, ColumnFold, CountedGroup, FactorBase, GroupOps, Oracle,
+    OracleCounters, PairTable,
 };
 use crate::cryptanalysis::koblitz_fast::FastPoint;
 use crate::cryptanalysis::koblitz_groebner::{
@@ -316,7 +316,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
         }
         let fb = koblitz_factor_base(&inst, &frob, ColumnFold::SignedFrobeniusOrbit, description.clone())?;
         let table = PairTable::build(&g, &fb);
-        if census_hits(&inst, &fb, &table, m, 64, cfg.seed) == 0 {
+        if census_hits(&inst, &fb, &Oracle::Mitm { table: &table, m }, 64, cfg.seed) == 0 {
             continue;
         }
         chosen = Some((frob, description, fb, table));

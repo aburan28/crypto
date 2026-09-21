@@ -857,6 +857,481 @@ and `docs/ic/tools/boundary_scoreboard_rows.py`; the ledger twins were
 updated from it by `docs/ic/tools/boundary_ledger_update.py`.  Re-run
 them on a new report rather than editing numbers by hand.
 
+## 10. Round 2: an engineering ledger, and one artifact caught
+
+**Frozen run:** `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`
+(`ic boundary --out …`, status `complete`, `all_verified` true, 2,026 s
+on the same host as §2, at commit `4d0e9f9b`; 24 instances, 498 rows.
+The oracle cells of §5 are unchanged and stay frozen in their own file).
+**Holdout:** `…-round2-holdout-2026-09-21.json`, a fresh seed
+(`1213743172`) and two targets on the largest instances of each regime.
+**Diagnostic:** `…-round2-unguarded-diagnostic-2026-09-21.json`
+(`--unguarded-targets`), the measurement of §10.2.
+**Comparison:** `ic-boundary-round2-comparison-2026-09-21.json`, written
+by `docs/ic/tools/boundary_round_compare.py`, which pairs every Round-2
+row with the rung it was built on and is the `AGENTS.md` §8 evidence
+(§10.7).
+
+### 10.1 What the first round said to move, and what was moved
+
+§4.1 named the phase that dominates each row: the pair table on the
+prime `m = 3` row (`|F|²/2` additions, once), the *making* of the targets
+on the prime `m = 2` row (two scalar multiplications per trial, about
+`65` additions each at 24 bits), the `|F|` subtractions per target and
+the table behind them on the binary row, and the table on every Koblitz
+row until the `n = 41` cap.  §3.5 owed an accounting correction: the
+counting ceiling divides by all of `#E` where a base confined to a
+subgroup can only reach that subgroup.  Round 2 moves those and nothing
+else — same curves, same subgroups, same seeds, same relation loop and
+elimination — so every first-round row stays on the table as the
+*before* mark of the rung built on it.
+
+| rung (suffix) | what changed | what did not | class by the `AGENTS.md` §3 test |
+|:--|:--|:--|:--|
+| `_negfold` | the pair table is built once per pair up to negation: `{P, Q}` and `{−P, −Q}` sum to `±(P+Q)`, whose abscissa was already the key, so the first point above each abscissa is added to every signed point above a later one and to itself — `|F|²/4` additions instead of `|F|²/2`, the same key set, the same probe | trials, relations, yield, the elimination, every count outside the table | **engineering**: `S` falls by the table's share, the ratio to the counting boundary is flat |
+| `_frobfold` (Koblitz) | the table is built once per pair up to `⟨σ, −1⟩`, keyed by the normal-basis canonical form of the sum's abscissa (`FrobeniusCanon`, the repository's rotation key): `σ^t(P) + σ^t(Q) = σ^t(P + Q)`, so all `2n` images of a pair share one entry — `|F|²/(4n)` entries and additions.  A probe canonicalises the target's abscissa once; the entry's shift and the target's give the rotation `t`; the summands `σ^t(P), σ^t(Q)` are read from a per-point orbit index; one addition confirms `±R`.  Canonicalisations are counted in their own unit and converted at a measured `ns_per_canon`, and every folded probe is cross-checked (`frobfold_mismatches`, zero on every row of every run) | as above.  The `2n` is the automorphism group the floor already credits to a generic algorithm, and the reference walk uses it too | **engineering** |
+| `_walk` | targets come from a 16-jump r-adding walk with the coefficients tracked modulo `r`, one addition per target, instead of `R = [a]G + [b]Q` with two scalar multiplications.  Fresh jumps at every restart and one guard for the whole run, for the reason in §10.2 | the oracle, the yield per target against the ceiling, the elimination, the verification | **engineering**: this is the reference's own target generator |
+| `mitm_m2_…` | two summands wherever the cofactor classes admit them and the exact floor fits the budget — the first round's census of 64 targets could not see a ceiling of `10⁻⁵`, which the exact formula computes instead of sampling | the base, the table, the loop | **engineering**: the ceiling moves by the counting formula of §1.3, the ratio to it does not |
+| `_balanced` (Koblitz, `n ≥ 37`) | a base sized so the folded table balances a two-summand walk's trials, `|F| ≈ 1.2·(4#E)^{1/3}` signed points within `2^23` folded entries, where that is at least half again the first-round base | the pipeline | **engineering**: the base size was a parameter the full table's budget had set |
+| exact ceiling (every row) | `min(1, N₀/r)` with `N₀` the `m`-multisets of base points whose cofactor classes `[r]P` cancel, reported next to the uniform `C(F+m−1, m)/#E`, with `yield_over_ceiling_exact` and `trials_floor_exact` | every count | **accounting**: the §3.5 correction, no `S` moves |
+
+Nothing in that list does what a generic algorithm cannot: the two folds
+use automorphisms the floor's `A` already grants, the walk is the
+reference's own device, and the base size and summand count are
+parameters of the same counting bound.  So the round can only be
+engineering, and the table reads accordingly — `S` falls, the ratio to
+the floor falls with it by the same factor, and the columns that would
+mark an advance (`yield/ceiling` against the exact ceiling, and the
+fitted exponents) do not move.
+
+### 10.2 An artifact caught before it was reported: a repeated target is a collision, not a relation
+
+**The mechanism.**  A relation loop that decomposes the **same group
+element twice** hands the elimination two rows with the same factor-base
+part and different `(a, b)`.  Those two rows pin the logarithm by
+themselves: `a₁ + b₁d = a₂ + b₂d`.  That is a generic collision resolved
+through the factor base, not a relation search, and it arrives after
+about `√r` targets whatever the oracle costs — so a run that takes it is
+measuring rho with extra steps and reporting the result as index
+calculus.
+
+**The rate is about one run in four, and it does not depend on the
+instance.**  A two-summand search draws `T ≈ K/p` targets, of which
+`T²/2r` pairs collide, and a fraction `p` of those are decomposable, so
+the expected number of repeated rows is `K²/(2rp)`; with
+`p ≈ C(F+1,2)/#E ≈ F²/2r` and `K = F/2` that is `1/4`, independently of
+`F`, `K` and `r`.  Measured on the unguarded diagnostic
+(`--unguarded-targets`, 198 rows):
+
+| target source | `m` | runs pinned by a repeated target |
+|:--|--:|--:|
+| `[a]G + [b]Q` per trial | 2 | **11 of 45 = 24.4%** |
+| `[a]G + [b]Q` per trial | 3 | 0 of 75 = 0% |
+| r-adding walk, one jump table for every segment | 2 | **32 of 39 = 82.1%** |
+| r-adding walk, one jump table for every segment | 3 | 2 of 39 = 5.1% |
+
+The `24.4%` is the predicted `1/4`.  The three-summand rows are immune
+at these sizes because they need far fewer targets than `√r`.  The walk
+is worse than the random draw because segments sharing one step function
+**merge** exactly as rho's walks do, so the second segment runs into the
+first segment's path deliberately rather than by birthday.
+
+**The fix, and what it cost.**  A repeat carries no relation the matrix
+does not already hold — its factor-base part is one the elimination has
+— so skipping it costs the relation search nothing.  Both target sources
+are now guarded by one hash insert per target, counted as
+`target_guard_probes`, priced as a lookup, and reported with
+`repeated_targets_skipped`; the walk additionally draws sixteen fresh
+jumps at every restart so no two segments share a step function.  The
+loop counts `repeated_column_rows` and `pinned_by_repeated_row`, which
+are zero on every row of all three guarded runs.  Two tests hold the
+ends: `an_unguarded_draw_pins_the_logarithm_by_a_repeated_target` and
+`a_shared_jump_table_lets_walk_segments_merge_and_pin_by_a_repeated_row`.
+Against the unguarded diagnostic on the same rows, the guard costs
+`1.10×` in `S` on the prime 24-bit two-summand walk, `2.72×` at
+`n = 41` and `2.90×` on the binary `n = 27` row — that is the size of
+what the artifact had been hiding.
+
+**It is a correction to the first round too.**  Round 1 drew targets
+without the guard, so 22 of its 63 rows moved when the guarded ladder
+reran them, by `0.88×` to `1.59×` in `S` — the largest being
+`bench-18bit`, where all three `m = 2` variants ran 674 trials and now
+run 1,068 (`S` `81.1 → 119` for meet in the middle).  §2.2's `m = 2`
+rows are to be read with that correction, and the comparison file
+carries it row by row.
+
+**What is *not* an artifact.**  A cycle among two-summand relations —
+rows over *distinct* targets whose factor-base parts sum to zero — is
+ordinary linear algebra and the classical way a two-summand index
+calculus closes.  It is what the corrected rows do: at `n = 41` the
+elimination finishes with 28 rows over 62 columns.  The line is whether
+the group element repeats (a collision) or the column vectors combine (a
+relation).
+
+### 10.3 The table: every rung on the largest instance of its regime
+
+| regime, instance | variant | m | \|F\| | K | trials | yield/ceiling (exact) | S | was | vs rho | vs floor | ok | class |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
+| **prime**, `generated-24bit-10935329`, `r = 2^23.4`, `#E = 1r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.23× | 1× | — | boundary |
+| | Pollard rho, r-adding, counted (walk alone 3.54) | | | | | | 3.93 | | 1× | 4.43× | ✓ | reference |
+| | Semaev `S₃` roots | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 5,129 |  | 1,305× | 5,787× | ✓ | baseline |
+| | direct subtraction | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 2,037 |  | 518× | 2,298× | ✓ | accounting |
+| | meet in the middle | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 268 |  | 68.3× | 303× | ✓ | engineering |
+| | meet in the middle | 3 | 512 | 256 | 265 | 0.87 (0.87) | **56.8** |  | **14.5×** | 64.1× | ✓ | engineering |
+| | + negation-folded table | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 248 | 268 | 63.2× | 280× | ✓ | engineering |
+| | + walk targets | 2 | 512 | 256 | 7,974 | 0.93 (0.93) | **24.2** | 248 | **6.16×** | 27.3× | ✓ | engineering |
+| | + negation-folded table | 3 | 512 | 256 | 265 | 0.87 (0.87) | 37.0 | 56.8 | 9.41× | 41.7× | ✓ | engineering |
+| | + walk targets | 3 | 512 | 256 | 259 | 0.89 (0.89) | 31.7 | 37.0 | 8.06× | 35.7× | ✓ | engineering |
+| **binary**, `random-binary-n27-b845462`, `r = 2^24.4`, `#E = 6r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.38× | 1× | — | boundary |
+| | Pollard rho, r-adding, counted (walk alone 1.98) | | | | | | 2.31 | | 1× | 2.61× | ✓ | reference |
+| | meet in the middle | 3 | 526 | 263 | 1,498 | 0.90 (0.90) | **206** |  | **89.1×** | 232× | ✓ | engineering |
+| | `S₄` pairs-and-solve | 3 | 526 | 263 | 1,499 | 0.90 (0.90) | 108,654 |  | 46,965× | 122,603× | ✓ | relabelling |
+| | + negation-folded table | 3 | 526 | 263 | 1,498 | 0.90 (0.90) | 191 | 206 | 82.7× | 216× | ✓ | engineering |
+| | + walk targets | 3 | 526 | 263 | 1,482 | 0.90 (0.90) | 169 | 191 | 73.2× | 191× | ✓ | engineering |
+| | + negation-folded table | 2 | 526 | 263 | 112,779 | 1.06 (1.05) | 1,645 | 206 | 711× | 1,856× | ✓ | engineering |
+| | + walk targets | 2 | 526 | 263 | 75,384 | 1.14 (1.13) | **71.2** | 1,645 | **30.8×** | 80.4× | ✓ | engineering |
+| **Koblitz**, `K_0 / GF(2^41)`, `r = 2^39.0`, `#E = 4r`, `A = 82` | generic floor `√(π/2A)` | | | | | | 0.138 | | 0.71× | 1× | — | boundary |
+| | signed-Frobenius rho, counted (walk alone 0.19) | | | | | | 0.20 | | 1× | 1.41× | ✓ | reference |
+| | meet in the middle, signed-orbit columns | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | **58.8** |  | **300×** | 425× | ✓ | advance, count |
+| | + negation-folded table | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | 50.4 | 58.8 | 257× | 364× | ✓ | engineering |
+| | + Frobenius-folded table | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | 45.2 | 58.8 | 231× | 327× | ✓ | engineering |
+| | + walk targets | 3 | 5,003 | 62 | 5,645 | 1.07 (1.07) | 41.1 | 45.2 | 210× | 297× | ✓ | engineering |
+| | two summands, folded table, walk targets | 2 | 5,003 | 62 | 5,346,681 | 0.99 (0.96) | 8.15 | 58.8 | 41.6× | 58.9× | ✓ | engineering |
+| | balanced base, three summands | 3 | 20,501 | 251 | 468 | 0.77 (0.77) | 12.3 | 41.1 | 62.7× | 88.7× | ✓ | engineering |
+| | balanced base, two summands | 2 | 20,501 | 251 | 901,943 | 1.12 (1.12) | **5.12** | 8.15 | **26.2×** | 37.0× | ✓ | engineering |
+
+The full Round-2 ladder, every instance and rung, with the phase split:
+
+<details><summary>every Round-2 row on every instance</summary>
+
+| regime | instance | log₂ r | variant | m | \|F\| | K | table | targets | trials | y/c | exact | S | was | vs rho | vs floor | FB | rel | LA | ok |
+|:--|:--|--:|:--|--:|--:|--:|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| prime | bench-10bit | 9.7 | mitm_m2_negfold | 2 | 32 | 16 | negation | random | 31 | 0.76 | 0.76 | 36.7 | 45.7 | 1.62 | 41.5 | 9.93 | 26.4 | 0.09 | ✓ |
+| prime | bench-10bit | 9.7 | mitm_m2_negfold_walk | 2 | 32 | 16 | negation | walk | 28 | 0.66 | 0.66 | 25.9 | 36.7 | 1.14 | 29.3 | 9.93 | 15.6 | 0.07 | ✓ |
+| prime | bench-10bit | 9.7 | mitm_m3_negfold | 3 | 32 | 16 | negation | random | 14 | 1.00 | 1.00 | 23.9 | 32.8 | 1.06 | 27.0 | 9.93 | 13.5 | 0.16 | ✓ |
+| prime | bench-10bit | 9.7 | mitm_m3_negfold_walk | 3 | 32 | 16 | negation | walk | 13 | 1.00 | 1.00 | 26.3 | 23.9 | 1.16 | 29.7 | 9.93 | 15.9 | 0.14 | ✓ |
+| prime | bench-12bit | 11.9 | mitm_m2_negfold | 2 | 32 | 16 | negation | random | 95 | 1.03 | 1.03 | 51.6 | 55.7 | 2.78 | 58.2 | 4.70 | 46.6 | 0.05 | ✓ |
+| prime | bench-12bit | 11.9 | mitm_m2_negfold_walk | 2 | 32 | 16 | negation | walk | 93 | 1.11 | 1.11 | 20.8 | 51.6 | 1.12 | 23.4 | 4.70 | 15.8 | 0.06 | ✓ |
+| prime | bench-12bit | 11.9 | mitm_m3_negfold | 3 | 32 | 16 | negation | random | 18 | 0.83 | 0.83 | 17.6 | 21.7 | 0.95 | 19.8 | 4.70 | 12.6 | 0.10 | ✓ |
+| prime | bench-12bit | 11.9 | mitm_m3_negfold_walk | 3 | 32 | 16 | negation | walk | 17 | 0.84 | 0.84 | 17.2 | 17.6 | 0.92 | 19.4 | 4.70 | 12.1 | 0.10 | ✓ |
+| prime | bench-14bit | 14.0 | mitm_m2_negfold | 2 | 64 | 32 | negation | random | 161 | 1.25 | 1.25 | 56.1 | 64.1 | 6.29 | 63.3 | 8.74 | 47.2 | 0.05 | ✓ |
+| prime | bench-14bit | 14.0 | mitm_m2_negfold_walk | 2 | 64 | 32 | negation | walk | 154 | 1.20 | 1.20 | 18.7 | 56.1 | 2.09 | 21.1 | 8.74 | 9.73 | 0.05 | ✓ |
+| prime | bench-14bit | 14.0 | mitm_m3_negfold | 3 | 64 | 32 | negation | random | 28 | 0.96 | 0.96 | 19.8 | 27.8 | 2.22 | 22.3 | 8.74 | 10.8 | 0.13 | ✓ |
+| prime | bench-14bit | 14.0 | mitm_m3_negfold_walk | 3 | 64 | 32 | negation | walk | 29 | 0.94 | 0.94 | 17.2 | 19.8 | 1.93 | 19.4 | 8.74 | 8.15 | 0.16 | ✓ |
+| prime | bench-16bit | 16.0 | mitm_m2_negfold | 2 | 128 | 64 | negation | random | 360 | 0.92 | 0.92 | 78.9 | 95.0 | 12.4 | 89.0 | 18.0 | 60.7 | 0.04 | ✓ |
+| prime | bench-16bit | 16.0 | mitm_m2_negfold_walk | 2 | 128 | 64 | negation | walk | 314 | 1.13 | 1.13 | 22.5 | 78.9 | 3.53 | 25.4 | 18.0 | 4.32 | 0.04 | ✓ |
+| prime | bench-16bit | 16.0 | mitm_m3_negfold | 3 | 128 | 64 | negation | random | 53 | 0.99 | 0.99 | 29.7 | 45.8 | 4.67 | 33.5 | 18.0 | 11.3 | 0.25 | ✓ |
+| prime | bench-16bit | 16.0 | mitm_m3_negfold_walk | 3 | 128 | 64 | negation | walk | 53 | 0.99 | 0.99 | 23.9 | 29.7 | 3.75 | 26.9 | 18.0 | 5.54 | 0.22 | ✓ |
+| prime | bench-18bit | 18.0 | mitm_m2_negfold | 2 | 128 | 64 | negation | random | 1,068 | 1.08 | 1.08 | 111 | 119 | 26.4 | 125 | 8.37 | 102 | 0.01 | ✓ |
+| prime | bench-18bit | 18.0 | mitm_m2_negfold_walk | 2 | 128 | 64 | negation | walk | 1,581 | 0.89 | 0.89 | 16.7 | 111 | 3.97 | 18.8 | 8.37 | 8.24 | 0.02 | ✓ |
+| prime | bench-18bit | 18.0 | mitm_m3_negfold | 3 | 128 | 64 | negation | random | 78 | 0.75 | 0.75 | 24.2 | 32.2 | 5.76 | 27.3 | 8.37 | 15.6 | 0.17 | ✓ |
+| prime | bench-18bit | 18.0 | mitm_m3_negfold_walk | 3 | 128 | 64 | negation | walk | 80 | 0.72 | 0.72 | 18.8 | 24.2 | 4.48 | 21.3 | 8.37 | 10.3 | 0.12 | ✓ |
+| prime | bench-20bit | 20.0 | mitm_m2_negfold | 2 | 256 | 128 | negation | random | 1,746 | 1.20 | 1.20 | 110 | 126 | 41.1 | 125 | 16.4 | 94.0 | 0.01 | ✓ |
+| prime | bench-20bit | 20.0 | mitm_m2_negfold_walk | 2 | 256 | 128 | negation | walk | 2,258 | 0.95 | 0.95 | 22.4 | 110 | 8.34 | 25.3 | 16.4 | 5.99 | 0.01 | ✓ |
+| prime | bench-20bit | 20.0 | mitm_m3_negfold | 3 | 256 | 128 | negation | random | 118 | 0.93 | 0.93 | 29.0 | 45.0 | 10.8 | 32.7 | 16.4 | 12.3 | 0.24 | ✓ |
+| prime | bench-20bit | 20.0 | mitm_m3_negfold_walk | 3 | 256 | 128 | negation | walk | 120 | 0.94 | 0.94 | 23.4 | 29.0 | 8.72 | 26.4 | 16.4 | 6.71 | 0.32 | ✓ |
+| prime | generated-22bit-3290411 | 21.7 | mitm_m2_negfold | 2 | 512 | 256 | negation | random | 3,118 | 1.00 | 1.00 | 139 | 176 | 46.8 | 157 | 36.5 | 103 | 0.02 | ✓ |
+| prime | generated-22bit-3290411 | 21.7 | mitm_m2_negfold_walk | 2 | 512 | 256 | negation | walk | 3,242 | 1.06 | 1.06 | 39.8 | 139 | 13.4 | 44.9 | 36.5 | 3.23 | 0.02 | ✓ |
+| prime | generated-22bit-3290411 | 21.7 | mitm_m3_negfold | 3 | 512 | 256 | negation | random | 218 | 1.00 | 1.00 | 48.1 | 84.3 | 16.2 | 54.3 | 36.5 | 11.1 | 0.51 | ✓ |
+| prime | generated-22bit-3290411 | 21.7 | mitm_m3_negfold_walk | 3 | 512 | 256 | negation | walk | 210 | 1.00 | 1.00 | 41.2 | 48.1 | 13.8 | 46.5 | 36.5 | 4.16 | 0.49 | ✓ |
+| prime | generated-24bit-10935329 | 23.4 | mitm_m2_negfold | 2 | 512 | 256 | negation | random | 11,612 | 0.99 | 0.99 | 248 | 268 | 63.2 | 280 | 20.4 | 228 | 0.01 | ✓ |
+| prime | generated-24bit-10935329 | 23.4 | mitm_m2_negfold_walk | 2 | 512 | 256 | negation | walk | 7,974 | 0.93 | 0.93 | 24.2 | 248 | 6.16 | 27.3 | 20.4 | 3.84 | 0.00 | ✓ |
+| prime | generated-24bit-10935329 | 23.4 | mitm_m3_negfold | 3 | 512 | 256 | negation | random | 265 | 0.87 | 0.87 | 37.0 | 56.8 | 9.41 | 41.7 | 20.4 | 16.1 | 0.51 | ✓ |
+| prime | generated-24bit-10935329 | 23.4 | mitm_m3_negfold_walk | 3 | 512 | 256 | negation | walk | 259 | 0.89 | 0.89 | 31.7 | 37.0 | 8.06 | 35.7 | 20.4 | 10.8 | 0.53 | ✓ |
+| char2 | random-binary-n15-b524b | 14.0 | mitm_m3_negfold | 3 | 30 | 15 | negation | random | 106 | 0.95 | 0.96 | 67.2 | 69.0 | 8.04 | 75.9 | 13.8 | 53.3 | 0.06 | ✓ |
+| char2 | random-binary-n15-b524b | 14.0 | mitm_m3_negfold_walk | 3 | 30 | 15 | negation | walk | 140 | 0.71 | 0.71 | 52.4 | 67.2 | 6.27 | 59.1 | 13.8 | 38.5 | 0.04 | ✓ |
+| char2 | random-binary-n15-b524b | 14.0 | mitm_m2_negfold | 2 | 30 | 15 | negation | random | 631 | 1.05 | 1.02 | 196 | 69.0 | 23.5 | 221 | 13.8 | 182 | 0.01 | ✓ |
+| char2 | random-binary-n15-b524b | 14.0 | mitm_m2_negfold_walk | 2 | 30 | 15 | negation | walk | 528 | 1.25 | 1.20 | 63.9 | 196 | 7.65 | 72.1 | 13.8 | 50.0 | 0.01 | ✓ |
+| char2 | random-binary-n18-b6507 | 15.0 | mitm_m3_negfold | 3 | 64 | 32 | negation | random | 97 | 1.61 | 0.84 | 74.3 | 80.0 | 9.83 | 83.9 | 24.6 | 49.6 | 0.05 | ✓ |
+| char2 | random-binary-n18-b6507 | 15.0 | mitm_m3_negfold_walk | 3 | 64 | 32 | negation | walk | 107 | 1.72 | 0.90 | 59.0 | 74.3 | 7.80 | 66.5 | 24.6 | 34.2 | 0.07 | ✓ |
+| char2 | random-binary-n18-b6507 | 15.0 | mitm_m2_negfold | 2 | 64 | 32 | negation | random | 908 | 2.28 | 1.03 | 226 | 80.0 | 29.9 | 255 | 24.6 | 201 | 0.01 | ✓ |
+| char2 | random-binary-n18-b6507 | 15.0 | mitm_m2_negfold_walk | 2 | 64 | 32 | negation | walk | 1,206 | 1.75 | 0.79 | 108 | 226 | 14.3 | 122 | 24.6 | 83.5 | 0.01 | ✓ |
+| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m3_negfold | 3 | 122 | 61 | negation | random | 407 | 0.96 | 0.96 | 77.3 | 81.0 | 24.3 | 87.3 | 11.6 | 65.7 | 0.04 | ✓ |
+| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m3_negfold_walk | 3 | 122 | 61 | negation | walk | 468 | 0.84 | 0.84 | 64.6 | 77.3 | 20.3 | 72.8 | 11.6 | 52.9 | 0.04 | ✓ |
+| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m2_negfold | 2 | 122 | 61 | negation | random | 10,149 | 0.99 | 0.98 | 557 | 81.0 | 175 | 629 | 11.6 | 546 | 0.00 | ✓ |
+| char2 | random-binary-n21-b1b6f3b | 20.0 | mitm_m2_negfold_walk | 2 | 122 | 61 | negation | walk | 10,919 | 0.89 | 0.88 | 78.5 | 557 | 24.7 | 88.5 | 11.6 | 66.9 | 0.00 | ✓ |
+| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m3_negfold | 3 | 274 | 137 | negation | random | 365 | 1.74 | 0.87 | 88.9 | 102 | 35.3 | 100 | 23.7 | 65.0 | 0.15 | ✓ |
+| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m3_negfold_walk | 3 | 274 | 137 | negation | walk | 386 | 1.63 | 0.81 | 79.4 | 88.9 | 31.5 | 89.6 | 23.7 | 55.5 | 0.13 | ✓ |
+| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m2_negfold | 2 | 274 | 137 | negation | random | 16,514 | 2.05 | 1.02 | 686 | 102 | 273 | 774 | 23.7 | 662 | 0.00 | ✓ |
+| char2 | random-binary-n24-b5fc9da | 21.0 | mitm_m2_negfold_walk | 2 | 274 | 137 | negation | walk | 14,315 | 1.87 | 0.92 | 62.1 | 686 | 24.7 | 70.1 | 23.7 | 38.4 | 0.00 | ✓ |
+| char2 | random-binary-n27-b845462 | 24.4 | mitm_m3_negfold | 3 | 526 | 263 | negation | random | 1,498 | 0.90 | 0.90 | 191 | 206 | 82.7 | 216 | 22.7 | 168 | 0.20 | ✓ |
+| char2 | random-binary-n27-b845462 | 24.4 | mitm_m3_negfold_walk | 3 | 526 | 263 | negation | walk | 1,482 | 0.90 | 0.90 | 169 | 191 | 73.2 | 191 | 22.7 | 146 | 0.19 | ✓ |
+| char2 | random-binary-n27-b845462 | 24.4 | mitm_m2_negfold | 2 | 526 | 263 | negation | random | 112,779 | 1.06 | 1.05 | 1,645 | 206 | 711 | 1,856 | 22.7 | 1,622 | 0.00 | ✓ |
+| char2 | random-binary-n27-b845462 | 24.4 | mitm_m2_negfold_walk | 2 | 526 | 263 | negation | walk | 75,384 | 1.14 | 1.13 | 71.2 | 1,645 | 30.8 | 80.4 | 22.7 | 48.5 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 45 | 3 | negation | random | 5 | 0.82 | 0.82 | 23.6 | 39.0 | 1.36 | 88.4 | 17.7 | 5.59 | 0.02 | ✓ |
+| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 45 | 3 | frobenius | random | 5 | 0.82 | 0.82 | 11.3 | 39.0 | 0.65 | 42.2 | 5.24 | 5.69 | 0.02 | ✓ |
+| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 45 | 3 | frobenius | walk | 4 | 1.00 | 1.00 | 19.8 | 11.3 | 1.14 | 74.1 | 5.24 | 14.2 | 0.03 | ✓ |
+| koblitz | K_1 / GF(2^11) | 10.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 45 | 3 | frobenius | walk | 4 | 1.00 | 0.98 | 19.2 | 39.0 | 1.11 | 71.9 | 5.24 | 13.7 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 79 | 4 | negation | random | 4 | 1.00 | 1.00 | 40.0 | 74.0 | 2.98 | 163 | 36.8 | 2.83 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 79 | 4 | frobenius | random | 4 | 1.00 | 1.00 | 10.6 | 74.0 | 0.79 | 43.3 | 7.49 | 2.84 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 79 | 4 | frobenius | walk | 4 | 1.00 | 1.00 | 18.8 | 10.6 | 1.40 | 76.5 | 7.49 | 11.0 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^13) | 11.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 79 | 4 | frobenius | walk | 6 | 1.65 | 0.84 | 18.5 | 74.0 | 1.38 | 75.4 | 7.49 | 10.8 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns_negfold | 3 | 33 | 3 | negation | random | 8 | 2.70 | 0.89 | 27.2 | 36.5 | 1.42 | 119 | 11.3 | 15.6 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns_frobfold | 3 | 33 | 3 | frobenius | random | 8 | 2.70 | 0.89 | 21.5 | 36.5 | 1.12 | 94.2 | 5.10 | 16.1 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 33 | 3 | frobenius | walk | 10 | 2.12 | 0.70 | 31.5 | 21.5 | 1.64 | 138 | 5.10 | 26.1 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 33 | 3 | frobenius | walk | 45 | 11.23 | 3.05 | 65.2 | 36.5 | 3.41 | 285 | 5.10 | 59.8 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 91 | 4 | frobenius | walk | 4 | 1.00 | 1.00 | 31.2 | 31.5 | 1.63 | 136 | 14.3 | 16.5 | 0.03 | ✓ |
+| koblitz | K_0 / GF(2^15) | 9.6 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 91 | 4 | frobenius | walk | 6 | 3.76 | 0.61 | 29.8 | 65.2 | 1.55 | 130 | 14.3 | 15.1 | 0.01 | ✓ |
+| koblitz | K_1 / GF(2^17) | 16.0 | mitm_m2_signed_orbit_columns_negfold | 2 | 239 | 8 | negation | random | 20 | 1.55 | 0.77 | 60.3 | 116 | 16.8 | 281 | 56.8 | 3.44 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^17) | 16.0 | mitm_m2_signed_orbit_columns_frobfold | 2 | 239 | 8 | frobenius | random | 22 | 1.47 | 0.73 | 9.96 | 116 | 2.77 | 46.4 | 6.16 | 3.72 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^17) | 16.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 239 | 8 | frobenius | walk | 15 | 2.24 | 1.12 | 9.18 | 9.96 | 2.56 | 42.7 | 6.16 | 2.94 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 305 | 9 | negation | random | 9 | 1.00 | 1.00 | 47.2 | 92.2 | 22.6 | 232 | 46.0 | 1.06 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 305 | 9 | frobenius | random | 9 | 1.00 | 1.00 | 5.28 | 92.2 | 2.53 | 26.0 | 4.16 | 1.07 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 305 | 9 | frobenius | walk | 8 | 1.00 | 1.00 | 6.20 | 5.28 | 2.97 | 30.5 | 4.16 | 1.98 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^19) | 18.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 305 | 9 | frobenius | walk | 67 | 1.46 | 1.37 | 5.99 | 92.2 | 2.87 | 29.4 | 4.16 | 1.78 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 875 | 20 | negation | random | 18 | 1.00 | 1.00 | 94.7 | 188 | 106 | 512 | 93.9 | 0.79 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 875 | 20 | frobenius | random | 18 | 1.00 | 1.00 | 6.35 | 188 | 7.11 | 34.4 | 5.53 | 0.80 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 875 | 20 | frobenius | walk | 19 | 1.00 | 1.00 | 6.33 | 6.35 | 7.09 | 34.3 | 5.53 | 0.78 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^23) | 22.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 875 | 20 | frobenius | walk | 281 | 1.00 | 0.98 | 6.21 | 188 | 6.96 | 33.6 | 5.53 | 0.67 | 0.00 | ✓ |
+| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m3_signed_orbit_columns_negfold | 3 | 3771 | 66 | negation | random | 59 | 0.99 | 0.99 | 17,311 | 34,555 | 4,121 | 105,189 | 17,274 | 36.8 | 0.22 | ✓ |
+| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m3_signed_orbit_columns_frobfold | 3 | 3771 | 66 | frobenius | random | 59 | 0.99 | 0.99 | 728 | 34,555 | 173 | 4,426 | 690 | 38.5 | 0.22 | ✓ |
+| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 3771 | 66 | frobenius | walk | 53 | 1.00 | 1.00 | 713 | 728 | 170 | 4,335 | 690 | 23.6 | 0.15 | ✓ |
+| koblitz | K_1 / GF(2^29) | 15.4 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 3771 | 66 | frobenius | walk | 350 | 1.38 | 0.30 | 703 | 34,555 | 167 | 4,271 | 690 | 13.2 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m3_signed_orbit_columns_negfold | 3 | 2421 | 41 | negation | random | 49 | 0.74 | 0.74 | 1,268 | 2,489 | 1,119 | 7,968 | 1,224 | 44.7 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m3_signed_orbit_columns_frobfold | 3 | 2421 | 41 | frobenius | random | 49 | 0.74 | 0.74 | 98.2 | 2,489 | 86.6 | 617 | 50.3 | 47.9 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 2421 | 41 | frobenius | walk | 51 | 0.70 | 0.70 | 100 | 98.2 | 88.4 | 630 | 50.3 | 49.9 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^31) | 20.5 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 2421 | 41 | frobenius | walk | 4,151 | 0.93 | 0.62 | 59.2 | 2,489 | 52.2 | 372 | 50.3 | 8.86 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns_negfold | 3 | 4663 | 64 | negation | random | 493 | 0.98 | 0.98 | 499 | 857 | 1,195 | 3,426 | 358 | 141 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns_frobfold | 3 | 4663 | 64 | frobenius | random | 493 | 0.98 | 0.98 | 161 | 857 | 387 | 1,108 | 11.3 | 150 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 4663 | 64 | frobenius | walk | 496 | 0.96 | 0.96 | 161 | 161 | 385 | 1,103 | 11.3 | 150 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 4663 | 64 | frobenius | walk | 91,721 | 1.07 | 0.92 | 19.4 | 857 | 46.4 | 133 | 11.3 | 8.13 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 9177 | 125 | frobenius | walk | 175 | 0.70 | 0.70 | 94.1 | 161 | 225 | 646 | 41.8 | 52.3 | 0.01 | ✓ |
+| koblitz | K_0 / GF(2^37) | 27.8 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 9177 | 125 | frobenius | walk | 72,038 | 1.40 | 1.32 | 48.2 | 19.4 | 115 | 331 | 41.8 | 6.38 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 4681 | 61 | negation | random | 921 | 2.05 | 1.02 | 1,170 | 1,831 | 2,569 | 8,242 | 662 | 508 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 4681 | 61 | frobenius | random | 921 | 2.05 | 1.02 | 561 | 1,831 | 1,233 | 3,955 | 19.8 | 541 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 4681 | 61 | frobenius | walk | 950 | 1.98 | 0.99 | 569 | 561 | 1,251 | 4,013 | 19.8 | 550 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 4681 | 61 | frobenius | walk | 224,721 | 4.84 | 0.71 | 110 | 1,831 | 241 | 774 | 19.8 | 90.1 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 21529 | 277 | frobenius | walk | 275 | 0.94 | 0.94 | 522 | 569 | 1,146 | 3,678 | 391 | 131 | 0.11 | ✓ |
+| koblitz | K_0 / GF(2^39) | 26.0 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 21529 | 277 | frobenius | walk | 38,806 | 1.93 | 0.90 | 397 | 110 | 873 | 2,800 | 391 | 6.62 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns_negfold | 3 | 5003 | 62 | negation | random | 6,086 | 1.05 | 1.04 | 50.4 | 58.8 | 257 | 364 | 8.45 | 41.9 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns_frobfold | 3 | 5003 | 62 | frobenius | random | 6,086 | 1.05 | 1.04 | 45.2 | 58.8 | 231 | 327 | 0.24 | 45.0 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns_frobfold_walk | 3 | 5003 | 62 | frobenius | walk | 5,645 | 1.07 | 1.07 | 41.1 | 45.2 | 210 | 297 | 0.24 | 40.9 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m2_signed_orbit_columns_frobfold_walk | 2 | 5003 | 62 | frobenius | walk | 5,346,681 | 0.99 | 0.96 | 8.15 | 58.8 | 41.6 | 58.9 | 0.24 | 7.91 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 3 | 20501 | 251 | frobenius | walk | 468 | 0.77 | 0.77 | 12.3 | 41.1 | 62.7 | 88.7 | 3.80 | 8.48 | 0.00 | ✓ |
+| koblitz | K_0 / GF(2^41) | 39.0 | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 2 | 20501 | 251 | frobenius | walk | 901,943 | 1.12 | 1.12 | 5.12 | 8.15 | 26.2 | 37.0 | 3.80 | 1.32 | 0.00 | ✓ |
+
+</details>
+
+### 10.4 Reading the rungs
+
+**The folds do what their counts say, and no more.**  The negation fold
+halves the table's additions and leaves every other count identical:
+prime `m = 3` at 24 bits, `S` `56.8 → 37.0` with the same 265 trials, the
+same 0.87 yield and the same elimination; Koblitz `m = 3` at `n = 41`,
+`58.8 → 50.4` with the same 6,086 trials.  The Frobenius fold shrinks
+the Koblitz table by the orbit length: `6,249,999 → 152,439` entries at
+`n = 41`, which takes the factor-base phase from `16.9` to `0.24` in
+`S`, and it pays `2.7` back in canonicalisations (one per probe, at
+`50.8 ns` against an addition's `682.6 ns`, so `0.074` of an addition
+each).  Net `50.4 → 45.2`.  On the large-cofactor rungs, where the base
+was almost the whole cost, the same fold is worth far more: `n = 29`
+goes `34,554 → 728`, `n = 31` `2,489 → 97.8`, `n = 37` `857 → 162`,
+`n = 39` `1,831 → 562`.
+
+**The walk is worth what the target generation cost.**  At `m = 3` a
+target costs two scalar multiplications against `|F|` subtractions and
+probes, so replacing the former by one addition moves little: prime
+`37.0 → 31.7`, binary `191 → 169`, Koblitz `45.2 → 41.1`.  At `m = 2`
+the target *was* the cost — one probe per target against `65` additions
+to make it — and the walk is decisive: prime `248 → 24.2`, binary
+`1,645 → 71.2`.  The relation phase of the prime `m = 2` row falls from
+`228` to `3.84` in `S`, and the scalar multiplications from `23,224` to
+`136`.
+
+**Two summands beat three once targets are cheap.**  The exact ceiling
+of §10.5 makes `m = 2` admissible where the first round's 64-target
+census saw nothing: at `n = 41` the two-summand ceiling is `5.9 × 10⁻⁶`,
+so the row needs `5.3` million walked targets — but each is one
+addition, one canonicalisation and one probe, and the whole row costs
+`S = 8.15` against the three-summand `41.1`.  On the balanced base it is
+`5.12`, the best Koblitz row on the board at `26.2×` the
+signed-Frobenius reference.  Note what pays for it: the elimination
+finishes with 28 rows over 62 columns on the narrow base, through cycles
+in the factor-base graph rather than through full rank — the classical
+way a two-summand index calculus closes, and (per §10.2) verified not to
+be a collision.
+
+**The balanced base trades table for trials, and wins at `n ≥ 37`.**
+Sizing the base to `1.2·(4#E)^{1/3}` takes `|F|` from `5,003` to
+`20,501` at `n = 41` and `K` from `62` to `251`.  The folded table grows
+to `2.6` million entries (`S` `0.24 → 3.80`) and the two-summand trials
+fall `5.3` million `→ 902` thousand, for a net `8.15 → 5.12`.  At
+`m = 3` the same base is `41.1 → 12.3`.
+
+**Per instance, best row to best row**, the round is worth `1.3×` to
+`2.9×` on the prime and binary ladders and `3×` to `50×` on the Koblitz
+one, where the folds bite hardest: the ratios of the best first-round row
+to the best Round-2 row run `1.26–2.35` (prime), `1.25–2.89` (binary) and
+`3.4–49` (Koblitz).  Nothing crosses the reference.  The closest rows are
+the prime `m = 2` walk at `6.2×` rho and the Koblitz balanced `m = 2` at
+`26.2×`; at 12 bits the prime `m = 3` walk sits at `0.9×`, which is
+rho's unamortised setup at small `r` and not a crossover (§2.3).
+
+### 10.5 The exact ceiling: the † rows corrected
+
+§3.5 marked six rows with a `yield/ceiling` above `1.4` and argued, by
+hand, that the ceiling was loose by the index of the subgroup the base's
+sums land in.  The exact ceiling computes that index instead of arguing
+it: it counts the `m`-multisets of base points whose cofactor classes
+cancel and divides by `r`, so a base confined to a proper subgroup is
+measured against what it can actually reach.  Every row now carries
+both.
+
+| instance | rows | cofactor | classes | `yield/ceiling` | exact | index |
+|:--|:--|--:|--:|--:|--:|--:|
+| `random-binary-n18-b6507` | `m = 3` and `m = 2`, all rungs | 8 | 4 | 1.48–2.28 | 0.77–1.03 | 1.92–2.21 |
+| `random-binary-n24-b5fc9da` | all rungs | 8 | 4 | 1.63–2.05 | 0.81–1.02 | 2.00–2.02 |
+| `K_0 / GF(2^15)` | all rungs | 44 | 13 | 1.37–2.70 | 0.45–0.89 | 3.04 |
+| `K_1 / GF(2^17)` | all `m = 2` rungs | 2 | 1 | 1.47–2.24 | 0.73–1.12 | 2.00 |
+| `K_1 / GF(2^29)` | `m = 2` walk | 12,646 | 3,133 | 1.38 | 0.30 | 4.59 |
+
+The hand-argued factor 2 of §3.5 is confirmed where the base is in `2E`
+(`1.92–2.21` measured, against the exact 2 the trace argument gives, the
+remainder being the multiset boundary terms), and the cases §3.5 could
+only gesture at now have numbers: the index is `3.04` at `n = 15`, where
+a cofactor of 44 leaves 13 classes, and `4.59` at `n = 29`, where 12,646
+leaves 3,133.  No count moved and no `S` moved; this is the accounting
+correction §3.5 asked for, and the `†` rows of §2.2 are to be read at
+the exact column from here on.
+
+One row still exceeds its exact ceiling: `K_0 / GF(2^15)`'s two-summand
+folded walk, at `3.05`.  That instance has `r = 2^9.6` with a cofactor of
+44 and a base of 33 signed points, so the run finds two or three
+relations in a handful of trials and the ratio is the variance of a
+three-run mean at single digits, not a structural yield.  It is flagged
+here rather than smoothed away.
+
+### 10.6 The exponents, refitted
+
+Fitted total exponents of every Round-2 variant next to the rung it was
+built on, from the run's `fits` array.  The folds move nothing — they
+divide a phase by a constant — and the walk moves the `m = 2` rows,
+because it replaces a per-target cost that grew with the scalar size by
+one that does not.
+
+| regime | variant | α (r) | R² | sizes | α of the rung it was built on |
+|:--|:--|--:|--:|--:|--:|
+| prime | rho reference | 0.274 | 0.903 | 8 | — |
+| prime | semaev_s3_roots_m2 | 0.933 | 0.965 | 8 | — |
+| prime | direct_subtraction_m2 | 0.871 | 0.997 | 8 | — |
+| prime | mitm_m2 | 0.678 | 0.998 | 8 | — |
+| prime | mitm_m3 | 0.601 | 0.982 | 8 | — |
+| prime | mitm_m2_negfold | 0.681 | 0.997 | 8 | 0.678 |
+| prime | mitm_m2_negfold_walk | 0.525 | 0.980 | 8 | 0.681 |
+| prime | mitm_m3_negfold | 0.578 | 0.989 | 8 | 0.601 |
+| prime | mitm_m3_negfold_walk | 0.554 | 0.982 | 8 | 0.578 |
+| char2 | rho reference | 0.302 | 0.973 | 5 | — |
+| char2 | mitm_m3 | 0.624 | 0.986 | 5 | — |
+| char2 | semaev_s4_pairs_and_solve_m3 | 1.055 | 0.988 | 5 | — |
+| char2 | mitm_m3_negfold | 0.618 | 0.985 | 5 | 0.624 |
+| char2 | mitm_m3_negfold_walk | 0.637 | 0.987 | 5 | 0.618 |
+| char2 | mitm_m2_negfold | 0.788 | 0.999 | 5 | 0.624 |
+| char2 | mitm_m2_negfold_walk | 0.476 | 0.979 | 5 | 0.788 |
+| koblitz | rho reference | 0.254 | 0.917 | 11 | — |
+| koblitz | mitm_m3_signed_orbit_columns | 0.544 | 0.709 | 10 | — |
+| koblitz | mitm_m3_signed_orbit_columns_negfold | 0.556 | 0.734 | 10 | 0.544 |
+| koblitz | mitm_m3_signed_orbit_columns_frobfold | 0.588 | 0.831 | 10 | 0.544 |
+| koblitz | mitm_m3_signed_orbit_columns_frobfold_walk | 0.558 | 0.827 | 10 | 0.588 |
+| koblitz | mitm_m2_signed_orbit_columns_frobfold_walk | 0.446 | 0.789 | 11 | 0.544 |
+| koblitz | mitm_m3_signed_orbit_columns_frobfold_walk_balanced | 0.471 | 0.861 | 4 | 0.558 |
+| koblitz | mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 0.430 | 0.821 | 4 | 0.446 |
+
+### 10.7 Against the targets of §1.6, and the `AGENTS.md` §8 gate
+
+**Neither condition of §1.6 is met, and the round does not claim them.**
+No variant is below the reference on any instance with `r ≥ 2^20`: the
+closest are the prime `m = 2` walk at `6.2×` rho (`2^23.4`) and the
+Koblitz balanced `m = 2` at `26.2×` (`2^39.0`).  No fitted total exponent
+is below the reference's: rho fits at `0.25–0.30` here and the best
+Round-2 rows at `0.43–0.53` (§10.6).  No `yield/ceiling` exceeds `1.5`
+against the exact ceiling on a base outside a proper subgroup (§10.5).
+Every logarithm on every row of all three runs was recovered and
+verified, every rho run recovered and verified its own, and no row was
+pinned by a repeated target.
+
+**The §8 comparison.**  103 candidate rows paired with the rung each was
+built on, plus 34 holdout rows on a fresh seed, in
+`ic-boundary-round2-comparison-2026-09-21.json`.  The speedups
+(`baseline_total_operations / candidate_total_operations`, same curves,
+subgroups, factor bases, targets and seeds, every phase charged) run
+from `0.13` to `49.2` with a median of `1.41`; the holdout runs `0.07`
+to `67.1`, median `1.31`.  Fourteen of the 103 are below one and are
+reported as such: they are the rungs where a lever costs more than it
+saves — the two-summand rows before the walk is applied to them
+(`mitm_m2_negfold` against a three-summand baseline), and the balanced
+base at the sizes where its larger table is not yet repaid.  A rung that
+loses is a measurement, not a failure, and it stays on the table.
+
+The comparison file also records what the target guard did to the
+*first* round's rows: 41 of 63 reproduce the frozen Round-1 counts
+exactly, and 22 moved, by `0.88×` to `1.59×` in `S`.  Those 22 are the
+rows §10.2 corrects, and the correction is to Round 1's numbers, not to
+this round's.
+
+The frozen WDSat regression suite of `AGENTS.md` §8
+(`research/index_calculus_baseline_20260914/regression/`) does not apply
+to this round and was not run, for the reason its own README gives: it
+measures one SAT-solver stage on sixty fixed Weil-descended inputs and
+"is not an adapter" for any other pipeline.  None of the six levers
+touches a solver stage — the pair table, the target generator, the
+counting bound and the base size are the phases *around* the oracle, and
+the oracle that finishes a logarithm here is a hash probe.  The matched
+suite §8 asks for instead is the comparison file: every candidate row
+paired with the rung it was built on, on identical curves, subgroups,
+factor bases, targets and seeds, with every phase charged exclusively,
+`speedup = baseline_total_operations / candidate_total_operations` per
+repeat and as the mean, a fresh-seed holdout on the largest instances,
+and a check that the first-round rows of the new run reproduce the
+frozen counts of §2 exactly.  No runtime claim is made, so no paired
+wall-clock interval is owed; the wall columns stay what they were in §2,
+a practicality note.
+
+### 10.8 What does not count, and what this is not
+
+- **Not a crossover.**  The best row of the round is `6.2×` the counted
+  reference on the prime ladder and `26.2×` the signed-Frobenius
+  reference on the Koblitz one.  The `0.9×` at 12 bits is rho's setup
+  being unamortised below `2^20` (§2.3), which the `vs floor` column
+  does not flatter.
+- **Not an advance.**  Every rung is engineering by the §3 test.  The
+  two folds use automorphisms the floor's `A` already grants a generic
+  algorithm, the walk is the reference's own target generator, and the
+  summand count and base size are parameters of the same counting bound.
+  The exact ceiling is accounting.  `yield/ceiling` against the exact
+  ceiling stays at or below one on every base that is not confined to a
+  proper subgroup.
+- **Not an exponent result.**  The two-summand walk rows fit at `0.43`
+  to `0.53`, which brackets rho's limiting one half, but over four to
+  eight rungs whose base size steps by `2^{1/3}` and with the factor
+  base and relation phases pulling opposite ways (§10.6).  §1.6 asks for
+  an exponent below *the reference's*; the reference fits at `0.25–0.30`
+  on these ladders.  The balanced rows in particular are four rungs at
+  cofactors 44, 596, 8,012 and 4, reported with their `R²` and not
+  offered as a law.
+- **Not a claim about a deployed curve**, and not a wall-clock
+  benchmark.  §8 stands unchanged.
+- **The collision correction cuts both ways.**  §10.2 removes a
+  mechanism that had been making some rows *look* cheaper, including 22
+  of the first round's.  The Round-2 gains in §10.4 are measured after
+  that removal, on rows where it applies equally to the before mark and
+  the after mark.
+
+### 10.9 Reproducing
+
+```bash
+cargo build --release --bin ic
+./target/release/ic boundary --out round2.json
+./target/release/ic boundary --seed 1213743172 --repeats 2 --prime-bits 22,24 \
+    --char2-degrees 24,27 --koblitz-degrees 37,39,41 --s4-max-degree 24 --out holdout.json
+./target/release/ic boundary --unguarded-targets --prime-bits 20,22,24 \
+    --char2-degrees 21,24,27 --s4-max-degree 20 --koblitz-degrees 23,37,39,41 --out unguarded.json
+python3 docs/ic/tools/boundary_round_compare.py round2.json \
+    --baseline docs/ic/runs/ic-boundary-ledger-2026-09-21.json --holdout holdout.json --out comparison.json
+python3 docs/ic/tools/boundary_ledger_tables.py round2.json
+python3 docs/ic/tools/boundary_scoreboard_rows.py round2.json
+cargo test --release --lib cryptanalysis::ic_
+```
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
