@@ -79,6 +79,12 @@ struct Solver {
     struct WalkResult {
         bool ok;
         Point endPoint;
+        // The trail's start, R_0 = [alpha0]P + Q.  Kept because the witness
+        // check is [mu]R_0 == endPoint, which is ONE scalar multiplication on
+        // a point the walk already built, against the two that rebuilding
+        // [mu*alpha0]P + [mu]Q costs.  Same statement -- R_0 is that sum --
+        // for 196 point operations instead of 392.
+        Point startPt;
         unsigned long long iters;
         unsigned long long counts[8];
         U192 alpha0;
@@ -94,6 +100,7 @@ struct Solver {
         out.iters = 0;
         for (int i = 0; i < 8; ++i) out.counts[i] = 0;
         Point p = R::startPoint(seed, basis, target, &out.alpha0, ell, spow);
+        out.startPt = p;
         out.a = out.alpha0;
         out.b = u192_from(1);
         u64 hist = ECC_HIST_EMPTY;
@@ -146,13 +153,13 @@ struct Solver {
         return out;   // the table walk has no (1 + s^j)^{n_j} factorisation
 #else
         if (total != iters) return out;
-        // Only alpha0 is wanted; the start point itself is rebuilt below as
-        // [alpha0]P + Q inside the payer's own expression.
-        (void)R::startPoint(seed, basis, target, &out.alpha0, ell, spow);
+        out.startPt = R::startPoint(seed, basis, target, &out.alpha0, ell, spow);
         const U192 mu = multiplier(out.counts);
         out.a = mod_mul(mu, out.alpha0, ell);
         out.b = mu;
-        out.endPoint = R::addPt(R::scalarMul(basis, out.a), R::scalarMul(target, out.b));
+        // [mu]R_0, not [mu*alpha0]P + [mu]Q: the same point by R_0's own
+        // definition, reached with one scalar multiplication instead of two.
+        out.endPoint = R::scalarMul(out.startPt, mu);
         if (R::weight(out.endPoint.x) > dpWeight) return out;
         out.ok = true;
         return out;

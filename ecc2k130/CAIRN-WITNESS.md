@@ -148,6 +148,43 @@ ECC2K-130 records: **5,039,383 steps carried and 0 replayed**, 30.8 s wall for
 128 claims; Route A on the same corpus would have had to walk all 5.04M steps
 back. That ratio is the reason §4's last column reads the way it does.
 
+### Route A, made cheaper
+
+Two things were costing more than they had to, and both are fixed.
+
+**The witness check was two scalar multiplications where one says the same
+thing.** It rebuilt the endpoint as `[mu·alpha_0]P + [mu]Q`. But `R_0` *is*
+`[alpha_0]P + Q`, and the walk already builds it, so `[mu]R_0` is the identical
+statement for 196 point operations instead of 392. `WalkResult` now carries
+`startPt` and both the replay check and `fromCounts` use it. The carried path
+gets this too: emitting 128 ECC2K-130 claims went from **30.8 s to 18.2 s**
+single-threaded, which is the whole of that 1.69x.
+
+**The replay was serial across records that do not depend on each other.** It
+now runs under OpenMP, with the emission left serial so the artifact bytes are
+whatever a one-record-at-a-time run would have produced. That is checked rather
+than asserted: the same corpus at `OMP_NUM_THREADS` 1, 2 and 4 gives
+byte-identical output on both paths.
+
+| | before | after, 1 thread | after, 4 threads |
+|---|---:|---:|---:|
+| replay, 8 records / 20,394 steps | 15.18 s | 12.78 s | **4.61 s** |
+| carried, 128 records | 30.8 s | 18.18 s | **4.90 s** |
+
+So 3.3x on the replay and 6.3x on the carried path, on four cores.
+
+**What this does not change is the shape of the cost**, and that is the honest
+limit. A serial replay costs the SUM of the trail lengths; parallelism divides
+that sum by the core count, but a single trail still cannot be split. On the
+128-record ECC2K-130 corpus the sum is 5,039,383 steps and the longest single
+trail is 77,146 -- a factor of 65 between what a replay must pay and what a
+*batched* replay bounded by the longest trail would pay. Closing that gap means
+replaying through the bitsliced walk, 512 lanes at a time, which is the walk
+this client already has and the counters Route B already added: a replay kernel
+is Route B's kernel pointed at a corpus's seeds instead of at fresh ones. It
+needs seed injection into the reseed path, which is the hottest code in the
+campaign, so it is written up here rather than rushed.
+
 ## 5. Route B, priced
 
 The two backends pay for the witness by different mechanisms, and the reason is

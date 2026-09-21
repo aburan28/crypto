@@ -323,7 +323,7 @@ build/test-production: src/testproduction.cpp src/main.cu $(HDRS) $(GEN)
 # figure (docs/ecc2k130-status/walk-forest/README.md).  Host only.
 build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	$(CXX) -O2 -std=c++17 -fopenmp $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
 	    -Wno-unknown-pragmas src/trailforest.cpp -o $@
 
 trailforest: build/trailforest
@@ -332,7 +332,7 @@ trailforest: build/trailforest
 # with one double scalar multiplication.  Host only.
 build/witness: src/witness.cpp $(HDRS) $(GEN)
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	$(CXX) -O2 -std=c++17 $(OMPFLAGS) $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
 	    -Wno-unknown-pragmas src/witness.cpp -o $@
 
 witness: build/witness

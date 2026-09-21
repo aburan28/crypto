@@ -416,7 +416,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
     if (o.max && first + o.max < limit) limit = first + o.max;
 
     std::vector<std::string> batch;
-    unsigned long long done = 0, emitted = 0, steps = 0, carried = 0;
+    unsigned long long emitted = 0, steps = 0, carried = 0;
     unsigned long long batchNo = 0;
     // False when the batch could not be written; the caller stops there rather
     // than walk more records whose witnesses would go the same way.
@@ -449,63 +449,92 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
         return true;
     };
 
-    for (unsigned long long i = first; i < limit; ++i) {
-        const CorpusRecord &rec = recs[(size_t)i];
+#if ECC_WALK_TABLE
+    fprintf(stderr, "this binary is built with ECC_WALK_TABLE: the replay tracks the "
+                    "table's coefficients directly and leaves the j-counts empty, so it "
+                    "cannot produce a j-counts witness\n");
+    return 7;
+#else
+    // The replay is the expensive half of this tool and every record is
+    // independent of every other, so it runs in parallel while the emission
+    // stays serial.  The output does not change: results are written back by
+    // index and the batching below walks them in corpus order, so the bytes
+    // are the same whatever the thread count -- which is what lets the tests
+    // compare a threaded run against a corpus walked one record at a time.
+    struct Replayed {
+        std::string el;              // the artifact element, ready to emit
+        unsigned long long iters;
+        bool carried;
+        int err;                     // 0, or the exit code this record earns
+        std::string msg;             // what to print for that error
+    };
+    const size_t span = (size_t)(limit - first);
+    std::vector<Replayed> done_(span);
+    unsigned long long progress = 0;
+
+#pragma omp parallel for schedule(dynamic, 1)
+    for (long long t = 0; t < (long long)span; ++t) {
+        Replayed &slot = done_[(size_t)t];
+        slot.err = 0;
+        slot.iters = 0;
+        slot.carried = false;
+        char note[256];
+        const CorpusRecord &rec = recs[(size_t)first + (size_t)t];
         // A v2 corpus already carries the counts, so the claim costs one
-        // double scalar multiplication rather than a replay of the trail --
-        // the asymmetry the witness exists for.  A v1 corpus has to be walked.
+        // scalar multiplication rather than a replay of the trail -- the
+        // asymmetry the witness exists for.  A v1 corpus has to be walked.
         const typename Solver<Cfg>::WalkResult wr =
             rec.hasWitness ? sol.fromCounts(rec.seed, rec.counts, rec.iters)
                            : sol.rewalk(rec.seed);
         if (!wr.ok) {
             if (rec.hasWitness)
-                fprintf(stderr, "seed %016llx carries a witness that does not sum to its %llu "
-                                "steps or does not reach a distinguished point\n",
-                        rec.seed, rec.iters);
+                snprintf(note, sizeof note,
+                         "seed %016llx carries a witness that does not sum to its %llu "
+                         "steps or does not reach a distinguished point", rec.seed, rec.iters);
             else
-                fprintf(stderr, "seed %016llx did not reach a distinguished point in %llu steps\n",
-                        rec.seed, maxIters);
-            return 6;
+                snprintf(note, sizeof note,
+                         "seed %016llx did not reach a distinguished point in %llu steps",
+                         rec.seed, maxIters);
+            slot.err = 6;
+            slot.msg = note;
+            continue;
         }
         // The replay must land on the orbit the record names, or the corpus
         // and this binary disagree about the walk and nothing below is worth
         // claiming.
         const typename R::Elem canon = R::canonical(wr.endPoint.x);
         if (canon.v[0] != rec.canon[0] || canon.v[1] != rec.canon[1] || canon.v[2] != rec.canon[2]) {
-            fprintf(stderr, "seed %016llx %s a different orbit than its record names\n",
-                    rec.seed, rec.hasWitness ? "carries a witness landing on" : "replays to");
-            return 6;
+            snprintf(note, sizeof note, "seed %016llx %s a different orbit than its record names",
+                     rec.seed, rec.hasWitness ? "carries a witness landing on" : "replays to");
+            slot.err = 6;
+            slot.msg = note;
+            continue;
         }
         if (R::weight(wr.endPoint.x) > w) {
-            fprintf(stderr, "seed %016llx ends on weight %d, past the job's %d\n",
-                    rec.seed, R::weight(wr.endPoint.x), w);
-            return 6;
+            snprintf(note, sizeof note, "seed %016llx ends on weight %d, past the job's %d",
+                     rec.seed, R::weight(wr.endPoint.x), w);
+            slot.err = 6;
+            slot.msg = note;
+            continue;
         }
-#if ECC_WALK_TABLE
-        fprintf(stderr, "this binary is built with ECC_WALK_TABLE: the replay tracks the "
-                        "table's coefficients directly and leaves the j-counts empty, so it "
-                        "cannot produce a j-counts witness\n");
-        return 7;
-#else
-        // The witness, checked here rather than trusted: mu from the counts
-        // must send the start point to the endpoint the replay reached.  This
-        // is the same double scalar multiplication the payer will do.
+        // The witness, checked here rather than trusted.
         //
         // For a carried witness this comparison is a tautology -- fromCounts
         // built the endpoint out of mu -- and the check that binds is the
         // orbit comparison above, which is the same thing the payer checks.
-        // It is still run, because it costs nothing next to the emission and
-        // it is the one line that would catch fromCounts drifting from the
-        // payer's expression.
+        // For a replay it is independent: the endpoint came from stepping and
+        // the counts came from counting those steps.
         if (!rec.hasWitness) {
-            const U192 mu = sol.multiplier(wr.counts);
-            const typename R::Point lhs =
-                R::addPt(R::scalarMul(sol.basis, mod_mul(mu, wr.alpha0, sol.ell)),
-                         R::scalarMul(sol.target, mu));
-            if (!R::eq(lhs, wr.endPoint)) {
-                fprintf(stderr, "seed %016llx: the j-counts do not reproduce the endpoint\n",
-                        rec.seed);
-                return 6;
+            // [mu]R_0 rather than [mu*alpha0]P + [mu]Q.  R_0 IS [alpha0]P + Q,
+            // so this is the payer's statement reached with one scalar
+            // multiplication instead of two -- 196 point operations saved on
+            // every replayed record, which is most of what a short trail costs.
+            if (!R::eq(R::scalarMul(wr.startPt, sol.multiplier(wr.counts)), wr.endPoint)) {
+                snprintf(note, sizeof note,
+                         "seed %016llx: the j-counts do not reproduce the endpoint", rec.seed);
+                slot.err = 6;
+                slot.msg = note;
+                continue;
             }
         }
         unsigned long long name[3];
@@ -517,20 +546,37 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
             hexOf(s, &shex);
         }
         std::string el = "{\"j\":[";
-        for (int t = 0; t < 8; ++t) {
+        for (int u = 0; u < 8; ++u) {
             char b[32];
-            snprintf(b, sizeof b, "%s%llu", t ? "," : "", wr.counts[t]);
+            snprintf(b, sizeof b, "%s%llu", u ? "," : "", wr.counts[u]);
             el += b;
         }
         el += "],\"seed\":\"" + shex + "\",\"x\":\"" + xhex + "\"}";
-        batch.push_back(el);
-        steps += wr.iters;
-        if (rec.hasWitness) ++carried;
-        if ((int)batch.size() >= o.batch && !flush()) return 9;
-#endif
-        if (!o.quiet && ++done % 64 == 0)
-            fprintf(stderr, "\rwitnessed %llu of %llu", done, limit - first);
+        slot.el = el;
+        slot.iters = wr.iters;
+        slot.carried = rec.hasWitness;
+        if (!o.quiet) {
+            unsigned long long seen;
+#pragma omp atomic capture
+            seen = ++progress;
+            if (seen % 64 == 0) fprintf(stderr, "\rwitnessed %llu of %llu", seen, (unsigned long long)span);
+        }
     }
+
+    // Serial from here: the first failure IN CORPUS ORDER is the one reported,
+    // so a threaded run fails exactly where a single-threaded one would.
+    for (size_t t = 0; t < span; ++t) {
+        const Replayed &slot = done_[t];
+        if (slot.err) {
+            fprintf(stderr, "%s\n", slot.msg.c_str());
+            return slot.err;
+        }
+        batch.push_back(slot.el);
+        steps += slot.iters;
+        if (slot.carried) ++carried;
+        if ((int)batch.size() >= o.batch && !flush()) return 9;
+    }
+#endif
     if (!flush()) return 9;
     if (!o.quiet) {
         // Separate the two numbers: steps replayed is the cost this run paid,

@@ -255,11 +255,14 @@ batches of up to 64.
 `--out-dir` writes one artifact per file, which is what a node's checker reads;
 without it the batches stream to stdout, one JSON object per line.
 
-**Replaying is what costs.** Measured here on the challenge curve: **835
-steps/s** marginal, plus **0.165 s** fixed per record for the 128-term start
-point and the witness check. At the campaign's `dpWeight` 32 a trail averages
-`2^28.41` steps, so one *replayed* production witness is about **119 hours**
-single-threaded. That is the number the carried counters delete: from a v2
+**Replaying is what costs.** The replay runs in parallel across records --
+they are independent, and the emission stays serial so the output bytes do not
+depend on the thread count. Measured here on the challenge curve, four cores:
+**~1,700 steps/s** marginal per core, plus **~0.22 s** fixed per record for the
+128-term start point and the witness check. At the campaign's `dpWeight` 32 a
+trail averages `2^28.41` steps, so one *replayed* production witness is still
+tens of hours: parallelism divides the cost, it does not change its shape,
+because a single trail cannot be split across cores. That is the number the carried counters delete: from a v2
 corpus only the fixed per-record part remains, because there is no trail to
 walk. Measured on 128 real weight-34 ECC2K-130 records: **5,039,383 steps
 carried, 0 replayed**, 30.8 s for two 64-point batches. The replay path is
