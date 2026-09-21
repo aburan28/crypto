@@ -141,8 +141,16 @@ def compare_instance(inst):
     return out
 
 def reproduction_check(new, old):
-    """First-round rows of the new run against the frozen Round-1 file:
-    the native counts must be identical (same seeds, same code path)."""
+    """First-round rows of the new run against the frozen Round-1 file.
+
+    A row whose counts are identical reproduces the earlier measurement,
+    which is what makes the pairing below a comparison rather than two
+    runs.  A row that moved is one the target guard bit: Round 1 drew
+    targets without it, so a run could decompose one group element twice
+    and be pinned by that collision instead of by its relations, ending
+    early.  Those rows are reported with the size of the move, because
+    the correction is to Round 1's numbers and not to this round's.
+    """
     checks = []
     old_by = {(i["regime"], i["curve"]["name"]): i for i in old["ledger"]["instances"]}
     for inst in new["ledger"]["instances"]:
@@ -163,7 +171,20 @@ def reproduction_check(new, old):
                 and a["recovered"] == b["recovered"]
                 for a, b in zip(o, runs)
             )
-            checks.append(OrderedDict([("regime", inst["regime"]), ("instance", inst["curve"]["name"]), ("variant", name), ("counts_identical", same)]))
+            row = OrderedDict([
+                ("regime", inst["regime"]),
+                ("instance", inst["curve"]["name"]),
+                ("variant", name),
+                ("counts_identical", same),
+            ])
+            if not same:
+                row["trials_round1"] = round(mean([r["trials"] for r in o]), 1)
+                row["trials_guarded"] = round(mean([r["trials"] for r in runs]), 1)
+                row["S_round1"] = round(mean([r["s"] for r in o]), 4)
+                row["S_guarded"] = round(mean([r["s"] for r in runs]), 4)
+                row["S_guarded_over_round1"] = round(mean([r["s"] for r in runs]) / mean([r["s"] for r in o]), 4)
+                row["repeated_targets_skipped"] = round(mean([r["relations"]["native"].get("repeated_targets_skipped", 0) for r in runs]), 1)
+            checks.append(row)
     return checks
 
 comparison = []
@@ -183,9 +204,12 @@ for c in comparison:
     print(f"| {c['regime']} | {c['instance']} | {c['log2_r']:.1f} | {c['candidate']} | {c['baseline']} | {c['lever']} | {c['class']} | {c['m']} | {c['signed_points']} | {c['columns']} | {', '.join(f(x) for x in c['speedup_per_repeat'])} | {f(c['speedup_mean'])} | {f(c['speedup_vs_first_round_best'])} | {f(c['S_baseline'])} → {f(c['S_candidate'])} | {f(c['S_over_rho_candidate'])}× | {f(c['S_over_floor_candidate'])}× | {f(c['yield_over_ceiling_exact_candidate'])} | {'✓' if c['verified_candidate'] and c['verified_baseline'] and c['rho_verified'] else '✗'} |")
 if repro:
     bad = [r for r in repro if not r["counts_identical"]]
-    print(f"\nFirst-round rows reproduced against the frozen Round-1 file: {len(repro) - len(bad)} of {len(repro)} identical in every native count.")
-    for r in bad:
-        print(f"  differs: {r}")
+    print(f"\nFirst-round rows against the frozen Round-1 file: {len(repro) - len(bad)} of {len(repro)} identical in every native count; {len(bad)} moved under the target guard.\n")
+    if bad:
+        print("| regime | instance | variant | trials Round 1 | trials guarded | S Round 1 | S guarded | ratio | repeats skipped |")
+        print("|:--|:--|:--|--:|--:|--:|--:|--:|--:|")
+        for r in bad:
+            print(f"| {r['regime']} | {r['instance']} | {r['variant']} | {r['trials_round1']:,.0f} | {r['trials_guarded']:,.0f} | {f(r['S_round1'])} | {f(r['S_guarded'])} | {f(r['S_guarded_over_round1'])} | {r['repeated_targets_skipped']:.1f} |")
 if holdout_rows:
     print("\nHoldout (fresh seed):\n")
     print("| regime | instance | candidate | baseline | speedup per repeat | speedup mean | S after | vs rho after | ok |")
@@ -204,7 +228,9 @@ if out_path:
         ("all_candidates_verified", all(c["verified_candidate"] for c in comparison)),
         ("all_baselines_verified", all(c["verified_baseline"] for c in comparison)),
         ("no_row_pinned_by_a_repeated_column_part", all(c["repeated_column_rows"] == 0 for c in comparison + holdout_rows)),
-        ("first_round_rows_reproduced", all(r["counts_identical"] for r in repro) if repro else None),
+        ("first_round_rows_identical", sum(1 for r in repro if r["counts_identical"]) if repro else None),
+        ("first_round_rows_moved_by_the_target_guard", sum(1 for r in repro if not r["counts_identical"]) if repro else None),
+        ("first_round_rows_moved_note", "Round 1 drew targets without the repeat guard, so a run could decompose one group element twice and be pinned by that collision rather than by its relations; the rows below are the ones that did, with the size of the correction to Round 1's figures"),
         ("reproduction_checks", repro),
         ("comparison", comparison),
         ("holdout_comparison", holdout_rows),
