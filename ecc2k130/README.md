@@ -208,8 +208,19 @@ and `build/witness` is it:
 
 ```sh
 make witness
-./build/witness --curve 131 --job ecc2k130.json --corpus dps.bin > claims.jsonl
+./build/witness --curve 131 --job ecc2k130.json --corpus dps.bin --out-dir claims/
 ```
+
+`--out-dir` writes one artifact per file, which is what a node's checker
+reads; without it the batches stream to stdout, one JSON object per line.
+
+Measured here on the challenge curve: **835 steps/s** marginal, plus
+**0.165 s** fixed per record for the 128-term start point and the witness
+check. That sets what it can reach. At the campaign's `dpWeight` 32 a trail
+averages `2^28.41` steps, so one production witness is about **119 hours**
+single-threaded -- this path is for small curves and for loosened cutoffs, and
+a production run wants the counters in a *replay* kernel, where the cost falls
+on the trails being claimed rather than on the search.
 
 It replays each record's seed with the reference walk — which has counted the
 `n_j` all along, because collision resolution always needed them — checks that
