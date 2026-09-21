@@ -1545,6 +1545,20 @@ This is a stronger statement than the earlier rounds could make.  §10.8
 said "not a crossover" about the rows it had measured.  This says the
 family has none to find.
 
+**What the law does not cover, said plainly.**  It is a statement about
+the *pair-table* family, and it rests on that family's two costs: a
+table of every pair, `F²/4t`, and `Θ(K)` relations from targets that
+decompose with the counting probability.  An index calculus with an
+**algebraic** decomposition oracle — Semaev's summation polynomials
+solved by F₄ or by SAT, which is what the published ECDLP attacks use —
+builds no such table, so the `F²` term is not its term and this law says
+nothing about it.  §5 prices those oracles on the same systems: at the
+sizes that fit here they cost `10^4` to `10^7` group-addition
+equivalents per target against the probe's `0.5` to `25`, which is why
+no row in this ledger uses one to finish a logarithm.  Whether their
+asymptotics are better is the question this ladder cannot reach, and
+naming it is the honest end of the round rather than a claim about it.
+
 **The ladder is the evidence that the law describes these rows**, and it
 gives it by converging.  The balanced prime row takes the base size the
 law prescribes at every rung:
