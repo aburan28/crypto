@@ -39,6 +39,10 @@ the `cuda` job proves the device code compiles for every architecture in the
 Makefile's gencode list (sm_80, sm_86, sm_89, sm_90, sm_120) and no more. It
 needs CUDA >= 12.8 because `compute_120` does; the job installs `cuda-nvcc`
 and `cuda-cudart-dev` only, about 330 MB rather than the full toolkit.
+That job pins `runs-on: ubuntu-24.04` rather than `ubuntu-latest`: the
+NVIDIA apt repository is addressed by distro and the CUDA version is
+pinned, so a floating runner image would eventually 404 the install and
+block every release. Bump the two together or not at all.
 
 ## Coverage this added
 

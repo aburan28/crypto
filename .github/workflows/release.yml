@@ -122,8 +122,14 @@ jobs:
         run: make -C ecc2k130 cpu MARCH=$ECC_MARCH
       - name: Solve a toy curve with it
         # Curve 23 is a planted instance that finishes in well under a
-        # second. A mis-built binary fails here rather than shipping.
-        run: ./ecc2k130/ecc2k130-cpu --curve 23 --launches 1
+        # second. The exit code alone proves nothing: a run that collects
+        # distinguished points without ever finding a collision also exits
+        # 0 (curve 83 at --launches 1 does exactly that), so assert on the
+        # verification line instead.
+        run: |
+          ./ecc2k130/ecc2k130-cpu --curve 23 --launches 1 | tee /tmp/smoke.log
+          grep -q 'verified \[k\]P == Q' /tmp/smoke.log \
+            || { echo "::error::client ran but did not solve the planted instance"; exit 1; }
       - name: Compile the CUDA header suites on the host
         # gpu/*/Makefile `test` builds the .cu/.cuh sources as host C++ and
         # runs their self-checks. No workflow covered these before.
@@ -150,7 +156,10 @@ jobs:
 
   cuda:
     needs: meta
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: the NVIDIA apt repo below is addressed by
+    # distro, and the CUDA version is pinned, so letting the runner image
+    # float would eventually 404 the install and block every release.
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -191,7 +200,10 @@ jobs:
   release:
     needs: [meta, rust, native, cuda]
     # Dry runs build and stage everything, then stop short of publishing.
-    if: github.event_name != 'pull_request'
+    # The ref test is not redundant with the event test: workflow_dispatch
+    # can be started from any branch, and a release tagged `-main.` that
+    # was not built from main would still become /releases/latest.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
