@@ -1,0 +1,22 @@
+{
+  "child_system_ms": 10.265999999999998,
+  "child_user_ms": 2261.272,
+  "command": [
+    "target/release/examples/koblitz_f4_kernel_bench",
+    "31",
+    "sym"
+  ],
+  "ended_unix_ns": 1790029741056411000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/koblitz_f4_kernel_bench",
+  "executable_sha256": "69aff375783d2345f9f93793d8d958461170a9a747b71ea9c2c698c62fb9aa38",
+  "exit_code": 0,
+  "peak_rss_bytes": 29245440,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790029738778904000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 1076,
+  "stdout_sha256": "c3b05a19de89ee40d2721c568f1ea8adcc1fcc2a33a233bdc66aae39c4358920",
+  "task_id": "TASK-KIC-GROEBNER-M4RI-KERNEL-SYM-SUFFIX-N31-20260921",
+  "wall_ms": 2277.480209
+}
