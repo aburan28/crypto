@@ -1770,11 +1770,47 @@ pub fn build_explicit_frobenius_orbit_factor_base(
 ///
 /// `None` when the field is too wide to sample abscissae as `u64`, or
 /// when sampling cannot reach `points` (a degenerate curve).
+/// What selecting a factor base cost, in its own native counts.
+///
+/// Selection is a phase like any other and AGENTS.md §8 asks for every
+/// phase priced, but it had no counters at all, so the `S` this thread
+/// reports has been a lower bound with selection left null.  These are
+/// the quantities the loop below actually spends, so a measured
+/// conversion turns them into the common unit.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FactorBaseSelectionCost {
+    /// Abscissae drawn and tested, the loop's dominant count: each one
+    /// costs a quadratic solve and, when it lifts, a cofactor
+    /// multiplication.
+    pub abscissae_drawn: u64,
+    /// Draws that produced a point on the curve, roughly half of them.
+    pub lifts_found: u64,
+    /// Cofactor multiplications, one per lift — cheap on a Koblitz
+    /// curve, where the cofactor is 2 or 4.
+    pub cofactor_multiplications: u64,
+    /// Frobenius squarings walking each new representative's orbit.
+    pub frobenius_squarings: u64,
+    /// Times the base was rebuilt from the representatives so far.
+    /// Quadratic in the representative count, and the comment in the
+    /// loop names it as most of what selection costs.
+    pub rebuilds: u32,
+}
+
+/// [`build_subgroup_orbit_factor_base_with_cost`], discarding the cost.
 pub fn build_subgroup_orbit_factor_base(
     kc: &KoblitzCurve,
     seed: u64,
     points: usize,
 ) -> Result<FrobeniusFactorBase, String> {
+    build_subgroup_orbit_factor_base_with_cost(kc, seed, points).map(|(fb, _)| fb)
+}
+
+/// The same selection, reporting what it spent.
+pub fn build_subgroup_orbit_factor_base_with_cost(
+    kc: &KoblitzCurve,
+    seed: u64,
+    points: usize,
+) -> Result<(FrobeniusFactorBase, FactorBaseSelectionCost), String> {
     if kc.n >= 64 {
         return Err("subgroup orbit sampling needs n < 64".into());
     }
@@ -1804,6 +1840,7 @@ pub fn build_subgroup_orbit_factor_base(
     // here as the batches arrive, which costs one Frobenius orbit per new
     // representative rather than one per representative per round.
     let mut abscissae: HashSet<BigUint> = HashSet::new();
+    let mut cost = FactorBaseSelectionCost::default();
     while base.as_ref().is_none_or(|b| b.points.len() < points) {
         let mut added = 0usize;
         while added < batch {
@@ -1823,6 +1860,8 @@ pub fn build_subgroup_orbit_factor_base(
             let Some(point) = lifts.into_iter().next() else {
                 continue;
             };
+            cost.lifts_found += 1;
+            cost.cofactor_multiplications += 1;
             // Multiply by the cofactor rather than rejecting: [h]P has
             // order dividing r for *every* P, so no sample is wasted, and
             // where the cofactor is large that is the difference between
@@ -1842,6 +1881,7 @@ pub fn build_subgroup_orbit_factor_base(
             for _ in 0..kc.extension_degree() {
                 abscissae.insert(orbit.to_biguint());
                 orbit = kc.frobenius_x(&orbit);
+                cost.frobenius_squarings += 1;
             }
             representatives.push(x);
             added += 1;
@@ -1849,9 +1889,12 @@ pub fn build_subgroup_orbit_factor_base(
         if 2 * abscissae.len() < points {
             continue;
         }
+        cost.rebuilds += 1;
         base = build_explicit_frobenius_orbit_factor_base(kc, &representatives);
     }
-    base.ok_or_else(|| "subgroup orbit sampling produced no base".into())
+    cost.abscissae_drawn = drawn;
+    base.map(|b| (b, cost))
+        .ok_or_else(|| "subgroup orbit sampling produced no base".into())
 }
 
 /// **Keep only the listed signed orbits** of a factor base.
@@ -2506,12 +2549,34 @@ impl PairSumTable {
     /// median over the four widths of
     /// `docs/ic/runs/koblitz-tier-crossover-20260921.json`.
     ///
-    /// **What this is calibrated on, and is not.**  One curve, one
-    /// degree (`n = 61`), one host.  The fold's build saving carries a
-    /// `1 − 1/2n` factor and its canonicalisation cost grows with `n`,
-    /// so both sides move with the degree and neither was measured
-    /// against it.  The model reproduces the cheapest of the two tiers
-    /// at all four widths measured; outside that range it is an
+    /// **What this is calibrated on, and is not.**  The constants were
+    /// measured at one degree (`n = 61`) and one base width (about
+    /// 12,700 points) on one host, and the limitation that matters is
+    /// the *width*, not the degree.
+    ///
+    /// Measured across `n = 41, 53, 57, 61` at a matched base, the
+    /// folded-to-compact ratio of the scan cost is flat once the
+    /// degrees whose `m = 3` scan saturates are excluded: `1.34` at
+    /// `n = 53` against `1.33` at `n = 61`, the only two of the ten
+    /// usable degrees with an `r` large enough to measure cleanly at a
+    /// workable width.  `n` does not determine `r` on this family — the
+    /// cofactor runs from 4 at `n = 41` to 57,284,756 at `n = 59` — so a
+    /// sweep that picks its width by degree lands in the saturated
+    /// regime and reads recovery cost as probing cost.
+    /// `examples/koblitz_degree_census.rs` computes the width that keeps
+    /// a degree measurable.
+    ///
+    /// Across widths at fixed degree the same ratio moves a great deal:
+    /// `1.33` at 3,904 points, `1.17` at 12,688, and `0.96` at 15,264,
+    /// because the compact table leaves cache while the folded one never
+    /// does.  The constants below give `1.17`, which is right at the
+    /// width they were taken at and wrong in both directions away from
+    /// it.  A width term is what this model is missing; a degree term is
+    /// not.  `docs/ic/runs/koblitz-phase-prices-20260921.json` records
+    /// both sweeps.
+    ///
+    /// The model reproduces the cheapest of the two tiers at all four
+    /// widths measured end to end; outside that range it is an
     /// extrapolation, which is why every builder stays reachable by name
     /// and `ic`'s `pair_table_tier` can override the choice outright.
     fn expected_adds(stored: u128, scan: f64, blocked: f64, probes: ProbeBudget) -> f64 {
@@ -2552,6 +2617,10 @@ impl PairSumTable {
             FOLDED_BLOCKED,
             probes,
         );
+        // Deliberately unused: measured flat in `n` over 41 to 61 once
+        // saturated degrees are excluded (see above).  Kept in the
+        // signature because the width term this model needs will want
+        // the field size beside it.
         let _ = degree;
         folded < compact
     }
@@ -8157,6 +8226,42 @@ mod tests {
                 report2.trials
             );
         }
+    }
+
+    #[test]
+    fn selecting_a_base_reports_what_it_spent() {
+        // Selection is a priced phase now, so its counters are part of
+        // the contract.  AGENTS.md §8 wants every phase priced, and this
+        // one reported nothing at all, which is why `S` was a lower
+        // bound with selection null.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let (fb, cost) = build_subgroup_orbit_factor_base_with_cost(&kc, 5, 400).unwrap();
+
+        // The base is the one the discarding wrapper returns, so adding
+        // the counters changed no measurement anywhere else.
+        let plain = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        assert_eq!(fb.points, plain.points);
+
+        // Every draw is either rejected or lifts, so lifts never exceed
+        // draws, and each lift costs exactly one cofactor multiply.
+        assert!(cost.abscissae_drawn >= cost.lifts_found, "{cost:?}");
+        assert_eq!(cost.lifts_found, cost.cofactor_multiplications);
+        // A representative is only kept once it lifts, and each keeps an
+        // orbit's worth of squarings.
+        assert_eq!(
+            cost.frobenius_squarings,
+            fb.signed_orbits.len() as u64 * u64::from(kc.extension_degree()),
+            "one orbit walk per representative kept"
+        );
+        assert!(cost.rebuilds >= 1, "the base was built at least once");
+        assert!(cost.abscissae_drawn > 0);
+
+        // Deterministic in the seed, like the base itself: a price that
+        // moved run to run could not be frozen into an evidence file.
+        let (_, again) = build_subgroup_orbit_factor_base_with_cost(&kc, 5, 400).unwrap();
+        assert_eq!(cost, again);
+        let (_, other) = build_subgroup_orbit_factor_base_with_cost(&kc, 6, 400).unwrap();
+        assert_ne!(cost.abscissae_drawn, other.abscissae_drawn);
     }
 
     #[test]
