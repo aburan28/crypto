@@ -1,0 +1,299 @@
+{
+ "operation": "koblitz_pair_table_tier_crossover",
+ "date": "2026-09-21",
+ "what": "Every pair-table tier priced over the whole cold pipeline in one unit -- batched group additions -- at four factor-base widths on one curve, to find where each tier is cheapest.",
+ "why": "The tier default was flipped to fold-first on wall-clock evidence. Re-priced in the repository's unit (AGENTS.md section 2) the flip was a regression at 12688 points: stored pairs fell 120.85x while total operations rose, which is section 3 relabelling. This sweep asks the question the flip should have been decided on -- at what width does the fold's build saving actually overtake its probe penalty -- over four sizes, as section 5 requires.",
+ "instance": {
+  "curve": "K_0 over GF(2^61)",
+  "subgroup_order": "162888033982417",
+  "subgroup_bits": 47.21,
+  "targets": 32,
+  "target_seeds": "200-231",
+  "factor_base": "subgroup_orbits seed 1",
+  "descent_summands": 2,
+  "collection_summands": 3
+ },
+ "boundaries": {
+  "floor": "generic-group floor S = sqrt(pi/2A) with A = 2n = 122 automorphisms -> 0.1135; untouched by the tier, since the tier changes no count the floor bounds",
+  "count_floor": "contract count floor for the m=2 descent: expected probes >= N / C(|F|+1,2); at 12688 points that is 2,023,479 probes a target",
+  "reference": "Pollard rho, signed-Frobenius, counted on the same instance in the same process: 2,263,934 steps a target, S = 0.1774. Not re-run in this sweep because rho does not depend on the tier; measured in docs/ic/runs alongside the tier ladder at the same subgroup."
+ },
+ "unit": {
+  "name": "batched group addition (Montgomery-shared inversion), the form both the rho walk and the pair-table build use",
+  "ns_per_add_by_width": {
+   "6000": 61.62,
+   "9000": 62.14,
+   "12000": 62.08,
+   "18000": 62.32
+  },
+  "native_counts": "the table build does one addition per stored pair; the rho walk one per step -- both exact",
+  "converted_counts": "summand scans and descent probes, converted by a factor measured on the same host, same base and same process by examples/koblitz_probe_conversion.rs, in the shape the pipeline probes in (witnesses_fast, m = 3, never-stopping sink for the scan; BLOCK = 1024 with the 32-key prefetch for the descent)"
+ },
+ "controlled": "At each width the folded and full arms share every operation count -- summand scans, descent probes, relations, rejected relations, columns and points -- and differ only in the table. Asserted, not assumed, when this file was written.",
+ "widths": [
+  {
+   "requested_points": 6000,
+   "points": 6832,
+   "signed_orbits": 56,
+   "columns": 56,
+   "relations": 56,
+   "rejected": 0,
+   "collect_trials": 938000,
+   "summands_scanned": 351750000,
+   "descent_probes": 171541325,
+   "targets": 32,
+   "verified_full": 32,
+   "verified_folded": 32,
+   "batched_add_ns": 61.62,
+   "tiers": {
+    "full": {
+     "stored_pairs": 23341528,
+     "build_adds": 23341528,
+     "collect_adds": 714052500,
+     "descent_adds": 138948473,
+     "total_adds": 876342501,
+     "adds_per_summand_scanned": 2.03,
+     "adds_per_descent_probe": 0.81,
+     "adds_per_lone_probe": 1.17,
+     "build_seconds": 1.67
+    },
+    "compact": {
+     "stored_pairs": 23341528,
+     "build_adds": 23341528,
+     "collect_adds": 749227500,
+     "descent_adds": 154387192,
+     "total_adds": 926956220,
+     "adds_per_summand_scanned": 2.13,
+     "adds_per_descent_probe": 0.9,
+     "adds_per_lone_probe": 1.38,
+     "build_seconds": 2.35
+    },
+    "folded": {
+     "stored_pairs": 194712,
+     "build_adds": 194712,
+     "collect_adds": 875857500,
+     "descent_adds": 228149962,
+     "total_adds": 1104202174,
+     "adds_per_summand_scanned": 2.49,
+     "adds_per_descent_probe": 1.33,
+     "adds_per_lone_probe": 1.43,
+     "build_seconds": 0.03
+    }
+   },
+   "cheapest": "full",
+   "full_over_folded": 0.7936,
+   "compact_over_folded": 0.8395,
+   "full_over_compact": 0.9454,
+   "peak_rss_bytes_full": 553078784,
+   "peak_rss_bytes_folded": 11800576
+  },
+  {
+   "requested_points": 9000,
+   "points": 9760,
+   "signed_orbits": 80,
+   "columns": 80,
+   "relations": 93,
+   "rejected": 0,
+   "collect_trials": 938000,
+   "summands_scanned": 351750000,
+   "descent_probes": 98199557,
+   "targets": 32,
+   "verified_full": 32,
+   "verified_folded": 32,
+   "batched_add_ns": 62.14,
+   "tiers": {
+    "full": {
+     "stored_pairs": 47633680,
+     "build_adds": 47633680,
+     "collect_adds": 759780000,
+     "descent_adds": 96235566,
+     "total_adds": 903649246,
+     "adds_per_summand_scanned": 2.16,
+     "adds_per_descent_probe": 0.98,
+     "adds_per_lone_probe": 1.41,
+     "build_seconds": 3.92
+    },
+    "compact": {
+     "stored_pairs": 47633680,
+     "build_adds": 47633680,
+     "collect_adds": 735157500,
+     "descent_adds": 97217561,
+     "total_adds": 880008741,
+     "adds_per_summand_scanned": 2.09,
+     "adds_per_descent_probe": 0.99,
+     "adds_per_lone_probe": 1.36,
+     "build_seconds": 5.26
+    },
+    "folded": {
+     "stored_pairs": 395280,
+     "build_adds": 395280,
+     "collect_adds": 875857500,
+     "descent_adds": 133551398,
+     "total_adds": 1009804178,
+     "adds_per_summand_scanned": 2.49,
+     "adds_per_descent_probe": 1.36,
+     "adds_per_lone_probe": 1.64,
+     "build_seconds": 0.06
+    }
+   },
+   "cheapest": "compact",
+   "full_over_folded": 0.8949,
+   "compact_over_folded": 0.8715,
+   "full_over_compact": 1.0269,
+   "peak_rss_bytes_full": 1101225984,
+   "peak_rss_bytes_folded": 14643200
+  },
+  {
+   "requested_points": 12000,
+   "points": 12688,
+   "signed_orbits": 104,
+   "columns": 104,
+   "relations": 177,
+   "rejected": 0,
+   "collect_trials": 938000,
+   "summands_scanned": 351750000,
+   "descent_probes": 51328107,
+   "targets": 32,
+   "verified_full": 32,
+   "verified_folded": 32,
+   "batched_add_ns": 62.08,
+   "tiers": {
+    "full": {
+     "stored_pairs": 80499016,
+     "build_adds": 80499016,
+     "collect_adds": 805507500,
+     "descent_adds": 55434356,
+     "total_adds": 941440872,
+     "adds_per_summand_scanned": 2.29,
+     "adds_per_descent_probe": 1.08,
+     "adds_per_lone_probe": 1.65,
+     "build_seconds": 9.44
+    },
+    "compact": {
+     "stored_pairs": 80499016,
+     "build_adds": 80499016,
+     "collect_adds": 759780000,
+     "descent_adds": 47221858,
+     "total_adds": 887500874,
+     "adds_per_summand_scanned": 2.16,
+     "adds_per_descent_probe": 0.92,
+     "adds_per_lone_probe": 1.42,
+     "build_seconds": 10.54
+    },
+    "folded": {
+     "stored_pairs": 666120,
+     "build_adds": 666120,
+     "collect_adds": 889927500,
+     "descent_adds": 75965598,
+     "total_adds": 966559218,
+     "adds_per_summand_scanned": 2.53,
+     "adds_per_descent_probe": 1.48,
+     "adds_per_lone_probe": 2.09,
+     "build_seconds": 0.12
+    }
+   },
+   "cheapest": "compact",
+   "full_over_folded": 0.974,
+   "compact_over_folded": 0.9182,
+   "full_over_compact": 1.0608,
+   "peak_rss_bytes_full": 1650270208,
+   "peak_rss_bytes_folded": 17887232
+  },
+  {
+   "requested_points": 18000,
+   "points": 18544,
+   "signed_orbits": 152,
+   "columns": 152,
+   "relations": 347,
+   "rejected": 0,
+   "collect_trials": 938000,
+   "summands_scanned": 351750000,
+   "descent_probes": 17443758,
+   "targets": 32,
+   "verified_full": 32,
+   "verified_folded": 32,
+   "batched_add_ns": 62.32,
+   "tiers": {
+    "full": {
+     "stored_pairs": 171949240,
+     "build_adds": 171949240,
+     "collect_adds": 921585000,
+     "descent_adds": 23897948,
+     "total_adds": 1117432188,
+     "adds_per_summand_scanned": 2.62,
+     "adds_per_descent_probe": 1.37,
+     "adds_per_lone_probe": 2.38,
+     "build_seconds": 18.31
+    },
+    "compact": {
+     "stored_pairs": 171949240,
+     "build_adds": 171949240,
+     "collect_adds": 847717500,
+     "descent_adds": 22851323,
+     "total_adds": 1042518063,
+     "adds_per_summand_scanned": 2.41,
+     "adds_per_descent_probe": 1.31,
+     "adds_per_lone_probe": 2.11,
+     "build_seconds": 24.39
+    },
+    "folded": {
+     "stored_pairs": 1418616,
+     "build_adds": 1418616,
+     "collect_adds": 953242500,
+     "descent_adds": 28258888,
+     "total_adds": 982920004,
+     "adds_per_summand_scanned": 2.71,
+     "adds_per_descent_probe": 1.62,
+     "adds_per_lone_probe": 2.05,
+     "build_seconds": 0.27
+    }
+   },
+   "cheapest": "folded",
+   "full_over_folded": 1.1368,
+   "compact_over_folded": 1.0606,
+   "full_over_compact": 1.0719,
+   "peak_rss_bytes_full": 3208892416,
+   "peak_rss_bytes_folded": 27045888
+  }
+ ],
+ "crossovers": {
+  "full_over_folded": {
+   "points": 13623,
+   "between": [
+    12688,
+    18544
+   ],
+   "method": "linear interpolation in |F| between two measured widths"
+  },
+  "compact_over_folded": {
+   "points": 16052,
+   "between": [
+    12688,
+    18544
+   ],
+   "method": "linear interpolation in |F| between two measured widths"
+  }
+ },
+ "pre_registered_prediction": {
+  "value_points": 13600,
+  "stated": "before this sweep's runs were analysed, from the measured per-probe deltas and the sweep's fixed probing volume",
+  "measured": 13623,
+  "formula": "fold wins when |F|^2/2 * (1 - 1/2n) > (scan_folded - scan_full) * summands_scanned + (blocked_folded - blocked_full) * descent_probes"
+ },
+ "finding": "All three tiers are cheapest somewhere. Full below about 8000 points, compact from there to about 16000, folded above. Neither fixed ladder is right: the first-that-fits order (full, compact, folded) is correct only at the narrow end and the fold-first order only at the wide end, and between them the cheapest tier is compact, which both orders reach second.",
+ "classification": {
+  "class": "accounting",
+  "why": "The algorithm did not change in this sweep; what changed is that the tier comparison is priced in operations instead of seconds, and the answer moved. AGENTS.md section 3: say so and do not claim the gain. The flip measured on its own at 12688 points is relabelling -- stored pairs down 120.85x, total operations up 1.2%."
+ },
+ "not_claimed": [
+  "That the crossover width generalises. It is one curve at one degree; the fold's saving carries a 1 - 1/2n factor and its canonicalisation cost grows with n, so both move with the degree.",
+  "Any exponent fit. Four widths on one curve at one degree is the minimum for a fit and this file does not make one.",
+  "That this changes the standing against rho. Every tier is 12 to 13 times rho's S on this instance and about 19 to 21 times the generic floor; the tier choice moves the constant, not the ratio to either boundary.",
+  "A two-sided estimate of the crossover. The sweep pins the probing volume at 351,750,000 summand scans for every width, which makes each width an exact controlled comparison but does not model how a run sizes its own collection: relations needed scale as |F|/2n while the m = 3 hit rate scales as |F|^3/r, so a properly sized run at a wider base probes less. The measured 13,623 is therefore an upper bound on where the fold begins to win in practice."
+ ],
+ "harness": {
+  "runs": "ic workflow on docs/ic/params/k0n61-width{6000,9000,12000,18000}-{full,folded}.json, rho baseline off (tier-independent)",
+  "conversion": "examples/koblitz_probe_conversion.rs 61 {6000,9000,12000,18000}",
+  "correctness": "32 of 32 targets recovered and verified as [d]G = Q against the planted scalar on every one of the eight runs"
+ }
+}
