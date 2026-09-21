@@ -1,0 +1,130 @@
+{
+  "what": "Why blocking the folded table's probe pays, and what the m = 4 arm actually costs per (k, l). Two corrections to claims this repository already published.",
+  "host": "Intel Xeon @ 2.80GHz, Cascade Lake-SP (32 KiB L1d/core, 1 MiB L2/core, 33 MiB L3, AVX-512 + VNNI, no VBMI); 4 cores, 15 GiB. Reorder buffer 224 entries, scheduler 97.",
+  "probe_window_sweep": {
+    "harness": "examples/probe_window_sweep.rs, n = 61, folded |F| = 183488 (0.64 GiB, 138074720 pairs)",
+    "method": "Canonicalise with k rotations instead of n, on the folded table, so the LOOKUP is held fixed and only the key's length moves. The key is wrong for k < n, which does not matter: it is spread over the same range, so the filter turns away the same fraction and the memory traffic is the one being measured. Both loops run on two disjoint 200000-point streams and are averaged; the two are asserted to return the same hit count.",
+    "why_not_the_compact_table": "The compact/folded comparison the note used as its control differs in the key AND the lookup, so it cannot separate them. This sweep can.",
+    "rows": [
+      {
+        "k": 2,
+        "uops_per_key": 46,
+        "key_alone_ns": 8.9,
+        "fused_ns": 173.3,
+        "blocked_ns": 78.2,
+        "gap_ns": 95.1
+      },
+      {
+        "k": 4,
+        "uops_per_key": 58,
+        "key_alone_ns": 9.3,
+        "fused_ns": 154.9,
+        "blocked_ns": 79.3,
+        "gap_ns": 75.6
+      },
+      {
+        "k": 6,
+        "uops_per_key": 70,
+        "key_alone_ns": 10.6,
+        "fused_ns": 156.7,
+        "blocked_ns": 78.8,
+        "gap_ns": 77.9
+      },
+      {
+        "k": 8,
+        "uops_per_key": 82,
+        "key_alone_ns": 12.2,
+        "fused_ns": 158.7,
+        "blocked_ns": 80.4,
+        "gap_ns": 78.3
+      },
+      {
+        "k": 10,
+        "uops_per_key": 94,
+        "key_alone_ns": 14.2,
+        "fused_ns": 230.8,
+        "blocked_ns": 84.0,
+        "gap_ns": 146.8
+      },
+      {
+        "k": 12,
+        "uops_per_key": 106,
+        "key_alone_ns": 16.2,
+        "fused_ns": 234.3,
+        "blocked_ns": 92.0,
+        "gap_ns": 142.3
+      },
+      {
+        "k": 14,
+        "uops_per_key": 118,
+        "key_alone_ns": 18.5,
+        "fused_ns": 242.4,
+        "blocked_ns": 93.4,
+        "gap_ns": 149.0
+      },
+      {
+        "k": 16,
+        "uops_per_key": 130,
+        "key_alone_ns": 20.4,
+        "fused_ns": 240.9,
+        "blocked_ns": 98.5,
+        "gap_ns": 142.4
+      },
+      {
+        "k": 20,
+        "uops_per_key": 154,
+        "key_alone_ns": 25.4,
+        "fused_ns": 250.5,
+        "blocked_ns": 102.7,
+        "gap_ns": 147.7
+      },
+      {
+        "k": 32,
+        "uops_per_key": 226,
+        "key_alone_ns": 37.8,
+        "fused_ns": 269.8,
+        "blocked_ns": 117.9,
+        "gap_ns": 151.9
+      },
+      {
+        "k": 61,
+        "uops_per_key": 400,
+        "key_alone_ns": 69.0,
+        "fused_ns": 291.1,
+        "blocked_ns": 144.7,
+        "gap_ns": 146.4
+      }
+    ],
+    "uop_count": "The rotation compiles to lea, shr, or, and, cmp, cmovb - six uops a step - plus about 40 for coords. Read off objdump of PairSumTable::canon_key_with.",
+    "the_finding": "The gap is a STEP, not proportional to the key. It doubles between k = 8 and k = 10 and is flat on either side: from k = 10 to k = 61 the key grows 5x in time and 4x in uops while the gap does not move. The knee is at 82-94 uops, against a 97-entry scheduler and a 224-entry ROB - so the capacity that binds is the scheduler, which is where a long dependent chain's uops wait.",
+    "reproducibility": "Two runs. Absolute levels moved (a shared host) but the knee sat between k = 8 and k = 12 in the first run and between k = 8 and k = 10 in the second, and the gap roughly doubled across it in both.",
+    "settled": [
+      "The data-dependent branch is not the mechanism: x < best compiles to cmovb in every variant of the loop. There is nothing to mispredict.",
+      "TLB pressure was never a competing hypothesis. Page walks lengthen the memory round trip in BOTH loops, so they govern how big the exposed cost is, not whether it is exposed."
+    ],
+    "not_settled": [
+      "The residual below the knee. At k = 2 the key costs the same ~9 ns as a compact table's pack, yet blocking buys the folded table 95 ns against compact's 32. Key cost held equal, the tables still differ threefold - that is the lookup structure or the canon's 16 KiB of tables in a 32 KiB L1, and nothing here separates those.",
+      "That these absolute nanoseconds combine with any other run's. Same host throughout this record."
+    ]
+  },
+  "m4_inversion_cost": {
+    "harness": "examples/m4_inversion_cost.rs, n = 61, 200000 points, two runs",
+    "why": "The note named the m = 4 arm's cost as the lone probe, 'the 265 rather than the 145' - about 104 ns. The line above the probe is FastCurve::add, which calls Gf2::inv, a Fermat inversion, once per (k, l), where the m = 3 arm's add_many amortises one inversion over a block by Montgomery's trick.",
+    "ns_per_pair": {
+      "Gf2_inv_alone": [
+        1262.7,
+        1256.8
+      ],
+      "FastCurve_add_what_m4_does": [
+        1298.5,
+        1303.6
+      ],
+      "add_many_1024_wide_what_m3_does": [
+        67.2,
+        68.9
+      ]
+    },
+    "the_finding": "The unbatched inversion costs about 1232 ns a pair - nineteen times the batched step, and about twelve times the 104 ns lone-probe penalty the note named. Blocking the probe and batching the inversion together would take the inner step from some 1565 ns to 212.",
+    "but": "No parameter set or recorded run in this repository asks for m = 4: 698 places ask for 3 and 110 for 2, and nothing sets max_m, so no admissible-summand sweep reaches it either. This is a correction to what the note claimed the arm costs, not a change worth making until something runs it."
+  }
+}
