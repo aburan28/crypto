@@ -41,24 +41,44 @@
 //!     IC_TEST_REDIS_URL=redis://127.0.0.1:6399/0 \
 //!       cargo run --release --features redis-cache --example preprocessing_cost
 //!
-//! Measured 2026-09-21, 4-core x86_64 container, rustc 1.90.0, release, against
-//! a loopback Redis 7.0. Scoped to these parameters on this machine:
+//! Measured 2026-09-21, release, rustc 1.90.0, against a loopback Redis, on a
+//! 4-core x86_64 container; three runs, medians of 11 within each. Every figure
+//! is scoped to these parameters on that machine:
 //!
-//!   * build spans 45 us (n=9) to 6.2 ms (n=61) over the whole feasible space.
-//!     Nothing here is expensive in absolute terms.
-//!   * A hit is at most 3.2x cheaper than a rebuild, and about break-even at
-//!     n=9: the in-process layer stores bytes, so even a local hit re-parses
+//!   * build spans 69 us (n=9) to 9.4 ms (n=61) over the whole feasible space.
+//!     Nothing here is expensive in absolute terms. Per point it is steady --
+//!     n=9/ell=9 gave 338, 339, 342 us across the three runs -- so the spread
+//!     below is between machines, not between runs.
+//!   * A hit is at most about 3x cheaper than a rebuild, and about break-even
+//!     at n=9: the in-process layer stores bytes, so even a local hit re-parses
 //!     the JSON.
-//!   * Against loopback Redis, over a held connection, a remote hit costs 60 us
-//!     (82 KB) to 520 us (990 KB) more than a local one. That makes it 1.10x
-//!     MORE expensive than rebuilding at n=9/ell=9, 0.85x at n=41/ell=7 and
-//!     0.42x at n=61/ell=1. Cross-AZ is strictly worse than loopback.
+//!   * Against loopback Redis, over a held connection, a remote hit runs
+//!     1.1x-1.4x the cost of just rebuilding at n=9/ell=9, about break-even at
+//!     n=31/ell=11 (1.03x-1.13x), 0.8x-1.0x at n=41/ell=7, and 0.43x-0.47x at
+//!     n=61/ell=1. Cross-AZ is strictly worse than loopback.
 //!   * The largest artifact stored is 1.92 MB against a 4 MB `max_value`.
 //!
 //! So a durable tier under Redis is not warranted for this layer: an S3 GET is
-//! tens of milliseconds and the whole build is at most 6.2 ms. The layer where
+//! tens of milliseconds and the whole build is at most 9.4 ms. The layer where
 //! an expensive artifact does live is `Parameterized`, measured by
 //! `gb_probe.rs`, and it is off the relation-search path.
+//!
+//! Superseded figures, kept because deleting them hides how much the method
+//! mattered. Two bugs were found in review, both fixed above:
+//!
+//!   * Remote hits were sampled on a fresh `AlgebraCache` each time, so every
+//!     sample paid a TCP handshake a production hit never pays. n=9/ell=9 read
+//!     1.92x the cost of rebuilding; over a held connection it is 1.1x-1.4x.
+//!     The handshake was most of that column at the small end.
+//!   * An n=9/ell=18 row was reported that cannot exist: `z^k` vanishes for
+//!     k >= n, so nine of those eighteen basis elements were the zero element
+//!     and the layout was degenerate. `ell` is now capped at `n` as well.
+//!
+//! A third correction is about provenance rather than method: 45 us-6.2 ms was
+//! recorded here from a different container than the header named. The numbers
+//! above are this machine's. Between the two, build moves by about half while
+//! the ordering and the conclusion do not -- which is the reason to quote a
+//! machine with every figure.
 
 use crypto_lib::binary_ecc::F2mElement;
 use crypto_lib::cryptanalysis::koblitz_groebner::{FieldStructure, MAX_VARS};
@@ -194,10 +214,18 @@ fn redis_round_trip(n: u32, ell: usize, m: usize, url: &str) -> Option<(u128, u1
     let key = template_key(&basis, &b, m, &st);
     let build = || DecompositionTemplate::build(&basis, &b, m, &st);
 
-    // Miss: builds, encodes, and writes through to Redis.
+    // Miss: builds, encodes, and writes through to Redis. The connection is
+    // opened first for the same reason the hit loop below does it: `remote`
+    // connects lazily, so an unwarmed first call folds a handshake into this
+    // column too, and a production miss reuses the connection like any other.
     let mut c = AlgebraCache::local(256 * 1024 * 1024)
         .with_redis(url)
         .ok()?;
+    black_box(c.memoize::<u8>(
+        Layer::Preprocessing,
+        format!("warm:{n}:{ell}:{m}").as_bytes(),
+        || Some(0u8),
+    ));
     let miss = {
         let start = Instant::now();
         black_box(c.memoize::<DecompositionTemplate>(Layer::Preprocessing, &key, build));
