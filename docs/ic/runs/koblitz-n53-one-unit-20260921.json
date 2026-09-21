@@ -1157,11 +1157,11 @@
   }
  },
  "science_process_accounting": {
-  "processes": 226,
-  "sequential_wall_seconds": 959.786737044,
-  "total_core_seconds": 2497.774722,
+  "processes": 272,
+  "sequential_wall_seconds": 1180.147196334,
+  "total_core_seconds": 2849.7960780000003,
   "peak_rss_bytes": 245972992,
-  "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count, width and window diagnostics, and accepted or rejected single-target build-cache, prefetch, canonicalization-lane, projected-predicate-reuse and cutoff A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
+  "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count, width and window diagnostics, and accepted or rejected single-target build-cache, prefetch, canonicalization-lane, projected-predicate-reuse, orbit-derived-projection and cutoff A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
  },
  "current_head_selection_cost_replay": {
@@ -2001,6 +2001,19 @@
     "default_thread_relation_unit_wall_seconds": 0.397840167,
     "one_thread_relation_unit_wall_seconds": 3.587864625,
     "decision": "rejected_slower_than_eight_lanes_consistent_with_register_pressure"
+   },
+   "laned_pair_table_build": {
+    "one_core_pairs": 5,
+    "default_thread_pairs": 5,
+    "one_core_pair_build_wall_ratio": 0.8973317771622858,
+    "one_core_pair_build_cpu_ratio": 0.8973541259045068,
+    "one_core_relation_unit_cpu_ratio": 1.0252461642377748,
+    "one_core_ic_wall_ratio": 0.992848832961085,
+    "default_pair_build_cpu_ratio": 0.9476311891196824,
+    "default_relation_unit_cpu_ratio": 1.0259239929215016,
+    "default_whole_cpu_ratio": 0.9967979049732411,
+    "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+    "decision": "rejected_pair_build_gain_offset_by_consistent_relation_scan_regression"
    }
   },
   "validation": [
@@ -2412,5 +2425,384 @@
    "identical 588-relation hash and verified scalar in every matched run"
   ],
   "claim_boundary": "A full-cost constant-factor implementation improvement on one public-synthetic target. Predicate construction remains charged once; the asymptotic exponent and SOTA gates are unchanged."
+ },
+ "single_target_orbit_derived_projection": {
+  "source_commit": "cea627df",
+  "instance": "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json",
+  "mechanism": "Cofactor projection commutes with Frobenius and negation. Project one representative of each already certified signed factor-base orbit, then derive all 36,464 projected points from their public (orbit, shift, sign) coordinates. Canonical projected-orbit merging remains exact and unchanged.",
+  "native_cost_current_head": {
+   "input_points": 36464,
+   "input_signed_orbits": 344,
+   "output_columns": 344,
+   "cofactor_multiplications": 344,
+   "derived_frobenius_coordinate_squarings": 1896128,
+   "derived_negations": 18232,
+   "canonical_frobenius_coordinate_squarings": 72928
+  },
+  "matched_one_core_ab": {
+   "pairs": 5,
+   "reference_binary_blake3": "fc4911eaab16cf639d6b6af4f408a993feb42a40a1d70ba41db8c98988284417",
+   "candidate_binary_blake3": "7485c1262c3af2f387d601d0510c13f1035f5783a694f18c0ed8576e53845f22",
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "relations_each": 588,
+   "recovered_scalar_each": 7892094459170,
+   "verified": "5/5 reference and 5/5 candidate",
+   "medians": {
+    "whole_wall": {
+     "reference": 7.614032541,
+     "candidate": 6.964037959,
+     "candidate_over_reference": 0.9138308008090691,
+     "candidate_wins": "5/5"
+    },
+    "whole_cpu": {
+     "reference": 7.556973,
+     "candidate": 6.909041,
+     "candidate_over_reference": 0.9131498034740712,
+     "candidate_wins": "5/5"
+    },
+    "rss": {
+     "reference": 103727104,
+     "candidate": 104218624,
+     "candidate_over_reference": 1.0050544937608592,
+     "candidate_wins": "1/5"
+    },
+    "ic_wall": {
+     "reference": 6.002867501,
+     "candidate": 5.343326124,
+     "candidate_over_reference": 0.8884464474789215,
+     "candidate_wins": "5/5"
+    },
+    "rho_wall": {
+     "reference": 1.5734542500000002,
+     "candidate": 1.581734125,
+     "candidate_over_reference": 1.006475702115843,
+     "candidate_wins": "0/5"
+    },
+    "rho_over_ic": {
+     "reference": 0.26233540370618275,
+     "candidate": 0.29639636090330046,
+     "candidate_over_reference": 1.1330802437801522,
+     "candidate_wins": "0/5"
+    },
+    "select_wall": {
+     "reference": 0.952542042,
+     "candidate": 0.205866167,
+     "candidate_over_reference": 0.21572026843934305,
+     "candidate_wins": "5/5"
+    },
+    "select_cpu": {
+     "reference": 0.9382969999999999,
+     "candidate": 0.19597499999999998,
+     "candidate_over_reference": 0.20772928958844383,
+     "candidate_wins": "5/5"
+    },
+    "collect_wall": {
+     "reference": 4.902368917,
+     "candidate": 4.990618583,
+     "candidate_over_reference": 1.0160367230731058,
+     "candidate_wins": "0/5"
+    },
+    "collect_cpu": {
+     "reference": 4.882157999999999,
+     "candidate": 4.967976,
+     "candidate_over_reference": 1.0163669076135922,
+     "candidate_wins": "0/5"
+    },
+    "logs_wall": {
+     "reference": 0.155658417,
+     "candidate": 0.154149209,
+     "candidate_over_reference": 0.9863041551821474,
+     "candidate_wins": "3/5"
+    },
+    "logs_cpu": {
+     "reference": 0.1472339999999992,
+     "candidate": 0.14664999999999928,
+     "candidate_over_reference": 0.9983794751678434,
+     "candidate_wins": "3/5"
+    },
+    "solve_wall": {
+     "reference": 0.018023833,
+     "candidate": 0.018060666,
+     "candidate_over_reference": 0.9938286272974783,
+     "candidate_wins": "3/5"
+    },
+    "solve_cpu": {
+     "reference": 0.006940000000000168,
+     "candidate": 0.006678999999999213,
+     "candidate_over_reference": 0.9671469740634165,
+     "candidate_wins": "3/5"
+    },
+    "unit_wall": {
+     "reference": 3.566416875,
+     "candidate": 3.574916084,
+     "candidate_over_reference": 0.9990413404626969,
+     "candidate_wins": "3/5"
+    },
+    "unit_cpu": {
+     "reference": 3.560789,
+     "candidate": 3.5686479999999996,
+     "candidate_over_reference": 0.9989122566783126,
+     "candidate_wins": "3/5"
+    }
+   },
+   "per_pair": [
+    {
+     "pair": 1,
+     "candidate_over_reference_whole_cpu": 0.9155047927258704,
+     "candidate_over_reference_ic_wall": 0.8918425236119502,
+     "candidate_over_reference_select_wall": 0.2136232453115777,
+     "candidate_over_reference_select_cpu": 0.20772928958844383,
+     "candidate_over_reference_peak_rss": 1.014351778025833,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_whole_cpu": 0.911734610436518,
+     "candidate_over_reference_ic_wall": 0.8880737909090226,
+     "candidate_over_reference_select_wall": 0.21572026843934305,
+     "candidate_over_reference_select_cpu": 0.206125437812971,
+     "candidate_over_reference_peak_rss": 0.999373727884766,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_whole_cpu": 0.9100227999767808,
+     "candidate_over_reference_ic_wall": 0.8818893970141183,
+     "candidate_over_reference_select_wall": 0.21882807613867408,
+     "candidate_over_reference_select_cpu": 0.20886243907845808,
+     "candidate_over_reference_peak_rss": 1.0050544937608592,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_whole_cpu": 0.9156300123951899,
+     "candidate_over_reference_ic_wall": 0.8913821941630158,
+     "candidate_over_reference_select_wall": 0.22024830506157092,
+     "candidate_over_reference_select_cpu": 0.210566762728146,
+     "candidate_over_reference_peak_rss": 1.0015782828282829,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_whole_cpu": 0.9131498034740712,
+     "candidate_over_reference_ic_wall": 0.8884464474789215,
+     "candidate_over_reference_select_wall": 0.21220795084358676,
+     "candidate_over_reference_select_cpu": 0.20347925628595792,
+     "candidate_over_reference_peak_rss": 1.0068199841395717,
+     "identical_relation_hash_scalar_and_verification": true
+    }
+   ],
+   "rayon_threads": 1,
+   "reading": "Projecting one representative per signed orbit cuts the charged selection predicate to about 21% of its prior one-core wall and CPU. Full IC wall and whole-process CPU win all five pairs with flat memory."
+  },
+  "matched_default_thread_ab": {
+   "pairs": 5,
+   "reference_binary_blake3": "fc4911eaab16cf639d6b6af4f408a993feb42a40a1d70ba41db8c98988284417",
+   "candidate_binary_blake3": "7485c1262c3af2f387d601d0510c13f1035f5783a694f18c0ed8576e53845f22",
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "relations_each": 588,
+   "recovered_scalar_each": 7892094459170,
+   "verified": "5/5 reference and 5/5 candidate",
+   "medians": {
+    "whole_wall": {
+     "reference": 2.573289458,
+     "candidate": 2.501626667,
+     "candidate_over_reference": 0.9743022844568479,
+     "candidate_wins": "5/5"
+    },
+    "whole_cpu": {
+     "reference": 8.963348,
+     "candidate": 8.175221,
+     "candidate_over_reference": 0.9064938080443713,
+     "candidate_wins": "5/5"
+    },
+    "rss": {
+     "reference": 129646592,
+     "candidate": 126337024,
+     "candidate_over_reference": 0.9710586443259711,
+     "candidate_wins": "5/5"
+    },
+    "ic_wall": {
+     "reference": 0.9653275000000001,
+     "candidate": 0.88848004,
+     "candidate_over_reference": 0.9149550510894163,
+     "candidate_wins": "5/5"
+    },
+    "rho_wall": {
+     "reference": 1.573161458,
+     "candidate": 1.5797184579999999,
+     "candidate_over_reference": 1.0064783682219127,
+     "candidate_wins": "0/5"
+    },
+    "rho_over_ic": {
+     "reference": 1.6300104109745137,
+     "candidate": 1.7780010657301877,
+     "candidate_over_reference": 1.0974821998658448,
+     "candidate_wins": "0/5"
+    },
+    "select_wall": {
+     "reference": 0.268293125,
+     "candidate": 0.18741925,
+     "candidate_over_reference": 0.6963893347582119,
+     "candidate_wins": "5/5"
+    },
+    "select_cpu": {
+     "reference": 1.060686,
+     "candidate": 0.20301899999999998,
+     "candidate_over_reference": 0.19377365214587539,
+     "candidate_wins": "5/5"
+    },
+    "collect_wall": {
+     "reference": 0.644259791,
+     "candidate": 0.644035958,
+     "candidate_over_reference": 0.9995744014368428,
+     "candidate_wins": "3/5"
+    },
+    "collect_cpu": {
+     "reference": 6.170040999999999,
+     "candidate": 6.212788,
+     "candidate_over_reference": 1.0000769844355584,
+     "candidate_wins": "2/5"
+    },
+    "logs_wall": {
+     "reference": 0.06674025,
+     "candidate": 0.068053125,
+     "candidate_over_reference": 1.0196714126782565,
+     "candidate_wins": "1/5"
+    },
+    "logs_cpu": {
+     "reference": 0.17149599999999943,
+     "candidate": 0.1725020000000006,
+     "candidate_over_reference": 1.0018061338862125,
+     "candidate_wins": "1/5"
+    },
+    "solve_wall": {
+     "reference": 0.017855791,
+     "candidate": 0.01787825,
+     "candidate_over_reference": 1.0534607511927083,
+     "candidate_wins": "2/5"
+    },
+    "solve_cpu": {
+     "reference": 0.006696000000000701,
+     "candidate": 0.006904999999999717,
+     "candidate_over_reference": 0.9902912621359405,
+     "candidate_wins": "3/5"
+    },
+    "unit_wall": {
+     "reference": 0.382866041,
+     "candidate": 0.386033417,
+     "candidate_over_reference": 1.002970111609738,
+     "candidate_wins": "2/5"
+    },
+    "unit_cpu": {
+     "reference": 4.025022999999999,
+     "candidate": 4.087654,
+     "candidate_over_reference": 1.0168321356103214,
+     "candidate_wins": "0/5"
+    }
+   },
+   "per_pair": [
+    {
+     "pair": 1,
+     "candidate_over_reference_whole_cpu": 0.9000598372229365,
+     "candidate_over_reference_ic_wall": 0.907841538359243,
+     "candidate_over_reference_select_wall": 0.6890352333851267,
+     "candidate_over_reference_select_cpu": 0.18873471773167308,
+     "candidate_over_reference_peak_rss": 0.9710586443259711,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_whole_cpu": 0.9064938080443713,
+     "candidate_over_reference_ic_wall": 0.9149550510894163,
+     "candidate_over_reference_select_wall": 0.6963893347582119,
+     "candidate_over_reference_select_cpu": 0.19377365214587539,
+     "candidate_over_reference_peak_rss": 0.9699565487274985,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_whole_cpu": 0.9212935939786674,
+     "candidate_over_reference_ic_wall": 0.9268736674530377,
+     "candidate_over_reference_select_wall": 0.6856044653860172,
+     "candidate_over_reference_select_cpu": 0.19190035321569532,
+     "candidate_over_reference_peak_rss": 0.9918894943606641,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_whole_cpu": 0.8977355479332757,
+     "candidate_over_reference_ic_wall": 0.9788255799197682,
+     "candidate_over_reference_select_wall": 0.7123942638659138,
+     "candidate_over_reference_select_cpu": 0.19490287316910374,
+     "candidate_over_reference_peak_rss": 0.956049444375078,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_whole_cpu": 0.9248275309627607,
+     "candidate_over_reference_ic_wall": 0.9148527938404915,
+     "candidate_over_reference_select_wall": 0.706083742763644,
+     "candidate_over_reference_select_cpu": 0.19491819962364143,
+     "candidate_over_reference_peak_rss": 0.9744723872109188,
+     "identical_relation_hash_scalar_and_verification": true
+    }
+   ],
+   "reading": "At default threads selection CPU falls to about 19% and wall to about 70% because the previous all-point projection parallelised. Full IC wall and whole-process CPU win all five pairs; RSS is lower in all five."
+  },
+  "current_head_replays": {
+   "default_threads": {
+    "binary_blake3": "9406db1954c057f4a75acfa9f1f3d61622d22fd91f7fe034ce9731e4d5bcc0e0",
+    "whole_process_wall_seconds": 2.5004570839999998,
+    "whole_process_cpu_seconds": 8.105071,
+    "peak_rss_bytes": 127320064,
+    "ic_wall_seconds": 0.8838184590000001,
+    "rho_wall_seconds": 1.581724042,
+    "rho_over_ic_wall_ratio": 1.7896481182228847,
+    "select_wall_seconds": 0.19560825,
+    "select_cpu_seconds": 0.21251,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 72928,
+     "cofactor_multiplications": 344,
+     "derived_frobenius_coordinate_squarings": 1896128,
+     "derived_negations": 18232,
+     "input_points": 36464,
+     "input_signed_orbits": 344,
+     "output_columns": 344
+    },
+    "relations": 588,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   "one_thread": {
+    "binary_blake3": "9406db1954c057f4a75acfa9f1f3d61622d22fd91f7fe034ce9731e4d5bcc0e0",
+    "whole_process_wall_seconds": 7.215804375,
+    "whole_process_cpu_seconds": 6.92793,
+    "peak_rss_bytes": 104628224,
+    "ic_wall_seconds": 5.284134084,
+    "rho_wall_seconds": 1.895752667,
+    "rho_over_ic_wall_ratio": 0.3587631647615095,
+    "select_wall_seconds": 0.209888792,
+    "select_cpu_seconds": 0.19653099999999998,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 72928,
+     "cofactor_multiplications": 344,
+     "derived_frobenius_coordinate_squarings": 1896128,
+     "derived_negations": 18232,
+     "input_points": 36464,
+     "input_signed_orbits": 344,
+     "output_columns": 344
+    },
+    "relations": 588,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   }
+  },
+  "validation": [
+   "fast orbit-derived projection agrees point-for-point with an independent all-point general-arithmetic map on subgroup bases at n=15, 19, 31, 37 and the algebraic n=41 union base",
+   "identical 588-relation hash and verified scalar in every matched run",
+   "predicate native counts emitted in both factor-base summary and selection stage"
+  ],
+  "claim_boundary": "A charged algebraic-predicate construction improvement on one public-synthetic target. It uses no target subgroup enumeration or logarithm labels and changes no asymptotic exponent or SOTA gate."
  }
 }

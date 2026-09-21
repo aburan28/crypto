@@ -1115,6 +1115,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     }
     let projected = ProjectedFactorBase::new(&c, &fb);
     let columns = projected.columns();
+    let projected_cost = projected.cost();
     if let Some(window) = p.collection_window {
         if window as usize >= fb.points.len() {
             return Err(format!(
@@ -1124,6 +1125,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         }
     }
     let mut factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
+    factor_base_summary["projected_predicate_cost"] = json!({
+        "input_points":projected_cost.input_points,
+        "input_signed_orbits":projected_cost.input_signed_orbits,
+        "output_columns":projected_cost.output_columns,
+        "cofactor_multiplications":projected_cost.cofactor_multiplications,
+        "derived_frobenius_coordinate_squarings":projected_cost.derived_frobenius_coordinate_squarings,
+        "derived_negations":projected_cost.derived_negations,
+        "canonical_frobenius_coordinate_squarings":projected_cost.canonical_frobenius_coordinate_squarings,
+    });
     if let Some(cost) = selection_cost {
         factor_base_summary["selection_cost"] = json!(cost);
     }
@@ -1136,6 +1146,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         write_atomic(&state_path, &state)?;
     }
     if let Some(report) = stage_reports.last_mut() {
+        report["projected_predicate_cost"] = factor_base_summary["projected_predicate_cost"].clone();
         report["elapsed_seconds"] = json!(t0.elapsed().as_secs_f64());
         report["resources"] = experiment::resource_delta(select_resource_start);
     }
