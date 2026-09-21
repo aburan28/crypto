@@ -1177,7 +1177,14 @@ def main():
               f"reachable={cc['reachable_decompositions']:7d} "
               f"rank ceiling {cc['rank_ceiling']}/{cc['factor_base_size']} "
               f"odd-abscissa census {cc['odd_abscissa_census']}", flush=True)
-    flat_budget = [b["lambda"] for b in e2_budget]
+    # A cell whose descent never landed has no verified answer, so by the
+    # rule in AGENTS.md section 2 it is not a result and cannot sit in a flat
+    # line or supply the minimum a falsifier tests.  `l = 5` is such a cell,
+    # and the rank ceiling above says why: with nothing determined there is
+    # nothing for a descent to land on, at any relation count.
+    landed = [b for b in e2_budget if b["descent_landed"]]
+    no_result = [b["l"] for b in e2_budget if not b["descent_landed"]]
+    flat_budget = [b["lambda"] for b in landed]
     flat_budget_line = sum(flat_budget) / len(flat_budget)
     e2 = {
         "question": "is the total really flat in the factor-base dimension?",
@@ -1187,6 +1194,9 @@ def main():
                                           "superseded, kept as the before mark",
         "budget_rule_rungs": e2_budget,
         "flat_line_lambda_at_budget": round(flat_budget_line, 3),
+        "budget_rule_dimensions_without_a_result": no_result,
+        "flat_line_excludes": "dimensions whose descent never landed; see "
+                              "budget_rule_dimensions_without_a_result",
         "rank_ceilings": ceilings,
         "l5_outlier_explained": "not relation correlation: at l = 5 the row "
                                 "space reachable over every one of the 810 "

@@ -1227,14 +1227,48 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         counted exhaustively over the whole odd subgroup, once the subsets containing a point and its
         negative are removed; those degeneracies, not the tail, are the entire source of the raw
         1.44&ndash;2.98 over-dispersion.</p>
-      <p><strong>Two constants the law prices at one are measured optimistic.</strong> Reaching full
-        rank took 2.0&times; the |F| relations the law budgets at n&thinsp;=&thinsp;19, because
-        decompositions harvested from one target are correlated; and large-prime pairing, whose guard
-        does hold, produces relations that are 5&ndash;11&times; redundant &mdash; at
-        m&thinsp;=&thinsp;2 they are <em>differences</em> P<sub>i</sub>&thinsp;&minus;&thinsp;P<sub>j</sub>
-        and so cannot span the base at all. Exponents untouched, verdict at n&thinsp;=&thinsp;131
-        untouched; class <span class="chip">accounting</span>
+      <p><strong>One constant the law prices at one is measured optimistic.</strong> Large-prime
+        pairing, whose guard does hold, produces relations that are 5&ndash;11&times; redundant
+        &mdash; at m&thinsp;=&thinsp;2 they are <em>differences</em>
+        P<sub>i</sub>&thinsp;&minus;&thinsp;P<sub>j</sub> and so cannot span the base at all.
+        Exponents untouched, verdict at n&thinsp;=&thinsp;131 untouched; class
+        <span class="chip">accounting</span>
         (<code>experiments/ecc2k130_decomposition_runs.json</code>).</p>
+      <p><strong>The second one is withdrawn.</strong> This panel previously read &ldquo;reaching
+        full rank took <s>2.0&times;</s> the |F| relations the law budgets at n&thinsp;=&thinsp;19,
+        because decompositions harvested from one target are correlated.&rdquo; Both halves fail.
+        The excess is the <em>coupon collector</em>: a harness that stops only at full rank over
+        every column spends |F|&thinsp;ln|F|/m relations, so the ratio is ln|F|/m and grows with the
+        base &mdash; predicted 1.391&thinsp;&rarr;&thinsp;2.089 across the sweep against measured
+        1.453&thinsp;&rarr;&thinsp;2.395, never a constant. It is not target correlation either:
+        <code>first_hit</code> shares no target between relations and shows the same excess, higher
+        at two factor-base sizes and lower at two. And a descent does not need full rank &mdash; at
+        the |F| relations the law budgets, every descent landed in 1&ndash;3 attempts and
+        &Lambda;&thinsp;=&thinsp;<strong>3.103</strong> against the predicted m&thinsp;=&thinsp;3,
+        where the superseded full-rank rule read <s>5.136</s> and <s>5.993</s>. The
+        2<sup>124.99</sup> headline is unchanged: <code>cost_cell</code> always priced
+        &rho;&thinsp;=&thinsp;1, so this removes a caveat rather than buying a bit. Class
+        <span class="chip">accounting</span>
+        (<code>experiments/ecc2k130_decomposition_runs.json</code> &rarr;
+        <code>relation_budget_and_stopping_rule</code>).</p>
+      <p><strong>E2's l&thinsp;=&thinsp;5 outlier was blamed on the same thing and is also
+        something else.</strong> That cell ran 15,455 targets and stalled at rank 28/29. Enumerated
+        exhaustively over every one of the 810 decompositions the base admits, the row space has a
+        <strong>rank ceiling of 28</strong> that no relation count can pass: every reachable triple
+        there uses exactly one even-abscissa point, so the vector +1 on odd abscissae and &minus;2
+        on even ones annihilates every row. From l&thinsp;=&thinsp;6 the base admits all-even
+        triples and the rank is full. Class <span class="chip">accounting</span>.</p>
+      <p><strong>E3's deferred item is now run, as a stage diagnostic.</strong> Section 3.2's swap
+        localisation queries detector(R&thinsp;&minus;&thinsp;P&thinsp;+&thinsp;Q), which is only
+        sound if a detector charges the same for that as for R. Swept over seven descent targets at
+        fixed curve, base, summands and seed, and priced per oracle call:
+        <code>groebner</code> costs 58,280,966&ndash;61,951,239 F4 word operations per call, flat to
+        <strong>6.3%</strong>. <code>sat</code> varies 32.4% with no trend in the target &mdash; the
+        wobble of a randomised search, not a dependence on which target it was handed.
+        <code>enumerate</code> and <code>pair-table</code> turned out setup-dominated and answer
+        nothing; <code>wdsat</code> was not exercised. One rung, one base, one seed: nothing is
+        inferred about a full ECDLP and <strong>no speedup is claimed</strong>
+        (<code>experiments/ecc2k130_e3_solver_panel.json</code>).</p>
     </div>
     <div class="note">
       <h3>What would count next</h3>
