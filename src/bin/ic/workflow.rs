@@ -889,12 +889,20 @@ fn with_tier(mut summary: Value, pair: Option<&PairSumTable>) -> Value {
 ///
 /// **Collection** scans `unit_trials × units` probes, each walking
 /// `collection_window` base points — or the whole base when no window
-/// is set, which is what a full `m = 3` scan does.  `units` is the pass
-/// the driver plans, not `max_units`, which is the cap it may extend to
-/// when the relations do not yet determine every column.  A run that
-/// does extend probes more than this says, and under-counting probes
-/// favours the fold, so this errs the same way the calibrated constants
-/// already do.
+/// is set.  Only the three-summand pair-table scan walks summands at
+/// all, though: `CollectionReport::summands_scanned` is `trials × |F|`
+/// exactly when `m == 3` and the strategy is the pair table, and zero
+/// otherwise, because no other path tries base points as a third
+/// summand.  This mirrors that condition rather than assuming the
+/// scan, since charging a run for hundreds of millions of scans it
+/// never performs would price the fold out of every `m = 2` and
+/// `m = 4` run.
+///
+/// `units` is the pass the driver plans, not `max_units`, which is the
+/// cap it may extend to when the relations do not yet determine every
+/// column.  A run that does extend probes more than this says, and
+/// under-counting probes favours the fold, so this errs the same way
+/// the calibrated constants already do.
 ///
 /// **The descent** spends, per target, about the counting bound
 /// `N / C(|F| + m − 1, m)` — the contract's own floor, which measured
@@ -903,15 +911,21 @@ fn with_tier(mut summary: Value, pair: Option<&PairSumTable>) -> Value {
 /// direction.
 fn probe_budget(c: &KoblitzCurve, fb: &FrobeniusFactorBase, p: &WorkflowParams) -> ProbeBudget {
     let points = fb.points.len() as u128;
-    let window = p
-        .collection_window
-        .map(u128::from)
-        .unwrap_or(points)
-        .min(points);
-    let summands_scanned = (p.collection.unit_trials as u128)
-        .saturating_mul(p.collection.units as u128)
-        .saturating_mul(window)
-        .min(u64::MAX as u128) as u64;
+    // The same condition `CollectionReport` reports under.
+    let scans_summands = p.summands == 3 && p.solver == Solver::PairTable;
+    let summands_scanned = if scans_summands {
+        let window = p
+            .collection_window
+            .map(u128::from)
+            .unwrap_or(points)
+            .min(points);
+        (p.collection.unit_trials as u128)
+            .saturating_mul(p.collection.units as u128)
+            .saturating_mul(window)
+            .min(u64::MAX as u128) as u64
+    } else {
+        0
+    };
 
     // Multisets of `m` summands from the base: the largest set of
     // points one probe can hit, and the denominator of the floor.
@@ -1695,6 +1709,11 @@ mod tests {
         // planned pass: the budget must not read this one.
         p.collection.max_units = 512;
         p.collection_window = window;
+        // The scanning case, so the collection-volume tests exercise a
+        // run that actually walks summands; the condition itself is
+        // pinned in `only_the_three_summand_pair_table_scan_walks_summands`.
+        p.summands = 3;
+        p.solver = Solver::PairTable;
         p.descent_summands = Some(2);
         p.targets = (0..targets).map(|i| serde_json::from_value(json!({"random_seed": i})).unwrap()).collect();
         p
@@ -1724,6 +1743,45 @@ mod tests {
         // And a window wider than the base is the base, not the window.
         let clamped = probe_budget(&kc, &fb, &params(1_000, 3, Some(1 << 20), 8));
         assert_eq!(clamped.summands_scanned, full.summands_scanned);
+    }
+
+    #[test]
+    fn only_the_three_summand_pair_table_scan_walks_summands() {
+        // `CollectionReport::summands_scanned` is `trials x |F|` exactly
+        // when `m == 3` and the strategy is the pair table, and zero
+        // otherwise: no other path tries base points as a third summand.
+        // Pricing a scan that never happens would charge the fold for
+        // hundreds of millions of probes it does not pay and push every
+        // `m = 2` and `m = 4` run onto the compact tier.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+
+        let mut three = params(1_000, 3, Some(64), 8);
+        three.summands = 3;
+        assert_eq!(probe_budget(&kc, &fb, &three).summands_scanned, 1_000 * 3 * 64);
+
+        for m in [2u8, 4] {
+            let mut other = params(1_000, 3, Some(64), 8);
+            other.summands = m;
+            assert_eq!(
+                probe_budget(&kc, &fb, &other).summands_scanned,
+                0,
+                "m = {m} does not scan summands"
+            );
+        }
+
+        // Nor does another decomposition oracle, whatever the summands.
+        let mut sat = params(1_000, 3, Some(64), 8);
+        sat.summands = 3;
+        sat.solver = Solver::Sat;
+        assert_eq!(probe_budget(&kc, &fb, &sat).summands_scanned, 0);
+
+        // The descent estimate is unaffected either way: it prices
+        // probes the descent makes, not summands collection walks.
+        assert!(probe_budget(&kc, &fb, &three).descent_probes > 0);
+        let mut two = params(1_000, 3, Some(64), 8);
+        two.summands = 2;
+        assert!(probe_budget(&kc, &fb, &two).descent_probes > 0);
     }
 
     #[test]
