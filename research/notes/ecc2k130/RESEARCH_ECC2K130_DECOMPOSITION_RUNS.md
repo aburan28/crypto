@@ -134,7 +134,7 @@ unknowns needed roughly `108` relations, and the rank never reached `29` at all
 
 ---
 
-## E3 — Deciding versus localising: run in the previous round
+## E3 — Deciding versus localising: **the deferred item is now run**
 
 Recorded in §3.2 of the background note and in
 `experiments/ecc2k130_point_decomposition.json → swap_localisation`: a
@@ -142,9 +142,60 @@ whole-base yes/no detector localises its own witness by swapping a candidate
 summand for a class-matched base point, measured over eight rungs with **zero
 sub-base queries** on every one.
 
-**Deferred, and not done here:** the design's first item — timing a *real*
-oracle's cost on `R − P + Q` against its cost on `R` for the repository's
-Gröbner, SAT and pairs solvers.  That is a Rust benchmark, not a Python run.
+That run counted queries.  It never priced one, and the design's first item was
+exactly that: **does a real solver charge the same for `R − P + Q` as it
+charges for `R`?**  If it does not, the swap saves queries and loses the saving
+back at the till.  This was the only part of the six designs no run in this
+repository had touched.
+
+**Stage diagnostic** in the sense of `AGENTS.md` §8 — one oracle call on one
+rung, priced.  Nothing below is a speedup, nothing is inferred about a full
+discrete logarithm, and no phase outside the solver is charged.
+
+**Runner:** `scripts/ecc2k130_e3_solver_panel.py`
+**Frozen artefact:** `experiments/ecc2k130_e3_solver_panel.json`
+`./target/release/ic run --degree 13 --summands 3 --solver S --known-log K`,
+sweeping `K ∈ {53, 211, 499, 887, 1289, 1613, 1987}` — the only lever that
+moves the descent target while the curve, the factor base, the summand count
+and the seed all stay fixed.  Every one of the 28 completed runs verified.
+
+The direct reading is the two solvers whose work is a **fixed sweep of the
+whole base**, which is what §3.2's detector actually is:
+
+| solver | cpu seconds, 7 targets | spread | independent relations found |
+|---|---:|---:|---:|
+| `enumerate` | 0.025545 – 0.028156 | **10.2 %** | 11 – 20 |
+| `pair-table` | 1.314142 – 1.333377 | **1.5 %** | 11 – 20 |
+
+The cost does not move when the target does, and it does not move when the run
+happens to find 11 relations instead of 20. That is §3.2's premise, measured.
+These two rows are **wall-clock**, so by §6 they are a practicality note and
+not the metric; they are here because for a fixed sweep there is no other unit
+that means anything.
+
+The two search solvers do not do a fixed amount of work per run, so their
+totals swing with how many relations a run decided to collect — which is not a
+property of the target.  Normalised per unit of solver output:
+
+| solver | unit | per-unit spread | whole-run total spread |
+|---|---|---:|---:|
+| `groebner` | F4 word operations per F4 reduction | **6.1 %** | 97.4 % |
+| `sat` | solver operations per independent relation | **9.8 %** | 248.8 % |
+| `wdsat` | — | not exercised | — |
+
+`2 085 187 – 2 212 544` word operations per F4 reduction, `206.2 – 226.3`
+solver operations per independent relation. The per-unit column is flat; the
+total column is not, and the gap between them is the whole point.
+
+**What this does not establish.** The normalised ratio is work per unit of
+solver *output* — an F4 reduction, an independent relation — not strictly per
+call: the counters do not separate calls that failed to decompose from calls
+that succeeded, so a target that shifted the failure rate could hide inside a
+flat ratio. The `enumerate` and `pair-table` rows do not have that hole, which
+is why they lead. One rung, one base, one seed, one summand count. `wdsat` was
+swept and returned `--solver wdsat requires --wdsat-binary` on every target;
+the repository does not vendor that binary, so it is recorded as attempted and
+not exercised rather than skipped.
 
 ---
 

@@ -1,0 +1,385 @@
+{
+  "schema": "ecc2k130_e3_solver_panel/v1",
+  "question": "E3 item 1 -- is a real solver's cost per call a function of the descent target?",
+  "premise_under_test": "section 3.2's swap localisation queries detector(R - P + Q); it is sound only if a detector charges the same for that as for R",
+  "kind": "stage diagnostic (AGENTS.md section 8): one oracle call on one rung, priced; nothing is inferred about a full ECDLP and no speedup is claimed",
+  "command": "./target/release/ic run --degree 13 --summands 3 --solver S --known-log K --json",
+  "degree": 13,
+  "summands": 3,
+  "targets": [
+    53,
+    211,
+    499,
+    887,
+    1289,
+    1613,
+    1987
+  ],
+  "caveat": "the ratio is work per unit of solver output -- an F4 reduction, an independent relation -- not strictly per call, because the counters do not separate calls that failed to decompose from calls that succeeded.  The whole-run totals swing because a run decides how many relations to collect, which is not a property of the target.",
+  "solvers": {
+    "groebner": {
+      "unit": "F4 word operations per F4 reduction",
+      "runs": [
+        {
+          "known_log": 53,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 1165619316,
+          "f4_reductions": 559,
+          "independent_relations": 19,
+          "cpu_seconds": 21.756603
+        },
+        {
+          "known_log": 211,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 1212997691,
+          "f4_reductions": 560,
+          "independent_relations": 20,
+          "cpu_seconds": 22.206789999999998
+        },
+        {
+          "known_log": 499,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 1239024783,
+          "f4_reductions": 560,
+          "independent_relations": 20,
+          "cpu_seconds": 23.129868000000002
+        },
+        {
+          "known_log": 887,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 1405372085,
+          "f4_reductions": 672,
+          "independent_relations": 23,
+          "cpu_seconds": 26.437535
+        },
+        {
+          "known_log": 1289,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 712117005,
+          "f4_reductions": 336,
+          "independent_relations": 12,
+          "cpu_seconds": 15.443230999999999
+        },
+        {
+          "known_log": 1613,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 713030612,
+          "f4_reductions": 336,
+          "independent_relations": 12,
+          "cpu_seconds": 15.281617
+        },
+        {
+          "known_log": 1987,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 1233294294,
+          "f4_reductions": 560,
+          "independent_relations": 20,
+          "cpu_seconds": 26.464543
+        }
+      ],
+      "completed": 7,
+      "attempted": 7,
+      "all_verified": true,
+      "exercised": true,
+      "total_spread_percent": 97.4,
+      "per_call": [
+        2085186.612,
+        2166067.305,
+        2212544.255,
+        2091327.507,
+        2119395.848,
+        2122114.917,
+        2202311.239
+      ],
+      "per_call_min": 2085186.612,
+      "per_call_max": 2212544.255,
+      "per_call_mean": 2142706.812,
+      "per_call_spread_percent": 6.1
+    },
+    "sat": {
+      "unit": "solver operations per independent relation",
+      "runs": [
+        {
+          "known_log": 53,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 4135,
+          "f4_reductions": 0,
+          "independent_relations": 20,
+          "cpu_seconds": 17.590555000000002
+        },
+        {
+          "known_log": 211,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 5826,
+          "f4_reductions": 0,
+          "independent_relations": 28,
+          "cpu_seconds": 27.630255000000002
+        },
+        {
+          "known_log": 499,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 7243,
+          "f4_reductions": 0,
+          "independent_relations": 32,
+          "cpu_seconds": 36.511384
+        },
+        {
+          "known_log": 887,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 12764,
+          "f4_reductions": 0,
+          "independent_relations": 60,
+          "cpu_seconds": 51.268129
+        },
+        {
+          "known_log": 1289,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 14421,
+          "f4_reductions": 0,
+          "independent_relations": 68,
+          "cpu_seconds": 72.79694799999999
+        },
+        {
+          "known_log": 1613,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 12807,
+          "f4_reductions": 0,
+          "independent_relations": 60,
+          "cpu_seconds": 58.314822
+        },
+        {
+          "known_log": 1987,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 7423,
+          "f4_reductions": 0,
+          "independent_relations": 36,
+          "cpu_seconds": 29.557149
+        }
+      ],
+      "completed": 7,
+      "attempted": 7,
+      "all_verified": true,
+      "exercised": true,
+      "total_spread_percent": 248.8,
+      "per_call": [
+        206.75,
+        208.071,
+        226.344,
+        212.733,
+        212.074,
+        213.45,
+        206.194
+      ],
+      "per_call_min": 206.194,
+      "per_call_max": 226.344,
+      "per_call_mean": 212.231,
+      "per_call_spread_percent": 9.8
+    },
+    "enumerate": {
+      "unit": "cpu seconds for the whole fixed sweep",
+      "runs": [
+        {
+          "known_log": 53,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 12,
+          "cpu_seconds": 0.025996
+        },
+        {
+          "known_log": 211,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 11,
+          "cpu_seconds": 0.026745
+        },
+        {
+          "known_log": 499,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 20,
+          "cpu_seconds": 0.026812
+        },
+        {
+          "known_log": 887,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 20,
+          "cpu_seconds": 0.028156
+        },
+        {
+          "known_log": 1289,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 19,
+          "cpu_seconds": 0.027543
+        },
+        {
+          "known_log": 1613,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 12,
+          "cpu_seconds": 0.026568
+        },
+        {
+          "known_log": 1987,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 12,
+          "cpu_seconds": 0.025545
+        }
+      ],
+      "completed": 7,
+      "attempted": 7,
+      "all_verified": true,
+      "exercised": true,
+      "total_spread_percent": 10.2,
+      "per_call_spread_percent": 10.2
+    },
+    "pair-table": {
+      "unit": "cpu seconds for the whole fixed sweep",
+      "runs": [
+        {
+          "known_log": 53,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 12,
+          "cpu_seconds": 1.332232
+        },
+        {
+          "known_log": 211,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 11,
+          "cpu_seconds": 1.333377
+        },
+        {
+          "known_log": 499,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 20,
+          "cpu_seconds": 1.3187220000000002
+        },
+        {
+          "known_log": 887,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 20,
+          "cpu_seconds": 1.319084
+        },
+        {
+          "known_log": 1289,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 19,
+          "cpu_seconds": 1.327692
+        },
+        {
+          "known_log": 1613,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 12,
+          "cpu_seconds": 1.3141420000000001
+        },
+        {
+          "known_log": 1987,
+          "status": "complete",
+          "verified": true,
+          "f4_word_ops": 0,
+          "f4_reductions": 0,
+          "independent_relations": 12,
+          "cpu_seconds": 1.3146200000000001
+        }
+      ],
+      "completed": 7,
+      "attempted": 7,
+      "all_verified": true,
+      "exercised": true,
+      "total_spread_percent": 1.5,
+      "per_call_spread_percent": 1.5
+    },
+    "wdsat": {
+      "unit": "not exercised: --solver wdsat requires --wdsat-binary",
+      "runs": [
+        {
+          "known_log": 53,
+          "status": "error",
+          "message": "--solver wdsat requires --wdsat-binary"
+        },
+        {
+          "known_log": 211,
+          "status": "error",
+          "message": "--solver wdsat requires --wdsat-binary"
+        },
+        {
+          "known_log": 499,
+          "status": "error",
+          "message": "--solver wdsat requires --wdsat-binary"
+        },
+        {
+          "known_log": 887,
+          "status": "error",
+          "message": "--solver wdsat requires --wdsat-binary"
+        },
+        {
+          "known_log": 1289,
+          "status": "error",
+          "message": "--solver wdsat requires --wdsat-binary"
+        },
+        {
+          "known_log": 1613,
+          "status": "error",
+          "message": "--solver wdsat requires --wdsat-binary"
+        },
+        {
+          "known_log": 1987,
+          "status": "error",
+          "message": "--solver wdsat requires --wdsat-binary"
+        }
+      ],
+      "completed": 0,
+      "attempted": 7,
+      "all_verified": false,
+      "exercised": false
+    }
+  }
+}
