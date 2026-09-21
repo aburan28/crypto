@@ -3278,7 +3278,6 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
     // converted with, `calib` stays as the host note.
     let mut priced = calib.clone();
     let pinned = priced.pin("prime", inst.name.as_str());
-    let calib = &priced;
     let mut out = RegimeInstance {
         regime: "prime".into(),
         curve: serde_json::json!({
@@ -3303,6 +3302,7 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         seeds: Vec::new(),
         targets: Vec::new(),
     };
+    let calib = &priced;
     out.curve["factor_base"] = serde_json::json!({
         "description": fb.description,
         "signed_points": fb.points.len(),
