@@ -302,20 +302,34 @@ pub struct WorkflowParams {
     /// Bytes the pair table may occupy, when it should differ from
     /// [`PairSumTable::DEFAULT_BYTE_BUDGET`].
     ///
-    /// The budget does not only refuse a base too wide to hold — it
-    /// *chooses the representation*, because `build_within` takes the
-    /// first tier that fits: summands, then compact rests, then the
-    /// signed-Frobenius fold.  A budget below what the compact table
-    /// wants therefore asks for the fold at a width where the compact
-    /// table would have fitted, which is the only way to compare the
-    /// two tiers at one width.
-    ///
-    /// That comparison is why this exists.  The tiers are ordered by
-    /// what fits, which is the right order for a base whose precompute
-    /// is already paid; it is not obviously the right order when the
-    /// precompute is the bill.
+    /// A budget refuses a base too wide to hold.  It no longer chooses
+    /// the representation: `build_within` takes the *cheapest* tier
+    /// rather than the first that fits, so every budget large enough to
+    /// build anything at all builds the fold.  Naming a tier is what
+    /// [`WorkflowParams::pair_table_tier`] is for.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pair_table_bytes: Option<u64>,
+    /// Build the pair table in a named representation rather than the
+    /// cheapest one.
+    ///
+    /// `build_within` used to pick by what fits — summands, then
+    /// compact rests, then the signed-Frobenius fold — and a byte
+    /// budget was therefore also a tier selector: squeeze it and the
+    /// next tier down was chosen.  Measuring the three tiers at one
+    /// width ranked them the other way round on build, on descent and
+    /// on resident memory at once, so the ladder is now climbed from
+    /// the cheap end and a budget selects nothing.
+    ///
+    /// That leaves the older tiers unreachable from a parameter file,
+    /// and they are the "before" of every comparison this thread makes.
+    /// Naming one here keeps the ladder measurable: `auto` (the
+    /// default) is what a real run does, `full`, `compact` and `folded`
+    /// are for the A/B.  A named tier that will not fit the budget is
+    /// an error rather than a quiet fall to another tier, because a run
+    /// that built a different table than its author believed looks
+    /// exactly like a run that did not.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pair_table_tier: Option<PairTableTier>,
     #[serde(default = "default_solver")]
     pub solver: Solver,
     #[serde(default = "default_seed")]
@@ -867,10 +881,31 @@ fn build_pair_table(
     fb: &FrobeniusFactorBase,
     p: &WorkflowParams,
 ) -> Option<PairSumTable> {
-    match p.pair_table_bytes {
-        Some(bytes) => PairSumTable::build_within(c, fb, u128::from(bytes)),
-        None => PairSumTable::build(c, fb),
+    let budget = p
+        .pair_table_bytes
+        .map(u128::from)
+        .unwrap_or(PairSumTable::DEFAULT_BYTE_BUDGET);
+    match p.pair_table_tier.unwrap_or(PairTableTier::Auto) {
+        PairTableTier::Auto => PairSumTable::build_within(c, fb, budget),
+        PairTableTier::Full => PairSumTable::build_full_within(c, fb, budget),
+        PairTableTier::Compact => PairSumTable::build_compact_within(c, fb, budget),
+        PairTableTier::Folded => PairSumTable::build_folded_within(c, fb, budget),
     }
+}
+
+/// Which representation of the pair table a run should build.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PairTableTier {
+    /// The cheapest tier that fits the budget: what a real run does.
+    Auto,
+    /// Every pair sum with its two summands, sixteen bytes a pair.
+    Full,
+    /// Every pair sum as a bucket and a rest, no summands.
+    Compact,
+    /// One key per orbit of the signed Frobenius group, `2n` times
+    /// fewer.
+    Folded,
 }
 
 pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {

@@ -2392,6 +2392,12 @@ impl PairSumTable {
         Self::build_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
     }
 
+    /// [`Self::build_full_within`] at the default budget: the table with
+    /// its summands, which [`Self::build`] no longer returns.
+    pub fn build_full(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+        Self::build_full_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
+    }
+
     /// Bytes the entries of a table for this base would occupy.
     pub fn byte_size(points: usize) -> u128 {
         Self::pair_count(points) * std::mem::size_of::<(u64, u32, u32)>() as u128
@@ -2469,14 +2475,52 @@ impl PairSumTable {
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
     ) -> Option<Self> {
+        // **Cheapest representation first, not the first that fits.**
+        //
+        // This ladder used to run the other way — summands, then compact
+        // rests, then the fold — on the reasoning that a base which fits
+        // with its summands should keep them, since for such a base the
+        // fold "only spends squarings".  That is true of a table whose
+        // construction is already paid for and false of one being built,
+        // and measuring it settled the question: on one base at one
+        // width the three tiers rank folded, compact, full on every axis
+        // at once — build time, descent time, and resident memory — and
+        // they rank that way at both widths measured.
+        //
+        // The fold wins the probe as well as the build because the table
+        // it produces is small enough to stay in cache when the others
+        // are not; at 12688 points it is 16 MiB against 1592.  That is
+        // why there is no trade-off to weigh here and the order is
+        // simply reversed.  `build_folded_within` returns `None` when
+        // the base has no signed orbits to fold by, so a base the fold
+        // cannot handle still falls through to the older tiers.
+        if let Some(folded) = Self::build_folded_within(kc, fb, byte_budget) {
+            return Some(folded);
+        }
+        if let Some(compact) = Self::build_compact_within(kc, fb, byte_budget) {
+            return Some(compact);
+        }
+        Self::build_full_within(kc, fb, byte_budget)
+    }
+
+    /// **The table with its summands**, which no other tier stores.
+    ///
+    /// [`Self::build_within`] reaches for this last, because storing the
+    /// summands costs sixteen bytes a pair against four and a half and
+    /// buys only a recovery that the other tiers do cheaply enough.
+    /// Callers that need [`Self::lookup`] to return pairs — rather than
+    /// [`Self::pairs_for`], which answers on any tier — must ask for it
+    /// by name.
+    pub fn build_full_within(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+    ) -> Option<Self> {
         if fb.points.len() > u32::MAX as usize {
             return None;
         }
         if Self::byte_size(fb.points.len()) > byte_budget {
-            // Too wide to store the summands; the compact table may
-            // still fit, and a base that fits only compactly is exactly
-            // the base worth having.
-            return Self::build_compact_within(kc, fb, byte_budget);
+            return None;
         }
         let curve = FastCurve::new(&kc.curve)?;
         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
@@ -2546,7 +2590,7 @@ impl PairSumTable {
     /// scattering into them puts every rest in place in two linear
     /// passes.  A run of rests is sorted afterwards, which is a handful
     /// of elements per bucket.
-    fn build_compact_within(
+    pub fn build_compact_within(
         kc: &KoblitzCurve,
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
@@ -2556,12 +2600,15 @@ impl PairSumTable {
             return None;
         }
         if Self::compact_byte_size(n_points, kc.n) > byte_budget {
-            // Folding by the signed Frobenius group stores `2n` times
-            // fewer keys, so a base too wide even for the compact table
-            // may still fit — at the cost of canonicalising every
-            // lookup.  It is the last tier because for a base that fits
-            // without it the fold only spends squarings.
-            return Self::build_folded_within(kc, fb, byte_budget);
+            // No fallthrough to the fold from here.  This used to hand a
+            // base too wide for the compact table on to
+            // `build_folded_within`, which made sense while the fold was
+            // the last tier and only memory reached for it.  Now that
+            // `build_within` tries the fold *first*, each builder means
+            // exactly one representation, and a caller that asks for the
+            // compact table by name and cannot have it gets a `None` it
+            // can report rather than a different tier.
+            return None;
         }
         let pairs = Self::pair_count(n_points);
         if pairs > u32::MAX as u128 {
@@ -2660,7 +2707,7 @@ impl PairSumTable {
     /// Duplicate `(bucket, rest)` pairs are left in place: two keys that
     /// agree there are indistinguishable to a lookup anyway, so storing
     /// one twice costs four bytes and can never lose an answer.
-    fn build_folded_within(
+    pub fn build_folded_within(
         kc: &KoblitzCurve,
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
@@ -7999,34 +8046,51 @@ mod tests {
     }
 
     #[test]
-    fn pair_table_refuses_a_base_beyond_its_byte_budget() {
+    fn pair_table_prefers_the_cheapest_tier_and_refuses_below_them_all() {
+        // The preference order, pinned.  It used to run the other way —
+        // summands first, the fold only when memory forced it — on the
+        // reasoning that a base which fits with its summands should keep
+        // them.  Measuring the three tiers on one base at one width
+        // ranked them folded, compact, full on build time, descent time
+        // and resident memory at once, so `build_within` now takes the
+        // cheapest representation that works rather than the first that
+        // fits.
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
         let full = PairSumTable::byte_size(fb.points.len());
         let compact = PairSumTable::compact_byte_size(fb.points.len(), kc.n);
-        assert!(compact < full, "the compact table is the narrower one");
-        // A budget that fits the summands keeps them.
-        let wide = PairSumTable::build_within(&kc, &fb, full).expect("fits with summands");
-        assert!(!wide.is_compact());
-        // One that does not falls back to the compact table rather than
-        // refusing: a base that fits only compactly is worth having.
-        let narrow = PairSumTable::build_within(&kc, &fb, full - 1).expect("fits compactly");
-        assert!(narrow.is_compact());
-        assert_eq!(wide.len(), narrow.len());
-        // Below even that, the fold is the last tier: `2n` times fewer
-        // keys, bought with a canonicalisation on every lookup.
         let folded_bytes =
             PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n);
+        assert!(compact < full, "the compact table is the narrower one");
         assert!(folded_bytes < compact, "the folded table is narrower still");
-        let folded = PairSumTable::build_within(&kc, &fb, compact - 1).expect("fits folded");
-        assert!(folded.is_folded() && folded.is_compact());
-        assert!(folded.len() < narrow.len(), "the fold stored no less");
-        // And below that it refuses with a number rather than an
-        // allocation the machine cannot meet.
+
+        // A budget with room for all three still returns the fold.
+        let roomy = PairSumTable::build_within(&kc, &fb, full).expect("fits every tier");
+        assert!(roomy.is_folded(), "tier was {}", roomy.tier());
+        // So does a budget that admits only the fold; the tier does not
+        // change with the budget, only whether there is one at all.
+        let tight = PairSumTable::build_within(&kc, &fb, folded_bytes).expect("fits folded");
+        assert!(tight.is_folded());
+        assert_eq!(roomy.len(), tight.len(), "the budget moved the table");
+        // Below the narrowest tier it refuses with a number rather than
+        // an allocation the machine cannot meet.
         assert!(PairSumTable::build_within(&kc, &fb, folded_bytes - 1).is_none());
         // The default budget is far above a base this size.
         assert!(full < PairSumTable::DEFAULT_BYTE_BUDGET);
-        assert!(PairSumTable::build(&kc, &fb).is_some());
+        assert!(PairSumTable::build(&kc, &fb).unwrap().is_folded());
+
+        // The older tiers are still reachable, by name, and each still
+        // refuses a budget under its own width.
+        let wide = PairSumTable::build_full_within(&kc, &fb, full).expect("fits with summands");
+        assert_eq!(wide.tier(), "full");
+        assert!(PairSumTable::build_full_within(&kc, &fb, full - 1).is_none());
+        let narrow =
+            PairSumTable::build_compact_within(&kc, &fb, compact).expect("fits compactly");
+        assert_eq!(narrow.tier(), "compact");
+        assert!(PairSumTable::build_compact_within(&kc, &fb, compact - 1).is_none());
+        // Same base, same pairs, three representations of them.
+        assert_eq!(wide.len(), narrow.len());
+        assert!(tight.len() < narrow.len(), "the fold stored no less");
     }
 
     #[test]
@@ -8182,7 +8246,7 @@ mod tests {
         // The presence filter must never hide an entry.
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
-        let table = PairSumTable::build(&kc, &fb).unwrap();
+        let table = PairSumTable::build_full(&kc, &fb).unwrap();
         let fc = FastCurve::new(&kc.curve).unwrap();
         for i in 0..fb.points.len() {
             for j in i..fb.points.len() {
@@ -9072,7 +9136,9 @@ mod tests {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
         let index = fb.index_map();
-        let table = PairSumTable::build(&kc, &fb).unwrap();
+        // The stored-pair count below is the full tier's own law, so
+        // the table is asked for by name: `build` now returns the fold.
+        let table = PairSumTable::build_full(&kc, &fb).unwrap();
         assert_eq!(table.len(), fb.points.len() * (fb.points.len() + 1) / 2);
         let r = kc.subgroup_order.to_u64_digits()[0];
         for m in [2usize, 3, 4] {
@@ -9712,7 +9778,7 @@ mod tests {
     fn the_folded_table_agrees_at(degree: u32, points: usize) {
         let kc = KoblitzCurve::new(0, degree).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
-        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let full = PairSumTable::build_full(&kc, &fb).unwrap();
         let orbits = fb.signed_orbits.len();
         // A budget under the compact table's width but over the folded
         // one's is exactly the tier that reaches for the fold.
@@ -9870,7 +9936,7 @@ mod tests {
         // Every `m` has to go through the folded lookup.
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 3, 200).unwrap();
-        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let full = PairSumTable::build_full(&kc, &fb).unwrap();
         let folded = PairSumTable::build_within(
             &kc,
             &fb,
@@ -9920,10 +9986,12 @@ mod tests {
     fn the_compact_table_agrees_at(degree: u32, points: usize) {
         let kc = KoblitzCurve::new(0, degree).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
-        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let full = PairSumTable::build_full(&kc, &fb).unwrap();
         // A budget below the full table's width but above the compact
         // one's forces the compact representation of the same base.
-        let compact = PairSumTable::build_within(
+        // Asked for by name: `build_within` now folds first, and a
+        // budget that admits the compact table admits the fold too.
+        let compact = PairSumTable::build_compact_within(
             &kc,
             &fb,
             PairSumTable::compact_byte_size(fb.points.len(), kc.n),
@@ -9992,8 +10060,10 @@ mod tests {
         // it is pinned here rather than left to a panic.
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 3, 200).unwrap();
-        let full = PairSumTable::build(&kc, &fb).unwrap();
-        let compact = PairSumTable::build_within(
+        let full = PairSumTable::build_full(&kc, &fb).unwrap();
+        // Asked for by name: `build_within` now folds first, and a
+        // budget that admits the compact table admits the fold too.
+        let compact = PairSumTable::build_compact_within(
             &kc,
             &fb,
             PairSumTable::compact_byte_size(fb.points.len(), kc.n),
