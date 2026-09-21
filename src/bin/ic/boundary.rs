@@ -89,12 +89,10 @@ fn host() -> Value {
                 .and_then(|l| l.split(':').nth(1))
                 .map(|v| v.trim().to_string())
         });
-    let commit = std::process::Command::new("git")
-        .args(["rev-parse", "HEAD"])
-        .output()
-        .ok()
-        .filter(|o| o.status.success())
-        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string());
+    // Captured at start-up, not here: a run of half an hour can outlive the
+    // commit it started on, and a report that names the wrong one is worse
+    // than a report that names none.
+    let commit = crate::git_commit();
     json!({
         "cpu": cpu,
         "logical_cores": std::thread::available_parallelism().map(|n| n.get()).unwrap_or(0),
