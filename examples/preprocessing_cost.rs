@@ -15,8 +15,9 @@
 //!   instantiate `template.instantiate(x_r)` -- per target, never cached
 //!
 //! `decode` is the whole hit path and not just the payload parse, because
-//! `AlgebraCache::memoize` runs it on a LOCAL hit too: the in-process layer
-//! stores bytes, not decoded values, so every hit re-parses. The envelope is
+//! `AlgebraCache::memoize` runs it on a REDIS hit: those bytes crossed a wire,
+//! so the envelope and its checksum still apply. A local hit no longer pays it
+//! -- the in-process layer holds decoded values and clones them. The envelope is
 //! also measured as stored -- a JSON object holding the payload as an escaped
 //! JSON string -- since that escaping, not the payload, is what `max_value`
 //! actually compares against.
@@ -49,9 +50,11 @@
 //!     Nothing here is expensive in absolute terms. Per point it is steady --
 //!     n=9/ell=9 gave 338, 339, 342 us across the three runs -- so the spread
 //!     below is between machines, not between runs.
-//!   * A hit is at most about 3x cheaper than a rebuild, and about break-even
-//!     at n=9: the in-process layer stores bytes, so even a local hit re-parses
-//!     the JSON.
+//!   * A local hit costs 3.7 us (n=9) to 167 us (n=61), which is 54x-91x
+//!     cheaper than rebuilding. Before the in-process layer held decoded
+//!     values it stored bytes and re-parsed on every hit, costing 266 us to
+//!     3.8 ms -- only about 1x-3x cheaper than a rebuild, so it returned most
+//!     of what it saved.
 //!   * Against loopback Redis, over a held connection, a remote hit runs
 //!     1.1x-1.4x the cost of just rebuilding at n=9/ell=9, about break-even at
 //!     n=31/ell=11 (1.03x-1.13x), 0.8x-1.0x at n=41/ell=7, and 0.43x-0.47x at

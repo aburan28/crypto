@@ -1,8 +1,18 @@
 //! Separate caches for target-independent preprocessing and exact reductions.
 //! Redis is a trusted, private computation cache, not a proof verifier. Checksums
 //! detect accidental corruption; they do not authenticate a malicious writer.
+//!
+//! The two layers store different things on purpose. Redis holds the encoded
+//! envelope, because bytes are what cross a wire and what a checksum can speak
+//! about. The in-process layer holds the DECODED value: it never left the
+//! process, so there is nothing to parse and nothing a checksum could tell us.
+//! Storing bytes there made every local hit re-run `serde_json` over the whole
+//! artifact -- measured at up to 5.6 ms against a 9.1 ms build, so the cache
+//! was returning most of what it saved (`examples/preprocessing_cost.rs`).
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::{cell::RefCell, collections::VecDeque, sync::OnceLock, time::Instant};
+use std::{
+    any::Any, cell::RefCell, collections::VecDeque, sync::OnceLock, time::Instant,
+};
 
 #[derive(Clone, Copy)]
 pub enum Layer {
@@ -42,11 +52,23 @@ struct Envelope {
     checksum: String,
 }
 
+/// One in-process entry: the decoded value, plus the encoded size it was
+/// admitted on.
+///
+/// `size` is the ENCODED length, not the decoded footprint, which cannot be
+/// measured from here. It stays the basis for `local_limit` so the bound keeps
+/// the meaning it had before; for these artifacts JSON is the larger form, so
+/// the limit errs conservative rather than over-committing memory.
+struct LocalEntry {
+    size: usize,
+    value: Box<dyn Any + Send>,
+}
+
 pub struct AlgebraCache {
     enabled: [bool; 3],
     remote_enabled: [bool; 3],
     namespace: String,
-    local: VecDeque<(String, Vec<u8>)>,
+    local: VecDeque<(String, LocalEntry)>,
     local_bytes: usize,
     local_limit: usize,
     max_value: usize,
@@ -167,21 +189,21 @@ impl AlgebraCache {
             blake3::hash(input).to_hex()
         )
     }
-    fn retain(&mut self, key: String, bytes: Vec<u8>) {
-        let size = key.len() + bytes.len() + 128;
+    fn retain(&mut self, key: String, encoded_len: usize, value: Box<dyn Any + Send>) {
+        let size = key.len() + encoded_len + 128;
         if size > self.local_limit {
             return;
         }
         if let Some(pos) = self.local.iter().position(|(k, _)| k == &key) {
-            let (k, v) = self.local.remove(pos).unwrap();
-            self.local_bytes -= k.len() + v.len() + 128;
+            let (_, e) = self.local.remove(pos).unwrap();
+            self.local_bytes -= e.size;
         }
         while self.local_bytes + size > self.local_limit {
-            let (k, v) = self.local.pop_front().unwrap();
-            self.local_bytes -= k.len() + v.len() + 128;
+            let (_, e) = self.local.pop_front().unwrap();
+            self.local_bytes -= e.size;
         }
         self.local_bytes += size;
-        self.local.push_back((key, bytes));
+        self.local.push_back((key, LocalEntry { size, value }));
     }
     #[cfg(feature = "redis-cache")]
     fn remote<T: redis::FromRedisValue>(&mut self, cmd: &redis::Cmd, i: usize) -> Option<T> {
@@ -213,7 +235,10 @@ impl AlgebraCache {
         }
     }
     /// Cache only successful computations; None is never an UNSAT certificate.
-    pub fn memoize<T: Serialize + DeserializeOwned>(
+    ///
+    /// `T: Clone + Send + 'static` is what the in-process layer costs: it holds
+    /// decoded values behind `dyn Any`, so a hit clones rather than re-parses.
+    pub fn memoize<T: Serialize + DeserializeOwned + Clone + Send + 'static>(
         &mut self,
         layer: Layer,
         input: &[u8],
@@ -223,24 +248,43 @@ impl AlgebraCache {
         let i = layer.index();
         let key = self.key(layer, input);
         self.stats[i].lookups += 1;
-        let mut local_hit = false;
-        let bytes = if let Some((_, v)) = self.local.iter().find(|(k, _)| k == &key) {
-            local_hit = true;
-            Some(v.clone())
-        } else {
-            #[cfg(feature = "redis-cache")]
-            {
-                self.remote::<Vec<u8>>(
-                    redis::cmd("GETRANGE").arg(&key).arg(0).arg(self.max_value),
-                    i,
-                )
-                .filter(|b| !b.is_empty())
+
+        // In-process hit: clone the decoded value and move it to the back of
+        // the LRU. No envelope, no checksum -- the value never left the
+        // process, so neither has anything to say about it.
+        if let Some(pos) = self.local.iter().position(|(k, _)| k == &key) {
+            let cloned = self.local[pos].1.value.downcast_ref::<T>().cloned();
+            match cloned {
+                Some(value) => {
+                    let entry = self.local.remove(pos).unwrap();
+                    self.local.push_back(entry);
+                    self.stats[i].local_hits += 1;
+                    self.stats[i].overhead_ns += start.elapsed().as_nanos() as u64;
+                    return Some(value);
+                }
+                None => {
+                    // One key holding a different type. Type erasure makes this
+                    // expressible where storing bytes did not, so it is handled
+                    // rather than assumed away: drop the entry and recompute,
+                    // never hand back something of the wrong type.
+                    let (_, e) = self.local.remove(pos).unwrap();
+                    self.local_bytes -= e.size;
+                    self.stats[i].invalid += 1;
+                }
             }
-            #[cfg(not(feature = "redis-cache"))]
-            {
-                None
-            }
-        };
+        }
+
+        // Redis: this came off a wire, so the envelope and its checksum apply.
+        #[cfg(feature = "redis-cache")]
+        let bytes = self
+            .remote::<Vec<u8>>(
+                redis::cmd("GETRANGE").arg(&key).arg(0).arg(self.max_value),
+                i,
+            )
+            .filter(|b| !b.is_empty());
+        #[cfg(not(feature = "redis-cache"))]
+        let bytes: Option<Vec<u8>> = None;
+
         if let Some(bytes) = bytes {
             let decode = || -> Option<T> {
                 if bytes.len() > self.max_value {
@@ -255,13 +299,9 @@ impl AlgebraCache {
                 serde_json::from_str(&e.payload).ok()
             };
             if let Some(value) = decode() {
-                if local_hit {
-                    self.stats[i].local_hits += 1;
-                } else {
-                    self.stats[i].redis_hits += 1;
-                }
+                self.stats[i].redis_hits += 1;
                 self.stats[i].bytes_read += bytes.len() as u64;
-                self.retain(key, bytes);
+                self.retain(key, bytes.len(), Box::new(value.clone()));
                 self.stats[i].overhead_ns += start.elapsed().as_nanos() as u64;
                 return Some(value);
             }
@@ -287,7 +327,7 @@ impl AlgebraCache {
                         );
                     }
                     self.stats[i].bytes_written += bytes.len() as u64;
-                    self.retain(key, bytes);
+                    self.retain(key, bytes.len(), Box::new(value.clone()));
                 } else {
                     self.stats[i].oversized += 1;
                 }
@@ -301,7 +341,7 @@ thread_local! { static CACHE: RefCell<AlgebraCache> = RefCell::new(AlgebraCache:
 pub fn enabled(layer: Layer) -> bool {
     CACHE.with(|c| c.borrow().enabled[layer.index()])
 }
-pub fn memoize<T: Serialize + DeserializeOwned>(
+pub fn memoize<T: Serialize + DeserializeOwned + Clone + Send + 'static>(
     layer: Layer,
     input: &[u8],
     compute: impl FnOnce() -> Option<T>,
@@ -373,22 +413,74 @@ mod tests {
         }
     }
     #[test]
-    fn bounded_storage_and_corruption_recompute() {
+    fn bounded_storage() {
         let mut c = AlgebraCache::local(4096);
-        c.memoize(Layer::Preprocessing, b"x", || Some(2u64));
-        c.local.front_mut().unwrap().1[0] = b'!';
-        assert_eq!(
-            c.memoize(Layer::Preprocessing, b"x", || Some(3u64)),
-            Some(3)
-        );
-        assert_eq!(c.stats[0].invalid, 1);
         for i in 0..100u64 {
             c.memoize(Layer::Preprocessing, &i.to_le_bytes(), || Some(i));
         }
         assert!(c.local_bytes <= 4096);
+        assert_eq!(
+            c.local_bytes,
+            c.local.iter().map(|(_, e)| e.size).sum::<usize>(),
+            "the running total must equal what is actually held"
+        );
         let mut c = AlgebraCache::local(0);
         c.memoize(Layer::Preprocessing, b"x", || Some(2u64));
         assert!(c.local.is_empty());
+    }
+
+    /// The local layer holds decoded values, so there are no local bytes left
+    /// to corrupt -- that property now belongs to Redis alone, where
+    /// `redis_cross_client_reuse_and_corruption` covers it. What type erasure
+    /// introduces instead is one key reached at two types, which is what this
+    /// pins: recompute at the new type, never hand back the old one.
+    #[test]
+    fn one_key_at_two_types_recomputes() {
+        let mut c = AlgebraCache::local(1 << 20);
+        assert_eq!(c.memoize(Layer::Preprocessing, b"x", || Some(2u64)), Some(2));
+        assert_eq!(
+            c.memoize(Layer::Preprocessing, b"x", || Some("two".to_string())),
+            Some("two".to_string())
+        );
+        assert_eq!(c.stats[0].invalid, 1);
+        // The displaced entry is gone from the accounting, not just the queue.
+        assert_eq!(
+            c.local_bytes,
+            c.local.iter().map(|(_, e)| e.size).sum::<usize>()
+        );
+        // And the surviving entry is the one just written.
+        assert_eq!(
+            c.memoize(Layer::Preprocessing, b"x", || panic!("must hit")),
+            Some("two".to_string())
+        );
+    }
+
+    /// A local hit must not touch `serde_json`: it returns a value whose type
+    /// does not round-trip through the encoder at all.
+    #[test]
+    fn a_local_hit_does_not_re_parse() {
+        #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+        struct Asymmetric {
+            n: u64,
+            /// Skipped on the wire, so a decode can never restore it. If a
+            /// local hit re-parsed, this would come back empty.
+            #[serde(skip)]
+            only_in_memory: String,
+        }
+        let mut c = AlgebraCache::local(1 << 20);
+        let made = Asymmetric {
+            n: 7,
+            only_in_memory: "not on the wire".into(),
+        };
+        assert_eq!(
+            c.memoize(Layer::Preprocessing, b"k", || Some(made.clone())),
+            Some(made.clone())
+        );
+        let hit = c
+            .memoize::<Asymmetric>(Layer::Preprocessing, b"k", || panic!("must hit"))
+            .unwrap();
+        assert_eq!(c.stats[0].local_hits, 1);
+        assert_eq!(hit, made, "a local hit re-parsed instead of cloning");
     }
     #[test]
     #[cfg(feature = "redis-cache")]
