@@ -1671,6 +1671,67 @@ weight-2 relations that is a cycle, and it arrives long before the
 `|F|`-row system is anywhere near full rank: `38` relations against
 `130` unknowns at `p = 271`.
 
+### 11.10 Pre-registration: does a merge-level cap restore `n^{4/9}`?
+
+**Written before the experiment was built or run.**  §11.7 leaves one loose
+end and names it: the large-prime linear algebra measures `n^{0.56}` against
+its own `4/9`, because row weight grows `8.9 → 17.9` as the eliminator chains
+merges, and "sieve implementations cap the merge level for exactly this reason,
+and that is the piece this module does not have."  This registers the
+experiment that supplies it.
+
+**Where the excess comes from, derived.**  The large-prime variant runs
+Wiedemann, so its linear algebra costs `≈ N² w` — `2N` matrix-vector products
+of `N w` nonzeros each — with `N` unknowns and mean row weight `w`.  The small
+base is Gaudry's rule, `N = |F|^{2/3}` (`SmallBase::Rule`), and `|F| ~ n^{1/3}`,
+so `N ~ n^{2/9}` and
+
+```text
+    N² ~ n^{4/9}                    exactly the relation-phase exponent
+    w  ~ n^{0.113}                  measured, 8.9 → 17.9 over 2^24.2 → 2^33.1
+    N² w ~ n^{0.557}                against the fitted n^{0.56}
+```
+
+**Fill-in is therefore the entire excess.**  Not part of it — all of it.  A cap
+that holds `w` to a constant puts the linear algebra exactly on `n^{4/9}`.
+
+**What it costs.**  `LargePrimeEliminator::feed` loops until every large prime
+is cancelled, subtracting one stored pivot per step and merging that pivot's
+columns in.  A cap abandons a relation once it has been reduced against `k`
+pivots.  Every abandoned relation is a residual that was paid for and thrown
+away, so the relation phase pays for the linear algebra's saving.  **The
+question this experiment answers is whether that repayment is a constant factor
+or a growing one**, because only the first leaves `n^{4/9}` end to end.
+
+**The falsifier, and the three outcomes.**  Fit the end-to-end exponent `e`
+over the same four sizes, same seeds, same `--protocol-la --groebner` as
+`experiments/21_gaudry_cubic_la.json`, with correctness preserved on every run:
+
+| outcome | `e` | what it means |
+|---|---|---|
+| **a** | `e ≤ 0.444` | the cap restores `n^{4/9}` end to end; §11.7's loose end closes, and the exponent is the method's rather than the relation phase's |
+| **b** | `0.444 < e ≤ 0.56` | the cap buys part of the gap; `n^{4/9}` stays a relation-phase exponent and the note says so as a measurement |
+| **c** | `e ≥ 0.56` | the cap does not help |
+
+**Predicted: (b), and (a) is live.**  Capping cannot raise `w` and cannot lower
+`N`, so `e` cannot exceed the uncapped `0.56` except through repayment; and it
+cannot fall below `4/9` at all.  Which of (a) and (b) lands depends entirely on
+how the discarded-residual count scales, which is the thing being measured and
+is not predicted here.
+
+**`S` will not move, and that is not a failure.**  The linear algebra is
+`0.02–0.03 %` of `S` at these four sizes, so any cap changes total cost by well
+under `1 %` and the `S / rho` column stays at its published `1,989×` to
+`4,000×`.  The deliverable is a fitted exponent, not a cheaper attack, and a
+flat `S` column is what a correct run looks like.  By §11.7's own arithmetic
+the exponent does not start paying until `n ≈ 2^{98}`.
+
+**Inadmissible**, by §6 and the standing rules of this note: changing the four
+sizes or the two seeds; changing `SmallBase::Rule`; reporting the linear-algebra
+exponent alone as the end-to-end one, which is the mistake §11.7 exists to
+record; quoting an improvement in `S` from a cap whose LA share is `0.03 %`;
+and counting a run whose recovered logarithm was not checked.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,
