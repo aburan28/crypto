@@ -2045,14 +2045,42 @@ the probe and batching the inversion together would take the inner step
 from some 1565 ns to 212.
 
 It is quadratic in the base and the least used, which is presumably why
-it was never blocked. *Least used* is the operative half: no parameter
-set or recorded run in this repository asks for `m = 4` — 698 places ask
-for 3 and 110 for 2 — and nothing sets `max_m`, so no sweep reaches it
-either. This is a correction to what the note claimed the arm costs, not
-a change worth making until something runs it — **accounting** by
-`AGENTS.md` §3, and a stage diagnostic by §2: the inner step of one
-enumeration arm, on no path any run takes, so nothing here is a
-speedup.
+it was never blocked. *Least used* is still true — no parameter set or
+recorded run in this repository asks for `m = 4`, 698 places ask for 3
+and 110 for 2, and nothing sets `max_m`, so no sweep reaches it either.
+
+**It is fixed now anyway.** The arm takes two batched inversions a row
+rather than one and then a row of single ones: the pair sums are one
+`add_many` slice as they always were, and the rests `R − (P_k + P_l)`
+are a second. It keys the row with `keys_of` and prefetches ahead of the
+probe, which is the shape the `m = 3` arm already had. Measured on the
+arm itself — `witnesses_fast` with `m = 4` and a sink that never stops,
+at `n = 61` on `|F| = 976`, where the group is large enough that a
+target has no witnesses at all and the figure is the walk rather than
+the recovery:
+
+| the `m = 4` arm, a `(k, l)` | ns |
+|---|---|
+| before | **1155.5** |
+| after | **123** [115 – 129] |
+
+**9.4×**, and the 1030 ns that went is the Fermat inversion the same
+binary measures alone at 1019 — which is the cross-check that says the
+gain is the thing it was supposed to be and not a measurement artefact.
+
+The isolation matters and was not free to find: at `n = 19` the same
+base decomposes a target tens of thousands of ways, and the `|F|`-long
+compact recovery each hit pays swamps the difference entirely — before
+and after came back 2452 against 2429, a 1% apart, and the fix looked
+like nothing. What the arm costs per `(k, l)` and what a *hit* costs are
+different questions, and the second one drowns the first at any degree
+small enough for hits to be common.
+
+**Engineering** by `AGENTS.md` §3, not an advance: the ratio to the
+floor does not move, and neither does any `S` — nothing runs `m = 4`, so
+no measured end-to-end number changes at all. A stage diagnostic by §2:
+the inner step of one enumeration arm, so the 9.4× is not a speedup and
+no scoreboard row follows.
 
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
@@ -2808,3 +2836,71 @@ collection: relations needed scale as `|F|/2n` while the `m = 3` hit
 rate scales as `|F|³/r`, so a properly sized run at a wider base probes
 less. `13,623` is therefore an **upper bound** on the practical
 crossover, not a two-sided estimate.
+
+### The probing volume is an input, and it moves every rung — 2026-09-21
+
+The previous round made the tier a function of the probing volume and
+then supplied the wrong volume. `build_within` cannot know how much
+probing it is being built for, so it falls back on the volume its
+constants were calibrated at — `351,750,000` summand scans. Every rung
+this repository actually runs probes less than that, some of them by
+three orders of magnitude.
+
+**Boundaries, unchanged and restated.** Floor `S ≥ √(π/2A)` with
+`A = 2n`; the contract's count floor `N / C(|F| + m − 1, m)` per target
+for the descent; reference is signed-Frobenius rho counted on the same
+instance in the same process. The tier moves no count either bound
+constrains, so this round cannot be an advance either.
+
+**The workflow knows its own volume exactly.** Collection scans
+`unit_trials × units × collection_window`, or the whole base when no
+window is set. That is not an approximation: it reproduces
+`summands_scanned_total` exactly on every run checked, including the
+frozen `277,760` of the `k0n31` rung. The descent follows the counting
+bound, which measured `1.26×` high on one degree-61 target set and
+`1.07×` low on an independent one — a fair central estimate rather than
+a bound in either direction.
+
+`units` is the pass the driver plans, not `max_units`, which is the cap
+it may extend to. A run that extends probes more than this says, and
+under-counting probes favours the fold, so the estimate errs the same
+way the calibrated constants already do.
+
+**What the rungs actually probe:**
+
+| rung | summands scanned | against the calibration |
+|:--|--:|--:|
+| `k0n31` | 277,760 | 1,266× less |
+| `k0n41-subgroup` | 15,072,256 | 23× less |
+| `k0n53-subgroup` | 242,514,432 | 1.45× less |
+
+All three move from compact to folded. Priced in group additions with
+conversions re-measured at each rung's **own** degree rather than
+carried over from 61, 32 of 32 verified on both arms, every probe count
+identical between them:
+
+| rung | compact | folded | ratio | `S` compact → folded | vs rho |
+|:--|--:|--:|--:|:--|--:|
+| `k0n41` | 47,988,000 | 34,990,959 | **1.371×** | 2.023 → 1.475 | 8.65× |
+| `k0n53` | 756,950,602 | 615,978,313 | **1.229×** | 5.156 → 4.196 | 19.3× |
+
+**Class: engineering.** `S` fell and the probe counts did not move, so
+the ratio to the counting floor is flat by construction. Legitimate,
+bounded, and not a finding.
+
+**`k0n31` is deliberately not priced, and the reason is worth keeping.**
+Its conversion measurement reads `2,572` adds per summand scanned on the
+compact table against the full tier's `6.71`. That is not a cache
+effect: at `r = 2^20.5` nearly every probe of the `m = 3` scan hits, and
+the never-stopping sink then pays the `O(|F|)` recovery a hit costs —
+which the full tier does not pay at all, because it stores its summands.
+The figure measures recovery, not probing. It would have made the fold
+look catastrophic at small `n` and it means nothing about probing cost,
+so it stays out of the model. The tier chosen at that rung is the
+model's extrapolation below the degrees it was measured at, and is not
+supported by a price here.
+
+**Still not claimed.** That the constants `build_within` *chooses* with
+generalise across degrees — they remain the degree-61 ones, and this
+round only re-measured the conversions used to *check* the choice. No
+exponent: two priced rungs is far short of §5's four sizes.

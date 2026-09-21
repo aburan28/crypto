@@ -25,16 +25,25 @@ inline bool syncParent(const std::string &path) {
 
 struct CorpusOutput {
     FILE *file = nullptr;
+    // Size at open, measured under the lock.  A caller that frames its records
+    // with a leading header needs this to tell a fresh corpus from an existing
+    // one; the append handle's own ftell cannot answer that.
+    long long bytes = 0;
     ~CorpusOutput() { if (file) fclose(file); }
-    bool openFile(const std::string &path, size_t recordBytes) {
+    bool openFile(const std::string &path, size_t recordBytes, size_t headerBytes = 0) {
         // Do not block on a FIFO/device or read an endless device as a corpus.
         struct stat st;
         if (lstat(path.c_str(), &st) == 0 && !S_ISREG(st.st_mode)) return false;
         file = fopen(path.c_str(), "ab");
         if (!file) return false;
         if (flock(fileno(file), LOCK_EX | LOCK_NB) != 0 ||
-            fstat(fileno(file), &st) != 0 || !S_ISREG(st.st_mode) ||
-            st.st_size % recordBytes != 0) return false;
+            fstat(fileno(file), &st) != 0 || !S_ISREG(st.st_mode)) return false;
+        bytes = (long long)st.st_size;
+        // An empty corpus is whole whatever its framing; a non-empty one is a
+        // header plus a whole number of records.
+        if (bytes != 0 && ((unsigned long long)bytes < headerBytes ||
+                           ((unsigned long long)bytes - headerBytes) % recordBytes != 0))
+            return false;
         return syncParent(path);
     }
     bool closeFile() {

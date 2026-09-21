@@ -13,6 +13,7 @@
 #   BATCH      walks batched into one field inversion per thread (default 32)
 #   THREADS    CUDA block size (default 128)
 #   MINBLOCKS  resident blocks per SM to ask ptxas for (default 2)
+#   WITNESS    carry the cairn witness in the walk (default 1; 0 is the control)
 #   PACKED_SINGLE_PRODUCT  use one polynomial product for packed mul (default 0)
 #   PACKED_ADD_COMBINE  join clmul32 class products with adds, not ors (default 0)
 #   PACKED_PAIR_ILP  independent buffers for the two paired products (default 0)
@@ -111,6 +112,18 @@ TABLE_PIPE_SELECT ?= 0
 PACKED_CHAIN_FIRST ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
+# Carry the eight per-branch step counts that make a distinguished point
+# payable on cairn (CAIRN-WITNESS.md).  WITNESS=0 compiles the counting out
+# and is the control for the paired comparison that prices it; it also keeps
+# the checkpoint and corpus formats byte-identical to what shipped before.
+# The table walk cannot carry this witness, so it is not the default there;
+# asking for both explicitly is still refused in walk.h rather than quietly
+# turned off.
+ifeq ($(WALK_TABLE),1)
+WITNESS ?= 0
+else
+WITNESS ?= 1
+endif
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -205,7 +218,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
-       -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
+       -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+       -DECC_WITNESS=$(WITNESS)
 
 all: cpu
 
@@ -309,7 +323,7 @@ build/test-production: src/testproduction.cpp src/main.cu $(HDRS) $(GEN)
 # figure (docs/ecc2k130-status/walk-forest/README.md).  Host only.
 build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	$(CXX) -O2 -std=c++17 -fopenmp $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
 	    -Wno-unknown-pragmas src/trailforest.cpp -o $@
 
 trailforest: build/trailforest
@@ -318,7 +332,7 @@ trailforest: build/trailforest
 # with one double scalar multiplication.  Host only.
 build/witness: src/witness.cpp $(HDRS) $(GEN)
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	$(CXX) -O2 -std=c++17 $(OMPFLAGS) $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
 	    -Wno-unknown-pragmas src/witness.cpp -o $@
 
 witness: build/witness
@@ -469,11 +483,11 @@ test-table-walk-host:
 
 test-table-walk-cuda:
 	mkdir -p build
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=%,$(DEFS)) -DECC_WALK_TABLE=1 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_WITNESS=%,$(DEFS)) -DECC_WALK_TABLE=1 -DECC_WITNESS=0 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp
 	./build/test-table-walk-cuda
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=%,$(DEFS)) \
-	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=% -DECC_WITNESS=%,$(DEFS)) \
+	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 -DECC_WITNESS=0 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda-addend-global -lgomp
 	./build/test-table-walk-cuda-addend-global
 
