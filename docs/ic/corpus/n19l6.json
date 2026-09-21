@@ -1,0 +1,197 @@
+{
+  "config": {
+    "a": 1,
+    "include_cnf": false,
+    "l": 6,
+    "n": 19,
+    "prefix": "",
+    "satisfiable": 2,
+    "seed": 1,
+    "unsatisfiable": 2
+  },
+  "formats": {
+    "<name>.anf": "one GF(2) polynomial per line in the shared variable naming",
+    "<name>.cnf": "the same system with every parity row Tseitin-expanded to clauses",
+    "<name>.dimacs": "DIMACS CNF with native parity rows as `x` lines (CryptoMiniSat / WDSat convention)",
+    "<name>.magma": "the system as a Magma script computing its Groebner basis",
+    "INFO<name>": "curve, modulus, target abscissa, certified label, planted witness and its SAT assignment, encoding sizes"
+  },
+  "instances": [
+    {
+      "anf": {
+        "equations": 52,
+        "monomials": 3778
+      },
+      "blake3": {
+        "anf": "e25e03bedf192fb744fd25d240f395b242870175722682bd30d7771533cb2f88",
+        "dimacs_cnf": "1d8438bbdb119faa13325443b47d60076efeab27f8f965d175494759870bc507",
+        "dimacs_xor": "8be835d6d5736a8efeac5cbc20580c9bdd00d583907b38d988227271dd2f1e50",
+        "magma": "513bf3370d9ff4c120b319ff8e992fd3f1bedac5717c9a524f534ff4d024c483"
+      },
+      "dimacs_cnf": {
+        "bytes": 529283,
+        "clauses": 21832,
+        "variables": 2593,
+        "xor_rows": 0
+      },
+      "dimacs_xor": {
+        "bytes": 41314,
+        "clauses": 2364,
+        "variables": 767,
+        "xor_rows": 52
+      },
+      "label_checked_by_own_solver": true,
+      "name": "n19l6-1-S",
+      "planted": [
+        "0x3d",
+        "0x10",
+        "0xe"
+      ],
+      "planted_true_sat_variables": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        11,
+        14,
+        15,
+        16
+      ],
+      "satisfiable": true,
+      "x_r": "0x40847"
+    },
+    {
+      "anf": {
+        "equations": 52,
+        "monomials": 4642
+      },
+      "blake3": {
+        "anf": "6b4d4f64715b09be0791a3228a6acd1dfa13c0730bb2c296abd0930041e6bffe",
+        "dimacs_cnf": "fc1408afb992ff48c55699966de1a98244ae26d28de50091312a174197cedec4",
+        "dimacs_xor": "19327707a59efaafd69edfe773d0565f25cc7defe20ca437f28de0939cbf1c8a",
+        "magma": "9cd9f5b1e9797a4977700f1d1f9d576ebb014427c965849ef3c111f588c09053"
+      },
+      "dimacs_cnf": {
+        "bytes": 650820,
+        "clauses": 26461,
+        "variables": 3022,
+        "xor_rows": 0
+      },
+      "dimacs_xor": {
+        "bytes": 44745,
+        "clauses": 2364,
+        "variables": 767,
+        "xor_rows": 52
+      },
+      "label_checked_by_own_solver": true,
+      "name": "n19l6-2-S",
+      "planted": [
+        "0x33",
+        "0x34",
+        "0xe"
+      ],
+      "planted_true_sat_variables": [
+        1,
+        2,
+        5,
+        6,
+        9,
+        11,
+        12,
+        14,
+        15,
+        16
+      ],
+      "satisfiable": true,
+      "x_r": "0x6317c"
+    },
+    {
+      "anf": {
+        "equations": 52,
+        "monomials": 4089
+      },
+      "blake3": {
+        "anf": "daa9190540b9fbf2137172a3e06e294a459fa02c964ba6d587e95906717a35e8",
+        "dimacs_cnf": "2252d772218ba8e407c1d051e0a823e811728582446678731962d86fc701c067",
+        "dimacs_xor": "b265e063e94570d3fbb985c3f43f09c6ab0c18890254b70ae870a21ced4039a1",
+        "magma": "0aa51520502f9f06f9a2694f2933a91817ec5e34144461ab67afe1a4b9c1a4a2"
+      },
+      "dimacs_cnf": {
+        "bytes": 574695,
+        "clauses": 23555,
+        "variables": 2748,
+        "xor_rows": 0
+      },
+      "dimacs_xor": {
+        "bytes": 42545,
+        "clauses": 2364,
+        "variables": 767,
+        "xor_rows": 52
+      },
+      "label_checked_by_own_solver": true,
+      "name": "n19l6-3-U",
+      "planted": null,
+      "planted_true_sat_variables": [],
+      "satisfiable": false,
+      "x_r": "0x1b207"
+    },
+    {
+      "anf": {
+        "equations": 52,
+        "monomials": 4140
+      },
+      "blake3": {
+        "anf": "cbcd8ed192e2ba8063dbd9407c3f626e128fba5492cf39ca364e7b295e2de8a7",
+        "dimacs_cnf": "9a3555980e03114adbb46094d27c4cc1f1c6619d204c958d033c136ea676f959",
+        "dimacs_xor": "bfe4d18dd5520df8437e27723962107ef3595b51aa8a0c0b4fdbd3d762d76aab",
+        "magma": "a4b0aeb41c942ae6ca59a4ebefcda4c9761fcc8649dbe9d910c381acb75523a9"
+      },
+      "dimacs_cnf": {
+        "bytes": 579986,
+        "clauses": 23759,
+        "variables": 2774,
+        "xor_rows": 0
+      },
+      "dimacs_xor": {
+        "bytes": 42755,
+        "clauses": 2364,
+        "variables": 767,
+        "xor_rows": 52
+      },
+      "label_checked_by_own_solver": true,
+      "name": "n19l6-4-U",
+      "planted": null,
+      "planted_true_sat_variables": [],
+      "satisfiable": false,
+      "x_r": "0x5c0bf"
+    }
+  ],
+  "operation": "corpus",
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "8794ed22be5fab334621692b861cd9e18b3d8cdd06a46ca950aed4310d627578",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete",
+  "written": [
+    "docs/ic/corpus/n19l6/INFOn19l6-1-S",
+    "docs/ic/corpus/n19l6/n19l6-1-S.dimacs",
+    "docs/ic/corpus/n19l6/n19l6-1-S.anf",
+    "docs/ic/corpus/n19l6/n19l6-1-S.magma",
+    "docs/ic/corpus/n19l6/INFOn19l6-2-S",
+    "docs/ic/corpus/n19l6/n19l6-2-S.dimacs",
+    "docs/ic/corpus/n19l6/n19l6-2-S.anf",
+    "docs/ic/corpus/n19l6/n19l6-2-S.magma",
+    "docs/ic/corpus/n19l6/INFOn19l6-3-U",
+    "docs/ic/corpus/n19l6/n19l6-3-U.dimacs",
+    "docs/ic/corpus/n19l6/n19l6-3-U.anf",
+    "docs/ic/corpus/n19l6/n19l6-3-U.magma",
+    "docs/ic/corpus/n19l6/INFOn19l6-4-U",
+    "docs/ic/corpus/n19l6/n19l6-4-U.dimacs",
+    "docs/ic/corpus/n19l6/n19l6-4-U.anf",
+    "docs/ic/corpus/n19l6/n19l6-4-U.magma"
+  ]
+}

@@ -1714,6 +1714,51 @@ pub fn to_dimacs(solver: &Solver) -> String {
     s
 }
 
+impl Solver {
+    /// The native parity rows as 1-indexed variable lists with their
+    /// right-hand sides, in the order they were added.
+    pub fn xor_rows(&self) -> Vec<(Vec<u32>, bool)> {
+        self.xors
+            .iter()
+            .map(|row| {
+                let vars = (0..self.n_vars)
+                    .filter(|&v| (row.mask[(v / 64) as usize] >> (v % 64)) & 1 == 1)
+                    .map(|v| v + 1)
+                    .collect();
+                (vars, row.rhs)
+            })
+            .collect()
+    }
+
+    /// Number of original (non-learnt) clauses.
+    pub fn n_original_clauses(&self) -> usize {
+        self.n_orig_clauses
+    }
+}
+
+/// Emit DIMACS with the parity rows as `x` lines, in the convention
+/// [`parse_dimacs_xor`] reads back (and CryptoMiniSat uses): `x 1 2 3 0`
+/// is `x₁ ⊕ x₂ ⊕ x₃ = 1`, and a negated first literal flips the
+/// constant, so `x -1 2 3 0` is `x₁ ⊕ x₂ ⊕ x₃ = 0`.
+pub fn to_dimacs_xor(solver: &Solver) -> String {
+    let mut s = to_dimacs(solver);
+    for (vars, rhs) in solver.xor_rows() {
+        if vars.is_empty() {
+            continue;
+        }
+        s.push('x');
+        for (k, v) in vars.iter().enumerate() {
+            s.push(' ');
+            if k == 0 && !rhs {
+                s.push('-');
+            }
+            s.push_str(&v.to_string());
+        }
+        s.push_str(" 0\n");
+    }
+    s
+}
+
 /// Convenience: verify that a model satisfies all clauses.
 pub fn check_model(clauses: &[Vec<Lit>], model: &[bool]) -> bool {
     for c in clauses {

@@ -677,6 +677,7 @@ pub fn matrix_f4_f2_blocked(
 
     let mut word_ops = 0u64;
     let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+    F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
 
     let n_vars_out = polys[0].n_vars;
     let mut out = Vec::with_capacity(rank);
@@ -777,6 +778,7 @@ pub fn matrix_f4_f2_counted(
     }
     let mut word_ops = 0u64;
     let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+    F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
 
     let n_vars_out = polys[0].n_vars;
     let words = cols.len().div_ceil(64);
@@ -872,9 +874,23 @@ fn build_macaulay(
 
 /// Reduced row echelon form over `F_2`; returns the rank, with the
 /// pivot rows moved to the front of `matrix`.
+/// Process-wide total of 64-bit word XORs performed by every Boolean
+/// Macaulay reduction, counted or not.  It exists so a caller that
+/// drives a whole splitting solve through [`solve_boolean_system`] —
+/// which reduces at every node without returning a count — can still
+/// price the solve exactly: read it before and after.
+pub static F4_WORD_OPS_TOTAL: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+/// The current value of [`F4_WORD_OPS_TOTAL`].
+pub fn f4_word_ops_total() -> u64 {
+    F4_WORD_OPS_TOTAL.load(std::sync::atomic::Ordering::Relaxed)
+}
+
 fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
-    let mut ignored = 0u64;
-    rref_f2_counted(matrix, n_cols, &mut ignored)
+    let mut count = 0u64;
+    let rank = rref_f2_counted(matrix, n_cols, &mut count);
+    F4_WORD_OPS_TOTAL.fetch_add(count, std::sync::atomic::Ordering::Relaxed);
+    rank
 }
 
 /// [`rref_f2`], accumulating the 64-bit word XORs it performs into
