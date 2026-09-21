@@ -3565,6 +3565,18 @@ factor base, and this prices a decomposition oracle.</p>
       <tr><td>binary k=3</td><td>7</td><td>7/7</td><td>6,7&rarr;5</td><td>0.0345</td><td>0.3282 [0.3043, 0.3533]</td><td>0.3284</td></tr>
     </tbody>
   </table></div>
+  <h3>Exact thread scaling</h3>
+  <p>Supplementary wall-time diagnostic on frozen radical inputs; every thread
+    count returns the identical leading ideal. F4 degree, matrix work and
+    calibrated operation counts are unchanged.</p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Input</th><th>1-thread median s</th><th>4-thread speedup</th><th>8-thread speedup</th><th>16-thread speedup</th></tr></thead>
+    <tbody>
+      <tr><td>prime b11 t0</td><td>0.9590</td><td>1.637&times;</td><td>1.752&times;</td><td>1.665&times;</td></tr>
+      <tr><td>prime b11 t2</td><td>0.9632</td><td>1.610&times;</td><td>1.685&times;</td><td>1.616&times;</td></tr>
+      <tr><td>binary k3 t0</td><td>1.0702</td><td>1.398&times;</td><td>1.441&times;</td><td>1.389&times;</td></tr>
+    </tbody>
+  </table></div>
   <p>The prior binary <code>k=4</code> probe is censored after 90 seconds;
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>

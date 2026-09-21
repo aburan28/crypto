@@ -72,6 +72,22 @@ promoted.  Every `b>=5` prime main/holdout cell and both binary cells have cold
 batch ratio below one in this solver-stage suite.  Timing remains secondary:
 shared-host variance is visible in raw repetitions, especially at `b=11`.
 
+## Exact thread scaling
+
+The accepted algebraic suite uses one thread. A separate 45-process resource
+study reruns two prime `b=11` radical inputs and one binary `k=3` radical input
+at 1, 2, 4, 8 and 16 threads. Every run returns the identical leading ideal.
+
+| Input | 1-thread median s | 4-thread speedup | 8-thread speedup | 16-thread speedup |
+| --- | ---: | ---: | ---: | ---: |
+| prime-b11-t0 | 0.9590 | 1.637x | **1.752x** | 1.665x |
+| prime-b11-t2 | 0.9632 | 1.610x | **1.685x** | 1.616x |
+| binary-k3-t0 | 1.0702 | 1.398x | **1.441x** | 1.389x |
+
+Eight threads are the measured wall-time knee on this host. This is a resource-
+scaling diagnostic: it does not reduce F4 degree, matrix work or calibrated
+operations, and does not alter the one-thread attack-accounting table.
+
 ## Correctness and scope
 
 - Direct and symmetric finite root sets agree on every target after quotient
@@ -93,7 +109,8 @@ recover both quadratics, and evaluate both polynomial presentations. Run 002 is
 superseded because those independent binary certificate checks were missing;
 run 001 stored absolute raw-log paths. Run 000 remains rejected because
 `msolve -g 0` measured full solution parametrization rather than the intended
-Gröbner stage.
+Gröbner stage. The separate thread-scaling run stores 45 matching-leading-ideal
+processes and passes its portable verifier.
 
 ## Interpretation
 

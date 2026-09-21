@@ -25,6 +25,8 @@ jobs:
           python3 -m json.tool research/radical_pair_image_20260921/contract.json >/dev/null
           python3 research/radical_pair_image_20260921/audit.py \
             research/radical_pair_image_20260921/results/run-003
+          python3 research/radical_pair_image_20260921/thread_scaling.py verify \
+            --output research/radical_pair_image_20260921/results/thread-scaling-001
           python3 - <<'PY'
           from html.parser import HTMLParser
           from pathlib import Path
