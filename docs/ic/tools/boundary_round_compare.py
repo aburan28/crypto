@@ -254,6 +254,8 @@ def compare_across_rounds(new, old):
     """
     out, new_rows = [], []
     old_by = {(i["regime"], i["curve"]["name"]): rows_of(i) for i in old["ledger"]["instances"]}
+    old_by_inst = {(i["regime"], i["curve"]["name"]): i["calibration"]["ns_per_add"]
+                   for i in old["ledger"]["instances"]}
     for inst in new["ledger"]["instances"]:
         prev_rows = old_by.get((inst["regime"], inst["curve"]["name"]))
         if prev_rows is None:
@@ -271,6 +273,26 @@ def compare_across_rounds(new, old):
             k = min(len(runs), len(base_runs))
             paired = [base_runs[i]["total_gae"] / runs[i]["total_gae"] for i in range(k)]
             gm, lo, hi = paired_log_summary(paired)
+            # The unit's conversion factors are measured on the host at the
+            # start of every run, so two runs price the same native counts
+            # slightly differently.  On a row that did not change at all,
+            # the ratio above is that drift and nothing else: `ns_per_add`
+            # moved from 213 ns to 146 ns between the Round-2 and Round-3
+            # ladders, which alone moves a square-root-heavy row's GAE by
+            # nearly a tenth.  So record whether the native counts are
+            # identical, and give a calibration-free ratio beside the GAE
+            # one: group additions, which are the unit's own numeraire and
+            # need no conversion.
+            same_counts = all(
+                base_runs[i]["trials"] == runs[i]["trials"]
+                and base_runs[i]["relations_found"] == runs[i]["relations_found"]
+                and all(base_runs[i][p]["group_ops"] == runs[i][p]["group_ops"]
+                        for p in ("factor_base", "relations", "linear_algebra"))
+                for i in range(k)
+            )
+            adds = lambda r: sum(r[p]["group_ops"]["adds"] for p in ("factor_base", "relations", "linear_algebra"))
+            paired_adds = [adds(base_runs[i]) / max(adds(runs[i]), 1) for i in range(k)]
+            gm_adds, lo_adds, hi_adds = paired_log_summary(paired_adds)
             # The phase the round's lever lives in, so a ratio that moves
             # can be read against the phase that moved it.
             phase = lambda rs, p: mean([r[p]["gae"] for r in rs])
@@ -292,6 +314,12 @@ def compare_across_rounds(new, old):
                 ("speedup_ci95_low", None if lo is None else round(lo, 4)),
                 ("speedup_ci95_high", None if hi is None else round(hi, 4)),
                 ("moved_at_95", None if lo is None else bool(lo > 1.0 or hi < 1.0)),
+                ("native_counts_identical", same_counts),
+                ("speedup_group_additions", None if gm_adds is None else round(gm_adds, 4)),
+                ("speedup_group_additions_ci95_low", None if lo_adds is None else round(lo_adds, 4)),
+                ("speedup_group_additions_ci95_high", None if hi_adds is None else round(hi_adds, 4)),
+                ("calibration_ns_per_add_previous_round", old_by_inst.get((inst["regime"], inst["curve"]["name"]))),
+                ("calibration_ns_per_add_this_round", inst["calibration"]["ns_per_add"]),
                 ("S_previous_round", round(mean([r["s"] for r in base_runs]), 4)),
                 ("S_this_round", round(mean([r["s"] for r in runs]), 4)),
                 ("S_over_rho_previous_round", round(mean([r["s"] for r in base_runs]) / inst["rho_s_mean"], 4)),
@@ -324,18 +352,26 @@ if holdout:
 # ── Markdown ──
 if across_rows:
     print("**Against the previous round, same row, same instance, same seed.**\n")
-    print("| regime | instance | log2 r | variant | m | |F| | repeats | speedup geomean | 95% interval | min | max | moved | S before → after | vs rho after | trials before → after | ok |")
-    print("|:--|:--|--:|:--|--:|--:|--:|--:|:--|--:|--:|:--|:--|--:|:--|:--|")
+    print("| regime | instance | log2 r | variant | m | |F| | repeats | counts | speedup geomean | 95% interval | moved | additions only | S before → after | vs rho after | trials before → after | ok |")
+    print("|:--|:--|--:|:--|--:|--:|--:|:--|--:|:--|:--|--:|:--|--:|:--|:--|")
     for c in across_rows:
         ci = "—" if c["speedup_ci95_low"] is None else f"{f(c['speedup_ci95_low'])} – {f(c['speedup_ci95_high'])}"
         moved = "—" if c["moved_at_95"] is None else ("yes" if c["moved_at_95"] else "no")
+        counts = "identical" if c["native_counts_identical"] else "differ"
         print(
             f"| {c['regime']} | {c['instance']} | {c['log2_r']:.1f} | {c['variant']} | {c['m']} | {c['signed_points']:,} "
-            f"| {c['repeats_paired']} | {f(c['speedup_geomean'])} | {ci} | {f(c['speedup_min'])} | {f(c['speedup_max'])} | {moved} "
+            f"| {c['repeats_paired']} | {counts} | {f(c['speedup_geomean'])} | {ci} | {moved} | {f(c['speedup_group_additions'])} "
             f"| {f(c['S_previous_round'])} → {f(c['S_this_round'])} | {f(c['S_over_rho_this_round'])}× "
             f"| {c['trials_previous_round']:,.0f} → {c['trials_this_round']:,.0f} "
             f"| {'✓' if c['verified_this_round'] and c['verified_previous_round'] else '✗'} |"
         )
+    identical = [c for c in across_rows if c["native_counts_identical"]]
+    if identical:
+        drift = [c["speedup_geomean"] for c in identical]
+        print(f"\n{len(identical)} of {len(across_rows)} rows have identical native counts in both rounds: "
+              f"the same trials, relations and group operations. Their GAE ratio is the unit's own "
+              f"calibration drift between two runs, not work done, and it spans "
+              f"{f(min(drift))} to {f(max(drift))}. A speedup is only claimed for rows whose counts differ.")
     if across_new:
         print(f"\nRows new in this round (priced by the within-run pairing below): "
               f"{', '.join(sorted({r['variant'] for r in across_new}))}.")
