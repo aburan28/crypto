@@ -164,14 +164,17 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
             &blocks, eccPacked131::walk, ECC_THREADS, dynamicSharedBytes()));
         size_t freeBytes, totalBytes;
         CUDA_CHECK(cudaMemGetInfo(&freeBytes, &totalBytes));
+        // The witness counters setup allocates alongside the walk state;
+        // zero when ECC_WITNESS is compiled out.
+        const size_t counterBytes = eccScalarCountWords(1, BATCH) * sizeof(unsigned);
 #if ECC_PACKED_COMPACT_STATE
         // autoThreads rounds to complete 256-worker tiles; each stored field
         // consumes sixteen low bytes and one top byte per worker/slot.
         const size_t perThread = size_t(BATCH) *
-            ((3 + denominatorFields) * 17 + sizeof(unsigned) + 2 * sizeof(u64));
+            ((3 + denominatorFields) * 17 + sizeof(unsigned) + 2 * sizeof(u64)) + counterBytes;
 #else
         const size_t perThread = size_t(BATCH) *
-            ((3 + denominatorFields) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64));
+            ((3 + denominatorFields) * 5 * sizeof(unsigned) + sizeof(unsigned) + 2 * sizeof(u64)) + counterBytes;
 #endif
         size_t threads = size_t(prop.multiProcessorCount) * ECC_THREADS * blocks;
         const size_t fits = (freeBytes - freeBytes / 4) / perThread;
