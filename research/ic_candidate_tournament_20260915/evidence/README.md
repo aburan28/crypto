@@ -46,7 +46,7 @@ to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015`, `round-0016`, `round-0017`, `round-0018` and `round-0018b` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015`, `round-0016`, `round-0017`, `round-0018`, `round-0018b` and `round-0019` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
@@ -173,3 +173,18 @@ with round 0017's certificate change, and its `beats_rho_strict=False` is not a 
 same pre-registration, the same seed and the same arms against the incumbent that pre-registration names,
 and it is the round of record. The first archive is kept because its 2,340 receipts are real measurements
 of those arms against an older baseline, and because a superseded run that is deleted cannot be checked.
+
+## Round 0019 is the promoted record
+
+`round-0019.tar.zst` (sha256 `11cf99af0cf018ab970d883e141c4224d1336b1bfa0da5795b786321a81f8054`,
+68,485 files) holds the round that promoted `both` and carries the campaign's
+strict-win record: `beats_rho_strict` on all eight cells in both metrics on
+both final stages, seed 2026092119, audit VERIFIED over 2,646 trial receipts
+and 452 source files.
+
+It is the first round with a per-cell confirmation allocation — forty fixtures
+at `n23a1`, twelve at the other seven, 124 cases against the flat panel's 96 —
+so its `contract.json` carries `confirmation_cases_per_cell` and
+`confirmation_allocation`. Rounds before it have neither key and are read
+exactly as before; the flat profile is what `prepare` produces when
+`--confirmation-cases` is absent.

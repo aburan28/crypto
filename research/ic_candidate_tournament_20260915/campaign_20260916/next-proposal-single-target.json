@@ -1,11 +1,21 @@
 {
   "candidates": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/next-candidates-single-target.json",
-  "baseline_source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0018b/source",
+  "baseline_source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0019/source_candidates/both/source",
   "target_count": 1,
   "require_native_progress": true,
   "panel": {
     "cells": "13a0,17a1,19a0,23a0,23a1,31a0",
     "holdout_cells": "19a1,29a1"
   },
-  "next_step": "Use this source (it carries .cargo/config.toml), preserve target count, gates and the eight-cell panel, and choose a new seed. oracle.py now accepts two certificate formats and two column conventions; a report declares which it uses and may not carry both. Round 0018 measured the pair-table row rule at every row count and found the shipped rule already optimal at seven of eight cells, so that is closed. What round 0018 leaves open is the native instrument: its own A/A control cells, where an arm provably does nothing, are the place to read what the native gate can and cannot resolve before spending another round on a sub-5% native effect."
+  "confirmation_allocation": {
+    "n13a0": 12,
+    "n17a1": 12,
+    "n19a0": 12,
+    "n19a1": 12,
+    "n23a0": 12,
+    "n23a1": 40,
+    "n29a1": 12,
+    "n31a0": 12
+  },
+  "next_step": "Use this source (it carries .cargo/config.toml and both round-0018 patches), preserve target count, gates and the eight-cell panel, and choose a new seed. oracle.py reads two certificate formats and two column conventions; a report declares which and may not carry both.\n\nRound 0019 promoted `both` with beats_rho_strict on all eight cells and closed two lines. The factor base is closed: the cost rises monotonically with the orbit count at every cell, the base the panel builds is the cheapest reachable, and the contract's `points` parameter is inert below one batch of eight orbits. The pair-table row rule was closed by round 0018.\n\nTwo things are open, and they point opposite ways.\n\nREPLICATION. Round 0019 holds the strict win on ONE seed with the binding cell resolved at forty fixtures. round19_seed_variance.py flags three of eight cells for scatter beyond within-round sampling (n13a0, n23a1, n31a0), on a test that over-rejects with n=12 and a right-skewed rho. A fourth seed at the round-0019 allocation is the cheapest thing that would settle whether a per-cell ratio is a property of the executable at all. Carry the allocation: the flat twelve is what made round 0018b unreadable.\n\nTHE BOUNDARY. round19_model.py puts this collector at r^(2/3) against rho's r^(1/2), and the same-degree contrast measures the ratio rising 16.6% per doubling of r at degree 23 -- one further doubling past n23a1 reads 1.040. A ninth cell at degree 23 or above with a large subgroup would measure the crossover directly rather than by extrapolation from two points. That is the measurement that would tell the campaign whether it is finished."
 }
