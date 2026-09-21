@@ -1962,20 +1962,58 @@ Why a block helps this much is worth stating, because the reason is not
 the one the code's comment gave. The key is some 76 ns of dependent work
 before the address it will load is even known, which is long enough that
 consecutive probes' memory round trips do not overlap when the two are
-fused; split, the lookups are adjacent and independent and do overlap. A
-compact table is the control: its key is a `pack`, nine nanoseconds, its
-probes already overlap, and that is why blocking buys it a third where
-it buys the folded table four fifths. Chunk 1 is measured too and comes
-back at 1.00x on the folded table, so the figure is the blocking and not
-the buffer the chunked loop uses.
+fused; split, the lookups are adjacent and independent and do overlap.
+Chunk 1 is measured too and comes back at 1.00x on the folded table, so
+the figure is the blocking and not the buffer the chunked loop uses.
 
-Which *microarchitectural* resource the long key exhausts is not settled
-here. Reorder-buffer capacity fits, and so would the data-dependent
-branch in the rotation's `x < best`, and a 128 MiB filter walked at
-random misses the TLB on most probes; nothing measured separates them,
-and the compact control speaks only to the key's length being the cause,
-not to the mechanism by which length costs. What it does settle is that
-the block must stay.
+Everything in this subsection is a **stage diagnostic** under `AGENTS.md`
+§2: probe cost is one slice of the pipeline, so none of these ratios is
+a speedup and none may be quoted as one. The method's speed is its `S`
+column, cold and whole, and nothing here moves it. By §3 the change is
+**accounting** — the numbers below correct what earlier rounds claimed
+this cost; the algorithm is unchanged, and no gain is claimed.
+
+**The compact table is not the control this wants.** It differs from the
+folded one in the key *and* in the lookup, and the two cannot be told
+apart by comparing them. The control that holds the lookup fixed is to
+canonicalise with `k` rotations instead of `n` on the folded table
+itself: the key is then wrong, which does not matter, because it is
+spread over the same range and the filter turns away the same fraction.
+`examples/probe_window_sweep.rs` does that. What it finds is not a gain
+proportional to the key's length but a **step**:
+
+| `k` | uops a key | key alone | fused − blocked |
+|---|---|---|---|
+| 2 | 46 | 8.9 ns | 95 ns |
+| 4 – 8 | 58 – 82 | 9.3 – 12.2 | 76 – 78 |
+| **10** | **94** | 14.2 | **147** |
+| 12 – 61 | 106 – 400 | 16.2 – 69.0 | 142 – 152 |
+
+Between `k = 8` and `k = 10` the gap doubles, and on either side of that
+it is flat: from `k = 10` to `k = 61` the key grows five times in time
+and four in uops while the gap does not move. The knee is at **82 to 94
+uops**, reproducible across runs, and the rotation is `lea, shr, or,
+and, cmp, cmovb` — six uops a step, which is where those counts come
+from.
+
+So the mechanism is a capacity, and the sweep says *which* capacity.
+This host is a Cascade Lake Xeon: a 224-entry reorder buffer and a
+**97-entry scheduler**. The knee sits on the scheduler, not the ROB —
+the key is one long dependent chain, so its uops wait in the scheduler
+rather than merely occupying the ROB, and it is the smaller structure
+that fills first. Two of the three candidates this note used to leave
+open are now closed: the `x < best` branch is a **`cmovb`** — disassemble
+`canon_key_with` and look — so there is no branch to mispredict; and TLB
+pressure was never a competing hypothesis, since page walks lengthen the
+round trip in *both* loops and so govern how big the exposed cost is,
+not whether it is exposed.
+
+What the sweep does not settle is the residual: at `k = 2` the key costs
+the same nine nanoseconds as a `pack` and blocking still buys 95 ns,
+where the compact table's gap is 32. Key cost held equal, the two tables
+still differ three-fold, so that part is the lookup structure or the
+16 KiB of canon tables in a 32 KiB L1, and nothing here separates those.
+What all of it settles is that the block must stay.
 
 This is a different thing from interleaving lanes, which is measured
 elsewhere in this note and buys the rotation nothing: interleaving fills
@@ -1987,9 +2025,34 @@ makes blocking pay.
 
 One arm still probes one at a time: `m = 4` walks every second half
 `R − (P_k + P_l)` and calls `pairs_for` on each, so it pays the 265
-rather than the 145. It is quadratic in the base and the least used,
-which is presumably why it was never blocked; blocking it is the same
-change the `m = 3` arm already carries.
+rather than the 145. That is the smaller half of what it does one at a
+time, and naming only it was a mistake. The line above the probe is
+`self.curve.add(target, self.curve.neg(pair))`, and `FastCurve::add`
+calls `Gf2::inv` — a Fermat inversion, `n − 1` squarings and as many
+multiplications — once per `(k, l)`, where the `m = 3` arm's `add_many`
+amortises one inversion over a whole block by Montgomery's trick.
+`examples/m4_inversion_cost.rs` prices them at `n = 61`:
+
+| per `(k, l)` | ns |
+|---|---|
+| `Gf2::inv` alone | 1257 |
+| `FastCurve::add`, what `m = 4` does | **1300** |
+| `add_many` 1024 wide, what `m = 3` does | **68** |
+
+The unbatched inversion is **1232 ns a pair, nineteen times the batched
+step and about twelve times the probe penalty named above**. Blocking
+the probe and batching the inversion together would take the inner step
+from some 1565 ns to 212.
+
+It is quadratic in the base and the least used, which is presumably why
+it was never blocked. *Least used* is the operative half: no parameter
+set or recorded run in this repository asks for `m = 4` — 698 places ask
+for 3 and 110 for 2 — and nothing sets `max_m`, so no sweep reaches it
+either. This is a correction to what the note claimed the arm costs, not
+a change worth making until something runs it — **accounting** by
+`AGENTS.md` §3, and a stage diagnostic by §2: the inner step of one
+enumeration arm, on no path any run takes, so nothing here is a
+speedup.
 
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
@@ -2647,3 +2710,101 @@ needs no recovery scan at all, and it was not tested here. Nor that
 flipping the default is free: the ladder is a documented contract with a
 test asserting it, and it is reached by every caller. The measurement
 says what it says; the change is a separate decision.
+
+### The tier order, decided in operations instead of seconds — 2026-09-21
+
+The previous round ended with the measurement and left the change as a
+separate decision. The decision was taken — flip the default to
+fold-first — and then the flip was priced in this repository's unit
+rather than in wall-clock. It did not survive.
+
+**The boundaries, stated before this round's measuring.** The floor is
+the generic-group bound `S ≥ √(π/2A)` with `A = 2n = 122`, which is
+`0.1135` here; the contract's count floor for the `m = 2` descent is
+`N / C(|F|+1, 2)`, which at 12688 points is `2,023,479` probes a target.
+The reference is signed-Frobenius Pollard rho counted on the same
+instance in the same process: `2,263,934` steps a target, `S = 0.1774`.
+Neither moves with the tier — the tier changes no count either bound
+constrains — so no tier choice can be an **advance** in the §3 sense,
+and this round could only ever be engineering, relabelling or
+accounting.
+
+**The falsification target, stated in advance.** The flip is an
+improvement if `baseline_total_operations / candidate_total_operations >
+1` over the whole cold pipeline at fixed base, with every target
+verified on both arms and every other operation count identical.
+Inadmissible: changing the base, the target set, the summand counts or
+the seeds; pricing only the build; quoting seconds.
+
+**The unit.** `S = total operations / √r` in batched group additions.
+The build's count is native — one addition per stored pair — and rho's
+is native too, one per walk step. The probe counts are foreign and are
+converted by a factor measured on the same host, base and process by
+`examples/koblitz_probe_conversion.rs`, in the shape the pipeline
+probes in: `witnesses_fast` with `m = 3` and a never-stopping sink for
+the summand scan, `BLOCK = 1024` with the descent's own 32-key prefetch
+for the descent. Earlier notes quoted `contains_pair` one target at a
+time, which the pipeline never does.
+
+**The flip, at the width it was argued from.** 12688 points, 32 targets,
+32 of 32 verified on every arm, and every operation count but the table
+identical between arms:
+
+| tier | build | collect | descent | **total adds** | `S` | vs rho | vs floor |
+|---|---|---|---|---|---|---|---|
+| full | 80,499,016 | 787,920,000 | 57,487,480 | **925,906,496** | 2.29 | 12.9× | 20.2× |
+| compact | 80,499,016 | 735,157,500 | 51,841,388 | **867,497,904** | 2.14 | 12.1× | 18.9× |
+| folded | 666,120 | 865,305,000 | 70,832,788 | **936,803,908** | 2.31 | 13.0× | 20.4× |
+
+Stored pairs fall `120.85×`; total operations **rise** `1.2%`. That is
+§3 **relabelling** by its exact definition, and it reproduced on an
+independent holdout target set (seeds 900–931, never used to tune
+anything here): `1.016×`. The wall-clock gain the flip was argued from
+is real and is memory traffic — the full build costs 121 ns a stored
+pair against a batched addition's 62 — which is precisely why §6 makes
+operation counts the metric.
+
+**So the question was re-asked over four widths.** Fixed everything but
+the base and the tier; rho off, because rho does not depend on the tier
+and was four fifths of the wall time; each width's conversion measured
+on its own base.
+
+| points | orbits | full | compact | folded | cheapest | verified |
+|---:|---:|---:|---:|---:|:--|:--|
+| 6,832 | 56 | **876,342,501** | 926,956,220 | 1,104,202,174 | full | 32/32 |
+| 9,760 | 80 | 903,649,246 | **880,008,741** | 1,009,804,178 | compact | 32/32 |
+| 12,688 | 104 | 941,440,872 | **887,500,874** | 966,559,218 | compact | 32/32 |
+| 18,544 | 152 | 1,117,432,188 | 1,042,518,063 | **982,920,004** | folded | 32/32 |
+
+`full/folded` crosses one at `|F| ≈ 13,623` and `compact/folded` at
+`≈ 16,052`, both by interpolation between two measured widths rather
+than beyond them. The crossover was **predicted at 13,600 before the
+sweep was analysed**, from the measured per-probe deltas and the sweep's
+probing volume, by
+`|F|²/2 · (1 − 1/2n) > Δ_scan · summands + Δ_blocked · descent`.
+
+**All three tiers are cheapest somewhere, so both fixed orders are
+wrong.** First-that-fits is right only below about 8000 points and
+fold-first only above about 16000; between them the answer is compact,
+which both orders reach second and which fold-first made unreachable by
+default. The tier is not a property of the base: the fold buys a build
+`2n` times cheaper and pays on every probe, so it depends on how much
+probing amortises the build. `ProbeBudget` makes that volume an input.
+
+**Class: accounting** for the round as a whole — the algorithm did not
+change when the answer did, only the unit — and **relabelling** for the
+flip measured on its own. Neither is a result. Nothing here moves the
+standing against rho: every tier costs 12–13× rho's `S` on this instance
+and 19–21× the generic floor, and the tier moves the constant only.
+
+**Not claimed.** That the crossover width generalises: one curve, one
+degree, one host, and the fold's saving carries `1 − 1/2n` while its
+canonicalisation grows with `n`, so both sides move with the degree and
+neither was measured against it. No exponent is fitted — four widths at
+one degree is the minimum for a fit and this round does not make one.
+And the sweep pins the probing volume across widths, which makes each
+width exactly controlled but does not model how a run sizes its own
+collection: relations needed scale as `|F|/2n` while the `m = 3` hit
+rate scales as `|F|³/r`, so a properly sized run at a wider base probes
+less. `13,623` is therefore an **upper bound** on the practical
+crossover, not a two-sided estimate.

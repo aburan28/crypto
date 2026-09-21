@@ -691,11 +691,44 @@ one jump table.  The guard is one hash insert per target, counted as
 `pinned_by_repeated_row` reported.  `--unguarded-targets` reproduces the
 old behaviour for that diagnostic; the note's §10.2 has the numbers.
 
-`tools/boundary_round_compare.py` pairs each new row with the rung it
-was built on (same curve, target, seed) and saves the
+**Round 3** (`runs/ic-boundary-ledger-round3-2026-09-21.json`, the note's
+§11) does not add a suffix.  Its first lever makes an existing row
+cheaper: the walk's **restarts**.  Round 2 redrew all sixteen jumps at
+two scalar multiplications each whenever the target guard forced a
+restart, which on the rungs that restart often cost more than every walk
+step put together.  The walk now draws its jumps once, keeps sixteen
+pooled offsets beside them, and restarts by adding one offset to the
+current point while rotating which jump each hash selects — so two
+segments still have different step functions and cannot merge, at one
+group operation per restart instead of thirty-two scalar
+multiplications.  The second lever gives the prime and binary regimes
+the `_balanced` row the Koblitz regime already had.  The third is
+reporting: every row now carries its ratio to the **family shape law**
+
+```text
+    ops(F) = F²/(4t) + c·#E/(2kF),   least at F = (c·#E·t/k)^{1/3}
+    S_family = 0.75·(#E·t/k)^{2/3} / (t·√r)
+```
+
+with `t` the table fold (1 up to negation, `n` up to `⟨σ, −1⟩`) and `k`
+the column fold (1 per abscissa, `n` per signed Frobenius orbit).  On a
+prime-order curve that is `Θ(r^{1/6})`, so no choice of base size
+escapes it and every constant this repository can tune lives inside the
+`0.75`.  It is a model of the family and not a bound on the problem —
+the relation count is an expectation over the cycle structure, so a row
+can land under it — and it is reported next to the generic floor, which
+is a bound.
+
+`tools/boundary_round_compare.py` pairs rows two ways and saves the
 `speedup = baseline_total_operations / candidate_total_operations`
-comparison `AGENTS.md` §8 asks for, recording which first-round rows
-reproduce the frozen counts and which the guard moved.
+comparison `AGENTS.md` §8 asks for.  Within a run it pairs each new row
+with the rung it was built on (same curve, target, seed), which is what
+prices a row a round *adds*; with `--across <previous-round.json>` it
+pairs each row with the same-named row of the previous round's run on
+the same instance and seed, which is the only pairing that can see a
+lever that makes an existing row cheaper without renaming it.  It also
+records which first-round rows reproduce the frozen counts and which the
+target guard moved.
 
 ## A benchmark corpus: `ic corpus`
 
@@ -889,10 +922,21 @@ against 3.3×.
 - `koblitz_fast::NormalBasis` builds the basis and is the key; the two
   keys pick different representatives of the same orbit, so a folded
   table is not portable across the change.
-- `PairSumTable::build_within` reaches for the fold as its last tier, when
-  neither the full nor the compact table fits the budget. That is still
-  right after the cheaper key: what the fold buys is a *wider* base, and
-  the base is fixed by the time the tier is chosen.
+- `PairSumTable::build_within` chooses the tier by a **measured cost
+  model**, not by what fits. It has been ordered three ways: first that
+  fits (summands, compact, fold), then fold-first, and now neither. Both
+  fixed orders treat the tier as a property of the base, and it is not —
+  the fold buys a build `2n` times cheaper and pays for it on every
+  probe, so the answer depends on how much probing amortises the build.
+  `ProbeBudget` carries that volume; `build_within_for` takes one.
+  Priced in group additions over four widths on one curve, the cheapest
+  tier is full below about 8000 points, compact from there to about
+  16000, and folded above; `full/folded` crosses one at `|F| ≈ 13,623`.
+  The default never picks `full` — it wins only the narrowest width
+  measured, by 5.8%, inside the conversion's own noise, and costs four
+  times the memory — but every tier stays reachable by name and `ic`'s
+  `pair_table_tier` overrides the choice.
+  `docs/ic/runs/koblitz-tier-crossover-20260921.json` is the sweep.
 - `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
 - `PairSumTable::contains_pair` is the probe on its own, without the
   `O(|F|)` summand recovery a hit would otherwise charge to it — one
@@ -917,10 +961,30 @@ against 3.3×.
   **74 ns** a base point, and the canonicalisation measured alone is
   **76** — so the fold's cost in the descent is the canon and nothing
   else.  Read it down the columns: blocking buys the folded table
-  **1.83×** and the compact table, the control, **1.35×**, which is what
-  says the cause is the key's length.
+  **1.83×** and the compact table **1.35×**.
   `docs/ic/runs/koblitz-probe-shape-20260913.json` records it, and what
   it does not claim.
+- `examples/probe_window_sweep.rs` then asks *why* blocking pays, with
+  the control that comparison lacks: the folded table canonicalised with
+  `k` rotations instead of `n`, so the lookup is held fixed and only the
+  key's length moves.  The gain does not scale with the key — it
+  **steps**, doubling between `k = 8` and `k = 10` and flat on either
+  side, which at six uops a rotation puts the knee at **82 to 94 uops**
+  against this host's **97-entry scheduler**.  So the capacity that
+  binds is the scheduler, not the 224-entry ROB; the `x < best` branch
+  is a `cmovb` and never mispredicted; and TLB pressure was never a
+  competing hypothesis, since it sets how big the exposed round trip is
+  rather than whether it is exposed.
+- `examples/m4_inversion_cost.rs` prices the `m = 4` arm's unbatched
+  `FastCurve::add`: a Fermat inversion at **1300 ns** a `(k, l)` against
+  `add_many`'s **68**, which is twelve times the lone-probe penalty the
+  note used to name as that arm's problem.  No shipped parameter set
+  asks for `m = 4`, so it is a correction rather than a change.
+- The three bullets above are **stage diagnostics** (`AGENTS.md` §2):
+  each prices one slice — a probe, a key, an inversion — so none is a
+  speedup, and the ones that correct an earlier figure are
+  **accounting** by §3.  The method's speed is its `S` column, whole and
+  cold; none of this moves it, so none of it is a scoreboard row.
 
 - `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
   whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over

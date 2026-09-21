@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Render the Round-2 tables of the boundary-ledger note (§10.3, §10.6).
+"""Render a round's tables for the boundary-ledger note.
 
-usage: boundary_round2_note_tables.py <round2.json> [--ladder]
+usage: boundary_round_note_tables.py <round.json> [--ladder]
 
-§10.3 is one block per regime: the boundary, the reference, every
-first-round row of the largest instance, and every Round-2 rung with the
-`S` of the rung it was built on as its "was" mark.  §10.6 is the fitted
-total exponent of every Round-2 variant next to the row it was built on
-and the reference.  `--ladder` adds the full Round-2 ladder.
+The first table is one block per regime: the generic floor, the family
+optimum, the reference, every first-round row of the largest instance,
+and every later rung with the `S` of the rung it was built on as its
+"was" mark.  The second is the fitted total exponent of every new
+variant next to the row it was built on and the reference.  `--ladder`
+adds the full ladder of new rows.
 """
 import json, math, sys
 from collections import OrderedDict
@@ -15,7 +16,7 @@ from collections import OrderedDict
 run = json.load(open(sys.argv[1]))
 L = run["ledger"]
 ROUND2 = ("_negfold", "_frobfold", "_walk", "_balanced")
-SUFFIXES = ("_walk", "_frobfold", "_negfold", "_balanced")
+SUFFIXES = ("_balanced", "_walk", "_frobfold", "_negfold")
 
 PRETTY = {
     "semaev_s3_roots_m2": "Semaev `S₃` roots",
@@ -40,6 +41,7 @@ PRETTY = {
     "mitm_m2_signed_orbit_columns_frobfold_walk": "two summands, folded table, walk targets",
     "mitm_m3_signed_orbit_columns_frobfold_walk_balanced": "balanced base, three summands",
     "mitm_m2_signed_orbit_columns_frobfold_walk_balanced": "balanced base, two summands",
+    "mitm_m2_negfold_walk_balanced": "+ balanced base",
 }
 CLASS = {
     "semaev_s3_roots_m2": "baseline",
@@ -85,17 +87,26 @@ by_regime = OrderedDict()
 for inst in L["instances"]:
     by_regime.setdefault(inst["regime"], []).append(inst)
 
-print("| regime, instance | variant | m | \\|F\\| | K | trials | yield/ceiling (exact) | S | was | vs rho | vs floor | ok | class |")
-print("|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|")
+print("| regime, instance | variant | m | \\|F\\| | K | trials | yield/ceiling (exact) | S | was | vs rho | vs floor | vs family | ok | class |")
+print("|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|")
 for regime, insts in by_regime.items():
     big = max(insts, key=lambda i: i["r"])
     A = big["automorphisms_generic"]
     ref = [x for x in big["rho"] if (A <= 2 or x["automorphisms"] == A)]
     walk_s = mean([x["s_walk"] for x in ref])
     head = f"{LABEL[regime]}, `{big['curve']['name']}`, `r = 2^{big['log2_r']:.1f}`, `#E = {big['cofactor']}r`, `A = {A}`"
-    print(f"| {head} | generic floor `√(π/2A)` | | | | | | {big['floor_s']:.3f} | | {f(big['floor_s'] / big['rho_s_mean'])}× | 1× | — | boundary |")
+    # The family optimum is a per-shape quantity: a row's table fold and
+    # column fold set it.  Show the best shape the instance offers, and
+    # name it, so the number is not read as a single instance constant.
+    shapes = [v for v in big["variants"] if v.get("family_optimum_s")]
+    best_shape = min(shapes, key=lambda v: v["family_optimum_s"]) if shapes else None
+    print(f"| {head} | generic floor `√(π/2A)` | | | | | | {big['floor_s']:.3f} | | {f(big['floor_s'] / big['rho_s_mean'])}× | 1× | | — | boundary |")
+    if best_shape:
+        fam = best_shape["family_optimum_s"]
+        t = round(best_shape["signed_points"] / (2.0 * max(best_shape["columns"], 1)))
+        print(f"| | family optimum `0.75·(#E·t/k)^(2/3)/(t√r)`, best shape on this instance (`k = {t}`) | | {best_shape['family_optimum_base']:,.0f} | | | | {f(fam)} | | {f(fam / big['rho_s_mean'])}× | {f(fam / big['floor_s'])}× | 1× | — | model |")
     name_ref = "signed-Frobenius rho, counted" if regime == "koblitz" else "Pollard rho, r-adding, counted"
-    print(f"| | {name_ref} (walk alone {f(walk_s)}) | | | | | | {f(big['rho_s_mean'])} | | 1× | {f(big['rho_s_mean'] / big['floor_s'])}× | ✓ | reference |")
+    print(f"| | {name_ref} (walk alone {f(walk_s)}) | | | | | | {f(big['rho_s_mean'])} | | 1× | {f(big['rho_s_mean'] / big['floor_s'])}× | | ✓ | reference |")
     rows = rows_of(big)
     first = [n for n in rows if not any(s in n for s in ROUND2)]
     best_before = min(first, key=lambda n: mean([r["s"] for r in rows[n]]))
@@ -115,6 +126,7 @@ for regime, insts in by_regime.items():
             f"| {mean([r['trials'] for r in runs]):,.0f} | {mean([r['yield_over_ceiling'] for r in runs]):.2f} "
             f"({mean([r['yield_over_ceiling_exact'] for r in runs]):.2f}) | {mark(f(s))} | {was} "
             f"| {mark(f(s / big['rho_s_mean']) + '×')} | {f(s / big['floor_s'])}× "
+            f"| {f(mean([r.get('ratio_to_family_optimum', float('nan')) for r in runs]))}× "
             f"| {'✓' if all(r['verified'] for r in runs) else '✗'} | {cls} |"
         )
 

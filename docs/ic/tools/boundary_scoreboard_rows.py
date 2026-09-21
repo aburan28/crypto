@@ -45,6 +45,9 @@ PRETTY = {
     "mitm_m2_signed_orbit_columns_frobfold_walk": "Two summands, Frobenius-folded table, walk targets",
     "mitm_m3_signed_orbit_columns_frobfold_walk_balanced": "Balanced base (|F| &asymp; 1.2&middot;(4#E)<sup>1/3</sup>), m = 3, folded table, walk",
     "mitm_m2_signed_orbit_columns_frobfold_walk_balanced": "Balanced base, m = 2, folded table, walk",
+    # Round 3: the balanced base on the other two regimes, sized by the
+    # family shape law rather than by the ceil(bits/3) rule.
+    "mitm_m2_negfold_walk_balanced": "&hellip; and a base at the family optimum (|F| = #E<sup>1/3</sup>)",
 }
 # Class of each variant by the AGENTS.md §3 test, argued in research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md §3.
 # Keyed by (regime, variant); a bare variant name is the fallback for every regime.
@@ -74,6 +77,9 @@ CLASS = {
     "mitm_m2_signed_orbit_columns_frobfold_walk": ("engineering", "engineering: two summands on the folded table with walk targets; the trials are what the exact ceiling allows, at one addition each"),
     "mitm_m3_signed_orbit_columns_frobfold_walk_balanced": ("engineering", "engineering: a different base, sized so the folded table balances the trials; its own row, its own floor"),
     "mitm_m2_signed_orbit_columns_frobfold_walk_balanced": ("engineering", "engineering: the same balanced base with two summands; the best Koblitz row, still above the reference"),
+    # Round 3 (§11): still engineering — the base size is a parameter of the
+    # same counting bound, now set by the family shape law instead of a rule.
+    "mitm_m2_negfold_walk_balanced": ("engineering", "engineering: the base size that minimises the family's table-plus-relations cost, F = #E^(1/3) signed points; its own row, its own table"),
 }
 CHIP = {"advance": "advance, count", "relabel": "relabelling"}
 ROUND2 = ("_negfold", "_frobfold", "_walk", "_balanced")
@@ -94,7 +100,7 @@ for inst in L["instances"]:
 print("<!-- table rows: largest instance per regime -->")
 for regime, insts in by_regime.items():
     big = max(insts, key=lambda i: i["r"])
-    print(f'          <tr class="group"><td colspan="6">{GROUP[regime]} &middot; {html.escape(big["curve"]["name"])} &middot; r = 2<sup>{big["log2_r"]:.1f}</sup> &middot; rho S = {fmt(big["rho_s_mean"])} &middot; floor S = {big["floor_s"]:.3f}</td></tr>')
+    print(f'          <tr class="group"><td colspan="7">{GROUP[regime]} &middot; {html.escape(big["curve"]["name"])} &middot; r = 2<sup>{big["log2_r"]:.1f}</sup> &middot; rho S = {fmt(big["rho_s_mean"])} &middot; floor S = {big["floor_s"]:.3f}</td></tr>')
     seen = OrderedDict()
     for v in big["variants"]:
         seen.setdefault(v["name"], []).append(v)
@@ -110,7 +116,11 @@ for regime, insts in by_regime.items():
             prev = previous_rung(name, seen) or best_before
             if prev:
                 was = f' <small>was {fmt(mean([r["s"] for r in seen[prev]]))}</small>'
-        print(f'          <tr><td>{PRETTY.get(name, name)}</td><td class="n">{fmt(s)}{was}</td><td class="n">{fmt(s / big["rho_s_mean"])}&times;</td><td class="n">{fmt(s / big["floor_s"])}&times;</td><td>{ok}</td><td title="{html.escape(why)}">{chip}</td></tr>')
+        # The family shape law is a model of this family, not a bound on the
+        # problem (§11.2), so it gets its own column and its own legend line
+        # rather than sitting beside the floor as if it were one.
+        fam = mean([r.get("ratio_to_family_optimum") for r in runs])
+        print(f'          <tr><td>{PRETTY.get(name, name)}</td><td class="n">{fmt(s)}{was}</td><td class="n">{fmt(s / big["rho_s_mean"])}&times;</td><td class="n">{fmt(s / big["floor_s"])}&times;</td><td class="n">{fmt(fam)}&times;</td><td>{ok}</td><td title="{html.escape(why)}">{chip}</td></tr>')
 
 print("\n<!-- exponent rows: total per variant, r-fit -->")
 def pos(alpha):

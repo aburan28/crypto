@@ -144,6 +144,25 @@ fn boundary_ledger_quick_run_prices_every_regime_and_verifies() {
             assert!(var["s"].as_f64().unwrap() > 0.0);
             assert!(var["ratio_to_floor"].as_f64().unwrap() > 1.0);
             assert!(var["relations"]["native"]["trials"].as_u64().unwrap() > 0);
+            // The family shape law is reported per row at that row's own
+            // table fold and column fold, and `S` divided by it is the
+            // `vs family` column of the note and the scoreboard.
+            let fam = var["family_optimum_s"].as_f64().unwrap();
+            assert!(fam > 0.0, "{}", var["name"]);
+            let ratio = var["ratio_to_family_optimum"].as_f64().unwrap();
+            assert!(
+                (ratio - var["s"].as_f64().unwrap() / fam).abs() < 1e-6,
+                "{}: ratio_to_family_optimum is not S / family_optimum_s",
+                var["name"]
+            );
+            assert!(var["family_optimum_base"].as_f64().unwrap() > 0.0);
+            // A relation search that is pinned by decomposing one group
+            // element twice is measuring a collision, not relations
+            // (§10.2); it must not happen on any row.
+            assert_eq!(
+                var["linear_algebra"]["native"]["repeated_column_rows"], 0,
+                "{}", var["name"]
+            );
         }
     }
     assert_eq!(v["oracle_pricing"]["all_agree"], true);

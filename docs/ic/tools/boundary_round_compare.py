@@ -2,7 +2,22 @@
 """Pair the before and after rows of a boundary-ledger run and save the
 baseline/candidate comparison AGENTS.md §8 asks for.
 
-usage: boundary_round_compare.py <round.json> [--baseline <round1.json>] [--out <comparison.json>] [--holdout <holdout.json>]
+usage: boundary_round_compare.py <round.json> [--baseline <round1.json>]
+       [--across <previous-round.json>] [--out <comparison.json>] [--holdout <holdout.json>]
+
+There are two pairings here and they answer different questions.
+
+`--across` is the one AGENTS.md §8 asks for when a round changes a row
+*in place* rather than adding a new one: it pairs each row of the
+candidate run with the **same-named row of the previous round's run**,
+on the same curve, the same subgroup, the same factor base, the same
+targets and the same seed, and reports the total-operation ratio.  A
+round whose lever is a cheaper restart, a cheaper probe or a cheaper
+table leaves the variant's name alone, so that is the only pairing that
+can see it.
+
+The within-run pairing below is the other one: it prices a *new* row
+against the rung it was built on, inside a single run.
 
 Every Round-2 row is a rung of a cumulative ledger named by suffix:
 `<first-round row>` → `_negfold` → `_frobfold` → `_walk`, with `_balanced`
@@ -30,6 +45,7 @@ def arg(flag, default=None):
 run_path = sys.argv[1]
 run = json.load(open(run_path))
 baseline = json.load(open(arg("--baseline"))) if arg("--baseline") else None
+across = json.load(open(arg("--across"))) if arg("--across") else None
 holdout = json.load(open(arg("--holdout"))) if arg("--holdout") else None
 out_path = arg("--out")
 
@@ -187,17 +203,98 @@ def reproduction_check(new, old):
             checks.append(row)
     return checks
 
+def compare_across_rounds(new, old):
+    """The same row, the same instance, the previous round's code.
+
+    Pairs on `(regime, curve, variant, repeat index)`.  The two runs use
+    the same seed, so repeat `i` of a row saw the same target in both,
+    and the ratio of their total operation counts is a paired
+    measurement rather than two independent draws.  A row present only
+    in the candidate is reported as new — the within-run pairing above
+    is what prices it.
+    """
+    out, new_rows = [], []
+    old_by = {(i["regime"], i["curve"]["name"]): rows_of(i) for i in old["ledger"]["instances"]}
+    for inst in new["ledger"]["instances"]:
+        prev_rows = old_by.get((inst["regime"], inst["curve"]["name"]))
+        if prev_rows is None:
+            continue
+        for name, runs in rows_of(inst).items():
+            if name not in prev_rows:
+                new_rows.append(OrderedDict([
+                    ("regime", inst["regime"]),
+                    ("instance", inst["curve"]["name"]),
+                    ("variant", name),
+                    ("S", round(mean([r["s"] for r in runs]), 4)),
+                ]))
+                continue
+            base_runs = prev_rows[name]
+            k = min(len(runs), len(base_runs))
+            paired = [base_runs[i]["total_gae"] / runs[i]["total_gae"] for i in range(k)]
+            # The phase the round's lever lives in, so a ratio that moves
+            # can be read against the phase that moved it.
+            phase = lambda rs, p: mean([r[p]["gae"] for r in rs])
+            out.append(OrderedDict([
+                ("regime", inst["regime"]),
+                ("instance", inst["curve"]["name"]),
+                ("log2_r", round(inst["log2_r"], 2)),
+                ("variant", name),
+                ("m", runs[0]["summands"]),
+                ("signed_points", runs[0]["signed_points"]),
+                ("columns", runs[0]["columns"]),
+                ("base_changed", runs[0]["signed_points"] != base_runs[0]["signed_points"]),
+                ("repeats_paired", k),
+                ("speedup_per_repeat", [round(x, 4) for x in paired]),
+                ("speedup_mean", round(mean(paired), 4)),
+                ("speedup_min", round(min(paired), 4)),
+                ("speedup_max", round(max(paired), 4)),
+                ("S_previous_round", round(mean([r["s"] for r in base_runs]), 4)),
+                ("S_this_round", round(mean([r["s"] for r in runs]), 4)),
+                ("S_over_rho_previous_round", round(mean([r["s"] for r in base_runs]) / inst["rho_s_mean"], 4)),
+                ("S_over_rho_this_round", round(mean([r["s"] for r in runs]) / inst["rho_s_mean"], 4)),
+                ("relations_gae_previous_round", round(phase(base_runs, "relations"), 1)),
+                ("relations_gae_this_round", round(phase(runs, "relations"), 1)),
+                ("trials_previous_round", round(mean([r["trials"] for r in base_runs]), 1)),
+                ("trials_this_round", round(mean([r["trials"] for r in runs]), 1)),
+                ("walk_restarts_this_round", round(mean([r["relations"]["native"].get("walk_restarts", 0) for r in runs]), 1)),
+                ("walk_jumps_this_round", round(mean([r["relations"]["native"].get("walk_jumps", 0) for r in runs]), 1)),
+                ("walk_jumps_previous_round", round(mean([r["relations"]["native"].get("walk_jumps", 0) for r in base_runs]), 1)),
+                ("ratio_to_family_optimum", round(mean([r.get("ratio_to_family_optimum", float("nan")) for r in runs]), 4)),
+                ("verified_this_round", all(r["verified"] for r in runs)),
+                ("verified_previous_round", all(r["verified"] for r in base_runs)),
+                ("repeated_column_rows", sum(r["linear_algebra"]["native"].get("repeated_column_rows", 0) for r in runs)),
+            ]))
+    return out, new_rows
+
 comparison = []
 for inst in run["ledger"]["instances"]:
     comparison.extend(compare_instance(inst))
 
 repro = reproduction_check(run, baseline) if baseline else []
+across_rows, across_new = compare_across_rounds(run, across) if across else ([], [])
 holdout_rows = []
 if holdout:
     for inst in holdout["ledger"]["instances"]:
         holdout_rows.extend(compare_instance(inst))
 
 # ── Markdown ──
+if across_rows:
+    print("**Against the previous round, same row, same instance, same seed.**\n")
+    print("| regime | instance | log2 r | variant | m | |F| | speedup per repeat | speedup mean | min | max | S before → after | vs rho after | relations before → after | trials before → after | ok |")
+    print("|:--|:--|--:|:--|--:|--:|:--|--:|--:|--:|:--|--:|:--|:--|:--|")
+    for c in across_rows:
+        print(
+            f"| {c['regime']} | {c['instance']} | {c['log2_r']:.1f} | {c['variant']} | {c['m']} | {c['signed_points']:,} "
+            f"| {', '.join(f(x) for x in c['speedup_per_repeat'])} | {f(c['speedup_mean'])} | {f(c['speedup_min'])} | {f(c['speedup_max'])} "
+            f"| {f(c['S_previous_round'])} → {f(c['S_this_round'])} | {f(c['S_over_rho_this_round'])}× "
+            f"| {f(c['relations_gae_previous_round'])} → {f(c['relations_gae_this_round'])} "
+            f"| {c['trials_previous_round']:,.0f} → {c['trials_this_round']:,.0f} "
+            f"| {'✓' if c['verified_this_round'] and c['verified_previous_round'] else '✗'} |"
+        )
+    if across_new:
+        print(f"\nRows new in this round (priced by the within-run pairing below): "
+              f"{', '.join(sorted({r['variant'] for r in across_new}))}.")
+    print()
 print("| regime | instance | log2 r | candidate | baseline | lever | class | m | |F| | K | speedup per repeat | speedup mean | vs first-round best | S before → after | vs rho after | vs floor after | y/c exact | ok |")
 print("|:--|:--|--:|:--|:--|:--|:--|--:|--:|--:|:--|--:|--:|:--|--:|--:|--:|:--|")
 for c in comparison:
@@ -223,6 +320,7 @@ if out_path:
         ("unit", run["ledger"]["unit"]),
         ("run", run_path),
         ("baseline_round1", arg("--baseline")),
+        ("previous_round", arg("--across")),
         ("holdout", arg("--holdout")),
         ("regression_suite_note", "The frozen WDSat solver regression suite (research/index_calculus_baseline_20260914/regression/) measures a SAT-solver stage on 60 fixed inputs and is not an adapter for other pipelines; the levers here (pair-table folds, target generation, exact ceiling, base sizing) touch no solver stage, so the matched full-DLP comparison in this file is the §8 evidence, under the parent accounting contract's exclusive per-phase charging."),
         ("all_candidates_verified", all(c["verified_candidate"] for c in comparison)),
@@ -232,6 +330,10 @@ if out_path:
         ("first_round_rows_moved_by_the_target_guard", sum(1 for r in repro if not r["counts_identical"]) if repro else None),
         ("first_round_rows_moved_note", "Round 1 drew targets without the repeat guard, so a run could decompose one group element twice and be pinned by that collision rather than by its relations; the rows below are the ones that did, with the size of the correction to Round 1's figures"),
         ("reproduction_checks", repro),
+        ("across_rounds_note", "Each row paired with the same-named row of the previous round's run on the same instance and seed; speedup = previous_round_total_operations / this_round_total_operations. This is the pairing that sees a lever which makes an existing row cheaper without renaming it."),
+        ("across_rounds_all_verified", all(c["verified_this_round"] and c["verified_previous_round"] for c in across_rows) if across_rows else None),
+        ("across_rounds", across_rows),
+        ("across_rounds_new_variants", across_new),
         ("comparison", comparison),
         ("holdout_comparison", holdout_rows),
     ])
