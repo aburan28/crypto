@@ -945,8 +945,16 @@ against 3.3×.
 - `examples/m4_inversion_cost.rs` prices the `m = 4` arm's unbatched
   `FastCurve::add`: a Fermat inversion at **1300 ns** a `(k, l)` against
   `add_many`'s **68**, which is twelve times the lone-probe penalty the
-  note used to name as that arm's problem.  No shipped parameter set
-  asks for `m = 4`, so it is a correction rather than a change.
+  note used to name as that arm's problem.  The arm now batches that
+  inversion the way `m = 3` does, and the same harness measures the arm
+  itself: **1155.5 → 123 ns** a `(k, l)`, **9.4×**, with the 1030 ns
+  saved matching the Fermat inversion the binary measures alone.
+  Measured at `n = 61` where a target has no witnesses, because at
+  `n = 19` the `|F|`-long compact recovery each hit pays hides the whole
+  difference — 2452 against 2429, 1% apart.
+  `docs/ic/runs/koblitz-m4-batched-20260921.json` records it.  No
+  shipped parameter set asks for `m = 4`, so no `S` moves and no
+  scoreboard row follows: **engineering** by `AGENTS.md` §3.
 - The three bullets above are **stage diagnostics** (`AGENTS.md` §2):
   each prices one slice — a probe, a key, an inversion — so none is a
   speedup, and the ones that correct an earlier figure are

@@ -3715,9 +3715,32 @@ impl PairSumTable {
                 // representation does not keep those, and walking them
                 // there would have reported no witness for a target that
                 // has one — a false "no" from an oracle, which is worse
-                // than a loud failure.  One batched inversion a row
-                // keeps the arithmetic close to what the triples cost.
+                // than a loud failure.
+                //
+                // **Two** batched inversions a row, not one and then a
+                // row of single ones.  `add_many` amortises Montgomery's
+                // trick over a whole slice, so the row's pair sums cost
+                // one inversion between them; the rests `R − (P_k + P_l)`
+                // are a second slice and cost one more.  Taking them one
+                // at a time through `add` is a *Fermat* inversion each —
+                // `n − 1` squarings and as many multiplications — which
+                // at `n = 61` measured 1300 ns against `add_many`'s 68,
+                // nineteen times the batched step and the dominant cost
+                // of everything this arm did.
+                // `examples/m4_inversion_cost.rs` prices the two.
+                //
+                // Keyed a row at a time and prefetched ahead of the
+                // probe, for the reason the `m = 3` arm is: the key is a
+                // long dependent chain, and fused with its lookup the
+                // memory round trips do not overlap.
+                //
+                // An early exit still throws away at most a row, as it
+                // always did — the row is the slice `add_many` batches.
+                const LOOKAHEAD: usize = 32;
                 let mut sums = Vec::new();
+                let mut negs = Vec::new();
+                let mut rests = Vec::new();
+                let mut keys = Vec::new();
                 let mut scratch = BatchScratch::default();
                 let mut pairs = Vec::new();
                 for l in 0..self.points.len() {
@@ -3728,9 +3751,23 @@ impl PairSumTable {
                         &mut sums,
                         &mut scratch,
                     );
-                    for (k, &pair) in sums.iter().enumerate() {
-                        let rest = self.curve.add(target, self.curve.neg(pair));
-                        self.pairs_for(rest, &mut pairs);
+                    negs.clear();
+                    negs.extend(sums.iter().map(|&s| self.curve.neg(s)));
+                    // `add_many` appends, so the slice starts empty.
+                    rests.clear();
+                    self.curve.add_many(target, &negs, &mut rests, &mut scratch);
+                    self.keys_of(&rests, &mut keys);
+                    for &key in keys.iter().take(LOOKAHEAD) {
+                        prefetch(&self.present[self.filter_word(key)]);
+                    }
+                    for (k, rest) in rests.iter().enumerate() {
+                        if let Some(&ahead) = keys.get(k + LOOKAHEAD) {
+                            prefetch(&self.present[self.filter_word(ahead)]);
+                        }
+                        if !self.admitted(keys[k]) {
+                            continue;
+                        }
+                        self.pairs_for_key(*rest, keys[k], &mut pairs);
                         for &(i, j) in &pairs {
                             if (!sorted || j as usize <= k)
                                 && !sink(&[i as usize, j as usize, k, l])
@@ -8227,6 +8264,135 @@ mod tests {
         assert!(PairSumTable::build_compact_within(&kc, &fb, compact - 1).is_none());
         assert_eq!(wide.len(), narrow.len(), "same base, same pairs");
         assert!(tight.len() < narrow.len(), "the fold stored no less");
+    }
+
+    #[test]
+    fn the_m4_scan_finds_exactly_the_quadruples_that_sum_to_the_target() {
+        use std::collections::BTreeSet;
+
+        // `m = 4` is the one arm no parameter set reaches — 698 ask for
+        // 3 and 110 for 2, and nothing sets `max_m` — so nothing else in
+        // this suite exercises it, and a change to it would otherwise
+        // land unmeasured.  The oracle here is a brute-force walk over
+        // every sorted quadruple, which shares no code with the scan: it
+        // does not key, does not probe, and does not know what a tier
+        // is.
+        //
+        // All three tiers are checked, because the scan reaches the
+        // table through `pairs_for_key`, whose compact branch recovers
+        // summands by a scan where the folded one reads them out of the
+        // entry.  A key computed one way and looked up another is a
+        // silent false "no" from an oracle, not a crash, and the fold is
+        // where the two keys can drift apart.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 40).unwrap();
+        let n_pts = fb.points.len();
+        let full = PairSumTable::byte_size(n_pts);
+        let compact = PairSumTable::compact_byte_size(n_pts, kc.n);
+        let folded = PairSumTable::folded_byte_size(fb.signed_orbits.len(), n_pts, kc.n);
+        let tiers = [
+            (
+                "full",
+                PairSumTable::build_full_within(&kc, &fb, full).expect("full fits"),
+            ),
+            (
+                "compact",
+                PairSumTable::build_compact_within(&kc, &fb, compact).expect("compact fits"),
+            ),
+            (
+                "folded",
+                PairSumTable::build_within(&kc, &fb, folded).expect("folded fits"),
+            ),
+        ];
+        assert!(
+            tiers[2].1.is_folded(),
+            "the third tier is not the folded one"
+        );
+
+        let fc = FastCurve::new(&kc.curve).expect("fast curve");
+        let pts: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+
+        // Targets that really are sums of four base points, so the scan
+        // has something to find.  The base is closed under negation, so
+        // a quadruple picked by hand lands on `O` more often than not;
+        // these are generated and filtered instead.
+        let mut targets: Vec<FastPoint> = Vec::new();
+        for step in 1..n_pts {
+            let idx = [0, step, (2 * step) % n_pts, (3 * step) % n_pts];
+            let sum = idx
+                .iter()
+                .fold(FastPoint::INFINITY, |acc, &i| fc.add(acc, pts[i]));
+            if !sum.infinity && !targets.contains(&sum) {
+                targets.push(sum);
+            }
+            if targets.len() == 4 {
+                break;
+            }
+        }
+        assert_eq!(
+            targets.len(),
+            4,
+            "only {} usable targets over {n_pts} points",
+            targets.len()
+        );
+
+        // The oracle's first half, shared across targets: every pair
+        // sum, indexed by the point it lands on.  Walking all `|F|⁴`
+        // quadruples would be the more obviously correct oracle and is
+        // far too slow; this is the same answer in `|F|²`, and it still
+        // shares no code with the scan — no table, no key, no tier.
+        let mut by_pair: HashMap<(bool, u64, u64), Vec<(usize, usize)>> = HashMap::new();
+        for i in 0..n_pts {
+            for j in i..n_pts {
+                let s = fc.add(pts[i], pts[j]);
+                by_pair
+                    .entry((s.infinity, s.x, s.y))
+                    .or_default()
+                    .push((i, j));
+            }
+        }
+
+        for target in &targets {
+            // Every `i ≤ j ≤ k ≤ l` whose four points sum here: for each
+            // second half `P_k + P_l`, the first halves that complete it.
+            let mut expected: BTreeSet<[usize; 4]> = BTreeSet::new();
+            for k in 0..n_pts {
+                for l in k..n_pts {
+                    let kl = fc.add(pts[k], pts[l]);
+                    let want = fc.add(*target, fc.neg(kl));
+                    let Some(firsts) = by_pair.get(&(want.infinity, want.x, want.y)) else {
+                        continue;
+                    };
+                    for &(i, j) in firsts {
+                        let mut v = [i, j, k, l];
+                        v.sort_unstable();
+                        expected.insert(v);
+                    }
+                }
+            }
+
+            for (name, table) in &tiers {
+                let mut got: BTreeSet<[usize; 4]> = BTreeSet::new();
+                table.witnesses_fast(*target, 4, &mut |w| {
+                    let mut v = [w[0], w[1], w[2], w[3]];
+                    v.sort_unstable();
+                    got.insert(v);
+                    true
+                });
+                assert_eq!(
+                    got, expected,
+                    "the {name} tier disagreed with the brute-force walk"
+                );
+                // And every witness really is one, so an oracle that
+                // agreed by finding the same wrong answers still fails.
+                for w in &got {
+                    let sum = w
+                        .iter()
+                        .fold(FastPoint::INFINITY, |a, &i| fc.add(a, pts[i]));
+                    assert_eq!(sum, *target, "the {name} tier returned a non-witness");
+                }
+            }
+        }
     }
 
     #[test]
