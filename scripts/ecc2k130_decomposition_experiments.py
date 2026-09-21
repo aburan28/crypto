@@ -1075,6 +1075,30 @@ def main():
               f"(undetermined {b['fraction_undetermined']:.4f}) "
               f"descent attempts {b['descent_attempts']} landed {b['descent_landed']} "
               f"Lambda {b['lambda']:.3f}", flush=True)
+    # E1's slope is reported on the full-rank rule.  It is a different number
+    # on the budget rule, and a superseded figure is not allowed to stand
+    # beside new ones, so it is derived here rather than by hand.  `ops` is
+    # `Lambda * 2^n`, so `log2(ops) = log2(Lambda) + n` and a two-point slope
+    # is `1 + (log2 L19 - log2 L13) / 6`.
+    def _mean(rows):
+        got = [b["lambda"] for b in rows]
+        return sum(got) / len(got)
+
+    b13 = [b for b in budgets if b["n"] == 13]
+    b19 = [b for b in budgets if b["n"] == 19 and b["l"] == 8]
+    m13, m19 = _mean(b13), _mean(b19)
+    slope_budget = 1 + (math.log2(m19) - math.log2(m13)) / 6
+    # Three seeds a rung is enough for a standard error but not for a fit.
+    # Propagating each rung's relative spread through log2 gives the slope's
+    # own, which is what says how far 0.944 really is from the 0.95 line.
+    def _rel_sd(rows):
+        got = [b["lambda"] for b in rows]
+        mu = sum(got) / len(got)
+        var = sum((x - mu) ** 2 for x in got) / (len(got) - 1)
+        return math.sqrt(var) / mu / math.sqrt(len(got))
+
+    slope_se = math.sqrt(_rel_sd(b13) ** 2 + _rel_sd(b19) ** 2) / math.log(2) / 6
+
     budget = {
         "question": "how many relations does the product law actually owe, and "
                     "what does its budget of |F| buy?",
@@ -1091,6 +1115,23 @@ def main():
                                        / len(budgets), 3),
         "predicted_lambda": 3,
         "every_descent_landed": all(b["descent_landed"] for b in budgets),
+        "mean_lambda_n13_l6": round(m13, 3),
+        "mean_lambda_n19_l8": round(m19, 3),
+        "slope_log2_ops_vs_n_at_budget": round(slope_budget, 3),
+        "slope_standard_error": round(slope_se, 3),
+        "slope_under_superseded_full_rank_rule": 1.037,
+        "slope_falsifier": "E1's falsifier is a slope below 0.95 over FOUR OR "
+                           "MORE rungs.  This is a two-point fit, so it cannot "
+                           "fire it in either direction -- but it lands on the "
+                           "wrong side of the line, within one standard error "
+                           "of it, and that is recorded rather than buried.",
+        "collection_rule": "budget_run collects under the `full` rule, so its "
+                           "|F| relations come from roughly 40 targets and ARE "
+                           "correlated by target in exactly the sense the "
+                           "superseded claim meant.  They still determine 91 "
+                           "to 95 percent of the base and every descent still "
+                           "lands, which is the sharpest single argument that "
+                           "correlation was never the mechanism.",
         "class": "accounting: the algorithm did not change, the harness's "
                  "stopping rule did, and the correction is to a number this "
                  "thread published",

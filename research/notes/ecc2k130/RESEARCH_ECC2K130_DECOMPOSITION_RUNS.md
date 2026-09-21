@@ -82,8 +82,10 @@ the factor base* and can never be a constant:
 | 527 | `n = 19`, `l = 9` | `first_hit` | 1 247 | **2.366** | 2.089 | 1.133 |
 
 The published `2.0` is the `n = 19`, `l = 8`, `full` cell of this table and
-nothing more general. Predicted `ρ` runs `1.391 → 2.089` across the sweep and
-measured `ρ` runs `1.453 → 2.395`; a flat 2 is not what either column shows.
+nothing more general. Predicted `ρ` rises monotonically with the base,
+`1.391 → 1.645 → 1.877 → 2.089`; measured `ρ` ranges `1.453` to `2.395` and
+rises with it on average but not cell by cell. A flat 2 is not what either
+column shows.
 
 These are single samples, and a full-rank crossing is a noisy thing: the
 coupon-collector time has relative standard deviation about `1.28/ln|F|`, which
@@ -125,8 +127,12 @@ more, and see whether that finishes.
 | `n = 19`, `l = 8` | 279 | 0.0323 | 0.0498 | 0.0824 | 1 | **3.040** |
 | `n = 19`, `l = 8` | 279 | 0.0573 | 0.0498 | 0.0645 | 1 | **3.034** |
 
-**Every descent landed**, in one to three attempts, and `Λ` came out at
-`3.103` on average against the predicted `m = 3`. The `Λ` of `5.136` and
+**These relations are themselves correlated by target, and it does not
+matter.** `budget_run` collects under the `full` rule, so its `|F|` relations
+come from roughly forty targets — correlated in exactly the sense the
+superseded claim meant. They still determine `91 %` to `95 %` of the base, and
+**every descent landed**, in one to three attempts, with `Λ` at `3.103` on
+average against the predicted `m = 3`. The `Λ` of `5.136` and
 `5.993` that E1 reports below, and the disagreement with the model that the
 last round read off them, are both properties of the stopping rule and not of
 the method.
@@ -160,16 +166,20 @@ with `ρ = 1` and always did. What is withdrawn is the claim that the figure was
 optimistic by a factor of two. The retraction removes a caveat; it does not
 buy a bit.
 
-**One number does move, and it moves the wrong way.** E1's slope of
+**One number does move, and it is worth saying out loud.** E1's slope of
 `log₂(total)` against `n` is `1.037` under the full-rank rule. Recomputed on
 the budget rule's means — `Λ = 3.489` at `n = 13` and `2.766` at `n = 19` — it
-is **`0.944`**. E1's falsifier is a slope below `0.95`, so this would fire it
-*if it applied*; it does not, because that falsifier requires **four or more
-rungs** and this is a two-point fit, exactly the shortfall E1 already reports
-below. It is recorded here rather than left in the artefact, because a
-two-point slope that lands on the wrong side of a pre-registered line is the
-kind of thing this note exists to say out loud. Four rungs would settle it and
-nothing here does.
+is **`0.944 ± 0.028`**, the error propagated from the three seeds at each rung.
+E1's falsifier is a slope below `0.95`.
+
+Two reasons that is not a falsification, and neither of them is a get-out.
+The falsifier requires **four or more rungs** and this is a two-point fit,
+which is exactly the shortfall E1 already reports below. And `0.95` is
+`0.21` standard errors from `0.944`: at this precision the measurement does not
+distinguish the two sides of the line at all. The honest statement is that the
+budget rule's slope is consistent with the falsifier's threshold and with `1`,
+and that **four rungs would settle which**, as the design asked for and this
+round still cannot supply.
 
 ---
 
@@ -356,9 +366,9 @@ be wall clock, a practicality note and never the metric.
 Frobenius onto 77 orbit columns), one seed, `m = 3`. `wdsat` was swept and
 returned `--solver wdsat requires --wdsat-binary` on every target; the
 repository does not vendor that binary, so it is recorded as attempted and not
-exercised rather than skipped. The oracle under test early-exits at its first
-witness (`decompose` in `src/cryptanalysis/koblitz_index_calculus.rs`), so
-none of this is a whole-base sweep.
+exercised rather than skipped. The `enumerate` oracle early-exits at its first
+witness (`decompose` in `src/cryptanalysis/koblitz_index_calculus.rs`), so its
+runs are not a whole-base sweep; `groebner` and `sat` dispatch elsewhere.
 
 ---
 
@@ -488,10 +498,10 @@ relation budget the law actually charges, `Λ` sits at the predicted `m`.
   falsifier.  `n = 29` and `n = 37` need the Rust pipeline.
 - **`m = 3` only, and `m = 2` only for E4 and E5's pair cells.**  Every
   conclusion in §0.5 is at one summand count.
-- **The budget rule's slope is `0.944`, and its falsifier is `0.95`.**  It does
-  not fire, because E1's falsifier requires four rungs and this is a two-point
-  fit — but it lands on the wrong side of a pre-registered line and four rungs
-  would settle which side it belongs on.  See §0.5.
+- **The budget rule's slope is `0.944 ± 0.028` against a falsifier of `0.95`.**
+  It does not fire — the falsifier wants four rungs, this is two — and the
+  threshold is `0.21` standard errors away, so the measurement does not say
+  which side of it the truth is on.  Four rungs would.  See §0.5.
 - **The two residuals §0.5 leaves unpriced are measured only at `\|F\| ≤ 279`.**
   One to three descent retries, and three dead base points per base.  Whether
   either matters at `\|F\| = 2^44.5` is not something these rungs can say, which
