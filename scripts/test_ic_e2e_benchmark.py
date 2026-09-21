@@ -36,7 +36,8 @@ def synthetic_report(*, targets: int = 4, rho_seconds: float = 2.0, ic_precomput
     return {
         "schema_version": 1, "operation": "workflow", "status": "complete", "failure": None,
         "name": "test-rung", "degree": N, "params_digest": "ab" * 32,
-        "factor_base": {"points": 200, "columns": 35, "pair_table_stored_pairs": 20100},
+        "factor_base": {"points": 200, "columns": 35, "pair_table_stored_pairs": 20100,
+                        "pair_table_tier": "compact"},
         "solutions": {"count": targets, "verified": targets, "items": items},
         "stages": [
             {"stage": "select", "status": "complete", "ran": True},
@@ -187,6 +188,43 @@ class CheckRungTests(unittest.TestCase):
         self.assertIn("**PASS**", text)
         self.assertEqual(text.count(f"| `{PARAMS}` |"), 1)
         self.assertIn("IC `S` is null", text)
+
+
+class TierPinTests(unittest.TestCase):
+    """The tier is pinned because no counter can see it.
+
+    ``pair_table_stored_pairs`` is ``|F|(|F|+1)/2`` for the full tier and
+    the compact one alike, so a run that switched between them used to
+    read as "counters identical" while the algorithm had changed.  This
+    pins the fix, not the bug.
+    """
+
+    def test_a_tier_change_is_caught_even_when_every_counter_matches(self):
+        report = synthetic_report()
+        m_before = bench.measure(report)
+        switched = synthetic_report()
+        switched["factor_base"]["pair_table_tier"] = "folded"
+        m_after = bench.measure(switched)
+        # The thing that made this slip through: nothing else moved.
+        self.assertEqual(m_before["counters"], m_after["counters"])
+        ref = dict(m_before)
+        row = bench.check_rung("p.json", ref, m_after, 0.5, 3.0)
+        self.assertFalse(row["ok"])
+        self.assertTrue(
+            any("tier changed" in p for p in row["problems"]),
+            row["problems"],
+        )
+
+    def test_an_unchanged_tier_passes(self):
+        m = bench.measure(synthetic_report())
+        row = bench.check_rung("p.json", dict(m), m, 0.5, 3.0)
+        self.assertTrue(row["ok"], row["problems"])
+
+    def test_a_report_without_a_tier_is_refused(self):
+        report = synthetic_report()
+        del report["factor_base"]["pair_table_tier"]
+        with self.assertRaises(bench.CheckFailure):
+            bench.measure(report)
 
 
 class CliTests(unittest.TestCase):

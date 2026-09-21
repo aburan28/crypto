@@ -7,17 +7,41 @@ rungs, and gates the result against the reference in this directory. It is the
 CI form of the rule in `AGENTS.md` §2 that end-to-end speed is the measure of
 speed: nothing on this page is a stage number.
 
-| rung | base | `n` | log₂ r | targets | ρ/IC whole-process, v1 (dev host) → v2 (CI runner) | crosses ρ e2e |
+| rung | base | `n` | log₂ r | targets | ρ/IC whole-process, v1 (dev) → v2 (runner) → v3 (dev) | crosses ρ e2e |
 |:--|:--|--:|--:|--:|:--|:--|
-| `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 0.03 → 0.04 | no |
-| `docs/ic/params/k0n41-subgroup.json` | subgroup, 5248 points | 41 | 39.0 | 32 | 2.70 → 2.23 | yes |
-| `docs/ic/params/k0n53-subgroup.json` | subgroup, 15264 points | 53 | 44.3 | 32 | 2.50 → 2.00 | yes |
+| `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 0.03 → 0.04 → 0.03 | no |
+| `docs/ic/params/k0n41-subgroup.json` | subgroup, 5248 points | 41 | 39.0 | 32 | 2.70 → 2.23 → 1.79 | yes |
+| `docs/ic/params/k0n53-subgroup.json` | subgroup, 15264 points | 53 | 44.3 | 32 | 2.50 → 2.00 → 1.51 | yes |
 
-The workflow gates against **`ic-e2e-reference-v2.json`**, frozen from the
+**`ic-e2e-reference-v3.json`** is what the workflow gates against. It
+supersedes v2 because the pair-table tier is now chosen by a measured
+cost model rather than a fixed ladder
+(`docs/ic/runs/koblitz-tier-crossover-20260921.json`), and all three
+rungs build the **compact** tier where v2 built the full one.
+
+That change went through this gate undetected the first time, which is
+worth recording. Every pinned counter was identical, because
+`pair_table_stored_pairs` is `|F|(|F|+1)/2` for the full tier *and* the
+compact one — they hold the same pairs and differ only in how a pair is
+stored. The gate reported "counters identical" while the algorithm had
+changed, which is the one thing it exists to refuse. The tier is
+therefore pinned beside the counters now, a report without one is
+refused, and `TierPinTests` fails if that check is removed. A reference
+frozen before tier reporting (v1, v2) carries no tier and skips that
+comparison, which is why v3 had to be frozen rather than v2 amended.
+
+v3's ρ/IC ratios are lower than v2's for two reasons that should not be
+confused: it is frozen on a dev host rather than the runner (the v1→v2
+column shows that effect on its own), and the compact tier really is a
+different algorithm. The counters and the tier are host-independent; the
+wall ratios are not, and are gated only as a paired same-host ratio.
+
+The previous references stay in the tree as the "before" marks.
+`ic-e2e-reference-v2.json` was frozen from the
 artifact of the workflow's own first run on a GitHub `ubuntu-latest` runner
 so that the wall ratios are matched to the host they are compared on.
 `ic-e2e-reference-v1.json` is the same three rungs frozen on a 4-vCPU dev
-host and stays in the tree as the "before" mark: every pinned counter is
+host: every pinned counter is
 identical between the two hosts (and between the two differently compiled
 `ic` binaries), while the whole-process ratios are 17–20 % lower on the
 runner, which is the size of the host effect this gate must not mistake for
@@ -33,9 +57,12 @@ Per rung, fail closed (`scripts/ic_e2e_benchmark.py check`):
    verified as `[d]G = Q`, and equal to the planted scalar; every ρ walk
    verified on the same target. A row without a verified answer is not a
    result, on either side.
-2. **Pinned counters, exact.** Factor-base points and columns, pair-table
-   pairs, collection trials, summands scanned, relations, descent trials, ρ
-   iterations and ρ group additions must equal the reference bit for bit.
+2. **Pinned counters, exact, and the pair-table tier.** Factor-base points
+   and columns, pair-table pairs, collection trials, summands scanned,
+   relations, descent trials, ρ iterations and ρ group additions must equal
+   the reference bit for bit — and so must the tier, which none of those
+   counters can see: `pair_table_stored_pairs` is `|F|(|F|+1)/2` for the
+   full and the compact tier alike.
    Every one of them is seeded and deterministic (checked across repeated
    runs). A drift is not a failure of the code, it is a change of algorithm,
    and the gate exists to make that change deliberate: freeze a new reference
