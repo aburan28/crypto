@@ -1,0 +1,184 @@
+{
+ "frozen_at": "2026-09-20T20:21:18.995797+00:00",
+ "frozen_from": {
+  "git": {
+   "commit": "aaf64036730f423b73d0fdfe5dc97863cb74bb66",
+   "dirty": false
+  },
+  "host": {
+   "cpu_count": 4,
+   "machine": "x86_64",
+   "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+   "python": "3.12.14"
+  },
+  "ic_binary": {
+   "path": "target/release/ic",
+   "sha256": "e998d9ec4996f91b6d9bf10e0a7989c50ae9f3d87bdc43eb2546d18449732ca0"
+  },
+  "note": "frozen from the artifact of run 35534929792 (GitHub Actions ubuntu-latest, 4 vCPU Azure x86_64; PR #506): the four-rung ladder n = 31, 41, 53, 61 on CI hardware. Supersedes v3 (same four rungs on the dev host) and v2 (three rungs on the runner); counters identical to both; whole-process rho/IC 0.04 / 2.26 / 2.03 / 1.77."
+ },
+ "rungs": {
+  "docs/ic/params/k0n31.json": {
+   "claim_boundary": "synthetic_known_answer",
+   "counters": {
+    "collection_relations": 78,
+    "collection_summands_scanned": 277760,
+    "collection_trials": 128,
+    "descent_trials": 52,
+    "factor_base_columns": 35,
+    "factor_base_points": 2170,
+    "pair_table_stored_pairs": 2355535,
+    "rho_group_additions": 5456,
+    "rho_iterations": 5477
+   },
+   "degree": 31,
+   "ic_S": null,
+   "ic_S_null_reason": "pinned IC counters are in mixed units (group additions, table lookups, scalar multiplications) with no measured conversion recorded; AGENTS.md \u00a78 says leave it null",
+   "ic_verified": 32,
+   "name": "k0n31-ledger-rung",
+   "params_digest": "07fa61787cde4e34d9ce2ba3a7f4ffb07bdefacf565cd8e8a7ec28fcfa7174da",
+   "rho_S": {
+    "expected": 0.15917105461020273,
+    "measured": 0.14211328883985427,
+    "measured_over_expected": 0.8928337453557648
+   },
+   "rho_verified": 32,
+   "subgroup_bits": 20.457029116748018,
+   "subgroup_order": "1439393",
+   "targets": 32,
+   "wall": {
+    "amortised_ratio": 0.03683566121139648,
+    "charged_ratio": 2.2856638743361297,
+    "ic_descent_seconds_total": 0.008782031000000001,
+    "ic_precompute_seconds": 0.5361456379999999,
+    "ic_whole_process_seconds": 0.5449276689999999,
+    "reported_whole_process_crossover": false,
+    "rho_seconds_total": 0.020072770999999996,
+    "whole_process_crossover": false,
+    "whole_process_ratio": 0.03683566121139648
+   }
+  },
+  "docs/ic/params/k0n41-subgroup.json": {
+   "claim_boundary": "synthetic_known_answer",
+   "counters": {
+    "collection_relations": 124,
+    "collection_summands_scanned": 15072256,
+    "collection_trials": 2872,
+    "descent_trials": 726,
+    "factor_base_columns": 64,
+    "factor_base_points": 5248,
+    "pair_table_stored_pairs": 13773376,
+    "rho_group_additions": 4054253,
+    "rho_iterations": 4045603
+   },
+   "degree": 41,
+   "ic_S": null,
+   "ic_S_null_reason": "pinned IC counters are in mixed units (group additions, table lookups, scalar multiplications) with no measured conversion recorded; AGENTS.md \u00a78 says leave it null",
+   "ic_verified": 32,
+   "name": "k0n41-subgroup-rung",
+   "params_digest": "6c98955f051f35648e69477854a89587c53d60b2867c0f20509536ccf6d25b4b",
+   "rho_S": {
+    "expected": 0.13840539283493047,
+    "measured": 0.17087389733637592,
+    "measured_over_expected": 1.2345898800357373
+   },
+   "rho_verified": 32,
+   "subgroup_bits": 39.00000151433405,
+   "subgroup_order": "549756390943",
+   "targets": 32,
+   "wall": {
+    "amortised_ratio": 2.256488574590357,
+    "charged_ratio": 10.773073191190845,
+    "ic_descent_seconds_total": 0.314850076,
+    "ic_precompute_seconds": 1.18832745,
+    "ic_whole_process_seconds": 1.503177526,
+    "reported_whole_process_crossover": true,
+    "rho_seconds_total": 3.3919029129999996,
+    "whole_process_crossover": true,
+    "whole_process_ratio": 2.256488574590357
+   }
+  },
+  "docs/ic/params/k0n53-subgroup.json": {
+   "claim_boundary": "synthetic_known_answer",
+   "counters": {
+    "collection_relations": 458,
+    "collection_summands_scanned": 242514432,
+    "collection_trials": 15888,
+    "descent_trials": 7803621,
+    "factor_base_columns": 144,
+    "factor_base_points": 15264,
+    "pair_table_stored_pairs": 116502480,
+    "rho_group_additions": 31947860,
+    "rho_iterations": 31891777
+   },
+   "degree": 53,
+   "ic_S": null,
+   "ic_S_null_reason": "pinned IC counters are in mixed units (group additions, table lookups, scalar multiplications) with no measured conversion recorded; AGENTS.md \u00a78 says leave it null",
+   "ic_verified": 32,
+   "name": "k0n53-subgroup-rung",
+   "params_digest": "fe74a196597c95cb34694eff0646b5ab382965a81ba331423dc6f1f5ef8c95be",
+   "rho_S": {
+    "expected": 0.12173263026670363,
+    "measured": 0.2176300151807038,
+    "measured_over_expected": 1.7877705813461757
+   },
+   "rho_verified": 32,
+   "subgroup_bits": 44.258533022667656,
+   "subgroup_order": "21044858204113",
+   "targets": 32,
+   "wall": {
+    "amortised_ratio": 2.034499616002666,
+    "charged_ratio": 26.134868706157192,
+    "ic_descent_seconds_total": 1.3911793280000002,
+    "ic_precompute_seconds": 16.479696045,
+    "ic_whole_process_seconds": 17.870875373,
+    "reported_whole_process_crossover": true,
+    "rho_seconds_total": 36.358289084,
+    "whole_process_crossover": true,
+    "whole_process_ratio": 2.034499616002666
+   }
+  },
+  "docs/ic/params/k0n61-subgroup-wide.json": {
+   "claim_boundary": "synthetic_known_answer",
+   "counters": {
+    "collection_relations": 336,
+    "collection_summands_scanned": 90000000,
+    "collection_trials": 80000,
+    "descent_trials": 6819485,
+    "factor_base_columns": 296,
+    "factor_base_points": 36112,
+    "pair_table_stored_pairs": 652056328,
+    "rho_group_additions": 72555474,
+    "rho_iterations": 72445898
+   },
+   "degree": 61,
+   "ic_S": null,
+   "ic_S_null_reason": "pinned IC counters are in mixed units (group additions, table lookups, scalar multiplications) with no measured conversion recorded; AGENTS.md \u00a78 says leave it null",
+   "ic_verified": 32,
+   "name": "k0n61-subgroup-wide",
+   "params_digest": "a5185d27548a825c18993f81a2a4b239a1a7e9f4bcf3431481ffc87e6fb81448",
+   "rho_S": {
+    "expected": 0.11346973044749432,
+    "measured": 0.1776542553485069,
+    "measured_over_expected": 1.565653277291538
+   },
+   "rho_verified": 32,
+   "subgroup_bits": 47.21087395347554,
+   "subgroup_order": "162888033982417",
+   "targets": 32,
+   "wall": {
+    "amortised_ratio": 1.7735232388217044,
+    "charged_ratio": 75.72531441073214,
+    "ic_descent_seconds_total": 1.3192055250000003,
+    "ic_precompute_seconds": 55.007799933,
+    "ic_whole_process_seconds": 56.327005458,
+    "reported_whole_process_crossover": true,
+    "rho_seconds_total": 99.89725315299998,
+    "whole_process_crossover": true,
+    "whole_process_ratio": 1.7735232388217044
+   }
+  }
+ },
+ "schema_version": 1,
+ "unit": "counters are exact seeded counts pinned bit-for-bit; wall figures are same-host, same-process seconds and are gated only as the paired ratio rho/IC; rho_S is group additions per target per sqrt(r); ic_S is null (no measured unit conversion)"
+}
