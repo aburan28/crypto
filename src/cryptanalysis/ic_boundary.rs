@@ -176,6 +176,40 @@ pub struct Calibration {
     pub ns_per_canon: Option<f64>,
 }
 
+/// The unit's conversion ratios, pinned in the repository.
+///
+/// Through Round 3 every factor above was measured on the host at the
+/// start of each run, and the *ratios* to `ns_per_add` then drifted by a
+/// median of `1.08` and up to `3.70` between runs on one machine.  That
+/// repriced rows which had done identical native work by up to eight per
+/// cent and put a floor under every cross-run comparison: 111 of 166
+/// rows in the Round-3 comparison moved without an operation changing.
+///
+/// `AGENTS.md` §6 says operation counts are the metric "because they
+/// survive hardware".  A conversion re-measured per run does not, so the
+/// ratios now come from `docs/ic/calibration.json`, compiled in here.
+/// The measured factors are still taken and still reported — they are
+/// the wall-clock practicality note, and they say whether the host has
+/// changed — but they no longer price anything.
+const PINNED_CALIBRATION: &str = include_str!("../../docs/ic/calibration.json");
+
+/// Ratios for one instance, and which units had none.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct PinOutcome {
+    /// Units priced at a ratio from the repository.
+    pub pinned: Vec<String>,
+    /// Units with no entry, left at the host's measured ratio.
+    pub measured: Vec<String>,
+}
+
+/// The pinned ratios for `regime/instance`, or `None` when the table has
+/// no entry for it — a new size or a freshly generated curve.
+fn pinned_ratios(regime: &str, instance: &str) -> Option<serde_json::Map<String, serde_json::Value>> {
+    let doc: serde_json::Value = serde_json::from_str(PINNED_CALIBRATION).ok()?;
+    let row = doc.get("instances")?.get(format!("{regime}/{instance}"))?;
+    Some(row.as_object()?.clone())
+}
+
 impl Calibration {
     /// Group-addition equivalents of `count` native units at
     /// `ns_per_unit`.
@@ -184,6 +218,54 @@ impl Calibration {
             return count as f64;
         }
         count as f64 * ns_per_unit / self.ns_per_add
+    }
+
+    /// Replace the measured factors with the repository's pinned ratios.
+    ///
+    /// Every factor is stored as nanoseconds, and [`Calibration::gae`]
+    /// divides by `ns_per_add`, so writing `ratio · ns_per_add` makes the
+    /// conversion exactly the pinned ratio whatever the host measured.
+    /// A unit the table does not carry keeps its measured value and is
+    /// named in the outcome, so a row priced the old way says so.
+    pub fn pin(&mut self, regime: &str, instance: &str) -> PinOutcome {
+        let mut out = PinOutcome::default();
+        let table = pinned_ratios(regime, instance);
+        let add = self.ns_per_add;
+        let mut apply = |name: &str, slot: &mut Option<f64>, out: &mut PinOutcome| {
+            match table.as_ref().and_then(|t| t.get(name)).and_then(serde_json::Value::as_f64) {
+                Some(ratio) => {
+                    *slot = Some(ratio * add);
+                    out.pinned.push(name.to_string());
+                }
+                None => {
+                    if slot.is_some() {
+                        out.measured.push(name.to_string());
+                    }
+                }
+            }
+        };
+        let mut double = Some(self.ns_per_double);
+        apply("ns_per_double", &mut double, &mut out);
+        self.ns_per_double = double.unwrap_or(self.ns_per_double);
+        let mut lookup = Some(self.ns_per_lookup);
+        apply("ns_per_lookup", &mut lookup, &mut out);
+        self.ns_per_lookup = lookup.unwrap_or(self.ns_per_lookup);
+        let mut row_op = Some(self.ns_per_row_op);
+        apply("ns_per_row_op", &mut row_op, &mut out);
+        self.ns_per_row_op = row_op.unwrap_or(self.ns_per_row_op);
+        for (name, slot) in [
+            ("ns_per_sqrt", &mut self.ns_per_sqrt),
+            ("ns_per_as_solve", &mut self.ns_per_as_solve),
+            ("ns_per_s4_pair", &mut self.ns_per_s4_pair),
+            ("ns_per_word_xor", &mut self.ns_per_word_xor),
+            ("ns_per_legendre", &mut self.ns_per_legendre),
+            ("ns_per_inversion", &mut self.ns_per_inversion),
+            ("ns_per_frobenius", &mut self.ns_per_frobenius),
+            ("ns_per_canon", &mut self.ns_per_canon),
+        ] {
+            apply(name, slot, &mut out);
+        }
+        out
     }
 }
 
@@ -486,7 +568,16 @@ pub struct RegimeInstance {
     pub automorphisms_generic: u32,
     pub floor_s: f64,
     pub floor_ops: f64,
+    /// The factors every conversion in this instance went through: the
+    /// repository's pinned ratios wherever the table has them.
     pub calibration: Calibration,
+    /// What the host measured for the same units.  Kept because it is
+    /// the wall-clock practicality note and because a host that no
+    /// longer resembles the one the ratios came from should be visible;
+    /// it prices nothing.
+    pub calibration_measured: Calibration,
+    /// Which units came from the table and which fell back to the host.
+    pub calibration_pinned: PinOutcome,
     /// Every rho run (best reference first within a repeat).
     pub rho: Vec<RhoResult>,
     /// Mean `S` of the best-reference rho over the repeats.
@@ -3181,6 +3272,16 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         .and_then(|f| exact_decomposition_ceiling(curve, &f.points, r, 2));
 
     let floor_s = generic_floor_s(2.0);
+    // The unit's conversion ratios come from the repository, not from
+    // what this host happened to measure a moment ago; see
+    // `PINNED_CALIBRATION`.  `priced` is what every phase below is
+    // converted with, `calib` stays as the host note — which is why the
+    // rebinding to `priced` happens *after* the instance is built, below:
+    // shadowing it here made `calibration_measured` a second copy of the
+    // pinned table, so every prime row claimed the host had measured
+    // exactly what the repository pinned.
+    let mut priced = calib.clone();
+    let pinned = priced.pin("prime", inst.name.as_str());
     let mut out = RegimeInstance {
         regime: "prime".into(),
         curve: serde_json::json!({
@@ -3195,7 +3296,9 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         automorphisms_generic: 2,
         floor_s,
         floor_ops: generic_floor_ops(r as f64, 2.0),
-        calibration: calib.clone(),
+        calibration: priced.clone(),
+        calibration_measured: calib.clone(),
+        calibration_pinned: pinned.clone(),
         rho: Vec::new(),
         rho_s_mean: 0.0,
         rho_verified_all: true,
@@ -3203,6 +3306,7 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         seeds: Vec::new(),
         targets: Vec::new(),
     };
+    let calib = &priced;
     out.curve["factor_base"] = serde_json::json!({
         "description": fb.description,
         "signed_points": fb.points.len(),
@@ -3587,6 +3691,8 @@ fn binary_regime_shell(inst: &BinaryInstance, regime: &str, automorphisms: u32) 
         floor_s: generic_floor_s(automorphisms as f64),
         floor_ops: generic_floor_ops(inst.r as f64, automorphisms as f64),
         calibration: Calibration::default(),
+        calibration_measured: Calibration::default(),
+        calibration_pinned: PinOutcome::default(),
         rho: Vec::new(),
         rho_s_mean: 0.0,
         rho_verified_all: true,
@@ -3655,6 +3761,10 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
     let m2_row = m_used == 3 && admissible.contains(&2) && two_summand_row_fits(cfg, &fb, space, exact_m2);
 
     let mut out = binary_regime_shell(inst, "char2", 2);
+    // Price with the repository's ratios, keep the host's as the note.
+    let instance_name = out.curve["name"].as_str().unwrap_or_default().to_string();
+    out.calibration_measured = calib.clone();
+    out.calibration_pinned = calib.pin("char2", &instance_name);
     out.calibration = calib.clone();
     out.curve["factor_base"] = serde_json::json!({
         "description": fb.description,
@@ -3859,6 +3969,10 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
     });
 
     let mut out = binary_regime_shell(inst, "koblitz", 2 * n);
+    // Price with the repository's ratios, keep the host's as the note.
+    let instance_name = out.curve["name"].as_str().unwrap_or_default().to_string();
+    out.calibration_measured = calib.clone();
+    out.calibration_pinned = calib.pin("koblitz", &instance_name);
     out.calibration = calib.clone();
     out.curve["factor_base"] = serde_json::json!({
         "description": description,
@@ -4459,6 +4573,35 @@ mod tests {
         let inst = roster_prime_instance(12).unwrap();
         let res = run_prime_instance(&inst, &cfg);
         assert!(res.rho_verified_all, "{:?}", res.rho);
+        // `bench-12bit` is in the pinned table, so this row prices with
+        // the repository's ratios — and must still report what the host
+        // measured.  The two came out identical once, because the pinned
+        // copy was bound over `calib` before the instance was built, so
+        // the "host note" was a second copy of the pinned values and a
+        // reader would have concluded the host measured exactly what the
+        // repository pinned.  Moving that rebinding is the fix; this is
+        // the assertion that keeps it moved.
+        assert!(!res.calibration_pinned.pinned.is_empty(), "{:?}", res.calibration_pinned);
+        let priced = &res.calibration;
+        let host = &res.calibration_measured;
+        assert_eq!(priced.ns_per_add, host.ns_per_add, "pinning must not touch ns_per_add");
+        let moved = [
+            (priced.ns_per_sqrt, host.ns_per_sqrt),
+            (priced.ns_per_legendre, host.ns_per_legendre),
+            (priced.ns_per_inversion, host.ns_per_inversion),
+        ]
+        .iter()
+        .filter(|(a, b)| a.is_some() && a != b)
+        .count()
+            + usize::from(priced.ns_per_double != host.ns_per_double)
+            + usize::from(priced.ns_per_lookup != host.ns_per_lookup)
+            + usize::from(priced.ns_per_row_op != host.ns_per_row_op);
+        assert!(
+            moved > 0,
+            "every pinned unit priced at exactly the host's measurement, which means the host \
+             note is a copy of the pinned table rather than the measurement: priced {priced:?} \
+             host {host:?}"
+        );
         // Eight rungs, plus the balanced row wherever `#E^{1/3}` differs
         // from the `2^{⌈bits/3⌉}` rule by more than a tenth.
         assert!((8..=9).contains(&res.variants.len()), "{}", res.variants.len());
@@ -4514,6 +4657,43 @@ mod tests {
             assert_eq!(v.linear_algebra.get("pinned_by_repeated_row"), 0, "{}", v.name);
             assert!(v.relations.get("target_guard_probes") >= v.trials, "{}", v.name);
         }
+    }
+
+    #[test]
+    fn the_unit_prices_the_same_counts_the_same_way_whatever_the_host_measured() {
+        // The defect this fixes: two runs measured the same instance's
+        // `ns_per_add` at 213 ns and 146 ns, and the *ratios* to it moved
+        // by a median of 1.08, so identical native counts came out up to
+        // eight per cent apart.  After pinning, the conversion is the
+        // repository's ratio and the host's speed cancels exactly.
+        let mut fast = Calibration { ns_per_add: 146.0, ..Calibration::default() };
+        let mut slow = Calibration { ns_per_add: 213.0, ..Calibration::default() };
+        // Give the two hosts deliberately different measured ratios.
+        fast.ns_per_sqrt = Some(146.0 * 4.0);
+        slow.ns_per_sqrt = Some(213.0 * 7.0);
+        fast.ns_per_lookup = 146.0 * 0.02;
+        slow.ns_per_lookup = 213.0 * 0.05;
+        let name = "generated-24bit-10935329";
+        let a = fast.pin("prime", name);
+        let b = slow.pin("prime", name);
+        assert_eq!(a.pinned, b.pinned, "the same units pin on either host");
+        assert!(a.pinned.contains(&"ns_per_sqrt".to_string()), "{:?}", a.pinned);
+        for count in [1u64, 97, 1_000_000] {
+            let f = fast.gae(count, fast.ns_per_sqrt.unwrap());
+            let s = slow.gae(count, slow.ns_per_sqrt.unwrap());
+            assert!((f - s).abs() / f.max(1e-9) < 1e-12, "{count}: {f} vs {s}");
+            let fl = fast.gae(count, fast.ns_per_lookup);
+            let sl = slow.gae(count, slow.ns_per_lookup);
+            assert!((fl - sl).abs() / fl.max(1e-9) < 1e-12, "{count}: {fl} vs {sl}");
+        }
+        // An instance the table does not carry keeps the host's numbers
+        // and says so, rather than silently pricing at someone else's.
+        let mut fresh = Calibration { ns_per_add: 100.0, ..Calibration::default() };
+        fresh.ns_per_sqrt = Some(250.0);
+        let out = fresh.pin("prime", "a-curve-generated-tomorrow");
+        assert!(out.pinned.is_empty(), "{:?}", out.pinned);
+        assert!(out.measured.contains(&"ns_per_sqrt".to_string()), "{:?}", out.measured);
+        assert_eq!(fresh.ns_per_sqrt, Some(250.0), "an unpinned unit must not be rewritten");
     }
 
     #[test]
@@ -4979,6 +5159,8 @@ mod tests {
             floor_s: 1.0,
             floor_ops: 1.0,
             calibration: Calibration::default(),
+            calibration_measured: Calibration::default(),
+            calibration_pinned: PinOutcome::default(),
             rho: Vec::new(),
             rho_s_mean: 0.0,
             rho_verified_all: true,
