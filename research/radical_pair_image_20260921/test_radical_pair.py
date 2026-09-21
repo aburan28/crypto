@@ -33,6 +33,10 @@ def test_binary_cell():
     target = cell.roots[0]
     certificate = cell.certificate(target)
     assert certificate["presentation_equivalence"]
+    assert certificate["unordered_pair_enumeration"]
+    assert certificate["quadratic_root_recovery"]
+    assert certificate["polynomial_evaluation"]
+    assert certificate["root_recovery"]
     assert certificate["nondegenerate_group_equivalence"]
     systems = cell.systems(target)
     assert set(systems) == {"direct", "radical_symmetric"}

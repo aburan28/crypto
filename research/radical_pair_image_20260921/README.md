@@ -65,6 +65,12 @@ python3 research/radical_pair_image_20260921/summarize.py \
   research/radical_pair_image_20260921/results/new-run
 python3 research/radical_pair_image_20260921/audit.py \
   research/radical_pair_image_20260921/results/new-run
+
+python3 research/radical_pair_image_20260921/thread_scaling.py run \
+  --run research/radical_pair_image_20260921/results/run-003 \
+  --output research/radical_pair_image_20260921/results/new-thread-run
+python3 research/radical_pair_image_20260921/thread_scaling.py verify \
+  --output research/radical_pair_image_20260921/results/new-thread-run
 ```
 
 The runner refuses to overwrite an output directory.  It freezes msolve inputs,
@@ -75,9 +81,11 @@ protocol without writing the much larger expanded reduced basis.
 
 ## Evidence
 
-- Accepted run: [`results/run-002/`](results/run-002/)
-- Summary: [`results/run-002/summary.json`](results/run-002/summary.json)
-- Audit: [`results/run-002/final-audit.json`](results/run-002/final-audit.json)
+- Accepted run: [`results/run-003/`](results/run-003/)
+- Summary: [`results/run-003/summary.json`](results/run-003/summary.json)
+- Audit: [`results/run-003/final-audit.json`](results/run-003/final-audit.json)
+- Exact thread scaling: [`results/thread-scaling-001/summary.json`](results/thread-scaling-001/summary.json)
+- Superseded binary-certificate run: [`results/run-002/SUPERSEDED.md`](results/run-002/SUPERSEDED.md)
 - Superseded absolute-path run: [`results/run-001/SUPERSEDED.md`](results/run-001/SUPERSEDED.md)
 - Rejected output-mode trial: [`results/run-000-rejected/REJECTED.md`](results/run-000-rejected/REJECTED.md)
 - Prior bounded binary `k=4` stop: [`results/binary-k4-censored.json`](results/binary-k4-censored.json)

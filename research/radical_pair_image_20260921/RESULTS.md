@@ -56,21 +56,37 @@ charges radical preprocessing once and includes all targets in the cell.
 
 | Cell | b | Producing / targets | F4 degree R→C | Matrix C/R | Wall C/R [95% CI] | Cold batch C/R |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| prime-main-b3 | 3 | 2/3 | 6→5 | 1.0111 | 0.7095 [0.4253, 0.9777] | **1.9189** |
-| prime-main-b5 | 5 | 2/3 | 9→7 | 0.1398 | 0.3737 [0.3525, 0.3962] | 0.4958 |
-| prime-main-b7 | 7 | 2/3 | 11→9 | 0.2318 | 0.2062 [0.1982, 0.2133] | 0.2386 |
-| prime-main-b9 | 9 | 2/3 | 15→11 | 0.1942 | 0.1449 [0.1254, 0.1633] | 0.1490 |
-| prime-holdout-b5 | 5 | 2/3 | 9→7 | 0.0551 | 0.4750 [0.4237, 0.5434] | 0.6414 |
-| prime-holdout-b7 | 7 | 2/3 | 11→9 | 0.5807 | 0.2043 [0.2016, 0.2071] | 0.2507 |
-| prime-holdout-b9 | 9 | 2/3 | 13→11 | 0.3077 | 0.1173 [0.1115, 0.1238] | 0.1327 |
-| prime-holdout-b11 | 11 | 2/3 | 15→13 | 0.3116 | 0.1083 [0.0841, 0.1418] | 0.1399 |
-| binary-k2 | 3 | 3/3 | 5→4 | 0.2508 | 0.8322 [0.7523, 0.9304] | 0.9488 |
-| binary-k3 | 7 | 7/7 | 6,7→5 | 0.0345 | 0.3099 [0.2658, 0.3561] | 0.3130 |
+| prime-main-b3 | 3 | 2/3 | 6→5 | 1.0111 | 0.7257 [0.4215, 0.9756] | **2.3834** |
+| prime-main-b5 | 5 | 2/3 | 9→7 | 0.1398 | 0.3825 [0.3716, 0.3937] | 0.5121 |
+| prime-main-b7 | 7 | 2/3 | 11→9 | 0.2318 | 0.2129 [0.2117, 0.2141] | 0.2416 |
+| prime-main-b9 | 9 | 2/3 | 15→11 | 0.1942 | 0.1578 [0.1534, 0.1620] | 0.1678 |
+| prime-holdout-b5 | 5 | 2/3 | 9→7 | 0.0551 | 0.4308 [0.4289, 0.4329] | 0.5861 |
+| prime-holdout-b7 | 7 | 2/3 | 11→9 | 0.5807 | 0.2025 [0.1933, 0.2115] | 0.2465 |
+| prime-holdout-b9 | 9 | 2/3 | 13→11 | 0.3077 | 0.1227 [0.1148, 0.1298] | 0.1416 |
+| prime-holdout-b11 | 11 | 2/3 | 15→13 | 0.3116 | 0.0837 [0.0651, 0.0996] | 0.0967 |
+| binary-k2 | 3 | 3/3 | 5→4 | 0.2508 | 0.8506 [0.8129, 0.8841] | 0.9315 |
+| binary-k3 | 7 | 7/7 | 6,7→5 | 0.0345 | 0.3282 [0.3043, 0.3533] | 0.3284 |
 
 The `b=3` prime cell is an explicit regression once setup is charged.  It is not
 promoted.  Every `b>=5` prime main/holdout cell and both binary cells have cold
 batch ratio below one in this solver-stage suite.  Timing remains secondary:
 shared-host variance is visible in raw repetitions, especially at `b=11`.
+
+## Exact thread scaling
+
+The accepted algebraic suite uses one thread. A separate 45-process resource
+study reruns two prime `b=11` radical inputs and one binary `k=3` radical input
+at 1, 2, 4, 8 and 16 threads. Every run returns the identical leading ideal.
+
+| Input | 1-thread median s | 4-thread speedup | 8-thread speedup | 16-thread speedup |
+| --- | ---: | ---: | ---: | ---: |
+| prime-b11-t0 | 0.9590 | 1.637x | **1.752x** | 1.665x |
+| prime-b11-t2 | 0.9632 | 1.610x | **1.685x** | 1.616x |
+| binary-k3-t0 | 1.0702 | 1.398x | **1.441x** | 1.389x |
+
+Eight threads are the measured wall-time knee on this host. This is a resource-
+scaling diagnostic: it does not reduce F4 degree, matrix work or calibrated
+operations, and does not alter the one-thread attack-accounting table.
 
 ## Correctness and scope
 
@@ -86,11 +102,15 @@ shared-host variance is visible in raw repetitions, especially at `b=11`.
 - The prior `GF(2^8)/GF(2^4)` feasibility run is censored after 90 seconds.
   No direct comparison was launched and no degree/runtime claim is inferred.
 
-Accepted run 002 stores 276 raw process logs, 34 certificates, every msolve
+Accepted run 003 stores 276 raw process logs, 34 certificates, every msolve
 input, source/input/log hashes and full F4 rounds.  Independent audit status is
-`pass`. Run 001 is superseded because it stored absolute raw-log paths. Run 000
-remains rejected because `msolve -g 0` measured full solution parametrization
-rather than the intended Gröbner stage.
+`pass`. Its binary certificates independently enumerate the symmetric roots,
+recover both quadratics, and evaluate both polynomial presentations. Run 002 is
+superseded because those independent binary certificate checks were missing;
+run 001 stored absolute raw-log paths. Run 000 remains rejected because
+`msolve -g 0` measured full solution parametrization rather than the intended
+Gröbner stage. The separate thread-scaling run stores 45 matching-leading-ideal
+processes and passes its portable verifier.
 
 ## Interpretation
 
