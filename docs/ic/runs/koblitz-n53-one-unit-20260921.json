@@ -1157,9 +1157,9 @@
   }
  },
  "science_process_accounting": {
-  "processes": 272,
-  "sequential_wall_seconds": 1180.147196334,
-  "total_core_seconds": 2849.7960780000003,
+  "processes": 294,
+  "sequential_wall_seconds": 1283.844761873,
+  "total_core_seconds": 3014.2404400000005,
   "peak_rss_bytes": 245972992,
   "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count, width and window diagnostics, and accepted or rejected single-target build-cache, prefetch, canonicalization-lane, projected-predicate-reuse, orbit-derived-projection and cutoff A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
@@ -2804,5 +2804,310 @@
    "predicate native counts emitted in both factor-base summary and selection stage"
   ],
   "claim_boundary": "A charged algebraic-predicate construction improvement on one public-synthetic target. It uses no target subgroup enumeration or logarithm labels and changes no asymptotic exponent or SOTA gate."
+ },
+ "single_target_fixed_width_key_chunks": {
+  "source_commit": "396c02b5",
+  "instance": "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json",
+  "mechanism": "Process every complete eight-point normal-basis canonicalization chunk with a compile-time fixed lane count and handle only the final remainder scalarly. This removes the dynamic chunk length from the hot rotation loop and gives LLVM a constant trip count.",
+  "matched_one_core_ab": {
+   "pairs": 5,
+   "reference_binary_blake3": "9406db1954c057f4a75acfa9f1f3d61622d22fd91f7fe034ce9731e4d5bcc0e0",
+   "candidate_binary_blake3": "6b6cb60ac699aedd0456acaa6e0f76285e17d58702f1f9765b7224da45977ff5",
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "relations_each": 588,
+   "recovered_scalar_each": 7892094459170,
+   "verified": "5/5 reference and 5/5 candidate",
+   "medians": {
+    "whole_wall": {
+     "reference": 6.864106,
+     "candidate": 6.8096945,
+     "candidate_over_reference": 0.9909703837109725,
+     "candidate_wins": "5/5"
+    },
+    "whole_cpu": {
+     "reference": 6.812336,
+     "candidate": 6.757385,
+     "candidate_over_reference": 0.9899165278988,
+     "candidate_wins": "5/5"
+    },
+    "rss": {
+     "reference": 103809024,
+     "candidate": 104644608,
+     "candidate_over_reference": 1.004077791718946,
+     "candidate_wins": "2/5"
+    },
+    "ic_wall": {
+     "reference": 5.2561839589999995,
+     "candidate": 5.195076417000001,
+     "candidate_over_reference": 0.9877124933622224,
+     "candidate_wins": "5/5"
+    },
+    "rho_wall": {
+     "reference": 1.5780311249999999,
+     "candidate": 1.5804262919999998,
+     "candidate_over_reference": 1.0013276162534384,
+     "candidate_wins": "1/5"
+    },
+    "rho_over_ic": {
+     "reference": 0.30056813491096307,
+     "candidate": 0.3042161780004476,
+     "candidate_over_reference": 1.012137158486761,
+     "candidate_wins": "1/5"
+    },
+    "collect_wall": {
+     "reference": 4.896434333,
+     "candidate": 4.843006625,
+     "candidate_over_reference": 0.9877139424510282,
+     "candidate_wins": "5/5"
+    },
+    "collect_cpu": {
+     "reference": 4.878029,
+     "candidate": 4.823721999999999,
+     "candidate_over_reference": 0.9863432546218976,
+     "candidate_wins": "5/5"
+    },
+    "pair_wall": {
+     "reference": 1.273221834,
+     "candidate": 1.268005667,
+     "candidate_over_reference": 0.9953024352549705,
+     "candidate_wins": "4/5"
+    },
+    "pair_cpu": {
+     "reference": 1.2710370000000002,
+     "candidate": 1.26582,
+     "candidate_over_reference": 0.9952440408894467,
+     "candidate_wins": "4/5"
+    },
+    "unit_wall": {
+     "reference": 3.566529875,
+     "candidate": 3.5165505,
+     "candidate_over_reference": 0.9847669268661731,
+     "candidate_wins": "5/5"
+    },
+    "unit_cpu": {
+     "reference": 3.560751,
+     "candidate": 3.509702,
+     "candidate_over_reference": 0.9844282525206514,
+     "candidate_wins": "5/5"
+    }
+   },
+   "per_pair": [
+    {
+     "pair": 1,
+     "candidate_over_reference_whole_cpu": 0.9927619334733141,
+     "candidate_over_reference_ic_wall": 0.9895080043985945,
+     "candidate_over_reference_relation_unit_wall": 0.9870121893797671,
+     "candidate_over_reference_relation_unit_cpu": 0.9870295678527308,
+     "candidate_over_reference_peak_rss": 0.9949645948072384,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_whole_cpu": 0.9962232180449356,
+     "candidate_over_reference_ic_wall": 0.9953804594247836,
+     "candidate_over_reference_relation_unit_wall": 0.990089765815405,
+     "candidate_over_reference_relation_unit_cpu": 0.989708135386649,
+     "candidate_over_reference_peak_rss": 1.0080492424242424,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_whole_cpu": 0.9828700988685183,
+     "candidate_over_reference_ic_wall": 0.9735424303861295,
+     "candidate_over_reference_relation_unit_wall": 0.9652138859311581,
+     "candidate_over_reference_relation_unit_cpu": 0.9714906380532137,
+     "candidate_over_reference_peak_rss": 1.004077791718946,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_whole_cpu": 0.9837915327186397,
+     "candidate_over_reference_ic_wall": 0.9877124933622224,
+     "candidate_over_reference_relation_unit_wall": 0.9847669268661731,
+     "candidate_over_reference_relation_unit_cpu": 0.9844282525206514,
+     "candidate_over_reference_peak_rss": 0.9923651980276762,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_whole_cpu": 0.9899165278988,
+     "candidate_over_reference_ic_wall": 0.9869215397451429,
+     "candidate_over_reference_relation_unit_wall": 0.9833285192935612,
+     "candidate_over_reference_relation_unit_cpu": 0.9833627793687344,
+     "candidate_over_reference_peak_rss": 1.0204472843450478,
+     "identical_relation_hash_scalar_and_verification": true
+    }
+   ],
+   "rayon_threads": 1,
+   "reading": "Fixed eight-lane chunks win relation-unit wall and CPU, full IC wall and whole-process CPU in all five one-core pairs. Median RSS rises 0.4%."
+  },
+  "matched_default_thread_ab": {
+   "pairs": 5,
+   "reference_binary_blake3": "9406db1954c057f4a75acfa9f1f3d61622d22fd91f7fe034ce9731e4d5bcc0e0",
+   "candidate_binary_blake3": "6b6cb60ac699aedd0456acaa6e0f76285e17d58702f1f9765b7224da45977ff5",
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "relations_each": 588,
+   "recovered_scalar_each": 7892094459170,
+   "verified": "5/5 reference and 5/5 candidate",
+   "medians": {
+    "whole_wall": {
+     "reference": 2.519614833,
+     "candidate": 2.517865375,
+     "candidate_over_reference": 0.9987569217960585,
+     "candidate_wins": "4/5"
+    },
+    "whole_cpu": {
+     "reference": 8.240952,
+     "candidate": 8.124213,
+     "candidate_over_reference": 0.9931200976371352,
+     "candidate_wins": "4/5"
+    },
+    "rss": {
+     "reference": 126451712,
+     "candidate": 128712704,
+     "candidate_over_reference": 1.01788027986525,
+     "candidate_wins": "2/5"
+    },
+    "ic_wall": {
+     "reference": 0.903399666,
+     "candidate": 0.891977584,
+     "candidate_over_reference": 0.9873565572028893,
+     "candidate_wins": "5/5"
+    },
+    "rho_wall": {
+     "reference": 1.580341792,
+     "candidate": 1.580089417,
+     "candidate_over_reference": 0.9996602347145702,
+     "candidate_wins": "3/5"
+    },
+    "rho_over_ic": {
+     "reference": 1.749284740160619,
+     "candidate": 1.7779878793456316,
+     "candidate_over_reference": 1.0164085003007441,
+     "candidate_wins": "1/5"
+    },
+    "collect_wall": {
+     "reference": 0.655839583,
+     "candidate": 0.648525125,
+     "candidate_over_reference": 0.9969241600487253,
+     "candidate_wins": "4/5"
+    },
+    "collect_cpu": {
+     "reference": 6.257922,
+     "candidate": 6.159004,
+     "candidate_over_reference": 0.9918927036587596,
+     "candidate_wins": "4/5"
+    },
+    "pair_wall": {
+     "reference": 0.203941583,
+     "candidate": 0.207196167,
+     "candidate_over_reference": 1.0167880286385216,
+     "candidate_wins": "2/5"
+    },
+    "pair_cpu": {
+     "reference": 2.105479,
+     "candidate": 2.113036,
+     "candidate_over_reference": 1.0081331533705569,
+     "candidate_wins": "2/5"
+    },
+    "unit_wall": {
+     "reference": 0.393040458,
+     "candidate": 0.380707334,
+     "candidate_over_reference": 0.9681861631659304,
+     "candidate_wins": "5/5"
+    },
+    "unit_cpu": {
+     "reference": 4.10412,
+     "candidate": 3.976877,
+     "candidate_over_reference": 0.9791307616517276,
+     "candidate_wins": "5/5"
+    }
+   },
+   "per_pair": [
+    {
+     "pair": 1,
+     "candidate_over_reference_whole_cpu": 0.994087333599322,
+     "candidate_over_reference_ic_wall": 0.9873565572028893,
+     "candidate_over_reference_relation_unit_wall": 0.9821957849450947,
+     "candidate_over_reference_relation_unit_cpu": 0.9791307616517276,
+     "candidate_over_reference_peak_rss": 1.01788027986525,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_whole_cpu": 1.0007315426354686,
+     "candidate_over_reference_ic_wall": 0.9947535892423185,
+     "candidate_over_reference_relation_unit_wall": 0.9840609292862228,
+     "candidate_over_reference_relation_unit_cpu": 0.9896446100713487,
+     "candidate_over_reference_peak_rss": 1.0400943396226414,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_whole_cpu": 0.9754016000820294,
+     "candidate_over_reference_ic_wall": 0.9772640523272033,
+     "candidate_over_reference_relation_unit_wall": 0.9667900357900199,
+     "candidate_over_reference_relation_unit_cpu": 0.9598540744977928,
+     "candidate_over_reference_peak_rss": 0.9898964061900499,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_whole_cpu": 0.9564823412735252,
+     "candidate_over_reference_ic_wall": 0.7697014993783273,
+     "candidate_over_reference_relation_unit_wall": 0.7638723721677294,
+     "candidate_over_reference_relation_unit_cpu": 0.9613174078730642,
+     "candidate_over_reference_peak_rss": 0.960035411660554,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_whole_cpu": 0.9931200976371352,
+     "candidate_over_reference_ic_wall": 0.999102532389342,
+     "candidate_over_reference_relation_unit_wall": 0.9681861631659304,
+     "candidate_over_reference_relation_unit_cpu": 0.983803099101934,
+     "candidate_over_reference_peak_rss": 1.0224996748601898,
+     "identical_relation_hash_scalar_and_verification": true
+    }
+   ],
+   "reading": "At default threads relation-unit wall and CPU and full IC wall win all five pairs; whole-process CPU wins four of five. Median RSS rises 1.8%."
+  },
+  "current_head_replays": {
+   "default_threads": {
+    "binary_blake3": "6b6cb60ac699aedd0456acaa6e0f76285e17d58702f1f9765b7224da45977ff5",
+    "whole_process_wall_seconds": 2.500567667,
+    "whole_process_cpu_seconds": 7.991069,
+    "peak_rss_bytes": 128286720,
+    "ic_wall_seconds": 0.882455415,
+    "rho_wall_seconds": 1.583856792,
+    "rho_over_ic_wall_ratio": 1.7948292515152167,
+    "pair_table_build_wall_seconds": 0.194020958,
+    "relation_unit_wall_seconds": 0.38011175,
+    "relation_unit_cpu_seconds": 3.9666309999999996,
+    "relations": 588,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   "one_thread": {
+    "binary_blake3": "6b6cb60ac699aedd0456acaa6e0f76285e17d58702f1f9765b7224da45977ff5",
+    "whole_process_wall_seconds": 6.896996417,
+    "whole_process_cpu_seconds": 6.809877999999999,
+    "peak_rss_bytes": 105938944,
+    "ic_wall_seconds": 5.277885709,
+    "rho_wall_seconds": 1.581483958,
+    "rho_over_ic_wall_ratio": 0.29964346429541067,
+    "pair_table_build_wall_seconds": 1.338297125,
+    "relation_unit_wall_seconds": 3.52751625,
+    "relation_unit_cpu_seconds": 3.514335,
+    "relations": 588,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   }
+  },
+  "validation": [
+   "direct fixed-lane versus scalar canonical-key equality across degrees 8, 12, 16, 20, 23, 31, 53 and 61 including infinity",
+   "identical 588-relation hash and verified scalar in every matched run"
+  ],
+  "claim_boundary": "A small constant-factor implementation improvement on one public-synthetic target. It changes no mathematics, factor base, relation, exponent or SOTA gate."
  }
 }

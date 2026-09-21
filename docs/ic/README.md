@@ -674,6 +674,13 @@ to 6.909 core-seconds (0.913x), all winning 5/5.  At default threads,
 full IC fell from 0.965 to 0.888 s (0.915x), whole-process CPU to 0.906x,
 and RSS was lower in 5/5 runs.  Median one-core IC remains about 3.37
 times slower than rho; default-thread rho/IC improves to 1.778.
+Making each complete eight-point canonicalization chunk explicitly
+fixed-width, with only the final remainder scalar, reduced the one-core
+relation unit from 3.567 to 3.517 s (0.985x), full IC to 0.988x and
+whole-process CPU to 0.990x over five matched pairs.  At default threads,
+relation-unit wall fell to 0.968x, unit CPU to 0.979x and full IC to
+0.987x; median RSS rose 1.8%.  Every relation-unit and IC comparison won
+5/5 with the same relation hash and scalar.
 
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
@@ -698,8 +705,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 272 processes, 1,180.147 sequential wall-seconds,
-2,849.796 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+campaign contains 294 processes, 1,283.845 sequential wall-seconds,
+3,014.240 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
 a rejected uncompressed-cache run).
 
 Before the cached builder, five fresh scalar-blind repeats with
