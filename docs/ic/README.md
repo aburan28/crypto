@@ -636,10 +636,28 @@ process (an r-adding walk with distinguished points, or the signed
 Frobenius walk on Koblitz curves).  Native counters — trials, pair-table
 probes, square roots, Artin–Schreier solves, pairs of the
 pairs-and-solve loop, multiply-subtracts of the elimination — are exact;
-the conversion to additions uses factors measured on the host at run
-time and recorded in the report, so a reader can re-convert.  The
-relation phase also carries its counting ceiling, `C(F+m−1, m)/#E`, and
-the measured yield against it.
+the conversion to additions uses the ratios **pinned in
+[`calibration.json`](calibration.json)**, so that two runs price
+identical native counts identically.
+
+That pinning is Round 4 (the note's §12).  Through Round 3 the factors
+were measured on the host at the start of each run, and the *ratios*
+between them drifted — a median of `1.08` and up to `3.70` for the same
+instance and unit across three ladders on one machine — which repriced
+rows that had done identical work by up to eight per cent and put a
+floor under every cross-run comparison the ledger makes.  Operation
+counts survive hardware, as `AGENTS.md` §6 requires; a conversion
+re-measured per run does not.  The host's factors are still taken and
+still reported, as `calibration_measured`, because they are the
+wall-clock practicality note and because a host that stops resembling
+the reference one should be visible — they simply price nothing.  An
+instance the table does not carry keeps them and says so in
+`calibration_pinned`, so a row priced the old way is never silent about
+it.  `tools/boundary_pin_calibration.py` regenerates the table as the
+median over a set of frozen runs.
+
+The relation phase also carries its counting ceiling, `C(F+m−1, m)/#E`,
+and the measured yield against it.
 
 Variants: Semaev `S₃` roots, direct subtraction and meet in the middle
 (`m = 2, 3`) on prime curves; `S₄` pairs-and-solve and meet in the

@@ -1859,6 +1859,75 @@ python3 docs/ic/tools/boundary_scoreboard_rows.py round3.json
 cargo test --release --lib cryptanalysis::ic_
 ```
 
+## 12. Round 4: the unit, pinned
+
+**Frozen run:** `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`
+— the Round-3 ladder rerun with nothing changed but the conversion.
+
+§11.7 found the defect and this round fixes it.  It is **accounting** by
+the `AGENTS.md` §3 test: the numbers move, the algorithm does not, and
+no gain is claimed from it.  It is worth a round of its own because it
+sets how much any later round can claim.
+
+### 12.1 What was wrong with the unit
+
+`S` is group-addition equivalents per `√r`, so every non-addition count
+is converted through `ns_per_<unit> / ns_per_add`.  Through Round 3 both
+factors were measured on the host at the start of each run.  The ratios
+between them then drifted, for the *same* instance and the *same* unit,
+across three ladders on one machine:
+
+| | median | 90th | max |
+|:--|--:|--:|--:|
+| spread of a pinned ratio across three runs | 1.08 | 1.23 | 3.70 |
+
+The worst are `ns_per_sqrt` on `bench-12bit` at `3.70` and
+`ns_per_frobenius` on `K_0 / GF(2^41)` at `2.50`.  The consequence was
+§11.7's: 111 of 166 cross-round rows had identical trials, relations and
+group operations and still moved, by `0.912` to `1.076`.
+
+`AGENTS.md` §6 keeps operation counts as the metric "because they
+survive hardware".  A conversion re-measured per run does not survive
+it, and an eight per cent floor is not a detail when the levers of §11.6
+move rows by `1.10×` to `1.89×`.
+
+### 12.2 What the unit is now
+
+The ratios live in `docs/ic/calibration.json`, compiled into the binary
+and applied per instance after the host measurement, so that
+`Calibration::gae` — which divides by `ns_per_add` — yields exactly the
+pinned ratio whatever the host's speed.  `boundary_pin_calibration.py`
+regenerates the table as the **median** over a set of frozen runs, which
+is what keeps one unlucky measurement from becoming the unit; it
+reproduces the committed table exactly from the three ladders it was
+built from.
+
+Three properties this design keeps, and each matters:
+
+- **The measurement survives.**  Every factor is still taken and still
+  reported, as `calibration_measured`.  It is the wall-clock
+  practicality note of §6, and it is how a host that no longer resembles
+  the reference one becomes visible.  It prices nothing.
+- **The fallback is loud.**  An instance the table does not carry — a
+  new size, a freshly generated curve — keeps the host's factors, and
+  `calibration_pinned` names every unit that fell back.  A row priced
+  the old way says so.  Two consecutive quick runs agree to twelve
+  digits on every pinned row, while the quick configuration's `n = 12`
+  binary curve, which the table does not carry, still moves `1.09×`.
+  That is the fallback working rather than failing quietly.
+- **It prices and gates nothing else.**  Every consumer of a
+  `Calibration` hands it to `price_phase`.  No native count and no
+  branch depends on it, which is what makes the round accounting rather
+  than a change to the method.
+
+### 12.3 Re-pinning is itself a repricing
+
+Regenerating the table reprices every row at once.  So the table records
+the host it came from and the runs it was taken over, and a later round
+that re-pins has to say so in the note and carry the delta the way this
+one does — otherwise the drift returns as a step instead of as noise.
+The reference host is the one named in the file.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
