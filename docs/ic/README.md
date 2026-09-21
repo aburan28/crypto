@@ -628,6 +628,13 @@ single-core pair build from 2.585 to 1.256 s (0.486x), full IC wall from
 core-seconds (0.875x).  Median RSS rose from 69.6 to 108.0 MB (1.538x).
 Same-process rho remained faster: rho/IC improved from 0.187 to 0.223,
 leaving IC about 4.49 times slower on one core.
+On this AArch64 host, enabling the scan's existing 32-key lookahead
+with native `PRFM PLDL1KEEP` reduced the one-core relation unit from
+3.929 to 3.877 s (0.989x) over five more matched pairs, full IC from
+7.120 to 7.060 s (0.993x), and whole-process CPU from 9.453 to 9.393
+core-seconds (0.995x), with 5/5 identical relation hashes and essentially
+flat RSS.  Other architectures retain their existing prefetch or no-op
+paths.
 
 Public hash seed 53001 constructs no target scalar and supplies no
 factor-base logs; relation-derived logs recovered `7892094459170` and
@@ -652,8 +659,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 167 processes, 576.140 sequential wall-seconds,
-1,930.454 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+campaign contains 179 processes, 683.360 sequential wall-seconds,
+2,045.455 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
 a rejected uncompressed-cache run).
 
 Before the cached builder, five fresh scalar-blind repeats with
