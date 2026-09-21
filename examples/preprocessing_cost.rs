@@ -44,14 +44,21 @@
 //! Measured 2026-09-21, 4-core x86_64 container, rustc 1.94.1, release, against
 //! a loopback Redis 7. Scoped to these parameters on this machine:
 //!
-//!   * build spans 74 us (n=9) to 9.1 ms (n=61) over the whole feasible space.
+//!   * build spans 65 us (n=9) to 9.0 ms (n=61) over the whole feasible space.
 //!     Nothing here is expensive in absolute terms.
-//!   * A hit is only 1.15x-3.3x cheaper than a rebuild: the in-process layer
+//!   * A hit is only 1.1x-3.1x cheaper than a rebuild: the in-process layer
 //!     stores bytes, so even a local hit re-parses the JSON.
-//!   * Against loopback Redis a remote hit was 1.92x MORE expensive than
-//!     rebuilding at n=9/ell=9, break-even at n=41/ell=7, and about 2x cheaper
-//!     only at n=61/ell=1. Cross-AZ is strictly worse than loopback.
+//!   * Against loopback Redis a remote hit is about break-even with rebuilding
+//!     at n=9/ell=9 and n=31/ell=11 (1.08x), 0.83x at n=41/ell=7, and 0.43x at
+//!     n=61/ell=1. Cross-AZ is strictly worse than loopback.
 //!   * The largest artifact stored is 1.92 MB against a 4 MB `max_value`.
+//!
+//! Two earlier figures here were wrong and are corrected above, both caught in
+//! review. The remote column read 1.92x at n=9/ell=9 rather than 1.08x, because
+//! each sample opened a fresh TCP connection that a production hit never pays;
+//! and an n=9/ell=18 row was reported that could not exist, because `z^k`
+//! vanishes for k >= n, so nine of those eighteen basis elements were zero. The
+//! range and the conclusion survive both; the individual numbers did not.
 //!
 //! So a durable tier under Redis is not warranted for this layer: an S3 GET is
 //! tens of milliseconds and the whole build is at most 9.1 ms. The layer where
@@ -179,6 +186,19 @@ fn us(ns: u128) -> f64 {
     ns as f64 / 1000.0
 }
 
+/// The largest usable subspace dimension at `(n, m)`.
+///
+/// Two bounds, and taking only the first is a trap: `MAX_VARS` caps the
+/// layout, but the basis `{z^k}` also has to consist of distinct nonzero field
+/// elements, and `z^k` for `k >= n` reduces to zero in a degree-`n` field. At
+/// n=9 the layout bound alone allows ell=18, of which indices 9..17 are every
+/// one the zero element -- a degenerate basis that understates both the build
+/// and the artifact it produces.
+fn feasible_ell(n: u32, m: usize) -> usize {
+    let layout = MAX_VARS.saturating_sub((m - 2) * n as usize) / m;
+    layout.min(n as usize)
+}
+
 /// The real cache path, end to end, at one parameter point.
 #[cfg(feature = "redis-cache")]
 fn redis_round_trip(n: u32, ell: usize, m: usize, url: &str) -> Option<(u128, u128, u128, usize)> {
@@ -192,14 +212,19 @@ fn redis_round_trip(n: u32, ell: usize, m: usize, url: &str) -> Option<(u128, u1
     let key = template_key(&basis, &b, m, &st);
     let build = || DecompositionTemplate::build(&basis, &b, m, &st);
 
-    let fresh = || {
-        AlgebraCache::local(256 * 1024 * 1024)
-            .with_redis(url)
-            .ok()
+    // Open the TCP connection before anything is timed. `AlgebraCache` connects
+    // lazily inside `remote()`, so the first memoize on a new instance carries a
+    // handshake that a production hit -- which reuses `self.connection` -- never
+    // pays. Left in, that artifact lands squarely on the hit-versus-rebuild
+    // comparison this whole table exists to make.
+    let warm = |c: &mut AlgebraCache| {
+        let probe = format!("warm:{n}:{ell}:{m}").into_bytes();
+        let _ = c.memoize::<u8>(Layer::Preprocessing, &probe, || Some(0u8));
     };
 
     // Miss: builds, encodes, and writes through to Redis.
-    let mut c = fresh()?;
+    let mut c = AlgebraCache::local(256 * 1024 * 1024).with_redis(url).ok()?;
+    warm(&mut c);
     let miss = {
         let start = Instant::now();
         black_box(c.memoize::<DecompositionTemplate>(Layer::Preprocessing, &key, build));
@@ -214,15 +239,18 @@ fn redis_round_trip(n: u32, ell: usize, m: usize, url: &str) -> Option<(u128, u1
         local.push(start.elapsed().as_nanos());
     }
 
-    // Redis hit: a fresh process-equivalent, empty local layer, value in Redis.
+    // Redis hit: `local(0)` retains nothing in process, so every lookup goes to
+    // Redis, with the connection already up.
     let mut remote = Vec::new();
     for _ in 0..REPS {
-        let mut cold = fresh()?;
+        let mut cold = AlgebraCache::local(0).with_redis(url).ok()?;
+        warm(&mut cold);
+        let before = cold.stats[0].redis_hits;
         let start = Instant::now();
         black_box(cold.memoize::<DecompositionTemplate>(Layer::Preprocessing, &key, build));
         remote.push(start.elapsed().as_nanos());
-        if cold.stats[0].redis_hits == 0 {
-            return None; // not actually served from Redis; do not report it
+        if cold.stats[0].redis_hits != before + 1 {
+            return None; // this sample was not served from Redis; do not report it
         }
     }
     let stored = serde_json::to_string(&build()?).ok()?.len();
@@ -239,7 +267,7 @@ fn main() {
 
     for &n in &degrees {
         let m = 3usize;
-        let max_ell = (MAX_VARS.saturating_sub(n as usize)) / m;
+        let max_ell = feasible_ell(n, m);
         if max_ell == 0 {
             continue;
         }
@@ -257,7 +285,7 @@ fn main() {
     // Summand count, held at one field, for the shape of the m dependence.
     for m in [2usize, 3, 4, 5] {
         let n = 31u32;
-        let max_ell = (MAX_VARS.saturating_sub((m - 2) * n as usize)) / m;
+        let max_ell = feasible_ell(n, m);
         if max_ell == 0 {
             continue;
         }
