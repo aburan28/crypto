@@ -1,0 +1,324 @@
+{
+ "schema_version": 1,
+ "operation": "koblitz_n53_one_unit_collection_selection",
+ "date": "2026-09-21",
+ "claim_boundary": "Finite public-synthetic engineering result. The one-unit schedule reduces deterministic collection work and same-host wall/core cost. The scalar-blind median remains slower than rho in whole-process wall and much slower in total core-seconds. This is not a SOTA, asymptotic, key-recovery, production-curve, Magma-complete, or externally reproduced result.",
+ "software": {
+  "source_commit": "96d419f72490b12f061651455f632adba9ba4ae5",
+  "profile": "release",
+  "binary_blake3": "5bf703f78e81dd797643bd3d65777b649ae5777a3418e61e7eaec98f30da97bd"
+ },
+ "host": {
+  "os": "macos",
+  "arch": "aarch64",
+  "logical_cpus_available": 14,
+  "resource_meter": "process CPU seconds and peak RSS reported by ic workflow"
+ },
+ "instance": {
+  "curve": "K_0 over GF(2^53)",
+  "subgroup_order": "21044858204113",
+  "factor_base": "algebraic subgroup-orbit specification, seed 1, 36000 requested points",
+  "factor_base_points": 36464,
+  "signed_orbit_columns": 344,
+  "pair_table_tier": "folded",
+  "pair_table_stored_pairs": 6290040,
+  "collection_summands": 3,
+  "descent_summands": 2,
+  "collection_window": 1139,
+  "factor_base_logs_known_by_construction": false
+ },
+ "change": {
+  "reference": {
+   "unit_trials": 4000,
+   "planned_units": 4,
+   "actual_units": 7,
+   "actual_trials": 28000
+  },
+  "candidate": {
+   "unit_trials": 26000,
+   "planned_units": 1,
+   "actual_units": 1,
+   "actual_trials": 26000
+  },
+  "why": "The deterministic relation stream reaches certified full rank at trial 26000. One in-process unit removes 2000 unnecessary probes, six unit artifacts, and extension solve attempts while retaining Rayon trial parallelism."
+ },
+ "matched_same_host_ab": {
+  "order": [
+   "reference,candidate",
+   "candidate,reference",
+   "reference,candidate"
+  ],
+  "runs": [
+   {
+    "pair": 1,
+    "reference_4k_units": {
+     "wall_seconds": 4.791385417,
+     "total_core_seconds": 14.394317,
+     "peak_rss_bytes": 104136704,
+     "trials": 28000,
+     "summands_scanned": 31892000,
+     "relations": 970,
+     "units": 7,
+     "verified_targets": 32
+    },
+    "candidate_one_26k_unit": {
+     "wall_seconds": 4.233273333,
+     "total_core_seconds": 13.955387,
+     "peak_rss_bytes": 102350848,
+     "trials": 26000,
+     "summands_scanned": 29614000,
+     "relations": 906,
+     "units": 1,
+     "verified_targets": 32
+    },
+    "candidate_over_reference": {
+     "wall": 0.8835175976410081,
+     "core_seconds": 0.9695067157406635,
+     "peak_rss": 0.9828508495909377
+    }
+   },
+   {
+    "pair": 2,
+    "reference_4k_units": {
+     "wall_seconds": 4.629679375,
+     "total_core_seconds": 14.358782999999999,
+     "peak_rss_bytes": 101056512,
+     "trials": 28000,
+     "summands_scanned": 31892000,
+     "relations": 970,
+     "units": 7,
+     "verified_targets": 32
+    },
+    "candidate_one_26k_unit": {
+     "wall_seconds": 3.660883792,
+     "total_core_seconds": 13.535563999999999,
+     "peak_rss_bytes": 102629376,
+     "trials": 26000,
+     "summands_scanned": 29614000,
+     "relations": 906,
+     "units": 1,
+     "verified_targets": 32
+    },
+    "candidate_over_reference": {
+     "wall": 0.7907424025448846,
+     "core_seconds": 0.9426679127332728,
+     "peak_rss": 1.0155642023346303
+    }
+   },
+   {
+    "pair": 3,
+    "reference_4k_units": {
+     "wall_seconds": 3.366436208,
+     "total_core_seconds": 14.186868,
+     "peak_rss_bytes": 108314624,
+     "trials": 28000,
+     "summands_scanned": 31892000,
+     "relations": 970,
+     "units": 7,
+     "verified_targets": 32
+    },
+    "candidate_one_26k_unit": {
+     "wall_seconds": 2.778963916,
+     "total_core_seconds": 13.375797,
+     "peak_rss_bytes": 103907328,
+     "trials": 26000,
+     "summands_scanned": 29614000,
+     "relations": 906,
+     "units": 1,
+     "verified_targets": 32
+    },
+    "candidate_over_reference": {
+     "wall": 0.8254913339501486,
+     "core_seconds": 0.9428294532662177,
+     "peak_rss": 0.9593102405082439
+    }
+   }
+  ],
+  "median": {
+   "reference_wall_seconds": 4.629679375,
+   "candidate_wall_seconds": 3.660883792,
+   "candidate_over_reference_wall": 0.8254913339501486,
+   "reference_total_core_seconds": 14.358782999999999,
+   "candidate_total_core_seconds": 13.535563999999999,
+   "candidate_over_reference_core_seconds": 0.9428294532662177,
+   "reference_peak_rss_bytes": 104136704,
+   "candidate_peak_rss_bytes": 102629376,
+   "candidate_over_reference_peak_rss": 0.9828508495909377,
+   "wall_wins": 3,
+   "core_second_wins": 3
+  },
+  "exact_counter_change": {
+   "trials": [
+    28000,
+    26000
+   ],
+   "summands_scanned": [
+    31892000,
+    29614000
+   ],
+   "verified_relations": [
+    970,
+    906
+   ]
+  },
+  "correctness": "32 of 32 targets verified in every arm; both arms used the same algebraic base, target seeds, solver, table tier, and binary."
+ },
+ "independent_known_target_holdout": {
+  "target_seeds": "300-331",
+  "verified_targets": 32,
+  "factor_base_points": 36464,
+  "orbit_columns": 344,
+  "pair_table_tier": "folded",
+  "relations": 906,
+  "trials": 26000,
+  "summands_scanned": 29614000,
+  "linear_algebra_seconds": 0.006835667,
+  "precompute_wall_seconds": 2.250573333,
+  "descent_wall_seconds_total": 0.512172292,
+  "ic_wall_seconds_total": 2.762745625,
+  "rho_wall_seconds_total": 30.991400877999993,
+  "rho_over_ic_amortised_wall_ratio": 11.217609249856288,
+  "rho_over_ic_online_wall_ratio": 60.50971784705603,
+  "whole_process_wall_crossover": true,
+  "combined_total_core_seconds": 43.534354,
+  "peak_rss_bytes": 108822528
+ },
+ "public_unknown_scalar": {
+  "input": {
+   "public_hash_seed": 53001,
+   "public_hash_counter": 0,
+   "published_q": [
+    221146751147987,
+    5112896707579409
+   ],
+   "target_scalar_constructed_or_supplied": false
+  },
+  "recovered_scalar": 7892094459170,
+  "verified_group_equation": true,
+  "relations": 906,
+  "trials": 26000,
+  "summands_scanned": 29614000,
+  "factor_base_logs_known_by_construction": false,
+  "fresh_combined_repeats": [
+   {
+    "repeat": 1,
+    "ic_precompute_wall_seconds": 1.593755958,
+    "ic_descent_wall_seconds": 0.003177334,
+    "ic_total_wall_seconds": 1.5969332920000001,
+    "rho_wall_seconds": 1.616218708,
+    "rho_over_ic_wall_ratio": 1.012076531998307,
+    "rho_over_ic_online_wall_ratio": 508.6713288562046,
+    "whole_process_wall_crossover": true,
+    "combined_total_core_seconds": 14.743926,
+    "peak_rss_bytes": 99581952,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 2,
+    "ic_precompute_wall_seconds": 1.7697310819999998,
+    "ic_descent_wall_seconds": 0.00360675,
+    "ic_total_wall_seconds": 1.773337832,
+    "rho_wall_seconds": 1.625594542,
+    "rho_over_ic_wall_ratio": 0.9166863260152902,
+    "rho_over_ic_online_wall_ratio": 450.7089601441741,
+    "whole_process_wall_crossover": false,
+    "combined_total_core_seconds": 14.632672999999999,
+    "peak_rss_bytes": 101793792,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 3,
+    "ic_precompute_wall_seconds": 1.745518292,
+    "ic_descent_wall_seconds": 0.003461,
+    "ic_total_wall_seconds": 1.748979292,
+    "rho_wall_seconds": 1.605151959,
+    "rho_over_ic_wall_ratio": 0.9177649880373769,
+    "rho_over_ic_online_wall_ratio": 463.7827099104305,
+    "whole_process_wall_crossover": false,
+    "combined_total_core_seconds": 14.600955,
+    "peak_rss_bytes": 98959360,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 4,
+    "ic_precompute_wall_seconds": 1.6835541680000001,
+    "ic_descent_wall_seconds": 0.003156292,
+    "ic_total_wall_seconds": 1.68671046,
+    "rho_wall_seconds": 1.611463375,
+    "rho_over_ic_wall_ratio": 0.955388262073148,
+    "rho_over_ic_online_wall_ratio": 510.55585953390874,
+    "whole_process_wall_crossover": false,
+    "combined_total_core_seconds": 14.538654000000001,
+    "peak_rss_bytes": 100843520,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 5,
+    "ic_precompute_wall_seconds": 1.662435501,
+    "ic_descent_wall_seconds": 0.003237083,
+    "ic_total_wall_seconds": 1.665672584,
+    "rho_wall_seconds": 1.8552226250000001,
+    "rho_over_ic_wall_ratio": 1.1137978993115254,
+    "rho_over_ic_online_wall_ratio": 573.1155565056565,
+    "whole_process_wall_crossover": true,
+    "combined_total_core_seconds": 14.835457,
+    "peak_rss_bytes": 98975744,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   }
+  ],
+  "median": {
+   "ic_total_wall_seconds": 1.68671046,
+   "rho_wall_seconds": 1.616218708,
+   "rho_over_ic_wall_ratio": 0.955388262073148,
+   "ic_over_rho_wall_ratio": 1.046694877567416,
+   "rho_over_ic_online_wall_ratio": 508.6713288562046,
+   "combined_total_core_seconds": 14.632672999999999,
+   "peak_rss_bytes": 99581952,
+   "whole_process_wall_wins": 2,
+   "repeats": 5
+  },
+  "ic_only_repeats": [
+   {
+    "repeat": 1,
+    "wall_seconds": 2.334859583,
+    "total_core_seconds": 12.723698,
+    "peak_rss_bytes": 109969408,
+    "verified": 1
+   },
+   {
+    "repeat": 2,
+    "wall_seconds": 1.7798513329999999,
+    "total_core_seconds": 12.718144,
+    "peak_rss_bytes": 100974592,
+    "verified": 1
+   },
+   {
+    "repeat": 3,
+    "wall_seconds": 1.9121417090000001,
+    "total_core_seconds": 12.825553,
+    "peak_rss_bytes": 98435072,
+    "verified": 1
+   }
+  ],
+  "ic_only_median": {
+   "wall_seconds": 1.9121417090000001,
+   "total_core_seconds": 12.723698,
+   "peak_rss_bytes": 100974592
+  },
+  "core_cost_reading": "IC-only total core-seconds are measured directly. The one-target rho is single-threaded, but its process CPU was not sampled as a separate report field; do not convert the wall ratio into a core-second crossover."
+ },
+ "gates": {
+  "algebraic_factor_base_and_charged_resources": "partial_pass",
+  "same_instance_solver_matrix": "not_run_here",
+  "wall_core_memory_reporting": "partial_pass_conflicts_not_applicable_to_pair_table",
+  "n31_n41_larger_pdp_scaling": "not_run_here",
+  "unknown_scalar_without_constructed_factor_base_logs": "finite_pass",
+  "full_cost_vs_automorphism_rho": "fail_median_wall_and_core_seconds",
+  "independent_external_reproduction_and_novelty_review": "missing"
+ }
+}

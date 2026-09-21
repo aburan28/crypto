@@ -574,11 +574,30 @@ ratio at 5.1 at 48 bits and wanted 315 targets, because it was measured
 on constants that have since moved three times.
 
 `docs/ic/params/k0n53-subgroup-wide.json` is the degree-53 rung on a
-36464-point compact base: the descent falls from 50.4 ms a target to
-16.3 ms and the charged ρ/IC ratio rises from 25.0 to 75.2, while the
-precompute rises from 16.5 s to 87.8 s. That is a trade, and
-`docs/ic/runs/koblitz-compact-pair-table-20260912.json` prices it — about
-2200 targets before the wider base is the cheaper one.
+36464-point base.  Its original compact-table measurement is retained in
+`docs/ic/runs/koblitz-compact-pair-table-20260912.json`: the descent fell
+from 50.4 ms a target to 16.3 ms, but precompute rose from 16.5 s to
+87.8 s.  That is a historical representation comparison; current
+`auto` pricing selects the folded table for this run.
+
+`docs/ic/params/k0n53-subgroup-one-unit.json` is the current same-host
+profile for that base.  The deterministic relation stream reaches
+certified full rank at 26000 probes, so one 26000-probe unit replaces
+four planned 4000-probe units followed by three extensions.  Across
+three alternating-order pairs, candidate/reference medians were 0.825
+for wall, 0.943 for total core-seconds and 0.983 for peak RSS; the work
+fell from 28,000 probes and 31,892,000 summand scans to 26,000 and
+29,614,000.  A fresh 32-target holdout recovered all targets and spent
+2.763 s in IC against 30.991 s in signed-Frobenius rho.
+
+The scalar-blind control is closer and does not cross robustly.  Public
+hash seed 53001 constructs no target scalar and supplies no factor-base
+logs; relation-derived logs recovered `7892094459170` and verified the
+published point in all five fresh runs.  Whole-process IC won 2/5 wall
+comparisons, while the median remained 1.047 times rho and IC alone used
+12.724 core-seconds.  `docs/ic/runs/koblitz-n53-one-unit-20260921.json`
+records the repeats, resources and gate failures.  This is a bounded
+engineering improvement, not a SOTA claim.
 
 **`descent_summands`** lets the descent ask for a different number of
 summands than collection, which shares only the base and its pair table.
