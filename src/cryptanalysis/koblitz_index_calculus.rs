@@ -2379,6 +2379,32 @@ pub struct PairSumTable {
     tagged: bool,
 }
 
+/// Probing a run expects to do, which is what decides the tier.
+///
+/// The fold trades a `2n`-times cheaper build for a dearer probe, so
+/// which tier is cheapest is not a property of the base alone: it
+/// depends on how much probing the build is amortised over.  A
+/// caller that knows its own collection volume should say so; the
+/// default is the volume of the sweep the constants were measured
+/// on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ProbeBudget {
+    /// Base points tried as a summand inside the `m = 3` scan —
+    /// `collection trials × collection window`, the `summands
+    /// scanned` a run reports.
+    pub summands_scanned: u64,
+    /// `m = 2` descent probes over every target.
+    pub descent_probes: u64,
+}
+
+impl Default for ProbeBudget {
+    fn default() -> Self {
+        // docs/ic/runs/koblitz-tier-crossover-20260921.json, the
+        // volume every width in that sweep was run at.
+        Self { summands_scanned: 351_750_000, descent_probes: 51_328_107 }
+    }
+}
+
 impl PairSumTable {
     /// Entries a table may occupy before [`Self::build`] refuses: 4 GiB,
     /// which is a base of about 16000 points.
@@ -2470,35 +2496,117 @@ impl PairSumTable {
     /// base that fits and one that does not is a single doubling.
     /// Refusing by a stated budget turns that into a `None` the caller
     /// can report, instead of an allocation the machine cannot meet.
+    /// Group additions a tier is expected to cost over a whole cold run
+    /// at this base and this probing volume.
+    ///
+    /// The build's count is native — one addition per stored pair — and
+    /// the probe counts are converted by factors measured on the same
+    /// host, base and process by `examples/koblitz_probe_conversion.rs`,
+    /// in the shape the pipeline probes in.  The constants below are the
+    /// median over the four widths of
+    /// `docs/ic/runs/koblitz-tier-crossover-20260921.json`.
+    ///
+    /// **What this is calibrated on, and is not.**  One curve, one
+    /// degree (`n = 61`), one host.  The fold's build saving carries a
+    /// `1 − 1/2n` factor and its canonicalisation cost grows with `n`,
+    /// so both sides move with the degree and neither was measured
+    /// against it.  The model reproduces the cheapest of the two tiers
+    /// at all four widths measured; outside that range it is an
+    /// extrapolation, which is why every builder stays reachable by name
+    /// and `ic`'s `pair_table_tier` can override the choice outright.
+    fn expected_adds(stored: u128, scan: f64, blocked: f64, probes: ProbeBudget) -> f64 {
+        stored as f64
+            + scan * probes.summands_scanned as f64
+            + blocked * probes.descent_probes as f64
+    }
+
+    /// Whether the fold is the cheaper of the two representations worth
+    /// defaulting to, at this base and this probing volume.
+    ///
+    /// Full and compact are within the conversion measurement's own
+    /// noise of each other — full wins the narrowest width measured by
+    /// 5.8% and loses the other three by 2.7% to 7.2% — so the default
+    /// never picks `full`, which also costs four times the memory.  It
+    /// stays reachable by name for a caller that needs [`Self::lookup`]
+    /// to return summands.
+    pub fn fold_is_cheaper(
+        points: usize,
+        degree: u32,
+        orbits: usize,
+        probes: ProbeBudget,
+    ) -> bool {
+        // adds per summand scanned / per descent probe, measured
+        const COMPACT_SCAN: f64 = 2.145;
+        const COMPACT_BLOCKED: f64 = 0.955;
+        const FOLDED_SCAN: f64 = 2.51;
+        const FOLDED_BLOCKED: f64 = 1.42;
+        let compact = Self::expected_adds(
+            Self::pair_count(points),
+            COMPACT_SCAN,
+            COMPACT_BLOCKED,
+            probes,
+        );
+        let folded = Self::expected_adds(
+            Self::folded_pair_count(orbits, points),
+            FOLDED_SCAN,
+            FOLDED_BLOCKED,
+            probes,
+        );
+        let _ = degree;
+        folded < compact
+    }
+
+    /// The pair table in the representation that costs the fewest group
+    /// additions over a whole cold run, at [`ProbeBudget::default`].
     pub fn build_within(
         kc: &KoblitzCurve,
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
     ) -> Option<Self> {
-        // **Cheapest representation first, not the first that fits.**
-        //
-        // This ladder used to run the other way — summands, then compact
-        // rests, then the fold — on the reasoning that a base which fits
-        // with its summands should keep them, since for such a base the
-        // fold "only spends squarings".  That is true of a table whose
-        // construction is already paid for and false of one being built,
-        // and measuring it settled the question: on one base at one
-        // width the three tiers rank folded, compact, full on every axis
-        // at once — build time, descent time, and resident memory — and
-        // they rank that way at both widths measured.
-        //
-        // The fold wins the probe as well as the build because the table
-        // it produces is small enough to stay in cache when the others
-        // are not; at 12688 points it is 16 MiB against 1592.  That is
-        // why there is no trade-off to weigh here and the order is
-        // simply reversed.  `build_folded_within` returns `None` when
-        // the base has no signed orbits to fold by, so a base the fold
-        // cannot handle still falls through to the older tiers.
-        if let Some(folded) = Self::build_folded_within(kc, fb, byte_budget) {
-            return Some(folded);
+        Self::build_within_for(kc, fb, byte_budget, ProbeBudget::default())
+    }
+
+    /// **Cheapest by measurement, not by what fits and not by bytes.**
+    ///
+    /// This ladder has now been ordered three ways.  It first took the
+    /// first tier that fit — summands, then compact rests, then the
+    /// fold — which is right for a table whose construction is already
+    /// paid for.  It was then reversed to fold-first, on a wall-clock
+    /// measurement of three tiers at one width.
+    ///
+    /// Re-priced in this repository's unit both orders turned out to be
+    /// wrong, because neither is a property of the base alone.  The fold
+    /// buys a `2n`-times cheaper build and pays for it on every probe,
+    /// so the answer depends on how much probing the build is amortised
+    /// over.  Over four widths on one curve, every phase priced in
+    /// batched group additions and 32 of 32 targets verified on all
+    /// eight runs, the cheapest tier is full below about 8,000 points,
+    /// compact from there to about 16,000, and folded above — and
+    /// `full/folded` crosses one at `|F| ≈ 13,623`
+    /// (`docs/ic/runs/koblitz-tier-crossover-20260921.json`).
+    ///
+    /// Measured at one degree on one host, so the choice is a calibrated
+    /// heuristic rather than a derived law; `ic`'s `pair_table_tier`
+    /// overrides it and every builder stays reachable by name.
+    pub fn build_within_for(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+        probes: ProbeBudget,
+    ) -> Option<Self> {
+        let (points, orbits) = (fb.points.len(), fb.signed_orbits.len());
+        if Self::fold_is_cheaper(points, kc.n, orbits, probes) {
+            if let Some(folded) = Self::build_folded_within(kc, fb, byte_budget) {
+                return Some(folded);
+            }
         }
         if let Some(compact) = Self::build_compact_within(kc, fb, byte_budget) {
             return Some(compact);
+        }
+        // Below the crossover but too wide to hold compactly: the fold
+        // is dearer per probe and still the only tier that fits.
+        if let Some(folded) = Self::build_folded_within(kc, fb, byte_budget) {
+            return Some(folded);
         }
         Self::build_full_within(kc, fb, byte_budget)
     }
@@ -8046,41 +8154,64 @@ mod tests {
     }
 
     #[test]
-    fn pair_table_prefers_the_cheapest_tier_and_refuses_below_them_all() {
-        // The preference order, pinned.  It used to run the other way —
-        // summands first, the fold only when memory forced it — on the
-        // reasoning that a base which fits with its summands should keep
-        // them.  Measuring the three tiers on one base at one width
-        // ranked them folded, compact, full on build time, descent time
-        // and resident memory at once, so `build_within` now takes the
-        // cheapest representation that works rather than the first that
-        // fits.
+    fn pair_table_picks_the_tier_the_measurement_picked() {
+        // The tier choice, pinned — and it has been pinned three ways.
+        //
+        // It first took the first tier that fit: summands, then compact
+        // rests, then the fold.  It was then reversed to fold-first on a
+        // wall-clock comparison of three tiers at one width.  Re-priced
+        // in group additions over the whole cold run, both fixed orders
+        // were wrong, because which tier is cheapest is not a property
+        // of the base: the fold buys a `2n`-times cheaper build and pays
+        // for it on every probe, so it depends on how much probing
+        // amortises the build.
+        //
+        // So what is pinned here is the *model*, against the widths it
+        // was measured at:
+        // `docs/ic/runs/koblitz-tier-crossover-20260921.json`.
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
-        let full = PairSumTable::byte_size(fb.points.len());
-        let compact = PairSumTable::compact_byte_size(fb.points.len(), kc.n);
-        let folded_bytes =
-            PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n);
+        let (points, orbits) = (fb.points.len(), fb.signed_orbits.len());
+        let full = PairSumTable::byte_size(points);
+        let compact = PairSumTable::compact_byte_size(points, kc.n);
+        let folded_bytes = PairSumTable::folded_byte_size(orbits, points, kc.n);
         assert!(compact < full, "the compact table is the narrower one");
         assert!(folded_bytes < compact, "the folded table is narrower still");
 
-        // A budget with room for all three still returns the fold.
+        // A base this narrow is far below the crossover, so the cheapest
+        // tier is the compact one however much room there is.
+        assert!(!PairSumTable::fold_is_cheaper(
+            points,
+            kc.n,
+            orbits,
+            ProbeBudget::default()
+        ));
         let roomy = PairSumTable::build_within(&kc, &fb, full).expect("fits every tier");
-        assert!(roomy.is_folded(), "tier was {}", roomy.tier());
-        // So does a budget that admits only the fold; the tier does not
-        // change with the budget, only whether there is one at all.
-        let tight = PairSumTable::build_within(&kc, &fb, folded_bytes).expect("fits folded");
-        assert!(tight.is_folded());
-        assert_eq!(roomy.len(), tight.len(), "the budget moved the table");
+        assert_eq!(roomy.tier(), "compact", "tier was {}", roomy.tier());
+        assert!(PairSumTable::build(&kc, &fb).unwrap().is_compact());
+
+        // Squeeze the budget under the compact table and the fold is
+        // what is left: dearer per probe and the only tier that fits.
+        let tight = PairSumTable::build_within(&kc, &fb, compact - 1).expect("fits folded");
+        assert!(tight.is_folded(), "tier was {}", tight.tier());
         // Below the narrowest tier it refuses with a number rather than
         // an allocation the machine cannot meet.
         assert!(PairSumTable::build_within(&kc, &fb, folded_bytes - 1).is_none());
-        // The default budget is far above a base this size.
         assert!(full < PairSumTable::DEFAULT_BYTE_BUDGET);
-        assert!(PairSumTable::build(&kc, &fb).unwrap().is_folded());
 
-        // The older tiers are still reachable, by name, and each still
-        // refuses a budget under its own width.
+        // The probe budget is an input, not a constant: a run that
+        // probes far less does not amortise the build, and the fold wins
+        // at a base where the default budget says it loses.
+        let barely = ProbeBudget { summands_scanned: 0, descent_probes: 0 };
+        assert!(PairSumTable::fold_is_cheaper(points, kc.n, orbits, barely));
+        assert!(
+            PairSumTable::build_within_for(&kc, &fb, full, barely)
+                .expect("fits")
+                .is_folded()
+        );
+
+        // Every tier stays reachable by name, and each refuses a budget
+        // under its own width rather than falling to another.
         let wide = PairSumTable::build_full_within(&kc, &fb, full).expect("fits with summands");
         assert_eq!(wide.tier(), "full");
         assert!(PairSumTable::build_full_within(&kc, &fb, full - 1).is_none());
@@ -8088,9 +8219,42 @@ mod tests {
             PairSumTable::build_compact_within(&kc, &fb, compact).expect("fits compactly");
         assert_eq!(narrow.tier(), "compact");
         assert!(PairSumTable::build_compact_within(&kc, &fb, compact - 1).is_none());
-        // Same base, same pairs, three representations of them.
-        assert_eq!(wide.len(), narrow.len());
+        assert_eq!(wide.len(), narrow.len(), "same base, same pairs");
         assert!(tight.len() < narrow.len(), "the fold stored no less");
+    }
+
+    #[test]
+    fn the_tier_model_reproduces_every_width_it_was_measured_at() {
+        // The four widths of docs/ic/runs/koblitz-tier-crossover-20260921.json,
+        // with the cheaper of the two tiers the sweep measured at each.
+        // The model is a calibrated heuristic, so what is pinned is that
+        // it still agrees with the measurement it was calibrated on — a
+        // constant edited without re-measuring fails here.
+        let probes = ProbeBudget::default();
+        for (points, orbits, fold_wins) in [
+            (6832usize, 56usize, false),
+            (9760, 80, false),
+            (12688, 104, false),
+            (18544, 152, true),
+        ] {
+            assert_eq!(
+                PairSumTable::fold_is_cheaper(points, 61, orbits, probes),
+                fold_wins,
+                "{points} points, {orbits} orbits"
+            );
+        }
+        // And the switch is monotone in the width, which is what makes
+        // "a crossover" the right word for it.
+        let mut switched = None;
+        for points in (2000..40_000).step_by(1000) {
+            let wins = PairSumTable::fold_is_cheaper(points, 61, points / 122, probes);
+            match (switched, wins) {
+                (None, true) => switched = Some(points),
+                (Some(at), false) => panic!("fold won at {at} and lost again at {points}"),
+                _ => {}
+            }
+        }
+        assert!(switched.is_some(), "the fold never became cheaper");
     }
 
     #[test]
