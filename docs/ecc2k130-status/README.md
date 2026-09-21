@@ -57,10 +57,13 @@ commands for the unpaid one. cairn now posts this search as
 says where the remaining gap actually is: a point on this curve cannot
 carry `(a, b)` at this walk's step cost, so a claim needs the eight
 branch counters that make a trail verifiable in ~227 group operations,
-and this client does not emit them — a run collects for the campaign and
-earns nothing. It also keeps cairn's own two limits visible, the posted
-tranche and the audit that a witness still needs. If the client learns to
-carry those counters, this section is what has to change with it.
+and the kernel does not emit them yet. The section says it should: the
+campaign's packed backend has the branch index as a scalar already, so a
+counter is two instructions, and replay is for the points already
+collected without them. It also keeps cairn's own two limits visible, the
+posted tranche and the audit that a witness still needs. When the kernel
+learns to carry those counters, this section is what has to change with
+it.
 
 Open `index.html` from the working tree next to the two JSON files and it
 renders exactly as published; only the site navigation links resolve solely

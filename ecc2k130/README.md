@@ -199,12 +199,30 @@ the trail cost, an asymmetry of `2^17.4`. The claim is
 {"dps": [{"x": "<canonical orbit>", "seed": "<64-bit walk seed>", "j": [n3, …, n10]}]}
 ```
 
-The kernel still does not carry those counters, and it should not: adding
-them costs about 105 ALU slots on a 2,324-slot update and 15% of the walk
-state, which is ~4% of the whole campaign — roughly 1,800 GPU-hours — to
-witness every trail, when the posted pool is 2^21 orbits, 0.004% of them.
-**Replaying only the trails you claim is the cheaper route by about 900x**,
-and `build/witness` is it:
+The kernel does not carry those counters yet, and **it should** — an earlier
+draft of this section said the opposite, on a cost that was measured against
+the wrong backend. Corrected:
+
+The campaign runs `--packed` (`aws/campaign.json`), and the packed kernel
+already computes the branch as a *scalar* — `const int j = 3 + ((hw >> 1) & 7)`
+in `include/packedkernels.cuh` — next to per-walk scalar state it touches every
+step anyway (`p.seed[id]`, `p.dead[id]`, `p.startIter[id]`). So a counter there
+is a scalar increment: eight 8-bit fields packed in one `u64`,
+`packed += 1ull << 8*(j-3)`, flushed before any field can overflow. That is
+**two instructions on a 2,324-slot update, +0.09%**, about **36 GPU-hours**
+across the campaign — and it makes every one of the `2^32.49` orbits the
+campaign will produce claimable, permanently.
+
+The earlier figure — 105 slots, ~4%, ~1,800 GPU-hours — priced *bitsliced*
+counters, where a counter is spread over bit-planes and every lane pays a full
+ripple carry. That is the right number for the bitsliced backend and the wrong
+one for the backend the campaign actually runs; the 2,324-slot budget it was
+compared against is itself the packed preset's, priced in `clmad`.
+
+Replay keeps one real job: the points **already collected without counters**
+are claimable no other way. At the campaign's weight 32 a trail is `2^28.41`
+steps, so replaying a claimed trail costs exactly what collecting it did —
+about **15 GPU-hours per 2^21 orbits**. `build/witness` is that path:
 
 ```sh
 make witness

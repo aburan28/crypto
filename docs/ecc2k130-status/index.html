@@ -355,13 +355,21 @@ cairn run</code></pre>
           <span class="mono">{x, seed, j: [n&#8323; … n&#8321;&#8320;]}</span>.
         </p>
         <p class="note">
-          The kernel still does not carry those counters, and it should not:
-          the cheaper route is to replay only the trails you claim. The
-          reference walk has counted the <span class="mono">n_j</span> all
-          along &mdash; collision resolution always needed them &mdash; so
-          <span class="mono">ecc2k130/build/witness</span> turns corpus records
-          into checked claims offline, at about a 900&times; saving over
-          carrying the counters through every step of the search. Two limits
+          The kernel does not carry those counters yet, and it should. The
+          campaign runs the <em>packed</em> backend, where the branch index is
+          already a scalar <span class="mono">int</span> beside per-walk state
+          the step touches anyway, so a counter is a scalar increment &mdash;
+          eight 8-bit fields in one <span class="mono">u64</span>, two
+          instructions on a 2,324-slot update,
+          <strong>+0.09%</strong>, about <span class="mono">36</span>
+          GPU-hours across the campaign to make every orbit it produces
+          claimable. Replay keeps the job the kernel cannot do backwards: the
+          points already collected <em>without</em> counters are claimable no
+          other way, and
+          <span class="mono">ecc2k130/build/witness</span> turns those corpus
+          records into checked claims offline, the reference walk having
+          counted the <span class="mono">n_j</span> all along because collision
+          resolution always needed them. Two limits
           cairn states plainly as well &mdash; the posted pool is one
           <em>tranche</em>, about
           <span class="mono">2^46.3</span> of the expected

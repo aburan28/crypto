@@ -943,9 +943,11 @@ paying per novel **orbit** rather than per point, because Frobenius and
 negation give one point 262 names. What is not ready is on this side: a point
 here cannot carry `(a, b)` without a 129-bit modular multiplication per step,
 so the claim needs the eight branch counters that make a trail checkable in
-about 227 group operations. The kernel does not carry them and should not:
-`ecc2k130/build/witness` replays only the trails you claim and emits the
-checked artifact, about 900× cheaper than counting through every step.
+about 227 group operations. The kernel does not carry them yet and should:
+the campaign's packed backend already has the branch index as a scalar, so a
+counter is two instructions (+0.09%, ~36 GPU-hours across the campaign) and
+makes every orbit claimable. For points already collected without counters,
+`ecc2k130/build/witness` replays a trail and emits the checked artifact.
 
 - [`SECURITY.md`](SECURITY.md) — structural limitations + recommended alternatives.
 - [`AGENTS.md`](AGENTS.md) — how cryptanalysis progress is reported here: state a boundary, put every variant in one table in one unit, and classify each change by whether the ratio to that boundary moved.
