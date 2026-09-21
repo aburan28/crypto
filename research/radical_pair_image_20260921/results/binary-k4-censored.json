@@ -1,0 +1,20 @@
+{
+  "status": "completed_censored",
+  "date": "2026-09-12",
+  "field": "GF(2^8)",
+  "subfield": "GF(2^4)",
+  "factor_base": "15 nonzero subfield elements; x=0 two-torsion excluded",
+  "presentation": "radical symmetric sparse m=4 pair tree",
+  "variables": 32,
+  "equations": 130,
+  "input_degree": 5,
+  "pair_image_size": 120,
+  "pair_preprocessing_seconds": 0.13863766589201987,
+  "pair_basis_size": 45,
+  "pair_basis_terms": 1785,
+  "solver": "msolve 0.9.5, one thread, exact sparse linear algebra, seed 0",
+  "solver_elapsed_lower_bound_seconds": 90,
+  "solver_result": null,
+  "direct_comparison_launched": false,
+  "interpretation": "Prior bounded feasibility stop; establishes no F4 degree, completion or comparative runtime. Excluded from run-001 claims."
+}
