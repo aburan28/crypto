@@ -52,12 +52,15 @@ The **Contribute compute** section under the worker table is static: it
 carries the [cairn](https://github.com/aburan28/cairn) download link
 (`releases/latest`, plus the one-line installer the cairn README
 documents) for the paid piecework path, and the `ecc2k130/` client
-commands for the unpaid one. It states plainly that no ECC2K-130
-objective is posted on cairn yet — the binary-field checker
-`GF(2^131)` needs is not in cairn's `examples/certicom-ecdlp/` — so the
-download is an invitation to be ready and to work the live rungs, not a
-claim that points on this campaign are payable today. If that changes,
-this section is what has to change with it.
+commands for the unpaid one. cairn now posts this search as
+`objective-ecc2k130-orbit-batch`, paying per novel orbit, so the section
+says where the remaining gap actually is: a point on this curve cannot
+carry `(a, b)` at this walk's step cost, so a claim needs the eight
+branch counters that make a trail verifiable in ~227 group operations,
+and this client does not emit them — a run collects for the campaign and
+earns nothing. It also keeps cairn's own two limits visible, the posted
+tranche and the audit that a witness still needs. If the client learns to
+carry those counters, this section is what has to change with it.
 
 Open `index.html` from the working tree next to the two JSON files and it
 renders exactly as published; only the site navigation links resolve solely
