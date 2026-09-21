@@ -234,32 +234,36 @@ pub fn trials_floor(columns: u64, signed_points: u64, m: u32, space: f64) -> f64
 /// and at least one group operation per target.  So
 ///
 /// ```text
-///     ops(F) = F²/(4a) + c·#E/(2aF),   minimal at F = (c·#E)^{1/3}
-///     ops    = 0.75·(c·#E)^{2/3} / a
+///     ops(F) = F²/(4t) + c·#E/(2kF),   minimal at F = (c·#E·t/k)^{1/3}
+///     ops    = 0.75·(c·#E·t/k)^{2/3} / t
 /// ```
 ///
 /// with `c` the group operations a fresh target costs (`c = 1` for a
-/// walk step, `c ≈ 2·1.5·log₂ r` for `[a]G + [b]Q`).  In the unit, with
-/// `c = 1`:
+/// walk step, `c ≈ 2·1.5·log₂ r` for `[a]G + [b]Q`), `t` the **table
+/// fold** (one entry per pair up to negation is `t = 1`; up to `⟨σ, −1⟩`
+/// is `t = n`) and `k` the **column fold** (one column per abscissa is
+/// `k = 1`, one per signed Frobenius orbit is `k = n`, so `K = F/2k`).
+/// The two are independent: a Koblitz row can fold its columns and not
+/// its table.  In the unit, with `c = 1`:
 ///
 /// ```text
-///     S_family = 0.75 · #E^{2/3} / (a · √r)
+///     S_family = 0.75 · (#E·t/k)^{2/3} / (t · √r)
 /// ```
 ///
 /// which is `Θ(r^{1/6})` on a prime-order curve: no choice of base size
 /// escapes it, and every constant this repository can tune lives inside
 /// the `0.75`.  It is a model of the family, not a theorem about the
 /// problem — the relation count is an expectation over the cycle
-/// structure, so an individual row can land a little under it — and the
-/// note reports it as such next to the generic floor, which is a bound.
-pub fn family_optimum_s(group_order: f64, r: f64, table_fold: f64) -> f64 {
-    0.75 * group_order.powf(2.0 / 3.0) / (table_fold * r.sqrt())
+/// structure, so an individual row can land under it — and the note
+/// reports it as such next to the generic floor, which is a bound.
+pub fn family_optimum_s(group_order: f64, r: f64, table_fold: f64, column_fold: f64) -> f64 {
+    0.75 * (group_order * table_fold / column_fold).powf(2.0 / 3.0) / (table_fold * r.sqrt())
 }
 
-/// The base size that attains [`family_optimum_s`]: `(#E)^{1/3}` signed
-/// points, independent of the fold.
-pub fn family_optimum_base(group_order: f64) -> f64 {
-    group_order.cbrt()
+/// The base size that attains [`family_optimum_s`]: `(#E·t/k)^{1/3}`
+/// signed points.
+pub fn family_optimum_base(group_order: f64, table_fold: f64, column_fold: f64) -> f64 {
+    (group_order * table_fold / column_fold).cbrt()
 }
 
 /// **The exact counting ceiling, from the base's cofactor classes.**
@@ -2901,8 +2905,10 @@ fn assemble_variant(
     let measured_yield = outcome.relations_found as f64 / outcome.trials.max(1) as f64;
     let (classes, p_exact) = exact.unwrap_or((0, p_ceiling));
     let tf_exact = (columns as f64 + 1.0) / p_exact;
-    let fam = family_optimum_s(space, r as f64, table_fold);
-    let fam_base = family_optimum_base(space);
+    // The column fold is the base's own: `K = F/2k`.
+    let column_fold = (signed_points as f64 / (2.0 * columns.max(1) as f64)).max(1.0);
+    let fam = family_optimum_s(space, r as f64, table_fold, column_fold);
+    let fam_base = family_optimum_base(space, table_fold, column_fold);
     VariantResult {
         name: name.to_string(),
         oracle: oracle_name,
@@ -3146,7 +3152,7 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
     // signed points, against the `2^{⌈bits/3⌉}` abscissae of the rule
     // above.  Its own rows, its own table; `None` when the two agree to
     // within a tenth so the ladder does not carry a duplicate.
-    let balanced_abscissae = (family_optimum_base(inst.group_order as f64) / 2.0).round().max(4.0) as usize;
+    let balanced_abscissae = (family_optimum_base(inst.group_order as f64, 1.0, 1.0) / 2.0).round().max(4.0) as usize;
     let balanced = (balanced_abscissae as f64 / fb.abscissae.max(1) as f64)
         .max(fb.abscissae.max(1) as f64 / balanced_abscissae as f64)
         > 1.1;
@@ -3191,8 +3197,8 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         "ceiling_exact_m2": exact_m2.map(|e| e.1),
         "ceiling_uniform_m3": decomposition_probability_ceiling(fb.points.len() as u64, 3, inst.group_order as f64),
         "ceiling_exact_m3": exact_m3.map(|e| e.1),
-        "family_optimum_base_signed_points": family_optimum_base(inst.group_order as f64),
-        "family_optimum_s": family_optimum_s(inst.group_order as f64, r as f64, 1.0),
+        "family_optimum_base_signed_points": family_optimum_base(inst.group_order as f64, 1.0, 1.0),
+        "family_optimum_s": family_optimum_s(inst.group_order as f64, r as f64, 1.0, 1.0),
     });
     if let (Some(f), Some(t)) = (&fb_bal, &table_bal) {
         out.curve["factor_base_balanced"] = serde_json::json!({
@@ -3593,7 +3599,7 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
     // pessimistic, and the gap grows as the base shrinks — so the ladder
     // brackets it, running `l*` and `l* − 1` wherever they differ from
     // the `⌈n/3⌉` rule.
-    let l_star = (family_optimum_base(inst.group_order as f64).log2().round() as i64)
+    let l_star = (family_optimum_base(inst.group_order as f64, 1.0, 1.0).log2().round() as i64)
         .clamp(2, (inst.n as i64 - 1).min(20)) as u32;
     let l_bal = if l_star == l { l_star.saturating_sub(1).max(2) } else { l_star };
     let fb_bal = (l_bal != l).then(|| {
@@ -3649,8 +3655,8 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
         "ceiling_exact_m2": exact_m2.map(|e| e.1),
         "ceiling_uniform_m3": decomposition_probability_ceiling(fb.points.len() as u64, 3, space),
         "ceiling_exact_m3": exact_m3.map(|e| e.1),
-        "family_optimum_base_signed_points": family_optimum_base(space),
-        "family_optimum_s": family_optimum_s(space, r as f64, 1.0),
+        "family_optimum_base_signed_points": family_optimum_base(space, 1.0, 1.0),
+        "family_optimum_s": family_optimum_s(space, r as f64, 1.0, 1.0),
     });
     if let (Some(f), Some(t)) = (&fb_bal, &table_bal) {
         out.curve["factor_base_balanced"] = serde_json::json!({
@@ -4500,7 +4506,7 @@ mod tests {
         for &e in &[1.0e6f64, 1.185e7, 1.33e8, 2.2e12] {
             for &a in &[1.0f64, 41.0] {
                 let ops = |f: f64| (f * f / 4.0 + e / (2.0 * f)) / a;
-                let f_star = family_optimum_base(e);
+                let f_star = family_optimum_base(e, a, a);
                 let best = ops(f_star);
                 assert!((best - 0.75 * e.powf(2.0 / 3.0) / a).abs() / best < 1e-9);
                 for k in 1..=40 {
@@ -4508,12 +4514,24 @@ mod tests {
                     assert!(ops(f) >= best * (1.0 - 1e-12), "F* is not the minimum at {f}");
                 }
                 // In the unit, with r = #E (prime order).
-                assert!((family_optimum_s(e, e, a) - best / e.sqrt()).abs() / (best / e.sqrt()) < 1e-9);
+                assert!((family_optimum_s(e, e, a, a) - best / e.sqrt()).abs() / (best / e.sqrt()) < 1e-9);
             }
         }
         // The Frobenius fold divides the family's cost by n.
         let (e, r) = (2.2e12, 5.5e11);
-        assert!((family_optimum_s(e, r, 1.0) / family_optimum_s(e, r, 41.0) - 41.0).abs() < 1e-9);
+        assert!((family_optimum_s(e, r, 1.0, 1.0) / family_optimum_s(e, r, 41.0, 41.0) - 41.0).abs() < 1e-9);
+        // The two folds are independent: folding the columns alone
+        // shrinks the relation term, folding the table alone the table.
+        let unfolded_table_orbit_columns = family_optimum_s(e, r, 1.0, 41.0);
+        let both = family_optimum_s(e, r, 41.0, 41.0);
+        assert!(unfolded_table_orbit_columns > both, "folding the table too must help");
+        let sweep = |t: f64, k: f64| {
+            let f = family_optimum_base(e, t, k);
+            (f * f / (4.0 * t) + e / (2.0 * k * f)) / r.sqrt()
+        };
+        for (t, k) in [(1.0, 1.0), (1.0, 41.0), (41.0, 41.0)] {
+            assert!((sweep(t, k) - family_optimum_s(e, r, t, k)).abs() / sweep(t, k) < 1e-9, "t={t} k={k}");
+        }
     }
 
     #[test]
