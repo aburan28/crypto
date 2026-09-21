@@ -1651,6 +1651,214 @@ column that says whether the interval clears one.  Every speedup in
 §11.6 is quoted that way, and the ones whose interval straddles one are
 reported as not moved — which is a result, not a gap in the evidence.
 
+### 11.5 The table: every rung on the largest instance of its regime
+
+Means over three targets, from the frozen ladder.  `vs family` is §11.2's
+model at the row's own folds, and is a model, not a bound.
+
+| regime, instance | variant | m | \|F\| | K | trials | y/c (exact) | S | was | vs rho | vs floor | vs family | ok | class |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
+| **prime**, `generated-24bit-10935329`, `r = 2^23.4`, `#E = 1r`, `A = 2` | generic floor `√(π/2A)` | | | | | | 0.886 | | 0.23× | 1× | | — | boundary |
+| | family optimum, `k = 1` | | 222 | | | | 11.2 | | 2.84× | 12.6× | 1× | — | model |
+| | Pollard rho, r-adding, counted | | | | | | 3.93 | | 1× | 4.43× | | ✓ | reference |
+| | Semaev `S₃` roots | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 5,123 | | 1,304× | 5,781× | 459× | ✓ | baseline |
+| | direct subtraction | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 2,037 | | 518× | 2,298× | 182× | ✓ | accounting |
+| | meet in the middle | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 268 | | 68.3× | 303× | 24.0× | ✓ | engineering |
+| | meet in the middle | 3 | 512 | 256 | 265 | 0.87 (0.87) | 56.8 | | 14.5× | 64.1× | 5.09× | ✓ | engineering |
+| | + negation-folded table | 2 | 512 | 256 | 11,612 | 0.99 (0.99) | 248 | 268 | 63.2× | 280× | 22.2× | ✓ | engineering |
+| | + walk targets | 2 | 512 | 256 | 9,873 | 0.99 (0.99) | 24.1 | 248 | 6.14× | 27.2× | 2.16× | ✓ | engineering |
+| | + negation-folded table | 3 | 512 | 256 | 265 | 0.87 (0.87) | 37.0 | 56.8 | 9.42× | 41.8× | 3.31× | ✓ | engineering |
+| | + walk targets | 3 | 512 | 256 | 262 | 0.89 (0.89) | 31.4 | 37.0 | 7.99× | 35.4× | 2.81× | ✓ | engineering |
+| | **+ base at the family optimum** | 2 | 222 | 111 | 31,023 | 1.02 (1.02) | **14.3** | 24.1 | **3.63×** | 16.1× | 1.28× | ✓ | engineering |
+| **binary**, `random-binary-n27-b845462`, `r = 2^24.4`, `#E = 6r`, `A = 2` | generic floor | | | | | | 0.886 | | 0.38× | 1× | | — | boundary |
+| | family optimum, `k = 1` | | 512 | | | | 41.6 | | 18.0× | 46.9× | 1× | — | model |
+| | Pollard rho, r-adding, counted | | | | | | 2.31 | | 1× | 2.61× | | ✓ | reference |
+| | meet in the middle | 3 | 526 | 263 | 1,498 | 0.90 (0.90) | 206 | | 89.1× | 233× | 4.96× | ✓ | engineering |
+| | `S₄` pairs-and-solve | 3 | 526 | 263 | 1,499 | 0.90 (0.90) | 119,093 | | 51,477× | 134,383× | 2,865× | ✓ | relabelling |
+| | + negation-folded table | 3 | 526 | 263 | 1,498 | 0.90 (0.90) | 191 | 206 | 82.7× | 216× | 4.61× | ✓ | engineering |
+| | + walk targets | 3 | 526 | 263 | 1,462 | 0.93 (0.93) | 167 | 191 | 72.1× | 188× | 4.01× | ✓ | engineering |
+| | + negation-folded table | 2 | 526 | 263 | 112,779 | 1.06 (1.05) | 1,645 | 206 | 711× | 1,856× | 39.6× | ✓ | engineering |
+| | + walk targets | 2 | 526 | 263 | 130,973 | 0.99 (0.98) | 51.3 | 1,645 | 22.2× | 57.9× | 1.23× | ✓ | engineering |
+| | **+ base at the family optimum** | 2 | 254 | 127 | 217,845 | 0.99 (0.96) | **50.7** | 51.3 | **21.9×** | 57.2× | 1.22× | ✓ | engineering |
+| **Koblitz**, `K_0 / GF(2^41)`, `r = 2^39.0`, `#E = 4r`, `A = 82` | generic floor | | | | | | 0.138 | | 0.71× | 1× | | — | boundary |
+| | family optimum, `k = 41` | | 13,021 | | | | 4.18 | | 21.4× | 30.2× | 1× | — | model |
+| | signed-Frobenius rho, counted | | | | | | 0.20 | | 1× | 1.41× | | ✓ | reference |
+| | meet in the middle, signed-orbit columns | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | 58.8 | | 301× | 425× | 4.05× | ✓ | advance, count |
+| | + negation-folded table | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | 50.4 | 58.8 | 257× | 364× | 3.47× | ✓ | engineering |
+| | + Frobenius-folded table | 3 | 5,003 | 62 | 6,086 | 1.05 (1.04) | 45.1 | 58.8 | 231× | 326× | 10.7× | ✓ | engineering |
+| | + walk targets | 3 | 5,003 | 62 | 5,110 | 1.14 (1.13) | 37.2 | 45.1 | 190× | 269× | 8.81× | ✓ | engineering |
+| | two summands, folded table, walk | 2 | 5,003 | 62 | 6,714,627 | 0.91 (0.88) | 10.1 | 58.8 | 51.5× | 72.8× | 2.39× | ✓ | engineering |
+| | balanced base, three summands | 3 | 20,501 | 251 | 477 | 0.74 (0.74) | 12.6 | 37.2 | 64.5× | 91.2× | 3.02× | ✓ | engineering |
+| | **balanced base, two summands** | 2 | 20,501 | 251 | 1,454,383 | 1.00 (1.00) | **5.92** | 10.1 | **30.3×** | 42.8× | 1.42× | ✓ | engineering |
+
+### 11.6 Reading the rungs: what moved, and what the round actually bought
+
+**The base at the family optimum is the round's one clear gain, and only
+where the rule of thumb was wrong.**  On the prime ladder the `⌈bits/3⌉`
+rule gave 512 signed points where §11.2 puts the optimum at 222, and
+moving there took the row from `24.1` to `14.3` — `6.14×` rho down to
+`3.63×`, and within `1.28×` of the family's own floor.  On the binary
+ladder the rule was already almost right (`512` against the law's `512`),
+so the balanced row runs the bracket below it and gains almost nothing:
+`51.3 → 50.7`.  The rule was not wrong on Koblitz either, where Round 2
+had already sized that base.
+
+**The cheap restart buys about a tenth, and only where restarts are
+frequent.**  From the matched eight-repeat headline, geometric means with
+95% intervals:
+
+| instance | row | speedup | 95% interval | moved |
+|:--|:--|--:|:--|:--|
+| prime 24-bit | `mitm_m2_negfold_walk` | 1.098 | 1.010 – 1.193 | yes |
+| binary `n = 27` | `mitm_m2_negfold_walk` | 1.210 | 0.944 – 1.550 | no |
+| Koblitz `n = 37` | `mitm_m2_…_walk` | 1.041 | 0.653 – 1.660 | no |
+| Koblitz `n = 41` | `mitm_m2_…_walk` | 0.959 | 0.710 – 1.296 | no |
+
+One row of eight clears one.  The ladder, at three repeats over more
+sizes, shows where the lever does pay: the binary `n = 21` two-summand
+walk at `3.33×` (`1.47–7.51`) and `n = 24` at `1.77×` (`1.22–2.56`),
+which are the rungs that restart most.
+
+**And it costs something fixed, which the small rungs show.**  The pooled
+offsets are drawn with the jumps at setup: sixteen extra `[c]G + [d]Q`,
+thirty-two scalar multiplications, once per run whether or not the walk
+ever restarts.  On rungs that barely restart that is a straight loss —
+`K_1 / GF(2^11)` at `0.597`, `K_0 / GF(2^13)` at `0.650`, `bench-10bit`'s
+three-summand walk at `0.656`.  Every one of those is below `2^20` and so
+outside §1.6's window, but it is a real trade and not noise, and the fix
+is obvious: draw the pool on the *first* restart rather than at setup, so
+a run that never restarts never pays for it.  That is the next round's
+first line, not this one's, because the code and the measurements have to
+move together.
+
+**The best row of each regime, against Round 2's:**
+
+| regime | Round 2 | Round 3 | vs rho | vs family |
+|:--|--:|--:|--:|--:|
+| prime, `2^23.4` | 24.2 | **14.3** | 3.63× | 1.28× |
+| binary, `2^24.4` | 71.2 | **50.7** | 21.9× | 1.22× |
+| Koblitz, `2^39.0` | 5.12 | **5.92** | 30.3× | 1.42× |
+
+The Koblitz row reads worse and did not move: the headline puts it at
+`0.927` with an interval of `0.849` to `1.012`, inside its own spread.
+
+### 11.7 A drift in the unit, found while comparing
+
+111 of the 166 cross-round rows have **identical native counts** — same
+trials, same relations, same group operations — because nothing this
+round touched them.  Their cost ratio should be exactly one.  It is not:
+it runs from `0.912` to `1.076`.
+
+The cause is the unit itself.  Every non-addition is converted at a
+factor measured on the host *at the start of each run*, and `ns_per_add`
+came out `213 ns` for the Round-2 ladder and `146 ns` for this one.  A
+row whose cost is mostly square roots or lookups is therefore repriced by
+up to eight per cent between two runs that did identical work.
+
+So the unit carries about a `±8%` run-to-run drift, and any cross-run
+ratio inside that band is the unit moving rather than the method.  The
+comparison file now records `native_counts_identical` per row, prints a
+calibration-free ratio of group additions beside the converted one, and
+states the drift's width; §11.6 claims a speedup only for rows whose
+counts differ.  This is an **accounting** finding by the §3 test: no
+algorithm changed, and it corrects how earlier rounds' cross-run
+comparisons should be read.
+
+### 11.8 The exponents, refitted
+
+| regime | variant | α (r) | R² | sizes | α of the rung it was built on |
+|:--|:--|--:|--:|--:|--:|
+| prime | rho reference | 0.274 | 0.903 | 8 | — |
+| prime | mitm_m2_negfold_walk | 0.487 | 0.958 | 8 | 0.681 |
+| prime | mitm_m3_negfold_walk | 0.502 | 0.975 | 8 | 0.577 |
+| prime | **mitm_m2_negfold_walk_balanced** | **0.405** | 0.961 | 8 | 0.487 |
+| char2 | rho reference | 0.302 | 0.973 | 5 | — |
+| char2 | mitm_m2_negfold_walk | 0.545 | 0.975 | 5 | 0.788 |
+| char2 | mitm_m2_negfold_walk_balanced | 0.567 | 0.966 | 5 | 0.545 |
+| koblitz | rho reference | 0.254 | 0.917 | 11 | — |
+| koblitz | mitm_m2_…_frobfold_walk | 0.440 | 0.829 | 11 | 0.544 |
+| koblitz | mitm_m2_…_frobfold_walk_balanced | 0.417 | 0.833 | 4 | 0.440 |
+
+No fit is below the reference's, which is what §1.6 asks.  And the
+balanced prime row's `0.405` must not be extrapolated, for the reason
+§11.3 gives: the law predicts `2/3` and the row is measured inside its
+convergence toward the law, not at its asymptote.
+
+### 11.9 Against the targets of §1.6, and the `AGENTS.md` §8 gate
+
+**Neither condition of §1.6 is met, and the round does not claim them.**
+The closest row to the reference is the prime balanced walk at `3.63×`
+rho on `r = 2^23.4`; no row is below `1×` at `r ≥ 2^20`.  No fitted total
+exponent is below the reference's `0.25–0.30`.  No `yield/ceiling`
+reaches `1.5` against the exact ceiling on a base outside a proper
+subgroup.  Every logarithm on every row of all four runs was recovered
+and verified as `[d]G = Q`, every rho run recovered and verified its own,
+and `repeated_column_rows` and `pinned_by_repeated_row` are zero
+everywhere.
+
+**The §8 comparison** is `ic-boundary-round3-comparison-2026-09-21.json`:
+166 cross-round rows paired with the same row of the previous round's
+run, 116 within-run rows pairing each new row with the rung it was built
+on, and 38 holdout rows on a fresh seed.  Within-run speedups run `0.092`
+to `53.1` with a median of `1.327`; 22 are below one and are reported as
+such, being the rungs where a lever costs more than it saves.
+
+**The reference and the candidate were run**, as §8 asks, and for this
+round that meant two binaries rather than two rows: the same command at
+eight repeats on a binary built from a git worktree at the Round-2 commit
+`acd192dc` and on this round's, on the same instances with the same seed,
+run concurrently.  A round whose lever makes an existing row cheaper
+cannot be measured any other way.
+
+The frozen WDSat regression suite does not apply and was not run, for the
+reason §10.7 gives: it measures one SAT-solver stage on sixty fixed
+Weil-descended inputs and is not an adapter for another pipeline.  A
+restart's step function, a base size and a derived model are not a solver
+stage.  No runtime claim is made, so no paired wall-clock interval is
+owed.
+
+### 11.10 What does not count, and what this is not
+
+- **Not a crossover.**  `3.63×` rho on the prime ladder is the closest
+  any row has come, and §11.3 says the family cannot reach `1×` at any
+  size.
+- **Not an advance.**  Every rung is engineering by the §3 test: the base
+  size is a parameter of the same counting bound, the restart is a
+  cheaper way to draw a step function, and `yield/ceiling` against the
+  exact ceiling does not move.
+- **Not an exponent result**, and §11.3 explains why the balanced row's
+  `0.405` is the opposite of one.
+- **The permutation is not a measured improvement** (§11.1), and the
+  pooled offsets are a measured *loss* on rungs that rarely restart
+  (§11.6).  Both are on the table.
+- **The `±8%` drift in the unit** (§11.7) is a correction to how every
+  cross-run ratio in this note, including Round 2's, should be read.
+- **Not a claim about a deployed curve**, and not a wall-clock benchmark.
+  The extrapolations of §11.3 are extrapolations and are marked as such.
+
+### 11.11 Reproducing
+
+```bash
+cargo build --release --bin ic
+./target/release/ic boundary --repeats 3 --out round3.json
+./target/release/ic boundary --seed 1213743172 --repeats 2 --prime-bits 22,24 \
+    --char2-degrees 24,27 --koblitz-degrees 37,39,41 --s4-max-degree 24 --out holdout3.json
+# The matched headline: the same command on two binaries.
+git worktree add /tmp/r2 acd192dc && cargo build --release --bin ic --manifest-path /tmp/r2/Cargo.toml
+for bin in ./target/release/ic /tmp/r2/target/release/ic; do
+  $bin boundary --repeats 8 --prime-bits 24 --char2-degrees 27 --koblitz-degrees 37,41 \
+      --s4-max-degree 20 --no-fold-max-degree 20 --out headline-$(basename $(dirname $bin)).json
+done
+python3 docs/ic/tools/boundary_round_compare.py round3.json \
+    --across docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json \
+    --baseline docs/ic/runs/ic-boundary-ledger-2026-09-21.json \
+    --holdout holdout3.json --out comparison3.json
+python3 docs/ic/tools/boundary_repeat_spread.py round3.json --min-repeats=3
+python3 docs/ic/tools/boundary_round_note_tables.py round3.json --ladder
+python3 docs/ic/tools/boundary_scoreboard_rows.py round3.json
+cargo test --release --lib cryptanalysis::ic_
+```
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

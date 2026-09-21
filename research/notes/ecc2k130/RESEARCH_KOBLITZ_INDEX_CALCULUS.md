@@ -2904,3 +2904,101 @@ supported by a price here.
 generalise across degrees — they remain the degree-61 ones, and this
 round only re-measured the conversions used to *check* the choice. No
 exponent: two priced rungs is far short of §5's four sizes.
+
+### Every phase priced, and the calibration's real limitation — 2026-09-21
+
+Two items the previous rounds left standing. One was a genuine gap; the
+other was a question about the wrong variable.
+
+#### `S` is admissible now, and collection is 97.8% of it
+
+`S` had been a lower bound throughout, because factor-base selection and
+the linear algebra were null rather than zero — which under §8 blocks a
+full-DLP `S` outright. Both are priced now.
+
+Selection reports its own counts through
+`build_subgroup_orbit_factor_base_with_cost`; the old signature stays as
+a wrapper, so none of its 39 callers changed. The linear algebra needed
+no new counters at all: block Wiedemann already reports `products`,
+`core_nonzeros` and `block_n`, whose product is the multiply-add count.
+
+| phase | `k0n41` | share | `k0n53` | share |
+|:--|--:|--:|--:|--:|
+| collect probes | 34,816,911 | 98.37% | 603,860,936 | 97.78% |
+| descent probes | 864 | 0.00% | 11,003,106 | 1.78% |
+| select | 400,851 | 1.13% | 1,581,890 | 0.26% |
+| pair table build | 170,560 | 0.48% | 1,106,640 | 0.18% |
+| linear algebra | 5,822 | 0.02% | 10,006 | 0.00% |
+| **total** | **35,395,009** | | **617,562,577** | |
+| `S` | **1.4918** | 8.75× rho | **4.2069** | 19.36× rho |
+| `S` as previously bounded | ≥ 1.4746 | | ≥ 4.196 | |
+
+32 of 32 verified on both. The bound moved by about 1%, which earlier
+rounds asserted and did not measure.
+
+**The linear algebra is one sixty-thousandth of the cost.** 10,006
+group-addition equivalents at degree 53, from 43,848 multiply-adds mod
+`r`. The block Wiedemann machinery — the filter, the Krylov sequence, the
+generator, the reconstruction — is solving a problem that is not
+remotely near the bill, and has not been for some time.
+
+It also puts the last two rounds in proportion. **The tier they spent
+themselves choosing is 0.18% of the pipeline** in the configuration it
+selects. It mattered only because the alternative's build is 15.4% of
+the compact total; the win was in avoiding a cost, not in reducing one.
+Collection at 97.8% is the only phase whose cost is worth attacking.
+
+Selection's price is a **time conversion, not a native count** — its cost
+is dominated by rebuilding the base from the representatives so far,
+which is not a countable primitive. At a quarter of a percent of the
+total, no plausible error in it moves `S`'s third digit; it is marked as
+the weaker kind of number in the evidence file.
+
+#### The tier constants are limited by width, not by degree
+
+The concern was that constants measured at `n = 61` are an unchecked
+extrapolation at 31, 41 and 53. Measured, the premise is wrong in its
+variable. Across `n = 41, 53, 57, 61` at a matched base the
+folded-to-compact scan ratio is **flat in `n`** once the degrees whose
+`m = 3` scan saturates are excluded: `1.34` at `n = 53` against `1.33`
+at `n = 61`.
+
+Only those two of the ten usable degrees admit a clean reading, because
+**`n` does not determine `r` on this family** — the cofactor runs from 4
+at `n = 41` to 57,284,756 at `n = 59`, so `r` is not monotone in `n`, and
+43 and 47 have no usable subgroup at all. At a width big enough to
+measure, `n = 41` and `n = 57` still carry 3.2% and 8.8% recovery
+contamination.
+
+What does move the ratio is the width:
+
+| base | folded/compact scan | compact table |
+|--:|--:|:--|
+| 3,904 | 1.33 | in cache |
+| 12,688 | **1.17** | leaving cache |
+| 15,264 | 0.96 | out of cache |
+
+The shipped constants give `1.17` — right at the width they were taken
+at, wrong in both directions away from it. So they are **not changed**:
+replacing one width's calibration with another's is not an improvement.
+The model lacks a width term, and the doc comment now says that with
+these numbers rather than blaming the degree.
+
+#### A correction inside this round
+
+The first pass at that measurement used 5,000 points at every degree and
+produced an apparently clean degree trend — `1.01` at `n = 41` rising to
+`1.32` at `n = 61`. It was saturation. 5,248 points is above `n = 41`'s
+scarcity limit of 4,962, and the resulting 13.1% recovery overhead
+inflated the compact scan, faking a low ratio at the low degree and a
+trend across the sweep.
+
+That is the **third** reading in this round that saturation contaminated,
+after `n = 31` and `n = 59` — the third after I had already written down
+why it happens. `examples/koblitz_degree_census.rs` now computes, per
+degree, the width that keeps the scan measurable, so the screen is a
+command rather than a thing to remember.
+
+**Class: accounting.** Nothing was made faster. Two null phases are
+priced, and a limitation was attributed to the wrong variable and is now
+attributed to the right one.
