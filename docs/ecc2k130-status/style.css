@@ -352,6 +352,7 @@ button:disabled { opacity: 0.55; cursor: progress; }
   font-size: 11.5px;
   min-height: 1em;
 }
+.card .foot .warn, td .warn { color: var(--warn); }
 
 /* ---- charts ---- */
 

@@ -944,7 +944,36 @@ make gpu
     if (isFinite(lifetime) && lifetime > 0) {
       parts.push(num(lifetime) + " lifetime workers reported points");
     }
-    el("gpus-foot").textContent = parts.join(" · ");
+    var foot = el("gpus-foot");
+    foot.textContent = parts.join(" · ");
+    // Slots the ingest host says are not walking at the campaign's cutoff.
+    // Their iterations are in the total above, but walks stop at their own
+    // distinguished point, so their meetings with campaign walks mostly go
+    // unrecorded: they add to the rate and almost nothing to the chance of a
+    // collision. Drawn as a warning, never folded into the count.
+    var offWeight = offWeightWalkingSlots(status);
+    if (offWeight > 0) {
+      var warn = document.createElement("span");
+      warn.className = "warn";
+      var weight = status.work && status.work.campaign_dp_weight;
+      warn.textContent = num(offWeight) + (offWeight === 1 ? " slot is" : " slots are") +
+        " not at the campaign DP weight" + (weight ? " (" + weight + ")" : "") +
+        "; their points mostly cannot collide with the rest";
+      foot.appendChild(document.createTextNode(" · "));
+      foot.appendChild(warn);
+    }
+  }
+
+  function offWeightWalkingSlots(status) {
+    if (!status || !status.work) return 0;
+    var n = Number(status.work.off_weight_walking_slots);
+    return isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function duplicateRecordsLastDay(status) {
+    if (!status || !status.ingest) return null;
+    var n = Number(status.ingest.duplicate_records_last_day);
+    return isFinite(n) && n >= 0 ? n : null;
   }
 
   function drawWorkers(workers, snapshotAt, source) {
@@ -995,6 +1024,33 @@ make gpu
       : "none with a point in the last hour · " + num(workers.length) + " lifetime";
   }
 
+  // Records the store dropped because it already held the point under the
+  // same seed. A resumed worker re-reports a handful; a run that is walking
+  // another run's seeds re-reports everything, and until this row existed
+  // that read as a new worker adding points (Modal runs 1-4, 2026-09-19/20).
+  function reReportCell(status) {
+    var dup = duplicateRecordsLastDay(status);
+    if (dup === null) return "not published by this snapshot";
+    if (dup === 0) return "0";
+    var slots = Number(status.ingest.duplicate_slots_last_day);
+    var text = num(dup) + " already held under the same seed";
+    if (isFinite(slots) && slots > 0) text += " · from " + num(slots) + (slots === 1 ? " slot" : " slots");
+    return text;
+  }
+
+  function offWeightCell(status) {
+    if (!status || !status.work || status.work.off_weight_slots === undefined) {
+      return "not published by this snapshot";
+    }
+    var all = Number(status.work.off_weight_slots) || 0;
+    var walking = offWeightWalkingSlots(status);
+    if (all === 0) return "0";
+    var weight = status.work.campaign_dp_weight;
+    return num(all) + (all === 1 ? " slot" : " slots") + " (" + num(walking) + " walking)" +
+      " report points at a cutoff other than" + (weight ? " weight " + weight : " the campaign's") +
+      "; walks stop at their own distinguished point, so those points mostly cannot collide with the rest";
+  }
+
   function drawCampaign(status) {
     var body = el("campaign-body");
     body.textContent = "";
@@ -1006,6 +1062,8 @@ make gpu
       ["First point", timeCell(status.first_dp_at, true), false],
       ["Latest point", timeCell(status.last_dp_at, true), false],
       ["Latest collision", status.latest_collision_at ? timeCell(status.latest_collision_at, true) : "none recorded", false],
+      ["Re-reported points, 24 h", reReportCell(status), false],
+      ["Slots off the DP weight", offWeightCell(status), false],
       ["Snapshot generated", timeCell(status.generated_at, true), false],
       ["Published to Pages", status.published_at ? timeCell(status.published_at, true) : "not stamped", false],
       ["Snapshot source", status.source || "—", true],
@@ -1492,7 +1550,7 @@ make gpu
     // 4 slots and 2.9 B it/s for hours after the feed stopped).
     if (stale) {
       if (status.work && typeof status.work === "object") {
-        status.work = Object.assign({}, status.work, { walking_slots: 0 });
+        status.work = Object.assign({}, status.work, { walking_slots: 0, off_weight_walking_slots: 0 });
       }
       if (status.walk_rate) {
         status = Object.assign({}, status);

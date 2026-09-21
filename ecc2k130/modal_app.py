@@ -8,10 +8,18 @@
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::profile    # Nsight Compute
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 97 --hours 4
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::fanout --curve 97 --count 8 --hours 4
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::next_run_id            # campaign run id
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 131 --packed \
+        --run-id 8000 --hours 4                                           # campaign run
 
 Curve 97 is ECC2K-95, a 2^44 iteration problem: feasible in GPU-hours, and its
 answer has been public since Harley's group solved it in 1998, so a recovered
 logarithm can be checked rather than merely believed.
+
+Curve 131 is the campaign. A search there takes its distinguished-point weight
+from aws/campaign.json and its run id from the Modal range (see CAMPAIGN_CURVE
+below for why both are refused otherwise); --off-campaign lifts both rules and
+keeps the run's files out of the upload path.
 
 The GPU comes from the ECC_GPU environment variable, which is read when this
 file is imported and baked into the function definitions.  That works on every
@@ -944,6 +952,121 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     return result
 
 
+# ---------------------------------------------------------------------------
+# Campaign identity. Points collected here are uploaded by modal_sync.py into
+# the ECC2K-130 campaign bucket, where they have to be *compatible* with the
+# AWS fleet's points or they can never be part of a detectable collision:
+#
+#  * Seeds are (runId << 48) | (walkIndex << 16): a run id names a seed space.
+#    modal_sync.py maps run id r to campaign slot 90000 + r, and the AWS fleet
+#    maps slot s to run id s + 1, so a Modal run id an AWS slot has ever used
+#    walks that slot's trails again, step for step. Every point it reports is
+#    one the store already holds under the same seed, dropped by ON CONFLICT
+#    with no collision recorded and nothing on the page. Run ids 1-4 did that
+#    on 2026-09-19/20 against slots 0-3: 89% of run 3's 912k records were
+#    byte-identical to slot 2's, and 100% of its seeds had been walked.
+#  * Walks stop at their own distinguished point. Two walks that merge only
+#    report the same point if they use the same cutoff; against the campaign's
+#    weight 32 a weight-34 walk's meeting is seen about 12% of the time and a
+#    weight-35 walk's about 4% (campaign.json: "dpWeight must be identical
+#    campaign-wide or cross-worker collisions can be missed"). Runs 4242-4245
+#    were launched with the run-sized default and collected at 34 and 35.
+#
+# So a campaign run refuses both: its weight comes from aws/campaign.json and
+# its run id from a range no AWS slot can reach. AWS slots are 16-bit and the
+# fleet has used 0-195; 90000 + run id must stay a five-digit slot.
+CAMPAIGN_CURVE = 131
+MODAL_RUN_ID_MIN = 8000
+MODAL_RUN_ID_MAX = 9999
+# Runs that deliberately depart from the campaign (a loose cutoff to see points
+# quickly, a different walk) live here, where modal_sync.py never looks.
+OFF_CAMPAIGN_ROOT = "/data/offcampaign"
+
+
+def campaignConfig():
+    """aws/campaign.json as this tree carries it (the image copies aws/ too)."""
+    with open(helperRoot / "aws" / "campaign.json", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def campaignDpWeight():
+    weight = int(campaignConfig()["dpWeight"])
+    if weight < 0:
+        raise ValueError("aws/campaign.json carries no dpWeight; a campaign run cannot pick one")
+    return weight
+
+
+def isCampaignRun(curve, offCampaign=False):
+    return int(curve) == CAMPAIGN_CURVE and not offCampaign
+
+
+def checkCampaignRunId(runId):
+    runId = int(runId)
+    if not (MODAL_RUN_ID_MIN <= runId <= MODAL_RUN_ID_MAX):
+        raise ValueError(
+            "run id %d is outside the Modal campaign range %d-%d: below it the id is "
+            "an AWS slot's (slot = run id - 1) and the run re-walks that slot's seeds; "
+            "above it modal_sync.py has no slot number. Pass --run-id from the range "
+            "(::next_run_id suggests the next free one) or --off-campaign to collect "
+            "outside the campaign corpus." % (runId, MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
+    return runId
+
+
+def campaignDpWeightFor(dpWeight):
+    """The cutoff a campaign run walks at: campaign.json's, and nothing else."""
+    want = campaignDpWeight()
+    if dpWeight < 0:
+        return want
+    if int(dpWeight) != want:
+        raise ValueError(
+            "dp weight %d differs from the campaign's %d; walks stop at their own "
+            "distinguished point, so a cross-weight meeting is only recorded when the "
+            "looser walk's stopping point also passes the tighter test. Use the "
+            "campaign weight, or --off-campaign to collect outside the campaign corpus."
+            % (int(dpWeight), want))
+    return want
+
+
+def dataRoot(curve, offCampaign=False):
+    return OFF_CAMPAIGN_ROOT if (int(curve) == CAMPAIGN_CURVE and offCampaign) else "/data"
+
+
+RUN_FILE_RE = re.compile(r"^curve(\d+)-run(\d+)\.(bin|ck|hdr)$")
+
+
+def usedRunIds(curve, root="/data"):
+    """Every run id with a corpus, checkpoint or header on the volume."""
+    ids = set()
+    for sub in ("dp", "ckpt"):
+        folder = os.path.join(root, sub)
+        if not os.path.isdir(folder):
+            continue
+        for name in os.listdir(folder):
+            m = RUN_FILE_RE.match(name)
+            if m and int(m.group(1)) == int(curve):
+                ids.add(int(m.group(2)))
+    return ids
+
+
+def nextFreeRunId(curve, root="/data"):
+    """One above the highest run id on the volume, inside the campaign range.
+
+    The volume is shared by every container, so this is the one place a free
+    id can be read off. It is a suggestion for the operator to pass explicitly:
+    a resumable pass loop must use the *same* id every pass, so nothing here
+    allocates one implicitly.
+    """
+    used = usedRunIds(curve, root)
+    if int(curve) == CAMPAIGN_CURVE:
+        candidates = [r for r in used if MODAL_RUN_ID_MIN <= r <= MODAL_RUN_ID_MAX]
+        nxt = (max(candidates) + 1) if candidates else MODAL_RUN_ID_MIN
+        if nxt > MODAL_RUN_ID_MAX:
+            raise ValueError("the Modal campaign run-id range %d-%d is exhausted"
+                             % (MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
+        return nxt
+    return (max(used) + 1) if used else 1
+
+
 # Expected rho iterations, and the weight cutoff that makes walks short enough
 # that most of them actually report within the run.
 CURVE_FACTS = {
@@ -1143,13 +1266,30 @@ def humanBytes(n):
     return "%d B" % n
 
 
+@app.function(image=image, timeout=10 * 60, volumes={"/data": volume})
+def runNextRunId(curve=CAMPAIGN_CURVE):
+    """Suggest the next unused run id on the volume (no GPU rented)."""
+    return {"curve": int(curve), "runId": nextFreeRunId(curve),
+            "used": sorted(usedRunIds(curve)),
+            "range": ([MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX]
+                      if int(curve) == CAMPAIGN_CURVE else None)}
+
+
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0):
+              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0,
+              offCampaign=False):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
+
+    On the campaign curve this is a campaign run unless `offCampaign` says
+    otherwise: the cutoff is aws/campaign.json's dpWeight (a different one is
+    refused, and -1 means that one rather than the run-sized guess), the run id
+    must come from the Modal range, and the files land where modal_sync.py
+    uploads them. An off-campaign run may use any weight and id, and writes
+    under OFF_CAMPAIGN_ROOT, which nothing uploads.
 
     Nothing here is throwaway.  The container dies at the deadline, but the run
     does not: the client checkpoints its live walks to the volume, reloads the
@@ -1168,6 +1308,18 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     so a recovered logarithm can be checked against it."""
     if packed and (curve != 131 or leaf):
         raise ValueError('packed search requires curve=131 and leaf=0')
+    campaign = isCampaignRun(curve, offCampaign)
+    if campaign:
+        # Refused before the build and before a GPU does anything: a run that
+        # gets past here produces points the campaign can use.
+        runId = checkCampaignRunId(runId)
+        dpWeight = campaignDpWeightFor(dpWeight)
+        print("campaign run: curve %d, run id %d (campaign slot %d), dp weight %d from "
+              "aws/campaign.json" % (curve, runId, 90000 + runId, dpWeight), flush=True)
+    elif int(curve) == CAMPAIGN_CURVE:
+        print("OFF-CAMPAIGN run on curve %d: files go under %s and are never uploaded "
+              "to the campaign bucket" % (curve, OFF_CAMPAIGN_ROOT), flush=True)
+    root = dataRoot(curve, offCampaign)
     if int(verify) > 0:
         # --verify N replays the first N reports through the CPU reference
         # before they are written. At dp-weight 32 that is ~2^32 scalar steps
@@ -1184,10 +1336,10 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
         if not ok:
             return {"error": log[-2000:]}
     name = gpuName()
-    os.makedirs("/data/dp", exist_ok=True)
-    os.makedirs("/data/ckpt", exist_ok=True)
-    dpFile = f"/data/dp/curve{curve}-run{runId}.bin"
-    ckFile = f"/data/ckpt/curve{curve}-run{runId}.ck"
+    os.makedirs(f"{root}/dp", exist_ok=True)
+    os.makedirs(f"{root}/ckpt", exist_ok=True)
+    dpFile = f"{root}/dp/curve{curve}-run{runId}.bin"
+    ckFile = f"{root}/ckpt/curve{curve}-run{runId}.ck"
     rc, out = sh(f"./ecc2k130 --curve {curve} --bench --steps 8 --launches 4 --verify 0{backendFlag}")
     rate = parseRate(out) or 1.0
     # The number of reports comes out at roughly four times the number of
@@ -1225,7 +1377,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     # itself, so it is not named twice.  It reads newest-first and stops at
     # loadMax, because a collection run that never finishes -- ECC2K-130 is
     # decades of GPU time -- grows a corpus no container can hold in memory.
-    for other in sorted(corpusFiles(curve)):
+    for other in sorted(corpusFiles(curve, f"{root}/dp")):
         if other != dpFile:
             cmd += f" --load {other}"
     deadline = time.time() + hours * HOUR
@@ -1240,7 +1392,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     lastReport = started
     last = None
     stopped = ""
-    hdrFile = f"/data/ckpt/curve{curve}-run{runId}.hdr"
+    hdrFile = f"{root}/ckpt/curve{curve}-run{runId}.hdr"
     header = readCheckpointHeader(ckFile) or defaultStatusHeader(
         curve, workerThreads, batch, runId, packed)
     resumeIterBase = int(header.get("iterBase", 0) or 0)
@@ -1340,6 +1492,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     # snapshot rather than the one before it.
     tryCommitVolume(volume, ckFile)
     return {"gpu": name, "distinguishedPoints": corpusCount(dpFile), "file": dpFile,
+            "runId": int(runId), "dpWeight": int(dpWeight), "campaign": campaign,
             "checkpoint": ckFile if os.path.exists(ckFile) else None,
             "checkpointBytes": os.path.getsize(ckFile) if os.path.exists(ckFile) else 0,
             "iterations": last["iters"] if last else 0,
@@ -1588,30 +1741,69 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
     print(r["report"])
 
 
+def requireExplicitRunId(curve, run_id, off_campaign, what="--run-id"):
+    """Campaign runs name their run id; nothing here picks one for them.
+
+    A pass loop resumes by launching the same id every pass, so an id chosen
+    at launch time would start a fresh seed space on every pass and leave the
+    checkpoint behind. `run_id` 0 is the request for a suggestion, answered
+    with ::next_run_id and refused here.
+    """
+    if isCampaignRun(curve, off_campaign):
+        if int(run_id) <= 0:
+            raise SystemExit(
+                "campaign runs on curve %d need an explicit %s in %d-%d; "
+                "`modal run modal_app.py::next_run_id` suggests the next free one, "
+                "and --off-campaign collects outside the campaign corpus"
+                % (curve, what, MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
+        checkCampaignRunId(run_id)
+    return int(run_id)
+
+
+@app.local_entrypoint()
+def next_run_id(curve: int = CAMPAIGN_CURVE):
+    """The next unused run id on the volume; pass it to ::search or ::fanout."""
+    print(json.dumps(runNextRunId.remote(curve=curve), indent=2))
+
+
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
-           threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
+           threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 0,
            walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
-           verify: int = 0, checkpoint_every: int = 60):
+           verify: int = 0, checkpoint_every: int = 60, off_campaign: bool = False):
+    if not isCampaignRun(curve, off_campaign) and int(run_id) <= 0:
+        run_id = 1
+    run_id = requireExplicitRunId(curve, run_id, off_campaign)
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dp_weight,
                                      runId=run_id, walksTarget=walks, loadMax=load_max,
                                      packed=packed, verify=verify,
-                                     checkpointEvery=checkpoint_every)
+                                     checkpointEvery=checkpoint_every,
+                                     offCampaign=off_campaign)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
-           verify: int = 0, checkpoint_every: int = 60):
-    """Run `count` independent searchers, each with its own run id so their
-    seeds never collide, then merge what they produced."""
+           run_id_base: int = 0, walks: int = 4000000, load_max: int = 50000000,
+           packed: bool = False, verify: int = 0, checkpoint_every: int = 60,
+           off_campaign: bool = False):
+    """Run `count` independent searchers on run ids base .. base+count-1, so
+    their seeds never collide, then merge what they produced.
+
+    The base is explicit on the campaign curve for the same reason as
+    ::search's run id: every pass of a loop must spawn the same ids."""
+    if not isCampaignRun(curve, off_campaign) and int(run_id_base) <= 0:
+        run_id_base = 1
+    run_id_base = requireExplicitRunId(curve, run_id_base, off_campaign, "--run-id-base")
+    if isCampaignRun(curve, off_campaign):
+        checkCampaignRunId(run_id_base + count - 1)
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max,
-                      packed=packed, verify=verify, checkpointEvery=checkpoint_every)
+                      dpWeight=dp_weight, runId=run_id_base + i, walksTarget=walks,
+                      loadMax=load_max, packed=packed, verify=verify,
+                      checkpointEvery=checkpoint_every, offCampaign=off_campaign)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))
