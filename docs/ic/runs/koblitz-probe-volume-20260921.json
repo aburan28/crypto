@@ -1,0 +1,169 @@
+{
+ "operation": "koblitz_pair_table_probe_volume_wiring",
+ "date": "2026-09-21",
+ "what": "The ic workflow now computes its own probing volume and passes it to PairSumTable::build_within_for, so the tier is priced for the run being built rather than for the volume the cost model's constants were calibrated at.",
+ "why": "build_within cannot know how much probing it is being built for and falls back on the calibration volume (351,750,000 summand scans). The ledger rungs probe between 1.45x and 1266x less than that, and less probing to amortise the build over is exactly when the fold wins.",
+ "estimate": {
+  "collection": "unit_trials x units x collection_window, or the whole base when no window is set",
+  "collection_is_exact": "reproduces summands_scanned_total exactly on every run checked, including the frozen 277,760 of the k0n31 rung",
+  "descent": "N / C(|F| + m - 1, m) per target, the contract's counting bound",
+  "descent_is_central": "measured 1.26x high on one degree-61 target set and 1.07x low on an independent one",
+  "units_not_max_units": "units is the pass the driver plans; max_units is the cap it may extend to. A run that extends probes more than this estimate says, and under-counting probes favours the fold, so this errs the way the calibrated constants already do."
+ },
+ "unit": {
+  "name": "batched group addition (Montgomery-shared inversion)",
+  "conversions": "measured at each rung's own degree by examples/koblitz_probe_conversion.rs, not carried over from the degree-61 calibration",
+  "S": "total priced operations / sqrt(r), a LOWER bound: factor-base selection and the linear algebra are unpriced in this unit and left null rather than zero. Both are identical across the arms, so they cannot move the tier ratio."
+ },
+ "rungs": [
+  {
+   "rung": "k0n31-ledger-rung",
+   "degree": 31,
+   "points": 2170,
+   "signed_orbits": 35,
+   "columns": 35,
+   "targets": 32,
+   "verified": 32,
+   "subgroup_order": "1439393",
+   "subgroup_bits": 20.46,
+   "summands_scanned": 277760,
+   "collect_trials": 128,
+   "relations": 78,
+   "descent_probes": 52,
+   "rho_steps": 5477,
+   "rho_S": 0.1427,
+   "tier_chosen": "folded",
+   "batched_add_ns": 45.83,
+   "tiers": null,
+   "not_priced": "At r = 2^20.5 nearly every probe of the m = 3 scan hits, so the never-stopping sink spends its time in the O(|F|) recovery a hit pays: 2572 adds a summand on the compact table against the full tier's 6.71, which stores its summands and pays no recovery. That figure measures recovery, not probing, and does not belong in a cost model. The tier chosen here is the model's extrapolation below the degrees it was measured at."
+  },
+  {
+   "rung": "k0n41-subgroup-rung",
+   "degree": 41,
+   "points": 5248,
+   "signed_orbits": 64,
+   "columns": 64,
+   "targets": 32,
+   "verified": 32,
+   "subgroup_order": "549756390943",
+   "subgroup_bits": 39.0,
+   "summands_scanned": 15072256,
+   "collect_trials": 2872,
+   "relations": 124,
+   "descent_probes": 726,
+   "rho_steps": 4045603,
+   "rho_S": 0.1705,
+   "tier_chosen": "folded",
+   "batched_add_ns": 49.81,
+   "tiers": {
+    "compact": {
+     "stored_pairs": 13773376,
+     "build_adds": 13773376,
+     "collect_adds": 34214021,
+     "descent_adds": 603,
+     "total_adds": 47988000,
+     "S": 2.0225,
+     "over_rho": 11.86,
+     "adds_per_summand_scanned": 2.27,
+     "adds_per_descent_probe": 0.83
+    },
+    "folded": {
+     "stored_pairs": 173184,
+     "build_adds": 173184,
+     "collect_adds": 34816911,
+     "descent_adds": 864,
+     "total_adds": 34990959,
+     "S": 1.4748,
+     "over_rho": 8.65,
+     "adds_per_summand_scanned": 2.31,
+     "adds_per_descent_probe": 1.19
+    },
+    "full": {
+     "stored_pairs": 13773376,
+     "build_adds": 13773376,
+     "collect_adds": 34063299,
+     "descent_adds": 784,
+     "total_adds": 47837459,
+     "S": 2.0162,
+     "over_rho": 11.82,
+     "adds_per_summand_scanned": 2.26,
+     "adds_per_descent_probe": 1.08
+    }
+   },
+   "compact_over_folded": 1.3714,
+   "class": "engineering: S fell, probe counts identical between arms so the floor ratio is flat"
+  },
+  {
+   "rung": "k0n53-subgroup-rung",
+   "degree": 53,
+   "points": 15264,
+   "signed_orbits": 144,
+   "columns": 144,
+   "targets": 32,
+   "verified": 32,
+   "subgroup_order": "21044858204113",
+   "subgroup_bits": 44.26,
+   "summands_scanned": 242514432,
+   "collect_trials": 15888,
+   "relations": 458,
+   "descent_probes": 7803621,
+   "rho_steps": 31891777,
+   "rho_S": 0.2172,
+   "tier_chosen": "folded",
+   "batched_add_ns": 57.87,
+   "tiers": {
+    "compact": {
+     "stored_pairs": 116502480,
+     "build_adds": 116502480,
+     "collect_adds": 630537523,
+     "descent_adds": 9910599,
+     "total_adds": 756950602,
+     "S": 5.1564,
+     "over_rho": 23.73,
+     "adds_per_summand_scanned": 2.6,
+     "adds_per_descent_probe": 1.27
+    },
+    "folded": {
+     "stored_pairs": 1114272,
+     "build_adds": 1114272,
+     "collect_adds": 603860936,
+     "descent_adds": 11003106,
+     "total_adds": 615978313,
+     "S": 4.1961,
+     "over_rho": 19.31,
+     "adds_per_summand_scanned": 2.49,
+     "adds_per_descent_probe": 1.41
+    },
+    "full": {
+     "stored_pairs": 116502480,
+     "build_adds": 116502480,
+     "collect_adds": 652363822,
+     "descent_adds": 11939540,
+     "total_adds": 780805842,
+     "S": 5.3189,
+     "over_rho": 24.48,
+     "adds_per_summand_scanned": 2.69,
+     "adds_per_descent_probe": 1.53
+    }
+   },
+   "compact_over_folded": 1.2289,
+   "class": "engineering: S fell, probe counts identical between arms so the floor ratio is flat"
+  }
+ ],
+ "finding": "All three rungs move from compact to folded. On the two that can be priced the fold is cheaper in operations as well as in wall clock: 1.371x at degree 41 and 1.229x at degree 53, with 32 of 32 targets verified on both arms and every probe count identical between them.",
+ "classification": {
+  "class": "engineering",
+  "why": "S fell and the probe counts did not move, so the ratio to the counting floor is flat by construction. AGENTS.md section 3: legitimate, bounded, and not a finding."
+ },
+ "not_claimed": [
+  "That the tier constants generalise across degrees. They are calibrated at n = 61; the conversions here were re-measured at n = 41 and n = 53 for the pricing, but the constants build_within uses to CHOOSE are still the degree-61 ones, so the choice at these degrees is an extrapolation that the pricing then checks.",
+  "Anything about the k0n31 rung's cost. Its m = 3 scan measurement is dominated by recovery at r = 2^20.5 and is not priced here.",
+  "Any change in the standing against rho: the two priced rungs sit at 8.65x and 19.3x rho's S.",
+  "Any exponent fit. Two priced rungs is far short of the four sizes section 5 requires."
+ ],
+ "harness": {
+  "runs": "scripts/ic_e2e_benchmark.py run on the three ledger rungs",
+  "conversions": "examples/koblitz_probe_conversion.rs 31 2000, 41 5000, 53 15000",
+  "correctness": "32 of 32 targets recovered and verified as [d]G = Q on every rung, on both sides of the rho comparison"
+ }
+}
