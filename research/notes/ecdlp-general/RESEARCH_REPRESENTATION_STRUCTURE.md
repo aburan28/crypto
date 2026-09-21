@@ -11,9 +11,9 @@ measured threads in §9.3, which found no further counterexample and split
 R5 into two failure modes.  **The verdict on murmurations is
 unchanged** and does not depend on the repaired clause; see §4.4.
 **Companions:** [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](./RESEARCH_ECDLP_STATE_OF_THE_ART.md) §8,
-[`RESEARCH_DIEM_DESCENT.md`](./RESEARCH_DIEM_DESCENT.md),
-[`RESEARCH_ECC2K130_HYPERELLIPTIC.md`](./RESEARCH_ECC2K130_HYPERELLIPTIC.md),
-[`RESEARCH_ISOGENY_CLASS_SEARCH.md`](./RESEARCH_ISOGENY_CLASS_SEARCH.md)
+[`RESEARCH_DIEM_DESCENT.md`](../index-calculus/RESEARCH_DIEM_DESCENT.md),
+[`RESEARCH_ECC2K130_HYPERELLIPTIC.md`](../ecc2k130/RESEARCH_ECC2K130_HYPERELLIPTIC.md),
+[`RESEARCH_ISOGENY_CLASS_SEARCH.md`](../ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md)
 
 ## TL;DR
 
@@ -229,6 +229,7 @@ defining feature.  The full catalogue of targets actually used:
 | **MOV / Frey–Rück** | small embedding degree `k` | `F_{q^k}^*` | finite-field index calculus |
 | **SSSA anomalous** | trace 1, `#E = p` | `(Z_p, +)` | division |
 | **HNP / nonce bias** | published `(r, s)` + bias | lattice in `Z^d` | LLL / BKZ |
+| **Cheon (DLPwAI)** | leaked auxiliary inputs `[α^d]G` | subgroup of `F_p^*` (or the norm-one torus of `F_{p²}^*`) | collision search in the exponent |
 
 The HNP row is the one §7.1 already gestured at, now stated as an instance
 rather than an analogy.  It is also the row that makes the category-change
@@ -686,3 +687,51 @@ fields are represented mostly by null results, and several threads are
 open rather than closed.  It is evidence that the pattern holds where
 this repository has measured, which is not the same as evidence that it
 holds.
+
+### 9.4 Cheon: the positive control the sweep lacked (2026-09-21)
+
+Merging `main` brought in
+[`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](./RESEARCH_TORSION_AUXILIARY_INPUTS.md),
+written independently and landing squarely on this note's subject.  It
+supplies the row §9.3 was missing.
+
+Every transfer in the §9.3 ledger is one that *fails*.  That is a weak
+evidential position: a pattern that only ever explains failures is hard to
+distinguish from a pattern that explains nothing.  Cheon's algorithm is
+measured in this repository as a transfer that **works**, against this
+repository's own rho reference and unit:
+
+| requirement | how Cheon satisfies it |
+|:--|:--|
+| R1 | the protocol leaks `[α^d]G` for some `d \| p ∓ 1`.  Not manufacturable from `G, [α]G` — that would be CDH |
+| R2 | embeds `α` into a subgroup of `F_p^*`, or of the norm-one torus of `F_{p²}^*` |
+| R3 | collision search in the exponent, which the curve group does not support |
+| R4 | the payload is `α` itself |
+| R5 | yes, at real parameters, when a suitable `d` divides `p ∓ 1` and the protocol leaks the input |
+
+Measured: the `p − 1` case sits on its own floor `√(p/d)` at a flat `≈ 20×`
+with fixed-base tables, **beats rho from 24 bits up**, with a fitted
+exponent of **`0.23` against rho's `0.50`**.  That is an exponent, not a
+constant — the thing six in-category threads never produced.
+
+Two further points that bear directly on this note:
+
+- **Its closing sentence is R1, stated independently.**  "Nothing here
+  lowers `Ω(√p)` for an algorithm that sees only `G` and `[α]G`."  The
+  transfer is worth an exponent when the protocol publishes the auxiliary
+  input and worth nothing when it does not.  Same algorithm, same curve,
+  same field; the only variable is what was published.  This is the
+  cleanest isolation of R1 as the scarce resource anywhere in the
+  repository, and it was not written to make that point.
+- **Its torsion sub-route is another R3 failure.**  Kim and Cheon asked
+  whether an auxiliary curve's `δ`-torsion could replace `F_p^*` and free
+  `d` from dividing `p ∓ 1` — i.e. whether R1 could be *manufactured*.
+  Closed by measurement: the only computable comparison costs `p/d`
+  pairwise scalar multiplications, `10³–10⁴×` rho and rising, because the
+  auxiliary curve supports no division in the exponent.  The target
+  category has to carry the algorithm; being a different category is not
+  enough.
+
+With this row the pattern has a positive instance measured in the same
+unit as its negative ones, which is what §9.3's evidential position
+needed.

@@ -345,7 +345,7 @@ provisional** until proceedings are confirmed.
 6. **Structural-handle proposals (and how to triage them)** — periodic suggestions that
    some newly-discovered arithmetic phenomenon bears on ECDLP. The recurring 2024–2026
    instance is *murmurations* of elliptic curves. See
-   [`RESEARCH_REPRESENTATION_STRUCTURE.md`](./RESEARCH_REPRESENTATION_STRUCTURE.md) for the
+   [`RESEARCH_REPRESENTATION_STRUCTURE.md`](RESEARCH_REPRESENTATION_STRUCTURE.md) for the
    admissibility test any such proposal must pass (R1–R5), derived from the transfers that
    have actually worked — Weil descent, the Kani-based SIDH break, and (per that note's own
    F4 audit) **MOV/Frey–Rück and SSSA from §3 above**, which transfer to `F_{q^k}^*` and
