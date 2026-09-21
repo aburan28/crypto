@@ -44,6 +44,7 @@
 //   {"dps":[{"j":[n3,...,n10],"seed":"<hex>","x":"<canonical orbit, hex>"},...]}
 //
 // Build:  make witness            (plain C++, no GPU)
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -279,6 +280,17 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
     std::vector<DpFileRecord> recs;
     if (!readCorpus(o.corpus, &recs)) return 8;
 
+    // Settle --out-dir before the first walk: a batch that turns out to be
+    // unwritable at flush time is a batch of replays thrown away.
+    if (!o.outDir.empty()) {
+        struct stat st;
+        if ((mkdir(o.outDir.c_str(), 0755) != 0 && errno != EEXIST) ||
+            stat(o.outDir.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) {
+            fprintf(stderr, "cannot use --out-dir %s\n", o.outDir.c_str());
+            return 9;
+        }
+    }
+
     // ---- the canonical orbit name, in the job's basis ----------------------
     // Read this basis's coordinates through perm to get the job's coordinate
     // string, then take its least rotation, which is what sigma does there.
@@ -331,9 +343,10 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
     std::vector<std::string> batch;
     unsigned long long done = 0, emitted = 0, steps = 0;
     unsigned long long batchNo = 0;
-    bool wroteAll = true;
-    auto flush = [&]() {
-        if (batch.empty()) return;
+    // False when the batch could not be written; the caller stops there rather
+    // than walk more records whose witnesses would go the same way.
+    auto flush = [&]() -> bool {
+        if (batch.empty()) return true;
         // A node's checker reads one artifact per file, so --out-dir is what a
         // submitter wants; the stream on stdout is for looking at.
         FILE *out = stdout;
@@ -345,9 +358,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
             out = fopen(path.c_str(), "wb");
             if (!out) {
                 fprintf(stderr, "cannot write %s\n", path.c_str());
-                wroteAll = false;
-                batch.clear();
-                return;
+                return false;
             }
         }
         fputs("{\"dps\":[", out);
@@ -360,6 +371,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
         ++batchNo;
         emitted += batch.size();
         batch.clear();
+        return true;
     };
 
     for (unsigned long long i = first; i < limit; ++i) {
@@ -418,13 +430,12 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
         el += "],\"seed\":\"" + shex + "\",\"x\":\"" + xhex + "\"}";
         batch.push_back(el);
         steps += wr.iters;
-        if ((int)batch.size() >= o.batch) flush();
+        if ((int)batch.size() >= o.batch && !flush()) return 9;
 #endif
         if (!o.quiet && ++done % 64 == 0)
             fprintf(stderr, "\rreplayed %llu of %llu", done, limit - first);
     }
-    flush();
-    if (!wroteAll) return 9;
+    if (!flush()) return 9;
     if (!o.quiet) {
         fprintf(stderr, "\r%llu witnesses from %llu records, %llu steps replayed\n",
                 emitted, limit - first, steps);
