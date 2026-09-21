@@ -1515,6 +1515,42 @@ says does not exist; that is the §5 mistake in a new costume, a number
 measured inside a transient and read as an asymptote, and the fit is
 reported here only beside the prediction it disagrees with.
 
+### 11.4 The resolution of the measurement, measured
+
+A row of one of these runs is a mean over repeats that differ only in
+the target drawn.  A two-summand search finishes when the factor-base
+graph first carries a cycle, and when that happens belongs to the draw,
+so the same row, on the same instance, on the same binary, costs
+several times more on one repeat than on another.  That spread is the
+resolution of every comparison in this note and until this round it was
+nowhere in it.  `docs/ic/tools/boundary_repeat_spread.py` reports it as
+`max/min` of the per-repeat operation count:
+
+| run | rows | `m` | median `max/min` | 75th | 90th | max |
+|:--|--:|--:|--:|--:|--:|--:|
+| Round-2 ladder, 3 repeats | 69 | 2 | 1.37 | 2.24 | 3.07 | 7.52 |
+| Round-2 ladder, 3 repeats | 97 | 3 | 1.08 | 1.23 | 1.72 | 25.10 |
+| headline pair, 8 repeats | 24 | 2 | 1.76 | 2.36 | 4.35 | 5.17 |
+| headline pair, 8 repeats | 32 | 3 | 1.28 | 1.43 | 1.56 | 1.69 |
+
+Two consequences, and both change how this round reports itself.
+
+**Three repeats cannot resolve this round's gains.**  Round 2's levers
+moved rows by factors of two to fifty and three repeats were enough.
+Round 3's move them by tens of percent.  So the headline is run at
+**eight repeats on two binaries** — the previous round's, built from a
+worktree at its commit, and this one's — on the same instances with the
+same seed, run concurrently so they saw the same machine.
+
+**A mean of ratios is the wrong average.**  The paired ratios on the
+Koblitz `n = 41` two-summand row were `0.425, 0.479, 0.662, 0.790,
+1.110, 1.473, 2.208, 4.277`; their arithmetic mean is `1.43`, which
+reads a spread as a gain.  `boundary_round_compare.py` now reports the
+**geometric** mean with a two-sided 95% `t`-interval on the logs, and a
+column that says whether the interval clears one.  Every speedup in
+§11.6 is quoted that way, and the ones whose interval straddles one are
+reported as not moved — which is a result, not a gap in the evidence.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
