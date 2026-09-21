@@ -1,0 +1,76 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -1129,7 +1129,14 @@
+             if current != rep {
+                 return Err("orbit does not close".into());
+             }
+-            columns.push(arith.mul_point(rep, h));
++            // The column IS the orbit representative.  `rep` is already in
++            // the order-`r` subgroup -- it is a Frobenius image of a point the
++            // sampler projected with `[h]` -- so the second `[h]` scaled every
++            // column by a constant and scaled the rows by the same constant to
++            // match.  Dropping both leaves the same logarithms and saves `K`
++            // scalar multiplications by the cofactor per job, which is the
++            // whole of the base phase wherever `h` is large.
++            columns.push(rep);
+         }
+         if points_vec.len() != 2 * xs.len() {
+             return Err("orbit closure does not cover the base".into());
+@@ -1459,7 +1466,9 @@
+                 let (o, _, _) = self.location(i);
+                 row[o as usize] = (row[o as usize] + self.coefficient(i)) % self.r;
+             }
+-            row[self.orbits] = mulmod(self.h % self.r, rel.a % self.r, self.r);
++            // Columns are the representatives themselves, so the row's
++            // right-hand side loses the matching factor of `h`.
++            row[self.orbits] = rel.a % self.r;
+             self.echelon.push(row);
+         }
+     }
+@@ -1531,7 +1540,7 @@
+             return None;
+         }
+         let r = self.r;
+-        let h = self.h % r;
++        let _ = self.h; // the cofactor no longer enters the descent
+         let mut a = self.rng.scalar(r);
+         let b = self.rng.scalar(r);
+         let stride_scalar = self.rng.scalar(r);
+@@ -1540,7 +1549,7 @@
+             self.arith.fixed_base_mul(&self.g_table, a),
+             self.arith.mul_point(q_fast, b),
+         );
+-        let hb_inv = invmod(mulmod(h, b, r), r)?;
++        let hb_inv = invmod(b, r)?;
+         let size = self.points.len();
+         let mut trials = 0u64;
+         while trials < self.max_trials {
+@@ -1557,7 +1566,7 @@
+                         let (o, _, _) = self.location(i);
+                         sum = (sum + mulmod(self.coefficient(i), logs[o as usize], r)) % r;
+                     }
+-                    let numerator = (sum + r - mulmod(h, a % r, r)) % r;
++                    let numerator = (sum + r - a % r) % r;
+                     candidate = Some((mulmod(numerator, hb_inv, r), w.to_vec()));
+                 }
+             }
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -520,6 +520,7 @@
+         out.push_str(&rels);
+         out.push_str(",\"factor_base_orbits\":");
+         out.push_str(&base);
++        out.push_str(",\"column_convention\":\"representative\"");
+         out.push_str(",\"rejected_relations\":0}");
+         return Ok(Report::Text(out, false));
+     }
+@@ -580,6 +581,9 @@
+     }
+     out.push_str("],\"factor_base_orbits\":");
+     out.push_str(&base);
++    // A column is the orbit representative itself, not `[h]` of it; the
++    // checker needs to know which convention the rows were built under.
++    out.push_str(",\"column_convention\":\"representative\"");
+     out.push_str(",\"relations\":");
+     out.push_str(&rels);
+     out.push_str(",\"column_logs\":");

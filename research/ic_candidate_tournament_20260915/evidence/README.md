@@ -46,7 +46,7 @@ to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015`, `round-0016` and `round-0017` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015`, `round-0016`, `round-0017`, `round-0018`, `round-0018b`, `round-0019` and `round-0020` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
@@ -157,3 +157,46 @@ smoke rejections and distinguish promotion from parity and strict beating.
 successful fresh-directory restoration and full audits of all three rounds.
 [The single-target winner](../single_target_20260916/WINNER.json) identifies its
 source/configuration; its cumulative patch is relative to round-0002's source.
+
+## Round 0018 comes in two archives, and both are kept
+
+`round-0018.tar.zst` (sha256 `11379eafac1827b652a9aca6e5beb31f7ea4af4533d311b2c21bf4e46eb1624c`) is a
+complete, fully verified tournament that answers the wrong question: its incumbent is round 0017's
+*incumbent* rather than round 0017's promoted winner, because `prepare` was given
+`runs/round-0017/source` instead of `runs/round-0017/source_candidates/orbits/source`. Its incumbent
+worker hashes to `7ca9953d…` against the winner's `e9f263b8…`, and its baseline source carries no
+`factor_base_orbits`. Every arm-versus-incumbent number in it therefore conflates round 0018's two levers
+with round 0017's certificate change, and its `beats_rho_strict=False` is not a statement about round
+0017, whose winner was never in it.
+
+`round-0018b.tar.zst` (sha256 `99efc1b7b0a0e65e58a068e960188197be7c1683517c934dfb36712446c0a36d`) is the
+same pre-registration, the same seed and the same arms against the incumbent that pre-registration names,
+and it is the round of record. The first archive is kept because its 2,340 receipts are real measurements
+of those arms against an older baseline, and because a superseded run that is deleted cannot be checked.
+
+## Round 0019 is the promoted record
+
+`round-0019.tar.zst` (sha256 `11cf99af0cf018ab970d883e141c4224d1336b1bfa0da5795b786321a81f8054`,
+68,485 files) holds the round that promoted `both` and carries the campaign's
+strict-win record: `beats_rho_strict` on all eight cells in both metrics on
+both final stages, seed 2026092119, audit VERIFIED over 2,646 trial receipts
+and 452 source files.
+
+It is the first round with a per-cell confirmation allocation — forty fixtures
+at `n23a1`, twelve at the other seven, 124 cases against the flat panel's 96 —
+so its `contract.json` carries `confirmation_cases_per_cell` and
+`confirmation_allocation`. Rounds before it have neither key and are read
+exactly as before; the flat profile is what `prepare` produces when
+`--confirmation-cases` is absent.
+
+## Round 0020 is the replication
+
+`round-0020.tar.zst` (sha256 `944a4bd2d6e54fc95fc7bb108ef09a5a1319da45882cf5565c30a8d30f653c2f`,
+69,001 files) holds the round that reproduced round 0019's strict win on a
+second independent seed: `beats_rho_strict` on all eight cells in both metrics
+on both final stages, seed 2026092120, audit VERIFIED over 2,646 trial receipts
+and 452 source files.
+
+It is identical to round 0019 but for the seed, and carries the same
+`confirmation_cases_per_cell` allocation — forty fixtures at `n23a1`, twelve at
+the other seven.

@@ -73,8 +73,19 @@ whichever document has them, then measures the rate from `history.json`
 when neither snapshot carries one. `published_at` is kept from whichever
 source wrote more recently: a healthy Pages job on a frozen ingest feed
 must not inherit the feed's old stamp, or the banner blames the publisher
-for a dead feed. Past the stale threshold, `walking_slots` and `walk_rate`
-are cleared so a frozen document cannot read as "walking now".
+for a dead feed. Past the stale threshold, `walking_slots`,
+`off_weight_walking_slots` and `walk_rate` are cleared so a frozen document
+cannot read as "walking now".
+
+Two fields answer whether the points being added can take part in a
+collision at all, both from the ingest host: `work.off_weight_slots` /
+`off_weight_walking_slots` (slots whose iterations per point put them at a
+distinguished-point cutoff other than the campaign's; drawn as a warning on
+the GPU card and a row in the campaign table) and
+`ingest.duplicate_records_last_day` (records dropped because the store
+already held the point under the same seed, i.e. a walk re-walking seeds
+already walked; a row in the campaign table). Neither is folded into the
+headline counts.
 
 See [`scripts/rho_status/README.md`](../../scripts/rho_status/README.md)
 for secrets, the walker hop, and what is (not) published, and

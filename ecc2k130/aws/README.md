@@ -121,6 +121,14 @@ at 8.5 B/s. The nearest thing to a direct measurement agrees — doubling
 resident blocks per SM (minBlocks 4) cost 34%
 ([../BATCH-TUNING.md](../BATCH-TUNING.md)).
 
+On a host without that systemd unit — a RunPod MIG box, a rented 8×B200 —
+one process is one GPU. `ECC_ALL_GPUS=1 python3 aws/worker.py` (or
+`aws/start_all_gpus.sh`) starts one supervisor per `nvidia-smi -L` device.
+B200 and MIG names omit the 385,024-worker 6000 preset and let `autoThreads`
+fill the slice; putting the 188-SM grid on one of eight 24 GB MIGs is how a
+pod shows ~1/8 utilization. The client default is `--verify 0`: a cutoff-32
+CPU replay is a ~2^28-step scalar walk during which the GPU used to sit idle.
+
 ## How the pieces fit
 
 ```

@@ -100,7 +100,7 @@ group before it becomes a relation:
 - sat: the same system, CDCL with native parity rows;
 - wdsat: the same Semaev system emitted as Trimoska ANF and solved by an
   external WDSat binary (`--wdsat-binary PATH`). See
-  [`RESEARCH_WDSAT_IC_UNIFICATION.md`](../RESEARCH_WDSAT_IC_UNIFICATION.md).
+  [`RESEARCH_WDSAT_IC_UNIFICATION.md`](../../research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md).
   Requires a capacity-sufficient build of
   [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
   baseline builder is
@@ -617,6 +617,66 @@ series of all four, with per-stage timings, filter and Wiedemann
 statistics, and both ρ and IC verification counts. No rung crosses: the
 charged ρ/IC ratio is below 1 at every one. Read its
 `what_this_is_not` before quoting any number from it.
+
+## The boundary ledger: `ic boundary`
+
+    ./target/release/ic boundary --quick
+    ./target/release/ic boundary --regime koblitz --koblitz-degrees 23,31,41 --repeats 2 --out ledger.json
+    ./target/release/ic boundary --oracles --out docs/ic/runs/ic-boundary-ledger-YYYY-MM-DD.json
+
+`boundary` is the one-table-one-unit measurement `AGENTS.md` asks for,
+run over three regimes at once: a generic prime-field curve, a random
+binary curve, and a Koblitz curve.  Every variant of every regime solves
+the same planted logarithm end to end — factor base, relation
+collection, decomposition oracle, linear algebra, verification — and is
+priced in **group-addition equivalents per `√r`** against two
+boundaries: the generic floor `√(π/2A)` for the automorphisms `A` the
+curve offers, and a counted Pollard rho on the same instance in the same
+process (an r-adding walk with distinguished points, or the signed
+Frobenius walk on Koblitz curves).  Native counters — trials, pair-table
+probes, square roots, Artin–Schreier solves, pairs of the
+pairs-and-solve loop, multiply-subtracts of the elimination — are exact;
+the conversion to additions uses factors measured on the host at run
+time and recorded in the report, so a reader can re-convert.  The
+relation phase also carries its counting ceiling, `C(F+m−1, m)/#E`, and
+the measured yield against it.
+
+Variants: Semaev `S₃` roots, direct subtraction and meet in the middle
+(`m = 2, 3`) on prime curves; `S₄` pairs-and-solve and meet in the
+middle on random binary curves over the low-order subspace of dimension
+`⌈n/3⌉`; meet in the middle over signed-Frobenius-orbit columns, the
+same without the fold, and `S₄` pairs-and-solve over the invariant
+subspace on Koblitz curves.  Exponents `ops ∝ r^α` are fitted per phase
+over the ladder.  `--oracles` additionally prices the decomposition
+oracles that cannot finish a logarithm at these sizes — matrix-F4 (word
+XORs, exact), CDCL SAT (conflicts), enumeration, meet in the middle,
+`S₄` — per target on the Koblitz Semaev systems, with each system's
+unknowns, equations, degree, Macaulay profile and first fall degree.
+
+The frozen run (`runs/ic-boundary-ledger-2026-09-21.json`) and its
+reading are in
+[`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md);
+the report JSON carries the Markdown tables under `markdown`.  The
+scripts in `tools/` render a report into the note's tables
+(`boundary_ledger_tables.py`), the scoreboard's rows
+(`boundary_scoreboard_rows.py`) and the ledger twin's records
+(`boundary_ledger_update.py`), so a new run updates the three places
+`AGENTS.md` §7 requires without numbers being typed.
+
+## A benchmark corpus: `ic corpus`
+
+    ./target/release/ic corpus --degree 19 --dimension 6 --sat 5 --unsat 5 --dir corpus/n19l6
+
+Writes Weil-descended symmetrised Semaev `S₄` instances — the family of
+`mtrimoska/EC-Index-Calculus-Benchmarks` — for external solvers: DIMACS
+with native `x` parity lines, plain CNF, one GF(2) polynomial per line
+(`.anf`), a Magma script computing the Gröbner basis, and an `INFO`
+file with the target, the label, the planted witness and its SAT
+assignment.  Labels are certified: satisfiable instances plant a sum of
+three factor-base points and are confirmed by a model of this crate's
+solver; unsatisfiable ones are refuted by the complete pairs-and-solve
+search.  `docs/ic/corpus/` holds small generated sets with their
+reports; everything is deterministic in `--seed`.
 
 ## Random fixtures and custom parameters
 

@@ -1,0 +1,77 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "hypothesis": "The retained winner, byte-identical to runs/round-0017/source. It holds beats_rho_strict on all eight cells in both metrics on both stages; it is the baseline every promotion gate is measured against.",
+    "id": "incumbent",
+    "parent": "round-0017 retained winner (the orbits source, unchanged)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "69de47e30a267e93ab6da91903217062f2e2d3fbe9d6963e17700f77f33c3bd6"
+  },
+  {
+    "binary_relative": "source_candidates/block/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any solution or factor-base hash different from the incumbent's on the same fixture; an instruction ratio to the incumbent differing from 1.000 by more than 0.001 at n13a0, n17a1, n19a0 or n29a1, where the patch cannot change behaviour; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "The scan block's clamp ceiling lowered from 64 to 16. The rule's shape is unchanged and so is every cell whose own value is already at or below 16 -- n13a0, n17a1, n19a0 and n29a1, which therefore act as an A/A control carried inside a live arm. Measured over the round-0017 panel, the rule asks for a block past its own optimum wherever it exceeds 16: at n23a1 it asks for 102, which costs 1.040x what 16 costs. Predictions are in ROUND18-single-target.md.",
+    "id": "block",
+    "parent": "orbits + round18-block.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017",
+    "source_directory": "source_candidates/block/source",
+    "source_manifest_relative": "source_candidates/block/source-manifest.json",
+    "source_manifest_sha256": "154168a52ca88a3fee9cbb31dadc5857d2c086007f18eba7b991103ecb44412b"
+  },
+  {
+    "binary_relative": "source_candidates/column/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any solution or factor-base hash different from the incumbent's on the same fixture; a report that fails to declare column_convention: representative; a per-cell gain not ordered by the cofactor (n29a1 and n31a0 must be the two largest); failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "A column is the orbit representative itself rather than [h] of it. The representative is already in the order-r subgroup -- it is a Frobenius image of a point the sampler projected with [h] -- so the second cofactor multiplication scaled every column by a constant and the row and the descent carried a matching constant to compensate. Dropping all four leaves the same logarithms and saves K scalar multiplications by the cofactor per job, which is most of the base phase wherever h is large (12,646 at n29a1; 1,492 at n31a0). The report declares column_convention: representative and the checker, amended additively by round18-oracle-convention.patch, verifies under either convention.",
+    "id": "column",
+    "parent": "orbits + round18-column.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017",
+    "source_directory": "source_candidates/column/source",
+    "source_manifest_relative": "source_candidates/column/source-manifest.json",
+    "source_manifest_sha256": "1e2a07a07d1209b943450c060aa9c960b86b5be259de600577b86bca79a3f3ef"
+  },
+  {
+    "binary_relative": "source_candidates/both/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any solution or factor-base hash different from the incumbent's on the same fixture; an instruction ratio to the incumbent worse than either single-lever arm at any cell, which would mean the two levers interact where the mechanisms say they cannot; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "Both patches. The levers are disjoint -- one is the setup's cofactor multiplications, the other the collection's scan block -- so their instruction gains should compose almost exactly. Development measures 0.9621 panel-wide against the incumbent, against 0.9867 for block alone and 0.9757 for column alone.",
+    "id": "both",
+    "parent": "orbits + round18-block.patch + round18-column.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0017",
+    "source_directory": "source_candidates/both/source",
+    "source_manifest_relative": "source_candidates/both/source-manifest.json",
+    "source_manifest_sha256": "563eb460f29d9ef09a2adbde4770a466d3dc16566f5f08f1e6d8238325b104d4"
+  }
+]

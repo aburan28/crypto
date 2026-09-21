@@ -37,6 +37,7 @@ Environment (written to /etc/ecc2k130.env by bootstrap.sh):
                  (controlplane/, needs DATABASE_URL or RHO_DB_HOST); the
                  default keeps DynamoDB/S3 so an upgrade is one variable
   ECC_GPU        GPU index on this instance (default 0)
+  ECC_ALL_GPUS   1 -> start one supervisor per nvidia-smi device (RunPod MIG)
   ECC_ROOT       directory holding campaign.json, the client, per-GPU work dirs
   ECC_CLIENT     client binary (default ECC_ROOT/ecc2k130)
   ECC_LOCAL_STORE  directory that stands in for S3 and DynamoDB (rehearsals)
@@ -231,8 +232,12 @@ def gpuName(gpu):
 # campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
 # g6e L40S) auto-sizes; a checkpoint is only loadable into the same worker
 # count, so Ada must not resume a Blackwell slot and g6 must not resume g6e.
+# Datacenter Blackwell (B200) and Hopper are not that preset: B200.md keeps
+# workers automatic on 148 SMs, and a 24 GB MIG slice has even fewer.
 BLACKWELL_FAMILIES = frozenset({"g7", "g7e"})
 ADA_FAMILIES = frozenset({"g6", "g6e"})
+AUTO_FAMILIES = frozenset({"g4dn", "g5", "g5g", "b200", "b300", "h100", "h200",
+                           "a100", "mig"})
 LOCAL_FAMILIES = frozenset({"", "local", "cpu", None})
 
 
@@ -256,6 +261,20 @@ def gpuFamily(name="", instance_type=""):
     if it in ("g6", "g6e", "g7", "g7e", "g4dn", "g5", "g5g"):
         return it
     n = (name or "").lower()
+    # MIG slices are not the full part the campaign worker count was measured
+    # on; autoThreads reads the slice's SM count. Check before the parent SKU.
+    if "mig" in n:
+        return "mig"
+    if "b200" in n:
+        return "b200"
+    if "b300" in n:
+        return "b300"
+    if "h100" in n:
+        return "h100"
+    if "h200" in n:
+        return "h200"
+    if "a100" in n:
+        return "a100"
     if "l40s" in n:
         return "g6e"
     if "rtx pro 6000" in n or "rtx 6000" in n:
@@ -286,8 +305,13 @@ def slotFamilyCompatible(slot_family, worker_family):
 
 
 def usesCampaignWorkers(family):
-    """Ada and Turing omit --threads so packedengine.autoThreads sizes the grid."""
-    return family not in ADA_FAMILIES and family not in ("g4dn", "g5", "g5g")
+    """Only the measured RTX PRO 4500/6000 preset passes campaign.json workers.
+
+    Everything else omits --threads so packedengine.autoThreads sizes the grid
+    from the device's SM count. Putting 385,024 workers on a B200, a MIG
+    slice, or an unclassified GPU is how an 8-wide pod shows ~1/8 utilization.
+    """
+    return family in BLACKWELL_FAMILIES
 
 
 def frozenCampaignMoved(current, nxt):
@@ -859,6 +883,8 @@ class Worker:
             cmd += ["--threads", str(cpuThreadCount())]
         else:
             if c.get("packed", False):
+                # CUDA_VISIBLE_DEVICES is set to this GPU in runClient, so the
+                # process always sees the assigned device as ordinal 0.
                 cmd += ["--packed", "--device", "0"]
             if c.get("workers") and usesCampaignWorkers(self.gpuFamily):
                 cmd += ["--threads", str(int(c["workers"]))]
@@ -1539,8 +1565,52 @@ class Worker:
         return 0
 
 
+def visibleGpuCount():
+    """How many devices nvidia-smi currently exposes, or 0 if none."""
+    try:
+        r = subprocess.run(["nvidia-smi", "-L"], capture_output=True, text=True)
+    except OSError:
+        return 0
+    if r.returncode != 0:
+        return 0
+    return sum(1 for line in r.stdout.splitlines() if line.startswith("GPU "))
+
+
+def runAllGpus():
+    """One supervisor per visible GPU. RunPod MIG boxes need this; systemd
+    already starts worker@N on EC2, so this is the no-systemd path."""
+    n = visibleGpuCount()
+    if n <= 1:
+        return Worker().run()
+    log("ECC_ALL_GPUS=1: starting %d workers" % n)
+    procs = []
+    for gpu in range(n):
+        env = dict(os.environ)
+        env["ECC_GPU"] = str(gpu)
+        env.pop("ECC_ALL_GPUS", None)
+        procs.append(subprocess.Popen([sys.executable, "-u", os.path.abspath(__file__)], env=env))
+
+    def stop(_signo=None, _frame=None):
+        for proc in procs:
+            if proc.poll() is None:
+                try:
+                    proc.send_signal(signal.SIGTERM)
+                except OSError:
+                    pass
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    rc = 0
+    for proc in procs:
+        got = proc.wait()
+        if got:
+            rc = got
+    return rc
+
+
 if __name__ == "__main__":
     try:
+        if os.environ.get("ECC_ALL_GPUS", "").strip() == "1":
+            sys.exit(runAllGpus())
         sys.exit(Worker().run())
     except Exception as e:
         log("fatal: %s" % e)

@@ -7,6 +7,18 @@ including a browser copy of the toy:
 
 # ECC2K-130 and ECC2K-95
 
+**20.078 B complete scalar walk iterations/s median on one RTX PRO 6000
+Blackwell** with `make gpu-rtx-pro6000-20b`
+([ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md)): the table walk in one
+512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt from
+the step tag instead of stored, products inlined and the forward pass
+software-pipelined. 300/300 device reports re-walked, the same distinguished
+points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
+the tree's previous best configuration rebuilt in the same session on the same
+card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
+22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
+serial inversion (§7 there). The campaign default below is unchanged.
+
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
 [native carryless multiplication](NATIVE-CARRYLESS.md) and the
@@ -129,10 +141,11 @@ make gpu
 
 On rented hardware, `./run.sh` drives the same binary through Modal — `./run.sh
 validate` recovers planted logarithms on the GPU itself before anything is
-spent, then `CURVE=131 RUNID=N ./run.sh search` collects and `./run.sh merge`
-scans every corpus for the colliding pair and rewalks it. `CURVE=131` does not
-finish: `2^60.9` iterations is decades of GPU time, so it is collection, not a
-solve.
+spent, then `CURVE=131 RUNID=N ./run.sh search` (with `N` from
+`./run.sh next-run-id`, in the Modal range 8000-9999) collects and `./run.sh
+merge` scans every corpus for the colliding pair and rewalks it. `CURVE=131`
+does not finish: `2^60.9` iterations is decades of GPU time, so it is
+collection, not a solve.
 
 **Or run a [cairn](https://github.com/aburan28/cairn) node**, which pays for
 verified outputs rather than for claimed effort. Its
@@ -569,6 +582,7 @@ modal run modal_app.py::autotune      # sweep the build knobs on real hardware
 modal run modal_app.py::search --hours 4
 modal run modal_app.py::fanout --count 8 --hours 4
 modal run modal_app.py::merge         # collisions across every run
+modal run modal_app.py::next_run_id   # the next free campaign run id (curve 131)
 ```
 
 The GPU comes from `ECC_GPU`, read when the file is imported and baked into the
@@ -629,18 +643,81 @@ iterations is decades of GPU time, so treat it as collection, not as a solve.
 Two things follow from a run that never ends, and both are handled rather than
 left to bite:
 
-* The distinguished-point cutoff cannot be sized against the whole expected run,
-  or no walk ever reaches it. At the full-run choice for m=131 a four-hour pass
-  on a fast GPU reports about **two hundred points in total**. The cutoff is
-  therefore sized from the iterations the pass will actually do, measured by the
-  bench it already runs, which puts it back at a few reports per walk -- roughly
-  30M points and a gigabyte of corpus per pass. `DPW` overrides it.
+* The distinguished-point cutoff is the campaign's, `dpWeight` 32 in
+  `aws/campaign.json`, and a campaign run refuses any other (`-1` means that
+  one, not the run-sized guess the other curves get). Walks stop at their own
+  distinguished point, so a walk at weight 34 that meets a weight-32 walk is
+  recorded about 12% of the time and one at 35 about 4%: points collected at
+  another cutoff join the store and the rate, and rarely a collision.
+  At weight 32 a four-hour pass on an RTX PRO 6000 reports about 600k points.
+  A run that wants a looser cutoff to see points quickly is an experiment,
+  not collection: pass `--off-campaign` and it may use any weight and run id,
+  and writes under `/data/offcampaign/`, which `modal_sync.py` never uploads.
 * The corpus outgrows memory. Every pass reloads it to catch collisions in
   process, and a store entry costs far more than the 32 bytes it occupies on
   disk, so an uncapped reload is what eventually ends a long collection run.
   `LOADMAX` (default 50M points) caps it, newest file first. What that gives up
   is finding a collision in process; the corpus is still complete on disk and
   `./run.sh merge` still finds it there.
+
+### Collecting for the campaign from Modal
+
+Points from Modal join the AWS fleet's store through `modal_sync.py`, which
+uploads run `r` as campaign slot `90000 + r`. For those points to be able to
+take part in a collision two things have to hold, and both are enforced at
+launch (`modal_app.py`), at upload (`modal_sync.py`) and on the page
+(`aws/dp_ingest.py`), because each was violated once and neither showed:
+
+1. **The run id is not one an AWS slot has used.** Seeds are
+   `(runId << 48) | (walkIndex << 16)` and the fleet's slot `s` runs as run id
+   `s + 1`, so Modal run `r` walks AWS slot `r - 1`'s trails step for step,
+   and every point it reports is one the store already holds under the same
+   seed: dropped by `ON CONFLICT`, correctly not a collision, and invisible.
+   Runs 1-4 did this against slots 0-3 on 2026-09-19/20; 813k of run 3's 912k
+   records were byte-identical to slot 2's, and 100% of its seeds had already
+   been walked. Campaign run ids therefore come from **8000-9999**, which no
+   AWS slot can reach (`90000 + r` must stay a five-digit slot), and
+   `modal_sync.py` refuses an id for which the bucket holds a checkpoint or a
+   dp object of slot `r - 1`.
+2. **The cutoff is the campaign's.** See above. `modal_sync.py` reads the
+   ratio of a run's checkpointed iterations to its records and refuses a run
+   that is not near `2^28.41` per point once it has 50k records; the ingest
+   host flags the same ratio per slot on the dashboard (`off_weight_slots`),
+   and counts the records it dropped as re-reports (`duplicate_records`).
+
+The procedure, once:
+
+```
+export ECC_GPU=RTX-PRO-6000 CURVE=131
+./run.sh next-run-id                 # e.g. {"runId": 8000, "used": [...], ...}
+RUNID=8000 COUNT=4 PASSES=0 ./run.sh fanout      # run ids 8000-8003, until stopped
+```
+
+`run.sh` refuses `CURVE=131` without a `RUNID` in range; `fanout` takes it as
+the base of `COUNT` consecutive ids, and every pass of the loop launches the
+same ids so the checkpoints resume. Two operators must not both start from
+the same `next-run-id` answer at the same moment; the volume is the only
+arbiter, and it is read, not locked.
+
+Retiring the runs that violated the rules (the state on 2026-09-21):
+
+| Modal run | slot | fault | what to do |
+|:--|:--|:--|:--|
+| 3, 4 | 90003, 90004 | replay of AWS slots 2 and 3, which are 15x further along | stop; every point so far is a re-report, and it will be for days |
+| 1, 2 | 90001, 90002 | replay of AWS slots 0 and 1 for their first 28M steps; new coverage since | stop; keeping them means AWS can never resume slots 0/1 without re-walking Modal's work |
+| 4242-4245 | 94242-94245 | weight 34 (4243-4245) and 35 (4242) against the campaign's 32 | stop; about 88% and 96% of their meetings with campaign walks go unrecorded |
+
+`modal app list` names the ephemeral apps; `modal app stop <app id>` sends the
+container SIGTERM, so the client checkpoints on the way out. Then relaunch as
+above. The old checkpoint headers under `ckpt/slot-9000{1..4}/` and
+`ckpt/slot-9424{2..5}/` stay in the bucket: they age out of `walking_slots`
+after 30 minutes, and their iterations remain in the campaign's total, where
+runs 3 and 4's `2^49.2` duplicated steps are about 1% of it. Deleting those
+two prefixes would correct that total; it is an accounting choice, recorded
+here rather than made. The re-reports already dropped are not counted
+retroactively -- `duplicate_records` starts when the ingest host is redeployed
+with this `dp_ingest.py` (`aws/ingest_host.sh` or `aws/ingest_lambda.sh`,
+whichever runs it).
 
 Every pass is launched from the same variables, because resume only works when
 the shape matches: the checkpoint header records curve, run id, worker count and

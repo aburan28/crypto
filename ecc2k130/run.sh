@@ -12,6 +12,7 @@
 #   ./run.sh sync-loop           keep syncing every Modal run until stopped
 #   ./run.sh ensure-sync         start sync-loop in tmux when it is not running
 #   ./run.sh ingest              copy s3://bucket/dp/ into Postgres (any host)
+#   ./run.sh next-run-id         the next free campaign run id on the volume
 #
 # A container has a finite life, so a real search is a loop: each pass runs for
 # HOURS, is stopped with SIGTERM so the client checkpoints, and the next pass
@@ -27,6 +28,11 @@
 #
 # CURVE=131 selects the audited RTX PRO 6000 packed preset (campaign.json):
 # batch 16, 256 threads, 385024 workers, dp weight 32, ~14 B iterations/s.
+# On that curve RUNID is required and must come from the Modal range
+# (8000-9999): a run id an AWS slot has used walks that slot's seeds again,
+# and a cutoff other than the campaign's cannot collide with it.  Both are
+# refused by modal_app.py and by modal_sync.py; `./run.sh next-run-id` picks
+# one, and fanout takes RUNID as the base of COUNT consecutive ids.
 
 set -euo pipefail
 
@@ -34,7 +40,7 @@ CURVE=${CURVE:-97}          # 97 = ECC2K-95 (solved 1998, answer known); 131 = E
 HOURS=${HOURS:-4}           # per pass; the loop supplies the total
 PASSES=${PASSES:-6}         # 0 = until solved
 GPU=${ECC_GPU:-RTX-PRO-6000}
-RUNID=${RUNID:-1}
+RUNID=${RUNID:-}            # required on curve 131 (see above); 1 elsewhere
 COUNT=${COUNT:-4}           # fanout width
 CHECKPOINT_EVERY=${CHECKPOINT_EVERY:-60}  # full walk-state file; status uses a 15s header
 SYNC_INTERVAL=${SYNC_INTERVAL:-15}        # volume → S3, so the page sees the header
@@ -89,11 +95,29 @@ cd "$(dirname "$0")"
 
 cmd=${1:-search}
 case "$cmd" in
-    validate|prewarm|bench|search|fanout|merge|sync|sync-loop|ensure-sync|ingest) ;;
-    *) sed -n '3,11p' "$0"; exit 1 ;;
+    validate|prewarm|bench|search|fanout|merge|sync|sync-loop|ensure-sync|ingest|next-run-id) ;;
+    *) sed -n '3,15p' "$0"; exit 1 ;;
 esac
 
 command -v modal >/dev/null || { echo "modal CLI not found: pip install -U modal" >&2; exit 1; }
+
+# The campaign curve refuses an implicit run id: every pass of the loop below
+# must launch the same one, so it has to be chosen once, here, by the operator.
+require_run_id() {
+    if [ "$CURVE" = 131 ]; then
+        if [ -z "$RUNID" ]; then
+            echo "CURVE=131 needs RUNID in 8000-9999 (./run.sh next-run-id suggests one)" >&2
+            exit 1
+        fi
+        if [ "$RUNID" -lt 8000 ] || [ "$RUNID" -gt 9999 ]; then
+            echo "RUNID=$RUNID is outside the Modal campaign range 8000-9999: below it the id" >&2
+            echo "belongs to AWS slot $((RUNID - 1)) and the run re-walks that slot's seeds" >&2
+            exit 1
+        fi
+    else
+        RUNID=${RUNID:-1}
+    fi
+}
 
 packed_flag=
 if [ "$PACKED" = 1 ]; then
@@ -127,7 +151,12 @@ bench)
     modal run modal_app.py::bench $build_shape --steps 1024 --launches 32 --workers "${WORKERS:-0}"
     ;;
 
+next-run-id)
+    modal run modal_app.py::next_run_id --curve "$CURVE"
+    ;;
+
 search)
+    require_run_id
     "$0" ensure-sync || true
     if [ "${PREWARM:-1}" != 0 ]; then
         prewarm_modal
@@ -168,19 +197,20 @@ search)
     ;;
 
 fanout)
-    # Independent searchers, each with its own run id so their seed spaces stay
-    # disjoint, each loading the others' corpora so a cross-worker collision is
-    # caught as it happens rather than in the merge afterwards.
+    # Independent searchers on run ids RUNID .. RUNID+COUNT-1, so their seed
+    # spaces stay disjoint, each loading the others' corpora so a cross-worker
+    # collision is caught as it happens rather than in the merge afterwards.
+    require_run_id
     "$0" ensure-sync || true
     if [ "${PREWARM:-1}" != 0 ]; then
         prewarm_modal
     fi
-    echo "curve $CURVE on $COUNT x $GPU: $PASSES passes of ${HOURS}h"
+    echo "curve $CURVE on $COUNT x $GPU: $PASSES passes of ${HOURS}h, run ids $RUNID-$((RUNID + COUNT - 1))"
     pass=1
     while [ "$PASSES" -eq 0 ] || [ "$pass" -le "$PASSES" ]; do
         echo "=== pass $pass ($(date -u +%H:%M:%SZ)) ==="
         modal run modal_app.py::fanout $shape --hours "$HOURS" --count "$COUNT" \
-            --checkpoint-every "$CHECKPOINT_EVERY" || \
+            --run-id-base "$RUNID" --checkpoint-every "$CHECKPOINT_EVERY" || \
             echo "pass $pass failed; checkpoints survive, retrying" >&2
         pass=$((pass + 1))
     done
@@ -191,6 +221,7 @@ merge)
     ;;
 
 sync)
+    require_run_id
     python3 modal_sync.py --curve "$CURVE" --run-id "$RUNID" ${ECC_BUCKET:+--bucket "$ECC_BUCKET"}
     ;;
 
