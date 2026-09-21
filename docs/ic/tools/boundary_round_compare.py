@@ -203,6 +203,31 @@ def reproduction_check(new, old):
             checks.append(row)
     return checks
 
+def paired_log_summary(ratios):
+    """Geometric mean of the paired ratios and a 95% interval for it.
+
+    The pairing is by repeat, so each ratio is one target measured both
+    ways, and the spread between repeats is the cycle-closing spread of
+    §11.4 rather than anything about the code.  A ratio is a ratio, so
+    the average that means anything is the geometric one, and the
+    interval is the usual t-interval on the logs, exponentiated.  With
+    the spreads on these rows an interval that straddles one says the
+    round did not move that row at this many repeats — which is a
+    result, and is reported as one.
+    """
+    xs = [math.log(x) for x in ratios if x > 0]
+    n = len(xs)
+    if n == 0:
+        return None, None, None
+    mu = sum(xs) / n
+    if n < 2:
+        return math.exp(mu), None, None
+    var = sum((x - mu) ** 2 for x in xs) / (n - 1)
+    # Student t, two-sided 95%, for the small n these runs use.
+    t = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365}.get(n, 1.96)
+    half = t * math.sqrt(var / n)
+    return math.exp(mu), math.exp(mu - half), math.exp(mu + half)
+
 def compare_across_rounds(new, old):
     """The same row, the same instance, the previous round's code.
 
@@ -231,6 +256,7 @@ def compare_across_rounds(new, old):
             base_runs = prev_rows[name]
             k = min(len(runs), len(base_runs))
             paired = [base_runs[i]["total_gae"] / runs[i]["total_gae"] for i in range(k)]
+            gm, lo, hi = paired_log_summary(paired)
             # The phase the round's lever lives in, so a ratio that moves
             # can be read against the phase that moved it.
             phase = lambda rs, p: mean([r[p]["gae"] for r in rs])
@@ -248,6 +274,10 @@ def compare_across_rounds(new, old):
                 ("speedup_mean", round(mean(paired), 4)),
                 ("speedup_min", round(min(paired), 4)),
                 ("speedup_max", round(max(paired), 4)),
+                ("speedup_geomean", None if gm is None else round(gm, 4)),
+                ("speedup_ci95_low", None if lo is None else round(lo, 4)),
+                ("speedup_ci95_high", None if hi is None else round(hi, 4)),
+                ("moved_at_95", None if lo is None else bool(lo > 1.0 or hi < 1.0)),
                 ("S_previous_round", round(mean([r["s"] for r in base_runs]), 4)),
                 ("S_this_round", round(mean([r["s"] for r in runs]), 4)),
                 ("S_over_rho_previous_round", round(mean([r["s"] for r in base_runs]) / inst["rho_s_mean"], 4)),
@@ -280,14 +310,15 @@ if holdout:
 # ── Markdown ──
 if across_rows:
     print("**Against the previous round, same row, same instance, same seed.**\n")
-    print("| regime | instance | log2 r | variant | m | |F| | speedup per repeat | speedup mean | min | max | S before → after | vs rho after | relations before → after | trials before → after | ok |")
-    print("|:--|:--|--:|:--|--:|--:|:--|--:|--:|--:|:--|--:|:--|:--|:--|")
+    print("| regime | instance | log2 r | variant | m | |F| | repeats | speedup geomean | 95% interval | min | max | moved | S before → after | vs rho after | trials before → after | ok |")
+    print("|:--|:--|--:|:--|--:|--:|--:|--:|:--|--:|--:|:--|:--|--:|:--|:--|")
     for c in across_rows:
+        ci = "—" if c["speedup_ci95_low"] is None else f"{f(c['speedup_ci95_low'])} – {f(c['speedup_ci95_high'])}"
+        moved = "—" if c["moved_at_95"] is None else ("yes" if c["moved_at_95"] else "no")
         print(
             f"| {c['regime']} | {c['instance']} | {c['log2_r']:.1f} | {c['variant']} | {c['m']} | {c['signed_points']:,} "
-            f"| {', '.join(f(x) for x in c['speedup_per_repeat'])} | {f(c['speedup_mean'])} | {f(c['speedup_min'])} | {f(c['speedup_max'])} "
+            f"| {c['repeats_paired']} | {f(c['speedup_geomean'])} | {ci} | {f(c['speedup_min'])} | {f(c['speedup_max'])} | {moved} "
             f"| {f(c['S_previous_round'])} → {f(c['S_this_round'])} | {f(c['S_over_rho_this_round'])}× "
-            f"| {f(c['relations_gae_previous_round'])} → {f(c['relations_gae_this_round'])} "
             f"| {c['trials_previous_round']:,.0f} → {c['trials_this_round']:,.0f} "
             f"| {'✓' if c['verified_this_round'] and c['verified_previous_round'] else '✗'} |"
         )
