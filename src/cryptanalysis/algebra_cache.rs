@@ -71,7 +71,15 @@ pub struct AlgebraCache {
     local: VecDeque<(String, LocalEntry)>,
     local_bytes: usize,
     local_limit: usize,
+    /// Largest envelope Redis will be asked to hold. A WIRE limit: `GETRANGE`
+    /// bounds what a read can pull back, so a value past it could not be read
+    /// whole even if it were written. It says nothing about what this process
+    /// can hold.
     max_value: usize,
+    /// Warn once per layer rather than once per artifact, so a relation search
+    /// that keeps building oversized templates says so without flooding.
+    warned_oversize: [bool; 3],
+    strict_oversize: bool,
     pub stats: [CacheStats; 3],
     #[cfg(feature = "redis-cache")]
     client: Option<redis::Client>,
@@ -105,6 +113,8 @@ impl AlgebraCache {
             local_bytes: 0,
             local_limit: bytes,
             max_value: 4 * 1024 * 1024,
+            warned_oversize: [false; 3],
+            strict_oversize: false,
             stats: Default::default(),
             #[cfg(feature = "redis-cache")]
             client: None,
@@ -121,8 +131,18 @@ impl AlgebraCache {
         self.client = Some(redis::Client::open(url).map_err(|_| "invalid Redis URL")?);
         Ok(self)
     }
+    /// Make an artifact that cannot be shared a hard failure instead of a
+    /// warning. Off by default and deliberately so: a cache must not be able
+    /// to kill a run over a sizing problem, and the computation is correct
+    /// either way. Turn it on where silence is unacceptable -- a CI job
+    /// asserting that no artifact has outgrown the wire.
+    pub fn strict_oversize(mut self, on: bool) -> Self {
+        self.strict_oversize = on;
+        self
+    }
     fn from_env() -> Self {
         let mut c = Self::local(32 * 1024 * 1024);
+        c.strict_oversize = std::env::var("IC_CACHE_STRICT_OVERSIZE").as_deref() == Ok("1");
         c.enabled = [
             "IC_PREPROCESS_CACHE",
             "IC_REDUCTION_CACHE",
@@ -234,6 +254,32 @@ impl AlgebraCache {
             }
         }
     }
+    /// An artifact past the wire cap is a performance cliff, and it used to be
+    /// an invisible one: the value silently stopped being shared and the only
+    /// trace was a counter nobody reads. Say it once per layer, or fail hard
+    /// under `strict_oversize`.
+    fn report_oversize(&mut self, i: usize, layer: Layer, len: usize) {
+        if self.strict_oversize {
+            panic!(
+                "algebra cache: {} artifact is {len} bytes, past the {} byte Redis \
+                 value cap, so it cannot be shared between processes. Reduce the \
+                 parameters or raise the cap; unset IC_CACHE_STRICT_OVERSIZE to \
+                 downgrade this to a warning.",
+                layer.name(),
+                self.max_value,
+            );
+        }
+        if !self.warned_oversize[i] {
+            self.warned_oversize[i] = true;
+            eprintln!(
+                "algebra cache: {} artifact is {len} bytes, past the {} byte Redis \
+                 value cap; holding it in this process only, not sharing it. \
+                 Later occurrences on this layer are counted in stats().oversized.",
+                layer.name(),
+                self.max_value,
+            );
+        }
+    }
     /// Cache only successful computations; None is never an UNSAT certificate.
     ///
     /// `T: Clone + Send + 'static` is what the in-process layer costs: it holds
@@ -327,10 +373,18 @@ impl AlgebraCache {
                         );
                     }
                     self.stats[i].bytes_written += bytes.len() as u64;
-                    self.retain(key, bytes.len(), Box::new(value.clone()));
                 } else {
+                    // Too big for the WIRE, which is all `max_value` governs.
+                    // This used to gate the in-process layer too, so crossing
+                    // the cap dropped both tiers at once -- and it drops them
+                    // for exactly the artifacts that cost the most to rebuild,
+                    // since size and build cost move together. The local layer
+                    // has its own bound in `local_limit` and holds a decoded
+                    // value rather than an envelope, so it takes this one.
                     self.stats[i].oversized += 1;
+                    self.report_oversize(i, layer, bytes.len());
                 }
+                self.retain(key, bytes.len(), Box::new(value.clone()));
             }
         }
         self.stats[i].overhead_ns += start.elapsed().as_nanos() as u64;
@@ -482,6 +536,66 @@ mod tests {
         assert_eq!(c.stats[0].local_hits, 1);
         assert_eq!(hit, made, "a local hit re-parsed instead of cloning");
     }
+    /// A value too big for the wire is still worth holding in process. It used
+    /// to be dropped by both tiers at once, which lost exactly the artifacts
+    /// that cost the most to rebuild.
+    #[test]
+    fn an_oversized_artifact_is_still_served_locally() {
+        let mut c = AlgebraCache::local(64 * 1024 * 1024);
+        c.max_value = 512;
+        let big = "x".repeat(4096);
+        assert_eq!(
+            c.memoize(Layer::Preprocessing, b"big", || Some(big.clone())),
+            Some(big.clone())
+        );
+        assert_eq!(c.stats[0].oversized, 1, "it must be counted as oversized");
+        assert_eq!(
+            c.stats[0].bytes_written, 0,
+            "and must not be claimed as written to the wire"
+        );
+        assert_eq!(
+            c.memoize(Layer::Preprocessing, b"big", || panic!("must hit locally")),
+            Some(big)
+        );
+        assert_eq!(c.stats[0].local_hits, 1);
+    }
+
+    /// The warning is once per layer, not once per artifact: a relation search
+    /// that keeps building oversized templates should say so without flooding.
+    #[test]
+    fn the_oversize_warning_is_once_per_layer() {
+        let mut c = AlgebraCache::local(64 * 1024 * 1024);
+        c.max_value = 512;
+        let big = "x".repeat(4096);
+        for n in 0..5u8 {
+            c.memoize(Layer::Preprocessing, &[n], || Some(big.clone()));
+        }
+        assert!(c.warned_oversize[0]);
+        assert!(!c.warned_oversize[1], "another layer warns on its own");
+        assert_eq!(c.stats[0].oversized, 5, "every one is still counted");
+    }
+
+    /// Opt-in, for a caller that would rather stop than quietly lose sharing.
+    #[test]
+    #[should_panic(expected = "cannot be shared between processes")]
+    fn strict_oversize_is_fatal_when_asked_for() {
+        let mut c = AlgebraCache::local(64 * 1024 * 1024).strict_oversize(true);
+        c.max_value = 512;
+        c.memoize(Layer::Preprocessing, b"big", || Some("x".repeat(4096)));
+    }
+
+    /// And off by default: a cache must not be able to kill a run over sizing.
+    #[test]
+    fn oversize_is_not_fatal_by_default() {
+        let mut c = AlgebraCache::local(64 * 1024 * 1024);
+        c.max_value = 512;
+        let big = "x".repeat(4096);
+        assert_eq!(
+            c.memoize(Layer::Preprocessing, b"big", || Some(big.clone())),
+            Some(big)
+        );
+    }
+
     #[test]
     #[cfg(feature = "redis-cache")]
     #[ignore = "needs IC_TEST_REDIS_URL pointing to a dedicated test Redis"]
