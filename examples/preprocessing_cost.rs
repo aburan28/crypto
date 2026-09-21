@@ -41,20 +41,22 @@
 //!     IC_TEST_REDIS_URL=redis://127.0.0.1:6399/0 \
 //!       cargo run --release --features redis-cache --example preprocessing_cost
 //!
-//! Measured 2026-09-21, 4-core x86_64 container, rustc 1.94.1, release, against
-//! a loopback Redis 7. Scoped to these parameters on this machine:
+//! Measured 2026-09-21, 4-core x86_64 container, rustc 1.90.0, release, against
+//! a loopback Redis 7.0. Scoped to these parameters on this machine:
 //!
-//!   * build spans 74 us (n=9) to 9.1 ms (n=61) over the whole feasible space.
+//!   * build spans 45 us (n=9) to 6.2 ms (n=61) over the whole feasible space.
 //!     Nothing here is expensive in absolute terms.
-//!   * A hit is only 1.15x-3.3x cheaper than a rebuild: the in-process layer
-//!     stores bytes, so even a local hit re-parses the JSON.
-//!   * Against loopback Redis a remote hit was 1.92x MORE expensive than
-//!     rebuilding at n=9/ell=9, break-even at n=41/ell=7, and about 2x cheaper
-//!     only at n=61/ell=1. Cross-AZ is strictly worse than loopback.
+//!   * A hit is at most 3.2x cheaper than a rebuild, and about break-even at
+//!     n=9: the in-process layer stores bytes, so even a local hit re-parses
+//!     the JSON.
+//!   * Against loopback Redis, over a held connection, a remote hit costs 60 us
+//!     (82 KB) to 520 us (990 KB) more than a local one. That makes it 1.10x
+//!     MORE expensive than rebuilding at n=9/ell=9, 0.85x at n=41/ell=7 and
+//!     0.42x at n=61/ell=1. Cross-AZ is strictly worse than loopback.
 //!   * The largest artifact stored is 1.92 MB against a 4 MB `max_value`.
 //!
 //! So a durable tier under Redis is not warranted for this layer: an S3 GET is
-//! tens of milliseconds and the whole build is at most 9.1 ms. The layer where
+//! tens of milliseconds and the whole build is at most 6.2 ms. The layer where
 //! an expensive artifact does live is `Parameterized`, measured by
 //! `gb_probe.rs`, and it is off the relation-search path.
 
@@ -192,14 +194,10 @@ fn redis_round_trip(n: u32, ell: usize, m: usize, url: &str) -> Option<(u128, u1
     let key = template_key(&basis, &b, m, &st);
     let build = || DecompositionTemplate::build(&basis, &b, m, &st);
 
-    let fresh = || {
-        AlgebraCache::local(256 * 1024 * 1024)
-            .with_redis(url)
-            .ok()
-    };
-
     // Miss: builds, encodes, and writes through to Redis.
-    let mut c = fresh()?;
+    let mut c = AlgebraCache::local(256 * 1024 * 1024)
+        .with_redis(url)
+        .ok()?;
     let miss = {
         let start = Instant::now();
         black_box(c.memoize::<DecompositionTemplate>(Layer::Preprocessing, &key, build));
@@ -214,14 +212,20 @@ fn redis_round_trip(n: u32, ell: usize, m: usize, url: &str) -> Option<(u128, u1
         local.push(start.elapsed().as_nanos());
     }
 
-    // Redis hit: a fresh process-equivalent, empty local layer, value in Redis.
+    // Redis hit: empty local layer, value in Redis. A zero-byte local layer
+    // retains nothing, so every lookup on this instance is served by Redis, and
+    // the one untimed lookup opens the connection `remote` makes lazily -- the
+    // production cache is thread-local and keeps it, so a steady-state hit is
+    // GETRANGE plus decode, not a handshake.
+    let mut cold = AlgebraCache::local(0).with_redis(url).ok()?;
+    black_box(cold.memoize::<DecompositionTemplate>(Layer::Preprocessing, &key, build));
     let mut remote = Vec::new();
     for _ in 0..REPS {
-        let mut cold = fresh()?;
+        let before = cold.stats[0].redis_hits;
         let start = Instant::now();
         black_box(cold.memoize::<DecompositionTemplate>(Layer::Preprocessing, &key, build));
         remote.push(start.elapsed().as_nanos());
-        if cold.stats[0].redis_hits == 0 {
+        if cold.stats[0].redis_hits == before {
             return None; // not actually served from Redis; do not report it
         }
     }
@@ -233,13 +237,15 @@ fn main() {
     let json = std::env::args().any(|a| a == "--json");
 
     // m = 3 everywhere in docs/ic/params; n from the same files. n_vars is
-    // m*ell + (m-2)*n and must stay within MAX_VARS, which is what bounds ell.
+    // m*ell + (m-2)*n and must stay within MAX_VARS, which is what bounds ell
+    // -- except at n=9, where the field does: a basis of F_{2^n} has at most n
+    // elements, and `fe(1 << k, n)` masks anything at or above bit n to zero.
     let degrees = [9u32, 31, 37, 39, 41, 53, 61];
     let mut rows = Vec::new();
 
     for &n in &degrees {
         let m = 3usize;
-        let max_ell = (MAX_VARS.saturating_sub(n as usize)) / m;
+        let max_ell = ((MAX_VARS.saturating_sub(n as usize)) / m).min(n as usize);
         if max_ell == 0 {
             continue;
         }
