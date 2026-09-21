@@ -262,6 +262,36 @@ class BuildTests(unittest.TestCase):
         self.assertIn('id="workers-note"', dashboard)
         self.assertIn("Lifetime distinguished-point contributors", dashboard)
 
+    def test_skip_link_is_clipped_until_keyboard_focus(self):
+        # left:-9999px parked "Skip to status" in a horizontal scrollport
+        # iOS could pan to, and :focus (not :focus-visible) un-hid it when a
+        # WebView focused the first link. The hash also has to land: without
+        # tabindex on #main the jump is a no-op on iOS.
+        for rel, label in (
+            ("status/index.html", "Skip to status"),
+            ("status/how.html", "Skip to explanation"),
+            ("index.html", "Skip to content"),
+        ):
+            page = read(os.path.join(self.out, rel))
+            self.assertIn(label, page, rel)
+            self.assertIn('href="#main"', page, rel)
+            self.assertIn('<main id="main" tabindex="-1">', page, rel)
+        for rel in ("status/style.css", "assets/site.css"):
+            css = read(os.path.join(self.out, rel))
+            self.assertNotIn("left: -9999px", css, rel)
+            self.assertIn(".skip:focus-visible", css, rel)
+            self.assertIn("clip-path: inset(50%)", css, rel)
+            self.assertNotIn(".skip:focus {", css, rel)
+
+    def test_dashboard_does_not_claim_zero_workers_on_the_ingest_feed(self):
+        # The live document is dp_ingest.py; it has no per_worker. Treating
+        # only source === "ingest-status-feed" as ingest-only made the table
+        # say "No workers have reported points" on 272M DPs.
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn('indexOf("dp_ingest")', dashboard)
+        self.assertIn("ingest-status-feed", dashboard)
+        self.assertIn("Per-worker counts need the walker hop", dashboard)
+
     def test_pages_prefer_the_counted_iteration_total_over_the_derived_one(self):
         # The derived total is the point count times the interval for
         # HW(x) <= 34, and this campaign distinguishes at HW(x) <= 32, so the
