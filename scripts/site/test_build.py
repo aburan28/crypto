@@ -292,6 +292,10 @@ class BuildTests(unittest.TestCase):
         self.assertIn("ingest-status-feed", dashboard)
         self.assertIn("Number(status && status.dps) > 0", dashboard)
         self.assertIn("Per-worker counts need the walker hop", dashboard)
+        css = read(os.path.join(self.out, "status", "style.css"))
+        empty = css[css.index("td.empty"):]
+        empty = empty[:empty.index("}")]
+        self.assertIn("white-space: normal", empty)
 
     def test_pages_prefer_the_counted_iteration_total_over_the_derived_one(self):
         # The derived total is the point count times the interval for
