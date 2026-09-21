@@ -1369,32 +1369,48 @@ instead of thirty-two scalar multiplications, and `walk_jumps` is 32 for
 a whole run however often it restarts, which is what the test
 `a_walk_restart_costs_one_addition_and_still_does_not_merge` asserts.
 
-**The first index map was wrong, and the ledger caught it.**  The map
+**A hypothesis about the index map, tested and not supported.**  The map
 was at first a *rotation*: segment `j` selected `jump[(h(P) + j) mod 16]`.
 That gives consecutive segments different step functions, but only
 sixteen distinct ones in total, so after enough restarts two segments
-share one and merge exactly as §10.2's shared jump table let them.  The
-guard still catches the repeated target — nothing false enters the
-matrix, and `repeated_column_rows` is zero on every row of every run in
-this round — but every step that reached it is wasted, and the waste
-showed up in counters the round was already reporting.  Against the
-Round-2 holdout on the same seeds:
+share one and can merge as §10.2's shared jump table let them.  Some
+Koblitz rows did move the wrong way under it — at `n = 37` the ladder's
+guard-forced restarts went from 18 to 129 and the row got `1.35×` worse,
+and on the holdout its walk steps per relation went `14,359 → 21,517` —
+so the round replaced the rotation with a **permutation**: Fisher–Yates
+over the sixteen indices at each restart, `16!` index maps instead of
+`16`, two colliding segments diverging again within a step or two
+because two random permutations agree on about one index in sixteen.
+Shuffling sixteen entries costs no group operation, so the restart stays
+one addition.
 
-| instance | row | walk steps per relation | guard-forced restarts | `S` |
-|:--|:--|:--|:--|:--|
-| `K_0 / GF(2^37)` | `mitm_m2_…_frobfold_walk` | 14,359 → 21,517 | 14 → 26 | 16.95 → 19.08 |
-| `K_0 / GF(2^39)` | `mitm_m2_…_frobfold_walk` | 5,653 → 11,587 | 20 → 122 | 29.03 → 35.75 |
+**Then the hypothesis was checked against the counter that measures it
+directly, and it failed.**  A merge shows up as a run of targets the
+guard has already seen, and `repeated_targets_skipped` counts exactly
+those.  Per thousand trials, on the holdout's two-summand walk rows:
 
-and on the ladder, at `n = 37`, the guard-forced restarts went from 18
-to 129 while the row got `1.35×` worse.  Those were the rows of the
-round whose total cost moved the wrong way.
+| instance | Round 2, fresh jumps | rotation | permutation |
+|:--|--:|--:|--:|
+| `generated-22bit` | 0.47 | 0.45 | 0.51 |
+| `generated-24bit` | 0.76 | 0.45 | 0.46 |
+| `random-binary-n24` | 2.92 | 4.28 | 3.61 |
+| `random-binary-n27` | 1.21 | 0.76 | 0.66 |
+| `K_0 / GF(2^37)` | 0.19 | 0.21 | 0.55 |
+| `K_0 / GF(2^39)` | 0.38 | 0.99 | 1.31 |
+| `K_0 / GF(2^41)` | 0.00 | 0.01 | 0.01 |
 
-The fix is a **permutation**, not a rotation: a restart runs
-Fisher–Yates over the sixteen indices, so there are `16!` index maps
-instead of `16`, and two segments that do collide diverge again within a
-step or two because two random permutations agree on about one index in
-sixteen.  Shuffling sixteen entries costs no group operation, so the
-restart is still one addition.
+There is no systematic difference between sixteen step functions per
+run, `16!` of them, and a fresh sixteen at every restart.  The rows that
+moved the wrong way under the rotation moved within their own spread
+(§11.4), not because their segments merged.
+
+So the permutation **is not a measured improvement and is not reported
+as one.**  It is retained because it removes a mechanism the ledger has
+already been bitten by once, at a cost of zero group operations, and
+because it is the version that shipped; the rotation runs stay frozen
+beside it as what the comparison actually showed.  `repeated_column_rows`
+and `pinned_by_repeated_row` are zero on every row of every run under
+both.
 
 The round's second lever gives the prime and binary regimes the
 `_balanced` row the Koblitz regime got in §10.1, sized by the law of
