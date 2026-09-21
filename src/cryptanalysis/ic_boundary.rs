@@ -2393,12 +2393,22 @@ pub enum TargetSource {
     Random,
     /// An r-adding walk `R ← R + J_{h(R)}` over 16 jumps
     /// `J_j = [a_j]G + [b_j]Q` with the coefficients tracked modulo `r`:
-    /// one addition per target after the jumps are set up.  A segment
-    /// guard (one hash insert per step, counted and priced as a lookup)
-    /// restarts the walk from a fresh random point when it meets itself,
-    /// and after `4√r + 2^16` steps regardless, so a target is never
-    /// presented twice within a segment.
+    /// one addition per target after the jumps are set up.  A guard (one
+    /// hash insert per step, counted and priced as a lookup) restarts the
+    /// walk from a fresh random point **with a fresh jump table** when it
+    /// meets any earlier target, and after `4√r + 2^16` steps regardless,
+    /// so no target is ever presented twice and no two segments share a
+    /// step function: two segments under one step function merge like
+    /// rho's walks, and a repeated decomposable target with different
+    /// coefficients pins the logarithm as a collision would, which is a
+    /// generic search and not index calculus (see `WalkSharedJumps`).
     Walk,
+    /// The walk as the Round-2 ladder first ran it: one jump table for
+    /// every segment and the guard cleared at each restart.  Kept, behind
+    /// `--walk-shared-jumps`, for the diagnostic that measures the merge
+    /// effect; the `repeated_column_rows` and `pinned_by_repeated_row`
+    /// counters of the linear-algebra phase show it.
+    WalkSharedJumps,
 }
 
 impl TargetSource {
@@ -2406,8 +2416,45 @@ impl TargetSource {
         match self {
             TargetSource::Random => "random",
             TargetSource::Walk => "walk",
+            TargetSource::WalkSharedJumps => "walk_shared_jumps",
         }
     }
+    pub fn is_walk(&self) -> bool {
+        !matches!(self, TargetSource::Random)
+    }
+}
+
+/// Sixteen jumps `[a]G + [b]Q` with their coefficients, charged to `ops`.
+fn draw_jumps<G: CountedGroup>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    rng: &mut StdRng,
+    ops: &mut GroupOps,
+    count: usize,
+) -> Vec<(G::Elt, u64, u64)> {
+    (0..count)
+        .map(|_| {
+            let aj = rng.gen_range(1..r);
+            let bj = rng.gen_range(1..r);
+            let ag = g.mul(ops, generator, aj);
+            let bq = g.mul(ops, target, bj);
+            (g.add(ops, ag, bq), aj, bj)
+        })
+        .collect()
+}
+
+/// A key for the column part of a row: the same for two relations with
+/// the same summand columns and coefficients, whatever their target.
+fn column_part_key(row: &[u64]) -> u64 {
+    let mut acc = 0x9E37_79B9_7F4A_7C15u64;
+    for (c, &v) in row.iter().enumerate() {
+        if v != 0 {
+            acc = mix(acc ^ mix((c as u64) << 32 ^ v));
+        }
+    }
+    acc
 }
 
 /// Draw the targets (`[a]G + [b]Q` per trial, or a walk), ask the
@@ -2443,26 +2490,31 @@ fn collect_and_solve<G: CountedGroup>(
     let h_mod = h % r;
     let mut direct_skipped = 0u64;
     let (mut single_column_rows, mut two_column_rows) = (0u64, 0u64);
+    // Rows whose column part repeats an earlier row's: with different
+    // coefficients `a, b` such a pair pins `d` by itself, which is what a
+    // rho collision does.  Zero on an honest relation search.
+    let mut column_parts: FastMap<()> = fast_map(64);
+    let (mut repeated_column_rows, mut pinned_by_repeated_row) = (0u64, false);
 
     // The walk: jumps with known coefficients, the current point with
-    // its coefficients, and the segment guard.
+    // its coefficients, and the guard.
     let jump_count = 16usize;
+    let shared_jumps = targets == TargetSource::WalkSharedJumps;
     let mut jumps: Vec<(G::Elt, u64, u64)> = Vec::new();
     let mut walk_point = g.identity();
     let (mut wa, mut wb) = (0u64, 0u64);
     let mut walk_fresh = true;
-    let segment_cap = ((r as f64).sqrt() * 4.0) as usize + 65_536;
+    let segment_cap = ((r as f64).sqrt() * 4.0) as u64 + 65_536;
+    let mut segment_steps = 0u64;
     let mut seen: FastMap<()> = fast_map(0);
-    let (mut walk_steps, mut walk_restarts, mut walk_cycles, mut guard_probes) = (0u64, 0u64, 0u64, 0u64);
-    if targets == TargetSource::Walk {
-        for _ in 0..jump_count {
-            let aj = rng.gen_range(1..r);
-            let bj = rng.gen_range(1..r);
-            let ag = g.mul(&mut rel.group_ops, generator, aj);
-            let bq = g.mul(&mut rel.group_ops, target, bj);
-            jumps.push((g.add(&mut rel.group_ops, ag, bq), aj, bj));
-        }
-        seen = fast_map(segment_cap.min(1 << 22));
+    let (mut walk_steps, mut walk_restarts, mut walk_cycles, mut guard_probes, mut walk_jumps) =
+        (0u64, 0u64, 0u64, 0u64, 0u64);
+    if shared_jumps {
+        jumps = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, jump_count);
+        walk_jumps += jump_count as u64;
+    }
+    if targets.is_walk() {
+        seen = fast_map((segment_cap as usize).min(1 << 22));
     }
 
     while trials < max_trials {
@@ -2480,8 +2532,12 @@ fn collect_and_solve<G: CountedGroup>(
                 }
                 (point, a, b)
             }
-            TargetSource::Walk => {
-                if walk_fresh || seen.len() >= segment_cap {
+            TargetSource::Walk | TargetSource::WalkSharedJumps => {
+                if walk_fresh || segment_steps >= segment_cap {
+                    if !shared_jumps {
+                        jumps = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, jump_count);
+                        walk_jumps += jump_count as u64;
+                    }
                     wa = rng.gen_range(1..r);
                     wb = rng.gen_range(1..r);
                     let ag = g.mul(&mut rel.group_ops, generator, wa);
@@ -2489,7 +2545,10 @@ fn collect_and_solve<G: CountedGroup>(
                     walk_point = g.add(&mut rel.group_ops, ag, bq);
                     walk_fresh = false;
                     walk_restarts += 1;
-                    seen.clear();
+                    segment_steps = 0;
+                    if shared_jumps {
+                        seen.clear();
+                    }
                 } else {
                     let hsh = mix(g.key(&walk_point));
                     let j = ((hsh >> 24) % jump_count as u64) as usize;
@@ -2498,6 +2557,7 @@ fn collect_and_solve<G: CountedGroup>(
                     wa = addmod(wa, aj, r);
                     wb = addmod(wb, bj, r);
                     walk_steps += 1;
+                    segment_steps += 1;
                 }
                 if g.is_identity(&walk_point) {
                     walk_fresh = true;
@@ -2533,6 +2593,10 @@ fn collect_and_solve<G: CountedGroup>(
             2 => two_column_rows += 1,
             _ => {}
         }
+        let repeated = column_parts.insert(column_part_key(&row[..d_col]), ()).is_some();
+        if repeated {
+            repeated_column_rows += 1;
+        }
         // h·a + h·b·d = Σ coef·x  ⇒  Σ coef·x − h·b·d = h·a
         row[d_col] = submod(0, mulmod(h_mod, b, r), r);
         let rhs = mulmod(h_mod, a, r);
@@ -2546,6 +2610,7 @@ fn collect_and_solve<G: CountedGroup>(
             RowStatus::Independent => {}
         }
         if let Some(d) = gauss.pinned(d_col) {
+            pinned_by_repeated_row = repeated;
             la_ns += la_start.elapsed().as_nanos() as u64;
             let v_start = Instant::now();
             let check = g.mul(&mut ver.group_ops, generator, d);
@@ -2572,8 +2637,8 @@ fn collect_and_solve<G: CountedGroup>(
     rel.count("canonicalisations", ctr.canonicalisations);
     rel.count("frobfold_mismatches", ctr.frobfold_mismatches);
     rel.count("direct_relations_skipped", direct_skipped);
-    if targets == TargetSource::Walk {
-        rel.count("walk_jumps", jump_count as u64);
+    if targets.is_walk() {
+        rel.count("walk_jumps", walk_jumps);
         rel.count("walk_steps", walk_steps);
         rel.count("walk_restarts", walk_restarts);
         rel.count("walk_cycles", walk_cycles);
@@ -2584,6 +2649,8 @@ fn collect_and_solve<G: CountedGroup>(
     la.count("rows", found);
     la.count("single_column_rows", single_column_rows);
     la.count("two_column_rows", two_column_rows);
+    la.count("repeated_column_rows", repeated_column_rows);
+    la.count("pinned_by_repeated_row", u64::from(pinned_by_repeated_row));
     la.count("columns", cols as u64);
     la.count("rank", gauss.rank() as u64);
     PipelineOutcome {
@@ -2825,6 +2892,11 @@ pub struct BoundaryConfig {
     /// Run a two-summand row on a binary base when it is admissible and
     /// its exact trials floor is at most `max_trials` over this divisor.
     pub m2_floor_divisor: u64,
+    /// Run the walk rows with one jump table for every segment and the
+    /// guard cleared at each restart (the walk as the Round-2 ladder first
+    /// ran it), for the merge diagnostic; the default draws fresh jumps
+    /// per segment and never presents a target twice.
+    pub walk_shared_jumps: bool,
 }
 
 impl Default for BoundaryConfig {
@@ -2847,11 +2919,21 @@ impl Default for BoundaryConfig {
             rho_cap_multiple: 64.0,
             max_folded_table_pairs: 1 << 23,
             m2_floor_divisor: 4,
+            walk_shared_jumps: false,
         }
     }
 }
 
 impl BoundaryConfig {
+    /// The target source of the walk rows.
+    pub fn walk_source(&self) -> TargetSource {
+        if self.walk_shared_jumps {
+            TargetSource::WalkSharedJumps
+        } else {
+            TargetSource::Walk
+        }
+    }
+
     /// A configuration small enough for a unit test.
     pub fn quick() -> Self {
         Self {
@@ -3011,7 +3093,8 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
             out.rho.push(rho);
         }
 
-        use TargetSource::{Random, Walk};
+        use TargetSource::Random;
+        let walk = cfg.walk_source();
         let variants: Vec<(&str, Oracle, TargetSource)> = vec![
             ("semaev_s3_roots_m2", Oracle::SemaevS3Roots, Random),
             ("direct_subtraction_m2", Oracle::Subtract, Random),
@@ -3019,9 +3102,9 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
             ("mitm_m3", Oracle::Mitm { table: &table, m: 3 }, Random),
             // Round 2: the negation-folded table, then walk targets on it.
             ("mitm_m2_negfold", Oracle::Mitm { table: &table_neg, m: 2 }, Random),
-            ("mitm_m2_negfold_walk", Oracle::Mitm { table: &table_neg, m: 2 }, Walk),
+            ("mitm_m2_negfold_walk", Oracle::Mitm { table: &table_neg, m: 2 }, walk),
             ("mitm_m3_negfold", Oracle::Mitm { table: &table_neg, m: 3 }, Random),
-            ("mitm_m3_negfold_walk", Oracle::Mitm { table: &table_neg, m: 3 }, Walk),
+            ("mitm_m3_negfold_walk", Oracle::Mitm { table: &table_neg, m: 3 }, walk),
         ];
         for (name, oracle, targets) in variants {
             let budget = trial_budget(cfg, &fb, oracle.summands(), space);
@@ -3425,7 +3508,8 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
             out.rho.push(rho);
         }
 
-        use TargetSource::{Random, Walk};
+        use TargetSource::Random;
+        let walk = cfg.walk_source();
         let mut variants: Vec<(String, Oracle, TargetSource)> = vec![(
             format!("mitm_m{m_used}"),
             Oracle::Mitm { table: &table, m: m_used },
@@ -3446,11 +3530,11 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
         variants.push((
             format!("mitm_m{m_used}_negfold_walk"),
             Oracle::Mitm { table: &table_neg, m: m_used },
-            Walk,
+            walk,
         ));
         if m2_row {
             variants.push(("mitm_m2_negfold".into(), Oracle::Mitm { table: &table_neg, m: 2 }, Random));
-            variants.push(("mitm_m2_negfold_walk".into(), Oracle::Mitm { table: &table_neg, m: 2 }, Walk));
+            variants.push(("mitm_m2_negfold_walk".into(), Oracle::Mitm { table: &table_neg, m: 2 }, walk));
         }
         for (name, oracle, targets) in variants {
             let v = run_binary_variant(
@@ -3674,7 +3758,8 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             out.rho.push(plain);
         }
 
-        use TargetSource::{Random, Walk};
+        use TargetSource::Random;
+        let walk = cfg.walk_source();
         let mut variants: Vec<(String, &FactorBase<FastPoint>, Oracle, TargetSource, ExactCeiling)> = vec![(
             format!("mitm_m{m_used}_signed_orbit_columns"),
             &folded,
@@ -3722,7 +3807,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
                 format!("mitm_m{m_used}_signed_orbit_columns_frobfold_walk"),
                 &folded,
                 Oracle::MitmFrobenius { table: tf, m: m_used },
-                Walk,
+                walk,
                 exact_of(m_used),
             ));
             if m2_row {
@@ -3730,7 +3815,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
                     "mitm_m2_signed_orbit_columns_frobfold_walk".into(),
                     &folded,
                     Oracle::MitmFrobenius { table: tf, m: 2 },
-                    Walk,
+                    walk,
                     exact_m2,
                 ));
             }
@@ -3741,7 +3826,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
                     "mitm_m3_signed_orbit_columns_frobfold_walk_balanced".into(),
                     fb,
                     Oracle::MitmFrobenius { table: tf, m: 3 },
-                    Walk,
+                    walk,
                     *exact_m3_b,
                 ));
             }
@@ -3750,7 +3835,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
                     "mitm_m2_signed_orbit_columns_frobfold_walk_balanced".into(),
                     fb,
                     Oracle::MitmFrobenius { table: tf, m: 2 },
-                    Walk,
+                    walk,
                     *exact_m2_b,
                 ));
             }
@@ -4192,9 +4277,54 @@ mod tests {
         let walk = res.variants.iter().find(|v| v.name == "mitm_m2_negfold_walk").unwrap();
         assert_eq!(walk.targets, "walk");
         assert!(walk.relations.get("walk_steps") > 0);
-        assert_eq!(walk.relations.get("walk_jumps"), 16);
+        assert_eq!(walk.relations.get("walk_jumps"), 16 * walk.relations.get("walk_restarts"));
         let random = res.variants.iter().find(|v| v.name == "mitm_m2_negfold").unwrap();
         assert!(walk.relations.group_ops.scalar_mults < random.relations.group_ops.scalar_mults);
+        // No target is ever presented twice, so no row can repeat an
+        // earlier row's column part with different coefficients: the walk
+        // is a relation search, not a collision search.
+        for v in &res.variants {
+            assert_eq!(v.linear_algebra.get("repeated_column_rows"), 0, "{}", v.name);
+            assert_eq!(v.linear_algebra.get("pinned_by_repeated_row"), 0, "{}", v.name);
+        }
+    }
+
+    #[test]
+    fn a_shared_jump_table_lets_walk_segments_merge_and_pin_by_a_repeated_row() {
+        // The Round-2 ladder's first walk: one step function for every
+        // segment, so a restarted segment runs into the first one's path
+        // and the first decomposable target it meets again pins the
+        // logarithm through two rows with one column part.  The fresh-jump
+        // walk of the same rows never repeats a target.
+        // A base small enough that the relation search outlasts the walk's
+        // own cycle (about 1.25√r steps): 32 signed points on the 18-bit
+        // curve give a two-sum ceiling near 0.002, so K/2 relations need
+        // thousands of targets against a cycle at about 640 steps.
+        let inst = roster_prime_instance(18).unwrap();
+        let curve = &inst.curve;
+        let fb = prime_factor_base(&inst, 16);
+        let table = PairTable::build_negation_folded(curve, &fb);
+        let g = inst.generator_point();
+        let mut ops = GroupOps::default();
+        let d = 20_021 % inst.r;
+        let q = curve.mul(&mut ops, g, d);
+        let oracle = Oracle::Mitm { table: &table, m: 2 };
+        let mut merged_repeats = 0;
+        let mut fresh_repeats = 0;
+        for seed in 1..=6u64 {
+            for (source, repeats) in [
+                (TargetSource::WalkSharedJumps, &mut merged_repeats),
+                (TargetSource::Walk, &mut fresh_repeats),
+            ] {
+                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, |o, c, p| {
+                    decompose_prime(curve, &fb, &oracle, o, c, p)
+                });
+                assert_eq!(out.recovered, Some(d), "{source:?} seed {seed}");
+                *repeats += out.linear_algebra.get("repeated_column_rows");
+            }
+        }
+        assert!(merged_repeats > 0, "the shared-jump walk should have merged at least once in six runs");
+        assert_eq!(fresh_repeats, 0, "the fresh-jump walk never repeats a column part");
     }
 
     /// A cyclic group `Z/N` as a counted group, for the class-counting

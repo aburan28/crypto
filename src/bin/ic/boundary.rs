@@ -71,6 +71,13 @@ pub struct BoundaryArgs {
     /// Targets per oracle cell.
     #[arg(long)]
     pub oracle_targets: Option<usize>,
+    /// Run the walk rows with one jump table for every segment and the
+    /// guard cleared at each restart, the walk as the Round-2 ladder first
+    /// ran it: segments merge like rho's walks and a repeated
+    /// decomposable target pins the logarithm.  For the merge diagnostic
+    /// only; the default draws fresh jumps per segment.
+    #[arg(long)]
+    pub walk_shared_jumps: bool,
 }
 
 fn host() -> Value {
@@ -124,6 +131,7 @@ pub fn run(args: BoundaryArgs, json: bool) -> Result<Value, String> {
     if let Some(v) = args.s4_max_degree {
         cfg.s4_max_degree = v;
     }
+    cfg.walk_shared_jumps = args.walk_shared_jumps;
     for &b in &cfg.prime_bits {
         if !(8..=32).contains(&b) {
             return Err(format!("prime ladder bits must lie in 8..=32, got {b}"));
