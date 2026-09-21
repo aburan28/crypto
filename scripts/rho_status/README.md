@@ -196,6 +196,34 @@ looked like a dead walk on this page until that distinction existed.
 A recorded collision is **not** treated as a solved discrete log on the
 page. Independent verification of `[k]P = Q` is still required.
 
+Two counts published since 2026-09-21 say whether the points being added
+can take part in a collision at all, because on 2026-09-20 most could not
+and nothing on the page said so:
+
+- `work.off_weight_slots` / `work.off_weight_walking_slots` — slots whose
+  checkpointed iterations divided by the records they uploaded is more than
+  `2^1.0` away from the campaign's `2^28.41` per point (`dp_ingest.py`,
+  `dpWeightVerdict`; `work.campaign_dp_weight` and
+  `work.iterations_per_dp_log2_expected` carry the reference). Walks stop at
+  their own distinguished point, so a slot at another cutoff meets the
+  fleet's walks and neither records the same point. Four Modal runs at
+  weight 34 and 35 were two thirds of the fleet's rate that evening. The
+  record count behind the ratio is per upload stream, furthest offset
+  reached, not a sum of object sizes: a stream re-uploaded from offset 0
+  (as every Modal corpus was, twice, that night) would otherwise read as
+  a slot three times as dense as it is.
+- `ingest.duplicate_records`, `ingest.duplicate_records_last_day`,
+  `ingest.duplicate_slots_last_day` — records the store dropped because it
+  already held the point **under the same seed**. A resumed worker
+  re-reports a handful; a run walking another run's seeds re-reports
+  everything, and Modal runs 1-4 did exactly that against AWS slots 0-3
+  (89% of run 3's records were byte-identical to slot 2's). Counted per
+  object on `dp_ingest_progress.duplicates` from the deploy onward; not a
+  collision, and no longer silent.
+
+The dashboard draws the first on the GPU card and both in the campaign
+table. Per-slot rows stay private, as before.
+
 ## Iterations per second, and why it is not derived from points
 
 `work_feed.py` adds a `work` block to `status.json` — the iteration total

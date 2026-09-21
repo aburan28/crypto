@@ -749,6 +749,59 @@ class WorkFeedTests(unittest.TestCase):
         self.assertEqual(block["walking_slots"], 2)
         self.assertEqual(block["slots"], 4)
 
+    def test_counts_slots_off_the_campaign_cutoff_from_the_rows(self):
+        # dp_ingest marks each slot against the campaign's weight; a slot at
+        # another cutoff mostly cannot collide with the rest, so the page gets
+        # it as a separate count and never folded into the walkers.
+        feed = work_feed()
+        rows = feed["work"]["per_slot"]
+        rows[0]["dp_weight_ok"] = True
+        rows[1]["dp_weight_ok"] = False      # walking, off weight
+        rows[2]["dp_weight_ok"] = False      # retired, off weight
+        rows[3]["dp_weight_ok"] = None       # too few records to judge
+        feed["work"]["campaign_dp_weight"] = 32
+        feed["work"]["iterations_per_dp_log2_expected"] = 28.41
+        block = work_block(feed, "ecc2k-130")
+        self.assertEqual(block["off_weight_slots"], 2)
+        self.assertEqual(block["off_weight_walking_slots"], 1)
+        self.assertEqual(block["campaign_dp_weight"], 32)
+        self.assertEqual(block["iterations_per_dp_log2_expected"], 28.41)
+
+    def test_takes_the_off_weight_counts_when_the_feed_has_stripped_per_slot(self):
+        feed = work_feed()
+        del feed["work"]["per_slot"]
+        feed["work"].update(slots=10, walking_slots=10, off_weight_slots=5,
+                            off_weight_walking_slots=4)
+        block = work_block(feed, "ecc2k-130")
+        self.assertEqual(block["off_weight_slots"], 5)
+        self.assertEqual(block["off_weight_walking_slots"], 4)
+        # An older ingest host that does not publish them reads as zero, not
+        # as a missing key the page has to special-case.
+        del feed["work"]["off_weight_slots"]
+        del feed["work"]["off_weight_walking_slots"]
+        block = work_block(feed, "ecc2k-130")
+        self.assertEqual(block["off_weight_slots"], 0)
+        self.assertNotIn("campaign_dp_weight", block)
+
+    def test_re_reports_are_copied_from_the_ingest_block(self):
+        feed = work_feed()
+        feed["ingest"] = {
+            "outstanding_objects": 0, "unrecognised_objects": 0,
+            "newest_object_at": "2026-09-21T00:00:00Z", "lag_seconds": 30,
+            "duplicate_records": 813112, "duplicate_records_last_day": 4000,
+            "duplicate_slots_last_day": 2,
+        }
+        block = ingest_block(feed)
+        self.assertEqual(block["duplicate_records"], 813112)
+        self.assertEqual(block["duplicate_records_last_day"], 4000)
+        self.assertEqual(block["duplicate_slots_last_day"], 2)
+        snapshot = {"campaign_id": "ecc2k-130", "dps": 1, "state": "COLLECTING"}
+        self.assertTrue(merge_work(snapshot, feed, "ecc2k-130"))
+        self.assertEqual(snapshot["ingest"]["duplicate_records_last_day"], 4000)
+        assert_public(snapshot)
+        # Absent on an older feed: absent here too, so the page can say so.
+        self.assertNotIn("duplicate_records", ingest_block(ingest_campaign_feed()))
+
     def test_merges_into_a_snapshot_without_publishing_anything_private(self):
         snapshot = {"campaign_id": "ecc2k-130", "dps": 1}
         self.assertTrue(merge_work(snapshot, work_feed(), "ecc2k-130"))
