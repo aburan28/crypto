@@ -16,9 +16,9 @@
 //! What this module ships, honestly:
 //!
 //! 1. **Negation-folded Pollard rho for P-256** — the canonical
-//!    `√2` speedup from `Aut(E) = {±1}`.  Real, well-known, but
-//!    not actually implemented in any open-source toolkit I'm
-//!    aware of for P-256 specifically.
+//!    `√2` speedup from `Aut(E) = {±1}`, published as the
+//!    negation-map speedup by Wiener and Zuccherato (SAC 1998).
+//!    Not novel; see "Novelty assessment" below.
 //!
 //! 2. **Novel hybrid: ECDSA-transcript-filtered rho** — when a
 //!    target's ECDSA signature transcript is available, the
