@@ -81,7 +81,7 @@ struct Options {
     bool refEngine = false;
     unsigned dpCap = 1u << 16;
     int device = 0;
-    int verify = 8;
+    int verify = 0;
     std::string dpFile;
     std::vector<std::string> loadFiles;
     unsigned long long loadMax = 0;
@@ -1098,13 +1098,24 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         }
     }
 
+    if (o.verify > 0) {
+        // A normal-cutoff replay is a 2^28–2^32-step scalar walk on the CPU.
+        // The next device launch is queued first so the GPU is not idle for it.
+        printf("WARNING: --verify %d replays reports on the CPU; campaign "
+               "collection uses --verify 0 so a cutoff-32 trail cannot stall the GPU\n",
+               o.verify);
+        fflush(stdout);
+    }
+
     const u64 timedIterBase = iterBase;
     const double t0 = nowSeconds();
     double lastPrint = t0;
     double lastCkpt = t0;
     FILE *dpOut = output.file;
+    bool nextInFlight = false;
     for (long launch = 0; o.launches == 0 || launch < o.launches; ++launch) {
-        eng.launch(iterBase);
+        if (!nextInFlight) eng.launch(iterBase);
+        nextInFlight = false;
         const unsigned n = eng.fetch(recs);
         iterBase += (u64)o.steps;
         if (n == ECC_SEED_EXHAUSTED) {
@@ -1116,6 +1127,20 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             return 7;
         }
         if (n || eng.needsReseed()) eng.reseed(iterBase);
+
+        // Start the next walk before host DP handling. fetch() already copied
+        // this launch's reports, so the next kernel cannot overwrite them.
+        // Skip when a checkpoint is due: save() captures walk state and must
+        // not race an in-flight launch.
+        const double nowBeforeHost = nowSeconds();
+        const bool leaving = gStop || (o.launches && launch + 1 == o.launches);
+        const bool ckptDue = !o.ckptFile.empty() &&
+                             (leaving || nowBeforeHost - lastCkpt > o.ckptSeconds);
+        if (!leaving && !ckptDue) {
+            eng.launch(iterBase);
+            nextInFlight = true;
+        }
+
         totalDp += recs.size();
         for (size_t i = 0; i < recs.size(); ++i) {
             const DpRecord &rec = recs[i];
@@ -1158,6 +1183,11 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                 printf("  unusable (%s), continuing\n", why.c_str());
                 continue;
             }
+            if (nextInFlight) {
+                eng.synchronize();
+                iterBase += (u64)o.steps;
+                nextInFlight = false;
+            }
             printf("  recomputed both walks in %.2f s\n", nowSeconds() - tr);
             printf("  k = %s\n", u192_to_dec(k).c_str());
             printf("  verified [k]P == Q\n");
@@ -1175,17 +1205,20 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         // Flush reports and checkpoint on a timer, and always on the way out,
         // so a container stopped by its deadline loses seconds of work rather
         // than hours of it.
-        const bool leaving = gStop || (o.launches && launch + 1 == o.launches);
-        if (dpOut && (leaving || now - lastCkpt > o.ckptSeconds) && !durableFlush(dpOut)) {
+        if (dpOut && (leaving || ckptDue || now - lastCkpt > o.ckptSeconds) && !durableFlush(dpOut)) {
             fprintf(stderr, "persistence failure: corpus flush; checkpoint NOT advanced\n");
             return 8;
         }
-        if (!o.ckptFile.empty() && (leaving || now - lastCkpt > o.ckptSeconds)) {
+        if (ckptDue) {
             if (!eng.save(o.ckptFile.c_str(), iterBase, o.runId)) {
                 fprintf(stderr, "persistence failure: checkpoint %s\n", o.ckptFile.c_str());
                 return 8;
             }
             lastCkpt = now;
+            if (!leaving) {
+                eng.launch(iterBase);
+                nextInFlight = true;
+            }
         }
         if (gStop) {
             printf("stopping: %llu iterations of %llu walks, %llu points reported\n",
@@ -1316,6 +1349,7 @@ static void usage() {
         "  --max-iters N    restart a walk that has run N steps without a report\n"
         "  --run-id R       16-bit salt making seeds unique across processes\n"
         "  --verify N       recompute the first N reported points with the reference\n"
+        "                   (default 0: collection must not stall the GPU on a CPU rewalk)\n"
         "  --ref            walk on the scalar reference arithmetic (toy curves; slow)\n"
         "  --dp-file F      append distinguished points to F (binary, 32 bytes each)\n"
         "  --load F         preload a corpus file so collisions with earlier runs count\n"
