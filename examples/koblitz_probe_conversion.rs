@@ -29,6 +29,8 @@ use std::time::Instant;
 const PROBES: usize = 200_000;
 /// Group additions timed against the same clock.
 const ADDS: usize = 2_000_000;
+/// `BLOCK` in `witnesses_fast_inner`: the block the descent really uses.
+const BLOCK: usize = 1024;
 
 fn main() {
     let degree: u32 = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(61);
@@ -79,10 +81,10 @@ fn main() {
     // The same probes against each representation of the same base, so
     // the only thing that differs between the rows is the table.
     let mut rng: u64 = 0x9e37_79b9_7f4a_7c15;
-    let mut targets = Vec::with_capacity(PROBES);
+    let mut targets: Vec<FastPoint> = Vec::with_capacity(PROBES);
     for _ in 0..PROBES {
         rng = rng.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
-        targets.push(fc.mul_u64(g, 1 + rng % (r - 1)).pack());
+        targets.push(fc.mul_u64(g, 1 + rng % (r - 1)));
     }
 
     let tiers: [(&str, Option<PairSumTable>); 3] = [
@@ -90,7 +92,10 @@ fn main() {
         ("compact", PairSumTable::build_compact_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)),
         ("full", PairSumTable::build_full_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)),
     ];
-    println!("\n{:<8} {:>14} {:>12} {:>12} {:>16}", "tier", "stored pairs", "build s", "probe ns", "adds per probe");
+    println!(
+        "\n{:<8} {:>14} {:>12} {:>10} {:>10} {:>10} {:>9} {:>9} {:>9}",
+        "tier", "stored pairs", "build s", "lone ns", "blkd ns", "scan ns", "lone/add", "blkd/add", "scan/add"
+    );
     for (name, table) in tiers {
         let Some(table) = table else {
             println!("{name:<8} {:>14}", "did not fit");
@@ -108,6 +113,8 @@ fn main() {
         let build_s = t.elapsed().as_secs_f64();
         drop(rebuilt);
 
+        // Shape 1: one target at a time.  Not what the pipeline does;
+        // measured because it is what earlier notes quoted.
         let t = Instant::now();
         let mut hits = 0usize;
         for &target in &targets {
@@ -115,12 +122,58 @@ fn main() {
                 hits += 1;
             }
         }
-        let probe_ns = t.elapsed().as_secs_f64() * 1e9 / PROBES as f64;
+        let lone_ns = t.elapsed().as_secs_f64() * 1e9 / PROBES as f64;
         std::hint::black_box(hits);
+
+        // Shape 2: the descent's own loop — keys computed a block at a
+        // time with a 32-key prefetch running ahead of the probe, which
+        // is what `witnesses_fast_inner` does at `BLOCK = 1024`.  This
+        // is the shape the `m = 2` descent probes in, so it is the
+        // conversion for `descent_trials_total`.
+        let mut keybuf: Vec<u64> = Vec::with_capacity(BLOCK);
+        let t = Instant::now();
+        let mut blocked_hits = 0usize;
+        for part in targets.chunks(BLOCK) {
+            keybuf.clear();
+            keybuf.extend(part.iter().map(|&q| table.probe_key(q)));
+            for &k in keybuf.iter().take(32) {
+                table.prefetch_key(k);
+            }
+            for w in 0..keybuf.len() {
+                if let Some(&ahead) = keybuf.get(w + 32) {
+                    table.prefetch_key(ahead);
+                }
+                if table.contains_key(keybuf[w]) {
+                    blocked_hits += 1;
+                }
+            }
+        }
+        let blocked_ns = t.elapsed().as_secs_f64() * 1e9 / PROBES as f64;
+        assert_eq!(blocked_hits, hits, "{name}: the blocked probe answered differently");
+
+        // Shape 3: the `m = 3` scan, with a sink that never stops so the
+        // whole window is walked and the figure is a true per-base-point
+        // cost.  This is the unit `summands_scanned_total` counts, and
+        // collection spends 351,750,000 of them against the descent's
+        // 51,328,107 — so this, not either shape above, is the
+        // conversion that decides the ledger.
+        let mut scanned = 0usize;
+        let mut scan_targets = 0usize;
+        let start = Instant::now();
+        while start.elapsed().as_secs_f64() < 3.0 {
+            scan_targets += 1;
+            let t = fc.mul_u64(g, scan_targets as u64 * 7_700_017 + 3);
+            table.witnesses_fast(t, 3, &mut |_| true);
+            scanned += n;
+        }
+        let scan_ns = start.elapsed().as_secs_f64() * 1e9 / scanned as f64;
+
         println!(
-            "{name:<8} {:>14} {build_s:>12.2} {probe_ns:>12.1} {:>16.2}",
+            "{name:<8} {:>14} {build_s:>12.2} {lone_ns:>10.1} {blocked_ns:>10.1} {scan_ns:>10.1}              {:>9.2} {:>9.2} {:>9.2}",
             table.len(),
-            probe_ns / add_ns
+            lone_ns / add_ns,
+            blocked_ns / add_ns,
+            scan_ns / add_ns
         );
     }
     println!(
