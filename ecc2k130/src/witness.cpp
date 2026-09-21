@@ -73,6 +73,7 @@ struct Options {
     unsigned long long skip = 0;
     unsigned long long max = 0;      // 0 = all
     int batch = 64;
+    std::string outDir;
     bool quiet = false;
 };
 
@@ -89,6 +90,9 @@ static void usage() {
             "                     hex, when no job file is at hand\n"
             "  --skip N/--max N   a slice of the corpus\n"
             "  --batch N          points per artifact (default 64, cairn's cap)\n"
+            "  --out-dir D        one artifact per file, batch-00000.json ... , which\n"
+            "                     is what a node's checker reads; default is a stream\n"
+            "                     of one batch per line on stdout\n"
             "  --quiet            suppress the progress line on stderr\n");
 }
 
@@ -325,14 +329,34 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
 
     std::vector<std::string> batch;
     unsigned long long done = 0, emitted = 0, steps = 0;
+    unsigned long long batchNo = 0;
+    bool wroteAll = true;
     auto flush = [&]() {
         if (batch.empty()) return;
-        fputs("{\"dps\":[", stdout);
-        for (size_t i = 0; i < batch.size(); ++i) {
-            if (i) putchar(',');
-            fputs(batch[i].c_str(), stdout);
+        // A node's checker reads one artifact per file, so --out-dir is what a
+        // submitter wants; the stream on stdout is for looking at.
+        FILE *out = stdout;
+        std::string path;
+        if (!o.outDir.empty()) {
+            char name[64];
+            snprintf(name, sizeof name, "/batch-%05llu.json", batchNo);
+            path = o.outDir + name;
+            out = fopen(path.c_str(), "wb");
+            if (!out) {
+                fprintf(stderr, "cannot write %s\n", path.c_str());
+                wroteAll = false;
+                batch.clear();
+                return;
+            }
         }
-        fputs("]}\n", stdout);
+        fputs("{\"dps\":[", out);
+        for (size_t i = 0; i < batch.size(); ++i) {
+            if (i) fputc(',', out);
+            fputs(batch[i].c_str(), out);
+        }
+        fputs("]}\n", out);
+        if (out != stdout) fclose(out);
+        ++batchNo;
         emitted += batch.size();
         batch.clear();
     };
@@ -399,6 +423,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
             fprintf(stderr, "\rreplayed %llu of %llu", done, limit - first);
     }
     flush();
+    if (!wroteAll) return 9;
     if (!o.quiet) {
         fprintf(stderr, "\r%llu witnesses from %llu records, %llu steps replayed\n",
                 emitted, limit - first, steps);
@@ -422,6 +447,7 @@ int main(int argc, char **argv) {
         else if (a == "--skip" && nx) o.skip = strtoull(argv[++i], 0, 10);
         else if (a == "--max" && nx) o.max = strtoull(argv[++i], 0, 10);
         else if (a == "--batch" && nx) o.batch = atoi(argv[++i]);
+        else if (a == "--out-dir" && nx) o.outDir = argv[++i];
         else if (a == "--quiet") o.quiet = true;
         else { usage(); return 1; }
     }
