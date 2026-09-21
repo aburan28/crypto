@@ -1,0 +1,39 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "hypothesis": "The same incumbent rounds 0017, 0018b and 0019 all measured, worker sha256 e9f263b8. It stays the baseline rather than being replaced by round 0019's promoted winner, because a replication must re-measure the same comparison: promoting `both` into the baseline would make both/incumbent identically 1 and destroy the quantity under test.",
+    "id": "incumbent",
+    "parent": "round-0019 incumbent (the round-0017 orbits source, unchanged)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0019",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "69de47e30a267e93ab6da91903217062f2e2d3fbe9d6963e17700f77f33c3bd6"
+  },
+  {
+    "binary_relative": "source_candidates/both/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any solution or factor-base hash different from the incumbent's on the same fixture; a report that fails to declare column_convention: representative; an instruction ratio to the incumbent outside [0.95, 0.98] or a 95% upper limit at or above 1 on either final stage; or failure of the strict rho gate at any cell -- which is the round's most informative outcome and would mean round 0019's win was seed-luck.",
+    "hypothesis": "Round 0018's two levers together, byte-identical to the arm round 0019 promoted. Round 0019 measured it at 0.6751 [0.6298, 0.7265] against rho in instructions and 0.8848 [0.8624, 0.9098] natively, below one at every cell in both metrics on both final stages, with n23a1 at 0.7498 on forty fixtures. Round 0020 changes the seed and nothing else. Predictions are in ROUND20-single-target.md.",
+    "id": "both",
+    "parent": "round-0019 incumbent + round18-block.patch + round18-column.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0019",
+    "source_directory": "source_candidates/both/source",
+    "source_manifest_relative": "source_candidates/both/source-manifest.json",
+    "source_manifest_sha256": "563eb460f29d9ef09a2adbde4770a466d3dc16566f5f08f1e6d8238325b104d4"
+  }
+]

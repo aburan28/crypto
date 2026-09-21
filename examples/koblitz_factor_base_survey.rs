@@ -8,7 +8,8 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{FieldStructure, SolverEngine};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, available_subspace_dimensions,
     build_frobenius_factor_base_from_divisor, cyclotomic_cosets, enumerate_decompose,
-    groebner_decompose, sat_decompose, KoblitzCurve,
+    groebner_decompose, koblitz_index_calculus_dlp_with_factor_base, sat_decompose,
+    DecompositionStrategy, KoblitzCurve, KoblitzIcOptions,
 };
 use num_bigint::BigUint;
 use std::time::Instant;
@@ -111,6 +112,67 @@ fn main() {
             );
         }
     }
+    println!();
+    println!("=== The payoff: a curve the single-factor base cannot reach ===");
+    println!();
+    let kc = KoblitzCurve::new(0, 31).expect("K_0 over F_2^31");
+    let g = kc.generator().clone();
+    let d = BigUint::from(123_456u32);
+    let q = kc.mul(&g, &d);
+    println!("K_0/F_2^31, r = {}, target d = {d}", kc.subgroup_order);
+    println!();
+    println!(
+        "{:>18} {:>4} {:>7} {:>7} {:>2} {:>6} {:>10} {:>9}",
+        "base", "dim", "|F|", "orbits", "m", "vars", "log", "time"
+    );
+    for (label, indices, m) in [
+        ("single factor", vec![1usize], 2usize),
+        ("single factor", vec![1], 4),
+        ("divisor [1,2]", vec![1, 2], 2),
+        ("divisor [0,1,2]", vec![0, 1, 2], 2),
+    ] {
+        let fb = match build_frobenius_factor_base_from_divisor(&kc, &indices) {
+            Some(f) => f,
+            None => continue,
+        };
+        let vars = fb.n_vars_for_summands(31, m);
+        if vars > 64 {
+            println!(
+                "{label:>18} {:>4} {:>7} {:>7} {m:>2} {vars:>6} {:>10} {:>9}",
+                fb.ell,
+                fb.points.len(),
+                fb.orbits.len(),
+                "—",
+                "over cap"
+            );
+            continue;
+        }
+        let opts = KoblitzIcOptions {
+            m,
+            strategy: DecompositionStrategy::Enumerate,
+            extra_relations: 8,
+            max_trials: 60_000,
+            ..KoblitzIcOptions::default()
+        };
+        let t = Instant::now();
+        let got =
+            koblitz_index_calculus_dlp_with_factor_base(&kc, &q, &fb, &opts).and_then(|r| r.log);
+        println!(
+            "{label:>18} {:>4} {:>7} {:>7} {m:>2} {vars:>6} {:>10} {:>9.1?}",
+            fb.ell,
+            fb.points.len(),
+            fb.orbits.len(),
+            got.map(|v| v.to_string()).unwrap_or_else(|| "none".into()),
+            t.elapsed()
+        );
+    }
+    println!();
+    println!("One irreducible factor gives dim 5: at m = 2 its 63 points pair into");
+    println!("~2 000 of 1.4M group elements so nothing decomposes, and m = 4 needs");
+    println!("82 unknowns — past the 64-variable cap.  That base cannot reach this");
+    println!("curve at all.  A divisor of x^31 − 1 gives dim 10 and solves it at");
+    println!("m = 2 in seconds: 20 unknowns, quadratic, no chaining.");
+
     println!();
     println!("`m ok` is the cofactor-class predicate: a sum of m factor-base points");
     println!("reaches ⟨G⟩ only when their h-torsion classes cancel.  On a cofactor-2");

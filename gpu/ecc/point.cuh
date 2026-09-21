@@ -43,6 +43,22 @@ struct Curve {
         const uint32_t l[8] = CURVE_B_LIMBS;
         return F::from_limbs(l);
     }
+#if CURVE_HAS_AUT6
+    /* beta, a primitive cube root of unity mod p, in the field's internal
+     * representation -- immediates in both modes, since ecref.py emits the
+     * Montgomery form too.  x -> beta x is the order-3 automorphism of a
+     * j = 0 curve: (beta x, y) = lambda (x, y) with lambda^3 = 1 mod n. */
+    static FP_HD fp256 beta() {
+#if FP_FAST
+        const uint32_t l[8] = CURVE_BETA_LIMBS;
+#else
+        const uint32_t l[8] = CURVE_BETA_MONT_LIMBS;
+#endif
+        fp256 r;
+        for (int j = 0; j < 8; j++) r.v[j] = l[j];
+        return r;
+    }
+#endif
     static FP_HD affine_pt generator() {
         const uint32_t gx[8] = CURVE_GX_LIMBS;
         const uint32_t gy[8] = CURVE_GY_LIMBS;
@@ -300,9 +316,20 @@ struct Curve {
      * the multiplication *is* the work, it is not. */
     static FP_BIG jac_pt double_scalar_mul_small(const affine_pt &P, const uint32_t a[8],
                                                  const affine_pt &Q, const uint32_t b[8]) {
+        /* Start at the highest set bit of either scalar: exact for any
+         * input, and on a toy curve, whose seeded scalars are masked to
+         * the group-order width, it skips the ~220 doublings of infinity
+         * that would otherwise dominate every walk reseed. */
+        int top = -1;
+        for (int l = 7; l >= 0 && top < 0; l--) {
+            uint32_t v = a[l] | b[l];
+            for (int k = 31; k >= 0 && v; k--) {
+                if ((v >> k) & 1u) { top = 32 * l + k; break; }
+            }
+        }
         jac_pt acc = infinity();
 #pragma unroll 1
-        for (int i = 255; i >= 0; i--) {
+        for (int i = top; i >= 0; i--) {
             acc = dbl(acc);
             if ((a[i >> 5] >> (i & 31)) & 1u) acc = madd(acc, P);
             if ((b[i >> 5] >> (i & 31)) & 1u) acc = madd(acc, Q);

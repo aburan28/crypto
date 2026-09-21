@@ -1,0 +1,64 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 828B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ic-autolab-fastlift:20260915
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/12] FROM docker.io/library/ic-autolab-fastlift:20260915@sha256:1e61ca358612372559cf3ba52cc9a11500d030b33c5f0ee31a39c709110b1ad3
+#4 resolve docker.io/library/ic-autolab-fastlift:20260915@sha256:1e61ca358612372559cf3ba52cc9a11500d030b33c5f0ee31a39c709110b1ad3 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 67.53kB 0.0s done
+#5 DONE 0.0s
+
+#6 [ 2/12] COPY baseline/ /opt/baseline/
+#6 CACHED
+
+#7 [ 5/12] COPY baseline-worker /opt/baseline-built/worker
+#7 CACHED
+
+#8 [ 4/12] COPY baseline-source-manifest.json /opt/baseline-built/source-manifest.json
+#8 CACHED
+
+#9 [ 3/12] COPY baseline/ /opt/baseline-built/source/
+#9 CACHED
+
+#10 [ 6/12] COPY evaluator/ /opt/evaluator/
+#10 CACHED
+
+#11 [ 7/12] COPY previous-targets.json /opt/previous-targets.json
+#11 DONE 0.1s
+
+#12 [ 8/12] COPY harness/ /opt/harness/
+#12 DONE 0.0s
+
+#13 [ 9/12] COPY candidate.rs /app/src/cryptanalysis/koblitz_index_calculus.rs
+#13 DONE 0.0s
+
+#14 [10/12] COPY candidate.json /app/candidate.json
+#14 DONE 0.0s
+
+#15 [11/12] COPY NOTES.md /app/NOTES.md
+#15 DONE 0.0s
+
+#16 [12/12] RUN chmod -R a+rX /opt/baseline /opt/baseline-built/source /opt/evaluator /opt/harness /app && chmod a+r /opt/previous-targets.json /opt/baseline-built/source-manifest.json && chmod 755 /opt/baseline-built/worker
+#16 DONE 4.7s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 0.4s done
+#17 exporting manifest sha256:d8566c169bfecdfc241b7c336f7c9eb3048b98a13db58d2d7106c4fdb087e80e 0.0s done
+#17 exporting config sha256:d2d01327104f759f2fd455f26cbb327469fdec3cb1899baff076fac40bd571df 0.0s done
+#17 exporting attestation manifest sha256:f002b394b24a31e0fbd15a566220a70372e31e28aca154cad5526ee854d77f41 0.0s done
+#17 exporting manifest list sha256:68e32e2cf212ceda22065b836dd130e8c89c9172e17684f39da1046122352cb9 0.0s done
+#17 naming to docker.io/library/ic-autolab-next30:20260915 done
+#17 unpacking to docker.io/library/ic-autolab-next30:20260915 0.1s done
+#17 DONE 0.6s

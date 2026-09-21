@@ -1,0 +1,12 @@
+name n15l5-3-U
+curve y^2 + x*y = x^3 + 1*x^2 + 1 over GF(2^15)
+modulus z^15 + z^1 + 1
+factor_base subspace <1, z, ..., z^4> (dimension 5)
+x_R 0x5650
+satisfiable false
+label_certified_by complete pairs-and-solve search over the subspace (semaev_decomp::decompose)
+variables x_(i,j) = bit j of X_(i+1) -> DIMACS 1 + i*l + j ; e-variables from 16 ; CNF auxiliaries after 42
+dimacs_xor variables 502 clauses 1505 xor_rows 42
+dimacs_cnf variables 1474 clauses 11922
+anf equations 42 monomials 2057
+generator crypto_lib::cryptanalysis::ic_corpus seed 1

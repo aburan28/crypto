@@ -1,0 +1,90 @@
+[
+  {
+    "id": "incumbent",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Last promoted single-target implementation; default base recipe unchanged."
+  },
+  {
+    "id": "cold_context",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/policy-sources/cold_context",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Reuse immutable reduction tables during all base lifts; original support."
+  },
+  {
+    "id": "orbits1",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/policy-sources/policy",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 1
+    },
+    "hypothesis": "Pay for 1 sampled signed orbit(s) before complete single-target recovery."
+  },
+  {
+    "id": "orbits2",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/policy-sources/policy",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 2
+    },
+    "hypothesis": "Pay for 2 sampled signed orbit(s) before complete single-target recovery."
+  },
+  {
+    "id": "orbits3",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/policy-sources/policy",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 3
+    },
+    "hypothesis": "Pay for 3 sampled signed orbit(s) before complete single-target recovery."
+  },
+  {
+    "id": "orbits4",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/policy-sources/policy",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 4
+    },
+    "hypothesis": "Pay for 4 sampled signed orbit(s) before complete single-target recovery."
+  },
+  {
+    "id": "cube_root",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/policy-sources/policy",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_cube_root": true
+    },
+    "hypothesis": "Predeclared cube-root size rule balances folded setup and collection costs."
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "changed_files": [
+    "src/cryptanalysis/koblitz_index_calculus.rs"
+  ],
+  "config": {
+    "batch_trials": 1,
+    "collection_window": 8,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "locked_unix": 1789512412.291837,
+  "merge_status": "not merged; source changes require review",
+  "selected_source": "/app"
+}

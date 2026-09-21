@@ -1,0 +1,30 @@
+[
+ {
+  "config": {
+   "batch_trials": 1,
+   "linear_algebra": "sparse",
+   "max_trials": 4096,
+   "solver": "pair_table",
+   "summands": 3
+  },
+  "hypothesis": "The retained winner, byte-identical to runs/round-0017/source_candidates/orbits/source and to runs/round-0018b/source. It is the baseline every promotion gate is measured against, and the executable whose per-cell spread ROUND19-single-target.md measures over 24 frozen fixtures a cell.",
+  "id": "incumbent",
+  "parent": "round-0018b retained winner (the round-0017 orbits source, unchanged)",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0018b"
+ },
+ {
+  "config": {
+   "batch_trials": 1,
+   "linear_algebra": "sparse",
+   "max_trials": 4096,
+   "solver": "pair_table",
+   "summands": 3
+  },
+  "falsification": "Any bad, missing or unmatched certificate; any solution or factor-base hash different from the incumbent's on the same fixture; a report that fails to declare column_convention: representative; an instruction ratio to the incumbent outside [0.95, 0.98] or a 95% upper limit at or above 1 on either final stage; failure of the no-regression gate against the incumbent; or failure of the strict rho gate at any cell other than n23a1, which would falsify the spread model of ROUND19-single-target.md sec. 5 outright.",
+  "hypothesis": "Round 0018's two levers together, unchanged: round18-block.patch lowers the scan block's clamp ceiling from 64 to 16, and round18-column.patch makes a column the orbit representative itself rather than [h] of it, dropping the matching factor of h from the row and the descent and declaring column_convention: representative. Round 0018b measured it at 0.9652 [0.9448, 0.9828] against the incumbent in instructions and 0.9613 [0.9288, 0.9895] natively, passing the no-regression gate on both final stages and failing only the strict rho gate, at n23a1 alone. Round 0019 re-runs it under a fresh seed with forty confirmation fixtures at that cell instead of twelve, which is the number ROUND19-single-target.md sec. 5 derives from the cell's own frozen spread. No new lever: sec. 3's base-size model says the contract's factor base is already at its optimum at n23a1 and the curve around it is flat.",
+  "id": "both",
+  "parent": "round-0018b winner + round18-block.patch + round18-column.patch",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0018b",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round19-sources/both"
+ }
+]

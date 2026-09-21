@@ -1,0 +1,59 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "hypothesis": "The round-0010 incumbent on a baseline whose general binary-field arithmetic (the final check both arms run, and what remains of the construction) is word-level and bit-exact with the previous bit-serial code, whose construction builds its single-word tables once per job, tabulates the sparse irreducible polynomial and takes the eigenvalue's square root in one word; every field implementation shares one cached CPUID probe.",
+    "id": "incumbent",
+    "parent": "tiny2 + certificate, lean static job (round-0010)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0010",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "54672220b4818be8513516d2a8e090126c2e98fbc421ba9d8e1772474e64c5bd"
+  },
+  {
+    "binary_relative": "source_candidates/wordfield_fastio/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "IC-only: the report's decimal numbers written two digits at a time from a table and appended without a UTF-8 validation pass (the same characters); expected to remove most of the log_certification phase's serialisation cost (65% of that phase in round-0010), a 2-6% instruction gain over the incumbent depending on the cell.",
+    "id": "wordfield_fastio",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/wordfield_fastio/source",
+    "source_manifest_relative": "source_candidates/wordfield_fastio/source-manifest.json",
+    "source_manifest_sha256": "b89e9e8ae696a5161f066aa9e542c0bba4e2f1de1321220431fda5d9e8b0b12f"
+  },
+  {
+    "binary_relative": "worker",
+    "changed_parameters": {
+      "batch_trials": 4
+    },
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any bad, missing or unmatched certificate; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "Configuration control on the same executable: four probes per batch against one.",
+    "id": "wordfield_batch4",
+    "parent": "incumbent",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "54672220b4818be8513516d2a8e090126c2e98fbc421ba9d8e1772474e64c5bd"
+  }
+]

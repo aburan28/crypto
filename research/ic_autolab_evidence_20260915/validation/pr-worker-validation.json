@@ -1,0 +1,1873 @@
+{
+  "status": "VERIFIED",
+  "cases": 60,
+  "outcomes": 120,
+  "worker_sha256": "f5e70e14c9d238742b91a495d03337945002b6750c94d381368d5438c69d02f2",
+  "worker_source_sha256": "565e096d6514533966aa936131f911bca98a7920190ffe6493631ec55c1a7c9b",
+  "arithmetic_source_sha256": "ec223182eaf53befa39f86cad381bde46fe56b2343244c0ee11492bb33316f0a",
+  "fixture_sha256": "71eda65988abdb548443096019c312ef27c090274ff0ffa60e46bd984b9de140",
+  "seconds": 1.409545792004792,
+  "scope": "Correctness integration on current main using the recorded confirmation inputs. No performance comparison or new instruction-cost claim.",
+  "records": [
+    {
+      "case": "n13a0-000",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "a1224eaf08e896d1270948acd7732a570d84a7d0899cded6a600ddd1241ff326",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 7,
+        "fresh_rows": 7,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "1089"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-000",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "401859759f9db664f999bebf07e027cc966503c2bca4827f6e293bd99699f06d",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1089"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-001",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "7b9b5cd61739e2a1e4b0a1c1f16a13857df3457179cafbd02af27e0c5a08f374",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 7,
+        "fresh_rows": 7,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "1589"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-001",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "066b52e5199bde07ac3f416beac1fb81cbd26bc1030b6438b3f54207734ad497",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1589"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-002",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "d495bd609072c0925f55e9b378906a601a142dc1e330b354e7702208a6e707b3",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 7,
+        "fresh_rows": 7,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "489"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-002",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "8f5a3a7fc24217d75cfdcd12b77aca5136d98fcfd0a9dd32c4f6f22910bf3cfe",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "489"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-003",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "36fa8775cfe4bf77534008cbd9ff7c0432dd8eddac32e6774d785b28ab66e180",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 16,
+        "fresh_rows": 16,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "988"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-003",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "d1ae31ea7a4db04a2d3755199ddbd0b5902a3f1804c5934d8e86efd1ec387b8f",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "988"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-004",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "d39ffa5df45df989ee728dc868f880adcbee87d71d997aca6cd488654c750c57",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 9,
+        "fresh_rows": 9,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "925"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-004",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "68bd34c6b6b7962d47734c490531208e2372355e3d73552a00c413453b97ba21",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "925"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-005",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "762e551329d10fdad70bf0739fcba3d657fa0cbb1d8667c29f8405d34635e111",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 7,
+        "fresh_rows": 7,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "1096"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-005",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "22c25d5bb47f206bb536583c1b2d44d03c0492febf664365b2c2a47dcc7571d4",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1096"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-006",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "67635b659508c31cdf9484d48b95a521f201a09cf5b924719be1033d99552e93",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 7,
+        "fresh_rows": 7,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "760"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-006",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "0d95eea3f172cc853feee8f73e4d2b82c07a95aaa5369c7d35ca0ee215894150",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "760"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-007",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "99d49046dee99d6720a39c86a96ba01b5c084c89834cb9f5601f7acb8c5e3417",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 7,
+        "fresh_rows": 7,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "717"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-007",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "0c9f8c22b426684ec5fcc7fdbee8eee876c95d3bd79e96b8699cb64c8bf7103c",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "717"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-008",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "8c316122b21a1313d44cf00ee990ae2e42ad3e4ff5cf188772735cb82440670e",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 7,
+        "fresh_rows": 7,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "1733"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-008",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "31a49a8dd7c57deb4a37c3feffc54000b4792cc8eb8d21bd932b9f551954b05a",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1733"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-009",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "e4c9abfb6a2a97bb7aed4a9b600de380838389ea9e8f2cba03957743d4c88e34",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 7,
+        "fresh_rows": 7,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "1012"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-009",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "b54fc2bdffd1678399c2c3a74dbf1c7fcc52cad7f9869f3a67c4435681e3efee",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1012"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-010",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "4068db3d58eb511753b0832f83df4df298e5c3cbb49d92ddbb50f8f5de5967e2",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 10,
+        "fresh_rows": 10,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "299"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-010",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "e9cf3d7bf2a519dd7e65d1972bdf2a89b603abbb658ae89d7edf040e313b4cae",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "299"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-011",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "b55b5f5d693aabc2d8c17353f1733d81f1b77fa1f390265d528af2a34a42f9e9",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "1313"
+        ]
+      }
+    },
+    {
+      "case": "n13a0-011",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "0402bbae4950bcb6bbd672dcffabca9c22da7a528ab3871bed41e1592bb071c5",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1313"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-000",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "afe31b62ab0a1e76558f20226068cca8a290f919742a970e265aa96a888bf7b2",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "11159"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-000",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "b5351c54bbf4971f2265231c348e8560789db62e39addf0c83dd758f55914e55",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "11159"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-001",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "b32f4af8323c5d64f111c9a15020ffed2456fdb14a299781d60c306e876057ad",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 14,
+        "fresh_rows": 14,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "61504"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-001",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "f5889156782772fda82661d174dbeebf6b44026d76797b30c6dc006aa47094dd",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "61504"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-002",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "31f79c3b69a08e04bc1db2d9b7dd5ecd462f5ad0fc617c6f9301060aa93b46b4",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "28164"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-002",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "f51790067108155f0a45b81ff9ba08b7500f1b06d6a6e35600c341aebb16219a",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "28164"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-003",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "59741f720f4df2ad7027063639d6d59f172737707ace41774df9086dde0634b2",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "61813"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-003",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "7436e0f8c20189f6d11de40796e32bb65b05b5ea9ec2561fb9252b9c1e026526",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "61813"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-004",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "9f77351200dfbe621be9b0bfc0119eee5638033c551805bc765d04606c53d081",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 9,
+        "fresh_rows": 9,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "55364"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-004",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "d60e111324095f2451602e3dbfbdd63b831492b3a0bceb548851272a93079426",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "55364"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-005",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "ff40a70675d3890fdb824a7dbc897abf6cf2d3b7d4954d4657804743aeeef400",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "62177"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-005",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "a1c654f872b668709d8ab23352a8b4a77d8cb9264aaf0f11ae07abbd9548d869",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "62177"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-006",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "966d9df3443cb5a5847386d848535fecd2c129ce27a7fdbe703981c280388388",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "64109"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-006",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "b4495f68125faf765aa65c72673f021ef5315a1918e7bfd4f2ae02f6a5c1afa9",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "64109"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-007",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "e85b92df8e82198ea8faf2e9fcebe91cd63a2c77142e7c8e8785d08a3837eec9",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "56475"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-007",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "b61ce58599c1524b92286842e676533252537c56910b482dc5a536dd711e4b75",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "56475"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-008",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "ed9b3cce500ed977d0645641e9eddc31af00cb3c18c93396709b84851aa408ca",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "40310"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-008",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "ea11a1151acffe8eaa30a69a750b04e93787dc0719ec6754c556631d381c6bb9",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "40310"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-009",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "369b6f61c1a021702878dfc54a7234de7170dc0398f10c33c29aa4e468ff8a5e",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 9,
+        "fresh_rows": 9,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "34699"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-009",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "8318c339d09fc3793b682b29bfa79cb6c5871a8057440668fb7a1066d1384d74",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "34699"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-010",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "35bb35e37a3dbe5771fcd5eac17b0afc457d88cb8a4df82f751ff67a8ecd0e85",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "4825"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-010",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "8485679b21e23fb84d952ceaf091e139ce60521b78bedb6ea94740fd0907a446",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "4825"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-011",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "920f3a8d0bcaaf53a1972377f54f6190966d655477f1bebc787e879010ffe366",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 272,
+        "factor_base_sha256": "97a080dc907831342bf69ba625103ad40af8fd8f4520e0715bbdf631b01b6533",
+        "solutions": [
+          "49375"
+        ]
+      }
+    },
+    {
+      "case": "n17a1-011",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "ce2070ec5ceeafc36337ff9902783f007f5599725cd6f7e3c2e8e1ac84481ba7",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "49375"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-000",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "64c8694ed3c85a95def9108c4dbba43e8cd0ce91ff3b2287a3b20c98b1f6efbb",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "60347"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-000",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "64ed028e6a8a3836ff3c3211d5e99648d796413e889dae64f806926f43ef2018",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "60347"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-001",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "5923288e85944f8cda26f094de28a4deb5771948fa26cbb7f5edd162b068dd10",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 10,
+        "fresh_rows": 10,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "25822"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-001",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "f5408c644d2b1a0b2f0a34056e04667972e97d606c5c5093d5f40eaf3f009c8d",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "25822"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-002",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "ed192f0b3b6873fd229bd08f443de919ddf9a3114e88a59fd24422810dbacd70",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 11,
+        "fresh_rows": 11,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "52782"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-002",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "a6548df9a47fe4feed61b3fe730d508d5512bab7107d06ab503096ab15603253",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "52782"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-003",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "a3c1ca893c676e7e28f34cebc44df10c72940191adc4a10047c26f8fb40687f3",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 13,
+        "fresh_rows": 13,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "73754"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-003",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "def4e1879298ee9c6c58c3c53601deb47f18b7c428b0b8f64a4ba46986c2bf93",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "73754"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-004",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "a87f19867134780514d97f26e3abaf69a3d721610b4d926a7645d43ff4e7d7b9",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "21810"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-004",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "d6bbc63a09546cd08aa591307b04d48be005c08f88c7763ab8ab17527107605b",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "21810"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-005",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "9eff5268907f160430fe8495936804b4ef2e794435b605583e620a3da9153617",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 9,
+        "fresh_rows": 9,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "112446"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-005",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "7fc83a2af76368198a37389e2e562ba77884487b3d35f57025d86849bab4cb18",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "112446"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-006",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "8851e271b626be3220a5e99dc81cd2f4e9d0f12a464790c7dbf186b956452489",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "114798"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-006",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "2ba3e001a5708d075cbc774d1205b2e1ba3ee362dc66999cf7114ba78d645094",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "114798"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-007",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "63d35a68b895a40dbdbbff25b8ca2011b591855ac28cc0b01e4ae13b534b1300",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 10,
+        "fresh_rows": 10,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "71799"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-007",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "04312099e5c92ffca2cbbb5462cd2cfda9727a21e2a9da08b96bf6005406402b",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "71799"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-008",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "a891155211bfcdee11898537bba9de56196194bd624748efa3d04c84871c09c7",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "130826"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-008",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "a173db43ac83c29d25998c3854db6f2ec91ec9fcfe7fe793f7b53728079b4bc0",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "130826"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-009",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "7d8ec7fcab6af4f1c051b8cb393bc8f42dbd37e18813604c336f88685b88dee8",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "11877"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-009",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "71337edae42290528f221d8c91457a62a2b7f93b54238e579f8356231a78d7b1",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "11877"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-010",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "437f20a8fa98db2d0823613597d927111122b6bfa448d5bcab6946d6cf354f31",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 9,
+        "fresh_rows": 9,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "23571"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-010",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "d5e0a70d98d5b7ef98dfc217f80847ee25e5b439b149e9b7835d25e67e7ded13",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "23571"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-011",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "5581c45e67fd9f0ee4972dcaf18e0e891aab43310fc5fd775839dd1c62710c14",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "1389b4ae9ea62aa9a80cab83d0848513632bfe41585d292149f282fa8990eb71",
+        "solutions": [
+          "78631"
+        ]
+      }
+    },
+    {
+      "case": "n19a0-011",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "c8554a51ab349f3cc61e62f9c1f481aca128790f3439a53cb97d1d0c8c5c1624",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "78631"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-000",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "e06304b3974cc2ad6dd91b9ebfbad6ebd4679e74ab54ab4f6d006c98bdb8eccc",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 12,
+        "fresh_rows": 12,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "1061151"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-000",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "f0b2e5c6c824c9e8ea6b85c61e63b5f8bf1cb330efe0b35266c25cf751ed6c53",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1061151"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-001",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "7dd8e2b6175373850b0f068abe7fe6f27fed295389dcd2ab6aa02ff0b2d621e4",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "1691594"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-001",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "f6f01749a266f8dcda7b6f03df4090774ee75f5efdf0278e6120ee3c3ead2fbb",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1691594"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-002",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "b0793da282bc59f3c91b13189c1b71fa0cd549c773835c6fa663a6bbb7ae2829",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 10,
+        "fresh_rows": 10,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "855494"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-002",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "0935953fbc8b0d32837a06537035cbd03c57d26f6b6305506e5c48d04dbcc7ae",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "855494"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-003",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "a7e88e1aeb3113e1618148f196ce6433c43b727a392c6634159a95997508102c",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 15,
+        "fresh_rows": 15,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "720094"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-003",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "39cc473b41accd3b236547c53b481193bb81406755f51cf2a74526d19be61991",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "720094"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-004",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "d84e1510c1189bbde59f20bde354c8f818ebf7b0087ee28c469a9a348fc3f44b",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "9189"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-004",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "85e8c9290c292a1a09fea93e8b52dd7f446d8275be27e9a47babdf2495eed181",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "9189"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-005",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "5362760b158379084e82a21b3dec8a05f99b83683e0634c608f6ee6a4eee8d9f",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "274029"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-005",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "3181bbc83ef8a67f74226cf65c6d889c532e09ea54de110e6e052d64561b6c5b",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "274029"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-006",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "f3d9907faaa8312f86a73aee79421187506295ce0fdae74726e106839b8ef389",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "1817771"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-006",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "62507e4f464f6afeff37393c567da4de8d268322af9826bb7a33cd83f5ca4f0d",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1817771"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-007",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "eb168a741dda4ca499ae089f2e6ef9dbf411dc9a1dd4401c6138437fbbe9fd5b",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 12,
+        "fresh_rows": 12,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "1369448"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-007",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "86d3f28f10d2de4d2513d332ffe655829ca469fdb326d5e9a8e6e6d2771106c9",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1369448"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-008",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "0627aadb4c06ac9fa0fdda100329b94b08311b113dd3aa95d7d687641119634f",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "2002454"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-008",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "ba018f2cb0abde8f43c0ff528850dce85a1ebba4151874150327e049c239b13f",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "2002454"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-009",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "955c1f85a0578d23c556e70a44da57b6b1aed474e23454f0fe13bff76d748689",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "690055"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-009",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "e3e95d50f5af7e91dcb35ec792ffb788a18dd92e15ca31c9020fe2583621df3e",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "690055"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-010",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "3dc32385ee8186d4000fad40a18dbd3004aa811f68bbce2015d345ca4927b4ee",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "1430343"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-010",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "ef690f3c1139e3d0c37826753443b10ab83f8772afc3aa299af5250083fd2b6d",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "1430343"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-011",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "f81be95d354b25deb28f3c3112d1f13afabb6453324ee86c038eb3a2e47cc38b",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 12,
+        "fresh_rows": 12,
+        "rank": 8,
+        "signed_base_size": 368,
+        "factor_base_sha256": "25139f1c7cc25f596df0c0cd841d27d7491bc240f15b76aab468ce445a291f9d",
+        "solutions": [
+          "422305"
+        ]
+      }
+    },
+    {
+      "case": "n23a0-011",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "a8c0add371f8e5f5de09cd5bc109d52b5303144ba06cf2f538eed9cc2cb8dadc",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "422305"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-000",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "5d6bb6856e41242526eb8ab0c49fe117cf7e33255ec0140e7dacf26109cb2f1f",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "137772"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-000",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "5cb6a452e4ecda5ef046754ca8b4b73e45492fe059184c540a350e20f70ceab0",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "137772"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-001",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "0d7293bd6af8d5124b2a47d01a01247a5dc246b01ecb267c4bdaf987c7d1d2be",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "260548"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-001",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "27fcc909b584e5b6f09a0c66e550d5ffa11acf946957000e1651be5c23fd6d92",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "260548"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-002",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "2b0b8d865359c72f81f8a869a025282d21c74bcb50affa8c9d2e0b0f2cd44136",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "50363"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-002",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "027e193e77071252b2b82adad57057b4b19b4a5f2d4351eb32a8b9d3f7bcb03c",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "50363"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-003",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "d9295616bdb8af477918739c9e55f1aca0a3be4fd2eeccffa328cade45e11145",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 11,
+        "fresh_rows": 11,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "257941"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-003",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "8fb33572b6e0400b00e8d8fa61159b2fe5579fef63d0b78b28becf122afc49db",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "257941"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-004",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "64ac9a20e6fb7e3224d89f69b185b6d733d9779f8da5adff142d3f3757d12a68",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 20,
+        "fresh_rows": 20,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "9072"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-004",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "a118e688f2112091391045ab77d50942750c898e42145637e32d3792d422dde6",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "9072"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-005",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "180b0321d8a1111293b7bd130acdc0559c2bd9b8c25dcf219a57d3d289abe3bb",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "28400"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-005",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "d5146119081ae88d52254dcfd77ac4412e9dbdfe877176b532308b57089abbfc",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "28400"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-006",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "7822d485459bd3c50cf82b158b4f2739bc178fc0527f88930e22c903dc4016b6",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "191859"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-006",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "24cdb6bca334ab740b32a571c18808ba40be3ef5fdfe9dd9ea3072a62c2c3969",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "191859"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-007",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "e3338975101aef093bf0e0a7b4c5451ad3d61e1bb950a4150c1d06bb63299505",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "239331"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-007",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "a6399249ab642b4ce1e285b999d99510700fffda3b8bcb4466ca23dc3f1d9e6c",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "239331"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-008",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "3649838c798e0dcec880a23e6a37ecee7cc7755278e50714d030713779b8dec0",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 9,
+        "fresh_rows": 9,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "119387"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-008",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "65bc5a6f271adc7f19877c1ead915d3f214563f6753532cdd0a6f2bf987898b9",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "119387"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-009",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "e7096596da2221e7d7b4ecaf485aa7bd6271961996fdee5aba1149402b76cbc9",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "137347"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-009",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "1b2fcf6d55912641fb01ec32e707767f27212469b122f01c97bfa8a2e463ac5d",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "137347"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-010",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "1e70d56dc9b8413b15b52916c5cfc7e2dfaef26cc75eac10e7e3535e267d646e",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 12,
+        "fresh_rows": 12,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "127471"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-010",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "22e036f3c6260429d891219aa6185d88ca72f14ee71c2b00f88ef162f8d3accb",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "127471"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-011",
+      "mode": "ic",
+      "status": "VERIFIED",
+      "output_sha256": "9413b8a28aba52e17c37562b2d08abef52c901a7369408af03f5632dd629feb3",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 8,
+        "fresh_rows": 8,
+        "rank": 8,
+        "signed_base_size": 304,
+        "factor_base_sha256": "151cfbb4d35c9a92641eda14041dfcebc365a6679a861b4ca8e1416756d03c6d",
+        "solutions": [
+          "166791"
+        ]
+      }
+    },
+    {
+      "case": "n19a1-011",
+      "mode": "rho",
+      "status": "VERIFIED",
+      "output_sha256": "fdb89a31f65bba39352f50208d64d5d9b22cf5d0c0380bbbc650cbd338b9489e",
+      "certificate": {
+        "verified_targets": 1,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "166791"
+        ]
+      }
+    }
+  ]
+}

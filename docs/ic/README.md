@@ -2,18 +2,20 @@
 
 The standalone ic executable inspects elliptic-curve parameters and runs
 bounded, reproducible index-calculus experiments on internally generated
-known-answer or public hash-derived Koblitz targets. Imported parameter-file
-points are used only for mathematical validation.
+known-answer or public hash-derived Koblitz targets. The `fixed` command also
+accepts explicit K_0 curve parameters and points through degree 131, with durable
+pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETERS.md).
+The older inspection command uses imported points for mathematical validation.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
-[`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
-[`boundary_targets.json`](./boundary_targets.json) (binary, Koblitz, prime;
+[`BOUNDARY_TARGETS.md`](BOUNDARY_TARGETS.md) and
+[`boundary_targets.json`](boundary_targets.json) (binary, Koblitz, prime;
 `schema_version` 2). Beat claims must include the ledger's **measurement
 schema** fields — including **FFD / degree of regularity** on algebraic
 `decomposition` frontiers — or they fail closed.
 
 **Autolab runner:** agents push those beats with the local control plane at
-[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
+[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab)
 (`boundary_autolab.py`). It pins the ledger, fail-closed validates measurement
 reports, and launches the public-synthetic `koblitz_rank_fixture` /
 `koblitz_rho_fixture` producers for the priority Koblitz `vs_rho` rungs.
@@ -82,7 +84,7 @@ The following knobs are recorded in each run report:
 - factor-base: a recipe file written by `ic search`, replacing factor-index;
 - summands: factor-base points per relation, 2 (default), 3, or 4;
 - max-trials: 1 through 1000000;
-- solver: groebner, sat, enumerate, or pair-table;
+- solver: groebner, sat, enumerate, pair-table, wdsat, or mq-fes;
 - batch: targets decomposed per parallel batch (0 = CPU count);
 - control: legacy accounting, see below.
 
@@ -95,7 +97,19 @@ group before it becomes a relation:
   sums built once per run — one lookup per target for two summands,
   `|F|` for three, `|F|²` for four (16 bytes per table entry);
 - groebner: the Weil-restricted Semaev system reduced by matrix-F4;
-- sat: the same system, CDCL with native parity rows.
+- sat: the same system, CDCL with native parity rows;
+- wdsat: the same Semaev system emitted as Trimoska ANF and solved by an
+  external WDSat binary (`--wdsat-binary PATH`). See
+  [`RESEARCH_WDSAT_IC_UNIFICATION.md`](../../research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md).
+  Requires a capacity-sufficient build of
+  [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
+  baseline builder is
+  `research/index_calculus_baseline_20260914/pilot/build_pilot.py`.
+- mq-fes: ALMASTY/libfes-inspired quadratic Semaev solver (`m = 2` only) —
+  libfes FFS Gray (`L=4` unroll) for early-exit `find_one`, Möbius for
+  all-roots when `n ≤ 24`, Monica hybrid past that
+  (<https://gitlab.lip6.fr/almasty/mq>,
+  <https://github.com/cbouilla/libfes-lite>).
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation
@@ -180,6 +194,49 @@ is even; `--no-saturate` skips it) and after greedy orbit pruning
 expected trial count, which is an exact recount over the witness list
 rather than a re-search. The pruned base stays Frobenius- and
 negation-closed, so every relation identity survives.
+
+### Ranking by what the solver pays, not by trials alone
+
+Expected trials is half the collection cost. A trial is paid whether or not
+it succeeds, so collection spends `trials × (cost per trial)`, and the
+second factor is the one that varies: coverage saturates at 100% as the
+subspace grows while the Weil-restricted summation system keeps `m·ℓ`
+Boolean unknowns. At `K_1/2^15` the two orders disagree by `22.41×` over
+twelve verified logarithms — see
+[`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).
+
+    ./target/release/ic search --degree 15 --curve-a 1 --summands 2 --family divisor \
+        --min-dimension 3 --max-dimension 8 --no-prune --no-saturate \
+        --solver groebner --solve-cost-targets 8
+
+`--solve-cost-targets N` runs the Gröbner oracle on `N` census targets per
+candidate, charging refutations as well as successes, and ranks by
+`expected_stage_ops = expected trials × measured word XORs per target`. The
+report's `scoring_objective` says which of the two ranked it, and each
+candidate carries `measured_ops_per_target`, `expected_stage_ops` and
+`trace_zero`. Omitted, nothing changes: the ranking is the trial count as
+before.
+
+Three restrictions, each refused loudly rather than silently worked around,
+because a number that does not describe the run is worse than no number:
+
+- it prices the **Gröbner** oracle, so `--solver` must be `groebner` —
+  scoring one oracle and running another selects for the wrong thing;
+- only a **linear-subspace** candidate is described by its own system. The
+  restriction is written over the subspace basis, so a pruned, saturated,
+  union or orbit base — a proper subset of that span, carried by the SAT
+  domain trie instead — would be priced on the span rather than on itself,
+  at a cost in time of several orders of magnitude. Such candidates are
+  left unpriced with the reason in `solve_cost_skipped`, and ranked below
+  every priced one, since trials and word XORs are not comparable numbers;
+- nothing is measured while `IC_REDUCTION_CACHE` is set, where a memoised
+  reduction returns without running F4 and the counter diff would report
+  replayed work as free. (A preprocessing hit is harmless: F4 still runs,
+  so it is still counted.)
+
+Free and unmeasured, reported for every candidate: `trace_zero`, true when
+the abscissae lie in `ker Tr`, which doubles the yield and is decided by the
+divisibility `(x+1) ∤ g` rather than by solving anything.
 
 The best `--validate-top` candidates are then validated by real child runs
 on `--holdout` fresh known-answer fixtures with `--solver` (default
@@ -380,6 +437,13 @@ A parameter file (schema_version 1):
                     "max_dimension":11,"targets":256,"saturate":false},
      "targets":[{"known_log":"654009"},{"random_seed":7},{"random_seed":8}]}
 
+The `search` mode also takes `solve_cost_targets`, the workflow form of
+`--solve-cost-targets` above: with it the select stage ranks candidates by
+measured solving cost instead of by expected trials. It requires
+`solver: "groebner"`, `prune: false`, `saturate: false` and a `factor` or
+`divisor` family, for the reasons given there, and the run is refused if
+they disagree.
+
 `factor_base.mode` is `spec` (with a recipe as written by `ic search`)
 or `search` (the census search's knobs; the best candidate is taken
 without child validation). Each target is a synthetic known-answer
@@ -554,6 +618,66 @@ statistics, and both ρ and IC verification counts. No rung crosses: the
 charged ρ/IC ratio is below 1 at every one. Read its
 `what_this_is_not` before quoting any number from it.
 
+## The boundary ledger: `ic boundary`
+
+    ./target/release/ic boundary --quick
+    ./target/release/ic boundary --regime koblitz --koblitz-degrees 23,31,41 --repeats 2 --out ledger.json
+    ./target/release/ic boundary --oracles --out docs/ic/runs/ic-boundary-ledger-YYYY-MM-DD.json
+
+`boundary` is the one-table-one-unit measurement `AGENTS.md` asks for,
+run over three regimes at once: a generic prime-field curve, a random
+binary curve, and a Koblitz curve.  Every variant of every regime solves
+the same planted logarithm end to end — factor base, relation
+collection, decomposition oracle, linear algebra, verification — and is
+priced in **group-addition equivalents per `√r`** against two
+boundaries: the generic floor `√(π/2A)` for the automorphisms `A` the
+curve offers, and a counted Pollard rho on the same instance in the same
+process (an r-adding walk with distinguished points, or the signed
+Frobenius walk on Koblitz curves).  Native counters — trials, pair-table
+probes, square roots, Artin–Schreier solves, pairs of the
+pairs-and-solve loop, multiply-subtracts of the elimination — are exact;
+the conversion to additions uses factors measured on the host at run
+time and recorded in the report, so a reader can re-convert.  The
+relation phase also carries its counting ceiling, `C(F+m−1, m)/#E`, and
+the measured yield against it.
+
+Variants: Semaev `S₃` roots, direct subtraction and meet in the middle
+(`m = 2, 3`) on prime curves; `S₄` pairs-and-solve and meet in the
+middle on random binary curves over the low-order subspace of dimension
+`⌈n/3⌉`; meet in the middle over signed-Frobenius-orbit columns, the
+same without the fold, and `S₄` pairs-and-solve over the invariant
+subspace on Koblitz curves.  Exponents `ops ∝ r^α` are fitted per phase
+over the ladder.  `--oracles` additionally prices the decomposition
+oracles that cannot finish a logarithm at these sizes — matrix-F4 (word
+XORs, exact), CDCL SAT (conflicts), enumeration, meet in the middle,
+`S₄` — per target on the Koblitz Semaev systems, with each system's
+unknowns, equations, degree, Macaulay profile and first fall degree.
+
+The frozen run (`runs/ic-boundary-ledger-2026-09-21.json`) and its
+reading are in
+[`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md);
+the report JSON carries the Markdown tables under `markdown`.  The
+scripts in `tools/` render a report into the note's tables
+(`boundary_ledger_tables.py`), the scoreboard's rows
+(`boundary_scoreboard_rows.py`) and the ledger twin's records
+(`boundary_ledger_update.py`), so a new run updates the three places
+`AGENTS.md` §7 requires without numbers being typed.
+
+## A benchmark corpus: `ic corpus`
+
+    ./target/release/ic corpus --degree 19 --dimension 6 --sat 5 --unsat 5 --dir corpus/n19l6
+
+Writes Weil-descended symmetrised Semaev `S₄` instances — the family of
+`mtrimoska/EC-Index-Calculus-Benchmarks` — for external solvers: DIMACS
+with native `x` parity lines, plain CNF, one GF(2) polynomial per line
+(`.anf`), a Magma script computing the Gröbner basis, and an `INFO`
+file with the target, the label, the planted witness and its SAT
+assignment.  Labels are certified: satisfiable instances plant a sum of
+three factor-base points and are confirmed by a model of this crate's
+solver; unsatisfiable ones are refuted by the complete pairs-and-solve
+search.  `docs/ic/corpus/` holds small generated sets with their
+reports; everything is deterministic in `--seed`.
+
 ## Random fixtures and custom parameters
 
     ./target/release/ic generate --degree 11 --curve-a 1 --seed 42 --out fixture.json
@@ -682,6 +806,13 @@ unsuccessful. Clap usage errors use its standard nonzero exit status.
     cargo test --release --test ic_framework --test ic_progress
     cargo test --release --lib koblitz_
 
+The end-to-end pipeline is gated in CI as well: `ic-e2e-benchmark.yml` runs
+the whole method plus the in-process ρ baseline on three frozen ledger rungs
+and fails closed on an unverified logarithm, a drifted seeded counter, or a
+regressed same-host end-to-end wall ratio. What it checks, what passing
+does not claim, and how to re-freeze after a deliberate change are in
+[`ci/README.md`](ci/README.md).
+
 Tests cover named profiles, custom prime curves, generated-fixture
 round trips, reproducibility, malformed and ambiguous parameters,
 resource reporting, a degree-11 synthetic run under both accountings,
@@ -778,3 +909,18 @@ assumed paid. The width curve says which width is cheapest for `T`
 targets at fixed `r`, where precompute is most of the bill. Memory sets
 the reach; the target count sets how much of that memory is worth using.
 
+## Persistent fixed parameters through degree 131
+
+`ic fixed --params docs/ic/params/ecc2k130-fixed.json --dir runs/ecc2k130-fixed --stage select`
+validates the actual fixed parameters and persists the factor base.
+[Fixed parameters](FIXED_PARAMETERS.md) documents bounded collection, resumable
+pair tables, precomputed logarithms, direct target equations and the complete
+small-curve example. This CPU Python workflow accepts full-width coordinates;
+the existing Rust symbolic engine remains limited to degree 63.
+
+### Learned solver and budget selector
+
+The fixed workflow accepts `--solver learned --selector-model MODEL.json`.
+[Solver selection](SOLVER_SELECTION.md) describes the matched natural-query
+benchmark, cost-sensitive tree, exact fallback and audited initial result.
+The initial portfolio selected a constant pair-table policy; no speedup is established.

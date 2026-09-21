@@ -1,4 +1,23 @@
+The algorithm in one file: [`examples/rho_toy.py`](examples/rho_toy.py)
+recovers a planted discrete logarithm on `GF(2^23)` with the same walk the
+GPU client uses. Live campaign counts:
+[status page](https://aburan28.github.io/crypto/status/). How the walk works,
+including a browser copy of the toy:
+[how.html](https://aburan28.github.io/crypto/status/how.html).
+
 # ECC2K-130 and ECC2K-95
+
+**20.078 B complete scalar walk iterations/s median on one RTX PRO 6000
+Blackwell** with `make gpu-rtx-pro6000-20b`
+([ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md)): the table walk in one
+512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt from
+the step tag instead of stored, products inlined and the forward pass
+software-pipelined. 300/300 device reports re-walked, the same distinguished
+points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
+the tree's previous best configuration rebuilt in the same session on the same
+card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
+22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
+serial inversion (§7 there). The campaign default below is unchanged.
 
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
@@ -27,6 +46,18 @@ client checks before all six timed samples completed their exact work budget.
 Use `RTX_PRO6000_SHARED_SIGMA=0` to select the global-mask control. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
+Every audited collecting rate in this tree is for that `sm_120` part. Other
+Modal GPUs are a `--bench` survey, not a campaign move:
+[benchmarks/modal-gpus/SURVEY.md](benchmarks/modal-gpus/SURVEY.md), via
+`make bench-modal-gpu SURVEY_GPU=…`. Per-family notes remain
+[RTX-PRO4500.md](RTX-PRO4500.md) (EC2 g7), [ADA-L4-L40S.md](ADA-L4-L40S.md)
+(L4 / L40S), [T4-G4DN.md](T4-G4DN.md), and [B200.md](B200.md)
+(`make bench-b200-modal`). The arithmetic and storage options of the RTX PRO
+6000 preset carry over; `PACKED_CLMAD` is on for sm_80+ and off on Turing.
+Workers stay automatic — 385,024 is a 188-SM occupancy.
+Per-SM occupancy (oversubscribed waves, same walk) is
+[benchmarks/per-sm/WAVES.md](benchmarks/per-sm/WAVES.md).
+
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
 instruction-pipe and memory probes for the earlier software arithmetic.
 The native carryless and batch comparisons above give the current complete
@@ -35,10 +66,23 @@ walk measurements.  The single-GPU objective is priced in
 from a kernel already issuing at 95% of the best rate measured on the part, so
 halving every instruction in it still lands at 29.3 B/s.  Two GPUs cross 30 B/s
 on a 2.5% per-GPU gain, and three cross it today.
+[ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) asks whether a different
+iteration function reaches 28 B/s on one GPU and answers no from the
+one-addition-per-step floor; it then builds the table walk
+`R ← R + ε·σᵏ(T_h)` behind `WALK_TABLE=1`, which measures 16.56 B/s against
+14.41 for the shipping walk on one RTX PRO 6000 (+14.9%; +9.2% in the audited
+385k-worker geometry) with every device report re-walked, and stays off by
+default because it misses the 17.0 B/s target the note set in advance.
 [FPGA-CEILING.md](FPGA-CEILING.md) asks whether an FPGA escapes that bound,
 measures the generated field circuits as 6-input lookup tables, and finds one
 FPGA competitive with one GPU on speed, about 2x cheaper per solved instance
 and about 5–10x better per watt.
+[THROUGHPUT-20B.md](THROUGHPUT-20B.md) asks the same of 20 B/s with a per-function
+static profile of the table walk, made with the measurement compiler and no GPU:
+both pipes are within a few percent of full at 16.56 B/s, the reduction and the
+products are 60% of the ALU, and no lever in the tree closes the 26% ALU cut
+20 B/s needs.  `TABLE_PIVOT_BYTES=1` is the one it adds, priced at −45 slots
+and unmeasured on a card.
 
 For the 857.163 M it/s RTX PRO 6000 baseline, experimental multiplier/cache
 controls, repeated benchmarks and profiling, see [TUNING.md](TUNING.md).
@@ -48,6 +92,17 @@ below; historical measurements remain recorded here.
 A GPU-oriented client for the Certicom binary-curve challenges: Pollard rho with
 a Frobenius-based iteration function, bitsliced, with the field arithmetic
 emitted by a code generator.
+
+The same iteration function exists in VHDL in [`hdl/ecc2k130/`](../hdl/ecc2k130/):
+a Karatsuba GF(2^131) multiplier in this normal basis, a step unit that does
+`R + sigma^j(R)` in `5 + 5/W` multiplies by sharing one eight-multiply
+inversion across a batch of `W` walks (the same Montgomery trick as this
+client's 32-walk words), and a walker that reports distinguished points.
+Its testbenches are checked against the field model in `codegen/`. An
+AXI-Lite register block, a host program that speaks `aws/worker.py`'s
+client contract, and the AWS F2 image and fleet scripts are there too
+(`hdl/ecc2k130/aws/README.md`); FPGA workers feed the same corpus as the
+GPUs.
 
 Two targets are configured:
 
@@ -64,6 +119,137 @@ The whole arithmetic layer is produced by a code generator that verifies every
 routine it emits against an independent model of the field. The same source
 compiles for CUDA (32-bit lanes) and for the CPU (64-bit lanes), so the exact
 code that would run on a GPU is what the test suite exercises.
+
+## Contribute compute
+
+The campaign is a Pollard rho over disjoint seed spaces, so a machine that
+walks its own seeds adds points to the same search without coordinating with
+anyone. Live counts are at
+<https://aburan28.github.io/crypto/status/>.
+
+**Run this client.** Every walk seed comes from a 16-bit `--run-id`, so two
+contributors who pick different ids never repeat each other's trail, and their
+corpora merge by reload. On a local card:
+
+```sh
+make test                                    # 52 checks, GF(2^23) … GF(2^131)
+make gpu
+./ecc2k130 --curve 41 --instance 3           # recover a planted log first
+./ecc2k130 --curve 131 --run-id N \
+           --dp-file dps.bin --checkpoint state.ck
+```
+
+On rented hardware, `./run.sh` drives the same binary through Modal — `./run.sh
+validate` recovers planted logarithms on the GPU itself before anything is
+spent, then `CURVE=131 RUNID=N ./run.sh search` (with `N` from
+`./run.sh next-run-id`, in the Modal range 8000-9999) collects and `./run.sh
+merge` scans every corpus for the colliding pair and rewalks it. `CURVE=131`
+does not finish: `2^60.9` iterations is decades of GPU time, so it is
+collection, not a solve.
+
+**Or run a [cairn](https://github.com/aburan28/cairn) node**, which pays for
+verified outputs rather than for claimed effort. Its
+[rho piecework design](https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md)
+makes one distinguished point `(x, y, a, b)` the paid artifact: `2^d` group
+operations to find, two scalar multiplications to check, so the proof of work
+is the work. Download it from
+**<https://github.com/aburan28/cairn/releases/latest>**, or install the
+published release in one line:
+
+```sh
+curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh
+cairn run
+```
+
+Linux amd64/arm64 and macOS Intel/Apple Silicon; no Windows build, because the
+verifier sandbox is seatbelt and bubblewrap. The installer checks the tarball
+against a `.sha256` served from the same host, which detects a corrupted
+download and nothing else — there is no signing key.
+
+cairn posts this search as
+[`objective-ecc2k130-orbit-batch`](https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/objective-ecc2k130-orbit-batch.json),
+which pays per novel **orbit** in batches of up to 64
+([design](https://github.com/aburan28/cairn/blob/main/docs/design/orbit-piecework.md)).
+Not per point: `σ(x, y) = (x², y²)` and negation generate a group of order
+`2m = 262` that the iteration function respects, so two trails have merged
+when they reach the same orbit, and a unit keyed on one representative would
+be paid 262 times for it — by 262 relabellings anybody derives from one
+published record. The unit is therefore the orbit's canonical name, the least
+cyclic rotation of the abscissa's normal-basis coordinates, and `m` prime is
+what makes it unique.
+
+**Why this client cannot claim yet.** A point here cannot carry `(a, b)`:
+tracking the combination costs a 129-bit modular multiplication per step, and
+this walk keeps its whole state in bitsliced field elements — which is exactly
+the trade recorded in *Distinguished points and restarts* above, and where the
+`1.4 × 10^10` steps a second come from. So the corpus record is
+`(seed, canonical x)`: nobody can check it for less than the work that made
+it, and anybody can invent one for nothing, since a low-weight bit string
+rotated to its least rotation is a syntactically perfect orbit name.
+
+cairn's answer is a **witness** taken from the walk's own algebra. A step is
+`R ↦ R + σ^j(R) = [1 + s^j]R` and the endomorphism ring is commutative, so a
+trail of any length is `[μ]R₀` with `μ = ∏_j (1 + s^j)^{n_j}` — and the `n_j`
+are only how many steps took each branch, in any order. **Eight counters**,
+for this client's own `j = 3 + ((HW(x)/2) mod 8)`. One double scalar
+multiplication verifies them: about 227 group operations against the `4 × 10^7`
+the trail cost, an asymmetry of `2^17.4`. The claim is
+
+```json
+{"dps": [{"x": "<canonical orbit>", "seed": "<64-bit walk seed>", "j": [n3, …, n10]}]}
+```
+
+There are two ways to get those counters, and both are built.
+
+**Replay what you claim.** The reference walk has counted the `n_j` all along,
+because collision resolution always needed them, so a trail can be walked again
+on the CPU to recover its witness. At the tranche the objective actually funds
+— 2^21 orbits, 0.004% of the search — that is much the cheaper route, because
+it pays for the trails you claim instead of all of them.
+
+**Carry them on the device.** `WITNESS=1` (the default) makes the walk count
+its own branches, so the corpus arrives with the witness already in it and a
+claim costs one double scalar multiplication rather than a replay. The
+bitsliced walk pays **+6.0%** for this, measured; the packed GPU path is
+implemented but has not been compiled or measured, and the estimate there is
+about 105 ALU slots on a 2,324-slot update plus 15% of the walk state. Build
+with `WITNESS=0` for the old rate and the old corpus format byte for byte.
+`CAIRN-WITNESS.md` has the full accounting, including the campaign-level trade
+and what a checkpoint costs.
+
+`build/witness` reads a corpus either way:
+
+```sh
+make witness
+./build/witness --curve 131 --job ecc2k130.json --corpus dps.bin > claims.jsonl
+```
+
+It frames the corpus by its magic. From a v2 record it takes the carried counts
+directly; from a v1 record it replays the seed. Either way it checks that the
+witness lands on the orbit the record names — the same check the payer makes —
+and prints batches of up to 64. `make test-witness` runs it end to end; with `CAIRN_ROOT` set it
+also hands the result to cairn's own checker. `cairn_job.py` writes a job
+document for a small curve so that check can run on a trail short enough to
+walk.
+
+One caveat the tool enforces rather than documents: this client works in the
+*permuted* type-II ONB, where `σ` is the coordinate permutation `i → fold(2i)`
+and **not** a rotation, while a cairn job names orbits by the least rotation in
+the plain normal basis its `nb_generator` pins. Both are the same conjugates,
+so the map is a permutation — cairn's generator is this basis's element `T`
+and its coordinate `k` is this one's `fold(T·2^k)` — and `--job` derives `T`
+by looking the generator up, refusing a job whose element is not in this basis
+instead of emitting names nobody can check.
+
+Two limits cairn states as plainly: the posted pool is one **tranche**, about
+`2^46.3` of the expected `2^60.8` iterations, because the full corpus is
+`2^35.5` orbits (~6.8 TB) and every verifying node holds all of it; and a
+witness does not prove the counters came from the job's own branch rule, which
+is what the sampled re-walk audit and `cairn attest slash` are for.
+
+The prime-field rho objectives — a 50-bit rung and Certicom's ECCp-131 — take
+a different contributor, `crypto cryptanalysis rho-collab work --cairn`
+([design note](../docs/POLLARD_COLLAB_DESIGN.md)).
 
 ## Status
 
@@ -314,6 +500,16 @@ Four threads reach 40 M iterations/s. For comparison, the 2009 hand-written
 qhasm implementation reached 533 cycles/iteration on a Core 2 with 128-bit
 vectors.
 
+Half of the host multiply is not arithmetic: the `m = 131` routines issue 4069
+`vpternlogd`/`vpxord`/`vpandd` against 4287 `vmovdqa32`, because `mulLeaf`
+keeps 254 values live against the 32 `zmm` registers x86 has.
+[HOST-SCHEDULE.md](HOST-SCHEDULE.md) reorders the same DAG to recover some of
+that, and gets 4287 moves down to 3903 -- all of it in `toOnb`, since the
+Karatsuba leaf's construction order already beats every schedule tried. It
+misses its declared target, records the leaf-size and compiler levers as
+measured dead ends, and leaves `GFNI` as the open one. `--no-schedule` in
+`codegen/gen.py` regenerates the pre-scheduling headers as the paired control.
+
 On aarch64, one core, `GF(2^131)`, `--bench --steps 32 --launches 8
 --threads 1`, median of five. The 64-lane column is what this code did before
 it had a NEON word, and is the paired control:
@@ -470,6 +666,7 @@ modal run modal_app.py::autotune      # sweep the build knobs on real hardware
 modal run modal_app.py::search --hours 4
 modal run modal_app.py::fanout --count 8 --hours 4
 modal run modal_app.py::merge         # collisions across every run
+modal run modal_app.py::next_run_id   # the next free campaign run id (curve 131)
 ```
 
 The GPU comes from `ECC_GPU`, read when the file is imported and baked into the
@@ -481,8 +678,9 @@ planted discrete logarithms with the CUDA engine itself, so a GPU run proves the
 same thing the CPU run does. `autotune` rebuilds for the local compute
 capability only and sweeps batch size, block size and Karatsuba leaf, writing
 the ranking to a Modal Volume. `search` collects distinguished points into that
-same volume, checkpointing its live walks alongside them, so a stopped run
-resumes where it left off and several containers contribute to one corpus; each
+same volume, checkpointing its live walks alongside them every 60 seconds (and a
+40-byte status header every 15 seconds), so a
+stopped run resumes where it left off and several containers contribute to one corpus; each
 gets its own run id, which keeps their seed spaces disjoint, and each loads its
 siblings' corpora so a cross-container collision is caught as it happens.
 `merge` scans the corpus for repeated hashes, which are the candidate
@@ -529,18 +727,81 @@ iterations is decades of GPU time, so treat it as collection, not as a solve.
 Two things follow from a run that never ends, and both are handled rather than
 left to bite:
 
-* The distinguished-point cutoff cannot be sized against the whole expected run,
-  or no walk ever reaches it. At the full-run choice for m=131 a four-hour pass
-  on a fast GPU reports about **two hundred points in total**. The cutoff is
-  therefore sized from the iterations the pass will actually do, measured by the
-  bench it already runs, which puts it back at a few reports per walk -- roughly
-  30M points and a gigabyte of corpus per pass. `DPW` overrides it.
+* The distinguished-point cutoff is the campaign's, `dpWeight` 32 in
+  `aws/campaign.json`, and a campaign run refuses any other (`-1` means that
+  one, not the run-sized guess the other curves get). Walks stop at their own
+  distinguished point, so a walk at weight 34 that meets a weight-32 walk is
+  recorded about 12% of the time and one at 35 about 4%: points collected at
+  another cutoff join the store and the rate, and rarely a collision.
+  At weight 32 a four-hour pass on an RTX PRO 6000 reports about 600k points.
+  A run that wants a looser cutoff to see points quickly is an experiment,
+  not collection: pass `--off-campaign` and it may use any weight and run id,
+  and writes under `/data/offcampaign/`, which `modal_sync.py` never uploads.
 * The corpus outgrows memory. Every pass reloads it to catch collisions in
   process, and a store entry costs far more than the 32 bytes it occupies on
   disk, so an uncapped reload is what eventually ends a long collection run.
   `LOADMAX` (default 50M points) caps it, newest file first. What that gives up
   is finding a collision in process; the corpus is still complete on disk and
   `./run.sh merge` still finds it there.
+
+### Collecting for the campaign from Modal
+
+Points from Modal join the AWS fleet's store through `modal_sync.py`, which
+uploads run `r` as campaign slot `90000 + r`. For those points to be able to
+take part in a collision two things have to hold, and both are enforced at
+launch (`modal_app.py`), at upload (`modal_sync.py`) and on the page
+(`aws/dp_ingest.py`), because each was violated once and neither showed:
+
+1. **The run id is not one an AWS slot has used.** Seeds are
+   `(runId << 48) | (walkIndex << 16)` and the fleet's slot `s` runs as run id
+   `s + 1`, so Modal run `r` walks AWS slot `r - 1`'s trails step for step,
+   and every point it reports is one the store already holds under the same
+   seed: dropped by `ON CONFLICT`, correctly not a collision, and invisible.
+   Runs 1-4 did this against slots 0-3 on 2026-09-19/20; 813k of run 3's 912k
+   records were byte-identical to slot 2's, and 100% of its seeds had already
+   been walked. Campaign run ids therefore come from **8000-9999**, which no
+   AWS slot can reach (`90000 + r` must stay a five-digit slot), and
+   `modal_sync.py` refuses an id for which the bucket holds a checkpoint or a
+   dp object of slot `r - 1`.
+2. **The cutoff is the campaign's.** See above. `modal_sync.py` reads the
+   ratio of a run's checkpointed iterations to its records and refuses a run
+   that is not near `2^28.41` per point once it has 50k records; the ingest
+   host flags the same ratio per slot on the dashboard (`off_weight_slots`),
+   and counts the records it dropped as re-reports (`duplicate_records`).
+
+The procedure, once:
+
+```
+export ECC_GPU=RTX-PRO-6000 CURVE=131
+./run.sh next-run-id                 # e.g. {"runId": 8000, "used": [...], ...}
+RUNID=8000 COUNT=4 PASSES=0 ./run.sh fanout      # run ids 8000-8003, until stopped
+```
+
+`run.sh` refuses `CURVE=131` without a `RUNID` in range; `fanout` takes it as
+the base of `COUNT` consecutive ids, and every pass of the loop launches the
+same ids so the checkpoints resume. Two operators must not both start from
+the same `next-run-id` answer at the same moment; the volume is the only
+arbiter, and it is read, not locked.
+
+Retiring the runs that violated the rules (the state on 2026-09-21):
+
+| Modal run | slot | fault | what to do |
+|:--|:--|:--|:--|
+| 3, 4 | 90003, 90004 | replay of AWS slots 2 and 3, which are 15x further along | stop; every point so far is a re-report, and it will be for days |
+| 1, 2 | 90001, 90002 | replay of AWS slots 0 and 1 for their first 28M steps; new coverage since | stop; keeping them means AWS can never resume slots 0/1 without re-walking Modal's work |
+| 4242-4245 | 94242-94245 | weight 34 (4243-4245) and 35 (4242) against the campaign's 32 | stop; about 88% and 96% of their meetings with campaign walks go unrecorded |
+
+`modal app list` names the ephemeral apps; `modal app stop <app id>` sends the
+container SIGTERM, so the client checkpoints on the way out. Then relaunch as
+above. The old checkpoint headers under `ckpt/slot-9000{1..4}/` and
+`ckpt/slot-9424{2..5}/` stay in the bucket: they age out of `walking_slots`
+after 30 minutes, and their iterations remain in the campaign's total, where
+runs 3 and 4's `2^49.2` duplicated steps are about 1% of it. Deleting those
+two prefixes would correct that total; it is an accounting choice, recorded
+here rather than made. The re-reports already dropped are not counted
+retroactively -- `duplicate_records` starts when the ingest host is redeployed
+with this `dp_ingest.py` (`aws/ingest_host.sh` or `aws/ingest_lambda.sh`,
+whichever runs it).
 
 Every pass is launched from the same variables, because resume only works when
 the shape matches: the checkpoint header records curve, run id, worker count and
@@ -549,7 +810,7 @@ and start over. Run `validate` first -- it recovers planted discrete logarithms
 on the GPU itself, so a broken kernel fails in a minute rather than quietly
 burning a day of credits.
 
-The searcher reports every 60 seconds:
+The searcher reports every 15 seconds:
 
 ```
 [1h04m] 842.1 M it/s  3.24T iters (18.412% of 2^44.0)  14.80M dp  14.79M distinct  corpus 473.6 MB  2h56m left
@@ -744,6 +1005,18 @@ snapshot contains the checkpoint just written rather than the one before it.
 Resuming needs the same shape it saved, so pass the same curve, run id, worker
 count, backend and build-time batch size; a mismatched existing checkpoint is
 an error. Use a new checkpoint path or run ID to start a different configuration.
+
+**The walks behind a corpus.** `make trailforest` builds a host-only tool that
+walks the seeds in a corpus again and prints every orbit each walk passed
+through, failing on any record whose replay does not end where the record
+says. By default it walks with the scalar reference, a few thousand steps a
+second; `--sample` walks with the client's own bitsliced kernel instead, keeps
+the walks that finish within a step cap, samples them at a stride and names
+orbits by hash, which is how the status page's walk-forest figure is drawn
+from real walks on the challenge curve
+(`docs/ecc2k130-status/walk-forest/README.md`). `--generate` walks a run id's
+seed schedule without stopping at the first collision, for curves small enough
+that a search solves inside its first launch.
 
 ## Build
 

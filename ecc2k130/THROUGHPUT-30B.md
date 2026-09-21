@@ -11,6 +11,12 @@ overtaken by the measured 14.637530 B/s.
 
 This prices the objective against the path that actually runs.
 
+> **Superseded in part by [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md).**
+> The instruction counts below are PTX-derived shares; the SASS counts and the
+> carry-less pipe's own budget are in that note, which also prices the floor of
+> any one-addition-per-step walk (≈ 25 B/s per GPU) and specifies the walk that
+> removes the Frobenius and conversion share priced here.
+
 ## The boundary
 
 The probe in [benchmarks/hardware-limits](benchmarks/hardware-limits/probe.cu)
@@ -190,6 +196,18 @@ Only ALU instructions pay, at roughly one percent of speed per percent removed.
    unpacks around every call. Three 64-bit limbs would not.
 4. **Not the memory path.** vector4 measured what that is worth: +0.285% for
    a 1.9% instruction cut.
+
+Two of these have since been costed further, in SASS rather than PTX, and the
+order changes — see [TOP-CLMAD.md](TOP-CLMAD.md). Levers 1 and 2 are dead on
+the memory pipe: a general linear map applied by table lookup gathers from
+~16 lines per load and needs ~5.6 L1 cycles per SM-clock, and the sparse basis
+only pays together with it. Lever 3 is larger than it looked: of `product131`'s
+77 SASS instructions, 65 are the correction for the three bits that do not fit
+the 4x4-word `clmad` product, and the product itself is 12. Moving that
+correction onto the carryless unit is `PACKED_TOP_CLMAD=1`: measured -5.4% of
+the routine ALU per update for +41% `clmad`s, predicted about +4% by the pipe
+model, and **15% slower** on an RTX PRO 6000 (12.859 vs 15.116 B/s matched
+control). See [TOP-CLMAD.md](TOP-CLMAD.md). The default stays off.
 
 ## Reproducing
 

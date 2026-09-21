@@ -12,6 +12,10 @@
  *   5. end-to-end solves of synthetic puzzles at several interval widths,
  *      with the measured step count compared against the 2*sqrt(W) model
  *   6. the shipped puzzles.txt registry loads and self-validates
+ *   7. MULTI-DEVICE SPLIT: two contexts with disjoint index ranges (what one
+ *      GPU each would hold) seed exactly the kangaroos one context of their
+ *      combined size would, never the same kangaroo twice, and a search
+ *      split across them with one shared table still recovers the key
  */
 #include <cstdio>
 #include <cstring>
@@ -92,7 +96,7 @@ struct HostState {
     uint32_t dp_count = 0;
     kg_ctx ctx;
 
-    void init(KangarooHost &h, uint32_t T, uint32_t W, uint32_t cap) {
+    void init(KangarooHost &h, uint32_t T, uint32_t W, uint32_t cap, uint32_t idx_base = 0) {
         uint32_t n = T * W;
         X.assign(8 * n, 0); Y.assign(8 * n, 0); D.assign(8 * n, 0);
         steps.assign(n, 0); restarts.assign(n, 0);
@@ -105,6 +109,7 @@ struct HostState {
         ctx.Qshift = h.Qshift;
         ctx.prm = h.prm;
         ctx.dp_out = dps.data(); ctx.dp_count = &dp_count; ctx.dp_cap = cap;
+        ctx.idx_base = idx_base;
         for (uint32_t t = 0; t < T; t++) kg_init_thread(ctx, t);
     }
 
@@ -282,6 +287,131 @@ static void test_solve() {
 }
 
 /* ---------------------------------------------------------------- */
+/* Several devices walk one job by holding disjoint GLOBAL index ranges:
+ * device d seeds kangaroo (base_d + local) from that global index, and the
+ * table on the host sees global indices.  This is the split the deployed
+ * multi-GPU kangaroo solvers use -- every GPU its own herds, one table --
+ * and it is correct only if (a) the union of the devices' kangaroos is the
+ * single-device herd of the combined size and (b) no kangaroo is seeded
+ * twice.  Both are checked here against the deterministic seeding, and
+ * then a search is run split across two host "devices". */
+static void test_multi_device() {
+    printf("[multi-device] disjoint index ranges, one shared table\n");
+    KangarooHost h;
+    h.prm.njump_bits = 6;
+    h.prm.dp_mask = (1u << 8) - 1u;
+    h.prm.max_steps = 1u << 20;
+    h.prm.seed = 11;
+    h.prm.reseed_on_dp = 1;
+    u256 secret = u256_pow2(39);
+    secret.v[0] ^= 0x2c7e19u;
+    h.setup(mulG(secret), u256_pow2(39), 39);
+
+    /* Device A: 4 threads x 8; device B: 2 threads x 8; bases 0 and 32.
+     * Different thread counts on purpose -- the storage layout (idx = t + w*T)
+     * differs per device, and only the global index may matter. */
+    const uint32_t TA = 4, TB = 2, W = 8, NA = TA * W, NB = TB * W;
+    HostState A, B;
+    A.init(h, TA, W, 4096, 0);
+    B.init(h, TB, W, 4096, NA);
+
+    /* (a) every kangaroo sits exactly where the global seeding puts it */
+    auto check_seeding = [&](const HostState &st, uint32_t base, const char *name) {
+        uint32_t n = kg_nkang(st.ctx);
+        for (uint32_t i = 0; i < n; i++) {
+            uint32_t g = base + i;
+            kg_state s;
+            kg_load(st.ctx, i, s);
+            uint32_t off[8];
+            kg_start_offset(g, kg_herd_of(g), 0, h.prm.seed, h.prm.w_bits, off);
+            CHECK(memcmp(off, s.dist, sizeof off) == 0,
+                  "%s kangaroo %u (global %u) not seeded from its global index", name, i, g);
+            CHECK(kg_herd_of(i) == kg_herd_of(g),
+                  "%s kangaroo %u (global %u): local herd differs from global herd", name, i, g);
+            CHECK(invariant_holds(h, st, i), "%s kangaroo %u breaks the invariant", name, i);
+        }
+    };
+    check_seeding(A, 0, "A");
+    check_seeding(B, NA, "B");
+
+    /* (b) the two devices never hold the same kangaroo, and together they
+     * hold exactly the single-device herd of size NA + NB */
+    {
+        std::vector<std::string> split, whole;
+        for (uint32_t i = 0; i < NA; i++) { kg_state s; kg_load(A.ctx, i, s); split.emplace_back((const char *)s.dist, sizeof s.dist); }
+        for (uint32_t i = 0; i < NB; i++) { kg_state s; kg_load(B.ctx, i, s); split.emplace_back((const char *)s.dist, sizeof s.dist); }
+        HostState one;
+        one.init(h, (NA + NB) / W, W, 4096, 0);
+        for (uint32_t i = 0; i < NA + NB; i++) { kg_state s; kg_load(one.ctx, i, s); whole.emplace_back((const char *)s.dist, sizeof s.dist); }
+        std::sort(split.begin(), split.end());
+        std::sort(whole.begin(), whole.end());
+        CHECK(split == whole, "split herds are not the single-device herd of the same size");
+        CHECK(std::adjacent_find(split.begin(), split.end()) == split.end(),
+              "a kangaroo is held by both devices");
+        /* and the failure mode the base exists to prevent: without it the
+         * second device is a copy of the first device's first NB kangaroos */
+        HostState dup;
+        dup.init(h, TB, W, 4096, 0);
+        uint32_t copies = 0;
+        for (uint32_t i = 0; i < NB; i++) {
+            kg_state s;
+            kg_load(dup.ctx, i, s);
+            std::string k((const char *)s.dist, sizeof s.dist);
+            if (std::binary_search(whole.begin(), whole.end(), k)) copies++;
+        }
+        CHECK(copies == NB, "control: a device without a base should duplicate %u kangaroos, duplicated %u",
+              NB, copies);
+        printf("  %u + %u kangaroos == one herd of %u; without the base all %u of B's would be copies\n",
+               NA, NB, NA + NB, copies);
+    }
+
+    /* (c) reported DPs carry the global index, so the host can tell the
+     * devices apart, and a search split across both devices with ONE table
+     * finds the key.  28-bit key so it is quick. */
+    {
+        u256 sec = u256_pow2(27);
+        sec.v[0] ^= 0x31a7c5u;
+        KangarooHost hs;
+        hs.prm.njump_bits = 6;
+        hs.prm.dp_mask = (1u << 6) - 1u;
+        hs.prm.max_steps = 1u << 22;
+        hs.prm.seed = 1009;
+        hs.prm.reseed_on_dp = 1;
+        hs.setup(mulG(sec), u256_pow2(27), 27);
+        HostState a, b;
+        a.init(hs, TA, W, 1u << 16, 0);
+        b.init(hs, TB, W, 1u << 16, NA);
+        uint32_t ca = 0, cb = 0, from_a = 0, from_b = 0;
+        bool solved = false, ok = false;
+        u256 found;
+        for (int it = 0; it < 4000000 && !solved; it++) {
+            /* the devices run independently; interleave them unevenly so
+             * the merge order is not lock-step */
+            for (uint32_t t = 0; t < TA; t++) kg_step_batch<8>(a.ctx, t);
+            if (it % 3) for (uint32_t t = 0; t < TB; t++) kg_step_batch<8>(b.ctx, t);
+            while (!solved && ca < a.dp_count && ca < a.ctx.dp_cap) {
+                const kg_dp &d = a.dps[ca++];
+                CHECK(d.idx < NA, "device A reported global index %u", d.idx);
+                from_a++;
+                if (hs.add_dp(d, found)) { solved = true; ok = u256_cmp(found, sec) == 0; }
+            }
+            while (!solved && cb < b.dp_count && cb < b.ctx.dp_cap) {
+                const kg_dp &d = b.dps[cb++];
+                CHECK(d.idx >= NA && d.idx < NA + NB, "device B reported global index %u", d.idx);
+                from_b++;
+                if (hs.add_dp(d, found)) { solved = true; ok = u256_cmp(found, sec) == 0; }
+            }
+        }
+        CHECK(solved, "split search did not find the key");
+        CHECK(ok, "split search recovered the wrong key");
+        CHECK(from_a > 0 && from_b > 0, "both devices should have reported (%u, %u)", from_a, from_b);
+        if (solved && ok)
+            printf("  split search recovered the 28-bit key: %u DPs from A, %u from B, one table\n",
+                   from_a, from_b);
+    }
+}
+
+/* ---------------------------------------------------------------- */
 static void test_registry() {
     printf("[registry] puzzles.txt\n");
     PuzzleRegistry reg;
@@ -322,6 +452,7 @@ int main() {
     test_invariant(h);
     test_steppers(h);
     test_solve();
+    test_multi_device();
     test_registry();
 
     if (failures) { printf("FAILED: %d checks\n", failures); return 1; }

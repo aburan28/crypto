@@ -3,10 +3,10 @@
 # One-time campaign infrastructure, idempotent: S3 bucket (corpus,
 # checkpoints, binaries and the slot registry), IAM role + instance profile,
 # security group, and the launch template that fleet.sh scales.  Also uploads
-# worker.py and campaign.json.
+# worker.py, build.sh, rollout.sh and campaign.json.
 #
 #   ./infra.sh                 create or update everything
-#   ./infra.sh sync            re-upload worker.py / campaign.json only
+#   ./infra.sh sync            re-upload worker.py / build.sh / rollout.sh / campaign.json only
 #   ./infra.sh destroy         delete the launch template, SG, role (and the
 #                              DynamoDB table if one was used); the bucket
 #                              and its corpus are kept
@@ -23,6 +23,10 @@
 #             at 14 B iterations/s) plus a ~370 MB checkpoint and its copies,
 #             which is ~22 GB on the eight-GPU sizes)
 #   AMI       override the automatic Deep Learning Base AMI lookup
+#   SKIP_IAM  if set to 1, do not create or update the worker role / instance
+#             profile (for callers like `adam` that lack iam:CreateRole). The
+#             role must already exist — run `AWS_PROFILE=admin ./iam_role.sh`
+#             once beforehand.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -43,7 +47,14 @@ cmd=${1:-create}
 
 sync() {
     aws s3 cp worker.py "s3://$BUCKET/aws/worker.py" --only-show-errors
+    aws s3 cp protocol.py "s3://$BUCKET/aws/protocol.py" --only-show-errors
     aws s3 cp merge.py "s3://$BUCKET/aws/merge.py" --only-show-errors
+    aws s3 cp build.sh "s3://$BUCKET/aws/build.sh" --only-show-errors
+    aws s3 cp bootstrap.sh "s3://$BUCKET/aws/bootstrap.sh" --only-show-errors
+    aws s3 cp bootstrap-cpu.sh "s3://$BUCKET/aws/bootstrap-cpu.sh" --only-show-errors
+    aws s3 cp enable-host-cpu.sh "s3://$BUCKET/aws/enable-host-cpu.sh" --only-show-errors
+    aws s3 cp rollout.sh "s3://$BUCKET/aws/rollout.sh" --only-show-errors
+    aws s3 cp rollout.py "s3://$BUCKET/aws/rollout.py" --only-show-errors
     if ! aws s3api head-object --bucket "$BUCKET" --key campaign.json >/dev/null 2>&1; then
         aws s3 cp campaign.json "s3://$BUCKET/campaign.json" --only-show-errors
         echo "uploaded the initial campaign.json (binaryKey empty until build.sh runs)"
@@ -103,30 +114,47 @@ else
 fi
 
 # ---- IAM role for the instances ------------------------------------------
-if aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
-    echo "role $ROLE exists"
+PROFILE_OK=0
+if [ "${SKIP_IAM:-0}" = 1 ]; then
+    echo "SKIP_IAM=1: leaving role $ROLE / profile $PROFILE untouched"
+    if aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
+        PROFILE_OK=1
+        echo "instance profile $PROFILE is visible"
+    elif [ -n "${WORKER_AWS_ACCESS_KEY_ID:-}" ] && [ -n "${WORKER_AWS_SECRET_ACCESS_KEY:-}" ]; then
+        echo "instance profile $PROFILE missing; embedding WORKER_AWS_* keys in user-data"
+    else
+        echo "instance profile $PROFILE is not usable and WORKER_AWS_* keys were not provided." >&2
+        echo "run: AWS_PROFILE=admin ./iam_role.sh adam" >&2
+        echo "or set WORKER_AWS_ACCESS_KEY_ID / WORKER_AWS_SECRET_ACCESS_KEY for a temporary fallback" >&2
+        exit 1
+    fi
 else
-    aws iam create-role --role-name "$ROLE" --assume-role-policy-document '{
-      "Version": "2012-10-17",
-      "Statement": [{"Effect": "Allow", "Principal": {"Service": "ec2.amazonaws.com"}, "Action": "sts:AssumeRole"}]
-    }' >/dev/null
-    echo "created role $ROLE"
-fi
-aws iam put-role-policy --role-name "$ROLE" --policy-name campaign --policy-document "{
-  \"Version\": \"2012-10-17\",
-  \"Statement\": [
-    {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
-    {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"}$TABLE_STATEMENT
-  ]
-}"
-aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-if aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
-    echo "instance profile $PROFILE exists"
-else
-    aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null
-    aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE"
-    echo "created instance profile $PROFILE; waiting for IAM to propagate"
-    sleep 15
+    PROFILE_OK=1
+    if aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
+        echo "role $ROLE exists"
+    else
+        aws iam create-role --role-name "$ROLE" --assume-role-policy-document '{
+          "Version": "2012-10-17",
+          "Statement": [{"Effect": "Allow", "Principal": {"Service": "ec2.amazonaws.com"}, "Action": "sts:AssumeRole"}]
+        }' >/dev/null
+        echo "created role $ROLE"
+    fi
+    aws iam put-role-policy --role-name "$ROLE" --policy-name campaign --policy-document "{
+      \"Version\": \"2012-10-17\",
+      \"Statement\": [
+        {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
+        {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"}$TABLE_STATEMENT
+      ]
+    }"
+    aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+    if aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
+        echo "instance profile $PROFILE exists"
+    else
+        aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null
+        aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE"
+        echo "created instance profile $PROFILE; waiting for IAM to propagate"
+        sleep 15
+    fi
 fi
 
 # ---- security group (egress only) ----------------------------------------
@@ -156,14 +184,50 @@ fi
 echo "AMI $AMI ($(aws ec2 describe-images --image-ids "$AMI" --query 'Images[0].Name' --output text))"
 
 # ---- launch template -----------------------------------------------------
-sed -e "s/__BUCKET__/$BUCKET/g" -e "s/__TABLE__/$TABLE/g" -e "s/__REGION__/$AWS_DEFAULT_REGION/g" \
-    bootstrap.sh > "${TMPDIR:-/tmp}/ecc-userdata.sh"
-LTDATA=$(python3 - "$AMI" "$PROFILE" "$SGID" "$ROOT_GB" "$KEY_NAME" "${TMPDIR:-/tmp}/ecc-userdata.sh" "$STACK" <<'EOF'
+# Optional static worker credentials when SKIP_IAM and the instance profile
+# does not exist yet (adam cannot iam:CreateRole). Prefer the instance profile.
+USERDATA_FILE="${TMPDIR:-/tmp}/ecc-userdata.sh"
+if [ "$PROFILE_OK" -eq 0 ] && [ -n "${WORKER_AWS_ACCESS_KEY_ID:-}" ]; then
+    python3 - "$USERDATA_FILE" bootstrap.sh "$BUCKET" "$TABLE" "$AWS_DEFAULT_REGION" \
+        "$WORKER_AWS_ACCESS_KEY_ID" "$WORKER_AWS_SECRET_ACCESS_KEY" <<'PY'
+import pathlib, sys
+out, bootstrap, bucket, table, region, key, secret = sys.argv[1:]
+body = pathlib.Path(bootstrap).read_text()
+body = (body
+        .replace("__BUCKET__", bucket)
+        .replace("__TABLE__", table)
+        .replace("__REGION__", region))
+if body.startswith("#!"):
+    body = body.split("\n", 1)[1]
+preamble = f"""#!/bin/bash
+install -d -m 700 /root/.aws /var/lib/ecc2k130
+cat > /root/.aws/credentials <<'AWSCREDS'
+[default]
+aws_access_key_id={key}
+aws_secret_access_key={secret}
+AWSCREDS
+chmod 600 /root/.aws/credentials
+cat > /root/.aws/config <<'AWSCONFIG'
+[default]
+region={region}
+AWSCONFIG
+cat > /var/lib/ecc2k130/aws-creds.env <<'AWSCREDSENV'
+AWS_ACCESS_KEY_ID={key}
+AWS_SECRET_ACCESS_KEY={secret}
+AWSCREDSENV
+chmod 600 /var/lib/ecc2k130/aws-creds.env
+"""
+pathlib.Path(out).write_text(preamble + body)
+PY
+else
+    sed -e "s/__BUCKET__/$BUCKET/g" -e "s/__TABLE__/$TABLE/g" \
+        -e "s/__REGION__/$AWS_DEFAULT_REGION/g" bootstrap.sh > "$USERDATA_FILE"
+fi
+LTDATA=$(python3 - "$AMI" "$PROFILE" "$SGID" "$ROOT_GB" "$KEY_NAME" "$USERDATA_FILE" "$STACK" "$PROFILE_OK" <<'EOF'
 import base64, json, sys
-ami, profile, sg, rootGb, key, userdata, stack = sys.argv[1:]
+ami, profile, sg, rootGb, key, userdata, stack, profile_ok = sys.argv[1:]
 data = {
     "ImageId": ami,
-    "IamInstanceProfile": {"Name": profile},
     "SecurityGroupIds": [sg],
     "UserData": base64.b64encode(open(userdata, "rb").read()).decode(),
     "BlockDeviceMappings": [{"DeviceName": "/dev/sda1",
@@ -175,6 +239,8 @@ data = {
                            "Tags": [{"Key": "Project", "Value": stack}]}],
     "InstanceInitiatedShutdownBehavior": "terminate",
 }
+if profile_ok == "1":
+    data["IamInstanceProfile"] = {"Name": profile}
 if key:
     data["KeyName"] = key
 print(json.dumps(data))

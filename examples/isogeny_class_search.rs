@@ -335,12 +335,27 @@ fn main() {
         "n", "l", "curves", "on the floor ∀ target", "fraction", "Koblitz mean"
     );
     let mut survivor_rows = Vec::new();
-    for (n, l) in [(8u32, 4u32), (10, 5)] {
+    // `n = 10` carries two extra target counts: at `T = 64` a single curve
+    // (`a₆ = 13`) is still on the floor, and reporting the decay without the
+    // rows that retire it would leave a survivor on the page that is only a
+    // small-sample artifact of the target count.
+    for (n, l, grid) in [
+        (8u32, 4u32, &[8u32, 16, 32, 48, 64][..]),
+        (10, 5, &[8, 16, 32, 48, 64, 128, 256][..]),
+    ] {
         let irr = first_irr(n);
-        for t in [8u32, 16, 32, 48, 64] {
+        for &t in grid {
             let fs = uniform_floor_survivors(n, l, 7, t, &irr);
+            // Name the survivors while there are few enough to name: the last
+            // one to fall is the curve the thread's own caveat was about, and
+            // a count alone would not show that.
+            let named = if !fs.survivors.is_empty() && fs.survivors.len() <= 4 {
+                format!("   a₆ = {:?}", fs.survivors)
+            } else {
+                String::new()
+            };
             println!(
-                "   {:>5} {:>4} {:>10} {:>20} {:>16.5} {:>14.3}",
+                "   {:>5} {:>4} {:>10} {:>20} {:>16.5} {:>14.3}{named}",
                 format!("{n}"),
                 l,
                 fs.curves,
@@ -351,17 +366,19 @@ fn main() {
             survivor_rows.push((n, l, t, fs.survivors.len(), fs.curves, fs.koblitz_mean));
         }
     }
-    let zeroed: Vec<u32> = survivor_rows
-        .iter()
-        .filter(|(n, _, _, c, _, _)| *n == 8 && *c == 0)
-        .map(|(_, _, t, _, _, _)| *t)
-        .collect();
-    if let Some(first_zero) = zeroed.first() {
-        println!(
-            "   ⇒ at n=8 the count reaches ZERO by T={first_zero}: no curve over the field is"
-        );
-        println!("     on the floor for every target, so there is nothing to move to.");
+    for size in [8u32, 10] {
+        let first_zero = survivor_rows
+            .iter()
+            .find(|(n, _, _, c, _, _)| *n == size && *c == 0)
+            .map(|(_, _, t, _, _, _)| *t);
+        match first_zero {
+            Some(t) => println!(
+                "   ⇒ at n={size} the count reaches ZERO by T={t}: no curve over the field is"
+            ),
+            None => println!("   ⇒ at n={size} some curve is still on the floor at every T tested"),
+        }
     }
+    println!("     on the floor for every target, so there is nothing to move to.");
 
     // ── The one table ───────────────────────────────────────────────
     println!("\n══ THE TABLE — one unit: log₂ operations for the decomposition solve ══");

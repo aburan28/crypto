@@ -12,6 +12,7 @@
 #include <string.h>
 #include <string>
 #include "bigmod.h"
+#include "tablewalk.h"
 
 typedef unsigned long long u64;
 
@@ -156,6 +157,8 @@ struct ScalarOnb {
         return r;
     }
     static int trace(const Elem &a) { return weight(a) & 1; }
+    // normal-basis coordinates, which this representation already is
+    static Elem nbCoords(const Elem &a) { return a; }
 
 };
 
@@ -270,6 +273,16 @@ struct ScalarPb {
         }
         return w;
     }
+    // the normal-basis coordinate vector itself, coordinate i at bit i-1
+    static Elem nbCoords(const Elem &a) {
+        Elem r = zero();
+        for (int i = 0; i < M; ++i) {
+            u64 acc = 0;
+            for (int l = 0; l < NL; ++l) acc ^= a.v[l] & Cfg::NB_ROWS[i][l];
+            if (__builtin_popcountll(acc) & 1) setBit(r, i);
+        }
+        return r;
+    }
     static int trace(const Elem &a) {
         Elem t = a, acc = a;
         for (int i = 1; i < M; ++i) {
@@ -304,6 +317,7 @@ struct RefT {
     static void setBit(Elem &a, int i) { SF::setBit(a, i); }
     static int weight(const Elem &a) { return SF::weight(a); }
     static int trace(const Elem &a) { return SF::trace(a); }
+    static Elem nbCoords(const Elem &a) { return SF::nbCoords(a); }
     static Elem fromLimbs(const unsigned long long *p) { return SF::fromLimbs(p); }
     // ---- polynomial-basis interoperability (normal-basis curves only) --
     static Elem fromPolyBasis(const unsigned long long *pb, const unsigned long long ztab[][3]) {
@@ -450,3 +464,83 @@ struct RefT {
 
 template <class Cfg>
 using Ref = RefT<Cfg, typename Cfg::Scalar>;
+
+
+// The table walk of tablewalk.h on the reference arithmetic: the table
+// T_h = a_h P + b_h Q with its Frobenius conjugates, one step, and the
+// coefficient bookkeeping a re-walk needs (endpoint = a P + b Q).
+template <class Cfg>
+struct TableWalk {
+    typedef Ref<Cfg> R;
+    typedef typename R::Elem Elem;
+    typedef typename R::Point Point;
+    static const int M = Cfg::M;
+    static const int H = ECC_TABLE_BRANCHES;
+
+    TableWalkConsts<M> consts;
+    Point table[H][M];        // table[h][k] = sigma^k(T_h)
+    U192 ta[H], tb[H];        // T_h = ta[h] P + tb[h] Q
+    bool ready = false;
+
+    // The coordinate functions are defined on the permuted type-II normal
+    // basis; the polynomial-basis test curves have no such coordinate order.
+    static bool applicable() { return Cfg::NRING == 2 * M + 1; }
+
+    // Coefficients are fixed constants of the walk, derived from nothing but
+    // the branch index, so every client and the resolver agree on them.
+    static U192 coefficient(int h, int which, const U192 &ell) {
+        U192 r;
+        for (int i = 0; i < 3; ++i) r.v[i] = R::eccPrfHost(0x7ab1e0000000ull + (u64)h * 2 + which, i);
+        r.v[2] &= ~(1ull << 63);   // mod_reduce wants a < 2^191
+        r = mod_reduce(r, ell);
+        if (u192_is_zero(r)) r = u192_from(1);
+        return r;
+    }
+
+    void setup(const Point &basis, const Point &target, const U192 &ell) {
+        consts.build();
+        for (int h = 0; h < H; ++h) {
+            ta[h] = coefficient(h, 0, ell);
+            tb[h] = coefficient(h, 1, ell);
+            const Point t = R::addPt(R::scalarMul(basis, ta[h]), R::scalarMul(target, tb[h]));
+            for (int k = 0; k < M; ++k) table[h][k] = R::frob(t, k);
+        }
+        ready = true;
+    }
+
+    static int branch(int hw) { return (hw >> 1) & (H - 1); }
+    int phase(const Elem &xn, int hw) const { return consts.phase(xn.v, hw); }
+    int negationBit(const Elem &xn, const Elem &yn, int k) const { return consts.negationBit(xn.v, yn.v, k); }
+
+    // The tag the point selects before the cycle rule, from its coordinates.
+    unsigned rawTag(const Point &p, int hw) const {
+        const Elem xn = R::nbCoords(p.x), yn = R::nbCoords(p.y);
+        const int k = phase(xn, hw);
+        return eccTag(branch(hw), k, negationBit(xn, yn, k));
+    }
+    // ...and after it: advance the branch while the step would be fruitless.
+    static unsigned resolveTag(unsigned t, u64 hist) {
+        for (int i = 0; i < H && eccTagFruitless(t, hist); ++i)
+            t = eccTag((eccTagH(t) + 1) & (H - 1), eccTagK(t), eccTagEps(t));
+        return t;
+    }
+    Point addend(unsigned t) const {
+        const Point q = table[eccTagH(t)][eccTagK(t)];
+        return eccTagEps(t) ? R::neg(q) : q;
+    }
+    // One step.  Raw addition, as on the device: the degenerate abscissa
+    // coincidence has probability 2^-m and is never special-cased there.
+    Point step(const Point &p, int hw, u64 *hist, U192 *a, U192 *b, const U192 &ell,
+               const U192 *spow) const {
+        const unsigned t = resolveTag(rawTag(p, hw), *hist);
+        *hist = eccHistPush(*hist, t);
+        if (a) {
+            U192 ca = mod_mul(spow[eccTagK(t)], ta[eccTagH(t)], ell);
+            U192 cb = mod_mul(spow[eccTagK(t)], tb[eccTagH(t)], ell);
+            if (eccTagEps(t)) { ca = mod_neg(ca, ell); cb = mod_neg(cb, ell); }
+            *a = mod_add(*a, ca, ell);
+            *b = mod_add(*b, cb, ell);
+        }
+        return R::addPtRaw(p, addend(t));
+    }
+};

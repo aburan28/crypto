@@ -27,17 +27,42 @@
 // per-branch step counter is.  ECC_WITNESS=0 compiles the counting out, which
 // is the control the paired comparison in CAIRN-WITNESS.md asks for.
 #define ECC_JCOUNT 8
+// Default to carrying the witness -- except on the table walk, which cannot
+// produce one (see below).  Defaulting rather than erroring matters because
+// several build recipes select the table walk and say nothing about the
+// witness; they want a table-walk binary, not a diagnostic.  An explicit
+// ECC_WITNESS=1 alongside the table walk is a different thing and still fails.
 #ifndef ECC_WITNESS
+#if defined(ECC_WALK_TABLE) && ECC_WALK_TABLE
+#define ECC_WITNESS 0
+#else
 #define ECC_WITNESS 1
+#endif
 #endif
 #ifndef ECC_COUNT_BITS
 #define ECC_COUNT_BITS 32
 #endif
+// The witness is a factorisation of THIS iteration function.  The table walk
+// of ITERATION-FUNCTION.md picks its addend from a table instead of computing
+// sigma^j(R), so a trail there is not [prod_j (1 + s^j)^{n_j}]R_0 and eight
+// counters say nothing about it.  Refuse the combination rather than emit
+// records whose counts are meaningless, or -- worse -- uninitialised, since
+// that path's report sites never fill them.
+#if ECC_WITNESS && defined(ECC_WALK_TABLE) && ECC_WALK_TABLE
+#error "WITNESS=1 needs the sigma^j + 1 iteration: the table walk has no (1 + s^j)^{n_j} factorisation. Build with WITNESS=0 or WALK_TABLE=0."
+#endif
+
 // Counters are walk state, so a checkpoint written with them cannot be read by
 // a build without them and the version has to say so.  With ECC_WITNESS=0 the
 // array is not allocated at all and the format is byte-identical to what
 // shipped, which is what makes the control in CAIRN-WITNESS.md a control.
-#define ECC_CKPT_BUMP (ECC_WITNESS ? 1u : 0u)
+//
+// 16 and not 1: the versions in use are 1 (bitsliced), 2 (packed) and 3 (the
+// packed table walk), so a bump of one would have put the witnessed packed
+// format on 3 and given two different layouts the same number -- which is the
+// one thing a format version exists to prevent.  A wide bump also leaves the
+// small numbers free for whatever is added next.
+#define ECC_CKPT_BUMP (ECC_WITNESS ? 16u : 0u)
 
 struct DpRecord {
     unsigned long long seed;
@@ -58,6 +83,8 @@ struct DpRecord {
     // no separate validity flag to keep in step with anything.
     unsigned counts[ECC_JCOUNT];
 };
+// Reserved host fetch result. No valid launch may report this many points.
+static constexpr unsigned ECC_SEED_EXHAUSTED = ~0u;
 
 // Scalar per-walk counter layout, for the backends where one worker is one
 // walk rather than one lane of a bitsliced word.  Thread innermost, so a

@@ -1,0 +1,21 @@
+{
+  "agent_budget_seconds": 0,
+  "agent_mode": "nop",
+  "autolab_commit": "4127da3dde8449be61a1cf9859473b9fbbd51751",
+  "baseline_round": "/home/ubuntu/crypto/research/ic_autolab_harness_20260915/runs/autolab-20260915T205319Z/jobs/autolab-20260915T205319Z/task__s4YLvUd/verifier/round-20260915t205319z",
+  "cloud_resources_created": false,
+  "cpus": 2,
+  "created_utc": "20260915T224645Z",
+  "harbor_version": "0.3.0",
+  "image_id": "sha256:68e32e2cf212ceda22065b836dd130e8c89c9172e17684f39da1046122352cb9",
+  "inference_policy": "No model calls; frozen source-candidate verification",
+  "local_compute_price_usd_per_hour": null,
+  "maximum_allocated_container_cpu_hours": 4,
+  "maximum_allocated_gib_hours": 16,
+  "memory_gib": 8,
+  "merge_policy": "Preserve isolated candidate and evidence; no automatic library merge",
+  "promotion_gate": "<=0.7 complete Ir cost ratio; paired 95% upper <1; max cell ratio <=1.1; verified fresh holdouts and replay",
+  "unit": "ic-autolab-20260915t224645z",
+  "verifier_budget_seconds": 3300,
+  "wall_budget_seconds": 7200
+}

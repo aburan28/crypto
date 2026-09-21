@@ -1,7 +1,7 @@
 //! # Descent of quotient coordinates to `F_p`: the Klein invariants in
 //! Gaudry's setting.
 //!
-//! §10.3 of `RESEARCH_EXOTIC_COORDINATES.md` ended on "bits, not degrees":
+//! §10.3 of `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md` ended on "bits, not degrees":
 //! the full 2-torsion group `E[2] ≅ (Z/2)²` quadruples the collapse but
 //! does not halve the per-point degree twice, and whether its invariants
 //! give a *cheaper system* is a question about the descended equations,

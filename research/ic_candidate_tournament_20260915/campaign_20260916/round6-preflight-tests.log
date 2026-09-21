@@ -1,0 +1,63 @@
+===== combined
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+ 94 | impl EdPoint {
+    Finished `release` profile [optimized] target(s) in 1m 42s
+     Running unittests src/lib.rs (../../round6-preflight-build/combined/release/deps/crypto_lib-cbd63239b50309c0)
+running 5 tests
+test cryptanalysis::koblitz_index_calculus::tournament_lambda_table_equivalence::lambda_powers_match_modular_exponentiation ... ok
+test cryptanalysis::koblitz_index_calculus::tournament_fast_orbits_equivalence::single_word_orbit_tables_match_general_tables ... ok
+test cryptanalysis::semaev_decomp::tournament_inverse_equivalence::inverse_matches_fermat_and_multiplies_to_one ... ok
+test cryptanalysis::koblitz_index_calculus::tournament_lift_equivalence::fast_factor_base_lift_matches_general_including_order ... ok
+test cryptanalysis::koblitz_index_calculus::tournament_fast_curve_once_equivalence::shared_curve_lift_and_verification_match_per_call_construction ... ok
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 2514 filtered out; finished in 0.46s
+===== fast_curve_once
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+ 94 | impl EdPoint {
+    Finished `release` profile [optimized] target(s) in 1m 40s
+     Running unittests src/lib.rs (../../round6-preflight-build/fast_curve_once/release/deps/crypto_lib-cbd63239b50309c0)
+running 2 tests
+test cryptanalysis::koblitz_index_calculus::tournament_lift_equivalence::fast_factor_base_lift_matches_general_including_order ... ok
+test cryptanalysis::koblitz_index_calculus::tournament_fast_curve_once_equivalence::shared_curve_lift_and_verification_match_per_call_construction ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 2514 filtered out; finished in 0.46s
+===== euclid_inv
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+             [lints.rust]
+             unexpected_cfgs = { level = "warn", check-cfg = ['cfg(hashclash_linked)'] }
+ 94 | impl EdPoint {
+    Finished `release` profile [optimized] target(s) in 1m 42s
+     Running unittests src/lib.rs (../../round6-preflight-build/euclid_inv/release/deps/crypto_lib-cbd63239b50309c0)
+running 2 tests
+test cryptanalysis::semaev_decomp::tournament_inverse_equivalence::inverse_matches_fermat_and_multiplies_to_one ... ok
+test cryptanalysis::koblitz_index_calculus::tournament_lift_equivalence::fast_factor_base_lift_matches_general_including_order ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 2514 filtered out; finished in 0.18s

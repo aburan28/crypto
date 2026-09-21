@@ -369,3 +369,58 @@ footer h2 { color: var(--ink); font-size: 14px; margin: 0 0 8px; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ---- browser GPU rho (see assets/rho-gpu.js) ---- */
+
+.rho-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: center;
+  margin: 18px 0 4px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.rho-controls label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14.5px;
+  color: var(--ink);
+}
+.rho-controls input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--good);
+  margin: 0;
+}
+.rho-controls select {
+  margin-left: 8px;
+  padding: 5px 8px;
+  background: var(--panel-2);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: 12.5px var(--mono);
+}
+.rho-controls .hint { color: var(--muted); font-size: 12.5px; }
+#rho-gpu.unavailable .rho-controls label:not(:first-child),
+#rho-gpu.unavailable .rho-controls select { opacity: 0.45; }
+
+.rho-live {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  margin-top: 14px;
+  padding-top: 14px;
+}
+.rho-live dd { font-size: 14px; font-weight: 500; word-break: break-word; }
+.rho-live dd.mono { font-family: var(--mono); font-size: 13px; }
+.s-good { color: var(--good); }
+.s-warn { color: var(--warn); }
+.s-bad { color: var(--bad); }
+#rho-note:empty { display: none; }
+
+/* Frozen performance overview */
+.performance-summary{margin:28px 0;padding:clamp(20px,4vw,34px);border:1px solid var(--line);border-top:3px solid var(--good);border-radius:14px;background:rgba(79,232,174,.035)}
+.performance-summary h2{font-size:clamp(23px,3vw,32px);margin:8px 0 22px}.performance-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.performance-stats strong{display:block;font-size:clamp(32px,4vw,46px);color:var(--good);line-height:1.2}.performance-stats span{display:block;font-weight:600;margin:8px 0}.performance-stats small{color:var(--muted);line-height:1.6}.performance-summary>p:not(.kicker){color:var(--muted);max-width:85ch}.performance-link{display:inline-flex;align-items:center;min-height:44px;font-weight:600}a:focus-visible{outline:2px solid var(--good);outline-offset:4px}@media(max-width:580px){.performance-stats{grid-template-columns:1fr;gap:18px}.performance-stats>div{padding-bottom:16px;border-bottom:1px solid var(--line)}}

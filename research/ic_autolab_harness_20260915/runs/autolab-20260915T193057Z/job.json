@@ -1,0 +1,32 @@
+{
+  "agents": [
+    {
+      "import_path": "free_agent:FreeOpenCode",
+      "model_name": "opencode/mimo-v2.5-free",
+      "override_setup_timeout_sec": 120
+    }
+  ],
+  "environment": {
+    "delete": false,
+    "kwargs": {
+      "keep_containers": true
+    },
+    "type": "docker"
+  },
+  "job_name": "autolab-20260915T193057Z",
+  "jobs_dir": "/home/ubuntu/crypto/research/ic_autolab_harness_20260915/runs/autolab-20260915T193057Z/jobs",
+  "n_attempts": 1,
+  "n_concurrent_trials": 1,
+  "quiet": true,
+  "retry": {
+    "max_retries": 0
+  },
+  "tasks": [
+    {
+      "path": "/home/ubuntu/crypto/research/ic_autolab_harness_20260915/runs/autolab-20260915T193057Z/task"
+    }
+  ],
+  "verifier": {
+    "max_timeout_sec": 3300
+  }
+}

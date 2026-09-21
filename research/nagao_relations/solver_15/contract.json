@@ -1,0 +1,32 @@
+{
+  "hypothesis": "Re-run of solver_14's M3 with a corrected instance minter, carrying the span-boundary measurement to d = 45 and beyond so the falsifier is answered by evidence rather than by a monotonicity argument. Prediction unchanged: the affine span of the S4 value set saturates F_2^131 for every d >= 7, so the linear NO-certificate that exists at d <= 6 is unavailable at the d = 45 where decompositions begin to exist.",
+  "why_this_is_the_remaining_question": "solver_12 and solver_13 closed the search-reorganisation routes: the Riemann-Roch encoding is Theta(|F|^2) with a constant worse than brute-force pair enumeration. The one place left for the falsification target of RESEARCH_ECC2K130_DECOMPOSITION.md section 5.3 to give is an oracle that exploits the algebraic structure of F rather than re-indexing a generic 3SUM search over it. Weil descent to F_2 in the subspace basis is the textbook way to do that (Gaudry, Diem, Petit-Quisquater), and it has never been run at n = 131: the repository's Rust implementation caps at n <= 64 because FieldStructure::new reduces structure constants through F2mElement::raw_bits().first(), a single u64.",
+  "curve": "K_0 : y^2 + xy = x^3 + 1 over GF(2^131), ONB model, group order checked against the Koblitz recurrence as 4r with the published 129-bit prime. Same curve and same subspace factor base as solver_10, solver_12 and solver_13.",
+  "system": "S4 in the elementary-symmetric form validated in solver_06 against src/cryptanalysis/koblitz_symmetrised.rs: e3^4 + (e4+1)*e3^2 + e4*(e4+1)*e1^2 + e1^4 on the four abscissas x1, x2, x3, x(R), with b = 1. Each xi = sum_j v_ij * b_j over the ONB basis of V, giving N = 3d Boolean unknowns; the 131 field coordinates give 131 Boolean equations.",
+  "measurements": [
+    "M3 Span boundary. For d = 4..12 and for d = 45 (the existence threshold) and beyond, sample assignments, accumulate the F2-affine span of the value set, and report its dimension and whether 0 is excluded. Several independent targets per d.",
+    "M4 Soundness gate. On PLANTED (decomposable) targets the value set contains 0, so no certificate may exist. Any planted target admitting a certificate is a correctness failure and invalidates the round."
+  ],
+  "falsification": "The hypothesis is falsified if the span stays a proper subspace at d >= 45, since the certificate would then be available at parameters where decompositions exist -- which would be a genuine sub-quadratic decision oracle and a major result. It is also falsified if the refutation degree exceeds 6, or needs multipliers, at any measured d below saturation. The soundness gate M4 overrides everything: a certificate on a decomposable target means the construction is wrong.",
+  "limits": "THE CERTIFICATE IS ONE-SIDED AND FINDS NOTHING. It can only prove that no decomposition exists; its absence proves nothing, and it never produces a witness. Section 3.2 of the background note converts a yes/no detector into a witness finder with k|F| further whole-base queries, but that conversion needs a detector that is correct in both directions, which this is not. M1 and M2 build the ANF by exhausting 2^(3d) assignments, which is a MEASUREMENT cost and larger than the brute-force search it is analysing; a deployed oracle would build the same ANF symbolically in poly(d), and no cost claim here rests on the exhaustive construction. M3's span dimension is computed from samples and is therefore a lower bound that rises to the true value; it is reported with the sample count and is stable well before the reported figure. Saturation at 131 is reported as measured on the sampled targets, not proved for all targets. No yield, Lambda, S or rho ratio is computed, and nothing here is an attack cost.",
+  "supersedes": "solver_14, whose M3 stopped at d = 12. See solver_14/DEFECT.md: its plantedTarget() enumerated all 2^d - 1 abscissas, which does not terminate usefully past d ~ 24. solver_14's records are valid and are not re-run here; this round repeats only M3 and M4, at every d including the large ones.",
+  "method": "Identical S4 descent and span accumulation. The ONLY change is that planted targets are minted by SAMPLING random subspace elements and keeping those that lift to the curve, instead of enumerating the subspace. Sampling is sound for this purpose because the gate only needs some decomposable target, not a uniform one over decomposable targets.",
+  "panels_d": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    10,
+    12,
+    16,
+    24,
+    32,
+    40,
+    44,
+    45,
+    48,
+    64,
+    80
+  ]
+}

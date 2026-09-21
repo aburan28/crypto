@@ -1,0 +1,23 @@
+{
+  "schema": "koblitz_github_reproduction_custody.v1",
+  "recorded_at": "2026-09-09",
+  "run_id": 34428320022,
+  "run_url": "https://github.com/aburan28/crypto/actions/runs/34428320022",
+  "job_id": 102718202102,
+  "pull_request": 99,
+  "head_sha": "5bfb8880c346ea75982b68eae10852bcb4286f09",
+  "environment": "ubuntu-latest Linux x86_64",
+  "duration": "7m09s",
+  "artifact_name": "koblitz-sota-gate-external-reproduction",
+  "artifact_archive": "stage-11-github-run-34428320022",
+  "checks": {
+    "fresh_checkout_build": "pass",
+    "degree9_controls": "pass",
+    "degree15_public_discovery_and_five_pairs": "pass",
+    "degree23_two_curve_discovery_and_pair": "pass",
+    "fail_closed_verifier": "pass",
+    "focused_library_tests": "37 passed, 1 ignored",
+    "artifact_upload": "pass"
+  },
+  "independence_boundary": "External execution environment only; workflow and verifier are project-authored, so this is not independent methodology or novelty review."
+}

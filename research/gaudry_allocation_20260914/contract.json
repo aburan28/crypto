@@ -1,0 +1,17 @@
+{
+  "classification": "engineering",
+  "parent_contract": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+  "boundary": "Representation-only optimization: identical field operations, complete solution sets, relation streams and recovered scalar. No change to the generic-group floor or asymptotic exponent.",
+  "target": "Remove pivot-row and memo-result copying. Require exact solver outputs and existing arithmetic counters. Report paired cold process time, with no speedup claim unless a paired 95% confidence interval excludes one.",
+  "wdsat_exception": "This is the prime-cubic-field Gaudry symmetrized-S4 solver, not binary ANF WDSat. Replay the same 60 residuals per stage case, plus fresh holdouts, against the unmodified solver and independent MITM oracle.",
+  "stage_cases": [[67, 11], [271, 1], [67, 401], [271, 503]],
+  "stage_residuals": 60,
+  "full_dlp_cases": [[67, 11], [67, 401], [67, 503]],
+  "repetitions": 3,
+  "max_residuals": 20000,
+  "timeout_seconds": 180,
+  "timing_order_seed": 20260914,
+  "primary_total_operations": null,
+  "floor_ratio": null,
+  "reason_primary_null": "Existing solver counters and rho calibration are retained; cold instance/factor-base construction and runtime bookkeeping are not fully calibrated in common operations. Process timings cover those phases, but cannot establish a total-operation speedup."
+}

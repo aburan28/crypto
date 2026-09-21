@@ -1,0 +1,21 @@
+{
+  "binary_relative": "source_candidates/tiny/worker",
+  "changed_parameters": {
+    "batch_trials": 1
+  },
+  "config": {
+    "batch_trials": 1,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+  "falsification": "Any bad or unmatched certificate; or failure of the both-metric confirmation/replay gate against the incumbent.",
+  "hypothesis": "With a cheap incremental rank check, one probe per batch avoids surplus probes after the columns are determined.",
+  "id": "tiny_batch1",
+  "parent": "tiny",
+  "source_directory": "source_candidates/tiny/source",
+  "source_manifest_relative": "source_candidates/tiny/source-manifest.json",
+  "source_manifest_sha256": "049a1fa0397fde7488a50ef21440a5309009785dbd70d42c5e95eeb802ded2c6"
+}

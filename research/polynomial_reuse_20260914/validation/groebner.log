@@ -1,0 +1,18 @@
+
+running 13 tests
+test cryptanalysis::koblitz_groebner::tests::infeasible_system_is_closed_by_the_basis ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_mul_matches_field_mul ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_square_matches_mul_by_self ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_s3_matches_scalar_s3 ... ok
+test cryptanalysis::koblitz_groebner::tests::structure_constants_match_the_curve_field ... ok
+test cryptanalysis::koblitz_groebner::tests::known_decomposition_is_a_root_of_the_system ... ok
+test cryptanalysis::koblitz_groebner::tests::system_degree_is_two_for_m2_and_three_when_chained ... ok
+test cryptanalysis::koblitz_groebner::tests::the_decomposition_systems_are_multilinear_in_their_blocks ... ok
+test cryptanalysis::koblitz_groebner::tests::splitting_solver_agrees_with_exhaustive_evaluation ... ok
+test cryptanalysis::koblitz_groebner::tests::every_split_rule_finds_exactly_the_solutions ... ok
+test cryptanalysis::koblitz_groebner::tests::fixing_x1_leaves_a_system_in_two_summands ... ok
+test cryptanalysis::koblitz_groebner::tests::the_blocked_macaulay_returns_only_ideal_members ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_s4_matches_the_scalar_symmetrised_s4 ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 2504 filtered out; finished in 0.11s
+

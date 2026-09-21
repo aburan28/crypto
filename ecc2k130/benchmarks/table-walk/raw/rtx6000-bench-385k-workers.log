@@ -1,0 +1,28 @@
++ cd /work/ecc
++ cat
++ docker run --rm --gpus all -v /work/ecc:/src -w /src nvidia/cuda:13.3.1-devel-ubuntu24.04 bash /src/benchjob4.sh
++ grep -v '^==$\|^== CUDA\|Copyright\|license\|LICENSE\|NGC\|^$\|CUDA Version'
+==========
+==========
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+=== audited geometry: --threads 385024 (RTX_PRO6000_WORKERS), 1024 steps x 32 launches
+=== bench385k legacy rep 1
+  finished: 15079.454 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2400 MHz, 549.05 W, 46
+=== bench385k table rep 1
+  finished: 16489.135 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2310 MHz, 554.58 W, 56
+=== bench385k legacy rep 2
+  finished: 14975.448 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2377 MHz, 551.15 W, 57
+=== bench385k table rep 2
+  finished: 16351.936 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2287 MHz, 546.57 W, 63
+=== bench385k legacy rep 3
+  finished: 14880.214 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2385 MHz, 547.44 W, 59
+=== bench385k table rep 3
+  finished: 16292.064 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2302 MHz, 548.60 W, 58
++ echo JOB_DONE
+JOB_DONE

@@ -1,0 +1,94 @@
+{
+  "rule": "A candidate needs every smoke trial VERIFIED before development; incomplete arms have null costs.",
+  "stage": "smoke",
+  "tables": [
+    {
+      "S_Ir": 133928.45599929738,
+      "candidate_over_floor": 4818030.676695076,
+      "candidate_over_incumbent": 1,
+      "candidate_over_rho": 3.1987181804694886,
+      "class": "reference",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "incumbent",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 94373.74145896247,
+      "candidate_over_floor": 3395063.267407163,
+      "candidate_over_incumbent": 0.7046578768850851,
+      "candidate_over_rho": 2.254001961803352,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "cold_context",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": null,
+      "candidate_over_floor": null,
+      "candidate_over_incumbent": null,
+      "candidate_over_rho": null,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "cube_root",
+      "verified_runs": 6
+    },
+    {
+      "S_Ir": null,
+      "candidate_over_floor": null,
+      "candidate_over_incumbent": null,
+      "candidate_over_rho": null,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "orbits1",
+      "verified_runs": 0
+    },
+    {
+      "S_Ir": 47611.94046352259,
+      "candidate_over_floor": 6626353.263321113,
+      "candidate_over_incumbent": 0.35550279519217626,
+      "candidate_over_rho": 1.1371532541889353,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "orbits2",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 54130.82898994951,
+      "candidate_over_floor": 5022409.530492118,
+      "candidate_over_incumbent": 0.4041772048072705,
+      "candidate_over_rho": 1.2928489731483561,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "orbits3",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 60438.36505946492,
+      "candidate_over_floor": 4205730.2605467895,
+      "candidate_over_incumbent": 0.45127351471730576,
+      "candidate_over_rho": 1.4434967958906113,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "orbits4",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 41869.414072495754,
+      "candidate_over_floor": null,
+      "candidate_over_incumbent": 0.3126252278508718,
+      "candidate_over_rho": 1.0,
+      "class": "reference",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "rho",
+      "verified_runs": 12
+    }
+  ]
+}

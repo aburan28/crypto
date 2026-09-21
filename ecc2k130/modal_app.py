@@ -8,10 +8,18 @@
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::profile    # Nsight Compute
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 97 --hours 4
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::fanout --curve 97 --count 8 --hours 4
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::next_run_id            # campaign run id
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 131 --packed \
+        --run-id 8000 --hours 4                                           # campaign run
 
 Curve 97 is ECC2K-95, a 2^44 iteration problem: feasible in GPU-hours, and its
 answer has been public since Harley's group solved it in 1998, so a recovered
 logarithm can be checked rather than merely believed.
+
+Curve 131 is the campaign. A search there takes its distinguished-point weight
+from aws/campaign.json and its run id from the Modal range (see CAMPAIGN_CURVE
+below for why both are refused otherwise); --off-campaign lifts both rules and
+keeps the run's files out of the upload path.
 
 The GPU comes from the ECC_GPU environment variable, which is read when this
 file is imported and baked into the function definitions.  That works on every
@@ -31,6 +39,7 @@ import json
 import os
 import pathlib
 import re
+import select
 import signal
 import struct
 import subprocess
@@ -92,6 +101,16 @@ if PACKED_GENERATED_PRODUCT == "1" and PACKED_DIRECT_REDUCE != "1":
 PACKED_CLMAD = os.environ.get("ECC_PACKED_CLMAD", "0")
 if PACKED_CLMAD not in ("0", "1"):
     raise ValueError("ECC_PACKED_CLMAD must be 0 or 1")
+PACKED_CLMAD_SQUARE = os.environ.get("ECC_PACKED_CLMAD_SQUARE", "0")
+if PACKED_CLMAD_SQUARE not in ("0", "1"):
+    raise ValueError("ECC_PACKED_CLMAD_SQUARE must be 0 or 1")
+if PACKED_CLMAD_SQUARE == "1" and PACKED_CLMAD != "1":
+    raise ValueError("ECC_PACKED_CLMAD_SQUARE requires ECC_PACKED_CLMAD")
+PACKED_KARAT3 = os.environ.get("ECC_PACKED_KARAT3", "0")
+if PACKED_KARAT3 not in ("0", "1"):
+    raise ValueError("ECC_PACKED_KARAT3 must be 0 or 1")
+if PACKED_KARAT3 == "1" and PACKED_CLMAD != "1":
+    raise ValueError("ECC_PACKED_KARAT3 requires ECC_PACKED_CLMAD")
 PACKED_WEIGHTED_PREFIX = os.environ.get("ECC_PACKED_WEIGHTED_PREFIX", "0")
 if PACKED_WEIGHTED_PREFIX not in ("0", "1", "2"):
     raise ValueError("ECC_PACKED_WEIGHTED_PREFIX must be 0, 1 or 2")
@@ -105,6 +124,25 @@ if PACKED_SHARED_SIGMA not in ("0", "1"):
     raise ValueError("ECC_PACKED_SHARED_SIGMA must be 0 or 1")
 if PACKED_SHARED_SIGMA == "1" and (PACKED_WEIGHTED_PREFIX != "2" or not (int(PACKED_PERM_SIGMA) & 1)):
     raise ValueError("ECC_PACKED_SHARED_SIGMA=1 requires weighted-prefix mode 2 and the walk permutation network")
+# The 3-bit top-word cross terms of every product on the carryless unit
+# instead of as masked shifts: four more clmads per product, 25 fewer ALU
+# instructions in SASS (77 -> 52).  Measured slower on an RTX PRO 6000
+# (12.859 vs 15.116 B/s); leave off.  See TOP-CLMAD.md.
+PACKED_TOP_CLMAD = os.environ.get("ECC_PACKED_TOP_CLMAD", "0")
+if PACKED_TOP_CLMAD not in ("0", "1"):
+    raise ValueError("ECC_PACKED_TOP_CLMAD must be 0 or 1")
+if PACKED_TOP_CLMAD == "1" and PACKED_CLMAD != "1":
+    raise ValueError("ECC_PACKED_TOP_CLMAD=1 requires ECC_PACKED_CLMAD=1")
+WALK_TABLE = os.environ.get("ECC_WALK_TABLE", "0")
+if WALK_TABLE not in ("0", "1"):
+    raise ValueError("ECC_WALK_TABLE must be 0 or 1")
+if WALK_TABLE == "1" and PACKED_WEIGHTED_PREFIX == "0":
+    raise ValueError("ECC_WALK_TABLE=1 requires ECC_PACKED_WEIGHTED_PREFIX")
+TABLE_PIVOT_BYTES = os.environ.get("ECC_TABLE_PIVOT_BYTES", "0")
+if TABLE_PIVOT_BYTES not in ("0", "1"):
+    raise ValueError("ECC_TABLE_PIVOT_BYTES must be 0 or 1")
+if TABLE_PIVOT_BYTES == "1" and WALK_TABLE != "1":
+    raise ValueError("ECC_TABLE_PIVOT_BYTES=1 requires ECC_WALK_TABLE=1")
 PACKED_STATE_TILE = os.environ.get("ECC_PACKED_STATE_TILE", "0")
 if PACKED_STATE_TILE not in ("0", "256"):
     raise ValueError("ECC_PACKED_STATE_TILE must be 0 or 256")
@@ -117,17 +155,21 @@ if PACKED_COMPACT_STATE == "1" and (PACKED_STATE_TILE != "256" or any(value != "
         (PACKED_POLY_STATE, PACKED_POLY_CHAIN, PACKED_CACHE_DENOM))):
     raise ValueError("ECC_PACKED_COMPACT_STATE=1 requires TILE256, polynomial state, polynomial chains and denominator cache")
 
-# Valid values include T4, L4, A10, L40S, A100, A100-80GB, RTX-PRO-6000, H100,
-# H200, B200 and B300; append ":n" for several of them.
+# Valid values include T4, L4, A10, L40S, A100, A100-40GB, A100-80GB,
+# RTX-PRO-6000, H100, H100!, H200, B200, B200+ and B300; append ":n" for
+# several of them. H100! / A100-40GB / B200 pin the SKU against Modal's
+# automatic upgrades (H100→H200, A100→A100-80GB, B200→B300).
 DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
 
 # Compute capability per Modal GPU type.  sm_120 is the Blackwell workstation
 # part (RTX PRO 6000), sm_100 is B200/B300, sm_90 is H100/H200, sm_89 is
-# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4.
+# L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4. Modal B300 reports
+# compute capability 10.3; the survey image still bakes sm_100, which ran.
 GPU_ARCH = {
     "T4": "75", "L4": "89", "L40S": "89", "A10": "86", "A10G": "86",
-    "A100": "80", "A100-80GB": "80", "H100": "90", "H200": "90",
-    "B200": "100", "B300": "100", "RTX-PRO-6000": "120",
+    "A100": "80", "A100-40GB": "80", "A100-80GB": "80",
+    "H100": "90", "H100!": "90", "H200": "90",
+    "B200": "100", "B200+": "100", "B300": "100", "RTX-PRO-6000": "120",
 }
 ALL_ARCHES = ("80", "89", "90", "100", "120")
 
@@ -142,7 +184,10 @@ def archesFor(gpu):
     GPU can run.  An unrecognised name falls back to the full set rather than
     guessing, since a missing architecture is a runtime failure, not a slow
     build."""
-    arch = GPU_ARCH.get(gpu.split(":")[0].strip())
+    key = gpu.split(":")[0].strip()
+    arch = GPU_ARCH.get(key)
+    if arch is None and key.endswith(("!", "+")):
+        arch = GPU_ARCH.get(key.rstrip("!+"))
     return (arch,) if arch else ALL_ARCHES
 
 
@@ -160,8 +205,13 @@ BAKED = {"batch": 32, "threads": 256 if PACKED_STATE_TILE == "256" else 128, "le
          "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
          "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
          "packedClmad": PACKED_CLMAD == "1",
+         "packedClmadSquare": PACKED_CLMAD_SQUARE == "1",
+         "packedKarat3": PACKED_KARAT3 == "1",
          "packedCompactState": PACKED_COMPACT_STATE == "1",
          "packedSharedSigma": PACKED_SHARED_SIGMA == "1",
+         "packedTopClmad": PACKED_TOP_CLMAD == "1",
+         "walkTable": WALK_TABLE == "1",
+         "tablePivotBytes": TABLE_PIVOT_BYTES == "1",
          "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
          "packedStateTile": int(PACKED_STATE_TILE)}
 
@@ -192,8 +242,13 @@ image = (
           "ECC_PACKED_DIRECT_REDUCE": PACKED_DIRECT_REDUCE,
           "ECC_PACKED_GENERATED_PRODUCT": PACKED_GENERATED_PRODUCT,
           "ECC_PACKED_CLMAD": PACKED_CLMAD,
+          "ECC_PACKED_CLMAD_SQUARE": PACKED_CLMAD_SQUARE,
+          "ECC_PACKED_KARAT3": PACKED_KARAT3,
           "ECC_PACKED_COMPACT_STATE": PACKED_COMPACT_STATE,
           "ECC_PACKED_SHARED_SIGMA": PACKED_SHARED_SIGMA,
+          "ECC_PACKED_TOP_CLMAD": PACKED_TOP_CLMAD,
+          "ECC_WALK_TABLE": WALK_TABLE,
+          "ECC_TABLE_PIVOT_BYTES": TABLE_PIVOT_BYTES,
           "ECC_PACKED_WEIGHTED_PREFIX": PACKED_WEIGHTED_PREFIX,
           "ECC_PACKED_STATE_TILE": PACKED_STATE_TILE})
     .apt_install("build-essential")
@@ -218,7 +273,7 @@ image = (
         f'PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} '
         f'PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} '
         f'PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} '
-        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}',
+        f'PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}',
     )
 )
 
@@ -313,8 +368,13 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
             "packedDirectReduction": PACKED_DIRECT_REDUCE == "1",
             "packedGeneratedProduct": PACKED_GENERATED_PRODUCT == "1",
             "packedClmad": PACKED_CLMAD == "1",
+            "packedClmadSquare": PACKED_CLMAD_SQUARE == "1",
+            "packedKarat3": PACKED_KARAT3 == "1",
             "packedCompactState": PACKED_COMPACT_STATE == "1",
             "packedSharedSigma": PACKED_SHARED_SIGMA == "1",
+            "packedTopClmad": PACKED_TOP_CLMAD == "1",
+            "walkTable": WALK_TABLE == "1",
+            "tablePivotBytes": TABLE_PIVOT_BYTES == "1",
             "packedWeightedPrefix": int(PACKED_WEIGHTED_PREFIX),
             "packedStateTile": int(PACKED_STATE_TILE)}
     if smemSpill and int(CUDA_VERSION.split('.')[0]) < 13:
@@ -342,7 +402,7 @@ def buildFor(batch, threads, leaf, arch=None, minBlocks=2,
         f"PACKED_POLY_CHAIN={PACKED_POLY_CHAIN} PACKED_UNROLL_INV={PACKED_UNROLL_INV} "
         f"PACKED_PAIR_PRODUCTS={PACKED_PAIR_PRODUCTS} PACKED_POLY_STATE={PACKED_POLY_STATE} "
         f"PACKED_DIRECT_REDUCE={PACKED_DIRECT_REDUCE} "
-        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE}",
+        f"PACKED_GENERATED_PRODUCT={PACKED_GENERATED_PRODUCT} PACKED_CLMAD={PACKED_CLMAD} PACKED_CLMAD_SQUARE={PACKED_CLMAD_SQUARE} PACKED_KARAT3={PACKED_KARAT3} PACKED_COMPACT_STATE={PACKED_COMPACT_STATE} PACKED_SHARED_SIGMA={PACKED_SHARED_SIGMA} PACKED_TOP_CLMAD={PACKED_TOP_CLMAD} PACKED_WEIGHTED_PREFIX={PACKED_WEIGHTED_PREFIX} PACKED_STATE_TILE={PACKED_STATE_TILE} WALK_TABLE={WALK_TABLE} TABLE_PIVOT_BYTES={TABLE_PIVOT_BYTES}",
         timeout=1800,
         prefix="  build| ",
     )
@@ -379,8 +439,13 @@ def benchmarkIdentity(packed=False):
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                 packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                packedClmadSquare=(PACKED_CLMAD_SQUARE == '1') if packed else None,
+                packedKarat3=(PACKED_KARAT3 == '1') if packed else None,
                 packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                 packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
+                packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
+                walkTable=(WALK_TABLE == '1') if packed else None,
+                tablePivotBytes=(TABLE_PIVOT_BYTES == '1') if packed else None,
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                 packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                 gpuState=gpu, gpuStateReturncode=gpuRc, cudaImageVersion=CUDA_VERSION)
@@ -392,8 +457,11 @@ def checkPackedReduction(sample):
         ('direct reduction', 'packedDirectReduction', 'expectedPackedDirectReduction', PACKED_DIRECT_REDUCE),
         ('generated product', 'packedGeneratedProduct', 'expectedPackedGeneratedProduct', PACKED_GENERATED_PRODUCT),
         ('native carryless multiply', 'packedClmad', 'expectedPackedClmad', PACKED_CLMAD),
+        ('native carryless square', 'packedClmadSquare', 'expectedPackedClmadSquare', PACKED_CLMAD_SQUARE),
+        ('three-limb Karatsuba', 'packedKarat3', 'expectedPackedKarat3', PACKED_KARAT3),
         ('compact state', 'packedCompactState', 'expectedPackedCompactState', PACKED_COMPACT_STATE),
         ('shared sigma', 'packedSharedSigma', 'expectedPackedSharedSigma', PACKED_SHARED_SIGMA),
+        ('top clmad', 'packedTopClmad', 'expectedPackedTopClmad', PACKED_TOP_CLMAD),
     ):
         modes = re.findall(r'^packed ' + marker + r': (.*)$', sample.get('raw', ''), re.MULTILINE)
         actual = modes[0] if len(modes) == 1 else None
@@ -538,8 +606,13 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                 packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                 packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                packedClmadSquare=(PACKED_CLMAD_SQUARE == '1') if packed else None,
+                packedKarat3=(PACKED_KARAT3 == '1') if packed else None,
                 packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                 packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
+                packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
+                walkTable=(WALK_TABLE == '1') if packed else None,
+                tablePivotBytes=(TABLE_PIVOT_BYTES == '1') if packed else None,
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                 packedStateTile=int(PACKED_STATE_TILE) if packed else None)
     want = dict(batch=batch, threads=threads, leaf=leaf, minBlocks=minBlocks,
@@ -547,8 +620,13 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
                 packedClmad=PACKED_CLMAD == '1',
+                packedClmadSquare=PACKED_CLMAD_SQUARE == '1',
+                packedKarat3=PACKED_KARAT3 == '1',
                 packedCompactState=PACKED_COMPACT_STATE == '1',
                 packedSharedSigma=PACKED_SHARED_SIGMA == '1',
+                packedTopClmad=PACKED_TOP_CLMAD == '1',
+                walkTable=WALK_TABLE == '1',
+                tablePivotBytes=TABLE_PIVOT_BYTES == '1',
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX),
                 packedStateTile=int(PACKED_STATE_TILE))
     if not rebuild and (streamKarat or smemSpill or globalCg or not bakedIntact[0]
@@ -562,6 +640,91 @@ def runBench(batch=32, threads=128, leaf=0, minBlocks=2, steps=64, launches=20,
             return dict(info, valid=False, rate=0.0, error=log)
     info['identity'] = benchmarkIdentity(packed)
     info.update(measureBench(steps, launches, workers, preferL1, repeats, packed))
+    return info
+
+
+def parseWaveList(text):
+    """Positive integer wave counts, comma-separated, order preserved."""
+    waves = []
+    for part in text.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        n = int(part)
+        if n < 1:
+            raise ValueError("waves must be positive integers, got %r" % part)
+        waves.append(n)
+    if not waves:
+        raise ValueError("waves is empty")
+    return waves
+
+
+def parsePackedLaunch(text):
+    """SM count and automatic worker count from one packed client dump."""
+    sms = re.search(r"(\d+) SMs", text)
+    resident = re.search(
+        r"(\d+) block\(s\) of (\d+) packed threads resident per SM", text)
+    threads = re.search(r"backend cuda-packed131: (\d+) threads", text)
+    if not (sms and resident and threads):
+        raise ValueError("packed launch identity missing from:\n" + text[-2000:])
+    return {
+        "sms": int(sms.group(1)),
+        "residentBlocks": int(resident.group(1)),
+        "blockThreads": int(resident.group(2)),
+        "automaticThreads": int(threads.group(1)),
+    }
+
+
+@app.function(image=image, gpu=DEFAULT_GPU, timeout=4 * HOUR)
+def runWaves(batch=32, threads=256, leaf=0, minBlocks=2, steps=1024, launches=32,
+             repeats=3, packed=True, waves="1,4,6,8", preferL1=False):
+    """One allocation, several oversubscribed grids.
+
+    Automatic occupancy is one wave: SMs × resident blocks × block threads.
+    The shipping 6000 preset is four waves. This measures that multiplier on
+    the same GPU, same binary, without a rebuild between rows.
+    """
+    if not packed:
+        raise ValueError("runWaves is the packed-walk occupancy sweep")
+    if leaf:
+        raise ValueError("packed arithmetic requires leaf=0")
+    waveList = parseWaveList(waves)
+    info = dict(gpu=gpuName(), cc=computeCapability(), batch=batch,
+                threads=threads, leaf=leaf, minBlocks=minBlocks,
+                steps=steps, launches=launches, repeats=repeats,
+                packed=True, waves=waveList, preferL1=preferL1)
+    ok, log = buildFor(batch, threads, leaf, minBlocks=minBlocks)
+    info["buildLog"] = log
+    if not ok:
+        return dict(info, valid=False, error=log)
+    info["identity"] = benchmarkIdentity(True)
+    probe = ("./ecc2k130 --curve 131 --bench --packed --steps 1 --launches 1 "
+             "--verify 0")
+    rc, out = sh(probe, timeout=600)
+    if rc != 0:
+        return dict(info, valid=False, error=out, probe=out)
+    launch = parsePackedLaunch(out)
+    info.update(launch)
+    info["probe"] = out
+    print("automatic occupancy: %d threads on %d SMs (%d x %d resident)"
+          % (launch["automaticThreads"], launch["sms"],
+             launch["residentBlocks"], launch["blockThreads"]), flush=True)
+    rows = []
+    for wave in waveList:
+        workers = launch["automaticThreads"] * wave
+        print("=== wave %d: %d workers ===" % (wave, workers), flush=True)
+        measured = measureBench(steps, launches, workers, preferL1, repeats, True)
+        row = dict(wave=wave, workers=workers, **measured)
+        if launch["sms"] and measured.get("valid"):
+            row["perSmM"] = measured["rate"] / launch["sms"]
+            row["medianB"] = measured["rate"] / 1000.0
+        rows.append(row)
+        if not measured.get("valid"):
+            break
+    info["rows"] = rows
+    info["valid"] = bool(rows) and all(r.get("valid") for r in rows)
+    validRows = [r for r in rows if r.get("valid")]
+    info["best"] = max(validRows, key=lambda r: r["rate"]) if validRows else None
     return info
 
 
@@ -637,8 +800,13 @@ def runAutotune(batches="8,16,32,64", threadCounts="64,128,256", leaves="0,17,33
                    packedDirectReduction=(PACKED_DIRECT_REDUCE == '1') if packed else None,
                    packedGeneratedProduct=(PACKED_GENERATED_PRODUCT == '1') if packed else None,
                    packedClmad=(PACKED_CLMAD == '1') if packed else None,
+                   packedClmadSquare=(PACKED_CLMAD_SQUARE == '1') if packed else None,
+                   packedKarat3=(PACKED_KARAT3 == '1') if packed else None,
                    packedCompactState=(PACKED_COMPACT_STATE == '1') if packed else None,
                    packedSharedSigma=(PACKED_SHARED_SIGMA == '1') if packed else None,
+                   packedTopClmad=(PACKED_TOP_CLMAD == '1') if packed else None,
+                   walkTable=(WALK_TABLE == '1') if packed else None,
+                   tablePivotBytes=(TABLE_PIVOT_BYTES == '1') if packed else None,
                    packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX) if packed else None,
                    packedStateTile=int(PACKED_STATE_TILE) if packed else None,
                    buildSeconds=round(time.time() - t0, 1), buildLog=log)
@@ -784,6 +952,121 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     return result
 
 
+# ---------------------------------------------------------------------------
+# Campaign identity. Points collected here are uploaded by modal_sync.py into
+# the ECC2K-130 campaign bucket, where they have to be *compatible* with the
+# AWS fleet's points or they can never be part of a detectable collision:
+#
+#  * Seeds are (runId << 48) | (walkIndex << 16): a run id names a seed space.
+#    modal_sync.py maps run id r to campaign slot 90000 + r, and the AWS fleet
+#    maps slot s to run id s + 1, so a Modal run id an AWS slot has ever used
+#    walks that slot's trails again, step for step. Every point it reports is
+#    one the store already holds under the same seed, dropped by ON CONFLICT
+#    with no collision recorded and nothing on the page. Run ids 1-4 did that
+#    on 2026-09-19/20 against slots 0-3: 89% of run 3's 912k records were
+#    byte-identical to slot 2's, and 100% of its seeds had been walked.
+#  * Walks stop at their own distinguished point. Two walks that merge only
+#    report the same point if they use the same cutoff; against the campaign's
+#    weight 32 a weight-34 walk's meeting is seen about 12% of the time and a
+#    weight-35 walk's about 4% (campaign.json: "dpWeight must be identical
+#    campaign-wide or cross-worker collisions can be missed"). Runs 4242-4245
+#    were launched with the run-sized default and collected at 34 and 35.
+#
+# So a campaign run refuses both: its weight comes from aws/campaign.json and
+# its run id from a range no AWS slot can reach. AWS slots are 16-bit and the
+# fleet has used 0-195; 90000 + run id must stay a five-digit slot.
+CAMPAIGN_CURVE = 131
+MODAL_RUN_ID_MIN = 8000
+MODAL_RUN_ID_MAX = 9999
+# Runs that deliberately depart from the campaign (a loose cutoff to see points
+# quickly, a different walk) live here, where modal_sync.py never looks.
+OFF_CAMPAIGN_ROOT = "/data/offcampaign"
+
+
+def campaignConfig():
+    """aws/campaign.json as this tree carries it (the image copies aws/ too)."""
+    with open(helperRoot / "aws" / "campaign.json", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def campaignDpWeight():
+    weight = int(campaignConfig()["dpWeight"])
+    if weight < 0:
+        raise ValueError("aws/campaign.json carries no dpWeight; a campaign run cannot pick one")
+    return weight
+
+
+def isCampaignRun(curve, offCampaign=False):
+    return int(curve) == CAMPAIGN_CURVE and not offCampaign
+
+
+def checkCampaignRunId(runId):
+    runId = int(runId)
+    if not (MODAL_RUN_ID_MIN <= runId <= MODAL_RUN_ID_MAX):
+        raise ValueError(
+            "run id %d is outside the Modal campaign range %d-%d: below it the id is "
+            "an AWS slot's (slot = run id - 1) and the run re-walks that slot's seeds; "
+            "above it modal_sync.py has no slot number. Pass --run-id from the range "
+            "(::next_run_id suggests the next free one) or --off-campaign to collect "
+            "outside the campaign corpus." % (runId, MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
+    return runId
+
+
+def campaignDpWeightFor(dpWeight):
+    """The cutoff a campaign run walks at: campaign.json's, and nothing else."""
+    want = campaignDpWeight()
+    if dpWeight < 0:
+        return want
+    if int(dpWeight) != want:
+        raise ValueError(
+            "dp weight %d differs from the campaign's %d; walks stop at their own "
+            "distinguished point, so a cross-weight meeting is only recorded when the "
+            "looser walk's stopping point also passes the tighter test. Use the "
+            "campaign weight, or --off-campaign to collect outside the campaign corpus."
+            % (int(dpWeight), want))
+    return want
+
+
+def dataRoot(curve, offCampaign=False):
+    return OFF_CAMPAIGN_ROOT if (int(curve) == CAMPAIGN_CURVE and offCampaign) else "/data"
+
+
+RUN_FILE_RE = re.compile(r"^curve(\d+)-run(\d+)\.(bin|ck|hdr)$")
+
+
+def usedRunIds(curve, root="/data"):
+    """Every run id with a corpus, checkpoint or header on the volume."""
+    ids = set()
+    for sub in ("dp", "ckpt"):
+        folder = os.path.join(root, sub)
+        if not os.path.isdir(folder):
+            continue
+        for name in os.listdir(folder):
+            m = RUN_FILE_RE.match(name)
+            if m and int(m.group(1)) == int(curve):
+                ids.add(int(m.group(2)))
+    return ids
+
+
+def nextFreeRunId(curve, root="/data"):
+    """One above the highest run id on the volume, inside the campaign range.
+
+    The volume is shared by every container, so this is the one place a free
+    id can be read off. It is a suggestion for the operator to pass explicitly:
+    a resumable pass loop must use the *same* id every pass, so nothing here
+    allocates one implicitly.
+    """
+    used = usedRunIds(curve, root)
+    if int(curve) == CAMPAIGN_CURVE:
+        candidates = [r for r in used if MODAL_RUN_ID_MIN <= r <= MODAL_RUN_ID_MAX]
+        nxt = (max(candidates) + 1) if candidates else MODAL_RUN_ID_MIN
+        if nxt > MODAL_RUN_ID_MAX:
+            raise ValueError("the Modal campaign run-id range %d-%d is exhausted"
+                             % (MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
+        return nxt
+    return (max(used) + 1) if used else 1
+
+
 # Expected rho iterations, and the weight cutoff that makes walks short enough
 # that most of them actually report within the run.
 CURVE_FACTS = {
@@ -855,6 +1138,60 @@ def corpusCount(path):
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
     r"(?:\s+(\d+)\s+dropped)?")
+RESUME_RE = re.compile(r"resumed from .* at iteration (\d+)")
+# Status ingest only needs the 40-byte checkpoint header. The walk-state file
+# on this geometry is ~370MB, so a 60s full-file cadence still left the page
+# idle: volume commits raced, and sync hashed the blob every pass. The sidecar
+# is what the feed polls; the full file still lands for resume.
+STATUS_HEADER_S = 15
+VOLUME_COMMIT_S = 15
+PROGRESS_PRINT_S = 15
+
+
+CKPT_MAGIC = b"ECC2K130"
+CKPT_HEADER_BYTES = 40
+
+
+def packCheckpointHeader(version, m, threads, batch, lanes, runId, iterBase):
+    return struct.pack("<8s6IQ", CKPT_MAGIC, int(version), int(m), int(threads),
+                       int(batch), int(lanes), int(runId), int(iterBase))
+
+
+def unpackCheckpointHeader(blob):
+    if len(blob) < CKPT_HEADER_BYTES or blob[:8] != CKPT_MAGIC:
+        return None
+    version, m, threads, batch, lanes, runId = struct.unpack_from("<6I", blob, 8)
+    iterBase, = struct.unpack_from("<Q", blob, 32)
+    return dict(version=version, m=m, threads=threads, batch=batch,
+                lanes=lanes, runId=runId, iterBase=iterBase)
+
+
+def readCheckpointHeader(path):
+    try:
+        with open(path, "rb") as fh:
+            return unpackCheckpointHeader(fh.read(CKPT_HEADER_BYTES))
+    except OSError:
+        return None
+
+
+def writeCheckpointHeaderFile(path, header):
+    blob = (packCheckpointHeader(header["version"], header["m"], header["threads"],
+                                 header["batch"], header["lanes"], header["runId"],
+                                 header["iterBase"])
+            if isinstance(header, dict) else header)
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as fh:
+        fh.write(blob)
+        fh.flush()
+        os.fsync(fh.fileno())
+    os.replace(tmp, path)
+    return blob
+
+
+def iterBaseFromProgress(resumeIterBase, passIters, walks):
+    if int(walks) <= 0:
+        return int(resumeIterBase)
+    return int(resumeIterBase) + int(passIters) // int(walks)
 
 
 def parseProgress(line):
@@ -865,6 +1202,39 @@ def parseProgress(line):
     return {"seconds": float(m.group(1)), "rate": float(m.group(2)),
             "iters": int(m.group(3)), "dp": int(m.group(4)), "stored": int(m.group(5)),
             "dropped": int(m.group(6)) if m.group(6) else 0}
+
+
+def parseResumeIterBase(line):
+    m = RESUME_RE.search(line)
+    return int(m.group(1)) if m else None
+
+
+def waitForLine(proc, timeout):
+    """Read one client line, or None on timeout. Commits must not wait on stdout."""
+    if proc.stdout is None:
+        return None
+    ready, _, _ = select.select([proc.stdout], [], [], max(0.0, timeout))
+    if not ready:
+        return None
+    return proc.stdout.readline()
+
+
+def defaultStatusHeader(curve, threads, batch, runId, packed):
+    return dict(version=2 if packed else 1, m=int(curve), threads=int(threads),
+                batch=int(batch), lanes=1 if packed else 32, runId=int(runId),
+                iterBase=0)
+
+
+def tryCommitVolume(volume, ckFile):
+    """Skip while the client is still writing the 370MB tmp; retry conflicts."""
+    if ckFile and os.path.exists(ckFile + ".tmp"):
+        return False
+    try:
+        volume.commit()
+        return True
+    except Exception as exc:
+        print("  volume commit failed: %s: %s" % (type(exc).__name__, exc), flush=True)
+        return False
 
 
 def humanRate(r):
@@ -896,13 +1266,30 @@ def humanBytes(n):
     return "%d B" % n
 
 
+@app.function(image=image, timeout=10 * 60, volumes={"/data": volume})
+def runNextRunId(curve=CAMPAIGN_CURVE):
+    """Suggest the next unused run id on the volume (no GPU rented)."""
+    return {"curve": int(curve), "runId": nextFreeRunId(curve),
+            "used": sorted(usedRunIds(curve)),
+            "range": ([MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX]
+                      if int(curve) == CAMPAIGN_CURVE else None)}
+
+
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=300, resume=True, loadMax=50000000, packed=False, verify=4):
+              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0,
+              offCampaign=False):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
+
+    On the campaign curve this is a campaign run unless `offCampaign` says
+    otherwise: the cutoff is aws/campaign.json's dpWeight (a different one is
+    refused, and -1 means that one rather than the run-sized guess), the run id
+    must come from the Modal range, and the files land where modal_sync.py
+    uploads them. An off-campaign run may use any weight and id, and writes
+    under OFF_CAMPAIGN_ROOT, which nothing uploads.
 
     Nothing here is throwaway.  The container dies at the deadline, but the run
     does not: the client checkpoints its live walks to the volume, reloads the
@@ -921,16 +1308,38 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     so a recovered logarithm can be checked against it."""
     if packed and (curve != 131 or leaf):
         raise ValueError('packed search requires curve=131 and leaf=0')
+    campaign = isCampaignRun(curve, offCampaign)
+    if campaign:
+        # Refused before the build and before a GPU does anything: a run that
+        # gets past here produces points the campaign can use.
+        runId = checkCampaignRunId(runId)
+        dpWeight = campaignDpWeightFor(dpWeight)
+        print("campaign run: curve %d, run id %d (campaign slot %d), dp weight %d from "
+              "aws/campaign.json" % (curve, runId, 90000 + runId, dpWeight), flush=True)
+    elif int(curve) == CAMPAIGN_CURVE:
+        print("OFF-CAMPAIGN run on curve %d: files go under %s and are never uploaded "
+              "to the campaign bucket" % (curve, OFF_CAMPAIGN_ROOT), flush=True)
+    root = dataRoot(curve, offCampaign)
+    if int(verify) > 0:
+        # --verify N replays the first N reports through the CPU reference
+        # before they are written. At dp-weight 32 that is ~2^32 scalar steps
+        # per point, and the GPU sits idle while it runs. That is why the
+        # recycled 6000s printed "resumed from" and then produced no DPs:
+        # the first report never finished verifying. validate/ still uses a
+        # budget; campaign collection does not.
+        print("WARNING: --verify %d replays reports on the CPU; campaign "
+              "collection uses --verify 0 so the walk is not stalled"
+              % int(verify), flush=True)
     backendFlag = ' --packed' if packed else ''
     if rebuild:
         ok, log = buildFor(batch, threads, leaf)
         if not ok:
             return {"error": log[-2000:]}
     name = gpuName()
-    os.makedirs("/data/dp", exist_ok=True)
-    os.makedirs("/data/ckpt", exist_ok=True)
-    dpFile = f"/data/dp/curve{curve}-run{runId}.bin"
-    ckFile = f"/data/ckpt/curve{curve}-run{runId}.ck"
+    os.makedirs(f"{root}/dp", exist_ok=True)
+    os.makedirs(f"{root}/ckpt", exist_ok=True)
+    dpFile = f"{root}/dp/curve{curve}-run{runId}.bin"
+    ckFile = f"{root}/ckpt/curve{curve}-run{runId}.ck"
     rc, out = sh(f"./ecc2k130 --curve {curve} --bench --steps 8 --launches 4 --verify 0{backendFlag}")
     rate = parseRate(out) or 1.0
     # The number of reports comes out at roughly four times the number of
@@ -968,7 +1377,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     # itself, so it is not named twice.  It reads newest-first and stops at
     # loadMax, because a collection run that never finishes -- ECC2K-130 is
     # decades of GPU time -- grows a corpus no container can hold in memory.
-    for other in sorted(corpusFiles(curve)):
+    for other in sorted(corpusFiles(curve, f"{root}/dp")):
         if other != dpFile:
             cmd += f" --load {other}"
     deadline = time.time() + hours * HOUR
@@ -978,55 +1387,84 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     lines = []
     solved = None
     started = time.time()
-    lastCommit = started
+    # Stagger the two GPUs on one volume so their commits do not collide.
+    lastCommit = started - (int(runId) % 2) * (VOLUME_COMMIT_S / 2.0)
     lastReport = started
     last = None
     stopped = ""
+    hdrFile = f"{root}/ckpt/curve{curve}-run{runId}.hdr"
+    header = readCheckpointHeader(ckFile) or defaultStatusHeader(
+        curve, workerThreads, batch, runId, packed)
+    resumeIterBase = int(header.get("iterBase", 0) or 0)
+    lastWrittenIter = None
+    lastHdrAt = 0.0
     # A container's output is the only window into a run that will outlive the
     # terminal that started it, so summarise on a fixed clock rather than
     # relaying the client's own line every two seconds.
     expected = 2.0 ** CURVE_FACTS[curve][1] if curve in CURVE_FACTS else 0.0
-    print(f"progress every 60 s; corpus {dpFile}"
+    print(f"progress every {PROGRESS_PRINT_S} s; status header every {STATUS_HEADER_S} s; "
+          f"checkpoint every {int(checkpointEvery)} s; corpus {dpFile}"
           + (f", checkpoint {ckFile}" if resume else ""), flush=True)
+
+    def pulse(now):
+        nonlocal lastCommit, lastReport, lastWrittenIter, lastHdrAt
+        # Rewrite the 40-byte sidecar when iterBase moves, at most every
+        # STATUS_HEADER_S; commit is a separate clock because two GPUs share
+        # the volume.
+        moved = header is not None and int(header["iterBase"]) != lastWrittenIter
+        if moved and (lastWrittenIter is None or now - lastHdrAt >= STATUS_HEADER_S):
+            writeCheckpointHeaderFile(hdrFile, header)
+            lastWrittenIter = int(header["iterBase"])
+            lastHdrAt = now
+        if now - lastCommit >= VOLUME_COMMIT_S:
+            lastCommit = now if tryCommitVolume(volume, ckFile) else now - VOLUME_COMMIT_S + 5
+        if now - lastReport >= PROGRESS_PRINT_S:
+            lastReport = now
+            if last:
+                frac = (" (%.3f%% of 2^%.1f)" % (100.0 * last["iters"] / expected,
+                                                 CURVE_FACTS[curve][1])) if expected else ""
+                drop = ("  %s DROPPED" % humanCount(last["dropped"])) if last["dropped"] else ""
+                print("[%s] %s M it/s  %s iters%s  %s dp  %s distinct  "
+                      "corpus %s  %s left%s"
+                      % (humanTime(now - started), humanRate(last["rate"]),
+                         humanCount(last["iters"]), frac,
+                         humanCount(last["dp"]), humanCount(last["stored"]),
+                         humanBytes(os.path.getsize(dpFile) if os.path.exists(dpFile) else 0),
+                         humanTime(deadline - now), drop), flush=True)
+            else:
+                print("[%s] no progress line yet (still starting up?)"
+                      % humanTime(now - started), flush=True)
+
     try:
         while proc.poll() is None:
-            line = proc.stdout.readline()
-            if not line:
-                break
-            lines.append(line.rstrip())
-            if "k = " in line:
-                solved = line.strip()
-            prog = parseProgress(line)
-            if prog:
-                last = prog
-            # Anything that is not a progress line is an event -- a collision, a
-            # verification failure, a checkpoint warning -- and is worth showing
-            # as it happens rather than only in the tail at the end.
-            elif line.strip():
-                print("  " + line.rstrip(), flush=True)
             now = time.time()
-            if now - lastReport >= 60:
-                lastReport = now
-                if last:
-                    frac = (" (%.3f%% of 2^%.1f)" % (100.0 * last["iters"] / expected,
-                                                     CURVE_FACTS[curve][1])) if expected else ""
-                    drop = ("  %s DROPPED" % humanCount(last["dropped"])) if last["dropped"] else ""
-                    print("[%s] %s M it/s  %s iters%s  %s dp  %s distinct  "
-                          "corpus %s  %s left%s"
-                          % (humanTime(now - started), humanRate(last["rate"]),
-                             humanCount(last["iters"]), frac,
-                             humanCount(last["dp"]), humanCount(last["stored"]),
-                             humanBytes(os.path.getsize(dpFile) if os.path.exists(dpFile) else 0),
-                             humanTime(deadline - now), drop), flush=True)
-                else:
-                    print("[%s] no progress line yet (still starting up?)"
-                          % humanTime(now - started), flush=True)
-            # Commit on a clock, not on a line count: the client's output rate
-            # depends on the launch size, so counting lines would space the
-            # commits arbitrarily far apart on a quiet run.
-            if now - lastCommit > 60:
-                volume.commit()
-                lastCommit = now
+            wait = min(5.0, max(0.0, deadline - now))
+            for stamp, every in ((lastCommit, VOLUME_COMMIT_S),
+                                 (lastReport, PROGRESS_PRINT_S)):
+                wait = min(wait, max(0.0, stamp + every - now))
+            line = waitForLine(proc, wait)
+            now = time.time()
+            if line:
+                lines.append(line.rstrip())
+                if "k = " in line:
+                    solved = line.strip()
+                resumed = parseResumeIterBase(line)
+                if resumed is not None:
+                    resumeIterBase = resumed
+                    header["iterBase"] = resumed
+                prog = parseProgress(line)
+                if prog:
+                    last = prog
+                    header["iterBase"] = iterBaseFromProgress(
+                        resumeIterBase, prog["iters"], walks)
+                # Anything that is not a progress line is an event -- a collision, a
+                # verification failure, a checkpoint warning -- and is worth showing
+                # as it happens rather than only in the tail at the end.
+                elif line.strip():
+                    print("  " + line.rstrip(), flush=True)
+            elif line == "":
+                break
+            pulse(now)
             if now > deadline:
                 stopped = "deadline"
                 break
@@ -1048,10 +1486,13 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
                 stopped = "killed before it could checkpoint"
                 proc.kill()
                 proc.wait(timeout=60)
+    if header is not None:
+        writeCheckpointHeaderFile(hdrFile, header)
     # Commit last, so the checkpoint the client just wrote is part of the
     # snapshot rather than the one before it.
-    volume.commit()
+    tryCommitVolume(volume, ckFile)
     return {"gpu": name, "distinguishedPoints": corpusCount(dpFile), "file": dpFile,
+            "runId": int(runId), "dpWeight": int(dpWeight), "campaign": campaign,
             "checkpoint": ckFile if os.path.exists(ckFile) else None,
             "checkpointBytes": os.path.getsize(ckFile) if os.path.exists(ckFile) else 0,
             "iterations": last["iters"] if last else 0,
@@ -1165,8 +1606,13 @@ def runCompileCheck(arch="120", streamKarat=False, smemSpill=False, globalCg=Fal
                 packedDirectReduction=PACKED_DIRECT_REDUCE == '1',
                 packedGeneratedProduct=PACKED_GENERATED_PRODUCT == '1',
                 packedClmad=PACKED_CLMAD == '1',
+                packedClmadSquare=PACKED_CLMAD_SQUARE == '1',
+                packedKarat3=PACKED_KARAT3 == '1',
                 packedCompactState=PACKED_COMPACT_STATE == '1',
                 packedSharedSigma=PACKED_SHARED_SIGMA == '1',
+                packedTopClmad=PACKED_TOP_CLMAD == '1',
+                walkTable=WALK_TABLE == '1',
+                tablePivotBytes=TABLE_PIVOT_BYTES == '1',
                 packedWeightedPrefix=int(PACKED_WEIGHTED_PREFIX),
                 packedStateTile=int(PACKED_STATE_TILE),
                 binarySha256=hashlib.sha256(pathlib.Path(REMOTE, 'ecc2k130').read_bytes()).hexdigest())
@@ -1200,6 +1646,22 @@ def bench(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
     print(json.dumps(r, indent=2))
     if not r.get('valid'):
         raise RuntimeError('benchmark did not complete successfully')
+
+
+@app.local_entrypoint()
+def waves(gpu: str = "", batch: int = 16, threads: int = 256, leaf: int = 0,
+          min_blocks: int = 2, steps: int = 1024, launches: int = 32,
+          repeats: int = 3, packed: bool = True, wave_list: str = "1,4,6,8",
+          prefer_l1: bool = False):
+    """Oversubscribed-grid sweep on one packed binary. --wave-list is 1,4,6,8."""
+    r = onGpu(runWaves, gpu).remote(batch=batch, threads=threads, leaf=leaf,
+                                    minBlocks=min_blocks, steps=steps,
+                                    launches=launches, repeats=repeats,
+                                    packed=packed, waves=wave_list,
+                                    preferL1=prefer_l1)
+    print(json.dumps(r, indent=2))
+    if not r.get("valid"):
+        raise RuntimeError("wave sweep did not complete successfully")
 
 
 @app.local_entrypoint()
@@ -1279,25 +1741,69 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
     print(r["report"])
 
 
+def requireExplicitRunId(curve, run_id, off_campaign, what="--run-id"):
+    """Campaign runs name their run id; nothing here picks one for them.
+
+    A pass loop resumes by launching the same id every pass, so an id chosen
+    at launch time would start a fresh seed space on every pass and leave the
+    checkpoint behind. `run_id` 0 is the request for a suggestion, answered
+    with ::next_run_id and refused here.
+    """
+    if isCampaignRun(curve, off_campaign):
+        if int(run_id) <= 0:
+            raise SystemExit(
+                "campaign runs on curve %d need an explicit %s in %d-%d; "
+                "`modal run modal_app.py::next_run_id` suggests the next free one, "
+                "and --off-campaign collects outside the campaign corpus"
+                % (curve, what, MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
+        checkCampaignRunId(run_id)
+    return int(run_id)
+
+
+@app.local_entrypoint()
+def next_run_id(curve: int = CAMPAIGN_CURVE):
+    """The next unused run id on the volume; pass it to ::search or ::fanout."""
+    print(json.dumps(runNextRunId.remote(curve=curve), indent=2))
+
+
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
-           threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
+           threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 0,
+           walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
+           verify: int = 0, checkpoint_every: int = 60, off_campaign: bool = False):
+    if not isCampaignRun(curve, off_campaign) and int(run_id) <= 0:
+        run_id = 1
+    run_id = requireExplicitRunId(curve, run_id, off_campaign)
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dp_weight,
-                                     runId=run_id, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
+                                     runId=run_id, walksTarget=walks, loadMax=load_max,
+                                     packed=packed, verify=verify,
+                                     checkpointEvery=checkpoint_every,
+                                     offCampaign=off_campaign)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False, verify: int = 4):
-    """Run `count` independent searchers, each with its own run id so their
-    seeds never collide, then merge what they produced."""
+           run_id_base: int = 0, walks: int = 4000000, load_max: int = 50000000,
+           packed: bool = False, verify: int = 0, checkpoint_every: int = 60,
+           off_campaign: bool = False):
+    """Run `count` independent searchers on run ids base .. base+count-1, so
+    their seeds never collide, then merge what they produced.
+
+    The base is explicit on the campaign curve for the same reason as
+    ::search's run id: every pass of a loop must spawn the same ids."""
+    if not isCampaignRun(curve, off_campaign) and int(run_id_base) <= 0:
+        run_id_base = 1
+    run_id_base = requireExplicitRunId(curve, run_id_base, off_campaign, "--run-id-base")
+    if isCampaignRun(curve, off_campaign):
+        checkCampaignRunId(run_id_base + count - 1)
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max, packed=packed, verify=verify)
+                      dpWeight=dp_weight, runId=run_id_base + i, walksTarget=walks,
+                      loadMax=load_max, packed=packed, verify=verify,
+                      checkpointEvery=checkpoint_every, offCampaign=off_campaign)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))
@@ -1312,3 +1818,4 @@ def merge(curve: int = 131, solve: bool = True, load_max: int = 0):
     if solve and r.get("collisionCount"):
         print("\n%d collision(s); recovering the logarithm" % r["collisionCount"])
         print(json.dumps(solveCorpus.remote(curve=curve, loadMax=load_max), indent=2))
+

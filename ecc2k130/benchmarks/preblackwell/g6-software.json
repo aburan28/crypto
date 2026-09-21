@@ -1,0 +1,72 @@
+{
+  "kind": "preblackwell complete-scalar-iteration throughput",
+  "family": "g6",
+  "gpu": "NVIDIA L4",
+  "cc": "89",
+  "valid": true,
+  "packedClmad": false,
+  "batch": 16,
+  "blockThreads": 256,
+  "minBlocks": 2,
+  "workers": "automatic",
+  "automaticThreads": 29696,
+  "steps": 1024,
+  "launches": 32,
+  "repeats": 3,
+  "sms": 58,
+  "sourceSha256": "7e230da07324777f38a2ad7a85712ebc1eb74e47a6d91db661581a63e6b65c19",
+  "binarySha256": "a7c3a9ab30a0e6fc89cf9414b42fe22313b53b8e6f56351d3d1c99c4a2d6ea20",
+  "activeBackend": "packed-poly131",
+  "cudaImageVersion": "13.3.1",
+  "gpuUuid": "GPU-2259f8c1-fd64-796e-004d-c1eadcb56901",
+  "gpuState": "name, uuid, driver_version, pstate, clocks.current.sm [MHz], clocks.current.memory [MHz], power.limit [W], temperature.gpu\nNVIDIA L4, GPU-2259f8c1-fd64-796e-004d-c1eadcb56901, 580.95.05, P8, 210 MHz, 405 MHz, 72.00 W, 36",
+  "compiler": "nvcc 13.3.73",
+  "ratesM": [
+    1331.262,
+    1323.708,
+    1315.86
+  ],
+  "minRateM": 1315.86,
+  "maxRateM": 1331.262,
+  "medianM": 1323.708,
+  "medianB": 1.323708,
+  "prior": {
+    "kind": "scaled-H1-H2-before-72W",
+    "B": 2.3
+  },
+  "ratioToPrior": 0.5755252173913045,
+  "ratioTo6000": 0.08757119706330968,
+  "perSmM": 22.82255172413793,
+  "samples": [
+    {
+      "valid": true,
+      "rateM": 1331.262,
+      "packedClmad": false,
+      "expectedPackedClmad": false,
+      "registers": 128,
+      "localBytes": 56,
+      "deviceLine": "NVIDIA L4, 58 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 29696
+    },
+    {
+      "valid": true,
+      "rateM": 1323.708,
+      "packedClmad": false,
+      "expectedPackedClmad": false,
+      "registers": 128,
+      "localBytes": 56,
+      "deviceLine": "NVIDIA L4, 58 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 29696
+    },
+    {
+      "valid": true,
+      "rateM": 1315.86,
+      "packedClmad": false,
+      "expectedPackedClmad": false,
+      "registers": 128,
+      "localBytes": 56,
+      "deviceLine": "NVIDIA L4, 58 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 29696
+    }
+  ]
+}

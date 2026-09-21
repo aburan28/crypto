@@ -1,0 +1,20 @@
+cargo test --release --locked --features redis-cache --lib koblitz_groebner:: -- --test-threads=1
+     Running unittests src/lib.rs (/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/deps/crypto_lib-826b700dda3d6423)
+running 16 tests
+test cryptanalysis::koblitz_groebner::rref_tests::paired_kernel_benchmark ... ignored, paired release benchmark; run via research/f4_linear_algebra_20260914/run.py
+test cryptanalysis::koblitz_groebner::rref_tests::rref_matches_reference_across_shapes_and_word_boundaries ... ok
+test cryptanalysis::koblitz_groebner::rref_tests::rref_skips_zero_prefix_words_and_preserves_padding ... ok
+test cryptanalysis::koblitz_groebner::tests::every_split_rule_finds_exactly_the_solutions ... ok
+test cryptanalysis::koblitz_groebner::tests::fixing_x1_leaves_a_system_in_two_summands ... ok
+test cryptanalysis::koblitz_groebner::tests::infeasible_system_is_closed_by_the_basis ... ok
+test cryptanalysis::koblitz_groebner::tests::known_decomposition_is_a_root_of_the_system ... ok
+test cryptanalysis::koblitz_groebner::tests::splitting_solver_agrees_with_exhaustive_evaluation ... ok
+test cryptanalysis::koblitz_groebner::tests::structure_constants_match_the_curve_field ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_mul_matches_field_mul ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_s3_matches_scalar_s3 ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_s4_matches_the_scalar_symmetrised_s4 ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_square_matches_mul_by_self ... ok
+test cryptanalysis::koblitz_groebner::tests::system_degree_is_two_for_m2_and_three_when_chained ... ok
+test cryptanalysis::koblitz_groebner::tests::the_blocked_macaulay_returns_only_ideal_members ... ok
+test cryptanalysis::koblitz_groebner::tests::the_decomposition_systems_are_multilinear_in_their_blocks ... ok
+test result: ok. 15 passed; 0 failed; 1 ignored; 0 measured; 2504 filtered out; finished in 0.22s

@@ -1,0 +1,30 @@
+{
+  "rows": {
+    "baseline": {
+      "runs": 36,
+      "complete": 36,
+      "verified_targets": 72,
+      "process_elapsed_ns": 116585901216,
+      "common_ops": null,
+      "S": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    },
+    "selector": {
+      "runs": 36,
+      "complete": 36,
+      "verified_targets": 72,
+      "process_elapsed_ns": 118377131745,
+      "common_ops": null,
+      "S": null,
+      "rho_ratio": null,
+      "floor_ratio": null
+    }
+  },
+  "model_file_sha256": "0f30789b363376044fffcf0a700d219f651d3120dd31973110efd114d9704c65",
+  "baseline_AA_relation_replay": true,
+  "performance_promoted": false,
+  "classification": "accounting; opt-in engineering feature",
+  "cost_scope": "native process wall time including Python startup, cold setup, model load/inference, failed queries, verification, matrix work, database commits, certificate export, output and close; independent audit excluded",
+  "limitations": "no calibrated full-process instruction count; no rho or floor comparison; tiny-field end-to-end checks are functional, not 131-bit extrapolation"
+}

@@ -1,0 +1,132 @@
+{
+  "title": "Table walk (ITERATION-FUNCTION.md section 4) against the shipping sigma walk, RTX PRO 4500",
+  "date": "2026-09-16",
+  "host": {
+    "instance": "g7.2xlarge (us-west-2)",
+    "gpu": "NVIDIA RTX PRO 4500 Blackwell Server Edition",
+    "sms": 82,
+    "clockMaxMHz": 2415,
+    "powerLimitW": 165.0,
+    "container": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "arch": "-gencode arch=compute_120,code=sm_120",
+    "note": "The target RTX PRO 6000 (g7e) could not be allocated: every launch attempt in us-east-1 and us-west-2 returned VcpuLimitExceeded because the running worker fleet holds the G-family vCPU quota. Every 6000 figure in ITERATION-FUNCTION.md section 6 is an extrapolation from this host and is marked as such."
+  },
+  "preset": "BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1",
+  "commands": {
+    "unitTest": "make test-table-walk-cuda <preset> (runs build/test-table-walk-cuda: 4096 device points against the host reference)",
+    "verify": "./ecc2k130-<variant> --curve 131 --packed --dp-weight 50 --steps 16 --launches 6 --verify 300",
+    "bench": "./ecc2k130-<variant> --curve 131 --packed --bench --steps 1024 --launches 32 --verify 0",
+    "clock": "nvidia-smi --query-gpu=clocks.sm,power.draw,temperature.gpu sampled immediately after each bench"
+  },
+  "variants": {
+    "legacy": {"knobs": "WALK_TABLE=0", "walk": "R <- sigma^j(R) + R", "aluSlotsPerUpdateStatic": 2323.5, "clmadPerUpdateStatic": 45.25, "instrPerUpdateStatic": 2545.8, "costing": "raw/kernel-cost-legacy.txt"},
+    "tablePlanes": {"knobs": "WALK_TABLE=1 TABLE_BRANCHES=8 (bit-plane selection, superseded by the LUT selection in the same PR)", "walk": "R <- R + (-1)^eps sigma^k(T_h)", "aluSlotsPerUpdateStatic": 2147.2, "clmadPerUpdateStatic": 45.25, "instrPerUpdateStatic": 2176.9, "costing": "raw/kernel-cost-table-planes.txt (predates the quarter-rate column; 2147.2 is the same SASS re-priced with POPC/FLO at 3.97 slots)"},
+    "tableLut": {"knobs": "WALK_TABLE=1 TABLE_BRANCHES=8", "walk": "R <- R + (-1)^eps sigma^k(T_h)", "selection": "byte LUT for the phase, nibble LUT for the pivot, 48,508 shared bytes per block", "aluSlotsPerUpdateStatic": 1830.7, "clmadPerUpdateStatic": 45.25, "instrPerUpdateStatic": 2084.9, "costing": "raw/kernel-cost-table-lut.txt"},
+    "tableLutAluSquare": {"knobs": "WALK_TABLE=1 TABLE_BRANCHES=8 PACKED_ALU_SQUARE=1", "aluSlotsPerUpdateStatic": 1937.8, "clmadPerUpdateStatic": 40.25, "instrPerUpdateStatic": 2172.9, "costing": "raw/kernel-cost-table-lut-alusquare.txt"}
+  },
+  "aluSlotPricing": {"alu": 1.0, "imad": 2.01, "quarterRate(POPC,FLO,BREV)": 3.97, "source": "raw/rtx4500-instruction-rates.log"},
+  "instructionRatesLanesPerSecond": {
+    "clockMHzDuringProbe": 2407,
+    "LOP3": 1.262867e13, "SHF": 1.258740e13, "PRMT": 1.263484e13, "ISETP+SEL": 1.875803e13,
+    "IMNMX": 6.988714e12, "IMAD.WIDE": 6.235186e12, "POPC": 3.162613e12, "FLO": 3.161642e12,
+    "LDS.U8 random": 1.819462e12,
+    "CLMAD.lo": 3.328936e11, "CLMAD product lo+hi (per product)": 3.953111e11,
+    "lanesPerSmClock": {"LOP3": 64.0, "POPC": 16.0, "CLMAD.lo": 1.687}
+  },
+  "correctness": {
+    "unitTest": {"points": 4096, "cycleRuleFired": 1536, "phaseMismatches": 0, "pivotMismatches": 0, "signMismatches": 0, "tagMismatches": 0, "addendWordMismatches": 0, "result": "PASS"},
+    "verify300": {
+      "tableLut": {"verified": 300, "dropped": 0, "distinguishedPoints": 331227},
+      "tableLutAluSquare": {"verified": 300, "dropped": 0, "distinguishedPoints": 331227},
+      "legacy": {"verified": 300, "dropped": 0, "distinguishedPoints": 331611},
+      "note": "identical iteration count per run; DP rate identical within 0.12%, the dpWeight predicate is unchanged"
+    },
+    "plantedLogsGF2_41": "raw/small-curve-gf2_41.txt"
+  },
+  "benchmark": {
+    "unit": "B scalar updates / s, --bench, 1024 steps x 32 launches, --verify 0",
+    "runs": [
+      {"job": "raw/rtx4500-planes-build-verify-bench.log", "legacy": [5.132563, 5.105966], "tablePlanes": [5.508951, 5.477905], "clocksMHz": "not sampled per run"},
+      {"job": "raw/rtx4500-lut-build-verify-bench.log",
+       "legacy": [5.150835, 5.106530, 5.069176], "legacyClockMHz": [1965, 1950, 1920], "legacyPowerW": [153.94, 153.81, 158.84],
+       "tableLut": [5.593211, 5.552470, 5.510157], "tableLutClockMHz": [1830, 1822, 1807], "tableLutPowerW": [154.08, 165.62, 152.81],
+       "tableLutAluSquare": [5.567730, 5.521633, 5.491350], "tableLutAluSquareClockMHz": [1830, 1822, 1987], "tableLutAluSquarePowerW": [153.51, 151.99, 151.89]}
+    ],
+    "medians": {"legacy": 5.106530, "tablePlanes": 5.493428, "tableLut": 5.552470, "tableLutAluSquare": 5.521633},
+    "ratioToLegacy": {"tablePlanes": 1.0758, "tableLut": 1.0873, "tableLutAluSquare": 1.0813},
+    "medianClockMHz": {"legacy": 1950, "tableLut": 1822, "tableLutAluSquare": 1830},
+    "updatesPerSmClock": {"legacy": 0.03194, "tableLut": 0.03717, "ratio": 1.164, "formula": "median B/s / (82 SMs x median clock)"},
+    "smClocksPerUpdate": {"legacy": 31.3, "tableLut": 26.9},
+    "powerNote": "The 4500 sits at its 165 W limit in both kernels; the table kernel draws more per clock and is clocked 6.6% lower, so its fixed-power gain (8.7%) is smaller than its per-clock gain (16.4%). The per-clock figure is the one that transfers to a GPU with power headroom."
+  },
+  "extrapolationRtxPro6000BeforeMeasurement": {
+    "marked": "EXTRAPOLATION made before the 6000 was available; retained as the 'before' mark, superseded by rtxPro6000 below",
+    "legacyMeasured": 14.637530,
+    "impliedLegacyClockGHz": 2.438,
+    "tableLutIfClockHeld": 17.04,
+    "tableLutIfClockScalesAsOn4500": 15.92
+  },
+  "rtxPro6000": {
+    "host": {
+      "instance": "g7e.2xlarge (us-east-1b, i-042094f5d76f96ccb), launched 11:25 UTC after the vCPU quota freed",
+      "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "sms": 188, "clockMaxMHz": 2430, "powerLimitW": 600.0,
+      "container": "nvidia/cuda:13.3.1-devel-ubuntu24.04", "arch": "sm_120", "preset": "same knobs as the 4500 run; binaries rebuilt on the host by gpujob.sh"
+    },
+    "instructionRatesLanesPerSecond": {
+      "log": "raw/rtx6000-probe-build-verify-bench.log", "clockMHzDuringProbe": 2347,
+      "LOP3": 2.803743e13, "SHF": 2.784319e13, "PRMT": 2.813125e13, "ISETP+SEL": 4.170605e13,
+      "IMNMX": 1.557030e13, "IMAD.WIDE": 1.378078e13, "POPC": 7.013315e12, "FLO": 7.000614e12,
+      "LDS.U8 random": 4.041016e12, "CLMAD.lo": 7.375335e11, "CLMAD product lo+hi (per product)": 8.743149e11,
+      "lanesPerSmClock": {"LOP3": 63.5, "POPC": 15.9, "CLMAD.lo": 1.672, "LDS.U8": 9.16},
+      "slotsPerClmad": 38.02, "slotsPer64x64Product": 64.14,
+      "note": "within 1% of the 4500 on every stream; the clmad ratio 1/37.7 assumed in ITERATION-FUNCTION.md section 1 is confirmed at 1/38.0"
+    },
+    "correctness": {
+      "unitTest": {"points": 4096, "cycleRuleFired": 1536, "mismatches": 0, "result": "PASS"},
+      "verify300": {
+        "command": "./ecc2k130-<variant> --curve 131 --packed --dp-weight 48 --dp-cap 262144 --steps 16 --launches 6 --verify 300",
+        "geometry": "96256 threads x 16 slots = 1,540,096 walks",
+        "tableLut": {"verified": 300, "dropped": 0, "distinguishedPoints": 264288, "exit": 0},
+        "tableLutAluSquare": {"verified": 300, "dropped": 0, "distinguishedPoints": 264288, "exit": 0},
+        "legacy": {"verified": 300, "dropped": 0, "distinguishedPoints": 264606, "exit": 0},
+        "firstAttempt": "dp-weight 50 with the default 65,536-record buffer overflowed on 188 SMs (125,865 / 126,331 reports) and aborted with exit 7 before verifying anything: raw/rtx6000-verify-dp50-overflow.log. The dp-weight 48 rerun above is the accepted check."
+      }
+    },
+    "benchmark": {
+      "unit": "B scalar updates / s, --bench --steps 1024 --launches 32 --verify 0, automatic worker count (96,256 threads)",
+      "logs": ["raw/rtx6000-probe-build-verify-bench.log", "raw/rtx6000-verify-dp48-bench-reps4-6.log"],
+      "reps": {
+        "legacy": [14.211277, 14.425870, 14.417013, 14.347139, 14.433841, 14.408255],
+        "legacyClockMHz": [2415, 2422, 2422, 2415, 2422, 2422], "legacyPowerW": [517.71, 524.63, 528.38, 516.13, 518.05, 525.88],
+        "tableLut": [16.611204, 16.570409, 16.516444, 16.628982, 16.550264, 16.515912],
+        "tableLutClockMHz": [2392, 2400, 2385, 2407, 2400, 2385], "tableLutPowerW": [544.57, 553.94, 561.04, 558.19, 556.81, 560.27],
+        "tableLutAluSquare": [16.513992, 16.455514, 16.393116, 16.482439, 16.419310, 16.407864],
+        "tableLutAluSquareClockMHz": [2400, 2385, 2385, 2407, 2392, 2377], "tableLutAluSquarePowerW": [549.44, 548.80, 553.08, 555.08, 553.81, 553.12]
+      },
+      "medians": {"legacy": 14.412634, "tableLut": 16.560337, "tableLutAluSquare": 16.437412},
+      "ratioToLegacy": {"tableLut": 1.1490, "tableLutAluSquare": 1.1405},
+      "pairedRatiosTableOverLegacy": [1.1689, 1.1487, 1.1456, 1.1590, 1.1466, 1.1463],
+      "pairedRatioRange": [1.1456, 1.1689],
+      "medianClockMHz": {"legacy": 2422, "tableLut": 2396},
+      "updatesPerSmClock": {"legacy": 0.03165, "tableLut": 0.03676, "ratio": 1.161},
+      "smClocksPerUpdate": {"legacy": 31.6, "tableLut": 27.2},
+      "powerNote": "both kernels stay under the 600 W limit (legacy ~520 W, table ~555 W); the table kernel gives up 1.1% of clock, so the fixed-power and per-clock gains nearly coincide here, unlike on the 165 W 4500"
+    },
+    "auditedGeometry": "see auditedGeometry385k below (added by the follow-up job)",
+    "auditedGeometry385k": {
+      "log": "raw/rtx6000-bench-385k-workers.log",
+      "unit": "B scalar updates / s, --bench --threads 385024 --steps 1024 --launches 32 --verify 0 (RTX_PRO6000_WORKERS, the audited preset's geometry, four times the automatic count)",
+      "reps": {
+        "legacy": [15.079454, 14.975448, 14.880214], "legacyClockMHz": [2400, 2377, 2385], "legacyPowerW": [549.05, 551.15, 547.44], "legacyTempC": [46, 57, 59],
+        "tableLut": [16.489135, 16.351936, 16.292064], "tableLutClockMHz": [2310, 2287, 2302], "tableLutPowerW": [554.58, 546.57, 548.60], "tableLutTempC": [56, 63, 58]
+      },
+      "medians": {"legacy": 14.975448, "tableLut": 16.351936},
+      "ratioToLegacy": 1.0919, "pairedRatios": [1.0935, 1.0919, 1.0949],
+      "medianClockMHz": {"legacy": 2385, "tableLut": 2302},
+      "updatesPerSmClock": {"legacy": 0.03340, "tableLut": 0.03778, "ratio": 1.131},
+      "note": "Oversubscribing 4x lifts the shipping kernel 4% (14.41 -> 14.98; the audited 14.64 sits between the two geometries) while the table kernel loses 1.3% (16.56 -> 16.35): per SM-clock it gains 2.8% but the card clocks it 3.9% lower. Power samples after each run read 547-555 W; the run itself is likely at the 600 W limit. The gain therefore depends on geometry: +14.9% at the automatic worker count, +9.2% at 4x. Best table configuration against best shipping configuration: 16.56 / 14.98 = 1.105."
+    },
+    "target": {"section": "ITERATION-FUNCTION.md 4.4", "benchmarkMedianRequired": 17.0, "measuredAutomaticWorkers": 16.560337, "measuredAuditedGeometry": 16.351936, "shortfall": {"automatic": 0.026, "audited": 0.038}, "verdict": "NOT MET in either geometry: engineering that did not pay by the pre-declared rule; the shipping walk stays the campaign default"}
+  }
+}

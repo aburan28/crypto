@@ -1,0 +1,1460 @@
+{
+  "unit": "64-bit word XORs in the Macaulay elimination",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "metric": "C = (U+1)/p * E[word XORs per target], coverage pooled over samples",
+  "samples": [
+    {
+      "seed": 1
+    },
+    {
+      "seed": 2
+    }
+  ],
+  "census": [
+    {
+      "invariant_dimensions": [
+        1,
+        2,
+        3,
+        6,
+        7,
+        8
+      ],
+      "n": 9,
+      "order_of_2": 6
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        12
+      ],
+      "n": 13,
+      "order_of_2": 12
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "n": 15,
+      "order_of_2": 4
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        8,
+        9,
+        16
+      ],
+      "n": 17,
+      "order_of_2": 8
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        18
+      ],
+      "n": 19,
+      "order_of_2": 18
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        11,
+        12,
+        22
+      ],
+      "n": 23,
+      "order_of_2": 11
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        5,
+        6,
+        10,
+        11,
+        15,
+        16,
+        20,
+        21,
+        25,
+        26,
+        30
+      ],
+      "n": 31,
+      "order_of_2": 5
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        20,
+        21,
+        40
+      ],
+      "n": 41,
+      "order_of_2": 20
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        52
+      ],
+      "n": 53,
+      "order_of_2": 52
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        9,
+        10,
+        18,
+        19,
+        27,
+        28,
+        36,
+        37,
+        45,
+        46,
+        54,
+        55,
+        63,
+        64,
+        72
+      ],
+      "n": 73,
+      "order_of_2": 9
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        7,
+        8,
+        14,
+        15,
+        21,
+        22,
+        28,
+        29,
+        35,
+        36,
+        42,
+        43,
+        49,
+        50,
+        56,
+        57,
+        63,
+        64,
+        70,
+        71,
+        77,
+        78,
+        84,
+        85,
+        91,
+        92,
+        98,
+        99,
+        105,
+        106,
+        112,
+        113,
+        119,
+        120,
+        126
+      ],
+      "n": 127,
+      "order_of_2": 7
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        130
+      ],
+      "n": 131,
+      "order_of_2": 130
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        162
+      ],
+      "n": 163,
+      "order_of_2": 162
+    }
+  ],
+  "rungs": [
+    {
+      "curve": "K_0/2^9",
+      "m": 2,
+      "candidates": [
+        {
+          "divisor": [
+            2
+          ],
+          "ell": 6,
+          "points": 55,
+          "unknowns": 4,
+          "trace_zero": true,
+          "is_pipeline_default": true,
+          "decided": 128,
+          "decomposed": 125,
+          "coverage": 0.9765625,
+          "coverage_ci": [
+            0.9333551190997279,
+            0.9919977285598879
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            0.96875
+          ],
+          "ops_per_target": 42503.25,
+          "T": 5.12,
+          "C": 217616.64,
+          "C_range": [
+            214230.58126203177,
+            227690.66741176025
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            2
+          ],
+          "ell": 7,
+          "points": 93,
+          "unknowns": 7,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 125,
+          "coverage": 0.9765625,
+          "coverage_ci": [
+            0.9333551190997279,
+            0.9919977285598879
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            0.96875
+          ],
+          "ops_per_target": 75556.609375,
+          "T": 8.192,
+          "C": 618959.7440000001,
+          "C_range": [
+            609328.8901754866,
+            647612.9638449167
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2
+          ],
+          "ell": 8,
+          "points": 253,
+          "unknowns": 15,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 125,
+          "coverage": 0.9765625,
+          "coverage_ci": [
+            0.9333551190997279,
+            0.9919977285598879
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            0.96875
+          ],
+          "ops_per_target": 116512.46875,
+          "T": 16.384,
+          "C": 1908940.288,
+          "C_range": [
+            1879237.6699353063,
+            1997309.9861477402
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            1
+          ],
+          "ell": 3,
+          "points": 3,
+          "unknowns": 2,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 0,
+          "coverage": 0.0,
+          "coverage_ci": [
+            0.0,
+            0.02913799589810803
+          ],
+          "per_sample_coverage": [
+            0.0,
+            0.0
+          ],
+          "ops_per_target": 52.03125,
+          "T": Infinity,
+          "C": Infinity,
+          "C_range": [
+            5357.051684194087,
+            Infinity
+          ]
+        }
+      ],
+      "trials_optimal": [
+        2
+      ],
+      "cost_optimal": [
+        2
+      ],
+      "penalty_of_selecting_on_trials": 1.0,
+      "penalty_lower_bound": 0.9408843309094131
+    },
+    {
+      "curve": "K_0/2^9",
+      "m": 3,
+      "candidates": [
+        {
+          "divisor": [
+            2
+          ],
+          "ell": 6,
+          "points": 55,
+          "unknowns": 4,
+          "trace_zero": true,
+          "is_pipeline_default": true,
+          "decided": 64,
+          "decomposed": 62,
+          "coverage": 0.96875,
+          "coverage_ci": [
+            0.8930250611770575,
+            0.9913880422874833
+          ],
+          "per_sample_coverage": [
+            0.96875,
+            0.96875
+          ],
+          "ops_per_target": 1900792.296875,
+          "T": 5.161290322580645,
+          "C": 9810540.887096774,
+          "C_range": [
+            9586520.190868951,
+            10642435.355451548
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            2
+          ],
+          "ell": 7,
+          "points": 93,
+          "unknowns": 7,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 64,
+          "decomposed": 62,
+          "coverage": 0.96875,
+          "coverage_ci": [
+            0.8930250611770575,
+            0.9913880422874833
+          ],
+          "per_sample_coverage": [
+            0.96875,
+            0.96875
+          ],
+          "ops_per_target": 5028911.796875,
+          "T": 8.258064516129032,
+          "C": 41529078.06451613,
+          "C_range": [
+            40580774.2871017,
+            45050577.10471516
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2
+          ],
+          "ell": 8,
+          "points": 253,
+          "unknowns": 15,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 64,
+          "decomposed": 62,
+          "coverage": 0.96875,
+          "coverage_ci": [
+            0.8930250611770575,
+            0.9913880422874833
+          ],
+          "per_sample_coverage": [
+            0.96875,
+            0.96875
+          ],
+          "ops_per_target": 4584737.953125,
+          "T": 16.516129032258064,
+          "C": 75722123.61290322,
+          "C_range": [
+            73993032.11358306,
+            82143055.59724484
+          ]
+        },
+        {
+          "divisor": [
+            0
+          ],
+          "ell": 1,
+          "points": 3,
+          "unknowns": 2,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 64,
+          "decomposed": 0,
+          "coverage": 0.0,
+          "coverage_ci": [
+            0.0,
+            0.056626022971156334
+          ],
+          "per_sample_coverage": [
+            0.0,
+            0.0
+          ],
+          "ops_per_target": 20530.421875,
+          "T": Infinity,
+          "C": Infinity,
+          "C_range": [
+            1087684.8203938464,
+            Infinity
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            1
+          ],
+          "ell": 3,
+          "points": 3,
+          "unknowns": 2,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 64,
+          "decomposed": 0,
+          "coverage": 0.0,
+          "coverage_ci": [
+            0.0,
+            0.056626022971156334
+          ],
+          "per_sample_coverage": [
+            0.0,
+            0.0
+          ],
+          "ops_per_target": 2964386.328125,
+          "T": Infinity,
+          "C": Infinity,
+          "C_range": [
+            157050743.0639252,
+            Infinity
+          ]
+        }
+      ],
+      "trials_optimal": [
+        2
+      ],
+      "cost_optimal": [
+        2
+      ],
+      "penalty_of_selecting_on_trials": 1.0,
+      "penalty_lower_bound": 0.9007825625135972
+    },
+    {
+      "curve": "K_1/2^15",
+      "m": 2,
+      "candidates": [
+        {
+          "divisor": [
+            1,
+            4
+          ],
+          "ell": 6,
+          "points": 77,
+          "unknowns": 5,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 59,
+          "coverage": 0.4609375,
+          "coverage_ci": [
+            0.3769796782209271,
+            0.5471717277086126
+          ],
+          "per_sample_coverage": [
+            0.484375,
+            0.4375
+          ],
+          "ops_per_target": 113531.4765625,
+          "T": 13.016949152542374,
+          "C": 1477833.4576271188,
+          "C_range": [
+            1244927.0034978052,
+            1806964.4034652514
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            3
+          ],
+          "ell": 6,
+          "points": 67,
+          "unknowns": 4,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 46,
+          "coverage": 0.359375,
+          "coverage_ci": [
+            0.281465985317146,
+            0.44547907602919684
+          ],
+          "per_sample_coverage": [
+            0.328125,
+            0.390625
+          ],
+          "ops_per_target": 119162.6640625,
+          "T": 13.91304347826087,
+          "C": 1657915.3260869565,
+          "C_range": [
+            1337466.454369341,
+            2116821.752515347
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            1,
+            3
+          ],
+          "ell": 7,
+          "points": 133,
+          "unknowns": 7,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 62,
+          "coverage": 0.484375,
+          "coverage_ci": [
+            0.3995214745657504,
+            0.5701390878060655
+          ],
+          "per_sample_coverage": [
+            0.515625,
+            0.453125
+          ],
+          "ops_per_target": 327840.2265625,
+          "T": 16.516129032258064,
+          "C": 5414651.483870967,
+          "C_range": [
+            4600143.839624142,
+            6564657.920705515
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            1,
+            4
+          ],
+          "ell": 7,
+          "points": 123,
+          "unknowns": 8,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 59,
+          "coverage": 0.4609375,
+          "coverage_ci": [
+            0.3769796782209271,
+            0.5471717277086126
+          ],
+          "per_sample_coverage": [
+            0.484375,
+            0.4375
+          ],
+          "ops_per_target": 312763.1640625,
+          "T": 19.52542372881356,
+          "C": 6106833.305084746,
+          "C_range": [
+            5144396.784443352,
+            7466897.1278416235
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2
+          ],
+          "ell": 6,
+          "points": 97,
+          "unknowns": 5,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 16,
+          "coverage": 0.125,
+          "coverage_ci": [
+            0.07842577339785958,
+            0.19342772352572143
+          ],
+          "per_sample_coverage": [
+            0.1875,
+            0.0625
+          ],
+          "ops_per_target": 131117.109375,
+          "T": 48.0,
+          "C": 6293621.25,
+          "C_range": [
+            4067165.977608099,
+            10031174.9845169
+          ]
+        },
+        {
+          "divisor": [
+            3,
+            4
+          ],
+          "ell": 8,
+          "points": 251,
+          "unknowns": 10,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 127,
+          "coverage": 0.9921875,
+          "coverage_ci": [
+            0.9570726816506786,
+            0.998619603637121
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            1.0
+          ],
+          "ops_per_target": 942241.5546875,
+          "T": 11.086614173228346,
+          "C": 10446268.57480315,
+          "C_range": [
+            10378984.213621363,
+            10829540.222260246
+          ]
+        },
+        {
+          "divisor": [
+            2,
+            4
+          ],
+          "ell": 8,
+          "points": 281,
+          "unknowns": 11,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 127,
+          "coverage": 0.9921875,
+          "coverage_ci": [
+            0.9570726816506786,
+            0.998619603637121
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            1.0
+          ],
+          "ops_per_target": 1147377.2890625,
+          "T": 12.094488188976378,
+          "C": 13876941.070866141,
+          "C_range": [
+            13787559.766104108,
+            14386083.452934003
+          ]
+        },
+        {
+          "divisor": [
+            2,
+            3
+          ],
+          "ell": 8,
+          "points": 211,
+          "unknowns": 8,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 109,
+          "coverage": 0.8515625,
+          "coverage_ci": [
+            0.7797712148689779,
+            0.902866131765165
+          ],
+          "per_sample_coverage": [
+            0.859375,
+            0.84375
+          ],
+          "ops_per_target": 1447802.6640625,
+          "T": 10.568807339449542,
+          "C": 15301547.42201835,
+          "C_range": [
+            14432066.413973821,
+            16710316.728929164
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            3,
+            4
+          ],
+          "ell": 9,
+          "points": 381,
+          "unknowns": 15,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 127,
+          "coverage": 0.9921875,
+          "coverage_ci": [
+            0.9570726816506786,
+            0.998619603637121
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            1.0
+          ],
+          "ops_per_target": 1311770.2890625,
+          "T": 16.125984251968504,
+          "C": 21153587.023622047,
+          "C_range": [
+            21017336.880387086,
+            21929708.18976998
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            1,
+            2
+          ],
+          "ell": 7,
+          "points": 163,
+          "unknowns": 8,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 16,
+          "coverage": 0.125,
+          "coverage_ci": [
+            0.07842577339785958,
+            0.19342772352572143
+          ],
+          "per_sample_coverage": [
+            0.1875,
+            0.0625
+          ],
+          "ops_per_target": 399964.546875,
+          "T": 72.0,
+          "C": 28797447.375,
+          "C_range": [
+            18609953.404100966,
+            45899208.46063653
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            2,
+            4
+          ],
+          "ell": 9,
+          "points": 651,
+          "unknowns": 24,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 127,
+          "coverage": 0.9921875,
+          "coverage_ci": [
+            0.9570726816506786,
+            0.998619603637121
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            1.0
+          ],
+          "ops_per_target": 1577112.046875,
+          "T": 25.19685039370079,
+          "C": 39738256.2992126,
+          "C_range": [
+            39482302.39850399,
+            41196245.51802402
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2,
+            3
+          ],
+          "ell": 10,
+          "points": 1057,
+          "unknowns": 37,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 127,
+          "coverage": 0.9921875,
+          "coverage_ci": [
+            0.9570726816506786,
+            0.998619603637121
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            1.0
+          ],
+          "ops_per_target": 1310442.78125,
+          "T": 38.2992125984252,
+          "C": 50188926.67716536,
+          "C_range": [
+            49865660.06328391,
+            52030349.0447712
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2,
+            4
+          ],
+          "ell": 10,
+          "points": 1127,
+          "unknowns": 40,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 127,
+          "coverage": 0.9921875,
+          "coverage_ci": [
+            0.9570726816506786,
+            0.998619603637121
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            1.0
+          ],
+          "ops_per_target": 1247082.7421875,
+          "T": 41.32283464566929,
+          "C": 51532993.944881886,
+          "C_range": [
+            51201070.20076815,
+            53423729.89008744
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            2,
+            3
+          ],
+          "ell": 9,
+          "points": 481,
+          "unknowns": 17,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 109,
+          "coverage": 0.8515625,
+          "coverage_ci": [
+            0.7797712148689779,
+            0.902866131765165
+          ],
+          "per_sample_coverage": [
+            0.859375,
+            0.84375
+          ],
+          "ops_per_target": 2591247.234375,
+          "T": 21.137614678899084,
+          "C": 54772785.57798165,
+          "C_range": [
+            51660427.36320259,
+            59815557.85768157
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            3,
+            4
+          ],
+          "ell": 10,
+          "points": 977,
+          "unknowns": 35,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 127,
+          "coverage": 0.9921875,
+          "coverage_ci": [
+            0.9570726816506786,
+            0.998619603637121
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            1.0
+          ],
+          "ops_per_target": 1569434.4375,
+          "T": 36.28346456692913,
+          "C": 56944518.8031496,
+          "C_range": [
+            56577739.45576465,
+            59033802.58702418
+          ]
+        },
+        {
+          "divisor": [
+            2,
+            3,
+            4
+          ],
+          "ell": 12,
+          "points": 4121,
+          "unknowns": 139,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 128,
+          "decomposed": 127,
+          "coverage": 0.9921875,
+          "coverage_ci": [
+            0.9570726816506786,
+            0.998619603637121
+          ],
+          "per_sample_coverage": [
+            0.984375,
+            1.0
+          ],
+          "ops_per_target": 2800176.5078125,
+          "T": 141.10236220472441,
+          "C": 395111519.8425197,
+          "C_range": [
+            392566608.6124664,
+            409608087.8806599
+          ]
+        }
+      ],
+      "trials_optimal": [
+        2,
+        3
+      ],
+      "cost_optimal": [
+        1,
+        4
+      ],
+      "penalty_of_selecting_on_trials": 10.354040465823028,
+      "penalty_lower_bound": 7.986912407514593
+    },
+    {
+      "curve": "K_1/2^17",
+      "m": 2,
+      "candidates": [
+        {
+          "divisor": [
+            2
+          ],
+          "ell": 8,
+          "points": 239,
+          "unknowns": 8,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 96,
+          "decomposed": 33,
+          "coverage": 0.34375,
+          "coverage_ci": [
+            0.2564024884934557,
+            0.4431215575955494
+          ],
+          "per_sample_coverage": [
+            0.4166666666666667,
+            0.2708333333333333
+          ],
+          "ops_per_target": 2556171.4270833335,
+          "T": 26.181818181818183,
+          "C": 66925215.545454554,
+          "C_range": [
+            51917002.11694026,
+            89724335.27819362
+          ]
+        },
+        {
+          "divisor": [
+            1
+          ],
+          "ell": 8,
+          "points": 205,
+          "unknowns": 7,
+          "trace_zero": true,
+          "is_pipeline_default": true,
+          "decided": 96,
+          "decomposed": 24,
+          "coverage": 0.25,
+          "coverage_ci": [
+            0.17413849417796745,
+            0.3450999795644406
+          ],
+          "per_sample_coverage": [
+            0.22916666666666666,
+            0.2708333333333333
+          ],
+          "ops_per_target": 2774025.7395833335,
+          "T": 32.0,
+          "C": 88768823.66666667,
+          "C_range": [
+            64306598.75632567,
+            127439978.28525208
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            2
+          ],
+          "ell": 9,
+          "points": 545,
+          "unknowns": 17,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 96,
+          "decomposed": 65,
+          "coverage": 0.6770833333333334,
+          "coverage_ci": [
+            0.5782964352989827,
+            0.7622429791334785
+          ],
+          "per_sample_coverage": [
+            0.6666666666666666,
+            0.6875
+          ],
+          "ops_per_target": 5190420.572916667,
+          "T": 26.584615384615383,
+          "C": 137985334.6153846,
+          "C_range": [
+            122569276.29390423,
+            161556538.4977644
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            1
+          ],
+          "ell": 9,
+          "points": 443,
+          "unknowns": 14,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 96,
+          "decomposed": 49,
+          "coverage": 0.5104166666666666,
+          "coverage_ci": [
+            0.41195862420919654,
+            0.6080731060515364
+          ],
+          "per_sample_coverage": [
+            0.4583333333333333,
+            0.5625
+          ],
+          "ops_per_target": 5972892.34375,
+          "T": 29.387755102040817,
+          "C": 175529897.4489796,
+          "C_range": [
+            147339825.20295286,
+            217481513.65500632
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2
+          ],
+          "ell": 16,
+          "points": 65587,
+          "unknowns": 1930,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 96,
+          "decomposed": 96,
+          "coverage": 1.0,
+          "coverage_ci": [
+            0.9615230525151842,
+            1.0
+          ],
+          "per_sample_coverage": [
+            1.0,
+            1.0
+          ],
+          "ops_per_target": 15714470.1875,
+          "T": 1931.0,
+          "C": 30344641932.0625,
+          "C_range": [
+            30344641932.0625,
+            31558933353.377197
+          ]
+        }
+      ],
+      "trials_optimal": [
+        2
+      ],
+      "cost_optimal": [
+        2
+      ],
+      "penalty_of_selecting_on_trials": 1.0,
+      "penalty_lower_bound": 0.5786278823461848
+    },
+    {
+      "curve": "K_1/2^23",
+      "m": 2,
+      "candidates": [
+        {
+          "divisor": [
+            1
+          ],
+          "ell": 11,
+          "points": 2071,
+          "unknowns": 46,
+          "trace_zero": true,
+          "is_pipeline_default": true,
+          "decided": 48,
+          "decomposed": 18,
+          "coverage": 0.375,
+          "coverage_ci": [
+            0.2521507240406812,
+            0.5163749387475043
+          ],
+          "per_sample_coverage": [
+            0.375,
+            0.375
+          ],
+          "ops_per_target": 105114757.6875,
+          "T": 125.33333333333333,
+          "C": 13174382963.5,
+          "C_range": [
+            9567454267.427647,
+            19593017748.04911
+          ]
+        },
+        {
+          "divisor": [
+            2
+          ],
+          "ell": 11,
+          "points": 2025,
+          "unknowns": 45,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 48,
+          "decomposed": 15,
+          "coverage": 0.3125,
+          "coverage_ci": [
+            0.19945512167731494,
+            0.4533333725049633
+          ],
+          "per_sample_coverage": [
+            0.25,
+            0.375
+          ],
+          "ops_per_target": 110166577.0,
+          "T": 147.2,
+          "C": 16216520134.4,
+          "C_range": [
+            11178666406.132536,
+            25407532779.22154
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            1
+          ],
+          "ell": 12,
+          "points": 3957,
+          "unknowns": 87,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 48,
+          "decomposed": 28,
+          "coverage": 0.5833333333333334,
+          "coverage_ci": [
+            0.44281082215364653,
+            0.7115054026542299
+          ],
+          "per_sample_coverage": [
+            0.5833333333333334,
+            0.5833333333333334
+          ],
+          "ops_per_target": 206070375.91666666,
+          "T": 150.85714285714286,
+          "C": 31087188138.285713,
+          "C_range": [
+            25487077136.75554,
+            40952461352.38868
+          ]
+        },
+        {
+          "divisor": [
+            0,
+            2
+          ],
+          "ell": 12,
+          "points": 3911,
+          "unknowns": 86,
+          "trace_zero": false,
+          "is_pipeline_default": false,
+          "decided": 48,
+          "decomposed": 25,
+          "coverage": 0.5208333333333334,
+          "coverage_ci": [
+            0.3832899563598438,
+            0.6552890998421255
+          ],
+          "per_sample_coverage": [
+            0.5416666666666666,
+            0.5
+          ],
+          "ops_per_target": 226583631.58333334,
+          "T": 167.04,
+          "C": 37848529819.68,
+          "C_range": [
+            30082563486.099907,
+            51430452639.47138
+          ]
+        }
+      ],
+      "trials_optimal": [
+        1
+      ],
+      "cost_optimal": [
+        1
+      ],
+      "penalty_of_selecting_on_trials": 1.0,
+      "penalty_lower_bound": 0.48830937584284506
+    },
+    {
+      "curve": "K_0/2^31",
+      "m": 2,
+      "candidates": [
+        {
+          "divisor": [
+            1,
+            2,
+            3
+          ],
+          "ell": 15,
+          "points": 34721,
+          "unknowns": 561,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 24,
+          "decomposed": 13,
+          "coverage": 0.5416666666666666,
+          "coverage_ci": [
+            0.35074553553106635,
+            0.7210894164831857
+          ],
+          "per_sample_coverage": [
+            0.5,
+            0.5833333333333334
+          ],
+          "ops_per_target": 6969662837.75,
+          "T": 1037.5384615384617,
+          "C": 7231293258120.924,
+          "C_range": [
+            5431990021319.132,
+            11167499278030.201
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2,
+            6
+          ],
+          "ell": 15,
+          "points": 32055,
+          "unknowns": 518,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 24,
+          "decomposed": 12,
+          "coverage": 0.5,
+          "coverage_ci": [
+            0.31427131627763083,
+            0.6857286837223692
+          ],
+          "per_sample_coverage": [
+            0.4166666666666667,
+            0.5833333333333334
+          ],
+          "ops_per_target": 7564955875.25,
+          "T": 1038.0,
+          "C": 7852424198509.5,
+          "C_range": [
+            5725605756991.135,
+            12493065373444.04
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            3,
+            5
+          ],
+          "ell": 15,
+          "points": 31931,
+          "unknowns": 516,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 24,
+          "decomposed": 12,
+          "coverage": 0.5,
+          "coverage_ci": [
+            0.31427131627763083,
+            0.6857286837223692
+          ],
+          "per_sample_coverage": [
+            0.4166666666666667,
+            0.5833333333333334
+          ],
+          "ops_per_target": 8355432067.666667,
+          "T": 1034.0,
+          "C": 8639516757967.334,
+          "C_range": [
+            6299515364494.519,
+            13745315449557.424
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2,
+            5
+          ],
+          "ell": 15,
+          "points": 32737,
+          "unknowns": 529,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 24,
+          "decomposed": 11,
+          "coverage": 0.4583333333333333,
+          "coverage_ci": [
+            0.2789105835168143,
+            0.6492544644689336
+          ],
+          "per_sample_coverage": [
+            0.5833333333333334,
+            0.3333333333333333
+          ],
+          "ops_per_target": 7924147704.375,
+          "T": 1156.3636363636365,
+          "C": 9163196254513.637,
+          "C_range": [
+            6468647522900.024,
+            15057866325339.936
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            3,
+            4
+          ],
+          "ell": 15,
+          "points": 32675,
+          "unknowns": 528,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 24,
+          "decomposed": 9,
+          "coverage": 0.375,
+          "coverage_ci": [
+            0.21159133433631458,
+            0.5729038096209293
+          ],
+          "per_sample_coverage": [
+            0.4166666666666667,
+            0.3333333333333333
+          ],
+          "ops_per_target": 8490873969.916667,
+          "T": 1410.6666666666667,
+          "C": 11977792880229.111,
+          "C_range": [
+            7840185829900.313,
+            21228054278189.92
+          ]
+        },
+        {
+          "divisor": [
+            1,
+            2,
+            4
+          ],
+          "ell": 15,
+          "points": 34969,
+          "unknowns": 565,
+          "trace_zero": true,
+          "is_pipeline_default": false,
+          "decided": 24,
+          "decomposed": 9,
+          "coverage": 0.375,
+          "coverage_ci": [
+            0.21159133433631458,
+            0.5729038096209293
+          ],
+          "per_sample_coverage": [
+            0.5,
+            0.25
+          ],
+          "ops_per_target": 8719372077.916666,
+          "T": 1509.3333333333333,
+          "C": 13160438922935.555,
+          "C_range": [
+            8614298793660.074,
+            23324039292916.496
+          ]
+        }
+      ],
+      "trials_optimal": [
+        1,
+        3,
+        5
+      ],
+      "cost_optimal": [
+        1,
+        2,
+        3
+      ],
+      "penalty_of_selecting_on_trials": 1.1947402006224737,
+      "penalty_lower_bound": 0.5640936442133955
+    }
+  ]
+}

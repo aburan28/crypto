@@ -1,9 +1,9 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
-  "updated": "2026-09-13",
+  "updated": "2026-09-21",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
-  "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gr\u00f6bner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
+  "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gröbner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
     "factor_base",
     "decomposition",
@@ -121,7 +121,7 @@
     "Pass the row acceptance_gates.",
     "PR updates current, appends history, sets next_target, links evidence.",
     "vs_rho and end_to_end_dlp past prior size require independent recomputation.",
-    "Incomplete measurement_schema fields fail closed \u2014 no row promotion."
+    "Incomplete measurement_schema fields fail closed — no row promotion."
   ],
   "agent_priorities": [
     {
@@ -155,7 +155,7 @@
       "stage": "end_to_end_dlp"
     },
     {
-      "beat": "publish first distributional yield curves so later vs_rho attempts have honest stage costs",
+      "beat": "Filled 2026-09-21 by the boundary ledger (operation-counted relation_yield and rank on the prime and binary ladders); the open item is the CI-bearing yield curve against the subgroup-tightened ceiling at n=27 / 24 bits",
       "rank": 6,
       "regime": "binary_and_prime",
       "stage": "relation_yield"
@@ -165,11 +165,17 @@
       "rank": 7,
       "regime": "all",
       "stage": "decomposition"
+    },
+    {
+      "beat": "Iterate against research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (ic boundary): in any regime, S/S_rho < 1 at r >= 2^20 with every phase counted, or a fitted total exponent below the reference's over >= 4 sizes, or yield/ceiling > 1.5 on a base outside every proper subgroup",
+      "rank": 8,
+      "regime": "all",
+      "stage": "vs_rho"
     }
   ],
   "regimes": {
     "binary": {
-      "label": "Binary fields (Weil\u2013Semaev / non-Koblitz)",
+      "label": "Binary fields (Weil–Semaev / non-Koblitz)",
       "best_stack": [
         "semaev_decomp",
         "semaev_sat",
@@ -257,77 +263,542 @@
           "history": []
         },
         "relation_yield": {
-          "status": "open",
+          "status": "record",
           "current": {
-            "summary": "No separate distributional frontier published",
+            "summary": "Operation-counted yield on the frozen char2 ladder (5 instances, up to r=2^24.4): relations per trial measured against the counting ceiling C(F+m-1,m)/#E for every variant; natural targets only",
+            "date": "2026-09-21",
             "metrics": {
-              "pr_decomposition": null,
-              "trials_per_relation": null,
-              "target_mix": null
+              "timing_class": "operation_counted",
+              "target_mix": {
+                "natural": "every trial",
+                "planted_sat": 0,
+                "proven_unsat": 0
+              },
+              "yield_over_ceiling_range": [
+                0.8877,
+                1.743
+              ],
+              "trials_per_relation_by_instance": [
+                {
+                  "instance": "random-binary-n15-b524b",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 30,
+                  "trials_per_relation": 6.935,
+                  "pr_decomposition_measured": 0.1442,
+                  "ceiling": 0.152,
+                  "yield_over_ceiling": 0.9512
+                },
+                {
+                  "instance": "random-binary-n15-b524b",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "m": 3,
+                  "signed_points": 30,
+                  "trials_per_relation": 7.447,
+                  "pr_decomposition_measured": 0.1343,
+                  "ceiling": 0.152,
+                  "yield_over_ceiling": 0.8877
+                },
+                {
+                  "instance": "random-binary-n18-b6507",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 64,
+                  "trials_per_relation": 3.744,
+                  "pr_decomposition_measured": 0.2671,
+                  "ceiling": 0.1748,
+                  "yield_over_ceiling": 1.609
+                },
+                {
+                  "instance": "random-binary-n18-b6507",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "m": 3,
+                  "signed_points": 64,
+                  "trials_per_relation": 4.0,
+                  "pr_decomposition_measured": 0.25,
+                  "ceiling": 0.1748,
+                  "yield_over_ceiling": 1.479
+                },
+                {
+                  "instance": "random-binary-n21-b1b6f3b",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 122,
+                  "trials_per_relation": 7.052,
+                  "pr_decomposition_measured": 0.1418,
+                  "ceiling": 0.1481,
+                  "yield_over_ceiling": 0.9601
+                },
+                {
+                  "instance": "random-binary-n21-b1b6f3b",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "m": 3,
+                  "signed_points": 122,
+                  "trials_per_relation": 7.069,
+                  "pr_decomposition_measured": 0.1415,
+                  "ceiling": 0.1481,
+                  "yield_over_ceiling": 0.9574
+                },
+                {
+                  "instance": "random-binary-n24-b5fc9da",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 274,
+                  "trials_per_relation": 2.786,
+                  "pr_decomposition_measured": 0.3589,
+                  "ceiling": 0.2066,
+                  "yield_over_ceiling": 1.743
+                },
+                {
+                  "instance": "random-binary-n24-b5fc9da",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "m": 3,
+                  "signed_points": 274,
+                  "trials_per_relation": 2.789,
+                  "pr_decomposition_measured": 0.3586,
+                  "ceiling": 0.2066,
+                  "yield_over_ceiling": 1.741
+                },
+                {
+                  "instance": "random-binary-n27-b845462",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 526,
+                  "trials_per_relation": 6.113,
+                  "pr_decomposition_measured": 0.1636,
+                  "ceiling": 0.1818,
+                  "yield_over_ceiling": 0.9018
+                },
+                {
+                  "instance": "random-binary-n27-b845462",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "m": 3,
+                  "signed_points": 526,
+                  "trials_per_relation": 6.12,
+                  "pr_decomposition_measured": 0.1634,
+                  "ceiling": 0.1818,
+                  "yield_over_ceiling": 0.9007
+                }
+              ],
+              "trials_exponent_fits": [
+                {
+                  "variant": "mitm_m3",
+                  "phase": "trials",
+                  "alpha_r": 0.3657,
+                  "r_squared": 0.9567,
+                  "alpha_group_order": 0.3178,
+                  "points": 5
+                },
+                {
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "phase": "trials",
+                  "alpha_r": 0.3572,
+                  "r_squared": 0.9462,
+                  "alpha_group_order": 0.309,
+                  "points": 5
+                }
+              ],
+              "ceiling_caveat": "C(F+m-1,m)/#E is loose by the index of any proper subgroup containing every m-sum: on n=18 and n=24 (a=0, even n) every base abscissa has trace zero, so the base lies in 2E and the ceiling is loose by exactly 2 (corrected yield/ceiling 0.74-0.87); see research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md section 3.5 (accounting correction, no S moves)"
             }
           },
           "next_target": {
-            "summary": "Yield curve at n=21 for one frozen base with 256 natural targets; publish trials-per-relation",
+            "summary": "Yield at n=27 against the subgroup-tightened ceiling (divide by the order of the subgroup containing every m-sum) with 256 natural targets and a 95% CI on the hit-rate",
             "acceptance_gates": [
+              "tightened ceiling stated (index of the subgroup generated by the base's m-sums)",
               "95% CI width <= 0.05 on hit-rate",
               "collector policy hash frozen"
             ]
           },
-          "evidence": [],
-          "history": []
+          "evidence": [
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+          ],
+          "history": [
+            {
+              "summary": "No separate distributional frontier published",
+              "metrics": {
+                "pr_decomposition": null,
+                "trials_per_relation": null,
+                "target_mix": null
+              },
+              "superseded_on": "2026-09-21"
+            }
+          ]
         },
         "rank": {
-          "status": "open",
+          "status": "record",
           "current": {
-            "summary": "Toy matrices only",
+            "summary": "Relation-matrix LA priced per instance on the char2 ladder: dense incremental Gauss-Jordan over Z/rZ, rank recomputed after every row, stop when the target column is pinned; multiply-subtracts counted and converted",
+            "date": "2026-09-21",
             "metrics": {
-              "matrix_dims": null,
-              "sparse_or_dense": null,
-              "la_cost_ms": null
+              "sparse_or_dense": "dense incremental reduced echelon form (IncrementalGauss)",
+              "rank_accumulation": "reduced after every relation; terminal when the logarithm's column is pinned",
+              "by_instance": [
+                {
+                  "instance": "random-binary-n15-b524b",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 15.33,
+                    "cols": 16
+                  },
+                  "rank": 15.33,
+                  "row_ops": 360.3,
+                  "la_charged_gae": 5.375,
+                  "la_S": 0.04208
+                },
+                {
+                  "instance": "random-binary-n15-b524b",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "matrix_dims": {
+                    "rows": 15.67,
+                    "cols": 16
+                  },
+                  "rank": 15.67,
+                  "row_ops": 403.0,
+                  "la_charged_gae": 6.012,
+                  "la_S": 0.04706
+                },
+                {
+                  "instance": "random-binary-n18-b6507",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 26.0,
+                    "cols": 33
+                  },
+                  "rank": 26.0,
+                  "row_ops": 741.3,
+                  "la_charged_gae": 8.751,
+                  "la_S": 0.04838
+                },
+                {
+                  "instance": "random-binary-n18-b6507",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "matrix_dims": {
+                    "rows": 24.33,
+                    "cols": 33
+                  },
+                  "rank": 24.33,
+                  "row_ops": 674.0,
+                  "la_charged_gae": 7.957,
+                  "la_S": 0.04399
+                },
+                {
+                  "instance": "random-binary-n21-b1b6f3b",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 57.67,
+                    "cols": 62
+                  },
+                  "rank": 57.67,
+                  "row_ops": 4169.0,
+                  "la_charged_gae": 43.29,
+                  "la_S": 0.0423
+                },
+                {
+                  "instance": "random-binary-n21-b1b6f3b",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "matrix_dims": {
+                    "rows": 57.67,
+                    "cols": 62
+                  },
+                  "rank": 57.67,
+                  "row_ops": 4375.0,
+                  "la_charged_gae": 45.43,
+                  "la_S": 0.04439
+                },
+                {
+                  "instance": "random-binary-n24-b5fc9da",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 131.0,
+                    "cols": 138
+                  },
+                  "rank": 131.0,
+                  "row_ops": 23640.0,
+                  "la_charged_gae": 214.8,
+                  "la_S": 0.1483
+                },
+                {
+                  "instance": "random-binary-n24-b5fc9da",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "matrix_dims": {
+                    "rows": 131.0,
+                    "cols": 138
+                  },
+                  "rank": 131.0,
+                  "row_ops": 23680.0,
+                  "la_charged_gae": 215.1,
+                  "la_S": 0.1485
+                },
+                {
+                  "instance": "random-binary-n27-b845462",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 245.0,
+                    "cols": 264
+                  },
+                  "rank": 245.0,
+                  "row_ops": 120500.0,
+                  "la_charged_gae": 942.7,
+                  "la_S": 0.1993
+                },
+                {
+                  "instance": "random-binary-n27-b845462",
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "matrix_dims": {
+                    "rows": 245.0,
+                    "cols": 264
+                  },
+                  "rank": 245.0,
+                  "row_ops": 120800.0,
+                  "la_charged_gae": 944.8,
+                  "la_S": 0.1998
+                }
+              ],
+              "la_exponent_fits": [
+                {
+                  "variant": "mitm_m3",
+                  "phase": "linear_algebra",
+                  "alpha_r": 0.7057,
+                  "r_squared": 0.9605,
+                  "alpha_group_order": 0.6505,
+                  "points": 5
+                },
+                {
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "phase": "linear_algebra",
+                  "alpha_r": 0.7037,
+                  "r_squared": 0.9625,
+                  "alpha_group_order": 0.6446,
+                  "points": 5
+                }
+              ]
             }
           },
           "next_target": {
-            "summary": "Full orbit-reduced rank at n=21 with surplus <= 2K+64; publish dims and LA cost",
+            "summary": "Rank at n>=31 (K>500 columns) with dims and LA cost; sparse or structured elimination once dense LA exceeds 1% of the total",
             "acceptance_gates": [
               "rank recomputed after every relation",
               "terminal rank equals required",
-              "matrix_dims and sparse_or_dense logged"
+              "matrix_dims, sparse_or_dense and LA cost logged"
             ]
           },
-          "evidence": [],
-          "history": []
+          "evidence": [
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+          ],
+          "history": [
+            {
+              "summary": "Toy matrices only",
+              "metrics": {
+                "matrix_dims": null,
+                "sparse_or_dense": null,
+                "la_cost_ms": null
+              },
+              "superseded_on": "2026-09-21"
+            }
+          ]
         },
         "end_to_end_dlp": {
           "status": "record",
           "current": {
-            "summary": "Toy known-answer / ic framework small degrees",
+            "summary": "Known-answer DLP recovered and verified ([d]G = Q) by every variant on every instance of the char2 ladder, largest n=27 (r=2^24.4); every phase counted in one unit",
+            "date": "2026-09-21",
             "metrics": {
-              "framework_degree_max_documented": 23,
-              "claim_boundary": "synthetic_known_answer"
+              "n_max": 27,
+              "claim_boundary": "synthetic_known_answer",
+              "stage_counts": "factor_base / relations / linear_algebra / verify per variant in the frozen run (native counts, wall_ns, gae)",
+              "recovered_d_verified": true,
+              "variants": [
+                "mitm_m3",
+                "semaev_s4_pairs_and_solve_m3"
+              ]
             }
           },
           "next_target": {
-            "summary": "Known-answer DLP at n=19 with stage timers",
+            "summary": "Known-answer DLP at n>=31 with every phase counted in S; vs rho and vs floor reported",
             "acceptance_gates": [
               "[d]G = Q",
+              "every phase inside the count",
               "incomplete stages fail closed",
-              "stage_timers present"
+              "S, S/S_rho, S/S_floor reported on the frozen run"
             ]
           },
           "evidence": [
-            "docs/ic/README.md"
+            "docs/ic/README.md",
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "Toy known-answer / ic framework small degrees",
+              "metrics": {
+                "framework_degree_max_documented": 23,
+                "claim_boundary": "synthetic_known_answer"
+              },
+              "superseded_on": "2026-09-21"
+            }
+          ]
         },
         "vs_rho": {
           "status": "not_achieved",
           "current": {
-            "summary": "No charged binary crossover on record",
+            "summary": "Whole-process operation-counted cost against a counted Pollard rho on the same instance: best variant mitm_m3 at 8.268x rho (n=15); no variant below rho at r >= 2^20",
+            "date": "2026-09-21",
             "metrics": {
-              "timing_class": null,
-              "automorphism_discount": null
+              "timing_class": "operation_counted_whole_process",
+              "automorphism_discount": "reference walk uses A=1 (no negation map); floor stated at A=2",
+              "by_instance": [
+                {
+                  "instance": "random-binary-n15-b524b",
+                  "log2_r": 13.99,
+                  "variant": "mitm_m3",
+                  "S": 69.13,
+                  "rho_S": 8.361,
+                  "rho_walk_S": 1.387,
+                  "S_over_rho": 8.268,
+                  "S_over_floor": 78.0,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n15-b524b",
+                  "log2_r": 13.99,
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "S": 1294.0,
+                  "rho_S": 8.361,
+                  "rho_walk_S": 1.387,
+                  "S_over_rho": 154.8,
+                  "S_over_floor": 1460.0,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n18-b6507",
+                  "log2_r": 15.0,
+                  "variant": "mitm_m3",
+                  "S": 79.97,
+                  "rho_S": 7.556,
+                  "rho_walk_S": 1.378,
+                  "S_over_rho": 10.58,
+                  "S_over_floor": 90.24,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n18-b6507",
+                  "log2_r": 15.0,
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "S": 2652.0,
+                  "rho_S": 7.556,
+                  "rho_walk_S": 1.378,
+                  "S_over_rho": 350.9,
+                  "S_over_floor": 2992.0,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n21-b1b6f3b",
+                  "log2_r": 20.0,
+                  "variant": "mitm_m3",
+                  "S": 80.98,
+                  "rho_S": 3.182,
+                  "rho_walk_S": 2.032,
+                  "S_over_rho": 25.45,
+                  "S_over_floor": 91.38,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n21-b1b6f3b",
+                  "log2_r": 20.0,
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "S": 8439.0,
+                  "rho_S": 3.182,
+                  "rho_walk_S": 2.032,
+                  "S_over_rho": 2652.0,
+                  "S_over_floor": 9522.0,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n24-b5fc9da",
+                  "log2_r": 21.0,
+                  "variant": "mitm_m3",
+                  "S": 101.8,
+                  "rho_S": 2.516,
+                  "rho_walk_S": 1.802,
+                  "S_over_rho": 40.47,
+                  "S_over_floor": 114.9,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n24-b5fc9da",
+                  "log2_r": 21.0,
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "S": 17420.0,
+                  "rho_S": 2.516,
+                  "rho_walk_S": 1.802,
+                  "S_over_rho": 6926.0,
+                  "S_over_floor": 19660.0,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n27-b845462",
+                  "log2_r": 24.41,
+                  "variant": "mitm_m3",
+                  "S": 206.0,
+                  "rho_S": 2.314,
+                  "rho_walk_S": 1.983,
+                  "S_over_rho": 89.04,
+                  "S_over_floor": 232.4,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "random-binary-n27-b845462",
+                  "log2_r": 24.41,
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "S": 105200.0,
+                  "rho_S": 2.314,
+                  "rho_walk_S": 1.983,
+                  "S_over_rho": 45470.0,
+                  "S_over_floor": 118700.0,
+                  "verified": true,
+                  "rho_verified": true
+                }
+              ],
+              "total_exponent_fits": [
+                {
+                  "variant": "mitm_m3",
+                  "phase": "total",
+                  "alpha_r": 0.624,
+                  "r_squared": 0.9863,
+                  "alpha_group_order": 0.5638,
+                  "points": 5
+                },
+                {
+                  "variant": "rho_reference",
+                  "phase": "total",
+                  "alpha_r": 0.3019,
+                  "r_squared": 0.9729,
+                  "alpha_group_order": 0.2708,
+                  "points": 5
+                },
+                {
+                  "variant": "semaev_s4_pairs_and_solve_m3",
+                  "phase": "total",
+                  "alpha_r": 1.058,
+                  "r_squared": 0.989,
+                  "alpha_group_order": 0.9605,
+                  "points": 5
+                }
+              ],
+              "rho_health": "every rho run recovered and verified; steps against sqrt(pi r/2) recorded per run"
             },
-            "verdict": null
+            "verdict": false
           },
           "next_target": {
             "summary": "Charged single-instance cost < automorphism-aware rho at any eligible n>=15",
@@ -337,8 +808,21 @@
               "timing_class and automorphism_discount explicit"
             ]
           },
-          "evidence": [],
-          "history": []
+          "evidence": [
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+          ],
+          "history": [
+            {
+              "summary": "No charged binary crossover on record",
+              "metrics": {
+                "timing_class": null,
+                "automorphism_discount": null
+              },
+              "verdict": null,
+              "superseded_on": "2026-09-21"
+            }
+          ]
         }
       }
     },
@@ -547,12 +1031,828 @@
                   }
                 ]
               },
-              "f4_splits": "flat across 39\u219246 unknowns (scaling note)",
+              "f4_splits": "flat across 39→46 unknowns (scaling note)",
               "oracle_classes": [
                 "enumerate",
                 "groebner",
                 "sat"
-              ]
+              ],
+              "oracle_pricing_2026_09_21": {
+                "what": "every decomposition oracle priced per target on the same Semaev systems, with FFD over the target draws; F4 word XORs exact (F4_WORD_OPS_TOTAL), SAT conflicts, enumerate additions, pair-table probes, S4 pairs",
+                "all_agree": true,
+                "cells": [
+                  {
+                    "n": 9,
+                    "dimension": 6,
+                    "m": 2,
+                    "signed_points": 55,
+                    "signed_orbits": 4,
+                    "unknowns": 12,
+                    "equations": 9,
+                    "system_degree": 2,
+                    "eq_var_ratio": 0.75,
+                    "ffd_min": 2,
+                    "ffd_max": 2,
+                    "ffd_no_fall": 0,
+                    "macaulay": [
+                      {
+                        "cols": 49,
+                        "degree": 2,
+                        "rank": 8,
+                        "rows": 9,
+                        "syzygies": 1
+                      },
+                      {
+                        "cols": 259,
+                        "degree": 3,
+                        "rank": 104,
+                        "rows": 117,
+                        "syzygies": 13
+                      }
+                    ],
+                    "targets": 8,
+                    "hit_rate": 1.0,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m2",
+                        "native_unit": "group_additions",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 5.75,
+                        "projected_relation_phase_S": 2.551,
+                        "projected_S_over_floor": 8.636,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m2",
+                        "native_unit": "pair_table_probes",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 1.018,
+                        "projected_relation_phase_S": 0.4517,
+                        "projected_S_over_floor": 1.529,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "matrix_f4_splitting",
+                        "native_unit": "word_xors",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 169.9,
+                        "projected_relation_phase_S": 75.38,
+                        "projected_S_over_floor": 255.2,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "cdcl_sat_native_xor",
+                        "native_unit": "conflicts",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 4118.0,
+                        "projected_relation_phase_S": 1827.0,
+                        "projected_S_over_floor": 6186.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  },
+                  {
+                    "n": 9,
+                    "dimension": 6,
+                    "m": 3,
+                    "signed_points": 55,
+                    "signed_orbits": 4,
+                    "unknowns": 27,
+                    "equations": 18,
+                    "system_degree": 3,
+                    "eq_var_ratio": 0.6667,
+                    "ffd_min": 3,
+                    "ffd_max": 3,
+                    "ffd_no_fall": 0,
+                    "macaulay": [
+                      {
+                        "cols": 70,
+                        "degree": 2,
+                        "rank": 9,
+                        "rows": 9,
+                        "syzygies": 0
+                      },
+                      {
+                        "cols": 1672,
+                        "degree": 3,
+                        "rank": 260,
+                        "rows": 261,
+                        "syzygies": 1
+                      }
+                    ],
+                    "targets": 8,
+                    "hit_rate": 1.0,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m3",
+                        "native_unit": "group_additions",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 5.0,
+                        "projected_relation_phase_S": 2.218,
+                        "projected_S_over_floor": 7.51,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m3",
+                        "native_unit": "pair_table_probes",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 2.018,
+                        "projected_relation_phase_S": 0.8953,
+                        "projected_S_over_floor": 3.031,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "semaev_s4_pairs_and_solve",
+                        "native_unit": "pairs",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 267.9,
+                        "projected_relation_phase_S": 118.9,
+                        "projected_S_over_floor": 402.4,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "matrix_f4_splitting",
+                        "native_unit": "word_xors",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 7533.0,
+                        "projected_relation_phase_S": 3342.0,
+                        "projected_S_over_floor": 11310.0,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "cdcl_sat_native_xor",
+                        "native_unit": "conflicts",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 72500.0,
+                        "projected_relation_phase_S": 32170.0,
+                        "projected_S_over_floor": 108900.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  },
+                  {
+                    "n": 11,
+                    "dimension": 10,
+                    "m": 2,
+                    "signed_points": 991,
+                    "signed_orbits": 46,
+                    "unknowns": 20,
+                    "equations": 11,
+                    "system_degree": 2,
+                    "eq_var_ratio": 0.55,
+                    "ffd_min": 2,
+                    "ffd_max": 2,
+                    "ffd_no_fall": 0,
+                    "macaulay": [
+                      {
+                        "cols": 121,
+                        "degree": 2,
+                        "rank": 10,
+                        "rows": 11,
+                        "syzygies": 1
+                      },
+                      {
+                        "cols": 1111,
+                        "degree": 3,
+                        "rank": 210,
+                        "rows": 231,
+                        "syzygies": 21
+                      }
+                    ],
+                    "targets": 8,
+                    "hit_rate": 1.0,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m2",
+                        "native_unit": "group_additions",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 1.0,
+                        "projected_relation_phase_S": 1.493,
+                        "projected_S_over_floor": 5.587,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m2",
+                        "native_unit": "pair_table_probes",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 1.017,
+                        "projected_relation_phase_S": 1.519,
+                        "projected_S_over_floor": 5.684,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "matrix_f4_splitting",
+                        "native_unit": "word_xors",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 1842.0,
+                        "projected_relation_phase_S": 2750.0,
+                        "projected_S_over_floor": 10290.0,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "cdcl_sat_native_xor",
+                        "native_unit": "conflicts",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 15180.0,
+                        "projected_relation_phase_S": 22660.0,
+                        "projected_S_over_floor": 84800.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  },
+                  {
+                    "n": 13,
+                    "dimension": 12,
+                    "m": 2,
+                    "signed_points": 4005,
+                    "signed_orbits": 155,
+                    "unknowns": 24,
+                    "equations": 13,
+                    "system_degree": 2,
+                    "eq_var_ratio": 0.5417,
+                    "ffd_min": 2,
+                    "ffd_max": 2,
+                    "ffd_no_fall": 0,
+                    "macaulay": [
+                      {
+                        "cols": 169,
+                        "degree": 2,
+                        "rank": 12,
+                        "rows": 13,
+                        "syzygies": 1
+                      },
+                      {
+                        "cols": 1885,
+                        "degree": 3,
+                        "rank": 300,
+                        "rows": 325,
+                        "syzygies": 25
+                      }
+                    ],
+                    "targets": 8,
+                    "hit_rate": 1.0,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m2",
+                        "native_unit": "group_additions",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 1.0,
+                        "projected_relation_phase_S": 3.486,
+                        "projected_S_over_floor": 14.18,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m2",
+                        "native_unit": "pair_table_probes",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 1.017,
+                        "projected_relation_phase_S": 3.546,
+                        "projected_S_over_floor": 14.42,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "matrix_f4_splitting",
+                        "native_unit": "word_xors",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 6392.0,
+                        "projected_relation_phase_S": 22280.0,
+                        "projected_S_over_floor": 90650.0,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "cdcl_sat_native_xor",
+                        "native_unit": "conflicts",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 24550.0,
+                        "projected_relation_phase_S": 85580.0,
+                        "projected_S_over_floor": 348200.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  },
+                  {
+                    "n": 13,
+                    "dimension": 12,
+                    "m": 3,
+                    "signed_points": 4005,
+                    "signed_orbits": 155,
+                    "unknowns": 49,
+                    "equations": 26,
+                    "system_degree": 3,
+                    "eq_var_ratio": 0.5306,
+                    "ffd_min": null,
+                    "ffd_max": null,
+                    "ffd_no_fall": 0,
+                    "macaulay": [],
+                    "targets": 8,
+                    "hit_rate": 1.0,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m3",
+                        "native_unit": "group_additions",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 2.0,
+                        "projected_relation_phase_S": 6.971,
+                        "projected_S_over_floor": 28.36,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m3",
+                        "native_unit": "pair_table_probes",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 2.017,
+                        "projected_relation_phase_S": 7.029,
+                        "projected_S_over_floor": 28.6,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "semaev_s4_pairs_and_solve",
+                        "native_unit": "pairs",
+                        "found": 8,
+                        "refuted": 0,
+                        "inconclusive": 0,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 24120.0,
+                        "projected_relation_phase_S": 84060.0,
+                        "projected_S_over_floor": 342000.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  },
+                  {
+                    "n": 15,
+                    "dimension": 5,
+                    "m": 2,
+                    "signed_points": 33,
+                    "signed_orbits": 3,
+                    "unknowns": 10,
+                    "equations": 15,
+                    "system_degree": 2,
+                    "eq_var_ratio": 1.5,
+                    "ffd_min": 2,
+                    "ffd_max": 3,
+                    "ffd_no_fall": 0,
+                    "macaulay": [
+                      {
+                        "cols": 36,
+                        "degree": 2,
+                        "rank": 15,
+                        "rows": 15,
+                        "syzygies": 0
+                      },
+                      {
+                        "cols": 156,
+                        "degree": 3,
+                        "rank": 136,
+                        "rows": 165,
+                        "syzygies": 29
+                      }
+                    ],
+                    "targets": 8,
+                    "hit_rate": 0.0,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m2",
+                        "native_unit": "group_additions",
+                        "found": 0,
+                        "refuted": 8,
+                        "inconclusive": 0,
+                        "native_median_refuted": 33.0,
+                        "ms_median_refuted": 0.007391,
+                        "gae_per_target_mean": 33.0,
+                        "projected_relation_phase_S": 154.1,
+                        "projected_S_over_floor": 673.6,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m2",
+                        "native_unit": "pair_table_probes",
+                        "found": 0,
+                        "refuted": 8,
+                        "inconclusive": 0,
+                        "native_median_refuted": 1.0,
+                        "ms_median_refuted": 5.55e-05,
+                        "gae_per_target_mean": 0.01095,
+                        "projected_relation_phase_S": 0.05113,
+                        "projected_S_over_floor": 0.2235,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "matrix_f4_splitting",
+                        "native_unit": "word_xors",
+                        "found": 0,
+                        "refuted": 8,
+                        "inconclusive": 0,
+                        "native_median_refuted": 17920.0,
+                        "ms_median_refuted": 0.6071,
+                        "gae_per_target_mean": 32.61,
+                        "projected_relation_phase_S": 152.3,
+                        "projected_S_over_floor": 665.6,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "cdcl_sat_native_xor",
+                        "native_unit": "conflicts",
+                        "found": 0,
+                        "refuted": 8,
+                        "inconclusive": 0,
+                        "native_median_refuted": 5.0,
+                        "ms_median_refuted": 0.3872,
+                        "gae_per_target_mean": 1537.0,
+                        "projected_relation_phase_S": 7177.0,
+                        "projected_S_over_floor": 31370.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  },
+                  {
+                    "n": 15,
+                    "dimension": 5,
+                    "m": 3,
+                    "signed_points": 33,
+                    "signed_orbits": 3,
+                    "unknowns": 30,
+                    "equations": 30,
+                    "system_degree": 3,
+                    "eq_var_ratio": 1.0,
+                    "ffd_min": 3,
+                    "ffd_max": 3,
+                    "ffd_no_fall": 0,
+                    "macaulay": [
+                      {
+                        "cols": 96,
+                        "degree": 2,
+                        "rank": 15,
+                        "rows": 15,
+                        "syzygies": 0
+                      },
+                      {
+                        "cols": 2246,
+                        "degree": 3,
+                        "rank": 479,
+                        "rows": 480,
+                        "syzygies": 1
+                      }
+                    ],
+                    "targets": 8,
+                    "hit_rate": 0.375,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m3",
+                        "native_unit": "group_additions",
+                        "found": 3,
+                        "refuted": 5,
+                        "inconclusive": 0,
+                        "native_median_refuted": 594.0,
+                        "ms_median_refuted": 0.1329,
+                        "gae_per_target_mean": 466.5,
+                        "projected_relation_phase_S": 181.6,
+                        "projected_S_over_floor": 793.5,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m3",
+                        "native_unit": "pair_table_probes",
+                        "found": 3,
+                        "refuted": 5,
+                        "inconclusive": 0,
+                        "native_median_refuted": 33.0,
+                        "ms_median_refuted": 0.009816,
+                        "gae_per_target_mean": 24.66,
+                        "projected_relation_phase_S": 9.599,
+                        "projected_S_over_floor": 41.95,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "semaev_s4_pairs_and_solve",
+                        "native_unit": "pairs",
+                        "found": 3,
+                        "refuted": 5,
+                        "inconclusive": 0,
+                        "native_median_refuted": 528.0,
+                        "ms_median_refuted": 0.3693,
+                        "gae_per_target_mean": 1118.0,
+                        "projected_relation_phase_S": 435.2,
+                        "projected_S_over_floor": 1902.0,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "matrix_f4_splitting",
+                        "native_unit": "word_xors",
+                        "found": 3,
+                        "refuted": 5,
+                        "inconclusive": 0,
+                        "native_median_refuted": 1698000000.0,
+                        "ms_median_refuted": 8255.0,
+                        "gae_per_target_mean": 2368000.0,
+                        "projected_relation_phase_S": 921700.0,
+                        "projected_S_over_floor": 4028000.0,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "cdcl_sat_native_xor",
+                        "native_unit": "conflicts",
+                        "found": 0,
+                        "refuted": 0,
+                        "inconclusive": 8,
+                        "native_median_refuted": null,
+                        "ms_median_refuted": null,
+                        "gae_per_target_mean": 39730000.0,
+                        "projected_relation_phase_S": 15460000.0,
+                        "projected_S_over_floor": 67580000.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  },
+                  {
+                    "n": 17,
+                    "dimension": 8,
+                    "m": 2,
+                    "signed_points": 239,
+                    "signed_orbits": 8,
+                    "unknowns": 16,
+                    "equations": 17,
+                    "system_degree": 2,
+                    "eq_var_ratio": 1.062,
+                    "ffd_min": 2,
+                    "ffd_max": 2,
+                    "ffd_no_fall": 0,
+                    "macaulay": [
+                      {
+                        "cols": 81,
+                        "degree": 2,
+                        "rank": 16,
+                        "rows": 17,
+                        "syzygies": 1
+                      },
+                      {
+                        "cols": 585,
+                        "degree": 3,
+                        "rank": 272,
+                        "rows": 289,
+                        "syzygies": 17
+                      }
+                    ],
+                    "targets": 8,
+                    "hit_rate": 0.25,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m2",
+                        "native_unit": "group_additions",
+                        "found": 2,
+                        "refuted": 6,
+                        "inconclusive": 0,
+                        "native_median_refuted": 239.0,
+                        "ms_median_refuted": 0.06224,
+                        "gae_per_target_mean": 183.1,
+                        "projected_relation_phase_S": 25.74,
+                        "projected_S_over_floor": 119.8,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m2",
+                        "native_unit": "pair_table_probes",
+                        "found": 2,
+                        "refuted": 6,
+                        "inconclusive": 0,
+                        "native_median_refuted": 1.0,
+                        "ms_median_refuted": 0.001515,
+                        "gae_per_target_mean": 0.2607,
+                        "projected_relation_phase_S": 0.03665,
+                        "projected_S_over_floor": 0.1705,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "matrix_f4_splitting",
+                        "native_unit": "word_xors",
+                        "found": 2,
+                        "refuted": 6,
+                        "inconclusive": 0,
+                        "native_median_refuted": 4980000.0,
+                        "ms_median_refuted": 59.97,
+                        "gae_per_target_mean": 8360.0,
+                        "projected_relation_phase_S": 1175.0,
+                        "projected_S_over_floor": 5467.0,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "cdcl_sat_native_xor",
+                        "native_unit": "conflicts",
+                        "found": 2,
+                        "refuted": 6,
+                        "inconclusive": 0,
+                        "native_median_refuted": 2052.0,
+                        "ms_median_refuted": 22.32,
+                        "gae_per_target_mean": 72100.0,
+                        "projected_relation_phase_S": 10140.0,
+                        "projected_S_over_floor": 47150.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  },
+                  {
+                    "n": 23,
+                    "dimension": 11,
+                    "m": 2,
+                    "signed_points": 2071,
+                    "signed_orbits": 46,
+                    "unknowns": 22,
+                    "equations": 23,
+                    "system_degree": 2,
+                    "eq_var_ratio": 1.045,
+                    "ffd_min": 2,
+                    "ffd_max": 2,
+                    "ffd_no_fall": 0,
+                    "macaulay": [
+                      {
+                        "cols": 144,
+                        "degree": 2,
+                        "rank": 22,
+                        "rows": 23,
+                        "syzygies": 1
+                      },
+                      {
+                        "cols": 1464,
+                        "degree": 3,
+                        "rank": 506,
+                        "rows": 529,
+                        "syzygies": 23
+                      }
+                    ],
+                    "targets": 8,
+                    "hit_rate": 0.5,
+                    "disagreements": 0,
+                    "oracles": [
+                      {
+                        "oracle": "enumerate_m2",
+                        "native_unit": "group_additions",
+                        "found": 4,
+                        "refuted": 4,
+                        "inconclusive": 0,
+                        "native_median_refuted": 2071.0,
+                        "ms_median_refuted": 0.7665,
+                        "gae_per_target_mean": 1310.0,
+                        "projected_relation_phase_S": 60.11,
+                        "projected_S_over_floor": 325.3,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "meet_in_the_middle_m2",
+                        "native_unit": "pair_table_probes",
+                        "found": 4,
+                        "refuted": 4,
+                        "inconclusive": 0,
+                        "native_median_refuted": 1.0,
+                        "ms_median_refuted": 0.001615,
+                        "gae_per_target_mean": 0.5112,
+                        "projected_relation_phase_S": 0.02346,
+                        "projected_S_over_floor": 0.1269,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "matrix_f4_splitting",
+                        "native_unit": "word_xors",
+                        "found": 4,
+                        "refuted": 4,
+                        "inconclusive": 0,
+                        "native_median_refuted": 226700000.0,
+                        "ms_median_refuted": 1352.0,
+                        "gae_per_target_mean": 199600.0,
+                        "projected_relation_phase_S": 9157.0,
+                        "projected_S_over_floor": 49550.0,
+                        "extrapolation": true
+                      },
+                      {
+                        "oracle": "cdcl_sat_native_xor",
+                        "native_unit": "conflicts",
+                        "found": 4,
+                        "refuted": 4,
+                        "inconclusive": 0,
+                        "native_median_refuted": 188400.0,
+                        "ms_median_refuted": 9529.0,
+                        "gae_per_target_mean": 12880000.0,
+                        "projected_relation_phase_S": 590800.0,
+                        "projected_S_over_floor": 3197000.0,
+                        "extrapolation": true
+                      }
+                    ]
+                  }
+                ],
+                "lift_checked_rerun": {
+                  "file": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
+                  "git_commit": "7b2e1b5",
+                  "what": "the thirteen cells re-run with the S4 tally lifting every witness over the signed base and comparing both directions; same seed and targets as the frozen run",
+                  "all_agree": true,
+                  "s4_lift_failures": 0,
+                  "identical_to_freeze": [
+                    "verdicts",
+                    "hit_rate",
+                    "ffd",
+                    "sat_conflicts",
+                    "enumerate_additions",
+                    "pair_table_probes"
+                  ],
+                  "matrix_f4_word_xors": {
+                    "ratio_frozen_over_rerun_range": [
+                      1.44,
+                      2.7
+                    ],
+                    "cause": "main's F4 work merged after the freeze: sparse structured elimination for binary Macaulay matrices (#405) and the native-elimination speed-up (5fa6138f); class engineering",
+                    "n23_m2_found_median": 32153918,
+                    "n23_m2_refuted_median": 105986387,
+                    "n23_m2_gae_per_target": 88400.0,
+                    "n23_m2_projected_relation_phase_S": 4060.0,
+                    "n15_m3_found_median": 64818554,
+                    "n15_m3_refuted_median": 628830074,
+                    "n15_m3_gae_per_target": 873000.0
+                  }
+                }
+              }
             }
           },
           "next_target": {
@@ -573,7 +1873,10 @@
           },
           "evidence": [
             "RESEARCH_KOBLITZ_SCALING_TARGET.md",
-            "RESEARCH_KOBLITZ_INDEX_CALCULUS.md"
+            "RESEARCH_KOBLITZ_INDEX_CALCULUS.md",
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md",
+            "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json"
           ],
           "history": []
         },
@@ -751,7 +2054,7 @@
                 "demo_n_max": 13,
                 "ic_degree_doc_max": 23
               },
-              "summary": "Known-answer recovery on toys n\u22487\u201313; ic runner degrees <=23 with caps"
+              "summary": "Known-answer recovery on toys n≈7–13; ic runner degrees <=23 with caps"
             },
             {
               "metrics": {
@@ -870,7 +2173,335 @@
               "n53_unknown_scalar_support_queries": 40136342,
               "repeatable_whole_process_wall_crossover": true,
               "same_target_n53": true,
-              "whole_process_wall_crossover_observed": true
+              "whole_process_wall_crossover_observed": true,
+              "operation_counted_whole_process_2026_09_21": {
+                "timing_class": "operation_counted_whole_process",
+                "automorphism_discount": "signed Frobenius walk, A=2n, measured (koblitz_signed_frobenius_rho_reference)",
+                "by_instance": [
+                  {
+                    "instance": "K_1 / GF(2^11)",
+                    "log2_r": 9.953,
+                    "cofactor": 2,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 45,
+                    "columns": 3,
+                    "S": 38.98,
+                    "rho_S": 17.39,
+                    "S_over_rho": 2.242,
+                    "S_over_floor": 145.9,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^11)",
+                    "log2_r": 9.953,
+                    "cofactor": 2,
+                    "variant": "mitm_m3_abscissa_columns_control",
+                    "signed_points": 45,
+                    "columns": 23,
+                    "S": 54.36,
+                    "rho_S": 17.39,
+                    "S_over_rho": 3.127,
+                    "S_over_floor": 203.5,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^13)",
+                    "log2_r": 10.97,
+                    "cofactor": 4,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 79,
+                    "columns": 4,
+                    "S": 73.96,
+                    "rho_S": 13.43,
+                    "S_over_rho": 5.505,
+                    "S_over_floor": 300.9,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^13)",
+                    "log2_r": 10.97,
+                    "cofactor": 4,
+                    "variant": "mitm_m3_abscissa_columns_control",
+                    "signed_points": 79,
+                    "columns": 40,
+                    "S": 92.09,
+                    "rho_S": 13.43,
+                    "S_over_rho": 6.855,
+                    "S_over_floor": 374.7,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^15)",
+                    "log2_r": 9.553,
+                    "cofactor": 44,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 33,
+                    "columns": 3,
+                    "S": 36.51,
+                    "rho_S": 19.16,
+                    "S_over_rho": 1.906,
+                    "S_over_floor": 159.5,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^15)",
+                    "log2_r": 9.553,
+                    "cofactor": 44,
+                    "variant": "mitm_m3_abscissa_columns_control",
+                    "signed_points": 33,
+                    "columns": 17,
+                    "S": 106.5,
+                    "rho_S": 19.16,
+                    "S_over_rho": 5.558,
+                    "S_over_floor": 465.3,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^15)",
+                    "log2_r": 9.553,
+                    "cofactor": 44,
+                    "variant": "semaev_s4_pairs_and_solve_m3_signed_orbit_columns",
+                    "signed_points": 33,
+                    "columns": 3,
+                    "S": 368.5,
+                    "rho_S": 19.16,
+                    "S_over_rho": 19.24,
+                    "S_over_floor": 1610.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^17)",
+                    "log2_r": 16.0,
+                    "cofactor": 2,
+                    "variant": "mitm_m2_signed_orbit_columns",
+                    "signed_points": 239,
+                    "columns": 8,
+                    "S": 115.6,
+                    "rho_S": 3.592,
+                    "S_over_rho": 32.19,
+                    "S_over_floor": 537.9,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^17)",
+                    "log2_r": 16.0,
+                    "cofactor": 2,
+                    "variant": "mitm_m2_abscissa_columns_control",
+                    "signed_points": 239,
+                    "columns": 120,
+                    "S": 151.3,
+                    "rho_S": 3.592,
+                    "S_over_rho": 42.13,
+                    "S_over_floor": 704.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^19)",
+                    "log2_r": 18.0,
+                    "cofactor": 2,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 305,
+                    "columns": 9,
+                    "S": 92.24,
+                    "rho_S": 2.088,
+                    "S_over_rho": 44.17,
+                    "S_over_floor": 453.7,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^19)",
+                    "log2_r": 18.0,
+                    "cofactor": 2,
+                    "variant": "mitm_m3_abscissa_columns_control",
+                    "signed_points": 305,
+                    "columns": 153,
+                    "S": 107.5,
+                    "rho_S": 2.088,
+                    "S_over_rho": 51.5,
+                    "S_over_floor": 529.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^23)",
+                    "log2_r": 22.0,
+                    "cofactor": 2,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 875,
+                    "columns": 20,
+                    "S": 187.9,
+                    "rho_S": 0.8933,
+                    "S_over_rho": 210.4,
+                    "S_over_floor": 1017.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^23)",
+                    "log2_r": 22.0,
+                    "cofactor": 2,
+                    "variant": "mitm_m3_abscissa_columns_control",
+                    "signed_points": 875,
+                    "columns": 438,
+                    "S": 202.5,
+                    "rho_S": 0.8933,
+                    "S_over_rho": 226.7,
+                    "S_over_floor": 1096.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^29)",
+                    "log2_r": 15.37,
+                    "cofactor": 12646,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 3771,
+                    "columns": 66,
+                    "S": 34550.0,
+                    "rho_S": 4.201,
+                    "S_over_rho": 8226.0,
+                    "S_over_floor": 210000.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_1 / GF(2^29)",
+                    "log2_r": 15.37,
+                    "cofactor": 12646,
+                    "variant": "mitm_m3_abscissa_columns_control",
+                    "signed_points": 3771,
+                    "columns": 1886,
+                    "S": 34650.0,
+                    "rho_S": 4.201,
+                    "S_over_rho": 8249.0,
+                    "S_over_floor": 210500.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^31)",
+                    "log2_r": 20.46,
+                    "cofactor": 1492,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 2421,
+                    "columns": 41,
+                    "S": 2489.0,
+                    "rho_S": 1.134,
+                    "S_over_rho": 2195.0,
+                    "S_over_floor": 15630.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^31)",
+                    "log2_r": 20.46,
+                    "cofactor": 1492,
+                    "variant": "mitm_m3_abscissa_columns_control",
+                    "signed_points": 2421,
+                    "columns": 1211,
+                    "S": 3412.0,
+                    "rho_S": 1.134,
+                    "S_over_rho": 3010.0,
+                    "S_over_floor": 21440.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^31)",
+                    "log2_r": 20.46,
+                    "cofactor": 1492,
+                    "variant": "semaev_s4_pairs_and_solve_m3_signed_orbit_columns",
+                    "signed_points": 2421,
+                    "columns": 41,
+                    "S": 128800.0,
+                    "rho_S": 1.134,
+                    "S_over_rho": 113600.0,
+                    "S_over_floor": 808900.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^37)",
+                    "log2_r": 27.78,
+                    "cofactor": 596,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 4663,
+                    "columns": 64,
+                    "S": 857.0,
+                    "rho_S": 0.4176,
+                    "S_over_rho": 2052.0,
+                    "S_over_floor": 5882.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^39)",
+                    "log2_r": 26.03,
+                    "cofactor": 8012,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 4681,
+                    "columns": 61,
+                    "S": 1830.0,
+                    "rho_S": 0.4553,
+                    "S_over_rho": 4021.0,
+                    "S_over_floor": 12900.0,
+                    "verified": true,
+                    "rho_verified": true
+                  },
+                  {
+                    "instance": "K_0 / GF(2^41)",
+                    "log2_r": 39.0,
+                    "cofactor": 4,
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "signed_points": 5003,
+                    "columns": 62,
+                    "S": 58.81,
+                    "rho_S": 0.1957,
+                    "S_over_rho": 300.5,
+                    "S_over_floor": 424.9,
+                    "verified": true,
+                    "rho_verified": true
+                  }
+                ],
+                "total_exponent_fits": [
+                  {
+                    "variant": "mitm_m3_abscissa_columns_control",
+                    "phase": "total",
+                    "alpha_r": 0.7529,
+                    "r_squared": 0.5935,
+                    "alpha_group_order": 0.632,
+                    "points": 7
+                  },
+                  {
+                    "variant": "mitm_m3_signed_orbit_columns",
+                    "phase": "total",
+                    "alpha_r": 0.544,
+                    "r_squared": 0.7093,
+                    "alpha_group_order": 0.5196,
+                    "points": 10
+                  },
+                  {
+                    "variant": "rho_reference",
+                    "phase": "total",
+                    "alpha_r": 0.2542,
+                    "r_squared": 0.9174,
+                    "alpha_group_order": 0.1713,
+                    "points": 11
+                  }
+                ],
+                "reading": "single-target whole-process counts on a materialised base; the n=53 record above is a wall-clock charged class and is unchanged",
+                "yield_ceiling_caveat": "on the rows marked in research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md section 2.2 the base lies in a proper subgroup (trace-zero invariant subspaces sit in or outside 2E), so C(F+m-1,m)/#E is loose by that subgroup's index; corrected values in section 3.5"
+              }
             },
             "summary": "Selected direct-routed four-shard n=53 stack wins five of five on an identified EPYC 9V74 host; full-build and core costs remain above rho",
             "verdict": "N53_SELECTED_ONLINE_WALL_CROSSOVER_FULL_COST_AND_CORE_LOSS"
@@ -884,7 +2515,12 @@
               "at least five fixed-protocol runs",
               "retained support < 512 MiB",
               "median direct/rho core ratio <= 1",
-              "refreshed forced-single-core selected-stack receipt"
+              "refreshed forced-single-core selected-stack receipt",
+              "whole-process direct/rho ratio < 1",
+              "evidence directory committed to the tree, not merely referenced",
+              "charged cost read from the producer batch summary, never summed from per-target rows",
+              "target mode swept, not left at the beat default, and the best one quoted",
+              "any cost component excluded from one arm excluded from the other on a stated policy"
             ],
             "n53_probe_note": "Selected EPYC 9V74 panel wins 5/5 with a 0.839190 median; scalar-blind EPYC 7763 run is 0.987489x. Median direct core remains 2.261565x rho, retained support is 738,197,504 bytes, and fresh build plus direct is 17.636692x.",
             "summary": "Reduce selected n=53 memory, core, and build costs while refreshing forced-single-core and obtaining independent reproduction"
@@ -904,7 +2540,11 @@
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-89-current-selected-panel-20260912/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-92-current-single-core-20260913/verification.json",
             "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-108-routing-selection-archive-20260913/verification.json",
-            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE108_ROUTING_SELECTION_RESULT_20260913.md"
+            "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE108_ROUTING_SELECTION_RESULT_20260913.md",
+            "research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/README.md",
+            "research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/target_mode_sweep.json",
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
           ],
           "history": [
             {
@@ -918,7 +2558,14 @@
                 "whole_process_wall_crossover": false
               },
               "summary": "n=37 charged-time crossover (amortized exact-support V2); n=41 base feasible only",
-              "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER"
+              "verdict": "N37_DIRECT_1024_CHARGED_CROSSOVER",
+              "retracted": {
+                "on": "2026-09-12",
+                "note": "Superseded by the current record on the same day. Recorded here because the row was not merely superseded, it was wrong, and the reasons apply to any future n=37 claim.",
+                "reason": "Measured against a rho baseline that did not solve. Commit 52e305e7 replaced Floyd cycle finding, which on a negation-quotient walk meets itself at fruitless cycles, with the distinguished-point method, and records that the old baseline recovered 0 of 32 logarithms at degree 41 while the workflow reported a 1.009 crossover, and that there is no crossover at 31, 37, 39 or 41. That landed 2026-09-11, one day after this row was written, and the row was not revisited.",
+                "evidence_pointer_status": "dangling: research/sat_factor_base_review_20260908/autolab_n37_direct_retry/runs/20260910T040358Z-9eac5234a5/artifacts/verdict.json is absent from the tree and appears in no commit, so the row was never independently replayable",
+                "remeasured_at": "research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/target_mode_sweep.json"
+              }
             },
             {
               "claim_boundary": "Finite public-synthetic results. n=41 wins only after precomputation; n=53 loses whole-process on the exact same target. Not asymptotic sub-rho, key recovery, or SOTA.",
@@ -1133,7 +2780,76 @@
               "summary": "n=41 online charged crossover with full-cost loss; five selected-stack n=53 process runs include two wins and a median 1.0188x loss; current selected CPU-0 remains 1.3543x rho wall",
               "verdict": "N41_ONLINE_CROSSOVER_N53_TWO_OF_FIVE_PROCESS_WINS_MEDIAN_NEAR_LOSS"
             }
-          ]
+          ],
+          "n37_autolab_remeasurement_20260912": {
+            "status": "measured_observation_not_a_record",
+            "summary": "n=37 over 1024 targets on the autolab producers: index calculus is behind rho in every target mode. Best is partition_walk at 14.778 ms per target charged against rho's 12.822, a factor of 1.15, with rho verifying 1024/1024.",
+            "verdict": "NO_CROSSOVER_MEASURED_N13_N37_N41_N53_ON_AUTOLAB_PRODUCERS",
+            "configuration": "signed_expanded pair index, pair_pair_16 query, eta=1/2, one process per arm. This is the autolab beat configuration, not the two_torsion_saturated fixed-algebraic base the current record uses.",
+            "timing_class": "algorithmic_charged",
+            "automorphism_discount": "sqrt(2*n), A=2*n signed Frobenius",
+            "all_stages_charged_same_series": true,
+            "rho_targets_verified": "1024/1024",
+            "ic_cost": 14.7777,
+            "rho_cost": 12.8217,
+            "cost_unit": "ms per target, 1024 targets",
+            "ic_cost_by_target_mode": {
+              "coefficient_walk": 15.33,
+              "independent": 20.2703,
+              "partition_walk": 14.7777
+            },
+            "registered_beat_note": "All koblitz.vs_rho.* beats pin target_mode=independent, the most expensive of the three at 20.270 ms per target, 37% above partition_walk. Reading this stage off one beat makes the method look worse than its best measured mode.",
+            "charged_definition": "direct: full_algorithm_charged_total_ms from the producer batch summary (curve setup + support-table setup charged once, plus per-target fixture setup and relation collection). rho: sum of per-target total_ms (setup + walk + validation).",
+            "charged_definition_pitfall": "Do not sum the direct producer's per-target charged_total_ms across a batch: it re-adds the shared support-table setup_ms for every target. At n=37 that reports 34.075 ms per target where the batch summary's full_algorithm_charged_total_ms gives 20.270 for the same run, and it makes setup amortization look like the bottleneck when setup is under 0.02 ms per target.",
+            "cost_decomposition_ms_per_target": {
+              "rho": {
+                "setup": 3.9759,
+                "total": 12.8217,
+                "validation": 1.2815,
+                "walk": 7.5644
+              },
+              "partition_walk": {
+                "batch_setup_amortized": 0.0154,
+                "collection": 14.6342,
+                "fixture_setup": 0.1281,
+                "of_which_linear_solve": 0.0156,
+                "of_which_solution_validation": 7.7804
+              }
+            },
+            "largest_direct_component": "solution_validation_ms, 7.780 of 14.778 ms per target (53%). It re-derives every factor-base discrete log by scalar multiplication and replays every relation under assert_eq!, confirming an answer the linear solve already produced. Making it cheap is the obvious lever; subtracting it from the direct arm while rho keeps its own 1.281 ms validation would manufacture a 1.65x win and is forbidden by claim_hygiene.",
+            "measurement_asymmetries": [
+              "rho charges setup_ms for building the target point Q = d0*G and the jump table. Constructing Q is instance generation, which the direct arm reports separately as fixture_generation_ms and does not charge. This asymmetry runs against rho.",
+              "solution_validation_ms re-derives the discrete log of every factor-base representative with a scalar multiplication and replays every collected relation against the solved vector, under assert_eq!. It confirms an answer the linear solve already produced rather than producing it. It is the largest single component of the direct arm's charged cost and is the obvious place to look next; it is not subtracted from any ratio quoted here."
+            ],
+            "other_rungs": {
+              "n13_whole_process_wall": {
+                "ic_ms": 6.944,
+                "rho_ms": 3.035,
+                "rho_over_ic": 0.437
+              },
+              "n41_algorithmic_charged": {
+                "ic_ms": 7698.893,
+                "rho_ms": 247.476,
+                "rho_over_ic": 0.0321,
+                "ic_collection_only_ms": 821.668,
+                "ic_support_setup_ms": 6877.225,
+                "note": "Single target. Discount the support build entirely and collection alone is still 3.3x rho, so on this base family no number of targets sharing one base crosses at n=41."
+              },
+              "n53_whole_process_wall": {
+                "ic_ms": 870766.0,
+                "rho_ms": 4839.2,
+                "rho_over_ic": 0.00556
+              },
+              "ratio_note": "rho_cost / ic_cost; above 1 would be an index-calculus win"
+            },
+            "claim_boundary": "Public synthetic Koblitz fixtures only. Not key recovery, not asymptotic sub-rho, not imported points. A negative result for this base family at these rungs, not a proof that no crossover exists.",
+            "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/target_mode_sweep.json"
+          },
+          "open_reconciliation": {
+            "question": "Both n=41 results in this record are live and point opposite ways. The current record reports an online charged crossover at ic_over_rho_online = 0.286 on a two_torsion_saturated base over 5 targets; the autolab remeasurement above reports per-target relation collection at 821.7 ms against rho's 247.5 ms on a signed_expanded base, 3.3x the other way.",
+            "not_yet_a_contradiction": "Different factor-base families, different target counts, and different cost boundaries. The current record's own amortised ratio is 5.026 and its full available wall is 110.79x rho, so the 0.286 figure excludes base construction rather than disagreeing about it.",
+            "to_settle_it": "Run both base families through one harness at one target count with one charged definition, and state which costs are inside the boundary. Until then neither n=41 number should be quoted without its configuration."
+          }
         }
       }
     },
@@ -1182,7 +2898,7 @@
         "decomposition": {
           "status": "record",
           "current": {
-            "summary": "S3 2-decomp through bench sizes; S4/Gr\u00f6bner not a scaling win; FFD not published on 2-decomp frontier",
+            "summary": "S3 2-decomp through bench sizes; S4/Gröbner not a scaling win; FFD not published on 2-decomp frontier",
             "metrics": {
               "summation": "S3",
               "summands": 2,
@@ -1212,79 +2928,1339 @@
         "relation_yield": {
           "status": "record",
           "current": {
-            "summary": "Enough relations for toys <=14-bit j=0 / <=12-bit generic",
+            "summary": "Operation-counted yield on the frozen prime ladder (8 instances, up to r=2^23.4): relations per trial measured against the counting ceiling C(F+m-1,m)/#E for every variant; natural targets only",
+            "date": "2026-09-21",
             "metrics": {
-              "j0_bits_max": 14,
-              "generic_bits_max": 12,
-              "trials_per_relation_curve": null
+              "timing_class": "operation_counted",
+              "target_mix": {
+                "natural": "every trial",
+                "planted_sat": 0,
+                "proven_unsat": 0
+              },
+              "yield_over_ceiling_range": [
+                0.7492,
+                1.245
+              ],
+              "trials_per_relation_by_instance": [
+                {
+                  "instance": "bench-10bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "m": 2,
+                  "signed_points": 32,
+                  "trials_per_relation": 2.163,
+                  "pr_decomposition_measured": 0.4623,
+                  "ceiling": 0.6416,
+                  "yield_over_ceiling": 0.755
+                },
+                {
+                  "instance": "bench-10bit",
+                  "variant": "direct_subtraction_m2",
+                  "m": 2,
+                  "signed_points": 32,
+                  "trials_per_relation": 2.163,
+                  "pr_decomposition_measured": 0.4623,
+                  "ceiling": 0.6416,
+                  "yield_over_ceiling": 0.755
+                },
+                {
+                  "instance": "bench-10bit",
+                  "variant": "mitm_m2",
+                  "m": 2,
+                  "signed_points": 32,
+                  "trials_per_relation": 2.163,
+                  "pr_decomposition_measured": 0.4623,
+                  "ceiling": 0.6416,
+                  "yield_over_ceiling": 0.755
+                },
+                {
+                  "instance": "bench-10bit",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 32,
+                  "trials_per_relation": 1.0,
+                  "pr_decomposition_measured": 1.0,
+                  "ceiling": 1.0,
+                  "yield_over_ceiling": 1.0
+                },
+                {
+                  "instance": "bench-12bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "m": 2,
+                  "signed_points": 32,
+                  "trials_per_relation": 7.889,
+                  "pr_decomposition_measured": 0.1268,
+                  "ceiling": 0.1358,
+                  "yield_over_ceiling": 1.035
+                },
+                {
+                  "instance": "bench-12bit",
+                  "variant": "direct_subtraction_m2",
+                  "m": 2,
+                  "signed_points": 32,
+                  "trials_per_relation": 7.889,
+                  "pr_decomposition_measured": 0.1268,
+                  "ceiling": 0.1358,
+                  "yield_over_ceiling": 1.035
+                },
+                {
+                  "instance": "bench-12bit",
+                  "variant": "mitm_m2",
+                  "m": 2,
+                  "signed_points": 32,
+                  "trials_per_relation": 7.889,
+                  "pr_decomposition_measured": 0.1268,
+                  "ceiling": 0.1358,
+                  "yield_over_ceiling": 1.035
+                },
+                {
+                  "instance": "bench-12bit",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 32,
+                  "trials_per_relation": 1.256,
+                  "pr_decomposition_measured": 0.7962,
+                  "ceiling": 1.0,
+                  "yield_over_ceiling": 0.8263
+                },
+                {
+                  "instance": "bench-14bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "m": 2,
+                  "signed_points": 64,
+                  "trials_per_relation": 6.722,
+                  "pr_decomposition_measured": 0.1488,
+                  "ceiling": 0.1281,
+                  "yield_over_ceiling": 1.245
+                },
+                {
+                  "instance": "bench-14bit",
+                  "variant": "direct_subtraction_m2",
+                  "m": 2,
+                  "signed_points": 64,
+                  "trials_per_relation": 6.722,
+                  "pr_decomposition_measured": 0.1488,
+                  "ceiling": 0.1281,
+                  "yield_over_ceiling": 1.245
+                },
+                {
+                  "instance": "bench-14bit",
+                  "variant": "mitm_m2",
+                  "m": 2,
+                  "signed_points": 64,
+                  "trials_per_relation": 6.722,
+                  "pr_decomposition_measured": 0.1488,
+                  "ceiling": 0.1281,
+                  "yield_over_ceiling": 1.245
+                },
+                {
+                  "instance": "bench-14bit",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 64,
+                  "trials_per_relation": 1.038,
+                  "pr_decomposition_measured": 0.9634,
+                  "ceiling": 1.0,
+                  "yield_over_ceiling": 0.962
+                },
+                {
+                  "instance": "bench-16bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "m": 2,
+                  "signed_points": 128,
+                  "trials_per_relation": 8.563,
+                  "pr_decomposition_measured": 0.1168,
+                  "ceiling": 0.127,
+                  "yield_over_ceiling": 0.9153
+                },
+                {
+                  "instance": "bench-16bit",
+                  "variant": "direct_subtraction_m2",
+                  "m": 2,
+                  "signed_points": 128,
+                  "trials_per_relation": 8.563,
+                  "pr_decomposition_measured": 0.1168,
+                  "ceiling": 0.127,
+                  "yield_over_ceiling": 0.9153
+                },
+                {
+                  "instance": "bench-16bit",
+                  "variant": "mitm_m2",
+                  "m": 2,
+                  "signed_points": 128,
+                  "trials_per_relation": 8.563,
+                  "pr_decomposition_measured": 0.1168,
+                  "ceiling": 0.127,
+                  "yield_over_ceiling": 0.9153
+                },
+                {
+                  "instance": "bench-16bit",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 128,
+                  "trials_per_relation": 1.006,
+                  "pr_decomposition_measured": 0.994,
+                  "ceiling": 1.0,
+                  "yield_over_ceiling": 0.9939
+                },
+                {
+                  "instance": "bench-18bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "m": 2,
+                  "signed_points": 128,
+                  "trials_per_relation": 28.07,
+                  "pr_decomposition_measured": 0.03563,
+                  "ceiling": 0.03155,
+                  "yield_over_ceiling": 1.133
+                },
+                {
+                  "instance": "bench-18bit",
+                  "variant": "direct_subtraction_m2",
+                  "m": 2,
+                  "signed_points": 128,
+                  "trials_per_relation": 28.07,
+                  "pr_decomposition_measured": 0.03563,
+                  "ceiling": 0.03155,
+                  "yield_over_ceiling": 1.133
+                },
+                {
+                  "instance": "bench-18bit",
+                  "variant": "mitm_m2",
+                  "m": 2,
+                  "signed_points": 128,
+                  "trials_per_relation": 28.07,
+                  "pr_decomposition_measured": 0.03563,
+                  "ceiling": 0.03155,
+                  "yield_over_ceiling": 1.133
+                },
+                {
+                  "instance": "bench-18bit",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 128,
+                  "trials_per_relation": 1.335,
+                  "pr_decomposition_measured": 0.7491,
+                  "ceiling": 1.0,
+                  "yield_over_ceiling": 0.7492
+                },
+                {
+                  "instance": "bench-20bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "m": 2,
+                  "signed_points": 256,
+                  "trials_per_relation": 26.59,
+                  "pr_decomposition_measured": 0.03761,
+                  "ceiling": 0.03142,
+                  "yield_over_ceiling": 1.199
+                },
+                {
+                  "instance": "bench-20bit",
+                  "variant": "direct_subtraction_m2",
+                  "m": 2,
+                  "signed_points": 256,
+                  "trials_per_relation": 26.59,
+                  "pr_decomposition_measured": 0.03761,
+                  "ceiling": 0.03142,
+                  "yield_over_ceiling": 1.199
+                },
+                {
+                  "instance": "bench-20bit",
+                  "variant": "mitm_m2",
+                  "m": 2,
+                  "signed_points": 256,
+                  "trials_per_relation": 26.59,
+                  "pr_decomposition_measured": 0.03761,
+                  "ceiling": 0.03142,
+                  "yield_over_ceiling": 1.199
+                },
+                {
+                  "instance": "bench-20bit",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 256,
+                  "trials_per_relation": 1.076,
+                  "pr_decomposition_measured": 0.9294,
+                  "ceiling": 1.0,
+                  "yield_over_ceiling": 0.9284
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "variant": "semaev_s3_roots_m2",
+                  "m": 2,
+                  "signed_points": 512,
+                  "trials_per_relation": 24.21,
+                  "pr_decomposition_measured": 0.04131,
+                  "ceiling": 0.0399,
+                  "yield_over_ceiling": 1.032
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "variant": "direct_subtraction_m2",
+                  "m": 2,
+                  "signed_points": 512,
+                  "trials_per_relation": 24.21,
+                  "pr_decomposition_measured": 0.04131,
+                  "ceiling": 0.0399,
+                  "yield_over_ceiling": 1.032
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "variant": "mitm_m2",
+                  "m": 2,
+                  "signed_points": 512,
+                  "trials_per_relation": 24.21,
+                  "pr_decomposition_measured": 0.04131,
+                  "ceiling": 0.0399,
+                  "yield_over_ceiling": 1.032
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 512,
+                  "trials_per_relation": 1.002,
+                  "pr_decomposition_measured": 0.998,
+                  "ceiling": 1.0,
+                  "yield_over_ceiling": 0.9985
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "variant": "semaev_s3_roots_m2",
+                  "m": 2,
+                  "signed_points": 512,
+                  "trials_per_relation": 79.98,
+                  "pr_decomposition_measured": 0.0125,
+                  "ceiling": 0.01201,
+                  "yield_over_ceiling": 1.054
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "variant": "direct_subtraction_m2",
+                  "m": 2,
+                  "signed_points": 512,
+                  "trials_per_relation": 79.98,
+                  "pr_decomposition_measured": 0.0125,
+                  "ceiling": 0.01201,
+                  "yield_over_ceiling": 1.054
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "variant": "mitm_m2",
+                  "m": 2,
+                  "signed_points": 512,
+                  "trials_per_relation": 79.98,
+                  "pr_decomposition_measured": 0.0125,
+                  "ceiling": 0.01201,
+                  "yield_over_ceiling": 1.054
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "variant": "mitm_m3",
+                  "m": 3,
+                  "signed_points": 512,
+                  "trials_per_relation": 1.144,
+                  "pr_decomposition_measured": 0.8741,
+                  "ceiling": 1.0,
+                  "yield_over_ceiling": 0.8744
+                }
+              ],
+              "trials_exponent_fits": [
+                {
+                  "variant": "direct_subtraction_m2",
+                  "phase": "trials",
+                  "alpha_r": 0.5684,
+                  "r_squared": 0.9893,
+                  "alpha_group_order": 0.5684,
+                  "points": 8
+                },
+                {
+                  "variant": "mitm_m2",
+                  "phase": "trials",
+                  "alpha_r": 0.5684,
+                  "r_squared": 0.9893,
+                  "alpha_group_order": 0.5684,
+                  "points": 8
+                },
+                {
+                  "variant": "mitm_m3",
+                  "phase": "trials",
+                  "alpha_r": 0.3293,
+                  "r_squared": 0.9881,
+                  "alpha_group_order": 0.3293,
+                  "points": 8
+                },
+                {
+                  "variant": "semaev_s3_roots_m2",
+                  "phase": "trials",
+                  "alpha_r": 0.5684,
+                  "r_squared": 0.9893,
+                  "alpha_group_order": 0.5684,
+                  "points": 8
+                }
+              ]
             }
           },
           "next_target": {
-            "summary": "Trials-per-relation vs bitlength for 10\u201316 bits on frozen ladder",
+            "summary": "Trials-per-relation on a j=0 zeta-orbit base, 10-24 bits, against the orbit-corrected ceiling",
             "acceptance_gates": [
-              "at least 3 bitlengths",
-              "R^2 reported"
+              "at least 4 bitlengths",
+              "R^2 reported",
+              "ceiling stated for the orbit-reduced base"
             ]
           },
           "evidence": [
-            "docs/RESEARCH_BENCH_LOG.md"
+            "docs/RESEARCH_BENCH_LOG.md",
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "Enough relations for toys <=14-bit j=0 / <=12-bit generic",
+              "metrics": {
+                "j0_bits_max": 14,
+                "generic_bits_max": 12,
+                "trials_per_relation_curve": null
+              },
+              "superseded_on": "2026-09-21"
+            }
+          ]
         },
         "rank": {
-          "status": "open",
+          "status": "record",
           "current": {
-            "summary": "Dense GE mod n on toy matrices",
+            "summary": "Relation-matrix LA priced per instance on the prime ladder: dense incremental Gauss-Jordan over Z/rZ, rank recomputed after every row, stop when the target column is pinned; multiply-subtracts counted and converted",
+            "date": "2026-09-21",
             "metrics": {
-              "sparse_or_dense": "dense",
-              "matrix_dims": null,
-              "la_cost_ms": null
+              "sparse_or_dense": "dense incremental reduced echelon form (IncrementalGauss)",
+              "rank_accumulation": "reduced after every relation; terminal when the logarithm's column is pinned",
+              "by_instance": [
+                {
+                  "instance": "bench-10bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "matrix_dims": {
+                    "rows": 14.33,
+                    "cols": 17
+                  },
+                  "rank": 14.33,
+                  "row_ops": 157.3,
+                  "la_charged_gae": 4.025,
+                  "la_S": 0.1403
+                },
+                {
+                  "instance": "bench-10bit",
+                  "variant": "direct_subtraction_m2",
+                  "matrix_dims": {
+                    "rows": 14.33,
+                    "cols": 17
+                  },
+                  "rank": 14.33,
+                  "row_ops": 157.3,
+                  "la_charged_gae": 4.025,
+                  "la_S": 0.1403
+                },
+                {
+                  "instance": "bench-10bit",
+                  "variant": "mitm_m2",
+                  "matrix_dims": {
+                    "rows": 14.33,
+                    "cols": 17
+                  },
+                  "rank": 14.33,
+                  "row_ops": 157.3,
+                  "la_charged_gae": 4.025,
+                  "la_S": 0.1403
+                },
+                {
+                  "instance": "bench-10bit",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 14.33,
+                    "cols": 17
+                  },
+                  "rank": 14.33,
+                  "row_ops": 282.0,
+                  "la_charged_gae": 7.214,
+                  "la_S": 0.2515
+                },
+                {
+                  "instance": "bench-12bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "matrix_dims": {
+                    "rows": 12.0,
+                    "cols": 17
+                  },
+                  "rank": 12.0,
+                  "row_ops": 128.7,
+                  "la_charged_gae": 2.997,
+                  "la_S": 0.04806
+                },
+                {
+                  "instance": "bench-12bit",
+                  "variant": "direct_subtraction_m2",
+                  "matrix_dims": {
+                    "rows": 12.0,
+                    "cols": 17
+                  },
+                  "rank": 12.0,
+                  "row_ops": 128.7,
+                  "la_charged_gae": 2.997,
+                  "la_S": 0.04806
+                },
+                {
+                  "instance": "bench-12bit",
+                  "variant": "mitm_m2",
+                  "matrix_dims": {
+                    "rows": 12.0,
+                    "cols": 17
+                  },
+                  "rank": 12.0,
+                  "row_ops": 128.7,
+                  "la_charged_gae": 2.997,
+                  "la_S": 0.04806
+                },
+                {
+                  "instance": "bench-12bit",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 14.33,
+                    "cols": 17
+                  },
+                  "rank": 14.33,
+                  "row_ops": 282.3,
+                  "la_charged_gae": 6.575,
+                  "la_S": 0.1054
+                },
+                {
+                  "instance": "bench-14bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "matrix_dims": {
+                    "rows": 24.0,
+                    "cols": 33
+                  },
+                  "rank": 24.0,
+                  "row_ops": 295.3,
+                  "la_charged_gae": 6.39,
+                  "la_S": 0.05016
+                },
+                {
+                  "instance": "bench-14bit",
+                  "variant": "direct_subtraction_m2",
+                  "matrix_dims": {
+                    "rows": 24.0,
+                    "cols": 33
+                  },
+                  "rank": 24.0,
+                  "row_ops": 295.3,
+                  "la_charged_gae": 6.39,
+                  "la_S": 0.05016
+                },
+                {
+                  "instance": "bench-14bit",
+                  "variant": "mitm_m2",
+                  "matrix_dims": {
+                    "rows": 24.0,
+                    "cols": 33
+                  },
+                  "rank": 24.0,
+                  "row_ops": 295.3,
+                  "la_charged_gae": 6.39,
+                  "la_S": 0.05016
+                },
+                {
+                  "instance": "bench-14bit",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 26.67,
+                    "cols": 33
+                  },
+                  "rank": 26.67,
+                  "row_ops": 777.0,
+                  "la_charged_gae": 16.81,
+                  "la_S": 0.1319
+                },
+                {
+                  "instance": "bench-16bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "matrix_dims": {
+                    "rows": 42.0,
+                    "cols": 65
+                  },
+                  "rank": 42.0,
+                  "row_ops": 478.0,
+                  "la_charged_gae": 9.27,
+                  "la_S": 0.03636
+                },
+                {
+                  "instance": "bench-16bit",
+                  "variant": "direct_subtraction_m2",
+                  "matrix_dims": {
+                    "rows": 42.0,
+                    "cols": 65
+                  },
+                  "rank": 42.0,
+                  "row_ops": 478.0,
+                  "la_charged_gae": 9.27,
+                  "la_S": 0.03636
+                },
+                {
+                  "instance": "bench-16bit",
+                  "variant": "mitm_m2",
+                  "matrix_dims": {
+                    "rows": 42.0,
+                    "cols": 65
+                  },
+                  "rank": 42.0,
+                  "row_ops": 478.0,
+                  "la_charged_gae": 9.27,
+                  "la_S": 0.03636
+                },
+                {
+                  "instance": "bench-16bit",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 52.67,
+                    "cols": 65
+                  },
+                  "rank": 52.67,
+                  "row_ops": 2978.0,
+                  "la_charged_gae": 57.75,
+                  "la_S": 0.2265
+                },
+                {
+                  "instance": "bench-18bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "matrix_dims": {
+                    "rows": 24.0,
+                    "cols": 65
+                  },
+                  "rank": 24.0,
+                  "row_ops": 231.0,
+                  "la_charged_gae": 4.165,
+                  "la_S": 0.008142
+                },
+                {
+                  "instance": "bench-18bit",
+                  "variant": "direct_subtraction_m2",
+                  "matrix_dims": {
+                    "rows": 24.0,
+                    "cols": 65
+                  },
+                  "rank": 24.0,
+                  "row_ops": 231.0,
+                  "la_charged_gae": 4.165,
+                  "la_S": 0.008142
+                },
+                {
+                  "instance": "bench-18bit",
+                  "variant": "mitm_m2",
+                  "matrix_dims": {
+                    "rows": 24.0,
+                    "cols": 65
+                  },
+                  "rank": 24.0,
+                  "row_ops": 231.0,
+                  "la_charged_gae": 4.165,
+                  "la_S": 0.008142
+                },
+                {
+                  "instance": "bench-18bit",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 58.67,
+                    "cols": 65
+                  },
+                  "rank": 58.67,
+                  "row_ops": 4918.0,
+                  "la_charged_gae": 88.67,
+                  "la_S": 0.1733
+                },
+                {
+                  "instance": "bench-20bit",
+                  "variant": "semaev_s3_roots_m2",
+                  "matrix_dims": {
+                    "rows": 65.67,
+                    "cols": 129
+                  },
+                  "rank": 65.67,
+                  "row_ops": 751.3,
+                  "la_charged_gae": 13.0,
+                  "la_S": 0.0127
+                },
+                {
+                  "instance": "bench-20bit",
+                  "variant": "direct_subtraction_m2",
+                  "matrix_dims": {
+                    "rows": 65.67,
+                    "cols": 129
+                  },
+                  "rank": 65.67,
+                  "row_ops": 751.3,
+                  "la_charged_gae": 13.0,
+                  "la_S": 0.0127
+                },
+                {
+                  "instance": "bench-20bit",
+                  "variant": "mitm_m2",
+                  "matrix_dims": {
+                    "rows": 65.67,
+                    "cols": 129
+                  },
+                  "rank": 65.67,
+                  "row_ops": 751.3,
+                  "la_charged_gae": 13.0,
+                  "la_S": 0.0127
+                },
+                {
+                  "instance": "bench-20bit",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 109.3,
+                    "cols": 129
+                  },
+                  "rank": 109.3,
+                  "row_ops": 14590.0,
+                  "la_charged_gae": 252.3,
+                  "la_S": 0.2466
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "variant": "semaev_s3_roots_m2",
+                  "matrix_dims": {
+                    "rows": 115.3,
+                    "cols": 257
+                  },
+                  "rank": 115.3,
+                  "row_ops": 1409.0,
+                  "la_charged_gae": 23.8,
+                  "la_S": 0.01312
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "variant": "direct_subtraction_m2",
+                  "matrix_dims": {
+                    "rows": 115.3,
+                    "cols": 257
+                  },
+                  "rank": 115.3,
+                  "row_ops": 1409.0,
+                  "la_charged_gae": 23.8,
+                  "la_S": 0.01312
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "variant": "mitm_m2",
+                  "matrix_dims": {
+                    "rows": 115.3,
+                    "cols": 257
+                  },
+                  "rank": 115.3,
+                  "row_ops": 1409.0,
+                  "la_charged_gae": 23.8,
+                  "la_S": 0.01312
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 218.0,
+                    "cols": 257
+                  },
+                  "rank": 218.0,
+                  "row_ops": 54650.0,
+                  "la_charged_gae": 923.2,
+                  "la_S": 0.5088
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "variant": "semaev_s3_roots_m2",
+                  "matrix_dims": {
+                    "rows": 122.3,
+                    "cols": 257
+                  },
+                  "rank": 122.3,
+                  "row_ops": 1377.0,
+                  "la_charged_gae": 21.57,
+                  "la_S": 0.006523
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "variant": "direct_subtraction_m2",
+                  "matrix_dims": {
+                    "rows": 122.3,
+                    "cols": 257
+                  },
+                  "rank": 122.3,
+                  "row_ops": 1377.0,
+                  "la_charged_gae": 21.57,
+                  "la_S": 0.006523
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "variant": "mitm_m2",
+                  "matrix_dims": {
+                    "rows": 122.3,
+                    "cols": 257
+                  },
+                  "rank": 122.3,
+                  "row_ops": 1377.0,
+                  "la_charged_gae": 21.57,
+                  "la_S": 0.006523
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "variant": "mitm_m3",
+                  "matrix_dims": {
+                    "rows": 232.0,
+                    "cols": 257
+                  },
+                  "rank": 232.0,
+                  "row_ops": 108300.0,
+                  "la_charged_gae": 1696.0,
+                  "la_S": 0.5129
+                }
+              ],
+              "la_exponent_fits": [
+                {
+                  "variant": "direct_subtraction_m2",
+                  "phase": "linear_algebra",
+                  "alpha_r": 0.2034,
+                  "r_squared": 0.74,
+                  "alpha_group_order": 0.2034,
+                  "points": 8
+                },
+                {
+                  "variant": "mitm_m2",
+                  "phase": "linear_algebra",
+                  "alpha_r": 0.2034,
+                  "r_squared": 0.74,
+                  "alpha_group_order": 0.2034,
+                  "points": 8
+                },
+                {
+                  "variant": "mitm_m3",
+                  "phase": "linear_algebra",
+                  "alpha_r": 0.6229,
+                  "r_squared": 0.9644,
+                  "alpha_group_order": 0.6229,
+                  "points": 8
+                },
+                {
+                  "variant": "semaev_s3_roots_m2",
+                  "phase": "linear_algebra",
+                  "alpha_r": 0.2034,
+                  "r_squared": 0.74,
+                  "alpha_group_order": 0.2034,
+                  "points": 8
+                }
+              ]
             }
           },
           "next_target": {
-            "summary": "Sparse LA for >=256 FB columns on a 16-bit instance; publish dims and LA cost",
+            "summary": "Sparse or structured LA at K>=1024 columns (>=28 bits); dims and cost published",
             "acceptance_gates": [
               "correct vs dense GE on a subsample",
-              "matrix_dims and la cost logged"
+              "matrix_dims and LA cost logged"
             ]
           },
-          "evidence": [],
-          "history": []
+          "evidence": [
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+          ],
+          "history": [
+            {
+              "summary": "Dense GE mod n on toy matrices",
+              "metrics": {
+                "sparse_or_dense": "dense",
+                "matrix_dims": null,
+                "la_cost_ms": null
+              },
+              "superseded_on": "2026-09-21"
+            }
+          ]
         },
         "end_to_end_dlp": {
           "status": "record",
           "current": {
-            "summary": "Generic IC 12-bit; j=0 orbit IC 14-bit bench success",
+            "summary": "Known-answer DLP recovered and verified ([d]G = Q) by every variant on every instance of the prime ladder, largest 23.4 bits (r=2^23.4); every phase counted in one unit",
+            "date": "2026-09-21",
             "metrics": {
-              "generic_bits": 12,
-              "j0_bits": 14,
-              "best_variant": "j0_zeta_orbit",
-              "claim_boundary": "synthetic_known_answer"
+              "bits_max": 23.38,
+              "claim_boundary": "synthetic_known_answer",
+              "stage_counts": "factor_base / relations / linear_algebra / verify per variant in the frozen run (native counts, wall_ns, gae)",
+              "recovered_d_verified": true,
+              "variants": [
+                "direct_subtraction_m2",
+                "mitm_m2",
+                "mitm_m3",
+                "semaev_s3_roots_m2"
+              ]
             }
           },
           "next_target": {
-            "summary": "j=0 known-answer IC at 16 bits under bench harness",
+            "summary": "Generic curve at >=28 bits, or a j=0 zeta-orbit pipeline at >=24 bits, in the same counted harness",
             "acceptance_gates": [
-              "agrees with rho on same instance",
-              "wall time logged",
-              "stage_timers present"
+              "[d]G = Q",
+              "every phase counted",
+              "agrees with the counted rho on the same instance",
+              "stage counts present"
             ]
           },
           "evidence": [
-            "docs/RESEARCH_BENCH_LOG.md"
+            "docs/RESEARCH_BENCH_LOG.md",
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "Generic IC 12-bit; j=0 orbit IC 14-bit bench success",
+              "metrics": {
+                "generic_bits": 12,
+                "j0_bits": 14,
+                "best_variant": "j0_zeta_orbit",
+                "claim_boundary": "synthetic_known_answer"
+              },
+              "superseded_on": "2026-09-21"
+            }
+          ]
         },
         "vs_rho": {
           "status": "not_achieved",
           "current": {
-            "summary": "IC slower than rho at all measured sizes; dense 3-sum wall ~80 bits",
+            "summary": "Whole-process operation-counted cost against a counted Pollard rho on the same instance: best variant mitm_m3 at 1.167x rho (11.9 bits); no variant below rho at r >= 2^20",
+            "date": "2026-09-21",
             "metrics": {
-              "dense_3sum_wall_bits": 80,
-              "timing_class": null,
-              "automorphism_discount": "n/a_prime_generic_unless_stated"
+              "timing_class": "operation_counted_whole_process",
+              "automorphism_discount": "reference walk uses A=1 (no negation map); floor stated at A=2",
+              "by_instance": [
+                {
+                  "instance": "bench-10bit",
+                  "log2_r": 9.685,
+                  "variant": "semaev_s3_roots_m2",
+                  "S": 43.34,
+                  "rho_S": 22.66,
+                  "rho_walk_S": 1.805,
+                  "S_over_rho": 1.913,
+                  "S_over_floor": 48.9,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-10bit",
+                  "log2_r": 9.685,
+                  "variant": "direct_subtraction_m2",
+                  "S": 51.34,
+                  "rho_S": 22.66,
+                  "rho_walk_S": 1.805,
+                  "S_over_rho": 2.266,
+                  "S_over_floor": 57.93,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-10bit",
+                  "log2_r": 9.685,
+                  "variant": "mitm_m2",
+                  "S": 45.89,
+                  "rho_S": 22.66,
+                  "rho_walk_S": 1.805,
+                  "S_over_rho": 2.025,
+                  "S_over_floor": 51.78,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-10bit",
+                  "log2_r": 9.685,
+                  "variant": "mitm_m3",
+                  "S": 33.12,
+                  "rho_S": 22.66,
+                  "rho_walk_S": 1.805,
+                  "S_over_rho": 1.461,
+                  "S_over_floor": 37.37,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-12bit",
+                  "log2_r": 11.93,
+                  "variant": "semaev_s3_roots_m2",
+                  "S": 75.04,
+                  "rho_S": 18.58,
+                  "rho_walk_S": 4.233,
+                  "S_over_rho": 4.039,
+                  "S_over_floor": 84.67,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-12bit",
+                  "log2_r": 11.93,
+                  "variant": "direct_subtraction_m2",
+                  "S": 92.27,
+                  "rho_S": 18.58,
+                  "rho_walk_S": 4.233,
+                  "S_over_rho": 4.967,
+                  "S_over_floor": 104.1,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-12bit",
+                  "log2_r": 11.93,
+                  "variant": "mitm_m2",
+                  "S": 55.66,
+                  "rho_S": 18.58,
+                  "rho_walk_S": 4.233,
+                  "S_over_rho": 2.996,
+                  "S_over_floor": 62.8,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-12bit",
+                  "log2_r": 11.93,
+                  "variant": "mitm_m3",
+                  "S": 21.68,
+                  "rho_S": 18.58,
+                  "rho_walk_S": 4.233,
+                  "S_over_rho": 1.167,
+                  "S_over_floor": 24.46,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-14bit",
+                  "log2_r": 13.99,
+                  "variant": "semaev_s3_roots_m2",
+                  "S": 102.4,
+                  "rho_S": 8.912,
+                  "rho_walk_S": 1.468,
+                  "S_over_rho": 11.5,
+                  "S_over_floor": 115.6,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-14bit",
+                  "log2_r": 13.99,
+                  "variant": "direct_subtraction_m2",
+                  "S": 121.6,
+                  "rho_S": 8.912,
+                  "rho_walk_S": 1.468,
+                  "S_over_rho": 13.64,
+                  "S_over_floor": 137.2,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-14bit",
+                  "log2_r": 13.99,
+                  "variant": "mitm_m2",
+                  "S": 64.16,
+                  "rho_S": 8.912,
+                  "rho_walk_S": 1.468,
+                  "S_over_rho": 7.199,
+                  "S_over_floor": 72.39,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-14bit",
+                  "log2_r": 13.99,
+                  "variant": "mitm_m3",
+                  "S": 27.88,
+                  "rho_S": 8.912,
+                  "rho_walk_S": 1.468,
+                  "S_over_rho": 3.128,
+                  "S_over_floor": 31.46,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-16bit",
+                  "log2_r": 15.99,
+                  "variant": "semaev_s3_roots_m2",
+                  "S": 593.6,
+                  "rho_S": 6.363,
+                  "rho_walk_S": 2.345,
+                  "S_over_rho": 93.28,
+                  "S_over_floor": 669.8,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-16bit",
+                  "log2_r": 15.99,
+                  "variant": "direct_subtraction_m2",
+                  "S": 231.4,
+                  "rho_S": 6.363,
+                  "rho_walk_S": 2.345,
+                  "S_over_rho": 36.36,
+                  "S_over_floor": 261.1,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-16bit",
+                  "log2_r": 15.99,
+                  "variant": "mitm_m2",
+                  "S": 94.88,
+                  "rho_S": 6.363,
+                  "rho_walk_S": 2.345,
+                  "S_over_rho": 14.91,
+                  "S_over_floor": 107.1,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-16bit",
+                  "log2_r": 15.99,
+                  "variant": "mitm_m3",
+                  "S": 45.67,
+                  "rho_S": 6.363,
+                  "rho_walk_S": 2.345,
+                  "S_over_rho": 7.178,
+                  "S_over_floor": 51.54,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-18bit",
+                  "log2_r": 18.0,
+                  "variant": "semaev_s3_roots_m2",
+                  "S": 191.5,
+                  "rho_S": 4.202,
+                  "rho_walk_S": 1.947,
+                  "S_over_rho": 45.58,
+                  "S_over_floor": 216.1,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-18bit",
+                  "log2_r": 18.0,
+                  "variant": "direct_subtraction_m2",
+                  "S": 231.8,
+                  "rho_S": 4.202,
+                  "rho_walk_S": 1.947,
+                  "S_over_rho": 55.17,
+                  "S_over_floor": 261.6,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-18bit",
+                  "log2_r": 18.0,
+                  "variant": "mitm_m2",
+                  "S": 81.15,
+                  "rho_S": 4.202,
+                  "rho_walk_S": 1.947,
+                  "S_over_rho": 19.31,
+                  "S_over_floor": 91.57,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-18bit",
+                  "log2_r": 18.0,
+                  "variant": "mitm_m3",
+                  "S": 32.16,
+                  "rho_S": 4.202,
+                  "rho_walk_S": 1.947,
+                  "S_over_rho": 7.654,
+                  "S_over_floor": 36.29,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-20bit",
+                  "log2_r": 20.0,
+                  "variant": "semaev_s3_roots_m2",
+                  "S": 439.4,
+                  "rho_S": 2.685,
+                  "rho_walk_S": 1.591,
+                  "S_over_rho": 163.7,
+                  "S_over_floor": 495.9,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-20bit",
+                  "log2_r": 20.0,
+                  "variant": "direct_subtraction_m2",
+                  "S": 525.1,
+                  "rho_S": 2.685,
+                  "rho_walk_S": 1.591,
+                  "S_over_rho": 195.6,
+                  "S_over_floor": 592.5,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-20bit",
+                  "log2_r": 20.0,
+                  "variant": "mitm_m2",
+                  "S": 126.4,
+                  "rho_S": 2.685,
+                  "rho_walk_S": 1.591,
+                  "S_over_rho": 47.08,
+                  "S_over_floor": 142.6,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "bench-20bit",
+                  "log2_r": 20.0,
+                  "variant": "mitm_m3",
+                  "S": 44.99,
+                  "rho_S": 2.685,
+                  "rho_walk_S": 1.591,
+                  "S_over_rho": 16.76,
+                  "S_over_floor": 50.77,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "log2_r": 21.65,
+                  "variant": "semaev_s3_roots_m2",
+                  "S": 692.3,
+                  "rho_S": 2.98,
+                  "rho_walk_S": 2.277,
+                  "S_over_rho": 232.3,
+                  "S_over_floor": 781.2,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "log2_r": 21.65,
+                  "variant": "direct_subtraction_m2",
+                  "S": 869.7,
+                  "rho_S": 2.98,
+                  "rho_walk_S": 2.277,
+                  "S_over_rho": 291.8,
+                  "S_over_floor": 981.4,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "log2_r": 21.65,
+                  "variant": "mitm_m2",
+                  "S": 164.8,
+                  "rho_S": 2.98,
+                  "rho_walk_S": 2.277,
+                  "S_over_rho": 55.31,
+                  "S_over_floor": 186.0,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "generated-22bit-3290411",
+                  "log2_r": 21.65,
+                  "variant": "mitm_m3",
+                  "S": 84.28,
+                  "rho_S": 2.98,
+                  "rho_walk_S": 2.277,
+                  "S_over_rho": 28.28,
+                  "S_over_floor": 95.1,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "log2_r": 23.38,
+                  "variant": "semaev_s3_roots_m2",
+                  "S": 4349.0,
+                  "rho_S": 3.93,
+                  "rho_walk_S": 3.542,
+                  "S_over_rho": 1107.0,
+                  "S_over_floor": 4907.0,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "log2_r": 23.38,
+                  "variant": "direct_subtraction_m2",
+                  "S": 1715.0,
+                  "rho_S": 3.93,
+                  "rho_walk_S": 3.542,
+                  "S_over_rho": 436.4,
+                  "S_over_floor": 1935.0,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "log2_r": 23.38,
+                  "variant": "mitm_m2",
+                  "S": 232.4,
+                  "rho_S": 3.93,
+                  "rho_walk_S": 3.542,
+                  "S_over_rho": 59.13,
+                  "S_over_floor": 262.2,
+                  "verified": true,
+                  "rho_verified": true
+                },
+                {
+                  "instance": "generated-24bit-10935329",
+                  "log2_r": 23.38,
+                  "variant": "mitm_m3",
+                  "S": 56.82,
+                  "rho_S": 3.93,
+                  "rho_walk_S": 3.542,
+                  "S_over_rho": 14.46,
+                  "S_over_floor": 64.11,
+                  "verified": true,
+                  "rho_verified": true
+                }
+              ],
+              "total_exponent_fits": [
+                {
+                  "variant": "direct_subtraction_m2",
+                  "phase": "total",
+                  "alpha_r": 0.8503,
+                  "r_squared": 0.9947,
+                  "alpha_group_order": 0.8503,
+                  "points": 8
+                },
+                {
+                  "variant": "mitm_m2",
+                  "phase": "total",
+                  "alpha_r": 0.6624,
+                  "r_squared": 0.9961,
+                  "alpha_group_order": 0.6624,
+                  "points": 8
+                },
+                {
+                  "variant": "mitm_m3",
+                  "phase": "total",
+                  "alpha_r": 0.6008,
+                  "r_squared": 0.9821,
+                  "alpha_group_order": 0.6008,
+                  "points": 8
+                },
+                {
+                  "variant": "rho_reference",
+                  "phase": "total",
+                  "alpha_r": 0.2738,
+                  "r_squared": 0.9029,
+                  "alpha_group_order": 0.2738,
+                  "points": 8
+                },
+                {
+                  "variant": "semaev_s3_roots_m2",
+                  "phase": "total",
+                  "alpha_r": 0.9051,
+                  "r_squared": 0.9587,
+                  "alpha_group_order": 0.9051,
+                  "points": 8
+                }
+              ],
+              "rho_health": "every rho run recovered and verified; steps against sqrt(pi r/2) recorded per run"
             },
-            "verdict": null
+            "verdict": false
           },
           "next_target": {
             "summary": "Charged IC < rho on any prime-order instance >=16 bits",
@@ -1296,9 +4272,22 @@
             ]
           },
           "evidence": [
-            "research/ecdlp_autolab/paper.md"
+            "research/ecdlp_autolab/paper.md",
+            "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
           ],
-          "history": []
+          "history": [
+            {
+              "summary": "IC slower than rho at all measured sizes; dense 3-sum wall ~80 bits",
+              "metrics": {
+                "dense_3sum_wall_bits": 80,
+                "timing_class": null,
+                "automorphism_discount": "n/a_prime_generic_unless_stated"
+              },
+              "verdict": null,
+              "superseded_on": "2026-09-21"
+            }
+          ]
         }
       }
     }

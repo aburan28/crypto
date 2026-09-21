@@ -3,6 +3,7 @@ name: Koblitz unknown-scalar panel
 on:
   pull_request:
     paths:
+      - "research/weil_factor_composition_20260914/validation/dependencies.lock.txt"
       - "Cargo.toml"
       - "examples/koblitz_unknown_scalar_panel.rs"
       - "examples/koblitz_public_factor_base_discovery.rs"
@@ -44,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Install frozen dependency lock
-        run: cp research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock Cargo.lock
+        run: cp research/weil_factor_composition_20260914/validation/dependencies.lock.txt Cargo.lock
       - name: Test Python control plane
         run: python3 scripts/test_koblitz_unknown_scalar_panel.py
       - name: Test compact terminal-evidence verifier
@@ -124,6 +125,10 @@ jobs:
           cp -R \
             research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-24-independent-math-replay-20260910/blake3-helper \
             "$RUNNER_TEMP/stage24-blake3-helper"
+          # Its archived lock includes cc 1.4.5, which the current smoke build
+          # need not download. Populate that exact dependency before offline build.
+          cargo fetch --locked \
+            --manifest-path "$RUNNER_TEMP/stage24-blake3-helper/Cargo.toml"
           cargo build --offline --locked --release \
             --manifest-path "$RUNNER_TEMP/stage24-blake3-helper/Cargo.toml"
           bundle="$RUNNER_TEMP/stage23-terminal-evidence/koblitz-stage23-unknown-scalar-production-successor-03-terminal-evidence-20260910"

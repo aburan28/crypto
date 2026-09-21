@@ -1,0 +1,1 @@
+Candidate A: route exactly representable KoblitzCurve scalar multiplication through existing FastCurve::mul, preserving generic fallback and all group/certificate checks. Parent is verified fast-lifting batch1/window8 source. Target is <=0.70 complete Ir on fresh confirmation and replay. See source patch and independent arithmetic tests; no model API calls.

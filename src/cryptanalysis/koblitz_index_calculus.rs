@@ -137,6 +137,10 @@ use serde::{Deserialize, Serialize};
 use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, F2mPoly, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
+use crate::cryptanalysis::crossbred::{
+    extract_crossbred, solve_crossbred, CrossbredParams,
+    SearchOptions as CrossbredSearchOptions, SearchStats as CrossbredSearchStats,
+};
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
@@ -148,6 +152,7 @@ use crate::cryptanalysis::koblitz_sparse_la::{
     self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
 use crate::cryptanalysis::sat::SolveResult;
+use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
 use crate::utils::mod_inverse;
 
@@ -738,6 +743,14 @@ impl KoblitzCurve {
 
     /// `[k]·P` on this curve.
     pub fn mul(&self, p: &BinaryPoint, k: &BigUint) -> BinaryPoint {
+        if let Some(fast) = FastCurve::new(&self.curve) {
+            let lifted = fast.lift(p);
+            // Preserve the general path for coordinates whose representation
+            // cannot be round-tripped through this curve's single-word field.
+            if fast.lower(lifted) == *p {
+                return fast.lower(fast.mul(lifted, k));
+            }
+        }
         scalar_mul(&self.curve, p, k)
     }
 
@@ -784,6 +797,36 @@ pub fn points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
     } else {
         vec![p, np]
     }
+}
+
+/// Single-word version of `points_with_x` for an odd-degree field.
+/// Reuse the field reduction tables across all coordinates of a factor base.
+/// The same half-trace root is returned first, preserving sampling and indexing.
+fn points_with_x_fast(curve: &FastCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+    debug_assert!(curve.n % 2 == 1);
+    let field = &curve.field;
+    let coordinate = field.from_element(x);
+    if coordinate == 0 {
+        return vec![curve.lower(FastPoint::affine(
+            0,
+            field.sqr_k(curve.b, curve.n - 1),
+        ))];
+    }
+    let inverse = field.inv(coordinate);
+    let rhs = coordinate ^ curve.a ^ field.mul(curve.b, field.sqr(inverse));
+    let mut root = rhs;
+    let mut power = rhs;
+    for _ in 0..(curve.n - 1) / 2 {
+        power = field.sqr(field.sqr(power));
+        root ^= power;
+    }
+    // H(rhs)^2 + H(rhs) = rhs + Tr(rhs) for odd degree. Testing the
+    // equation is the same trace-zero admission check as the general solver.
+    if field.sqr(root) ^ root != rhs {
+        return Vec::new();
+    }
+    let point = FastPoint::affine(coordinate, field.mul(coordinate, root));
+    vec![curve.lower(point), curve.lower(curve.neg(point))]
 }
 
 /// The scalar `λ` with `π(Q) = [λ]Q` for all `Q ∈ ⟨G⟩`.
@@ -1071,6 +1114,14 @@ impl FrobeniusFactorBase {
         (2..=max_m)
             .filter(|&m| self.m_can_decompose(kc, m))
             .collect()
+    }
+
+    /// Boolean unknowns an `m`-point decomposition over this base costs:
+    /// `m·dim` subspace coordinates plus `(m − 2)·n` for the chained
+    /// intermediates.  Tuning `dim` up to reach `m = 2` zeroes the
+    /// second term, which is the whole point of the divisor bases.
+    pub fn n_vars_for_summands(&self, n: u32, m: usize) -> usize {
+        m * self.ell as usize + m.saturating_sub(2) * n as usize
     }
 
     /// Lookup table from point identity to factor-base index, as both
@@ -1764,7 +1815,12 @@ pub fn build_subgroup_orbit_factor_base(
                 ));
             }
             let x = F2mElement::from_biguint(&BigUint::from(rng.gen_range(1..cap)), kc.n);
-            let Some(point) = points_with_x(&kc.curve, &x).into_iter().next() else {
+            let lifts = if curve.n % 2 == 1 {
+                points_with_x_fast(&curve, &x)
+            } else {
+                points_with_x(&kc.curve, &x)
+            };
+            let Some(point) = lifts.into_iter().next() else {
                 continue;
             };
             // Multiply by the cofactor rather than rejecting: [h]P has
@@ -1900,10 +1956,17 @@ fn finish_factor_base_domain(
     domain: FactorBaseDomain,
 ) -> Option<FrobeniusFactorBase> {
     let mut points: Vec<BinaryPoint> = Vec::new();
+    let fast = if kc.n % 2 == 1 {
+        FastCurve::new(&kc.curve)
+    } else {
+        None
+    };
     for x in &subspace {
-        for p in points_with_x(&kc.curve, x) {
-            points.push(p);
-        }
+        let lifts = match &fast {
+            Some(curve) => points_with_x_fast(curve, x),
+            None => points_with_x(&kc.curve, x),
+        };
+        points.extend(lifts);
     }
 
     // Index points for the orbit walk and for relation lookups.
@@ -2094,6 +2157,25 @@ pub enum DecompositionStrategy {
     /// `|F|^{m−1}` group operations for [`Self::Enumerate`].  Exact and
     /// complete like enumeration; costs `|F|²` memory once per run.
     PairTable,
+    /// The same Semaev system, solved by **Joux-Vitse Crossbred**
+    /// ([`crate::cryptanalysis::crossbred`]): Macaulay preprocessing
+    /// extracts polynomials linear in the non-enumerated variables,
+    /// then `2^k` fixed assignments are swept, each leaving a linear
+    /// solve.  Prices below matrix-F4 on the oracle ladder of
+    /// `RESEARCH_ECC2K130_CROSSBRED.md`.  Like [`Self::Groebner`] it is
+    /// a decomposition oracle only: relation collection stays `Θ(2^n)`
+    /// with any oracle polynomial in the factor base.
+    Crossbred,
+    /// Same Semaev / Weil-restriction system as [`Self::Sat`], emitted in
+    /// Trimoska ANF and solved by an external WDSat binary
+    /// ([`crate::cryptanalysis::wdsat_oracle`]).  Requires
+    /// [`KoblitzIcOptions::wdsat_binary`].
+    Wdsat,
+    /// Quadratic Semaev systems (`m = 2`) solved by ALMASTY-inspired FES
+    /// ([`crate::cryptanalysis::mq_fes`]; <https://gitlab.lip6.fr/almasty/mq>):
+    /// incremental Gray early-exit, Möbius all-roots, Monica past `n = 24`.
+    /// Refuses cubic chained systems.
+    MqFes,
 }
 
 /// Packed identity of a point for hashing and sorting, in one `u64`:
@@ -2645,7 +2727,11 @@ impl PairSumTable {
         //
         // Ordering the base by orbit makes "orbit at least `α`" a
         // suffix, so a row is a slice and no addend list is ever built.
-        let orbit_of_point: Vec<u32> = fb.signed_orbit_of.iter().map(|&(o, _, _)| o as u32).collect();
+        let orbit_of_point: Vec<u32> = fb
+            .signed_orbit_of
+            .iter()
+            .map(|&(o, _, _)| o as u32)
+            .collect();
         let mut order: Vec<u32> = (0..n_points as u32).collect();
         order.sort_unstable_by_key(|&i| (orbit_of_point[i as usize], i));
         let by_orbit: Vec<FastPoint> = order.iter().map(|&i| points[i as usize]).collect();
@@ -2860,13 +2946,11 @@ impl PairSumTable {
         }
         if let Some(canon) = self.canon.as_ref() {
             // A rotation has no dependency chain worth interleaving.
-            out.extend(points.iter().map(|p| {
-                if p.infinity {
-                    0
-                } else {
-                    canon.canon(p.x) + 1
-                }
-            }));
+            out.extend(
+                points
+                    .iter()
+                    .map(|p| if p.infinity { 0 } else { canon.canon(p.x) + 1 }),
+            );
             return;
         }
         const LANES: usize = 8;
@@ -3051,7 +3135,8 @@ impl PairSumTable {
         }
         for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
             rests.clear();
-            self.curve.add_many(target, addends, &mut rests, &mut scratch);
+            self.curve
+                .add_many(target, addends, &mut rests, &mut scratch);
             for (offset, rest) in rests.iter().enumerate() {
                 if rest.infinity {
                     continue;
@@ -3125,8 +3210,7 @@ impl PairSumTable {
         let mut addends = Vec::new();
         for orbit in orbits {
             let (lo, hi) = (orbit as usize, orbit as usize + 1);
-            let (Some(&start), Some(&end)) =
-                (self.orbit_start.get(lo), self.orbit_start.get(hi))
+            let (Some(&start), Some(&end)) = (self.orbit_start.get(lo), self.orbit_start.get(hi))
             else {
                 continue;
             };
@@ -3457,9 +3541,7 @@ impl PairSumTable {
                         let k = b * BLOCK + offset;
                         self.pairs_for_key(*rest, keys[offset], &mut pairs);
                         for &(i, j) in &pairs {
-                            if (!sorted || j as usize <= k)
-                                && !sink(&[i as usize, j as usize, k])
-                            {
+                            if (!sorted || j as usize <= k) && !sink(&[i as usize, j as usize, k]) {
                                 return;
                             }
                         }
@@ -3512,7 +3594,7 @@ impl PairSumTable {
 /// `≤ 2^m` sign choices and returns the first that closes the group
 /// identity, so a spurious root of the polynomial system can never
 /// become a relation.
-fn lift_candidate(
+pub(crate) fn lift_candidate(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     index_of: &HashMap<(BigUint, BigUint), usize>,
@@ -3587,7 +3669,13 @@ pub fn groebner_decompose(
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => return (None, SolveStats::default()),
     };
-    let sys = match build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    ) {
         Some(sys) => sys,
         None => return (None, SolveStats::default()),
     };
@@ -3614,6 +3702,93 @@ pub fn groebner_decompose(
         }
     });
     (found, stats)
+}
+
+/// Decompose `target` with **Crossbred** ([`crate::cryptanalysis::crossbred`]).
+///
+/// The same Semaev system [`groebner_decompose`] builds, handed to a
+/// different engine.  Preprocessing extracts a crossbred space at
+/// degree `D`; the search then sweeps `2^k` assignments of the first
+/// `k` variables, each leaving a linear solve in the rest.
+///
+/// `params` fixes `(D, k)`; `None` takes `D` from the system's own
+/// degree and `k = n_vars / 2`, capped by the search's enumeration
+/// budget.  As in the Gröbner path a root of `S₃` fixes the summands
+/// only up to sign, so each is lifted and the first that closes the
+/// group identity wins.
+///
+/// Returns `(None, stats)` with `stats.exhausted` set when no crossbred
+/// space exists at those parameters — that is "cannot say", not a
+/// refutation, and the caller records it as
+/// [`KoblitzRelationAttemptDisposition::Unknown`].
+pub fn crossbred_decompose(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    params: Option<CrossbredParams>,
+) -> (Option<Vec<usize>>, CrossbredSearchStats) {
+    let unknown = || {
+        let mut s = CrossbredSearchStats::default();
+        s.exhausted = true;
+        s
+    };
+    let x_r = match target {
+        BinaryPoint::Affine { x, .. } => x.clone(),
+        BinaryPoint::Infinity => return (None, CrossbredSearchStats::default()),
+    };
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    ) {
+        Some(sys) => sys,
+        None => return (None, CrossbredSearchStats::default()),
+    };
+    let params = params.unwrap_or_else(|| crossbred_params_for(&sys.equations, sys.n_vars));
+    let xb = match extract_crossbred(&sys.equations, sys.n_vars, &params) {
+        Some(xb) => xb,
+        None => return (None, unknown()),
+    };
+    let (roots, stats) = solve_crossbred(&sys.equations, &xb, &CrossbredSearchOptions::default());
+    for root in roots {
+        let xs: Vec<F2mElement> = (0..m)
+            .map(|i| sys.summand_x(&fb.subspace_basis, root, i, kc.n))
+            .collect();
+        if let Some(idxs) = lift_candidate(kc, fb, index_of, &xs, target) {
+            return (Some(idxs), stats);
+        }
+    }
+    (None, stats)
+}
+
+/// Default `(D, k)` for a system this shape.
+///
+/// `D` is the system's own degree, which is the smallest Macaulay
+/// degree that can produce anything, and `k = n_vars / 2` splits the
+/// variables evenly — the sweep in `RESEARCH_ECC2K130_CROSSBRED.md`
+/// found the kernel grows with `k` and the search cost grows as `2^k`,
+/// so the midpoint is the defensible default rather than a tuned one.
+/// `k` is capped so the sweep stays inside the search's memory budget.
+fn crossbred_params_for(system: &[F2BoolPoly], n_vars: usize) -> CrossbredParams {
+    let degree = system
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .map(|t| t.mask.count_ones())
+        .max()
+        .unwrap_or(2)
+        .max(2);
+    let budget = CrossbredSearchOptions::default().max_enumerated_bits as usize;
+    CrossbredParams {
+        macaulay_degree: degree,
+        enumerated: (n_vars / 2).clamp(1, n_vars.saturating_sub(1).min(budget)),
+        target_degree: 1,
+        ..CrossbredParams::default()
+    }
 }
 
 /// What a SAT decomposition attempt cost and concluded.
@@ -3834,7 +4009,13 @@ pub fn sat_decompose_with(
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => return (None, stats),
     };
-    let sys = match build_decomposition_system(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) {
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    ) {
         Some(sys) => sys,
         None => return (None, stats),
     };
@@ -4410,6 +4591,10 @@ pub struct KoblitzIcOptions {
     /// Which algebraic engine reduces the Semaev system.  Ignored by
     /// [`DecompositionStrategy::Enumerate`].
     pub engine: SolverEngine,
+    /// Experimental exact S3 decomposition on a validated Frobenius chart
+    /// cover. Applies only to two-summand Groebner collection/descent. Plan
+    /// construction is caller-owned precomputation and must be charged.
+    pub weil_charts: Option<std::sync::Arc<super::weil_charts::WeilChartPlan>>,
     /// Splitting nodes (Gröbner-basis computations) one decomposition
     /// may spend before it gives up.  Ignored by
     /// [`DecompositionStrategy::Enumerate`].
@@ -4425,6 +4610,11 @@ pub struct KoblitzIcOptions {
     /// Native-XOR/CNF, branching, domain, trace, and conflict controls
     /// for [`DecompositionStrategy::Sat`].
     pub sat_options: SatDecompositionOptions,
+    /// Path to a WDSat `wdsat_solver` binary for
+    /// [`DecompositionStrategy::Wdsat`].  Ignored by every other strategy.
+    pub wdsat_binary: Option<std::path::PathBuf>,
+    /// Soft wall-clock budget for one WDSat child process.
+    pub wdsat_timeout_ms: u64,
     /// Identify `P` and `-P` as one signed Frobenius relation unknown.
     /// Disable only for a matched Frobenius-only control.
     pub collapse_negation: bool,
@@ -4445,6 +4635,10 @@ pub struct KoblitzIcOptions {
     pub collapse_projected_orbits: bool,
     /// How [`solve_factor_base_logs`] solves the relation matrix.
     pub linear_algebra: LinearAlgebra,
+    /// Macaulay degree `D` and enumerated-variable count `k` for
+    /// [`DecompositionStrategy::Crossbred`], or `None` to pick `k` from
+    /// the system size at each call.  Ignored by every other strategy.
+    pub crossbred: Option<CrossbredParams>,
 }
 
 /// The linear-algebra stage of the factor-base logarithm precompute.
@@ -4474,14 +4668,18 @@ impl Default for KoblitzIcOptions {
             seed: 0x4b_6f_62_6c_69_74_7a_00, // "Koblitz\0"
             strategy: DecompositionStrategy::Groebner,
             engine: SolverEngine::default(),
+            weil_charts: None,
             node_budget: 4096,
             max_models: 64,
             sat_macaulay_degree: Some(2),
             sat_options: SatDecompositionOptions::default(),
+            wdsat_binary: None,
+            wdsat_timeout_ms: 5_000,
             collapse_negation: true,
             stop_on_verified_rank: true,
             relation_batch_size: 1,
             allow_direct_relation: true,
+            crossbred: None,
             collapse_projected_orbits: false,
             linear_algebra: LinearAlgebra::Dense,
         }
@@ -4657,6 +4855,7 @@ enum RelationAttemptOutcome {
     Enumerated(Option<Vec<usize>>),
     Groebner(Option<Vec<usize>>, SolveStats),
     Sat(Option<Vec<usize>>, SatDecompositionStats),
+    Crossbred(Option<Vec<usize>>, CrossbredSearchStats),
 }
 
 /// Live milestones from the existing small-curve pipeline.
@@ -4772,6 +4971,15 @@ fn koblitz_index_calculus_dlp_observed(
     opts: &KoblitzIcOptions,
     progress: &mut dyn FnMut(KoblitzIcEvent),
 ) -> Option<KoblitzIcReport> {
+    if let Some(plan) = &opts.weil_charts {
+        if opts.strategy != DecompositionStrategy::Groebner
+            || opts.m != 2
+            || opts.descent_m.is_some_and(|m| m != 2)
+            || !plan.matches(kc, fb)
+        {
+            return None;
+        }
+    }
     let r = &kc.subgroup_order;
     let g = kc.generator().clone();
     let projection_start = std::time::Instant::now();
@@ -4995,6 +5203,17 @@ fn koblitz_index_calculus_dlp_observed(
                         .and_then(|table| table.decompose(kc, fb, target, opts.m)),
                 ),
                 DecompositionStrategy::Groebner => {
+                    if let Some(plan) = &opts.weil_charts {
+                        let options = SolveOptions {
+                            engine: opts.engine,
+                            node_budget: opts.node_budget,
+                            split_rule: split_rule_default(),
+                            ..Default::default()
+                        };
+                        let (idxs, stats) = plan.decompose(kc, fb, &index_of, target, &options)
+                            .expect("chart cover validated at pipeline entry");
+                        return RelationAttemptOutcome::Groebner(idxs, stats.solver);
+                    }
                     let (idxs, stats) = groebner_decompose(
                         kc,
                         fb,
@@ -5007,6 +5226,18 @@ fn koblitz_index_calculus_dlp_observed(
                     );
                     RelationAttemptOutcome::Groebner(idxs, stats)
                 }
+                DecompositionStrategy::Crossbred => {
+                    let (idxs, stats) = crossbred_decompose(
+                        kc,
+                        fb,
+                        &index_of,
+                        &field,
+                        target,
+                        opts.m,
+                        opts.crossbred,
+                    );
+                    RelationAttemptOutcome::Crossbred(idxs, stats)
+                }
                 DecompositionStrategy::Sat => {
                     let (idxs, stats) = sat_decompose_with(
                         kc,
@@ -5018,6 +5249,36 @@ fn koblitz_index_calculus_dlp_observed(
                         opts.max_models,
                         opts.sat_macaulay_degree,
                         opts.sat_options,
+                    );
+                    RelationAttemptOutcome::Sat(idxs, stats)
+                }
+                DecompositionStrategy::Wdsat => {
+                    let binary = match &opts.wdsat_binary {
+                        Some(path) => path.clone(),
+                        None => {
+                            return RelationAttemptOutcome::Sat(
+                                None,
+                                SatDecompositionStats {
+                                    exhausted: true,
+                                    ..SatDecompositionStats::default()
+                                },
+                            )
+                        }
+                    };
+                    let wopts = crate::cryptanalysis::wdsat_oracle::WdsatSolveOptions {
+                        binary,
+                        work_dir: None,
+                        timeout: std::time::Duration::from_millis(opts.wdsat_timeout_ms),
+                        keep_anf: None,
+                    };
+                    let (idxs, stats) = crate::cryptanalysis::wdsat_oracle::wdsat_decompose(
+                        kc, fb, &index_of, &field, target, opts.m, &wopts,
+                    );
+                    RelationAttemptOutcome::Sat(idxs, stats)
+                }
+                DecompositionStrategy::MqFes => {
+                    let (idxs, stats) = crate::cryptanalysis::mq_fes::mq_fes_decompose(
+                        kc, fb, &index_of, &field, target, opts.m,
                     );
                     RelationAttemptOutcome::Sat(idxs, stats)
                 }
@@ -5101,6 +5362,16 @@ fn koblitz_index_calculus_dlp_observed(
                 RelationAttemptOutcome::Groebner(idxs, stats) => {
                     report.reductions += stats.reductions;
                     report.infeasible_branches += stats.infeasible_branches;
+                    let disposition = if idxs.is_some() {
+                        KoblitzRelationAttemptDisposition::RelationFound
+                    } else if stats.exhausted {
+                        KoblitzRelationAttemptDisposition::Unknown
+                    } else {
+                        KoblitzRelationAttemptDisposition::Refuted
+                    };
+                    (idxs, disposition)
+                }
+                RelationAttemptOutcome::Crossbred(idxs, stats) => {
                     let disposition = if idxs.is_some() {
                         KoblitzRelationAttemptDisposition::RelationFound
                     } else if stats.exhausted {
@@ -6467,12 +6738,34 @@ fn decompose_once(
     opts: &KoblitzIcOptions,
     target: &BinaryPoint,
 ) -> Option<Vec<usize>> {
+    if let Some(plan) = &opts.weil_charts {
+        if opts.strategy != DecompositionStrategy::Groebner
+            || opts.m != 2
+            || !plan.matches(kc, fb)
+        {
+            return None;
+        }
+    }
     match opts.strategy {
         DecompositionStrategy::Enumerate => decompose(kc, fb, index_of, target, opts.m, 0),
         DecompositionStrategy::PairTable => pair
             .expect("pair table required")
             .decompose(kc, fb, target, opts.m),
+        DecompositionStrategy::Crossbred => {
+            crossbred_decompose(kc, fb, index_of, field, target, opts.m, opts.crossbred).0
+        }
         DecompositionStrategy::Groebner => {
+            if let Some(plan) = &opts.weil_charts {
+                let options = SolveOptions {
+                    engine: opts.engine,
+                    node_budget: opts.node_budget,
+                    split_rule: split_rule_default(),
+                    ..Default::default()
+                };
+                return plan
+                    .decompose(kc, fb, index_of, target, &options)
+                    .and_then(|(ids, _)| ids);
+            }
             groebner_decompose(
                 kc,
                 fb,
@@ -6496,6 +6789,25 @@ fn decompose_once(
                 opts.max_models,
                 opts.sat_macaulay_degree,
                 opts.sat_options,
+            )
+            .0
+        }
+        DecompositionStrategy::Wdsat => {
+            let binary = opts.wdsat_binary.as_ref()?;
+            let wopts = crate::cryptanalysis::wdsat_oracle::WdsatSolveOptions {
+                binary: binary.clone(),
+                work_dir: None,
+                timeout: std::time::Duration::from_millis(opts.wdsat_timeout_ms),
+                keep_anf: None,
+            };
+            crate::cryptanalysis::wdsat_oracle::wdsat_decompose(
+                kc, fb, index_of, field, target, opts.m, &wopts,
+            )
+            .0
+        }
+        DecompositionStrategy::MqFes => {
+            crate::cryptanalysis::mq_fes::mq_fes_decompose(
+                kc, fb, index_of, field, target, opts.m,
             )
             .0
         }
@@ -7446,7 +7758,11 @@ impl<'a> IndividualLogSolver<'a> {
                 report.trials += 1;
                 if state.infinity {
                     // [a]G + [b]Q = O already yields d.
-                    if let Some(d) = solve_for_d(&BigUint::from(*a), &BigUint::from(*b), &self.kc.subgroup_order) {
+                    if let Some(d) = solve_for_d(
+                        &BigUint::from(*a),
+                        &BigUint::from(*b),
+                        &self.kc.subgroup_order,
+                    ) {
                         if self.kc.mul(self.kc.generator(), &d) == *q {
                             return Some(Some(d));
                         }
@@ -7565,13 +7881,77 @@ mod tests {
     use super::*;
 
     #[test]
+    fn koblitz_mul_dispatch_matches_general_arithmetic() {
+        let mut checked = 0usize;
+        for (a, n) in [(0, 5), (0, 9), (1, 11), (0, 13), (1, 17),
+                       (0, 19), (1, 19), (0, 23), (0, 31), (0, 53), (0, 61)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else { continue };
+            let mut points = vec![BinaryPoint::Infinity, kc.generator().clone(),
+                                  point_neg(kc.generator())];
+            for x in 0..8u64 {
+                points.extend(points_with_x(&kc.curve,
+                    &F2mElement::from_biguint(&BigUint::from(x), n)));
+            }
+            let scalars = [BigUint::zero(), BigUint::one(), BigUint::from(2u32),
+                &kc.subgroup_order - BigUint::one(), kc.subgroup_order.clone(),
+                &kc.subgroup_order + BigUint::one(),
+                (BigUint::one() << 80usize) + BigUint::from(123u32)];
+            for point in &points {
+                for scalar in &scalars {
+                    assert_eq!(kc.mul(point, scalar), scalar_mul(&kc.curve, point, scalar),
+                               "scalar dispatch at n={n}, a={a}, k={scalar}");
+                    checked += 1;
+                }
+            }
+            // A different field-width encoding must use the generic fallback.
+            if let BinaryPoint::Affine { x, y } = kc.generator() {
+                let wider = BinaryPoint::Affine {
+                    x: F2mElement::from_biguint(&x.to_biguint(), n + 1),
+                    y: F2mElement::from_biguint(&y.to_biguint(), n + 1),
+                };
+                assert_eq!(kc.mul(&wider, &BigUint::one()),
+                           scalar_mul(&kc.curve, &wider, &BigUint::one()));
+            }
+        }
+        assert!(checked >= 200, "insufficient independent arithmetic cases: {checked}");
+    }
+
+    #[test]
+    fn fast_base_lifts_preserve_roots_and_order() {
+        for n in [5, 7, 9, 11, 13, 17, 19, 23, 31, 53, 61] {
+            let Some(kc) = KoblitzCurve::new(0, n) else { continue };
+            for (a, b) in [(0u64, 1u64), (1, 1), (3, 5)] {
+                let mut curve = kc.curve.clone();
+                curve.a = F2mElement::from_biguint(&BigUint::from(a), n);
+                curve.b = F2mElement::from_biguint(&BigUint::from(b), n);
+                let fast = FastCurve::new(&curve).unwrap();
+                let samples = if n <= 11 { 1u64 << n } else { 128 };
+                let mut rng = StdRng::seed_from_u64(73015 + u64::from(n));
+                for i in 0..samples {
+                    let bits = if n <= 11 || i == 0 { i } else { rng.gen_range(0..1u64 << n) };
+                    let x = F2mElement::from_biguint(&BigUint::from(bits), n);
+                    assert_eq!(
+                        points_with_x_fast(&fast, &x),
+                        points_with_x(&curve, &x),
+                        "ordered roots at n={n}, a={a}, b={b}, x={bits}",
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
     #[ignore]
     fn subgroup_sizes_by_degree() {
         for n in 31..=59u32 {
             for a in [0u8, 1] {
                 if let Some(kc) = KoblitzCurve::new(a, n) {
                     let r = kc.subgroup_order.to_string();
-                    eprintln!("RUNG n={n} a={a} r={r} h={} bits={}", kc.cofactor, kc.subgroup_order.bits());
+                    eprintln!(
+                        "RUNG n={n} a={a} r={r} h={} bits={}",
+                        kc.cofactor,
+                        kc.subgroup_order.bits()
+                    );
                 }
             }
         }
@@ -8175,6 +8555,56 @@ mod tests {
     }
 
     #[test]
+    fn a_divisor_base_solves_a_curve_the_single_factor_base_cannot() {
+        // K_0 / F_2^31, r = 1 439 393.  One irreducible factor gives
+        // dim 5, |F| = 63: at m = 2 the pairs cover ~2 000 of 1.4M group
+        // elements so almost nothing decomposes, and m = 4 would need
+        // 4·5 + 2·31 = 82 unknowns, past the 64-variable cap.  The
+        // construction simply cannot reach this curve.
+        //
+        // A divisor of x^31 − 1 gives dim 10, |F| = 1179, and m = 2
+        // solves it — 20 unknowns, quadratic, no chaining.
+        let kc = KoblitzCurve::new(0, 31).unwrap();
+        let g = kc.generator().clone();
+        let d = BigUint::from(123_456u32);
+        let q = kc.mul(&g, &d);
+
+        let single = build_frobenius_factor_base_from_divisor(&kc, &[1]).unwrap();
+        assert_eq!((single.ell, single.points.len()), (5, 63));
+        assert_eq!(
+            single.n_vars_for_summands(31, 4),
+            82,
+            "m = 4 is over the cap"
+        );
+        // m = 2 over a 63-point base: sample targets, expect no hits.
+        let single_idx = single.index_map();
+        let hits = (1..40u32)
+            .filter(|k| {
+                let t = kc.mul(&g, &BigUint::from(*k));
+                enumerate_decompose(&kc, &single, &single_idx, &t, 2).is_some()
+            })
+            .count();
+        assert_eq!(
+            hits, 0,
+            "dim 5 is far too small for 2-point decompositions here"
+        );
+
+        let divisor = build_frobenius_factor_base_from_divisor(&kc, &[1, 2]).unwrap();
+        assert_eq!((divisor.ell, divisor.points.len()), (10, 1179));
+        assert_eq!(divisor.n_vars_for_summands(31, 2), 20);
+        let opts = KoblitzIcOptions {
+            m: 2,
+            strategy: DecompositionStrategy::Enumerate,
+            extra_relations: 8,
+            max_trials: 60_000,
+            ..KoblitzIcOptions::default()
+        };
+        let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &q, &divisor, &opts).unwrap();
+        assert_eq!(report.log, Some(d), "the divisor base must solve it");
+        assert!(!report.direct_relation, "not the degenerate shortcut");
+    }
+
+    #[test]
     fn the_cofactor_class_decides_which_m_can_decompose() {
         // Not a size effect: on K_1/F_2^7 (cofactor 2) no factor-base
         // point lies in ⟨G⟩, so a sum of m of them reaches ⟨G⟩ only for
@@ -8678,6 +9108,43 @@ mod tests {
             assert!(seen.insert(idxs.to_vec()), "duplicate witness {idxs:?}");
             true
         });
+    }
+
+    #[test]
+    fn crossbred_decompose_agrees_with_enumeration() {
+        // The oracle gate for `DecompositionStrategy::Crossbred`: on every
+        // target of the subgroup, the crossbred search must find a
+        // decomposition exactly when exhaustive enumeration does, and the
+        // witness it returns must sum to the target.  A `None` carrying
+        // `exhausted` is "cannot say" and is not held to the first half.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index = fb.index_map();
+        let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let mut decided = 0usize;
+        for k in 1..r {
+            let target = kc.mul(kc.generator(), &BigUint::from(k));
+            let reference = enumerate_decompose(&kc, &fb, &index, &target, 2);
+            let (found, stats) =
+                crossbred_decompose(&kc, &fb, &index, &field, &target, 2, None);
+            if let Some(idxs) = &found {
+                let sum = idxs
+                    .iter()
+                    .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+                assert_eq!(sum, target, "k = {k}: witness does not sum to the target");
+                assert!(reference.is_some(), "k = {k}: invented a decomposition");
+            }
+            if !stats.exhausted {
+                decided += 1;
+                assert_eq!(
+                    found.is_some(),
+                    reference.is_some(),
+                    "k = {k}: disagrees with enumeration"
+                );
+            }
+        }
+        assert!(decided > 0, "every target came back exhausted; nothing was tested");
     }
 
     #[test]
@@ -9255,7 +9722,10 @@ mod tests {
             PairSumTable::folded_byte_size(orbits, fb.points.len(), kc.n),
         )
         .expect("the folded table fits its own budget");
-        assert!(folded.is_folded(), "degree {degree}: expected the fold tier");
+        assert!(
+            folded.is_folded(),
+            "degree {degree}: expected the fold tier"
+        );
         assert!(
             folded.len() < full.len(),
             "degree {degree}: the fold stored no less"
@@ -9426,9 +9896,9 @@ mod tests {
                     found += 1;
                     // And the witness the folded table returns really sums.
                     let w = folded.decompose_fast(target, m).unwrap();
-                    let sum = w
-                        .iter()
-                        .fold(FastPoint::INFINITY, |s, &i| fc.add(s, fc.lift(&fb.points[i])));
+                    let sum = w.iter().fold(FastPoint::INFINITY, |s, &i| {
+                        fc.add(s, fc.lift(&fb.points[i]))
+                    });
                     assert_eq!(sum, target, "m = {m}: witness did not sum to its target");
                 }
             }
@@ -9555,14 +10025,20 @@ mod tests {
                 );
                 if let Some(idxs) = b {
                     assert_eq!(idxs.len(), m);
-                    let sum = idxs
-                        .iter()
-                        .fold(FastPoint::INFINITY, |acc, &i| fc.add(acc, fc.lift(&fb.points[i])));
-                    assert_eq!(sum, target, "m = {m}: a compact witness did not sum to its target");
+                    let sum = idxs.iter().fold(FastPoint::INFINITY, |acc, &i| {
+                        fc.add(acc, fc.lift(&fb.points[i]))
+                    });
+                    assert_eq!(
+                        sum, target,
+                        "m = {m}: a compact witness did not sum to its target"
+                    );
                     found += 1;
                 }
             }
-            assert!(found > 0, "m = {m}: the compact table decomposed nothing at all");
+            assert!(
+                found > 0,
+                "m = {m}: the compact table decomposed nothing at all"
+            );
         }
     }
 
@@ -10777,6 +11253,7 @@ mod subfield_tests {
             saturate: false,
             projected_columns: true,
             seed: 1,
+            solve_cost_targets: None,
         };
         let sreport = search(&kc, &sopts);
         assert!(sreport.candidates.len() >= factors.len());

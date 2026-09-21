@@ -3,7 +3,7 @@
 //! This module answers one question exactly, by symbolic computation rather
 //! than by measurement: **does the curve coefficient `a₆` reach the leading
 //! form of the Weil-descended `S_{m+1}` system?**  That is Boundary C of
-//! `RESEARCH_ISOGENY_CLASS_SEARCH.md`, and it is what decides whether moving
+//! `research/notes/ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md`, and it is what decides whether moving
 //! along an isogeny class can change the degree of regularity at all.
 //!
 //! ## Boolean degree is a sum of Hamming weights

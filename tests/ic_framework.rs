@@ -123,6 +123,77 @@ fn schema_unknown_fields_and_ambiguous_abstract_coordinates_are_rejected() {
     assert_eq!(report["status"], "invalid");
 }
 #[test]
+fn boundary_ledger_quick_run_prices_every_regime_and_verifies() {
+    let (ok, v) = command(&["boundary", "--quick", "--oracles"]);
+    assert!(ok, "{}", v["status"]);
+    assert_eq!(v["operation"], "boundary");
+    assert_eq!(v["status"], "complete");
+    assert_eq!(v["all_verified"], true);
+    let instances = v["ledger"]["instances"].as_array().unwrap();
+    let regimes: std::collections::BTreeSet<&str> = instances
+        .iter()
+        .map(|i| i["regime"].as_str().unwrap())
+        .collect();
+    assert_eq!(regimes.len(), 3, "{regimes:?}");
+    for inst in instances {
+        assert_eq!(inst["rho_verified_all"], true, "{}", inst["curve"]["name"]);
+        assert!(inst["floor_s"].as_f64().unwrap() > 0.0);
+        assert!(inst["calibration"]["ns_per_add"].as_f64().unwrap() > 0.0);
+        for var in inst["variants"].as_array().unwrap() {
+            assert_eq!(var["verified"], true, "{}", var["name"]);
+            assert!(var["s"].as_f64().unwrap() > 0.0);
+            assert!(var["ratio_to_floor"].as_f64().unwrap() > 1.0);
+            assert!(var["relations"]["native"]["trials"].as_u64().unwrap() > 0);
+        }
+    }
+    assert_eq!(v["oracle_pricing"]["all_agree"], true);
+    assert!(v["markdown"].as_str().unwrap().contains("| regime |"));
+}
+#[test]
+fn corpus_writes_certified_instances_in_every_format() {
+    let dir = std::env::temp_dir().join(format!("ic-corpus-{}", std::process::id()));
+    let (ok, v) = command(&[
+        "corpus",
+        "--degree",
+        "13",
+        "--dimension",
+        "4",
+        "--sat",
+        "1",
+        "--unsat",
+        "1",
+        "--dir",
+        dir.to_str().unwrap(),
+    ]);
+    assert!(ok, "{v}");
+    assert_eq!(v["status"], "complete");
+    let instances = v["instances"].as_array().unwrap();
+    assert_eq!(instances.len(), 2);
+    assert!(instances.iter().all(|i| i["label_checked_by_own_solver"] == true));
+    assert_eq!(v["written"].as_array().unwrap().len(), 10);
+    assert!(dir.join("n13l4-1-S.cnf").exists());
+    let info = std::fs::read_to_string(dir.join("INFOn13l4-1-S")).unwrap();
+    assert!(info.contains("satisfiable true"));
+    let dimacs = std::fs::read_to_string(dir.join("n13l4-1-S.dimacs")).unwrap();
+    assert!(dimacs.starts_with("p cnf ") && dimacs.contains("\nx "));
+    // Never overwrite.
+    let (again, _) = command(&[
+        "corpus",
+        "--degree",
+        "13",
+        "--dimension",
+        "4",
+        "--sat",
+        "1",
+        "--unsat",
+        "0",
+        "--dir",
+        dir.to_str().unwrap(),
+    ]);
+    assert!(!again);
+    std::fs::remove_dir_all(dir).unwrap();
+}
+#[test]
 fn supported_larger_fixture_completes_and_reports_resources() {
     // Control accounting: one column per Frobenius orbit, fixed surplus,
     // serial trials — the historical 91 + 4 relations.
@@ -513,6 +584,64 @@ fn factor_base_logarithm_database_precomputes_then_descends() {
     ]);
     assert!(!ok);
     std::fs::remove_file(db).unwrap();
+}
+
+/// The solve-cost objective prices one oracle over one kind of base.
+/// A workflow that asks for it while collecting with a different oracle,
+/// or while most of its candidates cannot be priced at all, is selecting
+/// on a number that does not describe the run it will do; refuse it, and
+/// name what to change.
+#[test]
+fn workflow_rejects_a_solve_cost_objective_that_does_not_match_the_run() {
+    let base = json!({
+        "schema_version":1,"name":"k1n15","curve":{"degree":15,"curve_a":1},
+        "summands":2,"solver":"groebner","seed":1,"max_trials":100000,
+        "collection":{"unit_trials":64,"units":1,"max_units":2},
+        "factor_base":{"mode":"search","family":"divisor","min_dimension":3,"max_dimension":6,
+            "prune":false,"saturate":false,"solve_cost_targets":4},
+        "targets":[{"known_log":"53"}]
+    });
+    let cases: [(&str, Value, &str); 5] = [
+        ("wrong oracle", json!({"solver":"pair_table"}), "groebner"),
+        ("pruned candidates", json!({"prune":true}), "prune and saturate"),
+        ("saturated candidates", json!({"saturate":true}), "prune and saturate"),
+        ("out of range", json!({"solve_cost_targets":0}), "1..=4096"),
+        ("unpriceable family", json!({"family":"union"}), "factor"),
+    ];
+    for (name, patch, expected) in cases {
+        let mut params = base.clone();
+        for (key, value) in patch.as_object().unwrap() {
+            if key == "solver" {
+                params["solver"] = value.clone();
+            } else {
+                params["factor_base"][key] = value.clone();
+            }
+        }
+        let file = path();
+        std::fs::write(&file, serde_json::to_vec(&params).unwrap()).unwrap();
+        let dir = std::env::temp_dir().join(format!(
+            "ic-solve-cost-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        let (ok, v) = command(&[
+            "workflow",
+            "--params",
+            file.to_str().unwrap(),
+            "--dir",
+            dir.to_str().unwrap(),
+            "--stop-after",
+            "select",
+        ]);
+        assert!(!ok, "{name} was accepted: {v}");
+        let message = v["message"].as_str().unwrap_or_default();
+        assert!(
+            message.contains(expected),
+            "{name}: {message:?} does not say what to change ({expected:?})"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 }
 
 #[test]

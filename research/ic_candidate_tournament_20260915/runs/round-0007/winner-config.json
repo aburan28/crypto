@@ -1,0 +1,18 @@
+{
+  "binary_relative": "source_candidates/tiny2/worker",
+  "config": {
+    "batch_trials": 1,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+  "falsification": "Any bad or unmatched certificate; failure of the no-regression gate against the incumbent; or failure of the strict rho gate (upper 95% limits and every cell below one in both metrics, confirmation and replay).",
+  "hypothesis": "The same pipeline with a work-minimising table-row rule, L\u00f3pez\u2013Dahab projective and fixed-base batched scalar multiplication, carry-less squaring, and its own field, sampler and tables (touching less code and data per cold process) is strictly below matched rho in instructions and native process time.",
+  "id": "tiny2",
+  "parent": "incumbent",
+  "source_directory": "source_candidates/tiny2/source",
+  "source_manifest_relative": "source_candidates/tiny2/source-manifest.json",
+  "source_manifest_sha256": "bc924789b8997c9e6a0fd4cba01af4dc3432b0d1d51e209d32cc73e5d30f3ace"
+}

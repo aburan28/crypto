@@ -1,0 +1,56 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "hypothesis": "The round-0013 incumbent built as one optimisation unit (fat LTO, one codegen unit, dead sections dropped), which removes a quarter of the executable's text without changing a line of source or a byte of any report, plus a tests-only fix to the arena tests' assumption about the process-global bump pointer. Both arms share it. Expected: 1.6-4.8% fewer instructions and a 3-8% faster job for both arms, with slightly more of the gain going to rho, so the winner/rho ratios are expected to be slightly WORSE than round 0013's while beats_rho_strict still holds on every cell.",
+    "id": "incumbent",
+    "parent": "tiny2 + certificate, scalar products in Lopez-Dahab coordinates (round-0013)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0013",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "78740d1e1bd21ca5accf4556c2a7184abcd770370fefa1a0e3b6f024dedc5109"
+  },
+  {
+    "binary_relative": "source_candidates/lto_canon/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "IC-only: the orbit name of an abscissa (the least rotation of its normal-basis coordinate word) found from the longest circular run of zeros, comparing one or two rotations instead of all n-1, tested equal to the rotation loop it replaces; development puts it at 0.950-0.997 of the incumbent by cell, so it is expected to fail the 0.98 no-regression line on the small cells.",
+    "id": "lto_canon",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/lto_canon/source",
+    "source_manifest_relative": "source_candidates/lto_canon/source-manifest.json",
+    "source_manifest_sha256": "ae2d407d325bb7e6864add314ddf0866787a55dec23f5a5bd024d7ec3f085981"
+  },
+  {
+    "binary_relative": "source_candidates/lto_ic/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "IC-only: lto_canon plus the report's decimal numbers written two digits at a time from a table and appended without a UTF-8 validation pass; development puts it at 0.906-0.945 of the incumbent's instructions. The same change has failed the native gate in rounds 0011, 0012 and 0013; this round asks it of a faster baseline.",
+    "id": "lto_ic",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/lto_ic/source",
+    "source_manifest_relative": "source_candidates/lto_ic/source-manifest.json",
+    "source_manifest_sha256": "60bda01d0b8b486be6469a266032fe4611845e475669ad5eed3ce95b047794f2"
+  }
+]

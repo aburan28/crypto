@@ -1,7 +1,7 @@
 # gpu/semaev — the pairs-and-solve decomposition sweep
 
 CUDA kernels for the decomposition oracle of
-[`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md),
+[`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`](../../research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md),
 which records exactly this as deferred:
 
 > **Parallelism.** The pair loop is embarrassingly parallel over `X₁` and

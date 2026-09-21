@@ -145,7 +145,8 @@ section { margin: 34px 0; }
 }
 .banner.COLLECTING { color: var(--good); border-color: #24503f; }
 .banner.COLLISION_RECORDED { color: var(--bad); background: #2a1520; border-color: #5c2634; }
-.banner.IDLE_OR_STALE { color: var(--warn); border-color: #54452a; }
+.banner.IDLE_OR_STALE,
+.banner.INGEST_BEHIND { color: var(--warn); border-color: #54452a; }
 .banner.EMPTY,
 .banner.UNREACHABLE { color: var(--idle); }
 .banner a { color: inherit; }
@@ -206,20 +207,26 @@ button:disabled { opacity: 0.55; cursor: progress; }
 }
 .ops .note { margin-top: 14px; }
 
-.eta {
+/* The rate block and the ETA are the same shape on purpose: one is the walk
+   measured between two snapshots, the other is that rate divided into the
+   work still expected, so they read as a pair. */
+.eta,
+.rate {
   margin-top: 18px;
   padding: 14px 16px 12px;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--panel);
 }
-.eta-label {
+.eta-label,
+.rate-label {
   color: var(--muted);
   font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.eta-value {
+.eta-value,
+.rate-value {
   margin: 4px 0 0;
   font-size: clamp(28px, 5vw, 44px);
   font-weight: 650;
@@ -227,7 +234,9 @@ button:disabled { opacity: 0.55; cursor: progress; }
   letter-spacing: -0.02em;
   color: var(--ink);
 }
-.eta-sub {
+.rate-value { color: var(--good); }
+.eta-sub,
+.rate-sub {
   margin: 6px 0 0;
   color: var(--muted);
   font-size: 12.5px;
@@ -235,45 +244,80 @@ button:disabled { opacity: 0.55; cursor: progress; }
 }
 
 
-.meter { margin-top: 16px; }
-.meter-head {
+/* The collision-odds panel: the chance a collision has already happened,
+   which is the only thing rho accumulates, drawn against the calendar. */
+.odds {
+  margin-top: 18px;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+.odds-head {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: 4px 14px;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
-.meter-head .mono { color: var(--ink); font-size: 13px; }
-.meter-head strong { color: var(--warn); font-weight: 600; }
+.odds-now {
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 650;
+  color: var(--good);
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+.odds-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  max-width: 80ch;
+}
+.odds-chart { margin-top: 12px; }
+/* Odds chart is drawn to be read at phone width: no forced min-width, so the
+   dates under the curve stay in view instead of living off-screen to the right. */
+.chart.odds-chart { overflow: visible; }
+/* Specificity has to beat `.chart svg` below, which sets min-width: 560px;
+   a bare `.odds-chart svg` ties and loses on source order, leaving the curve
+   560px wide and spilling out of the card on a phone. */
+.chart.odds-chart svg {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.chart .line.alt { stroke: var(--data); stroke-width: 1.5; stroke-dasharray: 6 5; opacity: 0.85; }
+.chart .guide { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; }
+.odds-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 14px;
+  margin: 12px 0 0;
+}
+.odds-tiles div { min-width: 0; }
+.odds-tiles dt {
+  color: var(--muted);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.odds-tiles dd {
+  margin: 4px 0 0;
+  font-size: clamp(17px, 2.4vw, 22px);
+  font-weight: 650;
+  color: var(--ink);
+}
+.odds .meter-foot { margin-top: 12px; max-width: 86ch; }
+
 .meter-foot {
   margin: 6px 0 0;
   color: var(--muted);
   font-size: 12px;
   min-height: 1em;
 }
-
-.bar {
-  margin-top: 6px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  overflow: hidden;
-}
-/* No minimum width: a share too small to see must render as nothing, and
-   the text under the bar is what reports it. */
-.bar-fill {
-  height: 100%;
-  width: 0;
-  border-radius: 999px;
-  background: var(--good);
-  transition: width 400ms ease;
-}
-/* The log-scale bar is legible where the linear one is empty, so it is
-   drawn in the warning colour and never in the colour of a real result. */
-.bar.log .bar-fill { background: var(--warn); opacity: 0.75; }
 
 /* ---- cards ---- */
 
@@ -308,6 +352,7 @@ button:disabled { opacity: 0.55; cursor: progress; }
   font-size: 11.5px;
   min-height: 1em;
 }
+.card .foot .warn, td .warn { color: var(--warn); }
 
 /* ---- charts ---- */
 
@@ -334,6 +379,100 @@ button:disabled { opacity: 0.55; cursor: progress; }
 .chart .axis { stroke: var(--line); stroke-width: 1; }
 .chart .grid { stroke: var(--line-soft); stroke-width: 1; }
 .chart .tick { fill: var(--muted); font-size: 10.5px; }
+
+/* ---- figure ---- */
+
+/* The walk-forest drawing is generated in the page's own palette on a
+   transparent ground, so it sits straight on the panel. Fit the 1000×900
+   figure to the column: a 640px min-width made the caption lay out at that
+   width too, so a phone clipped every line and the drawing ate the screen.
+   Trails stay visible at ~360px because the SVG thickens its own strokes
+   when its box is under 720px. */
+.figure {
+  margin: 14px 0 0;
+  padding: 12px 12px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  min-width: 0;
+}
+.figure-frame {
+  overflow: hidden;
+  max-width: 100%;
+}
+.figure img {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 1000px;
+  height: auto;
+  margin: 0 auto;
+}
+.figure figcaption {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+.figure figcaption .mono { color: var(--ink); }
+
+/* The explorable version of the same forest: a canvas that replaces the
+   image once the graph has loaded, a control row above it and a readout
+   under it. The tip follows the pointer inside the canvas. */
+.forest { position: relative; }
+.forest-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+.forest-controls select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 8px;
+  max-width: 100%;
+}
+.forest-canvas {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: grab;
+  touch-action: none;
+}
+.forest-canvas:active { cursor: grabbing; }
+.forest-readout {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  min-height: 1.2em;
+  overflow-wrap: anywhere;
+}
+.forest-tip {
+  position: absolute;
+  z-index: 2;
+  max-width: 320px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  pointer-events: none;
+  overflow-wrap: anywhere;
+}
 
 /* ---- tables ---- */
 
@@ -385,8 +524,10 @@ time { border-bottom: 1px dotted var(--line); }
 .note {
   color: var(--muted);
   font-size: 13px;
+  line-height: 1.55;
   max-width: 80ch;
   margin: 6px 0 0;
+  overflow-wrap: break-word;
 }
 details.alt { margin-top: 14px; }
 details.alt summary {
@@ -396,6 +537,84 @@ details.alt summary {
   font-family: var(--mono);
 }
 details.alt summary:hover { color: var(--ink); }
+
+/* ── Contribute ─────────────────────────────────────────────────────────── */
+
+.join {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.join-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 16px 18px 18px;
+  min-width: 0;
+}
+.join-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.join-card h3 {
+  margin: 4px 0 10px;
+  font-size: 17px;
+  color: var(--ink);
+}
+.join-card p { font-size: 14px; color: var(--muted); max-width: 62ch; }
+.join-card p strong { color: var(--ink); font-weight: 600; }
+
+.dl-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 0;
+}
+.dl {
+  display: inline-block;
+  padding: 9px 16px;
+  border: 1px solid #2f6a52;
+  border-radius: 8px;
+  background: #14382c;
+  color: var(--good);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+.dl:hover, .dl:focus-visible {
+  background: #17503c;
+  border-color: var(--good);
+  color: #ffffff;
+}
+.dl-sub {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+pre.cmd {
+  margin: 12px 0 0;
+  padding: 11px 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  /* The installer one-liner is longer than a card, and a hidden horizontal
+     scroll would hide the end of it. Soft-wrap instead: it is visual only,
+     so the command still copies as one line. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+pre.cmd code { font: inherit; color: inherit; }
 
 footer {
   margin-top: 44px;
@@ -407,10 +626,26 @@ footer {
 }
 footer h2 { color: var(--ink); font-size: 14px; }
 
+.transcript {
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: auto;
+  font: 13px/1.5 var(--mono);
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
 @media (max-width: 720px) {
   body { padding: 0 14px 40px; }
   th, td { padding: 8px 10px; }
   thead th { position: static; }
+  .odds { padding: 12px 12px 10px; }
+  .odds-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .figure { padding: 8px; }
+  .figure figcaption { font-size: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

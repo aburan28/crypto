@@ -1,0 +1,18 @@
+{
+  "binary_relative": "worker",
+  "config": {
+    "batch_trials": 1,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+  "hypothesis": "The round-0009 incumbent on a leaner job for both arms: statically linked executable, the C entry point without the standard runtime's start-up, and a single CPUID probe for carry-less multiplication; the evaluator spawns without forking itself.",
+  "id": "incumbent",
+  "parent": "tiny2 + certificate on the fast shared construction (round-0009)",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0009",
+  "source_directory": "source",
+  "source_manifest_relative": "source-manifest.json",
+  "source_manifest_sha256": "877bbb8691292b3794431982f420b2bb25d37dc6003dae6e267a21e6b10158cd"
+}

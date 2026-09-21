@@ -1,4 +1,4 @@
-//! # FFD breakthrough loop — the executable shell of `RESEARCH_FFD_WORKFLOW.md`.
+//! # FFD breakthrough loop — the executable shell of `research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md`.
 //!
 //! One invocation = one snapshot of the falsification-driven loop:
 //!
@@ -36,7 +36,7 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-/// Pre-registered gate thresholds (mirror RESEARCH_FFD_WORKFLOW.md §4).
+/// Pre-registered gate thresholds (mirror research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md §4).
 const G_P5_SPREAD_SUPPORT: f64 = 0.5; // spread below this ⇒ curve-independence supported
 const G_P6_OVERDET_RATIO: f64 = 2.0; // ρ ≥ this should collapse D* to ≈ 2
 const G_P6_COLLAPSE_MEAN: f64 = 2.05; // mean D* below this counts as "collapsed"
@@ -49,7 +49,7 @@ fn main() {
 
     println!("════════════════════════════════════════════════════════════════");
     println!(" FFD breakthrough loop — snapshot");
-    println!(" (gates: RESEARCH_FFD_WORKFLOW.md §4)");
+    println!(" (gates: research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md §4)");
     println!("════════════════════════════════════════════════════════════════");
 
     // ── EXP-A: curve-independence (P5) ──────────────────────────────

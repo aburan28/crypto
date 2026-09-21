@@ -18,6 +18,11 @@ slot, and keeps the slot's state durable so any instance can pick it up later:
     the supervisor uploads each new stretch of whole records as one immutable
     S3 object.  Points are uploaded *before* the checkpoint that follows them,
     so a resume can only re-report a point, never lose one.
+  * a stretch that cannot be uploaded is kept in a local spool directory under
+    its final object key and retried every cycle, so a store or network outage
+    costs a delay rather than points.  The spool is a *process and transport*
+    safety net only: it lives on the instance's disk, so a Spot reclamation
+    takes anything still in it.  campaign.json's spoolMaxBytes caps it.
   * an exit code 6 (checkpoint refused) retires the slot rather than restarting
     it from scratch: re-walking a run id's seeds from their start points would
     repeat work already done and reported.
@@ -29,7 +34,11 @@ flushes points and checkpoints before exiting.  Spot interruptions and
 Environment (written to /etc/ecc2k130.env by bootstrap.sh):
   ECC_BUCKET, AWS_DEFAULT_REGION   the campaign bucket (slots live in it too)
   ECC_TABLE      optional DynamoDB table for slots instead of S3 objects
+  ECC_SLOT_BACKEND  rds -> lease slots from the RDS control plane instead
+                 (controlplane/, needs DATABASE_URL or RHO_DB_HOST); the
+                 default keeps DynamoDB/S3 so an upgrade is one variable
   ECC_GPU        GPU index on this instance (default 0)
+  ECC_ALL_GPUS   1 -> start one supervisor per nvidia-smi device (RunPod MIG)
   ECC_ROOT       directory holding campaign.json, the client, per-GPU work dirs
   ECC_CLIENT     client binary (default ECC_ROOT/ecc2k130)
   ECC_LOCAL_STORE  directory that stands in for S3 and DynamoDB (rehearsals)
@@ -51,6 +60,35 @@ import sys
 import threading
 import time
 import urllib.request
+import uuid
+
+from protocol import (atomicJson, bindDirectory, campaignContract, envelope,
+                      sha256File, verifyEnvelope)
+
+# Frozen campaign fields a kernel rollout must not move. Duplicated from
+# rollout.py so an already-booted box can pick up a new worker.py without
+# also fetching that helper. kernelProtocol versions the client pointer
+# and is not storageProtocol.
+FROZEN_CAMPAIGN = (
+    "curve", "dpWeight", "workers", "batch", "blockThreads", "minBlocks", "walk",
+)
+KERNEL_PROTOCOL = "ecc2k-kernel-v1"
+
+def entryRecordBytes(entry):
+    """Payload bytes of a spool entry that are records, not its header.
+
+    A v2 delta carries its own 16-byte header so the merge can frame it
+    standalone, and that header is not part of the source file's record
+    stream -- so dpOffset must advance by the records only, or the next cut
+    starts past work that was never sent.
+    """
+    return int(entry.get("bytes", 0)) - int(entry.get("head", 0))
+
+
+def entryRecords(entry):
+    stride = int(entry.get("stride", 0)) or RECORD_BYTES
+    return entryRecordBytes(entry) // stride
+
 
 def dpStride(path):
     """(first record offset, record size) for a corpus file, by its magic."""
@@ -66,7 +104,15 @@ def dpStride(path):
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
     r"(?:\s+(\d+)\s+dropped)?")
+# The client's opening line names the grid it actually built.  Ada slots omit
+# --threads and let autoThreads size it (usesCampaignWorkers), so a slot's walk
+# count is not always campaign.json's workers x batch; the dashboard needs this
+# number per slot to turn a checkpointed iteration base into group operations.
+BANNER_RE = re.compile(r"=\s*(\d+)\s+walks,\s*dp weight")
 RECORD_BYTES = 32
+SPOOL_DIR = "spool"
+SPOOL_MANIFEST = ".spool.json"
+SPOOL_MAX_BYTES = 2 * 1024 * 1024 * 1024   # unsent points a worker may hold
 # Corpus v2 carries the cairn witness and is 72 bytes behind a 16-byte header
 # (../CAIRN-WITNESS.md).  Uploads are byte ranges, so the stride has to be the
 # file's own or a delta ends mid-record and the merge mis-frames everything
@@ -101,10 +147,20 @@ def readJson(path, default=None):
 
 
 def writeJson(path, obj):
-    tmp = path + ".tmp"
-    with open(tmp, "w") as fh:
-        json.dump(obj, fh, indent=1, sort_keys=True)
-    os.replace(tmp, path)
+    atomicJson(path, obj)
+
+
+def copyFsync(src, dest):
+    """Copy, and do not return until the bytes are on the disk.
+
+    The spool's manifest is written with atomicJson, which fsyncs; without
+    this the manifest could reach the disk first and claim records that were
+    still only in the page cache.
+    """
+    with open(src, "rb") as fh, open(dest, "wb") as out:
+        shutil.copyfileobj(fh, out)
+        out.flush()
+        os.fsync(out.fileno())
 
 
 def checkpointIter(path):
@@ -119,6 +175,26 @@ def checkpointIter(path):
     return struct.unpack_from("<Q", head, CKPT_ITER_OFFSET)[0]
 
 
+def checkpointSlot(path):
+    """slot = run-id - 1 from a checkpoint still on disk, or None.
+
+    retireSlot clears state.json and a crash can lose it; the checkpoint
+    header still names the walk those leftover spool files were cut for.
+    """
+    for candidate in (path, path + ".snap", path + ".remote"):
+        try:
+            with open(candidate, "rb") as fh:
+                head = fh.read(CKPT_ITER_OFFSET)
+        except OSError:
+            continue
+        if len(head) < CKPT_ITER_OFFSET or head[:8] != CKPT_MAGIC:
+            continue
+        runId = struct.unpack_from("<I", head, 8 + 5 * 4)[0]
+        if 1 <= runId <= MAX_SLOT + 1:
+            return runId - 1
+    return None
+
+
 def instanceId():
     try:
         req = urllib.request.Request("http://169.254.169.254/latest/api/token", method="PUT",
@@ -131,13 +207,175 @@ def instanceId():
         return socket.gethostname()
 
 
+def isCpuDevice():
+    return os.environ.get("ECC_DEVICE", "").lower() == "cpu"
+
+
+def isCpuSlotRecord(item):
+    name = str(item.get("gpuName") or "")
+    return name.startswith("cpu") or name == "cpu" or "/cpu" in name
+
+
+def idleSlotClaimable(item, info, newOnly):
+    """Whether this claimant may resume an expired/idle slot.
+
+    CPU and GPU share one registry. Mixing a host-shaped checkpoint with the
+    packed client (or the reverse) is exit 6, and on the unversioned store
+    retireSlot then drops that run id. CPU checkpoints also require an exact
+    thread match: cpu/4 must not resume cpu/2. An optional @host suffix on
+    gpuName is ignored when comparing.
+    """
+    cpuSlot = isCpuSlotRecord(item)
+    if newOnly:
+        have = str(item.get("gpuName") or "").split("@", 1)[0]
+        want = str(info.get("gpuName") or "").split("@", 1)[0]
+        return cpuSlot and bool(want) and have == want
+    return not cpuSlot
+
+
+def claimNewOnly():
+    # CPU (and FPGA host) walks must never resume a GPU checkpoint: loading a
+    # packed-shape walk.ck into ecc2k130-cpu exits 6 and the supervisor would
+    # retire the slot. Prefer an explicit ECC_CLAIM_NEW=1; CPU mode implies it.
+    if os.environ.get("ECC_CLAIM_NEW", "").strip() in ("1", "true", "yes"):
+        return True
+    return isCpuDevice()
+
+
+def cpuThreadCount():
+    raw = os.environ.get("ECC_THREADS", "").strip()
+    if raw:
+        return max(1, int(raw))
+    return max(1, int(os.cpu_count() or 1))
+
+
 def gpuName(gpu):
+    # Non-GPU clients (CPU / FPGA host) have no nvidia-smi; the bootstrap
+    # tells us what the device is instead.
+    if os.environ.get("ECC_DEVICE_NAME"):
+        return os.environ["ECC_DEVICE_NAME"]
+    if isCpuDevice():
+        return "cpu/%d" % cpuThreadCount()
     try:
         r = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader", "-i", str(gpu)],
                            capture_output=True, text=True)
     except OSError:
         return "cpu"
     return r.stdout.strip() if r.returncode == 0 and r.stdout.strip() else "cpu"
+
+
+# campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
+# g6e L40S) auto-sizes; a checkpoint is only loadable into the same worker
+# count, so Ada must not resume a Blackwell slot and g6 must not resume g6e.
+# Datacenter Blackwell (B200) and Hopper are not that preset: B200.md keeps
+# workers automatic on 148 SMs, and a 24 GB MIG slice has even fewer.
+BLACKWELL_FAMILIES = frozenset({"g7", "g7e"})
+ADA_FAMILIES = frozenset({"g6", "g6e"})
+AUTO_FAMILIES = frozenset({"g4dn", "g5", "g5g", "b200", "b300", "h100", "h200",
+                           "a100", "mig"})
+LOCAL_FAMILIES = frozenset({"", "local", "cpu", None})
+
+
+def instanceType():
+    if os.environ.get("ECC_INSTANCE_TYPE"):
+        return os.environ["ECC_INSTANCE_TYPE"]
+    try:
+        req = urllib.request.Request("http://169.254.169.254/latest/api/token", method="PUT",
+                                     headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"})
+        token = urllib.request.urlopen(req, timeout=1).read().decode()
+        req = urllib.request.Request("http://169.254.169.254/latest/meta-data/instance-type",
+                                     headers={"X-aws-ec2-metadata-token": token})
+        return urllib.request.urlopen(req, timeout=1).read().decode()
+    except Exception:
+        return ""
+
+
+def gpuFamily(name="", instance_type=""):
+    """EC2 family used to pin slots and decide --threads vs autoThreads."""
+    it = (instance_type or "").split(".")[0].lower()
+    if it in ("g6", "g6e", "g7", "g7e", "g4dn", "g5", "g5g"):
+        return it
+    n = (name or "").lower()
+    # MIG slices are not the full part the campaign worker count was measured
+    # on; autoThreads reads the slice's SM count. Check before the parent SKU.
+    if "mig" in n:
+        return "mig"
+    if "b200" in n:
+        return "b200"
+    if "b300" in n:
+        return "b300"
+    if "h100" in n:
+        return "h100"
+    if "h200" in n:
+        return "h200"
+    if "a100" in n:
+        return "a100"
+    if "l40s" in n:
+        return "g6e"
+    if "rtx pro 6000" in n or "rtx 6000" in n:
+        return "g7e"
+    if "rtx pro 4500" in n or "rtx 4500" in n:
+        return "g7"
+    if "tesla t4" in n or n.endswith(" t4") or n == "t4":
+        return "g4dn"
+    if "l4" in n:
+        return "g6"
+    if n in ("cpu", "local") or n.startswith("cpu/") or n.startswith("cpu@"):
+        return "cpu"
+    return ""
+
+
+def slotFamilyCompatible(slot_family, worker_family):
+    """True if this worker may resume (or first-claim) the slot.
+
+    Untagged slots are the live Blackwell corpus. Ada auto-sizes and would
+    refuse those checkpoints (exit 6), retiring the run id, so Ada creates
+    new slots instead. Rehearsal families stay compatible with anything.
+    """
+    if worker_family in LOCAL_FAMILIES:
+        return True
+    if not slot_family:
+        return worker_family in BLACKWELL_FAMILIES
+    return slot_family == worker_family
+
+
+def usesCampaignWorkers(family):
+    """Only the measured RTX PRO 4500/6000 preset passes campaign.json workers.
+
+    Everything else omits --threads so packedengine.autoThreads sizes the grid
+    from the device's SM count. Putting 385,024 workers on a B200, a MIG
+    slice, or an unclassified GPU is how an 8-wide pod shows ~1/8 utilization.
+    """
+    return family in BLACKWELL_FAMILIES
+
+
+def frozenCampaignMoved(current, nxt):
+    """First frozen campaign field that changed, or None."""
+    for key in FROZEN_CAMPAIGN:
+        if key in current and key in nxt and current[key] != nxt[key]:
+            return key
+    return None
+
+
+def campaignPointerMoved(current, nxt):
+    """True when the bucket names a different client. Geometry moves are not a pointer move."""
+    if frozenCampaignMoved(current, nxt):
+        return False
+    liveKey = current.get("binaryKey") or ""
+    liveSha = current.get("binarySha256") or ""
+    newKey = nxt.get("binaryKey") or ""
+    newSha = nxt.get("binarySha256") or ""
+    if newKey and newKey != liveKey:
+        return True
+    if newSha and newSha != liveSha:
+        return True
+    liveVer = int(current.get("kernelVersion") or 0)
+    newVer = int(nxt.get("kernelVersion") or 0)
+    if newVer and newVer != liveVer:
+        return True
+    if (nxt.get("kernelProtocol") or "") and (nxt.get("kernelProtocol") != (current.get("kernelProtocol") or "")):
+        return True
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -150,7 +388,11 @@ class S3Store:
     def exists(self, key):
         r = subprocess.run(["aws", "s3api", "head-object", "--bucket", self.bucket, "--key", key],
                            capture_output=True, text=True)
-        return r.returncode == 0
+        if r.returncode == 0:
+            return True
+        if "404" in r.stderr or "NoSuchKey" in r.stderr or "Not Found" in r.stderr:
+            return False
+        raise RuntimeError("object lookup failed; refusing to treat an access error as absence")
 
     def get(self, key, dest):
         if not self.exists(key):
@@ -217,7 +459,7 @@ class DynamoSlots:
 
     def scan(self):
         r = self._run("scan", "--table-name", self.table,
-                      "--projection-expression", "#s, leaseUntil, #st, #o",
+                      "--projection-expression", "#s, leaseUntil, #st, #o, gpuName",
                       "--expression-attribute-names", json.dumps({"#s": "slot", "#st": "state", "#o": "owner"}))
         if r.returncode != 0:
             raise RuntimeError("dynamodb scan failed: " + r.stderr.strip())
@@ -237,22 +479,26 @@ class DynamoSlots:
             return False
         raise RuntimeError("dynamodb update failed: " + r.stderr.strip())
 
-    def claim(self, owner, info):
+    def claim(self, owner, info, newOnly=False):
         now = int(time.time())
         items = self.scan()
         free = sorted(it["slot"] for it in items
                       if it.get("state") not in ("retired", "solved", "error")
-                      and int(it.get("leaseUntil") or 0) < now)
+                      and int(it.get("leaseUntil") or 0) < now
+                      and idleSlotClaimable(it, info, newOnly))
         names = {"#o": "owner", "#st": "state"}
         for slot in free:
+            it = next((x for x in items if x.get("slot") == slot), {})
+            if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
+                continue
             values = {":me": dv(owner), ":t": dv(now + LEASE_SECONDS), ":now": dv(now), ":active": dv("active"),
                       ":idle": dv("idle"), ":inst": dv(info["instance"]), ":gpu": dv(info["gpu"]),
-                      ":gpuName": dv(info["gpuName"])}
+                      ":gpuName": dv(info["gpuName"]), ":gpuFamily": dv(info.get("gpuFamily") or "")}
             # Only an expired or released lease may be taken, and only from a
             # slot that is still walking: retired, solved and error slots keep
             # their run id forever so its seeds are never walked twice.
             ok = self._update(slot, "SET #o = :me, leaseUntil = :t, claimedAt = :now, #st = :active, "
-                              "instance = :inst, gpu = :gpu, gpuName = :gpuName", names, values,
+                              "instance = :inst, gpu = :gpu, gpuName = :gpuName, gpuFamily = :gpuFamily", names, values,
                               "(attribute_not_exists(leaseUntil) OR leaseUntil < :now) AND "
                               "(attribute_not_exists(#st) OR #st = :active OR #st = :idle)")
             if ok:
@@ -263,7 +509,8 @@ class DynamoSlots:
                 raise RuntimeError("run ids exhausted")
             item = {"slot": dv(nextSlot), "owner": dv(owner), "leaseUntil": dv(now + LEASE_SECONDS),
                     "claimedAt": dv(now), "createdAt": dv(now), "state": dv("active"),
-                    "instance": dv(info["instance"]), "gpu": dv(info["gpu"]), "gpuName": dv(info["gpuName"])}
+                    "instance": dv(info["instance"]), "gpu": dv(info["gpu"]),
+                    "gpuName": dv(info["gpuName"]), "gpuFamily": dv(info.get("gpuFamily") or "")}
             r = self._run("put-item", "--table-name", self.table, "--item", json.dumps(item),
                           "--condition-expression", "attribute_not_exists(slot)")
             if r.returncode == 0:
@@ -282,7 +529,8 @@ class DynamoSlots:
             names["#f%d" % i] = k
             values[":v%d" % i] = dv(v)
             expr.append("#f%d = :v%d" % (i, i))
-        return self._update(slot, "SET " + ", ".join(expr), names, values, "#o = :me")
+        return self._update(slot, "SET " + ", ".join(expr), names, values,
+                            "#o = :me AND leaseUntil >= :now")
 
     def release(self, slot, owner, state="idle", extra=None):
         names = {"#o": "owner", "#st": "state"}
@@ -357,16 +605,20 @@ class S3Slots:
                 items.append(item)
         return items
 
-    def claim(self, owner, info):
+    def claim(self, owner, info, newOnly=False):
         now = int(time.time())
         items = self.scan()
         for it in sorted(items, key=lambda x: x["slot"]):
             if it.get("state") not in (None, "active", "idle") or int(it.get("leaseUntil") or 0) >= now:
                 continue
-            etag = it.pop("_etag")
-            slot = it.pop("slot")
-            it.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
-            if self._put(slot, it, ifMatch=etag):
+            if not idleSlotClaimable(it, info, newOnly):
+                continue
+            if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
+                continue
+            etag, slot = it["_etag"], it["slot"]
+            candidate = {k: v for k, v in it.items() if k not in ("_etag", "slot")}
+            candidate.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
+            if self._put(slot, candidate, ifMatch=etag):
                 return slot
         nextSlot = max((it["slot"] for it in items), default=-1) + 1
         for _ in range(64):
@@ -381,7 +633,7 @@ class S3Slots:
 
     def _modify(self, slot, owner, fn):
         item, etag = self._get(slot)
-        if item is None or item.get("owner") != owner:
+        if item is None or item.get("owner") != owner or item.get("leaseUntil", 0) < int(time.time()):
             return False
         fn(item)
         return self._put(slot, item, ifMatch=etag)
@@ -392,6 +644,24 @@ class S3Slots:
 
     def release(self, slot, owner, state="idle", extra=None):
         return self._modify(slot, owner, lambda it: it.update(extra or {}, leaseUntil=0, state=state))
+
+
+def rdsSlots():
+    """The control plane's registry, under the same four-method contract.
+
+    Imported here rather than at module scope: a worker that leases from
+    DynamoDB or from the bucket must not need the control-plane package on
+    its PATH, and this file runs on every GPU in the fleet.
+    """
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from controlplane.cache import cacheFromEnv
+    from controlplane.config import Config
+    from controlplane.db import databaseFromEnv
+    from controlplane.slots import PostgresSlots
+
+    config = Config.fromEnv()
+    return PostgresSlots(databaseFromEnv(config), campaign=config.campaign,
+                         cache=cacheFromEnv(config))
 
 
 class LocalSlots:
@@ -411,12 +681,16 @@ class LocalSlots:
     def scan(self):
         return [dict(it, slot=int(k)) for k, it in readJson(self.path, {}).items()]
 
-    def claim(self, owner, info):
+    def claim(self, owner, info, newOnly=False):
         def fn(items):
             now = int(time.time())
             for k in sorted(items, key=int):
                 it = items[k]
                 if it.get("state") in ("retired", "solved", "error") or int(it.get("leaseUntil") or 0) >= now:
+                    continue
+                if not idleSlotClaimable(it, info, newOnly):
+                    continue
+                if not slotFamilyCompatible(it.get("gpuFamily"), info.get("gpuFamily")):
                     continue
                 it.update(owner=owner, leaseUntil=now + LEASE_SECONDS, claimedAt=now, state="active", **info)
                 return int(k)
@@ -429,7 +703,7 @@ class LocalSlots:
     def heartbeat(self, slot, owner, fields):
         def fn(items):
             it = items.get(str(slot))
-            if not it or it.get("owner") != owner:
+            if not it or it.get("owner") != owner or it.get("leaseUntil", 0) < int(time.time()):
                 return False
             it.update(fields, leaseUntil=int(time.time()) + LEASE_SECONDS, updatedAt=int(time.time()))
             return True
@@ -450,7 +724,9 @@ class Worker:
     def __init__(self):
         self.root = os.environ.get("ECC_ROOT", os.getcwd())
         self.gpu = int(os.environ.get("ECC_GPU", "0"))
-        self.client = os.environ.get("ECC_CLIENT", os.path.join(self.root, "ecc2k130"))
+        self.cpu = isCpuDevice()
+        defaultClient = "ecc2k130-cpu" if self.cpu else "ecc2k130"
+        self.client = os.environ.get("ECC_CLIENT", os.path.join(self.root, defaultClient))
         local = os.environ.get("ECC_LOCAL_STORE")
         if local:
             os.makedirs(local, exist_ok=True)
@@ -458,20 +734,37 @@ class Worker:
             self.slots = LocalSlots(os.path.join(local, "slots.json"))
         else:
             self.store = S3Store(os.environ["ECC_BUCKET"])
-            # DynamoDB when a table is named, otherwise slots live in the
-            # bucket itself (fewer services, fewer permissions).
+            # The RDS control plane when asked for, DynamoDB when a table is
+            # named, otherwise slots live in the bucket itself (fewer
+            # services, fewer permissions).  One variable moves a campaign
+            # between them, and the four-method contract is the same.
             table = os.environ.get("ECC_TABLE", "")
-            self.slots = DynamoSlots(table) if table else S3Slots(os.environ["ECC_BUCKET"])
+            if os.environ.get("ECC_SLOT_BACKEND", "").strip().lower() == "rds":
+                self.slots = rdsSlots()
+            elif table:
+                self.slots = DynamoSlots(table)
+            else:
+                self.slots = S3Slots(os.environ["ECC_BUCKET"])
         self.instance = instanceId()
-        self.owner = "%s:gpu%d" % (self.instance, self.gpu)
-        self.work = os.path.join(self.root, "gpu%d" % self.gpu)
+        deviceTag = "cpu%d" % self.gpu if self.cpu else "gpu%d" % self.gpu
+        self.owner = "%s:%s:%s" % (self.instance, deviceTag, uuid.uuid4().hex)
+        self.work = os.path.join(self.root, deviceTag)
         os.makedirs(self.work, exist_ok=True)
         self.statePath = os.path.join(self.work, "state.json")
         self.state = readJson(self.statePath, {})
         self.stopping = False
         self.proc = None
         self.cfg = None
+        self.contract = None
+        self.leaseLost = False
+        self.lastBeatSuccess = None
+        self.streamId = uuid.uuid4().hex
+        # Prevent two local supervisors sharing offsets, checkpoint paths or a GPU.
+        self.workLock = open(os.path.join(self.work, "worker.lock"), "a+")
+        fcntl.flock(self.workLock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         self.gpuName = gpuName(self.gpu)
+        self.instanceType = instanceType()
+        self.gpuFamily = "cpu" if self.cpu else gpuFamily(self.gpuName, self.instanceType)
         signal.signal(signal.SIGTERM, self.onStop)
         signal.signal(signal.SIGINT, self.onStop)
 
@@ -488,8 +781,13 @@ class Worker:
     def saveState(self):
         writeJson(self.statePath, self.state)
 
+    def expectedClientSha(self):
+        if self.cpu:
+            return self.cfg.get("hostBinarySha256") or self.cfg.get("binarySha256")
+        return self.cfg.get("binarySha256")
+
     # ---- campaign configuration ------------------------------------------
-    def loadConfig(self):
+    def loadConfig(self, verifyBinary=True):
         path = os.path.join(self.work, "campaign.json")
         if not self.store.get("campaign.json", path):
             raise RuntimeError("campaign.json missing from the store")
@@ -497,16 +795,134 @@ class Worker:
         for key in ("curve", "steps", "checkpointEvery"):
             if key not in self.cfg:
                 raise RuntimeError("campaign.json lacks %r" % key)
+        if self.cfg.get("storageProtocol"):
+            self.contract = campaignContract(self.cfg)
+            if verifyBinary:
+                expected = self.expectedClientSha()
+                if expected and sha256File(self.client) != expected:
+                    raise RuntimeError("client binary hash differs from campaign")
+            bindDirectory(self.work, self.contract)
+        elif not os.environ.get("ECC_ALLOW_LEGACY_STORAGE"):
+            raise RuntimeError("unversioned campaign: set storageProtocol; legacy storage requires ECC_ALLOW_LEGACY_STORAGE=1")
+        elif verifyBinary and self.cpu:
+            # Legacy store: still pin the host binary so a GPU client is never
+            # started as ECC_DEVICE=cpu by accident.
+            want = self.cfg.get("hostBinarySha256")
+            if want and sha256File(self.client) != want:
+                raise RuntimeError("host binary hash differs from campaign")
+        self.verifyKernelPin(verifyBinary)
+
+    def verifyKernelPin(self, verifyBinary=True):
+        """When kernelProtocol is live, the client must match the pinned hash.
+
+        Independent of storageProtocol: the live corpus can adopt v1 without
+        migrating points. Version 0 is an empty pointer (no binary yet).
+        """
+        proto = self.cfg.get("kernelProtocol")
+        if not proto:
+            return
+        if proto != KERNEL_PROTOCOL:
+            raise RuntimeError("unknown kernelProtocol %r" % proto)
+        if int(self.cfg.get("kernelVersion") or 0) < 1 or not verifyBinary:
+            return
+        if self.gpuFamily in ("cpu", "local") or not self.cfg.get("packed", True):
+            want = self.cfg.get("hostBinarySha256") or self.cfg.get("binarySha256")
+        else:
+            want = self.cfg.get("binarySha256")
+        if not want:
+            raise RuntimeError("kernelVersion %s has no pinned client hash" % self.cfg.get("kernelVersion"))
+        if sha256File(self.client) != want:
+            raise RuntimeError("client binary hash differs from kernelVersion %s" % self.cfg.get("kernelVersion"))
+
+    def clientStoreKey(self):
+        """S3 key of the executable this worker should run.
+
+        GPU walkers take binaryKey. CPU walkers take hostBinaryKey so a
+        kernel rollout does not hand them the CUDA client. Rehearsals use
+        binaryKey=local and ECC_CLIENT; those do not re-fetch.
+        """
+        key = self.cfg.get("binaryKey") or ""
+        if key in ("", "local"):
+            return ""
+        if self.gpuFamily in ("cpu", "local") or not self.cfg.get("packed", True):
+            return self.cfg.get("hostBinaryKey") or key
+        return key
+
+    def fetchClient(self):
+        key = self.clientStoreKey()
+        if not key:
+            return False
+        tmp = self.client + ".next"
+        if not self.store.get(key, tmp):
+            raise RuntimeError("failed to download %s" % key)
+        if key == (self.cfg.get("hostBinaryKey") or ""):
+            want = self.cfg.get("hostBinarySha256") or ""
+        else:
+            want = self.cfg.get("binarySha256") or ""
+        if want and sha256File(tmp) != want:
+            os.remove(tmp)
+            raise RuntimeError("downloaded client hash differs from campaign")
+        os.chmod(tmp, 0o755)
+        os.replace(tmp, self.client)
+        return True
+
+    def campaignPointerChanged(self):
+        """True when campaign.json names a new client we are allowed to load."""
+        remote = os.path.join(self.work, "campaign.json.next")
+        try:
+            if not self.store.get("campaign.json", remote):
+                return False
+            nxt = readJson(remote)
+        except Exception as e:
+            log("campaign pointer poll failed: %s" % e)
+            return False
+        moved = frozenCampaignMoved(self.cfg, nxt)
+        if moved:
+            log("refusing campaign.json: frozen field %s moved; keep walking the current client" % moved)
+            return False
+        if campaignPointerMoved(self.cfg, nxt):
+            log("campaign client moved to %s (kernelVersion %s)"
+                % (nxt.get("binaryKey") or nxt.get("binarySha256"), nxt.get("kernelVersion")))
+            return True
+        return False
+
+    def reloadClient(self):
+        """Re-fetch campaign.json and the client it names. Slot is kept."""
+        log("reloading campaign.json and client")
+        remote = os.path.join(self.work, "campaign.json.next")
+        if not self.store.get("campaign.json", remote):
+            raise RuntimeError("campaign.json missing during reload")
+        nxt = readJson(remote)
+        moved = frozenCampaignMoved(self.cfg, nxt)
+        if moved:
+            raise RuntimeError("frozen field %s moved; refusing reload" % moved)
+        prev = self.cfg
+        self.cfg = nxt
+        try:
+            self.fetchClient()
+        except Exception:
+            self.cfg = prev
+            raise
+        path = os.path.join(self.work, "campaign.json")
+        os.replace(remote, path)
+        self.loadConfig(verifyBinary=True)
 
     def clientCommand(self, slot):
         c = self.cfg
         cmd = [self.client, "--curve", str(c["curve"]), "--steps", str(c["steps"]), "--launches", "0",
                "--run-id", str(slot + 1), "--dp-file", self.dpPath, "--checkpoint", self.ckptPath,
                "--checkpoint-every", str(int(c["checkpointEvery"])), "--verify", str(int(c.get("verify", 0)))]
-        if c.get("packed", False):
-            cmd += ["--packed", "--device", "0"]
-        if c.get("workers"):
-            cmd += ["--threads", str(int(c["workers"]))]
+        if self.cpu:
+            # Host binary: never --packed. Thread count is the box, not the
+            # GPU preset (campaign workers=385024 would OOM a c7i).
+            cmd += ["--threads", str(cpuThreadCount())]
+        else:
+            if c.get("packed", False):
+                # CUDA_VISIBLE_DEVICES is set to this GPU in runClient, so the
+                # process always sees the assigned device as ordinal 0.
+                cmd += ["--packed", "--device", "0"]
+            if c.get("workers") and usesCampaignWorkers(self.gpuFamily):
+                cmd += ["--threads", str(int(c["workers"]))]
         if c.get("dpWeight", -1) >= 0:
             cmd += ["--dp-weight", str(int(c["dpWeight"]))]
         if c.get("maxIters"):
@@ -531,21 +947,57 @@ class Worker:
         return "ckpt/slot-%05d.ck" % slot
 
     def claimSlot(self):
-        info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName}
-        slot = self.slots.claim(self.owner, info)
+        info = {"instance": self.instance, "gpu": self.gpu, "gpuName": self.gpuName,
+                "gpuFamily": self.gpuFamily}
+        newOnly = claimNewOnly()
+        if newOnly:
+            log("CPU-safe claim: resume idle %s slots only; otherwise allocate a new slot" % self.gpuName)
+        slot = self.slots.claim(self.owner, info, newOnly=newOnly)
+        self.lastBeatSuccess = time.monotonic()
+        if self.contract:
+            records = [r for r in self.slots.scan() if r["slot"] == slot]
+            record = records[0]
+            if record.get("campaignId") not in (None, self.contract["id"]):
+                raise RuntimeError("slot belongs to a different campaign")
+            if record.get("campaignId") is None and (record.get("ckptIter", -1) >= 0 or self.store.exists(self.ckptKey(slot))):
+                raise RuntimeError("legacy slot checkpoint requires audited migration")
+            if not self.slots.heartbeat(slot, self.owner, {"campaignId": self.contract["id"]}):
+                raise RuntimeError("lease lost during campaign binding")
         log("claimed slot %d (run id %d)" % (slot, slot + 1))
         if self.state.get("slot") != slot:
-            # A different slot than this work dir last held: nothing local applies.
+            # A different slot than this work dir last held: the live dp.bin
+            # and checkpoint do not apply.  Unsent spool entries do -- they
+            # were cut for the slot they name.  Finish any payload-only
+            # fragment and forget leftover offsets before deleting dp.bin,
+            # so sweepSpool cannot drop the only copy and creditSpoolEntry
+            # cannot treat those records as a prefix of the new empty file.
+            old = self.state.get("slot")
+            self.completeSpoolFragments(old)
+            self.detachSpoolFromLiveFile()
             for name in ("dp.bin", "walk.ck", "walk.ck.snap", "walk.ck.remote"):
                 p = os.path.join(self.work, name)
                 if os.path.exists(p):
                     os.remove(p)
-            self.state = {"slot": slot, "dpOffset": 0, "ckptIter": -1, "dpUploaded": 0}
+            self.state = {"slot": slot, "dpOffset": 0, "ckptIter": -1, "dpUploaded": 0, "walks": 0}
             self.saveState()
         # Resume from whichever checkpoint is further along: the one left here by
         # a previous run on this instance, or the one another instance uploaded.
         remote = self.ckptPath + ".remote"
-        if self.store.get(self.ckptKey(slot), remote):
+        if self.contract:
+            # The registry's conditional write is the checkpoint commit point.
+            # A stale writer may leave immutable blobs but cannot change this pointer.
+            key = record.get("checkpointKey")
+            if key:
+                meta = remote + ".json"
+                if not self.store.get(key, remote) or not self.store.get(key + ".json", meta):
+                    raise RuntimeError("committed checkpoint or manifest is missing")
+                verifyEnvelope(remote, readJson(meta), self.contract, "checkpoint")
+                os.replace(remote, self.ckptPath)
+                log("downloaded checkpoint at iteration %d" % checkpointIter(self.ckptPath))
+            # Do not trust an uncommitted local checkpoint after process restart.
+            elif os.path.exists(self.ckptPath):
+                raise RuntimeError("uncommitted local checkpoint requires recovery review")
+        elif self.store.get(self.ckptKey(slot), remote):
             if checkpointIter(remote) > checkpointIter(self.ckptPath):
                 os.replace(remote, self.ckptPath)
                 log("downloaded checkpoint at iteration %d" % checkpointIter(self.ckptPath))
@@ -553,15 +1005,306 @@ class Worker:
                 os.remove(remote)
         if os.path.exists(self.ckptPath):
             log("local checkpoint at iteration %d" % checkpointIter(self.ckptPath))
+        # Points a previous process on this disk cut but never sent are still
+        # owed to the campaign, under the slot they were cut for.
+        self.drainSpool(slot)
         return slot
 
     def retireSlot(self, slot, reason):
         log("retiring slot %d: %s" % (slot, reason))
+        # Finish payload-only fragments while this slot is still known.
+        # Clearing state below is what makes the next claimSlot see no
+        # prior slot; without a manifest, sweepSpool would then drop them
+        # once that claim deletes dp.bin.
+        self.completeSpoolFragments(slot)
         if os.path.exists(self.ckptPath):
             self.store.put(self.ckptPath, "ckpt/retired/slot-%05d.ck" % slot)
         self.slots.release(slot, self.owner, state="retired", extra={"reason": reason})
         self.state = {}
         self.saveState()
+
+    # ---- local spool of unsent points -------------------------------------
+    @property
+    def spoolDir(self):
+        return os.path.join(self.work, SPOOL_DIR)
+
+    def spoolBudget(self):
+        return int((getattr(self, "cfg", None) or {}).get("spoolMaxBytes", SPOOL_MAX_BYTES))
+
+    def spoolEntries(self):
+        """Cut deltas the store has not acknowledged, oldest first.
+
+        Each entry keeps its own object key rather than deriving one: a spool
+        left behind by a previous process holds points cut for the slot that
+        process had, which is not necessarily the slot this one claimed, and
+        re-filing them under the wrong slot would misattribute the walk.
+        """
+        if not os.path.isdir(self.spoolDir):
+            return []
+        out = []
+        for name in sorted(os.listdir(self.spoolDir)):
+            if not name.endswith(SPOOL_MANIFEST):
+                continue
+            entry = readJson(os.path.join(self.spoolDir, name))
+            if not entry or not entry.get("key") or not entry.get("name"):
+                continue
+            entry["manifest"] = os.path.join(self.spoolDir, name)
+            entry["payload"] = os.path.join(self.spoolDir, entry["name"])
+            out.append(entry)
+        out.sort(key=lambda e: (e.get("createdAt", 0), int(e.get("offset", 0)), e["name"]))
+        return out
+
+    def spoolBytes(self):
+        total = 0
+        if os.path.isdir(self.spoolDir):
+            for name in os.listdir(self.spoolDir):
+                path = os.path.join(self.spoolDir, name)
+                if os.path.isfile(path):
+                    total += os.path.getsize(path)
+        return total
+
+    def spoolPending(self):
+        """True while anything at all sits in the spool, manifest or not."""
+        return os.path.isdir(self.spoolDir) and bool(os.listdir(self.spoolDir))
+
+    def entrySize(self, entry):
+        total = 0
+        for path in (entry["payload"], entry["payload"] + ".json", entry["manifest"]):
+            if os.path.isfile(path):
+                total += os.path.getsize(path)
+        return total
+
+    def spoolDelta(self, src, key, slot, offset, metaPath=None):
+        """Hold a cut delta on disk under its final key until the store has it.
+
+        The five-hour stall of 2026-09-17 was an ingest fault rather than an
+        upload one, but it showed what an outage of the upload path would
+        have cost: the only copy of an unsent stretch was dp.bin, which
+        claimSlot deletes when the work dir changes slot and rotateDpFile
+        deletes on a rollout restart.  The manifest is written last, so a
+        payload without one is a fragment and never a record of work.
+        """
+        os.makedirs(self.spoolDir, exist_ok=True)
+        name = os.path.basename(key)
+        payload = os.path.join(self.spoolDir, name)
+        copyFsync(src, payload + ".part")
+        os.replace(payload + ".part", payload)
+        if metaPath:
+            copyFsync(metaPath, payload + ".json")
+        head, stride = dpStride(payload)
+        entry = {"name": name, "key": key, "slot": slot, "streamId": self.streamId,
+                 "offset": int(offset), "bytes": os.path.getsize(payload),
+                 "head": head, "stride": stride,
+                 "hasMeta": bool(metaPath), "createdAt": time.time()}
+        writeJson(payload + SPOOL_MANIFEST, entry)
+        entry["manifest"] = payload + SPOOL_MANIFEST
+        entry["payload"] = payload
+        return entry
+
+    def removeSpoolEntry(self, entry):
+        # Manifest last: a crash here leaves an entry that drains as a missing
+        # payload, never one that claims records the disk no longer holds.
+        for path in (entry["payload"] + ".json", entry["payload"], entry["manifest"]):
+            if os.path.exists(path):
+                os.remove(path)
+
+    def completeSpoolFragments(self, slot):
+        """Give payload-only spool files a manifest for this slot.
+
+        spoolDelta writes the payload first and the manifest last.  sweepSpool
+        would drop a lone payload as a fragment whose records are still in
+        dp.bin -- true only until claimSlot deletes that file on a slot
+        change.  The payload's name is the basename of its final key.
+        retireSlot clears state and a missing state.json leaves slot None;
+        recover it from a leftover manifest or a local checkpoint rather
+        than skip and let sweepSpool drop the only copy.
+        """
+        if not os.path.isdir(self.spoolDir):
+            return
+        if slot is None:
+            for entry in self.spoolEntries():
+                if entry.get("slot") is not None:
+                    slot = int(entry["slot"])
+                    break
+        if slot is None:
+            slot = checkpointSlot(self.ckptPath)
+        if slot is None:
+            return
+        claimed = {e["name"] for e in self.spoolEntries()}
+        fallbackOffset = int(self.state.get("dpOffset", 0))
+        for name in sorted(os.listdir(self.spoolDir)):
+            if not name.endswith(".bin") or name in claimed:
+                continue
+            payload = os.path.join(self.spoolDir, name)
+            if not os.path.isfile(payload):
+                continue
+            size = os.path.getsize(payload)
+            head, stride = dpStride(payload)
+            if size <= head or (size - head) % stride:
+                continue
+            parts = name[:-4].rsplit("-", 2)
+            if len(parts) == 3 and parts[1].isdigit():
+                streamId, offset = parts[0], int(parts[1])
+            else:
+                streamId, offset = self.streamId, fallbackOffset
+            meta = payload + ".json"
+            entry = {"name": name, "key": "dp/slot-%05d/%s" % (slot, name),
+                     "slot": slot, "streamId": streamId, "offset": offset,
+                     "bytes": size, "head": head, "stride": stride,
+                     "hasMeta": os.path.isfile(meta), "createdAt": time.time()}
+            writeJson(payload + SPOOL_MANIFEST, entry)
+
+    def detachSpoolFromLiveFile(self):
+        """Stop leftover entries from indexing a dp.bin that is about to go.
+
+        creditSpoolEntry treats a matching slot and offset as the records
+        still being in the live file.  After a slot change that file is a
+        new empty one, and a later reclaim of the same slot number would
+        jump dpOffset past its prefix.  Clearing the offset (not the
+        payload) keeps the records publishable on their own key.
+        """
+        for entry in self.spoolEntries():
+            body = {k: v for k, v in entry.items() if k not in ("manifest", "payload")}
+            body["offset"] = -1
+            writeJson(entry["manifest"], body)
+
+    def sweepSpool(self):
+        """Discard spool files that no manifest claims.
+
+        A payload is written before dpOffset moves, so an interrupted write
+        costs nothing: those records are still in dp.bin and the next cycle
+        cuts them again.  rotateDpFile refusing to run while the spool is
+        non-empty is what keeps that true on a rollout.  claimSlot changing
+        slot completes any payload-only fragment before it deletes dp.bin,
+        so a crash in spoolDelta cannot be swept away with the file.
+        """
+        if not os.path.isdir(self.spoolDir):
+            return
+        known = set()
+        for entry in self.spoolEntries():
+            known.update((entry["name"], entry["name"] + ".json",
+                          entry["name"] + SPOOL_MANIFEST))
+        live = os.path.exists(self.dpPath)
+        for name in sorted(os.listdir(self.spoolDir)):
+            path = os.path.join(self.spoolDir, name)
+            if name in known or not os.path.isfile(path):
+                continue
+            if not live and (name.endswith(".bin") or name.endswith(".bin.json")):
+                # dp.bin is gone, so these records are not 'still in dp.bin'.
+                continue
+            log("spool: discarding fragment %s (%d bytes); its records are still in dp.bin"
+                % (name, os.path.getsize(path)))
+            os.remove(path)
+
+    def creditSpoolEntry(self, entry, slot):
+        """Move dpOffset past a delta the store has, and only then.
+
+        The offset indexes one dp file, so only an entry for this slot whose
+        offset is where this process is reading may move it.  streamId is not
+        the test: it is a fresh UUID each process start and is not in
+        state.json, so a same-slot restart would upload the leftover and then
+        recut that prefix.  Rotation will not drop dp.bin while the spool
+        holds anything, so a matching slot and offset are the file still here.
+        claimSlot will drop it on a slot change, and forgets leftover offsets
+        first so a later claim of the same slot number cannot treat those
+        records as a prefix of the new empty file.  An entry for another slot
+        is published on its own key and the offset stays where it is, because
+        skipping the prefix of a file those records are not in would lose the
+        points at the front of it.
+        """
+        if slot is None or entry.get("slot") != slot:
+            return
+        if int(entry.get("offset", -1)) != int(self.state.get("dpOffset", 0)):
+            return
+        self.state["dpOffset"] = int(entry["offset"]) + entryRecordBytes(entry)
+        # Cumulative across dp file rotations, so the dashboard's count
+        # is this slot's whole contribution.
+        self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + entryRecords(entry)
+        self.saveState()
+
+    def uploadSpoolEntry(self, entry, slot=None, source=None, metaSource=None, check=True):
+        """Put one delta and unspool it only once the store holds it.
+
+        A key names the bytes it carries, so an attempt that failed after the
+        object landed leaves the same key in place; treating that as sent
+        keeps a retry from re-uploading a stretch the store already has.
+        """
+        payload = entry["payload"]
+        src = payload if os.path.exists(payload) else source
+        if src is None:
+            log("spool: %s claims records that are not on disk; dropping the manifest" % entry["name"])
+            if os.path.exists(entry["manifest"]):
+                os.remove(entry["manifest"])
+            return False
+        meta = payload + ".json"
+        metaSrc = meta if os.path.exists(meta) else (metaSource if entry.get("hasMeta") else None)
+        if check and self.store.exists(entry["key"]):
+            log("spool: %s is already in the store; dropping the local copy" % entry["name"])
+            if metaSrc and not self.store.exists(entry["key"] + ".json"):
+                self.store.put(metaSrc, entry["key"] + ".json")
+        else:
+            self.store.put(src, entry["key"])
+            if metaSrc:
+                self.store.put(metaSrc, entry["key"] + ".json")
+        self.removeSpoolEntry(entry)
+        self.creditSpoolEntry(entry, slot)
+        return True
+
+    def drainSpool(self, slot=None):
+        """Send what earlier cycles, or an earlier process, could not.
+
+        Never fatal: an unreachable store is the condition the spool exists
+        for, so a failure is a log line and another attempt next cycle.  The
+        first failure stops the drain because the cause is almost always the
+        store itself, and the rest of the queue would only hammer it.
+        """
+        self.sweepSpool()
+        entries = self.spoolEntries()
+        if not entries:
+            return 0
+        records = sum(entryRecords(e) for e in entries)
+        log("spool: draining %d unsent delta(s), %d records, %d bytes"
+            % (len(entries), records, self.spoolBytes()))
+        sent = 0
+        for entry in entries:
+            try:
+                if self.uploadSpoolEntry(entry, slot):
+                    sent += 1
+            except Exception as e:
+                log("spool: %s still unsent (will retry): %s" % (entry["name"], e))
+                break
+        return sent
+
+    def enforceSpoolBudget(self):
+        """Hold the spool to spoolMaxBytes by dropping the newest entries.
+
+        A worker that cannot reach the store must not fill the disk out from
+        under the client.  The oldest entries are the ones kept: they are the
+        ones whose dp.bin may already be gone, while the newest were cut from
+        the live file and the next cycle cuts them again.  What goes is said
+        out loud, with its record count, and counted into spoolDropped, which
+        the heartbeat publishes: a worker shedding points must not be a thing
+        only its own log knows.
+        """
+        budget = self.spoolBudget()
+        entries = self.spoolEntries()
+        total = self.spoolBytes()
+        dropped = 0
+        while total > budget and entries:
+            entry = entries.pop()
+            count = entryRecords(entry)
+            size = self.entrySize(entry)
+            self.removeSpoolEntry(entry)
+            log("spool over budget (%d > %d bytes): dropped %s, %d records no longer held locally"
+                % (total, budget, entry["name"], count))
+            total -= size
+            dropped += count
+        if dropped:
+            self.state["spoolDropped"] = int(self.state.get("spoolDropped", 0)) + dropped
+            self.saveState()
+            log("spool: %d records dropped from the spool on this worker so far"
+                % self.state["spoolDropped"])
+        return dropped
 
     # ---- durable copies ---------------------------------------------------
     def uploadCycle(self, slot):
@@ -571,7 +1314,29 @@ class Worker:
         the points read afterwards include everything flushed before that
         checkpoint was written (the client flushes the dp file, then saves).
         If this process dies between the two uploads the store holds extra
-        points and an older checkpoint, which a resume merely re-reports."""
+        points and an older checkpoint, which a resume merely re-reports.
+
+        Anything an earlier cycle failed to send goes first, for the same
+        reason: points before the checkpoint that follows them."""
+        if self.leaseLost:
+            raise RuntimeError("lease lost: refusing to publish")
+        if not self.slots.heartbeat(slot, self.owner, {}):
+            self.leaseLost = True
+            self.stopping = True
+            raise RuntimeError("lease lost before upload")
+        self.lastBeatSuccess = time.monotonic()
+        self.drainSpool(slot)
+        if self.spoolPending():
+            # Cutting a second delta now would spool [offset, more) beside the
+            # [offset, less) that just failed -- a superset under a different
+            # key, once per cycle, for as long as the outage lasts.  Stopping
+            # here keeps the spool one entry deep: those records are still in
+            # dp.bin, which rotateDpFile will not remove while the spool holds
+            # anything.  It also holds the publication order, since uploading
+            # the checkpoint that follows points the store does not have is
+            # the one reordering a resume cannot repair.
+            raise RuntimeError("store unreachable: %d bytes of points still spooled"
+                               % self.spoolBytes())
         snap = self.ckptPath + ".snap"
         if os.path.exists(snap):
             os.remove(snap)
@@ -599,18 +1364,44 @@ class Worker:
                     out.write(src.read(base))
                 src.seek(offset)
                 out.write(src.read(whole - offset))
-            key = "dp/slot-%05d/%d-%016d.bin" % (slot, int(time.time()), offset)
-            self.store.put(delta, key)
-            os.remove(delta)
-            self.state["dpOffset"] = whole
-            # Cumulative across dp file rotations, so the dashboard's count
-            # is this slot's whole contribution.
-            self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + (whole - offset) // stride
-            self.saveState()
+            key = "dp/slot-%05d/%s-%016d-%s.bin" % (slot, self.streamId, offset, sha256File(delta))
+            metaPath = None
+            if self.contract:
+                metaPath = delta + ".json"
+                # producedAt travels as an extra field, so verifyEnvelope --
+                # which compares only the keys envelope() recomputes -- is
+                # unaffected. It gives the ingest a campaign fact for found_at
+                # instead of the object's S3 LastModified, which is storage
+                # metadata that a copy, a replication or a lifecycle transition
+                # rewrites, silently moving points between hourly buckets.
+                writeJson(metaPath, envelope(delta, self.contract, "dp", owner=self.owner,
+                                             offset=offset,
+                                             producedAt=int(time.time())))
+            entry = self.spoolDelta(delta, key, slot, offset, metaPath)
+            self.enforceSpoolBudget()
+            try:
+                # A raise here leaves the delta spooled and dpOffset where it
+                # was; the next cycle drains it before cutting again.
+                self.uploadSpoolEntry(entry, slot, source=delta, metaSource=metaPath, check=False)
+            finally:
+                for path in (delta, delta + ".json"):
+                    if os.path.exists(path):
+                        os.remove(path)
         if haveSnap:
             it = checkpointIter(snap)
             if it >= 0 and it != self.state.get("ckptIter", -1):
-                self.store.put(snap, self.ckptKey(slot))
+                if self.contract:
+                    key = "ckpt/slot-%05d/%s.ck" % (slot, sha256File(snap))
+                    self.store.put(snap, key)
+                    writeJson(snap + ".json", envelope(snap, self.contract, "checkpoint", iteration=it))
+                    self.store.put(snap + ".json", key + ".json")
+                    if not self.slots.heartbeat(slot, self.owner, {"checkpointKey": key, "ckptIter": it}):
+                        self.leaseLost = True
+                        self.stopping = True
+                        raise RuntimeError("lease lost: checkpoint pointer not committed")
+                    self.lastBeatSuccess = time.monotonic()
+                else:
+                    self.store.put(snap, self.ckptKey(slot))
                 self.state["ckptIter"] = it
                 self.saveState()
             os.remove(snap)
@@ -622,7 +1413,7 @@ class Worker:
         Returns (returncode, solvedLine)."""
         cmd = self.clientCommand(slot)
         env = dict(os.environ)
-        if self.cfg.get("packed", False):
+        if (not self.cpu) and self.cfg.get("packed", False):
             env["CUDA_VISIBLE_DEVICES"] = str(self.gpu)
         log("starting: " + " ".join(cmd))
         self.proc = subprocess.Popen(cmd, cwd=self.work, env=env, stdout=subprocess.PIPE,
@@ -644,6 +1435,7 @@ class Worker:
         restartDue = False
         last = None
         solved = None
+        verifiedSolution = False
         tail = []
         eof = False
         while not eof or self.proc.poll() is None:
@@ -653,14 +1445,24 @@ class Worker:
                     eof = True
                 else:
                     tail = (tail + [line])[-30:]
+                    banner = BANNER_RE.search(line)
+                    if banner:
+                        walks = int(banner.group(1))
+                        if walks != int(self.state.get("walks", 0)):
+                            self.state["walks"] = walks
+                            self.saveState()
+                        log("client: " + line)
                     prog = PROGRESS_RE.search(line)
                     if prog:
                         last = {"rate": float(prog.group(2)) * 1e6, "iters": int(prog.group(3)),
                                 "dp": int(prog.group(4)), "stored": int(prog.group(5)),
                                 "dropped": int(prog.group(6) or 0)}
-                    else:
-                        if "k = " in line:
+                    elif not banner:
+                        if re.fullmatch(r"\s*k = [0-9]+\s*", line):
                             solved = line.strip()
+                            verifiedSolution = False
+                        if line.strip() == "verified [k]P == Q" and solved:
+                            verifiedSolution = True
                         log("client: " + line)
             except queue.Empty:
                 pass
@@ -669,19 +1471,35 @@ class Worker:
                 lastBeat = now
                 fields = {"ckptIter": int(self.state.get("ckptIter", -1)),
                           "dpUploaded": int(self.state.get("dpUploaded", 0)),
-                          "binary": self.cfg.get("binaryKey", "")}
+                          "walks": int(self.state.get("walks", 0)),
+                          # Unsent and unsendable points, so a worker whose
+                          # uploads are failing is visible without its log.
+                          "spoolBytes": self.spoolBytes(),
+                          "spoolDropped": int(self.state.get("spoolDropped", 0)),
+                          "binary": self.cfg.get("binaryKey", ""),
+                          "binarySha256": self.cfg.get("binarySha256", ""),
+                          "kernelVersion": int(self.cfg.get("kernelVersion") or 0)}
                 if last:
                     fields.update(rate=last["rate"], iters=last["iters"], dp=last["dp"], dropped=last["dropped"])
                 try:
                     if not self.slots.heartbeat(slot, self.owner, fields):
                         log("lost the lease on slot %d; stopping the client" % slot)
                         self.stopping = True
+                        self.leaseLost = True
+                    else:
+                        self.lastBeatSuccess = time.monotonic()
                 except Exception as e:
                     log("heartbeat failed (will retry): %s" % e)
+                if self.lastBeatSuccess is None or time.monotonic() - self.lastBeatSuccess >= LEASE_SECONDS:
+                    self.leaseLost = True
+                    self.stopping = True
                 if last:
                     log("%.3f B it/s, %d iterations this run, %d dp, %d uploaded, checkpoint at %d"
                         % (last["rate"] / 1e9, last["iters"], last["dp"],
                            int(self.state.get("dpUploaded", 0)), int(self.state.get("ckptIter", -1))))
+                if not restartDue and self.campaignPointerChanged():
+                    restartDue = True
+                    log("campaign binary moved; checkpointing to pick up the new client")
             if now - lastUpload >= uploadEvery:
                 lastUpload = now
                 try:
@@ -707,21 +1525,31 @@ class Worker:
             self.uploadCycle(slot)
         except Exception as e:
             log("final upload failed: %s" % e)
-        return rc, solved, restartDue
+        return rc, solved if rc == 0 and verifiedSolution and not self.leaseLost else None, restartDue
 
     def rotateDpFile(self):
         """After the client has exited and every record is uploaded, start a
         fresh dp file so a long-lived instance does not fill its disk.  The
         client reloads its own dp file at startup, which is only the points of
-        this stretch, and the campaign's collision detection is the merge's."""
+        this stretch, and the campaign's collision detection is the merge's.
+
+        Refused while the spool holds anything: dp.bin is the other local copy
+        of those records, and dropping it during an outage would turn a delay
+        into a loss."""
+        if self.spoolPending():
+            log("not rotating dp.bin: %d bytes of points are still unsent" % self.spoolBytes())
+            return
         if os.path.exists(self.dpPath):
             size = os.path.getsize(self.dpPath)
             base, stride = dpStride(self.dpPath)
             whole = size - (size - base) % stride if size > base else base
             if whole <= int(self.state.get("dpOffset", 0)):
-                os.remove(self.dpPath)
+                # Reset BEFORE unlink: a crash can re-upload duplicates but
+                # cannot skip the prefix of the next file.
                 self.state["dpOffset"] = 0
                 self.saveState()
+                os.remove(self.dpPath)
+                self.streamId = uuid.uuid4().hex
 
     # ---- main loop --------------------------------------------------------
     def run(self):
@@ -746,17 +1574,29 @@ class Worker:
                 log("SOLVED on slot %d: %s" % (slot, solved))
                 return 0
             if rc == 6:
+                if self.contract:
+                    self.slots.release(slot, self.owner, state="error", extra={"reason": "checkpoint rejected; preserve for recovery"})
+                    return 1
                 self.retireSlot(slot, "checkpoint refused by the client")
                 slot = None
                 continue
-            if rc == 3:
-                self.slots.release(slot, self.owner, state="error", extra={"reason": "reference mismatch"})
-                log("the GPU walk disagrees with the reference; refusing to continue")
+            if rc in (3, 7, 8, 9):
+                self.slots.release(slot, self.owner, state="error", extra={"reason": "integrity failure, exit %d" % rc})
+                log("reference, report-loss or persistence failure; refusing automatic retries")
                 return 1
             if self.stopping:
                 break
             if restartDue and rc == 0:
                 self.rotateDpFile()
+                try:
+                    self.reloadClient()
+                except Exception as e:
+                    log("reload after rollout failed: %s" % e)
+                    failures += 1
+                    if failures > 5:
+                        self.slots.release(slot, self.owner, state="error",
+                                           extra={"reason": "rollout reload failed"})
+                        return 1
                 continue
             failures += 1
             if failures > 5:
@@ -777,8 +1617,52 @@ class Worker:
         return 0
 
 
+def visibleGpuCount():
+    """How many devices nvidia-smi currently exposes, or 0 if none."""
+    try:
+        r = subprocess.run(["nvidia-smi", "-L"], capture_output=True, text=True)
+    except OSError:
+        return 0
+    if r.returncode != 0:
+        return 0
+    return sum(1 for line in r.stdout.splitlines() if line.startswith("GPU "))
+
+
+def runAllGpus():
+    """One supervisor per visible GPU. RunPod MIG boxes need this; systemd
+    already starts worker@N on EC2, so this is the no-systemd path."""
+    n = visibleGpuCount()
+    if n <= 1:
+        return Worker().run()
+    log("ECC_ALL_GPUS=1: starting %d workers" % n)
+    procs = []
+    for gpu in range(n):
+        env = dict(os.environ)
+        env["ECC_GPU"] = str(gpu)
+        env.pop("ECC_ALL_GPUS", None)
+        procs.append(subprocess.Popen([sys.executable, "-u", os.path.abspath(__file__)], env=env))
+
+    def stop(_signo=None, _frame=None):
+        for proc in procs:
+            if proc.poll() is None:
+                try:
+                    proc.send_signal(signal.SIGTERM)
+                except OSError:
+                    pass
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    rc = 0
+    for proc in procs:
+        got = proc.wait()
+        if got:
+            rc = got
+    return rc
+
+
 if __name__ == "__main__":
     try:
+        if os.environ.get("ECC_ALL_GPUS", "").strip() == "1":
+            sys.exit(runAllGpus())
         sys.exit(Worker().run())
     except Exception as e:
         log("fatal: %s" % e)

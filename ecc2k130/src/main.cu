@@ -19,6 +19,7 @@
 #include "../include/curveparams.h"
 #include "../include/kernel.h"
 #include "../include/solver.h"
+#include "../include/durable.h"
 
 #ifndef ECC_NO_CUDA
 #include <cuda_runtime.h>
@@ -53,6 +54,7 @@ struct DpFileRecord {
     unsigned long long seed;
     unsigned long long canon[3];
 };
+static_assert(sizeof(DpFileRecord) == 32, "corpus records must remain 32 bytes");
 
 // Corpus v2: the same point, plus the witness that makes it payable.
 //
@@ -113,9 +115,10 @@ struct Options {
     bool test = false;
     bool polyBasis = false;
     bool selfCheck = false;
+    bool refEngine = false;
     unsigned dpCap = 1u << 16;
     int device = 0;
-    int verify = 8;
+    int verify = 0;
     std::string dpFile;
     std::vector<std::string> loadFiles;
     unsigned long long loadMax = 0;
@@ -183,7 +186,8 @@ struct HostEngine {
 #endif
     }
     std::vector<DpRecord> dp;
-    unsigned dpCount = 0;
+    unsigned dpCount[3] = {0, 0, 0};
+    bool restartPending = false;
     WalkParams<W> P;
     std::vector<u64> px, py, qx, qy;
 
@@ -216,7 +220,7 @@ struct HostEngine {
         P.dead = dead.data();
         P.counts = counts.data();
         P.dp = dp.data();
-        P.dpCount = &dpCount;
+        P.dpCount = dpCount;
         P.dpCap = o.dpCap;
         P.consts.px = px.data();
         P.consts.py = py.data();
@@ -251,11 +255,13 @@ struct HostEngine {
     void synchronize() const {}
 
     unsigned fetch(std::vector<DpRecord> &out) {
-        const unsigned n = dpCount;
+        const unsigned n = dpCount[0];
+        const bool exhausted = dpCount[2] != 0;
+        restartPending = dpCount[1] != 0;
         const unsigned m = n < P.dpCap ? n : P.dpCap;
         out.assign(dp.begin(), dp.begin() + m);
-        dpCount = 0;
-        return n;
+        dpCount[0] = dpCount[1] = dpCount[2] = 0;
+        return exhausted ? ECC_SEED_EXHAUSTED : n;
     }
 
     bool save(const char *path, u64 iterBase, unsigned runId) const {
@@ -278,12 +284,12 @@ struct HostEngine {
         ok = ok && fwrite(counts.data(), sizeof(W), counts.size(), f) == counts.size();
         ok = ok && fwrite(seed.data(), sizeof(u64), seed.size(), f) == seed.size();
         ok = ok && fwrite(startIter.data(), sizeof(u64), startIter.size(), f) == startIter.size();
-        ok = ok && fflush(f) == 0;
-        fclose(f);
+        ok = ok && durableFlush(f);
+        if (fclose(f) != 0) ok = false;
         if (!ok) { remove(tmp.c_str()); return false; }
         // rename last so a checkpoint is either the old one or the new one,
         // never a half-written file
-        return rename(tmp.c_str(), path) == 0;
+        return rename(tmp.c_str(), path) == 0 && syncParent(path);
     }
 
     bool restore(const char *path, u64 *iterBase, unsigned runId) {
@@ -307,8 +313,182 @@ struct HostEngine {
     }
 
     const char *name() const { return "cpu"; }
-    bool needsReseed() const { return false; }
+    bool needsReseed() const { return restartPending; }
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
+};
+
+// ---------------------------------------------------------------------------
+// reference backend
+// ---------------------------------------------------------------------------
+// A scalar engine on the reference arithmetic, walking with whichever
+// iteration the build selects.  It exists to run the whole pipeline -- seeds,
+// distinguished points, collision, resolution -- on the toy curves with a
+// handful of walks, where the planted logarithm says whether the walk and its
+// resolver agree and the iteration count can be compared between walks on
+// identical seeds.  Under ECC_WALK_TABLE it is the only non-packed engine, the
+// bitsliced kernels implementing sigma^j + 1 only; otherwise --ref selects it.
+// It is slow; it checkpoints so that the campaign's certification suite can
+// exercise resume on it.
+template <class Cfg>
+struct RefEngine {
+    typedef Ref<Cfg> R;
+    typedef typename R::Point Point;
+    static const int M = Cfg::M;
+    static const int BATCH = ECC_BATCH;
+    struct Lane { Point p; u64 seed, startIter, hist; unsigned dead; };
+
+    std::vector<Lane> lanes;
+    std::vector<DpRecord> dp;
+    unsigned dpCount[3] = {0, 0, 0};
+    bool restartPending = false;
+    const Solver<Cfg> *sol = nullptr;
+    int threads = 0, steps = 0, dpWeight = 0;
+    unsigned runId = 0, dpCap = 0;
+    u64 maxIters = 0;
+
+    static int autoThreads(int) {
+#ifdef _OPENMP
+        return omp_get_max_threads();
+#else
+        return 1;
+#endif
+    }
+    void start(size_t id, u64 seed, u64 iterBase) {
+        Lane &l = lanes[id];
+        l.seed = seed;
+        l.p = R::startPoint(seed, sol->basis, sol->target, 0, sol->ell, sol->spow);
+        l.startIter = iterBase;
+        l.hist = ECC_HIST_EMPTY;
+        l.dead = 0;
+    }
+    void setup(const Options &o, const unsigned long long *, const unsigned long long *,
+               const unsigned long long *, const unsigned long long *) {
+        threads = o.threads; steps = o.steps; dpWeight = o.dpWeight; runId = o.runId;
+        maxIters = o.maxIters; dpCap = o.dpCap;
+        lanes.resize(size_t(threads) * BATCH);
+        dp.assign(o.dpCap, DpRecord());
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+        for (long id = 0; id < (long)lanes.size(); ++id) start(id, eccSeedFor(runId, id), 0);
+    }
+    void launch(u64 iterBase) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(dynamic, 16)
+#endif
+        for (long id = 0; id < (long)lanes.size(); ++id) {
+            Lane &l = lanes[id];
+            for (int step = 0; step < steps && !l.dead; ++step) {
+                const u64 now = iterBase + step;
+                const int hw = R::weight(l.p.x);
+                if (hw <= dpWeight) {
+                    if ((l.seed & 0xffffull) == 0xffffull) eccAtomicInc(dpCount + 2);
+                    const unsigned dest = eccAtomicInc(dpCount);
+                    if (dest < dpCap) {
+                        DpRecord rec;
+                        rec.seed = l.seed;
+                        rec.iters = now - l.startIter;
+                        for (int i = 0; i < 3; ++i) { rec.x[i] = l.p.x.v[i]; rec.y[i] = l.p.y.v[i]; }
+                        dp[dest] = rec;
+                    }
+                    l.dead = 1;
+                    break;
+                }
+                if (maxIters && now % ECC_GUARD_PERIOD == 0 && now - l.startIter >= maxIters) {
+                    if ((l.seed & 0xffffull) == 0xffffull) eccAtomicInc(dpCount + 2);
+                    l.dead = 1;
+                    eccAtomicInc(dpCount + 1);
+                    break;
+                }
+#if ECC_WALK_TABLE
+                l.p = sol->walk.step(l.p, hw, &l.hist, 0, 0, sol->ell, sol->spow);
+#else
+                l.p = R::step(l.p, hw);
+#endif
+            }
+        }
+    }
+    void reseed(u64 iterBase) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+        for (long id = 0; id < (long)lanes.size(); ++id)
+            if (lanes[id].dead) start(id, lanes[id].seed + 1, iterBase);
+        restartPending = false;
+    }
+    void synchronize() const {}
+    unsigned fetch(std::vector<DpRecord> &out) {
+        const unsigned n = dpCount[0];
+        const bool exhausted = dpCount[2] != 0;
+        restartPending = dpCount[1] != 0;
+        const unsigned m = n < dpCap ? n : dpCap;
+        out.assign(dp.begin(), dp.begin() + m);
+        dpCount[0] = dpCount[1] = dpCount[2] = 0;
+        return exhausted ? ECC_SEED_EXHAUSTED : n;
+    }
+    // One fixed-width record per lane: both coordinates as three words each,
+    // the seed, the start iteration, the cycle history and the dead flag.  The
+    // header's lane width is 1 and its version 2, so a bitsliced checkpoint of
+    // the same curve and thread count is refused rather than misread.
+    static const size_t LANE_WORDS = 3 + 3 + 1 + 1 + 1 + 1;
+    static const unsigned CKPT_VERSION = 2u;
+    void pack(std::vector<u64> &buf) const {
+        buf.resize(lanes.size() * LANE_WORDS);
+        for (size_t id = 0; id < lanes.size(); ++id) {
+            const Lane &l = lanes[id];
+            u64 *w = &buf[id * LANE_WORDS];
+            for (int i = 0; i < 3; ++i) { w[i] = l.p.x.v[i]; w[3 + i] = l.p.y.v[i]; }
+            w[6] = l.seed; w[7] = l.startIter; w[8] = l.hist; w[9] = l.dead;
+        }
+    }
+    void unpack(const std::vector<u64> &buf) {
+        for (size_t id = 0; id < lanes.size(); ++id) {
+            Lane &l = lanes[id];
+            const u64 *w = &buf[id * LANE_WORDS];
+            for (int i = 0; i < 3; ++i) { l.p.x.v[i] = w[i]; l.p.y.v[i] = w[3 + i]; }
+            l.seed = w[6]; l.startIter = w[7]; l.hist = w[8]; l.dead = (unsigned)w[9];
+        }
+    }
+    bool save(const char *path, u64 iterBase, unsigned runId) const {
+        const std::string tmp = std::string(path) + ".tmp";
+        FILE *f = fopen(tmp.c_str(), "wb");
+        if (!f) return false;
+        CkptHeader h;
+        memcpy(h.magic, "ECC2K130", 8);
+        h.version = CKPT_VERSION;
+        h.m = (unsigned)M;
+        h.threads = (unsigned)threads;
+        h.batch = (unsigned)BATCH;
+        h.lanes = 1u;
+        h.runId = runId;
+        h.iterBase = iterBase;
+        std::vector<u64> buf;
+        pack(buf);
+        bool ok = fwrite(&h, sizeof h, 1, f) == 1;
+        ok = ok && fwrite(buf.data(), sizeof(u64), buf.size(), f) == buf.size();
+        ok = ok && durableFlush(f);
+        if (fclose(f) != 0) ok = false;
+        if (!ok) { remove(tmp.c_str()); return false; }
+        return rename(tmp.c_str(), path) == 0 && syncParent(path);
+    }
+    bool restore(const char *path, u64 *iterBase, unsigned runId) {
+        FILE *f = fopen(path, "rb");
+        if (!f) return false;
+        CkptHeader h;
+        std::vector<u64> buf(lanes.size() * LANE_WORDS);
+        bool ok = fread(&h, sizeof h, 1, f) == 1 &&
+                  ckptHeaderMatches(h, M, threads, BATCH, 1, runId, CKPT_VERSION) &&
+                  ckptPayloadIsWhole(f, buf.size() * sizeof(u64));
+        ok = ok && fread(buf.data(), sizeof(u64), buf.size(), f) == buf.size();
+        fclose(f);
+        if (!ok) return false;
+        unpack(buf);
+        *iterBase = h.iterBase;
+        return true;
+    }
+    const char *name() const { return ECC_WALK_TABLE ? "reference-table-walk" : "reference"; }
+    bool needsReseed() const { return restartPending; }
+    u64 walksPerLaunch() const { return (u64)lanes.size(); }
 };
 
 #ifndef ECC_NO_CUDA
@@ -323,6 +503,7 @@ struct CudaEngine {
     static const int BATCH = ECC_BATCH;
     WalkParams<W> P;
     std::vector<DpRecord> staging;
+    bool restartPending = false;
 
     // Bytes of device memory one walk thread needs: x, y and pchain are a field
     // element per slot, plus the per-lane bookkeeping.
@@ -393,8 +574,8 @@ struct CudaEngine {
         CUDA_CHECK(cudaMalloc(&P.seed, lw));
         CUDA_CHECK(cudaMalloc(&P.startIter, lw));
         CUDA_CHECK(cudaMalloc(&P.dp, (size_t)o.dpCap * sizeof(DpRecord)));
-        CUDA_CHECK(cudaMalloc(&P.dpCount, sizeof(unsigned)));
-        CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof(unsigned)));
+        CUDA_CHECK(cudaMalloc(&P.dpCount, 3 * sizeof(unsigned)));
+        CUDA_CHECK(cudaMemset(P.dpCount, 0, 3 * sizeof(unsigned)));
         cudaFuncAttributes attrs;
         CUDA_CHECK(cudaFuncGetAttributes(&attrs, eccWalkKernel<Cfg, W>));
         cudaDeviceProp prop;
@@ -447,13 +628,15 @@ struct CudaEngine {
 
     unsigned fetch(std::vector<DpRecord> &out) {
         CUDA_CHECK(cudaDeviceSynchronize());
-        unsigned n = 0;
-        CUDA_CHECK(cudaMemcpy(&n, P.dpCount, sizeof n, cudaMemcpyDeviceToHost));
+        unsigned counts[3] = {0, 0, 0};
+        CUDA_CHECK(cudaMemcpy(counts, P.dpCount, sizeof counts, cudaMemcpyDeviceToHost));
+        const unsigned n = counts[0];
+        restartPending = counts[1] != 0;
         const unsigned m = n < P.dpCap ? n : P.dpCap;
         out.resize(m);
         if (m) CUDA_CHECK(cudaMemcpy(out.data(), P.dp, (size_t)m * sizeof(DpRecord), cudaMemcpyDeviceToHost));
-        if (n) CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof(unsigned)));
-        return n;
+        if (n || restartPending || counts[2]) CUDA_CHECK(cudaMemset(P.dpCount, 0, sizeof counts));
+        return counts[2] ? ECC_SEED_EXHAUSTED : n;
     }
 
     virtual ~CudaEngine() = default;
@@ -479,6 +662,10 @@ struct CudaEngine {
     // live device state; the default backend already stores checkpoint words.
     virtual void exportCheckpointField(std::vector<W> &) const {}
     virtual void importCheckpointField(std::vector<W> &) const {}
+    // Per-lane 64-bit arrays in the checkpoint, in order: seed, startIter,
+    // and whatever a backend adds (the table walk's step history).
+    virtual int laneArrayCount() const { return 2; }
+    virtual u64 *laneArray(int i) const { return i ? P.startIter : P.seed; }
 
     bool save(const char *path, u64 iterBase, unsigned runId) const {
         CUDA_CHECK(cudaDeviceSynchronize());
@@ -517,15 +704,14 @@ struct CudaEngine {
             CUDA_CHECK(cudaMemcpy(cbuf.data(), P.counts, cbuf.size() * sizeof(W), cudaMemcpyDeviceToHost));
             ok = fwrite(cbuf.data(), sizeof(W), cbuf.size(), f) == cbuf.size();
         }
-        const u64 *lanes[2] = {P.seed, P.startIter};
-        for (int i = 0; i < 2 && ok; ++i) {
-            CUDA_CHECK(cudaMemcpy(lbuf.data(), lanes[i], lbuf.size() * sizeof(u64), cudaMemcpyDeviceToHost));
+        for (int i = 0; i < laneArrayCount() && ok; ++i) {
+            CUDA_CHECK(cudaMemcpy(lbuf.data(), laneArray(i), lbuf.size() * sizeof(u64), cudaMemcpyDeviceToHost));
             ok = fwrite(lbuf.data(), sizeof(u64), lbuf.size(), f) == lbuf.size();
         }
-        ok = ok && fflush(f) == 0;
-        fclose(f);
+        ok = ok && durableFlush(f);
+        if (fclose(f) != 0) ok = false;
         if (!ok) { remove(tmp.c_str()); return false; }
-        return rename(tmp.c_str(), path) == 0;
+        return rename(tmp.c_str(), path) == 0 && syncParent(path);
     }
 
     bool restore(const char *path, u64 *iterBase, unsigned runId) {
@@ -533,7 +719,7 @@ struct CudaEngine {
         if (!f) return false;
         CkptHeader h;
         const size_t payload = (2 * fieldCount() + slotCount() + countElems()) * sizeof(W) +
-                               2 * laneCount() * sizeof(u64);
+                               size_t(laneArrayCount()) * laneCount() * sizeof(u64);
         bool ok = fread(&h, sizeof h, 1, f) == 1 &&
                   ckptHeaderMatches(h, M, P.threads, BATCH, checkpointLanes(), runId, checkpointVersion()) &&
                   ckptPayloadIsWhole(f, payload);
@@ -561,10 +747,9 @@ struct CudaEngine {
             ok = fread(cbuf.data(), sizeof(W), cbuf.size(), f) == cbuf.size();
             if (ok) CUDA_CHECK(cudaMemcpy(P.counts, cbuf.data(), cbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
         }
-        u64 *lanes[2] = {P.seed, P.startIter};
-        for (int i = 0; i < 2 && ok; ++i) {
+        for (int i = 0; i < laneArrayCount() && ok; ++i) {
             ok = ok && fread(lbuf.data(), sizeof(u64), lbuf.size(), f) == lbuf.size();
-            if (ok) CUDA_CHECK(cudaMemcpy(lanes[i], lbuf.data(), lbuf.size() * sizeof(u64), cudaMemcpyHostToDevice));
+            if (ok) CUDA_CHECK(cudaMemcpy(laneArray(i), lbuf.data(), lbuf.size() * sizeof(u64), cudaMemcpyHostToDevice));
         }
         fclose(f);
         if (ok) *iterBase = h.iterBase;
@@ -572,7 +757,7 @@ struct CudaEngine {
     }
 
     const char *name() const { return "cuda"; }
-    bool needsReseed() const { return false; }
+    bool needsReseed() const { return restartPending; }
     u64 walksPerLaunch() const { return (u64)P.threads * BATCH * LANES; }
 };
 #include "../include/packedengine.cuh"
@@ -680,9 +865,53 @@ static void testField(Rng &rng) {
 }
 
 template <class Cfg>
-static void testOrbit(Rng &rng, const U192 &ell) {
+static void testOrbit(Rng &rng, const Solver<Cfg> &sol) {
     typedef Ref<Cfg> R;
+    const U192 &ell = sol.ell;
     bool okFrob = true, okNeg = true, okWeight = true, okTrace = true;
+#if ECC_WALK_TABLE
+    if (!TableWalk<Cfg>::applicable()) {
+        printf("  %-46s (table walk needs a type-II normal basis)\n", "  ... not applicable for GF(2^m) in a polynomial basis");
+        return;
+    }
+    // The table walk's class covariance rests on three identities of the
+    // coordinate functions (tablewalk.h); check them, then the step itself
+    // with an empty history and with a history that trips the cycle rule.
+    bool okPhase = true, okEpsFrob = true, okEpsNeg = true, okTables = sol.walk.consts.consistent();
+    for (int t = 0; t < 64; ++t) {
+        const typename R::Point p = randomPoint<Cfg>(rng, ell);
+        const int hw = R::weight(p.x);
+        const int c = 1 + (int)(rng.next() % (Cfg::M - 1));
+        const typename R::Point pc = R::frob(p, c), pn = R::neg(p);
+        const typename R::Elem xn = R::nbCoords(p.x), yn = R::nbCoords(p.y);
+        const typename R::Elem xc = R::nbCoords(pc.x), yc = R::nbCoords(pc.y), ynn = R::nbCoords(pn.y);
+        const int k = sol.walk.phase(xn, hw), kc = sol.walk.phase(xc, hw);
+        if (kc != (k + c) % Cfg::M) okPhase = false;
+        if (sol.walk.negationBit(xc, yc, kc) != sol.walk.negationBit(xn, yn, k)) okEpsFrob = false;
+        if (sol.walk.negationBit(xn, ynn, k) != 1 - sol.walk.negationBit(xn, yn, k)) okEpsNeg = false;
+        u64 h0 = ECC_HIST_EMPTY, h1 = h0, h2 = h0;
+        const typename R::Point f = sol.walk.step(p, hw, &h0, 0, 0, ell, sol.spow);
+        if (!R::eq(sol.walk.step(pc, R::weight(pc.x), &h1, 0, 0, ell, sol.spow), R::frob(f, c))) okFrob = false;
+        if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &h2, 0, 0, ell, sol.spow), R::neg(f))) okNeg = false;
+        // Trails meeting as R and sigma^c(-R) carry conjugate histories; the
+        // cycle rule must fire for both or neither.
+        const unsigned tag = unsigned(h0 & 0xFFFF);
+        const u64 undo = eccHistPush(ECC_HIST_EMPTY, tag ^ ECC_TAG_EPS);
+        const u64 undoC = eccHistPush(ECC_HIST_EMPTY, unsigned(h1 & 0xFFFF) ^ ECC_TAG_EPS);
+        const u64 undoN = eccHistPush(ECC_HIST_EMPTY, unsigned(h2 & 0xFFFF) ^ ECC_TAG_EPS);
+        u64 g0 = undo, g1 = undoC, g2 = undoN;
+        const typename R::Point fa = sol.walk.step(p, hw, &g0, 0, 0, ell, sol.spow);
+        if (R::eq(fa, f)) okFrob = false;   // the rule did not fire
+        if (!R::eq(sol.walk.step(pc, R::weight(pc.x), &g1, 0, 0, ell, sol.spow), R::frob(fa, c))) okFrob = false;
+        if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &g2, 0, 0, ell, sol.spow), R::neg(fa))) okNeg = false;
+        if (R::weight(pc.x) != hw) okWeight = false;
+        if (R::trace(p.x) != 0) okTrace = false;
+    }
+    report("coordinate logarithm table is a bijection", okTables);
+    report("Frobenius phase advances by one under sigma", okPhase);
+    report("negation bit is sigma-invariant", okEpsFrob);
+    report("negation bit flips under negation", okEpsNeg);
+#else
     for (int t = 0; t < 8; ++t) {
         const typename R::Point p = randomPoint<Cfg>(rng, ell);
         const int hw = R::weight(p.x);
@@ -695,6 +924,7 @@ static void testOrbit(Rng &rng, const U192 &ell) {
         if (R::weight(pc.x) != hw) okWeight = false;
         if (R::trace(p.x) != 0) okTrace = false;
     }
+#endif
     report("iteration commutes with Frobenius", okFrob);
     report("iteration commutes with negation", okNeg);
     report("weight is constant on an orbit", okWeight);
@@ -815,29 +1045,38 @@ static void testSolveAlgebra(Rng &rng, const Solver<Cfg> &base) {
     if (u192_is_zero(knownK)) knownK = u192_from(7);
     sol.target = R::scalarMul(sol.basis, knownK);
     bool ok = true;
+    auto randomScalar = [&]() {
+        U192 r = u192_zero();
+        r.v[0] = rng.next();
+        r.v[1] = rng.next() & 0xFFFF;
+        return mod_reduce(r, sol.ell);
+    };
     for (int t = 0; t < 4 && ok; ++t) {
         typename Solver<Cfg>::WalkResult A, B;
         A.ok = B.ok = true;
+        // Endpoints are a P + b Q.  The sigma^j + 1 walk has b = mu, a product
+        // of (1 + s^j); the table walk's b is an arbitrary residue.
+#if ECC_WALK_TABLE
+        A.b = randomScalar();
+        B.b = randomScalar();
+#else
         for (int j = 0; j < 8; ++j) {
             A.counts[j] = rng.next() % 7;
             B.counts[j] = rng.next() % 7;
         }
-        const U192 muA = sol.multiplier(A.counts), muB = sol.multiplier(B.counts);
-        U192 beta = u192_zero();
-        beta.v[0] = rng.next();
-        beta.v[1] = rng.next() & 0xFFFF;
-        beta = mod_reduce(beta, sol.ell);
+        A.b = sol.multiplier(A.counts);
+        B.b = sol.multiplier(B.counts);
+#endif
+        B.a = randomScalar();
         const int c = (int)(rng.next() % Cfg::M);
         const int eps = (rng.next() & 1) ? 1 : -1;
         U192 sc = sol.spow[c];
         if (eps < 0) sc = mod_neg(sc, sol.ell);
-        // choose alpha so that  mu_A (alpha + k) = eps s^c mu_B (beta + k)
-        const U192 rhs = mod_mul(mod_mul(sc, muB, sol.ell), mod_add(beta, knownK, sol.ell), sol.ell);
-        const U192 alpha = mod_sub(mod_mul(rhs, mod_inv(muA, sol.ell), sol.ell), knownK, sol.ell);
-        A.alpha0 = alpha;
-        B.alpha0 = beta;
-        A.endPoint = R::scalarMul(R::addPt(R::scalarMul(sol.basis, alpha), sol.target), muA);
-        B.endPoint = R::scalarMul(R::addPt(R::scalarMul(sol.basis, beta), sol.target), muB);
+        // choose a_A so that  a_A + b_A k = eps s^c (a_B + b_B k)
+        const U192 rhs = mod_mul(sc, mod_add(B.a, mod_mul(B.b, knownK, sol.ell), sol.ell), sol.ell);
+        A.a = mod_sub(rhs, mod_mul(A.b, knownK, sol.ell), sol.ell);
+        A.endPoint = R::addPt(R::scalarMul(sol.basis, A.a), R::scalarMul(sol.target, A.b));
+        B.endPoint = R::addPt(R::scalarMul(sol.basis, B.a), R::scalarMul(sol.target, B.b));
         if (!R::eq(A.endPoint, eps > 0 ? R::frob(B.endPoint, c) : R::neg(R::frob(B.endPoint, c)))) {
             ok = false;
             break;
@@ -858,7 +1097,56 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     std::vector<DpRecord> recs;
     u64 iterBase = 0;
     u64 totalDp = 0, lost = 0, verified = 0, verifyBudget = (u64)(o.verify < 0 ? 0 : o.verify);
-    bool warnedLost = false;
+    CorpusOutput output;
+    if (eng.walksPerLaunch() >= ECC_SEED_EXHAUSTED) {
+        fprintf(stderr, "too many walks for the report counter or seed namespace\n");
+        return 1;
+    }
+    // A fresh corpus gets the v2 header; an existing one keeps whatever format
+    // it already is, because appending v2 records to a v1 stream would produce
+    // a file neither reader can frame.  Refusing is the only safe answer: the
+    // witness has to go somewhere the reader will find it.
+    const bool dpOutV2 = ECC_WITNESS != 0;
+    if (!o.dpFile.empty()) {
+        // Read the file's shape from a separate handle rather than from the
+        // append handle.  A stream opened "ab" cannot be read at all, and its
+        // ftell is an implementation-defined position rather than a length
+        // until the first write -- on the library that reports 0 that would
+        // put a v2 header in the middle of an existing corpus and mis-frame
+        // everything after it.
+        long long probed = 0;
+        bool probedV2 = false;
+        FILE *probe = fopen(o.dpFile.c_str(), "rb");
+        if (probe) {
+            struct stat ps;
+            if (fstat(fileno(probe), &ps) == 0 && S_ISREG(ps.st_mode))
+                probed = (long long)ps.st_size;
+            probedV2 = dpFileIsV2(probe);
+            fclose(probe);
+        }
+        if (probed != 0 && probedV2 != dpOutV2) {
+            fprintf(stderr, "refusing to append %s records to a %s corpus: %s\n",
+                    dpOutV2 ? "v2" : "v1", probedV2 ? "v2" : "v1", o.dpFile.c_str());
+            return 2;
+        }
+        if (!output.openFile(o.dpFile, dpOutV2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord),
+                             dpOutV2 ? sizeof(DpFileHeader) : 0)) {
+            fprintf(stderr, "persistence failure: cannot lock/open aligned regular corpus %s\n", o.dpFile.c_str());
+            return 8;
+        }
+        // The size measured under the lock decides the header, not the probe
+        // above: the probe runs before the lock exists.
+        if (dpOutV2 && output.bytes == 0) {
+            DpFileHeader h;
+            memcpy(h.magic, DP_MAGIC_V2, sizeof h.magic);
+            h.version = 2u;
+            h.recordBytes = (unsigned)sizeof(DpFileRecordV2);
+            if (fwrite(&h, sizeof h, 1, output.file) != 1) {
+                fprintf(stderr, "persistence failure: cannot write the corpus header to %s\n", o.dpFile.c_str());
+                return 8;
+            }
+        }
+    }
 
     // Reload every corpus file first, so a collision against work done by an
     // earlier run or another worker is found the moment it happens rather than
@@ -897,13 +1185,27 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     for (size_t ci = 0; ci < corpus.size(); ++ci) {
         if (o.loadMax && reloaded >= o.loadMax) { skippedFiles = corpus.size() - ci; break; }
         FILE *in = fopen(corpus[ci].c_str(), "rb");
-        if (!in) continue;
-        // A single --dp-file is append-only across passes, so the newest
-        // records sit at the end.  When the remaining cap is smaller than
-        // the file, start there rather than keeping the oldest prefix.
+        struct stat inputStat;
+        if (!in || fstat(fileno(in), &inputStat) != 0 || !S_ISREG(inputStat.st_mode)) {
+            if (in) fclose(in);
+            fprintf(stderr, "persistence failure: missing, non-regular or truncated corpus %s\n", corpus[ci].c_str());
+            return 8;
+        }
+        // Frame the file before judging its length: a v2 corpus is a header
+        // plus 72-byte records, so a v1 record-size check would call every
+        // valid v2 corpus truncated.
         const bool v2 = dpFileIsV2(in);
         const long base = v2 ? (long)sizeof(DpFileHeader) : 0;
         const size_t recBytes = v2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord);
+        if (inputStat.st_size < base ||
+            (unsigned long long)(inputStat.st_size - base) % recBytes != 0) {
+            fclose(in);
+            fprintf(stderr, "persistence failure: missing, non-regular or truncated corpus %s\n", corpus[ci].c_str());
+            return 8;
+        }
+        // A single --dp-file is append-only across passes, so the newest
+        // records sit at the end.  When the remaining cap is smaller than
+        // the file, start there rather than keeping the oldest prefix.
         if (o.loadMax && reloaded < o.loadMax && fseek(in, 0, SEEK_END) == 0) {
             const long sz = ftell(in) - base;
             unsigned long long skip = 0;
@@ -954,7 +1256,9 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             }
             printf("  unusable (%s)\n", why.c_str());
         }
+        const bool readFailed = ferror(in) != 0;
         fclose(in);
+        if (readFailed) return 8;
     }
     if (reloaded) {
         printf("reloaded %zu points from %zu file(s), %zu distinct orbits\n",
@@ -981,52 +1285,49 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         }
     }
 
+    if (o.verify > 0) {
+        // A normal-cutoff replay is a 2^28–2^32-step scalar walk on the CPU.
+        // The next device launch is queued first so the GPU is not idle for it.
+        printf("WARNING: --verify %d replays reports on the CPU; campaign "
+               "collection uses --verify 0 so a cutoff-32 trail cannot stall the GPU\n",
+               o.verify);
+        fflush(stdout);
+    }
+
     const u64 timedIterBase = iterBase;
     const double t0 = nowSeconds();
     double lastPrint = t0;
     double lastCkpt = t0;
-    FILE *dpOut = o.dpFile.empty() ? NULL : fopen(o.dpFile.c_str(), "ab");
-    // A fresh corpus gets the v2 header; an existing one keeps whatever format
-    // it already is, because appending v2 records to a v1 stream would produce
-    // a file neither reader can frame.  Refusing is the only safe answer: the
-    // witness has to go somewhere the reader will find it.
-    const bool dpOutV2 = ECC_WITNESS != 0;
-    if (dpOut) {
-        // Read the file's shape from a separate handle rather than from this
-        // one.  A stream opened "ab" has an implementation-defined position
-        // until the first write, so ftell here is not a length -- on the
-        // library that reports 0 it would put a v2 header in the middle of an
-        // existing corpus and mis-frame everything after it.
-        long existing = 0;
-        bool existingV2 = false;
-        FILE *probe = fopen(o.dpFile.c_str(), "rb");
-        if (probe) {
-            if (fseek(probe, 0, SEEK_END) == 0) existing = ftell(probe);
-            rewind(probe);
-            existingV2 = dpFileIsV2(probe);
-            fclose(probe);
-        }
-        if (existing == 0) {
-            if (dpOutV2) {
-                DpFileHeader h;
-                memcpy(h.magic, DP_MAGIC_V2, sizeof h.magic);
-                h.version = 2u;
-                h.recordBytes = (unsigned)sizeof(DpFileRecordV2);
-                fwrite(&h, sizeof h, 1, dpOut);
-            }
-        } else if (existingV2 != dpOutV2) {
-            printf("refusing to append %s records to a %s corpus: %s\n",
-                   dpOutV2 ? "v2" : "v1", existingV2 ? "v2" : "v1", o.dpFile.c_str());
-            fclose(dpOut);
-            return 2;
-        }
-    }
+    FILE *dpOut = output.file;
+    bool nextInFlight = false;
     for (long launch = 0; o.launches == 0 || launch < o.launches; ++launch) {
-        eng.launch(iterBase);
+        if (!nextInFlight) eng.launch(iterBase);
+        nextInFlight = false;
         const unsigned n = eng.fetch(recs);
         iterBase += (u64)o.steps;
+        if (n == ECC_SEED_EXHAUSTED) {
+            fprintf(stderr, "SEED EXHAUSTED: refusing counter wrap into another walk; retire this run-id\n");
+            return 9;
+        }
+        if (n > recs.size()) {
+            fprintf(stderr, "DP OVERFLOW: %u reports, capacity %zu; checkpoint NOT advanced. Increase --dp-cap or lower --dp-weight.\n", n, recs.size());
+            return 7;
+        }
         if (n || eng.needsReseed()) eng.reseed(iterBase);
-        if (n > recs.size()) lost += n - recs.size();
+
+        // Start the next walk before host DP handling. fetch() already copied
+        // this launch's reports, so the next kernel cannot overwrite them.
+        // Skip when a checkpoint is due: save() captures walk state and must
+        // not race an in-flight launch.
+        const double nowBeforeHost = nowSeconds();
+        const bool leaving = gStop || (o.launches && launch + 1 == o.launches);
+        const bool ckptDue = !o.ckptFile.empty() &&
+                             (leaving || nowBeforeHost - lastCkpt > o.ckptSeconds);
+        if (!leaving && !ckptDue) {
+            eng.launch(iterBase);
+            nextInFlight = true;
+        }
+
         totalDp += recs.size();
         for (size_t i = 0; i < recs.size(); ++i) {
             const DpRecord &rec = recs[i];
@@ -1069,6 +1370,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             }
             if (dpOut) {
                 const typename R::Elem cx = R::canonical(R::fromLimbs(rec.x));
+                bool wrote;
                 if (dpOutV2) {
                     DpFileRecordV2 fr;
                     fr.seed = rec.seed;
@@ -1077,14 +1379,18 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                     fr.canon[1] = cx.v[1];
                     fr.canon[2] = cx.v[2];
                     for (int k = 0; k < ECC_JCOUNT; ++k) fr.counts[k] = rec.counts[k];
-                    fwrite(&fr, sizeof fr, 1, dpOut);
+                    wrote = fwrite(&fr, sizeof fr, 1, dpOut) == 1;
                 } else {
                     DpFileRecord fr;
                     fr.seed = rec.seed;
                     fr.canon[0] = cx.v[0];
                     fr.canon[1] = cx.v[1];
                     fr.canon[2] = cx.v[2];
-                    fwrite(&fr, sizeof fr, 1, dpOut);
+                    wrote = fwrite(&fr, sizeof fr, 1, dpOut) == 1;
+                }
+                if (!wrote) {
+                    fprintf(stderr, "persistence failure: corpus write; checkpoint NOT advanced\n");
+                    return 8;
                 }
             }
             typename Solver<Cfg>::Entry other;
@@ -1101,6 +1407,11 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                 printf("  unusable (%s), continuing\n", why.c_str());
                 continue;
             }
+            if (nextInFlight) {
+                eng.synchronize();
+                iterBase += (u64)o.steps;
+                nextInFlight = false;
+            }
             printf("  recomputed both walks in %.2f s\n", nowSeconds() - tr);
             printf("  k = %s\n", u192_to_dec(k).c_str());
             printf("  verified [k]P == Q\n");
@@ -1110,20 +1421,28 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             printf("  solved after %llu iterations of %llu walks in %.2f s (%llu distinguished points)\n",
                    (unsigned long long)iterBase, (unsigned long long)eng.walksPerLaunch(), el,
                    (unsigned long long)totalDp);
-            if (dpOut) { fflush(dpOut); fclose(dpOut); }
-            if (!o.ckptFile.empty()) eng.save(o.ckptFile.c_str(), iterBase, o.runId);
+            if (!output.closeFile()) return 8;
+            if (!o.ckptFile.empty() && !eng.save(o.ckptFile.c_str(), iterBase, o.runId)) return 8;
             return (knownK && !u192_eq(k, *knownK)) ? 4 : 0;
         }
         const double now = nowSeconds();
         // Flush reports and checkpoint on a timer, and always on the way out,
         // so a container stopped by its deadline loses seconds of work rather
         // than hours of it.
-        const bool leaving = gStop || (o.launches && launch + 1 == o.launches);
-        if (dpOut && (leaving || now - lastCkpt > o.ckptSeconds)) fflush(dpOut);
-        if (!o.ckptFile.empty() && (leaving || now - lastCkpt > o.ckptSeconds)) {
-            if (!eng.save(o.ckptFile.c_str(), iterBase, o.runId))
-                printf("warning: could not write checkpoint %s\n", o.ckptFile.c_str());
+        if (dpOut && (leaving || ckptDue || now - lastCkpt > o.ckptSeconds) && !durableFlush(dpOut)) {
+            fprintf(stderr, "persistence failure: corpus flush; checkpoint NOT advanced\n");
+            return 8;
+        }
+        if (ckptDue) {
+            if (!eng.save(o.ckptFile.c_str(), iterBase, o.runId)) {
+                fprintf(stderr, "persistence failure: checkpoint %s\n", o.ckptFile.c_str());
+                return 8;
+            }
             lastCkpt = now;
+            if (!leaving) {
+                eng.launch(iterBase);
+                nextInFlight = true;
+            }
         }
         if (gStop) {
             printf("stopping: %llu iterations of %llu walks, %llu points reported\n",
@@ -1138,17 +1457,6 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                    "  %8llu dropped\n",
                    el, it / el / 1e6, (unsigned long long)it, (unsigned long long)totalDp,
                    (unsigned long long)sol.inserted, (unsigned long long)lost);
-            // A drop is a distinguished point the device found and the host
-            // never saw: real work, computed and thrown away.  It means the
-            // report buffer is too small for the cutoff, which is a setting,
-            // not bad luck -- so say so once rather than leaving it to the
-            // summary line hours later, by which time the run is already lost.
-            if (lost && !warnedLost && lost * 10 > totalDp + lost) {
-                printf("  warning: dropping %.1f%% of reports; --dp-cap %u is too small "
-                       "for this dp weight, raise it or raise --dp-weight\n",
-                       100.0 * (double)lost / (double)(totalDp + lost), o.dpCap);
-                warnedLost = true;
-            }
             fflush(stdout);
             lastPrint = now;
         }
@@ -1159,7 +1467,7 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     const double it = (double)(iterBase - timedIterBase) * (double)eng.walksPerLaunch();
     printf("  finished: %.3f M it/s, %llu distinguished points (%llu verified against the reference, %llu dropped)\n",
            it / el / 1e6, (unsigned long long)totalDp, (unsigned long long)verified, (unsigned long long)lost);
-    if (dpOut) fclose(dpOut);
+    if (!output.closeFile()) return 8;
     return 0;
 }
 
@@ -1172,7 +1480,10 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
     if (o.dpWeight < 0) o.dpWeight = defaultW;
     Solver<Cfg> sol;
     sol.setup(px, py, qx, qy, ellDec, sDec, o.dpWeight,
-              o.maxIters ? o.maxIters : (u64)1 << 40);
+              // Guards are checked on global ECC_GUARD_PERIOD boundaries.
+              // A valid first DP may occur in the bounded overshoot window
+              // after maxIters, so reference replay must include that window.
+              o.maxIters ? o.maxIters + ECC_GUARD_PERIOD - 1 : (u64)1 << 40);
     std::string why;
     if (!sol.checkSetup(&why)) {
         printf("parameter check failed: %s\n", why.c_str());
@@ -1195,7 +1506,7 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
         }
         Rng rng(0x1234567 + Cfg::M);
         testField<Cfg>(rng);
-        testOrbit<Cfg>(rng, sol.ell);
+        testOrbit<Cfg>(rng, sol);
         testStartPoint<Cfg>(rng, sol);
         testWitness<Cfg>(rng, sol);
         testSolveAlgebra<Cfg>(rng, sol);
@@ -1206,6 +1517,7 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
     if (o.packed) {
         if constexpr (Cfg::M == 131) {
             PackedCudaEngine eng;
+            eng.sol = &sol;
             if (o.threads <= 0) o.threads = eng.autoThreads(o.device);
             eng.setup(o, px, py, qx, qy);
             printf("backend %s: %d threads x %d slots x 1 lanes = %llu walks, dp weight %d, %d steps per launch\n",
@@ -1216,6 +1528,23 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
             return 1;
         }
     }
+#endif
+    if (ECC_WALK_TABLE || o.refEngine) {
+        // The bitsliced kernels walk with sigma^j + 1; only the packed
+        // GF(2^131) kernel and the reference implement the table walk.
+        if (ECC_WALK_TABLE && !TableWalk<Cfg>::applicable()) {
+            fprintf(stderr, "the table walk is defined on type-II normal-basis fields only\n");
+            return 1;
+        }
+        RefEngine<Cfg> eng;
+        eng.sol = &sol;
+        if (o.threads <= 0) o.threads = eng.autoThreads(o.device);
+        eng.setup(o, px, py, qx, qy);
+        printf("backend %s: %d threads x %d slots x 1 lanes = %llu walks, dp weight %d, %d steps per launch\n",
+               eng.name(), o.threads, (int)ECC_BATCH, (unsigned long long)eng.walksPerLaunch(), o.dpWeight, o.steps);
+        return runSearch<Cfg>(o, eng, sol, haveK ? &knownK : NULL);
+    }
+#ifndef ECC_NO_CUDA
     CudaEngine<Cfg> eng;
     if (o.preferL1)
         CUDA_CHECK(cudaFuncSetCacheConfig(eccWalkKernel<Cfg, DeviceWord>, cudaFuncCachePreferL1));
@@ -1245,6 +1574,8 @@ static void usage() {
         "  --max-iters N    restart a walk that has run N steps without a report\n"
         "  --run-id R       16-bit salt making seeds unique across processes\n"
         "  --verify N       recompute the first N reported points with the reference\n"
+        "                   (default 0: collection must not stall the GPU on a CPU rewalk)\n"
+        "  --ref            walk on the scalar reference arithmetic (toy curves; slow)\n"
         "  --dp-file F      append distinguished points to F (binary, 32 bytes each)\n"
         "  --load F         preload a corpus file so collisions with earlier runs count\n"
         "  --load-max N     stop reloading after N points (0 = no limit), newest file first\n"
@@ -1277,6 +1608,7 @@ int main(int argc, char **argv) {
         else if (a == "--max-iters" && nx) o.maxIters = strtoull(argv[++i], NULL, 10);
         else if (a == "--run-id" && nx) o.runId = (unsigned)atoi(argv[++i]);
         else if (a == "--verify" && nx) o.verify = atoi(argv[++i]);
+        else if (a == "--ref") o.refEngine = true;
         else if (a == "--dp-cap" && nx) o.dpCap = (unsigned)atoi(argv[++i]);
         else if (a == "--dp-file" && nx) o.dpFile = argv[++i];
         else if (a == "--load" && nx) o.loadFiles.push_back(argv[++i]);
@@ -1294,6 +1626,12 @@ int main(int argc, char **argv) {
     }
     if (o.packed && (o.curve != 131 || o.polyBasis || o.test)) {
         fprintf(stderr, "--packed selects the GF(2^131) CUDA walk; use --verify for device report validation and make test-packed for host arithmetic\n");
+        return 1;
+    }
+    if (o.runId > 65535 || o.steps <= 0 || o.launches < 0 || o.dpCap == 0 ||
+        o.dpWeight < -1 || o.dpWeight > o.curve || !(o.ckptSeconds > 0) ||
+        o.maxIters > ~u64(0) - (ECC_GUARD_PERIOD - 1)) {
+        fprintf(stderr, "invalid run-id, launch, DP or checkpoint parameters\n");
         return 1;
     }
     // The device thread count is left at 0 here on purpose: it depends on the

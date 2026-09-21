@@ -1,11 +1,11 @@
 [
   {
     "path": "EC_Index_Calculus_Performance_Baseline.md",
-    "sha256": "f8e286deca7cf5331eec7e110dcbcb55a4cc2328f65277d23327ccd07cb434b1"
+    "sha256": "69e8c49908007e41c07f7b1de79ecfb84b583b84a3ee8bfc42388e2d0f517071"
   },
   {
     "path": "README.md",
-    "sha256": "b546b082f599e010fe22316e2a33ffe2c03a82c8dc13760a5dee109c7625827f"
+    "sha256": "ef171e04427abbda72c86ccb2b3dfe100e303a4cba36f3460f84c74898c058a1"
   },
   {
     "path": "ec_index_calculus_budget.py",
@@ -194,6 +194,110 @@
   {
     "path": "pilot/source_manifest.json",
     "sha256": "80d73d2869d45376d3bc45b835544d7513d8c11ced7838a5e85efdea600453e6"
+  },
+  {
+    "path": "regression/README.md",
+    "sha256": "936662012566af2a96a125b5ccfea994e241ce59fc87957f8c006c462fba2ea1"
+  },
+  {
+    "path": "regression/RESULTS.md",
+    "sha256": "758ea3098293c099041ea3403020c30ad25f0fa62d814b236d04f8ed76885c35"
+  },
+  {
+    "path": "regression/compare.py",
+    "sha256": "e02f215e7ee5b5a552f8eab8ce49937e1679b63b09365d9a43cfc6c881ad7fff"
+  },
+  {
+    "path": "regression/contract.json",
+    "sha256": "7620c9a2b3e0ddac5718823464c02d7fe78e380fefc1190e9a2a9042a9944842"
+  },
+  {
+    "path": "regression/corpus_manifest.json",
+    "sha256": "14e505b1614d3d9c70bb657badf49c939d6665c71de3ec6a4ecd6bf4cd72c97d"
+  },
+  {
+    "path": "regression/frozen_targets.json",
+    "sha256": "cf6853a038bf2390625dd02eef9607a70300a3fab19bcf331de82b3623eab652"
+  },
+  {
+    "path": "regression/history/strict_point_v1_contract.json",
+    "sha256": "040335351c0b410df20dea9f5c8a02013688fe8ab69d41cb3f9910cf7ed38a19"
+  },
+  {
+    "path": "regression/history/strict_point_v1_run.py",
+    "sha256": "257de097b49a56adb0b62bff6b6fa821d9e4df8f07c0c33a1c6ba004fbca5d52"
+  },
+  {
+    "path": "regression/negative_control.json",
+    "sha256": "14a3ecccc56b7fb8001e95aa87b1f44587dd35cf7452067fe0dead1d5e461233"
+  },
+  {
+    "path": "regression/results/baseline_v2/build.json",
+    "sha256": "da46eb77d09ffcf689b1d2cdd3aef2becc92078448ca6cc553df143bef78b2fc"
+  },
+  {
+    "path": "regression/results/baseline_v2/build.stderr",
+    "sha256": "86f8f756abe7863e62beccbdf7a6006fc4b8dad4bbc0d30065eb615c2c5cd7c2"
+  },
+  {
+    "path": "regression/results/baseline_v2/build.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "regression/results/baseline_v2/contract.json",
+    "sha256": "7620c9a2b3e0ddac5718823464c02d7fe78e380fefc1190e9a2a9042a9944842"
+  },
+  {
+    "path": "regression/results/baseline_v2/corpus_manifest.json",
+    "sha256": "14e505b1614d3d9c70bb657badf49c939d6665c71de3ec6a4ecd6bf4cd72c97d"
+  },
+  {
+    "path": "regression/results/baseline_v2/metadata.json",
+    "sha256": "8c168a4e2315de54ba10b502b3dc718b3248df9923c1cd2cf805ed2a7e2fcb8e"
+  },
+  {
+    "path": "regression/results/baseline_v2/raw.jsonl",
+    "sha256": "cc5bd3463e89487c875f7945d1b1c323a982ee7b4ea98ca4b7901e7fc96ea13d"
+  },
+  {
+    "path": "regression/results/baseline_v2/summary.json",
+    "sha256": "eee1cfa453ad98391ba72535e2e5e6e0e79635008fb36b2ddc7ae7b69318092f"
+  },
+  {
+    "path": "regression/results/strict_point_v1/build.json",
+    "sha256": "da46eb77d09ffcf689b1d2cdd3aef2becc92078448ca6cc553df143bef78b2fc"
+  },
+  {
+    "path": "regression/results/strict_point_v1/contract.json",
+    "sha256": "040335351c0b410df20dea9f5c8a02013688fe8ab69d41cb3f9910cf7ed38a19"
+  },
+  {
+    "path": "regression/results/strict_point_v1/corpus_manifest.json",
+    "sha256": "14e505b1614d3d9c70bb657badf49c939d6665c71de3ec6a4ecd6bf4cd72c97d"
+  },
+  {
+    "path": "regression/results/strict_point_v1/metadata.json",
+    "sha256": "f876e7e63bd82d770013c1254550eddcf57651c4df736ce8acf9cebe28b3e760"
+  },
+  {
+    "path": "regression/results/strict_point_v1/raw.jsonl",
+    "sha256": "e0cfd358b0b951e96f335df226a83e8e208f3e3c7b85109ca4664086f1e3c91f"
+  },
+  {
+    "path": "regression/results/strict_point_v1/summary.json",
+    "sha256": "eee229d02ab22195222b02b01eebc1629b4fe3f107a54abd5caee75f88469d2d"
+  },
+  {
+    "path": "regression/run.py",
+    "sha256": "0e663f819719fadea857759fc09080a2b4868d8417fb61d7bf01dec85157fb97"
+  },
+  {
+    "path": "regression/test_regression.py",
+    "sha256": "2063275acbf557f88a42c09820499c6fdacfdb839b998f2708827ed37123879e"
+  },
+  {
+    "path": "regression/validation.json",
+    "sha256": "1f72939f8b29af09564687d04a5e226b704f405f985993b2f1397eef52a276db"
   },
   {
     "path": "summary.json",

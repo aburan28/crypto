@@ -4,7 +4,7 @@
 //! reports the `D*` *distribution* (min / mean / max + histogram) over a
 //! batch of non-decomposable (unsatisfiable) targets per `n` — the stable
 //! form that the proposal's prediction #1 actually talks about
-//! (`RESEARCH_FFD_PROOF_COMPLEXITY.md` §6): mean `D*` should climb with
+//! (`research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §6): mean `D*` should climb with
 //! `n` while the first-fall mean stays roughly flat.
 //!
 //! ```bash

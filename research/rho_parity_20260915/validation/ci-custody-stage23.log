@@ -1,0 +1,64 @@
+EEE...E....
+======================================================================
+ERROR: test_cargo_build_hardlink_is_allowed_but_copied_binary_hardlink_is_not (__main__.Stage23Tests.test_cargo_build_hardlink_is_allowed_but_copied_binary_hardlink_is_not)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/test_koblitz_unknown_scalar_panel.py", line 904, in test_cargo_build_hardlink_is_allowed_but_copied_binary_hardlink_is_not
+    run_root, outer = make_complete_rank_deficient_run(parent / "accepted")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/test_koblitz_unknown_scalar_panel.py", line 379, in make_complete_rank_deficient_run
+    source = stage23.source_binding()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/run_koblitz_unknown_scalar_panel.py", line 126, in source_binding
+    raise Stage23Error("workspace Cargo.lock differs from the frozen lock")
+stage23.Stage23Error: workspace Cargo.lock differs from the frozen lock
+
+======================================================================
+ERROR: test_full_verifier_accepts_rank_deficient_unique_target_only (__main__.Stage23Tests.test_full_verifier_accepts_rank_deficient_unique_target_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/test_koblitz_unknown_scalar_panel.py", line 819, in test_full_verifier_accepts_rank_deficient_unique_target_only
+    run_root, outer = make_complete_rank_deficient_run(parent / "accepted")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/test_koblitz_unknown_scalar_panel.py", line 379, in make_complete_rank_deficient_run
+    source = stage23.source_binding()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/run_koblitz_unknown_scalar_panel.py", line 126, in source_binding
+    raise Stage23Error("workspace Cargo.lock differs from the frozen lock")
+stage23.Stage23Error: workspace Cargo.lock differs from the frozen lock
+
+======================================================================
+ERROR: test_full_verifier_reconstructs_and_rejects_coherent_tampering (__main__.Stage23Tests.test_full_verifier_reconstructs_and_rejects_coherent_tampering)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/test_koblitz_unknown_scalar_panel.py", line 753, in test_full_verifier_reconstructs_and_rejects_coherent_tampering
+    run_root, outer = make_incomplete_build_run(parent / "baseline")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/test_koblitz_unknown_scalar_panel.py", line 505, in make_incomplete_build_run
+    source = stage23.source_binding()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/run_koblitz_unknown_scalar_panel.py", line 126, in source_binding
+    raise Stage23Error("workspace Cargo.lock differs from the frozen lock")
+stage23.Stage23Error: workspace Cargo.lock differs from the frozen lock
+
+======================================================================
+ERROR: test_plan_is_write_once_and_outside_checkout (__main__.Stage23Tests.test_plan_is_write_once_and_outside_checkout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/test_koblitz_unknown_scalar_panel.py", line 942, in test_plan_is_write_once_and_outside_checkout
+    rendered = stage23.plan(parser_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/run_koblitz_unknown_scalar_panel.py", line 178, in plan
+    source = source_binding(args.profile)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/run_koblitz_unknown_scalar_panel.py", line 137, in source_binding
+    "cargo": custody.tool_identity(Path(shutil.which("cargo") or ""), "Cargo"),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/1b5e041dd49b/crypto-rho-parity/scripts/run_koblitz_relation_yield_bridge.py", line 330, in tool_identity
+    raise Stage21Error(f"{context} must be a regular executable: {resolved}")
+run_koblitz_relation_yield_bridge.Stage21Error: Cargo must be a regular executable: /workspace/scratch/1b5e041dd49b/crypto-rho-parity
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.188s
+
+FAILED (errors=4)

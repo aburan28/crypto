@@ -1,0 +1,184 @@
+{
+  "format": "fixed-ic-selector-v1",
+  "seed": 1794,
+  "queries_requested": 48,
+  "repetitions": 1,
+  "pair_budget": 100000,
+  "query_seconds": 0.25,
+  "common_ops": null,
+  "S": null,
+  "rho_ratio": null,
+  "floor_ratio": null,
+  "performance_promoted": false,
+  "status": "complete",
+  "setup_ns": 84171331,
+  "records": 52,
+  "pair_verified": 52,
+  "accounting": {
+    "elapsed_ns": 6448630912,
+    "phases": {
+      "parameter_validation": {
+        "ns": 988327,
+        "calls": {
+          "field.fromCoords": 7,
+          "group.onCurve": 3,
+          "field.mul": 201,
+          "field.add": 271,
+          "group.mul": 5,
+          "group.add": 27,
+          "group.dbl": 33,
+          "field.inv": 52,
+          "polynomial.xor": 1806,
+          "group.frob": 2,
+          "field.frob": 4
+        }
+      },
+      "factor_base": {
+        "ns": 10555421,
+        "calls": {
+          "field.fromCoords": 4,
+          "group.onCurve": 3,
+          "field.mul": 150,
+          "field.add": 232,
+          "group.mul": 3,
+          "group.add": 21,
+          "group.dbl": 21,
+          "field.inv": 41,
+          "polynomial.xor": 1354,
+          "group.frob": 18,
+          "field.frob": 44,
+          "group.pointFromX": 4,
+          "field.trace": 4,
+          "field.toCoords": 7,
+          "group.neg": 18
+        }
+      },
+      "pair_table": {
+        "ns": 8116960,
+        "calls": {
+          "field.mul": 504,
+          "field.add": 1270,
+          "group.add": 162,
+          "group.dbl": 18,
+          "field.inv": 162,
+          "polynomial.xor": 5112,
+          "group.neg": 190
+        }
+      },
+      "symbolic_setup": {
+        "ns": 1785308,
+        "calls": {}
+      },
+      "decomposition": {
+        "ns": 30295569,
+        "calls": {
+          "field.mul": 5620,
+          "field.add": 9656,
+          "group.mul": 135,
+          "group.add": 1189,
+          "group.dbl": 847,
+          "field.inv": 1591,
+          "polynomial.xor": 53320,
+          "group.neg": 1060,
+          "pairs.lookups": 190
+        }
+      },
+      "encoding": {
+        "ns": 124098377,
+        "calls": {
+          "field.toCoords": 104,
+          "cnf.variables": 133850,
+          "cnf.clauses": 147368,
+          "cnf.xors": 81538
+        }
+      },
+      "solver_load": {
+        "ns": 101432500,
+        "calls": {}
+      },
+      "solve": {
+        "ns": 4629990943,
+        "calls": {
+          "sat.calls": 132
+        }
+      },
+      "solver_teardown": {
+        "ns": 17512088,
+        "calls": {}
+      },
+      "query_process_overhead": {
+        "ns": 1360774038,
+        "calls": {}
+      },
+      "extract_lift_verify": {
+        "ns": 21600042,
+        "calls": {
+          "field.toCoords": 147,
+          "field.fromCoords": 147,
+          "group.pointFromX": 147,
+          "field.mul": 2153,
+          "field.inv": 527,
+          "polynomial.xor": 17436,
+          "field.add": 4048,
+          "field.trace": 147,
+          "field.frob": 588,
+          "group.onCurve": 147,
+          "sat.blocked_models": 28,
+          "group.neg": 752,
+          "group.add": 402,
+          "group.mul": 21,
+          "group.dbl": 131
+        }
+      },
+      "witness_verification": {
+        "ns": 9161566,
+        "calls": {
+          "field.fromCoords": 63,
+          "group.onCurve": 63,
+          "field.mul": 1709,
+          "field.add": 3442,
+          "group.mul": 21,
+          "group.add": 429,
+          "group.dbl": 137,
+          "field.inv": 461,
+          "polynomial.xor": 15410,
+          "field.frob": 252,
+          "group.pointFromX": 63,
+          "field.trace": 63,
+          "field.toCoords": 63,
+          "group.neg": 626
+        }
+      }
+    },
+    "orchestration_ns": 132319773,
+    "logical_calls": {
+      "field.fromCoords": 221,
+      "group.onCurve": 216,
+      "field.mul": 17735,
+      "field.add": 30393,
+      "group.mul": 389,
+      "group.add": 3569,
+      "group.dbl": 2450,
+      "field.inv": 4879,
+      "polynomial.xor": 164154,
+      "group.frob": 488,
+      "field.frob": 1876,
+      "group.pointFromX": 214,
+      "field.trace": 214,
+      "field.toCoords": 2685,
+      "group.neg": 3594,
+      "pairs.lookups": 190,
+      "cnf.variables": 133850,
+      "cnf.clauses": 147368,
+      "cnf.xors": 81538,
+      "sat.calls": 132,
+      "sat.blocked_models": 28
+    },
+    "total_common_operations": null,
+    "S": null,
+    "rho_ratio": null,
+    "note": "nested logical call categories must not be summed; SAT internal operations are uncalibrated"
+  },
+  "full_collection_ns": 6448797395,
+  "cost_scope": "full collection includes validation, pair/circuit setup, all policy calls, feature extraction, labels, serialization and DB close; query elapsed is warm diagnostic only"
+}

@@ -1,0 +1,70 @@
+{
+  "comparisons": [
+    {
+      "candidate": "fastcurve_batch4",
+      "candidate_over_baseline": 1.0065134844033248,
+      "ci95": [
+        0.9993667967896865,
+        1.0194015997928632
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.9641571176672628,
+      "native_wall_ci95": [
+        0.9088507559069463,
+        1.0149630456585783
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.988666145153597,
+        "n17a1": 0.8851573373728012,
+        "n19a0": 1.0112412630594403,
+        "n23a0": 0.9764866892747458
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 12,
+      "per_cell": {
+        "n13a0": 1.00292758949019,
+        "n17a1": 0.9992549267108277,
+        "n19a0": 0.9994978485645455,
+        "n23a0": 1.0245912672649864
+      },
+      "speedup": 0.9935286665263248
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 71.7931343629898,
+  "provisional_challenger": "fastcurve_batch4",
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.759840040187465,
+    "ci95": [
+      1.6366481818184553,
+      1.8850208465453062
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 4,
+    "native_wall_candidate_over_baseline": 1.0496772850150475,
+    "native_wall_ci95": [
+      0.9855818832990267,
+      1.1113591717394713
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.0664820072784988,
+      "n17a1": 0.9723664010124281,
+      "n19a0": 1.1217089096874986,
+      "n23a0": 1.0436612299735266
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 12,
+    "per_cell": {
+      "n13a0": 1.6264084517944548,
+      "n17a1": 1.8768505798938164,
+      "n19a0": 1.8894028792367283,
+      "n23a0": 1.6630637001520658
+    },
+    "speedup": 0.5682334627944231
+  },
+  "runs": 108,
+  "stage": "selection",
+  "verified_runs": 108
+}

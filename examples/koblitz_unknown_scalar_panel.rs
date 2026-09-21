@@ -520,6 +520,9 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         seed,
         strategy: DecompositionStrategy::Sat,
         engine: SolverEngine::default(),
+        // Caller-owned precomputation that this panel does not use; the field
+        // was added to KoblitzIcOptions without updating this initializer.
+        weil_charts: None,
         node_budget: 0,
         max_models: 64,
         sat_macaulay_degree: None,
@@ -536,6 +539,9 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         relation_batch_size: 1,
         allow_direct_relation: false,
         collapse_projected_orbits: true,
+        crossbred: None,
+        wdsat_binary: None,
+        wdsat_timeout_ms: 5_000,
         linear_algebra: LinearAlgebra::Dense,
     };
     let solve_started = Instant::now();
