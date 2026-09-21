@@ -6,7 +6,9 @@ proposed direction, not the cost of an attack.
 stated — "embedding into an abelian variety of dimension ≥ 2" — was too
 narrow, and two attacks already catalogued in this repository violate it.
 §2.4 states the corrected pattern, §3 the corrected test (R2 restated,
-R5 added), §9 the audit that found it.  **The verdict on murmurations is
+R5 added), §9 the audit that found it — completed across the repository's
+measured threads in §9.3, which found no further counterexample and split
+R5 into two failure modes.  **The verdict on murmurations is
 unchanged** and does not depend on the repaired clause; see §4.4.
 **Companions:** [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](./RESEARCH_ECDLP_STATE_OF_THE_ART.md) §8,
 [`RESEARCH_DIEM_DESCENT.md`](./RESEARCH_DIEM_DESCENT.md),
@@ -275,6 +277,16 @@ problem to become interesting.
 
 A handle that satisfies R1–R4 but fails R5 is not a weaker result than one
 that satisfies all five.  It is a different thing: a theorem about a toy.
+
+The completed sweep (§9.3) splits R5 into two failure modes that do not
+imply each other — **R5a**, the handle exists only in a parameter range
+disjoint from the hard one (the `S₄` certificate, `d ≤ 6` against
+`d = 45`), and **R5b**, the handle exists at cryptographic parameters and
+lands somewhere *more expensive* (hyperelliptic covers of ECC2K-130 exist
+in every genus and all cost `≥ 2^131`).  R5b is the sharper warning: it
+produces a genuine, correct transfer that simply costs more, so Weil
+descent and Kani are distinguished from it not by rigour but by landing
+somewhere cheaper.
 
 ---
 
@@ -606,3 +618,71 @@ described in §3.  It is the one place in the repository where a genuine
 category change (Weil descent) was achieved on the real curve and still
 paid nothing — because it was available only at `d ≤ 6` and needed
 `d = 45`.
+
+### 9.3 The sweep completed, 2026-09-21
+
+§9.1 audited four notes.  A partial audit invites exactly the error it
+was meant to catch, so the remaining measured threads were swept against
+R1–R5.  **No F4′ counterexample was found.**  Every thread falls into one
+of three classes, and the classes are the point.
+
+| thread | R1 (licensing datum) | class | outcome |
+|:--|:--|:--|:--|
+| `ECC2K130_EXTENSION` | none — 131 prime, no subfield at any `e` | R1 absent | no transfer exists |
+| `ISOGENY_DEGREE_SEARCH` | none — the class holds one curve with subfield structure, and isogenies only lose it | R1 absent | closed, negative |
+| `SECP256K1_CM` | none — `h(−3) = 1`, and Tate preserves group order across the class | R1 absent | amortisation vacuous |
+| `QUASI_SUBFIELD` | attempts to *manufacture* R1 | R1 manufacture | first-moment threshold; no witness that pays |
+| `VOLCANO_FLOOR_RHO` | attempts to manufacture R1 (class group at depth 1) | R1 manufacture | "does not beat plain ρ" |
+| `ECC2K130_HYPERELLIPTIC` | cover construction | **R5b** | transfer exists in every genus, all cost `≥ 2^131` |
+| `HYPERELLIPTIC_IC_RHO` | genus change | **R5b** | ratio to reference `≈ 1`; "does nothing a generic algorithm cannot" |
+| `RR_SOLVER_PANEL` §9 | `F_2`-subspace | **R5a** | certificate real, expires at `d = 6`, needed at `d = 45` |
+| `RR_SOLVER_PANEL` §2–§8 | — stays in category | in-category | `0.494×` a double loop; constants, never an exponent |
+| `EDS_RESIDUE` | — stays in category | in-category | information-tight, algorithmically inert |
+| `DEGREE_REDUCTION` | — presentation levers only | in-category | `D*` is a property of the presentation; no exponent moved |
+| `EXOTIC_COORDINATES` | — coordinate choice only | in-category | no relation-cost exponent moved |
+| `RESIDUAL_WALKS` | — stays in category | in-category | `528×`–`4,000×` rho; crossover past `2^230` |
+
+**The three classes, and what each one teaches.**
+
+1. **R1 absent** — the transfer cannot be written down, because the
+   licensing datum does not exist.  This is the prime-field situation and
+   the ECC2K-130 situation alike, and it is the strongest form of "no":
+   the attack is undefined, not slow (§2.1).
+2. **In-category** — representation-level work that never leaves the
+   group.  Six independent threads, all of them serious, and the outcome
+   is unanimous: **constants, never exponents.**  This is F4′ attempted
+   repeatedly and in earnest, and it is the closest thing this repository
+   has to positive evidence for the pattern rather than mere consistency
+   with it.
+3. **R5 failure** — the transfer exists and is useless.  This class was
+   invisible before the audit and is the sweep's main find.
+
+**R5 splits, and the split matters.**  The two failure modes are
+different and neither implies the other:
+
+- **R5a — regime gap.**  The handle is available only in a parameter
+  range disjoint from the one where the problem is hard.  The `S₄`
+  `NO`-certificate lives at `d ≤ 6`; decompositions begin at `d = 45`.
+  The general form is Kosters–Yeo: an overdetermined descended system
+  collapses for reasons unrelated to the ECDLP, and the collapse
+  *necessarily* disappears when the problem becomes interesting.
+- **R5b — the target is worse.**  The handle is available at
+  cryptographic parameters and lands somewhere more expensive than where
+  it started.  Covers of ECC2K-130 exist in **every** genus and all cost
+  at least `2^131`, which is `2^70.19×` rho; the genus that would pay
+  sits in `[130, 290…300]`, a window `2^120.77` away.
+
+R5b is the sharper warning of the two, because R5a announces itself — a
+handle that only works on toys looks like a toy — whereas R5b produces a
+*genuine, correct, cryptographic-parameter* transfer that simply costs
+more.  Weil descent and the Kani embedding are not distinguished from the
+hyperelliptic covers by existing, or by being rigorous.  They are
+distinguished by landing somewhere cheaper.
+
+**What the sweep does not establish.**  It is a survey of this
+repository's own threads, not of the literature, and it inherits their
+scope: binary Koblitz curves and ECC2K-130 dominate the sample, prime
+fields are represented mostly by null results, and several threads are
+open rather than closed.  It is evidence that the pattern holds where
+this repository has measured, which is not the same as evidence that it
+holds.
