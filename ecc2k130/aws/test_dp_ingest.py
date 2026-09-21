@@ -626,6 +626,27 @@ class Collisions(unittest.TestCase):
         self.assertEqual(hits, 1)
         self.assertEqual(self.progressRow(conn)[3], 0)
 
+    def test_a_large_object_is_copied_in_bounded_batches_with_the_same_totals(self):
+        # A sync loop whose state was reset re-sends a whole corpus as one
+        # object (6.5 M records on 2026-09-21); decoding it in one go is
+        # gigabytes of Python dicts. Three records at a chunk of two must
+        # produce two COPY batches, one progress row, and summed counts.
+        self.addCleanup(setattr, dp_ingest, "INGEST_CHUNK_RECORDS", dp_ingest.INGEST_CHUNK_RECORDS)
+        dp_ingest.INGEST_CHUNK_RECORDS = 2
+        conn, (added, seen, hits) = self.ingest(
+            record(7) + record(8) + record(9), inserted=1,
+            candidates=[self.candidate(b"pk", 7, 7)])
+        self.assertEqual(seen, 3)
+        # The fake reports `inserted` rows per INSERT, so two batches insert two.
+        self.assertEqual(added, 2)
+        truncates = [q for q, _ in conn.queries if q.startswith("TRUNCATE dp_in")]
+        inserts = [q for q, _ in conn.queries if "INSERT INTO distinguished_points" in q]
+        self.assertEqual((len(truncates), len(inserts)), (2, 2))
+        # Both batches conflicted (1 < 2 and 1 < 1 is false -> only the first
+        # batch runs the check), and the one re-report is counted once.
+        self.assertEqual(self.progressRow(conn)[2:], (3, 1))
+        self.assertEqual(conn.commits, 1)
+
     def test_the_progress_table_grows_the_column_it_needs(self):
         self.assertIn("ADD COLUMN IF NOT EXISTS duplicates", dp_ingest.PROGRESS_DUPLICATES_DDL)
         conn = CollisionConn()
