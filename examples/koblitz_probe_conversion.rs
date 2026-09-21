@@ -21,7 +21,7 @@
 //!
 //!     cargo run --release --example koblitz_probe_conversion -- 61 12000
 
-use crypto_lib::cryptanalysis::koblitz_fast::{BatchScratch, FastPoint};
+use crypto_lib::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::*;
 use std::time::Instant;
 
