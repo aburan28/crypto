@@ -8,7 +8,7 @@ from unittest import mock
 
 from worker import (gpuFamily, slotFamilyCompatible, usesCampaignWorkers,
                     visibleGpuCount, runAllGpus, BLACKWELL_FAMILIES, ADA_FAMILIES,
-                    AUTO_FAMILIES)
+                    AUTO_FAMILIES, LOCAL_FAMILIES)
 
 
 class GpuFamily(unittest.TestCase):
@@ -55,6 +55,22 @@ class SlotFamily(unittest.TestCase):
             self.assertFalse(slotFamilyCompatible(None, family))
             self.assertFalse(slotFamilyCompatible("g7e", family))
             self.assertTrue(slotFamilyCompatible(family, family))
+
+    def test_unclassified_names_pin_to_their_own_slots(self):
+        # An unmatched name auto-sizes, so it is not the family-less rehearsal
+        # claimant: it must not resume the untagged Blackwell corpus or another
+        # model's grid (exit 6), and Blackwell must not resume its slots.
+        family = gpuFamily("NVIDIA GeForce RTX 4090")
+        self.assertEqual(family, "nvidia-geforce-rtx-4090")
+        self.assertNotIn(family, LOCAL_FAMILIES)
+        self.assertFalse(usesCampaignWorkers(family))
+        self.assertFalse(slotFamilyCompatible(None, family))
+        self.assertFalse(slotFamilyCompatible("", family))
+        self.assertFalse(slotFamilyCompatible("g7e", family))
+        self.assertFalse(slotFamilyCompatible(gpuFamily("NVIDIA A40"), family))
+        self.assertFalse(slotFamilyCompatible(family, "g7e"))
+        self.assertTrue(slotFamilyCompatible(family, family))
+        self.assertEqual(gpuFamily(""), "")
 
     def test_same_family_only(self):
         self.assertTrue(slotFamilyCompatible("g6", "g6"))

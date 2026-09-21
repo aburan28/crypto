@@ -1215,12 +1215,16 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                 return 8;
             }
             lastCkpt = now;
-            if (!leaving) {
+            if (!leaving && !gStop) {
                 eng.launch(iterBase);
                 nextInFlight = true;
             }
         }
-        if (gStop) {
+        // leaving was read before host DP handling. A signal that arrived
+        // after the overlapped launch was queued is honoured on the next
+        // pass, once fetch() has drained that launch and the checkpoint has
+        // been written with it, rather than breaking out and losing both.
+        if (gStop && !nextInFlight) {
             printf("stopping: %llu iterations of %llu walks, %llu points reported\n",
                    (unsigned long long)iterBase, (unsigned long long)eng.walksPerLaunch(),
                    (unsigned long long)totalDp);

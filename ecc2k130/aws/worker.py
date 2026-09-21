@@ -287,7 +287,11 @@ def gpuFamily(name="", instance_type=""):
         return "g6"
     if n in ("cpu", "local") or n.startswith("cpu/") or n.startswith("cpu@"):
         return "cpu"
-    return ""
+    # Any other name auto-sizes (usesCampaignWorkers), so it must pin to its
+    # own slots: neither the untagged 385,024-worker Blackwell corpus nor
+    # another model's grid would load its checkpoint (exit 6). Only a missing
+    # name is the family-less rehearsal claimant in LOCAL_FAMILIES.
+    return re.sub(r"[^a-z0-9]+", "-", n).strip("-")
 
 
 def slotFamilyCompatible(slot_family, worker_family):

@@ -133,12 +133,61 @@ static bool overlapCase() {
     return ok;
 }
 
+// A signal that lands after the overlapped launch is queued, i.e. during host
+// DP handling.  The loop must drain that launch and checkpoint it before it
+// stops, not break out with a kernel in flight and nothing saved.
+struct StopOnSecondLaunch : PendingEngine {
+    void launch(u64 iterBase) {
+        PendingEngine::launch(iterBase);
+        if (launches == 2) gStop = 1;
+    }
+};
+
+static bool stopDuringHostCase() {
+    timingSeconds = 0;
+    gStop = 0;
+    Options options;
+    options.steps = 2;
+    options.launches = 5;
+    options.verify = 0;
+    options.ckptFile = "synthetic-checkpoint";
+    StopOnSecondLaunch engine;
+    engine.restart = false;
+    Solver<CfgF23> unusedSolver;
+
+    FILE *capture = tmpfile();
+    if (!capture) return false;
+    fflush(stdout);
+    const int savedStdout = dup(fileno(stdout));
+    if (savedStdout < 0 || dup2(fileno(capture), fileno(stdout)) < 0) return false;
+    const int result = runSearch<CfgF23>(options, engine, unusedSolver, nullptr);
+    fflush(stdout);
+    if (dup2(savedStdout, fileno(stdout)) < 0) return false;
+    close(savedStdout);
+    rewind(capture);
+    std::string output;
+    char chunk[1024];
+    for (size_t n; (n = fread(chunk, 1, sizeof chunk, capture));) output.append(chunk, n);
+    fclose(capture);
+    gStop = 0;
+
+    const bool ok = result == 0 && engine.launches == 2 && engine.saves == 1 &&
+                    engine.syncs == 2 && timingSeconds == 4 &&
+                    output.find("stopping: 44 iterations") != std::string::npos &&
+                    output.find("finished: 4.000 M it/s") != std::string::npos;
+    if (!ok) {
+        fprintf(stderr, "stop-during-host mismatch: launches=%d saves=%d syncs=%d clock=%ld\n%s",
+                engine.launches, engine.saves, engine.syncs, timingSeconds, output.c_str());
+    }
+    return ok;
+}
+
 int main() {
     HostEngine<CfgF23> host;
     host.synchronize();
     if (!timingCase(false, false, false) || !timingCase(true, false, false) ||
         !timingCase(true, true, false) || !timingCase(true, false, true) ||
-        !overlapCase()) return 1;
+        !overlapCase() || !stopDuringHostCase()) return 1;
     puts("PASS: final timing waits for pending reseeds; no-reseed, checkpoint/resume, "
-         "interrupted-run, and overlapped-launch controls retain their counts");
+         "interrupted-run, overlapped-launch and stop-during-host controls retain their counts");
 }
