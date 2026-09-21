@@ -1,0 +1,60 @@
+# The three stores the control plane talks to, on ports chosen not to collide
+# with a developer's own Postgres or Redis.
+#
+# Every one of them is disposable: the data lives in the container, nothing is
+# mounted, and `services.sh down` takes the volumes with it.  A suite that can
+# corrupt something you wanted to keep is a suite nobody runs.
+name: ecc2k130-controlplane-integration
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: controlplane
+      POSTGRES_PASSWORD: integration
+      POSTGRES_DB: controlplane
+      # No fsync: this database exists for the length of one test run, and
+      # the suite's threaded claim races are the thing being measured.
+      POSTGRES_INITDB_ARGS: "--nosync"
+    command: >-
+      postgres -c fsync=off -c full_page_writes=off -c synchronous_commit=off
+               -c max_connections=200
+    ports:
+      - "${ECC_IT_PG_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U controlplane -d controlplane"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    # No persistence: the cache is a hint store, and a fixture that survives
+    # a restart is a fixture that leaks between runs.
+    command: redis-server --save "" --appendonly no --maxmemory 256mb
+    ports:
+      - "${ECC_IT_REDIS_PORT:-6380}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # From quay.io, not Docker Hub: `minio/minio` there refuses anonymous pulls
+  # (a token request for it answers 401), which is what failed the first run
+  # of this workflow.  quay is MinIO's own registry and answers 200 for the
+  # same image, linux/amd64 among its platforms.
+  #
+  # The only unpinned image here: MinIO publishes dated release tags rather
+  # than a stable series, and the S3 surface this uses -- put, head, get,
+  # list_objects_v2 with a continuation token -- has been the same for years.
+  # `services.sh` waits on its health endpoint rather than on a healthcheck
+  # inside the container, because what matters is that it answers from here.
+  minio:
+    image: quay.io/minio/minio:latest
+    command: server /data --address ":9000"
+    environment:
+      MINIO_ROOT_USER: ecc2k130
+      MINIO_ROOT_PASSWORD: ecc2k130-integration
+    ports:
+      - "${ECC_IT_S3_PORT:-9010}:9000"

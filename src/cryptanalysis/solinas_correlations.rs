@@ -40,7 +40,7 @@
 //!
 //! # The agent's TOP-3 entry
 //!
-//! Per the research-agent surveys (`RESEARCH_P256.md`), this is
+//! Per the research-agent surveys (`research/notes/cm-isogeny/RESEARCH_P256.md`), this is
 //! one of the underexplored angles ("Solinas-prime micro-bit-
 //! correlations").  Methodologically rigorous null-hypothesis test
 //! that's never been published at this scale.
@@ -303,7 +303,7 @@ mod tests {
     #[test]
     fn solinas_micro_bit_correlations() {
         // For CI: N = 10K (fast).  Full result documented in
-        // RESEARCH_P256.md was at N = 10⁶ (max |z| = 2.46 < 6.11
+        // research/notes/cm-isogeny/RESEARCH_P256.md was at N = 10⁶ (max |z| = 2.46 < 6.11
         // threshold; clean null result).
         let n_samples = 10_000u64;
         let table = run_correlation_experiment(n_samples, 42);

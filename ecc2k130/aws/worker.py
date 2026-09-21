@@ -33,7 +33,11 @@ flushes points and checkpoints before exiting.  Spot interruptions and
 Environment (written to /etc/ecc2k130.env by bootstrap.sh):
   ECC_BUCKET, AWS_DEFAULT_REGION   the campaign bucket (slots live in it too)
   ECC_TABLE      optional DynamoDB table for slots instead of S3 objects
+  ECC_SLOT_BACKEND  rds -> lease slots from the RDS control plane instead
+                 (controlplane/, needs DATABASE_URL or RHO_DB_HOST); the
+                 default keeps DynamoDB/S3 so an upgrade is one variable
   ECC_GPU        GPU index on this instance (default 0)
+  ECC_ALL_GPUS   1 -> start one supervisor per nvidia-smi device (RunPod MIG)
   ECC_ROOT       directory holding campaign.json, the client, per-GPU work dirs
   ECC_CLIENT     client binary (default ECC_ROOT/ecc2k130)
   ECC_LOCAL_STORE  directory that stands in for S3 and DynamoDB (rehearsals)
@@ -136,6 +140,26 @@ def checkpointIter(path):
     return struct.unpack_from("<Q", head, CKPT_ITER_OFFSET)[0]
 
 
+def checkpointSlot(path):
+    """slot = run-id - 1 from a checkpoint still on disk, or None.
+
+    retireSlot clears state.json and a crash can lose it; the checkpoint
+    header still names the walk those leftover spool files were cut for.
+    """
+    for candidate in (path, path + ".snap", path + ".remote"):
+        try:
+            with open(candidate, "rb") as fh:
+                head = fh.read(CKPT_ITER_OFFSET)
+        except OSError:
+            continue
+        if len(head) < CKPT_ITER_OFFSET or head[:8] != CKPT_MAGIC:
+            continue
+        runId = struct.unpack_from("<I", head, 8 + 5 * 4)[0]
+        if 1 <= runId <= MAX_SLOT + 1:
+            return runId - 1
+    return None
+
+
 def instanceId():
     try:
         req = urllib.request.Request("http://169.254.169.254/latest/api/token", method="PUT",
@@ -208,8 +232,12 @@ def gpuName(gpu):
 # campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
 # g6e L40S) auto-sizes; a checkpoint is only loadable into the same worker
 # count, so Ada must not resume a Blackwell slot and g6 must not resume g6e.
+# Datacenter Blackwell (B200) and Hopper are not that preset: B200.md keeps
+# workers automatic on 148 SMs, and a 24 GB MIG slice has even fewer.
 BLACKWELL_FAMILIES = frozenset({"g7", "g7e"})
 ADA_FAMILIES = frozenset({"g6", "g6e"})
+AUTO_FAMILIES = frozenset({"g4dn", "g5", "g5g", "b200", "b300", "h100", "h200",
+                           "a100", "mig"})
 LOCAL_FAMILIES = frozenset({"", "local", "cpu", None})
 
 
@@ -233,6 +261,20 @@ def gpuFamily(name="", instance_type=""):
     if it in ("g6", "g6e", "g7", "g7e", "g4dn", "g5", "g5g"):
         return it
     n = (name or "").lower()
+    # MIG slices are not the full part the campaign worker count was measured
+    # on; autoThreads reads the slice's SM count. Check before the parent SKU.
+    if "mig" in n:
+        return "mig"
+    if "b200" in n:
+        return "b200"
+    if "b300" in n:
+        return "b300"
+    if "h100" in n:
+        return "h100"
+    if "h200" in n:
+        return "h200"
+    if "a100" in n:
+        return "a100"
     if "l40s" in n:
         return "g6e"
     if "rtx pro 6000" in n or "rtx 6000" in n:
@@ -263,8 +305,13 @@ def slotFamilyCompatible(slot_family, worker_family):
 
 
 def usesCampaignWorkers(family):
-    """Ada and Turing omit --threads so packedengine.autoThreads sizes the grid."""
-    return family not in ADA_FAMILIES and family not in ("g4dn", "g5", "g5g")
+    """Only the measured RTX PRO 4500/6000 preset passes campaign.json workers.
+
+    Everything else omits --threads so packedengine.autoThreads sizes the grid
+    from the device's SM count. Putting 385,024 workers on a B200, a MIG
+    slice, or an unclassified GPU is how an 8-wide pod shows ~1/8 utilization.
+    """
+    return family in BLACKWELL_FAMILIES
 
 
 def frozenCampaignMoved(current, nxt):
@@ -564,6 +611,24 @@ class S3Slots:
         return self._modify(slot, owner, lambda it: it.update(extra or {}, leaseUntil=0, state=state))
 
 
+def rdsSlots():
+    """The control plane's registry, under the same four-method contract.
+
+    Imported here rather than at module scope: a worker that leases from
+    DynamoDB or from the bucket must not need the control-plane package on
+    its PATH, and this file runs on every GPU in the fleet.
+    """
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from controlplane.cache import cacheFromEnv
+    from controlplane.config import Config
+    from controlplane.db import databaseFromEnv
+    from controlplane.slots import PostgresSlots
+
+    config = Config.fromEnv()
+    return PostgresSlots(databaseFromEnv(config), campaign=config.campaign,
+                         cache=cacheFromEnv(config))
+
+
 class LocalSlots:
     """Same contract as DynamoSlots on one JSON file under an exclusive lock."""
 
@@ -634,10 +699,17 @@ class Worker:
             self.slots = LocalSlots(os.path.join(local, "slots.json"))
         else:
             self.store = S3Store(os.environ["ECC_BUCKET"])
-            # DynamoDB when a table is named, otherwise slots live in the
-            # bucket itself (fewer services, fewer permissions).
+            # The RDS control plane when asked for, DynamoDB when a table is
+            # named, otherwise slots live in the bucket itself (fewer
+            # services, fewer permissions).  One variable moves a campaign
+            # between them, and the four-method contract is the same.
             table = os.environ.get("ECC_TABLE", "")
-            self.slots = DynamoSlots(table) if table else S3Slots(os.environ["ECC_BUCKET"])
+            if os.environ.get("ECC_SLOT_BACKEND", "").strip().lower() == "rds":
+                self.slots = rdsSlots()
+            elif table:
+                self.slots = DynamoSlots(table)
+            else:
+                self.slots = S3Slots(os.environ["ECC_BUCKET"])
         self.instance = instanceId()
         deviceTag = "cpu%d" % self.gpu if self.cpu else "gpu%d" % self.gpu
         self.owner = "%s:%s:%s" % (self.instance, deviceTag, uuid.uuid4().hex)
@@ -811,6 +883,8 @@ class Worker:
             cmd += ["--threads", str(cpuThreadCount())]
         else:
             if c.get("packed", False):
+                # CUDA_VISIBLE_DEVICES is set to this GPU in runClient, so the
+                # process always sees the assigned device as ordinal 0.
                 cmd += ["--packed", "--device", "0"]
             if c.get("workers") and usesCampaignWorkers(self.gpuFamily):
                 cmd += ["--threads", str(int(c["workers"]))]
@@ -856,7 +930,15 @@ class Worker:
                 raise RuntimeError("lease lost during campaign binding")
         log("claimed slot %d (run id %d)" % (slot, slot + 1))
         if self.state.get("slot") != slot:
-            # A different slot than this work dir last held: nothing local applies.
+            # A different slot than this work dir last held: the live dp.bin
+            # and checkpoint do not apply.  Unsent spool entries do -- they
+            # were cut for the slot they name.  Finish any payload-only
+            # fragment and forget leftover offsets before deleting dp.bin,
+            # so sweepSpool cannot drop the only copy and creditSpoolEntry
+            # cannot treat those records as a prefix of the new empty file.
+            old = self.state.get("slot")
+            self.completeSpoolFragments(old)
+            self.detachSpoolFromLiveFile()
             for name in ("dp.bin", "walk.ck", "walk.ck.snap", "walk.ck.remote"):
                 p = os.path.join(self.work, name)
                 if os.path.exists(p):
@@ -895,6 +977,11 @@ class Worker:
 
     def retireSlot(self, slot, reason):
         log("retiring slot %d: %s" % (slot, reason))
+        # Finish payload-only fragments while this slot is still known.
+        # Clearing state below is what makes the next claimSlot see no
+        # prior slot; without a manifest, sweepSpool would then drop them
+        # once that claim deletes dp.bin.
+        self.completeSpoolFragments(slot)
         if os.path.exists(self.ckptPath):
             self.store.put(self.ckptPath, "ckpt/retired/slot-%05d.ck" % slot)
         self.slots.release(slot, self.owner, state="retired", extra={"reason": reason})
@@ -984,13 +1071,74 @@ class Worker:
             if os.path.exists(path):
                 os.remove(path)
 
+    def completeSpoolFragments(self, slot):
+        """Give payload-only spool files a manifest for this slot.
+
+        spoolDelta writes the payload first and the manifest last.  sweepSpool
+        would drop a lone payload as a fragment whose records are still in
+        dp.bin -- true only until claimSlot deletes that file on a slot
+        change.  The payload's name is the basename of its final key.
+        retireSlot clears state and a missing state.json leaves slot None;
+        recover it from a leftover manifest or a local checkpoint rather
+        than skip and let sweepSpool drop the only copy.
+        """
+        if not os.path.isdir(self.spoolDir):
+            return
+        if slot is None:
+            for entry in self.spoolEntries():
+                if entry.get("slot") is not None:
+                    slot = int(entry["slot"])
+                    break
+        if slot is None:
+            slot = checkpointSlot(self.ckptPath)
+        if slot is None:
+            return
+        claimed = {e["name"] for e in self.spoolEntries()}
+        fallbackOffset = int(self.state.get("dpOffset", 0))
+        for name in sorted(os.listdir(self.spoolDir)):
+            if not name.endswith(".bin") or name in claimed:
+                continue
+            payload = os.path.join(self.spoolDir, name)
+            if not os.path.isfile(payload):
+                continue
+            size = os.path.getsize(payload)
+            if size <= 0 or size % RECORD_BYTES:
+                continue
+            parts = name[:-4].rsplit("-", 2)
+            if len(parts) == 3 and parts[1].isdigit():
+                streamId, offset = parts[0], int(parts[1])
+            else:
+                streamId, offset = self.streamId, fallbackOffset
+            meta = payload + ".json"
+            entry = {"name": name, "key": "dp/slot-%05d/%s" % (slot, name),
+                     "slot": slot, "streamId": streamId, "offset": offset,
+                     "bytes": size, "hasMeta": os.path.isfile(meta),
+                     "createdAt": time.time()}
+            writeJson(payload + SPOOL_MANIFEST, entry)
+
+    def detachSpoolFromLiveFile(self):
+        """Stop leftover entries from indexing a dp.bin that is about to go.
+
+        creditSpoolEntry treats a matching slot and offset as the records
+        still being in the live file.  After a slot change that file is a
+        new empty one, and a later reclaim of the same slot number would
+        jump dpOffset past its prefix.  Clearing the offset (not the
+        payload) keeps the records publishable on their own key.
+        """
+        for entry in self.spoolEntries():
+            body = {k: v for k, v in entry.items() if k not in ("manifest", "payload")}
+            body["offset"] = -1
+            writeJson(entry["manifest"], body)
+
     def sweepSpool(self):
         """Discard spool files that no manifest claims.
 
         A payload is written before dpOffset moves, so an interrupted write
         costs nothing: those records are still in dp.bin and the next cycle
         cuts them again.  rotateDpFile refusing to run while the spool is
-        non-empty is what keeps that true.
+        non-empty is what keeps that true on a rollout.  claimSlot changing
+        slot completes any payload-only fragment before it deletes dp.bin,
+        so a crash in spoolDelta cannot be swept away with the file.
         """
         if not os.path.isdir(self.spoolDir):
             return
@@ -998,9 +1146,13 @@ class Worker:
         for entry in self.spoolEntries():
             known.update((entry["name"], entry["name"] + ".json",
                           entry["name"] + SPOOL_MANIFEST))
+        live = os.path.exists(self.dpPath)
         for name in sorted(os.listdir(self.spoolDir)):
             path = os.path.join(self.spoolDir, name)
             if name in known or not os.path.isfile(path):
+                continue
+            if not live and (name.endswith(".bin") or name.endswith(".bin.json")):
+                # dp.bin is gone, so these records are not 'still in dp.bin'.
                 continue
             log("spool: discarding fragment %s (%d bytes); its records are still in dp.bin"
                 % (name, os.path.getsize(path)))
@@ -1009,13 +1161,20 @@ class Worker:
     def creditSpoolEntry(self, entry, slot):
         """Move dpOffset past a delta the store has, and only then.
 
-        The offset indexes one dp file, so only an entry this process cut
-        from the one it is reading now may move it: an entry left by another
-        process or another slot is published on its own key and the offset
-        stays where it is, because skipping the prefix of a file these
-        records are not in would lose the points at the front of it.
+        The offset indexes one dp file, so only an entry for this slot whose
+        offset is where this process is reading may move it.  streamId is not
+        the test: it is a fresh UUID each process start and is not in
+        state.json, so a same-slot restart would upload the leftover and then
+        recut that prefix.  Rotation will not drop dp.bin while the spool
+        holds anything, so a matching slot and offset are the file still here.
+        claimSlot will drop it on a slot change, and forgets leftover offsets
+        first so a later claim of the same slot number cannot treat those
+        records as a prefix of the new empty file.  An entry for another slot
+        is published on its own key and the offset stays where it is, because
+        skipping the prefix of a file those records are not in would lose the
+        points at the front of it.
         """
-        if slot is None or entry.get("slot") != slot or entry.get("streamId") != self.streamId:
+        if slot is None or entry.get("slot") != slot:
             return
         if int(entry.get("offset", -1)) != int(self.state.get("dpOffset", 0)):
             return
@@ -1159,7 +1318,15 @@ class Worker:
             metaPath = None
             if self.contract:
                 metaPath = delta + ".json"
-                writeJson(metaPath, envelope(delta, self.contract, "dp", owner=self.owner, offset=offset))
+                # producedAt travels as an extra field, so verifyEnvelope --
+                # which compares only the keys envelope() recomputes -- is
+                # unaffected. It gives the ingest a campaign fact for found_at
+                # instead of the object's S3 LastModified, which is storage
+                # metadata that a copy, a replication or a lifecycle transition
+                # rewrites, silently moving points between hourly buckets.
+                writeJson(metaPath, envelope(delta, self.contract, "dp", owner=self.owner,
+                                             offset=offset,
+                                             producedAt=int(time.time())))
             entry = self.spoolDelta(delta, key, slot, offset, metaPath)
             self.enforceSpoolBudget()
             try:
@@ -1398,8 +1565,52 @@ class Worker:
         return 0
 
 
+def visibleGpuCount():
+    """How many devices nvidia-smi currently exposes, or 0 if none."""
+    try:
+        r = subprocess.run(["nvidia-smi", "-L"], capture_output=True, text=True)
+    except OSError:
+        return 0
+    if r.returncode != 0:
+        return 0
+    return sum(1 for line in r.stdout.splitlines() if line.startswith("GPU "))
+
+
+def runAllGpus():
+    """One supervisor per visible GPU. RunPod MIG boxes need this; systemd
+    already starts worker@N on EC2, so this is the no-systemd path."""
+    n = visibleGpuCount()
+    if n <= 1:
+        return Worker().run()
+    log("ECC_ALL_GPUS=1: starting %d workers" % n)
+    procs = []
+    for gpu in range(n):
+        env = dict(os.environ)
+        env["ECC_GPU"] = str(gpu)
+        env.pop("ECC_ALL_GPUS", None)
+        procs.append(subprocess.Popen([sys.executable, "-u", os.path.abspath(__file__)], env=env))
+
+    def stop(_signo=None, _frame=None):
+        for proc in procs:
+            if proc.poll() is None:
+                try:
+                    proc.send_signal(signal.SIGTERM)
+                except OSError:
+                    pass
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    rc = 0
+    for proc in procs:
+        got = proc.wait()
+        if got:
+            rc = got
+    return rc
+
+
 if __name__ == "__main__":
     try:
+        if os.environ.get("ECC_ALL_GPUS", "").strip() == "1":
+            sys.exit(runAllGpus())
         sys.exit(Worker().run())
     except Exception as e:
         log("fatal: %s" % e)

@@ -63,6 +63,19 @@ Open `index.html` from the working tree next to the two JSON files and it
 renders exactly as published; only the site navigation links resolve solely
 on the published site.
 
+`how.html` is the readable walk: the same iteration as the GPU client, on
+`GF(2^23)`, with `rho-toy.js` recovering a planted `k` in the browser. The
+Python original is `ecc2k130/examples/rho_toy.py`.
+
+The dashboard fetches the live S3 `status.json` and the Pages copy together
+and fills missing fields (walk rate, walking slots, per-worker rows) from
+whichever document has them, then measures the rate from `history.json`
+when neither snapshot carries one. `published_at` is kept from whichever
+source wrote more recently: a healthy Pages job on a frozen ingest feed
+must not inherit the feed's old stamp, or the banner blames the publisher
+for a dead feed. Past the stale threshold, `walking_slots` and `walk_rate`
+are cleared so a frozen document cannot read as "walking now".
+
 See [`scripts/rho_status/README.md`](../../scripts/rho_status/README.md)
 for secrets, the walker hop, and what is (not) published, and
 [`scripts/site/README.md`](../../scripts/site/README.md) for the published

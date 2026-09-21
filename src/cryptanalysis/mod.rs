@@ -79,7 +79,7 @@
 //! ## Example: analyse a 4-bit S-box
 //!
 //! ```
-//! use crypto::cryptanalysis::sbox::Sbox;
+//! use crypto_lib::cryptanalysis::sbox::Sbox;
 //!
 //! // Serpent S0 — Anderson/Biham/Knudsen 1998.
 //! let s0 = Sbox::new(4, 4, vec![3, 8, 15, 1, 10, 6, 5, 11, 14, 13, 4, 2, 7, 0, 9, 12]).unwrap();
@@ -103,6 +103,7 @@ pub mod binary_semaev;
 pub mod binary_semaev_s4;
 pub mod bleichenbacher;
 pub mod boolean;
+pub mod bsgs_fast;
 pub mod boomerang;
 pub mod canonical_lift;
 pub mod cga_hnc;
@@ -165,9 +166,15 @@ pub mod mazur_tate_sigma;
 pub mod md5_chosen_prefix;
 pub mod md5_differential;
 pub mod md5_hashclash_ffi;
+pub mod ml_dsa_fault;
+pub mod ml_dsa_leakage;
+pub mod ml_kem_pco;
 pub mod ml_rho_walks;
+pub mod mlwe;
 pub mod modular_polynomial;
 pub mod mov_attack;
+pub mod mq_fes;
+pub mod mq_monica;
 pub mod multi_key_hnp;
 pub mod nonanom_formal_log;
 pub mod orbit_homology;
@@ -210,6 +217,7 @@ pub mod tls12_kdf;
 pub mod tls13_kdf;
 pub mod visual_demos;
 pub mod visualize;
+pub mod wdsat_oracle;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,

@@ -8,7 +8,7 @@
 //!
 //! ## G-R5 as pre-registered is degenerate — and that is the first finding
 //!
-//! `RESEARCH_DEGREE_REDUCTION.md` registered G-R5 as *"`c(composed) < 1/2`
+//! `research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` registered G-R5 as *"`c(composed) < 1/2`
 //! at ≥ 2 operating points"*. The composed route hits `c = 0.000`
 //! everywhere — the mutant system is already at `D* = 2` with **no guessing
 //! at all**, which is just iteration 2's result restated. The gate passes

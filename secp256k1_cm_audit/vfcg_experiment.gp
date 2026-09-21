@@ -3,7 +3,7 @@
 \\ action scalar c_γ at the depth-1 floor of a j=0 volcano lies
 \\ in a structured proper subgroup of (Z/n)*.
 \\
-\\ See RESEARCH_VOLCANO_FLOOR_RHO.md §5.
+\\ See research/notes/cm-isogeny/RESEARCH_VOLCANO_FLOOR_RHO.md §5.
 \\
 \\ Run: gp -q vfcg_experiment.gp > vfcg_output.txt
 \\

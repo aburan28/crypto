@@ -24,7 +24,7 @@ derived rather than measured.  It comes in two kinds, and a thread
 normally has one of each:
 
 - A **floor**: a lower bound from a counting or generic-group argument.
-  Example from `RESEARCH_RESIDUAL_WALKS.md`: a generic algorithm's
+  Example from `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`: a generic algorithm's
   expected relation yield from `P` residuals is at most `γP²/2n`, so the
   count factor obeys `κ_total ≥ √(2(B+1)/γ)`.  That floor moves only
   with the factor-base size `B` and the automorphism order `γ`, so it
@@ -54,6 +54,22 @@ belongs in `S`: precomputation, table setup, relation verification,
 linear algebra, and any work an oracle does per call.  Convert foreign
 units with a measured conversion factor and record it, for instance the
 63 field multiplications per curve addition measured on `F_{p³}`.
+
+**End-to-end speed is the measure of speed.**  `S` is defined over the
+*whole* method, cold, from setup to the recovered logarithm; a number
+that prices only one phase — the relation search, the decomposition
+oracle, a single solver call, the linear algebra — is a stage
+diagnostic, never a speed.  "Faster than rho" means the method's `S`
+column, with every phase inside it, sits below rho's, robustly, at
+growing `n` — nothing less earns the phrase.  Quoting a phase crossover
+as a method crossover is the §5 mistake, and the residual-walk thread is
+the worked case: its relation phase crosses rho near `2^{96}` in
+isolation while the whole method never does, because the linear algebra
+it left out decides the exponent (§11.6–11.7).  Equivalently, the only
+admissible speed ratio is §8's
+`speedup = baseline_total_operations / candidate_total_operations`;
+a ratio taken over any smaller slice of the pipeline is labelled a stage
+diagnostic and may not be reported as a speedup.
 
 The table must carry a **ratio column** against each boundary, and a
 correctness column.  A row without a verified answer is not a result.
@@ -231,7 +247,7 @@ existing EC2 key-pair name **`meow34`** when launching the instance.
 
 ## Worked example
 
-`RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
+`research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
 rule, end to end: §9.6 states the boundary and the target, §9.7 freezes
 the baseline table, §10.6 classifies every lever tried against the
 floor, §11.5 and §11.6 are an engineering ledger with the class of each

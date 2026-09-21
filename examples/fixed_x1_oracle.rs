@@ -1,6 +1,6 @@
 //! Is there a sub-`2^{2ℓ}` decomposition oracle?
 //!
-//! `RESEARCH_SEMAEV_DECOMPOSITION.md` ends on a boundary rather than a
+//! `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md` ends on a boundary rather than a
 //! result: with any oracle that enumerates the factor base, relation
 //! collection costs `Θ(2^n)` however fast the inner loop is, because a
 //! larger factor base needs fewer tries and makes each try

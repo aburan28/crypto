@@ -12,7 +12,7 @@
 //! `2^{3l}/3!` of them — and evaluates.  That is what
 //! [`crate::cryptanalysis::semaev_corpus::CorpusInstance::decide_exhaustively`]
 //! does, and what the SAT solver turns out to do as well (one conflict
-//! per triple; see `RESEARCH_SAT_SEMAEV.md`).
+//! per triple; see `research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`).
 //!
 //! But `S₄` is a *quartic in its last argument*.  Fix `X₁` and `X₂`
 //! and it becomes a degree-4 polynomial in `X₃`, whose roots are the

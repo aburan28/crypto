@@ -343,5 +343,5 @@ print("     (mechanical; ~80 lines once the source is open)");
 print("  2. Use the quadruple (J_2, J_4, J_6, J_10) to verify two");
 print("     candidate Howe-glue curves are F_p-isomorphic");
 print("  3. Implement Mestre's Step 2 reconstruction (out of scope");
-print("     for this script; see RESEARCH_MESTRE_HOWE.md §7)");
+print("     for this script; see research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md §7)");
 print("================================================================");

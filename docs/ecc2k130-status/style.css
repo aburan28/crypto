@@ -145,7 +145,8 @@ section { margin: 34px 0; }
 }
 .banner.COLLECTING { color: var(--good); border-color: #24503f; }
 .banner.COLLISION_RECORDED { color: var(--bad); background: #2a1520; border-color: #5c2634; }
-.banner.IDLE_OR_STALE { color: var(--warn); border-color: #54452a; }
+.banner.IDLE_OR_STALE,
+.banner.INGEST_BEHIND { color: var(--warn); border-color: #54452a; }
 .banner.EMPTY,
 .banner.UNREACHABLE { color: var(--idle); }
 .banner a { color: inherit; }
@@ -279,8 +280,11 @@ button:disabled { opacity: 0.55; cursor: progress; }
 .odds-chart { margin-top: 12px; }
 /* Odds chart is drawn to be read at phone width: no forced min-width, so the
    dates under the curve stay in view instead of living off-screen to the right. */
-.odds-chart.chart { overflow: visible; }
-.odds-chart svg {
+.chart.odds-chart { overflow: visible; }
+/* Specificity has to beat `.chart svg` below, which sets min-width: 560px;
+   a bare `.odds-chart svg` ties and loses on source order, leaving the curve
+   560px wide and spilling out of the card on a phone. */
+.chart.odds-chart svg {
   min-width: 0;
   width: 100%;
   max-width: 100%;
@@ -620,6 +624,18 @@ footer {
   max-width: 82ch;
 }
 footer h2 { color: var(--ink); font-size: 14px; }
+
+.transcript {
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: auto;
+  font: 13px/1.5 var(--mono);
+  color: var(--ink);
+  white-space: pre-wrap;
+}
 
 @media (max-width: 720px) {
   body { padding: 0 14px 40px; }

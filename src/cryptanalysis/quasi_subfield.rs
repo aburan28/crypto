@@ -768,7 +768,7 @@ mod tests {
     /// itself rule out a quasi-subfield polynomial with coefficients in
     /// `F_{2^131}`, whose kernel need not be Frobenius-stable; what
     /// stands behind that wider claim is the census agreement recorded
-    /// in `RESEARCH_QUASI_SUBFIELD.md`, which is evidence at reachable
+    /// in `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md`, which is evidence at reachable
     /// `n`, not a proof.
     #[test]
     fn f2_131_admits_no_non_trivial_stable_subspace() {

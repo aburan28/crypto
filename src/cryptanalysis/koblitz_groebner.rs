@@ -364,7 +364,7 @@ pub fn sym_semaev_s3(
 /// — which is the whole reason it is here.  Fixing `x₁` to a constant
 /// leaves a system in the `2ℓ` unknowns of `x₂` and `x₃` alone, and
 /// that is the object
-/// [`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md)
+/// [`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`](../../research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md)
 /// names as the one route to a sub-`2^{2ℓ}` decomposition oracle.
 ///
 /// Any of `x₁, x₂, x₃` may be a [`SymElement::constant`]; the degree of
@@ -871,9 +871,12 @@ mod f4_counters {
     pub(super) static ROWS: AtomicU64 = AtomicU64::new(0);
     pub(super) static COLS: AtomicU64 = AtomicU64::new(0);
     pub(super) static WORD_OPS: AtomicU64 = AtomicU64::new(0);
-    pub(super) const ALL: [&AtomicU64; 8] = [
-        &CALLS, &OVERSIZE, &BUILD_NS, &REDUCE_NS, &READBACK_NS, &ROWS, &COLS, &WORD_OPS,
-    ];
+
+    pub(super) fn all() -> [&'static AtomicU64; 8] {
+        [
+            &CALLS, &OVERSIZE, &BUILD_NS, &REDUCE_NS, &READBACK_NS, &ROWS, &COLS, &WORD_OPS,
+        ]
+    }
 }
 
 /// The F4 stage profile since the last [`f4_profile_reset`].
@@ -894,7 +897,7 @@ pub fn f4_profile() -> F4Profile {
 /// Clear the F4 stage profile.  Not synchronised against concurrent
 /// solving: reset before the work, read after it.
 pub fn f4_profile_reset() {
-    for counter in f4_counters::ALL {
+    for counter in f4_counters::all() {
         counter.store(0, std::sync::atomic::Ordering::Relaxed);
     }
 }

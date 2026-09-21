@@ -162,7 +162,7 @@ pub enum FactorBaseSource {
         /// Weil-restricted summation system carries `m·ℓ` unknowns, so
         /// coverage alone can rank bases backwards — by `22.41×` over
         /// twelve verified logarithms at `K_1/2^15`
-        /// (`RESEARCH_FACTOR_BASE_SOLVE_COST.md`).  Requires
+        /// (`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`).  Requires
         /// `solver: "groebner"`, since it prices that oracle, and only
         /// linear-subspace candidates can be priced, so it also requires
         /// `prune: false`, `saturate: false` and a `factor` or `divisor`

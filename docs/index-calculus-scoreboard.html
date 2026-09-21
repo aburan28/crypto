@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Every index-calculus variant built for the elliptic-curve discrete logarithm in this repository, scored in operations per root-n against Pollard rho and a generic-group floor.">
 <!--
-  Standalone build of the cost ledger in RESEARCH_RESIDUAL_WALKS.md §§9-11.
+  Standalone build of the cost ledger in research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md §§9-11.
   Open it directly in a browser; it loads two webfont families from Google
   Fonts and needs nothing else.  Every figure on the page is taken from the
   frozen experiment JSON in experiments/; see the footer for the conversion
@@ -307,8 +307,15 @@
     <div class="eyebrow">Cryptanalysis cost ledger · aburan28/crypto</div>
     <h1>Index Calculus Scoreboard</h1>
     <p class="verdict">The calibrated index-calculus families below are scored against
-      their generic-group floor and matched Pollard rho reference; their existing
-      500×-or-worse rho verdict is unchanged. The newer binary-field solver and
+      their generic-group floor and matched Pollard rho reference. On elliptic curves the
+      500×-or-worse rho verdict is unchanged. It is no longer blanket, though: on
+      hyperelliptic Jacobians at genus 3 and 4 index calculus measures
+      <strong>below</strong> a real distinguished-point rho — 0.21 at
+      <code>N</code> = 2<sup>24</sup> on the conservative accounting — with a fitted
+      exponent matching the derived law. That is a toy-size result
+      (<code>p ≤ 251</code>) whose reference needed correcting, not a statement about
+      any deployed curve. The newer binary-field solver, the
+      Crossbred decomposition oracle, the WDSat Riemann-Roch panel and the
       parameter-sweep pilots are explicitly uncalibrated: their component counts
       do not establish an end-to-end speedup or belong in that normalized claim.</p>
 
@@ -316,7 +323,10 @@
       <div class="fact">
         <dt>The unit</dt>
         <dd>S = ops / &radic;n</dd>
-        <p>Group operations per square root of the group order, so rho is flat at every size.</p>
+        <p>Group operations per square root of the group order, so rho is flat at every size.
+          Counted end to end across every phase &mdash; setup, relation finding, the
+          decomposition oracle and linear algebra &mdash; because end-to-end speed is the
+          measure of speed: a phase-only crossover is a diagnostic, not a win.</p>
       </div>
       <div class="fact">
         <dt>Boundary 1 · the floor</dt>
@@ -949,6 +959,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
             <td class="n"><strong>67.29</strong></td><td class="n"><strong>6.9</strong></td>
             <td class="n"><strong>2^+6.48</strong></td>
             <td><span class="chip">accounting</span></td></tr>
+          <tr><td><em>Floor of this family &mdash; a bound, not a search result</em></td>
+            <td class="n"><em>65.54</em></td><td class="n"><em>2.06</em></td>
+            <td class="n"><em>2^+4.73</em></td>
+            <td><span class="chip">boundary</span></td></tr>
           <tr><td>Homogeneous relations at m = 28</td><td class="n">56.76</td>
             <td class="n">0.018</td><td class="n">2^&minus;4.05</td>
             <td><span class="chip relabel">relabelling</span></td></tr>
@@ -963,6 +977,20 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         quotiented table, 1,011 EB charged at zero. The structure is run end to
         end on small curves and recovers a planted logarithm in 6 of 6 cells
         (<code>amortised_attack.json</code>).</p>
+      <p><strong>Parity is below the floor, so it is unreachable rather than unreached.</strong>
+        Balancing the build against the streamed side collapses every configuration to
+        total = 2&radic;(K&#8321;&thinsp;&middot;&thinsp;U&thinsp;&middot;&thinsp;C(n,s)&thinsp;&middot;&thinsp;r)
+        with K&#8321; = 0.265358. U&thinsp;&ge;&thinsp;2 (one orbit, plus d) and
+        C(n,s)&thinsp;&ge;&thinsp;n&thinsp;&ge;&thinsp;2, so every configuration costs at least
+        <strong>2<sup>65.54</sup></strong> whatever the support size, relation
+        length, split or table layout. The reference is 2<sup>60.81</sup>: parity sits
+        2<sup>-4.73</sup> <em>below</em> the floor, and closing it would need the
+        constant to fall 26.6&times; with nothing left to take it from.
+        Structurally, the 262 automorphisms enter rho&rsquo;s constant <em>inside</em> its square
+        root, while the Frobenius quotient divides index calculus&rsquo;s unknown count and table
+        size &mdash; both real, worth 2<sup>14</sup> together, and neither touching the square root
+        a two-list collision search over a space of size r must pay. Moving it needs a
+        decomposition oracle cheaper than that square root, not a better constant.</p>
       <p><strong>Decomposing the points is not the hard part; finding the decomposition is.</strong>
         At the challenge parameters a target of ECC2K-130 does have factor-base decompositions
         &mdash; the yield law C(|F|,&thinsp;m)/#E holds to within 1.09&times; over twelve toy cells (one small-base outlier at 0.57&times; aside),
@@ -1138,6 +1166,40 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         and <a href="https://github.com/aburan28/crypto/blob/main/research/index_calculus_baseline_20260914/ec_index_calculus_contract.json">contract</a>.
         Existing attack verdicts and exponents are unchanged.</p>
     </div>
+  </div>
+
+  <div class="panel" id="wdsat-ic-unification-20260920">
+    <div class="panel-head">
+      <h2>WDSat as an IC decomposition oracle</h2>
+      <p>Class <span class="chip">engineering</span>. The Semaev / Weil system used by
+        native CDCL is emitted in Trimoska ANF and solved by an external WDSat binary
+        through <code>DecompositionStrategy::Wdsat</code> /
+        <code>ic run --solver wdsat</code>. Same algebraic question as
+        <code>--solver sat</code>; ratio to the free-oracle floor is unchanged.
+        ECC2K-130 sits in the prime-degree family; full-size attack costs are not moved.
+        Note: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md">RESEARCH_WDSAT_IC_UNIFICATION.md</a>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Planted two-summand agreement on <code>K_1/F_2^7</code> (prime degree),
+        identical Frobenius-invariant factor base, independent group lift.
+        WDSat pin <code>61c6ff3</code> via the frozen baseline builder.</caption>
+      <thead><tr><th scope="col">Variant</th><th scope="col">Planted lift</th>
+        <th scope="col">Agrees with native SAT</th><th scope="col">S / rho / floor</th>
+        <th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><td>Native <code>--solver sat</code></td><td>yes</td><td>—</td>
+          <td>Unmeasured (stage oracle)</td><td>Reference</td></tr>
+        <tr><td><code>--solver wdsat</code></td><td>yes</td><td>yes</td>
+          <td>Unmeasured (floor ratio flat)</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td><code>--solver mq-fes</code> (libfes FFS Gray + Möbius; <code>m=2</code>)</td><td>yes</td><td>yes</td>
+          <td>Unmeasured (floor ratio flat); FFS Gray <code>find_one</code> ~273× Möbius, ~33× prior O(n)/step Gray on <code>n=18</code></td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Monica hybrid (ALMASTY <code>monica.c</code>)</td><td>—</td><td>agrees with Gray/Möbius on toys</td>
+          <td>Range extension for <code>n&gt;24</code>; not faster than Möbius inside the cap (~0.22× on <code>n=14,m=32</code>)</td>
+          <td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table></div>
   </div>
 
   <div class="panel" id="ec-regression-v2">
@@ -1456,6 +1518,49 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <section aria-labelledby="genus-crossover" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="genus-crossover">Hyperelliptic: the crossover has a measured exponent</h2>
+    <p>The one family in this ledger that measures below a real rho. With <code>N</code> the
+    subgroup order, rho costs <code>&radic;N</code> at any genus while the relation stage is
+    <code>(m+1)&middot;g!</code>, so
+    <code>S<sub>ic</sub>/S<sub>rho</sub> &prop; g!&middot;N<sup>1/g &minus; 1/2</sup></code>.
+    Pre-registered with its falsification list before measuring, in
+    <code>research/notes/index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md</code>.</p>
+    <table><caption>Genus exponent fit against <code>log&#8322; N</code>, rho&rsquo;s walk
+    renormalised to <code>&radic;(&pi;/2)</code>. Every run returned its verified
+    <code>k</code>.</caption><thead><tr>
+      <th scope="col" class="n">g</th><th scope="col" class="n">predicted slope</th>
+      <th scope="col" class="n">measured</th><th scope="col" class="n">R&sup2;</th>
+      <th scope="col" class="n">best ratio</th><th scope="col">Class</th>
+    </tr></thead><tbody>
+      <tr><td class="n">2</td><td class="n">0.000</td><td class="n">&minus;0.027</td><td class="n">0.24</td><td class="n">0.94</td><td><span class="chip">baseline, no trend</span></td></tr>
+      <tr><td class="n">3</td><td class="n">&minus;0.167</td><td class="n"><strong>&minus;0.154</strong></td><td class="n">0.98</td><td class="n">0.38 at <code>N</code>&thinsp;=&thinsp;2<sup>22</sup></td><td><span class="chip advance">advance, exponent</span></td></tr>
+      <tr><td class="n">4</td><td class="n">&minus;0.250</td><td class="n"><strong>&minus;0.275</strong></td><td class="n">0.96</td><td class="n"><strong>0.21</strong> at <code>N</code>&thinsp;=&thinsp;2<sup>24</sup></td><td><span class="chip advance">advance, exponent</span></td></tr>
+    </tbody></table>
+    <p><strong>Two corrections belong on this row and both cut against it.</strong> The fit was
+    pre-registered against <code>log&#8322; p</code> with slopes <code>1 &minus; g/2</code>, and
+    genus 4 missed it at &minus;1.611 against &minus;1.0. The law is not wrong; the step from
+    <code>N</code> to <code>p</code> is, and it was this thread&rsquo;s: the harness picks a
+    prime-order subgroup above <code>lo/4</code>, and <code>N</code> measures as
+    <code>p<sup>1.91</sup></code>, <code>p<sup>3.20</sup></code> and
+    <code>p<sup>5.94</sup></code>. Restated against <code>N</code>, every genus lands inside
+    the band.</p>
+    <p>And the reference degrades where it matters. <code>S<sub>walk</sub></code>, rho&rsquo;s
+    walk alone, must sit near <code>1.2533</code>; it drifts to 1.71, 1.82 and
+    <strong>2.10</strong> on the three largest rows while genus 2 stays flat near 1.3. A
+    reference that worsens as the group grows flatters the algorithm under study, so every
+    ratio here renormalises the walk to the ideal and leaves rho&rsquo;s measured
+    precomputation alone. The best row reads <strong>0.13 raw and 0.21 corrected</strong>: the
+    correction nearly halves the claim, and that row&rsquo;s walk is 68% above ideal, so it is
+    also the least trustworthy correction. <strong>0.21 is the number to quote</strong>, and
+    the walk needs fixing before it is quoted hard.</p>
+    <p>Scope: <code>p &le; 251</code>, <code>N &le; 2<sup>24</sup></code>, one machine, full
+    degree-1 factor base. The <code>O(p)</code> factor-base build that dominates at
+    cryptographic size is not modelled, so this is a statement about the shape of the curve,
+    not its position. Frozen source:
+    <a href="https://github.com/aburan28/crypto/blob/main/experiments/hyperelliptic_exponent_fit.json">hyperelliptic_exponent_fit.json</a>.</p>
+  </section>
+
   <section aria-labelledby="g7-native-result" style="margin:3rem 0;overflow-x:auto">
     <h2 id="g7-native-result">ECC2K-130 GPU engineering: G7 native arithmetic</h2>
     <p>Completed on one RTX PRO 4500 Blackwell Server Edition. All device and integration
@@ -1574,7 +1679,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
   </section>
 
   <footer>
-    <p>Source: <code>RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
+    <p>Source: <code>research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md</code> &sect;&sect;9&ndash;11 with the frozen data in
       <code>experiments/20_residual_walk_*.json</code> and <code>experiments/21_gaudry_cubic*.json</code>,
       with the pair-only cells from <code>gaudry_cubic_bench --pair-only</code> and the closed routes
       from <code>examples/fixed_x1_oracle.rs</code> and <code>examples/blocked_macaulay_bench.rs</code>.
@@ -2222,6 +2327,39 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/goal28/occupancy-summary.json">frozen paired receipt</a>;
       <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/GOAL28-RESULTS.md">report and complete raw evidence</a>.</p>
   </section>
+  <section aria-labelledby="per-sm-waves-result" style="margin:3rem 0;overflow-x:auto">
+    <h2 id="per-sm-waves-result">ECC2K-130 GPU engineering: per-SM oversubscribed waves</h2>
+    <p><span class="chip">engineering</span> Same packed walk, 5.3125 field products per
+      update, <code>MINBLOCKS=2</code>. Automatic occupancy is one wave; the 6000 shipping
+      preset is four. 6&times; and 8&times; were unmeasured. Unit: M complete scalar updates
+      per SM per second, so the 6000 integer-pipe remainder is a flat &asymp;85. One Modal
+      allocation per SKU, one binary, waves 1/4/6/8, batch 16, 256-thread blocks, three
+      complete-scalar repeats. Live 6000 searchers stay on 385,024 workers.</p>
+    <table><thead><tr><th scope="col">GPU / waves</th><th scope="col">Workers</th><th scope="col">Median B/s</th><th scope="col">M it/s/SM</th><th scope="col">/ 4-wave</th><th scope="col">/ pipe &asymp;85</th><th scope="col">Class</th><th scope="col">Correctness</th></tr></thead>
+      <tbody>
+        <tr><td>RTX PRO 6000 shipping (other allocation)</td><td>385024</td><td>15.115792</td><td>80.40</td><td>&mdash;</td><td>0.946</td><td>reference</td><td>top-clmad control</td></tr>
+        <tr><td>RTX-PRO-6000 &times;1</td><td>96256</td><td>14.479876</td><td>77.02</td><td>0.970</td><td>0.906</td><td>engineering</td><td>3/3, 104 regs, clmad 1</td></tr>
+        <tr><td>RTX-PRO-6000 &times;4</td><td>385024</td><td>14.932231</td><td>79.43</td><td>1.000</td><td>0.934</td><td>engineering</td><td>3/3, 188 SMs, 2&times;256 resident</td></tr>
+        <tr><td>RTX-PRO-6000 &times;6</td><td>577536</td><td>14.861568</td><td>79.05</td><td>0.995</td><td>0.930</td><td>engineering</td><td>3/3, same allocation</td></tr>
+        <tr><td>RTX-PRO-6000 &times;8</td><td>770048</td><td>14.844084</td><td>78.96</td><td>0.994</td><td>0.929</td><td>engineering</td><td>3/3, same allocation</td></tr>
+        <tr><td>L40S &times;1</td><td>72704</td><td>8.618576</td><td>60.69</td><td>1.115</td><td>0.714</td><td>engineering</td><td>3/3, 94 regs, clmad 1</td></tr>
+        <tr><td>L40S &times;4</td><td>290816</td><td>7.727937</td><td>54.42</td><td>1.000</td><td>0.640</td><td>engineering</td><td>3/3, 142 SMs, 2&times;256 resident</td></tr>
+        <tr><td>L40S &times;6</td><td>436224</td><td>7.464325</td><td>52.57</td><td>0.966</td><td>0.618</td><td>engineering</td><td>3/3, same allocation</td></tr>
+        <tr><td>L40S &times;8</td><td>581632</td><td>7.268352</td><td>51.19</td><td>0.941</td><td>0.602</td><td>engineering</td><td>3/3, same allocation</td></tr>
+      </tbody></table>
+    <p>&ldquo;More waves help the 6000&rdquo; is falsified: 6&times; and 8&times; are both
+      &le; 4&times; per-SM (0.995 and 0.994), and neither is &gt;1% above the 4-wave row on
+      that allocation. &ldquo;The survey starved other SMs&rdquo; is falsified on L40S:
+      4&times; is 0.897 of 1&times;. The 85 floor is a 6000 pipe remainder; L40S is not
+      asked to cross it. Campaign default stays four waves on the 6000. Occupancy on that
+      part is spent; remaining headroom is instruction cuts.</p>
+    <p>Frozen source:
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/per-sm/rtx-pro-6000-waves.json">6000 wave receipt</a>
+      (<a href="https://modal.com/apps/a-buran28/main/ap-CreQoLEbhXsEhB1glybxbo">ap-CreQoLEbhXsEhB1glybxbo</a>);
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/per-sm/l40s-waves.json">L40S wave receipt</a>
+      (<a href="https://modal.com/apps/a-buran28/main/ap-aNsvFhZH5TKB6fETEVUfLP">ap-aNsvFhZH5TKB6fETEVUfLP</a>);
+      <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/per-sm/WAVES.md">boundaries and table</a>.</p>
+  </section>
 <!-- BEGIN ic-tournament-round-autolab-20260915 -->
 <section class="panel" id="ic-tournament-round-autolab-20260915">
 <div class="panel-head"><h2>Complete IC candidate tournament</h2>
@@ -2726,5 +2864,190 @@ this is kernel engineering, not a full-DLP or asymptotic improvement.</p>
 <table><thead><tr><th>Variant</th><th>Median B updates/s</th><th>/ paired baseline</th><th>/ 25 B target</th><th>Replay</th></tr></thead><tbody><tr><td>Baseline (engineering)</td><td>17.295877</td><td>1.000000</td><td>0.691835</td><td>600/600, zero dropped</td></tr><tr><td>Inline single (engineering)</td><td>17.296764</td><td>1.000051</td><td>0.691871</td><td>600/600, zero dropped</td></tr><tr><td>Inline paired (engineering)</td><td>17.940329</td><td>1.037260</td><td>0.717613</td><td>600/600, zero dropped</td></tr><tr><td>Inline both (engineering)</td><td>17.946263</td><td>1.037604</td><td>0.717851</td><td>600/600, zero dropped</td></tr></tbody></table>
 <p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/results.json">results</a>;
 <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/benchmarks/throughput-25b-inline/README.md">report and reproduction</a>.</p></section>
+<!-- BEGIN auxiliary-inputs-20260918 -->
+<section class="panel" id="auxiliary-inputs-20260918">
+<div class="panel-head"><h2>Auxiliary inputs and torsion points against rho <span class="chip advance">advance, DLPwAI only</span></h2>
+<p>Frozen source: <code>research/torsion_auxiliary_inputs_20260918/results/*.json</code>, tables in its <code>RESULTS.md</code>; note <code>research/notes/ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md</code>. Unit S = ops / &radic;p, affine additions, every phase charged, medians over three planted secrets, every row verified. Rows marked DLPwAI were handed <code>[&alpha;^d]G</code> (or <code>[&alpha;^i]G</code>, i &le; 2d) by the problem and are scored against that problem's generic floor &radic;(p/d); no row that sees only G and [&alpha;]G moved, as the &Omega;(&radic;p) floor requires. The torsion-embedding route (an auxiliary curve's [d]-map in place of F<sub>p</sub><sup>*</sup>) is closed by measurement. No index-calculus row exists: the inputs' logarithms are polynomially related and the relation matrix is linear.</p></div>
+<div class="table-scroll"><table>
+<caption>p &minus; 1 case, d &asymp; p<sup>1/2</sup>, inputs G, [&alpha;]G, [&alpha;<sup>d</sup>]G. Fitted exponents over seven sizes (24&ndash;48 bits): rho 0.487, comb 0.231, naive 0.297, kangaroo 0.310.</caption>
+<thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho</th><th>ops / &radic;(p/d)</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>Pollard rho (sees G, [&alpha;]G only)</td><td>24 / 32 / 40 / 48</td><td>1.317 / 2.007 / 1.638 / 0.926</td><td>1</td><td>&mdash;</td><td>21/21</td><td><span class="chip">reference</span></td></tr>
+<tr><td>plain BSGS, d baby steps (old <code>cheon_attack.rs</code>)</td><td>24 / 28 / 32</td><td>1.714 / 1.697 / 1.710</td><td>1.30 / 2.72 / 0.85</td><td>&mdash;</td><td>9/9</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>Cheon p&minus;1, BSGS, naive scalar mults</td><td>24 / 32 / 40 / 48</td><td>1.481 / 0.530 / 0.140 / 0.051</td><td>1.13 / 0.26 / 0.086 / 0.055</td><td>86 / 118 / 138 / 306</td><td>21/21</td><td><span class="chip advance">advance, DLPwAI</span></td></tr>
+<tr><td>Cheon p&minus;1, BSGS, fixed-base comb</td><td>24 / 32 / 40 / 48</td><td>0.370 / 0.090 / 0.016 / 0.004</td><td>0.28 / 0.045 / 0.010 / 0.004</td><td>21.5 / 20.1 / 15.3 / 24.2</td><td>21/21</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>Cheon p&minus;1, kangaroo, comb</td><td>24 / 32 / 40 / 48</td><td>1.101 / 0.363 / 0.065 / 0.043</td><td>0.84 / 0.18 / 0.039 / 0.047</td><td>64 / 81 / 63 / 262</td><td>21/21</td><td><span class="chip">engineering, memory</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>p + 1 case, d &asymp; p<sup>1/3</sup>, inputs [&alpha;<sup>i</sup>]G for i &le; 2d. Fitted exponents over five sizes (24&ndash;40 bits): rho 0.503, Cheon 0.355. The polynomial phase (3(2d+1) multi-scalar terms) is 85&ndash;93% of the total.</caption>
+<thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho</th><th>ops / &radic;(p/d)</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>Pollard rho</td><td>24 / 32 / 40</td><td>1.428 / 1.189 / 1.411</td><td>1</td><td>&mdash;</td><td>15/15</td><td><span class="chip">reference</span></td></tr>
+<tr><td>Cheon p+1, BSGS, comb</td><td>24 / 32 / 40</td><td>10.04 / 3.43 / 1.94</td><td>7.0 / 2.9 / 1.37</td><td>179 / 126 / 184</td><td>15/15</td><td><span class="chip advance">advance, DLPwAI</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Torsion-point route (Kim&ndash;Cheon elliptic embedding), d &asymp; p<sup>1/4</sup>, d&sup2; inputs. Honest = the only computable comparison (pairwise, cross-multiplied); oracle = handed the exponent quotient, not an attack.</caption>
+<thead><tr><th>Variant</th><th>bits</th><th>S</th><th>vs rho (S &asymp; 1.3)</th><th>ops / &radic;(p/d)</th><th>Answer</th><th>Class</th></tr></thead><tbody>
+<tr><td>torsion embedding, honest</td><td>14 / 16 / 18 / 20</td><td>677&ndash;2,242 / 1,106&ndash;1,870 / 2,360&ndash;6,988 / 8,976&ndash;15,833</td><td>500&ndash;12,000&times;, rising</td><td>1,659&ndash;100,138</td><td>10/12 (2 runs found no pair, full cost recorded)</td><td><span class="chip relabel">closed</span></td></tr>
+<tr><td>torsion embedding, oracle quotient</td><td>14 / 16 / 18 / 20</td><td>8.6&ndash;27.5 / 10.6&ndash;35.0 / 8.6&ndash;20.6 / 9.8&ndash;22.0</td><td>&mdash;</td><td>33&ndash;139</td><td>collision 12/12</td><td>not a row (uses &alpha;)</td></tr>
+</tbody></table></div>
+<p>What a leak would buy on standard curves (<code>results/curve_divisors.md</code>): the largest divisor of n&minus;1 below 2<sup>32</sup> is 18,051,648 on secp256k1, 4.26&middot;10<sup>9</sup> on P-256, 2<sup>32</sup> on BLS12-381 and 4.29&middot;10<sup>9</sup> on BN254, so a protocol publishing 2<sup>32</sup> powers hands over a 2<sup>12</sup>&ndash;2<sup>16</sup> exponent-side reduction; Curve25519's &ell;&minus;1 has nothing above 132. The 2<sup>256</sup> extrapolation with d &asymp; 2<sup>128</sup> (&asymp; 21&middot;2<sup>64</sup> operations) rests on the 0.231 exponent and on a leak no protocol provides; it is marked as extrapolation.</p>
+</section>
+<!-- END auxiliary-inputs-20260918 -->
+<!-- BEGIN ic-tournament-round-0016 -->
+<section class="panel" id="ic-tournament-round-0016">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0016/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0016/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0016/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,374</td><td>1</td><td>0.813</td><td>2.136e+05</td><td>18/18</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>2,997</td><td>0.8882</td><td>0.7221</td><td>1.897e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,151</td><td>1.23</td><td>1</td><td>unmeasured</td><td>18/18</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,531</td><td>1</td><td>0.8348</td><td>2.235e+05</td><td>54/54</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>3,130</td><td>0.8865</td><td>0.74</td><td>1.981e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,230</td><td>1.198</td><td>1</td><td>unmeasured</td><td>54/54</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,869</td><td>1</td><td>0.8383</td><td>2.192e+05</td><td>288/288</td><td>reference</td></tr>
+<tr><td>scan_io</td><td>3,433</td><td>0.8873</td><td>0.7438</td><td>1.945e+05</td><td>288/288</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,616</td><td>1.193</td><td>1</td><td>unmeasured</td><td>288/288</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.252</td><td>1</td><td>reference</td><td>0.9779</td><td>288/288</td></tr>
+<tr><td>scan_io</td><td>1.225</td><td>0.978</td><td>[0.960814677461623, 0.9947467695163384]</td><td>0.9564</td><td>288/288</td></tr>
+<tr><td>rho</td><td>1.281</td><td>1.023</td><td>[0.9721719623543028, 1.07094965995282]</td><td>1</td><td>288/288</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0016 -->
+<!-- BEGIN ic-tournament-round-0017 -->
+<section class="panel" id="ic-tournament-round-0017">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>promoted: orbits</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0017/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0017/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0017/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,383</td><td>1</td><td>0.8969</td><td>2.141e+05</td><td>18/18</td><td>reference</td></tr>
+<tr><td>orbits</td><td>2,815</td><td>0.8321</td><td>0.7464</td><td>1.782e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>orbits_rows</td><td>2,828</td><td>0.8359</td><td>0.7497</td><td>1.79e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>2,993</td><td>0.8847</td><td>0.7935</td><td>1.894e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3,771</td><td>1.115</td><td>1</td><td>unmeasured</td><td>18/18</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,462</td><td>1</td><td>0.9226</td><td>2.191e+05</td><td>54/54</td><td>reference</td></tr>
+<tr><td>orbits</td><td>2,884</td><td>0.833</td><td>0.7685</td><td>1.825e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>orbits_rows</td><td>3,002</td><td>0.8671</td><td>0.8</td><td>1.9e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>scan_io</td><td>3,067</td><td>0.8859</td><td>0.8174</td><td>1.941e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3,752</td><td>1.084</td><td>1</td><td>unmeasured</td><td>54/54</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,821</td><td>1</td><td>0.8056</td><td>2.165e+05</td><td>288/288</td><td>reference</td></tr>
+<tr><td>orbits</td><td>3,178</td><td>0.8319</td><td>0.6702</td><td>1.801e+05</td><td>288/288</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,743</td><td>1.241</td><td>1</td><td>unmeasured</td><td>288/288</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.193</td><td>1</td><td>reference</td><td>0.9556</td><td>288/288</td></tr>
+<tr><td>orbits</td><td>1.124</td><td>0.9417</td><td>[0.9172232193663789, 0.9640014454071378]</td><td>0.8999</td><td>288/288</td></tr>
+<tr><td>rho</td><td>1.249</td><td>1.046</td><td>[1.0092476671270958, 1.0831044142392454]</td><td>1</td><td>288/288</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0017 -->
+<section class="panel" id="crossbred-20260920">
+<h2>Crossbred as a decomposition oracle: fastest oracle, still loses the pipeline</h2>
+<p>Joux&ndash;Vitse Crossbred wired into Koblitz index calculus as
+<code>DecompositionStrategy::Crossbred</code> (Route 1 of the ECC2K-130 routes note,
+whose metric and falsifier were declared before this run). Two phases, two units, because
+the oracle result and the pipeline result point opposite ways. Frozen source:
+<a href="https://github.com/aburan28/crypto/blob/main/research/crossbred_20260920/oracle_ladder.txt">oracle ladder</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/crossbred_20260920/e2e_panel.txt">end-to-end panel</a>.
+Write-up: <code>research/notes/ecc2k130/RESEARCH_ECC2K130_CROSSBRED.md</code>.</p>
+<div class="table-scroll"><table>
+<caption>Oracle phase. Unit: bit operations, one 64-bit word XOR = 64 bit ops. Boundary: exhaustive
+search over the Boolean system, 2<sup>v</sup>&middot;T. The declared metric is the wall-clock
+xb/F4 ratio at m = 3; the falsifier was xb/F4 &ge; 1 and does not fire.</caption>
+<thead><tr><th>Variant</th><th>n / m</th><th>xb/brute</th><th>xb/F4 (bit ops)</th><th>xb/F4 (wall)</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>Exhaustive search over the system</td><td>&mdash;</td><td>1</td><td>&mdash;</td><td>&mdash;</td><td>Reference root set where it fits</td><td><span class="chip">boundary</span></td></tr>
+<tr><td>Matrix-F4 at the deciding degree</td><td>9/2, 13/2, 7/3, 9/3</td><td>&mdash;</td><td>1</td><td>1</td><td>Certificate never contradicts the reference</td><td><span class="chip">reference</span></td></tr>
+<tr><td>Crossbred, best (D, k) per rung</td><td>9/2, 13/2, 7/3, 9/3</td><td>0.120 / 0.001 / 0.016 / &mdash;</td><td>0.004 / 0.002 / 0.013 / 0.023</td><td>0.021 / 0.053 / 0.040 / <strong>0.696</strong></td><td>Root-set equality where exhaustive fits; two one-sided checks past v = 24; all rows agree</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>&nbsp;&nbsp;&mdash; margin vs. size</td><td>m = 3: n 7 &rarr; 9</td><td>&mdash;</td><td>&mdash;</td><td>0.040 &rarr; 0.696, rising</td><td>Two rungs; no exponent fitted</td><td><span class="chip">shrinking; one rung decides</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Whole pipeline, strategy the only variable: same curve, factor base, m, seed, trial cap and
+linear algebra, with the generic aG+bQ=O shortcut counted and skipped. Unit: relations per second
+over relation-collection time. Reference arm is exhaustive enumeration &mdash; the null object.
+S against the group order is <strong>uncalibrated</strong> here: this prices a phase, not a full
+priced attack, and does not belong in the normalized rho claim.</caption>
+<thead><tr><th>Variant</th><th>Full-DLP S</th><th>Cost / rho</th><th>relations/s, n=9 m=2</th><th>relations/s, n=9 m=3</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>Enumerate (null object)</td><td>Uncalibrated</td><td>Uncalibrated</td><td>51,103.0</td><td>21,330.5</td><td>Planted scalar recovered on every row</td><td><span class="chip">reference</span></td></tr>
+<tr><td>Crossbred</td><td>Uncalibrated</td><td>Uncalibrated</td><td>4,672.2 (0.09&times;)</td><td>11.8 (0.0006&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">engineering at m = 2; worst arm at m = 3</span></td></tr>
+<tr><td>Gr&ouml;bner</td><td>Uncalibrated</td><td>Uncalibrated</td><td>613.9 (0.01&times;)</td><td>32.3 (0.0015&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">prior arm</span></td></tr>
+<tr><td>SAT</td><td>Uncalibrated</td><td>Uncalibrated</td><td>1,654.1 (0.03&times;)</td><td>51.9 (0.0024&times;)</td><td>Planted scalar recovered on every row</td><td><span class="chip">prior arm</span></td></tr>
+<tr><td>Reading the oracle win as a pipeline win</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td><span class="chip relabel">relabelling &mdash; named so it is not claimed later</span></td></tr>
+</tbody></table></div>
+<p>No row is an advance. The floor is &Theta;(2<sup>n</sup>) relation collection with any oracle
+polynomial in the factor base, and every arm sits against it identically; a faster oracle buys reach,
+not an exponent. One structural finding carries the whole round: <strong>no (D, k) in the sweep
+produced a single filter</strong>, so on these systems Crossbred is Macaulay preprocessing in front of
+2<sup>k</sup> linear solves, paid per target &mdash; which is what the decaying wall-clock margin measures.</p>
+</section>
+<!-- END crossbred-20260920 -->
+<section class="panel" id="wdsat-rr-20260920">
+<h2>The Riemann&ndash;Roch encodings in front of WDSat: one engine win, one tool ceiling</h2>
+<p>WDSat is the Weil-descent SAT solver this repository vendors for the frozen S4 regression; the
+Riemann&ndash;Roch incidence and norm frontends had never been put in front of it. New ANF exporter
+(<code>ecc2k130/codegen/wdsat.py</code>) and matched suite. Frozen source:
+<a href="https://github.com/aburan28/crypto/blob/main/research/wdsat_rr_20260920/panel_n9.txt">n = 9 panel</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/wdsat_rr_20260920/ceiling.txt">solver ceiling probe</a>.
+Write-up: <code>research/notes/ecc2k130/RESEARCH_ECC2K130_WDSAT.md</code>.
+<strong>Not a run of the frozen S4 regression</strong> &mdash; a different encoding is a different
+instance family and, because WDSat's structures are statically allocated, a differently compiled
+binary, so AGENTS.md &sect;8's equivalent-suite route applies.</p>
+<div class="table-scroll"><table>
+<caption>Eight targets per formulation at n = 9, ten-second budget, both arms on the identical
+equations. Unit: conflicts, each solver's own counter. A timeout is neither a model nor a refutation;
+a crash is neither, and is reported as neither.</caption>
+<thead><tr><th>Variant</th><th>Full-DLP S</th><th>Cost / rho</th><th>Decided / 8</th><th>Conflicts, median</th><th>Correctness</th><th>Class / status</th></tr></thead><tbody>
+<tr><td>RR norm &mdash; WDSat, Gaussian (<code>-x</code>)</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td><strong>62</strong></td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>RR norm &mdash; WDSat, plain</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td>79,151.5</td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">paired control</span></td></tr>
+<tr><td>RR norm &mdash; CryptoMiniSat</td><td>Uncalibrated</td><td>Uncalibrated</td><td>8</td><td>not reported by the binding</td><td>8/8 witnesses reconstruct; 0 invalid</td><td><span class="chip">reference</span></td></tr>
+<tr><td>RR incidence &mdash; WDSat, either configuration</td><td>&mdash;</td><td>&mdash;</td><td><strong>0</strong></td><td>&mdash;</td><td>SIGSEGV before any output; instance exceeds the static allocation</td><td><span class="chip">does not reach the solver</span></td></tr>
+<tr><td>RR incidence &mdash; CryptoMiniSat</td><td>Uncalibrated</td><td>Uncalibrated</td><td>7</td><td>not reported by the binding</td><td>7/7 witnesses reconstruct; 0 invalid</td><td><span class="chip">reference</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>The reusable boundary: WDSat's static allocation, measured with a one-variable trivially
+satisfiable probe so nothing about an encoding is involved. monomials_to_column is
+__MAX_ANF_ID__ &times; (__MAX_ID__+1) &times; (__MAX_DEGREE__&minus;1) of uint_fast64_t.</caption>
+<thead><tr><th>__MAX_ANF_ID__</th><th>__MAX_ID__</th><th>Product (M entries)</th><th>Result</th></tr></thead><tbody>
+<tr><td>3,938</td><td>5,314</td><td>20.9</td><td>runs (RR norm at n = 9 sits here)</td></tr>
+<tr><td>4,300</td><td>5,314</td><td>22.9</td><td>runs</td></tr>
+<tr><td>4,500</td><td>5,314</td><td>23.9</td><td>SIGSEGV</td></tr>
+<tr><td>4,875</td><td>6,656</td><td>32.5</td><td>SIGSEGV (RR incidence at n = 9 sits here)</td></tr>
+</tbody></table></div>
+<p><strong>Two things this round did not get.</strong> Its pre-registered success condition asked WDSat to
+decide an RR-incidence instance CryptoMiniSat leaves undecided; incidence does not reach the solver at
+all, so the condition is unmeetable and the round is abandoned on its own terms for that formulation.
+And the declared unit is unavailable on the reference arm &mdash; <code>pysat</code> reports no conflict
+count for CryptoMiniSat &mdash; so the cross-solver comparison in conflicts <em>cannot be made</em>; only the
+within-WDSat pairing is claimed, and seconds are not promoted to the metric to paper over the gap.
+No row is an advance: relation collection stays &Theta;(2<sup>n</sup>) with any oracle polynomial in the
+factor base, and this prices a decomposition oracle.</p>
+</section>
+<!-- END wdsat-rr-20260920 -->
 </body>
 </html>

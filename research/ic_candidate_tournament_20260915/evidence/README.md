@@ -31,7 +31,9 @@ general arithmetic in words, `--archive round-0012` for the musl static
 executable with the arena allocator, `--archive round-0013` for the scalar
 products in projective coordinates, `--archive round-0014` for the worker
 built as one optimisation unit, `--archive round-0015` for the scan and the
-resolution limit of the native gate, `--archive round-0007` and
+resolution limit of the native gate, `--archive round-0016` for the widened
+eight-cell panel on which `beats_rho_strict` fails, `--archive round-0017` for the
+orbit-representative certificate that restores it on all eight, `--archive round-0007` and
 `--archive round-0006` for the strict-win and parity rounds it built on),
 `--archive round-0005-batch16` or `--archive round-0006-batch16` for the
 16-target rounds, or `--out /absolute/path/to/evidence` to restore elsewhere.
@@ -44,7 +46,7 @@ to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014` and `round-0015` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015`, `round-0016` and `round-0017` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
@@ -114,7 +116,25 @@ two IC-only challengers from round-0013's source (`round14-lto.patch`,
 `round14-arena-tests.patch`, `round14-canon.patch`, `round14-fastio.patch`,
 `round14_candidates.py`, `round-0014.tar.zst`), and round-0015's two IC-only
 challengers from the unchanged round-0014 source (`round15-scan.patch`,
-`round15-fastio.patch`, `round15_candidates.py`, `round-0015.tar.zst`).
+`round15-fastio.patch`, `round15_candidates.py`, `round-0015.tar.zst`). Round-0016
+changed no source at all — both arms are the trees round-0015 sealed — so it ships
+its analysis instead: `round16_resolution.py`, `round16_cell_census.py`,
+`round16_floor_probe.py` with `round16-floor-probe.patch`, `round16_legacy_subset.py`
+and `round-0016.tar.zst`, whose 2,142 receipts carry both the eight-cell verdict and,
+through the legacy-subset script, the five-cell one computed from the same trials. Round-0017
+ships `round17-orbits.patch`, `round17-rows.patch`, `round17-oracle-orbits.patch` (the checker's
+second certificate format), `round17_candidates.py`, `round17_base_sweep.py`, `round17_measure.py`
+and `round-0017.tar.zst`, whose 2,340 receipts include both certificate formats side by side on
+the development and selection fixtures where `scan_io` and `orbits` both ran.
+
+The first `round-0017.tar.zst` (sha256 `48a120ed19c5f2141cc1f5c7d879dd721b6705a82760b581a9fc56f888dc15ae`,
+committed in b9b0fee) was packed before `report.py` had produced its outputs: the
+report's support audit did not yet understand the orbit-named certificate and
+failed, and the post-run chain masked the failure. That archive holds the same
+2,340 receipts and the same decision but no `REPORT.md`, `measurements.json` or
+`admission.json`. It is superseded, not rewritten: the archive the manifest now
+names was packed from the identical receipts after the report ran, and the
+earlier hash is recorded here so the two cannot be confused.
 Generate a new registry with `tournament.py propose --from-round ...` to obtain
 local paths before preparing a new experiment with a new seed.
 

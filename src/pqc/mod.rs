@@ -21,6 +21,7 @@ pub mod bike;
 pub mod classic_mceliece;
 pub mod csidh;
 pub mod faest;
+pub mod fast;
 pub mod fn_dsa;
 pub mod frodo;
 pub mod hawk;

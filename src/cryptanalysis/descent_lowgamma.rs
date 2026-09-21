@@ -46,8 +46,8 @@
 //!
 //! ## References
 //!
-//! See `RESEARCH_FFD_PROOF_COMPLEXITY.md` (§3 expansion conjecture) and
-//! `RESEARCH_FFD_WORKFLOW.md` (EXP-E). Subfield index calculus: C. Diem,
+//! See `research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` (§3 expansion conjecture) and
+//! `research/notes/index-calculus/RESEARCH_FFD_WORKFLOW.md` (EXP-E). Subfield index calculus: C. Diem,
 //! *On the discrete logarithm problem in elliptic curves*, 2011.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};

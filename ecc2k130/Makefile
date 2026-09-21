@@ -25,7 +25,16 @@
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
 #   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
+#   TABLE_TAG_DENOM  reverse pass rebuilds d from the tag in hist; no
+#                    denominator field (default 0; ONE-BLOCK-GEOMETRY.md)
+#   TABLE_FUSED  one fused pass per step, alternating slot order (default 0)
+#   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
+#                      selection (default 0)
+#   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
+#   PHASE_PROFILE  clock64() timing of the walk's three phases, at exit
 #   ARCH     CUDA architectures
+#
+# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md.
 
 MODAL   ?= modal
 NVCC    ?= nvcc
@@ -86,6 +95,20 @@ TABLE_PIVOT_BYTES ?= 0
 TABLE_GLOBAL ?= 0
 # Hybrid: selection tables in shared, addend table in global.
 TABLE_ADDEND_GLOBAL ?= 0
+# Reverse pass rebuilds the denominator from the step tag in hist instead of
+# loading the 17-byte field the forward pass stored (no denominator field).
+TABLE_TAG_DENOM ?= 0
+# One fused pass per step: the reverse pass of step s runs step s+1's
+# selection and chain product on the point it just produced (needs TAG_DENOM).
+TABLE_FUSED ?= 0
+TABLE_FUSED_PIPE ?= 0
+# clock64() phase timing of the two-pass walk, printed at exit (diagnostic).
+PHASE_PROFILE ?= 0
+# Forward pass software-pipelined: slot k's products issue before slot k+1's
+# selection (needs TAG_DENOM; two-pass kernel only).
+TABLE_PIPE_SELECT ?= 0
+# Reverse pass issues the chain product before lambda's.
+PACKED_CHAIN_FIRST ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Keep experimental tuning independent: one change per comparison initially.
@@ -179,6 +202,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
+       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
@@ -250,6 +274,8 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testpolystateaudit.py'
 	python3 -m unittest discover -s codegen -p 'testdirectbuild.py'
 	python3 -m unittest discover -s codegen -p 'testnativebench.py'
+	python3 -m unittest discover -s codegen -p 'testirschedule.py'
+	python3 -m unittest discover -s codegen -p 'testwdsat.py'
 
 # The iteration exploits an automorphism group of order 2m, and the usual price
 # for that is fruitless cycles.  This iteration cannot have them -- it is
@@ -296,6 +322,28 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_status_walks.py -v
 	python3 -m unittest discover -s aws -p test_fleet_roll.py -v
 	python3 -m unittest discover -s aws -p test_rollout.py -v
+	python3 -m unittest discover -s aws -p test_dp_ingest.py -v
+	python3 -m unittest discover -s aws -p test_worker_spool.py -v
+	python3 -m unittest discover -s aws -p test_controlplane.py -v
+
+# The control plane against real Postgres, Redis and S3 rather than SQLite, a
+# fake and a directory.  `services.sh` brings the three up (docker compose
+# where there is a daemon, the host's own binaries where there is not), and
+# takes them down again whether the suite passed or failed.
+#
+# Not part of `test` or `test-production`: those must pass on a laptop with no
+# services and no network, which is what test_controlplane.py is for.
+test-integration:
+	aws/integration/services.sh up
+	@set -a; . build/integration/env; set +a; \
+	  python3 -m unittest discover -s aws -p test_integration.py -v; rc=$$?; \
+	  aws/integration/services.sh down; \
+	  exit $$rc
+
+# The clients production imports lazily.  Separate from the target above so
+# that a run cannot quietly install into somebody's system python.
+test-integration-deps:
+	python3 -m pip install -r aws/integration/requirements.txt
 
 certify-local: ecc2k130-cpu build/test-production
 	python3 aws/certify.py --output build/certification-local.json
@@ -516,6 +564,21 @@ bench-rtx-pro6000:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
+# The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
+# 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
+# from the step tag, the products inlined, the forward pass software-pipelined.
+# Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
+gpu-rtx-pro6000-20b:
+	$(MAKE) -B ecc2k130 ARCH="-gencode arch=compute_120,code=sm_120" \
+	    BATCH=16 THREADS=512 MINBLOCKS=1 \
+	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=1 \
+	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
+	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
+
 # Ada preset for the EC2 g6 (L4) and g6e (L40S) instance types, both sm_89.
 # It is the RTX PRO 6000 arithmetic/storage preset. CLMAD is on: the
 # preblackwell receipt measured 1.811× on L40S and 1.881× on L4 against the
@@ -552,6 +615,50 @@ bench-g6-modal:
 bench-g6e-modal:
 	$(MAKE) bench-ada-modal ADA_GPU=L40S
 
+# Datacenter Blackwell B200 (Modal), sm_100. Same arithmetic/storage preset as
+# the RTX PRO 6000; workers stay automatic — 385,024 is a 188-SM occupancy
+# and has no claim on a 148-SM part. See B200.md. B200_CLMAD=0 is the
+# software-product before-arm.
+B200_CLMAD ?= 1
+B200_ENV = ECC_GPU=B200 ECC_CUDA_VERSION=13.3.1 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=$(B200_CLMAD) ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
+                 ECC_PACKED_SHARED_SIGMA=1 \
+                 ECC_PACKED_TOP_CLMAD=0
+
+bench-b200-modal:
+	$(B200_ENV) $(MODAL) run modal_app.py::bench --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3
+
+validate-b200-modal:
+	$(B200_ENV) $(MODAL) run modal_app.py::validate --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2
+
+# Per-SM occupancy: several wave multipliers of automatic workers on one
+# allocation. See benchmarks/per-sm/WAVES.md. WAVES_GPU selects the part;
+# default is the campaign 6000. Does not change the shipping 385,024 preset.
+WAVES_GPU ?= RTX-PRO-6000
+WAVES_LIST ?= 1,4,6,8
+WAVES_ENV = ECC_GPU=$(WAVES_GPU) ECC_CUDA_VERSION=13.3.1 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=1 ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
+                 ECC_PACKED_SHARED_SIGMA=1 \
+                 ECC_PACKED_TOP_CLMAD=0
+
+bench-waves-modal:
+	$(WAVES_ENV) $(MODAL) run modal_app.py::waves --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3 --wave-list $(WAVES_LIST)
+
 # Turing T4 (EC2 g4dn), sm_75. Software product only; see T4-G4DN.md.
 T4_ENV = ECC_GPU=T4 ECC_CUDA_VERSION=13.3.1 \
                  ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
@@ -565,6 +672,27 @@ T4_ENV = ECC_GPU=T4 ECC_CUDA_VERSION=13.3.1 \
 
 bench-g4dn-modal:
 	$(T4_ENV) $(MODAL) run modal_app.py::bench --packed \
+	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+	    --steps 1024 --launches 32 --repeats 3
+
+# One matched packed-walk recipe on any Modal GPU type. Workers stay
+# automatic. SURVEY_CLMAD defaults on; T4 must pass 0 (no clmad on sm_75).
+# See benchmarks/modal-gpus/SURVEY.md. Do not pass --workers: 385,024 is a
+# 188-SM occupancy.
+SURVEY_GPU ?= L40S
+SURVEY_CLMAD ?= 1
+SURVEY_ENV = ECC_GPU=$(SURVEY_GPU) ECC_CUDA_VERSION=13.3.1 \
+                 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 \
+                 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 \
+                 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 \
+                 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 \
+                 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=$(SURVEY_CLMAD) ECC_PACKED_STATE_TILE=256 \
+                 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 \
+                 ECC_PACKED_SHARED_SIGMA=1 \
+                 ECC_PACKED_TOP_CLMAD=0
+
+bench-modal-gpu:
+	$(SURVEY_ENV) $(MODAL) run modal_app.py::bench --packed \
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3
 
@@ -625,4 +753,4 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean

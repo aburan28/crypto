@@ -97,7 +97,7 @@ For a conference (e.g., AsiaCrypt, CRYPTO, ANTS):
 
 6. **Cryptanalysis Workshops** (CHES, FDTC, COSADE) — better fit
    for the side-channel/HNP companion direction
-   (`RESEARCH_GLV_HNP.md`) than for the main structural-completeness
+   (`research/notes/lattice-hnp/RESEARCH_GLV_HNP.md`) than for the main structural-completeness
    theorem.
 
 ## Risks and weaknesses to address
@@ -128,7 +128,7 @@ For a conference (e.g., AsiaCrypt, CRYPTO, ANTS):
 ## Post-submission
 
 - [ ] Add a "Published in" line to README.md once accepted
-- [ ] Update PAPER_STRUCTURAL_COMPLETENESS.md with a link to the
+- [ ] Update research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md with a link to the
       ePrint / DOI
 - [ ] Continue developing the companion directions
       (Mestre algorithm, GLV-HNP) as follow-up papers

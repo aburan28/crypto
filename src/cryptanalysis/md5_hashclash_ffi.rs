@@ -29,7 +29,7 @@
 //! ## Usage (when fully wired)
 //!
 //! ```ignore
-//! use crypto::cryptanalysis::md5_hashclash_ffi::ChosenPrefixCollision;
+//! use crypto_lib::cryptanalysis::md5_hashclash_ffi::ChosenPrefixCollision;
 //!
 //! let prefix_p = b"Alice's CSR:\n";
 //! let prefix_q = b"Bob's CSR:\n";

@@ -533,6 +533,45 @@ fn kpke_decrypt(p: &MlKemParams, dk: &[u8], c: &[u8]) -> [u8; 32] {
     byte_encode(&compress_poly(&w, 1), 1).try_into().unwrap()
 }
 
+// ── Research hooks for cryptanalysis ─────────────────────────────────────────
+//
+// Both functions below are `pub(crate)`: they are not part of the library's
+// public surface and nothing outside this crate can reach them. They exist so
+// that `crate::cryptanalysis::ml_kem_pco` can mount its attack against *this*
+// implementation rather than against a re-implementation written to be
+// attackable — the difference between demonstrating an attack and asserting one.
+
+/// K-PKE decryption, exposed inside the crate.
+///
+/// This models the information a side channel gives up. An FO-protected
+/// decapsulation never reveals `K-PKE.Decrypt`'s output; a decapsulation whose
+/// re-encryption comparison or message decoding leaks does, and that leak is
+/// the entire basis of the chosen-ciphertext attacks on ML-KEM. See
+/// [`crate::cryptanalysis::ml_kem_pco`].
+pub(crate) fn kpke_decrypt_for_analysis(p: &MlKemParams, dk_pke: &[u8], c: &[u8]) -> [u8; 32] {
+    kpke_decrypt(p, dk_pke, c)
+}
+
+/// The K-PKE secret `s`, as centred coefficients, one vector per module
+/// component.
+///
+/// `dk_pke` stores `ŝ` in the NTT domain packed at 12 bits; this undoes both.
+/// Used only to score an attack's output against the truth.
+pub(crate) fn secret_coefficients_for_analysis(p: &MlKemParams, dk_pke: &[u8]) -> Vec<Vec<i16>> {
+    (0..p.k)
+        .map(|i| {
+            let mut f = byte_decode(&dk_pke[384 * i..384 * (i + 1)], 12);
+            ntt_inv(&mut f);
+            f.0.iter()
+                .map(|&c| {
+                    let c = c as i32;
+                    (if c > Q as i32 / 2 { c - Q as i32 } else { c }) as i16
+                })
+                .collect()
+        })
+        .collect()
+}
+
 // ── ML-KEM (FIPS 203 Algorithms 16–18) ───────────────────────────────────────
 
 #[derive(Clone, Debug, PartialEq)]

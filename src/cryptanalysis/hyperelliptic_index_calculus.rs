@@ -60,7 +60,7 @@
 //! The measured comparison against rho on the same instances, in the
 //! unit `S = total group operations / sqrt(N)`, lives in
 //! [`crate::cryptanalysis::hyperelliptic_ic_bench`] and
-//! `RESEARCH_HYPERELLIPTIC_IC_RHO.md`.  This module *measures*; it does
+//! `research/notes/index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md`.  This module *measures*; it does
 //! not claim.
 //!
 //! ## Scope

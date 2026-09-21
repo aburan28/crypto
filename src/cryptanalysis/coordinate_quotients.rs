@@ -1,5 +1,5 @@
 //! # Coordinate quotients: invariants of any finite group of point maps, by
-//! orbit sums — the second search space of `RESEARCH_EXOTIC_COORDINATES.md`.
+//! orbit sums — the second search space of `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md`.
 //!
 //! The first search ([`crate::cryptanalysis::coordinate_search`]) handled
 //! coordinates of a single point and proved that, up to a Möbius frame, the

@@ -5,10 +5,10 @@ name: ECC2K-130 status pages
 
 on:
   schedule:
-    # Every 15 minutes. scripts/rho_status/render.py sizes history.json from
+    # Every 3 minutes. scripts/rho_status/render.py sizes history.json from
     # this interval, and test_rho_status.py pins the two together, so changing
     # it here without changing that constant shortens the published series.
-    - cron: "*/15 * * * *"
+    - cron: "*/3 * * * *"
   workflow_dispatch:
   pull_request:
     paths:
@@ -71,7 +71,10 @@ jobs:
     needs: test
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 35 min so the index-only fallback plus a stretch of hour-chunk
+    # backfill (300 s each, resumed next run) plus history merge and Pages
+    # deploy still fit. Later runs read the rollup and finish in the old 15.
+    timeout-minutes: 35
     permissions:
       contents: read
       pages: write
@@ -83,22 +86,37 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure AWS
+        # Not fatal. AWS credentials are needed to find the walker and to
+        # derive the status-bucket URL from the account; with the
+        # RHO_WORK_FEED_URL secret set, the ingest feed publishes without
+        # either, so an IAM or STS problem must not freeze Pages.
+        continue-on-error: true
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Snapshot via walker SSH hop
+      - name: Snapshot (ingest feed first, walker SSH hop when it answers)
+        # fetch_via_walker.sh writes the ingest host's public status.json
+        # first, then tries the walker hop in a subshell; the hop replaces
+        # the feed copy only when it produces a file. The step fails only
+        # when neither source answered.
         env:
           RHO_WALKER_HOST: ${{ secrets.RHO_WALKER_HOST }}
+          RHO_WORK_FEED_URL: ${{ secrets.RHO_WORK_FEED_URL }}
+          RHO_WALKER_SSH_KEY_MATERIAL: ${{ secrets.RHO_WALKER_SSH_KEY }}
           RHO_CAMPAIGN: ecc2k-130
           RHO_STATUS_OUT: docs/ecc2k130-status/status.json
         run: |
           set -euo pipefail
-          install -m 600 /dev/null "$RUNNER_TEMP/walker.pem"
-          printf '%s\n' "${{ secrets.RHO_WALKER_SSH_KEY }}" > "$RUNNER_TEMP/walker.pem"
-          export RHO_WALKER_SSH_KEY="$RUNNER_TEMP/walker.pem"
+          # Only materialise a key that exists: an unset secret leaves the
+          # path empty and the script skips the hop instead of failing it.
+          if [ -n "$RHO_WALKER_SSH_KEY_MATERIAL" ]; then
+            install -m 600 /dev/null "$RUNNER_TEMP/walker.pem"
+            printf '%s\n' "$RHO_WALKER_SSH_KEY_MATERIAL" > "$RUNNER_TEMP/walker.pem"
+            export RHO_WALKER_SSH_KEY="$RUNNER_TEMP/walker.pem"
+          fi
           chmod +x scripts/rho_status/fetch_via_walker.sh
           scripts/rho_status/fetch_via_walker.sh
           python3 -c 'import json,sys; d=json.load(open("docs/ecc2k130-status/status.json")); assert d["campaign_id"]=="ecc2k-130"; assert "point_key" not in json.dumps(d)'
@@ -111,6 +129,7 @@ jobs:
         # fails soft: no feed means no iteration total, not no publication.
         env:
           RHO_CAMPAIGN: ecc2k-130
+          RHO_WORK_FEED_URL: ${{ secrets.RHO_WORK_FEED_URL }}
         run: python3 scripts/rho_status/work_feed.py --status docs/ecc2k130-status/status.json
 
       - name: Merge previous Pages history
@@ -119,7 +138,10 @@ jobs:
         run: |
           set -euo pipefail
           set +e
-          http_code=$(curl -sS -L -o /tmp/history-prev.json -w "%{http_code}" "$PAGES_HISTORY_URL")
+          # Retried: losing this fetch loses seven days of points and the
+          # measured rate with them, so one Pages hiccup is not allowed to.
+          http_code=$(curl -sS -L --retry 5 --retry-all-errors --retry-delay 3 --max-time 60 \
+            -o /tmp/history-prev.json -w "%{http_code}" "$PAGES_HISTORY_URL")
           curl_exit=$?
           set -e
           if [ "$http_code" = "404" ]; then
@@ -145,3 +167,23 @@ jobs:
           path: _site
       - id: deploy
         uses: actions/deploy-pages@v4
+
+      - name: Check the snapshot we just published is current
+        # Last, and after the deploy, on purpose. Every other step in this job
+        # fails soft so a view problem never freezes the dashboard; the page
+        # renders a stale banner honestly, and an old number labelled old
+        # beats a page that stopped deploying. So this only decides the colour
+        # of the run.
+        #
+        # It exists because a green run here used to mean "I copied a file",
+        # not "the campaign is being counted". On 2026-09-20 the ingest host
+        # stopped at 04:53Z and this workflow published that frozen snapshot
+        # 802 times, green, for hours. This is the one assertion that fails
+        # whatever the cause -- dead host, expired credential, RDS failover,
+        # or an object key shape nobody recognises.
+        #
+        # Drop to `--warn-only` to silence it without reverting, e.g. during a
+        # planned ingest migration.
+        run: |
+          python3 scripts/rho_status/check_feed_age.py \
+            --status docs/ecc2k130-status/status.json

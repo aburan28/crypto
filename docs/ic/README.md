@@ -8,14 +8,14 @@ pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETE
 The older inspection command uses imported points for mathematical validation.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
-[`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
-[`boundary_targets.json`](./boundary_targets.json) (binary, Koblitz, prime;
+[`BOUNDARY_TARGETS.md`](BOUNDARY_TARGETS.md) and
+[`boundary_targets.json`](boundary_targets.json) (binary, Koblitz, prime;
 `schema_version` 2). Beat claims must include the ledger's **measurement
 schema** fields — including **FFD / degree of regularity** on algebraic
 `decomposition` frontiers — or they fail closed.
 
 **Autolab runner:** agents push those beats with the local control plane at
-[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
+[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab)
 (`boundary_autolab.py`). It pins the ledger, fail-closed validates measurement
 reports, and launches the public-synthetic `koblitz_rank_fixture` /
 `koblitz_rho_fixture` producers for the priority Koblitz `vs_rho` rungs.
@@ -84,7 +84,7 @@ The following knobs are recorded in each run report:
 - factor-base: a recipe file written by `ic search`, replacing factor-index;
 - summands: factor-base points per relation, 2 (default), 3, or 4;
 - max-trials: 1 through 1000000;
-- solver: groebner, sat, enumerate, or pair-table;
+- solver: groebner, sat, enumerate, pair-table, wdsat, or mq-fes;
 - batch: targets decomposed per parallel batch (0 = CPU count);
 - control: legacy accounting, see below.
 
@@ -97,7 +97,19 @@ group before it becomes a relation:
   sums built once per run — one lookup per target for two summands,
   `|F|` for three, `|F|²` for four (16 bytes per table entry);
 - groebner: the Weil-restricted Semaev system reduced by matrix-F4;
-- sat: the same system, CDCL with native parity rows.
+- sat: the same system, CDCL with native parity rows;
+- wdsat: the same Semaev system emitted as Trimoska ANF and solved by an
+  external WDSat binary (`--wdsat-binary PATH`). See
+  [`RESEARCH_WDSAT_IC_UNIFICATION.md`](../../research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md).
+  Requires a capacity-sufficient build of
+  [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
+  baseline builder is
+  `research/index_calculus_baseline_20260914/pilot/build_pilot.py`.
+- mq-fes: ALMASTY/libfes-inspired quadratic Semaev solver (`m = 2` only) —
+  libfes FFS Gray (`L=4` unroll) for early-exit `find_one`, Möbius for
+  all-roots when `n ≤ 24`, Monica hybrid past that
+  (<https://gitlab.lip6.fr/almasty/mq>,
+  <https://github.com/cbouilla/libfes-lite>).
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation
@@ -191,7 +203,7 @@ second factor is the one that varies: coverage saturates at 100% as the
 subspace grows while the Weil-restricted summation system keeps `m·ℓ`
 Boolean unknowns. At `K_1/2^15` the two orders disagree by `22.41×` over
 twelve verified logarithms — see
-[`RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../RESEARCH_FACTOR_BASE_SOLVE_COST.md).
+[`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).
 
     ./target/release/ic search --degree 15 --curve-a 1 --summands 2 --family divisor \
         --min-dimension 3 --max-dimension 8 --no-prune --no-saturate \
@@ -733,6 +745,13 @@ unsuccessful. Clap usage errors use its standard nonzero exit status.
 
     cargo test --release --test ic_framework --test ic_progress
     cargo test --release --lib koblitz_
+
+The end-to-end pipeline is gated in CI as well: `ic-e2e-benchmark.yml` runs
+the whole method plus the in-process ρ baseline on three frozen ledger rungs
+and fails closed on an unverified logarithm, a drifted seeded counter, or a
+regressed same-host end-to-end wall ratio. What it checks, what passing
+does not claim, and how to re-freeze after a deliberate change are in
+[`ci/README.md`](ci/README.md).
 
 Tests cover named profiles, custom prime curves, generated-fixture
 round trips, reproducibility, malformed and ambiguous parameters,

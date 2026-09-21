@@ -1,4 +1,23 @@
+The algorithm in one file: [`examples/rho_toy.py`](examples/rho_toy.py)
+recovers a planted discrete logarithm on `GF(2^23)` with the same walk the
+GPU client uses. Live campaign counts:
+[status page](https://aburan28.github.io/crypto/status/). How the walk works,
+including a browser copy of the toy:
+[how.html](https://aburan28.github.io/crypto/status/how.html).
+
 # ECC2K-130 and ECC2K-95
+
+**20.078 B complete scalar walk iterations/s median on one RTX PRO 6000
+Blackwell** with `make gpu-rtx-pro6000-20b`
+([ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md)): the table walk in one
+512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt from
+the step tag instead of stored, products inlined and the forward pass
+software-pipelined. 300/300 device reports re-walked, the same distinguished
+points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
+the tree's previous best configuration rebuilt in the same session on the same
+card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
+22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
+serial inversion (§7 there). The campaign default below is unchanged.
 
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
@@ -27,14 +46,17 @@ client checks before all six timed samples completed their exact work budget.
 Use `RTX_PRO6000_SHARED_SIGMA=0` to select the global-mask control. See
 [RTX-PRO6000.md](RTX-PRO6000.md) for results and requirements.
 
-Every rate in this tree is for that `sm_120` part. The other GPUs the campaign
-can rent have none: [RTX-PRO4500.md](RTX-PRO4500.md) covers the RTX PRO 4500
-(EC2 g7) and [ADA-L4-L40S.md](ADA-L4-L40S.md) the Ada parts, L4 (g6) and L40S
-(g6e), with `make bench-ada` to measure one. The arithmetic and storage options
-of the RTX PRO 6000 preset carry over to both; `PACKED_CLMAD` does not, because
-it is bought with a pipe balance measured only on Blackwell, so `aws/build.sh`
-now defaults it off for any build that includes a pre-Blackwell architecture
-and `benchmarks/ada/run.sh` measures both arms rather than assuming one.
+Every audited collecting rate in this tree is for that `sm_120` part. Other
+Modal GPUs are a `--bench` survey, not a campaign move:
+[benchmarks/modal-gpus/SURVEY.md](benchmarks/modal-gpus/SURVEY.md), via
+`make bench-modal-gpu SURVEY_GPU=…`. Per-family notes remain
+[RTX-PRO4500.md](RTX-PRO4500.md) (EC2 g7), [ADA-L4-L40S.md](ADA-L4-L40S.md)
+(L4 / L40S), [T4-G4DN.md](T4-G4DN.md), and [B200.md](B200.md)
+(`make bench-b200-modal`). The arithmetic and storage options of the RTX PRO
+6000 preset carry over; `PACKED_CLMAD` is on for sm_80+ and off on Turing.
+Workers stay automatic — 385,024 is a 188-SM occupancy.
+Per-SM occupancy (oversubscribed waves, same walk) is
+[benchmarks/per-sm/WAVES.md](benchmarks/per-sm/WAVES.md).
 
 [THROUGHPUT-CEILING.md](THROUGHPUT-CEILING.md) records historical
 instruction-pipe and memory probes for the earlier software arithmetic.
@@ -393,6 +415,16 @@ Four threads reach 40 M iterations/s. For comparison, the 2009 hand-written
 qhasm implementation reached 533 cycles/iteration on a Core 2 with 128-bit
 vectors.
 
+Half of the host multiply is not arithmetic: the `m = 131` routines issue 4069
+`vpternlogd`/`vpxord`/`vpandd` against 4287 `vmovdqa32`, because `mulLeaf`
+keeps 254 values live against the 32 `zmm` registers x86 has.
+[HOST-SCHEDULE.md](HOST-SCHEDULE.md) reorders the same DAG to recover some of
+that, and gets 4287 moves down to 3903 -- all of it in `toOnb`, since the
+Karatsuba leaf's construction order already beats every schedule tried. It
+misses its declared target, records the leaf-size and compiler levers as
+measured dead ends, and leaves `GFNI` as the open one. `--no-schedule` in
+`codegen/gen.py` regenerates the pre-scheduling headers as the paired control.
+
 On aarch64, one core, `GF(2^131)`, `--bench --steps 32 --launches 8
 --threads 1`, median of five. The 64-lane column is what this code did before
 it had a NEON word, and is the paired control:
@@ -560,8 +592,9 @@ planted discrete logarithms with the CUDA engine itself, so a GPU run proves the
 same thing the CPU run does. `autotune` rebuilds for the local compute
 capability only and sweeps batch size, block size and Karatsuba leaf, writing
 the ranking to a Modal Volume. `search` collects distinguished points into that
-same volume, checkpointing its live walks alongside them, so a stopped run
-resumes where it left off and several containers contribute to one corpus; each
+same volume, checkpointing its live walks alongside them every 60 seconds (and a
+40-byte status header every 15 seconds), so a
+stopped run resumes where it left off and several containers contribute to one corpus; each
 gets its own run id, which keeps their seed spaces disjoint, and each loads its
 siblings' corpora so a cross-container collision is caught as it happens.
 `merge` scans the corpus for repeated hashes, which are the candidate
@@ -628,7 +661,7 @@ and start over. Run `validate` first -- it recovers planted discrete logarithms
 on the GPU itself, so a broken kernel fails in a minute rather than quietly
 burning a day of credits.
 
-The searcher reports every 60 seconds:
+The searcher reports every 15 seconds:
 
 ```
 [1h04m] 842.1 M it/s  3.24T iters (18.412% of 2^44.0)  14.80M dp  14.79M distinct  corpus 473.6 MB  2h56m left

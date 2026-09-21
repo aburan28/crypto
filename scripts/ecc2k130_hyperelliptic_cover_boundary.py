@@ -404,7 +404,7 @@ def main() -> None:
             "gcd_with_curve_order": math.gcd(order, twist_order),
             "note": "a split surface is the boundary of the moduli of abelian surfaces, "
                     "not a genus-2 Jacobian; gluing along torsion (Howe, then Mestre "
-                    "for the equation -- RESEARCH_MESTRE_HOWE.md) produces one, still "
+                    "for the equation -- research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md) produces one, still "
                     "over F_2^131, so still on the row above",
         },
     }

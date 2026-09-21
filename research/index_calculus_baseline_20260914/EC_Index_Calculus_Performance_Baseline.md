@@ -10,9 +10,9 @@ The supplied benchmark repository is suitable as one input corpus. It needs a su
 
 Class: **accounting**. This is an independent imported pilot and planning contract,
 not a new solver or an improvement to an existing attack. The repository already
-has a [Trimoska corpus audit](../../RESEARCH_TRIMOSKA_BENCHMARKS.md),
-[F4 notes](../../RESEARCH_GROEBNER_F4.md),
-[Koblitz scaling work](../../RESEARCH_KOBLITZ_SCALING_TARGET.md), and
+has a [Trimoska corpus audit](../notes/ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md),
+[F4 notes](../notes/index-calculus/RESEARCH_GROEBNER_F4.md),
+[Koblitz scaling work](../notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md), and
 [matched Nagao controls](../nagao_relations/solver_09/README.md). Statements below
 about unmeasured work describe this pilot only. In particular, the existing audit
 identifies `n19l6-19-U` as SAT; this six-case pilot does not include that instance.

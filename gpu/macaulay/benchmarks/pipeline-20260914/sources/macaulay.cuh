@@ -2,7 +2,7 @@
  *
  * The shape this exists for: `src/cryptanalysis/gaudry_cubic.rs` solves
  * one symmetrised-`S4` system per residual of an index-calculus run, and
- * `RESEARCH_RESIDUAL_WALKS.md` 11.6 measures that solve as 17% forward
+ * `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` 11.6 measures that solve as 17% forward
  * elimination plus 40% normal forms of a 226 x 286 matrix over `F_p`.
  * Every residual produces the *same shape* over the *same* `p`, there
  * are thousands per run, and no residual depends on another.  That is a

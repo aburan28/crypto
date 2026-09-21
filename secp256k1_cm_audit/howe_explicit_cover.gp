@@ -37,7 +37,7 @@
 \\     E × E^t over F_p" claim.
 \\   • Explicit covers C → E_1, C → E_2 over F̄_p (degree-2 maps).
 \\
-\\ The structural-completeness theorem of PAPER_STRUCTURAL_COMPLETENESS.md
+\\ The structural-completeness theorem of research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md
 \\ is UNAFFECTED: B5 says any genus-g cover has DLP cost ≥ √(|Jac|) ≥
 \\ √p > √n for g ≥ 2, regardless of which F_p-isogeny class the Jacobian
 \\ falls in.  The cover doesn't help break ECDLP either way.
@@ -176,7 +176,7 @@ print("================================================================");
 print("Effect on the structural-completeness theorem");
 print("================================================================");
 print("");
-print("The B5 block of PAPER_STRUCTURAL_COMPLETENESS.md says:");
+print("The B5 block of research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md says:");
 print("");
 print("    For every smooth genus-g curve C/F_p with Jac(C) → E_secp,");
 print("    the best known DLP algorithm on Jac(C)(F_p) costs");
@@ -191,11 +191,11 @@ print("  whether we have the literal Howe glue or just a generic");
 print("  genus-2 cover.  Neither attacks secp256k1's ECDLP.");
 print("");
 print("What DOES require correction:");
-print("• Earlier claim in RESEARCH_SECP256K1_CM.md §8.6 that the");
+print("• Earlier claim in research/notes/cm-isogeny/RESEARCH_SECP256K1_CM.md §8.6 that the");
 print("  explicit Howe cover for secp256k1 has the simple form");
 print("  y² = (x³+7)(x³+189) is WRONG.  Howe's theorem guarantees");
 print("  EXISTENCE of an F_p-rational genus-2 curve C with Jac(C)");
 print("  ~ E × E^t, but the explicit construction requires Mestre");
-print("  reconstruction.  See errata in RESEARCH_SECP256K1_CM.md §8.6.");
+print("  reconstruction.  See errata in research/notes/cm-isogeny/RESEARCH_SECP256K1_CM.md §8.6.");
 print("");
 print("================================================================");
