@@ -610,6 +610,102 @@ def e2_sweep(n: int, l: int, m: int = 3, rule: str = "full", seed: int = 4):
 
 # ── E4: large primes -- a real gain, or a relabelling? ──────────────────
 
+def e4_pairing_crossing(n: int, l: int, lp: int, m: int = 2, seed: int = 11,
+                        targets: int = 4000):
+    """Paired relations needed to *reach* the rank ceiling, against however
+    many the harness happened to collect.
+
+    E4 reported paired large-prime relations "5-11x redundant" from
+    `rank / relations`, with `relations` being whatever the run collected.  That
+    denominator is a harness choice, not a cost.  Two E4 cells share a factor
+    base (`n = 19`, `l = 7`, `|F| = 139`) and differ only in `l'`: the second
+    collects 2.2x the relations, moves the rank by **one** -- 134 to 135 -- and
+    halves the ratio.  Run long enough on a small base the statistic is
+    unbounded: at `n = 13`, `l = 6` it reads `0.0065`, a "154x redundancy",
+    with the ceiling reached at relation 153 of 9 399.
+
+    Two quantities are separated here, and only the second is a cost.
+
+    **The ceiling.**  At `m = 2` a paired relation is
+    `(P_i + U) - (P_j + U) = P_i - P_j`, a pure difference, so every row is
+    orthogonal to the all-ones vector and the rank can never exceed `|F| - 1`.
+    Measured a little below that, because some base points never appear in any
+    partial at all.
+
+    **The crossing.**  Differences are edges of a graph on the base, so
+    reaching the ceiling is graph connectivity: about `(|F|/2) ln|F|` edges,
+    which makes `rank / relations` at the crossing `~ 2/ln|F|` -- the coupon
+    collector again, in the guise section 0.5 already retracted once, and so
+    not a constant either.
+    """
+    assert lp > l and m == 2, "the large-prime cell the design registered"
+    rng = random.Random(seed + n)
+    rung = Rung(n)
+    c = rung.curve
+    points, index, _ = build_base(rung, l)
+    member = set(points)
+    big = 1 << lp
+    npts = len(points)
+
+    partials: dict = {}
+    rows = []
+    for _ in range(targets):
+        a = rng.randrange(1, rung.p)
+        R = c.mul(rung.G, a)
+        if R is None:
+            continue
+        negR = c.neg(R)
+        for i in range(npts):
+            T = c.add(negR, points[i])
+            if T is None:
+                continue
+            U = c.neg(T)
+            if U[0] >= big or U in member:
+                continue
+            prev = partials.get(U)
+            if prev is None:
+                partials[U] = i
+            elif prev != i:
+                j = partials[U]
+                rows.append({i: 1, j: (-1) % rung.p})
+
+    pivots: dict = {}
+    rank, history = 0, []
+    for row in rows:
+        cur = dict(row)
+        while cur:
+            col = min(cur)
+            if col not in pivots:
+                inv = pow(cur[col], rung.p - 2, rung.p)
+                pivots[col] = {k: v * inv % rung.p for k, v in cur.items()}
+                rank += 1
+                break
+            f, pr = cur[col], pivots[col]
+            cur = {k: v for k in set(cur) | set(pr)
+                   if (v := (cur.get(k, 0) - f * pr.get(k, 0)) % rung.p)}
+        history.append(rank)
+    ceiling = max(history) if history else 0
+    at = next((i for i, r in enumerate(history, 1) if r == ceiling), None)
+    connectivity = 2.0 / math.log(npts)
+    measured = ceiling / at if at else None
+    return {
+        "n": n, "m": m, "l": l, "large_prime_dim": lp,
+        "factor_base_size": npts,
+        "paired_relations_collected": len(rows),
+        "rank_ceiling": ceiling,
+        "ceiling_over_unknowns": round(ceiling / npts, 4),
+        "difference_bound": npts - 1,
+        "reached_ceiling_at": at,
+        "rank_over_relations_as_published": (round(ceiling / len(rows), 4)
+                                             if rows else None),
+        "rank_over_relations_at_crossing": (round(measured, 4)
+                                            if measured else None),
+        "connectivity_prediction": round(connectivity, 4),
+        "measured_over_prediction": (round(measured / connectivity, 3)
+                                     if measured else None),
+    }
+
+
 def e4_large_prime(n: int, l: int, lp: int, m: int = 2, seed: int = 11,
                    targets: int = 400):
     """Allow the last summand's abscissa anywhere in `V' ⊃ V`, key the partial
@@ -1402,9 +1498,37 @@ def main():
               f"guard={row['guard_satisfied']} paired={row['paired_full_relations']:5d} "
               f"rank={row['matrix_rank']:4d} rank/rels={row['rank_over_relations']} "
               f"rank/unk={row['rank_over_unknowns']}", flush=True)
+    # What the "5-11x redundant" statistic was actually measuring.
+    crossings_e4 = [e4_pairing_crossing(n, l, lp, targets=t)
+                    for n, l, lp, t in ((19, 7, 10, 6000), (19, 7, 11, 6000),
+                                        (19, 8, 11, 4000), (19, 6, 9, 8000),
+                                        (13, 6, 9, 3000))]
+    for x in crossings_e4:
+        print(f"E4-CROSSING n={x['n']:3d} l={x['l']} l'={x['large_prime_dim']} "
+              f"|F|={x['factor_base_size']:4d} collected={x['paired_relations_collected']:5d} "
+              f"ceiling {x['rank_ceiling']}/{x['factor_base_size']} reached at "
+              f"{x['reached_ceiling_at']}; rank/rels as published "
+              f"{x['rank_over_relations_as_published']} vs at crossing "
+              f"{x['rank_over_relations_at_crossing']} (2/ln|F| = "
+              f"{x['connectivity_prediction']})", flush=True)
+    published = [x["rank_over_relations_as_published"] for x in crossings_e4]
+    crossed = [x["rank_over_relations_at_crossing"] for x in crossings_e4]
     e4 = {
         "question": "do large primes move the product law, or only relabel it?",
         "rungs": e4_rows,
+        "pairing_crossings": crossings_e4,
+        "superseded_claim": "E4 reported paired large-prime relations '5-11x "
+                            "redundant' from rank/relations.  Withdrawn: that "
+                            "denominator is however many relations the harness "
+                            "collected, not a cost.  Two cells share a factor "
+                            "base and differ only in l'; the second collects "
+                            "2.2x the relations, moves the rank by one, and "
+                            "halves the ratio.  Measured at the crossing "
+                            "instead, the cost is about 3x and stable.",
+        "spread_as_published": round(max(published) / min(published), 1),
+        "spread_at_crossing": round(max(crossed) / min(crossed), 1),
+        "class": "accounting: the algorithm did not change, the denominator "
+                 "did, and the correction is to a number this thread published",
         "falsifier": "a guarded cell below the BSGS line at the same memory",
         "measured_caveat": "the design flagged relation independence as the most "
                            "likely place for the model to be wrong, and required "

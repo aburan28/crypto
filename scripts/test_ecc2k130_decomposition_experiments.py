@@ -265,6 +265,39 @@ class DispersionTests(unittest.TestCase):
         self.assertLess(d["index_of_dispersion"], d["index_of_dispersion_all_subsets"])
 
 
+class LargePrimeRedundancyTests(unittest.TestCase):
+    """E4's "5-11x redundant" divided the rank by however many relations the
+    harness collected.  These pin what that statistic does and does not say."""
+
+    def test_the_published_ratio_moves_with_collection_not_with_the_method(self) -> None:
+        """Same factor base, same rung; only how long the run went."""
+        short = X.e4_pairing_crossing(13, 6, 9, targets=400)
+        long = X.e4_pairing_crossing(13, 6, 9, targets=3000)
+        self.assertEqual(short["factor_base_size"], long["factor_base_size"])
+        self.assertEqual(short["rank_ceiling"], long["rank_ceiling"])
+        # the published statistic falls just by collecting more ...
+        self.assertLess(long["rank_over_relations_as_published"],
+                        short["rank_over_relations_as_published"])
+        # ... while the crossing, which is the cost, does not move with it
+        self.assertAlmostEqual(long["rank_over_relations_at_crossing"],
+                               short["rank_over_relations_at_crossing"], delta=0.12)
+
+    def test_differences_cannot_span_and_the_ceiling_shows_it(self) -> None:
+        """At `m = 2` every paired row is `P_i - P_j`, so the rank is capped at
+        `|F| - 1` however many relations arrive."""
+        d = X.e4_pairing_crossing(19, 7, 10, targets=6000)
+        self.assertLessEqual(d["rank_ceiling"], d["difference_bound"])
+        self.assertGreater(d["ceiling_over_unknowns"], 0.9)
+
+    def test_the_crossing_tracks_graph_connectivity(self) -> None:
+        """Differences are edges, so reaching the ceiling is connectivity:
+        `~(|F|/2) ln|F|` edges, i.e. `rank/relations ~ 2/ln|F|`."""
+        for n, l, lp, t in ((19, 7, 10, 6000), (19, 8, 11, 4000)):
+            d = X.e4_pairing_crossing(n, l, lp, targets=t)
+            self.assertGreater(d["measured_over_prediction"], 0.4, d)
+            self.assertLess(d["measured_over_prediction"], 1.6, d)
+
+
 class OrbitTests(unittest.TestCase):
     def test_orbit_relations_are_independent_and_the_saving_is_n(self) -> None:
         d = X.e6_orbit_union(13, 6, relations_multiple=20)
