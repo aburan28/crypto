@@ -23,12 +23,58 @@
 #include "fieldbs.h"
 #include "fieldpb.h"
 
+// How many sigma^j branches the iteration chooses between, and how wide a
+// per-branch step counter is.  ECC_WITNESS=0 compiles the counting out, which
+// is the control the paired comparison in CAIRN-WITNESS.md asks for.
+#define ECC_JCOUNT 8
+#ifndef ECC_WITNESS
+#define ECC_WITNESS 1
+#endif
+#ifndef ECC_COUNT_BITS
+#define ECC_COUNT_BITS 32
+#endif
+// Counters are walk state, so a checkpoint written with them cannot be read by
+// a build without them and the version has to say so.  With ECC_WITNESS=0 the
+// array is not allocated at all and the format is byte-identical to what
+// shipped, which is what makes the control in CAIRN-WITNESS.md a control.
+#define ECC_CKPT_BUMP (ECC_WITNESS ? 1u : 0u)
+
 struct DpRecord {
     unsigned long long seed;
     unsigned long long iters;
     unsigned long long x[3];
     unsigned long long y[3];
+    // The witness: steps this trail took on each branch.  A step is
+    // R -> R + sigma^j(R) = [1 + s^j]R and the endomorphism ring commutes, so
+    // the whole trail collapses to [mu]R_0 with mu = prod_j (1 + s^j)^{n_j}
+    // whatever order the steps came in -- eight numbers, and the point becomes
+    // checkable with one double scalar multiplication instead of the 2^25.27
+    // steps that made it.  CAIRN-WITNESS.md is the design.
+    //
+    // 32 bits, and nothing on the hot path checks for overflow because nothing
+    // has to: the counts sum to `iters`, which is 64 bits, so a wrapped
+    // counter makes the sum disagree and the record says so about itself.
+    // ECC_WITNESS=0 leaves them zero, which fails the same test, so there is
+    // no separate validity flag to keep in step with anything.
+    unsigned counts[ECC_JCOUNT];
 };
+
+// Scalar per-walk counter layout, for the backends where one worker is one
+// walk rather than one lane of a bitsliced word.  Thread innermost, so a
+// warp's counters are contiguous, exactly as the coordinate arrays are.
+ECC_HD size_t eccScalarCountIndex(int slot, int k, int tid, int threads) {
+    return ((size_t)(slot * ECC_JCOUNT + k) * (size_t)threads) + (size_t)tid;
+}
+
+ECC_HD size_t eccScalarCountWords(int threads, int batch) {
+#if ECC_WITNESS
+    return (size_t)threads * (size_t)batch * ECC_JCOUNT;
+#else
+    (void)threads;
+    (void)batch;
+    return 0;
+#endif
+}
 
 ECC_HD unsigned long long eccPrf(unsigned long long seed, int idx) {
     unsigned long long z = seed + 0x9E3779B97F4A7C15ull * (unsigned long long)(idx + 1);

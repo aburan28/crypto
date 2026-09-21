@@ -13,6 +13,7 @@
 #   BATCH      walks batched into one field inversion per thread (default 32)
 #   THREADS    CUDA block size (default 128)
 #   MINBLOCKS  resident blocks per SM to ask ptxas for (default 2)
+#   WITNESS    carry the cairn witness in the walk (default 1; 0 is the control)
 #   PACKED_SINGLE_PRODUCT  use one polynomial product for packed mul (default 0)
 #   ARCH     CUDA architectures
 
@@ -48,6 +49,11 @@ PACKED_WEIGHTED_PREFIX ?= 0
 PACKED_COMPACT_STATE ?= 0
 PACKED_SHARED_SIGMA ?= 0
 PACKED_STATE_TILE ?= 0
+# Carry the eight per-branch step counts that make a distinguished point
+# payable on cairn (CAIRN-WITNESS.md).  WITNESS=0 compiles the counting out
+# and is the control for the paired comparison that prices it; it also keeps
+# the checkpoint and corpus formats byte-identical to what shipped before.
+WITNESS ?= 1
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -122,7 +128,8 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_WEIGHTED_PREFIX=$(PACKED_WEIGHTED_PREFIX) \
        -DECC_PACKED_COMPACT_STATE=$(PACKED_COMPACT_STATE) \
        -DECC_PACKED_SHARED_SIGMA=$(PACKED_SHARED_SIGMA) \
-       -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE)
+       -DECC_PACKED_STATE_TILE=$(PACKED_STATE_TILE) \
+       -DECC_WITNESS=$(WITNESS)
 
 all: cpu
 

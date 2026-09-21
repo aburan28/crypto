@@ -39,6 +39,7 @@ struct WalkParams {
     unsigned long long *seed;         // one per lane
     unsigned long long *startIter;    // one per lane
     W *dead;                          // one word per slot: lanes awaiting a restart
+    W *counts;                        // bitsliced per-branch step counts (the witness)
     DpRecord *dp;
     unsigned *dpCount;
     unsigned dpCap;
@@ -72,6 +73,20 @@ struct Kernel {
     static ECC_HD size_t laneIndex(int slot, int lane, int tid, int threads) {
         return ((size_t)(slot * LANES + lane) * (size_t)threads) + (size_t)tid;
     }
+    // Same structure-of-arrays discipline as the coordinates: the innermost
+    // index is the thread, so a warp's counter words are contiguous.
+    static ECC_HD size_t countIndex(int slot, int k, int bit, int tid, int threads) {
+        return ((size_t)((slot * ECC_JCOUNT + k) * ECC_COUNT_BITS + bit) * (size_t)threads) +
+               (size_t)tid;
+    }
+    static ECC_HD size_t countWords(int threads) {
+#if ECC_WITNESS
+        return (size_t)threads * BATCH * ECC_JCOUNT * ECC_COUNT_BITS;
+#else
+        (void)threads;
+        return 0;
+#endif
+    }
 
     static ECC_HD void load(const W *src, int slot, int tid, int threads, W *dst) {
 ECC_WIDE_UNROLL_PRAGMA
@@ -97,7 +112,48 @@ ECC_WIDE_UNROLL_PRAGMA
             WK::startPoint(seeds, P.consts, x, y);
             store(P.x, slot, tid, P.threads, x);
             store(P.y, slot, tid, P.threads, y);
+#if ECC_WITNESS
+            clearCounts(tid, slot, P, ~ECC_ZERO);
+#endif
             P.dead[(size_t)slot * (size_t)P.threads + (size_t)tid] = ECC_ZERO;
+        }
+    }
+
+    // Add one to the counter each live lane's branch selects.
+    //
+    // The selector is three bitsliced words, so every lane in the word wants a
+    // different counter and all eight have to be touched -- this is the whole
+    // reason the bitsliced backend pays an order of magnitude more for the
+    // witness than the packed one, where `j` is an `int` and one counter is
+    // incremented.  The carry loop stops as soon as no lane is still carrying,
+    // which is what keeps the average near seven bits rather than
+    // ECC_COUNT_BITS: a lane carries past bit b only when its low b bits are
+    // all set.
+    static ECC_BIG void bumpCounts(int tid, int slot, const WalkParams<W> &P,
+                                   const W *jb, W live) {
+        for (int k = 0; k < ECC_JCOUNT; ++k) {
+            W m = live;
+            m &= (k & 1) ? jb[1] : ~jb[1];
+            m &= (k & 2) ? jb[2] : ~jb[2];
+            m &= (k & 4) ? jb[3] : ~jb[3];
+            for (int b = 0; b < ECC_COUNT_BITS && m != ECC_ZERO; ++b) {
+                const size_t ci = countIndex(slot, k, b, tid, P.threads);
+                const W c = P.counts[ci];
+                P.counts[ci] = c ^ m;
+                m = c & m;
+            }
+        }
+    }
+
+    // Clear the counters of the lanes in `mask` -- every lane at startup, the
+    // revived ones on a restart.  A trail's witness has to start at zero or it
+    // reports steps some earlier trail took.
+    static ECC_BIG void clearCounts(int tid, int slot, const WalkParams<W> &P, W mask) {
+        for (int k = 0; k < ECC_JCOUNT; ++k) {
+            for (int b = 0; b < ECC_COUNT_BITS; ++b) {
+                const size_t ci = countIndex(slot, k, b, tid, P.threads);
+                P.counts[ci] &= ~mask;
+            }
         }
     }
 
@@ -129,6 +185,17 @@ ECC_WIDE_UNROLL_PRAGMA
             rec.iters = now - P.startIter[li];
             F::getLane(x, lane, rec.x);
             F::getLane(y, lane, rec.y);
+            for (int k = 0; k < ECC_JCOUNT; ++k) {
+                unsigned v = 0;
+#if ECC_WITNESS
+                for (int b = 0; b < ECC_COUNT_BITS; ++b) {
+                    if (laneBit(P.counts[countIndex(slot, k, b, tid, P.threads)], lane)) {
+                        v |= 1u << b;
+                    }
+                }
+#endif
+                rec.counts[k] = v;
+            }
             const unsigned slotIdx = eccAtomicInc(P.dpCount);
             if (slotIdx < P.dpCap) P.dp[slotIdx] = rec;
         }
@@ -157,6 +224,9 @@ ECC_WIDE_UNROLL_PRAGMA
             WK::reseedLanes(mask, seeds, P.consts, x, y);
             store(P.x, slot, tid, P.threads, x);
             store(P.y, slot, tid, P.threads, y);
+#if ECC_WITNESS
+            clearCounts(tid, slot, P, mask);
+#endif
             P.dead[di] = ECC_ZERO;
         }
     }
@@ -189,6 +259,9 @@ ECC_WIDE_UNROLL_PRAGMA
                 jbits[slot][1] = hb[1];
                 jbits[slot][2] = hb[2];
                 jbits[slot][3] = hb[3];
+#if ECC_WITNESS
+                bumpCounts(tid, slot, P, jbits[slot], ~(alreadyDead | dp));
+#endif
                 WK::sigmaJ(x, jbits[slot], t);
                 F::add(x, t, u);                       // u = d
                 if (slot == 0) {

@@ -54,6 +54,43 @@ struct DpFileRecord {
     unsigned long long canon[3];
 };
 
+// Corpus v2: the same point, plus the witness that makes it payable.
+//
+// v1 is a headerless stream of 32-byte records and every corpus on disk is
+// one, so v2 announces itself with a magic rather than with its size.  Sizes
+// would have been cheaper and wrong: a v1 file truncated mid-record, or a v2
+// file read by an older build, would each look like a valid file of the other
+// format and silently mis-frame every record after the first.
+//
+// `iters` is here so the witness can be checked without the curve: the counts
+// sum to it, so a wrapped 32-bit counter or a witness-less build is visible
+// from the record alone.  That costs 8 bytes a record and saves a consumer
+// from having to trust the producer's build flags.
+struct DpFileRecordV2 {
+    unsigned long long seed;
+    unsigned long long iters;
+    unsigned long long canon[3];
+    unsigned counts[ECC_JCOUNT];
+};
+
+struct DpFileHeader {
+    char magic[8];
+    unsigned version;
+    unsigned recordBytes;
+};
+
+static const char DP_MAGIC_V2[8] = {'E', 'C', 'C', '2', 'K', 'D', 'P', '2'};
+
+// Leaves the handle positioned at the first record either way.
+static bool dpFileIsV2(FILE *in) {
+    char probe[8];
+    if (fread(probe, 1, sizeof probe, in) != sizeof probe || memcmp(probe, DP_MAGIC_V2, 8) != 0) {
+        rewind(in);
+        return false;
+    }
+    return fseek(in, (long)sizeof(DpFileHeader), SEEK_SET) == 0;
+}
+
 static double nowSeconds() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -133,7 +170,7 @@ struct HostEngine {
     static const int LANES = WordTraits<W>::LANES;
     static const int BATCH = ECC_BATCH;
 
-    std::vector<W> x, y, pchain, dead;
+    std::vector<W> x, y, pchain, dead, counts;
     std::vector<u64> seed, startIter;
 
     // Present so runCurve can size either backend the same way; on the host the
@@ -157,6 +194,7 @@ struct HostEngine {
         y.assign(T * BATCH * M, 0);
         pchain.assign(T * BATCH * M, 0);
         dead.assign(T * BATCH, 0);
+        counts.assign(K::countWords(o.threads), 0);
         seed.assign(T * BATCH * LANES, 0);
         startIter.assign(T * BATCH * LANES, 0);
         dp.assign(o.dpCap, DpRecord());
@@ -176,6 +214,7 @@ struct HostEngine {
         P.seed = seed.data();
         P.startIter = startIter.data();
         P.dead = dead.data();
+        P.counts = counts.data();
         P.dp = dp.data();
         P.dpCount = &dpCount;
         P.dpCap = o.dpCap;
@@ -225,7 +264,7 @@ struct HostEngine {
         if (!f) return false;
         CkptHeader h;
         memcpy(h.magic, "ECC2K130", 8);
-        h.version = 1u;
+        h.version = 1u + ECC_CKPT_BUMP;
         h.m = (unsigned)M;
         h.threads = (unsigned)P.threads;
         h.batch = (unsigned)BATCH;
@@ -236,6 +275,7 @@ struct HostEngine {
         ok = ok && fwrite(x.data(), sizeof(W), x.size(), f) == x.size();
         ok = ok && fwrite(y.data(), sizeof(W), y.size(), f) == y.size();
         ok = ok && fwrite(dead.data(), sizeof(W), dead.size(), f) == dead.size();
+        ok = ok && fwrite(counts.data(), sizeof(W), counts.size(), f) == counts.size();
         ok = ok && fwrite(seed.data(), sizeof(u64), seed.size(), f) == seed.size();
         ok = ok && fwrite(startIter.data(), sizeof(u64), startIter.size(), f) == startIter.size();
         ok = ok && fflush(f) == 0;
@@ -250,14 +290,15 @@ struct HostEngine {
         FILE *f = fopen(path, "rb");
         if (!f) return false;
         CkptHeader h;
-        const size_t payload = (x.size() + y.size() + dead.size()) * sizeof(W) +
+        const size_t payload = (x.size() + y.size() + dead.size() + counts.size()) * sizeof(W) +
                                (seed.size() + startIter.size()) * sizeof(u64);
         bool ok = fread(&h, sizeof h, 1, f) == 1 &&
-                  ckptHeaderMatches(h, M, P.threads, BATCH, LANES, runId) &&
+                  ckptHeaderMatches(h, M, P.threads, BATCH, LANES, runId, 1u + ECC_CKPT_BUMP) &&
                   ckptPayloadIsWhole(f, payload);
         ok = ok && fread(x.data(), sizeof(W), x.size(), f) == x.size();
         ok = ok && fread(y.data(), sizeof(W), y.size(), f) == y.size();
         ok = ok && fread(dead.data(), sizeof(W), dead.size(), f) == dead.size();
+        ok = ok && fread(counts.data(), sizeof(W), counts.size(), f) == counts.size();
         ok = ok && fread(seed.data(), sizeof(u64), seed.size(), f) == seed.size();
         ok = ok && fread(startIter.data(), sizeof(u64), startIter.size(), f) == startIter.size();
         fclose(f);
@@ -288,6 +329,9 @@ struct CudaEngine {
     static size_t bytesPerThread() {
         return (size_t)BATCH * M * sizeof(W) * 3
              + (size_t)BATCH * sizeof(W)
+#if ECC_WITNESS
+             + (size_t)BATCH * ECC_JCOUNT * ECC_COUNT_BITS * sizeof(W)
+#endif
              + (size_t)BATCH * LANES * sizeof(u64) * 2;
     }
 
@@ -341,6 +385,11 @@ struct CudaEngine {
         CUDA_CHECK(cudaMalloc(&P.pchain, fw));
         CUDA_CHECK(cudaMalloc(&P.dead, T * BATCH * sizeof(W)));
         CUDA_CHECK(cudaMemset(P.dead, 0, T * BATCH * sizeof(W)));
+        P.counts = nullptr;
+        if (countElems()) {
+            CUDA_CHECK(cudaMalloc(&P.counts, countElems() * sizeof(W)));
+            CUDA_CHECK(cudaMemset(P.counts, 0, countElems() * sizeof(W)));
+        }
         CUDA_CHECK(cudaMalloc(&P.seed, lw));
         CUDA_CHECK(cudaMalloc(&P.startIter, lw));
         CUDA_CHECK(cudaMalloc(&P.dp, (size_t)o.dpCap * sizeof(DpRecord)));
@@ -414,7 +463,16 @@ struct CudaEngine {
     virtual size_t physicalFieldCount() const { return fieldCount(); }
     size_t slotCount() const { return (size_t)P.threads * BATCH; }
     virtual size_t laneCount() const { return (size_t)P.threads * BATCH * LANES; }
-    virtual unsigned checkpointVersion() const { return 1u; }
+    virtual unsigned checkpointVersion() const { return 1u + ECC_CKPT_BUMP; }
+    // Bitsliced: ECC_COUNT_BITS words per counter per slot. Packed overrides
+    // this, because there one worker is one walk and a counter is a number.
+    virtual size_t countElems() const {
+#if ECC_WITNESS
+        return (size_t)P.threads * BATCH * ECC_JCOUNT * ECC_COUNT_BITS;
+#else
+        return 0;
+#endif
+    }
     virtual int checkpointLanes() const { return LANES; }
     // Backends may use a different coordinate representation on the device.
     // These hooks preserve the checkpoint representation without touching
@@ -454,6 +512,11 @@ struct CudaEngine {
             CUDA_CHECK(cudaMemcpy(sbuf.data(), P.dead, sbuf.size() * sizeof(W), cudaMemcpyDeviceToHost));
             ok = fwrite(sbuf.data(), sizeof(W), sbuf.size(), f) == sbuf.size();
         }
+        if (ok && countElems()) {
+            std::vector<W> cbuf(countElems());
+            CUDA_CHECK(cudaMemcpy(cbuf.data(), P.counts, cbuf.size() * sizeof(W), cudaMemcpyDeviceToHost));
+            ok = fwrite(cbuf.data(), sizeof(W), cbuf.size(), f) == cbuf.size();
+        }
         const u64 *lanes[2] = {P.seed, P.startIter};
         for (int i = 0; i < 2 && ok; ++i) {
             CUDA_CHECK(cudaMemcpy(lbuf.data(), lanes[i], lbuf.size() * sizeof(u64), cudaMemcpyDeviceToHost));
@@ -469,7 +532,7 @@ struct CudaEngine {
         FILE *f = fopen(path, "rb");
         if (!f) return false;
         CkptHeader h;
-        const size_t payload = (2 * fieldCount() + slotCount()) * sizeof(W) +
+        const size_t payload = (2 * fieldCount() + slotCount() + countElems()) * sizeof(W) +
                                2 * laneCount() * sizeof(u64);
         bool ok = fread(&h, sizeof h, 1, f) == 1 &&
                   ckptHeaderMatches(h, M, P.threads, BATCH, checkpointLanes(), runId, checkpointVersion()) &&
@@ -492,6 +555,11 @@ struct CudaEngine {
         if (ok) {
             ok = fread(sbuf.data(), sizeof(W), sbuf.size(), f) == sbuf.size();
             if (ok) CUDA_CHECK(cudaMemcpy(P.dead, sbuf.data(), sbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
+        }
+        if (ok && countElems()) {
+            std::vector<W> cbuf(countElems());
+            ok = fread(cbuf.data(), sizeof(W), cbuf.size(), f) == cbuf.size();
+            if (ok) CUDA_CHECK(cudaMemcpy(P.counts, cbuf.data(), cbuf.size() * sizeof(W), cudaMemcpyHostToDevice));
         }
         u64 *lanes[2] = {P.seed, P.startIter};
         for (int i = 0; i < 2 && ok; ++i) {
@@ -631,6 +699,59 @@ static void testOrbit(Rng &rng, const U192 &ell) {
     report("iteration commutes with negation", okNeg);
     report("weight is constant on an orbit", okWeight);
     report("subgroup x-coordinates have even weight", okTrace);
+}
+
+// The equation the whole witness rests on, checked here rather than believed.
+//
+// A trail is [mu]R_0 with mu = prod_j (1 + s^j)^{n_j}, so a point plus eight
+// counts is a claim about where [mu] takes the start point.  A cairn checker
+// spells the same claim [mu*alpha_0]P + [mu]Q, which is that one composed with
+// R_0 = [alpha_0]P + Q -- and testStartPoint above already checks that half, so
+// checking this one completes the chain at half the scalar multiplications.
+// If the algebra were wrong, or the counts counted the wrong thing, every
+// record this client emits would verify locally and be refused by everyone
+// else.  CAIRN-WITNESS.md is the design.
+template <class Cfg>
+static void testWitness(Rng &rng, Solver<Cfg> &sol) {
+    typedef Ref<Cfg> R;
+    const int STEPS = 50;
+    const int TRAILS = 4;
+    bool okSum = true, okMu = true;
+    int walked = 0, verified = 0;
+    for (int t = 0; t < 2 * TRAILS && walked < TRAILS; ++t) {
+        U192 alpha0;
+        bool degenerate = false;
+        const u64 seed = rng.next();
+        const typename R::Point start =
+            R::startPoint(seed, sol.basis, sol.target, &alpha0, sol.ell, sol.spow, &degenerate);
+        if (degenerate) continue;     // toy fields only; see testStartPoint
+        typename R::Point p = start;
+        unsigned long long counts[ECC_JCOUNT] = {0};
+        unsigned long long taken = 0;
+        bool ran = true;
+        for (int i = 0; i < STEPS; ++i) {
+            const int hw = R::weight(p.x);
+            counts[R::jOf(hw) - 3]++;
+            p = R::step(p, hw);
+            ++taken;
+            if (p.inf) { ran = false; break; }
+        }
+        if (!ran) continue;
+        ++walked;
+        unsigned long long total = 0;
+        for (int k = 0; k < ECC_JCOUNT; ++k) total += counts[k];
+        if (total != taken) okSum = false;
+        // The endpoint identity costs one scalar multiplication, and the
+        // reference's is O(m^3) -- at m = 131 it is seconds, so one trail is
+        // checked rather than all four.  The counting half above is free and
+        // runs on every trail.
+        if (verified == 0) {
+            if (!R::eq(R::scalarMul(start, sol.multiplier(counts)), p)) okMu = false;
+            ++verified;
+        }
+    }
+    report("witness counts sum to the trail length", okSum && walked > 0);
+    report("[mu] times the start point is the trail's endpoint", okMu && verified > 0);
 }
 
 template <class Cfg>
@@ -780,18 +901,35 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
         // A single --dp-file is append-only across passes, so the newest
         // records sit at the end.  When the remaining cap is smaller than
         // the file, start there rather than keeping the oldest prefix.
+        const bool v2 = dpFileIsV2(in);
+        const long base = v2 ? (long)sizeof(DpFileHeader) : 0;
+        const size_t recBytes = v2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord);
         if (o.loadMax && reloaded < o.loadMax && fseek(in, 0, SEEK_END) == 0) {
-            const long sz = ftell(in);
+            const long sz = ftell(in) - base;
             unsigned long long skip = 0;
             if (sz > 0) {
-                const unsigned long long nrec = (unsigned long long)sz / sizeof(DpFileRecord);
+                const unsigned long long nrec = (unsigned long long)sz / recBytes;
                 const unsigned long long remain = o.loadMax - (unsigned long long)reloaded;
                 if (nrec > remain) skip = nrec - remain;
             }
-            if (fseek(in, (long)(skip * sizeof(DpFileRecord)), SEEK_SET) != 0) rewind(in);
+            if (fseek(in, base + (long)(skip * recBytes), SEEK_SET) != 0)
+                fseek(in, base, SEEK_SET);
+        } else if (fseek(in, base, SEEK_SET) != 0) {
+            rewind(in);
         }
-        DpFileRecord fr;
-        while (fread(&fr, sizeof fr, 1, in) == 1) {
+        DpFileRecordV2 fr;
+        while (fread(&fr, recBytes, 1, in) == 1) {
+            if (!v2) {
+                // A v1 record is the first 32 bytes of a v2 one only by
+                // accident of field order, so unpack rather than alias.
+                const DpFileRecord *v1 = (const DpFileRecord *)&fr;
+                const unsigned long long seed = v1->seed;
+                const unsigned long long c0 = v1->canon[0], c1 = v1->canon[1], c2 = v1->canon[2];
+                fr.seed = seed;
+                fr.iters = 0;
+                fr.canon[0] = c0; fr.canon[1] = c1; fr.canon[2] = c2;
+                for (int k = 0; k < ECC_JCOUNT; ++k) fr.counts[k] = 0;
+            }
             if (o.loadMax && reloaded >= o.loadMax) break;
             typename Solver<Cfg>::Key key;
             key.v[0] = fr.canon[0];
@@ -848,6 +986,41 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
     double lastPrint = t0;
     double lastCkpt = t0;
     FILE *dpOut = o.dpFile.empty() ? NULL : fopen(o.dpFile.c_str(), "ab");
+    // A fresh corpus gets the v2 header; an existing one keeps whatever format
+    // it already is, because appending v2 records to a v1 stream would produce
+    // a file neither reader can frame.  Refusing is the only safe answer: the
+    // witness has to go somewhere the reader will find it.
+    const bool dpOutV2 = ECC_WITNESS != 0;
+    if (dpOut) {
+        // Read the file's shape from a separate handle rather than from this
+        // one.  A stream opened "ab" has an implementation-defined position
+        // until the first write, so ftell here is not a length -- on the
+        // library that reports 0 it would put a v2 header in the middle of an
+        // existing corpus and mis-frame everything after it.
+        long existing = 0;
+        bool existingV2 = false;
+        FILE *probe = fopen(o.dpFile.c_str(), "rb");
+        if (probe) {
+            if (fseek(probe, 0, SEEK_END) == 0) existing = ftell(probe);
+            rewind(probe);
+            existingV2 = dpFileIsV2(probe);
+            fclose(probe);
+        }
+        if (existing == 0) {
+            if (dpOutV2) {
+                DpFileHeader h;
+                memcpy(h.magic, DP_MAGIC_V2, sizeof h.magic);
+                h.version = 2u;
+                h.recordBytes = (unsigned)sizeof(DpFileRecordV2);
+                fwrite(&h, sizeof h, 1, dpOut);
+            }
+        } else if (existingV2 != dpOutV2) {
+            printf("refusing to append %s records to a %s corpus: %s\n",
+                   dpOutV2 ? "v2" : "v1", existingV2 ? "v2" : "v1", o.dpFile.c_str());
+            fclose(dpOut);
+            return 2;
+        }
+    }
     for (long launch = 0; o.launches == 0 || launch < o.launches; ++launch) {
         eng.launch(iterBase);
         const unsigned n = eng.fetch(recs);
@@ -868,16 +1041,51 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
                            (unsigned long long)rec.seed);
                     return 3;
                 }
+#if ECC_WITNESS
+                // The witness is the only thing the walk now carries that
+                // nothing else would catch: a wrong count still produces a
+                // well-formed record, a well-formed claim, and a mu that lands
+                // on some other orbit.  The reference walk counts the same
+                // branches, so this is the oracle for it.
+                u64 witnessed = 0;
+                for (int k = 0; k < ECC_JCOUNT; ++k) {
+                    if ((u64)rec.counts[k] != w.counts[k]) {
+                        printf("MISMATCH: seed %016llx witness[%d] = %u, the reference walk "
+                               "took %llu steps on that branch\n",
+                               (unsigned long long)rec.seed, k, rec.counts[k],
+                               (unsigned long long)w.counts[k]);
+                        return 3;
+                    }
+                    witnessed += rec.counts[k];
+                }
+                if (witnessed != rec.iters) {
+                    printf("MISMATCH: seed %016llx witness sums to %llu over %llu steps\n",
+                           (unsigned long long)rec.seed, (unsigned long long)witnessed,
+                           (unsigned long long)rec.iters);
+                    return 3;
+                }
+#endif
                 ++verified;
             }
             if (dpOut) {
                 const typename R::Elem cx = R::canonical(R::fromLimbs(rec.x));
-                DpFileRecord fr;
-                fr.seed = rec.seed;
-                fr.canon[0] = cx.v[0];
-                fr.canon[1] = cx.v[1];
-                fr.canon[2] = cx.v[2];
-                fwrite(&fr, sizeof fr, 1, dpOut);
+                if (dpOutV2) {
+                    DpFileRecordV2 fr;
+                    fr.seed = rec.seed;
+                    fr.iters = rec.iters;
+                    fr.canon[0] = cx.v[0];
+                    fr.canon[1] = cx.v[1];
+                    fr.canon[2] = cx.v[2];
+                    for (int k = 0; k < ECC_JCOUNT; ++k) fr.counts[k] = rec.counts[k];
+                    fwrite(&fr, sizeof fr, 1, dpOut);
+                } else {
+                    DpFileRecord fr;
+                    fr.seed = rec.seed;
+                    fr.canon[0] = cx.v[0];
+                    fr.canon[1] = cx.v[1];
+                    fr.canon[2] = cx.v[2];
+                    fwrite(&fr, sizeof fr, 1, dpOut);
+                }
             }
             typename Solver<Cfg>::Entry other;
             if (!sol.insert(rec, &other)) continue;
@@ -989,6 +1197,7 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
         testField<Cfg>(rng);
         testOrbit<Cfg>(rng, sol.ell);
         testStartPoint<Cfg>(rng, sol);
+        testWitness<Cfg>(rng, sol);
         testSolveAlgebra<Cfg>(rng, sol);
         return 0;
     }

@@ -1,14 +1,20 @@
 # Earning on cairn: what a distinguished point has to carry
 
-**This is a scope, not a result.** Nothing here is measured on a GPU, and the
-one number that decides the design — what eight counters cost the packed walk —
-is named below as a measurement to run, not estimated and then quoted. What *is*
-measured here is the basis reconciliation in §3, because it was the one thing
-that could have made the whole idea impossible.
+**Route B is implemented.** The walk now carries the eight per-branch step
+counts, they reach disk in a v2 corpus, and a claim built from one is accepted
+by cairn's own checker. What is measured and what is not:
 
-Under `AGENTS.md` §3 this change is none of the four classes. It does not lower
-`S` and it does not move the ratio to any floor: it *raises* the cost of the
-walk to buy a property that is not in the cost model at all — that a
+| | |
+|---|---|
+| bitsliced backend (CPU and the default CUDA path) | **implemented and tested here**: counters verified against `Solver::rewalk` on every distinguished point of runs on `GF(2^23)` and `GF(2^41)`, planted logarithms still recovered, and the witness algebra checked in `--test`. On `GF(2^131)` a reference re-walk is 2^25.27 scalar steps, so there the check is cairn's, below |
+| packed backend (the RTX preset, and the campaign) | **implemented, not compiled**: there is no CUDA toolchain on the machine this was written on, so `make gpu` has not been run. The edits mirror the bitsliced ones site for site and are listed in §5 |
+| end to end against cairn | **done**: 53 real weight-34 ECC2K-130 orbits, emitted by `cairn_artifacts.py` and accepted by `examples/certicom-ecdlp/checkers/ecc2k130_orbit_batch.py` in the merged objective |
+| what the witness costs the bitsliced walk | **measured: +4.2%** on the CPU backend, against +33.8% predicted (§5) |
+| what the witness costs the packed walk | **not measured** — it needs the GPU, and §5 says what to run |
+
+Under `AGENTS.md` §3 this change is still none of the four classes. It does not
+lower `S` and it does not move the ratio to any floor: it *raises* the cost of
+the walk to buy a property that is not in the cost model at all — that a
 distinguished point becomes checkable by a stranger in `2^7.8` group operations
 instead of the `2^25.27` it cost to make. It therefore does not belong on
 `docs/index-calculus-scoreboard.html`, which prices attacks against rho; saying
@@ -110,7 +116,7 @@ for the counters.
 | | device change | cost per orbit | tranche of 2^21 orbits | payable fraction of a 128-GPU fleet |
 |---|---|---|---|---|
 | **A — host re-walk** | none | one full trail again: 3.21 CPU core-s, or 2.87 ms of a GPU | +77.9 CPU core-days, or +1.67 GPU-h on top of the 1.67 GPU-h that produced it | linear in CPU budget: one core buys **0.089%** of one GPU; the fleet would need **143,418 cores** for all of it |
-| **B — counters on device** | packed + bitsliced walks, checkpoint, DP record | ~0 extra walk steps; cost is state and issue slots (§5) | ~0 | **100%** |
+| **B — counters on device** | packed + bitsliced walks, checkpoint, DP record | ~0 extra walk steps; the cost is throughput: **+4.2%** measured on the bitsliced CPU walk, unmeasured on the packed one (§5) | ~0 | **100%** |
 
 Route A is not a fallback to be embarrassed about: it needs no GPU change, no
 checkpoint bump and no corpus change, it makes the format testable **today**,
@@ -118,22 +124,52 @@ and at the tranche the objective actually funds (`2^21` orbits, about one part
 in 24,000 of the search) it is 1.67 extra GPU-hours. It does not scale to a
 campaign, and the table says so in the column that matters.
 
-Route B is what makes a campaign payable, and it is the one that needs hardware.
+Route B is what makes a campaign payable. It is built, and on the one backend
+that can be measured here it costs 4.2% of the walk against Route A's 100%.
+What still needs hardware is the backend the campaign actually runs.
 
 ## 5. Route B, priced
 
-**The packed backend is cheap and the bitsliced backend is not**, and the reason
-is one line of each. `packedkernels.cuh` computes `const int j = 3 + ((hw >> 1) & 7);`
+The two backends pay for the witness by different mechanisms, and the reason is
+one line of each. `packedkernels.cuh` computes `const int j = 3 + ((hw >> 1) & 7);`
 — an `int`, per worker — so incrementing one of eight counters is an ordinary
 indexed read-modify-write of four bytes. `kernel.h` carries the same selector as
 three *bitsliced words* `hb[1..3]`, so every lane in the word wants a different
 counter and all eight must be touched with a ripple-carry every step.
 
-| | added per step | against | share |
-|---|---:|---:|---|
-| packed: one 4-byte RMW | ~2–6 instructions | 2,189.75 instr/update (`THROUGHPUT-30B.md`) | **+0.09% to +0.27%** |
-| bitsliced, 32-bit counters | `8 × (1 + 2×32)` = 520 lane-ops | ~1,540 lane-ops/update (`THROUGHPUT-CEILING.md`) | **+33.8%** |
-| bitsliced, 16-bit + flush | `8 × (1 + 2×16)` = 264 lane-ops | same | **+17.1%** |
+This note first said the bitsliced one would therefore be expensive. Measured,
+it is not: **+4.2%** on the CPU backend, against +33.8% predicted. The estimate
+is left in the table beside the measurement rather than quietly corrected,
+because the gap is the useful part.
+
+| | added per step | against | predicted | measured |
+|---|---:|---:|---:|---:|
+| packed: one 4-byte RMW | ~2–6 instructions | 2,189.75 instr/update (`THROUGHPUT-30B.md`) | +0.09% to +0.27% | *needs the GPU* |
+| bitsliced, 32-bit counters | `8 × (1 + 2×32)` = 520 lane-ops | ~1,540 lane-ops/update (`THROUGHPUT-CEILING.md`) | +33.8% | **+4.2%** |
+| bitsliced, 16-bit + flush | `8 × (1 + 2×16)` = 264 lane-ops | same | +17.1% | not built |
+
+The measurement, so the number can be argued with: `make cpu WITNESS=0` and
+`WITNESS=1`, four threads on a four-core host, `--curve 131 --steps 256
+--launches 25 --verify 0`, runs interleaved. Control 8.066 and 8.098 M it/s,
+witness 7.779 and 7.711, so 4.2% on the means and 3.9–4.4% pairwise. Two
+samples each on a shared box is a thin measurement and the spread says so;
+what it is good enough to establish is that the cost is single-digit percent
+and not the third of the walk that was predicted.
+
+**The bitsliced prediction was wrong, and by a lot.** It assumed a branch-free
+ripple over all `ECC_COUNT_BITS` of all eight counters. The implementation's
+carry loop stops as soon as no lane in the word is still carrying, and a lane
+carries past bit `b` only when its low `b` bits are all set — so on a 64-lane
+word it runs about seven bits, not 32. The other half of the gap is the
+denominator: a walk step is not 1,540 lane-ops of counting-comparable work, it
+is a batched field inversion amortised over `BATCH` slots, and the counters are
+a much smaller share of that than the lane-op ratio suggested.
+
+Two things the CPU number does *not* transfer to the GPU. The early exit is a
+data-dependent loop bound, so on a warp it costs the maximum across 32 threads
+rather than each thread's own; and the packed backend is a different mechanism
+entirely, one scalar read-modify-write against a kernel that is issue-bound at
+95% of the part's best measured rate. Neither is predicted here from the other.
 
 The packed kernel is at **74.1 lane-instructions per SM-clock, 95% of the best
 mixed rate ever measured on the part**, so it is issue-bound and added
@@ -159,33 +195,49 @@ measured at 8.5 B/s" — (a) is a 36% increase in hot state and (c) is 18%.
 (b) is free relative to (a) because `iters` is already derivable from `now` and
 `startIter`, both of which the record already holds.
 
-### What to change
+### What changed
 
-- `include/walk.h` — `DpRecord` gains `counts[8]`; `WalkParams` gains the
-  counter array.
-- `include/kernel.h` — bitsliced increment in `run`, counters zeroed in `init`
-  and in `reseed`, counters copied in `handleDistinguished`.
-- `include/packedkernels.cuh`, `include/packedengine.cuh` — the same for the
-  packed path, plus the allocation and the tile layout if (c) is chosen.
-- `src/main.cu` — `DpFileRecord` gains the counters (32 → 64 bytes with (a));
-  `CkptHeader` payload grows, so `checkpointVersion()` **must** go to 2 for the
-  bitsliced engine and 3 for the packed one, and `ckptPayloadIsWhole` follows.
-- `include/solver.h` — `rewalk` stays as the oracle the device is checked
-  against; `solve` can then take counters directly and skip re-walking on a
-  collision, which is a small speedup it gets for free.
-- `aws/merge.py` — `RECORD` dtype and `RECORD_BYTES`; bucket files hold the old
-  32-byte shape, so this is a corpus-format break (§6).
-- new: the artifact emitter and the §3 permutation, with the popcount assertion.
+- `include/walk.h` — `DpRecord` gains `counts[ECC_JCOUNT]`; `ECC_WITNESS`,
+  `ECC_COUNT_BITS` and the scalar counter layout the packed path indexes with.
+- `include/kernel.h` — `WalkParams` gains the counter array; `bumpCounts`
+  (bitsliced, with a carry loop that stops when no lane is still carrying),
+  `clearCounts` on start and on restart, and the per-lane read-out in
+  `handleDistinguished`.
+- `include/packedkernels.cuh` — the same three points, scalar: zero in `init`
+  (which also serves restart), one `+= 1` after `j` is computed, copy at the
+  report.
+- `include/packedengine.cuh`, `src/main.cu` — allocation, `bytesPerThread`,
+  and the checkpoint. Counters are walk state, so `checkpointVersion` moves to
+  2 for the bitsliced engine and 3 for the packed one, and `WITNESS=0` leaves
+  both at what they were.
+- `src/main.cu` — corpus v2 behind a magic, `--verify` compares the device's
+  counters against `Solver::rewalk`, and a `testWitness` in `--test`.
+- `aws/merge.py` — reads either format. The witness is deliberately *not*
+  carried into the bucket files: merging matches two seeds against one orbit
+  key and nothing else, and widening every bucket record to carry something
+  the merge never reads would cost the pass its margin.
+- new: `cairn_artifacts.py` turns a v2 corpus into claims, and `cairn_basis.py`
+  is the basis map it needs.
+
+One thing deliberately not done: `Solver::Entry` still holds only `(seed,
+iters)`, so resolving a collision still re-walks both trails rather than
+reading their witnesses. The witness would save those two walks, but `Entry`
+is the per-orbit store that `--load-max` exists to bound, and growing it by 40
+bytes to save work that happens once per campaign is the wrong trade.
 
 ### What to measure, and against what
 
 `TUNING.md`'s paired comparison, not a before/after across builds: same CUDA,
-same geometry, same arithmetic options, counters on and off, three benchmark
-and three DP34 collection samples each, reporting the median and the spread.
-The control is the same binary with the counter writes compiled out. Report
-instructions/update from the receipt alongside B/s, because if throughput falls
-by more than the instruction count did, state traffic became binding again and
-layout (c) is the answer rather than a smaller counter.
+same geometry, same arithmetic options, `WITNESS=1` against `WITNESS=0`, three
+benchmark and three DP34 collection samples each, reporting the median and the
+spread. Report instructions/update from the receipt alongside B/s, because if
+throughput falls by more than the instruction count did, state traffic became
+binding again and layout (c) is the answer rather than a smaller counter.
+
+`make` does not rebuild on a flag change alone, so `touch src/main.cu` between
+the two builds or the control is a copy of the treatment. That mistake was
+made once already while measuring the CPU number below, and it reports a
+perfect 0.00% difference, which is exactly what it looks like when it works.
 
 ## 6. Operational constraints
 
@@ -193,31 +245,61 @@ layout (c) is the answer rather than a smaller counter.
   geometry "must never change while checkpoints exist"; counters are walk state,
   so every in-flight checkpoint is invalidated. This lands at a campaign
   boundary or it strands work.
-- **The corpus format breaks.** DP files are headerless fixed-size records, so
-  v1 and v2 files are indistinguishable by content. Either write v2 under a new
-  extension or give the file a header; do not overload the size.
+- **The corpus grew and the format moved.** v2 records are 72 bytes against
+  v1's 32, so the full `2^35.5`-orbit corpus goes from about 1.6 TB to 3.6 TB.
+  The format is told apart by an `ECC2KDP2` magic rather than by size, and a
+  build refuses to append one to a non-empty file of the other. **Every
+  uploaded delta carries the header**, because `aws/worker.py` ships byte
+  ranges as standalone objects and the merge frames each on its own — without
+  that, only a slot's first delta would announce the format and every later one
+  would be read as v1, which mis-frames every record in it and is invisible
+  until the merge reports orbits nobody walked.
+- **Bucket files stay v1.** `aws/merge.py` reads either corpus format but
+  writes the old 32-byte shape into its buckets: the merge matches two seeds
+  against one orbit key and never reads a witness, so widening every bucket
+  record to carry one would cost the pass its margin. Whatever wants the
+  witness reads the corpus.
 - **`dpWeight` must stay 34 campaign-wide** (campaign.json already warns), and
   the cairn job pins 34 too, so the two agree by construction — but a future
   cutoff change forks the cairn job id and is a new objective, not a tweak.
 
 ## 7. Validation
 
-In this order, because each step is only worth running if the previous passed:
+What was run, in the order each became worth running:
 
-1. **Host, no GPU.** Emit an artifact from `rewalk` on the `GF(2^23)` and
-   `GF(2^41)` instances and run cairn's own checker
-   (`examples/certicom-ecdlp/checkers/ecc2k130_orbit_batch.py` shape, its toy
-   twin for the small fields) over it. These instances have a planted `k`, so a
-   collision must recover it — `AGENTS.md` §6's "a run whose answer was not
-   checked against the planted secret" applies.
-2. **Device against the oracle.** Extend `--verify N` to compare the device's
-   counters with `rewalk`'s, not just the endpoint. A mismatch is the only
-   failure mode this change can introduce that nothing else would catch.
-3. **Cross-implementation.** Feed the emitted artifact to cairn's checker *and*
-   to `orbit_dp.py verify`; both must accept, and `orbit_dp.py audit` must
-   re-walk it clean.
-4. **Interop on the real instance.** One artifact from an ECC2K-130 trail,
-   accepted by the checker. This costs one trail and is the end-to-end proof.
+1. **The device against the oracle.** `--verify N` now compares the walk's
+   counters with `Solver::rewalk`'s, not just the endpoint — a wrong count
+   still produces a well-formed record, a well-formed claim, and a `mu` that
+   lands on somebody else's orbit, so nothing else would catch it. Every
+   distinguished point of runs on `GF(2^23)` and `GF(2^41)` at several
+   distinguishing weights, including trails of 448 steps where the carry
+   actually propagates, and the counts sum to `iters` on all of them. Not on
+   `GF(2^131)`: one reference re-walk there is 2^25.27 scalar steps, which is
+   why step 4 exists and does the same job from the other side.
+2. **The algebra, in `--test`.** `testWitness` walks a bounded few steps and
+   requires `[mu]R_0` to be the point it reached, on every curve the suite
+   covers including `GF(2^131)`. The identity holds at every step, which is
+   what makes it a unit test rather than a 2^25.27-step one; the endpoint half
+   runs on one trail per curve rather than four, because the reference's
+   scalar multiplication is `O(m^3)` and four of them at m = 131 turned a
+   21-second suite into a six-minute one.
+3. **The planted logarithms still come out.** `make break-small` on both
+   backends, which is `AGENTS.md` §6's "a run whose answer was not checked
+   against the planted secret".
+4. **Interop on the real instance.** 53 genuine weight-34 ECC2K-130 orbits
+   collected by this client, written to a v2 corpus, turned into a claim by
+   `cairn_artifacts.py`, and accepted by
+   `examples/certicom-ecdlp/checkers/ecc2k130_orbit_batch.py` — the checker
+   whose hash is pinned inside the merged objective — and independently by
+   `orbit_dp.py verify`. Tampering with one counter, the seed, the orbit name,
+   or the order of the counters is refused by the checker in every case.
+5. **The corpus formats.** A v2 file round-trips through reload; a v1 file
+   written by a `WITNESS=0` build still reads; and a v2 build refuses to
+   append to a non-empty v1 corpus rather than producing a file neither reader
+   can frame.
+
+What has *not* been run: `make gpu`. There is no CUDA toolchain here, so the
+packed edits are uncompiled — see the status table at the top.
 
 ## 8. What would make this not worth doing
 
@@ -229,7 +311,13 @@ this kernel has already absorbed; above it, the witness is buying an external
 property at a price that shows up in the campaign's wall-clock, and that trade
 should be made deliberately rather than by default.
 
-The bitsliced path is exempt from that target and is expected to fail it: at
-+17% it should stay witness-free and keep using Route A, which is what it is
-for — it is the correctness oracle and the small-field path, not the production
-walk.
+That target stands for the packed walk and is still unmeasured.
+
+The exemption written here for the bitsliced path does not: it was granted on
+an estimate of +17%, and the path measures **+4.2%** on the CPU
+backend. So the bitsliced walk carries the witness by default too, and
+`WITNESS=0` is there for whoever wants the old rate rather than for whoever
+wants correctness. What that does not settle is the same path under CUDA,
+where the carry loop's early exit costs the warp's maximum rather than each
+thread's own; if that turns out to matter, the 16-bit-plus-flush layout is the
+next thing to build, and it is already costed above.

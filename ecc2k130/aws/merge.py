@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Merge distinguished-point corpora from many workers and solve any collision.
 
-The client writes 32-byte records: the walk seed, then the canonical orbit
+The client writes fixed-width records: the walk seed, then the canonical orbit
 representative of the distinguished point (three little-endian 64-bit words).
+A v2 corpus leads with an ECC2KDP2 magic and adds the trail length and the
+eight branch counts -- the cairn witness -- for 72 bytes a record.
 Two records with the same representative and different seeds are a collision,
 and the client's own reload path (--load) recomputes both walks and recovers
 the logarithm.  This tool only has to find the pair.
@@ -37,6 +39,43 @@ import numpy as np
 
 RECORD = np.dtype([("seed", "<u8"), ("k0", "<u8"), ("k1", "<u8"), ("k2", "<u8")])
 RECORD_BYTES = RECORD.itemsize  # 32
+
+# Corpus v2 carries the cairn witness besides the point: seed, iters, the
+# orbit key, and the eight per-branch step counts (see ../CAIRN-WITNESS.md).
+# The magic is what tells the two apart -- framing on size alone would read a
+# truncated v1 file as v2 and mis-frame every record after the first.
+RECORD_V2 = np.dtype([("seed", "<u8"), ("iters", "<u8"),
+                      ("k0", "<u8"), ("k1", "<u8"), ("k2", "<u8"),
+                      ("counts", "<u4", 8)])
+RECORD_V2_BYTES = RECORD_V2.itemsize  # 72
+DP_MAGIC_V2 = b"ECC2KDP2"
+DP_HEADER_BYTES = 16
+
+
+def corpusFormat(path):
+    """(header bytes, record bytes, dtype) for a corpus file."""
+    with open(path, "rb") as fh:
+        if fh.read(len(DP_MAGIC_V2)) == DP_MAGIC_V2:
+            return DP_HEADER_BYTES, RECORD_V2_BYTES, RECORD_V2
+    return 0, RECORD_BYTES, RECORD
+
+
+def keyRecords(raw, dtype):
+    """The (seed, k0, k1, k2) view the merge works on, from either format.
+
+    The witness is deliberately not carried into the buckets.  Merging looks
+    for two seeds against one orbit key and nothing else, the solve re-walks
+    both trails anyway, and widening every bucket record by 40 bytes to carry
+    something the merge never reads would cost the pass its whole margin.
+    Whatever wants the witness reads the corpus directly.
+    """
+    recs = np.frombuffer(raw, dtype=dtype)
+    if dtype is RECORD:
+        return recs
+    out = np.empty(len(recs), dtype=RECORD)
+    for field in ("seed", "k0", "k1", "k2"):
+        out[field] = recs[field]
+    return out
 
 
 def log(msg):
@@ -76,14 +115,17 @@ def ingest(state, root, work):
     added = 0
     for path in sourceFiles(root):
         rel = os.path.relpath(path, root)
-        done = int(state["offsets"].get(rel, 0))
+        head, stride, dtype = corpusFormat(path)
+        done = int(state["offsets"].get(rel, head))
+        if done < head:
+            done = head
         size = os.path.getsize(path)
-        whole = size - size % RECORD_BYTES
+        whole = size - (size - head) % stride
         if whole <= done:
             continue
         with open(path, "rb") as fh:
             fh.seek(done)
-            recs = np.frombuffer(fh.read(whole - done), dtype=RECORD)
+            recs = keyRecords(fh.read(whole - done), dtype)
         buckets = (recs["k0"] & (nb - 1)).astype(np.int64)
         order = np.argsort(buckets, kind="stable")
         recs = recs[order]

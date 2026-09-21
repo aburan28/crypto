@@ -11,6 +11,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     ~PackedCudaEngine() override {
         cudaFree(P.x); cudaFree(P.y); cudaFree(P.pchain); cudaFree(P.dead);
         cudaFree(P.seed); cudaFree(P.startIter); cudaFree(P.dp); cudaFree(P.dpCount);
+        cudaFree(P.counts);
         cudaFree(denominators);
     }
     size_t fieldCount() const override { return size_t(P.threads) * BATCH * 5; }
@@ -25,7 +26,12 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
     }
 #endif
     size_t laneCount() const override { return size_t(P.threads) * BATCH; }
-    unsigned checkpointVersion() const override { return 2u; }
+    unsigned checkpointVersion() const override { return 2u + ECC_CKPT_BUMP; }
+    // One worker is one walk here, so a counter is a number rather than
+    // ECC_COUNT_BITS bitsliced words. That is the whole reason the witness
+    // costs this backend a read-modify-write and the bitsliced one a
+    // ripple-carry over all eight counters; see CAIRN-WITNESS.md.
+    size_t countElems() const override { return eccScalarCountWords(P.threads, BATCH); }
     int checkpointLanes() const override { return 1; }
 #if ECC_PACKED_POLY_STATE
     // Packed checkpoint v2 always stores normal-basis coordinates, including
@@ -145,6 +151,11 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         CUDA_CHECK(cudaMalloc(&denominators, bytes * denominatorFields));
 #endif
         CUDA_CHECK(cudaMalloc(&P.dead, slotCount() * sizeof(unsigned)));
+        P.counts = nullptr;
+        if (countElems()) {
+            CUDA_CHECK(cudaMalloc(&P.counts, countElems() * sizeof(unsigned)));
+            CUDA_CHECK(cudaMemset(P.counts, 0, countElems() * sizeof(unsigned)));
+        }
         CUDA_CHECK(cudaMalloc(&P.seed, laneCount() * sizeof(u64)));
         CUDA_CHECK(cudaMalloc(&P.startIter, laneCount() * sizeof(u64)));
         CUDA_CHECK(cudaMalloc(&P.dp, size_t(P.dpCap) * sizeof(DpRecord)));

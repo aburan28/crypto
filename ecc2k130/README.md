@@ -218,14 +218,22 @@ analysis below.
 A walk that reports is restarted in place from `R = Q + sum c_i sigma^i(P)`,
 with `c` a 128-bit string from a PRF of the walk seed, computed with the same
 bitsliced arithmetic and merged into the finished lanes under a mask. No linear
-combination of `P` and `Q` is tracked in the loop; the server recomputes both
-walks from their seeds when two of them collide, which is what keeps the inner
-loop free of conditional counter updates.
+combination of `P` and `Q` is tracked in the loop: a coefficient update is a
+129-bit modular multiplication per step, which this walk cannot afford.
 
 Reports are `(seed, endpoint)`. Collision resolution recomputes each walk
 counting how often each `sigma^j + 1` was applied, giving
 `endpoint = [mu](alpha_0 P + Q)` with `mu = prod_j (1 + s^j)^{n_j}`, matches the
 two endpoints up to Frobenius and negation, and solves for `k`.
+
+The walk also carries those counts as it goes (`WITNESS=1`, the default), which
+is eight per-branch counters and not a coefficient: the product commutes, so the
+order of the steps does not matter and there is nothing to multiply per step.
+That turns a report into something a third party can check with one double
+scalar multiplication instead of re-walking `2^25.27` steps, which is what the
+cairn objective in [CAIRN-WITNESS.md](CAIRN-WITNESS.md) pays for. It costs 4.2%
+of the bitsliced walk, measured; `WITNESS=0` compiles it out and restores the
+previous checkpoint and corpus formats exactly.
 
 ## Results
 
@@ -697,10 +705,20 @@ run gets longer.
 
 Three things are saved.
 
-**The corpus.** `--dp-file F` appends 32-byte records of (seed, canonical orbit
-hash): fixed width, so a file can be counted with a stat, appended to by several
-writers and truncated by a dying container without becoming unparseable. A
-short trailing record is ignored rather than misread.
+**The corpus.** `--dp-file F` appends fixed-width records, so a file can be
+counted with a stat, appended to by several writers and truncated by a dying
+container without becoming unparseable. A short trailing record is ignored
+rather than misread.
+
+There are two formats. v1 is a headerless stream of 32-byte (seed, canonical
+orbit) records, which is what a `WITNESS=0` build writes and what every corpus
+written before the witness existed is. v2 leads with an `ECC2KDP2` magic and
+carries 72-byte records that add `iters` and the eight branch counts. The magic
+is what tells them apart -- framing on size alone would read a truncated v1 file
+as v2 and mis-frame every record after the first -- and a build will refuse to
+append one format to a non-empty file of the other rather than produce a file
+neither reader can frame. Both formats read back through `--load`, and
+`aws/merge.py` takes either.
 
 **Old points as live state.** `--load F` reads a corpus back into the store at
 startup, so a collision between today's walk and one from last week is found the
