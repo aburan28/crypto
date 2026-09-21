@@ -59,8 +59,14 @@
 //!
 //! Define `R(P)` = the lex-smallest point in `{α·P : α ∈ Aut(E)}`.
 //! This is a 6-to-1 map `E → E/Aut(E)`.  Pollard rho on the
-//! quotient effectively walks a group of size `n/6`, giving
-//! expected collision time `√(n · π/4) / √6 = (1/√6) · √(πn/4)`.
+//! quotient effectively walks a set of size `n/6`, so the expected
+//! number of steps to the first repeated class is
+//! `√(π(n/6)/2) = √(πn/12) = (1/√6) · √(πn/2)`, against `√(πn/2)`
+//! for the walk on `E` itself.  This solver detects the repeat with
+//! Floyd's tortoise and hare, which stops after about `1.03 · √(n/6)`
+//! iterations of one tortoise step plus two hare steps (Knuth,
+//! TAOCP vol. 2, §3.1); `FoldedRhoSolution::effective_rho_factor`
+//! reports the measured multiple of `√(n/6)`.
 //!
 //! Per-step bookkeeping: each walker tracks `(current_point, a, b)`
 //! such that `current_point = a·G + b·Q`.  When two walkers with
@@ -279,9 +285,14 @@ pub struct FoldedRhoSolution {
     pub iterations: u64,
     /// Total restarts due to sterile collisions.
     pub restarts: u32,
-    /// Effective rho factor — `iterations / √(n/6)` should approach
-    /// `√(π/4)` ≈ 0.886 in expectation.  Reported for empirical
-    /// speedup measurement.
+    /// Effective rho factor — `iterations / √(n/6)`.  `iterations`
+    /// counts Floyd iterations, which stop at the first multiple of
+    /// the cycle length past the tail, so this should approach about
+    /// 1.03 in expectation (Knuth, TAOCP vol. 2, §3.1; simulated on
+    /// random mappings of 2^11–2^15 points: 1.02–1.04).  The expected
+    /// number of steps to the first repeated class, `√(π/2) ≈ 1.25`
+    /// times `√(n/6)`, is a different quantity.  Reported for
+    /// empirical speedup measurement.
     pub effective_rho_factor: f64,
 }
 
@@ -743,8 +754,17 @@ mod tests {
         }
         let folded_mean = folded_total as f64 / folded_runs.max(1) as f64;
         let n_f = n_u as f64;
-        let theoretical_full_rho = (std::f64::consts::PI * n_f / 4.0).sqrt();
-        let theoretical_aut_folded = theoretical_full_rho / 6f64.sqrt();
+        // Expected number of walk steps to the first repeated point on a
+        // set of size N is √(πN/2).  `iterations` counts Floyd
+        // tortoise-and-hare iterations, which stop at the first multiple
+        // of the cycle length past the tail, after about 1.03·√N of them
+        // (Knuth, TAOCP vol. 2, §3.1), so the like-for-like expectation
+        // for the measured count is the Floyd line.
+        let rho_len_full = (std::f64::consts::PI * n_f / 2.0).sqrt();
+        let rho_len_folded = rho_len_full / 6f64.sqrt(); // √(πn/12)
+        const FLOYD_CONSTANT: f64 = 1.03;
+        let floyd_full = FLOYD_CONSTANT * n_f.sqrt();
+        let floyd_folded = FLOYD_CONSTANT * (n_f / 6.0).sqrt();
 
         println!();
         println!("=== Aut-folded rho empirical speedup ===");
@@ -758,18 +778,29 @@ mod tests {
             "  Aut-folded mean iterations: {:.1} (over {} runs)",
             folded_mean, folded_runs
         );
-        println!("  Theoretical full rho:       {:.1}", theoretical_full_rho);
         println!(
-            "  Theoretical aut-folded:     {:.1}",
-            theoretical_aut_folded
+            "  Expected rho length √(πn/2), unfolded:        {:.1}",
+            rho_len_full
         );
         println!(
-            "  Empirical / theoretical-full-rho ratio: {:.2}",
-            folded_mean / theoretical_full_rho
+            "  Expected rho length √(πn/12), aut-folded:     {:.1}",
+            rho_len_folded
         );
         println!(
-            "  Empirical / theoretical-aut-folded ratio: {:.2}",
-            folded_mean / theoretical_aut_folded
+            "  Expected Floyd iterations 1.03·√n, unfolded:  {:.1}",
+            floyd_full
+        );
+        println!(
+            "  Expected Floyd iterations 1.03·√(n/6), folded: {:.1}",
+            floyd_folded
+        );
+        println!(
+            "  Measured folded / expected unfolded Floyd: {:.2} (1/√6 ≈ 0.41 if the fold pays in full)",
+            folded_mean / floyd_full
+        );
+        println!(
+            "  Measured folded / expected folded Floyd:   {:.2} (1.00 = on the Floyd expectation)",
+            folded_mean / floyd_folded
         );
         println!();
         println!("  Honest interpretation:");
@@ -783,13 +814,13 @@ mod tests {
         println!("    cryptographic-scale benchmarking would require a curve where");
         println!("    point arithmetic itself is fast (e.g., the projective");
         println!("    constant-time secp256k1 backend in `ecc::secp256k1_point`).");
-        // Sanity: aut-folded should not be wildly worse than full-rho at this scale.
-        // Allow 4× variance margin for prime-order n=73.
+        // Sanity: aut-folded should not be wildly worse than unfolded rho at
+        // this scale.  Allow 4× variance margin for prime-order n=73.
         assert!(
-            folded_mean < 4.0 * theoretical_full_rho,
-            "aut-folded mean {} should be ≤ 4× full-rho theoretical {}",
+            folded_mean < 4.0 * floyd_full,
+            "aut-folded mean {} should be ≤ 4× the unfolded Floyd expectation {}",
             folded_mean,
-            theoretical_full_rho
+            floyd_full
         );
     }
 
