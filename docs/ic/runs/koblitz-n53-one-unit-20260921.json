@@ -740,9 +740,9 @@
   "core_cost_reading": "IC-only total core-seconds are measured directly. The one-target rho is single-threaded, but its process CPU was not sampled as a separate report field; the whole-process wall crossover is not a core-second crossover."
  },
  "gates": {
-  "algebraic_factor_base_and_charged_resources": "partial_pass_native_selection_counts_added_licensed_magma_missing",
+  "algebraic_factor_base_and_charged_resources": "partial_pass_native_selection_and_phase_cpu_counts_added_licensed_magma_missing",
   "same_instance_solver_matrix": "not_run_here",
-  "wall_core_memory_reporting": "partial_pass_current_single_core_refresh_added_magma_missing",
+  "wall_core_memory_reporting": "partial_pass_current_single_core_and_phase_cpu_added_magma_missing",
   "n31_n41_larger_pdp_scaling": "not_run_here",
   "unknown_scalar_without_constructed_factor_base_logs": "finite_pass",
   "full_cost_vs_automorphism_rho": "parallel_wall_pass_4_of_5_single_target_single_core_and_total_core_fail_32_target_batch_pass",
@@ -1157,9 +1157,9 @@
   }
  },
  "science_process_accounting": {
-  "processes": 101,
-  "sequential_wall_seconds": 311.139654002,
-  "total_core_seconds": 1159.24267,
+  "processes": 102,
+  "sequential_wall_seconds": 315.05442587699997,
+  "total_core_seconds": 1172.5110490000002,
   "peak_rss_bytes": 139853824,
   "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count diagnostic, factor-base-width diagnostic, collection-window diagnostic, and rejected reusable-scratch A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
@@ -1222,5 +1222,70 @@
    }
   },
   "reading": "The workflow now emits native subgroup-orbit construction counts on fresh and resumed materialization. Timing already charged selection wall and process resources; these counters expose what that phase did without changing the base or solver."
+ },
+ "current_head_phase_resource_replay": {
+  "source_commit": "140bf3ac",
+  "binary_blake3": "dfe17636da8740232ea4d6f0c50f4ac26b204b373781263e281f9282dfda65c7",
+  "stages": [
+   {
+    "stage": "select",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 0.33432175,
+    "cpu_seconds": 1.111232,
+    "peak_rss_bytes_at_end": 24313856
+   },
+   {
+    "stage": "collect",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 1.405011,
+    "cpu_seconds": 8.338066000000001,
+    "peak_rss_bytes_at_end": 107560960
+   },
+   {
+    "stage": "logs",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 0.241615,
+    "cpu_seconds": 1.1647669999999994,
+    "peak_rss_bytes_at_end": 108855296
+   },
+   {
+    "stage": "solve",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 0.163229875,
+    "cpu_seconds": 0.9620979999999992,
+    "peak_rss_bytes_at_end": 108904448
+   },
+   {
+    "stage": "baseline",
+    "status": "complete",
+    "ran": true,
+    "wall_seconds": 1.764106417,
+    "cpu_seconds": 1.68417,
+    "peak_rss_bytes_at_end": 108920832
+   }
+  ],
+  "stage_cpu_sum": 13.260333,
+  "whole_process_cpu_seconds": 13.268379000000001,
+  "unattributed_cpu_seconds": 0.008046000000001996,
+  "whole_process_wall_seconds": 3.914771875,
+  "whole_process_peak_rss_bytes": 108953600,
+  "selection_cost": {
+   "abscissae_drawn": 695,
+   "cofactor_multiplications": 344,
+   "frobenius_squarings": 18232,
+   "lifts_found": 344,
+   "rebuilds": 1
+  },
+  "trials": 17000,
+  "summands_scanned": 19363000,
+  "relations": 588,
+  "recovered_scalar": 7892094459170,
+  "verified": true,
+  "rho_over_ic_wall_ratio": 0.8951202254669488,
+  "reading": "Stage CPU deltas reconcile to the top-level process total. RSS fields are the process high-water mark sampled at each stage end and are not phase-local allocation peaks or deltas."
  }
 }
