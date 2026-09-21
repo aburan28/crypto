@@ -140,27 +140,33 @@ python3 scripts/ic_e2e_instructions.py measure --ic target/release/ic --output /
 python3 scripts/ic_e2e_instructions.py report --instructions /tmp/ir/instructions.json
 ```
 
-Frozen: [`instructions/ladder-20260920-n31-41-53.json`](instructions/ladder-20260920-n31-41-53.json)
+Frozen: [`instructions/ladder-20260920-n31-41-53-61.json`](instructions/ladder-20260920-n31-41-53-61.json)
 (`ic` built from `a6ad6236`, valgrind 3.22.0, x86_64):
 
-| rung | log₂ r | `S`, index calculus | `S`, rho | rho / IC in Ir | rho / IC in wall (runner, 95 % CI) | pair table's share of IC Ir |
+| rung | log₂ r | `S`, index calculus | `S`, rho | rho / IC in Ir | rho / IC in wall (runner, 95 % CI) | IC Ir in the pair table / in the scan |
 |:--|--:|--:|--:|--:|:--|--:|
-| `k0n31` | 20.5 | 167,091 | 5,912 | 0.035 | [0.036, 0.037] | 38 % |
-| `k0n41-subgroup` | 39.0 | 1,155 | 1,542 | **1.335** | [2.210, 2.260] | 57 % |
-| `k0n53-subgroup` | 44.3 | 2,292 | 2,761 | **1.204** | [1.961, 2.062] | 47 % |
-| `k0n61-subgroup-wide` | 47.2 | pending | pending | pending | [1.632, 1.871] | — |
+| `k0n31` | 20.5 | 167,091 | 5,912 | 0.035 | [0.036, 0.037] | 38 % / 2 % |
+| `k0n41-subgroup` | 39.0 | 1,155 | 1,542 | **1.335** | [2.210, 2.260] | 57 % / 41 % |
+| `k0n53-subgroup` | 44.3 | 2,292 | 2,761 | **1.204** | [1.961, 2.062] | 47 % / 52 % |
+| `k0n61-subgroup-wide` | 47.2 | 2,723 | 2,724 | **1.001** | [1.632, 1.871] | 86 % / 11 % |
 
 **Read the two ratio columns together.** The wall ratio compares a pipeline
-whose collection runs on every core against a single-threaded rho; the
-instruction ratio removes that parallelism and the end-to-end margin roughly
-halves: 1.34 and 1.20 in work where the runner clock said 2.26 and 2.03. That
-is the AGENTS.md §6 rule — wall time is never the headline — with the number
-attached. In the repository unit the pipeline beats rho end to end by 20–34 %
-at 39–44 bits on a 32-target batch, and the margin shrinks with `r`; at
-n = 31 it loses by 28×. Class: engineering (a ratio to the counting floor
-did not move; nothing here does what a generic algorithm cannot). `S_rho`
-at n = 31 (5,912) sits beside the tournament thread's 5,388 on comparable
-cells, which is the check that the two threads are on one axis.
+whose pair table and collection run on every core against a single-threaded
+rho; the instruction count removes that parallelism, and the end-to-end
+margin is 1.34, 1.20 and **1.00** in work where the runner clock said 2.26,
+2.03 and 1.77. At 47 bits the whole-process advantage in the ledger's unit
+is gone: what the clock shows there is the pipeline's four cores against
+rho's one, and the pair table alone is 86 % of the pipeline's instructions.
+That is the AGENTS.md §6 rule — wall time is never the headline — with the
+number attached, and it is why the gate pins counters and shows the charged
+column as advisory only. In the repository unit the pipeline beats matched
+rho end to end by 20–34 % at 39–44 bits on a 32-target batch, reaches parity
+at 47, and loses by 28× at 20. Class: engineering (no ratio to the counting
+floor moved; nothing here does what a generic algorithm cannot). `S_rho` at
+n = 31 (5,912) sits beside the tournament thread's 5,388 on comparable
+cells, which is the check that the two threads are on one axis. Callgrind
+totals sum every thread; `RAYON_NUM_THREADS=1` still leaves one rayon worker,
+to which the table build is handed, so the totals are whole-process work.
 
 ## Running it locally
 

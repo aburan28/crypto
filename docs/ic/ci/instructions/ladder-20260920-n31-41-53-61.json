@@ -1,6 +1,8 @@
 {
  "S_definition": "Ir / (targets * sqrt(r)) from ONE single-threaded (RAYON_NUM_THREADS=1) callgrind pass of the full workflow; Ir_rho = inclusive Ir of koblitz_signed_frobenius_rho_with_progress (all 32 calls, setup included), Ir_ic = total - Ir_rho, so process start-up, curve construction, target resolution and JSON output are charged to index calculus",
+ "breakdown_note": "breakdown_inclusive: inclusive Ir of the largest symbol matching each needle, across threads; a diagnostic split of Ir_ic, not a second accounting",
  "determinism": "single-threaded totals of two passes of the n=31 rung differed by 1.6e-5 relative and the rho inclusive by 1.2e-5; one pass is reported to that precision",
+ "finished_at": "2026-09-21T03:57:52.184554+00:00",
  "git": "a6ad6236f586493c96f92c11d58b72a8d38969c4",
  "host": {
   "machine": "x86_64",
@@ -16,7 +18,7 @@
    "S_rho": 5912.17568364684,
    "breakdown_inclusive": {
     "collector_with_pair": 3272422079,
-    "descent_solve": null,
+    "decomposition_scan": 148298775,
     "pair_table_build": 2441301355
    },
    "counters": {
@@ -44,7 +46,7 @@
    "run": {
     "breakdown_inclusive": {
      "collector_with_pair": 3272422079,
-     "descent_solve": null,
+     "decomposition_scan": 148298775,
      "pair_table_build": 2441301355
     },
     "callgrind_out": "<work>/k0n31/callgrind.out",
@@ -78,7 +80,7 @@
    "S_rho": 1542.3858716144748,
    "breakdown_inclusive": {
     "collector_with_pair": 41331574,
-    "descent_solve": null,
+    "decomposition_scan": 11215312497,
     "pair_table_build": 15626756701
    },
    "counters": {
@@ -106,7 +108,7 @@
    "run": {
     "breakdown_inclusive": {
      "collector_with_pair": 41331574,
-     "descent_solve": null,
+     "decomposition_scan": 11215312497,
      "pair_table_build": 15626756701
     },
     "callgrind_out": "<work>/k0n41-subgroup/callgrind.out",
@@ -140,7 +142,7 @@
    "S_rho": 2761.1519287085152,
    "breakdown_inclusive": {
     "collector_with_pair": 153878111,
-    "descent_solve": null,
+    "decomposition_scan": 173459097982,
     "pair_table_build": 156615056955
    },
    "counters": {
@@ -168,7 +170,7 @@
    "run": {
     "breakdown_inclusive": {
      "collector_with_pair": 153878111,
-     "descent_solve": null,
+     "decomposition_scan": 173459097982,
      "pair_table_build": 156615056955
     },
     "callgrind_out": "<work>/k0n53-subgroup/callgrind.out",
@@ -196,10 +198,73 @@
    "subgroup_bits": 44.258533022667656,
    "subgroup_order": "21044858204113",
    "targets": 32
+  },
+  {
+   "S_ic": 2722.74278473723,
+   "S_rho": 2724.271251985227,
+   "breakdown_inclusive": {
+    "collector_with_pair": 784816347,
+    "decomposition_scan": 118932738464,
+    "pair_table_build": 956740922005
+   },
+   "counters": {
+    "collection_relations": 336,
+    "collection_summands_scanned": 90000000,
+    "collection_trials": 80000,
+    "descent_trials": 6819485,
+    "factor_base_columns": 296,
+    "factor_base_points": 36112,
+    "pair_table_stored_pairs": 652056328,
+    "rho_group_additions": 72555474,
+    "rho_iterations": 72445898
+   },
+   "degree": 61,
+   "ic_verified": 32,
+   "ir_ic": 1111990776349,
+   "ir_rho": 1112615015073,
+   "ir_total": 2224605791422,
+   "name": "k0n61-subgroup-wide",
+   "params": "docs/ic/params/k0n61-subgroup-wide.json",
+   "rho_S_group_additions": 0.1776542553485069,
+   "rho_ir_per_group_addition": 15334.680537997725,
+   "rho_over_ic_ir": 1.000561370415364,
+   "rho_verified": 32,
+   "run": {
+    "breakdown_inclusive": {
+     "collector_with_pair": 784816347,
+     "decomposition_scan": 118932738464,
+     "pair_table_build": 956740922005
+    },
+    "callgrind_out": "<work>/k0n61-subgroup-wide/callgrind.out",
+    "command": [
+     "valgrind",
+     "--tool=callgrind",
+     "--callgrind-out-file=/tmp/ir-ladder/k0n61-subgroup-wide/callgrind.out",
+     "target/release/ic",
+     "workflow",
+     "--params",
+     "docs/ic/params/k0n61-subgroup-wide.json",
+     "--dir",
+     "/tmp/ir-ladder/k0n61-subgroup-wide/run",
+     "--out",
+     "/tmp/ir-ladder/k0n61-subgroup-wide/report.json",
+     "--json"
+    ],
+    "env": {
+     "RAYON_NUM_THREADS": "1"
+    },
+    "ir_rho_inclusive": 1112615015073,
+    "ir_total": 2224605791422,
+    "wall_seconds_under_callgrind_not_a_cost": 13359.706646
+   },
+   "subgroup_bits": 47.21087395347554,
+   "subgroup_order": "162888033982417",
+   "targets": 32
   }
  ],
  "schema_version": 1,
- "scope_note": "Three rungs (n = 31, 41, 53) of the four-rung ladder; the n = 61 pass was still running when this file was frozen and is recorded separately when complete.",
+ "scope_note": "All four rungs of the ladder (n = 31, 41, 53, 61); supersedes ladder-20260920-n31-41-53.json, whose three rows it reproduces byte for byte (same pass).",
  "started_at": "2026-09-20T23:00:53.737540+00:00",
+ "threads": "RAYON_NUM_THREADS=1 still leaves one rayon worker thread, to which the pair-table build is handed; PROGRAM TOTALS sums every thread, so Ir_total and Ir_ic are whole-process work; the rho routine runs on the main thread",
  "unit": "valgrind-3.22.0-x86_64-Ir"
 }

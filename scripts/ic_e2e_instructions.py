@@ -64,10 +64,14 @@ def valgrind_version() -> str:
 
 
 RHO_SYMBOL = "koblitz_signed_frobenius_rho_with_progress"
+# Inclusive cost of the largest matching symbol, across threads (rayon keeps
+# one worker even at RAYON_NUM_THREADS=1 and hands it the table build).  A
+# diagnostic split of Ir_ic, not a second accounting: the two rows may
+# overlap or leave a remainder.
 BREAKDOWN_SYMBOLS = {
+    "pair_table_build": "PairSumTable>::build",
+    "decomposition_scan": "PairSumTable>::decompose_fast",
     "collector_with_pair": "RelationCollector>::with_pair",
-    "pair_table_build": "PairSumTable>::build_within",
-    "descent_solve": "workflow::solve",
 }
 
 
@@ -145,6 +149,7 @@ def cmd_measure(args: argparse.Namespace) -> int:
         "schema_version": SCHEMA_VERSION, "unit": f"{valgrind_version()}-{platform.machine()}-Ir",
         "S_definition": "Ir / (targets * sqrt(r)) from ONE single-threaded (RAYON_NUM_THREADS=1) callgrind pass of the full workflow; Ir_rho = inclusive Ir of koblitz_signed_frobenius_rho_with_progress (all 32 calls, setup included), Ir_ic = total - Ir_rho, so process start-up, curve construction, target resolution and JSON output are charged to index calculus",
         "determinism": "single-threaded totals of two passes of the n=31 rung differed by 1.6e-5 relative and the rho inclusive by 1.2e-5; one pass is reported to that precision",
+        "threads": "RAYON_NUM_THREADS=1 still leaves one rayon worker thread, to which the pair-table build is handed; PROGRAM TOTALS sums every thread, so Ir_total and Ir_ic are whole-process work; the rho routine runs on the main thread",
         "started_at": _dt.datetime.now(_dt.timezone.utc).isoformat(), "host": {"platform": platform.platform(), "machine": platform.machine()},
         "ic_binary": {"path": str(ic), "sha256": sha256(ic)},
         "git": subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
