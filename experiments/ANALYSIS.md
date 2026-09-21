@@ -21,6 +21,19 @@
   `compose_isogenies` with `O(p · log² p)` Tonelli-Shanks point
   sampling.  Bit ceiling lifted from 18 to 22-bit at full 4-trial
   experiment cost, 26-bit (4 trials) feasible at ~1 hr.
+- **Round 9 (2026-09-21, Vélu `v(Q)` correction — §3 data
+  regenerated)**: [`src/isogeny/velu.rs`](src/isogeny/velu.rs) used
+  `v(Q) = 4 x_Q g_y(Q)² + 2 g_x(Q)²` for non-2-torsion kernel points
+  where Vélu's value is `2 g_x(Q)` (`g_x(Q)` on the T-row).  Codomains
+  were wrong, and **wrong in a way that broke isogeny**: on `toy-a` the
+  recorded 3-isogenous curve had `#E = 2059` against the start curve's
+  `2019`, so by Tate it was not in the isogeny class at all.  Every §3
+  figure below rests on graph vertices, so all of them were regenerated
+  on the fixed code; superseded values are kept inline as "was".
+  **What this does not license:** the regenerated runs are today's
+  code, so the deltas conflate the Vélu fix with rounds 2–4 (the rho
+  gcd-recovery in particular lifts success from 39 % to ~100 %).  They
+  are a corrected baseline, not a measurement of the Vélu fix alone.
 - **Round 8 (2026-05-20, Pohlig-Hellman + multi-target GLS)**: added
   [`pohlig_multi_target_rho`](src/isogeny/attack.rs) — wraps the
   round-7 `multi_target_dp_rho` in a Pohlig-Hellman outer loop.
@@ -200,10 +213,10 @@ at p ≤ 2^18 in reasonable time on this machine:
 
 | bits requested | actual bits | wall time | n succ / n total | notes |
 |----------------|-------------|-----------|------------------|-------|
-| 14             | 14          | 10 s      | 35 / 89          | initial cap=2^14 |
-| 14             | 14          | 18 s      | 35 / 89          | cap=2^18 — no extra successes |
-| 16             | 16          | 1m54s     | 30 / 80          | cap=2^14 |
-| 18             | 18          | 23m       | 41 / 106         | cap=2^14 |
+| 14             | 14          | < 1 s     | 16 / 16          | cap=2^14 (was 35 / 89) |
+| 14             | 14          | < 1 s     | 16 / 16          | cap=2^18 — still no extra successes (was 35 / 89) |
+| 16             | 16          | 3 s       | 70 / 73          | cap=2^14 (was 30 / 80) |
+| 18             | 18          | < 1 s     | 25 / 30          | cap=2^14 (was 41 / 106) |
 | 64             | clamped→30  | killed @ 4h | -              | infeasible without SEA |
 
 **Key infrastructure observation:** the failure mode is *not* "rho cycle
@@ -334,38 +347,47 @@ runs Pollard ρ at every vertex of the discovered class.
 
 ```
  #  j_E    |cls| trace  order   f_disc cond  succ/N  min  med   max  med/√(πn/2)
- 0  7057    1    -59   16471    -6907   3   1/1     92   92    92   0.572
- 1  1224    1   -185   16597    -3491   3   1/1    164  164   164   1.016
- 2  8770   16    126   16286   -49768   1   5/16    32  140   384   0.875
- 3 12331   16    107   16305   -54195   1   6/16    35  576  1209   3.602
- 4  4044    3    -42   16454   -63880   1   2/3    190  194   198   1.207
- 5 10350   16    184   16228     -883   6   4/16    57   92   138   0.579
- 6  2652   16     64   16348   -15387   2   6/16   114  272   852   1.697
- 7 13652    3   -138   16550    -1864   5   2/3    110  140   171   0.871
- 8 12300   16   -188   16600     -303  10   7/16    22  378   606   2.341
- 9  7640    1     21   16391   -65203   1   1/1      8    8     8   0.050
+ 0   7057    1    -59   16471    -6907   3  1/1      36    36    36  0.224
+ 1   1224    1   -185   16597    -3491   3  1/1      59    59    59  0.365
+ 2   8770    2    126   16286   -49768   1  2/2      53    90   128  0.566
+ 3  12331    2    107   16305   -54195   1  2/2      64    70    76  0.437
+ 4   4044    2    -42   16454   -63880   1  2/2      45    65    85  0.404
+ 5  10350    1    184   16228     -883   6  1/1     220   220   220  1.378
+ 6   2652    2     64   16348   -15387   2  2/2      48    66    84  0.412
+ 7  13652    2   -138   16550    -1864   5  2/2      29    34    38  0.208
+ 8  12300    2   -188   16600     -303  10  2/2      18    21    24  0.130
+ 9   7640    1     21   16391   -65203   1  1/1       7     7     7  0.044
 ```
 
 ### 3.2 Pooled statistics (successful rho runs only)
 
 | bits | n_succ | n_fail | median iters | √(πn/2) | median ratio | mean ratio | CoV   |
 |------|--------|--------|--------------|---------|--------------|------------|-------|
-| 14   | 35     | 54     | 164          | 161     | **1.021**    | 1.86       | 1.04  |
-| 16   | 30     | 50     | 330          | 321     | **1.029**    | 1.37       | 1.02  |
-| 18   | 41     | 65     | 708          | 642     | **1.103**    | 1.35       | 0.84  |
+| 14   | 16     | 0      | 50           | 161     | **0.314**    | 0.40       | 0.81  |
+| 16   | 70     | 3      | 196          | 320     | **0.613**    | 0.62       | 0.69  |
+| 18   | 25     | 5      | 224          | 642     | **0.349**    | 0.51       | 0.98  |
+
+*(was, on the buggy Vélu: 14 → `35 succ / 54 fail`, median ratio
+`1.021`; 16 → `30 / 50`, `1.029`; 18 → `41 / 65`, `1.103`.)*
 
 After the round-2/round-3/round-4 fixes (rho gcd-recovery + BSGS
 point counting + cofactor-sampling ℓ-isogeny construction):
 
 | bits | vertices | succ | median iters | √(πn/2)   | ratio | wall   |
 |------|----------|------|--------------|-----------|-------|--------|
-| 14   | 89       | 87   | 128          | 161       | 0.80  |  18 s  |
-| 16   | 80       | 80   | 177          | 321       | 0.55  |  2 m 24 s |
-| 18   | 106      | 105  | 482          | 642       | 0.75  |  2 m 25 s |
+| 14   | 16       | 16   | 50           | 161       | 0.31  |  < 1 s |
+| 16   | 73       | 70   | 196          | 320       | 0.61  |  3 s   |
+| 18   | 30       | 25   | 224          | 642       | 0.35  |  < 1 s |
 | 22   | 30       | 30   | 1 384        | 2 567     | 0.54  |  **1 s**     |
 | 30   | 5        | 5    | 38 266       | 41 069    | 0.93  |  **2 s**     |
 | 40   | 15       | 14   | 870 880      | 1 314 195 | 0.66  |  13 m 07 s |
 | 50   | 14       | 14   | 30 200 000   | 42 054 244 | 0.72  |  ~1 hr |
+
+The 14/16/18 rows are regenerated on the corrected Vélu (they read
+`89 / 87`, `80 / 80` and `106 / 105` vertices before).  **The 22–50-bit
+rows are not regenerated**: no frozen artifact for them exists under
+`experiments/`, and their vertex counts came from the same broken walk,
+so treat them as stale pending a re-run.
 
 The post-fix median ratio is consistently 0.5–0.9 of the textbook
 √(πn/2) expectation.  At small `bits` the gcd-recovery branch reports
@@ -445,37 +467,51 @@ signature of sample-size noise, not a structural class-leak.
 
 ### 3.4 Within-class variation
 
-For starting curves whose ℓ ∈ {2,3} graph reached the 16-vertex cap:
+For starting curves with at least two successful odd-`n` vertices.
+**The framing changed with round 9:** this section used to read "curves
+whose ℓ ∈ {2,3} graph reached the 16-vertex cap", but on the corrected
+Vélu no 14- or 18-bit class reaches the cap at all — the saturated
+classes were the broken walk manufacturing vertices.  Genuine
+cap-reaching classes survive only at 16 bits, which is why that width
+now carries the bulk of the evidence.
 
 14-bit:
 
-| curve | |cls| | conductor | n_succ | mean | stdev | CoV |
+| curve | \|cls\| | conductor | n_succ | mean | stdev | CoV |
 |-------|-------|-----------|--------|------|-------|-----|
-| #2 | 16 | 1  | 5 | 178   | 130   | 0.728 |
-| #3 | 16 | 1  | 6 | 616   | 512   | 0.832 |
-| #5 | 16 | 6  | 4 | 95    | 34    | 0.357 |
-| #6 | 16 | 2  | 6 | 391   | 322   | 0.824 |
-| #8 | 16 | 10 | 7 | 312   | 213   | 0.683 |
+| #3 | 2 | 1 | 2 | 70 | 8 | 0.121 |
+
+16-bit:
+
+| curve | \|cls\| | conductor | n_succ | mean | stdev | CoV |
+|-------|-------|-----------|--------|------|-------|-----|
+| #0 | 16 | 1 | 16 | 212 | 114 | 0.541 |
+| #1 | 16 | 1 | 15 | 194 | 121 | 0.624 |
+| #7 | 16 | 1 | 14 | 158 | 127 | 0.805 |
+| #8 | 16 | 1 | 16 | 238 | 184 | 0.775 |
 
 18-bit:
 
-| curve | |cls| | conductor | n_succ | mean | stdev | CoV |
+| curve | \|cls\| | conductor | n_succ | mean | stdev | CoV |
 |-------|-------|-----------|--------|------|-------|-----|
-| #1 | 16 | 3   | 5 |  915 | 729  | 0.63 |
-| #4 | 16 | 6   | 6 |  464 | 797  | 0.77 |
-| #6 | 16 | 1   | 6 | 1007 | 765  | 0.72 |
-| #7 | 16 | 6   | 6 |  404 | 777  | 0.73 |
-| #8 | 16 | 14  | 6 |  921 | 766  | 0.72 |
-| #9 | 16 | 114 | 4 |  998 | 685  | 0.55 |
+| #1 | 2 | 3 | 2 | 237 | 18 | 0.078 |
+| #2 | 2 | 3 | 2 | 526 | 359 | 0.681 |
 
-Across both bit-widths the within-class CoV runs from 0.36 to 0.83.
+*(was, on the buggy Vélu: five 14-bit and six 18-bit classes, all at
+`|cls| = 16`, CoV 0.357–0.832.)*
+
+Across the three widths the within-class CoV runs from 0.08 to 0.81.
 The theoretical CoV for a truncated-at-N-iters Pollard ρ with mean ≈
-√(πn/2) is ≈ 0.52, so empirical CoVs are within a factor of 1.6 of
-that (the upper outliers all come from samples where cap-induced
-truncation widens the distribution).
+√(πn/2) is ≈ 0.52.  The four 16-bit classes — the only ones here with
+14–16 samples each — sit at 0.54–0.81, within a factor of 1.6 of that.
+The 14- and 18-bit entries rest on **two samples apiece**, so their
+0.08 and 0.12 are not evidence of tight clustering; a two-point CoV is
+essentially unconstrained.
 
-**Conclusion: vertices of the same isogeny class show no anomalous
-within-class clustering of rho cost.**
+**Conclusion, narrowed:** in the one width with enough samples to say
+anything (16-bit), vertices of the same isogeny class show no anomalous
+within-class clustering of rho cost.  At 14 and 18 bits the corrected
+classes are too small to support the claim either way.
 
 ### 3.4.1 Permutation test for class-structure leakage
 
@@ -485,25 +521,30 @@ successes only):
 
 | bits | classes (≥2 samples) | obs mean within-class var | null 5–95 % | p(obs ≤ null) |
 |------|----------------------|---------------------------|-------------|---------------|
-| 14   | 5                    | 43 383                    | [30 077, 50 548]  | 0.526   |
-| 16   | 6                    | 286 976                   | [117 162, 270 441] | 0.985  |
-| 18   | 9                    | 137 004                   | [145 214, 264 186] | 0.025  |
+| 14   | 1                    | n/a — test needs ≥2 classes | n/a       | n/a     |
+| 16   | 4                    | 18 241                    | [16 831, 19 320]  | 0.593   |
+| 18   | 2                    | 32 216                    | [32 216, 38 708]  | 1.000   |
 
-If isogeny-class structure leaked rho cost, we would expect
-*consistently low* within-class variance across scales — vertices of
-the same class behaving similarly.  Instead the 16-bit p-value points
-the *other* way (16-bit classes are MORE variable internally than
-random pooling) and the 18-bit p-value points the original way (LESS
-variable).  The directions disagree across scales, which is exactly
-the signature of sampling noise rather than a real signal.
+*(was, on the buggy Vélu: 5/6/9 classes, p = 0.526 / 0.985 / 0.025.)*
 
-**Permutation conclusion: no detectable isogeny-class structure leak in
-rho cost.**
+**The corrected data cannot run this test.**  Shrinking the classes to
+their true sizes leaves one class at 14 bits (the test is undefined),
+two at 18 bits (where the observed value coincides with the minimum of
+the null, so p = 1.000 is an artifact of having two points to permute),
+and four at 16 bits.  Only the 16-bit row is meaningful, and at
+p = 0.593 it is squarely inside the null.
+
+**Permutation conclusion, weakened:** no detectable isogeny-class
+structure leak at 16 bits; at 14 and 18 bits the test is underpowered
+on the corrected classes and neither supports nor refutes a leak.  The
+earlier "directions disagree across scales" reading is withdrawn — it
+was computed over vertices that were not all in the isogeny class.
 
 ### 3.5 j = 0 / j = 1728 behavior
 
-In the harness data none of the 89 random vertices landed on j = 0 or
-j = 1728 (they're a measure-zero subset of the curve space for our
+In the harness data none of the 119 random vertices (14/16/18-bit
+pooled, regenerated in round 9; was 89 at 14-bit alone) landed on
+j = 0 or j = 1728 (they're a measure-zero subset of the curve space for our
 random generation).  The dedicated `volcano --curve toy-j0` probe at p=103
 shows what *is* anomalous about j=0: the 3-volcano collapses to a single
 crater because the unique CM order Z[ζ₃] has discriminant −3 in which ℓ=3
@@ -573,4 +614,10 @@ Every command's stdout is preserved under `experiments/`:
 * [06b_experiment_14bit_10trials_HIGH_CAP.json](experiments/06b_experiment_14bit_10trials_HIGH_CAP.json) (cap 2^18)
 * [06_experiment_16bit_10trials.json](experiments/06_experiment_16bit_10trials.json)
 * [07_experiment_18bit_10trials.json](experiments/07_experiment_18bit_10trials.json)
-* [pooled_vertex_data.csv](experiments/pooled_vertex_data.csv) — every vertex across all three bit widths flattened to one CSV: `bits, curve_idx, class_size, p, a, b, trace, n, n_parity, fundamental_disc, conductor, rho_iters, rho_success, mov_feasible, smart_applies, glv_speedup`.  275 rows; ready to load in Pandas / R.
+* [pooled_vertex_data.csv](experiments/pooled_vertex_data.csv) — every vertex across all three bit widths flattened to one CSV: `bits, curve_idx, class_size, p, a, b, trace, n, n_parity, fundamental_disc, conductor, rho_iters, rho_success, mov_feasible, smart_applies, glv_speedup`.  119 rows (was 275 on the buggy Vélu); ready to load in Pandas / R.
+  Regenerate with
+  [`scripts/pool_isogeny_vertices.py`](scripts/pool_isogeny_vertices.py);
+  the §3.2/§3.4/§3.4.1 tables above are reproduced by
+  [`scripts/analyse_isogeny_vertices.py`](scripts/analyse_isogeny_vertices.py).
+  Both were written in round 9 — the CSV and those statistics had been
+  produced ad hoc, which is why nothing caught the bad vertices.
