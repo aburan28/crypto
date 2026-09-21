@@ -288,10 +288,14 @@ ECC_WIDE_UNROLL_PRAGMA
                 if (guard) {
                     const W overdue = overdueLanes(tid, slot, P, now) & ~P.dead[di];
                     if (overdue != ECC_ZERO) {
-                        for (int lane = 0; lane < LANES; ++lane) {
-                            const size_t li = laneIndex(slot, lane, tid, P.threads);
-                            if (laneBit(overdue, lane) && (P.seed[li] & 0xffffull) == 0xffffull)
-                                eccAtomicInc(P.dpCount + 2);
+                        // Same tripwire as handleDistinguished, and meaningless
+                        // on a replay for the same reason.
+                        if (!P.replaySeeds) {
+                            for (int lane = 0; lane < LANES; ++lane) {
+                                const size_t li = laneIndex(slot, lane, tid, P.threads);
+                                if (laneBit(overdue, lane) && (P.seed[li] & 0xffffull) == 0xffffull)
+                                    eccAtomicInc(P.dpCount + 2);
+                            }
                         }
                         P.dead[di] |= overdue;
                         eccAtomicInc(P.dpCount + 1);

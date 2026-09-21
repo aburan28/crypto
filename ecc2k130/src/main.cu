@@ -1807,11 +1807,15 @@ static int runCurve(const Options &oIn, const unsigned long long *px, const unsi
     HostEngine<Cfg> eng;
 #endif
     if (o.threads <= 0) o.threads = eng.autoThreads(o.device);
-    if (!o.replayFile.empty() && (u64)o.dpCap < eng.walksPerLaunch()) {
+    {
         // Every lane of a chunk can reach its distinguished point in the same
         // launch, so the report buffer has to hold a whole chunk or the
-        // overflow silently drops witnesses.
-        o.dpCap = (unsigned)eng.walksPerLaunch();
+        // overflow silently drops witnesses.  The engine's own walksPerLaunch()
+        // reads P.threads, which setup() has not assigned yet, so the chunk is
+        // computed from the option it will be assigned from.
+        typedef decltype(eng) Eng;
+        const u64 chunk = (u64)o.threads * Eng::BATCH * Eng::LANES;
+        if (!o.replayFile.empty() && (u64)o.dpCap < chunk) o.dpCap = (unsigned)chunk;
     }
     eng.setup(o, px, py, qx, qy);
     printf("backend %s: %d threads x %d slots x %d lanes = %llu walks, dp weight %d, %d steps per launch\n",
