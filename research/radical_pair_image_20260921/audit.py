@@ -50,6 +50,12 @@ def main():
 
     assert all(cert["presentation_equivalence"] and cert["nondegenerate_group_equivalence"]
                for cert in certificates.values())
+    for key, cert in certificates.items():
+        if key.startswith("binary-"):
+            assert cert["unordered_pair_enumeration"]
+            assert cert["quadratic_root_recovery"]
+            assert cert["polynomial_evaluation"]
+            assert cert["root_recovery"]
     assert min(cert["full_group_coverage"] for cert in certificates.values()) >= 0.8
     assert summary["all_processes_completed"] and summary["all_certificates_pass"]
     assert summary["primary_metrics"]["total_common_operations"] is None
