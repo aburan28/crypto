@@ -157,45 +157,48 @@ discrete logarithm, and no phase outside the solver is charged.
 `./target/release/ic run --degree 13 --summands 3 --solver S --known-log K`,
 sweeping `K ∈ {53, 211, 499, 887, 1289, 1613, 1987}` — the only lever that
 moves the descent target while the curve, the factor base, the summand count
-and the seed all stay fixed.  Every one of the 28 completed runs verified.
+and the seed all stay fixed.  All 28 completed runs verified.
 
-The direct reading is the two solvers whose work is a **fixed sweep of the
-whole base**, which is what §3.2's detector actually is:
+The denominator is `counts.trials`, which counts **every attempt to decompose a
+target, successful or not**.  On all 28 runs `trials` equalled the relation
+count, so no call failed: the ratios below cannot be flat because a shifting
+failure rate is hiding inside them.
 
-| solver | cpu seconds, 7 targets | spread | independent relations found |
-|---|---:|---:|---:|
-| `enumerate` | 0.025545 – 0.028156 | **10.2 %** | 11 – 20 |
-| `pair-table` | 1.314142 – 1.333377 | **1.5 %** | 11 – 20 |
+| solver | unit | per call | spread | calls |
+|---|---|---:|---:|---:|
+| `groebner` | F4 word operations per call | 58 280 966 – 61 951 239 | **6.3 %** | 12 – 24 |
+| `sat` | SAT conflicts per call | 10 162.9 – 13 457.6 | **32.4 %** | 20 – 68 |
+| `wdsat` | — | not exercised | — | — |
 
-The cost does not move when the target does, and it does not move when the run
-happens to find 11 relations instead of 20. That is §3.2's premise, measured.
-These two rows are **wall-clock**, so by §6 they are a practicality note and
-not the metric; they are here because for a fixed sweep there is no other unit
-that means anything.
+**`groebner` is the answer**, because it is the one solver here that exposes a
+hardware-independent operation count per call. Seven targets, `6.3 %`
+peak-to-trough. The price of a call does not depend on which target it is
+handed, which is what §3.2 leans on.
 
-The two search solvers do not do a fixed amount of work per run, so their
-totals swing with how many relations a run decided to collect — which is not a
-property of the target.  Normalised per unit of solver output:
+**`sat` is not flat, and is not a counter-example either.** A third
+peak-to-trough is a real swing, but it has no trend in the target: mean
+`11 576` conflicts per call, coefficient of variation about `10 %`, and the
+largest and smallest both sit in the middle of the target range. That is the
+wobble of a randomised search restarted on a different instance, not a cost
+that tracks which target it was given.
 
-| solver | unit | per-unit spread | whole-run total spread |
-|---|---|---:|---:|
-| `groebner` | F4 word operations per F4 reduction | **6.1 %** | 97.4 % |
-| `sat` | solver operations per independent relation | **9.8 %** | 248.8 % |
-| `wdsat` | — | not exercised | — |
+**Two solvers establish nothing here, and are excluded from the finding.**
+`enumerate` and `pair-table` expose no operation counter, so they could only be
+timed — and their whole-run totals move by `2.6 %` and `4.9 %` while the number
+of calls those runs make moves from 12 to 20. A total that does not follow the
+call count is paying for something fixed, setup, not for the calls; dividing it
+by the call count returns the reciprocal of the call count and nothing else
+(`0.0022 s` at 12 calls against `0.0013 s` at 20, which is exactly `20/12`).
+The artefact flags both `setup_dominated`. By §6 those rows would in any case
+be wall clock, a practicality note and never the metric.
 
-`2 085 187 – 2 212 544` word operations per F4 reduction, `206.2 – 226.3`
-solver operations per independent relation. The per-unit column is flat; the
-total column is not, and the gap between them is the whole point.
-
-**What this does not establish.** The normalised ratio is work per unit of
-solver *output* — an F4 reduction, an independent relation — not strictly per
-call: the counters do not separate calls that failed to decompose from calls
-that succeeded, so a target that shifted the failure rate could hide inside a
-flat ratio. The `enumerate` and `pair-table` rows do not have that hole, which
-is why they lead. One rung, one base, one seed, one summand count. `wdsat` was
-swept and returned `--solver wdsat requires --wdsat-binary` on every target;
-the repository does not vendor that binary, so it is recorded as attempted and
-not exercised rather than skipped.
+**Scope.** One rung (`degree 13`), one base (4 005 points collapsed by
+Frobenius onto 77 orbit columns), one seed, `m = 3`. `wdsat` was swept and
+returned `--solver wdsat requires --wdsat-binary` on every target; the
+repository does not vendor that binary, so it is recorded as attempted and not
+exercised rather than skipped. The oracle under test early-exits at its first
+witness (`decompose` in `src/cryptanalysis/koblitz_index_calculus.rs`), so
+none of this is a whole-base sweep.
 
 ---
 

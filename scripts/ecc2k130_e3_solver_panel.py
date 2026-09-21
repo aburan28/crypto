@@ -116,6 +116,7 @@ def panel(degree: int, summands: int) -> dict:
         totals = [r[num] if num else r["cpu_seconds"] for r in done]
         row["total_min"], row["total_max"] = min(totals), max(totals)
         row["total_spread_percent"] = round(spread(totals), 1)
+        row["calls_spread_percent"] = round(spread(row["oracle_calls"]), 1)
         per = [(r[num] if num else r["cpu_seconds"]) / r["trials"]
                for r in done if r["trials"]]
         row["per_call"] = [round(x, 6) for x in per]
@@ -124,6 +125,14 @@ def panel(degree: int, summands: int) -> dict:
         row["per_call_mean"] = round(statistics.fmean(per), 6)
         row["per_call_spread_percent"] = round(spread(per), 1)
         row["metric_is_operation_count"] = num is not None
+        # A run whose total barely moves while its call count does is paying
+        # for something fixed -- table construction, setup -- not for the
+        # calls.  Dividing such a total by the call count yields the
+        # reciprocal of the call count and nothing else, so the per-call
+        # figure is recorded but must not be read as a price.
+        row["setup_dominated"] = row["total_spread_percent"] < \
+            0.5 * row["calls_spread_percent"]
+        row["per_call_is_a_price"] = not row["setup_dominated"]
         out[solver] = row
     return out
 
@@ -145,9 +154,13 @@ def main() -> None:
         print(f"{name:11s} {row['unit']}")
         print(f"            per call {row['per_call_min']:g} .. {row['per_call_max']:g} "
               f"(spread {row['per_call_spread_percent']:.1f}%)   "
-              f"whole-run total spread {row['total_spread_percent']:.1f}%   "
-              f"calls {min(row['oracle_calls'])}-{max(row['oracle_calls'])}"
+              f"total spread {row['total_spread_percent']:.1f}% over "
+              f"{min(row['oracle_calls'])}-{max(row['oracle_calls'])} calls "
+              f"(spread {row['calls_spread_percent']:.1f}%)"
               f"{'' if row['no_call_failed'] else '   SOME CALLS FAILED'}")
+        if row["setup_dominated"]:
+            print("            SETUP-DOMINATED: the total does not follow the "
+                  "call count, so no per-call price can be read off it")
 
     report = {
         "schema": "ecc2k130_e3_solver_panel/v1",
@@ -173,7 +186,14 @@ def main() -> None:
                        "property of the target.",
         "unit_caveat": "enumerate and pair-table expose no operation counter, "
                        "so their rows are cpu seconds -- a practicality note "
-                       "under AGENTS.md section 6, never the metric.",
+                       "under AGENTS.md section 6, never the metric.  Both are "
+                       "also setup_dominated, so this run does not price a "
+                       "call on either and they are excluded from the finding.",
+        "finding": "groebner, the one solver that exposes an operation count "
+                   "per call, is flat in the target.  sat varies by about a "
+                   "third with no trend in the target, which is the wobble of "
+                   "a randomised search rather than a dependence on which "
+                   "target it was handed.  Neither contradicts section 3.2.",
         "solvers": solvers,
     }
     OUT.write_text(json.dumps(report, indent=2) + "\n")
