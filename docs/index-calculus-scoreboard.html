@@ -1338,6 +1338,74 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="koblitz-phase-prices-20260921">
+    <div class="panel-head">
+      <h2>Every phase priced: the linear algebra is 0.002% of the cost</h2>
+      <p>Class <span class="chip">accounting</span>. Nothing was made faster. Factor-base selection and
+        the linear algebra had been <em>null</em> rather than zero, which under &sect;8 blocks a full-DLP
+        <code>S</code> outright &mdash; so every <code>S</code> this thread reported was a lower bound. Both are priced now,
+        and the composition is lopsided: <b>collection is 97.8%</b> of the whole pipeline, the linear
+        algebra is <b>one sixty-thousandth</b> of it, and the pair-table tier that the previous two rounds
+        spent themselves choosing is <b>0.18%</b>. Frozen source:
+        <code>docs/ic/runs/koblitz-phase-prices-20260921.json</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Unit is a batched group addition, measured per instance. The build and rho are native
+        counts; probes and the linear algebra are converted by factors measured on the same host and
+        instance. Selection is priced by converting its measured <em>time</em>, not a native count &mdash; its cost
+        is dominated by rebuilding the base, which is not a countable primitive &mdash; and at a quarter of a
+        percent of the total no plausible error in it moves <code>S</code>&rsquo;s third digit.</caption>
+      <thead>
+        <tr><th scope="col">Phase</th><th scope="col" class="n">Group additions</th>
+          <th scope="col" class="n">Share</th><th scope="col" class="n">S</th>
+          <th scope="col" class="n">vs rho</th><th scope="col">Correct</th></tr>
+      </thead>
+      <tbody>
+        <tr class="group"><td colspan="6"><code>k0n31-ledger-rung</code> &middot; n = 31 &middot; 2,170 points &middot; tier folded &mdash; <em>not priced:</em> the m=3 scan saturates at r=2^20.5: |F| x C(|F|+1,2)/r puts 1771 hits a target, so the conversion measures the O(|F|) recovery a hit pays rather than probing</td></tr>
+        <tr class="group"><td colspan="6"><code>k0n41-subgroup-rung</code> &middot; n = 41 &middot; 5,248 points, 64 orbits &middot; r = 2<sup>39.0</sup> &middot; tier folded &middot; rho <code>S</code> = 0.1705</td></tr>
+        <tr><td>collect probes</td><td class="n">34,816,911</td><td class="n">98.367%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>descent probes</td><td class="n">864</td><td class="n">0.002%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>select</td><td class="n">400,851</td><td class="n">1.133%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>pair table build</td><td class="n">170,560</td><td class="n">0.482%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>linear algebra</td><td class="n">5,822</td><td class="n">0.016%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td><b>whole pipeline</b></td><td class="n"><b>35,395,008</b></td><td class="n">100%</td><td class="n"><b>1.4918</b></td><td class="n"><b>8.75&times;</b></td><td>32/32</td></tr>
+        <tr><td><em>the same rung as previously bounded</em></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&ge; 1.4746</td><td class="n">&mdash;</td><td><em>select and the linear algebra were null</em></td></tr>
+        <tr class="group"><td colspan="6"><code>k0n53-subgroup-rung</code> &middot; n = 53 &middot; 15,264 points, 144 orbits &middot; r = 2<sup>44.26</sup> &middot; tier folded &middot; rho <code>S</code> = 0.2172</td></tr>
+        <tr><td>collect probes</td><td class="n">603,860,936</td><td class="n">97.781%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>descent probes</td><td class="n">11,003,106</td><td class="n">1.782%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>select</td><td class="n">1,581,890</td><td class="n">0.256%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>pair table build</td><td class="n">1,106,640</td><td class="n">0.179%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td>linear algebra</td><td class="n">10,006</td><td class="n">0.002%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
+        <tr><td><b>whole pipeline</b></td><td class="n"><b>617,562,578</b></td><td class="n">100%</td><td class="n"><b>4.2069</b></td><td class="n"><b>19.36&times;</b></td><td>32/32</td></tr>
+        <tr><td><em>the same rung as previously bounded</em></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&ge; 4.196</td><td class="n">&mdash;</td><td><em>select and the linear algebra were null</em></td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>The linear algebra is not near the cost and has not been.</b> 10,006 group-addition
+        equivalents at degree 53, from 43,848 multiply-adds mod <code>r</code> (29 products &times; 378 nonzeros
+        &times; block 4). The filter, the Krylov sequence, the generator and the reconstruction together
+        solve a problem four to five orders of magnitude below the bill.</span>
+      <span><b>The tier work was 0.18% of the pipeline.</b> It mattered only because the alternative&rsquo;s
+        build is 15.4% of the compact total &mdash; the win was in avoiding a cost, not reducing one.
+        Collection at 97.8% is the only phase whose cost is worth attacking next.</span>
+      <span><b>The tier constants are limited by width, not degree.</b> Across n = 41, 53, 57, 61 at a
+        matched base the folded/compact scan ratio is flat in n once saturated degrees are excluded &mdash;
+        1.34 at n = 53 against 1.33 at n = 61, the only two of ten usable degrees that read cleanly,
+        because <code>n</code> does not determine <code>r</code> here (the cofactor runs 4 to 57,284,756). Across widths it
+        moves 1.33 &rarr; 1.17 &rarr; 0.96 from 3,904 to 12,688 to 15,264 points, as the compact table leaves
+        cache. The shipped constants give 1.17, right at the width they were taken at, so they are left
+        alone: one width&rsquo;s calibration for another is not an improvement.</span>
+      <span><b>A correction inside this round.</b> The first pass at that sweep used 5,000 points at every
+        degree and showed an apparently clean degree trend, 1.01 at n = 41 rising to 1.32 at n = 61. It
+        was saturation: 5,248 points is above n = 41&rsquo;s scarcity limit of 4,962, and the 13.1% recovery
+        overhead inflated the compact scan. That is the third reading this round that saturation
+        contaminated, after n = 31 and n = 59, so
+        <code>examples/koblitz_degree_census.rs</code> now computes the width that keeps a degree measurable.</span>
+      <span><code>k0n31</code> stays unpriced for the same reason it did last round, now with the number: |F| &times;
+        C(|F|+1,2)/r puts 1,771 hits a target at r = 2<sup>21</sup>, so its conversion measures recovery.</span>
+    </div>
+  </div>
+
   <div class="panel" id="koblitz-probe-volume-20260921">
     <div class="panel-head">
       <h2>The probing volume is an input, and it moves every rung</h2>
