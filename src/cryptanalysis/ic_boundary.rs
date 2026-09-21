@@ -1754,8 +1754,11 @@ pub struct OracleCounters {
 }
 
 /// Resolve the signs of a witness of abscissae: which points above them
-/// sum to the target.  Costs at most `2·2^m` additions.
-fn lift_abscissae<G: CountedGroup>(
+/// sum to the target.  Costs at most `2·2^m` additions.  `None` when no
+/// choice of signs sums to the target, or when an abscissa has no point
+/// in the base: the witness does not lift, and a pipeline must not turn
+/// it into a relation.
+pub(crate) fn lift_abscissae<G: CountedGroup>(
     g: &G,
     fb: &FactorBase<G::Elt>,
     ops: &mut GroupOps,

@@ -43,6 +43,8 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde::Serialize;
 
+use crate::cryptanalysis::ic_boundary::lift_abscissae;
+
 use crate::cryptanalysis::ic_boundary::{
     calibrate_binary_instance, calibrate_s4, census_hits, choose_koblitz_base, decompose_mitm,
     generic_floor_ops, generic_floor_s, koblitz_factor_base, koblitz_instance_best,
@@ -276,6 +278,19 @@ fn enumerate_counted(
 }
 
 /// Price one `(n, m)` cell.
+/// Whether an `S₄` answer agrees with the exhaustive search.  A witness
+/// agrees only if it lifts over the signed base *and* the search found a
+/// decomposition; a refutation agrees only if the search found none.  A
+/// witness that does not lift is a spurious answer whatever the search
+/// said, and is counted against the oracle.
+pub fn s4_agrees(found: bool, lifted: bool, truth: bool) -> bool {
+    if found {
+        lifted && truth
+    } else {
+        !truth
+    }
+}
+
 pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCell> {
     let started = Instant::now();
     let inst = koblitz_instance_best(n)?;
@@ -411,25 +426,38 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
 
         // S₄ pairs-and-solve
         if let Some(oracle) = &s4 {
+            let mut o = GroupOps::default();
             let t0 = Instant::now();
             let (witness, pairs) = oracle.decompose(target.x, &inst.gf);
+            // The witness is a triple of abscissae.  Lift it over the
+            // signed base exactly as the pipeline does before it accepts
+            // a relation: some choice of the base points above those
+            // abscissae must sum to the target.  The lift is charged to
+            // the row, and the agreement test runs in both directions: a
+            // witness that does not lift, a witness on a target the
+            // exhaustive search refuted, and a refutation on a target it
+            // found are all disagreements.
+            let lifted = witness
+                .as_ref()
+                .map(|xs| lift_abscissae(&g, &fb, &mut o, xs, *target).is_some())
+                .unwrap_or(false);
             let wall = t0.elapsed().as_nanos() as u64;
-            // The witness is a triple of abscissae; the group truth
-            // decides whether it lifts, so only a refutation is compared.
             let verdict = match witness {
                 Some(_) => Verdict::Found,
                 None => Verdict::Refuted,
             };
-            if verdict == Verdict::Refuted && truth {
+            if !s4_agrees(verdict == Verdict::Found, lifted, truth) {
                 disagreements += 1;
             }
+            let mut extra = BTreeMap::new();
+            extra.insert("lift_failures".into(), u64::from(witness.is_some() && !lifted));
             s4_rows.push(TargetPrice {
                 verdict,
                 native: pairs,
-                group_adds: 0,
+                group_adds: o.adds,
                 wall_ns: wall,
-                gae: price(pairs, calib.ns_per_s4_pair.unwrap_or(ns_add), 0),
-                extra: BTreeMap::new(),
+                gae: price(pairs, calib.ns_per_s4_pair.unwrap_or(ns_add), o.adds),
+                extra,
             });
         }
 
@@ -694,9 +722,29 @@ mod tests {
         let cell = price_cell(9, 3, &cfg).expect("K_0 / 2^9, m = 3");
         assert_eq!(cell.disagreements, 0, "{cell:?}");
         assert_eq!(cell.system_degree, 3);
-        assert!(cell.oracles.iter().any(|o| o.oracle == "semaev_s4_pairs_and_solve"));
+        let s4 = cell
+            .oracles
+            .iter()
+            .find(|o| o.oracle == "semaev_s4_pairs_and_solve")
+            .expect("the S4 oracle is priced at m = 3");
+        assert_eq!(
+            s4.extra_totals.get("lift_failures").copied().unwrap_or(0),
+            0,
+            "every S4 witness must lift over the signed base"
+        );
         assert!(rho_floor_ops(&cell) > 0.0);
         let table = format_oracle_markdown(&[cell]);
         assert!(table.contains("semaev_s4_pairs_and_solve"));
+    }
+
+    #[test]
+    fn s4_agreement_is_checked_in_both_directions() {
+        // (found, lifted, truth) -> agrees
+        assert!(s4_agrees(true, true, true));
+        assert!(!s4_agrees(true, true, false), "a witness on a refuted target");
+        assert!(!s4_agrees(true, false, true), "a witness that does not lift");
+        assert!(!s4_agrees(true, false, false), "a spurious witness on a refuted target");
+        assert!(s4_agrees(false, false, false));
+        assert!(!s4_agrees(false, false, true), "a refutation on a decomposable target");
     }
 }
