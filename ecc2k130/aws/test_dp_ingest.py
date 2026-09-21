@@ -620,6 +620,27 @@ class Collisions(unittest.TestCase):
         conn, _ = self.ingest(record(7) + record(8), inserted=1, candidates=[tuple(own)])
         self.assertEqual(self.progressRow(conn)[3], 0)
 
+    def test_two_walks_meeting_inside_one_object_is_a_collision(self):
+        # Two records of one upload share a point but not a seed: DO NOTHING
+        # stores one, the other joins to it under this object's own
+        # worker_id, and that is a meeting, not an own re-report.
+        own = list(self.candidate(b"pk", 9, 7))
+        own[5] = dp_ingest.workerId(ORBIT)
+        conn, (_, _, hits) = self.ingest(record(7) + record(9), inserted=1,
+                                         candidates=[tuple(own)])
+        self.assertEqual(hits, 1)
+        self.assertEqual(len(conn.stored), 1)
+        self.assertEqual(self.progressRow(conn)[3], 0)
+
+    def test_the_database_keeps_the_objects_own_same_seed_rows_out(self):
+        # Every just-inserted record joins to itself; a large object with a
+        # few re-reports must not come back whole for Python to discard.
+        conn, _ = self.ingest(record(7) + record(8), inserted=1)
+        sql, args = next((q, a) for q, a in conn.queries if "JOIN distinguished_points" in q)
+        self.assertIn("d.worker_id IS DISTINCT FROM %s", sql)
+        self.assertIn("d.a IS DISTINCT FROM i.a", sql)
+        self.assertIn(dp_ingest.workerId(ORBIT), args)
+
     def test_a_collision_is_not_also_a_re_report(self):
         conn, (_, _, hits) = self.ingest(
             record(7), inserted=0, candidates=[self.candidate(b"pk", 7, 9)])

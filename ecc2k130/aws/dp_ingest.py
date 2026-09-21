@@ -604,23 +604,25 @@ def findCollisions(cur, key):
     insert, so every record of the object joins to the stored row for its
     point -- its own row when it was just inserted, someone else's when it was
     not. A point stored under a *different* seed is a collision, two walks
-    meeting, which is the whole point of the campaign. A point stored under
-    the *same* seed by a different object is a re-report: harmless from a
-    resumed worker, and the entire output of a run that is walking another
-    run's seeds, so it is counted rather than dropped in silence. The
-    object's own rows are neither.
+    meeting -- within this object or against the corpus -- which is the whole
+    point of the campaign. A point stored under the *same* seed by a different
+    object is a re-report: harmless from a resumed worker, and the entire
+    output of a run that is walking another run's seeds, so it is counted
+    rather than dropped in silence. The object's own rows under the same seed
+    are neither, and the database keeps them out of the result: they are the
+    bulk of every object that conflicted at all, and fetching them would turn
+    a resumed worker's few re-reports into a transfer of the whole object.
     """
+    mine = workerId(key)
     cur.execute(
         "SELECT i.point_key, i.a, i.walk_seed, d.a, d.walk_seed, d.worker_id "
         "FROM dp_in i JOIN distinguished_points d "
-        "  ON d.campaign_id = %s AND d.point_key = i.point_key",
-        (CAMPAIGN,))
-    mine = workerId(key)
+        "  ON d.campaign_id = %s AND d.point_key = i.point_key "
+        "WHERE d.worker_id IS DISTINCT FROM %s OR d.a IS DISTINCT FROM i.a",
+        (CAMPAIGN, mine))
     out = []
     duplicates = 0
     for point_key, mineA, mineSeed, theirsA, theirsSeed, worker in cur.fetchall():
-        if worker == mine:
-            continue
         if theirsA is None:
             # `a` is NOT NULL for everything this program writes, but the
             # corpus predates it. A stored point with no seed cannot be
@@ -630,11 +632,14 @@ def findCollisions(cur, key):
             log("WARNING: point %s is stored with no seed (%s); cannot tell a "
                 "re-report from a collision" % (bytes(point_key).hex(), worker))
             continue
-        # Byte inequality would be the cheap filter; equality of the seeds
-        # themselves is the question, and a width difference between eras is
-        # not a collision.
+        # Byte inequality is the cheap filter the database can do; equality of
+        # the seeds themselves is the question, and a width difference between
+        # eras is not a collision. The same seed from another object is a
+        # re-report; from this object it is the row the insert just wrote (or
+        # a retried ingest of the same object), and is neither.
         if seedOf(mineA) == seedOf(theirsA):
-            duplicates += 1
+            if worker != mine:
+                duplicates += 1
             continue
         out.append({
             "point_key": bytes(point_key),

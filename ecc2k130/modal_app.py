@@ -1502,9 +1502,12 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
 
 
 @app.function(image=image, timeout=2 * HOUR, volumes={"/data": volume})
-def mergeCorpus(curve=131):
+def mergeCorpus(curve=131, offCampaign=False):
     """Merge every distinguished-point file in the volume and report duplicate
     hashes, which are the candidate collisions.
+
+    `offCampaign` scans the tree an off-campaign run wrote into (see
+    runSearch) rather than the campaign corpus.
 
     Records are the client's 32-byte binary format, so a partial trailing record
     (a container that died mid-write) is ignored rather than misparsed."""
@@ -1512,7 +1515,7 @@ def mergeCorpus(curve=131):
     dup = []
     total = 0
     short = 0
-    files = corpusFiles(curve)
+    files = corpusFiles(curve, f"{dataRoot(curve, offCampaign)}/dp")
     if not files:
         return {"error": "no distinguished points yet"}
     for path in files:
@@ -1536,7 +1539,7 @@ def mergeCorpus(curve=131):
 
 
 @app.function(image=image, timeout=4 * HOUR, volumes={"/data": volume})
-def solveCorpus(curve=131, loadMax=0):
+def solveCorpus(curve=131, loadMax=0, offCampaign=False):
     """Recover the logarithm from a collision spanning several corpora.
 
     mergeCorpus reports that two seeds reached the same orbit; it does not say
@@ -1556,7 +1559,7 @@ def solveCorpus(curve=131, loadMax=0):
     collection run does not finish and grows by roughly that much every pass,
     so there uncapped eventually means out of memory -- hence the parameter,
     and hence reporting the size before asking for it rather than after."""
-    files = corpusFiles(curve)
+    files = corpusFiles(curve, f"{dataRoot(curve, offCampaign)}/dp")
     if not files:
         return {"error": "no distinguished points yet"}
     records = 0
@@ -1807,15 +1810,17 @@ def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))
-    print(json.dumps(mergeCorpus.remote(curve=curve), indent=2))
+    print(json.dumps(mergeCorpus.remote(curve=curve, offCampaign=off_campaign), indent=2))
 
 
 @app.local_entrypoint()
-def merge(curve: int = 131, solve: bool = True, load_max: int = 0):
+def merge(curve: int = 131, solve: bool = True, load_max: int = 0,
+          off_campaign: bool = False):
     """Scan the corpora for collisions, and recover k when one is there."""
-    r = mergeCorpus.remote(curve=curve)
+    r = mergeCorpus.remote(curve=curve, offCampaign=off_campaign)
     print(json.dumps(r, indent=2))
     if solve and r.get("collisionCount"):
         print("\n%d collision(s); recovering the logarithm" % r["collisionCount"])
-        print(json.dumps(solveCorpus.remote(curve=curve, loadMax=load_max), indent=2))
+        print(json.dumps(solveCorpus.remote(curve=curve, loadMax=load_max,
+                                            offCampaign=off_campaign), indent=2))
 
