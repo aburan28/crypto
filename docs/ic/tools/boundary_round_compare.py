@@ -131,6 +131,12 @@ def compare_instance(inst):
             ("verified_candidate", all(r["verified"] for r in runs)),
             ("verified_baseline", all(r["verified"] for r in base_runs)),
             ("rho_verified", inst["rho_verified_all"]),
+            # A row whose column part repeats an earlier row's pins the
+            # logarithm the way a rho collision does, not the way a
+            # relation does.  Must be zero on every row of an honest
+            # relation search; see the note's walk-merge diagnostic.
+            ("repeated_column_rows", sum(r["linear_algebra"]["native"].get("repeated_column_rows", 0) for r in runs)),
+            ("pinned_by_repeated_row", sum(r["linear_algebra"]["native"].get("pinned_by_repeated_row", 0) for r in runs)),
         ]))
     return out
 
@@ -197,6 +203,7 @@ if out_path:
         ("regression_suite_note", "The frozen WDSat solver regression suite (research/index_calculus_baseline_20260914/regression/) measures a SAT-solver stage on 60 fixed inputs and is not an adapter for other pipelines; the levers here (pair-table folds, target generation, exact ceiling, base sizing) touch no solver stage, so the matched full-DLP comparison in this file is the §8 evidence, under the parent accounting contract's exclusive per-phase charging."),
         ("all_candidates_verified", all(c["verified_candidate"] for c in comparison)),
         ("all_baselines_verified", all(c["verified_baseline"] for c in comparison)),
+        ("no_row_pinned_by_a_repeated_column_part", all(c["repeated_column_rows"] == 0 for c in comparison + holdout_rows)),
         ("first_round_rows_reproduced", all(r["counts_identical"] for r in repro) if repro else None),
         ("reproduction_checks", repro),
         ("comparison", comparison),

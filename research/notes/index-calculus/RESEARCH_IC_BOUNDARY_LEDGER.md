@@ -857,6 +857,142 @@ and `docs/ic/tools/boundary_scoreboard_rows.py`; the ledger twins were
 updated from it by `docs/ic/tools/boundary_ledger_update.py`.  Re-run
 them on a new report rather than editing numbers by hand.
 
+## 10. Round 2: an engineering ledger, and one artifact caught
+
+**Frozen run:** `docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json`
+(`ic boundary --out …`; the oracle cells of §5 are unchanged and stay
+frozen in their own file).
+**Holdout:** `…-round2-holdout-2026-09-21.json`, a fresh seed on the
+largest instances of each regime.
+**Diagnostic:** `…-round2-walk-merge-diagnostic-2026-09-21.json`
+(`--walk-shared-jumps`), the measurement of §10.2.
+**Comparison:** `ic-boundary-round2-comparison-2026-09-21.json`, written
+by `docs/ic/tools/boundary_round_compare.py`, which pairs every Round-2
+row with the rung it was built on and is the `AGENTS.md` §8 evidence
+(§10.7).
+
+### 10.1 What the first round said to move, and what was moved
+
+§4.1 named the phase that dominates each row: the pair table on the
+prime `m = 3` row (`|F|²/2` additions, once), the *making* of the targets
+on the prime `m = 2` row (two scalar multiplications per trial, about
+`65` additions each at 24 bits), the `|F|` subtractions per target and
+the table behind them on the binary row, and the table on every Koblitz
+row until the `n = 41` cap.  §3.5 owed an accounting correction: the
+counting ceiling divides by all of `#E` where a base confined to a
+subgroup can only reach that subgroup.  Round 2 moves those and nothing
+else — same curves, same subgroups, same seeds, same relation loop and
+elimination — so every first-round row stays on the table as the
+*before* mark of the rung built on it.
+
+| rung (suffix) | what changed | what did not | class by the `AGENTS.md` §3 test |
+|:--|:--|:--|:--|
+| `_negfold` | the pair table is built once per pair up to negation: `{P, Q}` and `{−P, −Q}` sum to `±(P+Q)`, whose abscissa was already the key, so the first point above each abscissa is added to every signed point above a later one and to itself — `|F|²/4` additions instead of `|F|²/2`, the same key set, the same probe | trials, relations, yield, the elimination, every count outside the table | **engineering**: `S` falls by the table's share, the ratio to the counting boundary is flat |
+| `_frobfold` (Koblitz) | the table is built once per pair up to `⟨σ, −1⟩`, keyed by the normal-basis canonical form of the sum's abscissa (`FrobeniusCanon`, the repository's rotation key): `σ^t(P) + σ^t(Q) = σ^t(P + Q)`, so all `2n` images of a pair share one entry — `|F|²/(4n)` entries and additions.  A probe canonicalises the target's abscissa once; the entry's shift and the target's give the rotation `t`; the summands `σ^t(P), σ^t(Q)` are read from a per-point orbit index; one addition confirms `±R`.  Canonicalisations are counted in their own unit and converted at a measured `ns_per_canon`, and every folded probe is cross-checked (`frobfold_mismatches`, zero on every row of every run) | as above.  The `2n` is the automorphism group the floor already credits to a generic algorithm, and the reference walk uses it too | **engineering** |
+| `_walk` | targets come from a 16-jump r-adding walk with the coefficients tracked modulo `r`, one addition per target, instead of `R = [a]G + [b]Q` with two scalar multiplications.  Fresh jumps at every restart and one guard for the whole run, for the reason in §10.2 | the oracle, the yield per target against the ceiling, the elimination, the verification | **engineering**: this is the reference's own target generator |
+| `mitm_m2_…` | two summands wherever the cofactor classes admit them and the exact floor fits the budget — the first round's census of 64 targets could not see a ceiling of `10⁻⁵`, which the exact formula computes instead of sampling | the base, the table, the loop | **engineering**: the ceiling moves by the counting formula of §1.3, the ratio to it does not |
+| `_balanced` (Koblitz, `n ≥ 37`) | a base sized so the folded table balances a two-summand walk's trials, `|F| ≈ 1.2·(4#E)^{1/3}` signed points within `2^23` folded entries, where that is at least half again the first-round base | the pipeline | **engineering**: the base size was a parameter the full table's budget had set |
+| exact ceiling (every row) | `min(1, N₀/r)` with `N₀` the `m`-multisets of base points whose cofactor classes `[r]P` cancel, reported next to the uniform `C(F+m−1, m)/#E`, with `yield_over_ceiling_exact` and `trials_floor_exact` | every count | **accounting**: the §3.5 correction, no `S` moves |
+
+Nothing in that list does what a generic algorithm cannot: the two folds
+use automorphisms the floor's `A` already grants, the walk is the
+reference's own device, and the base size and summand count are
+parameters of the same counting bound.  So the round can only be
+engineering, and the table reads accordingly — `S` falls, the ratio to
+the floor falls with it by the same factor, and the columns that would
+mark an advance (`yield/ceiling` against the exact ceiling, and the
+fitted exponents) do not move.
+
+### 10.2 An artifact caught before it was reported: merging walk segments are a collision search
+
+The first Round-2 ladder ran every walk row with **one** jump table for
+all segments and cleared the repeat guard at each restart.  Two segments
+under one step function merge exactly as rho's walks do, and the first
+decomposable target the second segment meets on the first segment's path
+produces a relation row whose factor-base part repeats an earlier row's
+with different `(a, b)`.  Two such rows pin the logarithm by themselves:
+`a₁ + b₁d = a₂ + b₂d`.  That is a rho collision resolved through a pair
+table, not a relation search, and it made the two-summand rows finish
+with a handful of relations after about `2√r` targets — a number that
+would have been read as an index-calculus result.
+
+It is caught, not inferred.  The relation loop now counts
+`repeated_column_rows` (a row whose factor-base part repeats an earlier
+row's — for these oracles the column part determines the summand
+multiset, so a repeat means the same group element was presented twice)
+and `pinned_by_repeated_row`.  `TargetSource::Walk` draws sixteen fresh
+jumps at every restart and keeps **one** guard for the whole run, so no
+target is ever presented twice and no two segments share a step
+function; the old behaviour is kept behind `ic boundary
+--walk-shared-jumps` as the diagnostic above.  The unit test
+`a_shared_jump_table_lets_walk_segments_merge_and_pin_by_a_repeated_row`
+holds both ends: shared jumps repeat a column part, fresh jumps never do.
+
+Note what is *not* an artifact.  A cycle among two-summand relations —
+rows whose factor-base parts sum to zero over several distinct targets —
+is ordinary linear algebra and the classical way a two-summand index
+calculus finishes; it is legitimate and it is what the corrected rows
+do.  The line is whether the group element repeats (a collision) or the
+column vectors combine (a relation).
+
+### 10.3 The table: every rung on the largest instance of its regime
+
+<!-- ROUND2_TABLE_10_3 -->
+
+### 10.4 Reading the rungs
+
+<!-- ROUND2_READING_10_4 -->
+
+### 10.5 The exact ceiling: the † rows corrected
+
+<!-- ROUND2_EXACT_10_5 -->
+
+### 10.6 The exponents, refitted
+
+<!-- ROUND2_FITS_10_6 -->
+
+### 10.7 Against the targets of §1.6, and the `AGENTS.md` §8 gate
+
+<!-- ROUND2_TARGETS_10_7 -->
+
+The frozen WDSat regression suite of `AGENTS.md` §8
+(`research/index_calculus_baseline_20260914/regression/`) does not apply
+to this round and was not run, for the reason its own README gives: it
+measures one SAT-solver stage on sixty fixed Weil-descended inputs and
+"is not an adapter" for any other pipeline.  None of the six levers
+touches a solver stage — the pair table, the target generator, the
+counting bound and the base size are the phases *around* the oracle, and
+the oracle that finishes a logarithm here is a hash probe.  The matched
+suite §8 asks for instead is the comparison file: every candidate row
+paired with the rung it was built on, on identical curves, subgroups,
+factor bases, targets and seeds, with every phase charged exclusively,
+`speedup = baseline_total_operations / candidate_total_operations` per
+repeat and as the mean, a fresh-seed holdout on the largest instances,
+and a check that the first-round rows of the new run reproduce the
+frozen counts of §2 exactly.  No runtime claim is made, so no paired
+wall-clock interval is owed; the wall columns stay what they were in §2,
+a practicality note.
+
+### 10.8 What does not count, and what this is not
+
+<!-- ROUND2_NONCLAIMS_10_8 -->
+
+### 10.9 Reproducing
+
+```bash
+cargo build --release --bin ic
+./target/release/ic boundary --out round2.json
+./target/release/ic boundary --seed 1213743172 --repeats 2 --prime-bits 22,24 \
+    --char2-degrees 24,27 --koblitz-degrees 37,39,41 --s4-max-degree 24 --out holdout.json
+./target/release/ic boundary --walk-shared-jumps --prime-bits 20,22,24 \
+    --char2-degrees 21,24,27 --s4-max-degree 20 --koblitz-degrees 23,37,39,41 --out merge.json
+python3 docs/ic/tools/boundary_round_compare.py round2.json \
+    --baseline docs/ic/runs/ic-boundary-ledger-2026-09-21.json --holdout holdout.json --out comparison.json
+python3 docs/ic/tools/boundary_ledger_tables.py round2.json
+python3 docs/ic/tools/boundary_scoreboard_rows.py round2.json
+cargo test --release --lib cryptanalysis::ic_
+```
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
