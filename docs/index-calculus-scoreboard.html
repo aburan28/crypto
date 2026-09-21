@@ -312,9 +312,10 @@
       their generic-group floor and matched Pollard rho reference. On elliptic curves nothing
       measured end to end is below rho: the residual-walk thread's 500×-or-worse verdict on
       E(F<sub>p</sub><sup>3</sup>) is unchanged, and the three-regime ledger that heads the page
-      puts the best whole-pipeline variant at 14.5× rho on a 23-bit prime-order curve, 89× on a
-      24-bit random binary curve and 300× on a 39-bit Koblitz subgroup, every fitted exponent
-      above rho's one half. It is no longer blanket, though: on
+      puts the best whole-pipeline variant at 6.2× rho on a 23-bit prime-order curve, 31× on a
+      24-bit random binary curve and 26× on a 39-bit Koblitz subgroup after a round of
+      engineering (folded pair tables, walked targets, two-summand rows, a balanced base),
+      with no fitted exponent below the reference's. It is no longer blanket, though: on
       hyperelliptic Jacobians at genus 3 and 4 index calculus measures
       <strong>below</strong> a real distinguished-point rho — 0.21 at
       <code>N</code> = 2<sup>24</sup> on the conservative accounting — with a fitted
@@ -346,8 +347,8 @@
       </div>
       <div class="fact">
         <dt>Closest to rho</dt>
-        <dd>14.5&times; at 2<sup>23.4</sup></dd>
-        <p>Meet in the middle, m = 3, prime field, every phase counted; exponent 0.60 against rho's one half, so the gap widens.</p>
+        <dd>6.2&times; at 2<sup>23.4</sup></dd>
+        <p>Meet in the middle, m = 2, prime field, negation-folded table and walked targets, every phase counted; fitted 0.53 against a reference that fits 0.27 here.</p>
       </div>
     </dl>
   </header>
@@ -370,11 +371,17 @@
         counted Pollard rho on the same instance. Native counts are exact; the conversion factors
         are measured on the host and stored in the run. Rows are the largest instance of each
         regime, plus the largest Koblitz rung on which the control was run; the full ladder and
-        the fits are in <code>research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md</code>.</p>
+        the fits are in <code>research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md</code>.
+        The second round (that note&rsquo;s &sect;10) keeps every first-round row as the
+        <em>before</em> mark of the rung built on it and adds the rungs of a cumulative
+        engineering ledger &mdash; the pair table folded by negation, then (Koblitz) by the
+        Frobenius, targets drawn by an r-adding walk, two-summand rows where the cofactor classes
+        admit them, and a Koblitz base sized to the folded table &mdash; each priced with every
+        phase inside, on the same curves, targets and seeds.</p>
     </div>
     <div class="table-scroll">
       <table>
-        <caption>Frozen source: <code>docs/ic/runs/ic-boundary-ledger-2026-09-21.json</code>
+        <caption>Frozen source: <code>docs/ic/runs/ic-boundary-ledger-round2-2026-09-21.json</code>
           (<code>ic boundary --oracles</code>). Means over three targets; rho over eight walks per
           target. Every logarithm on the board recovered and verified as [d]G = Q. The Koblitz
           reference and floor use all 2n signed-Frobenius automorphisms; the prime and binary
@@ -392,23 +399,35 @@
         </thead>
         <tbody>
           <tr class="group"><td colspan="6">Prime field, generic curve &middot; generated-24bit-10935329 &middot; r = 2<sup>23.4</sup> &middot; rho S = 3.93 &middot; floor S = 0.886</td></tr>
-          <tr><td>Semaev S&#8323; roots, m = 2</td><td class="n">4,349</td><td class="n">1,107&times;</td><td class="n">4,907&times;</td><td>yes</td><td title="baseline: one square root per base abscissa per target"><span class="chip">baseline</span></td></tr>
-          <tr><td>Direct subtraction, m = 2</td><td class="n">1,715</td><td class="n">436&times;</td><td class="n">1,935&times;</td><td>yes</td><td title="accounting: the same enumeration, priced by additions instead of square roots"><span class="chip">accounting</span></td></tr>
-          <tr><td>Meet in the middle, m = 2</td><td class="n">232</td><td class="n">59.1&times;</td><td class="n">262&times;</td><td>yes</td><td title="engineering: memory for time, ratio to the counting boundary unmoved"><span class="chip">engineering</span></td></tr>
-          <tr><td>Meet in the middle, m = 3</td><td class="n">56.8</td><td class="n">14.5&times;</td><td class="n">64.1&times;</td><td>yes</td><td title="engineering: memory for time, one probe per subtraction; the best row on this ledger"><span class="chip">engineering</span></td></tr>
+          <tr><td>Semaev S&#8323; roots, m = 2</td><td class="n">5,129</td><td class="n">1,305&times;</td><td class="n">5,787&times;</td><td>yes</td><td title="baseline: one square root per base abscissa per target"><span class="chip">baseline</span></td></tr>
+          <tr><td>Direct subtraction, m = 2</td><td class="n">2,037</td><td class="n">518&times;</td><td class="n">2,298&times;</td><td>yes</td><td title="accounting: the same enumeration, priced by additions instead of square roots"><span class="chip">accounting</span></td></tr>
+          <tr><td>Meet in the middle, m = 2</td><td class="n">268</td><td class="n">68.3&times;</td><td class="n">303&times;</td><td>yes</td><td title="engineering: memory for time, ratio to the counting boundary unmoved"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 3</td><td class="n">56.8</td><td class="n">14.5&times;</td><td class="n">64.1&times;</td><td>yes</td><td title="engineering: memory for time, one probe per subtraction"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 2, negation-folded table</td><td class="n">248 <small>was 268</small></td><td class="n">63.2&times;</td><td class="n">280&times;</td><td>yes</td><td title="engineering: half the table&#x27;s additions build entries the abscissa key already held; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">24.2 <small>was 248</small></td><td class="n">6.16&times;</td><td class="n">27.3&times;</td><td>yes</td><td title="engineering: one addition per target instead of two scalar multiplications; same yield against the ceiling"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 3, negation-folded table</td><td class="n">37.0 <small>was 56.8</small></td><td class="n">9.41&times;</td><td class="n">41.7&times;</td><td>yes</td><td title="engineering: the table&#x27;s additions halve; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">31.7 <small>was 37.0</small></td><td class="n">8.06&times;</td><td class="n">35.7&times;</td><td>yes</td><td title="engineering: the target&#x27;s two scalar multiplications become one addition; the |F| subtractions per target remain"><span class="chip">engineering</span></td></tr>
           <tr class="group"><td colspan="6">Binary field, random curve &middot; random-binary-n27-b845462 &middot; r = 2<sup>24.4</sup> &middot; rho S = 2.31 &middot; floor S = 0.886</td></tr>
-          <tr><td>Meet in the middle, m = 3</td><td class="n">206</td><td class="n">89.0&times;</td><td class="n">232&times;</td><td>yes</td><td title="baseline: the table pipeline on the random binary curve"><span class="chip">baseline</span></td></tr>
-          <tr><td>S&#8324; pairs-and-solve, m = 3</td><td class="n">105,198</td><td class="n">45,471&times;</td><td class="n">118,703&times;</td><td>yes</td><td title="relabelling: the pair table's memory is paid back as a per-target loop over |F|²/2 pairs; S rises 510×"><span class="chip relabel">relabelling</span></td></tr>
-          <tr class="group"><td colspan="6">Koblitz curve, signed-Frobenius reference &middot; K_1 / GF(2^23) &middot; r = 2<sup>22.0</sup> &middot; rho S = 0.89 &middot; floor S = 0.185</td></tr>
-          <tr><td>Same base, one column per abscissa (control)</td><td class="n">203</td><td class="n">227&times;</td><td class="n">1,096&times;</td><td>yes</td><td title="baseline: the random-binary pipeline on the Koblitz curve"><span class="chip">baseline</span></td></tr>
-          <tr><td>Meet in the middle, signed-orbit columns</td><td class="n">188</td><td class="n">210&times;</td><td class="n">1,017&times;</td><td>yes</td><td title="advance, count: K falls 438 → 20 and the trials 348 → 18; S moves 7% because the factor base is 99.6% of it"><span class="chip advance">advance, count</span></td></tr>
+          <tr><td>Meet in the middle, m = 3</td><td class="n">206</td><td class="n">89.1&times;</td><td class="n">232&times;</td><td>yes</td><td title="baseline: the table pipeline on the random binary curve"><span class="chip">baseline</span></td></tr>
+          <tr><td>S&#8324; pairs-and-solve, m = 3</td><td class="n">108,654</td><td class="n">46,965&times;</td><td class="n">122,603&times;</td><td>yes</td><td title="relabelling: the pair table&#x27;s memory is paid back as a per-target loop over |F|^2/2 pairs; S rises"><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Meet in the middle, m = 3, negation-folded table</td><td class="n">191 <small>was 206</small></td><td class="n">82.7&times;</td><td class="n">216&times;</td><td>yes</td><td title="engineering: the table&#x27;s additions halve; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">169 <small>was 191</small></td><td class="n">73.2&times;</td><td class="n">191&times;</td><td>yes</td><td title="engineering: the target&#x27;s two scalar multiplications become one addition; the |F| subtractions per target remain"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 2, negation-folded table</td><td class="n">1,645 <small>was 206</small></td><td class="n">711&times;</td><td class="n">1,856&times;</td><td>yes</td><td title="engineering: half the table&#x27;s additions build entries the abscissa key already held; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">71.2 <small>was 1,645</small></td><td class="n">30.8&times;</td><td class="n">80.4&times;</td><td>yes</td><td title="engineering: one addition per target instead of two scalar multiplications; same yield against the ceiling"><span class="chip">engineering</span></td></tr>
           <tr class="group"><td colspan="6">Koblitz curve, signed-Frobenius reference &middot; K_0 / GF(2^41) &middot; r = 2<sup>39.0</sup> &middot; rho S = 0.20 &middot; floor S = 0.138</td></tr>
-          <tr><td>Meet in the middle, signed-orbit columns</td><td class="n">58.8</td><td class="n">300&times;</td><td class="n">425&times;</td><td>yes</td><td title="advance, count: the same fold; the base is capped at 6,000 points here, so relations are 71% of the cost"><span class="chip advance">advance, count</span></td></tr>
+          <tr><td>Meet in the middle, signed-orbit columns</td><td class="n">58.8</td><td class="n">300&times;</td><td class="n">425&times;</td><td>yes</td><td title="advance, count: K falls by the orbit length 2n against the control; S moves little because the factor base dominates"><span class="chip advance">advance, count</span></td></tr>
+          <tr><td>Signed-orbit columns, negation-folded table</td><td class="n">50.4 <small>was 58.8</small></td><td class="n">257&times;</td><td class="n">364&times;</td><td>yes</td><td title="engineering: the table&#x27;s additions halve; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; Frobenius-folded table (|F|&sup2;/4n entries)</td><td class="n">45.2 <small>was 58.8</small></td><td class="n">231&times;</td><td class="n">327&times;</td><td>yes</td><td title="engineering: the table shrinks by the orbit length 2n, the automorphism group the floor already credits to a generic walk; one canonicalisation per probe, priced"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">41.1 <small>was 45.2</small></td><td class="n">210&times;</td><td class="n">297&times;</td><td>yes</td><td title="engineering: one addition per target; at m = 3 the |F| subtractions per target dominate, so little moves"><span class="chip">engineering</span></td></tr>
+          <tr><td>Two summands, Frobenius-folded table, walk targets</td><td class="n">8.15 <small>was 58.8</small></td><td class="n">41.6&times;</td><td class="n">58.9&times;</td><td>yes</td><td title="engineering: two summands on the folded table with walk targets; the trials are what the exact ceiling allows, at one addition each"><span class="chip">engineering</span></td></tr>
+          <tr><td>Balanced base (|F| &asymp; 1.2&middot;(4#E)<sup>1/3</sup>), m = 3, folded table, walk</td><td class="n">12.3 <small>was 41.1</small></td><td class="n">62.7&times;</td><td class="n">88.7&times;</td><td>yes</td><td title="engineering: a different base, sized so the folded table balances the trials; its own row, its own floor"><span class="chip">engineering</span></td></tr>
+          <tr><td>Balanced base, m = 2, folded table, walk</td><td class="n">5.12 <small>was 8.15</small></td><td class="n">26.2&times;</td><td class="n">37.0&times;</td><td>yes</td><td title="engineering: the same balanced base with two summands; the best Koblitz row, still above the reference"><span class="chip">engineering</span></td></tr>
         </tbody>
       </table>
     </div>
     <div class="legend" style="padding-top:0">
       <span>class by the AGENTS.md &sect;3 test: advance = the count boundary moved &middot; engineering = S fell, ratio flat &middot; relabelling = work left the headline &middot; accounting = only the numbers changed</span>
+      <span>Round-2 rows carry the S of the rung they were built on as &ldquo;was&rdquo;; every one is engineering by that test &mdash; trials, yield against the exact ceiling and the fitted exponents did not move, and nothing in the round does what a generic walk cannot</span>
       <span>every fitted total exponent is above rho&rsquo;s one half, so all three gaps widen with size</span>
       <span>rho&rsquo;s setup is inside its S and dominates below 2<sup>20</sup>, so &ldquo;vs rho&rdquo; flatters index calculus at small sizes; &ldquo;vs floor&rdquo; does not</span>
     </div>
@@ -425,17 +444,31 @@
           Anything to the right of one half loses as the group grows, whatever its constant.</p>
       </div>
       <div class="exp">
+<div class="erow"><div class="name">char2: Meet in the middle, m = 2, negation-folded table</div><div class="track"><i class="dot" style="left:82.8%" title="r^0.79 (R² 1.00, 5 sizes)"></i></div><div class="num">0.79</div></div>
+        <div class="erow"><div class="name">char2: &hellip; and walk targets</div><div class="track"><i class="dot" style="left:34.7%" title="r^0.48 (R² 0.98, 5 sizes)"></i></div><div class="num">0.48</div></div>
+        <div class="erow"><div class="name">char2: Meet in the middle, m = 3</div><div class="track"><i class="dot" style="left:57.6%" title="r^0.62 (R² 0.99, 5 sizes)"></i></div><div class="num">0.62</div></div>
+        <div class="erow"><div class="name">char2: Meet in the middle, m = 3, negation-folded table</div><div class="track"><i class="dot" style="left:56.6%" title="r^0.62 (R² 0.99, 5 sizes)"></i></div><div class="num">0.62</div></div>
+        <div class="erow"><div class="name">char2: &hellip; and walk targets</div><div class="track"><i class="dot" style="left:59.5%" title="r^0.64 (R² 0.99, 5 sizes)"></i></div><div class="num">0.64</div></div>
+        <div class="erow"><div class="name">char2: rho reference</div><div class="track"><i class="dot" style="left:8.0%" title="r^0.30 (R² 0.97, 5 sizes)"></i></div><div class="num">0.30</div></div>
+        <div class="erow"><div class="name">char2: S&#8324; pairs-and-solve, m = 3</div><div class="track"><i class="dot" style="left:100.0%" title="r^1.06 (R² 0.99, 5 sizes)"></i></div><div class="num">1.06</div></div>
+        <div class="erow"><div class="name">koblitz: Two summands, Frobenius-folded table, walk targets</div><div class="track"><i class="dot" style="left:30.2%" title="r^0.45 (R² 0.79, 11 sizes)"></i></div><div class="num">0.45</div></div>
+        <div class="erow"><div class="name">koblitz: Balanced base, m = 2, folded table, walk</div><div class="track"><i class="dot" style="left:27.7%" title="r^0.43 (R² 0.82, 4 sizes)"></i></div><div class="num">0.43</div></div>
+        <div class="erow"><div class="name">koblitz: Same base, one column per abscissa (control)</div><div class="track"><i class="dot" style="left:76.9%" title="r^0.75 (R² 0.59, 7 sizes)"></i></div><div class="num">0.75</div></div>
+        <div class="erow"><div class="name">koblitz: Meet in the middle, signed-orbit columns</div><div class="track"><i class="dot" style="left:45.2%" title="r^0.54 (R² 0.71, 10 sizes)"></i></div><div class="num">0.54</div></div>
+        <div class="erow"><div class="name">koblitz: &hellip; Frobenius-folded table (|F|&sup2;/4n entries)</div><div class="track"><i class="dot" style="left:52.0%" title="r^0.59 (R² 0.83, 10 sizes)"></i></div><div class="num">0.59</div></div>
+        <div class="erow"><div class="name">koblitz: &hellip; and walk targets</div><div class="track"><i class="dot" style="left:47.3%" title="r^0.56 (R² 0.83, 10 sizes)"></i></div><div class="num">0.56</div></div>
+        <div class="erow"><div class="name">koblitz: Balanced base (|F| &asymp; 1.2&middot;(4#E)<sup>1/3</sup>), m = 3, folded table, walk</div><div class="track"><i class="dot" style="left:34.0%" title="r^0.47 (R² 0.86, 4 sizes)"></i></div><div class="num">0.47</div></div>
+        <div class="erow"><div class="name">koblitz: Signed-orbit columns, negation-folded table</div><div class="track"><i class="dot" style="left:47.0%" title="r^0.56 (R² 0.73, 10 sizes)"></i></div><div class="num">0.56</div></div>
+        <div class="erow"><div class="name">koblitz: rho reference</div><div class="track"><i class="dot" style="left:0.6%" title="r^0.25 (R² 0.92, 11 sizes)"></i></div><div class="num">0.25</div></div>
+        <div class="erow"><div class="name">prime: Direct subtraction, m = 2</div><div class="track"><i class="dot" style="left:95.6%" title="r^0.87 (R² 1.00, 8 sizes)"></i></div><div class="num">0.87</div></div>
+        <div class="erow"><div class="name">prime: Meet in the middle, m = 2</div><div class="track"><i class="dot" style="left:65.8%" title="r^0.68 (R² 1.00, 8 sizes)"></i></div><div class="num">0.68</div></div>
+        <div class="erow"><div class="name">prime: Meet in the middle, m = 2, negation-folded table</div><div class="track"><i class="dot" style="left:66.3%" title="r^0.68 (R² 1.00, 8 sizes)"></i></div><div class="num">0.68</div></div>
+        <div class="erow"><div class="name">prime: &hellip; and walk targets</div><div class="track"><i class="dot" style="left:42.3%" title="r^0.52 (R² 0.98, 8 sizes)"></i></div><div class="num">0.52</div></div>
+        <div class="erow"><div class="name">prime: Meet in the middle, m = 3</div><div class="track"><i class="dot" style="left:54.1%" title="r^0.60 (R² 0.98, 8 sizes)"></i></div><div class="num">0.60</div></div>
+        <div class="erow"><div class="name">prime: Meet in the middle, m = 3, negation-folded table</div><div class="track"><i class="dot" style="left:50.4%" title="r^0.58 (R² 0.99, 8 sizes)"></i></div><div class="num">0.58</div></div>
+        <div class="erow"><div class="name">prime: &hellip; and walk targets</div><div class="track"><i class="dot" style="left:46.7%" title="r^0.55 (R² 0.98, 8 sizes)"></i></div><div class="num">0.55</div></div>
         <div class="erow"><div class="name">prime: rho reference</div><div class="track"><i class="dot" style="left:3.7%" title="r^0.27 (R² 0.90, 8 sizes)"></i></div><div class="num">0.27</div></div>
-        <div class="erow"><div class="name">prime: Meet in the middle, m = 3</div><div class="track"><i class="dot" style="left:54.0%" title="r^0.60 (R² 0.98, 8 sizes)"></i></div><div class="num">0.60</div></div>
-        <div class="erow"><div class="name">prime: Meet in the middle, m = 2</div><div class="track"><i class="dot" style="left:63.4%" title="r^0.66 (R² 1.00, 8 sizes)"></i></div><div class="num">0.66</div></div>
-        <div class="erow"><div class="name">prime: Direct subtraction, m = 2</div><div class="track"><i class="dot" style="left:92.4%" title="r^0.85 (R² 0.99, 8 sizes)"></i></div><div class="num">0.85</div></div>
-        <div class="erow"><div class="name">prime: Semaev S&#8323; roots, m = 2</div><div class="track"><i class="dot" style="left:100.0%" title="r^0.91 (R² 0.96, 8 sizes)"></i></div><div class="num">0.91</div></div>
-        <div class="erow"><div class="name">binary: rho reference</div><div class="track"><i class="dot" style="left:8.0%" title="r^0.30 (R² 0.97, 5 sizes)"></i></div><div class="num">0.30</div></div>
-        <div class="erow"><div class="name">binary: Meet in the middle, m = 3</div><div class="track"><i class="dot" style="left:57.5%" title="r^0.62 (R² 0.99, 5 sizes)"></i></div><div class="num">0.62</div></div>
-        <div class="erow"><div class="name">binary: S&#8324; pairs-and-solve, m = 3</div><div class="track"><i class="dot" style="left:100.0%" title="r^1.06 (R² 0.99, 5 sizes), off the axis"></i></div><div class="num">1.06</div></div>
-        <div class="erow"><div class="name">Koblitz: signed-Frobenius rho</div><div class="track"><i class="dot" style="left:0.6%" title="r^0.25 (R² 0.92, 11 sizes)"></i></div><div class="num">0.25</div></div>
-        <div class="erow"><div class="name">Koblitz: Meet in the middle, signed-orbit columns</div><div class="track"><i class="dot" style="left:45.2%" title="r^0.54 (R² 0.71 over 10 rungs; 0.51, R² 0.98 over the cofactor ≤ 4 rungs)"></i></div><div class="num">0.54</div></div>
-        <div class="erow"><div class="name">Koblitz: one column per abscissa (control)</div><div class="track"><i class="dot" style="left:77.4%" title="r^0.75 (R² 0.59 over 7 rungs; 0.62, R² 0.99 over the cofactor ≤ 4 rungs)"></i></div><div class="num">0.75</div></div>
+        <div class="erow"><div class="name">prime: Semaev S&#8323; roots, m = 2</div><div class="track"><i class="dot" style="left:100.0%" title="r^0.93 (R² 0.96, 8 sizes)"></i></div><div class="num">0.93</div></div>
         <div class="exp-axis">
           <div></div>
           <div class="ticks">
@@ -989,14 +1022,27 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <div class="note">
       <h3>What was actually found</h3>
       <p><strong>Three regimes now share one axis.</strong> A generic prime-field curve, a random
-        binary curve and a Koblitz curve solve the same planted logarithm with every phase counted:
-        the table pipeline is 14.5&times;, 89&times; and 300&times; the counted rho at the largest
-        sizes, its exponents 0.60, 0.62 and 0.54 against one half, and the algebraic oracles are
-        three to five orders of magnitude behind a pair-table probe per target. The Frobenius fold
-        is a real count advance &mdash; 2n fewer unknowns &mdash; worth 7% of S at n = 23 because the
-        factor base is 99.6% of the cost. The counting ceiling on relation yield turned out loose by
-        the index of any subgroup that contains the base (exactly 2 on the trace-zero bases); an
-        accounting correction, no S moved (<code>research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md</code>).</p>
+        binary curve and a Koblitz curve solve the same planted logarithm with every phase counted.
+        A second round of engineering &mdash; the pair table folded by negation and, on Koblitz
+        curves, by the Frobenius; targets drawn by an r-adding walk instead of two scalar
+        multiplications each; two-summand rows wherever the cofactor classes admit them; a Koblitz
+        base sized to the folded table &mdash; takes the best rows to 6.2&times;, 31&times; and
+        26&times; the counted rho, worth 1.3&ndash;2.9&times; per instance on the prime and binary
+        ladders and 3&ndash;49&times; on the Koblitz one. Nothing crosses rho and no fitted exponent
+        falls below the reference's, so every rung is engineering, not an advance. The counting
+        ceiling is now computed exactly from the base's cofactor classes rather than argued: the
+        index it corrects for is 1.9&ndash;2.2 on the trace-zero bases, 3.0 at n = 15 and 4.6 at
+        n = 29.</p>
+      <p><strong>A collision was being counted as a relation.</strong> A run that decomposes the
+        same group element twice gets two rows with one factor-base part and different
+        coefficients, and those pin the logarithm by themselves &mdash; a generic collision
+        resolved through the factor base, arriving after about &radic;r targets whatever the oracle
+        costs. Measured: 24.4% of unguarded two-summand runs end that way, which is the predicted
+        K&sup2;/(2rp) = 1/4, and 82% when walk segments share one jump table and merge as rho's
+        walks do. Both target sources are now guarded, which costs 1.1&ndash;2.9&times; in S on the
+        affected rows and moved 22 of the first round's 63 rows by up to 1.59&times;. The
+        first-round figures on this page are the corrected ones
+        (<code>research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md</code> §10.2).</p>
       <p><strong>The walk hypothesis is closed.</strong> Collision search over partial decompositions
         cannot beat independent sampling, because the relation yield is bounded by a counting
         argument. Every lever tried left the ratio to that floor between 1.00 and 1.07.</p>
@@ -1210,8 +1256,12 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><strong>The six pre-registered experiments have been run, and no falsifier fired.</strong>
         The product law is now evidence at n&thinsp;=&thinsp;13 and n&thinsp;=&thinsp;19 rather than
         arithmetic: every end-to-end rung recovered its planted logarithm, every relation was re-added
-        in the group before entering the matrix, and the slope of log&#8322;(total) against n is 1.037
-        against a falsifier of 0.95. Two rungs, not the four the design asked for &mdash;
+        in the group before entering the matrix, and the slope of log&#8322;(total) against n is
+        <s>1.037</s>&thinsp;&rarr;&thinsp;<strong>0.944&thinsp;&plusmn;&thinsp;0.028</strong>
+        against a falsifier of 0.95 &mdash; the struck figure is the superseded full-rank stopping
+        rule, the live one is the relation budget the law actually charges. The threshold sits 0.21
+        standard errors away, so these two rungs do not resolve which side of it the truth is on.
+        Two rungs, not the four the design asked for &mdash;
         n&thinsp;=&thinsp;11 is <em>excluded</em> because its 23-torsion has rank two, so no cyclic
         subgroup of order p exists to pose the logarithm in, and n&thinsp;&ge;&thinsp;29 needs field
         tables that do not fit in memory. The slope is a two-point fit and cannot fire its own
@@ -1227,14 +1277,48 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         counted exhaustively over the whole odd subgroup, once the subsets containing a point and its
         negative are removed; those degeneracies, not the tail, are the entire source of the raw
         1.44&ndash;2.98 over-dispersion.</p>
-      <p><strong>Two constants the law prices at one are measured optimistic.</strong> Reaching full
-        rank took 2.0&times; the |F| relations the law budgets at n&thinsp;=&thinsp;19, because
-        decompositions harvested from one target are correlated; and large-prime pairing, whose guard
-        does hold, produces relations that are 5&ndash;11&times; redundant &mdash; at
-        m&thinsp;=&thinsp;2 they are <em>differences</em> P<sub>i</sub>&thinsp;&minus;&thinsp;P<sub>j</sub>
-        and so cannot span the base at all. Exponents untouched, verdict at n&thinsp;=&thinsp;131
-        untouched; class <span class="chip">accounting</span>
+      <p><strong>One constant the law prices at one is measured optimistic.</strong> Large-prime
+        pairing, whose guard does hold, produces relations that are 5&ndash;11&times; redundant
+        &mdash; at m&thinsp;=&thinsp;2 they are <em>differences</em>
+        P<sub>i</sub>&thinsp;&minus;&thinsp;P<sub>j</sub> and so cannot span the base at all.
+        Exponents untouched, verdict at n&thinsp;=&thinsp;131 untouched; class
+        <span class="chip">accounting</span>
         (<code>experiments/ecc2k130_decomposition_runs.json</code>).</p>
+      <p><strong>The second one is withdrawn.</strong> This panel previously read &ldquo;reaching
+        full rank took <s>2.0&times;</s> the |F| relations the law budgets at n&thinsp;=&thinsp;19,
+        because decompositions harvested from one target are correlated.&rdquo; Both halves fail.
+        The excess is the <em>coupon collector</em>: a harness that stops only at full rank over
+        every column spends |F|&thinsp;ln|F|/m relations, so the ratio is ln|F|/m and grows with the
+        base &mdash; predicted 1.391&thinsp;&rarr;&thinsp;2.089 across the sweep against measured
+        1.453&thinsp;&rarr;&thinsp;2.395, never a constant. It is not target correlation either:
+        <code>first_hit</code> shares no target between relations and shows the same excess, higher
+        at two factor-base sizes and lower at two. And a descent does not need full rank &mdash; at
+        the |F| relations the law budgets, every descent landed in 1&ndash;3 attempts and
+        &Lambda;&thinsp;=&thinsp;<strong>3.103</strong> against the predicted m&thinsp;=&thinsp;3,
+        where the superseded full-rank rule read <s>5.136</s> and <s>5.993</s>. The
+        2<sup>124.99</sup> headline is unchanged: <code>cost_cell</code> always priced
+        &rho;&thinsp;=&thinsp;1, so this removes a caveat rather than buying a bit. Class
+        <span class="chip">accounting</span>
+        (<code>experiments/ecc2k130_decomposition_runs.json</code> &rarr;
+        <code>relation_budget_and_stopping_rule</code>).</p>
+      <p><strong>E2's l&thinsp;=&thinsp;5 outlier was blamed on the same thing and is also
+        something else.</strong> That cell ran 15,455 targets and stalled at rank 28/29. Enumerated
+        exhaustively over every one of the 810 decompositions the base admits, the row space has a
+        <strong>rank ceiling of 28</strong> that no relation count can pass: every reachable triple
+        there uses exactly one even-abscissa point, so the vector +1 on odd abscissae and &minus;2
+        on even ones annihilates every row. From l&thinsp;=&thinsp;6 the base admits all-even
+        triples and the rank is full. Class <span class="chip">accounting</span>.</p>
+      <p><strong>E3's deferred item is now run, as a stage diagnostic.</strong> Section 3.2's swap
+        localisation queries detector(R&thinsp;&minus;&thinsp;P&thinsp;+&thinsp;Q), which is only
+        sound if a detector charges the same for that as for R. Swept over seven descent targets at
+        fixed curve, base, summands and seed, and priced per oracle call:
+        <code>groebner</code> costs 58,280,966&ndash;61,951,239 F4 word operations per call, flat to
+        <strong>6.3%</strong>. <code>sat</code> varies 32.4% with no trend in the target &mdash; the
+        wobble of a randomised search, not a dependence on which target it was handed.
+        <code>enumerate</code> and <code>pair-table</code> turned out setup-dominated and answer
+        nothing; <code>wdsat</code> was not exercised. One rung, one base, one seed: nothing is
+        inferred about a full ECDLP and <strong>no speedup is claimed</strong>
+        (<code>experiments/ecc2k130_e3_solver_panel.json</code>).</p>
     </div>
     <div class="note">
       <h3>What would count next</h3>

@@ -168,6 +168,12 @@ enum IsogenyOp {
         trials: u32,
         #[arg(long, default_value = "2,3")]
         ell_list: String,
+        /// Override the Pollard-rho iteration cap.  Defaults to the
+        /// `8·2^{bits/2}` heuristic below.  Frozen artifacts under
+        /// `experiments/` were produced with explicit caps (2^14, 2^18),
+        /// so reproducing them needs this.
+        #[arg(long)]
+        rho_cap: Option<u64>,
     },
     /// secp256k1 case study: GLV constants, twist analysis, MOV
     /// embedding-degree certificate, small-degree-isogeny survey.
@@ -1216,6 +1222,7 @@ fn cmd_isogeny(op: IsogenyOp) {
             bits,
             trials,
             ell_list,
+            rho_cap,
         } => {
             let mut cfg = ExperimentConfig::default_for_bits(bits);
             cfg.num_curves = trials.max(1);
@@ -1225,7 +1232,8 @@ fn cmd_isogeny(op: IsogenyOp) {
             // √n ≈ √p = 2^{bits/2}.  Allow 8× headroom for the
             // geometric-distribution tail.
             let half_bits = (cfg.bits.min(60) / 2) as u32;
-            cfg.rho_max_iters = 8u64.checked_shl(half_bits).unwrap_or(u64::MAX);
+            cfg.rho_max_iters =
+                rho_cap.unwrap_or_else(|| 8u64.checked_shl(half_bits).unwrap_or(u64::MAX));
             eprintln!(
                 "# Running isogeny experiment: bits={}, trials={}, ell={:?}",
                 cfg.bits, cfg.num_curves, cfg.primes,

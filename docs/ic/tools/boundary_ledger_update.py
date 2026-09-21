@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Update docs/ic/boundary_targets.json from a frozen boundary-ledger run.
 
-usage: boundary_ledger_update.py <run.json> <boundary_targets.json> <run path for evidence> [--date=YYYY-MM-DD] [--dry]
+usage: boundary_ledger_update.py <run.json> <boundary_targets.json> <run path for evidence> [--date=YYYY-MM-DD] [--round=N] [--evidence=<path>]... [--dry]
 
 Moves the binary and prime relation_yield / rank / end_to_end_dlp / vs_rho
 records to the run's figures (the previous current block goes to history),
 adds the Koblitz oracle-pricing and operation-counted vs_rho metrics, and
-appends the ledger's agent priority.  Written for the 2026-09-21 run; a later
-round should check the row texts it writes before running it again.
+appends the ledger's agent priority.  Written for the 2026-09-21 run and
+re-used for its Round 2 (`--round=2`, which labels the records and keys the
+Koblitz block by round and takes extra evidence paths such as the saved
+baseline/candidate comparison); a later round should check the row texts it
+writes before running it again.
 """
 import json, math, sys, copy
 from collections import OrderedDict
@@ -18,6 +21,9 @@ run = json.load(open(run_path))
 ledger = json.load(open(ledger_path, encoding="utf-8"))
 L = run["ledger"]
 DATE = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--date=")), "2026-09-21")
+ROUND = int(next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--round=")), "1"))
+EXTRA_EVIDENCE = [a.split("=", 1)[1] for a in sys.argv if a.startswith("--evidence=")]
+ROUND_LABEL = f" (Round {ROUND})" if ROUND > 1 else ""
 NOTE = "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
 
 def mean(xs):
@@ -56,11 +62,16 @@ def instance_rows(regime):
                 ("signed_points", runs[0]["signed_points"]),
                 ("columns", runs[0]["columns"]),
                 ("dimension", runs[0]["dimension"]),
+                ("table", runs[0].get("table")),
+                ("targets", runs[0].get("targets")),
                 ("trials", r3(m("trials"))),
                 ("relations", r3(m("relations_found"))),
                 ("trials_per_relation", r3(m("trials") / max(m("relations_found"), 1))),
                 ("decomposition_probability_ceiling", r3(runs[0]["decomposition_probability_ceiling"])),
                 ("yield_over_ceiling", r3(m("yield_over_ceiling"))),
+                ("cofactor_classes", runs[0].get("cofactor_classes")),
+                ("decomposition_probability_ceiling_exact", r3(runs[0].get("decomposition_probability_ceiling_exact"))),
+                ("yield_over_ceiling_exact", r3(m("yield_over_ceiling_exact")) if "yield_over_ceiling_exact" in runs[0] else None),
                 ("matrix_rows", r3(m("relations_found"))),
                 ("matrix_columns", runs[0]["columns"] + 1),
                 ("rank", r3(m("rank"))),
@@ -98,7 +109,7 @@ def push_history(stage):
 
 def evidence(stage):
     ev = stage.setdefault("evidence", [])
-    for e in (evidence_path, NOTE):
+    for e in [evidence_path, NOTE] + EXTRA_EVIDENCE:
         if e not in ev:
             ev.append(e)
 
@@ -118,14 +129,18 @@ for key, regime_name in (("binary", "char2"), ("prime", "prime")):
     st = rec["relation_yield"]
     push_history(st)
     st["status"] = "record"
+    exact_note = ""
+    if ROUND > 1:
+        exact_note = "; the exact ceiling (m-multisets whose cofactor classes cancel, over r) is carried next to the uniform one"
     st["current"] = OrderedDict([
-        ("summary", f"Operation-counted yield on the frozen {regime_name} ladder ({len(set(r['instance'] for r in rows))} instances, up to r=2^{largest['log2_r']:.1f}): relations per trial measured against the counting ceiling C(F+m-1,m)/#E for every variant; natural targets only"),
+        ("summary", f"Operation-counted yield on the frozen {regime_name} ladder{ROUND_LABEL} ({len(set(r['instance'] for r in rows))} instances, up to r=2^{largest['log2_r']:.1f}): relations per trial measured against the counting ceiling C(F+m-1,m)/#E for every variant; natural targets only{exact_note}"),
         ("date", DATE),
         ("metrics", OrderedDict([
             ("timing_class", "operation_counted"),
             ("target_mix", {"natural": "every trial", "planted_sat": 0, "proven_unsat": 0}),
             ("yield_over_ceiling_range", [r3(min(r["yield_over_ceiling"] for r in rows)), r3(max(r["yield_over_ceiling"] for r in rows))]),
-            ("trials_per_relation_by_instance", [OrderedDict([("instance", r["instance"]), ("variant", r["variant"]), ("m", r["m"]), ("signed_points", r["signed_points"]), ("trials_per_relation", r["trials_per_relation"]), ("pr_decomposition_measured", r3(1.0 / r["trials_per_relation"]) if r["trials_per_relation"] else None), ("ceiling", r["decomposition_probability_ceiling"]), ("yield_over_ceiling", r["yield_over_ceiling"])]) for r in rows]),
+            ("yield_over_ceiling_exact_range", [r3(min(r["yield_over_ceiling_exact"] for r in rows if r["yield_over_ceiling_exact"] is not None)), r3(max(r["yield_over_ceiling_exact"] for r in rows if r["yield_over_ceiling_exact"] is not None))] if any(r["yield_over_ceiling_exact"] is not None for r in rows) else None),
+            ("trials_per_relation_by_instance", [OrderedDict([("instance", r["instance"]), ("variant", r["variant"]), ("m", r["m"]), ("signed_points", r["signed_points"]), ("table", r["table"]), ("targets", r["targets"]), ("trials_per_relation", r["trials_per_relation"]), ("pr_decomposition_measured", r3(1.0 / r["trials_per_relation"]) if r["trials_per_relation"] else None), ("ceiling", r["decomposition_probability_ceiling"]), ("yield_over_ceiling", r["yield_over_ceiling"]), ("cofactor_classes", r["cofactor_classes"]), ("ceiling_exact", r["decomposition_probability_ceiling_exact"]), ("yield_over_ceiling_exact", r["yield_over_ceiling_exact"])]) for r in rows]),
             ("trials_exponent_fits", fits_of(regime_name, "trials")),
         ])),
     ])
@@ -135,7 +150,7 @@ for key, regime_name in (("binary", "char2"), ("prime", "prime")):
     push_history(st)
     st["status"] = "record"
     st["current"] = OrderedDict([
-        ("summary", f"Relation-matrix LA priced per instance on the {regime_name} ladder: dense incremental Gauss-Jordan over Z/rZ, rank recomputed after every row, stop when the target column is pinned; multiply-subtracts counted and converted"),
+        ("summary", f"Relation-matrix LA priced per instance on the {regime_name} ladder{ROUND_LABEL}: dense incremental Gauss-Jordan over Z/rZ, rank recomputed after every row, stop when the target column is pinned; multiply-subtracts counted and converted"),
         ("date", DATE),
         ("metrics", OrderedDict([
             ("sparse_or_dense", "dense incremental reduced echelon form (IncrementalGauss)"),
@@ -150,7 +165,7 @@ for key, regime_name in (("binary", "char2"), ("prime", "prime")):
     push_history(st)
     st["status"] = "record"
     st["current"] = OrderedDict([
-        ("summary", f"Known-answer DLP recovered and verified ([d]G = Q) by every variant on every instance of the {regime_name} ladder, largest {label(largest)} (r=2^{largest['log2_r']:.1f}); every phase counted in one unit"),
+        ("summary", f"Known-answer DLP recovered and verified ([d]G = Q) by every variant on every instance of the {regime_name} ladder{ROUND_LABEL}, largest {label(largest)} (r=2^{largest['log2_r']:.1f}); every phase counted in one unit"),
         ("date", DATE),
         ("metrics", OrderedDict([
             (f"{n_or_bits}_max", int(round(math.log2(largest["group_order"]))) if key == "binary" else r3(largest["log2_r"])),
@@ -165,13 +180,14 @@ for key, regime_name in (("binary", "char2"), ("prime", "prime")):
     st = rec["vs_rho"]
     push_history(st)
     st["status"] = "not_achieved"
+    largest_best = min((r for r in rows if r["r"] == largest["r"]), key=lambda r: r["S_over_rho"])
     st["current"] = OrderedDict([
-        ("summary", f"Whole-process operation-counted cost against a counted Pollard rho on the same instance: best variant {best['variant']} at {best['S_over_rho']}x rho ({label(best)}); no variant below rho at r >= 2^20"),
+        ("summary", f"Whole-process operation-counted cost against a counted Pollard rho on the same instance{ROUND_LABEL}: best variant {best['variant']} at {best['S_over_rho']}x rho ({label(best)}); at the largest instance ({label(largest_best)}) {largest_best['variant']} at {largest_best['S_over_rho']}x rho; no variant below rho at r >= 2^20"),
         ("date", DATE),
         ("metrics", OrderedDict([
             ("timing_class", "operation_counted_whole_process"),
             ("automorphism_discount", "reference walk uses A=1 (no negation map); floor stated at A=2"),
-            ("by_instance", [OrderedDict([("instance", r["instance"]), ("log2_r", r["log2_r"]), ("variant", r["variant"]), ("S", r["S"]), ("rho_S", r["rho_S_mean"]), ("rho_walk_S", r["rho_walk_S_mean"]), ("S_over_rho", r["S_over_rho"]), ("S_over_floor", r["S_over_floor"]), ("verified", r["verified_all"]), ("rho_verified", r["rho_verified_all"])]) for r in rows]),
+            ("by_instance", [OrderedDict([("instance", r["instance"]), ("log2_r", r["log2_r"]), ("variant", r["variant"]), ("table", r["table"]), ("targets", r["targets"]), ("S", r["S"]), ("rho_S", r["rho_S_mean"]), ("rho_walk_S", r["rho_walk_S_mean"]), ("S_over_rho", r["S_over_rho"]), ("S_over_floor", r["S_over_floor"]), ("verified", r["verified_all"]), ("rho_verified", r["rho_verified_all"])]) for r in rows]),
             ("total_exponent_fits", fits_of(regime_name, "total")),
             ("rho_health", "every rho run recovered and verified; steps against sqrt(pi r/2) recorded per run"),
         ])),
@@ -184,12 +200,13 @@ rec = regimes["koblitz"]["records"]
 rows = instance_rows("koblitz")
 if rows:
     st = rec["vs_rho"]
-    st["current"]["metrics"]["operation_counted_whole_process_2026_09_21"] = OrderedDict([
+    key = "operation_counted_whole_process_" + DATE.replace("-", "_") + (f"_round{ROUND}" if ROUND > 1 else "")
+    st["current"]["metrics"][key] = OrderedDict([
         ("timing_class", "operation_counted_whole_process"),
         ("automorphism_discount", "signed Frobenius walk, A=2n, measured (koblitz_signed_frobenius_rho_reference)"),
-        ("by_instance", [OrderedDict([("instance", r["instance"]), ("log2_r", r["log2_r"]), ("cofactor", r["cofactor"]), ("variant", r["variant"]), ("signed_points", r["signed_points"]), ("columns", r["columns"]), ("S", r["S"]), ("rho_S", r["rho_S_mean"]), ("S_over_rho", r["S_over_rho"]), ("S_over_floor", r["S_over_floor"]), ("verified", r["verified_all"]), ("rho_verified", r["rho_verified_all"])]) for r in rows]),
+        ("by_instance", [OrderedDict([("instance", r["instance"]), ("log2_r", r["log2_r"]), ("cofactor", r["cofactor"]), ("variant", r["variant"]), ("table", r["table"]), ("targets", r["targets"]), ("signed_points", r["signed_points"]), ("columns", r["columns"]), ("S", r["S"]), ("rho_S", r["rho_S_mean"]), ("S_over_rho", r["S_over_rho"]), ("S_over_floor", r["S_over_floor"]), ("yield_over_ceiling_exact", r["yield_over_ceiling_exact"]), ("verified", r["verified_all"]), ("rho_verified", r["rho_verified_all"])]) for r in rows]),
         ("total_exponent_fits", fits_of("koblitz", "total")),
-        ("reading", "single-target whole-process counts on a materialised base; the n=53 record above is a wall-clock charged class and is unchanged"),
+        ("reading", "single-target whole-process counts on a materialised base; the n=53 record above is a wall-clock charged class and is unchanged" + ("; Round 2 keeps every first-round row as its before mark and adds the folded-table, walk-target and balanced-base rungs" if ROUND > 1 else "")),
     ])
     evidence(st)
 

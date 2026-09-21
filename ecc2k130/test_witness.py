@@ -247,6 +247,26 @@ def main():
              "--skip", str(skip), "--max", "1", "--quiet"])
     check("a job this binary cannot walk is refused", r.returncode != 0, "exit %d" % r.returncode)
 
+    # --out-dir is the shape a node's checker actually reads: one artifact per
+    # file.  Found by running the stream form against cairn and watching it
+    # fail on the second line.
+    outdir = os.path.join(tmp, "batches")
+    os.makedirs(outdir)
+    r = run(["./build/witness", "--curve", str(CURVE), "--instance", str(INSTANCE),
+             "--dp-weight", str(DPW), "--corpus", corpus, "--job", job,
+             "--skip", str(skip), "--max", "64", "--batch", "32",
+             "--out-dir", outdir, "--quiet"])
+    files = sorted(f for f in os.listdir(outdir) if f.endswith(".json"))
+    check("--out-dir writes one artifact per file", r.returncode == 0 and len(files) >= 1,
+          "%d files" % len(files))
+    one_per_file = True
+    for f in files:
+        try:
+            json.load(open(os.path.join(outdir, f)))
+        except ValueError:
+            one_per_file = False
+    check("each file parses as a single artifact", one_per_file)
+
     # ---- the check that binds: cairn's own verifier ----------------------
     orbit_dp = None
     if args.cairn:
@@ -256,18 +276,24 @@ def main():
     if orbit_dp is None:
         print("skip cairn cross-verification -- pass --cairn <checkout> or set CAIRN_ROOT")
     else:
-        # `verify` reads one artifact per file and the emitter writes one batch
-        # per line, so split.  With <= max_batch records the two happen to look
-        # the same, which is exactly why this was worth writing out.
+        # The tool has two outputs and both are checked. --out-dir is the shape
+        # a node reads; the stdout stream is one batch per line, so it has to
+        # be split before `verify`, which reads one artifact per file.
         batches = []
         for i, line in enumerate(lines):
             bpath = os.path.join(tmp, "batch-%d.json" % i)
             open(bpath, "w").write(line)
             batches.append(bpath)
         results = [run(["python3", orbit_dp, "verify", "--job", job, b]) for b in batches]
-        check("cairn's checker verifies every batch",
+        check("cairn's checker verifies every batch on stdout",
               bool(results) and all(x.returncode == 0 for x in results),
               "%d of %d batches" % (sum(x.returncode == 0 for x in results), len(results)))
+        every = True
+        for f in files:
+            rr = run(["python3", orbit_dp, "verify", "--job", job, os.path.join(outdir, f)])
+            every = every and rr.returncode == 0
+        check("cairn's checker verifies every --out-dir artifact", every,
+              "%d files" % len(files))
         # and rejects a witness that does not reach the orbit it names
         art = json.loads(lines[0])
         art["dps"][0]["j"] = list(art["dps"][0]["j"])

@@ -217,8 +217,8 @@
           <button type="button" id="forest-play">Play the walks</button>
           <button type="button" id="forest-reset">Reset view</button>
         </div>
-        <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
-             alt="Walk trails on the ECC2K-130 curve drawn as separate meandering chains of hollow nodes, each ending at a filled green node, none of them touching.">
+        <img src="./walk-forest.svg" width="1000" height="1000" loading="lazy"
+             alt="Walk trails on the ECC2K-130 curve drawn as a circle: each walk a coloured arc of hollow nodes running out from its seed to a filled green node on the rim, the longer walks starting nearer the centre, none of them touching.">
         <p class="forest-readout mono" id="forest-readout"></p>
       </div>
       <figcaption>
@@ -241,13 +241,19 @@
         enough to draw. Every trail is checked against the record the client
         wrote for it, the first few against the scalar reference as well, and
         the orbits are named by hash on the page because a distinguished
-        point's orbit is its key. The figure regenerates from the committed
+        point's orbit is its key. The figure is a circle: every
+        distinguished point sits on the rim, and every walk comes in to it
+        from as far inside as it had iterations still to go, so a seed sits
+        as deep as its walk was long and the rings mark each quarter of the
+        cap; the walks are in order of length, which is why their seeds
+        spiral in. The figure regenerates from the committed
         trails with
         <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">walk_forest.py</a>.
         With JavaScript the figure is a graph: drag to pan, wheel or pinch to
         zoom, hover a node for the walk it is on and how far along, click one
         to light every path through it to its distinguished point, and play
-        the walks to watch them set off for theirs. The second forest in the
+        the walks to run them all at once, at the same number of iterations a
+        second, each lighting its trail until it reaches the rim. The second forest in the
         menu is the <span class="mono">GF(2^23)</span> test curve, small
         enough that trails meet, with the same iteration function and
         distinguishing test.
@@ -355,13 +361,21 @@ cairn run</code></pre>
           <span class="mono">{x, seed, j: [n&#8323; … n&#8321;&#8320;]}</span>.
         </p>
         <p class="note">
-          The kernel still does not carry those counters, and it should not:
-          the cheaper route is to replay only the trails you claim. The
-          reference walk has counted the <span class="mono">n_j</span> all
-          along &mdash; collision resolution always needed them &mdash; so
-          <span class="mono">ecc2k130/build/witness</span> turns corpus records
-          into checked claims offline, at about a 900&times; saving over
-          carrying the counters through every step of the search. Two limits
+          The kernel does not carry those counters yet, and it should. The
+          campaign runs the <em>packed</em> backend, where the branch index is
+          already a scalar <span class="mono">int</span> beside per-walk state
+          the step touches anyway, so a counter is a scalar increment &mdash;
+          eight 8-bit fields in one <span class="mono">u64</span>, two
+          instructions on a 2,324-slot update,
+          <strong>+0.09%</strong>, about <span class="mono">36</span>
+          GPU-hours across the campaign to make every orbit it produces
+          claimable. Replay keeps the job the kernel cannot do backwards: the
+          points already collected <em>without</em> counters are claimable no
+          other way, and
+          <span class="mono">ecc2k130/build/witness</span> turns those corpus
+          records into checked claims offline, the reference walk having
+          counted the <span class="mono">n_j</span> all along because collision
+          resolution always needed them. Two limits
           cairn states plainly as well &mdash; the posted pool is one
           <em>tranche</em>, about
           <span class="mono">2^46.3</span> of the expected

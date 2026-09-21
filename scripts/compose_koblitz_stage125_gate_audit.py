@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 """Compose the current seven-gate audit through the Stage 108 selection,
-re-sealed over the boundary ledger as updated on 2026-09-21.
+re-sealed over the boundary ledger as updated by Round 2 on 2026-09-21.
 
 Stage 109 sealed this audit on 2026-09-13 by pinning the mutable gate
 documents (the boundary ledger and its Markdown twin, the gate status, the
-autolab protocol) by hash.  The index-calculus boundary ledger of 2026-09-21
-(research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) then moved
-the ledger and its twin -- operation-counted rows for the prime and binary
-regimes, oracle pricing and the whole-process count on the Koblitz rows --
-without moving any Koblitz gate fact.  Stage 124 recomposes the same seven
-gates over the current documents and chains to the Stage 109 seal; Stage 109
-itself is verified as an immutable historical snapshot by its own script.
-
-The ledger moved again later on 2026-09-21 (the boundary ledger's Round 2),
-so Stage 125 re-seals the audit and this script's verify is historical:
-seal and frozen audit only.  `build` is kept for the record of how the
-Stage 124 audit was composed and will not reproduce it on the moved
-documents.
+autolab protocol) by hash; Stage 124 re-sealed it on 2026-09-21 after the
+index-calculus boundary ledger's first round moved the ledger and its twin.
+Round 2 of that ledger (research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md
+section 10: folded pair tables, walk targets, the exact counting ceiling, a
+balanced Koblitz base) moved them again -- the prime and binary
+relation_yield / rank / end_to_end_dlp / vs_rho records and a second
+operation-counted block on the Koblitz vs_rho row -- again without moving
+any Koblitz gate fact.  Stage 125 recomposes the same seven gates over the
+current documents and chains to the Stage 124 and Stage 109 seals; both are
+verified as immutable historical snapshots by their own scripts.
 """
 
 from __future__ import annotations
@@ -35,24 +32,25 @@ EVIDENCE = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota
 STAGE99 = EVIDENCE / "stage-99-optimization-chain-20260913"
 STAGE108 = EVIDENCE / "stage-108-routing-selection-archive-20260913"
 STAGE109 = EVIDENCE / "stage-109-current-gate-audit-20260913"
+STAGE124 = EVIDENCE / "stage-124-current-gate-audit-20260921"
 LEDGER = REPO / "docs/ic/boundary_targets.json"
 SCOREBOARD = REPO / "docs/ic/BOUNDARY_TARGETS.md"
 GATE_STATUS = EVIDENCE / "GATE_STATUS.md"
 AUTOLAB_PROTOCOL = REPO / "research/sat_factor_base_review_20260908/autolab/protocol.json"
 
-SCHEMA = "koblitz_stage124_current_gate_audit.v1"
-SEAL_SCHEMA = "koblitz_stage124_current_gate_audit_seal.v1"
+SCHEMA = "koblitz_stage125_current_gate_audit.v1"
+SEAL_SCHEMA = "koblitz_stage125_current_gate_audit_seal.v1"
 LEDGER_UPDATED = "2026-09-21"
-GATE_STATUS_MARKER = "Current through Stage 124"
+GATE_STATUS_MARKER = "Current through Stage 125"
 
 
-class Stage124Error(RuntimeError):
+class Stage125Error(RuntimeError):
     pass
 
 
 def require(condition: bool, message: str) -> None:
     if not condition:
-        raise Stage124Error(message)
+        raise Stage125Error(message)
 
 
 def load(path: Path, context: str) -> dict[str, Any]:
@@ -81,9 +79,11 @@ def replay(script: str, output: Path) -> dict[str, Any]:
 def compose() -> dict[str, Any]:
     historical = replay("verify_koblitz_stage99_optimization_chain.py", STAGE99)
     selected = replay("verify_koblitz_stage108_routing_archive.py", STAGE108)
-    # Stage 109 verifies as a historical snapshot: its own script checks the
-    # seal and the frozen audit, never the documents that have moved since.
+    # Stages 109 and 124 verify as historical snapshots: their own scripts
+    # check the seal and the frozen audit, never the documents that have
+    # moved since.
     stage109 = replay("compose_koblitz_stage109_gate_audit.py", STAGE109)
+    stage124 = replay("compose_koblitz_stage124_gate_audit.py", STAGE124)
     ledger = load(LEDGER, "boundary ledger")
     require(
         ledger.get("schema_version") == 2 and ledger.get("updated") == LEDGER_UPDATED,
@@ -107,7 +107,9 @@ def compose() -> dict[str, Any]:
     require(unknown["direct_over_rho_wall_ratio"] < 1.0, "unknown online crossover changed")
     require(selected["stage106"]["direct_route_wins"] == 5, "routing panel changed")
     require(selected["selected_panel"]["direct_wins"] == 5, "selected archive panel changed")
-    # The gate facts Stage 109 sealed must be the ones this audit re-seals.
+    # The gate facts Stage 109 sealed, and Stage 124 re-sealed, must be the
+    # ones this audit re-seals.
+    require(stage124["selected_n53"] == stage109["selected_n53"], "Stage 124 and Stage 109 sealed different facts")
     sealed = stage109["selected_n53"]
     require(sealed["base_hash"] == factor["base_hash"], "selected base hash moved since Stage 109")
     require(sealed["support_entries"] == factor["support_index_entries"], "support entries moved since Stage 109")
@@ -172,13 +174,15 @@ def compose() -> dict[str, Any]:
             "stage99_verification_sha256": sha256(STAGE99 / "verification.json"),
             "stage108_verification_sha256": sha256(STAGE108 / "verification.json"),
             "stage109_audit_sha256": sha256(STAGE109 / "audit.json"),
+            "stage124_audit_sha256": sha256(STAGE124 / "audit.json"),
             "stage99_status": historical["status"],
             "stage108_status": selected["status"],
             "stage109_status": stage109["status"],
+            "stage124_status": stage124["status"],
         },
-        "since_stage109": {
-            "what_moved": "docs/ic/boundary_targets.json, docs/ic/BOUNDARY_TARGETS.md and GATE_STATUS.md: operation-counted relation_yield / rank / end_to_end_dlp / vs_rho rows for the prime and binary regimes, oracle pricing and the whole-process operation count on the Koblitz decomposition and vs_rho rows, agent priority 8, and the research-notes move of 2026-09-19",
-            "what_did_not": "every Koblitz gate fact Stage 109 sealed: the selected n=53 base hash, support entries and bytes, the five paired wall ratios, the core and fresh-build ratios, the unknown-scalar ratio, and the seven gate statuses",
+        "since_stage124": {
+            "what_moved": "docs/ic/boundary_targets.json, docs/ic/BOUNDARY_TARGETS.md and GATE_STATUS.md: the boundary ledger's Round 2 (folded pair tables, walk targets, the exact counting ceiling, a balanced Koblitz base) -- the prime and binary relation_yield / rank / end_to_end_dlp / vs_rho records moved to the Round-2 run with the first-round records kept in history, and a second operation-counted whole-process block on the Koblitz vs_rho row",
+            "what_did_not": "every Koblitz gate fact Stage 109 sealed and Stage 124 re-sealed: the selected n=53 base hash, support entries and bytes, the five paired wall ratios, the core and fresh-build ratios, the unknown-scalar ratio, and the seven gate statuses",
             "reference": "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md",
         },
         "gates": {
@@ -246,21 +250,16 @@ def build(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path) -> dict[str, Any]:
-    # Stage 124 is an immutable historical snapshot.  The mutable documents
-    # it pinned by hash (the boundary ledger and its Markdown twin, the gate
-    # status) moved again on 2026-09-21 with the boundary ledger's Round 2
-    # (folded pair tables, walk targets, the exact counting ceiling, the
-    # balanced Koblitz base), so recomposing here would compare two points
-    # in time.  Stage 125 recomposes the current evidence and chains to this
-    # seal (compose_koblitz_stage125_gate_audit.py); this verify checks the
-    # seal and the frozen audit only, as Stage 109's does.
-    seal = load(output / "result-seal.json", "Stage-124 seal")
+    # Stage 125 is the current audit: recompose from the live documents and
+    # require the result to equal the sealed one.  When the documents it pins
+    # move again, the next stage re-seals and this verify becomes historical,
+    # exactly as Stage 109's and Stage 124's did.
+    seal = load(output / "result-seal.json", "Stage-125 seal")
     require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    committed = load(output / "audit.json", "Stage-124 audit")
-    require(committed.get("schema") == SCHEMA, "committed audit schema changed")
-    require(committed.get("status") == "current_seven_gate_audit_verified", "committed audit status changed")
-    return committed
+    current = compose()
+    require(current == load(output / "audit.json", "Stage-125 audit"), "current audit changed")
+    return current
 
 
 def main() -> None:
@@ -274,8 +273,8 @@ def main() -> None:
     try:
         value = build(args.output.resolve()) if args.command == "build" else verify(args.output.resolve(strict=True))
         print(json.dumps(value, indent=2, sort_keys=True))
-    except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Stage124Error) as error:
-        raise SystemExit(f"stage124-gate-audit: {error}")
+    except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Stage125Error) as error:
+        raise SystemExit(f"stage125-gate-audit: {error}")
 
 
 if __name__ == "__main__":

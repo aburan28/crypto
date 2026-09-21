@@ -25,7 +25,7 @@ its old name still identify it.
 | note | subject |
 |:--|:--|
 | [`RESEARCH_RESIDUAL_WALKS.md`](index-calculus/RESEARCH_RESIDUAL_WALKS.md) | Residual walks over partial decompositions; the reference thread for the boundary-table-ratio rule |
-| [`RESEARCH_IC_BOUNDARY_LEDGER.md`](index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) | The boundary ledger: prime, random-binary and Koblitz index calculus end to end in one unit against the generic floor and a counted rho (`ic boundary`, frozen run under `docs/ic/runs/`) |
+| [`RESEARCH_IC_BOUNDARY_LEDGER.md`](index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) | The boundary ledger: prime, random-binary and Koblitz index calculus end to end in one unit against the generic floor and a counted rho (`ic boundary`, frozen runs under `docs/ic/runs/`); §10 is the Round-2 engineering ledger (folded pair tables, walk targets, exact ceiling, balanced base) with every first-round row kept as its before mark |
 | [`RESEARCH_SEMAEV_DECOMPOSITION.md`](index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md) | Fast factor-base decomposition for binary Semaev `S₄` |
 | [`RESEARCH_SYMMETRIZED_SEMAEV.md`](index-calculus/RESEARCH_SYMMETRIZED_SEMAEV.md) | Symmetrised summation polynomials (FGHR) |
 | [`RESEARCH_HIGHER_SEMAEV.md`](index-calculus/RESEARCH_HIGHER_SEMAEV.md) | Higher-order Semaev polynomials over prime fields |

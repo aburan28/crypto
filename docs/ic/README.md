@@ -663,6 +663,40 @@ scripts in `tools/` render a report into the note's tables
 (`boundary_ledger_update.py`), so a new run updates the three places
 `AGENTS.md` §7 requires without numbers being typed.
 
+**Round 2** (`runs/ic-boundary-ledger-round2-2026-09-21.json`, the note's
+§10) keeps every first-round row as its *before* mark and adds, per
+regime, the rungs of a cumulative engineering ledger, named by suffix:
+`_negfold` (the pair table built once per pair up to negation, `|F|²/4`
+additions instead of `|F|²/2`), `_frobfold` (Koblitz: once per pair up
+to negation and the Frobenius, keyed by the normal-basis canonical form
+of the sum's abscissa, `|F|²/(4n)`; canonicalisations counted and priced
+at a measured factor), `_walk` (targets from a 16-jump r-adding walk
+with tracked coefficients, one addition each, fresh jumps per segment),
+`mitm_m2_…` rows wherever the cofactor classes admit two summands and
+the exact floor fits the budget, and `_balanced` (Koblitz, `n ≥ 37`: a
+base sized to balance the folded table against the walk's trials).
+Every row carries the **exact** counting ceiling next to the uniform
+one — the `m`-multisets of base points whose cofactor classes cancel,
+over `r` — which is the §3.5 accounting correction of the first round.
+
+Every row is also **guarded against decomposing one group element
+twice**.  Two rows with the same factor-base part and different `(a, b)`
+pin the logarithm by themselves, which is a generic collision resolved
+through the factor base rather than a relation, and it arrives after
+about `√r` targets whatever the oracle costs; measured, it ends 24.4% of
+unguarded two-summand runs and 82% of those whose walk segments share
+one jump table.  The guard is one hash insert per target, counted as
+`target_guard_probes` and priced as a lookup, with
+`repeated_targets_skipped`, `repeated_column_rows` and
+`pinned_by_repeated_row` reported.  `--unguarded-targets` reproduces the
+old behaviour for that diagnostic; the note's §10.2 has the numbers.
+
+`tools/boundary_round_compare.py` pairs each new row with the rung it
+was built on (same curve, target, seed) and saves the
+`speedup = baseline_total_operations / candidate_total_operations`
+comparison `AGENTS.md` §8 asks for, recording which first-round rows
+reproduce the frozen counts and which the guard moved.
+
 ## A benchmark corpus: `ic corpus`
 
     ./target/release/ic corpus --degree 19 --dimension 6 --sat 5 --unsat 5 --dir corpus/n19l6

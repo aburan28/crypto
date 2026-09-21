@@ -199,35 +199,73 @@ the trail cost, an asymmetry of `2^17.4`. The claim is
 {"dps": [{"x": "<canonical orbit>", "seed": "<64-bit walk seed>", "j": [n3, …, n10]}]}
 ```
 
-There are two ways to get those counters, and both are built.
+The kernel **now carries those counters**, and it should — an earlier draft of
+this section said the opposite, on a cost that was measured against the wrong
+backend. Both the correction and the implementation are below.
 
-**Replay what you claim.** The reference walk has counted the `n_j` all along,
-because collision resolution always needed them, so a trail can be walked again
-on the CPU to recover its witness. At the tranche the objective actually funds
-— 2^21 orbits, 0.004% of the search — that is much the cheaper route, because
-it pays for the trails you claim instead of all of them.
-
-**Carry them on the device.** `WITNESS=1` (the default) makes the walk count
+**Carry them in the search.** `WITNESS=1` (the default) makes the walk count
 its own branches, so the corpus arrives with the witness already in it and a
-claim costs one double scalar multiplication rather than a replay. The
-bitsliced walk pays **+6.0%** for this, measured; the packed GPU path is
-implemented but has not been compiled or measured, and the estimate there is
-about 105 ALU slots on a 2,324-slot update plus 15% of the walk state. Build
-with `WITNESS=0` for the old rate and the old corpus format byte for byte.
-`CAIRN-WITNESS.md` has the full accounting, including the campaign-level trade
-and what a checkpoint costs.
+claim costs one double scalar multiplication rather than a replay.
 
-`build/witness` reads a corpus either way:
+The campaign runs `--packed` (`aws/campaign.json`), and the packed kernel
+already computes the branch as a *scalar* — `const int j = 3 + ((hw >> 1) & 7)`
+in `include/packedkernels.cuh` — next to per-walk scalar state it touches every
+step anyway (`p.seed[id]`, `p.dead[id]`, `p.startIter[id]`). So a counter there
+is a scalar increment, and it is implemented as one: a single indexed `+= 1u`
+per step into eight 32-bit fields per walk. A tighter layout is possible —
+eight 8-bit fields packed in one `u64`, `packed += 1ull << 8*(j-3)`, flushed
+before any field can overflow — which costs 8 bytes of per-walk state instead
+of 32 and is costed at **two instructions on a 2,324-slot update, +0.09%**,
+about **36 GPU-hours** across the campaign. The shipped layout trades that
+state for needing no overflow flush; it is the same cost class, but **neither
+has been measured**, because there is no CUDA toolchain here. What the counters
+buy is not in doubt: every one of the `2^32.49` orbits the campaign will
+produce becomes claimable, permanently.
+
+The **bitsliced** backend pays much more, and that one *is* measured: **+6.0%**
+of the walk. There a counter is spread over bit-planes and every lane pays a
+ripple carry, though with an early exit that stops as soon as no lane is still
+carrying. Build with `WITNESS=0` for the old rate and the old corpus format
+byte for byte; `CAIRN-WITNESS.md` has the full accounting, including what a
+checkpoint costs.
+
+The superseded figure, kept visible rather than deleted: 105 slots, ~4% of the
+campaign, ~1,800 GPU-hours. It priced *bitsliced* counters, and the 2,324-slot
+budget it was compared against is itself the packed preset's, priced in
+`clmad`. Two backends, one budget — wrong twice in the same direction.
+
+**Replay what you claim.** This keeps one real job that the search kernel
+cannot do backwards: the points **already collected without counters** are
+claimable no other way. At the campaign's weight 32 a trail is `2^28.41` steps,
+so replaying a claimed trail costs about what collecting it did — roughly
+**15 GPU-hours per 2^21 orbits**. `build/witness` is both paths:
 
 ```sh
 make witness
-./build/witness --curve 131 --job ecc2k130.json --corpus dps.bin > claims.jsonl
+./build/witness --curve 131 --job ecc2k130.json --corpus dps.bin --out-dir claims/
 ```
 
-It frames the corpus by its magic. From a v2 record it takes the carried counts
-directly; from a v1 record it replays the seed. Either way it checks that the
-witness lands on the orbit the record names — the same check the payer makes —
-and prints batches of up to 64. `make test-witness` runs it end to end; with `CAIRN_ROOT` set it
+It frames the corpus by its magic. From a **v2** record it takes the carried
+counts directly; from a **v1** record it replays the seed with the reference
+walk, which has counted the `n_j` all along because collision resolution always
+needed them. Either way it checks the witness lands on the orbit the record
+names — the same double scalar multiplication the payer will do — and writes
+batches of up to 64.
+
+`--out-dir` writes one artifact per file, which is what a node's checker reads;
+without it the batches stream to stdout, one JSON object per line.
+
+**Replaying is what costs.** Measured here on the challenge curve: **835
+steps/s** marginal, plus **0.165 s** fixed per record for the 128-term start
+point and the witness check. At the campaign's `dpWeight` 32 a trail averages
+`2^28.41` steps, so one *replayed* production witness is about **119 hours**
+single-threaded. That is the number the carried counters delete: from a v2
+corpus only the fixed per-record part remains, because there is no trail to
+walk. Measured on 128 real weight-34 ECC2K-130 records: **5,039,383 steps
+carried, 0 replayed**, 30.8 s for two 64-point batches. The replay path is
+therefore for small curves, loosened cutoffs, and every corpus written before
+the counters existed. `make test-witness` runs it end to end; with `CAIRN_ROOT`
+set it
 also hands the result to cairn's own checker. `cairn_job.py` writes a job
 document for a small curve so that check can run on a trail short enough to
 walk.

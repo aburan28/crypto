@@ -1,8 +1,9 @@
 // Orbit witnesses for a corpus: the claim artifact a cairn piecework node pays.
 //
 // The client records only (seed, canonical endpoint), which is all a collision
-// needs and is deliberately not checkable: reproducing one costs the 2^25.27
-// steps that produced it, and a canonical name on its own is free to invent --
+// needs and is deliberately not checkable: reproducing one costs the steps
+// that produced it -- 2^28.41 at the campaign's weight 32, 2^25.27 at the
+// weight 34 a cairn job allows -- and a canonical name is free to invent --
 // any low-weight bit string rotated to its least rotation is a syntactically
 // perfect orbit name.  So a corpus record is worth nothing to anybody who did
 // not walk it.
@@ -56,6 +57,7 @@
 //   {"dps":[{"j":[n3,...,n10],"seed":"<hex>","x":"<canonical orbit, hex>"},...]}
 //
 // Build:  make witness            (plain C++, no GPU)
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -113,6 +115,7 @@ struct Options {
     unsigned long long skip = 0;
     unsigned long long max = 0;      // 0 = all
     int batch = 64;
+    std::string outDir;
     bool quiet = false;
 };
 
@@ -129,6 +132,9 @@ static void usage() {
             "                     hex, when no job file is at hand\n"
             "  --skip N/--max N   a slice of the corpus\n"
             "  --batch N          points per artifact (default 64, cairn's cap)\n"
+            "  --out-dir D        one artifact per file, batch-00000.json ... , which\n"
+            "                     is what a node's checker reads; default is a stream\n"
+            "                     of one batch per line on stdout\n"
             "  --quiet            suppress the progress line on stderr\n");
 }
 
@@ -262,6 +268,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
     static const int NRING = Cfg::NRING;
 
     const int w = o.dpWeight < 0 ? defaultW : o.dpWeight;
+    unsigned long long maxIters = o.maxIters;
 
     // The job, if given: agreement with this binary, then the normal element.
     std::string gammaHex = o.nbGenerator;
@@ -280,8 +287,9 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
             !jobExpect(src, "start_terms", 128, "start-point terms")) return 4;
         long long cap;
         if (jobInt(src, "max_steps_per_walker", &cap) && cap > 0 &&
-            (unsigned long long)cap < o.maxIters) {
+            (unsigned long long)cap < maxIters) {
             fprintf(stderr, "note: job caps a trail at %lld steps; using that\n", cap);
+            maxIters = (unsigned long long)cap;
         }
         std::string wit;
         if (jobField(src, "witness", &wit) && wit != "j-counts") {
@@ -337,7 +345,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
     }
 
     Solver<Cfg> sol;
-    sol.setup(px, py, qx, qy, ellDec, sDec, w, o.maxIters);
+    sol.setup(px, py, qx, qy, ellDec, sDec, w, maxIters);
     std::string why;
     if (!sol.checkSetup(&why)) {
         fprintf(stderr, "parameter check failed: %s\n", why.c_str());
@@ -346,6 +354,17 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
 
     std::vector<CorpusRecord> recs;
     if (!readCorpus(o.corpus, &recs)) return 8;
+
+    // Settle --out-dir before the first walk: a batch that turns out to be
+    // unwritable at flush time is a batch of replays thrown away.
+    if (!o.outDir.empty()) {
+        struct stat st;
+        if ((mkdir(o.outDir.c_str(), 0755) != 0 && errno != EEXIST) ||
+            stat(o.outDir.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) {
+            fprintf(stderr, "cannot use --out-dir %s\n", o.outDir.c_str());
+            return 9;
+        }
+    }
 
     // ---- the canonical orbit name, in the job's basis ----------------------
     // Read this basis's coordinates through perm to get the job's coordinate
@@ -398,16 +417,36 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
 
     std::vector<std::string> batch;
     unsigned long long done = 0, emitted = 0, steps = 0, carried = 0;
-    auto flush = [&]() {
-        if (batch.empty()) return;
-        fputs("{\"dps\":[", stdout);
-        for (size_t i = 0; i < batch.size(); ++i) {
-            if (i) putchar(',');
-            fputs(batch[i].c_str(), stdout);
+    unsigned long long batchNo = 0;
+    // False when the batch could not be written; the caller stops there rather
+    // than walk more records whose witnesses would go the same way.
+    auto flush = [&]() -> bool {
+        if (batch.empty()) return true;
+        // A node's checker reads one artifact per file, so --out-dir is what a
+        // submitter wants; the stream on stdout is for looking at.
+        FILE *out = stdout;
+        std::string path;
+        if (!o.outDir.empty()) {
+            char name[64];
+            snprintf(name, sizeof name, "/batch-%05llu.json", batchNo);
+            path = o.outDir + name;
+            out = fopen(path.c_str(), "wb");
+            if (!out) {
+                fprintf(stderr, "cannot write %s\n", path.c_str());
+                return false;
+            }
         }
-        fputs("]}\n", stdout);
+        fputs("{\"dps\":[", out);
+        for (size_t i = 0; i < batch.size(); ++i) {
+            if (i) fputc(',', out);
+            fputs(batch[i].c_str(), out);
+        }
+        fputs("]}\n", out);
+        if (out != stdout) fclose(out);
+        ++batchNo;
         emitted += batch.size();
         batch.clear();
+        return true;
     };
 
     for (unsigned long long i = first; i < limit; ++i) {
@@ -425,7 +464,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
                         rec.seed, rec.iters);
             else
                 fprintf(stderr, "seed %016llx did not reach a distinguished point in %llu steps\n",
-                        rec.seed, o.maxIters);
+                        rec.seed, maxIters);
             return 6;
         }
         // The replay must land on the orbit the record names, or the corpus
@@ -487,12 +526,12 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
         batch.push_back(el);
         steps += wr.iters;
         if (rec.hasWitness) ++carried;
-        if ((int)batch.size() >= o.batch) flush();
+        if ((int)batch.size() >= o.batch && !flush()) return 9;
 #endif
         if (!o.quiet && ++done % 64 == 0)
             fprintf(stderr, "\rwitnessed %llu of %llu", done, limit - first);
     }
-    flush();
+    if (!flush()) return 9;
     if (!o.quiet) {
         // Separate the two numbers: steps replayed is the cost this run paid,
         // steps carried is the cost the walk had already paid for it.
@@ -519,6 +558,7 @@ int main(int argc, char **argv) {
         else if (a == "--skip" && nx) o.skip = strtoull(argv[++i], 0, 10);
         else if (a == "--max" && nx) o.max = strtoull(argv[++i], 0, 10);
         else if (a == "--batch" && nx) o.batch = atoi(argv[++i]);
+        else if (a == "--out-dir" && nx) o.outDir = argv[++i];
         else if (a == "--quiet") o.quiet = true;
         else { usage(); return 1; }
     }

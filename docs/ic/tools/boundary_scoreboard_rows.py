@@ -32,6 +32,19 @@ PRETTY = {
     "mitm_m3_abscissa_columns_control": "Same base, one column per abscissa (control)",
     "mitm_m2_abscissa_columns_control": "Same base (m = 2), one column per abscissa (control)",
     "semaev_s4_pairs_and_solve_m3_signed_orbit_columns": "S&#8324; pairs-and-solve on the invariant subspace",
+    # Round 2: the cumulative engineering ledger, one rung per suffix.
+    "mitm_m2_negfold": "Meet in the middle, m = 2, negation-folded table",
+    "mitm_m2_negfold_walk": "&hellip; and walk targets",
+    "mitm_m3_negfold": "Meet in the middle, m = 3, negation-folded table",
+    "mitm_m3_negfold_walk": "&hellip; and walk targets",
+    "mitm_m3_signed_orbit_columns_negfold": "Signed-orbit columns, negation-folded table",
+    "mitm_m3_signed_orbit_columns_frobfold": "&hellip; Frobenius-folded table (|F|&sup2;/4n entries)",
+    "mitm_m3_signed_orbit_columns_frobfold_walk": "&hellip; and walk targets",
+    "mitm_m2_signed_orbit_columns_negfold": "Signed-orbit columns (m = 2), negation-folded table",
+    "mitm_m2_signed_orbit_columns_frobfold": "&hellip; Frobenius-folded table (|F|&sup2;/4n entries)",
+    "mitm_m2_signed_orbit_columns_frobfold_walk": "Two summands, Frobenius-folded table, walk targets",
+    "mitm_m3_signed_orbit_columns_frobfold_walk_balanced": "Balanced base (|F| &asymp; 1.2&middot;(4#E)<sup>1/3</sup>), m = 3, folded table, walk",
+    "mitm_m2_signed_orbit_columns_frobfold_walk_balanced": "Balanced base, m = 2, folded table, walk",
 }
 # Class of each variant by the AGENTS.md §3 test, argued in research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md §3.
 # Keyed by (regime, variant); a bare variant name is the fallback for every regime.
@@ -47,8 +60,31 @@ CLASS = {
     "mitm_m3_abscissa_columns_control": ("baseline", "baseline: the random-binary pipeline on the Koblitz curve"),
     "mitm_m2_abscissa_columns_control": ("baseline", "baseline: the random-binary pipeline on the Koblitz curve"),
     "semaev_s4_pairs_and_solve_m3_signed_orbit_columns": ("relabel", "relabelling: pairs instead of probes on the same base"),
+    # Round 2 (RESEARCH_IC_BOUNDARY_LEDGER.md §10): every rung is engineering by the §3 test —
+    # S falls, trials, yield/ceiling and the exponents do not move.
+    "mitm_m2_negfold": ("engineering", "engineering: half the table's additions build entries the abscissa key already held; same trials, same yield"),
+    "mitm_m2_negfold_walk": ("engineering", "engineering: one addition per target instead of two scalar multiplications; same yield against the ceiling"),
+    "mitm_m3_negfold": ("engineering", "engineering: the table's additions halve; same trials, same yield"),
+    "mitm_m3_negfold_walk": ("engineering", "engineering: the target's two scalar multiplications become one addition; the |F| subtractions per target remain"),
+    "mitm_m3_signed_orbit_columns_negfold": ("engineering", "engineering: the table's additions halve; same trials, same yield"),
+    "mitm_m3_signed_orbit_columns_frobfold": ("engineering", "engineering: the table shrinks by the orbit length 2n, the automorphism group the floor already credits to a generic walk; one canonicalisation per probe, priced"),
+    "mitm_m3_signed_orbit_columns_frobfold_walk": ("engineering", "engineering: one addition per target; at m = 3 the |F| subtractions per target dominate, so little moves"),
+    "mitm_m2_signed_orbit_columns_negfold": ("engineering", "engineering: the table's additions halve; same trials, same yield"),
+    "mitm_m2_signed_orbit_columns_frobfold": ("engineering", "engineering: the table shrinks by the orbit length 2n; one canonicalisation per probe, priced"),
+    "mitm_m2_signed_orbit_columns_frobfold_walk": ("engineering", "engineering: two summands on the folded table with walk targets; the trials are what the exact ceiling allows, at one addition each"),
+    "mitm_m3_signed_orbit_columns_frobfold_walk_balanced": ("engineering", "engineering: a different base, sized so the folded table balances the trials; its own row, its own floor"),
+    "mitm_m2_signed_orbit_columns_frobfold_walk_balanced": ("engineering", "engineering: the same balanced base with two summands; the best Koblitz row, still above the reference"),
 }
 CHIP = {"advance": "advance, count", "relabel": "relabelling"}
+ROUND2 = ("_negfold", "_frobfold", "_walk", "_balanced")
+
+def previous_rung(name, names):
+    """The rung this Round-2 row was built on: the name with its last suffix
+    stripped, else the first-round best of the instance."""
+    for s in ("_walk", "_frobfold", "_negfold", "_balanced"):
+        if name.endswith(s) and name[: -len(s)] in names:
+            return name[: -len(s)]
+    return None
 GROUP = {"prime": "Prime field, generic curve", "char2": "Binary field, random curve", "koblitz": "Koblitz curve, signed-Frobenius reference"}
 
 by_regime = OrderedDict()
@@ -62,12 +98,19 @@ for regime, insts in by_regime.items():
     seen = OrderedDict()
     for v in big["variants"]:
         seen.setdefault(v["name"], []).append(v)
+    first_round = [n for n in seen if not any(s in n for s in ROUND2)]
+    best_before = min(first_round, key=lambda n: mean([r["s"] for r in seen[n]])) if first_round else None
     for name, runs in seen.items():
         s = mean([r["s"] for r in runs])
         cls, why = CLASS.get((regime, name), CLASS.get(name, ("baseline", "baseline")))
         chip = f'<span class="chip {cls}">{CHIP[cls]}</span>' if cls in CHIP else f'<span class="chip">{cls}</span>'
         ok = "yes" if all(r["verified"] for r in runs) else "no"
-        print(f'          <tr><td>{PRETTY.get(name, name)}</td><td class="n">{fmt(s)}</td><td class="n">{fmt(s / big["rho_s_mean"])}&times;</td><td class="n">{fmt(s / big["floor_s"])}&times;</td><td>{ok}</td><td title="{html.escape(why)}">{chip}</td></tr>')
+        was = ""
+        if any(sfx in name for sfx in ROUND2):
+            prev = previous_rung(name, seen) or best_before
+            if prev:
+                was = f' <small>was {fmt(mean([r["s"] for r in seen[prev]]))}</small>'
+        print(f'          <tr><td>{PRETTY.get(name, name)}</td><td class="n">{fmt(s)}{was}</td><td class="n">{fmt(s / big["rho_s_mean"])}&times;</td><td class="n">{fmt(s / big["floor_s"])}&times;</td><td>{ok}</td><td title="{html.escape(why)}">{chip}</td></tr>')
 
 print("\n<!-- exponent rows: total per variant, r-fit -->")
 def pos(alpha):

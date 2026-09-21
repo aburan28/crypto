@@ -176,6 +176,29 @@ describes the code in this branch.
 | bitsliced, 32-bit counters | `8 × (1 + 2×32)` = 520 lane-ops | ~1,540 lane-ops/update (`THROUGHPUT-CEILING.md`) | +33.8% | **+6.0%** |
 | bitsliced, 16-bit + flush | `8 × (1 + 2×16)` = 264 lane-ops | same | +17.1% | not built |
 
+`main` has since made the same correction from the other side
+(*Correct the counter cost: it was priced against the wrong backend*): the
+campaign runs packed, so the ~105-slot / ~4% / ~1,800 GPU-hour figure that
+once argued against carrying counters at all was pricing the *bitsliced*
+layout against the *packed* preset's budget. Its conclusion — a scalar counter
+on the packed path is ~+0.09%, about 36 GPU-hours across the campaign — agrees
+with the first row above, which is the reassuring part: two independent
+routes, one number.
+
+One difference worth naming, since the two descriptions are not identical.
+That correction costs the scalar counter at two instructions by packing eight
+8-bit fields into one `u64` and flushing before a field can overflow. What is
+implemented here is a single indexed `+= 1u` into eight 32-bit fields per walk:
+8 bytes of per-walk state against 32, in exchange for needing no flush. Same
+cost class, different trade, and **neither is measured** — that still needs a
+GPU.
+
+**Two distinguishing weights appear in this note and they are different
+things.** The cairn job pins weight **34**, where a trail averages `2^25.27`
+steps; the campaign's own `dpWeight` is **32**, where it is `2^28.41`. Every
+`2^25.27` here is the cairn-objective figure and is correct for it. Campaign
+accounting uses 32.
+
 The measurement, so the number can be argued with: `make cpu WITNESS=0` and
 `WITNESS=1`, four threads on a four-core host, `--curve 131 --dp-weight 34
 --launches 900 --verify 0`, three rounds with the two binaries interleaved
