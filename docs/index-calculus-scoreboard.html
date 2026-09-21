@@ -1295,15 +1295,29 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         The product law is now evidence at n&thinsp;=&thinsp;13 and n&thinsp;=&thinsp;19 rather than
         arithmetic: every end-to-end rung recovered its planted logarithm, every relation was re-added
         in the group before entering the matrix, and the slope of log&#8322;(total) against n is
-        <s>1.037</s>&thinsp;&rarr;&thinsp;<strong>0.944&thinsp;&plusmn;&thinsp;0.028</strong>
-        against a falsifier of 0.95 &mdash; the struck figure is the superseded full-rank stopping
-        rule, the live one is the relation budget the law actually charges. The threshold sits 0.21
-        standard errors away, so these two rungs do not resolve which side of it the truth is on.
-        Two rungs, not the four the design asked for &mdash;
-        n&thinsp;=&thinsp;11 is <em>excluded</em> because its 23-torsion has rank two, so no cyclic
-        subgroup of order p exists to pose the logarithm in, and n&thinsp;&ge;&thinsp;29 needs field
-        tables that do not fit in memory. The slope is a two-point fit and cannot fire its own
-        falsifier in either direction; it is reported as such.</p>
+        <s>1.037</s>&thinsp;<s>0.944&thinsp;&plusmn;&thinsp;0.028</s>&thinsp;&rarr;&thinsp;<strong>0.976&thinsp;&plusmn;&thinsp;0.024</strong>
+        against a falsifier of 0.95. The first struck figure is the superseded full-rank stopping
+        rule; the second is the relation budget on <em>two</em> rungs, which read <em>below</em> the
+        falsifier. Fitted on three &mdash; n&thinsp;=&thinsp;13,&thinsp;19,&thinsp;23, mean
+        &Lambda; 3.489, 2.766, 3.020 &mdash; the slope is 1.1 standard errors <em>above</em> it
+        instead. <strong>The third rung reversed the sign:</strong> n&thinsp;=&thinsp;19 sits 0.138
+        under the fitted line and was dragging a two-point join down with it, where a two-point
+        join has no residual in which that could show. The two error estimates now agree
+        (0.0241 from seed noise, 0.0239 from scatter about the line), a check the two-point fit
+        could not perform.</p>
+      <p><strong>There is no fourth rung, and that is a fact about the curve family.</strong> This
+        panel previously said n&thinsp;&ge;&thinsp;29 needed field tables that do not fit in memory.
+        They are not rungs at all: a rung needs a prime subgroup that is nearly the whole curve, or
+        n does not mean what this axis says, and at n&thinsp;=&thinsp;29 the largest prime factor of
+        #E is 16,067 against a cofactor of 33,412 &mdash; a 2<sup>14</sup> logarithm wearing a
+        2<sup>29</sup> label. n&thinsp;=&thinsp;37's cofactor is 596. Censused over
+        11&thinsp;&le;&thinsp;n&thinsp;&le;&thinsp;61, exactly four degrees have the ECC2K-130
+        shape &mdash; 13, 19, 23 and 41, every one with cofactor 4 &mdash; and n&thinsp;=&thinsp;41
+        costs 6.6&thinsp;&times;&thinsp;10<sup>12</sup> oracle operations. <strong>E1's four-rung
+        falsifier cannot be fired on this family at any size this repository can run.</strong>
+        n&thinsp;=&thinsp;11 is separately <em>excluded</em> because its 23-torsion has rank two, so
+        no cyclic subgroup of order p exists to pose the logarithm in. Class
+        <span class="chip">accounting</span>.</p>
       <p>Sweeping the factor-base dimension at n&thinsp;=&thinsp;19 moves the yield &lambda; by a
         factor of <strong>6,600</strong> and moves &Lambda;&thinsp;=&thinsp;ops/2<sup>n</sup> by 2.4:
         the dimension is measured not to be a lever, which is the whole content of the product law.
@@ -1315,10 +1329,24 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         counted exhaustively over the whole odd subgroup, once the subsets containing a point and its
         negative are removed; those degeneracies, not the tail, are the entire source of the raw
         1.44&ndash;2.98 over-dispersion.</p>
-      <p><strong>One constant the law prices at one is measured optimistic.</strong> Large-prime
-        pairing, whose guard does hold, produces relations that are 5&ndash;11&times; redundant
-        &mdash; at m&thinsp;=&thinsp;2 they are <em>differences</em>
-        P<sub>i</sub>&thinsp;&minus;&thinsp;P<sub>j</sub> and so cannot span the base at all.
+      <p><strong>The other constant is withdrawn too, and it was the same error.</strong> This
+        panel previously read &ldquo;large-prime pairing produces relations that are
+        <s>5&ndash;11&times;</s> redundant&rdquo;. That statistic divided the rank by however many
+        paired relations the run collected, which is a harness choice and not a cost. Its own rows
+        say so: two cells share a factor base (n&thinsp;=&thinsp;19, l&thinsp;=&thinsp;7,
+        |F|&thinsp;=&thinsp;139) and differ only in l&prime;; the second collects 2.2&times; the
+        relations, moves the rank by <em>exactly one</em> (134&thinsp;&rarr;&thinsp;135) and halves
+        the ratio. On a small base run long it reads 0.0069, which by the same convention is
+        &ldquo;145&times; redundant&rdquo;. Measured at the rank ceiling instead, the cost is
+        <strong>3&times;</strong>: rank/relations spans 2.0&times; across five cells against
+        52&times; for the published version. And the mechanism is the one retracted above &mdash;
+        paired relations at m&thinsp;=&thinsp;2 are <em>differences</em>, so they are edges of a
+        graph on the base and reaching the ceiling is graph connectivity, about
+        (|F|/2)&thinsp;ln|F| edges, making rank/relations&thinsp;&asymp;&thinsp;2/ln|F|. Measured
+        against that prediction: 0.73, 0.87, 0.68, 1.01, 0.88. <strong>Both constants this thread
+        called optimistic were the coupon collector in disguise.</strong> What survives is
+        structural, not a constant: differences cap the rank at |F|&thinsp;&minus;&thinsp;1, so a
+        large-prime pipeline at m&thinsp;=&thinsp;2 cannot pin absolute logarithms on its own.
         Exponents untouched, verdict at n&thinsp;=&thinsp;131 untouched; class
         <span class="chip">accounting</span>
         (<code>experiments/ecc2k130_decomposition_runs.json</code>).</p>
@@ -1331,7 +1359,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         1.453&thinsp;&rarr;&thinsp;2.395, never a constant. It is not target correlation either:
         <code>first_hit</code> shares no target between relations and shows the same excess, higher
         at two factor-base sizes and lower at two. And a descent does not need full rank &mdash; at
-        the |F| relations the law budgets, every descent landed in 1&ndash;3 attempts and
+        the |F| relations the law budgets, every descent landed in 1&ndash;3 attempts, each landing
+        checked against its planted logarithm, and
         &Lambda;&thinsp;=&thinsp;<strong>3.103</strong> against the predicted m&thinsp;=&thinsp;3,
         where the superseded full-rank rule read <s>5.136</s> and <s>5.993</s>. The
         2<sup>124.99</sup> headline is unchanged: <code>cost_cell</code> always priced
@@ -1346,15 +1375,20 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         there uses exactly one even-abscissa point, so the vector +1 on odd abscissae and &minus;2
         on even ones annihilates every row. From l&thinsp;=&thinsp;6 the base admits all-even
         triples and the rank is full. Class <span class="chip">accounting</span>.</p>
-      <p><strong>E3's deferred item is now run, as a stage diagnostic.</strong> Section 3.2's swap
-        localisation queries detector(R&thinsp;&minus;&thinsp;P&thinsp;+&thinsp;Q), which is only
-        sound if a detector charges the same for that as for R. Swept over seven descent targets at
-        fixed curve, base, summands and seed, and priced per oracle call:
-        <code>groebner</code> costs 58,280,966&ndash;61,951,239 F4 word operations per call, flat to
-        <strong>6.3%</strong>. <code>sat</code> varies 32.4% with no trend in the target &mdash; the
-        wobble of a randomised search, not a dependence on which target it was handed.
-        <code>enumerate</code> and <code>pair-table</code> turned out setup-dominated and answer
-        nothing; <code>wdsat</code> was not exercised. One rung, one base, one seed: nothing is
+      <p><strong>E3's deferred item is now run on the pair it asks about, as a stage
+        diagnostic.</strong> Section 3.2's swap localisation queries
+        detector(R&thinsp;&minus;&thinsp;P&thinsp;+&thinsp;Q), which is only sound if a detector
+        charges the same for that as for R. <code>ic swap</code> builds R as an m-sum of base points,
+        forms R&thinsp;&minus;&thinsp;P&thinsp;+&thinsp;Q for a summand P and a class-matched Q, and
+        hands both points of each of 64 pairs to every oracle: at degree 13, m&thinsp;=&thinsp;3,
+        matrix-F4's ratio cost(swap)/cost(R) is 0.502&ndash;1.363 with median
+        <strong>1.000</strong>, dearer in exactly 32 of 64 pairs, and its worst swapped pair sits
+        below the worst pair of <em>unrelated</em> targets (1.814); SAT's median is 0.968 with the
+        heavy tail of a randomised search on both sides (31/33). No oracle is systematically dearer
+        on the swap. This panel's earlier <s>&ldquo;<code>groebner</code> flat to 6.3% across seven
+        targets&rdquo;</s> is withdrawn: it swept <code>ic run --known-log</code>, never built a
+        swapped point, and averaged away a 2.4&times; per-call spread; class
+        <span class="chip">accounting</span>. Two toy rungs, one base each, one seed: nothing is
         inferred about a full ECDLP and <strong>no speedup is claimed</strong>
         (<code>experiments/ecc2k130_e3_solver_panel.json</code>).</p>
     </div>

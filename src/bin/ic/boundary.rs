@@ -17,10 +17,84 @@ use crypto_lib::cryptanalysis::ic_boundary::{
     BoundaryConfig, BoundaryLedger,
 };
 use crypto_lib::cryptanalysis::ic_oracle_pricing::{
-    format_oracle_markdown, price_oracles, OraclePricingConfig,
+    format_oracle_markdown, price_oracles, price_swaps, OraclePricingConfig,
 };
 use serde_json::{json, Value};
 use std::time::Instant;
+
+/// `n:m` cells, e.g. `9:2,15:3`.
+fn parse_cells(cells: &[String]) -> Result<Vec<(u32, u32)>, String> {
+    let mut parsed = Vec::new();
+    for c in cells {
+        let (n, m) = c
+            .split_once(':')
+            .ok_or_else(|| format!("oracle cell `{c}` is not of the form n:m"))?;
+        let n: u32 = n.parse().map_err(|_| format!("bad degree in `{c}`"))?;
+        let m: u32 = m.parse().map_err(|_| format!("bad summand count in `{c}`"))?;
+        if !(5..=62).contains(&n) || !(2..=4).contains(&m) {
+            return Err(format!("oracle cell `{c}` out of range"));
+        }
+        parsed.push((n, m));
+    }
+    Ok(parsed)
+}
+
+/// `ic swap`: price every decomposition oracle on `R` and on `R − P + Q`,
+/// pairwise, for the swap localisation of the ECC2K-130 decomposition
+/// note's section 3.2.  A stage diagnostic: one oracle call priced against
+/// another, nothing inferred about a discrete logarithm.
+#[derive(Args, Clone, Debug)]
+pub struct SwapArgs {
+    /// Cells as `n:m` pairs, e.g. `13:3,19:3`.
+    #[arg(long, value_delimiter = ',', default_value = "13:3")]
+    pub cells: Vec<String>,
+    /// Swap pairs per cell; every oracle sees both points of every pair.
+    #[arg(long, default_value_t = 16)]
+    pub pairs: usize,
+    /// Skip the algebraic oracles above this many Boolean unknowns.  The
+    /// degree-13, three-summand cell of the decomposition note is 49.
+    #[arg(long, default_value_t = 64)]
+    pub max_unknowns: usize,
+    #[arg(long)]
+    pub seed: Option<u64>,
+}
+
+pub fn swap(args: SwapArgs, json: bool) -> Result<Value, String> {
+    let started = Instant::now();
+    let mut cfg = OraclePricingConfig {
+        cells: parse_cells(&args.cells)?,
+        targets: args.pairs.max(1),
+        max_unknowns: args.max_unknowns,
+        ..OraclePricingConfig::default()
+    };
+    if let Some(v) = args.seed {
+        cfg.seed = v;
+    }
+    let cells = price_swaps(&cfg, |line| {
+        if !json {
+            eprintln!("  {line}");
+        }
+    });
+    let complete = !cells.is_empty()
+        && cells
+            .iter()
+            .all(|c| c.oracles.iter().all(|o| o.inconclusive == 0));
+    Ok(json!({
+        "schema_version": 1,
+        "operation": "swap",
+        "status": if complete { "complete" } else { "incomplete" },
+        "what_this_is": "Every decomposition oracle priced, in its native unit, on a target R built as an m-sum of base points and on R - P + Q for a summand P and a class-matched base point Q; the per-pair ratio is the quantity the swap localisation needs to be a constant.",
+        "what_this_is_not": [
+            "not a speedup: one oracle call is compared with another, no phase of a discrete logarithm is priced",
+            "not a claim about any deployed curve: toy Koblitz instances only",
+            "not a failure-rate measurement: Q is drawn so that R - P + Q is a genuine m-sum, the branch the swap relies on; the miss and false-positive rates are measured elsewhere"
+        ],
+        "config": cfg,
+        "host": host(),
+        "elapsed_seconds": started.elapsed().as_secs_f64(),
+        "cells": cells,
+    }))
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, ValueEnum)]
 pub enum Regime {
@@ -165,19 +239,7 @@ pub fn run(args: BoundaryArgs, json: bool) -> Result<Value, String> {
         };
         ocfg.seed = cfg.seed;
         if let Some(cells) = &args.oracle_cells {
-            let mut parsed = Vec::new();
-            for c in cells {
-                let (n, m) = c
-                    .split_once(':')
-                    .ok_or_else(|| format!("oracle cell `{c}` is not of the form n:m"))?;
-                let n: u32 = n.parse().map_err(|_| format!("bad degree in `{c}`"))?;
-                let m: u32 = m.parse().map_err(|_| format!("bad summand count in `{c}`"))?;
-                if !(5..=62).contains(&n) || !(2..=4).contains(&m) {
-                    return Err(format!("oracle cell `{c}` out of range"));
-                }
-                parsed.push((n, m));
-            }
-            ocfg.cells = parsed;
+            ocfg.cells = parse_cells(cells)?;
         }
         if let Some(t) = args.oracle_targets {
             ocfg.targets = t.max(1);
