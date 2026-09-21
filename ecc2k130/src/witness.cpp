@@ -187,6 +187,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
     static const int NRING = Cfg::NRING;
 
     const int w = o.dpWeight < 0 ? defaultW : o.dpWeight;
+    unsigned long long maxIters = o.maxIters;
 
     // The job, if given: agreement with this binary, then the normal element.
     std::string gammaHex = o.nbGenerator;
@@ -205,8 +206,9 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
             !jobExpect(src, "start_terms", 128, "start-point terms")) return 4;
         long long cap;
         if (jobInt(src, "max_steps_per_walker", &cap) && cap > 0 &&
-            (unsigned long long)cap < o.maxIters) {
+            (unsigned long long)cap < maxIters) {
             fprintf(stderr, "note: job caps a trail at %lld steps; using that\n", cap);
+            maxIters = (unsigned long long)cap;
         }
         std::string wit;
         if (jobField(src, "witness", &wit) && wit != "j-counts") {
@@ -262,7 +264,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
     }
 
     Solver<Cfg> sol;
-    sol.setup(px, py, qx, qy, ellDec, sDec, w, o.maxIters);
+    sol.setup(px, py, qx, qy, ellDec, sDec, w, maxIters);
     std::string why;
     if (!sol.checkSetup(&why)) {
         fprintf(stderr, "parameter check failed: %s\n", why.c_str());
@@ -340,7 +342,7 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
         const typename Solver<Cfg>::WalkResult wr = sol.rewalk(rec.seed);
         if (!wr.ok) {
             fprintf(stderr, "seed %016llx did not reach a distinguished point in %llu steps\n",
-                    rec.seed, o.maxIters);
+                    rec.seed, maxIters);
             return 6;
         }
         // The replay must land on the orbit the record names, or the corpus
