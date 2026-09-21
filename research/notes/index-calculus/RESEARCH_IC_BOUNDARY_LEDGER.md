@@ -1516,6 +1516,27 @@ use rho's asymptote rather than its measured `S`, which is the less
 flattering choice: at `2^{24}` rho measures `3.93` because its setup is
 not amortised, so the *measured* ratio there is `3.6×` and not `9.6×`.
 
+**The Koblitz case, which is the one the campaign cares about.**  There
+both folds are `n`, so `S_family = 0.75·(cof·r)^{2/3}/(n√r)` against a
+signed-Frobenius reference at `A = 2n`, `S_rho = √(π/4n)`.  The fold
+buys a factor `n`, and the reference gets `√n` of it back, so the ratio
+grows as `r^{1/6}/√(log r)` — slower than the prime case, and still
+unbounded:
+
+| curve | `r` | `S_family` | vs signed-Frobenius rho |
+|:--|:--|--:|--:|
+| `GF(2^41)`, cof 4 | `2^39` | 4.17 | 30× |
+| `GF(2^83)`, cof 2 | `2^82` | 187 | 1.9×10³ |
+| `GF(2^163)`, cof 2 | `2^162` | 9.8×10⁵ | 1.4×10⁷ |
+| `GF(2^233)`, cof 2 | `2^232` | 2.2×10⁹ | 3.8×10¹⁰ |
+| `GF(2^283)`, cof 2 | `2^282` | 5.9×10¹¹ | 1.1×10¹³ |
+
+The first row is measured to `31.5×` against the law's `30.1×`; the rest
+are extrapolation.  At `sect163k1`'s size the whole pair-table family,
+folded by the full `⟨σ, −1⟩` and sized at its own optimum, is about
+`10^7` times the cost of the automorphism-aware walk it is competing
+with.
+
 This is a stronger statement than the earlier rounds could make.  §10.8
 said "not a crossover" about the rows it had measured.  This says the
 family has none to find.
