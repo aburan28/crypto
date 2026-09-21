@@ -1515,6 +1515,10 @@ Those are **extrapolations from the law**, not measurements, and they
 use rho's asymptote rather than its measured `S`, which is the less
 flattering choice: at `2^{24}` rho measures `3.93` because its setup is
 not amortised, so the *measured* ratio there is `3.6×` and not `9.6×`.
+They are also generous to index calculus in the other direction, for the
+reason §2.3 gives: the prime reference walk takes `A = 1`, where a
+negation-aware one would take `A = 2` and sit at `0.886`, making every
+ratio in the table a further `√2` larger.
 
 **The Koblitz case, which is the one the campaign cares about.**  There
 both folds are `n`, so `S_family = 0.75·(cof·r)^{2/3}/(n√r)` against a
