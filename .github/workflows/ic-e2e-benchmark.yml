@@ -17,6 +17,8 @@ on:
       - "scripts/test_ic_e2e_benchmark.py"
       - "scripts/ic_e2e_history.py"
       - "scripts/test_ic_e2e_history.py"
+      - "scripts/ic_e2e_instructions.py"
+      - "scripts/test_ic_e2e_instructions.py"
       - ".github/workflows/ic-e2e-benchmark.yml"
   workflow_dispatch:
     inputs:
@@ -45,6 +47,7 @@ jobs:
         run: |
           python -m unittest discover -s scripts -p 'test_ic_e2e_benchmark.py'
           python -m unittest discover -s scripts -p 'test_ic_e2e_history.py'
+          python -m unittest discover -s scripts -p 'test_ic_e2e_instructions.py'
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:

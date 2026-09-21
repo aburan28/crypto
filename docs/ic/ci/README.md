@@ -119,6 +119,49 @@ Current history (5 runs on the `ubuntu-latest` image, see `runs/`):
 Add each new passing run's artifact; the table above is regenerated from the
 `report` output, not edited by hand.
 
+## The `S` column: instruction counts, the unit the rest of the ledger uses
+
+The gate leaves the index-calculus `S` null because its counters are in mixed
+units. `scripts/ic_e2e_instructions.py` fills that column the way the
+beats-rho tournament thread does: **valgrind callgrind instructions (Ir)**,
+`S = Ir / (targets · √r)`, one single-threaded pass per rung
+(`RAYON_NUM_THREADS=1`, so rayon workers do not spin under callgrind's
+serialised threading and the count is work, not scheduling). `Ir_rho` is the
+inclusive cost of `koblitz_signed_frobenius_rho_with_progress` (all 32 calls,
+setup included) read from `callgrind_annotate --inclusive=yes`; `Ir_ic` is the
+rest of the process, so start-up, curve construction, target resolution and
+JSON output are charged to the index-calculus side. Single-threaded totals
+reproduce to about 2 × 10⁻⁵. Callgrind is ~50× slower than native, so this is
+a frozen measurement re-run when the `ic` binary changes, not a CI step.
+
+```bash
+python3 scripts/ic_e2e_instructions.py measure --ic target/release/ic --output /tmp/ir \
+    --params docs/ic/params/k0n31.json docs/ic/params/k0n41-subgroup.json docs/ic/params/k0n53-subgroup.json
+python3 scripts/ic_e2e_instructions.py report --instructions /tmp/ir/instructions.json
+```
+
+Frozen: [`instructions/ladder-20260920-n31-41-53.json`](instructions/ladder-20260920-n31-41-53.json)
+(`ic` built from `a6ad6236`, valgrind 3.22.0, x86_64):
+
+| rung | log₂ r | `S`, index calculus | `S`, rho | rho / IC in Ir | rho / IC in wall (runner, 95 % CI) | pair table's share of IC Ir |
+|:--|--:|--:|--:|--:|:--|--:|
+| `k0n31` | 20.5 | 167,091 | 5,912 | 0.035 | [0.036, 0.037] | 38 % |
+| `k0n41-subgroup` | 39.0 | 1,155 | 1,542 | **1.335** | [2.210, 2.260] | 57 % |
+| `k0n53-subgroup` | 44.3 | 2,292 | 2,761 | **1.204** | [1.961, 2.062] | 47 % |
+| `k0n61-subgroup-wide` | 47.2 | pending | pending | pending | [1.632, 1.871] | — |
+
+**Read the two ratio columns together.** The wall ratio compares a pipeline
+whose collection runs on every core against a single-threaded rho; the
+instruction ratio removes that parallelism and the end-to-end margin roughly
+halves: 1.34 and 1.20 in work where the runner clock said 2.26 and 2.03. That
+is the AGENTS.md §6 rule — wall time is never the headline — with the number
+attached. In the repository unit the pipeline beats rho end to end by 20–34 %
+at 39–44 bits on a 32-target batch, and the margin shrinks with `r`; at
+n = 31 it loses by 28×. Class: engineering (a ratio to the counting floor
+did not move; nothing here does what a generic algorithm cannot). `S_rho`
+at n = 31 (5,912) sits beside the tournament thread's 5,388 on comparable
+cells, which is the check that the two threads are on one axis.
+
 ## Running it locally
 
 ```bash
