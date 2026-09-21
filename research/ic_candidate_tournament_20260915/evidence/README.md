@@ -46,7 +46,7 @@ to `manifest.json`. Verification uses the
 frozen Python evaluator and checker, including all source/artifact hashes,
 every recovered scalar, each phase cost, stage summaries and the final decision.
 It needs neither Valgrind nor a Rust rebuild. Repeat for rounds `round-0002`,
-`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015`, `round-0016`, `round-0017`, `round-0018`, `round-0018b` and `round-0019` to audit their complete records.
+`round-0003b`, `round-0004`, `round-0006`, `round-0007`, `round-0008`, `round-0009`, `round-0010`, `round-0011`, `round-0012`, `round-0013`, `round-0014`, `round-0015`, `round-0016`, `round-0017`, `round-0018`, `round-0018b`, `round-0019` and `round-0020` to audit their complete records.
 
 The restoration program checks each archive SHA-256 from [manifest.json](manifest.json)
 before extraction. It refuses unsafe paths and different existing files. Existing
@@ -188,3 +188,15 @@ so its `contract.json` carries `confirmation_cases_per_cell` and
 `confirmation_allocation`. Rounds before it have neither key and are read
 exactly as before; the flat profile is what `prepare` produces when
 `--confirmation-cases` is absent.
+
+## Round 0020 is the replication
+
+`round-0020.tar.zst` (sha256 `944a4bd2d6e54fc95fc7bb108ef09a5a1319da45882cf5565c30a8d30f653c2f`,
+69,001 files) holds the round that reproduced round 0019's strict win on a
+second independent seed: `beats_rho_strict` on all eight cells in both metrics
+on both final stages, seed 2026092120, audit VERIFIED over 2,646 trial receipts
+and 452 source files.
+
+It is identical to round 0019 but for the seed, and carries the same
+`confirmation_cases_per_cell` allocation — forty fixtures at `n23a1`, twelve at
+the other seven.

@@ -1,7 +1,7 @@
 # Continued IC tournament results
 
 Batch (16-target) parity verdict: **True**; selected implementation **combined_descent**.
-Single-target verdict: **strictly below rho in both metrics on every cell**; selected implementation **tiny2** (round-0007), re-measured with the per-target descent certificate under the merged checker in round-0008 (retained, `beats_rho_strict`), in round-0010 on a lean static executable under an evaluator that no longer forks itself (0.5347 of rho's instructions and 0.8445 of its native time, `beats_rho_strict` on every cell), in round-0011 with the general binary-field arithmetic in words for both arms (0.4796 of rho's instructions and 0.8653 of its native time, `beats_rho_strict` on every cell), in round-0012 as a musl static executable without relocations whose worker serves the heap from an arena, for both arms (0.4369 of rho's instructions and 0.7988 of its native time, `beats_rho_strict` on every cell), in round-0013 with one field inversion per scalar product for both arms, which halved rho's job because its setup is scalar products (0.7697 of rho's instructions and 0.9098 of its native time, `beats_rho_strict` on every cell: the strict-win record under the corrected baseline), in round-0014 with the worker built as one optimisation unit, which made both arms faster again and rho slightly more so (0.7818 and 0.9424), and in round-0015 on that same executable against fresh fixtures: 0.7372 and 0.9246, `beats_rho_strict` still on every cell, after **tiny_batch1** reached parity in round-0006. The last two figures are the same executable measured twice, which is the size of the fixture variation these ratios carry. Rounds 0016–0017 widened the panel to eight cells and round 0017 held `beats_rho_strict` there; round 0018b, the same executable under a fresh seed, did not, failing at `n23a1` alone. **Round 0019 settles it: `both` — round 0018's scan-block ceiling and representative column convention together — is PROMOTED with `beats_rho_strict` on all eight cells in both metrics on both final stages, at 0.6751 of rho's instructions and 0.8848 of its native time, under seed 2026092119 with forty confirmation fixtures at `n23a1` instead of twelve.** Every eight-cell strict claim is scoped to its seed as well as its panel, and the tournament classifies round 0019 `engineering` rather than an advance: `S` fell, the ratio to the boundary at the largest cell did not.
+Single-target verdict: **strictly below rho in both metrics on every cell**; selected implementation **tiny2** (round-0007), re-measured with the per-target descent certificate under the merged checker in round-0008 (retained, `beats_rho_strict`), in round-0010 on a lean static executable under an evaluator that no longer forks itself (0.5347 of rho's instructions and 0.8445 of its native time, `beats_rho_strict` on every cell), in round-0011 with the general binary-field arithmetic in words for both arms (0.4796 of rho's instructions and 0.8653 of its native time, `beats_rho_strict` on every cell), in round-0012 as a musl static executable without relocations whose worker serves the heap from an arena, for both arms (0.4369 of rho's instructions and 0.7988 of its native time, `beats_rho_strict` on every cell), in round-0013 with one field inversion per scalar product for both arms, which halved rho's job because its setup is scalar products (0.7697 of rho's instructions and 0.9098 of its native time, `beats_rho_strict` on every cell: the strict-win record under the corrected baseline), in round-0014 with the worker built as one optimisation unit, which made both arms faster again and rho slightly more so (0.7818 and 0.9424), and in round-0015 on that same executable against fresh fixtures: 0.7372 and 0.9246, `beats_rho_strict` still on every cell, after **tiny_batch1** reached parity in round-0006. The last two figures are the same executable measured twice, which is the size of the fixture variation these ratios carry. Rounds 0016–0017 widened the panel to eight cells and round 0017 held `beats_rho_strict` there; round 0018b, the same executable under a fresh seed, did not, failing at `n23a1` alone. **Round 0019 settles it: `both` — round 0018's scan-block ceiling and representative column convention together — is PROMOTED with `beats_rho_strict` on all eight cells in both metrics on both final stages, at 0.6751 of rho's instructions and 0.8848 of its native time, under seed 2026092119 with forty confirmation fixtures at `n23a1` instead of twelve.** Round 0020 then **replicated that win on a second independent seed** (2026092120): `beats_rho_strict` on all eight cells again, at 0.6629 of rho's instructions and 0.8832 of its native time, with `n23a1` at 0.7948. Every eight-cell strict claim is scoped to its seeds as well as its panel, and the tournament classifies both rounds `engineering` rather than an advance: `S` fell, the ratio to the boundary at the largest cell did not.
 
 Completed three new tournaments with **4,704 profiled trials**, each paired with a fresh native run, followed by round 0006-batch16 (1,680 further profiled trials, incumbent retained, index-calculus admission enforced by a per-target descent certificate) and by the single-target rounds 0006–0011 (1,584, 1,488, 1,356, 1,356, 1,440 and 1,440 profiled trials: parity, a strict win over rho, that win re-measured with the descent certificate, the same pipeline on a leaner shared job, the strict win on every cell on a lean static executable under an evaluator that no longer forks itself, and the same again with the general binary-field arithmetic in words). Every listed round passed its independent artifact/correctness audit. The 36-trial batch screen is separate development evidence.
 
@@ -540,6 +540,78 @@ at the first rebuild that reaches the target. At degree 23, `points=1`,
 `points=138` — the contract's value — and `points=368` all return eight orbits.
 **The panel's factor base is seven or eight orbits at every cell and the
 contract's `points` parameter has been inert since round 0002.**
+
+## Round 0020: the replication, and what a fourth seed said about the flagged cells
+
+Round 0019 promoted `both` with `beats_rho_strict` on all eight cells. That was
+one seed, and this campaign's own failure mode is that a single-seed strict win
+need not survive a fresh draw — round 0017 held the gate and round 0018b, the
+same executable, did not. Round 0020 is the test round 0017 never got: identical
+to round 0019 in panel, allocation, arms, objective and limits, changing only
+the seed (2026092120).
+
+The baseline stayed the **incumbent** rather than round 0019's promoted winner.
+Promoting `both` into the baseline would make `both`/incumbent identically 1 and
+destroy the quantity under test.
+
+**Result: `beats_rho_strict` again, on a second independent seed. `both`
+promoted.** 2,646 trials, audit VERIFIED over 2,646 receipts and 452 source
+files.
+
+| winner (`both`) / rho | confirmation | replay |
+|---|---|---|
+| instructions | 0.6629 [0.5916, 0.7426] | 0.6629 [0.5916, 0.7426] |
+| native wall | 0.8832 [0.8568, 0.9129] | 0.8791 [0.8512, 0.9093] |
+
+`n23a1` reads **0.7948** in instructions and 0.9322 natively, against 0.7498 and
+0.8967 in round 0019 — and 1.0112 in round 0018b on twelve fixtures. Against the
+incumbent, `both` reads 0.9638 [0.9440, 0.9822] in instructions and 0.9698
+natively.
+
+### Predictions: five confirmed, one reported rather than scored
+
+**1 confirmed** — `beats_rho_strict` holds. **2 confirmed** — 0.6629 inside the
+predicted [0.62, 0.74], 0.8832 inside [0.85, 0.92]. **3 confirmed** — `n23a1`
+below 0.95 in instructions, at 0.7948. **4 confirmed** — `both`/incumbent 0.9638
+inside [0.95, 0.98] with both upper limits below one on both stages. **6
+confirmed** — the incumbent's worst native cell is `n29a1` as predicted.
+
+**5 was pre-registered with no expected outcome**, which is what it means for
+round 0019 to have recorded its flagged cells as open questions rather than
+findings. Over four seeds:
+
+| cell | 0017 | 0018b | 0019 | 0020 | combined | p (3 seeds) | p (4 seeds) |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| `n13a0` | 0.7146 | 0.7039 | 0.6932 | 0.7160 | 0.7058 | 0.0431 | **0.0204** |
+| `n31a0` | 0.5737 | 0.6932 | 0.7868 | 0.6119 | 0.6612 | 0.0001 | **0.0001** |
+| `n23a1` | 0.7765 | 1.0231 | 0.7647 | 0.8122 | 0.8022 | 0.0443 | 0.0953 |
+
+**`n23a1` came off the list.** Adding a second forty-fixture column moved it from
+0.044 to 0.095: its apparent seed-dependence was largely round 0018b's
+twelve-fixture reading, which is the same diagnosis round 0019 made of the
+original gate failure, now confirmed from the other side. `n13a0` tightened
+rather than loosened, and `n31a0` is unchanged at 0.0001.
+
+Two corrections to how round 0019 read this. The monotone rise at `n31a0` across
+three seeds — 0.5737, 0.6932, 0.7868 — **is not a trend**; the fourth seed reads
+0.6119. It is scatter. And the two cells that remain flagged sit at combined
+0.7058 and 0.6612, **nowhere near the gate**, so whatever they are, they do not
+threaten the strict win. The cell that could have threatened it is the one that
+cleared.
+
+The caveat on the test still stands and still matters: rho's cost is
+right-skewed, twelve-case sample spreads underestimate, and chi-square
+over-rejects here. Two flags out of eight cells at p < 0.05, on four seeds with
+n=12 at six of them, is weak evidence of anything.
+
+### Scope, unchanged
+
+Two independent seeds now hold `beats_rho_strict` on the eight-cell panel with
+the binding cell resolved at forty fixtures. That makes the result robust to the
+fixture draw **on this panel, at these subgroup orders, for this executable**. It
+says nothing about larger `r`, where the boundary of round 0019 §3 puts this
+collector at `Θ(r^{2/3})` against rho's `Θ(r^{1/2})`. The classification is
+**engineering** under AGENTS.md §3, in both rounds' own decision records.
 
 ## Interpretation
 

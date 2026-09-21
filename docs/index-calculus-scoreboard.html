@@ -3125,5 +3125,41 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0019 -->
+<!-- BEGIN ic-tournament-round-0020 -->
+<section class="panel" id="ic-tournament-round-0020">
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>promoted: both</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0020/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0020/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0020/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,821</td><td>1</td><td>0.6409</td><td>1.786e+05</td><td>18/18</td><td>reference</td></tr>
+<tr><td>both</td><td>2,749</td><td>0.9745</td><td>0.6246</td><td>1.74e+05</td><td>18/18</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,402</td><td>1.56</td><td>1</td><td>unmeasured</td><td>18/18</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,909</td><td>1</td><td>0.6444</td><td>1.841e+05</td><td>54/54</td><td>reference</td></tr>
+<tr><td>both</td><td>2,828</td><td>0.9722</td><td>0.6265</td><td>1.79e+05</td><td>54/54</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,514</td><td>1.552</td><td>1</td><td>unmeasured</td><td>54/54</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,144</td><td>1</td><td>0.6877</td><td>1.781e+05</td><td>372/372</td><td>reference</td></tr>
+<tr><td>both</td><td>3,031</td><td>0.9638</td><td>0.6629</td><td>1.717e+05</td><td>372/372</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>4,572</td><td>1.454</td><td>1</td><td>unmeasured</td><td>372/372</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: True.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1.004</td><td>1</td><td>reference</td><td>0.9107</td><td>372/372</td></tr>
+<tr><td>both</td><td>0.9733</td><td>0.9698</td><td>[0.950907083856746, 0.9858691248163581]</td><td>0.8832</td><td>372/372</td></tr>
+<tr><td>rho</td><td>1.102</td><td>1.098</td><td>[1.0540424688374987, 1.1394445583466524]</td><td>1</td><td>372/372</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0020 -->
 </body>
 </html>
