@@ -911,7 +911,7 @@ pub(crate) fn generic_rank_prediction(n_eqs: u64, num_vars: u32, d: u32, cols: u
 
 // ── Misc helpers ────────────────────────────────────────────────────
 
-pub(crate) fn random_nonzero_f2m<R: Rng>(rng: &mut R, n: u32) -> F2mElement {
+pub fn random_nonzero_f2m<R: Rng>(rng: &mut R, n: u32) -> F2mElement {
     loop {
         let bits: Vec<u32> = (0..n).filter(|_| rng.gen::<bool>()).collect();
         let e = F2mElement::from_bit_positions(&bits, n);
@@ -921,7 +921,7 @@ pub(crate) fn random_nonzero_f2m<R: Rng>(rng: &mut R, n: u32) -> F2mElement {
     }
 }
 
-pub(crate) fn choose_irreducible(n: u32) -> IrreduciblePoly {
+pub fn choose_irreducible(n: u32) -> IrreduciblePoly {
     // Trinomials/pentanomials with low low_terms for n ∈ {3..16}.
     let low_terms: Vec<u32> = match n {
         2 => vec![0, 1],
@@ -986,6 +986,167 @@ pub fn print_sweep(rows: &[FfdRow]) {
         }
         println!();
     }
+}
+
+// ── Degree-general Macaulay measurement (monomial-set input) ────────
+//
+// The quadratic path above (`build_macaulay_rows`) is hard-wired to
+// degree-2 equations: its multiplier enumeration assumes every equation
+// has degree exactly 2.  The functions below accept equations given as
+// SETS OF SQUAREFREE MONOMIALS — each monomial a sorted vector of
+// distinct variable indices, the empty vector being the constant 1 —
+// of ARBITRARY degree.  This is what the Weil-descended, subspace-
+// restricted `S₄` system needs after `e`-elimination: `n = 3l`
+// equations of degree ≤ 6 in the `3l` factor-base bits (quadratic in
+// the `e`-variables, whose correspondence constraints are cubic in the
+// `x`-bits).
+//
+// Conventions, identical to the quadratic path so the two agree
+// exactly on quadratic input (asserted in `examples/ffd_s4_subspace`):
+//   * multipliers run over multilinear monomials of degree ≤ D − δ,
+//     where δ is the top degree of the equation;
+//   * terms of degree > D are truncated away (Macaulay finiteness);
+//   * the field equations xᵢ² = xᵢ are enforced by squarefree merging;
+//   * every (equation, multiplier) pair contributes one row, even when
+//     the row collapses to zero;
+//   * the operational first-fall definition is unchanged: the smallest
+//     D with rank < rows_constructed AND rank < cols.
+//
+// For mixed-degree input the "generic prediction" is simply
+// min(rows_constructed, cols): a generic system of the same degrees
+// has full rank up to that clamp.
+
+/// Union of two sorted squarefree monomials, collapsing repeated
+/// variables (`x² = x`).
+fn merge_squarefree_monomials(a: &[u32], b: &[u32]) -> Vec<u32> {
+    let mut out = Vec::with_capacity(a.len() + b.len());
+    let (mut i, mut j) = (0, 0);
+    while i < a.len() && j < b.len() {
+        match a[i].cmp(&b[j]) {
+            std::cmp::Ordering::Less => {
+                out.push(a[i]);
+                i += 1;
+            }
+            std::cmp::Ordering::Greater => {
+                out.push(b[j]);
+                j += 1;
+            }
+            std::cmp::Ordering::Equal => {
+                out.push(a[i]); // x · x = x
+                i += 1;
+                j += 1;
+            }
+        }
+    }
+    out.extend_from_slice(&a[i..]);
+    out.extend_from_slice(&b[j..]);
+    out
+}
+
+/// Estimate the dense bit-packed memory (bytes) that
+/// [`build_macaulay_rows_monomial`] would allocate at degree `d`.
+/// Lets a caller cap the degree before committing to the allocation.
+pub fn macaulay_memory_estimate_monomial(eqs: &[Vec<Vec<u32>>], num_vars: u32, d: u32) -> u64 {
+    let cols = num_monomials_upto_degree(num_vars, d);
+    let words = (cols + 63) / 64;
+    let mut rows: u64 = 0;
+    for eq in eqs {
+        if eq.is_empty() {
+            continue;
+        }
+        let deg = eq.iter().map(|m| m.len() as u32).max().unwrap_or(0);
+        if deg <= d {
+            rows += num_monomials_upto_degree(num_vars, d - deg);
+        }
+    }
+    rows * words * 8
+}
+
+/// Build the bit-packed Macaulay-matrix rows of `eqs` at degree `d`.
+/// Returns `(rows, cols, rows_constructed)`; column 0 is the constant
+/// monomial, indexed by [`monomial_index`] (degree-graded colex over
+/// the multilinear basis).
+pub fn build_macaulay_rows_monomial(
+    eqs: &[Vec<Vec<u32>>],
+    num_vars: u32,
+    d: u32,
+) -> (Vec<Vec<u64>>, usize, u64) {
+    let cols = num_monomials_upto_degree(num_vars, d) as usize;
+    if cols == 0 || eqs.is_empty() {
+        return (Vec::new(), cols, 0);
+    }
+    let row_words = (cols + 63) / 64;
+    let mut rows: Vec<Vec<u64>> = Vec::new();
+    for eq in eqs {
+        if eq.is_empty() {
+            continue;
+        }
+        let deg = eq.iter().map(|m| m.len() as u32).max().unwrap_or(0);
+        if deg > d {
+            continue; // contributes nothing at this degree
+        }
+        for mult in &enumerate_monomials_upto(num_vars, d - deg) {
+            let mut row = vec![0u64; row_words];
+            for mono in eq {
+                let merged = merge_squarefree_monomials(mono, mult);
+                if merged.len() as u32 > d {
+                    continue; // degree-d truncation
+                }
+                let idx = monomial_index(&merged, num_vars, d);
+                row[idx / 64] ^= 1u64 << (idx % 64);
+            }
+            rows.push(row);
+        }
+    }
+    let rows_constructed = rows.len() as u64;
+    (rows, cols, rows_constructed)
+}
+
+/// Degree-general first-fall measurement over monomial-set equations.
+///
+/// For each `D ∈ d_min..=d_max`, builds and ranks the Macaulay matrix
+/// and records `(rows_constructed, cols, rank, rank_generic,
+/// fall_signal)`.  `fall_degree` is the smallest `D` with
+/// `rank < rows_constructed` (a nontrivial syzygy) **and**
+/// `rank < cols` (not yet saturated) — the same operational definition
+/// as [`measure_one`].  `None` if no fall was observed up to `d_max`.
+///
+/// Koszul caveat for the caller: for equations of top degree δ, the
+/// trivial Koszul syzygies `f_i·f_j − f_j·f_i` enter at degree 2δ, so
+/// a fall at `D ≥ 2·δ_min` may be Koszul-contaminated; falls strictly
+/// below that are structural.
+pub fn measure_monomial_system(
+    eqs: &[Vec<Vec<u32>>],
+    num_vars: u32,
+    d_min: u32,
+    d_max: u32,
+) -> (Vec<MacaulayMeasurement>, Option<u32>) {
+    let mut per_degree = Vec::new();
+    let mut fall_degree: Option<u32> = None;
+    for d in d_min..=d_max {
+        let (mut rows, cols, rows_constructed) =
+            build_macaulay_rows_monomial(eqs, num_vars, d);
+        let rank = if rows.is_empty() {
+            0
+        } else {
+            f2_rank(&mut rows, cols) as u64
+        };
+        let cols_u64 = cols as u64;
+        let rank_generic = rows_constructed.min(cols_u64);
+        let fall_signal = rank as i64 - rank_generic as i64;
+        if fall_degree.is_none() && rank < rows_constructed && rank < cols_u64 {
+            fall_degree = Some(d);
+        }
+        per_degree.push(MacaulayMeasurement {
+            degree: d,
+            rows_constructed,
+            cols: cols_u64,
+            rank,
+            rank_generic,
+            fall_signal,
+        });
+    }
+    (per_degree, fall_degree)
 }
 
 // ── Tests ───────────────────────────────────────────────────────────

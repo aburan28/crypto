@@ -1,0 +1,34 @@
+ffd_s4_subspace: l=8 n=24 draws=16 seed=0x54FFD518 D∈[4,8]×[4,7] cap=2GB
+── sanity: degree-general Macaulay vs quadratic path (S₃, seed 0xFFDDEAD) ──
+   n=5: rows/cols/rank match at D=2..4, FFD=3 ✓
+   n=6: rows/cols/rank match at D=2..4, FFD=3 ✓
+   n=7: rows/cols/rank match at D=2..4, FFD=3 ✓
+   sanity PASS
+
+probe build: 14 ms each; e-vars: 45; x_R-independence ✓
+draw  0: x_R=0x945BE7 decomp=false (23 ms) x1_fix=0x17 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (177866.737833 ms total)
+draw  1: x_R=0xD53C44 decomp=false (16 ms) x1_fix=0xFB deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (173577.63575000002 ms total)
+draw  2: x_R=0xB938D9 decomp=false (16 ms) x1_fix=0xCD deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (177500.874958 ms total)
+draw  3: x_R=0x6D824B decomp=false (17 ms) x1_fix=0x7F deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (170445.602083 ms total)
+draw  4: x_R=0x0EF9FE decomp=false (16 ms) x1_fix=0x57 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (175358.845 ms total)
+draw  5: x_R=0xDDDF82 decomp=false (17 ms) x1_fix=0x6B deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (173608.538125 ms total)
+draw  6: x_R=0x5DCE22 decomp=false (16 ms) x1_fix=0x2C deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (168410.028166 ms total)
+draw  7: x_R=0x9EB152 decomp=false (17 ms) x1_fix=0xAA deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (168853.603917 ms total)
+draw  8: x_R=0x04CA3A decomp=true (5 ms) x1_fix=0xF1 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (170475.31304200002 ms total)
+draw  9: x_R=0x3DC2BC decomp=false (16 ms) x1_fix=0xF0 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (167638.710167 ms total)
+draw 10: x_R=0xF640DB decomp=false (24 ms) x1_fix=0x92 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (175852.445292 ms total)
+draw 11: x_R=0x39D2C8 decomp=false (17 ms) x1_fix=0xD7 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (173699.344583 ms total)
+draw 12: x_R=0x180674 decomp=false (16 ms) x1_fix=0x22 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (171111.465875 ms total)
+draw 13: x_R=0x56B611 decomp=true (9 ms) x1_fix=0xB1 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (169330.09208300003 ms total)
+draw 14: x_R=0x350224 decomp=false (16 ms) x1_fix=0xA7 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (167537.93233299998 ms total)
+draw 15: x_R=0xFBFBC1 decomp=false (16 ms) x1_fix=0x95 deg_full={6: 24} deg_fix={4: 24} fall_full=None fall_fix=Some(7) (167398.859834 ms total)
+
+── summary ──
+decomposable draws: 2/16
+ffd_full: {"draws_censored":16,"draws_with_fall":0,"max":null,"mean":null,"min":null}
+ffd_fix:  {"draws_censored":0,"draws_with_fall":16,"max":7,"mean":7.0,"min":7}
+structural falls full: []  fix: [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7]
+median decompose (pairs recheck): 16.5 ms
+pair cache entries: 737
+verdict: L8_S4_SUBSPACE_X1FIXED_STRUCTURAL_FALL_D7
+total: 2748.8s → research/sat_factor_base_review_20260908/autolab/runs_manual/binary_s4_ffd_l8_20260920/ffd_s4_subspace_summary.json
