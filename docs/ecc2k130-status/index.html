@@ -347,23 +347,33 @@ cairn run</code></pre>
           32-byte records. Its test suite replays 48 points that the campaign's
           own client wrote and requires every byte back, so a point it finds is
           a point of this campaign. It needs an NVIDIA GPU of the Ampere
-          generation or newer (<span class="mono">sm_80+</span>) with a driver
+          generation or newer (<span class="mono">sm_80+</span>) and a driver
           for CUDA 13.3, on Linux.
         </p>
-        <pre class="cmd"><code>git clone https://github.com/aburan28/cryptanalysis
-cd cryptanalysis/ecc2k130
-make test      # host test, incl. the campaign's known answers
-make gpu NVCC=$(scripts/fetch_cuda.sh)/bin/nvcc
-build/ec2k-gpu walk --run-id R \
+        <p class="dl-row">
+          <a class="dl" href="https://github.com/aburan28/cryptanalysis/releases?q=ec2k-gpu">Download ec2k-gpu</a>
+          <span class="dl-sub">Linux x86_64 &middot; aarch64 &middot; sm_80 to sm_120</span>
+        </p>
+        <pre class="cmd"><code>V=0.1.0-pre1
+curl -fsSLO https://github.com/aburan28/cryptanalysis/releases/download/ec2k-gpu-v$V/ec2k-gpu-$V-linux-x86_64.tar.gz
+tar xzf ec2k-gpu-$V-linux-x86_64.tar.gz
+cd ec2k-gpu-$V-linux-x86_64
+./ec2k-gpu check --kat campaign-kat.hex
+./ec2k-gpu walk --run-id R \
     --dp-file dps.bin --checkpoint state.ck</code></pre>
         <p class="note">
-          <strong>There is no download yet.</strong> The client builds from
-          source. <span class="mono">fetch_cuda.sh</span> fetches the pinned
-          CUDA 13.3 compiler from NVIDIA's pip wheels, so no system CUDA
-          install is needed. The default target is the RTX PRO 6000
-          (<span class="mono">sm_120</span>); for another card add, for example,
-          <span class="mono">ARCH="-gencode arch=compute_89,code=sm_89"</span>
-          for an RTX 4090 or L4.
+          One binary covers every card from the A100 and RTX 30-series on,
+          and the CUDA runtime is built in: nothing to install beyond the
+          driver. <span class="mono">check --kat</span> needs no GPU. It
+          replays the campaign's known answers on the CPU, and it is worth
+          running before spending GPU time. Each tarball has a
+          <span class="mono">.sha256</span> beside it. That comes from the
+          same host, so it catches a damaged download, not a substituted one.
+          This is a prerelease: the binary is proven against the campaign's
+          walk on the CPU, but has not yet run on a card. To build from
+          source instead, see
+          <a href="https://github.com/aburan28/cryptanalysis/tree/HEAD/ecc2k130#collecting-for-the-ecc2k-130-campaign">the
+          README</a>.
         </p>
         <p class="note">
           <strong>Pick a run id no one else walks.</strong> Every walk seed
@@ -381,9 +391,7 @@ build/ec2k-gpu walk --run-id R \
           takes points only from the campaign's own fleet, and there is no
           public upload. Until there is, <span class="mono">dps.bin</span> stays
           on the machine that found it: keep it, since its records are already
-          in the format the store ingests. This client's walk is proven
-          against the campaign's on the CPU; its first runs on a card are
-          still to come. Read
+          in the format the store ingests. Read
           <a href="https://github.com/aburan28/cryptanalysis/tree/HEAD/ecc2k130#collecting-for-the-ecc2k-130-campaign">its
           README</a> for what makes a point the campaign's.
         </p>
