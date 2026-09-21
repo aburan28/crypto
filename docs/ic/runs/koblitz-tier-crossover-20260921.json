@@ -16,7 +16,9 @@
  "boundaries": {
   "floor": "generic-group floor S = sqrt(pi/2A) with A = 2n = 122 automorphisms -> 0.1135; untouched by the tier, since the tier changes no count the floor bounds",
   "count_floor": "contract count floor for the m=2 descent: expected probes >= N / C(|F|+1,2); at 12688 points that is 2,023,479 probes a target",
-  "reference": "Pollard rho, signed-Frobenius, counted on the same instance in the same process: 2,263,934 steps a target, S = 0.1774. Not re-run in this sweep because rho does not depend on the tier; measured in docs/ic/runs alongside the tier ladder at the same subgroup."
+  "reference": "Pollard rho, signed-Frobenius, counted on the same instance in the same process: 2,263,934 steps a target, S = 0.1774. Not re-run in this sweep because rho does not depend on the tier; measured in docs/ic/runs alongside the tier ladder at the same subgroup.",
+  "rho_S": 0.1774,
+  "generic_floor_S": 0.1135
  },
  "unit": {
   "name": "batched group addition (Montgomery-shared inversion), the form both the rho walk and the pair-table build use",
@@ -27,7 +29,8 @@
    "18000": 62.32
   },
   "native_counts": "the table build does one addition per stored pair; the rho walk one per step -- both exact",
-  "converted_counts": "summand scans and descent probes, converted by a factor measured on the same host, same base and same process by examples/koblitz_probe_conversion.rs, in the shape the pipeline probes in (witnesses_fast, m = 3, never-stopping sink for the scan; BLOCK = 1024 with the 32-key prefetch for the descent)"
+  "converted_counts": "summand scans and descent probes, converted by a factor measured on the same host, same base and same process by examples/koblitz_probe_conversion.rs, in the shape the pipeline probes in (witnesses_fast, m = 3, never-stopping sink for the scan; BLOCK = 1024 with the 32-key prefetch for the descent)",
+  "S": "S = total priced operations / sqrt(r), a LOWER bound: factor-base selection and the linear algebra are unpriced in this unit and left null rather than zero. Both are identical across the arms, so they cannot move the tier ratio."
  },
  "controlled": "At each width the folded and full arms share every operation count -- summand scans, descent probes, relations, rejected relations, columns and points -- and differ only in the table. Asserted, not assumed, when this file was written.",
  "widths": [
@@ -55,7 +58,11 @@
      "adds_per_summand_scanned": 2.03,
      "adds_per_descent_probe": 0.81,
      "adds_per_lone_probe": 1.17,
-     "build_seconds": 1.67
+     "build_seconds": 1.67,
+     "S_lower_bound": 2.1458,
+     "over_rho": 12.1,
+     "over_generic_floor": 18.91,
+     "class": "baseline"
     },
     "compact": {
      "stored_pairs": 23341528,
@@ -66,7 +73,11 @@
      "adds_per_summand_scanned": 2.13,
      "adds_per_descent_probe": 0.9,
      "adds_per_lone_probe": 1.38,
-     "build_seconds": 2.35
+     "build_seconds": 2.35,
+     "S_lower_bound": 2.2697,
+     "over_rho": 12.79,
+     "over_generic_floor": 20.0,
+     "class": "none: dearer, with no headline count falling"
     },
     "folded": {
      "stored_pairs": 194712,
@@ -77,7 +88,11 @@
      "adds_per_summand_scanned": 2.49,
      "adds_per_descent_probe": 1.33,
      "adds_per_lone_probe": 1.43,
-     "build_seconds": 0.03
+     "build_seconds": 0.03,
+     "S_lower_bound": 2.7037,
+     "over_rho": 15.24,
+     "over_generic_floor": 23.82,
+     "class": "relabelling"
     }
    },
    "cheapest": "full",
@@ -111,7 +126,11 @@
      "adds_per_summand_scanned": 2.16,
      "adds_per_descent_probe": 0.98,
      "adds_per_lone_probe": 1.41,
-     "build_seconds": 3.92
+     "build_seconds": 3.92,
+     "S_lower_bound": 2.2126,
+     "over_rho": 12.47,
+     "over_generic_floor": 19.49,
+     "class": "baseline"
     },
     "compact": {
      "stored_pairs": 47633680,
@@ -122,7 +141,11 @@
      "adds_per_summand_scanned": 2.09,
      "adds_per_descent_probe": 0.99,
      "adds_per_lone_probe": 1.36,
-     "build_seconds": 5.26
+     "build_seconds": 5.26,
+     "S_lower_bound": 2.1547,
+     "over_rho": 12.15,
+     "over_generic_floor": 18.98,
+     "class": "engineering"
     },
     "folded": {
      "stored_pairs": 395280,
@@ -133,7 +156,11 @@
      "adds_per_summand_scanned": 2.49,
      "adds_per_descent_probe": 1.36,
      "adds_per_lone_probe": 1.64,
-     "build_seconds": 0.06
+     "build_seconds": 0.06,
+     "S_lower_bound": 2.4725,
+     "over_rho": 13.94,
+     "over_generic_floor": 21.78,
+     "class": "relabelling"
     }
    },
    "cheapest": "compact",
@@ -167,7 +194,11 @@
      "adds_per_summand_scanned": 2.29,
      "adds_per_descent_probe": 1.08,
      "adds_per_lone_probe": 1.65,
-     "build_seconds": 9.44
+     "build_seconds": 9.44,
+     "S_lower_bound": 2.3051,
+     "over_rho": 12.99,
+     "over_generic_floor": 20.31,
+     "class": "baseline"
     },
     "compact": {
      "stored_pairs": 80499016,
@@ -178,7 +209,11 @@
      "adds_per_summand_scanned": 2.16,
      "adds_per_descent_probe": 0.92,
      "adds_per_lone_probe": 1.42,
-     "build_seconds": 10.54
+     "build_seconds": 10.54,
+     "S_lower_bound": 2.1731,
+     "over_rho": 12.25,
+     "over_generic_floor": 19.15,
+     "class": "engineering"
     },
     "folded": {
      "stored_pairs": 666120,
@@ -189,7 +224,11 @@
      "adds_per_summand_scanned": 2.53,
      "adds_per_descent_probe": 1.48,
      "adds_per_lone_probe": 2.09,
-     "build_seconds": 0.12
+     "build_seconds": 0.12,
+     "S_lower_bound": 2.3666,
+     "over_rho": 13.34,
+     "over_generic_floor": 20.85,
+     "class": "relabelling"
     }
    },
    "cheapest": "compact",
@@ -223,7 +262,11 @@
      "adds_per_summand_scanned": 2.62,
      "adds_per_descent_probe": 1.37,
      "adds_per_lone_probe": 2.38,
-     "build_seconds": 18.31
+     "build_seconds": 18.31,
+     "S_lower_bound": 2.7361,
+     "over_rho": 15.42,
+     "over_generic_floor": 24.11,
+     "class": "baseline"
     },
     "compact": {
      "stored_pairs": 171949240,
@@ -234,7 +277,11 @@
      "adds_per_summand_scanned": 2.41,
      "adds_per_descent_probe": 1.31,
      "adds_per_lone_probe": 2.11,
-     "build_seconds": 24.39
+     "build_seconds": 24.39,
+     "S_lower_bound": 2.5526,
+     "over_rho": 14.39,
+     "over_generic_floor": 22.49,
+     "class": "engineering"
     },
     "folded": {
      "stored_pairs": 1418616,
@@ -245,7 +292,11 @@
      "adds_per_summand_scanned": 2.71,
      "adds_per_descent_probe": 1.62,
      "adds_per_lone_probe": 2.05,
-     "build_seconds": 0.27
+     "build_seconds": 0.27,
+     "S_lower_bound": 2.4067,
+     "over_rho": 13.57,
+     "over_generic_floor": 21.2,
+     "class": "engineering"
     }
    },
    "cheapest": "folded",

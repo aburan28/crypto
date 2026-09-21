@@ -1254,6 +1254,82 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="koblitz-tier-crossover-20260921">
+    <div class="panel-head">
+      <h2>Koblitz pair table: the tier is not a property of the base</h2>
+      <p>Class <span class="chip">accounting</span> for the round and
+        <span class="chip relabel">relabelling</span> for the change it re-prices. The pair-table
+        tier ladder was flipped to fold-first on a wall-clock comparison. Re-priced in this page&rsquo;s
+        unit &mdash; group additions over the whole cold run &mdash; the flip is a <em>regression</em> at
+        the width it was argued from: stored pairs fall <b>120.85&times;</b> while total operations
+        <b>rise 1.2%</b>, which is the &sect;3 relabelling test exactly. Over four widths all three tiers
+        turn out to be cheapest somewhere, so both fixed orders are wrong.
+        Frozen source: <code>docs/ic/runs/koblitz-tier-crossover-20260921.json</code>;
+        note: <code>research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption><code>K_0 / GF(2^61)</code> &middot; r = 2<sup>47.21</sup> &middot; 32 targets &middot;
+        rho <code>S</code> = 0.1774 (2,263,934 steps a target, counted in the same process) &middot;
+        floor <code>S</code> = &radic;(&pi;/2A) = 0.1135 with A = 2n = 122.
+        Unit is a batched group addition (62 ns on the measuring host). The build&rsquo;s count is
+        native, one addition per stored pair; probe counts are converted by a factor measured on the
+        same host, base and process in the shape the pipeline probes in
+        (<code>examples/koblitz_probe_conversion.rs</code>). Every target recovered and verified as
+        [d]G = Q on all arms; at each width the two arms share every operation count but the table.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Base / variant</th>
+          <th scope="col" class="n">Build adds</th>
+          <th scope="col" class="n">Total adds</th>
+          <th scope="col" class="n">S &ge;</th>
+          <th scope="col" class="n">vs rho</th>
+          <th scope="col" class="n">vs floor</th>
+          <th scope="col">Correct</th>
+          <th scope="col">Class</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group"><td colspan="8">6,832 points &middot; 56 signed orbits</td></tr>
+        <tr><td>full <em>(cheapest here)</em></td><td class="n">23,341,528</td><td class="n">876,342,501</td><td class="n">2.146</td><td class="n">12.10&times;</td><td class="n">18.91&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>compact</td><td class="n">23,341,528</td><td class="n">926,956,220</td><td class="n">2.270</td><td class="n">12.79&times;</td><td class="n">20.00&times;</td><td>32/32</td><td><span title="no §3 class applies: S rose and no headline count fell — simply dearer here">—</span></td></tr>
+        <tr><td>folded</td><td class="n">194,712</td><td class="n">1,104,202,174</td><td class="n">2.704</td><td class="n">15.24&times;</td><td class="n">23.82&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 119.88x, total operations rose 26.0%"><span class="chip relabel">relabelling</span></td></tr>
+        <tr class="group"><td colspan="8">9,760 points &middot; 80 signed orbits</td></tr>
+        <tr><td>full</td><td class="n">47,633,680</td><td class="n">903,649,246</td><td class="n">2.213</td><td class="n">12.47&times;</td><td class="n">19.49&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>compact <em>(cheapest here)</em></td><td class="n">47,633,680</td><td class="n">880,008,741</td><td class="n">2.155</td><td class="n">12.15&times;</td><td class="n">18.98&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>folded</td><td class="n">395,280</td><td class="n">1,009,804,178</td><td class="n">2.473</td><td class="n">13.94&times;</td><td class="n">21.78&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 120.51x, total operations rose 11.7%"><span class="chip relabel">relabelling</span></td></tr>
+        <tr class="group"><td colspan="8">12,688 points &middot; 104 signed orbits &mdash; the width the flip was argued from</td></tr>
+        <tr><td>full</td><td class="n">80,499,016</td><td class="n">941,440,872</td><td class="n">2.305</td><td class="n">12.99&times;</td><td class="n">20.31&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>compact <em>(cheapest here)</em></td><td class="n">80,499,016</td><td class="n">887,500,874</td><td class="n">2.173</td><td class="n">12.25&times;</td><td class="n">19.15&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>folded <em>(the flip)</em></td><td class="n">666,120</td><td class="n">966,559,218</td><td class="n">2.367</td><td class="n">13.34&times;</td><td class="n">20.85&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 120.85x, total operations rose 2.7%"><span class="chip relabel">relabelling</span></td></tr>
+        <tr class="group"><td colspan="8">18,544 points &middot; 152 signed orbits</td></tr>
+        <tr><td>full</td><td class="n">171,949,240</td><td class="n">1,117,432,188</td><td class="n">2.736</td><td class="n">15.42&times;</td><td class="n">24.11&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>compact</td><td class="n">171,949,240</td><td class="n">1,042,518,063</td><td class="n">2.553</td><td class="n">14.39&times;</td><td class="n">22.49&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>folded <em>(cheapest here)</em></td><td class="n">1,418,616</td><td class="n">982,920,004</td><td class="n">2.407</td><td class="n">13.57&times;</td><td class="n">21.20&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>Crossovers, measured between two widths, not extrapolated beyond them:</b>
+        full/folded crosses one at |F| &asymp; <b>13,623</b> points, compact/folded at &asymp; <b>16,052</b>.
+        Predicted at 13,600 from the measured per-probe deltas and stated before the sweep was analysed.</span>
+      <span><b><code>S</code> is a lower bound (&ldquo;&ge;&rdquo;), not an equality.</b> Factor-base selection and the
+        linear algebra are unpriced in this unit and left null rather than zero, per the accounting
+        contract; both are identical across the arms, so they cannot move the tier ratio, only raise
+        every row together.</span>
+      <span>The superseded figure, kept as the &ldquo;before&rdquo; mark: the flip was argued from wall clock,
+        where at 12,688 points folded read 0.87&ndash;0.91 s a target against full&rsquo;s 1.10 and compact&rsquo;s 1.17,
+        and resident memory 17 MiB against 1,563 and 527. Both are real and neither is the metric
+        (&sect;6): the full build costs 121 ns a stored pair against a batched addition&rsquo;s 62, so most of
+        that wall-clock gap is memory traffic an operation count does not charge.</span>
+      <span>No exponent is fitted here &mdash; four widths at one degree is the minimum for a fit and this
+        round does not make one &mdash; and the crossover width is calibrated at <code>n</code> = 61 on one host, so it
+        is a heuristic, not a law. The sweep also pins the probing volume across widths, which makes
+        13,623 an <em>upper</em> bound on the practical crossover.</span>
+      <span>Nothing here moves the standing against rho: every tier costs 12&ndash;15&times; rho&rsquo;s <code>S</code> on this
+        instance and 19&ndash;24&times; the generic floor. The tier moves the constant only, which is why no row
+        carries an <span class="chip advance">advance</span> chip.</span>
+    </div>
+  </div>
+
   <div class="panel" id="ec-baseline-20260914">
     <div class="panel-head">
       <h2>Imported EC index-calculus baseline</h2>
