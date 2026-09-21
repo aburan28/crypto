@@ -691,11 +691,44 @@ one jump table.  The guard is one hash insert per target, counted as
 `pinned_by_repeated_row` reported.  `--unguarded-targets` reproduces the
 old behaviour for that diagnostic; the note's §10.2 has the numbers.
 
-`tools/boundary_round_compare.py` pairs each new row with the rung it
-was built on (same curve, target, seed) and saves the
+**Round 3** (`runs/ic-boundary-ledger-round3-2026-09-21.json`, the note's
+§11) does not add a suffix.  Its first lever makes an existing row
+cheaper: the walk's **restarts**.  Round 2 redrew all sixteen jumps at
+two scalar multiplications each whenever the target guard forced a
+restart, which on the rungs that restart often cost more than every walk
+step put together.  The walk now draws its jumps once, keeps sixteen
+pooled offsets beside them, and restarts by adding one offset to the
+current point while rotating which jump each hash selects — so two
+segments still have different step functions and cannot merge, at one
+group operation per restart instead of thirty-two scalar
+multiplications.  The second lever gives the prime and binary regimes
+the `_balanced` row the Koblitz regime already had.  The third is
+reporting: every row now carries its ratio to the **family shape law**
+
+```text
+    ops(F) = F²/(4t) + c·#E/(2kF),   least at F = (c·#E·t/k)^{1/3}
+    S_family = 0.75·(#E·t/k)^{2/3} / (t·√r)
+```
+
+with `t` the table fold (1 up to negation, `n` up to `⟨σ, −1⟩`) and `k`
+the column fold (1 per abscissa, `n` per signed Frobenius orbit).  On a
+prime-order curve that is `Θ(r^{1/6})`, so no choice of base size
+escapes it and every constant this repository can tune lives inside the
+`0.75`.  It is a model of the family and not a bound on the problem —
+the relation count is an expectation over the cycle structure, so a row
+can land under it — and it is reported next to the generic floor, which
+is a bound.
+
+`tools/boundary_round_compare.py` pairs rows two ways and saves the
 `speedup = baseline_total_operations / candidate_total_operations`
-comparison `AGENTS.md` §8 asks for, recording which first-round rows
-reproduce the frozen counts and which the guard moved.
+comparison `AGENTS.md` §8 asks for.  Within a run it pairs each new row
+with the rung it was built on (same curve, target, seed), which is what
+prices a row a round *adds*; with `--across <previous-round.json>` it
+pairs each row with the same-named row of the previous round's run on
+the same instance and seed, which is the only pairing that can see a
+lever that makes an existing row cheaper without renaming it.  It also
+records which first-round rows reproduce the frozen counts and which the
+target guard moved.
 
 ## A benchmark corpus: `ic corpus`
 

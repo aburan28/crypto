@@ -95,10 +95,16 @@ for regime, insts in by_regime.items():
     ref = [x for x in big["rho"] if (A <= 2 or x["automorphisms"] == A)]
     walk_s = mean([x["s_walk"] for x in ref])
     head = f"{LABEL[regime]}, `{big['curve']['name']}`, `r = 2^{big['log2_r']:.1f}`, `#E = {big['cofactor']}r`, `A = {A}`"
-    fam = big["variants"][0].get("family_optimum_s")
+    # The family optimum is a per-shape quantity: a row's table fold and
+    # column fold set it.  Show the best shape the instance offers, and
+    # name it, so the number is not read as a single instance constant.
+    shapes = [v for v in big["variants"] if v.get("family_optimum_s")]
+    best_shape = min(shapes, key=lambda v: v["family_optimum_s"]) if shapes else None
     print(f"| {head} | generic floor `√(π/2A)` | | | | | | {big['floor_s']:.3f} | | {f(big['floor_s'] / big['rho_s_mean'])}× | 1× | | — | boundary |")
-    if fam:
-        print(f"| | family optimum `0.75·#E^(2/3)/(a√r)` at `\\|F\\| = #E^(1/3)` | | {big['variants'][0]['family_optimum_base']:,.0f} | | | | {f(fam)} | | {f(fam / big['rho_s_mean'])}× | {f(fam / big['floor_s'])}× | 1× | — | model |")
+    if best_shape:
+        fam = best_shape["family_optimum_s"]
+        t = round(best_shape["signed_points"] / (2.0 * max(best_shape["columns"], 1)))
+        print(f"| | family optimum `0.75·(#E·t/k)^(2/3)/(t√r)`, best shape on this instance (`k = {t}`) | | {best_shape['family_optimum_base']:,.0f} | | | | {f(fam)} | | {f(fam / big['rho_s_mean'])}× | {f(fam / big['floor_s'])}× | 1× | — | model |")
     name_ref = "signed-Frobenius rho, counted" if regime == "koblitz" else "Pollard rho, r-adding, counted"
     print(f"| | {name_ref} (walk alone {f(walk_s)}) | | | | | | {f(big['rho_s_mean'])} | | 1× | {f(big['rho_s_mean'] / big['floor_s'])}× | | ✓ | reference |")
     rows = rows_of(big)
