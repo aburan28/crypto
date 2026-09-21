@@ -1338,6 +1338,58 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="koblitz-probe-volume-20260921">
+    <div class="panel-head">
+      <h2>The probing volume is an input, and it moves every rung</h2>
+      <p>Class <span class="chip">engineering</span>. The tier is a function of how much probing
+        amortises the table build, and <code>build_within</code> cannot know that &mdash; it falls back on
+        the volume its constants were calibrated at, 351,750,000 summand scans. The <code>ic</code> workflow
+        knows its own exactly, and now passes it to <code>build_within_for</code>. Every ledger rung probes
+        less than the calibration (1.45&times; to 1,266&times; less) and all three move from the compact tier
+        to the folded one. Frozen source:
+        <code>docs/ic/runs/koblitz-probe-volume-20260921.json</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Unit is a batched group addition, with the probe conversions re-measured at each
+        rung&rsquo;s <em>own</em> degree rather than carried over from the degree-61 calibration. Build counts
+        are native, one addition per stored pair. Both arms of each rung share every probe count, so
+        the ratio to the counting floor is flat and no row can be an advance. <code>S</code> is a lower bound:
+        factor-base selection and the linear algebra are unpriced and left null, not zero.</caption>
+      <thead>
+        <tr><th scope="col">Rung / tier</th><th scope="col" class="n">Summands scanned</th>
+          <th scope="col" class="n">Build adds</th><th scope="col" class="n">Total adds</th>
+          <th scope="col" class="n">S &ge;</th><th scope="col" class="n">vs rho</th>
+          <th scope="col">Correct</th><th scope="col">Class</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>k0n31-ledger-rung</code> &middot; n = 31 &middot; 2,170 points</td><td class="n">277,760</td><td colspan="4">Not priced &mdash; at r = 2<sup>20.46</sup> the <code>m = 3</code> scan measurement is dominated by the <code>O(|F|)</code> recovery a hit pays, not by probing</td><td>32/32</td><td><span class="chip">accounting</span></td></tr>
+        <tr class="group"><td colspan="8"><code>k0n41-subgroup-rung</code> &middot; n = 41 &middot; 5,248 points, 64 orbits &middot; r = 2<sup>39.0</sup> &middot; rho <code>S</code> = 0.1705</td></tr>
+        <tr><td>compact <em>(v3 chose this)</em></td><td class="n">15,072,256</td><td class="n">13,773,376</td><td class="n">47,988,000</td><td class="n">2.022</td><td class="n">11.86&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>folded <em>(v4 chooses this)</em></td><td class="n">15,072,256</td><td class="n">173,184</td><td class="n">34,990,959</td><td class="n">1.475</td><td class="n">8.65&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr class="group"><td colspan="8"><code>k0n53-subgroup-rung</code> &middot; n = 53 &middot; 15,264 points, 144 orbits &middot; r = 2<sup>44.26</sup> &middot; rho <code>S</code> = 0.2172</td></tr>
+        <tr><td>compact <em>(v3 chose this)</em></td><td class="n">242,514,432</td><td class="n">116,502,480</td><td class="n">756,950,602</td><td class="n">5.156</td><td class="n">23.73&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>folded <em>(v4 chooses this)</em></td><td class="n">242,514,432</td><td class="n">1,114,272</td><td class="n">615,978,313</td><td class="n">4.196</td><td class="n">19.31&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>The collection estimate is exact, not approximate:</b> <code>unit_trials &times; units &times;
+        collection_window</code> (the whole base when no window is set) reproduces
+        <code>summands_scanned_total</code> to the unit on every run checked, including the frozen 277,760 of
+        the <code>k0n31</code> rung. The descent uses the contract&rsquo;s counting bound, which measured 1.26&times; high
+        on one degree-61 target set and 1.07&times; low on an independent one.</span>
+      <span><b>Why <code>k0n31</code> carries no price.</b> Its conversion reads 2,572 adds a summand on the
+        compact table against the full tier&rsquo;s 6.71 &mdash; not a cache effect but the <code>O(|F|)</code> recovery
+        a hit pays, which the full tier avoids by storing its summands. At r = 2<sup>20.5</sup> nearly every
+        probe hits. That figure measures recovery, not probing, so it stays out of the model; the tier
+        chosen there is the model extrapolating below the degrees it was measured at.</span>
+      <span>The superseded figures move rather than vanish: v3 chose compact on all three rungs and is
+        the baseline row of each pair. The wall-clock &rho;/IC ratios went 1.79 &rarr; 3.39 at degree 41 and
+        1.51 &rarr; 3.00 at degree 53, which is a practicality note and never the metric (&sect;6).</span>
+      <span>Nothing here moves the standing against rho &mdash; the two priced rungs sit at 8.65&times; and 19.3&times;
+        rho&rsquo;s <code>S</code> &mdash; and no exponent is fitted: two priced rungs is far short of &sect;5&rsquo;s four sizes.</span>
+    </div>
+  </div>
+
   <div class="panel" id="koblitz-tier-crossover-20260921">
     <div class="panel-head">
       <h2>Koblitz pair table: the tier is not a property of the base</h2>
