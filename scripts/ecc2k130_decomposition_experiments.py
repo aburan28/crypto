@@ -1170,8 +1170,16 @@ def main():
               f"full rank at {c['full_rank_at']} (rho {c['rho_measured']}), coupon collector "
               f"predicts {c['coupon_collector_relations']} (rho {c['coupon_collector_rho']}), "
               f"ratio {c['measured_over_coupon']}", flush=True)
+    # The ladder's design dimension at each rung -- 13:6, 19:8, 23:9 from
+    # `ladder_dimension` -- plus 19:7 as an off-design cell.  `n = 23` joins
+    # here rather than in E1 because E1 stops only at full rank over every
+    # column, which at `|F| = 527` is the `|F| ln|F| / m ~ 1100` relations
+    # section 0.5 retracted: measured, 535 relations reach rank 494 of 527 and
+    # the collection alone costs 353 s.  The budget rule needs `|F|`, and it is
+    # the rule the slope below is fitted on.
     budgets = [budget_run(Rung(n), l, 3, random.Random(100 + seed))
-               for n, l in ((13, 6), (19, 7), (19, 8)) for seed in (1, 2, 3)]
+               for n, l in ((13, 6), (19, 7), (19, 8), (23, 9))
+               if n <= args.max_rung for seed in (1, 2, 3)]
     for b in budgets:
         print(f"BUDGET n={b['n']:3d} l={b['l']} |F|={b['factor_base_size']:5d} "
               f"determined {b['fraction_determined']:.3f} "
@@ -1187,20 +1195,41 @@ def main():
         got = [b["lambda"] for b in rows]
         return sum(got) / len(got)
 
-    b13 = [b for b in budgets if b["n"] == 13]
-    b19 = [b for b in budgets if b["n"] == 19 and b["l"] == 8]
-    m13, m19 = _mean(b13), _mean(b19)
-    slope_budget = 1 + (math.log2(m19) - math.log2(m13)) / 6
-    # Three seeds a rung is enough for a standard error but not for a fit.
-    # Propagating each rung's relative spread through log2 gives the slope's
-    # own, which is what says how far 0.944 really is from the 0.95 line.
     def _rel_sd(rows):
         got = [b["lambda"] for b in rows]
         mu = sum(got) / len(got)
         var = sum((x - mu) ** 2 for x in got) / (len(got) - 1)
         return math.sqrt(var) / mu / math.sqrt(len(got))
 
-    slope_se = math.sqrt(_rel_sd(b13) ** 2 + _rel_sd(b19) ** 2) / math.log(2) / 6
+    # Three rungs at the design dimension, so this is a least-squares fit with
+    # one degree of freedom rather than the two-point join the first round had.
+    # `ops = Lambda * 2^n`, so `log2(ops) = log2(Lambda) + n` and the slope is
+    # `1 + d log2(Lambda)/dn`.
+    design = {13: 6, 19: 8, 23: 9}
+    by_rung = {n: [b for b in budgets if b["n"] == n and b["l"] == l]
+               for n, l in design.items()}
+    # A truncated ladder (`--max-rung`) fits on what it has; two rungs is the
+    # join the first round reported, three is a fit with a residual.
+    rungs = sorted(n for n in design if by_rung[n])
+    means = {n: _mean(by_rung[n]) for n in rungs}
+    xs = [float(n) for n in rungs]
+    ys = [math.log2(means[n]) + n for n in rungs]
+    mx, my = sum(xs) / len(xs), sum(ys) / len(ys)
+    sxx = sum((x - mx) ** 2 for x in xs)
+    slope_budget = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / sxx
+    intercept = my - slope_budget * mx
+    residuals = [y - (intercept + slope_budget * x) for x, y in zip(xs, ys)]
+    # Two standard errors, because they answer different questions and the
+    # first round only had the first: the seed noise propagated through log2,
+    # and the scatter of the three rungs about the fitted line.  A fit is only
+    # as good as the larger of them.
+    se_seed = math.sqrt(sum(_rel_sd(by_rung[n]) ** 2 for n in rungs)) \
+        / math.log(2) / math.sqrt(sxx)
+    dof = len(rungs) - 2
+    se_fit = (math.sqrt(sum(r * r for r in residuals) / dof / sxx)
+              if dof > 0 else None)
+    slope_se = max(se_seed, se_fit) if se_fit is not None else se_seed
+    m13, m19 = means.get(13), means.get(19)
 
     budget = {
         "question": "how many relations does the product law actually owe, and "
@@ -1220,10 +1249,16 @@ def main():
         "every_descent_landed": all(b["descent_landed"] for b in budgets),
         "every_planted_log_recovered": all(b["planted_log_recovered"]
                                            for b in budgets),
-        "mean_lambda_n13_l6": round(m13, 3),
-        "mean_lambda_n19_l8": round(m19, 3),
+        "mean_lambda_n13_l6": round(m13, 3) if m13 else None,
+        "mean_lambda_n19_l8": round(m19, 3) if m19 else None,
+        "mean_lambda_by_rung": {str(n): round(means[n], 3) for n in rungs},
+        "slope_rungs": rungs,
         "slope_log2_ops_vs_n_at_budget": round(slope_budget, 3),
         "slope_standard_error": round(slope_se, 3),
+        "slope_standard_error_from_seeds": round(se_seed, 4),
+        "slope_standard_error_from_fit": (round(se_fit, 4)
+                                          if se_fit is not None else None),
+        "slope_residuals_log2": [round(r, 4) for r in residuals],
         "slope_under_superseded_full_rank_rule": 1.037,
         "slope_falsifier": "E1's falsifier is a slope below 0.95 over FOUR OR "
                            "MORE rungs.  This is a two-point fit, so it cannot "
