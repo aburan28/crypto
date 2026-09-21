@@ -343,6 +343,28 @@ def prepare(args):
     profile = {'development':3,'selection':3,'confirmation':12}
     if args.profile=='standard':
         profile = {'development':30,'selection':30,'confirmation':100}
+    # Per-cell confirmation allocation (additive; the default is the flat
+    # profile above and reproduces every round before 0019).
+    #
+    # The strict rho gate asks every cell's ratio to be below one, and that
+    # per-cell test is a point estimate of a geometric mean over the cell's
+    # fixtures.  Its resolution is therefore the cell's own spread over its own
+    # sample count, and rounds 0017 and 0018b measured that spread to differ by
+    # a factor of nine across this panel: the winner/rho instruction ratio has
+    # a per-case log spread of 0.037 at n13a0 and 0.329 at n23a1, because rho's
+    # solve phase is where the variance lives and it dominates rho's cost only
+    # at the large-subgroup cells.  A flat twelve therefore buys a 1e-8 failure
+    # probability at one end of the panel and a 9% one at the other, and round
+    # 0018b spent that 9%.
+    #
+    # `--confirmation-cases n23a1=48` raises a named cell's count.  Raises
+    # only: a count below the flat profile is refused, so no round can weaken
+    # a cell's evidence, and the allocation moves an estimate toward the truth
+    # in whichever direction the truth lies -- it cannot buy a pass, only
+    # resolve one.  The estimator and the gate are untouched; the cross-cell
+    # mean is unweighted and stays unbiased under unequal counts.
+    extra = parse_confirmation_allocation(args.confirmation_cases,profile['confirmation'],
+                                          [f'n{n}a{a}' for n,a in cells+holdout])
     limits = {'timeout_seconds':args.timeout,'memory_bytes':8*1024**3,'cpu':cpu,
               'worker_threads':1,'max_profiled_jobs':args.max_processes}
     fixtures = {}
@@ -355,7 +377,8 @@ def prepare(args):
             continue
         cases = []
         for degree,a in stage_cells:
-            for index in range(count):
+            n_cases = extra.get(f'n{degree}a{a}',count) if stage=='confirmation' else count
+            for index in range(n_cases):
                 public_seed = rng.getrandbits(64)
                 case = {'id':f'n{degree}a{a}-{index:03d}', 'cell':f'n{degree}a{a}',
                     'job':{'mode':'fixture','degree':degree,'curve_a':a,
@@ -378,10 +401,15 @@ def prepare(args):
         'restrictions':'CPU only; fixed compiler/ISA/profiler. This is implementation cost, not a hardware-independent arithmetic complexity claim.',
         'floor':'For this required full-rank collector, K columns require at least K relation-producing trials and at least K guest instructions. Weak implementation-specific floor; never evidence of a non-generic advance.',
         'paired_aa_gate':'same executable/config; both complete, no >=20% promotion, each cell within 5%'},exclusive=True)
-    confirmation_cases = profile['confirmation']*len(cells+holdout)
+    allocation = {f'n{n}a{a}':extra.get(f'n{n}a{a}',profile['confirmation']) for n,a in cells+holdout}
+    confirmation_cases = sum(allocation.values())
     c = {'schema_version':1,'profile':args.profile,'seed':args.seed,'created_unix':time.time(),
         'cells':[f'n{n}a{a}' for n,a in cells],'holdout_cells':[f'n{n}a{a}' for n,a in holdout],
         'confirmation_cases':confirmation_cases,
+        'confirmation_cases_per_cell':allocation,
+        'confirmation_allocation':('flat' if not extra else
+            'per-cell; raised at the cells whose measured spread a flat count cannot resolve, '
+            'never lowered, from frozen prior rounds only; estimator and gate unchanged'),
         'unit':UNIT,'evidence_scope':'bounded public-hash ECDLP configuration tournament',
         'metric_class':'implementation_instruction_cost','family_wide_or_scaling_claim':False,
         'equivalent_suite_reason':'Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; the final suite has '+str(confirmation_cases)+' inputs.',
@@ -402,6 +430,30 @@ def prepare(args):
     write(out/'contract.json',c,exclusive=True)
     write(out/'seal.json',{'contract_sha256':objhash(c)},exclusive=True)
     print(json.dumps({'status':'prepared','round':str(out),'command':f'python3 {evaluator / "tournament.py"} run --round {out}'}))
+
+
+def parse_confirmation_allocation(text,floor,declared):
+    """'n23a1=48' -> {'n23a1': 48}, against the profile's flat `floor`.
+
+    Raises only.  A count below the floor is refused rather than clamped: the
+    allocation exists to resolve a cell a flat count cannot, and a round that
+    could also *lower* a count could buy a pass by measuring less.  Unknown
+    cell names are refused too, so a typo shows up as a failed prepare rather
+    than as a silently flat panel."""
+    out = {}
+    for item in (text or '').split(','):
+        if not item.strip():
+            continue
+        name,sep,value = item.partition('=')
+        require(bool(sep),f'--confirmation-cases wants cell=count, got {item!r}')
+        name = name.strip()
+        require(name not in out,f'{name}: named twice in --confirmation-cases')
+        n = int(value)
+        require(n>=floor,f'{name}: {n} confirmation cases is below the profile floor {floor}')
+        out[name] = n
+    unknown = sorted(set(out)-set(declared))
+    require(not unknown,f'--confirmation-cases names cells outside the panel: {unknown}')
+    return out
 
 
 def parse_cells(text):
@@ -787,6 +839,8 @@ def main():
     p.add_argument('--comparison-kind',choices=['fixed-support','factor-base-policy'],default='fixed-support')
     p.add_argument('--candidates',type=Path)
     p.add_argument('--profile',choices=['pilot','standard'],default='pilot')
+    p.add_argument('--confirmation-cases',default='',
+        help='cell=count,... raising named cells above the profile floor. Lowering is refused.')
     p.add_argument('--cells',default='13a0,17a1,19a0,23a0',
         help='development and selection curve cells, <degree>a<curve_a> comma separated')
     p.add_argument('--holdout-cells',default='19a1',
