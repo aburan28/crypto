@@ -299,13 +299,20 @@
         <h3>Run a cairn node</h3>
         <p>
           <a href="https://github.com/aburan28/cairn">cairn</a> pays for
-          verified outputs and never for claimed effort. Under its
-          <a href="https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md">rho
-          piecework design</a> the paid artifact is one distinguished point
-          <span class="mono">(x, y, a, b)</span> with
-          <span class="mono">a&middot;P + b&middot;Q = (x, y)</span>: it costs
-          <span class="mono">2^d</span> group operations to find and two scalar
-          multiplications to check, so the proof of work <em>is</em> the work.
+          verified outputs and never for claimed effort, and it now posts
+          <em>this</em> search:
+          <a href="https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/objective-ecc2k130-orbit-batch.json"><span class="mono">objective-ecc2k130-orbit-batch</span></a>
+          pays per novel <strong>orbit</strong>, in batches of up to 64.
+        </p>
+        <p class="note">
+          Not per point, because on a Koblitz curve
+          <span class="mono">&sigma;(x, y) = (x&sup2;, y&sup2;)</span> and
+          negation generate a group of order <span class="mono">2m = 262</span>
+          that the walk respects: two trails have merged when they reach the
+          same orbit, and a unit keyed on one representative would pay 262
+          times for it, to 262 relabellings anybody derives from one published
+          record. So the unit is the orbit's canonical name &mdash; the least
+          cyclic rotation of the abscissa's normal-basis coordinates.
         </p>
         <p class="dl-row">
           <a class="dl" href="https://github.com/aburan28/cairn/releases/latest">Download cairn</a>
@@ -322,16 +329,49 @@ cairn run</code></pre>
           the verifier sandbox is seatbelt and bubblewrap.
         </p>
         <p class="note">
-          <strong>What is and is not posted.</strong> The rho objectives that
-          ship today are prime-field &mdash; a 50-bit rung anyone can finish,
-          and Certicom's ECCp-131 &mdash; and the contributor for them is
-          <span class="mono">crypto cryptanalysis rho-collab work --cairn</span>.
-          An ECC2K-130 objective needs a
-          <span class="mono">GF(2^131)</span> checker, which
-          <a href="https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/README.md">cairn
-          does not carry yet</a>, so points on <em>this</em> campaign are not
-          payable through cairn until it does. Install the node now to have it
-          ready, and to work the rungs that are live.
+          <strong>Why this client cannot claim yet.</strong> A point here
+          cannot carry <span class="mono">(a, b)</span>: tracking the
+          combination would cost a 129-bit modular multiplication per step, and
+          the walk above keeps its whole state in bitsliced field elements at
+          <span class="mono">1.4 &times; 10^10</span> steps a second. So the
+          corpus record is <span class="mono">(seed, canonical x)</span>, which
+          nobody can check for less than the work that made it &mdash; and
+          which anybody can invent for nothing, since a low-weight bit string
+          rotated to its least rotation is a syntactically perfect orbit name.
+        </p>
+        <p class="note">
+          cairn's answer is a <strong>witness</strong>, and it falls out of the
+          walk's own algebra: a step is
+          <span class="mono">R &#8614; R + &sigma;^j(R) = [1 + s^j]R</span> and
+          the endomorphism ring is commutative, so a trail of any length is
+          <span class="mono">[&mu;]R&#8320;</span> with
+          <span class="mono">&mu; = &prod;_j (1 + s^j)^(n_j)</span> &mdash; and
+          the <span class="mono">n_j</span> are just how many steps took each
+          branch. <strong>Eight counters.</strong> One double scalar
+          multiplication checks them: about <span class="mono">227</span> group
+          operations against the <span class="mono">4 &times; 10^7</span> the
+          trail cost, an asymmetry of <span class="mono">2^17.4</span>. The
+          claim is
+          <span class="mono">{x, seed, j: [n&#8323; … n&#8321;&#8320;]}</span>.
+        </p>
+        <p class="note">
+          The kernel still does not carry those counters, and it should not:
+          the cheaper route is to replay only the trails you claim. The
+          reference walk has counted the <span class="mono">n_j</span> all
+          along &mdash; collision resolution always needed them &mdash; so
+          <span class="mono">ecc2k130/build/witness</span> turns corpus records
+          into checked claims offline, at about a 900&times; saving over
+          carrying the counters through every step of the search. Two limits
+          cairn states plainly as well &mdash; the posted pool is one
+          <em>tranche</em>, about
+          <span class="mono">2^46.3</span> of the expected
+          <span class="mono">2^60.8</span> iterations, because the full corpus
+          is <span class="mono">2^35.5</span> orbits (~6.8 TB) and every
+          verifying node holds all of it; and a witness does not prove the
+          counters came from the job's own branch rule, which is what the
+          sampled re-walk audit and <span class="mono">attest slash</span> are
+          for. Install the node now to be ready, and to work the rungs that are
+          live.
         </p>
       </article>
 

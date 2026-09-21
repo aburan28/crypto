@@ -166,14 +166,78 @@ verifier sandbox is seatbelt and bubblewrap. The installer checks the tarball
 against a `.sha256` served from the same host, which detects a corrupted
 download and nothing else — there is no signing key.
 
-What that does **not** buy yet: cairn's shipped rho objectives are
-prime-field — a 50-bit rung and Certicom's ECCp-131, contributed to with
-`crypto cryptanalysis rho-collab work --cairn` ([design
-note](../docs/POLLARD_COLLAB_DESIGN.md)) — and an ECC2K-130 objective needs a
-`GF(2^131)` checker that
-[cairn does not carry](https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/README.md).
-Until it does, points on *this* curve are not payable through cairn; the
-client above is the path that is live today.
+cairn posts this search as
+[`objective-ecc2k130-orbit-batch`](https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/objective-ecc2k130-orbit-batch.json),
+which pays per novel **orbit** in batches of up to 64
+([design](https://github.com/aburan28/cairn/blob/main/docs/design/orbit-piecework.md)).
+Not per point: `σ(x, y) = (x², y²)` and negation generate a group of order
+`2m = 262` that the iteration function respects, so two trails have merged
+when they reach the same orbit, and a unit keyed on one representative would
+be paid 262 times for it — by 262 relabellings anybody derives from one
+published record. The unit is therefore the orbit's canonical name, the least
+cyclic rotation of the abscissa's normal-basis coordinates, and `m` prime is
+what makes it unique.
+
+**Why this client cannot claim yet.** A point here cannot carry `(a, b)`:
+tracking the combination costs a 129-bit modular multiplication per step, and
+this walk keeps its whole state in bitsliced field elements — which is exactly
+the trade recorded in *Distinguished points and restarts* above, and where the
+`1.4 × 10^10` steps a second come from. So the corpus record is
+`(seed, canonical x)`: nobody can check it for less than the work that made
+it, and anybody can invent one for nothing, since a low-weight bit string
+rotated to its least rotation is a syntactically perfect orbit name.
+
+cairn's answer is a **witness** taken from the walk's own algebra. A step is
+`R ↦ R + σ^j(R) = [1 + s^j]R` and the endomorphism ring is commutative, so a
+trail of any length is `[μ]R₀` with `μ = ∏_j (1 + s^j)^{n_j}` — and the `n_j`
+are only how many steps took each branch, in any order. **Eight counters**,
+for this client's own `j = 3 + ((HW(x)/2) mod 8)`. One double scalar
+multiplication verifies them: about 227 group operations against the `4 × 10^7`
+the trail cost, an asymmetry of `2^17.4`. The claim is
+
+```json
+{"dps": [{"x": "<canonical orbit>", "seed": "<64-bit walk seed>", "j": [n3, …, n10]}]}
+```
+
+The kernel still does not carry those counters, and it should not: adding
+them costs about 105 ALU slots on a 2,324-slot update and 15% of the walk
+state, which is ~4% of the whole campaign — roughly 1,800 GPU-hours — to
+witness every trail, when the posted pool is 2^21 orbits, 0.004% of them.
+**Replaying only the trails you claim is the cheaper route by about 900x**,
+and `build/witness` is it:
+
+```sh
+make witness
+./build/witness --curve 131 --job ecc2k130.json --corpus dps.bin > claims.jsonl
+```
+
+It replays each record's seed with the reference walk — which has counted the
+`n_j` all along, because collision resolution always needed them — checks that
+the replay lands on the orbit the record names, checks the witness itself by
+the same double scalar multiplication the payer will do, and prints batches of
+up to 64. `make test-witness` runs it end to end; with `CAIRN_ROOT` set it
+also hands the result to cairn's own checker. `cairn_job.py` writes a job
+document for a small curve so that check can run on a trail short enough to
+walk.
+
+One caveat the tool enforces rather than documents: this client works in the
+*permuted* type-II ONB, where `σ` is the coordinate permutation `i → fold(2i)`
+and **not** a rotation, while a cairn job names orbits by the least rotation in
+the plain normal basis its `nb_generator` pins. Both are the same conjugates,
+so the map is a permutation — cairn's generator is this basis's element `T`
+and its coordinate `k` is this one's `fold(T·2^k)` — and `--job` derives `T`
+by looking the generator up, refusing a job whose element is not in this basis
+instead of emitting names nobody can check.
+
+Two limits cairn states as plainly: the posted pool is one **tranche**, about
+`2^46.3` of the expected `2^60.8` iterations, because the full corpus is
+`2^35.5` orbits (~6.8 TB) and every verifying node holds all of it; and a
+witness does not prove the counters came from the job's own branch rule, which
+is what the sampled re-walk audit and `cairn attest slash` are for.
+
+The prime-field rho objectives — a 50-bit rung and Certicom's ECCp-131 — take
+a different contributor, `crypto cryptanalysis rho-collab work --cairn`
+([design note](../docs/POLLARD_COLLAB_DESIGN.md)).
 
 ## Status
 

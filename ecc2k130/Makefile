@@ -314,6 +314,20 @@ build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
 
 trailforest: build/trailforest
 
+# Orbit witnesses for a corpus: the j-counts a cairn piecework node can check
+# with one double scalar multiplication.  Host only.
+build/witness: src/witness.cpp $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	    -Wno-unknown-pragmas src/witness.cpp -o $@
+
+witness: build/witness
+
+# The witness generator end to end: corpus -> claims, the structural rules a
+# payer applies, and (with CAIRN_ROOT or --cairn) cairn's own checker.
+test-witness: build/witness ecc2k130-cpu
+	python3 test_witness.py $(if $(CAIRN_ROOT),--cairn $(CAIRN_ROOT),)
+
 test-production: ecc2k130-cpu build/test-production
 	./build/test-production
 	python3 -m unittest discover -s aws -p test_certification.py -v

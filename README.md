@@ -937,10 +937,15 @@ seed spaces, so any machine walking its own `--run-id` adds points to the same
 search. Run the client in [`ecc2k130/`](ecc2k130/README.md#contribute-compute),
 or **[download cairn](https://github.com/aburan28/cairn/releases/latest)**
 (`curl -fsSL https://github.com/aburan28/cairn/releases/latest/download/install.sh | sh`)
-for the paid path, where a node is paid per verified distinguished point
-instead of per claimed hour. cairn's shipped rho objectives are prime-field
-today — an ECC2K-130 one needs a `GF(2^131)` checker cairn does not carry yet,
-so points on this curve are not payable through it until that lands.
+for the paid path. cairn posts this search as
+[`objective-ecc2k130-orbit-batch`](https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/objective-ecc2k130-orbit-batch.json),
+paying per novel **orbit** rather than per point, because Frobenius and
+negation give one point 262 names. What is not ready is on this side: a point
+here cannot carry `(a, b)` without a 129-bit modular multiplication per step,
+so the claim needs the eight branch counters that make a trail checkable in
+about 227 group operations. The kernel does not carry them and should not:
+`ecc2k130/build/witness` replays only the trails you claim and emits the
+checked artifact, about 900× cheaper than counting through every step.
 
 - [`SECURITY.md`](SECURITY.md) — structural limitations + recommended alternatives.
 - [`AGENTS.md`](AGENTS.md) — how cryptanalysis progress is reported here: state a boundary, put every variant in one table in one unit, and classify each change by whether the ratio to that boundary moved.
