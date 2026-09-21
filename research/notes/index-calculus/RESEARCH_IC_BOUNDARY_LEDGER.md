@@ -723,6 +723,53 @@ spurious model in any cell (every model was checked in the group).
   `FFD = 3` and `30` unknowns.  The table's price on the same systems is
   the boundary they would have to cross to matter.
 
+### 5.4 Re-run on the merged tree, with the lift-checked tally
+
+A review finding on the first CI round was correct: the `S₄` tally
+behind §5.2 counted a disagreement only when the oracle refuted a target
+the exhaustive search could decompose, so a spurious witness would not
+have counted.  The pricing now lifts every `S₄` witness over the signed
+base with the pipeline's own sign-lift, charges the lift to the row,
+records lift failures, and tests agreement in both directions.  The
+thirteen cells were re-run under that tally on the merged tree (commit
+`7b2e1b5`, `docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json`, the
+same seed and targets as the frozen run):
+
+- every verdict, hit rate, first fall degree and SAT conflict count is
+  identical to §5.1 and §5.2, `disagreements` is zero in every cell, and
+  no `S₄` witness failed to lift (`lift_failures = 0` on all three
+  `m = 3` cells); the `S₄` prices move only with the host factor
+  (`284` against `268` additions per target at `n = 9`);
+- matrix-F4 does `1.4×` to `2.7×` fewer word XORs than the frozen run,
+  because the merge brought in main's F4 work since the freeze: the
+  sparse structured elimination for binary Macaulay matrices (#405) and
+  the native-elimination speed-up (5fa6138f).  Same verdicts, same
+  splits, fewer XORs per reduction: **engineering** by the §3 test, in
+  main's solver rather than in anything this note built, and the ratio
+  to the tabled probe is unmoved at five orders of magnitude.
+
+| n | m | F4 word XORs, found (frozen → re-run) | refuted (frozen → re-run) | GAE per target | projected relation-phase S | total XORs, ratio |
+|--:|--:|:--|:--|:--|:--|--:|
+| 9 | 2 | 46,150 → 32,114 | — | 170 → 167 | 75.4 → 74.2 | 1.44× |
+| 9 | 3 | 2,041,484 → 1,057,972 | — | 7.53e3 → 3.80e3 | 3.34e3 → 1.69e3 | 1.98× |
+| 11 | 2 | 677,942 → 450,018 | — | 1.84e3 → 1.25e3 | 2.75e3 → 1.87e3 | 1.52× |
+| 13 | 2 | 2,731,272 → 1,795,996 | — | 6.39e3 → 4.17e3 | 2.23e4 → 1.45e4 | 1.52× |
+| 15 | 2 | — | 17,925 → 11,329 | 32.6 → 20.8 | 152 → 97.1 | 1.57× |
+| 15 | 3 | 171,194,633 → 64,818,554 | 1,698,176,490 → 628,830,074 | 2.37e6 → 8.73e5 | 9.22e5 → 3.40e5 | 2.70× |
+| 17 | 2 | 3,042,354 → 1,647,510 | 4,979,528 → 2,683,981 | 8.36e3 → 4.47e3 | 1.18e3 → 628 | 1.86× |
+| 23 | 2 | 68,297,378 → 32,153,918 | 226,738,826 → 105,986,387 | 2.00e5 → 8.84e4 | 9.16e3 → 4.06e3 | 2.14× |
+
+The GAE column moves less than the XOR column on the small cells because
+a re-run is a new calibration and the host factors of the two runs
+differ; the native counts are the measurement.  The numbers to beat in
+§5.3 therefore read, on the merged tree: `8.8 × 10⁴` additions per
+target at `n = 23, m = 2` (`3.2 × 10⁷` word XORs found, `1.06 × 10⁸`
+refuted) and `8.7 × 10⁵` at `n = 15, m = 3`; the projected F4-driven
+relation phase at `n = 23` is `S ≈ 4.1 × 10³`, `22×` the whole measured
+cost of the tabled fold.  §5.2 stays as the measurement at the frozen
+commit; this section is the current one, and the scoreboard's F4 rows
+carry both.
+
 ## 6. The algorithms on the shelf, and where each one is priced
 
 The user's question was also an inventory question: which solvers and

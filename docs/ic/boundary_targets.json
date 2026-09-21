@@ -1822,7 +1822,36 @@
                       }
                     ]
                   }
-                ]
+                ],
+                "lift_checked_rerun": {
+                  "file": "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json",
+                  "git_commit": "7b2e1b5",
+                  "what": "the thirteen cells re-run with the S4 tally lifting every witness over the signed base and comparing both directions; same seed and targets as the frozen run",
+                  "all_agree": true,
+                  "s4_lift_failures": 0,
+                  "identical_to_freeze": [
+                    "verdicts",
+                    "hit_rate",
+                    "ffd",
+                    "sat_conflicts",
+                    "enumerate_additions",
+                    "pair_table_probes"
+                  ],
+                  "matrix_f4_word_xors": {
+                    "ratio_frozen_over_rerun_range": [
+                      1.44,
+                      2.7
+                    ],
+                    "cause": "main's F4 work merged after the freeze: sparse structured elimination for binary Macaulay matrices (#405) and the native-elimination speed-up (5fa6138f); class engineering",
+                    "n23_m2_found_median": 32153918,
+                    "n23_m2_refuted_median": 105986387,
+                    "n23_m2_gae_per_target": 88400.0,
+                    "n23_m2_projected_relation_phase_S": 4060.0,
+                    "n15_m3_found_median": 64818554,
+                    "n15_m3_refuted_median": 628830074,
+                    "n15_m3_gae_per_target": 873000.0
+                  }
+                }
               }
             }
           },
@@ -1846,7 +1875,8 @@
             "RESEARCH_KOBLITZ_SCALING_TARGET.md",
             "RESEARCH_KOBLITZ_INDEX_CALCULUS.md",
             "docs/ic/runs/ic-boundary-ledger-2026-09-21.json",
-            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
+            "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md",
+            "docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json"
           ],
           "history": []
         },

@@ -461,19 +461,20 @@
         <div class="lrow"><div class="name"><strong>n = 23, m = 2</strong> &middot; 22 unknowns, 23 equations, first fall degree 2, hit rate 0.5</div><div class="num">GAE / target</div></div>
         <div class="lrow"><div class="name">Meet in the middle, one probe</div><div class="num">0.51</div><div class="lbar"><i style="width:8.4%"></i></div></div>
         <div class="lrow"><div class="name">Enumeration of the base</div><div class="num">1,310</div><div class="lbar"><i style="width:48.5%"></i></div></div>
-        <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 6.8&times;10<sup>7</sup> word XORs found, 2.3&times;10<sup>8</sup> refuted</div><div class="num">2.0&times;10<sup>5</sup></div><div class="lbar"><i style="width:74.1%"></i></div></div>
+        <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 3.2&times;10<sup>7</sup> word XORs found, 1.1&times;10<sup>8</sup> refuted &middot; was 6.8&times;10<sup>7</sup> / 2.3&times;10<sup>8</sup> at the freeze</div><div class="num">8.8&times;10<sup>4</sup></div><div class="lbar"><i style="width:70.0%"></i></div></div>
         <div class="lrow"><div class="name">CDCL with native parity rows &middot; 29,000 conflicts found, 188,000 refuted</div><div class="num">1.3&times;10<sup>7</sup></div><div class="lbar"><i style="width:95.4%"></i></div></div>
         <div class="lrow"><div class="name"><strong>n = 15, m = 3</strong> &middot; 30 unknowns, 30 equations, first fall degree 3, hit rate 0.38</div><div class="num"></div></div>
         <div class="lrow"><div class="name">Meet in the middle</div><div class="num">24.7</div><div class="lbar"><i style="width:28.1%"></i></div></div>
         <div class="lrow"><div class="name">Enumeration of the base</div><div class="num">467</div><div class="lbar"><i style="width:43.2%"></i></div></div>
         <div class="lrow"><div class="name">S&#8324; pairs-and-solve</div><div class="num">1,118</div><div class="lbar"><i style="width:47.6%"></i></div></div>
-        <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 1.7&times;10<sup>8</sup> word XORs found, 1.7&times;10<sup>9</sup> refuted</div><div class="num">2.4&times;10<sup>6</sup></div><div class="lbar"><i style="width:86.8%"></i></div></div>
+        <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 6.5&times;10<sup>7</sup> word XORs found, 6.3&times;10<sup>8</sup> refuted &middot; was 1.7&times;10<sup>8</sup> / 1.7&times;10<sup>9</sup> at the freeze</div><div class="num">8.7&times;10<sup>5</sup></div><div class="lbar"><i style="width:81.7%"></i></div></div>
         <div class="lrow"><div class="name">CDCL &middot; no answer on 8 of 8 targets at 200,000 conflicts</div><div class="num">&ge; 4.0&times;10<sup>7</sup></div><div class="lbar"><i style="width:100%"></i></div></div>
       </div>
       <div class="legend" style="padding-top:0">
         <span>bars on a log<sub>10</sub> scale from 0.1 to 3&times;10<sup>7</sup> group additions</span>
-        <span>zero disagreements between oracles on every target of every cell</span>
-        <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 9.2&times;10<sup>3</sup>, 49&times; the whole measured cost of the tabled fold &mdash; an extrapolation</span>
+        <span>zero disagreements between oracles on every target of every cell, S&#8324; witnesses lifted in the group and compared both ways</span>
+        <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 4.1&times;10<sup>3</sup>, 22&times; the whole measured cost of the tabled fold (9.2&times;10<sup>3</sup> and 49&times; at the freeze) &mdash; an extrapolation</span>
+        <span>matrix-F4 rows from the lift-checked re-run on the merged tree, <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>: same verdicts, fall degrees and SAT conflicts as the freeze, 1.4&ndash;2.7&times; fewer word XORs after main&rsquo;s sparse elimination (#405) &mdash; engineering, ratio to the probe unmoved</span>
       </div>
     </div>
   </div>
