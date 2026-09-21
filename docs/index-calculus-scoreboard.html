@@ -1247,7 +1247,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         1.453&thinsp;&rarr;&thinsp;2.395, never a constant. It is not target correlation either:
         <code>first_hit</code> shares no target between relations and shows the same excess, higher
         at two factor-base sizes and lower at two. And a descent does not need full rank &mdash; at
-        the |F| relations the law budgets, every descent landed in 1&ndash;3 attempts and
+        the |F| relations the law budgets, every descent landed in 1&ndash;3 attempts, each landing
+        checked against its planted logarithm, and
         &Lambda;&thinsp;=&thinsp;<strong>3.103</strong> against the predicted m&thinsp;=&thinsp;3,
         where the superseded full-rank rule read <s>5.136</s> and <s>5.993</s>. The
         2<sup>124.99</sup> headline is unchanged: <code>cost_cell</code> always priced
@@ -1262,15 +1263,20 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         there uses exactly one even-abscissa point, so the vector +1 on odd abscissae and &minus;2
         on even ones annihilates every row. From l&thinsp;=&thinsp;6 the base admits all-even
         triples and the rank is full. Class <span class="chip">accounting</span>.</p>
-      <p><strong>E3's deferred item is now run, as a stage diagnostic.</strong> Section 3.2's swap
-        localisation queries detector(R&thinsp;&minus;&thinsp;P&thinsp;+&thinsp;Q), which is only
-        sound if a detector charges the same for that as for R. Swept over seven descent targets at
-        fixed curve, base, summands and seed, and priced per oracle call:
-        <code>groebner</code> costs 58,280,966&ndash;61,951,239 F4 word operations per call, flat to
-        <strong>6.3%</strong>. <code>sat</code> varies 32.4% with no trend in the target &mdash; the
-        wobble of a randomised search, not a dependence on which target it was handed.
-        <code>enumerate</code> and <code>pair-table</code> turned out setup-dominated and answer
-        nothing; <code>wdsat</code> was not exercised. One rung, one base, one seed: nothing is
+      <p><strong>E3's deferred item is now run on the pair it asks about, as a stage
+        diagnostic.</strong> Section 3.2's swap localisation queries
+        detector(R&thinsp;&minus;&thinsp;P&thinsp;+&thinsp;Q), which is only sound if a detector
+        charges the same for that as for R. <code>ic swap</code> builds R as an m-sum of base points,
+        forms R&thinsp;&minus;&thinsp;P&thinsp;+&thinsp;Q for a summand P and a class-matched Q, and
+        hands both points of each of 64 pairs to every oracle: at degree 13, m&thinsp;=&thinsp;3,
+        matrix-F4's ratio cost(swap)/cost(R) is 0.502&ndash;1.363 with median
+        <strong>1.000</strong>, dearer in exactly 32 of 64 pairs, and its worst swapped pair sits
+        below the worst pair of <em>unrelated</em> targets (1.814); SAT's median is 0.968 with the
+        heavy tail of a randomised search on both sides (31/33). No oracle is systematically dearer
+        on the swap. This panel's earlier <s>&ldquo;<code>groebner</code> flat to 6.3% across seven
+        targets&rdquo;</s> is withdrawn: it swept <code>ic run --known-log</code>, never built a
+        swapped point, and averaged away a 2.4&times; per-call spread; class
+        <span class="chip">accounting</span>. Two toy rungs, one base each, one seed: nothing is
         inferred about a full ECDLP and <strong>no speedup is claimed</strong>
         (<code>experiments/ecc2k130_e3_solver_panel.json</code>).</p>
     </div>
