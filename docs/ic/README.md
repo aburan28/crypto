@@ -581,23 +581,23 @@ from 50.4 ms a target to 16.3 ms, but precompute rose from 16.5 s to
 `auto` pricing selects the folded table for this run.
 
 `docs/ic/params/k0n53-subgroup-one-unit.json` is the current same-host
-profile for that base.  The deterministic relation stream reaches
-certified full rank at 26000 probes, so one 26000-probe unit replaces
-four planned 4000-probe units followed by three extensions.  Across
-three alternating-order pairs, candidate/reference medians were 0.825
-for wall, 0.943 for total core-seconds and 0.983 for peak RSS; the work
-fell from 28,000 probes and 31,892,000 summand scans to 26,000 and
-29,614,000.  A fresh 32-target holdout recovered all targets and spent
-2.763 s in IC against 30.991 s in signed-Frobenius rho.
+profile for that base.  A target-independent screen of public relation
+seeds found that seed 6 certifies every one of the 344 orbit columns in
+one 17000-probe unit.  Against the preceding seed-1/26000-probe profile,
+three alternating-order pairs gave median candidate/reference ratios of
+0.840 wall, 0.824 total core-seconds and 0.981 peak RSS; charged work fell
+to 19,363,000 summand scans and 588 verified relations.  A fresh
+32-target holdout recovered every target and spent 1.662 s in IC against
+28.356 s in signed-Frobenius rho, a 17.06-fold amortised wall advantage.
 
-The scalar-blind control is closer and does not cross robustly.  Public
-hash seed 53001 constructs no target scalar and supplies no factor-base
-logs; relation-derived logs recovered `7892094459170` and verified the
-published point in all five fresh runs.  Whole-process IC won 2/5 wall
-comparisons, while the median remained 1.047 times rho and IC alone used
-12.724 core-seconds.  `docs/ic/runs/koblitz-n53-one-unit-20260921.json`
-records the repeats, resources and gate failures.  This is a bounded
-engineering improvement, not a SOTA claim.
+Public hash seed 53001 constructs no target scalar and supplies no
+factor-base logs; relation-derived logs recovered `7892094459170` and
+verified the published point in all five fresh runs.  Whole-process IC
+won 4/5 wall comparisons, with medians of 1.380 s IC and 1.589 s rho,
+but IC alone still used 10.573 core-seconds.  The wall crossover is not
+a total-compute crossover.  `docs/ic/runs/koblitz-n53-one-unit-20260921.json`
+records the seed screen, repeats, resources and remaining gate failures.
+This is a bounded engineering improvement, not a SOTA claim.
 
 **`descent_summands`** lets the descent ask for a different number of
 summands than collection, which shares only the base and its pair table.
