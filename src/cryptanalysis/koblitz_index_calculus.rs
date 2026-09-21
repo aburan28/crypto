@@ -3236,12 +3236,7 @@ impl PairSumTable {
             return;
         }
         if let Some(canon) = self.canon.as_ref() {
-            // A rotation has no dependency chain worth interleaving.
-            out.extend(
-                points
-                    .iter()
-                    .map(|p| if p.infinity { 0 } else { canon.canon(p.x) + 1 }),
-            );
+            canon.point_keys(points, out);
             return;
         }
         const LANES: usize = 8;
