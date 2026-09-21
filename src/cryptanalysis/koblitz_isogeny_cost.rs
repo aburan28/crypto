@@ -1379,6 +1379,9 @@ impl ClassCostSummary {
     /// - `SPREAD` — survives both controls.  Only this one points at
     ///   something neither sampling nor the factor-base count explains.
     pub fn yield_verdict(&self) -> &'static str {
+        if self.verification_failures > 0 || self.inconsistent_rows > 0 {
+            return "INVALID";
+        }
         if self.measured < 2 {
             return "INSUFFICIENT";
         }
