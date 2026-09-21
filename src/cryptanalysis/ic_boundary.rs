@@ -221,6 +221,47 @@ pub fn trials_floor(columns: u64, signed_points: u64, m: u32, space: f64) -> f64
     (columns as f64 + 1.0) / decomposition_probability_ceiling(signed_points, m, space)
 }
 
+/// **The shape law of the pair-table family**: what the best member of
+/// it costs, and at which base size.
+///
+/// Every two-summand row on this ledger pays the same two things.  The
+/// table is one entry per pair up to the fold, `F²/4a` additions with
+/// `a = 1` for the negation fold and `a = n` when the Frobenius folds it
+/// too.  The relations are `K/2` rows — a two-summand row is an edge on
+/// the `K = F/2a` columns, and a random multigraph acquires its first
+/// cycle at about half as many edges as vertices, which is what closes
+/// the elimination — at `1/p` targets each, `p = C(F+1,2)/#E ≈ F²/2#E`,
+/// and at least one group operation per target.  So
+///
+/// ```text
+///     ops(F) = F²/(4a) + c·#E/(2aF),   minimal at F = (c·#E)^{1/3}
+///     ops    = 0.75·(c·#E)^{2/3} / a
+/// ```
+///
+/// with `c` the group operations a fresh target costs (`c = 1` for a
+/// walk step, `c ≈ 2·1.5·log₂ r` for `[a]G + [b]Q`).  In the unit, with
+/// `c = 1`:
+///
+/// ```text
+///     S_family = 0.75 · #E^{2/3} / (a · √r)
+/// ```
+///
+/// which is `Θ(r^{1/6})` on a prime-order curve: no choice of base size
+/// escapes it, and every constant this repository can tune lives inside
+/// the `0.75`.  It is a model of the family, not a theorem about the
+/// problem — the relation count is an expectation over the cycle
+/// structure, so an individual row can land a little under it — and the
+/// note reports it as such next to the generic floor, which is a bound.
+pub fn family_optimum_s(group_order: f64, r: f64, table_fold: f64) -> f64 {
+    0.75 * group_order.powf(2.0 / 3.0) / (table_fold * r.sqrt())
+}
+
+/// The base size that attains [`family_optimum_s`]: `(#E)^{1/3}` signed
+/// points, independent of the fold.
+pub fn family_optimum_base(group_order: f64) -> f64 {
+    group_order.cbrt()
+}
+
 /// **The exact counting ceiling, from the base's cofactor classes.**
 ///
 /// With `#E = h·r` and `gcd(h, r) = 1`, a point lies in the order-`r`
@@ -384,6 +425,15 @@ pub struct VariantResult {
     pub yield_over_ceiling_exact: f64,
     pub trials_floor_exact: f64,
     pub trials_over_floor_exact: f64,
+    /// `0.75·#E^{2/3}/(a·√r)`: what the best member of the pair-table
+    /// family costs, at `F = #E^{1/3}` ([`family_optimum_s`]).
+    pub family_optimum_s: f64,
+    /// The base size that attains it, against this row's `|F|`.
+    pub family_optimum_base: f64,
+    pub signed_points_over_family_optimum: f64,
+    /// `S` over the family optimum: how much of the family's own best is
+    /// left on the table.  A model, not a bound (see `family_optimum_s`).
+    pub ratio_to_family_optimum: f64,
     pub total_gae: f64,
     pub total_wall_ns: u64,
     /// `total_gae / √r`.
@@ -2509,10 +2559,25 @@ fn collect_and_solve<G: CountedGroup>(
 
     // The walk: jumps with known coefficients, the current point with
     // its coefficients.  The guard is shared by both target sources.
+    //
+    // A restart must break the segment without letting the next one
+    // merge into the path this one walked.  Round 2 redrew all sixteen
+    // jumps, at two scalar multiplications each — about 1,170 additions
+    // on a 24-bit curve, which on the binary rungs cost more than every
+    // walk step put together.  Instead, the walk jumps **once**, keeps a
+    // small pool of offsets `[c]G + [d]Q` drawn with them, and restarts
+    // by adding one pool offset to the current point (one addition, the
+    // coefficients add) while rotating which jump each hash lands on.
+    // Two segments then have different step functions, so they cannot
+    // merge, and the restart costs one group operation instead of
+    // thirty-two scalar multiplications.
     let jump_count = 16usize;
+    let pool_count = 16usize;
     let shared_jumps = targets == TargetSource::WalkSharedJumps;
     let guarded = targets.is_guarded();
     let mut jumps: Vec<(G::Elt, u64, u64)> = Vec::new();
+    let mut pool: Vec<(G::Elt, u64, u64)> = Vec::new();
+    let mut jump_rotation = 0usize;
     let mut walk_point = g.identity();
     let (mut wa, mut wb) = (0u64, 0u64);
     let mut walk_fresh = true;
@@ -2521,9 +2586,13 @@ fn collect_and_solve<G: CountedGroup>(
     let mut seen: FastMap<()> = fast_map(if guarded { 1 << 12 } else { 0 });
     let (mut walk_steps, mut walk_restarts, mut repeats_skipped, mut guard_probes, mut walk_jumps) =
         (0u64, 0u64, 0u64, 0u64, 0u64);
-    if shared_jumps {
+    if targets.is_walk() {
         jumps = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, jump_count);
         walk_jumps += jump_count as u64;
+        if !shared_jumps {
+            pool = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, pool_count);
+            walk_jumps += pool_count as u64;
+        }
     }
 
     while trials < max_trials {
@@ -2542,21 +2611,28 @@ fn collect_and_solve<G: CountedGroup>(
             }
             TargetSource::Walk | TargetSource::WalkSharedJumps => {
                 if walk_fresh || segment_steps >= segment_cap {
-                    if !shared_jumps {
-                        jumps = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, jump_count);
-                        walk_jumps += jump_count as u64;
+                    if walk_restarts == 0 || shared_jumps || pool.is_empty() {
+                        // The first segment, and every segment of the
+                        // unguarded diagnostic, starts from a fresh
+                        // `[a]G + [b]Q`.
+                        wa = rng.gen_range(1..r);
+                        wb = rng.gen_range(1..r);
+                        let ag = g.mul(&mut rel.group_ops, generator, wa);
+                        let bq = g.mul(&mut rel.group_ops, target, wb);
+                        walk_point = g.add(&mut rel.group_ops, ag, bq);
+                    } else {
+                        let (op, oa, ob) = pool[rng.gen_range(0..pool.len())];
+                        walk_point = g.add(&mut rel.group_ops, walk_point, op);
+                        wa = addmod(wa, oa, r);
+                        wb = addmod(wb, ob, r);
+                        jump_rotation = (jump_rotation + 1 + rng.gen_range(0..jump_count - 1)) % jump_count;
                     }
-                    wa = rng.gen_range(1..r);
-                    wb = rng.gen_range(1..r);
-                    let ag = g.mul(&mut rel.group_ops, generator, wa);
-                    let bq = g.mul(&mut rel.group_ops, target, wb);
-                    walk_point = g.add(&mut rel.group_ops, ag, bq);
                     walk_fresh = false;
                     walk_restarts += 1;
                     segment_steps = 0;
                 } else {
                     let hsh = mix(g.key(&walk_point));
-                    let j = ((hsh >> 24) % jump_count as u64) as usize;
+                    let j = (((hsh >> 24) as usize) + jump_rotation) % jump_count;
                     let (jp, aj, bj) = jumps[j];
                     walk_point = g.add(&mut rel.group_ops, walk_point, jp);
                     wa = addmod(wa, aj, r);
@@ -2789,6 +2865,7 @@ fn assemble_variant(
     calib: &Calibration,
     rho_s: f64,
     floor_s: f64,
+    table_fold: f64,
 ) -> VariantResult {
     let mut fb_phase = fb_cost.clone();
     let table_kind = match &table {
@@ -2824,6 +2901,8 @@ fn assemble_variant(
     let measured_yield = outcome.relations_found as f64 / outcome.trials.max(1) as f64;
     let (classes, p_exact) = exact.unwrap_or((0, p_ceiling));
     let tf_exact = (columns as f64 + 1.0) / p_exact;
+    let fam = family_optimum_s(space, r as f64, table_fold);
+    let fam_base = family_optimum_base(space);
     VariantResult {
         name: name.to_string(),
         oracle: oracle_name,
@@ -2852,6 +2931,10 @@ fn assemble_variant(
         yield_over_ceiling_exact: measured_yield / p_exact,
         trials_floor_exact: tf_exact,
         trials_over_floor_exact: outcome.trials as f64 / tf_exact,
+        family_optimum_s: fam,
+        family_optimum_base: fam_base,
+        signed_points_over_family_optimum: signed_points as f64 / fam_base,
+        ratio_to_family_optimum: s / fam,
         total_gae,
         total_wall_ns: total_wall,
         s,
@@ -3059,6 +3142,19 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
     calib.ns_per_lookup = table.calibrate_lookup(1_000_000);
     let exact_m2 = exact_decomposition_ceiling(curve, &fb.points, r, 2);
     let exact_m3 = exact_decomposition_ceiling(curve, &fb.points, r, 3);
+    // Round 3: the base the family's shape law asks for, `#E^{1/3}`
+    // signed points, against the `2^{⌈bits/3⌉}` abscissae of the rule
+    // above.  Its own rows, its own table; `None` when the two agree to
+    // within a tenth so the ladder does not carry a duplicate.
+    let balanced_abscissae = (family_optimum_base(inst.group_order as f64) / 2.0).round().max(4.0) as usize;
+    let balanced = (balanced_abscissae as f64 / fb.abscissae.max(1) as f64)
+        .max(fb.abscissae.max(1) as f64 / balanced_abscissae as f64)
+        > 1.1;
+    let fb_bal = balanced.then(|| prime_factor_base(inst, balanced_abscissae));
+    let table_bal = fb_bal.as_ref().map(|f| PairTable::build_negation_folded(curve, f));
+    let exact_bal_m2 = fb_bal
+        .as_ref()
+        .and_then(|f| exact_decomposition_ceiling(curve, &f.points, r, 2));
 
     let floor_s = generic_floor_s(2.0);
     let mut out = RegimeInstance {
@@ -3095,7 +3191,19 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         "ceiling_exact_m2": exact_m2.map(|e| e.1),
         "ceiling_uniform_m3": decomposition_probability_ceiling(fb.points.len() as u64, 3, inst.group_order as f64),
         "ceiling_exact_m3": exact_m3.map(|e| e.1),
+        "family_optimum_base_signed_points": family_optimum_base(inst.group_order as f64),
+        "family_optimum_s": family_optimum_s(inst.group_order as f64, r as f64, 1.0),
     });
+    if let (Some(f), Some(t)) = (&fb_bal, &table_bal) {
+        out.curve["factor_base_balanced"] = serde_json::json!({
+            "description": f.description,
+            "signed_points": f.points.len(),
+            "abscissae": f.abscissae,
+            "columns": f.columns,
+            "negation_folded_table_entries": t.entries,
+            "ceiling_exact_m2": exact_bal_m2.map(|e| e.1),
+        });
+    }
 
     let space = inst.group_order as f64;
     for rep in 0..cfg.repeats {
@@ -3125,19 +3233,28 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
             ("mitm_m3_negfold", Oracle::Mitm { table: &table_neg, m: 3 }, random),
             ("mitm_m3_negfold_walk", Oracle::Mitm { table: &table_neg, m: 3 }, walk),
         ];
+        let mut variants = variants;
+        if let Some(t) = &table_bal {
+            variants.push(("mitm_m2_negfold_walk_balanced", Oracle::Mitm { table: t, m: 2 }, walk));
+        }
         for (name, oracle, targets) in variants {
-            let budget = trial_budget(cfg, &fb, oracle.summands(), space);
+            let fb = match name.ends_with("_balanced") {
+                true => fb_bal.as_ref().unwrap_or(&fb),
+                false => &fb,
+            };
+            let exact_m2 = if name.ends_with("_balanced") { exact_bal_m2 } else { exact_m2 };
+            let budget = trial_budget(cfg, fb, oracle.summands(), space);
             let outcome = collect_and_solve(
                 curve,
                 g,
                 target,
                 r,
                 inst.cofactor,
-                &fb,
+                fb,
                 seed,
                 budget,
                 targets,
-                |ops, ctr, point| decompose_prime(curve, &fb, &oracle, ops, ctr, point),
+                |ops, ctr, point| decompose_prime(curve, fb, &oracle, ops, ctr, point),
             );
             let exact = if oracle.summands() == 2 { exact_m2 } else { exact_m3 };
             let mut v = assemble_variant(
@@ -3158,6 +3275,7 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
                 &calib,
                 rho_s,
                 floor_s,
+                1.0,
             );
             v.verified &= v.recovered == Some(d);
             out.variants.push(v);
@@ -3184,6 +3302,7 @@ fn run_binary_variant(
     calib: &Calibration,
     rho_s: f64,
     floor_s: f64,
+    table_fold: f64,
 ) -> VariantResult {
     let g = BinaryGroup(&inst.fast);
     let space = inst.group_order as f64;
@@ -3218,6 +3337,7 @@ fn run_binary_variant(
         calib,
         rho_s,
         floor_s,
+        table_fold,
     );
     v.verified &= v.recovered == Some(d);
     v
@@ -3464,6 +3584,21 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
     let l = inst.n.div_ceil(3);
     let basis: Vec<u64> = (0..l).map(|i| 1u64 << i).collect();
     let mut fb = binary_subspace_factor_base(inst, &basis);
+    // Round 3: the subspace dimension the family's shape law asks for.
+    // About half the subspace's elements carry points and each carries
+    // two, so a dimension `l` base holds about `2^l` signed points and
+    // the model optimum `#E^{1/3}` wants `l* = log2(#E^{1/3})`.  The
+    // measurements put the real optimum at or a little below `l*` — the
+    // model's `c = 1` per target is right but its `K/2` relations is
+    // pessimistic, and the gap grows as the base shrinks — so the ladder
+    // brackets it, running `l*` and `l* − 1` wherever they differ from
+    // the `⌈n/3⌉` rule.
+    let l_star = (family_optimum_base(inst.group_order as f64).log2().round() as i64)
+        .clamp(2, (inst.n as i64 - 1).min(20)) as u32;
+    let l_bal = if l_star == l { l_star.saturating_sub(1).max(2) } else { l_star };
+    let fb_bal = (l_bal != l).then(|| {
+        binary_subspace_factor_base(inst, &(0..l_bal).map(|i| 1u64 << i).collect::<Vec<u64>>())
+    });
     let mut class_ops = GroupOps::default();
     let admissible: Vec<u32> = [3u32, 2]
         .into_iter()
@@ -3473,6 +3608,10 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
     fb.cost.count("admissibility_scalar_mults", class_ops.scalar_mults);
     let table = PairTable::build(&g, &fb);
     let table_neg = PairTable::build_negation_folded(&g, &fb);
+    let table_bal = fb_bal.as_ref().map(|f| PairTable::build_negation_folded(&g, f));
+    let exact_bal_m2 = fb_bal
+        .as_ref()
+        .and_then(|f| exact_decomposition_ceiling(&g, &f.points, r, 2));
     calib.ns_per_lookup = table.calibrate_lookup(1_000_000);
     let census: Vec<(u32, usize)> = admissible
         .iter()
@@ -3510,7 +3649,20 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
         "ceiling_exact_m2": exact_m2.map(|e| e.1),
         "ceiling_uniform_m3": decomposition_probability_ceiling(fb.points.len() as u64, 3, space),
         "ceiling_exact_m3": exact_m3.map(|e| e.1),
+        "family_optimum_base_signed_points": family_optimum_base(space),
+        "family_optimum_s": family_optimum_s(space, r as f64, 1.0),
     });
+    if let (Some(f), Some(t)) = (&fb_bal, &table_bal) {
+        out.curve["factor_base_balanced"] = serde_json::json!({
+            "description": f.description,
+            "dimension": l_bal,
+            "signed_points": f.points.len(),
+            "abscissae": f.abscissae,
+            "columns": f.columns,
+            "negation_folded_table_entries": t.entries,
+            "ceiling_exact_m2": exact_bal_m2.map(|e| e.1),
+        });
+    }
     let mut rng = StdRng::seed_from_u64(cfg.seed ^ r ^ 0xC2);
     let mut ops = GroupOps::default();
     for rep in 0..cfg.repeats {
@@ -3555,11 +3707,20 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
             variants.push(("mitm_m2_negfold".into(), Oracle::Mitm { table: &table_neg, m: 2 }, random));
             variants.push(("mitm_m2_negfold_walk".into(), Oracle::Mitm { table: &table_neg, m: 2 }, walk));
         }
+        if let Some(t) = &table_bal {
+            variants.push(("mitm_m2_negfold_walk_balanced".into(), Oracle::Mitm { table: t, m: 2 }, walk));
+        }
         for (name, oracle, targets) in variants {
+            let base = if name.ends_with("_balanced") { fb_bal.as_ref().unwrap_or(&fb) } else { &fb };
+            let exact_of = |m: u32| match (name.ends_with("_balanced"), m) {
+                (true, 2) => exact_bal_m2,
+                (_, 2) => exact_m2,
+                _ => exact_m3,
+            };
             let v = run_binary_variant(
                 inst,
                 &name,
-                &fb,
+                base,
                 &oracle,
                 targets,
                 exact_of(oracle.summands()),
@@ -3570,6 +3731,7 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
                 &calib,
                 rho_s,
                 out.floor_s,
+                1.0,
             );
             out.variants.push(v);
         }
@@ -3860,6 +4022,10 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
             }
         }
         for (name, fb, oracle, targets, exact) in variants {
+            // The table fold the family optimum is measured against: the
+            // Frobenius-folded table holds one entry per `⟨σ, −1⟩`-orbit
+            // of pairs, so its build is `|F|²/4n` rather than `|F|²/4`.
+            let table_fold = if matches!(oracle, Oracle::MitmFrobenius { .. }) { n as f64 } else { 1.0 };
             let v = run_binary_variant(
                 inst,
                 &name,
@@ -3874,6 +4040,7 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
                 &calib,
                 rho_s,
                 out.floor_s,
+                table_fold,
             );
             out.variants.push(v);
         }
@@ -4268,8 +4435,20 @@ mod tests {
         let inst = roster_prime_instance(12).unwrap();
         let res = run_prime_instance(&inst, &cfg);
         assert!(res.rho_verified_all, "{:?}", res.rho);
-        assert_eq!(res.variants.len(), 8);
+        // Eight rungs, plus the balanced row wherever `#E^{1/3}` differs
+        // from the `2^{⌈bits/3⌉}` rule by more than a tenth.
+        assert!((8..=9).contains(&res.variants.len()), "{}", res.variants.len());
+        let balanced = res.variants.iter().find(|v| v.name.ends_with("_balanced"));
+        if let Some(b) = balanced {
+            assert!(res.curve["factor_base_balanced"].is_object());
+            assert!(
+                (b.signed_points_over_family_optimum - 1.0).abs() < 0.3,
+                "the balanced base should sit at the family optimum: {}",
+                b.signed_points_over_family_optimum
+            );
+        }
         for v in &res.variants {
+            assert!(v.family_optimum_s > 0.0 && v.ratio_to_family_optimum > 0.0);
             assert!(v.verified, "{} did not verify: {v:?}", v.name);
             assert!(v.total_gae > 0.0 && v.s.is_finite());
             assert!(v.relations.get("trials") == v.trials);
@@ -4296,7 +4475,9 @@ mod tests {
         let walk = res.variants.iter().find(|v| v.name == "mitm_m2_negfold_walk").unwrap();
         assert_eq!(walk.targets, "walk");
         assert!(walk.relations.get("walk_steps") > 0);
-        assert_eq!(walk.relations.get("walk_jumps"), 16 * walk.relations.get("walk_restarts"));
+        // Sixteen jumps and sixteen restart offsets, drawn once for the
+        // whole run whatever the restarts (Round 3).
+        assert_eq!(walk.relations.get("walk_jumps"), 32);
         let random = res.variants.iter().find(|v| v.name == "mitm_m2_negfold").unwrap();
         assert!(walk.relations.group_ops.scalar_mults < random.relations.group_ops.scalar_mults);
         // No target is ever presented twice, on either source, so no row
@@ -4304,11 +4485,68 @@ mod tests {
         // coefficients: every row is a relation search, not a collision
         // search.  Every row is guarded and the guard is priced.
         for v in &res.variants {
-            assert_eq!(v.targets, if v.name.ends_with("_walk") { "walk" } else { "random" });
+            assert_eq!(v.targets, if v.name.contains("_walk") { "walk" } else { "random" });
             assert_eq!(v.linear_algebra.get("repeated_column_rows"), 0, "{}", v.name);
             assert_eq!(v.linear_algebra.get("pinned_by_repeated_row"), 0, "{}", v.name);
             assert!(v.relations.get("target_guard_probes") >= v.trials, "{}", v.name);
         }
+    }
+
+    #[test]
+    fn the_family_optimum_is_the_minimum_of_the_table_and_relation_terms() {
+        // ops(F) = F²/(4a) + #E/(2aF) is minimal at F = #E^{1/3} and
+        // equals 0.75·#E^{2/3}/a there; the closed forms must agree with
+        // a numeric sweep, and the fold must divide both.
+        for &e in &[1.0e6f64, 1.185e7, 1.33e8, 2.2e12] {
+            for &a in &[1.0f64, 41.0] {
+                let ops = |f: f64| (f * f / 4.0 + e / (2.0 * f)) / a;
+                let f_star = family_optimum_base(e);
+                let best = ops(f_star);
+                assert!((best - 0.75 * e.powf(2.0 / 3.0) / a).abs() / best < 1e-9);
+                for k in 1..=40 {
+                    let f = f_star * (0.2 + 0.1 * k as f64);
+                    assert!(ops(f) >= best * (1.0 - 1e-12), "F* is not the minimum at {f}");
+                }
+                // In the unit, with r = #E (prime order).
+                assert!((family_optimum_s(e, e, a) - best / e.sqrt()).abs() / (best / e.sqrt()) < 1e-9);
+            }
+        }
+        // The Frobenius fold divides the family's cost by n.
+        let (e, r) = (2.2e12, 5.5e11);
+        assert!((family_optimum_s(e, r, 1.0) / family_optimum_s(e, r, 41.0) - 41.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn a_walk_restart_costs_one_addition_and_still_does_not_merge() {
+        // Round 2 redrew sixteen jumps at two scalar multiplications
+        // each on every restart; Round 3 adds one pooled offset and
+        // rotates the jump index.  The relation phase's scalar
+        // multiplications must therefore not grow with the restarts, and
+        // no target may repeat.
+        let inst = roster_prime_instance(18).unwrap();
+        let curve = &inst.curve;
+        let fb = prime_factor_base(&inst, 16);
+        let table = PairTable::build_negation_folded(curve, &fb);
+        let g = inst.generator_point();
+        let mut ops = GroupOps::default();
+        let d = 30_011 % inst.r;
+        let q = curve.mul(&mut ops, g, d);
+        let oracle = Oracle::Mitm { table: &table, m: 2 };
+        let mut restarts = 0u64;
+        for seed in 1..=8u64 {
+            let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, |o, c, p| {
+                decompose_prime(curve, &fb, &oracle, o, c, p)
+            });
+            assert_eq!(out.recovered, Some(d), "seed {seed}");
+            assert_eq!(out.linear_algebra.get("repeated_column_rows"), 0);
+            let r = out.relations.get("walk_restarts");
+            restarts += r;
+            // Sixteen jumps and sixteen pool offsets, two scalar
+            // multiplications each, drawn once; the restarts add none.
+            assert_eq!(out.relations.group_ops.scalar_mults, 2 * 32 + 2, "seed {seed}: restarts {r}");
+            assert_eq!(out.relations.get("walk_jumps"), 32);
+        }
+        assert!(restarts > 0, "the guard should have forced a restart somewhere in eight runs");
     }
 
     #[test]
@@ -4736,6 +4974,10 @@ mod tests {
                 yield_over_ceiling_exact: 1.0,
                 trials_floor_exact: 1.0,
                 trials_over_floor_exact: 1.0,
+                family_optimum_s: 1.0,
+                family_optimum_base: 1.0,
+                signed_points_over_family_optimum: 1.0,
+                ratio_to_family_optimum: 1.0,
                 total_gae: gae,
                 total_wall_ns: 0,
                 s: 1.0,
