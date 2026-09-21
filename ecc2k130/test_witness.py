@@ -36,6 +36,7 @@ rather than silently passing.
 import argparse
 import json
 import os
+import struct
 import subprocess
 import sys
 import tempfile
@@ -80,6 +81,18 @@ def to_v1(src, dst):
         rec = raw[off:off + stride]
         out += rec[0:8] + rec[16:40]     # seed, then canon[3]; iters/counts go
     open(dst, "wb").write(bytes(out))
+
+
+def read_v2(path):
+    """{seed: whole record} for a v2 corpus, so two can be compared field for
+    field rather than by a digest that hides which field moved."""
+    raw = open(path, "rb").read()
+    assert raw[:len(DP_MAGIC_V2)] == DP_MAGIC_V2, path
+    out = {}
+    for off in range(V2_HEADER, len(raw), V2_STRIDE):
+        r = struct.unpack_from("<QQ3Q8I", raw, off)
+        out[r[0]] = r
+    return out
 
 
 def claim_index(text):
@@ -211,6 +224,41 @@ def main():
                   "%d of %d agree" % (len(same), len(carried)))
     else:
         print("skip carried-vs-replayed -- this client was built without the counters")
+
+    # ---- the client's own batched replay --------------------------------
+    # `--replay` walks a corpus through the production bitsliced kernel, so it
+    # costs the longest trail in a chunk rather than the sum of them all.  The
+    # test that binds it is not the speed: it is that the counters it derives
+    # are the SAME numbers the device carried the first time.
+    if stride == V2_STRIDE:
+        upgraded = os.path.join(tmp, "upgraded.bin")
+        r = run(["./ecc2k130-cpu", "--curve", str(CURVE), "--instance", str(INSTANCE),
+                 "--dp-weight", str(DPW), "--replay", v1corpus, "--dp-file", upgraded])
+        if check("--replay upgrades a v1 corpus", r.returncode == 0,
+                 (r.stdout + r.stderr).strip()[-200:]):
+            orig, back = read_v2(corpus), read_v2(upgraded)
+            check("the replay covers every record",
+                  set(orig) == set(back), "%d in, %d out" % (len(orig), len(back)))
+            same = [k for k in orig if k in back and orig[k] == back[k]]
+            check("replayed records equal carried records, field for field",
+                  len(same) == len(orig) and len(orig) > 0,
+                  "%d of %d identical" % (len(same), len(orig)))
+
+        # On a v2 corpus --replay is an audit: it checks the counts it finds.
+        r = run(["./ecc2k130-cpu", "--curve", str(CURVE), "--instance", str(INSTANCE),
+                 "--dp-weight", str(DPW), "--replay", corpus])
+        check("--replay audits a v2 corpus", r.returncode == 0,
+              (r.stdout + r.stderr).strip()[-160:])
+
+        # and refuses one whose witness does not survive the walk
+        bad2 = os.path.join(tmp, "bad-witness.bin")
+        raw2 = bytearray(open(corpus, "rb").read())
+        raw2[V2_HEADER + 40] ^= 1              # one bit of one count
+        open(bad2, "wb").write(bytes(raw2))
+        r = run(["./ecc2k130-cpu", "--curve", str(CURVE), "--instance", str(INSTANCE),
+                 "--dp-weight", str(DPW), "--replay", bad2])
+        check("--replay catches a tampered witness", r.returncode != 0,
+              "exit %d" % r.returncode)
 
     # A corpus record whose orbit the replay does not reach is a disagreement
     # about the walk, and nothing after it is worth claiming.

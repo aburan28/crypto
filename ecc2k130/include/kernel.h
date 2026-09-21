@@ -43,6 +43,13 @@ struct WalkParams {
     DpRecord *dp;
     unsigned *dpCount;                // report count, restart count, exhausted seed flag
     unsigned dpCap;
+    // Replay: when set, init() seeds lanes from this list instead of the
+    // run-id PRF, and lanes past replayCount start dead so a partial final
+    // chunk walks nothing.  Null for an ordinary search, which is every
+    // caller that does not set it -- hence the default, so a backend that
+    // never heard of replay cannot inherit a stale pointer.
+    const unsigned long long *replaySeeds = nullptr;
+    unsigned long long replayCount = 0;
     CurveConsts consts;
     // Table walk only (tablewalk.h): the last four step tags of every lane,
     // and the flat constant buffer packedtablewalk.cuh copies to shared memory.
@@ -106,10 +113,24 @@ ECC_WIDE_UNROLL_PRAGMA
         W x[M], y[M];
         unsigned long long seeds[LANES];
         for (int slot = 0; slot < BATCH; ++slot) {
+            W absent = ECC_ZERO;
             for (int lane = 0; lane < LANES; ++lane) {
                 const unsigned long long walkIndex =
                     ((unsigned long long)tid * BATCH + slot) * LANES + lane;
-                seeds[lane] = eccSeedFor(P.runId, walkIndex);
+                if (P.replaySeeds) {
+                    // A replay walks the corpus's seeds, not the run's. The
+                    // last chunk is usually short, so the lanes past its end
+                    // start dead: they have no trail to walk and must not
+                    // report one.
+                    if (walkIndex < P.replayCount) {
+                        seeds[lane] = P.replaySeeds[walkIndex];
+                    } else {
+                        seeds[lane] = 0;
+                        absent = absent | laneMask<W>(lane);
+                    }
+                } else {
+                    seeds[lane] = eccSeedFor(P.runId, walkIndex);
+                }
                 P.seed[laneIndex(slot, lane, tid, P.threads)] = seeds[lane];
                 P.startIter[laneIndex(slot, lane, tid, P.threads)] = 0;
             }
@@ -119,7 +140,7 @@ ECC_WIDE_UNROLL_PRAGMA
 #if ECC_WITNESS
             clearCounts(tid, slot, P, ~ECC_ZERO);
 #endif
-            P.dead[(size_t)slot * (size_t)P.threads + (size_t)tid] = ECC_ZERO;
+            P.dead[(size_t)slot * (size_t)P.threads + (size_t)tid] = absent;
         }
     }
 
@@ -186,7 +207,11 @@ ECC_WIDE_UNROLL_PRAGMA
             const size_t li = laneIndex(slot, lane, tid, P.threads);
             DpRecord rec;
             rec.seed = P.seed[li];
-            if ((rec.seed & 0xffffull) == 0xffffull) eccAtomicInc(P.dpCount + 2);
+            // The low-16-bits tripwire watches the run-id seed namespace for
+            // a counter about to wrap into another walk.  A corpus seed is an
+            // arbitrary 64-bit value that can carry that pattern innocently,
+            // so it means nothing on a replay.
+            if (!P.replaySeeds && (rec.seed & 0xffffull) == 0xffffull) eccAtomicInc(P.dpCount + 2);
             rec.iters = now - P.startIter[li];
             F::getLane(x, lane, rec.x);
             F::getLane(y, lane, rec.y);

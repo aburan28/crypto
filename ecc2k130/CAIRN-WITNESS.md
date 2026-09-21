@@ -173,17 +173,52 @@ byte-identical output on both paths.
 
 So 3.3x on the replay and 6.3x on the carried path, on four cores.
 
-**What this does not change is the shape of the cost**, and that is the honest
-limit. A serial replay costs the SUM of the trail lengths; parallelism divides
-that sum by the core count, but a single trail still cannot be split. On the
-128-record ECC2K-130 corpus the sum is 5,039,383 steps and the longest single
-trail is 77,146 -- a factor of 65 between what a replay must pay and what a
-*batched* replay bounded by the longest trail would pay. Closing that gap means
-replaying through the bitsliced walk, 512 lanes at a time, which is the walk
-this client already has and the counters Route B already added: a replay kernel
-is Route B's kernel pointed at a corpus's seeds instead of at fresh ones. It
-needs seed injection into the reseed path, which is the hottest code in the
-campaign, so it is written up here rather than rushed.
+**And the shape of the cost is changed too**, which is the part that matters.
+A serial replay costs the SUM of the trail lengths, and parallelism only
+divides that sum -- a single trail still cannot be split across cores. The
+client's `--replay` walks the corpus through the production bitsliced kernel
+instead, 512 lanes to a word, so it costs the LONGEST trail in a chunk rather
+than the sum of them all.
+
+It is Route B's kernel pointed at a corpus's seeds. Nothing about the walk, the
+counters or the reports changes; `init()` draws each lane's seed from a list
+when one is supplied and marks the lanes past its end dead, which is a branch
+in code that runs once per chunk and never in the step loop. That was the
+design constraint: the reseed path is the hottest code in the campaign, and it
+is untouched -- `reseed()` revives a dead lane onto the *next* seed in its own
+namespace, which is exactly what a replay must not do, so a replay re-runs
+`init()` instead.
+
+Measured on the real corpus, 128 ECC2K-130 records at weight 34, four cores:
+
+| corpus | records | sum of trails | longest trail | `--replay` | serial at 1,700 steps/s |
+|---|---:|---:|---:|---:|---:|
+| the 32 longest | 32 | 2,219,026 | 77,146 | 126.7 s | ~1,305 s |
+| the 64 longest | 64 | 3,880,366 | 77,146 | 125.8 s | ~2,283 s |
+| all of it | 128 | 5,039,383 | 77,146 | 131.5 s | ~2,964 s |
+
+The wall clock is flat while the work grows 2.3x, because every subset shares
+the same longest trail. That is the shape claim, demonstrated rather than
+asserted: **23x on this corpus, and the ratio keeps growing with the record
+count** -- 5,121 m=41 records replay in 0.08 s, one chunk, whatever their
+number.
+
+**What binds it is not the speed.** The replayed corpus is compared against the
+one the device carried, field for field: 128 of 128 records identical on seed,
+iterations, canonical orbit and all eight counts, and 5,121 of 5,121 at m = 41
+in `test_witness.py`. Re-deriving the counters through a different path and
+getting the same numbers is the strongest statement available that either path
+is right.
+
+On a v2 corpus `--replay` checks the counts it finds instead of writing them,
+so it is also a full-corpus **audit** of the carried witness. Flipping one bit
+of one count is caught (`witness[0] replays as 2, the record claims 3`, exit 3).
+
+Two limits, stated plainly. It is **host-only**: the seeds would have to reach
+the device, and that is a buffer this machine cannot test, so the CUDA path
+refuses rather than running a GPU replay nobody has exercised. And it needs the
+bitsliced sigma^j + 1 walk, so `--packed`, `--ref-engine` and `WALK_TABLE=1`
+refuse for the same reason `WITNESS=1` does.
 
 ## 5. Route B, priced
 

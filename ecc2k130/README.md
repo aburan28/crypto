@@ -236,7 +236,11 @@ budget it was compared against is itself the packed preset's, priced in
 
 **Replay what you claim.** This keeps one real job that the search kernel
 cannot do backwards: the points **already collected without counters** are
-claimable no other way. At the campaign's weight 32 a trail is `2^28.41` steps,
+claimable no other way. `--replay` on the client does it through the production
+bitsliced walk, so it costs the *longest* trail in a chunk rather than the sum
+of them all -- 128 ECC2K-130 records in 131 s against the ~2,964 s a serial
+re-walk of the same 5,039,383 steps would take, and flat as the corpus grows.
+On a v2 corpus it audits the counts instead of writing them. At the campaign's weight 32 a trail is `2^28.41` steps,
 so replaying a claimed trail costs about what collecting it did — roughly
 **15 GPU-hours per 2^21 orbits**. `build/witness` is both paths:
 
