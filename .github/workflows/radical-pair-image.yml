@@ -1,0 +1,36 @@
+name: Radical pair-image evidence
+
+on:
+  pull_request:
+    paths:
+      - "research/radical_pair_image_20260921/**"
+      - "docs/index-calculus-scoreboard.html"
+      - ".github/workflows/radical-pair-image.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify frozen evidence and report syntax
+        run: |
+          python3 -m json.tool research/radical_pair_image_20260921/contract.json >/dev/null
+          python3 research/radical_pair_image_20260921/audit.py \
+            research/radical_pair_image_20260921/results/run-002
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          parser = HTMLParser()
+          parser.feed(Path("docs/index-calculus-scoreboard.html").read_text())
+          parser.close()
+          print("scoreboard HTML: pass")
+          PY
