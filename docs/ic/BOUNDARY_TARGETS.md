@@ -153,7 +153,7 @@ recovery, or deployed-curve security impact.
 | `decomposition` | 2-decomp via S₃ through bench sizes; S₄/Gröbner not a scaling win. **FFD not published** on the current 2-decomp bench frontier (must be filled on the next algebraic push) | One verified 3-decomposition relation family on a ≥14-bit prime with GB cost + **FFD / DoR logged**; record unknowns, system degree, eq/var, median ms | Witnesses sum in the group; timing + **FFD** logged | `ec_index_calculus.rs` |
 | `relation_yield` | Enough relations for toys ≤ 14 bits (j=0) / 12 bits (generic) | Publish trials-per-relation vs bitlength for 10–16 bits on a frozen curve ladder | ≥3 bitlengths; R² reported | `docs/RESEARCH_BENCH_LOG.md` |
 | `rank` | Dense GE mod n on toy matrices; dims unpublished as a frontier | Sparse LA for ≥ 2⁸ factor-base columns on a 16-bit instance; report dims + LA cost | Correctness vs dense GE on a subsample | — |
-| `end_to_end_dlp` | Generic IC **12-bit**; j=0 orbit IC **14-bit** (bench success); synthetic known-answer | j=0 IC known-answer at **16 bits** under the same bench harness | Agrees with ρ on the same instance; wall time logged | `docs/RESEARCH_BENCH_LOG.md` |
+| `end_to_end_dlp` | **j=0 known-answer IC at 16 bits** — recovers d with `[d]G = Q` and agrees with ρ on the same instance; three independent replay receipts (2026-09-11 both-runs, 2026-09-15 3-seed, 2026-09-15 3-shot redraw), zero discrepancies; IC wall ≈1.5–2.1 s ≫ ρ ms, so **no vs_rho crossover**; 14-bit control retained | Extend the known-answer ladder to ≥ 20 bits and split stage timers (FB → relations → LA → verify) | Agrees with ρ; wall logged; split stage timers; independent recomputation for any promotion past 16 bits | `runs_manual/prime_j0_e2e_16bit_20260911/`; `runs_manual/prime_j0_e2e_16bit_20260915/`; `docs/RESEARCH_BENCH_LOG.md` |
 | `vs_rho` | **Not achieved** — IC slower than ρ at all measured sizes; dense 3-sum non-scaling wall ~**80 bits** | Any prime-order instance ≥ 16 bits where charged IC < ρ (same host accounting) | Artifact cost model + independent replay; no verifier gaming | `research/ecdlp_autolab/paper.md` |
 
 **Asymptotic reminder:** 2-decomp IC on prime fields is `O(p^{3/2})` vs ρ's
@@ -168,7 +168,7 @@ recovery, or deployed-curve security impact.
 2. **Koblitz factor base → replace the explicit pair table while preserving 309 ms certified-base ingestion and exact replay.**
 3. **Koblitz decomposition → repeat n=31 dim-16 m=2 over a distribution or advance the quadratic cell to n=37.**
 4. **Binary decomposition → first sub-`2^{2ℓ}` oracle at `ℓ = 8` with FFD logged.**
-5. **Prime end-to-end DLP → 16-bit j=0 public known-answer IC.**
+5. **Prime end-to-end DLP → extend the j=0 known-answer IC ladder to ≥ 20 bits with split stage timers** *(16-bit achieved 2026-09-21: IC agrees with ρ and truth, independently replayed 3× with zero discrepancies — no vs_rho crossover)*.
 6. Fill missing binary/prime yield and rank distributions and backfill FFD/DoR where only wall or conflicts are cited.
 
 ---

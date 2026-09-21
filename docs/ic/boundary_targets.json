@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "title": "Index-calculus boundary ledger",
-  "updated": "2026-09-12",
+  "updated": "2026-09-21",
   "claim_hygiene": "Public synthetic / known-answer fixtures only. Never combine best component costs from different runs into a synthetic vs_rho win.",
   "ffd_vs_rank_la": "FFD / degree_of_regularity apply to Boolean Macaulay / Gr\u00f6bner algebra of Semaev (decomposition). Relation-matrix LA over F_r is stage rank; never conflate the two.",
   "stages": [
@@ -152,7 +152,7 @@
       "rank": 5,
       "regime": "prime",
       "stage": "end_to_end_dlp",
-      "beat": "j=0 public known-answer IC at 16 bits agreeing with rho"
+      "beat": "Extend the j=0 known-answer IC ladder to >=20 bits with split stage timers (16-bit achieved 2026-09-21, independently replayed 3x, zero discrepancies; no vs_rho crossover)"
     },
     {
       "rank": 6,
@@ -1008,26 +1008,83 @@
         "end_to_end_dlp": {
           "status": "record",
           "current": {
-            "summary": "Generic IC 12-bit; j=0 orbit IC 14-bit bench success",
+            "summary": "j=0 known-answer IC at 16 bits recovers d with [d]G=Q and agrees with rho on the same instance; three independent replay receipts (2026-09-11 both-runs, 2026-09-15 3-seed, 2026-09-15 3-shot redraw) with zero discrepancies; IC wall ~1.5-2.1 s >> rho ms, so no vs_rho crossover",
             "metrics": {
-              "generic_bits": 12,
-              "j0_bits": 14,
-              "best_variant": "j0_zeta_orbit",
-              "claim_boundary": "synthetic_known_answer"
-            }
+              "n_or_bits": 16,
+              "curve": "j0-bench-16bit",
+              "recovered_d_verified": true,
+              "ic_agrees_rho": true,
+              "ic_matches_truth": true,
+              "target_orbits": 40,
+              "claim_boundary": "public_synthetic_known_answer",
+              "stage_timers": {
+                "ic_ms": 2088.1385,
+                "rho_ms": 6.7435,
+                "note": "producer does not yet split FB/relations/LA; wall is full j0_index_calculus_dlp vs pollard_rho (runs_manual/prime_j0_e2e_16bit_20260915/result.json)"
+              },
+              "control_14bit": {
+                "ic_agrees_rho": true,
+                "ic_ms": 362.508,
+                "rho_ms": 5.067042
+              },
+              "independent_replay_discrepancies": 0,
+              "independent_replay_receipts": [
+                "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260911/replay_receipt_16bit.json",
+                "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/independent_validation_20260915/replay_receipt.json",
+                "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/independent_validation_20260915_redraw/replay_receipt.json"
+              ],
+              "fixture_hash": "3f5c48fa550223b6a1fc5eb74c6b002170a1ec15bf50f665827a53ab07457333",
+              "executable_or_source_hash": {
+                "executable": "a33f7266e2ddb2b1b991bc03971359c685eede203f07d7d32f59b1db74a5843a",
+                "source": "3f5c48fa550223b6a1fc5eb74c6b002170a1ec15bf50f665827a53ab07457333"
+              },
+              "host_id": {
+                "node": "Adams-MacBook-Pro.local",
+                "platform": "macOS-26.6-arm64-arm-64bit"
+              },
+              "resource_caps": {},
+              "seeds": {
+                "random_scalar": "runtime"
+              },
+              "claim_boundary_non_claims": [
+                "not key recovery on deployed curves",
+                "not asymptotic sub-rho",
+                "not a vs_rho crossover (IC wall >> rho on every measured instance)",
+                "not imported/external points"
+              ]
+            },
+            "verdict": "J0_16BIT_KA_IC_AGREES_RHO_INDEPENDENTLY_REPLAYED"
           },
           "next_target": {
-            "summary": "j=0 known-answer IC at 16 bits under bench harness",
+            "summary": "Extend the j=0 known-answer IC ladder to >=20 bits and split stage timers (factor_base -> relations -> LA -> verify)",
             "acceptance_gates": [
-              "agrees with rho on same instance",
+              "agrees with rho on the same instance",
               "wall time logged",
-              "stage_timers present"
+              "split stage_timers present",
+              "independent recomputation for any promotion past 16 bits"
             ]
           },
           "evidence": [
-            "docs/RESEARCH_BENCH_LOG.md"
+            "docs/RESEARCH_BENCH_LOG.md",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260911/claim_draft_16bit.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260911/claim_check_16bit.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260911/replay_receipt_16bit.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/result.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/independent_validation_20260915/replay_receipt.json",
+            "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260915/independent_validation_20260915_redraw/replay_receipt.json"
           ],
-          "history": []
+          "history": [
+            {
+              "metrics": {
+                "generic_bits": 12,
+                "j0_bits": 14,
+                "best_variant": "j0_zeta_orbit",
+                "claim_boundary": "synthetic_known_answer"
+              },
+              "recorded": "2026-09-21-pre-16bit-promotion",
+              "summary": "Generic IC 12-bit; j=0 orbit IC 14-bit bench success"
+            }
+          ]
         },
         "vs_rho": {
           "status": "not_achieved",
