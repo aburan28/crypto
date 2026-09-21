@@ -114,7 +114,7 @@ impl AlgebraCache {
             local_limit: bytes,
             max_value: 4 * 1024 * 1024,
             warned_oversize: [false; 3],
-            strict_oversize: false,
+            strict_oversize: true,
             stats: Default::default(),
             #[cfg(feature = "redis-cache")]
             client: None,
@@ -131,18 +131,28 @@ impl AlgebraCache {
         self.client = Some(redis::Client::open(url).map_err(|_| "invalid Redis URL")?);
         Ok(self)
     }
-    /// Make an artifact that cannot be shared a hard failure instead of a
-    /// warning. Off by default and deliberately so: a cache must not be able
-    /// to kill a run over a sizing problem, and the computation is correct
-    /// either way. Turn it on where silence is unacceptable -- a CI job
-    /// asserting that no artifact has outgrown the wire.
+    /// Whether an artifact that cannot be shared is fatal. ON by default.
+    ///
+    /// The cost of this default is real and worth stating: a run that produces
+    /// an artifact past the wire cap now stops, even though its computation was
+    /// correct and would have completed. That is the trade asked for -- silence
+    /// there is a performance cliff nobody sees, and a stopped run is at least
+    /// a run you can ask about.
+    ///
+    /// Turn it off for a job that would rather finish degraded than stop:
+    /// `strict_oversize(false)`, or `IC_CACHE_STRICT_OVERSIZE=0`.
     pub fn strict_oversize(mut self, on: bool) -> Self {
         self.strict_oversize = on;
         self
     }
     fn from_env() -> Self {
         let mut c = Self::local(32 * 1024 * 1024);
-        c.strict_oversize = std::env::var("IC_CACHE_STRICT_OVERSIZE").as_deref() == Ok("1");
+        // Opt-OUT: anything explicitly falsey disables it, everything else
+        // (including unset) leaves it on.
+        c.strict_oversize = !matches!(
+            std::env::var("IC_CACHE_STRICT_OVERSIZE").as_deref(),
+            Ok("0") | Ok("false") | Ok("no")
+        );
         c.enabled = [
             "IC_PREPROCESS_CACHE",
             "IC_REDUCTION_CACHE",
@@ -263,8 +273,8 @@ impl AlgebraCache {
             panic!(
                 "algebra cache: {} artifact is {len} bytes, past the {} byte Redis \
                  value cap, so it cannot be shared between processes. Reduce the \
-                 parameters or raise the cap; unset IC_CACHE_STRICT_OVERSIZE to \
-                 downgrade this to a warning.",
+                 parameters or raise the cap; set IC_CACHE_STRICT_OVERSIZE=0 to \
+                 carry on with a warning instead of stopping.",
                 layer.name(),
                 self.max_value,
             );
@@ -541,7 +551,7 @@ mod tests {
     /// that cost the most to rebuild.
     #[test]
     fn an_oversized_artifact_is_still_served_locally() {
-        let mut c = AlgebraCache::local(64 * 1024 * 1024);
+        let mut c = AlgebraCache::local(64 * 1024 * 1024).strict_oversize(false);
         c.max_value = 512;
         let big = "x".repeat(4096);
         assert_eq!(
@@ -564,7 +574,7 @@ mod tests {
     /// that keeps building oversized templates should say so without flooding.
     #[test]
     fn the_oversize_warning_is_once_per_layer() {
-        let mut c = AlgebraCache::local(64 * 1024 * 1024);
+        let mut c = AlgebraCache::local(64 * 1024 * 1024).strict_oversize(false);
         c.max_value = 512;
         let big = "x".repeat(4096);
         for n in 0..5u8 {
@@ -575,25 +585,42 @@ mod tests {
         assert_eq!(c.stats[0].oversized, 5, "every one is still counted");
     }
 
-    /// Opt-in, for a caller that would rather stop than quietly lose sharing.
+    /// Fatal by default: losing the ability to share an artifact is a cliff,
+    /// and stopping is preferred to sliding down it quietly.
     #[test]
     #[should_panic(expected = "cannot be shared between processes")]
-    fn strict_oversize_is_fatal_when_asked_for() {
-        let mut c = AlgebraCache::local(64 * 1024 * 1024).strict_oversize(true);
+    fn oversize_is_fatal_by_default() {
+        let mut c = AlgebraCache::local(64 * 1024 * 1024);
         c.max_value = 512;
         c.memoize(Layer::Preprocessing, b"big", || Some("x".repeat(4096)));
     }
 
-    /// And off by default: a cache must not be able to kill a run over sizing.
+    /// The way out has to work, or the default is a trap rather than a choice.
     #[test]
-    fn oversize_is_not_fatal_by_default() {
-        let mut c = AlgebraCache::local(64 * 1024 * 1024);
+    fn oversize_can_be_downgraded_to_a_warning() {
+        let mut c = AlgebraCache::local(64 * 1024 * 1024).strict_oversize(false);
         c.max_value = 512;
         let big = "x".repeat(4096);
         assert_eq!(
             c.memoize(Layer::Preprocessing, b"big", || Some(big.clone())),
             Some(big)
         );
+        assert_eq!(c.stats[0].oversized, 1);
+    }
+
+    /// `IC_CACHE_STRICT_OVERSIZE` is an opt-OUT now, so only an explicitly
+    /// falsey value disables it; unset must leave it on.
+    #[test]
+    fn the_env_opt_out_reads_only_falsey_values() {
+        fn strict_for(value: Option<&str>) -> bool {
+            !matches!(value, Some("0") | Some("false") | Some("no"))
+        }
+        assert!(strict_for(None), "unset must stay strict");
+        assert!(strict_for(Some("1")));
+        assert!(strict_for(Some("yes")));
+        assert!(!strict_for(Some("0")));
+        assert!(!strict_for(Some("false")));
+        assert!(!strict_for(Some("no")));
     }
 
     #[test]
