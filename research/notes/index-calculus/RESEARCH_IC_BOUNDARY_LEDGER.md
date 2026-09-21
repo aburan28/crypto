@@ -1332,6 +1332,189 @@ python3 docs/ic/tools/boundary_scoreboard_rows.py round2.json
 cargo test --release --lib cryptanalysis::ic_
 ```
 
+## 11. Round 3: the restart was the cost, and the family has a ceiling
+
+**Frozen runs.**  `docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json`
+(the ladder), `…-round3-holdout-2026-09-21.json` (a fresh seed), and a
+**matched headline pair** at eight repeats:
+`…-round2-headline-2026-09-21.json`, run on a binary built from a git
+worktree at the Round-2 commit `acd192dc`, against
+`…-round3-headline-2026-09-21.json` on this round's.  The intermediate
+that the round discarded is frozen too — `…-round3-rotation-*.json`,
+§11.1 — because it is the measurement that justified discarding it.
+**Comparison:** `ic-boundary-round3-comparison-2026-09-21.json`.
+
+### 11.1 What Round 2 left on the table
+
+§10.4 reported the walk as an unqualified win: one addition per target
+instead of two scalar multiplications.  That was true of the *steps* and
+false of the *restarts*.  The guard of §10.2 forces a restart whenever a
+segment reaches a group element the run has already decomposed, and
+Round 2 answered each restart by drawing sixteen fresh jumps — sixteen
+`[a]G + [b]Q`, two scalar multiplications each, about `1,170` additions
+on a 24-bit curve — so that no two segments could share a step function
+and merge.  On a rung that restarts often that is the dominant cost of
+the relation phase: at `n = 27` the binary two-summand row restarted 132
+times, drew 2,117 jumps, and spent about two thirds of its whole
+relation phase on them.
+
+Nothing about the guard requires a fresh jump *table*.  Two segments
+merge when they share a step function, and a step function is a pair
+(jump set, index map); Round 3 keeps one jump set for the run and gives
+each segment its own index map.  Sixteen offsets `[c]G + [d]Q` are
+pooled with the jumps at setup, and a restart adds one pooled offset to
+the current point — one addition, the coefficients add modulo `r` — and
+changes the map.  The restart therefore costs one group operation
+instead of thirty-two scalar multiplications, and `walk_jumps` is 32 for
+a whole run however often it restarts, which is what the test
+`a_walk_restart_costs_one_addition_and_still_does_not_merge` asserts.
+
+**The first index map was wrong, and the ledger caught it.**  The map
+was at first a *rotation*: segment `j` selected `jump[(h(P) + j) mod 16]`.
+That gives consecutive segments different step functions, but only
+sixteen distinct ones in total, so after enough restarts two segments
+share one and merge exactly as §10.2's shared jump table let them.  The
+guard still catches the repeated target — nothing false enters the
+matrix, and `repeated_column_rows` is zero on every row of every run in
+this round — but every step that reached it is wasted, and the waste
+showed up in counters the round was already reporting.  Against the
+Round-2 holdout on the same seeds:
+
+| instance | row | walk steps per relation | guard-forced restarts | `S` |
+|:--|:--|:--|:--|:--|
+| `K_0 / GF(2^37)` | `mitm_m2_…_frobfold_walk` | 14,359 → 21,517 | 14 → 26 | 16.95 → 19.08 |
+| `K_0 / GF(2^39)` | `mitm_m2_…_frobfold_walk` | 5,653 → 11,587 | 20 → 122 | 29.03 → 35.75 |
+
+and on the ladder, at `n = 37`, the guard-forced restarts went from 18
+to 129 while the row got `1.35×` worse.  Those were the rows of the
+round whose total cost moved the wrong way.
+
+The fix is a **permutation**, not a rotation: a restart runs
+Fisher–Yates over the sixteen indices, so there are `16!` index maps
+instead of `16`, and two segments that do collide diverge again within a
+step or two because two random permutations agree on about one index in
+sixteen.  Shuffling sixteen entries costs no group operation, so the
+restart is still one addition.
+
+The round's second lever gives the prime and binary regimes the
+`_balanced` row the Koblitz regime got in §10.1, sized by the law of
+§11.2 rather than by the `⌈bits/3⌉` rule.  The third is the law itself.
+
+### 11.2 The family shape law, derived before measuring
+
+Every two-summand row on this ledger pays exactly two things, and both
+are functions of the one parameter it has, the base size `F` in signed
+points.
+
+- **The pair table**, one entry per pair of base points up to the fold:
+  `F²/4` additions up to negation, `F²/(4n)` when the Frobenius folds it
+  too.  Write `t` for that **table fold**, `1` or `n`.
+- **The relations.**  A two-summand row is an *edge* on the `K = F/2k`
+  columns, with `k` the **column fold** — `1` when a column is an
+  abscissa, `n` when it is a signed Frobenius orbit.  A random graph
+  first carries a cycle at about half as many edges as vertices, and it
+  is that cycle which closes the elimination, so the row needs about
+  `K/2` relations.  Each costs `1/p` targets with
+  `p = C(F+1,2)/#E ≈ F²/2#E` the counting ceiling of §1.3, at `c` group
+  operations per target — `c = 1` for a walk step.
+
+So the family's whole cost:
+
+```text
+    ops(F) = F²/(4t) + c·#E/(2kF),
+    least at  F* = (c·#E·t/k)^{1/3},  where  ops = 0.75·(c·#E·t/k)^{2/3} / t
+```
+
+and, in the unit of §1.1 with `c = 1`,
+
+```text
+    S_family = 0.75·(#E·t/k)^{2/3} / (t·√r).
+```
+
+**The two folds are independent**, which is the correction this round
+had to make to its own first formula: a Koblitz row can fold its columns
+without folding its table, and the ladder runs rows of exactly that
+shape, so a single fold in both terms is the wrong model for them.  On
+the prime and binary ladders both folds are one and nothing changes.
+
+**The law is derived for two summands**, and the `vs family` column on
+an `m = 3` row therefore reads "how this row compares with the best
+*two-summand* member of the family on the same instance" — a common mark
+across the ledger, not that row's own optimum.
+
+**And it is a model, not a bound.**  The `K/2` is the first-cycle
+threshold for a simple graph; the factor-base graph is a *multi*graph,
+where two relations over the same pair of columns are a cycle of length
+two and appear after about `√K` relations.  The two thresholds differ by
+`√K/2`, so the relation term is an over-estimate somewhere in that
+range, and a row can finish under `S_family` without doing anything a
+counting argument forbids.  The Koblitz `n = 37` two-summand walk does,
+at `0.79`, with its measured yield *below* the exact ceiling (`0.84`) —
+which rules out the alternative explanation, that it beat the counting
+bound.
+
+### 11.3 The family cannot cross rho, and the ladder shows it converging
+
+The unit was chosen so that rho is a constant: a counted r-adding walk
+costs `√(πr/2A)` operations, so `S_rho = √(π/2A)` — `1.25` at `A = 1`,
+`0.886` at `A = 2` — at every size.  §11.2's law says the best member of
+the pair-table two-summand family costs `0.75·r^{1/6}` on a prime-order
+curve, which is **unbounded**.  A constant and an unbounded increasing
+function cross at most once, and these cross at `r ≈ 22`.
+
+So no choice of base size, table fold or target generator inside this
+family gives a crossover at any size that matters, and the gap widens as
+`r^{1/6}`.  Against rho's asymptotic `1.25`:
+
+| `r` | `S_family` | vs rho |
+|:--|--:|--:|
+| `2^24` | 12.0 | 9.6× |
+| `2^48` | 192 | 153× |
+| `2^64` | 1,219 | 973× |
+| `2^128` | 1.98×10⁶ | 1.58×10⁶× |
+| `2^160` | 7.99×10⁷ | 6.4×10⁷× |
+
+Those are **extrapolations from the law**, not measurements, and they
+use rho's asymptote rather than its measured `S`, which is the less
+flattering choice: at `2^{24}` rho measures `3.93` because its setup is
+not amortised, so the *measured* ratio there is `3.6×` and not `9.6×`.
+
+This is a stronger statement than the earlier rounds could make.  §10.8
+said "not a crossover" about the rows it had measured.  This says the
+family has none to find.
+
+**The ladder is the evidence that the law describes these rows**, and it
+gives it by converging.  The balanced prime row takes the base size the
+law prescribes at every rung:
+
+| instance | `log₂ r` | `\|F\|` | `F*` | `S` | `S_family` | `S / S_family` |
+|:--|--:|--:|--:|--:|--:|--:|
+| bench-10bit | 9.7 | 10 | 9 | 32.90 | 2.30 | 14.33 |
+| bench-12bit | 11.9 | 16 | 16 | 21.51 | 2.97 | 7.23 |
+| bench-14bit | 14.0 | 26 | 25 | 14.28 | 3.77 | 3.78 |
+| bench-16bit | 16.0 | 40 | 40 | 12.36 | 4.76 | 2.60 |
+| bench-18bit | 18.0 | 64 | 64 | 10.72 | 6.00 | 1.79 |
+| bench-20bit | 20.0 | 102 | 102 | 11.97 | 7.56 | 1.58 |
+| generated-22bit | 21.7 | 148 | 149 | 10.47 | 9.15 | 1.15 |
+| generated-24bit | 23.4 | 222 | 222 | 14.03 | 11.17 | 1.26 |
+
+The same check on the Koblitz ladder, where the Frobenius fold divides
+the family's cost by `n`: at `n = 41` the law puts the family's floor at
+`S_family = 4.17`, which is `30.1×` the asymptotic signed-Frobenius rho
+`√(π/4n) = 0.138`, and the best measured row sits at `31.5×`.  The
+family is within half a tenth of its own optimum, and its own optimum is
+thirty times the reference.
+
+**That convergence is why the fitted exponent must not be
+extrapolated.**  The balanced prime row fits `ops ∝ r^{0.407}`
+(`R²` 0.97, 8 sizes) while the law predicts `r^{2/3}` — `S = 0.75 r^{1/6}`
+means `ops = 0.75 r^{2/3}`.  The fit is flatter because the row starts
+fourteen times above the law and is still falling toward it.  A reader
+who extrapolated `0.407` would predict a crossover with rho that the law
+says does not exist; that is the §5 mistake in a new costume, a number
+measured inside a transient and read as an asymptote, and the fit is
+reported here only beside the prediction it disagrees with.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
