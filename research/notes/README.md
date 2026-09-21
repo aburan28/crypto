@@ -58,6 +58,7 @@ its old name still identify it.
 | [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md) | Frobenius-invariant factor bases on Koblitz curves |
 | [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md) | Making the Koblitz decomposition oracle reach a useful `m` |
 | [`RESEARCH_TRIMOSKA_BENCHMARKS.md`](ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md) | Bit-sliced Weil descent: EC-Index-Calculus-Benchmarks review |
+| [`RESEARCH_WDSAT_IC_UNIFICATION.md`](ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md) | Unifying Koblitz index calculus with the Trimoska WDSat solver |
 
 ## cm-isogeny — CM structure, isogeny graphs, covers, P-256 and secp256k1 audits
 
@@ -93,3 +94,10 @@ Put it in the theme it belongs to (or add a theme directory), add a row
 here, and cite its frozen evidence directory by path.  Guides and primers
 that are not research results go in `docs/guides/`; the library roadmap
 is `docs/DEFERRED.md`.
+
+A research note never lives at the repository root or loose in a code
+directory: that is the one placement this index exists to prevent.  When a
+note moves into its theme, update every inbound link in the same commit —
+sibling notes, `docs/` pages, and the `docs/index-calculus-scoreboard.html`
+citation — but leave the basename unchanged so the frozen experiment JSONs
+that name the note by filename keep resolving.
