@@ -574,11 +574,68 @@ ratio at 5.1 at 48 bits and wanted 315 targets, because it was measured
 on constants that have since moved three times.
 
 `docs/ic/params/k0n53-subgroup-wide.json` is the degree-53 rung on a
-36464-point compact base: the descent falls from 50.4 ms a target to
-16.3 ms and the charged ρ/IC ratio rises from 25.0 to 75.2, while the
-precompute rises from 16.5 s to 87.8 s. That is a trade, and
-`docs/ic/runs/koblitz-compact-pair-table-20260912.json` prices it — about
-2200 targets before the wider base is the cheaper one.
+36464-point base.  Its original compact-table measurement is retained in
+`docs/ic/runs/koblitz-compact-pair-table-20260912.json`: the descent fell
+from 50.4 ms a target to 16.3 ms, but precompute rose from 16.5 s to
+87.8 s.  That is a historical representation comparison; current
+`auto` pricing selects the folded table for this run.
+
+`docs/ic/params/k0n53-subgroup-one-unit.json` is the current same-host
+profile for that base.  A target-independent screen of public relation
+seeds found that seed 6 certifies every one of the 344 orbit columns in
+one 17000-probe unit.  Against the preceding seed-1/26000-probe profile,
+three alternating-order pairs gave median candidate/reference ratios of
+0.840 wall, 0.824 total core-seconds and 0.981 peak RSS; charged work fell
+to 19,363,000 summand scans and 588 verified relations.  The exact first
+complete prefix is trial 16689; the profile keeps a 311-probe cushion.
+
+The primary control is the single scalar-blind target in
+`docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json`:
+
+    target/release/ic workflow \
+      --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json \
+      --dir /tmp/k0n53-public-unknown
+
+Public hash seed 53001 constructs no target scalar and supplies no
+factor-base logs; relation-derived logs recovered `7892094459170` and
+verified the published point in all five fresh runs.  The selected
+operational profile charges base materialisation, pair-table predicate
+construction, relation collection and verification, sparse linear
+algebra, descent, process CPU and peak RSS.  It won 4/5 whole-process
+wall comparisons, with medians of 1.380 s IC and 1.589 s rho, but IC
+alone still used 10.573 core-seconds.  The wall crossover is not a
+total-compute crossover.
+
+The parameter search is retained and charged separately rather than
+made free: 45 through-logs processes used 77.960 sequential wall-seconds,
+484.310 core-seconds and at most 106.9 MB RSS.  Charging that discovery
+to a first-ever single target gives 79.340 s wall and 494.883
+core-seconds on the IC side, so it does not cross rho.  The selected-run
+ratio applies only once the public profile is fixed; amortisation must
+name and count later targets explicitly.
+
+Adjacent factor-base widths and collection windows did not reduce the
+complete rank-producing core cost.  Reusing window scratch preserved
+every relation hash and scalar across eight matched pairs but was speed
+neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
+selection, validation and rejected diagnostics, the retained science
+campaign contains 98 processes, 307.394 sequential wall-seconds,
+1,144.929 core-seconds and a 139.9 MB maximum RSS.
+
+With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
+median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
+slower, with 10.984 total process core-seconds, 68.5 MB peak RSS and a
+1.008 wall/core ratio.  A one-pass 2/4/6/8/10/12/14-thread diagnostic
+first crossed wall at eight threads; no thread count produced a
+single-target core crossover.  As a secondary amortisation control, the
+independent 32-target one-thread holdout spent 8.819 s in IC against
+32.916 s in rho, with 32/32 verified.  The batch result does not repair
+the single-target loss.
+
+`docs/ic/runs/koblitz-n53-one-unit-20260921.json` records the seed
+screen, discovery envelope, thread diagnostic, repeats, resources and
+remaining gate failures.  This is a bounded engineering improvement,
+not a SOTA claim.
 
 **`descent_summands`** lets the descent ask for a different number of
 summands than collection, which shares only the base and its pair table.
