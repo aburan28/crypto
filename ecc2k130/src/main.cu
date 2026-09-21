@@ -1124,6 +1124,20 @@ static int runSearch(const Options &o, Engine &eng, Solver<Cfg> &sol, const U192
             probedV2 = dpFileIsV2(probe);
             fclose(probe);
         }
+        // Integrity before compatibility.  A corpus whose tail is a partial
+        // record is corrupt whichever build opens it, and that is the more
+        // urgent thing to report than which format it happens to be in --
+        // "refusing to append v2 to a v1 corpus" is true of a truncated v1
+        // file and tells an operator the wrong thing to go and fix.  Judge it
+        // in its OWN framing, since that is the writer it has to be whole for.
+        const size_t probedBase = probedV2 ? sizeof(DpFileHeader) : 0;
+        const size_t probedRec = probedV2 ? sizeof(DpFileRecordV2) : sizeof(DpFileRecord);
+        if (probed != 0 && ((unsigned long long)probed < probedBase ||
+                            ((unsigned long long)probed - probedBase) % probedRec != 0)) {
+            fprintf(stderr, "persistence failure: cannot lock/open aligned regular corpus %s\n",
+                    o.dpFile.c_str());
+            return 8;
+        }
         if (probed != 0 && probedV2 != dpOutV2) {
             fprintf(stderr, "refusing to append %s records to a %s corpus: %s\n",
                     dpOutV2 ? "v2" : "v1", probedV2 ? "v2" : "v1", o.dpFile.c_str());
