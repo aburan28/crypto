@@ -2710,3 +2710,101 @@ needs no recovery scan at all, and it was not tested here. Nor that
 flipping the default is free: the ladder is a documented contract with a
 test asserting it, and it is reached by every caller. The measurement
 says what it says; the change is a separate decision.
+
+### The tier order, decided in operations instead of seconds — 2026-09-21
+
+The previous round ended with the measurement and left the change as a
+separate decision. The decision was taken — flip the default to
+fold-first — and then the flip was priced in this repository's unit
+rather than in wall-clock. It did not survive.
+
+**The boundaries, stated before this round's measuring.** The floor is
+the generic-group bound `S ≥ √(π/2A)` with `A = 2n = 122`, which is
+`0.1135` here; the contract's count floor for the `m = 2` descent is
+`N / C(|F|+1, 2)`, which at 12688 points is `2,023,479` probes a target.
+The reference is signed-Frobenius Pollard rho counted on the same
+instance in the same process: `2,263,934` steps a target, `S = 0.1774`.
+Neither moves with the tier — the tier changes no count either bound
+constrains — so no tier choice can be an **advance** in the §3 sense,
+and this round could only ever be engineering, relabelling or
+accounting.
+
+**The falsification target, stated in advance.** The flip is an
+improvement if `baseline_total_operations / candidate_total_operations >
+1` over the whole cold pipeline at fixed base, with every target
+verified on both arms and every other operation count identical.
+Inadmissible: changing the base, the target set, the summand counts or
+the seeds; pricing only the build; quoting seconds.
+
+**The unit.** `S = total operations / √r` in batched group additions.
+The build's count is native — one addition per stored pair — and rho's
+is native too, one per walk step. The probe counts are foreign and are
+converted by a factor measured on the same host, base and process by
+`examples/koblitz_probe_conversion.rs`, in the shape the pipeline
+probes in: `witnesses_fast` with `m = 3` and a never-stopping sink for
+the summand scan, `BLOCK = 1024` with the descent's own 32-key prefetch
+for the descent. Earlier notes quoted `contains_pair` one target at a
+time, which the pipeline never does.
+
+**The flip, at the width it was argued from.** 12688 points, 32 targets,
+32 of 32 verified on every arm, and every operation count but the table
+identical between arms:
+
+| tier | build | collect | descent | **total adds** | `S` | vs rho | vs floor |
+|---|---|---|---|---|---|---|---|
+| full | 80,499,016 | 787,920,000 | 57,487,480 | **925,906,496** | 2.29 | 12.9× | 20.2× |
+| compact | 80,499,016 | 735,157,500 | 51,841,388 | **867,497,904** | 2.14 | 12.1× | 18.9× |
+| folded | 666,120 | 865,305,000 | 70,832,788 | **936,803,908** | 2.31 | 13.0× | 20.4× |
+
+Stored pairs fall `120.85×`; total operations **rise** `1.2%`. That is
+§3 **relabelling** by its exact definition, and it reproduced on an
+independent holdout target set (seeds 900–931, never used to tune
+anything here): `1.016×`. The wall-clock gain the flip was argued from
+is real and is memory traffic — the full build costs 121 ns a stored
+pair against a batched addition's 62 — which is precisely why §6 makes
+operation counts the metric.
+
+**So the question was re-asked over four widths.** Fixed everything but
+the base and the tier; rho off, because rho does not depend on the tier
+and was four fifths of the wall time; each width's conversion measured
+on its own base.
+
+| points | orbits | full | compact | folded | cheapest | verified |
+|---:|---:|---:|---:|---:|:--|:--|
+| 6,832 | 56 | **876,342,501** | 926,956,220 | 1,104,202,174 | full | 32/32 |
+| 9,760 | 80 | 903,649,246 | **880,008,741** | 1,009,804,178 | compact | 32/32 |
+| 12,688 | 104 | 941,440,872 | **887,500,874** | 966,559,218 | compact | 32/32 |
+| 18,544 | 152 | 1,117,432,188 | 1,042,518,063 | **982,920,004** | folded | 32/32 |
+
+`full/folded` crosses one at `|F| ≈ 13,623` and `compact/folded` at
+`≈ 16,052`, both by interpolation between two measured widths rather
+than beyond them. The crossover was **predicted at 13,600 before the
+sweep was analysed**, from the measured per-probe deltas and the sweep's
+probing volume, by
+`|F|²/2 · (1 − 1/2n) > Δ_scan · summands + Δ_blocked · descent`.
+
+**All three tiers are cheapest somewhere, so both fixed orders are
+wrong.** First-that-fits is right only below about 8000 points and
+fold-first only above about 16000; between them the answer is compact,
+which both orders reach second and which fold-first made unreachable by
+default. The tier is not a property of the base: the fold buys a build
+`2n` times cheaper and pays on every probe, so it depends on how much
+probing amortises the build. `ProbeBudget` makes that volume an input.
+
+**Class: accounting** for the round as a whole — the algorithm did not
+change when the answer did, only the unit — and **relabelling** for the
+flip measured on its own. Neither is a result. Nothing here moves the
+standing against rho: every tier costs 12–13× rho's `S` on this instance
+and 19–21× the generic floor, and the tier moves the constant only.
+
+**Not claimed.** That the crossover width generalises: one curve, one
+degree, one host, and the fold's saving carries `1 − 1/2n` while its
+canonicalisation grows with `n`, so both sides move with the degree and
+neither was measured against it. No exponent is fitted — four widths at
+one degree is the minimum for a fit and this round does not make one.
+And the sweep pins the probing volume across widths, which makes each
+width exactly controlled but does not model how a run sizes its own
+collection: relations needed scale as `|F|/2n` while the `m = 3` hit
+rate scales as `|F|³/r`, so a properly sized run at a wider base probes
+less. `13,623` is therefore an **upper bound** on the practical
+crossover, not a two-sided estimate.

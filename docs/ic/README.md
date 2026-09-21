@@ -889,10 +889,21 @@ against 3.3×.
 - `koblitz_fast::NormalBasis` builds the basis and is the key; the two
   keys pick different representatives of the same orbit, so a folded
   table is not portable across the change.
-- `PairSumTable::build_within` reaches for the fold as its last tier, when
-  neither the full nor the compact table fits the budget. That is still
-  right after the cheaper key: what the fold buys is a *wider* base, and
-  the base is fixed by the time the tier is chosen.
+- `PairSumTable::build_within` chooses the tier by a **measured cost
+  model**, not by what fits. It has been ordered three ways: first that
+  fits (summands, compact, fold), then fold-first, and now neither. Both
+  fixed orders treat the tier as a property of the base, and it is not —
+  the fold buys a build `2n` times cheaper and pays for it on every
+  probe, so the answer depends on how much probing amortises the build.
+  `ProbeBudget` carries that volume; `build_within_for` takes one.
+  Priced in group additions over four widths on one curve, the cheapest
+  tier is full below about 8000 points, compact from there to about
+  16000, and folded above; `full/folded` crosses one at `|F| ≈ 13,623`.
+  The default never picks `full` — it wins only the narrowest width
+  measured, by 5.8%, inside the conversion's own noise, and costs four
+  times the memory — but every tier stays reachable by name and `ic`'s
+  `pair_table_tier` overrides the choice.
+  `docs/ic/runs/koblitz-tier-crossover-20260921.json` is the sweep.
 - `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
 - `PairSumTable::contains_pair` is the probe on its own, without the
   `O(|F|)` summand recovery a hit would otherwise charge to it — one

@@ -109,6 +109,22 @@ def _lookup(report: dict[str, Any], path: tuple[str, ...]) -> Any:
     return node
 
 
+def tier_of(report: dict[str, Any]) -> str:
+    """Which representation of the pair table the run actually built.
+
+    Pinned beside the counters because none of them can see it.
+    ``pair_table_stored_pairs`` is ``|F|(|F|+1)/2`` for the full tier and
+    for the compact one alike — they hold the same pairs and differ only
+    in how a pair is stored — so a run that switched between them reads
+    as "counters identical" while the algorithm has changed.  That is the
+    one thing this gate exists to refuse, and it went through it once.
+    """
+    tier = _lookup(report, ("factor_base", "pair_table_tier"))
+    if not isinstance(tier, str) or not tier:
+        raise CheckFailure("factor_base.pair_table_tier missing: the report predates tier reporting")
+    return tier
+
+
 def counters_of(report: dict[str, Any]) -> dict[str, int]:
     out: dict[str, int] = {}
     for label, path in COUNTER_PATHS:
@@ -297,6 +313,7 @@ def measure(report: dict[str, Any]) -> dict[str, Any]:
         "ic_verified": ic_verified,
         "rho_verified": rho_verified,
         "counters": counters,
+        "pair_table_tier": tier_of(report),
         "wall": wall_of(report),
         "rho_S": rho_s_of(report, counters),
         "ic_S": None,
@@ -377,6 +394,12 @@ def check_rung(params: str, ref: dict[str, Any], m: dict[str, Any], tolerance: f
     problems: list[str] = []
     if m["params_digest"] != ref["params_digest"]:
         problems.append(f"parameter file changed (digest {m['params_digest'][:12]} != frozen {ref['params_digest'][:12]}); re-freeze deliberately")
+    frozen_tier = ref.get("pair_table_tier")
+    if frozen_tier is not None and m.get("pair_table_tier") != frozen_tier:
+        problems.append(
+            f"pair table tier changed ({frozen_tier} -> {m.get('pair_table_tier')}); "
+            "the algorithm changed — freeze a new reference beside the old one"
+        )
     drift = {}
     for label, frozen in ref["counters"].items():
         now = m["counters"].get(label)
