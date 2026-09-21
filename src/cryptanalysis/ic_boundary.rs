@@ -2442,6 +2442,7 @@ fn collect_and_solve<G: CountedGroup>(
     let mut la_ns = 0u64;
     let h_mod = h % r;
     let mut direct_skipped = 0u64;
+    let (mut single_column_rows, mut two_column_rows) = (0u64, 0u64);
 
     // The walk: jumps with known coefficients, the current point with
     // its coefficients, and the segment guard.
@@ -2523,6 +2524,15 @@ fn collect_and_solve<G: CountedGroup>(
             let c = fb.col_of[i];
             row[c] = addmod(row[c], fb.coef_of[i], r);
         }
+        // How many columns the row touches: with orbit columns a sum of
+        // two points of one signed orbit is a single-column row, and two
+        // of those on one column pin the logarithm by themselves.
+        let support = row[..d_col].iter().filter(|&&c| c != 0).count();
+        match support {
+            1 => single_column_rows += 1,
+            2 => two_column_rows += 1,
+            _ => {}
+        }
         // h·a + h·b·d = Σ coef·x  ⇒  Σ coef·x − h·b·d = h·a
         row[d_col] = submod(0, mulmod(h_mod, b, r), r);
         let rhs = mulmod(h_mod, a, r);
@@ -2572,6 +2582,8 @@ fn collect_and_solve<G: CountedGroup>(
     la.wall_ns = la_ns;
     la.count("row_ops", gauss.row_ops);
     la.count("rows", found);
+    la.count("single_column_rows", single_column_rows);
+    la.count("two_column_rows", two_column_rows);
     la.count("columns", cols as u64);
     la.count("rank", gauss.rank() as u64);
     PipelineOutcome {
