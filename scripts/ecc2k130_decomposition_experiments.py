@@ -1375,7 +1375,13 @@ def main():
 
     # ---- E1 -----------------------------------------------------------
     e1_rows = []
-    for n in (11, 13, 19, 23, 29, 37):
+    # `n = 23` is deliberately not here.  E1 stops only at full rank over every
+    # column, and at `|F| = 527` that is the `|F| ln|F| / m ~ 1100` relations
+    # section 0.5 retracted: 535 relations reach rank 494, so the rung retries
+    # and the collection alone is 353 s a pass.  It runs in the budget table
+    # instead, which is the rule the slope is fitted on.  `29` and `37` stay so
+    # that their exclusion is recorded rather than silently dropped.
+    for n in (11, 13, 19, 29, 37):
         if n > args.max_rung:
             continue
         for rule in ("full", "first_hit", "folded"):
