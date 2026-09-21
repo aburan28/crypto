@@ -1157,9 +1157,9 @@
   }
  },
  "science_process_accounting": {
-  "processes": 102,
-  "sequential_wall_seconds": 315.05442587699997,
-  "total_core_seconds": 1172.5110490000002,
+  "processes": 103,
+  "sequential_wall_seconds": 318.046582585,
+  "total_core_seconds": 1184.8914760000002,
   "peak_rss_bytes": 139853824,
   "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count diagnostic, factor-base-width diagnostic, collection-window diagnostic, and rejected reusable-scratch A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
@@ -1224,55 +1224,67 @@
   "reading": "The workflow now emits native subgroup-orbit construction counts on fresh and resumed materialization. Timing already charged selection wall and process resources; these counters expose what that phase did without changing the base or solver."
  },
  "current_head_phase_resource_replay": {
-  "source_commit": "140bf3ac",
-  "binary_blake3": "dfe17636da8740232ea4d6f0c50f4ac26b204b373781263e281f9282dfda65c7",
+  "source_commit": "00080dfd",
+  "binary_blake3": "f9931bdeb1d4e8ed4c0fa8a965b6575ca39e3c13a4c58ddba57f1e3a330b0af9",
   "stages": [
    {
     "stage": "select",
     "status": "complete",
     "ran": true,
-    "wall_seconds": 0.33432175,
-    "cpu_seconds": 1.111232,
-    "peak_rss_bytes_at_end": 24313856
+    "wall_seconds": 0.271455625,
+    "cpu_seconds": 1.057332,
+    "peak_rss_bytes_at_end": 23003136
    },
    {
     "stage": "collect",
     "status": "complete",
     "ran": true,
-    "wall_seconds": 1.405011,
-    "cpu_seconds": 8.338066000000001,
-    "peak_rss_bytes_at_end": 107560960
+    "wall_seconds": 0.862095333,
+    "cpu_seconds": 7.776439,
+    "peak_rss_bytes_at_end": 93913088,
+    "subphases": {
+     "pair_table_build": {
+      "wall_seconds": 0.317252375,
+      "cpu_seconds": 3.2593150000000004,
+      "peak_rss_bytes_at_end": 92700672
+     },
+     "relation_unit": {
+      "wall_seconds": 0.487008459,
+      "cpu_seconds": 4.472336,
+      "peak_rss_bytes_at_end": 93913088
+     }
+    }
    },
    {
     "stage": "logs",
     "status": "complete",
     "ran": true,
-    "wall_seconds": 0.241615,
-    "cpu_seconds": 1.1647669999999994,
-    "peak_rss_bytes_at_end": 108855296
+    "wall_seconds": 0.160044334,
+    "cpu_seconds": 1.051146000000001,
+    "peak_rss_bytes_at_end": 95436800
    },
    {
     "stage": "solve",
     "status": "complete",
     "ran": true,
-    "wall_seconds": 0.163229875,
-    "cpu_seconds": 0.9620979999999992,
-    "peak_rss_bytes_at_end": 108904448
+    "wall_seconds": 0.106963584,
+    "cpu_seconds": 0.9036300000000015,
+    "peak_rss_bytes_at_end": 95518720
    },
    {
     "stage": "baseline",
     "status": "complete",
     "ran": true,
-    "wall_seconds": 1.764106417,
-    "cpu_seconds": 1.68417,
-    "peak_rss_bytes_at_end": 108920832
+    "wall_seconds": 1.585445958,
+    "cpu_seconds": 1.580718000000001,
+    "peak_rss_bytes_at_end": 95551488
    }
   ],
-  "stage_cpu_sum": 13.260333,
-  "whole_process_cpu_seconds": 13.268379000000001,
-  "unattributed_cpu_seconds": 0.008046000000001996,
-  "whole_process_wall_seconds": 3.914771875,
-  "whole_process_peak_rss_bytes": 108953600,
+  "stage_cpu_sum": 12.369265000000004,
+  "whole_process_cpu_seconds": 12.380427000000001,
+  "unattributed_cpu_seconds": 0.011161999999997008,
+  "whole_process_wall_seconds": 2.992156708,
+  "whole_process_peak_rss_bytes": 95567872,
   "selection_cost": {
    "abscissae_drawn": 695,
    "cofactor_multiplications": 344,
@@ -1285,7 +1297,7 @@
   "relations": 588,
   "recovered_scalar": 7892094459170,
   "verified": true,
-  "rho_over_ic_wall_ratio": 0.8951202254669488,
-  "reading": "Stage CPU deltas reconcile to the top-level process total. RSS fields are the process high-water mark sampled at each stage end and are not phase-local allocation peaks or deltas."
+  "rho_over_ic_wall_ratio": 1.2354096675370514,
+  "reading": "Stage CPU deltas reconcile to the top-level process total. Collection now separates pair-table construction from the relation unit; RSS fields remain cumulative process high-water marks, not phase-local allocation peaks or deltas."
  }
 }
