@@ -199,14 +199,41 @@ the trail cost, an asymmetry of `2^17.4`. The claim is
 {"dps": [{"x": "<canonical orbit>", "seed": "<64-bit walk seed>", "j": [n3, …, n10]}]}
 ```
 
-So the gap is on *this* side now, not cairn's: the client does not carry those
-eight counters through the kernel, and until it does a run collects for the
-campaign and earns nothing. Two limits cairn states as plainly: the posted
-pool is one **tranche**, about `2^46.3` of the expected `2^60.8` iterations,
-because the full corpus is `2^35.5` orbits (~6.8 TB) and every verifying node
-holds all of it; and a witness does not prove the counters came from the job's
-own branch rule, which is what the sampled re-walk audit and
-`cairn attest slash` are for.
+The kernel still does not carry those counters, and it should not: adding
+them costs about 105 ALU slots on a 2,324-slot update and 15% of the walk
+state, which is ~4% of the whole campaign — roughly 1,800 GPU-hours — to
+witness every trail, when the posted pool is 2^21 orbits, 0.004% of them.
+**Replaying only the trails you claim is the cheaper route by about 900x**,
+and `build/witness` is it:
+
+```sh
+make witness
+./build/witness --curve 131 --job ecc2k130.json --corpus dps.bin > claims.jsonl
+```
+
+It replays each record's seed with the reference walk — which has counted the
+`n_j` all along, because collision resolution always needed them — checks that
+the replay lands on the orbit the record names, checks the witness itself by
+the same double scalar multiplication the payer will do, and prints batches of
+up to 64. `make test-witness` runs it end to end; with `CAIRN_ROOT` set it
+also hands the result to cairn's own checker. `cairn_job.py` writes a job
+document for a small curve so that check can run on a trail short enough to
+walk.
+
+One caveat the tool enforces rather than documents: this client works in the
+*permuted* type-II ONB, where `σ` is the coordinate permutation `i → fold(2i)`
+and **not** a rotation, while a cairn job names orbits by the least rotation in
+the plain normal basis its `nb_generator` pins. Both are the same conjugates,
+so the map is a permutation — cairn's generator is this basis's element `T`
+and its coordinate `k` is this one's `fold(T·2^k)` — and `--job` derives `T`
+by looking the generator up, refusing a job whose element is not in this basis
+instead of emitting names nobody can check.
+
+Two limits cairn states as plainly: the posted pool is one **tranche**, about
+`2^46.3` of the expected `2^60.8` iterations, because the full corpus is
+`2^35.5` orbits (~6.8 TB) and every verifying node holds all of it; and a
+witness does not prove the counters came from the job's own branch rule, which
+is what the sampled re-walk audit and `cairn attest slash` are for.
 
 The prime-field rho objectives — a 50-bit rung and Certicom's ECCp-131 — take
 a different contributor, `crypto cryptanalysis rho-collab work --cairn`

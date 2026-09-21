@@ -353,11 +353,15 @@ cairn run</code></pre>
           <span class="mono">{x, seed, j: [n&#8323; … n&#8321;&#8320;]}</span>.
         </p>
         <p class="note">
-          The gap is therefore on <em>this</em> side now, not cairn's: the
-          client would have to carry those eight counters through a kernel
-          tuned to the byte, and it does not yet, so a run today collects for
-          the campaign and earns nothing. Two limits cairn states plainly as
-          well &mdash; the posted pool is one <em>tranche</em>, about
+          The kernel still does not carry those counters, and it should not:
+          the cheaper route is to replay only the trails you claim. The
+          reference walk has counted the <span class="mono">n_j</span> all
+          along &mdash; collision resolution always needed them &mdash; so
+          <span class="mono">ecc2k130/build/witness</span> turns corpus records
+          into checked claims offline, at about a 900&times; saving over
+          carrying the counters through every step of the search. Two limits
+          cairn states plainly as well &mdash; the posted pool is one
+          <em>tranche</em>, about
           <span class="mono">2^46.3</span> of the expected
           <span class="mono">2^60.8</span> iterations, because the full corpus
           is <span class="mono">2^35.5</span> orbits (~6.8 TB) and every
