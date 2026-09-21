@@ -1545,6 +1545,30 @@ This is a stronger statement than the earlier rounds could make.  §10.8
 said "not a crossover" about the rows it had measured.  This says the
 family has none to find.
 
+**The conclusion does not rest on the `K/2`.**  That heuristic is the
+shakiest part of §11.2, and the runs show it is only roughly right: the
+measured relations used to close, over columns, run from `1.13` at
+`K = 5` down to `0.08` at `K = 277`, falling as the base grows.  So
+suppose instead that a row needs `K^{1−a}` relations for some `a ≥ 0`
+— `a = 0` is the `K/2` heuristic, larger `a` is the faster closing the
+data hints at.  Redoing the minimisation gives
+`F* ∝ (#E·t)^{1/(3+a)}` and, on a prime-order curve,
+
+| relations needed | `F*` | `S_family` |
+|:--|:--|:--|
+| `K` (`a = 0`) | `#E^{1/3}` | `r^{1/6}` |
+| `K^{3/4}` | `#E^{1/3.25}` | `r^{0.115}` |
+| `K^{1/2}` | `#E^{1/3.5}` | `r^{1/14}` |
+| `K^{1/4}` | `#E^{1/3.75}` | `r^{0.033}` |
+
+`S_family ∝ r^{2/(3+a) − 1/2}`, whose exponent is positive for every
+`a < 1`.  A row would have to close on a number of relations growing
+slower than *any* power of `K` to escape, and a bounded number of
+two-summand relations cannot pin a logarithm over `K` unknowns.  The
+crossover with a flat reference therefore does not exist for any
+plausible relation count; only the rate at which the gap opens depends
+on `a`.
+
 **What the law does not cover, said plainly.**  It is a statement about
 the *pair-table* family, and it rests on that family's two costs: a
 table of every pair, `F²/4t`, and `Θ(K)` relations from targets that
