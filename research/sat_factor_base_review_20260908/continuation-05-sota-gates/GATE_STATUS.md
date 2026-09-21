@@ -1,11 +1,17 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 109, 2026-09-13. The historical optimization chain is
+Current through Stage 124, 2026-09-21. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
-public unknown-scalar run. Stage 109 composes the current seven-gate audit
-without changing any prior frozen artifact.
+public unknown-scalar run. Stage 109 composed the current seven-gate audit on
+2026-09-13 without changing any prior frozen artifact. Stage 124 re-seals that
+audit over the boundary ledger as updated on 2026-09-21 by the index-calculus
+boundary ledger (operation-counted rows for the prime and binary regimes,
+oracle pricing and the whole-process count on the Koblitz rows;
+`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`), chaining to
+the Stage 109 seal; no Koblitz gate fact moved and no prior frozen artifact
+changed.
 
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
