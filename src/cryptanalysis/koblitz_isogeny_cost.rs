@@ -1330,6 +1330,29 @@ pub fn summarise(
 }
 
 impl ClassCostSummary {
+    /// Whether the sweep can carry **any** conclusion, on either channel.
+    ///
+    /// A recovered logarithm that failed either of its two checks, or a
+    /// contradictory relation row, invalidates the run as a whole — not
+    /// one channel of it.  The relations that feed the yield are the same
+    /// relations that feed the solve, so a sweep whose solves are wrong has
+    /// no standing to report a yield conclusion either.
+    ///
+    /// Both verdicts route through this rather than repeating the test,
+    /// because they did once diverge: `yield_verdict` checked only the
+    /// member count, so a sweep the algebraic channel called `INVALID`
+    /// printed `SIZE_EXPLAINED` beside it and a failed recovery read as a
+    /// successful yield conclusion.
+    fn unreadable(&self) -> Option<&'static str> {
+        if self.verification_failures > 0 || self.inconsistent_rows > 0 {
+            return Some("INVALID");
+        }
+        if self.measured < 2 {
+            return Some("INSUFFICIENT");
+        }
+        None
+    }
+
     /// The verdict the experiment was built to return, on the **algebraic**
     /// channel: solving degree, first fall, and reductions per call.
     ///
@@ -1343,11 +1366,8 @@ impl ClassCostSummary {
     /// spread is dominated by the factor-base size and would otherwise
     /// manufacture a `SPREAD` out of an arithmetic identity.
     pub fn verdict(&self) -> &'static str {
-        if self.verification_failures > 0 || self.inconsistent_rows > 0 {
-            return "INVALID";
-        }
-        if self.measured < 2 {
-            return "INSUFFICIENT";
+        if let Some(blocked) = self.unreadable() {
+            return blocked;
         }
         if self.reductions_per_call.cv() < FLATNESS_CV && self.first_fall_modes.len() == 1 {
             "FLAT"
@@ -1379,8 +1399,8 @@ impl ClassCostSummary {
     /// - `SPREAD` — survives both controls.  Only this one points at
     ///   something neither sampling nor the factor-base count explains.
     pub fn yield_verdict(&self) -> &'static str {
-        if self.measured < 2 {
-            return "INSUFFICIENT";
+        if let Some(blocked) = self.unreadable() {
+            return blocked;
         }
         if self.yield_per_probe.cv() < FLATNESS_CV {
             "FLAT"
@@ -1493,6 +1513,67 @@ mod tests {
         let (a2, r, _) = preferred_family(17).expect("n = 17 has a usable family");
         assert_eq!(a2, 1);
         assert_eq!(r, 65587);
+    }
+
+    /// A summary with the spreads of a clean, flat sweep, so a test can
+    /// vary exactly the field it is about.
+    fn clean_summary() -> ClassCostSummary {
+        ClassCostSummary {
+            n: 17,
+            l: 5,
+            m: 2,
+            measured: 273,
+            skipped: 0,
+            verification_failures: 0,
+            inconsistent_rows: 0,
+            reductions_per_call: Spread::of(&[1.0, 1.0, 1.0]),
+            ns_per_call: Spread::of(&[100.0, 100.0, 100.0]),
+            yield_per_probe: Spread::of(&[0.004, 0.004, 0.004]),
+            normalised_yield: Spread::of(&[2.0, 2.0, 2.0]),
+            unknowns: Spread::of(&[15.0, 15.0, 15.0]),
+            yield_variance_ratio: 1.0,
+            yield_sampling_variance: 1e-7,
+            normalised_variance_ratio: 1.0,
+            yield_probes: 20_000,
+            pooled_first_fall: BTreeMap::from([(2, 100)]),
+            pooled_d_star: BTreeMap::from([(2, 100)]),
+            first_fall_modes: BTreeMap::from([(2, 273)]),
+            koblitz_reductions_per_call: Some(1.0),
+            best_ratio_to_koblitz: Some(1.0),
+        }
+    }
+
+    #[test]
+    fn a_failed_recovery_invalidates_both_channels_not_just_one() {
+        // Caught by review on PR #550: `yield_verdict` checked only the
+        // member count, so a sweep the algebraic channel called INVALID
+        // still printed a yield conclusion next to it.  The relations that
+        // feed the yield are the ones that feed the solve, so a wrong
+        // solve retires both.
+        let clean = clean_summary();
+        assert_eq!(clean.verdict(), "FLAT");
+        assert_eq!(clean.yield_verdict(), "FLAT");
+
+        let failed = ClassCostSummary {
+            verification_failures: 1,
+            ..clean_summary()
+        };
+        assert_eq!(failed.verdict(), "INVALID");
+        assert_eq!(failed.yield_verdict(), "INVALID");
+
+        let contradictory = ClassCostSummary {
+            inconsistent_rows: 1,
+            ..clean_summary()
+        };
+        assert_eq!(contradictory.verdict(), "INVALID");
+        assert_eq!(contradictory.yield_verdict(), "INVALID");
+
+        let thin = ClassCostSummary {
+            measured: 1,
+            ..clean_summary()
+        };
+        assert_eq!(thin.verdict(), "INSUFFICIENT");
+        assert_eq!(thin.yield_verdict(), "INSUFFICIENT");
     }
 
     #[test]
