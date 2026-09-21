@@ -1157,9 +1157,9 @@
   }
  },
  "science_process_accounting": {
-  "processes": 294,
-  "sequential_wall_seconds": 1283.844761873,
-  "total_core_seconds": 3014.2404400000005,
+  "processes": 318,
+  "sequential_wall_seconds": 1395.640867705,
+  "total_core_seconds": 3192.1819040000005,
   "peak_rss_bytes": 245972992,
   "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count, width and window diagnostics, and accepted or rejected single-target build-cache, prefetch, canonicalization-lane, projected-predicate-reuse, orbit-derived-projection and cutoff A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
@@ -1469,6 +1469,20 @@
     "median_candidate_over_reference_peak_rss": 1.2625843279709392,
     "median_candidate_over_reference_relation_unit_cpu": 1.031091267951328,
     "decision": "rejected_relation_scan_regression; selected cache preserves the original filter index"
+   },
+   "single_worker_non_atomic_builder": {
+    "one_core_pairs": 5,
+    "default_thread_pairs": 5,
+    "one_core_pair_build_wall_ratio": 0.9568650218336607,
+    "one_core_pair_build_cpu_ratio": 0.9568687204769059,
+    "one_core_ic_wall_ratio": 0.9882979322893674,
+    "one_core_whole_cpu_ratio": 0.9920829466798847,
+    "one_core_peak_rss_ratio": 0.98359375,
+    "default_pair_build_wall_ratio": 0.9713190300153137,
+    "default_whole_cpu_ratio": 0.9933315613701098,
+    "default_peak_rss_ratio": 1.0002560819462227,
+    "static_dispatch_followup_one_core_pair_wall_seconds": 1.218050167,
+    "decision": "rejected_small_end_to_end_gain_does_not_justify_duplicated_serial_builder"
    }
   },
   "matched_one_core_ab": {

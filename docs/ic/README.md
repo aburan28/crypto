@@ -622,6 +622,10 @@ and whole-process CPU from 12.269 to 11.213 core-seconds (0.914x).  The
 charged trade is memory: median peak RSS rose from 93.9 MB to 125.9 MB
 (1.331x).  A full hash cache was rejected at 2.519x RSS, and a five-byte
 filter variant was rejected after slowing the relation unit by 3.1%.
+A one-worker non-atomic builder cut pair-build wall to 0.957x but
+moved full IC only to 0.988x; duplicating the counting and scatter paths
+was rejected for that small end-to-end gain.  The statically dispatched
+follow-up did not improve it.
 The same exact binaries over five matched one-worker pairs cut the
 single-core pair build from 2.585 to 1.256 s (0.486x), full IC wall from
 8.449 to 7.095 s (0.841x), and whole-process CPU from 10.791 to 9.424
@@ -705,8 +709,8 @@ complete rank-producing core cost.  Reusing window scratch preserved
 every relation hash and scalar across eight matched pairs but was speed
 neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
 selection, validation and rejected diagnostics, the retained science
-campaign contains 294 processes, 1,283.845 sequential wall-seconds,
-3,014.240 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+campaign contains 318 processes, 1,395.641 sequential wall-seconds,
+3,192.182 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
 a rejected uncompressed-cache run).
 
 Before the cached builder, five fresh scalar-blind repeats with
