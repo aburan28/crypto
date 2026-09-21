@@ -1157,11 +1157,11 @@
   }
  },
  "science_process_accounting": {
-  "processes": 204,
-  "sequential_wall_seconds": 838.206838339,
-  "total_core_seconds": 2298.0146480000003,
+  "processes": 226,
+  "sequential_wall_seconds": 959.786737044,
+  "total_core_seconds": 2497.774722,
   "peak_rss_bytes": 245972992,
-  "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count, width and window diagnostics, and accepted or rejected single-target build-cache, prefetch, canonicalization-lane and cutoff A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
+  "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count, width and window diagnostics, and accepted or rejected single-target build-cache, prefetch, canonicalization-lane, projected-predicate-reuse and cutoff A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
   "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
  },
  "current_head_selection_cost_replay": {
@@ -2009,5 +2009,408 @@
    "identical 588-relation hash and verified scalar in every matched run"
   ],
   "claim_boundary": "A constant-factor implementation improvement on one public-synthetic target. It changes no factor base, relation, solver, asymptotic exponent or SOTA gate."
+ },
+ "single_target_projected_predicate_reuse": {
+  "source_commit": "6dc1200e",
+  "instance": "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json",
+  "mechanism": "Construct the public cofactor-projected signed-Frobenius factor-base predicate once in selection, keep it bound to its curve and factor base, and reuse exact clones for relation linear algebra and individual-log descent. Selection retains the full construction charge; logs and solve no longer repeat it.",
+  "known_log_boundary": "The context contains only projected points and algebraic orbit locations. It contains no factor-base logarithms; those remain derived from collected relations and certified separately.",
+  "matched_one_core_ab": {
+   "pairs": 5,
+   "reference_binary_blake3": "a4df5da5e73f8f3519f149d19952b2b2054d828208debe533e6712398db4d457",
+   "candidate_binary_blake3": "fc4911eaab16cf639d6b6af4f408a993feb42a40a1d70ba41db8c98988284417",
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "relations_each": 588,
+   "recovered_scalar_each": 7892094459170,
+   "verified": "5/5 reference and 5/5 candidate",
+   "medians": {
+    "whole_wall": {
+     "reference": 9.221667374999999,
+     "candidate": 7.69312,
+     "candidate_over_reference": 0.8327755050556795,
+     "candidate_wins": "5/5"
+    },
+    "whole_cpu": {
+     "reference": 9.156872,
+     "candidate": 7.633814,
+     "candidate_over_reference": 0.8324320858311396,
+     "candidate_wins": "5/5"
+    },
+    "rss": {
+     "reference": 106676224,
+     "candidate": 104251392,
+     "candidate_over_reference": 0.9772692366763938,
+     "candidate_wins": "5/5"
+    },
+    "ic_wall": {
+     "reference": 6.834280709000001,
+     "candidate": 6.0862440829999995,
+     "candidate_over_reference": 0.8887632207693054,
+     "candidate_wins": "5/5"
+    },
+    "rho_wall": {
+     "reference": 1.583771333,
+     "candidate": 1.5743447499999998,
+     "candidate_over_reference": 0.9928869035688672,
+     "candidate_wins": "4/5"
+    },
+    "rho_over_ic": {
+     "reference": 0.2315413681085095,
+     "candidate": 0.25905446990519154,
+     "candidate_over_reference": 1.1169170774307515,
+     "candidate_wins": "0/5"
+    },
+    "select_wall": {
+     "reference": 0.954390667,
+     "candidate": 0.9530905,
+     "candidate_over_reference": 0.9992932562195868,
+     "candidate_wins": "3/5"
+    },
+    "select_cpu": {
+     "reference": 0.941048,
+     "candidate": 0.936565,
+     "candidate_over_reference": 1.0007888458479774,
+     "candidate_wins": "2/5"
+    },
+    "collect_wall": {
+     "reference": 4.969495042,
+     "candidate": 4.990963667,
+     "candidate_over_reference": 1.0042823766851083,
+     "candidate_wins": "1/5"
+    },
+    "collect_cpu": {
+     "reference": 4.946472,
+     "candidate": 4.966488999999999,
+     "candidate_over_reference": 1.0040467225933958,
+     "candidate_wins": "1/5"
+    },
+    "logs_wall": {
+     "reference": 0.924990584,
+     "candidate": 0.1554455,
+     "candidate_over_reference": 0.16747889332070226,
+     "candidate_wins": "5/5"
+    },
+    "logs_cpu": {
+     "reference": 0.9159220000000001,
+     "candidate": 0.1468600000000002,
+     "candidate_over_reference": 0.1600832121637883,
+     "candidate_wins": "5/5"
+    },
+    "solve_wall": {
+     "reference": 0.789949625,
+     "candidate": 0.01894,
+     "candidate_over_reference": 0.023943570783494645,
+     "candidate_wins": "5/5"
+    },
+    "solve_cpu": {
+     "reference": 0.7763960000000001,
+     "candidate": 0.0077750000000005315,
+     "candidate_over_reference": 0.010011266698857917,
+     "candidate_wins": "5/5"
+    },
+    "unit_wall": {
+     "reference": 3.557703916,
+     "candidate": 3.571519541,
+     "candidate_over_reference": 1.0044453530629331,
+     "candidate_wins": "0/5"
+    },
+    "unit_cpu": {
+     "reference": 3.5523199999999995,
+     "candidate": 3.5652160000000004,
+     "candidate_over_reference": 1.0042938136203947,
+     "candidate_wins": "0/5"
+    }
+   },
+   "per_pair": [
+    {
+     "pair": 1,
+     "candidate_over_reference_whole_cpu": 0.8306228865474148,
+     "candidate_over_reference_ic_wall": 0.8865325490683523,
+     "candidate_over_reference_select_wall": 0.9909645878232867,
+     "candidate_over_reference_logs_wall": 0.16747889332070226,
+     "candidate_over_reference_solve_wall": 0.023907972496934066,
+     "candidate_over_reference_peak_rss": 0.9788560997870398,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_whole_cpu": 0.833670493592135,
+     "candidate_over_reference_ic_wall": 0.8905464001478723,
+     "candidate_over_reference_select_wall": 0.9992932562195868,
+     "candidate_over_reference_logs_wall": 0.16668645423694053,
+     "candidate_over_reference_solve_wall": 0.026627520037372607,
+     "candidate_over_reference_peak_rss": 0.9630538095968113,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_whole_cpu": 0.8424893268453126,
+     "candidate_over_reference_ic_wall": 0.9017485328687956,
+     "candidate_over_reference_select_wall": 1.0082129070516463,
+     "candidate_over_reference_logs_wall": 0.16782816434400144,
+     "candidate_over_reference_solve_wall": 0.02646671931770333,
+     "candidate_over_reference_peak_rss": 0.959020181790171,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_whole_cpu": 0.8324320858311396,
+     "candidate_over_reference_ic_wall": 0.8887632207693054,
+     "candidate_over_reference_select_wall": 0.9896433108479868,
+     "candidate_over_reference_logs_wall": 0.16696183471636292,
+     "candidate_over_reference_solve_wall": 0.022759431251672898,
+     "candidate_over_reference_peak_rss": 0.9772692366763938,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_whole_cpu": 0.8312913860859498,
+     "candidate_over_reference_ic_wall": 0.8866059836774557,
+     "candidate_over_reference_select_wall": 1.0099034392590094,
+     "candidate_over_reference_logs_wall": 0.16850678969015556,
+     "candidate_over_reference_solve_wall": 0.023943570783494645,
+     "candidate_over_reference_peak_rss": 0.9844423906346272,
+     "identical_relation_hash_scalar_and_verification": true
+    }
+   ],
+   "rayon_threads": 1,
+   "reading": "Selection remains unchanged because it still constructs and charges the algebraic projected predicate once. Reusing that exact map cuts logs and solve setup, producing 5/5 IC-wall and whole-CPU wins with slightly lower RSS."
+  },
+  "matched_default_thread_ab": {
+   "pairs": 5,
+   "reference_binary_blake3": "a4df5da5e73f8f3519f149d19952b2b2054d828208debe533e6712398db4d457",
+   "candidate_binary_blake3": "fc4911eaab16cf639d6b6af4f408a993feb42a40a1d70ba41db8c98988284417",
+   "canonical_relations_sha256": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+   "relations_each": 588,
+   "recovered_scalar_each": 7892094459170,
+   "verified": "5/5 reference and 5/5 candidate",
+   "medians": {
+    "whole_wall": {
+     "reference": 2.770519583,
+     "candidate": 2.580819166,
+     "candidate_over_reference": 0.9332171299086468,
+     "candidate_wins": "5/5"
+    },
+    "whole_cpu": {
+     "reference": 10.794471,
+     "candidate": 9.074529,
+     "candidate_over_reference": 0.8422138178748118,
+     "candidate_wins": "5/5"
+    },
+    "rss": {
+     "reference": 127336448,
+     "candidate": 127303680,
+     "candidate_over_reference": 1.0021434875803807,
+     "candidate_wins": "2/5"
+    },
+    "ic_wall": {
+     "reference": 1.065869875,
+     "candidate": 0.9705664580000001,
+     "candidate_over_reference": 0.916590228643428,
+     "candidate_wins": "5/5"
+    },
+    "rho_wall": {
+     "reference": 1.5803085000000001,
+     "candidate": 1.573929583,
+     "candidate_over_reference": 0.993823927963203,
+     "candidate_wins": "5/5"
+    },
+    "rho_over_ic": {
+     "reference": 1.481851032706971,
+     "candidate": 1.6216608043959415,
+     "candidate_over_reference": 1.0842619710599384,
+     "candidate_wins": "0/5"
+    },
+    "select_wall": {
+     "reference": 0.267637292,
+     "candidate": 0.266155584,
+     "candidate_over_reference": 0.994610606451913,
+     "candidate_wins": "5/5"
+    },
+    "select_cpu": {
+     "reference": 1.071333,
+     "candidate": 1.0667820000000001,
+     "candidate_over_reference": 0.9957520210802804,
+     "candidate_wins": "3/5"
+    },
+    "collect_wall": {
+     "reference": 0.645397042,
+     "candidate": 0.64821125,
+     "candidate_over_reference": 1.0102660009151088,
+     "candidate_wins": "1/5"
+    },
+    "collect_cpu": {
+     "reference": 6.161538,
+     "candidate": 6.2339720000000005,
+     "candidate_over_reference": 1.0200743710417755,
+     "candidate_wins": "0/5"
+    },
+    "logs_wall": {
+     "reference": 0.158428625,
+     "candidate": 0.065357417,
+     "candidate_over_reference": 0.412535405139065,
+     "candidate_wins": "5/5"
+    },
+    "logs_cpu": {
+     "reference": 1.090273999999999,
+     "candidate": 0.17258499999999977,
+     "candidate_over_reference": 0.15823043669107204,
+     "candidate_wins": "5/5"
+    },
+    "solve_wall": {
+     "reference": 0.106205,
+     "candidate": 0.0198405,
+     "candidate_over_reference": 0.18509833092444852,
+     "candidate_wins": "5/5"
+    },
+    "solve_cpu": {
+     "reference": 0.8978380000000001,
+     "candidate": 0.00710799999999967,
+     "candidate_over_reference": 0.007822884847604888,
+     "candidate_wins": "5/5"
+    },
+    "unit_wall": {
+     "reference": 0.384615292,
+     "candidate": 0.38988325,
+     "candidate_over_reference": 1.0137966384527952,
+     "candidate_wins": "1/5"
+    },
+    "unit_cpu": {
+     "reference": 4.021287999999999,
+     "candidate": 4.076842,
+     "candidate_over_reference": 1.0035470087077072,
+     "candidate_wins": "2/5"
+    }
+   },
+   "per_pair": [
+    {
+     "pair": 1,
+     "candidate_over_reference_whole_cpu": 0.8629686398568801,
+     "candidate_over_reference_ic_wall": 0.891328709282341,
+     "candidate_over_reference_select_wall": 0.9551256615319031,
+     "candidate_over_reference_logs_wall": 0.4111720967348314,
+     "candidate_over_reference_solve_wall": 0.18648612455790248,
+     "candidate_over_reference_peak_rss": 0.9994853319608852,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_whole_cpu": 0.843274394826759,
+     "candidate_over_reference_ic_wall": 0.916590228643428,
+     "candidate_over_reference_select_wall": 0.9953535261862538,
+     "candidate_over_reference_logs_wall": 0.43214525324704345,
+     "candidate_over_reference_solve_wall": 0.1879678501600505,
+     "candidate_over_reference_peak_rss": 1.0251895643233517,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_whole_cpu": 0.8327563233115964,
+     "candidate_over_reference_ic_wall": 0.9257213503665258,
+     "candidate_over_reference_select_wall": 0.994610606451913,
+     "candidate_over_reference_logs_wall": 0.412535405139065,
+     "candidate_over_reference_solve_wall": 0.18509833092444852,
+     "candidate_over_reference_peak_rss": 0.9981834695731153,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_whole_cpu": 0.8349452952410448,
+     "candidate_over_reference_ic_wall": 0.9035241607510717,
+     "candidate_over_reference_select_wall": 0.9938134518264367,
+     "candidate_over_reference_logs_wall": 0.3683546014029365,
+     "candidate_over_reference_solve_wall": 0.17284937051180746,
+     "candidate_over_reference_peak_rss": 1.0362763403574287,
+     "identical_relation_hash_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_whole_cpu": 0.8422138178748118,
+     "candidate_over_reference_ic_wall": 0.9252145978422534,
+     "candidate_over_reference_select_wall": 0.9970613424183106,
+     "candidate_over_reference_logs_wall": 0.4131079049774099,
+     "candidate_over_reference_solve_wall": 0.16871694364672096,
+     "candidate_over_reference_peak_rss": 1.0021434875803807,
+     "identical_relation_hash_scalar_and_verification": true
+    }
+   ],
+   "reading": "Default-thread selection is unchanged, while logs and solve CPU collapse because the predicate is cloned rather than rebuilt. Whole wall, whole CPU and IC wall win all five pairs with flat RSS."
+  },
+  "current_head_replays": {
+   "default_threads": {
+    "binary_blake3": "fc4911eaab16cf639d6b6af4f408a993feb42a40a1d70ba41db8c98988284417",
+    "whole_process_wall_seconds": 2.574807333,
+    "whole_process_cpu_seconds": 9.065834,
+    "peak_rss_bytes": 127860736,
+    "ic_wall_seconds": 0.96919725,
+    "rho_wall_seconds": 1.570788292,
+    "rho_over_ic_wall_ratio": 1.6207106365603081,
+    "stages": {
+     "select": {
+      "wall_seconds": 0.268186958,
+      "cpu_seconds": 1.0782880000000001
+     },
+     "collect": {
+      "wall_seconds": 0.645786792,
+      "cpu_seconds": 6.228334
+     },
+     "logs": {
+      "wall_seconds": 0.0675425,
+      "cpu_seconds": 0.1724509999999997
+     },
+     "solve": {
+      "wall_seconds": 0.017955375,
+      "cpu_seconds": 0.00725899999999946
+     },
+     "baseline": {
+      "wall_seconds": 1.571195833,
+      "cpu_seconds": 1.5688179999999994
+     }
+    },
+    "relations": 588,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   "one_thread": {
+    "binary_blake3": "fc4911eaab16cf639d6b6af4f408a993feb42a40a1d70ba41db8c98988284417",
+    "whole_process_wall_seconds": 7.618693291,
+    "whole_process_cpu_seconds": 7.546781999999999,
+    "peak_rss_bytes": 104054784,
+    "ic_wall_seconds": 6.005126167,
+    "rho_wall_seconds": 1.575897125,
+    "rho_over_ic_wall_ratio": 0.2624253148351879,
+    "stages": {
+     "select": {
+      "wall_seconds": 0.950818625,
+      "cpu_seconds": 0.9347540000000001
+     },
+     "collect": {
+      "wall_seconds": 4.911084875,
+      "cpu_seconds": 4.879803000000001
+     },
+     "logs": {
+      "wall_seconds": 0.154973875,
+      "cpu_seconds": 0.14600599999999897
+     },
+     "solve": {
+      "wall_seconds": 0.02094325,
+      "cpu_seconds": 0.007095999999999769
+     },
+     "baseline": {
+      "wall_seconds": 1.576237458,
+      "cpu_seconds": 1.57355
+     }
+    },
+    "relations": 588,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   }
+  },
+  "validation": [
+   "shared and freshly rebuilt projected contexts expose the same column count",
+   "shared and fresh individual-log solvers recover the same scalar and trial count",
+   "identical 588-relation hash and verified scalar in every matched run"
+  ],
+  "claim_boundary": "A full-cost constant-factor implementation improvement on one public-synthetic target. Predicate construction remains charged once; the asymptotic exponent and SOTA gates are unchanged."
  }
 }
