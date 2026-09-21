@@ -1,0 +1,60 @@
+[
+ {
+  "config": {
+   "batch_trials": 1,
+   "linear_algebra": "sparse",
+   "max_trials": 4096,
+   "solver": "pair_table",
+   "summands": 3
+  },
+  "hypothesis": "The retained winner, byte-identical to runs/round-0016/source. It lost to rho outright at n23a1 and n29a1 on the eight-cell panel in round 0016 and is expected to again; it is the baseline every promotion gate is measured against.",
+  "id": "incumbent",
+  "parent": "round-0016 retained winner (the round-0015 winner source, unchanged)",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016"
+ },
+ {
+  "config": {
+   "batch_trials": 1,
+   "linear_algebra": "sparse",
+   "max_trials": 4096,
+   "solver": "pair_table",
+   "summands": 3
+  },
+  "falsification": "Any bad, missing or unmatched certificate; any relation, column log or solution different from scan_io's on the same fixture; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+  "hypothesis": "CONTROL. The round-0015 challenger exactly as sealed, so that any difference between it and orbits is the certificate format alone. On eight cells in round 0016 it beat rho on instructions in every cell and panel-wide natively (upper 0.9988) but not per cell at n29a1 (1.037) and n23a1 (1.021); it was refused over the incumbent by its replay native upper limit, 1.0034.",
+  "id": "scan_io",
+  "parent": "round-0015 challenger scan_io, unchanged (control)",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016/source_candidates/scan_io/source"
+ },
+ {
+  "config": {
+   "batch_trials": 1,
+   "linear_algebra": "sparse",
+   "max_trials": 4096,
+   "solver": "pair_table",
+   "summands": 3
+  },
+  "falsification": "Any bad, missing or unmatched certificate; any relation, column log or solution different from scan_io's on the same fixture; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+  "hypothesis": "scan_io with the certificate naming the factor base by its orbit representatives (factor_base_orbits) instead of listing every point; the checker regenerates the flat base with its own Frobenius and negation. Same base, same relations, same logs, same solutions on every fixture; 2n times fewer points to format and write. Predictions are in ROUND17-single-target.md.",
+  "id": "orbits",
+  "parent": "scan_io + round17-orbits.patch",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round17-sources/orbits"
+ },
+ {
+  "config": {
+   "batch_trials": 1,
+   "linear_algebra": "sparse",
+   "max_trials": 4096,
+   "solver": "pair_table",
+   "summands": 3
+  },
+  "falsification": "Any bad, missing or unmatched certificate; a row count other than the one the weighted rule predicts (2 at n23a1, unchanged elsewhere); an instruction ratio to orbits above 1.0 at any cell other than n23a1; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+  "hypothesis": "orbits with the pair-table row rule weighting a built entry at the ratio round 0015 measured, 680/380, instead of at one. The rule is unchanged otherwise and still decided before any probe is drawn. By its own arithmetic on the round-0016 panel it moves exactly one cell, n23a1, from three rows to two, and leaves every other cell: predicted about +84,000 instructions (2.7%) at n23a1 and no change elsewhere. Its certificate differs from scan_io's wherever the row count differs -- a different set of rests is scanned, so different relations are found -- and is judged by the checker, not by byte identity.",
+  "id": "orbits_rows",
+  "parent": "orbits + round17-rows.patch",
+  "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0016",
+  "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round17-sources/orbits_rows"
+ }
+]

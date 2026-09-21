@@ -33,7 +33,7 @@ PRETTY = {
     "mitm_m2_abscissa_columns_control": "Same base (m = 2), one column per abscissa (control)",
     "semaev_s4_pairs_and_solve_m3_signed_orbit_columns": "S&#8324; pairs-and-solve on the invariant subspace",
 }
-# Class of each variant by the AGENTS.md §3 test, argued in RESEARCH_IC_BOUNDARY_LEDGER.md §3.
+# Class of each variant by the AGENTS.md §3 test, argued in research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md §3.
 # Keyed by (regime, variant); a bare variant name is the fallback for every regime.
 CLASS = {
     "semaev_s3_roots_m2": ("baseline", "baseline: one square root per base abscissa per target"),

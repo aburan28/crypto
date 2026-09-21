@@ -190,6 +190,10 @@ hashes, and failures. Outputs are written to new paths.
 
 ## Observations from the frozen correctness panel
 
+The subsequent [follow-up experiment](followup_01/README.md) tests denser bases,
+nine- and eleven-bit SAT instances, and larger subspace supports. Its results
+are additive; the original observations below remain unchanged.
+
 The raw SAT artifact is
 [`nagao_relation_comparison_20260913.json`](experiments/nagao_relation_comparison_20260913.json).
 Its aggregate `valid: false` means the full panel did not complete: all 24
@@ -202,6 +206,14 @@ campaign. The exact per-variant observations are:
 | Chained S3 + verified lifts | 110 / 110 | 0 | 0 | Unmeasured / unmeasured | Reference implementation |
 | RR incidence | 86 / 110 | 24 | 0 | Unmeasured / unmeasured | Engineering candidate; incomplete panel |
 | RR norm | 110 / 110 | 0 | 0 | Unmeasured / unmeasured | Engineering candidate; correctness passed |
+
+**Followed up 2026-09-20.** The incidence watchdogs above are the open item
+`research/notes/ecc2k130/RESEARCH_ECC2K130_WDSAT.md` went after, by putting both
+encodings in front of WDSat instead. RR-norm runs there and XORGAUSS is worth
+1,277x in conflicts; RR-incidence never reaches the solver, because the instance
+exceeds WDSat's static allocation and the process dies before printing. That is a
+tool boundary, not a statement about the encoding, and the incidence panel here
+stays incomplete.
 
 Both complete backends recovered the same 947 **projected x-tuples**, summed
 over the 110 target cases. The Semaev frontend also produced five non-liftable
@@ -289,3 +301,87 @@ solver and watchdog. No general mathematical avenue is closed.
    <https://api.lib.kyushu-u.ac.jp/opac_download_md/19584/JMI2011A-9.pdf>.
 
 All three sources were retrieved and read during this implementation session.
+
+## Compiled support experiment (solver_02)
+
+The [new proof and hypothesis ledger](solver_02/README.md) records 96 matched
+first-relation trials and 992 coefficient checks. The support formulation
+passed validation but both root-free variants resolved none of the eight
+cases at each of n=9 and n=11. Norm resolved eight and six respectively.
+Two-bit conditioning stalled in its first branch on every larger case.
+This supersedes the priority above: next test hybrid root retention and a
+fair conditioning schedule, while preparing a symmetrized-S4 cost comparison.
+The historical experiments remain unchanged; no attack improvement is claimed.
+
+## Hybrid support and fair scheduling (solver_03)
+
+The [follow-up proof and results](solver_03/README.md) add 96 matched trials
+and 7,936 hybrid vector checks. Hybrid resolved 2/8 nine-bit slots and 0/8
+eleven-bit slots; norm remained at 8/8 and 6/8. Fair scheduling reached
+all four branches but resolved none of the larger cases. Both hypotheses
+failed their completion-improvement criterion against the relevant control.
+A new proof reduces quadratic support to linear image-space membership
+when its linear coefficient is fixed; the resulting branching solver is
+a proposed next experiment, not a measured result.
+
+## Function-first goal and fresh-target campaign
+
+The [goal](GOAL.md) sets a 20% all-cost improvement criterion at three sizes.
+The [288-trial follow-through](goal_round_20260913.md) records conditioned
+SAT, a direct quadratic function solver, and matched elementary/transformed
+S4 controls. The direct solver clears the finite eleven-bit panel in both
+first and complete-enumeration modes; S4 wins at smaller sizes. The goal
+remains open, with all-cost accounting and broader held-out scaling next.
+
+## Beyond eleven bits
+
+The [240-trial scaling campaign](scaling_23_29.md) adds cached arithmetic,
+exact image-space support and matched S3/S4 controls at 11, 23 and 29 bits.
+The image solver completes every target/mode slot under five seconds.
+The larger bases have dimension six; increasing base dimension and
+calibrating total solver work remain necessary before an attack-cost claim.
+
+## Subfield and dimension extension (2026-09-14)
+
+[Subfield dimension results](subfield_dimension_results.md) extend the hybrid
+to non-F2 coefficients in F4 over GF(2^18) and GF(2^30), with factor-base
+dimensions 6, 7 and 8. The 144 matched five-second trials resolve 35/48 hybrid
+slots and 0/48 for each Semaev SAT control. Eight separate 60-second hybrid
+enumerations at d8 all complete; the maximum is 20.723362 seconds. Exact-set
+validation and certificate replay report no failures. This is a functionality
+extension and engineering diagnostic; the calibrated all-cost goal remains open.
+
+Frozen implementation, proof, contract, raw trials and source-publication
+mapping are in [subfield_01](subfield_01/README.md). Replay evidence with
+`python research/nagao_relations/check_subfield_evidence.py`.
+
+## Structured support and the direct S3 table (2026-09-14)
+
+The [structured scaling results](structured_01/RESULTS.md) test prefix
+dimensions 8–10 and F4-linear, Frobenius4-stable dimensions 8 and 10 at
+18 and 30 bits. All 240 cold trials use matched targets, bases and budgets.
+The new early support filter preserves the hybrid's accepted functions,
+but does not increase its completion count. A direct S3 pair-invariant
+table completes 14/24 cold enumerations; neither hybrid completes any.
+This is a stronger Semaev comparator, not a function-first success.
+
+Ten separately charged eight-target batches all complete, including d10
+at 30 bits. Uniform-target yield remains sparse at 30 bits, and supported
+targets are reported separately. Quadratic setup, the small sample, lack
+of timing repetitions and uncalibrated costs preclude an asymptotic or
+full-ECDLP claim. Frozen source, raw results, counter comparisons, proof
+checks and certificate replay are in [structured_01](structured_01/README.md).
+
+## Exact bounds and coefficient-block proposal (2026-09-14)
+
+The [bound audit](bounds_01/RESULTS.md) derives exact signed-triple exclusions,
+group-trace fiber ceilings, and implementation-specific multiplication floors.
+The existing hybrid's branch-only floor exceeds the measured direct S3 total
+on all ten identical eight-target complete-enumeration batches. The trace
+quotient into E(F64) adds no whole-target rejection on these bases.
+
+The [next experiment](bounds_01/NEXT.md) targets entire coefficient blocks
+before branch solving. Its general-coefficient normalization has passed
+exact residual checks; block elimination and any resulting gain are still
+proposed. These are accounting and conditional architecture bounds, with
+no new solver performance claim or full-DLP ratio.

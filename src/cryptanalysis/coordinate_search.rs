@@ -76,7 +76,7 @@
 //! polynomials are specialised to one curve, which is all the shape
 //! measurements need.  Nothing here solves a decomposition; it produces the
 //! system the solvers would have to solve and says how big it is.  See
-//! `RESEARCH_EXOTIC_COORDINATES.md` for the measurements and for what they
+//! `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md` for the measurements and for what they
 //! do and do not imply.
 //!
 //! ## References
@@ -2583,7 +2583,7 @@ mod tests {
 
     #[test]
     fn koblitz_orders_match_known_counts() {
-        // From RESEARCH_KOBLITZ_INDEX_CALCULUS.md: K_1/F_2^7 has 142 points,
+        // From research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md: K_1/F_2^7 has 142 points,
         // K_0/F_2^9 has 508.
         assert_eq!(Curve::koblitz(1, 7).order(), 142);
         assert_eq!(Curve::koblitz(0, 9).order(), 508);

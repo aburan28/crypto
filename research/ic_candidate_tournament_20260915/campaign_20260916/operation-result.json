@@ -1,0 +1,85 @@
+{
+  "rounds": [
+    {
+      "round": "round-0002",
+      "targets": 1,
+      "winner": "batch16",
+      "instruction_ratio_to_rho": 13.034913050463174,
+      "instruction_ci95_to_rho": null,
+      "native_ratio_to_rho": null,
+      "native_ci95_to_rho": null,
+      "rho_parity": false,
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 1632,
+        "source_files": 450
+      }
+    },
+    {
+      "round": "round-0003b",
+      "targets": 1,
+      "winner": "combined_batch8",
+      "instruction_ratio_to_rho": 7.14936323673641,
+      "instruction_ci95_to_rho": [
+        6.563380843095217,
+        7.844932268218591
+      ],
+      "native_ratio_to_rho": 2.757943084955262,
+      "native_ci95_to_rho": [
+        2.408587066800431,
+        3.0866033786867497
+      ],
+      "rho_parity": false,
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 1632,
+        "source_files": 450
+      }
+    },
+    {
+      "round": "round-0004",
+      "targets": 1,
+      "winner": "folded_lift_batch4",
+      "instruction_ratio_to_rho": 3.042890033353724,
+      "instruction_ci95_to_rho": [
+        2.688274518239304,
+        3.4833783647230367
+      ],
+      "native_ratio_to_rho": 1.52133131793758,
+      "native_ci95_to_rho": [
+        1.4825577742485183,
+        1.5518235985269213
+      ],
+      "rho_parity": false,
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 1584,
+        "source_files": 450
+      }
+    },
+    {
+      "round": "round-0005-batch16",
+      "targets": 16,
+      "winner": "combined_descent",
+      "instruction_ratio_to_rho": 0.7194927360588594,
+      "instruction_ci95_to_rho": [
+        0.6374471292425982,
+        0.8219836239443673
+      ],
+      "native_ratio_to_rho": 0.7796092721660197,
+      "native_ci95_to_rho": [
+        0.6991620583548833,
+        0.8736653449888768
+      ],
+      "rho_parity": true,
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 1488,
+        "source_files": 450
+      }
+    }
+  ],
+  "new_profiled_trials": 4704,
+  "batch_screen_trials": 36,
+  "scope": "Separate complete cold single-target and 16-target workloads on five small Koblitz cells; existing signed-Frobenius rho reference."
+}

@@ -1,0 +1,23 @@
+{
+  "hypotheses": {
+    "H1": "Compiled H-divides-L_V constraints exactly encode the existing restricted RR coefficient search.",
+    "H2": "Removing explicit roots improves first-verified-relation completion on matched subspace instances.",
+    "H3": "Incrementally conditioning two bits of b improves the root-free solver within the same total per-instance budget.",
+    "H4": "A practical advantage survives increasing field sizes; a full cost/scaling claim additionally needs the strongest Semaev baseline and operation accounting."
+  },
+  "domain": "y^2+xy=x^3+1; three summands; nonzero distinct x in span(first d ONB vectors); x different from target x; finite targets; RR b nonzero",
+  "panels": [{"n":5,"d":3},{"n":9,"d":4},{"n":11,"d":5}],
+  "variants": ["chained-s3","rr-norm","support","support-conditioned"],
+  "seed":2026091302,
+  "targets_per_panel": {"uniform":4,"known_decomposable":4},
+  "target_policy": "Seeded uniform affine targets and separately labeled seeded samples from the exhaustive oracle's supported targets; strata may overlap and are not pooled as a natural hit probability.",
+  "seconds_per_instance":3,
+  "conditioned_policy":"Enumerate b low-two-bit assignments 0,1,2,3 with assumptions on one incremental solver; one shared total deadline; first verified relation stops the search.",
+  "comparison":"Same base, exact target, and arity per paired row. SAT requires direct point verification; UNSAT must agree with exhaustive group arithmetic. Timeout is incomplete, not UNSAT.",
+  "validation":"Exhaust all 992 coefficient pairs a,b!=0 at n5,d3 on one fixed target: full IR remainder vector equals independent scalar polynomial remainder. Check CNF decision correctness on the frozen target panel; audit every emitted model and recovered certificate.",
+  "falsification":"Any circuit/scalar or model/curve mismatch invalidates H1 implementation. No better matched completion falsifies H2 or H3 only on the tested panel. H4 remains unestablished without calibrated operation cost and symmetrized S4 baseline.",
+  "metrics":"Verified SAT/UNSAT decisions, incomplete cases, source-CNF sizes, construction/loading/solve/verification diagnostic times, first-verified relation, rejected candidates, branch count. Full attack S and rho ratio null.",
+  "counting_boundary":"At fixed base and arity exact target support is invariant. No encoding change increases genuine relation yield.",
+  "performance_target":"20% lower all-phase verified-relation cost at three increasing sizes against the strongest matched Semaev baseline; not dischargeable by this diagnostic-only panel.",
+  "source_policy":"No changes to old contracts or results. Append raw rows immediately; keep all failed and timed-out cases. Scientific verdicts scope to the actual experiment."
+}

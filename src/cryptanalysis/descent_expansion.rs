@@ -1,7 +1,7 @@
 //! # Descent incidence-graph expansion — the P2 predictor.
 //!
 //! Implements the combinatorial predictor at the heart of the
-//! proof-complexity bridge (`RESEARCH_FFD_PROOF_COMPLEXITY.md` §3): the
+//! proof-complexity bridge (`research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §3): the
 //! **expansion `γ` of the Weil-descent incidence (Tanner) graph**, built
 //! from the field's multiplication **structure-constant tensor**
 //! `c_{ikj}` defined by `z^i · z^k ≡ Σ_j c_{ikj} z^j (mod m(z))`.
@@ -55,7 +55,7 @@
 //!
 //! ## References
 //!
-//! See `RESEARCH_FFD_PROOF_COMPLEXITY.md`. Core: Ben-Sasson–Wigderson
+//! See `research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md`. Core: Ben-Sasson–Wigderson
 //! 2001 (boundary expansion ⇒ width/degree), Alekhnovich–Razborov 2001.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};

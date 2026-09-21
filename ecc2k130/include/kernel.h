@@ -40,9 +40,13 @@ struct WalkParams {
     unsigned long long *startIter;    // one per lane
     W *dead;                          // one word per slot: lanes awaiting a restart
     DpRecord *dp;
-    unsigned *dpCount;
+    unsigned *dpCount;                // report count, restart count, exhausted seed flag
     unsigned dpCap;
     CurveConsts consts;
+    // Table walk only (tablewalk.h): the last four step tags of every lane,
+    // and the flat constant buffer packedtablewalk.cuh copies to shared memory.
+    unsigned long long *hist;
+    const unsigned *twConsts;
 };
 
 ECC_HD unsigned eccAtomicInc(unsigned *p) {
@@ -126,6 +130,7 @@ ECC_WIDE_UNROLL_PRAGMA
             const size_t li = laneIndex(slot, lane, tid, P.threads);
             DpRecord rec;
             rec.seed = P.seed[li];
+            if ((rec.seed & 0xffffull) == 0xffffull) eccAtomicInc(P.dpCount + 2);
             rec.iters = now - P.startIter[li];
             F::getLane(x, lane, rec.x);
             F::getLane(y, lane, rec.y);
@@ -178,13 +183,24 @@ ECC_WIDE_UNROLL_PRAGMA
                 const size_t di = (size_t)slot * (size_t)P.threads + (size_t)tid;
                 WK::hamming(x, hb);
                 W dp = WK::dpMask(hb, P.dpWeight);
-                if (guard) dp |= overdueLanes(tid, slot, P, now);
                 const W alreadyDead = P.dead[di];
                 dp &= ~alreadyDead;
                 if (dp != ECC_ZERO) {
                     load(P.y, slot, tid, P.threads, y);
                     handleDistinguished(tid, slot, dp, P, now, x, y);
                     P.dead[di] = alreadyDead | dp;
+                }
+                if (guard) {
+                    const W overdue = overdueLanes(tid, slot, P, now) & ~P.dead[di];
+                    if (overdue != ECC_ZERO) {
+                        for (int lane = 0; lane < LANES; ++lane) {
+                            const size_t li = laneIndex(slot, lane, tid, P.threads);
+                            if (laneBit(overdue, lane) && (P.seed[li] & 0xffffull) == 0xffffull)
+                                eccAtomicInc(P.dpCount + 2);
+                        }
+                        P.dead[di] |= overdue;
+                        eccAtomicInc(P.dpCount + 1);
+                    }
                 }
                 jbits[slot][1] = hb[1];
                 jbits[slot][2] = hb[2];

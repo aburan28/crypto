@@ -1,0 +1,146 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "hypothesis": "Round-0005 winner with the per-target descent certificate, freshly measured on the same complete cold 16-target jobs.",
+    "id": "incumbent",
+    "parent": "combined_descent",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0005-batch16",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "7033b0c9be27a1aaa92c0a25b2472ea0e3e22d5be2ed99c82d5fc0e99b117733"
+  },
+  {
+    "binary_relative": "source_candidates/it_inv/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately.",
+    "hypothesis": "Field inversion by the Itoh\u2013Tsujii chain: the same power as Fermat with 6 instead of 21 multiplications at degree 23; inversion is 41% of descent and 18% of setup instructions.",
+    "id": "it_inv",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/it_inv/source",
+    "source_manifest_relative": "source_candidates/it_inv/source-manifest.json",
+    "source_manifest_sha256": "55f8734c9c87aac6a6cd73a8b30a608315e9f2e96585fddd37948f11f6e5e4ed"
+  },
+  {
+    "binary_relative": "source_candidates/euclid_inv/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately.",
+    "hypothesis": "Field inversion by binary extended Euclid over F_2[z]: fewer instructions than Fermat, at the price of data-dependent branches.",
+    "id": "euclid_inv",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/euclid_inv/source",
+    "source_manifest_relative": "source_candidates/euclid_inv/source-manifest.json",
+    "source_manifest_sha256": "231760d1d71c1ba948fef74000086876dc3790f7069215163998f4a81a768c6f"
+  },
+  {
+    "binary_relative": "source_candidates/fast_curve_once/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately.",
+    "hypothesis": "Build the single-word curve (and its 256-entry reduction tables) once per factor-base build and once per verified relation batch instead of once per abscissa and per relation.",
+    "id": "fast_curve_once",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/fast_curve_once/source",
+    "source_manifest_relative": "source_candidates/fast_curve_once/source-manifest.json",
+    "source_manifest_sha256": "f1cb5efccd80b740e416ae0f916de3dada06d93ae1d3cd7e6fcf01dba4215ab7"
+  },
+  {
+    "binary_relative": "source_candidates/lazy_field/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately.",
+    "hypothesis": "Do not build the symbolic FieldStructure the pair-table path never reads; it is constructed twice per job at 1.6M instructions each.",
+    "id": "lazy_field",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/lazy_field/source",
+    "source_manifest_relative": "source_candidates/lazy_field/source-manifest.json",
+    "source_manifest_sha256": "b3a73889ba4cb4c51767063a3d34474534865226d317f170df0b94fb7df3c496"
+  },
+  {
+    "binary_relative": "source_candidates/lambda_table/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately.",
+    "hypothesis": "Compute the n Frobenius eigenvalue powers once per projected orbit map instead of one BigUint modular exponentiation per relation summand.",
+    "id": "lambda_table",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/lambda_table/source",
+    "source_manifest_relative": "source_candidates/lambda_table/source-manifest.json",
+    "source_manifest_sha256": "999b83e4d44c8f5b491187c12a36db7bd2927a1676a076d49d84ba143f8f2a92"
+  },
+  {
+    "binary_relative": "source_candidates/fast_orbits/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately.",
+    "hypothesis": "Walk the Frobenius and signed-Frobenius orbits of the factor base in single-word arithmetic with packed keys, replacing big-integer squarings and hash keys.",
+    "id": "fast_orbits",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/fast_orbits/source",
+    "source_manifest_relative": "source_candidates/fast_orbits/source-manifest.json",
+    "source_manifest_sha256": "4e3410d5313e67f6520a8ed27b20b8e3420822aebe22517b0e83c825bde77ada"
+  },
+  {
+    "binary_relative": "source_candidates/combined/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion requires >=20% lower instructions and native wall, upper paired 95% limits <1 and every cell <=1.10, on confirmation and replay; rho parity is reported separately.",
+    "hypothesis": "Measure it_inv, fast_curve_once, lazy_field, lambda_table and fast_orbits together, every check retained.",
+    "id": "combined",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/combined/source",
+    "source_manifest_relative": "source_candidates/combined/source-manifest.json",
+    "source_manifest_sha256": "1343ad71e2e9e29dfc2629ee4a067c10f6b860fcb060edeb4abab6bac2bc1940"
+  }
+]

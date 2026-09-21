@@ -68,7 +68,7 @@
 //! 6 rounds by additionally guessing a column of the *first* round key
 //! at the front. We do not implement those — they are well documented
 //! and the structure is the same; what gets harder is bookkeeping, not
-//! technique. Cross-referenced in `DEFERRED.md`.
+//! technique. Cross-referenced in `docs/DEFERRED.md`.
 
 use super::reduced::{bytes_to_state, state_to_bytes, ReducedAes128, RoundOps, INV_SBOX};
 

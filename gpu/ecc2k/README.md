@@ -435,7 +435,7 @@ Two things stand out against the prime-field walk in `gpu/ecc`, which needs
 ## The `|F|²` pair table
 
 `pairtable.cuh` builds the meet-in-the-middle table that
-`RESEARCH_KOBLITZ_INDEX_CALCULUS.md` measures as the whole wall-clock
+`research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md` measures as the whole wall-clock
 cost of a relation-collection worker:
 
 > two workers run concurrently on the same four cores collected units 0

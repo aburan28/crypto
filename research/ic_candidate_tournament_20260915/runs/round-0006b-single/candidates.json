@@ -1,0 +1,103 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "hypothesis": "Frozen single-target incumbent folded_lift_batch4.",
+    "id": "incumbent",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "d1f968a924273701a5e4869448e2ffa35140527cb8464ff28360a00afbdca9ad"
+  },
+  {
+    "binary_relative": "source_candidates/descent/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any mismatched certificate or failure of the two-metric gate.",
+    "hypothesis": "descent as pre-registered in PLAN.md",
+    "id": "descent",
+    "source_directory": "source_candidates/descent/source",
+    "source_manifest_relative": "source_candidates/descent/source-manifest.json",
+    "source_manifest_sha256": "1690462c36efebd8325b9afaeab7f7650cf56b1ab2373d39c9637c446cdee7bb"
+  },
+  {
+    "binary_relative": "source_candidates/lazy_field/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any mismatched certificate or failure of the two-metric gate.",
+    "hypothesis": "lazy_field as pre-registered in PLAN.md",
+    "id": "lazy_field",
+    "source_directory": "source_candidates/lazy_field/source",
+    "source_manifest_relative": "source_candidates/lazy_field/source-manifest.json",
+    "source_manifest_sha256": "f0d6b6e5df8006753591f8292cb2875435b14638cc397d63e3a5ae4511a76ffb"
+  },
+  {
+    "binary_relative": "source_candidates/fast_orbits/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any mismatched certificate or failure of the two-metric gate.",
+    "hypothesis": "fast_orbits as pre-registered in PLAN.md",
+    "id": "fast_orbits",
+    "source_directory": "source_candidates/fast_orbits/source",
+    "source_manifest_relative": "source_candidates/fast_orbits/source-manifest.json",
+    "source_manifest_sha256": "be48cc0c66c23dd01e0e2f2508855f2be9cc0f25ce3a44ef692c941b534a1602"
+  },
+  {
+    "binary_relative": "source_candidates/combined/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any mismatched certificate or failure of the two-metric gate.",
+    "hypothesis": "combined as pre-registered in PLAN.md",
+    "id": "combined",
+    "source_directory": "source_candidates/combined/source",
+    "source_manifest_relative": "source_candidates/combined/source-manifest.json",
+    "source_manifest_sha256": "c504979f093e80014927397d82757634e07210060ba95be62f90947bd352bb2d"
+  },
+  {
+    "binary_relative": "source_candidates/combined/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any mismatched certificate or failure of the two-metric gate.",
+    "hypothesis": "Reduce surplus relation work after setup and descent optimizations.",
+    "id": "combined_batch1",
+    "source_directory": "source_candidates/combined/source",
+    "source_manifest_relative": "source_candidates/combined/source-manifest.json",
+    "source_manifest_sha256": "c504979f093e80014927397d82757634e07210060ba95be62f90947bd352bb2d"
+  }
+]

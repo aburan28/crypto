@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "solver_processes_executed": 720,
+  "batches": [
+    {
+      "id": "strict_point_v1",
+      "processes": 360,
+      "admission": "failed_on_six_non_lifting_results",
+      "preserved": true
+    },
+    {
+      "id": "baseline_v2",
+      "processes": 360,
+      "admission": "passed_with_explicit_algebraic_only_control",
+      "preserved": true
+    }
+  ],
+  "self_comparison_status": "correctness_and_compatibility_pass",
+  "self_comparison_conflict_ratios": {
+    "symmetry_off": 1.0,
+    "symmetry_on": 1.0
+  },
+  "source_and_contract_provenance": "Both historical and current runner/contract/checker hashes checked against actual source files.",
+  "solver_failures_or_timeouts": 0,
+  "rust_tests": "not run; no Rust changes",
+  "python_tests_passed": 20
+}

@@ -671,7 +671,7 @@ def measure_toy_yield(n: int, m: int, l: int, targets: int, rng: random.Random,
         if m == 2:
             for P in base:
                 Q = curve.add(R, curve.neg(P))
-                if Q in base_set:
+                if Q != P and Q in base_set:
                     found = (P, Q)
                     break
         elif m == 3:
@@ -679,15 +679,17 @@ def measure_toy_yield(n: int, m: int, l: int, targets: int, rng: random.Random,
                 rest = curve.add(R, curve.neg(P))
                 if rest in pair_sums:
                     i, j = pair_sums[rest]
-                    found = (P, base[i], base[j])
-                    break
+                    if P not in (base[i], base[j]):
+                        found = (P, base[i], base[j])
+                        break
         else:                                        # m == 4, pairs against pairs
             for s, (i, j) in pair_sums.items():
                 rest = curve.add(R, curve.neg(s))
                 if rest in pair_sums:
                     k, t = pair_sums[rest]
-                    found = (base[i], base[j], base[k], base[t])
-                    break
+                    if not ({i, j} & {k, t}):
+                        found = (base[i], base[j], base[k], base[t])
+                        break
         if found is not None:
             hits += 1
             if witness is None:
@@ -821,7 +823,7 @@ def cost_cell(m: int, l: float, n: int, split: int = 1, frobenius: bool = False)
     `split = v` tabulates the sums of every `v`-subset of the base once and
     enumerates the remaining `m - v` per target.  `v = 1` is the oracle this
     repository has actually built and measured: walk `C(|F|, m-1)` sub-tuples and
-    root-find the last summand inside the subspace (`RESEARCH_SEMAEV_DECOMPOSITION.md`,
+    root-find the last summand inside the subspace (`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`,
     "Don't enumerate triples"), with only `O(|F|)` memory.  `v >= 2` buys speed
     with a table, and `v = m` tabulates every `m`-subset sum -- at which point the
     table is a baby-step table and the method is a generic algorithm in costume.

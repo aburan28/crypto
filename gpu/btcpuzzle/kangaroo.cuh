@@ -133,6 +133,14 @@ struct kg_ctx {
     kg_dp *dp_out;
     uint32_t *dp_count;
     uint32_t dp_cap;
+    /* First global kangaroo index held by this context.  A kangaroo's start
+     * position is a function of its GLOBAL index (base + local), so several
+     * contexts -- one per GPU -- walking the same job with disjoint index
+     * ranges hold disjoint herds and report into one shared table, the way
+     * the deployed multi-GPU kangaroo solvers split their work.  Must be
+     * even, so that the herd parity below is the same locally and
+     * globally.  Zero-initialised contexts are single-device runs. */
+    uint32_t idx_base;
 };
 
 FP_HD uint32_t kg_nkang(const kg_ctx &c) { return c.nthreads * c.kang_per_thread; }
@@ -140,6 +148,9 @@ FP_HD uint32_t kg_nkang(const kg_ctx &c) { return c.nthreads * c.kang_per_thread
 /* Kangaroos alternate herd by index parity, so each warp is half tame and
  * half wild and the two herds stay balanced without any bookkeeping. */
 FP_HD uint32_t kg_herd_of(uint32_t idx) { return idx & 1u; }
+
+/* The index a kangaroo is seeded and reported by; see kg_ctx::idx_base. */
+FP_HD uint32_t kg_global_idx(const kg_ctx &c, uint32_t idx) { return c.idx_base + idx; }
 
 FP_HD void kg_load(const kg_ctx &c, uint32_t idx, kg_state &st) {
     uint32_t n = kg_nkang(c);
@@ -175,7 +186,7 @@ FP_HD void kg_emit_dp(const kg_ctx &c, uint32_t idx, const kg_state &st) {
             d.dist[l] = st.dist[l];
         }
         d.herd = kg_herd_of(idx);
-        d.idx = idx;
+        d.idx = kg_global_idx(c, idx);
         d.steps = c.steps[idx];
         d.pad = 0;
     }
@@ -190,7 +201,7 @@ FP_BIG void kg_reseed(const kg_ctx &c, uint32_t idx, kg_state &st, int first) {
     uint32_t herd = kg_herd_of(idx);
     for (;;) {
         uint32_t off[8];
-        kg_start_offset(idx, herd, r, c.prm.seed, c.prm.w_bits, off);
+        kg_start_offset(kg_global_idx(c, idx), herd, r, c.prm.seed, c.prm.w_bits, off);
         /* off*G for a tame kangaroo, off*G + Q' for a wild one.  The
          * table-free ladder is half the speed of the windowed one, and
          * seeding happens once per distinguished point, but the windowed

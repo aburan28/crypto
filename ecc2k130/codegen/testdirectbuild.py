@@ -37,7 +37,7 @@ def assignment(name, env):
     execute([node], env)
 
 
-def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0'):
+def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0', square='0', karat='0'):
     env = dict(re=re, hashlib=hashlib, pathlib=SimpleNamespace(Path=Path),
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
@@ -47,19 +47,22 @@ def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', comp
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
                 'UNROLL_INV', 'PAIR_PRODUCTS', 'POLY_STATE'):
         env['PACKED_' + key] = '1'
-    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_WEIGHTED_PREFIX=weighted, PACKED_COMPACT_STATE=compact, PACKED_SHARED_SIGMA=shared)
+    env.update(PACKED_PERM_SIGMA='3', PACKED_DIRECT_REDUCE=mode, PACKED_GENERATED_PRODUCT=generated, PACKED_STATE_TILE=tile, PACKED_CLMAD=clmad, PACKED_CLMAD_SQUARE=square, PACKED_KARAT3=karat, PACKED_WEIGHTED_PREFIX=weighted, PACKED_COMPACT_STATE=compact, PACKED_SHARED_SIGMA=shared, PACKED_TOP_CLMAD='0', WALK_TABLE='0', TABLE_PIVOT_BYTES='0')
     assignment('BAKED', env)
     return env
 
 
-def raw(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0'):
+def raw(mode='0', generated='0', tile='0', clmad='0', weighted='0', compact='0', shared='0', square='0', karat='0'):
     return (f'packed direct reduction: {mode}\n'
             f'packed generated product: {generated}\n'
             f'packed state tile: {tile}\n'
             f'packed native carryless multiply: {clmad}\n'
+            f'packed native carryless square: {square}\n'
+            f'packed three-limb Karatsuba: {karat}\n'
             f'packed weighted prefix: {weighted}\n'
             f'packed compact state: {compact}\n'
             f'packed shared sigma: {shared}\n'
+            f'packed top clmad: 0\n'
             'finished: 6000.000 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n')
 
 
@@ -331,10 +334,11 @@ class GeneratedProductBuildTests(unittest.TestCase):
                       tile='0', compact='0', storage_output=None, storage_returncode=0,
                       failed_compact_phase=None, failed_compact_marker=None, build_calls=None,
                       shared='0', shared_probe_output=None, shared_probe_returncode=0,
-                      failed_shared_phase=None, failed_shared_marker=None, block_threads=128):
+                      failed_shared_phase=None, failed_shared_marker=None, block_threads=128,
+                      square='0', square_arithmetic=None, karat='0', karat_arithmetic=None):
         with tempfile.TemporaryDirectory() as directory:
             commands = []
-            env = environment('1', mode, clmad=clmad, weighted=weighted, tile=tile, compact=compact, shared=shared)
+            env = environment('1', mode, clmad=clmad, weighted=weighted, tile=tile, compact=compact, shared=shared, square=square, karat=karat)
             workers = 6160384 // batch
             def output(weight, phase):
                 marker = mode if failed_phase != phase else failed_marker
@@ -344,9 +348,12 @@ class GeneratedProductBuildTests(unittest.TestCase):
                         f'packed generated product: {marker}\n'
                         f'packed state tile: {tile}\n'
                         f'packed native carryless multiply: {clmad}\n'
+                        f'packed native carryless square: {square}\n'
+                        f'packed three-limb Karatsuba: {karat}\n'
                         f'packed weighted prefix: {weighted}\n'
                         f'packed compact state: {compactMarker}\n'
                         f'packed shared sigma: {sharedMarker}\n'
+                        f'packed top clmad: 0\n'
                         f'backend cuda-packed131: {workers} threads x {batch} slots x 1 lanes = {workers * batch} walks, '
                         f'dp weight {weight}, 1024 steps per launch\n'
                         '1.0 s 6000.000 M it/s 201863462912 iterations 1 dp 1 stored 0 dropped\n'
@@ -380,6 +387,8 @@ class GeneratedProductBuildTests(unittest.TestCase):
                                            stdout=text if shared_probe_output is None else shared_probe_output, stderr='')
                 elif command[0] == 'make':
                     text = ('packed arithmetic direct reduction: 1\n'
+                            + (f'packed arithmetic native carryless square: {square}\n' if square_arithmetic is None else square_arithmetic)
+                            + (f'packed arithmetic three-limb Karatsuba: {karat}\n' if karat_arithmetic is None else karat_arithmetic)
                              + (f'packed arithmetic native carryless multiply: {clmad}\n' if clmad_arithmetic is None else clmad_arithmetic)
                             + (f'packed arithmetic weighted prefix: {weighted}\n' if weighted_arithmetic is None else weighted_arithmetic)
                             + ('PASS: 6240 GPU paired Frobenius vectors, both inputs against independent routing\n' if paired_sigma is None else paired_sigma)
@@ -524,6 +533,118 @@ class StateTileBuildTests(unittest.TestCase):
                 self.assertFalse(check(sample))
                 self.assertEqual(sample['rate'], 0)
                 self.assertFalse(summarizeSamples([good, sample])['valid'])
+
+
+class ClmadSquareBuildTests(unittest.TestCase):
+    def test_environment_guards(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_CLMAD_SQUARE' for t in node.targets))
+        for multiply in ('0', '1'):
+            for value in (None, '0', '1', '', '2', '-1', 'true'):
+                env = dict(PACKED_CLMAD=multiply, os=SimpleNamespace(
+                    environ={} if value is None else {'ECC_PACKED_CLMAD_SQUARE': value}))
+                allowed = value in (None, '0') or (value == '1' and multiply == '1')
+                with self.subTest(multiply=multiply, square=value):
+                    if allowed:
+                        execute(body[index:index + 3], env)
+                        self.assertEqual(env['PACKED_CLMAD_SQUARE'], value or '0')
+                    else:
+                        with self.assertRaises(ValueError):
+                            execute(body[index:index + 3], env)
+
+    def test_cache_rebuild_and_mode_gate(self):
+        env = environment('1', '1', clmad='1')
+        commands = []
+        env.update(sh=lambda *a, **k: (0, ''),
+                   shStream=lambda c, **k: (commands.append(c) or 0, 'built'))
+        build = function('buildFor', env)
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertEqual(commands, [])
+        env['PACKED_CLMAD_SQUARE'] = '1'
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertIn('PACKED_CLMAD_SQUARE=1', commands[-1])
+        check = function('checkPackedReduction', env)
+        text = raw('1', '1', clmad='1', square='1')
+        marker = 'packed native carryless square: 1\n'
+        for bad in (text.replace(marker, ''), text + marker,
+                    text.replace(marker, 'packed native carryless square: 0\n'),
+                    text.replace(marker, 'packed native carryless square: true\n')):
+            sample = benchResult(['fixture'], 0, bad)
+            self.assertFalse(check(sample))
+            self.assertEqual(sample['rate'], 0)
+        self.assertTrue(check(benchResult(['fixture'], 0, text)))
+
+    def test_audit_checks_candidate_arithmetic_before_timing(self):
+        fixture = GeneratedProductBuildTests()
+        for square in ('0', '1'):
+            result, commands = fixture.audit_fixture('1', clmad='1', square=square)
+            self.assertTrue(result['valid'], result)
+            self.assertIn('PACKED_CLMAD_SQUARE=' + square, commands[0])
+            self.assertEqual(result['packedClmadSquare'], square == '1')
+            marker = 'packed arithmetic native carryless square: ' + square + '\n'
+            for bad in ('', marker * 2, 'packed arithmetic native carryless square: true\n',
+                        'packed arithmetic native carryless square: ' + str(1-int(square)) + '\n'):
+                result, commands = fixture.audit_fixture('1', clmad='1', square=square, square_arithmetic=bad)
+                self.assertFalse(result['valid'])
+                self.assertIn('CLMAD square identity', result['error'])
+                self.assertEqual(len(commands), 1)
+
+
+class Karat3BuildTests(unittest.TestCase):
+    def test_environment_guards(self):
+        body = nodes('modal_app.py')
+        index = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                     and any(isinstance(t, ast.Name) and t.id == 'PACKED_KARAT3' for t in node.targets))
+        for multiply in ('0', '1'):
+            for value in (None, '0', '1', '', '2', '-1', 'true'):
+                env = dict(PACKED_CLMAD=multiply, os=SimpleNamespace(
+                    environ={} if value is None else {'ECC_PACKED_KARAT3': value}))
+                allowed = value in (None, '0') or (value == '1' and multiply == '1')
+                with self.subTest(multiply=multiply, karat=value):
+                    if allowed:
+                        execute(body[index:index + 3], env)
+                        self.assertEqual(env['PACKED_KARAT3'], value or '0')
+                    else:
+                        with self.assertRaises(ValueError):
+                            execute(body[index:index + 3], env)
+
+    def test_cache_rebuild_and_mode_gate(self):
+        env = environment('1', '1', clmad='1')
+        commands = []
+        env.update(sh=lambda *a, **k: (0, ''),
+                   shStream=lambda c, **k: (commands.append(c) or 0, 'built'))
+        build = function('buildFor', env)
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertEqual(commands, [])
+        env['PACKED_KARAT3'] = '1'
+        self.assertTrue(build(32, 128, 0)[0])
+        self.assertIn('PACKED_KARAT3=1', commands[-1])
+        check = function('checkPackedReduction', env)
+        text = raw('1', '1', clmad='1', karat='1')
+        marker = 'packed three-limb Karatsuba: 1\n'
+        for bad in (text.replace(marker, ''), text + marker,
+                    text.replace(marker, 'packed three-limb Karatsuba: 0\n'),
+                    text.replace(marker, 'packed three-limb Karatsuba: true\n')):
+            sample = benchResult(['fixture'], 0, bad)
+            self.assertFalse(check(sample))
+            self.assertEqual(sample['rate'], 0)
+        self.assertTrue(check(benchResult(['fixture'], 0, text)))
+
+    def test_audit_checks_candidate_arithmetic_before_timing(self):
+        fixture = GeneratedProductBuildTests()
+        for karat in ('0', '1'):
+            result, commands = fixture.audit_fixture('1', clmad='1', karat=karat)
+            self.assertTrue(result['valid'], result)
+            self.assertIn('PACKED_KARAT3=' + karat, commands[0])
+            self.assertEqual(result['packedKarat3'], karat == '1')
+            marker = 'packed arithmetic three-limb Karatsuba: ' + karat + '\n'
+            for bad in ('', marker * 2, 'packed arithmetic three-limb Karatsuba: true\n',
+                        'packed arithmetic three-limb Karatsuba: ' + str(1-int(karat)) + '\n'):
+                result, commands = fixture.audit_fixture('1', clmad='1', karat=karat, karat_arithmetic=bad)
+                self.assertFalse(result['valid'])
+                self.assertIn('Karat3 identity', result['error'])
+                self.assertEqual(len(commands), 1)
 
 
 class ClmadBuildTests(unittest.TestCase):
@@ -1102,6 +1223,51 @@ class SharedSigmaBuildTests(unittest.TestCase):
                 self.assertIn('--workers 385024', result.stdout)
                 self.assertIn('--min-blocks 2', result.stdout)
 
+    def test_preblackwell_targets_bind_gpu_arch_and_fastest_product(self):
+        # Ada receipt selected CLMAD=1; Turing has no clmad. See
+        # benchmarks/preblackwell/summary.json. B200 is Blackwell sm_100
+        # with automatic workers (B200.md).
+        cases = (
+            ('bench-g6-modal', 'ECC_GPU=L4', '1'),
+            ('bench-g6e-modal', 'ECC_GPU=L40S', '1'),
+            ('bench-g4dn-modal', 'ECC_GPU=T4', '0'),
+            ('bench-b200-modal', 'ECC_GPU=B200', '1'),
+            ('bench-waves-modal', 'ECC_GPU=RTX-PRO-6000', '1'),
+            ('bench-modal-gpu', 'ECC_GPU=L40S', '1'),
+            ('gpu-g6', 'arch=compute_89,code=sm_89', '1'),
+            ('gpu-g6e', 'arch=compute_89,code=sm_89', '1'),
+            ('gpu-g4dn', 'arch=compute_75,code=sm_75', '0'),
+        )
+        for target, needle, clmad in cases:
+            result = subprocess.run(['make', '-n', target], cwd=ROOT, capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn(needle, result.stdout)
+            hay = result.stdout.replace('ECC_PACKED_CLMAD=', 'PACKED_CLMAD=')
+            self.assertIn('PACKED_CLMAD=' + clmad, hay)
+            self.assertIn('--batch 16' if target.startswith('bench-') else 'BATCH=16', result.stdout)
+        dry = subprocess.run(
+            ['make', '-n', 'bench-modal-gpu', 'SURVEY_GPU=T4', 'SURVEY_CLMAD=0'],
+            cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(dry.returncode, 0, dry.stderr)
+        self.assertIn('ECC_GPU=T4', dry.stdout)
+        self.assertIn('ECC_PACKED_CLMAD=0', dry.stdout)
+        self.assertNotIn('--workers', dry.stdout)
+        bang = subprocess.run(
+            ['make', '-n', 'bench-modal-gpu', 'SURVEY_GPU=H100!'],
+            cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(bang.returncode, 0, bang.stderr)
+        self.assertIn('ECC_GPU=H100!', bang.stdout)
+        self.assertNotIn('--workers', bang.stdout)
+        waves = subprocess.run(
+            ['make', '-n', 'bench-waves-modal', 'WAVES_GPU=L40S'],
+            cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(waves.returncode, 0, waves.stderr)
+        self.assertIn('ECC_GPU=L40S', waves.stdout)
+        self.assertIn('modal_app.py::waves', waves.stdout)
+        self.assertIn('--wave-list', waves.stdout)
+        self.assertNotIn('--workers', waves.stdout)
+
 
 if __name__ == '__main__':
     unittest.main()
+

@@ -1,0 +1,43 @@
+name: Polynomial reuse correctness
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/algebra_cache.rs'
+      - 'src/cryptanalysis/polynomial_reuse.rs'
+      - 'src/cryptanalysis/koblitz_groebner.rs'
+      - 'src/cryptanalysis/f4_rref_tests.rs'
+      - 'src/cryptanalysis/weil_charts.rs'
+      - 'examples/weil_factor_composition.rs'
+      - 'research/weil_factor_composition_20260914/**'
+      - 'research/f4_linear_algebra_20260914/contract.json'
+      - 'src/cryptanalysis/pq_groebner_f2.rs'
+      - '.github/workflows/polynomial-reuse.yml'
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    services:
+      redis:
+        image: redis:7.4.2
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.90.0
+      - run: cargo check --no-default-features --lib --bin ic
+      - run: cargo test --release --features redis-cache --lib polynomial_reuse
+      - run: cargo test --release --features redis-cache --lib algebra_cache
+      - run: cargo test --release --features redis-cache --lib koblitz_groebner::
+      - run: cargo test --release --features redis-cache --lib weil_charts::
+      - run: cargo check --release --features redis-cache --example weil_factor_composition
+      - run: cargo test --release --features redis-cache --lib redis_cross_client -- --ignored
+        env:
+          IC_TEST_REDIS_URL: redis://127.0.0.1:6379/0

@@ -3,3 +3,10 @@ research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-pan
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**/*.stderr -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wdsat-correction-20260909/**/*.stdout -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wdsat-correction-20260909/**/*.stderr -whitespace
+
+# Preserve frozen patch context and verbatim benchmark source/log bytes.
+research/summation_polynomials_20260914/*.patch -whitespace
+research/gaudry_allocation_20260914/*.patch -whitespace
+research/summation_polynomials_20260914/gaudry-tests.log whitespace=-blank-at-eof
+research/gaudry_allocation_20260914/gaudry-tests.log whitespace=-blank-at-eof
+gpu/macaulay/benchmarks/pipeline-20260914/sources/kernels.cuh whitespace=-blank-at-eof

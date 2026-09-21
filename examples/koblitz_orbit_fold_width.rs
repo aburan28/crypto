@@ -187,11 +187,19 @@ fn main() {
     // base this wide.
     let mut probe_ns = Vec::new();
     let mut recover_ms = Vec::new();
+    // A lone probe, a probe in a block, and the descent's own loop: the
+    // three are far enough apart that which one a claim about "a probe"
+    // means has to be said.
+    let mut blocked_ns = Vec::new();
+    let mut descent_ns_v = Vec::new();
+    let mut chunk_sweep = Vec::new();
     for (name, table, width, base) in [
         ("compact", &compact_t, pc, &fb_c),
         ("folded", &folded_t, pf, &fb_f),
     ] {
-        let stream: Vec<_> = (1u64..=200_000).map(|t| fc.mul_u64(g, t * 1_000_003 + 5)).collect();
+        let stream: Vec<_> = (1u64..=200_000)
+            .map(|t| fc.mul_u64(g, t * 1_000_003 + 5))
+            .collect();
         let start = Instant::now();
         let mut hits = 0usize;
         for &q in &stream {
@@ -200,6 +208,129 @@ fn main() {
             }
         }
         let ns = start.elapsed().as_secs_f64() * 1e9 / stream.len() as f64;
+        // Whether the canonicalisation and the lookup cost what they
+        // cost *together*.  A probe canonicalises out of a 16 KiB table
+        // and then reads one line out of a table three orders of
+        // magnitude larger; alternating the two evicts the small one.
+        // Doing them in chunks — canonicalise `c` targets, then look up
+        // `c` keys — keeps the canon tables hot across a run and leaves
+        // the lookups adjacent and independent.
+        //
+        // `c = 1` is the shipped probe with the buffer's overhead, so it
+        // is the control, not the baseline.  The two streams are
+        // disjoint: measuring a chunked probe on the keys the fused one
+        // has just walked would credit chunking with the residency the
+        // first pass paid for.
+        let stream_b: Vec<_> = (1u64..=200_000)
+            .map(|t| fc.mul_u64(g, t * 1_000_003 + 500_000_009))
+            .collect();
+        let mut keybuf: Vec<u64> = Vec::with_capacity(4096);
+        let mut chunked = Vec::new();
+        let fused_on = |st: &Vec<FastPoint>| {
+            let t0 = Instant::now();
+            let mut h = 0usize;
+            for &q in st {
+                if table.contains_pair(q) {
+                    h += 1;
+                }
+            }
+            (t0.elapsed().as_secs_f64() * 1e9 / st.len() as f64, h)
+        };
+        // Warm both streams into whatever residency 200 000 random
+        // probes of a 0.64 GiB table leaves, so the first `c` measured
+        // is not the only cold one.
+        fused_on(&stream);
+        fused_on(&stream_b);
+        // 1024 is `BLOCK` in `witnesses_fast_inner`, so it is the one
+        // the descent actually uses and the one the note quotes; the
+        // rest of the sweep is there to show where the gain saturates.
+        for c in [1usize, 4, 16, 64, 256, 1024, 4096] {
+            // Each side is measured on both streams and averaged, so a
+            // difference between the streams cannot be read as a
+            // difference between the loops.
+            let mut fused = 0.0;
+            let mut batched = 0.0;
+            let mut pref = 0.0;
+            let mut hits_f = 0usize;
+            let mut hits_b = 0usize;
+            for st in [&stream, &stream_b] {
+                let (ns, h) = fused_on(st);
+                fused += ns / 2.0;
+                hits_f += h;
+                let t0 = Instant::now();
+                let mut h2 = 0usize;
+                for part in st.chunks(c) {
+                    keybuf.clear();
+                    for &q in part {
+                        keybuf.push(table.probe_key(q));
+                    }
+                    for &k in &keybuf {
+                        if table.contains_key(k) {
+                            h2 += 1;
+                        }
+                    }
+                }
+                batched += t0.elapsed().as_secs_f64() * 1e9 / st.len() as f64 / 2.0;
+                hits_b += h2;
+                // The descent's own loop: the same blocking, plus the
+                // 32-key prefetch it runs ahead of the probe.
+                let t0 = Instant::now();
+                let mut h3 = 0usize;
+                for part in st.chunks(c) {
+                    keybuf.clear();
+                    for &q in part {
+                        keybuf.push(table.probe_key(q));
+                    }
+                    for &k in keybuf.iter().take(32) {
+                        table.prefetch_key(k);
+                    }
+                    for w in 0..keybuf.len() {
+                        if let Some(&ahead) = keybuf.get(w + 32) {
+                            table.prefetch_key(ahead);
+                        }
+                        if table.contains_key(keybuf[w]) {
+                            h3 += 1;
+                        }
+                    }
+                }
+                pref += t0.elapsed().as_secs_f64() * 1e9 / st.len() as f64 / 2.0;
+                assert_eq!(h3, h2, "the prefetching probe answered differently");
+            }
+            assert_eq!(hits_f, hits_b, "the chunked probe answered differently");
+            println!(
+                "  {name:8} chunk {c:5}: fused {fused:7.1}, chunked {batched:7.1}, \
+                 +prefetch {pref:7.1} ns  ({:.2}x / {:.2}x)   [{hits_f} hits]",
+                fused / batched,
+                fused / pref
+            );
+            chunked.push(json!({
+                "chunk": c, "fused_ns": fused,
+                "chunked_ns": batched, "chunked_prefetch_ns": pref,
+            }));
+        }
+
+        // And the descent's own loop, measured rather than read off
+        // the source: `witnesses_fast` with `m = 3` and a sink that
+        // never stops, so it walks the whole base and the figure is a
+        // true per-base-point cost.  It carries the batched inversion
+        // `add_many` does as well as the key and the lookup, which the
+        // chunked figures above do not — the same for both tables, so
+        // the folded-minus-compact difference is still the fold's.
+        let mut scanned = 0usize;
+        let start = Instant::now();
+        let mut targets = 0usize;
+        while start.elapsed().as_secs_f64() < 4.0 {
+            targets += 1;
+            let t = fc.mul_u64(g, targets as u64 * 7_700_017 + 3);
+            table.witnesses_fast(t, 3, &mut |_| true);
+            scanned += width;
+        }
+        let descent_ns = start.elapsed().as_secs_f64() * 1e9 / scanned as f64;
+        println!(
+            "  {name:8} descent loop (witnesses_fast m = 3, {targets} targets): \
+             {descent_ns:7.1} ns a base point"
+        );
+
         // Recovery, on targets known to be sums of two base points.
         let mut out = Vec::new();
         // Summands from far-apart orbits, and never a `±` pair: `P + (−P)`
@@ -234,10 +365,26 @@ fn main() {
         );
         probe_ns.push(ns);
         recover_ms.push(ms);
+        descent_ns_v.push(descent_ns);
+        // The descent's own block size, not the best of the sweep: a
+        // figure quoted as "blocked 1024" has to be the one measured at
+        // 1024.
+        blocked_ns.push(
+            chunked
+                .iter()
+                .find(|c| c["chunk"] == 1024)
+                .expect("the sweep must measure BLOCK")["chunked_prefetch_ns"]
+                .as_f64()
+                .unwrap(),
+        );
+        chunk_sweep.push(json!({"table": name, "sweep": chunked}));
     }
     println!(
-        "  the fold multiplies a probe by {:.2}x and divides the probes per target by {:.1}x",
+        "  the fold multiplies a probe by {:.2}x one at a time, {:.2}x in a block, \
+         {:.2}x in the descent loop, and divides the probes per target by {:.1}x",
         probe_ns[1] / probe_ns[0],
+        blocked_ns[1] / blocked_ns[0],
+        descent_ns_v[1] / descent_ns_v[0],
         probes(pc) / probes(pf)
     );
 
@@ -277,6 +424,11 @@ fn main() {
             "hit_rate_folded": timing[1].4,
             "ns_per_probe_compact": probe_ns[0],
             "ns_per_probe_folded": probe_ns[1],
+            "ns_per_probe_blocked_compact": blocked_ns[0],
+            "ns_per_probe_blocked_folded": blocked_ns[1],
+            "ns_per_base_point_descent_compact": descent_ns_v[0],
+            "ns_per_base_point_descent_folded": descent_ns_v[1],
+            "chunk_sweep": chunk_sweep,
             "recover_ms_compact": recover_ms[0],
             "recover_ms_folded": recover_ms[1],
             "probes_per_target_compact": probes(pc),

@@ -108,6 +108,11 @@ pub enum Solver {
     Enumerate,
     /// Meet-in-the-middle over a precomputed pair-sum table.
     PairTable,
+    /// Trimoska WDSat on the same Semaev ANF as `sat`.
+    Wdsat,
+    /// ALMASTY-inspired quadratic Semaev FES (`m = 2`): Gray early-exit,
+    /// Möbius all-roots, Monica past `n = 24`.
+    MqFes,
 }
 impl Solver {
     pub fn name(self) -> &'static str {
@@ -116,6 +121,8 @@ impl Solver {
             Self::Sat => "sat",
             Self::Enumerate => "enumerate",
             Self::PairTable => "pair-table",
+            Self::Wdsat => "wdsat",
+            Self::MqFes => "mq-fes",
         }
     }
     fn strategy(self) -> DecompositionStrategy {
@@ -124,6 +131,8 @@ impl Solver {
             Self::Sat => DecompositionStrategy::Sat,
             Self::Enumerate => DecompositionStrategy::Enumerate,
             Self::PairTable => DecompositionStrategy::PairTable,
+            Self::Wdsat => DecompositionStrategy::Wdsat,
+            Self::MqFes => DecompositionStrategy::MqFes,
         }
     }
 }
@@ -256,6 +265,12 @@ pub struct RunArgs {
     pub max_trials: u32,
     #[arg(long,value_enum,default_value_t=Solver::Groebner)]
     pub solver: Solver,
+    /// Path to a WDSat `wdsat_solver` binary; required for `--solver wdsat`.
+    #[arg(long)]
+    pub wdsat_binary: Option<PathBuf>,
+    /// Soft wall-clock budget for one WDSat child process, in milliseconds.
+    #[arg(long, default_value_t = 5_000)]
+    pub wdsat_timeout_ms: u64,
     /// Targets decomposed per batch (in parallel); 0 selects the CPU count.
     #[arg(long,default_value_t=0,value_parser=clap::value_parser!(u32).range(0..=4096))]
     pub batch: u32,
@@ -279,6 +294,8 @@ impl Default for RunArgs {
             summands: 2,
             max_trials: 20_000,
             solver: Solver::Groebner,
+            wdsat_binary: None,
+            wdsat_timeout_ms: 5_000,
             batch: 0,
             control: false,
         }
@@ -378,6 +395,15 @@ pub struct SearchArgs {
     /// Score raw signed orbits instead of cofactor-projected columns.
     #[arg(long)]
     pub raw_columns: bool,
+    /// Measure the Gröbner oracle on this many targets per candidate and
+    /// rank by expected stage word XORs instead of expected trials.
+    ///
+    /// A trial is paid whether or not it succeeds, and the Weil-restricted
+    /// system carries m·ℓ unknowns, so coverage alone can rank bases
+    /// backwards: see research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md. Off by default,
+    /// so existing searches score exactly as before.
+    #[arg(long,value_parser=clap::value_parser!(u32).range(1..=4096))]
+    pub solve_cost_targets: Option<u32>,
     #[arg(long, default_value_t = 1)]
     pub seed: u64,
     /// Candidates (best census first) validated by real end-to-end runs.
@@ -532,6 +558,7 @@ pub(crate) fn ic_options_with_descent(
         strategy: strategy.strategy(),
         collapse_negation: true,
         collapse_projected_orbits: true,
+        crossbred: None,
         allow_direct_relation: false,
         max_trials: max_trials as usize,
         seed,
@@ -893,6 +920,9 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
     if args.max_trials == 0 || args.max_trials > 1_000_000 {
         return Err("trial limit must be 1..=1000000".into());
     }
+    if args.solver == Solver::Wdsat && args.wdsat_binary.is_none() {
+        return Err("--solver wdsat requires --wdsat-binary".into());
+    }
     let spec = factor_base_spec(&args)?;
     if !quiet {
         println!(
@@ -924,9 +954,12 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         seed: args.seed,
         collapse_negation: !args.control,
         collapse_projected_orbits: !args.control,
+        crossbred: None,
         stop_on_verified_rank: !args.control,
         allow_direct_relation: false,
         relation_batch_size: batch,
+        wdsat_binary: args.wdsat_binary.clone(),
+        wdsat_timeout_ms: args.wdsat_timeout_ms,
         ..KoblitzIcOptions::default()
     };
     let mut stages = Vec::new();
@@ -1073,7 +1106,9 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
             "independent_relations":r.independent_relations,"dependent_relations":r.dependent_relations,
             "inconsistent_relations":r.inconsistent_relations,"verification_failures":r.verification_failures,
             "trials":r.trials,"batches":r.relation_batches,"pair_table_entries":r.pair_table_entries,
-            "f4_reductions":r.reductions,"sat_calls":r.sat_calls,"sat_unknowns":r.sat_unknowns,"sat_invalid_models":r.sat_invalid_models,
+            "algebra_cache_current_thread":crypto_lib::cryptanalysis::algebra_cache::stats(),
+            "f4_reductions":r.reductions,
+            "f4_word_ops":crypto_lib::cryptanalysis::koblitz_groebner::f4_profile().word_ops,"sat_calls":r.sat_calls,"sat_unknowns":r.sat_unknowns,"sat_invalid_models":r.sat_invalid_models,
             "sat_conflicts":r.sat_conflicts,"linear_solve_attempts":r.linear_solve_attempts,"cofactor_admissible":r.m_cofactor_admissible},
         "timing_seconds":{"pair_table":r.pair_table_ns as f64/1e9,"relation_collection":r.relation_collection_ns as f64/1e9,
             "linear_algebra":r.linear_algebra_ns as f64/1e9},
@@ -1325,6 +1360,10 @@ fn candidate_summary(c: &Candidate) -> Value {
         "expected_trials":census.map(|x| if x.expected_trials.is_finite(){json!(x.expected_trials)}else{Value::Null}),
         "enumeration_ops_per_trial":c.enumeration_ops_per_trial,"pair_table_lookups_per_trial":c.pair_table_lookups_per_trial,
         "sat_variables":c.sat_variables,"build_ms":c.build_ms,"census_ms":census.map(|x| x.census_ms),
+        "trace_zero":c.trace_zero,
+        "measured_ops_per_target":c.measured_ops_per_target,
+        "expected_stage_ops":c.expected_stage_ops,
+        "solve_cost_skipped":c.solve_cost_skipped,
         "prune_steps":c.prune_steps,"skipped":c.skipped})
 }
 pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
@@ -1335,6 +1374,28 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
     if let Some(path) = &args.spec_out {
         if std::fs::symlink_metadata(path).is_ok() {
             return Err(format!("spec output already exists: {}", path.display()));
+        }
+    }
+    // Scoring one oracle and running another selects for the wrong thing.
+    if args.solve_cost_targets.is_some() {
+        if args.solver != Solver::Groebner {
+            return Err(format!(
+                "--solve-cost-targets measures the Gröbner oracle, but the runs would use {}; \
+                 pass --solver groebner or drop --solve-cost-targets",
+                args.solver.name()
+            ));
+        }
+        // A replayed reduction reports as free, so a warm cache would price
+        // the candidates measured later at a fraction of their cost.
+        // Only a replayed *reduction* skips the counter: word_ops is added
+        // inside matrix_f4_f2_counted, so a preprocessing hit still runs F4.
+        use crypto_lib::cryptanalysis::algebra_cache::{enabled, Layer};
+        if enabled(Layer::ExactReduction) {
+            return Err(
+                "--solve-cost-targets cannot measure while replayed reductions report as free; \
+                 unset IC_REDUCTION_CACHE"
+                    .into(),
+            );
         }
     }
     let kc = curve(args.degree, args.curve_a, args.subfield, args.curve_b)?;
@@ -1365,6 +1426,7 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         saturate: !args.no_saturate,
         projected_columns: !args.raw_columns,
         seed: args.seed,
+        solve_cost_targets: args.solve_cost_targets.map(|t| t as usize),
     };
     if !quiet {
         println!(
@@ -1387,9 +1449,13 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
                 } else {
                     "∞".into()
                 }),
-                c.skipped
-                    .as_ref()
-                    .map_or(String::new(), |s| format!("  ({s})"))
+                c.expected_stage_ops
+                    .map(|ops| format!("  stage word XORs {ops:.3e}"))
+                    .or_else(|| c.solve_cost_skipped.as_ref().map(|r| format!("  (unpriced: {r})")))
+                    .unwrap_or_default()
+                    + &c.skipped
+                        .as_ref()
+                        .map_or(String::new(), |s| format!("  ({s})"))
             );
             let _ = std::io::stdout().flush();
         }
@@ -1403,7 +1469,7 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
         .candidates
         .iter()
         .enumerate()
-        .filter(|(_, c)| c.expected_trials().is_finite())
+        .filter(|(_, c)| c.score().is_finite())
         .take(args.validate_top as usize)
         .collect();
     for (rank, candidate) in scored {
@@ -1477,21 +1543,60 @@ pub fn search(args: SearchArgs, quiet: bool) -> Result<Value, String> {
     } else {
         "inconclusive"
     };
+    // What ranked the report is what was measured, not what was requested.
+    let measured_any = report
+        .candidates
+        .iter()
+        .any(|c| c.expected_stage_ops.is_some());
+    let mut limitations = vec![
+        "Coverage is exact on the target set, which is the whole subgroup only when exhaustive_targets is true.".to_string(),
+        "Selected means fastest validated on these holdout fixtures, not a global optimum.".to_string(),
+        "No imported target was used.".to_string(),
+    ];
+    let scoring = if let (Some(t), true) = (args.solve_cost_targets, measured_any) {
+        limitations.push(format!(
+            "Solve cost is the mean over {t} census targets of one oracle, the Gröbner one, and only for \
+             linear-subspace candidates; pruned, saturated, union and orbit bases are left unmeasured and \
+             ranked below every measured one (see solve_cost_skipped)."
+        ));
+        limitations.push(
+            "Base construction, lifting, filtering and the relation linear algebra are not in the score; \
+             all of them grow with the base size, so pricing them would favour the smaller base further."
+                .to_string(),
+        );
+        "expected_stage_ops = expected_trials × measured Gröbner word XORs per census target, charged on \
+         decomposing and refuted targets alike; expected_trials = (columns + 1 + extra) / coverage"
+    } else {
+        if args.solve_cost_targets.is_some() {
+            limitations.push(
+                "Solve cost was requested but no candidate could be priced, so this report is ranked by \
+                 expected trials; see solve_cost_skipped on each candidate."
+                    .to_string(),
+            );
+        }
+        limitations.push(
+            "Expected trials ignore per-trial oracle cost; the validation runs measure wall time with the \
+             chosen oracle. Pass --solve-cost-targets to rank by measured solving cost instead."
+                .to_string(),
+        );
+        "expected_trials = (columns + 1 + extra) / coverage, coverage measured exactly on the shared target \
+         set by enumerating every m-summand witness through a pair-sum table"
+    };
     Ok(json!({"schema_version":1,"operation":"search","status":status,
         "evidence_scope":"exact_yield_census_with_synthetic_validation",
         "degree":kc.n,"curve_a":kc.a,"subgroup_order":kc.subgroup_order.to_string(),"cofactor":kc.cofactor.to_string(),
         "summands":args.summands,"options":report.options,"targets":report.targets,"exhaustive_targets":report.exhaustive_targets,
         "candidate_count":report.candidates.len(),
         "candidates":report.candidates.iter().map(candidate_summary).collect::<Vec<_>>(),
+        // best_census keeps its name for frozen consumers; best_scored is the
+        // same candidate named after the objective that actually ranked it.
         "best_census":report.best().map(|c| c.spec.clone()),
+        "best_scored":report.best().map(|c| c.spec.clone()),
         "validation":{"solver":args.solver,"holdout_samples":args.holdout,"max_trials":args.max_trials,
             "timeout_seconds":args.timeout_seconds,"validated_top":args.validate_top,"runs":validations},
         "selected":selected_doc,"selected_summary":selected.map(candidate_summary),
         "spec_out":args.spec_out.as_ref().filter(|_| selected.is_some()).map(|p| p.display().to_string()),
         "census_ms":census_ms,"elapsed_seconds":started.elapsed().as_secs_f64(),"resources":resources(),
-        "scoring":"expected_trials = (columns + 1 + extra) / coverage, coverage measured exactly on the shared target set by enumerating every m-summand witness through a pair-sum table",
-        "limitations":["Coverage is exact on the target set, which is the whole subgroup only when exhaustive_targets is true.",
-            "Expected trials ignore per-trial oracle cost; the validation runs measure wall time with the chosen oracle.",
-            "Selected means fastest validated on these holdout fixtures, not a global optimum.",
-            "No imported target was used."]}))
+        "scoring":scoring,"scoring_objective":if measured_any{"expected_stage_ops"}else{"expected_trials"},
+        "limitations":limitations}))
 }

@@ -1,0 +1,251 @@
+{
+  "arithmetic_operation_speedup": null,
+  "beats_rho": true,
+  "beats_rho_strict": true,
+  "beats_rho_strict_definition": "Winner/rho upper paired 95% limits and every cell ratio < 1 in both instructions and native process wall, on confirmation and replay. beats_rho alone is the confirmation point estimate of rho/winner exceeding one.",
+  "challenger_over_rho": {
+    "confirmation": {
+      "candidate": "arena_fastio",
+      "candidate_over_baseline": 0.4168858592538319,
+      "ci95": [
+        0.38750290261424325,
+        0.4589190967777072
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.804974532697431,
+      "native_wall_ci95": [
+        0.7721322749780425,
+        0.8366898814457386
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8588581191571506,
+        "n17a1": 0.8075633395600235,
+        "n19a0": 0.7981231230002201,
+        "n19a1": 0.8090909753385235,
+        "n23a0": 0.7546497490743826
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.5048009298156442,
+        "n17a1": 0.38153949893357403,
+        "n19a0": 0.39392489305291434,
+        "n19a1": 0.4033868289408074,
+        "n23a0": 0.41142533344597026
+      },
+      "speedup": 2.398738114528187
+    },
+    "replay": {
+      "candidate": "arena_fastio",
+      "candidate_over_baseline": 0.4168866357872513,
+      "ci95": [
+        0.387503570185787,
+        0.45891653324535603
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.7914331387527366,
+      "native_wall_ci95": [
+        0.7545612525075509,
+        0.8265352247714031
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8511888064115858,
+        "n17a1": 0.7922840345602915,
+        "n19a0": 0.8058455983098861,
+        "n19a1": 0.7779437484824173,
+        "n23a0": 0.7344535148829854
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.5047994230955135,
+        "n17a1": 0.38153740338755304,
+        "n19a0": 0.39392707515300146,
+        "n19a1": 0.4033869877133812,
+        "n23a0": 0.41143021202170943
+      },
+      "speedup": 2.3987336464062796
+    }
+  },
+  "classification": "accounting",
+  "confirmation": {
+    "candidate": "arena_fastio",
+    "candidate_over_baseline": 0.954132046741485,
+    "ci95": [
+      0.9487283946328573,
+      0.960167020225172
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 1.007766853173474,
+    "native_wall_ci95": [
+      0.9903726365238592,
+      1.0270724892190246
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.0017143645500697,
+      "n17a1": 1.0012987409495349,
+      "n19a0": 1.0018986432671655,
+      "n19a1": 1.035404768152843,
+      "n23a0": 0.9989846792449357
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.9532774015408513,
+      "n17a1": 0.9451248637924133,
+      "n19a0": 0.9521779921666558,
+      "n19a1": 0.9554197817698367,
+      "n23a0": 0.9647650449034382
+    },
+    "speedup": 1.048072961614864
+  },
+  "family_wide_or_complexity_claim": false,
+  "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+  "instruction_speedup": null,
+  "objective": "rho",
+  "parity_definition": "Both candidate/rho upper paired 95% limits and every cell ratio <= 1.10, instructions and native process wall, confirmation and replay.",
+  "provisional_challenger": "arena_fastio",
+  "reasons": [
+    "No challenger passed every confirmation and replay threshold."
+  ],
+  "replay": {
+    "candidate": "arena_fastio",
+    "candidate_over_baseline": 0.9541320997030339,
+    "ci95": [
+      0.9487269800971505,
+      0.9601673397462499
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.9999963245473455,
+    "native_wall_ci95": [
+      0.9882338965796592,
+      1.0144058421329114
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 0.9932441920816648,
+      "n17a1": 0.9993535421706898,
+      "n19a0": 1.019039650310495,
+      "n19a1": 0.9971739021066758,
+      "n23a0": 0.991413531738102
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.9532769843316553,
+      "n17a1": 0.9451239972765977,
+      "n19a0": 0.9521783207668373,
+      "n19a1": 0.9554205099143187,
+      "n23a0": 0.9647655512118004
+    },
+    "speedup": 1.0480729034388867
+  },
+  "rho_comparison": {
+    "candidate": "rho",
+    "candidate_over_baseline": 2.2887129068115897,
+    "ci95": [
+      2.077197340943909,
+      2.457808542872546
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 1.2519238960225185,
+    "native_wall_ci95": [
+      1.2022513266516623,
+      1.3043777114975845
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.1663327646399995,
+      "n17a1": 1.2399011840917176,
+      "n19a0": 1.2553184018788153,
+      "n19a1": 1.2797136536093856,
+      "n23a0": 1.3237726249432171
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 1.8884224359273525,
+      "n17a1": 2.4771350448226053,
+      "n19a0": 2.417156186265064,
+      "n19a1": 2.368495233913634,
+      "n23a0": 2.3449334945489793
+    },
+    "speedup": 0.436926797163521
+  },
+  "rho_over_winner": 2.2887129068115897,
+  "rho_parity": true,
+  "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+  "scope": "bounded public-hash ECDLP configuration tournament",
+  "status": "retained",
+  "unit": "valgrind-3.22-amd64-Ir",
+  "winner": "incumbent",
+  "winner_over_rho": {
+    "confirmation": {
+      "candidate": "incumbent",
+      "candidate_over_baseline": 0.436926797163521,
+      "ci95": [
+        0.4069034566370304,
+        0.48145735501622794
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.798770598737747,
+      "native_wall_ci95": [
+        0.7667779157944749,
+        0.8318517878456885
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8573882431474522,
+        "n17a1": 0.8065158843545619,
+        "n19a0": 0.7966106435652626,
+        "n19a1": 0.781424811073584,
+        "n23a0": 0.7554167393685867
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.5295425329496932,
+        "n17a1": 0.4036921612691539,
+        "n19a0": 0.41370930256069954,
+        "n19a1": 0.4222089982202027,
+        "n23a0": 0.42645132679651465
+      },
+      "speedup": 2.2887129068115897
+    },
+    "replay": {
+      "candidate": "incumbent",
+      "candidate_over_baseline": 0.4369275867744142,
+      "ci95": [
+        0.40690298023525534,
+        0.4814550806508336
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.7914360476384587,
+      "native_wall_ci95": [
+        0.7557909440653447,
+        0.8270206925674652
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8569783877896574,
+        "n17a1": 0.7927965440932707,
+        "n19a0": 0.7907892475669126,
+        "n19a1": 0.7801485245842248,
+        "n23a0": 0.7408144950325363
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.5295411841390774,
+        "n17a1": 0.40369031416720363,
+        "n19a0": 0.4137114514808026,
+        "n19a1": 0.42220884262737524,
+        "n23a0": 0.42645615974257134
+      },
+      "speedup": 2.288708770673938
+    }
+  }
+}

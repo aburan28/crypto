@@ -1,0 +1,86 @@
+{
+  "all_stages_charged_same_series": true,
+  "automorphism_discount": {
+    "A": 26,
+    "description": "signed Frobenius automorphism discount family used by Koblitz rho control",
+    "formula": "sqrt(2*n)",
+    "n": 13
+  },
+  "beat_id": "smoke.koblitz.vs_rho.n13",
+  "claim_boundary": "Public synthetic Koblitz fixture comparison only. Not key recovery, not asymptotic sub-rho, not an imported-point attack, and not a ledger promotion until independent validation and schema PASS.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported/external points",
+    "not ledger promotion until independent validation"
+  ],
+  "direct_rows": 36,
+  "executable_or_source_hash": {
+    "direct": "80542f6e5b403552e7b769f6d89bb09e90966d3c4985c6073b866d4f6b087b4c",
+    "rank_fixture_source": "9547e83ac6bd8cfd5bcda49d86a4df933486d428d421cc6aad1165485f8657ef",
+    "rho": "b9fe7b93e64a6b3820c3f2667095dded18dea500ec1bb2ecc8e75f0be7cc4193",
+    "rho_fixture_source": "e83169eb4a162786c2610210f11a1df47036e3c27b0f80253b4622349ff115f3"
+  },
+  "fixture_hash": "9547e83ac6bd8cfd5bcda49d86a4df933486d428d421cc6aad1165485f8657ef",
+  "host_id": {
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "ic_cost": 6.944499999999909,
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs/20260912T161059Z-07471fc673/artifacts/claim_draft.json",
+  "n": 13,
+  "n_or_bits": 13,
+  "producer_exit_codes": {
+    "direct": 0,
+    "rho": 0
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "common_cap_bytes": 17179869184
+  },
+  "rho_cost": 3.034749999999864,
+  "rho_rows": 1,
+  "schema_version": 2,
+  "seeds": {
+    "direct": 17678626299687071818,
+    "rho": 1038724261465292771
+  },
+  "stage": "vs_rho",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_class": "whole_process_wall",
+  "verdict": "DRAFT_PENDING_INDEPENDENT_VALIDATION",
+  "whole_process_wall_method": {
+    "cold_start_wall_ms": {
+      "direct": 412.339958,
+      "rho": 190.595583
+    },
+    "description": "median of timed executions after one discarded warmup; first-execution cost is reported separately and not charged",
+    "samples_ms": {
+      "direct": [
+        9.300375000000027,
+        6.944499999999909,
+        6.718624999999978
+      ],
+      "rho": [
+        5.223916999999911,
+        3.034749999999864,
+        2.90779200000002
+      ]
+    },
+    "stdout_stable": {
+      "direct": true,
+      "rho": true
+    },
+    "timed_repeats": {
+      "direct": 3,
+      "rho": 3
+    }
+  },
+  "whole_process_wall_ms": {
+    "direct": 6.944499999999909,
+    "rho": 3.034749999999864
+  }
+}

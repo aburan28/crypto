@@ -154,6 +154,22 @@ pub enum FactorBaseSource {
         prune: bool,
         #[serde(default)]
         saturate: bool,
+        /// Measure the Gröbner oracle on this many census targets per
+        /// candidate and rank by expected stage word XORs rather than by
+        /// expected trials.
+        ///
+        /// A trial is paid whether or not it succeeds, and the
+        /// Weil-restricted summation system carries `m·ℓ` unknowns, so
+        /// coverage alone can rank bases backwards — by `22.41×` over
+        /// twelve verified logarithms at `K_1/2^15`
+        /// (`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`).  Requires
+        /// `solver: "groebner"`, since it prices that oracle, and only
+        /// linear-subspace candidates can be priced, so it also requires
+        /// `prune: false`, `saturate: false` and a `factor` or `divisor`
+        /// family.  It cannot measure at all while `IC_REDUCTION_CACHE`
+        /// is set, where a replayed reduction reports as free.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        solve_cost_targets: Option<usize>,
     },
 }
 fn default_family() -> String {
@@ -740,6 +756,7 @@ fn search_options(src: &FactorBaseSource, p: &WorkflowParams) -> Result<SearchOp
         extra_relations,
         prune,
         saturate,
+        solve_cost_targets,
     } = src
     else {
         return Err("not a search source".into());
@@ -760,6 +777,39 @@ fn search_options(src: &FactorBaseSource, p: &WorkflowParams) -> Result<SearchOp
             experiment::MAX_ABSCISSAE
         ));
     }
+    // The score prices one oracle over one kind of base. Selecting on it
+    // while collecting with another, or while most candidates cannot be
+    // priced at all, is worse than not measuring: refuse both.
+    if let Some(t) = solve_cost_targets {
+        if *t == 0 || *t > 4096 {
+            return Err("solve_cost_targets must be 1..=4096".into());
+        }
+        if p.solver != Solver::Groebner {
+            return Err(format!(
+                "solve_cost_targets prices the Gröbner oracle but collection would use {}; \
+                 set solver to \"groebner\" or drop solve_cost_targets",
+                p.solver.name()
+            ));
+        }
+        // The CLI shows an operator the unpriced candidates and lets them
+        // judge; a workflow selects on its own, so every candidate it may
+        // select must carry the same kind of score.
+        if *prune || *saturate || !matches!(family.as_str(), "factor" | "divisor") {
+            return Err(
+                "solve_cost_targets can only price linear-subspace candidates; \
+                 set prune and saturate to false and family to \"factor\" or \"divisor\""
+                    .into(),
+            );
+        }
+        use crypto_lib::cryptanalysis::algebra_cache::{enabled, Layer};
+        if enabled(Layer::ExactReduction) {
+            return Err(
+                "solve_cost_targets cannot measure while replayed reductions report as free; \
+                 unset IC_REDUCTION_CACHE"
+                    .into(),
+            );
+        }
+    }
     Ok(SearchOptions {
         m: p.summands as usize,
         min_dimension: *min_dimension,
@@ -775,6 +825,7 @@ fn search_options(src: &FactorBaseSource, p: &WorkflowParams) -> Result<SearchOp
         saturate: *saturate,
         projected_columns: true,
         seed: p.seed,
+        solve_cost_targets: *solve_cost_targets,
     })
 }
 
@@ -782,7 +833,11 @@ fn candidate_json(c: &Candidate) -> Value {
     let census = c.census.as_ref();
     json!({"spec":c.spec,"family":c.family,"points":c.points,"columns":c.unknowns,
         "coverage":census.map(|x| x.coverage),
-        "expected_trials":census.map(|x| if x.expected_trials.is_finite(){json!(x.expected_trials)}else{Value::Null})})
+        "expected_trials":census.map(|x| if x.expected_trials.is_finite(){json!(x.expected_trials)}else{Value::Null}),
+        "trace_zero":c.trace_zero,
+        "measured_ops_per_target":c.measured_ops_per_target,
+        "expected_stage_ops":c.expected_stage_ops,
+        "solve_cost_skipped":c.solve_cost_skipped})
 }
 
 /// Run (or resume) the workflow described by `args.params` in `args.dir`.

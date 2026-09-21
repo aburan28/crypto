@@ -1,0 +1,96 @@
+{
+  "audit_sha256": "fb77f6189a4ca8cc5843211161854549a8afb4a996645d1598fdd9696b714b0b",
+  "comparison": {
+    "candidate": "candidate",
+    "candidate_over_baseline": 0.5283411363594956,
+    "ci95": [
+      0.5210107275323967,
+      0.5378618892502337
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 4,
+    "native_wall_candidate_over_baseline": 0.7225673464131198,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 8,
+    "per_cell": {
+      "n13a0": 0.5424149156300002,
+      "n17a1": 0.5198380647340374,
+      "n19a0": 0.5290118925713817,
+      "n23a0": 0.5223872490023828
+    },
+    "speedup": 1.892716525709966
+  },
+  "phase_totals_Ir": {
+    "candidate": {
+      "collection_and_decomposition": 73260805,
+      "curve_and_targets": 156170940,
+      "factor_base_and_tables": 1088166160,
+      "final_verification": 2036300,
+      "individual_log": 99884978,
+      "log_certification": 38260811,
+      "reporting_and_cleanup": 37629480,
+      "rho_solve": 0,
+      "startup_and_input": 9370854,
+      "verify_filter_and_linear_algebra": 100503165
+    },
+    "incumbent": {
+      "collection_and_decomposition": 73480655,
+      "curve_and_targets": 158842080,
+      "factor_base_and_tables": 1456094141,
+      "final_verification": 44308846,
+      "individual_log": 142204413,
+      "log_certification": 357533501,
+      "reporting_and_cleanup": 37612919,
+      "rho_solve": 0,
+      "startup_and_input": 9371070,
+      "verify_filter_and_linear_algebra": 773334482
+    },
+    "rho": {
+      "collection_and_decomposition": 0,
+      "curve_and_targets": 158842080,
+      "factor_base_and_tables": 0,
+      "final_verification": 43046772,
+      "individual_log": 0,
+      "log_certification": 0,
+      "reporting_and_cleanup": 1842997,
+      "rho_solve": 110743199,
+      "startup_and_input": 9370752,
+      "verify_filter_and_linear_algebra": 0
+    }
+  },
+  "probe": "/home/ubuntu/crypto/research/ic_autolab_next30_20260915/development/20260915T223851-7c8511",
+  "rows": [
+    {
+      "S_Ir": 408236.74986956205,
+      "class": "reference",
+      "cost_over_floor": 14686178.299824247,
+      "cost_over_incumbent": 1.0,
+      "cost_over_rho": 9.534885835230954,
+      "scheduled_pairs": 24,
+      "variant": "incumbent",
+      "verified_pairs": 24
+    },
+    {
+      "S_Ir": 215688.26832979184,
+      "class": "engineering experiment",
+      "cost_over_floor": 7759312.131707304,
+      "cost_over_incumbent": 0.5283411363594956,
+      "cost_over_rho": 5.03767241724398,
+      "scheduled_pairs": 24,
+      "variant": "candidate",
+      "verified_pairs": 24
+    },
+    {
+      "S_Ir": 42815.06427283554,
+      "class": "reference",
+      "cost_over_floor": null,
+      "cost_over_incumbent": 0.1048780255244428,
+      "cost_over_rho": 1.0,
+      "scheduled_pairs": 24,
+      "variant": "rho",
+      "verified_pairs": 24
+    }
+  ],
+  "scope": "Development only: eight targets, four curve cells, three repetitions. The baseline is the previously verified fast-lifting batch1/window8 winner.",
+  "unit": "valgrind-3.22-amd64-Ir"
+}

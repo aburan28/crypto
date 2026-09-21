@@ -5,7 +5,7 @@ the best *measured* result in this repository, the next target that counts as a
 push, and the acceptance gates. Do not combine best-of-breed component costs
 from different runs into a synthetic win.
 
-**Machine-readable twin:** [`boundary_targets.json`](./boundary_targets.json)
+**Machine-readable twin:** [`boundary_targets.json`](boundary_targets.json)
 (`schema_version` 2). Update both files in the same PR when a record moves.
 
 **Claim hygiene.** Every positive result must state its claim boundary
@@ -49,7 +49,7 @@ and how its step count compares with `√(πr/2)/√A`. A baseline that
 exhausts its iteration budget, or runs orders of magnitude above that
 bound, makes every ratio in the row meaningless — see the
 negation-map fruitless-cycle failure recorded in
-[`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../RESEARCH_KOBLITZ_INDEX_CALCULUS.md)
+[`research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md)
 ("The ρ baseline was failing, not losing"), which produced a spurious
 charged crossover at `n = 41` until the walk was fixed.
 
@@ -82,10 +82,10 @@ same process series. Faster planted decompositions alone never promote to
 
 1. Freeze a public fixture (curve, seeds, base hash, resource caps).
 2. Run via
-   [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
+   [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab)
    (`boundary_autolab.py plan|preflight|launch|claim-check`), or for an
    operation-counted whole-process row via `ic boundary --oracles --out <file>`
-   (see [`RESEARCH_IC_BOUNDARY_LEDGER.md`](../../RESEARCH_IC_BOUNDARY_LEDGER.md) §9);
+   (see [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) §9);
    write a JSON report under `research/` or `docs/ic/runs/` with hashes of
    executable, inputs, and outputs **and** every required measurement-schema
    field for that stage.
@@ -110,12 +110,12 @@ subspace factor bases (`semaev_decomp`, `semaev_sat`, `pq_descent`,
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | Linearized / subspace bases; `ic` dim ≤ 12; structure checks through `n = 36`; mostly **materialized** | Implicit (non-materialized) base at `n ≥ 41` with membership predicate only; log construction time + retained bytes | Predicate agrees with exhaustive membership on ≥ 2¹⁶ holdout; retained bytes logged | `docs/ic/README.md`; `RESEARCH_SEMAEV_DECOMPOSITION.md` |
-| `decomposition` | SAT decides `n = 19`, `ℓ = 6`; pairs-and-solve validated at `n = 21`, `ℓ = 7`; usable wall-clock to ~`ℓ = 12` still `O(2^{2ℓ})`. Full-field Weil `S₃` FFD harness: **FFD = 3** on `n ∈ {3..7}` (`RESEARCH_FFD_MEASUREMENT.md`). Subspace oracle FFD **not yet logged as a frontier metric** on the SAT / pairs ladder | Sub-`2^{2ℓ}` oracle at fixed `ℓ = 8` (≤ 64 targets), median ≤ half pairs-and-solve; **report FFD / DoR** (min/max/mean over ≥ 16 draws) + eq/var + unknowns | Zero disagreements vs exhaustive / group check; budget/host recorded; **FFD fields present** | `RESEARCH_SAT_SEMAEV.md`; `RESEARCH_SEMAEV_DECOMPOSITION.md`; `RESEARCH_FFD_MEASUREMENT.md` |
-| `relation_yield` | **Operation-counted yield on the frozen `char2` ladder** (2026-09-21, `ic boundary`): 5 instances to `r = 2^24.4`, relations per trial against the counting ceiling `C(F+m−1,m)/#E` for every variant, natural targets only; `yield/ceiling` 0.89–0.96 on the odd-degree rungs and 1.48–1.74 on `n = 18, 24`, where the base lies in `2E` and the ceiling is loose by exactly 2 (corrected 0.74–0.87); trials grow as `r^0.37` (`R²` 0.96) | Yield at `n = 27` against the subgroup-tightened ceiling (divide by the order of the subgroup containing every `m`-sum) with 256 natural targets and a 95% CI on the hit-rate | Tightened ceiling stated; 95% CI width ≤ 0.05 on hit-rate; policy hash frozen | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §3.3, §3.5 |
-| `rank` | Relation-matrix LA priced per instance on the `char2` ladder (2026-09-21): dense incremental Gauss–Jordan over `Z/rZ`, rank recomputed after every row, stop when the target column is pinned, zero surplus; at `n = 27`: 245 rows × 264 columns, rank 245, 120,500 multiply-subtracts = 943 GAE, `S_LA = 0.20` (under 0.1% of the total); LA grows as `r^0.71` (`R²` 0.96) | Rank at `n ≥ 31` (`K > 500`) with dims and LA cost; sparse or structured elimination once dense LA exceeds 1% of the total | Rank recomputed after every relation; terminal rank = required; dims and cost logged | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §4 |
-| `end_to_end_dlp` | Known-answer DLP recovered and verified `[d]G = Q` by every variant on every instance of the `char2` ladder, largest `n = 27` (`r = 2^24.4`), every phase counted in one unit (2026-09-21); claim = synthetic known-answer | Known-answer DLP at `n ≥ 31` with every phase counted in `S`; `vs rho` and `vs floor` reported | `[d]G = Q`; every phase inside the count; incomplete stages fail closed | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §2 |
-| `vs_rho` | **Not achieved.** Whole-process operation-counted cost against a counted Pollard ρ on the same instance (2026-09-21): best variant meet in the middle `m = 3` at 8.3× ρ (`n = 15`) and 89× at `n = 27` (`r = 2^24.4`, `S = 206` vs ρ 2.31); `S₄` pairs-and-solve 155×–45,471×; total exponent `r^0.62` (`R²` 0.99) against ρ's ½; ρ health: every run recovered and verified, walk 1.1–1.6× `√(πr/2)`; the reference walk uses `A = 1`, floor stated at `A = 2` | Charged single-instance cost < automorphism-aware ρ at any eligible `n ≥ 15`; state discount explicitly | All stages charged; independent replay; timing class named | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §2–§4 |
+| `factor_base` | Linearized / subspace bases; `ic` dim ≤ 12; structure checks through `n = 36`; mostly **materialized** | Implicit (non-materialized) base at `n ≥ 41` with membership predicate only; log construction time + retained bytes | Predicate agrees with exhaustive membership on ≥ 2¹⁶ holdout; retained bytes logged | `docs/ic/README.md`; `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md` |
+| `decomposition` | SAT decides `n = 19`, `ℓ = 6`; pairs-and-solve validated at `n = 21`, `ℓ = 7`; usable wall-clock to ~`ℓ = 12` still `O(2^{2ℓ})`. Full-field Weil `S₃` FFD harness: **FFD = 3** on `n ∈ {3..7}` (`research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md`). Subspace oracle FFD **not yet logged as a frontier metric** on the SAT / pairs ladder | Sub-`2^{2ℓ}` oracle at fixed `ℓ = 8` (≤ 64 targets), median ≤ half pairs-and-solve; **report FFD / DoR** (min/max/mean over ≥ 16 draws) + eq/var + unknowns | Zero disagreements vs exhaustive / group check; budget/host recorded; **FFD fields present** | `research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`; `research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`; `research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md` |
+| `relation_yield` | **Operation-counted yield on the frozen `char2` ladder** (2026-09-21, `ic boundary`): 5 instances to `r = 2^24.4`, relations per trial against the counting ceiling `C(F+m−1,m)/#E` for every variant, natural targets only; `yield/ceiling` 0.89–0.96 on the odd-degree rungs and 1.48–1.74 on `n = 18, 24`, where the base lies in `2E` and the ceiling is loose by exactly 2 (corrected 0.74–0.87); trials grow as `r^0.37` (`R²` 0.96) | Yield at `n = 27` against the subgroup-tightened ceiling (divide by the order of the subgroup containing every `m`-sum) with 256 natural targets and a 95% CI on the hit-rate | Tightened ceiling stated; 95% CI width ≤ 0.05 on hit-rate; policy hash frozen | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.3, §3.5 |
+| `rank` | Relation-matrix LA priced per instance on the `char2` ladder (2026-09-21): dense incremental Gauss–Jordan over `Z/rZ`, rank recomputed after every row, stop when the target column is pinned, zero surplus; at `n = 27`: 245 rows × 264 columns, rank 245, 120,500 multiply-subtracts = 943 GAE, `S_LA = 0.20` (under 0.1% of the total); LA grows as `r^0.71` (`R²` 0.96) | Rank at `n ≥ 31` (`K > 500`) with dims and LA cost; sparse or structured elimination once dense LA exceeds 1% of the total | Rank recomputed after every relation; terminal rank = required; dims and cost logged | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §4 |
+| `end_to_end_dlp` | Known-answer DLP recovered and verified `[d]G = Q` by every variant on every instance of the `char2` ladder, largest `n = 27` (`r = 2^24.4`), every phase counted in one unit (2026-09-21); claim = synthetic known-answer | Known-answer DLP at `n ≥ 31` with every phase counted in `S`; `vs rho` and `vs floor` reported | `[d]G = Q`; every phase inside the count; incomplete stages fail closed | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2 |
+| `vs_rho` | **Not achieved.** Whole-process operation-counted cost against a counted Pollard ρ on the same instance (2026-09-21): best variant meet in the middle `m = 3` at 8.3× ρ (`n = 15`) and 89× at `n = 27` (`r = 2^24.4`, `S = 206` vs ρ 2.31); `S₄` pairs-and-solve 155×–45,471×; total exponent `r^0.62` (`R²` 0.99) against ρ's ½; ρ health: every run recovered and verified, walk 1.1–1.6× `√(πr/2)`; the reference walk uses `A = 1`, floor stated at `A = 2` | Charged single-instance cost < automorphism-aware ρ at any eligible `n ≥ 15`; state discount explicitly | All stages charged; independent replay; timing class named | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2–§4 |
 
 **Hard caps (implementation, not mathematics):** Weil truth-table descent
 `m' ≤ 8` (S₃) / `m' ≤ 5` (S₄) in `pq_descent`; higher-genus GHS smooth model
@@ -136,15 +136,61 @@ Unknowns formula (chained Semaev): `unknowns(n,ℓ,m) = m·ℓ + (m−2)·n`.
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
 | `factor_base` | Algebraic point-defined `n = 53` base: 9,964 points, 94 signed-Frobenius orbit columns, and 24,805,379 exact support entries. Four direct-routed shards build the 738,197,504-byte table in a 1.379006 s median while preserving the 95-relation solve; selection uses no scalar labels or target-subgroup enumeration | Reduce retained support below 512 MiB without regressing the exact 95-relation solve or selected online crossover | Same base/support cardinality; terminal rank 95; construction wall/core/RSS + retained bytes logged | `stage-108-routing-selection-archive-20260913/verification.json` |
-| `decomposition` | F₄ refutation frontier past **46 unknowns** (`n = 31`, `m = 3` ~145 s); SAT comfortable ~27 unknowns; classical demos `n ≤ 13`. **FFD ladder** (`RESEARCH_KOBLITZ_SCALING_TARGET.md`, 16 draws): chained `m ≥ 3` falls at **FFD = 3** (no fall later than 3 on the measured ladder); `m = 2` often FFD 2–3 and heavily overdetermined. F₄ splits flat across 39→46 unknowns. **Priced per target (2026-09-21, `ic boundary --oracles`):** every oracle on the same Semaev systems at `n = 9…23`, F₄ word XORs exact, SAT conflicts, `disagreements = 0`; FFD 2 (`m = 2`) / 3 (`m = 3`) on every profiled cell; `n = 23, m = 2` (22 unknowns): F₄ 6.8e7 XORs found / 2.3e8 refuted = 2.0e5 GAE per target, SAT 2.9e4 / 1.9e5 conflicts = 1.3e7 GAE; `n = 15, m = 3` (30 unknowns): F₄ 2.4e6 GAE, SAT no answer at 200,000 conflicts; the pair-table probe costs 0.5–25 GAE on the same targets | Solve useful `m = ⌈n/ℓ⌉` at `n = 31`, dim 16, **`m = 2`** (32 unknowns, quadratic) within 1 h median; log FFD, eq/var, F₄ splits / SAT conflicts, median ms | Three oracles agree or F₄+group check; `disagreements = 0`; **FFD reported** | `RESEARCH_KOBLITZ_SCALING_TARGET.md`; `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`; `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §5 |
+| `decomposition` | F₄ refutation frontier past **46 unknowns** (`n = 31`, `m = 3` ~145 s); SAT comfortable ~27 unknowns; classical demos `n ≤ 13`. **FFD ladder** (`research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`, 16 draws): chained `m ≥ 3` falls at **FFD = 3** (no fall later than 3 on the measured ladder); `m = 2` often FFD 2–3 and heavily overdetermined. F₄ splits flat across 39→46 unknowns. **Priced per target (2026-09-21, `ic boundary --oracles`):** every oracle on the same Semaev systems at `n = 9…23`, F₄ word XORs exact, SAT conflicts, `disagreements = 0`; FFD 2 (`m = 2`) / 3 (`m = 3`) on every profiled cell; `n = 23, m = 2` (22 unknowns): F₄ 6.8e7 XORs found / 2.3e8 refuted = 2.0e5 GAE per target, SAT 2.9e4 / 1.9e5 conflicts = 1.3e7 GAE; `n = 15, m = 3` (30 unknowns): F₄ 2.4e6 GAE, SAT no answer at 200,000 conflicts; the pair-table probe costs 0.5–25 GAE on the same targets | Solve useful `m = ⌈n/ℓ⌉` at `n = 31`, dim 16, **`m = 2`** (32 unknowns, quadratic) within 1 h median; log FFD, eq/var, F₄ splits / SAT conflicts, median ms | Three oracles agree or F₄+group check; `disagreements = 0`; **FFD reported** | `research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`; `research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`; `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §5 |
 | `relation_yield` | Exact coverage / yield controls at `n = 19`; fixture collectors at `n = 37` | Distributional yield for frozen `(n, η, base)` at `n = 23` with 256 natural + 64 planted + 64 proven-UNSAT; trials-per-relation | Preregistered covariates; no silent arm omission | `TASK-KIC-SAT-RHO-CROSSOVER-20260909` |
 | `rank` | Rank-aware `n = 53` collection reaches augmented rank 95 with exactly 95 rows and zero surplus; current final solve is 0.542 ms after 48,531,878 support queries; relation-matrix LA, not GB FFD | Unaffiliated replay of the 95-row transcript and a distribution across public targets | Preserved transcript; matrix dimensions and LA wall logged; terminal rank unchanged; no log labels used by targeting | `stage-89-current-selected-panel-20260912/verification.json` |
 | `end_to_end_dlp` | Selected public hash-derived unknown-scalar recovery through `n = 53`: 95 verified relations, 40,136,342 queries, relation-derived factor-base logs, direct/rho agreement, and `[d]G=Q`; no expected scalar constructed or supplied. Direct is 4.307977 s versus 4.362556 s rho, ratio 0.987489 | Repeat n=53 on independent public seeds and obtain unaffiliated reproduction | Target scalar not constructed; factor-base logs group-certified; all stages retained | `stage-108-routing-selection-archive-20260913/verification.json` |
-| `vs_rho` | `n = 41` retains an online charged crossover with full-cost loss. The selected direct-routed four-shard `n = 53` panel wins 5/5 on an identified EPYC 9V74: ratios 0.8471x, 0.8589x, 0.8392x, 0.8291x, and 0.8389x; median 0.8392x. Median direct is 3.630 s / 9.740 core-s / 1,055,776,768 B RSS versus 4.308 s / 4.307 core-s rho. Fresh build plus direct remains 17.637x; current single-core evidence predates sharding. **Operation-counted, whole process (2026-09-21, `ic boundary`):** the signed-orbit fold at `n = 41` (`r = 2^39`, cofactor 4) is `S = 58.8`, 300× the counted signed-Frobenius ρ (`S = 0.20`) and 425× the floor with factor base, pair table, targets, oracle, elimination and verification all inside the count; `n = 23`: 210× (abscissa-column control 227×); total exponent 0.54 (`R²` 0.71 over 10 rungs; 0.51, `R²` 0.98 over the cofactor ≤ 4 rungs) against ρ's ½ | Reduce retained memory below 512 MiB, median direct/rho core ratio from 2.262x to at most 1, refresh selected CPU-0, and obtain independent replay | All stages charged; same target; independent external validation; timing class + `A=2n` discount explicit; fixed-protocol wall and core panels | Stages 39, 40, 92, and 108 sealed results; `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §3.4, §3.6 |
+| `vs_rho` | `n = 41` retains an online charged crossover with full-cost loss. The selected direct-routed four-shard `n = 53` panel wins 5/5 on an identified EPYC 9V74: ratios 0.8471x, 0.8589x, 0.8392x, 0.8291x, and 0.8389x; median 0.8392x. Median direct is 3.630 s / 9.740 core-s / 1,055,776,768 B RSS versus 4.308 s / 4.307 core-s rho. Fresh build plus direct remains 17.637x; current single-core evidence predates sharding. **Operation-counted, whole process (2026-09-21, `ic boundary`):** the signed-orbit fold at `n = 41` (`r = 2^39`, cofactor 4) is `S = 58.8`, 300× the counted signed-Frobenius ρ (`S = 0.20`) and 425× the floor with factor base, pair table, targets, oracle, elimination and verification all inside the count; `n = 23`: 210× (abscissa-column control 227×); total exponent 0.54 (`R²` 0.71 over 10 rungs; 0.51, `R²` 0.98 over the cofactor ≤ 4 rungs) against ρ's ½ | Reduce retained memory below 512 MiB, median direct/rho core ratio from 2.262x to at most 1, refresh selected CPU-0, and obtain independent replay | All stages charged; same target; independent external validation; timing class + `A=2n` discount explicit; fixed-protocol wall and core panels | Stages 39, 40, 92, and 108 sealed results; `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.4, §3.6 |
 
 **Explicit non-claims for the current `vs_rho` record:** not Semaev-SAT, not
 asymptotic sub-ρ, not key recovery, not deployed-curve security impact, not a
 full-cost/core crossover, and not a state-of-the-art result.
+
+### Autolab remeasurement, 2026-09-12 — no crossover on the `signed_expanded` base
+
+Separate measurement, separate base family, not a competing record. The
+`koblitz.vs_rho.*` autolab beats use a `signed_expanded` / `pair_pair_16`
+construction rather than the `two_torsion_saturated` base behind the row above.
+On that family, index calculus is behind ρ at every rung measured — `n = 13`,
+37, 41 and 53. Full writeup and committed bundles:
+[`evidence/20260912-koblitz-vs-rho-no-crossover/`](../../research/sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover).
+
+At `n = 37` over 1024 targets, charged ms/target, with ρ verifying 1024/1024:
+
+| arm | charged ms/target | ρ/IC |
+|---|---|---|
+| ρ | **12.82** | 1.000 |
+| `partition_walk` | 14.78 | 0.868 |
+| `coefficient_walk` | 15.33 | 0.836 |
+| `independent` | 20.27 | 0.633 |
+
+Three things this turned up that apply to any future `vs_rho` claim:
+
+- **Read charged cost off the batch summary.** The direct producer's per-target
+  `charged_total_ms` re-adds the shared support-table `setup_ms` for *every*
+  target, so summing it across a batch double-counts the base once per target.
+  At `n = 37` that reports 34.08 ms/target where
+  `full_algorithm_charged_total_ms` gives 20.27 for the same run, and it makes
+  setup amortization look like the bottleneck when setup is under 0.02
+  ms/target.
+- **Sweep the target mode.** All three beats pin `target_mode=independent`, the
+  most expensive of the three and 37% above `partition_walk`, so a stage read
+  off one beat understates the method.
+- **The direct arm's largest charged component is an assertion.** 7.78 of
+  `partition_walk`'s 14.78 ms/target is `solution_validation_ms`, which
+  re-derives every factor-base discrete log by scalar multiplication and
+  replays every relation under `assert_eq!` to confirm what the linear solve
+  already produced. Cutting it is the obvious lever, but ρ spends 1.28
+  ms/target on its own validation; dropping one side only would turn a 1.15x
+  loss into a 1.65x "win" by accounting alone.
+
+**The two `n = 41` results are not reconciled.** The row above reports an online
+charged crossover at IC/ρ 0.286 over 5 targets; the autolab beat measures
+per-target collection at 821.7 ms against ρ's 247.5 ms, 3.3x the other way.
+Different base families, target counts, and cost boundaries — the row's own
+amortized ratio is 5.03x and its full available wall is 110.79x, so the 0.286
+excludes base construction rather than disputing it. Neither `n = 41` number
+should be quoted without its configuration.
 
 ---
 
@@ -156,12 +202,12 @@ full-cost/core crossover, and not a state-of-the-art result.
 
 | Stage | Current best (measured knobs) | Next target to beat | Acceptance gates | Evidence |
 |-------|-------------------------------|---------------------|------------------|----------|
-| `factor_base` | Small-x and ζ-orbit bases on toy primes; Eisenstein-smooth FB implemented; sizes from bench ladder | Orbit-reduced base on a **16-bit** j=0 prime-order curve with certified orbit count; construction time + retained bytes | No duplicate orbits; size vs theory within 5% | `docs/RESEARCH_BENCH_LOG.md`; `ec_index_calculus_j0` |
+| `factor_base` | Small-x and ζ-orbit bases on toy primes; Eisenstein-smooth FB implemented; sizes from bench ladder | Orbit-reduced base on a **16-bit** j=0 prime-order curve with certified orbit count; construction time + retained bytes | No duplicate orbits; size vs theory within 5% | `research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md`; `ec_index_calculus_j0` |
 | `decomposition` | 2-decomp via S₃ through bench sizes; S₄/Gröbner not a scaling win. **FFD not published** on the current 2-decomp bench frontier (must be filled on the next algebraic push) | One verified 3-decomposition relation family on a ≥14-bit prime with GB cost + **FFD / DoR logged**; record unknowns, system degree, eq/var, median ms | Witnesses sum in the group; timing + **FFD** logged | `ec_index_calculus.rs` |
-| `relation_yield` | **Operation-counted yield on the frozen prime ladder** (2026-09-21, `ic boundary`): 8 instances, 10–24 bits, relations per trial against `C(F+m−1,m)/#E` for every variant, natural targets; `yield/ceiling` 0.75–1.25 (`m = 2`) and 0.75–1.00 (`m = 3`); trials grow as `r^0.57` (`m = 2`) and `r^0.33` (`m = 3`), `R² ≥ 0.99` | Trials-per-relation on a j=0 ζ-orbit base, 10–24 bits, against the orbit-corrected ceiling | ≥4 bitlengths; R² reported; ceiling stated for the orbit-reduced base | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §3.2 |
-| `rank` | Relation-matrix LA priced per instance on the prime ladder (2026-09-21): dense incremental Gauss–Jordan over `Z/rZ`, rank recomputed after every row, stop when the target column is pinned; at 24 bits (`K = 256`): 232 rows × 257 columns, rank 232, 108,300 multiply-subtracts = 1,696 GAE, `S_LA = 0.51` (0.9% of the `m = 3` total); LA grows as `r^0.62` (`R²` 0.96) | Sparse or structured LA at `K ≥ 1,024` columns (≥ 28 bits); dims and cost published | Correct vs dense GE on a subsample; dims and cost logged | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §4 |
-| `end_to_end_dlp` | Known-answer DLP recovered and verified `[d]G = Q` by every variant on every instance of the prime ladder, largest **23.4 bits** (generated prime-order curve), every phase counted in one unit (2026-09-21); j=0 orbit IC **14-bit** (bench, wall-clock); synthetic known-answer | Generic curve at ≥ 28 bits, or a j=0 ζ-orbit pipeline at ≥ 24 bits, in the same counted harness | `[d]G = Q`; every phase counted; agrees with the counted ρ on the same instance | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §2; `docs/RESEARCH_BENCH_LOG.md` |
-| `vs_rho` | **Not achieved.** Whole-process operation-counted cost against a counted Pollard ρ (2026-09-21): best variant meet in the middle `m = 3` at 1.17× ρ at 11.9 bits (where ρ's setup dominates) and 14.5× at 23.4 bits (`S = 56.8` vs ρ 3.93, 64× the floor); Semaev `S₃` roots 1,107×; total exponents 0.60 (`m = 3`), 0.66, 0.85, 0.91 against ρ's ½; ρ health: every run recovered and verified, walk 1.2–3.4× `√(πr/2)`; dense 3-sum non-scaling wall ~**80 bits** (earlier record) | Any prime-order instance ≥ 16 bits where charged IC < ρ (same accounting) | Artifact cost model + independent replay; no verifier gaming | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `RESEARCH_IC_BOUNDARY_LEDGER.md` §2–§4; `research/ecdlp_autolab/paper.md` |
+| `relation_yield` | **Operation-counted yield on the frozen prime ladder** (2026-09-21, `ic boundary`): 8 instances, 10–24 bits, relations per trial against `C(F+m−1,m)/#E` for every variant, natural targets; `yield/ceiling` 0.75–1.25 (`m = 2`) and 0.75–1.00 (`m = 3`); trials grow as `r^0.57` (`m = 2`) and `r^0.33` (`m = 3`), `R² ≥ 0.99` | Trials-per-relation on a j=0 ζ-orbit base, 10–24 bits, against the orbit-corrected ceiling | ≥4 bitlengths; R² reported; ceiling stated for the orbit-reduced base | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §3.2 |
+| `rank` | Relation-matrix LA priced per instance on the prime ladder (2026-09-21): dense incremental Gauss–Jordan over `Z/rZ`, rank recomputed after every row, stop when the target column is pinned; at 24 bits (`K = 256`): 232 rows × 257 columns, rank 232, 108,300 multiply-subtracts = 1,696 GAE, `S_LA = 0.51` (0.9% of the `m = 3` total); LA grows as `r^0.62` (`R²` 0.96) | Sparse or structured LA at `K ≥ 1,024` columns (≥ 28 bits); dims and cost published | Correct vs dense GE on a subsample; dims and cost logged | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §4 |
+| `end_to_end_dlp` | Known-answer DLP recovered and verified `[d]G = Q` by every variant on every instance of the prime ladder, largest **23.4 bits** (generated prime-order curve), every phase counted in one unit (2026-09-21); j=0 orbit IC **14-bit** (bench, wall-clock); synthetic known-answer | Generic curve at ≥ 28 bits, or a j=0 ζ-orbit pipeline at ≥ 24 bits, in the same counted harness | `[d]G = Q`; every phase counted; agrees with the counted ρ on the same instance | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2; `research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md` |
+| `vs_rho` | **Not achieved.** Whole-process operation-counted cost against a counted Pollard ρ (2026-09-21): best variant meet in the middle `m = 3` at 1.17× ρ at 11.9 bits (where ρ's setup dominates) and 14.5× at 23.4 bits (`S = 56.8` vs ρ 3.93, 64× the floor); Semaev `S₃` roots 1,107×; total exponents 0.60 (`m = 3`), 0.66, 0.85, 0.91 against ρ's ½; ρ health: every run recovered and verified, walk 1.2–3.4× `√(πr/2)`; dense 3-sum non-scaling wall ~**80 bits** (earlier record) | Any prime-order instance ≥ 16 bits where charged IC < ρ (same accounting) | Artifact cost model + independent replay; no verifier gaming | `docs/ic/runs/ic-boundary-ledger-2026-09-21.json`; `research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md` §2–§4; `research/ecdlp_autolab/paper.md` |
 
 **Asymptotic reminder:** 2-decomp IC on prime fields is `O(p^{3/2})` vs ρ's
 `O(p^{1/2})`. A `vs_rho` win requires a genuinely better decomposition regime
@@ -173,6 +219,9 @@ full-cost/core crossover, and not a state-of-the-art result.
 
 1. **Koblitz `factor_base` → reduce the selected 738,197,504-byte exact support below 512 MiB while preserving the 95-relation solve and online wall crossover.**
 2. **Koblitz `vs_rho` → reduce the selected 2.2616x median core ratio and 17.6367x fresh-build ratio while preserving the 0.8392x wall median; refresh selected CPU-0.**
+   On the autolab `signed_expanded` family the nearest charged gap is `n = 37`
+   at 1.15x (`partition_walk`, 14.78 ms/target against ρ's 12.82); start there
+   with `solution_validation_ms`, 53% of the direct arm's charged cost.
 3. **Koblitz `decomposition` → `n = 31`, dim 16, `m = 2` within budget (with FFD logged).**
 4. **Binary `decomposition` → first sub-`2^{2ℓ}` oracle at `ℓ = 8` (with FFD logged).**
 5. **Prime `end_to_end_dlp` → 16-bit j=0 IC.**
@@ -182,7 +231,7 @@ full-cost/core crossover, and not a state-of-the-art result.
    ceiling at `n = 27` / 24 bits.
 7. **Backfill FFD / DoR** on any algebraic decomposition claim that currently
    cites only wall-clock or conflict counts.
-8. **All regimes → iterate against [`RESEARCH_IC_BOUNDARY_LEDGER.md`](../../RESEARCH_IC_BOUNDARY_LEDGER.md)
+8. **All regimes → iterate against [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md)
    (`ic boundary`):** `S / S_ρ < 1` at `r ≥ 2^20` with every phase counted, or a
    fitted total exponent below the reference's over ≥ 4 sizes, or
    `yield/ceiling > 1.5` on a base outside every proper subgroup, against the
@@ -192,14 +241,14 @@ full-cost/core crossover, and not a state-of-the-art result.
 
 ## Related documents
 
-- [`RESEARCH_IC_BOUNDARY_LEDGER.md`](../../RESEARCH_IC_BOUNDARY_LEDGER.md) — the operation-counted ledger (`ic boundary`): three regimes, one unit, every phase priced against the generic floor and a counted ρ; frozen run under `docs/ic/runs/`
-- [`docs/ic/README.md`](./README.md) — `ic` runner, fixtures, comparison limits
-- [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
-- [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians
-- [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../RESEARCH_KOBLITZ_INDEX_CALCULUS.md) — orbits, `|F|/K`, `√(2n)` ρ discount
-- [`RESEARCH_FFD_MEASUREMENT.md`](../../RESEARCH_FFD_MEASUREMENT.md) — full-field Semaev FFD harness
-- [`RESEARCH_SAT_SEMAEV.md`](../../RESEARCH_SAT_SEMAEV.md)
-- [`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md)
-- [`docs/RESEARCH_BENCH_LOG.md`](../RESEARCH_BENCH_LOG.md)
+- [`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) — the operation-counted ledger (`ic boundary`): three regimes, one unit, every phase priced against the generic floor and a counted ρ; frozen run under `docs/ic/runs/`
+- [`docs/ic/README.md`](README.md) — `ic` runner, fixtures, comparison limits
+- [`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab) — agent autolab runner (`boundary_autolab.py`) wired to this ledger
+- [`research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md) — unknowns formula, FFD ladder, F₄/SAT medians
+- [`research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](../../research/notes/ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md) — orbits, `|F|/K`, `√(2n)` ρ discount
+- [`research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md`](../../research/notes/index-calculus/RESEARCH_FFD_MEASUREMENT.md) — full-field Semaev FFD harness
+- [`research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md`](../../research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md)
+- [`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`](../../research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md)
+- [`research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md`](../../research/notes/ecdlp-general/RESEARCH_BENCH_LOG.md)
 - [`docs/ECDLP_ATTACK_MATRIX.md`](../ECDLP_ATTACK_MATRIX.md)
 - `research/sat_factor_base_review_20260908/TASK-KIC-SAT-RHO-CROSSOVER-20260909.md`

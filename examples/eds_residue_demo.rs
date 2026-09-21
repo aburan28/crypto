@@ -7,7 +7,7 @@
 //! Builds the EDS `W_{E,P}` over `F_p` for several toy curves, verifies the
 //! rank-of-apparition law and the Ward/Lauter–Stange shift multiplier, and
 //! reports the Legendre-character invariants `(χ(A), χ(B))` plus the QR
-//! balance of the apparition block.  Companion to `RESEARCH_EDS_RESIDUE.md`.
+//! balance of the apparition block.  Companion to `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`.
 
 use crypto_lib::cryptanalysis::eds_residue::{
     analyze, find_toy_point, format_report, recover_dl_from_net_zeros,

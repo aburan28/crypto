@@ -5,6 +5,8 @@ mod boundary;
 mod corpus;
 #[path = "ic/experiment.rs"]
 mod experiment;
+#[path = "ic/fixed.rs"]
+mod fixed;
 #[path = "ic/params.rs"]
 mod params;
 #[path = "ic/workflow.rs"]
@@ -26,7 +28,7 @@ use std::{
     about = "Curve inspection and synthetic index-calculus research"
 )]
 #[command(
-    long_about = "Inspect named/custom curves, generate reproducible known-answer fixtures, run the toy index-calculus pipeline, compare factor-base candidates, or search for high-yield factor bases. Bare ic runs the default synthetic example. A bare curve name (for example ic ecc2k-130) performs inspection only. Imported parameters and points are never sent to a DLP solver."
+    long_about = "Inspect named/custom curves, generate reproducible known-answer fixtures, run the toy index-calculus pipeline, compare factor-base candidates, or search for high-yield factor bases. Bare ic runs the default synthetic example. A bare curve name (for example ic ecc2k-130) performs inspection only. The fixed subcommand accepts explicit K_0 parameters and points with full-width coordinates."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -63,6 +65,8 @@ enum Action {
     Solve(experiment::SolveArgs),
     /// Run or resume a staged select → collect → logs → solve pipeline from a parameter file (or act as a collection worker).
     Workflow(workflow::WorkflowArgs),
+    /// Persist and resume index calculus on fixed K_0 parameters through degree 131.
+    Fixed(fixed::FixedArgs),
     /// Price every index-calculus variant of the prime, generic-binary and Koblitz regimes in one unit against the generic floor and a counted Pollard rho, with fitted exponents.
     Boundary(boundary::BoundaryArgs),
     /// Write a benchmark corpus of Weil-descended Semaev S4 instances (Magma, DIMACS+XOR, CNF, ANF) with certified labels and planted witnesses.
@@ -111,6 +115,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Logs(args)) => experiment::logs(args.clone(), cli.json),
         Some(Action::Solve(args)) => experiment::solve(args.clone(), cli.json),
         Some(Action::Workflow(args)) => workflow::run(args.clone(), cli.json),
+        Some(Action::Fixed(args)) => fixed::run(args.clone()),
         Some(Action::Boundary(args)) => boundary::run(args.clone(), cli.json),
         Some(Action::Corpus(args)) => corpus::run(args.clone()),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),

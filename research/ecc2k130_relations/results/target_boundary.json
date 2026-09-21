@@ -1,0 +1,141 @@
+{
+  "instance": "ECC2K-130",
+  "log2_r": 129.0,
+  "frobenius_order": 131,
+  "rho_reference_log2": 60.809,
+  "rho_reference_source": "experiments/ecc2k130_extension_field_boundary.json -> target.log2_rho_reference",
+  "memory_charged": false,
+  "measured_rate_factor": 0.84,
+  "decomposition_model": "P = 2^n C(B,n) / r, measured in results/target_decomposition.json",
+  "family_floor": {
+    "K1": 0.265358,
+    "min_unknowns": 2,
+    "min_split_multiplicity": 2,
+    "log2_floor": 65.543,
+    "log2_floor_vs_rho": 4.734,
+    "parity_reachable": false,
+    "statement": "Every configuration in this family costs at least 2^65.54. The rho reference is 2^60.809. Parity sits 2^-4.73 below the floor, so it is not reachable by any choice of support size, relation length, split or table layout -- the constant would have to fall by 26.6x, and it is pinned by the probe cost and the group structure."
+  },
+  "best_logarithm_cost": {
+    "orbits": 2,
+    "support_size": 262,
+    "relation_length": 12,
+    "mitm_split": "11+1",
+    "stored_table": "quotiented",
+    "log2_build_once": 66.777,
+    "log2_probes_per_attempt": 10.033,
+    "log2_probe_cost": 3.868,
+    "log2_decomposition_probability": -50.055,
+    "log2_target_attempts": 51.64,
+    "relations_needed": 3,
+    "log2_total_cost": 67.287,
+    "log2_total_vs_rho": 6.478,
+    "S": 6.904,
+    "log2_memory_bytes": 69.777,
+    "memory_exabytes": 1011.0
+  },
+  "best_if_table_rebuilt_per_attempt": {
+    "orbits": 21,
+    "support_size": 2751,
+    "relation_length": 13,
+    "mitm_split": "7+6",
+    "stored_table": "quotiented",
+    "log2_build_once": 67.637,
+    "log2_probes_per_attempt": 66.055,
+    "log2_probe_cost": 3.868,
+    "log2_decomposition_probability": -0.294,
+    "log2_target_attempts": 4.753,
+    "relations_needed": 22,
+    "log2_total_cost": 74.945,
+    "log2_total_vs_rho": 14.136,
+    "S": 1394.0,
+    "log2_memory_bytes": 70.637,
+    "memory_exabytes": 1835.0
+  },
+  "amortisation_saving_log2": 7.658,
+  "amortisation_saving_is_between_separate_optima": true,
+  "canonicalisation_group_ops": 13.6,
+  "reachable_four_torsion": 2,
+  "homogeneous_extension_past_m8": [
+    {
+      "m": 4,
+      "log2_support_size": 41.184,
+      "log2_total_cost": 108.485,
+      "log2_total_vs_rho": 47.676
+    },
+    {
+      "m": 6,
+      "log2_support_size": 25.292,
+      "log2_total_cost": 84.515,
+      "log2_total_vs_rho": 23.706
+    },
+    {
+      "m": 8,
+      "log2_support_size": 18.609,
+      "log2_total_cost": 74.395,
+      "log2_total_vs_rho": 13.586
+    },
+    {
+      "m": 10,
+      "log2_support_size": 14.973,
+      "log2_total_cost": 68.865,
+      "log2_total_vs_rho": 8.056
+    },
+    {
+      "m": 12,
+      "log2_support_size": 12.709,
+      "log2_total_cost": 65.406,
+      "log2_total_vs_rho": 4.597
+    },
+    {
+      "m": 14,
+      "log2_support_size": 11.178,
+      "log2_total_cost": 63.055,
+      "log2_total_vs_rho": 2.246
+    },
+    {
+      "m": 16,
+      "log2_support_size": 10.081,
+      "log2_total_cost": 61.364,
+      "log2_total_vs_rho": 0.555
+    },
+    {
+      "m": 18,
+      "log2_support_size": 9.263,
+      "log2_total_cost": 60.096,
+      "log2_total_vs_rho": -0.713
+    },
+    {
+      "m": 20,
+      "log2_support_size": 8.634,
+      "log2_total_cost": 59.115,
+      "log2_total_vs_rho": -1.694
+    },
+    {
+      "m": 22,
+      "log2_support_size": 8.138,
+      "log2_total_cost": 58.337,
+      "log2_total_vs_rho": -2.472
+    },
+    {
+      "m": 24,
+      "log2_support_size": 7.739,
+      "log2_total_cost": 57.709,
+      "log2_total_vs_rho": -3.1
+    },
+    {
+      "m": 26,
+      "log2_support_size": 7.414,
+      "log2_total_cost": 57.192,
+      "log2_total_vs_rho": -3.617
+    },
+    {
+      "m": 28,
+      "log2_support_size": 7.145,
+      "log2_total_cost": 56.763,
+      "log2_total_vs_rho": -4.046
+    }
+  ],
+  "homogeneous_first_sub_rho_m": 18,
+  "verdict": "Pricing a logarithm rather than a homogeneous relation, the best configuration is a 2-orbit support (B = 262) with 12-point relations, at 2^67.287 against the reference 2^60.809 -- short by 2^6.478, with memory charged at zero. The homogeneous accounting extended past m = 8 does cross below the reference, at m = 18, but it prices relations that carry no information about log_P(Q), which is the section 3 error in its strongest form. Amortising the stored table moves the optimum from 2^74.945 to 2^67.287; those are two separately optimised configurations, not one attack repriced."
+}

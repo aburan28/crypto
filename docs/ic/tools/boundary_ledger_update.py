@@ -18,7 +18,7 @@ run = json.load(open(run_path))
 ledger = json.load(open(ledger_path, encoding="utf-8"))
 L = run["ledger"]
 DATE = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--date=")), "2026-09-21")
-NOTE = "RESEARCH_IC_BOUNDARY_LEDGER.md"
+NOTE = "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md"
 
 def mean(xs):
     xs = [x for x in xs if x is not None and not (isinstance(x, float) and math.isnan(x))]
@@ -216,7 +216,7 @@ ledger["updated"] = DATE
 pri = ledger["agent_priorities"]
 if not any("RESEARCH_IC_BOUNDARY_LEDGER" in p.get("beat", "") for p in pri):
     pri.append(OrderedDict([
-        ("beat", "Iterate against RESEARCH_IC_BOUNDARY_LEDGER.md (ic boundary): in any regime, S/S_rho < 1 at r >= 2^20 with every phase counted, or a fitted total exponent below the reference's over >= 4 sizes, or yield/ceiling > 1.5 on a base outside every proper subgroup"),
+        ("beat", "Iterate against research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md (ic boundary): in any regime, S/S_rho < 1 at r >= 2^20 with every phase counted, or a fitted total exponent below the reference's over >= 4 sizes, or yield/ceiling > 1.5 on a base outside every proper subgroup"),
         ("rank", len(pri) + 1),
         ("regime", "all"),
         ("stage", "vs_rho"),

@@ -1,0 +1,41 @@
+{
+  "comparisons": [
+    {
+      "candidate": "aa_control",
+      "candidate_over_baseline": 1.00000162071278,
+      "ci95": [
+        0.99997994279707,
+        1.0000331215812959
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.9770729577532563,
+      "native_wall_ci95": [
+        0.9577262557773843,
+        1.0140917728042438
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9575617950884288,
+        "n17a1": 0.957890744712369,
+        "n19a0": 0.9613779718995153,
+        "n23a0": 1.0335488786339386
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 4,
+      "per_cell": {
+        "n13a0": 0.999978031264489,
+        "n17a1": 1.000050211248037,
+        "n19a0": 0.999981854333305,
+        "n23a0": 0.9999963876730535
+      },
+      "speedup": 0.9999983792898467
+    }
+  ],
+  "failures": [],
+  "passed": true,
+  "process_wall_seconds_including_profiling": 28.291362951999872,
+  "rho_over_incumbent": null,
+  "runs": 24,
+  "stage": "aa",
+  "verified_runs": 24
+}

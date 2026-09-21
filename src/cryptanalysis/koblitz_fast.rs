@@ -488,6 +488,153 @@ mod tests {
         points
     }
 
+    /// Degrees the [`FrobeniusCanon`] tests sweep.
+    ///
+    /// `koblitz_index_calculus` already checks the key on the degrees the
+    /// pipeline runs at — 13, 19, 23, 31, 53, 61 — and those are all
+    /// prime, so no element there ever lies in a proper subfield.  These
+    /// include composites, where an orbit is *shorter* than `n` and its
+    /// coordinate word is a repeating pattern that its own rotation
+    /// fixes.  That is the case a least-rotation key has to get right and
+    /// a sampled prime-degree test cannot reach.
+    const NB_DEGREES: [u32; 8] = [8, 12, 16, 20, 23, 31, 53, 61];
+
+    fn nb_field(n: u32) -> Gf2 {
+        Gf2::new(&crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse(n).unwrap())
+    }
+
+    #[test]
+    fn the_change_of_basis_is_a_bijection_and_turns_squaring_into_a_rotation() {
+        // The property everything else rests on, checked directly rather
+        // than through the key: `coords` is one-to-one, and squaring in
+        // the field is a one-bit rotation of the coordinate word.  If
+        // either half failed, the key would still be *constant* on orbits
+        // and would silently merge some of them.
+        for n in NB_DEGREES {
+            let f = nb_field(n);
+            let canon = FrobeniusCanon::new(&f, n)
+                .unwrap_or_else(|| panic!("degree {n}: no normal element"));
+            assert_eq!(canon.degree(), n);
+            let mask = (1u64 << n) - 1;
+            let rot1 = |c: u64| ((c << 1) | (c >> (n - 1))) & mask;
+
+            let mut rng = StdRng::seed_from_u64(0xA110_0000 + n as u64);
+            let mut seen: std::collections::HashMap<u64, u64> = Default::default();
+            for _ in 0..2000 {
+                let x = rng.gen::<u64>() & mask;
+                let c = canon.coords(x);
+                assert_eq!(
+                    *seen.entry(c).or_insert(x),
+                    x,
+                    "degree {n}: coords sent two elements to {c:#x}"
+                );
+                assert_eq!(
+                    canon.coords(f.sqr(x)),
+                    rot1(c),
+                    "degree {n}: coords(x²) is not a rotation of coords(x), x = {x:#x}"
+                );
+            }
+            assert_eq!(canon.coords(0), 0, "degree {n}: coords is not linear at 0");
+        }
+    }
+
+    #[test]
+    fn the_least_rotation_is_constant_on_a_frobenius_orbit() {
+        for n in NB_DEGREES {
+            let f = nb_field(n);
+            let canon = FrobeniusCanon::new(&f, n).unwrap();
+            let mask = (1u64 << n) - 1;
+            let mut rng = StdRng::seed_from_u64(0xB1A5_0000 + n as u64);
+            for _ in 0..300 {
+                let x = rng.gen::<u64>() & mask;
+                let want = canon.canon(x);
+                let mut v = x;
+                for k in 0..n {
+                    assert_eq!(
+                        canon.canon(v),
+                        want,
+                        "degree {n}: image {k} of {x:#x} keys apart"
+                    );
+                    v = f.sqr(v);
+                }
+                assert_eq!(v, x, "degree {n}: the orbit did not close");
+            }
+        }
+    }
+
+    #[test]
+    fn the_least_rotation_partitions_exactly_as_the_squaring_chain() {
+        // The two keys pick different representatives; the claim is
+        // that they cut the field into the *same* orbits.  These degrees
+        // are small enough to enumerate whole rather than sample, and
+        // composite, so the short orbits are all present.
+        for n in [8u32, 12, 16, 20] {
+            let f = nb_field(n);
+            let canon = FrobeniusCanon::new(&f, n).unwrap();
+            let mut poly_of: std::collections::HashMap<u64, u64> = Default::default();
+            let mut nb_of: std::collections::HashMap<u64, u64> = Default::default();
+            let mut mismatch = 0usize;
+            for x in 0..(1u64 << n) {
+                // The polynomial-basis key: least element of the orbit.
+                let mut v = x;
+                let mut best = x;
+                for _ in 1..n {
+                    v = f.sqr(v);
+                    best = best.min(v);
+                }
+                let (pk, nk) = (best, canon.canon(x));
+                let a = *poly_of.entry(pk).or_insert(nk);
+                let b = *nb_of.entry(nk).or_insert(pk);
+                if a != nk || b != pk {
+                    mismatch += 1;
+                }
+            }
+            assert_eq!(
+                mismatch, 0,
+                "degree {n}: the two keys disagree on {mismatch} elements"
+            );
+            assert_eq!(
+                poly_of.len(),
+                nb_of.len(),
+                "degree {n}: different orbit counts"
+            );
+        }
+    }
+
+    #[test]
+    fn every_degree_the_pipeline_reaches_has_a_normal_element() {
+        // `PairSumTable` keeps a squaring-chain fallback for the `None`
+        // this can in principle return, and that fallback names orbits
+        // *differently* from the rotation.  A build that quietly fell
+        // back and a probe that did not would agree on nothing, so the
+        // search failing is not a slow path, it is a wrong one — and the
+        // bound on it is a random search over 4096 candidates.  Sweeping
+        // every degree the pipeline can be given is what says the bound
+        // is enough in practice.
+        let mut checked = 0usize;
+        for n in 8u32..=FastCurve::MAX_DEGREE {
+            for a in [0u8, 1] {
+                let Some(kc) = KoblitzCurve::new(a, n) else {
+                    continue;
+                };
+                let fc = FastCurve::new(&kc.curve).unwrap();
+                assert!(
+                    FrobeniusCanon::new(&fc.field, fc.n).is_some(),
+                    "degree {n}, a = {a}: no normal element found"
+                );
+                checked += 1;
+            }
+        }
+        // Both curve shapes at every degree `KoblitzCurve` will build:
+        // fewer than `MAX_DEGREE - 8` of them, since not every degree
+        // gives a usable subgroup.  The bound is only here to say the
+        // loop is not vacuous — pinning the exact count would turn a
+        // change in which degrees `KoblitzCurve::new` accepts into a
+        // failure of the normal-element search, which is not what this
+        // test is about.
+        assert!(checked >= 10, "the sweep only reached {checked} curves");
+    }
+
     #[test]
     fn matches_the_general_arithmetic_on_random_points() {
         for (a, n) in [(0u8, 9u32), (1, 11), (1, 15), (1, 19), (0, 31)] {

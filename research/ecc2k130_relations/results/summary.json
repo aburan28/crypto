@@ -1,0 +1,80 @@
+{
+  "instance": "ECC2K-130",
+  "curve": "y^2 + xy = x^3 + 1 over F_2^131",
+  "subgroup_order_r": "680564733841876926932320129493409985129",
+  "log2_r": 129.0,
+  "rho_reference_log2_iterations": 60.9,
+  "python": "3.11.15",
+  "platform": "Linux-6.18.44-fc-v33-x86_64-with-glibc2.39",
+  "budget_seconds_per_experiment": 7200.0,
+  "experiments": [
+    {
+      "name": "weight_two_complete",
+      "base_size": 4262,
+      "pairs_total": 9084453,
+      "complete": true,
+      "elapsed_seconds": 444.238,
+      "relations_found": 0,
+      "relations_verified_on_curve": 0,
+      "log2_expected_by_yield_law": -95.41301786737304
+    },
+    {
+      "name": "weight_at_most_two",
+      "base_size": 4336,
+      "pairs_total": 9402616,
+      "complete": true,
+      "elapsed_seconds": 493.744,
+      "relations_found": 1,
+      "relations_verified_on_curve": 1,
+      "log2_expected_by_yield_law": -95.33851537665954
+    },
+    {
+      "name": "weight_two_frobenius_stable",
+      "base_size": 1090,
+      "pairs_total": 594595,
+      "complete": true,
+      "elapsed_seconds": 27.501,
+      "relations_found": 0,
+      "relations_verified_on_curve": 0,
+      "log2_expected_by_yield_law": -101.3146252417283
+    },
+    {
+      "name": "random_matched_1",
+      "base_size": 4262,
+      "pairs_total": 9084453,
+      "complete": true,
+      "elapsed_seconds": 495.06,
+      "relations_found": 0,
+      "relations_verified_on_curve": 0,
+      "log2_expected_by_yield_law": -95.41301786737304
+    },
+    {
+      "name": "random_matched_2",
+      "base_size": 4262,
+      "pairs_total": 9084453,
+      "complete": true,
+      "elapsed_seconds": 488.353,
+      "relations_found": 0,
+      "relations_verified_on_curve": 0,
+      "log2_expected_by_yield_law": -95.41301786737304
+    },
+    {
+      "name": "constructed_random_coeffs",
+      "base_size": 4000,
+      "pairs_total": 8002000,
+      "complete": true,
+      "elapsed_seconds": 444.9,
+      "relations_found": 0,
+      "relations_verified_on_curve": 0,
+      "log2_expected_by_yield_law": -95.6876096467349,
+      "rank_accounting": {
+        "rows": 0,
+        "construction_rows": 0,
+        "determining_rows": 0,
+        "useful_rank": 0,
+        "log": null,
+        "consistent": true
+      }
+    }
+  ]
+}

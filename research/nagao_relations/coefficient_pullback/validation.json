@@ -1,0 +1,15 @@
+{
+  "test_command": [
+    "/workspace/scratch/5ef6d6b590d6/novel-venv/bin/python",
+    "research/nagao_relations/coefficient_pullback/test_pullback.py",
+    "-v"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "test_modular_rows_and_dependent_relations (__main__.ExactAlgebraTests.test_modular_rows_and_dependent_relations) ... ok\ntest_restricted_linear_map (__main__.ExactAlgebraTests.test_restricted_linear_map) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.039s\n\nOK\n",
+  "test_source_sha256": "05f573aa136af1c131580f5fb5b23e31626c7e1d658458de07c7e78855b370aa",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "python": "3.12.14",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "note": "Host metadata recorded immediately after campaign; no concurrent benchmark processes were used. Source and dependency hashes are in the run manifests."
+}

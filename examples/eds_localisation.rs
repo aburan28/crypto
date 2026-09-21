@@ -1,5 +1,5 @@
 //! EDS-Residue **χ-localisation** sweep — the rank-1, fully-certifiable
-//! probe of §5.3 in `RESEARCH_EDS_RESIDUE.md`.
+//! probe of §5.3 in `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`.
 //!
 //! ```bash
 //! cargo run --release --example eds_localisation

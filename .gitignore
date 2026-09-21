@@ -28,6 +28,10 @@ gpu/ecc/vec_*.h
 gpu/ecc/test_secp_fast
 gpu/ecc/test_secp_mont
 gpu/ecc/test_toy_mont
+gpu/ecc/test_toyj0_mont
+gpu/ecc/test_bsgs_toy
+gpu/ecc/test_bsgs_secp_fast
+gpu/ecc/test_bsgs_secp_mont
 gpu/ecc/bench
 
 # GHDL analysis artifacts
@@ -64,3 +68,24 @@ gpu/ecc2k/test_pt_k41
 
 # Assembled GitHub Pages site (scripts/site/build.py output).
 /_site
+
+# FPGA host program for the ECC2K-130 engine (built from hdl/ecc2k130/host)
+hdl/ecc2k130/host/ecc2k130-fpga
+
+# F2 custom-logic build tree (hdl/ecc2k130/aws/cl_ecc2k130): symlinks that
+# build_afi.sh drops in from the HDK, and Vivado's outputs
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/aws_build_dcp_from_cl.py
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/build_all.tcl
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/build_level_1_cl.tcl
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/*.log
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/*.jou
+hdl/ecc2k130/aws/cl_ecc2k130/build/scripts/.Xil/
+hdl/ecc2k130/aws/cl_ecc2k130/build/checkpoints/
+hdl/ecc2k130/aws/cl_ecc2k130/build/reports/
+hdl/ecc2k130/aws/cl_ecc2k130/build/src_post_encryption/
+hdl/ecc2k130/aws/cl_ecc2k130/build/constraints/generated_cl_clocks_aws.xdc
+
+# Build artifacts from ecc2k130/aws/ingest_lambda.sh package (vendored wheels
+# plus a 5 MB zip; rebuilt on demand and never a source of truth).
+ecc2k130/aws/build/
+ecc2k130/aws/ingest_lambda.zip

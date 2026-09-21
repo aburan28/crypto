@@ -124,6 +124,7 @@ pub const MAX_VARS: usize = 64;
 /// product are `F_2`-bilinear in the coordinates of the operands, with
 /// these structure constants.
 #[derive(Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct FieldStructure {
     /// Extension degree.
     pub n: u32,
@@ -157,6 +158,7 @@ impl FieldStructure {
 /// An element of `F_{2^n}` whose coordinates are Boolean polynomials —
 /// i.e. a symbolic field element in the Weil restriction.
 #[derive(Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct SymElement {
     /// `coords[k]` multiplies `z^k`.  Length `n`.
     pub coords: Vec<F2BoolPoly>,
@@ -362,7 +364,7 @@ pub fn sym_semaev_s3(
 /// — which is the whole reason it is here.  Fixing `x₁` to a constant
 /// leaves a system in the `2ℓ` unknowns of `x₂` and `x₃` alone, and
 /// that is the object
-/// [`RESEARCH_SEMAEV_DECOMPOSITION.md`](../../RESEARCH_SEMAEV_DECOMPOSITION.md)
+/// [`research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md`](../../research/notes/index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md)
 /// names as the one route to a sub-`2^{2ℓ}` decomposition oracle.
 ///
 /// Any of `x₁, x₂, x₃` may be a [`SymElement::constant`]; the degree of
@@ -413,6 +415,7 @@ pub fn sym_semaev_s4(
 /// The Boolean system whose roots are the `m`-point decompositions of a
 /// target with abscissa `x_r` over the subspace spanned by `basis`.
 #[derive(Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct DecompositionSystem {
     /// The equations, `n` per `S₃` link.
     pub equations: Vec<F2BoolPoly>,
@@ -772,17 +775,34 @@ pub fn matrix_f4_f2_counted(
     if polys.is_empty() {
         return Some((Vec::new(), 0));
     }
-    let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
+    let t_build = std::time::Instant::now();
+    let built = build_macaulay(polys, n_vars, degree);
+    let build_ns = t_build.elapsed().as_nanos();
+    let (cols, mut matrix) = match built {
+        Some(b) => b,
+        None => {
+            f4_profile_add(|p| {
+                p.oversize += 1;
+                p.build_ns += build_ns;
+            });
+            return None;
+        }
+    };
     if matrix.is_empty() {
+        f4_profile_add(|p| {
+            p.calls += 1;
+            p.build_ns += build_ns;
+        });
         return Some((Vec::new(), 0));
     }
     let mut word_ops = 0u64;
+    let t_reduce = std::time::Instant::now();
     let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
+    let reduce_ns = t_reduce.elapsed().as_nanos();
     F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
 
     let n_vars_out = polys[0].n_vars;
-    let words = cols.len().div_ceil(64);
-    let _ = words;
+    let t_read = std::time::Instant::now();
     let mut out = Vec::with_capacity(rank);
     for row in matrix.iter().take(rank) {
         let monos: Vec<F2BoolMono> = (0..cols.len())
@@ -793,19 +813,133 @@ pub fn matrix_f4_f2_counted(
             out.push(F2BoolPoly::from_monos(monos, n_vars_out));
         }
     }
+    let readback_ns = t_read.elapsed().as_nanos();
+    f4_profile_add(|p| {
+        p.calls += 1;
+        p.build_ns += build_ns;
+        p.reduce_ns += reduce_ns;
+        p.readback_ns += readback_ns;
+        p.rows += matrix.len() as u64;
+        p.cols += cols.len() as u64;
+        p.word_ops += word_ops;
+    });
     Some((out, word_ops))
 }
 
-/// Build the Macaulay matrix: every product `p · m` with
-/// `deg(p·m) ≤ degree`, as bit-rows over the monomials that occur.
+// ── F4 stage profile ───────────────────────────────────────────────
+
+/// Where the time and the work inside the F4 stage actually go.
 ///
-/// Returns the column monomials (DegRevLex descending) and the rows.
-/// `None` if the matrix would exceed the size limits.
-fn build_macaulay(
+/// Counters are process-wide and cumulative since the last
+/// [`f4_profile_reset`], so a profile covers a parallel run (`ic run
+/// --batch N` decomposes on several threads) and not just the thread
+/// that asks for it.  A caller that wants a scoped measurement resets
+/// first and reads after, with no solving in between.
+///
+/// The stage is three phases — building the Macaulay matrix, reducing
+/// it, and reading the reduced rows back as polynomials — and only the
+/// middle one is counted by `word_ops`.  Optimising the stage without
+/// knowing the split between them is how a round spends itself on the
+/// phase that was never the cost, so the split is measured rather than
+/// assumed.  The cost is one relaxed atomic add per nonzero counter per
+/// F4 call, plus three `Instant::now()` pairs, all far below the call.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct F4Profile {
+    /// Calls to [`matrix_f4_f2_counted`] that built a matrix.
+    pub calls: u64,
+    /// Calls that returned `None` because the matrix exceeded the caps.
+    pub oversize: u64,
+    /// Nanoseconds in [`build_macaulay`].
+    pub build_ns: u128,
+    /// Nanoseconds in the row reduction.
+    pub reduce_ns: u128,
+    /// Nanoseconds turning reduced rows back into polynomials.
+    pub readback_ns: u128,
+    /// Rows summed over all calls.
+    pub rows: u64,
+    /// Columns summed over all calls.
+    pub cols: u64,
+    /// 64-bit word XORs performed by the reductions.
+    pub word_ops: u64,
+}
+
+mod f4_counters {
+    use std::sync::atomic::AtomicU64;
+    pub(super) static CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static OVERSIZE: AtomicU64 = AtomicU64::new(0);
+    pub(super) static BUILD_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static REDUCE_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static READBACK_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROWS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static COLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static WORD_OPS: AtomicU64 = AtomicU64::new(0);
+
+    pub(super) fn all() -> [&'static AtomicU64; 8] {
+        [
+            &CALLS, &OVERSIZE, &BUILD_NS, &REDUCE_NS, &READBACK_NS, &ROWS, &COLS, &WORD_OPS,
+        ]
+    }
+}
+
+/// The F4 stage profile since the last [`f4_profile_reset`].
+pub fn f4_profile() -> F4Profile {
+    use std::sync::atomic::Ordering::Relaxed;
+    F4Profile {
+        calls: f4_counters::CALLS.load(Relaxed),
+        oversize: f4_counters::OVERSIZE.load(Relaxed),
+        build_ns: f4_counters::BUILD_NS.load(Relaxed) as u128,
+        reduce_ns: f4_counters::REDUCE_NS.load(Relaxed) as u128,
+        readback_ns: f4_counters::READBACK_NS.load(Relaxed) as u128,
+        rows: f4_counters::ROWS.load(Relaxed),
+        cols: f4_counters::COLS.load(Relaxed),
+        word_ops: f4_counters::WORD_OPS.load(Relaxed),
+    }
+}
+
+/// Clear the F4 stage profile.  Not synchronised against concurrent
+/// solving: reset before the work, read after it.
+pub fn f4_profile_reset() {
+    for counter in f4_counters::all() {
+        counter.store(0, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+fn f4_profile_add(f: impl FnOnce(&mut F4Profile)) {
+    use std::sync::atomic::Ordering::Relaxed;
+    let mut delta = F4Profile::default();
+    f(&mut delta);
+    let pairs: [(&std::sync::atomic::AtomicU64, u64); 8] = [
+        (&f4_counters::CALLS, delta.calls),
+        (&f4_counters::OVERSIZE, delta.oversize),
+        (&f4_counters::BUILD_NS, delta.build_ns as u64),
+        (&f4_counters::REDUCE_NS, delta.reduce_ns as u64),
+        (&f4_counters::READBACK_NS, delta.readback_ns as u64),
+        (&f4_counters::ROWS, delta.rows),
+        (&f4_counters::COLS, delta.cols),
+        (&f4_counters::WORD_OPS, delta.word_ops),
+    ];
+    for (counter, delta) in pairs {
+        if delta != 0 {
+            counter.fetch_add(delta, Relaxed);
+        }
+    }
+}
+
+/// The Macaulay rows of `polys` at `degree`, as monomial masks: every
+/// product `p · m` with `deg(p·m) ≤ degree`, each row the set of
+/// monomials occurring in it.  Columns are not assigned here — see
+/// [`macaulay_columns`].  `None` if the row count would exceed the size
+/// limits.
+///
+/// Shared by the dense [`build_macaulay`] and the sparse
+/// [`build_macaulay_sparse`] so the two cannot drift: any difference
+/// between the dense and sparse solving-degree paths would otherwise be
+/// indistinguishable from a difference in the matrix they were handed.
+pub(crate) fn macaulay_rows_monos(
     polys: &[F2BoolPoly],
     n_vars: usize,
     degree: u32,
-) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+) -> Option<Vec<Vec<u64>>> {
     let mut rows_monos: Vec<Vec<u64>> = Vec::new();
     for p in polys {
         let pdeg = p
@@ -843,10 +977,18 @@ fn build_macaulay(
             }
         }
     }
-    if rows_monos.is_empty() {
-        return Some((Vec::new(), Vec::new()));
-    }
+    Some(rows_monos)
+}
 
+/// Column masks of the Macaulay matrix at `degree`, in descending
+/// monomial order.
+///
+/// Because [`cmp_mono`] orders by total degree first, descending order
+/// puts the **highest-degree monomials in the leading columns** and the
+/// constant monomial last.  Both elimination paths depend on that: it is
+/// what makes "leading column index ≥ the degree-≤1 boundary" equivalent
+/// to "this row is a linear consequence".
+pub(crate) fn macaulay_columns(rows_monos: &[Vec<u64>]) -> Option<Vec<u64>> {
     let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
     cols.sort_unstable();
     cols.dedup();
@@ -854,6 +996,59 @@ fn build_macaulay(
         return None;
     }
     cols.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
+    Some(cols)
+}
+
+/// Sparse Macaulay matrix: column masks, plus one ascending list of
+/// column indices per row.
+///
+/// A row is one polynomial times one monomial, so it carries exactly as
+/// many nonzeros as that polynomial has terms — a handful, against tens
+/// of thousands of columns.  The dense form spends a kilobyte per row
+/// representing twenty bits.
+pub(crate) fn build_macaulay_sparse(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<u64>, Vec<Vec<u32>>)> {
+    let rows_monos = macaulay_rows_monos(polys, n_vars, degree)?;
+    if rows_monos.is_empty() {
+        return Some((Vec::new(), Vec::new()));
+    }
+    let cols = macaulay_columns(&rows_monos)?;
+    let index: std::collections::HashMap<u64, u32> = cols
+        .iter()
+        .enumerate()
+        .map(|(i, m)| (*m, i as u32))
+        .collect();
+    let rows: Vec<Vec<u32>> = rows_monos
+        .iter()
+        .map(|monos| {
+            let mut r: Vec<u32> = monos.iter().map(|m| index[m]).collect();
+            r.sort_unstable();
+            r
+        })
+        .collect();
+    Some((cols, rows))
+}
+
+/// Build the dense Macaulay matrix: every product `p · m` with
+/// `deg(p·m) ≤ degree`, as bit-rows over the monomials that occur.
+///
+/// Returns the column monomials (DegRevLex descending) and the rows.
+/// `None` if the matrix would exceed the size limits.  For the sparse
+/// form of the same matrix see [`build_macaulay_sparse`].
+pub(crate) fn build_macaulay(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    let rows_monos = macaulay_rows_monos(polys, n_vars, degree)?;
+    if rows_monos.is_empty() {
+        return Some((Vec::new(), Vec::new()));
+    }
+
+    let cols: Vec<u64> = macaulay_columns(&rows_monos)?;
     let index: std::collections::HashMap<u64, usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
 
@@ -886,7 +1081,7 @@ pub fn f4_word_ops_total() -> u64 {
     F4_WORD_OPS_TOTAL.load(std::sync::atomic::Ordering::Relaxed)
 }
 
-fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+pub(crate) fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
     let mut count = 0u64;
     let rank = rref_f2_counted(matrix, n_cols, &mut count);
     F4_WORD_OPS_TOTAL.fetch_add(count, std::sync::atomic::Ordering::Relaxed);
@@ -906,12 +1101,18 @@ fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -
             None => continue,
         };
         matrix.swap(pivot_row, piv);
-        for r in 0..matrix.len() {
-            if r != pivot_row && matrix[r][w] & bit != 0 {
-                for k in 0..words {
-                    matrix[r][k] ^= matrix[pivot_row][k];
+        // Earlier columns of this pivot row are zero: previous pivots
+        // eliminated them, and skipped columns were zero in all remaining
+        // rows. Whole words before w therefore need no XOR. Separating the
+        // pivot borrow also lets LLVM vectorize the contiguous suffix.
+        let (before, rest) = matrix.split_at_mut(pivot_row);
+        let (pivot, after) = rest.split_first_mut().unwrap();
+        for row in before.iter_mut().chain(after.iter_mut()) {
+            if row[w] & bit != 0 {
+                for (dst, &src) in row[w..words].iter_mut().zip(&pivot[w..words]) {
+                    *dst ^= src;
                 }
-                *word_ops += words as u64;
+                *word_ops += (words - w) as u64;
             }
         }
         pivot_row += 1;
@@ -921,6 +1122,10 @@ fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -
     }
     pivot_row
 }
+
+#[cfg(test)]
+#[path = "f4_rref_tests.rs"]
+mod rref_tests;
 
 // ── Macaulay profile / first fall degree ───────────────────────────
 
@@ -966,6 +1171,66 @@ pub fn macaulay_profile(
     })
 }
 
+/// [`macaulay_profile`] via structured sparse elimination.
+///
+/// Same rank, different representation.  This matters more than the
+/// solving-degree path does: the first fall degree is swept to `d_max`
+/// whatever the system does, so it pays for the *highest* degree
+/// requested rather than stopping at the one that resolves.  On the
+/// `n = 5, m = 3` cell at `d_max = 7` that is 32 140 × 41 226 against
+/// the 8 340 × 21 778 the solving degree stops at — about fourteen times
+/// the dense work, and enough to dominate a sweep whose other half has
+/// already been made fast.
+pub fn macaulay_profile_sparse(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<MacaulayProfile> {
+    use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+    let (cols, rows) = build_macaulay_sparse(polys, n_vars, degree)?;
+    let n_cols = cols.len();
+    let n_rows = rows.len();
+    if n_cols == 0 {
+        return Some(MacaulayProfile {
+            degree,
+            rows: 0,
+            cols: 0,
+            rank: 0,
+        });
+    }
+
+    let low_start = low_column_start(&cols);
+    let elim = eliminate_high_columns(rows, n_cols, low_start);
+
+    let low_width = n_cols - low_start;
+    let words = low_width.div_ceil(64).max(1);
+    let mut low: Vec<Vec<u64>> = elim
+        .linear_rows
+        .iter()
+        .map(|r| {
+            let mut row = vec![0u64; words];
+            for &c in r {
+                let k = c as usize - low_start;
+                row[k / 64] |= 1 << (k % 64);
+            }
+            row
+        })
+        .collect();
+    let low_rank = if low.is_empty() {
+        0
+    } else {
+        rref_f2(&mut low, low_width)
+    };
+
+    Some(MacaulayProfile {
+        degree,
+        rows: n_rows,
+        cols: n_cols,
+        rank: elim.high_rank + low_rank,
+    })
+}
+
 /// **First fall degree** of `polys`: the smallest `D ≥ 2` whose Macaulay
 /// matrix has `rank < rows` *and* `rank < cols` — a non-trivial syzygy
 /// appears and the system has not saturated.
@@ -988,7 +1253,7 @@ pub fn first_fall_degree(
     let mut fall = None;
     let mut profiles = Vec::new();
     for d in 2..=d_max {
-        let prof = match macaulay_profile(polys, n_vars, d) {
+        let prof = match macaulay_profile_sparse(polys, n_vars, d) {
             Some(p) => p,
             None => break,
         };
@@ -998,6 +1263,285 @@ pub fn first_fall_degree(
         profiles.push(prof);
     }
     (fall, profiles)
+}
+
+// ── Solving degree ─────────────────────────────────────────────────
+
+/// What the reduced Macaulay rows at one degree actually *determine*.
+///
+/// [`MacaulayProfile`] records rank; this records whether that rank is
+/// enough to finish.  The distinction is the whole point: the first
+/// fall degree is where the rank first drops below generic, and the
+/// solving degree is where linear algebra alone pins every unknown.
+/// Complexity claims for Semaev systems are stated in terms of the
+/// first and assume it tracks the second, which is precisely the
+/// assumption Kosters–Yeo (arXiv:1503.08001) show can fail.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SolvingProfile {
+    /// Degree the matrix was built at.
+    pub degree: u32,
+    /// Rows constructed.
+    pub rows: usize,
+    /// Distinct monomials occurring, i.e. columns.
+    pub cols: usize,
+    /// Rank over `F_2`.
+    pub rank: usize,
+    /// Variables pinned outright by a reduced row of the form `v` or
+    /// `v + 1`.
+    pub vars_determined: usize,
+    /// Variables actually occurring in the input system.  A variable
+    /// that never occurs is free and can never be pinned, so it is
+    /// excluded from the target rather than counted as a failure.
+    pub vars_occurring: usize,
+    /// A reduced row is the constant `1`: the system is refuted at this
+    /// degree, which resolves it just as decisively as pinning every
+    /// variable.
+    pub refuted: bool,
+}
+
+impl SolvingProfile {
+    /// Whether degree-`degree` linear algebra resolves the system with
+    /// no splitting: either a refutation, or every occurring variable
+    /// pinned.
+    pub fn resolves(&self) -> bool {
+        self.refuted || (self.vars_occurring > 0 && self.vars_determined == self.vars_occurring)
+    }
+}
+
+/// Variables occurring in `polys`, as a bitmask.
+fn occurring_vars(polys: &[F2BoolPoly]) -> u64 {
+    polys
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .fold(0u64, |acc, t| acc | t.mask)
+}
+
+/// Total degree of a boolean system.
+pub fn system_degree(polys: &[F2BoolPoly]) -> u32 {
+    polys
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .map(|t| t.mask.count_ones())
+        .max()
+        .unwrap_or(0)
+}
+
+/// Build the Macaulay matrix of `polys` at `degree`, reduce it, and
+/// report what the reduced rows determine.
+///
+/// `None` means the matrix exceeded the size caps (exactly as for
+/// [`macaulay_profile`]), **or** that `degree` is below the system's own
+/// total degree.
+///
+/// That second guard is not a convenience.  [`build_macaulay`] skips
+/// input polynomials whose degree exceeds the degree requested, so at
+/// `degree < system_degree(polys)` the rows describe a strict
+/// *subsystem* — the cubic equations of a chained `m ≥ 3` system simply
+/// vanish.  Pinning every variable of a subsystem says nothing about
+/// the system, and the brute-force gate in this module's tests catches
+/// it as "every variable pinned but 2 solutions exist".  It is the same
+/// trap `macaulay_rows_may_be_added_but_never_substituted` pins for the
+/// solver: implied rows may be added, never substituted.
+///
+/// A refutation below the system degree would in fact be sound — fewer
+/// equations admit more solutions, so an infeasible subsystem forces an
+/// infeasible system — but reporting one would make the returned degree
+/// mean two different things, so the guard applies to both.
+pub fn solving_profile(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<SolvingProfile> {
+    if degree < system_degree(polys) {
+        return None;
+    }
+    let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
+    let rows = matrix.len();
+    let n_cols = cols.len();
+    let rank = if matrix.is_empty() {
+        0
+    } else {
+        rref_f2(&mut matrix, n_cols)
+    };
+
+    let occurring = occurring_vars(polys);
+    let mut determined = 0u64;
+    let mut refuted = false;
+
+    // `rref_f2` moves the pivot rows to the front, so only the first
+    // `rank` rows carry information.
+    for row in matrix.iter().take(rank) {
+        let mut support: Vec<u64> = Vec::new();
+        for (c, mono) in cols.iter().enumerate().take(n_cols) {
+            if row[c / 64] >> (c % 64) & 1 == 1 {
+                support.push(*mono);
+            }
+            if support.len() > 2 {
+                break;
+            }
+        }
+        match support.len() {
+            // The constant `1` alone: `1 = 0`, a refutation.
+            1 if support[0] == 0 => refuted = true,
+            // A bare variable `v = 0`.
+            1 if support[0].count_ones() == 1 => determined |= support[0],
+            // `v + 1 = 0`, i.e. `v = 1`.
+            2 if support.contains(&0) => {
+                let v = support[0] | support[1];
+                if v.count_ones() == 1 {
+                    determined |= v;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    Some(SolvingProfile {
+        degree,
+        rows,
+        cols: n_cols,
+        rank,
+        vars_determined: (determined & occurring).count_ones() as usize,
+        vars_occurring: occurring.count_ones() as usize,
+        refuted,
+    })
+}
+
+/// [`solving_profile`] via structured sparse elimination.
+///
+/// Identical semantics, different representation: the high-degree
+/// columns are eliminated sparsely and only the resulting linear block —
+/// at most `n_vars + 1` columns wide — is reduced densely.  See
+/// [`crate::cryptanalysis::sparse_macaulay`] for why that is equivalent
+/// and why a Krylov method is the wrong tool for this particular
+/// question.
+///
+/// `solving_profile_agrees_with_sparse` holds the two paths to the same
+/// answers, so this is an optimisation rather than a second opinion.
+pub fn solving_profile_sparse(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<SolvingProfile> {
+    use crate::cryptanalysis::sparse_macaulay::{eliminate_high_columns, low_column_start};
+
+    if degree < system_degree(polys) {
+        return None;
+    }
+    let (cols, rows) = build_macaulay_sparse(polys, n_vars, degree)?;
+    let n_cols = cols.len();
+    let n_rows = rows.len();
+    if n_cols == 0 {
+        return Some(SolvingProfile {
+            degree,
+            rows: 0,
+            cols: 0,
+            rank: 0,
+            vars_determined: 0,
+            vars_occurring: occurring_vars(polys).count_ones() as usize,
+            refuted: false,
+        });
+    }
+
+    let low_start = low_column_start(&cols);
+    let elim = eliminate_high_columns(rows, n_cols, low_start);
+
+    // The surviving linear consequences span `cols[low_start..]` only.
+    // Echelon form is not enough to read off a pinned variable — `{v+w,
+    // w}` must reduce to `{v, w}` first — so reduce this block densely.
+    // It is at most `n_vars + 1` columns wide.
+    let low_width = n_cols - low_start;
+    let words = low_width.div_ceil(64).max(1);
+    let mut low: Vec<Vec<u64>> = elim
+        .linear_rows
+        .iter()
+        .map(|r| {
+            let mut row = vec![0u64; words];
+            for &c in r {
+                let k = c as usize - low_start;
+                row[k / 64] |= 1 << (k % 64);
+            }
+            row
+        })
+        .collect();
+    let low_rank = if low.is_empty() {
+        0
+    } else {
+        rref_f2(&mut low, low_width)
+    };
+
+    let occurring = occurring_vars(polys);
+    let mut determined = 0u64;
+    let mut refuted = false;
+    for row in low.iter().take(low_rank) {
+        let mut support: Vec<u64> = Vec::new();
+        for k in 0..low_width {
+            if row[k / 64] >> (k % 64) & 1 == 1 {
+                support.push(cols[low_start + k]);
+            }
+            if support.len() > 2 {
+                break;
+            }
+        }
+        match support.len() {
+            1 if support[0] == 0 => refuted = true,
+            1 if support[0].count_ones() == 1 => determined |= support[0],
+            2 if support.contains(&0) => {
+                let v = support[0] | support[1];
+                if v.count_ones() == 1 {
+                    determined |= v;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    Some(SolvingProfile {
+        degree,
+        rows: n_rows,
+        cols: n_cols,
+        rank: elim.high_rank + low_rank,
+        vars_determined: (determined & occurring).count_ones() as usize,
+        vars_occurring: occurring.count_ones() as usize,
+        refuted,
+    })
+}
+
+/// **Solving degree** of `polys`: the smallest `D ≥ 1` at which the
+/// reduced Macaulay matrix resolves the system outright — a refutation,
+/// or every occurring variable pinned by a linear row.
+///
+/// This is the degree that governs cost: the Macaulay matrix at `D` has
+/// `Θ(binom(n_vars, D))` columns, so an attack's exponent is set by the
+/// solving degree, not by the first fall degree.  Compare against
+/// [`first_fall_degree`] on the same system — the gap between them is
+/// the quantity the first-fall-degree assumption asserts is small.
+///
+/// Returns the solving degree (if reached at or below `d_max`) and the
+/// per-degree profiles.
+pub fn solving_degree(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    d_max: u32,
+) -> (Option<u32>, Vec<SolvingProfile>) {
+    let mut solved = None;
+    let mut profiles = Vec::new();
+    // Below the system's own degree the Macaulay matrix drops equations
+    // rather than relaxing them; see [`solving_profile`].
+    for d in system_degree(polys).max(1)..=d_max {
+        let prof = match solving_profile_sparse(polys, n_vars, d) {
+            Some(p) => p,
+            None => break,
+        };
+        if solved.is_none() && prof.resolves() {
+            solved = Some(d);
+        }
+        profiles.push(prof);
+        if solved.is_some() {
+            break;
+        }
+    }
+    (solved, profiles)
 }
 
 // ── Gröbner solve with splitting ───────────────────────────────────
@@ -1204,6 +1748,33 @@ fn reduce_system(
     n_vars: usize,
     engine: SolverEngine,
     stats: &mut SolveStats,
+) -> Option<Vec<F2BoolPoly>> {
+    use crate::cryptanalysis::algebra_cache::{self, Layer};
+    if !algebra_cache::enabled(Layer::ExactReduction) {
+        return reduce_system_uncached(system, n_vars, engine, stats);
+    }
+    let key = serde_json::to_vec(&(n_vars, format!("{engine:?}"), system)).unwrap();
+    let mut miss_oversize = 0;
+    let value: Option<(Vec<F2BoolPoly>, u32, usize)> = algebra_cache::memoize(
+        Layer::ExactReduction, &key, || {
+            let mut measured = SolveStats::default();
+            let rows = reduce_system_uncached(system, n_vars, engine, &mut measured);
+            // Preserve the metadata even when no reduction could be computed.
+            stats.max_degree_built = stats.max_degree_built.max(measured.max_degree_built);
+            miss_oversize = measured.oversize;
+            rows.map(|r| (r, measured.max_degree_built, measured.oversize))
+        });
+    stats.reductions += 1;
+    if value.is_none() { stats.oversize += miss_oversize; }
+    value.map(|(rows, degree, oversize)| {
+        stats.oversize += oversize;
+        stats.max_degree_built = stats.max_degree_built.max(degree);
+        rows
+    })
+}
+
+fn reduce_system_uncached(
+    system: &[F2BoolPoly], n_vars: usize, engine: SolverEngine, stats: &mut SolveStats,
 ) -> Option<Vec<F2BoolPoly>> {
     stats.reductions += 1;
     match engine {
@@ -1878,5 +2449,296 @@ mod tests {
                 );
             }
         }
+    }
+
+    // ── Solving degree ─────────────────────────────────────────────
+
+    /// Evaluate a boolean polynomial at the assignment packed in `a`.
+    use rand::{rngs::StdRng, Rng, SeedableRng};
+
+    fn eval_f2(p: &F2BoolPoly, a: u64) -> bool {
+        p.terms.iter().fold(false, |acc, t| acc ^ (t.mask & a == t.mask))
+    }
+
+    /// Brute-force solution count over the cube — deliberately
+    /// independent of every Macaulay code path.
+    fn brute_force_solutions(polys: &[F2BoolPoly], n_vars: usize) -> usize {
+        (0u64..1 << n_vars)
+            .filter(|&a| polys.iter().all(|p| !eval_f2(p, a)))
+            .count()
+    }
+
+    #[test]
+    fn solving_degree_pins_a_linear_system() {
+        let n = 3;
+        let polys = vec![
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::one()], n),
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(1)], n),
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(2), F2BoolMono::one()], n),
+        ];
+        let (d, profs) = solving_degree(&polys, n, 4);
+        assert_eq!(d, Some(1), "a linear system resolves at degree 1");
+        let last = profs.last().unwrap();
+        assert_eq!(last.vars_determined, 3);
+        assert!(!last.refuted);
+    }
+
+    #[test]
+    fn solving_degree_detects_refutation() {
+        let n = 2;
+        let polys = vec![
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(0)], n),
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::one()], n),
+        ];
+        let (d, profs) = solving_degree(&polys, n, 3);
+        assert_eq!(d, Some(1));
+        assert!(profs.last().unwrap().refuted, "x0 = 0 and x0 = 1 is 1 = 0");
+        assert_eq!(brute_force_solutions(&polys, n), 0);
+    }
+
+    /// The soundness gate: whatever `solving_degree` claims has to
+    /// agree with an exhaustive count over the cube.
+    ///
+    /// Two directions, both checkable without trusting the Macaulay
+    /// path: a reported refutation means zero solutions; a reported
+    /// resolution-by-pinning means at most one; and a system with two
+    /// or more solutions must never be reported as resolved at any
+    /// degree.
+    #[test]
+    fn solving_degree_agrees_with_brute_force() {
+        let mut rng = StdRng::seed_from_u64(0xD_E6_5EED);
+        let n_vars = 8usize;
+        let mut resolved = 0usize;
+        let mut multi = 0usize;
+        for _ in 0..200 {
+            let n_eqs = 2 + (rng.gen::<usize>() % 8);
+            let polys: Vec<F2BoolPoly> = (0..n_eqs)
+                .map(|_| {
+                    let n_terms = 1 + rng.gen::<usize>() % 4;
+                    let monos: Vec<F2BoolMono> = (0..n_terms)
+                        .map(|_| {
+                            // degree ≤ 3 monomial over `n_vars`
+                            let mut mask = 0u64;
+                            for _ in 0..(rng.gen::<u32>() % 4) {
+                                mask |= 1u64 << (rng.gen::<u32>() % n_vars as u32);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .collect();
+
+            let truth = brute_force_solutions(&polys, n_vars);
+            // A variable that never occurs is free, so it doubles the
+            // cube count without making the system any less resolved.
+            let free = n_vars - occurring_vars(&polys).count_ones() as usize;
+            let unique = 1usize << free;
+            let deg = system_degree(&polys);
+            let (d, profs) = solving_degree(&polys, n_vars, n_vars as u32);
+            assert!(
+                profs.iter().all(|p| p.degree >= deg),
+                "no profile may be built below the system degree"
+            );
+
+            match d {
+                Some(_) => {
+                    resolved += 1;
+                    let p = profs.last().unwrap();
+                    if p.refuted {
+                        assert_eq!(truth, 0, "refutation claimed but {truth} solutions exist");
+                    } else {
+                        assert!(
+                            truth <= unique,
+                            "every occurring variable pinned, so at most \
+                             {unique} solutions may exist, but {truth} do"
+                        );
+                    }
+                }
+                None => {
+                    multi += 1;
+                }
+            }
+            if truth > unique {
+                assert!(
+                    d.is_none(),
+                    "{truth} solutions over {free} free variables must not \
+                     be reported as resolved"
+                );
+            }
+        }
+        assert!(resolved > 0, "the sample must contain resolved systems");
+        assert!(multi > 0, "and unresolved ones, or it proves nothing");
+    }
+
+    /// A variable that never occurs is free, not unsolvable: it must be
+    /// excluded from the pinning target rather than blocking it.
+    #[test]
+    fn solving_degree_ignores_variables_that_never_occur() {
+        let n = 5;
+        let polys = vec![
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(0), F2BoolMono::one()], n),
+            F2BoolPoly::from_monos(vec![F2BoolMono::var(1)], n),
+        ];
+        let (d, profs) = solving_degree(&polys, n, 3);
+        assert_eq!(d, Some(1));
+        let p = profs.last().unwrap();
+        assert_eq!(p.vars_occurring, 2, "only x0 and x1 appear");
+        assert_eq!(p.vars_determined, 2);
+    }
+
+
+    /// The sparse path must answer **exactly** what the dense path
+    /// answers.
+    ///
+    /// This is the entire safety argument for
+    /// [`solving_profile_sparse`]: it is an optimisation, not a second
+    /// opinion, so any disagreement is a bug rather than a data point.
+    /// Rank, refutation, pinned-variable count and the resolve verdict
+    /// are all compared, over systems drawn to span every interesting
+    /// case — refuted, uniquely solved, and underdetermined.
+    #[test]
+    fn solving_profile_agrees_with_sparse() {
+        let mut rng = StdRng::seed_from_u64(0x5A11_0C17);
+        let n_vars = 9usize;
+        let mut compared = 0usize;
+        let mut refutations = 0usize;
+        let mut pinnings = 0usize;
+
+        for _ in 0..150 {
+            let n_eqs = 2 + rng.gen::<usize>() % 10;
+            let polys: Vec<F2BoolPoly> = (0..n_eqs)
+                .map(|_| {
+                    let n_terms = 1 + rng.gen::<usize>() % 4;
+                    let monos: Vec<F2BoolMono> = (0..n_terms)
+                        .map(|_| {
+                            let mut mask = 0u64;
+                            for _ in 0..(rng.gen::<u32>() % 4) {
+                                mask |= 1u64 << (rng.gen::<u32>() % n_vars as u32);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .collect();
+
+            for d in system_degree(&polys).max(1)..=5 {
+                let dense = solving_profile(&polys, n_vars, d);
+                let sparse = solving_profile_sparse(&polys, n_vars, d);
+                match (dense, sparse) {
+                    (Some(a), Some(b)) => {
+                        assert_eq!(a.rank, b.rank, "rank at degree {d}");
+                        assert_eq!(a.refuted, b.refuted, "refutation at degree {d}");
+                        assert_eq!(
+                            a.vars_determined, b.vars_determined,
+                            "pinned variables at degree {d}"
+                        );
+                        assert_eq!(a.vars_occurring, b.vars_occurring);
+                        assert_eq!(a.resolves(), b.resolves(), "verdict at degree {d}");
+                        compared += 1;
+                        refutations += usize::from(a.refuted);
+                        pinnings += usize::from(!a.refuted && a.vars_determined > 0);
+                    }
+                    (None, None) => {}
+                    (a, b) => panic!("paths disagree on availability at degree {d}: {a:?} / {b:?}"),
+                }
+            }
+        }
+
+        assert!(compared > 100, "the comparison must actually run");
+        assert!(refutations > 0, "and must cover refuted systems");
+        assert!(pinnings > 0, "and systems that pin variables");
+    }
+
+    /// `xor_sorted` is addition over `F_2`: shared indices cancel.
+    #[test]
+    fn sparse_row_addition_cancels_shared_indices() {
+        use crate::cryptanalysis::sparse_macaulay::xor_sorted;
+        assert_eq!(xor_sorted(&[1, 3, 5], &[3, 4]), vec![1, 4, 5]);
+        assert_eq!(xor_sorted(&[2, 7], &[2, 7]), Vec::<u32>::new());
+        assert_eq!(xor_sorted(&[], &[9]), vec![9]);
+    }
+
+    /// The boundary the elimination targets really does separate the
+    /// degree-≤1 monomials into a suffix.  If monomial order ever stops
+    /// being degree-first, the sparse path's central equivalence —
+    /// leading index past the boundary implies a linear consequence —
+    /// silently breaks, and it would break in the direction of reporting
+    /// spurious resolutions.
+    #[test]
+    fn low_columns_are_a_suffix_in_monomial_order() {
+        use crate::cryptanalysis::sparse_macaulay::low_column_start;
+        let n = 6;
+        let polys = vec![
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b000111),
+                    F2BoolMono::var(2),
+                    F2BoolMono::one(),
+                ],
+                n,
+            ),
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b011000), F2BoolMono::var(0)],
+                n,
+            ),
+        ];
+        let (cols, _) = build_macaulay_sparse(&polys, n, 4).unwrap();
+        let start = low_column_start(&cols);
+        for (i, m) in cols.iter().enumerate() {
+            if i < start {
+                assert!(m.count_ones() >= 2, "column {i} before the boundary is low");
+            } else {
+                assert!(m.count_ones() <= 1, "column {i} after the boundary is high");
+            }
+        }
+    }
+
+
+    /// The sparse rank must equal the dense rank, degree by degree.
+    ///
+    /// `first_fall_degree` is decided by comparing rank against rows and
+    /// cols, so a rank that is off by one moves the reported fall degree
+    /// and silently changes a headline number.
+    #[test]
+    fn macaulay_profile_agrees_with_sparse() {
+        let mut rng = StdRng::seed_from_u64(0xFA11_5EED);
+        let n_vars = 9usize;
+        let mut compared = 0usize;
+        for _ in 0..120 {
+            let n_eqs = 2 + rng.gen::<usize>() % 8;
+            let polys: Vec<F2BoolPoly> = (0..n_eqs)
+                .map(|_| {
+                    let n_terms = 1 + rng.gen::<usize>() % 4;
+                    let monos: Vec<F2BoolMono> = (0..n_terms)
+                        .map(|_| {
+                            let mut mask = 0u64;
+                            for _ in 0..(rng.gen::<u32>() % 4) {
+                                mask |= 1u64 << (rng.gen::<u32>() % n_vars as u32);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .collect();
+            for d in 2..=5u32 {
+                match (
+                    macaulay_profile(&polys, n_vars, d),
+                    macaulay_profile_sparse(&polys, n_vars, d),
+                ) {
+                    (Some(a), Some(b)) => {
+                        assert_eq!(a.rows, b.rows, "rows at degree {d}");
+                        assert_eq!(a.cols, b.cols, "cols at degree {d}");
+                        assert_eq!(a.rank, b.rank, "rank at degree {d}");
+                        compared += 1;
+                    }
+                    (None, None) => {}
+                    (a, b) => panic!("availability differs at degree {d}: {a:?} / {b:?}"),
+                }
+            }
+        }
+        assert!(compared > 100, "the comparison must actually run");
     }
 }

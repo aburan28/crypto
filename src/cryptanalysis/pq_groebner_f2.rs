@@ -70,6 +70,7 @@ use std::collections::HashSet;
 /// A monomial in `F_2[v_0, …, v_{n-1}] / (v_i² − v_i)` represented as a
 /// bitmask: bit `k` is set iff `v_k` divides the monomial.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct F2BoolMono {
     pub mask: u64,
 }
@@ -169,6 +170,7 @@ pub fn cmp_mono(a: F2BoolMono, b: F2BoolMono) -> Ordering {
 /// Stored as a `Vec<F2BoolMono>` sorted DESCENDING by [`cmp_mono`] with
 /// no duplicates.  `terms[0]` (if present) is the leading monomial.
 #[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct F2BoolPoly {
     pub terms: Vec<F2BoolMono>,
     pub n_vars: usize,

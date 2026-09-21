@@ -1,0 +1,31 @@
+[
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "The round-0007 winner plus the per-target descent certificate the merged checker now requires: every solution reports the relation [a]G + [b]Q = sum of base points its scalar was derived from.",
+    "id": "incumbent",
+    "parent": "tiny2",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0007"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 4
+    },
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad, missing or unmatched certificate (including the per-target descent relation); failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "Configuration control on the same certified source: four probes per batch against one.",
+    "id": "tiny2_cert_batch4",
+    "parent": "incumbent"
+  }
+]

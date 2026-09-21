@@ -1,0 +1,13 @@
+per scalar update, batch 16 (callees attributed to their call sites):
+                                          n      alu     imad  quarter    clmad      mem
+slot loop 0                             850      647       17       14       12       83
+slot loop 1                             887      757        9        0       29       14
+inversion + step overhead, /B         294.9    266.2      2.8      3.8     4.25      7.1
+TOTAL per update                     2031.9   1670.2     28.8     17.8    45.25    104.1
+ALU slots/update (alu + 2.01 imad + 3.97 quarter-rate) = 1798.7 ; clmad/update = 45.25 ; instr/update = 2031.9
+kernel 4walk: 3488 SASS instructions, regs 102, spills ('0', '0')
+  LDS             49
+  PRMT            34
+  VIMNMX          16
+
+[exited with code 0]

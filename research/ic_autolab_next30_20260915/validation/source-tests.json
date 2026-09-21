@@ -1,0 +1,48 @@
+{
+  "binary_sha256": "51648d32f46bec6c9bf4dffa2f6e6e0e6b28e4103d9a27d83fb202ee718ddfb8",
+  "source_sha256": "a86060b0f387a879d8f2d8e731d60d98401e8a0db085bb54c1e8d6ac79d5aa46",
+  "tests": [
+    {
+      "log": "validation/candidate-a-test.log",
+      "one_test_ran": true,
+      "returncode": 0,
+      "test": "cryptanalysis::koblitz_index_calculus::tests::koblitz_mul_dispatch_matches_general_arithmetic"
+    },
+    {
+      "log": "validation/test-matches_the_general_arithmetic_on_random_points.log",
+      "one_test_ran": true,
+      "returncode": 0,
+      "seconds": 0.08849668502807617,
+      "test": "cryptanalysis::koblitz_fast::tests::matches_the_general_arithmetic_on_random_points"
+    },
+    {
+      "log": "validation/test-a_wrong_column_log_fails_the_table_verification.log",
+      "one_test_ran": true,
+      "returncode": 0,
+      "seconds": 0.0036520957946777344,
+      "test": "cryptanalysis::koblitz_index_calculus::tests::a_wrong_column_log_fails_the_table_verification"
+    },
+    {
+      "log": "validation/test-factor_base_logs_precompute_and_descend_every_target.log",
+      "one_test_ran": true,
+      "returncode": 0,
+      "seconds": 0.1046600341796875,
+      "test": "cryptanalysis::koblitz_index_calculus::tests::factor_base_logs_precompute_and_descend_every_target"
+    },
+    {
+      "log": "validation/test-sparse_and_dense_linear_algebra_certify_the_same_log_table.log",
+      "one_test_ran": true,
+      "returncode": 0,
+      "seconds": 0.042902469635009766,
+      "test": "cryptanalysis::koblitz_index_calculus::tests::sparse_and_dense_linear_algebra_certify_the_same_log_table"
+    },
+    {
+      "log": "validation/test-subfield_factor_bases_are_invariant_and_solve_the_dlp.log",
+      "one_test_ran": true,
+      "returncode": 0,
+      "seconds": 0.02593827247619629,
+      "test": "cryptanalysis::koblitz_index_calculus::subfield_tests::subfield_factor_bases_are_invariant_and_solve_the_dlp"
+    }
+  ],
+  "verified_test_count": 6
+}

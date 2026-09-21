@@ -20,11 +20,16 @@ Two things live here:
         python3 ecref.py vectors --curve secp256k1 --mode mont > vec_secp256k1_mont.h
         python3 ecref.py vectors --curve secp256k1 --mode fast > vec_secp256k1_fast.h
         python3 ecref.py vectors --curve toy40     --mode mont > vec_toy40_mont.h
+        python3 ecref.py params --curve toy36j0   > curve_toy36j0.h
+        python3 ecref.py vectors --curve toy36j0  --mode mont > vec_toy36j0_mont.h
 
 The r-adding walk used by the rho kernel is defined here as well (see
 `RhoWalk`); the C code must match it bit-for-bit, including the choice of
 hashing the *internal* field representation rather than the canonical one
-(see gpu/README.md, "Walk definition").
+(see gpu/README.md, "Walk definition").  `RhoWalk` also defines the
+automorphism folding: the negation map (fold 2) and, on j = 0 curves such
+as secp256k1, the full Aut(E) = Z/6 orbit (fold 6), with the beta / lambda
+constants that `params` emits for it (see `compute_aut6`).
 """
 import argparse
 import hashlib
@@ -148,6 +153,50 @@ class Curve:
     def from_mont(self, x):
         return x * pow(R256, -1, self.p) % self.p
 
+    # -- j = 0 automorphisms -------------------------------------------------
+    @property
+    def aut6(self):
+        """(beta, lambda) when Aut(E) = Z/6 acts on <G>, else None.  Cached."""
+        if not hasattr(self, "_aut6"):
+            self._aut6 = compute_aut6(self)
+        return self._aut6
+
+
+def primitive_cube_roots(m):
+    """The two primitive cube roots of unity modulo a prime m = 1 (mod 3),
+    ascending.  g^((m-1)/3) is one for any g that is not a cube; its square
+    is the other."""
+    assert m % 3 == 1
+    for g in range(2, 1 << 16):
+        r = pow(g, (m - 1) // 3, m)
+        if r != 1:
+            return sorted((r, r * r % m))
+    raise SystemExit("no cube root of unity mod %d" % m)
+
+
+def compute_aut6(E):
+    """The order-6 automorphism group of a j = 0 curve, as the pair
+    (beta, lambda) with beta^3 = 1 (mod p) and lambda^3 = 1 (mod n) such that
+
+        (beta * x, y) = lambda * (x, y)      for every (x, y) in <G>.
+
+    Aut(E) = {1, w, w^2, -1, -w, -w^2} with w acting as x -> beta x, so a point
+    P has the six-element orbit {(beta^k x, +-y)}; on scalars w acts as
+    multiplication by lambda.  Returns None when the group is not available:
+    a != 0 (j != 0), p != 1 (mod 3) (beta not in F_p), or n != 1 (mod 3)
+    (lambda not in Z/n; for prime n > 3 this cannot actually happen, since w
+    then acts non-trivially on the cyclic group <G>).  beta is the smaller of
+    the two cube roots, which for secp256k1 is the constant libsecp256k1
+    uses; lambda is whichever of the two roots mod n matches it on G."""
+    if E.a != 0 or E.n is None or E.p % 3 != 1 or E.n % 3 != 1:
+        return None
+    beta = primitive_cube_roots(E.p)[0]
+    target = (beta * E.G[0] % E.p, E.G[1])
+    for lam in primitive_cube_roots(E.n):
+        if E.mul(lam, E.G) == target:
+            return beta, lam
+    raise SystemExit("no cube root of unity mod n matches beta on G")
+
 
 def tonelli_shanks(n, p):
     n %= p
@@ -234,6 +283,29 @@ def make_toy_curve(bits=40, seed=1):
             return E
 
 
+def make_toy_j0_curve(bits=36, seed=1):
+    """Deterministically find y^2 = x^3 + b over a `bits`-bit prime p = 1 (mod 3)
+    with prime group order: a j = 0 curve whose full Aut(E) = Z/6 acts on
+    <G>, small enough for the end-to-end fold-6 rho solve.  b is drawn at
+    random, so the search visits all six twists of each p."""
+    rng = random.Random(seed)
+    while True:
+        p = rng.getrandbits(bits) | (1 << (bits - 1)) | 1
+        if p % 3 != 1 or not is_probable_prime(p):
+            continue
+        for _ in range(60):
+            b = rng.randrange(1, p)
+            E = Curve("toy%dj0" % bits, p, 0, b)
+            P = E.random_point(rng)
+            m = point_order_bsgs(E, P)
+            if m is None or not is_probable_prime(m):
+                continue
+            E.n, E.G = m, P
+            assert E.mul(m, P) is None
+            assert E.aut6 is not None
+            return E
+
+
 _CURVES = {}
 
 
@@ -241,6 +313,8 @@ def get_curve(name):
     if name not in _CURVES:
         if name == "secp256k1":
             _CURVES[name] = SECP256K1
+        elif name.startswith("toy") and name.endswith("j0"):
+            _CURVES[name] = make_toy_j0_curve(int(name[3:-2]))
         elif name.startswith("toy"):
             _CURVES[name] = make_toy_curve(int(name[3:]))
         else:
@@ -266,19 +340,38 @@ class Repr:
 
 
 class RhoWalk:
-    """r-adding walk with optional negation map, defined on the *internal*
-    representation of the affine coordinates.
+    """r-adding walk folded by an automorphism subgroup of order `fold`,
+    defined on the *internal* representation of the affine coordinates.
 
     partition(P) = limb0(internal(x)) & (R-1)
     DP test      = ((limb0(internal(x)) >> 8) & dp_mask) == 0
-    negation map = replace (x, y) by (x, -y) if internal(y) > (p-1)/2
-    step         = P <- P + M[partition(P)]   (M[j] = c_j P + d_j Q)
+    step         = P <- canonical(P + M[partition(P)])   (M[j] = c_j P + d_j Q)
+
+    canonical(P) picks one representative of P's orbit under the folded
+    subgroup, so the walk is a function on E / <aut> and the expected number
+    of steps to a collision falls from sqrt(pi n / 2) to sqrt(pi n / (2 fold)):
+
+    fold 1   canonical(P) = P
+    fold 2   negation map: (x, y) -> (x, -y) if internal(y) > (p-1)/2
+    fold 6   beta orbit, then the negation map: x -> beta^k x for the k in
+             {0, 1, 2} that minimises internal(beta^k x).  j = 0 curves only,
+             where (beta x, y) = lambda (x, y) (see compute_aut6).
+
+    `canonical` also returns the *aut code* (k << 1) | negated: the scalar
+    action of the automorphism it applied is (-1)^negated * lambda^k, which
+    is what the host multiplies a walk's (a, b) coefficients by.
     """
 
-    def __init__(self, E, repr_, r_bits, neg_map, table_seed=0):
+    def __init__(self, E, repr_, r_bits, fold, table_seed=0):
+        if fold not in (1, 2, 6):
+            raise SystemExit("fold must be 1, 2 or 6")
         self.E, self.repr, self.R = E, repr_, 1 << r_bits
-        self.neg_map = neg_map
+        self.fold = fold
         self.table_seed = table_seed
+        if fold == 6:
+            if E.aut6 is None:
+                raise SystemExit("fold 6 needs a j = 0 curve with p = n = 1 (mod 3)")
+            self.beta = E.aut6[0]
 
     def build_table(self, P, Q):
         rng = random.Random(self.table_seed)
@@ -294,18 +387,39 @@ class RhoWalk:
         return (((self.repr.internal(P[0]) & 0xFFFFFFFF) >> 8) & dp_mask) == 0
 
     def canonical(self, P):
-        if P is None or not self.neg_map:
-            return P, False
-        if self.repr.internal(P[1]) > (self.E.p - 1) // 2:
-            return self.E.neg(P), True
-        return P, False
+        """Orbit representative of P and the aut code that maps P to it."""
+        if P is None or self.fold == 1:
+            return P, 0
+        p = self.E.p
+        x, y = P
+        k = 0
+        if self.fold == 6:
+            cands = [x, x * self.beta % p, x * self.beta * self.beta % p]
+            k = min(range(3), key=lambda i: self.repr.internal(cands[i]))
+            x = cands[k]
+        negated = 0
+        if self.repr.internal(y) > (p - 1) // 2:
+            y, negated = (-y) % p, 1
+        return (x, y), (k << 1) | negated
+
+    def apply_aut(self, P, code):
+        """The point (beta^k x, (-1)^negated y) for aut code `code`."""
+        if P is None:
+            return None
+        x, y = P
+        p = self.E.p
+        for _ in range(code >> 1):
+            x = x * self.beta % p
+        if code & 1:
+            y = (-y) % p
+        return (x, y)
 
     def step(self, P):
-        """One step; returns (new point, partition index, negated flag)."""
+        """One step; returns (new point, partition index, aut code)."""
         j = self.partition(P)
         Pn = self.E.add(P, self.M[j])
-        Pn, negated = self.canonical(Pn)
-        return Pn, j, negated
+        Pn, code = self.canonical(Pn)
+        return Pn, j, code
 
     def walk(self, P, steps):
         for _ in range(steps):
@@ -362,6 +476,20 @@ def emit_params(E, out):
     w("#define CURVE_N_LIMBS %s\n" % c_limbs(E.n))
     w("#define CURVE_GX_LIMBS %s\n" % c_limbs(E.G[0]))
     w("#define CURVE_GY_LIMBS %s\n" % c_limbs(E.G[1]))
+    aut = E.aut6
+    w("/* Aut(E) = Z/6 for j = 0: beta^3 = 1 mod p, lambda^3 = 1 mod n, and\n"
+      " * (beta x, y) = lambda (x, y) on <G>.  Used by the fold-6 rho walk. */\n")
+    w("#define CURVE_HAS_AUT6 %d\n" % (1 if aut else 0))
+    beta, lam = aut if aut else (0, 0)
+    if E.name == "secp256k1":
+        # cross-check against the constants libsecp256k1 ships (src/scalar.h,
+        # src/field.h); a mismatch here would mean an arithmetic slip above.
+        assert beta == 0x7AE96A2B657C07106E64479EAC3434E99CF0497512F58995C1396C28719501EE
+        assert lam == 0x5363AD4CC05C30E0A5261C028812645A122E22EA20816678DF02967C1B23BD72
+    w("#define CURVE_BETA_LIMBS %s\n" % c_limbs(beta))
+    w("/* beta * 2^256 mod p: beta in Montgomery form, for FP_FAST=0 builds */\n")
+    w("#define CURVE_BETA_MONT_LIMBS %s\n" % c_limbs(beta * R256 % p if aut else 0))
+    w("#define CURVE_LAMBDA_LIMBS %s\n" % c_limbs(lam))
     n = E.n
     w("/* Montgomery constants for the scalar ring mod n (host-side DLP solve) */\n")
     w("#define N_BITS %d\n" % n.bit_length())
@@ -432,14 +560,16 @@ def emit_vectors(E, mode, out, count=64, seed=12345):
             c_point(E.mul(k, P)), c_limbs(k)))
     w("};\n")
 
-    # ---- rho walk vectors ----
-    for neg in (0, 1):
+    # ---- rho walk vectors: one walk per folding level ----
+    # (fold 1 and 2 draw from `rng` exactly as before fold 6 existed, so their
+    # vectors are unchanged; fold 6 is only emitted on j = 0 curves)
+    folds = [(1, "plain"), (2, "neg")] + ([(6, "aut6")] if E.aut6 else [])
+    for fi, (fold, tag) in enumerate(folds):
         r_bits = 5
-        walk = RhoWalk(E, rp, r_bits, neg_map=bool(neg), table_seed=777 + neg)
+        walk = RhoWalk(E, rp, r_bits, fold=fold, table_seed=777 + fi)
         P0 = E.G
         Q0 = E.mul(rng.randrange(2, E.n), E.G)
         M = walk.build_table(P0, Q0)
-        tag = "neg" if neg else "plain"
         w("#define VEC_WALK_%s_RBITS %d\n" % (tag.upper(), r_bits))
         w("static const vec_pt_t vec_walk_%s_P = %s;\n" % (tag, c_point(P0)))
         w("static const vec_pt_t vec_walk_%s_Q = %s;\n" % (tag, c_point(Q0)))
@@ -453,6 +583,13 @@ def emit_vectors(E, mode, out, count=64, seed=12345):
         w("};\n")
         nsteps = 200
         starts = [E.random_point(rng) for _ in range(4)]
+        if fold == 6:
+            # the representative must be a function of the orbit alone
+            for S in starts:
+                ref = walk.canonical(S)[0]
+                for code in range(6):
+                    assert walk.canonical(walk.apply_aut(S, code))[0] == ref
+                assert walk.apply_aut(S, walk.canonical(S)[1]) == ref
         w("#define VEC_WALK_%s_STEPS %d\n" % (tag.upper(), nsteps))
         w("#define VEC_WALK_%s_COUNT %d\n" % (tag.upper(), len(starts)))
         w("static const vec_pt_t vec_walk_%s_start[%d] = {\n" % (tag, len(starts)))
@@ -463,12 +600,13 @@ def emit_vectors(E, mode, out, count=64, seed=12345):
         for S in starts:
             w("  %s,\n" % c_point(walk.walk(S, nsteps)))
         w("};\n")
-        # per-step trace of the first walk (partition index + negated flag)
+        # per-step trace of the first walk: partition index | aut code << 8
+        # (for fold 2 the aut code is just the negated flag)
         trace = []
         S = starts[0]
         for _ in range(nsteps):
-            S, j, negated = walk.step(S)
-            trace.append(j | (negated << 8))
+            S, j, code = walk.step(S)
+            trace.append(j | (code << 8))
         w("static const uint16_t vec_walk_%s_trace[%d] = {%s};\n" % (
             tag, nsteps, ", ".join(str(t) for t in trace)))
     w("#endif\n")
@@ -529,6 +667,10 @@ def main():
         print("curve", E.name, "p =", hex(E.p), "a =", hex(E.a), "b =", hex(E.b))
         print("n =", hex(E.n), "prime" if is_probable_prime(E.n) else "COMPOSITE")
         print("G =", tuple(hex(c) for c in E.G))
+        if E.aut6:
+            print("Aut(E) = Z/6: beta =", hex(E.aut6[0]), "lambda =", hex(E.aut6[1]))
+        else:
+            print("Aut(E) = Z/6: not available (a != 0 or p, n != 1 mod 3)")
     elif args.what == "vhdl":
         emit_vhdl_vectors(E, sys.stdout)
     elif args.what == "params":

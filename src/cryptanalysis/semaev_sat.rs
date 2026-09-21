@@ -63,7 +63,7 @@
 //! [`mtrimoska/EC-Index-Calculus-Benchmarks`][up] emits for the same
 //! family (`p cnf 767 2416` with 52 `x`-lines).  See
 //! [`crate::cryptanalysis::semaev_corpus`] and
-//! `RESEARCH_TRIMOSKA_BENCHMARKS.md`.
+//! `research/notes/ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md`.
 //!
 //! [up]: https://github.com/mtrimoska/EC-Index-Calculus-Benchmarks
 //!
@@ -1204,7 +1204,7 @@ mod tests {
     // ── S₄, three-point decomposition ───────────────────────────────
 
     /// `n = 19`, `l = 6` Koblitz parameters from `INFOn19l6-1-S` in the
-    /// reference corpus (see `RESEARCH_TRIMOSKA_BENCHMARKS.md`), with
+    /// reference corpus (see `research/notes/ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md`), with
     /// the decomposition that generator planted.
     fn corpus_n19l6() -> (u32, u32, IrreduciblePoly, F2mElement) {
         let n = 19;
