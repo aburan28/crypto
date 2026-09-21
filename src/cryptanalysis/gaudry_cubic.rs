@@ -2164,6 +2164,13 @@ pub struct GaudryReport {
     /// of those rows; solve attempts (Wiedemann retries with more rows).
     pub la_mode: String,
     pub la_ops: u64,
+    /// Relations the merge-level cap discarded: residuals paid for and
+    /// thrown away, which is what the cap costs.
+    pub lp_abandoned: u64,
+    /// Mean pivot reductions a surviving relation went through.
+    pub lp_mean_merge_depth: f64,
+    /// The cap in force, echoed so a row states its own configuration.
+    pub lp_max_merge_level: u8,
     pub la_unknowns: usize,
     pub la_rows: usize,
     pub la_avg_weight: f64,
@@ -2200,6 +2207,17 @@ pub struct GaudryOptions {
     pub small_base: usize,
     /// Decompositions with more large primes than this are discarded.
     pub max_large_primes: u8,
+    /// **Merge-level cap.**  A relation is abandoned once it has been
+    /// reduced against this many stored pivots, instead of being chained
+    /// until every large prime cancels.  `0` means no cap, which is what
+    /// this module did before it was measured and what section 11.7 of
+    /// `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` records
+    /// as its loose end: chaining merges the pivots' columns in, so row
+    /// weight grows with `n` and the linear algebra measures `n^{0.56}`
+    /// against its own `4/9`.  Capping holds the weight down and pays for
+    /// it in discarded residuals; which side of that trade wins is
+    /// [`GaudryReport::lp_abandoned`] against the fitted exponent.
+    pub max_merge_level: u8,
 }
 
 impl Default for GaudryOptions {
@@ -2211,6 +2229,7 @@ impl Default for GaudryOptions {
             sparse_la: false,
             small_base: 0,
             max_large_primes: 0,
+            max_merge_level: 0,
         }
     }
 }
@@ -2253,18 +2272,36 @@ pub struct LargePrimeEliminator {
     small: usize,
     n: u64,
     pivots: HashMap<usize, SparseRel>,
+    /// Abandon a relation after this many pivot reductions; `0` is no cap.
+    max_merge_level: u8,
+    /// Relations discarded by the cap: residuals paid for and thrown away,
+    /// which is exactly what the cap costs.
+    pub abandoned: u64,
+    /// Merge depth summed over relations that survived, and how many did,
+    /// so the realised depth can be reported rather than assumed.
+    pub depth_sum: u64,
+    pub depth_count: u64,
 }
 
 impl LargePrimeEliminator {
     pub fn new(small: usize, n: u64) -> Self {
+        Self::with_cap(small, n, 0)
+    }
+
+    pub fn with_cap(small: usize, n: u64, max_merge_level: u8) -> Self {
         LargePrimeEliminator {
             small,
             n,
             pivots: HashMap::new(),
+            max_merge_level,
+            abandoned: 0,
+            depth_sum: 0,
+            depth_count: 0,
         }
     }
 
     pub fn feed(&mut self, mut rel: SparseRel, ops: &mut u64) -> Option<SparseRel> {
+        let mut depth = 0u8;
         loop {
             let lp: Vec<(usize, u64)> = rel
                 .cols
@@ -2273,7 +2310,19 @@ impl LargePrimeEliminator {
                 .filter(|&(c, _)| c >= self.small)
                 .collect();
             if lp.is_empty() {
+                self.depth_sum += u64::from(depth);
+                self.depth_count += 1;
                 return Some(rel);
+            }
+            // The cap.  Uncapped, this loop chains until every large prime
+            // cancels, and each reduction merges a pivot's columns in; that
+            // unbounded chaining is the fill-in section 11.7 measures.  Past
+            // the cap the relation is dropped rather than densified -- it is
+            // not stored as a pivot either, since a capped relation is not a
+            // reduced one and would seed the same growth from a new column.
+            if self.max_merge_level != 0 && depth >= self.max_merge_level {
+                self.abandoned += 1;
+                return None;
             }
             let Some(&(c, v)) = lp.iter().find(|(c, _)| self.pivots.contains_key(c)) else {
                 // No pivot for any of its large primes: store under one.
@@ -2291,6 +2340,16 @@ impl LargePrimeEliminator {
             };
             let piv = self.pivots[&c].clone();
             rel = rel.sub_scaled(v, &piv, self.n, ops);
+            depth += 1;
+        }
+    }
+
+    /// Mean number of pivot reductions a surviving relation went through.
+    pub fn mean_merge_depth(&self) -> f64 {
+        if self.depth_count == 0 {
+            0.0
+        } else {
+            self.depth_sum as f64 / self.depth_count as f64
         }
     }
 }
@@ -2597,7 +2656,7 @@ pub fn run_gaudry_opts(
     curve.reset();
     let mut stats = SolveStats::default();
     let mut system = RelationSystem::new(n, unknowns);
-    let mut eliminator = LargePrimeEliminator::new(small, n);
+    let mut eliminator = LargePrimeEliminator::with_cap(small, n, opts.max_merge_level);
     let mut full_rels: Vec<SparseRel> = Vec::new();
     let mut la_ops = 0u64;
     let mut la_attempts = 0u64;
@@ -2636,6 +2695,9 @@ pub fn run_gaudry_opts(
             "dense".to_string()
         },
         la_ops: 0,
+        lp_abandoned: 0,
+        lp_mean_merge_depth: 0.0,
+        lp_max_merge_level: opts.max_merge_level,
         la_unknowns: unknowns,
         la_rows: 0,
         la_avg_weight: 0.0,
@@ -2841,6 +2903,8 @@ pub fn run_gaudry_opts(
     rep.precompute_fp_muls = precompute_muls;
     rep.solve_stats = stats;
     rep.la_ops = la_ops + system.ops();
+    rep.lp_abandoned = eliminator.abandoned;
+    rep.lp_mean_merge_depth = eliminator.mean_merge_depth();
     rep.la_rows = la_rows_used;
     rep.la_attempts = la_attempts;
     if opts.sparse_la {
@@ -3334,6 +3398,77 @@ mod tests {
             .collect();
         let sol = wiedemann_u64(&sel, n_cols, n, &mut rng, &mut ops).expect("core solves");
         assert_eq!(sol[map[keep]], x[keep]);
+    }
+
+    #[test]
+    fn the_merge_cap_bounds_depth_and_charges_what_it_discards() {
+        // Section 11.10's cap.  Uncapped, `feed` chains pivot reductions until
+        // every large prime cancels, and each one merges a pivot's columns in;
+        // that is the fill-in section 11.7 measures.  Capped, a relation past
+        // the depth bound is dropped instead, and the drop is counted because
+        // it is a residual that was paid for.
+        let n = 1_000_003u64;
+        let small = 5usize;
+        let build = |cap: u8| {
+            let mut rng = StdRng::seed_from_u64(9);
+            let mut el = LargePrimeEliminator::with_cap(small, n, cap);
+            let x: Vec<u64> = (0..small + 6).map(|_| rng.gen_range(0..n)).collect();
+            let mut ops = 0u64;
+            let mut full = 0usize;
+            for _ in 0..400 {
+                let mut cols: Vec<(usize, u64)> = Vec::new();
+                for _ in 0..3 {
+                    let c = if rng.gen_bool(0.6) {
+                        small + rng.gen_range(0..6)
+                    } else {
+                        rng.gen_range(0..small)
+                    };
+                    let v = if rng.gen_bool(0.5) { 1 } else { n - 1 };
+                    if let Some(e) = cols.iter_mut().find(|(cc, _)| *cc == c) {
+                        e.1 = am(e.1, v, n);
+                    } else {
+                        cols.push((c, v));
+                    }
+                }
+                cols.retain(|&(_, v)| v != 0);
+                cols.sort_unstable();
+                let rhs = cols
+                    .iter()
+                    .fold(0u64, |acc, &(c, v)| am(acc, mm(v, x[c], n), n));
+                if let Some(r) = el.feed(SparseRel { cols, rhs }, &mut ops) {
+                    // Whatever survives is still a true relation over the
+                    // small base: a cap must not corrupt what it lets through.
+                    assert!(r.cols.iter().all(|&(c, _)| c < small));
+                    let lhs = r
+                        .cols
+                        .iter()
+                        .fold(0u64, |acc, &(c, v)| am(acc, mm(v, x[c], n), n));
+                    assert_eq!(lhs, r.rhs);
+                    full += 1;
+                }
+            }
+            (el, full)
+        };
+
+        let (uncapped, full_uncapped) = build(0);
+        let (capped, full_capped) = build(1);
+
+        // The cap binds: nothing survives past depth 1, and the uncapped run
+        // went deeper than that.
+        assert_eq!(capped.abandoned > 0, true, "a depth-1 cap must discard something");
+        assert_eq!(uncapped.abandoned, 0, "no cap means nothing is discarded");
+        assert!(capped.mean_merge_depth() <= 1.0);
+        assert!(
+            uncapped.mean_merge_depth() > capped.mean_merge_depth(),
+            "uncapped {} vs capped {}",
+            uncapped.mean_merge_depth(),
+            capped.mean_merge_depth()
+        );
+        // And it costs relations, which is the trade being measured.
+        assert!(
+            full_capped < full_uncapped,
+            "capped {full_capped} should yield fewer full relations than {full_uncapped}"
+        );
     }
 
     #[test]
