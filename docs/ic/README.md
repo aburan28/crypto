@@ -663,6 +663,27 @@ scripts in `tools/` render a report into the note's tables
 (`boundary_ledger_update.py`), so a new run updates the three places
 `AGENTS.md` §7 requires without numbers being typed.
 
+**Round 2** (`runs/ic-boundary-ledger-round2-2026-09-21.json`, the note's
+§10) keeps every first-round row as its *before* mark and adds, per
+regime, the rungs of a cumulative engineering ledger, named by suffix:
+`_negfold` (the pair table built once per pair up to negation, `|F|²/4`
+additions instead of `|F|²/2`), `_frobfold` (Koblitz: once per pair up
+to negation and the Frobenius, keyed by the normal-basis canonical form
+of the sum's abscissa, `|F|²/(4n)`; canonicalisations counted and priced
+at a measured factor), `_walk` (targets from a 16-jump r-adding walk
+with tracked coefficients, one addition each, with a cycle guard priced
+as lookups), `mitm_m2_…` rows wherever the cofactor classes admit two
+summands and the exact floor fits the budget, and `_balanced` (Koblitz,
+`n ≥ 37`: a base sized to balance the folded table against the walk's
+trials).  Every row now carries the **exact** counting ceiling next to
+the uniform one — the `m`-multisets of base points whose cofactor
+classes cancel, over `r` — which is the §3.5 accounting correction of
+the first round.  `tools/boundary_round_compare.py` pairs each new row
+with the rung it was built on (same curve, target, seed) and saves the
+`speedup = baseline_total_operations / candidate_total_operations`
+comparison `AGENTS.md` §8 asks for, checking that the first-round rows
+reproduce the frozen counts exactly.
+
 ## A benchmark corpus: `ic corpus`
 
     ./target/release/ic corpus --degree 19 --dimension 6 --sat 5 --unsat 5 --dir corpus/n19l6
