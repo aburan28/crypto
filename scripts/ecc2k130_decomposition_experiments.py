@@ -343,20 +343,29 @@ def matrix_rank_mod_p(rows, unknowns: int, p: int) -> int:
 
 # ── what a relation budget actually determines ──────────────────────────
 
-def determined_columns(rows, unknowns: int, p: int):
-    """The columns whose value every solution of the system agrees on.
+def determined_logs(rows, rhs, unknowns: int, p: int):
+    """The columns whose value every solution of the system agrees on, with
+    that value: `{column: logarithm}`.
 
     A pivot column is determined only if its echelon row is free of the
     non-pivot (free) columns; otherwise the kernel moves it.  Columns no
     relation ever touches are of course undetermined.  This is the set whose
-    logarithms the descent may actually use.
+    logarithms the descent may actually use -- and the right-hand side rides
+    along in column `unknowns`, so a determined pivot's reduced row reads
+    `x_c = rhs` and the descent has a value to check against the planted
+    secret rather than a column index.
     """
     mat = [dict((k, v % p) for k, v in r.items() if v % p) for r in rows]
+    for row, b in zip(mat, rhs):
+        if b % p:
+            row[unknowns] = b % p
     pivots: dict = {}                      # col -> reduced row
     for row in mat:
         cur = dict(row)
         while cur:
             c = min(cur)
+            # only the right-hand side left: `0 = b` with `b != 0`
+            assert c != unknowns, "the relation system is inconsistent"
             if c not in pivots:
                 inv = pow(cur[c], p - 2, p)
                 pivots[c] = {k: (v * inv) % p for k, v in cur.items()}
@@ -379,7 +388,13 @@ def determined_columns(rows, unknowns: int, p: int):
                    if (v := (row.get(j, 0) - f * pr.get(j, 0)) % p)}
         pivots[c] = row
     free = {k for k in range(unknowns) if k not in pivots}
-    return {c for c, row in pivots.items() if not (set(row) - {c}) & free}
+    return {c: row.get(unknowns, 0) for c, row in pivots.items()
+            if not (set(row) - {c}) & free}
+
+
+def determined_columns(rows, unknowns: int, p: int):
+    """The determined columns alone, without their values."""
+    return set(determined_logs(rows, [0] * len(rows), unknowns, p))
 
 
 def budget_run(rung: Rung, l: int, m: int, rng: random.Random,
@@ -392,14 +407,17 @@ def budget_run(rung: Rung, l: int, m: int, rng: random.Random,
     `ln|F|/m` times the budget.  Index calculus does not need that: it drops the
     base points no relation determined and retries the descent when one turns
     up in a decomposition.  This measures both halves -- how much of the base
-    `|F|` relations determine, and how many descents that costs.
+    `|F|` relations determine, and how many descents that costs -- and a
+    descent has landed only when the logarithm it reads off the determined
+    columns is the planted one.
     """
     points, index, abscissae = build_base(rung, l)
     unknowns = len(points)
     want = int(unknowns * (1.0 + slack_fraction))
     d = collect(rung, l, m, 'full', rng, want=want)
     rows = d["rows"][:want]
-    known = determined_columns(rows, unknowns, rung.p)
+    logs = determined_logs(rows, d["rhs"][:want], unknowns, rung.p)
+    known = set(logs)
     frac = len(known) / unknowns
     # `e^{-m}` predicts the columns no relation *touches*.  Determination is a
     # strictly stronger property -- a column can be hit and still be free, when
@@ -418,6 +436,7 @@ def budget_run(rung: Rung, l: int, m: int, rng: random.Random,
     c = rung.curve
     secret = rng.randrange(2, rung.p)
     Q = c.mul(rung.G, secret)
+    inv_proj = pow(rung.proj_scalar % rung.p, rung.p - 2, rung.p)
     attempts, descent_ops, landed = 0, 0, False
     for _ in range(descent_tries):
         attempts += 1
@@ -445,6 +464,14 @@ def budget_run(rung: Rung, l: int, m: int, rng: random.Random,
             if hit:
                 break
         if hit:
+            # `[cc]Q + [dd]G = P_1 + P_2 + P_3`, projected: the determined
+            # logs sum to `c (cc x + dd)`, so `x` falls out of one inverse.
+            # A triple over determined columns that does not give back the
+            # planted secret is a harness fault, and fails the run.
+            total = sum(logs[pos[P]] for P in hit) % rung.p
+            got = (total * inv_proj - dd) * pow(cc, rung.p - 2, rung.p) % rung.p
+            assert got == secret, \
+                f"n={rung.n} l={l}: planted log {secret} came back as {got}"
             landed = True
             break
     return {
@@ -461,6 +488,7 @@ def budget_run(rung: Rung, l: int, m: int, rng: random.Random,
         "descent_success_per_try_predicted": round(frac ** m, 4),
         "descent_attempts": attempts,
         "descent_landed": landed,
+        "planted_log_recovered": landed,
         "collection_oracle_ops": d["oracle_ops"],
         "descent_oracle_ops": descent_ops,
         "total_oracle_ops": d["oracle_ops"] + descent_ops,
@@ -1190,6 +1218,8 @@ def main():
                                        / len(budgets), 3),
         "predicted_lambda": 3,
         "every_descent_landed": all(b["descent_landed"] for b in budgets),
+        "every_planted_log_recovered": all(b["planted_log_recovered"]
+                                           for b in budgets),
         "mean_lambda_n13_l6": round(m13, 3),
         "mean_lambda_n19_l8": round(m19, 3),
         "slope_log2_ops_vs_n_at_budget": round(slope_budget, 3),

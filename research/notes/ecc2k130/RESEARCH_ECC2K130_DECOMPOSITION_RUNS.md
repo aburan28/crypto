@@ -132,7 +132,11 @@ matter.** `budget_run` collects under the `full` rule, so its `|F|` relations
 come from roughly forty targets — correlated in exactly the sense the
 superseded claim meant. They still determine `91 %` to `95 %` of the base, and
 **every descent landed**, in one to three attempts, with `Λ` at `3.103` on
-average against the predicted `m = 3`. The `Λ` of `5.136` and
+average against the predicted `m = 3`.  A landing is a triple over determined
+columns *whose logarithms give back the planted secret*: the harness carries
+the right-hand side through the elimination, reads the logarithm off the
+triple, and fails the run if it is not the one it planted.  Every cell above
+passed that check. The `Λ` of `5.136` and
 `5.993` that E1 reports below, and the disagreement with the model that the
 last round read off them, are both properties of the stopping rule and not of
 the method.
@@ -269,9 +273,10 @@ flatness verdict reads.  Collecting the budgeted `|F|` relations instead:
 
 `l = 5` has no verified answer, so by §2 it is not a result and is excluded
 from the flat line rather than averaged into it — the rank ceiling above says
-why there is nothing there for a descent to land on.  Over the four cells that
-did finish the flat line is `3.449` and the minimum is `3.111`, well above half
-of it.  **The verdict is unchanged and the numbers under it are now the
+why there is nothing there for a descent to land on.  The four that landed
+each gave back the planted logarithm, checked as in §0.5.  Over the four cells
+that did finish the flat line is `3.449` and the minimum is `3.111`, well above
+half of it.  **The verdict is unchanged and the numbers under it are now the
 method's rather than the harness's**, and they are flat at `m` where the
 superseded ones ranged `5.027` to `7.402`.
 
@@ -318,57 +323,77 @@ charges for `R`?**  If it does not, the swap saves queries and loses the saving
 back at the till.  This was the only part of the six designs no run in this
 repository had touched.
 
-**Stage diagnostic** in the sense of `AGENTS.md` §8 — one oracle call on one
-rung, priced.  Nothing below is a speedup, nothing is inferred about a full
-discrete logarithm, and no phase outside the solver is charged.
+**Stage diagnostic** in the sense of `AGENTS.md` §8 — one oracle call priced
+against another, on toy rungs.  Nothing below is a speedup, nothing is
+inferred about a full discrete logarithm, and no phase outside the solver is
+charged.
 
 **Runner:** `scripts/ecc2k130_e3_solver_panel.py`
 **Frozen artefact:** `experiments/ecc2k130_e3_solver_panel.json`
-`./target/release/ic run --degree 13 --summands 3 --solver S --known-log K`,
-sweeping `K ∈ {53, 211, 499, 887, 1289, 1613, 1987}` — the only lever that
-moves the descent target while the curve, the factor base, the summand count
-and the seed all stay fixed.  All 28 completed runs verified.
+`./target/release/ic swap --cells 13:3,13:2,15:3 --pairs 64 --json`
 
-The denominator is `counts.trials`, which counts **every attempt to decompose a
-target, successful or not**.  On all 28 runs `trials` equalled the relation
-count, so no call failed: the ratios below cannot be flat because a shifting
-failure rate is hiding inside them.
+**The pair is built, not swept.**  §3.2's condition is pairwise — the same
+solver, once on `R` and once on `R − P + Q` — so that is what is priced.
+`ic swap` draws `m` distinct base points whose sum `R` lies in `⟨G⟩`, takes a
+summand `P` and a base point `Q` of `P`'s cofactor class that is neither a
+summand of `R` nor the negative of one, and forms `R − P + Q`: literally
+another `m`-sum of base points, which is the branch the swap relies on.  Every
+decomposition oracle the repository has — enumeration, meet in the middle, the
+`S₄` pairs-and-solve, matrix-F4, CDCL SAT — sees both points of every pair and
+is counted in its own native unit.  The statistic is the per-pair ratio
+`cost(R − P + Q) / cost(R)`.  A control runs beside it: the same ratio taken
+between two consecutive *unrelated* built targets, which is how far a
+solver's price already moves with no swap involved.
 
-| solver | unit | per call | spread | calls |
-|---|---|---:|---:|---:|
-| `groebner` | F4 word operations per call | 58 280 966 – 61 951 239 | **6.3 %** | 12 – 24 |
-| `sat` | SAT conflicts per call | 10 162.9 – 13 457.6 | **32.4 %** | 20 – 68 |
-| `wdsat` | — | not exercised | — | — |
+**A retraction first.**  The previous revision of this section swept
+`ic run --known-log` over seven descent targets at fixed seed and reported
+`groebner` "flat to `6.3 %`" per call.  No swapped point was ever built: those
+runs decompose the random probes `[a]G + [b]Q` of a relation collection, and
+the `6.3 %` was an average over the 12–24 such calls of each run, which hid a
+per-call spread that is in fact `2.4×` (below).  It priced a target family,
+not the swap, and could not have detected a swap that cost more.  Class
+**accounting**; the figure is kept in the artefact under `superseded` and is
+not read.
 
-**`groebner` is the answer**, because it is the one solver here that exposes a
-hardware-independent operation count per call. Seven targets, `6.3 %`
-peak-to-trough. The price of a call does not depend on which target it is
-handed, which is what §3.2 leans on.
+Degree 13, `m = 3`, the base `ic run` used (4 005 points, dimension 12),
+64 pairs, every call conclusive:
 
-**`sat` is not flat, and is not a counter-example either.** A third
-peak-to-trough is a real swing, but it has no trend in the target: mean
-`11 576` conflicts per call, coefficient of variation about `10 %`, and the
-largest and smallest both sit in the middle of the target range. That is the
-wobble of a randomised search restarted on a different instance, not a cost
-that tracks which target it was given.
+| oracle | unit | ratio swap / `R`: min / median / max | swap dearer / cheaper | sign test `p` | control: worst unrelated pair | swapped points decomposed |
+|---|---|---:|---:|---:|---:|---:|
+| `enumerate` | group additions | 1.000 / 1.000 / 1.000 | 0 / 0 | — | 1.000 | 64 / 64 |
+| `meet_in_the_middle` | pair-table probes | 1.000 / 1.000 / 1.000 | 0 / 0 | — | 1.000 | 64 / 64 |
+| `semaev_s4_pairs_and_solve` | pairs | 1.000 / 1.000 / 1.000 | 0 / 0 | — | 1.000 | 64 / 64 |
+| `matrix_f4_splitting` | F4 word operations | 0.502 / **1.000** / 1.363 | 32 / 32 | 1.00 | 1.814 | 64 / 64 |
+| `cdcl_sat_native_xor` | SAT conflicts | 0.017 / **0.968** / 100.2 | 31 / 33 | 0.90 | 53.7 | 64 / 64 |
 
-**Two solvers establish nothing here, and are excluded from the finding.**
-`enumerate` and `pair-table` expose no operation counter, so they could only be
-timed — and their whole-run totals move by `2.6 %` and `4.9 %` while the number
-of calls those runs make moves from 12 to 20. A total that does not follow the
-call count is paying for something fixed, setup, not for the calls; dividing it
-by the call count returns the reciprocal of the call count and nothing else
-(`0.0022 s` at 12 calls against `0.0013 s` at 20, which is exactly `20/12`).
-The artefact flags both `setup_dominated`. By §6 those rows would in any case
-be wall clock, a practicality note and never the metric.
+**No oracle is systematically dearer on the swapped point.**  Matrix-F4, the
+deterministic solver with an operation count, has a median ratio of exactly
+`1.000` and is dearer on the swap in exactly half the pairs.  Its price on `R`
+alone runs `45.9M`–`109.6M` word operations, a `2.4×` spread between targets,
+and the dearest swapped pair (`1.36×`) is *below* the dearest unrelated pair
+(`1.81×`): the paired ratio is the solver's own target-to-target wobble.  SAT
+is heavy-tailed per target — `363` to `71 845` conflicts on `R` alone, `200×`
+— so a single pair at `100×` against a control worst of `54×` is the tail of
+a randomised search, and the sign test sees no direction (`31 / 33`).  The
+three enumerative oracles are trivially flat on this base — nearly every
+point of the field is in it, so `R` and `R − P + Q` are both found on the
+first probe — and establish nothing beyond that.
 
-**Scope.** One rung (`degree 13`), one base (4 005 points collapsed by
-Frobenius onto 77 orbit columns), one seed, `m = 3`. `wdsat` was swept and
-returned `--solver wdsat requires --wdsat-binary` on every target; the
-repository does not vendor that binary, so it is recorded as attempted and not
-exercised rather than skipped. The `enumerate` oracle early-exits at its first
-witness (`decompose` in `src/cryptanalysis/koblitz_index_calculus.rs`), so its
-runs are not a whole-base sweep; `groebner` and `sat` dispatch elsewhere.
+Two more cells say the same thing where the enumerative oracles do move.  At
+`13:2` matrix-F4 runs `0.752 / 0.983 / 1.246` (`26 / 38`, `p = 0.17`, control
+worst `1.30`) and SAT `0.037 / 0.883 / 10.9` (`32 / 32`).  At `15:3` (dimension
+5, 33 points) enumeration, meet in the middle and `S₄` now vary `0.2`–`4×` with
+the target and their worst swapped pair sits inside the control's; matrix-F4
+runs `0.139 / 0.996 / 10.1` (`31 / 33`, control worst `11.3`); SAT exhausted
+its `200 000`-conflict budget on one side or the other of 43 of its 64 pairs
+there and is **not read**.  Every swapped point every conclusive oracle was
+handed decomposed, as it must.
+
+**Scope.**  One base per rung, one seed, `m ∈ {2, 3}`, degrees 13 and 15.
+`wdsat` is not among the oracles `ic swap` prices; the repository does not
+vendor its binary.  The per-call price is a property of the solver's search
+and not of whether the target was swapped, which is the condition §3.2 needs
+— on two toy rungs, and nothing here is a speedup.
 
 ---
 
@@ -474,7 +499,7 @@ there.
 | §0.5 | the published `2.0×` relation constant is **withdrawn**: it is the coupon collector `ln\|F\|/m`, not a constant, not target correlation, and not something the model owes.  At the budgeted `\|F\|` relations every descent lands and `Λ = 3.103` against a predicted `3` | **accounting** |
 | E1 | the law's exponent survives at `n = 13, 19`; the `Λ` gap the last round reported is the stopping rule, and closes on the budget | constant belongs to the harness |
 | E2 | `λ` moves `6 600×` and `Λ` moves `2.4×` — the dimension is not a lever, measured on both stopping rules; the model's predicted rise above saturation does not occur.  The `l = 5` outlier is a **structural rank ceiling of 28/29**, exhaustive over all 810 reachable decompositions, not a relation count | model conservative; `l = 5` an accounting correction |
-| E3 | a real solver's price per oracle call does not depend on the target: `6.3 %` across seven targets in F4 word operations | **stage diagnostic**, §8 |
+| E3 | no solver is systematically dearer on `R − P + Q` than on `R`: matrix-F4's median ratio over 64 built pairs is `1.000`, dearer in exactly half, and the worst swapped pair is below the worst unrelated one.  The earlier "`6.3 %` flat across seven targets" priced a target family, not the swap, and is withdrawn | **stage diagnostic**, §8; the withdrawal **accounting** |
 | E4 | the guard holds; paired relations are `5–11×` redundant, and at `m = 2` they are differences and **cannot** span | a cost the model omits |
 | E5 | Poisson is right for the decompositions that count; the raw over-dispersion is `±P` degeneracy | no correction needed |
 | E6 | the Frobenius collapse delivers exactly `n`, with independent relations | §6.1 confirmed |
@@ -506,5 +531,6 @@ relation budget the law actually charges, `Λ` sits at the predicted `m`.
   One to three descent retries, and three dead base points per base.  Whether
   either matters at `\|F\| = 2^44.5` is not something these rungs can say, which
   is why neither is folded into the model.
-- **E3 is one rung, one base, one seed**, and two of its four solvers turned out
-  setup-dominated and answer nothing.  `wdsat` was not exercised at all.
+- **E3 is two toy rungs, one base each, one seed.**  Its enumerative oracles
+  are trivially flat on the degree-13 base and only move at `15:3`, and SAT's
+  `15:3` row exhausted its budget and is not read.  `wdsat` was not exercised.
