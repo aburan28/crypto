@@ -432,10 +432,14 @@ impl FrobeniusCanon {
         const LANES: usize = 8;
         out.clear();
         out.resize(points.len(), 0);
-        for (chunk, keys) in points.chunks(LANES).zip(out.chunks_mut(LANES)) {
+        let full = points.len() / LANES * LANES;
+        for base in (0..full).step_by(LANES) {
+            let chunk = &points[base..base + LANES];
+            let keys = &mut out[base..base + LANES];
             let mut v = [0u64; LANES];
             let mut best = [0u64; LANES];
-            for (lane, &point) in chunk.iter().enumerate() {
+            for lane in 0..LANES {
+                let point = chunk[lane];
                 if !point.infinity {
                     let c = self.coords(point.x);
                     v[lane] = c;
@@ -443,16 +447,24 @@ impl FrobeniusCanon {
                 }
             }
             for _ in 1..self.n {
-                for lane in 0..chunk.len() {
+                for lane in 0..LANES {
                     v[lane] = ((v[lane] << 1) | (v[lane] >> (self.n - 1))) & self.mask;
                     if v[lane] < best[lane] {
                         best[lane] = v[lane];
                     }
                 }
             }
-            for (lane, &point) in chunk.iter().enumerate() {
+            for lane in 0..LANES {
+                let point = chunk[lane];
                 keys[lane] = if point.infinity { 0 } else { best[lane] + 1 };
             }
+        }
+        for (point, key) in points[full..].iter().zip(&mut out[full..]) {
+            *key = if point.infinity {
+                0
+            } else {
+                self.canon(point.x) + 1
+            };
         }
     }
 
