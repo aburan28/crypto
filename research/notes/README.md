@@ -17,6 +17,7 @@ its old name still identify it.
 |:--|:--|
 | [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](ecdlp-general/RESEARCH_ECDLP_STATE_OF_THE_ART.md) | The ECDLP: state of the art, 2025–2026 |
 | [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md) | Auxiliary inputs (Cheon) and torsion points against rho and index calculus |
+| [`RESEARCH_REPRESENTATION_STRUCTURE.md`](ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md) | Where exploitable structure can come from: the transfer pattern, an R1–R5 admissibility test for candidate handles, and why murmurations fail it |
 | [`RESEARCH_BENCH_LOG.md`](ecdlp-general/RESEARCH_BENCH_LOG.md) | Cryptanalysis research bench: empirical log |
 
 ## index-calculus — Semaev decomposition, factor bases, Gröbner, first-fall degree
