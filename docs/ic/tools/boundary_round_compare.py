@@ -204,16 +204,18 @@ def reproduction_check(new, old):
     return checks
 
 def paired_log_summary(ratios):
-    """Geometric mean of the paired ratios and a 95% interval for it.
+    """Geometric mean of the per-repeat ratios and a 95% interval for it.
 
-    The pairing is by repeat, so each ratio is one target measured both
-    ways, and the spread between repeats is the cycle-closing spread of
-    §11.4 rather than anything about the code.  A ratio is a ratio, so
-    the average that means anything is the geometric one, and the
-    interval is the usual t-interval on the logs, exponentiated.  With
-    the spreads on these rows an interval that straddles one says the
-    round did not move that row at this many repeats — which is a
-    result, and is reported as one.
+    A ratio is a ratio, so the average that means anything is the
+    geometric one, and the interval is the usual t-interval on the logs,
+    exponentiated.  With the spreads these rows have — §11.4 — an
+    interval that straddles one says the round did not move that row at
+    this many repeats, which is a result and is reported as one.
+
+    See `compare_across_rounds` on how far the pairing goes: the two
+    runs share an instance, a seed and a first target, but their random
+    streams diverge at the first restart, so this is an estimate of the
+    ratio rather than a paired test.
     """
     xs = [math.log(x) for x in ratios if x > 0]
     n = len(xs)
@@ -232,11 +234,23 @@ def compare_across_rounds(new, old):
     """The same row, the same instance, the previous round's code.
 
     Pairs on `(regime, curve, variant, repeat index)`.  The two runs use
-    the same seed, so repeat `i` of a row saw the same target in both,
-    and the ratio of their total operation counts is a paired
-    measurement rather than two independent draws.  A row present only
-    in the candidate is reported as new — the within-run pairing above
-    is what prices it.
+    the same seed, so repeat `i` of a row starts from the same instance,
+    the same factor base and the same first target.
+
+    **How far the pairing goes.**  Only that far.  The two rounds draw
+    different numbers of random values per restart — Round 2 drew
+    sixteen fresh jumps, a rotation drew one index, a shuffle draws
+    fifteen — so the two runs' random streams diverge the moment the
+    first restart happens, and every target after it is an independent
+    draw rather than the same target seen twice.  The pairing is
+    therefore at the instance and seed level, not the per-target level,
+    and the interval below sits somewhere between a paired and an
+    unpaired one.  It is reported as an estimate of the ratio, not as a
+    paired test, and a row whose interval straddles one is reported as
+    not moved.
+
+    A row present only in the candidate is reported as new — the
+    within-run pairing above is what prices it.
     """
     out, new_rows = [], []
     old_by = {(i["regime"], i["curve"]["name"]): rows_of(i) for i in old["ledger"]["instances"]}
