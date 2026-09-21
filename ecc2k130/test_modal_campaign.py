@@ -14,7 +14,9 @@ class FakeCalls:
     def __init__(self):
         self.spawned = []          # kwargs per spawn, in order
         self.results = {}          # call_id -> result dict, exception, or mc.Running
+        self.started_ids = set()   # call ids a container has taken up
         self.cancelled = []
+        self.cancel_error = None   # raised by cancel when set
         self.n = 0
 
     def spawn(self, **kwargs):
@@ -30,7 +32,12 @@ class FakeCalls:
             raise outcome
         return outcome
 
+    def started(self, call_id):
+        return call_id in self.started_ids
+
     def cancel(self, call_id):
+        if self.cancel_error is not None:
+            raise self.cancel_error
         self.cancelled.append(call_id)
 
 
@@ -102,16 +109,67 @@ class DriverTests(unittest.TestCase):
         self.assertEqual(self.calls.spawned[-1][1]["runId"], 8001)
         self.assertTrue(any("failed" in line and "container lost" in line for line in self.logged))
 
-    def test_a_call_past_its_deadline_and_grace_is_cancelled_and_replaced(self):
+    def test_the_pass_clock_starts_when_a_container_takes_the_call_up(self):
+        # fc-001 queues for an hour before a container takes it; fc-002 never
+        # leaves the queue. Neither is lost, however long the spawn clock says.
         d = self.driver()
         d.tick()
-        self.clock.t = 1000.0 + 4 * 3600 + 1799
+        self.clock.t = 1000.0 + 3600
+        self.calls.started_ids.add("fc-001")
+        self.assertEqual(d.tick(), 2)
+        self.assertEqual(mc.load_state(self.state)["8000"]["started_at"], 1000.0 + 3600)
+        self.assertNotIn("started_at", mc.load_state(self.state)["8001"])
+        self.clock.t = 1000.0 + 3600 + 4 * 3600 + 1799
         self.assertEqual(d.tick(), 2)
         self.assertEqual(self.calls.cancelled, [])
-        self.clock.t = 1000.0 + 4 * 3600 + 1801
+        self.clock.t = 1000.0 + 3600 + 4 * 3600 + 1801
         self.assertEqual(d.tick(), 2)
-        self.assertEqual(sorted(self.calls.cancelled), ["fc-001", "fc-002"])
-        self.assertEqual(len(self.calls.spawned), 4)
+        self.assertEqual(self.calls.cancelled, ["fc-001"])
+
+    def test_a_cancelled_call_is_replaced_only_once_it_has_stopped(self):
+        d = self.driver(run_ids=(8000,))
+        d.tick()
+        self.calls.started_ids.add("fc-001")
+        d.tick()
+        self.clock.t = 1000.0 + 4 * 3600 + 1801
+        self.assertEqual(d.tick(), 1)
+        self.assertEqual(self.calls.cancelled, ["fc-001"])
+        # Cancel is asynchronous: while poll still says running, no second
+        # container goes onto the checkpoint, and the cancel is not re-sent
+        # every minute either.
+        self.assertEqual(len(self.calls.spawned), 1)
+        self.clock.t += 60
+        self.assertEqual(d.tick(), 1)
+        self.assertEqual(len(self.calls.spawned), 1)
+        self.assertEqual(self.calls.cancelled, ["fc-001"])
+        # A cancel that has not taken after another grace is asked for again.
+        self.clock.t += 1801
+        self.assertEqual(d.tick(), 1)
+        self.assertEqual(self.calls.cancelled, ["fc-001", "fc-001"])
+        self.assertEqual(len(self.calls.spawned), 1)
+        # Once the call is gone the next pass follows, on the same run id.
+        self.calls.results["fc-001"] = RuntimeError("Input was cancelled")
+        self.assertEqual(d.tick(), 1)
+        self.assertEqual(len(self.calls.spawned), 2)
+        self.assertEqual(self.calls.spawned[-1][1]["runId"], 8000)
+        self.assertEqual(mc.load_state(self.state)["8000"]["pass"], 2)
+        self.assertTrue(any("stopped after cancel" in line for line in self.logged))
+
+    def test_a_failed_cancel_is_retried_and_not_papered_over_with_a_spawn(self):
+        d = self.driver(run_ids=(8000,))
+        d.tick()
+        self.calls.started_ids.add("fc-001")
+        d.tick()
+        self.clock.t = 1000.0 + 4 * 3600 + 1801
+        self.calls.cancel_error = RuntimeError("no route to modal")
+        self.assertEqual(d.tick(), 1)
+        self.assertEqual(len(self.calls.spawned), 1)
+        self.assertNotIn("cancelled_at", mc.load_state(self.state)["8000"])
+        self.calls.cancel_error = None
+        self.clock.t += 60
+        self.assertEqual(d.tick(), 1)
+        self.assertEqual(self.calls.cancelled, ["fc-001"])
+        self.assertEqual(len(self.calls.spawned), 1)
 
     def test_a_solved_pass_stops_everything(self):
         d = self.driver()

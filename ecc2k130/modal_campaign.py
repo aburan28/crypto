@@ -16,8 +16,10 @@ process. This driver:
     running, instead of spawning a second container onto the same checkpoint;
   * when a call returns (the pass reached its deadline), spawns the next pass
     for that run id at once, so the checkpoint is resumed within a minute;
-  * cancels and respawns a call that has run past hours + grace, which is a
-    container that lost its function without returning.
+  * cancels a call that has run past hours + grace since its container took
+    it up (queueing is not pass time), which is a container that lost its
+    function without returning, and spawns the replacement only once the
+    cancelled call has actually stopped.
 
     modal deploy modal_app.py                 # once per code change, same env as run.sh
     python3 modal_campaign.py --run-id-base 8000 --count 4 --hours 4 --packed ...
@@ -76,6 +78,17 @@ class ModalCalls:
             raise Running()
         except TimeoutError:
             raise Running()
+
+    def started(self, call_id):
+        """Whether a container has taken the call up. Modal counts neither
+        queueing nor scheduling against a function's timeout, and runSearch
+        sets its own deadline only once it is running, so neither may count
+        against the pass here either. The call graph is best-effort; while it
+        is empty the call is treated as not started, which only delays a
+        cancel, never brings one forward."""
+        import modal
+        graph = modal.FunctionCall.from_id(call_id).get_call_graph()
+        return any(node.task_id for node in graph if node.function_call_id == call_id)
 
     def cancel(self, call_id):
         import modal
@@ -138,6 +151,14 @@ class Driver:
     def entry(self, run_id):
         return self.state.get(str(run_id))
 
+    def started(self, run_id, call_id):
+        try:
+            return bool(self.calls.started(call_id))
+        except Exception as exc:
+            log("run %d: could not tell whether %s has started: %s: %s"
+                % (run_id, call_id, type(exc).__name__, exc))
+            return False
+
     def spawn(self, run_id, reason):
         entry = self.entry(run_id) or {}
         pass_no = int(entry.get("pass") or 0) + 1
@@ -163,23 +184,44 @@ class Driver:
             try:
                 result = self.calls.poll(entry["call_id"])
             except Running:
-                age = self.now() - float(entry.get("spawned_at") or 0)
+                walking += 1
+                if not entry.get("started_at"):
+                    # The pass clock starts when a container takes the call
+                    # up, not when it was spawned: a call can queue for
+                    # capacity longer than the grace and still be healthy.
+                    if self.started(run_id, entry["call_id"]):
+                        entry["started_at"] = self.now()
+                        save_state(self.state_path, self.state)
+                    continue
+                age = self.now() - float(entry["started_at"])
                 if age > self.hours * 3600 + self.grace_s:
-                    log("run %d: call %s is %.0f s past its deadline; cancelling"
-                        % (run_id, entry["call_id"], age - self.hours * 3600))
-                    try:
-                        self.calls.cancel(entry["call_id"])
-                    except Exception as exc:
-                        log("run %d: cancel failed: %s: %s" % (run_id, type(exc).__name__, exc))
-                    if self.spawn(run_id, "replacing a lost pass"):
-                        walking += 1
-                else:
-                    walking += 1
+                    # Cancel is asynchronous and the container may still be
+                    # writing its checkpoint, so the replacement is not
+                    # spawned here: it follows once the call has left the
+                    # function and poll reports it gone. A cancel that fails
+                    # or does not take is asked for again after another grace.
+                    cancelled_at = float(entry.get("cancelled_at") or 0)
+                    if not cancelled_at or self.now() - cancelled_at > self.grace_s:
+                        log("run %d: call %s is %.0f s past its deadline; cancelling"
+                            % (run_id, entry["call_id"], age - self.hours * 3600))
+                        try:
+                            self.calls.cancel(entry["call_id"])
+                        except Exception as exc:
+                            log("run %d: cancel failed: %s: %s" % (run_id, type(exc).__name__, exc))
+                        else:
+                            entry["cancelled_at"] = self.now()
+                            save_state(self.state_path, self.state)
                 continue
             except Exception as exc:
-                log("run %d: pass %s failed: %s: %s" % (run_id, entry.get("pass"),
-                                                       type(exc).__name__, str(exc)[:300]))
-                if self.spawn(run_id, "after a failed pass"):
+                if entry.get("cancelled_at"):
+                    log("run %d: pass %s stopped after cancel: %s" % (run_id, entry.get("pass"),
+                                                                    type(exc).__name__))
+                    reason = "replacing a lost pass"
+                else:
+                    log("run %d: pass %s failed: %s: %s" % (run_id, entry.get("pass"),
+                                                           type(exc).__name__, str(exc)[:300]))
+                    reason = "after a failed pass"
+                if self.spawn(run_id, reason):
                     walking += 1
                 continue
             log("run %d: pass %s finished -- %s" % (run_id, entry.get("pass"), summarize(result)))

@@ -114,15 +114,20 @@ esac
 
 command -v modal >/dev/null || { echo "modal CLI not found: pip install -U modal" >&2; exit 1; }
 
-# A pass is launched detached and bounded from this side. Without --detach a
-# dropped local connection stops the app: on 2026-09-21 four campaign runners
-# were terminated at 15:23Z that way while the local client kept drawing
-# "Running (4/4 containers active)" for four hours. The containers stop
-# themselves at HOURS; the timeout here is for the client that has stopped
-# hearing from them, so the loop can go round and resume the checkpoints.
+# A pass is bounded from this side too. The containers stop themselves at
+# HOURS; the timeout here is for a client that has stopped hearing from them
+# -- on 2026-09-21 four campaign runners were terminated at 15:23Z while the
+# local client kept drawing "Running (4/4 containers active)" for four hours
+# -- so the loop can go round and resume the checkpoints. Not --detach: the
+# loop below has no record of a pass beyond this client, so the client's exit
+# (this timeout, a Ctrl-C, a dropped shell) must take the ephemeral app and
+# its containers with it, or the next pass, or the operator's restart, opens a
+# second container on the same run id and the two fight over one checkpoint
+# and interleave appends to one corpus. Surviving a dropped shell is what
+# `fleet` is for.
 PASS_TIMEOUT=$(awk "BEGIN{print int($HOURS*3600+1800)}")
 modal_pass() {
-    timeout --signal=INT --kill-after=60 "$PASS_TIMEOUT" modal run --detach "$@"
+    timeout --signal=INT --kill-after=60 "$PASS_TIMEOUT" modal run "$@"
 }
 
 # The campaign curve refuses an implicit run id: every pass of the loop below
