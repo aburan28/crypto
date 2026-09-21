@@ -904,7 +904,13 @@ pub fn generate(args: GenerateArgs) -> Result<Value, String> {
     let k = known(&c, &run)?;
     serde_json::to_value(parameters(&c, &k, args.seed)).map_err(|e| e.to_string())
 }
-pub fn resources() -> Value {
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct ResourceSnapshot {
+    cpu_seconds: Option<f64>,
+    peak_rss_bytes: Option<u64>,
+}
+
+pub(crate) fn resource_snapshot() -> ResourceSnapshot {
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     {
         // libc defines the platform-specific layout; no shell/process inspection is used.
@@ -912,12 +918,37 @@ pub fn resources() -> Value {
         if unsafe { libc::getrusage(libc::RUSAGE_SELF, &mut usage) } == 0 {
             let multiplier = if cfg!(target_os = "macos") { 1 } else { 1024 };
             let seconds = |t: libc::timeval| t.tv_sec as f64 + t.tv_usec as f64 / 1_000_000.0;
-            return json!({"cpu_seconds":seconds(usage.ru_utime)+seconds(usage.ru_stime),
-                "peak_rss_bytes":usage.ru_maxrss.max(0) as u64*multiplier,
-                "scope":"process counters sampled before report emission; peak resident memory, not allocated bytes"});
+            return ResourceSnapshot {
+                cpu_seconds: Some(seconds(usage.ru_utime) + seconds(usage.ru_stime)),
+                peak_rss_bytes: Some(usage.ru_maxrss.max(0) as u64 * multiplier),
+            };
         }
     }
-    json!({"cpu_seconds":null,"peak_rss_bytes":null,"scope":"measurement unavailable on this platform"})
+    ResourceSnapshot {
+        cpu_seconds: None,
+        peak_rss_bytes: None,
+    }
+}
+
+pub(crate) fn resource_delta(start: ResourceSnapshot) -> Value {
+    let end = resource_snapshot();
+    let cpu_seconds = match (start.cpu_seconds, end.cpu_seconds) {
+        (Some(start), Some(end)) => Some((end - start).max(0.0)),
+        _ => None,
+    };
+    json!({"cpu_seconds":cpu_seconds,
+        "peak_rss_bytes_at_end":end.peak_rss_bytes,
+        "scope":"process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"})
+}
+
+pub fn resources() -> Value {
+    let value = resource_snapshot();
+    json!({"cpu_seconds":value.cpu_seconds,"peak_rss_bytes":value.peak_rss_bytes,
+        "scope":if value.cpu_seconds.is_some() {
+            "process counters sampled before report emission; peak resident memory, not allocated bytes"
+        } else {
+            "measurement unavailable on this platform"
+        }})
 }
 fn batch_size(requested: u32) -> usize {
     if requested == 0 {
