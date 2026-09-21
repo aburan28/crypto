@@ -411,7 +411,9 @@ static int run(const Options &o, const unsigned long long *px, const unsigned lo
         *out = buf + i;
     };
 
-    const unsigned long long first = o.skip;
+    // Clamp so a --skip past the corpus is an empty slice, as it was for the
+    // serial loop; unclamped, limit - first below would wrap.
+    const unsigned long long first = o.skip < recs.size() ? o.skip : recs.size();
     unsigned long long limit = recs.size();
     if (o.max && first + o.max < limit) limit = first + o.max;
 
