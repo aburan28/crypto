@@ -380,6 +380,7 @@ struct CudaEngine {
         const size_t T = (size_t)o.threads;
         const size_t fw = T * BATCH * M * sizeof(W);
         const size_t lw = T * BATCH * LANES * sizeof(u64);
+        P.threads = o.threads;    // countElems() below sizes from it
         CUDA_CHECK(cudaMalloc(&P.x, fw));
         CUDA_CHECK(cudaMalloc(&P.y, fw));
         CUDA_CHECK(cudaMalloc(&P.pchain, fw));
@@ -415,7 +416,6 @@ struct CudaEngine {
         P.consts.py = dk + 3;
         P.consts.qx = dk + 6;
         P.consts.qy = dk + 9;
-        P.threads = o.threads;
         P.steps = o.steps;
         P.dpWeight = o.dpWeight;
         P.runId = o.runId;
