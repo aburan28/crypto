@@ -8,7 +8,9 @@ narrow, and two attacks already catalogued in this repository violate it.
 §2.4 states the corrected pattern, §3 the corrected test (R2 restated,
 R5 added), §9 the audit that found it — completed across the repository's
 measured threads in §9.3, which found no further counterexample and split
-R5 into two failure modes.  **The verdict on murmurations is
+R5 into two failure modes; §9.4 adds Cheon as the measured positive
+control, and §9.5 closes §7.3 — the higher-dimensional analogue for plain
+curves exists, and computes the trace.  **The verdict on murmurations is
 unchanged** and does not depend on the repaired clause; see §4.4.
 **Companions:** [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](./RESEARCH_ECDLP_STATE_OF_THE_ART.md) §8,
 [`RESEARCH_DIEM_DESCENT.md`](../index-calculus/RESEARCH_DIEM_DESCENT.md),
@@ -498,8 +500,12 @@ but:
    quasi-subfields (`RESEARCH_QUASI_SUBFIELD.md`).  §2.1 says why: it is
    an attempt to manufacture R1.
 3. **Is there a Kani-analogue for plain curves?**  I.e. a licensing
-   datum that is *not* a subfield and *not* a torsion image.  Unknown,
-   and the only genuinely open question in this note.
+   datum that is *not* a subfield and *not* a torsion image.  **Answered
+   — see §9.5.  There is one, it was built by Robert, and what it computes
+   on a plain curve is the trace and the endomorphism ring.**  Those are
+   exactly the two terminals §4.1 and §5 named in advance, so the question
+   this note called its only open one closes as a confirmation rather than
+   as a lead.
 
 ---
 
@@ -543,6 +549,14 @@ but:
   Pauli 47 (1998).
 - I. Semaev, *Evaluation of discrete logarithms in a group of p-torsion
   points of an elliptic curve in characteristic p*, Math. Comp. 67 (1998).
+
+**The higher-dimensional machinery applied to plain curves (§9.5)**
+- D. Robert, *Some applications of higher dimensional isogenies to
+  elliptic curves (overview of results)*, ePrint 2022/1704.
+- D. Robert, *Evaluating isogenies in polylogarithmic time*,
+  ePrint 2022/1068.
+- D. Robert, *On the efficient representation of isogenies*, survey for
+  NuTMiC 2024.
 
 **Murmurations**
 - Y.-H. He, K.-H. Lee, T. Oliver, A. Pozdnyakov, *Murmurations of
@@ -735,3 +749,60 @@ Two further points that bear directly on this note:
 With this row the pattern has a positive instance measured in the same
 unit as its negative ones, which is what §9.3's evidential position
 needed.
+
+### 9.5 §7.3 answered: the Kani-analogue for plain curves exists, and computes the trace (2026-09-21)
+
+§7.3 asked whether the higher-dimensional machinery has an analogue for
+plain elliptic curves — a licensing datum that is neither a subfield nor a
+torsion image.  It does, and it was built by the person who closed SIDH
+with it.
+
+Damien Robert, *Some applications of higher dimensional isogenies to
+elliptic curves* (ePrint 2022/1704), applies the same **embedding lemma**
+— Kani's lemma generalised to abelian varieties, combined with Zarhin's
+trick — directly to ordinary elliptic curves over finite fields.  It
+works.  What it yields:
+
+| application | result |
+|:--|:--|
+| endomorphism ring of an ordinary `E/F_q` | **polynomial time** in `log q`, given the factorisation of `Δ_π` |
+| canonical lift to precision `m` | `Õ(nm log^{O(1)} p)` |
+| **point counting** | `Õ(n² log^{O(1)} p)` — polynomial in `log p`, unlike a `p`-adic cohomology computation |
+| Siegel modular polynomials | quasi-linear CRT, no heuristic and no GRH |
+
+And on the cryptographic question, Robert's own assessment: *"lifts do not
+seem to help attack (commutative) isogeny based cryptography."*  No ECDLP
+claim is made.
+
+**This is the strongest confirmation in the note, and it is not an
+argument.**  §4.1 asserted that any bridge of this kind terminates in
+`a_q`, which SEA already computes.  §5 asserted that the CM/Deuring route
+terminates in the endomorphism ring and the class-group action.  Both were
+written as predictions about where a hypothetical bridge would land.  The
+bridge exists, its author pointed it at plain elliptic curves, and it
+landed on **point counting and the endomorphism ring** — the two terminals
+named in advance, and nothing else.
+
+Read against the test: the machinery satisfies R1–R3 and R5 comfortably.
+It fails **R4**, exactly and only.  The payload is the trace, and the
+trace was already polynomial-time.  A better algorithm for `#E(F_q)` is a
+real contribution to computational number theory and is worth nothing
+against the discrete logarithm, because the quantity it computes faster is
+one the parameter set publishes.
+
+Three honesties about this entry:
+
+- **Robert's phrasing is a hedge, not a theorem.**  "Do not seem to help"
+  is an assessment by someone well placed to make it, not a proof that the
+  machinery cannot be turned.  It is evidence, not closure.
+- **The endomorphism-ring result is conditional** on being given the
+  factorisation of `Δ_π`, and the unconditional version is quantum
+  polynomial time.  Neither conditional touches R4.
+- **A web search for this question returned this repository's own pull
+  request #446 among its results.**  That is contamination, not
+  corroboration, and nothing in this entry rests on it.  The citations
+  below are the primary sources.
+
+What this does *not* close: F4′ and F5 stand, and §7.1 — which deployed
+protocols publish more than the group element — remains the productive
+question, now with one fewer distraction beside it.

@@ -354,7 +354,13 @@ provisional** until proceedings are confirmed.
    polynomial-time via SEA and already in the parameter set. R5 (the handle must exist at
    cryptographic parameters, not only in a toy regime) is drawn from the Weil-descent
    `NO`-certificate in `RESEARCH_ECC2K130_RR_SOLVER_PANEL.md` §9, which is real and expires
-   at `d = 6` against an existence threshold of `d = 45`.
+   at `d = 6` against an existence threshold of `d = 45`. That note's §9.5 also records the
+   answer to the obvious follow-up — whether the Kani/higher-dimensional machinery has an
+   analogue for plain curves. It does: Robert (ePrint 2022/1704) applies the embedding lemma
+   to ordinary curves and gets the **endomorphism ring in polynomial time** (given the
+   factorisation of `Δ_π`) and **point counting in `Õ(n² log^{O(1)} p)`**, with no ECDLP
+   claim. The machinery lands on the trace, which SEA already computes — a genuine
+   contribution to computational number theory and nothing against the logarithm.
 
 ---
 
