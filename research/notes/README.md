@@ -34,6 +34,7 @@ its old name still identify it.
 | [`RESEARCH_FACTOR_BASE_SOLVE_COST.md`](index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md) | Choosing the factor base for the solver, not for the yield |
 | [`RESEARCH_GROEBNER_F4.md`](index-calculus/RESEARCH_GROEBNER_F4.md) | Minimal Buchberger / matrix-F4 solver |
 | [`RESEARCH_DREG_MEASUREMENT.md`](index-calculus/RESEARCH_DREG_MEASUREMENT.md) | Solving degree vs first-fall degree on binary Semaev systems |
+| [`RESEARCH_DESCENT_CROSSOVER.md`](index-calculus/RESEARCH_DESCENT_CROSSOVER.md) | The descent crossover: why a descended Semaev system's overdetermination and its decomposition yield are one parameter, and the scoping rule that follows for every refutation measurement |
 | [`RESEARCH_FFD_MEASUREMENT.md`](index-calculus/RESEARCH_FFD_MEASUREMENT.md) | First-fall-degree measurement |
 | [`RESEARCH_FFD_PROOF_COMPLEXITY.md`](index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md) | A proof-complexity bridge for the first-fall-degree assumption |
 | [`RESEARCH_FFD_WORKFLOW.md`](index-calculus/RESEARCH_FFD_WORKFLOW.md) | FFD falsification-driven experiment loop |
