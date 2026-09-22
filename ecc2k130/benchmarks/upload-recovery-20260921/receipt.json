@@ -1,6 +1,17 @@
 {
   "base_commit": "dda2b4c07921563747ad530af1c8d2a17a99c786",
   "classification": "engineering and accounting; no algorithmic claim",
+  "database_confirmation": {
+    "checked_at": "2026-09-22 00:55:51.920545+00:00",
+    "duplicate_slots_last_day": 17,
+    "duplicates_last_day": 5885462,
+    "duplicates_last_hour": 0,
+    "latest_duplicate_ingested_at": "2026-09-21 22:17:18.324943+00:00",
+    "method": "read-only SQL through an existing campaign container",
+    "recovered_duplicates": 0,
+    "recovered_objects": 8,
+    "recovered_records": 1191589
+  },
   "initial_snapshot": {
     "dps": 305849248,
     "dps_last_hour": 621822,
@@ -30,7 +41,6 @@
   },
   "limitations": [
     "The aggregate duplicate count does not identify GPU recomputation versus repeated uploads.",
-    "The database was not reachable from the audit host; diagnosis used S3 objects, producer commands, the ingest journal, and the public feed.",
     "One uploader per run is still required; reconciliation is not a distributed writer lease."
   ],
   "recovered_uploads": {

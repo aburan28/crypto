@@ -31,8 +31,12 @@ sync now exits unsuccessfully when any run reports an error.
 
 Live recovery for GPU runs 8000-8003 and CPU runs 9000-9003 uploaded exactly
 1,191,589 pending records in eight objects. The next live pass uploaded zero
-records, objects, or checkpoints. All 74 focused uploader, launch-rule, and
-driver tests passed, including lost state, stale/foreign offsets, overlapping
+records, objects, or checkpoints. Read-only SQL through an existing campaign
+container at 00:55:51 UTC confirmed all eight objects and all 1,191,589 records
+were ingested with zero duplicates. The database also reported zero duplicate
+records in the preceding hour and exactly 5,885,462 across the 17 slots in
+the preceding day; the latest duplicate transaction was 22:17:18 UTC.
+All 74 focused uploader, launch-rule, and driver tests passed, including lost state, stale/foreign offsets, overlapping
 objects, pagination, prefix mismatch, gaps, and failure after point upload.
 
 Separately, process inspection found legacy Modal runs 4242-4245 still walking
