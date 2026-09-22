@@ -442,6 +442,8 @@ pub struct GbStats {
     /// `mono_ops`, `reduction_steps` and `wall_ns`, identical to the
     /// engine before they were added.
     pub field_pairs: u64,
+    /// Field pairs the chain criterion dropped unreduced; see the loop.
+    pub field_pairs_chain_skipped: u64,
     /// New basis elements a field pair produced: the ones an engine that
     /// paired basis elements only with each other would have missed.
     /// Also counted in `new_generators`.
@@ -500,14 +502,16 @@ fn reduce_counted(r: &F2BoolPoly, basis: &[F2BoolPoly], st: &mut GbStats) -> F2B
 /// Queue `g`'s field pairs: one per variable of its leading monomial.
 /// A variable outside it gives coprime leading monomials, and Buchberger's
 /// first criterion already says that S-polynomial reduces to zero.
-fn queue_field_pairs(i: usize, g: &F2BoolPoly, field: &mut Vec<(usize, u32, u32)>) {
-    let Some(lm) = g.lt() else { return };
+/// Returns the variables queued, as a mask.
+fn queue_field_pairs(i: usize, g: &F2BoolPoly, field: &mut Vec<(usize, u32, u32)>) -> u64 {
+    let Some(lm) = g.lt() else { return 0 };
     let degree = lm.degree() + 1;
     for k in 0..64u32 {
         if lm.mask >> k & 1 == 1 {
             field.push((i, k, degree));
         }
     }
+    lm.mask
 }
 
 fn basis_monomials(basis: &[F2BoolPoly]) -> u64 {
@@ -561,8 +565,11 @@ pub fn groebner_basis_f2_within(
     // `lcm(LM(g), v_k²)`, the nominal degree the semi-regular bound counts
     // the field equations at.  Drained only when the S-pair queue is empty.
     let mut field: Vec<(usize, u32, u32)> = Vec::new();
+    // `pending[i]` has bit `k` set while `(i, v_k)` is still queued, so the
+    // chain criterion below can ask that in constant time.
+    let mut pending: Vec<u64> = Vec::new();
     for (i, p) in basis.iter().enumerate() {
-        queue_field_pairs(i, p, &mut field);
+        pending.push(queue_field_pairs(i, p, &mut field));
     }
 
     loop {
@@ -581,6 +588,28 @@ pub fn groebner_basis_f2_within(
                 break;
             };
             let (i, k, degree) = field.swap_remove(min_idx);
+            pending[i] &= !(1u64 << k);
+            // The chain criterion with the field equation as the third
+            // element.  `lcm(LM(g_i), v_k²) = LM(g_i)·v_k`, and a multilinear
+            // `LM(g_j)` divides that exactly when it divides `LM(g_i)`.  The
+            // pair can be dropped when some such `g_j` has had both of its
+            // pairs treated: `(i, j)` has, because this queue only drains
+            // with the S-pair queue empty, and `(j, v_k)` has when it has
+            // left the queue or never entered it, `v_k` being outside
+            // `LM(g_j)` and the pair coprime.  Field pairs leave
+            // lowest-degree first, so a divisor's go before its multiples'.
+            // Without this the redundant elements that interreduction drops
+            // at the end carry most of the field pairs: 60 to 2 100 per
+            // target on the descent systems, against a final basis of 4 to 9.
+            let lm_i = basis[i].lt().unwrap().mask;
+            if (0..basis.len()).any(|j| {
+                j != i
+                    && basis[j].lt().is_some_and(|l| l.mask & !lm_i == 0)
+                    && pending[j] >> k & 1 == 0
+            }) {
+                st.field_pairs_chain_skipped += 1;
+                continue;
+            }
             st.field_pairs += 1;
             let before = st.mono_ops;
             let product = mul_mono_counted(&basis[i], F2BoolMono::var(k), &mut st);
@@ -601,7 +630,7 @@ pub fn groebner_basis_f2_within(
                     let lcm_deg = basis[j].lt().unwrap().lcm(r_lt).degree();
                     pairs.push((j, new_idx, lcm_deg));
                 }
-                queue_field_pairs(new_idx, &r, &mut field);
+                pending.push(queue_field_pairs(new_idx, &r, &mut field));
                 basis.push(r);
                 st.peak_basis_monomials = st.peak_basis_monomials.max(basis_monomials(&basis));
             }
@@ -662,7 +691,7 @@ pub fn groebner_basis_f2_within(
                 let lcm_deg = basis[k].lt().unwrap().lcm(r_lt).degree();
                 pairs.push((k, new_idx, lcm_deg));
             }
-            queue_field_pairs(new_idx, &r, &mut field);
+            pending.push(queue_field_pairs(new_idx, &r, &mut field));
             basis.push(r);
             st.peak_basis_monomials = st.peak_basis_monomials.max(basis_monomials(&basis));
         }
