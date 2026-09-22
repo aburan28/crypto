@@ -1455,6 +1455,73 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="koblitz-collection-window-20260921">
+    <div class="panel-head">
+      <h2>The rungs were scanning the whole base</h2>
+      <p>Class <span class="chip">engineering</span>. Collection is 97.8% of this pipeline and the ledger
+        rungs scanned the entire factor base per probe. A full <code>m = 3</code> scan meets each triple
+        three times &mdash; once for each summand that can be the third &mdash; and keeps one sorted
+        witness, discarding two; a window of <code>w</code> keeps all three chances at
+        <code>w/|F|</code> of the scan. Priced end to end at equal <em>relation yield</em>, that is about
+        <b>2.5&times; fewer operations</b> on both rungs. The generic floor does not move &mdash; the
+        window changes no count it bounds &mdash; and the contract's count floor, which is on
+        <em>attempts</em>, gets <em>worse</em>: a window spends more trials per relation, not fewer. What
+        falls is summand scans, which that floor does not bound. Frozen source:
+        <code>docs/ic/runs/koblitz-collection-window-20260921.json</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Same curve, base, seed, targets and descent on each rung; only the window varies, and the
+        trial count is sized so every row banks the same relations. Unit is a batched group addition.
+        Re-priced on 2026-09-22 at the scan constant measured for each row's own base width and window
+        &mdash; the original figures, which used one full-scan constant per degree, stay on their rows as
+        the &ldquo;before&rdquo; mark and in the frozen file.</caption>
+      <thead>
+        <tr><th scope="col">Variant</th><th scope="col" class="n">|F|</th><th scope="col" class="n">Window</th>
+          <th scope="col" class="n">Scans</th><th scope="col" class="n">Relations</th>
+          <th scope="col" class="n">Total adds</th><th scope="col" class="n">S</th>
+          <th scope="col" class="n">vs rho</th><th scope="col" class="n">Speedup</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>n53 full scan</td><td class="n">15,264</td><td class="n">&mdash;</td>
+          <td class="n">242,514,432</td><td class="n">458</td><td class="n">610,287,145</td>
+          <td class="n">4.1573</td><td class="n">19.14&times;</td><td class="n">&mdash;</td></tr>
+        <tr><td>n53 window 1,908</td><td class="n">15,264</td><td class="n">1,908</td>
+          <td class="n">95,636,592</td><td class="n">444</td><td class="n">244,576,591</td>
+          <td class="n">1.6660</td><td class="n">7.67&times;</td><td class="n">2.495&times;</td></tr>
+        <tr><td>n53 window 954</td><td class="n">15,264</td><td class="n">954</td>
+          <td class="n">91,091,736</td><td class="n">444</td><td class="n">237,061,975</td>
+          <td class="n">1.6148</td><td class="n">7.43&times;</td><td class="n">2.574&times;</td></tr>
+        <tr><td><b>n53 window 477</b></td><td class="n">15,264</td><td class="n">477</td>
+          <td class="n">85,860,000</td><td class="n">443</td><td class="n">226,915,356</td>
+          <td class="n">1.5458</td><td class="n">7.12&times;</td>
+          <td class="n"><b>2.689&times;</b> <span class="was">was 2.715&times;</span></td></tr>
+        <tr><td>&nbsp;&nbsp;holdout</td><td class="n">15,264</td><td class="n">477</td>
+          <td class="n">85,860,000</td><td class="n">443</td><td class="n">222,982,723</td>
+          <td class="n">1.5190</td><td class="n">6.99&times;</td><td class="n">&mdash;</td></tr>
+        <tr><td>n41 full scan</td><td class="n">5,248</td><td class="n">&mdash;</td>
+          <td class="n">15,072,256</td><td class="n">124</td><td class="n">33,586,338</td>
+          <td class="n">1.4156</td><td class="n">8.50&times;</td><td class="n">&mdash;</td></tr>
+        <tr><td>n41 window 164</td><td class="n">5,248</td><td class="n">164</td>
+          <td class="n">5,432,992</td><td class="n">120</td><td class="n">13,760,190</td>
+          <td class="n">0.5799</td><td class="n">3.48&times; <span class="was">was 3.24&times;</span></td>
+          <td class="n">2.441&times;</td></tr>
+      </tbody>
+    </table></div>
+    <div class="facts">
+      <span><b>A first pass sized the windows wrong.</b> It equalised <em>scans</em> instead of
+        relations, so every window over-collected &mdash; 1,652 and 1,735 relations where 458 were needed
+        &mdash; and the totals came out at 0.63&times; and 1.00&times;. A gain in yield is not a gain in
+        cost until the trial count comes down to bank it.</span>
+      <span><b>The frozen ledger rungs are deliberately unchanged.</b> They are the regression baseline;
+        rewriting their parameters would change what the gate measures and break comparability with
+        references v1&ndash;v4. Whether the benchmark should track the best known configuration is a
+        question for the repository, raised in the evidence file rather than decided here.</span>
+      <span><b>Re-priced, small and not all one way.</b> At n = 53 the windowed constants (2.42&ndash;2.48)
+        sit below the 2.490 first used, so those rows were marginally overcharged; at n = 41 window 164
+        was undercharged, 2.31 against a measured 2.43. Original values retained in the frozen file.</span>
+    </div>
+  </div>
+
   <div class="panel" id="koblitz-collection-aim-20260922">
     <div class="panel-head">
       <h2>Collection was waiting for rank, not coverage &mdash; and the relation count is now at its floor</h2>

@@ -3003,6 +3003,64 @@ command rather than a thing to remember.
 priced, and a limitation was attributed to the wrong variable and is now
 attributed to the right one.
 
+## The rungs were scanning the whole base — 2026-09-21
+
+The previous round established that relation collection is 97.8% of the
+whole pipeline and everything else together is 2.2%. This attacks the
+97.8%.
+
+A full `m = 3` scan meets each triple three times — once for each of its
+summands standing as the third — and keeps one sorted witness, throwing
+two away. A window of `w` keeps all three chances at `w/|F|` of the scan,
+so relations per summand scanned rise towards three times the full scan's
+while the cost per probe falls to `w/|F|`. The mechanism already existed
+and most parameter files used it; the three ledger rungs did not, so they
+paid the redundancy on the phase that holds the cost.
+
+Priced end to end at equal *relation yield* — the first attempt sized the
+windows to equal **scans** instead, which made every window over-collect
+and produced ratios of 0.63× and 1.00×; a gain in yield is not a gain in
+cost until the trials come down to bank it. Same curve, base, seed,
+targets and descent, 32 of 32 verified and every column covered on every
+row:
+
+| variant | `|F|` | window | scans | relations | total adds | `S` | `/rho` | speedup |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| n53 full scan | 15,264 | — | 242,514,432 | 458 | 610,287,145 | 4.1573 | 19.14 | — |
+| n53 window 1,908 | 15,264 | 1,908 | 95,636,592 | 444 | 244,576,591 | 1.6660 | 7.67 | 2.495× |
+| n53 window 954 | 15,264 | 954 | 91,091,736 | 444 | 237,061,975 | 1.6148 | 7.43 | 2.574× |
+| **n53 window 477** | 15,264 | 477 | 85,860,000 | 443 | 226,915,356 | 1.5458 | 7.12 | **2.689×** |
+| n53 window 477, holdout | 15,264 | 477 | 85,860,000 | 443 | 222,982,723 | 1.5190 | 6.99 | — |
+| n41 full scan | 5,248 | — | 15,072,256 | 124 | 33,586,338 | 1.4156 | 8.50 | — |
+| n41 window 164 | 5,248 | 164 | 5,432,992 | 120 | 13,760,190 | 0.5799 | 3.48 | 2.441× |
+
+**Class: engineering.** `S` fell by about `2.5×` on both rungs. The
+generic floor is unmoved — the window changes no count it bounds — and
+the contract's count floor is on *attempts*, which the window makes
+**worse**: it spends more trials per relation, not fewer. What falls is
+summand scans, which that floor does not bound. So this is a real
+reduction in the dominant phase and not a statement about the boundary.
+
+The frozen ledger rungs are deliberately **unchanged**. They are the
+regression baseline, and rewriting their parameters would change what the
+gate measures and break comparability with references v1–v4. Whether the
+benchmark should track the best known configuration is a question for the
+repository, raised in the evidence file rather than decided here.
+
+### Re-priced on 2026-09-22
+
+The figures above are not the ones this round first reported. Every row
+had been priced at one adds-per-summand constant per degree, taken from
+the full scan; the next round measured that the constant depends on the
+window and the base width as well. The effect is small and not all in one
+direction: at `n = 53` the windowed constants (`2.42`–`2.48`) sit
+slightly *below* the `2.490` used, so those rows were marginally
+overcharged and `2.715×` becomes `2.689×`; at `n = 41` window 164 was
+undercharged at `2.31` against a measured `2.43`, so `3.24×` rho becomes
+`3.48×`. The original values are retained in
+`docs/ic/runs/koblitz-collection-window-20260921.json` beside the
+re-priced ones.
+
 ## Collection was waiting for rank, not coverage — 2026-09-22
 
 Collection is 60% of this pipeline and its cost is proportional to the
