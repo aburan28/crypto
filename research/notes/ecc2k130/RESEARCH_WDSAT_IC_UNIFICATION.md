@@ -70,7 +70,8 @@ The `mq-fes` backend ports the ALMASTY
 
 | backend | when used | measured vs Möbius / baseline |
 |---|---|---|
-| Incremental Gray (libfes FFS, `L=4` + `Fl[0..4]` register block) | `find_one` / Semaev lift (early exit); default full enum | **~337×** wall faster than full Möbius on planted early root; **~37×** vs prior O(n)/step Gray on full `n=18` enum |
+| Incremental Gray (libfes FFS, `L=4` + `Fl[0..4]` register block) | `find_one` / Semaev lift (early exit); default full enum | **~337×** wall faster than full Möbius on planted early root; **~37–50×** vs prior O(n)/step Gray on full `n=18` enum |
+| `u32` L=4 twin (`m≤32`) | opt-in | ties or loses to `u64` at fit sizes (~0.9–1.0×); tables already L1-resident |
 | Parallel outer specialisation (rayon, 4 outer bits) | opt-in (`gray_ffs_parallel_outer`) | within noise of serial `L=4` at `n=20` on a 4-core host (~0.96–1.34×); specialisation tax dominates below that |
 | Möbius transform (`moebius.c`) | `find_all` for `n ≤ 24` | reference for all-roots |
 | Monica hybrid (`monica.c`) | `n > 24` (range extension) | does **not** beat Möbius inside `n ≤ 24` (release wall on `n=14,m=32` was ~0.22×); calibrated cost model agrees |

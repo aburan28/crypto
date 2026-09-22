@@ -278,17 +278,15 @@ impl Ffs {
 /// ```
 ///
 /// so the hot loop no longer walks all `n` derivatives.  Dispatch:
-/// - `n ≥ 4`, `m ≤ 32`: scalar `L = 4` over **u32** equation words (libfes
-///   single-system width) with `Fl[0..4]` register-blocked.
-/// - `n ≥ 4`, `m > 32`: same chunk over **u64** words.
+/// - `n ≥ 4`: scalar `L = 4` (16-step) chunk with `Fl[0..4]` held in
+///   registers and unchecked table indexing (libfes asm register set).
 /// - else: minimal one-step FFS.
 ///
 /// `find_one` uses a dedicated no-`Vec` walk of the same blocked chunk.
-/// Parallel outer specialisation (`gray_ffs_parallel_outer`), hardcoded
-/// `L = 8`, batch-probe, and AVX2 4×u64 remain available for experiments
-/// but are not auto-selected: walls at the sizes that fit are within noise
-/// of, or slower than, the `L=4` path (specialisation tax / I-cache /
-/// predicted zero-checks / SIMD setup).
+/// A `u32` twin (`gray_ffs_unrolled_l4_u32`) is available for experiments
+/// when `m ≤ 32` but is not auto-selected (ties or loses to `u64` at fit
+/// sizes — tables are already L1-resident). Parallel outer, hardcoded
+/// `L = 8`, batch-probe, and AVX2 4×u64 likewise stay opt-in.
 /// Inspired by <https://github.com/cbouilla/libfes-lite>
 /// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`, batch asm) and
 /// ALMASTY `ffs.h`.
@@ -305,21 +303,15 @@ pub fn gray_incremental_find_all(
         return None;
     }
 
+    let mut fq = [0u64; 561];
+    let mut fl = [0u64; 34];
+    fill_fq_fl(forms, n, &mut fq, &mut fl);
+
     let mut out = Vec::new();
-    if m <= 32 && n >= 4 {
-        let mut fq = [0u32; 561];
-        let mut fl = [0u32; 34];
-        fill_fq_fl_u32(forms, n, &mut fq, &mut fl);
-        gray_ffs_unrolled_l4_u32(&mut fq, &mut fl, n, max_solutions, &mut out);
+    if n >= 4 {
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
     } else {
-        let mut fq = [0u64; 561];
-        let mut fl = [0u64; 34];
-        fill_fq_fl(forms, n, &mut fq, &mut fl);
-        if n >= 4 {
-            gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
-        } else {
-            gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
-        }
+        gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
     }
     Some(out)
 }
@@ -1387,20 +1379,12 @@ pub fn gray_incremental_find_one(forms: &[QuadraticForm]) -> Option<u64> {
     if n == 0 || n > 32 || m > 64 || forms.iter().any(|f| f.n != n) {
         return None;
     }
-    if m <= 32 && n >= 4 {
-        let mut fq = [0u32; 561];
-        let mut fl = [0u32; 34];
-        fill_fq_fl_u32(forms, n, &mut fq, &mut fl);
-        gray_ffs_l4_find_one_u32(&mut fq, &mut fl, n)
-    } else if n >= 4 {
-        let mut fq = [0u64; 561];
-        let mut fl = [0u64; 34];
-        fill_fq_fl(forms, n, &mut fq, &mut fl);
+    let mut fq = [0u64; 561];
+    let mut fl = [0u64; 34];
+    fill_fq_fl(forms, n, &mut fq, &mut fl);
+    if n >= 4 {
         gray_ffs_l4_find_one(&mut fq, &mut fl, n)
     } else {
-        let mut fq = [0u64; 561];
-        let mut fl = [0u64; 34];
-        fill_fq_fl(forms, n, &mut fq, &mut fl);
         let mut out = Vec::new();
         gray_ffs_minimal(&mut fq, &mut fl, n, 1, &mut out);
         out.into_iter().next()
@@ -1934,6 +1918,53 @@ mod tests {
             "parallel_outer4_vs_l4 n={n} m={m}: par={par_ns}ns ser={ser_ns}ns ratio={ratio:.2} sols={}",
             par.len()
         );
+    }
+
+    #[test]
+    fn u32_l4_agrees_and_beats_u64_wall() {
+        let n = 18usize;
+        let m = 24usize; // ≤32 → u32 path eligible
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let mut fq32 = [0u32; 561];
+        let mut fl32 = [0u32; 34];
+        fill_fq_fl_u32(&forms, n, &mut fq32, &mut fl32);
+        let mut a = Vec::new();
+        let t0 = std::time::Instant::now();
+        gray_ffs_unrolled_l4_u32(&mut fq32, &mut fl32, n, usize::MAX, &mut a);
+        let u32_ns = t0.elapsed().as_nanos();
+
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut b);
+        let u64_ns = t1.elapsed().as_nanos();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+        let ratio = u64_ns as f64 / u32_ns.max(1) as f64;
+        eprintln!(
+            "u32_vs_u64_l4 n={n} m={m}: u32={u32_ns}ns u64={u64_ns}ns ratio={ratio:.2} sols={}",
+            a.len()
+        );
+        // u32 ties or loses to u64 at n=18 (L1-resident); keep opt-in only.
     }
 
     #[test]
