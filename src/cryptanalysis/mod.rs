@@ -180,6 +180,8 @@ pub mod mlwe;
 pub mod modular_polynomial;
 pub mod mov_attack;
 pub mod mq_fes;
+pub mod mq_fes_avx2;
+pub mod mq_fes_l8_steps;
 pub mod mq_monica;
 pub mod multi_key_hnp;
 pub mod nonanom_formal_log;

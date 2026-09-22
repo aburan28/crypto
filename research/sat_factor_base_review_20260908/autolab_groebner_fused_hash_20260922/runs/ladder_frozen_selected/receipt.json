@@ -1,0 +1,24 @@
+{
+  "child_system_ms": 7.332,
+  "child_user_ms": 4278.277,
+  "command": [
+    "target/release/examples/groebner_stage_bench",
+    "--out",
+    "research/sat_factor_base_review_20260908/autolab_groebner_fused_hash_20260922/runs/ladder_frozen_selected/artifact",
+    "--label",
+    "ladder_frozen_selected"
+  ],
+  "ended_unix_ns": 1790092494913297000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/groebner_stage_bench",
+  "executable_sha256": "7239fa28745f981175ba55144c10fe63a59fb9abfb07dbc0aa1a90492b587dae",
+  "exit_code": 0,
+  "peak_rss_bytes": 14925824,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790092490095624000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 1118,
+  "stdout_sha256": "c81c408bbe62ff634f2301158a13a7cc881ac88a71ee770aeede1cf15cd5db52",
+  "task_id": "TASK-KIC-GROEBNER-FUSED-HASH-LADDER-FROZEN-SELECTED-20260922",
+  "wall_ms": 4817.6815
+}

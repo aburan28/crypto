@@ -215,23 +215,23 @@ pub fn fes_find_all(forms: &[QuadraticForm], max_solutions: usize) -> Vec<u64> {
 
 /// Triangular index of the monomial `x_i x_j` with `i < j` (libfes `idxq`).
 #[inline]
-fn idxq(i: usize, j: usize) -> usize {
+pub(crate) fn idxq(i: usize, j: usize) -> usize {
     debug_assert!(i < j);
     j * (j - 1) / 2 + i
 }
 
 /// Bitner–Ehrlich–Reingold focus pointers (`libfes-lite` / ALMASTY `ffs.h`).
 #[derive(Clone, Debug)]
-struct Ffs {
+pub(crate) struct Ffs {
     focus: [i32; 34],
     stack: [i32; 33],
     sp: i32,
-    k1: i32,
-    k2: i32,
+    pub(crate) k1: i32,
+    pub(crate) k2: i32,
 }
 
 impl Ffs {
-    fn reset(n: usize) -> Self {
+    pub(crate) fn reset(n: usize) -> Self {
         let mut focus = [0i32; 34];
         for j in 0..=32 {
             focus[j] = j as i32;
@@ -248,7 +248,7 @@ impl Ffs {
     }
 
     #[inline]
-    fn step(&mut self) {
+    pub(crate) fn step(&mut self) {
         let j = self.focus[0];
         self.focus[0] = 0;
         self.focus[j as usize] = self.focus[(j + 1) as usize];
@@ -271,11 +271,18 @@ impl Ffs {
 ///     Fl[0]    ^= Fl[1+k1];
 /// ```
 ///
-/// so the hot loop no longer walks all `n` derivatives.  For `n ≥ 4` the
-/// search uses a 16-way unrolled chunk (`L = 4`) matching
-/// `feslite_generic_enum_1x32`.  Early exit on the first common zero still
-/// applies.  Inspired by <https://github.com/cbouilla/libfes-lite>
-/// (`generic_minimal.c`, `generic_1x32.c`) and ALMASTY `ffs.h`.
+/// so the hot loop no longer walks all `n` derivatives.  Dispatch:
+/// - `n ≥ 14` and multi-root: **parallel outer specialisation** (rayon over
+///   the top 4 Boolean variables → 16 independent `L=4` walks).
+/// - `n ≥ 4`: scalar `L = 4` (16-step) chunk with `Fl[0]` kept in a register.
+/// - else: minimal one-step FFS.
+///
+/// Hardcoded `L = 8`, batch-probe, and AVX2 4×u64 remain available for
+/// experiments but are not auto-selected (I-cache / rewind / SIMD overhead
+/// lose to the packed-u64 `L=4` path on this host).
+/// Inspired by <https://github.com/cbouilla/libfes-lite>
+/// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`, batch asm) and
+/// ALMASTY `ffs.h`.
 pub fn gray_incremental_find_all(
     forms: &[QuadraticForm],
     max_solutions: usize,
@@ -289,10 +296,39 @@ pub fn gray_incremental_find_all(
         return None;
     }
 
-    // Stack tables: Fq through fictive n+1 is at most idxq(0,34)=561; Fl ≤ 34.
+    // Parallel outer specialisation for large full enums / multi-root lifts.
+    const PARALLEL_OUTER: usize = 4;
+    if max_solutions > 1 && n >= 4 + PARALLEL_OUTER + 4 {
+        return Some(gray_ffs_parallel_outer(
+            forms,
+            n,
+            max_solutions,
+            PARALLEL_OUTER,
+        ));
+    }
+
     let mut fq = [0u64; 561];
     let mut fl = [0u64; 34];
+    fill_fq_fl(forms, n, &mut fq, &mut fl);
 
+    let mut out = Vec::new();
+    if n >= 4 {
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
+    } else {
+        gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
+    }
+    Some(out)
+}
+
+/// Pack ANF coefficients into the libfes Fq / Fl tables (with fictive vars).
+pub(crate) fn fill_fq_fl(
+    forms: &[QuadraticForm],
+    n: usize,
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+) {
+    fq.fill(0);
+    fl.fill(0);
     for (eq, form) in forms.iter().enumerate() {
         let bit = 1u64 << eq;
         if form.constant {
@@ -309,7 +345,6 @@ pub fn gray_incremental_find_all(
             }
         }
     }
-
     for i in 0..n {
         fq[idxq(i, n)] = 0;
     }
@@ -318,14 +353,138 @@ pub fn gray_incremental_find_all(
         fq[idxq(i, n + 1)] = fq[idxq(i - 1, i)];
     }
     fq[idxq(n, n + 1)] = 0;
+}
+
+/// Specialise the top `outer` variables to the bit-pattern `lane`, writing
+/// the induced system on the remaining `n_inner = n - outer` variables into
+/// `fq`/`fl` (with fictive padding).  Mirrors libfes / AVX2 lane setup.
+pub(crate) fn specialize_outer_to_tables(
+    forms: &[QuadraticForm],
+    n: usize,
+    outer: usize,
+    lane: u32,
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+) {
+    let n_inner = n - outer;
+    fq.fill(0);
+    fl.fill(0);
+    let m = forms.len();
+    for (eq, form) in forms.iter().enumerate().take(m) {
+        let bit = 1u64 << eq;
+        let mut c = form.constant;
+        let mut lin = vec![false; n_inner];
+        let mut quad = vec![vec![false; n_inner]; n_inner];
+
+        let val = |v: usize| -> Option<bool> {
+            if v < n_inner {
+                None
+            } else {
+                Some(((lane >> (v - n_inner)) & 1) == 1)
+            }
+        };
+
+        for i in 0..n {
+            if form.linear[i] {
+                match val(i) {
+                    Some(true) => c = !c,
+                    Some(false) => {}
+                    None => lin[i] = !lin[i],
+                }
+            }
+        }
+        for i in 0..n {
+            for j in 0..i {
+                if !form.quad[i][j] {
+                    continue;
+                }
+                match (val(i), val(j)) {
+                    (Some(true), Some(true)) => c = !c,
+                    (Some(true), None) => lin[j] = !lin[j],
+                    (None, Some(true)) => lin[i] = !lin[i],
+                    (None, None) => quad[i][j] = !quad[i][j],
+                    _ => {}
+                }
+            }
+        }
+
+        if c {
+            fl[0] ^= bit;
+        }
+        for i in 0..n_inner {
+            if lin[i] {
+                fl[1 + i] ^= bit;
+            }
+            for j in 0..i {
+                if quad[i][j] {
+                    fq[idxq(j, i)] ^= bit;
+                }
+            }
+        }
+    }
+    for i in 0..n_inner {
+        fq[idxq(i, n_inner)] = 0;
+    }
+    fq[idxq(0, n_inner + 1)] = 0;
+    for i in 1..n_inner {
+        fq[idxq(i, n_inner + 1)] = fq[idxq(i - 1, i)];
+    }
+    fq[idxq(n_inner, n_inner + 1)] = 0;
+}
+
+/// Rayon over `2^outer` specialised subsystems (independent Gray walks).
+pub(crate) fn gray_ffs_parallel_outer(
+    forms: &[QuadraticForm],
+    n: usize,
+    max_solutions: usize,
+    outer: usize,
+) -> Vec<u64> {
+    use rayon::prelude::*;
+    let n_inner = n - outer;
+    let lanes = 1u32 << outer;
+    // Each lane may collect up to the global cap; merge truncates.  (Splitting
+    // the budget across lanes can miss a lane-heavy solution set.)
+    let per_lane = max_solutions;
+
+    let parts: Vec<Vec<u64>> = (0..lanes)
+        .into_par_iter()
+        .map(|lane| {
+            let mut fq = [0u64; 561];
+            let mut fl = [0u64; 34];
+            specialize_outer_to_tables(forms, n, outer, lane, &mut fq, &mut fl);
+            let mut local = Vec::new();
+            if n_inner >= 4 {
+                gray_ffs_unrolled_l4(&mut fq, &mut fl, n_inner, per_lane, &mut local);
+            } else {
+                gray_ffs_minimal(&mut fq, &mut fl, n_inner, per_lane, &mut local);
+            }
+            let shift = n_inner as u64;
+            for x in &mut local {
+                *x |= (lane as u64) << shift;
+            }
+            local
+        })
+        .collect();
 
     let mut out = Vec::new();
-    if n >= 4 {
-        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
-    } else {
-        gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
+    for part in parts {
+        for x in part {
+            out.push(x);
+            if out.len() >= max_solutions {
+                return out;
+            }
+        }
     }
-    Some(out)
+    out
+}
+
+/// Heuristic: AVX2 batch-probe vs scalar `L=4` batch on this host.
+/// Tuned from release walls; engineering lever only (floor unchanged).
+#[inline]
+pub fn prefer_avx2_batch(n: usize, m: usize, max_solutions: usize) -> bool {
+    let _ = (n, m, max_solutions);
+    // Measured slower than hardcoded scalar L=4/L=8 on this host; keep false.
+    false
 }
 
 /// libfes `generic_minimal`: one FFS step per point.
@@ -372,8 +531,33 @@ fn step2(fq: &[u64; 561], fl: &mut [u64; 34], a: usize, b: usize, index: u64, ou
     false
 }
 
+/// Hot-path step with `Fl[0]` held in a register (`v`) and unchecked indexing.
+#[inline(always)]
+unsafe fn step2_fast(
+    fq: &[u64; 561],
+    fl: &mut [u64; 34],
+    v: &mut u64,
+    a: usize,
+    b: usize,
+    index: u64,
+    out: &mut Vec<u64>,
+    max_solutions: usize,
+) -> bool {
+    if *v == 0 {
+        out.push(index ^ (index >> 1));
+        if out.len() >= max_solutions {
+            fl[0] = *v;
+            return true;
+        }
+    }
+    let fa = fl.get_unchecked_mut(a);
+    *fa ^= *fq.get_unchecked(b);
+    *v ^= *fa;
+    false
+}
+
 /// libfes `generic_1x32` / `UNROLLED_CHUNK`: 16 Gray steps per FFS advance.
-fn gray_ffs_unrolled_l4(
+pub(crate) fn gray_ffs_unrolled_l4(
     fq: &mut [u64; 561],
     fl: &mut [u64; 34],
     n: usize,
@@ -393,7 +577,104 @@ fn gray_ffs_unrolled_l4(
         let beta = (1 + k1) as usize;
         let gamma = idxq(k1 as usize, k2 as usize);
         let base = j << L;
-        // Hard-coded 16-step Gray chunk (libfes UNROLLED_CHUNK).
+        let mut v = fl[0];
+        // Hard-coded 16-step Gray chunk with Fl[0] in a local.
+        let done = unsafe {
+            step2_fast(fq, fl, &mut v, 1, alpha, base, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 2, alpha + 1, base + 1, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 0, base + 2, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 3, alpha + 2, base + 3, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 1, base + 4, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 2, 2, base + 5, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 0, base + 6, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 4, alpha + 3, base + 7, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 3, base + 8, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 2, 4, base + 9, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 0, base + 10, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 3, 5, base + 11, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 1, base + 12, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 2, 2, base + 13, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 0, base + 14, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, beta, gamma, base + 15, out, max_solutions)
+        };
+        fl[0] = v;
+        if done {
+            return;
+        }
+    }
+}
+
+#[inline(always)]
+fn step2_update(fq: &[u64; 561], fl: &mut [u64; 34], a: usize, b: usize) {
+    fl[a] ^= fq[b];
+    fl[0] ^= fl[a];
+}
+
+/// `L = 4` batch probe: update without recording; on a hit, rewind and harvest.
+///
+/// Wins on sparse / unsat full enums (most chunks have `Fl[0] ≠ 0` the whole
+/// way) by dropping per-step solution branches from the common path.
+pub(crate) fn gray_ffs_unrolled_l4_batch(
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    const L: usize = 4;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+
+        let fl_save = *fl;
+        let mut hit = false;
+        // Probe the 16-step chunk (same order as UNROLLED_CHUNK).
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, alpha);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 2, alpha + 1);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 0);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 3, alpha + 2);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 1);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 2, 2);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 0);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 4, alpha + 3);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 3);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 2, 4);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 0);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 3, 5);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 1);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 2, 2);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 0);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, beta, gamma);
+
+        if !hit {
+            continue;
+        }
+        *fl = fl_save;
         if step2(fq, fl, 1, alpha, base, out, max_solutions)
             || step2(fq, fl, 2, alpha + 1, base + 1, out, max_solutions)
             || step2(fq, fl, 1, 0, base + 2, out, max_solutions)
@@ -411,6 +692,363 @@ fn gray_ffs_unrolled_l4(
             || step2(fq, fl, 1, 0, base + 14, out, max_solutions)
             || step2(fq, fl, beta, gamma, base + 15, out, max_solutions)
         {
+            return;
+        }
+    }
+}
+
+#[inline(always)]
+fn l8_fq_index(kind: u8, payload: u16, alpha: usize) -> usize {
+    if kind == 0 {
+        payload as usize
+    } else {
+        alpha + payload as usize
+    }
+}
+
+/// Hard-coded `L = 8` (256-step) Gray chunk — matches libfes UNROLLED_CHUNK.
+pub(crate) fn gray_ffs_unrolled_l8(
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    const L: usize = 8;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+        if false
+            || step2(fq, fl, 1, alpha + 0, base + 0, out, max_solutions)
+            || step2(fq, fl, 2, alpha + 1, base + 1, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 2, out, max_solutions)
+            || step2(fq, fl, 3, alpha + 2, base + 3, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 4, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 5, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 6, out, max_solutions)
+            || step2(fq, fl, 4, alpha + 3, base + 7, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 8, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 9, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 10, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 11, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 12, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 13, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 14, out, max_solutions)
+            || step2(fq, fl, 5, alpha + 4, base + 15, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 16, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 17, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 18, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 19, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 20, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 21, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 22, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 23, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 24, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 25, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 26, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 27, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 28, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 29, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 30, out, max_solutions)
+            || step2(fq, fl, 6, alpha + 5, base + 31, out, max_solutions)
+            || step2(fq, fl, 1, 10, base + 32, out, max_solutions)
+            || step2(fq, fl, 2, 11, base + 33, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 34, out, max_solutions)
+            || step2(fq, fl, 3, 12, base + 35, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 36, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 37, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 38, out, max_solutions)
+            || step2(fq, fl, 4, 13, base + 39, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 40, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 41, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 42, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 43, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 44, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 45, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 46, out, max_solutions)
+            || step2(fq, fl, 5, 14, base + 47, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 48, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 49, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 50, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 51, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 52, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 53, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 54, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 55, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 56, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 57, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 58, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 59, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 60, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 61, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 62, out, max_solutions)
+            || step2(fq, fl, 7, alpha + 6, base + 63, out, max_solutions)
+            || step2(fq, fl, 1, 15, base + 64, out, max_solutions)
+            || step2(fq, fl, 2, 16, base + 65, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 66, out, max_solutions)
+            || step2(fq, fl, 3, 17, base + 67, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 68, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 69, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 70, out, max_solutions)
+            || step2(fq, fl, 4, 18, base + 71, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 72, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 73, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 74, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 75, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 76, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 77, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 78, out, max_solutions)
+            || step2(fq, fl, 5, 19, base + 79, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 80, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 81, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 82, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 83, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 84, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 85, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 86, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 87, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 88, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 89, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 90, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 91, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 92, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 93, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 94, out, max_solutions)
+            || step2(fq, fl, 6, 20, base + 95, out, max_solutions)
+            || step2(fq, fl, 1, 10, base + 96, out, max_solutions)
+            || step2(fq, fl, 2, 11, base + 97, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 98, out, max_solutions)
+            || step2(fq, fl, 3, 12, base + 99, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 100, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 101, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 102, out, max_solutions)
+            || step2(fq, fl, 4, 13, base + 103, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 104, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 105, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 106, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 107, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 108, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 109, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 110, out, max_solutions)
+            || step2(fq, fl, 5, 14, base + 111, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 112, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 113, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 114, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 115, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 116, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 117, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 118, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 119, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 120, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 121, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 122, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 123, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 124, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 125, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 126, out, max_solutions)
+            || step2(fq, fl, 8, alpha + 7, base + 127, out, max_solutions)
+            || step2(fq, fl, 1, 21, base + 128, out, max_solutions)
+            || step2(fq, fl, 2, 22, base + 129, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 130, out, max_solutions)
+            || step2(fq, fl, 3, 23, base + 131, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 132, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 133, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 134, out, max_solutions)
+            || step2(fq, fl, 4, 24, base + 135, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 136, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 137, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 138, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 139, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 140, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 141, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 142, out, max_solutions)
+            || step2(fq, fl, 5, 25, base + 143, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 144, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 145, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 146, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 147, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 148, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 149, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 150, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 151, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 152, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 153, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 154, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 155, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 156, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 157, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 158, out, max_solutions)
+            || step2(fq, fl, 6, 26, base + 159, out, max_solutions)
+            || step2(fq, fl, 1, 10, base + 160, out, max_solutions)
+            || step2(fq, fl, 2, 11, base + 161, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 162, out, max_solutions)
+            || step2(fq, fl, 3, 12, base + 163, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 164, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 165, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 166, out, max_solutions)
+            || step2(fq, fl, 4, 13, base + 167, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 168, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 169, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 170, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 171, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 172, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 173, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 174, out, max_solutions)
+            || step2(fq, fl, 5, 14, base + 175, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 176, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 177, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 178, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 179, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 180, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 181, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 182, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 183, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 184, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 185, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 186, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 187, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 188, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 189, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 190, out, max_solutions)
+            || step2(fq, fl, 7, 27, base + 191, out, max_solutions)
+            || step2(fq, fl, 1, 15, base + 192, out, max_solutions)
+            || step2(fq, fl, 2, 16, base + 193, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 194, out, max_solutions)
+            || step2(fq, fl, 3, 17, base + 195, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 196, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 197, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 198, out, max_solutions)
+            || step2(fq, fl, 4, 18, base + 199, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 200, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 201, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 202, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 203, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 204, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 205, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 206, out, max_solutions)
+            || step2(fq, fl, 5, 19, base + 207, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 208, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 209, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 210, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 211, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 212, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 213, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 214, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 215, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 216, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 217, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 218, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 219, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 220, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 221, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 222, out, max_solutions)
+            || step2(fq, fl, 6, 20, base + 223, out, max_solutions)
+            || step2(fq, fl, 1, 10, base + 224, out, max_solutions)
+            || step2(fq, fl, 2, 11, base + 225, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 226, out, max_solutions)
+            || step2(fq, fl, 3, 12, base + 227, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 228, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 229, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 230, out, max_solutions)
+            || step2(fq, fl, 4, 13, base + 231, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 232, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 233, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 234, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 235, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 236, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 237, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 238, out, max_solutions)
+            || step2(fq, fl, 5, 14, base + 239, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 240, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 241, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 242, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 243, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 244, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 245, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 246, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 247, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 248, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 249, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 250, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 251, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 252, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 253, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 254, out, max_solutions)
+            || step2(fq, fl, beta, gamma, base + 255, out, max_solutions)
+        {
+            return;
+        }
+    }
+}
+
+/// Probe a 256-step chunk without recording, then harvest only if a zero appeared.
+///
+/// Matches libfes `BATCH_MODE` / `avx2_asm_enum_batch`: most chunks have no
+/// solutions, so the common path stays branch-light.  On a hit, restore `Fl`
+/// and re-run with ordinary recording.
+pub(crate) fn gray_ffs_unrolled_l8_batch(
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    use super::mq_fes_l8_steps::L8_STEPS;
+    const L: usize = 8;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+
+        let fl_save = *fl;
+        let mut hit = false;
+        for &(a, kind, payload) in L8_STEPS.iter() {
+            hit |= fl[0] == 0;
+            let a = a as usize;
+            let b = l8_fq_index(kind, payload, alpha);
+            fl[a] ^= fq[b];
+            fl[0] ^= fl[a];
+        }
+        hit |= fl[0] == 0;
+        fl[beta] ^= fq[gamma];
+        fl[0] ^= fl[beta];
+
+        if !hit {
+            continue;
+        }
+        // Rewind and harvest with the early-exit-capable step function.
+        *fl = fl_save;
+        for (step_i, &(a, kind, payload)) in L8_STEPS.iter().enumerate() {
+            if step2(
+                fq,
+                fl,
+                a as usize,
+                l8_fq_index(kind, payload, alpha),
+                base + step_i as u64,
+                out,
+                max_solutions,
+            ) {
+                return;
+            }
+        }
+        if step2(fq, fl, beta, gamma, base + 255, out, max_solutions) {
             return;
         }
     }
@@ -716,6 +1354,199 @@ mod tests {
         c.sort_unstable();
         assert_eq!(a, b);
         assert_eq!(a, c);
+    }
+
+    #[test]
+    fn l8_and_l8_batch_agree_with_l4() {
+        let n = 12usize;
+        let m = 16usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut l4 = Vec::new();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut l4);
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut l4b = Vec::new();
+        gray_ffs_unrolled_l4_batch(&mut fq, &mut fl, n, usize::MAX, &mut l4b);
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut l8 = Vec::new();
+        gray_ffs_unrolled_l8(&mut fq, &mut fl, n, usize::MAX, &mut l8);
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut batch = Vec::new();
+        gray_ffs_unrolled_l8_batch(&mut fq, &mut fl, n, usize::MAX, &mut batch);
+
+        l4.sort_unstable();
+        l4b.sort_unstable();
+        l8.sort_unstable();
+        batch.sort_unstable();
+        assert_eq!(l4, l4b);
+        assert_eq!(l4, l8);
+        assert_eq!(l4, batch);
+    }
+
+    #[test]
+    fn l4_batch_vs_l4_unsat_wall() {
+        // Document: with packed-u64 and a well-predicted never-hit branch,
+        // batch probe+rewind loses to plain L=4 (copy + extra compares).
+        let n = 18usize;
+        let m = 24usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut a = Vec::new();
+        let t0 = std::time::Instant::now();
+        gray_ffs_unrolled_l4_batch(&mut fq, &mut fl, n, usize::MAX, &mut a);
+        let batch_ns = t0.elapsed().as_nanos();
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut b);
+        let l4_ns = t1.elapsed().as_nanos();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+        let ratio = l4_ns as f64 / batch_ns.max(1) as f64;
+        eprintln!(
+            "l4_batch_vs_l4 n={n} m={m} unsat: batch={batch_ns}ns l4={l4_ns}ns ratio={ratio:.2} sols={}",
+            a.len()
+        );
+        assert!(
+            ratio < 1.0,
+            "unexpected: L=4 batch beat plain L=4 ({ratio:.3}×); update note"
+        );
+    }
+
+    #[test]
+    fn l8_hardcoded_vs_l4_full_enum_wall() {
+        // Document: hardcoded L=8 loses to L=4 on this host (I-cache / spill).
+        let n = 18usize;
+        let m = 24usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut a = Vec::new();
+        let t0 = std::time::Instant::now();
+        gray_ffs_unrolled_l8(&mut fq, &mut fl, n, usize::MAX, &mut a);
+        let l8_ns = t0.elapsed().as_nanos();
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut b);
+        let l4_ns = t1.elapsed().as_nanos();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+        let ratio = l4_ns as f64 / l8_ns.max(1) as f64;
+        eprintln!(
+            "l8_hardcoded_vs_l4 n={n} m={m} full_enum: l8={l8_ns}ns l4={l4_ns}ns ratio={ratio:.2} sols={}",
+            a.len()
+        );
+        assert!(
+            ratio < 1.0,
+            "unexpected: L=8 beat L=4 ({ratio:.3}×); update note/scoreboard"
+        );
+    }
+
+    #[test]
+    fn parallel_outer_agrees_and_beats_serial_wall() {
+        let n = 16usize;
+        let m = 20usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let t0 = std::time::Instant::now();
+        let mut par = gray_ffs_parallel_outer(&forms, n, usize::MAX, 4);
+        let par_ns = t0.elapsed().as_nanos();
+
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut ser = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut ser);
+        let ser_ns = t1.elapsed().as_nanos();
+        par.sort_unstable();
+        ser.sort_unstable();
+        assert_eq!(par, ser);
+        let ratio = ser_ns as f64 / par_ns.max(1) as f64;
+        eprintln!(
+            "parallel_outer4_vs_l4 n={n} m={m}: par={par_ns}ns ser={ser_ns}ns ratio={ratio:.2} sols={}",
+            par.len()
+        );
+        assert!(
+            ratio >= 1.3,
+            "expected 4-outer parallel ≥1.3× serial L=4, got {ratio:.3}"
+        );
     }
 
     #[test]

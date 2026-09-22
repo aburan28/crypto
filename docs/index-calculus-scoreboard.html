@@ -345,7 +345,14 @@
       the optimum is <code>r<sup>2/(3+a)&minus;1/2</sup></code>, positive for every
       <code>a &lt; 1</code>. So this family has no crossover to find at any size, and at
       sect163k1's size it sits about 10<sup>7</sup>&times; the automorphism-aware walk it competes
-      with. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
+      with. That <code>r<sup>1/6</sup></code> rise now has a <strong>measured</strong> crossing
+      behind it rather than only a derivation: the tournament collector that sits strictly below
+      rho on an eight-cell Koblitz panel reads 0.831 [0.772, 0.894] at
+      <code>r</code>&thinsp;=&thinsp;4.2&times;10<sup>6</sup> and 1.533 [1.238, 1.899] at
+      <code>r</code>&thinsp;=&thinsp;2.3&times;10<sup>8</sup>, both bands clear of one in opposite
+      directions, growing as <code>r<sup>0.153</sup></code>
+      (<a href="#ic-crossover-20260922">below</a>). Two cells fix a rate and no curvature, so that
+      is agreement worth what a two-point rate is worth. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
       no such table and its asymptotics are the question this ladder cannot reach. It is also not
       blanket across problems: on hyperelliptic Jacobians at genus 3 and 4 index calculus measures
       <strong>below</strong> a real distinguished-point rho &mdash; 0.21 at
@@ -390,7 +397,9 @@
           fold and k the column fold. <strong>A model of that family, not a bound on the
           problem</strong> &mdash; its relation term counts K/2 edges, and a multigraph closes
           earlier &mdash; so a row may sit under it. On a prime-order curve it is
-          &Theta;(r<sup>1/6</sup>) where the reference is flat, which is the round&rsquo;s result.</p>
+          &Theta;(r<sup>1/6</sup>) where the reference is flat, which is the round&rsquo;s result &mdash;
+          measured at <code>r<sup>0.153</sup></code> between two certified cells two decades of
+          <code>r</code> apart.</p>
       </div>
     </dl>
   </header>
@@ -2053,6 +2062,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>Monica hybrid (ALMASTY <code>monica.c</code>)</td><td>—</td><td>agrees with Gray/Möbius on toys</td>
           <td>Range extension for <code>n&gt;24</code>; not faster than Möbius inside the cap (~0.22× on <code>n=14,m=32</code>)</td>
           <td><span class="chip">engineering</span></td></tr>
+        <tr><td>AVX2 Gray (libfes <code>avx2_8x32</code> → 4×u64)</td><td>—</td><td>agrees with L=4 / Möbius</td>
+          <td>Opt-in only; <strong>slower</strong> than packed-u64 scalar L=4 on single-system Semaev (~0.35× on <code>n=16,m=24</code>)</td>
+          <td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table></div>
   </div>
@@ -2372,6 +2384,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/SOLVER_SELECTION.md">Run and train</a></p>
     </div>
   </div>
+  </section>
 
   <section aria-labelledby="genus-crossover" style="margin:3rem 0;overflow-x:auto">
     <h2 id="genus-crossover">Hyperelliptic: the crossover has a measured exponent</h2>
@@ -4023,6 +4036,54 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0020 -->
+<!-- BEGIN ic-crossover-20260922 -->
+<section class="panel" id="ic-crossover-20260922">
+<div class="panel-head"><h2>Where the tournament collector crosses rho <span class="chip">engineering</span></h2>
+<p>Rounds 0019 and 0020 put this collector strictly below rho on an eight-cell
+  Koblitz panel whose largest subgroup order is 4.2&times;10<sup>6</sup>, and classified the gain
+  engineering because the <code>&Theta;(r<sup>2/3</sup>)</code> against
+  <code>&Theta;(r<sup>1/2</sup>)</code> shape was <em>derived</em>. Round 0021 measures it: the
+  promoted implementation was capped at degree 31 only because its pair table packed coordinates
+  into <code>u32</code>, so widening that field to <code>u64</code> opens <code>n37a0</code> at
+  <code>r</code> = 230,603,167, 55&times; the panel's largest cell. Sixty-four independent
+  fixtures a cell, pooled over two seed streams, every index-calculus report checked by the
+  independent <code>oracle.py</code> certificate checker. <strong>No tournament ran and nothing
+  was promoted</strong> &mdash; this is a measurement against the round-0020 winner source, so it
+  has no stage summaries, no evidence pack and no effect on the promoted winner.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND21-crossover.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round21_crossover.py">measurement script</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round21-wide-pair-table.patch">pair-table widening</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/PROBE-degree-ceiling.md">why the cell was out of reach</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Instruction unit Ir, complete DLP, 64 fixtures a cell over seeds 20260922 and 4242;
+  base at the sampler's default 8 orbits, which is the cheapest measured size at both cells.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>IC / rho</th><th>95% band</th><th>per-case sd(log)</th><th>Certified</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>0.831</td><td>[0.772, 0.894]</td><td>0.300</td><td>64/64</td><td>IC ahead</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td>1.533</td><td>[1.238, 1.899]</td><td>0.872</td><td>64/64</td><td>rho ahead</td></tr>
+</tbody></table></div>
+<p><strong>Both bands exclude one, in opposite directions, so the collector crosses rho between
+  these two subgroup orders.</strong> The ratio grows as <code>r<sup>0.153</sup></code> between
+  them, against the <code>r<sup>1/6</sup> = r<sup>0.167</sup></code> the pair-table shape law
+  derives for the balanced optimum. Two cells fix one rate and no curvature, and they differ in
+  degree as well as in <code>r</code>, so that agreement is worth exactly what a two-point rate is
+  worth &mdash; but it is the first measured support the boundary has had beyond the panel. The
+  <code>n23a1</code> row doubles as a cross-check on the widened build: 0.831 here against 0.7498
+  in round 0019 and 0.7948 in round 0020.</p>
+<div class="table-scroll"><table>
+<caption>What the widening cost: widened build against the promoted worker, three confirmation
+  fixtures at each panel cell. All 24 returned the same logarithms and the same factor-base hash.</caption>
+<thead><tr><th>Cell</th><th>n13a0</th><th>n17a1</th><th>n19a0</th><th>n19a1</th><th>n23a0</th><th>n23a1</th><th>n29a1</th><th>n31a0</th></tr></thead><tbody>
+<tr><td>widened / promoted Ir</td><td>1.0011</td><td>1.0008</td><td>1.0015</td><td>1.0006</td><td>1.0003</td><td>1.0002</td><td>1.0004</td><td>1.0004</td></tr>
+</tbody></table></div>
+<p>0.07% panel-wide, worst cell 0.15%. Two claims are withdrawn here: a pre-computed prediction
+  that <code>n37a0</code> would need 32 orbits (8 solve it, and are the best size measured), and
+  the derived orbit count for <code>n41a0</code>. <strong><code>n41a0</code> yields no
+  comparison</strong> at all: index calculus completes at <code>r</code> = 5.5&times;10<sup>11</sup>
+  and rho does not, returning in 0.06s against the ~72,600 steps it needs, which is the frozen
+  trial budget cutting rho off rather than rho being out-run &mdash; a budget exhaustion is never
+  evidence about an algorithm. The rounds-0019/0020 strict win is unchanged and stays scoped to
+  its eight cells, its two seeds and its subgroup orders; this panel adds the measured cell beyond
+  that scope, where the same collector loses. Earlier calibrated rows, fitted exponents and the
+  page's end-to-end verdict are unchanged.</p>
+</section>
+<!-- END ic-crossover-20260922 -->
 <section class="panel" id="radical-pair-image-20260921">
   <div class="panel-head">
     <h2>Radical unordered-pair image <span class="chip">engineering diagnostic</span></h2>

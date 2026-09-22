@@ -48,6 +48,10 @@ endpoints, the scalar reference's replay and the caption disagree.
 `scripts/site/build.py` copies the SVG next to the page so the relative
 `src` resolves both in the working tree and once published.
 
+The worker table is empty on the live ingest feed: `dp_ingest.py` does
+not publish `per_worker` (`worker_id` is an upload-object name). The
+dashboard names that, instead of "No workers have reported points."
+
 The **Contribute compute** section under the worker table is static: it
 carries the [cairn](https://github.com/aburan28/cairn) download link
 (`releases/latest`, plus the one-line installer the cairn README
