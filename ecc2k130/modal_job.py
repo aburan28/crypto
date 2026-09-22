@@ -97,6 +97,64 @@ def fetch(token: str, outdir: pathlib.Path):
     return meta
 
 
+def _client_link_error(exc):
+    """A dropped client link, not a failed, timed-out, or expired call.
+
+    gRPC "Deadline exceeded" arrives as modal.exception.ServiceError (or a raw
+    grpclib status on older SDKs). FunctionTimeoutError, RemoteError and a
+    stale FunctionCall are not this, and get() raises them on every pass.
+    """
+    classes = []
+    for name in ("ConnectionError", "ServiceError"):
+        kind = getattr(modal.exception, name, None)
+        if kind is not None:
+            classes.append(kind)
+    if classes and isinstance(exc, tuple(classes)):
+        return True
+    if isinstance(exc, ConnectionError):
+        return True
+    status = getattr(exc, "status", None)
+    return getattr(status, "name", None) in ("CANCELLED", "UNKNOWN", "DEADLINE_EXCEEDED", "UNAVAILABLE")
+
+
+def _collect(call, token, outdir):
+    """Wait until the call returns, or the Volume already holds its results.
+
+    A poll timeout means the job is still running. A dropped client link is
+    retried. Anything else (function timeout, remote crash, stale call) is
+    collected from the Volume once and then re-raised, so it cannot spin.
+    """
+    # The client's link to Modal drops now and then (gRPC "Deadline exceeded");
+    # the app is detached, so wait that out and keep polling.  run() writes the
+    # Volume before returning.  --fetch-token is the same collect.
+    recovered = None
+    while True:
+        try:
+            meta = call.get(timeout=60)
+            break
+        except TimeoutError:
+            continue
+        except Exception as exc:  # noqa: BLE001 - modal.exception.ConnectionError and friends
+            # Some SDKs raise modal.exception.TimeoutError for the poll wait.
+            # FunctionTimeoutError and OutputExpiredError subclass it and are
+            # permanent: they fall through to the Volume collect below.
+            modal_timeout = getattr(modal.exception, "TimeoutError", None)
+            if modal_timeout is not None and type(exc) is modal_timeout:
+                continue
+            recovered = fetch(token, outdir)
+            if recovered is not None:
+                meta = recovered
+                break
+            if not _client_link_error(exc):
+                raise
+            print(time.strftime("%H:%M:%S"), "client error, retrying:", type(exc).__name__, flush=True)
+            time.sleep(30)
+    if recovered is None:
+        fetched = fetch(token, outdir)
+        meta = fetched or meta
+    return meta
+
+
 @app.local_entrypoint()
 def main(job: str = "benchmarks/two-chains/gpujob.sh", out: str = "/tmp/ecc2k130-job",
          gpu: str = "", env: str = "", fetch_token: str = ""):
@@ -136,20 +194,7 @@ def main(job: str = "benchmarks/two-chains/gpujob.sh", out: str = "/tmp/ecc2k130
     (outdir / "launch.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print("spawned", call.object_id, "token", token, "- if this client dies, collect with:",
           "modal run modal_job.py --fetch-token", token, "--out", out, flush=True)
-    # The client's link to Modal drops now and then (gRPC "Deadline exceeded");
-    # the app is detached, so wait it out and keep polling.  Results are in the
-    # Volume either way, and --fetch-token collects them if this process dies.
-    while True:
-        try:
-            meta = call.get(timeout=60)
-            break
-        except TimeoutError:
-            continue
-        except Exception as exc:  # noqa: BLE001 - modal.exception.ConnectionError and friends
-            print(time.strftime("%H:%M:%S"), "client error, retrying:", type(exc).__name__, flush=True)
-            time.sleep(30)
-    fetched = fetch(token, outdir)
-    meta = fetched or meta
+    meta = _collect(call, token, outdir)
     receipt.update(exitCode=meta["exitCode"], seconds=meta["seconds"], deviceLine=meta["gpu"],
                    finishedAt=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
     (outdir / "launch.json").write_text(json.dumps(receipt, indent=2) + "\n")
