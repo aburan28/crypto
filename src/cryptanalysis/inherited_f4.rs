@@ -360,23 +360,21 @@ impl ReducedBasis {
         }
         let columns = macaulay_columns(&rows_monos)?;
         let mut matrix = pack_rows(&rows_monos, &columns);
-        // A basis needs distinct leading columns and nothing more, so an
-        // echelon form without back-substitution would do.  The fully
-        // reduced form costs more here but makes every later displaced row
-        // reduce in exactly as many XORs as it has pivot bits, which pays
-        // back over a deep tree.  The default mirrors the from-scratch
-        // step's own kernel choice on the same shape — full RREF below 24
-        // variables, echelon-only at and above it — so the root costs what
-        // it always cost and every descendant is the saving.
-        // `KIC_F4_INHERIT_ROOT=rref|ref` pins either for controls.
-        static ROOT_POLICY: std::sync::OnceLock<Option<bool>> = std::sync::OnceLock::new();
-        let full = ROOT_POLICY
-            .get_or_init(|| match std::env::var("KIC_F4_INHERIT_ROOT").as_deref() {
-                Ok("rref") => Some(true),
-                Ok("ref") => Some(false),
-                _ => None,
-            })
-            .unwrap_or(n_vars < 24);
+        // A basis needs distinct leading columns and nothing more, so the
+        // root is reduced to echelon form without back-substitution.  A
+        // fully reduced root makes every later displaced row reduce in as
+        // many XORs as it has pivot bits, and below 24 variables that paid
+        // for its back-substitution while every child re-reduced all of its
+        // displaced rows.  Now that a refuted child stops at its refutation
+        // and a rewrite skips a row's leading zeros, the children no longer
+        // earn it back on any rung (`RESEARCH_INHERITED_F4.md` §3.1).  A
+        // middle ground, clearing only the pivot columns of degree below
+        // `D`, was tried and costs what it saves.
+        // `KIC_F4_INHERIT_ROOT=rref` restores the fully reduced root as a
+        // control.
+        static ROOT_POLICY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        let full = *ROOT_POLICY
+            .get_or_init(|| std::env::var("KIC_F4_INHERIT_ROOT").as_deref() == Ok("rref"));
         let rank = if full {
             rref_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops)
         } else {
