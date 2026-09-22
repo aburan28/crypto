@@ -613,6 +613,120 @@ says nothing about larger `r`, where the boundary of round 0019 §3 puts this
 collector at `Θ(r^{2/3})` against rho's `Θ(r^{1/2})`. The classification is
 **engineering** under AGENTS.md §3, in both rounds' own decision records.
 
+## Round 0021: the crossover, measured — and the ceiling was eight bytes
+
+Rounds 0019 and 0020 hold `beats_rho_strict` on the eight-cell panel under two
+seeds, and both classify the gain **engineering** for one reason: the
+`Θ(r^{2/3})` against `Θ(r^{1/2})` boundary was *derived*, its only measured
+support a same-degree contrast between two panel cells.
+[PROBE-degree-ceiling.md](PROBE-degree-ceiling.md) then found the cell that
+would settle it — `n37a0`, `r = 230,603,167`, 55× the panel's largest — and
+found that the promoted implementation could not run there. This round removes
+that obstacle and takes the measurement.
+[ROUND21-crossover.md](ROUND21-crossover.md) is the full write-up.
+
+**No tournament ran, nothing was promoted, and `WINNER-single-target.json` is
+unchanged.** This is a measurement round against the round-0020 winner source,
+not a round of the tournament, so it has no `runs/round-0021/`, no stage
+summaries and no evidence pack.
+
+### The crossover
+
+Sixty-four independent fixtures a cell, pooled over two seed streams
+(20260922, 4242), every IC report checked by `oracle.py`
+([round21_crossover.py](round21_crossover.py)):
+
+| cell | r | IC/rho | 95% band | per-case sd(log) |
+|:--|--:|--:|:--|--:|
+| `n23a1` | 4,196,903 | **0.831** | [0.772, 0.894] | 0.300 |
+| `n37a0` | 230,603,167 | **1.533** | [1.238, 1.899] | 0.872 |
+
+**Both bands exclude one, in opposite directions: the collector crosses rho
+between these two subgroup orders.** Measured on cells where both arms complete
+and every answer is certified — not extrapolated. The ratio grows as
+**r^0.153** across the two, where [round19_model.py](round19_model.py) derives
+**r^{1/6} = r^0.167** for the balanced optimum. Two cells fix one rate and no
+curvature, and the cells differ in degree as well as in `r`, so the agreement is
+worth exactly what a two-point rate is worth — but it is the first measured
+support the boundary has had beyond the panel. The `n23a1` value doubles as a
+cross-check: 0.831 here against 0.7498 (round 0019) and 0.7948 (round 0020).
+
+### The ceiling was eight bytes
+
+`koblitz_tiny_ic` declared `MAX_DEGREE = 31`. Its field has always been one
+`u64`; the ceiling lived in the pair table, which packed each stored sum's
+coordinates into `u32`.
+[round21-wide-pair-table.patch](round21-wide-pair-table.patch) widens those two
+fields and lifts the three bounds that mirrored them — the module constant, the
+worker's `(5..=31)` dispatch guard and `oracle.py`'s `Curve.__init__` — all to
+61. Lifting one and not the others cost a build to discover, so
+[round21_build.sh](round21_build.sh) now checks all three before it hands back a
+binary.
+
+The widening costs **0.07% panel-wide**, worst cell 0.15%, and **24 of 24
+confirmation fixtures returned the same logarithms and the same factor-base
+hash**:
+
+| cell | n13a0 | n17a1 | n19a0 | n19a1 | n23a0 | n23a1 | n29a1 | n31a0 |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| widened / promoted | 1.0011 | 1.0008 | 1.0015 | 1.0006 | 1.0003 | 1.0002 | 1.0004 | 1.0004 |
+
+### A test that had been red since round 0018
+
+Building the widened tree surfaced `complete_solve_verifies_in_general_arithmetic`
+failing at `n13a0`, and it reproduces **identically on the unmodified round-0020
+winner** — it is not this round's. The assertion carried the **cofactor**
+convention (`h·(a + b·d)`) after round 0018's `column` patch moved the solver to
+the **representative** convention. `oracle.py` was amended at the time; this test
+was not, and has been red at every cell whose cofactor is not one ever since,
+through the two rounds that promoted the arm that broke it.
+
+It does not invalidate those rounds, for a specific reason: the failing assertion
+is an internal cross-check between the tiny path and the general one, while the
+assertion in the same test that the recovered logarithm equals the planted scalar
+passed throughout, and every published result was verified by `oracle.py` — 2,646
+receipts a round — against the planted secret. What it does expose is a real gap:
+**the campaign verified through `oracle.py` and the tournament harness and never
+ran `cargo test` on a candidate arm's own source.** Fixed here, in the patch.
+
+### Withdrawn
+
+Two claims of mine were wrong and are withdrawn. Before writing any code I
+computed that `n37a0` would need 32 orbits and that 8 could not solve it inside
+`max_trials`, and I let that shape the design: eight orbits solve it and are the
+*best* configuration. `max_trials` bounds relation-producing trials; the quantity
+in the cost model is the pair-table scan count. The same error produced the claim
+that `n41a0` "needs ~39,922 orbits".
+
+### What is not claimed
+
+**`n41a0` yields no comparison.** At `r = 5.5·10¹¹` IC completes with a large
+enough base (104 orbits, 3.8s) and rho does not complete at all, returning in
+0.06s against the ~72,600 steps it would need. That is the frozen trial budget
+cutting rho off, not rho being out-run, and a budget exhaustion is never evidence
+about an algorithm. Recorded so the absence is on the record.
+
+**The factor base was not tuned toward the answer.** The base is swept at
+`n37a0` and every size reported — 8 orbits 1.533, 32 orbits 1.815, 40 orbits
+1.884, 56 orbits 2.105 on the sixteen-fixture pass. Bigger is monotonically
+worse, which is what round 0019's sweep found at all eight panel cells,
+reproduced two decades of `r` higher; the headline uses the cheapest
+configuration, which is the one the sampler builds by default.
+
+**The sample size was arrived at the hard way.** Three fixtures read `n23a1` at
+0.882, then 1.097 on a second draw; sixteen read `n37a0` at 1.782 [1.394, 2.278]
+on one stream and **1.116 [0.578, 2.154]** on another — a band containing one,
+which is no answer. That is round 0019's finding, that the per-case spread grows
+with the cell because rho's collision search is a growing share of its cost,
+holding two decades of `r` further out. Sixty-four fixtures bring both standard
+errors under 0.11.
+
+**This does not overturn rounds 0019 and 0020.** Their strict win stands exactly
+as scoped: eight cells, subgroup orders 2·10³ to 4·10⁶, two seeds. This round
+adds the measured cell beyond that scope, where the same collector loses. By
+AGENTS.md §3 the campaign's gains remain **engineering**, with a measurement
+rather than a derivation now behind the reason why.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.

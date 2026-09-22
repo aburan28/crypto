@@ -18,7 +18,15 @@ class Curve:
         self.n = int(fixture['degree'])
         self.a = int(fixture['curve_a'])
         self.r = int(fixture['subgroup_order'])
-        require(5 <= self.n <= 31 and self.n % 2 == 1, 'unsupported degree')
+        # The upper bound mirrors `koblitz_tiny_ic::MAX_DEGREE`, which is what
+        # the collector can run, not what this checker can read: the arithmetic
+        # here is Python integers over the fixture's own irreducible polynomial
+        # and has no width of its own. The Rust ceiling was 31 because the pair
+        # table packed coordinates into `u32`; widening that to `u64` lifted it
+        # to 61, and this follows so the checker keeps refusing exactly what the
+        # collector refuses. Additive: it accepts strictly more than before and
+        # reads every earlier fixture identically.
+        require(5 <= self.n <= 61 and self.n % 2 == 1, 'unsupported degree')
         require(self.a in (0, 1), 'unsupported coefficient')
         terms = fixture['irreducible']['low_terms']
         require(fixture['irreducible']['degree'] == self.n, 'field degree mismatch')
