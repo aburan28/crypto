@@ -1,0 +1,32 @@
+name: Koblitz Stage 141 current gate audit
+on:
+  pull_request:
+    paths:
+      - "docs/ic/params/k1n59-cofactor-projected-l15-rank-interval4-control-public-59001.json"
+      - "docs/ic/patches/koblitz-n59-rank-solve-interval4-rejected-20260922.patch"
+      - "docs/ic/runs/koblitz-n59-rank-solve-interval4-rejection-20260922.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-140-current-gate-audit-20260922/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-141-current-gate-audit-20260922/**"
+      - "scripts/compose_koblitz_stage140_gate_audit.py"
+      - "scripts/compose_koblitz_stage141_gate_audit.py"
+      - ".github/workflows/koblitz-stage141-current-gate-audit.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay Stage 140 historical audit and Stage 141 current audit
+        run: |
+          python3 -m py_compile scripts/compose_koblitz_stage140_gate_audit.py scripts/compose_koblitz_stage141_gate_audit.py
+          python3 -m json.tool docs/ic/params/k1n59-cofactor-projected-l15-rank-interval4-control-public-59001.json >/dev/null
+          python3 -m json.tool docs/ic/runs/koblitz-n59-rank-solve-interval4-rejection-20260922.json >/dev/null
+          git apply --check docs/ic/patches/koblitz-n59-rank-solve-interval4-rejected-20260922.patch
+          python3 scripts/compose_koblitz_stage140_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-140-current-gate-audit-20260922 > "$RUNNER_TEMP/stage140-historical.json"
+          python3 scripts/compose_koblitz_stage141_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-141-current-gate-audit-20260922 > "$RUNNER_TEMP/stage141-current.json"
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
