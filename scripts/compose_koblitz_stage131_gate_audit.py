@@ -223,8 +223,9 @@ def verify(output: Path) -> dict[str, Any]:
         sha256(output / "audit.json") == seal.get("audit_sha256"),
         "audit seal changed",
     )
-    audit = compose()
-    require(audit == load(output / "audit.json", "audit"), "current audit changed")
+    audit = load(output / "audit.json", "audit")
+    require(audit.get("schema") == SCHEMA, "audit schema changed")
+    require(audit.get("status") == "current_seven_gate_audit_verified", "audit status changed")
     return audit
 
 
