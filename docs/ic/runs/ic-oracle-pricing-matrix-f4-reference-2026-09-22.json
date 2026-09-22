@@ -35,11 +35,11 @@
     "trial_floor_multiple": 64.0,
     "unguarded_targets": false
   },
-  "elapsed_seconds": 104.903134286,
+  "elapsed_seconds": 103.781641767,
   "host": {
     "arch": "x86_64",
     "cpu": "Intel(R) Xeon(R) Processor",
-    "git_commit": "9942fdb477562297df333ebb4712f77989bb1666",
+    "git_commit": "b00af28eab153c8863288b6cb195182dac7261c9",
     "logical_cores": 4,
     "os": "linux"
   },
@@ -50,32 +50,32 @@
       {
         "automorphisms_generic": 22,
         "calibration": {
-          "ns_per_add": 128.50069,
-          "ns_per_as_solve": 6.386484293,
-          "ns_per_canon": 8.269918906329998,
-          "ns_per_double": 126.12124272326999,
-          "ns_per_frobenius": 9.94543940324,
+          "ns_per_add": 131.79817,
+          "ns_per_as_solve": 6.550369049,
+          "ns_per_canon": 8.48213482669,
+          "ns_per_double": 129.35766328611,
+          "ns_per_frobenius": 10.20065116532,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 1.9070787402899998,
-          "ns_per_row_op": 2.5333911033499996,
+          "ns_per_lookup": 1.95601664097,
+          "ns_per_row_op": 2.59840092155,
           "ns_per_s4_pair": null,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.35209189059999996
+          "ns_per_word_xor": 0.36112698579999997
         },
         "calibration_measured": {
-          "ns_per_add": 128.50069,
-          "ns_per_as_solve": 9.74268,
-          "ns_per_canon": 8.268626,
-          "ns_per_double": 129.04565,
-          "ns_per_frobenius": 10.000195,
+          "ns_per_add": 131.79817,
+          "ns_per_as_solve": 6.38693,
+          "ns_per_canon": 8.273409,
+          "ns_per_double": 128.22142,
+          "ns_per_frobenius": 9.989875,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 1.965484,
-          "ns_per_row_op": 2.502150390625,
+          "ns_per_lookup": 1.90694,
+          "ns_per_row_op": 2.511251953125,
           "ns_per_s4_pair": null,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.3486815185546875
+          "ns_per_word_xor": 0.3497637939453125
         },
         "calibration_pinned": {
           "measured": [],
@@ -170,7 +170,7 @@
             "steps_over_expected": 0.5944079084745454,
             "verified": true,
             "walks": 1,
-            "wall_ns": 338161
+            "wall_ns": 353555
           },
           {
             "automorphisms": 1,
@@ -190,7 +190,7 @@
             "steps_over_expected": 0.7350235129864366,
             "verified": true,
             "walks": 4,
-            "wall_ns": 71885
+            "wall_ns": 71462
           },
           {
             "automorphisms": 22,
@@ -210,7 +210,7 @@
             "steps_over_expected": 0.7132894901694544,
             "verified": true,
             "walks": 1,
-            "wall_ns": 281603
+            "wall_ns": 291191
           },
           {
             "automorphisms": 1,
@@ -230,7 +230,7 @@
             "steps_over_expected": 0.7603691513652793,
             "verified": true,
             "walks": 3,
-            "wall_ns": 66403
+            "wall_ns": 65292
           },
           {
             "automorphisms": 22,
@@ -250,7 +250,7 @@
             "steps_over_expected": 0.4755263267796363,
             "verified": true,
             "walks": 1,
-            "wall_ns": 220162
+            "wall_ns": 221527
           },
           {
             "automorphisms": 1,
@@ -270,7 +270,7 @@
             "steps_over_expected": 0.8110604281229645,
             "verified": true,
             "walks": 10,
-            "wall_ns": 89823
+            "wall_ns": 88350
           },
           {
             "automorphisms": 22,
@@ -290,7 +290,7 @@
             "steps_over_expected": 0.9510526535592726,
             "verified": true,
             "walks": 1,
-            "wall_ns": 241313
+            "wall_ns": 241543
           },
           {
             "automorphisms": 1,
@@ -310,7 +310,7 @@
             "steps_over_expected": 1.0138255351537055,
             "verified": true,
             "walks": 11,
-            "wall_ns": 91592
+            "wall_ns": 91642
           },
           {
             "automorphisms": 22,
@@ -330,7 +330,7 @@
             "steps_over_expected": 1.1888158169490908,
             "verified": true,
             "walks": 1,
-            "wall_ns": 264834
+            "wall_ns": 262637
           },
           {
             "automorphisms": 1,
@@ -350,7 +350,7 @@
             "steps_over_expected": 0.9631342583960204,
             "verified": true,
             "walks": 10,
-            "wall_ns": 85746
+            "wall_ns": 86258
           },
           {
             "automorphisms": 22,
@@ -370,7 +370,7 @@
             "steps_over_expected": 1.545460562033818,
             "verified": true,
             "walks": 1,
-            "wall_ns": 299350
+            "wall_ns": 299236
           },
           {
             "automorphisms": 1,
@@ -390,7 +390,7 @@
             "steps_over_expected": 0.6843322362287513,
             "verified": true,
             "walks": 11,
-            "wall_ns": 87946
+            "wall_ns": 88249
           },
           {
             "automorphisms": 22,
@@ -410,7 +410,7 @@
             "steps_over_expected": 1.4265789803389088,
             "verified": true,
             "walks": 1,
-            "wall_ns": 290398
+            "wall_ns": 288250
           },
           {
             "automorphisms": 1,
@@ -430,7 +430,7 @@
             "steps_over_expected": 1.3940101108363452,
             "verified": true,
             "walks": 13,
-            "wall_ns": 106130
+            "wall_ns": 99804
           },
           {
             "automorphisms": 22,
@@ -450,7 +450,7 @@
             "steps_over_expected": 0.8321710718643635,
             "verified": true,
             "walks": 1,
-            "wall_ns": 229286
+            "wall_ns": 228542
           },
           {
             "automorphisms": 1,
@@ -470,7 +470,7 @@
             "steps_over_expected": 0.633640959471066,
             "verified": true,
             "walks": 6,
-            "wall_ns": 73651
+            "wall_ns": 73543
           }
         ],
         "rho_s_mean": 17.36471625637235,
@@ -504,7 +504,7 @@
                 "frobenius_maps": 45,
                 "pair_table_entries": 297
               },
-              "wall_ns": 132866
+              "wall_ns": 132399
             },
             "family_optimum_base": 6.417227888919429,
             "family_optimum_s": 0.9811137463810778,
@@ -526,7 +526,7 @@
                 "single_column_rows": 1,
                 "two_column_rows": 0
               },
-              "wall_ns": 3151
+              "wall_ns": 2614
             },
             "name": "mitm_m3_signed_orbit_columns",
             "oracle": "meet_in_the_middle_m3",
@@ -557,18 +557,18 @@
                 "target_guard_probes": 5,
                 "trials": 5
               },
-              "wall_ns": 23585
+              "wall_ns": 23187
             },
             "relations_found": 4,
             "s": 38.938731026802806,
-            "s_wall": 39.70536776771668,
+            "s_wall": 38.346344730801846,
             "signed_points": 45,
             "signed_points_over_family_optimum": 7.012373688286979,
             "summands": 3,
             "table": "full",
             "targets": "random",
             "total_gae": 1225.79719,
-            "total_wall_ns": 160617,
+            "total_wall_ns": 159100,
             "trials": 5,
             "trials_floor": 4.0,
             "trials_floor_exact": 4.0,
@@ -583,7 +583,7 @@
                 "scalar_mults": 1
               },
               "native": {},
-              "wall_ns": 1015
+              "wall_ns": 900
             },
             "yield_over_ceiling": 0.8,
             "yield_over_ceiling_exact": 0.8
@@ -610,13 +610,13 @@
                 "frobenius_maps": 45,
                 "pair_table_entries": 297
               },
-              "wall_ns": 126825
+              "wall_ns": 126855
             },
             "family_optimum_base": 12.561298904168526,
             "family_optimum_s": 3.759183590513981,
             "independent": 23,
             "linear_algebra": {
-              "gae": 11.020684999999999,
+              "gae": 11.020685000000002,
               "group_ops": {
                 "adds": 0,
                 "doubles": 0,
@@ -632,7 +632,7 @@
                 "single_column_rows": 0,
                 "two_column_rows": 1
               },
-              "wall_ns": 15116
+              "wall_ns": 15258
             },
             "name": "mitm_m3_abscissa_columns_control",
             "oracle": "meet_in_the_middle_m3",
@@ -663,18 +663,18 @@
                 "target_guard_probes": 24,
                 "trials": 24
               },
-              "wall_ns": 92841
+              "wall_ns": 92777
             },
             "relations_found": 23,
             "s": 56.98982656733603,
-            "s_wall": 58.23364945370342,
+            "s_wall": 56.80079428044381,
             "signed_points": 45,
             "signed_points_over_family_optimum": 3.5824320672017875,
             "summands": 3,
             "table": "full",
             "targets": "random",
             "total_gae": 1794.0484299999998,
-            "total_wall_ns": 235568,
+            "total_wall_ns": 235668,
             "trials": 24,
             "trials_floor": 24.0,
             "trials_floor_exact": 24.0,
@@ -689,7 +689,7 @@
                 "scalar_mults": 1
               },
               "native": {},
-              "wall_ns": 786
+              "wall_ns": 778
             },
             "yield_over_ceiling": 0.9583333333333334,
             "yield_over_ceiling_exact": 0.9583333333333334
@@ -716,7 +716,7 @@
                 "frobenius_maps": 45,
                 "pair_table_entries": 297
               },
-              "wall_ns": 79659
+              "wall_ns": 79482
             },
             "family_optimum_base": 6.417227888919429,
             "family_optimum_s": 0.9811137463810778,
@@ -738,7 +738,7 @@
                 "single_column_rows": 1,
                 "two_column_rows": 0
               },
-              "wall_ns": 1632
+              "wall_ns": 1624
             },
             "name": "mitm_m3_signed_orbit_columns_negfold",
             "oracle": "meet_in_the_middle_m3",
@@ -769,18 +769,127 @@
                 "target_guard_probes": 5,
                 "trials": 5
               },
-              "wall_ns": 22647
+              "wall_ns": 22389
             },
             "relations_found": 4,
             "s": 23.563964327449742,
-            "s_wall": 25.883627088781232,
+            "s_wall": 25.12878630819234,
             "signed_points": 45,
             "signed_points_over_family_optimum": 7.012373688286979,
             "summands": 3,
             "table": "negation_folded",
             "targets": "random",
             "total_gae": 741.79719,
-            "total_wall_ns": 104705,
+            "total_wall_ns": 104260,
+            "trials": 5,
+            "trials_floor": 4.0,
+            "trials_floor_exact": 4.0,
+            "trials_over_floor": 1.25,
+            "trials_over_floor_exact": 1.25,
+            "verified": true,
+            "verify": {
+              "gae": 6.0,
+              "group_ops": {
+                "adds": 2,
+                "doubles": 4,
+                "scalar_mults": 1
+              },
+              "native": {},
+              "wall_ns": 765
+            },
+            "yield_over_ceiling": 0.8,
+            "yield_over_ceiling_exact": 0.8
+          },
+          {
+            "abscissae": 23,
+            "cofactor_classes": 2,
+            "columns": 3,
+            "decomposition_probability_ceiling": 1.0,
+            "decomposition_probability_ceiling_exact": 1.0,
+            "dependent": 0,
+            "dimension": null,
+            "factor_base": {
+              "gae": 164.629826,
+              "group_ops": {
+                "adds": 111,
+                "doubles": 0,
+                "scalar_mults": 0
+              },
+              "native": {
+                "abscissae_scanned": 34,
+                "as_solves": 34,
+                "canonicalisations": 108,
+                "derived_counts": 1,
+                "frobenius_maps": 495,
+                "lookups": 450,
+                "pair_table_entries": 27,
+                "pair_table_representatives": 3
+              },
+              "wall_ns": 49357
+            },
+            "family_optimum_base": 14.27178706160297,
+            "family_optimum_s": 0.4411522164885582,
+            "independent": 4,
+            "linear_algebra": {
+              "gae": 0.808315,
+              "group_ops": {
+                "adds": 0,
+                "doubles": 0,
+                "scalar_mults": 0
+              },
+              "native": {
+                "columns": 4,
+                "pinned_by_repeated_row": 0,
+                "rank": 4,
+                "repeated_column_rows": 0,
+                "row_ops": 41,
+                "rows": 4,
+                "single_column_rows": 1,
+                "two_column_rows": 0
+              },
+              "wall_ns": 1118
+            },
+            "name": "mitm_m3_signed_orbit_columns_frobfold",
+            "oracle": "meet_in_the_middle_m3_frobenius_folded",
+            "rank": 4,
+            "ratio_to_family_optimum": 25.4524754142207,
+            "ratio_to_floor": 42.021339689731995,
+            "ratio_to_rho": 0.6466224831046974,
+            "recovered": 21,
+            "relations": {
+              "gae": 182.034105,
+              "group_ops": {
+                "adds": 98,
+                "doubles": 80,
+                "scalar_mults": 10
+              },
+              "native": {
+                "canonicalisations": 50,
+                "direct_relations_skipped": 0,
+                "frobfold_mismatches": 0,
+                "inversions": 0,
+                "lift_failures": 0,
+                "lookups": 50,
+                "relations": 4,
+                "repeated_targets_skipped": 0,
+                "s4_hits": 0,
+                "s4_pairs": 0,
+                "sqrt_solves": 0,
+                "target_guard_probes": 5,
+                "trials": 5
+              },
+              "wall_ns": 23661
+            },
+            "relations_found": 4,
+            "s": 11.228415944103995,
+            "s_wall": 18.053150593156825,
+            "signed_points": 45,
+            "signed_points_over_family_optimum": 3.153073949727619,
+            "summands": 3,
+            "table": "frobenius_folded",
+            "targets": "random",
+            "total_gae": 353.47224600000004,
+            "total_wall_ns": 74903,
             "trials": 5,
             "trials_floor": 4.0,
             "trials_floor_exact": 4.0,
@@ -825,122 +934,13 @@
                 "pair_table_entries": 27,
                 "pair_table_representatives": 3
               },
-              "wall_ns": 52056
+              "wall_ns": 49357
             },
             "family_optimum_base": 14.27178706160297,
             "family_optimum_s": 0.4411522164885582,
             "independent": 4,
             "linear_algebra": {
-              "gae": 0.808315,
-              "group_ops": {
-                "adds": 0,
-                "doubles": 0,
-                "scalar_mults": 0
-              },
-              "native": {
-                "columns": 4,
-                "pinned_by_repeated_row": 0,
-                "rank": 4,
-                "repeated_column_rows": 0,
-                "row_ops": 41,
-                "rows": 4,
-                "single_column_rows": 1,
-                "two_column_rows": 0
-              },
-              "wall_ns": 1034
-            },
-            "name": "mitm_m3_signed_orbit_columns_frobfold",
-            "oracle": "meet_in_the_middle_m3_frobenius_folded",
-            "rank": 4,
-            "ratio_to_family_optimum": 25.4524754142207,
-            "ratio_to_floor": 42.021339689731995,
-            "ratio_to_rho": 0.6466224831046974,
-            "recovered": 21,
-            "relations": {
-              "gae": 182.034105,
-              "group_ops": {
-                "adds": 98,
-                "doubles": 80,
-                "scalar_mults": 10
-              },
-              "native": {
-                "canonicalisations": 50,
-                "direct_relations_skipped": 0,
-                "frobfold_mismatches": 0,
-                "inversions": 0,
-                "lift_failures": 0,
-                "lookups": 50,
-                "relations": 4,
-                "repeated_targets_skipped": 0,
-                "s4_hits": 0,
-                "s4_pairs": 0,
-                "sqrt_solves": 0,
-                "target_guard_probes": 5,
-                "trials": 5
-              },
-              "wall_ns": 23891
-            },
-            "relations_found": 4,
-            "s": 11.228415944103995,
-            "s_wall": 19.218973191512312,
-            "signed_points": 45,
-            "signed_points_over_family_optimum": 3.153073949727619,
-            "summands": 3,
-            "table": "frobenius_folded",
-            "targets": "random",
-            "total_gae": 353.47224600000004,
-            "total_wall_ns": 77745,
-            "trials": 5,
-            "trials_floor": 4.0,
-            "trials_floor_exact": 4.0,
-            "trials_over_floor": 1.25,
-            "trials_over_floor_exact": 1.25,
-            "verified": true,
-            "verify": {
-              "gae": 6.0,
-              "group_ops": {
-                "adds": 2,
-                "doubles": 4,
-                "scalar_mults": 1
-              },
-              "native": {},
-              "wall_ns": 764
-            },
-            "yield_over_ceiling": 0.8,
-            "yield_over_ceiling_exact": 0.8
-          },
-          {
-            "abscissae": 23,
-            "cofactor_classes": 2,
-            "columns": 3,
-            "decomposition_probability_ceiling": 1.0,
-            "decomposition_probability_ceiling_exact": 1.0,
-            "dependent": 0,
-            "dimension": null,
-            "factor_base": {
-              "gae": 164.629826,
-              "group_ops": {
-                "adds": 111,
-                "doubles": 0,
-                "scalar_mults": 0
-              },
-              "native": {
-                "abscissae_scanned": 34,
-                "as_solves": 34,
-                "canonicalisations": 108,
-                "derived_counts": 1,
-                "frobenius_maps": 495,
-                "lookups": 450,
-                "pair_table_entries": 27,
-                "pair_table_representatives": 3
-              },
-              "wall_ns": 52056
-            },
-            "family_optimum_base": 14.27178706160297,
-            "family_optimum_s": 0.4411522164885582,
-            "independent": 4,
-            "linear_algebra": {
-              "gae": 0.8280299999999999,
+              "gae": 0.82803,
               "group_ops": {
                 "adds": 0,
                 "doubles": 0,
@@ -956,7 +956,7 @@
                 "single_column_rows": 0,
                 "two_column_rows": 3
               },
-              "wall_ns": 1405
+              "wall_ns": 1374
             },
             "name": "mitm_m3_signed_orbit_columns_frobfold_walk",
             "oracle": "meet_in_the_middle_m3_frobenius_folded",
@@ -993,18 +993,18 @@
                 "walk_restarts": 1,
                 "walk_steps": 3
               },
-              "wall_ns": 57289
+              "wall_ns": 57207
             },
             "relations_found": 4,
             "s": 19.768303233183975,
-            "s_wall": 27.56758934205259,
+            "s_wall": 26.213619102870773,
             "signed_points": 45,
             "signed_points_over_family_optimum": 3.153073949727619,
             "summands": 3,
             "table": "frobenius_folded",
             "targets": "walk",
             "total_gae": 622.3092,
-            "total_wall_ns": 111517,
+            "total_wall_ns": 108761,
             "trials": 4,
             "trials_floor": 4.0,
             "trials_floor_exact": 4.0,
@@ -1019,7 +1019,7 @@
                 "scalar_mults": 1
               },
               "native": {},
-              "wall_ns": 767
+              "wall_ns": 823
             },
             "yield_over_ceiling": 1.0,
             "yield_over_ceiling_exact": 1.0
@@ -1049,13 +1049,13 @@
                 "pair_table_entries": 27,
                 "pair_table_representatives": 3
               },
-              "wall_ns": 52056
+              "wall_ns": 49357
             },
             "family_optimum_base": 14.27178706160297,
             "family_optimum_s": 0.4411522164885582,
             "independent": 2,
             "linear_algebra": {
-              "gae": 0.19714999999999996,
+              "gae": 0.19715000000000002,
               "group_ops": {
                 "adds": 0,
                 "doubles": 0,
@@ -1071,7 +1071,7 @@
                 "single_column_rows": 2,
                 "two_column_rows": 0
               },
-              "wall_ns": 603
+              "wall_ns": 953
             },
             "name": "mitm_m2_signed_orbit_columns_frobfold_walk",
             "oracle": "meet_in_the_middle_m2_frobenius_folded",
@@ -1108,18 +1108,18 @@
                 "walk_restarts": 1,
                 "walk_steps": 2
               },
-              "wall_ns": 54703
+              "wall_ns": 55482
             },
             "relations_found": 2,
             "s": 19.3172219682442,
-            "s_wall": 26.72832747331268,
+            "s_wall": 25.684097296625822,
             "signed_points": 45,
             "signed_points_over_family_optimum": 3.153073949727619,
             "summands": 2,
             "table": "frobenius_folded",
             "targets": "walk",
             "total_gae": 608.109093,
-            "total_wall_ns": 108122,
+            "total_wall_ns": 106564,
             "trials": 3,
             "trials_floor": 7.659903381642511,
             "trials_floor_exact": 7.493383742911154,
@@ -1134,7 +1134,7 @@
                 "scalar_mults": 1
               },
               "native": {},
-              "wall_ns": 760
+              "wall_ns": 772
             },
             "yield_over_ceiling": 1.276650563607085,
             "yield_over_ceiling_exact": 1.2488972904851923
@@ -1153,18 +1153,18 @@
       {
         "a": 0,
         "calibration": {
-          "ns_per_add": 104.970955,
-          "ns_per_as_solve": 9.17474,
+          "ns_per_add": 105.059775,
+          "ns_per_as_solve": 4.545155,
           "ns_per_canon": null,
-          "ns_per_double": 105.49006,
-          "ns_per_frobenius": 9.275425,
+          "ns_per_double": 105.51413,
+          "ns_per_frobenius": 10.328965,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 1.84672,
-          "ns_per_row_op": 2.5108466796875,
+          "ns_per_lookup": 1.87447,
+          "ns_per_row_op": 2.5092275390625,
           "ns_per_s4_pair": null,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.34814697265625
+          "ns_per_word_xor": 0.3497249755859375
         },
         "curve": {
           "a": 0,
@@ -1223,9 +1223,9 @@
             "gae_per_refutation_mean": -0.0,
             "gae_per_target_mean": 5.75,
             "inconclusive": 0,
-            "ms_median_found": 0.0005315000000000001,
+            "ms_median_found": 0.0005564999999999999,
             "ms_median_refuted": null,
-            "ms_total": 0.006268,
+            "ms_total": 0.006386,
             "native_median_found": 3.0,
             "native_median_refuted": null,
             "native_total": 46,
@@ -1238,7 +1238,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 564
+                "wall_ns": 539
               },
               {
                 "extra": {},
@@ -1246,7 +1246,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 394
+                "wall_ns": 421
               },
               {
                 "extra": {},
@@ -1254,7 +1254,7 @@
                 "group_adds": 4,
                 "native": 4,
                 "verdict": "Found",
-                "wall_ns": 499
+                "wall_ns": 574
               },
               {
                 "extra": {},
@@ -1262,7 +1262,7 @@
                 "group_adds": 11,
                 "native": 11,
                 "verdict": "Found",
-                "wall_ns": 1282
+                "wall_ns": 1242
               },
               {
                 "extra": {},
@@ -1270,7 +1270,7 @@
                 "group_adds": 15,
                 "native": 15,
                 "verdict": "Found",
-                "wall_ns": 1677
+                "wall_ns": 1764
               },
               {
                 "extra": {},
@@ -1278,7 +1278,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 200
+                "wall_ns": 202
               },
               {
                 "extra": {},
@@ -1286,7 +1286,7 @@
                 "group_adds": 10,
                 "native": 10,
                 "verdict": "Found",
-                "wall_ns": 1283
+                "wall_ns": 1258
               },
               {
                 "extra": {},
@@ -1294,7 +1294,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 369
+                "wall_ns": 386
               }
             ],
             "refuted": 0
@@ -1303,11 +1303,11 @@
             "extra_totals": {},
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 1.0175926759930878,
+            "gae_per_target_mean": 1.0178419380776325,
             "inconclusive": 0,
-            "ms_median_found": 0.0001805,
+            "ms_median_found": 0.000181,
             "ms_median_refuted": null,
-            "ms_total": 0.001552,
+            "ms_total": 0.0014810000000000001,
             "native_median_found": 1.0,
             "native_median_refuted": null,
             "native_total": 8,
@@ -1316,55 +1316,7 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 1.0175926759930878,
-                "group_adds": 1,
-                "native": 1,
-                "verdict": "Found",
-                "wall_ns": 180
-              },
-              {
-                "extra": {},
-                "gae": 1.0175926759930878,
-                "group_adds": 1,
-                "native": 1,
-                "verdict": "Found",
-                "wall_ns": 191
-              },
-              {
-                "extra": {},
-                "gae": 1.0175926759930878,
-                "group_adds": 1,
-                "native": 1,
-                "verdict": "Found",
-                "wall_ns": 177
-              },
-              {
-                "extra": {},
-                "gae": 1.0175926759930878,
-                "group_adds": 1,
-                "native": 1,
-                "verdict": "Found",
-                "wall_ns": 181
-              },
-              {
-                "extra": {},
-                "gae": 1.0175926759930878,
-                "group_adds": 1,
-                "native": 1,
-                "verdict": "Found",
-                "wall_ns": 166
-              },
-              {
-                "extra": {},
-                "gae": 1.0175926759930878,
-                "group_adds": 1,
-                "native": 1,
-                "verdict": "Found",
-                "wall_ns": 167
-              },
-              {
-                "extra": {},
-                "gae": 1.0175926759930878,
+                "gae": 1.0178419380776325,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
@@ -1372,11 +1324,59 @@
               },
               {
                 "extra": {},
-                "gae": 1.0175926759930878,
+                "gae": 1.0178419380776325,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 285
+                "wall_ns": 185
+              },
+              {
+                "extra": {},
+                "gae": 1.0178419380776325,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 152
+              },
+              {
+                "extra": {},
+                "gae": 1.0178419380776325,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 171
+              },
+              {
+                "extra": {},
+                "gae": 1.0178419380776325,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 182
+              },
+              {
+                "extra": {},
+                "gae": 1.0178419380776325,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 165
+              },
+              {
+                "extra": {},
+                "gae": 1.0178419380776325,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 180
+              },
+              {
+                "extra": {},
+                "gae": 1.0178419380776325,
+                "group_adds": 1,
+                "native": 1,
+                "verdict": "Found",
+                "wall_ns": 241
               }
             ],
             "refuted": 0
@@ -1393,11 +1393,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 116.61134301600065,
+            "gae_per_target_mean": 117.04086008160225,
             "inconclusive": 0,
-            "ms_median_found": 0.921365,
+            "ms_median_found": 0.8498785,
             "ms_median_refuted": null,
-            "ms_total": 8.044223,
+            "ms_total": 7.415976000000001,
             "native_median_found": 32113.5,
             "native_median_refuted": null,
             "native_total": 281279,
@@ -1414,11 +1414,11 @@
                   "reductions": 7,
                   "splits": 4
                 },
-                "gae": 98.97074682263447,
+                "gae": 99.33528790119682,
                 "group_adds": 0,
                 "native": 29841,
                 "verdict": "Found",
-                "wall_ns": 794827
+                "wall_ns": 738029
               },
               {
                 "extra": {
@@ -1430,11 +1430,11 @@
                   "reductions": 11,
                   "splits": 5
                 },
-                "gae": 122.11068518198974,
+                "gae": 122.56045809276715,
                 "group_adds": 0,
                 "native": 36818,
                 "verdict": "Found",
-                "wall_ns": 1146048
+                "wall_ns": 1070927
               },
               {
                 "extra": {
@@ -1446,11 +1446,11 @@
                   "reductions": 15,
                   "splits": 8
                 },
-                "gae": 188.72797081851118,
+                "gae": 189.42311660901794,
                 "group_adds": 0,
                 "native": 56904,
                 "verdict": "Found",
-                "wall_ns": 1606201
+                "wall_ns": 1467232
               },
               {
                 "extra": {
@@ -1462,11 +1462,11 @@
                   "reductions": 8,
                   "splits": 4
                 },
-                "gae": 105.34857417895384,
+                "gae": 105.73660684607138,
                 "group_adds": 0,
                 "native": 31764,
                 "verdict": "Found",
-                "wall_ns": 873283
+                "wall_ns": 805969
               },
               {
                 "extra": {
@@ -1478,11 +1478,11 @@
                   "reductions": 9,
                   "splits": 4
                 },
-                "gae": 107.6668795986456,
+                "gae": 108.06345132993374,
                 "group_adds": 0,
                 "native": 32463,
                 "verdict": "Found",
-                "wall_ns": 904139
+                "wall_ns": 836032
               },
               {
                 "extra": {
@@ -1494,11 +1494,11 @@
                   "reductions": 6,
                   "splits": 4
                 },
-                "gae": 88.3543009736598,
+                "gae": 88.67973826908896,
                 "group_adds": 0,
                 "native": 26640,
                 "verdict": "Found",
-                "wall_ns": 759564
+                "wall_ns": 689644
               },
               {
                 "extra": {
@@ -1510,11 +1510,11 @@
                   "reductions": 9,
                   "splits": 4
                 },
-                "gae": 123.21511394416048,
+                "gae": 123.66895482113078,
                 "group_adds": 0,
                 "native": 37151,
                 "verdict": "Found",
-                "wall_ns": 1021570
+                "wall_ns": 944418
               },
               {
                 "extra": {
@@ -1526,11 +1526,11 @@
                   "reductions": 10,
                   "splits": 4
                 },
-                "gae": 98.49647260945002,
+                "gae": 98.85926678361125,
                 "group_adds": 0,
                 "native": 29698,
                 "verdict": "Found",
-                "wall_ns": 938591
+                "wall_ns": 863725
               }
             ],
             "refuted": 0
@@ -1544,11 +1544,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 3973.158575150622,
+            "gae_per_target_mean": 4017.2903949204156,
             "inconclusive": 0,
-            "ms_median_found": 0.4069925,
+            "ms_median_found": 0.4160085,
             "ms_median_refuted": null,
-            "ms_total": 3.3365299999999998,
+            "ms_total": 3.376445,
             "native_median_found": 60.0,
             "native_median_refuted": null,
             "native_total": 495,
@@ -1562,11 +1562,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 4201.886131263644,
+                "gae": 4260.165224987394,
                 "group_adds": 0,
                 "native": 69,
                 "verdict": "Found",
-                "wall_ns": 441076
+                "wall_ns": 447572
               },
               {
                 "extra": {
@@ -1575,11 +1575,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 3552.496974043915,
+                "gae": 3659.2977664382015,
                 "group_adds": 0,
                 "native": 51,
                 "verdict": "Found",
-                "wall_ns": 372909
+                "wall_ns": 384445
               },
               {
                 "extra": {
@@ -1588,11 +1588,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 5365.684250467189,
+                "gae": 5334.6487749474045,
                 "group_adds": 0,
                 "native": 97,
                 "verdict": "Found",
-                "wall_ns": 563241
+                "wall_ns": 560457
               },
               {
                 "extra": {
@@ -1601,11 +1601,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 2096.9229059600343,
+                "gae": 2116.99482508886,
                 "group_adds": 0,
                 "native": 17,
                 "verdict": "Found",
-                "wall_ns": 220116
+                "wall_ns": 222411
               },
               {
                 "extra": {
@@ -1614,11 +1614,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 2937.6602318231744,
+                "gae": 2993.9336915579725,
                 "group_adds": 0,
                 "native": 28,
                 "verdict": "Found",
-                "wall_ns": 308369
+                "wall_ns": 314542
               },
               {
                 "extra": {
@@ -1627,11 +1627,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 4587.468981300589,
+                "gae": 4633.010112576388,
                 "group_adds": 0,
                 "native": 81,
                 "verdict": "Found",
-                "wall_ns": 481551
+                "wall_ns": 486743
               },
               {
                 "extra": {
@@ -1640,11 +1640,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 6625.813778678112,
+                "gae": 6672.039798295779,
                 "group_adds": 0,
                 "native": 131,
                 "verdict": "Found",
-                "wall_ns": 695518
+                "wall_ns": 700963
               },
               {
                 "extra": {
@@ -1653,11 +1653,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 2417.3353476683146,
+                "gae": 2468.2329654713235,
                 "group_adds": 0,
                 "native": 21,
                 "verdict": "Found",
-                "wall_ns": 253750
+                "wall_ns": 259312
               }
             ],
             "refuted": 0
@@ -1675,25 +1675,25 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m2",
-            "relation_phase_gae": 5.087963379965439,
-            "s_over_rho_floor": 1.5283345479183872,
-            "s_projected": 0.4514837424883144,
+            "relation_phase_gae": 5.089209690388162,
+            "s_over_rho_floor": 1.528708917609014,
+            "s_projected": 0.4515943346549501,
             "targets_needed": 5.0
           },
           {
             "extrapolation": true,
             "oracle": "matrix_f4_splitting",
-            "relation_phase_gae": 583.0567150800032,
-            "s_over_rho_floor": 175.13996357784902,
-            "s_projected": 51.73791714850172,
+            "relation_phase_gae": 585.2043004080112,
+            "s_over_rho_floor": 175.78506036929247,
+            "s_projected": 51.92848453053517,
             "targets_needed": 5.0
           },
           {
             "extrapolation": true,
             "oracle": "cdcl_sat_native_xor",
-            "relation_phase_gae": 19865.792875753108,
-            "s_over_rho_floor": 5967.334138715967,
-            "s_projected": 1762.804062301178,
+            "relation_phase_gae": 20086.451974602078,
+            "s_over_rho_floor": 6033.616243931456,
+            "s_projected": 1782.3843910737307,
             "targets_needed": 5.0
           }
         ],
@@ -1703,23 +1703,23 @@
         "system_degree": 2,
         "targets": 8,
         "unknowns": 12,
-        "wall_ns": 67092044
+        "wall_ns": 65765026
       },
       {
         "a": 0,
         "calibration": {
-          "ns_per_add": 104.943235,
-          "ns_per_as_solve": 5.634,
+          "ns_per_add": 105.020465,
+          "ns_per_as_solve": 4.541345,
           "ns_per_canon": null,
-          "ns_per_double": 105.379055,
-          "ns_per_frobenius": 9.30053,
+          "ns_per_double": 105.42282,
+          "ns_per_frobenius": 10.350065,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 1.84713,
-          "ns_per_row_op": 2.5047578125,
-          "ns_per_s4_pair": 431.693514252036,
+          "ns_per_lookup": 1.874835,
+          "ns_per_row_op": 2.5019609375,
+          "ns_per_s4_pair": 440.93137858979856,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.3469932861328125
+          "ns_per_word_xor": 0.3493306884765625
         },
         "curve": {
           "a": 0,
@@ -1778,9 +1778,9 @@
             "gae_per_refutation_mean": -0.0,
             "gae_per_target_mean": 5.0,
             "inconclusive": 0,
-            "ms_median_found": 0.000696,
+            "ms_median_found": 0.001058,
             "ms_median_refuted": null,
-            "ms_total": 0.006787,
+            "ms_total": 0.008901,
             "native_median_found": 3.5,
             "native_median_refuted": null,
             "native_total": 40,
@@ -1793,7 +1793,7 @@
                 "group_adds": 4,
                 "native": 4,
                 "verdict": "Found",
-                "wall_ns": 714
+                "wall_ns": 790
               },
               {
                 "extra": {},
@@ -1801,7 +1801,7 @@
                 "group_adds": 6,
                 "native": 6,
                 "verdict": "Found",
-                "wall_ns": 1160
+                "wall_ns": 1790
               },
               {
                 "extra": {},
@@ -1809,7 +1809,7 @@
                 "group_adds": 3,
                 "native": 3,
                 "verdict": "Found",
-                "wall_ns": 678
+                "wall_ns": 1263
               },
               {
                 "extra": {},
@@ -1817,7 +1817,7 @@
                 "group_adds": 11,
                 "native": 11,
                 "verdict": "Found",
-                "wall_ns": 1436
+                "wall_ns": 1611
               },
               {
                 "extra": {},
@@ -1825,7 +1825,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 475
+                "wall_ns": 853
               },
               {
                 "extra": {},
@@ -1833,7 +1833,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 478
+                "wall_ns": 667
               },
               {
                 "extra": {},
@@ -1841,7 +1841,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 574
+                "wall_ns": 535
               },
               {
                 "extra": {},
@@ -1849,7 +1849,7 @@
                 "group_adds": 10,
                 "native": 10,
                 "verdict": "Found",
-                "wall_ns": 1272
+                "wall_ns": 1392
               }
             ],
             "refuted": 0
@@ -1858,11 +1858,11 @@
             "extra_totals": {},
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 2.0176012298458303,
+            "gae_per_target_mean": 2.0178520919708363,
             "inconclusive": 0,
-            "ms_median_found": 0.0003255,
+            "ms_median_found": 0.00038849999999999996,
             "ms_median_refuted": null,
-            "ms_total": 0.002619,
+            "ms_total": 0.0034289999999999998,
             "native_median_found": 1.0,
             "native_median_refuted": null,
             "native_total": 8,
@@ -1871,67 +1871,67 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 2.0176012298458303,
+                "gae": 2.0178520919708363,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 287
+                "wall_ns": 372
               },
               {
                 "extra": {},
-                "gae": 2.0176012298458303,
+                "gae": 2.0178520919708363,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 373
+                "wall_ns": 352
               },
               {
                 "extra": {},
-                "gae": 2.0176012298458303,
+                "gae": 2.0178520919708363,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 316
+                "wall_ns": 652
               },
               {
                 "extra": {},
-                "gae": 2.0176012298458303,
+                "gae": 2.0178520919708363,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 343
+                "wall_ns": 543
               },
               {
                 "extra": {},
-                "gae": 2.0176012298458303,
+                "gae": 2.0178520919708363,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 304
+                "wall_ns": 394
               },
               {
                 "extra": {},
-                "gae": 2.0176012298458303,
+                "gae": 2.0178520919708363,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 351
+                "wall_ns": 437
               },
               {
                 "extra": {},
-                "gae": 2.0176012298458303,
+                "gae": 2.0178520919708363,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 310
+                "wall_ns": 296
               },
               {
                 "extra": {},
-                "gae": 2.0176012298458303,
+                "gae": 2.0178520919708363,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 335
+                "wall_ns": 383
               }
             ],
             "refuted": 0
@@ -1942,11 +1942,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 270.01980402434043,
+            "gae_per_target_mean": 275.45580157636044,
             "inconclusive": 0,
-            "ms_median_found": 0.0123265,
+            "ms_median_found": 0.010033,
             "ms_median_refuted": null,
-            "ms_total": 0.111388,
+            "ms_total": 0.078223,
             "native_median_found": 64.0,
             "native_median_refuted": null,
             "native_total": 512,
@@ -1957,81 +1957,81 @@
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 269.26980402434043,
+                "gae": 274.70580157636044,
                 "group_adds": 6,
                 "native": 64,
                 "verdict": "Found",
-                "wall_ns": 8260
+                "wall_ns": 8961
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 275.26980402434043,
+                "gae": 280.70580157636044,
                 "group_adds": 12,
                 "native": 64,
                 "verdict": "Found",
-                "wall_ns": 20641
+                "wall_ns": 11451
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 272.26980402434043,
+                "gae": 277.70580157636044,
                 "group_adds": 9,
                 "native": 64,
                 "verdict": "Found",
-                "wall_ns": 10240
+                "wall_ns": 11107
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 272.26980402434043,
+                "gae": 277.70580157636044,
                 "group_adds": 9,
                 "native": 64,
                 "verdict": "Found",
-                "wall_ns": 12480
+                "wall_ns": 11105
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 266.26980402434043,
+                "gae": 271.70580157636044,
                 "group_adds": 3,
                 "native": 64,
                 "verdict": "Found",
-                "wall_ns": 9443
+                "wall_ns": 7574
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 269.26980402434043,
+                "gae": 274.70580157636044,
                 "group_adds": 6,
                 "native": 64,
                 "verdict": "Found",
-                "wall_ns": 19414
+                "wall_ns": 7771
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 266.26980402434043,
+                "gae": 271.70580157636044,
                 "group_adds": 3,
                 "native": 64,
                 "verdict": "Found",
-                "wall_ns": 18737
+                "wall_ns": 8538
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 269.26980402434043,
+                "gae": 274.70580157636044,
                 "group_adds": 6,
                 "native": 64,
                 "verdict": "Found",
-                "wall_ns": 12173
+                "wall_ns": 11716
               }
             ],
             "refuted": 0
@@ -2048,11 +2048,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 882.0637005020532,
+            "gae_per_target_mean": 887.352400990069,
             "inconclusive": 0,
-            "ms_median_found": 4.0603,
+            "ms_median_found": 3.221528,
             "ms_median_refuted": null,
-            "ms_total": 36.13569699999999,
+            "ms_total": 29.009273,
             "native_median_found": 263307.5,
             "native_median_refuted": null,
             "native_total": 2134142,
@@ -2069,11 +2069,11 @@
                   "reductions": 18,
                   "splits": 11
                 },
-                "gae": 884.7692322724258,
+                "gae": 890.0741546582321,
                 "group_adds": 0,
                 "native": 267586,
                 "verdict": "Found",
-                "wall_ns": 5948105
+                "wall_ns": 5321477
               },
               {
                 "extra": {
@@ -2085,11 +2085,11 @@
                   "reductions": 16,
                   "splits": 10
                 },
-                "gae": 868.0615609791871,
+                "gae": 873.2663070746962,
                 "group_adds": 0,
                 "native": 262533,
                 "verdict": "Found",
-                "wall_ns": 4042423
+                "wall_ns": 3123895
               },
               {
                 "extra": {
@@ -2101,11 +2101,11 @@
                   "reductions": 15,
                   "splits": 10
                 },
-                "gae": 873.1833070376131,
+                "gae": 878.4187622314145,
                 "group_adds": 0,
                 "native": 264082,
                 "verdict": "Found",
-                "wall_ns": 3956491
+                "wall_ns": 3256472
               },
               {
                 "extra": {
@@ -2117,11 +2117,11 @@
                   "reductions": 17,
                   "splits": 11
                 },
-                "gae": 838.8454549932268,
+                "gae": 843.875026400221,
                 "group_adds": 0,
                 "native": 253697,
                 "verdict": "Found",
-                "wall_ns": 4078177
+                "wall_ns": 3186584
               },
               {
                 "extra": {
@@ -2133,11 +2133,11 @@
                   "reductions": 15,
                   "splits": 10
                 },
-                "gae": 815.8753001398469,
+                "gae": 820.7671464946551,
                 "group_adds": 0,
                 "native": 246750,
                 "verdict": "Found",
-                "wall_ns": 3909207
+                "wall_ns": 3027854
               },
               {
                 "extra": {
@@ -2149,11 +2149,11 @@
                   "reductions": 18,
                   "splits": 11
                 },
-                "gae": 835.7505845537905,
+                "gae": 840.7615996560711,
                 "group_adds": 0,
                 "native": 252761,
                 "verdict": "Found",
-                "wall_ns": 3969323
+                "wall_ns": 3115761
               },
               {
                 "extra": {
@@ -2165,11 +2165,11 @@
                   "reductions": 21,
                   "splits": 12
                 },
-                "gae": 1030.4364515131997,
+                "gae": 1036.614769202597,
                 "group_adds": 0,
                 "native": 311641,
                 "verdict": "Found",
-                "wall_ns": 5232887
+                "wall_ns": 4163979
               },
               {
                 "extra": {
@@ -2181,11 +2181,11 @@
                   "reductions": 21,
                   "splits": 12
                 },
-                "gae": 909.5877125271357,
+                "gae": 915.0414422026653,
                 "group_adds": 0,
                 "native": 275092,
                 "verdict": "Found",
-                "wall_ns": 4999084
+                "wall_ns": 3813251
               }
             ],
             "refuted": 0
@@ -2199,11 +2199,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 70481.80499676801,
+            "gae_per_target_mean": 71955.37912539236,
             "inconclusive": 0,
-            "ms_median_found": 6.3068725,
+            "ms_median_found": 6.424614999999999,
             "ms_median_refuted": null,
-            "ms_total": 59.172709,
+            "ms_total": 60.454299,
             "native_median_found": 409.0,
             "native_median_refuted": null,
             "native_total": 3903,
@@ -2217,11 +2217,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 28520.95230340479,
+                "gae": 29129.770088144247,
                 "group_adds": 0,
                 "native": 196,
                 "verdict": "Found",
-                "wall_ns": 2993081
+                "wall_ns": 3059222
               },
               {
                 "extra": {
@@ -2230,11 +2230,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 87748.36224555114,
+                "gae": 91097.48276205023,
                 "group_adds": 0,
                 "native": 649,
                 "verdict": "Found",
-                "wall_ns": 9208597
+                "wall_ns": 9567100
               },
               {
                 "extra": {
@@ -2243,11 +2243,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 46118.64690468137,
+                "gae": 47046.868436547105,
                 "group_adds": 0,
                 "native": 349,
                 "verdict": "Found",
-                "wall_ns": 4839840
+                "wall_ns": 4940884
               },
               {
                 "extra": {
@@ -2256,11 +2256,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 105370.18417623585,
+                "gae": 107418.25414694173,
                 "group_adds": 0,
                 "native": 690,
                 "verdict": "Found",
-                "wall_ns": 11057888
+                "wall_ns": 11281115
               },
               {
                 "extra": {
@@ -2269,11 +2269,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 37151.50385825251,
+                "gae": 37927.23637245369,
                 "group_adds": 0,
                 "native": 313,
                 "verdict": "Found",
-                "wall_ns": 3898799
+                "wall_ns": 3983136
               },
               {
                 "extra": {
@@ -2282,11 +2282,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 55235.470871466845,
+                "gae": 56069.72888569861,
                 "group_adds": 0,
                 "native": 362,
                 "verdict": "Found",
-                "wall_ns": 5796589
+                "wall_ns": 5888469
               },
               {
                 "extra": {
@@ -2295,11 +2295,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 64960.41407528556,
+                "gae": 66280.04360864332,
                 "group_adds": 0,
                 "native": 456,
                 "verdict": "Found",
-                "wall_ns": 6817156
+                "wall_ns": 6960761
               },
               {
                 "extra": {
@@ -2308,11 +2308,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 138748.90553926607,
+                "gae": 140673.64870266,
                 "group_adds": 0,
                 "native": 888,
                 "verdict": "Found",
-                "wall_ns": 14560759
+                "wall_ns": 14773612
               }
             ],
             "refuted": 0
@@ -2330,33 +2330,33 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m3",
-            "relation_phase_gae": 10.088006149229152,
-            "s_over_rho_floor": 3.030259293569203,
-            "s_projected": 0.8951657923548272,
+            "relation_phase_gae": 10.08926045985418,
+            "s_over_rho_floor": 3.030636066379637,
+            "s_projected": 0.8952770944246221,
             "targets_needed": 5.0
           },
           {
             "extrapolation": true,
             "oracle": "semaev_s4_pairs_and_solve",
-            "relation_phase_gae": 1350.099020121702,
-            "s_over_rho_floor": 405.5459564995484,
-            "s_projected": 119.80191538613091,
+            "relation_phase_gae": 1377.2790078818023,
+            "s_over_rho_floor": 413.7103459032399,
+            "s_projected": 122.21374929260844,
             "targets_needed": 5.0
           },
           {
             "extrapolation": true,
             "oracle": "matrix_f4_splitting",
-            "relation_phase_gae": 4410.318502510266,
-            "s_over_rho_floor": 1324.7819670345016,
-            "s_projected": 391.35248318008115,
+            "relation_phase_gae": 4436.762004950345,
+            "s_over_rho_floor": 1332.7251292251485,
+            "s_projected": 393.69896458227765,
             "targets_needed": 5.0
           },
           {
             "extrapolation": true,
             "oracle": "cdcl_sat_native_xor",
-            "relation_phase_gae": 352409.02498384006,
-            "s_over_rho_floor": 105857.46155364337,
-            "s_projected": 31271.244229639637,
+            "relation_phase_gae": 359776.8956269618,
+            "s_over_rho_floor": 108070.64007077199,
+            "s_projected": 31925.03702721063,
             "targets_needed": 5.0
           }
         ],
@@ -2366,23 +2366,23 @@
         "system_degree": 3,
         "targets": 8,
         "unknowns": 27,
-        "wall_ns": 188295899
+        "wall_ns": 183499093
       },
       {
         "a": 1,
         "calibration": {
-          "ns_per_add": 127.55387,
-          "ns_per_as_solve": 6.443635,
+          "ns_per_add": 128.02165,
+          "ns_per_as_solve": 6.50134,
           "ns_per_canon": null,
-          "ns_per_double": 128.16102,
-          "ns_per_frobenius": 10.008705,
+          "ns_per_double": 128.144025,
+          "ns_per_frobenius": 9.99673,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 2.19864,
-          "ns_per_row_op": 2.5046064453125,
+          "ns_per_lookup": 2.192005,
+          "ns_per_row_op": 2.501953125,
           "ns_per_s4_pair": null,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.3486170654296875
+          "ns_per_word_xor": 0.34860546875
         },
         "curve": {
           "a": 1,
@@ -2441,9 +2441,9 @@
             "gae_per_refutation_mean": -0.0,
             "gae_per_target_mean": 1.0,
             "inconclusive": 0,
-            "ms_median_found": 0.000559,
+            "ms_median_found": 0.0007379999999999999,
             "ms_median_refuted": null,
-            "ms_total": 0.004827999999999999,
+            "ms_total": 0.0060940000000000005,
             "native_median_found": 1.0,
             "native_median_refuted": null,
             "native_total": 8,
@@ -2456,7 +2456,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 892
+                "wall_ns": 773
               },
               {
                 "extra": {},
@@ -2464,7 +2464,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 561
+                "wall_ns": 802
               },
               {
                 "extra": {},
@@ -2472,7 +2472,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 557
+                "wall_ns": 595
               },
               {
                 "extra": {},
@@ -2480,7 +2480,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 803
+                "wall_ns": 560
               },
               {
                 "extra": {},
@@ -2488,7 +2488,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 512
+                "wall_ns": 703
               },
               {
                 "extra": {},
@@ -2496,7 +2496,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 581
+                "wall_ns": 1098
               },
               {
                 "extra": {},
@@ -2504,7 +2504,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 471
+                "wall_ns": 993
               },
               {
                 "extra": {},
@@ -2512,7 +2512,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 451
+                "wall_ns": 570
               }
             ],
             "refuted": 0
@@ -2521,11 +2521,11 @@
             "extra_totals": {},
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 1.0172369525126914,
+            "gae_per_target_mean": 1.0171221430125295,
             "inconclusive": 0,
-            "ms_median_found": 0.000321,
+            "ms_median_found": 0.000751,
             "ms_median_refuted": null,
-            "ms_total": 0.002622,
+            "ms_total": 0.005791,
             "native_median_found": 1.0,
             "native_median_refuted": null,
             "native_total": 8,
@@ -2534,67 +2534,67 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 1.0172369525126914,
+                "gae": 1.0171221430125295,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 383
+                "wall_ns": 615
               },
               {
                 "extra": {},
-                "gae": 1.0172369525126914,
+                "gae": 1.0171221430125295,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 312
+                "wall_ns": 249
               },
               {
                 "extra": {},
-                "gae": 1.0172369525126914,
+                "gae": 1.0171221430125295,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 299
+                "wall_ns": 862
               },
               {
                 "extra": {},
-                "gae": 1.0172369525126914,
+                "gae": 1.0171221430125295,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 330
+                "wall_ns": 945
               },
               {
                 "extra": {},
-                "gae": 1.0172369525126914,
+                "gae": 1.0171221430125295,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 330
+                "wall_ns": 640
               },
               {
                 "extra": {},
-                "gae": 1.0172369525126914,
+                "gae": 1.0171221430125295,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 422
+                "wall_ns": 554
               },
               {
                 "extra": {},
-                "gae": 1.0172369525126914,
+                "gae": 1.0171221430125295,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 293
+                "wall_ns": 889
               },
               {
                 "extra": {},
-                "gae": 1.0172369525126914,
+                "gae": 1.0171221430125295,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 253
+                "wall_ns": 1037
               }
             ],
             "refuted": 0
@@ -2611,11 +2611,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 1171.8777440335618,
+            "gae_per_target_mean": 1167.5569645966925,
             "inconclusive": 0,
-            "ms_median_found": 4.704594,
+            "ms_median_found": 4.219234500000001,
             "ms_median_refuted": null,
-            "ms_total": 38.713083999999995,
+            "ms_total": 34.618358,
             "native_median_found": 431855.5,
             "native_median_refuted": null,
             "native_total": 3430183,
@@ -2632,11 +2632,11 @@
                   "reductions": 11,
                   "splits": 9
                 },
-                "gae": 1245.955939532761,
+                "gae": 1241.3620296047095,
                 "group_adds": 0,
                 "native": 455877,
                 "verdict": "Found",
-                "wall_ns": 5318381
+                "wall_ns": 4673693
               },
               {
                 "extra": {
@@ -2648,11 +2648,11 @@
                   "reductions": 11,
                   "splits": 9
                 },
-                "gae": 1157.8053705903703,
+                "gae": 1153.5364767892775,
                 "group_adds": 0,
                 "native": 423624,
                 "verdict": "Found",
-                "wall_ns": 4639133
+                "wall_ns": 4165326
               },
               {
                 "extra": {
@@ -2664,11 +2664,11 @@
                   "reductions": 11,
                   "splits": 9
                 },
-                "gae": 1068.1270005740087,
+                "gae": 1064.1887559887332,
                 "group_adds": 0,
                 "native": 390812,
                 "verdict": "Found",
-                "wall_ns": 4431696
+                "wall_ns": 3942022
               },
               {
                 "extra": {
@@ -2680,11 +2680,11 @@
                   "reductions": 11,
                   "splits": 9
                 },
-                "gae": 1170.9460996845637,
+                "gae": 1166.628755273034,
                 "group_adds": 0,
                 "native": 428432,
                 "verdict": "Found",
-                "wall_ns": 4492708
+                "wall_ns": 4027837
               },
               {
                 "extra": {
@@ -2696,11 +2696,11 @@
                   "reductions": 11,
                   "splits": 9
                 },
-                "gae": 1192.4091083319638,
+                "gae": 1188.0126285951926,
                 "group_adds": 0,
                 "native": 436285,
                 "verdict": "Found",
-                "wall_ns": 5361057
+                "wall_ns": 4832507
               },
               {
                 "extra": {
@@ -2712,11 +2712,11 @@
                   "reductions": 11,
                   "splits": 9
                 },
-                "gae": 1229.5218288748192,
+                "gae": 1224.9885124410598,
                 "group_adds": 0,
                 "native": 449864,
                 "verdict": "Found",
-                "wall_ns": 5358630
+                "wall_ns": 4783043
               },
               {
                 "extra": {
@@ -2728,11 +2728,11 @@
                   "reductions": 11,
                   "splits": 9
                 },
-                "gae": 1120.5969916618458,
+                "gae": 1116.4652872556126,
                 "group_adds": 0,
                 "native": 410010,
                 "verdict": "Found",
-                "wall_ns": 4341424
+                "wall_ns": 3920787
               },
               {
                 "extra": {
@@ -2744,11 +2744,11 @@
                   "reductions": 11,
                   "splits": 9
                 },
-                "gae": 1189.659613018162,
+                "gae": 1185.273270825921,
                 "group_adds": 0,
                 "native": 435279,
                 "verdict": "Found",
-                "wall_ns": 4770055
+                "wall_ns": 4273143
               }
             ],
             "refuted": 0
@@ -2762,11 +2762,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 14936.785140270538,
+            "gae_per_target_mean": 15036.525072126471,
             "inconclusive": 0,
-            "ms_median_found": 1.8618999999999999,
+            "ms_median_found": 1.889089,
             "ms_median_refuted": null,
-            "ms_total": 15.241958,
+            "ms_total": 15.400006,
             "native_median_found": 284.5,
             "native_median_refuted": null,
             "native_total": 2399,
@@ -2780,11 +2780,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 23325.66624595553,
+                "gae": 23634.57274609412,
                 "group_adds": 0,
                 "native": 471,
                 "verdict": "Found",
-                "wall_ns": 2975279
+                "wall_ns": 3025737
               },
               {
                 "extra": {
@@ -2793,11 +2793,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 10772.0761432013,
+                "gae": 10646.628910032015,
                 "group_adds": 0,
                 "native": 223,
                 "verdict": "Found",
-                "wall_ns": 1374020
+                "wall_ns": 1362999
               },
               {
                 "extra": {
@@ -2806,11 +2806,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 21082.449321216205,
+                "gae": 21152.875314448767,
                 "group_adds": 0,
                 "native": 408,
                 "verdict": "Found",
-                "wall_ns": 2689148
+                "wall_ns": 2708026
               },
               {
                 "extra": {
@@ -2819,11 +2819,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 8286.052002969413,
+                "gae": 8275.858028700615,
                 "group_adds": 0,
                 "native": 168,
                 "verdict": "Found",
-                "wall_ns": 1056918
+                "wall_ns": 1059489
               },
               {
                 "extra": {
@@ -2832,11 +2832,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 12066.36066784959,
+                "gae": 12208.28664526664,
                 "group_adds": 0,
                 "native": 235,
                 "verdict": "Found",
-                "wall_ns": 1539111
+                "wall_ns": 1562925
               },
               {
                 "extra": {
@@ -2845,11 +2845,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 17127.57911618048,
+                "gae": 17303.737297558655,
                 "group_adds": 0,
                 "native": 334,
                 "verdict": "Found",
-                "wall_ns": 2184689
+                "wall_ns": 2215253
               },
               {
                 "extra": {
@@ -2858,11 +2858,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 7864.50462067517,
+                "gae": 7865.239980893857,
                 "group_adds": 0,
                 "native": 149,
                 "verdict": "Found",
-                "wall_ns": 1003148
+                "wall_ns": 1006921
               },
               {
                 "extra": {
@@ -2871,11 +2871,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 18969.593004116614,
+                "gae": 19205.001654017113,
                 "group_adds": 0,
                 "native": 411,
                 "verdict": "Found",
-                "wall_ns": 2419645
+                "wall_ns": 2458656
               }
             ],
             "refuted": 0
@@ -2893,25 +2893,25 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m2",
-            "relation_phase_gae": 47.8101367680965,
-            "s_over_rho_floor": 5.683744680041239,
-            "s_projected": 1.5187390468463748,
+            "relation_phase_gae": 47.804740721588885,
+            "s_over_rho_floor": 5.6831031894975155,
+            "s_projected": 1.5185676357799422,
             "targets_needed": 47.0
           },
           {
             "extrapolation": true,
             "oracle": "matrix_f4_splitting",
-            "relation_phase_gae": 55078.2539695774,
-            "s_over_rho_floor": 6547.789948897265,
-            "s_projected": 1749.6183987396057,
+            "relation_phase_gae": 54875.17733604455,
+            "s_over_rho_floor": 6523.647877497603,
+            "s_projected": 1743.1674568746107,
             "targets_needed": 47.0
           },
           {
             "extrapolation": true,
             "oracle": "cdcl_sat_native_xor",
-            "relation_phase_gae": 702028.9015927153,
-            "s_over_rho_floor": 83458.30621688167,
-            "s_projected": 22300.683012791502,
+            "relation_phase_gae": 706716.6783899441,
+            "s_over_rho_floor": 84015.59653716892,
+            "s_projected": 22449.595150386613,
             "targets_needed": 47.0
           }
         ],
@@ -2921,23 +2921,23 @@
         "system_degree": 2,
         "targets": 8,
         "unknowns": 20,
-        "wall_ns": 190382292
+        "wall_ns": 186765656
       },
       {
         "a": 0,
         "calibration": {
-          "ns_per_add": 146.914335,
-          "ns_per_as_solve": 7.544605,
+          "ns_per_add": 146.783655,
+          "ns_per_as_solve": 7.60765,
           "ns_per_canon": null,
-          "ns_per_double": 147.061805,
-          "ns_per_frobenius": 9.99975,
+          "ns_per_double": 147.02808,
+          "ns_per_frobenius": 10.540115,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 2.495335,
-          "ns_per_row_op": 2.5050771484375,
+          "ns_per_lookup": 2.508485,
+          "ns_per_row_op": 2.50893359375,
           "ns_per_s4_pair": null,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.34790087890625
+          "ns_per_word_xor": 0.3475802001953125
         },
         "curve": {
           "a": 0,
@@ -2998,9 +2998,9 @@
             "gae_per_refutation_mean": -0.0,
             "gae_per_target_mean": 1.0,
             "inconclusive": 0,
-            "ms_median_found": 0.0005945,
+            "ms_median_found": 0.0008684999999999999,
             "ms_median_refuted": null,
-            "ms_total": 0.0053620000000000004,
+            "ms_total": 0.007827,
             "native_median_found": 1.0,
             "native_median_refuted": null,
             "native_total": 8,
@@ -3013,7 +3013,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 912
+                "wall_ns": 1798
               },
               {
                 "extra": {},
@@ -3021,7 +3021,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 893
+                "wall_ns": 1345
               },
               {
                 "extra": {},
@@ -3029,7 +3029,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 487
+                "wall_ns": 878
               },
               {
                 "extra": {},
@@ -3037,7 +3037,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 579
+                "wall_ns": 692
               },
               {
                 "extra": {},
@@ -3045,7 +3045,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 610
+                "wall_ns": 1190
               },
               {
                 "extra": {},
@@ -3053,7 +3053,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 860
+                "wall_ns": 859
               },
               {
                 "extra": {},
@@ -3061,7 +3061,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 532
+                "wall_ns": 540
               },
               {
                 "extra": {},
@@ -3069,7 +3069,7 @@
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 489
+                "wall_ns": 525
               }
             ],
             "refuted": 0
@@ -3078,11 +3078,11 @@
             "extra_totals": {},
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 1.0169849661028654,
+            "gae_per_target_mean": 1.0170896752775371,
             "inconclusive": 0,
-            "ms_median_found": 0.000803,
+            "ms_median_found": 0.0009660000000000001,
             "ms_median_refuted": null,
-            "ms_total": 0.005985000000000001,
+            "ms_total": 0.007929,
             "native_median_found": 1.0,
             "native_median_refuted": null,
             "native_total": 8,
@@ -3091,67 +3091,67 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 1.0169849661028654,
+                "gae": 1.017089675277537,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 906
+                "wall_ns": 1240
               },
               {
                 "extra": {},
-                "gae": 1.0169849661028654,
+                "gae": 1.017089675277537,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 879
+                "wall_ns": 930
               },
               {
                 "extra": {},
-                "gae": 1.0169849661028654,
+                "gae": 1.017089675277537,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 522
+                "wall_ns": 1228
               },
               {
                 "extra": {},
-                "gae": 1.0169849661028654,
+                "gae": 1.017089675277537,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 684
+                "wall_ns": 843
               },
               {
                 "extra": {},
-                "gae": 1.0169849661028654,
+                "gae": 1.017089675277537,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 839
+                "wall_ns": 1118
               },
               {
                 "extra": {},
-                "gae": 1.0169849661028654,
+                "gae": 1.017089675277537,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 767
+                "wall_ns": 828
               },
               {
                 "extra": {},
-                "gae": 1.0169849661028654,
+                "gae": 1.017089675277537,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 942
+                "wall_ns": 1002
               },
               {
                 "extra": {},
-                "gae": 1.0169849661028654,
+                "gae": 1.017089675277537,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 446
+                "wall_ns": 740
               }
             ],
             "refuted": 0
@@ -3168,11 +3168,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 1222.5178318324529,
+            "gae_per_target_mean": 1222.4783642411066,
             "inconclusive": 0,
-            "ms_median_found": 5.3320255,
+            "ms_median_found": 4.121307,
             "ms_median_refuted": null,
-            "ms_total": 44.189366,
+            "ms_total": 34.751127000000004,
             "native_median_found": 523631.0,
             "native_median_refuted": null,
             "native_total": 4130036,
@@ -3189,11 +3189,11 @@
                   "reductions": 15,
                   "splits": 12
                 },
-                "gae": 1100.7466449325725,
+                "gae": 1100.7111085848592,
                 "group_adds": 0,
                 "native": 464832,
                 "verdict": "Found",
-                "wall_ns": 7590788
+                "wall_ns": 6601841
               },
               {
                 "extra": {
@@ -3205,11 +3205,11 @@
                   "reductions": 15,
                   "splits": 12
                 },
-                "gae": 1399.315457936816,
+                "gae": 1399.270282636121,
                 "group_adds": 0,
                 "native": 590914,
                 "verdict": "Found",
-                "wall_ns": 5280510
+                "wall_ns": 4148424
               },
               {
                 "extra": {
@@ -3221,11 +3221,11 @@
                   "reductions": 15,
                   "splits": 12
                 },
-                "gae": 1101.1776305131214,
+                "gae": 1101.1420802515308,
                 "group_adds": 0,
                 "native": 465014,
                 "verdict": "Found",
-                "wall_ns": 4811237
+                "wall_ns": 3639907
               },
               {
                 "extra": {
@@ -3237,11 +3237,11 @@
                   "reductions": 15,
                   "splits": 12
                 },
-                "gae": 1267.8766961325891,
+                "gae": 1267.8357641821365,
                 "group_adds": 0,
                 "native": 535409,
                 "verdict": "Found",
-                "wall_ns": 5379311
+                "wall_ns": 4075436
               },
               {
                 "extra": {
@@ -3253,11 +3253,11 @@
                   "reductions": 15,
                   "splits": 12
                 },
-                "gae": 1212.0948481358255,
+                "gae": 1212.0557170385987,
                 "group_adds": 0,
                 "native": 511853,
                 "verdict": "Found",
-                "wall_ns": 5284740
+                "wall_ns": 4094190
               },
               {
                 "extra": {
@@ -3269,11 +3269,11 @@
                   "reductions": 15,
                   "splits": 12
                 },
-                "gae": 1321.683588227277,
+                "gae": 1321.640919182793,
                 "group_adds": 0,
                 "native": 558131,
                 "verdict": "Found",
-                "wall_ns": 5487915
+                "wall_ns": 4243126
               },
               {
                 "extra": {
@@ -3285,11 +3285,11 @@
                   "reductions": 15,
                   "splits": 12
                 },
-                "gae": 1330.8550561034642,
+                "gae": 1330.812090968619,
                 "group_adds": 0,
                 "native": 562004,
                 "verdict": "Found",
-                "wall_ns": 5569700
+                "wall_ns": 4285004
               },
               {
                 "extra": {
@@ -3301,11 +3301,11 @@
                   "reductions": 15,
                   "splits": 12
                 },
-                "gae": 1046.3927326779572,
+                "gae": 1046.3589510841957,
                 "group_adds": 0,
                 "native": 441879,
                 "verdict": "Found",
-                "wall_ns": 4785165
+                "wall_ns": 3663199
               }
             ],
             "refuted": 0
@@ -3319,11 +3319,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 24168.623504302697,
+            "gae_per_target_mean": 24509.26245841201,
             "inconclusive": 0,
-            "ms_median_found": 1.9812865,
+            "ms_median_found": 2.020782,
             "ms_median_refuted": null,
-            "ms_total": 28.405738,
+            "ms_total": 28.780473000000004,
             "native_median_found": 222.0,
             "native_median_refuted": null,
             "native_total": 3369,
@@ -3337,11 +3337,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 38487.76227316415,
+                "gae": 39084.038342007494,
                 "group_adds": 0,
                 "native": 751,
                 "verdict": "Found",
-                "wall_ns": 5654404
+                "wall_ns": 5736898
               },
               {
                 "extra": {
@@ -3350,11 +3350,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 14874.212240759216,
+                "gae": 15293.385356836903,
                 "group_adds": 0,
                 "native": 235,
                 "verdict": "Found",
-                "wall_ns": 2185235
+                "wall_ns": 2244819
               },
               {
                 "extra": {
@@ -3363,11 +3363,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 5995.922725988584,
+                "gae": 6037.606843895527,
                 "group_adds": 0,
                 "native": 58,
                 "verdict": "Found",
-                "wall_ns": 880887
+                "wall_ns": 886222
               },
               {
                 "extra": {
@@ -3376,11 +3376,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 58945.50045099411,
+                "gae": 60318.45303211723,
                 "group_adds": 0,
                 "native": 1056,
                 "verdict": "Found",
-                "wall_ns": 8659939
+                "wall_ns": 8853763
               },
               {
                 "extra": {
@@ -3389,11 +3389,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 46656.468206455145,
+                "gae": 46697.44052905618,
                 "group_adds": 0,
                 "native": 856,
                 "verdict": "Found",
-                "wall_ns": 6854504
+                "wall_ns": 6854421
               },
               {
                 "extra": {
@@ -3402,11 +3402,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 12097.78473965798,
+                "gae": 12240.770268324495,
                 "group_adds": 0,
                 "native": 209,
                 "verdict": "Found",
-                "wall_ns": 1777338
+                "wall_ns": 1796745
               },
               {
                 "extra": {
@@ -3415,11 +3415,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 4995.577865155228,
+                "gae": 4997.273027436195,
                 "group_adds": 0,
                 "native": 6,
                 "verdict": "Found",
-                "wall_ns": 733922
+                "wall_ns": 733518
               },
               {
                 "extra": {
@@ -3428,11 +3428,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 11295.759532247144,
+                "gae": 11405.132267622032,
                 "group_adds": 0,
                 "native": 198,
                 "verdict": "Found",
-                "wall_ns": 1659509
+                "wall_ns": 1674087
               }
             ],
             "refuted": 0
@@ -3450,25 +3450,25 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m2",
-            "relation_phase_gae": 158.649654712047,
-            "s_over_rho_floor": 14.421996706768121,
-            "s_projected": 3.5448564793144257,
+            "relation_phase_gae": 158.6659893432958,
+            "s_over_rho_floor": 14.423481601257832,
+            "s_projected": 3.5452214591407265,
             "targets_needed": 156.0
           },
           {
             "extrapolation": true,
             "oracle": "matrix_f4_splitting",
-            "relation_phase_gae": 190712.78176586266,
-            "s_over_rho_floor": 17336.685135293923,
-            "s_projected": 4261.272685136583,
+            "relation_phase_gae": 190706.62482161264,
+            "s_over_rho_floor": 17336.125440223306,
+            "s_projected": 4261.135114816893,
             "targets_needed": 156.0
           },
           {
             "extrapolation": true,
             "oracle": "cdcl_sat_native_xor",
-            "relation_phase_gae": 3770305.266671221,
-            "s_over_rho_floor": 342738.4083383945,
-            "s_projected": 84243.42982536538,
+            "relation_phase_gae": 3823444.9435122735,
+            "s_over_rho_floor": 347569.05386227777,
+            "s_projected": 85430.77894440747,
             "targets_needed": 156.0
           }
         ],
@@ -3478,23 +3478,23 @@
         "system_degree": 2,
         "targets": 8,
         "unknowns": 24,
-        "wall_ns": 1399591129
+        "wall_ns": 1386136383
       },
       {
         "a": 0,
         "calibration": {
-          "ns_per_add": 146.847835,
-          "ns_per_as_solve": 7.77939,
+          "ns_per_add": 146.776275,
+          "ns_per_as_solve": 7.524645,
           "ns_per_canon": null,
-          "ns_per_double": 147.17445,
-          "ns_per_frobenius": 10.007,
+          "ns_per_double": 147.068325,
+          "ns_per_frobenius": 9.999725,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 2.4757,
-          "ns_per_row_op": 2.50185546875,
-          "ns_per_s4_pair": 865.6690789022495,
+          "ns_per_lookup": 2.51001,
+          "ns_per_row_op": 2.502025390625,
+          "ns_per_s4_pair": 863.7463578338362,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.348492431640625
+          "ns_per_word_xor": 0.3490994873046875
         },
         "curve": {
           "a": 0,
@@ -3540,9 +3540,9 @@
             "gae_per_refutation_mean": -0.0,
             "gae_per_target_mean": 2.0,
             "inconclusive": 0,
-            "ms_median_found": 0.000711,
+            "ms_median_found": 0.000725,
             "ms_median_refuted": null,
-            "ms_total": 0.006926,
+            "ms_total": 0.006592,
             "native_median_found": 2.0,
             "native_median_refuted": null,
             "native_total": 16,
@@ -3555,7 +3555,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 1897
+                "wall_ns": 1728
               },
               {
                 "extra": {},
@@ -3563,7 +3563,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 971
+                "wall_ns": 678
               },
               {
                 "extra": {},
@@ -3571,7 +3571,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 690
+                "wall_ns": 915
               },
               {
                 "extra": {},
@@ -3579,7 +3579,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 843
+                "wall_ns": 693
               },
               {
                 "extra": {},
@@ -3587,7 +3587,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 718
+                "wall_ns": 580
               },
               {
                 "extra": {},
@@ -3595,7 +3595,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 544
+                "wall_ns": 483
               },
               {
                 "extra": {},
@@ -3603,7 +3603,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 559
+                "wall_ns": 758
               },
               {
                 "extra": {},
@@ -3611,7 +3611,7 @@
                 "group_adds": 2,
                 "native": 2,
                 "verdict": "Found",
-                "wall_ns": 704
+                "wall_ns": 757
               }
             ],
             "refuted": 0
@@ -3620,11 +3620,11 @@
             "extra_totals": {},
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 2.016858947903454,
+            "gae_per_target_mean": 2.0171009245193066,
             "inconclusive": 0,
-            "ms_median_found": 0.0015335000000000001,
+            "ms_median_found": 0.0014885,
             "ms_median_refuted": null,
-            "ms_total": 0.012646999999999999,
+            "ms_total": 0.013401000000000001,
             "native_median_found": 1.0,
             "native_median_refuted": null,
             "native_total": 8,
@@ -3633,67 +3633,67 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 2.016858947903454,
+                "gae": 2.0171009245193066,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 2312
+                "wall_ns": 3022
               },
               {
                 "extra": {},
-                "gae": 2.016858947903454,
+                "gae": 2.0171009245193066,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1829
+                "wall_ns": 1404
               },
               {
                 "extra": {},
-                "gae": 2.016858947903454,
+                "gae": 2.0171009245193066,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1594
+                "wall_ns": 1556
               },
               {
                 "extra": {},
-                "gae": 2.016858947903454,
+                "gae": 2.0171009245193066,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1175
+                "wall_ns": 1238
               },
               {
                 "extra": {},
-                "gae": 2.016858947903454,
+                "gae": 2.0171009245193066,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1420
+                "wall_ns": 1421
               },
               {
                 "extra": {},
-                "gae": 2.016858947903454,
+                "gae": 2.0171009245193066,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1582
+                "wall_ns": 1865
               },
               {
                 "extra": {},
-                "gae": 2.016858947903454,
+                "gae": 2.0171009245193066,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1250
+                "wall_ns": 1596
               },
               {
                 "extra": {},
-                "gae": 2.016858947903454,
+                "gae": 2.0171009245193066,
                 "group_adds": 2,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1485
+                "wall_ns": 1299
               }
             ],
             "refuted": 0
@@ -3704,11 +3704,11 @@
             },
             "found": 8,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 24150.450447166033,
+            "gae_per_target_mean": 24108.566421411724,
             "inconclusive": 0,
-            "ms_median_found": 0.26131400000000005,
+            "ms_median_found": 0.2609905,
             "ms_median_refuted": null,
-            "ms_total": 2.09554,
+            "ms_total": 2.0909240000000002,
             "native_median_found": 4096.0,
             "native_median_refuted": null,
             "native_total": 32768,
@@ -3719,81 +3719,81 @@
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 24148.950447166033,
+                "gae": 24107.066421411724,
                 "group_adds": 3,
                 "native": 4096,
                 "verdict": "Found",
-                "wall_ns": 264450
+                "wall_ns": 266243
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 24151.950447166033,
+                "gae": 24110.066421411724,
                 "group_adds": 6,
                 "native": 4096,
                 "verdict": "Found",
-                "wall_ns": 263712
+                "wall_ns": 259705
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 24151.950447166033,
+                "gae": 24110.066421411724,
                 "group_adds": 6,
                 "native": 4096,
                 "verdict": "Found",
-                "wall_ns": 261719
+                "wall_ns": 259594
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 24148.950447166033,
+                "gae": 24107.066421411724,
                 "group_adds": 3,
                 "native": 4096,
                 "verdict": "Found",
-                "wall_ns": 261460
+                "wall_ns": 258891
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 24148.950447166033,
+                "gae": 24107.066421411724,
                 "group_adds": 3,
                 "native": 4096,
                 "verdict": "Found",
-                "wall_ns": 260979
+                "wall_ns": 263112
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 24148.950447166033,
+                "gae": 24107.066421411724,
                 "group_adds": 3,
                 "native": 4096,
                 "verdict": "Found",
-                "wall_ns": 261053
+                "wall_ns": 260784
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 24151.950447166033,
+                "gae": 24110.066421411724,
                 "group_adds": 6,
                 "native": 4096,
                 "verdict": "Found",
-                "wall_ns": 261168
+                "wall_ns": 261197
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 24151.950447166033,
+                "gae": 24110.066421411724,
                 "group_adds": 6,
                 "native": 4096,
                 "verdict": "Found",
-                "wall_ns": 260999
+                "wall_ns": 261398
               }
             ],
             "refuted": 0
@@ -3811,17 +3811,17 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m3",
-            "relation_phase_gae": 314.6299958729388,
-            "s_over_rho_floor": 28.601340309033972,
-            "s_projected": 7.030070008542961,
+            "relation_phase_gae": 314.6677442250118,
+            "s_over_rho_floor": 28.60477181104556,
+            "s_projected": 7.030913455007892,
             "targets_needed": 156.0
           },
           {
             "extrapolation": true,
             "oracle": "semaev_s4_pairs_and_solve",
-            "relation_phase_gae": 3767470.2697579013,
-            "s_over_rho_floor": 342480.693840233,
-            "s_projected": 84180.08485814653,
+            "relation_phase_gae": 3760936.361740229,
+            "s_over_rho_floor": 341886.7309974886,
+            "s_projected": 84034.09168713252,
             "targets_needed": 156.0
           }
         ],
@@ -3831,23 +3831,23 @@
         "system_degree": 3,
         "targets": 8,
         "unknowns": 49,
-        "wall_ns": 8559862862
+        "wall_ns": 8544994251
       },
       {
         "a": 0,
         "calibration": {
-          "ns_per_add": 166.01111,
-          "ns_per_as_solve": 9.240345,
+          "ns_per_add": 167.969105,
+          "ns_per_as_solve": 9.887545,
           "ns_per_canon": null,
-          "ns_per_double": 166.417795,
-          "ns_per_frobenius": 10.031655,
+          "ns_per_double": 167.397465,
+          "ns_per_frobenius": 9.99878,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 1.905035,
-          "ns_per_row_op": 2.5044794921875,
+          "ns_per_lookup": 1.860165,
+          "ns_per_row_op": 2.501931640625,
           "ns_per_s4_pair": null,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.3449259033203125
+          "ns_per_word_xor": 0.350126953125
         },
         "curve": {
           "a": 0,
@@ -3907,8 +3907,8 @@
             "gae_per_target_mean": 33.0,
             "inconclusive": 0,
             "ms_median_found": null,
-            "ms_median_refuted": 0.0052785,
-            "ms_total": 0.043712,
+            "ms_median_refuted": 0.0052665,
+            "ms_total": 0.042463,
             "native_median_found": null,
             "native_median_refuted": 33.0,
             "native_total": 264,
@@ -3921,7 +3921,7 @@
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 5570
+                "wall_ns": 5575
               },
               {
                 "extra": {},
@@ -3929,7 +3929,7 @@
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 5271
+                "wall_ns": 5331
               },
               {
                 "extra": {},
@@ -3937,7 +3937,7 @@
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 6501
+                "wall_ns": 5253
               },
               {
                 "extra": {},
@@ -3945,7 +3945,7 @@
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 5286
+                "wall_ns": 5291
               },
               {
                 "extra": {},
@@ -3953,7 +3953,7 @@
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 5258
+                "wall_ns": 5260
               },
               {
                 "extra": {},
@@ -3961,7 +3961,7 @@
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 5250
+                "wall_ns": 5233
               },
               {
                 "extra": {},
@@ -3969,7 +3969,7 @@
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 5235
+                "wall_ns": 5247
               },
               {
                 "extra": {},
@@ -3977,7 +3977,7 @@
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 5341
+                "wall_ns": 5273
               }
             ],
             "refuted": 8
@@ -3985,12 +3985,12 @@
           {
             "extra_totals": {},
             "found": 0,
-            "gae_per_refutation_mean": 0.01147534643916302,
-            "gae_per_target_mean": 0.01147534643916302,
+            "gae_per_refutation_mean": 0.011074447291958837,
+            "gae_per_target_mean": 0.011074447291958837,
             "inconclusive": 0,
             "ms_median_found": null,
-            "ms_median_refuted": 0.000046,
-            "ms_total": 0.00043299999999999995,
+            "ms_median_refuted": 0.000042000000000000004,
+            "ms_total": 0.000381,
             "native_median_found": null,
             "native_median_refuted": 1.0,
             "native_total": 8,
@@ -3999,23 +3999,15 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 0.011475346439163018,
+                "gae": 0.011074447291958838,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 80
+                "wall_ns": 86
               },
               {
                 "extra": {},
-                "gae": 0.011475346439163018,
-                "group_adds": 0,
-                "native": 1,
-                "verdict": "Refuted",
-                "wall_ns": 73
-              },
-              {
-                "extra": {},
-                "gae": 0.011475346439163018,
+                "gae": 0.011074447291958838,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
@@ -4023,15 +4015,23 @@
               },
               {
                 "extra": {},
-                "gae": 0.011475346439163018,
+                "gae": 0.011074447291958838,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 78
+                "wall_ns": 38
               },
               {
                 "extra": {},
-                "gae": 0.011475346439163018,
+                "gae": 0.011074447291958838,
+                "group_adds": 0,
+                "native": 1,
+                "verdict": "Refuted",
+                "wall_ns": 52
+              },
+              {
+                "extra": {},
+                "gae": 0.011074447291958838,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
@@ -4039,27 +4039,27 @@
               },
               {
                 "extra": {},
-                "gae": 0.011475346439163018,
+                "gae": 0.011074447291958838,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 46
+                "wall_ns": 38
               },
               {
                 "extra": {},
-                "gae": 0.011475346439163018,
+                "gae": 0.011074447291958838,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 36
+                "wall_ns": 45
               },
               {
                 "extra": {},
-                "gae": 0.011475346439163018,
+                "gae": 0.011074447291958838,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 35
+                "wall_ns": 37
               }
             ],
             "refuted": 8
@@ -4075,12 +4075,12 @@
               "splits": 0
             },
             "found": 0,
-            "gae_per_refutation_mean": 20.697026061613453,
-            "gae_per_target_mean": 20.697026061613453,
+            "gae_per_refutation_mean": 20.764210642698526,
+            "gae_per_target_mean": 20.764210642698526,
             "inconclusive": 0,
             "ms_median_found": null,
-            "ms_median_refuted": 0.383941,
-            "ms_total": 2.748044,
+            "ms_median_refuted": 0.3698245,
+            "ms_total": 2.6488929999999997,
             "native_median_found": null,
             "native_median_refuted": 11329.0,
             "native_total": 79691,
@@ -4097,11 +4097,11 @@
                   "reductions": 1,
                   "splits": 0
                 },
-                "gae": 23.742195912317015,
+                "gae": 23.819265414073463,
                 "group_adds": 0,
                 "native": 11427,
                 "verdict": "Refuted",
-                "wall_ns": 406080
+                "wall_ns": 378490
               },
               {
                 "extra": {
@@ -4113,11 +4113,11 @@
                   "reductions": 1,
                   "splits": 0
                 },
-                "gae": 0.17868459337177417,
+                "gae": 0.1792646211263077,
                 "group_adds": 0,
                 "native": 86,
                 "verdict": "Refuted",
-                "wall_ns": 148827
+                "wall_ns": 148156
               },
               {
                 "extra": {
@@ -4129,11 +4129,11 @@
                   "reductions": 1,
                   "splits": 0
                 },
-                "gae": 23.50533493970792,
+                "gae": 23.581635567464172,
                 "group_adds": 0,
                 "native": 11313,
                 "verdict": "Refuted",
-                "wall_ns": 311271
+                "wall_ns": 306230
               },
               {
                 "extra": {
@@ -4145,11 +4145,11 @@
                   "reductions": 1,
                   "splits": 0
                 },
-                "gae": 22.888249774226328,
+                "gae": 22.96254728287681,
                 "group_adds": 0,
                 "native": 11016,
                 "verdict": "Refuted",
-                "wall_ns": 402875
+                "wall_ns": 393571
               },
               {
                 "extra": {
@@ -4161,11 +4161,11 @@
                   "reductions": 1,
                   "splits": 0
                 },
-                "gae": 23.216530771351216,
+                "gae": 23.291893912387934,
                 "group_adds": 0,
                 "native": 11174,
                 "verdict": "Refuted",
-                "wall_ns": 319847
+                "wall_ns": 304525
               },
               {
                 "extra": {
@@ -4177,11 +4177,11 @@
                   "reductions": 1,
                   "splits": 0
                 },
-                "gae": 24.147352839148365,
+                "gae": 24.225737520115675,
                 "group_adds": 0,
                 "native": 11622,
                 "verdict": "Refuted",
-                "wall_ns": 389702
+                "wall_ns": 378272
               },
               {
                 "extra": {
@@ -4193,11 +4193,11 @@
                   "reductions": 1,
                   "splits": 0
                 },
-                "gae": 24.32603743252014,
+                "gae": 24.40500214124198,
                 "group_adds": 0,
                 "native": 11708,
                 "verdict": "Refuted",
-                "wall_ns": 378180
+                "wall_ns": 366825
               },
               {
                 "extra": {
@@ -4209,11 +4209,11 @@
                   "reductions": 1,
                   "splits": 0
                 },
-                "gae": 23.57182223026486,
+                "gae": 23.64833868230187,
                 "group_adds": 0,
                 "native": 11345,
                 "verdict": "Refuted",
-                "wall_ns": 391262
+                "wall_ns": 372824
               }
             ],
             "refuted": 8
@@ -4226,12 +4226,12 @@
               "spurious": 0
             },
             "found": 0,
-            "gae_per_refutation_mean": 1527.4369287694055,
-            "gae_per_target_mean": 1527.4369287694055,
+            "gae_per_refutation_mean": 1483.2020745719874,
+            "gae_per_target_mean": 1483.2020745719874,
             "inconclusive": 0,
             "ms_median_found": null,
-            "ms_median_refuted": 0.26563000000000003,
-            "ms_total": 2.028572,
+            "ms_median_refuted": 0.26022449999999997,
+            "ms_total": 1.993057,
             "native_median_found": null,
             "native_median_refuted": 5.0,
             "native_total": 39,
@@ -4245,11 +4245,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1719.445162435213,
+                "gae": 1693.1863749586566,
                 "group_adds": 0,
                 "native": 5,
                 "verdict": "Refuted",
-                "wall_ns": 285447
+                "wall_ns": 284403
               },
               {
                 "extra": {
@@ -4258,11 +4258,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1141.200730481231,
+                "gae": 1140.8050307822975,
                 "group_adds": 0,
                 "native": 0,
                 "verdict": "Refuted",
-                "wall_ns": 189452
+                "wall_ns": 191620
               },
               {
                 "extra": {
@@ -4271,11 +4271,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1302.6658276063572,
+                "gae": 1243.2762560710196,
                 "group_adds": 0,
                 "native": 6,
                 "verdict": "Refuted",
-                "wall_ns": 216257
+                "wall_ns": 208832
               },
               {
                 "extra": {
@@ -4284,11 +4284,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1772.6644921535674,
+                "gae": 1721.4594314829503,
                 "group_adds": 0,
                 "native": 5,
                 "verdict": "Refuted",
-                "wall_ns": 294282
+                "wall_ns": 289152
               },
               {
                 "extra": {
@@ -4297,11 +4297,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1317.3214732435679,
+                "gae": 1250.4263804941986,
                 "group_adds": 0,
                 "native": 8,
                 "verdict": "Refuted",
-                "wall_ns": 218690
+                "wall_ns": 210033
               },
               {
                 "extra": {
@@ -4310,11 +4310,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1766.0504769831368,
+                "gae": 1717.9826016218874,
                 "group_adds": 0,
                 "native": 8,
                 "verdict": "Refuted",
-                "wall_ns": 293184
+                "wall_ns": 288568
               },
               {
                 "extra": {
@@ -4323,11 +4323,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1551.3901449125904,
+                "gae": 1493.77470338965,
                 "group_adds": 0,
                 "native": 3,
                 "verdict": "Refuted",
-                "wall_ns": 257548
+                "wall_ns": 250908
               },
               {
                 "extra": {
@@ -4336,11 +4336,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1648.7571223395832,
+                "gae": 1604.705817775239,
                 "group_adds": 0,
                 "native": 4,
                 "verdict": "Refuted",
-                "wall_ns": 273712
+                "wall_ns": 269541
               }
             ],
             "refuted": 8
@@ -4358,25 +4358,25 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m2",
-            "relation_phase_gae": 1.4688443442128665,
-            "s_over_rho_floor": 0.23423753855308918,
-            "s_projected": 0.053598891361307896,
+            "relation_phase_gae": 1.417529253370731,
+            "s_over_rho_floor": 0.22605428849201392,
+            "s_projected": 0.05172637710199938,
             "targets_needed": 128.0
           },
           {
             "extrapolation": true,
             "oracle": "matrix_f4_splitting",
-            "relation_phase_gae": 2649.219335886522,
-            "s_over_rho_floor": 422.4726866193919,
-            "s_projected": 96.67138654678297,
+            "relation_phase_gae": 2657.8189622654113,
+            "s_over_rho_floor": 423.84407448864,
+            "s_projected": 96.9851913701776,
             "targets_needed": 128.0
           },
           {
             "extrapolation": true,
             "oracle": "cdcl_sat_native_xor",
-            "relation_phase_gae": 195511.9268824839,
-            "s_over_rho_floor": 31178.410899125018,
-            "s_projected": 7134.331537648327,
+            "relation_phase_gae": 189849.8655452144,
+            "s_over_rho_floor": 30275.478388948555,
+            "s_projected": 6927.7199850402785,
             "targets_needed": 128.0
           }
         ],
@@ -4386,23 +4386,23 @@
         "system_degree": 2,
         "targets": 8,
         "unknowns": 10,
-        "wall_ns": 87501131
+        "wall_ns": 87991348
       },
       {
         "a": 0,
         "calibration": {
-          "ns_per_add": 165.90622,
-          "ns_per_as_solve": 9.284215,
+          "ns_per_add": 169.36362,
+          "ns_per_as_solve": 9.78285,
           "ns_per_canon": null,
-          "ns_per_double": 166.36092,
-          "ns_per_frobenius": 10.02662,
+          "ns_per_double": 169.706905,
+          "ns_per_frobenius": 9.97564,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 1.872455,
-          "ns_per_row_op": 2.5052001953125,
-          "ns_per_s4_pair": 440.8058265312894,
+          "ns_per_lookup": 1.93774,
+          "ns_per_row_op": 2.50192578125,
+          "ns_per_s4_pair": 459.4516888977371,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.3453758544921875
+          "ns_per_word_xor": 0.3487630615234375
         },
         "curve": {
           "a": 0,
@@ -4461,9 +4461,9 @@
             "gae_per_refutation_mean": 594.0,
             "gae_per_target_mean": 466.5,
             "inconclusive": 0,
-            "ms_median_found": 0.038298,
-            "ms_median_refuted": 0.0957,
-            "ms_total": 0.6054099999999999,
+            "ms_median_found": 0.047296,
+            "ms_median_refuted": 0.097473,
+            "ms_total": 0.6324280000000001,
             "native_median_found": 229.0,
             "native_median_refuted": 594.0,
             "native_total": 3732,
@@ -4476,7 +4476,7 @@
                 "group_adds": 594,
                 "native": 594,
                 "verdict": "Refuted",
-                "wall_ns": 92773
+                "wall_ns": 93996
               },
               {
                 "extra": {},
@@ -4484,7 +4484,7 @@
                 "group_adds": 594,
                 "native": 594,
                 "verdict": "Refuted",
-                "wall_ns": 96213
+                "wall_ns": 98235
               },
               {
                 "extra": {},
@@ -4492,7 +4492,7 @@
                 "group_adds": 336,
                 "native": 336,
                 "verdict": "Found",
-                "wall_ns": 56338
+                "wall_ns": 64476
               },
               {
                 "extra": {},
@@ -4500,7 +4500,7 @@
                 "group_adds": 229,
                 "native": 229,
                 "verdict": "Found",
-                "wall_ns": 38298
+                "wall_ns": 47296
               },
               {
                 "extra": {},
@@ -4508,7 +4508,7 @@
                 "group_adds": 197,
                 "native": 197,
                 "verdict": "Found",
-                "wall_ns": 34981
+                "wall_ns": 35942
               },
               {
                 "extra": {},
@@ -4516,7 +4516,7 @@
                 "group_adds": 594,
                 "native": 594,
                 "verdict": "Refuted",
-                "wall_ns": 95700
+                "wall_ns": 96523
               },
               {
                 "extra": {},
@@ -4524,7 +4524,7 @@
                 "group_adds": 594,
                 "native": 594,
                 "verdict": "Refuted",
-                "wall_ns": 95822
+                "wall_ns": 97473
               },
               {
                 "extra": {},
@@ -4532,7 +4532,7 @@
                 "group_adds": 594,
                 "native": 594,
                 "verdict": "Refuted",
-                "wall_ns": 95285
+                "wall_ns": 98487
               }
             ],
             "refuted": 5
@@ -4540,12 +4540,12 @@
           {
             "extra_totals": {},
             "found": 3,
-            "gae_per_refutation_mean": 33.37244543935725,
-            "gae_per_target_mean": 24.645869410441634,
+            "gae_per_refutation_mean": 33.37756290282411,
+            "gae_per_target_mean": 24.649591202053898,
             "inconclusive": 0,
-            "ms_median_found": 0.002472,
-            "ms_median_refuted": 0.006521,
-            "ms_total": 0.039653,
+            "ms_median_found": 0.0028,
+            "ms_median_refuted": 0.006447,
+            "ms_total": 0.039971,
             "native_median_found": 8.0,
             "native_median_refuted": 33.0,
             "native_total": 192,
@@ -4554,67 +4554,67 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 33.37244543935725,
+                "gae": 33.37756290282411,
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 5234
+                "wall_ns": 5230
               },
               {
                 "extra": {},
-                "gae": 33.37244543935725,
+                "gae": 33.37756290282411,
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 6521
+                "wall_ns": 6627
               },
               {
                 "extra": {},
-                "gae": 13.135434705220817,
+                "gae": 13.13729560102695,
                 "group_adds": 13,
                 "native": 12,
                 "verdict": "Found",
-                "wall_ns": 3253
+                "wall_ns": 3224
               },
               {
                 "extra": {},
-                "gae": 9.090289803480545,
+                "gae": 9.091530400684633,
                 "group_adds": 9,
                 "native": 8,
                 "verdict": "Found",
-                "wall_ns": 2472
+                "wall_ns": 2723
               },
               {
                 "extra": {},
-                "gae": 8.079003578045477,
+                "gae": 8.080089100599054,
                 "group_adds": 8,
                 "native": 7,
                 "verdict": "Found",
-                "wall_ns": 2447
+                "wall_ns": 2800
               },
               {
                 "extra": {},
-                "gae": 33.37244543935725,
+                "gae": 33.37756290282411,
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 6904
+                "wall_ns": 6762
               },
               {
                 "extra": {},
-                "gae": 33.37244543935725,
+                "gae": 33.37756290282411,
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 6549
+                "wall_ns": 6158
               },
               {
                 "extra": {},
-                "gae": 33.37244543935725,
+                "gae": 33.37756290282411,
                 "group_adds": 33,
                 "native": 33,
                 "verdict": "Refuted",
-                "wall_ns": 6273
+                "wall_ns": 6447
               }
             ],
             "refuted": 5
@@ -4624,12 +4624,12 @@
               "lift_failures": 0
             },
             "found": 3,
-            "gae_per_refutation_mean": 1402.8737223265098,
-            "gae_per_target_mean": 1098.67389830829,
+            "gae_per_refutation_mean": 1432.3648239096756,
+            "gae_per_target_mean": 1121.6440034713146,
             "inconclusive": 0,
-            "ms_median_found": 0.107264,
-            "ms_median_refuted": 0.256218,
-            "ms_total": 1.601852,
+            "ms_median_found": 0.101929,
+            "ms_median_refuted": 0.257236,
+            "ms_total": 1.600171,
             "native_median_found": 203.0,
             "native_median_refuted": 528.0,
             "native_total": 3290,
@@ -4640,81 +4640,81 @@
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 1402.8737223265098,
+                "gae": 1432.3648239096756,
                 "group_adds": 0,
                 "native": 528,
                 "verdict": "Refuted",
-                "wall_ns": 241042
+                "wall_ns": 242987
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 1402.8737223265098,
+                "gae": 1432.3648239096756,
                 "group_adds": 0,
                 "native": 528,
                 "verdict": "Refuted",
-                "wall_ns": 256807
+                "wall_ns": 248708
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 810.1164688086617,
+                "gae": 826.7052134491925,
                 "group_adds": 21,
                 "native": 297,
                 "verdict": "Found",
-                "wall_ns": 148803
+                "wall_ns": 150459
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 542.362434909624,
+                "gae": 553.7008697986063,
                 "group_adds": 3,
                 "native": 203,
                 "verdict": "Found",
-                "wall_ns": 107264
+                "wall_ns": 101929
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 422.54367111548567,
+                "gae": 430.92182497433964,
                 "group_adds": 24,
                 "native": 150,
                 "verdict": "Found",
-                "wall_ns": 81302
+                "wall_ns": 78900
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 1402.8737223265098,
+                "gae": 1432.3648239096756,
                 "group_adds": 0,
                 "native": 528,
                 "verdict": "Refuted",
-                "wall_ns": 256767
+                "wall_ns": 257236
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 1402.8737223265098,
+                "gae": 1432.3648239096756,
                 "group_adds": 0,
                 "native": 528,
                 "verdict": "Refuted",
-                "wall_ns": 256218
+                "wall_ns": 259244
               },
               {
                 "extra": {
                   "lift_failures": 0
                 },
-                "gae": 1402.8737223265098,
+                "gae": 1432.3648239096756,
                 "group_adds": 0,
                 "native": 528,
                 "verdict": "Refuted",
-                "wall_ns": 253649
+                "wall_ns": 260708
               }
             ],
             "refuted": 5
@@ -4730,12 +4730,12 @@
               "splits": 3631
             },
             "found": 3,
-            "gae_per_refutation_mean": 653249.8010598863,
-            "gae_per_target_mean": 430151.41123519425,
+            "gae_per_refutation_mean": 646190.1531090174,
+            "gae_per_target_mean": 425502.7798479931,
             "inconclusive": 0,
-            "ms_median_found": 203.041111,
-            "ms_median_refuted": 1940.05055,
-            "ms_total": 10193.889408000001,
+            "ms_median_found": 175.929828,
+            "ms_median_refuted": 1662.290294,
+            "ms_total": 8733.136994999999,
             "native_median_found": 32836912.0,
             "native_median_refuted": 314471884.0,
             "native_total": 1653034947,
@@ -4752,11 +4752,11 @@
                   "reductions": 1697,
                   "splits": 688
                 },
-                "gae": 661694.5040877551,
+                "gae": 654543.594524055,
                 "group_adds": 0,
                 "native": 317854397,
                 "verdict": "Refuted",
-                "wall_ns": 1952680228
+                "wall_ns": 1677415153
               },
               {
                 "extra": {
@@ -4768,11 +4768,11 @@
                   "reductions": 1686,
                   "splits": 688
                 },
-                "gae": 657088.7493697421,
+                "gae": 649987.6140375909,
                 "group_adds": 0,
                 "native": 315641957,
                 "verdict": "Refuted",
-                "wall_ns": 1929210077
+                "wall_ns": 1656073500
               },
               {
                 "extra": {
@@ -4784,11 +4784,11 @@
                   "reductions": 170,
                   "splits": 70
                 },
-                "gae": 68358.35655157936,
+                "gae": 67619.61016241684,
                 "group_adds": 0,
                 "native": 32836912,
                 "verdict": "Found",
-                "wall_ns": 203041111
+                "wall_ns": 175929828
               },
               {
                 "extra": {
@@ -4800,11 +4800,11 @@
                   "reductions": 56,
                   "splits": 24
                 },
-                "gae": 18330.33504263481,
+                "gae": 18132.239747370244,
                 "group_adds": 0,
                 "native": 8805238,
                 "verdict": "Found",
-                "wall_ns": 58409823
+                "wall_ns": 49520317
               },
               {
                 "extra": {
@@ -4816,11 +4816,11 @@
                   "reductions": 219,
                   "splits": 91
                 },
-                "gae": 88273.59298790837,
+                "gae": 87319.62332907063,
                 "group_adds": 0,
                 "native": 42403480,
                 "verdict": "Found",
-                "wall_ns": 250845564
+                "wall_ns": 212955275
               },
               {
                 "extra": {
@@ -4832,11 +4832,11 @@
                   "reductions": 1693,
                   "splits": 686
                 },
-                "gae": 647482.5998405844,
+                "gae": 640485.2778333348,
                 "group_adds": 0,
                 "native": 311027506,
                 "verdict": "Refuted",
-                "wall_ns": 1914674694
+                "wall_ns": 1635661065
               },
               {
                 "extra": {
@@ -4848,11 +4848,11 @@
                   "reductions": 1700,
                   "splits": 692
                 },
-                "gae": 654652.9458043711,
+                "gae": 647578.1341168977,
                 "group_adds": 0,
                 "native": 314471884,
                 "verdict": "Refuted",
-                "wall_ns": 1940050550
+                "wall_ns": 1663291563
               },
               {
                 "extra": {
@@ -4864,11 +4864,11 @@
                   "reductions": 1699,
                   "splits": 692
                 },
-                "gae": 645330.2061969787,
+                "gae": 638356.1450332085,
                 "group_adds": 0,
                 "native": 309993573,
                 "verdict": "Refuted",
-                "wall_ns": 1944977361
+                "wall_ns": 1662290294
               }
             ],
             "refuted": 5
@@ -4882,11 +4882,11 @@
             },
             "found": 0,
             "gae_per_refutation_mean": -0.0,
-            "gae_per_target_mean": 38594239.308809526,
+            "gae_per_target_mean": 38381668.79492774,
             "inconclusive": 8,
             "ms_median_found": null,
             "ms_median_refuted": null,
-            "ms_total": 51224.19486,
+            "ms_total": 52003.66695,
             "native_median_found": null,
             "native_median_refuted": null,
             "native_total": 1600000,
@@ -4900,11 +4900,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 39489494.42040208,
+                "gae": 39260475.136277795,
                 "group_adds": 0,
                 "native": 200000,
                 "verdict": "Inconclusive",
-                "wall_ns": 6551552749
+                "wall_ns": 6649296192
               },
               {
                 "extra": {
@@ -4913,11 +4913,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 37647673.70988261,
+                "gae": 37409270.810342856,
                 "group_adds": 0,
                 "native": 200000,
                 "verdict": "Inconclusive",
-                "wall_ns": 6245983237
+                "wall_ns": 6335769526
               },
               {
                 "extra": {
@@ -4926,11 +4926,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 38432388.616894536,
+                "gae": 38342727.70031723,
                 "group_adds": 0,
                 "native": 200000,
                 "verdict": "Inconclusive",
-                "wall_ns": 6376172321
+                "wall_ns": 6493863164
               },
               {
                 "extra": {
@@ -4939,11 +4939,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 38935290.85286857,
+                "gae": 38800856.464924395,
                 "group_adds": 0,
                 "native": 200000,
                 "verdict": "Inconclusive",
-                "wall_ns": 6459606930
+                "wall_ns": 6571453510
               },
               {
                 "extra": {
@@ -4952,11 +4952,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 39068131.6770402,
+                "gae": 38847853.553201094,
                 "group_adds": 0,
                 "native": 200000,
                 "verdict": "Inconclusive",
-                "wall_ns": 6481646049
+                "wall_ns": 6579413107
               },
               {
                 "extra": {
@@ -4965,11 +4965,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 38959988.395854,
+                "gae": 38564183.069539964,
                 "group_adds": 0,
                 "native": 200000,
                 "verdict": "Inconclusive",
-                "wall_ns": 6463704406
+                "wall_ns": 6531369647
               },
               {
                 "extra": {
@@ -4978,11 +4978,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 37681769.42371419,
+                "gae": 37470186.501682006,
                 "group_adds": 0,
                 "native": 200000,
                 "verdict": "Inconclusive",
-                "wall_ns": 6251639928
+                "wall_ns": 6346086428
               },
               {
                 "extra": {
@@ -4991,11 +4991,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 38539177.373819984,
+                "gae": 38357797.1231366,
                 "group_adds": 0,
                 "native": 200000,
                 "verdict": "Inconclusive",
-                "wall_ns": 6393889240
+                "wall_ns": 6496415376
               }
             ],
             "refuted": 0
@@ -5013,33 +5013,33 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m3",
-            "relation_phase_gae": 262.8892737113774,
-            "s_over_rho_floor": 41.92311910297172,
-            "s_projected": 9.5929658423134,
+            "relation_phase_gae": 262.92897282190825,
+            "s_over_rho_floor": 41.929449945290116,
+            "s_projected": 9.59441448343107,
             "targets_needed": 10.666666666666666
           },
           {
             "extrapolation": true,
             "oracle": "semaev_s4_pairs_and_solve",
-            "relation_phase_gae": 11719.18824862176,
-            "s_over_rho_floor": 1868.8663778519679,
-            "s_projected": 427.63925276044347,
+            "relation_phase_gae": 11964.202703694022,
+            "s_over_rho_floor": 1907.9389882971602,
+            "s_projected": 436.57995720683994,
             "targets_needed": 10.666666666666666
           },
           {
             "extrapolation": true,
             "oracle": "matrix_f4_splitting",
-            "relation_phase_gae": 4588281.719842072,
-            "s_over_rho_floor": 731696.1940033777,
-            "s_projected": 167428.77787276974,
+            "relation_phase_gae": 4538696.318378593,
+            "s_over_rho_floor": 723788.7786038268,
+            "s_projected": 165619.38087531453,
             "targets_needed": 10.666666666666666
           },
           {
             "extrapolation": true,
             "oracle": "cdcl_sat_native_xor",
-            "relation_phase_gae": 411671885.96063495,
-            "s_over_rho_floor": 65649576.579608336,
-            "s_projected": 15022120.47113353,
+            "relation_phase_gae": 409404467.14589584,
+            "s_over_rho_floor": 65287989.864088744,
+            "s_projected": 14939381.183474759,
             "targets_needed": 10.666666666666666
           }
         ],
@@ -5049,23 +5049,23 @@
         "system_degree": 3,
         "targets": 8,
         "unknowns": 30,
-        "wall_ns": 61542490633
+        "wall_ns": 60863461217
       },
       {
         "a": 1,
         "calibration": {
-          "ns_per_add": 185.17277,
-          "ns_per_as_solve": 11.511675,
+          "ns_per_add": 185.186105,
+          "ns_per_as_solve": 11.432525,
           "ns_per_canon": null,
-          "ns_per_double": 185.44733,
-          "ns_per_frobenius": 10.008405,
+          "ns_per_double": 185.512995,
+          "ns_per_frobenius": 9.993825,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 1.98088,
-          "ns_per_row_op": 2.5096435546875,
+          "ns_per_lookup": 1.979245,
+          "ns_per_row_op": 2.5019638671875,
           "ns_per_s4_pair": null,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.3483311767578125
+          "ns_per_word_xor": 0.349183837890625
         },
         "curve": {
           "a": 1,
@@ -5124,9 +5124,9 @@
             "gae_per_refutation_mean": 239.0,
             "gae_per_target_mean": 183.125,
             "inconclusive": 0,
-            "ms_median_found": 0.0035255,
-            "ms_median_refuted": 0.042272000000000004,
-            "ms_total": 0.26241000000000003,
+            "ms_median_found": 0.0034745,
+            "ms_median_refuted": 0.042564500000000005,
+            "ms_total": 0.26345999999999997,
             "native_median_found": 15.5,
             "native_median_refuted": 239.0,
             "native_total": 1465,
@@ -5139,7 +5139,7 @@
                 "group_adds": 239,
                 "native": 239,
                 "verdict": "Refuted",
-                "wall_ns": 43444
+                "wall_ns": 43827
               },
               {
                 "extra": {},
@@ -5147,7 +5147,7 @@
                 "group_adds": 239,
                 "native": 239,
                 "verdict": "Refuted",
-                "wall_ns": 43152
+                "wall_ns": 42615
               },
               {
                 "extra": {},
@@ -5155,7 +5155,7 @@
                 "group_adds": 19,
                 "native": 19,
                 "verdict": "Found",
-                "wall_ns": 4314
+                "wall_ns": 4292
               },
               {
                 "extra": {},
@@ -5163,7 +5163,7 @@
                 "group_adds": 239,
                 "native": 239,
                 "verdict": "Refuted",
-                "wall_ns": 42357
+                "wall_ns": 42514
               },
               {
                 "extra": {},
@@ -5171,7 +5171,7 @@
                 "group_adds": 239,
                 "native": 239,
                 "verdict": "Refuted",
-                "wall_ns": 42138
+                "wall_ns": 42397
               },
               {
                 "extra": {},
@@ -5179,7 +5179,7 @@
                 "group_adds": 239,
                 "native": 239,
                 "verdict": "Refuted",
-                "wall_ns": 42081
+                "wall_ns": 43103
               },
               {
                 "extra": {},
@@ -5187,7 +5187,7 @@
                 "group_adds": 12,
                 "native": 12,
                 "verdict": "Found",
-                "wall_ns": 2737
+                "wall_ns": 2657
               },
               {
                 "extra": {},
@@ -5195,7 +5195,7 @@
                 "group_adds": 239,
                 "native": 239,
                 "verdict": "Refuted",
-                "wall_ns": 42187
+                "wall_ns": 42055
               }
             ],
             "refuted": 6
@@ -5203,12 +5203,12 @@
           {
             "extra_totals": {},
             "found": 2,
-            "gae_per_refutation_mean": 0.010697469179728747,
-            "gae_per_target_mean": 0.2606974691797288,
+            "gae_per_refutation_mean": 0.01068786991335014,
+            "gae_per_target_mean": 0.26068786991335013,
             "inconclusive": 0,
-            "ms_median_found": 0.0006085,
-            "ms_median_refuted": 0.0002795,
-            "ms_total": 0.003042,
+            "ms_median_found": 0.000414,
+            "ms_median_refuted": 0.0001315,
+            "ms_total": 0.0016810000000000002,
             "native_median_found": 1.0,
             "native_median_refuted": 1.0,
             "native_total": 8,
@@ -5217,67 +5217,67 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 0.010697469179728747,
+                "gae": 0.01068786991335014,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 381
+                "wall_ns": 109
               },
               {
                 "extra": {},
-                "gae": 0.010697469179728747,
+                "gae": 0.01068786991335014,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 581
+                "wall_ns": 180
               },
               {
                 "extra": {},
-                "gae": 1.0106974691797288,
+                "gae": 1.0106878699133501,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 545
+                "wall_ns": 388
               },
               {
                 "extra": {},
-                "gae": 0.010697469179728747,
+                "gae": 0.01068786991335014,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 314
+                "wall_ns": 114
               },
               {
                 "extra": {},
-                "gae": 0.010697469179728747,
+                "gae": 0.01068786991335014,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 145
+                "wall_ns": 187
               },
               {
                 "extra": {},
-                "gae": 0.010697469179728747,
+                "gae": 0.01068786991335014,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 159
+                "wall_ns": 130
               },
               {
                 "extra": {},
-                "gae": 1.0106974691797288,
+                "gae": 1.0106878699133501,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 672
+                "wall_ns": 440
               },
               {
                 "extra": {},
-                "gae": 0.010697469179728747,
+                "gae": 0.01068786991335014,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 245
+                "wall_ns": 133
               }
             ],
             "refuted": 6
@@ -5293,12 +5293,12 @@
               "splits": 225
             },
             "found": 2,
-            "gae_per_refutation_mean": 3727.559996688382,
-            "gae_per_target_mean": 3368.9647915966066,
+            "gae_per_refutation_mean": 3736.415416528826,
+            "gae_per_target_mean": 3376.9683107039496,
             "inconclusive": 0,
-            "ms_median_found": 17.932172,
-            "ms_median_refuted": 29.516924000000003,
-            "ms_total": 212.838051,
+            "ms_median_found": 16.338811,
+            "ms_median_refuted": 26.876749500000003,
+            "ms_total": 193.74137600000003,
             "native_median_found": 1219053.5,
             "native_median_refuted": 1992251.0,
             "native_total": 14327527,
@@ -5315,11 +5315,11 @@
                   "reductions": 63,
                   "splits": 31
                 },
-                "gae": 3726.4106357483306,
+                "gae": 3735.2633250965278,
                 "group_adds": 0,
                 "native": 1980959,
                 "verdict": "Refuted",
-                "wall_ns": 29612670
+                "wall_ns": 26978771
               },
               {
                 "extra": {
@@ -5331,11 +5331,11 @@
                   "reductions": 63,
                   "splits": 31
                 },
-                "gae": 3774.0780763717166,
+                "gae": 3783.0440074114795,
                 "group_adds": 0,
                 "native": 2006299,
                 "verdict": "Refuted",
-                "wall_ns": 29379982
+                "wall_ns": 26639220
               },
               {
                 "extra": {
@@ -5347,11 +5347,11 @@
                   "reductions": 60,
                   "splits": 30
                 },
-                "gae": 3550.708901078001,
+                "gae": 3559.1441826236187,
                 "group_adds": 0,
                 "native": 1887556,
                 "verdict": "Found",
-                "wall_ns": 27643154
+                "wall_ns": 25167134
               },
               {
                 "extra": {
@@ -5363,11 +5363,11 @@
                   "reductions": 63,
                   "splits": 31
                 },
-                "gae": 3730.558493150642,
+                "gae": 3739.421036402939,
                 "group_adds": 0,
                 "native": 1983164,
                 "verdict": "Refuted",
-                "wall_ns": 29043937
+                "wall_ns": 26527697
               },
               {
                 "extra": {
@@ -5379,11 +5379,11 @@
                   "reductions": 63,
                   "splits": 31
                 },
-                "gae": 3590.8895061180774,
+                "gae": 3599.4202431700824,
                 "group_adds": 0,
                 "native": 1908916,
                 "verdict": "Refuted",
-                "wall_ns": 29733411
+                "wall_ns": 26873263
               },
               {
                 "extra": {
@@ -5395,11 +5395,11 @@
                   "reductions": 63,
                   "splits": 31
                 },
-                "gae": 3778.677401246389,
+                "gae": 3787.6542587240315,
                 "group_adds": 0,
                 "native": 2008744,
                 "verdict": "Refuted",
-                "wall_ns": 29421178
+                "wall_ns": 26880236
               },
               {
                 "extra": {
@@ -5411,11 +5411,11 @@
                   "reductions": 17,
                   "splits": 9
                 },
-                "gae": 1035.6494515645602,
+                "gae": 1038.1098038350203,
                 "group_adds": 0,
                 "native": 550551,
                 "verdict": "Found",
-                "wall_ns": 8221190
+                "wall_ns": 7510488
               },
               {
                 "extra": {
@@ -5427,11 +5427,11 @@
                   "reductions": 63,
                   "splits": 31
                 },
-                "gae": 3764.745867495134,
+                "gae": 3773.6896283678934,
                 "group_adds": 0,
                 "native": 2001338,
                 "verdict": "Refuted",
-                "wall_ns": 29782529
+                "wall_ns": 27164567
               }
             ],
             "refuted": 6
@@ -5444,12 +5444,12 @@
               "spurious": 0
             },
             "found": 2,
-            "gae_per_refutation_mean": 82749.2643761823,
-            "gae_per_target_mean": 71236.35605278249,
+            "gae_per_refutation_mean": 83494.3249836878,
+            "gae_per_target_mean": 71897.98540770648,
             "inconclusive": 0,
-            "ms_median_found": 6.795401999999999,
-            "ms_median_refuted": 15.180038499999998,
-            "ms_total": 105.528267,
+            "ms_median_found": 6.872065,
+            "ms_median_refuted": 15.3759965,
+            "ms_total": 106.51606300000002,
             "native_median_found": 944.5,
             "native_median_refuted": 2052.0,
             "native_total": 14259,
@@ -5463,11 +5463,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 64179.927750716255,
+                "gae": 64659.80803473349,
                 "group_adds": 0,
                 "native": 1628,
                 "verdict": "Refuted",
-                "wall_ns": 11884375
+                "wall_ns": 11974098
               },
               {
                 "extra": {
@@ -5476,11 +5476,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 88487.83220124643,
+                "gae": 89565.76952682275,
                 "group_adds": 0,
                 "native": 2185,
                 "verdict": "Refuted",
-                "wall_ns": 16385537
+                "wall_ns": 16586336
               },
               {
                 "extra": {
@@ -5489,11 +5489,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 37623.22613632663,
+                "gae": 38044.67943207726,
                 "group_adds": 0,
                 "native": 949,
                 "verdict": "Found",
-                "wall_ns": 6966797
+                "wall_ns": 7045346
               },
               {
                 "extra": {
@@ -5502,11 +5502,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 75467.57549719648,
+                "gae": 76494.16785346827,
                 "group_adds": 0,
                 "native": 1907,
                 "verdict": "Refuted",
-                "wall_ns": 13974540
+                "wall_ns": 14165657
               },
               {
                 "extra": {
@@ -5515,11 +5515,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 72034.60854422602,
+                "gae": 72652.07073716464,
                 "group_adds": 0,
                 "native": 1919,
                 "verdict": "Refuted",
-                "wall_ns": 13338848
+                "wall_ns": 13454154
               },
               {
                 "extra": {
@@ -5528,11 +5528,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 99350.16903403237,
+                "gae": 99905.9405671932,
                 "group_adds": 0,
                 "native": 2351,
                 "verdict": "Refuted",
-                "wall_ns": 18396946
+                "wall_ns": 18501192
               },
               {
                 "extra": {
@@ -5541,11 +5541,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 35772.036028839444,
+                "gae": 36173.253927447746,
                 "group_adds": 0,
                 "native": 940,
                 "verdict": "Found",
-                "wall_ns": 6624007
+                "wall_ns": 6698784
               },
               {
                 "extra": {
@@ -5554,11 +5554,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 96975.47322967625,
+                "gae": 97688.19318274446,
                 "group_adds": 0,
                 "native": 2380,
                 "verdict": "Refuted",
-                "wall_ns": 17957217
+                "wall_ns": 18090496
               }
             ],
             "refuted": 6
@@ -5576,25 +5576,25 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m2",
-            "relation_phase_gae": 9.385108890470237,
-            "s_over_rho_floor": 0.17049433475753487,
-            "s_projected": 0.03664632532343831,
+            "relation_phase_gae": 9.384763316880605,
+            "s_over_rho_floor": 0.17048805690397328,
+            "s_projected": 0.03664497595154113,
             "targets_needed": 36.0
           },
           {
             "extrapolation": true,
             "oracle": "matrix_f4_splitting",
-            "relation_phase_gae": 121282.73249747783,
-            "s_over_rho_floor": 2203.279582161297,
-            "s_projected": 473.57644147647426,
+            "relation_phase_gae": 121570.85918534218,
+            "s_over_rho_floor": 2208.5138280871174,
+            "s_projected": 474.701498677309,
             "targets_needed": 36.0
           },
           {
             "extrapolation": true,
             "oracle": "cdcl_sat_native_xor",
-            "relation_phase_gae": 2564508.8179001696,
-            "s_over_rho_floor": 46588.08224715378,
-            "s_projected": 10013.716999173466,
+            "relation_phase_gae": 2588327.4746774333,
+            "s_over_rho_floor": 47020.78325142035,
+            "s_projected": 10106.722445909756,
             "targets_needed": 36.0
           }
         ],
@@ -5604,23 +5604,23 @@
         "system_degree": 2,
         "targets": 8,
         "unknowns": 16,
-        "wall_ns": 440854874
+        "wall_ns": 419680920
       },
       {
         "a": 1,
         "calibration": {
-          "ns_per_add": 263.55918,
-          "ns_per_as_solve": 18.269825,
+          "ns_per_add": 263.048975,
+          "ns_per_as_solve": 17.0651,
           "ns_per_canon": null,
-          "ns_per_double": 263.26314,
-          "ns_per_frobenius": 10.78695,
+          "ns_per_double": 263.315985,
+          "ns_per_frobenius": 12.000285,
           "ns_per_inversion": null,
           "ns_per_legendre": null,
-          "ns_per_lookup": 2.63243,
-          "ns_per_row_op": 2.5111845703125,
+          "ns_per_lookup": 2.64725,
+          "ns_per_row_op": 2.507744140625,
           "ns_per_s4_pair": null,
           "ns_per_sqrt": null,
-          "ns_per_word_xor": 0.3473880615234375
+          "ns_per_word_xor": 0.349087646484375
         },
         "curve": {
           "a": 1,
@@ -5679,9 +5679,9 @@
             "gae_per_refutation_mean": 2071.0,
             "gae_per_target_mean": 1310.0,
             "inconclusive": 0,
-            "ms_median_found": 0.127612,
-            "ms_median_refuted": 0.5404005000000001,
-            "ms_total": 2.7427050000000004,
+            "ms_median_found": 0.125166,
+            "ms_median_refuted": 0.5409405,
+            "ms_total": 2.745611,
             "native_median_found": 468.5,
             "native_median_refuted": 2071.0,
             "native_total": 10480,
@@ -5694,7 +5694,7 @@
                 "group_adds": 2071,
                 "native": 2071,
                 "verdict": "Refuted",
-                "wall_ns": 526567
+                "wall_ns": 531433
               },
               {
                 "extra": {},
@@ -5702,7 +5702,7 @@
                 "group_adds": 2071,
                 "native": 2071,
                 "verdict": "Refuted",
-                "wall_ns": 540877
+                "wall_ns": 540715
               },
               {
                 "extra": {},
@@ -5710,7 +5710,7 @@
                 "group_adds": 2071,
                 "native": 2071,
                 "verdict": "Refuted",
-                "wall_ns": 540569
+                "wall_ns": 541166
               },
               {
                 "extra": {},
@@ -5718,7 +5718,7 @@
                 "group_adds": 2071,
                 "native": 2071,
                 "verdict": "Refuted",
-                "wall_ns": 540232
+                "wall_ns": 544223
               },
               {
                 "extra": {},
@@ -5726,7 +5726,7 @@
                 "group_adds": 1039,
                 "native": 1039,
                 "verdict": "Found",
-                "wall_ns": 277915
+                "wall_ns": 278327
               },
               {
                 "extra": {},
@@ -5734,7 +5734,7 @@
                 "group_adds": 556,
                 "native": 556,
                 "verdict": "Found",
-                "wall_ns": 150805
+                "wall_ns": 148151
               },
               {
                 "extra": {},
@@ -5742,7 +5742,7 @@
                 "group_adds": 381,
                 "native": 381,
                 "verdict": "Found",
-                "wall_ns": 104419
+                "wall_ns": 102181
               },
               {
                 "extra": {},
@@ -5750,7 +5750,7 @@
                 "group_adds": 220,
                 "native": 220,
                 "verdict": "Found",
-                "wall_ns": 61321
+                "wall_ns": 59415
               }
             ],
             "refuted": 4
@@ -5758,12 +5758,12 @@
           {
             "extra_totals": {},
             "found": 4,
-            "gae_per_refutation_mean": 0.009988003453342052,
-            "gae_per_target_mean": 0.5099880034533419,
+            "gae_per_refutation_mean": 0.010063715321452974,
+            "gae_per_target_mean": 0.5100637153214529,
             "inconclusive": 0,
-            "ms_median_found": 0.0017894999999999999,
-            "ms_median_refuted": 0.0011775,
-            "ms_total": 0.011134999999999999,
+            "ms_median_found": 0.0015305000000000002,
+            "ms_median_refuted": 0.0012185,
+            "ms_total": 0.010635,
             "native_median_found": 1.0,
             "native_median_refuted": 1.0,
             "native_total": 8,
@@ -5772,67 +5772,67 @@
             "per_target": [
               {
                 "extra": {},
-                "gae": 0.009988003453342052,
+                "gae": 0.010063715321452974,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 256
+                "wall_ns": 168
               },
               {
                 "extra": {},
-                "gae": 0.009988003453342052,
+                "gae": 0.010063715321452974,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 1328
+                "wall_ns": 1308
               },
               {
                 "extra": {},
-                "gae": 0.009988003453342052,
+                "gae": 0.010063715321452974,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 1027
+                "wall_ns": 1174
               },
               {
                 "extra": {},
-                "gae": 0.009988003453342052,
+                "gae": 0.010063715321452974,
                 "group_adds": 0,
                 "native": 1,
                 "verdict": "Refuted",
-                "wall_ns": 1454
+                "wall_ns": 1263
               },
               {
                 "extra": {},
-                "gae": 1.009988003453342,
+                "gae": 1.010063715321453,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 2154
+                "wall_ns": 2336
               },
               {
                 "extra": {},
-                "gae": 1.009988003453342,
+                "gae": 1.010063715321453,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1337
+                "wall_ns": 1572
               },
               {
                 "extra": {},
-                "gae": 1.009988003453342,
+                "gae": 1.010063715321453,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 2078
+                "wall_ns": 1489
               },
               {
                 "extra": {},
-                "gae": 1.009988003453342,
+                "gae": 1.010063715321453,
                 "group_adds": 1,
                 "native": 1,
                 "verdict": "Found",
-                "wall_ns": 1501
+                "wall_ns": 1325
               }
             ],
             "refuted": 4
@@ -5848,12 +5848,12 @@
               "splits": 1296
             },
             "found": 4,
-            "gae_per_refutation_mean": 95262.74208399943,
-            "gae_per_target_mean": 60675.39623351741,
+            "gae_per_refutation_mean": 95914.48585737299,
+            "gae_per_target_mean": 61090.50932838611,
             "inconclusive": 0,
-            "ms_median_found": 184.6223315,
-            "ms_median_refuted": 613.4334034999999,
-            "ms_total": 3120.474458,
+            "ms_median_found": 168.325583,
+            "ms_median_refuted": 562.6620235,
+            "ms_total": 2852.5140210000004,
             "native_median_found": 21898047.0,
             "native_median_refuted": 72515968.0,
             "native_total": 368269597,
@@ -5870,11 +5870,11 @@
                   "reductions": 511,
                   "splits": 255
                 },
-                "gae": 95804.61760971317,
+                "gae": 96460.06864567545,
                 "group_adds": 0,
                 "native": 72685821,
                 "verdict": "Refuted",
-                "wall_ns": 610265541
+                "wall_ns": 556689431
               },
               {
                 "extra": {
@@ -5886,11 +5886,11 @@
                   "reductions": 512,
                   "splits": 255
                 },
-                "gae": 95361.5857357961,
+                "gae": 96014.0057518768,
                 "group_adds": 0,
                 "native": 72349698,
                 "verdict": "Refuted",
-                "wall_ns": 620852898
+                "wall_ns": 566434776
               },
               {
                 "extra": {
@@ -5902,11 +5902,11 @@
                   "reductions": 511,
                   "splits": 255
                 },
-                "gae": 95799.89498375705,
+                "gae": 96455.31370968926,
                 "group_adds": 0,
                 "native": 72682238,
                 "verdict": "Refuted",
-                "wall_ns": 614141884
+                "wall_ns": 563696266
               },
               {
                 "extra": {
@@ -5918,11 +5918,11 @@
                   "reductions": 511,
                   "splits": 255
                 },
-                "gae": 94084.87000673143,
+                "gae": 94728.55532225047,
                 "group_adds": 0,
                 "native": 71381069,
                 "verdict": "Refuted",
-                "wall_ns": 612724923
+                "wall_ns": 561627781
               },
               {
                 "extra": {
@@ -5934,11 +5934,11 @@
                   "reductions": 99,
                   "splits": 50
                 },
-                "gae": 18791.27332063377,
+                "gae": 18919.834551525953,
                 "group_adds": 0,
                 "native": 14256715,
                 "verdict": "Found",
-                "wall_ns": 119344270
+                "wall_ns": 109459445
               },
               {
                 "extra": {
@@ -5950,11 +5950,11 @@
                   "reductions": 207,
                   "splits": 105
                 },
-                "gae": 39610.277205115024,
+                "gae": 39881.27246480711,
                 "group_adds": 0,
                 "native": 30051845,
                 "verdict": "Found",
-                "wall_ns": 250309335
+                "wall_ns": 228127653
               },
               {
                 "extra": {
@@ -5966,11 +5966,11 @@
                   "reductions": 33,
                   "splits": 18
                 },
-                "gae": 7015.83716528076,
+                "gae": 7063.836289465561,
                 "group_adds": 0,
                 "native": 5322832,
                 "verdict": "Found",
-                "wall_ns": 42935214
+                "wall_ns": 39286948
               },
               {
                 "extra": {
@@ -5982,11 +5982,11 @@
                   "reductions": 204,
                   "splits": 103
                 },
-                "gae": 38934.81384111202,
+                "gae": 39201.18789179837,
                 "group_adds": 0,
                 "native": 29539379,
                 "verdict": "Found",
-                "wall_ns": 249900393
+                "wall_ns": 227191721
               }
             ],
             "refuted": 4
@@ -5999,12 +5999,12 @@
               "spurious": 0
             },
             "found": 4,
-            "gae_per_refutation_mean": 24015131.970550217,
-            "gae_per_target_mean": 12639834.974634537,
+            "gae_per_refutation_mean": 24524019.44637876,
+            "gae_per_target_mean": 12902778.237398569,
             "inconclusive": 0,
-            "ms_median_found": 381.205029,
-            "ms_median_refuted": 6461.8493945,
-            "ms_total": 26650.75633,
+            "ms_median_found": 385.58445,
+            "ms_median_refuted": 6579.3149105,
+            "ms_total": 27152.50072,
             "native_median_found": 29247.0,
             "native_median_refuted": 188443.0,
             "native_total": 836317,
@@ -6018,11 +6018,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 23014000.50645172,
+                "gae": 23445781.345469985,
                 "group_adds": 0,
                 "native": 186854,
                 "verdict": "Refuted",
-                "wall_ns": 6065551102
+                "wall_ns": 6167388751
               },
               {
                 "extra": {
@@ -6031,11 +6031,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 26021281.774362784,
+                "gae": 26577716.449950054,
                 "group_adds": 0,
                 "native": 194210,
                 "verdict": "Refuted",
-                "wall_ns": 6858147687
+                "wall_ns": 6991241070
               },
               {
                 "extra": {
@@ -6044,11 +6044,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 18940894.060301747,
+                "gae": 19335953.854220495,
                 "group_adds": 0,
                 "native": 163406,
                 "verdict": "Refuted",
-                "wall_ns": 4992046507
+                "wall_ns": 5086302842
               },
               {
                 "extra": {
@@ -6057,11 +6057,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 28084351.54108462,
+                "gae": 28736626.13587451,
                 "group_adds": 0,
                 "native": 190032,
                 "verdict": "Refuted",
-                "wall_ns": 7401888663
+                "wall_ns": 7559140050
               },
               {
                 "extra": {
@@ -6070,11 +6070,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 185369.9537234863,
+                "gae": 186907.73077522923,
                 "group_adds": 0,
                 "native": 4363,
                 "verdict": "Found",
-                "wall_ns": 48855953
+                "wall_ns": 49165887
               },
               {
                 "extra": {
@@ -6083,11 +6083,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1277843.7654875081,
+                "gae": 1292472.175571108,
                 "group_adds": 0,
                 "native": 27265,
                 "verdict": "Found",
-                "wall_ns": 336787455
+                "wall_ns": 339983481
               },
               {
                 "extra": {
@@ -6096,11 +6096,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1980034.844546109,
+                "gae": 2007585.165462059,
                 "group_adds": 0,
                 "native": 38958,
                 "verdict": "Found",
-                "wall_ns": 521856360
+                "wall_ns": 528093220
               },
               {
                 "extra": {
@@ -6109,11 +6109,11 @@
                   "solver_calls": 1,
                   "spurious": 0
                 },
-                "gae": 1614903.3511183332,
+                "gae": 1639183.041865113,
                 "group_adds": 0,
                 "native": 31229,
                 "verdict": "Found",
-                "wall_ns": 425622603
+                "wall_ns": 431185419
               }
             ],
             "refuted": 4
@@ -6131,25 +6131,25 @@
           {
             "extrapolation": true,
             "oracle": "meet_in_the_middle_m2",
-            "relation_phase_gae": 47.938872324614145,
-            "s_over_rho_floor": 0.12663166735545942,
-            "s_projected": 0.02340040359630194,
+            "relation_phase_gae": 47.94598924021657,
+            "s_over_rho_floor": 0.126650466856688,
+            "s_projected": 0.023403877576589373,
             "targets_needed": 94.0
           },
           {
             "extrapolation": true,
             "oracle": "matrix_f4_splitting",
-            "relation_phase_gae": 5703487.245950636,
-            "s_over_rho_floor": 15065.89672791473,
-            "s_projected": 2784.0434492882023,
+            "relation_phase_gae": 5742507.876868295,
+            "s_over_rho_floor": 15168.970649239074,
+            "s_projected": 2803.090591362646,
             "targets_needed": 94.0
           },
           {
             "extrapolation": true,
             "oracle": "cdcl_sat_native_xor",
-            "relation_phase_gae": 1188144487.6156466,
-            "s_over_rho_floor": 3138511.8220379064,
-            "s_projected": 579969.0145538124,
+            "relation_phase_gae": 1212861154.3154655,
+            "s_over_rho_floor": 3203801.482889194,
+            "s_projected": 592033.9620230518,
             "targets_needed": 94.0
           }
         ],
@@ -6159,7 +6159,7 @@
         "system_degree": 2,
         "targets": 8,
         "unknowns": 22,
-        "wall_ns": 30662491099
+        "wall_ns": 30897437853
       }
     ],
     "config": {
@@ -6224,12 +6224,12 @@
       "seed": 123212651130,
       "targets": 8
     },
-    "markdown": "| n | dim | m | unknowns | eqs | deg | FFD | hit rate | oracle | found/refuted/inconc | native (median refuted) | ms (median refuted) | GAE/target | projected S | vs floor |\n|--:|--:|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 5.750e0 | 2.551e0 | 8.636e0 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.018e0 | 4.515e-1 | 1.528e0 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 1.166e2 | 5.174e1 | 1.751e2 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 3.973e3 | 1.763e3 | 5.967e3 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | enumerate_m3 | 8/0/0 | — | — | 5.000e0 | 2.218e0 | 7.510e0 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | meet_in_the_middle_m3 | 8/0/0 | — | — | 2.018e0 | 8.952e-1 | 3.030e0 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | semaev_s4_pairs_and_solve | 8/0/0 | — | — | 2.700e2 | 1.198e2 | 4.055e2 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 8.821e2 | 3.914e2 | 1.325e3 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 7.048e4 | 3.127e4 | 1.059e5 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 1.000e0 | 1.493e0 | 5.587e0 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.017e0 | 1.519e0 | 5.684e0 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 1.172e3 | 1.750e3 | 6.548e3 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 1.494e4 | 2.230e4 | 8.346e4 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 1.000e0 | 3.486e0 | 1.418e1 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.017e0 | 3.545e0 | 1.442e1 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 1.223e3 | 4.261e3 | 1.734e4 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 2.417e4 | 8.424e4 | 3.427e5 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | enumerate_m3 | 8/0/0 | — | — | 2.000e0 | 6.971e0 | 2.836e1 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | meet_in_the_middle_m3 | 8/0/0 | — | — | 2.017e0 | 7.030e0 | 2.860e1 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | semaev_s4_pairs_and_solve | 8/0/0 | — | — | 2.415e4 | 8.418e4 | 3.425e5 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | enumerate_m2 | 0/8/0 | 33 | 0.005 | 3.300e1 | 1.541e2 | 6.736e2 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | meet_in_the_middle_m2 | 0/8/0 | 1 | 0.000 | 1.148e-2 | 5.360e-2 | 2.342e-1 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | matrix_f4_splitting | 0/8/0 | 11329 | 0.384 | 2.070e1 | 9.667e1 | 4.225e2 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | cdcl_sat_native_xor | 0/8/0 | 5 | 0.266 | 1.527e3 | 7.134e3 | 3.118e4 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | enumerate_m3 | 3/5/0 | 594 | 0.096 | 4.665e2 | 1.816e2 | 7.935e2 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | meet_in_the_middle_m3 | 3/5/0 | 33 | 0.007 | 2.465e1 | 9.593e0 | 4.192e1 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | semaev_s4_pairs_and_solve | 3/5/0 | 528 | 0.256 | 1.099e3 | 4.276e2 | 1.869e3 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | matrix_f4_splitting | 3/5/0 | 314471884 | 1940.051 | 4.302e5 | 1.674e5 | 7.317e5 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | cdcl_sat_native_xor | 0/0/8 | — | — | 3.859e7 | 1.502e7 | 6.565e7 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | enumerate_m2 | 2/6/0 | 239 | 0.042 | 1.831e2 | 2.574e1 | 1.198e2 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | meet_in_the_middle_m2 | 2/6/0 | 1 | 0.000 | 2.607e-1 | 3.665e-2 | 1.705e-1 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | matrix_f4_splitting | 2/6/0 | 1992251 | 29.517 | 3.369e3 | 4.736e2 | 2.203e3 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | cdcl_sat_native_xor | 2/6/0 | 2052 | 15.180 | 7.124e4 | 1.001e4 | 4.659e4 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | enumerate_m2 | 4/4/0 | 2071 | 0.540 | 1.310e3 | 6.011e1 | 3.253e2 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | meet_in_the_middle_m2 | 4/4/0 | 1 | 0.001 | 5.100e-1 | 2.340e-2 | 1.266e-1 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | matrix_f4_splitting | 4/4/0 | 72515968 | 613.433 | 6.068e4 | 2.784e3 | 1.507e4 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | cdcl_sat_native_xor | 4/4/0 | 188443 | 6461.849 | 1.264e7 | 5.800e5 | 3.139e6 |\n"
+    "markdown": "| n | dim | m | unknowns | eqs | deg | FFD | hit rate | oracle | found/refuted/inconc | native (median refuted) | ms (median refuted) | GAE/target | projected S | vs floor |\n|--:|--:|--:|--:|--:|--:|:--|--:|:--|:--|--:|--:|--:|--:|--:|\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 5.750e0 | 2.551e0 | 8.636e0 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.018e0 | 4.516e-1 | 1.529e0 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 1.170e2 | 5.193e1 | 1.758e2 |\n| 9 | 6 | 2 | 12 | 9 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 4.017e3 | 1.782e3 | 6.034e3 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | enumerate_m3 | 8/0/0 | — | — | 5.000e0 | 2.218e0 | 7.510e0 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | meet_in_the_middle_m3 | 8/0/0 | — | — | 2.018e0 | 8.953e-1 | 3.031e0 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | semaev_s4_pairs_and_solve | 8/0/0 | — | — | 2.755e2 | 1.222e2 | 4.137e2 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 8.874e2 | 3.937e2 | 1.333e3 |\n| 9 | 6 | 3 | 27 | 18 | 3 | 3 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 7.196e4 | 3.193e4 | 1.081e5 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 1.000e0 | 1.493e0 | 5.587e0 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.017e0 | 1.519e0 | 5.683e0 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 1.168e3 | 1.743e3 | 6.524e3 |\n| 11 | 10 | 2 | 20 | 11 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 1.504e4 | 2.245e4 | 8.402e4 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | enumerate_m2 | 8/0/0 | — | — | 1.000e0 | 3.486e0 | 1.418e1 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | meet_in_the_middle_m2 | 8/0/0 | — | — | 1.017e0 | 3.545e0 | 1.442e1 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | matrix_f4_splitting | 8/0/0 | — | — | 1.222e3 | 4.261e3 | 1.734e4 |\n| 13 | 12 | 2 | 24 | 13 | 2 | 2 | 1.00 | cdcl_sat_native_xor | 8/0/0 | — | — | 2.451e4 | 8.543e4 | 3.476e5 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | enumerate_m3 | 8/0/0 | — | — | 2.000e0 | 6.971e0 | 2.836e1 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | meet_in_the_middle_m3 | 8/0/0 | — | — | 2.017e0 | 7.031e0 | 2.860e1 |\n| 13 | 12 | 3 | 49 | 26 | 3 | — | 1.00 | semaev_s4_pairs_and_solve | 8/0/0 | — | — | 2.411e4 | 8.403e4 | 3.419e5 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | enumerate_m2 | 0/8/0 | 33 | 0.005 | 3.300e1 | 1.541e2 | 6.736e2 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | meet_in_the_middle_m2 | 0/8/0 | 1 | 0.000 | 1.107e-2 | 5.173e-2 | 2.261e-1 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | matrix_f4_splitting | 0/8/0 | 11329 | 0.370 | 2.076e1 | 9.699e1 | 4.238e2 |\n| 15 | 5 | 2 | 10 | 15 | 2 | 2–3 | 0.00 | cdcl_sat_native_xor | 0/8/0 | 5 | 0.260 | 1.483e3 | 6.928e3 | 3.028e4 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | enumerate_m3 | 3/5/0 | 594 | 0.097 | 4.665e2 | 1.816e2 | 7.935e2 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | meet_in_the_middle_m3 | 3/5/0 | 33 | 0.006 | 2.465e1 | 9.594e0 | 4.193e1 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | semaev_s4_pairs_and_solve | 3/5/0 | 528 | 0.257 | 1.122e3 | 4.366e2 | 1.908e3 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | matrix_f4_splitting | 3/5/0 | 314471884 | 1662.290 | 4.255e5 | 1.656e5 | 7.238e5 |\n| 15 | 5 | 3 | 30 | 30 | 3 | 3 | 0.38 | cdcl_sat_native_xor | 0/0/8 | — | — | 3.838e7 | 1.494e7 | 6.529e7 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | enumerate_m2 | 2/6/0 | 239 | 0.043 | 1.831e2 | 2.574e1 | 1.198e2 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | meet_in_the_middle_m2 | 2/6/0 | 1 | 0.000 | 2.607e-1 | 3.664e-2 | 1.705e-1 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | matrix_f4_splitting | 2/6/0 | 1992251 | 26.877 | 3.377e3 | 4.747e2 | 2.209e3 |\n| 17 | 8 | 2 | 16 | 17 | 2 | 2 | 0.25 | cdcl_sat_native_xor | 2/6/0 | 2052 | 15.376 | 7.190e4 | 1.011e4 | 4.702e4 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | enumerate_m2 | 4/4/0 | 2071 | 0.541 | 1.310e3 | 6.011e1 | 3.253e2 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | meet_in_the_middle_m2 | 4/4/0 | 1 | 0.001 | 5.101e-1 | 2.340e-2 | 1.267e-1 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | matrix_f4_splitting | 4/4/0 | 72515968 | 562.662 | 6.109e4 | 2.803e3 | 1.517e4 |\n| 23 | 11 | 2 | 22 | 23 | 2 | 2 | 0.50 | cdcl_sat_native_xor | 4/4/0 | 188443 | 6579.315 | 1.290e7 | 5.920e5 | 3.204e6 |\n"
   },
   "schema_version": 1,
   "software": {
     "arch": "x86_64",
-    "binary_blake3": "ae9491bfec7627a7ddeb68e7ea24853fc1691481cef750d103879481d6996279",
+    "binary_blake3": "9c58850c76b90b1552a2b9ff0ed622e8136833734130e5e15934bec954ebb182",
     "os": "linux",
     "version": "0.1.0"
   },
