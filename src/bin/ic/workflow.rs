@@ -55,7 +55,8 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, FactorBaseLogSolver,
     FactorBaseLogTable,
-    solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
+    solve_factor_base_logs_from_relations, CollectedRelation, ColumnCoverage,
+    DecompositionStrategy,
     IndividualLogSolver,
     FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
     ProbeBudget,
@@ -95,6 +96,13 @@ fn one_u32() -> u32 {
 fn one_u64() -> u64 {
     1
 }
+/// `skip_serializing_if` for a flag that is off by default, so adding
+/// one does not change the digest of every parameter file that predates
+/// it.
+fn is_false(b: &bool) -> bool {
+    !*b
+}
+
 fn is_one_u32(v: &u32) -> bool {
     *v == 1
 }
@@ -301,6 +309,30 @@ pub struct WorkflowParams {
     /// probe. A separate selection run must tune this value.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub collection_window: Option<u32>,
+    /// Aim the collection window at the columns the run still needs
+    /// covered, instead of sweeping the whole base.
+    ///
+    /// A relation cannot be used until every column it mentions has a
+    /// log, and the matrix cannot be solved until every column is
+    /// mentioned, so a run's relation count is set by *coverage*, not
+    /// by rank.  Measured at `n = 41` on a 192-column base: coverage and
+    /// full rank both complete at relation 330, where rank alone needs
+    /// 192, and 62% of the scanning goes on the last 10% of columns —
+    /// the coupon-collector tail of relations arriving at uniformly
+    /// random columns.
+    ///
+    /// The `m = 3` scan's hit always involves the column of the summand
+    /// it scanned, so a window restricted to the columns still missing
+    /// returns only relations that cover one.  The window keeps its
+    /// width, so scans per trial and the reported counter are unchanged;
+    /// what falls is the number of relations the run needs.
+    ///
+    /// Off by default, and deliberately: with it on, every unit after
+    /// the first scans a different set, so a run's counters are not the
+    /// swept run's.  The frozen ledger rungs are the regression
+    /// baseline and sweep.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub collection_aim: bool,
     /// Bytes the pair table may occupy, when it should differ from
     /// [`PairSumTable::DEFAULT_BYTE_BUDGET`].
     ///
@@ -1171,6 +1203,20 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let mut relations_now = 0usize;
     let mut trials_now = 0u64;
     let mut summands_scanned_now = 0u64;
+    // Columns already covered by the units on disk, so a resumed run
+    // aims at the same set a straight-through run would, and the report
+    // can state coverage even when every unit was reused.
+    let mut coverage = match p.collection_aim {
+        true => {
+            let mut cov =
+                ColumnCoverage::new(&c, &fb).ok_or("factor base has no projected columns")?;
+            for doc in units.values() {
+                cov.add(&doc.relations);
+            }
+            Some(cov)
+        }
+        false => None,
+    };
     if !wanted.is_empty() {
         say(&format!(
             "[2/4] collect: running {} work unit(s) of {} probes ({} already present) …",
@@ -1188,12 +1234,32 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
             .ok_or("factor base cannot decompose with this summand count")?;
         for &u in &wanted {
-            let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u)?;
+            // `None` sweeps.  The first unit of a fresh run has every
+            // column at zero mentions, and a window over every column
+            // *is* the sweep, so aiming costs nothing until the counts
+            // start to differ.  It stays on after coverage completes,
+            // aiming then at the once-mentioned columns, because that is
+            // the phase where the run is short of rank rather than of
+            // coverage and where the tail actually is.
+            let aim = coverage
+                .as_ref()
+                .map(|cov| cov.missing_points())
+                .filter(|pts| !pts.is_empty());
+            let doc =
+                collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u, aim.as_deref())?;
+            if let Some(cov) = coverage.as_mut() {
+                cov.add(&doc.relations);
+            }
             say(&format!(
-                "      unit {u:05}: {} relations from {} probes ({:.2}s)",
+                "      unit {u:05}: {} relations from {} probes ({:.2}s){}",
                 doc.relations.len(),
                 doc.count,
-                doc.elapsed_seconds
+                doc.elapsed_seconds,
+                match coverage.as_ref() {
+                    Some(cov) =>
+                        format!(", {}/{} columns covered", cov.covered(), cov.columns()),
+                    None => String::new(),
+                }
             ));
             units_ran += 1;
             relations_now += doc.relations.len();
@@ -1227,6 +1293,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         "summands_scanned_now":summands_scanned_now,
         "trials_total":trials_total,"relations_total":state.relations_collected,
         "summands_scanned_total":summands_scanned_total,
+        // What the run aimed at, and how far coverage got: the number
+        // aiming exists to move is `relations_total`, and without the
+        // coverage beside it a reader cannot tell a run that finished
+        // from one that ran out of units.
+        "aimed":p.collection_aim,
+        "columns_covered":coverage.as_ref().map(|cov| cov.covered()),
+        "columns":coverage.as_ref().map(|cov| cov.columns()),
         "elapsed_seconds":t1.elapsed().as_secs_f64()}));
     if units_ran == 0 {
         say(&format!(
@@ -1291,6 +1364,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
                     .ok_or("factor base cannot decompose with this summand count")?
             };
+            // Coverage of every relation the solver already holds, so
+            // the first extension unit aims at what those left out.
+            let mut extend_coverage = match p.collection_aim {
+                true => {
+                    let mut cov = ColumnCoverage::new(&c, &fb)
+                        .ok_or("factor base has no projected columns")?;
+                    cov.add(&merged);
+                    Some(cov)
+                }
+                false => None,
+            };
             while outcome.is_none() {
                 let report = solver.report();
                 let next = units.keys().max().map_or(0, |m| m + 1);
@@ -1301,12 +1385,32 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     "      {} accepted relations ({} rejected, {} duplicates) do not determine all {} columns; collecting unit {next:05} …",
                     report.relations, report.rejected_relations, report.duplicate_relations, report.columns
                 ));
-                let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, next)?;
+                // The extension loop runs precisely when the system is
+                // undetermined, so it is where aiming is worth most —
+                // and measurement says what it should aim at there is
+                // the least-mentioned columns, not the uncovered ones:
+                // at n = 41 a run that has covered every column still
+                // lacks a pivot on two of them, and both are columns
+                // mentioned exactly once.
+                let aim = extend_coverage
+                    .as_ref()
+                    .map(|cov| cov.missing_points())
+                    .filter(|pts| !pts.is_empty());
+                let doc =
+                    collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, next, aim.as_deref())?;
+                if let Some(cov) = extend_coverage.as_mut() {
+                    cov.add(&doc.relations);
+                }
                 say(&format!(
-                    "      unit {next:05}: {} relations from {} probes ({:.2}s)",
+                    "      unit {next:05}: {} relations from {} probes ({:.2}s){}",
                     doc.relations.len(),
                     doc.count,
-                    doc.elapsed_seconds
+                    doc.elapsed_seconds,
+                    match extend_coverage.as_ref() {
+                        Some(cov) =>
+                            format!(", {}/{} columns covered", cov.covered(), cov.columns()),
+                        None => String::new(),
+                    }
                 ));
                 solver.push(&doc.relations);
                 loaded += doc.relations.len();
@@ -1588,7 +1692,7 @@ fn finish(
         "evidence_scope":evidence_scope(p),
         "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,
         "summands":p.summands,"descent_summands":p.descent_summands.unwrap_or(p.summands),
-        "collection_window":p.collection_window,"solver":p.solver,
+        "collection_window":p.collection_window,"collection_aim":p.collection_aim,"solver":p.solver,
         "params_digest":state.params_digest,"run_directory":args.dir.display().to_string(),"run_number":state.runs,
         "resumed":state.runs>1,"stop_after":args.stop_after,
         "factor_base":factor_base,
@@ -1660,6 +1764,7 @@ fn collect_unit(
     spec: &FactorBaseSpec,
     rel_dir: &Path,
     unit: usize,
+    aim: Option<&[u32]>,
 ) -> Result<RelationUnitDocument, String> {
     let work = RelationWorkUnit {
         seed: p.seed,
@@ -1668,7 +1773,7 @@ fn collect_unit(
             .ok_or("work unit range overflows")?,
         count: p.collection.unit_trials,
     };
-    let (relations, report) = collector.collect(work);
+    let (relations, report) = collector.collect_aimed(work, aim);
     let doc = RelationUnitDocument {
         schema_version: 1,
         params_digest: digest.to_string(),

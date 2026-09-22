@@ -93,8 +93,18 @@ fn main() {
         ("full", PairSumTable::build_full_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)),
     ];
     println!(
-        "\n{:<8} {:>14} {:>12} {:>10} {:>10} {:>10} {:>9} {:>9} {:>9}",
-        "tier", "stored pairs", "build s", "lone ns", "blkd ns", "scan ns", "lone/add", "blkd/add", "scan/add"
+        "\n{:<8} {:>14} {:>12} {:>10} {:>10} {:>10} {:>10} {:>9} {:>9} {:>9} {:>9}",
+        "tier",
+        "stored pairs",
+        "build s",
+        "lone ns",
+        "blkd ns",
+        "scan ns",
+        "aim ns",
+        "lone/add",
+        "blkd/add",
+        "scan/add",
+        "aim/add"
     );
     for (name, table) in tiers {
         let Some(table) = table else {
@@ -168,12 +178,43 @@ fn main() {
         }
         let scan_ns = start.elapsed().as_secs_f64() * 1e9 / scanned as f64;
 
+        // Shape 4: the same scan aimed at a named subset rather than
+        // swept over the base.  It costs a gather — one `FastPoint` copy
+        // per summand, because a column's points are not contiguous in
+        // the base ordering — and that copy must be inside this figure,
+        // not assumed away: aiming is only a saving if the scan it makes
+        // is no dearer per summand than the sweep it replaces.
+        //
+        // The subset is a tenth of the base, which is the order of what
+        // aiming actually scans once coverage is nearly complete, and it
+        // is deliberately stridden rather than contiguous so the gather
+        // pays the scattered reads a real target set would.
+        let aimed_idxs: Vec<u32> = (0..n as u32).filter(|i| i % 10 == 3).collect();
+        let mut aim_scratch = ScanScratch::default();
+        let mut aimed_scanned = 0usize;
+        let mut aimed_targets = 0usize;
+        let start = Instant::now();
+        while start.elapsed().as_secs_f64() < 3.0 {
+            aimed_targets += 1;
+            let t = fc.mul_u64(g, aimed_targets as u64 * 7_700_017 + 3);
+            table.witnesses_fast_scan(
+                t,
+                3,
+                Scan::Indices(&aimed_idxs),
+                &mut aim_scratch,
+                &mut |_| true,
+            );
+            aimed_scanned += aimed_idxs.len();
+        }
+        let aimed_ns = start.elapsed().as_secs_f64() * 1e9 / aimed_scanned as f64;
+
         println!(
-            "{name:<8} {:>14} {build_s:>12.2} {lone_ns:>10.1} {blocked_ns:>10.1} {scan_ns:>10.1}              {:>9.2} {:>9.2} {:>9.2}",
+            "{name:<8} {:>14} {build_s:>12.2} {lone_ns:>10.1} {blocked_ns:>10.1} {scan_ns:>10.1} {aimed_ns:>10.1}       {:>9.2} {:>9.2} {:>9.2} {:>9.2}",
             table.len(),
             lone_ns / add_ns,
             blocked_ns / add_ns,
-            scan_ns / add_ns
+            scan_ns / add_ns,
+            aimed_ns / add_ns
         );
     }
     println!(

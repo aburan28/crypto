@@ -2430,6 +2430,258 @@ pub struct PairSumTable {
 /// caller that knows its own collection volume should say so; the
 /// default is the volume of the sweep the constants were measured
 /// on.
+/// Buffers a windowed `m = 3` scan reuses across trials.
+///
+/// The scan allocates nothing of its own, and that matters more than it
+/// looks: collection runs one scan per probe, and a 256-summand window
+/// is small enough that four fresh allocations per call — the gathered
+/// summands, the remainders, the batched inversion's workspace and the
+/// key block — are a measurable share of the scan's cost rather than
+/// noise amortised over a long loop.  One of these per collection run,
+/// handed to every trial, takes them out of the measurement and out of
+/// the run.
+#[derive(Clone, Debug, Default)]
+pub struct ScanScratch {
+    /// Summands gathered for a [`Scan::Indices`] scan.
+    gather: Vec<FastPoint>,
+    /// `target − P_k` for each scanned summand.
+    rests: Vec<FastPoint>,
+    /// Workspace for the shared-inversion batch addition.
+    batch: BatchScratch,
+    /// Canonical keys of one block of remainders.
+    keys: Vec<u64>,
+    /// Pairs recovered for one key.
+    pairs: Vec<(u32, u32)>,
+}
+
+/// How often each relation-matrix column has been mentioned, and the
+/// factor-base points that would mention the least-mentioned ones.
+///
+/// A column no relation mentions has no equation, so the system cannot
+/// determine its logarithm however many relations arrive elsewhere.  A
+/// column mentioned *once* is barely better: its single row pins it only
+/// if every other column in that row is pinned, so it is the likeliest
+/// place for the matrix to fall short of full rank.  Both are the same
+/// defect at different depths, which is why this counts mentions rather
+/// than tracking a covered/uncovered bit.
+///
+/// Measured at `n = 41` on a 192-column base, and the reason the count
+/// matters:
+///
+/// | run | coverage complete | full rank |
+/// |:--|--:|--:|
+/// | swept | 330 relations | 330 |
+/// | aimed at uncovered columns | 117 | 309 |
+///
+/// Aiming at *uncovered* columns alone moves coverage by `2.8×` and the
+/// run's cost by almost nothing, because coverage was never what the run
+/// was waiting for.  At the moment the row count first reaches the
+/// column count, the aimed run has every column covered and rank
+/// `190/192`; the two columns without a pivot are mentioned exactly
+/// once, among 21 columns mentioned once.  So the set worth scanning is
+/// not "columns with no mention" but "columns with the fewest", and that
+/// needs a counter rather than an elimination.
+///
+/// [`Self::missing_points`] therefore returns the points of the columns
+/// at the current *minimum* mention count.  That is the sweep while
+/// nothing is covered (every column is at zero), the uncovered columns
+/// while some are, and the once-mentioned columns after that — one rule,
+/// no threshold to tune, and it keeps aiming through the phase where
+/// rank, not coverage, is what the run is short of.
+///
+/// The columns counted here are the *projected* signed orbits, the ones
+/// the relation matrix actually has, not the factor base's own orbits;
+/// the two coincide when every point projects to a distinct orbit and
+/// need not in general.
+pub struct ColumnCoverage {
+    /// Projected column of each factor-base point, where it has one.
+    column_of: Vec<Option<usize>>,
+    /// Points of each projected column.
+    points_of: Vec<Vec<u32>>,
+    /// How many relation summands have mentioned each projected column.
+    mentions: Vec<u64>,
+    covered: usize,
+}
+
+impl ColumnCoverage {
+    /// `None` when the base has no projected columns, the same condition
+    /// under which there is no system to solve.
+    pub fn new(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+        let projected = projected_signed_orbit_map(kc, fb);
+        let columns = projected.representatives.len();
+        if columns == 0 {
+            return None;
+        }
+        let column_of: Vec<Option<usize>> =
+            projected.orbit_of.iter().map(|o| o.map(|(c, _, _)| c)).collect();
+        let mut points_of = vec![Vec::new(); columns];
+        for (i, c) in column_of.iter().enumerate() {
+            if let Some(c) = c {
+                points_of[*c].push(i as u32);
+            }
+        }
+        Some(Self { column_of, points_of, mentions: vec![0; columns], covered: 0 })
+    }
+
+    /// Total projected columns, the number that must be covered.
+    pub fn columns(&self) -> usize {
+        self.points_of.len()
+    }
+
+    /// How many are covered so far.
+    pub fn covered(&self) -> usize {
+        self.covered
+    }
+
+    /// Whether every column has been mentioned.
+    pub fn complete(&self) -> bool {
+        self.covered == self.points_of.len()
+    }
+
+    /// The fewest mentions any column has.
+    pub fn least_mentions(&self) -> u64 {
+        self.mentions.iter().copied().min().unwrap_or(0)
+    }
+
+    /// Record the columns these relations mention.
+    ///
+    /// Relations are taken as they were collected, not as the solver
+    /// will accept them: a duplicate or dependent relation still proves
+    /// its columns reachable, which is what aiming needs to know.
+    pub fn add(&mut self, relations: &[CollectedRelation]) {
+        for rel in relations {
+            for &i in &rel.points {
+                if let Some(Some(c)) = self.column_of.get(i).copied() {
+                    if self.mentions[c] == 0 {
+                        self.covered += 1;
+                    }
+                    self.mentions[c] += 1;
+                }
+            }
+        }
+    }
+
+    /// Factor-base points of the columns mentioned fewest times, in
+    /// index order.
+    ///
+    /// Never empty on a base with columns, and deliberately so: the set
+    /// is the sweep before anything is covered, the uncovered columns
+    /// while some are, and the once-mentioned columns after coverage is
+    /// complete — which is the phase where a run is short of rank rather
+    /// than of coverage, and the one where aiming is worth most.
+    pub fn missing_points(&self) -> Vec<u32> {
+        let least = self.least_mentions();
+        let mut out = Vec::new();
+        for (c, &m) in self.mentions.iter().enumerate() {
+            if m == least {
+                out.extend_from_slice(&self.points_of[c]);
+            }
+        }
+        out.sort_unstable();
+        out
+    }
+}
+
+/// What one walked collection unit scans, owned so a work unit can
+/// carry it across the unit's parallel runs.
+///
+/// [`Scan`] is the borrowed form the pair table takes; this is the same
+/// choice held by the collector.
+///
+/// Both variants scan the same number of summands per trial, from a
+/// rotating offset, so they report the same counter and differ only in
+/// *which* summands are eligible.  That is deliberate: it makes the
+/// aimed run and the swept run comparable in the one unit the
+/// scoreboard is kept in, and it means aiming cannot pay for itself by
+/// quietly scanning more.
+#[derive(Clone, Debug)]
+enum Targets {
+    /// A cyclic window of this many summands over the whole base.
+    Window(usize),
+    /// A cyclic window over a named subset of the base.
+    ///
+    /// `doubled` is the subset concatenated with itself, so a window of
+    /// any length up to the subset's is one contiguous slice and the
+    /// rotation needs no scratch of its own.
+    Subset { doubled: Vec<u32>, len: usize, window: usize },
+}
+
+impl Targets {
+    /// Summands scanned per trial, which is what the unit reports.
+    fn len(&self) -> usize {
+        match self {
+            Targets::Window(w) => *w,
+            Targets::Subset { window, .. } => *window,
+        }
+    }
+
+    /// Summands available to scan, which bounds the window.
+    fn pool(&self, base: usize) -> usize {
+        match self {
+            Targets::Window(_) => base,
+            Targets::Subset { len, .. } => *len,
+        }
+    }
+
+    /// The scan for trial `t` of a unit seeded `seed`.
+    fn scan(&self, seed: u64, t: u64, base: usize) -> Scan<'_> {
+        let pool = self.pool(base);
+        // A rotating offset, so no column is favoured by sitting where
+        // the window always starts.
+        let offset =
+            pair_filter_hash(seed ^ t.wrapping_mul(0x9e37_79b9_7f4a_7c15)) as usize % pool.max(1);
+        match self {
+            Targets::Window(len) => Scan::Cyclic { start: offset, len: *len },
+            Targets::Subset { doubled, window, .. } => {
+                Scan::Indices(&doubled[offset..offset + *window])
+            }
+        }
+    }
+}
+
+/// Which factor-base summands an `m = 3` scan tries as the third one.
+///
+/// The `m = 3` search fixes a third summand `k`, looks the remainder
+/// `target − P_k` up in the pair table, and so finds a triple whenever
+/// *any* of its three indices is scanned.  Which indices those are is
+/// free, and that freedom is the point: a hit always involves
+/// `column(k)`, so a scan restricted to the columns a run still needs
+/// returns only relations that cover one.
+///
+/// [`Scan::Cyclic`] is the cheap default — a contiguous window of the
+/// base, taken from a rotating offset so no column sits where the
+/// window always starts.  [`Scan::Indices`] names the summands
+/// outright, which costs a gather but can express a set the base
+/// ordering does not make contiguous; factor-base orbits are not
+/// contiguous in index order, so the columns still uncovered never are
+/// either.
+///
+/// The hit rate per summand scanned is `|pairs| / r` whichever summand
+/// it is, so the choice does not change scans-per-relation; it changes
+/// only how many relations a run needs before every column is covered.
+#[derive(Clone, Copy, Debug)]
+pub enum Scan<'a> {
+    /// `len` summands from `start`, wrapping at the end of the base.
+    Cyclic { start: usize, len: usize },
+    /// Exactly these base indices, in this order.
+    Indices(&'a [u32]),
+}
+
+impl Scan<'_> {
+    /// How many summands the scan tries.
+    pub fn len(&self) -> usize {
+        match self {
+            Scan::Cyclic { len, .. } => *len,
+            Scan::Indices(idxs) => idxs.len(),
+        }
+    }
+
+    /// Whether the scan tries none.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ProbeBudget {
     /// Base points tried as a summand inside the `m = 3` scan —
@@ -3563,8 +3815,27 @@ impl PairSumTable {
         start: usize,
         len: usize,
     ) -> Option<Vec<usize>> {
+        self.decompose_fast_scan(
+            target,
+            m,
+            Scan::Cyclic { start, len },
+            &mut ScanScratch::default(),
+        )
+    }
+
+    /// [`Self::decompose_fast_window`] over an arbitrary scan.
+    ///
+    /// `scratch` is the scan's workspace; a caller in a loop hands back
+    /// the same one every trial and the scan allocates nothing.
+    pub fn decompose_fast_scan(
+        &self,
+        target: FastPoint,
+        m: usize,
+        scan: Scan<'_>,
+        scratch: &mut ScanScratch,
+    ) -> Option<Vec<usize>> {
         let mut found: Option<Vec<usize>> = None;
-        self.witnesses_fast_window(target, m, start, len, &mut |witness| {
+        self.witnesses_fast_scan(target, m, scan, scratch, &mut |witness| {
             found = Some(witness.to_vec());
             false
         });
@@ -3587,31 +3858,80 @@ impl PairSumTable {
         len: usize,
         sink: &mut dyn FnMut(&[usize]) -> bool,
     ) {
+        self.witnesses_fast_scan(
+            target,
+            m,
+            Scan::Cyclic { start, len },
+            &mut ScanScratch::default(),
+            sink,
+        )
+    }
+
+    /// [`Self::witnesses_fast_window`]'s enumerator over an arbitrary
+    /// scan of third summands.
+    ///
+    /// A [`Scan::Cyclic`] window is two contiguous slices of
+    /// `self.negated`, so it is handed to `add_many` as it stands.  A
+    /// [`Scan::Indices`] scan is scattered, so its summands are
+    /// gathered into `gather` first; that copy is one `FastPoint` move
+    /// per summand against the curve addition it feeds, and it is
+    /// inside the measured adds-per-scan constant for the targeted
+    /// path rather than assumed away.
+    pub fn witnesses_fast_scan(
+        &self,
+        target: FastPoint,
+        m: usize,
+        scan: Scan<'_>,
+        scratch: &mut ScanScratch,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
         let base = self.points.len();
-        if m != 3 || base == 0 || len >= base {
+        let len = scan.len();
+        // A cyclic window as long as the base *is* the full scan, and
+        // the full scan is cheaper: it keeps witnesses sorted and so
+        // does not re-find a triple three times.  An explicit index
+        // list is never the full scan, however long, because its point
+        // is which summands it leaves out.
+        if m != 3 || base == 0 || (matches!(scan, Scan::Cyclic { .. }) && len >= base) {
             self.witnesses_fast(target, m, sink);
             return;
         }
         if len == 0 {
             return;
         }
-        let start = start % base;
-        let tail = len.min(base - start);
-        let mut rests = Vec::with_capacity(len);
-        let mut scratch = BatchScratch::default();
-        self.curve.add_many(
-            target,
-            &self.negated[start..start + tail],
-            &mut rests,
-            &mut scratch,
-        );
-        if tail < len {
-            self.curve.add_many(
-                target,
-                &self.negated[..len - tail],
-                &mut rests,
-                &mut scratch,
-            );
+        // Every buffer below is borrowed from `scratch`, so a scan
+        // allocates nothing; `add_many` appends, so `rests` is cleared
+        // rather than re-created.
+        let ScanScratch { gather, rests, batch, keys, pairs } = scratch;
+        rests.clear();
+        let mut tail = len;
+        match scan {
+            Scan::Cyclic { start, len } => {
+                let start = start % base;
+                tail = len.min(base - start);
+                self.curve.add_many(
+                    target,
+                    &self.negated[start..start + tail],
+                    rests,
+                    batch,
+                );
+                if tail < len {
+                    self.curve.add_many(
+                        target,
+                        &self.negated[..len - tail],
+                        rests,
+                        batch,
+                    );
+                }
+            }
+            Scan::Indices(idxs) => {
+                gather.clear();
+                gather.reserve(idxs.len());
+                for &i in idxs {
+                    gather.push(self.negated[i as usize]);
+                }
+                self.curve.add_many(target, gather, rests, batch);
+            }
         }
         // Keys a block at a time: enough to keep `LANES`
         // canonicalisations interleaved — and, with a
@@ -3622,10 +3942,8 @@ impl PairSumTable {
         // stopping at its first witness has not paid for the rest.
         const BLOCK: usize = 1024;
         const LOOKAHEAD: usize = 32;
-        let mut keys = Vec::with_capacity(BLOCK);
-        let mut pairs = Vec::new();
         for (b, block) in rests.chunks(BLOCK).enumerate() {
-            self.keys_of(block, &mut keys);
+            self.keys_of(block, keys);
             for &key in keys.iter().take(LOOKAHEAD) {
                 prefetch(&self.present[self.filter_word(key)]);
             }
@@ -3637,13 +3955,19 @@ impl PairSumTable {
                     continue;
                 }
                 let offset = b * BLOCK + within;
-                let k = if offset < tail {
-                    start + offset
-                } else {
-                    offset - tail
+                let k = match scan {
+                    Scan::Cyclic { start, .. } => {
+                        let start = start % base;
+                        if offset < tail {
+                            start + offset
+                        } else {
+                            offset - tail
+                        }
+                    }
+                    Scan::Indices(idxs) => idxs[offset] as usize,
                 };
-                self.pairs_for_key(*rest, keys[within], &mut pairs);
-                for &(i, j) in &pairs {
+                self.pairs_for_key(*rest, keys[within], pairs);
+                for &(i, j) in pairs.iter() {
                     if !sink(&[i as usize, j as usize, k]) {
                         return;
                     }
@@ -7273,24 +7597,95 @@ impl<'a> RelationCollector<'a> {
     /// than the base has and the fast oracle can honour it.
     fn window(&self) -> Option<usize> {
         let w = self.opts.collection_window?;
-        if self.opts.m != 3
-            || self.opts.strategy != DecompositionStrategy::PairTable
-            || self.fast.is_none()
-            || self.pair_table().is_none()
-            || w == 0
-            || w >= self.fb.points.len()
-        {
+        if !self.can_walk() || w == 0 || w >= self.fb.points.len() {
             return None;
         }
         Some(w)
     }
 
+    /// Whether the walked, windowed collection path is available at all:
+    /// the `m = 3` pair-table oracle on a liftable curve.  Both the
+    /// cyclic window and the targeted scan need it.
+    fn can_walk(&self) -> bool {
+        self.opts.m == 3
+            && self.opts.strategy == DecompositionStrategy::PairTable
+            && self.fast.is_some()
+            && self.pair_table().is_some()
+    }
+
+    /// The scan a unit runs when `points` names the summands worth
+    /// scanning: a window over exactly those.
+    ///
+    /// `None` when there is nothing to aim at — no points named, the
+    /// walked path unavailable, or no window asked for.  Naming *every*
+    /// point is not a special case: the subset is then the whole base
+    /// and the scan is the cyclic sweep, point for point.
+    fn aimed(&self, points: &[u32]) -> Option<Targets> {
+        let window = self.window()?;
+        if points.is_empty() {
+            return None;
+        }
+        // Sorted and deduplicated, so the subset is in base index order
+        // and a window over it rotates the way the sweep's does.
+        let mut idxs: Vec<u32> = points
+            .iter()
+            .copied()
+            .filter(|&i| (i as usize) < self.fb.points.len())
+            .collect();
+        idxs.sort_unstable();
+        idxs.dedup();
+        if idxs.is_empty() {
+            return None;
+        }
+        let len = idxs.len();
+        // A window wider than what is left to scan is that whole set;
+        // the counter follows, so a shrinking target set makes each
+        // trial cheaper rather than making it scan a column twice.
+        let window = window.min(len);
+        let mut doubled = Vec::with_capacity(len + window);
+        doubled.extend_from_slice(&idxs);
+        doubled.extend_from_slice(&idxs[..window]);
+        Some(Targets::Subset { doubled, len, window })
+    }
+
     /// Collect the relations of one work unit, trials in parallel,
     /// returned in trial order.
     pub fn collect(&self, unit: RelationWorkUnit) -> (Vec<CollectedRelation>, CollectionReport) {
-        if let Some(window) = self.window() {
-            return self.collect_walked(unit, window);
+        self.collect_aimed(unit, None)
+    }
+
+    /// [`Self::collect`] scanning only `points`, without rebuilding the
+    /// collector.
+    ///
+    /// The collector costs about as much to build as a short unit costs
+    /// to run, so a driver that retargets between units must be able to
+    /// say so per call rather than through the options it was built
+    /// with.  `None` sweeps the whole base, which is what a run with
+    /// nothing to aim at should do.
+    ///
+    /// The caller decides what is worth scanning; [`ColumnCoverage`] is
+    /// the set this thread aims at, the points of the columns a run has
+    /// yet to cover.
+    pub fn collect_aimed(
+        &self,
+        unit: RelationWorkUnit,
+        points: Option<&[u32]>,
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
+        // Aiming takes precedence over sweeping: a run that names the
+        // summands it still needs has said the sweep is what it wants to
+        // stop doing.
+        if let Some(targets) = points.and_then(|c| self.aimed(c)) {
+            return self.collect_walked(unit, targets);
         }
+        if let Some(window) = self.window() {
+            return self.collect_walked(unit, Targets::Window(window));
+        }
+        self.collect_swept(unit)
+    }
+
+    /// [`Self::collect`] without the walked, windowed path: one scalar
+    /// multiplication per probe and a full scan.
+    fn collect_swept(&self, unit: RelationWorkUnit) -> (Vec<CollectedRelation>, CollectionReport) {
         let begin = std::time::Instant::now();
         let g = self.kc.generator();
         let end = unit.start.saturating_add(unit.count);
@@ -7362,8 +7757,9 @@ impl<'a> RelationCollector<'a> {
     fn collect_walked(
         &self,
         unit: RelationWorkUnit,
-        window: usize,
+        targets: Targets,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
+        let window = targets.len();
         let begin = std::time::Instant::now();
         let end = unit.start.saturating_add(unit.count);
         if end == unit.start {
@@ -7393,15 +7789,18 @@ impl<'a> RelationCollector<'a> {
                 let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
                 let mut point = fc.mul_u64(*g_fast, a);
                 let mut found = Vec::new();
+                // Reused across the run's trials, so the scan's four
+                // buffers are allocated once per run rather than once
+                // per probe.
+                let mut scratch = ScanScratch::default();
                 for t in run_start..run_end {
                     if !point.infinity && a != 0 {
                         // A rotating offset, so no column is favoured by
                         // sitting where the window always starts.
-                        let offset =
-                            pair_filter_hash(unit.seed ^ t.wrapping_mul(0x9e37_79b9_7f4a_7c15))
-                                as usize
-                                % base;
-                        if let Some(points) = pair.decompose_fast_window(point, 3, offset, window) {
+                        let scan = targets.scan(unit.seed, t, base);
+                        if let Some(points) =
+                            pair.decompose_fast_scan(point, 3, scan, &mut scratch)
+                        {
                             found.push(CollectedRelation {
                                 trial: t,
                                 a,
@@ -10597,6 +10996,190 @@ mod tests {
             checked, 5,
             "a degree this test relies on stopped being available"
         );
+    }
+
+    /// A cyclic window and the same indices named outright are the same
+    /// scan, so they must return the same witnesses.  This is the
+    /// cross-check §6 asks for when a new oracle replaces one that
+    /// already works: not a spot check, every target of a full sweep.
+    #[test]
+    fn naming_a_window_s_indices_finds_what_the_window_finds() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let base = fb.points.len();
+        let len = base / 8;
+        let mut gather = Vec::new();
+        let mut compared = 0;
+        for t in 1u64..400 {
+            let target = fc.mul_u64(fc.lift(kc.generator()), t);
+            for start in [0usize, 7, base / 3, base - len / 2] {
+                let idxs: Vec<u32> =
+                    (0..len).map(|o| ((start + o) % base) as u32).collect();
+                let mut from_window = Vec::new();
+                pair.witnesses_fast_window(target, 3, start, len, &mut |w| {
+                    from_window.push(w.to_vec());
+                    true
+                });
+                let mut from_indices = Vec::new();
+                pair.witnesses_fast_scan(
+                    target,
+                    3,
+                    Scan::Indices(&idxs),
+                    &mut gather,
+                    &mut |w| {
+                        from_indices.push(w.to_vec());
+                        true
+                    },
+                );
+                from_window.sort();
+                from_indices.sort();
+                assert_eq!(
+                    from_window, from_indices,
+                    "scan shapes disagree at t = {t}, start = {start}"
+                );
+                compared += 1;
+            }
+        }
+        assert!(compared >= 1500, "the sweep shrank: {compared} comparisons");
+    }
+
+    /// The whole point of an index scan: every witness it returns has
+    /// its third summand inside the set it was given.  Without this a
+    /// targeted scan would not guarantee coverage, and the relation
+    /// count would not fall.
+    #[test]
+    fn an_index_scan_s_third_summand_is_always_one_it_was_given() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        // A scattered set, deliberately not a contiguous range.
+        let idxs: Vec<u32> = (0..fb.points.len() as u32).filter(|i| i % 7 == 3).collect();
+        let wanted: std::collections::BTreeSet<u32> = idxs.iter().copied().collect();
+        let mut gather = Vec::new();
+        let mut seen = 0;
+        for t in 1u64..600 {
+            let target = fc.mul_u64(fc.lift(kc.generator()), t);
+            pair.witnesses_fast_scan(target, 3, Scan::Indices(&idxs), &mut gather, &mut |w| {
+                assert_eq!(w.len(), 3);
+                assert!(
+                    wanted.contains(&(w[2] as u32)),
+                    "third summand {} was not in the scan",
+                    w[2]
+                );
+                seen += 1;
+                true
+            });
+        }
+        assert!(seen > 0, "the scan found nothing to check");
+    }
+
+    /// Aiming must not cost correctness: every relation an aimed unit
+    /// banks has to verify in the group exactly as a swept one does.
+    #[test]
+    fn an_aimed_unit_s_relations_still_verify_in_the_group() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let mut cov = ColumnCoverage::new(&kc, &fb).unwrap();
+        // This base has 16 columns and is dense enough that a trial
+        // yields a relation; 16 trials leave two columns uncovered and
+        // 32 leave none, so the seeding unit has to be this short.
+        let unit = RelationWorkUnit { seed: 11, start: 0, count: 16 };
+        let (swept, _) = collector.collect_aimed(unit, None);
+        cov.add(&swept);
+        assert!(cov.covered() > 0, "the sweep covered nothing to aim past");
+        assert!(!cov.complete(), "nothing left to aim at: shorten the sweep");
+
+        let missing = cov.missing_points();
+        let aimed_unit = RelationWorkUnit { seed: 11, start: 16, count: 4096 };
+        let (aimed, report) = collector.collect_aimed(aimed_unit, Some(&missing));
+        assert!(!aimed.is_empty(), "the aimed unit found nothing to check");
+        for rel in &aimed {
+            assert!(
+                verify_collected_relation(&kc, &fb, opts.m, rel),
+                "an aimed relation does not sum to its probe"
+            );
+        }
+        assert_eq!(
+            report.summands_scanned,
+            report.trials as u64 * opts.collection_window.unwrap().min(missing.len()) as u64,
+            "an aimed unit must report the summands it actually scanned"
+        );
+    }
+
+    /// And the point of it: every relation an aimed unit banks covers a
+    /// column that was missing.  This is the whole mechanism — if it
+    /// fails, aiming cannot reduce the relation count.
+    #[test]
+    fn every_aimed_relation_covers_a_column_that_was_missing() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let mut cov = ColumnCoverage::new(&kc, &fb).unwrap();
+        let (swept, _) = collector.collect_aimed(
+            RelationWorkUnit { seed: 11, start: 0, count: 16 },
+            None,
+        );
+        cov.add(&swept);
+        assert!(!cov.complete(), "nothing left to aim at: shorten the sweep");
+
+        // The columns still missing, as a set, before the aimed unit.
+        let missing = cov.missing_points();
+        let wanted: std::collections::BTreeSet<u32> = missing.iter().copied().collect();
+        let (aimed, _) = collector.collect_aimed(
+            RelationWorkUnit { seed: 11, start: 16, count: 8192 },
+            Some(&missing),
+        );
+        assert!(!aimed.is_empty(), "the aimed unit found nothing to check");
+        for rel in &aimed {
+            assert!(
+                rel.points.iter().any(|&i| wanted.contains(&(i as u32))),
+                "an aimed relation mentions no missing column: {:?}",
+                rel.points
+            );
+        }
+        // And it converts: the aimed unit must move coverage.
+        let before = cov.covered();
+        cov.add(&aimed);
+        assert!(
+            cov.covered() > before,
+            "aiming banked {} relations and covered nothing new",
+            aimed.len()
+        );
+    }
+
+    /// Aiming at every column is the sweep, so the two must agree
+    /// relation for relation.  Without this, turning aiming on would
+    /// change a run's first unit and the comparison with a swept run
+    /// would not be controlled.
+    #[test]
+    fn aiming_at_every_column_is_the_sweep() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let all: Vec<u32> = (0..fb.points.len() as u32).collect();
+        let unit = RelationWorkUnit { seed: 7, start: 0, count: 8192 };
+        let (swept, swept_report) = collector.collect_aimed(unit, None);
+        let (aimed, aimed_report) = collector.collect_aimed(unit, Some(&all));
+        assert!(!swept.is_empty(), "the sweep found nothing to compare");
+        assert_eq!(swept.len(), aimed.len(), "relation counts differ");
+        for (a, b) in swept.iter().zip(aimed.iter()) {
+            assert_eq!((a.trial, a.a), (b.trial, b.a), "different probes");
+            let (mut x, mut y) = (a.points.clone(), b.points.clone());
+            x.sort();
+            y.sort();
+            assert_eq!(x, y, "different summands at trial {}", a.trial);
+        }
+        assert_eq!(swept_report.summands_scanned, aimed_report.summands_scanned);
     }
 
     #[test]
