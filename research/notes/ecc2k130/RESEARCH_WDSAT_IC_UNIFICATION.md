@@ -89,9 +89,60 @@ opt-in. Monica is kept as a capacity extension, not as an in-cap speedup.
 Cubic chained (`m ≥ 3`) Semaev systems are refused; those stay on SAT /
 WDSat.
 
+### mq-fes in the full pipeline: packed, bilinear oracle (2026-09-22)
+
+Evidence, raw runs and reproduction: [`research/mq_fes_ic_pipeline_20260922/`](../../mq_fes_ic_pipeline_20260922/README.md).
+Boundaries are the ones above (free-oracle floor; rho), plus the
+pipeline's own `m = 2` oracles `enumerate` and `pair-table` as measured
+references on the same instances.
+
+Pricing the oracle inside `ic run` showed the earlier Gray work had
+optimised the smaller cost. At `n = 23` a call spent 2.1 ms rebuilding
+the Weil-restricted `S₃` system symbolically and 1.3 ms walking all
+`2^{2ℓ}` assignments. The new default oracle
+(`src/cryptanalysis/mq_fes_semaev.rs`) changes three things:
+
+- **Packed template.** The system is affine in the target's bits, so it
+  is stored once per factor base as bit-sliced words, and a call costs
+  at most `n` table XORs.
+- **Bilinear split.** With `s = a ⊕ b`, the only quadratic monomials are
+  `aᵢsⱼ`. So each Gray-enumerated `a` leaves a linear system in `s`,
+  which is eliminated in eight branch-free lanes (AVX2 when available).
+  The walk drops from `2·4^ℓ` word ops to `2^ℓ(ℓ²/2 + 5ℓ/2 + 1)`.
+- **Lift on the fly.** Roots are lifted as they are reached, with no
+  64-root cap.
+
+The previous oracle is kept as `mq_fes_decompose_reference` and
+cross-checked on every target of a sweep.
+
+| variant (matched full DLP, cold) | n=17 holdout | n=23 a=0 holdout | n=23 a=1 holdout | class |
+|:--|--:|--:|--:|:--|
+| mq-fes reference (baseline) | 1.00 | 1.00 | 1.00 | reference |
+| + packed template, swap-symmetric walk | 4.40 [3.41, 5.68] | 4.49 [3.96, 5.09] | 4.97 [4.72, 5.23] | engineering |
+| + bilinear split, 8 lanes | 4.53 [3.40, 6.04] | 13.05 [11.51, 14.81] | 13.95 [11.99, 16.24] | engineering |
+| ref `enumerate` | 0.75 [0.68, 0.82] | 0.27 [0.26, 0.29] | 0.26 [0.23, 0.29] | reference |
+| ref `pair-table` | 5.32 [3.97, 7.15] | 3.06 [2.50, 3.74] | 2.95 [2.28, 3.83] | reference |
+
+Cells are baseline ÷ variant, cold end-to-end wall time, as a paired
+geometric mean with a 95% interval over 8 holdout seeds (training seeds
+agree; `n = 13` is in the round README). All 960 runs verified. `S`, the
+rho ratio and the floor ratio are null: only the oracle stage has an
+operation counter, and the other phases have no conversion into it.
+
+The frozen WDSat suite cannot run an in-process oracle, as the README
+explains. The stage fit over seven `n ≥ 2ℓ` sizes gives word-op slopes
+of 2.000 for the baseline and 1.014 for the split once its polynomial
+factor is divided out, matching the predictions.
+
+At `n = 23` the split beats `pair-table`, the fastest pre-existing
+oracle, by 3.9–4.7×. At `n = 17` it loses to it (0.85×). The round is
+**engineering**: the oracle's exponent in `ℓ` fell and the floor did
+not move. The next round's falsification target is stated in the round
+README.
+
 ```text
 WDSAT_BINARY=/path/to/wdsat_solver cargo test --lib \
-  wdsat_agrees_with_native_sat_on_prime_degree -- --ignored
+    wdsat_agrees_with_native_sat_on_prime_degree -- --ignored
 ```
 
 Build the pinned WDSat binary with the baseline pilot:
@@ -124,6 +175,12 @@ Monica extends past the Möbius `n ≤ 24` table rather than beating it
 inside the cap. An AVX2 4×u64 port of libfes `avx2_8x32` ideas is
 correct but **slower** than packed-u64 scalar `L=4` on single-system
 instances, so it stays opt-in. Parallel outer specialisation and
-hardcoded `L=8` / batch probe likewise stay opt-in. Full-size
-ECC2K-130 index calculus remains above rho for every oracle this
-repository has priced.
+hardcoded `L=8` / batch probe likewise stay opt-in.
+
+In the full pipeline, the packed bilinear-split oracle makes
+`ic run --solver mq-fes` 13–15× faster end to end at `n = 23` than the
+previous oracle, and 3.9–4.7× faster than `pair-table` there. It is
+slower than `pair-table` at `n = 17`. The oracle's cost falls from
+`4^ℓ` to `2^ℓ·ℓ²`, the free-oracle floor is untouched, and `S` is
+unmeasured. Full-size ECC2K-130 index calculus remains above rho for
+every oracle this repository has priced.

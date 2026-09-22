@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "source": "results/oracle_scaling_01/raw.jsonl",
+  "regime": "n >= 2*ell (overdetermined; refutations pay the full enumeration)",
+  "fits": {
+    "baseline": {
+      "sizes": [
+        3,
+        4,
+        5,
+        8,
+        11,
+        12,
+        14
+      ],
+      "word_ops_slope": 2.0,
+      "wall_slope": 1.0313898516643047
+    },
+    "mqfes-linear": {
+      "sizes": [
+        3,
+        4,
+        5,
+        8,
+        11,
+        12,
+        14
+      ],
+      "word_ops_slope": 1.3158073759640256,
+      "wall_slope": 0.8336249139768592,
+      "word_ops_slope_poly_removed": 1.0139819666013545
+    }
+  },
+  "prediction": {
+    "baseline": "2 * 4^ell word ops (slope 2)",
+    "mqfes-linear": "2^ell * (ell(ell-1)/2 + 3 ell + 1) word ops (slope 1 after the polynomial)"
+  },
+  "per_call_wall_ratio_at_ell_ge_11": [
+    {
+      "degree": 23,
+      "ell": 11,
+      "ratio": 31.30158424304068
+    },
+    {
+      "degree": 39,
+      "ell": 12,
+      "ratio": 84.9942077695799
+    },
+    {
+      "degree": 43,
+      "ell": 14,
+      "ratio": 141.1211378475707
+    },
+    {
+      "degree": 45,
+      "ell": 12,
+      "ratio": 115.43487970452496
+    }
+  ]
+}
