@@ -802,7 +802,12 @@ pub fn points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
 /// Single-word version of `points_with_x` for an odd-degree field.
 /// Reuse the field reduction tables across all coordinates of a factor base.
 /// The same half-trace root is returned first, preserving sampling and indexing.
-fn points_with_x_fast(curve: &FastCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+///
+/// Public so that the cost of a lift can be priced on its own: it is the
+/// one piece of algebra selecting a factor base cannot avoid, and
+/// therefore the floor everything else in that phase is measured
+/// against (`examples/koblitz_select_decomposition.rs`).
+pub fn points_with_x_fast(curve: &FastCurve, x: &F2mElement) -> Vec<BinaryPoint> {
     debug_assert!(curve.n % 2 == 1);
     let field = &curve.field;
     let coordinate = field.from_element(x);
@@ -1989,30 +1994,87 @@ pub fn saturate_factor_base_two_torsion(
     )
 }
 
-fn finish_factor_base_domain(
+/// The orbit maps a factor base needs: `(orbit_of, orbits,
+/// signed_orbit_of, signed_orbits)`.
+type OrbitMaps = (Vec<(usize, u32)>, Vec<Vec<usize>>, Vec<(usize, u32, bool)>, Vec<Vec<usize>>);
+
+/// Walk the Frobenius and signed-Frobenius orbits of `points`, keying on
+/// the packed single-word point.
+///
+/// Identical in output to [`orbit_maps_bigint`] and the reason selecting
+/// a base stopped costing 13 times its floor; see the table in
+/// [`finish_factor_base_domain`].
+fn orbit_maps_packed(
     kc: &KoblitzCurve,
-    ell: u32,
-    f_j: u64,
-    exps: Vec<u32>,
-    subspace_basis: Vec<F2mElement>,
-    subspace: Vec<F2mElement>,
-    domain: FactorBaseDomain,
-) -> Option<FrobeniusFactorBase> {
-    let mut points: Vec<BinaryPoint> = Vec::new();
-    let fast = if kc.n % 2 == 1 {
-        FastCurve::new(&kc.curve)
-    } else {
-        None
-    };
-    for x in &subspace {
-        let lifts = match &fast {
-            Some(curve) => points_with_x_fast(curve, x),
-            None => points_with_x(&kc.curve, x),
-        };
-        points.extend(lifts);
+    curve: &FastCurve,
+    points: &[BinaryPoint],
+) -> Option<OrbitMaps> {
+    let fast: Vec<FastPoint> = points.iter().map(|p| curve.lift(p)).collect();
+    let mut index_of: HashMap<u64, usize> = HashMap::with_capacity(points.len() * 2);
+    for (i, p) in fast.iter().enumerate() {
+        index_of.insert(p.pack(), i);
     }
 
-    // Index points for the orbit walk and for relation lookups.
+    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
+    let mut orbits: Vec<Vec<usize>> = Vec::new();
+    for start in 0..points.len() {
+        if orbit_of[start].0 != usize::MAX {
+            continue;
+        }
+        let o = orbits.len();
+        let mut cycle = Vec::new();
+        let mut cur = fast[start];
+        let mut k = 0u32;
+        loop {
+            let idx = *index_of.get(&cur.pack())?;
+            if orbit_of[idx].0 != usize::MAX {
+                break;
+            }
+            orbit_of[idx] = (o, k);
+            cycle.push(idx);
+            cur = curve.frobenius_k(cur, kc.k);
+            k += 1;
+        }
+        orbits.push(cycle);
+    }
+
+    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
+    let mut signed_orbits = Vec::new();
+    for start in 0..points.len() {
+        if signed_orbit_of[start].0 != usize::MAX {
+            continue;
+        }
+        let signed_orbit = signed_orbits.len();
+        let mut members = Vec::new();
+        let mut current = fast[start];
+        for k in 0..kc.n {
+            for (negated, point) in [(false, current), (true, curve.neg(current))] {
+                let index = *index_of.get(&point.pack())?;
+                if signed_orbit_of[index].0 == usize::MAX {
+                    signed_orbit_of[index] = (signed_orbit, k, negated);
+                    members.push(index);
+                } else if signed_orbit_of[index].0 != signed_orbit {
+                    return None;
+                }
+            }
+            current = curve.frobenius_k(current, kc.k);
+        }
+        if current != fast[start] {
+            return None;
+        }
+        signed_orbits.push(members);
+    }
+    Some((orbit_of, orbits, signed_orbit_of, signed_orbits))
+}
+
+/// [`orbit_maps_packed`] for a field too wide, or of the wrong parity,
+/// for single-word arithmetic: the same walks over `BigUint`-backed
+/// points.
+///
+/// Kept because a `FastCurve` exists only for odd degrees; this is the
+/// path an even-degree base still takes, and the reference the packed
+/// walk is checked against.
+fn orbit_maps_bigint(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Option<OrbitMaps> {
     let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
     for (i, p) in points.iter().enumerate() {
         index_of.insert(point_key(p), i);
@@ -2067,6 +2129,62 @@ fn finish_factor_base_domain(
         }
         signed_orbits.push(members);
     }
+    Some((orbit_of, orbits, signed_orbit_of, signed_orbits))
+}
+
+fn finish_factor_base_domain(
+    kc: &KoblitzCurve,
+    ell: u32,
+    f_j: u64,
+    exps: Vec<u32>,
+    subspace_basis: Vec<F2mElement>,
+    subspace: Vec<F2mElement>,
+    domain: FactorBaseDomain,
+) -> Option<FrobeniusFactorBase> {
+    let mut points: Vec<BinaryPoint> = Vec::new();
+    let fast = if kc.n % 2 == 1 {
+        FastCurve::new(&kc.curve)
+    } else {
+        None
+    };
+    for x in &subspace {
+        let lifts = match &fast {
+            Some(curve) => points_with_x_fast(curve, x),
+            None => points_with_x(&kc.curve, x),
+        };
+        points.extend(lifts);
+    }
+
+    // Index points for the orbit walk and for relation lookups, and walk
+    // both orbit structures.
+    //
+    // Two implementations of the same three loops, and the fast one is
+    // not an optimisation of the slow one so much as the slow one
+    // finally using the representation the rest of the pipeline already
+    // does.  Measured at `n = 41` on a 15,744-point base, in
+    // group-addition equivalents per point
+    // (`examples/koblitz_select_decomposition.rs`):
+    //
+    // | step | `BigUint` | packed |
+    // |:--|--:|--:|
+    // | both orbit walks | 41.60 | 0.40 |
+    // | keying, three times over | 4.33 | 0.02 |
+    //
+    // which is 57% of what selecting a base cost, against a floor of
+    // 6.21 for the field algebra a point cannot avoid.  A `BinaryPoint`
+    // carries two `BigUint`s, so a key is two allocations and a
+    // two-`BigUint` hash, and a Frobenius step is two `BigUint`
+    // squarings; packed, a point is one `u64` and the step is two
+    // table-driven squarings.
+    //
+    // The two paths agree by construction: same iteration order, same
+    // decisions, same output, only the identity and the step change
+    // representation.  `factor_base_orbit_maps_agree_in_both_representations`
+    // pins that on every usable degree.
+    let (orbit_of, orbits, signed_orbit_of, signed_orbits) = match &fast {
+        Some(curve) => orbit_maps_packed(kc, curve, &points)?,
+        None => orbit_maps_bigint(kc, &points)?,
+    };
     if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
         return None;
     }
@@ -11002,6 +11120,49 @@ mod tests {
     /// scan, so they must return the same witnesses.  This is the
     /// cross-check §6 asks for when a new oracle replaces one that
     /// already works: not a spot check, every target of a full sweep.
+    /// The packed orbit walk and the `BigUint` one must produce the same
+    /// maps, field for field.
+    ///
+    /// This is the control for the whole selection round: the change is a
+    /// change of representation, so if the maps agree then every
+    /// downstream counter of every run is unchanged by construction and
+    /// the only thing the round moved is the time selection takes. If
+    /// they ever disagree, the measured gain is meaningless and the base
+    /// is wrong, in that order of importance.
+    #[test]
+    fn factor_base_orbit_maps_agree_in_both_representations() {
+        let mut checked = 0;
+        for degree in [19u32, 23, 29, 31, 37, 41] {
+            let Some(kc) = KoblitzCurve::new(0, degree) else { continue };
+            let Some(curve) = FastCurve::new(&kc.curve) else { continue };
+            for points in [200usize, 600, 1500] {
+                let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 7, points) else { continue };
+                let packed = orbit_maps_packed(&kc, &curve, &fb.points)
+                    .expect("packed walk");
+                let bigint = orbit_maps_bigint(&kc, &fb.points).expect("bigint walk");
+                assert_eq!(packed.0, bigint.0, "orbit_of at degree {degree}, {points} points");
+                assert_eq!(packed.1, bigint.1, "orbits at degree {degree}, {points} points");
+                assert_eq!(
+                    packed.2, bigint.2,
+                    "signed_orbit_of at degree {degree}, {points} points"
+                );
+                assert_eq!(
+                    packed.3, bigint.3,
+                    "signed_orbits at degree {degree}, {points} points"
+                );
+                // And the maps the base actually shipped with are the
+                // packed ones, since an odd degree takes that path.
+                assert_eq!(fb.orbit_of, packed.0, "the base did not use the packed walk");
+                assert_eq!(fb.signed_orbit_of, packed.2);
+                checked += 1;
+            }
+        }
+        assert!(
+            checked >= 12,
+            "the sweep shrank to {checked} cases: a degree this test relies on stopped being available"
+        );
+    }
+
     #[test]
     fn naming_a_window_s_indices_finds_what_the_window_finds() {
         let kc = KoblitzCurve::new(0, 19).unwrap();
