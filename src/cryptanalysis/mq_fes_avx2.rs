@@ -323,7 +323,7 @@ fn specialize_lane(
 mod tests {
     use super::*;
     use crate::cryptanalysis::mq_fes::{
-        fill_fq_fl, gray_ffs_unrolled_l4, gray_ffs_unrolled_l8, gray_ffs_unrolled_l8_batch,
+        fill_fq_fl, gray_ffs_unrolled_l4, gray_ffs_unrolled_l4_batch, gray_ffs_unrolled_l8_batch,
         moebius_find_all, QuadraticForm,
     };
     use crate::cryptanalysis::wdsat_oracle::AnfRow;
@@ -458,42 +458,10 @@ mod tests {
     }
 
     #[test]
-    fn l8_beats_l4_full_enum_wall() {
-        let forms = dense_forms(16, 24);
-        let mut fq = [0u64; 561];
-        let mut fl = [0u64; 34];
-        fill_fq_fl(&forms, 16, &mut fq, &mut fl);
-        let mut a = Vec::new();
-        let t0 = std::time::Instant::now();
-        gray_ffs_unrolled_l8(&mut fq, &mut fl, 16, usize::MAX, &mut a);
-        let l8_ns = t0.elapsed().as_nanos();
-
-        fill_fq_fl(&forms, 16, &mut fq, &mut fl);
-        let mut b = Vec::new();
-        let t1 = std::time::Instant::now();
-        gray_ffs_unrolled_l4(&mut fq, &mut fl, 16, usize::MAX, &mut b);
-        let l4_ns = t1.elapsed().as_nanos();
-        a.sort_unstable();
-        b.sort_unstable();
-        assert_eq!(a, b);
-        let ratio = l4_ns as f64 / l8_ns.max(1) as f64;
-        eprintln!(
-            "l8_vs_l4 n=16 m=24 full_enum: l8={l8_ns}ns l4={l4_ns}ns ratio={ratio:.2} sols={}",
-            a.len()
-        );
-        // Soft expectation: L=8 should not regress badly; document the ratio.
-        assert!(
-            ratio >= 0.85,
-            "L=8 unexpectedly slower than L=4 ({ratio:.3}×); investigate"
-        );
-    }
-
-    #[test]
-    fn avx2_batch_vs_scalar_l8_sparse_wall() {
+    fn avx2_batch_vs_l4_batch_sparse_wall() {
         if !is_x86_feature_detected!("avx2") {
             return;
         }
-        // m ≈ n → few solutions → batch probe pays.
         let forms = sparse_forms(16, 24);
         let t0 = std::time::Instant::now();
         let mut a = gray_ffs_avx2_8x32_batch(&forms, usize::MAX).expect("avx2 batch");
@@ -504,16 +472,43 @@ mod tests {
         fill_fq_fl(&forms, 16, &mut fq, &mut fl);
         let mut b = Vec::new();
         let t1 = std::time::Instant::now();
-        gray_ffs_unrolled_l8_batch(&mut fq, &mut fl, 16, usize::MAX, &mut b);
-        let l8_ns = t1.elapsed().as_nanos();
+        gray_ffs_unrolled_l4_batch(&mut fq, &mut fl, 16, usize::MAX, &mut b);
+        let l4_ns = t1.elapsed().as_nanos();
         a.sort_unstable();
         b.sort_unstable();
         assert_eq!(a, b);
-        let ratio = l8_ns as f64 / avx_ns.max(1) as f64;
+        let ratio = l4_ns as f64 / avx_ns.max(1) as f64;
         eprintln!(
-            "avx2_batch_vs_l8_batch n=16 m=24 sparse: avx2={avx_ns}ns l8={l8_ns}ns ratio={ratio:.2} sols={}",
+            "avx2_batch_vs_l4_batch n=16 m=24 sparse: avx2={avx_ns}ns l4_batch={l4_ns}ns ratio={ratio:.2} sols={}",
             a.len()
         );
-        // Document; do not hard-fail if AVX2 still loses — heuristic can disable it.
+        // Soft document; heuristic gates auto-select. Do not require a win.
+    }
+
+    #[test]
+    fn avx2_batch_vs_l4_batch_unsat_wall() {
+        if !is_x86_feature_detected!("avx2") {
+            return;
+        }
+        let forms = dense_forms(16, 24); // historically 0 solutions
+        let t0 = std::time::Instant::now();
+        let mut a = gray_ffs_avx2_8x32_batch(&forms, usize::MAX).expect("avx2 batch");
+        let avx_ns = t0.elapsed().as_nanos();
+
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, 16, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4_batch(&mut fq, &mut fl, 16, usize::MAX, &mut b);
+        let l4_ns = t1.elapsed().as_nanos();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+        let ratio = l4_ns as f64 / avx_ns.max(1) as f64;
+        eprintln!(
+            "avx2_batch_vs_l4_batch n=16 m=24 unsat: avx2={avx_ns}ns l4_batch={l4_ns}ns ratio={ratio:.2} sols={}",
+            a.len()
+        );
     }
 }

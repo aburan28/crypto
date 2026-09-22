@@ -272,17 +272,15 @@ impl Ffs {
 /// ```
 ///
 /// so the hot loop no longer walks all `n` derivatives.  Dispatch:
-/// - `n ≥ 8`: scalar `L = 8` (256-step) chunk; full enum uses libfes-style
-///   **batch probe then harvest** (skip per-step recording until a chunk may
-///   contain a zero).  Early-exit `max_solutions == 1` checks every step.
-/// - `n ≥ 4`: scalar `L = 4` (16-step) fallback.
+/// - `n ≥ 4`: scalar `L = 4` (16-step) chunk.  Full enum (`max_solutions > 1`)
+///   uses libfes-style **batch probe then harvest** (record only when a chunk
+///   may contain a zero).  Early-exit `find_one` checks every step.
 /// - else: minimal one-step FFS.
 ///
-/// When AVX2 is available and `n ≥ 10`, the 4×u64 batch-probe path in
-/// [`crate::cryptanalysis::mq_fes_avx2`] is tried for full enumeration and
-/// kept only when it beats scalar `L = 8` on that call's size class (see
-/// [`prefer_avx2_batch`]).  Inspired by
-/// <https://github.com/cbouilla/libfes-lite>
+/// Scalar `L = 8` and AVX2 4×u64 batch remain available for explicit callers /
+/// experiments (`gray_ffs_unrolled_l8*`, `mq_fes_avx2`).  AVX2 batch is
+/// auto-selected for sparse full enums when [`prefer_avx2_batch`] says so.
+/// Inspired by <https://github.com/cbouilla/libfes-lite>
 /// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`, batch asm) and
 /// ALMASTY `ffs.h`.
 pub fn gray_incremental_find_all(
@@ -315,14 +313,12 @@ pub fn gray_incremental_find_all(
     fill_fq_fl(forms, n, &mut fq, &mut fl);
 
     let mut out = Vec::new();
-    if n >= 8 {
+    if n >= 4 {
         if max_solutions == 1 {
-            gray_ffs_unrolled_l8(&mut fq, &mut fl, n, max_solutions, &mut out);
+            gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
         } else {
-            gray_ffs_unrolled_l8_batch(&mut fq, &mut fl, n, max_solutions, &mut out);
+            gray_ffs_unrolled_l4_batch(&mut fq, &mut fl, n, max_solutions, &mut out);
         }
-    } else if n >= 4 {
-        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
     } else {
         gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
     }
@@ -364,16 +360,16 @@ pub(crate) fn fill_fq_fl(
     fq[idxq(n, n + 1)] = 0;
 }
 
-/// Heuristic: AVX2 batch-probe wins on sparse full enums at moderate `n`.
-/// Tuned from release walls on this host; still an engineering lever only.
+/// Heuristic: AVX2 batch-probe vs scalar `L=4` batch on this host.
+/// Tuned from release walls; engineering lever only (floor unchanged).
 #[inline]
 pub fn prefer_avx2_batch(n: usize, m: usize, max_solutions: usize) -> bool {
     // Early-exit find_one stays on scalar (cheaper per-step + no rewind).
     if max_solutions <= 1 {
         return false;
     }
-    // Need room for OUTER(2)+UNROLL(8); sparse-ish systems (m ≈ n or denser).
-    n >= 12 && n <= 24 && m >= 8 && m <= 64
+    // Prefer AVX2 when n is large enough that 4-lane specialisation amortises.
+    n >= 14 && n <= 24 && m >= 16 && m <= 64
 }
 
 /// libfes `generic_minimal`: one FFS step per point.
@@ -442,6 +438,99 @@ pub(crate) fn gray_ffs_unrolled_l4(
         let gamma = idxq(k1 as usize, k2 as usize);
         let base = j << L;
         // Hard-coded 16-step Gray chunk (libfes UNROLLED_CHUNK).
+        if step2(fq, fl, 1, alpha, base, out, max_solutions)
+            || step2(fq, fl, 2, alpha + 1, base + 1, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 2, out, max_solutions)
+            || step2(fq, fl, 3, alpha + 2, base + 3, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 4, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 5, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 6, out, max_solutions)
+            || step2(fq, fl, 4, alpha + 3, base + 7, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 8, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 9, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 10, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 11, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 12, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 13, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 14, out, max_solutions)
+            || step2(fq, fl, beta, gamma, base + 15, out, max_solutions)
+        {
+            return;
+        }
+    }
+}
+
+#[inline(always)]
+fn step2_update(fq: &[u64; 561], fl: &mut [u64; 34], a: usize, b: usize) {
+    fl[a] ^= fq[b];
+    fl[0] ^= fl[a];
+}
+
+/// `L = 4` batch probe: update without recording; on a hit, rewind and harvest.
+///
+/// Wins on sparse / unsat full enums (most chunks have `Fl[0] ≠ 0` the whole
+/// way) by dropping per-step solution branches from the common path.
+pub(crate) fn gray_ffs_unrolled_l4_batch(
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    const L: usize = 4;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+
+        let fl_save = *fl;
+        let mut hit = false;
+        // Probe the 16-step chunk (same order as UNROLLED_CHUNK).
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, alpha);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 2, alpha + 1);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 0);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 3, alpha + 2);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 1);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 2, 2);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 0);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 4, alpha + 3);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 3);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 2, 4);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 0);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 3, 5);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 1);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 2, 2);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, 1, 0);
+        hit |= fl[0] == 0;
+        step2_update(fq, fl, beta, gamma);
+
+        if !hit {
+            continue;
+        }
+        *fl = fl_save;
         if step2(fq, fl, 1, alpha, base, out, max_solutions)
             || step2(fq, fl, 2, alpha + 1, base + 1, out, max_solutions)
             || step2(fq, fl, 1, 0, base + 2, out, max_solutions)
@@ -878,6 +967,103 @@ mod tests {
         c.sort_unstable();
         assert_eq!(a, b);
         assert_eq!(a, c);
+    }
+
+    #[test]
+    fn l8_and_l8_batch_agree_with_l4() {
+        let n = 12usize;
+        let m = 16usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut l4 = Vec::new();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut l4);
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut l4b = Vec::new();
+        gray_ffs_unrolled_l4_batch(&mut fq, &mut fl, n, usize::MAX, &mut l4b);
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut l8 = Vec::new();
+        gray_ffs_unrolled_l8(&mut fq, &mut fl, n, usize::MAX, &mut l8);
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut batch = Vec::new();
+        gray_ffs_unrolled_l8_batch(&mut fq, &mut fl, n, usize::MAX, &mut batch);
+
+        l4.sort_unstable();
+        l4b.sort_unstable();
+        l8.sort_unstable();
+        batch.sort_unstable();
+        assert_eq!(l4, l4b);
+        assert_eq!(l4, l8);
+        assert_eq!(l4, batch);
+    }
+
+    #[test]
+    fn l4_batch_beats_l4_unsat_wall() {
+        // Unsat full enum: batch drops per-step harvest branches.
+        let n = 18usize;
+        let m = 24usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut a = Vec::new();
+        let t0 = std::time::Instant::now();
+        gray_ffs_unrolled_l4_batch(&mut fq, &mut fl, n, usize::MAX, &mut a);
+        let batch_ns = t0.elapsed().as_nanos();
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut b);
+        let l4_ns = t1.elapsed().as_nanos();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+        let ratio = l4_ns as f64 / batch_ns.max(1) as f64;
+        eprintln!(
+            "l4_batch_vs_l4 n={n} m={m} unsat: batch={batch_ns}ns l4={l4_ns}ns ratio={ratio:.2} sols={}",
+            a.len()
+        );
+        assert!(
+            ratio >= 1.05,
+            "expected L=4 batch ≥1.05× plain L=4 on unsat, got {ratio:.3}"
+        );
     }
 
     #[test]
