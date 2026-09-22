@@ -122,6 +122,9 @@ def main():
     ap.add_argument("--dump", help="write SASS listing here")
     ap.add_argument("--extra", action="append", default=[], help="extra nvcc args")
     ap.add_argument("--ops", action="store_true", help="opcode histogram of the slot loops")
+    ap.add_argument("--slot-updates", type=int, default=1,
+                    help="scalar updates one slot-loop iteration covers: 2 for ECC_PACKED_CHAINS=2 "
+                         "(each iteration advances one slot of each chain) or ECC_UNROLL_SLOTS=2")
     a = ap.parse_args()
     defs = dict(PRESET)
     for d in a.define:
@@ -189,11 +192,13 @@ def main():
     print("\nstep loop %x-%x; slot loops: %s" % (step[0], step[1], ["%x-%x"%l for l in inner]))
     per = Counter()
     for c in cin:
-        for k in ("alu","imad","quarter","clmad","mem","n"): per[k] += c[k]
-    print("\nper scalar update, batch %d (callees attributed to their call sites):" % B)
+        for k in ("alu","imad","quarter","clmad","mem","n"): per[k] += c[k] / a.slot_updates
+    print("\nper scalar update, batch %d (callees attributed to their call sites%s):" % (
+        B, "; slot-loop rows divided by %d updates per iteration" % a.slot_updates if a.slot_updates != 1 else ""))
     print("%-34s %8s %8s %8s %8s %8s %8s" % ("", "n", "alu", "imad", "quarter", "clmad", "mem"))
     for name, c in zip(["slot loop %d"%i for i in range(len(cin))], cin):
-        print("%-34s %8d %8d %8d %8d %8d %8d" % (name, c["n"], c["alu"], c["imad"], c["quarter"], c["clmad"], c["mem"]))
+        print("%-34s %8.1f %8.1f %8.1f %8.1f %8.1f %8.1f" % (name, c["n"]/a.slot_updates, c["alu"]/a.slot_updates,
+              c["imad"]/a.slot_updates, c["quarter"]/a.slot_updates, c["clmad"]/a.slot_updates, c["mem"]/a.slot_updates))
     print("%-34s %8.1f %8.1f %8.1f %8.1f %8.2f %8.1f" % ("inversion + step overhead, /B", rest["n"]/B, rest["alu"]/B, rest["imad"]/B, rest["quarter"]/B, rest["clmad"]/B, rest["mem"]/B))
     tot = {k: per[k] + rest[k]/B for k in ("n","alu","imad","quarter","clmad","mem")}
     print("%-34s %8.1f %8.1f %8.1f %8.1f %8.2f %8.1f" % ("TOTAL per update", tot["n"], tot["alu"], tot["imad"], tot["quarter"], tot["clmad"], tot["mem"]))
