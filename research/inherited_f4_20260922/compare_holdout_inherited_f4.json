@@ -1,0 +1,75 @@
+{
+  "unit": "64-bit word XORs in the Macaulay elimination",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "verdict_digest",
+    "reductions",
+    "infeasible_branches",
+    "propagations",
+    "splits",
+    "oversize",
+    "targets",
+    "decomposed",
+    "f4_calls",
+    "ell",
+    "factor_base_points"
+  ],
+  "repetitions": {
+    "baseline": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_0/2^19",
+      "m": 2,
+      "ell": 18,
+      "targets": 12,
+      "decomposed": 12,
+      "verdict_digest": "68ec64dac8d429669fbeb161f9bfbfe3083fc5a9907127116ec0235e4a13c134",
+      "baseline_word_ops": 116912104,
+      "candidate_word_ops": 73382095,
+      "word_op_ratio": 1.593196596526714,
+      "baseline_wall_ns": 419376998,
+      "candidate_wall_ns": 318089540,
+      "wall_ratio": 1.3184243593800664,
+      "phases_baseline_ns": {
+        "build": 271318131,
+        "reduce": 130169667,
+        "readback": 302764
+      },
+      "phases_candidate_ns": {
+        "build": 296487220,
+        "reduce": 1550577,
+        "readback": 0
+      }
+    },
+    {
+      "curve": "K_1/2^17",
+      "m": 2,
+      "ell": 8,
+      "targets": 24,
+      "decomposed": 10,
+      "verdict_digest": "cf3925c40bceb166e759343051f1a9c6d957f6391e077aae2499d4302e25ef45",
+      "baseline_word_ops": 33578834,
+      "candidate_word_ops": 6460770,
+      "word_op_ratio": 5.197342422033287,
+      "baseline_wall_ns": 490446943,
+      "candidate_wall_ns": 135784134,
+      "wall_ratio": 3.611960606531541,
+      "phases_baseline_ns": {
+        "build": 242038867,
+        "reduce": 216476424,
+        "readback": 7257721
+      },
+      "phases_candidate_ns": {
+        "build": 108957673,
+        "reduce": 2426185,
+        "readback": 0
+      }
+    }
+  ],
+  "total_word_op_ratio": 1.8848389020108434,
+  "total_wall_ratio": 2.0045752664650034,
+  "min_word_op_ratio": 1.593196596526714,
+  "min_wall_ratio": 1.3184243593800664
+}
