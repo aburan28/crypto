@@ -184,17 +184,103 @@ fn masked_multiplier_schedule_matches_the_full_schedule() {
 #[test]
 fn cached_layout_requires_exact_column_support() {
     let columns = vec![3u64, 2, 1, 0];
-    let layout = F4ColumnLayout {
-        index: columns
-            .iter()
-            .enumerate()
-            .map(|(column, &monomial)| (monomial, column))
-            .collect(),
-        columns,
-    };
+    let layout = F4ColumnLayout::new(columns);
     assert!(pack_rows_with_layout(&[vec![3, 0], vec![2, 1]], &layout, true).is_some());
     assert!(pack_rows_with_layout(&[vec![3, 0], vec![2]], &layout, true).is_none());
     assert!(pack_rows_with_layout(&[vec![4]], &layout, true).is_none());
+}
+
+#[test]
+fn fused_flat_packing_matches_materialized_rows() {
+    let n_vars = 8;
+    let polynomials = vec![
+        F2BoolPoly::from_monos(
+            vec![
+                F2BoolMono::from_mask(0b0000_0011),
+                F2BoolMono::from_mask(0b0001_0100),
+                F2BoolMono::var(6),
+                F2BoolMono::one(),
+            ],
+            n_vars,
+        ),
+        F2BoolPoly::from_monos(
+            vec![
+                F2BoolMono::from_mask(0b0010_0100),
+                F2BoolMono::from_mask(0b0100_1000),
+                F2BoolMono::var(1),
+            ],
+            n_vars,
+        ),
+    ];
+    let multiplier_mask = occurring_vars(&polynomials);
+    for degree in [2, 3, 4] {
+        let rows =
+            macaulay_rows_monos_with_mask(&polynomials, n_vars, degree, multiplier_mask, None)
+                .unwrap();
+        let columns = macaulay_columns(&rows).unwrap();
+        let layout = F4ColumnLayout::new(columns);
+        let materialized = pack_rows_flat_with_layout(&rows, &layout, true).unwrap();
+        let fused =
+            pack_polynomials_flat_fused(&polynomials, n_vars, degree, multiplier_mask, &layout)
+                .unwrap();
+        assert_eq!(fused.rows, materialized.rows);
+        assert_eq!(fused.words, materialized.words);
+        assert_eq!(fused.data, materialized.data);
+
+        let mut missing_columns = layout.columns.clone();
+        missing_columns.pop();
+        let missing = F4ColumnLayout::new(missing_columns);
+        assert!(pack_polynomials_flat_fused(
+            &polynomials,
+            n_vars,
+            degree,
+            multiplier_mask,
+            &missing,
+        )
+        .is_none());
+
+        let mut extra_columns = layout.columns.clone();
+        extra_columns.push(1u64 << 63);
+        let extra = F4ColumnLayout::new(extra_columns);
+        assert!(
+            pack_polynomials_flat_fused(&polynomials, n_vars, degree, multiplier_mask, &extra,)
+                .is_none()
+        );
+    }
+}
+
+#[test]
+fn fast_column_index_matches_standard_hashing() {
+    let mut columns = Vec::new();
+    let mut state = 0x9e3779b97f4a7c15u64;
+    for _ in 0..2048 {
+        state = state.wrapping_add(0x9e3779b97f4a7c15);
+        let mut value = state;
+        value = (value ^ (value >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
+        value = (value ^ (value >> 27)).wrapping_mul(0x94d049bb133111eb);
+        columns.push(value ^ (value >> 31));
+    }
+    columns.sort_unstable();
+    columns.dedup();
+    let standard: std::collections::HashMap<u64, usize> = columns
+        .iter()
+        .enumerate()
+        .map(|(column, &monomial)| (monomial, column))
+        .collect();
+    let mut fast = FastColumnMap::with_capacity_and_hasher(
+        columns.len(),
+        std::hash::BuildHasherDefault::default(),
+    );
+    fast.extend(
+        columns
+            .iter()
+            .enumerate()
+            .map(|(column, &monomial)| (monomial, column)),
+    );
+    for monomial in &columns {
+        assert_eq!(fast.get(monomial), standard.get(monomial));
+    }
+    assert_eq!(fast.get(&0xDEADBEEF), standard.get(&0xDEADBEEF));
 }
 
 #[test]

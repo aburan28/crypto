@@ -1638,6 +1638,93 @@ fn pack_rows_flat_with_layout(
     })
 }
 
+fn pack_polynomials_flat_fused(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    layout: &F4ColumnLayout,
+) -> Option<FlatF2Matrix> {
+    let words = layout.columns.len().div_ceil(64);
+    let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
+    let mut gaps = Vec::with_capacity(polys.len());
+    let mut estimated_rows = 0usize;
+    for polynomial in polys {
+        let polynomial_degree = polynomial
+            .terms
+            .iter()
+            .map(|term| term.mask.count_ones())
+            .max()
+            .unwrap_or(0);
+        if polynomial_degree > degree {
+            gaps.push(None);
+            continue;
+        }
+        let gap = (degree - polynomial_degree) as usize;
+        let multipliers = schedules[gap].get_or_insert_with(|| {
+            if multiplier_mask == all_variable_mask(n_vars) {
+                monomials_up_to_mask(multiplier_mask, gap as u32).into()
+            } else {
+                cached_monomials_up_to_mask(multiplier_mask, gap as u32)
+            }
+        });
+        estimated_rows = estimated_rows.saturating_add(multipliers.len());
+        gaps.push(Some(gap));
+    }
+    let mut seen = vec![false; layout.columns.len()];
+    let mut data = Vec::with_capacity(estimated_rows.min(max_f4_rows()) * words);
+    let mut rows = 0usize;
+    for (polynomial, gap) in polys.iter().zip(gaps) {
+        let Some(gap) = gap else {
+            continue;
+        };
+        let multipliers = schedules[gap].as_ref().unwrap();
+        let mut product = Vec::with_capacity(polynomial.terms.len());
+        for &multiplier in multipliers.iter() {
+            product.clear();
+            product.extend(
+                polynomial
+                    .terms
+                    .iter()
+                    .map(|term| term.mask | multiplier),
+            );
+            product.sort_unstable();
+            let mut read = 0usize;
+            let mut write = 0usize;
+            while read < product.len() {
+                let mut end = read + 1;
+                while end < product.len() && product[end] == product[read] {
+                    end += 1;
+                }
+                if (end - read) % 2 == 1 {
+                    product[write] = product[read];
+                    write += 1;
+                }
+                read = end;
+            }
+            if write == 0 {
+                continue;
+            }
+            if rows == max_f4_rows() {
+                return None;
+            }
+            let start = data.len();
+            data.resize(start + words, 0);
+            let row = &mut data[start..start + words];
+            for monomial in &product[..write] {
+                let &column = layout.index.get(monomial)?;
+                row[column / 64] |= 1 << (column % 64);
+                seen[column] = true;
+            }
+            rows += 1;
+        }
+    }
+    if seen.iter().any(|present| !present) {
+        return None;
+    }
+    Some(FlatF2Matrix { data, rows, words })
+}
+
 fn build_macaulay_with_multiplier_mask(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -1665,6 +1752,32 @@ fn build_macaulay_flat_with_multiplier_mask(
     reuse_layout: bool,
     criterion: RowCriterion,
 ) -> Option<BuiltMacaulay<FlatF2Matrix>> {
+    // The fused packer builds every product straight into the cached
+    // layout, so it applies only to the plain row set: the F5 criterion
+    // selects rows through `build_macaulay_packed` and must go that way.
+    let fused = reuse_layout
+        && criterion == RowCriterion::None
+        && std::env::var("KIC_F4_DISABLE_FUSED_PACK").as_deref() != Ok("1");
+    if fused {
+        let layout_key = (multiplier_mask, degree, false);
+        let cached = F4_LAYOUTS.with(|layouts| layouts.borrow().get(&layout_key).cloned());
+        if let Some(layout) = cached {
+            if let Some(matrix) =
+                pack_polynomials_flat_fused(polys, n_vars, degree, multiplier_mask, &layout)
+            {
+                F4_LAYOUT_HITS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                return Some(BuiltMacaulay {
+                    columns: layout.columns.clone(),
+                    matrix,
+                    rows_pruned: 0,
+                    criterion_word_ops: 0,
+                });
+            }
+            F4_LAYOUTS.with(|layouts| {
+                layouts.borrow_mut().remove(&layout_key);
+            });
+        }
+    }
     build_macaulay_packed(
         polys,
         n_vars,
@@ -1736,12 +1849,7 @@ fn build_macaulay_packed<P: Default>(
     }
 
     let cols: Vec<u64> = macaulay_columns(&rows_monos)?;
-    let index: std::collections::HashMap<u64, usize> =
-        cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
-    let layout = std::rc::Rc::new(F4ColumnLayout {
-        columns: cols,
-        index,
-    });
+    let layout = std::rc::Rc::new(F4ColumnLayout::new(cols));
     let matrix = pack(&rows_monos, &layout, false)?;
     if reuse_layout {
         F4_LAYOUTS.with(|layouts| {
@@ -1779,7 +1887,78 @@ static F4_BUILD_ROWS_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::Atomi
 static F4_BUILD_PACK_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 struct F4ColumnLayout {
     columns: Vec<u64>,
-    index: std::collections::HashMap<u64, usize>,
+    index: F4ColumnIndex,
+}
+
+impl F4ColumnLayout {
+    fn new(columns: Vec<u64>) -> Self {
+        let index = if std::env::var("KIC_F4_STD_COLUMN_HASH").as_deref() == Ok("1") {
+            F4ColumnIndex::Standard(
+                columns
+                    .iter()
+                    .enumerate()
+                    .map(|(column, &monomial)| (monomial, column))
+                    .collect(),
+            )
+        } else {
+            let mut index = FastColumnMap::with_capacity_and_hasher(
+                columns.len(),
+                std::hash::BuildHasherDefault::default(),
+            );
+            index.extend(
+                columns
+                    .iter()
+                    .enumerate()
+                    .map(|(column, &monomial)| (monomial, column)),
+            );
+            F4ColumnIndex::Fast(index)
+        };
+        Self { columns, index }
+    }
+}
+
+enum F4ColumnIndex {
+    Standard(std::collections::HashMap<u64, usize>),
+    Fast(FastColumnMap),
+}
+
+impl F4ColumnIndex {
+    fn get(&self, monomial: &u64) -> Option<&usize> {
+        match self {
+            Self::Standard(index) => index.get(monomial),
+            Self::Fast(index) => index.get(monomial),
+        }
+    }
+}
+
+type FastColumnMap = std::collections::HashMap<
+    u64,
+    usize,
+    std::hash::BuildHasherDefault<FastU64Hasher>,
+>;
+
+#[derive(Default)]
+struct FastU64Hasher(u64);
+
+impl std::hash::Hasher for FastU64Hasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        let mut value = 0xcbf29ce484222325u64;
+        for &byte in bytes {
+            value = (value ^ u64::from(byte)).wrapping_mul(0x100000001b3);
+        }
+        self.write_u64(value);
+    }
+
+    fn write_u64(&mut self, value: u64) {
+        let mut mixed = value.wrapping_add(0x9e3779b97f4a7c15);
+        mixed = (mixed ^ (mixed >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
+        mixed = (mixed ^ (mixed >> 27)).wrapping_mul(0x94d049bb133111eb);
+        self.0 = mixed ^ (mixed >> 31);
+    }
 }
 thread_local! {
     /// Keyed by multiplier mask, degree and whether the F5 criterion

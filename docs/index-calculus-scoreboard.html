@@ -254,6 +254,13 @@
   .chip.advance { background: var(--data-soft); color: var(--data); border-color: transparent; }
   .chip.relabel { background: var(--bound-soft); color: var(--bound); border-color: transparent; }
 
+  /* A superseded figure stays on its row as the "before" mark, so a
+     re-priced step cannot read as an improvement it was not. */
+  .was {
+    display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 400;
+    color: var(--muted); text-decoration: line-through; margin-left: 6px; white-space: nowrap;
+  }
+
   /* ---------- closing ---------- */
   .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 20px; }
   .note { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 18px 20px; }
@@ -313,13 +320,21 @@
       measured end to end is below rho: the residual-walk thread's 500&times;-or-worse verdict on
       E(F<sub>p</sub><sup>3</sup>) is unchanged, and the three-regime ledger that heads the page
       puts the best whole-pipeline variant at 3.55&times; rho on a 23-bit prime-order curve,
-      16.0&times; on a 24-bit random binary curve and 26.1&times; on a 39-bit Koblitz subgroup,
-      with no fitted exponent below the reference's. Those three read lower than Round 4&rsquo;s
-      3.63, 21.9 and 30.3 for a reason that is <em>not</em> progress and is not counted as any:
-      Round 5 re-seeded the walk rows, which moves a single row by up to a factor 1.8 in
-      either direction at three repeats, and its own lever is exactly 1.000&times; on all three
-      (see the panel below). Round 3 turns that from a report into a
-      <strong>boundary</strong>. The pair-table family has a derived shape law &mdash; a
+      16.0&times; on a 24-bit random binary curve and &mdash; after the collection and selection
+      rounds of 2026-09-21 and 2026-09-22 &mdash; <b>1.17&times;</b> on a 39-bit Koblitz subgroup,
+      with no fitted exponent below the reference's. Two independent things moved those numbers
+      and they must not be confused. The first two read lower than Round 4&rsquo;s 3.63 and 21.9
+      for a reason that is <em>not</em> progress and is not counted as any: Round 5 re-seeded the
+      walk rows, which moves a single row by up to a factor 1.8 in either direction at three
+      repeats, and its own lever is exactly 1.000&times; on all three (see the panel below). That
+      same re-seed took the Koblitz row from 30.3&times; to 26.1&times;. The 1.17&times; is
+      separate and is progress: it is the collection and selection rounds measured end to end
+      against a rho reference pooled over 224 targets of their own runs, so it is not the
+      re-seeded row re-measured and the two references are not interchangeable. It is the
+      closest anything here has come to rho on an elliptic curve and it is still above it; the
+      rounds that produced it also drove the relation count to its counting floor, so that lever
+      is spent rather than promising. Round 3 turns the general statement from a
+      report into a <strong>boundary</strong>. The pair-table family has a derived shape law &mdash; a
       two-summand row pays <code>F&sup2;/4t</code> for its table and about
       <code>c&middot;#E/(2kF)</code> for its relations, least at
       <code>F = (c&middot;#E&middot;t/k)<sup>1/3</sup></code> &mdash; and in this unit, where rho
@@ -330,7 +345,14 @@
       the optimum is <code>r<sup>2/(3+a)&minus;1/2</sup></code>, positive for every
       <code>a &lt; 1</code>. So this family has no crossover to find at any size, and at
       sect163k1's size it sits about 10<sup>7</sup>&times; the automorphism-aware walk it competes
-      with. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
+      with. That <code>r<sup>1/6</sup></code> rise now has a <strong>measured</strong> crossing
+      behind it rather than only a derivation: the tournament collector that sits strictly below
+      rho on an eight-cell Koblitz panel reads 0.831 [0.772, 0.894] at
+      <code>r</code>&thinsp;=&thinsp;4.2&times;10<sup>6</sup> and 1.533 [1.238, 1.899] at
+      <code>r</code>&thinsp;=&thinsp;2.3&times;10<sup>8</sup>, both bands clear of one in opposite
+      directions, growing as <code>r<sup>0.153</sup></code>
+      (<a href="#ic-crossover-20260922">below</a>). Two cells fix a rate and no curvature, so that
+      is agreement worth what a two-point rate is worth. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
       no such table and its asymptotics are the question this ladder cannot reach. It is also not
       blanket across problems: on hyperelliptic Jacobians at genus 3 and 4 index calculus measures
       <strong>below</strong> a real distinguished-point rho &mdash; 0.21 at
@@ -375,7 +397,9 @@
           fold and k the column fold. <strong>A model of that family, not a bound on the
           problem</strong> &mdash; its relation term counts K/2 edges, and a multigraph closes
           earlier &mdash; so a row may sit under it. On a prime-order curve it is
-          &Theta;(r<sup>1/6</sup>) where the reference is flat, which is the round&rsquo;s result.</p>
+          &Theta;(r<sup>1/6</sup>) where the reference is flat, which is the round&rsquo;s result &mdash;
+          measured at <code>r<sup>0.153</sup></code> between two certified cells two decades of
+          <code>r</code> apart.</p>
       </div>
     </dl>
   </header>
@@ -1526,6 +1550,307 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="koblitz-select-packed-20260922">
+    <div class="panel-head">
+      <h2>Selecting a base was 5.6&times; its floor, and all of it was BigUints</h2>
+      <p>Class <span class="chip">engineering</span>. With collection's relation count at its counting
+        floor, selecting the base became 23.4% of the pipeline at 78.2 group-addition equivalents a
+        point. The algebra a point <em>requires</em> is 13.93: the half-trace lift that produces it,
+        unconverted, plus the one Frobenius step that places it in its orbit. The rebuild was 89.7% of
+        the call, and half of the whole call was stepping <code>BigUint</code>-backed points through a
+        Frobenius the pair table has always done in one word. Keying the point index on the packed
+        <code>u64</code> and walking both orbit structures with the <code>FastCurve</code> takes selection
+        to <b>37.3 adds a point</b>, <b>2.7&times;</b> its floor, and the whole pipeline to
+        <b>1.17&times; rho</b>. Frozen source:
+        <code>docs/ic/runs/koblitz-select-packed-20260922.json</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Per point, at <code>n = 41</code> on a 15,744-point base. The packed column is what the
+        builder does now; the <code>BigUint</code> column is what it did. A <code>BinaryPoint</code>
+        carries two <code>BigUint</code>s, so an index key is two allocations and a two-<code>BigUint</code>
+        hash, and a Frobenius step is two <code>BigUint</code> squarings.</caption>
+      <thead>
+        <tr><th scope="col">Step</th><th scope="col" class="n">BigUint</th>
+          <th scope="col" class="n">packed</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>both orbit walks (<code>kc.frobenius</code>)</td><td class="n">41.60</td>
+          <td class="n">0.40</td></tr>
+        <tr><td>keying, three times over (<code>point_key</code>)</td><td class="n">4.33</td>
+          <td class="n">0.02</td></tr>
+        <tr><td>lifts (<code>points_with_x_fast</code>)</td><td class="n">13.68</td>
+          <td class="n">&mdash;</td></tr>
+        <tr><td>&nbsp;&nbsp;of which <code>lower()</code> back to BigUint</td><td class="n">1.66</td>
+          <td class="n">&mdash;</td></tr>
+        <tr><td><b>FLOOR: lift algebra + one orbit step</b></td><td class="n" colspan="2">
+          <b>13.93</b> = 13.51 + 0.43</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>Selection by factor-base width, quiet machine, three passes each; and the whole pipeline on
+        the aimed least-mentioned config, where only the selection column differs and every other counter
+        is identical.</caption>
+      <thead>
+        <tr><th scope="col">|F|</th><th scope="col" class="n">Before</th><th scope="col" class="n">After</th>
+          <th scope="col" class="n">Speedup</th><th scope="col" class="n">Before/pt</th>
+          <th scope="col" class="n">After/pt</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>5,248</td><td class="n">409,745</td><td class="n">185,428</td><td class="n">2.21&times;</td>
+          <td class="n">78.1</td><td class="n">35.3</td></tr>
+        <tr><td>8,528</td><td class="n">669,193</td><td class="n">309,274</td><td class="n">2.16&times;</td>
+          <td class="n">78.5</td><td class="n">36.3</td></tr>
+        <tr><td>12,464</td><td class="n">969,811</td><td class="n">452,708</td><td class="n">2.14&times;</td>
+          <td class="n">77.8</td><td class="n">36.3</td></tr>
+        <tr><td>16,400</td><td class="n">1,304,319</td><td class="n">618,316</td><td class="n">2.11&times;</td>
+          <td class="n">79.5</td><td class="n">37.7</td></tr>
+        <tr><td>20,336</td><td class="n">1,613,142</td><td class="n">772,161</td><td class="n">2.09&times;</td>
+          <td class="n">79.3</td><td class="n">38.0</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>End to end at <code>|F|</code> = 15,744, window 256, 32 targets, aimed at the
+        least-mentioned columns.</caption>
+      <thead>
+        <tr><th scope="col">Variant</th><th scope="col" class="n">Select</th><th scope="col" class="n">Build</th>
+          <th scope="col" class="n">Collect</th><th scope="col" class="n">Total adds</th>
+          <th scope="col" class="n">S</th><th scope="col" class="n">vs rho</th>
+          <th scope="col">Correct</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>aimed, BigUint base build</td><td class="n">1,230,873</td><td class="n">1,519,296</td>
+          <td class="n">2,517,120</td><td class="n">5,269,495</td><td class="n">0.2221</td>
+          <td class="n">1.33&times;</td><td>32/32, 0 rejected</td></tr>
+        <tr><td><b>aimed, packed base build</b></td><td class="n"><b>587,043</b></td>
+          <td class="n">1,519,296</td><td class="n">2,517,120</td><td class="n"><b>4,625,665</b></td>
+          <td class="n"><b>0.1950</b></td><td class="n"><b>1.17&times;</b></td>
+          <td>32/32, 0 rejected</td></tr>
+      </tbody>
+    </table></div>
+    <div class="facts">
+      <span><b>speedup = baseline_total_operations / candidate_total_operations</b> =
+        5,269,495 / 4,625,665 = <b>1.139&times;</b>, against a 1.10&times; condition registered before
+        any code changed. The phase itself falls 2.10&times;. Against the rung this branch started from,
+        the pipeline is now 33,589,843 &rarr; 4,625,665 adds, <b>7.26&times;</b>.</span>
+      <span><b>The control, not the stopwatch, is what this stands on.</b> The change is a change of
+        representation, so the maps must come out identical: they agree field for field over 6 degrees
+        &times; 3 widths, and the end-to-end runs reproduce <em>every</em> counter &mdash; points, orbits,
+        columns, tier, stored pairs, scans, trials, relations, units, rejected, duplicates, core
+        dimension and nonzeros, descent trials, rho steps. Only the time moved.</span>
+      <span><b>The floor's first version was wrong, twofold.</b> It halved the lift and orbit-step terms,
+        which were already per point &mdash; a half-trace solve yields two points and every figure is per
+        point. That would have reported selection at 13&times; its floor instead of 5.6&times;. A floor is
+        only a boundary if it is derived at the same normalisation as the thing it bounds.</span>
+      <span><b>A discarded measurement.</b> The first post-change run shared the machine with a compiling
+        test suite. Contention inflates the measured per-addition unit, which <em>divides</em> the
+        converted total down, so a contended run <em>understates</em> the operation count &mdash; in the
+        flattering direction. Caught because the sweep came out non-monotone: 12,464 points reading
+        slower than 16,400, which cannot be true.</span>
+      <span><b>Prediction against outcome.</b> Registered 35.3 adds a point and 1.15&times; rho; measured
+        37.3 and 1.17&times;. The packed path lifts every point from <code>BigUint</code> once, about 1.5
+        adds a point, which the prediction did not account for.</span>
+      <span><b>What is left.</b> Collection 54.4%, table build 32.8%, selection 12.7%, descent and linear
+        algebra 0.0%. Selection is now bounded by 2.7&times; and the remainder is the half-trace solve
+        itself; the table build is the largest phase after collection.</span>
+    </div>
+  </div>
+
+  <div class="panel" id="koblitz-collection-window-20260921">
+    <div class="panel-head">
+      <h2>The rungs were scanning the whole base</h2>
+      <p>Class <span class="chip">engineering</span>. Collection is 97.8% of this pipeline and the ledger
+        rungs scanned the entire factor base per probe. A full <code>m = 3</code> scan meets each triple
+        three times &mdash; once for each summand that can be the third &mdash; and keeps one sorted
+        witness, discarding two; a window of <code>w</code> keeps all three chances at
+        <code>w/|F|</code> of the scan. Priced end to end at equal <em>relation yield</em>, that is about
+        <b>2.5&times; fewer operations</b> on both rungs. The generic floor does not move &mdash; the
+        window changes no count it bounds &mdash; and the contract's count floor, which is on
+        <em>attempts</em>, gets <em>worse</em>: a window spends more trials per relation, not fewer. What
+        falls is summand scans, which that floor does not bound. Frozen source:
+        <code>docs/ic/runs/koblitz-collection-window-20260921.json</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Same curve, base, seed, targets and descent on each rung; only the window varies, and the
+        trial count is sized so every row banks the same relations. Unit is a batched group addition.
+        Re-priced on 2026-09-22 at the scan constant measured for each row's own base width and window
+        &mdash; the original figures, which used one full-scan constant per degree, stay on their rows as
+        the &ldquo;before&rdquo; mark and in the frozen file.</caption>
+      <thead>
+        <tr><th scope="col">Variant</th><th scope="col" class="n">|F|</th><th scope="col" class="n">Window</th>
+          <th scope="col" class="n">Scans</th><th scope="col" class="n">Relations</th>
+          <th scope="col" class="n">Total adds</th><th scope="col" class="n">S</th>
+          <th scope="col" class="n">vs rho</th><th scope="col" class="n">Speedup</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>n53 full scan</td><td class="n">15,264</td><td class="n">&mdash;</td>
+          <td class="n">242,514,432</td><td class="n">458</td><td class="n">610,287,145</td>
+          <td class="n">4.1573</td><td class="n">19.14&times;</td><td class="n">&mdash;</td></tr>
+        <tr><td>n53 window 1,908</td><td class="n">15,264</td><td class="n">1,908</td>
+          <td class="n">95,636,592</td><td class="n">444</td><td class="n">244,576,591</td>
+          <td class="n">1.6660</td><td class="n">7.67&times;</td><td class="n">2.495&times;</td></tr>
+        <tr><td>n53 window 954</td><td class="n">15,264</td><td class="n">954</td>
+          <td class="n">91,091,736</td><td class="n">444</td><td class="n">237,061,975</td>
+          <td class="n">1.6148</td><td class="n">7.43&times;</td><td class="n">2.574&times;</td></tr>
+        <tr><td><b>n53 window 477</b></td><td class="n">15,264</td><td class="n">477</td>
+          <td class="n">85,860,000</td><td class="n">443</td><td class="n">226,915,356</td>
+          <td class="n">1.5458</td><td class="n">7.12&times;</td>
+          <td class="n"><b>2.689&times;</b> <span class="was">was 2.715&times;</span></td></tr>
+        <tr><td>&nbsp;&nbsp;holdout</td><td class="n">15,264</td><td class="n">477</td>
+          <td class="n">85,860,000</td><td class="n">443</td><td class="n">222,982,723</td>
+          <td class="n">1.5190</td><td class="n">6.99&times;</td><td class="n">&mdash;</td></tr>
+        <tr><td>n41 full scan</td><td class="n">5,248</td><td class="n">&mdash;</td>
+          <td class="n">15,072,256</td><td class="n">124</td><td class="n">33,586,338</td>
+          <td class="n">1.4156</td><td class="n">8.50&times;</td><td class="n">&mdash;</td></tr>
+        <tr><td>n41 window 164</td><td class="n">5,248</td><td class="n">164</td>
+          <td class="n">5,432,992</td><td class="n">120</td><td class="n">13,760,190</td>
+          <td class="n">0.5799</td><td class="n">3.48&times; <span class="was">was 3.24&times;</span></td>
+          <td class="n">2.441&times;</td></tr>
+      </tbody>
+    </table></div>
+    <div class="facts">
+      <span><b>A first pass sized the windows wrong.</b> It equalised <em>scans</em> instead of
+        relations, so every window over-collected &mdash; 1,652 and 1,735 relations where 458 were needed
+        &mdash; and the totals came out at 0.63&times; and 1.00&times;. A gain in yield is not a gain in
+        cost until the trial count comes down to bank it.</span>
+      <span><b>The frozen ledger rungs are deliberately unchanged.</b> They are the regression baseline;
+        rewriting their parameters would change what the gate measures and break comparability with
+        references v1&ndash;v4. Whether the benchmark should track the best known configuration is a
+        question for the repository, raised in the evidence file rather than decided here.</span>
+      <span><b>Re-priced, small and not all one way.</b> At n = 53 the windowed constants (2.42&ndash;2.48)
+        sit below the 2.490 first used, so those rows were marginally overcharged; at n = 41 window 164
+        was undercharged, 2.31 against a measured 2.43. Original values retained in the frozen file.</span>
+    </div>
+  </div>
+
+  <div class="panel" id="koblitz-collection-aim-20260922">
+    <div class="panel-head">
+      <h2>Collection was waiting for rank, not coverage &mdash; and the relation count is now at its floor</h2>
+      <p>Class <span class="chip advance">advance</span>, with a <span class="chip relabel">relabelling</span> and two
+        <span class="chip">accounting</span> corrections inside it. Collection is 60% of this pipeline and
+        its cost is proportional to relations banked, so <em>why</em> a run needs 333 relations for 192
+        columns decides what is left to win. Replaying a finished run answers it: coverage and full rank
+        both complete at relation <b>330</b>, the coupon-collector threshold
+        <code>C&middot;ln(C)/3</code>, because with three summands on uniform columns a column is missed
+        with probability <code>e<sup>&minus;3R/C</sup></code> and the two thresholds coincide. Aiming the
+        scan at <em>uncovered</em> columns moves coverage to 117 relations &mdash; a 2.8&times; move in the
+        tracked number &mdash; and the total by 1.02&times;. Aiming it at the <em>least-mentioned</em>
+        columns reaches full rank at <b>exactly 192 relations, the counting floor</b>: 192 unknowns need
+        192 independent equations, so no collection strategy can bank fewer and this lever is finished.
+        <code>S</code> is still <b>1.33&times; rho</b>. Frozen source:
+        <code>docs/ic/runs/koblitz-collection-aim-20260922.json</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Matched A/B on <code>K_0/GF(2<sup>41</sup>)</code>, |F| = 15,744, window 256, 32 targets,
+        both arms extending collection until the system is determined so neither is charged for units it
+        did not need. Unit is a batched group addition. Every phase priced: selection measured at this
+        width, the build at one addition per stored pair, the scan at the constant measured for this base
+        and window, the descent and the linear algebra converted on the same host. Floor is the counting
+        bound <code>R &ge; C</code>; rho is pooled over 224 targets because its step count varies about
+        20% between seed sets.</caption>
+      <thead>
+        <tr><th scope="col">Arm</th><th scope="col" class="n">Relations</th>
+          <th scope="col" class="n">&divide; floor 192</th><th scope="col" class="n">Scans</th>
+          <th scope="col" class="n">Total adds</th><th scope="col" class="n">S</th>
+          <th scope="col" class="n">vs rho</th><th scope="col">Correct</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>swept</td><td class="n">333</td><td class="n">1.73&times;</td><td class="n">1,459,200</td>
+          <td class="n">6,911,843</td><td class="n">0.2913</td><td class="n">1.75&times;</td>
+          <td>32/32, 0 rejected</td></tr>
+        <tr><td>aimed at uncovered columns</td><td class="n">320</td><td class="n">1.67&times;</td>
+          <td class="n">1,420,800</td><td class="n">6,773,987</td><td class="n">0.2855</td>
+          <td class="n">1.71&times;</td><td>32/32, 0 rejected</td></tr>
+        <tr><td><b>aimed at least-mentioned columns</b></td><td class="n"><b>197</b></td>
+          <td class="n"><b>1.03&times;</b></td><td class="n"><b>883,200</b></td>
+          <td class="n"><b>5,270,523</b></td><td class="n"><b>0.2221</b></td>
+          <td class="n"><b>1.33&times;</b></td><td>32/32, 0 rejected</td></tr>
+        <tr><td>&nbsp;&nbsp;holdout, target seeds 900&ndash;931</td><td class="n">197</td>
+          <td class="n">1.03&times;</td><td class="n">883,200</td><td class="n">5,270,516</td>
+          <td class="n">0.2221</td><td class="n">1.33&times;</td><td>32/32, 0 rejected</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>The diagnosis, at the moment the row count first reaches the column count &mdash; the
+        earliest a system can possibly be determined. A column mentioned once is pinned only if every
+        other column in its row is, which is why the set worth scanning is the least-mentioned columns
+        and why finding it needs a counter rather than an elimination.</caption>
+      <thead>
+        <tr><th scope="col">At 192 relations</th><th scope="col" class="n">Covered</th>
+          <th scope="col" class="n">Rank</th><th scope="col" class="n">No pivot</th>
+          <th scope="col">Mentions of those</th><th scope="col" class="n">Mentioned once</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>swept</td><td class="n">186</td><td class="n">183</td><td class="n">9</td>
+          <td>six 0&times;, two 1&times;, one 2&times;</td><td class="n">35</td></tr>
+        <tr><td>aimed at uncovered</td><td class="n">192</td><td class="n">190</td><td class="n">2</td>
+          <td>both exactly 1&times;</td><td class="n">21</td></tr>
+        <tr><td>aimed at least-mentioned</td><td class="n">192</td><td class="n">192</td><td class="n">0</td>
+          <td>&mdash;</td><td class="n">0</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>The whole <code>n = 41</code> ladder, every row re-priced at the scan constant measured for
+        its own base width and window. Superseded figures move here rather than vanishing: the three rows
+        the earlier rounds reported at 3.24&times;, 2.40&times; and 1.78&times; rho read 3.48&times;,
+        2.78&times; and 2.04&times;, because they were priced at 2.31 adds a summand &mdash; the
+        5,248-point base's full-scan figure, which undercharges a wide base with a narrow window by up to
+        23%. The shape of the ladder is unchanged; two of its steps are smaller than reported.</caption>
+      <thead>
+        <tr><th scope="col">Step</th><th scope="col" class="n">|F|</th><th scope="col" class="n">Window</th>
+          <th scope="col" class="n">Adds/scan</th><th scope="col" class="n">Relations</th>
+          <th scope="col" class="n">Total adds</th><th scope="col" class="n">S</th>
+          <th scope="col" class="n">vs rho</th><th scope="col">Priced</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>original rung, full scan</td><td class="n">5,248</td><td class="n">full</td>
+          <td class="n">2.19</td><td class="n">124</td><td class="n">33,589,843</td>
+          <td class="n">1.4157</td><td class="n">8.50&times;</td><td>measured</td></tr>
+        <tr><td>+ collection window</td><td class="n">5,248</td><td class="n">164</td><td class="n">2.43</td>
+          <td class="n">120</td><td class="n">13,764,117</td><td class="n">0.5801</td>
+          <td class="n">3.48&times; <span class="was">was 3.24&times;</span></td>
+          <td>interpolated, windows 128&ndash;256</td></tr>
+        <tr><td>+ wider base</td><td class="n">16,400</td><td class="n">500</td><td class="n">2.72</td>
+          <td class="n">675</td><td class="n">10,980,083</td><td class="n">0.4628</td>
+          <td class="n">2.78&times; <span class="was">was 2.40&times;</span></td>
+          <td>interpolated, windows 256&ndash;512</td></tr>
+        <tr><td>+ lean relation target</td><td class="n">16,400</td><td class="n">256</td><td class="n">2.78</td>
+          <td class="n">406</td><td class="n">8,056,053</td><td class="n">0.3395</td>
+          <td class="n">2.04&times; <span class="was">was 1.78&times;</span></td><td>measured</td></tr>
+        <tr><td>+ stop when determined</td><td class="n">15,744</td><td class="n">256</td><td class="n">2.85</td>
+          <td class="n">333</td><td class="n">6,911,843</td><td class="n">0.2913</td>
+          <td class="n">1.75&times;</td><td>measured</td></tr>
+        <tr><td><b>+ aim at least-mentioned</b></td><td class="n">15,744</td><td class="n">256</td>
+          <td class="n">2.85</td><td class="n"><b>197</b></td><td class="n"><b>5,270,523</b></td>
+          <td class="n"><b>0.2221</b></td><td class="n"><b>1.33&times;</b></td><td>measured</td></tr>
+      </tbody>
+    </table></div>
+    <div class="facts">
+      <span><b>speedup = baseline_total_operations / candidate_total_operations.</b> Swept to
+        least-mentioned, 6,911,843 / 5,270,523 = <b>1.311&times;</b>, against a success condition of
+        1.3&times; registered before the code was written. Original rung to best,
+        33,589,843 / 5,270,523 = <b>6.37&times;</b>.</span>
+      <span><b>The first aim met an abandon condition.</b> Aiming at uncovered columns was pre-registered
+        to be abandoned above 280 relations and reached 309. It is reported as a relabelling rather than
+        rescued; the least-mention rule is a different aim, registered and measured separately.</span>
+      <span><b>A correction that was itself nearly wrong.</b> The first version of the window-cost
+        measurement drew each target with a scalar multiplication &mdash; about 59 chained additions
+        &mdash; which a narrow window divides over 256 summands and a full scan over 15,744. It showed
+        5.78 adds a summand at window 256 against 2.72 at full scan, a fourfold penalty that would have
+        cut the collection window's reported gain from 2.7&times; to 1.3&times;. Collection walks to its
+        next probe with one addition; the measurement now walks too, and the real penalty is 1.07&times;.</span>
+      <span><b>The gather is free.</b> An index scan costs 0.96&ndash;1.02&times; a cyclic window at every
+        target-set size a run actually aims at; only a set of one or two columns costs more, and the
+        least-mention rule never produces one.</span>
+      <span><b><code>ScanScratch</code> is not a gain.</b> Taking four per-trial allocations out of the
+        scan's hot loop measured 5.46 &rarr; 5.58 adds a summand &mdash; no change, the allocator was
+        already recycling the blocks. Kept as a refactor, not claimed.</span>
+      <span><b>What is left.</b> Collection 47.6%, table build 28.9%, selection 23.4%, descent 0.0%,
+        linear algebra 0.06%. No phase is dominant enough for another factor to hide in, which is a first
+        for this thread. Selection spends 79.5 adds a point on algebra far cheaper than that, and is the
+        next thing to measure.</span>
+    </div>
+  </div>
+
   <div class="panel" id="koblitz-probe-volume-20260921">
     <div class="panel-head">
       <h2>The probing volume is an input, and it moves every rung</h2>
@@ -2059,6 +2384,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/SOLVER_SELECTION.md">Run and train</a></p>
     </div>
   </div>
+  </section>
 
   <section aria-labelledby="genus-crossover" style="margin:3rem 0;overflow-x:auto">
     <h2 id="genus-crossover">Hyperelliptic: the crossover has a measured exponent</h2>
@@ -3710,6 +4036,54 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0020 -->
+<!-- BEGIN ic-crossover-20260922 -->
+<section class="panel" id="ic-crossover-20260922">
+<div class="panel-head"><h2>Where the tournament collector crosses rho <span class="chip">engineering</span></h2>
+<p>Rounds 0019 and 0020 put this collector strictly below rho on an eight-cell
+  Koblitz panel whose largest subgroup order is 4.2&times;10<sup>6</sup>, and classified the gain
+  engineering because the <code>&Theta;(r<sup>2/3</sup>)</code> against
+  <code>&Theta;(r<sup>1/2</sup>)</code> shape was <em>derived</em>. Round 0021 measures it: the
+  promoted implementation was capped at degree 31 only because its pair table packed coordinates
+  into <code>u32</code>, so widening that field to <code>u64</code> opens <code>n37a0</code> at
+  <code>r</code> = 230,603,167, 55&times; the panel's largest cell. Sixty-four independent
+  fixtures a cell, pooled over two seed streams, every index-calculus report checked by the
+  independent <code>oracle.py</code> certificate checker. <strong>No tournament ran and nothing
+  was promoted</strong> &mdash; this is a measurement against the round-0020 winner source, so it
+  has no stage summaries, no evidence pack and no effect on the promoted winner.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND21-crossover.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round21_crossover.py">measurement script</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round21-wide-pair-table.patch">pair-table widening</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/PROBE-degree-ceiling.md">why the cell was out of reach</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Instruction unit Ir, complete DLP, 64 fixtures a cell over seeds 20260922 and 4242;
+  base at the sampler's default 8 orbits, which is the cheapest measured size at both cells.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>IC / rho</th><th>95% band</th><th>per-case sd(log)</th><th>Certified</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>0.831</td><td>[0.772, 0.894]</td><td>0.300</td><td>64/64</td><td>IC ahead</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td>1.533</td><td>[1.238, 1.899]</td><td>0.872</td><td>64/64</td><td>rho ahead</td></tr>
+</tbody></table></div>
+<p><strong>Both bands exclude one, in opposite directions, so the collector crosses rho between
+  these two subgroup orders.</strong> The ratio grows as <code>r<sup>0.153</sup></code> between
+  them, against the <code>r<sup>1/6</sup> = r<sup>0.167</sup></code> the pair-table shape law
+  derives for the balanced optimum. Two cells fix one rate and no curvature, and they differ in
+  degree as well as in <code>r</code>, so that agreement is worth exactly what a two-point rate is
+  worth &mdash; but it is the first measured support the boundary has had beyond the panel. The
+  <code>n23a1</code> row doubles as a cross-check on the widened build: 0.831 here against 0.7498
+  in round 0019 and 0.7948 in round 0020.</p>
+<div class="table-scroll"><table>
+<caption>What the widening cost: widened build against the promoted worker, three confirmation
+  fixtures at each panel cell. All 24 returned the same logarithms and the same factor-base hash.</caption>
+<thead><tr><th>Cell</th><th>n13a0</th><th>n17a1</th><th>n19a0</th><th>n19a1</th><th>n23a0</th><th>n23a1</th><th>n29a1</th><th>n31a0</th></tr></thead><tbody>
+<tr><td>widened / promoted Ir</td><td>1.0011</td><td>1.0008</td><td>1.0015</td><td>1.0006</td><td>1.0003</td><td>1.0002</td><td>1.0004</td><td>1.0004</td></tr>
+</tbody></table></div>
+<p>0.07% panel-wide, worst cell 0.15%. Two claims are withdrawn here: a pre-computed prediction
+  that <code>n37a0</code> would need 32 orbits (8 solve it, and are the best size measured), and
+  the derived orbit count for <code>n41a0</code>. <strong><code>n41a0</code> yields no
+  comparison</strong> at all: index calculus completes at <code>r</code> = 5.5&times;10<sup>11</sup>
+  and rho does not, returning in 0.06s against the ~72,600 steps it needs, which is the frozen
+  trial budget cutting rho off rather than rho being out-run &mdash; a budget exhaustion is never
+  evidence about an algorithm. The rounds-0019/0020 strict win is unchanged and stays scoped to
+  its eight cells, its two seeds and its subgroup orders; this panel adds the measured cell beyond
+  that scope, where the same collector loses. Earlier calibrated rows, fitted exponents and the
+  page's end-to-end verdict are unchanged.</p>
+</section>
+<!-- END ic-crossover-20260922 -->
 <section class="panel" id="radical-pair-image-20260921">
   <div class="panel-head">
     <h2>Radical unordered-pair image <span class="chip">engineering diagnostic</span></h2>

@@ -368,7 +368,13 @@ Per `AGENTS.md` §8, and because the number is large enough to tempt:
   are flat by construction; the one measured attempt to inherit on them
   regressed `0.60×` and is retained as a rejected variant.
 - **Wall time is a practicality note.**  `4.4×` on this host, single thread,
-  no pinning.  The `ic run` end-to-end effect is not measured here.
+  no pinning.  The `ic run` end-to-end effect is not measured here.  The
+  fused flat-matrix packing that landed on `main` concurrently (#601) is a
+  build-phase change to the *reference* arm: on the merged tree it leaves
+  every word-operation count and verdict in this note's evidence identical
+  and lowers the reference's stage wall by about `9%` on this host, so the
+  wall column would read nearer `4.0×` than `4.4×`.  The frozen files are
+  the measurement at their recorded revision and are not restated.
 
 ## 6. Reproducing
 

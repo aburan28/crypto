@@ -1,0 +1,65 @@
+{
+  "claim_boundary": "Public-synthetic n=31 decomposition-construction evidence only. This is not relation-yield evidence, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim.",
+  "claim_boundary_non_claims": [
+    "not relation-yield evidence",
+    "not end-to-end index calculus",
+    "not asymptotic or sub-rho evidence",
+    "not external or private targets",
+    "not a key-recovery claim"
+  ],
+  "dimension_l_or_dim": 16,
+  "eq_var_ratio": 0.96875,
+  "executable_or_source_hash": {
+    "frontier_probe_source": "3ef9da206011ecb9aed60a9aa567cbcc2deb1dc031c83b4d31c7df5d7d23a688",
+    "koblitz_groebner_source": "d033b42322df37d2af9d0b6476e934071201f7bb94131fe0b267d3c3125de50f",
+    "paired_executable_receipt": "69d3b67ac23354075ed8e859f12d9b5507088a9575f1d58a85e69c0cc3cf152d",
+    "profile_executable_receipt": "e6c9af23d505c7a554e841a47fbaadd59ff06b50bf8798e64cba97c0c6a9838d",
+    "rref_tests_source": "146486a809092d7bce2bce0979f6cb12da990f24a1387dbb498f57b3a906c38f"
+  },
+  "f4_splits": {
+    "sym": 4095,
+    "x": 7056
+  },
+  "ffd_or_degree_of_regularity": {
+    "symmetrised": 4,
+    "x_chained": 3
+  },
+  "fixture_hash": "39f3f35b4f6ffbc71479b6a1b5215dcd501b4dd784f8332ef6bd1c119b6c628b",
+  "host_id": {
+    "hostname": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "system": "Darwin"
+  },
+  "largest_solvable": {
+    "m": 2,
+    "n": 31,
+    "node_budget": 50000,
+    "unknowns": 32
+  },
+  "m_summands": 2,
+  "macaulay_degree_max": 3,
+  "median_ms_per_target": {
+    "sym_refuted_selected": 4874.0,
+    "x_found_selected": 8022.0
+  },
+  "n_or_bits": 31,
+  "oracle_class": "Boolean matrix-F4 with fused verified flat packing and trusted-u64 hashing",
+  "resource_caps": {
+    "node_budget": 50000,
+    "targets_per_arm": 2,
+    "threads": 1
+  },
+  "schema_version": 2,
+  "seeds": [
+    24301
+  ],
+  "stage": "decomposition",
+  "system_degree": "quadratic",
+  "task_id": "TASK-KIC-GROEBNER-FUSED-HASH-20260922",
+  "unknowns": 32,
+  "verdict_mix": {
+    "inconclusive": 0,
+    "sym_refuted": 2,
+    "x_found": 2
+  }
+}

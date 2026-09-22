@@ -5,7 +5,7 @@ worker (degree 13, two public-hash targets, no planted scalar)."""
 import copy
 import unittest
 
-from oracle import InvalidEvidence, verify
+from oracle import Curve, InvalidEvidence, verify
 
 FIXTURE = {"cofactor": "4", "curve_a": 0, "degree": 13, "generator": ["4793", "7108"], "group_order": "8012", "irreducible": {"degree": 13, "low_terms": [0, 1, 3, 4]}, "lambda": "89", "subgroup_order": "2003", "target_scalar_constructed": False, "target_seeds": [1, 2], "targets": [["6260", "4377"], ["5985", "7591"]]}
 
@@ -57,6 +57,50 @@ class DescentCertificateTests(unittest.TestCase):
     def test_degenerate_relation_is_only_accepted_when_the_probe_is_infinity(self):
         self.rejects(lambda r: r['solutions'][1]['relation'].update(points=[]), 'does not hold in the group')
 
+
+class DegreeBoundTests(unittest.TestCase):
+    """The checker's degree bound mirrors the collector's MAX_DEGREE.
+
+    It is not a width limit -- the arithmetic here is Python integers over the
+    fixture's own irreducible polynomial. It exists so the checker refuses
+    exactly what `koblitz_tiny_ic` refuses. Round 0021 widened the pair table's
+    packed coordinates from `u32` to `u64`, which moved that ceiling from 31 to
+    61, and this bound followed.
+
+    The bound is asserted by WHICH failure a degree produces, not by whether
+    one does. `Curve.__init__` goes on to check the group order against the
+    Frobenius trace, the cofactor, the generator and the eigenvalue, so a
+    fixture with only its degree swapped fails on the group order no matter
+    what the bound says. A degree the bound rejects therefore has to fail with
+    'unsupported degree'; a degree it accepts has to fail with something else,
+    which is what proves it got past the bound.
+    """
+
+    def failure_for(self, degree):
+        fixture = dict(FIXTURE, degree=degree,
+                       irreducible={'degree': degree, 'low_terms': [0, 1, 3, 4]})
+        try:
+            Curve(fixture)
+        except InvalidEvidence as exc:
+            return str(exc)
+        return ''
+
+    def test_accepts_the_degrees_the_collector_now_runs(self):
+        for degree in (5, 13, 31, 37, 41, 61):
+            self.assertNotIn('unsupported degree', self.failure_for(degree), f'degree {degree}')
+
+    def test_refuses_above_the_collector_ceiling(self):
+        for degree in (63, 65, 127):
+            self.assertIn('unsupported degree', self.failure_for(degree), f'degree {degree}')
+
+    def test_still_refuses_even_degrees_and_tiny_fields(self):
+        for degree in (3, 4, 12, 36):
+            self.assertIn('unsupported degree', self.failure_for(degree), f'degree {degree}')
+
+    def test_the_round_0020_fixture_still_verifies_unchanged(self):
+        """The amendment is additive: a degree-13 report reads exactly as before."""
+        self.assertEqual(verify(copy.deepcopy(REPORT), FIXTURE, expected_mode='ic',
+                                summands=3)['solutions'], ['1621', '1301'])
 
 if __name__ == '__main__':
     unittest.main()
