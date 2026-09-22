@@ -128,7 +128,7 @@
 //!   Boolean-ring representation.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
-use crate::cryptanalysis::inherited_f4::{InheritCost, ReducedBasis};
+use crate::cryptanalysis::inherited_f4::{ChildSystem, InheritCost, ReducedBasis};
 use crate::cryptanalysis::matrix_f5_f2::F5Criterion;
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, groebner_basis_f2, F2BoolMono, F2BoolPoly};
 
@@ -2094,11 +2094,14 @@ fn echelon_f2_m4ri_counted(
     word_ops: &mut u64,
     reduce_above: bool,
 ) -> usize {
-    let block_width = std::env::var("KIC_F4_M4RI_BLOCK")
-        .ok()
-        .and_then(|value| value.parse::<usize>().ok())
-        .unwrap_or(4)
-        .clamp(2, 10);
+    static BLOCK_WIDTH: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    let block_width = *BLOCK_WIDTH.get_or_init(|| {
+        std::env::var("KIC_F4_M4RI_BLOCK")
+            .ok()
+            .and_then(|value| value.parse::<usize>().ok())
+            .unwrap_or(4)
+            .clamp(2, 10)
+    });
     let words = n_cols.div_ceil(64);
     let rows = matrix.len();
     let mut pivot_row = 0usize;
@@ -2203,8 +2206,15 @@ fn echelon_f2_m4ri_counted(
     pivot_row
 }
 
+/// `KIC_F4_RREF_SUFFIX=1` pins the column-at-a-time kernel; read once, since
+/// every tail reduction of the inherited engine passes through here.
+fn suffix_kernel_forced() -> bool {
+    static FORCED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *FORCED.get_or_init(|| std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1"))
+}
+
 pub(crate) fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
-    if std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1")
+    if suffix_kernel_forced()
         || matrix.len() < 128
         || n_cols < 256
         || n_cols > matrix.len().saturating_mul(4)
@@ -2224,7 +2234,7 @@ pub(crate) fn echelon_f2_counted(
     n_cols: usize,
     word_ops: &mut u64,
 ) -> usize {
-    if std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1")
+    if suffix_kernel_forced()
         || matrix.len() < 128
         || n_cols < 256
         || n_cols > matrix.len().saturating_mul(4)
@@ -3112,17 +3122,25 @@ impl InheritedBases {
         self.bases.iter().position(|b| b.degree == degree)
     }
 
-    /// The bases of `system|_{var = value}`.  Specialisation replaces the
+    /// The bases of `system|_{var = value}`, given `substituted` — the
+    /// solver's own image of the node's system, aligned generator for
+    /// generator with the bases' (the solver substitutes it anyway, so the
+    /// bases do not substitute it again).  Specialisation replaces the
     /// child's matrix build, so its wall time is charged to the build
     /// phase; its word operations enter the stage unit.
-    fn specialise(&self, var: u32, value: bool) -> Self {
+    fn specialise(&self, var: u32, value: bool, substituted: &[F2BoolPoly]) -> Self {
         let started = std::time::Instant::now();
         let mut total = InheritCost::default();
+        let child = self
+            .bases
+            .first()
+            .map(|b| ChildSystem::new(b.generator_degrees(), substituted));
         let bases = self
             .bases
             .iter()
             .map(|b| {
-                let (next, cost) = b.specialise(var, value);
+                let child = child.as_ref().expect("a basis exists");
+                let (next, cost) = b.specialise_shared(var, value, child);
                 total.reduce_word_ops += cost.reduce_word_ops;
                 total.specialise_word_ops += cost.specialise_word_ops;
                 next
@@ -3183,7 +3201,7 @@ fn reduce_inherited(
             }
         };
         let basis = &mut bases.bases[index];
-        debug_assert_eq!(basis.system, system, "basis out of step with the node system");
+        debug_assert_eq!(basis.system.as_slice(), system, "basis out of step with the node system");
         let started = std::time::Instant::now();
         let mut cost = InheritCost::default();
         let rows = basis.decisive_rows(&mut cost);
@@ -3304,7 +3322,7 @@ fn solve_rec(
             if matches!(opts.engine, SolverEngine::InheritedF4 { .. })
                 && !system.iter().any(is_constant_one) =>
         {
-            bases.specialise(var, value)
+            bases.specialise(var, value, &system)
         }
         _ => InheritedBases::default(),
     };
@@ -3346,8 +3364,11 @@ fn solve_rec(
                     assignment[v as usize] = Some(val);
                     system = system.iter().map(|p| substitute(p, v, val)).collect();
                     if inherit {
-                        bases = bases.specialise(v, val);
+                        bases = bases.specialise(v, val, &system);
                     }
+                    // Keep the solver's system aligned with the bases',
+                    // which drop generators that vanish.
+                    system.retain(|p| !p.is_zero());
                 }
             }
         }
