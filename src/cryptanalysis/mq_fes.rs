@@ -1937,6 +1937,56 @@ mod tests {
     }
 
     #[test]
+    fn u32_l4_agrees_and_beats_u64_wall() {
+        let n = 18usize;
+        let m = 24usize; // ≤32 → u32 path eligible
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let mut fq32 = [0u32; 561];
+        let mut fl32 = [0u32; 34];
+        fill_fq_fl_u32(&forms, n, &mut fq32, &mut fl32);
+        let mut a = Vec::new();
+        let t0 = std::time::Instant::now();
+        gray_ffs_unrolled_l4_u32(&mut fq32, &mut fl32, n, usize::MAX, &mut a);
+        let u32_ns = t0.elapsed().as_nanos();
+
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut b);
+        let u64_ns = t1.elapsed().as_nanos();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+        let ratio = u64_ns as f64 / u32_ns.max(1) as f64;
+        eprintln!(
+            "u32_vs_u64_l4 n={n} m={m}: u32={u32_ns}ns u64={u64_ns}ns ratio={ratio:.2} sols={}",
+            a.len()
+        );
+        assert!(
+            ratio >= 1.05,
+            "expected u32 L=4 ≥1.05× u64 L=4 when m≤32, got {ratio:.3}"
+        );
+    }
+
+    #[test]
     fn gray_ffs_beats_on_step_full_enum_wall() {
         // Full enumeration (no early exit): O(1)/step FFS vs O(n)/step update.
         let n = 18usize;
