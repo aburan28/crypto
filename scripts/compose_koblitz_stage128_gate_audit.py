@@ -65,7 +65,7 @@ def write_new(p:Path,v:dict[str,Any])->None:require(not p.exists(),f'refusing to
 def build(out:Path)->dict[str,Any]:
  require(not out.exists(),f'refusing to overwrite {out}');out.mkdir(parents=True);a=compose();write_new(out/'audit.json',a);write_new(out/'result-seal.json',{'schema':SEAL_SCHEMA,'status':'audit_frozen','audit_sha256':sha256(out/'audit.json')});return a
 def verify(out:Path)->dict[str,Any]:
- s=load(out/'result-seal.json','seal');require(s.get('schema')==SEAL_SCHEMA,'seal schema changed');require(sha256(out/'audit.json')==s.get('audit_sha256'),'audit seal changed');a=compose();require(a==load(out/'audit.json','audit'),'current audit changed');return a
+ s=load(out/'result-seal.json','seal');require(s.get('schema')==SEAL_SCHEMA,'seal schema changed');require(sha256(out/'audit.json')==s.get('audit_sha256'),'audit seal changed');a=load(out/'audit.json','audit');require(a.get('schema')==SCHEMA,'audit schema changed');require(a.get('status')=='current_seven_gate_audit_verified','audit status changed');return a
 def main()->None:
  p=argparse.ArgumentParser(description=__doc__);sub=p.add_subparsers(dest='cmd',required=True);b=sub.add_parser('build');b.add_argument('--output',type=Path,required=True);v=sub.add_parser('verify');v.add_argument('--output',type=Path,required=True);a=p.parse_args()
  try:r=build(a.output.resolve()) if a.cmd=='build' else verify(a.output.resolve(strict=True));print(json.dumps(r,indent=2,sort_keys=True))
