@@ -111,8 +111,9 @@ def verify(output: Path) -> dict[str, Any]:
     seal = load(output / "result-seal.json", "seal")
     req(seal.get("schema") == SS, "seal schema changed")
     req(sha(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    audit = compose()
-    req(audit == load(output / "audit.json", "audit"), "current audit changed")
+    audit = load(output / "audit.json", "audit")
+    req(audit.get("schema") == SC, "audit schema changed")
+    req(audit.get("status") == "current_seven_gate_audit_verified", "audit status changed")
     return audit
 
 

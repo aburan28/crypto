@@ -1,0 +1,30 @@
+name: Koblitz Stage 134 current gate audit
+on:
+  pull_request:
+    paths:
+      - "docs/ic/params/k1n59-cofactor-projected-l15-witnessed-full-public-59001.json"
+      - "docs/ic/runs/koblitz-n59-witnessed-compact-optimization-20260921.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-133-current-gate-audit-20260921/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-134-current-gate-audit-20260921/**"
+      - "scripts/compose_koblitz_stage133_gate_audit.py"
+      - "scripts/compose_koblitz_stage134_gate_audit.py"
+      - ".github/workflows/koblitz-stage134-current-gate-audit.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay Stage 133 historical audit and Stage 134 current audit
+        run: |
+          python3 -m py_compile scripts/compose_koblitz_stage133_gate_audit.py scripts/compose_koblitz_stage134_gate_audit.py
+          python3 -m json.tool docs/ic/params/k1n59-cofactor-projected-l15-witnessed-full-public-59001.json >/dev/null
+          python3 -m json.tool docs/ic/runs/koblitz-n59-witnessed-compact-optimization-20260921.json >/dev/null
+          python3 scripts/compose_koblitz_stage133_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-133-current-gate-audit-20260921 > "$RUNNER_TEMP/stage133-historical.json"
+          python3 scripts/compose_koblitz_stage134_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-134-current-gate-audit-20260921 > "$RUNNER_TEMP/stage134-current.json"
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
