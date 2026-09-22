@@ -18,8 +18,11 @@ use clap::Args;
 use serde_json::{json, Value};
 
 use crypto_lib::cryptanalysis::ic_descent_degrees::{
-    format_markdown, max_n_prime, price_descent_cell, semi_regular_degree, DescentCell,
+    format_engine_markdown, format_markdown, max_n_prime, price_descent_cell, price_engine_cell,
+    semi_regular_degree, DescentCell, EngineCell,
 };
+use crypto_lib::cryptanalysis::ic_framework::solvers::solver_by_name;
+use crypto_lib::cryptanalysis::ic_framework::stages::Params;
 
 #[derive(Args, Clone)]
 pub struct DescentArgs {
@@ -45,6 +48,29 @@ pub struct DescentArgs {
     /// finishing.  Zero means no budget.
     #[arg(long, default_value_t = 120)]
     pub budget_seconds: u64,
+    /// Price registered `SystemSolver` engines instead of the built-in
+    /// Buchberger, all on the same targets: `name` or `name:k=v,k=v`.
+    /// Repeat the flag once per engine (parameters use commas, so the
+    /// engines cannot share one flag).  Without it the command
+    /// reproduces the frozen §14/§16 tables exactly.
+    #[arg(long = "solver")]
+    pub solvers: Vec<String>,
+    /// With `--solver`: how many times every engine solves every target.
+    /// The runs are interleaved per target and the engine order rotates
+    /// each repetition, so drift on the host falls on every engine.
+    #[arg(long, default_value_t = 1)]
+    pub repeats: usize,
+}
+
+/// `name:k=v,k=v` → `(name, params)`.
+fn parse_engine(spec: &str) -> Result<(String, Params), String> {
+    let (name, rest) = spec.split_once(':').unwrap_or((spec, ""));
+    let mut params = Params::default();
+    for kv in rest.split(',').filter(|s| !s.is_empty()) {
+        let (k, v) = kv.split_once('=').ok_or_else(|| format!("parameter `{kv}` is not key=value"))?;
+        params.set(k.trim(), v.trim());
+    }
+    Ok((name.to_string(), params))
 }
 
 /// `n' = ceil(n/m)` makes the descent square: `m·n'` unknowns against
@@ -104,6 +130,10 @@ pub fn run(args: DescentArgs, json_only: bool) -> Result<Value, String> {
         if f != "K" && f != "R" {
             return Err(format!("family `{f}` is not K or R"));
         }
+    }
+
+    if !args.solvers.is_empty() {
+        return run_engines(&args, &cells, json_only);
     }
 
     let started = std::time::Instant::now();
@@ -171,5 +201,89 @@ pub fn run(args: DescentArgs, json_only: bool) -> Result<Value, String> {
             "quadratic_16_vars_16_eqs": semi_regular_degree(16, &[2; 16]),
             "quadratic_16_vars_32_eqs": semi_regular_degree(16, &[2; 32]),
         },
+    }))
+}
+
+/// `--solver`: every named engine on every target of every cell, paired.
+fn run_engines(args: &DescentArgs, cells: &[(u32, u32, u32)], json_only: bool) -> Result<Value, String> {
+    let mut engines = Vec::new();
+    let mut described = Vec::new();
+    for spec in &args.solvers {
+        let (name, params) = parse_engine(spec)?;
+        if engines.iter().any(|(n, _, _): &(String, _, _)| *n == name) {
+            return Err(format!("engine `{name}` listed twice"));
+        }
+        let solver = solver_by_name(&name)?;
+        described.push(json!({
+            "engine": name,
+            "spec": spec,
+            "describe": solver.describe(),
+            "finds_every_solution": solver.finds_every_solution(),
+        }));
+        engines.push((name, solver, params));
+    }
+    let budget = (args.budget_seconds > 0).then(|| std::time::Duration::from_secs(args.budget_seconds));
+    let started = std::time::Instant::now();
+    let mut measured: Vec<EngineCell> = Vec::new();
+    let mut skipped: Vec<Value> = Vec::new();
+    for family in &args.families {
+        for (n, n_prime, m) in cells {
+            if !json_only {
+                eprintln!("  {family} n={n} n'={n_prime} m={m} × {} engines × {} repeats …", engines.len(), args.repeats.max(1));
+            }
+            match price_engine_cell(
+                &engines,
+                family,
+                *n,
+                *n_prime,
+                *m,
+                args.targets.max(1),
+                args.seed,
+                budget,
+                args.repeats,
+            ) {
+                Some(cell) => measured.push(cell),
+                None => skipped.push(json!({
+                    "family": family, "n": n, "n_prime": n_prime, "m": m,
+                    "why": "no instance of this family at this degree, or past the descent cap",
+                })),
+            }
+        }
+    }
+    let disagreements: Vec<Value> = measured
+        .iter()
+        .flat_map(|c| {
+            c.engines.iter().filter(|e| !e.agrees_with_reference).map(move |e| {
+                json!({"family": c.family, "n": c.n, "n_prime": c.n_prime, "m": c.summands, "engine": e.engine})
+            })
+        })
+        .collect();
+    Ok(json!({
+        "schema_version": 1,
+        "operation": "descent-engines",
+        "status": if measured.is_empty() { "incomplete" } else { "complete" },
+        "what_this_is": "For each (curve family, n, n', m) cell: the Weil descent of the Semaev polynomial over the same seeded targets as the descent-degrees table, solved by every listed engine in every repetition, interleaved per target with the engine order rotated each repetition. Each engine's answers are checked against the reference engine's (fes-f2 where it applies, else exhaustive); each system carries a blake3 fingerprint and each cell a digest of the reference answers, so a rerun can prove it solved the same inputs and decided them the same way. The ms column is the mean over targets of the per-target median over repetitions.",
+        "what_this_is_not": [
+            "not a speed: this prices one decomposition oracle call on one target, which AGENTS.md section 2 calls a stage diagnostic and never a speed",
+            "not a common unit: each engine counts in its own unit (ops column, unit named per engine); only wall time is common, and it is a host-dependent practicality note",
+            "not a group relation: a boolean root is not yet a point decomposition until it is lifted and checked on the curve, which the whole-pipeline run does",
+            "not one leaderboard: a first-solution engine (sat-cdcl) and the complete-enumeration engines are different workloads and are listed apart"
+        ],
+        "config": {
+            "families": args.families,
+            "cells": cells.iter().map(|(n, np, m)| json!({"n": n, "n_prime": np, "m": m})).collect::<Vec<_>>(),
+            "targets": args.targets,
+            "seed": args.seed,
+            "budget_seconds_per_call": args.budget_seconds,
+            "repeats": args.repeats.max(1),
+            "engines": described,
+            "worker_threads": 1,
+        },
+        "cells_measured": measured.len(),
+        "cells_skipped": skipped,
+        "disagreements": disagreements,
+        "elapsed_seconds": started.elapsed().as_secs_f64(),
+        "markdown": format_engine_markdown(&measured),
+        "cells": measured,
     }))
 }

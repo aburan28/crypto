@@ -2944,6 +2944,172 @@ ic descent --cells 15:8:2,17:9:2,19:10:2,21:11:2 --targets 8 \
 ic descent --cells 11:6:2 --targets 8 --families K,R
 ```
 
+## 17. F4 and F5 behind the plug point
+
+§16 ended on "the engine is the wall": the only Gröbner engine behind
+the `SystemSolver` plug point was a Buchberger that takes pairs one at a
+time, and it cost six to thirteen times more per two extra unknowns
+until it hit the budget at twenty.  This round puts behind that plug
+point the engines the thread did not have:
+
+| engine | what it is | module |
+|:--|:--|:--|
+| `f4-f2` | Faugère's F4 over `F_2[v]/(v² − v)`: normal strategy, Gebauer–Möller criteria, the field products `v·g` as pairs, symbolic preprocessing, bit-packed elimination; a full reduced basis, solutions read off its linear elements | `pq_f4_f2` (new) |
+| `matrix-f4` | the Koblitz oracle's hybrid: Macaulay matrices to a fixed degree, propagation, splitting | `koblitz_groebner` |
+| `matrix-f5` | the same, with the rows the Boolean F5 criterion predicts to reduce to zero left out | `koblitz_groebner` |
+| `inherited-f4` | the same, children specialising their parent's reduced basis | `koblitz_groebner` |
+| `crossbred-f2` | Joux–Vitse: a Macaulay left kernel at degree `D`, then `2^k` bit-sliced linear solves | `crossbred` |
+| `fes-f2` | fast exhaustive search, libfes-lite's Gray code: two word XORs per point | `mq_fes` |
+
+and asks whether any of them moves an algebraic row.  §17.1 and §17.2
+were written and committed before the suite in §17.3 ran.
+
+### 17.1 The boundaries, stated before measuring
+
+**At the stage** — one decomposition oracle call on one target, a stage
+diagnostic and never a speed:
+
+- **The reference is exhaustive search, not Buchberger.**  `fes-f2`
+  wherever the system is quadratic, which is every two-summand descent
+  (`S₃` descends to quadratics, §16.1), and the `exhaustive` evaluator
+  where it is not (three summands, degree up to six).  It is the best
+  algorithm that already decides these systems at these sizes, and a
+  Gröbner engine that does not beat it on a cell has not earned its
+  place in that cell.
+- **The baseline is `buchberger-f2`**, the engine every frozen algebraic
+  row so far used (§14–§16).  Beating it is engineering; beating the
+  reference is the question.
+- **The degree floor is `D_sr`**, the semi-regular degree of the
+  system's shape (§14.3), derived per target: `5` from eighteen
+  unknowns on for two summands (§16.5), `7` and `8` at nine and twelve
+  unknowns for three.  The column it bounds is `D_learn`, the highest
+  step degree at which an engine produced a new basis element.
+
+**For the whole method** — `S`, every phase priced:
+
+- **The method reference is counted Pollard rho on the same subgroup.**
+  `ic bench` now runs it (`--rho-runs 16`: sixteen counted runs over the
+  planted targets, with its spread), so the `vs rho` column §15 and §16
+  left empty is filled from this round on.  At these toy orders rho's
+  `S` is setup-dominated — a development run put it at `16.2` (range
+  `10.1`–`33.1`) at `r = 4,091` — and the column is the ratio to the rho
+  measured on the same instance, never to the asymptotic `1.3`.
+- **The oracle reference is the pair table on the same base** (§15.1),
+  and the **floor** is the generic one, `√(π/2A)` in `S` (§3).
+
+**A known caveat on the baseline's degree, stated here because it
+changes how §14–§16's degree column reads.**  The boolean Buchberger
+processes S-pairs only, never the field products `v_i·g` for `v_i` in a
+leading monomial.  Its output is therefore not guaranteed to be a
+Gröbner basis of the boolean ideal: on the toy system
+`{v₀v₁ + v₀ + v₁}` it stops with three standard monomials for one
+solution, where `v₀·g = v₀` closes it.  A development check certified
+its outputs as boolean bases on all thirty-two descent targets probed
+(`n = 7`–`13`: every S-pair and every field product reduces to zero,
+and the standard monomials number the solutions); the whole-pipeline
+rows of §15 and §16.3 were verified end to end, logarithm and all; and
+the suite below compares its verdict with the reference's on every
+target, which is the check for the cells in between.  Its *degree* is
+another matter: an engine that must
+rediscover what a field product gives for free can need a higher
+degree to do it, so a `D_solve` from the pair-only engine is an upper
+bound on what the ideal needs, and the F4 engine, which processes field
+pairs at sugar degree `deg LM + 1`, is the one whose `D_learn` is
+compared with `D_sr` from here on.
+
+### 17.2 The suite, and the target, declared before the suite ran
+
+**The protocol.**  The WDSat regression suite of `AGENTS.md` §8 is a
+SAT-counter protocol and says of itself that it is not an adapter for
+other engines, so this round freezes an equivalent matched suite under
+the parent accounting contract, at
+`research/ic_framework_engines_20260922/`:
+
+- **Stage cells**, `ic descent --solver …`, the descent of §14/§16 with
+  the same target draw: two summands at `n:n' = 7:4, 9:5, 11:6, 13:7,
+  15:8, 17:9, 19:10, 21:11` (eight to twenty-two unknowns, square
+  systems) and three summands at `7:3, 9:3, 11:4`; families `K` and `R`
+  (`K` has no instance at `n = 21`); eight targets a cell; seed
+  `0x0DE5CE47`; three repetitions, interleaved per target with the
+  engine order rotated each repetition; a 120-second budget per call.
+  Engines: `buchberger-f2` (baseline), `f4-f2`, `matrix-f4`,
+  `matrix-f5`, `inherited-f4`, `crossbred-f2` at its module defaults
+  (`D = 3`, `k = 8`), `fes-f2`, `exhaustive`, and `sat-cdcl` on the
+  separate first-solution leaderboard.
+- **Past Buchberger's reach**, `23:12` and `25:13` (twenty-four and
+  twenty-six unknowns), the same protocol without `buchberger-f2`, whose
+  every call at twenty-two unknowns already hit the budget (§16.5), and
+  without `sat-cdcl`, which is on a separate leaderboard and was
+  `5,000×` the reference at twenty-two in development.
+- **A holdout**: seed `0x0F4F5EED` — new targets, and for `R` a new
+  curve — at `15:8, 17:9, 21:11, 23:12` and `9:3:3`, same engines.
+- **The whole method**, `ic bench`: the §15 base at `n = 13` and a
+  square base at `n = 15` (`dimension = 8`), each on three curves
+  (seeds `20260922`, `20260923`, `20260924`), and the §16.3 base at
+  `n = 17` on its curve; two planted targets each; the pair table, then
+  the descent oracle once per engine including `buchberger-f2`; rho on
+  every instance.
+- **Checks**: every system fingerprinted with blake3 and every cell's
+  reference answers digested, so a later run proves it saw the same
+  inputs; every engine's answers compared with the reference's on every
+  target and repetition; a call that exhausts its budget is recorded,
+  never repeated on that target and never read as "no solution";
+  every whole-pipeline logarithm verified against the planted one.
+- **Not in it**: `xl-f2`, for §15.6's reasons (one pass at degree
+  `n_vars`, no budget hook, a modelled count; it declines above ten
+  unknowns).
+
+What was known when this was written, disclosed so that the target can
+be judged against it: a one-target development probe per cell, run to
+size the budget and to check that no engine hangs, put `f4-f2` at
+`0.76 s` a call at twenty-two unknowns (Buchberger: over the 120-second
+budget on every §16.5 target), and `crossbred-f2` at `4.2×` and `1.8×`
+`fes-f2`'s wall time at twenty and twenty-two unknowns on one target
+each.  None of the probe's numbers is used below.
+
+**Success, all three:**
+
+1. **Reach.**  An F4-family engine (`f4-f2`, `matrix-f4`, `matrix-f5`,
+   `inherited-f4`) decides every two-summand target at sixteen to
+   twenty-two unknowns, main and holdout, within the budget, with zero
+   disagreements against the reference.
+2. **Engineering gate.**  The contract's promotion gate, on the whole
+   method: at `n = 13` and `n = 15` on all three curves, the best
+   F4-family row costs at least `20 %` less than the `buchberger-f2`
+   row per verified relation, all phases priced, with a `95 %` paired
+   bootstrap interval that excludes no improvement.
+3. **The question.**  Some algebraic engine's per-call wall time falls
+   below the reference's on a two-summand cell of the stage suite: the
+   median over the cell's targets of `engine / fes-f2` (each target's
+   median over repetitions) below one, with its `95 %` bootstrap
+   interval below one too.  A ratio that falls from sixteen to
+   twenty-six unknowns without crossing is recorded, and the crossover
+   it implies is extrapolated and marked as extrapolation; it does not
+   meet this target.
+
+**Abandon** the algebraic engines for two-summand descents at these
+sizes if no algebraic engine's ratio to `fes-f2` at twenty-six unknowns
+is below its ratio at sixteen: the engines are then not gaining on
+enumeration over the range this repository can reach, and more
+engineering on them is engineering on the wrong side of the boundary.
+
+**Classes, fixed in advance.**  A lower wall time than the baseline's
+is **engineering**, however large.  A `D_learn` below the baseline's
+`D_solve` is **accounting** on the degree column, not an advance: the
+ideal did not change, only whether the engine closed it (§17.1).  An
+**advance** at the stage is target 3's first clause; for the method it
+would be a whole-pipeline `S` below the same instance's pair-table
+row, which nothing in development came near.
+
+**Inadmissible**: changing a cell, a seed, a target count, the budget or
+an engine's parameters after reading the suite's numbers; dropping a
+budget-exhausted or declined call from a row; pricing an
+elimination-only count at the word-XOR ratio (every candidate engine's
+count is qualified and priced by measured wall time, §15.4); ranking
+the first-solution engine against the complete enumerators; and
+tuning `crossbred-f2`'s `D` and `k` per cell in this round — a tuned
+crossbred is a separate round with its own declaration.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

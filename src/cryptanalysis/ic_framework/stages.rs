@@ -379,6 +379,16 @@ pub trait SystemSolver: Send + Sync {
         true
     }
 
+    /// Whether `Solved` carries **every** solution (a complete
+    /// enumeration) or only one (a first-solution search, as a CDCL
+    /// solver returns).  The two are different workloads and are never
+    /// ranked against each other: the accounting contract keeps them
+    /// on separate leaderboards, and a comparison checks a first-solution
+    /// engine only for membership in the reference's solution set.
+    fn finds_every_solution(&self) -> bool {
+        true
+    }
+
     fn solve(
         &self,
         system: &BooleanSystem,
