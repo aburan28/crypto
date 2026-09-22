@@ -25,11 +25,12 @@ that did not pay**; the reference stays. §6 then asks the question the
 floor makes unavoidable — is the carry-less unit this slow on every GPU? —
 and measures the answer: **no.** On an H100 and a B200 a `CLMAD` costs 2.0
 and 3.8 logic slots instead of 38. On a B200 the same kernel runs at
-**11.15 B/s** bound by the logic pipe with the unit 96% idle, the
-`TOP_CLMAD` trade that lost 15% on the 6000 wins 13.4% there (**12.64 B/s**,
-verified, the part's best measured rate), and 30 B/s is not below a floor
-but a 2.4× cut of ALU work away — an engineering question this note prices
-and does not build. Per dollar the 6000 stays 3.3× ahead.
+**11.1 B/s** bound by the logic pipe with the unit 96% idle; the two
+ALU→`CLMAD` trades that lost or measured neutral on the 6000 win there,
+**+37.9% stacked (15.37 B/s**, verified, the part's best measured rate), at
+par with the ALU slots they remove; and 30 B/s is not below a floor but a
+1.95× cut of ALU work away — an engineering question this note prices and
+does not build. Per dollar the 6000 stays 2.7× ahead.
 
 ## 1. Boundary
 
@@ -347,12 +348,12 @@ with room for 282 `CLMAD`s per update on the unit.**
 |---|---:|---:|---:|---|---:|---:|---:|---|---|---|
 | shipping σ-walk, 256 × 2 ([B200.md](B200.md), 2026-09) | 2,324 | 33.1 | 8.822 | — | 33.0 | | | 3/3 validate | different walk | before |
 | **reference** = 20 B/s knob set, `sm_100` | 1,939 | 33.1 | **11.146** | 1 | 26.1 | 1,662 slots | 4.4% | 300/300 | yes | reference (+26% on the shipping walk) |
-| + `PACKED_ALU_SQUARE=0` (λ² on `CLMAD`) | 1,831 | 38.1 | 11.145 | 1.000 (0.9996 – 1.0001) | 26.1 | | 5.0% | 300/300 | yes | neutral — as on the 6000, the squaring is not on the binding path of either part |
 | **+ `PACKED_TOP_CLMAD=1`** (3-bit correction on the unit; −15% on the 6000) | 1,731 | 59.1 | **12.645** | **1.134 (1.134 – 1.135)** | 23.0 | 1,465 | 8.8% | 300/300 | yes | **engineering, +13.4%** |
-| + `TOP_CLMAD` + `ALU_SQUARE=0` | 1,626 | 64.1 | 12.644 | 1.134 (1.134 – 1.135) | 23.0 | | 9.6% | 300/300 | yes | the squaring is neutral here too |
-| + `PACKED_ONB_INV=1` (−4.8% on the 6000) | 1,883 | 36.1 | 11.839 | 1.062 (1.062 – 1.062) | 24.6 | | 5.0% | 300/300 | yes | engineering, +6.2%; not yet combined with `TOP_CLMAD` |
+| + `PACKED_ALU_SQUARE=0` (λ² on `CLMAD`), first run | — | — | ~~11.145~~ | ~~1.000~~ | | | | 300/300 | yes | **accounting: not a measurement.** The binary's identity line reads `packed alu square: 1`: the recursive `gpu-rtx-pro6000-20b` recipe hardcoded the knob, so the command-line 0 never reached the build and this row timed the reference against itself. Fixed in the Makefile (the recipe now forwards `PACKED_ALU_SQUARE`); re-measured below. |
+| + `TOP_CLMAD` + `ALU_SQUARE=0`, first run | — | — | ~~12.644~~ | ~~1.134~~ | | | | 300/300 | yes | accounting, the same defect: identical to the `TOP_CLMAD` row |
+| + `PACKED_ONB_INV=1` (−4.8% on the 6000) | 1,883 | 36.1 | 11.839 | 1.062 (1.062 – 1.062) | 24.6 | | 5.0% | 300/300 | yes | engineering, +6.2% |
 | + `PACKED_CHAINS=2`, 256 × 32 | 1,911 | 33.1 | 9.204 | 0.826 (0.825 – 0.826) | 31.6 | | 3.6% | 300/300 | yes | did not pay here either |
-| **30 B/s on a B200** | **≤ 618** | ≤ 282 | 30 | 2.69 | 9.7 | | | | | **not below a floor; a 2.4× ALU cut away** |
+| the `ALU_SQUARE=0` rows, re-measured, and the stacked best row | | | | | | | | | | **§6.4** |
 
 Three things the table says. **The hypothesis was right about the unit and
 wrong about what follows.** The unit is idle 91 – 96% of the time on the
@@ -366,34 +367,81 @@ unit, slow as it is, was still hiding some ALU latency that here lands on
 the pipe. **The trades flip sign with the die**, which is the point of the
 hypothesis: `TOP_CLMAD` cost 15% on the 6000 and buys 13.4% here; `ONB_INV`
 cost 4.8% and buys 6.2%; the two-chain kernel loses on both, so its loss is
-not a unit-rate effect but the register-file one §5.2 describes. **And 30
-B/s on a B200 is not below a floor**, unlike the 6000. It is 618 ALU slots
-per update against the ≤ 1,465 the best row spends, i.e. a 2.4× cut of the
-logic-pipe work, with 282 `CLMAD`s per update of unit capacity to move it
-onto. The reduction (78 slots × 6.3 per update, 490 in all) by `CLMAD`
-against the modulus is priced at −290 ALU / +19 `CLMAD` in THROUGHPUT-20B
-§4; the basis conversions and the inversion's Frobenius networks (≈ 300)
-are GF(2)-linear maps that a `CLMAD`-based formulation might absorb; the
-selection's 175 slots are lookups that could move to the idle unit as
-polynomial evaluations. None of that is built. Whether the sum reaches 618
-is the open engineering question on the B200 — and it is an engineering
-question, not a floor.
+not a unit-rate effect but the register-file one §5.2 describes. (The two
+`ALU_SQUARE=0` rows of this first run said "neutral" with a precision —
+0.9998, and 1.1343 against 1.1342 — that should have been the tell: they
+were the same binaries as their controls, a Makefile knob that did not
+propagate, caught in review from the identity lines in the frozen logs.
+§6.4 has the honest rows: **+8.8%** alone, **+25.5%** stacked on
+`TOP_CLMAD`, **+37.9%** with `ONB_INV` on top.) **And 30 B/s on a B200 is
+not below a floor**, unlike the 6000. It is 618 ALU slots per update against
+the ≤ 1,205 the best row of §6.4 spends, i.e. a 1.95× cut of the logic-pipe
+work, with 282 `CLMAD`s per
+update of unit capacity to move it onto. The reduction (78 slots × 6.3 per
+update, 490 in all) by `CLMAD` against the modulus is priced at −290 ALU /
++19 `CLMAD` in THROUGHPUT-20B §4; the basis conversions and the inversion's
+Frobenius networks (≈ 300) are GF(2)-linear maps that a `CLMAD`-based
+formulation might absorb; the selection's 175 slots are lookups that could
+move to the idle unit as polynomial evaluations. None of that is built.
+Whether the sum reaches 618 is the open engineering question on the B200 —
+and it is an engineering question, not a floor.
 
 What it is not is a campaign move. At Modal's list prices the 6000 does 6.6
-B/s per dollar-hour at 19.98 B/s and the B200 2.0 at 12.64: **3.3× worse per
+B/s per dollar-hour at 19.98 B/s and the B200 2.5 at 15.37: **2.7× worse per
 dollar**, and B200.md's break-even (29.1 B/s) is exactly the 30 B/s that is
-not built. The receipt for the B200 rows also supersedes B200.md's 8.82 B/s
-as that part's best measured rate (+43% with `TOP_CLMAD`, the same walk
-family); B200.md keeps its number as the before mark.
+not built. The receipts for the B200 rows also supersede B200.md's 8.82 B/s
+as that part's best measured rate (+74% at 15.37, the same walk family);
+B200.md keeps its number as the before mark.
 
-### 6.3 What would have to be true for 30 B/s on one GPU
+### 6.4 The B200 rows re-measured, knob asserted
+
+[benchmarks/fast-clmad/gpujob-clsq.sh](benchmarks/fast-clmad/gpujob-clsq.sh)
+rebuilds the four affected binaries after the Makefile fix, refuses to time
+any binary whose own identity line does not say the `PACKED_ALU_SQUARE` it
+was asked for, verifies each (300/300, 0 dropped, one DP hash `626a6fce…`
+across four) and benches them alternating, five repetitions, same B200 SKU
+and driver as §6.2 ([clsq-rerun/summary.json](benchmarks/fast-clmad/clsq-rerun/summary.json)).
+[gpujob-best.sh](benchmarks/fast-clmad/gpujob-best.sh) then stacks the ONB
+inversion on the best of those ([best/summary.json](benchmarks/fast-clmad/best/summary.json)).
+
+| variant on the B200 | ALU slots / update (static, `sm_100`) | `CLMAD` / update (static) | B/s, median of 5 | paired / ref (min – max) | SM-clocks / update | logic pipe allows ≤ | verified | same DPs | class |
+|---|---:|---:|---:|---|---:|---:|---|---|---|
+| reference (this session) | 1,939 | 40.25 | 11.058 | 1 | 26.3 | 1,675 | 300/300 | yes | reference |
+| + `ALU_SQUARE=0` (λ² on `CLMAD`) | 1,831 (−5.6%) | 45.25 | **12.033** | **1.088 (1.088 – 1.089)** | 24.2 | 1,540 | 300/300 | yes | **engineering, +8.8%** (neutral on the 6000) |
+| + `TOP_CLMAD=1` | 1,731 (−10.7%) | 66.25 | 12.595 | 1.139 (1.138 – 1.139) | 23.1 | 1,471 | 300/300 | yes | engineering, +13.9% (−15% on the 6000) |
+| + `TOP_CLMAD=1` + `ALU_SQUARE=0` | 1,626 (−16.1%) | 71.25 | 13.876; 13.942 in the next session | 1.255 (1.253 – 1.256); 1.250 | 21.0 | 1,335 | 300/300 | yes | engineering, +25.5% |
+| **+ `TOP_CLMAD=1` + `ALU_SQUARE=0` + `ONB_INV=1`** | **1,554 (−19.9%)** | 76.25 | **15.372** (ref that session 11.153) | **1.379 (1.378 – 1.379)** | **18.9** | 1,205 | 300/300 | yes | **engineering, +37.9%; the B200's best measured rate, 0.77 of the 6000's 19.98** |
+| **30 B/s on a B200** | **≤ 618** | ≤ 282 | 30 | 2.69 | 9.7 | | | | **a 1.95× ALU cut away** |
+
+The rate now moves with the static ALU column and with nothing else: −5.6%
+slots buys +8.8%, −10.7% buys +13.9%, −16.1% buys +25.5%, −19.9% buys
++37.9%, while the `CLMAD` column rises 89% and the unit stays under 12%
+busy. That is the signature of a kernel bound by one pipe with the other
+empty, and it is the opposite of the 6000, where the same changes measured
+−0.8%, −15% and −4.8% because that card's unit was the full one. The same
+source, two dies, two different binding pipes, trades of opposite sign. The
+gains run somewhat ahead of the static slot cut (−19.9% of slots for a
+1.379× rate is what a −27.5% dynamic cut would give), which the profile
+explains: `TOP_CLMAD` and `ONB_INV` both shorten the *dependent* part of a
+product and of the inversion chain, and at four warps per scheduler the
+kernel pays for latency as well as for issue.
+
+### 6.5 What would have to be true for 30 B/s on one GPU
 
 | part | binding pipe at the best row | best row | 30 B/s needs | status |
 |---|---|---:|---|---|
 | RTX PRO 6000 | carry-less unit (1.6 – 2.0 lane-`CLMAD`/SM-clock) | 19.98 | fewer than 4.1 products per update, or a faster unit | **below the floor**; two cards do 40 |
-| B200 | logic pipe (63.7 lanes/SM-clock) | 12.64 | ≤ 618 ALU slots per update, from ≤ 1,465 | a 2.4× ALU cut onto an idle unit; not built |
+| B200 | logic pipe (63.7 lanes/SM-clock) | 15.37 | ≤ 618 ALU slots per update, from ≤ 1,205 | a 1.95× ALU cut onto an idle unit; every trade so far has paid at par or better, none of the remaining ones is built |
 | H100 | logic pipe (59.8 lanes/SM-clock), by the probe; kernel not run | — | ≤ 521 ALU slots per update | as the B200, with 11% less pipe |
 
 The per-GPU answer to the question at the top is therefore **no on every
 part measured**, for two different reasons, and only one of them is a
-floor.
+floor. What the B200 rows add is the direction the remaining engineering
+would take on a full-rate part: every logic-pipe instruction that a
+`CLMAD` can replace is worth its slot count in rate, and the tree's
+remaining priced candidates — the reduction against the modulus (−290 slots
+for +19 `CLMAD`, THROUGHPUT-20B §4), the conversions and Frobenius networks
+as `CLMAD`-based linear maps, the selection lookups as polynomial
+evaluations — sum to something in the region of the 600 slots that 618
+needs, and none has been built or measured. Per dollar the 6000 is still the
+campaign's part: 6.6 B/s per dollar-hour against the B200's 2.5 at 15.37.

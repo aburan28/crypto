@@ -27,10 +27,12 @@ inside the warp — same walk, same distinguished points, and **0.696× the
 reference** measured paired on one RTX PRO 6000: each warp issues `CLMAD`s
 1.42× more often but 182 registers halve the warps. Its §6 then measures the
 `CLMAD` rate across dies: 37.8 logic slots per `CLMAD` on the RTX PRO 6000,
-3.8 on a B200, 2.0 on an H100. On a B200 the same kernel does 11.15 B/s
-bound by the logic pipe with the unit idle, `TOP_CLMAD` (−15% on the 6000)
-wins +13.4% there (12.64 B/s, verified), and 30 B/s is a 2.4× ALU cut away
-rather than below a floor; per dollar the 6000 stays 3.3× ahead.
+3.8 on a B200, 2.0 on an H100. On a B200 the same kernel does 11.1 B/s
+bound by the logic pipe with the unit idle; the ALU→`CLMAD` trades that lost
+on the 6000 win there at par with the slots they remove (`TOP_CLMAD` + the
+`CLMAD` squaring + the ONB inversion: +37.9%, 15.37 B/s, verified), and
+30 B/s is a 1.95× ALU cut away rather than below a floor; per dollar the
+6000 stays 2.7× ahead.
 
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
