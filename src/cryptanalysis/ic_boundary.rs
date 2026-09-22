@@ -2582,6 +2582,19 @@ impl TargetSource {
     }
 }
 
+/// When the walk's restart offsets are drawn.
+///
+/// `Lazy` draws offset `i` the first time a restart reaches for it, so a
+/// run that never restarts pays for none.  `Eager` draws all sixteen at
+/// setup, which is what Rounds 3 and 4 did; it is kept as a
+/// configuration rather than deleted so that the two can be run against
+/// each other from one binary, on one host, in one ladder.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RestartPool {
+    Lazy,
+    Eager,
+}
+
 /// Sixteen jumps `[a]G + [b]Q` with their coefficients, charged to `ops`.
 fn draw_jumps<G: CountedGroup>(
     g: &G,
@@ -2601,6 +2614,26 @@ fn draw_jumps<G: CountedGroup>(
             (g.add(ops, ag, bq), aj, bj)
         })
         .collect()
+}
+
+/// One restart offset `[c]G + [d]Q`, charged to the run's ledger and,
+/// for the report, to the pool's own ledger as well: `walk_pool_ops` is
+/// then the exact number of group additions the offsets cost, which is
+/// what the lazy and the eager arm differ by.
+fn draw_pool_offset<G: CountedGroup>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    rng: &mut StdRng,
+    ops: &mut GroupOps,
+    pool_ops: &mut GroupOps,
+) -> (G::Elt, u64, u64) {
+    let mut local = GroupOps::default();
+    let drawn = draw_jumps(g, generator, target, r, rng, &mut local, 1);
+    ops.merge(local);
+    pool_ops.merge(local);
+    drawn[0]
 }
 
 /// A key for the column part of a row: the same for two relations with
@@ -2629,6 +2662,7 @@ fn collect_and_solve<G: CountedGroup>(
     seed: u64,
     max_trials: u64,
     targets: TargetSource,
+    pool_mode: RestartPool,
     mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
 ) -> PipelineOutcome {
     let mut rng = StdRng::seed_from_u64(seed ^ 0x5245_4C41_5449_4F4E);
@@ -2680,12 +2714,33 @@ fn collect_and_solve<G: CountedGroup>(
     // sixteen jumps agree on about one index in sixteen, so two segments
     // that do collide diverge again within a step or two.  Shuffling
     // sixteen indices costs no group operation at all.
+    //
+    // The pool is drawn **on first use**, one offset at a time (§13).
+    // Rounds 3 and 4 drew all sixteen at setup, at two scalar
+    // multiplications each, and 110 of the ladder's 204 walk rows then
+    // restarted exactly once — that is, never took an offset at all —
+    // so more than half the rows paid thirty-two scalar multiplications
+    // for nothing, and on the smallest rungs that setup was most of the
+    // relation phase.  Drawing lazily charges a row for exactly the
+    // offsets it used.
+    //
+    // Two details make the lazy and the eager arm comparable rather than
+    // merely similar.  The offsets come off a **stream of their own**,
+    // so moving the draw cannot shift the walk's randomness; and a
+    // restart takes offset `k mod 16` rather than a random one, so the
+    // selection consumes no randomness either.  The two arms therefore
+    // walk bit-identical trajectories and differ in exactly one thing:
+    // the offsets they paid for.  `walk_pool_ops` reports that cost, so
+    // the difference between the arms is checkable rather than argued.
     let jump_count = 16usize;
     let pool_count = 16usize;
     let shared_jumps = targets == TargetSource::WalkSharedJumps;
     let guarded = targets.is_guarded();
     let mut jumps: Vec<(G::Elt, u64, u64)> = Vec::new();
     let mut pool: Vec<(G::Elt, u64, u64)> = Vec::new();
+    let mut pool_rng = StdRng::seed_from_u64(seed ^ 0x504F_4F4C_5F4F_4646);
+    let mut pool_ops = GroupOps::default();
+    let mut pool_taken = 0u64;
     let mut jump_perm: Vec<usize> = (0..jump_count).collect();
     let mut walk_point = g.identity();
     let (mut wa, mut wb) = (0u64, 0u64);
@@ -2698,9 +2753,12 @@ fn collect_and_solve<G: CountedGroup>(
     if targets.is_walk() {
         jumps = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, jump_count);
         walk_jumps += jump_count as u64;
-        if !shared_jumps {
-            pool = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, pool_count);
-            walk_jumps += pool_count as u64;
+        if !shared_jumps && pool_mode == RestartPool::Eager {
+            for _ in 0..pool_count {
+                let off =
+                    draw_pool_offset(g, generator, target, r, &mut pool_rng, &mut rel.group_ops, &mut pool_ops);
+                pool.push(off);
+            }
         }
     }
 
@@ -2720,7 +2778,7 @@ fn collect_and_solve<G: CountedGroup>(
             }
             TargetSource::Walk | TargetSource::WalkSharedJumps => {
                 if walk_fresh || segment_steps >= segment_cap {
-                    if walk_restarts == 0 || shared_jumps || pool.is_empty() {
+                    if walk_restarts == 0 || shared_jumps {
                         // The first segment, and every segment of the
                         // unguarded diagnostic, starts from a fresh
                         // `[a]G + [b]Q`.
@@ -2730,7 +2788,23 @@ fn collect_and_solve<G: CountedGroup>(
                         let bq = g.mul(&mut rel.group_ops, target, wb);
                         walk_point = g.add(&mut rel.group_ops, ag, bq);
                     } else {
-                        let (op, oa, ob) = pool[rng.gen_range(0..pool.len())];
+                        // Offset `k mod 16` for the k-th restart, drawn
+                        // here if this is the first restart to reach it.
+                        let idx = (pool_taken as usize) % pool_count;
+                        pool_taken += 1;
+                        if idx == pool.len() {
+                            let off = draw_pool_offset(
+                                g,
+                                generator,
+                                target,
+                                r,
+                                &mut pool_rng,
+                                &mut rel.group_ops,
+                                &mut pool_ops,
+                            );
+                            pool.push(off);
+                        }
+                        let (op, oa, ob) = pool[idx];
                         walk_point = g.add(&mut rel.group_ops, walk_point, op);
                         wa = addmod(wa, oa, r);
                         wb = addmod(wb, ob, r);
@@ -2839,7 +2913,10 @@ fn collect_and_solve<G: CountedGroup>(
     rel.count("repeated_targets_skipped", repeats_skipped);
     rel.count("target_guard_probes", guard_probes);
     if targets.is_walk() {
-        rel.count("walk_jumps", walk_jumps);
+        rel.count("walk_jumps", walk_jumps + pool.len() as u64);
+        rel.count("walk_pool_offsets", pool.len() as u64);
+        rel.count("walk_pool_ops", pool_ops.adds + pool_ops.doubles);
+        rel.count("walk_pool_restarts", pool_taken);
         rel.count("walk_steps", walk_steps);
         rel.count("walk_restarts", walk_restarts);
     }
@@ -3105,6 +3182,12 @@ pub struct BoundaryConfig {
     /// before §10.2 of the note, for the diagnostic that measures what
     /// that cost.  The default guards both sources.
     pub unguarded_targets: bool,
+    /// Draw all sixteen restart offsets at setup, as Rounds 3 and 4 did,
+    /// instead of drawing each the first time a restart reaches for it.
+    /// This is the baseline arm of §13's comparison; the default is
+    /// lazy.  Nothing else about the walk changes with it, which is what
+    /// makes the two arms comparable row by row.
+    pub eager_restart_pool: bool,
 }
 
 impl Default for BoundaryConfig {
@@ -3128,6 +3211,7 @@ impl Default for BoundaryConfig {
             max_folded_table_pairs: 1 << 23,
             m2_floor_divisor: 4,
             unguarded_targets: false,
+            eager_restart_pool: false,
         }
     }
 }
@@ -3139,6 +3223,15 @@ impl BoundaryConfig {
             TargetSource::WalkSharedJumps
         } else {
             TargetSource::Walk
+        }
+    }
+
+    /// When the walk rows draw their restart offsets.
+    pub fn restart_pool(&self) -> RestartPool {
+        if self.eager_restart_pool {
+            RestartPool::Eager
+        } else {
+            RestartPool::Lazy
         }
     }
 
@@ -3382,6 +3475,7 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
                 seed,
                 budget,
                 targets,
+                cfg.restart_pool(),
                 |ops, ctr, point| decompose_prime(curve, fb, &oracle, ops, ctr, point),
             );
             let exact = if oracle.summands() == 2 { exact_m2 } else { exact_m3 };
@@ -3445,6 +3539,7 @@ fn run_binary_variant(
         seed,
         budget,
         targets,
+        cfg.restart_pool(),
         |ops, ctr, point| decompose_binary(inst, fb, oracle, ops, ctr, point),
     );
     let mut v = assemble_variant(
@@ -4642,9 +4737,14 @@ mod tests {
         let walk = res.variants.iter().find(|v| v.name == "mitm_m2_negfold_walk").unwrap();
         assert_eq!(walk.targets, "walk");
         assert!(walk.relations.get("walk_steps") > 0);
-        // Sixteen jumps and sixteen restart offsets, drawn once for the
-        // whole run whatever the restarts (Round 3).
-        assert_eq!(walk.relations.get("walk_jumps"), 32);
+        // Sixteen jumps drawn once, and one restart offset per restart
+        // up to sixteen (§13).  Round 3 and Round 4 drew all sixteen
+        // offsets here whatever the restarts, which on a run this small
+        // is the whole of the relation phase's setup.
+        let offsets = walk.relations.get("walk_pool_offsets");
+        assert_eq!(walk.relations.get("walk_jumps"), 16 + offsets);
+        assert_eq!(offsets, walk.relations.get("walk_pool_restarts").min(16));
+        assert!(offsets < 16, "the quick ladder's walk should not need the whole pool");
         let random = res.variants.iter().find(|v| v.name == "mitm_m2_negfold").unwrap();
         assert!(walk.relations.group_ops.scalar_mults < random.relations.group_ops.scalar_mults);
         // No target is ever presented twice, on either source, so no row
@@ -4750,19 +4850,82 @@ mod tests {
         let oracle = Oracle::Mitm { table: &table, m: 2 };
         let mut restarts = 0u64;
         for seed in 1..=8u64 {
-            let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, |o, c, p| {
-                decompose_prime(curve, &fb, &oracle, o, c, p)
-            });
-            assert_eq!(out.recovered, Some(d), "seed {seed}");
-            assert_eq!(out.linear_algebra.get("repeated_column_rows"), 0);
-            let r = out.relations.get("walk_restarts");
-            restarts += r;
-            // Sixteen jumps and sixteen pool offsets, two scalar
-            // multiplications each, drawn once; the restarts add none.
-            assert_eq!(out.relations.group_ops.scalar_mults, 2 * 32 + 2, "seed {seed}: restarts {r}");
-            assert_eq!(out.relations.get("walk_jumps"), 32);
+            for pool in [RestartPool::Eager, RestartPool::Lazy] {
+                let out =
+                    collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, pool, |o, c, p| {
+                        decompose_prime(curve, &fb, &oracle, o, c, p)
+                    });
+                assert_eq!(out.recovered, Some(d), "seed {seed}");
+                assert_eq!(out.linear_algebra.get("repeated_column_rows"), 0);
+                let r = out.relations.get("walk_restarts");
+                if pool == RestartPool::Eager {
+                    restarts += r;
+                }
+                // Sixteen jumps and the offsets the pool holds, two
+                // scalar multiplications each; the restarts themselves
+                // add none.
+                let offsets = out.relations.get("walk_pool_offsets");
+                assert_eq!(out.relations.group_ops.scalar_mults, 2 * (16 + offsets) + 2, "seed {seed}: restarts {r}");
+                assert_eq!(out.relations.get("walk_jumps"), 16 + offsets);
+                match pool {
+                    RestartPool::Eager => assert_eq!(offsets, 16, "seed {seed}"),
+                    // A run takes offset `k mod 16` on its k-th restart,
+                    // so it holds one per restart until it has sixteen.
+                    RestartPool::Lazy => {
+                        assert_eq!(offsets, out.relations.get("walk_pool_restarts").min(16), "seed {seed}")
+                    }
+                }
+            }
         }
         assert!(restarts > 0, "the guard should have forced a restart somewhere in eight runs");
+    }
+
+    #[test]
+    fn drawing_the_restart_pool_lazily_changes_the_cost_and_nothing_else() {
+        // §13's whole claim in one assertion.  The offsets come off a
+        // stream of their own and are taken in a fixed cycle, so the two
+        // arms must walk the *same* trajectory — same steps, same
+        // restarts, same trials, same relations, same logarithm — and
+        // differ in exactly one quantity: what the offsets cost.  If that
+        // holds, the saving is not an estimate, it is a subtraction.
+        // Two rungs, because the saving lives at one end: a big run
+        // restarts past sixteen and draws the whole pool either way,
+        // and it is the small run that was paying for offsets it never
+        // reached.
+        let mut saved_somewhere = false;
+        for bits in [12u32, 18] {
+            let inst = roster_prime_instance(bits).unwrap();
+            let curve = &inst.curve;
+            let fb = prime_factor_base(&inst, 16);
+            let table = PairTable::build_negation_folded(curve, &fb);
+            let g = inst.generator_point();
+            let mut ops = GroupOps::default();
+            let d = 30_011 % inst.r;
+            let q = curve.mul(&mut ops, g, d);
+            let oracle = Oracle::Mitm { table: &table, m: 2 };
+            for seed in 1..=8u64 {
+                let run = |pool| {
+                    collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, pool, |o, c, p| {
+                        decompose_prime(curve, &fb, &oracle, o, c, p)
+                    })
+                };
+                let eager = run(RestartPool::Eager);
+                let lazy = run(RestartPool::Lazy);
+                let at = format!("{bits} bits, seed {seed}");
+                assert_eq!(eager.recovered, lazy.recovered, "{at}");
+                assert_eq!(eager.recovered, Some(d), "{at}");
+                for k in ["trials", "relations", "walk_steps", "walk_restarts", "walk_pool_restarts", "repeated_targets_skipped"] {
+                    assert_eq!(eager.relations.get(k), lazy.relations.get(k), "{at}: {k}");
+                }
+                assert_eq!(eager.linear_algebra.native, lazy.linear_algebra.native, "{at}");
+                // The one difference, and it accounts for itself exactly.
+                let pool_saving = eager.relations.get("walk_pool_ops") - lazy.relations.get("walk_pool_ops");
+                let gae_saving = eager.relations.group_ops.gae() - lazy.relations.group_ops.gae();
+                assert_eq!(gae_saving, pool_saving as f64, "{at}");
+                saved_somewhere |= pool_saving > 0;
+            }
+        }
+        assert!(saved_somewhere, "no run took fewer than sixteen offsets; the fixture proves nothing");
     }
 
     #[test]
@@ -4790,7 +4953,7 @@ mod tests {
                 (TargetSource::RandomUnguarded, &mut unguarded_repeats),
                 (TargetSource::Random, &mut guarded_repeats),
             ] {
-                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, |o, c, p| {
+                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, RestartPool::Lazy, |o, c, p| {
                     decompose_prime(curve, &fb, &oracle, o, c, p)
                 });
                 assert_eq!(out.recovered, Some(d), "{source:?} seed {seed}");
@@ -4828,7 +4991,7 @@ mod tests {
                 (TargetSource::WalkSharedJumps, &mut merged_repeats),
                 (TargetSource::Walk, &mut fresh_repeats),
             ] {
-                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, |o, c, p| {
+                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, RestartPool::Lazy, |o, c, p| {
                     decompose_prime(curve, &fb, &oracle, o, c, p)
                 });
                 assert_eq!(out.recovered, Some(d), "{source:?} seed {seed}");
@@ -5084,7 +5247,7 @@ mod tests {
         }
         eprintln!("ground truth: {truth_hits}/{checked} targets decompose; oracle found {oracle_hits}");
         let t = Instant::now();
-        let outcome = collect_and_solve(&g, inst.generator, target, inst.r, inst.cofactor, &folded, 5, 1_000_000, TargetSource::Random, |ops, ctr, point| {
+        let outcome = collect_and_solve(&g, inst.generator, target, inst.r, inst.cofactor, &folded, 5, 1_000_000, TargetSource::Random, RestartPool::Lazy, |ops, ctr, point| {
             decompose_binary(&inst, &folded, &Oracle::Mitm { table: &table, m: 3 }, ops, ctr, point)
         });
         eprintln!(
