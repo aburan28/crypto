@@ -44,7 +44,8 @@
     "gray_ffs_l4_full_ns": 92545,
     "gray_on_step_full_ns": 3419810,
     "ratio_on_step_over_ffs": 36.95,
-    "l4_hot_path": "Fl[0..4] held in registers for the whole walk + unchecked Fq/Fl indexing; dedicated no-Vec find_one; cold push_solution",
+    "l4_hot_path": "Fl[0..4] held in registers for the whole walk + unchecked indexing; dedicated no-Vec find_one; cold push_solution",
+    "u32_l4_role": "opt-in; ties or loses to u64 at n=18 (~0.9–1.0×)",
     "parallel_outer": {
       "auto_select": false,
       "outer_bits": 4,
