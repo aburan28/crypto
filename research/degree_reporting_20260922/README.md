@@ -42,8 +42,9 @@ The focused CI job runs `cargo test --lib degree_reporting_` and
 `cargo test --lib control_arms_are_reported_separately`, then checks the example
 build. Tests cover both counterexamples and zero-root controls over 96 generated
 systems (three variable counts, two equation counts, sixteen seeds).
-The source environment used to prepare this correction has no Rust toolchain;
-Rust validation is delegated to the recorded CI job, not claimed as a local pass.
+[Focused CI run 35752762984](https://github.com/aburan28/crypto/actions/runs/35752762984)
+passed all three commands. The source environment has no Rust toolchain;
+this is a recorded CI pass, not a local Rust run.
 
 There is no performance iteration, full-DLP measurement, or boundary-ratio
 improvement in this correction. No new cost is inferred from these diagnostics.
