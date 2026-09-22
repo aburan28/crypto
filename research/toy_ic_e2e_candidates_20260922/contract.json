@@ -1,0 +1,26 @@
+{
+  "id": "bounded-toy-ic-candidate-comparison-20260922-v1",
+  "classification": "accounting and integration; no cryptanalytic advance",
+  "scope": "Only fixed internally generated 5/9-bit Koblitz toy instances; no external targets or field-size option.",
+  "parent": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+  "equivalent_suite_reason": "The WDSat regression fixes another curve/encoding and measures a solver stage. This comparison retains the existing a=0, m=3, normal-basis distinct-abscissa domain and extends its tiny full-DLP smoke test; it does not replace the WDSat baseline or claim a performance optimization.",
+  "panels": [
+    {"n":5,"d":3,"curve_order":44,"subgroup_order":11},
+    {"n":9,"d":4,"curve_order":508,"subgroup_order":127}
+  ],
+  "frozen_seeds": [91,137,211],
+  "fresh_seeds": [733,947,1201,1601,1901,2203,2707],
+  "repetitions": 3,
+  "variants": ["quadratic-image","coefficient-pullback","cached-pullback","s4-symmetric","chained-s3","rho"],
+  "target_attempt_cap": 128,
+  "decomposition_seconds": 3,
+  "run_seconds": 30,
+  "domain": "Exactly three distinct nonzero normal-basis factor abscissae, excluding the target abscissa. Same raw support, cofactor projection, scalar field, targets and seeds across adapters.",
+  "boundary": "At most 8*C(M,3) signed triples of M rational abscissae can cover #E-1 uniformly sampled nonidentity targets. With B independent columns and at most one row per attempt, expected collection attempts >= B/min(1,8*C(M,3)/(#E-1)). This is an attempt-count bound, not a common-operation lower bound.",
+  "reference": "Existing plain three-partition Floyd rho on the identical target/group. No automorphism-aware rho claim, no real-curve extrapolation.",
+  "success_gate": "Every completed scalar verifies. All five-bit first/enumerate outputs equal an independent group oracle; every full-run attempt is audited after timing, including complete empty answers. All planned attempts, failures and timeouts remain in raw output.",
+  "falsifier": "A false relation, a false empty answer, or a wrong scalar invalidates correctness. Missing completions block unconditional comparisons. No uncalibrated field/SAT/scalar sum, common-operation speedup, or fitted exponent is reported.",
+  "accounting": "Cold starts include toy field/group enumeration, generator/target setup, factor base, every per-call encoding/setup, failed search, lifting, filtering, rank elimination, individual descent, and final verification. Process import is measured separately. Offline truth audit is excluded. Nested solver timings are diagnostics and are not added to their parent phase.",
+  "timing_analysis": "Sequential one-thread runs with randomized variant order, three repetitions. Show per-seed medians, paired diagnostic wall-time ratios and seed-cluster bootstrap intervals. Fresh seeds may collide in tiny groups; preserve and report distinct target counts. S and calibrated boundary ratios remain null.",
+  "unimplemented": ["F4/Magma in this matched full-DLP harness","WDSat backend","Frobenius orbit factor-base compression","large-prime relation graph","large sparse scalar-field linear algebra","ECC2K-130 key recovery"]
+}

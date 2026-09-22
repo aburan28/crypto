@@ -1,0 +1,90 @@
+{
+  "source_commit": "2e2dcbe3e3e8111cba55e25c36a5a32d48df8929",
+  "source_sha256": {
+    "ecc2k130/codegen/build.py": "eeeb25eb6482b233c8d4ae56f5cc564d331897aaa4647ac2e83c6ccdbf8479a5",
+    "ecc2k130/codegen/cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879",
+    "ecc2k130/codegen/curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+    "ecc2k130/codegen/decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+    "ecc2k130/codegen/field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+    "ecc2k130/codegen/indexcalc.py": "1be6ee84858db71349a034241b92d842e0c79ee6a0fabaefbc497d586ada71a7",
+    "ecc2k130/codegen/ir.py": "72309644779d6be6cb21dbbf197f6b747b7ad3fc07b359cd7c79007b798fd5b0",
+    "ecc2k130/codegen/nagaoannihilator.py": "7cf9d7f9fc6f2d7f9154e32a8dacd16429a50d9e2a745a84aa2335fb513b1b73",
+    "ecc2k130/codegen/nagaocompare.py": "57b27ec7098196d07734568c2b2bc76a7532fd2ac753a835c2f8cd3104a7fa5a",
+    "ecc2k130/codegen/nagaodecomp.py": "bb51628284100957ec22a8da294204943a08358ee46713d6d254d721143fc446",
+    "research/nagao_relations/coefficient_pullback/experiment.py": "545e76476c634dc8489efdf6afd9437e538772d1b7980e20fd3ba5c2824964e9",
+    "research/nagao_relations/coefficient_pullback/pullback.py": "b4f5fcd32312ae215093beac4d9d03508cb54a7a263632da4126f6eadf99dcbc",
+    "research/nagao_relations/solver_02/run.py": "9ff8a57e8ff901ec9592a9ea10591e2e3a876e063dc0d471e9c36ded9c3e90d3",
+    "research/nagao_relations/solver_02/support.py": "34936db804fde876e7ad170c47a14da2e9705bcd15835c7c3aff105e31dfcb0c",
+    "research/nagao_relations/solver_05/quadratic.py": "a4fdbd4e9d6fb7fef7196b3af27437bc7e6c235701c1c5408d8abfb99841c47f",
+    "research/nagao_relations/solver_06/s4.py": "f85a4ec9779e91e65dc61281aa7b3b1ec50911b5382cac23e34caf101be59ce3",
+    "research/nagao_relations/solver_07/optimized.py": "6ba3550399d995a7aff53e2defcba77982739a6855ed1d3361481abfdc8f09e0",
+    "research/nagao_relations/solver_08/image_solver.py": "c7b832c0912d93bcc7d03db6c3cd426906a06fe9c0ed6ee3f10d0bf7f76a81c2",
+    "research/toy_ic_e2e_candidates_20260922/benchmark.py": "d418a277a207e9bf953a3d6224d596914e3d9555676fba61e1976a06c022e1b2",
+    "research/toy_ic_e2e_candidates_20260922/bindings.py": "5079250ee2de6184c28e904086cca5ba25dbd803391534386f99c940d34b3bdc",
+    "research/toy_ic_e2e_candidates_20260922/contract.json": "1ce53f078759ee04784b9fa6aee1d69bfa936f447245d8015a188428c3dd34e6",
+    "research/toy_ic_e2e_candidates_20260922/pipeline.py": "b926e79b2d53790779269c862cbe0d42188c9ee737fcc1fc16f5734869ccd085"
+  },
+  "python": "3.12.14",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+  "pycryptosat": "5.14.7",
+  "threads_per_solver": 1,
+  "command": [
+    "research/toy_ic_e2e_candidates_20260922/benchmark.py",
+    "--smoke",
+    "--output",
+    "research/toy_ic_e2e_candidates_20260922/smoke_v1"
+  ],
+  "contract": {
+    "id": "bounded-toy-ic-candidate-comparison-20260922-v1",
+    "classification": "accounting and integration; no cryptanalytic advance",
+    "scope": "Only fixed internally generated 5/9-bit Koblitz toy instances; no external targets or field-size option.",
+    "parent": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+    "equivalent_suite_reason": "The WDSat regression fixes another curve/encoding and measures a solver stage. This comparison retains the existing a=0, m=3, normal-basis distinct-abscissa domain and extends its tiny full-DLP smoke test; it does not replace the WDSat baseline or claim a performance optimization.",
+    "panels": [
+      {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      }
+    ],
+    "frozen_seeds": [
+      91
+    ],
+    "fresh_seeds": [],
+    "repetitions": 1,
+    "variants": [
+      "quadratic-image",
+      "coefficient-pullback",
+      "cached-pullback",
+      "s4-symmetric",
+      "chained-s3",
+      "rho"
+    ],
+    "target_attempt_cap": 128,
+    "decomposition_seconds": 3,
+    "run_seconds": 30,
+    "domain": "Exactly three distinct nonzero normal-basis factor abscissae, excluding the target abscissa. Same raw support, cofactor projection, scalar field, targets and seeds across adapters.",
+    "boundary": "At most 8*C(M,3) signed triples of M rational abscissae can cover #E-1 uniformly sampled nonidentity targets. With B independent columns and at most one row per attempt, expected collection attempts >= B/min(1,8*C(M,3)/(#E-1)). This is an attempt-count bound, not a common-operation lower bound.",
+    "reference": "Existing plain three-partition Floyd rho on the identical target/group. No automorphism-aware rho claim, no real-curve extrapolation.",
+    "success_gate": "Every completed scalar verifies. All five-bit first/enumerate outputs equal an independent group oracle; every full-run attempt is audited after timing, including complete empty answers. All planned attempts, failures and timeouts remain in raw output.",
+    "falsifier": "A false relation, a false empty answer, or a wrong scalar invalidates correctness. Missing completions block unconditional comparisons. No uncalibrated field/SAT/scalar sum, common-operation speedup, or fitted exponent is reported.",
+    "accounting": "Cold starts include toy field/group enumeration, generator/target setup, factor base, every per-call encoding/setup, failed search, lifting, filtering, rank elimination, individual descent, and final verification. Process import is measured separately. Offline truth audit is excluded. Nested solver timings are diagnostics and are not added to their parent phase.",
+    "timing_analysis": "Sequential one-thread runs with randomized variant order, three repetitions. Show per-seed medians, paired diagnostic wall-time ratios and seed-cluster bootstrap intervals. Fresh seeds may collide in tiny groups; preserve and report distinct target counts. S and calibrated boundary ratios remain null.",
+    "unimplemented": [
+      "F4/Magma in this matched full-DLP harness",
+      "WDSat backend",
+      "Frobenius orbit factor-base compression",
+      "large-prime relation graph",
+      "large sparse scalar-field linear algebra",
+      "ECC2K-130 key recovery"
+    ]
+  }
+}
