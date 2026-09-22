@@ -1,0 +1,178 @@
+diff --git a/src/bin/ic/workflow.rs b/src/bin/ic/workflow.rs
+index 47c80aab..60b9240d 100644
+--- a/src/bin/ic/workflow.rs
++++ b/src/bin/ic/workflow.rs
+@@ -105,6 +105,9 @@ fn is_zero_u64(v: &u64) -> bool {
+ fn is_zero_usize(v: &usize) -> bool {
+     *v == 0
+ }
++fn is_false(v: &bool) -> bool {
++    !*v
++}
+ fn default_targeted_tail_seed() -> u64 {
+     0x5441_5247_4554_5901
+ }
+@@ -264,6 +267,11 @@ pub struct CollectionParams {
+     /// the targeted tail coverage-only.
+     #[serde(default, skip_serializing_if = "is_zero_usize")]
+     pub targeted_tail_rank_columns: usize,
++    /// Restrict rank-tail selection to the latest homogeneous sparse
++    /// null-vector support when available, falling back to global
++    /// incidence otherwise.
++    #[serde(default, skip_serializing_if = "is_false")]
++    pub targeted_tail_null_support: bool,
+     /// Independent probe-sequence domain for the targeted tail.
+     #[serde(
+         default = "default_targeted_tail_seed",
+@@ -280,6 +288,7 @@ impl Default for CollectionParams {
+             targeted_tail_trials: 0,
+             targeted_tail_rounds: 0,
+             targeted_tail_rank_columns: 0,
++            targeted_tail_null_support: false,
+             targeted_tail_seed: default_targeted_tail_seed(),
+         }
+     }
+@@ -577,6 +586,8 @@ pub struct TargetedTailDocument {
+     pub base_seed: u64,
+     pub trials_per_column: u64,
+     pub rank_columns_per_round: usize,
++    #[serde(default)]
++    pub null_support_policy: bool,
+     pub attempts: Vec<TargetedTailAttempt>,
+ }
+ 
+@@ -1416,6 +1427,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+                 || document.trials_per_column != p.collection.targeted_tail_trials
+                 || document.rank_columns_per_round
+                     != p.collection.targeted_tail_rank_columns
++                || document.null_support_policy != p.collection.targeted_tail_null_support
+             {
+                 return Err(format!(
+                     "{} belongs to a different run or targeted-tail policy",
+@@ -1435,6 +1447,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+                 base_seed: p.collection.targeted_tail_seed,
+                 trials_per_column: p.collection.targeted_tail_trials,
+                 rank_columns_per_round: p.collection.targeted_tail_rank_columns,
++                null_support_policy: p.collection.targeted_tail_null_support,
+                 attempts: Vec::new(),
+             }
+         };
+@@ -1479,7 +1492,16 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+             'rounds: for round in first_round..p.collection.targeted_tail_rounds {
+                 let uncovered = solver.uncovered_columns();
+                 let columns = if uncovered.is_empty() {
+-                    solver.least_covered_columns(p.collection.targeted_tail_rank_columns)
++                    let supported = p.collection.targeted_tail_null_support
++                        .then(|| {
++                            solver.null_support_columns(p.collection.targeted_tail_rank_columns)
++                        })
++                        .unwrap_or_default();
++                    if supported.is_empty() {
++                        solver.least_covered_columns(p.collection.targeted_tail_rank_columns)
++                    } else {
++                        supported
++                    }
+                 } else {
+                     uncovered
+                 };
+@@ -2059,16 +2081,19 @@ mod tests {
+         assert!(collection.get("targeted_tail_trials").is_none());
+         assert!(collection.get("targeted_tail_rounds").is_none());
+         assert!(collection.get("targeted_tail_rank_columns").is_none());
++        assert!(collection.get("targeted_tail_null_support").is_none());
+         assert!(collection.get("targeted_tail_seed").is_none());
+ 
+         p.collection.targeted_tail_trials = 10_000;
+         p.collection.targeted_tail_rounds = 4;
+         p.collection.targeted_tail_rank_columns = 8;
++        p.collection.targeted_tail_null_support = true;
+         p.collection.targeted_tail_seed ^= 1;
+         let enabled = serde_json::to_value(&p.collection).unwrap();
+         assert_eq!(enabled["targeted_tail_trials"], 10_000);
+         assert_eq!(enabled["targeted_tail_rounds"], 4);
+         assert_eq!(enabled["targeted_tail_rank_columns"], 8);
++        assert_eq!(enabled["targeted_tail_null_support"], true);
+         assert!(enabled.get("targeted_tail_seed").is_some());
+     }
+ 
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index cd730af6..e9f853da 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -8145,6 +8145,10 @@ impl<'a> LogSystem<'a> {
+     }
+ 
+     fn least_covered_columns(&self, limit: usize) -> Vec<usize> {
++        self.least_covered_columns_within(&(0..self.n_cols).collect::<Vec<_>>(), limit)
++    }
++
++    fn least_covered_columns_within(&self, candidates: &[usize], limit: usize) -> Vec<usize> {
+         let mut weights = vec![0usize; self.n_cols];
+         if self.sparse_opts.is_some() {
+             for row in &self.sparse_rows {
+@@ -8159,7 +8163,13 @@ impl<'a> LogSystem<'a> {
+                 }
+             }
+         }
+-        let mut columns: Vec<usize> = (0..self.n_cols).collect();
++        let mut columns: Vec<usize> = candidates
++            .iter()
++            .copied()
++            .filter(|&column| column < self.n_cols)
++            .collect();
++        columns.sort_unstable();
++        columns.dedup();
+         columns.sort_unstable_by_key(|&column| (weights[column], column));
+         columns.truncate(limit.min(columns.len()));
+         columns
+@@ -8423,6 +8433,22 @@ impl<'a> FactorBaseLogSolver<'a> {
+         self.system.least_covered_columns(limit)
+     }
+ 
++    /// Low-incidence original columns supporting the most recent sparse
++    /// homogeneous null vector. Empty when the failed attempt produced no
++    /// explicit rank-defect witness.
++    pub fn null_support_columns(&self, limit: usize) -> Vec<usize> {
++        let Some(report) = self.report.sparse_report.as_ref() else {
++            return Vec::new();
++        };
++        let candidates: Vec<usize> = report
++            .null_support_columns
++            .iter()
++            .map(|&column| column as usize)
++            .collect();
++        self.system
++            .least_covered_columns_within(&candidates, limit)
++    }
++
+     /// Try to solve with what has been pushed.  `None` means more
+     /// relations are needed; the solver stays usable either way.
+     pub fn try_solve(&mut self) -> Option<(FactorBaseLogTable, LogTableReport)> {
+diff --git a/src/cryptanalysis/koblitz_sparse_la.rs b/src/cryptanalysis/koblitz_sparse_la.rs
+index 85d76afd..8e1cb4cf 100644
+--- a/src/cryptanalysis/koblitz_sparse_la.rs
++++ b/src/cryptanalysis/koblitz_sparse_la.rs
+@@ -1206,6 +1206,11 @@ pub struct SparseSolveReport {
+     /// Columns recovered by back-substitution, propagation and the
+     /// residual dense solve after the core.
+     pub reconstructed_columns: usize,
++    /// Original column indices supporting the most recent homogeneous
++    /// null vector (`t = 0`) returned by block Wiedemann. Empty when no
++    /// such rank-defect witness was obtained.
++    #[serde(default, skip_serializing_if = "Vec::is_empty")]
++    pub null_support_columns: Vec<u32>,
+ }
+ 
+ /// Outcome of [`solve_sparse_system`].
+@@ -1310,6 +1315,11 @@ pub fn solve_sparse_system(
+             report.wiedemann = Some(wr);
+             let t = z[core_cols];
+             let Some(inv) = (t != 0).then(|| invmod(t, modulus)).flatten() else {
++                report.null_support_columns = z[..core_cols]
++                    .iter()
++                    .enumerate()
++                    .filter_map(|(i, &value)| (value != 0).then_some(filtered.core_columns[i]))
++                    .collect();
+                 continue;
+             };
+             let x: Vec<u64> = z[..core_cols]
