@@ -256,16 +256,16 @@ def build(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path) -> dict[str, Any]:
-    # Stage 126 is the current audit: recompose from the live documents and
-    # require the result to equal the sealed one.  When the documents it pins
-    # move again, the next stage re-seals and this verify becomes historical,
-    # exactly as Stage 109's, Stage 124's and Stage 125's did.
+    # Stage 127 supersedes this audit.  Stage 126 is now an immutable
+    # historical snapshot: verify its own seal and payload, never the live
+    # documents that the successor intentionally moved.
     seal = load(output / "result-seal.json", "Stage-126 seal")
     require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    current = compose()
-    require(current == load(output / "audit.json", "Stage-126 audit"), "current audit changed")
-    return current
+    audit = load(output / "audit.json", "Stage-126 audit")
+    require(audit.get("schema") == SCHEMA, "audit schema changed")
+    require(audit.get("status") == "current_seven_gate_audit_verified", "audit status changed")
+    return audit
 
 
 def main() -> None:
