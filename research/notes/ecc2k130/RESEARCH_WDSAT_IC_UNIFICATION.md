@@ -70,8 +70,8 @@ The `mq-fes` backend ports the ALMASTY
 
 | backend | when used | measured vs Möbius / baseline |
 |---|---|---|
-| Incremental Gray (libfes FFS, `L=4` + `Fl[0]` hoist) | `find_one` / Semaev lift (early exit); full enum for `n < 20` | **~258×** wall faster than full Möbius on planted early root; **~28×** vs prior O(n)/step Gray on full `n=18` enum |
-| Parallel outer specialisation (rayon, 4 outer bits) | full enum / multi-root when `n ≥ 20` | **~1.16×** serial `L=4` on `n=20,m=24` unsat (4-core host) |
+| Incremental Gray (libfes FFS, `L=4` + `Fl[0]` hoist) | `find_one` / Semaev lift (early exit); full enum for `n < 20` | **~264×** wall faster than full Möbius on planted early root; **~33×** vs prior O(n)/step Gray on full `n=18` enum |
+| Parallel outer specialisation (rayon, 4 outer bits) | full enum / multi-root when `n ≥ 20` | **~1.34×** serial `L=4` on `n=20,m=24` unsat (4-core host) |
 | Möbius transform (`moebius.c`) | `find_all` for `n ≤ 24` | reference for all-roots |
 | Monica hybrid (`monica.c`) | `n > 24` (range extension) | does **not** beat Möbius inside `n ≤ 24` (release wall on `n=14,m=32` was ~0.22×); calibrated cost model agrees |
 | AVX2 Gray (`avx2_8x32` ideas → 4×u64 lanes, ± batch) | opt-in only (`mq_fes_avx2`) | **does not** beat packed-u64 scalar `L=4` on single-system Semaev (~0.42× per-step; ~0.6–0.8× batch on `n=16,m=24`); correct vs Möbius/L=4 |
