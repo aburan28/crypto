@@ -134,7 +134,10 @@ impl GroupOps {
     pub fn gae(&self) -> f64 {
         (self.adds + self.doubles) as f64
     }
-    fn merge(&mut self, other: GroupOps) {
+    /// Add another ledger's operations to this one.  Public so a
+    /// framework plug-in can charge a precomputation it performed on
+    /// its own ledger to the pipeline's total.
+    pub fn merge(&mut self, other: GroupOps) {
         self.adds += other.adds;
         self.doubles += other.doubles;
         self.scalar_mults += other.scalar_mults;
@@ -1653,6 +1656,13 @@ pub struct FactorBase<E> {
 }
 
 impl<E: Copy> FactorBase<E> {
+    /// The index of the base point with this group key, if the base
+    /// holds it.  The keying is the group's own `key`, so a caller
+    /// never has to know how points are packed.
+    pub fn index_of_key(&self, key: u64) -> Option<usize> {
+        self.point_index.get(&key).copied()
+    }
+
     fn empty(description: String) -> Self {
         Self {
             points: Vec::new(),
@@ -2530,6 +2540,48 @@ pub struct PipelineOutcome {
     pub counters: OracleCounters,
 }
 
+/// **The relation matrix, as a plug point.**
+///
+/// The choice between a dense incremental elimination, a structured
+/// Gaussian elimination and an iterative method (Wiedemann, Lanczos) is
+/// one of the real levers of an index-calculus attack, and the one most
+/// often left unpriced.  The relation loop takes any implementation, so
+/// `ic_framework` can swap it without a second copy of the loop.
+///
+/// The trait lives here rather than in the framework because
+/// [`IncrementalGauss`] is its canonical implementation and the loop
+/// that drives it is here too.
+pub trait RelationSolver {
+    /// Add a relation row over `Z/rZ` with right-hand side `rhs`.
+    fn add_row(&mut self, row: Vec<u64>, rhs: u64) -> RowStatus;
+    /// The value of column `col`, once the matrix determines it.
+    fn pinned(&self, col: usize) -> Option<u64>;
+    fn rank(&self) -> usize;
+    /// Rows that added nothing to the rank.
+    fn dependent(&self) -> u64;
+    /// The work done and what it is counted in: `row_ops` for an
+    /// elimination, matrix-vector products for an iterative method.
+    fn work(&self) -> (u64, &'static str);
+}
+
+impl RelationSolver for IncrementalGauss {
+    fn add_row(&mut self, row: Vec<u64>, rhs: u64) -> RowStatus {
+        IncrementalGauss::add_row(self, row, rhs)
+    }
+    fn pinned(&self, col: usize) -> Option<u64> {
+        IncrementalGauss::pinned(self, col)
+    }
+    fn rank(&self) -> usize {
+        IncrementalGauss::rank(self)
+    }
+    fn dependent(&self) -> u64 {
+        self.dependent
+    }
+    fn work(&self) -> (u64, &'static str) {
+        (self.row_ops, "row_ops")
+    }
+}
+
 /// How the relation loop draws its targets.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TargetSource {
@@ -2652,7 +2704,7 @@ fn column_part_key(row: &[u64]) -> u64 {
 /// oracle, turn a decomposition into a row, and stop the moment the
 /// elimination pins the logarithm.
 #[allow(clippy::too_many_arguments)]
-fn collect_and_solve<G: CountedGroup>(
+pub fn collect_and_solve<G: CountedGroup>(
     g: &G,
     generator: G::Elt,
     target: G::Elt,
@@ -2663,6 +2715,33 @@ fn collect_and_solve<G: CountedGroup>(
     max_trials: u64,
     targets: TargetSource,
     pool_mode: RestartPool,
+    oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
+) -> PipelineOutcome {
+    let mut gauss = IncrementalGauss::new(fb.columns + 1, r);
+    collect_and_solve_with(
+        g, generator, target, r, h, fb, seed, max_trials, targets, pool_mode, &mut gauss, oracle,
+    )
+}
+
+/// [`collect_and_solve`] over any [`RelationSolver`].
+///
+/// The relation loop, the target guard, the collision guards and the
+/// verification are identical; only the matrix differs.  Sharing the
+/// loop is what keeps a framework result comparable with the ledger's
+/// instead of being a second implementation that drifts.
+#[allow(clippy::too_many_arguments)]
+pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    h: u64,
+    fb: &FactorBase<G::Elt>,
+    seed: u64,
+    max_trials: u64,
+    targets: TargetSource,
+    pool_mode: RestartPool,
+    matrix: &mut L,
     mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
 ) -> PipelineOutcome {
     let mut rng = StdRng::seed_from_u64(seed ^ 0x5245_4C41_5449_4F4E);
@@ -2672,7 +2751,6 @@ fn collect_and_solve<G: CountedGroup>(
     let mut ctr = OracleCounters::default();
     let cols = fb.columns + 1;
     let d_col = fb.columns;
-    let mut gauss = IncrementalGauss::new(cols, r);
     let mut trials = 0u64;
     let mut found = 0u64;
     let mut recovered = None;
@@ -2873,7 +2951,7 @@ fn collect_and_solve<G: CountedGroup>(
         // h·a + h·b·d = Σ coef·x  ⇒  Σ coef·x − h·b·d = h·a
         row[d_col] = submod(0, mulmod(h_mod, b, r), r);
         let rhs = mulmod(h_mod, a, r);
-        match gauss.add_row(row, rhs) {
+        match matrix.add_row(row, rhs) {
             RowStatus::Inconsistent => {
                 la_ns += la_start.elapsed().as_nanos() as u64;
                 la.count("inconsistent", 1);
@@ -2882,7 +2960,7 @@ fn collect_and_solve<G: CountedGroup>(
             RowStatus::Dependent => {}
             RowStatus::Independent => {}
         }
-        if let Some(d) = gauss.pinned(d_col) {
+        if let Some(d) = matrix.pinned(d_col) {
             pinned_by_repeated_row = repeated;
             la_ns += la_start.elapsed().as_nanos() as u64;
             let v_start = Instant::now();
@@ -2921,23 +2999,24 @@ fn collect_and_solve<G: CountedGroup>(
         rel.count("walk_restarts", walk_restarts);
     }
     la.wall_ns = la_ns;
-    la.count("row_ops", gauss.row_ops);
+    let (work, work_unit) = matrix.work();
+    la.count(work_unit, work);
     la.count("rows", found);
     la.count("single_column_rows", single_column_rows);
     la.count("two_column_rows", two_column_rows);
     la.count("repeated_column_rows", repeated_column_rows);
     la.count("pinned_by_repeated_row", u64::from(pinned_by_repeated_row));
     la.count("columns", cols as u64);
-    la.count("rank", gauss.rank() as u64);
+    la.count("rank", matrix.rank() as u64);
     PipelineOutcome {
         relations: rel,
         linear_algebra: la,
         verify: ver,
         trials,
         relations_found: found,
-        independent: gauss.rank() as u64,
-        dependent: gauss.dependent,
-        rank: gauss.rank() as u64,
+        independent: matrix.rank() as u64,
+        dependent: matrix.dependent(),
+        rank: matrix.rank() as u64,
         recovered,
         verified,
         counters: ctr,
@@ -2946,7 +3025,13 @@ fn collect_and_solve<G: CountedGroup>(
 
 // ── Calibration ────────────────────────────────────────────────────
 
-fn calibrate_group<G: CountedGroup>(g: &G, points: &[G::Elt], calib: &mut Calibration) {
+/// Measure this host's nanoseconds per group addition and doubling on
+/// the instance's own points.
+///
+/// Public because `ic_framework` calibrates the same way the ledger
+/// does; the pinned ratios of §12 then convert every other counter, so
+/// only `ns_per_add` is ever host-dependent and it cancels.
+pub fn calibrate_group<G: CountedGroup>(g: &G, points: &[G::Elt], calib: &mut Calibration) {
     let mut ops = GroupOps::default();
     let n = points.len();
     let samples = 200_000u64;
@@ -2972,7 +3057,8 @@ fn calibrate_group<G: CountedGroup>(g: &G, points: &[G::Elt], calib: &mut Calibr
     std::hint::black_box(acc);
 }
 
-fn calibrate_row_ops(modulus: u64, calib: &mut Calibration) {
+/// Measure this host's nanoseconds per relation-matrix multiply-subtract.
+pub fn calibrate_row_ops(modulus: u64, calib: &mut Calibration) {
     let mut rng = StdRng::seed_from_u64(11);
     let cols = 2048usize;
     let pivot: Vec<u64> = (0..cols).map(|_| rng.gen_range(0..modulus)).collect();
@@ -3010,7 +3096,13 @@ pub fn calibrate_word_xor() -> f64 {
 
 // ── Pricing a run ──────────────────────────────────────────────────
 
-fn price_phase(phase: &mut PhaseCost, calib: &Calibration) {
+/// Convert a phase's native counters into group-addition equivalents.
+///
+/// Public because `ic_framework` prices its phases with it: a second
+/// conversion table would be free to drift from this one, which is the
+/// defect §12 of the ledger note removed at the level of the factors
+/// themselves.
+pub fn price_phase(phase: &mut PhaseCost, calib: &Calibration) {
     let mut gae = phase.group_ops.gae();
     let conv = |name: &str, ns: Option<f64>| -> f64 {
         match ns {

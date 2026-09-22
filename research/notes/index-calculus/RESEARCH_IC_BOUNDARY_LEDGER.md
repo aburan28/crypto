@@ -2359,6 +2359,196 @@ and the code they ran was committed afterwards.  `binary_blake3`
 (`ae6dd73f4404…`) is the identifier that matters and is the same on all
 six.
 
+## 14. The decomposition systems, in Petit–Quisquater's shape
+
+§5 priced the decomposition oracles per target and §11.3 left the
+algebraic ones as the question this ladder cannot reach: the family
+shape law bounds the *tabled* family, and an algebraic oracle builds no
+table, so its asymptotics sit outside everything §11 established.  This
+section starts measuring them, in the shape Petit and Quisquater's
+Table 2 uses (*On Polynomial Systems Arising from a Weil Descent*,
+ASIACRYPT 2012, p. 461).
+
+Their table reports, per `(curve family, n, n', m)` cell, the average
+maximal degree a Gröbner basis reached, the average time and the peak
+memory — and its point is not the timings.  It is that in every cell
+the degree reached came out **below** the bound derived for a generic
+system, because Semaev's polynomials are sparse and the bound is not.
+
+### 14.1 This is a stage diagnostic, and says so first
+
+Everything in this section prices **one decomposition oracle call on one
+target**.  By §2 that is never a speed, and no row here may be quoted as
+one.  The whole-pipeline unit `S`, the floor and the rho reference stay
+where they are, in §3 and §10–§13.  What this section can do is give the
+algebraic oracle a boundary of its own to be measured against, in the
+way rho's `S ≈ 1.3` is the boundary for the whole method.
+
+### 14.2 What is measured, and what is not reproduced
+
+The descent is the plain one: `x_i = Σ_k v_{i,k} e_k` over a subspace
+`V ⊂ F_{2^n}` of dimension `n'`, substituted into `S_{m+1}(x_1, …, x_m,
+x_R)` and split into `n` boolean equations in `m·n'` unknowns.  `n' =
+⌈n/m⌉` makes that square.  The engine is the repository's boolean-ring
+Buchberger over `F_2[v]/(v²−v)`.
+
+**Their numbers are not reproduced and are not claimed to be.**  Table 2
+solves a *symmetrised* system in `mt + 1 = m² + 1` variables — five at
+`m = 2`, ten at `m = 3` — from the block structure of their Section 4.
+At `(n, n', m) = (11, 6, 2)` that is a five-variable system where this
+one has twelve.  The degrees do not compare row by row.  What carries
+over is the shape of the measurement: a derived degree bound in one
+column, the degree reached beside it, and the ratio.
+
+### 14.3 Two boundaries, both derived before measuring
+
+**The degree bound** is the semi-regular degree.  For equations of
+degrees `d_1, …, d_k` in `v` boolean variables, the Hilbert series of a
+semi-regular quotient is `(1 + t)^v / Π_i (1 + t^{d_i})`, and the degree
+of regularity is the index of its first non-positive coefficient
+(Bardet–Faugère–Salvy).  It is what a system with no exploitable
+structure reaches, so a measured degree below it is structure the solver
+found.  The series is short enough to check by hand and a unit test does:
+`(1+t)^4 / (1+t²)² = 1 + 4t + 4t² − 4t³ + …`, first non-positive at
+three.
+
+**The reference** is what §1 asks for — the cost of the best algorithm
+that already solves the same problem, in the same unit.  At these sizes
+that is exhaustive search over the subspace: evaluate every equation at
+every point, `2^{m·n'} · Σ_i |terms_i|` monomial tests.  Any algebraic
+oracle worth the name has to get below that line before its degree
+behaviour matters at all.
+
+### 14.4 The table
+
+Eight targets per cell, seeded; `K` is the Koblitz curve
+`y² + xy = x³ + a x² + 1` and `R` a random binary curve of the same
+degree.
+
+| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum | ms | KiB | no decomp |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|
+| K | 7 | 4 | 2 | 8 | 7 | 3.0 | 3.0 | 3 | 1.00 | 1.159e4 | 1.830e4 | **0.6×** | 0.4 | 3 | 3/8 |
+| K | 9 | 5 | 2 | 10 | 9 | 3.0 | 3.0 | 4 | 0.75 | 8.198e4 | 1.627e5 | **0.5×** | 3.6 | 9 | 2/8 |
+| K | 11 | 6 | 2 | 12 | 11 | 3.0 | 3.0 | 4 | 0.75 | 4.995e5 | 9.564e5 | **0.5×** | 36.8 | 24 | 3/8 |
+| K | 13 | 7 | 2 | 14 | 13 | 3.2 | 3.2 | 4 | 0.81 | 2.778e6 | 6.642e6 | **0.4×** | 303.0 | 65 | 4/8 |
+| R | 7 | 4 | 2 | 8 | 7 | 3.0 | 3.0 | 3 | 1.00 | 1.098e4 | 1.907e4 | **0.6×** | 0.4 | 3 | 3/8 |
+| R | 9 | 5 | 2 | 10 | 9 | 3.0 | 3.0 | 4 | 0.75 | 8.547e4 | 1.647e5 | **0.5×** | 3.9 | 8 | 3/8 |
+| R | 11 | 6 | 2 | 12 | 11 | 3.0 | 3.0 | 4 | 0.75 | 4.387e5 | 9.728e5 | **0.5×** | 31.4 | 24 | 2/8 |
+| R | 13 | 7 | 2 | 14 | 13 | 3.2 | 3.2 | 4 | 0.81 | 2.683e6 | 6.789e6 | **0.4×** | 298.0 | 65 | 3/8 |
+
+Reading it:
+
+- **The solving degree is flat in `n`.**  `D_av = 3.0` from `n = 7` to
+  `n = 11`, `3.2` at `n = 13`, against a bound that rises from 3 to 4.
+  Six of the eight cells sit below the bound: the phenomenon their table
+  reports, on a different system and a different engine.  It is also,
+  coincidentally, their own `D_av = 3.0` for the `m = 2` rows.
+- **The Koblitz curve and the random one behave identically**, on every
+  column.  Whatever the extra automorphism buys elsewhere in this
+  ledger, it does not change the shape of this system.
+- **The cost is below enumeration and the margin grows**: `0.6×`,
+  `0.5×`, `0.5×`, `0.4×`.  That is the column that matters, and it is
+  the one a degree table on its own would have hidden.
+
+**`D_pair` is in the table to keep an earlier mistake visible**, and it
+has a second story now.  The first version of this measurement reported
+the highest degree of a pair *processed*, which is a property of
+Buchberger's selection strategy and not of the system, and is not what
+an F4 run reports.  Under the coprime criterion alone it read `5.0`
+where the solving degree read `3.0`, and gave a ratio of `1.25` against
+the bound — the opposite conclusion, from the wrong statistic.  Under
+the chain criterion the two columns **coincide** at every cell: the
+pairs the old engine was pushing to degree five were exactly the ones
+that contribute nothing, so pruning them removes the gap the wrong
+statistic was measuring.
+
+**Three summands, where the verdict flips.**  The same measurement at
+`m = 3`, four targets a cell under a 120-second per-target budget:
+
+| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum | ms | KiB | no decomp |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|
+| K | 7 | 3 | 3 | 9 | 7 | 7.0 | 7.0 | 7 | 1.00 | 3.633e7 | 4.291e5 | 84.7x | 19585.5 | 441 | 3/4 |
+| K | 9 | 3 | 3 | 9 | 9 | 7.0 | 7.0 | 7 | 1.00 | 3.606e7 | 5.268e5 | 68.4x | 19481.0 | 430 | 2/4 |
+| K | 11 | 4 | 3 | 12 | 11 | 9.0 | 9.0 | 8 | 1.12 | 4.313e9 | 2.281e7 | 189.1x | 120049.4 | 24567 | 3/4 |
+| ^ | | | | | | — | — | — | — | — | — | — | — | — | 4 of 4 runs hit the budget: every figure on this row is a lower bound |
+| R | 7 | 3 | 3 | 9 | 7 | 7.0 | 7.0 | 7 | 1.00 | 3.531e7 | 4.572e5 | 77.2x | 19451.3 | 441 | 3/4 |
+| R | 9 | 3 | 3 | 9 | 9 | 7.0 | 7.0 | 7 | 1.00 | 3.876e7 | 5.728e5 | 67.7x | 18729.6 | 435 | 3/4 |
+| R | 11 | 4 | 3 | 12 | 11 | 9.0 | 9.0 | 8 | 1.12 | 4.305e9 | 2.341e7 | 183.9x | 120031.9 | 24528 | 1/4 |
+| ^ | | | | | | — | — | — | — | — | — | — | — | — | 4 of 4 runs hit the budget: every figure on this row is a lower bound |
+
+At nine variables the solver finishes and costs **68× to 85× the
+enumeration it is competing with** — the opposite of the two-summand
+rows, which come in at `0.4×`.  At twelve variables it does not finish:
+every run hit the budget, so those rows are lower bounds and are marked
+as such.  Whatever the three-summand descent buys in relations per
+target, this engine does not get it back on the decomposition, and the
+`m = 2` result does not carry over.
+
+### 14.5 The engine was the measurement, twice
+
+Neither of the two corrections above was a tuning choice; both were
+defects found by taking the measurement.
+
+**The pruning that was documented but not implemented.**  The module
+header of `pq_groebner_f2` claimed Buchberger with Gebauer–Möller
+pruning; the code had only the coprime criterion.  Adding the chain
+criterion — if another basis element's leading monomial divides the
+pair's lcm and both of its pairs have left the queue, that S-polynomial
+cannot contribute — gives, paired on the same seed and the same systems:
+
+| cell | ops before | ops after | ratio | ops/enum before → after |
+|:--|--:|--:|--:|:--|
+| `K n = 7` | 1.193e5 | 1.159e4 | 0.097× | 6.5× → 0.6× |
+| `K n = 9` | 1.584e6 | 8.198e4 | 0.052× | 9.7× → 0.5× |
+| `K n = 11` | 2.654e7 | 4.995e5 | 0.019× | 27.8× → 0.5× |
+| `K n = 13` | 2.884e8 | 2.778e6 | 0.010× | 43.4× → 0.4× |
+
+**and it reverses the verdict.**  Under the coprime criterion alone the
+Gröbner basis measured 6.5× to 43× *worse* than enumeration, widening
+with `n`; under both it measures 0.4× to 0.6×, narrowing.  The first
+reading was a statement about the engine and was withdrawn, not filed.
+The coprime-only ladder stays frozen beside the fixed one as the before
+mark, because deleting it would hide the size of the correction.
+
+That the pruning is exact is checked **on the systems being measured**
+rather than inferred from the sixty-seven tests over `pq_*`,
+`koblitz_groebner` and `polynomial_reuse` that also still pass: for six
+targets the variety of the pruned basis is compared against every point
+of the subspace evaluated in the original equations, and must agree,
+with a guard that not every target was inconsistent.
+
+**The cell that never returned.**  At `m = 3` and twelve variables the
+engine ran for four hours and forty-nine minutes without finishing, and
+was killed.  A Gröbner basis has no natural stopping point, so the
+engine now takes a wall-clock budget: a run that exceeds it stops,
+`timed_out` marks it, and the row says every figure on it is a lower
+bound.  A table with an honest "did not finish" row is worth more than
+one with a silently missing cell.
+
+### 14.6 What does not count
+
+- No row here is a speed, a crossover, or evidence about any deployed
+  curve; the largest field is `GF(2^15)`.
+- `ms` and `KiB` are practicality notes.  The metric is the monomial
+  operation count, as §6 requires.
+- The `ops/enum` column is a ratio to *this repository's* enumeration on
+  *these* systems.  It is not a statement about F4, about Magma, or
+  about the symmetrised systems Petit–Quisquater solve.
+- A row whose `timed_out` is non-zero is a statement about the engine's
+  budget and not about the system's difficulty.
+- The degrees are not comparable to Petit–Quisquater's row by row, for
+  the reason §14.2 gives.
+
+### 14.7 Reproducing
+
+```
+ic descent --cells 7:4:2,9:5:2,11:6:2,13:7:2 --targets 8 \
+  --out docs/ic/runs/ic-descent-degrees-2026-09-22.json
+
+# The before mark, on the coprime criterion alone, is frozen at
+# docs/ic/runs/ic-descent-degrees-coprime-only-2026-09-22.json
+```
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
