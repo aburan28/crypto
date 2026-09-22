@@ -1,0 +1,21 @@
+digraph G {
+
+graph [bgcolor="#FAFAF8", pad="0.25", nodesep="0.45", ranksep="0.55", fontname="DejaVu Sans"];
+node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#2A2A2A",
+      fontname="DejaVu Sans", fontsize=15, margin="0.16,0.10", penwidth=1.4];
+edge [color="#4A4A4A", penwidth=1.5, arrowsize=0.8, fontname="DejaVu Sans", fontsize=12];
+
+rankdir=TB;
+title [shape=plain, fontsize=24, label="Prime-field decomposition: Semaev turns point addition into algebra"];
+r [label="Random point\nR = [a]P + [b]Q\nover F_p"];
+fb [label="Factor base F\npoints with constrained / structured x-coordinate"];
+sem [label="Semaev condition\nS_(t+1)(x₁,…,x_t,x_R) = 0", penwidth=2.6];
+sys [label="Add factor-base constraints\nfor x₁,…,x_t"];
+solve [label="Solve multivariate system\nGröbner / F4 / SAT-like encodings / hybrids"];
+pts [label="Lift roots to curve points\nP₁,…,P_t"];
+verify [label="Verify\nP₁ + ⋯ + P_t = R"];
+rel [label="Emit relation\na + bk ≡ Σ log_P(P_i)  (mod n)"];
+r -> sem; fb -> sys; sem -> sys -> solve -> pts -> verify -> rel;
+why [shape=note, fontsize=13, label="Why prime fields are hard:\nthere is no extension-field basis to descend into\nsmall Boolean coordinate blocks. The solver sees\na comparatively stubborn algebraic system."];
+why -> solve [style=dashed, arrowhead=none];
+}

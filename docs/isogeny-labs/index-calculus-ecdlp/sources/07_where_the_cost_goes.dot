@@ -1,0 +1,20 @@
+digraph G {
+
+graph [bgcolor="#FAFAF8", pad="0.25", nodesep="0.45", ranksep="0.55", fontname="DejaVu Sans"];
+node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#2A2A2A",
+      fontname="DejaVu Sans", fontsize=15, margin="0.16,0.10", penwidth=1.4];
+edge [color="#4A4A4A", penwidth=1.5, arrowsize=0.8, fontname="DejaVu Sans", fontsize=12];
+
+rankdir=TB;
+title [shape=plain, fontsize=24, label="Where index calculus usually spends its effort"];
+a [label="Factor-base design\nControls smoothness / decomposition probability"];
+b [label="Relation candidates\nCheap group arithmetic"];
+c [label="Point decomposition", penwidth=3.0];
+d [label="Polynomial-system solving\nDegree of regularity • Macaulay matrices • SAT branching", penwidth=3.0];
+e [label="Relation filtering\nDeduplicate • rank checks • orbit canonicalization"];
+f [label="Sparse linear algebra\nCan be large, but is usually more predictable"];
+g [label="Final log recovery\nUsually cheap once factor-base logs are known"];
+a -> b -> c -> d -> e -> f -> g;
+n [shape=note, fontsize=13, label="For modern ECDLP index-calculus research,\nthe decisive uncertainty is often whether Step 3/4\nscales gently enough to offset relation scarcity."];
+n -> d [style=dashed, arrowhead=none];
+}

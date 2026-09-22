@@ -1,0 +1,19 @@
+digraph G {
+
+graph [bgcolor="#FAFAF8", pad="0.25", nodesep="0.45", ranksep="0.55", fontname="DejaVu Sans"];
+node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#2A2A2A",
+      fontname="DejaVu Sans", fontsize=15, margin="0.16,0.10", penwidth=1.4];
+edge [color="#4A4A4A", penwidth=1.5, arrowsize=0.8, fontname="DejaVu Sans", fontsize=12];
+
+rankdir=TB;
+title [shape=plain, fontsize=24, label="What a relation actually buys you"];
+top [label="ECDLP: Q = [k]P"];
+rand [label="Pick a,b and compute\nR = [a]P + [b]Q"];
+dec [label="Successful decomposition\nR = P_i + P_j + P_h + …"];
+eq [label="Take logs base P\na + b·k ≡ ℓ_i + ℓ_j + ℓ_h + …  (mod n)", penwidth=2.6];
+row [label="One sparse matrix row\ncoefficients mostly zero"];
+many [label="Thousands / millions of rows\n(depending on factor-base size)"];
+solve [label="Sparse modular linear algebra\nsolve the unknown factor-base logs ℓ_i"];
+finish [label="Back-substitute into a relation\nand isolate k"];
+top -> rand -> dec -> eq -> row -> many -> solve -> finish;
+}

@@ -1,0 +1,35 @@
+digraph G {
+
+graph [bgcolor="#FAFAF8", pad="0.25", nodesep="0.45", ranksep="0.55", fontname="DejaVu Sans"];
+node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#2A2A2A",
+      fontname="DejaVu Sans", fontsize=15, margin="0.16,0.10", penwidth=1.4];
+edge [color="#4A4A4A", penwidth=1.5, arrowsize=0.8, fontname="DejaVu Sans", fontsize=12];
+
+rankdir=LR;
+title [shape=plain, fontsize=25, label="ECDLP index calculus: three worlds"];
+subgraph cluster_prime {
+  label="Prime field  F_p"; color="#B8B8B8"; style="rounded";
+  p1 [label="Curve\ny² = x³ + Ax + B"];
+  p2 [label="No useful field-subspace\ndecomposition"];
+  p3 [label="Semaev / algebraic\npoint decomposition"];
+  p4 [label="Main pain:\npolynomial-system cost"];
+  p1 -> p2 -> p3 -> p4;
+}
+subgraph cluster_bin {
+  label="Characteristic 2 extension  F_(2^m)"; color="#B8B8B8"; style="rounded";
+  b1 [label="Binary curve\ny² + xy = x³ + a₂x² + a₆"];
+  b2 [label="Choose F₂-subspace V\nfor factor-base x-coordinates"];
+  b3 [label="Weil descent → equations\nover F₂"];
+  b4 [label="Gröbner / SAT / F4\npoint decomposition"];
+  b1 -> b2 -> b3 -> b4;
+}
+subgraph cluster_k {
+  label="Koblitz / subfield curve"; color="#B8B8B8"; style="rounded";
+  k1 [label="Curve defined over F₂,\nused over F_(2^m)"];
+  k2 [label="Frobenius τ:\n(x,y) ↦ (x²,y²)"];
+  k3 [label="τ-invariant factor bases\n+ orbit representatives"];
+  k4 [label="Fewer equivalent systems\n+ cheaper linear algebra"];
+  k1 -> k2 -> k3 -> k4;
+}
+title -> p1 [style=invis];
+}

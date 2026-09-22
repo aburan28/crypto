@@ -1,0 +1,21 @@
+digraph G {
+
+graph [bgcolor="#FAFAF8", pad="0.25", nodesep="0.45", ranksep="0.55", fontname="DejaVu Sans"];
+node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#2A2A2A",
+      fontname="DejaVu Sans", fontsize=15, margin="0.16,0.10", penwidth=1.4];
+edge [color="#4A4A4A", penwidth=1.5, arrowsize=0.8, fontname="DejaVu Sans", fontsize=12];
+
+rankdir=LR;
+title [shape=plain, fontsize=24, label="Koblitz curves: quotient repeated work using Frobenius"];
+curve [label="Koblitz / subfield curve\ncoefficients in F₂\npoints in E(F_(2^m))"];
+tau [label="Cheap Frobenius τ\n(x,y) ↦ (x²,y²)", penwidth=2.6];
+orbit [label="Orbit of a point\nP, τ(P), τ²(P), …"];
+canon [label="Canonical orbit representative\nstore one representative + exponent"];
+fb [label="τ-invariant factor base"];
+decomp [label="Orbit-aware decomposition\nsolve representatives, not duplicates"];
+rels [label="Relation collection\nquotient equivalent relations"];
+la [label="Smaller / structured\nlinear-algebra problem"];
+curve -> tau -> orbit -> canon; canon -> fb -> decomp -> rels -> la; tau -> decomp [style=dashed];
+note [shape=note, fontsize=13, label="Frobenius helps both sides of the race:\nindex calculus can quotient symmetry, but Pollard rho\ncan also use Frobenius automorphisms. So the baseline\nis stronger than on a generic curve."];
+note -> la [style=dashed, arrowhead=none];
+}

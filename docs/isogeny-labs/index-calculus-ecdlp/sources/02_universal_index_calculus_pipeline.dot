@@ -1,0 +1,21 @@
+digraph G {
+
+graph [bgcolor="#FAFAF8", pad="0.25", nodesep="0.45", ranksep="0.55", fontname="DejaVu Sans"];
+node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#2A2A2A",
+      fontname="DejaVu Sans", fontsize=15, margin="0.16,0.10", penwidth=1.4];
+edge [color="#4A4A4A", penwidth=1.5, arrowsize=0.8, fontname="DejaVu Sans", fontsize=12];
+
+rankdir=LR;
+title [shape=plain, fontsize=24, label="The universal ECDLP index-calculus pipeline"];
+s0 [label="0. ECDLP input\nQ = [k]P"];
+s1 [label="1. Choose factor base F\nsmall, structured point set"];
+s2 [label="2. Randomize target\nR = [a]P + [b]Q"];
+s3 [label="3. Try point decomposition\nR = P₁ + ⋯ + P_t\nwith P_i ∈ F", penwidth=2.6];
+s4 [label="4. Turn decomposition\ninto a linear relation"];
+s5 [label="5. Collect enough\nindependent relations"];
+s6 [label="6. Sparse linear algebra\nsolve factor-base logs"];
+s7 [label="7. Recover k\nfrom one/few relations"];
+s0 -> s1 -> s2 -> s3 -> s4 -> s5 -> s6 -> s7;
+note [shape=note, fontsize=13, label="The three curve families mostly differ here:\nhow F is chosen and how Step 3 is solved."];
+note -> s3 [style=dashed, arrowhead=none];
+}

@@ -1,0 +1,23 @@
+digraph G {
+
+graph [bgcolor="#FAFAF8", pad="0.25", nodesep="0.45", ranksep="0.55", fontname="DejaVu Sans"];
+node [shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#2A2A2A",
+      fontname="DejaVu Sans", fontsize=15, margin="0.16,0.10", penwidth=1.4];
+edge [color="#4A4A4A", penwidth=1.5, arrowsize=0.8, fontname="DejaVu Sans", fontsize=12];
+
+rankdir=TB;
+title [shape=plain, fontsize=24, label="Characteristic-2 decomposition: exploit the F₂-vector-space structure"];
+field [label="F_(2^m) as an m-dimensional\nvector space over F₂"];
+basis [label="Fix a basis\n1, β, β², … (or a normal basis)"];
+fb [label="Factor base\nF = {P : x(P) ∈ V}\nV ⊂ F_(2^m), dim_F₂(V)=ℓ"];
+r [label="Random point\nR = [a]P + [b]Q"];
+sem [label="Point-sum equation\nS_(t+1)(x₁,…,x_t,x_R)=0"];
+expand [label="Weil descent\nexpand each x_i into F₂ coordinates", penwidth=2.6];
+bool [label="Polynomial / Boolean system\nover F₂"];
+solve [label="Solve\nGröbner/F4, SAT, or hybrid"];
+pts [label="Recover P₁,…,P_t ∈ F\nand verify the sum"];
+rel [label="Store relation"];
+field -> basis -> fb; r -> sem; fb -> expand; sem -> expand -> bool -> solve -> pts -> rel;
+note [shape=note, fontsize=13, label="The potential advantage is structural:\nsubspaces, sparse binary arithmetic, and descent\ncan reduce the effective representation size.\nThe hard part is still degree growth / solver cost."];
+note -> solve [style=dashed, arrowhead=none];
+}
