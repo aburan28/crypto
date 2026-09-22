@@ -37,7 +37,8 @@
 //! §5 regardless of how fast one Macaulay matrix reduces.
 
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    f4_profile, f4_profile_reset, F4Profile, FieldStructure, SolverEngine,
+    f4_profile, f4_profile_reset, split_rule_default, F4Profile, FieldStructure, SolveOptions,
+    SolverEngine,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, groebner_decompose, KoblitzCurve,
@@ -140,6 +141,7 @@ fn main() {
         let mut verdicts: Vec<String> = Vec::new();
         let mut decomposed = 0u32;
         let mut stats_total = (0usize, 0usize, 0usize, 0usize, 0usize);
+        let mut exhausted = 0u32;
         let wall = Instant::now();
         for i in 0..inst.targets {
             let target = kc.mul(&g, &target_scalar(i));
@@ -167,6 +169,7 @@ fn main() {
             stats_total.2 += stats.propagations;
             stats_total.3 += stats.splits;
             stats_total.4 += stats.oversize;
+            exhausted += u32::from(stats.exhausted);
         }
         let wall_ns = wall.elapsed().as_nanos();
         let p: F4Profile = f4_profile();
@@ -213,6 +216,7 @@ fn main() {
             "propagations": stats_total.2,
             "splits": stats_total.3,
             "oversize": stats_total.4,
+            "exhausted": exhausted,
         }));
     }
 
@@ -239,6 +243,12 @@ fn main() {
             // The engine actually run: `SolverEngine::default()` after the
             // retained-control overrides, so a saved run names its variant.
             "engine": format!("{:?}", SolverEngine::default().effective()),
+            "split_rule": format!(
+                "{:?}",
+                SolveOptions { split_rule: split_rule_default(), ..SolveOptions::default() }
+                    .resolve()
+                    .split_rule
+            ),
             "criterion": std::env::var("KIC_F4_CRITERION").unwrap_or_else(|_| "none".into()),
             "inherit_root": std::env::var("KIC_F4_INHERIT_ROOT").unwrap_or_else(|_| "auto".into()),
             "rows": rows,

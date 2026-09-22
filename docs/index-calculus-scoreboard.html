@@ -571,14 +571,14 @@
         <div class="lrow"><div class="name">Meet in the middle, one probe</div><div class="num">0.51</div><div class="lbar"><i style="width:8.4%"></i></div></div>
         <div class="lrow"><div class="name">Enumeration of the base</div><div class="num">1,310</div><div class="lbar"><i style="width:48.5%"></i></div></div>
         <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 3.2&times;10<sup>7</sup> word XORs found, 1.1&times;10<sup>8</sup> refuted &middot; was 6.8&times;10<sup>7</sup> / 2.3&times;10<sup>8</sup> at the freeze</div><div class="num">8.8&times;10<sup>4</sup></div><div class="lbar"><i style="width:70.0%"></i></div></div>
-        <div class="lrow"><div class="name">Inherited matrix-F4 (default engine since 2026-09-22) &middot; 3.3&times;10<sup>6</sup> word ops found, 9.7&times;10<sup>6</sup> refuted &middot; the from-scratch engine on the same binary: 2.2&times;10<sup>7</sup> / 7.3&times;10<sup>7</sup> &middot; identical verdicts, splits and refutations</div><div class="num">8.4&times;10<sup>3</sup></div><div class="lbar"><i style="width:57.9%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable (default engine since 2026-09-22) &middot; 1.4&times;10<sup>6</sup> word ops found, 4.3&times;10<sup>6</sup> refuted &middot; was 3.3&times;10<sup>6</sup> / 9.7&times;10<sup>6</sup> on the historical tree &middot; the from-scratch engine on the same binary: 2.2&times;10<sup>7</sup> / 7.3&times;10<sup>7</sup> &middot; identical found/refuted verdicts, tree of the same size</div><div class="num">3.9&times;10<sup>3</sup></div><div class="lbar"><i style="width:54.2%"></i></div></div>
         <div class="lrow"><div class="name">CDCL with native parity rows &middot; 29,000 conflicts found, 188,000 refuted</div><div class="num">1.3&times;10<sup>7</sup></div><div class="lbar"><i style="width:95.4%"></i></div></div>
         <div class="lrow"><div class="name"><strong>n = 15, m = 3</strong> &middot; 30 unknowns, 30 equations, first fall degree 3, hit rate 0.38</div><div class="num"></div></div>
         <div class="lrow"><div class="name">Meet in the middle</div><div class="num">24.7</div><div class="lbar"><i style="width:28.1%"></i></div></div>
         <div class="lrow"><div class="name">Enumeration of the base</div><div class="num">467</div><div class="lbar"><i style="width:43.2%"></i></div></div>
         <div class="lrow"><div class="name">S&#8324; pairs-and-solve</div><div class="num">1,118</div><div class="lbar"><i style="width:47.6%"></i></div></div>
         <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 6.5&times;10<sup>7</sup> word XORs found, 6.3&times;10<sup>8</sup> refuted &middot; was 1.7&times;10<sup>8</sup> / 1.7&times;10<sup>9</sup> at the freeze</div><div class="num">8.7&times;10<sup>5</sup></div><div class="lbar"><i style="width:81.7%"></i></div></div>
-        <div class="lrow"><div class="name">Inherited matrix-F4 &middot; the default routes this cubic system to the from-scratch engine, so the 2026-09-22 re-run prices it at 3.3&times;10<sup>7</sup> / 3.1&times;10<sup>8</sup>, the same work &middot; forced to inherit it costs <strong>1.66&times; more</strong> (2.7&times;10<sup>9</sup> against 1.7&times;10<sup>9</sup> total) &mdash; a rejected variant, retained</div><div class="num">4.4&times;10<sup>5</sup></div><div class="lbar"><i style="width:78.3%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable &middot; 7.7&times;10<sup>6</sup> word ops found, 2.6&times;10<sup>7</sup> refuted (1.5&times;10<sup>8</sup> total against the from-scratch engine&rsquo;s 1.7&times;10<sup>9</sup>) &middot; on the historical tree, inheriting cost <strong>1.66&times; more</strong> here (2.7&times;10<sup>9</sup>): the loss that the split variable reversed &middot; identical found/refuted verdicts</div><div class="num">3.9&times;10<sup>4</sup></div><div class="lbar"><i style="width:65.9%"></i></div></div>
         <div class="lrow"><div class="name">CDCL &middot; no answer on 8 of 8 targets at 200,000 conflicts</div><div class="num">&ge; 4.0&times;10<sup>7</sup></div><div class="lbar"><i style="width:100%"></i></div></div>
       </div>
       <div class="legend" style="padding-top:0">
@@ -586,7 +586,7 @@
         <span>zero disagreements between oracles on every target of every cell, S&#8324; witnesses lifted in the group and compared both ways</span>
         <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 4.1&times;10<sup>3</sup>, 22&times; the whole measured cost of the tabled fold (9.2&times;10<sup>3</sup> and 49&times; at the freeze) &mdash; an extrapolation</span>
         <span>matrix-F4 rows from the lift-checked re-run on the merged tree, <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>: same verdicts, fall degrees and SAT conflicts as the freeze, 1.4&ndash;2.7&times; fewer word XORs after main&rsquo;s sparse elimination (#405) &mdash; engineering, ratio to the probe unmoved</span>
-        <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical verdicts, splits and refutations on all 13 cells; 1.8&ndash;7.2&times; fewer word operations on every quadratic cell with a tree, the specialisation&rsquo;s reads and writes charged &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
+        <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical found/refuted verdicts on all 13 cells, zero disagreements, no inconclusive target; 1.6&ndash;15.8&times; fewer word operations on every cell with a tree, the specialisation&rsquo;s reads and writes charged; the default splits on the smallest free variable, so its tree has the same size and a different shape from the reference&rsquo;s &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
       </div>
     </div>
 
@@ -4178,7 +4178,7 @@ factor base, and this prices a decomposition oracle.</p>
 </section>
 <section class="panel" id="inherited-f4-20260922">
   <div class="panel-head">
-    <h2>F5 for the Koblitz Gr&ouml;bner stage: the criterion prunes nothing at degree 3, the inheritance it implies cuts the stage 6.28&times; <span class="chip">engineering</span></h2>
+    <h2>F5 for the Koblitz Gr&ouml;bner stage: the criterion prunes nothing at degree 3; inheriting the parent&rsquo;s reduced basis, and splitting on the variable that displaces the fewest of its rows, cuts the stage 12.6&times; <span class="chip">engineering</span></h2>
     <p>Two F5 ideas applied to the matrix-F4 splitting solver behind the Koblitz decomposition
       oracle. <strong>The F5 criterion</strong>, stated correctly for the Boolean ring (the textbook
       <code>F_2</code> rule &ldquo;prune <code>t&middot;f_i</code> for <code>t &isin; LM&lang;f_1..f_i&rang;</code>&rdquo;
@@ -4188,65 +4188,76 @@ factor base, and this prices a decomposition oracle.</p>
       0&ndash;12% of rows where linear equations appear: <code>1.001&times;</code> net of its own cost.
       <strong>Inherited matrix-F4</strong> applies F5&rsquo;s idea to the axis the solver actually iterates
       along: substitution is a ring homomorphism, so a child&rsquo;s Macaulay row space is the image of its
-      parent&rsquo;s reduced rows, and only the <code>&asymp; 3/n</code> of them whose pivot contains the
-      assigned variable need re-reducing. No matrix is built below the root. It is the default engine
-      on quadratic systems; on the chained cubic <code>m &ge; 3</code> systems it loses
-      (<code>0.60&times;</code>: their 40%-rank-deficient matrices make the reduced rows dense) and the
-      default routes them to the from-scratch engine.</p>
+      parent&rsquo;s reduced rows, and only the rows whose pivot contains the assigned variable need
+      re-reducing. No matrix is built below the root. <strong>Which variable</strong> decides how many that is:
+      a pivot is a row&rsquo;s largest DegRevLex monomial, so the historical rule &mdash; split on the
+      lowest-indexed free variable, the largest in the order &mdash; picks the variable most pivots contain and
+      displaces half the basis per level deep in the tree. Splitting on the <em>smallest</em> free variable
+      halves the engine&rsquo;s work on every rung with a tree and turns its one loss (the chained cubic
+      systems, <code>0.60&times;</code>) into an <code>11&times;</code> win.</p>
     <p>Boundary: the <code>m&middot;2<sup>131</sup></code> candidate-tuple count of the ECC2K-130
       decomposition note &mdash; no term for how a Macaulay matrix is reduced or how many are built, so
       the ratio to it is <strong>flat by construction</strong>. Reference:
-      <code>SolverEngine::MatrixF4 { max_degree: 3 }</code>, the pre-round default, on the same binary
-      (<code>KIC_F4_INHERIT=0</code>). Unit: 64-bit word operations; the candidate is additionally charged one
-      per word read and written by specialisation, which the reference&rsquo;s matrix build never pays.
+      <code>SolverEngine::MatrixF4 { max_degree: 3 }</code> splitting on the lowest free variable, the pre-round
+      default, on the same binary (<code>KIC_F4_INHERIT=0</code>). Unit: 64-bit word operations; the candidate is
+      additionally charged one per word read and written by specialisation, which the reference&rsquo;s matrix
+      build never pays. Two comparisons are drawn and named: <em>same-tree</em>, accepted by the frozen suite&rsquo;s
+      <code>compare.py</code> (identical verdict digest and node counts), and <em>cross-tree</em> against the
+      pre-round default, where the split rule changed the tree&rsquo;s shape &mdash; same instances, same targets
+      decomposed, no exhausted budget, every decomposition lifted and verified in the group
+      (<code>compare_cross_tree.py</code>).
       Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/manifest.json">manifest</a> &middot;
-      <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/compare_inherited_f4.json">ladder comparison</a> &middot;
-      <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/compare_holdout_inherited_f4.json">holdout</a> &middot;
-      <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/compare_f5_criterion.json">F5 criterion</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/compare_cross_tree_inherited_f4_vs_baseline.json">cross-tree ladder</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/compare_inherited_f4_vs_matrix_f4_highest.json">same-tree ladder</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/compare_inherited_f4_lowest_vs_baseline.json">same-tree, historical rule</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/compare_cross_tree_holdout_inherited_f4_vs_baseline.json">holdout</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/inherited_f4_20260922/compare_f5_criterion_vs_baseline.json">F5 criterion</a> &middot;
       <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_INHERITED_F4.md">note</a>.</p>
   </div>
   <div class="table-scroll"><table>
     <caption>Frozen Gr&ouml;bner-stage ladder of <code>research/groebner_stage_20260915</code>, 176 targets, medians of 3;
-      word operations are deterministic and identical across repetitions. <code>compare.py</code> accepted every
-      comparison: identical verdict digest, reductions, refutations, propagations, splits, F4 calls and oversize count
-      rung for rung. Ratios are reference / candidate. Stage diagnostic (AGENTS.md &sect;8): no <code>S</code>, rho
-      ratio or end-to-end claim.</caption>
-    <thead><tr><th>Rung</th><th>m</th><th>Reference word ops</th><th>F5 criterion</th><th>Inherited F4</th><th>Ratio</th><th>Floor ratio</th><th>Wall</th><th>Correct</th><th>Class</th></tr></thead>
+      word operations are deterministic and identical across repetitions. &ldquo;L&rdquo; and &ldquo;H&rdquo; are the
+      split rules (lowest, highest free variable); &ldquo;nodes&rdquo; are the reductions each tree took. Ratios are
+      reference / candidate. Stage diagnostic (AGENTS.md &sect;8): no <code>S</code>, rho ratio or end-to-end claim.</caption>
+    <thead><tr><th>Rung</th><th>m</th><th>Nodes L &rarr; H</th><th>Reference (F4, L)</th><th>F5 criterion</th><th>Inherited, L (same tree)</th><th>F4, H</th><th>Inherited, H (default)</th><th>Ratio to reference</th><th>Floor ratio</th><th>Wall</th><th>Correct</th><th>Class</th></tr></thead>
     <tbody>
-      <tr><td><code>K_0/2^9</code></td><td>2</td><td class="n">1,352,350</td><td class="n">1,348,747</td><td class="n">664,322</td><td class="n">2.04&times;</td><td>flat</td><td class="n">1.50&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_0/2^9</code></td><td>3</td><td class="n">4,164,666</td><td class="n">4,149,441</td><td class="n">4,164,666 (forced: 3,943,077)</td><td class="n">1.00&times; (forced: 1.06&times;)</td><td>flat</td><td class="n">1.00&times;</td><td>identical</td><td>cubic: reduces from scratch by policy</td></tr>
-      <tr><td><code>K_0/2^13</code></td><td>2</td><td class="n">20,668,245</td><td class="n">19,776,482</td><td class="n">11,642,531</td><td class="n">1.78&times;</td><td>flat</td><td class="n">1.35&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_1/2^15</code></td><td>2</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">1.00&times;</td><td>flat</td><td class="n">0.97&times;</td><td>identical</td><td>no tree to inherit along</td></tr>
-      <tr><td><code>K_1/2^17</code></td><td>2</td><td class="n">55,594,932</td><td class="n">55,594,932</td><td class="n">10,059,990</td><td class="n">5.53&times;</td><td>flat</td><td class="n">3.77&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_1/2^23</code></td><td>2</td><td class="n">699,511,508</td><td class="n">699,511,508</td><td class="n">97,826,189</td><td class="n">7.15&times;</td><td>flat</td><td class="n">5.18&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><strong>total</strong></td><td></td><td class="n">781,399,171</td><td class="n">780,488,580 (1.001&times;)</td><td class="n"><strong>124,465,168</strong></td><td class="n"><strong>6.28&times;</strong></td><td>flat</td><td class="n">4.36&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">74,984,242</td><td class="n">1.56&times;</td><td>flat</td><td class="n">1.29&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,475,463</td><td class="n">5.19&times;</td><td>flat</td><td class="n">3.61&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns, forced to inherit</td><td>3</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,746,829,713</td><td class="n"><strong>0.60&times;</strong></td><td>flat</td><td class="n">1.04&times;</td><td>identical</td><td><span class="chip">rejected &mdash; cubic systems reduce from scratch</span></td></tr>
+      <tr><td><code>K_0/2^9</code></td><td>2</td><td>386 &rarr; 338</td><td class="n">1,352,350</td><td class="n">1,348,747</td><td class="n">664,322 (2.04&times;)</td><td class="n">1,257,665</td><td class="n">475,686</td><td class="n">2.84&times;</td><td>flat</td><td class="n">1.76&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_0/2^9</code></td><td>3</td><td>285 &rarr; 382</td><td class="n">4,164,666</td><td class="n">4,149,441</td><td class="n">3,943,077 (1.06&times;)</td><td class="n">2,026,237</td><td class="n">2,524,783</td><td class="n">1.65&times;</td><td>flat</td><td class="n">1.14&times;</td><td>verified</td><td><span class="chip">engineering</span>; F4-H cheaper on this shallow cubic cell (0.80&times;)</td></tr>
+      <tr><td><code>K_0/2^13</code></td><td>2</td><td>599 &rarr; 520</td><td class="n">20,668,245</td><td class="n">19,776,482</td><td class="n">11,642,531 (1.78&times;)</td><td class="n">25,336,199</td><td class="n">8,302,715</td><td class="n">2.49&times;</td><td>flat</td><td class="n">1.28&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_1/2^15</code></td><td>2</td><td>32 &rarr; 32</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">1.00&times;</td><td>flat</td><td class="n">0.92&times;</td><td>identical</td><td>no tree to inherit along</td></tr>
+      <tr><td><code>K_1/2^17</code></td><td>2</td><td>1,763 &rarr; 1,769</td><td class="n">55,594,932</td><td class="n">55,594,932</td><td class="n">10,059,990 (5.53&times;)</td><td class="n">62,049,801</td><td class="n">6,535,588</td><td class="n">8.51&times;</td><td>flat</td><td class="n">4.50&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_1/2^23</code></td><td>2</td><td>4,934 &rarr; 4,876</td><td class="n">699,511,508</td><td class="n">699,511,508</td><td class="n">97,826,189 (7.15&times;)</td><td class="n">883,061,010</td><td class="n">44,225,148</td><td class="n"><strong>15.82&times;</strong></td><td>flat</td><td class="n">7.47&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><strong>total</strong></td><td></td><td>7,999 &rarr; 7,917</td><td class="n">781,399,171</td><td class="n">780,488,580 (1.001&times;)</td><td class="n">124,243,579 (6.29&times;)</td><td class="n">973,838,382 (0.80&times;)</td><td class="n"><strong>62,171,390</strong></td><td class="n"><strong>12.57&times;</strong></td><td>flat</td><td class="n">5.86&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>same-tree: F4, H &rarr; inherited, H</td><td></td><td>7,917</td><td class="n">973,838,382</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">62,171,390</td><td class="n">15.66&times;</td><td>flat</td><td class="n">5.59&times;</td><td>identical</td><td><span class="chip">engineering</span> (compare.py accepts every rung)</td></tr>
+      <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td>228 &rarr; 228</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">74,984,242 (1.56&times;)</td><td class="n">163,178,360</td><td class="n">31,800,117</td><td class="n">3.68&times;</td><td>flat</td><td class="n">1.54&times;</td><td>identical tree</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td>1,062 &rarr; 1,198</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,475,463 (5.19&times;)</td><td class="n">42,029,541</td><td class="n">4,607,771</td><td class="n">7.29&times;</td><td>flat</td><td class="n">3.92&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,746,829,713 (<strong>0.60&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n"><strong>11.13&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.60&times; is the superseded loss</td></tr>
     </tbody>
   </table></div>
   <div class="table-scroll"><table>
-    <caption>Where the inherited engine&rsquo;s operations go on the rung that dominates, <code>K_1/2^23</code>, whole ladder run.
-      The elimination phase every earlier round optimised is 0.3% of what it was; what remains is the re-reduction of
-      displaced rows, which cascades as the basis drifts from reduced form down a 22-level tree.</caption>
-    <thead><tr><th>Component</th><th>Word operations</th><th>Share</th></tr></thead>
+    <caption>Where the inherited engine&rsquo;s operations go on the rung that dominates, <code>K_1/2^23</code>, whole ladder run,
+      before and after the split rule. The re-reduction of displaced rows &mdash; the cascade the historical rule caused &mdash;
+      falls 8.4&times;; what remains is the specialisation charge, one word read and one written per word of every row at
+      every level, which is the next lever.</caption>
+    <thead><tr><th>Component</th><th>Inherited, L</th><th>Share</th><th>Inherited, H (default)</th><th>Share</th></tr></thead>
     <tbody>
-      <tr><td>root reductions (16 targets, degrees 2 and 3)</td><td class="n">6,719,658</td><td class="n">7%</td></tr>
-      <tr><td>re-reduction of displaced rows</td><td class="n">60,351,941</td><td class="n">62%</td></tr>
-      <tr><td>specialisation (word reads and writes, charged to the candidate only)</td><td class="n">30,626,267</td><td class="n">31%</td></tr>
-      <tr><td>tail RREF</td><td class="n">128,323</td><td class="n">0.1%</td></tr>
-      <tr><td><strong>inherited F4 total</strong> &middot; reference 699,511,508</td><td class="n"><strong>97,826,189</strong></td><td class="n"></td></tr>
+      <tr><td>root reductions (16 targets, degrees 2 and 3)</td><td class="n">6,719,658</td><td class="n">7%</td><td class="n">6,719,658</td><td class="n">15%</td></tr>
+      <tr><td>re-reduction of displaced rows</td><td class="n">60,351,941</td><td class="n">62%</td><td class="n">7,150,501</td><td class="n">16%</td></tr>
+      <tr><td>specialisation (word reads and writes, charged to the candidate only)</td><td class="n">30,626,267</td><td class="n">31%</td><td class="n">30,228,073</td><td class="n">68%</td></tr>
+      <tr><td>tail RREF</td><td class="n">128,323</td><td class="n">0.1%</td><td class="n">126,916</td><td class="n">0.3%</td></tr>
+      <tr><td><strong>inherited F4 total</strong> &middot; reference 699,511,508</td><td class="n"><strong>97,826,189</strong></td><td class="n"></td><td class="n"><strong>44,225,148</strong></td><td class="n"></td></tr>
     </tbody>
   </table></div>
-  <p>Controls retained in the evidence, all forcing inheritance on every degree so the root policy is the only
-    variable: an echelon-only root everywhere (<code>5.53&times;</code>, loses 16% on <code>n = 23</code>), a fully
-    reduced root everywhere (<code>5.98&times;</code>, loses 52% on <code>K_0/2^13</code> and regresses the cubic rung),
-    and two rejected cubic-system rescues &mdash; drift-triggered rebuilds and a cost-triggered switch to the
-    from-scratch engine, both <code>0.45&ndash;0.48&times;</code> because the estimate fires after most of the subtree
-    has paid. The node-level probe cross-checks 4,163 children on six cells against from-scratch reductions
-    with zero solver-view mismatches. Existing calibrated rows, exponents and the page&rsquo;s end-to-end verdict
-    are unchanged: the stage is one phase of relation collection, and <code>6.28&times;</code> off it is
-    <code>2<sup>2.6</sup></code> off <code>2<sup>131</sup></code>.</p>
+  <p>Controls retained in the evidence, all under the shipped rule: an echelon-only root everywhere
+    (<code>62,218,273</code>, within 0.1% of the default), a fully reduced root everywhere (<code>70,124,293</code>),
+    restoring reduced form after every level (<code>94,996,759</code> &mdash; it cuts the cascade from 40.5 to 9.8 pivots per
+    displaced row but costs 72 M word XORs to save 49 M on <code>n = 23</code>, because a reduced basis is denser), and, from the
+    historical rule, two rejected cubic-system rescues (drift-triggered rebuilds, a cost-triggered fallback; 0.45&ndash;0.48&times;).
+    The node-level probe cross-checks 10,998 children on six cells against from-scratch reductions with zero solver-view
+    mismatches. The split rule alone costs the from-scratch engine 0.80&times; on the quadratic rungs, so <code>SplitRule::Auto</code>
+    gives it to the inherited engine only and <code>KIC_F4_INHERIT=0</code> still reproduces the reference to the digit.
+    Existing calibrated rows, exponents and the page&rsquo;s end-to-end verdict are unchanged: the stage is one phase of
+    relation collection, and <code>12.6&times;</code> off it is <code>2<sup>3.7</sup></code> off <code>2<sup>131</sup></code>.</p>
 </section>
 <!-- END inherited-f4-20260922 -->
 </body>
