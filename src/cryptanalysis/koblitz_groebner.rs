@@ -701,7 +701,7 @@ pub fn matrix_f4_f2_blocked(
 
     let mut word_ops = 0u64;
     let rank = rref_f2_counted(&mut matrix, cols.len(), &mut word_ops);
-    F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+    charge_word_ops(word_ops);
 
     let n_vars_out = polys[0].n_vars;
     let mut out = Vec::with_capacity(rank);
@@ -985,7 +985,7 @@ fn matrix_f4_f2_counted_impl(
             p.criterion_word_ops += criterion_word_ops;
             p.word_ops += criterion_word_ops;
         });
-        F4_WORD_OPS_TOTAL.fetch_add(criterion_word_ops, std::sync::atomic::Ordering::Relaxed);
+        charge_word_ops(criterion_word_ops);
         return Some((Vec::new(), criterion_word_ops));
     }
     // The criterion's echelons are elimination work in the same unit; the
@@ -1016,7 +1016,7 @@ fn matrix_f4_f2_counted_impl(
         rref_f2_counted(matrix, cols.len(), &mut word_ops)
     };
     let reduce_ns = t_reduce.elapsed().as_nanos();
-    F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+    charge_word_ops(word_ops);
 
     let n_vars_out = polys[0].n_vars;
     let t_read = std::time::Instant::now();
@@ -1822,10 +1822,30 @@ pub fn f4_word_ops_total() -> u64 {
     F4_WORD_OPS_TOTAL.load(std::sync::atomic::Ordering::Relaxed)
 }
 
+thread_local! {
+    static F4_WORD_OPS_THREAD: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
+}
+
+/// Charge `word_ops` to the process-wide total and to the calling
+/// thread's own total.
+fn charge_word_ops(word_ops: u64) {
+    F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+    F4_WORD_OPS_THREAD.with(|c| c.set(c.get().wrapping_add(word_ops)));
+}
+
+/// Word operations charged by Boolean Macaulay reductions **on the calling
+/// thread** since it started.  The process-wide counters serve a run that
+/// solves on several threads; this one serves a scoped measurement — read
+/// before and after — that must not see other threads' work, such as a
+/// test binary running its cases in parallel.
+pub fn f4_word_ops_thread() -> u64 {
+    F4_WORD_OPS_THREAD.with(|c| c.get())
+}
+
 pub(crate) fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
     let mut count = 0u64;
     let rank = rref_f2_counted(matrix, n_cols, &mut count);
-    F4_WORD_OPS_TOTAL.fetch_add(count, std::sync::atomic::Ordering::Relaxed);
+    charge_word_ops(count);
     rank
 }
 
@@ -2896,7 +2916,7 @@ impl InheritedBases {
             })
             .collect();
         let word_ops = total.word_ops();
-        F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+        charge_word_ops(word_ops);
         f4_profile_add(|p| {
             p.build_ns += started.elapsed().as_nanos();
             p.word_ops += word_ops;
@@ -2933,7 +2953,7 @@ fn reduce_inherited(
                 match ReducedBasis::from_system(system, n_vars, d) {
                     Some((basis, cost)) => {
                         let word_ops = cost.word_ops();
-                        F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+                        charge_word_ops(word_ops);
                         f4_profile_add(|p| {
                             p.build_ns += started.elapsed().as_nanos();
                             p.word_ops += word_ops;
@@ -2955,7 +2975,7 @@ fn reduce_inherited(
         let mut cost = InheritCost::default();
         let rows = basis.decisive_rows(&mut cost);
         let word_ops = cost.word_ops();
-        F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+        charge_word_ops(word_ops);
         let (rank, columns) = (basis.rank() as u64, basis.columns() as u64);
         f4_profile_add(|p| {
             p.calls += 1;
