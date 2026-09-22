@@ -431,7 +431,7 @@ kernel pays for latency as well as for issue.
 | part | binding pipe at the best row | best row | 30 B/s needs | status |
 |---|---|---:|---|---|
 | RTX PRO 6000 | carry-less unit (1.6 – 2.0 lane-`CLMAD`/SM-clock) | 19.98 | fewer than 4.1 products per update, or a faster unit | **below the floor**; two cards do 40 |
-| B200 | logic pipe (63.7 lanes/SM-clock) | 15.37 | ≤ 618 ALU slots per update, from ≤ 1,205 | a 1.95× ALU cut onto an idle unit; every trade so far has paid at par or better, none of the remaining ones is built |
+| B200 | logic pipe (63.7 lanes/SM-clock) | 15.37 here; **19.40** after the automatic sweep of [AUTOSWEEP.md](AUTOSWEEP.md) | ≤ 618 ALU slots per update, from ≤ 1,205 (≤ 955 after the sweep) | a 1.95× ALU cut onto an idle unit here, 1.55× after the sweep; every trade so far has paid at par or better, none of the remaining ones is built |
 | H100 | logic pipe (59.8 lanes/SM-clock), by the probe; kernel not run | — | ≤ 521 ALU slots per update | as the B200, with 11% less pipe |
 
 The per-GPU answer to the question at the top is therefore **no on every
