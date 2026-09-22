@@ -131,3 +131,85 @@ Note which way this error ran: **reporting the default OVERSTATED the
 candidate's loss.** It is the one direction a result that already goes against
 the candidate will not be challenged on, which is exactly why the check had to
 be run rather than inherited.
+
+## 4. The ladder, with the base where the model assumes it is
+
+Three certified cells, 64 fixtures a configuration over two seed streams, both
+arms required to complete, every index-calculus report checked by `oracle.py`.
+Each cell's base is fixed from the sweep before the draw, so no fixture selects
+its own configuration:
+
+| cell | r | best base | IC/rho | 95% band | per-case sd(log) |
+|:--|--:|--:|--:|:--|--:|
+| `n23a1` | 4,196,903 | 8 orbits | **0.831** | [0.772, 0.894] | 0.300 |
+| `n37a0` | 230,603,167 | 16 orbits | **1.396** | [1.244, 1.567] | 0.472 |
+| `n43a1` | 4,644,189,029 | 24 orbits | **2.207** | [1.933, 2.519] | 0.540 |
+
+**The crossing round 0021 reported survives**, and survives a correction that
+moved both of its numbers: it still lies between `n23a1` and `n37a0`, with both
+bands clear of one in opposite directions. What changed is everything about the
+rate.
+
+### The rate, and the curvature that was not there
+
+| step | r ratio | rate |
+|:--|--:|:--|
+| `n23a1` → `n37a0` | 55× | r^[0.130, 0.188] |
+| `n37a0` → `n43a1` | 20× | r^[0.075, 0.187] |
+
+Each step is a range over every base size inside that cell's flat region — the
+minimum plus every size whose band overlaps it — because the ladder must not
+depend on choosing between sizes the data cannot separate.
+
+**The two ranges overlap, so this ladder sees no curvature: one rate fits both
+steps.** And the derived `r^{1/6} = r^0.167` lies inside both.
+
+That is the third answer this round has produced for the same question, and the
+first two were artifacts of the measurement rather than of the method:
+
+* at the sampler's default base, the rate appeared to **accelerate** — r^0.188
+  then r^0.396 — which was a handicap widening with `r`, not a method;
+* on a base grid that skipped 16 orbits, it appeared to **decelerate** on
+  disjoint ranges — r^[0.180, 0.199] then r^[0.060, 0.120] — with `n43a1`'s
+  minimum sitting on the edge of the grid, which is how a minimum outside it
+  announces itself. Filling the hole moved `n37a0`'s best base from 32 orbits
+  to 16 and its ratio from 1.709 to 1.396.
+
+Both spurious results were more interesting than the real one. Neither
+survived being measured on a complete grid.
+
+### What the optima say about the model, which is less kind
+
+The model's rate survives. Its other prediction does not. `F = (c·#E·t/k)^{1/3}`
+grows as `r^{1/3}`; anchored at `n23a1`'s 8 orbits it predicts 30 orbits at
+`n37a0` and 83 at `n43a1`. Measured, the best bases are **8, 16 and 24** — a
+growth of about `r^0.157`, less than half the derived exponent, and 88 orbits
+at `n43a1` measures 2.870 against 2.207 at 24.
+
+These two predictions are not independent: `r^{1/6}` is derived *from* the base
+sitting at `(c·#E·t/k)^{1/3}`. So the agreement on the rate, at a base
+measurably not where the derivation puts it, is not confirmation of the model —
+it is a coincidence the model does not yet explain, and the honest reading is
+that one of its two predictions is wrong and the other is right for a reason
+the derivation does not supply.
+
+## 5. What this round claims, and what it does not
+
+**Claimed.** The collector crosses rho between `r` = 4.2·10⁶ and `r` = 2.3·10⁸,
+on certified cells where both arms complete. Beyond the crossing the ratio grows
+at a rate consistent with `r^0.13`–`r^0.19` across 1100× in `r`, with no
+curvature resolvable at three cells and 64 fixtures. The best factor base grows
+with `r` far more slowly than the pair-table model derives.
+
+**Not claimed.** Nothing about a fourth cell: degrees 47, 53, 59 and 61 have
+certified cells, and rho does not complete at any of them inside a budget this
+protocol can raise without changing rho's restart policy materially. Nothing
+about curvature — ranges that overlap are not evidence of a single rate, only
+an absence of evidence for two. And nothing about the eight-cell panel, whose
+strict win under rounds 0019 and 0020 is untouched by any of this: it was
+measured at 4096 trials with a base that is optimal there, and both of those
+facts still hold.
+
+**The classification stays `engineering`** under AGENTS.md §3, for the same
+reason as rounds 0019 through 0021, now with a measured rate rather than a
+derived one behind it.

@@ -158,7 +158,10 @@ def main():
         best = min(rows, key=lambda x: x[1])
         flat[label] = [x for x in rows if x[2] <= best[3] and best[2] <= x[3]]
         kept = ', '.join(f'{o} orbits {v:.3f}' for o, v, *_ in flat[label])
-        edge = (rows[0][0] == best[0] or rows[-1][0] == best[0])
+        # A minimum on the grid's edge may lie outside it -- except at 8
+        # orbits, which is one batch and the smallest base the sampler can
+        # build, so there is no outside to lie in.
+        edge = ((rows[0][0] == best[0] and best[0] > 8) or rows[-1][0] == best[0])
         print(f'\n{label}: flat region = {kept}'
               + ('   MINIMUM AT THE EDGE OF THE GRID -- it may lie outside' if edge else ''))
     table = flat
