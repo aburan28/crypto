@@ -20,12 +20,23 @@ base the sweep chose for it, which is the comparison the cost model is actually
 about: `F = (c*#E*t/k)^(1/3)` is where the model says the base SHOULD be, and
 `r^(1/6)` is the rate it predicts FOR A BASE THAT IS THERE.
 
-Two things this does not do.  It does not re-choose the base per fixture -- the
-size is fixed per cell from an independent sweep, so the draw measured here
-cannot select its own configuration.  And it does not claim the swept size is
-the true optimum: the sampler builds in batches of 8, so the grid is coarse and
-the curve is flat near its minimum.  A size that is merely the best of six
-measured is reported as that and not as an optimum.
+**The argmin of a sweep is not a base size, it is a selection.**  At 16
+fixtures `n43a1` reads 1.894, 1.886 and 1.877 at 24, 32 and 48 orbits -- three
+sizes that are statistically indistinguishable, whose bands overlap almost
+entirely.  Taking the lowest of them and quoting one exponent would be six
+chances to find a favourable number at the cell that drives the rate, and it
+would bias the ladder toward the candidate exactly where the ladder is most
+sensitive.  So every size inside the flat region is measured and the exponent
+is reported as a RANGE across them.  If that range is wide, the exponent is not
+resolved and saying so is the result.
+
+It also does not re-choose the base per fixture: the size is fixed per cell
+before the draw, so a fixture cannot select its own configuration.  And no
+swept size is called an optimum -- the sampler builds in batches of 8, so the
+grid is coarse.  Worth recording against the model: `F = (c*#E*t/k)^(1/3)`
+anchored at `n23a1`'s 8 orbits predicts 30 at `n37a0`, which measures best at
+32, and 83 at `n43a1`, where 88 orbits measures 2.870 against 1.877 at 48.  The
+model's growth holds for the first step and breaks by the second.
 
 Both arms must complete on a fixture for it to count, which is the check round
 0021 omitted for rho.
@@ -46,11 +57,13 @@ from oracle import verify  # noqa: E402
 
 FROZEN = json.loads((ROOT / 'runs/round-0020/candidates.json').read_text())[0]['config']
 CONFIG = dict(FROZEN, max_trials=65536)
-# (label, degree, curve_a, r, points, the orbit count those points build).
-# The point counts come from round22_base_sweep.py and nowhere else.
-CELLS = [('n23a1', 23, 1, 4_196_903, 222, 8),
-         ('n37a0', 37, 0, 230_603_167, 1777, 32),
-         ('n43a1', 43, 1, 4_644_189_029, 3600, 48)]
+# (label, degree, curve_a, r, [(points, orbits built), ...]).  The sizes come
+# from round22_base_sweep.py: the sweep's minimum, plus every neighbouring size
+# whose band overlaps it, because picking the single argmin of a flat region is
+# a selection rather than a measurement.
+CELLS = [('n23a1', 23, 1, 4_196_903, [(222, 8)]),
+         ('n37a0', 37, 0, 230_603_167, [(1777, 32), (2400, 40)]),
+         ('n43a1', 43, 1, 4_644_189_029, [(1777, 24), (2400, 32), (3600, 48)])]
 SEEDS = (20260922, 4242)
 Z = 1.959963985
 
@@ -78,70 +91,83 @@ def main():
     fixtures = int(sys.argv[2]) if len(sys.argv) > 2 else 64
     env = T.child_env()
 
-    print(f'{fixtures} fixtures a cell over seeds {SEEDS}, max_trials='
-          f'{CONFIG["max_trials"]}, base fixed per cell by round22_base_sweep.py\n')
+    print(f'{fixtures} fixtures a configuration over seeds {SEEDS}, max_trials='
+          f'{CONFIG["max_trials"]}; base sizes fixed by round22_base_sweep.py\n')
     print(f'{"cell":8} {"r":>16} {"orbits":>7} {"IC/rho":>8} {"sd(log)":>8} '
           f'{"95% band":>18} {"complete":>10}')
-    table = []
-    for label, degree, curve_a, r, points, want in CELLS:
-        ic_ir, rho_ir, dropped, built = [], [], [], 0
-        for stream in SEEDS:
-            rng = random.Random(stream)
-            for _ in range(fixtures // len(SEEDS)):
-                job = {'degree': degree, 'curve_a': curve_a,
-                       'target_seeds': [rng.getrandbits(64)],
-                       'algorithm_seed': rng.getrandbits(64), 'config': CONFIG,
-                       'factor_base': {'kind': 'subgroup_orbits', 'seed': 43,
-                                       'points': points}}
-                fixture = run(worker, dict(job, mode='fixture'), env)
-                if fixture.get('status') != 'fixture':
-                    dropped.append('no fixture')
-                    continue
-                report = run(worker, dict(job, mode='ic'), env)
-                rho = run(worker, dict(job, mode='rho'), env)
-                if report.get('status') != 'complete':
-                    dropped.append('IC incomplete')
-                    continue
-                if rho.get('status') != 'complete':
-                    dropped.append('rho incomplete')
-                    continue
-                built = len(report.get('factor_base_orbits') or [])
-                verify(report, fixture['fixture'], expected_mode='ic', summands=3)
-                verify(rho, fixture['fixture'], expected_mode='rho')
-                ic_ir.append(instructions(worker, dict(job, mode='ic'), env))
-                rho_ir.append(instructions(worker, dict(job, mode='rho'), env))
-        n = len(ic_ir)
-        if dropped or n < 2:
-            reasons = {x: dropped.count(x) for x in sorted(set(dropped))}
-            print(f'{label:8} {r:>16,} {built:>7}   NO RATIO -- {reasons} ({n} usable)')
-            continue
-        if built != want:
-            # The sweep picked a size by the orbit count it achieved, so a
-            # different count here means this is not the configuration that was
-            # chosen and the number below would be mislabelled.
-            print(f'{label:8} {r:>16,} {built:>7}   REFUSED -- sweep chose {want} orbits')
-            continue
-        logs = [math.log(a / b) for a, b in zip(ic_ir, rho_ir)]
-        ratio, spread = math.exp(st.mean(logs)), st.stdev(logs)
-        err = spread / math.sqrt(n)
-        lo, hi = ratio * math.exp(-Z * err), ratio * math.exp(Z * err)
-        table.append((label, r, built, ratio, lo, hi))
-        print(f'{label:8} {r:>16,} {built:>7} {ratio:>8.3f} {spread:>8.3f} '
-              f'{f"[{lo:.3f}, {hi:.3f}]":>18} {f"{n}/{fixtures}":>10}')
+    table = {}
+    for label, degree, curve_a, r, sizes in CELLS:
+        for points, want in sizes:
+            ic_ir, rho_ir, dropped, built = [], [], [], 0
+            for stream in SEEDS:
+                rng = random.Random(stream)
+                for _ in range(fixtures // len(SEEDS)):
+                    job = {'degree': degree, 'curve_a': curve_a,
+                           'target_seeds': [rng.getrandbits(64)],
+                           'algorithm_seed': rng.getrandbits(64), 'config': CONFIG,
+                           'factor_base': {'kind': 'subgroup_orbits', 'seed': 43,
+                                           'points': points}}
+                    fixture = run(worker, dict(job, mode='fixture'), env)
+                    if fixture.get('status') != 'fixture':
+                        dropped.append('no fixture')
+                        continue
+                    report = run(worker, dict(job, mode='ic'), env)
+                    rho = run(worker, dict(job, mode='rho'), env)
+                    if report.get('status') != 'complete':
+                        dropped.append('IC incomplete')
+                        continue
+                    if rho.get('status') != 'complete':
+                        dropped.append('rho incomplete')
+                        continue
+                    built = len(report.get('factor_base_orbits') or [])
+                    verify(report, fixture['fixture'], expected_mode='ic', summands=3)
+                    verify(rho, fixture['fixture'], expected_mode='rho')
+                    ic_ir.append(instructions(worker, dict(job, mode='ic'), env))
+                    rho_ir.append(instructions(worker, dict(job, mode='rho'), env))
+            n = len(ic_ir)
+            if dropped or n < 2:
+                reasons = {x: dropped.count(x) for x in sorted(set(dropped))}
+                print(f'{label:8} {r:>16,} {built:>7}   NO RATIO -- {reasons} ({n} usable)')
+                continue
+            if built != want:
+                # The sweep chose a size by the orbit count it achieved, so a
+                # different count here is a different configuration and the
+                # number would be mislabelled.
+                print(f'{label:8} {r:>16,} {built:>7}   REFUSED -- sweep chose {want}')
+                continue
+            logs = [math.log(a / b) for a, b in zip(ic_ir, rho_ir)]
+            ratio, spread = math.exp(st.mean(logs)), st.stdev(logs)
+            err = spread / math.sqrt(n)
+            lo, hi = ratio * math.exp(-Z * err), ratio * math.exp(Z * err)
+            table.setdefault(label, []).append((built, ratio, lo, hi))
+            print(f'{label:8} {r:>16,} {built:>7} {ratio:>8.3f} {spread:>8.3f} '
+                  f'{f"[{lo:.3f}, {hi:.3f}]":>18} {f"{n}/{fixtures}":>10}')
 
-    if len(table) >= 2:
-        print('\nrate between consecutive cells, each at its own best measured base')
+    order = [(c, r) for c, _d, _a, r, _s in CELLS if table.get(c)]
+    if len(order) >= 2:
+        print('\nrate between consecutive cells. Every size inside each cell\'s flat')
+        print('region is carried, so each step is a RANGE and not a point.')
         rates = []
-        for (c0, r0, _o0, v0, *_), (c1, r1, _o1, v1, *_) in zip(table, table[1:]):
-            e = math.log(v1 / v0) / math.log(r1 / r0)
-            rates.append(e)
-            print(f'  {c0} -> {c1}: r^{e:.3f} ({r1 / r0:.0f}x in r, {v1 / v0:.2f}x in the ratio)')
-        print('round19_model.py derives r^(1/6) = r^0.167 for the balanced optimum,')
-        print('which is the rate for a base AT that optimum -- which is what this')
-        print('ladder holds and the default-base ladder does not.')
+        for (c0, r0), (c1, r1) in zip(order, order[1:]):
+            es = [math.log(v1 / v0) / math.log(r1 / r0)
+                  for _o0, v0, *_ in table[c0] for _o1, v1, *_ in table[c1]]
+            rates.append((min(es), max(es)))
+            print(f'  {c0} -> {c1}: r^[{min(es):.3f}, {max(es):.3f}] '
+                  f'over {len(table[c0])}x{len(table[c1])} base choices '
+                  f'({r1 / r0:.0f}x in r)')
+        print('\nround19_model.py derives r^(1/6) = r^0.167 for the balanced optimum,')
+        print('which is the rate for a base AT that optimum. This ladder holds one;')
+        print('a ladder pinned at the sampler default does not, which is why round')
+        print('0021\'s exponent was measuring a widening handicap rather than a method.')
         if len(rates) >= 2:
-            print(f'\nThe two rates are {rates[0]:.3f} and {rates[1]:.3f}. They are free to')
-            print('disagree; whether they do is the first curvature this campaign can see.')
+            (a0, a1), (b0, b1) = rates[0], rates[1]
+            overlap = not (a1 < b0 or b1 < a0)
+            print(f'\nThe two steps are r^[{a0:.3f}, {a1:.3f}] and r^[{b0:.3f}, {b1:.3f}].')
+            print('They OVERLAP, so this ladder sees no curvature: one rate fits both'
+                  if overlap else
+                  'They are DISJOINT, so the rate genuinely changes between the steps')
+            print('steps, and the base choice inside each cell does not decide that.'
+                  if overlap else 'and the base choice inside each cell cannot explain it.')
     print('\nEvery ratio is between two arms that both completed, at a base size fixed')
     print('from an independent sweep rather than chosen by this draw.')
 
