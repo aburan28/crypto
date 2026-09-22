@@ -501,6 +501,14 @@ without them the infinity branch is never taken and the test would claim
 coverage it does not have. `ecc2k95` skips it: at `m = 97` a point does
 not fit in a `u64` and `FastCurve` refuses the same case.
 
+**CI runs it** — `.github/workflows/gpu-ecc2k-host-verification.yml`, on
+any pull request touching `gpu/ecc2k/**`, and also on
+`examples/dump_canon_vectors.rs` and `src/cryptanalysis/koblitz_fast.rs`,
+because `vec_canon.h` is generated from those and a change to either
+moves what the C++ side is checked against. No GPU: `G2_HD` is `inline`
+without `__CUDACC__`, so everything but the kernels builds under g++.
+The kernels themselves are still covered by nothing.
+
 ## Files
 
 | File | What it is |

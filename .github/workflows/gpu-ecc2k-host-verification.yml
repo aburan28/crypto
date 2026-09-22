@@ -1,0 +1,41 @@
+# The `gpu/ecc2k` headers have a CPU test harness — `G2_HD` is `inline`
+# when `__CUDACC__` is not defined, so everything but the kernels
+# compiles and runs under g++ with no GPU.  Nothing ran it.
+#
+# That matters most for `pt_canon`, the folded pair table's key.  Its
+# correctness is not a thing a reviewer can eyeball: it has to name
+# Frobenius orbits exactly as the squaring chain does *and* exactly as
+# `koblitz_fast::FrobeniusCanon` does, and a key that gets either wrong
+# reports "no decomposition" for a target that has one — a silent wrong
+# answer from an oracle rather than a crash.  `test_pairtable.cpp`
+# checks both, exhaustively at composite degrees; this runs it.
+name: GPU ecc2k host verification
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'gpu/ecc2k/**'
+      # `vec_canon.h` is generated from these: the basis change comes
+      # from `FrobeniusCanon`, and the vectors are its own answers, so a
+      # change to either moves what the C++ side is checked against.
+      - 'examples/dump_canon_vectors.rs'
+      - 'src/cryptanalysis/koblitz_fast.rs'
+      - '.github/workflows/gpu-ecc2k-host-verification.yml'
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    # Most of this is one `cargo build --release` to generate the
+    # vectors; the C++ itself is seconds.
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.90.0
+      # `make test` builds six binaries and runs them: the field and
+      # curve harness for each of the three curves, and the pair-table
+      # one.  `test_pt_ecc2k95` declines at m = 97 > 62, which is
+      # `pt_low64`'s ceiling and `FrobeniusCanon`'s too, and says so
+      # rather than passing silently.
+      - name: Host tests for the ecc2k kernels
+        run: make -C gpu/ecc2k test
