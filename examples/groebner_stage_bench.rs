@@ -141,6 +141,7 @@ fn main() {
         let mut verdicts: Vec<String> = Vec::new();
         let mut decomposed = 0u32;
         let mut stats_total = (0usize, 0usize, 0usize, 0usize, 0usize);
+        let mut exhausted = 0u32;
         let wall = Instant::now();
         for i in 0..inst.targets {
             let target = kc.mul(&g, &target_scalar(i));
@@ -168,6 +169,7 @@ fn main() {
             stats_total.2 += stats.propagations;
             stats_total.3 += stats.splits;
             stats_total.4 += stats.oversize;
+            exhausted += u32::from(stats.exhausted);
         }
         let wall_ns = wall.elapsed().as_nanos();
         let p: F4Profile = f4_profile();
@@ -214,6 +216,7 @@ fn main() {
             "propagations": stats_total.2,
             "splits": stats_total.3,
             "oversize": stats_total.4,
+            "exhausted": exhausted,
         }));
     }
 
