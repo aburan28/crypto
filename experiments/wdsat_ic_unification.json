@@ -45,18 +45,17 @@
     "ratio_on_step_over_ffs": 33.08,
     "l4_hot_path": "Fl[0] held in a register + unchecked Fq/Fl indexing on the L=4 chunk",
     "parallel_outer": {
-      "auto_select": "n >= 20 and max_solutions > 1",
+      "auto_select": false,
       "outer_bits": 4,
       "instance": "dense quadratic n=20 m=24 unsat full enum",
-      "parallel_ns": 306751,
-      "serial_l4_ns": 411953,
-      "ratio_serial_over_parallel": 1.34,
-      "note": "specialisation tax dominates below n=20; stays serial there"
+      "ratio_serial_over_parallel_range": [0.96, 1.34],
+      "note": "within noise at n=20 on 4 cores; specialisation tax dominates below; stays opt-in"
     },
     "tried_and_not_auto_selected": {
-      "scalar_l8_hardcoded": "within noise of L=4 at n=18 (~0.7–1.2×); I-cache / spill",
+      "scalar_l8_hardcoded": "within noise of L=4 at n=18 (~0.6–1.2×); I-cache / spill",
       "l4_batch_probe": "~0.45× vs plain L=4 on unsat — well-predicted zero-checks beat rewind copies",
-      "avx2_4x64_batch": "~0.6–0.8× vs scalar L=4 batch on n=16 m=24"
+      "avx2_4x64_batch": "~0.6–0.8× vs scalar L=4 batch on n=16 m=24",
+      "parallel_outer_4": "noisy ~1× at n=20; not auto-selected"
     },
     "avx2_instance_full_enum": "dense quadratic n=16 m=24",
     "avx2_4x64_full_ns": 116177,
@@ -66,7 +65,7 @@
     "monica_vs_moebius_n14_m32_ratio": 0.22,
     "monica_role": "range extension past Moebius n<=24 cap; not an in-cap speedup",
     "floor_ratio": "flat",
-    "technique": "libfes-lite FFS O(1)/step + L=4 unrolled chunk with Fl[0] hoist; parallel outer at n>=20; AVX2 4x64 opt-in"
+    "technique": "libfes-lite FFS O(1)/step + L=4 unrolled chunk with Fl[0] hoist; AVX2/L=8/batch/parallel opt-in"
   },
   "ecc2k130": {
     "field": "F_2^131",

@@ -272,16 +272,15 @@ impl Ffs {
 /// ```
 ///
 /// so the hot loop no longer walks all `n` derivatives.  Dispatch:
-/// - `n ≥ 20` and multi-root: **parallel outer specialisation** (rayon over
-///   the top 4 Boolean variables → 16 independent `L=4` walks).  Measured
-///   ~1.16× serial at `n=20,m=24` unsat on a 4-core host.
 /// - `n ≥ 4`: scalar `L = 4` (16-step) chunk with `Fl[0]` kept in a register
 ///   and unchecked table indexing.
 /// - else: minimal one-step FFS.
 ///
-/// Hardcoded `L = 8`, batch-probe, and AVX2 4×u64 remain available for
-/// experiments but are not auto-selected (I-cache / rewind / SIMD overhead
-/// lose to, or are within noise of, packed-u64 `L=4` on this host).
+/// Parallel outer specialisation (`gray_ffs_parallel_outer`), hardcoded
+/// `L = 8`, batch-probe, and AVX2 4×u64 remain available for experiments
+/// but are not auto-selected: walls at the sizes that fit are within noise
+/// of, or slower than, the `L=4` path (specialisation tax / I-cache /
+/// predicted zero-checks / SIMD setup).
 /// Inspired by <https://github.com/cbouilla/libfes-lite>
 /// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`, batch asm) and
 /// ALMASTY `ffs.h`.
@@ -296,16 +295,6 @@ pub fn gray_incremental_find_all(
     let m = forms.len();
     if n == 0 || n > 32 || m > 64 || forms.iter().any(|f| f.n != n) {
         return None;
-    }
-
-    const PARALLEL_OUTER: usize = 4;
-    if max_solutions > 1 && n >= 20 {
-        return Some(gray_ffs_parallel_outer(
-            forms,
-            n,
-            max_solutions,
-            PARALLEL_OUTER,
-        ));
     }
 
     let mut fq = [0u64; 561];
@@ -1547,7 +1536,9 @@ mod tests {
     }
 
     #[test]
-    fn parallel_outer_beats_serial_at_n20_wall() {
+    fn parallel_outer_vs_serial_n20_wall() {
+        // Document only: 4-core walls oscillate around 1× at n=20 (setup tax
+        // vs walk work). Keep parallel opt-in until a clearer regime appears.
         let n = 20usize;
         let m = 24usize;
         let mut forms = Vec::with_capacity(m);
@@ -1567,7 +1558,6 @@ mod tests {
                 quad,
             });
         }
-        // Warm rayon pool + serial path.
         let _ = gray_ffs_parallel_outer(&forms, n, 1, 2);
         let mut fq = [0u64; 561];
         let mut fl = [0u64; 34];
@@ -1591,10 +1581,6 @@ mod tests {
         eprintln!(
             "parallel_outer4_vs_l4 n={n} m={m}: par={par_ns}ns ser={ser_ns}ns ratio={ratio:.2} sols={}",
             par.len()
-        );
-        assert!(
-            ratio >= 1.1,
-            "expected 4-outer parallel ≥1.1× serial L=4 at n=20, got {ratio:.3}"
         );
     }
 

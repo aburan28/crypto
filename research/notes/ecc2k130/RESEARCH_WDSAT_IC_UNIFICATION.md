@@ -70,8 +70,8 @@ The `mq-fes` backend ports the ALMASTY
 
 | backend | when used | measured vs Möbius / baseline |
 |---|---|---|
-| Incremental Gray (libfes FFS, `L=4` + `Fl[0]` hoist) | `find_one` / Semaev lift (early exit); full enum for `n < 20` | **~264×** wall faster than full Möbius on planted early root; **~33×** vs prior O(n)/step Gray on full `n=18` enum |
-| Parallel outer specialisation (rayon, 4 outer bits) | full enum / multi-root when `n ≥ 20` | **~1.34×** serial `L=4` on `n=20,m=24` unsat (4-core host) |
+| Incremental Gray (libfes FFS, `L=4` + `Fl[0]` hoist) | `find_one` / Semaev lift (early exit); default full enum | **~264×** wall faster than full Möbius on planted early root; **~33×** vs prior O(n)/step Gray on full `n=18` enum |
+| Parallel outer specialisation (rayon, 4 outer bits) | opt-in (`gray_ffs_parallel_outer`) | within noise of serial `L=4` at `n=20` on a 4-core host (~0.96–1.34×); specialisation tax dominates below that |
 | Möbius transform (`moebius.c`) | `find_all` for `n ≤ 24` | reference for all-roots |
 | Monica hybrid (`monica.c`) | `n > 24` (range extension) | does **not** beat Möbius inside `n ≤ 24` (release wall on `n=14,m=32` was ~0.22×); calibrated cost model agrees |
 | AVX2 Gray (`avx2_8x32` ideas → 4×u64 lanes, ± batch) | opt-in only (`mq_fes_avx2`) | **does not** beat packed-u64 scalar `L=4` on single-system Semaev (~0.42× per-step; ~0.6–0.8× batch on `n=16,m=24`); correct vs Möbius/L=4 |
@@ -82,10 +82,11 @@ Falsification for the “faster than Möbius” claim: a release run of
 the fixed dense quadratic with a Gray-index-2000 planted root. Falsification
 for the Gray speedup itself: `gray_ffs_beats_on_step_full_enum_wall` must
 keep FFS/`L=4` ≥ 1.5× the prior O(n)-per-step Gray on full `n=18` enum.
-Parallel outer must keep `≥ 1.1×` serial at `n=20` (`parallel_outer_beats_serial_at_n20_wall`).
-AVX2 stays opt-in. Monica is kept as a capacity extension, not as an in-cap
-speedup. Cubic chained (`m ≥ 3`) Semaev systems are refused; those stay on
-SAT / WDSat.
+Parallel outer must agree with serial (`parallel_outer_agrees_with_serial`);
+auto-select stays off while `n=20` walls oscillate around 1×. AVX2 stays
+opt-in. Monica is kept as a capacity extension, not as an in-cap speedup.
+Cubic chained (`m ≥ 3`) Semaev systems are refused; those stay on SAT /
+WDSat.
 
 ```text
 WDSAT_BINARY=/path/to/wdsat_solver cargo test --lib \
@@ -116,10 +117,11 @@ root appears early in Gray order.
 **Engineering unification landed; no advance against the floor.** Native
 SAT and WDSat agree on the planted prime-degree toy. Incremental Gray
 beats Möbius on `find_one` wall time (engineering, floor ratio flat);
-`Fl[0]` register hoist and (for `n ≥ 20`) parallel outer specialisation
-are further engineering levers. Monica extends past the Möbius `n ≤ 24`
-table rather than beating it inside the cap. An AVX2 4×u64 port of
-libfes `avx2_8x32` ideas is correct but **slower** than packed-u64
-scalar `L=4` on single-system instances, so it stays opt-in. Full-size
+`Fl[0]` register hoist is a further micro-optimisation of that path.
+Monica extends past the Möbius `n ≤ 24` table rather than beating it
+inside the cap. An AVX2 4×u64 port of libfes `avx2_8x32` ideas is
+correct but **slower** than packed-u64 scalar `L=4` on single-system
+instances, so it stays opt-in. Parallel outer specialisation and
+hardcoded `L=8` / batch probe likewise stay opt-in. Full-size
 ECC2K-130 index calculus remains above rho for every oracle this
 repository has priced.
