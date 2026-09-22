@@ -1,0 +1,110 @@
+{
+  "base_commit": "dda2b4c07921563747ad530af1c8d2a17a99c786",
+  "classification": "engineering and accounting; no algorithmic claim",
+  "initial_snapshot": {
+    "dps": 305849248,
+    "dps_last_hour": 621822,
+    "generated_at": "2026-09-22T00:40:23Z",
+    "ingest": {
+      "duplicate_records": 5885462,
+      "duplicate_records_last_day": 5885462,
+      "duplicate_slots_last_day": 17,
+      "lag_seconds": 220,
+      "newest_object_at": "2026-09-22T00:36:43Z",
+      "outstanding_objects": 0,
+      "unrecognised_objects": 0
+    }
+  },
+  "last_pre_recovery_snapshot": {
+    "dps": 305879370,
+    "generated_at": "2026-09-22T00:48:32Z",
+    "ingest": {
+      "duplicate_records": 5885462,
+      "duplicate_records_last_day": 5885462,
+      "duplicate_slots_last_day": 17,
+      "lag_seconds": 254,
+      "newest_object_at": "2026-09-22T00:44:18Z",
+      "outstanding_objects": 0,
+      "unrecognised_objects": 0
+    }
+  },
+  "limitations": [
+    "The aggregate duplicate count does not identify GPU recomputation versus repeated uploads.",
+    "The database was not reachable from the audit host; diagnosis used S3 objects, producer commands, the ingest journal, and the public feed.",
+    "One uploader per run is still required; reconciliation is not a distributed writer lease."
+  ],
+  "recovered_uploads": {
+    "errors": 0,
+    "streams": 8,
+    "uploaded_checkpoints": 8,
+    "uploaded_objects": 8,
+    "uploaded_records": 1191589
+  },
+  "repeat_uploads": {
+    "errors": 0,
+    "streams": 8,
+    "uploaded_checkpoints": 0,
+    "uploaded_objects": 0,
+    "uploaded_records": 0
+  },
+  "retained_legacy_checkpoints": [
+    {
+      "Created/Modified": "2026-09-21 17:46 PDT",
+      "Filename": "ckpt/curve131-run4244.hdr",
+      "Size": "40 B",
+      "Type": "file"
+    },
+    {
+      "Created/Modified": "2026-09-21 17:46 PDT",
+      "Filename": "ckpt/curve131-run4244.ck",
+      "Size": "259.4 MiB",
+      "Type": "file"
+    },
+    {
+      "Created/Modified": "2026-09-21 17:46 PDT",
+      "Filename": "ckpt/curve131-run4243.hdr",
+      "Size": "40 B",
+      "Type": "file"
+    },
+    {
+      "Created/Modified": "2026-09-21 17:46 PDT",
+      "Filename": "ckpt/curve131-run4243.ck",
+      "Size": "259.4 MiB",
+      "Type": "file"
+    },
+    {
+      "Created/Modified": "2026-09-21 17:46 PDT",
+      "Filename": "ckpt/curve131-run4245.hdr",
+      "Size": "40 B",
+      "Type": "file"
+    },
+    {
+      "Created/Modified": "2026-09-21 17:46 PDT",
+      "Filename": "ckpt/curve131-run4245.ck",
+      "Size": "259.4 MiB",
+      "Type": "file"
+    },
+    {
+      "Created/Modified": "2026-09-21 17:46 PDT",
+      "Filename": "ckpt/curve131-run4242.hdr",
+      "Size": "40 B",
+      "Type": "file"
+    },
+    {
+      "Created/Modified": "2026-09-21 17:46 PDT",
+      "Filename": "ckpt/curve131-run4242.ck",
+      "Size": "259.4 MiB",
+      "Type": "file"
+    }
+  ],
+  "source_sha256": {
+    "ecc2k130/modal_sync.py": "d8a4e3754a3a8a342c1f0eb2f6c23a50f826ce312ae84fb962d65c140194d8ad",
+    "ecc2k130/test_modal_sync.py": "002319bf174609ae8adfe9a606139aea32995b9d41b7da62588573e0d16c5215"
+  },
+  "stopped_app": "ap-nb3Ti51HwSILaepvKi9ccR",
+  "stopped_app_at": "2026-09-22T00:47:47Z",
+  "tests": {
+    "command": "python3 -m unittest test_modal_sync test_modal_app test_modal_campaign",
+    "passed": 74
+  }
+}

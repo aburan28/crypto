@@ -317,6 +317,61 @@ def orbit_key(slot, run_id, offset, delta_path):
         slot, sid, offset, sha256_file(delta_path))
 
 
+def committed_offset(s3, bucket, run_id, corpus):
+    """Recover the contiguous uploaded prefix from immutable S3 objects.
+
+    Local state is a cache, not evidence that points were uploaded. A new
+    host or a lost /tmp must not resend a growing corpus from byte zero under
+    a new hash. Check every object's digest against this volume snapshot so
+    reusing a run id with a different corpus cannot silently skip new points.
+    No objects or checkpoints are changed during reconciliation.
+    """
+    prefix = "dp/slot-%05d/%s-" % (slot_for_run(run_id), stream_id(run_id))
+    ranges = []
+    request = dict(Bucket=bucket, Prefix=prefix, MaxKeys=1000)
+    while True:
+        page = s3.list_objects_v2(**request)
+        for item in page.get("Contents", []) or []:
+            key = item["Key"]
+            match = ORBIT_KEY_RE.fullmatch(key)
+            if not match:
+                if key.endswith(".bin"):
+                    raise ValueError("unrecognised corpus object: " + key)
+                continue
+            start, size = int(match[3]), int(item["Size"])
+            if start % RECORD_BYTES or size <= 0 or size % RECORD_BYTES:
+                raise ValueError("unaligned corpus object: " + key)
+            ranges.append((start, start + size, match[4], key))
+        if not page.get("IsTruncated"):
+            break
+        token = page.get("NextContinuationToken")
+        if not token or token == request.get("ContinuationToken"):
+            raise ValueError("incomplete S3 listing for " + prefix)
+        request["ContinuationToken"] = token
+
+    whole = os.path.getsize(corpus) // RECORD_BYTES * RECORD_BYTES
+    offset = 0
+    with open(corpus, "rb") as src:
+        for start, end, digest, key in sorted(ranges):
+            if start > offset:
+                raise ValueError("gap in uploaded corpus at byte %d; refusing to skip points" % offset)
+            if end > whole:
+                raise ValueError("volume corpus is behind S3 at byte %d; wait for a fresh snapshot" % end)
+            src.seek(start)
+            remaining = end - start
+            h = hashlib.sha256()
+            while remaining:
+                chunk = src.read(min(1024 * 1024, remaining))
+                if not chunk:
+                    raise ValueError("volume corpus changed during reconciliation")
+                h.update(chunk)
+                remaining -= len(chunk)
+            if h.hexdigest() != digest:
+                raise ValueError("volume corpus differs from uploaded object " + key)
+            offset = max(offset, end)
+    return offset
+
+
 def parse_run_ids(text):
     if not text:
         return []
@@ -471,6 +526,19 @@ def sync_once(s3, bucket, volume, curve, run_id, state_dir, dry_run=False,
                 save_state(state_file, state)
             return dict(offset=offset, uploaded_records=0, objects=0, pending=False, **ckpt)
 
+        if s3 is not None:
+            committed = committed_offset(s3, bucket, run_id, local)
+            if committed != offset:
+                log("run %d: recovered upload offset %d from S3 (local cache was %d)"
+                    % (run_id, committed, offset))
+            offset = committed
+            state.update(offset=offset, bucket=bucket, remote=remote,
+                         slot=slot_for_run(run_id), stream_id=stream_id(run_id))
+            # Save point progress independently of checkpoint publication. A
+            # failed checkpoint upload must not undo a successful DP upload.
+            if not dry_run:
+                save_state(state_file, state)
+
         if whole <= offset:
             log("corpus %s: %d bytes on volume, nothing new after offset %d"
                 % (remote, size, offset))
@@ -510,6 +578,8 @@ def sync_once(s3, bucket, volume, curve, run_id, state_dir, dry_run=False,
                      stream_id=stream_id(run_id),
                      remote=remote,
                      bucket=bucket)
+        if not dry_run:
+            save_state(state_file, state)
         # Points before the checkpoint that follows them, as worker.py does, so
         # the work counter never leads the corpus it accounts for.
         ckpt = upload_checkpoint(s3, bucket, curve, run_id, state, ck_local, ck_remote, dry_run)
@@ -607,7 +677,8 @@ def main(argv=None):
                 dry_run=args.dry_run, policy=policy)
             if args.watch <= 0:
                 print(json.dumps(results, indent=2))
-                return 1 if any(r.get("refused") for r in results.values()) else 0
+                return 1 if any(r.get("refused") or r.get("error")
+                                for r in results.values()) else 0
             for run_id, result in results.items():
                 if result.get("uploaded_records") or result.get("checkpoint_uploaded"):
                     print(json.dumps({run_id: result}, indent=2), flush=True)

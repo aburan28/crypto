@@ -815,6 +815,27 @@ launch (`modal_app.py`), at upload (`modal_sync.py`) and on the page
    host flags the same ratio per slot on the dashboard (`off_weight_slots`),
    and counts the records it dropped as re-reports (`duplicate_records`).
 
+`modal_sync.py` recovers each run's uploaded byte offset from its immutable
+S3 objects on every pass. The local JSON state is only a cache: losing `/tmp`,
+moving the uploader to another host, or failing to publish a checkpoint after
+a successful point upload must not send an already-uploaded prefix again.
+Recovery lists every page, requires contiguous whole-record coverage, and
+checks the object-name hashes against the downloaded volume corpus. A gap,
+changed prefix, or volume snapshot older than S3 stops that run's sync before
+any points or checkpoint are published. Wait for a fresh volume snapshot or
+investigate the mismatch; do not reset the offset to bypass it. Reconciliation
+reads and hashes the covered corpus (including historical overlaps), so its
+cost grows with that corpus. Run one uploader per run: this recovery is not
+a distributed writer lease, and concurrent uploaders can still race between
+listing and uploading.
+
+The dashboard's `Re-reported points, 24 h` is a rolling count of duplicate
+ingest records, not a count of wasted GPU iterations. It includes repeat
+uploads as well as retraced walks, and can remain high after the source of
+duplicates has stopped. Check its change between fresh snapshots alongside
+new distinct points. Preserve the old objects and checkpoints when stopping
+a faulty producer; resetting the counter does not repair that producer.
+
 The procedure, once:
 
 ```
