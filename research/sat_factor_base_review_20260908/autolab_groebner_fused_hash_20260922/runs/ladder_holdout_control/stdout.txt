@@ -1,0 +1,13 @@
+
+=== Gröbner stage: frozen decomposition ladder (ladder_holdout_control) ===
+
+| instance | m | ℓ | targets | decomposed | word XORs | F4 calls | build ms | reduce ms | read ms | wall s |
+|:---------|--:|--:|--------:|-----------:|----------:|---------:|---------:|----------:|--------:|-------:|
+| `K_0/2^19` | 2 | 18 | 12 | 12 | 116912104 | 216 | 219.5 | 89.8 | 0.1 | 0.32 |
+| `K_1/2^17` | 2 | 8 | 24 | 10 | 33578834 | 2104 | 187.6 | 127.5 | 9.8 | 0.35 |
+
+Unit: 64-bit word XORs in the Macaulay eliminations; wall time is the whole
+stage including building and reading back every matrix.  Per AGENTS.md §8 this
+is a solver-stage diagnostic, not an end-to-end ECDLP measurement.
+
+Wrote research/sat_factor_base_review_20260908/autolab_groebner_fused_hash_20260922/runs/ladder_holdout_control/artifact/stage.json
