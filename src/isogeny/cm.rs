@@ -9,10 +9,10 @@
 //! 2. The characteristic polynomial of `π` is `T² − t T + p`, so its
 //!    discriminant is `t² − 4p < 0`.
 //! 3. Write `t² − 4p = D · f²` with `D` a **fundamental
-//!    discriminant** (square-free factor of `t² − 4p`) and `f` the
-//!    **conductor** of `End(E)` inside the maximal order
-//!    `O_K = O_{Q(√D)}`.  Then `End(E)` is the order `Z + f O_K`,
-//!    of discriminant `f² D`.
+//!    discriminant** and `f` the conductor of **`Z[π]`**, not of
+//!    `End(E)`. The ordinary curve's endomorphism conductor divides
+//!    `f`; the trace alone does not identify it. Unknown endomorphism
+//!    conductors and discriminants are represented by `None`.
 //!
 //! Kohel's algorithm walks the `ℓ`-isogeny volcano to **descend**
 //! from the maximal order all the way to the floor, reading off the
@@ -23,16 +23,17 @@
 //! ## What's expensive
 //!
 //! Frobenius trace by brute-force point counting is `O(p)` field
-//! operations: feasible for `p < 2^32` on a laptop in seconds, and
-//! easy for our 60–80-bit experimental scope.  Schoof's algorithm
+//! operations: only suitable for tiny fields; it is not a viable
+//! 60–80-bit procedure. The point counter also has a bounded BSGS
+//! path and a brute-force fallback. Schoof's algorithm
 //! (`O((log p)^5)`) would be required to scale to cryptographic
 //! sizes; we deliberately do not implement it here — see
 //! [`crate::cryptanalysis::ai_schoof`] for the start of that work.
 
 use super::SmallCurve;
-use num_bigint::{BigInt, BigUint};
+use num_bigint::BigUint;
 use num_integer::Integer;
-use num_traits::{Signed, Zero};
+use num_traits::Zero;
 use std::collections::HashMap;
 
 // ── Frobenius trace ───────────────────────────────────────────────────────────
@@ -421,7 +422,15 @@ pub fn legendre_u64(a: u64, p: u64) -> i32 {
 
 // ── Discriminant / conductor decomposition ───────────────────────────────────
 
-/// CM data attached to a curve `E/F_p`.
+/// Evidence establishing the full ordinary endomorphism order.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
+pub enum EndomorphismEvidence {
+    FrobeniusOrderMaximal,
+    JZeroAutomorphism,
+    J1728Automorphism,
+}
+
+/// CM data attached to a nonsingular short-Weierstrass curve over a prime p > 3.
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct CmData {
     /// Field prime.
@@ -434,10 +443,13 @@ pub struct CmData {
     pub frobenius_disc: i64,
     /// Fundamental discriminant of `Q(π)`.
     pub fundamental_disc: i64,
-    /// Conductor `f` of `End(E)` over `O_K`.
-    pub conductor: i64,
-    /// Discriminant of `End(E)`: `f² · D_K`.
-    pub endomorphism_disc: i64,
+    /// Conductor of `Z[π]` in `O_K`; derived from `t² − 4p`.
+    pub frobenius_order_conductor: i64,
+    /// Conductor of `End(E)`, only when established by separate evidence.
+    pub endomorphism_conductor: Option<i64>,
+    /// Discriminant of `End(E)`, not the Frobenius discriminant.
+    pub endomorphism_disc: Option<i64>,
+    pub endomorphism_evidence: Option<EndomorphismEvidence>,
     /// Whether the curve is **anomalous** (`#E = p`, Smart's attack
     /// applies).
     pub anomalous: bool,
@@ -445,8 +457,21 @@ pub struct CmData {
     pub supersingular: bool,
 }
 
-/// Compute the full CM data for a small curve.
+/// Compute Frobenius data and only the endomorphism labels we can prove.
+/// Ordinary j=0 and j=1728 automorphisms generate maximal orders. Otherwise
+/// the only inference from the trace implemented here is f_pi=1 => f_E=1.
 pub fn cm_discriminant(curve: &SmallCurve) -> CmData {
+    assert!(
+        curve.p > 3 && curve.p <= (i64::MAX as u64) / 8,
+        "CM metadata requires a small prime field of characteristic > 3"
+    );
+    let modulus = curve.p as u128;
+    let a = curve.a as u128 % modulus;
+    let b = curve.b as u128 % modulus;
+    assert!(
+        (4 * ((a * a % modulus) * a % modulus) + 27 * (b * b % modulus)) % modulus != 0,
+        "CM metadata requires a nonsingular curve"
+    );
     let p = curve.p as i64;
     let trace = frobenius_trace(curve);
     let order = p + 1 - trace;
@@ -454,14 +479,28 @@ pub fn cm_discriminant(curve: &SmallCurve) -> CmData {
     let (fund_d, cond) = fundamental_discriminant_and_conductor(frobenius_disc);
     let anomalous = order == p;
     let supersingular = trace.rem_euclid(p) == 0;
+    let endomorphism_evidence = if supersingular {
+        None
+    } else if cond == 1 {
+        Some(EndomorphismEvidence::FrobeniusOrderMaximal)
+    } else if a == 0 && fund_d == -3 {
+        Some(EndomorphismEvidence::JZeroAutomorphism)
+    } else if b == 0 && fund_d == -4 {
+        Some(EndomorphismEvidence::J1728Automorphism)
+    } else {
+        None
+    };
+    let endomorphism_conductor = endomorphism_evidence.map(|_| 1);
     CmData {
         p: curve.p,
         trace,
         order,
         frobenius_disc,
         fundamental_disc: fund_d,
-        conductor: cond,
-        endomorphism_disc: fund_d * cond * cond,
+        frobenius_order_conductor: cond,
+        endomorphism_conductor,
+        endomorphism_disc: endomorphism_conductor.map(|f| fund_d * f * f),
+        endomorphism_evidence,
         anomalous,
         supersingular,
     }
@@ -532,6 +571,8 @@ pub enum EndomorphismRing {
     /// `f > 1`: non-maximal order.  Curve sits below the crater on
     /// at least one volcano.
     NonMaximal { conductor: i64 },
+    /// The Frobenius order bounds the conductor but does not determine it.
+    Unknown { frobenius_order_conductor: i64 },
     /// Supersingular curves are not handled by this CM machinery
     /// (their endomorphism ring is a quaternion order, not
     /// imaginary quadratic).
@@ -541,11 +582,13 @@ pub enum EndomorphismRing {
 pub fn classify_endomorphism_ring(data: &CmData) -> EndomorphismRing {
     if data.supersingular {
         EndomorphismRing::Supersingular
-    } else if data.conductor == 1 {
-        EndomorphismRing::Maximal
     } else {
-        EndomorphismRing::NonMaximal {
-            conductor: data.conductor,
+        match data.endomorphism_conductor {
+            Some(1) => EndomorphismRing::Maximal,
+            Some(conductor) => EndomorphismRing::NonMaximal { conductor },
+            None => EndomorphismRing::Unknown {
+                frobenius_order_conductor: data.frobenius_order_conductor,
+            },
         }
     }
 }
@@ -582,22 +625,12 @@ pub fn class_number_one_j(disc: i64) -> Option<i64> {
 
 // ── CM detection on a known curve ─────────────────────────────────────────────
 
-/// Verify that the supplied curve really does have CM by an order
-/// of discriminant `expected_disc`.  Returns `true` iff
-/// `t² − 4p = D · f²` for some integer `f`.  This is the cheap
-/// fingerprint that lets us reject "fake CM" claims.
+/// Return true only when the full endomorphism discriminant is established
+/// and equals `expected_disc`. False also includes unknown orders; it is not
+/// a proof of nonexistence. A square ratio of discriminants is insufficient.
 pub fn verify_cm(curve: &SmallCurve, expected_disc: i64) -> bool {
     let data = cm_discriminant(curve);
-    if expected_disc >= 0 || data.fundamental_disc == 0 {
-        return false;
-    }
-    // Both `data.frobenius_disc` and `expected_disc` should differ by
-    // a perfect-square factor.
-    let ratio = BigInt::from(data.frobenius_disc) / BigInt::from(expected_disc);
-    let ratio = ratio.abs();
-    let r_u: u128 = ratio.to_string().parse().unwrap_or(0);
-    let sq = (r_u as f64).sqrt() as u128;
-    sq * sq == r_u
+    !data.supersingular && data.endomorphism_disc == Some(expected_disc)
 }
 
 #[cfg(test)]
@@ -724,5 +757,109 @@ mod tests {
         let (d, f) = fundamental_discriminant_and_conductor(-12);
         assert_eq!(d, -3);
         assert_eq!(f, 2);
+    }
+
+    #[test]
+    fn j0_frobenius_order_is_not_the_endomorphism_order() {
+        let data = cm_discriminant(&toy_curve_j0());
+        assert_eq!(data.trace, 20);
+        assert_eq!(data.frobenius_disc, -12);
+        assert_eq!(data.frobenius_order_conductor, 2);
+        assert_eq!(data.endomorphism_conductor, Some(1));
+        assert_eq!(data.endomorphism_disc, Some(-3));
+        assert_eq!(
+            data.endomorphism_evidence,
+            Some(EndomorphismEvidence::JZeroAutomorphism)
+        );
+        assert_eq!(classify_endomorphism_ring(&data), EndomorphismRing::Maximal);
+    }
+
+    #[test]
+    fn equal_trace_does_not_certify_equal_endomorphism_orders() {
+        // A degree-two neighbor of y^2=x^3+1; same trace but no implemented
+        // certificate for its full order. Do not silently assign f_E=f_pi.
+        let neighbor = SmallCurve {
+            name: "same-trace",
+            p: 103,
+            a: 88,
+            b: 22,
+        };
+        let data = cm_discriminant(&neighbor);
+        assert_eq!(data.trace, cm_discriminant(&toy_curve_j0()).trace);
+        assert_eq!(data.frobenius_order_conductor, 2);
+        assert_eq!(data.endomorphism_conductor, None);
+        assert_eq!(data.endomorphism_disc, None);
+        assert_eq!(data.endomorphism_evidence, None);
+        assert_eq!(
+            classify_endomorphism_ring(&data),
+            EndomorphismRing::Unknown {
+                frobenius_order_conductor: 2
+            }
+        );
+        let json = serde_json::to_value(&data).unwrap();
+        assert!(json["endomorphism_disc"].is_null());
+        assert!(json.get("conductor").is_none());
+    }
+
+    #[test]
+    fn j1728_automorphism_and_supersingular_exclusion() {
+        let ordinary = SmallCurve {
+            name: "j1728",
+            p: 5,
+            a: 1,
+            b: 0,
+        };
+        let data = cm_discriminant(&ordinary);
+        assert_eq!(data.frobenius_order_conductor, 2);
+        assert_eq!(data.endomorphism_disc, Some(-4));
+        assert_eq!(
+            data.endomorphism_evidence,
+            Some(EndomorphismEvidence::J1728Automorphism)
+        );
+        let supersingular = SmallCurve { p: 7, ..ordinary };
+        let ss = cm_discriminant(&supersingular);
+        assert_eq!(ss.endomorphism_conductor, None);
+        assert_eq!(ss.endomorphism_disc, None);
+        assert_eq!(
+            classify_endomorphism_ring(&ss),
+            EndomorphismRing::Supersingular
+        );
+    }
+
+    #[test]
+    fn cm_verification_requires_the_proven_order_not_a_square_ratio() {
+        assert!(verify_cm(&toy_curve_j0(), -3));
+        for wrong in [-12, -48, 0, 1] {
+            assert!(!verify_cm(&toy_curve_j0(), wrong));
+        }
+        let unknown = SmallCurve {
+            name: "unknown",
+            p: 103,
+            a: 88,
+            b: 22,
+        };
+        assert!(!verify_cm(&unknown, -12));
+    }
+
+    #[test]
+    #[should_panic(expected = "characteristic > 3")]
+    fn binary_short_weierstrass_metadata_is_rejected() {
+        cm_discriminant(&SmallCurve {
+            name: "unsupported",
+            p: 2,
+            a: 1,
+            b: 1,
+        });
+    }
+
+    #[test]
+    #[should_panic(expected = "nonsingular")]
+    fn singular_metadata_is_rejected() {
+        cm_discriminant(&SmallCurve {
+            name: "singular",
+            p: 7,
+            a: 0,
+            b: 0,
+        });
     }
 }

@@ -1,61 +1,33 @@
-//! # ℓ-isogeny volcanoes (Kohel, Sutherland).
+//! Local isogeny neighborhoods and evidence-backed ordinary volcano metadata.
 //!
-//! For an ordinary `E/F_p` and a prime `ℓ ∤ p · disc(End(E))`,
-//! the `ℓ`-isogeny graph
+//! Graph distance from the starting vertex is not endomorphism-ring depth.
+//! The surface is maximal at the chosen ell, not necessarily globally maximal.
+//! Trace determines the Frobenius order and the maximum rational ell-depth;
+//! it does not generally determine the curve's own endomorphism order.
 //!
-//! ```text
-//! G_ℓ = (vertex set: j-invariants;  edges: ℓ-isogenies up to ±)
-//! ```
-//!
-//! around `E` has the shape of a **volcano**:
-//!
-//! - A **crater** at the top: a cycle (or single vertex) of
-//!   horizontal isogenies among curves whose endomorphism ring is
-//!   the *maximal* order `O_K`.  The crater's length is the order of
-//!   `[ℓ]` in `Cl(O_K)` (could be 1, ℓ−1, ℓ, or ℓ+1).
-//! - **Descending edges** from each crater vertex into a tree of
-//!   non-maximal orders.  Each level corresponds to a power of `ℓ`
-//!   in the conductor.
-//! - The **floor**: leaves of the tree, where the conductor's
-//!   `ℓ`-adic valuation equals the maximum permitted by the
-//!   Frobenius trace.
-//!
-//! Kohel's algorithm reads off `v_ℓ(End(E))` (the `ℓ`-adic
-//! valuation of the conductor) from the **depth** at which a random
-//! walk first hits a 1-regular vertex (the floor): every floor
-//! curve has exactly one `ℓ`-isogenous neighbour (its ascending
-//! one).
-//!
-//! ## What we implement
-//!
-//! - [`map_volcano`] — Starting from a given curve `E`, build the
-//!   local volcano structure up to a configurable depth, by
-//!   alternating Vélu walks across `ℓ`-isogenies.
-//! - [`volcano_depth`] — Walk from `E` to the floor (descending
-//!   when possible, randomly otherwise) and report the depth.
-//! - [`crater_size`] — Once at the crater, walk horizontally
-//!   until cycling back to start; report the cycle length.
-//! - [`position`] — Determine `(level, on_crater?)` for `E`.
+//! Neighbor enumeration here only finds pointwise rational kernels. For odd
+//! ell it is also sampled, and can miss kernels even with rational generators.
+//! It cannot find Frobenius-stable kernels without rational generators.
+//! Consequently graph valency and truncated walks are not used as certificates
+//! of a floor, horizontal edge, or crater size. No binary-field model is supported.
 
 use super::cm::{cm_discriminant, CmData};
 use super::velu::{velu_isogeny_2, velu_isogeny_odd, VeluIsogeny};
 use super::SmallCurve;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
-/// One level of the volcano, recording the curves and their
-/// 1-step neighbours within the level (crater horizontal edges)
-/// and the descent edges to the level below.
+/// One breadth-first distance bucket in the enumerated neighborhood.
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct VolcanoLevel {
-    /// `0 = crater`, increasing downward.
-    pub level: usize,
+    /// Distance from the input vertex; zero does not imply the crater.
+    pub bfs_distance: usize,
     /// j-invariants present at this level.
     pub j_invariants: Vec<u64>,
     /// Curves at this level (as `(p, a, b)` tuples).
     pub curves: Vec<(u64, u64, u64)>,
 }
 
-/// A complete map of an `ℓ`-isogeny volcano around a starting curve.
+/// A bounded neighborhood, not a certified complete rational volcano.
 #[derive(Clone, Debug, serde::Serialize)]
 pub struct VolcanoMap {
     pub ell: u64,
@@ -63,7 +35,57 @@ pub struct VolcanoMap {
     pub start_cm: CmData,
     pub levels: Vec<VolcanoLevel>,
     /// Whether the start curve sits on the crater (level 0).
-    pub start_on_crater: bool,
+    pub start_on_crater: Option<bool>,
+    /// Only ell=2 has a complete rational-kernel enumeration in this backend.
+    pub rational_kernel_enumeration_complete: bool,
+    /// Preserve enumerated self-loops and parallel kernels independently of vertices.
+    pub edges: Vec<VolcanoEdge>,
+}
+
+/// A recorded kernel edge; no horizontal/vertical classification is inferred.
+#[derive(Clone, Debug, serde::Serialize)]
+pub struct VolcanoEdge {
+    pub source_j: u64,
+    pub target_j: u64,
+    pub kernel_half: Vec<(u64, u64)>,
+}
+
+fn validate_degree(curve: &SmallCurve, ell: u64) {
+    assert!(
+        curve.p > 3,
+        "Short Weierstrass volcano backend requires characteristic > 3"
+    );
+    assert!(
+        ell >= 2 && ell != curve.p,
+        "ell must be prime and different from the characteristic"
+    );
+    let mut divisor = 2;
+    while divisor <= ell / divisor {
+        assert!(ell % divisor != 0, "ell must be prime");
+        divisor += 1;
+    }
+}
+
+fn valuation(mut conductor: i64, ell: u64) -> u32 {
+    let mut depth = 0;
+    while conductor > 0 && conductor as u64 % ell == 0 {
+        conductor /= ell as i64;
+        depth += 1;
+    }
+    depth
+}
+
+fn certified_depth(cm: &CmData, ell: u64) -> Option<u32> {
+    if cm.supersingular {
+        None
+    } else if let Some(f) = cm.endomorphism_conductor {
+        Some(valuation(f, ell))
+    } else if cm.frobenius_order_conductor as u64 % ell != 0 {
+        // f_E divides f_pi, so this local statement is known even when f_E is not.
+        Some(0)
+    } else {
+        None
+    }
 }
 
 /// Compute the j-invariant of an elliptic curve `y² = x³ + ax + b`:
@@ -92,9 +114,10 @@ pub fn j_invariant(curve: &SmallCurve) -> u64 {
 }
 
 /// Enumerate the `ℓ`-isogenous neighbours of `curve` via Vélu's
-/// formulas.  Returns one `VeluIsogeny` per cyclic order-`ℓ`
-/// subgroup; the codomains' j-invariants are the neighbours.
+/// formulas for pointwise rational kernels only. Frobenius-stable kernels
+/// without rational generators may be absent for odd ell.
 pub fn neighbors_ell(curve: &SmallCurve, ell: u64) -> Vec<VeluIsogeny> {
+    validate_degree(curve, ell);
     if ell == 2 {
         // 2-isogenies: kernel = order-2 subgroup = {O, T}, with
         // T = (x_T, 0).  Roots of x³ + a x + b = 0 over F_p.
@@ -112,31 +135,26 @@ pub fn neighbors_ell(curve: &SmallCurve, ell: u64) -> Vec<VeluIsogeny> {
     }
 }
 
-/// Map the volcano around `curve` for the given prime `ℓ`.  Performs
-/// a BFS over the local `ℓ`-isogeny graph, capped at `max_depth`
-/// hops and at `max_vertices` total vertices.
-///
-/// The returned `levels` use BFS distance as the level coordinate;
-/// **callers must determine** whether level 0 corresponds to the
-/// crater (we tag this in `start_on_crater` using the conductor's
-/// `ℓ`-adic valuation, which is derived from the Frobenius trace).
+/// Enumerate a capped neighborhood. Buckets are BFS distances, never strata.
+/// `start_on_crater` is unknown unless separately justified by conductor data.
 pub fn map_volcano(
     curve: &SmallCurve,
     ell: u64,
     max_depth: usize,
     max_vertices: usize,
 ) -> VolcanoMap {
+    validate_degree(curve, ell);
+    assert!(
+        max_vertices > 0,
+        "Neighborhood must have room for its input vertex"
+    );
     let cm = cm_discriminant(curve);
-    // ν_ℓ(f): the start curve sits at level ν.  If ν = 0 then
-    // we are already on the crater.
-    let f = cm.conductor.unsigned_abs() as u64;
-    let mut nu = 0u32;
-    let mut ff = f;
-    while ff % ell == 0 && ff != 0 {
-        ff /= ell;
-        nu += 1;
-    }
-    let start_on_crater = nu == 0;
+    assert!(
+        !cm.supersingular,
+        "Ordinary volcano metadata does not apply to supersingular curves"
+    );
+    let start_on_crater = certified_depth(&cm, ell).map(|d| d == 0);
+    let mut edges = Vec::new();
 
     // BFS by j-invariant.
     let start_j = j_invariant(curve);
@@ -156,6 +174,14 @@ pub fn map_volcano(
         let neighbours = neighbors_ell(&c, ell);
         for iso in neighbours {
             let j = j_invariant(&iso.codomain);
+            if !seen.contains(&j) && visited >= max_vertices {
+                continue;
+            }
+            edges.push(VolcanoEdge {
+                source_j: j_invariant(&c),
+                target_j: j,
+                kernel_half: iso.kernel_half.clone(),
+            });
             if seen.insert(j) {
                 visited += 1;
                 levels.entry(d + 1).or_default().push((
@@ -165,9 +191,6 @@ pub fn map_volcano(
                     iso.codomain.b,
                 ));
                 frontier.push_back((iso.codomain, d + 1));
-                if visited >= max_vertices {
-                    break;
-                }
             }
         }
     }
@@ -175,7 +198,7 @@ pub fn map_volcano(
     let level_vec: Vec<VolcanoLevel> = levels
         .into_iter()
         .map(|(level, entries)| VolcanoLevel {
-            level,
+            bfs_distance: level,
             j_invariants: entries.iter().map(|e| e.0).collect(),
             curves: entries.iter().map(|e| (e.1, e.2, e.3)).collect(),
         })
@@ -187,115 +210,60 @@ pub fn map_volcano(
         start_cm: cm,
         levels: level_vec,
         start_on_crater,
+        rational_kernel_enumeration_complete: ell == 2,
+        edges,
     }
 }
 
-// ── Targeted walks ───────────────────────────────────────────────────────────
-
-/// Walk **down** the `ℓ`-volcano from `curve` until we reach the
-/// floor (a vertex with exactly one `ℓ`-isogenous neighbour up to
-/// the one we just came from).  Returns the number of descent
-/// steps taken.
-///
-/// This is Kohel's algorithm restricted to detecting the floor.
-/// Combined with the crater walk below, it lets us read off
-/// `v_ℓ(End(E))`.
-pub fn volcano_depth(curve: &SmallCurve, ell: u64, max_depth: usize) -> usize {
-    let mut current = *curve;
-    let mut previous_j: Option<u64> = None;
-    for d in 0..max_depth {
-        let n = neighbors_ell(&current, ell);
-        // Filter out the edge we came from.
-        let forward: Vec<_> = n
-            .iter()
-            .filter(|iso| Some(j_invariant(&iso.codomain)) != previous_j)
-            .collect();
-        if forward.is_empty() {
-            // We hit a dead-end immediately — should not happen for
-            // a well-formed ordinary curve, but if it does we're at
-            // a degenerate floor.
-            return d;
-        }
-        if forward.len() == 1 {
-            // Floor (one neighbour besides the one we came from).
-            // Actually a "floor" vertex has *zero* forward neighbours
-            // when ν = depth; a 1-forward vertex is mid-descent.
-            // We continue but record `d` as our last position.
-            previous_j = Some(j_invariant(&current));
-            current = forward[0].codomain;
-            return d + 1;
-        }
-        // Multiple forward neighbours: pick any descending one.  In
-        // general we should detect "ascending" vs "descending" using
-        // the conductor, but for a top-down random walk we can pick
-        // the first forward neighbour and rely on the volcano's
-        // tree structure below the crater.
-        previous_j = Some(j_invariant(&current));
-        current = forward[0].codomain;
+/// Maximum rational ell-volcano depth v_ell(f_pi), not a guessed walk length.
+/// Returns None for supersingular curves or when the requested depth cap is too
+/// small. The cap is never returned as though a traversal completed.
+pub fn volcano_depth(curve: &SmallCurve, ell: u64, max_depth: usize) -> Option<usize> {
+    validate_degree(curve, ell);
+    let cm = cm_discriminant(curve);
+    if cm.supersingular {
+        return None;
     }
-    max_depth
+    let depth = valuation(cm.frobenius_order_conductor, ell) as usize;
+    (depth <= max_depth).then_some(depth)
 }
 
-/// Walk horizontally on the crater starting from `curve`.  Picks any
-/// `ℓ`-isogeny that **does not change** the endomorphism-ring
-/// discriminant (detected by checking that the codomain's Frobenius
-/// trace matches the source's) and follows it until cycling back to
-/// the start (or until `max_steps`).  Returns the cycle length.
-pub fn crater_size(curve: &SmallCurve, ell: u64, max_steps: usize) -> usize {
-    let start_j = j_invariant(curve);
-    let start_disc = cm_discriminant(curve).endomorphism_disc;
-    let mut current = *curve;
-    let mut previous_j: Option<u64> = None;
-    for step in 1..=max_steps {
-        let n = neighbors_ell(&current, ell);
-        let horizontal: Vec<_> = n
-            .iter()
-            .filter(|iso| {
-                let c = cm_discriminant(&iso.codomain);
-                c.endomorphism_disc == start_disc && Some(j_invariant(&iso.codomain)) != previous_j
-            })
-            .collect();
-        if horizontal.is_empty() {
-            return 0; // not on the crater
-        }
-        let next = horizontal[0].codomain;
-        if j_invariant(&next) == start_j {
-            return step;
-        }
-        previous_j = Some(j_invariant(&current));
-        current = next;
+/// Only certify a singleton surface when its proven maximal endomorphism order
+/// has class number one. Other cases remain unknown; equal traces and incomplete
+/// rational-point kernel walks cannot establish horizontal cycles.
+pub fn crater_size(curve: &SmallCurve, ell: u64, max_steps: usize) -> Option<usize> {
+    validate_degree(curve, ell);
+    let cm = cm_discriminant(curve);
+    if max_steps == 0 || cm.supersingular || cm.endomorphism_conductor != Some(1) {
+        return None;
     }
-    max_steps
+    matches!(
+        cm.fundamental_disc,
+        -3 | -4 | -7 | -8 | -11 | -19 | -43 | -67 | -163
+    )
+    .then_some(1)
 }
 
-/// Classification of a curve's position within the `ℓ`-volcano.
+/// Local ordinary volcano position. Unknown is distinct from zero/false.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
 pub struct VolcanoPosition {
-    pub on_crater: bool,
-    /// Distance from the crater (`0` iff on the crater).
-    pub depth: u32,
-    /// Crater length (`1` for a single vertex).
-    pub crater_size: u32,
+    pub on_crater: Option<bool>,
+    /// v_ell(f_E), when certified; not BFS distance.
+    pub depth: Option<u32>,
+    /// v_ell(f_pi), the maximum rational depth of this component.
+    pub max_depth: Option<u32>,
+    pub crater_size: Option<u32>,
 }
 
 pub fn position(curve: &SmallCurve, ell: u64) -> VolcanoPosition {
+    validate_degree(curve, ell);
     let cm = cm_discriminant(curve);
-    let mut f = cm.conductor.unsigned_abs() as u64;
-    let mut depth = 0u32;
-    while f != 0 && f % ell == 0 {
-        f /= ell;
-        depth += 1;
-    }
-    let on_crater = depth == 0;
-    let crater = if on_crater {
-        crater_size(curve, ell, 64) as u32
-    } else {
-        0
-    };
+    let depth = certified_depth(&cm, ell);
     VolcanoPosition {
-        on_crater,
+        on_crater: depth.map(|d| d == 0),
         depth,
-        crater_size: crater.max(1),
+        max_depth: (!cm.supersingular).then(|| valuation(cm.frobenius_order_conductor, ell)),
+        crater_size: crater_size(curve, ell, 64).map(|n| n as u32),
     }
 }
 
@@ -322,5 +290,87 @@ mod tests {
         // Build a tiny volcano and just check it doesn't crash.
         let v = map_volcano(&toy_curve_b(), 2, 3, 16);
         assert!(!v.levels.is_empty());
+    }
+
+    #[test]
+    fn local_depth_uses_the_curve_order_not_the_frobenius_order() {
+        let pos = position(&toy_curve_j0(), 2);
+        assert_eq!(pos.depth, Some(0));
+        assert_eq!(pos.max_depth, Some(1));
+        assert_eq!(pos.on_crater, Some(true));
+        assert_eq!(pos.crater_size, Some(1));
+        assert_eq!(volcano_depth(&toy_curve_j0(), 2, 0), None);
+        assert_eq!(volcano_depth(&toy_curve_j0(), 2, 1), Some(1));
+    }
+
+    #[test]
+    fn unknown_depth_and_crater_are_not_zero_or_one() {
+        let curve = SmallCurve {
+            name: "unknown",
+            p: 103,
+            a: 88,
+            b: 22,
+        };
+        let pos = position(&curve, 2);
+        assert_eq!(pos.depth, None);
+        assert_eq!(pos.on_crater, None);
+        assert_eq!(pos.max_depth, Some(1));
+        assert_eq!(pos.crater_size, None);
+        assert_eq!(crater_size(&curve, 2, 64), None);
+        // Its Frobenius conductor is 2, proving local maximality at 3.
+        assert_eq!(position(&curve, 3).depth, Some(0));
+        let map = map_volcano(&curve, 2, 0, 1);
+        assert_eq!(map.start_on_crater, None);
+        assert_eq!(map.levels[0].bfs_distance, 0);
+        let json = serde_json::to_value(map).unwrap();
+        assert!(json["start_on_crater"].is_null());
+        assert!(json["levels"][0].get("level").is_none());
+    }
+
+    #[test]
+    fn self_loops_survive_vertex_deduplication() {
+        let map = map_volcano(&toy_curve_j0(), 3, 1, 8);
+        assert!(!map.rational_kernel_enumeration_complete);
+        assert!(map.edges.iter().any(|edge| edge.source_j == edge.target_j));
+    }
+
+    #[test]
+    fn parallel_kernels_survive_the_vertex_limit() {
+        let map = map_volcano(&toy_curve_j0(), 2, 1, 2);
+        assert_eq!(
+            map.levels
+                .iter()
+                .map(|b| b.j_invariants.len())
+                .sum::<usize>(),
+            2
+        );
+        assert_eq!(map.edges.len(), 3);
+        assert!(map
+            .edges
+            .iter()
+            .all(|e| e.target_j == map.edges[0].target_j));
+    }
+
+    #[test]
+    fn supersingular_positions_remain_unclassified() {
+        let curve = SmallCurve {
+            name: "ss",
+            p: 7,
+            a: 1,
+            b: 0,
+        };
+        let pos = position(&curve, 2);
+        assert_eq!(pos.depth, None);
+        assert_eq!(pos.max_depth, None);
+        assert_eq!(pos.on_crater, None);
+        assert_eq!(pos.crater_size, None);
+        assert_eq!(volcano_depth(&curve, 2, 8), None);
+    }
+
+    #[test]
+    fn invalid_degrees_fail_before_valuation_or_enumeration() {
+        for ell in [0, 1, 4, 103] {
+            assert!(std::panic::catch_unwind(|| position(&toy_curve_j0(), ell)).is_err());
+        }
     }
 }
