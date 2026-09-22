@@ -7,6 +7,14 @@ nearly idle, and that three knobs whose sign was negative on the RTX PRO
 was tuned on the 6000. What does the card itself pick when the whole knob
 and geometry space is searched automatically?
 
+Answer: a different point. On the B200 the sweep finds **19.40 B/s**, +26.3%
+over the best hand-picked row, in three knobs the 6000 had rejected — one
+fused pass per step, batch 32, and the three-limb Karatsuba product — and
+the same sweep run on the RTX PRO 6000 finds nothing (§4): its one arm over
+the line is a geometry that a warm card takes back in clock, and the B200's
+winners are its largest losses. Both results are engineering; neither moves
+a floor; 30 B/s is still nobody's.
+
 ## 1. Boundary
 
 Unit: billions of complete scalar updates per second, `finished:` line, one
@@ -173,7 +181,51 @@ an idle unit — the reduction by `CLMAD` against the modulus (−290 slots for
 +19 `CLMAD`, THROUGHPUT-20B §4) is the next priced lever and would take the
 count to ≈ 665 — where the 6000's is a floor.
 
-### 3.5 Classification
+## 4. The same sweep on the RTX PRO 6000
+
+The symmetric experiment, so that "the 6000-tuned point is the 6000's" is a
+measurement and not an assumption: the same twenty arms around the 20 B/s
+build itself (`BASE_KNOBS=`), same procedure, one RTX PRO 6000 (Modal,
+2026-09-22; [summary.json](benchmarks/autosweep/rtx-pro-6000/summary.json)).
+Base screened **19.961 B/s**.
+
+| arm (20 B/s build + …) | screened / base | | arm | screened / base |
+|---|---:|---|---|---:|
+| 640 × 1 | **1.005** | | slot unroll 2 | 0.992 |
+| fused | 1.002 | | fused, loads one slot ahead | 0.980 |
+| pair-ILP off | 1.001 | | nibble pivot | 0.979 |
+| flat lo/hi issue | 1.000 | | single products inlined only | 0.968 |
+| forward-pass pipeline off | 0.999 | | products out of line | 0.960 |
+| chain product not first | 0.998 | | L2 persist off | 0.939 |
+| ONB squarings on the ALU | 0.996 | | 768 × 1 | 0.931 |
+| 9-word inverse conversion | 0.995 | | 384 × 1 | 0.924 |
+| | | | 256 × 2 | 0.908 |
+| | | | batch 32, 8 warps | 0.861 |
+| | | | batch 32, 16 warps | 0.851 |
+| | | | three-limb Karatsuba for `TOP_CLMAD` | **0.696** |
+
+One arm clears the 0.5% line, by 0.02%; the greedy therefore builds one
+combination (the same arm) and stops. The four knobs that carried the B200
+are the bottom of this table: batch 32 at −14 to −15%, and the three-limb
+Karatsuba — four more `CLMAD`s per product on the die where a `CLMAD` costs
+38 logic slots — at **−30%**, the largest loss of any arm on either card.
+`TABLE_FUSED` is +0.2% here against +13.6% there. The sweep draws the two
+dies' pipes as two orderings of the same list.
+
+| finalist | B/s, reps 1 – 5 | median | paired / base per rep | SM clock, MHz | GPU °C | verified | same DPs | class |
+|---|---|---:|---|---|---|---|---|---|
+| base = `gpu-rtx-pro6000-20b` | 19.992 / 19.981 / 19.951 / 19.935 / 19.933 | **19.951** | 1 | 2422 throughout | 47 → 79 | 300/300 | yes | reference |
+| 640 × 1 (96 registers) | 20.272 / 20.190 / 19.993 / 19.799 / 19.755 | 19.993 | 1.014, 1.010, 1.002, **0.993, 0.991** | 2422 → 2355 | 50 → 78 | 300/300 | yes | engineering, did not pay: fails "every repetition above 1.0" |
+
+The 640-thread block is a per-clock gain of about 1.4% that the card takes
+back in clock: 20 warps at 96 registers draw more per SM-clock than 16 at
+116, and once the card is warm (it had run the sweep for an hour; 76 – 79 °C
+in the last two repetitions) the 600 W limit costs the fuller kernel
+60 – 70 MHz while the base holds 2422. Same shape as ITERATION-FUNCTION.md
+§6.3 on the 4500. **The 20 B/s build stands on the RTX PRO 6000**, now
+against an automatic search of the same space that moved the B200 by 26%.
+
+## 5. Classification
 
 | change | class | evidence |
 |---|---|---|
@@ -181,3 +233,5 @@ count to ≈ 665 — where the 6000's is a floor.
 | `combo5` (fused + batch 32 + `KARAT3` + 512 threads) on the B200 | **engineering, +26.3%**, new B200 build | paired 1.2627, 5/5; 300/300; identical DPs |
 | the 14 arms below the line | engineering that did not pay on this part | star table; each is a knob the 6000 selected for its own pipes |
 | `kernel_cost.py` on the fused kernel | tooling gap, recorded | its loop finder sees one loop where the fused kernel has a step loop containing a slot loop; the fused rows' ALU column is the bound from the measured rate, not a static count |
+| 640 × 1 on the RTX PRO 6000 | engineering, did not pay | +1.4% per clock, −0.9% once the card is warm; 2 of 5 paired repetitions below 1.0 |
+| the 6000's other 19 arms | engineering that did not pay | star table of §4; the B200's four winners are the 6000's four largest losses |
