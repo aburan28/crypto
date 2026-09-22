@@ -1,0 +1,277 @@
+{
+  "schema_version": 1,
+  "operation": "koblitz_n59_cofactor_projected_unknown_scalar_completion",
+  "date": "2026-09-21",
+  "claim_boundary": "Finite current completion on one public-synthetic n59 target using a target-independent cofactor-projected algebraic base. Online descent beats rho after precomputation, but full default-thread and one-core costs lose by large factors. No SOTA or asymptotic claim.",
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l14-full-public-59001.json",
+    "sha256": "5c76b986bc5a0c0b127a3c7316e6e44435a79c91532520e9a7c308da551d14a8"
+  },
+  "instance": {
+    "curve": "K_1 over GF(2^59)",
+    "subgroup_order": 25179555920633,
+    "cofactor": 22894,
+    "collection_m": 3,
+    "descent_m": 2,
+    "collection_window": 1024,
+    "public_target_seed": 59001,
+    "target_scalar_constructed_or_supplied": false
+  },
+  "factor_base": {
+    "kind": "cofactor_projected",
+    "parent": {
+      "kind": "standard_subspace",
+      "ell": 14
+    },
+    "construction": "public [h] image of every point in the standard polynomial subspace; identity deduplication only",
+    "parent_abscissae": 16384,
+    "points": 16308,
+    "signed_negation_orbits": 8154,
+    "projected_columns": 8094,
+    "factor_base_logs_known_by_construction": false,
+    "target_subgroup_enumerated": false,
+    "scalar_preimages_retained": false,
+    "pair_table_tier": "compact",
+    "pair_entries": 132983586,
+    "folded_table_forbidden": true,
+    "projected_predicate_cost": {
+      "canonical_frobenius_coordinate_squarings": 1910184,
+      "cofactor_multiplications": 8154,
+      "derived_frobenius_coordinate_squarings": 0,
+      "derived_negations": 8154,
+      "input_points": 16308,
+      "input_signed_orbits": 8154,
+      "output_columns": 8094
+    }
+  },
+  "relation_stream": {
+    "units": 53,
+    "trials": 5300000,
+    "relations": 26796,
+    "summands_scanned": 5427200000,
+    "canonical_relations_sha256": "f6b3234bfa93dab2cd05a3609dabf06ce4e5735f55dbcd1efb051983cfd0fc02",
+    "rejected": 0,
+    "duplicates": 0
+  },
+  "default_thread": {
+    "mode": "default_threads",
+    "whole_wall_seconds": 133.377729375,
+    "whole_cpu_seconds": 1387.7314589999999,
+    "peak_rss_bytes": 895205376,
+    "ic_wall_seconds": 132.7824315,
+    "rho_wall_seconds": 0.553665208,
+    "ic_over_rho_wall_ratio": 239.82440937484375,
+    "online_descent_seconds": 0.024512167,
+    "online_rho_over_descent_ratio": 22.587362757442047,
+    "stages": {
+      "select": {
+        "wall_seconds": 0.354696292,
+        "cpu_seconds": 1.679315
+      },
+      "collect": {
+        "wall_seconds": 116.121456125,
+        "cpu_seconds": 1253.600732
+      },
+      "logs": {
+        "wall_seconds": 16.298993584,
+        "cpu_seconds": 131.8498239999999
+      },
+      "solve": {
+        "wall_seconds": 0.042811125,
+        "cpu_seconds": 0.029285999999956402
+      },
+      "baseline": {
+        "wall_seconds": 0.55412725,
+        "cpu_seconds": 0.5539189999999508
+      }
+    },
+    "trials": 5300000,
+    "units": 53,
+    "relations": 26796,
+    "summands_scanned": 5427200000,
+    "linear_algebra": {
+      "attempts": 1,
+      "mode": "sparse",
+      "seconds": 0.166448417,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 802,
+        "core_nonzeros": 11465,
+        "filter": {
+          "columns_in": 8094,
+          "columns_out": 802,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 18670,
+          "merged_columns": 3217,
+          "nonzeros_in": 80380,
+          "nonzeros_out": 11465,
+          "rows_in": 26796,
+          "rows_out": 834,
+          "singletons_removed": 4075,
+          "uncovered_columns": 0
+        },
+        "reconstructed_columns": 7292,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 803,
+          "extra_steps": 0,
+          "generator_degree": 200,
+          "products": 611,
+          "sequence_length": 410
+        }
+      }
+    },
+    "verification_seconds": 2.3709977099999997,
+    "recovered_scalar": 17861472351607,
+    "verified": true,
+    "target": {
+      "kind": "public_hash_to_curve_cofactor",
+      "public_hash_counter": 0,
+      "public_hash_seed": 59001,
+      "target_scalar_constructed": false,
+      "x": "551007654412192707",
+      "y": "76595654768815112"
+    },
+    "rho_iterations": 518669,
+    "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16"
+  },
+  "one_worker": {
+    "mode": "one_worker",
+    "whole_wall_seconds": 1220.424188667,
+    "whole_cpu_seconds": 1190.8750260000002,
+    "peak_rss_bytes": 850935808,
+    "ic_wall_seconds": 1219.8423875419999,
+    "rho_wall_seconds": 0.546317834,
+    "ic_over_rho_wall_ratio": 2232.8437982897694,
+    "online_descent_seconds": 0.023713958,
+    "online_rho_over_descent_ratio": 23.03781739007887,
+    "stages": {
+      "select": {
+        "wall_seconds": 1.441492459,
+        "cpu_seconds": 1.413998
+      },
+      "collect": {
+        "wall_seconds": 1104.268536,
+        "cpu_seconds": 1074.89121
+      },
+      "logs": {
+        "wall_seconds": 114.124176375,
+        "cpu_seconds": 113.97517400000015
+      },
+      "solve": {
+        "wall_seconds": 0.038460917,
+        "cpu_seconds": 0.027939000000060332
+      },
+      "baseline": {
+        "wall_seconds": 0.546760875,
+        "cpu_seconds": 0.5470780000000559
+      }
+    },
+    "trials": 5300000,
+    "units": 53,
+    "relations": 26796,
+    "summands_scanned": 5427200000,
+    "linear_algebra": {
+      "attempts": 1,
+      "mode": "sparse",
+      "seconds": 0.16412325,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 802,
+        "core_nonzeros": 11465,
+        "filter": {
+          "columns_in": 8094,
+          "columns_out": 802,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 18670,
+          "merged_columns": 3217,
+          "nonzeros_in": 80380,
+          "nonzeros_out": 11465,
+          "rows_in": 26796,
+          "rows_out": 834,
+          "singletons_removed": 4075,
+          "uncovered_columns": 0
+        },
+        "reconstructed_columns": 7292,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 803,
+          "extra_steps": 0,
+          "generator_degree": 200,
+          "products": 611,
+          "sequence_length": 410
+        }
+      }
+    },
+    "verification_seconds": 7.610533707,
+    "recovered_scalar": 17861472351607,
+    "verified": true,
+    "target": {
+      "kind": "public_hash_to_curve_cofactor",
+      "public_hash_counter": 0,
+      "public_hash_seed": 59001,
+      "target_scalar_constructed": false,
+      "x": "551007654412192707",
+      "y": "76595654768815112"
+    },
+    "rho_iterations": 518669,
+    "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16"
+  },
+  "pilots": [
+    {
+      "name": "projected_l9",
+      "wall_seconds": 0.670231958,
+      "total_core_seconds": 6.515136,
+      "peak_rss_bytes": 9977856,
+      "trials": 100000,
+      "relations": 0,
+      "summands_scanned": 25600000
+    },
+    {
+      "name": "projected_l14",
+      "wall_seconds": 8.607579791,
+      "total_core_seconds": 86.647025,
+      "peak_rss_bytes": 892993536,
+      "trials": 100000,
+      "relations": 491,
+      "summands_scanned": 102400000
+    }
+  ],
+  "process_accounting": {
+    "processes": 4,
+    "sequential_wall_seconds": 1363.0797297909999,
+    "total_core_seconds": 2671.768646,
+    "peak_rss_bytes": 895205376,
+    "scope": "two target-independent yield pilots plus one complete default-thread and one complete one-worker workflow; factor-base width/class frontier charged separately"
+  },
+  "comparison": {
+    "default_thread_full_ic_over_rho_wall": 239.82440937484375,
+    "one_worker_full_ic_over_rho_wall": 2232.8437982897694,
+    "default_thread_online_rho_over_descent": 22.587362757442047,
+    "one_worker_online_rho_over_descent": 23.03781739007887,
+    "default_thread_full_crossover": false,
+    "one_worker_full_crossover": false,
+    "online_descent_crossover_after_precompute": true
+  },
+  "validation": [
+    "default and one-worker runs have identical 26,796-relation hash",
+    "both recover the same unknown scalar and verify [d]G=Q",
+    "all factor-base points are independently checked in the prime-order subgroup",
+    "sparse solution is verified against all relations and every column log is group-certified"
+  ],
+  "gates": {
+    "larger_pdp_end_to_end": "finite_pass_n59_single_target",
+    "unknown_scalar_without_constructed_logs": "finite_pass_n59_single_target",
+    "single_core_resources": "pass_current_n59",
+    "full_cost_vs_rho": "fail_large_margin",
+    "independent_external_reproduction": "missing"
+  },
+  "software": {
+    "source_stack_head": "8083d939a093dc8c7530daab4a88f0fa9587db8c",
+    "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16"
+  }
+}

@@ -891,6 +891,10 @@ pub enum FactorBaseDomain {
     /// kernel it need not be Frobenius-closed; its base columns collapse
     /// only by negation before public cofactor projection.
     StandardSubspace,
+    /// Public image `[h]F` of another algebraic base under cofactor
+    /// multiplication.  Every point lies in the prime-order subgroup,
+    /// but no discrete logarithm is computed or retained.
+    CofactorProjection,
     /// A subset of the signed Frobenius orbits of a linear subspace
     /// base, selected by the factor-base search.  The coordinates still
     /// live in the subspace (so the algebraic system keeps its `ℓ`
@@ -1012,7 +1016,10 @@ impl FrobeniusFactorBase {
                 continue;
             };
             let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
-            let steps = if self.domain == FactorBaseDomain::StandardSubspace {
+            let steps = if matches!(
+                self.domain,
+                FactorBaseDomain::StandardSubspace | FactorBaseDomain::CofactorProjection
+            ) {
                 1
             } else {
                 kc.n
@@ -1695,6 +1702,62 @@ pub fn build_standard_subspace_factor_base(
     if points.is_empty() {
         return Err("standard subspace contains no rational curve point".into());
     }
+    finish_negation_only_factor_base(
+        kc,
+        FactorBaseDomain::StandardSubspace,
+        ell,
+        subspace,
+        subspace_basis,
+        points,
+    )
+}
+
+/// Public cofactor image `[h]F` of an algebraic factor base.  The image
+/// is target-independent and all outputs lie in the prime-order
+/// subgroup, but no scalar preimage or discrete logarithm is retained.
+pub fn cofactor_project_factor_base(
+    kc: &KoblitzCurve,
+    parent: &FrobeniusFactorBase,
+) -> Result<FrobeniusFactorBase, String> {
+    let mut points: Vec<BinaryPoint> = parent
+        .points
+        .par_iter()
+        .map(|point| kc.mul(point, &kc.cofactor))
+        .filter(|point| *point != BinaryPoint::Infinity)
+        .collect();
+    points.sort_by_key(point_key);
+    points.dedup_by(|left, right| point_key(left) == point_key(right));
+    if points.is_empty() {
+        return Err("cofactor projection contains no nonidentity point".into());
+    }
+    let mut xs = std::collections::BTreeMap::new();
+    for point in &points {
+        let BinaryPoint::Affine { x, .. } = point else {
+            continue;
+        };
+        xs.entry(x.to_biguint()).or_insert_with(|| x.clone());
+    }
+    let ambient = (0..kc.n)
+        .map(|i| F2mElement::from_bit_positions(&[i], kc.n))
+        .collect();
+    finish_negation_only_factor_base(
+        kc,
+        FactorBaseDomain::CofactorProjection,
+        kc.n,
+        xs.into_values().collect(),
+        ambient,
+        points,
+    )
+}
+
+fn finish_negation_only_factor_base(
+    _kc: &KoblitzCurve,
+    domain: FactorBaseDomain,
+    ell: u32,
+    subspace: Vec<F2mElement>,
+    subspace_basis: Vec<F2mElement>,
+    points: Vec<BinaryPoint>,
+) -> Result<FrobeniusFactorBase, String> {
     let index_of: HashMap<(BigUint, BigUint), usize> = points
         .iter()
         .enumerate()
@@ -1711,7 +1774,7 @@ pub fn build_standard_subspace_factor_base(
         let orbit = signed_orbits.len();
         let negated = *index_of
             .get(&point_key(&point_neg(&points[i])))
-            .ok_or("standard subspace was not closed under point negation")?;
+            .ok_or("explicit factor base was not closed under point negation")?;
         signed_orbit_of[i] = (orbit, 0, false);
         let mut members = vec![i];
         if negated != i {
@@ -1721,7 +1784,7 @@ pub fn build_standard_subspace_factor_base(
         signed_orbits.push(members);
     }
     Ok(FrobeniusFactorBase {
-        domain: FactorBaseDomain::StandardSubspace,
+        domain,
         ell,
         f_j: 0,
         linearised_exponents: Vec::new(),
@@ -2984,7 +3047,10 @@ impl PairSumTable {
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
     ) -> Option<Self> {
-        if fb.domain == FactorBaseDomain::StandardSubspace {
+        if matches!(
+            fb.domain,
+            FactorBaseDomain::StandardSubspace | FactorBaseDomain::CofactorProjection
+        ) {
             return None;
         }
         let n_points = fb.points.len();
@@ -9414,6 +9480,33 @@ mod tests {
             }),
             target
         );
+    }
+
+    #[test]
+    fn cofactor_projected_standard_points_need_no_subgroup_labels() {
+        let kc = KoblitzCurve::new(1, 59).unwrap();
+        let parent = build_standard_subspace_factor_base(&kc, 9).unwrap();
+        let fb = cofactor_project_factor_base(&kc, &parent).unwrap();
+        assert_eq!(fb.domain, FactorBaseDomain::CofactorProjection);
+        assert!(fb.points.len() >= 480);
+        assert!(fb.points.iter().all(|point| {
+            kc.mul(point, &kc.subgroup_order) == BinaryPoint::Infinity
+        }));
+        assert!(
+            PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+                .is_none()
+        );
+        let compact = PairSumTable::build_compact_within(
+            &kc,
+            &fb,
+            PairSumTable::DEFAULT_BYTE_BUDGET,
+        )
+        .unwrap();
+        let fc = compact.curve();
+        let target = [0usize, 1, 2]
+            .into_iter()
+            .fold(FastPoint::INFINITY, |sum, i| fc.add(sum, fc.lift(&fb.points[i])));
+        assert!(compact.decompose_fast(target, 3).is_some());
     }
 
     #[test]
