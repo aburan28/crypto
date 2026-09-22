@@ -2045,14 +2045,42 @@ the probe and batching the inversion together would take the inner step
 from some 1565 ns to 212.
 
 It is quadratic in the base and the least used, which is presumably why
-it was never blocked. *Least used* is the operative half: no parameter
-set or recorded run in this repository asks for `m = 4` — 698 places ask
-for 3 and 110 for 2 — and nothing sets `max_m`, so no sweep reaches it
-either. This is a correction to what the note claimed the arm costs, not
-a change worth making until something runs it — **accounting** by
-`AGENTS.md` §3, and a stage diagnostic by §2: the inner step of one
-enumeration arm, on no path any run takes, so nothing here is a
-speedup.
+it was never blocked. *Least used* is still true — no parameter set or
+recorded run in this repository asks for `m = 4`, 698 places ask for 3
+and 110 for 2, and nothing sets `max_m`, so no sweep reaches it either.
+
+**It is fixed now anyway.** The arm takes two batched inversions a row
+rather than one and then a row of single ones: the pair sums are one
+`add_many` slice as they always were, and the rests `R − (P_k + P_l)`
+are a second. It keys the row with `keys_of` and prefetches ahead of the
+probe, which is the shape the `m = 3` arm already had. Measured on the
+arm itself — `witnesses_fast` with `m = 4` and a sink that never stops,
+at `n = 61` on `|F| = 976`, where the group is large enough that a
+target has no witnesses at all and the figure is the walk rather than
+the recovery:
+
+| the `m = 4` arm, a `(k, l)` | ns |
+|---|---|
+| before | **1155.5** |
+| after | **123** [115 – 129] |
+
+**9.4×**, and the 1030 ns that went is the Fermat inversion the same
+binary measures alone at 1019 — which is the cross-check that says the
+gain is the thing it was supposed to be and not a measurement artefact.
+
+The isolation matters and was not free to find: at `n = 19` the same
+base decomposes a target tens of thousands of ways, and the `|F|`-long
+compact recovery each hit pays swamps the difference entirely — before
+and after came back 2452 against 2429, a 1% apart, and the fix looked
+like nothing. What the arm costs per `(k, l)` and what a *hit* costs are
+different questions, and the second one drowns the first at any degree
+small enough for hits to be common.
+
+**Engineering** by `AGENTS.md` §3, not an advance: the ratio to the
+floor does not move, and neither does any `S` — nothing runs `m = 4`, so
+no measured end-to-end number changes at all. A stage diagnostic by §2:
+the inner step of one enumeration arm, so the 9.4× is not a speedup and
+no scoreboard row follows.
 
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
@@ -2808,3 +2836,169 @@ collection: relations needed scale as `|F|/2n` while the `m = 3` hit
 rate scales as `|F|³/r`, so a properly sized run at a wider base probes
 less. `13,623` is therefore an **upper bound** on the practical
 crossover, not a two-sided estimate.
+
+### The probing volume is an input, and it moves every rung — 2026-09-21
+
+The previous round made the tier a function of the probing volume and
+then supplied the wrong volume. `build_within` cannot know how much
+probing it is being built for, so it falls back on the volume its
+constants were calibrated at — `351,750,000` summand scans. Every rung
+this repository actually runs probes less than that, some of them by
+three orders of magnitude.
+
+**Boundaries, unchanged and restated.** Floor `S ≥ √(π/2A)` with
+`A = 2n`; the contract's count floor `N / C(|F| + m − 1, m)` per target
+for the descent; reference is signed-Frobenius rho counted on the same
+instance in the same process. The tier moves no count either bound
+constrains, so this round cannot be an advance either.
+
+**The workflow knows its own volume exactly.** Collection scans
+`unit_trials × units × collection_window`, or the whole base when no
+window is set. That is not an approximation: it reproduces
+`summands_scanned_total` exactly on every run checked, including the
+frozen `277,760` of the `k0n31` rung. The descent follows the counting
+bound, which measured `1.26×` high on one degree-61 target set and
+`1.07×` low on an independent one — a fair central estimate rather than
+a bound in either direction.
+
+`units` is the pass the driver plans, not `max_units`, which is the cap
+it may extend to. A run that extends probes more than this says, and
+under-counting probes favours the fold, so the estimate errs the same
+way the calibrated constants already do.
+
+**What the rungs actually probe:**
+
+| rung | summands scanned | against the calibration |
+|:--|--:|--:|
+| `k0n31` | 277,760 | 1,266× less |
+| `k0n41-subgroup` | 15,072,256 | 23× less |
+| `k0n53-subgroup` | 242,514,432 | 1.45× less |
+
+All three move from compact to folded. Priced in group additions with
+conversions re-measured at each rung's **own** degree rather than
+carried over from 61, 32 of 32 verified on both arms, every probe count
+identical between them:
+
+| rung | compact | folded | ratio | `S` compact → folded | vs rho |
+|:--|--:|--:|--:|:--|--:|
+| `k0n41` | 47,988,000 | 34,990,959 | **1.371×** | 2.023 → 1.475 | 8.65× |
+| `k0n53` | 756,950,602 | 615,978,313 | **1.229×** | 5.156 → 4.196 | 19.3× |
+
+**Class: engineering.** `S` fell and the probe counts did not move, so
+the ratio to the counting floor is flat by construction. Legitimate,
+bounded, and not a finding.
+
+**`k0n31` is deliberately not priced, and the reason is worth keeping.**
+Its conversion measurement reads `2,572` adds per summand scanned on the
+compact table against the full tier's `6.71`. That is not a cache
+effect: at `r = 2^20.5` nearly every probe of the `m = 3` scan hits, and
+the never-stopping sink then pays the `O(|F|)` recovery a hit costs —
+which the full tier does not pay at all, because it stores its summands.
+The figure measures recovery, not probing. It would have made the fold
+look catastrophic at small `n` and it means nothing about probing cost,
+so it stays out of the model. The tier chosen at that rung is the
+model's extrapolation below the degrees it was measured at, and is not
+supported by a price here.
+
+**Still not claimed.** That the constants `build_within` *chooses* with
+generalise across degrees — they remain the degree-61 ones, and this
+round only re-measured the conversions used to *check* the choice. No
+exponent: two priced rungs is far short of §5's four sizes.
+
+### Every phase priced, and the calibration's real limitation — 2026-09-21
+
+Two items the previous rounds left standing. One was a genuine gap; the
+other was a question about the wrong variable.
+
+#### `S` is admissible now, and collection is 97.8% of it
+
+`S` had been a lower bound throughout, because factor-base selection and
+the linear algebra were null rather than zero — which under §8 blocks a
+full-DLP `S` outright. Both are priced now.
+
+Selection reports its own counts through
+`build_subgroup_orbit_factor_base_with_cost`; the old signature stays as
+a wrapper, so none of its 39 callers changed. The linear algebra needed
+no new counters at all: block Wiedemann already reports `products`,
+`core_nonzeros` and `block_n`, whose product is the multiply-add count.
+
+| phase | `k0n41` | share | `k0n53` | share |
+|:--|--:|--:|--:|--:|
+| collect probes | 34,816,911 | 98.37% | 603,860,936 | 97.78% |
+| descent probes | 864 | 0.00% | 11,003,106 | 1.78% |
+| select | 400,851 | 1.13% | 1,581,890 | 0.26% |
+| pair table build | 170,560 | 0.48% | 1,106,640 | 0.18% |
+| linear algebra | 5,822 | 0.02% | 10,006 | 0.00% |
+| **total** | **35,395,009** | | **617,562,577** | |
+| `S` | **1.4918** | 8.75× rho | **4.2069** | 19.36× rho |
+| `S` as previously bounded | ≥ 1.4746 | | ≥ 4.196 | |
+
+32 of 32 verified on both. The bound moved by about 1%, which earlier
+rounds asserted and did not measure.
+
+**The linear algebra is one sixty-thousandth of the cost.** 10,006
+group-addition equivalents at degree 53, from 43,848 multiply-adds mod
+`r`. The block Wiedemann machinery — the filter, the Krylov sequence, the
+generator, the reconstruction — is solving a problem that is not
+remotely near the bill, and has not been for some time.
+
+It also puts the last two rounds in proportion. **The tier they spent
+themselves choosing is 0.18% of the pipeline** in the configuration it
+selects. It mattered only because the alternative's build is 15.4% of
+the compact total; the win was in avoiding a cost, not in reducing one.
+Collection at 97.8% is the only phase whose cost is worth attacking.
+
+Selection's price is a **time conversion, not a native count** — its cost
+is dominated by rebuilding the base from the representatives so far,
+which is not a countable primitive. At a quarter of a percent of the
+total, no plausible error in it moves `S`'s third digit; it is marked as
+the weaker kind of number in the evidence file.
+
+#### The tier constants are limited by width, not by degree
+
+The concern was that constants measured at `n = 61` are an unchecked
+extrapolation at 31, 41 and 53. Measured, the premise is wrong in its
+variable. Across `n = 41, 53, 57, 61` at a matched base the
+folded-to-compact scan ratio is **flat in `n`** once the degrees whose
+`m = 3` scan saturates are excluded: `1.34` at `n = 53` against `1.33`
+at `n = 61`.
+
+Only those two of the ten usable degrees admit a clean reading, because
+**`n` does not determine `r` on this family** — the cofactor runs from 4
+at `n = 41` to 57,284,756 at `n = 59`, so `r` is not monotone in `n`, and
+43 and 47 have no usable subgroup at all. At a width big enough to
+measure, `n = 41` and `n = 57` still carry 3.2% and 8.8% recovery
+contamination.
+
+What does move the ratio is the width:
+
+| base | folded/compact scan | compact table |
+|--:|--:|:--|
+| 3,904 | 1.33 | in cache |
+| 12,688 | **1.17** | leaving cache |
+| 15,264 | 0.96 | out of cache |
+
+The shipped constants give `1.17` — right at the width they were taken
+at, wrong in both directions away from it. So they are **not changed**:
+replacing one width's calibration with another's is not an improvement.
+The model lacks a width term, and the doc comment now says that with
+these numbers rather than blaming the degree.
+
+#### A correction inside this round
+
+The first pass at that measurement used 5,000 points at every degree and
+produced an apparently clean degree trend — `1.01` at `n = 41` rising to
+`1.32` at `n = 61`. It was saturation. 5,248 points is above `n = 41`'s
+scarcity limit of 4,962, and the resulting 13.1% recovery overhead
+inflated the compact scan, faking a low ratio at the low degree and a
+trend across the sweep.
+
+That is the **third** reading in this round that saturation contaminated,
+after `n = 31` and `n = 59` — the third after I had already written down
+why it happens. `examples/koblitz_degree_census.rs` now computes, per
+degree, the width that keeps the scan measurable, so the screen is a
+command rather than a thing to remember.
+
+**Class: accounting.** Nothing was made faster. Two null phases are
+priced, and a limitation was attributed to the wrong variable and is now
+attributed to the right one.

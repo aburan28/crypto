@@ -1,0 +1,252 @@
+name: Release
+
+# Every merge to main publishes a rolling build. The tag carries the crate
+# version plus the run number, so each merge gets its own release and
+# /releases/latest always points at the newest main build.
+on:
+  push:
+    branches: [main]
+  # Dry run on pull requests that touch what the build consumes, so the
+  # macOS and Windows legs are proven before a merge can turn a release
+  # red. The `release` job is skipped for these; nothing is published.
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - 'Cargo.toml'
+      - 'ecc2k130/Makefile'
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  # Never cancel a release mid-upload: a half-uploaded release is worse than
+  # a redundant one.
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # Portable baseline for the native client. ecc2k130/Makefile defaults to
+  # -march=native, which bakes the runner's CPU into the binary and SIGILLs
+  # elsewhere. x86-64-v3 is AVX2 + BMI2 + FMA (Haswell / Zen 1 onwards).
+  ECC_MARCH: x86-64-v3
+  # 12.8 is the first release that knows compute_120, which the Makefile's
+  # gencode list requires.
+  CUDA_PKG_VERSION: 12-8
+  CUDA_DIR_VERSION: "12.8"
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+      short_sha: ${{ steps.v.outputs.short_sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          [ -n "$version" ] || { echo "no version found in Cargo.toml"; exit 1; }
+          {
+            echo "short_sha=$(git rev-parse --short HEAD)"
+            echo "tag=v$version-main.${{ github.run_number }}"
+          } >> "$GITHUB_OUTPUT"
+
+  rust:
+    needs: meta
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {target: x86_64-unknown-linux-gnu,  os: ubuntu-latest}
+          - {target: x86_64-unknown-linux-musl, os: ubuntu-latest}
+          - {target: aarch64-apple-darwin,      os: macos-latest}
+          - {target: x86_64-pc-windows-msvc,    os: windows-latest}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.90.0
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install the musl linker
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
+      # No --locked: Cargo.lock is gitignored in this repo, so a fresh
+      # checkout has none and --locked would refuse to build.
+      - run: cargo build --release --bins --target ${{ matrix.target }}
+      - name: Smoke-test the binaries
+        # Every target in the matrix is native to its runner, so the
+        # binaries must start here.
+        shell: bash
+        run: |
+          ext=""
+          [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
+          "./target/${{ matrix.target }}/release/crypto$ext" --help > /dev/null
+          "./target/${{ matrix.target }}/release/ic$ext" --help > /dev/null
+      - name: Stage the archive
+        shell: bash
+        run: |
+          name="crypto-${{ needs.meta.outputs.tag }}-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          ext=""
+          [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
+          cp "target/${{ matrix.target }}/release/crypto$ext" "dist/$name/"
+          cp "target/${{ matrix.target }}/release/ic$ext" "dist/$name/"
+          # `[ -f ] && cp` leaves the loop's exit status at 1 when the last
+          # candidate is absent, which trips the step's `bash -e`.
+          for extra in README.md LICENSE LICENSE.md; do
+            [ -f "$extra" ] && cp "$extra" "dist/$name/" || true
+          done
+          cd dist
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a -tzip "$name.zip" "$name" > /dev/null
+          else
+            tar czf "$name.tar.gz" "$name"
+          fi
+          rm -rf "$name"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rust-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  native:
+    needs: meta
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the ECC2K-130 CPU client
+        run: make -C ecc2k130 cpu MARCH=$ECC_MARCH
+      - name: Solve a toy curve with it
+        # Curve 23 is a planted instance that finishes in well under a
+        # second. The exit code alone proves nothing: a run that collects
+        # distinguished points without ever finding a collision also exits
+        # 0 (curve 83 at --launches 1 does exactly that), so assert on the
+        # verification line instead.
+        run: |
+          ./ecc2k130/ecc2k130-cpu --curve 23 --launches 1 | tee /tmp/smoke.log
+          grep -q 'verified \[k\]P == Q' /tmp/smoke.log \
+            || { echo "::error::client ran but did not solve the planted instance"; exit 1; }
+      - name: Compile the CUDA header suites on the host
+        # gpu/*/Makefile `test` builds the .cu/.cuh sources as host C++ and
+        # runs their self-checks. No workflow covered these before.
+        run: |
+          for d in gpu/ecc gpu/ecc2k gpu/semaev gpu/macaulay gpu/btcpuzzle; do
+            echo "::group::$d"
+            make -C "$d" test
+            echo "::endgroup::"
+          done
+      - name: Stage the archive
+        run: |
+          name="ecc2k130-cpu-${{ needs.meta.outputs.tag }}-x86_64-linux"
+          mkdir -p "dist/$name"
+          cp ecc2k130/ecc2k130-cpu ecc2k130/README.md "dist/$name/"
+          echo "built with -march=$ECC_MARCH (AVX2/BMI2/FMA baseline)" \
+            > "dist/$name/BUILD-FLAGS.txt"
+          tar czf "dist/$name.tar.gz" -C dist "$name"
+          rm -rf "dist/$name"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-linux
+          path: dist/*
+          if-no-files-found: error
+
+  cuda:
+    needs: meta
+    # Pinned, not ubuntu-latest: the NVIDIA apt repo below is addressed by
+    # distro, and the CUDA version is pinned, so letting the runner image
+    # float would eventually 404 the install and block every release.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install nvcc
+        # Compiler and CUDA headers only, not the full toolkit: ~330 MB
+        # instead of several GB.
+        run: |
+          distro="ubuntu$(lsb_release -rs | tr -d .)"
+          curl -fsSL -o /tmp/cuda-keyring.deb \
+            "https://developer.download.nvidia.com/compute/cuda/repos/$distro/x86_64/cuda-keyring_1.1-1_all.deb"
+          sudo dpkg -i /tmp/cuda-keyring.deb
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            "cuda-nvcc-$CUDA_PKG_VERSION" "cuda-cudart-dev-$CUDA_PKG_VERSION"
+          echo "/usr/local/cuda-$CUDA_DIR_VERSION/bin" >> "$GITHUB_PATH"
+      - run: nvcc --version
+      - name: Compile the CUDA client
+        # Compile only: GitHub runners have no GPU. This proves the device
+        # code builds for every architecture in the gencode list; it does
+        # not run it.
+        run: make -C ecc2k130 gpu
+      - name: Stage the archive
+        run: |
+          name="ecc2k130-cuda-${{ needs.meta.outputs.tag }}-x86_64-linux"
+          mkdir -p "dist/$name"
+          cp ecc2k130/ecc2k130 "dist/$name/"
+          nvcc --version | tail -2 > "dist/$name/BUILD-FLAGS.txt"
+          echo "fatbinary: sm_80 sm_86 sm_89 sm_90 sm_120; compiled, not GPU-tested in CI" \
+            >> "dist/$name/BUILD-FLAGS.txt"
+          tar czf "dist/$name.tar.gz" -C dist "$name"
+          rm -rf "dist/$name"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-cuda
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    needs: [meta, rust, native, cuda]
+    # Dry runs build and stage everything, then stop short of publishing.
+    # The ref test is not redundant with the event test: workflow_dispatch
+    # can be started from any branch, and a release tagged `-main.` that
+    # was not built from main would still become /releases/latest.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: staging
+      - name: Collect the archives and checksum them
+        run: |
+          mkdir -p dist
+          find staging -type f \( -name '*.tar.gz' -o -name '*.zip' \) \
+            -exec mv -t dist/ {} +
+          # Build the sums outside dist so the glob cannot race the file
+          # being written into the directory it is listing.
+          ( cd dist && sha256sum -- * ) > /tmp/SHA256SUMS
+          mv /tmp/SHA256SUMS dist/
+          cat dist/SHA256SUMS
+      - name: Write the release notes
+        run: |
+          cat > /tmp/notes.md <<'NOTES'
+          Rolling build of `main`.
+
+          | Artifact | Contents |
+          | --- | --- |
+          | `crypto-*-x86_64-unknown-linux-gnu.tar.gz` | `crypto`, `ic` — glibc |
+          | `crypto-*-x86_64-unknown-linux-musl.tar.gz` | `crypto`, `ic` — static |
+          | `crypto-*-aarch64-apple-darwin.tar.gz` | `crypto`, `ic` — Apple silicon |
+          | `crypto-*-x86_64-pc-windows-msvc.zip` | `crypto.exe`, `ic.exe` |
+          | `ecc2k130-cpu-*.tar.gz` | ECC2K-130 client, CPU (`-march=x86-64-v3`) |
+          | `ecc2k130-cuda-*.tar.gz` | ECC2K-130 client, CUDA fatbinary (sm_80–sm_120) |
+
+          Verify with `sha256sum -c SHA256SUMS`.
+
+          The CUDA binary is compiled, not GPU-tested: GitHub runners have no GPU.
+          NOTES
+          printf '\nBuilt from commit %s.\n' "$GITHUB_SHA" >> /tmp/notes.md
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ needs.meta.outputs.tag }}" \
+            --target "$GITHUB_SHA" \
+            --title "${{ needs.meta.outputs.tag }} (${{ needs.meta.outputs.short_sha }})" \
+            --notes-file /tmp/notes.md \
+            dist/*

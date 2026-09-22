@@ -228,6 +228,12 @@ static __global__ void ECC_BOUNDS init(WalkParams<unsigned> p, bool reseed) {
         x = nx;
     }
     const int slot = int(id / p.threads), tid = int(id % p.threads);
+#if ECC_WITNESS
+    // A trail's witness starts at zero or it reports steps an earlier trail
+    // took. This kernel serves both the first start and every restart, so it
+    // is the one place that has to do it.
+    for (int k = 0; k < ECC_JCOUNT; ++k) p.counts[eccScalarCountIndex(slot, k, tid, p.threads)] = 0;
+#endif
 #if ECC_PACKED_POLY_STATE
     // Seed construction uses the established normal-basis point arithmetic.
     // Only the persistent coordinate representation changes.
@@ -555,6 +561,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #else
                         toLimbs(load(p.y, slot, tid, p.threads), rec.y);
 #endif
+                        for (int k = 0; k < ECC_JCOUNT; ++k) {
+#if ECC_WITNESS
+                            rec.counts[k] = p.counts[eccScalarCountIndex(slot, k, tid, p.threads)];
+#else
+                            rec.counts[k] = 0;
+#endif
+                        }
                         p.dp[dest] = rec;
                     }
                     p.dead[id] = 1;
@@ -589,6 +602,13 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
 #else
             const int j = 3 + ((hw >> 1) & 7);
+#if ECC_WITNESS
+            // One read-modify-write of the counter this walk's branch selects.
+            // A lane that reported this step is dead from here and the step
+            // belongs to the trail replacing it, so the report above having
+            // set p.dead[id] is what excludes it.
+            if (!p.dead[id]) p.counts[eccScalarCountIndex(slot, j - 3, tid, p.threads)] += 1u;
+#endif
 #if !ECC_PACKED_CACHE_DENOM
             js[slot] = j;
 #endif

@@ -1,0 +1,1226 @@
+{
+ "schema_version": 2,
+ "operation": "koblitz_n53_relation_stream_and_one_unit_selection",
+ "date": "2026-09-21",
+ "claim_boundary": "Finite public-synthetic engineering result. The selected relation stream and one-unit schedule reduce deterministic collection work and same-host wall/core cost. The scalar-blind median crosses same-target rho in whole-process wall, but IC remains much dearer in total core-seconds. This is not a SOTA, asymptotic, key-recovery, production-curve, Magma-complete, or externally reproduced result.",
+ "software": {
+  "source_commit": "96d419f72490b12f061651455f632adba9ba4ae5",
+  "profile": "release",
+  "binary_blake3": "5bf703f78e81dd797643bd3d65777b649ae5777a3418e61e7eaec98f30da97bd"
+ },
+ "host": {
+  "os": "macos",
+  "arch": "aarch64",
+  "logical_cpus_available": 14,
+  "resource_meter": "process CPU seconds and peak RSS reported by ic workflow"
+ },
+ "instance": {
+  "curve": "K_0 over GF(2^53)",
+  "subgroup_order": "21044858204113",
+  "factor_base": "algebraic subgroup-orbit specification, factor-base seed 1, 36000 requested points",
+  "factor_base_points": 36464,
+  "signed_orbit_columns": 344,
+  "pair_table_tier": "folded",
+  "pair_table_stored_pairs": 6290040,
+  "collection_summands": 3,
+  "descent_summands": 2,
+  "collection_window": 1139,
+  "factor_base_logs_known_by_construction": false
+ },
+ "selection": {
+  "scope": "Target-independent deterministic relation rank and through-logs resource screen. No target solve or rho timing entered the seed choice.",
+  "rounds": [
+   {
+    "trials": 24000,
+    "summands_scanned": 27336000,
+    "candidates": [
+     {
+      "seed": 2,
+      "complete": false,
+      "relations": 793,
+      "wall_seconds_through_logs": 2.108052459,
+      "total_core_seconds_through_logs": 12.291148,
+      "peak_rss_bytes": 102350848
+     },
+     {
+      "seed": 3,
+      "complete": true,
+      "relations": 786,
+      "wall_seconds_through_logs": 1.877613583,
+      "total_core_seconds_through_logs": 12.032384,
+      "peak_rss_bytes": 103071744
+     },
+     {
+      "seed": 4,
+      "complete": false,
+      "relations": 840,
+      "wall_seconds_through_logs": 2.170090708,
+      "total_core_seconds_through_logs": 12.697168999999999,
+      "peak_rss_bytes": 99811328
+     },
+     {
+      "seed": 5,
+      "complete": true,
+      "relations": 847,
+      "wall_seconds_through_logs": 1.864549083,
+      "total_core_seconds_through_logs": 12.094987,
+      "peak_rss_bytes": 99762176
+     },
+     {
+      "seed": 6,
+      "complete": true,
+      "relations": 849,
+      "wall_seconds_through_logs": 1.897875041,
+      "total_core_seconds_through_logs": 12.033872,
+      "peak_rss_bytes": 101629952
+     },
+     {
+      "seed": 7,
+      "complete": true,
+      "relations": 841,
+      "wall_seconds_through_logs": 2.123136417,
+      "total_core_seconds_through_logs": 12.300376,
+      "peak_rss_bytes": 98566144
+     },
+     {
+      "seed": 8,
+      "complete": true,
+      "relations": 815,
+      "wall_seconds_through_logs": 1.989037416,
+      "total_core_seconds_through_logs": 12.220088,
+      "peak_rss_bytes": 99631104
+     },
+     {
+      "seed": 9,
+      "complete": true,
+      "relations": 886,
+      "wall_seconds_through_logs": 1.88413225,
+      "total_core_seconds_through_logs": 12.129939,
+      "peak_rss_bytes": 99680256
+     }
+    ]
+   },
+   {
+    "trials": 22000,
+    "summands_scanned": 25058000,
+    "candidates": [
+     {
+      "seed": 3,
+      "complete": true,
+      "relations": 721,
+      "wall_seconds_through_logs": 1.70570825,
+      "total_core_seconds_through_logs": 11.670314000000001,
+      "peak_rss_bytes": 99205120
+     },
+     {
+      "seed": 5,
+      "complete": true,
+      "relations": 767,
+      "wall_seconds_through_logs": 1.749878042,
+      "total_core_seconds_through_logs": 11.672169,
+      "peak_rss_bytes": 94797824
+     },
+     {
+      "seed": 6,
+      "complete": true,
+      "relations": 764,
+      "wall_seconds_through_logs": 1.965641792,
+      "total_core_seconds_through_logs": 11.655352,
+      "peak_rss_bytes": 102973440
+     },
+     {
+      "seed": 7,
+      "complete": true,
+      "relations": 769,
+      "wall_seconds_through_logs": 1.7940676660000001,
+      "total_core_seconds_through_logs": 11.668604,
+      "peak_rss_bytes": 106086400
+     },
+     {
+      "seed": 8,
+      "complete": true,
+      "relations": 749,
+      "wall_seconds_through_logs": 1.6580535840000001,
+      "total_core_seconds_through_logs": 12.060503,
+      "peak_rss_bytes": 99614720
+     },
+     {
+      "seed": 9,
+      "complete": true,
+      "relations": 829,
+      "wall_seconds_through_logs": 1.81096375,
+      "total_core_seconds_through_logs": 12.048158999999998,
+      "peak_rss_bytes": 103153664
+     }
+    ]
+   },
+   {
+    "trials": 20000,
+    "summands_scanned": 22780000,
+    "candidates": [
+     {
+      "seed": 3,
+      "complete": false,
+      "relations": 651,
+      "wall_seconds_through_logs": 1.5647255420000001,
+      "total_core_seconds_through_logs": 10.832464,
+      "peak_rss_bytes": 94846976
+     },
+     {
+      "seed": 5,
+      "complete": true,
+      "relations": 703,
+      "wall_seconds_through_logs": 1.579338875,
+      "total_core_seconds_through_logs": 10.942887,
+      "peak_rss_bytes": 98025472
+     },
+     {
+      "seed": 6,
+      "complete": true,
+      "relations": 684,
+      "wall_seconds_through_logs": 1.570759417,
+      "total_core_seconds_through_logs": 10.762936,
+      "peak_rss_bytes": 100925440
+     },
+     {
+      "seed": 7,
+      "complete": true,
+      "relations": 693,
+      "wall_seconds_through_logs": 1.9231277919999998,
+      "total_core_seconds_through_logs": 10.878891,
+      "peak_rss_bytes": 101138432
+     },
+     {
+      "seed": 8,
+      "complete": true,
+      "relations": 678,
+      "wall_seconds_through_logs": 1.669297792,
+      "total_core_seconds_through_logs": 10.784702,
+      "peak_rss_bytes": 100024320
+     },
+     {
+      "seed": 9,
+      "complete": true,
+      "relations": 766,
+      "wall_seconds_through_logs": 1.588415334,
+      "total_core_seconds_through_logs": 10.703805,
+      "peak_rss_bytes": 99172352
+     }
+    ]
+   },
+   {
+    "trials": 18000,
+    "summands_scanned": 20502000,
+    "candidates": [
+     {
+      "seed": 5,
+      "complete": true,
+      "relations": 634,
+      "wall_seconds_through_logs": 1.508213458,
+      "total_core_seconds_through_logs": 9.834633,
+      "peak_rss_bytes": 99713024
+     },
+     {
+      "seed": 6,
+      "complete": true,
+      "relations": 612,
+      "wall_seconds_through_logs": 1.372116208,
+      "total_core_seconds_through_logs": 10.080076,
+      "peak_rss_bytes": 99647488
+     },
+     {
+      "seed": 7,
+      "complete": true,
+      "relations": 626,
+      "wall_seconds_through_logs": 1.373945542,
+      "total_core_seconds_through_logs": 9.965072000000001,
+      "peak_rss_bytes": 97452032
+     },
+     {
+      "seed": 8,
+      "complete": true,
+      "relations": 614,
+      "wall_seconds_through_logs": 1.331422959,
+      "total_core_seconds_through_logs": 9.922956000000001,
+      "peak_rss_bytes": 93290496
+     },
+     {
+      "seed": 9,
+      "complete": true,
+      "relations": 687,
+      "wall_seconds_through_logs": 1.361595875,
+      "total_core_seconds_through_logs": 10.024578,
+      "peak_rss_bytes": 100073472
+     }
+    ]
+   },
+   {
+    "trials": 16000,
+    "summands_scanned": 18224000,
+    "candidates": [
+     {
+      "seed": 5,
+      "complete": false,
+      "relations": 557,
+      "wall_seconds_through_logs": 1.275036084,
+      "total_core_seconds_through_logs": 9.322963999999999,
+      "peak_rss_bytes": 98123776
+     },
+     {
+      "seed": 6,
+      "complete": false,
+      "relations": 561,
+      "wall_seconds_through_logs": 1.393064084,
+      "total_core_seconds_through_logs": 9.542686,
+      "peak_rss_bytes": 96256000
+     },
+     {
+      "seed": 7,
+      "complete": false,
+      "relations": 551,
+      "wall_seconds_through_logs": 1.336482125,
+      "total_core_seconds_through_logs": 9.48601,
+      "peak_rss_bytes": 95518720
+     },
+     {
+      "seed": 8,
+      "complete": false,
+      "relations": 542,
+      "wall_seconds_through_logs": 1.3368666249999999,
+      "total_core_seconds_through_logs": 9.337163,
+      "peak_rss_bytes": 98107392
+     },
+     {
+      "seed": 9,
+      "complete": false,
+      "relations": 614,
+      "wall_seconds_through_logs": 1.553750708,
+      "total_core_seconds_through_logs": 9.505187000000001,
+      "peak_rss_bytes": 98238464
+     }
+    ]
+   },
+   {
+    "trials": 17000,
+    "summands_scanned": 19363000,
+    "candidates": [
+     {
+      "seed": 5,
+      "complete": false,
+      "relations": 602,
+      "wall_seconds_through_logs": 2.618837666,
+      "total_core_seconds_through_logs": 10.555883,
+      "peak_rss_bytes": 100515840
+     },
+     {
+      "seed": 6,
+      "complete": true,
+      "relations": 588,
+      "wall_seconds_through_logs": 2.663958667,
+      "total_core_seconds_through_logs": 10.353864,
+      "peak_rss_bytes": 106856448
+     },
+     {
+      "seed": 7,
+      "complete": false,
+      "relations": 581,
+      "wall_seconds_through_logs": 3.018855833,
+      "total_core_seconds_through_logs": 10.583789000000001,
+      "peak_rss_bytes": 103776256
+     },
+     {
+      "seed": 8,
+      "complete": true,
+      "relations": 574,
+      "wall_seconds_through_logs": 2.84226025,
+      "total_core_seconds_through_logs": 10.547806999999999,
+      "peak_rss_bytes": 105349120
+     },
+     {
+      "seed": 9,
+      "complete": true,
+      "relations": 646,
+      "wall_seconds_through_logs": 2.511893292,
+      "total_core_seconds_through_logs": 10.365825,
+      "peak_rss_bytes": 101531648
+     }
+    ]
+   }
+  ],
+  "selected": {
+   "relation_stream_seed": 6,
+   "trials": 17000,
+   "summands_scanned": 19363000,
+   "relations": 588,
+   "reason": "Seeds 6, 8 and 9 were complete at 17000 after all candidates failed at 16000; seed 6 had the lowest measured process CPU among the complete 17000-probe candidates."
+  },
+  "boundary_refinement": {
+   "runs": [
+    {
+     "trials": 16500,
+     "complete": false,
+     "relations": 575,
+     "summands_scanned": 18793500,
+     "wall_seconds_through_logs": 1.3709875,
+     "total_core_seconds_through_logs": 9.851629,
+     "peak_rss_bytes": 95633408
+    },
+    {
+     "trials": 16750,
+     "complete": true,
+     "relations": 584,
+     "summands_scanned": 19078250,
+     "wall_seconds_through_logs": 1.350960666,
+     "total_core_seconds_through_logs": 9.898622,
+     "peak_rss_bytes": 99565568
+    },
+    {
+     "trials": 16625,
+     "complete": false,
+     "relations": 579,
+     "summands_scanned": 18935875,
+     "wall_seconds_through_logs": 1.366930667,
+     "total_core_seconds_through_logs": 9.898954,
+     "peak_rss_bytes": 98549760
+    },
+    {
+     "trials": 16688,
+     "complete": false,
+     "relations": 581,
+     "summands_scanned": 19007632,
+     "wall_seconds_through_logs": 1.410835416,
+     "total_core_seconds_through_logs": 10.669747999999998,
+     "peak_rss_bytes": 99598336
+    },
+    {
+     "trials": 16720,
+     "complete": true,
+     "relations": 583,
+     "summands_scanned": 19044080,
+     "wall_seconds_through_logs": 1.420280917,
+     "total_core_seconds_through_logs": 10.08068,
+     "peak_rss_bytes": 97878016
+    },
+    {
+     "trials": 16704,
+     "complete": true,
+     "relations": 583,
+     "summands_scanned": 19025856,
+     "wall_seconds_through_logs": 1.3940352919999999,
+     "total_core_seconds_through_logs": 10.032223,
+     "peak_rss_bytes": 101072896
+    },
+    {
+     "trials": 16696,
+     "complete": true,
+     "relations": 583,
+     "summands_scanned": 19016744,
+     "wall_seconds_through_logs": 1.361360625,
+     "total_core_seconds_through_logs": 9.949406999999999,
+     "peak_rss_bytes": 95666176
+    },
+    {
+     "trials": 16692,
+     "complete": true,
+     "relations": 582,
+     "summands_scanned": 19012188,
+     "wall_seconds_through_logs": 1.52276425,
+     "total_core_seconds_through_logs": 10.442402000000001,
+     "peak_rss_bytes": 99680256
+    },
+    {
+     "trials": 16690,
+     "complete": true,
+     "relations": 582,
+     "summands_scanned": 19009910,
+     "wall_seconds_through_logs": 1.385620708,
+     "total_core_seconds_through_logs": 9.921273000000001,
+     "peak_rss_bytes": 98779136
+    },
+    {
+     "trials": 16689,
+     "complete": true,
+     "relations": 582,
+     "summands_scanned": 19008771,
+     "wall_seconds_through_logs": 1.383295667,
+     "total_core_seconds_through_logs": 10.656043,
+     "peak_rss_bytes": 98926592
+    }
+   ],
+   "exact_first_complete_trial": 16689,
+   "last_incomplete_trial": 16688,
+   "deployed_trials": 17000,
+   "deployed_cushion_trials": 311
+  },
+  "resource_envelope": {
+   "processes": 45,
+   "sequential_wall_seconds": 77.959835877,
+   "total_core_seconds": 484.310223,
+   "peak_rss_bytes": 106856448,
+   "accounting": "Target-independent parameter selection is not hidden in the selected operational run. Charge this envelope once when treating seed 6 and the 17k budget as newly discovered for a first-ever target; amortize it only across explicitly counted later targets."
+  }
+ },
+ "change": {
+  "reference": {
+   "relation_stream_seed": 1,
+   "unit_trials": 26000,
+   "planned_units": 1,
+   "actual_trials": 26000
+  },
+  "candidate": {
+   "relation_stream_seed": 6,
+   "unit_trials": 17000,
+   "planned_units": 1,
+   "actual_trials": 17000
+  },
+  "why": "A target-independent public seed screen found a relation stream that determines all 344 orbit columns with 9000 fewer walked probes. Both arms retain in-process trial parallelism and one relation artifact."
+ },
+ "matched_same_host_ab": {
+  "order": [
+   "reference,candidate",
+   "candidate,reference",
+   "reference,candidate"
+  ],
+  "runs": [
+   {
+    "pair": 1,
+    "reference_seed1_26k": {
+     "wall_seconds": 2.52203275,
+     "total_core_seconds": 13.65697,
+     "peak_rss_bytes": 96501760,
+     "trials": 26000,
+     "summands_scanned": 29614000,
+     "relations": 906,
+     "verified_targets": 32
+    },
+    "candidate_seed6_17k": {
+     "wall_seconds": 2.343980166,
+     "total_core_seconds": 11.254643999999999,
+     "peak_rss_bytes": 103153664,
+     "trials": 17000,
+     "summands_scanned": 19363000,
+     "relations": 588,
+     "verified_targets": 32
+    },
+    "candidate_over_reference": {
+     "wall": 0.9294011610277464,
+     "core_seconds": 0.8240952422096556,
+     "peak_rss": 1.06893039049236
+    }
+   },
+   {
+    "pair": 2,
+    "reference_seed1_26k": {
+     "wall_seconds": 2.636162958,
+     "total_core_seconds": 13.706804,
+     "peak_rss_bytes": 103563264,
+     "trials": 26000,
+     "summands_scanned": 29614000,
+     "relations": 906,
+     "verified_targets": 32
+    },
+    "candidate_seed6_17k": {
+     "wall_seconds": 2.214060042,
+     "total_core_seconds": 11.303182999999999,
+     "peak_rss_bytes": 98500608,
+     "trials": 17000,
+     "summands_scanned": 19363000,
+     "relations": 588,
+     "verified_targets": 32
+    },
+    "candidate_over_reference": {
+     "wall": 0.8398798091297662,
+     "core_seconds": 0.8246403027284842,
+     "peak_rss": 0.9511153298528714
+    }
+   },
+   {
+    "pair": 3,
+    "reference_seed1_26k": {
+     "wall_seconds": 2.7722979580000002,
+     "total_core_seconds": 13.849181,
+     "peak_rss_bytes": 105676800,
+     "trials": 26000,
+     "summands_scanned": 29614000,
+     "relations": 906,
+     "verified_targets": 32
+    },
+    "candidate_seed6_17k": {
+     "wall_seconds": 2.283238833,
+     "total_core_seconds": 11.214679,
+     "peak_rss_bytes": 103661568,
+     "trials": 17000,
+     "summands_scanned": 19363000,
+     "relations": 588,
+     "verified_targets": 32
+    },
+    "candidate_over_reference": {
+     "wall": 0.8235907061906077,
+     "core_seconds": 0.8097720002359706,
+     "peak_rss": 0.9809302325581395
+    }
+   }
+  ],
+  "median": {
+   "reference_wall_seconds": 2.636162958,
+   "candidate_wall_seconds": 2.283238833,
+   "candidate_over_reference_wall": 0.8398798091297662,
+   "reference_total_core_seconds": 13.706804,
+   "candidate_total_core_seconds": 11.254643999999999,
+   "candidate_over_reference_core_seconds": 0.8240952422096556,
+   "reference_peak_rss_bytes": 103563264,
+   "candidate_peak_rss_bytes": 103153664,
+   "candidate_over_reference_peak_rss": 0.9809302325581395,
+   "wall_wins": 3,
+   "core_second_wins": 3
+  },
+  "exact_counter_change": {
+   "trials": [
+    26000,
+    17000
+   ],
+   "summands_scanned": [
+    29614000,
+    19363000
+   ],
+   "verified_relations": [
+    906,
+    588
+   ]
+  },
+  "correctness": "32 of 32 targets verified in every arm; both arms used the same algebraic base, target seeds, solver, table tier, and binary."
+ },
+ "independent_known_target_holdout": {
+  "target_seeds": "300-331",
+  "verified_targets": 32,
+  "factor_base_points": 36464,
+  "orbit_columns": 344,
+  "pair_table_tier": "folded",
+  "relations": 588,
+  "trials": 17000,
+  "summands_scanned": 19363000,
+  "linear_algebra_seconds": 0.001783834,
+  "precompute_wall_seconds": 1.417192417,
+  "descent_wall_seconds_total": 0.24481837399999995,
+  "ic_wall_seconds_total": 1.6620107910000002,
+  "rho_wall_seconds_total": 28.356293582000006,
+  "rho_over_ic_amortised_wall_ratio": 17.061437708800053,
+  "rho_over_ic_online_wall_ratio": 115.82583904425414,
+  "whole_process_wall_crossover": true,
+  "combined_total_core_seconds": 39.300461,
+  "peak_rss_bytes": 101974016
+ },
+ "public_unknown_scalar": {
+  "input": {
+   "public_hash_seed": 53001,
+   "public_hash_counter": 0,
+   "published_q": [
+    221146751147987,
+    5112896707579409
+   ],
+   "target_scalar_constructed_or_supplied": false
+  },
+  "recovered_scalar": 7892094459170,
+  "verified_group_equation": true,
+  "relations": 588,
+  "trials": 17000,
+  "summands_scanned": 19363000,
+  "factor_base_logs_known_by_construction": false,
+  "fresh_combined_repeats": [
+   {
+    "repeat": 1,
+    "ic_precompute_wall_seconds": 1.532627042,
+    "ic_descent_wall_seconds": 0.001691958,
+    "ic_total_wall_seconds": 1.5343190000000002,
+    "rho_wall_seconds": 1.597088958,
+    "rho_over_ic_wall_ratio": 1.0409106307097806,
+    "rho_over_ic_online_wall_ratio": 943.929434418585,
+    "whole_process_wall_crossover": true,
+    "combined_total_core_seconds": 13.220417999999999,
+    "peak_rss_bytes": 108494848,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 2,
+    "ic_precompute_wall_seconds": 1.600622751,
+    "ic_descent_wall_seconds": 0.001755125,
+    "ic_total_wall_seconds": 1.602377876,
+    "rho_wall_seconds": 1.5893485410000001,
+    "rho_over_ic_wall_ratio": 0.991868750065044,
+    "rho_over_ic_online_wall_ratio": 905.547206609216,
+    "whole_process_wall_crossover": false,
+    "combined_total_core_seconds": 13.237167000000001,
+    "peak_rss_bytes": 100532224,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 3,
+    "ic_precompute_wall_seconds": 1.378066542,
+    "ic_descent_wall_seconds": 0.001743625,
+    "ic_total_wall_seconds": 1.379810167,
+    "rho_wall_seconds": 1.653015667,
+    "rho_over_ic_wall_ratio": 1.1980022372164474,
+    "rho_over_ic_online_wall_ratio": 948.0339333285541,
+    "whole_process_wall_crossover": true,
+    "combined_total_core_seconds": 12.924215,
+    "peak_rss_bytes": 96763904,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 4,
+    "ic_precompute_wall_seconds": 1.334848666,
+    "ic_descent_wall_seconds": 0.001699917,
+    "ic_total_wall_seconds": 1.3365485830000001,
+    "rho_wall_seconds": 1.579250708,
+    "rho_over_ic_wall_ratio": 1.1815887039850312,
+    "rho_over_ic_online_wall_ratio": 929.016362563584,
+    "whole_process_wall_crossover": true,
+    "combined_total_core_seconds": 12.193848000000001,
+    "peak_rss_bytes": 98598912,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 5,
+    "ic_precompute_wall_seconds": 1.3103850419999998,
+    "ic_descent_wall_seconds": 0.001658375,
+    "ic_total_wall_seconds": 1.312043417,
+    "rho_wall_seconds": 1.583177958,
+    "rho_over_ic_wall_ratio": 1.2066505860148682,
+    "rho_over_ic_online_wall_ratio": 954.6561893419764,
+    "whole_process_wall_crossover": true,
+    "combined_total_core_seconds": 12.178507999999999,
+    "peak_rss_bytes": 97714176,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   }
+  ],
+  "median": {
+   "ic_total_wall_seconds": 1.379810167,
+   "rho_wall_seconds": 1.5893485410000001,
+   "rho_over_ic_wall_ratio": 1.1815887039850312,
+   "ic_over_rho_wall_ratio": 0.8463181787599997,
+   "rho_over_ic_online_wall_ratio": 943.929434418585,
+   "combined_total_core_seconds": 12.924215,
+   "peak_rss_bytes": 98598912,
+   "whole_process_wall_wins": 4,
+   "repeats": 5
+  },
+  "ic_only_repeats": [
+   {
+    "repeat": 1,
+    "wall_seconds": 1.501317667,
+    "total_core_seconds": 10.572973999999999,
+    "peak_rss_bytes": 95207424,
+    "verified": 1
+   },
+   {
+    "repeat": 2,
+    "wall_seconds": 1.548826834,
+    "total_core_seconds": 10.545164,
+    "peak_rss_bytes": 99811328,
+    "verified": 1
+   },
+   {
+    "repeat": 3,
+    "wall_seconds": 1.519538667,
+    "total_core_seconds": 10.885351,
+    "peak_rss_bytes": 98762752,
+    "verified": 1
+   }
+  ],
+  "ic_only_median": {
+   "wall_seconds": 1.519538667,
+   "total_core_seconds": 10.572973999999999,
+   "peak_rss_bytes": 98762752
+  },
+  "core_cost_reading": "IC-only total core-seconds are measured directly. The one-target rho is single-threaded, but its process CPU was not sampled as a separate report field; the whole-process wall crossover is not a core-second crossover."
+ },
+ "gates": {
+  "algebraic_factor_base_and_charged_resources": "partial_pass_native_selection_counts_added_licensed_magma_missing",
+  "same_instance_solver_matrix": "not_run_here",
+  "wall_core_memory_reporting": "partial_pass_current_single_core_refresh_added_magma_missing",
+  "n31_n41_larger_pdp_scaling": "not_run_here",
+  "unknown_scalar_without_constructed_factor_base_logs": "finite_pass",
+  "full_cost_vs_automorphism_rho": "parallel_wall_pass_4_of_5_single_target_single_core_and_total_core_fail_32_target_batch_pass",
+  "independent_external_reproduction_and_novelty_review": "missing"
+ },
+ "forced_single_core": {
+  "control": "RAYON_NUM_THREADS=1; the measured wall/core ratio verifies that the relation collector did not spend parallel CPU behind the one-thread label.",
+  "public_unknown_scalar_repeats": [
+   {
+    "repeat": 1,
+    "whole_process_wall_seconds": 11.791969417,
+    "whole_process_total_core_seconds": 11.358346,
+    "wall_over_core_seconds": 1.0381766339042675,
+    "peak_rss_bytes": 68370432,
+    "ic_precompute_wall_seconds": 9.077676540999999,
+    "ic_descent_wall_seconds": 0.001685916,
+    "ic_total_wall_seconds": 9.079362456999998,
+    "rho_wall_seconds": 1.852113417,
+    "ic_over_rho_wall_ratio": 4.902163319839499,
+    "rho_over_ic_online_wall_ratio": 1098.5798918807343,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 2,
+    "whole_process_wall_seconds": 11.007051917,
+    "whole_process_total_core_seconds": 10.932848,
+    "wall_over_core_seconds": 1.006787244915506,
+    "peak_rss_bytes": 70598656,
+    "ic_precompute_wall_seconds": 8.558120208,
+    "ic_descent_wall_seconds": 0.001647542,
+    "ic_total_wall_seconds": 8.55976775,
+    "rho_wall_seconds": 1.5962318340000001,
+    "ic_over_rho_wall_ratio": 5.362484050045578,
+    "rho_over_ic_online_wall_ratio": 968.8565353720876,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 3,
+    "whole_process_wall_seconds": 11.087743417,
+    "whole_process_total_core_seconds": 10.983716,
+    "wall_over_core_seconds": 1.0094710585197215,
+    "peak_rss_bytes": 67567616,
+    "ic_precompute_wall_seconds": 8.562665875,
+    "ic_descent_wall_seconds": 0.001729709,
+    "ic_total_wall_seconds": 8.564395584,
+    "rho_wall_seconds": 1.593769917,
+    "ic_over_rho_wall_ratio": 5.373671251193531,
+    "rho_over_ic_online_wall_ratio": 921.4092757799143,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 4,
+    "whole_process_wall_seconds": 11.041141666,
+    "whole_process_total_core_seconds": 10.958816,
+    "wall_over_core_seconds": 1.0075122774212104,
+    "peak_rss_bytes": 70057984,
+    "ic_precompute_wall_seconds": 8.56868375,
+    "ic_descent_wall_seconds": 0.001679209,
+    "ic_total_wall_seconds": 8.570362959,
+    "rho_wall_seconds": 1.613118458,
+    "ic_over_rho_wall_ratio": 5.31291605802207,
+    "rho_over_ic_online_wall_ratio": 960.6418605426721,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   },
+   {
+    "repeat": 5,
+    "whole_process_wall_seconds": 11.057604375,
+    "whole_process_total_core_seconds": 10.991155000000001,
+    "wall_over_core_seconds": 1.0060457135760528,
+    "peak_rss_bytes": 68501504,
+    "ic_precompute_wall_seconds": 8.595387083,
+    "ic_descent_wall_seconds": 0.001673333,
+    "ic_total_wall_seconds": 8.597060416,
+    "rho_wall_seconds": 1.5993101250000001,
+    "ic_over_rho_wall_ratio": 5.3754805160131145,
+    "rho_over_ic_online_wall_ratio": 955.7632132994449,
+    "recovered_scalar": 7892094459170,
+    "verified": true
+   }
+  ],
+  "public_unknown_scalar_median": {
+   "whole_process_wall_seconds": 11.057604375,
+   "whole_process_total_core_seconds": 10.983716,
+   "wall_over_core_seconds": 1.0075122774212104,
+   "peak_rss_bytes": 68501504,
+   "ic_precompute_wall_seconds": 8.56868375,
+   "ic_descent_wall_seconds": 0.001679209,
+   "ic_total_wall_seconds": 8.570362959,
+   "rho_wall_seconds": 1.5993101250000001,
+   "ic_over_rho_wall_ratio": 5.362484050045578,
+   "rho_over_ic_online_wall_ratio": 960.6418605426721
+  },
+  "independent_32_target_holdout": {
+   "target_seeds": "300-331",
+   "verified_targets": 32,
+   "whole_process_wall_seconds": 42.882562625,
+   "whole_process_total_core_seconds": 42.408739,
+   "wall_over_core_seconds": 1.0111727826899075,
+   "peak_rss_bytes": 69320704,
+   "trials": 17000,
+   "summands_scanned": 19363000,
+   "relations": 588,
+   "linear_algebra_seconds": 0.00166,
+   "ic_precompute_wall_seconds": 8.575774874,
+   "ic_descent_wall_seconds_total": 0.243508083,
+   "ic_total_wall_seconds": 8.819282957,
+   "rho_wall_seconds_total": 32.915960542,
+   "rho_over_ic_amortised_wall_ratio": 3.732271739379231,
+   "rho_over_ic_online_wall_ratio": 135.17399560818686,
+   "whole_process_wall_crossover": true
+  },
+  "reading": "The scalar-blind one-target run loses to automorphism rho after full precompute on one core. The 32-target batch crosses in wall and total core because the same precompute is amortized. Neither result is an asymptotic or SOTA claim."
+ },
+ "thread_count_diagnostic": {
+  "runs": [
+   {
+    "rayon_threads": 2,
+    "whole_process_wall_seconds": 6.807835,
+    "combined_total_core_seconds": 11.038026,
+    "peak_rss_bytes": 68567040,
+    "ic_total_wall_seconds": 4.448300166999999,
+    "rho_wall_seconds": 1.8737533750000002,
+    "rho_over_ic_wall_ratio": 0.42122907732274006,
+    "whole_process_wall_crossover": false
+   },
+   {
+    "rayon_threads": 4,
+    "whole_process_wall_seconds": 4.278391167,
+    "combined_total_core_seconds": 11.092269,
+    "peak_rss_bytes": 74842112,
+    "ic_total_wall_seconds": 2.397185915,
+    "rho_wall_seconds": 1.600075542,
+    "rho_over_ic_wall_ratio": 0.6674807873631278,
+    "whole_process_wall_crossover": false
+   },
+   {
+    "rayon_threads": 6,
+    "whole_process_wall_seconds": 3.588938041,
+    "combined_total_core_seconds": 11.478723,
+    "peak_rss_bytes": 79478784,
+    "ic_total_wall_seconds": 1.766992833,
+    "rho_wall_seconds": 1.602986167,
+    "rho_over_ic_wall_ratio": 0.9071831741832538,
+    "whole_process_wall_crossover": false
+   },
+   {
+    "rayon_threads": 8,
+    "whole_process_wall_seconds": 3.373483417,
+    "combined_total_core_seconds": 12.404684999999999,
+    "peak_rss_bytes": 86491136,
+    "ic_total_wall_seconds": 1.5684129159999998,
+    "rho_wall_seconds": 1.610805625,
+    "rho_over_ic_wall_ratio": 1.0270290486437184,
+    "whole_process_wall_crossover": true
+   },
+   {
+    "rayon_threads": 10,
+    "whole_process_wall_seconds": 3.259618833,
+    "combined_total_core_seconds": 12.349103999999999,
+    "peak_rss_bytes": 92225536,
+    "ic_total_wall_seconds": 1.4417963340000002,
+    "rho_wall_seconds": 1.6452781669999998,
+    "rho_over_ic_wall_ratio": 1.1411307742997767,
+    "whole_process_wall_crossover": true
+   },
+   {
+    "rayon_threads": 12,
+    "whole_process_wall_seconds": 3.106184208,
+    "combined_total_core_seconds": 12.294357,
+    "peak_rss_bytes": 94371840,
+    "ic_total_wall_seconds": 1.315637709,
+    "rho_wall_seconds": 1.599625834,
+    "rho_over_ic_wall_ratio": 1.215855872066677,
+    "whole_process_wall_crossover": true
+   },
+   {
+    "rayon_threads": 14,
+    "whole_process_wall_seconds": 3.094736791,
+    "combined_total_core_seconds": 12.244561,
+    "peak_rss_bytes": 99024896,
+    "ic_total_wall_seconds": 1.319634834,
+    "rho_wall_seconds": 1.601606167,
+    "rho_over_ic_wall_ratio": 1.2136737571145382,
+    "whole_process_wall_crossover": true
+   }
+  ],
+  "minimum_threads_with_observed_wall_crossover": 8,
+  "fastest_crossing_threads": 12,
+  "reading": "This is a one-pass diagnostic on the scalar-blind target, not an independent selection panel. The default 14 logical-thread run remains the operational profile; lower thread counts reduce concurrency but do not create a one-target core-second crossover."
+ },
+ "single_target_primary_accounting": {
+  "selected_parallel_operational": {
+   "ic_wall_seconds": 1.379810167,
+   "rho_wall_seconds": 1.5893485410000001,
+   "ic_over_rho_wall_ratio": 0.8463181787599997,
+   "whole_process_wall_wins": 4,
+   "repeats": 5,
+   "ic_only_total_core_seconds": 10.572973999999999
+  },
+  "forced_single_core_operational": {
+   "ic_wall_seconds": 8.570362959,
+   "rho_wall_seconds": 1.5993101250000001,
+   "ic_over_rho_wall_ratio": 5.362484050045578,
+   "whole_process_total_core_seconds": 10.983716,
+   "peak_rss_bytes": 68501504
+  },
+  "parameter_selection_envelope": {
+   "processes": 45,
+   "sequential_wall_seconds": 77.959835877,
+   "total_core_seconds": 484.310223,
+   "peak_rss_bytes": 106856448,
+   "accounting": "Target-independent parameter selection is not hidden in the selected operational run. Charge this envelope once when treating seed 6 and the 17k budget as newly discovered for a first-ever target; amortize it only across explicitly counted later targets."
+  },
+  "discovery_charged_first_target": {
+   "parallel_ic_plus_selection_sequential_wall_seconds": 79.339646044,
+   "parallel_ic_plus_selection_total_core_seconds": 494.883197,
+   "rho_wall_seconds": 1.5893485410000001,
+   "full_discovery_charged_crossover": false
+  },
+  "scope": "The operational run charges algebraic factor-base materialization, pair-table predicate construction, relation collection, verification, sparse linear algebra, descent, memory and process CPU. The separate selection envelope charges the research-time search that fixed relation seed 6 and the 17k budget."
+ },
+ "reproduction": {
+  "single_target_params": "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json",
+  "parallel_command": "target/release/ic workflow --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json --dir /tmp/k0n53-public-unknown",
+  "single_core_command": "RAYON_NUM_THREADS=1 target/release/ic workflow --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json --dir /tmp/k0n53-public-unknown-1c"
+ },
+ "single_target_parameter_diagnostics": {
+  "factor_base_width": {
+   "runs": [
+    {
+     "requested_points": 28000,
+     "actual_points": 28832,
+     "columns": 272,
+     "trials": 30000,
+     "summands_scanned": 26340000,
+     "relations": 514,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.349707625,
+     "total_core_seconds_through_logs": 10.323213,
+     "peak_rss_bytes": 69419008
+    },
+    {
+     "requested_points": 32000,
+     "actual_points": 32224,
+     "columns": 304,
+     "trials": 23000,
+     "summands_scanned": 23000000,
+     "relations": 533,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.284185208,
+     "total_core_seconds_through_logs": 9.693131,
+     "peak_rss_bytes": 84361216
+    },
+    {
+     "requested_points": 34000,
+     "actual_points": 34768,
+     "columns": 328,
+     "trials": 20000,
+     "summands_scanned": 21200000,
+     "relations": 623,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.377180708,
+     "total_core_seconds_through_logs": 10.159604,
+     "peak_rss_bytes": 95125504
+    },
+    {
+     "requested_points": 38000,
+     "actual_points": 38160,
+     "columns": 360,
+     "trials": 15500,
+     "summands_scanned": 18445000,
+     "relations": 610,
+     "rank_complete": true,
+     "wall_seconds_through_logs": 1.4142715,
+     "total_core_seconds_through_logs": 10.281957,
+     "peak_rss_bytes": 101842944
+    },
+    {
+     "requested_points": 40000,
+     "actual_points": 40704,
+     "columns": 384,
+     "trials": 14500,
+     "summands_scanned": 18154000,
+     "relations": 665,
+     "rank_complete": true,
+     "wall_seconds_through_logs": 1.47783825,
+     "total_core_seconds_through_logs": 11.249419,
+     "peak_rss_bytes": 110706688
+    },
+    {
+     "requested_points": 44000,
+     "actual_points": 44096,
+     "columns": 416,
+     "trials": 12000,
+     "summands_scanned": 16536000,
+     "relations": 711,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.582017917,
+     "total_core_seconds_through_logs": 12.004864000000001,
+     "peak_rss_bytes": 139853824
+    }
+   ],
+   "selected_requested_points": 36000,
+   "reading": "The adjacent complete 38k and 40k arms used more process CPU; narrower and 44k trial budgets were already comparable or dearer before reaching rank."
+  },
+  "collection_window": {
+   "runs": [
+    {
+     "collection_window": 768,
+     "trials": 25500,
+     "summands_scanned": 19584000,
+     "relations": 630,
+     "rank_complete": true,
+     "wall_seconds_through_logs": 1.391681583,
+     "total_core_seconds_through_logs": 10.200708,
+     "peak_rss_bytes": 98418688
+    },
+    {
+     "collection_window": 1536,
+     "trials": 12750,
+     "summands_scanned": 19584000,
+     "relations": 583,
+     "rank_complete": false,
+     "wall_seconds_through_logs": 1.365107375,
+     "total_core_seconds_through_logs": 9.965024,
+     "peak_rss_bytes": 93552640
+    },
+    {
+     "collection_window": 2048,
+     "trials": 9750,
+     "summands_scanned": 19968000,
+     "relations": 586,
+     "rank_complete": true,
+     "wall_seconds_through_logs": 1.3971969579999999,
+     "total_core_seconds_through_logs": 10.21921,
+     "peak_rss_bytes": 98582528
+    }
+   ],
+   "selected_window": 1139,
+   "reading": "The complete 768 and 2048 controls used more CPU. The 1536 control did not reach rank at a slightly larger scan budget."
+  },
+  "reusable_window_scratch_rejected": {
+   "pairs": [
+    {
+     "pair": 1,
+     "candidate_over_reference_wall": 0.8930395529490298,
+     "candidate_over_reference_core_seconds": 0.9675965863862716,
+     "candidate_over_reference_peak_rss": 0.9590268886043534,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 2,
+     "candidate_over_reference_wall": 0.9836442285169329,
+     "candidate_over_reference_core_seconds": 0.9934477691153607,
+     "candidate_over_reference_peak_rss": 0.9838497033618985,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 3,
+     "candidate_over_reference_wall": 1.0290471377784425,
+     "candidate_over_reference_core_seconds": 1.0004089572463628,
+     "candidate_over_reference_peak_rss": 0.9880239520958084,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 4,
+     "candidate_over_reference_wall": 1.044118944977704,
+     "candidate_over_reference_core_seconds": 1.0117489643744821,
+     "candidate_over_reference_peak_rss": 0.9659391534391535,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 5,
+     "candidate_over_reference_wall": 1.0209758230880999,
+     "candidate_over_reference_core_seconds": 1.0036824699132145,
+     "candidate_over_reference_peak_rss": 0.9994937563280459,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 6,
+     "candidate_over_reference_wall": 0.9561396686989238,
+     "candidate_over_reference_core_seconds": 0.9865581356446824,
+     "candidate_over_reference_peak_rss": 0.9751749416861046,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 7,
+     "candidate_over_reference_wall": 1.0044478209990977,
+     "candidate_over_reference_core_seconds": 1.0075840912281324,
+     "candidate_over_reference_peak_rss": 1.0016633399866932,
+     "identical_relations_scalar_and_verification": true
+    },
+    {
+     "pair": 8,
+     "candidate_over_reference_wall": 0.9898169051775313,
+     "candidate_over_reference_core_seconds": 1.0012155777199254,
+     "candidate_over_reference_peak_rss": 0.9721561969439728,
+     "identical_relations_scalar_and_verification": true
+    }
+   ],
+   "median_candidate_over_reference_wall": 0.9971323630883144,
+   "median_candidate_over_reference_core_seconds": 1.0008122674831441,
+   "median_candidate_over_reference_peak_rss": 0.9795123225240016,
+   "wall_wins": 4,
+   "core_wins": 3,
+   "rss_wins": 7,
+   "decision": "rejected_speed_neutral_memory_only"
+  }
+ },
+ "science_process_accounting": {
+  "processes": 101,
+  "sequential_wall_seconds": 311.139654002,
+  "total_core_seconds": 1159.24267,
+  "peak_rss_bytes": 139853824,
+  "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count diagnostic, factor-base-width diagnostic, collection-window diagnostic, and rejected reusable-scratch A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
+  "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden."
+ },
+ "current_head_selection_cost_replay": {
+  "source_commit": "1f82245f",
+  "binary_blake3": "47defaee523d35deb5e806842afe43154f1d29ff3c39cab4b7d6d83c3659e61d",
+  "fresh_complete_single_target": {
+   "whole_process_wall_seconds": 3.185437667,
+   "whole_process_total_core_seconds": 12.221167,
+   "peak_rss_bytes": 102318080,
+   "selection_cost": {
+    "abscissae_drawn": 695,
+    "cofactor_multiplications": 344,
+    "frobenius_squarings": 18232,
+    "lifts_found": 344,
+    "rebuilds": 1
+   },
+   "factor_base_summary_selection_cost": {
+    "abscissae_drawn": 695,
+    "cofactor_multiplications": 344,
+    "frobenius_squarings": 18232,
+    "lifts_found": 344,
+    "rebuilds": 1
+   },
+   "trials": 17000,
+   "summands_scanned": 19363000,
+   "relations": 588,
+   "linear_algebra_seconds": 0.001688,
+   "ic_total_wall_seconds": 1.369710207,
+   "rho_wall_seconds": 1.614627292,
+   "rho_over_ic_wall_ratio": 1.178809418042104,
+   "recovered_scalar": 7892094459170,
+   "verified": true
+  },
+  "fresh_and_resumed_select_only": {
+   "fresh": {
+    "ran": true,
+    "selection_cost": {
+     "abscissae_drawn": 695,
+     "cofactor_multiplications": 344,
+     "frobenius_squarings": 18232,
+     "lifts_found": 344,
+     "rebuilds": 1
+    },
+    "process_cpu_seconds": 1.0625419999999999,
+    "peak_rss_bytes": 22708224
+   },
+   "resumed": {
+    "ran": false,
+    "selection_cost": {
+     "abscissae_drawn": 695,
+     "cofactor_multiplications": 344,
+     "frobenius_squarings": 18232,
+     "lifts_found": 344,
+     "rebuilds": 1
+    },
+    "process_cpu_seconds": 1.029919,
+    "peak_rss_bytes": 22986752
+   }
+  },
+  "reading": "The workflow now emits native subgroup-orbit construction counts on fresh and resumed materialization. Timing already charged selection wall and process resources; these counters expose what that phase did without changing the base or solver."
+ }
+}

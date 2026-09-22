@@ -1770,11 +1770,47 @@ pub fn build_explicit_frobenius_orbit_factor_base(
 ///
 /// `None` when the field is too wide to sample abscissae as `u64`, or
 /// when sampling cannot reach `points` (a degenerate curve).
+/// What selecting a factor base cost, in its own native counts.
+///
+/// Selection is a phase like any other and AGENTS.md §8 asks for every
+/// phase priced, but it had no counters at all, so the `S` this thread
+/// reports has been a lower bound with selection left null.  These are
+/// the quantities the loop below actually spends, so a measured
+/// conversion turns them into the common unit.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FactorBaseSelectionCost {
+    /// Abscissae drawn and tested, the loop's dominant count: each one
+    /// costs a quadratic solve and, when it lifts, a cofactor
+    /// multiplication.
+    pub abscissae_drawn: u64,
+    /// Draws that produced a point on the curve, roughly half of them.
+    pub lifts_found: u64,
+    /// Cofactor multiplications, one per lift — cheap on a Koblitz
+    /// curve, where the cofactor is 2 or 4.
+    pub cofactor_multiplications: u64,
+    /// Frobenius squarings walking each new representative's orbit.
+    pub frobenius_squarings: u64,
+    /// Times the base was rebuilt from the representatives so far.
+    /// Quadratic in the representative count, and the comment in the
+    /// loop names it as most of what selection costs.
+    pub rebuilds: u32,
+}
+
+/// [`build_subgroup_orbit_factor_base_with_cost`], discarding the cost.
 pub fn build_subgroup_orbit_factor_base(
     kc: &KoblitzCurve,
     seed: u64,
     points: usize,
 ) -> Result<FrobeniusFactorBase, String> {
+    build_subgroup_orbit_factor_base_with_cost(kc, seed, points).map(|(fb, _)| fb)
+}
+
+/// The same selection, reporting what it spent.
+pub fn build_subgroup_orbit_factor_base_with_cost(
+    kc: &KoblitzCurve,
+    seed: u64,
+    points: usize,
+) -> Result<(FrobeniusFactorBase, FactorBaseSelectionCost), String> {
     if kc.n >= 64 {
         return Err("subgroup orbit sampling needs n < 64".into());
     }
@@ -1804,6 +1840,7 @@ pub fn build_subgroup_orbit_factor_base(
     // here as the batches arrive, which costs one Frobenius orbit per new
     // representative rather than one per representative per round.
     let mut abscissae: HashSet<BigUint> = HashSet::new();
+    let mut cost = FactorBaseSelectionCost::default();
     while base.as_ref().is_none_or(|b| b.points.len() < points) {
         let mut added = 0usize;
         while added < batch {
@@ -1823,6 +1860,8 @@ pub fn build_subgroup_orbit_factor_base(
             let Some(point) = lifts.into_iter().next() else {
                 continue;
             };
+            cost.lifts_found += 1;
+            cost.cofactor_multiplications += 1;
             // Multiply by the cofactor rather than rejecting: [h]P has
             // order dividing r for *every* P, so no sample is wasted, and
             // where the cofactor is large that is the difference between
@@ -1842,6 +1881,7 @@ pub fn build_subgroup_orbit_factor_base(
             for _ in 0..kc.extension_degree() {
                 abscissae.insert(orbit.to_biguint());
                 orbit = kc.frobenius_x(&orbit);
+                cost.frobenius_squarings += 1;
             }
             representatives.push(x);
             added += 1;
@@ -1849,9 +1889,12 @@ pub fn build_subgroup_orbit_factor_base(
         if 2 * abscissae.len() < points {
             continue;
         }
+        cost.rebuilds += 1;
         base = build_explicit_frobenius_orbit_factor_base(kc, &representatives);
     }
-    base.ok_or_else(|| "subgroup orbit sampling produced no base".into())
+    cost.abscissae_drawn = drawn;
+    base.map(|b| (b, cost))
+        .ok_or_else(|| "subgroup orbit sampling produced no base".into())
 }
 
 /// **Keep only the listed signed orbits** of a factor base.
@@ -2506,12 +2549,34 @@ impl PairSumTable {
     /// median over the four widths of
     /// `docs/ic/runs/koblitz-tier-crossover-20260921.json`.
     ///
-    /// **What this is calibrated on, and is not.**  One curve, one
-    /// degree (`n = 61`), one host.  The fold's build saving carries a
-    /// `1 − 1/2n` factor and its canonicalisation cost grows with `n`,
-    /// so both sides move with the degree and neither was measured
-    /// against it.  The model reproduces the cheapest of the two tiers
-    /// at all four widths measured; outside that range it is an
+    /// **What this is calibrated on, and is not.**  The constants were
+    /// measured at one degree (`n = 61`) and one base width (about
+    /// 12,700 points) on one host, and the limitation that matters is
+    /// the *width*, not the degree.
+    ///
+    /// Measured across `n = 41, 53, 57, 61` at a matched base, the
+    /// folded-to-compact ratio of the scan cost is flat once the
+    /// degrees whose `m = 3` scan saturates are excluded: `1.34` at
+    /// `n = 53` against `1.33` at `n = 61`, the only two of the ten
+    /// usable degrees with an `r` large enough to measure cleanly at a
+    /// workable width.  `n` does not determine `r` on this family — the
+    /// cofactor runs from 4 at `n = 41` to 57,284,756 at `n = 59` — so a
+    /// sweep that picks its width by degree lands in the saturated
+    /// regime and reads recovery cost as probing cost.
+    /// `examples/koblitz_degree_census.rs` computes the width that keeps
+    /// a degree measurable.
+    ///
+    /// Across widths at fixed degree the same ratio moves a great deal:
+    /// `1.33` at 3,904 points, `1.17` at 12,688, and `0.96` at 15,264,
+    /// because the compact table leaves cache while the folded one never
+    /// does.  The constants below give `1.17`, which is right at the
+    /// width they were taken at and wrong in both directions away from
+    /// it.  A width term is what this model is missing; a degree term is
+    /// not.  `docs/ic/runs/koblitz-phase-prices-20260921.json` records
+    /// both sweeps.
+    ///
+    /// The model reproduces the cheapest of the two tiers at all four
+    /// widths measured end to end; outside that range it is an
     /// extrapolation, which is why every builder stays reachable by name
     /// and `ic`'s `pair_table_tier` can override the choice outright.
     fn expected_adds(stored: u128, scan: f64, blocked: f64, probes: ProbeBudget) -> f64 {
@@ -2552,6 +2617,10 @@ impl PairSumTable {
             FOLDED_BLOCKED,
             probes,
         );
+        // Deliberately unused: measured flat in `n` over 41 to 61 once
+        // saturated degrees are excluded (see above).  Kept in the
+        // signature because the width term this model needs will want
+        // the field size beside it.
         let _ = degree;
         folded < compact
     }
@@ -3715,9 +3784,32 @@ impl PairSumTable {
                 // representation does not keep those, and walking them
                 // there would have reported no witness for a target that
                 // has one — a false "no" from an oracle, which is worse
-                // than a loud failure.  One batched inversion a row
-                // keeps the arithmetic close to what the triples cost.
+                // than a loud failure.
+                //
+                // **Two** batched inversions a row, not one and then a
+                // row of single ones.  `add_many` amortises Montgomery's
+                // trick over a whole slice, so the row's pair sums cost
+                // one inversion between them; the rests `R − (P_k + P_l)`
+                // are a second slice and cost one more.  Taking them one
+                // at a time through `add` is a *Fermat* inversion each —
+                // `n − 1` squarings and as many multiplications — which
+                // at `n = 61` measured 1300 ns against `add_many`'s 68,
+                // nineteen times the batched step and the dominant cost
+                // of everything this arm did.
+                // `examples/m4_inversion_cost.rs` prices the two.
+                //
+                // Keyed a row at a time and prefetched ahead of the
+                // probe, for the reason the `m = 3` arm is: the key is a
+                // long dependent chain, and fused with its lookup the
+                // memory round trips do not overlap.
+                //
+                // An early exit still throws away at most a row, as it
+                // always did — the row is the slice `add_many` batches.
+                const LOOKAHEAD: usize = 32;
                 let mut sums = Vec::new();
+                let mut negs = Vec::new();
+                let mut rests = Vec::new();
+                let mut keys = Vec::new();
                 let mut scratch = BatchScratch::default();
                 let mut pairs = Vec::new();
                 for l in 0..self.points.len() {
@@ -3728,9 +3820,23 @@ impl PairSumTable {
                         &mut sums,
                         &mut scratch,
                     );
-                    for (k, &pair) in sums.iter().enumerate() {
-                        let rest = self.curve.add(target, self.curve.neg(pair));
-                        self.pairs_for(rest, &mut pairs);
+                    negs.clear();
+                    negs.extend(sums.iter().map(|&s| self.curve.neg(s)));
+                    // `add_many` appends, so the slice starts empty.
+                    rests.clear();
+                    self.curve.add_many(target, &negs, &mut rests, &mut scratch);
+                    self.keys_of(&rests, &mut keys);
+                    for &key in keys.iter().take(LOOKAHEAD) {
+                        prefetch(&self.present[self.filter_word(key)]);
+                    }
+                    for (k, rest) in rests.iter().enumerate() {
+                        if let Some(&ahead) = keys.get(k + LOOKAHEAD) {
+                            prefetch(&self.present[self.filter_word(ahead)]);
+                        }
+                        if !self.admitted(keys[k]) {
+                            continue;
+                        }
+                        self.pairs_for_key(*rest, keys[k], &mut pairs);
                         for &(i, j) in &pairs {
                             if (!sorted || j as usize <= k)
                                 && !sink(&[i as usize, j as usize, k, l])
@@ -8160,6 +8266,42 @@ mod tests {
     }
 
     #[test]
+    fn selecting_a_base_reports_what_it_spent() {
+        // Selection is a priced phase now, so its counters are part of
+        // the contract.  AGENTS.md §8 wants every phase priced, and this
+        // one reported nothing at all, which is why `S` was a lower
+        // bound with selection null.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let (fb, cost) = build_subgroup_orbit_factor_base_with_cost(&kc, 5, 400).unwrap();
+
+        // The base is the one the discarding wrapper returns, so adding
+        // the counters changed no measurement anywhere else.
+        let plain = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        assert_eq!(fb.points, plain.points);
+
+        // Every draw is either rejected or lifts, so lifts never exceed
+        // draws, and each lift costs exactly one cofactor multiply.
+        assert!(cost.abscissae_drawn >= cost.lifts_found, "{cost:?}");
+        assert_eq!(cost.lifts_found, cost.cofactor_multiplications);
+        // A representative is only kept once it lifts, and each keeps an
+        // orbit's worth of squarings.
+        assert_eq!(
+            cost.frobenius_squarings,
+            fb.signed_orbits.len() as u64 * u64::from(kc.extension_degree()),
+            "one orbit walk per representative kept"
+        );
+        assert!(cost.rebuilds >= 1, "the base was built at least once");
+        assert!(cost.abscissae_drawn > 0);
+
+        // Deterministic in the seed, like the base itself: a price that
+        // moved run to run could not be frozen into an evidence file.
+        let (_, again) = build_subgroup_orbit_factor_base_with_cost(&kc, 5, 400).unwrap();
+        assert_eq!(cost, again);
+        let (_, other) = build_subgroup_orbit_factor_base_with_cost(&kc, 6, 400).unwrap();
+        assert_ne!(cost.abscissae_drawn, other.abscissae_drawn);
+    }
+
+    #[test]
     fn pair_table_picks_the_tier_the_measurement_picked() {
         // The tier choice, pinned — and it has been pinned three ways.
         //
@@ -8227,6 +8369,135 @@ mod tests {
         assert!(PairSumTable::build_compact_within(&kc, &fb, compact - 1).is_none());
         assert_eq!(wide.len(), narrow.len(), "same base, same pairs");
         assert!(tight.len() < narrow.len(), "the fold stored no less");
+    }
+
+    #[test]
+    fn the_m4_scan_finds_exactly_the_quadruples_that_sum_to_the_target() {
+        use std::collections::BTreeSet;
+
+        // `m = 4` is the one arm no parameter set reaches — 698 ask for
+        // 3 and 110 for 2, and nothing sets `max_m` — so nothing else in
+        // this suite exercises it, and a change to it would otherwise
+        // land unmeasured.  The oracle here is a brute-force walk over
+        // every sorted quadruple, which shares no code with the scan: it
+        // does not key, does not probe, and does not know what a tier
+        // is.
+        //
+        // All three tiers are checked, because the scan reaches the
+        // table through `pairs_for_key`, whose compact branch recovers
+        // summands by a scan where the folded one reads them out of the
+        // entry.  A key computed one way and looked up another is a
+        // silent false "no" from an oracle, not a crash, and the fold is
+        // where the two keys can drift apart.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 40).unwrap();
+        let n_pts = fb.points.len();
+        let full = PairSumTable::byte_size(n_pts);
+        let compact = PairSumTable::compact_byte_size(n_pts, kc.n);
+        let folded = PairSumTable::folded_byte_size(fb.signed_orbits.len(), n_pts, kc.n);
+        let tiers = [
+            (
+                "full",
+                PairSumTable::build_full_within(&kc, &fb, full).expect("full fits"),
+            ),
+            (
+                "compact",
+                PairSumTable::build_compact_within(&kc, &fb, compact).expect("compact fits"),
+            ),
+            (
+                "folded",
+                PairSumTable::build_within(&kc, &fb, folded).expect("folded fits"),
+            ),
+        ];
+        assert!(
+            tiers[2].1.is_folded(),
+            "the third tier is not the folded one"
+        );
+
+        let fc = FastCurve::new(&kc.curve).expect("fast curve");
+        let pts: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+
+        // Targets that really are sums of four base points, so the scan
+        // has something to find.  The base is closed under negation, so
+        // a quadruple picked by hand lands on `O` more often than not;
+        // these are generated and filtered instead.
+        let mut targets: Vec<FastPoint> = Vec::new();
+        for step in 1..n_pts {
+            let idx = [0, step, (2 * step) % n_pts, (3 * step) % n_pts];
+            let sum = idx
+                .iter()
+                .fold(FastPoint::INFINITY, |acc, &i| fc.add(acc, pts[i]));
+            if !sum.infinity && !targets.contains(&sum) {
+                targets.push(sum);
+            }
+            if targets.len() == 4 {
+                break;
+            }
+        }
+        assert_eq!(
+            targets.len(),
+            4,
+            "only {} usable targets over {n_pts} points",
+            targets.len()
+        );
+
+        // The oracle's first half, shared across targets: every pair
+        // sum, indexed by the point it lands on.  Walking all `|F|⁴`
+        // quadruples would be the more obviously correct oracle and is
+        // far too slow; this is the same answer in `|F|²`, and it still
+        // shares no code with the scan — no table, no key, no tier.
+        let mut by_pair: HashMap<(bool, u64, u64), Vec<(usize, usize)>> = HashMap::new();
+        for i in 0..n_pts {
+            for j in i..n_pts {
+                let s = fc.add(pts[i], pts[j]);
+                by_pair
+                    .entry((s.infinity, s.x, s.y))
+                    .or_default()
+                    .push((i, j));
+            }
+        }
+
+        for target in &targets {
+            // Every `i ≤ j ≤ k ≤ l` whose four points sum here: for each
+            // second half `P_k + P_l`, the first halves that complete it.
+            let mut expected: BTreeSet<[usize; 4]> = BTreeSet::new();
+            for k in 0..n_pts {
+                for l in k..n_pts {
+                    let kl = fc.add(pts[k], pts[l]);
+                    let want = fc.add(*target, fc.neg(kl));
+                    let Some(firsts) = by_pair.get(&(want.infinity, want.x, want.y)) else {
+                        continue;
+                    };
+                    for &(i, j) in firsts {
+                        let mut v = [i, j, k, l];
+                        v.sort_unstable();
+                        expected.insert(v);
+                    }
+                }
+            }
+
+            for (name, table) in &tiers {
+                let mut got: BTreeSet<[usize; 4]> = BTreeSet::new();
+                table.witnesses_fast(*target, 4, &mut |w| {
+                    let mut v = [w[0], w[1], w[2], w[3]];
+                    v.sort_unstable();
+                    got.insert(v);
+                    true
+                });
+                assert_eq!(
+                    got, expected,
+                    "the {name} tier disagreed with the brute-force walk"
+                );
+                // And every witness really is one, so an oracle that
+                // agreed by finding the same wrong answers still fails.
+                for w in &got {
+                    let sum = w
+                        .iter()
+                        .fold(FastPoint::INFINITY, |a, &i| fc.add(a, pts[i]));
+                    assert_eq!(sum, *target, "the {name} tier returned a non-witness");
+                }
+            }
+        }
     }
 
     #[test]

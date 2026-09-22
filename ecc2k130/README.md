@@ -199,52 +199,80 @@ the trail cost, an asymmetry of `2^17.4`. The claim is
 {"dps": [{"x": "<canonical orbit>", "seed": "<64-bit walk seed>", "j": [n3, …, n10]}]}
 ```
 
-The kernel does not carry those counters yet, and **it should** — an earlier
-draft of this section said the opposite, on a cost that was measured against
-the wrong backend. Corrected:
+The kernel **now carries those counters**, and it should — an earlier draft of
+this section said the opposite, on a cost that was measured against the wrong
+backend. Both the correction and the implementation are below.
+
+**Carry them in the search.** `WITNESS=1` (the default) makes the walk count
+its own branches, so the corpus arrives with the witness already in it and a
+claim costs one double scalar multiplication rather than a replay.
 
 The campaign runs `--packed` (`aws/campaign.json`), and the packed kernel
 already computes the branch as a *scalar* — `const int j = 3 + ((hw >> 1) & 7)`
 in `include/packedkernels.cuh` — next to per-walk scalar state it touches every
 step anyway (`p.seed[id]`, `p.dead[id]`, `p.startIter[id]`). So a counter there
-is a scalar increment: eight 8-bit fields packed in one `u64`,
-`packed += 1ull << 8*(j-3)`, flushed before any field can overflow. That is
-**two instructions on a 2,324-slot update, +0.09%**, about **36 GPU-hours**
-across the campaign — and it makes every one of the `2^32.49` orbits the
-campaign will produce claimable, permanently.
+is a scalar increment, and it is implemented as one: a single indexed `+= 1u`
+per step into eight 32-bit fields per walk. A tighter layout is possible —
+eight 8-bit fields packed in one `u64`, `packed += 1ull << 8*(j-3)`, flushed
+before any field can overflow — which costs 8 bytes of per-walk state instead
+of 32 and is costed at **two instructions on a 2,324-slot update, +0.09%**,
+about **36 GPU-hours** across the campaign. The shipped layout trades that
+state for needing no overflow flush; it is the same cost class, but **neither
+has been measured**, because there is no CUDA toolchain here. What the counters
+buy is not in doubt: every one of the `2^32.49` orbits the campaign will
+produce becomes claimable, permanently.
 
-The earlier figure — 105 slots, ~4%, ~1,800 GPU-hours — priced *bitsliced*
-counters, where a counter is spread over bit-planes and every lane pays a full
-ripple carry. That is the right number for the bitsliced backend and the wrong
-one for the backend the campaign actually runs; the 2,324-slot budget it was
-compared against is itself the packed preset's, priced in `clmad`.
+The **bitsliced** backend pays much more, and that one *is* measured: **+6.0%**
+of the walk. There a counter is spread over bit-planes and every lane pays a
+ripple carry, though with an early exit that stops as soon as no lane is still
+carrying. Build with `WITNESS=0` for the old rate and the old corpus format
+byte for byte; `CAIRN-WITNESS.md` has the full accounting, including what a
+checkpoint costs.
 
-Replay keeps one real job: the points **already collected without counters**
-are claimable no other way. At the campaign's weight 32 a trail is `2^28.41`
-steps, so replaying a claimed trail costs exactly what collecting it did —
-about **15 GPU-hours per 2^21 orbits**. `build/witness` is that path:
+The superseded figure, kept visible rather than deleted: 105 slots, ~4% of the
+campaign, ~1,800 GPU-hours. It priced *bitsliced* counters, and the 2,324-slot
+budget it was compared against is itself the packed preset's, priced in
+`clmad`. Two backends, one budget — wrong twice in the same direction.
+
+**Replay what you claim.** This keeps one real job that the search kernel
+cannot do backwards: the points **already collected without counters** are
+claimable no other way. `--replay` on the client does it through the production
+bitsliced walk, so it costs the *longest* trail in a chunk rather than the sum
+of them all -- 128 ECC2K-130 records in 131 s against the ~2,964 s a serial
+re-walk of the same 5,039,383 steps would take, and flat as the corpus grows.
+On a v2 corpus it audits the counts instead of writing them. At the campaign's weight 32 a trail is `2^28.41` steps,
+so replaying a claimed trail costs about what collecting it did — roughly
+**15 GPU-hours per 2^21 orbits**. `build/witness` is both paths:
 
 ```sh
 make witness
 ./build/witness --curve 131 --job ecc2k130.json --corpus dps.bin --out-dir claims/
 ```
 
-`--out-dir` writes one artifact per file, which is what a node's checker
-reads; without it the batches stream to stdout, one JSON object per line.
+It frames the corpus by its magic. From a **v2** record it takes the carried
+counts directly; from a **v1** record it replays the seed with the reference
+walk, which has counted the `n_j` all along because collision resolution always
+needed them. Either way it checks the witness lands on the orbit the record
+names — the same double scalar multiplication the payer will do — and writes
+batches of up to 64.
 
-Measured here on the challenge curve: **835 steps/s** marginal, plus
-**0.165 s** fixed per record for the 128-term start point and the witness
-check. That sets what it can reach. At the campaign's `dpWeight` 32 a trail
-averages `2^28.41` steps, so one production witness is about **119 hours**
-single-threaded -- this path is for small curves and for loosened cutoffs, and
-a production run wants the counters in a *replay* kernel, where the cost falls
-on the trails being claimed rather than on the search.
+`--out-dir` writes one artifact per file, which is what a node's checker reads;
+without it the batches stream to stdout, one JSON object per line.
 
-It replays each record's seed with the reference walk — which has counted the
-`n_j` all along, because collision resolution always needed them — checks that
-the replay lands on the orbit the record names, checks the witness itself by
-the same double scalar multiplication the payer will do, and prints batches of
-up to 64. `make test-witness` runs it end to end; with `CAIRN_ROOT` set it
+**Replaying is what costs.** The replay runs in parallel across records --
+they are independent, and the emission stays serial so the output bytes do not
+depend on the thread count. Measured here on the challenge curve, four cores:
+**~1,700 steps/s** marginal per core, plus **~0.22 s** fixed per record for the
+128-term start point and the witness check. At the campaign's `dpWeight` 32 a
+trail averages `2^28.41` steps, so one *replayed* production witness is still
+tens of hours: parallelism divides the cost, it does not change its shape,
+because a single trail cannot be split across cores. That is the number the carried counters delete: from a v2
+corpus only the fixed per-record part remains, because there is no trail to
+walk. Measured on 128 real weight-34 ECC2K-130 records: **5,039,383 steps
+carried, 0 replayed**, 30.8 s for two 64-point batches. The replay path is
+therefore for small curves, loosened cutoffs, and every corpus written before
+the counters existed. `make test-witness` runs it end to end; with `CAIRN_ROOT`
+set it
 also hands the result to cairn's own checker. `cairn_job.py` writes a job
 document for a small curve so that check can run on a trail short enough to
 walk.
@@ -421,14 +449,22 @@ analysis below.
 A walk that reports is restarted in place from `R = Q + sum c_i sigma^i(P)`,
 with `c` a 128-bit string from a PRF of the walk seed, computed with the same
 bitsliced arithmetic and merged into the finished lanes under a mask. No linear
-combination of `P` and `Q` is tracked in the loop; the server recomputes both
-walks from their seeds when two of them collide, which is what keeps the inner
-loop free of conditional counter updates.
+combination of `P` and `Q` is tracked in the loop: a coefficient update is a
+129-bit modular multiplication per step, which this walk cannot afford.
 
 Reports are `(seed, endpoint)`. Collision resolution recomputes each walk
 counting how often each `sigma^j + 1` was applied, giving
 `endpoint = [mu](alpha_0 P + Q)` with `mu = prod_j (1 + s^j)^{n_j}`, matches the
 two endpoints up to Frobenius and negation, and solves for `k`.
+
+The walk also carries those counts as it goes (`WITNESS=1`, the default), which
+is eight per-branch counters and not a coefficient: the product commutes, so the
+order of the steps does not matter and there is nothing to multiply per step.
+That turns a report into something a third party can check with one double
+scalar multiplication instead of re-walking `2^25.27` steps, which is what the
+cairn objective in [CAIRN-WITNESS.md](CAIRN-WITNESS.md) pays for. It costs 4.2%
+of the bitsliced walk, measured; `WITNESS=0` compiles it out and restores the
+previous checkpoint and corpus formats exactly.
 
 ## Results
 
@@ -676,6 +712,7 @@ modal run modal_app.py::search --hours 4
 modal run modal_app.py::fanout --count 8 --hours 4
 modal run modal_app.py::merge         # collisions across every run
 modal run modal_app.py::next_run_id   # the next free campaign run id (curve 131)
+modal deploy modal_app.py             # then python3 modal_campaign.py ... (see below)
 ```
 
 The GPU comes from `ECC_GPU`, read when the file is imported and baked into the
@@ -783,14 +820,48 @@ The procedure, once:
 ```
 export ECC_GPU=RTX-PRO-6000 CURVE=131
 ./run.sh next-run-id                 # e.g. {"runId": 8000, "used": [...], ...}
-RUNID=8000 COUNT=4 PASSES=0 ./run.sh fanout      # run ids 8000-8003, until stopped
+RUNID=8000 COUNT=4 PASSES=0 ./run.sh fleet       # run ids 8000-8003, until stopped
 ```
 
-`run.sh` refuses `CURVE=131` without a `RUNID` in range; `fanout` takes it as
-the base of `COUNT` consecutive ids, and every pass of the loop launches the
-same ids so the checkpoints resume. Two operators must not both start from
-the same `next-run-id` answer at the same moment; the volume is the only
-arbiter, and it is read, not locked.
+`run.sh` refuses `CURVE=131` without a `RUNID` in range; `fleet` takes it as
+the base of `COUNT` consecutive ids, and every pass launches the same ids so
+the checkpoints resume. Two operators must not both start from the same
+`next-run-id` answer at the same moment; the volume is the only arbiter, and
+it is read, not locked.
+
+`fleet` deploys the app and drives it with `modal_campaign.py`, and that is
+the shape a campaign needs. `search` and `fanout` run inside an *ephemeral*
+app that Modal stops when the launching shell's connection drops -- on
+2026-09-21 four runners were terminated at 15:23Z that way while the shell
+kept drawing "Running (4/4 containers active)" for four hours -- and
+`--detach` keeps only the last spawned function alive. On the deployed app
+each pass is a call that runs to completion on its own; the driver records
+the call ids in `~/.ecc2k130-modal-campaign/calls.json`, re-attaches to the
+ones still running when it restarts (a second container on one run id would
+fight the first over its checkpoint), spawns the next pass the minute one
+returns, and cancels a call that is half an hour past its deadline.
+
+#### Walking on the container's CPUs too
+
+`CPU_THREADS=32 ./run.sh fleet` (or `ECC_CPU_THREADS` for `modal run`) also
+runs the host client on that many threads in every container, under run id
+`+1000` (8000 → 9000; GPU runs with a CPU walker take 8000-8999 so the pair
+stays in range). Same iteration function, same canonical key -- `validate`
+recovers planted logs through both backends -- so its points are ordinary
+campaign points, and `modal_sync.py` finds its corpus and checkpoint header
+like any run's. The image carries an x86-64-v3 (AVX2) and an x86-64-v4
+(AVX-512) host build; the walker picks v4 when `/proc/cpuinfo` has every flag
+it needs and runs `--test` on its choice before walking.
+
+What it buys, measured 2026-09-21 in an RTX PRO 6000 container: **12.4 M
+it/s per thread** at AVX-512 (49.4 M it/s on 4 threads over a 2-core
+request), against 14,750 M it/s from the GPU beside it. Modal bills CPU at
+`max(request, use)`, $0.047 per physical core-hour against $3.03 for the
+6000, so 32 threads (16 cores) add about **25% to the container's cost for
+about 2.7% more iterations** -- roughly ten times worse per dollar than the
+GPU. It is off by default. It is the right call where cores come with the
+box (`aws/enable-host-cpu.sh` on a g7e; a c7i via `aws/fleet-cpu.sh`), and
+a knowing one here.
 
 Retiring the runs that violated the rules (the state on 2026-09-21):
 
@@ -975,10 +1046,20 @@ run gets longer.
 
 Three things are saved.
 
-**The corpus.** `--dp-file F` appends 32-byte records of (seed, canonical orbit
-hash): fixed width, so a file can be counted with a stat, appended to by several
-writers and truncated by a dying container without becoming unparseable. A
-short trailing record is ignored rather than misread.
+**The corpus.** `--dp-file F` appends fixed-width records, so a file can be
+counted with a stat, appended to by several writers and truncated by a dying
+container without becoming unparseable. A short trailing record is ignored
+rather than misread.
+
+There are two formats. v1 is a headerless stream of 32-byte (seed, canonical
+orbit) records, which is what a `WITNESS=0` build writes and what every corpus
+written before the witness existed is. v2 leads with an `ECC2KDP2` magic and
+carries 72-byte records that add `iters` and the eight branch counts. The magic
+is what tells them apart -- framing on size alone would read a truncated v1 file
+as v2 and mis-frame every record after the first -- and a build will refuse to
+append one format to a non-empty file of the other rather than produce a file
+neither reader can frame. Both formats read back through `--load`, and
+`aws/merge.py` takes either.
 
 **Old points as live state.** `--load F` reads a corpus back into the store at
 startup, so a collision between today's walk and one from last week is found the

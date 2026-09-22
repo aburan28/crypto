@@ -574,11 +574,74 @@ ratio at 5.1 at 48 bits and wanted 315 targets, because it was measured
 on constants that have since moved three times.
 
 `docs/ic/params/k0n53-subgroup-wide.json` is the degree-53 rung on a
-36464-point compact base: the descent falls from 50.4 ms a target to
-16.3 ms and the charged ρ/IC ratio rises from 25.0 to 75.2, while the
-precompute rises from 16.5 s to 87.8 s. That is a trade, and
-`docs/ic/runs/koblitz-compact-pair-table-20260912.json` prices it — about
-2200 targets before the wider base is the cheaper one.
+36464-point base.  Its original compact-table measurement is retained in
+`docs/ic/runs/koblitz-compact-pair-table-20260912.json`: the descent fell
+from 50.4 ms a target to 16.3 ms, but precompute rose from 16.5 s to
+87.8 s.  That is a historical representation comparison; current
+`auto` pricing selects the folded table for this run.
+
+`docs/ic/params/k0n53-subgroup-one-unit.json` is the current same-host
+profile for that base.  A target-independent screen of public relation
+seeds found that seed 6 certifies every one of the 344 orbit columns in
+one 17000-probe unit.  Against the preceding seed-1/26000-probe profile,
+three alternating-order pairs gave median candidate/reference ratios of
+0.840 wall, 0.824 total core-seconds and 0.981 peak RSS; charged work fell
+to 19,363,000 summand scans and 588 verified relations.  The exact first
+complete prefix is trial 16689; the profile keeps a 311-probe cushion.
+
+The primary control is the single scalar-blind target in
+`docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json`:
+
+    target/release/ic workflow \
+      --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json \
+      --dir /tmp/k0n53-public-unknown
+
+The select report now exposes its native algebraic-construction counts:
+695 abscissae drawn, 344 lifts, 344 cofactor multiplications, 18,232
+Frobenius squarings and one rebuild.  Fresh and resumed materialisation
+report the same deterministic counts; process CPU, RSS and select wall
+remain charged separately.
+
+Public hash seed 53001 constructs no target scalar and supplies no
+factor-base logs; relation-derived logs recovered `7892094459170` and
+verified the published point in all five fresh runs.  The selected
+operational profile charges base materialisation, pair-table predicate
+construction, relation collection and verification, sparse linear
+algebra, descent, process CPU and peak RSS.  It won 4/5 whole-process
+wall comparisons, with medians of 1.380 s IC and 1.589 s rho, but IC
+alone still used 10.573 core-seconds.  The wall crossover is not a
+total-compute crossover.
+
+The parameter search is retained and charged separately rather than
+made free: 45 through-logs processes used 77.960 sequential wall-seconds,
+484.310 core-seconds and at most 106.9 MB RSS.  Charging that discovery
+to a first-ever single target gives 79.340 s wall and 494.883
+core-seconds on the IC side, so it does not cross rho.  The selected-run
+ratio applies only once the public profile is fixed; amortisation must
+name and count later targets explicitly.
+
+Adjacent factor-base widths and collection windows did not reduce the
+complete rank-producing core cost.  Reusing window scratch preserved
+every relation hash and scalar across eight matched pairs but was speed
+neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
+selection, validation and rejected diagnostics, the retained science
+campaign contains 101 processes, 311.140 sequential wall-seconds,
+1,159.243 core-seconds and a 139.9 MB maximum RSS.
+
+With `RAYON_NUM_THREADS=1`, five fresh scalar-blind repeats used a
+median 8.570 s for full IC against 1.599 s for rho: IC was 5.362 times
+slower, with 10.984 total process core-seconds, 68.5 MB peak RSS and a
+1.008 wall/core ratio.  A one-pass 2/4/6/8/10/12/14-thread diagnostic
+first crossed wall at eight threads; no thread count produced a
+single-target core crossover.  As a secondary amortisation control, the
+independent 32-target one-thread holdout spent 8.819 s in IC against
+32.916 s in rho, with 32/32 verified.  The batch result does not repair
+the single-target loss.
+
+`docs/ic/runs/koblitz-n53-one-unit-20260921.json` records the seed
+screen, discovery envelope, thread diagnostic, repeats, resources and
+remaining gate failures.  This is a bounded engineering improvement,
+not a SOTA claim.
 
 **`descent_summands`** lets the descent ask for a different number of
 summands than collection, which shares only the base and its pair table.
@@ -636,10 +699,28 @@ process (an r-adding walk with distinguished points, or the signed
 Frobenius walk on Koblitz curves).  Native counters — trials, pair-table
 probes, square roots, Artin–Schreier solves, pairs of the
 pairs-and-solve loop, multiply-subtracts of the elimination — are exact;
-the conversion to additions uses factors measured on the host at run
-time and recorded in the report, so a reader can re-convert.  The
-relation phase also carries its counting ceiling, `C(F+m−1, m)/#E`, and
-the measured yield against it.
+the conversion to additions uses the ratios **pinned in
+[`calibration.json`](calibration.json)**, so that two runs price
+identical native counts identically.
+
+That pinning is Round 4 (the note's §12).  Through Round 3 the factors
+were measured on the host at the start of each run, and the *ratios*
+between them drifted — a median of `1.08` and up to `3.70` for the same
+instance and unit across three ladders on one machine — which repriced
+rows that had done identical work by up to eight per cent and put a
+floor under every cross-run comparison the ledger makes.  Operation
+counts survive hardware, as `AGENTS.md` §6 requires; a conversion
+re-measured per run does not.  The host's factors are still taken and
+still reported, as `calibration_measured`, because they are the
+wall-clock practicality note and because a host that stops resembling
+the reference one should be visible — they simply price nothing.  An
+instance the table does not carry keeps them and says so in
+`calibration_pinned`, so a row priced the old way is never silent about
+it.  `tools/boundary_pin_calibration.py` regenerates the table as the
+median over a set of frozen runs.
+
+The relation phase also carries its counting ceiling, `C(F+m−1, m)/#E`,
+and the measured yield against it.
 
 Variants: Semaev `S₃` roots, direct subtraction and meet in the middle
 (`m = 2, 3`) on prime curves; `S₄` pairs-and-solve and meet in the
@@ -978,8 +1059,16 @@ against 3.3×.
 - `examples/m4_inversion_cost.rs` prices the `m = 4` arm's unbatched
   `FastCurve::add`: a Fermat inversion at **1300 ns** a `(k, l)` against
   `add_many`'s **68**, which is twelve times the lone-probe penalty the
-  note used to name as that arm's problem.  No shipped parameter set
-  asks for `m = 4`, so it is a correction rather than a change.
+  note used to name as that arm's problem.  The arm now batches that
+  inversion the way `m = 3` does, and the same harness measures the arm
+  itself: **1155.5 → 123 ns** a `(k, l)`, **9.4×**, with the 1030 ns
+  saved matching the Fermat inversion the binary measures alone.
+  Measured at `n = 61` where a target has no witnesses, because at
+  `n = 19` the `|F|`-long compact recovery each hit pays hides the whole
+  difference — 2452 against 2429, 1% apart.
+  `docs/ic/runs/koblitz-m4-batched-20260921.json` records it.  No
+  shipped parameter set asks for `m = 4`, so no `S` moves and no
+  scoreboard row follows: **engineering** by `AGENTS.md` §3.
 - The three bullets above are **stage diagnostics** (`AGENTS.md` §2):
   each prices one slice — a probe, a key, an inversion — so none is a
   speedup, and the ones that correct an earlier figure are

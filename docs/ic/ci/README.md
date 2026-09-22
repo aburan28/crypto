@@ -7,17 +7,27 @@ rungs, and gates the result against the reference in this directory. It is the
 CI form of the rule in `AGENTS.md` §2 that end-to-end speed is the measure of
 speed: nothing on this page is a stage number.
 
-| rung | base | `n` | log₂ r | targets | ρ/IC whole-process, v1 (dev) → v2 (runner) → v3 (dev) | crosses ρ e2e |
+| rung | base | `n` | log₂ r | targets | ρ/IC whole-process, v1 (dev) → v2 (runner) → v3 (dev) → v4 (dev) | crosses ρ e2e |
 |:--|:--|--:|--:|--:|:--|:--|
-| `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 0.03 → 0.04 → 0.03 | no |
-| `docs/ic/params/k0n41-subgroup.json` | subgroup, 5248 points | 41 | 39.0 | 32 | 2.70 → 2.23 → 1.79 | yes |
-| `docs/ic/params/k0n53-subgroup.json` | subgroup, 15264 points | 53 | 44.3 | 32 | 2.50 → 2.00 → 1.51 | yes |
+| `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 0.03 → 0.04 → 0.03 → 0.04 | no |
+| `docs/ic/params/k0n41-subgroup.json` | subgroup, 5248 points | 41 | 39.0 | 32 | 2.70 → 2.23 → 1.79 → 3.39 | yes |
+| `docs/ic/params/k0n53-subgroup.json` | subgroup, 15264 points | 53 | 44.3 | 32 | 2.50 → 2.00 → 1.51 → 3.00 | yes |
 
-**`ic-e2e-reference-v3.json`** is what the workflow gates against. It
-supersedes v2 because the pair-table tier is now chosen by a measured
-cost model rather than a fixed ladder
+**`ic-e2e-reference-v4.json`** is what the workflow gates against. It
+supersedes v3 because the workflow now computes its own probing volume
+and passes it to `PairSumTable::build_within_for`
+(`docs/ic/runs/koblitz-probe-volume-20260921.json`), so the tier is
+priced for the run being built rather than for the volume the cost model
+was calibrated at. All three rungs move to the **folded** tier: they
+probe between 1.45× and 1,266× less than that calibration volume, and
+less probing to amortise the build over is when the fold wins. Priced in
+group additions at each rung's own degree, that is 1.371× fewer
+operations at degree 41 and 1.229× at degree 53.
+
+v3 superseded v2 because the tier came to be chosen by a measured cost
+model rather than a fixed ladder
 (`docs/ic/runs/koblitz-tier-crossover-20260921.json`), and all three
-rungs build the **compact** tier where v2 built the full one.
+rungs built the **compact** tier where v2 built the full one.
 
 That change went through this gate undetected the first time, which is
 worth recording. Every pinned counter was identical, because

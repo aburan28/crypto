@@ -1,0 +1,38 @@
+{
+  "base_git_commit": "8421516e84b0c6978be3966a222ea6609c537e1a",
+  "end_to_end_metrics": null,
+  "evidence_type": "measured_local_solver_stage",
+  "hardware": {
+    "cpu_brand": null,
+    "cpu_count": 14,
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python": "3.14.3 (main, Mar  8 2026, 09:55:32) [Clang 17.0.0 (clang-1700.6.3.2)]"
+  },
+  "msolve_options": [
+    "-g",
+    "1",
+    "-v",
+    "2",
+    "-t",
+    "1",
+    "--random-seed",
+    "0"
+  ],
+  "msolve_path": "/opt/homebrew/bin/msolve",
+  "msolve_version": "0.9.5",
+  "processes": 276,
+  "repetitions": 3,
+  "sage": "10.9",
+  "source_hashes": {
+    "audit.py": "6dc0aab34f10bb526f6732e15db72fe3d38988bc8091c0b506bc90baf4583608",
+    "contract.json": "85e4e1343ea15f2dd8dbf114fe8f5871a35258e1227d90a77ed451a683c1e02d",
+    "radical_pair.py": "1d86ce9461fcea7d8a84c32473cded0a70d335014201441e5c7d387dff2d26f8",
+    "run.py": "e31df4625816149a7efb5b13da38fd544ae92b4851d9f110e9422deb7f30da42",
+    "summarize.py": "81a7cfe9781b36f118f722b6b732fdbbbd43a0a8838f5bcbb00ca8d20a6af115",
+    "test_radical_pair.py": "26a5951ebc476360de334fc262ecce9261929edc5afa408ac37fc2960fbdb961"
+  },
+  "status": "complete",
+  "timeout_seconds": 120.0
+}

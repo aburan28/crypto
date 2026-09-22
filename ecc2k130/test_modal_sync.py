@@ -66,8 +66,8 @@ class ModalSyncTests(unittest.TestCase):
 
     def test_modal_search_defaults_verify_off(self):
         src = Path(__file__).with_name("modal_app.py").read_text()
-        self.assertIn("verify: int = 0, checkpoint_every: int = 60, off_campaign: bool = False)", src)
-        self.assertIn("packed=False, verify=0,\n              offCampaign=False):", src)
+        self.assertIn("verify: int = 0, checkpoint_every: int = 60, off_campaign: bool = False,\n           cpu_threads: int = -1)", src)
+        self.assertIn("packed=False, verify=0,\n              offCampaign=False, cpuThreads=None):", src)
 
     # --- campaign admission: run ids -------------------------------------
 
