@@ -783,9 +783,14 @@
           <div class="num">0.72</div>
         </div>
         <div class="erow">
-          <div class="name">Linear algebra, large primes</div>
-          <div class="track"><i class="dot" style="left:47.7%" title="n^0.56"></i></div>
-          <div class="num">0.56</div>
+          <div class="name">Linear algebra, large primes <span class="chip">6 seeds</span></div>
+          <div class="track"><i class="dot" style="left:44.0%" title="n^0.516 +/- 0.027 (6 seeds); was n^0.56 on 2 seeds, no error bar"></i></div>
+          <div class="num">0.516</div>
+        </div>
+        <div class="erow">
+          <div class="name">Total, large primes, end to end <span class="chip">6 seeds</span></div>
+          <div class="track"><i class="dot" style="left:36.0%" title="n^0.424 +/- 0.016 (6 seeds); consistent with 4/9"></i></div>
+          <div class="num">0.424</div>
         </div>
         <div class="erow">
           <div class="name">Linear algebra, Wiedemann</div>
@@ -1136,9 +1141,35 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><strong>The large-prime variant wins too late.</strong> Its score falls as
         n<sup>&minus;1/18</sup>, so closing the measured factor of 1,987 takes roughly two hundred
         doublings of the group order.</p>
-      <p><strong>One loose end.</strong> Row weight doubles across the measured range, which pushes
-        the large-prime linear algebra to n<sup>0.56</sup>. Capping the merge level is the missing
-        piece.</p>
+      <p><strong>The loose end is closed, and the missing piece does not fit.</strong> This panel
+        said row weight doubling pushes the large-prime linear algebra to n<sup>0.56</sup> and that
+        &ldquo;capping the merge level is the missing piece&rdquo;. The cap was built and measured
+        over six seeds, paired so each seed is its own control &mdash; the fitted exponent moves by
+        0.04 between seeds, which is the size of the whole effect, and a two-seed version of this
+        comparison said the opposite of the truth. At k&thinsp;=&thinsp;12 the <em>solve</em>
+        exponent falls 0.045&thinsp;&plusmn;&thinsp;0.017 (2.6&sigma;, five seeds of six) and row
+        weight at p&thinsp;=&thinsp;2083 drops 20.93&thinsp;&rarr;&thinsp;11.89, exactly as
+        intended &mdash; and the eliminator's own work rises 0.043&thinsp;&plusmn;&thinsp;0.030,
+        cancelling it, so the linear algebra as a whole moves
+        &minus;0.009&thinsp;&plusmn;&thinsp;0.019, which is nothing. <strong>End to end the cap is
+        worse</strong>, +0.051&thinsp;&plusmn;&thinsp;0.031 on five seeds of six. Its cost is not
+        the 0.3&ndash;2% of relations it discards but the full relations that never form: yield per
+        residual falls to 0.64&times; at the two largest sizes against 0.95&times; at the smallest,
+        and <em>a yield loss that grows in n is a residual exponent that rises</em>. Mean merge
+        depth is flat across the ladder, so chains are not lengthening &mdash; the tail past the cap
+        thickens. Class <span class="chip">engineering</span>, negative; S is untouched, as the
+        pre-registration said in advance it would be
+        (<code>experiments/22_gaudry_merge_cap_uncapped.json</code>,
+        <code>&hellip;_k12.json</code>; &sect;&sect;11.10&ndash;11.11).</p>
+      <p><strong>And the exponent it was built to fix was never pinned.</strong> The
+        n<sup>0.56</sup> above is a two-seed figure quoted without an error bar. Six seeds give
+        <strong>0.516&thinsp;&plusmn;&thinsp;0.027</strong> &mdash; still 2.7&sigma; above 4/9, so
+        the concern was real &mdash; and 0.56 sits inside a two-seed
+        &plusmn;0.046. Meanwhile the <em>end-to-end</em> exponent is
+        0.424&thinsp;&plusmn;&thinsp;0.016, consistent with 4/9: the large-prime variant does reach
+        n<sup>4/9</sup> over this ladder, because its linear algebra is about 2% of the cost. The
+        higher linear-algebra exponent bites only near 2<sup>98</sup>, and capping the merge level
+        is not how to meet it there.</p>
       <p><strong>A bigger field is not a lever.</strong> Base-changing ECC2K-130 to
         F<sub>2</sub><sup>131e</sup> leaves the target group and its 262 automorphisms untouched, so
         the reference stays 2<sup>60.81</sup> at every e. Because 131 is prime, every subfield and
