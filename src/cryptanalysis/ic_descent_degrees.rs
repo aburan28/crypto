@@ -46,6 +46,8 @@
 //! | `D_pair` | mean highest degree of a pair *processed*, which Buchberger's strategy pushes above the solving degree |
 //! | `D_sr` | the semi-regular degree of a system with the same equation degrees — the derived bound `D_av` is measured against |
 //! | `ops` | monomial operations, the metric |
+//! | `enumerate` | the reference in the same unit: evaluating every equation at every point of the subspace |
+//! | `ops/enum` | above one means the Gröbner basis costs more than enumerating |
 //! | `ms` | wall time, the practicality note |
 //! | `KiB` | the engine's own peak footprint: monomials held × 8 bytes |
 //!
@@ -130,6 +132,16 @@ pub struct DescentCell {
     /// The metric: monomial operations per target.
     pub mono_ops_mean: f64,
     pub mono_ops_max: u64,
+    /// **The reference**, in the same unit: what it costs to solve the
+    /// same problem by evaluating every equation at every point of the
+    /// subspace, `2^vars · Σ_i |terms_i|` monomial tests.  `AGENTS.md`
+    /// §1 asks a method to be priced against the best algorithm that
+    /// already solves the problem, and at these sizes that is
+    /// exhaustive search.
+    pub brute_force_ops: f64,
+    /// `mono_ops_mean / brute_force_ops`.  Above one means the Gröbner
+    /// basis costs more than enumerating the subspace.
+    pub ops_over_brute_force: f64,
     pub spolys_mean: f64,
     pub basis_len_mean: f64,
     /// The practicality note, never the metric.
@@ -203,6 +215,7 @@ pub fn price_descent_cell(
 
     let mut runs: Vec<TargetRun> = Vec::with_capacity(targets);
     let mut bounds: Vec<Option<u32>> = Vec::new();
+    let mut brute: Vec<f64> = Vec::new();
     let mut n_vars = 0usize;
     let mut equations = 0usize;
 
@@ -224,6 +237,10 @@ pub fn price_descent_cell(
         equations = eqs.len();
         // The derived bound, on the same equations the run will solve.
         bounds.push(semi_regular_degree_of(&eqs, vars));
+        // The reference: evaluate every equation at every point of the
+        // subspace.  One monomial test per term per point.
+        let terms: usize = eqs.iter().map(|p| p.terms.len()).sum();
+        brute.push((terms as f64) * 2f64.powi(vars as i32));
         let (gb, stats) = groebner_basis_f2_stats(eqs, vars);
         let inconsistent = gb.len() == 1 && gb[0].terms.len() == 1 && gb[0].terms[0].degree() == 0;
         runs.push(TargetRun { stats, inconsistent });
@@ -232,6 +249,8 @@ pub fn price_descent_cell(
     let seen: Vec<u32> = bounds.iter().filter_map(|f| *f).collect();
     let d_semireg_min = seen.iter().copied().min();
     let d_av = mean(runs.iter().map(|r| r.stats.solving_degree as f64));
+    let ops_mean = mean(runs.iter().map(|r| r.stats.mono_ops as f64));
+    let brute_mean = mean(brute.iter().copied());
     Some(DescentCell {
         family: family.into(),
         curve: inst.name.clone(),
@@ -252,7 +271,9 @@ pub fn price_descent_cell(
         d_semireg_max: seen.iter().copied().max(),
         d_semireg_unbounded: bounds.iter().filter(|f| f.is_none()).count(),
         d_av_over_semireg: d_semireg_min.map(|f| d_av / f as f64),
-        mono_ops_mean: mean(runs.iter().map(|r| r.stats.mono_ops as f64)),
+        mono_ops_mean: ops_mean,
+        brute_force_ops: brute_mean,
+        ops_over_brute_force: ops_mean / brute_mean,
         mono_ops_max: runs.iter().map(|r| r.stats.mono_ops).max().unwrap_or(0),
         spolys_mean: mean(runs.iter().map(|r| r.stats.spolys as f64)),
         basis_len_mean: mean(runs.iter().map(|r| r.stats.basis_len as f64)),
@@ -345,8 +366,8 @@ fn semi_regular_degree_of(
 /// The table, in the shape of Petit–Quisquater's Table 2.
 pub fn format_markdown(cells: &[DescentCell]) -> String {
     let mut out = String::new();
-    out.push_str("| E | n | n' | m | vars | eqs | D_av | D_max | D_pair | D_sr | D_av/D_sr | ops | ms | KiB | no decomp |\n");
-    out.push_str("|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|\n");
+    out.push_str("| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum | ms | KiB | no decomp |\n");
+    out.push_str("|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|\n");
     for c in cells {
         let bound = match (c.d_semireg_min, c.d_semireg_max) {
             (Some(a), Some(b)) if a == b => format!("{a}"),
@@ -358,7 +379,7 @@ pub fn format_markdown(cells: &[DescentCell]) -> String {
             None => "—".into(),
         };
         out.push_str(&format!(
-            "| {} | {} | {} | {} | {} | {} | {:.1} | {} | {:.1} | {} | {} | {:.3e} | {:.1} | {:.0} | {}/{} |\n",
+            "| {} | {} | {} | {} | {} | {} | {:.1} | {:.1} | {} | {} | {:.3e} | {:.3e} | {:.1}x | {:.1} | {:.0} | {}/{} |\n",
             c.family,
             c.n,
             c.n_prime,
@@ -366,11 +387,12 @@ pub fn format_markdown(cells: &[DescentCell]) -> String {
             c.n_vars,
             c.equations,
             c.d_av,
-            c.d_max,
             c.d_pair_av,
             bound,
             ratio,
             c.mono_ops_mean,
+            c.brute_force_ops,
+            c.ops_over_brute_force,
             c.ms_mean,
             c.peak_kib_max,
             c.inconsistent,
@@ -417,6 +439,47 @@ mod tests {
             assert_eq!(cell.n_vars, 6);
             assert_eq!(cell.family, family);
         }
+    }
+
+    /// **The pruning must not lose a solution.**  The chain criterion
+    /// skips S-polynomials on the argument that they cannot contribute;
+    /// that argument is standard, but it is being applied here to the
+    /// systems this table measures, so it is checked on them: the
+    /// variety of the Gröbner basis must equal the variety of the
+    /// original equations, computed by enumerating every point of the
+    /// subspace.  A criterion that dropped a needed pair would show up
+    /// as a basis with solutions the system does not have, or the
+    /// reverse.
+    #[test]
+    fn the_pruned_basis_has_exactly_the_solutions_the_system_has() {
+        use crate::cryptanalysis::pq_descent::weil_descend_s3;
+        use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_stats, solve_system_f2};
+
+        let inst = instance_for("K", 11, 5).expect("K_1 over GF(2^11)");
+        let curve = curve_of(&inst).unwrap();
+        let v_basis = standard_basis(11, 5);
+        let mut rng = StdRng::seed_from_u64(20260922);
+        let mut consistent = 0;
+        for _ in 0..6 {
+            let x_r = inst.gf.to_element(rng.gen::<u64>() & inst.gf.mask);
+            let sys = weil_descend_s3(&curve, &x_r, &v_basis);
+            let (gb, _) = groebner_basis_f2_stats(sys.equations.clone(), sys.n_vars);
+            let from_basis: std::collections::HashSet<u64> =
+                solve_system_f2(&gb, sys.n_vars).into_iter().collect();
+            // Every point of the subspace, checked against the original
+            // equations rather than the basis.
+            let direct: std::collections::HashSet<u64> = (0..1u64 << sys.n_vars)
+                .filter(|v| sys.equations.iter().all(|e| e.eval(*v) == 0))
+                .collect();
+            assert_eq!(from_basis, direct, "the pruned basis changed the variety");
+            if !direct.is_empty() {
+                consistent += 1;
+            }
+        }
+        assert!(
+            consistent > 0,
+            "every target was inconsistent; the fixture proves only that {{1}} has no roots"
+        );
     }
 
     /// The series is short enough to divide by hand, so it is:
