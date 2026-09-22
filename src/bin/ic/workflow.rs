@@ -103,6 +103,18 @@ fn baseline_is_default(b: &BaselineParams) -> bool {
     let d = BaselineParams::default();
     !b.rho && b.rho_seed == d.rho_seed && b.rho_max_iterations == d.rho_max_iterations
 }
+fn is_zero_u64(v: &u64) -> bool {
+    *v == 0
+}
+fn is_zero_usize(v: &usize) -> bool {
+    *v == 0
+}
+fn default_targeted_tail_seed() -> u64 {
+    0x5441_5247_4554_5901
+}
+fn is_default_targeted_tail_seed(v: &u64) -> bool {
+    *v == default_targeted_tail_seed()
+}
 
 fn evidence_scope(p: &WorkflowParams) -> &'static str {
     let public = p
@@ -230,6 +242,11 @@ pub struct LinearAlgebraParams {
 }
 
 /// Relation collection in work units.
+///
+/// The targeted-tail fields are left out of the canonical JSON while
+/// they hold their defaults. `params_digest` hashes that JSON, so a
+/// run directory written before the tail existed still matches a
+/// parameter file that leaves the tail disabled.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct CollectionParams {
@@ -242,10 +259,13 @@ pub struct CollectionParams {
     pub max_units: usize,
     /// Direct pair lookups per uncovered projected column and targeted
     /// round. Zero disables the targeted tail.
+    #[serde(skip_serializing_if = "is_zero_u64")]
     pub targeted_tail_trials: u64,
     /// Targeted rounds allowed before falling back to ordinary units.
+    #[serde(skip_serializing_if = "is_zero_usize")]
     pub targeted_tail_rounds: usize,
     /// Independent probe-sequence domain for the targeted tail.
+    #[serde(skip_serializing_if = "is_default_targeted_tail_seed")]
     pub targeted_tail_seed: u64,
 }
 impl Default for CollectionParams {
@@ -256,7 +276,7 @@ impl Default for CollectionParams {
             max_units: 64,
             targeted_tail_trials: 0,
             targeted_tail_rounds: 0,
-            targeted_tail_seed: 0x5441_5247_4554_5901,
+            targeted_tail_seed: default_targeted_tail_seed(),
         }
     }
 }
@@ -564,6 +584,27 @@ pub struct TargetedTailAttempt {
     pub pair_lookups: u64,
     pub relations: Vec<CollectedRelation>,
     pub elapsed_seconds: f64,
+}
+
+/// Uncovered columns that still need an attempt in `round`.
+///
+/// A round persists one column at a time. Columns already stored for
+/// that round are finished; columns absent from `attempts` are the
+/// remainder of a crashed round and keep that round's seed window.
+fn pending_targeted_columns(
+    attempts: &[TargetedTailAttempt],
+    round: usize,
+    uncovered: &[usize],
+) -> Vec<usize> {
+    uncovered
+        .iter()
+        .copied()
+        .filter(|column| {
+            !attempts
+                .iter()
+                .any(|attempt| attempt.round == round && attempt.column == *column)
+        })
+        .collect()
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -1438,18 +1479,18 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             }
             let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
                 .ok_or("factor base cannot collect a targeted tail")?;
-            let first_round = targeted_tail
-                .attempts
-                .iter()
-                .map(|attempt| attempt.round)
-                .max()
-                .map_or(0, |round| round + 1);
-            'rounds: for round in first_round..p.collection.targeted_tail_rounds {
+            // Walk every round from the start and skip pairs already on
+            // disk. `max(round) + 1` would treat a partially written
+            // round as complete, so its remaining columns would miss
+            // that seed window and, on the last round, never be targeted.
+            'rounds: for round in 0..p.collection.targeted_tail_rounds {
                 let uncovered = solver.uncovered_columns();
                 if uncovered.is_empty() {
                     break;
                 }
-                for column in uncovered {
+                let pending =
+                    pending_targeted_columns(&targeted_tail.attempts, round, &uncovered);
+                for column in pending {
                     let fixed_point_index = projected
                         .factor_point_for_column(column)
                         .ok_or("uncovered projected column has no factor-base point")?;
@@ -1985,6 +2026,68 @@ mod tests {
         p.descent_summands = Some(2);
         p.targets = (0..targets).map(|i| serde_json::from_value(json!({"random_seed": i})).unwrap()).collect();
         p
+    }
+
+    #[test]
+    fn a_disabled_targeted_tail_keeps_the_pre_tail_parameter_digest() {
+        let without = json!({
+            "schema_version": 1,
+            "curve": {"degree": 19, "curve_a": 0},
+            "factor_base": {"mode": "spec", "spec": {"kind": "factor", "index": 0}},
+            "collection": {"unit_trials": 128, "units": 2, "max_units": 8}
+        });
+        let mut explicit_defaults = without.clone();
+        explicit_defaults["collection"]["targeted_tail_trials"] = json!(0);
+        explicit_defaults["collection"]["targeted_tail_rounds"] = json!(0);
+        explicit_defaults["collection"]["targeted_tail_seed"] = json!(default_targeted_tail_seed());
+        let older: WorkflowParams = serde_json::from_value(without).unwrap();
+        let explicit: WorkflowParams = serde_json::from_value(explicit_defaults).unwrap();
+        assert_eq!(params_digest(&older), params_digest(&explicit));
+        let canonical: Value = serde_json::from_slice(&serde_json::to_vec(&older).unwrap()).unwrap();
+        assert!(canonical["collection"].get("targeted_tail_trials").is_none());
+        assert!(canonical["collection"].get("targeted_tail_rounds").is_none());
+        assert!(canonical["collection"].get("targeted_tail_seed").is_none());
+
+        let mut enabled = explicit;
+        enabled.collection.targeted_tail_trials = 4;
+        enabled.collection.targeted_tail_rounds = 2;
+        assert_ne!(params_digest(&older), params_digest(&enabled));
+        let enabled_json: Value = serde_json::from_slice(&serde_json::to_vec(&enabled).unwrap()).unwrap();
+        assert_eq!(enabled_json["collection"]["targeted_tail_trials"], 4);
+        assert_eq!(enabled_json["collection"]["targeted_tail_rounds"], 2);
+        assert!(enabled_json["collection"].get("targeted_tail_seed").is_none());
+        enabled.collection.targeted_tail_seed = 1;
+        let seeded: Value = serde_json::from_slice(&serde_json::to_vec(&enabled).unwrap()).unwrap();
+        assert_eq!(seeded["collection"]["targeted_tail_seed"], 1);
+    }
+
+    fn tail_attempt(round: usize, column: usize) -> TargetedTailAttempt {
+        TargetedTailAttempt {
+            round,
+            column,
+            fixed_point_index: column,
+            seed: 0,
+            start: 0,
+            count: 1,
+            pair_lookups: 1,
+            relations: Vec::new(),
+            elapsed_seconds: 0.0,
+        }
+    }
+
+    #[test]
+    fn resume_retries_uncovered_columns_left_out_of_a_crashed_round() {
+        let attempts = vec![tail_attempt(1, 0), tail_attempt(1, 2)];
+        let uncovered = vec![0, 2, 4];
+        // Earlier rounds that never ran for these columns are still due.
+        assert_eq!(pending_targeted_columns(&attempts, 0, &uncovered), vec![0, 2, 4]);
+        // The crashed round keeps only the column that was not persisted.
+        assert_eq!(pending_targeted_columns(&attempts, 1, &uncovered), vec![4]);
+        // A later round has no attempts, so every uncovered column is due.
+        assert_eq!(pending_targeted_columns(&attempts, 2, &uncovered), uncovered);
+        // A column covered by an earlier attempt in this round is absent
+        // from `uncovered` and is not targeted again.
+        assert!(pending_targeted_columns(&attempts, 1, &[0, 2]).is_empty());
     }
 
     #[test]
