@@ -131,7 +131,11 @@ impl InheritCost {
 struct LayoutStep {
     /// Words per row in the epoch this step maps *from*.
     from_words: usize,
-    map: Vec<Option<u32>>,
+    map: Rc<[Option<u32>]>,
+    /// Composed maps from earlier epochs to the epoch this step maps *to*,
+    /// built on demand.  Shared with every basis below this step, so a
+    /// child composes one step on top of what its parent already built.
+    to_here: RefCell<HashMap<u32, Rc<[Option<u32>]>>>,
 }
 
 /// A basis row: its content, valid in the layout of epoch `version`.
@@ -142,7 +146,7 @@ struct LayoutStep {
 #[derive(Clone, Debug)]
 struct LazyRow {
     version: u32,
-    data: Rc<[u64]>,
+    data: Rc<Vec<u64>>,
 }
 
 /// The reduced degree-`degree` Macaulay row space of a system, kept as an
@@ -172,14 +176,13 @@ pub struct ReducedBasis {
     assigned: u64,
     /// Column monomials of the current layout, in descending order.
     columns: Vec<u64>,
-    column_index: HashMap<u64, usize>,
+    /// Monomial → column, built only when a row has to be packed from
+    /// monomials (completion), which most levels never do.
+    column_index: Option<HashMap<u64, usize>>,
     words: usize,
     /// Layout steps since the root: `history[e]` maps epoch `e` to `e + 1`.
     /// The current epoch is `history.len()`.
     history: Vec<Rc<LayoutStep>>,
-    /// Composed maps from an older epoch to the current one, built on
-    /// demand for the epochs that still have live rows.
-    composites: RefCell<HashMap<u32, Rc<[Option<u32>]>>>,
     /// Echelon rows; every row is nonzero and their leading columns are
     /// pairwise distinct.
     rows: Vec<LazyRow>,
@@ -218,12 +221,11 @@ impl ReducedBasis {
             system: system.clone(),
             generator_degrees: generator_degrees.clone(),
             assigned: 0,
-            column_index: columns.iter().enumerate().map(|(i, &m)| (m, i)).collect(),
+            column_index: None,
             words: columns.len().div_ceil(64).max(1),
             pivot_of: vec![None; columns.len()],
             columns,
             history: Vec::new(),
-            composites: RefCell::new(HashMap::new()),
             rows: Vec::new(),
             pivot_col: Vec::new(),
         };
@@ -260,10 +262,19 @@ impl ReducedBasis {
             out.pivot_col.push(c as u32);
             out.rows.push(LazyRow {
                 version: 0,
-                data: row.into(),
+                data: Rc::new(row),
             });
         }
         Some((out, cost))
+    }
+
+    /// Monomial → current column, built on first use after a layout change.
+    fn column_index(&mut self) -> &HashMap<u64, usize> {
+        if self.column_index.is_none() {
+            self.column_index =
+                Some(self.columns.iter().enumerate().map(|(i, &m)| (m, i)).collect());
+        }
+        self.column_index.as_ref().expect("just built")
     }
 
     /// Variables specialised away since the root, as a mask.
@@ -300,31 +311,38 @@ impl ReducedBasis {
             .unwrap_or(self.columns.len())
     }
 
-    /// The composed map from the columns of epoch `from` to the current
-    /// layout.  Built once per epoch that still has a live row and shared
-    /// by every row of that epoch; index bookkeeping, not charged, as the
-    /// from-scratch path's column indexing never was.
-    fn composite(&self, from: u32) -> Rc<[Option<u32>]> {
-        if let Some(c) = self.composites.borrow().get(&from) {
+    /// The composed map from the columns of epoch `from` to those of epoch
+    /// `to`.  Memoised on the step that maps into `to`, which every basis
+    /// below that step shares, so a node composes at most one step on top
+    /// of what its ancestors already built.  Index bookkeeping, not
+    /// charged, as the from-scratch path's column indexing never was.
+    fn composite_to(&self, to: u32, from: u32) -> Rc<[Option<u32>]> {
+        debug_assert!(from < to);
+        let step = &self.history[(to - 1) as usize];
+        if from + 1 == to {
+            return step.map.clone();
+        }
+        if let Some(c) = step.to_here.borrow().get(&from) {
             return c.clone();
         }
-        let step = &self.history[from as usize];
-        let composed: Rc<[Option<u32>]> = if from + 1 == self.epoch() {
-            step.map.clone().into()
-        } else {
-            let next = self.composite(from + 1);
-            step.map
-                .iter()
-                .map(|c| c.and_then(|c| next[c as usize]))
-                .collect()
-        };
-        self.composites.borrow_mut().insert(from, composed.clone());
+        let prev = self.composite_to(to - 1, from);
+        let composed: Rc<[Option<u32>]> = prev
+            .iter()
+            .map(|c| c.and_then(|c| step.map[c as usize]))
+            .collect();
+        step.to_here.borrow_mut().insert(from, composed.clone());
         composed
+    }
+
+    /// The composed map from the columns of epoch `from` to the current
+    /// layout.
+    fn composite(&self, from: u32) -> Rc<[Option<u32>]> {
+        self.composite_to(self.epoch(), from)
     }
 
     /// Rewrite `row` from the layout of epoch `version` into the current
     /// one.  Charged one word operation per word read and per word written.
-    fn materialised(&self, row: &LazyRow, cost: &mut InheritCost) -> Rc<[u64]> {
+    fn materialised(&self, row: &LazyRow, cost: &mut InheritCost) -> Rc<Vec<u64>> {
         debug_assert!(row.version < self.epoch());
         let map = self.composite(row.version);
         let from_words = self.history[row.version as usize].from_words;
@@ -340,7 +358,7 @@ impl ReducedBasis {
             }
         }
         cost.specialise_word_ops += (from_words + self.words) as u64;
-        out.into()
+        Rc::new(out)
     }
 
     /// Bring row `r` into the current layout if it is not there yet.
@@ -362,7 +380,7 @@ impl ReducedBasis {
     }
 
     /// Row `r`'s content in the current layout, materialising it if needed.
-    fn current_row(&mut self, r: usize, cost: &mut InheritCost) -> Rc<[u64]> {
+    fn current_row(&mut self, r: usize, cost: &mut InheritCost) -> Rc<Vec<u64>> {
         self.ensure_current(r, cost);
         self.rows[r].data.clone()
     }
@@ -402,7 +420,7 @@ impl ReducedBasis {
                     }
                     *row = LazyRow {
                         version: epoch,
-                        data: data.into(),
+                        data: Rc::new(data),
                     };
                     cost.reduce_word_ops += (words - w) as u64;
                     cost.rref_word_ops += (words - w) as u64;
@@ -450,7 +468,7 @@ impl ReducedBasis {
                     self.pivot_col.push(c as u32);
                     self.rows.push(LazyRow {
                         version: self.epoch(),
-                        data: row.into(),
+                        data: Rc::new(row),
                     });
                     return;
                 }
@@ -463,9 +481,10 @@ impl ReducedBasis {
     fn adopt_layout(&mut self, columns: Vec<u64>, map: Vec<Option<u32>>) {
         let step = LayoutStep {
             from_words: self.words,
-            map,
+            map: map.into(),
+            to_here: RefCell::new(HashMap::new()),
         };
-        self.column_index = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
+        self.column_index = None;
         self.words = columns.len().div_ceil(64).max(1);
         self.pivot_of = vec![None; columns.len()];
         for (r, pc) in self.pivot_col.iter_mut().enumerate() {
@@ -476,7 +495,6 @@ impl ReducedBasis {
         }
         self.columns = columns;
         self.history.push(Rc::new(step));
-        self.composites.borrow_mut().clear();
     }
 
     /// The basis of `system|_{var = value}`: the kept rows shared by
@@ -503,38 +521,98 @@ impl ReducedBasis {
         let mut cost = InheritCost::default();
         let bit = 1u64 << var;
 
-        // New system.
-        let system: Vec<F2BoolPoly> = self
-            .system
-            .iter()
-            .map(|p| substitute(p, var, value))
-            .filter(|p| !p.is_zero())
-            .collect();
-        let new_degrees: Vec<u32> = system.iter().map(poly_degree).collect();
+        // New system, with each survivor's degree before and after.
+        let mut system = Vec::with_capacity(self.system.len());
+        let mut new_degrees = Vec::with_capacity(self.system.len());
+        let mut dropped: Vec<(usize, u32, u32)> = Vec::new();
+        for (p, &old_degree) in self.system.iter().zip(&self.generator_degrees) {
+            let q = substitute(p, var, value);
+            if q.is_zero() {
+                continue;
+            }
+            let new_degree = poly_degree(&q);
+            if new_degree != 0 && new_degree < old_degree && old_degree <= self.degree {
+                dropped.push((system.len(), old_degree, new_degree));
+            }
+            system.push(q);
+            new_degrees.push(new_degree);
+        }
 
-        // New column layout: images of the old columns.
-        let mut new_columns: Vec<u64> = self
-            .columns
-            .iter()
-            .filter(|&&m| value || m & bit == 0)
-            .map(|&m| m & !bit)
-            .collect();
-        new_columns.sort_unstable();
-        new_columns.dedup();
-        new_columns.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
-        let new_index: HashMap<u64, usize> =
-            new_columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
-        let map: Vec<Option<u32>> = self
-            .columns
-            .iter()
-            .map(|&m| {
-                if !value && m & bit != 0 {
-                    None
-                } else {
-                    Some(new_index[&(m & !bit)] as u32)
+        // New column layout: the images of the old columns.  Deleting the
+        // columns that contain `v` keeps the rest in order; folding
+        // `m ∋ v ↦ m ∖ v` keeps the folded ones in order among themselves
+        // (every degree drops by one, and the symmetric difference of two
+        // of them is unchanged), so the new layout is a merge of two sorted
+        // lists and the old → new map falls out of the merge.
+        let n_old = self.columns.len();
+        let mut map: Vec<Option<u32>> = vec![None; n_old];
+        let mut new_columns: Vec<u64> = Vec::with_capacity(n_old);
+        if value {
+            let (mut i, mut j) = (0usize, 0usize);
+            let next_keep = |i: &mut usize| -> Option<usize> {
+                while *i < n_old && self.columns[*i] & bit != 0 {
+                    *i += 1;
                 }
-            })
-            .collect();
+                (*i < n_old).then_some(*i)
+            };
+            let next_fold = |j: &mut usize| -> Option<usize> {
+                while *j < n_old && self.columns[*j] & bit == 0 {
+                    *j += 1;
+                }
+                (*j < n_old).then_some(*j)
+            };
+            loop {
+                let k = next_keep(&mut i);
+                let f = next_fold(&mut j);
+                let target = new_columns.len() as u32;
+                match (k, f) {
+                    (None, None) => break,
+                    (Some(k), None) => {
+                        new_columns.push(self.columns[k]);
+                        map[k] = Some(target);
+                        i += 1;
+                    }
+                    (None, Some(f)) => {
+                        new_columns.push(self.columns[f] & !bit);
+                        map[f] = Some(target);
+                        j += 1;
+                    }
+                    (Some(k), Some(f)) => {
+                        let (mk, mf) = (self.columns[k], self.columns[f] & !bit);
+                        match cmp_mono(F2BoolMono::from_mask(mk), F2BoolMono::from_mask(mf)) {
+                            std::cmp::Ordering::Greater => {
+                                new_columns.push(mk);
+                                map[k] = Some(target);
+                                i += 1;
+                            }
+                            std::cmp::Ordering::Less => {
+                                new_columns.push(mf);
+                                map[f] = Some(target);
+                                j += 1;
+                            }
+                            std::cmp::Ordering::Equal => {
+                                new_columns.push(mk);
+                                map[k] = Some(target);
+                                map[f] = Some(target);
+                                i += 1;
+                                j += 1;
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            for (k, &m) in self.columns.iter().enumerate() {
+                if m & bit == 0 {
+                    map[k] = Some(new_columns.len() as u32);
+                    new_columns.push(m);
+                }
+            }
+        }
+        debug_assert!(new_columns.windows(2).all(|w| {
+            cmp_mono(F2BoolMono::from_mask(w[0]), F2BoolMono::from_mask(w[1]))
+                == std::cmp::Ordering::Greater
+        }));
 
         // The child starts as a copy of the parent's bookkeeping — rows by
         // reference — minus the displaced rows, then adopts the new layout.
@@ -542,13 +620,12 @@ impl ReducedBasis {
             degree: self.degree,
             n_vars: self.n_vars,
             system,
-            generator_degrees: new_degrees.clone(),
+            generator_degrees: new_degrees,
             assigned: self.assigned | bit,
             columns: self.columns.clone(),
-            column_index: HashMap::new(),
+            column_index: None,
             words: self.words,
             history: self.history.clone(),
-            composites: RefCell::new(HashMap::new()),
             rows: Vec::with_capacity(self.rows.len()),
             pivot_col: Vec::with_capacity(self.rows.len()),
             pivot_of: Vec::new(),
@@ -569,7 +646,7 @@ impl ReducedBasis {
         for row in displaced {
             let image = out.materialised(&row, &mut cost);
             if image.iter().any(|&w| w != 0) {
-                out.insert(image.to_vec(), &mut cost);
+                out.insert(Rc::try_unwrap(image).unwrap_or_else(|rc| (*rc).clone()), &mut cost);
             }
         }
 
@@ -578,26 +655,16 @@ impl ReducedBasis {
         // system (the from-scratch step's own active-multiplier policy):
         // a multiplier containing a variable that occurs nowhere adds only
         // rows `x·g` that cannot reach the linear tail.
-        let multiplier_mask = out
-            .system
-            .iter()
-            .flat_map(|p| p.terms.iter())
-            .fold(0u64, |acc, t| acc | t.mask)
-            & all_variable_mask(out.n_vars);
-        let mut completion: Vec<Vec<u64>> = Vec::new();
-        {
-            // Pair each surviving generator with its pre-specialisation degree.
-            let mut old = self
+        if !dropped.is_empty() {
+            let multiplier_mask = out
                 .system
                 .iter()
-                .zip(&self.generator_degrees)
-                .map(|(p, &d)| (substitute(p, var, value), d))
-                .filter(|(p, _)| !p.is_zero());
-            for (p, &new_degree) in out.system.iter().zip(&new_degrees) {
-                let (_, old_degree) = old.next().expect("systems align");
-                if new_degree == 0 || new_degree >= old_degree || old_degree > self.degree {
-                    continue;
-                }
+                .flat_map(|p| p.terms.iter())
+                .fold(0u64, |acc, t| acc | t.mask)
+                & all_variable_mask(out.n_vars);
+            let mut completion: Vec<Vec<u64>> = Vec::new();
+            for &(index, old_degree, new_degree) in &dropped {
+                let p = &out.system[index];
                 let old_gap = self.degree - old_degree;
                 let new_gap = self.degree - new_degree;
                 for t in monomials_up_to_mask(multiplier_mask, new_gap) {
@@ -623,17 +690,19 @@ impl ReducedBasis {
                     }
                 }
             }
-        }
-        if !completion.is_empty() {
-            out.extend_columns(&completion);
-            cost.completion_rows = completion.len() as u64;
-            for monos in completion {
-                let mut row = vec![0u64; out.words];
-                for m in monos {
-                    let c = out.column_index[&m];
-                    row[c / 64] |= 1u64 << (c % 64);
+            if !completion.is_empty() {
+                out.extend_columns(&completion);
+                cost.completion_rows = completion.len() as u64;
+                for monos in completion {
+                    let words = out.words;
+                    let index = out.column_index();
+                    let mut row = vec![0u64; words];
+                    for m in monos {
+                        let c = index[&m];
+                        row[c / 64] |= 1u64 << (c % 64);
+                    }
+                    out.insert(row, &mut cost);
                 }
-                out.insert(row, &mut cost);
             }
         }
         let every = Self::rref_every();
@@ -647,11 +716,12 @@ impl ReducedBasis {
     /// the descending column order.  A layout step like any other: rows
     /// are not touched.
     fn extend_columns(&mut self, rows_monos: &[Vec<u64>]) {
+        let index = self.column_index();
         let mut missing: Vec<u64> = rows_monos
             .iter()
             .flatten()
             .copied()
-            .filter(|m| !self.column_index.contains_key(m))
+            .filter(|m| !index.contains_key(m))
             .collect();
         if missing.is_empty() {
             return;
