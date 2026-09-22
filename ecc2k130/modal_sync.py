@@ -19,8 +19,8 @@ are indistinguishable from good points and cost the campaign silently:
     holds under the same seed -- dropped by ON CONFLICT, not a collision, not
     on the page. Runs 1-4 did this against slots 0-3 on 2026-09-19/20. The
     bucket is asked for evidence of the slot (a checkpoint or a dp object) and
-    the id is also required to sit in the Modal range, which no AWS slot can
-    reach.
+    the id is also required to sit in the Modal range. The shared seed
+    registry at launch, not this numeric convention, prevents concurrent reuse.
   * A run whose iterations-per-point says it is not walking at the campaign's
     cutoff. Walks stop at their own distinguished point, so a weight-34 walk
     meeting a weight-32 walk is recorded about 12% of the time and a

@@ -44,7 +44,8 @@ class Clock:
 
 def finished(dp=10, solved=None, cpu=None):
     return {"gpu": "RTX PRO 6000", "distinguishedPoints": dp, "rate": 14600.0,
-            "iterations": 4 * 10 ** 12, "stopped": "deadline", "solved": solved, "cpu": cpu}
+            "iterations": 4 * 10 ** 12, "stopped": "deadline", "solved": solved, "cpu": cpu,
+            "checkpoint": "/data/ckpt/curve131-run8000.ck"}
 
 
 class DriverTests(unittest.TestCase):
@@ -94,24 +95,52 @@ class DriverTests(unittest.TestCase):
         self.assertEqual(mc.load_state(self.state)["8000"], {"call_id": cid, "spawned_at": 1000.0, "pass": 2})
         self.assertTrue(any("1234 dp" in line for line in self.logged))
 
-    def test_a_failed_pass_is_respawned_and_said_out_loud(self):
+    def test_a_failed_or_unknown_call_is_held_without_a_second_container(self):
         d = self.driver()
         d.tick()
         self.calls.results["fc-002"] = RuntimeError("container lost")
-        self.assertEqual(d.tick(), 2)
-        self.assertEqual(self.calls.spawned[-1][1]["runId"], 8001)
+        self.assertEqual(d.tick(), 1)
+        self.assertEqual(len(self.calls.spawned), 2)
+        self.assertTrue(mc.load_state(self.state)['8001']['attention'])
+        self.assertEqual(d.run(poll_s=0), 1)
         self.assertTrue(any("failed" in line and "container lost" in line for line in self.logged))
 
-    def test_a_call_past_its_deadline_and_grace_is_cancelled_and_replaced(self):
+    def test_a_call_past_its_deadline_is_cancelled_but_not_blindly_replaced(self):
         d = self.driver()
         d.tick()
         self.clock.t = 1000.0 + 4 * 3600 + 1799
         self.assertEqual(d.tick(), 2)
         self.assertEqual(self.calls.cancelled, [])
         self.clock.t = 1000.0 + 4 * 3600 + 1801
-        self.assertEqual(d.tick(), 2)
+        self.assertEqual(d.tick(), 0)
         self.assertEqual(sorted(self.calls.cancelled), ["fc-001", "fc-002"])
-        self.assertEqual(len(self.calls.spawned), 4)
+        self.assertEqual(len(self.calls.spawned), 2)
+
+    def test_cancellation_failure_never_spawns_an_overlapping_call(self):
+        d = self.driver(run_ids=(8000,))
+        d.tick()
+        self.clock.t += 4 * 3600 + 1801
+        def unavailable(call_id):
+            raise RuntimeError('network error; old container may still be running')
+        self.calls.cancel = unavailable
+        self.assertEqual(d.tick(), 0)
+        self.assertEqual(len(self.calls.spawned), 1)
+        # Restarting the driver preserves the hold.
+        self.assertEqual(self.driver(run_ids=(8000,)).run(poll_s=0), 1)
+        self.assertEqual(len(self.calls.spawned), 1)
+
+    def test_returned_error_or_missing_checkpoint_does_not_restart_seeds(self):
+        for result in ({'error': 'build failed'}, {'stopped': 'deadline'},
+                       {'returncode': 6, 'checkpoint': 'incompatible.ck'}, None):
+            with self.subTest(result=result):
+                if os.path.exists(self.state):
+                    os.unlink(self.state)
+                self.calls = FakeCalls()
+                d = self.driver(run_ids=(8000,))
+                d.tick()
+                self.calls.results['fc-001'] = result
+                self.assertEqual(d.tick(), 0)
+                self.assertEqual(len(self.calls.spawned), 1)
 
     def test_a_solved_pass_stops_everything(self):
         d = self.driver()

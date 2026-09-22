@@ -16,8 +16,9 @@ process. This driver:
     running, instead of spawning a second container onto the same checkpoint;
   * when a call returns (the pass reached its deadline), spawns the next pass
     for that run id at once, so the checkpoint is resumed within a minute;
-  * cancels and respawns a call that has run past hours + grace, which is a
-    container that lost its function without returning.
+  * holds a failed, unobservable or overdue call for recovery. An uncertain
+    cancellation is not proof that the old container stopped, so it must
+    never authorize a second container on those seeds.
 
     modal deploy modal_app.py                 # once per code change, same env as run.sh
     python3 modal_campaign.py --run-id-base 8000 --count 4 --hours 4 --packed ...
@@ -134,6 +135,14 @@ class Driver:
         self.now = now
         self.state = load_state(state_path)
         self.solved = None
+        self.attention = None
+
+    def hold(self, run_id, reason):
+        entry = self.entry(run_id)
+        entry["attention"] = reason
+        save_state(self.state_path, self.state)
+        self.attention = reason
+        log("run %d held for operator recovery: %s" % (run_id, reason))
 
     def entry(self, run_id):
         return self.state.get(str(run_id))
@@ -156,6 +165,9 @@ class Driver:
         walking = 0
         for run_id in self.run_ids:
             entry = self.entry(run_id)
+            if entry and entry.get("attention"):
+                self.attention = entry["attention"]
+                continue
             if not entry or not entry.get("call_id"):
                 if self.spawn(run_id, "no call on record"):
                     walking += 1
@@ -171,21 +183,23 @@ class Driver:
                         self.calls.cancel(entry["call_id"])
                     except Exception as exc:
                         log("run %d: cancel failed: %s: %s" % (run_id, type(exc).__name__, exc))
-                    if self.spawn(run_id, "replacing a lost pass"):
-                        walking += 1
+                    self.hold(run_id, "deadline exceeded; confirm the old container stopped and its checkpoint before replacement")
                 else:
                     walking += 1
                 continue
             except Exception as exc:
                 log("run %d: pass %s failed: %s: %s" % (run_id, entry.get("pass"),
                                                        type(exc).__name__, str(exc)[:300]))
-                if self.spawn(run_id, "after a failed pass"):
-                    walking += 1
+                self.hold(run_id, "call result failed or is unknown; inspect the existing call before replacement")
                 continue
             log("run %d: pass %s finished -- %s" % (run_id, entry.get("pass"), summarize(result)))
             if isinstance(result, dict) and result.get("solved"):
                 self.solved = result
                 return 0
+            if (not isinstance(result, dict) or result.get("error")
+                    or result.get("returncode", 0) != 0 or not result.get("checkpoint")):
+                self.hold(run_id, "pass returned without a successful checkpoint; refusing to restart seeds")
+                continue
             if self.spawn(run_id, "next pass"):
                 walking += 1
         return walking
@@ -193,6 +207,9 @@ class Driver:
     def run(self, poll_s=POLL_S, sleep=time.sleep):
         while True:
             walking = self.tick()
+            if self.attention:
+                log("operator recovery required; no replacement calls were spawned for held runs")
+                return 1
             if self.solved:
                 log("SOLVED: %s" % self.solved.get("solved"))
                 return 0

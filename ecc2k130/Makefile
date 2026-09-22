@@ -353,6 +353,8 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_dp_ingest.py -v
 	python3 -m unittest discover -s aws -p test_worker_spool.py -v
 	python3 -m unittest discover -s aws -p test_controlplane.py -v
+	python3 -m unittest discover -s aws -p test_seed_registry.py -v
+	python3 -m unittest discover -s aws -p test_seed_audit.py -v
 	python3 -m unittest discover -s . -p test_modal_sync.py -v
 	python3 -m unittest discover -s . -p test_modal_app.py -v
 	python3 -m unittest discover -s . -p test_modal_campaign.py -v

@@ -805,9 +805,11 @@ launch (`modal_app.py`), at upload (`modal_sync.py`) and on the page
    seed: dropped by `ON CONFLICT`, correctly not a collision, and invisible.
    Runs 1-4 did this against slots 0-3 on 2026-09-19/20; 813k of run 3's 912k
    records were byte-identical to slot 2's, and 100% of its seeds had already
-   been walked. Campaign run ids therefore come from **8000-9999**, which no
-   AWS slot can reach (`90000 + r` must stay a five-digit slot), and
-   `modal_sync.py` refuses an id for which the bucket holds a checkpoint or a
+   been walked. Modal GPU IDs use **8000-8999** and CPU sidecars use
+   **9000-9999** (`90000 + r` stays a five-digit slot). The
+   shared [seed registry](SEED-IDENTITY.md) enforces permanent ownership across
+   providers and storage prefixes. `modal_sync.py` also refuses an id for
+   which the bucket holds a checkpoint or a
    dp object of slot `r - 1`.
 2. **The cutoff is the campaign's.** See above. `modal_sync.py` reads the
    ratio of a run's checkpointed iterations to its records and refuses a run
@@ -846,9 +848,9 @@ RUNID=8000 COUNT=4 PASSES=0 ./run.sh fleet       # run ids 8000-8003, until stop
 
 `run.sh` refuses `CURVE=131` without a `RUNID` in range; `fleet` takes it as
 the base of `COUNT` consecutive ids, and every pass launches the same ids so
-the checkpoints resume. Two operators must not both start from the same
-`next-run-id` answer at the same moment; the volume is the only arbiter, and
-it is read, not locked.
+the checkpoints resume. The suggestion checks the volume and permanent registry. If two operators
+choose the same answer, conditional seed acquisition admits one; the other
+launch is refused. GPU-only launches cannot use the CPU sidecar range.
 
 `fleet` deploys the app and drives it with `modal_campaign.py`, and that is
 the shape a campaign needs. `search` and `fanout` run inside an *ephemeral*
