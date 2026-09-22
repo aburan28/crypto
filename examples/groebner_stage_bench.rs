@@ -250,7 +250,7 @@ fn main() {
                     .split_rule
             ),
             "criterion": std::env::var("KIC_F4_CRITERION").unwrap_or_else(|_| "none".into()),
-            "inherit_root": std::env::var("KIC_F4_INHERIT_ROOT").unwrap_or_else(|_| "auto".into()),
+            "inherit_root": std::env::var("KIC_F4_INHERIT_ROOT").unwrap_or_else(|_| "ref".into()),
             "rows": rows,
         });
         std::fs::write(&path, serde_json::to_string_pretty(&doc).unwrap()).unwrap();

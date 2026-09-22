@@ -43,7 +43,11 @@
 //! reduction through the shared kernel, every XOR of the re-reduction, and
 //! the specialisation itself at one word operation per word read and per
 //! word written — a charge the from-scratch path never pays, since its
-//! matrix build is not counted.  Wall time is reported beside it.
+//! matrix build is not counted.  Rows are stored from their first nonzero
+//! word, so a rewrite reads the words from the row's leading word to the
+//! end of its layout and writes those from its image's first word to the
+//! end of the new one; an XOR has always started at the pivot's leading
+//! word.  Wall time is reported beside it.
 //!
 //! ## What decides the cost: which variable the solver splits on
 //!
@@ -107,6 +111,8 @@ pub struct InheritCost {
     pub displaced_rows: u64,
     /// Completion rows added because a generator's degree dropped.
     pub completion_rows: u64,
+    /// Products of degree falls inserted by [`ReducedBasis::close`].
+    pub closure_products: u64,
 }
 
 impl InheritCost {
@@ -120,22 +126,63 @@ impl InheritCost {
         self.specialise_word_ops += other.specialise_word_ops;
         self.displaced_rows += other.displaced_rows;
         self.completion_rows += other.completion_rows;
+        self.closure_products += other.closure_products;
     }
 }
 
+/// A column a layout step deletes (`v := 0` on a monomial containing `v`).
+const DELETED: u32 = u32::MAX;
+
 /// One change of column layout: how the columns of one epoch map to the
-/// columns of the next.  `None` is a deleted column (`v := 0`); two
-/// columns may map to the same target (`v := 1` folds `m ∋ v` onto
+/// columns of the next.  [`DELETED`] marks a deleted column (`v := 0`);
+/// two columns may map to the same target (`v := 1` folds `m ∋ v` onto
 /// `m ∖ v`), and a materialisation XORs them together.
 #[derive(Debug)]
 struct LayoutStep {
-    /// Words per row in the epoch this step maps *from*.
-    from_words: usize,
-    map: Rc<[Option<u32>]>,
+    map: Rc<[u32]>,
     /// Composed maps from earlier epochs to the epoch this step maps *to*,
     /// built on demand.  Shared with every basis below this step, so a
     /// child composes one step on top of what its parent already built.
-    to_here: RefCell<HashMap<u32, Rc<[Option<u32>]>>>,
+    to_here: RefCell<HashMap<u32, Rc<[u32]>>>,
+}
+
+/// A child's generator system, computed once per node and shared by every
+/// basis at it.
+#[derive(Debug)]
+pub struct ChildSystem {
+    system: Rc<Vec<F2BoolPoly>>,
+    degrees: Rc<Vec<u32>>,
+    /// `(index in the child system, degree before, degree after)` for each
+    /// generator whose degree dropped.
+    dropped: Vec<(usize, u32, u32)>,
+}
+
+impl ChildSystem {
+    /// The child of a system whose generators have degrees
+    /// `parent_degrees`, given `substituted[i]` — the image of the parent's
+    /// `i`-th generator, zero or not.
+    pub fn new(parent_degrees: &[u32], substituted: &[F2BoolPoly]) -> Self {
+        debug_assert_eq!(parent_degrees.len(), substituted.len());
+        let mut system = Vec::with_capacity(substituted.len());
+        let mut degrees = Vec::with_capacity(substituted.len());
+        let mut dropped = Vec::new();
+        for (q, &old_degree) in substituted.iter().zip(parent_degrees) {
+            if q.is_zero() {
+                continue;
+            }
+            let new_degree = poly_degree(q);
+            if new_degree != 0 && new_degree < old_degree {
+                dropped.push((system.len(), old_degree, new_degree));
+            }
+            system.push(q.clone());
+            degrees.push(new_degree);
+        }
+        Self {
+            system: Rc::new(system),
+            degrees: Rc::new(degrees),
+            dropped,
+        }
+    }
 }
 
 /// A basis row: its content, valid in the layout of epoch `version`.
@@ -143,10 +190,76 @@ struct LayoutStep {
 /// Rows are shared by reference between a basis and the children
 /// specialised from it; a row is rewritten into a newer layout — and
 /// charged for it — only when something needs its content there.
+///
+/// **Trimmed.**  A row is stored from the word it starts in to the end of
+/// its layout.  An echelon row is zero before its leading column, and the
+/// rows the tree rewrites most lead far to the right — a displaced row's
+/// image falls towards the tail, and so do the pivots it hits — so the
+/// words before `lead` are neither stored, read nor written, as the
+/// elimination's XORs have never touched a pivot's words before its
+/// leading column either.
 #[derive(Clone, Debug)]
 struct LazyRow {
     version: u32,
+    /// The layout word `data[0]` holds.
+    start: u32,
+    /// The first word that can be nonzero (`≥ start`); a rewrite reads
+    /// from here.
+    lead: u32,
+    /// Words `start ..` to the end of the layout of `version`.
     data: Rc<Vec<u64>>,
+}
+
+impl LazyRow {
+    /// Word `w` of the row in its own layout.
+    fn word(&self, w: usize) -> u64 {
+        if w < self.lead as usize {
+            0
+        } else {
+            self.data[w - self.start as usize]
+        }
+    }
+
+    /// The words from `w` (at least `lead`) to the end of the layout.
+    fn from_word(&self, w: usize) -> &[u64] {
+        debug_assert!(w >= self.lead as usize);
+        &self.data[w - self.start as usize..]
+    }
+
+    /// The words a rewrite reads.
+    fn live(&self) -> &[u64] {
+        self.from_word(self.lead as usize)
+    }
+}
+
+/// A row being reduced into a basis: words `start ..` to the end of the
+/// current layout.
+struct Draft {
+    start: usize,
+    data: Vec<u64>,
+}
+
+impl Draft {
+    /// A full-width row.
+    fn full(data: Vec<u64>) -> Self {
+        Self { start: 0, data }
+    }
+
+    /// Leading set column at or after word `from` (a layout word).
+    fn leading_column_from(&self, from: usize) -> Option<usize> {
+        self.data[from - self.start..]
+            .iter()
+            .position(|&w| w != 0)
+            .map(|i| {
+                let w = from + i;
+                w * 64 + self.data[w - self.start].trailing_zeros() as usize
+            })
+    }
+}
+
+thread_local! {
+    /// Full-width staging for [`ReducedBasis::rewrite`], zero between uses.
+    static STAGING: RefCell<Vec<u64>> = const { RefCell::new(Vec::new()) };
 }
 
 /// The reduced degree-`degree` Macaulay row space of a system, kept as an
@@ -169,9 +282,9 @@ pub struct ReducedBasis {
     /// Number of Boolean variables of the ambient ring.
     pub n_vars: usize,
     /// The system whose Macaulay row space this is.
-    pub system: Vec<F2BoolPoly>,
+    pub system: Rc<Vec<F2BoolPoly>>,
     /// Degree of each generator when the basis was last completed.
-    generator_degrees: Vec<u32>,
+    generator_degrees: Rc<Vec<u32>>,
     /// Variables specialised away on the path from the root.
     assigned: u64,
     /// Column monomials of the current layout, in descending order.
@@ -190,6 +303,15 @@ pub struct ReducedBasis {
     pivot_col: Vec<u32>,
     /// `pivot_of[c]` is the row leading at column `c`.
     pivot_of: Vec<Option<u32>>,
+    /// Rounds of degree-fall closure run per node; `0` keeps the plain
+    /// Macaulay row space (see [`ReducedBasis::from_system_closed`]).
+    closure_rounds: u32,
+    /// Degree falls not yet multiplied by the variables, as row indices.
+    pending: Vec<u32>,
+    /// The row space contains the constant `1`.  The basis is then kept as
+    /// that one row: every specialisation of `1` is `1`, and the solver
+    /// reads nothing past it (see [`ReducedBasis::specialise_shared`]).
+    refuted: bool,
 }
 
 impl ReducedBasis {
@@ -205,15 +327,16 @@ impl ReducedBasis {
         n_vars: usize,
         degree: u32,
     ) -> Option<(Self, InheritCost)> {
-        let system: Vec<F2BoolPoly> = system.iter().filter(|p| !p.is_zero()).cloned().collect();
-        let generator_degrees: Vec<u32> = system.iter().map(poly_degree).collect();
+        let system: Rc<Vec<F2BoolPoly>> =
+            Rc::new(system.iter().filter(|p| !p.is_zero()).cloned().collect());
+        let generator_degrees: Rc<Vec<u32>> = Rc::new(system.iter().map(poly_degree).collect());
         let occurring = system
             .iter()
             .flat_map(|p| p.terms.iter())
             .fold(0u64, |acc, t| acc | t.mask)
             & all_variable_mask(n_vars);
         let rows_monos =
-            macaulay_rows_monos_with_mask(&system, n_vars, degree, occurring, None)?;
+            macaulay_rows_monos_with_mask(system.as_slice(), n_vars, degree, occurring, None)?;
         let mut cost = InheritCost::default();
         let empty = |columns: Vec<u64>| Self {
             degree,
@@ -228,26 +351,30 @@ impl ReducedBasis {
             history: Vec::new(),
             rows: Vec::new(),
             pivot_col: Vec::new(),
+            closure_rounds: 0,
+            pending: Vec::new(),
+            refuted: false,
         };
         if rows_monos.is_empty() {
             return Some((empty(Vec::new()), cost));
         }
         let columns = macaulay_columns(&rows_monos)?;
         let mut matrix = pack_rows(&rows_monos, &columns);
-        // A basis needs distinct leading columns and nothing more, so an
-        // echelon form without back-substitution would do.  The fully
-        // reduced form costs more here but makes every later displaced row
-        // reduce in exactly as many XORs as it has pivot bits, which pays
-        // back over a deep tree.  The default mirrors the from-scratch
-        // step's own kernel choice on the same shape — full RREF below 24
-        // variables, echelon-only at and above it — so the root costs what
-        // it always cost and every descendant is the saving.
-        // `KIC_F4_INHERIT_ROOT=rref|ref` pins either for controls.
-        let full = match std::env::var("KIC_F4_INHERIT_ROOT").as_deref() {
-            Ok("rref") => true,
-            Ok("ref") => false,
-            _ => n_vars < 24,
-        };
+        // A basis needs distinct leading columns and nothing more, so the
+        // root is reduced to echelon form without back-substitution.  A
+        // fully reduced root makes every later displaced row reduce in as
+        // many XORs as it has pivot bits, and below 24 variables that paid
+        // for its back-substitution while every child re-reduced all of its
+        // displaced rows.  Now that a refuted child stops at its refutation
+        // and a rewrite skips a row's leading zeros, the children no longer
+        // earn it back on any rung (`RESEARCH_INHERITED_F4.md` §3.1).  A
+        // middle ground, clearing only the pivot columns of degree below
+        // `D`, was tried and costs what it saves.
+        // `KIC_F4_INHERIT_ROOT=rref` restores the fully reduced root as a
+        // control.
+        static ROOT_POLICY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        let full = *ROOT_POLICY
+            .get_or_init(|| std::env::var("KIC_F4_INHERIT_ROOT").as_deref() == Ok("rref"));
         let rank = if full {
             rref_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops)
         } else {
@@ -262,10 +389,39 @@ impl ReducedBasis {
             out.pivot_col.push(c as u32);
             out.rows.push(LazyRow {
                 version: 0,
+                start: 0,
+                lead: (c / 64) as u32,
                 data: Rc::new(row),
             });
         }
+        if let Some(r) = out.one_row() {
+            out.collapse_to_one(r);
+        }
         Some((out, cost))
+    }
+
+    /// The row leading at the constant monomial, if the row space has one.
+    /// `1` is the smallest monomial of any degree-compatible order, so it
+    /// can only be the last column.
+    fn one_row(&self) -> Option<usize> {
+        if self.columns.last() != Some(&0) {
+            return None;
+        }
+        self.pivot_of.last().copied().flatten().map(|r| r as usize)
+    }
+
+    /// Reduce the basis to its row `r`, which is the constant `1`.
+    fn collapse_to_one(&mut self, r: usize) {
+        debug_assert_eq!(self.columns[self.pivot_col[r] as usize], 0);
+        let row = self.rows.swap_remove(r);
+        let c = self.pivot_col[r];
+        self.rows = vec![row];
+        self.pivot_col = vec![c];
+        self.pivot_of = vec![None; self.columns.len()];
+        self.pivot_of[c as usize] = Some(0);
+        self.column_index = None;
+        self.pending.clear();
+        self.refuted = true;
     }
 
     /// Monomial → current column, built on first use after a layout change.
@@ -275,6 +431,58 @@ impl ReducedBasis {
                 Some(self.columns.iter().enumerate().map(|(i, &m)| (m, i)).collect());
         }
         self.column_index.as_ref().expect("just built")
+    }
+
+    /// [`ReducedBasis::from_system`], closed under multiplying degree falls
+    /// by monomials for `rounds` rounds at this node and at every node
+    /// specialised from it (see [`ReducedBasis::close`]).  The falls seeded
+    /// at the root are the rows whose leading monomial has degree in
+    /// `[2, degree)` and is not a leading monomial of the degree-`degree−1`
+    /// Macaulay row space: a row of that space times a monomial of degree
+    /// one is already a row of the degree-`degree` matrix.
+    pub fn from_system_closed(
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        degree: u32,
+        rounds: u32,
+    ) -> Option<(Self, InheritCost)> {
+        let (mut basis, mut cost) = Self::from_system(system, n_vars, degree)?;
+        if rounds == 0 || degree < 3 || basis.rows.is_empty() || basis.refuted {
+            return Some((basis, cost));
+        }
+        basis.closure_rounds = rounds;
+        let occurring = basis
+            .system
+            .iter()
+            .flat_map(|p| p.terms.iter())
+            .fold(0u64, |acc, t| acc | t.mask)
+            & all_variable_mask(n_vars);
+        let lower = macaulay_rows_monos_with_mask(
+            basis.system.as_slice(),
+            n_vars,
+            degree - 1,
+            occurring,
+            None,
+        )?;
+        let mut lower_leading: std::collections::HashSet<u64> = std::collections::HashSet::new();
+        if !lower.is_empty() {
+            let columns = macaulay_columns(&lower)?;
+            let mut matrix = pack_rows(&lower, &columns);
+            let rank = echelon_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops);
+            for row in matrix.iter().take(rank) {
+                if let Some(c) = leading_column(row) {
+                    lower_leading.insert(columns[c]);
+                }
+            }
+        }
+        for r in 0..basis.rows.len() {
+            let lead = basis.columns[basis.pivot_col[r] as usize];
+            if basis.is_fall(r) && !lower_leading.contains(&lead) {
+                basis.pending.push(r as u32);
+            }
+        }
+        basis.close(&mut cost);
+        Some((basis, cost))
     }
 
     /// Variables specialised away since the root, as a mask.
@@ -316,7 +524,7 @@ impl ReducedBasis {
     /// below that step shares, so a node composes at most one step on top
     /// of what its ancestors already built.  Index bookkeeping, not
     /// charged, as the from-scratch path's column indexing never was.
-    fn composite_to(&self, to: u32, from: u32) -> Rc<[Option<u32>]> {
+    fn composite_to(&self, to: u32, from: u32) -> Rc<[u32]> {
         debug_assert!(from < to);
         let step = &self.history[(to - 1) as usize];
         if from + 1 == to {
@@ -326,9 +534,9 @@ impl ReducedBasis {
             return c.clone();
         }
         let prev = self.composite_to(to - 1, from);
-        let composed: Rc<[Option<u32>]> = prev
+        let composed: Rc<[u32]> = prev
             .iter()
-            .map(|c| c.and_then(|c| step.map[c as usize]))
+            .map(|&c| if c == DELETED { DELETED } else { step.map[c as usize] })
             .collect();
         step.to_here.borrow_mut().insert(from, composed.clone());
         composed
@@ -336,38 +544,66 @@ impl ReducedBasis {
 
     /// The composed map from the columns of epoch `from` to the current
     /// layout.
-    fn composite(&self, from: u32) -> Rc<[Option<u32>]> {
+    fn composite(&self, from: u32) -> Rc<[u32]> {
         self.composite_to(self.epoch(), from)
     }
 
     /// Rewrite `row` from the layout of epoch `version` into the current
-    /// one.  Charged one word operation per word read and per word written.
-    fn materialised(&self, row: &LazyRow, cost: &mut InheritCost) -> Rc<Vec<u64>> {
+    /// one, trimmed to the first word its image touches; `None` if every
+    /// bit was deleted or the folds cancelled it.  Charged one word
+    /// operation per word read (from the row's `lead`) and per word
+    /// written (from the image's first word to the end of the layout).
+    fn rewrite(&self, row: &LazyRow, cost: &mut InheritCost) -> Option<Draft> {
         debug_assert!(row.version < self.epoch());
         let map = self.composite(row.version);
-        let from_words = self.history[row.version as usize].from_words;
-        let mut out = vec![0u64; self.words];
-        for (wi, &word) in row.data.iter().enumerate() {
-            let mut bits = word;
-            while bits != 0 {
-                let b = bits.trailing_zeros() as usize;
-                bits &= bits - 1;
-                if let Some(c) = map[wi * 64 + b] {
-                    out[c as usize / 64] ^= 1u64 << (c % 64);
+        let words = self.words;
+        let live = row.live();
+        let lead = row.lead as usize;
+        cost.specialise_word_ops += live.len() as u64;
+        STAGING.with(|staging| {
+            let mut staging = staging.borrow_mut();
+            if staging.len() < words {
+                staging.resize(words, 0);
+            }
+            let (mut lo, mut hi) = (usize::MAX, 0usize);
+            for (i, &word) in live.iter().enumerate() {
+                let base = (lead + i) * 64;
+                let mut bits = word;
+                while bits != 0 {
+                    let b = bits.trailing_zeros() as usize;
+                    bits &= bits - 1;
+                    let c = map[base + b];
+                    if c != DELETED {
+                        let w = c as usize / 64;
+                        staging[w] ^= 1u64 << (c % 64);
+                        lo = lo.min(w);
+                        hi = hi.max(w);
+                    }
                 }
             }
-        }
-        cost.specialise_word_ops += (from_words + self.words) as u64;
-        Rc::new(out)
+            if lo == usize::MAX {
+                return None;
+            }
+            cost.specialise_word_ops += (words - lo) as u64;
+            let mut data = vec![0u64; words - lo];
+            data[..=hi - lo].copy_from_slice(&staging[lo..=hi]);
+            staging[lo..=hi].fill(0);
+            data.iter().any(|&w| w != 0).then_some(Draft { start: lo, data })
+        })
     }
 
-    /// Bring row `r` into the current layout if it is not there yet.
+    /// Bring row `r` into the current layout if it is not there yet.  A
+    /// kept row's leading monomial survives every step, so its image is
+    /// nonzero.
     fn ensure_current(&mut self, r: usize, cost: &mut InheritCost) {
         if self.rows[r].version != self.epoch() {
-            let data = self.materialised(&self.rows[r], cost);
+            let draft = self.rewrite(&self.rows[r], cost).expect("a kept pivot survives");
+            let lead = draft.start + draft.data.iter().position(|&w| w != 0).expect("nonzero");
             self.rows[r] = LazyRow {
                 version: self.epoch(),
-                data,
+                start: draft.start as u32,
+                lead: lead as u32,
+                data: Rc::new(draft.data),
             };
         }
     }
@@ -379,10 +615,10 @@ impl ReducedBasis {
         }
     }
 
-    /// Row `r`'s content in the current layout, materialising it if needed.
-    fn current_row(&mut self, r: usize, cost: &mut InheritCost) -> Rc<Vec<u64>> {
+    /// Row `r` in the current layout, materialising it if needed.
+    fn current_row(&mut self, r: usize, cost: &mut InheritCost) -> LazyRow {
         self.ensure_current(r, cost);
-        self.rows[r].data.clone()
+        self.rows[r].clone()
     }
 
     /// Restore reduced row echelon form: clear every pivot column from
@@ -402,6 +638,9 @@ impl ReducedBasis {
     /// against such a basis picks up those bits and cascades; against a
     /// reduced basis it clears one pivot column per XOR and stops.
     pub fn reduce_fully(&mut self, cost: &mut InheritCost) {
+        if self.refuted {
+            return;
+        }
         self.materialise_all(cost);
         let words = self.words;
         let epoch = self.epoch();
@@ -411,15 +650,18 @@ impl ReducedBasis {
             };
             let r = r as usize;
             let (w, bit) = (c / 64, 1u64 << (c % 64));
-            let pivot = self.rows[r].data.clone();
+            let pivot = self.rows[r].clone();
             for (i, row) in self.rows.iter_mut().enumerate() {
-                if i != r && row.data[w] & bit != 0 {
+                if i != r && row.word(w) & bit != 0 {
                     let mut data = row.data.to_vec();
-                    for (dst, &src) in data[w..].iter_mut().zip(&pivot[w..]) {
+                    let at = w - row.start as usize;
+                    for (dst, &src) in data[at..].iter_mut().zip(pivot.from_word(w)) {
                         *dst ^= src;
                     }
                     *row = LazyRow {
                         version: epoch,
+                        start: row.start,
+                        lead: row.lead,
                         data: Rc::new(data),
                     };
                     cost.reduce_word_ops += (words - w) as u64;
@@ -440,47 +682,64 @@ impl ReducedBasis {
     /// than an echelon one and every specialisation refills some twenty
     /// pivot columns per row (`RESEARCH_INHERITED_F4.md` §3.5).
     fn rref_every() -> u32 {
-        std::env::var("KIC_F4_INHERIT_RREF")
-            .ok()
-            .and_then(|v| v.parse::<u32>().ok())
-            .unwrap_or(0)
+        static EVERY: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+        *EVERY.get_or_init(|| {
+            std::env::var("KIC_F4_INHERIT_RREF")
+                .ok()
+                .and_then(|v| v.parse::<u32>().ok())
+                .unwrap_or(0)
+        })
     }
 
     /// Insert a row given in the current layout, reducing its leading term
     /// against the existing pivots until it becomes a new pivot or vanishes.
     /// Every pivot it hits is materialised first.
-    fn insert(&mut self, mut row: Vec<u64>, cost: &mut InheritCost) {
+    fn insert(&mut self, mut row: Draft, cost: &mut InheritCost) -> Option<usize> {
+        let mut from = row.start;
         loop {
-            let Some(c) = leading_column(&row) else {
-                return;
-            };
+            let c = row.leading_column_from(from)?;
+            let w = c / 64;
             match self.pivot_of[c] {
                 Some(r) => {
-                    let w = c / 64;
                     let pivot = self.current_row(r as usize, cost);
-                    for (dst, &src) in row[w..].iter_mut().zip(&pivot[w..]) {
+                    let at = w - row.start;
+                    for (dst, &src) in row.data[at..].iter_mut().zip(pivot.from_word(w)) {
                         *dst ^= src;
                     }
                     cost.reduce_word_ops += (self.words - w) as u64;
+                    from = w;
                 }
                 None => {
                     self.pivot_of[c] = Some(self.rows.len() as u32);
                     self.pivot_col.push(c as u32);
                     self.rows.push(LazyRow {
                         version: self.epoch(),
-                        data: Rc::new(row),
+                        start: row.start as u32,
+                        lead: w as u32,
+                        data: Rc::new(row.data),
                     });
-                    return;
+                    return Some(self.rows.len() - 1);
                 }
             }
         }
     }
 
+    /// Did the row just inserted land on the constant `1`?  If so, collapse
+    /// the basis to it.
+    fn refutes(&mut self, inserted: Option<usize>) -> bool {
+        match inserted {
+            Some(r) if self.columns[self.pivot_col[r] as usize] == 0 => {
+                self.collapse_to_one(r);
+                true
+            }
+            _ => false,
+        }
+    }
+
     /// Adopt a new column layout: record the step, remap every pivot
     /// column and rebuild the pivot index.  Rows are left where they are.
-    fn adopt_layout(&mut self, columns: Vec<u64>, map: Vec<Option<u32>>) {
+    fn adopt_layout(&mut self, columns: Vec<u64>, map: Vec<u32>) {
         let step = LayoutStep {
-            from_words: self.words,
             map: map.into(),
             to_here: RefCell::new(HashMap::new()),
         };
@@ -488,7 +747,8 @@ impl ReducedBasis {
         self.words = columns.len().div_ceil(64).max(1);
         self.pivot_of = vec![None; columns.len()];
         for (r, pc) in self.pivot_col.iter_mut().enumerate() {
-            let c = step.map[*pc as usize].expect("a kept pivot column survives the step");
+            let c = step.map[*pc as usize];
+            debug_assert!(c != DELETED, "a kept pivot column survives the step");
             debug_assert!(self.pivot_of[c as usize].is_none(), "row {r} collides");
             self.pivot_of[c as usize] = Some(r as u32);
             *pc = c;
@@ -518,25 +778,48 @@ impl ReducedBasis {
     /// and `g = 1` is already a refutation.  The solver reads nothing but
     /// the tail, so it behaves identically.
     pub fn specialise(&self, var: u32, value: bool) -> (Self, InheritCost) {
+        let substituted: Vec<F2BoolPoly> =
+            self.system.iter().map(|p| substitute(p, var, value)).collect();
+        let child = ChildSystem::new(&self.generator_degrees, &substituted);
+        self.specialise_shared(var, value, &child)
+    }
+
+    /// The generator degrees this basis was completed for, aligned with
+    /// [`ReducedBasis::system`].
+    pub fn generator_degrees(&self) -> &[u32] {
+        &self.generator_degrees
+    }
+
+    /// [`ReducedBasis::specialise`] with the child's system already
+    /// computed — by the solver, which substitutes it anyway, once for
+    /// every basis at the node.  `child` must be the image of this basis's
+    /// own system under `var := value`.
+    ///
+    /// **Refutation.**  Once a re-reduced or completion row lands on the
+    /// constant `1`, the child's tail is a refutation whatever the rows not
+    /// yet inserted would add, so they are not inserted: the child is
+    /// collapsed to `1` and returned.  Its row space is then no longer the
+    /// sandwich above, but the solver's view of it is — every space in the
+    /// sandwich contains `1`, the solver refutes on `1` before reading
+    /// anything else, and a specialisation of `1` is `1`, so a refuted
+    /// basis stays refuted, at no cost, through whatever the solver still
+    /// assigns before it reads this degree.
+    pub fn specialise_shared(&self, var: u32, value: bool, child: &ChildSystem) -> (Self, InheritCost) {
         let mut cost = InheritCost::default();
         let bit = 1u64 << var;
-
-        // New system, with each survivor's degree before and after.
-        let mut system = Vec::with_capacity(self.system.len());
-        let mut new_degrees = Vec::with_capacity(self.system.len());
-        let mut dropped: Vec<(usize, u32, u32)> = Vec::new();
-        for (p, &old_degree) in self.system.iter().zip(&self.generator_degrees) {
-            let q = substitute(p, var, value);
-            if q.is_zero() {
-                continue;
-            }
-            let new_degree = poly_degree(&q);
-            if new_degree != 0 && new_degree < old_degree && old_degree <= self.degree {
-                dropped.push((system.len(), old_degree, new_degree));
-            }
-            system.push(q);
-            new_degrees.push(new_degree);
+        if self.refuted {
+            let mut out = self.clone();
+            out.system = child.system.clone();
+            out.generator_degrees = child.degrees.clone();
+            out.assigned |= bit;
+            return (out, cost);
         }
+        let dropped: Vec<(usize, u32, u32)> = child
+            .dropped
+            .iter()
+            .copied()
+            .filter(|&(_, old_degree, _)| old_degree <= self.degree)
+            .collect();
 
         // New column layout: the images of the old columns.  Deleting the
         // columns that contain `v` keeps the rest in order; folding
@@ -545,7 +828,7 @@ impl ReducedBasis {
         // of them is unchanged), so the new layout is a merge of two sorted
         // lists and the old → new map falls out of the merge.
         let n_old = self.columns.len();
-        let mut map: Vec<Option<u32>> = vec![None; n_old];
+        let mut map: Vec<u32> = vec![DELETED; n_old];
         let mut new_columns: Vec<u64> = Vec::with_capacity(n_old);
         if value {
             let (mut i, mut j) = (0usize, 0usize);
@@ -569,12 +852,12 @@ impl ReducedBasis {
                     (None, None) => break,
                     (Some(k), None) => {
                         new_columns.push(self.columns[k]);
-                        map[k] = Some(target);
+                        map[k] = target;
                         i += 1;
                     }
                     (None, Some(f)) => {
                         new_columns.push(self.columns[f] & !bit);
-                        map[f] = Some(target);
+                        map[f] = target;
                         j += 1;
                     }
                     (Some(k), Some(f)) => {
@@ -582,18 +865,18 @@ impl ReducedBasis {
                         match cmp_mono(F2BoolMono::from_mask(mk), F2BoolMono::from_mask(mf)) {
                             std::cmp::Ordering::Greater => {
                                 new_columns.push(mk);
-                                map[k] = Some(target);
+                                map[k] = target;
                                 i += 1;
                             }
                             std::cmp::Ordering::Less => {
                                 new_columns.push(mf);
-                                map[f] = Some(target);
+                                map[f] = target;
                                 j += 1;
                             }
                             std::cmp::Ordering::Equal => {
                                 new_columns.push(mk);
-                                map[k] = Some(target);
-                                map[f] = Some(target);
+                                map[k] = target;
+                                map[f] = target;
                                 i += 1;
                                 j += 1;
                             }
@@ -604,7 +887,7 @@ impl ReducedBasis {
         } else {
             for (k, &m) in self.columns.iter().enumerate() {
                 if m & bit == 0 {
-                    map[k] = Some(new_columns.len() as u32);
+                    map[k] = new_columns.len() as u32;
                     new_columns.push(m);
                 }
             }
@@ -619,34 +902,59 @@ impl ReducedBasis {
         let mut out = Self {
             degree: self.degree,
             n_vars: self.n_vars,
-            system,
-            generator_degrees: new_degrees,
+            system: child.system.clone(),
+            generator_degrees: child.degrees.clone(),
             assigned: self.assigned | bit,
-            columns: self.columns.clone(),
+            // Set by `adopt_layout` below; the split reads the parent's.
+            columns: Vec::new(),
             column_index: None,
             words: self.words,
             history: self.history.clone(),
             rows: Vec::with_capacity(self.rows.len()),
             pivot_col: Vec::with_capacity(self.rows.len()),
             pivot_of: Vec::new(),
+            closure_rounds: self.closure_rounds,
+            pending: Vec::new(),
+            refuted: false,
         };
-        let mut displaced: Vec<LazyRow> = Vec::new();
-        for (row, &pc) in self.rows.iter().zip(&self.pivot_col) {
+        // Kept rows are renumbered; a pending fall that is kept stays pending.
+        let mut is_pending = Vec::new();
+        if !self.pending.is_empty() {
+            is_pending = vec![false; self.rows.len()];
+            for &r in &self.pending {
+                is_pending[r as usize] = true;
+            }
+        }
+        let mut displaced: Vec<(u32, LazyRow)> = Vec::new();
+        for (r, (row, &pc)) in self.rows.iter().zip(&self.pivot_col).enumerate() {
             if self.columns[pc as usize] & bit == 0 {
                 // Leading monomial survives and stays distinct; the row's
                 // content is not needed here.
+                if is_pending.get(r) == Some(&true) {
+                    out.pending.push(out.rows.len() as u32);
+                }
                 out.rows.push(row.clone());
                 out.pivot_col.push(pc);
             } else {
-                displaced.push(row.clone());
+                displaced.push((pc, row.clone()));
             }
         }
         out.adopt_layout(new_columns, map);
         cost.displaced_rows = displaced.len() as u64;
-        for row in displaced {
-            let image = out.materialised(&row, &mut cost);
-            if image.iter().any(|&w| w != 0) {
-                out.insert(Rc::try_unwrap(image).unwrap_or_else(|rc| (*rc).clone()), &mut cost);
+        // Lowest pivot first.  The order changes neither the child's row
+        // space nor, measurably, the cost of building it; it changes how
+        // soon a refutation is found.  A row pivoting near the tail has
+        // its image there too, next to the constant `1`, and inserted
+        // first those rows reach `1` before the ones that re-reduce through
+        // the whole basis are touched (`RESEARCH_INHERITED_F4.md` §3.7).
+        displaced.sort_unstable_by_key(|&(pc, _)| std::cmp::Reverse(pc));
+        for (_, row) in displaced {
+            if let Some(image) = out.rewrite(&row, &mut cost) {
+                let inserted = out.insert(image, &mut cost);
+                if out.refutes(inserted) {
+                    return (out, cost);
+                }
+                out.note_fall(inserted);
             }
         }
 
@@ -701,15 +1009,203 @@ impl ReducedBasis {
                         let c = index[&m];
                         row[c / 64] |= 1u64 << (c % 64);
                     }
-                    out.insert(row, &mut cost);
+                    let inserted = out.insert(Draft::full(row), &mut cost);
+                    if out.refutes(inserted) {
+                        return (out, cost);
+                    }
+                    out.note_fall(inserted);
                 }
             }
+        }
+        if Self::close_children() {
+            out.close(&mut cost);
+        } else {
+            out.pending.clear();
         }
         let every = Self::rref_every();
         if every > 0 && out.depth() % every == 0 {
             out.reduce_fully(&mut cost);
         }
         (out, cost)
+    }
+
+    /// Does a closed basis keep closing below its root?
+    /// `KIC_F4_CLOSURE_CHILDREN=0` confines the closure to the bases built
+    /// from scratch; any other value, or none, closes every specialisation
+    /// too.  Irrelevant unless `KIC_F4_CLOSURE_ROUNDS` is positive.
+    fn close_children() -> bool {
+        static CHILDREN: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        *CHILDREN.get_or_init(|| std::env::var("KIC_F4_CLOSURE_CHILDREN").as_deref() != Ok("0"))
+    }
+
+    /// Is row `r` a degree fall this basis closes — leading degree at
+    /// least 2 and below the Macaulay degree?
+    fn is_fall(&self, r: usize) -> bool {
+        if self.closure_rounds == 0 {
+            return false;
+        }
+        let d = self.columns[self.pivot_col[r] as usize].count_ones();
+        d >= 2 && d < self.degree
+    }
+
+    /// Queue a freshly inserted row for closure if it is a degree fall.
+    fn note_fall(&mut self, inserted: Option<usize>) {
+        if let Some(r) = inserted {
+            if self.is_fall(r) {
+                self.pending.push(r as u32);
+            }
+        }
+    }
+
+    /// Multiply the pending degree falls by every monomial `t` that keeps
+    /// the degree within the basis's (`1 ≤ deg t ≤ D − deg q`, over the
+    /// variables occurring in the system) and insert the products; falls
+    /// the products produce are queued in turn.  At most `closure_rounds`
+    /// rounds run per node; what is left stays pending for the children.
+    ///
+    /// This is MutantXL's step at fixed degree: a degree fall `q` of the
+    /// degree-`D` Macaulay row space has multiples `t·q` of degree `≤ D`
+    /// that the Macaulay matrix does not contain, and on the Semaev systems
+    /// here they are what lets a degree-3 basis refute or pin a branch
+    /// that the plain degree-3 matrix has to split.  Every product lies in
+    /// the ideal, so the tail stays sound.  Each product is charged one
+    /// word read per word of `q` and one written per word of the product.
+    pub fn close(&mut self, cost: &mut InheritCost) {
+        if self.closure_rounds == 0 || self.refuted {
+            self.pending.clear();
+            return;
+        }
+        let multipliers = self
+            .system
+            .iter()
+            .flat_map(|p| p.terms.iter())
+            .fold(0u64, |acc, t| acc | t.mask)
+            & all_variable_mask(self.n_vars);
+        for _ in 0..self.closure_rounds {
+            let work = std::mem::take(&mut self.pending);
+            if work.is_empty() {
+                break;
+            }
+            let mut products: Vec<Vec<u64>> = Vec::new();
+            let mut read_words = 0u64;
+            for r in work {
+                let r = r as usize;
+                if !self.is_fall(r) {
+                    continue;
+                }
+                let gap = self.degree - self.columns[self.pivot_col[r] as usize].count_ones();
+                let q = self.current_row(r, cost);
+                let mut q_monos: Vec<u64> = Vec::new();
+                for (i, &word) in q.live().iter().enumerate() {
+                    let base = (q.lead as usize + i) * 64;
+                    let mut bits = word;
+                    while bits != 0 {
+                        let b = bits.trailing_zeros() as usize;
+                        bits &= bits - 1;
+                        q_monos.push(self.columns[base + b]);
+                    }
+                }
+                for t in monomials_up_to_mask(multipliers, gap) {
+                    if t == 0 {
+                        continue;
+                    }
+                    let mut all: Vec<u64> = q_monos.iter().map(|&m| m | t).collect();
+                    all.sort_unstable();
+                    let mut product = Vec::with_capacity(all.len());
+                    let mut i = 0;
+                    while i < all.len() {
+                        let mut j = i;
+                        while j < all.len() && all[j] == all[i] {
+                            j += 1;
+                        }
+                        if (j - i) % 2 == 1 {
+                            product.push(all[i]);
+                        }
+                        i = j;
+                    }
+                    if !product.is_empty() {
+                        products.push(product);
+                        read_words += q.live().len() as u64;
+                    }
+                }
+            }
+            if products.is_empty() {
+                break;
+            }
+            self.extend_columns(&products);
+            let words = self.words;
+            cost.specialise_word_ops += read_words + (products.len() * words) as u64;
+            cost.closure_products += products.len() as u64;
+            let packed: Vec<Vec<u64>> = {
+                let index = self.column_index();
+                products
+                    .iter()
+                    .map(|monos| {
+                        let mut row = vec![0u64; words];
+                        for m in monos {
+                            let c = index[m];
+                            row[c / 64] |= 1u64 << (c % 64);
+                        }
+                        row
+                    })
+                    .collect()
+            };
+            self.absorb(packed, cost);
+            if self.refuted {
+                break;
+            }
+        }
+    }
+
+    /// Absorb a batch of rows given in the current layout: one elimination
+    /// of the whole basis with the batch below it, through the shape-selected
+    /// kernel ([`rref_f2_counted`]), leaving the basis in reduced row echelon
+    /// form.  Inserting the rows one at a time into an echelon basis would
+    /// cascade through its pivots; a batch of closure products is large
+    /// enough that the Four Russians kernel reduces it for a fraction of
+    /// that.  Rows whose pivot column is new and whose leading degree is a
+    /// fall's are queued for closure.
+    fn absorb(&mut self, batch: Vec<Vec<u64>>, cost: &mut InheritCost) {
+        if batch.is_empty() {
+            return;
+        }
+        self.materialise_all(cost);
+        let was_pivot: Vec<bool> = self.pivot_of.iter().map(Option::is_some).collect();
+        let words = self.words;
+        let mut matrix: Vec<Vec<u64>> = self
+            .rows
+            .iter()
+            .map(|row| {
+                let mut full = vec![0u64; words];
+                full[row.start as usize..].copy_from_slice(&row.data);
+                full
+            })
+            .collect();
+        matrix.extend(batch);
+        let rank = rref_f2_counted(&mut matrix, self.columns.len(), &mut cost.reduce_word_ops);
+        matrix.truncate(rank);
+        let epoch = self.epoch();
+        self.rows.clear();
+        self.pivot_col.clear();
+        self.pivot_of = vec![None; self.columns.len()];
+        self.pending.clear();
+        for (r, row) in matrix.into_iter().enumerate() {
+            let c = leading_column(&row).expect("rank rows are nonzero");
+            self.pivot_of[c] = Some(r as u32);
+            self.pivot_col.push(c as u32);
+            self.rows.push(LazyRow {
+                version: epoch,
+                start: 0,
+                lead: (c / 64) as u32,
+                data: Rc::new(row),
+            });
+            if !was_pivot[c] && self.is_fall(r) {
+                self.pending.push(r as u32);
+            }
+        }
+        if let Some(r) = self.one_row() {
+            self.collapse_to_one(r);
+        }
     }
 
     /// Add any monomials of `rows_monos` missing from the layout, keeping
@@ -732,7 +1228,7 @@ impl ReducedBasis {
         columns.extend(missing);
         columns.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
         let index: HashMap<u64, usize> = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
-        let map: Vec<Option<u32>> = self.columns.iter().map(|m| Some(index[m] as u32)).collect();
+        let map: Vec<u32> = self.columns.iter().map(|m| index[m] as u32).collect();
         self.adopt_layout(columns, map);
     }
 
@@ -741,6 +1237,9 @@ impl ReducedBasis {
     /// as polynomials.  Exactly what the from-scratch step's readback
     /// consumes.  Only the rows leading in the tail are materialised.
     pub fn linear_tail(&mut self, cost: &mut InheritCost) -> Vec<F2BoolPoly> {
+        if self.refuted {
+            return vec![F2BoolPoly::one(self.n_vars)];
+        }
         let low_start = self.low_start();
         let low_width = self.columns.len() - low_start;
         if low_width == 0 {
@@ -756,7 +1255,7 @@ impl ReducedBasis {
             let c = self.pivot_col[r] as usize;
             let mut packed = vec![0u64; low_words];
             for column in c..self.columns.len() {
-                if row[column / 64] & (1u64 << (column % 64)) != 0 {
+                if row.word(column / 64) & (1u64 << (column % 64)) != 0 {
                     let k = column - low_start;
                     packed[k / 64] |= 1u64 << (k % 64);
                 }
@@ -936,9 +1435,16 @@ mod tests {
 
     /// The sandwich `V_occurring(S) ⊆ basis ⊆ V_unassigned(S)` the module
     /// documents, for a node reached by assigning `assigned`.
+    /// A refuted basis is collapsed to `1`, so for it the claim is only the
+    /// solver's view: the smallest space of the sandwich refutes as well.
     fn assert_sandwich(basis: &ReducedBasis, system: &[F2BoolPoly], n_vars: usize, assigned: u64, what: &str) {
         let rows = rref_polys(&basis_polys(basis), n_vars);
         let lower = masked_space(system, n_vars, basis.degree, occurring(system) & !assigned);
+        if basis.refuted {
+            assert_eq!(rows, vec![F2BoolPoly::one(n_vars)], "{what}: a refuted basis is exactly 1");
+            assert!(has_constant(&lower), "{what}: refuted, but V_occurring does not contain 1");
+            return;
+        }
         let upper = masked_space(system, n_vars, basis.degree, all_variable_mask(n_vars) & !assigned);
         assert!(contained(&lower, &rows, n_vars), "{what}: V_occurring not contained in the basis");
         assert!(contained(&rows, &upper, n_vars), "{what}: basis not contained in V_unassigned");
@@ -954,7 +1460,7 @@ mod tests {
             .map(|row| {
                 F2BoolPoly::from_monos(
                     (0..b.columns.len())
-                        .filter(|c| row.data[c / 64] & (1u64 << (c % 64)) != 0)
+                        .filter(|c| row.word(c / 64) & (1u64 << (c % 64)) != 0)
                         .map(|c| F2BoolMono::from_mask(b.columns[c]))
                         .collect(),
                     b.n_vars,
@@ -1001,7 +1507,7 @@ mod tests {
                             .map(|p| substitute(p, v, value))
                             .filter(|p| !p.is_zero())
                             .collect();
-                        assert_eq!(child.system, child_system);
+                        assert_eq!(*child.system, child_system);
                         if !has_constant(&child_system) {
                             assert_sandwich(
                                 &child,
@@ -1074,5 +1580,125 @@ mod tests {
             masked_space(&system, n_vars, 3, all_variable_mask(n_vars) & !1),
             rref_polys(&basis_polys(&child), n_vars)
         );
+    }
+
+    /// Every point of `F_2^n_vars` on which the whole system vanishes.
+    fn variety(system: &[F2BoolPoly], n_vars: usize) -> Vec<u64> {
+        (0..1u64 << n_vars).filter(|&x| system.iter().all(|p| p.eval(x) == 0)).collect()
+    }
+
+    /// A closed basis may leave the Macaulay space — that is its point —
+    /// but must stay inside the ideal and keep everything the plain basis
+    /// has, so its tail refutes or pins at least what the plain one does.
+    fn assert_closed_sound(basis: &ReducedBasis, system: &[F2BoolPoly], n_vars: usize, assigned: u64, what: &str) {
+        let rows = basis_polys(basis);
+        let roots = variety(system, n_vars);
+        for p in &rows {
+            assert!(roots.iter().all(|&x| p.eval(x) == 0), "{what}: a closed row does not vanish on the variety");
+        }
+        if !has_constant(system) && !basis.refuted {
+            let lower = masked_space(system, n_vars, basis.degree, occurring(system) & !assigned);
+            assert!(
+                contained(&lower, &rref_polys(&rows, n_vars), n_vars),
+                "{what}: the closed basis lost part of the Macaulay space"
+            );
+        }
+    }
+
+    #[test]
+    fn closed_bases_stay_in_the_ideal_and_contain_the_macaulay_space() {
+        let mut seed = 0x0fed_cba9_8765_4321u64;
+        let mut products = 0u64;
+        for trial in 0..40 {
+            let n_vars = 5 + trial % 4;
+            let m = 3 + trial % 3;
+            let system: Vec<F2BoolPoly> = (0..m)
+                .map(|k| random_poly(n_vars, 2, 4 + k, &mut seed))
+                .filter(|p| poly_degree(p) >= 1)
+                .collect();
+            if system.is_empty() {
+                continue;
+            }
+            let rounds = 1 + trial as u32 % 2;
+            let (root, cost) = ReducedBasis::from_system_closed(&system, n_vars, 3, rounds).unwrap();
+            products += cost.closure_products;
+            assert_closed_sound(&root, &system, n_vars, 0, &format!("trial {trial} root"));
+            for v in 0..n_vars as u32 {
+                if occurring(&system) & (1 << v) == 0 {
+                    continue;
+                }
+                for value in [false, true] {
+                    let (child, cost) = root.specialise(v, value);
+                    products += cost.closure_products;
+                    let child_system: Vec<F2BoolPoly> = system
+                        .iter()
+                        .map(|p| substitute(p, v, value))
+                        .filter(|p| !p.is_zero())
+                        .collect();
+                    assert_closed_sound(&child, &child_system, n_vars, 1 << v, &format!("trial {trial} v{v}={value}"));
+                }
+            }
+        }
+        assert!(products > 0, "no degree fall was closed; the test exercised nothing");
+    }
+
+    #[test]
+    fn a_refuted_child_is_one_and_stays_refuted_for_free() {
+        let mut seed = 0x0bad_5eed_0dd5_0001u64;
+        let mut refuted_children = 0;
+        for trial in 0..120 {
+            let n_vars = 5 + trial % 3;
+            let system: Vec<F2BoolPoly> = (0..3 + trial % 3)
+                .map(|k| random_poly(n_vars, 2, 4 + k, &mut seed))
+                .filter(|p| poly_degree(p) >= 1)
+                .collect();
+            let Some((root, _)) = ReducedBasis::from_system(&system, n_vars, 3) else {
+                continue;
+            };
+            if root.refuted {
+                continue;
+            }
+            let occurring = occurring(&system);
+            for v in (0..n_vars as u32).filter(|v| occurring & (1 << v) != 0) {
+                for value in [false, true] {
+                    let (child, _) = root.specialise(v, value);
+                    if !child.refuted {
+                        continue;
+                    }
+                    refuted_children += 1;
+                    let child_system: Vec<F2BoolPoly> = system
+                        .iter()
+                        .map(|p| substitute(p, v, value))
+                        .filter(|p| !p.is_zero())
+                        .collect();
+                    let legacy = matrix_f4_f2(&child_system, n_vars, 3).unwrap_or_default();
+                    assert!(has_constant(&legacy), "trial {trial} v{v}={value}: refuted, but not from scratch");
+                    assert_eq!(basis_polys(&child), vec![F2BoolPoly::one(n_vars)]);
+                    let Some(w) = (0..n_vars as u32).find(|&w| w != v && occurring & (1 << w) != 0) else {
+                        continue;
+                    };
+                    let (mut grandchild, cost) = child.specialise(w, !value);
+                    assert!(grandchild.refuted, "trial {trial}: refutation lost below v{v}={value}");
+                    assert_eq!(cost.word_ops(), 0, "trial {trial}: a refuted basis cost something to specialise");
+                    let mut read = InheritCost::default();
+                    assert_eq!(grandchild.decisive_rows(&mut read), vec![F2BoolPoly::one(n_vars)]);
+                    assert_eq!(read.word_ops(), 0);
+                }
+            }
+        }
+        assert!(refuted_children > 0, "no specialisation refuted; the test exercised nothing");
+    }
+
+    #[test]
+    fn zero_closure_rounds_is_the_plain_basis() {
+        let mut seed = 0x5555_aaaa_1234_4321u64;
+        for trial in 0..20 {
+            let n_vars = 5 + trial % 4;
+            let system: Vec<F2BoolPoly> = (0..4).map(|k| random_poly(n_vars, 2, 5 + k, &mut seed)).collect();
+            let (plain, plain_cost) = ReducedBasis::from_system(&system, n_vars, 3).unwrap();
+            let (closed, closed_cost) = ReducedBasis::from_system_closed(&system, n_vars, 3, 0).unwrap();
+            assert_eq!(basis_polys(&plain), basis_polys(&closed), "trial {trial}");
+            assert_eq!(plain_cost, closed_cost, "trial {trial}");
+        }
     }
 }
