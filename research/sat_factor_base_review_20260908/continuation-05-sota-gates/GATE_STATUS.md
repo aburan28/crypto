@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 126, 2026-09-21. The historical optimization chain is
+Current through Stage 127, 2026-09-21. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -18,8 +18,14 @@ records kept in the ledger's history), chaining to the Stage 124 and Stage
 the same day (a walk restart that costs one group operation instead of
 thirty-two scalar multiplications, bases sized at the derived family optimum
 on the prime and binary ladders, and the family shape law reported per row;
-the note's §11), chaining to the Stage 125, Stage 124 and Stage 109 seals. No
-Koblitz gate fact moved at any of these re-seals and no prior frozen artifact
+the note's §11), chaining to the Stage 125, Stage 124 and Stage 109 seals.
+Stage 127 re-seals it a fourth time over that ledger's Round 4, also of the
+same day: the unit's conversion from native counters to group additions now
+uses ratios pinned in `docs/ic/calibration.json` rather than factors measured
+on the host at the start of each run (the note's §12). That round reprices
+every row by up to 9.5 per cent without moving a single native counter on any
+of the 537 rows compared, and chains to the Stage 126, 125, 124 and 109 seals.
+No Koblitz gate fact moved at any of these re-seals and no prior frozen artifact
 changed.
 
 The campaign has target-independent algebraic factor bases; matched native-XOR,

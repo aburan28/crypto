@@ -1928,6 +1928,66 @@ that re-pins has to say so in the note and carry the delta the way this
 one does — otherwise the drift returns as a step instead of as noise.
 The reference host is the one named in the file.
 
+### 12.4 The correction, measured
+
+The ladder was rerun with nothing changed but the conversion, and
+`boundary_repricing_check.py` compared every field of `group_ops` and
+every key of `native`, in every phase, row by row and repeat by repeat.
+
+| | |
+|:--|--:|
+| rows compared | 537 |
+| identical in every native counter | **537** |
+| rows whose counters moved | **0** |
+| `S` after over before, median | 1.0000 |
+| range | 0.9048 to 1.0766 |
+| rows repriced by more than 2% | 21 of 537 |
+
+So the round is accounting, as claimed: nothing computed anything
+different, and the correction to individual rows reaches about `±9.5%`.
+The checker's sensitivity is not assumed — run against two runs that
+genuinely differ, the rotation ladder against the shuffle one, it finds
+94 of 537 rows with moved counters and names the fields.
+
+**Where the correction lands, and why.**  A row is repriced in
+proportion to how much of its cost was *not* plain group additions,
+because additions are the unit's numeraire and need no conversion.  The
+share of each variant's cost that goes through a conversion, against the
+largest repricing that variant saw:
+
+| variant | converted share | worst ratio |
+|:--|--:|--:|
+| `semaev_s4_pairs_and_solve_m3` | 0.999 | 0.925 |
+| `…_s4_pairs_and_solve_m3_signed_orbit_columns` | 0.996 | 0.964 |
+| `semaev_s3_roots_m2` | 0.897 | 0.905 |
+| `mitm_m2_negfold` | 0.591 | 0.995 |
+| `mitm_m2_negfold_walk` | 0.247 | 0.996 |
+| `mitm_m2_negfold_walk_balanced` | 0.196 | 0.997 |
+| `mitm_m2_…_frobfold_walk_balanced` | 0.082 | 0.996 |
+| `mitm_m3_signed_orbit_columns_negfold` | 0.011 | 1.0002 |
+| `mitm_m3_signed_orbit_columns` | 0.006 | 1.0001 |
+
+The two ends of that table are the whole story.  A row that is 99.9%
+converted work moves by nine per cent; a row that is 0.6% converted work
+moves by one part in ten thousand.
+
+**And that is why §11's conclusions do not depend on the drift.**  The
+best row of each regime is a walk over a pair table — additions, almost
+all the way down — so the headline figures are unmoved:
+
+| regime | best row | `S` before | `S` after | vs rho |
+|:--|:--|--:|--:|--:|
+| prime, `2^23.4` | balanced `m = 2` walk | 14.281 | 14.280 | 3.63× |
+| binary, `2^24.4` | balanced `m = 2` walk | 50.656 | 50.652 | 21.9× |
+| Koblitz, `2^39.0` | balanced `m = 2` folded walk | 5.924 | 5.926 | 30.3× |
+
+The rows the drift *did* move are the ones this ledger already classes
+baseline or relabelling — Semaev `S₃` roots and `S₄` pairs-and-solve —
+and no conclusion ever rested on them.  So the defect was real, it was
+worth removing, and it was not threatening the answers: it put a floor
+under what a *future* round could resolve, which is the reason to fix it
+rather than a correction to what earlier rounds said.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the
