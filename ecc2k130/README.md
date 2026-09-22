@@ -18,6 +18,21 @@ the tree's previous best configuration rebuilt in the same session on the same
 card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
 22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
 serial inversion (§7 there). The campaign default below is unchanged.
+[TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× that
+ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
+SM-clocks 30 B/s allows) and builds the kernel for the remaining tenth:
+`PACKED_CHAINS=2` (`make gpu-rtx-pro6000-chains2`), two interleaved
+Montgomery chains per thread so the inversion and the forward pass overlap
+inside the warp — same walk, same distinguished points, and **0.696× the
+reference** measured paired on one RTX PRO 6000: each warp issues `CLMAD`s
+1.42× more often but 182 registers halve the warps. Its §6 then measures the
+`CLMAD` rate across dies: 37.8 logic slots per `CLMAD` on the RTX PRO 6000,
+3.8 on a B200, 2.0 on an H100. On a B200 the same kernel does 11.1 B/s
+bound by the logic pipe with the unit idle; the ALU→`CLMAD` trades that lost
+on the 6000 win there at par with the slots they remove (`TOP_CLMAD` + the
+`CLMAD` squaring + the ONB inversion: +37.9%, 15.37 B/s, verified), and
+30 B/s is a 1.95× ALU cut away rather than below a floor; per dollar the
+6000 stays 2.7× ahead.
 
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using
