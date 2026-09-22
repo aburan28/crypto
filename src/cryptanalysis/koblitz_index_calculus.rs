@@ -8144,6 +8144,27 @@ impl<'a> LogSystem<'a> {
             .collect()
     }
 
+    fn least_covered_columns(&self, limit: usize) -> Vec<usize> {
+        let mut weights = vec![0usize; self.n_cols];
+        if self.sparse_opts.is_some() {
+            for row in &self.sparse_rows {
+                for &(column, _) in &row.entries {
+                    weights[column as usize] += 1;
+                }
+            }
+        } else {
+            for row in &self.dense_matrix {
+                for (column, value) in row.iter().enumerate() {
+                    weights[column] += usize::from(!value.is_zero());
+                }
+            }
+        }
+        let mut columns: Vec<usize> = (0..self.n_cols).collect();
+        columns.sort_unstable_by_key(|&column| (weights[column], column));
+        columns.truncate(limit.min(columns.len()));
+        columns
+    }
+
     /// Rewrite `[a]G = Σ P_i` as a row over the projected columns.
     fn push(&mut self, rel: &CollectedRelation) {
         let r = &self.kc.subgroup_order;
@@ -8395,6 +8416,11 @@ impl<'a> FactorBaseLogSolver<'a> {
     /// Column indices not occurring in any accepted relation so far.
     pub fn uncovered_columns(&self) -> Vec<usize> {
         self.system.uncovered_columns()
+    }
+
+    /// Least-represented columns, ordered by occurrence count and index.
+    pub fn least_covered_columns(&self, limit: usize) -> Vec<usize> {
+        self.system.least_covered_columns(limit)
     }
 
     /// Try to solve with what has been pushed.  `None` means more
@@ -10796,6 +10822,7 @@ mod tests {
         assert_eq!(sparse.filter.columns_in, columns);
         assert_eq!(sparse.filter.uncovered_columns, columns - 1);
         assert_eq!(solver.uncovered_columns(), (1..columns).collect::<Vec<_>>());
+        assert_eq!(solver.least_covered_columns(2), vec![1, 2]);
     }
 
     fn collector_options() -> KoblitzIcOptions {
