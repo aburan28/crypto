@@ -1,0 +1,29 @@
+{
+  "child_system_ms": 224.98,
+  "child_user_ms": 110255.73199999999,
+  "command": [
+    "target/release/examples/symmetrised_oracle_bench",
+    "--only",
+    "0",
+    "31",
+    "2",
+    "--targets",
+    "2",
+    "--no-sat",
+    "--node-budget",
+    "50000"
+  ],
+  "ended_unix_ns": 1790092395552184000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/symmetrised_oracle_bench",
+  "executable_sha256": "69d3b67ac23354075ed8e859f12d9b5507088a9575f1d58a85e69c0cc3cf152d",
+  "exit_code": 0,
+  "peak_rss_bytes": 464715776,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790092284879374000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 608,
+  "stdout_sha256": "9cc47d1a0d74ce312ad772f80f0100922d64754e5a0f80e6f0841516c93649ba",
+  "task_id": "TASK-KIC-GROEBNER-FUSED-HASH-PAIRED-CONTROL-N31-T2-20260922",
+  "wall_ms": 110673.03875
+}
