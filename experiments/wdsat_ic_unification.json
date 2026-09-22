@@ -25,7 +25,9 @@
       "moebius_transform",
       "gray_incremental_early_exit",
       "monica_hybrid_range_extension",
-      "avx2_4x64_gray_opt_in"
+      "avx2_4x64_gray_opt_in",
+      "l4_fl0_register_hoist",
+      "parallel_outer_specialization_n20"
     ],
     "libfes_lite": "https://github.com/cbouilla/libfes-lite",
     "note": "mq-fes ports ALMASTY/libfes ideas (public domain); not a binding to that tree"
@@ -34,22 +36,37 @@
     "class": "engineering",
     "unit": "wall_ns_release",
     "instance_find_one": "dense quadratic n=18 m=18 planted Gray-index 2000",
-    "moebius_ns": 3459704,
-    "gray_ffs_l4_find_one_ns": 12675,
-    "ratio_moebius_over_gray_find_one": 272.95,
+    "moebius_ns": 4854177,
+    "gray_ffs_l4_find_one_ns": 18836,
+    "ratio_moebius_over_gray_find_one": 257.71,
     "instance_full_enum": "dense quadratic n=18 m=18 no early exit",
-    "gray_ffs_l4_full_ns": 121930,
-    "gray_on_step_full_ns": 4069116,
-    "ratio_on_step_over_ffs": 33.37,
+    "gray_ffs_l4_full_ns": 126974,
+    "gray_on_step_full_ns": 3550511,
+    "ratio_on_step_over_ffs": 27.96,
+    "l4_hot_path": "Fl[0] held in a register + unchecked Fq/Fl indexing on the L=4 chunk",
+    "parallel_outer": {
+      "auto_select": "n >= 20 and max_solutions > 1",
+      "outer_bits": 4,
+      "instance": "dense quadratic n=20 m=24 unsat full enum",
+      "parallel_ns": 378987,
+      "serial_l4_ns": 437928,
+      "ratio_serial_over_parallel": 1.16,
+      "note": "specialisation tax dominates below n=20; stays serial there"
+    },
+    "tried_and_not_auto_selected": {
+      "scalar_l8_hardcoded": "within noise of L=4 at n=18 (~0.7–1.2×); I-cache / spill",
+      "l4_batch_probe": "~0.45× vs plain L=4 on unsat — well-predicted zero-checks beat rewind copies",
+      "avx2_4x64_batch": "~0.6–0.8× vs scalar L=4 batch on n=16 m=24"
+    },
     "avx2_instance_full_enum": "dense quadratic n=16 m=24",
-    "avx2_4x64_full_ns": 100295,
-    "scalar_l4_full_ns_matched": 35366,
-    "ratio_l4_over_avx2": 0.35,
+    "avx2_4x64_full_ns": 116177,
+    "scalar_l4_full_ns_matched": 49096,
+    "ratio_l4_over_avx2": 0.42,
     "avx2_role": "opt-in correct port; not auto-selected — loses to packed-u64 scalar L=4 on single-system Semaev",
     "monica_vs_moebius_n14_m32_ratio": 0.22,
     "monica_role": "range extension past Moebius n<=24 cap; not an in-cap speedup",
     "floor_ratio": "flat",
-    "technique": "libfes-lite FFS O(1)/step + L=4 unrolled chunk; AVX2 4x64 opt-in"
+    "technique": "libfes-lite FFS O(1)/step + L=4 unrolled chunk with Fl[0] hoist; parallel outer at n>=20; AVX2 4x64 opt-in"
   },
   "ecc2k130": {
     "field": "F_2^131",

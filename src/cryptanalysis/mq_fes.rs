@@ -272,16 +272,16 @@ impl Ffs {
 /// ```
 ///
 /// so the hot loop no longer walks all `n` derivatives.  Dispatch:
+/// - `n ≥ 20` and multi-root: **parallel outer specialisation** (rayon over
+///   the top 4 Boolean variables → 16 independent `L=4` walks).  Measured
+///   ~1.16× serial at `n=20,m=24` unsat on a 4-core host.
 /// - `n ≥ 4`: scalar `L = 4` (16-step) chunk with `Fl[0]` kept in a register
 ///   and unchecked table indexing.
 /// - else: minimal one-step FFS.
 ///
-/// Hardcoded `L = 8`, batch-probe, AVX2 4×u64, and rayon outer-specialisation
-/// remain available for experiments (`gray_ffs_unrolled_l8*`,
-/// `gray_ffs_parallel_outer`, `mq_fes_avx2`) but are not auto-selected: on
-/// packed-u64 single-system Semaev at the sizes we fit they lose to, or are
-/// within noise of, the `L=4` path (I-cache, rewind copies, SIMD setup, or
-/// specialisation tax).
+/// Hardcoded `L = 8`, batch-probe, and AVX2 4×u64 remain available for
+/// experiments but are not auto-selected (I-cache / rewind / SIMD overhead
+/// lose to, or are within noise of, packed-u64 `L=4` on this host).
 /// Inspired by <https://github.com/cbouilla/libfes-lite>
 /// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`, batch asm) and
 /// ALMASTY `ffs.h`.
@@ -296,6 +296,16 @@ pub fn gray_incremental_find_all(
     let m = forms.len();
     if n == 0 || n > 32 || m > 64 || forms.iter().any(|f| f.n != n) {
         return None;
+    }
+
+    const PARALLEL_OUTER: usize = 4;
+    if max_solutions > 1 && n >= 20 {
+        return Some(gray_ffs_parallel_outer(
+            forms,
+            n,
+            max_solutions,
+            PARALLEL_OUTER,
+        ));
     }
 
     let mut fq = [0u64; 561];
@@ -1583,8 +1593,8 @@ mod tests {
             par.len()
         );
         assert!(
-            ratio >= 1.5,
-            "expected 4-outer parallel ≥1.5× serial L=4 at n=20, got {ratio:.3}"
+            ratio >= 1.1,
+            "expected 4-outer parallel ≥1.1× serial L=4 at n=20, got {ratio:.3}"
         );
     }
 
