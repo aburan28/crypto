@@ -3723,5 +3723,42 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section id="toy-subfield-geometry-20260922" class="panel">
+  <h2>Subfield factor bases: toy relation geometry <span class="chip">structural diagnostic</span></h2>
+  <p>New exhaustive experiment: 96 variants on four fixed fields of at most
+    12 bits, with 431,576 verified nonidentity pair witnesses. A narrower
+    product span retained at least the generic base's target coverage in all
+    four initial holdout cells and all four independently selected follow-up
+    cells. The latter require an odd prime factor with cofactor at most eight.
+    This is a geometric screen; no polynomial solver or DLP is executed.</p>
+  <p>Source: <a href="../research/toy_subfield_relation_geometry_20260922/README.md">experiment and limitations</a>,
+    <a href="../research/toy_subfield_relation_geometry_20260922/RESULTS.md">all 96 matched rows</a>,
+    <a href="../research/toy_subfield_relation_geometry_20260922/results_followup.json">follow-up raw evidence</a>.
+    The table shows the independent follow-up at coordinate dimension k.
+    Coverage is over the whole toy curve, not just its prime-order subgroup.</p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>n / k</th><th>Family</th><th>Base points</th><th>Product-span rank</th><th>Distinct targets / curve order</th><th>Total S / vs rho</th></tr></thead>
+    <tbody>
+      <tr><td>6 / 2</td><td>Generic linear</td><td>3</td><td>3</td><td>2 / 52</td><td>Unmeasured</td></tr>
+      <tr><td>6 / 2</td><td>Subfield linear</td><td>3</td><td>2</td><td>2 / 52</td><td>Unmeasured</td></tr>
+      <tr><td>6 / 2</td><td>Scaled subfield linear</td><td>3</td><td>2</td><td>2 / 52</td><td>Unmeasured</td></tr>
+      <tr><td>9 / 3</td><td>Generic linear</td><td>7</td><td>5</td><td>18 / 548</td><td>Unmeasured</td></tr>
+      <tr><td>9 / 3</td><td>Subfield linear</td><td>11</td><td>3</td><td>50 / 548</td><td>Unmeasured</td></tr>
+      <tr><td>9 / 3</td><td>Scaled subfield linear</td><td>3</td><td>3</td><td>2 / 548</td><td>Unmeasured</td></tr>
+      <tr><td>10 / 2</td><td>Generic linear</td><td>1</td><td>3</td><td>0 / 1048</td><td>Unmeasured</td></tr>
+      <tr><td>10 / 2</td><td>Subfield linear</td><td>7</td><td>2</td><td>18 / 1048</td><td>Unmeasured</td></tr>
+      <tr><td>10 / 2</td><td>Scaled subfield linear</td><td>7</td><td>2</td><td>18 / 1048</td><td>Unmeasured</td></tr>
+      <tr><td>12 / 4</td><td>Generic linear</td><td>13</td><td>10</td><td>72 / 4184</td><td>Unmeasured</td></tr>
+      <tr><td>12 / 4</td><td>Subfield linear</td><td>23</td><td>4</td><td>242 / 4184</td><td>Unmeasured</td></tr>
+      <tr><td>12 / 4</td><td>Scaled subfield linear</td><td>19</td><td>4</td><td>162 / 4184</td><td>Unmeasured</td></tr>
+    </tbody>
+  </table></div>
+  <p>Product-span rank bounds the rank of quadratic coefficient vectors; it is
+    not a measured solving degree. Equal coordinate dimensions can produce
+    different numbers of base points. The scaled family regresses at n=9.
+    At dimension 2k in the degree-five toy extension n=10, the ranks are 10,
+    6 and 6, with 86, 187 and 204 covered targets respectively; the base point
+    counts are 15, 23 and 23. No end-to-end speedup or Oakley-size result follows.</p>
+</section>
 </body>
 </html>
