@@ -1,8 +1,11 @@
 #!/bin/bash
 # Build, verify and bench job behind benchmarks/two-chains/summary.json
 # (TWO-CHAINS.md).  Runs inside nvidia/cuda:13.3.1-devel-ubuntu24.04 with the
-# ecc2k130 tree mounted at /work and an output directory at /results; the
-# launcher is aws/bench_job.py.
+# ecc2k130 tree mounted at /work and an output directory at /results (or
+# $RESULTS).  Launchers, all running this same script on one RTX PRO 6000:
+#   modal run modal_job.py --job benchmarks/two-chains/gpujob.sh --out DIR
+#   python3 runpod_job.py --job benchmarks/two-chains/gpujob.sh --out DIR
+#   python3 aws/bench_job.py --job benchmarks/two-chains/gpujob.sh --out DIR
 #
 # Every binary is the 20 B/s build of ONE-BLOCK-GEOMETRY.md plus what its name
 # says.  Verification forces the same walk count on every binary (1,540,096
@@ -17,7 +20,7 @@ REPS=${REPS:-5}
 {
   nvidia-smi --query-gpu=name,driver_version,clocks.max.sm,power.limit,memory.total --format=csv,noheader
   nvcc --version | tail -2
-  echo "source: $(cat /work/SOURCE_REV 2>/dev/null || echo unknown)"
+  echo "source: ${SOURCE_REV:-$(cat /work/SOURCE_REV 2>/dev/null || echo unknown)}"
 } | tee "$R/host.txt"
 
 build() {

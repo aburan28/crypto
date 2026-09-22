@@ -32,10 +32,13 @@
 #   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
 #                      selection (default 0)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
+#   PACKED_CHAINS  independent Montgomery chains per thread, 1 or 2 (default 1;
+#                  TWO-CHAINS.md; 2 needs TAG_DENOM and an even BATCH)
 #   PHASE_PROFILE  clock64() timing of the walk's three phases, at exit
 #   ARCH     CUDA architectures
 #
-# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md.
+# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md;
+# `make gpu-rtx-pro6000-chains2` its two-chain form (TWO-CHAINS.md).
 
 MODAL   ?= modal
 NVCC    ?= nvcc
