@@ -76,9 +76,10 @@ use crate::binary_ecc::{BinaryPoint, F2mElement};
 use super::koblitz_groebner::{f4_profile, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
     build_frobenius_factor_base, build_frobenius_factor_base_from_divisor, groebner_decompose,
-    build_frobenius_union_factor_base, build_subgroup_orbit_factor_base, invariant_factors,
-    projected_signed_orbit_count, restrict_factor_base_to_orbits, saturate_factor_base_two_torsion,
-    span_f2, top_factor_indices, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
+    build_frobenius_union_factor_base, build_standard_subspace_factor_base,
+    build_subgroup_orbit_factor_base, invariant_factors, projected_signed_orbit_count,
+    restrict_factor_base_to_orbits, saturate_factor_base_two_torsion, span_f2,
+    top_factor_indices, FactorBaseDomain, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
 };
 
 // ── Specifications ─────────────────────────────────────────────────
@@ -92,6 +93,10 @@ use super::koblitz_index_calculus::{
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum FactorBaseSpec {
+    /// The plain polynomial-basis span `⟨1,z,…,z^(dimension-1)⟩` used by
+    /// the standard Semaev benchmark cells.  It is algebraic but not in
+    /// general Frobenius-closed, so pair tables must remain unfolded.
+    StandardSubspace { dimension: u32 },
     /// The legacy single-factor family: the `index`-th degree-`ord_n(2)`
     /// irreducible factor of `x^n − 1` (`ic run --factor-index`).
     Factor { index: usize },
@@ -138,6 +143,7 @@ impl FactorBaseSpec {
     /// Short family label for reports.
     pub fn family(&self) -> &'static str {
         match self {
+            Self::StandardSubspace { .. } => "standard_subspace",
             Self::Factor { .. } => "factor",
             Self::Divisor { .. } => "divisor",
             Self::FrobeniusUnion { .. } => "frobenius_union",
@@ -158,6 +164,9 @@ impl FactorBaseSpec {
     /// Build the base this spec names on `kc`, or explain why not.
     pub fn materialize(&self, kc: &KoblitzCurve) -> Result<FrobeniusFactorBase, String> {
         match self {
+            Self::StandardSubspace { dimension } => {
+                build_standard_subspace_factor_base(kc, *dimension)
+            }
             Self::Factor { index } => build_frobenius_factor_base(kc, *index).ok_or_else(|| {
                 format!(
                     "no top-degree invariant factor with index {index} on {}",
@@ -238,6 +247,7 @@ impl FactorBaseSpec {
 pub fn domain_label(domain: &FactorBaseDomain) -> String {
     match domain {
         FactorBaseDomain::LinearSubspace => "linear_subspace".into(),
+        FactorBaseDomain::StandardSubspace => "standard_subspace".into(),
         FactorBaseDomain::SubspaceSubset { retained_orbits } => {
             format!("subspace_subset({retained_orbits} orbits)")
         }

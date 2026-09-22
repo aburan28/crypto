@@ -970,7 +970,7 @@ fn main() {
     let batch_seed = args.get(6).map(|value| value.parse::<u64>().unwrap());
     let fixture_target = FixtureTarget::parse(args.get(7).map(String::as_str));
     assert!(matches!(backend, "reference" | "packed"));
-    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
+    assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53 | 59));
     assert!(fixtures > 0);
     let curve = KoblitzCurve::new(a, n).expect("frozen exact rung must construct");
     let modulus = curve.subgroup_order.to_u64_digits()[0];
@@ -1019,6 +1019,7 @@ mod packed_tests {
             (23, 1),
             (37, 0),
             (41, 0),
+            (59, 1),
         ] {
             let curve = KoblitzCurve::new(a, n).unwrap();
             let generator = raw_point(curve.generator());

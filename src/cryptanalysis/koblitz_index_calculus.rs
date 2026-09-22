@@ -887,6 +887,10 @@ pub fn frobenius_eigenvalue_q(
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FactorBaseDomain {
     LinearSubspace,
+    /// The polynomial-basis span `⟨1,z,…,z^(ell-1)⟩`.  Unlike a GGMP
+    /// kernel it need not be Frobenius-closed; its base columns collapse
+    /// only by negation before public cofactor projection.
+    StandardSubspace,
     /// A subset of the signed Frobenius orbits of a linear subspace
     /// base, selected by the factor-base search.  The coordinates still
     /// live in the subspace (so the algebraic system keeps its `ℓ`
@@ -954,7 +958,9 @@ impl FrobeniusFactorBase {
     pub fn uses_ambient_basis(&self) -> bool {
         !matches!(
             self.domain,
-            FactorBaseDomain::LinearSubspace | FactorBaseDomain::SubspaceSubset { .. }
+            FactorBaseDomain::LinearSubspace
+                | FactorBaseDomain::StandardSubspace
+                | FactorBaseDomain::SubspaceSubset { .. }
         )
     }
 
@@ -1006,7 +1012,12 @@ impl FrobeniusFactorBase {
                 continue;
             };
             let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
-            for _ in 0..kc.n {
+            let steps = if self.domain == FactorBaseDomain::StandardSubspace {
+                1
+            } else {
+                kc.n
+            };
+            for _ in 0..steps {
                 for candidate in [current.clone(), point_neg(&current)] {
                     classes.entry(point_key(&candidate)).or_insert(candidate);
                 }
@@ -1648,6 +1659,80 @@ pub fn build_frobenius_factor_base_from_divisor(
 pub fn build_frobenius_factor_base(kc: &KoblitzCurve, index: usize) -> Option<FrobeniusFactorBase> {
     let idx = *top_factor_indices(kc).get(index)?;
     build_frobenius_factor_base_from_divisor(kc, &[idx])
+}
+
+/// Build the plain polynomial-basis factor base
+/// `x ∈ ⟨1,z,…,z^(ell-1)⟩` used by the standard Semaev benchmark cells.
+///
+/// This subspace is algebraic and target-independent but need not be
+/// Frobenius-closed.  Its pre-projection columns therefore identify only
+/// `P` with `-P`; public cofactor projection may subsequently merge
+/// signed Frobenius-related subgroup points through
+/// [`ProjectedFactorBase`].  Folded pair tables are forbidden for this
+/// domain because their covering proof requires closure of the base.
+pub fn build_standard_subspace_factor_base(
+    kc: &KoblitzCurve,
+    ell: u32,
+) -> Result<FrobeniusFactorBase, String> {
+    if ell == 0 || ell > 20 || ell >= kc.n {
+        return Err("standard-subspace dimension must be 1..=20 and smaller than n".into());
+    }
+    let subspace_basis: Vec<F2mElement> = (0..ell)
+        .map(|i| F2mElement::from_bit_positions(&[i], kc.n))
+        .collect();
+    let subspace = span_f2(&subspace_basis, kc.n);
+    if subspace.len() != 1usize << ell {
+        return Err("standard polynomial basis was not independent".into());
+    }
+    let fast = (kc.n % 2 == 1).then(|| FastCurve::new(&kc.curve)).flatten();
+    let mut points = Vec::new();
+    for x in &subspace {
+        points.extend(match &fast {
+            Some(curve) => points_with_x_fast(curve, x),
+            None => points_with_x(&kc.curve, x),
+        });
+    }
+    if points.is_empty() {
+        return Err("standard subspace contains no rational curve point".into());
+    }
+    let index_of: HashMap<(BigUint, BigUint), usize> = points
+        .iter()
+        .enumerate()
+        .map(|(i, point)| (point_key(point), i))
+        .collect();
+    let orbits: Vec<Vec<usize>> = (0..points.len()).map(|i| vec![i]).collect();
+    let orbit_of: Vec<(usize, u32)> = (0..points.len()).map(|i| (i, 0)).collect();
+    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
+    let mut signed_orbits = Vec::new();
+    for i in 0..points.len() {
+        if signed_orbit_of[i].0 != usize::MAX {
+            continue;
+        }
+        let orbit = signed_orbits.len();
+        let negated = *index_of
+            .get(&point_key(&point_neg(&points[i])))
+            .ok_or("standard subspace was not closed under point negation")?;
+        signed_orbit_of[i] = (orbit, 0, false);
+        let mut members = vec![i];
+        if negated != i {
+            signed_orbit_of[negated] = (orbit, 0, true);
+            members.push(negated);
+        }
+        signed_orbits.push(members);
+    }
+    Ok(FrobeniusFactorBase {
+        domain: FactorBaseDomain::StandardSubspace,
+        ell,
+        f_j: 0,
+        linearised_exponents: Vec::new(),
+        subspace,
+        subspace_basis,
+        points,
+        orbits,
+        orbit_of,
+        signed_orbits,
+        signed_orbit_of,
+    })
 }
 
 /// Shared tail of the factor-base constructors: span the subspace,
@@ -2899,6 +2984,9 @@ impl PairSumTable {
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
     ) -> Option<Self> {
+        if fb.domain == FactorBaseDomain::StandardSubspace {
+            return None;
+        }
         let n_points = fb.points.len();
         if n_points > u32::MAX as usize {
             return None;
@@ -4412,7 +4500,12 @@ pub fn sat_decompose_with(
         enc.solver
             .set_branch_priority(&(1..=(m * fb.subspace_basis.len()) as u32).collect::<Vec<_>>());
     }
-    if options.restrict_to_factor_base || fb.domain != FactorBaseDomain::LinearSubspace {
+    if options.restrict_to_factor_base
+        || !matches!(
+            fb.domain,
+            FactorBaseDomain::LinearSubspace | FactorBaseDomain::StandardSubspace
+        )
+    {
         let ell = fb.subspace_basis.len();
         let legal_x: std::collections::HashSet<BigUint> = fb
             .points
@@ -9282,6 +9375,45 @@ mod tests {
         assert_eq!(small.points.len(), 15);
         assert_eq!(large.points.len(), 71);
         assert!(large.orbits.len() > small.orbits.len());
+    }
+
+    #[test]
+    fn the_n59_standard_subspace_matches_the_phase_b_factor_base() {
+        let kc = KoblitzCurve::new(1, 59).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 9).unwrap();
+        assert_eq!(fb.domain, FactorBaseDomain::StandardSubspace);
+        assert_eq!(fb.subspace.len(), 512);
+        assert_eq!(fb.points.len(), 483);
+        assert!(fb.points.iter().all(|point| match point {
+            BinaryPoint::Affine { x, .. } => x.to_biguint() < BigUint::from(512u32),
+            BinaryPoint::Infinity => false,
+        }));
+        assert_eq!(
+            fb.signed_orbits.iter().map(Vec::len).sum::<usize>(),
+            fb.points.len()
+        );
+        assert!(
+            PairSumTable::build_folded_within(&kc, &fb, PairSumTable::DEFAULT_BYTE_BUDGET)
+                .is_none(),
+            "a non-Frobenius-closed base must never use the folded table"
+        );
+        let compact = PairSumTable::build_compact_within(
+            &kc,
+            &fb,
+            PairSumTable::DEFAULT_BYTE_BUDGET,
+        )
+        .unwrap();
+        let fc = compact.curve();
+        let target = [0usize, 1, 2]
+            .into_iter()
+            .fold(FastPoint::INFINITY, |sum, i| fc.add(sum, fc.lift(&fb.points[i])));
+        let witness = compact.decompose_fast(target, 3).expect("planted standard-base triple");
+        assert_eq!(
+            witness.iter().fold(FastPoint::INFINITY, |sum, &i| {
+                fc.add(sum, fc.lift(&fb.points[i]))
+            }),
+            target
+        );
     }
 
     #[test]
