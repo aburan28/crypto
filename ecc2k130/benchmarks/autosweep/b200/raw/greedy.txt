@@ -1,0 +1,13 @@
+greedy combo1 = base + fused: 17.4816 B/s vs 15.3716  1965 MHz, 529.02 W, 45
+  keep
+greedy combo2 = combo1 + fused-pipe: 17.15075 B/s vs 17.4816  1965 MHz, 512.11 W, 45
+  drop
+greedy combo3 = combo1 + batch32-256x1: 17.7529 B/s vs 17.4816  1965 MHz, 570.45 W, 47
+  keep
+greedy combo4 = combo3 + karat3-not-topclmad: 18.64145 B/s vs 17.7529  1965 MHz, 547.78 W, 46
+  keep
+greedy combo5 = combo4 + batch32-512x1: 19.4024 B/s vs 18.64145  1965 MHz, 599.34 W, 47
+  keep
+greedy combo6 = combo5 + no-pipe-select: 19.39715 B/s vs 19.4024  1965 MHz, 558.64 W, 46
+  drop
+greedy result: combo5 (TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0 BATCH=32 THREADS=512 MINBLOCKS=1) at 19.4024 B/s
