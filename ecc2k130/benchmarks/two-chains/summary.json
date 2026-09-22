@@ -2,7 +2,7 @@
   "note": "TWO-CHAINS.md",
   "unit": "billions of complete scalar updates per second, `finished:` line",
   "command": "--curve 131 --packed --bench --steps 1024 --launches 64 --verify 0, automatic worker count, alternating binaries",
-  "verifyCommand": "--curve 131 --packed --threads <forced> --dp-weight 48 --dp-cap 262144 --steps 96 --launches 6 --verify 300 --run-id 7 --dp-file",
+  "verifyCommand": "--curve 131 --packed --threads <forced common count> --dp-weight 48 --dp-cap 262144 --steps 96 --launches 6 --verify 300 --run-id 7 --dp-file",
   "repetitions": 5,
   "host": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\nsource: 40a18e281d7a879c38a199f14be9b52e8a6c4a7a",
   "launch": {
@@ -127,7 +127,8 @@
         0.6989629155805928
       ],
       "pairedRatioMedian": 0.6959283398055649,
-      "pairedRatioMin": 0.6921963662145392
+      "pairedRatioMin": 0.6921963662145392,
+      "pairedRatioMax": 0.6989629155805928
     },
     "c2-384x32": {
       "samplesBps": [
@@ -182,7 +183,8 @@
         0.7850858273469271
       ],
       "pairedRatioMedian": 0.7841899384886052,
-      "pairedRatioMin": 0.7820147237760517
+      "pairedRatioMin": 0.7820147237760517,
+      "pairedRatioMax": 0.7860336210242893
     },
     "c2-512x16": {
       "samplesBps": [
@@ -237,7 +239,8 @@
         0.7884771613235396
       ],
       "pairedRatioMedian": 0.7852623505911492,
-      "pairedRatioMin": 0.7813810441204956
+      "pairedRatioMin": 0.7813810441204956,
+      "pairedRatioMax": 0.7884771613235396
     },
     "ref-alusqr": {
       "samplesBps": [
@@ -292,7 +295,8 @@
         0.9954673526704986
       ],
       "pairedRatioMedian": 0.992291681545949,
-      "pairedRatioMin": 0.9896439792231962
+      "pairedRatioMin": 0.9896439792231962,
+      "pairedRatioMax": 0.9954673526704986
     },
     "c2-256x32-alusqr": {
       "samplesBps": [
@@ -347,11 +351,12 @@
         0.6748112037512369
       ],
       "pairedRatioMedian": 0.672103301058259,
-      "pairedRatioMin": 0.6685534761638692
+      "pairedRatioMin": 0.6685534761638692,
+      "pairedRatioMax": 0.6748112037512369
     }
   },
   "phaseProfile": {
-    "ref": {
+    "ref-prof": {
       "cyclesPerWarpStep": 184285,
       "forward": 69639,
       "forwardPct": 37.8,
@@ -362,7 +367,7 @@
       "warpCyclesPerUpdate": 11517.8,
       "rateBps": 19.918973
     },
-    "c2-256x32": {
+    "c2-256x32-prof": {
       "cyclesPerWarpStep": 259949,
       "forward": 110121,
       "forwardPct": 42.4,

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Freeze one two-chains job run into summary.json (TWO-CHAINS.md section 5).
+"""Freeze one GPU job run into summary.json (TWO-CHAINS.md sections 5 and 6).
 
     python3 benchmarks/two-chains/summarize.py /tmp/two-chains-run1 benchmarks/two-chains
+    python3 benchmarks/two-chains/summarize.py /tmp/fast-clmad-b200 benchmarks/fast-clmad \
+        --variants ref,clsq,topclmad,topclmad-clsq,onbinv,c2-256x32 --profiles ref-prof,topclmad-clsq-prof
 
-Reads the launcher's launch.json and the job's results/ (bench.txt, verify-*.txt,
+Reads the launcher's launch.json and the job's results/ (job.log, verify-*.txt,
 dp-identity.txt, profile-*.txt, build-*.txt, host.txt), computes per-variant
 medians and the paired ratios against the reference within each repetition,
 and writes summary.json plus the raw text files into the target directory.
@@ -80,8 +82,16 @@ def parse_profile(path):
 
 
 def main():
-    run = pathlib.Path(sys.argv[1]).resolve()
-    target = pathlib.Path(sys.argv[2]).resolve()
+    global VARIANTS
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("run"); ap.add_argument("target")
+    ap.add_argument("--variants", default=",".join(VARIANTS), help="bench variant names, reference first")
+    ap.add_argument("--profiles", default="ref-prof,c2-256x32-prof", help="PHASE_PROFILE binaries")
+    a = ap.parse_args()
+    VARIANTS = a.variants.split(",")
+    run = pathlib.Path(a.run).resolve()
+    target = pathlib.Path(a.target).resolve()
     results = run / "results"
     launch = json.loads((run / "launch.json").read_text())
     # job.log carries the "=== bench <variant> rep <n>" headers with the samples;
@@ -105,12 +115,13 @@ def main():
             entry["pairedRatioToRef"] = pairs
             entry["pairedRatioMedian"] = statistics.median(pairs) if pairs else None
             entry["pairedRatioMin"] = min(pairs) if pairs else None
+            entry["pairedRatioMax"] = max(pairs) if pairs else None
         variants[name] = entry
     summary = {
         "note": "TWO-CHAINS.md",
         "unit": "billions of complete scalar updates per second, `finished:` line",
         "command": "--curve 131 --packed --bench --steps 1024 --launches 64 --verify 0, automatic worker count, alternating binaries",
-        "verifyCommand": "--curve 131 --packed --threads <forced> --dp-weight 48 --dp-cap 262144 --steps 96 --launches 6 --verify 300 --run-id 7 --dp-file",
+        "verifyCommand": "--curve 131 --packed --threads <forced common count> --dp-weight 48 --dp-cap 262144 --steps 96 --launches 6 --verify 300 --run-id 7 --dp-file",
         "repetitions": reps,
         "host": (results / "host.txt").read_text().strip() if (results / "host.txt").exists() else None,
         "launch": {k: launch.get(k) for k in ("provider", "gpu", "cudaImage", "gitRev", "gitDirty", "startedAt", "finishedAt", "exitCode", "seconds", "deviceLine")},
@@ -118,8 +129,7 @@ def main():
                      "basis": "1.62 lane-CLMADs per SM-clock, 188 SMs, 2.42 GHz (ONE-BLOCK-GEOMETRY.md section 1)"},
         "referenceBps": {"oneBlockGeometry": 20.078, "thisSession": variants["ref"]["medianBps"]},
         "variants": variants,
-        "phaseProfile": {"ref": parse_profile(results / "profile-ref-prof.txt"),
-                         "c2-256x32": parse_profile(results / "profile-c2-256x32-prof.txt")},
+        "phaseProfile": {name: parse_profile(results / ("profile-%s.txt" % name)) for name in a.profiles.split(",")},
     }
     target.mkdir(parents=True, exist_ok=True)
     (target / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
@@ -134,6 +144,8 @@ def main():
             "%.4f" % entry["pairedRatioMedian"] if entry.get("pairedRatioMedian") else "-",
             entry["verify"]["verified"], entry["verify"]["distinguishedPoints"], entry["verify"]["dropped"],
             "identical" if (entry["dpIdentity"] or {}).get("identicalToRef") else entry["dpIdentity"]))
+    for name, prof in summary["phaseProfile"].items():
+        if prof: print("profile %-20s %s" % (name, {k: v for k, v in prof.items() if k in ("cyclesPerWarpStep", "forward", "inversion", "reverse", "warpCyclesPerUpdate", "rateBps")}))
     return 0
 
 
