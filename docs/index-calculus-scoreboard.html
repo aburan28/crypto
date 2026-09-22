@@ -2062,6 +2062,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td>Monica hybrid (ALMASTY <code>monica.c</code>)</td><td>—</td><td>agrees with Gray/Möbius on toys</td>
           <td>Range extension for <code>n&gt;24</code>; not faster than Möbius inside the cap (~0.22× on <code>n=14,m=32</code>)</td>
           <td><span class="chip">engineering</span></td></tr>
+        <tr><td>AVX2 Gray (libfes <code>avx2_8x32</code> → 4×u64)</td><td>—</td><td>agrees with L=4 / Möbius</td>
+          <td>Opt-in only; <strong>slower</strong> than packed-u64 scalar L=4 on single-system Semaev (~0.35× on <code>n=16,m=24</code>)</td>
+          <td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table></div>
   </div>

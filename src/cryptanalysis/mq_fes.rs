@@ -215,23 +215,23 @@ pub fn fes_find_all(forms: &[QuadraticForm], max_solutions: usize) -> Vec<u64> {
 
 /// Triangular index of the monomial `x_i x_j` with `i < j` (libfes `idxq`).
 #[inline]
-fn idxq(i: usize, j: usize) -> usize {
+pub(crate) fn idxq(i: usize, j: usize) -> usize {
     debug_assert!(i < j);
     j * (j - 1) / 2 + i
 }
 
 /// Bitner–Ehrlich–Reingold focus pointers (`libfes-lite` / ALMASTY `ffs.h`).
 #[derive(Clone, Debug)]
-struct Ffs {
+pub(crate) struct Ffs {
     focus: [i32; 34],
     stack: [i32; 33],
     sp: i32,
-    k1: i32,
-    k2: i32,
+    pub(crate) k1: i32,
+    pub(crate) k2: i32,
 }
 
 impl Ffs {
-    fn reset(n: usize) -> Self {
+    pub(crate) fn reset(n: usize) -> Self {
         let mut focus = [0i32; 34];
         for j in 0..=32 {
             focus[j] = j as i32;
@@ -248,7 +248,7 @@ impl Ffs {
     }
 
     #[inline]
-    fn step(&mut self) {
+    pub(crate) fn step(&mut self) {
         let j = self.focus[0];
         self.focus[0] = 0;
         self.focus[j as usize] = self.focus[(j + 1) as usize];
@@ -273,9 +273,11 @@ impl Ffs {
 ///
 /// so the hot loop no longer walks all `n` derivatives.  For `n ≥ 4` the
 /// search uses a 16-way unrolled chunk (`L = 4`) matching
-/// `feslite_generic_enum_1x32`.  Early exit on the first common zero still
-/// applies.  Inspired by <https://github.com/cbouilla/libfes-lite>
-/// (`generic_minimal.c`, `generic_1x32.c`) and ALMASTY `ffs.h`.
+/// `feslite_generic_enum_1x32`.  When AVX2 is available, `n ≥ 11` and
+/// `m ≤ 32`, an 8-lane specialised port of libfes `avx2_8x32` runs instead.
+/// Early exit on the first common zero still applies.  Inspired by
+/// <https://github.com/cbouilla/libfes-lite>
+/// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`) and ALMASTY `ffs.h`.
 pub fn gray_incremental_find_all(
     forms: &[QuadraticForm],
     max_solutions: usize,
@@ -288,6 +290,11 @@ pub fn gray_incremental_find_all(
     if n == 0 || n > 32 || m > 64 || forms.iter().any(|f| f.n != n) {
         return None;
     }
+
+    // AVX2 4×u64 is available via `mq_fes_avx2` but is not auto-selected:
+    // release walls show it loses to the packed-u64 scalar `L=4` path on
+    // single-system Semaev instances (libfes's asm+multi-system batch is a
+    // different regime).  Call `gray_ffs_avx2_8x32` explicitly to use it.
 
     // Stack tables: Fq through fictive n+1 is at most idxq(0,34)=561; Fl ≤ 34.
     let mut fq = [0u64; 561];
@@ -373,7 +380,7 @@ fn step2(fq: &[u64; 561], fl: &mut [u64; 34], a: usize, b: usize, index: u64, ou
 }
 
 /// libfes `generic_1x32` / `UNROLLED_CHUNK`: 16 Gray steps per FFS advance.
-fn gray_ffs_unrolled_l4(
+pub(crate) fn gray_ffs_unrolled_l4(
     fq: &mut [u64; 561],
     fl: &mut [u64; 34],
     n: usize,

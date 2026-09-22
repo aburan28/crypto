@@ -24,10 +24,11 @@
     "techniques": [
       "moebius_transform",
       "gray_incremental_early_exit",
-      "monica_hybrid_range_extension"
+      "monica_hybrid_range_extension",
+      "avx2_4x64_gray_opt_in"
     ],
     "libfes_lite": "https://github.com/cbouilla/libfes-lite",
-    "note": "mq-fes ports ALMASTY ideas (public domain); not a binding to that tree"
+    "note": "mq-fes ports ALMASTY/libfes ideas (public domain); not a binding to that tree"
   },
   "mq_fes_speed": {
     "class": "engineering",
@@ -40,10 +41,15 @@
     "gray_ffs_l4_full_ns": 121930,
     "gray_on_step_full_ns": 4069116,
     "ratio_on_step_over_ffs": 33.37,
+    "avx2_instance_full_enum": "dense quadratic n=16 m=24",
+    "avx2_4x64_full_ns": 100295,
+    "scalar_l4_full_ns_matched": 35366,
+    "ratio_l4_over_avx2": 0.35,
+    "avx2_role": "opt-in correct port; not auto-selected — loses to packed-u64 scalar L=4 on single-system Semaev",
     "monica_vs_moebius_n14_m32_ratio": 0.22,
     "monica_role": "range extension past Moebius n<=24 cap; not an in-cap speedup",
     "floor_ratio": "flat",
-    "technique": "libfes-lite FFS O(1)/step + L=4 unrolled chunk"
+    "technique": "libfes-lite FFS O(1)/step + L=4 unrolled chunk; AVX2 4x64 opt-in"
   },
   "ecc2k130": {
     "field": "F_2^131",
