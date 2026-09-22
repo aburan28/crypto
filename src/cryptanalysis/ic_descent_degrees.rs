@@ -21,8 +21,9 @@
 //! **Not reproduced**: Petit–Quisquater's *numbers*.  Their Table 2
 //! solves a symmetrised system in `mt + 1 = m² + 1` variables — five at
 //! `m = 2`, ten at `m = 3` — obtained from the block structure of
-//! Section 4 of that paper.  [`weil_descend_s3`] and [`weil_descend_s4`]
-//! build the plain descent, `m·n'` boolean variables with no
+//! Section 4 of that paper.  The symbolic descent
+//! ([`pq_descent_symbolic`](crate::cryptanalysis::pq_descent_symbolic))
+//! builds the plain descent, `m·n'` boolean variables with no
 //! symmetrisation, so at `(n, n', m) = (11, 6, 2)` this module solves a
 //! 12-variable system where they solve a 5-variable one.  The degrees
 //! are therefore not comparable row by row and are not presented as
@@ -62,28 +63,28 @@
 
 use serde::Serialize;
 
-use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
+use crate::binary_ecc::{BinaryCurve, BinaryPoint};
 use crate::cryptanalysis::ic_boundary::{koblitz_instance, random_binary_instance, BinaryInstance};
 use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
-use crate::cryptanalysis::pq_descent::{weil_descend_s3, weil_descend_s4};
+use crate::cryptanalysis::pq_descent_symbolic::descend;
 use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_within, GbStats};
 use num_bigint::BigUint;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
-/// The caps the descent's truth-table construction imposes: it
-/// enumerates `2^{m·n'}` inputs to build the algebraic normal form.
-pub const MAX_N_PRIME_M2: u32 = 8;
-pub const MAX_N_PRIME_M3: u32 = 5;
+/// The caps the descent's truth-table construction imposed: it
+/// enumerated `2^{m·n'}` inputs to build the algebraic normal form.
+/// Kept as the record of where the §14 table stopped and why; the
+/// symbolic descent this module now uses is capped only by the
+/// monomial mask, see [`max_n_prime`].
+pub const TRUTH_TABLE_MAX_N_PRIME_M2: u32 = 8;
+pub const TRUTH_TABLE_MAX_N_PRIME_M3: u32 = 5;
 
 /// The largest subspace dimension this module will descend at `m`
-/// summands.
+/// summands: `⌊64 / m⌋`, the monomial mask's width, since the descent
+/// is symbolic and builds no table.
 pub fn max_n_prime(m: u32) -> u32 {
-    match m {
-        2 => MAX_N_PRIME_M2,
-        3 => MAX_N_PRIME_M3,
-        _ => 0,
-    }
+    crate::cryptanalysis::pq_descent_symbolic::max_n_prime(m)
 }
 
 /// One Gröbner run on one target.
@@ -180,13 +181,11 @@ pub fn curve_of(inst: &BinaryInstance) -> Option<BinaryCurve> {
 }
 
 /// `{1, z, …, z^{n'-1}}`, the standard low-degree subspace of
-/// `F_{2^n}`.  It is the subspace Gaudry's and Diem's factor bases use
-/// and the one the descent is cheapest on; a random subspace would
-/// change the constants but not the shape.
-fn standard_basis(n: u32, n_prime: u32) -> Vec<F2mElement> {
-    (0..n_prime)
-        .map(|k| F2mElement::from_bit_positions(&[k], n))
-        .collect()
+/// `F_{2^n}`, as words.  It is the subspace Gaudry's and Diem's factor
+/// bases use and the one the descent is cheapest on; a random subspace
+/// would change the constants but not the shape.
+fn standard_basis(n_prime: u32) -> Vec<u64> {
+    (0..n_prime).map(|k| 1u64 << k).collect()
 }
 
 /// The `K` or `R` instance at degree `n`.
@@ -214,8 +213,7 @@ pub fn price_descent_cell(
         return None;
     }
     let inst = instance_for(family, n, seed)?;
-    let curve = curve_of(&inst)?;
-    let v_basis = standard_basis(n, n_prime);
+    let v_basis = standard_basis(n_prime);
     let mut rng = StdRng::seed_from_u64(seed ^ ((n as u64) << 32) ^ ((summands as u64) << 16));
 
     let mut runs: Vec<TargetRun> = Vec::with_capacity(targets);
@@ -225,19 +223,12 @@ pub fn price_descent_cell(
     let mut equations = 0usize;
 
     for _ in 0..targets {
-        // A target abscissa drawn uniformly from the field.
-        let x_r = inst.gf.to_element(rng.gen::<u64>() & inst.gf.mask);
-        let (eqs, vars) = match summands {
-            2 => {
-                let sys = weil_descend_s3(&curve, &x_r, &v_basis);
-                (sys.equations, sys.n_vars)
-            }
-            3 => {
-                let sys = weil_descend_s4(&curve, &x_r, &v_basis);
-                (sys.equations, sys.n_vars)
-            }
-            _ => return None,
-        };
+        // A target abscissa drawn uniformly from the field.  The same
+        // draw the truth-table rounds made, so a cell re-run here is
+        // the same targets.
+        let x_r = rng.gen::<u64>() & inst.gf.mask;
+        let sys = descend(&inst.gf, inst.b, x_r, &v_basis, summands).ok()?;
+        let (eqs, vars) = (sys.equations, sys.n_vars);
         n_vars = vars;
         equations = eqs.len();
         // The derived bound, on the same equations the run will solve.
@@ -464,17 +455,15 @@ mod tests {
     /// reverse.
     #[test]
     fn the_pruned_basis_has_exactly_the_solutions_the_system_has() {
-        use crate::cryptanalysis::pq_descent::weil_descend_s3;
         use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_stats, solve_system_f2};
 
         let inst = instance_for("K", 11, 5).expect("K_1 over GF(2^11)");
-        let curve = curve_of(&inst).unwrap();
-        let v_basis = standard_basis(11, 5);
+        let v_basis = standard_basis(5);
         let mut rng = StdRng::seed_from_u64(20260922);
         let mut consistent = 0;
         for _ in 0..6 {
-            let x_r = inst.gf.to_element(rng.gen::<u64>() & inst.gf.mask);
-            let sys = weil_descend_s3(&curve, &x_r, &v_basis);
+            let x_r = rng.gen::<u64>() & inst.gf.mask;
+            let sys = descend(&inst.gf, inst.b, x_r, &v_basis, 2).unwrap();
             let (gb, _) = groebner_basis_f2_stats(sys.equations.clone(), sys.n_vars);
             let from_basis: std::collections::HashSet<u64> =
                 solve_system_f2(&gb, sys.n_vars).into_iter().collect();
@@ -510,13 +499,24 @@ mod tests {
         assert_eq!(semi_regular_degree(8, &[1; 8]), Some(1));
     }
 
-    /// The truth-table descent caps the subspace dimension; asking past
-    /// the cap must decline rather than attempt a `2^{3·6}`-entry table.
+    /// The descent is symbolic, so the only cap is the monomial mask;
+    /// a cell past the old truth-table cap now runs, and one past the
+    /// mask declines rather than panic.
     #[test]
-    fn the_subspace_dimension_cap_is_enforced() {
-        assert_eq!(max_n_prime(2), 8);
-        assert_eq!(max_n_prime(3), 5);
-        assert!(price_descent_cell("K", 17, 9, 2, 1, 3, None).is_none());
-        assert!(price_descent_cell("K", 17, 6, 3, 1, 3, None).is_none());
+    fn the_subspace_dimension_cap_is_the_monomial_mask() {
+        assert_eq!(max_n_prime(2), 32);
+        assert_eq!(max_n_prime(3), 21);
+        assert!(price_descent_cell("K", 17, 33, 2, 1, 3, None).is_none());
+        assert!(price_descent_cell("K", 17, 22, 3, 1, 3, None).is_none());
+        // Past the truth table's `n' = 8`: the system is built and the
+        // engine runs on it, under a budget so the test stays short.
+        let cell = price_descent_cell("K", 17, 9, 2, 1, 3, Some(std::time::Duration::from_secs(3)))
+            .expect("a cell past the old cap");
+        assert_eq!(cell.n_vars, 18);
+        assert_eq!(cell.equations, 17);
+        // The bound is derived from the shape, so the cell must carry
+        // exactly what the series gives for seventeen quadratics in
+        // eighteen unknowns.
+        assert_eq!(cell.d_semireg_min, semi_regular_degree(18, &[2; 17]));
     }
 }

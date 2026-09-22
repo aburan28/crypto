@@ -37,9 +37,7 @@ use super::stages::{
     BooleanSystem, DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost,
     SolverTotals, SolverVerdict, SystemShape, SystemSolver,
 };
-use crate::binary_ecc::{BinaryCurve, F2mElement};
-use crate::cryptanalysis::ic_descent_degrees::{curve_of, max_n_prime};
-use crate::cryptanalysis::pq_descent::{weil_descend_s3, weil_descend_s4};
+use crate::cryptanalysis::pq_descent_symbolic::{descend, max_n_prime, SymbolicDescent};
 use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
     prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
@@ -468,17 +466,17 @@ impl SolverHarness {
 /// solution back to signed base points costs real group additions,
 /// which are charged to `ops` like any other oracle's.
 ///
-/// ## The cap it inherits
+/// ## The cap
 ///
-/// The descent builds its algebraic normal form from a truth table of
-/// `2^{m·n'}` evaluations, so it declines above `n' = 8` at two
-/// summands and `n' = 5` at three.  That is a property of this
-/// construction, not of the method, and a symbolic descent lifts it.
+/// The descent is symbolic — the summation polynomial expanded in
+/// `F_{2^n}[v]/(v² − v)` term by term — so it builds no table and is
+/// capped only by the monomial mask: `m·n' ≤ 64` boolean variables,
+/// `n' ≤ 32` at two summands and `n' ≤ 21` at three.  What limits a
+/// row above that is the engine, which says so through `accepts`.
 pub struct DescentAlgebraicOracle<'i> {
     summands: u32,
     instance: &'i BinaryInstance,
-    curve: Option<BinaryCurve>,
-    v_basis: Vec<F2mElement>,
+    v_basis: Vec<u64>,
     harness: SolverHarness,
     totals: SolverTotals,
     /// Systems the solver decided satisfiable none of whose solutions
@@ -505,7 +503,6 @@ impl<'i> DescentAlgebraicOracle<'i> {
         Self {
             summands,
             instance,
-            curve: None,
             v_basis: Vec::new(),
             harness: SolverHarness::new(solver, solver_params, budget),
             totals,
@@ -517,42 +514,18 @@ impl<'i> DescentAlgebraicOracle<'i> {
         self.harness.solver.name()
     }
 
-    /// The boolean system for a target abscissa, and the map from one
-    /// of its solutions back to abscissae in the field.  `prepare` must
-    /// have run.
-    #[allow(clippy::type_complexity)]
-    fn descend(&self, x_r: F2mElement) -> (BooleanSystem, Box<dyn Fn(u64) -> Vec<u64> + 'i>) {
-        let curve = self.curve.as_ref().expect("prepare builds the curve");
-        // The lift borrows the instance, not the oracle, so the caller
-        // can go on to mutate the oracle's totals while holding it.
-        let instance: &'i BinaryInstance = self.instance;
-        let gf = &instance.gf;
-        match self.summands {
-            2 => {
-                let sys = weil_descend_s3(curve, &x_r, &self.v_basis);
-                let n_vars = sys.n_vars;
-                let eqs = sys.equations.clone();
-                (
-                    BooleanSystem { equations: eqs, n_vars },
-                    Box::new(move |v| {
-                        let (a, b) = sys.lift_solution(v);
-                        vec![gf.from_element(&a), gf.from_element(&b)]
-                    }),
-                )
-            }
-            _ => {
-                let sys = weil_descend_s4(curve, &x_r, &self.v_basis);
-                let n_vars = sys.n_vars;
-                let eqs = sys.equations.clone();
-                (
-                    BooleanSystem { equations: eqs, n_vars },
-                    Box::new(move |v| {
-                        let (a, b, c) = sys.lift_solution(v);
-                        vec![gf.from_element(&a), gf.from_element(&b), gf.from_element(&c)]
-                    }),
-                )
-            }
-        }
+    /// The descended system for a target abscissa; its `lift` maps a
+    /// solution back to abscissae.  `prepare` must have run.
+    fn descend(&self, x_r: u64) -> SymbolicDescent {
+        descend(&self.instance.gf, self.instance.b, x_r, &self.v_basis, self.summands)
+            .expect("prepare checked the dimension")
+    }
+}
+
+fn system_of(sys: &SymbolicDescent) -> BooleanSystem {
+    BooleanSystem {
+        equations: sys.equations.clone(),
+        n_vars: sys.n_vars,
     }
 }
 
@@ -594,18 +567,17 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         let cap = max_n_prime(self.summands);
         if basis.len() as u32 > cap {
             return Err(format!(
-                "the truth-table descent is capped at n' = {cap} for m = {}; this base has n' = {}",
+                "the descent's monomial mask holds n' ≤ {cap} at m = {}; this base has n' = {}",
                 self.summands,
                 basis.len()
             ));
         }
-        self.curve = Some(curve_of(self.instance).ok_or("no curve for this instance")?);
-        self.v_basis = basis.iter().map(|&w| self.instance.gf.to_element(w)).collect();
+        self.v_basis = basis.clone();
         // Every system on one base has the same shape, so descend one
         // abscissa now and let the engine decline the shape here, once,
         // with a reason a sweep can report — rather than target by
         // target, which would run the whole relation phase for nothing.
-        let shape = self.descend(self.instance.gf.to_element(self.instance.generator.x)).0.shape();
+        let shape = system_of(&self.descend(self.instance.generator.x)).shape();
         if !self.harness.solver.accepts(&shape) {
             return Err(format!(
                 "solver `{}` declines a system of {} unknowns and {} equations; \
@@ -626,10 +598,12 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         counters: &mut OracleCounters,
         point: FastPoint,
     ) -> Option<Vec<usize>> {
-        self.curve.as_ref()?;
-        let x_r = self.instance.gf.to_element(point.x);
+        if self.v_basis.is_empty() {
+            return None;
+        }
         // Descend, solve, and lift every solution until one sums to R.
-        let (system, lift) = self.descend(x_r);
+        let sys = self.descend(point.x);
+        let system = system_of(&sys);
         let shape = system.shape();
         let verdict = self.harness.solve(&system);
         let exceeded = matches!(verdict, SolverVerdict::BudgetExceeded);
@@ -638,7 +612,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
             return None;
         };
         for v in solutions {
-            let xs = lift(v);
+            let xs = sys.lift(v);
             if let Some(indices) =
                 crate::cryptanalysis::ic_boundary::lift_abscissae(ctx.group, fb, ops, &xs, point)
             {

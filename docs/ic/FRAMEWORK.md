@@ -293,8 +293,13 @@ of them, and the runner prices the totals into `S`. The shipped one is
 abscissa subspace, hands the boolean system to whichever `SystemSolver`
 was named, and lifts each solution to signed base points summing to the
 target. It needs a base that exposes a subspace (`binary-subspace`,
-`koblitz-orbit`) and, in this release, `n' ≤ 8` at `m = 2` and `n' ≤ 5`
-at `m = 3`, the reach of the truth-table descent (§8).
+`koblitz-orbit`). The descent is symbolic — the summation polynomial
+expanded term by term in `F_{2^n}[v]/(v² − v)`, where squaring is
+linear and a product of monomials is their union — so it builds no
+table and is capped only by the monomial mask: `m·n' ≤ 64`, i.e.
+`n' ≤ 32` at `m = 2` and `n' ≤ 21` at `m = 3`. `S3` descends to
+quadratics, `S4` to degree at most six. Above that it is the engine
+that limits a row, and it says so through `accepts`.
 
 ### `SystemSolver` — F4, F5, XL, SAT, anything
 
@@ -511,6 +516,7 @@ Sweeps that ship, under [`docs/ic/sweeps/`](sweeps/):
 |:--|:--|
 | `factor-base-size.json` | what the base size does to the hit rate, the trials, the matrix and `S` |
 | `solver-engines.json` | what the polynomial-system engine does to the whole pipeline: the pair table as the reference row, then `descent-algebraic` once per engine, on one base |
+| `solver-engines-n17.json` | the same question past the old truth-table cap: an 18-unknown descent on a degree-17 curve, which engines still finish, and at what cost |
 | `relation-matrix.json` | what the matrix does: same relations, two eliminations, two base sizes |
 
 ---
@@ -547,12 +553,14 @@ worse than none:
 
 - **The sizes are toy.** The largest instances here are tens of bits.
   Nothing measured is a statement about a deployed curve.
-- **The descent is a truth table.** `descent-algebraic` builds the
-  boolean system by evaluating the summation polynomial on every point
-  of the subspace, which caps it at `n' ≤ 8` for `m = 2` and `n' ≤ 5`
-  for `m = 3`. A symbolic Weil descent lifts the cap and is the next
-  piece of work; until then the algebraic rows stop at bases of
-  `2^8` abscissae.
+- **The engines, not the descent, are the ceiling on the algebraic
+  rows.** The descent is symbolic and reaches 64 boolean variables;
+  the shipped engines do not. `exhaustive` and Buchberger's solution
+  extraction enumerate `2^{n_vars}` points and stop at 26 variables,
+  `xl-f2` stops at 10, and Buchberger's basis computation itself runs
+  out of budget long before its cap. An engine that scales is the
+  plug point's purpose (§5); the rows past `n' ≈ 12` are waiting for
+  one.
 - **No F4 or F5 ships.** The `SystemSolver` plug point exists for them
   and is exercised by four engines (Buchberger, XL, CDCL, exhaustive),
   but a signature-based or matrix-F4 engine is yours to plug in; §5
@@ -588,6 +596,7 @@ worse than none:
 | [`stages.rs`](../../src/cryptanalysis/ic_framework/stages.rs) | the traits and their types — the normative contracts |
 | [`solvers.rs`](../../src/cryptanalysis/ic_framework/solvers.rs) | the `SystemSolver` implementations and their registry |
 | [`plugins.rs`](../../src/cryptanalysis/ic_framework/plugins.rs) | the factor bases and decomposition oracles, the algebraic one included |
+| [`pq_descent_symbolic.rs`](../../src/cryptanalysis/pq_descent_symbolic.rs) | the symbolic Weil descent the algebraic oracle builds its systems with |
 | [`linalg.rs`](../../src/cryptanalysis/ic_framework/linalg.rs) | the structured elimination and the matrix registry |
 | [`mod.rs`](../../src/cryptanalysis/ic_framework/mod.rs) | the runner and the report |
 | [`bench.rs`](../../src/bin/ic/bench.rs) | the CLI |

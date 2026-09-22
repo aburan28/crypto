@@ -195,6 +195,7 @@ pub mod pohlig_hellman;
 pub mod pollard_collab;
 pub mod pollard_rho;
 pub mod pq_descent;
+pub mod pq_descent_symbolic;
 pub mod pq_groebner_f2;
 pub mod pq_sparse_la;
 pub mod pq_wiedemann;

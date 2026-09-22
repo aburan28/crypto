@@ -2719,8 +2719,10 @@ is the **relabelling** pattern, work moved into the price of an
   `n_vars`, about `150 s` a call on this shape against Buchberger's
   `7 ms`, and a modelled rather than counted op figure.  It now
   declines above ten unknowns, and the sweep file says why.
-- The descent is a truth table, capped at `n' = 8` for two summands;
-  every algebraic row above sits at `n' = 6`.  Nothing here extrapolates.
+- The descent these rows were built with was a truth table, capped at
+  `n' = 8` for two summands; every algebraic row above sits at
+  `n' = 6`.  §16 replaces the construction with a symbolic one and
+  measures past the cap.  Nothing here extrapolates.
 
 ### 15.7 Reproducing
 
