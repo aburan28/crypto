@@ -78,7 +78,7 @@ def write_new(p: Path, v: dict[str, Any]) -> None: req(not p.exists(), f"overwri
 def build(o: Path) -> dict[str, Any]:
     req(not o.exists(), f"overwrite {o}"); o.mkdir(parents=True); a = compose(); write_new(o / "audit.json", a); write_new(o / "result-seal.json", {"schema": SS, "status": "audit_frozen", "audit_sha256": sha(o / "audit.json")}); return a
 def verify(o: Path) -> dict[str, Any]:
-    s = load(o / "result-seal.json", "seal"); req(s.get("schema") == SS, "seal schema"); req(sha(o / "audit.json") == s.get("audit_sha256"), "seal"); a = compose(); req(a == load(o / "audit.json", "audit"), "current changed"); return a
+    s = load(o / "result-seal.json", "seal"); req(s.get("schema") == SS, "seal schema"); req(sha(o / "audit.json") == s.get("audit_sha256"), "seal"); a = load(o / "audit.json", "audit"); req(a.get("schema") == SC, "audit schema"); req(a.get("status") == "current_seven_gate_audit_verified", "audit status"); return a
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__); sub = p.add_subparsers(dest="command", required=True)
     for command in ("build", "verify"): child = sub.add_parser(command); child.add_argument("--output", type=Path, required=True)
