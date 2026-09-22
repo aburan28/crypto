@@ -109,6 +109,7 @@
 //!   Boolean-ring representation.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
+use crate::cryptanalysis::inherited_f4::{InheritCost, ReducedBasis};
 use crate::cryptanalysis::matrix_f5_f2::F5Criterion;
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, groebner_basis_f2, F2BoolMono, F2BoolPoly};
 
@@ -1803,6 +1804,19 @@ pub(crate) fn rref_f2(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
 /// [`rref_f2`], accumulating the 64-bit word XORs it performs into
 /// `word_ops`.
 fn rref_f2_suffix_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
+    echelon_f2_suffix_counted(matrix, n_cols, word_ops, true)
+}
+
+/// Column-at-a-time elimination.  With `reduce_above` the result is the
+/// reduced row echelon form; without it, rows already holding a pivot are
+/// left alone and the result is a row echelon form — distinct leading
+/// columns, no back-substitution — at roughly half the XORs.
+fn echelon_f2_suffix_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+    reduce_above: bool,
+) -> usize {
     let words = n_cols.div_ceil(64);
     let mut pivot_row = 0usize;
     for c in 0..n_cols {
@@ -1819,7 +1833,8 @@ fn rref_f2_suffix_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut
         // pivot borrow also lets LLVM vectorize the contiguous suffix.
         let (before, rest) = matrix.split_at_mut(pivot_row);
         let (pivot, after) = rest.split_first_mut().unwrap();
-        for row in before.iter_mut().chain(after.iter_mut()) {
+        let above = if reduce_above { before.len() } else { 0 };
+        for row in before[..above].iter_mut().chain(after.iter_mut()) {
             if row[w] & bit != 0 {
                 for (dst, &src) in row[w..words].iter_mut().zip(&pivot[w..words]) {
                     *dst ^= src;
@@ -1840,6 +1855,18 @@ fn rref_f2_suffix_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut
 /// non-pivot row clears the whole block with one suffix XOR. The default block
 /// width is four and `KIC_F4_M4RI_BLOCK` permits bounded ablation runs.
 fn rref_f2_m4ri_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
+    echelon_f2_m4ri_counted(matrix, n_cols, word_ops, true)
+}
+
+/// Four Russians elimination; `reduce_above` selects the reduced form
+/// (every row cleared on the block's pivot columns) or the plain row
+/// echelon form (only the rows below the block are cleared).
+fn echelon_f2_m4ri_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+    reduce_above: bool,
+) -> usize {
     let block_width = std::env::var("KIC_F4_M4RI_BLOCK")
         .ok()
         .and_then(|value| value.parse::<usize>().ok())
@@ -1922,7 +1949,8 @@ fn rref_f2_m4ri_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u
             *word_ops += suffix_words as u64;
         }
 
-        for row in 0..rows {
+        let first_target = if reduce_above { 0 } else { block_start + block_rows };
+        for row in first_target..rows {
             if (block_start..block_start + block_rows).contains(&row) {
                 continue;
             }
@@ -1957,6 +1985,26 @@ pub(crate) fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: 
         rref_f2_suffix_counted(matrix, n_cols, word_ops)
     } else {
         rref_f2_m4ri_counted(matrix, n_cols, word_ops)
+    }
+}
+
+/// Row echelon form over `F_2` — distinct leading columns, no
+/// back-substitution — with the pivot rows moved to the front; returns the
+/// rank.  Same shape selection as [`rref_f2_counted`], same unit.  This is
+/// all an inherited basis needs, and it is the cheaper half of an RREF.
+pub(crate) fn echelon_f2_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+) -> usize {
+    if std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1")
+        || matrix.len() < 128
+        || n_cols < 256
+        || n_cols > matrix.len().saturating_mul(4)
+    {
+        echelon_f2_suffix_counted(matrix, n_cols, word_ops, false)
+    } else {
+        echelon_f2_m4ri_counted(matrix, n_cols, word_ops, false)
     }
 }
 
@@ -2436,6 +2484,19 @@ pub enum SolverEngine {
         /// Highest Macaulay degree to build before splitting.
         max_degree: u32,
     },
+    /// Inherited matrix-F4 ([`crate::cryptanalysis::inherited_f4`]): the
+    /// root of the splitting tree reduces its Macaulay matrices as
+    /// `MatrixF4` does, and every descendant *specialises* its parent's
+    /// reduced basis by the assigned variable instead of building and
+    /// reducing a matrix of its own.  Same row space at every node, hence
+    /// the same tail, verdicts and splitting tree; the work per node is
+    /// the re-reduction of the rows whose pivot contained the variable,
+    /// plus the specialisation itself, all charged in word operations.
+    /// `KIC_F4_INHERIT=1|0` selects or deselects it over `MatrixF4`.
+    InheritedF4 {
+        /// Highest Macaulay degree to build before splitting.
+        max_degree: u32,
+    },
     /// Full Buchberger Gröbner basis
     /// ([`crate::cryptanalysis::pq_groebner_f2::groebner_basis_f2`]) at
     /// every node.  The reference engine: same answers, far slower on
@@ -2447,6 +2508,48 @@ pub enum SolverEngine {
 impl Default for SolverEngine {
     fn default() -> Self {
         SolverEngine::MatrixF4 { max_degree: 3 }
+    }
+}
+
+impl SolverEngine {
+    /// The engine a solve actually runs, after the `KIC_F4_INHERIT`
+    /// override: `1` turns `MatrixF4` into `InheritedF4`, `0` turns
+    /// `InheritedF4` back into `MatrixF4`.  Retained controls can A/B the
+    /// two on a harness that only knows [`SolverEngine::default`].
+    pub fn effective(self) -> Self {
+        match (self, std::env::var("KIC_F4_INHERIT").as_deref()) {
+            (SolverEngine::MatrixF4 { max_degree }, Ok("1")) => {
+                SolverEngine::InheritedF4 { max_degree }
+            }
+            (SolverEngine::InheritedF4 { max_degree }, Ok("0")) => {
+                SolverEngine::MatrixF4 { max_degree }
+            }
+            (engine, _) => engine,
+        }
+    }
+
+    /// The Macaulay degree ladder this engine runs on a system whose
+    /// generators have total degree `system_degree`: from the system's own
+    /// degree (at least 2) up to `max_degree`, or the top degree alone for
+    /// wide systems, as the `MatrixF4` policy has always done.
+    fn degree_ladder(self, system_degree: u32, n_vars: usize) -> Option<std::ops::RangeInclusive<u32>> {
+        let max_degree = match self {
+            SolverEngine::MatrixF4 { max_degree }
+            | SolverEngine::MatrixF5 { max_degree }
+            | SolverEngine::InheritedF4 { max_degree } => max_degree,
+            SolverEngine::Buchberger => return None,
+        };
+        let base = system_degree.max(2);
+        let top = max_degree.max(base);
+        // A higher-degree Macaulay matrix includes the lower-degree rows,
+        // so this changes work scheduling rather than the ideal or roots.
+        let highest_only = match std::env::var("KIC_F4_MAX_DEGREE_ONLY").as_deref() {
+            Ok("1") => true,
+            Ok("0") => false,
+            _ => n_vars >= 24,
+        };
+        let first = if highest_only { top } else { base };
+        Some(first..=top)
     }
 }
 
@@ -2647,31 +2750,25 @@ fn reduce_system_uncached(
 ) -> Option<Vec<F2BoolPoly>> {
     stats.reductions += 1;
     dump_node_system(system, n_vars, engine);
+    // Reached with `InheritedF4` only when a caller bypasses the solver's
+    // basis state (the cached path, or a direct call): reduce as MatrixF4.
+    let engine = match engine {
+        SolverEngine::InheritedF4 { max_degree } => SolverEngine::MatrixF4 { max_degree },
+        other => other,
+    };
     match engine {
         SolverEngine::Buchberger => Some(groebner_basis_f2(system.to_vec(), n_vars)),
-        SolverEngine::MatrixF4 { max_degree } | SolverEngine::MatrixF5 { max_degree } => {
+        SolverEngine::InheritedF4 { .. } => unreachable!("mapped to MatrixF4 above"),
+        SolverEngine::MatrixF4 { .. } | SolverEngine::MatrixF5 { .. } => {
             let criterion = RowCriterion::from_env_or(match engine {
                 SolverEngine::MatrixF5 { .. } => RowCriterion::F5,
                 _ => RowCriterion::None,
             });
-            let base = system
-                .iter()
-                .flat_map(|p| p.terms.iter())
-                .map(|t| t.mask.count_ones())
-                .max()
-                .unwrap_or(0)
-                .max(2);
-            let top = max_degree.max(base);
-            // A higher-degree Macaulay matrix includes the lower-degree rows,
-            // so this changes work scheduling rather than the ideal or roots.
-            let highest_only = match std::env::var("KIC_F4_MAX_DEGREE_ONLY").as_deref() {
-                Ok("1") => true,
-                Ok("0") => false,
-                _ => n_vars >= 24,
-            };
-            let first = if highest_only { top } else { base };
+            let ladder = engine
+                .degree_ladder(system_degree(system), n_vars)
+                .expect("matrix engines have a ladder");
             let mut best: Option<Vec<F2BoolPoly>> = None;
-            for d in first..=top {
+            for d in ladder {
                 // Retained legacy control. Production only consumes a
                 // contradiction or a forced variable, never the nonlinear
                 // reduced rows themselves.
@@ -2709,6 +2806,114 @@ fn is_constant_one(p: &F2BoolPoly) -> bool {
     p.terms.len() == 1 && p.terms[0].mask == 0
 }
 
+/// Per-node state of [`SolverEngine::InheritedF4`]: the reduced Macaulay
+/// bases of the node's current system, one per degree the ladder has
+/// reached, kept in step with every substitution the solver applies.
+#[derive(Clone, Default)]
+struct InheritedBases {
+    bases: Vec<ReducedBasis>,
+}
+
+impl InheritedBases {
+    fn position(&self, degree: u32) -> Option<usize> {
+        self.bases.iter().position(|b| b.degree == degree)
+    }
+
+    /// The bases of `system|_{var = value}`.  Specialisation replaces the
+    /// child's matrix build, so its wall time is charged to the build
+    /// phase; its word operations enter the stage unit.
+    fn specialise(&self, var: u32, value: bool) -> Self {
+        let started = std::time::Instant::now();
+        let mut total = InheritCost::default();
+        let bases = self
+            .bases
+            .iter()
+            .map(|b| {
+                let (next, cost) = b.specialise(var, value);
+                total.reduce_word_ops += cost.reduce_word_ops;
+                total.specialise_word_ops += cost.specialise_word_ops;
+                next
+            })
+            .collect();
+        let word_ops = total.word_ops();
+        F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+        f4_profile_add(|p| {
+            p.build_ns += started.elapsed().as_nanos();
+            p.word_ops += word_ops;
+        });
+        Self { bases }
+    }
+}
+
+/// The inherited engine's reduction: read the decisive rows off the node's
+/// bases, building a basis from scratch only for a degree no ancestor has
+/// reached.  Mirrors `reduce_system_uncached`'s ladder, decisiveness test
+/// and counters so a solve is comparable call for call.
+fn reduce_inherited(
+    system: &[F2BoolPoly],
+    n_vars: usize,
+    engine: SolverEngine,
+    bases: &mut InheritedBases,
+    stats: &mut SolveStats,
+) -> Option<Vec<F2BoolPoly>> {
+    stats.reductions += 1;
+    dump_node_system(system, n_vars, engine);
+    let ladder = engine.degree_ladder(system_degree(system), n_vars)?;
+    let mut best: Option<Vec<F2BoolPoly>> = None;
+    for d in ladder {
+        if system.is_empty() {
+            best = Some(Vec::new());
+            break;
+        }
+        let index = match bases.position(d) {
+            Some(i) => i,
+            None => {
+                let started = std::time::Instant::now();
+                match ReducedBasis::from_system(system, n_vars, d) {
+                    Some((basis, cost)) => {
+                        let word_ops = cost.word_ops();
+                        F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+                        f4_profile_add(|p| {
+                            p.build_ns += started.elapsed().as_nanos();
+                            p.word_ops += word_ops;
+                        });
+                        bases.bases.push(basis);
+                        bases.bases.len() - 1
+                    }
+                    None => {
+                        stats.oversize += 1;
+                        f4_profile_add(|p| p.oversize += 1);
+                        break;
+                    }
+                }
+            }
+        };
+        let basis = &bases.bases[index];
+        debug_assert_eq!(basis.system, system, "basis out of step with the node system");
+        let started = std::time::Instant::now();
+        let mut cost = InheritCost::default();
+        let rows = basis.decisive_rows(&mut cost);
+        let word_ops = cost.word_ops();
+        F4_WORD_OPS_TOTAL.fetch_add(word_ops, std::sync::atomic::Ordering::Relaxed);
+        let (rank, columns) = (basis.rank() as u64, basis.columns() as u64);
+        f4_profile_add(|p| {
+            p.calls += 1;
+            p.reduce_ns += started.elapsed().as_nanos();
+            p.rows += rank;
+            p.cols += columns;
+            p.word_ops += word_ops;
+        });
+        stats.max_degree_built = stats.max_degree_built.max(d);
+        let decisive =
+            rows.iter().any(is_constant_one) || rows.iter().any(|p| forced_assignment(p).is_some());
+        best = Some(rows);
+        if decisive {
+            break;
+        }
+    }
+    best
+}
+
 /// **Solve a Boolean system** by algebraic reduction plus splitting.
 ///
 /// At each node the system is reduced ([`matrix_f4_f2`] by default,
@@ -2741,16 +2946,21 @@ pub fn solve_boolean_system_filtered(
     let mut stats = SolveStats::default();
     let mut out = Vec::new();
     let mut stop = false;
+    let opts = SolveOptions {
+        engine: opts.engine.effective(),
+        ..*opts
+    };
     solve_rec(
         equations.to_vec(),
         equations,
         vec![None; n_vars],
         n_vars,
-        opts,
+        &opts,
         &mut stats,
         &mut out,
         &mut accept,
         &mut stop,
+        None,
     );
     (out, stats)
 }
@@ -2766,6 +2976,7 @@ fn solve_rec(
     out: &mut Vec<u64>,
     accept: &mut impl FnMut(u64) -> bool,
     stop: &mut bool,
+    parent: Option<(&InheritedBases, u32, bool)>,
 ) {
     if *stop || out.len() >= opts.max_solutions {
         return;
@@ -2792,6 +3003,19 @@ fn solve_rec(
         return;
     }
 
+    // Under the inherited engine the node's bases are its parent's,
+    // specialised by the branch assignment; the root starts with none and
+    // builds them at its first reduction.  A system that already contains
+    // the constant `1` is refuted below without reducing, so nothing is
+    // specialised for it either.
+    let inherit = matches!(opts.engine, SolverEngine::InheritedF4 { .. });
+    let mut bases = match parent {
+        Some((bases, var, value)) if inherit && !system.iter().any(is_constant_one) => {
+            bases.specialise(var, value)
+        }
+        _ => InheritedBases::default(),
+    };
+
     // Reduce, propagate, repeat until the algebra stops learning.
     loop {
         system.retain(|p| !p.is_zero());
@@ -2799,7 +3023,12 @@ fn solve_rec(
             stats.infeasible_branches += 1;
             return;
         }
-        let reduced = match reduce_system(&system, n_vars, opts.engine, stats) {
+        let reduced = if inherit {
+            reduce_inherited(&system, n_vars, opts.engine, &mut bases, stats)
+        } else {
+            reduce_system(&system, n_vars, opts.engine, stats)
+        };
+        let reduced = match reduced {
             Some(r) => r,
             None => break, // no reduction available; split instead
         };
@@ -2822,6 +3051,9 @@ fn solve_rec(
                     stats.propagations += 1;
                     assignment[v as usize] = Some(val);
                     system = system.iter().map(|p| substitute(p, v, val)).collect();
+                    if inherit {
+                        bases = bases.specialise(v, val);
+                    }
                 }
             }
         }
@@ -2866,6 +3098,7 @@ fn solve_rec(
                     out,
                     accept,
                     stop,
+                    Some((&bases, free as u32, value)),
                 );
                 if *stop || out.len() >= opts.max_solutions {
                     return;

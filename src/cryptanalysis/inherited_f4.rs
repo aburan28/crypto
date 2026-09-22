@@ -53,8 +53,8 @@
 //! ruled out and not by how one node's matrix is reduced.
 
 use crate::cryptanalysis::koblitz_groebner::{
-    all_variable_mask, macaulay_columns, macaulay_rows_monos, monomials_up_to_mask, pack_rows,
-    rref_f2_counted,
+    all_variable_mask, echelon_f2_counted, macaulay_columns, macaulay_rows_monos,
+    monomials_up_to_mask, pack_rows, rref_f2_counted,
 };
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
 use std::collections::HashMap;
@@ -161,7 +161,25 @@ impl ReducedBasis {
         }
         let columns = macaulay_columns(&rows_monos)?;
         let mut matrix = pack_rows(&rows_monos, &columns);
-        let rank = rref_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops);
+        // A basis needs distinct leading columns and nothing more, so an
+        // echelon form without back-substitution would do.  The fully
+        // reduced form costs more here but makes every later displaced row
+        // reduce in exactly as many XORs as it has pivot bits, which pays
+        // back over a deep tree.  The default mirrors the from-scratch
+        // step's own kernel choice on the same shape — full RREF below 24
+        // variables, echelon-only at and above it — so the root costs what
+        // it always cost and every descendant is the saving.
+        // `KIC_F4_INHERIT_ROOT=rref|ref` pins either for controls.
+        let full = match std::env::var("KIC_F4_INHERIT_ROOT").as_deref() {
+            Ok("rref") => true,
+            Ok("ref") => false,
+            _ => n_vars < 24,
+        };
+        let rank = if full {
+            rref_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops)
+        } else {
+            echelon_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops)
+        };
         matrix.truncate(rank);
         let words = columns.len().div_ceil(64).max(1);
         let column_index = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
