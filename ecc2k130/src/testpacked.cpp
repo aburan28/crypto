@@ -90,6 +90,26 @@ int main() {
             unpack(eccPacked131::inv131(pa))!=R::inv(a)) {
             printf("packed field mismatch at case %d\n",test);return 1;
         }
+        // The two-chain kernel's paired routines must be bit-identical to the
+        // single ones on each of their two inputs.
+        {
+            const P pc=pack(c);
+            P m1,m2,i1,i2;
+            eccPacked131::mul131x2(pa,pb,pc,pa,&m1,&m2);
+            eccPacked131::inv131x2(pa,pc,&i1,&i2);
+            if (!same(m1,eccPacked131::mul131(pa,pb)) || !same(m2,eccPacked131::mul131(pc,pa)) ||
+                !same(i1,eccPacked131::inv131(pa)) || !same(i2,eccPacked131::inv131(pc)) ||
+                unpack(i2)!=R::inv(c)) {
+                printf("paired mul131x2/inv131x2 mismatch at case %d\n",test);return 1;
+            }
+            for (int j:{0,1,2,4,8,16,32,65}) {
+                P sa=pa,sc=pc;
+                eccPacked131::sigma131x2(&sa,&sc,j);
+                if (!same(sa,eccPacked131::sigma131(pa,j)) || !same(sc,eccPacked131::sigma131(pc,j))) {
+                    printf("paired sigma131x2 mismatch at case %d, power %d\n",test,j);return 1;
+                }
+            }
+        }
         const int powers[]={0,1,2,3,4,5,6,7,8,9,10,16,32,65,130,131};
         for (int j:powers) if (unpack(eccPacked131::sigma131(pa,j))!=R::sigma(a,j)) {
             printf("packed Frobenius mismatch at case %d, power %d\n",test,j);return 1;
@@ -107,5 +127,5 @@ int main() {
             !same(eccPacked131::mulPolynomial131(a,polynomialEdges[1]),a) ||
             !same(pair.first,polynomialEdges[0]) || !same(pair.second,a)) return 1;
     }
-    puts("PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference");
+    puts("PASS: packed multiplication, squaring, inversion, walk and inversion Frobenius powers against independent reference; paired mul131x2/inv131x2/sigma131x2 bit-identical to the single routines");
 }
