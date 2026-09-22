@@ -3251,3 +3251,136 @@ smaller than reported.
 
 No phase is dominant enough for another factor to hide in, which is the
 first time that has been true in this thread.
+
+## Selecting a base was 5.6× its floor, and all of it was BigUints — 2026-09-22
+
+With collection's relation count at its counting floor, selecting the
+base became 23.4% of the pipeline: 78.2 group-addition equivalents for
+each of the 15,744 points it produces. The algebra a point *requires* is
+much less than that, so this asks what, and measures the rest against it.
+
+### The boundary, stated first
+
+The floor is the field algebra a point cannot avoid: the half-trace lift
+that produces it, unconverted, plus the single Frobenius step that places
+it in its orbit. An orbit walk visits every point once, so that is one
+step per point.
+
+| | adds a point |
+|:--|--:|
+| lift algebra, no conversion | 13.51 |
+| one orbit step, packed | 0.43 |
+| **floor** | **13.93** |
+
+**No halving anywhere, and the first version of this got that wrong.** A
+half-trace solve yields two points, and every figure in the table is per
+point, so "adds a point" already carries that; halving the lift term
+again — which is what the first draft did, to the orbit step as well —
+understated the boundary twofold and would have reported selection at
+`13×` its floor instead of `5.6×`. A floor is only a boundary if it is
+derived at the same normalisation as the thing it bounds. The reasoning
+is written into `examples/koblitz_select_decomposition.rs` beside the
+computation.
+
+### Where the other 64 additions went
+
+The rebuild is 89.7% of selection. Inside it, per point:
+
+| step | `BigUint` | packed |
+|:--|--:|--:|
+| both orbit walks (`kc.frobenius`) | **41.60** | 0.40 |
+| keying, three times over (`point_key`) | 4.33 | 0.02 |
+| lifts (`points_with_x_fast`) | 13.68 | — |
+| of which `lower()` back to `BigUint` | 1.66 | — |
+
+A `BinaryPoint` carries two `BigUint`s, so an index key is two
+allocations and a two-`BigUint` hash, and a Frobenius step is two
+`BigUint` squarings. Half the whole call was stepping `BigUint`-backed
+points through a Frobenius the pair table has always done in one word.
+
+### The change, and the control it stands on
+
+`finish_factor_base_domain` now keys its point index on the packed `u64`
+and walks both orbit structures with the `FastCurve`, split out as
+`orbit_maps_packed` and `orbit_maps_bigint`. Even degrees have no
+`FastCurve` and keep the `BigUint` walk, which is also the reference the
+packed one is checked against.
+
+This is a change of *representation*, not of algorithm — same iteration
+order, same decisions, same output — so the claim rests entirely on the
+maps coming out identical:
+
+- `factor_base_orbit_maps_agree_in_both_representations` compares
+  `orbit_of`, `orbits`, `signed_orbit_of` and `signed_orbits` field for
+  field over 6 degrees × 3 widths, and checks the base an odd degree
+  ships with is the packed walk's output.
+- End to end, the best aimed config and its holdout re-run on the packed
+  build with **every counter identical**: points, orbits, columns, tier,
+  stored pairs, scans, trials, relations, units, rejected, duplicates,
+  core dimension, core nonzeros, descent trials, rho steps, 32/32
+  verified.
+
+Identical counters mean the only thing this round moved is the time
+selection takes, which is exactly what a representation change should
+move and nothing else.
+
+### What it bought
+
+Quiet machine, nothing else running, three passes a width:
+
+| `|F|` | before | after | speedup | before/pt | after/pt |
+|--:|--:|--:|--:|--:|--:|
+| 5,248 | 409,745 | 185,428 | 2.21× | 78.1 | 35.3 |
+| 8,528 | 669,193 | 309,274 | 2.16× | 78.5 | 36.3 |
+| 12,464 | 969,811 | 452,708 | 2.14× | 77.8 | 36.3 |
+| 16,400 | 1,304,319 | 618,316 | 2.11× | 79.5 | 37.7 |
+| 20,336 | 1,613,142 | 772,161 | 2.09× | 79.3 | 38.0 |
+
+and end to end on the aimed config, only the selection column differing:
+
+| variant | select | build | collect | total adds | `S` | `/rho` |
+|:--|--:|--:|--:|--:|--:|--:|
+| aimed, `BigUint` base build | 1,230,873 | 1,519,296 | 2,517,120 | 5,269,495 | 0.2221 | 1.33 |
+| **aimed, packed base build** | **587,043** | 1,519,296 | 2,517,120 | **4,625,665** | **0.1950** | **1.17** |
+
+`speedup = 5,269,495 / 4,625,665 = 1.139×`, against a registered
+condition of `1.10×`. Selection falls `2.10×` and lands at `2.7×` its
+floor, from `5.6×`.
+
+**Class: engineering.** `S` fell, and the ratio to the generic floor fell
+with it, but nothing the method *does* changed — no count the floor
+bounds moved. `S` is still `1.17×` rho.
+
+### An honest note on the unit, and on a discarded measurement
+
+Selection is the one phase priced by converting measured **time** rather
+than a native count, because its cost is dominated by rebuilding the base
+and a rebuild has no countable primitive. That was true when selection
+was first priced, so before and after are like for like — but it does
+mean this round's number rests on a timing, which is why the
+base-identity control above is what the claim actually stands on rather
+than the stopwatch.
+
+The first post-change measurement is discarded. It shared the machine
+with a compiling test suite, and contention inflates the measured
+per-addition unit, which *divides* the converted total down — so a
+contended run **understates** the operation count, in the flattering
+direction. It was caught because the sweep came out non-monotone, with
+12,464 points reading slower than 16,400, which cannot be true.
+
+The registered prediction was `35.3` adds a point and `1.15×` rho; the
+outcome is `37.3` and `1.17×`. The packed path lifts every point from
+`BigUint` to the packed form once, about 1.5 adds a point, which the
+prediction did not account for.
+
+### What is left
+
+| phase | share | can it fall? |
+|:--|--:|:--|
+| collection | 54.4% | only with the column count or the scan constant — the relation count is at its floor |
+| table build | 32.8% | `\|F\|²/4n + \|F\|`, one addition per stored pair; now the largest phase after collection |
+| selection | 12.7% | bounded by `2.7×`, and the remainder is the half-trace solve itself |
+| descent, linear algebra | 0.0% | |
+
+Against the rung this branch started from, the `n = 41` pipeline is now
+`33,589,843 → 4,625,665` adds, **7.26×** fewer operations.
