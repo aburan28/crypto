@@ -29,18 +29,18 @@
       "baseline_word_ops": 1352350,
       "candidate_word_ops": 1348747,
       "word_op_ratio": 1.002671368314443,
-      "baseline_wall_ns": 41041279,
-      "candidate_wall_ns": 42113938,
-      "wall_ratio": 0.9745295963535873,
+      "baseline_wall_ns": 41131075,
+      "candidate_wall_ns": 42211022,
+      "wall_ratio": 0.9744155211404263,
       "phases_baseline_ns": {
-        "build": 23381519,
-        "reduce": 10421686,
-        "readback": 827557
+        "build": 23493323,
+        "reduce": 10446596,
+        "readback": 837765
       },
       "phases_candidate_ns": {
-        "build": 24756706,
-        "reduce": 10130908,
-        "readback": 826968
+        "build": 24775426,
+        "reduce": 10231273,
+        "readback": 835993
       }
     },
     {
@@ -53,18 +53,18 @@
       "baseline_word_ops": 4164666,
       "candidate_word_ops": 4149441,
       "word_op_ratio": 1.0036691689314297,
-      "baseline_wall_ns": 77947540,
-      "candidate_wall_ns": 79388442,
-      "wall_ratio": 0.9818499776075716,
+      "baseline_wall_ns": 78230313,
+      "candidate_wall_ns": 79243290,
+      "wall_ratio": 0.9872168735043686,
       "phases_baseline_ns": {
-        "build": 47280716,
-        "reduce": 23754053,
-        "readback": 102559
+        "build": 47596095,
+        "reduce": 23702852,
+        "readback": 102263
       },
       "phases_candidate_ns": {
-        "build": 48938235,
-        "reduce": 23479170,
-        "readback": 98648
+        "build": 48820281,
+        "reduce": 23453621,
+        "readback": 99366
       }
     },
     {
@@ -77,18 +77,18 @@
       "baseline_word_ops": 20668245,
       "candidate_word_ops": 19776482,
       "word_op_ratio": 1.045092094741623,
-      "baseline_wall_ns": 217453083,
-      "candidate_wall_ns": 204747280,
-      "wall_ratio": 1.062056028290095,
+      "baseline_wall_ns": 208767508,
+      "candidate_wall_ns": 205950402,
+      "wall_ratio": 1.013678565191633,
       "phases_baseline_ns": {
-        "build": 141802618,
-        "reduce": 57416343,
-        "readback": 176450
+        "build": 133183236,
+        "reduce": 57433259,
+        "readback": 176915
       },
       "phases_candidate_ns": {
-        "build": 135142518,
-        "reduce": 51440322,
-        "readback": 135464
+        "build": 136329099,
+        "reduce": 51336863,
+        "readback": 137557
       }
     },
     {
@@ -101,18 +101,18 @@
       "baseline_word_ops": 107470,
       "candidate_word_ops": 107470,
       "word_op_ratio": 1.0,
-      "baseline_wall_ns": 4193447,
-      "candidate_wall_ns": 4278061,
-      "wall_ratio": 0.9802214133926561,
+      "baseline_wall_ns": 4143950,
+      "candidate_wall_ns": 4283322,
+      "wall_ratio": 0.9674617037897221,
       "phases_baseline_ns": {
-        "build": 1734830,
-        "reduce": 923105,
-        "readback": 77548
+        "build": 1720143,
+        "reduce": 908402,
+        "readback": 77096
       },
       "phases_candidate_ns": {
-        "build": 1824728,
-        "reduce": 922748,
-        "readback": 77590
+        "build": 1835261,
+        "reduce": 911273,
+        "readback": 77147
       }
     },
     {
@@ -125,18 +125,18 @@
       "baseline_word_ops": 55594932,
       "candidate_word_ops": 55594932,
       "word_op_ratio": 1.0,
-      "baseline_wall_ns": 816107239,
-      "candidate_wall_ns": 822522657,
-      "wall_ratio": 0.9922003145501195,
+      "baseline_wall_ns": 812935051,
+      "candidate_wall_ns": 825504582,
+      "wall_ratio": 0.984773517586605,
       "phases_baseline_ns": {
-        "build": 401642651,
-        "reduce": 363135969,
-        "readback": 12332506
+        "build": 398915890,
+        "reduce": 363267763,
+        "readback": 12332484
       },
       "phases_candidate_ns": {
-        "build": 409476673,
-        "reduce": 361905536,
-        "readback": 12285021
+        "build": 409872773,
+        "reduce": 364690217,
+        "readback": 12359754
       }
     },
     {
@@ -149,23 +149,23 @@
       "baseline_word_ops": 699511508,
       "candidate_word_ops": 699511508,
       "word_op_ratio": 1.0,
-      "baseline_wall_ns": 5890091642,
-      "candidate_wall_ns": 5913915652,
-      "wall_ratio": 0.9959715336839573,
+      "baseline_wall_ns": 5928529503,
+      "candidate_wall_ns": 5932020782,
+      "wall_ratio": 0.9994114519944715,
       "phases_baseline_ns": {
-        "build": 2518097478,
-        "reduce": 3159907050,
-        "readback": 66468462
+        "build": 2522580710,
+        "reduce": 3194013284,
+        "readback": 66536141
       },
       "phases_candidate_ns": {
-        "build": 2564327800,
-        "reduce": 3148064801,
-        "readback": 66530166
+        "build": 2562275750,
+        "reduce": 3169908459,
+        "readback": 66252098
       }
     }
   ],
   "total_word_op_ratio": 1.0011666935600774,
-  "total_wall_ratio": 0.9971512810568866,
+  "total_wall_ratio": 0.9978169651374862,
   "min_word_op_ratio": 1.0,
-  "min_wall_ratio": 0.9745295963535873
+  "min_wall_ratio": 0.9674617037897221
 }

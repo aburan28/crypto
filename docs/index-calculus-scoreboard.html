@@ -3771,7 +3771,7 @@ factor base, and this prices a decomposition oracle.</p>
 </section>
 <section class="panel" id="inherited-f4-20260922">
   <div class="panel-head">
-    <h2>F5 for the Koblitz Gr&ouml;bner stage: the criterion prunes nothing at degree 3, the inheritance it implies cuts the stage 6.25&times; <span class="chip">engineering</span></h2>
+    <h2>F5 for the Koblitz Gr&ouml;bner stage: the criterion prunes nothing at degree 3, the inheritance it implies cuts the stage 6.28&times; <span class="chip">engineering</span></h2>
     <p>Two F5 ideas applied to the matrix-F4 splitting solver behind the Koblitz decomposition
       oracle. <strong>The F5 criterion</strong>, stated correctly for the Boolean ring (the textbook
       <code>F_2</code> rule &ldquo;prune <code>t&middot;f_i</code> for <code>t &isin; LM&lang;f_1..f_i&rang;</code>&rdquo;
@@ -3806,15 +3806,15 @@ factor base, and this prices a decomposition oracle.</p>
       ratio or end-to-end claim.</caption>
     <thead><tr><th>Rung</th><th>m</th><th>Reference word ops</th><th>F5 criterion</th><th>Inherited F4</th><th>Ratio</th><th>Floor ratio</th><th>Wall</th><th>Correct</th><th>Class</th></tr></thead>
     <tbody>
-      <tr><td><code>K_0/2^9</code></td><td>2</td><td class="n">1,352,350</td><td class="n">1,348,747</td><td class="n">656,325</td><td class="n">2.06&times;</td><td>flat</td><td class="n">1.50&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_0/2^9</code></td><td>3</td><td class="n">4,164,666</td><td class="n">4,149,441</td><td class="n">3,844,010 (forced)</td><td class="n">1.08&times;</td><td>flat</td><td class="n">1.35&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_0/2^13</code></td><td>2</td><td class="n">20,668,245</td><td class="n">19,776,482</td><td class="n">12,526,392</td><td class="n">1.65&times;</td><td>flat</td><td class="n">1.34&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_1/2^15</code></td><td>2</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">1.00&times;</td><td>flat</td><td class="n">0.99&times;</td><td>identical</td><td>no tree to inherit along</td></tr>
-      <tr><td><code>K_1/2^17</code></td><td>2</td><td class="n">55,594,932</td><td class="n">55,594,932</td><td class="n">10,050,078</td><td class="n">5.53&times;</td><td>flat</td><td class="n">3.78&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_1/2^23</code></td><td>2</td><td class="n">699,511,508</td><td class="n">699,511,508</td><td class="n">97,756,456</td><td class="n">7.16&times;</td><td>flat</td><td class="n">5.13&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><strong>total</strong></td><td></td><td class="n">781,399,171</td><td class="n">780,488,580 (1.001&times;)</td><td class="n"><strong>124,940,731</strong></td><td class="n"><strong>6.25&times;</strong></td><td>flat</td><td class="n">4.36&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">73,382,095</td><td class="n">1.59&times;</td><td>flat</td><td class="n">1.32&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,460,770</td><td class="n">5.20&times;</td><td>flat</td><td class="n">3.60&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_0/2^9</code></td><td>2</td><td class="n">1,352,350</td><td class="n">1,348,747</td><td class="n">664,322</td><td class="n">2.04&times;</td><td>flat</td><td class="n">1.50&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_0/2^9</code></td><td>3</td><td class="n">4,164,666</td><td class="n">4,149,441</td><td class="n">4,164,666 (forced: 3,943,077)</td><td class="n">1.00&times; (forced: 1.06&times;)</td><td>flat</td><td class="n">1.00&times;</td><td>identical</td><td>cubic: reduces from scratch by policy</td></tr>
+      <tr><td><code>K_0/2^13</code></td><td>2</td><td class="n">20,668,245</td><td class="n">19,776,482</td><td class="n">11,642,531</td><td class="n">1.78&times;</td><td>flat</td><td class="n">1.35&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_1/2^15</code></td><td>2</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">1.00&times;</td><td>flat</td><td class="n">0.97&times;</td><td>identical</td><td>no tree to inherit along</td></tr>
+      <tr><td><code>K_1/2^17</code></td><td>2</td><td class="n">55,594,932</td><td class="n">55,594,932</td><td class="n">10,059,990</td><td class="n">5.53&times;</td><td>flat</td><td class="n">3.77&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_1/2^23</code></td><td>2</td><td class="n">699,511,508</td><td class="n">699,511,508</td><td class="n">97,826,189</td><td class="n">7.15&times;</td><td>flat</td><td class="n">5.18&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><strong>total</strong></td><td></td><td class="n">781,399,171</td><td class="n">780,488,580 (1.001&times;)</td><td class="n"><strong>124,465,168</strong></td><td class="n"><strong>6.28&times;</strong></td><td>flat</td><td class="n">4.36&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">74,984,242</td><td class="n">1.56&times;</td><td>flat</td><td class="n">1.29&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,475,463</td><td class="n">5.19&times;</td><td>flat</td><td class="n">3.61&times;</td><td>identical</td><td><span class="chip">engineering</span></td></tr>
       <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns, forced to inherit</td><td>3</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,746,829,713</td><td class="n"><strong>0.60&times;</strong></td><td>flat</td><td class="n">1.04&times;</td><td>identical</td><td><span class="chip">rejected &mdash; cubic systems reduce from scratch</span></td></tr>
     </tbody>
   </table></div>
@@ -3826,18 +3826,19 @@ factor base, and this prices a decomposition oracle.</p>
     <tbody>
       <tr><td>root reductions (16 targets, degrees 2 and 3)</td><td class="n">6,719,658</td><td class="n">7%</td></tr>
       <tr><td>re-reduction of displaced rows</td><td class="n">60,351,941</td><td class="n">62%</td></tr>
-      <tr><td>specialisation (word reads and writes, charged to the candidate only)</td><td class="n">30,585,461</td><td class="n">31%</td></tr>
+      <tr><td>specialisation (word reads and writes, charged to the candidate only)</td><td class="n">30,626,267</td><td class="n">31%</td></tr>
       <tr><td>tail RREF</td><td class="n">128,323</td><td class="n">0.1%</td></tr>
-      <tr><td><strong>inherited F4 total</strong> &middot; reference 699,511,508</td><td class="n"><strong>97,756,456</strong></td><td class="n"></td></tr>
+      <tr><td><strong>inherited F4 total</strong> &middot; reference 699,511,508</td><td class="n"><strong>97,826,189</strong></td><td class="n"></td></tr>
     </tbody>
   </table></div>
-  <p>Controls retained in the evidence: an echelon-only root everywhere (<code>5.50&times;</code>, loses 16% on
-    <code>n = 23</code>), a fully reduced root everywhere (<code>5.96&times;</code>, loses 46% on <code>K_0/2^13</code>),
+  <p>Controls retained in the evidence, all forcing inheritance on every degree so the root policy is the only
+    variable: an echelon-only root everywhere (<code>5.53&times;</code>, loses 16% on <code>n = 23</code>), a fully
+    reduced root everywhere (<code>5.98&times;</code>, loses 52% on <code>K_0/2^13</code> and regresses the cubic rung),
     and two rejected cubic-system rescues &mdash; drift-triggered rebuilds and a cost-triggered switch to the
     from-scratch engine, both <code>0.45&ndash;0.48&times;</code> because the estimate fires after most of the subtree
     has paid. The node-level probe cross-checks 4,163 children on six cells against from-scratch reductions
     with zero solver-view mismatches. Existing calibrated rows, exponents and the page&rsquo;s end-to-end verdict
-    are unchanged: the stage is one phase of relation collection, and <code>6.25&times;</code> off it is
+    are unchanged: the stage is one phase of relation collection, and <code>6.28&times;</code> off it is
     <code>2<sup>2.6</sup></code> off <code>2<sup>131</sup></code>.</p>
 </section>
 <!-- END inherited-f4-20260922 -->

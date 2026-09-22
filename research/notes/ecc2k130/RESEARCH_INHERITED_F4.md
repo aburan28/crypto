@@ -31,8 +31,8 @@ second question has a complete answer: **every** row of a child's matrix is
 the specialisation of a row its parent has already reduced, and all but the
 `≈ 3/n` of them whose pivot contains the assigned variable are *still reduced*
 after specialisation.  Building nothing below the root and re-reducing only
-those rows cuts the stage's counted work by **`6.25×`** across the frozen ladder
-(`7.16×` on the rung that dominates it), deciding all 176 targets identically
+those rows cuts the stage's counted work by **`6.28×`** across the frozen ladder
+(`7.15×` on the rung that dominates it), deciding all 176 targets identically
 and the 36-target holdout identically, at `4.4×` less wall time.  It pays on
 the **quadratic** `m = 2` systems, whose reduced rows stay sparse, and loses
 (`0.60×`) on the chained cubic `m = 3` systems, whose 40%-rank-deficient
@@ -200,19 +200,20 @@ Ratios are reference / candidate.  `compare.py` accepted every comparison shown.
 
 | rung | `m` | `ℓ` | targets | decomposed | reference | F5 criterion | inherited F4 | ratio | ratio to floor | wall | class | correct |
 |:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|:--|:--|
-| `K_0/2^9`  | 2 | 6 | 40 | 39 | 1,352,350 | 1,348,747 | **656,325** | **2.06×** | flat | 1.50× | engineering | ✓ identical |
-| `K_0/2^9`  | 3 | 6 | 16 | 15 | 4,164,666 | 4,149,441 | **3,844,010** | **1.08×** | flat | 1.35× | engineering | ✓ identical |
-| `K_0/2^13` | 2 | 12 | 40 | 40 | 20,668,245 | 19,776,482 | **12,526,392** | **1.65×** | flat | 1.34× | engineering | ✓ identical |
-| `K_1/2^15` | 2 | 4 | 32 | 0 | 107,470 | 107,470 | 107,470 | 1.00× | flat | 0.99× | — (no tree) | ✓ identical |
-| `K_1/2^17` | 2 | 8 | 32 | 7 | 55,594,932 | 55,594,932 | **10,050,078** | **5.53×** | flat | 3.78× | engineering | ✓ identical |
-| `K_1/2^23` | 2 | 11 | 16 | 9 | 699,511,508 | 699,511,508 | **97,756,456** | **7.16×** | flat | 5.13× | engineering | ✓ identical |
-| **total**  |   |   | 176 | 110 | 781,399,171 | 780,488,580 (1.001×) | **124,940,731** | **6.25×** | flat | **4.36×** | engineering | ✓ |
+| `K_0/2^9`  | 2 | 6 | 40 | 39 | 1,352,350 | 1,348,747 | **664,322** | **2.04×** | flat | 1.50× | engineering | ✓ identical |
+| `K_0/2^9`  | 3 | 6 | 16 | 15 | 4,164,666 | 4,149,441 | 4,164,666 (forced: **3,943,077**) | 1.00× (forced: 1.06×) | flat | 1.00× | reduces from scratch, §3.4 | ✓ identical |
+| `K_0/2^13` | 2 | 12 | 40 | 40 | 20,668,245 | 19,776,482 | **11,642,531** | **1.78×** | flat | 1.35× | engineering | ✓ identical |
+| `K_1/2^15` | 2 | 4 | 32 | 0 | 107,470 | 107,470 | 107,470 | 1.00× | flat | 0.97× | — (no tree) | ✓ identical |
+| `K_1/2^17` | 2 | 8 | 32 | 7 | 55,594,932 | 55,594,932 | **10,059,990** | **5.53×** | flat | 3.77× | engineering | ✓ identical |
+| `K_1/2^23` | 2 | 11 | 16 | 9 | 699,511,508 | 699,511,508 | **97,826,189** | **7.15×** | flat | 5.18× | engineering | ✓ identical |
+| **total**  |   |   | 176 | 110 | 781,399,171 | 780,488,580 (1.001×) | **124,465,168** | **6.28×** | flat | **4.36×** | engineering | ✓ |
 
-The inherited-F4 column is the engine as shipped, `KIC_F4_INHERIT=1` forcing
-it on the one cubic rung (`K_0/2^9`, `m = 3`) so that every rung prices the
-inherited path; the shipped default routes cubic systems to the reference
-engine (§3.4), so on that rung the default costs exactly the reference's
-`4,164,666`.  `K_1/2^15` refutes every target at its root (`32` reductions,
+The inherited-F4 column is the engine as shipped.  Its default routes cubic
+systems to the reference engine (§3.4), so on the one cubic rung
+(`K_0/2^9`, `m = 3`) it costs exactly the reference's `4,164,666`; the
+`inherited_f4_forced` variant (`KIC_F4_INHERIT=1`, in the evidence) inherits
+there too, for `3,943,077` and a ladder total of `124,243,579` (`6.29×`).
+`K_1/2^15` refutes every target at its root (`32` reductions,
 `0` splits): there is no tree to inherit along, so the engine does exactly the
 reference's work and the row is flat rather than improved.  The falsification
 target's clause (b) is met on every rung that has a tree.
@@ -221,15 +222,17 @@ target's clause (b) is met on every rung that has a tree.
 
 | variant | total word ops | ratio | min rung ratio | wall |
 |:--|--:|--:|--:|--:|
-| inherited F4, root as the from-scratch shape policy (**default**) | 124,940,731 | 6.25× | 1.00× (`K_1/2^15`, no tree) | 4.36× |
-| inherited F4, echelon-only root everywhere | 142,095,482 | 5.50× | 1.08× | 4.18× |
-| inherited F4, fully reduced root everywhere | 131,002,042 | 5.96× | 1.00× | 4.40× |
+| inherited F4, forced on every degree, root as the from-scratch shape policy | 124,243,579 | 6.29× | 1.00× (`K_1/2^15`, no tree) | 4.40× |
+| inherited F4, forced, echelon-only root everywhere | 141,394,044 | 5.53× | 1.06× | 4.21× |
+| inherited F4, forced, fully reduced root everywhere | 130,571,387 | 5.98× | **0.98×** (`K_0/2^9`, m=3) | 4.42× |
 
-The fully reduced root loses `46%` on `K_0/2^13` and is flat on the shallow
-`n_vars ≥ 24` rungs, where the reference itself only echelonises; the
-echelon-only root loses `16%` on `K_1/2^23`, where displaced rows cascade
-against unreduced pivots over a deep tree.  The default takes each regime's
-better half.
+All three force inheriting on every degree so the root policy is the only
+variable.  The fully reduced root loses `52%` on `K_0/2^13` and regresses the
+cubic rung, both shallow trees with `n_vars ≥ 24` where the reference itself
+only echelonises; the echelon-only root loses `16%` on `K_1/2^23`, where
+displaced rows cascade against unreduced pivots over a deep tree.  The
+default takes each regime's better half and is the only one of the three
+that never regresses a rung.
 
 ### 3.2 Holdout
 
@@ -237,8 +240,8 @@ Two instances the tuning never saw, from the predecessor note's holdout ladder:
 
 | instance | targets | decomposed | reference | inherited F4 | ratio | wall | correct |
 |:--|--:|--:|--:|--:|--:|--:|:--|
-| `K_0/2^19`, m=2 (`ℓ = 18`, 36 unknowns, the widest matrices) | 12 | 12 | 116,912,104 | 73,382,095 | **1.59×** | 1.32× | ✓ identical |
-| `K_1/2^17`, m=2, divisor 1 | 24 | 10 | 33,578,834 | 6,460,770 | **5.20×** | 3.60× | ✓ identical |
+| `K_0/2^19`, m=2 (`ℓ = 18`, 36 unknowns, the widest matrices) | 12 | 12 | 116,912,104 | 74,984,242 | **1.56×** | 1.29× | ✓ identical |
+| `K_1/2^17`, m=2, divisor 1 | 24 | 10 | 33,578,834 | 6,475,463 | **5.19×** | 3.61× | ✓ identical |
 
 `K_0/2^19` has 18 F4 calls per target — a shallow tree with a very wide root —
 and shows the floor of this method: when almost all the work is the root, the
@@ -274,9 +277,9 @@ fully reduced basis.  The ladder run, which specialises the same basis up to
 |:--|--:|--:|
 | root reductions (16 targets, degrees 2 and 3) | 6,719,658 | 7% |
 | re-reduction of displaced rows | 60,351,941 | **62%** |
-| specialisation (word reads and writes) | 30,585,461 | 31% |
+| specialisation (word reads and writes) | 30,626,267 | 31% |
 | tail RREF | 128,323 | 0.1% |
-| **inherited F4 total** | **97,756,456** | |
+| **inherited F4 total** | **97,826,189** | |
 
 Re-reduction costs `12.2 k` per reduction on the ladder against `2.2 k` per
 child in the depth-one probe: a fold `m ∋ v ↦ m ∖ v` can land on another row's
@@ -321,10 +324,10 @@ Stage wall on the `K_1/2^23` rung, the one that dominates:
 
 | phase | reference | inherited F4 |
 |:--|--:|--:|
-| build (reference: Macaulay build; inherited: root build **and every specialisation**) | 2,518 ms | 1,008 ms |
-| reduce (reference: elimination; inherited: tail RREF of the low block) | 3,160 ms | 20 ms |
-| readback | 66 ms | 0 ms |
-| **stage wall** | **5,890 ms** | **1,148 ms** |
+| build (reference: Macaulay build; inherited: root build **and every specialisation**) | 2,523 ms | 1,002 ms |
+| reduce (reference: elimination; inherited: tail RREF of the low block) | 3,194 ms | 19 ms |
+| readback | 67 ms | 0 ms |
+| **stage wall** | **5,929 ms** | **1,144 ms** |
 
 The elimination phase, which the unit has always measured and every earlier
 round optimised, is `0.3%` of what it was: there is almost nothing left to
@@ -359,7 +362,7 @@ Per `AGENTS.md` §8, and because the number is large enough to tempt:
 - **The accounting is asymmetric against the candidate**, deliberately: the
   reference's matrix build is not in the unit, the candidate's specialisation
   is — `30.6 M` of its `97.8 M` operations at `n = 23`.  Dropping that charge
-  would read `10.4×` on that rung; it is not dropped, and the `7.16×` stands.
+  would read `10.4×` on that rung; it is not dropped, and the `7.15×` stands.
 - **It is a quadratic-system result.**  On the chained cubic systems the
   shipped engine reduces exactly as the reference does (§3.4), so those cells
   are flat by construction; the one measured attempt to inherit on them

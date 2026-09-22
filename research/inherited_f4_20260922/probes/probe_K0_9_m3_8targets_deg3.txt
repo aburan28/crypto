@@ -1,6 +1,6 @@
 
 === whole solve, engine InheritedF4 { max_degree: 3 }: 127 reductions, 11 refutations, 136 propagations, 78 splits, 0.24 s ===
-F4 calls 120 · word ops 1691486 (specialisation 947912, fallbacks 8) · rows 29319 · cols 101366 · build 23 ms · reduce 1 ms · readback 0 ms
+F4 calls 120 · word ops 1733065 (specialisation 966444) · rows 28491 · cols 101367 · build 24 ms · reduce 0 ms · readback 0 ms
 
 === inherited F4 probe: K_0/2^9, m = 3, 8 targets, degree 3 ===
 node systems captured: 127 (reduced: 120)
@@ -17,6 +17,6 @@ mean rank per node: 237.4
 | completion rows (both children) | 14410 | 120.08 |
 
 ratio from-scratch / inherited (children): 1.35×
-wall from-scratch / inherited (children): 2.67×
+wall from-scratch / inherited (children): 2.73×
 children compared: 236; solver-view mismatches: 0; raw decisive-row differences (refuted nodes where the from-scratch tail also holds x_v·1): 0
-{"children":236,"completion_rows":14410,"curve":"K_0/2^9","degree":3,"displaced_rows":9134,"inherited_child_word_ops":3252426,"inherited_reduce_word_ops":1589526,"inherited_specialise_word_ops":1662900,"m":3,"mean_rank":237.425,"mismatches":0,"nodes":120,"raw_decisive_row_differences":0,"scratch_child_word_ops":4386371,"scratch_parent_word_ops":2245426,"targets":8,"wall_inherit_ns":36046712,"wall_scratch_ns":96303832}
+{"children":236,"completion_rows":14410,"curve":"K_0/2^9","degree":3,"displaced_rows":9134,"inherited_child_word_ops":3252426,"inherited_reduce_word_ops":1589526,"inherited_specialise_word_ops":1662900,"m":3,"mean_rank":237.425,"mismatches":0,"nodes":120,"raw_decisive_row_differences":0,"scratch_child_word_ops":4386371,"scratch_parent_word_ops":2245426,"targets":8,"wall_inherit_ns":35519887,"wall_scratch_ns":96795069}

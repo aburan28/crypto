@@ -1,6 +1,6 @@
 
-=== whole solve, engine InheritedF4 { max_degree: 3 }: 409 reductions, 202 refutations, 22 propagations, 203 splits, 0.40 s ===
-F4 calls 814 · word ops 2370751 (specialisation 841830, fallbacks 2) · rows 86906 · cols 116509 · build 42 ms · reduce 1 ms · readback 0 ms
+=== whole solve, engine InheritedF4 { max_degree: 3 }: 409 reductions, 202 refutations, 22 propagations, 203 splits, 0.39 s ===
+F4 calls 814 · word ops 2373729 (specialisation 843478) · rows 86906 · cols 116509 · build 43 ms · reduce 1 ms · readback 0 ms
 
 === inherited F4 probe: K_1/2^17, m = 2, 8 targets, degree 3 ===
 node systems captured: 409 (reduced: 407)
@@ -17,6 +17,6 @@ mean rank per node: 197.5
 | completion rows (both children) | 0 | 0.00 |
 
 ratio from-scratch / inherited (children): 9.35×
-wall from-scratch / inherited (children): 6.00×
+wall from-scratch / inherited (children): 6.03×
 children compared: 814; solver-view mismatches: 0; raw decisive-row differences (refuted nodes where the from-scratch tail also holds x_v·1): 0
-{"children":814,"completion_rows":0,"curve":"K_1/2^17","degree":3,"displaced_rows":33156,"inherited_child_word_ops":1442242,"inherited_reduce_word_ops":241278,"inherited_specialise_word_ops":1200964,"m":2,"mean_rank":197.52825552825553,"mismatches":0,"nodes":407,"raw_decisive_row_differences":0,"scratch_child_word_ops":13488551,"scratch_parent_word_ops":9813390,"targets":8,"wall_inherit_ns":33238818,"wall_scratch_ns":199394366}
+{"children":814,"completion_rows":0,"curve":"K_1/2^17","degree":3,"displaced_rows":33156,"inherited_child_word_ops":1442242,"inherited_reduce_word_ops":241278,"inherited_specialise_word_ops":1200964,"m":2,"mean_rank":197.52825552825553,"mismatches":0,"nodes":407,"raw_decisive_row_differences":0,"scratch_child_word_ops":13488551,"scratch_parent_word_ops":9813390,"targets":8,"wall_inherit_ns":33158960,"wall_scratch_ns":200074352}
