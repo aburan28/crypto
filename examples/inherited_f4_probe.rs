@@ -35,6 +35,18 @@ fn canonical(mut rows: Vec<F2BoolPoly>) -> Vec<String> {
     out
 }
 
+/// What the solver does with decisive rows: refute on `1`, otherwise
+/// propagate the forced variables.  The from-scratch step multiplies by
+/// the assigned variable too, so once `1` is in its row space `x_v·1 = x_v`
+/// joins its tail; the solver never reads past the `1`.
+fn solver_view(rows: Vec<F2BoolPoly>) -> Vec<String> {
+    if rows.iter().any(|p| p.terms.len() == 1 && p.terms[0].mask == 0) {
+        vec!["refuted".into()]
+    } else {
+        canonical(rows)
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let a: u8 = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(1);
@@ -78,6 +90,8 @@ fn main() {
     let mut ranks = 0u64;
     let mut completion = 0u64;
     let mut mismatches = 0u64;
+    let mut raw_mismatches = 0u64;
+    let mut children = 0u64;
     let mut wall_scratch = 0u128;
     let mut wall_inherit = 0u128;
 
@@ -122,7 +136,11 @@ fn main() {
             inherited_specialise += cost.specialise_word_ops;
             displaced += cost.displaced_rows;
             completion += cost.completion_rows;
-            if canonical(scratch_rows) != canonical(child_rows) {
+            children += 1;
+            if canonical(scratch_rows.clone()) != canonical(child_rows.clone()) {
+                raw_mismatches += 1;
+            }
+            if solver_view(scratch_rows) != solver_view(child_rows) {
                 mismatches += 1;
             }
         }
@@ -152,12 +170,16 @@ fn main() {
         "wall from-scratch / inherited (children): {:.2}×",
         wall_scratch as f64 / wall_inherit.max(1) as f64
     );
-    println!("decisive-row mismatches: {mismatches}");
+    println!(
+        "children compared: {children}; solver-view mismatches: {mismatches}; \
+         raw decisive-row differences (refuted nodes where the from-scratch tail also holds x_v·1): {raw_mismatches}"
+    );
     println!(
         "{}",
         serde_json::json!({
             "curve": format!("K_{a}/2^{n}"), "targets": targets, "degree": degree,
-            "nodes": nodes, "mean_rank": per(ranks),
+            "nodes": nodes, "children": children, "mean_rank": per(ranks),
+            "raw_decisive_row_differences": raw_mismatches,
             "scratch_parent_word_ops": scratch_parent,
             "scratch_child_word_ops": scratch_child,
             "inherited_child_word_ops": inherited_child,

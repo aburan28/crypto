@@ -80,13 +80,32 @@
 //! solutions are verified against the original system before they are
 //! returned.
 //!
+//! ## The engines
+//!
+//! [`SolverEngine`] selects what reduces the system at a node:
+//!
+//! - `MatrixF4`: the degree-bounded Macaulay matrix of every product
+//!   `t·f_i`, row-reduced from scratch at every node ([`matrix_f4_f2`]).
+//! - `MatrixF5`: the same matrix with the rows the F5 criterion predicts
+//!   to reduce to zero left out ([`crate::cryptanalysis::matrix_f5_f2`]);
+//!   same row space.  On the quadratic systems here the trivial syzygies
+//!   first appear at degree 4, so at degree 3 it prunes only what linear
+//!   equations allow.
+//! - `InheritedF4` (the default): the root reduces as `MatrixF4` does and
+//!   every descendant specialises its parent's reduced basis by the
+//!   assigned variable ([`crate::cryptanalysis::inherited_f4`]); same row
+//!   space at every node, no matrix built below the root.
+//! - `Buchberger`: the textbook reference
+//!   ([`crate::cryptanalysis::pq_groebner_f2`]), kept so the matrix engines
+//!   can be tested against it.
+//!
 //! ## Honest scope
 //!
-//! - The engine underneath is Buchberger with Gebauer–Möller pruning
-//!   ([`crate::cryptanalysis::pq_groebner_f2`]), not F4/F5 with sparse
-//!   linear algebra.  It is the right *algorithm* and the wrong
-//!   *constant*; the toy parameters (`m·ℓ + (m−2)·n ≤ 64` unknowns, and
-//!   in practice far fewer) are chosen accordingly.
+//! - The toy parameters (`m·ℓ + (m−2)·n ≤ 64` unknowns, and in practice
+//!   far fewer) are set by the `u64` monomial representation; nothing here
+//!   bears on the oracle's cost at `n = 131`, which is bounded by the
+//!   counting argument in
+//!   `research/notes/ecc2k130/RESEARCH_ECC2K130_DECOMPOSITION.md`.
 //! - `S₃` is a *necessary* condition on `x`-coordinates only.  A root
 //!   fixes the summands up to sign, so each candidate is lifted to
 //!   actual points and the group identity `P_1 + … + P_m = R` is
@@ -2506,8 +2525,14 @@ pub enum SolverEngine {
 }
 
 impl Default for SolverEngine {
+    /// Inherited matrix-F4 through degree 3.  It decides every target of
+    /// the frozen Gröbner-stage ladder and its holdout identically to
+    /// `MatrixF4 { max_degree: 3 }` (the default before it) for a fraction
+    /// of the word operations — see
+    /// `research/notes/ecc2k130/RESEARCH_INHERITED_F4.md`.  `KIC_F4_INHERIT=0`
+    /// restores the from-scratch engine as a retained control.
     fn default() -> Self {
-        SolverEngine::MatrixF4 { max_degree: 3 }
+        SolverEngine::InheritedF4 { max_degree: 3 }
     }
 }
 
@@ -3491,6 +3516,118 @@ mod tests {
             got.sort_unstable();
             brute.sort_unstable();
             assert_eq!(got, brute, "x_R = {raw}");
+        }
+    }
+
+    /// The engines that share the F4 row space must walk the same splitting
+    /// tree: same roots, same reductions, refutations, propagations and
+    /// splits.  Checked on real Semaev systems for `m = 2` and the chained
+    /// cubic `m = 3`, over targets that decompose and targets that do not.
+    #[test]
+    fn inherited_and_f5_engines_walk_the_same_tree_as_matrix_f4() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base(&kc, 0)
+            .unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let basis = &fb.subspace_basis;
+        let engines = [
+            SolverEngine::InheritedF4 { max_degree: 3 },
+            SolverEngine::MatrixF5 { max_degree: 3 },
+        ];
+        for (m, raws) in [(2usize, vec![1u64, 9, 23, 64, 300, 511]), (3, vec![1u64, 23, 300])] {
+            for raw in raws {
+                let sys =
+                    build_decomposition_system(basis, &fe(raw, kc.n), &kc.curve.b, m, &st).unwrap();
+                let reference = SolveOptions {
+                    max_solutions: 64,
+                    engine: SolverEngine::MatrixF4 { max_degree: 3 },
+                    ..SolveOptions::default()
+                };
+                let (mut want, want_stats) = solve_boolean_system(&sys.equations, sys.n_vars, &reference);
+                want.sort_unstable();
+                for engine in engines {
+                    let opts = SolveOptions { engine, ..reference };
+                    let (mut got, stats) = solve_boolean_system(&sys.equations, sys.n_vars, &opts);
+                    got.sort_unstable();
+                    assert_eq!(got, want, "{engine:?} m={m} x_R={raw}: roots differ");
+                    assert_eq!(
+                        (stats.reductions, stats.infeasible_branches, stats.propagations, stats.splits),
+                        (
+                            want_stats.reductions,
+                            want_stats.infeasible_branches,
+                            want_stats.propagations,
+                            want_stats.splits
+                        ),
+                        "{engine:?} m={m} x_R={raw}: the splitting tree differs"
+                    );
+                    assert_eq!(stats.max_degree_built, want_stats.max_degree_built);
+                    assert_eq!(stats.oversize, want_stats.oversize);
+                }
+            }
+        }
+    }
+
+    /// Same tree on random systems with linear equations mixed in — where
+    /// degree drops (completion rows) and forced propagation chains occur.
+    #[test]
+    fn inherited_engine_matches_matrix_f4_on_random_systems() {
+        let mut seed = 0xdead_beef_cafe_f00du64;
+        let mut next = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        for trial in 0..60 {
+            let n_vars = 6 + (trial % 5);
+            let m = 4 + (trial % 4);
+            let system: Vec<F2BoolPoly> = (0..m)
+                .map(|k| {
+                    let deg = if k % 3 == 2 { 1 } else { 2 };
+                    let terms = 3 + (next() % 6) as usize;
+                    let monos = (0..terms)
+                        .map(|_| {
+                            let d = (next() % (deg + 1)) as u32;
+                            let mut mask = 0u64;
+                            for _ in 0..d {
+                                mask |= 1u64 << (next() % n_vars as u64);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .filter(|p| !p.is_zero())
+                .collect();
+            let reference = SolveOptions {
+                max_solutions: 1 << 12,
+                engine: SolverEngine::MatrixF4 { max_degree: 3 },
+                ..SolveOptions::default()
+            };
+            let (mut want, want_stats) = solve_boolean_system(&system, n_vars, &reference);
+            want.sort_unstable();
+            let opts = SolveOptions {
+                engine: SolverEngine::InheritedF4 { max_degree: 3 },
+                ..reference
+            };
+            let (mut got, stats) = solve_boolean_system(&system, n_vars, &opts);
+            got.sort_unstable();
+            assert_eq!(got, want, "trial {trial}: roots differ");
+            assert_eq!(
+                (stats.reductions, stats.infeasible_branches, stats.propagations, stats.splits),
+                (
+                    want_stats.reductions,
+                    want_stats.infeasible_branches,
+                    want_stats.propagations,
+                    want_stats.splits
+                ),
+                "trial {trial}: the splitting tree differs"
+            );
+            // Roots are the truth, whichever engine found them.
+            let brute: Vec<u64> = (0..(1u64 << n_vars))
+                .filter(|pt| system.iter().all(|e| e.eval(*pt) == 0))
+                .collect();
+            assert_eq!(got, brute, "trial {trial}: roots are not the variety");
         }
     }
 

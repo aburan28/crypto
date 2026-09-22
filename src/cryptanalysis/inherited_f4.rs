@@ -261,16 +261,19 @@ impl ReducedBasis {
     /// **Completion.**  The Macaulay matrix multiplies `f_i` by every
     /// monomial of degree `≤ D − deg f_i`.  If `deg f_i|_{v=c} < deg f_i`,
     /// the specialised system has multipliers of higher degree that no
-    /// parent row maps to; those products are built and inserted so the
-    /// row space is exactly the one a from-scratch step on the specialised
-    /// system would reduce with multipliers over the unassigned variables.
+    /// parent row maps to; those products are built and inserted, with
+    /// multipliers over the variables occurring in the specialised system.
     ///
-    /// **Assigned variables as multipliers.**  The from-scratch step
-    /// multiplies by every variable, assigned ones included.  Such a row
-    /// `x·g`, with `x` occurring in no generator, lies in the linear tail
-    /// only if `g ∈ {0, 1}`, and `g = 1` is already a refutation — so the
-    /// two row spaces have the same tail and the solver behaves
-    /// identically.
+    /// **Which row space, exactly.**  Write `V_M(S)` for the Macaulay row
+    /// space of `S` with multipliers over the variable set `M`.  The
+    /// inherited rows span `V_{unassigned}` for the generators whose degree
+    /// did not drop and the completion adds `V_{occurring}` for the rest,
+    /// so the basis lies between `V_{occurring}(S')` and `V_{all}(S')`, the
+    /// latter being what the from-scratch step reduces.  Every space in
+    /// that sandwich has the **same linear tail**: a row `x·g` with `x`
+    /// occurring in no generator lies in the tail only if `g ∈ {0, 1}`,
+    /// and `g = 1` is already a refutation.  The solver reads nothing but
+    /// the tail, so it behaves identically.
     pub fn specialise(&self, var: u32, value: bool) -> (Self, InheritCost) {
         let mut cost = InheritCost::default();
         let bit = 1u64 << var;
@@ -358,8 +361,16 @@ impl ReducedBasis {
         }
 
         // Completion rows for generators whose degree dropped, with
-        // multipliers over the unassigned variables.
-        let multiplier_mask = all_variable_mask(out.n_vars) & !out.assigned;
+        // multipliers over the variables occurring in the specialised
+        // system (the from-scratch step's own active-multiplier policy):
+        // a multiplier containing a variable that occurs nowhere adds only
+        // rows `x·g` that cannot reach the linear tail.
+        let multiplier_mask = out
+            .system
+            .iter()
+            .flat_map(|p| p.terms.iter())
+            .fold(0u64, |acc, t| acc | t.mask)
+            & all_variable_mask(out.n_vars);
         let mut completion: Vec<Vec<u64>> = Vec::new();
         {
             // Pair each surviving generator with its pre-specialisation degree.
@@ -647,6 +658,27 @@ mod tests {
         system.iter().any(|p| p.terms.len() == 1 && p.terms[0].mask == 0)
     }
 
+    fn occurring(system: &[F2BoolPoly]) -> u64 {
+        system.iter().flat_map(|p| p.terms.iter()).fold(0, |a, t| a | t.mask)
+    }
+
+    /// Does every polynomial of `inner` reduce to zero against the RREF
+    /// `outer`?  (`inner ⊆ span(outer)`.)
+    fn contained(inner: &[F2BoolPoly], outer: &[F2BoolPoly], n_vars: usize) -> bool {
+        let joint = rref_polys(&[outer, inner].concat(), n_vars);
+        joint.len() == rref_polys(outer, n_vars).len()
+    }
+
+    /// The sandwich `V_occurring(S) ⊆ basis ⊆ V_unassigned(S)` the module
+    /// documents, for a node reached by assigning `assigned`.
+    fn assert_sandwich(basis: &ReducedBasis, system: &[F2BoolPoly], n_vars: usize, assigned: u64, what: &str) {
+        let rows = rref_polys(&basis_polys(basis), n_vars);
+        let lower = masked_space(system, n_vars, basis.degree, occurring(system) & !assigned);
+        let upper = masked_space(system, n_vars, basis.degree, all_variable_mask(n_vars) & !assigned);
+        assert!(contained(&lower, &rows, n_vars), "{what}: V_occurring not contained in the basis");
+        assert!(contained(&rows, &upper, n_vars), "{what}: basis not contained in V_unassigned");
+    }
+
     fn basis_polys(b: &ReducedBasis) -> Vec<F2BoolPoly> {
         b.rows
             .iter()
@@ -695,12 +727,13 @@ mod tests {
                             .filter(|p| !p.is_zero())
                             .collect();
                         assert_eq!(child.system, child_system);
-                        // Exact row space: multipliers over the unassigned variables.
                         if !has_constant(&child_system) {
-                            assert_eq!(
-                                masked_space(&child_system, n_vars, degree, all & !(1 << v)),
-                                rref_polys(&basis_polys(&child), n_vars),
-                                "trial {trial} degree {degree} v{v}={value}: row space differs"
+                            assert_sandwich(
+                                &child,
+                                &child_system,
+                                n_vars,
+                                1 << v,
+                                &format!("trial {trial} degree {degree} v{v}={value}"),
                             );
                         }
                         // Tail agreement with the legacy all-variable step's readback.
@@ -721,10 +754,12 @@ mod tests {
                             .filter(|p| !p.is_zero())
                             .collect();
                         if !has_constant(&gc_system) {
-                            assert_eq!(
-                                masked_space(&gc_system, n_vars, degree, all & !(1 << v) & !(1 << w)),
-                                rref_polys(&basis_polys(&grandchild), n_vars),
-                                "trial {trial} degree {degree} v{v}={value} w{w}: grandchild differs"
+                            assert_sandwich(
+                                &grandchild,
+                                &gc_system,
+                                n_vars,
+                                (1 << v) | (1 << w),
+                                &format!("trial {trial} degree {degree} v{v}={value} w{w}: grandchild"),
                             );
                         }
                         let legacy = matrix_f4_f2(&gc_system, n_vars, degree).unwrap_or_default();
@@ -756,8 +791,12 @@ mod tests {
         let (root, _) = ReducedBasis::from_system(&[f, g], n_vars, 3).unwrap();
         let (child, cost) = root.specialise(0, false);
         assert!(cost.completion_rows > 0, "f dropped to degree 1; completion expected");
+        let system = child.system.clone();
+        assert_sandwich(&child, &system, n_vars, 1, "degree drop");
+        // With every unassigned variable occurring, the sandwich is an equality.
+        assert_eq!(occurring(&system), all_variable_mask(n_vars) & !1);
         assert_eq!(
-            masked_space(&child.system, n_vars, 3, all_variable_mask(n_vars) & !1),
+            masked_space(&system, n_vars, 3, all_variable_mask(n_vars) & !1),
             rref_polys(&basis_polys(&child), n_vars)
         );
     }
