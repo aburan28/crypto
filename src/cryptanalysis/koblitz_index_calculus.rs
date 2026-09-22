@@ -11010,7 +11010,7 @@ mod tests {
         let fc = FastCurve::new(&kc.curve).unwrap();
         let base = fb.points.len();
         let len = base / 8;
-        let mut gather = Vec::new();
+        let mut scratch = ScanScratch::default();
         let mut compared = 0;
         for t in 1u64..400 {
             let target = fc.mul_u64(fc.lift(kc.generator()), t);
@@ -11027,7 +11027,7 @@ mod tests {
                     target,
                     3,
                     Scan::Indices(&idxs),
-                    &mut gather,
+                    &mut scratch,
                     &mut |w| {
                         from_indices.push(w.to_vec());
                         true
@@ -11058,11 +11058,11 @@ mod tests {
         // A scattered set, deliberately not a contiguous range.
         let idxs: Vec<u32> = (0..fb.points.len() as u32).filter(|i| i % 7 == 3).collect();
         let wanted: std::collections::BTreeSet<u32> = idxs.iter().copied().collect();
-        let mut gather = Vec::new();
+        let mut scratch = ScanScratch::default();
         let mut seen = 0;
         for t in 1u64..600 {
             let target = fc.mul_u64(fc.lift(kc.generator()), t);
-            pair.witnesses_fast_scan(target, 3, Scan::Indices(&idxs), &mut gather, &mut |w| {
+            pair.witnesses_fast_scan(target, 3, Scan::Indices(&idxs), &mut scratch, &mut |w| {
                 assert_eq!(w.len(), 3);
                 assert!(
                     wanted.contains(&(w[2] as u32)),

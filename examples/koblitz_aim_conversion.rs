@@ -58,12 +58,18 @@ fn main() {
 
     // The swept window, for the same window width, as the reference the
     // aimed scan has to beat per relation rather than per scan.
+    // The target is walked by one addition, as collection walks it: a
+    // scalar multiplication per target is some 59 chained additions and
+    // would sit inside the per-summand figure, larger the narrower the
+    // scan.
+    let stride = fc.mul_u64(g, 7_700_017);
     let mut swept = 0usize;
     let mut n_targets = 0usize;
+    let mut t = fc.mul_u64(g, 12_345);
     let start = Instant::now();
     while start.elapsed().as_secs_f64() < SECONDS {
         n_targets += 1;
-        let t = fc.mul_u64(g, n_targets as u64 * 7_700_017 + 3);
+        t = fc.add(t, stride);
         table.decompose_fast_window(t, 3, (n_targets * 7919) % base, window);
         swept += window;
     }
@@ -83,9 +89,9 @@ fn main() {
     for &ncols in &counts {
         // Whole orbits, taken evenly across the base so the set is as
         // scattered as a real set of missing columns.
-        let stride = (columns / ncols).max(1);
+        let col_stride = (columns / ncols).max(1);
         let mut idxs: Vec<u32> = Vec::new();
-        for c in (0..columns).step_by(stride).take(ncols) {
+        for c in (0..columns).step_by(col_stride).take(ncols) {
             idxs.extend(fb.signed_orbits[c].iter().map(|&i| i as u32));
         }
         idxs.sort_unstable();
@@ -97,10 +103,11 @@ fn main() {
         let mut scratch = ScanScratch::default();
         let mut scanned = 0usize;
         let mut targets = 0usize;
+        let mut t = fc.mul_u64(g, 12_345);
         let start = Instant::now();
         while start.elapsed().as_secs_f64() < SECONDS {
             targets += 1;
-            let t = fc.mul_u64(g, targets as u64 * 7_700_017 + 3);
+            t = fc.add(t, stride);
             let off = (targets * 7919) % idxs.len();
             table.decompose_fast_scan(
                 t,
