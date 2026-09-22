@@ -2858,7 +2858,64 @@ cap, the shipped engines are, and by a margin that widens with `n'` —
 the direction §14.5 warned the reader to expect from "the engine was
 the measurement".
 
-### 16.5 What does not count
+### 16.5 The degree ladder past the cap
+
+§14.4 stopped at `n = 13`, `n' = 7`, fourteen unknowns, because the
+table did.  The same measurement — eight targets a cell, the Koblitz
+curve `K` and a random curve `R` at each degree, `n' = ⌈n/2⌉` so the
+system is square, a 120-second budget per target — continues here from
+sixteen to twenty-two unknowns.  Frozen at
+`docs/ic/runs/ic-descent-degrees-symbolic-2026-09-22.json`; the `K`
+family has no instance at `n = 21` in the roster, so that cell is
+recorded as skipped rather than filled from elsewhere.
+
+| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum (raw counts) | ms | KiB | no decomp | budget hit |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| K | 15 | 8 | 2 | 16 | 15 | 3.8 | 3.8 | 4–5 | 0.94 | 1.976e7 | 3.703e7 | 0.5× | 3,514 | 395 | 2/8 | 0/8 |
+| K | 17 | 9 | 2 | 18 | 17 | 4.0 | 4.0 | 5 | 0.80 | 9.345e7 | 2.103e8 | 0.4× | 22,293 | 706 | 3/8 | 0/8 |
+| K | 19 | 10 | 2 | 20 | 19 | ≥ 4.0 | ≥ 4.0 | 5 | ≥ 0.80 | ≥ 3.387e8 | 1.226e9 | — | ≥ 114,059 | 1,696 | 6/8 | **6/8** |
+| R | 15 | 8 | 2 | 16 | 15 | 3.6 | 3.6 | 4–5 | 0.91 | 1.194e7 | 3.749e7 | 0.3× | 1,705 | 171 | 1/8 | 0/8 |
+| R | 17 | 9 | 2 | 18 | 17 | 4.0 | 4.0 | 5 | 0.80 | 9.763e7 | 2.124e8 | 0.5× | 22,704 | 706 | 5/8 | 0/8 |
+| R | 19 | 10 | 2 | 20 | 19 | ≥ 4.0 | ≥ 4.0 | 5 | ≥ 0.80 | ≥ 3.640e8 | 1.233e9 | — | ≥ 114,096 | 1,657 | 3/8 | **7/8** |
+| R | 21 | 11 | 2 | 22 | 21 | ≥ 4.0 | ≥ 4.0 | 5 | ≥ 0.80 | ≥ 1.053e9 | 6.671e9 | — | ≥ 120,003 | 3,620 | 4/8 | **8/8** |
+
+A row with a budget hit carries lower bounds in every measured column
+— a run that was stopped had not finished raising its degree or
+spending its operations — and its `ops/enum` is left blank, since a
+lower bound over a fixed reference says nothing.  `D_sr` reads `4–5`
+where the bound differs between targets of one cell: a target whose
+descended system carries a linear coordinate equation has a lower
+bound than one whose equations are all quadratic.
+
+Reading it:
+
+- **The solving degree is `4` from eighteen unknowns on, against a
+  bound of `5`**: every one of the thirty-two finished runs at
+  `n' ≥ 9` reached exactly degree four, on both families, and so did
+  every run the budget stopped.  §14's phenomenon — the descended
+  system solved below the semi-regular degree — holds at every cell
+  the symbolic descent reached, at `0.80` of the bound; at sixteen
+  unknowns, where the bound is `4` or `5` by target, it holds at
+  `0.91`–`0.94`.
+- **`K` and `R` still behave identically**, on the degree and on the
+  cost, as they did in §14.4.
+- **The engine is the wall.**  Per target, the finished runs cost
+  `1.7`–`3.5 s` at sixteen unknowns and `22 s` at eighteen (`8`–`51 s`
+  by target); at twenty, thirteen of sixteen runs hit the 120-second
+  budget, and at twenty-two all eight did.  That is a factor of six to
+  thirteen per two unknowns, the growth §16.4 saw from the inside of a
+  whole run, and it is the reason the algebraic rows stop where they
+  do: not the descent any more, and not the degree, which is flat.
+- **The `ops/enum` column is in raw counts of unlike units** and is
+  kept only to line up with §14.4; §15.4 is the correction, and the
+  converted ratio (about `2,300×` at eighteen unknowns, §16.4) is the
+  one that means something.
+
+By §3 these rows are **measurements**: the degree ladder extended by
+three rungs, no boundary crossed, the timed-out cells marked as the
+lower bounds they are.
+
+### 16.6 What does not count
 
 - Nothing here is a speed against rho; the `vs rho` column is empty.
 - Every algebraic price is `measured` and host-dependent (§12); the
@@ -2873,11 +2930,15 @@ the measurement".
   XL, the budget for Buchberger) are where the rows now stop, and §8 of
   the framework manual says so.
 
-### 16.6 Reproducing
+### 16.7 Reproducing
 
 ```
 ic bench --sweep docs/ic/sweeps/solver-engines-n17.json \
   --out docs/ic/runs/ic-bench-solver-engines-n17-2026-09-22.json
+
+ic descent --cells 15:8:2,17:9:2,19:10:2,21:11:2 --targets 8 \
+  --families K,R --budget-seconds 120 \
+  --out docs/ic/runs/ic-descent-degrees-symbolic-2026-09-22.json
 
 # The reproduce check: the frozen 11:6:2 cell through the symbolic path.
 ic descent --cells 11:6:2 --targets 8 --families K,R
