@@ -272,14 +272,14 @@ impl Ffs {
 /// ```
 ///
 /// so the hot loop no longer walks all `n` derivatives.  Dispatch:
-/// - `n ≥ 8`: hardcoded scalar `L = 8` (256-step) chunk (libfes unroll).
-/// - `n ≥ 4`: scalar `L = 4` (16-step) chunk.
+/// - `n ≥ 14` and multi-root: **parallel outer specialisation** (rayon over
+///   the top 4 Boolean variables → 16 independent `L=4` walks).
+/// - `n ≥ 4`: scalar `L = 4` (16-step) chunk with `Fl[0]` kept in a register.
 /// - else: minimal one-step FFS.
 ///
-/// Batch-probe and AVX2 4×u64 helpers remain available for experiments
-/// (`gray_ffs_unrolled_l4_batch`, `gray_ffs_unrolled_l8_batch`, `mq_fes_avx2`)
-/// but are not auto-selected: on packed-u64 single-system Semaev they lose to
-/// the hardcoded scalar path (well-predicted per-step zero checks).
+/// Hardcoded `L = 8`, batch-probe, and AVX2 4×u64 remain available for
+/// experiments but are not auto-selected (I-cache / rewind / SIMD overhead
+/// lose to the packed-u64 `L=4` path on this host).
 /// Inspired by <https://github.com/cbouilla/libfes-lite>
 /// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`, batch asm) and
 /// ALMASTY `ffs.h`.
@@ -296,18 +296,23 @@ pub fn gray_incremental_find_all(
         return None;
     }
 
-    // AVX2 4×u64 (+ batch) stays opt-in: release walls still lose to hardcoded
-    // scalar L=4 / L=8 on single-system packed-u64 Semaev instances.
+    // Parallel outer specialisation for large full enums / multi-root lifts.
+    const PARALLEL_OUTER: usize = 4;
+    if max_solutions > 1 && n >= 4 + PARALLEL_OUTER + 4 {
+        return Some(gray_ffs_parallel_outer(
+            forms,
+            n,
+            max_solutions,
+            PARALLEL_OUTER,
+        ));
+    }
 
-    // Stack tables: Fq through fictive n+1 is at most idxq(0,34)=561; Fl ≤ 34.
     let mut fq = [0u64; 561];
     let mut fl = [0u64; 34];
     fill_fq_fl(forms, n, &mut fq, &mut fl);
 
     let mut out = Vec::new();
-    if n >= 8 {
-        gray_ffs_unrolled_l8(&mut fq, &mut fl, n, max_solutions, &mut out);
-    } else if n >= 4 {
+    if n >= 4 {
         gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
     } else {
         gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
@@ -348,6 +353,129 @@ pub(crate) fn fill_fq_fl(
         fq[idxq(i, n + 1)] = fq[idxq(i - 1, i)];
     }
     fq[idxq(n, n + 1)] = 0;
+}
+
+/// Specialise the top `outer` variables to the bit-pattern `lane`, writing
+/// the induced system on the remaining `n_inner = n - outer` variables into
+/// `fq`/`fl` (with fictive padding).  Mirrors libfes / AVX2 lane setup.
+pub(crate) fn specialize_outer_to_tables(
+    forms: &[QuadraticForm],
+    n: usize,
+    outer: usize,
+    lane: u32,
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+) {
+    let n_inner = n - outer;
+    fq.fill(0);
+    fl.fill(0);
+    let m = forms.len();
+    for (eq, form) in forms.iter().enumerate().take(m) {
+        let bit = 1u64 << eq;
+        let mut c = form.constant;
+        let mut lin = vec![false; n_inner];
+        let mut quad = vec![vec![false; n_inner]; n_inner];
+
+        let val = |v: usize| -> Option<bool> {
+            if v < n_inner {
+                None
+            } else {
+                Some(((lane >> (v - n_inner)) & 1) == 1)
+            }
+        };
+
+        for i in 0..n {
+            if form.linear[i] {
+                match val(i) {
+                    Some(true) => c = !c,
+                    Some(false) => {}
+                    None => lin[i] = !lin[i],
+                }
+            }
+        }
+        for i in 0..n {
+            for j in 0..i {
+                if !form.quad[i][j] {
+                    continue;
+                }
+                match (val(i), val(j)) {
+                    (Some(true), Some(true)) => c = !c,
+                    (Some(true), None) => lin[j] = !lin[j],
+                    (None, Some(true)) => lin[i] = !lin[i],
+                    (None, None) => quad[i][j] = !quad[i][j],
+                    _ => {}
+                }
+            }
+        }
+
+        if c {
+            fl[0] ^= bit;
+        }
+        for i in 0..n_inner {
+            if lin[i] {
+                fl[1 + i] ^= bit;
+            }
+            for j in 0..i {
+                if quad[i][j] {
+                    fq[idxq(j, i)] ^= bit;
+                }
+            }
+        }
+    }
+    for i in 0..n_inner {
+        fq[idxq(i, n_inner)] = 0;
+    }
+    fq[idxq(0, n_inner + 1)] = 0;
+    for i in 1..n_inner {
+        fq[idxq(i, n_inner + 1)] = fq[idxq(i - 1, i)];
+    }
+    fq[idxq(n_inner, n_inner + 1)] = 0;
+}
+
+/// Rayon over `2^outer` specialised subsystems (independent Gray walks).
+pub(crate) fn gray_ffs_parallel_outer(
+    forms: &[QuadraticForm],
+    n: usize,
+    max_solutions: usize,
+    outer: usize,
+) -> Vec<u64> {
+    use rayon::prelude::*;
+    let n_inner = n - outer;
+    let lanes = 1u32 << outer;
+    // Each lane may collect up to the global cap; merge truncates.  (Splitting
+    // the budget across lanes can miss a lane-heavy solution set.)
+    let per_lane = max_solutions;
+
+    let parts: Vec<Vec<u64>> = (0..lanes)
+        .into_par_iter()
+        .map(|lane| {
+            let mut fq = [0u64; 561];
+            let mut fl = [0u64; 34];
+            specialize_outer_to_tables(forms, n, outer, lane, &mut fq, &mut fl);
+            let mut local = Vec::new();
+            if n_inner >= 4 {
+                gray_ffs_unrolled_l4(&mut fq, &mut fl, n_inner, per_lane, &mut local);
+            } else {
+                gray_ffs_minimal(&mut fq, &mut fl, n_inner, per_lane, &mut local);
+            }
+            let shift = n_inner as u64;
+            for x in &mut local {
+                *x |= (lane as u64) << shift;
+            }
+            local
+        })
+        .collect();
+
+    let mut out = Vec::new();
+    for part in parts {
+        for x in part {
+            out.push(x);
+            if out.len() >= max_solutions {
+                return out;
+            }
+        }
+    }
+    out
 }
 
 /// Heuristic: AVX2 batch-probe vs scalar `L=4` batch on this host.
@@ -403,6 +531,31 @@ fn step2(fq: &[u64; 561], fl: &mut [u64; 34], a: usize, b: usize, index: u64, ou
     false
 }
 
+/// Hot-path step with `Fl[0]` held in a register (`v`) and unchecked indexing.
+#[inline(always)]
+unsafe fn step2_fast(
+    fq: &[u64; 561],
+    fl: &mut [u64; 34],
+    v: &mut u64,
+    a: usize,
+    b: usize,
+    index: u64,
+    out: &mut Vec<u64>,
+    max_solutions: usize,
+) -> bool {
+    if *v == 0 {
+        out.push(index ^ (index >> 1));
+        if out.len() >= max_solutions {
+            fl[0] = *v;
+            return true;
+        }
+    }
+    let fa = fl.get_unchecked_mut(a);
+    *fa ^= *fq.get_unchecked(b);
+    *v ^= *fa;
+    false
+}
+
 /// libfes `generic_1x32` / `UNROLLED_CHUNK`: 16 Gray steps per FFS advance.
 pub(crate) fn gray_ffs_unrolled_l4(
     fq: &mut [u64; 561],
@@ -424,24 +577,28 @@ pub(crate) fn gray_ffs_unrolled_l4(
         let beta = (1 + k1) as usize;
         let gamma = idxq(k1 as usize, k2 as usize);
         let base = j << L;
-        // Hard-coded 16-step Gray chunk (libfes UNROLLED_CHUNK).
-        if step2(fq, fl, 1, alpha, base, out, max_solutions)
-            || step2(fq, fl, 2, alpha + 1, base + 1, out, max_solutions)
-            || step2(fq, fl, 1, 0, base + 2, out, max_solutions)
-            || step2(fq, fl, 3, alpha + 2, base + 3, out, max_solutions)
-            || step2(fq, fl, 1, 1, base + 4, out, max_solutions)
-            || step2(fq, fl, 2, 2, base + 5, out, max_solutions)
-            || step2(fq, fl, 1, 0, base + 6, out, max_solutions)
-            || step2(fq, fl, 4, alpha + 3, base + 7, out, max_solutions)
-            || step2(fq, fl, 1, 3, base + 8, out, max_solutions)
-            || step2(fq, fl, 2, 4, base + 9, out, max_solutions)
-            || step2(fq, fl, 1, 0, base + 10, out, max_solutions)
-            || step2(fq, fl, 3, 5, base + 11, out, max_solutions)
-            || step2(fq, fl, 1, 1, base + 12, out, max_solutions)
-            || step2(fq, fl, 2, 2, base + 13, out, max_solutions)
-            || step2(fq, fl, 1, 0, base + 14, out, max_solutions)
-            || step2(fq, fl, beta, gamma, base + 15, out, max_solutions)
-        {
+        let mut v = fl[0];
+        // Hard-coded 16-step Gray chunk with Fl[0] in a local.
+        let done = unsafe {
+            step2_fast(fq, fl, &mut v, 1, alpha, base, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 2, alpha + 1, base + 1, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 0, base + 2, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 3, alpha + 2, base + 3, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 1, base + 4, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 2, 2, base + 5, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 0, base + 6, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 4, alpha + 3, base + 7, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 3, base + 8, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 2, 4, base + 9, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 0, base + 10, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 3, 5, base + 11, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 1, base + 12, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 2, 2, base + 13, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, 1, 0, base + 14, out, max_solutions)
+                || step2_fast(fq, fl, &mut v, beta, gamma, base + 15, out, max_solutions)
+        };
+        fl[0] = v;
+        if done {
             return;
         }
     }
@@ -1298,7 +1455,8 @@ mod tests {
     }
 
     #[test]
-    fn l8_hardcoded_beats_l4_full_enum_wall() {
+    fn l8_hardcoded_vs_l4_full_enum_wall() {
+        // Document: hardcoded L=8 loses to L=4 on this host (I-cache / spill).
         let n = 18usize;
         let m = 24usize;
         let mut forms = Vec::with_capacity(m);
@@ -1340,8 +1498,54 @@ mod tests {
             a.len()
         );
         assert!(
-            ratio >= 1.05,
-            "expected hardcoded L=8 ≥1.05× L=4 on full enum, got {ratio:.3}"
+            ratio < 1.0,
+            "unexpected: L=8 beat L=4 ({ratio:.3}×); update note/scoreboard"
+        );
+    }
+
+    #[test]
+    fn parallel_outer_agrees_and_beats_serial_wall() {
+        let n = 16usize;
+        let m = 20usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let t0 = std::time::Instant::now();
+        let mut par = gray_ffs_parallel_outer(&forms, n, usize::MAX, 4);
+        let par_ns = t0.elapsed().as_nanos();
+
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut ser = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut ser);
+        let ser_ns = t1.elapsed().as_nanos();
+        par.sort_unstable();
+        ser.sort_unstable();
+        assert_eq!(par, ser);
+        let ratio = ser_ns as f64 / par_ns.max(1) as f64;
+        eprintln!(
+            "parallel_outer4_vs_l4 n={n} m={m}: par={par_ns}ns ser={ser_ns}ns ratio={ratio:.2} sols={}",
+            par.len()
+        );
+        assert!(
+            ratio >= 1.3,
+            "expected 4-outer parallel ≥1.3× serial L=4, got {ratio:.3}"
         );
     }
 
