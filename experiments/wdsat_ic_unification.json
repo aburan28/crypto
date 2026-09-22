@@ -19,15 +19,16 @@
     "mq_fes_lifted": true,
     "indices_agree_after_sort": true
   },
-  "inspiration": {
+    "inspiration": {
     "almasty_mq": "https://gitlab.lip6.fr/almasty/mq",
     "techniques": [
       "moebius_transform",
       "gray_incremental_early_exit",
       "monica_hybrid_range_extension",
       "avx2_4x64_gray_opt_in",
-      "l4_fl0_register_hoist",
-      "parallel_outer_specialization_n20"
+      "l4_fl0_to_fl4_register_block",
+      "l4_dedicated_find_one",
+      "parallel_outer_specialization_opt_in"
     ],
     "libfes_lite": "https://github.com/cbouilla/libfes-lite",
     "note": "mq-fes ports ALMASTY/libfes ideas (public domain); not a binding to that tree"
@@ -36,14 +37,14 @@
     "class": "engineering",
     "unit": "wall_ns_release",
     "instance_find_one": "dense quadratic n=18 m=18 planted Gray-index 2000",
-    "moebius_ns": 4841169,
-    "gray_ffs_l4_find_one_ns": 18329,
-    "ratio_moebius_over_gray_find_one": 264.13,
+    "moebius_ns": 6638685,
+    "gray_ffs_l4_find_one_ns": 19726,
+    "ratio_moebius_over_gray_find_one": 336.54,
     "instance_full_enum": "dense quadratic n=18 m=18 no early exit",
-    "gray_ffs_l4_full_ns": 122380,
-    "gray_on_step_full_ns": 4048926,
-    "ratio_on_step_over_ffs": 33.08,
-    "l4_hot_path": "Fl[0] held in a register + unchecked Fq/Fl indexing on the L=4 chunk",
+    "gray_ffs_l4_full_ns": 92545,
+    "gray_on_step_full_ns": 3419810,
+    "ratio_on_step_over_ffs": 36.95,
+    "l4_hot_path": "Fl[0..4] held in registers for the whole walk + unchecked Fq/Fl indexing; dedicated no-Vec find_one; cold push_solution",
     "parallel_outer": {
       "auto_select": false,
       "outer_bits": 4,
@@ -65,7 +66,7 @@
     "monica_vs_moebius_n14_m32_ratio": 0.22,
     "monica_role": "range extension past Moebius n<=24 cap; not an in-cap speedup",
     "floor_ratio": "flat",
-    "technique": "libfes-lite FFS O(1)/step + L=4 unrolled chunk with Fl[0] hoist; AVX2/L=8/batch/parallel opt-in"
+    "technique": "libfes-lite FFS O(1)/step + L=4 chunk with Fl[0..4] register block + dedicated find_one; AVX2/L=8/batch/parallel opt-in"
   },
   "ecc2k130": {
     "field": "F_2^131",
