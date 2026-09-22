@@ -3157,6 +3157,18 @@ impl InheritedBases {
     }
 }
 
+/// Rounds of degree-fall closure the inherited engine runs per node on its
+/// top-degree basis (`KIC_F4_CLOSURE_ROUNDS`, `0` for none).
+fn closure_rounds() -> u32 {
+    static ROUNDS: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    *ROUNDS.get_or_init(|| {
+        std::env::var("KIC_F4_CLOSURE_ROUNDS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0)
+    })
+}
+
 /// The inherited engine's reduction: read the decisive rows off the node's
 /// bases, building a basis from scratch only for a degree no ancestor has
 /// reached.  Mirrors `reduce_system_uncached`'s ladder, decisiveness test
@@ -3171,6 +3183,7 @@ fn reduce_inherited(
     stats.reductions += 1;
     dump_node_system(system, n_vars, engine);
     let ladder = engine.degree_ladder(system_degree(system), n_vars)?;
+    let top = *ladder.end();
     let mut best: Option<Vec<F2BoolPoly>> = None;
     for d in ladder {
         if system.is_empty() {
@@ -3181,7 +3194,8 @@ fn reduce_inherited(
             Some(i) => i,
             None => {
                 let started = std::time::Instant::now();
-                match ReducedBasis::from_system(system, n_vars, d) {
+                let rounds = if d == top { closure_rounds() } else { 0 };
+                match ReducedBasis::from_system_closed(system, n_vars, d, rounds) {
                     Some((basis, cost)) => {
                         let word_ops = cost.word_ops();
                         charge_word_ops(word_ops);
