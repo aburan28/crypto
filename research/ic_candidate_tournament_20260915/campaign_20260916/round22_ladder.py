@@ -58,12 +58,18 @@ from oracle import verify  # noqa: E402
 FROZEN = json.loads((ROOT / 'runs/round-0020/candidates.json').read_text())[0]['config']
 CONFIG = dict(FROZEN, max_trials=65536)
 # (label, degree, curve_a, r, [(points, orbits built), ...]).  The sizes come
-# from round22_base_sweep.py: the sweep's minimum, plus every neighbouring size
-# whose band overlaps it, because picking the single argmin of a flat region is
-# a selection rather than a measurement.
-CELLS = [('n23a1', 23, 1, 4_196_903, [(222, 8)]),
-         ('n37a0', 37, 0, 230_603_167, [(1777, 32), (2400, 40)]),
-         ('n43a1', 43, 1, 4_644_189_029, [(1777, 24), (2400, 32), (3600, 48)])]
+# from round22_base_sweep.py, with the sizes that sweep SKIPPED filled in: its
+# `points` grid jumped straight from 8 orbits to 24 and 32, so 16 was never
+# measured at any cell, and at 64 fixtures `n43a1`'s minimum sat at the lowest
+# size tested -- which is how a minimum outside the grid announces itself.
+# The flat region is then selected from the measurements by a stated rule
+# (every size whose band overlaps the minimum's), because picking the single
+# argmin of a flat region is a selection rather than a measurement.
+CELLS = [('n23a1', 23, 1, 4_196_903, [(222, 8), (400, 16), (800, 24)]),
+         ('n37a0', 37, 0, 230_603_167,
+          [(222, 8), (600, 16), (1400, 24), (1777, 32), (2400, 40)]),
+         ('n43a1', 43, 1, 4_644_189_029,
+          [(222, 8), (800, 16), (1400, 24), (2400, 32), (3600, 48)])]
 SEEDS = (20260922, 4242)
 Z = 1.959963985
 
@@ -143,6 +149,19 @@ def main():
             print(f'{label:8} {r:>16,} {built:>7} {ratio:>8.3f} {spread:>8.3f} '
                   f'{f"[{lo:.3f}, {hi:.3f}]":>18} {f"{n}/{fixtures}":>10}')
 
+    # The flat region, by a rule fixed before the numbers: the minimum, plus
+    # every size whose 95% band overlaps the minimum's. A size that is
+    # resolvably worse is excluded; one that is not is carried, because the
+    # ladder must not depend on picking between sizes the data cannot separate.
+    flat = {}
+    for label, rows in table.items():
+        best = min(rows, key=lambda x: x[1])
+        flat[label] = [x for x in rows if x[2] <= best[3] and best[2] <= x[3]]
+        kept = ', '.join(f'{o} orbits {v:.3f}' for o, v, *_ in flat[label])
+        edge = (rows[0][0] == best[0] or rows[-1][0] == best[0])
+        print(f'\n{label}: flat region = {kept}'
+              + ('   MINIMUM AT THE EDGE OF THE GRID -- it may lie outside' if edge else ''))
+    table = flat
     order = [(c, r) for c, _d, _a, r, _s in CELLS if table.get(c)]
     if len(order) >= 2:
         print('\nrate between consecutive cells. Every size inside each cell\'s flat')
