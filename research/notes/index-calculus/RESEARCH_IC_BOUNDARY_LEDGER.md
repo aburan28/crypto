@@ -1988,6 +1988,144 @@ worth removing, and it was not threatening the answers: it put a floor
 under what a *future* round could resolve, which is the reason to fix it
 rather than a correction to what earlier rounds said.
 
+## 13. Round 5: the restart pool, drawn on first use
+
+§11.6 ended by naming this round's first line, and this is it:
+
+> The pooled offsets are drawn with the jumps at setup: sixteen extra
+> `[c]G + [d]Q`, thirty-two scalar multiplications, once per run whether
+> or not the walk ever restarts. … the fix is obvious: draw the pool on
+> the *first* restart rather than at setup, so a run that never restarts
+> never pays for it.
+
+### 13.1 How much is actually lying there, counted before touching the code
+
+The Round-4 ladder has 204 walk rows.  Their `walk_restarts` counter —
+which counts the opening segment as the first — distributes like this:
+
+| `walk_restarts` | rows | offsets the row used |
+|--:|--:|--:|
+| 1 | 110 | 0 |
+| 2 | 10 | 1 |
+| 3 | 7 | 2 |
+| 4–15 | 29 | 3–14 |
+| ≥ 16 | 48 | 16 |
+
+So **110 of 204 rows drew sixteen offsets and took none**, and another 46
+took fewer than they paid for.  Only the 48 rows that restart at least
+sixteen times used the pool they bought.
+
+What that waste is worth is arithmetic, not a guess, and it is worth
+doing before the measurement so the measurement has something to
+contradict.  One offset is two scalar multiplications and one addition;
+a scalar multiplication by a uniform `k < r` is `⌈log₂r⌉ − 1` doublings
+and about `log₂r/2 − 1` additions, so sixteen offsets cost about
+
+```
+ΔS_max  ≈  (48·log₂r − 48) / √r          group-addition equivalents
+```
+
+in the unit, and that is the *whole* saving on a row that takes no
+offset.  It falls fast:
+
+| `r` | `ΔS_max` |
+|:--|--:|
+| `2^10` | 10.4 |
+| `2^15` | 3.4 |
+| `2^20` | 0.89 |
+| `2^27` | 0.11 |
+| `2^39` | 0.0025 |
+
+That table is the round's honest headline before a single run: this
+removes a real cost, it removes it almost entirely from rungs below
+`2^15`, and **it does essentially nothing inside §1.6's window**.  The
+three losses §11.6 recorded — `K_1 / GF(2^11)` at `0.597`,
+`K_0 / GF(2^13)` at `0.650`, `bench-10bit`'s three-summand walk at
+`0.656` — are all below `2^20`, and so is all of the gain.
+
+There is one consequence that is not cosmetic.  §11.3 reads the ladder's
+`S / S_family` column as the family law converging to its own optimum,
+and the small rungs are where that column is measured; a fixed setup
+cost that nobody uses inflates exactly those rows.  So the reason to
+land this is the same as Round 4's reason for pinning the unit: it
+raises the resolution of a future measurement rather than improving an
+answer.
+
+**The lever is also nearly exhausted by construction**, and that is
+worth saying now rather than discovering it later.  Drawing offsets one
+at a time on demand — which is what this implements — recovers the whole
+of the 110 rows' waste and most of the 46's.  Nothing else remains in
+the restart: what is left is sixteen jumps at setup, which every segment
+uses, and one addition per restart, which is already the floor for
+moving off a path.
+
+### 13.2 The comparison is exact, by construction
+
+A saving this small is below the run-to-run spread of §11.4, so a
+before-and-after of two ladders would not resolve it.  Two changes make
+it resolvable without any statistics at all:
+
+- **The offsets come off their own random stream.**  `pool_rng` is
+  seeded from the run's seed and is touched by nothing else, so moving
+  the draw earlier or later cannot shift the walk's randomness.
+- **A restart takes offset `k mod 16`**, not a random one, so selecting
+  an offset consumes no randomness either.
+
+With both, the eager and the lazy arm walk **bit-identical
+trajectories**: same steps, same restarts, same trials, same relations,
+same rows, same logarithm.  They differ in exactly one quantity — what
+the offsets cost — and the run reports that quantity directly, as
+`walk_pool_ops`, so the difference between the arms is a subtraction
+rather than an inference.  Both arms come from one binary on one host;
+`--eager-restart-pool` selects the baseline.
+
+**The eager arm is Round 4's pool *policy*, not Round 4's run**, and the
+distinction matters.  Round 4 chose an offset with a draw from the main
+stream, which this round replaces with the fixed cycle; that alone
+shifts every walk's randomness, so the Round-4 file is not a valid
+baseline for a saving this small and is not used as one.  It stays
+frozen for what it was.  Where a cross-round figure is wanted — §11.6's
+three losses were measured against *Round 2* — it is quoted as a
+cross-round figure, with the §12 repricing caveat, and never as the
+paired result.
+
+The test `drawing_the_restart_pool_lazily_changes_the_cost_and_nothing_else`
+asserts the whole of that on two prime rungs and eight seeds.
+
+### 13.3 The falsification target, declared before the ladders were read
+
+The round succeeds only if **all** of these hold:
+
+1. **The pairing holds.**  Every row of the two ladder arms is identical
+   in every native counter except `walk_jumps`, `walk_pool_offsets` and
+   `walk_pool_ops`; zero rows have a moved trajectory.
+2. **The saving accounts for itself exactly.**  On every walk row,
+   `gae_eager − gae_lazy` equals `walk_pool_ops_eager − walk_pool_ops_lazy`
+   to the operation — no row saves more or less than the offsets it
+   stopped drawing.
+3. **The loss is gone and no new one appears.**  `S` falls on each of
+   the three rows §11.6 named, and rises on none anywhere.
+4. **Correctness is preserved.**  `all_verified` on both arms, every
+   recovered logarithm equal to the planted one, and
+   `repeated_column_rows` and `pinned_by_repeated_row` zero everywhere,
+   on the holdout seed as well.
+5. **It is engineering and is reported as engineering.**  Trials and
+   yield against the exact ceiling must be *identical*, since the change
+   touches no decision the search makes.  The fitted exponents may move,
+   because the saving is larger at small `r` than at large: a steepening
+   of the walk rows' fit is expected and must be reported as an artifact
+   of removing a size-independent cost, never as a change in the
+   method's growth.
+
+**Inadmissible**: changing the factor base or the decomposition size;
+changing the operation accounting or the pinned conversion; skipping
+verification; choosing favourable seeds; quoting the relation phase
+instead of the whole-pipeline `S`; or reporting a small-rung saving as
+if it moved a conclusion inside §1.6's window.
+
+**Abandon if** the pairing fails — if any trajectory counter moves, the
+change did more than move a cost and this design is wrong.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

@@ -152,6 +152,13 @@ pub struct BoundaryArgs {
     /// collision and not a relation.  For that diagnostic only.
     #[arg(long)]
     pub unguarded_targets: bool,
+    /// Draw all sixteen walk-restart offsets at setup, as Rounds 3 and 4
+    /// did, instead of drawing each the first time a restart reaches for
+    /// it.  The baseline arm of the note's §13: the walk is otherwise
+    /// identical, down to the trajectory, so the two runs differ only in
+    /// the offsets each row paid for.
+    #[arg(long)]
+    pub eager_restart_pool: bool,
 }
 
 fn host() -> Value {
@@ -204,6 +211,7 @@ pub fn run(args: BoundaryArgs, json: bool) -> Result<Value, String> {
         cfg.s4_max_degree = v;
     }
     cfg.unguarded_targets = args.unguarded_targets;
+    cfg.eager_restart_pool = args.eager_restart_pool;
     for &b in &cfg.prime_bits {
         if !(8..=32).contains(&b) {
             return Err(format!("prime ladder bits must lie in 8..=32, got {b}"));
