@@ -278,8 +278,9 @@ impl Ffs {
 /// ```
 ///
 /// so the hot loop no longer walks all `n` derivatives.  Dispatch:
-/// - `n ≥ 4`: scalar `L = 4` (16-step) chunk with `Fl[0..4]` held in
-///   registers and unchecked table indexing (libfes asm register set).
+/// - `n ≥ 4`, `m ≤ 32`: scalar `L = 4` over **u32** equation words (libfes
+///   single-system width) with `Fl[0..4]` register-blocked.
+/// - `n ≥ 4`, `m > 32`: same chunk over **u64** words.
 /// - else: minimal one-step FFS.
 ///
 /// `find_one` uses a dedicated no-`Vec` walk of the same blocked chunk.
@@ -304,15 +305,21 @@ pub fn gray_incremental_find_all(
         return None;
     }
 
-    let mut fq = [0u64; 561];
-    let mut fl = [0u64; 34];
-    fill_fq_fl(forms, n, &mut fq, &mut fl);
-
     let mut out = Vec::new();
-    if n >= 4 {
-        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
+    if m <= 32 && n >= 4 {
+        let mut fq = [0u32; 561];
+        let mut fl = [0u32; 34];
+        fill_fq_fl_u32(forms, n, &mut fq, &mut fl);
+        gray_ffs_unrolled_l4_u32(&mut fq, &mut fl, n, max_solutions, &mut out);
     } else {
-        gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(forms, n, &mut fq, &mut fl);
+        if n >= 4 {
+            gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
+        } else {
+            gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
+        }
     }
     Some(out)
 }
@@ -647,6 +654,210 @@ pub(crate) fn gray_ffs_unrolled_l4(
 pub(crate) fn gray_ffs_l4_find_one(
     fq: &mut [u64; 561],
     fl: &mut [u64; 34],
+    n: usize,
+) -> Option<u64> {
+    const L: usize = 4;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    let mut f0 = fl[0];
+    let mut f1 = fl[1];
+    let mut f2 = fl[2];
+    let mut f3 = fl[3];
+    let mut f4 = fl[4];
+
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+        unsafe {
+            let qa0 = *fq.get_unchecked(alpha);
+            let qa1 = *fq.get_unchecked(alpha + 1);
+            let qa2 = *fq.get_unchecked(alpha + 2);
+            let qa3 = *fq.get_unchecked(alpha + 3);
+            let q0 = *fq.get_unchecked(0);
+            let q1 = *fq.get_unchecked(1);
+            let q2 = *fq.get_unchecked(2);
+            let q3 = *fq.get_unchecked(3);
+            let q4 = *fq.get_unchecked(4);
+            let q5 = *fq.get_unchecked(5);
+
+            macro_rules! step_one {
+                ($fa:ident, $qb:expr, $idx:expr) => {{
+                    if f0 == 0 {
+                        return Some(($idx) ^ (($idx) >> 1));
+                    }
+                    $fa ^= $qb;
+                    f0 ^= $fa;
+                }};
+            }
+
+            step_one!(f1, qa0, base);
+            step_one!(f2, qa1, base + 1);
+            step_one!(f1, q0, base + 2);
+            step_one!(f3, qa2, base + 3);
+            step_one!(f1, q1, base + 4);
+            step_one!(f2, q2, base + 5);
+            step_one!(f1, q0, base + 6);
+            step_one!(f4, qa3, base + 7);
+            step_one!(f1, q3, base + 8);
+            step_one!(f2, q4, base + 9);
+            step_one!(f1, q0, base + 10);
+            step_one!(f3, q5, base + 11);
+            step_one!(f1, q1, base + 12);
+            step_one!(f2, q2, base + 13);
+            step_one!(f1, q0, base + 14);
+            if f0 == 0 {
+                return Some((base + 15) ^ ((base + 15) >> 1));
+            }
+            let fb = fl.get_unchecked_mut(beta);
+            *fb ^= *fq.get_unchecked(gamma);
+            f0 ^= *fb;
+        }
+    }
+    let _ = (f1, f2, f3, f4);
+    None
+}
+
+
+/// Pack ANF into u32 Fq/Fl when `m ≤ 32` (libfes single-system width).
+pub(crate) fn fill_fq_fl_u32(
+    forms: &[QuadraticForm],
+    n: usize,
+    fq: &mut [u32; 561],
+    fl: &mut [u32; 34],
+) {
+    fq.fill(0);
+    fl.fill(0);
+    for (eq, form) in forms.iter().enumerate() {
+        debug_assert!(eq < 32);
+        let bit = 1u32 << eq;
+        if form.constant {
+            fl[0] ^= bit;
+        }
+        for i in 0..n {
+            if form.linear[i] {
+                fl[1 + i] ^= bit;
+            }
+            for j in 0..i {
+                if form.quad[i][j] {
+                    fq[idxq(j, i)] ^= bit;
+                }
+            }
+        }
+    }
+    for i in 0..n {
+        fq[idxq(i, n)] = 0;
+    }
+    fq[idxq(0, n + 1)] = 0;
+    for i in 1..n {
+        fq[idxq(i, n + 1)] = fq[idxq(i - 1, i)];
+    }
+    fq[idxq(n, n + 1)] = 0;
+}
+
+/// Register-blocked `L=4` walk over `u32` equation words (`m ≤ 32`).
+pub(crate) fn gray_ffs_unrolled_l4_u32(
+    fq: &mut [u32; 561],
+    fl: &mut [u32; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    const L: usize = 4;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    let mut f0 = fl[0];
+    let mut f1 = fl[1];
+    let mut f2 = fl[2];
+    let mut f3 = fl[3];
+    let mut f4 = fl[4];
+
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+
+        let full = unsafe {
+            let qa0 = *fq.get_unchecked(alpha);
+            let qa1 = *fq.get_unchecked(alpha + 1);
+            let qa2 = *fq.get_unchecked(alpha + 2);
+            let qa3 = *fq.get_unchecked(alpha + 3);
+            let q0 = *fq.get_unchecked(0);
+            let q1 = *fq.get_unchecked(1);
+            let q2 = *fq.get_unchecked(2);
+            let q3 = *fq.get_unchecked(3);
+            let q4 = *fq.get_unchecked(4);
+            let q5 = *fq.get_unchecked(5);
+
+            macro_rules! step_reg {
+                ($fa:ident, $qb:expr, $idx:expr) => {{
+                    if f0 == 0 && push_solution(out, $idx, max_solutions) {
+                        true
+                    } else {
+                        $fa ^= $qb;
+                        f0 ^= $fa;
+                        false
+                    }
+                }};
+            }
+
+            step_reg!(f1, qa0, base)
+                || step_reg!(f2, qa1, base + 1)
+                || step_reg!(f1, q0, base + 2)
+                || step_reg!(f3, qa2, base + 3)
+                || step_reg!(f1, q1, base + 4)
+                || step_reg!(f2, q2, base + 5)
+                || step_reg!(f1, q0, base + 6)
+                || step_reg!(f4, qa3, base + 7)
+                || step_reg!(f1, q3, base + 8)
+                || step_reg!(f2, q4, base + 9)
+                || step_reg!(f1, q0, base + 10)
+                || step_reg!(f3, q5, base + 11)
+                || step_reg!(f1, q1, base + 12)
+                || step_reg!(f2, q2, base + 13)
+                || step_reg!(f1, q0, base + 14)
+                || {
+                    if f0 == 0 && push_solution(out, base + 15, max_solutions) {
+                        true
+                    } else {
+                        let fb = fl.get_unchecked_mut(beta);
+                        *fb ^= *fq.get_unchecked(gamma);
+                        f0 ^= *fb;
+                        false
+                    }
+                }
+        };
+        if full {
+            fl[0] = f0;
+            fl[1] = f1;
+            fl[2] = f2;
+            fl[3] = f3;
+            fl[4] = f4;
+            return;
+        }
+    }
+    fl[0] = f0;
+    fl[1] = f1;
+    fl[2] = f2;
+    fl[3] = f3;
+    fl[4] = f4;
+}
+
+pub(crate) fn gray_ffs_l4_find_one_u32(
+    fq: &mut [u32; 561],
+    fl: &mut [u32; 34],
     n: usize,
 ) -> Option<u64> {
     const L: usize = 4;
@@ -1176,12 +1387,20 @@ pub fn gray_incremental_find_one(forms: &[QuadraticForm]) -> Option<u64> {
     if n == 0 || n > 32 || m > 64 || forms.iter().any(|f| f.n != n) {
         return None;
     }
-    let mut fq = [0u64; 561];
-    let mut fl = [0u64; 34];
-    fill_fq_fl(forms, n, &mut fq, &mut fl);
-    if n >= 4 {
+    if m <= 32 && n >= 4 {
+        let mut fq = [0u32; 561];
+        let mut fl = [0u32; 34];
+        fill_fq_fl_u32(forms, n, &mut fq, &mut fl);
+        gray_ffs_l4_find_one_u32(&mut fq, &mut fl, n)
+    } else if n >= 4 {
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(forms, n, &mut fq, &mut fl);
         gray_ffs_l4_find_one(&mut fq, &mut fl, n)
     } else {
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(forms, n, &mut fq, &mut fl);
         let mut out = Vec::new();
         gray_ffs_minimal(&mut fq, &mut fl, n, 1, &mut out);
         out.into_iter().next()
