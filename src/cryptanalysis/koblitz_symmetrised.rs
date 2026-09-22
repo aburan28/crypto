@@ -45,8 +45,17 @@
 //!   on `F_x = {x(P) ∈ V}` — `S₃` for `m = 2`, chained `S₃` links with
 //!   `(m − 2)·n` free intermediate unknowns for `m = 3`;
 //! - **x-direct** (`m = 3`): the 24-term `S₄` in `x`, no chaining, Boolean
-//!   degree 7 — separates "no chaining" from "symmetry";
-//! - **sym**: the symmetrised system on `F_u`.
+//!   degree 6 — separates "no chaining" from "symmetry";
+//! - **sym**: the symmetrised system on `F_u`, Boolean degree 4.
+//!
+//! Both degrees are counted over the unknowns only, and are what `system_degree`
+//! reports in the `deg` column: at `K₁/F₂⁹`, `m = 3` the arms print 9 vars /
+//! deg 6 and 7 vars / deg 4.  The target is fixed when a decomposition is
+//! attempted, so it is not an unknown; counting it as a variable gives 7 and 5
+//! instead, which is the convention
+//! `coordinate_search::boolean_degree` uses for the *polynomial* and what
+//! `RESEARCH_EXOTIC_COORDINATES.md` §3.2's table reports.  The gap is 2 either
+//! way; mixing the two reports it as 3.
 //!
 //! Every verdict is gated against exhaustive enumeration on its own base,
 //! every returned relation is re-summed in the group, and timings are

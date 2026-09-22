@@ -49,6 +49,7 @@ from snapshot import (
     sql_campaign,
     sql_hour,
 )
+from check_feed_age import describe as describe_feed_age
 from work_feed import (
     MAX_FEED_AGE_S,
     feed_url,
@@ -748,6 +749,59 @@ class WorkFeedTests(unittest.TestCase):
         self.assertEqual(block["walking_slots"], 2)
         self.assertEqual(block["slots"], 4)
 
+    def test_counts_slots_off_the_campaign_cutoff_from_the_rows(self):
+        # dp_ingest marks each slot against the campaign's weight; a slot at
+        # another cutoff mostly cannot collide with the rest, so the page gets
+        # it as a separate count and never folded into the walkers.
+        feed = work_feed()
+        rows = feed["work"]["per_slot"]
+        rows[0]["dp_weight_ok"] = True
+        rows[1]["dp_weight_ok"] = False      # walking, off weight
+        rows[2]["dp_weight_ok"] = False      # retired, off weight
+        rows[3]["dp_weight_ok"] = None       # too few records to judge
+        feed["work"]["campaign_dp_weight"] = 32
+        feed["work"]["iterations_per_dp_log2_expected"] = 28.41
+        block = work_block(feed, "ecc2k-130")
+        self.assertEqual(block["off_weight_slots"], 2)
+        self.assertEqual(block["off_weight_walking_slots"], 1)
+        self.assertEqual(block["campaign_dp_weight"], 32)
+        self.assertEqual(block["iterations_per_dp_log2_expected"], 28.41)
+
+    def test_takes_the_off_weight_counts_when_the_feed_has_stripped_per_slot(self):
+        feed = work_feed()
+        del feed["work"]["per_slot"]
+        feed["work"].update(slots=10, walking_slots=10, off_weight_slots=5,
+                            off_weight_walking_slots=4)
+        block = work_block(feed, "ecc2k-130")
+        self.assertEqual(block["off_weight_slots"], 5)
+        self.assertEqual(block["off_weight_walking_slots"], 4)
+        # An older ingest host that does not publish them reads as zero, not
+        # as a missing key the page has to special-case.
+        del feed["work"]["off_weight_slots"]
+        del feed["work"]["off_weight_walking_slots"]
+        block = work_block(feed, "ecc2k-130")
+        self.assertEqual(block["off_weight_slots"], 0)
+        self.assertNotIn("campaign_dp_weight", block)
+
+    def test_re_reports_are_copied_from_the_ingest_block(self):
+        feed = work_feed()
+        feed["ingest"] = {
+            "outstanding_objects": 0, "unrecognised_objects": 0,
+            "newest_object_at": "2026-09-21T00:00:00Z", "lag_seconds": 30,
+            "duplicate_records": 813112, "duplicate_records_last_day": 4000,
+            "duplicate_slots_last_day": 2,
+        }
+        block = ingest_block(feed)
+        self.assertEqual(block["duplicate_records"], 813112)
+        self.assertEqual(block["duplicate_records_last_day"], 4000)
+        self.assertEqual(block["duplicate_slots_last_day"], 2)
+        snapshot = {"campaign_id": "ecc2k-130", "dps": 1, "state": "COLLECTING"}
+        self.assertTrue(merge_work(snapshot, feed, "ecc2k-130"))
+        self.assertEqual(snapshot["ingest"]["duplicate_records_last_day"], 4000)
+        assert_public(snapshot)
+        # Absent on an older feed: absent here too, so the page can say so.
+        self.assertNotIn("duplicate_records", ingest_block(ingest_campaign_feed()))
+
     def test_merges_into_a_snapshot_without_publishing_anything_private(self):
         snapshot = {"campaign_id": "ecc2k-130", "dps": 1}
         self.assertTrue(merge_work(snapshot, work_feed(), "ecc2k-130"))
@@ -1138,6 +1192,125 @@ class FetchScriptTests(unittest.TestCase):
             self.assertEqual(len(calls), 2)
         finally:
             wf.urllib.request.urlopen = original
+
+
+class FeedAgeCheck(unittest.TestCase):
+    """The end-to-end assertion that a green publish means a moving number."""
+
+    def at(self, minutes_ago, now=None):
+        now = now or datetime(2026, 9, 20, 8, 0, tzinfo=timezone.utc)
+        return (now - timedelta(minutes=minutes_ago)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    @property
+    def now(self):
+        return datetime(2026, 9, 20, 8, 0, tzinfo=timezone.utc)
+
+    def test_a_current_feed_passes(self):
+        ok, message = describe_feed_age(
+            {"dps": 10, "generated_at": self.at(4), "published_at": self.at(1)}, self.now)
+        self.assertTrue(ok, message)
+        self.assertIn("current", message)
+
+    def test_the_20260920_outage_fails_and_blames_the_ingest_side(self):
+        # The exact shape of that morning: the ingest host stopped writing at
+        # 04:53Z, the publisher kept running every three minutes, and every
+        # run was green. Both halves are needed -- a stale generated_at with a
+        # fresh published_at is what "the workflow is fine, the feed is dead"
+        # looks like, and the message has to say so or the next person reads
+        # 802 green runs and goes looking in the wrong repository.
+        ok, message = describe_feed_age(
+            {"dps": 190497264, "generated_at": self.at(187), "published_at": self.at(13)},
+            self.now)
+        self.assertFalse(ok)
+        self.assertIn("stale", message)
+        self.assertIn("ingest feed is what stopped", message)
+
+    def test_a_stopped_publisher_is_named_instead(self):
+        ok, message = describe_feed_age(
+            {"dps": 190497264, "generated_at": self.at(500), "published_at": self.at(480)},
+            self.now)
+        self.assertFalse(ok)
+        self.assertIn("this workflow is not running either", message)
+
+    def test_a_campaign_with_no_points_is_not_an_outage(self):
+        # The committed placeholder. A fresh checkout, or a campaign before its
+        # first point, must not read as a dead feed.
+        with open(os.path.join(ROOT, "docs", "ecc2k130-status", "status.json")) as fh:
+            placeholder = json.load(fh)
+        ok, message = describe_feed_age(placeholder, self.now)
+        self.assertTrue(ok, message)
+        self.assertIn("nothing has been counted", message)
+
+    def test_points_without_a_timestamp_is_still_an_outage(self):
+        # The placeholder exemption is guarded on dps: a campaign that
+        # collected 190 M points and then lost its timestamp is broken, and
+        # must not be excused by the same branch that forgives an empty one.
+        ok, message = describe_feed_age({"dps": 190497264, "generated_at": None}, self.now)
+        self.assertFalse(ok)
+        self.assertIn("no generated_at", message)
+
+    def test_a_future_timestamp_is_not_reported_as_fresh(self):
+        ok, message = describe_feed_age(
+            {"dps": 10, "generated_at": self.at(-120)}, self.now)
+        self.assertFalse(ok)
+        self.assertIn("future", message)
+
+    def test_the_threshold_boundary(self):
+        limit = MAX_FEED_AGE_S / 60
+        ok, _ = describe_feed_age({"dps": 10, "generated_at": self.at(limit - 1)}, self.now)
+        self.assertTrue(ok)
+        ok, _ = describe_feed_age({"dps": 10, "generated_at": self.at(limit + 1)}, self.now)
+        self.assertFalse(ok)
+
+    def test_the_run_reds_before_the_page_apologises(self):
+        # Two thresholds describe one event. The run must fail no later than
+        # the dashboard starts telling readers the counts are not current --
+        # otherwise the page is apologising while CI still reads green, which
+        # is the state this whole check exists to remove.
+        page = os.path.join(ROOT, "docs", "ecc2k130-status", "index.html")
+        with open(page, encoding="utf-8") as fh:
+            match = re.search(r"var STALE_AFTER_MS = ([^;]+);", fh.read())
+        self.assertIsNotNone(match, "STALE_AFTER_MS not found on the dashboard")
+        expression = match.group(1).replace("HOUR_MS", str(3600 * 1000)).strip()
+        self.assertRegex(expression, r"^[\d\s*]+$", "unexpected STALE_AFTER_MS: %s" % expression)
+        stale_s = eval(expression) / 1000  # noqa: S307 - digits and * only
+        self.assertLessEqual(
+            MAX_FEED_AGE_S, stale_s,
+            "MAX_FEED_AGE_S of %d s is above the dashboard's %d s: the page would "
+            "call the counts stale while the run still passed" % (MAX_FEED_AGE_S, stale_s))
+
+    def test_the_threshold_does_not_flap_on_one_late_run(self):
+        # Same jitter argument as the banner: the feed is rewritten every
+        # --status-every seconds and published once per cron interval, so the
+        # limit has to clear one of each with room to spare.
+        workflow = os.path.join(ROOT, ".github", "workflows", "ecc2k130-status.yml")
+        with open(workflow, encoding="utf-8") as fh:
+            crons = re.findall(r'- cron: "([^"]+)"', fh.read())
+        minute = crons[0].split(" ", 1)[0]
+        step_s = (int(minute[2:]) if minute.startswith("*/") else 60) * 60
+        ingest = os.path.join(ROOT, "ecc2k130", "aws", "dp_ingest.py")
+        with open(ingest, encoding="utf-8") as fh:
+            every = re.search(r'RHO_STATUS_EVERY", "([\d.]+)"', fh.read())
+        self.assertIsNotNone(every, "--status-every default not found in dp_ingest.py")
+        self.assertGreaterEqual(MAX_FEED_AGE_S, 2 * (float(every.group(1)) + step_s))
+
+    def test_cli_exit_codes_and_warn_only(self):
+        import check_feed_age
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "status.json")
+            stale = {"dps": 10, "generated_at": self.at(500, datetime.now(timezone.utc))}
+            with open(path, "w") as fh:
+                json.dump(stale, fh)
+            self.assertEqual(check_feed_age.main(["--status", path]), 1)
+            # The rollout lever: report the failure, keep the run green.
+            self.assertEqual(check_feed_age.main(["--status", path, "--warn-only"]), 0)
+            # A raised limit forgives it, so the threshold is really a knob.
+            self.assertEqual(
+                check_feed_age.main(["--status", path, "--max-age-s", "99999"]), 0)
+            # An unreadable snapshot is a failure, not a pass by default.
+            self.assertEqual(
+                check_feed_age.main(["--status", os.path.join(tmp, "absent.json")]), 1)
 
 
 if __name__ == "__main__":

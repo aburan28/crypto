@@ -1,0 +1,440 @@
+{
+ "ab": {
+  "arms": {
+   "aimed_at_least_mentioned": {
+    "aimed": true,
+    "columns": 192,
+    "descent_trials": 52,
+    "duplicates": 0,
+    "points": 15744,
+    "rejected": 0,
+    "relations": 197,
+    "rho_iterations": 4045603,
+    "rho_verified": 32,
+    "scans": 883200,
+    "stored_pairs": 1519296,
+    "targets": 32,
+    "tier": "folded",
+    "trials": 3450,
+    "units": 23,
+    "verified": 32,
+    "window": 256
+   },
+   "aimed_at_least_mentioned_holdout": {
+    "aimed": true,
+    "columns": 192,
+    "descent_trials": 46,
+    "duplicates": 0,
+    "points": 15744,
+    "rejected": 0,
+    "relations": 197,
+    "rho_iterations": 3381251,
+    "rho_verified": 32,
+    "scans": 883200,
+    "stored_pairs": 1519296,
+    "targets": 32,
+    "tier": "folded",
+    "trials": 3450,
+    "units": 23,
+    "verified": 32,
+    "window": 256
+   },
+   "aimed_at_uncovered": {
+    "aimed": true,
+    "columns": 192,
+    "descent_trials": 52,
+    "duplicates": 0,
+    "points": 15744,
+    "rejected": 0,
+    "relations": 320,
+    "rho_iterations": 4045603,
+    "rho_verified": 32,
+    "scans": 1420800,
+    "stored_pairs": 1519296,
+    "targets": 32,
+    "tier": "folded",
+    "trials": 5550,
+    "units": 37,
+    "verified": 32,
+    "window": 256
+   },
+   "swept": {
+    "aimed": false,
+    "columns": 192,
+    "descent_trials": 52,
+    "duplicates": 0,
+    "points": 15744,
+    "rejected": 0,
+    "relations": 333,
+    "rho_iterations": 4045603,
+    "rho_verified": 32,
+    "scans": 1459200,
+    "stored_pairs": 1519296,
+    "targets": 32,
+    "tier": "folded",
+    "trials": 5700,
+    "units": 38,
+    "verified": 32,
+    "window": 256
+   }
+  },
+  "controlled": [
+   "curve",
+   "factor base spec and seed",
+   "window",
+   "targets",
+   "summand count",
+   "pair table tier",
+   "operation accounting",
+   "stop rule (extend until determined)"
+  ],
+  "varied": [
+   "collection_aim",
+   "what the aim points at"
+  ]
+ },
+ "boundaries": {
+  "counting_floor_relations": {
+   "formula": "R >= C, C = |F| / 2n; a determined system needs at least as many independent rows as unknowns",
+   "note": "moves only with the column count",
+   "value": 192
+  },
+  "coverage_threshold_relations": {
+   "formula": "R > C * ln(C) / 3; with m = 3 summands on uniform columns a column is missed with probability e^{-3R/C}",
+   "note": "above the counting floor, so it is what a swept run waits for",
+   "value": 330
+  },
+  "generic_floor_S": {
+   "formula": "sqrt(pi / 2A), A = 2n = 82",
+   "value": 0.1384
+  },
+  "rho_reference_S": {
+   "note": "pooled because rho's step count varies about 20% between seed sets",
+   "pooled_over_targets": 224,
+   "value": 0.1665
+  }
+ },
+ "classes": {
+  "aim_at_least_mentioned_columns": {
+   "caveat": "S is still 1.33x rho: closing the relation count to its floor did not produce a crossover",
+   "class": "advance",
+   "why": "ratio to the counting floor fell from 1.73 to 1.03 and cannot fall below 1.00; the lever is terminal"
+  },
+  "aim_at_uncovered_columns": {
+   "class": "relabelling",
+   "why": "coverage fell 330 -> 117, a 2.8x move in the tracked number; total fell 1.02x"
+  },
+  "scan_scratch": {
+   "class": "accounting",
+   "why": "taking four per-trial allocations out of the scan's hot loop measured 5.46 -> 5.58 adds a summand: no change. Kept as a refactor, not claimed as a gain"
+  },
+  "walked_probe_in_the_harness": {
+   "class": "accounting",
+   "why": "a first version of the window measurement drew targets with mul_u64, about 59 chained additions, and divided it over 256 summands instead of 15,744. It invented a fourfold window penalty that would have cut the window round's reported gain from 2.7x to 1.3x. Collection walks; the measurement now walks"
+  },
+  "window_constant_by_base_and_window": {
+   "class": "accounting",
+   "why": "2.31 was the full scan on a 5,248-point base; wider bases and narrower windows cost more, up to 23%. Earlier rows re-priced, none deleted"
+  }
+ },
+ "commit": "3af1aeabb9f90047785e0b65648e9c95be52b117",
+ "conversions_measured": {
+  "aimed_scan_adds_per_summand": {
+   "note": "the gather an index scan pays is free at every set size a run actually aims at; only a set of one or two columns, which the least-mention rule never produces, costs more",
+   "source": "examples/koblitz_aim_conversion.rs, walked probe, base 15,744, window 256",
+   "vs_swept_by_columns_aimed": {
+    "1": 1.1,
+    "128": 0.98,
+    "16": 1.0,
+    "160": 0.96,
+    "192": 0.95,
+    "2": 1.02,
+    "32": 1.0,
+    "4": 1.0,
+    "64": 1.02,
+    "8": 1.01,
+    "96": 0.99
+   }
+  },
+  "descent_probe_adds": 1.19,
+  "multiply_add_mod_r_adds": 0.2648,
+  "scan_adds_per_summand": {
+   "by_base_then_window": {
+    "12464": {
+     "1024": 2.42,
+     "128": 2.68,
+     "2048": 2.54,
+     "256": 2.53,
+     "4096": 2.59,
+     "512": 2.41,
+     "64": 2.92,
+     "full": 2.6
+    },
+    "15744": {
+     "1024": 2.68,
+     "128": 2.92,
+     "2048": 2.62,
+     "256": 2.85,
+     "4096": 2.62,
+     "512": 2.76,
+     "64": 3.12,
+     "full": 2.67
+    },
+    "16400": {
+     "1024": 2.69,
+     "128": 2.74,
+     "2048": 2.6,
+     "256": 2.78,
+     "4096": 2.64,
+     "512": 2.72,
+     "64": 3.02,
+     "full": 2.65
+    },
+    "20336": {
+     "1024": 2.76,
+     "128": 3.07,
+     "2048": 2.75,
+     "256": 2.88,
+     "4096": 2.74,
+     "512": 2.81,
+     "64": 3.3,
+     "full": 2.75
+    },
+    "5248": {
+     "1024": 2.18,
+     "128": 2.48,
+     "2048": 2.18,
+     "256": 2.33,
+     "4096": 2.19,
+     "512": 2.24,
+     "64": 2.67,
+     "full": 2.19
+    },
+    "8528": {
+     "1024": 2.32,
+     "128": 2.62,
+     "2048": 2.31,
+     "256": 2.52,
+     "4096": 2.33,
+     "512": 2.42,
+     "64": 2.75,
+     "full": 2.31
+    }
+   },
+   "note": "depends on BOTH base width and window; 2.31 used by the earlier window round was the full scan on a 5,248-point base and undercharges wider bases by up to 23%",
+   "source": "examples/koblitz_window_cost.rs, walked probe"
+  },
+  "select_adds": {
+   "by_points": {
+    "12464": 969811,
+    "15744": 1230873,
+    "16400": 1304319,
+    "20336": 1613142,
+    "5248": 409745,
+    "8528": 669193
+   },
+   "source": "examples/koblitz_phase_prices.rs, measured at each width, never scaled"
+  }
+ },
+ "diagnosis": {
+  "aimed_at_least_mentioned": {
+   "coverage_complete_at": 117,
+   "full_rank_at": 192,
+   "reading": "full rank at exactly the counting floor"
+  },
+  "aimed_at_uncovered": {
+   "coverage_complete_at": 117,
+   "full_rank_at": 309,
+   "reading": "coverage moved 2.8x and the total 1.02x: coverage was never the constraint"
+  },
+  "at_row_count_equal_to_column_count": {
+   "aimed_at_least_mentioned": {
+    "columns_mentioned_once": 0,
+    "covered": 192,
+    "least_mentions": 2,
+    "pivotless": 0,
+    "rank": 192
+   },
+   "aimed_at_uncovered": {
+    "columns_mentioned_once": 21,
+    "covered": 192,
+    "pivotless": 2,
+    "pivotless_mentions": "both exactly 1x",
+    "rank": 190
+   },
+   "swept": {
+    "columns_mentioned_once": 35,
+    "covered": 186,
+    "pivotless": 9,
+    "pivotless_mentions": "six at 0x, two at 1x, one at 2x",
+    "rank": 183
+   }
+  },
+  "method": "replay a finished run's banked relations in arrival order; report where coverage completes and where full rank does",
+  "reading": "a column mentioned once is pinned only if every other column in its row is, so the set worth scanning is the least-mentioned columns, which is a counter rather than an elimination",
+  "swept": {
+   "coverage_complete_at": 330,
+   "full_rank_at": 330,
+   "reading": "coverage and rank share the coupon-collector threshold when rows are uniform"
+  },
+  "tool": "examples/koblitz_relation_coverage.rs"
+ },
+ "falsification": {
+  "abandon_conditions": [
+   "relations > 280",
+   "aimed adds/scan > 3.5",
+   "any run fails verification"
+  ],
+  "abandon_note": "the first aim, at uncovered columns, MET an abandon condition (309 relations > 280) and was abandoned as a lever; the least-mention rule is a different aim and is reported separately rather than as a rescue of the same one",
+  "measured_speedup": 1.311,
+  "met": true,
+  "registered_before_building": true,
+  "success_condition": "whole-pipeline total adds fall >= 1.3x against the matched swept arm, 32/32 verified, 0 rejected, every column covered, aimed scans priced with their own measured constant"
+ },
+ "frozen_at": "2026-09-22T01:20:03.882326+00:00",
+ "instance": {
+  "a": 0,
+  "automorphism_order_A": 82,
+  "curve": "K_0/GF(2^41)",
+  "degree": 41,
+  "log2_r": 39.0,
+  "sqrt_r": 741456,
+  "subgroup_order": 549756390943
+ },
+ "ledger": {
+  "note": "every phase priced; select measured at the width, build one addition per stored pair, scan at the constant for its own base and window, descent and linear algebra converted as above",
+  "rows": [
+   {
+    "S": 1.4157,
+    "adds_per_scan": 2.19,
+    "points": 5248,
+    "priced": "measured (full scan)",
+    "relations": 124,
+    "scans": 15072256,
+    "total_adds": 33589843,
+    "variant": "original rung, full scan",
+    "verified": "32/32",
+    "vs_rho": 8.5,
+    "window": null
+   },
+   {
+    "S": 0.5801,
+    "adds_per_scan": 2.43,
+    "points": 5248,
+    "priced": "interpolated between measured windows 128 and 256",
+    "relations": 120,
+    "scans": 5432992,
+    "total_adds": 13764117,
+    "variant": "+ collection window 164",
+    "verified": "32/32",
+    "vs_rho": 3.48,
+    "window": 164
+   },
+   {
+    "S": 0.4628,
+    "adds_per_scan": 2.72,
+    "points": 16400,
+    "priced": "interpolated between measured windows 256 and 512",
+    "relations": 675,
+    "scans": 2948000,
+    "total_adds": 10980083,
+    "variant": "+ wider base 16,400",
+    "verified": "32/32",
+    "vs_rho": 2.78,
+    "window": 500
+   },
+   {
+    "S": 0.3395,
+    "adds_per_scan": 2.78,
+    "points": 16400,
+    "priced": "measured",
+    "relations": 406,
+    "scans": 1835008,
+    "total_adds": 8056053,
+    "variant": "+ lean relation target",
+    "verified": "32/32",
+    "vs_rho": 2.04,
+    "window": 256
+   },
+   {
+    "S": 0.2913,
+    "adds_per_scan": 2.85,
+    "points": 15744,
+    "priced": "measured",
+    "relations": 333,
+    "scans": 1459200,
+    "total_adds": 6911843,
+    "variant": "+ stop when determined",
+    "verified": "32/32",
+    "vs_rho": 1.75,
+    "window": 256
+   },
+   {
+    "S": 0.2855,
+    "adds_per_scan": 2.83,
+    "points": 15744,
+    "priced": "measured",
+    "relations": 320,
+    "scans": 1420800,
+    "total_adds": 6773987,
+    "variant": "+ aim at uncovered columns (relabelling, not kept)",
+    "verified": "32/32",
+    "vs_rho": 1.71,
+    "window": 256
+   },
+   {
+    "S": 0.2221,
+    "adds_per_scan": 2.85,
+    "points": 15744,
+    "priced": "measured",
+    "relations": 197,
+    "scans": 883200,
+    "total_adds": 5270523,
+    "variant": "+ aim at least-mentioned",
+    "verified": "32/32",
+    "vs_rho": 1.33,
+    "window": 256
+   },
+   {
+    "S": 0.2221,
+    "adds_per_scan": 2.85,
+    "points": 15744,
+    "priced": "measured",
+    "relations": 197,
+    "scans": 883200,
+    "total_adds": 5270516,
+    "variant": "+ aim at least-mentioned (holdout, seeds 900-931)",
+    "verified": "32/32",
+    "vs_rho": 1.33,
+    "window": 256
+   }
+  ]
+ },
+ "limitations": [
+  "One degree. n = 41 only; the diagnosis is expected to hold wherever m = 3 and columns = |F|/2n, but that is not measured here.",
+  "The two interpolated rows are marked as such; they interpolate between measured windows at the same base width, never across widths.",
+  "The frozen ledger rungs sweep and are unchanged: collection_aim is off by default, so an aimed run's counters are not a swept run's."
+ ],
+ "question": "Why does a run need 333 relations for 192 columns, and can the scan be aimed so it needs fewer?",
+ "run": "koblitz-collection-aim-20260922",
+ "schema_version": 1,
+ "speedups": {
+  "definition": "baseline_total_operations / candidate_total_operations",
+  "original_rung_to_best": 6.37,
+  "relations_vs_counting_floor": {
+   "aimed_at_least_mentioned": 1.03,
+   "aimed_at_uncovered": 1.67,
+   "swept": 1.73
+  },
+  "swept_to_aimed_at_least_mentioned": 1.311,
+  "swept_to_aimed_at_uncovered": 1.02
+ },
+ "unit": "one batched group addition (Montgomery-shared inversion) on this curve and host",
+ "what_is_left": {
+  "collection": "47.6% of the best run; the relation count is at its floor, so this can now fall only with the column count or the scan constant",
+  "descent": "0.0%",
+  "linear_algebra": "0.06%",
+  "selection": "23.4% at 79.5 adds a point, and the algebra it performs is far cheaper than that -- the next thing to measure",
+  "table_build": "28.9%; folded_pair_count = |F|^2/(4n) + |F|, one addition per stored pair"
+ }
+}

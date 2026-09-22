@@ -1,0 +1,23 @@
+{
+  "child_system_ms": 6.024,
+  "child_user_ms": 4198.741,
+  "command": [
+    "target/release/examples/koblitz_f4_frontier_probe",
+    "x",
+    "3",
+    "solve"
+  ],
+  "ended_unix_ns": 1790039817259700000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/koblitz_f4_frontier_probe",
+  "executable_sha256": "ba7b1a4ed0b33c1b2ee048442dbc2a54cb2da5a6e1fd667b0c439e08de475822",
+  "exit_code": 0,
+  "peak_rss_bytes": 55885824,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790039813051831000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 462,
+  "stdout_sha256": "53ba638cb36ad00dd46ec64f4cea130df502a5c8d9fecff0de567f671ddf8b21",
+  "task_id": "TASK-KIC-GROEBNER-LINEAR-TAIL-PROFILE-X-LEGACY-20260921",
+  "wall_ms": 4207.855333
+}

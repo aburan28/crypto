@@ -13,7 +13,8 @@ slot, and keeps the slot's state durable so any instance can pick it up later:
     it to S3 after every timer tick.  A replacement worker resumes exactly the
     walks in flight instead of throwing them away (about a quarter of all work
     at any instant sits in unreported walks).
-  * distinguished points: the client appends 32-byte records to a local file;
+  * distinguished points: the client appends fixed-width records to a local
+    file (32 bytes, or 72 behind a magic when it carries the cairn witness);
     the supervisor uploads each new stretch of whole records as one immutable
     S3 object.  Points are uploaded *before* the checkpoint that follows them,
     so a resume can only re-report a point, never lose one.
@@ -37,6 +38,7 @@ Environment (written to /etc/ecc2k130.env by bootstrap.sh):
                  (controlplane/, needs DATABASE_URL or RHO_DB_HOST); the
                  default keeps DynamoDB/S3 so an upgrade is one variable
   ECC_GPU        GPU index on this instance (default 0)
+  ECC_ALL_GPUS   1 -> start one supervisor per nvidia-smi device (RunPod MIG)
   ECC_ROOT       directory holding campaign.json, the client, per-GPU work dirs
   ECC_CLIENT     client binary (default ECC_ROOT/ecc2k130)
   ECC_LOCAL_STORE  directory that stands in for S3 and DynamoDB (rehearsals)
@@ -72,6 +74,33 @@ FROZEN_CAMPAIGN = (
 )
 KERNEL_PROTOCOL = "ecc2k-kernel-v1"
 
+def entryRecordBytes(entry):
+    """Payload bytes of a spool entry that are records, not its header.
+
+    A v2 delta carries its own 16-byte header so the merge can frame it
+    standalone, and that header is not part of the source file's record
+    stream -- so dpOffset must advance by the records only, or the next cut
+    starts past work that was never sent.
+    """
+    return int(entry.get("bytes", 0)) - int(entry.get("head", 0))
+
+
+def entryRecords(entry):
+    stride = int(entry.get("stride", 0)) or RECORD_BYTES
+    return entryRecordBytes(entry) // stride
+
+
+def dpStride(path):
+    """(first record offset, record size) for a corpus file, by its magic."""
+    try:
+        with open(path, "rb") as fh:
+            if fh.read(len(DP_MAGIC_V2)) == DP_MAGIC_V2:
+                return DP_HEADER_BYTES, RECORD_BYTES_V2
+    except OSError:
+        pass
+    return 0, RECORD_BYTES
+
+
 PROGRESS_RE = re.compile(
     r"([\d.]+)\s+s\s+([\d.]+)\s+M it/s\s+(\d+)\s+iterations\s+(\d+)\s+dp\s+(\d+)\s+stored"
     r"(?:\s+(\d+)\s+dropped)?")
@@ -84,6 +113,13 @@ RECORD_BYTES = 32
 SPOOL_DIR = "spool"
 SPOOL_MANIFEST = ".spool.json"
 SPOOL_MAX_BYTES = 2 * 1024 * 1024 * 1024   # unsent points a worker may hold
+# Corpus v2 carries the cairn witness and is 72 bytes behind a 16-byte header
+# (../CAIRN-WITNESS.md).  Uploads are byte ranges, so the stride has to be the
+# file's own or a delta ends mid-record and the merge mis-frames everything
+# after it.
+RECORD_BYTES_V2 = 72
+DP_MAGIC_V2 = b"ECC2KDP2"
+DP_HEADER_BYTES = 16
 CKPT_MAGIC = b"ECC2K130"
 CKPT_ITER_OFFSET = 32      # magic[8] + version, m, threads, batch, lanes, runId (u32 each)
 LEASE_SECONDS = 180
@@ -231,8 +267,12 @@ def gpuName(gpu):
 # campaign.json workers=385024 is the RTX PRO 6000 / g7e preset. Ada (g6 L4,
 # g6e L40S) auto-sizes; a checkpoint is only loadable into the same worker
 # count, so Ada must not resume a Blackwell slot and g6 must not resume g6e.
+# Datacenter Blackwell (B200) and Hopper are not that preset: B200.md keeps
+# workers automatic on 148 SMs, and a 24 GB MIG slice has even fewer.
 BLACKWELL_FAMILIES = frozenset({"g7", "g7e"})
 ADA_FAMILIES = frozenset({"g6", "g6e"})
+AUTO_FAMILIES = frozenset({"g4dn", "g5", "g5g", "b200", "b300", "h100", "h200",
+                           "a100", "mig"})
 LOCAL_FAMILIES = frozenset({"", "local", "cpu", None})
 
 
@@ -256,6 +296,20 @@ def gpuFamily(name="", instance_type=""):
     if it in ("g6", "g6e", "g7", "g7e", "g4dn", "g5", "g5g"):
         return it
     n = (name or "").lower()
+    # MIG slices are not the full part the campaign worker count was measured
+    # on; autoThreads reads the slice's SM count. Check before the parent SKU.
+    if "mig" in n:
+        return "mig"
+    if "b200" in n:
+        return "b200"
+    if "b300" in n:
+        return "b300"
+    if "h100" in n:
+        return "h100"
+    if "h200" in n:
+        return "h200"
+    if "a100" in n:
+        return "a100"
     if "l40s" in n:
         return "g6e"
     if "rtx pro 6000" in n or "rtx 6000" in n:
@@ -286,8 +340,13 @@ def slotFamilyCompatible(slot_family, worker_family):
 
 
 def usesCampaignWorkers(family):
-    """Ada and Turing omit --threads so packedengine.autoThreads sizes the grid."""
-    return family not in ADA_FAMILIES and family not in ("g4dn", "g5", "g5g")
+    """Only the measured RTX PRO 4500/6000 preset passes campaign.json workers.
+
+    Everything else omits --threads so packedengine.autoThreads sizes the grid
+    from the device's SM count. Putting 385,024 workers on a B200, a MIG
+    slice, or an unclassified GPU is how an 8-wide pod shows ~1/8 utilization.
+    """
+    return family in BLACKWELL_FAMILIES
 
 
 def frozenCampaignMoved(current, nxt):
@@ -859,6 +918,8 @@ class Worker:
             cmd += ["--threads", str(cpuThreadCount())]
         else:
             if c.get("packed", False):
+                # CUDA_VISIBLE_DEVICES is set to this GPU in runClient, so the
+                # process always sees the assigned device as ordinal 0.
                 cmd += ["--packed", "--device", "0"]
             if c.get("workers") and usesCampaignWorkers(self.gpuFamily):
                 cmd += ["--threads", str(int(c["workers"]))]
@@ -1030,8 +1091,10 @@ class Worker:
         os.replace(payload + ".part", payload)
         if metaPath:
             copyFsync(metaPath, payload + ".json")
+        head, stride = dpStride(payload)
         entry = {"name": name, "key": key, "slot": slot, "streamId": self.streamId,
                  "offset": int(offset), "bytes": os.path.getsize(payload),
+                 "head": head, "stride": stride,
                  "hasMeta": bool(metaPath), "createdAt": time.time()}
         writeJson(payload + SPOOL_MANIFEST, entry)
         entry["manifest"] = payload + SPOOL_MANIFEST
@@ -1076,7 +1139,8 @@ class Worker:
             if not os.path.isfile(payload):
                 continue
             size = os.path.getsize(payload)
-            if size <= 0 or size % RECORD_BYTES:
+            head, stride = dpStride(payload)
+            if size <= head or (size - head) % stride:
                 continue
             parts = name[:-4].rsplit("-", 2)
             if len(parts) == 3 and parts[1].isdigit():
@@ -1086,8 +1150,8 @@ class Worker:
             meta = payload + ".json"
             entry = {"name": name, "key": "dp/slot-%05d/%s" % (slot, name),
                      "slot": slot, "streamId": streamId, "offset": offset,
-                     "bytes": size, "hasMeta": os.path.isfile(meta),
-                     "createdAt": time.time()}
+                     "bytes": size, "head": head, "stride": stride,
+                     "hasMeta": os.path.isfile(meta), "createdAt": time.time()}
             writeJson(payload + SPOOL_MANIFEST, entry)
 
     def detachSpoolFromLiveFile(self):
@@ -1150,12 +1214,16 @@ class Worker:
         """
         if slot is None or entry.get("slot") != slot:
             return
-        if int(entry.get("offset", -1)) != int(self.state.get("dpOffset", 0)):
+        # A v2 cut starts at the file's header, not at 0, so a fresh or
+        # just-rotated file's dpOffset of 0 names the same place as an entry
+        # at head -- the same reading merge.py gives a committed offset.
+        reading = max(int(self.state.get("dpOffset", 0)), int(entry.get("head", 0)))
+        if int(entry.get("offset", -1)) != reading:
             return
-        self.state["dpOffset"] = int(entry["offset"]) + int(entry["bytes"])
+        self.state["dpOffset"] = int(entry["offset"]) + entryRecordBytes(entry)
         # Cumulative across dp file rotations, so the dashboard's count
         # is this slot's whole contribution.
-        self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + int(entry["bytes"]) // RECORD_BYTES
+        self.state["dpUploaded"] = int(self.state.get("dpUploaded", 0)) + entryRecords(entry)
         self.saveState()
 
     def uploadSpoolEntry(self, entry, slot=None, source=None, metaSource=None, check=True):
@@ -1198,7 +1266,7 @@ class Worker:
         entries = self.spoolEntries()
         if not entries:
             return 0
-        records = sum(int(e.get("bytes", 0)) for e in entries) // RECORD_BYTES
+        records = sum(entryRecords(e) for e in entries)
         log("spool: draining %d unsent delta(s), %d records, %d bytes"
             % (len(entries), records, self.spoolBytes()))
         sent = 0
@@ -1228,7 +1296,7 @@ class Worker:
         dropped = 0
         while total > budget and entries:
             entry = entries.pop()
-            count = int(entry.get("bytes", 0)) // RECORD_BYTES
+            count = entryRecords(entry)
             size = self.entrySize(entry)
             self.removeSpoolEntry(entry)
             log("spool over budget (%d > %d bytes): dropped %s, %d records no longer held locally"
@@ -1281,11 +1349,23 @@ class Worker:
             os.link(self.ckptPath, snap)
             haveSnap = True
         size = os.path.getsize(self.dpPath) if os.path.exists(self.dpPath) else 0
-        whole = size - size % RECORD_BYTES
+        base, stride = dpStride(self.dpPath)
+        whole = size - (size - base) % stride if size > base else 0
         offset = int(self.state.get("dpOffset", 0))
+        if offset < base:
+            offset = base
         if whole > offset:
             delta = os.path.join(self.work, "delta.bin")
             with open(self.dpPath, "rb") as src, open(delta, "wb") as out:
+                # Every delta is a standalone object in the bucket and the
+                # merge frames each one on its own, so a v2 delta carries its
+                # own header.  Without it only the first delta of a slot would
+                # announce the format and every later one would be read as v1
+                # -- which mis-frames every record in it and is invisible until
+                # the merge reports orbits nobody walked.
+                if base:
+                    src.seek(0)
+                    out.write(src.read(base))
                 src.seek(offset)
                 out.write(src.read(whole - offset))
             key = "dp/slot-%05d/%s-%016d-%s.bin" % (slot, self.streamId, offset, sha256File(delta))
@@ -1465,7 +1545,9 @@ class Worker:
             return
         if os.path.exists(self.dpPath):
             size = os.path.getsize(self.dpPath)
-            if size - size % RECORD_BYTES <= int(self.state.get("dpOffset", 0)):
+            base, stride = dpStride(self.dpPath)
+            whole = size - (size - base) % stride if size > base else base
+            if whole <= int(self.state.get("dpOffset", 0)):
                 # Reset BEFORE unlink: a crash can re-upload duplicates but
                 # cannot skip the prefix of the next file.
                 self.state["dpOffset"] = 0
@@ -1539,8 +1621,52 @@ class Worker:
         return 0
 
 
+def visibleGpuCount():
+    """How many devices nvidia-smi currently exposes, or 0 if none."""
+    try:
+        r = subprocess.run(["nvidia-smi", "-L"], capture_output=True, text=True)
+    except OSError:
+        return 0
+    if r.returncode != 0:
+        return 0
+    return sum(1 for line in r.stdout.splitlines() if line.startswith("GPU "))
+
+
+def runAllGpus():
+    """One supervisor per visible GPU. RunPod MIG boxes need this; systemd
+    already starts worker@N on EC2, so this is the no-systemd path."""
+    n = visibleGpuCount()
+    if n <= 1:
+        return Worker().run()
+    log("ECC_ALL_GPUS=1: starting %d workers" % n)
+    procs = []
+    for gpu in range(n):
+        env = dict(os.environ)
+        env["ECC_GPU"] = str(gpu)
+        env.pop("ECC_ALL_GPUS", None)
+        procs.append(subprocess.Popen([sys.executable, "-u", os.path.abspath(__file__)], env=env))
+
+    def stop(_signo=None, _frame=None):
+        for proc in procs:
+            if proc.poll() is None:
+                try:
+                    proc.send_signal(signal.SIGTERM)
+                except OSError:
+                    pass
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    rc = 0
+    for proc in procs:
+        got = proc.wait()
+        if got:
+            rc = got
+    return rc
+
+
 if __name__ == "__main__":
     try:
+        if os.environ.get("ECC_ALL_GPUS", "").strip() == "1":
+            sys.exit(runAllGpus())
         sys.exit(Worker().run())
     except Exception as e:
         log("fatal: %s" % e)

@@ -24,12 +24,44 @@ from unittest import mock
 
 import worker
 from protocol import PROTOCOL, campaignContract, sha256File, verifyEnvelope
-from worker import CKPT_MAGIC, RECORD_BYTES, Worker, readJson
+from worker import (CKPT_MAGIC, DP_HEADER_BYTES, DP_MAGIC_V2, RECORD_BYTES,
+                    RECORD_BYTES_V2, Worker, readJson)
 
 
 def record(i):
     """One 32-byte distinguished point record, distinguishable from the rest."""
     return ("%032d" % i).encode()
+
+
+def recordV2(i):
+    """One 72-byte v2 record: the same point, plus the witness."""
+    return ("%072d" % i).encode()
+
+
+def v2Header():
+    return DP_MAGIC_V2 + struct.pack("<II", 2, RECORD_BYTES_V2)
+
+
+def storedRecordsV2(root):
+    """Every record the store holds, framing each object by its own magic.
+
+    The merge frames each delta standalone, so this reads them the same way.
+    An object that does not announce v2 is read as v1, which is exactly the
+    mis-framing a missing per-delta header would cause.
+    """
+    out = []
+    for dirpath, _dirs, names in os.walk(os.path.join(root, "dp")):
+        for name in sorted(names):
+            if not name.endswith(".bin"):
+                continue
+            with open(os.path.join(dirpath, name), "rb") as fh:
+                data = fh.read()
+            if data[:len(DP_MAGIC_V2)] == DP_MAGIC_V2:
+                body, stride = data[DP_HEADER_BYTES:], RECORD_BYTES_V2
+            else:
+                body, stride = data, RECORD_BYTES
+            out += [body[i:i + stride] for i in range(0, len(body), stride)]
+    return out
 
 
 def quiet(fn, *args):
@@ -562,6 +594,121 @@ class Fragments(SpoolCase):
         for key in storedKeys(self.storeRoot):
             self.assertIn("slot-%05d" % slot, key)
         self.assertEqual(int(nxt.state["dpOffset"]), 0)
+
+
+class V2Corpus(SpoolCase):
+    """The witness corpus through the same spool, which v1 alone never tests.
+
+    Every other case in this file writes a headerless 32-byte stream.  That
+    left the whole format this client now writes by default uncovered, and it
+    is where the offset accounting is hardest: a v2 cut starts at the file's
+    16-byte header rather than at 0, so `dpOffset` of 0 and an entry at 16
+    name the same place.  Comparing them for equality made the first upload of
+    every v2 corpus fail to credit -- each cycle recut the whole file, dp.bin
+    never rotated, and the merge ingested overlapping deltas.
+    """
+
+    def appendDpV2(self, w, count):
+        fresh = not os.path.exists(w.dpPath) or os.path.getsize(w.dpPath) == 0
+        with open(w.dpPath, "ab") as fh:
+            if fresh:
+                fh.write(v2Header())
+            for i in range(self.written, self.written + count):
+                fh.write(recordV2(i))
+        self.written += count
+
+    def test_the_first_cycle_credits_past_the_header(self):
+        """The bug, stated as a test: dpOffset has to move off 0."""
+        w, slot = self.claimed()
+        self.appendDpV2(w, 5)
+        out, err = quiet(w.uploadCycle, slot)
+        self.assertIsNone(err, out)
+        self.assertEqual(int(w.state["dpOffset"]),
+                         DP_HEADER_BYTES + 5 * RECORD_BYTES_V2)
+        self.assertEqual(int(w.state["dpUploaded"]), 5)
+        self.assertEqual(w.spoolEntries(), [])
+        self.assertEqual(sorted(storedRecordsV2(self.storeRoot)),
+                         sorted(recordV2(i) for i in range(5)))
+
+    def test_a_second_cycle_sends_only_what_is_new(self):
+        """An offset that did not move resends the whole file every cycle."""
+        w, slot = self.claimed()
+        self.appendDpV2(w, 4)
+        _, err = quiet(w.uploadCycle, slot)
+        self.assertIsNone(err)
+        firstKeys = storedKeys(self.storeRoot)
+        self.appendDpV2(w, 3)
+        out, err = quiet(w.uploadCycle, slot)
+        self.assertIsNone(err, out)
+        got = storedRecordsV2(self.storeRoot)
+        self.assertEqual(len(got), 7, "a record was sent twice")
+        self.assertEqual(len(set(got)), 7)
+        self.assertEqual(sorted(got), sorted(recordV2(i) for i in range(7)))
+        self.assertEqual(len(storedKeys(self.storeRoot)), len(firstKeys) + 1)
+        self.assertEqual(int(w.state["dpOffset"]),
+                         DP_HEADER_BYTES + 7 * RECORD_BYTES_V2)
+
+    def test_every_delta_announces_the_format(self):
+        """Deltas are standalone objects, so each carries its own header.
+
+        Without this only a slot's first delta would announce v2 and every
+        later one would be read as v1 -- invisible until the merge reports
+        orbits nobody walked.
+        """
+        w, slot = self.claimed()
+        for _ in range(3):
+            self.appendDpV2(w, 2)
+            _, err = quiet(w.uploadCycle, slot)
+            self.assertIsNone(err)
+        keys = storedKeys(self.storeRoot)
+        self.assertEqual(len(keys), 3)
+        for key in keys:
+            with open(os.path.join(self.storeRoot, key), "rb") as fh:
+                head = fh.read(DP_HEADER_BYTES)
+            self.assertEqual(head[:len(DP_MAGIC_V2)], DP_MAGIC_V2, key)
+            self.assertEqual(struct.unpack("<II", head[len(DP_MAGIC_V2):]),
+                             (2, RECORD_BYTES_V2), key)
+            size = os.path.getsize(os.path.join(self.storeRoot, key))
+            self.assertEqual((size - DP_HEADER_BYTES) % RECORD_BYTES_V2, 0, key)
+
+    def test_the_offset_advances_by_records_not_payload_bytes(self):
+        """A delta's payload includes its header; the source stream does not.
+
+        Advancing by payload bytes would step the offset past records that
+        were never sent, once per cycle.
+        """
+        w, slot = self.claimed()
+        self.appendDpV2(w, 6)
+        _, err = quiet(w.uploadCycle, slot)
+        self.assertIsNone(err)
+        entries = storedKeys(self.storeRoot)
+        self.assertEqual(len(entries), 1)
+        payload = os.path.getsize(os.path.join(self.storeRoot, entries[0]))
+        self.assertEqual(payload, DP_HEADER_BYTES + 6 * RECORD_BYTES_V2)
+        # Off by exactly the header if payload bytes were used.
+        self.assertEqual(int(w.state["dpOffset"]),
+                         DP_HEADER_BYTES + 6 * RECORD_BYTES_V2)
+        self.assertNotEqual(int(w.state["dpOffset"]),
+                            DP_HEADER_BYTES + payload)
+
+    def test_a_spooled_v2_delta_credits_on_recovery(self):
+        """The failure path: the clamped offset has to reconcile there too."""
+        w, slot = self.claimed()
+        self.appendDpV2(w, 5)
+        self.failedCycle(w, slot)
+        self.assertEqual(int(w.state["dpOffset"]), 0)
+        self.assertEqual(len(w.spoolEntries()), 1)
+        self.assertEqual(w.spoolEntries()[0]["head"], DP_HEADER_BYTES)
+        self.assertEqual(w.spoolEntries()[0]["stride"], RECORD_BYTES_V2)
+        self.appendDpV2(w, 2)
+        out, err = quiet(w.uploadCycle, slot)
+        self.assertIsNone(err, out)
+        self.assertEqual(w.spoolEntries(), [])
+        got = storedRecordsV2(self.storeRoot)
+        self.assertEqual(sorted(got), sorted(recordV2(i) for i in range(7)))
+        self.assertEqual(len(set(got)), 7)
+        self.assertEqual(int(w.state["dpOffset"]),
+                         DP_HEADER_BYTES + 7 * RECORD_BYTES_V2)
 
 
 if __name__ == "__main__":

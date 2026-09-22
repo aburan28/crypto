@@ -153,6 +153,53 @@ G2_HD uint64_t pt_pack(const pt2k &P, int n) {
     return ((x + 1ull) << 1) | sign;
 }
 
+/* The **folded** key a sum is stored under: a name for the Frobenius
+ * orbit of its abscissa, shared by every point in that orbit and by no
+ * point outside it.
+ *
+ * `koblitz_fast::FrobeniusCanon` is the CPU side, and this is the same
+ * function applied to the same data.  `pi` is a squaring only in a
+ * *polynomial* basis; in a normal basis `{b, b^2, b^4, ...}` it is a
+ * one-bit cyclic rotation of the coordinate word, because
+ * `(sum c_k b^(2^k))^2 = sum c_k b^(2^(k+1))`.  So the orbit of `x` is
+ * the set of rotations of its coordinate word, and the least rotation
+ * names it.  Nothing is squared and nothing is reduced.
+ *
+ * `tables` is the change of basis, `canon_bytes` rows of 256 each,
+ * flattened: `tables[i * 256 + b]` is the normal coordinates of the
+ * element whose `i`-th byte is `b`.  It is **host data**, uploaded from
+ * `FrobeniusCanon::tables()` — not rediscovered here.  The normal
+ * element comes from a randomised search, so a device that searched for
+ * its own would find a different basis and name the same orbits
+ * differently: valid on its own, and unable to read a table the CPU
+ * built.  Build and probe must share one basis, which is why this takes
+ * it as a parameter.
+ *
+ * The `+1` and the `0` for infinity are `FrobeniusCanon`'s, not a
+ * flourish: they keep the sentinel the same as `pt_pack`'s so a folded
+ * table and an unfolded one agree about what "no point" means.
+ *
+ * `n <= 62` is `pt_low64`'s ceiling and also `FrobeniusCanon`'s (it
+ * refuses `n > 63`), so the fold does not reach `ecc2k95`.  That is a
+ * limit, not an omission.
+ */
+G2_HD uint64_t pt_canon(const pt2k &P, const uint64_t *tables, int canon_bytes, int n) {
+    if (P.inf) return 0;
+    const uint64_t x = pt_low64(P.x);
+    uint64_t c = 0;
+    for (int i = 0; i < canon_bytes; i++) {
+        c ^= tables[(size_t)i * 256 + ((x >> (8 * i)) & 0xffull)];
+    }
+    const uint64_t mask = (n >= 64) ? ~0ull : ((1ull << n) - 1ull);
+    uint64_t best = c;
+    uint64_t v = c;
+    for (int t = 1; t < n; t++) {
+        v = ((v << 1) | (v >> (n - 1))) & mask;
+        if (v < best) best = v;
+    }
+    return best + 1ull;
+}
+
 #ifdef __CUDACC__
 
 /* One thread per row, grid-stride so the triangular load can be
@@ -162,9 +209,28 @@ G2_HD uint64_t pt_pack(const pt2k &P, int n) {
  * `row_offset[i]`.  The host computes the offsets, because the kernel
  * would otherwise recompute the same prefix sum in every thread.
  */
+/* `canon_tables` null keys on `pt_pack`, which is the unfolded table
+ * this kernel has always built.  Non-null keys on `pt_canon` instead —
+ * one name per Frobenius orbit — and the host is then responsible for
+ * uploading `FrobeniusCanon::tables()` and for knowing that the result
+ * is a folded table.
+ *
+ * **What this does not do yet.**  Keying by orbit is not the same as
+ * *storing* by orbit: this still writes one entry per pair, so the
+ * table is the same size and merely named differently.  The fold's
+ * whole point is `2n` times fewer entries, which needs the base sorted
+ * by orbit host-side and one entry emitted per signed orbit, and then
+ * the orbit tag (`(orbit << 16) | ...`) that makes recovery `O(n)`
+ * rather than `O(|F|)`.  Both are the next steps and neither is here.
+ *
+ * The tables are read from global memory.  They are 16 KiB at `n = 61`,
+ * which fits shared memory comfortably, and moving them there is worth
+ * doing — but it is a change whose effect can only be measured on a
+ * device, so it is not guessed at here. */
 __global__ void pairtable_kernel(const pt2k *pts, int n, const uint32_t *row_offset,
                                  uint64_t *keys, uint32_t *idx_i, uint32_t *idx_j,
-                                 f2e *scratch, int scratch_stride) {
+                                 f2e *scratch, int scratch_stride,
+                                 const uint64_t *canon_tables, int canon_bytes) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
     const int stride = gridDim.x * blockDim.x;
     for (int i = tid; i < n; i += stride) {
@@ -190,7 +256,8 @@ __global__ void pairtable_kernel(const pt2k *pts, int n, const uint32_t *row_off
             } else {
                 s = Koblitz::add_with_inv(P, Q, den[t]);
             }
-            keys[base + t] = pt_pack(s, n);
+            keys[base + t] = canon_tables ? pt_canon(s, canon_tables, canon_bytes, n)
+                                          : pt_pack(s, n);
             idx_i[base + t] = (uint32_t)i;
             idx_j[base + t] = (uint32_t)(i + t);
         }

@@ -1,0 +1,145 @@
+{
+  "comparisons": [
+    {
+      "candidate": "block",
+      "candidate_over_baseline": 0.9928691000211656,
+      "ci95": [
+        0.9861321206828102,
+        0.9987485555904301
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.994337929638075,
+      "native_wall_ci95": [
+        0.9640996219097356,
+        1.022050953020713
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9786433797671221,
+        "n17a1": 1.0283339462829315,
+        "n19a0": 1.039195420107316,
+        "n23a0": 0.9836367766145089,
+        "n23a1": 0.9309544710012282,
+        "n31a0": 1.0092179768637857
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 1.0002473758106571,
+        "n17a1": 1.0001829199712766,
+        "n19a0": 1.0001310629917075,
+        "n23a0": 0.9799355328915764,
+        "n23a1": 0.9915311444706633,
+        "n31a0": 0.9853813368122899
+      },
+      "speedup": 1.0071821149219795
+    },
+    {
+      "candidate": "column",
+      "candidate_over_baseline": 0.9842003944730398,
+      "ci95": [
+        0.9731603294275096,
+        0.9935668997671229
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9802538138977883,
+      "native_wall_ci95": [
+        0.9385887171292605,
+        1.026374981286335
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9254926159958476,
+        "n17a1": 1.0682579609127336,
+        "n19a0": 1.0069019565352042,
+        "n23a0": 1.029076798101297,
+        "n23a1": 0.9202399215067038,
+        "n31a0": 0.9411223928710913
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 0.9751119876980678,
+        "n17a1": 0.9931256697281043,
+        "n19a0": 0.9895769499162259,
+        "n23a0": 0.9935785721160905,
+        "n23a1": 0.9957773380786066,
+        "n31a0": 0.9585802563936119
+      },
+      "speedup": 1.0160532403925926
+    },
+    {
+      "candidate": "both",
+      "candidate_over_baseline": 0.9769208922639196,
+      "ci95": [
+        0.9637166601549506,
+        0.9882427446214579
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9765343931454744,
+      "native_wall_ci95": [
+        0.9490104481017707,
+        0.9953714536783282
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9945003127965405,
+        "n17a1": 0.9889165598601438,
+        "n19a0": 0.9987613240379895,
+        "n23a0": 0.9954734370466081,
+        "n23a1": 0.9132036753096425,
+        "n31a0": 0.9711842817848996
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 6,
+      "per_cell": {
+        "n13a0": 0.9750919301999064,
+        "n17a1": 0.9931108383790819,
+        "n19a0": 0.9895627809441494,
+        "n23a0": 0.9734449095424539,
+        "n23a1": 0.9872653883763108,
+        "n31a0": 0.943896679422489
+      },
+      "speedup": 1.0236243363396567
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 19.312096020934405,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.4591020728582655,
+    "ci95": [
+      1.2007521976283417,
+      1.7381132568781685
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 6,
+    "native_wall_candidate_over_baseline": 1.11399182032203,
+    "native_wall_ci95": [
+      1.0175069835442543,
+      1.2003207492284216
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.151165715330929,
+      "n17a1": 1.1410888581092347,
+      "n19a0": 1.231852029251068,
+      "n23a0": 1.2272207096799361,
+      "n23a1": 0.9256265290176998,
+      "n31a0": 1.0397230885735798
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 6,
+    "per_cell": {
+      "n13a0": 1.458491007554991,
+      "n17a1": 1.6021824330086505,
+      "n19a0": 1.9270395349743366,
+      "n23a0": 1.8053079131667882,
+      "n23a1": 0.9953256998054242,
+      "n31a0": 1.1925900916234304
+    },
+    "speedup": 0.6853530116923754
+  },
+  "runs": 90,
+  "stage": "smoke",
+  "verified_runs": 90
+}

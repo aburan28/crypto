@@ -1,0 +1,23 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -1200,8 +1200,19 @@
+         // A scan block pays one inversion and is thrown away on an early
+         // exit; size it to about one expected witness per block.
+         // `1 − exp(−x) ≥ min(x, 1)/2`, enough to size a block without libm.
++        //
++        // The ceiling is 16, not 64.  One expected witness per block is the
++        // wrong target: the inversion a block amortises saturates after a
++        // dozen or so rests, while the work discarded on an early exit keeps
++        // growing with the block, so past ~16 a larger block costs more than
++        // it saves.  Measured over the round-0017 panel, six fixtures a cell
++        // (`campaign_20260916/round18_block_grid.py`), the block this rule
++        // asks for is past its own optimum wherever it exceeds 16 — at n23a1
++        // it asks for 102, which costs 1.040x what 16 costs.  Only the
++        // ceiling moves; the shape of the rule, and every cell whose value is
++        // already at or below 16, are unchanged.
+         let hit = (lambda_pairs * coverage(table_rows)).min(1.0).max(1e-9);
+-        let chunk = ((1.0 / hit) as usize + 1).clamp(8, 64).min(size);
++        let chunk = ((1.0 / hit) as usize + 1).clamp(8, 16).min(size);
+ 
+         let mut prng = SplitMix(algorithm_seed ^ 0x5449_4e59_4943_0001);
+         let probe_scalar = prng.scalar(r);

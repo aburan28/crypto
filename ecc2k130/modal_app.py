@@ -8,10 +8,20 @@
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::profile    # Nsight Compute
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 97 --hours 4
     ECC_GPU=RTX-PRO-6000 modal run modal_app.py::fanout --curve 97 --count 8 --hours 4
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::next_run_id            # campaign run id
+    ECC_GPU=RTX-PRO-6000 modal run modal_app.py::search --curve 131 --packed \
+        --run-id 8000 --hours 4                                           # campaign run
+    ECC_GPU=RTX-PRO-6000 ECC_CPU_THREADS=32 modal run modal_app.py::search --curve 131 \
+        --packed --run-id 8000 --hours 4     # ... walking the container's CPUs too (run 9000)
 
 Curve 97 is ECC2K-95, a 2^44 iteration problem: feasible in GPU-hours, and its
 answer has been public since Harley's group solved it in 1998, so a recovered
 logarithm can be checked rather than merely believed.
+
+Curve 131 is the campaign. A search there takes its distinguished-point weight
+from aws/campaign.json and its run id from the Modal range (see CAMPAIGN_CURVE
+below for why both are refused otherwise); --off-campaign lifts both rules and
+keeps the run's files out of the upload path.
 
 The GPU comes from the ECC_GPU environment variable, which is read when this
 file is imported and baked into the function definitions.  That works on every
@@ -153,6 +163,28 @@ if PACKED_COMPACT_STATE == "1" and (PACKED_STATE_TILE != "256" or any(value != "
 # automatic upgrades (H100→H200, A100→A100-80GB, B200→B300).
 DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
 
+# Walk on the container's CPUs as well as its GPU. The host binary is the same
+# iteration function with the same canonical key (validate solves planted
+# logs through both), so its points join the campaign like any slot's. What
+# it is worth is a matter of record, not of the CPU column on the dashboard:
+# measured here on 2026-09-21, one thread of the x86-64-v3 (AVX2, 256-lane)
+# build does ~10 M it/s and one thread of the x86-64-v4 (AVX-512, 512-lane)
+# build ~18 M it/s, against ~14,800 M it/s for the RTX PRO 6000 in the same
+# container. Modal bills CPU at max(request, use) -- $0.047 per physical
+# core-hour against $3.03 for the 6000 -- so 16 cores (32 threads) at AVX-512
+# add about 25% to the container's cost for about 2.5% more iterations: an
+# order of magnitude worse per dollar than the GPU beside it. It is off by
+# default and sized by ECC_CPU_THREADS at import time (like ECC_GPU), which
+# also sets the container's CPU request to half that many physical cores.
+CPU_THREADS = int(os.environ.get("ECC_CPU_THREADS", "0"))
+if CPU_THREADS < 0:
+    raise ValueError("ECC_CPU_THREADS must be a non-negative thread count")
+CPU_CORES_REQUEST = (CPU_THREADS + 1) // 2 if CPU_THREADS else None
+CPU_BINARIES = {"v3": "ecc2k130-cpu-v3", "v4": "ecc2k130-cpu-v4"}
+# x86-64-v4 is AVX-512 F/BW/CD/DQ/VL; a host missing any of them SIGILLs the
+# binary, so every flag is checked and the AVX2 build is the fallback.
+X86_64_V4_FLAGS = ("avx512f", "avx512bw", "avx512cd", "avx512dq", "avx512vl")
+
 # Compute capability per Modal GPU type.  sm_120 is the Blackwell workstation
 # part (RTX PRO 6000), sm_100 is B200/B300, sm_90 is H100/H200, sm_89 is
 # L40S/L4, sm_86 is A10, sm_80 is A100, sm_75 is T4. Modal B300 reports
@@ -223,6 +255,7 @@ image = (
     # Containers re-import this module; preserve the settings that selected
     # their image and baked architecture rather than reverting to defaults.
     .env({"ECC_CUDA_VERSION": CUDA_VERSION, "ECC_GPU": DEFAULT_GPU,
+          "ECC_CPU_THREADS": str(CPU_THREADS),
           "ECC_PACKED_SINGLE_PRODUCT": PACKED_SINGLE_PRODUCT,
           "ECC_PACKED_CACHE_DENOM": PACKED_CACHE_DENOM,
           "ECC_PACKED_BY_VALUE": PACKED_BY_VALUE,
@@ -248,7 +281,8 @@ image = (
         LOCAL,
         remote_path=REMOTE,
         copy=True,
-        ignore=["ecc2k130-cpu", "ecc2k130", "build/*", "__pycache__", "*.pyc"],
+        ignore=["ecc2k130-cpu", "ecc2k130-cpu-v3", "ecc2k130-cpu-v4", "ecc2k130",
+                "build/*", "__pycache__", "*.pyc"],
     )
     .run_commands(
         # Regenerate before building so the baked binary's leaf is known to be
@@ -256,8 +290,13 @@ image = (
         f"cd {REMOTE}/codegen && python3 gen.py --out ../generated "
         f"--leaf {BAKED['leaf']}",
         # x86-64-v3 keeps the host binary runnable on any Modal machine; the
-        # GPU client picks its own word width on the device.
-        f"cd {REMOTE} && make cpu MARCH=x86-64-v3",
+        # GPU client picks its own word width on the device. The v4 (AVX-512)
+        # build is for the CPU walker, chosen at runtime by chooseCpuBinary
+        # when the host has every flag it needs; ./ecc2k130-cpu stays the v3
+        # build that validate's --test and solveCorpus run.
+        f"cd {REMOTE} && make cpu MARCH=x86-64-v3 && cp ecc2k130-cpu {CPU_BINARIES['v3']} "
+        f"&& make -B cpu MARCH=x86-64-v4 && cp ecc2k130-cpu {CPU_BINARIES['v4']} "
+        f"&& cp {CPU_BINARIES['v3']} ecc2k130-cpu",
         f'cd {REMOTE} && make gpu ARCH="{GENCODE}" BATCH={BAKED["batch"]} '
         f'THREADS={BAKED["threads"]} MINBLOCKS={BAKED["minBlocks"]} '
         f'PACKED_SINGLE_PRODUCT={PACKED_SINGLE_PRODUCT} PACKED_CACHE_DENOM={PACKED_CACHE_DENOM} '
@@ -944,6 +983,172 @@ def runProfile(batch=32, threads=128, leaf=0, minBlocks=2, steps=4, launches=1,
     return result
 
 
+# ---------------------------------------------------------------------------
+# Campaign identity. Points collected here are uploaded by modal_sync.py into
+# the ECC2K-130 campaign bucket, where they have to be *compatible* with the
+# AWS fleet's points or they can never be part of a detectable collision:
+#
+#  * Seeds are (runId << 48) | (walkIndex << 16): a run id names a seed space.
+#    modal_sync.py maps run id r to campaign slot 90000 + r, and the AWS fleet
+#    maps slot s to run id s + 1, so a Modal run id an AWS slot has ever used
+#    walks that slot's trails again, step for step. Every point it reports is
+#    one the store already holds under the same seed, dropped by ON CONFLICT
+#    with no collision recorded and nothing on the page. Run ids 1-4 did that
+#    on 2026-09-19/20 against slots 0-3: 89% of run 3's 912k records were
+#    byte-identical to slot 2's, and 100% of its seeds had been walked.
+#  * Walks stop at their own distinguished point. Two walks that merge only
+#    report the same point if they use the same cutoff; against the campaign's
+#    weight 32 a weight-34 walk's meeting is seen about 12% of the time and a
+#    weight-35 walk's about 4% (campaign.json: "dpWeight must be identical
+#    campaign-wide or cross-worker collisions can be missed"). Runs 4242-4245
+#    were launched with the run-sized default and collected at 34 and 35.
+#
+# So a campaign run refuses both: its weight comes from aws/campaign.json and
+# its run id from a range no AWS slot can reach. AWS slots are 16-bit and the
+# fleet has used 0-195; 90000 + run id must stay a five-digit slot.
+CAMPAIGN_CURVE = 131
+MODAL_RUN_ID_MIN = 8000
+MODAL_RUN_ID_MAX = 9999
+# The range is split: a GPU run takes an id in 8000-8999, and the CPU walker
+# that shares its container (see CPU_THREADS below) takes id + 1000, so the
+# two seed spaces are disjoint and the pair is recoverable from either id.
+MODAL_GPU_RUN_ID_MAX = 8999
+CPU_RUN_ID_OFFSET = 1000
+# Runs that deliberately depart from the campaign (a loose cutoff to see points
+# quickly, a different walk) live here, where modal_sync.py never looks.
+OFF_CAMPAIGN_ROOT = "/data/offcampaign"
+
+def cpuRunId(runId):
+    return int(runId) + CPU_RUN_ID_OFFSET
+
+
+def cpuFlags(path="/proc/cpuinfo"):
+    try:
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                if line.startswith("flags"):
+                    return set(line.split(":", 1)[1].split())
+    except OSError:
+        pass
+    return set()
+
+
+def chooseCpuBinary(flags=None, root=None):
+    """The fastest host build this container can run: (level, path)."""
+    root = pathlib.Path(root or REMOTE)
+    flags = cpuFlags() if flags is None else set(flags)
+    if all(f in flags for f in X86_64_V4_FLAGS) and (root / CPU_BINARIES["v4"]).exists():
+        return "v4", str(root / CPU_BINARIES["v4"])
+    if (root / CPU_BINARIES["v3"]).exists():
+        return "v3", str(root / CPU_BINARIES["v3"])
+    return "native", str(root / "ecc2k130-cpu")
+
+
+def cpuClientCommand(binary, curve, runId, threads, dpFile, ckFile, dpWeight,
+                     loadMax, checkpointEvery=60, steps=1024, loads=()):
+    """The host client as aws/worker.py runs it for a CPU slot: never --packed,
+    --threads is the box, the campaign cutoff, its own dp file and checkpoint."""
+    cmd = (f"{binary} --curve {curve} --steps {steps} --launches 0 --run-id {runId} "
+           f"--dp-file {dpFile} --checkpoint {ckFile} --checkpoint-every {int(checkpointEvery)} "
+           f"--verify 0 --threads {int(threads)} --load-max {int(loadMax)}")
+    if dpWeight >= 0:
+        cmd += f" --dp-weight {int(dpWeight)}"
+    for other in loads:
+        cmd += f" --load {other}"
+    return cmd
+
+
+def campaignConfig():
+    """aws/campaign.json as this tree carries it (the image copies aws/ too)."""
+    with open(helperRoot / "aws" / "campaign.json", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def campaignDpWeight():
+    weight = int(campaignConfig()["dpWeight"])
+    if weight < 0:
+        raise ValueError("aws/campaign.json carries no dpWeight; a campaign run cannot pick one")
+    return weight
+
+
+def isCampaignRun(curve, offCampaign=False):
+    return int(curve) == CAMPAIGN_CURVE and not offCampaign
+
+
+def checkCampaignRunId(runId, withCpu=False):
+    runId = int(runId)
+    if not (MODAL_RUN_ID_MIN <= runId <= MODAL_RUN_ID_MAX):
+        raise ValueError(
+            "run id %d is outside the Modal campaign range %d-%d: below it the id is "
+            "an AWS slot's (slot = run id - 1) and the run re-walks that slot's seeds; "
+            "above it modal_sync.py has no slot number. Pass --run-id from the range "
+            "(::next_run_id suggests the next free one) or --off-campaign to collect "
+            "outside the campaign corpus." % (runId, MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX))
+    if withCpu and runId > MODAL_GPU_RUN_ID_MAX:
+        raise ValueError(
+            "run id %d cannot carry a CPU walker: its sidecar id %d is past %d. GPU runs "
+            "with a CPU sidecar take %d-%d." % (runId, cpuRunId(runId), MODAL_RUN_ID_MAX,
+                                                MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX))
+    return runId
+
+
+def campaignDpWeightFor(dpWeight):
+    """The cutoff a campaign run walks at: campaign.json's, and nothing else."""
+    want = campaignDpWeight()
+    if dpWeight < 0:
+        return want
+    if int(dpWeight) != want:
+        raise ValueError(
+            "dp weight %d differs from the campaign's %d; walks stop at their own "
+            "distinguished point, so a cross-weight meeting is only recorded when the "
+            "looser walk's stopping point also passes the tighter test. Use the "
+            "campaign weight, or --off-campaign to collect outside the campaign corpus."
+            % (int(dpWeight), want))
+    return want
+
+
+def dataRoot(curve, offCampaign=False):
+    return OFF_CAMPAIGN_ROOT if (int(curve) == CAMPAIGN_CURVE and offCampaign) else "/data"
+
+
+RUN_FILE_RE = re.compile(r"^curve(\d+)-run(\d+)\.(bin|ck|hdr)$")
+
+
+def usedRunIds(curve, root="/data"):
+    """Every run id with a corpus, checkpoint or header on the volume."""
+    ids = set()
+    for sub in ("dp", "ckpt"):
+        folder = os.path.join(root, sub)
+        if not os.path.isdir(folder):
+            continue
+        for name in os.listdir(folder):
+            m = RUN_FILE_RE.match(name)
+            if m and int(m.group(1)) == int(curve):
+                ids.add(int(m.group(2)))
+    return ids
+
+
+def nextFreeRunId(curve, root="/data"):
+    """One above the highest run id on the volume, inside the campaign range.
+
+    The volume is shared by every container, so this is the one place a free
+    id can be read off. It is a suggestion for the operator to pass explicitly:
+    a resumable pass loop must use the *same* id every pass, so nothing here
+    allocates one implicitly.
+    """
+    used = usedRunIds(curve, root)
+    if int(curve) == CAMPAIGN_CURVE:
+        # GPU ids only: a CPU sidecar's id is its GPU run's plus the offset and
+        # must not push the next GPU id into the sidecar range.
+        candidates = [r for r in used if MODAL_RUN_ID_MIN <= r <= MODAL_GPU_RUN_ID_MAX]
+        nxt = (max(candidates) + 1) if candidates else MODAL_RUN_ID_MIN
+        if nxt > MODAL_GPU_RUN_ID_MAX:
+            raise ValueError("the Modal campaign GPU run-id range %d-%d is exhausted"
+                             % (MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX))
+        return nxt
+    return (max(used) + 1) if used else 1
+
+
 # Expected rho iterations, and the weight cutoff that makes walks short enough
 # that most of them actually report within the run.
 CURVE_FACTS = {
@@ -1143,13 +1348,160 @@ def humanBytes(n):
     return "%d B" % n
 
 
-@app.function(image=image, gpu=DEFAULT_GPU, timeout=24 * HOUR, volumes={"/data": volume})
+@app.function(image=image, timeout=10 * 60, volumes={"/data": volume})
+def runNextRunId(curve=CAMPAIGN_CURVE):
+    """Suggest the next unused run id on the volume (no GPU rented)."""
+    return {"curve": int(curve), "runId": nextFreeRunId(curve),
+            "used": sorted(usedRunIds(curve)),
+            "range": ([MODAL_RUN_ID_MIN, MODAL_RUN_ID_MAX]
+                      if int(curve) == CAMPAIGN_CURVE else None)}
+
+
+class CpuWalker:
+    """The host client walking beside the GPU client in the same container.
+
+    Its own run id, dp file and checkpoint; the same cutoff. Its stdout is
+    drained on a thread so the main loop's select() stays about the GPU
+    client, and its 40-byte status header is copied from its checkpoint
+    (written atomically by the client every `checkpointEvery`) rather than
+    inverted from progress lines, which is enough for a walker whose whole
+    output is a percent of the GPU's.
+    """
+
+    def __init__(self, curve, runId, threads, root, dpWeight, loadMax, checkpointEvery,
+                 loads=(), binary=None):
+        self.curve, self.runId, self.threads = int(curve), int(runId), int(threads)
+        self.level, self.binary = (None, binary) if binary else chooseCpuBinary()
+        self.dpFile = f"{root}/dp/curve{curve}-run{runId}.bin"
+        self.ckFile = f"{root}/ckpt/curve{curve}-run{runId}.ck"
+        self.hdrFile = f"{root}/ckpt/curve{curve}-run{runId}.hdr"
+        self.cmd = cpuClientCommand(self.binary, curve, runId, threads, self.dpFile,
+                                    self.ckFile, dpWeight, loadMax, checkpointEvery,
+                                    loads=[p for p in loads if p != self.dpFile])
+        self.proc = None
+        self.last = None
+        self.lines = []
+        self.lastHdrMtime = None
+        self.skipped = None
+        self.exited = False
+
+    def selfTest(self):
+        """--test on the chosen build, falling back to the AVX2 one: 13 s of one
+        core against a SIGILL an hour in."""
+        rc, out = sh(f"{self.binary} --test", timeout=600)
+        if rc == 0 and "all checks passed" in out:
+            return True
+        fallback = str(pathlib.Path(REMOTE) / CPU_BINARIES["v3"])
+        if self.binary != fallback and os.path.exists(fallback):
+            print(f"cpu| {self.binary} failed --test (rc {rc}); falling back to {fallback}",
+                  flush=True)
+            self.level, self.binary = "v3", fallback
+            rc, out = sh(f"{self.binary} --test", timeout=600)
+            if rc == 0 and "all checks passed" in out:
+                self.cmd = self.cmd.replace(self.cmd.split(" ", 1)[0], self.binary, 1)
+                return True
+        self.skipped = "host binary failed --test (rc %d): %s" % (rc, out.strip()[-400:])
+        print("cpu| NOT started: " + self.skipped, flush=True)
+        return False
+
+    def start(self):
+        import threading
+        # exec, for the same reason as the GPU client's Popen in runSearch.
+        self.proc = subprocess.Popen("exec " + self.cmd, shell=True, cwd=REMOTE,
+                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        thread = threading.Thread(target=self._drain, daemon=True)
+        thread.start()
+        print(f"cpu| walking run {self.runId} on {self.threads} threads with the {self.level} "
+              f"host build; corpus {self.dpFile}", flush=True)
+
+    def _drain(self):
+        for line in self.proc.stdout:
+            self.lines.append(line.rstrip())
+            prog = parseProgress(line)
+            if prog:
+                self.last = prog
+            elif line.strip():
+                print("cpu| " + line.rstrip(), flush=True)
+
+    def pulse(self):
+        """Refresh the status header from the checkpoint when it has moved, and
+        say so once if the client has died under us."""
+        if self.proc is not None and self.proc.poll() is not None and not self.exited:
+            self.exited = True
+            print("cpu| host client exited with rc %d; last lines: %s"
+                  % (self.proc.returncode, " | ".join(self.lines[-3:])), flush=True)
+        try:
+            mtime = os.path.getmtime(self.ckFile)
+        except OSError:
+            return
+        if mtime == self.lastHdrMtime or os.path.exists(self.ckFile + ".tmp"):
+            return
+        header = readCheckpointHeader(self.ckFile)
+        if header is not None:
+            writeCheckpointHeaderFile(self.hdrFile, header)
+            self.lastHdrMtime = mtime
+
+    def progress(self):
+        if self.exited:
+            return "cpu: exited (rc %s)" % self.proc.returncode
+        if not self.last:
+            return "cpu: no progress line yet"
+        return "cpu: %s M it/s  %s iters  %s dp" % (
+            humanRate(self.last["rate"]), humanCount(self.last["iters"]), humanCount(self.last["dp"]))
+
+    def terminate(self):
+        if self.proc is not None and self.proc.poll() is None:
+            self.proc.send_signal(signal.SIGTERM)
+
+    def stop(self, graceSeconds=600):
+        if self.proc is None:
+            return "never started"
+        if self.proc.poll() is None:
+            self.terminate()
+            try:
+                self.proc.wait(timeout=graceSeconds)
+            except subprocess.TimeoutExpired:
+                self.proc.kill()
+                self.proc.wait(timeout=60)
+                stopped = "killed before it could checkpoint"
+            else:
+                stopped = "deadline"
+        else:
+            stopped = "exited (rc %d)" % self.proc.returncode
+        self.lastHdrMtime = None
+        self.pulse()
+        return stopped
+
+    def summary(self, stopped):
+        return {"runId": self.runId, "threads": self.threads, "build": self.level,
+                "binary": os.path.basename(self.binary), "skipped": self.skipped,
+                "distinguishedPoints": corpusCount(self.dpFile), "file": self.dpFile,
+                "checkpoint": self.ckFile if os.path.exists(self.ckFile) else None,
+                "iterations": self.last["iters"] if self.last else 0,
+                "rate": self.last["rate"] if self.last else 0.0,
+                "stopped": stopped, "tail": self.lines[-10:]}
+
+
+@app.function(image=image, gpu=DEFAULT_GPU, cpu=CPU_CORES_REQUEST, timeout=24 * HOUR,
+              volumes={"/data": volume})
 def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
               runId=1, steps=256, workers=0, rebuild=True, walksTarget=4000000,
-              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0):
+              checkpointEvery=60, resume=True, loadMax=50000000, packed=False, verify=0,
+              offCampaign=False, cpuThreads=None):
     """Collect distinguished points into the volume until the time budget runs
     out.  Records are 32 bytes of (seed, canonical orbit hash); a collision is
     resolved by recomputing both walks from their seeds.
+
+    On the campaign curve this is a campaign run unless `offCampaign` says
+    otherwise: the cutoff is aws/campaign.json's dpWeight (a different one is
+    refused, and -1 means that one rather than the run-sized guess), the run id
+    must come from the Modal range, and the files land where modal_sync.py
+    uploads them. An off-campaign run may use any weight and id, and writes
+    under OFF_CAMPAIGN_ROOT, which nothing uploads.
+
+    `cpuThreads` (default: the image's ECC_CPU_THREADS) also walks on that
+    many host threads under run id `runId + CPU_RUN_ID_OFFSET`; see
+    CPU_THREADS for what that is worth.
 
     Nothing here is throwaway.  The container dies at the deadline, but the run
     does not: the client checkpoints its live walks to the volume, reloads the
@@ -1168,6 +1520,22 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     so a recovered logarithm can be checked against it."""
     if packed and (curve != 131 or leaf):
         raise ValueError('packed search requires curve=131 and leaf=0')
+    cpuThreads = CPU_THREADS if cpuThreads is None else int(cpuThreads)
+    campaign = isCampaignRun(curve, offCampaign)
+    if campaign:
+        # Refused before the build and before a GPU does anything: a run that
+        # gets past here produces points the campaign can use.
+        runId = checkCampaignRunId(runId, withCpu=cpuThreads > 0)
+        dpWeight = campaignDpWeightFor(dpWeight)
+        print("campaign run: curve %d, run id %d (campaign slot %d), dp weight %d from "
+              "aws/campaign.json" % (curve, runId, 90000 + runId, dpWeight), flush=True)
+        if cpuThreads > 0:
+            print("campaign run: CPU walker run id %d (campaign slot %d) on %d threads"
+                  % (cpuRunId(runId), 90000 + cpuRunId(runId), cpuThreads), flush=True)
+    elif int(curve) == CAMPAIGN_CURVE:
+        print("OFF-CAMPAIGN run on curve %d: files go under %s and are never uploaded "
+              "to the campaign bucket" % (curve, OFF_CAMPAIGN_ROOT), flush=True)
+    root = dataRoot(curve, offCampaign)
     if int(verify) > 0:
         # --verify N replays the first N reports through the CPU reference
         # before they are written. At dp-weight 32 that is ~2^32 scalar steps
@@ -1184,10 +1552,10 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
         if not ok:
             return {"error": log[-2000:]}
     name = gpuName()
-    os.makedirs("/data/dp", exist_ok=True)
-    os.makedirs("/data/ckpt", exist_ok=True)
-    dpFile = f"/data/dp/curve{curve}-run{runId}.bin"
-    ckFile = f"/data/ckpt/curve{curve}-run{runId}.ck"
+    os.makedirs(f"{root}/dp", exist_ok=True)
+    os.makedirs(f"{root}/ckpt", exist_ok=True)
+    dpFile = f"{root}/dp/curve{curve}-run{runId}.bin"
+    ckFile = f"{root}/ckpt/curve{curve}-run{runId}.ck"
     rc, out = sh(f"./ecc2k130 --curve {curve} --bench --steps 8 --launches 4 --verify 0{backendFlag}")
     rate = parseRate(out) or 1.0
     # The number of reports comes out at roughly four times the number of
@@ -1225,13 +1593,29 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     # itself, so it is not named twice.  It reads newest-first and stops at
     # loadMax, because a collection run that never finishes -- ECC2K-130 is
     # decades of GPU time -- grows a corpus no container can hold in memory.
-    for other in sorted(corpusFiles(curve)):
+    for other in sorted(corpusFiles(curve, f"{root}/dp")):
         if other != dpFile:
             cmd += f" --load {other}"
     deadline = time.time() + hours * HOUR
     print(f"{name}: collecting into {dpFile} for {hours} h at ~{rate:.2f} M it/s")
-    proc = subprocess.Popen(cmd, shell=True, cwd=REMOTE, stdout=subprocess.PIPE,
+    # `exec`: /bin/sh here is dash, which does not exec a single command the
+    # way bash does, so without it the SIGTERM below killed the shell and
+    # orphaned the client, which walked on unflushed until the container went
+    # away -- every pass lost up to checkpointEvery of work and the points
+    # still in its stdio buffer, and no tail ever showed the client's
+    # "stopping:" line. Measured on 2026-09-21: 11,967 points reported,
+    # 11,909 in the corpus.
+    proc = subprocess.Popen("exec " + cmd, shell=True, cwd=REMOTE, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, text=True)
+    # The CPU walker starts after the GPU client so a host build that fails
+    # its self-test costs the GPU nothing; it is stopped before the GPU
+    # client below so its checkpoint is in the final commit too.
+    cpu = None
+    if cpuThreads > 0:
+        cpu = CpuWalker(curve, cpuRunId(runId), cpuThreads, root, dpWeight, loadMax,
+                        checkpointEvery, loads=sorted(corpusFiles(curve, f"{root}/dp")))
+        if cpu.selfTest():
+            cpu.start()
     lines = []
     solved = None
     started = time.time()
@@ -1240,7 +1624,7 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
     lastReport = started
     last = None
     stopped = ""
-    hdrFile = f"/data/ckpt/curve{curve}-run{runId}.hdr"
+    hdrFile = f"{root}/ckpt/curve{curve}-run{runId}.hdr"
     header = readCheckpointHeader(ckFile) or defaultStatusHeader(
         curve, workerThreads, batch, runId, packed)
     resumeIterBase = int(header.get("iterBase", 0) or 0)
@@ -1264,24 +1648,27 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
             writeCheckpointHeaderFile(hdrFile, header)
             lastWrittenIter = int(header["iterBase"])
             lastHdrAt = now
+        if cpu is not None and cpu.proc is not None:
+            cpu.pulse()
         if now - lastCommit >= VOLUME_COMMIT_S:
             lastCommit = now if tryCommitVolume(volume, ckFile) else now - VOLUME_COMMIT_S + 5
         if now - lastReport >= PROGRESS_PRINT_S:
             lastReport = now
+            cpuNote = ("  |  " + cpu.progress()) if cpu is not None and cpu.proc is not None else ""
             if last:
                 frac = (" (%.3f%% of 2^%.1f)" % (100.0 * last["iters"] / expected,
                                                  CURVE_FACTS[curve][1])) if expected else ""
                 drop = ("  %s DROPPED" % humanCount(last["dropped"])) if last["dropped"] else ""
                 print("[%s] %s M it/s  %s iters%s  %s dp  %s distinct  "
-                      "corpus %s  %s left%s"
+                      "corpus %s  %s left%s%s"
                       % (humanTime(now - started), humanRate(last["rate"]),
                          humanCount(last["iters"]), frac,
                          humanCount(last["dp"]), humanCount(last["stored"]),
                          humanBytes(os.path.getsize(dpFile) if os.path.exists(dpFile) else 0),
-                         humanTime(deadline - now), drop), flush=True)
+                         humanTime(deadline - now), drop, cpuNote), flush=True)
             else:
-                print("[%s] no progress line yet (still starting up?)"
-                      % humanTime(now - started), flush=True)
+                print("[%s] no progress line yet (still starting up?)%s"
+                      % (humanTime(now - started), cpuNote), flush=True)
 
     try:
         while proc.poll() is None:
@@ -1317,6 +1704,11 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
                 stopped = "deadline"
                 break
     finally:
+        cpuStopped = None
+        if cpu is not None:
+            # Both clients get their SIGTERM together and checkpoint in
+            # parallel; the CPU one is waited for after the GPU one.
+            cpu.terminate()
         if proc.poll() is None:
             # SIGTERM, not kill: the client finishes the launch in flight, then
             # writes its checkpoint and flushes the corpus.  Draining stdout
@@ -1334,17 +1726,21 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
                 stopped = "killed before it could checkpoint"
                 proc.kill()
                 proc.wait(timeout=60)
+        if cpu is not None:
+            cpuStopped = cpu.stop()
     if header is not None:
         writeCheckpointHeaderFile(hdrFile, header)
     # Commit last, so the checkpoint the client just wrote is part of the
     # snapshot rather than the one before it.
     tryCommitVolume(volume, ckFile)
     return {"gpu": name, "distinguishedPoints": corpusCount(dpFile), "file": dpFile,
+            "runId": int(runId), "dpWeight": int(dpWeight), "campaign": campaign,
             "checkpoint": ckFile if os.path.exists(ckFile) else None,
             "checkpointBytes": os.path.getsize(ckFile) if os.path.exists(ckFile) else 0,
             "iterations": last["iters"] if last else 0,
             "rate": last["rate"] if last else 0.0,
             "elapsed": round(time.time() - started, 1),
+            "cpu": cpu.summary(cpuStopped) if cpu is not None else None,
             "stopped": stopped, "solved": solved, "tail": lines[-25:]}
 
 
@@ -1588,30 +1984,81 @@ def profile(gpu: str = "", batch: int = 32, threads: int = 128, leaf: int = 0,
     print(r["report"])
 
 
+def requireExplicitRunId(curve, run_id, off_campaign, what="--run-id", with_cpu=False):
+    """Campaign runs name their run id; nothing here picks one for them.
+
+    A pass loop resumes by launching the same id every pass, so an id chosen
+    at launch time would start a fresh seed space on every pass and leave the
+    checkpoint behind. `run_id` 0 is the request for a suggestion, answered
+    with ::next_run_id and refused here.
+    """
+    if isCampaignRun(curve, off_campaign):
+        if int(run_id) <= 0:
+            raise SystemExit(
+                "campaign runs on curve %d need an explicit %s in %d-%d; "
+                "`modal run modal_app.py::next_run_id` suggests the next free one, "
+                "and --off-campaign collects outside the campaign corpus"
+                % (curve, what, MODAL_RUN_ID_MIN, MODAL_GPU_RUN_ID_MAX))
+        checkCampaignRunId(run_id, withCpu=with_cpu)
+    return int(run_id)
+
+
+def resolveCpuThreads(cpu_threads):
+    """-1 (the CLI default) means the image's ECC_CPU_THREADS; 0 means none."""
+    return CPU_THREADS if int(cpu_threads) < 0 else int(cpu_threads)
+
+
+@app.local_entrypoint()
+def next_run_id(curve: int = CAMPAIGN_CURVE):
+    """The next unused run id on the volume; pass it to ::search or ::fanout."""
+    print(json.dumps(runNextRunId.remote(curve=curve), indent=2))
+
+
 @app.local_entrypoint()
 def search(gpu: str = "", hours: float = 1.0, curve: int = 97, batch: int = 8,
-           threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 1,
+           threads: int = 128, leaf: int = 0, dp_weight: int = -1, run_id: int = 0,
            walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
-           verify: int = 0, checkpoint_every: int = 60):
+           verify: int = 0, checkpoint_every: int = 60, off_campaign: bool = False,
+           cpu_threads: int = -1):
+    """--cpu-threads N also walks on N host threads under run id + 1000
+    (-1: the image's ECC_CPU_THREADS; 0: GPU only)."""
+    cpu_threads = resolveCpuThreads(cpu_threads)
+    if not isCampaignRun(curve, off_campaign) and int(run_id) <= 0:
+        run_id = 1
+    run_id = requireExplicitRunId(curve, run_id, off_campaign, with_cpu=cpu_threads > 0)
     r = onGpu(runSearch, gpu).remote(hours=hours, curve=curve, batch=batch,
                                      threads=threads, leaf=leaf, dpWeight=dp_weight,
                                      runId=run_id, walksTarget=walks, loadMax=load_max,
                                      packed=packed, verify=verify,
-                                     checkpointEvery=checkpoint_every)
+                                     checkpointEvery=checkpoint_every,
+                                     offCampaign=off_campaign, cpuThreads=cpu_threads)
     print(json.dumps(r, indent=2))
 
 
 @app.local_entrypoint()
 def fanout(gpu: str = "", count: int = 4, hours: float = 1.0, curve: int = 97,
            batch: int = 8, threads: int = 128, leaf: int = 0, dp_weight: int = -1,
-           walks: int = 4000000, load_max: int = 50000000, packed: bool = False,
-           verify: int = 0, checkpoint_every: int = 60):
-    """Run `count` independent searchers, each with its own run id so their
-    seeds never collide, then merge what they produced."""
+           run_id_base: int = 0, walks: int = 4000000, load_max: int = 50000000,
+           packed: bool = False, verify: int = 0, checkpoint_every: int = 60,
+           off_campaign: bool = False, cpu_threads: int = -1):
+    """Run `count` independent searchers on run ids base .. base+count-1, so
+    their seeds never collide, then merge what they produced.
+
+    The base is explicit on the campaign curve for the same reason as
+    ::search's run id: every pass of a loop must spawn the same ids."""
+    cpu_threads = resolveCpuThreads(cpu_threads)
+    if not isCampaignRun(curve, off_campaign) and int(run_id_base) <= 0:
+        run_id_base = 1
+    run_id_base = requireExplicitRunId(curve, run_id_base, off_campaign, "--run-id-base",
+                                       with_cpu=cpu_threads > 0)
+    if isCampaignRun(curve, off_campaign):
+        checkCampaignRunId(run_id_base + count - 1, withCpu=cpu_threads > 0)
     fn = onGpu(runSearch, gpu)
     calls = [fn.spawn(hours=hours, curve=curve, batch=batch, threads=threads, leaf=leaf,
-                      dpWeight=dp_weight, runId=i + 1, walksTarget=walks, loadMax=load_max,
-                      packed=packed, verify=verify, checkpointEvery=checkpoint_every)
+                      dpWeight=dp_weight, runId=run_id_base + i, walksTarget=walks,
+                      loadMax=load_max, packed=packed, verify=verify,
+                      checkpointEvery=checkpoint_every, offCampaign=off_campaign,
+                      cpuThreads=cpu_threads)
              for i in range(count)]
     for c in calls:
         print(json.dumps(c.get(), indent=2))

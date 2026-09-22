@@ -11,8 +11,8 @@
 //! ```text
 //!   g_x(Q) = 3 x_Q² + a
 //!   g_y(Q) = -2 y_Q
-//!   v(Q)   = 2 g_x(Q)            if 2Q = O          (T-row)
-//!          = 4 x_Q g_y(Q)² + 2 g_x(Q)²            otherwise
+//!   v(Q)   =   g_x(Q)            if 2Q = O          (T-row)
+//!          = 2 g_x(Q)            otherwise
 //!   u(Q)   = g_y(Q)²              (for the y-coordinate map)
 //! ```
 //!
@@ -99,14 +99,8 @@ impl VeluIsogeny {
             // T-row test: 2Q = O ⇔ yQ = 0.
             let t_row = yq == 0;
 
-            let v_q = if t_row {
-                (2 * gx_q) % p
-            } else {
-                let gy2 = mod_mul(gy_q, gy_q, p);
-                let term1 = mod_mul(4 * xq % p, gy2, p);
-                let term2 = mod_mul(2 * gx_q % p, gx_q, p);
-                mod_add(term1, term2, p)
-            };
+            // Vélu: v(Q) = g_x(Q) when 2Q = O, and 2·g_x(Q) otherwise.
+            let v_q = if t_row { gx_q } else { (2 * gx_q) % p };
             let u_q = mod_mul(gy_q, gy_q, p);
 
             let dx = mod_sub(xm, xq, p);
@@ -200,14 +194,8 @@ fn velu_codomain_from_kernel(domain: &SmallCurve, kernel: &[(u64, u64)]) -> Velu
         let gx_q = mod_add(3 * mod_mul(xq, xq, p) % p, a, p);
         let gy_q = mod_sub(0, 2 * yq % p, p);
         let t_row = yq == 0;
-        let v_q = if t_row {
-            (2 * gx_q) % p
-        } else {
-            let gy2 = mod_mul(gy_q, gy_q, p);
-            let term1 = mod_mul(4 * xq % p, gy2, p);
-            let term2 = mod_mul(2 * gx_q % p, gx_q, p);
-            mod_add(term1, term2, p)
-        };
+        // Vélu: v(Q) = g_x(Q) when 2Q = O, and 2·g_x(Q) otherwise.
+        let v_q = if t_row { gx_q } else { (2 * gx_q) % p };
         let u_q = mod_mul(gy_q, gy_q, p);
 
         sum_v = mod_add(sum_v, v_q, p);
@@ -526,5 +514,165 @@ mod tests {
         let curve = toy_curve_a();
         let isos = velu_isogeny_odd(&curve, 3);
         assert!(isos.len() <= 4, "got {} 3-isogenies", isos.len());
+    }
+
+    // ── The transfer that lever L5 rests on ───────────────────────────────
+    //
+    // `research/notes/ecc2k130/RESEARCH_ISOGENY_CLASS_SEARCH.md` opens by
+    // asserting that "the ECDLP transports along an isogeny of degree
+    // coprime to the subgroup order".  §1.1 of that note derives it; these
+    // two tests are what make it a checked statement rather than a cited
+    // one, and they are the reason the thread may treat every curve in the
+    // class as carrying the same discrete logarithm.
+
+    use crate::ecc::field::FieldElement;
+    use crate::ecc::point::Point;
+
+    fn pt(x: u64, y: u64, p: u64) -> Point {
+        Point::Affine {
+            x: FieldElement::new(BigUint::from(x), BigUint::from(p)),
+            y: FieldElement::new(BigUint::from(y), BigUint::from(p)),
+        }
+    }
+
+    fn xy(point: &Point) -> Option<(u64, u64)> {
+        match point {
+            Point::Affine { x, y } => Some((
+                x.value.iter_u64_digits().next().unwrap_or(0),
+                y.value.iter_u64_digits().next().unwrap_or(0),
+            )),
+            Point::Infinity => None,
+        }
+    }
+
+    /// An isogeny is a group homomorphism, so `φ([k]P) = [k]φ(P)` and the
+    /// discrete logarithm crosses **unchanged** — no factor of the degree
+    /// appears anywhere in the transfer.
+    ///
+    /// `toy_curve_a` has `#E = 2019 = 3 · 673`, so with `ℓ = 3` the kernel
+    /// has order 3 and `⟨P⟩` has prime order `n = 673`.  `gcd(3, 673) = 1`
+    /// makes `φ` injective on `⟨P⟩`, which is exactly the note's side
+    /// condition.  Every `k` in `1..n` is checked, not a sample.
+    #[test]
+    fn transfer_preserves_the_discrete_logarithm() {
+        let curve = toy_curve_a();
+        let (ell, n) = (3u64, 673u64);
+        assert_eq!(2019, ell * n, "toy_curve_a order must factor as 3 · 673");
+        assert_eq!(
+            1,
+            num_integer::gcd(ell, n),
+            "side condition gcd(deg, n) = 1"
+        );
+
+        let iso = velu_isogeny_odd(&curve, ell)
+            .into_iter()
+            .next()
+            .expect("toy_curve_a admits a 3-isogeny");
+
+        let dom = curve.to_curve_params();
+        let cod = iso.codomain.to_curve_params();
+        let (a_dom, a_cod) = (dom.a_fe(), cod.a_fe());
+
+        // A generator of the order-n subgroup: kill the cofactor ℓ.
+        let mut rng: u64 = 0x5DEE_CE66_D4A5_1B2D;
+        let base = loop {
+            if let Some(p0) = crate::isogeny::cm::sample_random_point(&curve, &mut rng) {
+                let q = p0.scalar_mul(&BigUint::from(ell), &a_dom);
+                if !matches!(q, Point::Infinity) {
+                    break q;
+                }
+            }
+        };
+        assert!(
+            matches!(base.scalar_mul(&BigUint::from(n), &a_dom), Point::Infinity),
+            "base point must have order n"
+        );
+
+        let (bx, by) = xy(&base).expect("base is affine");
+        let image = iso.evaluate(bx, by).expect("P is not in ker φ");
+        let p_img = pt(image.0, image.1, iso.codomain.p);
+
+        // φ([k]P) == [k]φ(P) for every k in 1..n.
+        for k in 1..n {
+            let kp = base.scalar_mul(&BigUint::from(k), &a_dom);
+            let (kx, ky) = xy(&kp).expect("[k]P affine for 0 < k < n");
+            let lhs = iso.evaluate(kx, ky).expect("[k]P not in ker φ");
+            let rhs = xy(&p_img.scalar_mul(&BigUint::from(k), &a_cod)).expect("[k]φ(P) affine");
+            assert_eq!(
+                lhs, rhs,
+                "φ([{k}]P) != [{k}]φ(P) — the log did not transfer"
+            );
+        }
+    }
+
+    /// Regression pin for the `v(Q)` formula.  Until 2026-09, this module
+    /// used `v(Q) = 4 x_Q g_y(Q)² + 2 g_x(Q)²` for non-2-torsion `Q`, which
+    /// is not Vélu's: the correct value is `2 g_x(Q)` (and `g_x(Q)` on the
+    /// T-row).  The bug was invisible to the older tests because they only
+    /// checked a subgroup *count* and that the codomain shared the domain's
+    /// prime — never that a point's image satisfies the codomain equation,
+    /// which it did not.
+    ///
+    /// The expected values here come from an independent implementation
+    /// cross-checked for the homomorphism property; they are not read back
+    /// from this code.
+    #[test]
+    fn codomain_and_image_match_an_independent_reference() {
+        let curve = toy_curve_a();
+        let iso = velu_isogeny_odd(&curve, 3)
+            .into_iter()
+            .next()
+            .expect("toy_curve_a admits a 3-isogeny");
+
+        assert_eq!(iso.kernel_half, vec![(594u64, 805u64)], "kernel generator");
+        assert_eq!(
+            (iso.codomain.a, iso.codomain.b),
+            (739, 792),
+            "Vélu codomain"
+        );
+        assert_eq!(
+            iso.evaluate(24, 118),
+            Some((643, 1661)),
+            "image of (24, 118)"
+        );
+
+        // …and the image really is a point of the codomain.
+        let (p, a2, b2) = (
+            curve.p as u128,
+            iso.codomain.a as u128,
+            iso.codomain.b as u128,
+        );
+        let (x, y) = iso.evaluate(24, 118).expect("not in kernel");
+        let (x, y) = (x as u128, y as u128);
+        assert_eq!(
+            y * y % p,
+            (x * x % p * x % p + a2 * x % p + b2) % p,
+            "φ(P) must satisfy the codomain equation"
+        );
+    }
+
+    /// The side condition, from the other direction: `ker φ ∩ ⟨P⟩` is a
+    /// subgroup of a group of prime order `n`, so it is trivial unless
+    /// `n | deg φ`.  Kernel points themselves must die.
+    #[test]
+    fn kernel_points_die_and_the_subgroup_survives() {
+        let curve = toy_curve_a();
+        let iso = velu_isogeny_odd(&curve, 3)
+            .into_iter()
+            .next()
+            .expect("toy_curve_a admits a 3-isogeny");
+
+        for &(kx, ky) in &iso.kernel_half {
+            assert!(
+                iso.evaluate(kx, ky).is_none(),
+                "kernel point ({kx}, {ky}) should map to the point at infinity"
+            );
+        }
+        assert_eq!(
+            iso.kernel_half.len() as u64,
+            (iso.degree - 1) / 2,
+            "half-set of a degree-{} kernel has (ℓ-1)/2 points",
+            iso.degree
+        );
     }
 }

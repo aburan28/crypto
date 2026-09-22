@@ -421,9 +421,46 @@ impl FrobeniusCanon {
         best
     }
 
+    /// The canonical name together with the rotation that produced it:
+    /// `(c, t)` with `c = rotl^t(coords(x))`, `0 ≤ t < n`.  Two abscissae
+    /// with one name are Frobenius conjugates, and the shift says which
+    /// power: `coords(x') = rotl^{t − t'}(coords(x))`, so `x' = x^{2^{t − t'}}`.
+    #[inline]
+    pub fn canon_with_shift(&self, x: u64) -> (u64, u32) {
+        let c = self.coords(x);
+        let n = self.n;
+        let mut best = c;
+        let mut best_t = 0u32;
+        let mut v = c;
+        for t in 1..n {
+            v = ((v << 1) | (v >> (n - 1))) & self.mask;
+            if v < best {
+                best = v;
+                best_t = t;
+            }
+        }
+        (best, best_t)
+    }
+
     /// The extension degree this was built for.
     pub fn degree(&self) -> u32 {
         self.n
+    }
+
+    /// The byte tables the change of basis is applied through:
+    /// `tables()[i][b]` is the normal coordinates of the field element
+    /// whose `i`-th byte is `b` and whose other bytes are zero, so
+    /// [`Self::coords`] is their XOR over the bytes of `x`.
+    ///
+    /// Exposed because the basis change is *data*, and a device that
+    /// has to produce the same keys needs to be handed it rather than
+    /// rediscover it: the normal element comes from a randomised search,
+    /// so an independent search would find a different basis and a
+    /// different — equally valid, but incompatible — naming of the same
+    /// orbits.  `gpu/ecc2k/pairtable.cuh`'s `pt_canon` takes these and
+    /// is checked against [`Self::canon`] on them.
+    pub fn tables(&self) -> &[[u64; 256]] {
+        &self.tables
     }
 }
 

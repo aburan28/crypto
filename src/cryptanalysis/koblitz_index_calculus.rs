@@ -137,6 +137,10 @@ use serde::{Deserialize, Serialize};
 use crate::binary_ecc::curve::{point_add, point_neg, scalar_mul};
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, F2mPoly, IrreduciblePoly};
 use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
+use crate::cryptanalysis::crossbred::{
+    extract_crossbred, solve_crossbred, CrossbredParams,
+    SearchOptions as CrossbredSearchOptions, SearchStats as CrossbredSearchStats,
+};
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
@@ -148,6 +152,7 @@ use crate::cryptanalysis::koblitz_sparse_la::{
     self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
 use crate::cryptanalysis::sat::SolveResult;
+use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use crate::cryptanalysis::semaev_sat::{encode_boolean_system_with, XorEncoding};
 use crate::utils::mod_inverse;
 
@@ -797,7 +802,12 @@ pub fn points_with_x(curve: &BinaryCurve, x: &F2mElement) -> Vec<BinaryPoint> {
 /// Single-word version of `points_with_x` for an odd-degree field.
 /// Reuse the field reduction tables across all coordinates of a factor base.
 /// The same half-trace root is returned first, preserving sampling and indexing.
-fn points_with_x_fast(curve: &FastCurve, x: &F2mElement) -> Vec<BinaryPoint> {
+///
+/// Public so that the cost of a lift can be priced on its own: it is the
+/// one piece of algebra selecting a factor base cannot avoid, and
+/// therefore the floor everything else in that phase is measured
+/// against (`examples/koblitz_select_decomposition.rs`).
+pub fn points_with_x_fast(curve: &FastCurve, x: &F2mElement) -> Vec<BinaryPoint> {
     debug_assert!(curve.n % 2 == 1);
     let field = &curve.field;
     let coordinate = field.from_element(x);
@@ -1765,11 +1775,47 @@ pub fn build_explicit_frobenius_orbit_factor_base(
 ///
 /// `None` when the field is too wide to sample abscissae as `u64`, or
 /// when sampling cannot reach `points` (a degenerate curve).
+/// What selecting a factor base cost, in its own native counts.
+///
+/// Selection is a phase like any other and AGENTS.md §8 asks for every
+/// phase priced, but it had no counters at all, so the `S` this thread
+/// reports has been a lower bound with selection left null.  These are
+/// the quantities the loop below actually spends, so a measured
+/// conversion turns them into the common unit.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct FactorBaseSelectionCost {
+    /// Abscissae drawn and tested, the loop's dominant count: each one
+    /// costs a quadratic solve and, when it lifts, a cofactor
+    /// multiplication.
+    pub abscissae_drawn: u64,
+    /// Draws that produced a point on the curve, roughly half of them.
+    pub lifts_found: u64,
+    /// Cofactor multiplications, one per lift — cheap on a Koblitz
+    /// curve, where the cofactor is 2 or 4.
+    pub cofactor_multiplications: u64,
+    /// Frobenius squarings walking each new representative's orbit.
+    pub frobenius_squarings: u64,
+    /// Times the base was rebuilt from the representatives so far.
+    /// Quadratic in the representative count, and the comment in the
+    /// loop names it as most of what selection costs.
+    pub rebuilds: u32,
+}
+
+/// [`build_subgroup_orbit_factor_base_with_cost`], discarding the cost.
 pub fn build_subgroup_orbit_factor_base(
     kc: &KoblitzCurve,
     seed: u64,
     points: usize,
 ) -> Result<FrobeniusFactorBase, String> {
+    build_subgroup_orbit_factor_base_with_cost(kc, seed, points).map(|(fb, _)| fb)
+}
+
+/// The same selection, reporting what it spent.
+pub fn build_subgroup_orbit_factor_base_with_cost(
+    kc: &KoblitzCurve,
+    seed: u64,
+    points: usize,
+) -> Result<(FrobeniusFactorBase, FactorBaseSelectionCost), String> {
     if kc.n >= 64 {
         return Err("subgroup orbit sampling needs n < 64".into());
     }
@@ -1799,6 +1845,7 @@ pub fn build_subgroup_orbit_factor_base(
     // here as the batches arrive, which costs one Frobenius orbit per new
     // representative rather than one per representative per round.
     let mut abscissae: HashSet<BigUint> = HashSet::new();
+    let mut cost = FactorBaseSelectionCost::default();
     while base.as_ref().is_none_or(|b| b.points.len() < points) {
         let mut added = 0usize;
         while added < batch {
@@ -1818,6 +1865,8 @@ pub fn build_subgroup_orbit_factor_base(
             let Some(point) = lifts.into_iter().next() else {
                 continue;
             };
+            cost.lifts_found += 1;
+            cost.cofactor_multiplications += 1;
             // Multiply by the cofactor rather than rejecting: [h]P has
             // order dividing r for *every* P, so no sample is wasted, and
             // where the cofactor is large that is the difference between
@@ -1837,6 +1886,7 @@ pub fn build_subgroup_orbit_factor_base(
             for _ in 0..kc.extension_degree() {
                 abscissae.insert(orbit.to_biguint());
                 orbit = kc.frobenius_x(&orbit);
+                cost.frobenius_squarings += 1;
             }
             representatives.push(x);
             added += 1;
@@ -1844,9 +1894,12 @@ pub fn build_subgroup_orbit_factor_base(
         if 2 * abscissae.len() < points {
             continue;
         }
+        cost.rebuilds += 1;
         base = build_explicit_frobenius_orbit_factor_base(kc, &representatives);
     }
-    base.ok_or_else(|| "subgroup orbit sampling produced no base".into())
+    cost.abscissae_drawn = drawn;
+    base.map(|b| (b, cost))
+        .ok_or_else(|| "subgroup orbit sampling produced no base".into())
 }
 
 /// **Keep only the listed signed orbits** of a factor base.
@@ -1941,30 +1994,87 @@ pub fn saturate_factor_base_two_torsion(
     )
 }
 
-fn finish_factor_base_domain(
+/// The orbit maps a factor base needs: `(orbit_of, orbits,
+/// signed_orbit_of, signed_orbits)`.
+type OrbitMaps = (Vec<(usize, u32)>, Vec<Vec<usize>>, Vec<(usize, u32, bool)>, Vec<Vec<usize>>);
+
+/// Walk the Frobenius and signed-Frobenius orbits of `points`, keying on
+/// the packed single-word point.
+///
+/// Identical in output to [`orbit_maps_bigint`] and the reason selecting
+/// a base stopped costing 13 times its floor; see the table in
+/// [`finish_factor_base_domain`].
+fn orbit_maps_packed(
     kc: &KoblitzCurve,
-    ell: u32,
-    f_j: u64,
-    exps: Vec<u32>,
-    subspace_basis: Vec<F2mElement>,
-    subspace: Vec<F2mElement>,
-    domain: FactorBaseDomain,
-) -> Option<FrobeniusFactorBase> {
-    let mut points: Vec<BinaryPoint> = Vec::new();
-    let fast = if kc.n % 2 == 1 {
-        FastCurve::new(&kc.curve)
-    } else {
-        None
-    };
-    for x in &subspace {
-        let lifts = match &fast {
-            Some(curve) => points_with_x_fast(curve, x),
-            None => points_with_x(&kc.curve, x),
-        };
-        points.extend(lifts);
+    curve: &FastCurve,
+    points: &[BinaryPoint],
+) -> Option<OrbitMaps> {
+    let fast: Vec<FastPoint> = points.iter().map(|p| curve.lift(p)).collect();
+    let mut index_of: HashMap<u64, usize> = HashMap::with_capacity(points.len() * 2);
+    for (i, p) in fast.iter().enumerate() {
+        index_of.insert(p.pack(), i);
     }
 
-    // Index points for the orbit walk and for relation lookups.
+    let mut orbit_of: Vec<(usize, u32)> = vec![(usize::MAX, 0); points.len()];
+    let mut orbits: Vec<Vec<usize>> = Vec::new();
+    for start in 0..points.len() {
+        if orbit_of[start].0 != usize::MAX {
+            continue;
+        }
+        let o = orbits.len();
+        let mut cycle = Vec::new();
+        let mut cur = fast[start];
+        let mut k = 0u32;
+        loop {
+            let idx = *index_of.get(&cur.pack())?;
+            if orbit_of[idx].0 != usize::MAX {
+                break;
+            }
+            orbit_of[idx] = (o, k);
+            cycle.push(idx);
+            cur = curve.frobenius_k(cur, kc.k);
+            k += 1;
+        }
+        orbits.push(cycle);
+    }
+
+    let mut signed_orbit_of = vec![(usize::MAX, 0, false); points.len()];
+    let mut signed_orbits = Vec::new();
+    for start in 0..points.len() {
+        if signed_orbit_of[start].0 != usize::MAX {
+            continue;
+        }
+        let signed_orbit = signed_orbits.len();
+        let mut members = Vec::new();
+        let mut current = fast[start];
+        for k in 0..kc.n {
+            for (negated, point) in [(false, current), (true, curve.neg(current))] {
+                let index = *index_of.get(&point.pack())?;
+                if signed_orbit_of[index].0 == usize::MAX {
+                    signed_orbit_of[index] = (signed_orbit, k, negated);
+                    members.push(index);
+                } else if signed_orbit_of[index].0 != signed_orbit {
+                    return None;
+                }
+            }
+            current = curve.frobenius_k(current, kc.k);
+        }
+        if current != fast[start] {
+            return None;
+        }
+        signed_orbits.push(members);
+    }
+    Some((orbit_of, orbits, signed_orbit_of, signed_orbits))
+}
+
+/// [`orbit_maps_packed`] for a field too wide, or of the wrong parity,
+/// for single-word arithmetic: the same walks over `BigUint`-backed
+/// points.
+///
+/// Kept because a `FastCurve` exists only for odd degrees; this is the
+/// path an even-degree base still takes, and the reference the packed
+/// walk is checked against.
+fn orbit_maps_bigint(kc: &KoblitzCurve, points: &[BinaryPoint]) -> Option<OrbitMaps> {
     let mut index_of: HashMap<(BigUint, BigUint), usize> = HashMap::new();
     for (i, p) in points.iter().enumerate() {
         index_of.insert(point_key(p), i);
@@ -2019,6 +2129,62 @@ fn finish_factor_base_domain(
         }
         signed_orbits.push(members);
     }
+    Some((orbit_of, orbits, signed_orbit_of, signed_orbits))
+}
+
+fn finish_factor_base_domain(
+    kc: &KoblitzCurve,
+    ell: u32,
+    f_j: u64,
+    exps: Vec<u32>,
+    subspace_basis: Vec<F2mElement>,
+    subspace: Vec<F2mElement>,
+    domain: FactorBaseDomain,
+) -> Option<FrobeniusFactorBase> {
+    let mut points: Vec<BinaryPoint> = Vec::new();
+    let fast = if kc.n % 2 == 1 {
+        FastCurve::new(&kc.curve)
+    } else {
+        None
+    };
+    for x in &subspace {
+        let lifts = match &fast {
+            Some(curve) => points_with_x_fast(curve, x),
+            None => points_with_x(&kc.curve, x),
+        };
+        points.extend(lifts);
+    }
+
+    // Index points for the orbit walk and for relation lookups, and walk
+    // both orbit structures.
+    //
+    // Two implementations of the same three loops, and the fast one is
+    // not an optimisation of the slow one so much as the slow one
+    // finally using the representation the rest of the pipeline already
+    // does.  Measured at `n = 41` on a 15,744-point base, in
+    // group-addition equivalents per point
+    // (`examples/koblitz_select_decomposition.rs`):
+    //
+    // | step | `BigUint` | packed |
+    // |:--|--:|--:|
+    // | both orbit walks | 41.60 | 0.40 |
+    // | keying, three times over | 4.33 | 0.02 |
+    //
+    // which is 57% of what selecting a base cost, against a floor of
+    // 6.21 for the field algebra a point cannot avoid.  A `BinaryPoint`
+    // carries two `BigUint`s, so a key is two allocations and a
+    // two-`BigUint` hash, and a Frobenius step is two `BigUint`
+    // squarings; packed, a point is one `u64` and the step is two
+    // table-driven squarings.
+    //
+    // The two paths agree by construction: same iteration order, same
+    // decisions, same output, only the identity and the step change
+    // representation.  `factor_base_orbit_maps_agree_in_both_representations`
+    // pins that on every usable degree.
+    let (orbit_of, orbits, signed_orbit_of, signed_orbits) = match &fast {
+        Some(curve) => orbit_maps_packed(kc, curve, &points)?,
+        None => orbit_maps_bigint(kc, &points)?,
+    };
     if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
         return None;
     }
@@ -2152,6 +2318,15 @@ pub enum DecompositionStrategy {
     /// `|F|^{m−1}` group operations for [`Self::Enumerate`].  Exact and
     /// complete like enumeration; costs `|F|²` memory once per run.
     PairTable,
+    /// The same Semaev system, solved by **Joux-Vitse Crossbred**
+    /// ([`crate::cryptanalysis::crossbred`]): Macaulay preprocessing
+    /// extracts polynomials linear in the non-enumerated variables,
+    /// then `2^k` fixed assignments are swept, each leaving a linear
+    /// solve.  Prices below matrix-F4 on the oracle ladder of
+    /// `RESEARCH_ECC2K130_CROSSBRED.md`.  Like [`Self::Groebner`] it is
+    /// a decomposition oracle only: relation collection stays `Θ(2^n)`
+    /// with any oracle polynomial in the factor base.
+    Crossbred,
     /// Same Semaev / Weil-restriction system as [`Self::Sat`], emitted in
     /// Trimoska ANF and solved by an external WDSat binary
     /// ([`crate::cryptanalysis::wdsat_oracle`]).  Requires
@@ -2365,6 +2540,284 @@ pub struct PairSumTable {
     tagged: bool,
 }
 
+/// Probing a run expects to do, which is what decides the tier.
+///
+/// The fold trades a `2n`-times cheaper build for a dearer probe, so
+/// which tier is cheapest is not a property of the base alone: it
+/// depends on how much probing the build is amortised over.  A
+/// caller that knows its own collection volume should say so; the
+/// default is the volume of the sweep the constants were measured
+/// on.
+/// Buffers a windowed `m = 3` scan reuses across trials.
+///
+/// The scan allocates nothing of its own, and that matters more than it
+/// looks: collection runs one scan per probe, and a 256-summand window
+/// is small enough that four fresh allocations per call — the gathered
+/// summands, the remainders, the batched inversion's workspace and the
+/// key block — are a measurable share of the scan's cost rather than
+/// noise amortised over a long loop.  One of these per collection run,
+/// handed to every trial, takes them out of the measurement and out of
+/// the run.
+#[derive(Clone, Debug, Default)]
+pub struct ScanScratch {
+    /// Summands gathered for a [`Scan::Indices`] scan.
+    gather: Vec<FastPoint>,
+    /// `target − P_k` for each scanned summand.
+    rests: Vec<FastPoint>,
+    /// Workspace for the shared-inversion batch addition.
+    batch: BatchScratch,
+    /// Canonical keys of one block of remainders.
+    keys: Vec<u64>,
+    /// Pairs recovered for one key.
+    pairs: Vec<(u32, u32)>,
+}
+
+/// How often each relation-matrix column has been mentioned, and the
+/// factor-base points that would mention the least-mentioned ones.
+///
+/// A column no relation mentions has no equation, so the system cannot
+/// determine its logarithm however many relations arrive elsewhere.  A
+/// column mentioned *once* is barely better: its single row pins it only
+/// if every other column in that row is pinned, so it is the likeliest
+/// place for the matrix to fall short of full rank.  Both are the same
+/// defect at different depths, which is why this counts mentions rather
+/// than tracking a covered/uncovered bit.
+///
+/// Measured at `n = 41` on a 192-column base, and the reason the count
+/// matters:
+///
+/// | run | coverage complete | full rank |
+/// |:--|--:|--:|
+/// | swept | 330 relations | 330 |
+/// | aimed at uncovered columns | 117 | 309 |
+///
+/// Aiming at *uncovered* columns alone moves coverage by `2.8×` and the
+/// run's cost by almost nothing, because coverage was never what the run
+/// was waiting for.  At the moment the row count first reaches the
+/// column count, the aimed run has every column covered and rank
+/// `190/192`; the two columns without a pivot are mentioned exactly
+/// once, among 21 columns mentioned once.  So the set worth scanning is
+/// not "columns with no mention" but "columns with the fewest", and that
+/// needs a counter rather than an elimination.
+///
+/// [`Self::missing_points`] therefore returns the points of the columns
+/// at the current *minimum* mention count.  That is the sweep while
+/// nothing is covered (every column is at zero), the uncovered columns
+/// while some are, and the once-mentioned columns after that — one rule,
+/// no threshold to tune, and it keeps aiming through the phase where
+/// rank, not coverage, is what the run is short of.
+///
+/// The columns counted here are the *projected* signed orbits, the ones
+/// the relation matrix actually has, not the factor base's own orbits;
+/// the two coincide when every point projects to a distinct orbit and
+/// need not in general.
+pub struct ColumnCoverage {
+    /// Projected column of each factor-base point, where it has one.
+    column_of: Vec<Option<usize>>,
+    /// Points of each projected column.
+    points_of: Vec<Vec<u32>>,
+    /// How many relation summands have mentioned each projected column.
+    mentions: Vec<u64>,
+    covered: usize,
+}
+
+impl ColumnCoverage {
+    /// `None` when the base has no projected columns, the same condition
+    /// under which there is no system to solve.
+    pub fn new(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+        let projected = projected_signed_orbit_map(kc, fb);
+        let columns = projected.representatives.len();
+        if columns == 0 {
+            return None;
+        }
+        let column_of: Vec<Option<usize>> =
+            projected.orbit_of.iter().map(|o| o.map(|(c, _, _)| c)).collect();
+        let mut points_of = vec![Vec::new(); columns];
+        for (i, c) in column_of.iter().enumerate() {
+            if let Some(c) = c {
+                points_of[*c].push(i as u32);
+            }
+        }
+        Some(Self { column_of, points_of, mentions: vec![0; columns], covered: 0 })
+    }
+
+    /// Total projected columns, the number that must be covered.
+    pub fn columns(&self) -> usize {
+        self.points_of.len()
+    }
+
+    /// How many are covered so far.
+    pub fn covered(&self) -> usize {
+        self.covered
+    }
+
+    /// Whether every column has been mentioned.
+    pub fn complete(&self) -> bool {
+        self.covered == self.points_of.len()
+    }
+
+    /// The fewest mentions any column has.
+    pub fn least_mentions(&self) -> u64 {
+        self.mentions.iter().copied().min().unwrap_or(0)
+    }
+
+    /// Record the columns these relations mention.
+    ///
+    /// Relations are taken as they were collected, not as the solver
+    /// will accept them: a duplicate or dependent relation still proves
+    /// its columns reachable, which is what aiming needs to know.
+    pub fn add(&mut self, relations: &[CollectedRelation]) {
+        for rel in relations {
+            for &i in &rel.points {
+                if let Some(Some(c)) = self.column_of.get(i).copied() {
+                    if self.mentions[c] == 0 {
+                        self.covered += 1;
+                    }
+                    self.mentions[c] += 1;
+                }
+            }
+        }
+    }
+
+    /// Factor-base points of the columns mentioned fewest times, in
+    /// index order.
+    ///
+    /// Never empty on a base with columns, and deliberately so: the set
+    /// is the sweep before anything is covered, the uncovered columns
+    /// while some are, and the once-mentioned columns after coverage is
+    /// complete — which is the phase where a run is short of rank rather
+    /// than of coverage, and the one where aiming is worth most.
+    pub fn missing_points(&self) -> Vec<u32> {
+        let least = self.least_mentions();
+        let mut out = Vec::new();
+        for (c, &m) in self.mentions.iter().enumerate() {
+            if m == least {
+                out.extend_from_slice(&self.points_of[c]);
+            }
+        }
+        out.sort_unstable();
+        out
+    }
+}
+
+/// What one walked collection unit scans, owned so a work unit can
+/// carry it across the unit's parallel runs.
+///
+/// [`Scan`] is the borrowed form the pair table takes; this is the same
+/// choice held by the collector.
+///
+/// Both variants scan the same number of summands per trial, from a
+/// rotating offset, so they report the same counter and differ only in
+/// *which* summands are eligible.  That is deliberate: it makes the
+/// aimed run and the swept run comparable in the one unit the
+/// scoreboard is kept in, and it means aiming cannot pay for itself by
+/// quietly scanning more.
+#[derive(Clone, Debug)]
+enum Targets {
+    /// A cyclic window of this many summands over the whole base.
+    Window(usize),
+    /// A cyclic window over a named subset of the base.
+    ///
+    /// `doubled` is the subset concatenated with itself, so a window of
+    /// any length up to the subset's is one contiguous slice and the
+    /// rotation needs no scratch of its own.
+    Subset { doubled: Vec<u32>, len: usize, window: usize },
+}
+
+impl Targets {
+    /// Summands scanned per trial, which is what the unit reports.
+    fn len(&self) -> usize {
+        match self {
+            Targets::Window(w) => *w,
+            Targets::Subset { window, .. } => *window,
+        }
+    }
+
+    /// Summands available to scan, which bounds the window.
+    fn pool(&self, base: usize) -> usize {
+        match self {
+            Targets::Window(_) => base,
+            Targets::Subset { len, .. } => *len,
+        }
+    }
+
+    /// The scan for trial `t` of a unit seeded `seed`.
+    fn scan(&self, seed: u64, t: u64, base: usize) -> Scan<'_> {
+        let pool = self.pool(base);
+        // A rotating offset, so no column is favoured by sitting where
+        // the window always starts.
+        let offset =
+            pair_filter_hash(seed ^ t.wrapping_mul(0x9e37_79b9_7f4a_7c15)) as usize % pool.max(1);
+        match self {
+            Targets::Window(len) => Scan::Cyclic { start: offset, len: *len },
+            Targets::Subset { doubled, window, .. } => {
+                Scan::Indices(&doubled[offset..offset + *window])
+            }
+        }
+    }
+}
+
+/// Which factor-base summands an `m = 3` scan tries as the third one.
+///
+/// The `m = 3` search fixes a third summand `k`, looks the remainder
+/// `target − P_k` up in the pair table, and so finds a triple whenever
+/// *any* of its three indices is scanned.  Which indices those are is
+/// free, and that freedom is the point: a hit always involves
+/// `column(k)`, so a scan restricted to the columns a run still needs
+/// returns only relations that cover one.
+///
+/// [`Scan::Cyclic`] is the cheap default — a contiguous window of the
+/// base, taken from a rotating offset so no column sits where the
+/// window always starts.  [`Scan::Indices`] names the summands
+/// outright, which costs a gather but can express a set the base
+/// ordering does not make contiguous; factor-base orbits are not
+/// contiguous in index order, so the columns still uncovered never are
+/// either.
+///
+/// The hit rate per summand scanned is `|pairs| / r` whichever summand
+/// it is, so the choice does not change scans-per-relation; it changes
+/// only how many relations a run needs before every column is covered.
+#[derive(Clone, Copy, Debug)]
+pub enum Scan<'a> {
+    /// `len` summands from `start`, wrapping at the end of the base.
+    Cyclic { start: usize, len: usize },
+    /// Exactly these base indices, in this order.
+    Indices(&'a [u32]),
+}
+
+impl Scan<'_> {
+    /// How many summands the scan tries.
+    pub fn len(&self) -> usize {
+        match self {
+            Scan::Cyclic { len, .. } => *len,
+            Scan::Indices(idxs) => idxs.len(),
+        }
+    }
+
+    /// Whether the scan tries none.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ProbeBudget {
+    /// Base points tried as a summand inside the `m = 3` scan —
+    /// `collection trials × collection window`, the `summands
+    /// scanned` a run reports.
+    pub summands_scanned: u64,
+    /// `m = 2` descent probes over every target.
+    pub descent_probes: u64,
+}
+
+impl Default for ProbeBudget {
+    fn default() -> Self {
+        // docs/ic/runs/koblitz-tier-crossover-20260921.json, the
+        // volume every width in that sweep was run at.
+        Self { summands_scanned: 351_750_000, descent_probes: 51_328_107 }
+    }
+}
+
 impl PairSumTable {
     /// Entries a table may occupy before [`Self::build`] refuses: 4 GiB,
     /// which is a base of about 16000 points.
@@ -2376,6 +2829,12 @@ impl PairSumTable {
     /// pack a point into a `u64`.
     pub fn build(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
         Self::build_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
+    }
+
+    /// [`Self::build_full_within`] at the default budget: the table with
+    /// its summands, which [`Self::build`] no longer returns.
+    pub fn build_full(kc: &KoblitzCurve, fb: &FrobeniusFactorBase) -> Option<Self> {
+        Self::build_full_within(kc, fb, Self::DEFAULT_BYTE_BUDGET)
     }
 
     /// Bytes the entries of a table for this base would occupy.
@@ -2450,7 +2909,156 @@ impl PairSumTable {
     /// base that fits and one that does not is a single doubling.
     /// Refusing by a stated budget turns that into a `None` the caller
     /// can report, instead of an allocation the machine cannot meet.
+    /// Group additions a tier is expected to cost over a whole cold run
+    /// at this base and this probing volume.
+    ///
+    /// The build's count is native — one addition per stored pair — and
+    /// the probe counts are converted by factors measured on the same
+    /// host, base and process by `examples/koblitz_probe_conversion.rs`,
+    /// in the shape the pipeline probes in.  The constants below are the
+    /// median over the four widths of
+    /// `docs/ic/runs/koblitz-tier-crossover-20260921.json`.
+    ///
+    /// **What this is calibrated on, and is not.**  The constants were
+    /// measured at one degree (`n = 61`) and one base width (about
+    /// 12,700 points) on one host, and the limitation that matters is
+    /// the *width*, not the degree.
+    ///
+    /// Measured across `n = 41, 53, 57, 61` at a matched base, the
+    /// folded-to-compact ratio of the scan cost is flat once the
+    /// degrees whose `m = 3` scan saturates are excluded: `1.34` at
+    /// `n = 53` against `1.33` at `n = 61`, the only two of the ten
+    /// usable degrees with an `r` large enough to measure cleanly at a
+    /// workable width.  `n` does not determine `r` on this family — the
+    /// cofactor runs from 4 at `n = 41` to 57,284,756 at `n = 59` — so a
+    /// sweep that picks its width by degree lands in the saturated
+    /// regime and reads recovery cost as probing cost.
+    /// `examples/koblitz_degree_census.rs` computes the width that keeps
+    /// a degree measurable.
+    ///
+    /// Across widths at fixed degree the same ratio moves a great deal:
+    /// `1.33` at 3,904 points, `1.17` at 12,688, and `0.96` at 15,264,
+    /// because the compact table leaves cache while the folded one never
+    /// does.  The constants below give `1.17`, which is right at the
+    /// width they were taken at and wrong in both directions away from
+    /// it.  A width term is what this model is missing; a degree term is
+    /// not.  `docs/ic/runs/koblitz-phase-prices-20260921.json` records
+    /// both sweeps.
+    ///
+    /// The model reproduces the cheapest of the two tiers at all four
+    /// widths measured end to end; outside that range it is an
+    /// extrapolation, which is why every builder stays reachable by name
+    /// and `ic`'s `pair_table_tier` can override the choice outright.
+    fn expected_adds(stored: u128, scan: f64, blocked: f64, probes: ProbeBudget) -> f64 {
+        stored as f64
+            + scan * probes.summands_scanned as f64
+            + blocked * probes.descent_probes as f64
+    }
+
+    /// Whether the fold is the cheaper of the two representations worth
+    /// defaulting to, at this base and this probing volume.
+    ///
+    /// Full and compact are within the conversion measurement's own
+    /// noise of each other — full wins the narrowest width measured by
+    /// 5.8% and loses the other three by 2.7% to 7.2% — so the default
+    /// never picks `full`, which also costs four times the memory.  It
+    /// stays reachable by name for a caller that needs [`Self::lookup`]
+    /// to return summands.
+    pub fn fold_is_cheaper(
+        points: usize,
+        degree: u32,
+        orbits: usize,
+        probes: ProbeBudget,
+    ) -> bool {
+        // adds per summand scanned / per descent probe, measured
+        const COMPACT_SCAN: f64 = 2.145;
+        const COMPACT_BLOCKED: f64 = 0.955;
+        const FOLDED_SCAN: f64 = 2.51;
+        const FOLDED_BLOCKED: f64 = 1.42;
+        let compact = Self::expected_adds(
+            Self::pair_count(points),
+            COMPACT_SCAN,
+            COMPACT_BLOCKED,
+            probes,
+        );
+        let folded = Self::expected_adds(
+            Self::folded_pair_count(orbits, points),
+            FOLDED_SCAN,
+            FOLDED_BLOCKED,
+            probes,
+        );
+        // Deliberately unused: measured flat in `n` over 41 to 61 once
+        // saturated degrees are excluded (see above).  Kept in the
+        // signature because the width term this model needs will want
+        // the field size beside it.
+        let _ = degree;
+        folded < compact
+    }
+
+    /// The pair table in the representation that costs the fewest group
+    /// additions over a whole cold run, at [`ProbeBudget::default`].
     pub fn build_within(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+    ) -> Option<Self> {
+        Self::build_within_for(kc, fb, byte_budget, ProbeBudget::default())
+    }
+
+    /// **Cheapest by measurement, not by what fits and not by bytes.**
+    ///
+    /// This ladder has now been ordered three ways.  It first took the
+    /// first tier that fit — summands, then compact rests, then the
+    /// fold — which is right for a table whose construction is already
+    /// paid for.  It was then reversed to fold-first, on a wall-clock
+    /// measurement of three tiers at one width.
+    ///
+    /// Re-priced in this repository's unit both orders turned out to be
+    /// wrong, because neither is a property of the base alone.  The fold
+    /// buys a `2n`-times cheaper build and pays for it on every probe,
+    /// so the answer depends on how much probing the build is amortised
+    /// over.  Over four widths on one curve, every phase priced in
+    /// batched group additions and 32 of 32 targets verified on all
+    /// eight runs, the cheapest tier is full below about 8,000 points,
+    /// compact from there to about 16,000, and folded above — and
+    /// `full/folded` crosses one at `|F| ≈ 13,623`
+    /// (`docs/ic/runs/koblitz-tier-crossover-20260921.json`).
+    ///
+    /// Measured at one degree on one host, so the choice is a calibrated
+    /// heuristic rather than a derived law; `ic`'s `pair_table_tier`
+    /// overrides it and every builder stays reachable by name.
+    pub fn build_within_for(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+        probes: ProbeBudget,
+    ) -> Option<Self> {
+        let (points, orbits) = (fb.points.len(), fb.signed_orbits.len());
+        if Self::fold_is_cheaper(points, kc.n, orbits, probes) {
+            if let Some(folded) = Self::build_folded_within(kc, fb, byte_budget) {
+                return Some(folded);
+            }
+        }
+        if let Some(compact) = Self::build_compact_within(kc, fb, byte_budget) {
+            return Some(compact);
+        }
+        // Below the crossover but too wide to hold compactly: the fold
+        // is dearer per probe and still the only tier that fits.
+        if let Some(folded) = Self::build_folded_within(kc, fb, byte_budget) {
+            return Some(folded);
+        }
+        Self::build_full_within(kc, fb, byte_budget)
+    }
+
+    /// **The table with its summands**, which no other tier stores.
+    ///
+    /// [`Self::build_within`] reaches for this last, because storing the
+    /// summands costs sixteen bytes a pair against four and a half and
+    /// buys only a recovery that the other tiers do cheaply enough.
+    /// Callers that need [`Self::lookup`] to return pairs — rather than
+    /// [`Self::pairs_for`], which answers on any tier — must ask for it
+    /// by name.
+    pub fn build_full_within(
         kc: &KoblitzCurve,
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
@@ -2459,10 +3067,7 @@ impl PairSumTable {
             return None;
         }
         if Self::byte_size(fb.points.len()) > byte_budget {
-            // Too wide to store the summands; the compact table may
-            // still fit, and a base that fits only compactly is exactly
-            // the base worth having.
-            return Self::build_compact_within(kc, fb, byte_budget);
+            return None;
         }
         let curve = FastCurve::new(&kc.curve)?;
         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
@@ -2532,7 +3137,7 @@ impl PairSumTable {
     /// scattering into them puts every rest in place in two linear
     /// passes.  A run of rests is sorted afterwards, which is a handful
     /// of elements per bucket.
-    fn build_compact_within(
+    pub fn build_compact_within(
         kc: &KoblitzCurve,
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
@@ -2542,12 +3147,15 @@ impl PairSumTable {
             return None;
         }
         if Self::compact_byte_size(n_points, kc.n) > byte_budget {
-            // Folding by the signed Frobenius group stores `2n` times
-            // fewer keys, so a base too wide even for the compact table
-            // may still fit — at the cost of canonicalising every
-            // lookup.  It is the last tier because for a base that fits
-            // without it the fold only spends squarings.
-            return Self::build_folded_within(kc, fb, byte_budget);
+            // No fallthrough to the fold from here.  This used to hand a
+            // base too wide for the compact table on to
+            // `build_folded_within`, which made sense while the fold was
+            // the last tier and only memory reached for it.  Now that
+            // `build_within` tries the fold *first*, each builder means
+            // exactly one representation, and a caller that asks for the
+            // compact table by name and cannot have it gets a `None` it
+            // can report rather than a different tier.
+            return None;
         }
         let pairs = Self::pair_count(n_points);
         if pairs > u32::MAX as u128 {
@@ -2646,7 +3254,7 @@ impl PairSumTable {
     /// Duplicate `(bucket, rest)` pairs are left in place: two keys that
     /// agree there are indistinguishable to a lookup anyway, so storing
     /// one twice costs four bytes and can never lose an answer.
-    fn build_folded_within(
+    pub fn build_folded_within(
         kc: &KoblitzCurve,
         fb: &FrobeniusFactorBase,
         byte_budget: u128,
@@ -3325,8 +3933,27 @@ impl PairSumTable {
         start: usize,
         len: usize,
     ) -> Option<Vec<usize>> {
+        self.decompose_fast_scan(
+            target,
+            m,
+            Scan::Cyclic { start, len },
+            &mut ScanScratch::default(),
+        )
+    }
+
+    /// [`Self::decompose_fast_window`] over an arbitrary scan.
+    ///
+    /// `scratch` is the scan's workspace; a caller in a loop hands back
+    /// the same one every trial and the scan allocates nothing.
+    pub fn decompose_fast_scan(
+        &self,
+        target: FastPoint,
+        m: usize,
+        scan: Scan<'_>,
+        scratch: &mut ScanScratch,
+    ) -> Option<Vec<usize>> {
         let mut found: Option<Vec<usize>> = None;
-        self.witnesses_fast_window(target, m, start, len, &mut |witness| {
+        self.witnesses_fast_scan(target, m, scan, scratch, &mut |witness| {
             found = Some(witness.to_vec());
             false
         });
@@ -3349,31 +3976,80 @@ impl PairSumTable {
         len: usize,
         sink: &mut dyn FnMut(&[usize]) -> bool,
     ) {
+        self.witnesses_fast_scan(
+            target,
+            m,
+            Scan::Cyclic { start, len },
+            &mut ScanScratch::default(),
+            sink,
+        )
+    }
+
+    /// [`Self::witnesses_fast_window`]'s enumerator over an arbitrary
+    /// scan of third summands.
+    ///
+    /// A [`Scan::Cyclic`] window is two contiguous slices of
+    /// `self.negated`, so it is handed to `add_many` as it stands.  A
+    /// [`Scan::Indices`] scan is scattered, so its summands are
+    /// gathered into `gather` first; that copy is one `FastPoint` move
+    /// per summand against the curve addition it feeds, and it is
+    /// inside the measured adds-per-scan constant for the targeted
+    /// path rather than assumed away.
+    pub fn witnesses_fast_scan(
+        &self,
+        target: FastPoint,
+        m: usize,
+        scan: Scan<'_>,
+        scratch: &mut ScanScratch,
+        sink: &mut dyn FnMut(&[usize]) -> bool,
+    ) {
         let base = self.points.len();
-        if m != 3 || base == 0 || len >= base {
+        let len = scan.len();
+        // A cyclic window as long as the base *is* the full scan, and
+        // the full scan is cheaper: it keeps witnesses sorted and so
+        // does not re-find a triple three times.  An explicit index
+        // list is never the full scan, however long, because its point
+        // is which summands it leaves out.
+        if m != 3 || base == 0 || (matches!(scan, Scan::Cyclic { .. }) && len >= base) {
             self.witnesses_fast(target, m, sink);
             return;
         }
         if len == 0 {
             return;
         }
-        let start = start % base;
-        let tail = len.min(base - start);
-        let mut rests = Vec::with_capacity(len);
-        let mut scratch = BatchScratch::default();
-        self.curve.add_many(
-            target,
-            &self.negated[start..start + tail],
-            &mut rests,
-            &mut scratch,
-        );
-        if tail < len {
-            self.curve.add_many(
-                target,
-                &self.negated[..len - tail],
-                &mut rests,
-                &mut scratch,
-            );
+        // Every buffer below is borrowed from `scratch`, so a scan
+        // allocates nothing; `add_many` appends, so `rests` is cleared
+        // rather than re-created.
+        let ScanScratch { gather, rests, batch, keys, pairs } = scratch;
+        rests.clear();
+        let mut tail = len;
+        match scan {
+            Scan::Cyclic { start, len } => {
+                let start = start % base;
+                tail = len.min(base - start);
+                self.curve.add_many(
+                    target,
+                    &self.negated[start..start + tail],
+                    rests,
+                    batch,
+                );
+                if tail < len {
+                    self.curve.add_many(
+                        target,
+                        &self.negated[..len - tail],
+                        rests,
+                        batch,
+                    );
+                }
+            }
+            Scan::Indices(idxs) => {
+                gather.clear();
+                gather.reserve(idxs.len());
+                for &i in idxs {
+                    gather.push(self.negated[i as usize]);
+                }
+                self.curve.add_many(target, gather, rests, batch);
+            }
         }
         // Keys a block at a time: enough to keep `LANES`
         // canonicalisations interleaved — and, with a
@@ -3384,10 +4060,8 @@ impl PairSumTable {
         // stopping at its first witness has not paid for the rest.
         const BLOCK: usize = 1024;
         const LOOKAHEAD: usize = 32;
-        let mut keys = Vec::with_capacity(BLOCK);
-        let mut pairs = Vec::new();
         for (b, block) in rests.chunks(BLOCK).enumerate() {
-            self.keys_of(block, &mut keys);
+            self.keys_of(block, keys);
             for &key in keys.iter().take(LOOKAHEAD) {
                 prefetch(&self.present[self.filter_word(key)]);
             }
@@ -3399,13 +4073,19 @@ impl PairSumTable {
                     continue;
                 }
                 let offset = b * BLOCK + within;
-                let k = if offset < tail {
-                    start + offset
-                } else {
-                    offset - tail
+                let k = match scan {
+                    Scan::Cyclic { start, .. } => {
+                        let start = start % base;
+                        if offset < tail {
+                            start + offset
+                        } else {
+                            offset - tail
+                        }
+                    }
+                    Scan::Indices(idxs) => idxs[offset] as usize,
                 };
-                self.pairs_for_key(*rest, keys[within], &mut pairs);
-                for &(i, j) in &pairs {
+                self.pairs_for_key(*rest, keys[within], pairs);
+                for &(i, j) in pairs.iter() {
                     if !sink(&[i as usize, j as usize, k]) {
                         return;
                     }
@@ -3493,13 +4173,19 @@ impl PairSumTable {
                 // enough that consecutive probes' memory round trips do
                 // not overlap when the two are fused.  Split, the
                 // lookups are adjacent and independent and do overlap.
-                // A compact table, whose key is a `pack`, gains a third
-                // where this gains four fifths, which is what says the
-                // cause is the length of the key; which resource the
-                // length exhausts is not established.
-                // `examples/koblitz_orbit_fold_width.rs` measures the
-                // sweep, `docs/ic/runs/koblitz-probe-shape-20260913.json`
-                // records it.  Do not unroll this back into a single
+                // The cause is a capacity, and it is the *scheduler*
+                // rather than the reorder buffer.  Cut the rotation
+                // count to `k` and the gap does not scale with it — it
+                // steps, doubling between `k = 8` and `k = 10`, which
+                // at six uops a rotation is 82 to 94 uops, against this
+                // host's 97-entry scheduler and 224-entry ROB.  The key
+                // is one dependent chain, so its uops wait in the
+                // scheduler and fill the smaller structure first.  Not
+                // a branch: `x < best` is a `cmovb`.
+                // `examples/probe_window_sweep.rs` is that sweep,
+                // `examples/koblitz_orbit_fold_width.rs` the shapes,
+                // `docs/ic/runs/koblitz-probe-window-20260921.json`
+                // records both.  Do not unroll this back into a single
                 // loop.
                 const BLOCK: usize = 1024;
                 const LOOKAHEAD: usize = 32;
@@ -3540,9 +4226,32 @@ impl PairSumTable {
                 // representation does not keep those, and walking them
                 // there would have reported no witness for a target that
                 // has one — a false "no" from an oracle, which is worse
-                // than a loud failure.  One batched inversion a row
-                // keeps the arithmetic close to what the triples cost.
+                // than a loud failure.
+                //
+                // **Two** batched inversions a row, not one and then a
+                // row of single ones.  `add_many` amortises Montgomery's
+                // trick over a whole slice, so the row's pair sums cost
+                // one inversion between them; the rests `R − (P_k + P_l)`
+                // are a second slice and cost one more.  Taking them one
+                // at a time through `add` is a *Fermat* inversion each —
+                // `n − 1` squarings and as many multiplications — which
+                // at `n = 61` measured 1300 ns against `add_many`'s 68,
+                // nineteen times the batched step and the dominant cost
+                // of everything this arm did.
+                // `examples/m4_inversion_cost.rs` prices the two.
+                //
+                // Keyed a row at a time and prefetched ahead of the
+                // probe, for the reason the `m = 3` arm is: the key is a
+                // long dependent chain, and fused with its lookup the
+                // memory round trips do not overlap.
+                //
+                // An early exit still throws away at most a row, as it
+                // always did — the row is the slice `add_many` batches.
+                const LOOKAHEAD: usize = 32;
                 let mut sums = Vec::new();
+                let mut negs = Vec::new();
+                let mut rests = Vec::new();
+                let mut keys = Vec::new();
                 let mut scratch = BatchScratch::default();
                 let mut pairs = Vec::new();
                 for l in 0..self.points.len() {
@@ -3553,9 +4262,23 @@ impl PairSumTable {
                         &mut sums,
                         &mut scratch,
                     );
-                    for (k, &pair) in sums.iter().enumerate() {
-                        let rest = self.curve.add(target, self.curve.neg(pair));
-                        self.pairs_for(rest, &mut pairs);
+                    negs.clear();
+                    negs.extend(sums.iter().map(|&s| self.curve.neg(s)));
+                    // `add_many` appends, so the slice starts empty.
+                    rests.clear();
+                    self.curve.add_many(target, &negs, &mut rests, &mut scratch);
+                    self.keys_of(&rests, &mut keys);
+                    for &key in keys.iter().take(LOOKAHEAD) {
+                        prefetch(&self.present[self.filter_word(key)]);
+                    }
+                    for (k, rest) in rests.iter().enumerate() {
+                        if let Some(&ahead) = keys.get(k + LOOKAHEAD) {
+                            prefetch(&self.present[self.filter_word(ahead)]);
+                        }
+                        if !self.admitted(keys[k]) {
+                            continue;
+                        }
+                        self.pairs_for_key(*rest, keys[k], &mut pairs);
                         for &(i, j) in &pairs {
                             if (!sorted || j as usize <= k)
                                 && !sink(&[i as usize, j as usize, k, l])
@@ -3688,6 +4411,93 @@ pub fn groebner_decompose(
         }
     });
     (found, stats)
+}
+
+/// Decompose `target` with **Crossbred** ([`crate::cryptanalysis::crossbred`]).
+///
+/// The same Semaev system [`groebner_decompose`] builds, handed to a
+/// different engine.  Preprocessing extracts a crossbred space at
+/// degree `D`; the search then sweeps `2^k` assignments of the first
+/// `k` variables, each leaving a linear solve in the rest.
+///
+/// `params` fixes `(D, k)`; `None` takes `D` from the system's own
+/// degree and `k = n_vars / 2`, capped by the search's enumeration
+/// budget.  As in the Gröbner path a root of `S₃` fixes the summands
+/// only up to sign, so each is lifted and the first that closes the
+/// group identity wins.
+///
+/// Returns `(None, stats)` with `stats.exhausted` set when no crossbred
+/// space exists at those parameters — that is "cannot say", not a
+/// refutation, and the caller records it as
+/// [`KoblitzRelationAttemptDisposition::Unknown`].
+pub fn crossbred_decompose(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    params: Option<CrossbredParams>,
+) -> (Option<Vec<usize>>, CrossbredSearchStats) {
+    let unknown = || {
+        let mut s = CrossbredSearchStats::default();
+        s.exhausted = true;
+        s
+    };
+    let x_r = match target {
+        BinaryPoint::Affine { x, .. } => x.clone(),
+        BinaryPoint::Infinity => return (None, CrossbredSearchStats::default()),
+    };
+    let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    ) {
+        Some(sys) => sys,
+        None => return (None, CrossbredSearchStats::default()),
+    };
+    let params = params.unwrap_or_else(|| crossbred_params_for(&sys.equations, sys.n_vars));
+    let xb = match extract_crossbred(&sys.equations, sys.n_vars, &params) {
+        Some(xb) => xb,
+        None => return (None, unknown()),
+    };
+    let (roots, stats) = solve_crossbred(&sys.equations, &xb, &CrossbredSearchOptions::default());
+    for root in roots {
+        let xs: Vec<F2mElement> = (0..m)
+            .map(|i| sys.summand_x(&fb.subspace_basis, root, i, kc.n))
+            .collect();
+        if let Some(idxs) = lift_candidate(kc, fb, index_of, &xs, target) {
+            return (Some(idxs), stats);
+        }
+    }
+    (None, stats)
+}
+
+/// Default `(D, k)` for a system this shape.
+///
+/// `D` is the system's own degree, which is the smallest Macaulay
+/// degree that can produce anything, and `k = n_vars / 2` splits the
+/// variables evenly — the sweep in `RESEARCH_ECC2K130_CROSSBRED.md`
+/// found the kernel grows with `k` and the search cost grows as `2^k`,
+/// so the midpoint is the defensible default rather than a tuned one.
+/// `k` is capped so the sweep stays inside the search's memory budget.
+fn crossbred_params_for(system: &[F2BoolPoly], n_vars: usize) -> CrossbredParams {
+    let degree = system
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .map(|t| t.mask.count_ones())
+        .max()
+        .unwrap_or(2)
+        .max(2);
+    let budget = CrossbredSearchOptions::default().max_enumerated_bits as usize;
+    CrossbredParams {
+        macaulay_degree: degree,
+        enumerated: (n_vars / 2).clamp(1, n_vars.saturating_sub(1).min(budget)),
+        target_degree: 1,
+        ..CrossbredParams::default()
+    }
 }
 
 /// What a SAT decomposition attempt cost and concluded.
@@ -4534,6 +5344,10 @@ pub struct KoblitzIcOptions {
     pub collapse_projected_orbits: bool,
     /// How [`solve_factor_base_logs`] solves the relation matrix.
     pub linear_algebra: LinearAlgebra,
+    /// Macaulay degree `D` and enumerated-variable count `k` for
+    /// [`DecompositionStrategy::Crossbred`], or `None` to pick `k` from
+    /// the system size at each call.  Ignored by every other strategy.
+    pub crossbred: Option<CrossbredParams>,
 }
 
 /// The linear-algebra stage of the factor-base logarithm precompute.
@@ -4574,6 +5388,7 @@ impl Default for KoblitzIcOptions {
             stop_on_verified_rank: true,
             relation_batch_size: 1,
             allow_direct_relation: true,
+            crossbred: None,
             collapse_projected_orbits: false,
             linear_algebra: LinearAlgebra::Dense,
         }
@@ -4749,6 +5564,7 @@ enum RelationAttemptOutcome {
     Enumerated(Option<Vec<usize>>),
     Groebner(Option<Vec<usize>>, SolveStats),
     Sat(Option<Vec<usize>>, SatDecompositionStats),
+    Crossbred(Option<Vec<usize>>, CrossbredSearchStats),
 }
 
 /// Live milestones from the existing small-curve pipeline.
@@ -5119,6 +5935,18 @@ fn koblitz_index_calculus_dlp_observed(
                     );
                     RelationAttemptOutcome::Groebner(idxs, stats)
                 }
+                DecompositionStrategy::Crossbred => {
+                    let (idxs, stats) = crossbred_decompose(
+                        kc,
+                        fb,
+                        &index_of,
+                        &field,
+                        target,
+                        opts.m,
+                        opts.crossbred,
+                    );
+                    RelationAttemptOutcome::Crossbred(idxs, stats)
+                }
                 DecompositionStrategy::Sat => {
                     let (idxs, stats) = sat_decompose_with(
                         kc,
@@ -5243,6 +6071,16 @@ fn koblitz_index_calculus_dlp_observed(
                 RelationAttemptOutcome::Groebner(idxs, stats) => {
                     report.reductions += stats.reductions;
                     report.infeasible_branches += stats.infeasible_branches;
+                    let disposition = if idxs.is_some() {
+                        KoblitzRelationAttemptDisposition::RelationFound
+                    } else if stats.exhausted {
+                        KoblitzRelationAttemptDisposition::Unknown
+                    } else {
+                        KoblitzRelationAttemptDisposition::Refuted
+                    };
+                    (idxs, disposition)
+                }
+                RelationAttemptOutcome::Crossbred(idxs, stats) => {
                     let disposition = if idxs.is_some() {
                         KoblitzRelationAttemptDisposition::RelationFound
                     } else if stats.exhausted {
@@ -6622,6 +7460,9 @@ fn decompose_once(
         DecompositionStrategy::PairTable => pair
             .expect("pair table required")
             .decompose(kc, fb, target, opts.m),
+        DecompositionStrategy::Crossbred => {
+            crossbred_decompose(kc, fb, index_of, field, target, opts.m, opts.crossbred).0
+        }
         DecompositionStrategy::Groebner => {
             if let Some(plan) = &opts.weil_charts {
                 let options = SolveOptions {
@@ -6874,24 +7715,95 @@ impl<'a> RelationCollector<'a> {
     /// than the base has and the fast oracle can honour it.
     fn window(&self) -> Option<usize> {
         let w = self.opts.collection_window?;
-        if self.opts.m != 3
-            || self.opts.strategy != DecompositionStrategy::PairTable
-            || self.fast.is_none()
-            || self.pair_table().is_none()
-            || w == 0
-            || w >= self.fb.points.len()
-        {
+        if !self.can_walk() || w == 0 || w >= self.fb.points.len() {
             return None;
         }
         Some(w)
     }
 
+    /// Whether the walked, windowed collection path is available at all:
+    /// the `m = 3` pair-table oracle on a liftable curve.  Both the
+    /// cyclic window and the targeted scan need it.
+    fn can_walk(&self) -> bool {
+        self.opts.m == 3
+            && self.opts.strategy == DecompositionStrategy::PairTable
+            && self.fast.is_some()
+            && self.pair_table().is_some()
+    }
+
+    /// The scan a unit runs when `points` names the summands worth
+    /// scanning: a window over exactly those.
+    ///
+    /// `None` when there is nothing to aim at — no points named, the
+    /// walked path unavailable, or no window asked for.  Naming *every*
+    /// point is not a special case: the subset is then the whole base
+    /// and the scan is the cyclic sweep, point for point.
+    fn aimed(&self, points: &[u32]) -> Option<Targets> {
+        let window = self.window()?;
+        if points.is_empty() {
+            return None;
+        }
+        // Sorted and deduplicated, so the subset is in base index order
+        // and a window over it rotates the way the sweep's does.
+        let mut idxs: Vec<u32> = points
+            .iter()
+            .copied()
+            .filter(|&i| (i as usize) < self.fb.points.len())
+            .collect();
+        idxs.sort_unstable();
+        idxs.dedup();
+        if idxs.is_empty() {
+            return None;
+        }
+        let len = idxs.len();
+        // A window wider than what is left to scan is that whole set;
+        // the counter follows, so a shrinking target set makes each
+        // trial cheaper rather than making it scan a column twice.
+        let window = window.min(len);
+        let mut doubled = Vec::with_capacity(len + window);
+        doubled.extend_from_slice(&idxs);
+        doubled.extend_from_slice(&idxs[..window]);
+        Some(Targets::Subset { doubled, len, window })
+    }
+
     /// Collect the relations of one work unit, trials in parallel,
     /// returned in trial order.
     pub fn collect(&self, unit: RelationWorkUnit) -> (Vec<CollectedRelation>, CollectionReport) {
-        if let Some(window) = self.window() {
-            return self.collect_walked(unit, window);
+        self.collect_aimed(unit, None)
+    }
+
+    /// [`Self::collect`] scanning only `points`, without rebuilding the
+    /// collector.
+    ///
+    /// The collector costs about as much to build as a short unit costs
+    /// to run, so a driver that retargets between units must be able to
+    /// say so per call rather than through the options it was built
+    /// with.  `None` sweeps the whole base, which is what a run with
+    /// nothing to aim at should do.
+    ///
+    /// The caller decides what is worth scanning; [`ColumnCoverage`] is
+    /// the set this thread aims at, the points of the columns a run has
+    /// yet to cover.
+    pub fn collect_aimed(
+        &self,
+        unit: RelationWorkUnit,
+        points: Option<&[u32]>,
+    ) -> (Vec<CollectedRelation>, CollectionReport) {
+        // Aiming takes precedence over sweeping: a run that names the
+        // summands it still needs has said the sweep is what it wants to
+        // stop doing.
+        if let Some(targets) = points.and_then(|c| self.aimed(c)) {
+            return self.collect_walked(unit, targets);
         }
+        if let Some(window) = self.window() {
+            return self.collect_walked(unit, Targets::Window(window));
+        }
+        self.collect_swept(unit)
+    }
+
+    /// [`Self::collect`] without the walked, windowed path: one scalar
+    /// multiplication per probe and a full scan.
+    fn collect_swept(&self, unit: RelationWorkUnit) -> (Vec<CollectedRelation>, CollectionReport) {
         let begin = std::time::Instant::now();
         let g = self.kc.generator();
         let end = unit.start.saturating_add(unit.count);
@@ -6963,8 +7875,9 @@ impl<'a> RelationCollector<'a> {
     fn collect_walked(
         &self,
         unit: RelationWorkUnit,
-        window: usize,
+        targets: Targets,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
+        let window = targets.len();
         let begin = std::time::Instant::now();
         let end = unit.start.saturating_add(unit.count);
         if end == unit.start {
@@ -6994,15 +7907,18 @@ impl<'a> RelationCollector<'a> {
                 let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
                 let mut point = fc.mul_u64(*g_fast, a);
                 let mut found = Vec::new();
+                // Reused across the run's trials, so the scan's four
+                // buffers are allocated once per run rather than once
+                // per probe.
+                let mut scratch = ScanScratch::default();
                 for t in run_start..run_end {
                     if !point.infinity && a != 0 {
                         // A rotating offset, so no column is favoured by
                         // sitting where the window always starts.
-                        let offset =
-                            pair_filter_hash(unit.seed ^ t.wrapping_mul(0x9e37_79b9_7f4a_7c15))
-                                as usize
-                                % base;
-                        if let Some(points) = pair.decompose_fast_window(point, 3, offset, window) {
+                        let scan = targets.scan(unit.seed, t, base);
+                        if let Some(points) =
+                            pair.decompose_fast_scan(point, 3, scan, &mut scratch)
+                        {
                             found.push(CollectedRelation {
                                 trial: t,
                                 a,
@@ -7867,34 +8783,272 @@ mod tests {
     }
 
     #[test]
-    fn pair_table_refuses_a_base_beyond_its_byte_budget() {
+    fn selecting_a_base_reports_what_it_spent() {
+        // Selection is a priced phase now, so its counters are part of
+        // the contract.  AGENTS.md §8 wants every phase priced, and this
+        // one reported nothing at all, which is why `S` was a lower
+        // bound with selection null.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let (fb, cost) = build_subgroup_orbit_factor_base_with_cost(&kc, 5, 400).unwrap();
+
+        // The base is the one the discarding wrapper returns, so adding
+        // the counters changed no measurement anywhere else.
+        let plain = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        assert_eq!(fb.points, plain.points);
+
+        // Every draw is either rejected or lifts, so lifts never exceed
+        // draws, and each lift costs exactly one cofactor multiply.
+        assert!(cost.abscissae_drawn >= cost.lifts_found, "{cost:?}");
+        assert_eq!(cost.lifts_found, cost.cofactor_multiplications);
+        // A representative is only kept once it lifts, and each keeps an
+        // orbit's worth of squarings.
+        assert_eq!(
+            cost.frobenius_squarings,
+            fb.signed_orbits.len() as u64 * u64::from(kc.extension_degree()),
+            "one orbit walk per representative kept"
+        );
+        assert!(cost.rebuilds >= 1, "the base was built at least once");
+        assert!(cost.abscissae_drawn > 0);
+
+        // Deterministic in the seed, like the base itself: a price that
+        // moved run to run could not be frozen into an evidence file.
+        let (_, again) = build_subgroup_orbit_factor_base_with_cost(&kc, 5, 400).unwrap();
+        assert_eq!(cost, again);
+        let (_, other) = build_subgroup_orbit_factor_base_with_cost(&kc, 6, 400).unwrap();
+        assert_ne!(cost.abscissae_drawn, other.abscissae_drawn);
+    }
+
+    #[test]
+    fn pair_table_picks_the_tier_the_measurement_picked() {
+        // The tier choice, pinned — and it has been pinned three ways.
+        //
+        // It first took the first tier that fit: summands, then compact
+        // rests, then the fold.  It was then reversed to fold-first on a
+        // wall-clock comparison of three tiers at one width.  Re-priced
+        // in group additions over the whole cold run, both fixed orders
+        // were wrong, because which tier is cheapest is not a property
+        // of the base: the fold buys a `2n`-times cheaper build and pays
+        // for it on every probe, so it depends on how much probing
+        // amortises the build.
+        //
+        // So what is pinned here is the *model*, against the widths it
+        // was measured at:
+        // `docs/ic/runs/koblitz-tier-crossover-20260921.json`.
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
-        let full = PairSumTable::byte_size(fb.points.len());
-        let compact = PairSumTable::compact_byte_size(fb.points.len(), kc.n);
+        let (points, orbits) = (fb.points.len(), fb.signed_orbits.len());
+        let full = PairSumTable::byte_size(points);
+        let compact = PairSumTable::compact_byte_size(points, kc.n);
+        let folded_bytes = PairSumTable::folded_byte_size(orbits, points, kc.n);
         assert!(compact < full, "the compact table is the narrower one");
-        // A budget that fits the summands keeps them.
-        let wide = PairSumTable::build_within(&kc, &fb, full).expect("fits with summands");
-        assert!(!wide.is_compact());
-        // One that does not falls back to the compact table rather than
-        // refusing: a base that fits only compactly is worth having.
-        let narrow = PairSumTable::build_within(&kc, &fb, full - 1).expect("fits compactly");
-        assert!(narrow.is_compact());
-        assert_eq!(wide.len(), narrow.len());
-        // Below even that, the fold is the last tier: `2n` times fewer
-        // keys, bought with a canonicalisation on every lookup.
-        let folded_bytes =
-            PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n);
         assert!(folded_bytes < compact, "the folded table is narrower still");
-        let folded = PairSumTable::build_within(&kc, &fb, compact - 1).expect("fits folded");
-        assert!(folded.is_folded() && folded.is_compact());
-        assert!(folded.len() < narrow.len(), "the fold stored no less");
-        // And below that it refuses with a number rather than an
-        // allocation the machine cannot meet.
+
+        // A base this narrow is far below the crossover, so the cheapest
+        // tier is the compact one however much room there is.
+        assert!(!PairSumTable::fold_is_cheaper(
+            points,
+            kc.n,
+            orbits,
+            ProbeBudget::default()
+        ));
+        let roomy = PairSumTable::build_within(&kc, &fb, full).expect("fits every tier");
+        assert_eq!(roomy.tier(), "compact", "tier was {}", roomy.tier());
+        assert!(PairSumTable::build(&kc, &fb).unwrap().is_compact());
+
+        // Squeeze the budget under the compact table and the fold is
+        // what is left: dearer per probe and the only tier that fits.
+        let tight = PairSumTable::build_within(&kc, &fb, compact - 1).expect("fits folded");
+        assert!(tight.is_folded(), "tier was {}", tight.tier());
+        // Below the narrowest tier it refuses with a number rather than
+        // an allocation the machine cannot meet.
         assert!(PairSumTable::build_within(&kc, &fb, folded_bytes - 1).is_none());
-        // The default budget is far above a base this size.
         assert!(full < PairSumTable::DEFAULT_BYTE_BUDGET);
-        assert!(PairSumTable::build(&kc, &fb).is_some());
+
+        // The probe budget is an input, not a constant: a run that
+        // probes far less does not amortise the build, and the fold wins
+        // at a base where the default budget says it loses.
+        let barely = ProbeBudget { summands_scanned: 0, descent_probes: 0 };
+        assert!(PairSumTable::fold_is_cheaper(points, kc.n, orbits, barely));
+        assert!(
+            PairSumTable::build_within_for(&kc, &fb, full, barely)
+                .expect("fits")
+                .is_folded()
+        );
+
+        // Every tier stays reachable by name, and each refuses a budget
+        // under its own width rather than falling to another.
+        let wide = PairSumTable::build_full_within(&kc, &fb, full).expect("fits with summands");
+        assert_eq!(wide.tier(), "full");
+        assert!(PairSumTable::build_full_within(&kc, &fb, full - 1).is_none());
+        let narrow =
+            PairSumTable::build_compact_within(&kc, &fb, compact).expect("fits compactly");
+        assert_eq!(narrow.tier(), "compact");
+        assert!(PairSumTable::build_compact_within(&kc, &fb, compact - 1).is_none());
+        assert_eq!(wide.len(), narrow.len(), "same base, same pairs");
+        assert!(tight.len() < narrow.len(), "the fold stored no less");
+    }
+
+    #[test]
+    fn the_m4_scan_finds_exactly_the_quadruples_that_sum_to_the_target() {
+        use std::collections::BTreeSet;
+
+        // `m = 4` is the one arm no parameter set reaches — 698 ask for
+        // 3 and 110 for 2, and nothing sets `max_m` — so nothing else in
+        // this suite exercises it, and a change to it would otherwise
+        // land unmeasured.  The oracle here is a brute-force walk over
+        // every sorted quadruple, which shares no code with the scan: it
+        // does not key, does not probe, and does not know what a tier
+        // is.
+        //
+        // All three tiers are checked, because the scan reaches the
+        // table through `pairs_for_key`, whose compact branch recovers
+        // summands by a scan where the folded one reads them out of the
+        // entry.  A key computed one way and looked up another is a
+        // silent false "no" from an oracle, not a crash, and the fold is
+        // where the two keys can drift apart.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 40).unwrap();
+        let n_pts = fb.points.len();
+        let full = PairSumTable::byte_size(n_pts);
+        let compact = PairSumTable::compact_byte_size(n_pts, kc.n);
+        let folded = PairSumTable::folded_byte_size(fb.signed_orbits.len(), n_pts, kc.n);
+        let tiers = [
+            (
+                "full",
+                PairSumTable::build_full_within(&kc, &fb, full).expect("full fits"),
+            ),
+            (
+                "compact",
+                PairSumTable::build_compact_within(&kc, &fb, compact).expect("compact fits"),
+            ),
+            (
+                "folded",
+                PairSumTable::build_within(&kc, &fb, folded).expect("folded fits"),
+            ),
+        ];
+        assert!(
+            tiers[2].1.is_folded(),
+            "the third tier is not the folded one"
+        );
+
+        let fc = FastCurve::new(&kc.curve).expect("fast curve");
+        let pts: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+
+        // Targets that really are sums of four base points, so the scan
+        // has something to find.  The base is closed under negation, so
+        // a quadruple picked by hand lands on `O` more often than not;
+        // these are generated and filtered instead.
+        let mut targets: Vec<FastPoint> = Vec::new();
+        for step in 1..n_pts {
+            let idx = [0, step, (2 * step) % n_pts, (3 * step) % n_pts];
+            let sum = idx
+                .iter()
+                .fold(FastPoint::INFINITY, |acc, &i| fc.add(acc, pts[i]));
+            if !sum.infinity && !targets.contains(&sum) {
+                targets.push(sum);
+            }
+            if targets.len() == 4 {
+                break;
+            }
+        }
+        assert_eq!(
+            targets.len(),
+            4,
+            "only {} usable targets over {n_pts} points",
+            targets.len()
+        );
+
+        // The oracle's first half, shared across targets: every pair
+        // sum, indexed by the point it lands on.  Walking all `|F|⁴`
+        // quadruples would be the more obviously correct oracle and is
+        // far too slow; this is the same answer in `|F|²`, and it still
+        // shares no code with the scan — no table, no key, no tier.
+        let mut by_pair: HashMap<(bool, u64, u64), Vec<(usize, usize)>> = HashMap::new();
+        for i in 0..n_pts {
+            for j in i..n_pts {
+                let s = fc.add(pts[i], pts[j]);
+                by_pair
+                    .entry((s.infinity, s.x, s.y))
+                    .or_default()
+                    .push((i, j));
+            }
+        }
+
+        for target in &targets {
+            // Every `i ≤ j ≤ k ≤ l` whose four points sum here: for each
+            // second half `P_k + P_l`, the first halves that complete it.
+            let mut expected: BTreeSet<[usize; 4]> = BTreeSet::new();
+            for k in 0..n_pts {
+                for l in k..n_pts {
+                    let kl = fc.add(pts[k], pts[l]);
+                    let want = fc.add(*target, fc.neg(kl));
+                    let Some(firsts) = by_pair.get(&(want.infinity, want.x, want.y)) else {
+                        continue;
+                    };
+                    for &(i, j) in firsts {
+                        let mut v = [i, j, k, l];
+                        v.sort_unstable();
+                        expected.insert(v);
+                    }
+                }
+            }
+
+            for (name, table) in &tiers {
+                let mut got: BTreeSet<[usize; 4]> = BTreeSet::new();
+                table.witnesses_fast(*target, 4, &mut |w| {
+                    let mut v = [w[0], w[1], w[2], w[3]];
+                    v.sort_unstable();
+                    got.insert(v);
+                    true
+                });
+                assert_eq!(
+                    got, expected,
+                    "the {name} tier disagreed with the brute-force walk"
+                );
+                // And every witness really is one, so an oracle that
+                // agreed by finding the same wrong answers still fails.
+                for w in &got {
+                    let sum = w
+                        .iter()
+                        .fold(FastPoint::INFINITY, |a, &i| fc.add(a, pts[i]));
+                    assert_eq!(sum, *target, "the {name} tier returned a non-witness");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn the_tier_model_reproduces_every_width_it_was_measured_at() {
+        // The four widths of docs/ic/runs/koblitz-tier-crossover-20260921.json,
+        // with the cheaper of the two tiers the sweep measured at each.
+        // The model is a calibrated heuristic, so what is pinned is that
+        // it still agrees with the measurement it was calibrated on — a
+        // constant edited without re-measuring fails here.
+        let probes = ProbeBudget::default();
+        for (points, orbits, fold_wins) in [
+            (6832usize, 56usize, false),
+            (9760, 80, false),
+            (12688, 104, false),
+            (18544, 152, true),
+        ] {
+            assert_eq!(
+                PairSumTable::fold_is_cheaper(points, 61, orbits, probes),
+                fold_wins,
+                "{points} points, {orbits} orbits"
+            );
+        }
+        // And the switch is monotone in the width, which is what makes
+        // "a crossover" the right word for it.
+        let mut switched = None;
+        for points in (2000..40_000).step_by(1000) {
+            let wins = PairSumTable::fold_is_cheaper(points, 61, points / 122, probes);
+            match (switched, wins) {
+                (None, true) => switched = Some(points),
+                (Some(at), false) => panic!("fold won at {at} and lost again at {points}"),
+                _ => {}
+            }
+        }
+        assert!(switched.is_some(), "the fold never became cheaper");
     }
 
     #[test]
@@ -8050,7 +9204,7 @@ mod tests {
         // The presence filter must never hide an entry.
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
-        let table = PairSumTable::build(&kc, &fb).unwrap();
+        let table = PairSumTable::build_full(&kc, &fb).unwrap();
         let fc = FastCurve::new(&kc.curve).unwrap();
         for i in 0..fb.points.len() {
             for j in i..fb.points.len() {
@@ -8940,7 +10094,9 @@ mod tests {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
         let index = fb.index_map();
-        let table = PairSumTable::build(&kc, &fb).unwrap();
+        // The stored-pair count below is the full tier's own law, so
+        // the table is asked for by name: `build` now returns the fold.
+        let table = PairSumTable::build_full(&kc, &fb).unwrap();
         assert_eq!(table.len(), fb.points.len() * (fb.points.len() + 1) / 2);
         let r = kc.subgroup_order.to_u64_digits()[0];
         for m in [2usize, 3, 4] {
@@ -8976,6 +10132,43 @@ mod tests {
             assert!(seen.insert(idxs.to_vec()), "duplicate witness {idxs:?}");
             true
         });
+    }
+
+    #[test]
+    fn crossbred_decompose_agrees_with_enumeration() {
+        // The oracle gate for `DecompositionStrategy::Crossbred`: on every
+        // target of the subgroup, the crossbred search must find a
+        // decomposition exactly when exhaustive enumeration does, and the
+        // witness it returns must sum to the target.  A `None` carrying
+        // `exhausted` is "cannot say" and is not held to the first half.
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index = fb.index_map();
+        let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let r = kc.subgroup_order.to_u64_digits()[0];
+        let mut decided = 0usize;
+        for k in 1..r {
+            let target = kc.mul(kc.generator(), &BigUint::from(k));
+            let reference = enumerate_decompose(&kc, &fb, &index, &target, 2);
+            let (found, stats) =
+                crossbred_decompose(&kc, &fb, &index, &field, &target, 2, None);
+            if let Some(idxs) = &found {
+                let sum = idxs
+                    .iter()
+                    .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+                assert_eq!(sum, target, "k = {k}: witness does not sum to the target");
+                assert!(reference.is_some(), "k = {k}: invented a decomposition");
+            }
+            if !stats.exhausted {
+                decided += 1;
+                assert_eq!(
+                    found.is_some(),
+                    reference.is_some(),
+                    "k = {k}: disagrees with enumeration"
+                );
+            }
+        }
+        assert!(decided > 0, "every target came back exhausted; nothing was tested");
     }
 
     #[test]
@@ -9543,7 +10736,7 @@ mod tests {
     fn the_folded_table_agrees_at(degree: u32, points: usize) {
         let kc = KoblitzCurve::new(0, degree).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
-        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let full = PairSumTable::build_full(&kc, &fb).unwrap();
         let orbits = fb.signed_orbits.len();
         // A budget under the compact table's width but over the folded
         // one's is exactly the tier that reaches for the fold.
@@ -9701,7 +10894,7 @@ mod tests {
         // Every `m` has to go through the folded lookup.
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 3, 200).unwrap();
-        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let full = PairSumTable::build_full(&kc, &fb).unwrap();
         let folded = PairSumTable::build_within(
             &kc,
             &fb,
@@ -9751,10 +10944,12 @@ mod tests {
     fn the_compact_table_agrees_at(degree: u32, points: usize) {
         let kc = KoblitzCurve::new(0, degree).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
-        let full = PairSumTable::build(&kc, &fb).unwrap();
+        let full = PairSumTable::build_full(&kc, &fb).unwrap();
         // A budget below the full table's width but above the compact
         // one's forces the compact representation of the same base.
-        let compact = PairSumTable::build_within(
+        // Asked for by name: `build_within` now folds first, and a
+        // budget that admits the compact table admits the fold too.
+        let compact = PairSumTable::build_compact_within(
             &kc,
             &fb,
             PairSumTable::compact_byte_size(fb.points.len(), kc.n),
@@ -9823,8 +11018,10 @@ mod tests {
         // it is pinned here rather than left to a panic.
         let kc = KoblitzCurve::new(0, 19).unwrap();
         let fb = build_subgroup_orbit_factor_base(&kc, 3, 200).unwrap();
-        let full = PairSumTable::build(&kc, &fb).unwrap();
-        let compact = PairSumTable::build_within(
+        let full = PairSumTable::build_full(&kc, &fb).unwrap();
+        // Asked for by name: `build_within` now folds first, and a
+        // budget that admits the compact table admits the fold too.
+        let compact = PairSumTable::build_compact_within(
             &kc,
             &fb,
             PairSumTable::compact_byte_size(fb.points.len(), kc.n),
@@ -9917,6 +11114,233 @@ mod tests {
             checked, 5,
             "a degree this test relies on stopped being available"
         );
+    }
+
+    /// A cyclic window and the same indices named outright are the same
+    /// scan, so they must return the same witnesses.  This is the
+    /// cross-check §6 asks for when a new oracle replaces one that
+    /// already works: not a spot check, every target of a full sweep.
+    /// The packed orbit walk and the `BigUint` one must produce the same
+    /// maps, field for field.
+    ///
+    /// This is the control for the whole selection round: the change is a
+    /// change of representation, so if the maps agree then every
+    /// downstream counter of every run is unchanged by construction and
+    /// the only thing the round moved is the time selection takes. If
+    /// they ever disagree, the measured gain is meaningless and the base
+    /// is wrong, in that order of importance.
+    #[test]
+    fn factor_base_orbit_maps_agree_in_both_representations() {
+        let mut checked = 0;
+        for degree in [19u32, 23, 29, 31, 37, 41] {
+            let Some(kc) = KoblitzCurve::new(0, degree) else { continue };
+            let Some(curve) = FastCurve::new(&kc.curve) else { continue };
+            for points in [200usize, 600, 1500] {
+                let Ok(fb) = build_subgroup_orbit_factor_base(&kc, 7, points) else { continue };
+                let packed = orbit_maps_packed(&kc, &curve, &fb.points)
+                    .expect("packed walk");
+                let bigint = orbit_maps_bigint(&kc, &fb.points).expect("bigint walk");
+                assert_eq!(packed.0, bigint.0, "orbit_of at degree {degree}, {points} points");
+                assert_eq!(packed.1, bigint.1, "orbits at degree {degree}, {points} points");
+                assert_eq!(
+                    packed.2, bigint.2,
+                    "signed_orbit_of at degree {degree}, {points} points"
+                );
+                assert_eq!(
+                    packed.3, bigint.3,
+                    "signed_orbits at degree {degree}, {points} points"
+                );
+                // And the maps the base actually shipped with are the
+                // packed ones, since an odd degree takes that path.
+                assert_eq!(fb.orbit_of, packed.0, "the base did not use the packed walk");
+                assert_eq!(fb.signed_orbit_of, packed.2);
+                checked += 1;
+            }
+        }
+        assert!(
+            checked >= 12,
+            "the sweep shrank to {checked} cases: a degree this test relies on stopped being available"
+        );
+    }
+
+    #[test]
+    fn naming_a_window_s_indices_finds_what_the_window_finds() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let base = fb.points.len();
+        let len = base / 8;
+        let mut scratch = ScanScratch::default();
+        let mut compared = 0;
+        for t in 1u64..400 {
+            let target = fc.mul_u64(fc.lift(kc.generator()), t);
+            for start in [0usize, 7, base / 3, base - len / 2] {
+                let idxs: Vec<u32> =
+                    (0..len).map(|o| ((start + o) % base) as u32).collect();
+                let mut from_window = Vec::new();
+                pair.witnesses_fast_window(target, 3, start, len, &mut |w| {
+                    from_window.push(w.to_vec());
+                    true
+                });
+                let mut from_indices = Vec::new();
+                pair.witnesses_fast_scan(
+                    target,
+                    3,
+                    Scan::Indices(&idxs),
+                    &mut scratch,
+                    &mut |w| {
+                        from_indices.push(w.to_vec());
+                        true
+                    },
+                );
+                from_window.sort();
+                from_indices.sort();
+                assert_eq!(
+                    from_window, from_indices,
+                    "scan shapes disagree at t = {t}, start = {start}"
+                );
+                compared += 1;
+            }
+        }
+        assert!(compared >= 1500, "the sweep shrank: {compared} comparisons");
+    }
+
+    /// The whole point of an index scan: every witness it returns has
+    /// its third summand inside the set it was given.  Without this a
+    /// targeted scan would not guarantee coverage, and the relation
+    /// count would not fall.
+    #[test]
+    fn an_index_scan_s_third_summand_is_always_one_it_was_given() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        // A scattered set, deliberately not a contiguous range.
+        let idxs: Vec<u32> = (0..fb.points.len() as u32).filter(|i| i % 7 == 3).collect();
+        let wanted: std::collections::BTreeSet<u32> = idxs.iter().copied().collect();
+        let mut scratch = ScanScratch::default();
+        let mut seen = 0;
+        for t in 1u64..600 {
+            let target = fc.mul_u64(fc.lift(kc.generator()), t);
+            pair.witnesses_fast_scan(target, 3, Scan::Indices(&idxs), &mut scratch, &mut |w| {
+                assert_eq!(w.len(), 3);
+                assert!(
+                    wanted.contains(&(w[2] as u32)),
+                    "third summand {} was not in the scan",
+                    w[2]
+                );
+                seen += 1;
+                true
+            });
+        }
+        assert!(seen > 0, "the scan found nothing to check");
+    }
+
+    /// Aiming must not cost correctness: every relation an aimed unit
+    /// banks has to verify in the group exactly as a swept one does.
+    #[test]
+    fn an_aimed_unit_s_relations_still_verify_in_the_group() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let mut cov = ColumnCoverage::new(&kc, &fb).unwrap();
+        // This base has 16 columns and is dense enough that a trial
+        // yields a relation; 16 trials leave two columns uncovered and
+        // 32 leave none, so the seeding unit has to be this short.
+        let unit = RelationWorkUnit { seed: 11, start: 0, count: 16 };
+        let (swept, _) = collector.collect_aimed(unit, None);
+        cov.add(&swept);
+        assert!(cov.covered() > 0, "the sweep covered nothing to aim past");
+        assert!(!cov.complete(), "nothing left to aim at: shorten the sweep");
+
+        let missing = cov.missing_points();
+        let aimed_unit = RelationWorkUnit { seed: 11, start: 16, count: 4096 };
+        let (aimed, report) = collector.collect_aimed(aimed_unit, Some(&missing));
+        assert!(!aimed.is_empty(), "the aimed unit found nothing to check");
+        for rel in &aimed {
+            assert!(
+                verify_collected_relation(&kc, &fb, opts.m, rel),
+                "an aimed relation does not sum to its probe"
+            );
+        }
+        assert_eq!(
+            report.summands_scanned,
+            report.trials as u64 * opts.collection_window.unwrap().min(missing.len()) as u64,
+            "an aimed unit must report the summands it actually scanned"
+        );
+    }
+
+    /// And the point of it: every relation an aimed unit banks covers a
+    /// column that was missing.  This is the whole mechanism — if it
+    /// fails, aiming cannot reduce the relation count.
+    #[test]
+    fn every_aimed_relation_covers_a_column_that_was_missing() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let mut cov = ColumnCoverage::new(&kc, &fb).unwrap();
+        let (swept, _) = collector.collect_aimed(
+            RelationWorkUnit { seed: 11, start: 0, count: 16 },
+            None,
+        );
+        cov.add(&swept);
+        assert!(!cov.complete(), "nothing left to aim at: shorten the sweep");
+
+        // The columns still missing, as a set, before the aimed unit.
+        let missing = cov.missing_points();
+        let wanted: std::collections::BTreeSet<u32> = missing.iter().copied().collect();
+        let (aimed, _) = collector.collect_aimed(
+            RelationWorkUnit { seed: 11, start: 16, count: 8192 },
+            Some(&missing),
+        );
+        assert!(!aimed.is_empty(), "the aimed unit found nothing to check");
+        for rel in &aimed {
+            assert!(
+                rel.points.iter().any(|&i| wanted.contains(&(i as u32))),
+                "an aimed relation mentions no missing column: {:?}",
+                rel.points
+            );
+        }
+        // And it converts: the aimed unit must move coverage.
+        let before = cov.covered();
+        cov.add(&aimed);
+        assert!(
+            cov.covered() > before,
+            "aiming banked {} relations and covered nothing new",
+            aimed.len()
+        );
+    }
+
+    /// Aiming at every column is the sweep, so the two must agree
+    /// relation for relation.  Without this, turning aiming on would
+    /// change a run's first unit and the comparison with a swept run
+    /// would not be controlled.
+    #[test]
+    fn aiming_at_every_column_is_the_sweep() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 400).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        let opts = windowed_options(fb.points.len() / 8);
+        let collector = RelationCollector::with_pair_table(&kc, &fb, &opts, Some(&pair)).unwrap();
+        let all: Vec<u32> = (0..fb.points.len() as u32).collect();
+        let unit = RelationWorkUnit { seed: 7, start: 0, count: 8192 };
+        let (swept, swept_report) = collector.collect_aimed(unit, None);
+        let (aimed, aimed_report) = collector.collect_aimed(unit, Some(&all));
+        assert!(!swept.is_empty(), "the sweep found nothing to compare");
+        assert_eq!(swept.len(), aimed.len(), "relation counts differ");
+        for (a, b) in swept.iter().zip(aimed.iter()) {
+            assert_eq!((a.trial, a.a), (b.trial, b.a), "different probes");
+            let (mut x, mut y) = (a.points.clone(), b.points.clone());
+            x.sort();
+            y.sort();
+            assert_eq!(x, y, "different summands at trial {}", a.trial);
+        }
+        assert_eq!(swept_report.summands_scanned, aimed_report.summands_scanned);
     }
 
     #[test]

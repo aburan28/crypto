@@ -491,6 +491,11 @@
     return isFinite(t) ? t : 0;
   }
 
+  function publishedMs(status) {
+    var t = Date.parse(String(status && status.published_at || ""));
+    return isFinite(t) ? t : 0;
+  }
+
   function mergeSnapshots(live, pages) {
     if (!live && !pages) return null;
     if (!live) return pages;
@@ -508,6 +513,13 @@
       out.work.walking_slots = walkingSlots(older);
     }
     if (!out.walk_rate && older.walk_rate) out.walk_rate = older.walk_rate;
+    // Keep the fresher published_at across the two sources: it names the
+    // publisher, not the count, and must not be overwritten by a frozen feed.
+    var livePub = publishedMs(live);
+    var pagesPub = publishedMs(pages);
+    if (pagesPub > livePub) out.published_at = pages.published_at;
+    else if (livePub > 0) out.published_at = live.published_at;
+    else if (pages.published_at) out.published_at = pages.published_at;
     return out;
   }
 

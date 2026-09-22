@@ -17,6 +17,7 @@ its old name still identify it.
 |:--|:--|
 | [`RESEARCH_ECDLP_STATE_OF_THE_ART.md`](ecdlp-general/RESEARCH_ECDLP_STATE_OF_THE_ART.md) | The ECDLP: state of the art, 2025–2026 |
 | [`RESEARCH_TORSION_AUXILIARY_INPUTS.md`](ecdlp-general/RESEARCH_TORSION_AUXILIARY_INPUTS.md) | Auxiliary inputs (Cheon) and torsion points against rho and index calculus |
+| [`RESEARCH_REPRESENTATION_STRUCTURE.md`](ecdlp-general/RESEARCH_REPRESENTATION_STRUCTURE.md) | Where exploitable structure can come from: the transfer pattern, an R1–R5 admissibility test for candidate handles, and why murmurations fail it |
 | [`RESEARCH_BENCH_LOG.md`](ecdlp-general/RESEARCH_BENCH_LOG.md) | Cryptanalysis research bench: empirical log |
 
 ## index-calculus — Semaev decomposition, factor bases, Gröbner, first-fall degree
@@ -24,6 +25,7 @@ its old name still identify it.
 | note | subject |
 |:--|:--|
 | [`RESEARCH_RESIDUAL_WALKS.md`](index-calculus/RESEARCH_RESIDUAL_WALKS.md) | Residual walks over partial decompositions; the reference thread for the boundary-table-ratio rule |
+| [`RESEARCH_IC_BOUNDARY_LEDGER.md`](index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md) | The boundary ledger: prime, random-binary and Koblitz index calculus end to end in one unit against the generic floor and a counted rho (`ic boundary`, frozen runs under `docs/ic/runs/`); §10 is the Round-2 engineering ledger (folded pair tables, walk targets, exact ceiling, balanced base) with every first-round row kept as its before mark |
 | [`RESEARCH_SEMAEV_DECOMPOSITION.md`](index-calculus/RESEARCH_SEMAEV_DECOMPOSITION.md) | Fast factor-base decomposition for binary Semaev `S₄` |
 | [`RESEARCH_SYMMETRIZED_SEMAEV.md`](index-calculus/RESEARCH_SYMMETRIZED_SEMAEV.md) | Symmetrised summation polynomials (FGHR) |
 | [`RESEARCH_HIGHER_SEMAEV.md`](index-calculus/RESEARCH_HIGHER_SEMAEV.md) | Higher-order Semaev polynomials over prime fields |
@@ -58,6 +60,7 @@ its old name still identify it.
 | [`RESEARCH_KOBLITZ_INDEX_CALCULUS.md`](ecc2k130/RESEARCH_KOBLITZ_INDEX_CALCULUS.md) | Frobenius-invariant factor bases on Koblitz curves |
 | [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md) | Making the Koblitz decomposition oracle reach a useful `m` |
 | [`RESEARCH_TRIMOSKA_BENCHMARKS.md`](ecc2k130/RESEARCH_TRIMOSKA_BENCHMARKS.md) | Bit-sliced Weil descent: EC-Index-Calculus-Benchmarks review |
+| [`RESEARCH_WDSAT_IC_UNIFICATION.md`](ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md) | Unifying Koblitz index calculus with the Trimoska WDSat solver |
 
 ## cm-isogeny — CM structure, isogeny graphs, covers, P-256 and secp256k1 audits
 
@@ -93,3 +96,10 @@ Put it in the theme it belongs to (or add a theme directory), add a row
 here, and cite its frozen evidence directory by path.  Guides and primers
 that are not research results go in `docs/guides/`; the library roadmap
 is `docs/DEFERRED.md`.
+
+A research note never lives at the repository root or loose in a code
+directory: that is the one placement this index exists to prevent.  When a
+note moves into its theme, update every inbound link in the same commit —
+sibling notes, `docs/` pages, and the `docs/index-calculus-scoreboard.html`
+citation — but leave the basename unchanged so the frozen experiment JSONs
+that name the note by filename keep resolving.

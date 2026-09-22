@@ -6,8 +6,9 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
 };
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    factor_x_n_minus_1, individual_log, koblitz_index_calculus_dlp_with_factor_base_and_progress,
-    order_of_2_mod_n, solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable,
+    build_subgroup_orbit_factor_base_with_cost, factor_x_n_minus_1, individual_log,
+    koblitz_index_calculus_dlp_with_factor_base_and_progress, order_of_2_mod_n,
+    solve_factor_base_logs, DecompositionStrategy, FactorBaseLogTable, FactorBaseSelectionCost,
     FrobeniusFactorBase, KoblitzCurve, KoblitzIcEvent, KoblitzIcOptions, LinearAlgebra,
     LogTableReport, MAX_N, MAX_SUBFIELD_DEGREE,
 };
@@ -558,6 +559,7 @@ pub(crate) fn ic_options_with_descent(
         strategy: strategy.strategy(),
         collapse_negation: true,
         collapse_projected_orbits: true,
+        crossbred: None,
         allow_direct_relation: false,
         max_trials: max_trials as usize,
         seed,
@@ -840,15 +842,27 @@ fn factor_base_spec(args: &RunArgs) -> Result<FactorBaseSpec, String> {
         }
     }
 }
-pub(crate) fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFactorBase, String> {
-    let fb = spec.materialize(kc)?;
+pub(crate) fn materialize_with_selection_cost(
+    kc: &KoblitzCurve,
+    spec: &FactorBaseSpec,
+) -> Result<(FrobeniusFactorBase, Option<FactorBaseSelectionCost>), String> {
+    let (fb, cost) = match spec {
+        FactorBaseSpec::SubgroupOrbits { seed, points } => {
+            let (fb, cost) = build_subgroup_orbit_factor_base_with_cost(kc, *seed, *points)?;
+            (fb, Some(cost))
+        }
+        _ => (spec.materialize(kc)?, None),
+    };
     if fb.subspace.len() > MAX_ABSCISSAE {
         return Err(format!(
             "factor base has {} abscissae, above the materialization limit {MAX_ABSCISSAE}",
             fb.subspace.len()
         ));
     }
-    Ok(fb)
+    Ok((fb, cost))
+}
+pub(crate) fn materialize(kc: &KoblitzCurve, spec: &FactorBaseSpec) -> Result<FrobeniusFactorBase, String> {
+    materialize_with_selection_cost(kc, spec).map(|(fb, _)| fb)
 }
 pub(crate) fn factor_base_json(spec: &FactorBaseSpec, fb: &FrobeniusFactorBase, columns: usize) -> Value {
     json!({"spec":spec,"family":spec.family(),
@@ -953,6 +967,7 @@ pub fn run(args: RunArgs, quiet: bool) -> Result<Value, String> {
         seed: args.seed,
         collapse_negation: !args.control,
         collapse_projected_orbits: !args.control,
+        crossbred: None,
         stop_on_verified_rank: !args.control,
         allow_direct_relation: false,
         relation_batch_size: batch,
