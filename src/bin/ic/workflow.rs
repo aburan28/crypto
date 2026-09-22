@@ -959,6 +959,9 @@ fn build_pair_table(
         }
         PairTableTier::Full => PairSumTable::build_full_within(c, fb, budget),
         PairTableTier::Compact => PairSumTable::build_compact_within(c, fb, budget),
+        PairTableTier::WitnessedCompact => {
+            PairSumTable::build_witnessed_compact_within(c, fb, budget)
+        }
         PairTableTier::Folded => PairSumTable::build_folded_within(c, fb, budget),
     }
 }
@@ -973,6 +976,8 @@ pub enum PairTableTier {
     Full,
     /// Every pair sum as a bucket and a rest, no summands.
     Compact,
+    /// Compact rests plus one packed pair witness, eight bytes per pair.
+    WitnessedCompact,
     /// One key per orbit of the signed Frobenius group, `2n` times
     /// fewer.
     Folded,

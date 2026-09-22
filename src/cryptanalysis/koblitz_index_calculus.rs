@@ -2524,6 +2524,11 @@ pub struct PairSumTable {
     /// (`target − P_i` is a base point or it is not), so what the table
     /// returns is right whatever the rest said.
     rests: Vec<u32>,
+    /// Packed `(i, j)` witnesses parallel to `rests` in the explicit
+    /// witnessed-compact tier.  Each index occupies sixteen bits, so
+    /// this tier is available only below 65,536 base points.  Empty in
+    /// every other representation.
+    compact_witnesses: Vec<u32>,
     /// `pack()` of each base point to its index, for recovering the
     /// summands of a compact hit.  `|F|` entries, not `|F|²`.
     index_of_point: PointIndex,
@@ -2643,6 +2648,13 @@ impl PairSumTable {
         let pairs = Self::pair_count(points);
         let buckets = 1u128 << Self::compact_bucket_bits(pairs, degree);
         pairs * 4 + buckets * 4 + pairs / 2
+    }
+
+    /// [`Self::compact_byte_size`] plus one packed pair witness per
+    /// stored rest.  This avoids a full-base recovery scan on every hit
+    /// while retaining half the entry width of the full table.
+    pub fn witnessed_compact_byte_size(points: usize, degree: u32) -> u128 {
+        Self::compact_byte_size(points, degree) + Self::pair_count(points) * 4
     }
 
     /// Stored keys for a folded table: one per `(orbit representative,
@@ -2901,6 +2913,7 @@ impl PairSumTable {
         Some(Self {
             entries,
             rests: Vec::new(),
+            compact_witnesses: Vec::new(),
             index_of_point: PointIndex::default(),
             curve,
             points,
@@ -3016,7 +3029,101 @@ impl PairSumTable {
         Some(Self {
             entries: Vec::new(),
             rests,
+            compact_witnesses: Vec::new(),
             index_of_point,
+            curve,
+            points,
+            negated,
+            bucket_start,
+            bucket_shift,
+            present,
+            present_mask,
+            fold: false,
+            canon: None,
+            orbit_start: Vec::new(),
+            orbit_members: Vec::new(),
+            tagged: false,
+        })
+    }
+
+    /// The compact table with one packed pair witness beside every
+    /// rest.  A successful lookup verifies the stored pair in the group
+    /// and returns it directly instead of scanning the full base through
+    /// [`Self::recover_pair`].
+    pub fn build_witnessed_compact_within(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        byte_budget: u128,
+    ) -> Option<Self> {
+        let n_points = fb.points.len();
+        if n_points > u16::MAX as usize
+            || Self::witnessed_compact_byte_size(n_points, kc.n) > byte_budget
+        {
+            return None;
+        }
+        let pairs = Self::pair_count(n_points);
+        if pairs > u32::MAX as u128 {
+            return None;
+        }
+        let curve = FastCurve::new(&kc.curve)?;
+        let key_bits = curve.n + 2;
+        let bucket_bits = Self::compact_bucket_bits(pairs, curve.n);
+        let bucket_shift = key_bits - bucket_bits;
+        let buckets = 1usize << bucket_bits;
+        let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+        let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+
+        let each_row = |i: usize, f: &mut dyn FnMut(u64, u32)| {
+            let mut sums = Vec::with_capacity(n_points - i);
+            let mut scratch = BatchScratch::default();
+            curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
+            for (offset, sum) in sums.into_iter().enumerate() {
+                f(sum.pack(), (i + offset) as u32);
+            }
+        };
+        let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
+        (0..n_points).into_par_iter().for_each(|i| {
+            each_row(i, &mut |key, _| {
+                counts[(key >> bucket_shift) as usize + 1].fetch_add(1, Ordering::Relaxed);
+            });
+        });
+        let mut bucket_start: Vec<u32> = counts.iter().map(|c| c.load(Ordering::Relaxed)).collect();
+        for b in 0..buckets {
+            bucket_start[b + 1] += bucket_start[b];
+        }
+        let total = bucket_start[buckets] as usize;
+        let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+        let mut rests = vec![0u32; total];
+        let mut compact_witnesses = vec![0u32; total];
+        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
+        let present_mask = (1u64 << filter_bits) - 1;
+        let words = (1usize << filter_bits) / 64;
+        let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+        let rest_slots = rests.as_mut_ptr() as usize;
+        let witness_slots = compact_witnesses.as_mut_ptr() as usize;
+        (0..n_points).into_par_iter().for_each(|i| {
+            each_row(i, &mut |key, j| {
+                let bucket = (key >> bucket_shift) as usize;
+                let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
+                // SAFETY: the bucket cursor gives this pair a unique
+                // slot inside the range sized by the counting pass.
+                unsafe {
+                    *(rest_slots as *mut u32).add(slot) = Self::compact_rest(key);
+                    *(witness_slots as *mut u32).add(slot) = ((i as u32) << 16) | j;
+                }
+                let h = (pair_filter_hash(key) & present_mask) as usize;
+                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
+            });
+        });
+        let present: Vec<u64> = present_atomic
+            .iter()
+            .map(|w| w.load(Ordering::Relaxed))
+            .collect();
+        Some(Self {
+            entries: Vec::new(),
+            rests,
+            compact_witnesses,
+            index_of_point: PointIndex::default(),
             curve,
             points,
             negated,
@@ -3252,6 +3359,7 @@ impl PairSumTable {
         Some(Self {
             entries: Vec::new(),
             rests,
+            compact_witnesses: Vec::new(),
             index_of_point,
             curve,
             points,
@@ -3427,6 +3535,8 @@ impl PairSumTable {
     pub fn tier(&self) -> &'static str {
         if self.fold {
             "folded"
+        } else if self.is_witnessed_compact() {
+            "witnessed_compact"
         } else if self.is_compact() {
             "compact"
         } else {
@@ -3442,6 +3552,11 @@ impl PairSumTable {
     /// Whether this table keeps the summands of each pair.
     pub fn is_compact(&self) -> bool {
         self.entries.is_empty() && !self.rests.is_empty()
+    }
+
+    /// Whether compact rests carry their pair indices directly.
+    pub fn is_witnessed_compact(&self) -> bool {
+        self.is_compact() && self.compact_witnesses.len() == self.rests.len()
     }
 
     /// Number of stored pair sums (with multiplicity).
@@ -3695,6 +3810,30 @@ impl PairSumTable {
             return;
         }
         if self.is_compact() {
+            if self.is_witnessed_compact() {
+                let bucket = self.bucket_of(key);
+                let Some(&lo) = self.bucket_start.get(bucket) else {
+                    return;
+                };
+                let hi = self.bucket_start[bucket + 1];
+                let rest = Self::compact_rest(key);
+                for slot in lo as usize..hi as usize {
+                    if self.rests[slot] != rest {
+                        continue;
+                    }
+                    let witness = self.compact_witnesses[slot];
+                    let i = witness >> 16;
+                    let j = witness & 0xffff;
+                    if self.curve.add(self.points[i as usize], self.points[j as usize]) == target {
+                        out.push((i, j));
+                    }
+                }
+                if out.len() > 1 {
+                    out.sort_unstable();
+                    out.dedup();
+                }
+                return;
+            }
             if self.compact_contains(key) {
                 self.recover_pair(target, out);
             }
@@ -8706,8 +8845,10 @@ mod tests {
         let (points, orbits) = (fb.points.len(), fb.signed_orbits.len());
         let full = PairSumTable::byte_size(points);
         let compact = PairSumTable::compact_byte_size(points, kc.n);
+        let witnessed = PairSumTable::witnessed_compact_byte_size(points, kc.n);
         let folded_bytes = PairSumTable::folded_byte_size(orbits, points, kc.n);
         assert!(compact < full, "the compact table is the narrower one");
+        assert!(compact < witnessed && witnessed < full);
         assert!(folded_bytes < compact, "the folded table is narrower still");
 
         // A base this narrow is far below the crossover, so the cheapest
@@ -8751,7 +8892,15 @@ mod tests {
             PairSumTable::build_compact_within(&kc, &fb, compact).expect("fits compactly");
         assert_eq!(narrow.tier(), "compact");
         assert!(PairSumTable::build_compact_within(&kc, &fb, compact - 1).is_none());
+        let direct = PairSumTable::build_witnessed_compact_within(&kc, &fb, witnessed)
+            .expect("fits with packed witnesses");
+        assert_eq!(direct.tier(), "witnessed_compact");
+        assert!(direct.is_witnessed_compact());
+        assert!(
+            PairSumTable::build_witnessed_compact_within(&kc, &fb, witnessed - 1).is_none()
+        );
         assert_eq!(wide.len(), narrow.len(), "same base, same pairs");
+        assert_eq!(direct.len(), narrow.len(), "same base, same pairs");
         assert!(tight.len() < narrow.len(), "the fold stored no less");
     }
 
@@ -8767,7 +8916,7 @@ mod tests {
         // does not key, does not probe, and does not know what a tier
         // is.
         //
-        // All three tiers are checked, because the scan reaches the
+        // All four tiers are checked, because the scan reaches the
         // table through `pairs_for_key`, whose compact branch recovers
         // summands by a scan where the folded one reads them out of the
         // entry.  A key computed one way and looked up another is a
@@ -8778,6 +8927,7 @@ mod tests {
         let n_pts = fb.points.len();
         let full = PairSumTable::byte_size(n_pts);
         let compact = PairSumTable::compact_byte_size(n_pts, kc.n);
+        let witnessed = PairSumTable::witnessed_compact_byte_size(n_pts, kc.n);
         let folded = PairSumTable::folded_byte_size(fb.signed_orbits.len(), n_pts, kc.n);
         let tiers = [
             (
@@ -8789,13 +8939,18 @@ mod tests {
                 PairSumTable::build_compact_within(&kc, &fb, compact).expect("compact fits"),
             ),
             (
+                "witnessed_compact",
+                PairSumTable::build_witnessed_compact_within(&kc, &fb, witnessed)
+                    .expect("witnessed compact fits"),
+            ),
+            (
                 "folded",
                 PairSumTable::build_within(&kc, &fb, folded).expect("folded fits"),
             ),
         ];
         assert!(
-            tiers[2].1.is_folded(),
-            "the third tier is not the folded one"
+            tiers[3].1.is_folded(),
+            "the fourth tier is not the folded one"
         );
 
         let fc = FastCurve::new(&kc.curve).expect("fast curve");
