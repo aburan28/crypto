@@ -1846,21 +1846,31 @@ does not scale.  A lever on a quantity that does not scale cannot move an
 exponent, and by §3 of `AGENTS.md` that is `engineering`: "legitimate, bounded,
 and not a finding".
 
-**Its ceiling is about `2.3×`.**  §11.6 splits the post-row-selection `C₃` into
-forward elimination `17 %`, normal forms `40 %`, characteristic polynomial
-`31 %`, eigenvectors and roots `10 %`.  A border basis replaces the first two —
-the fixed-degree Macaulay construction and its reduction.  The characteristic
-polynomial of the `64 × 64` multiplication matrix and its eigen-solve are
-properties of that matrix, not of the route taken to it, and survive unchanged.
-So even driving the Macaulay share to **zero** gives `1/0.43 ≈ 2.3×`, and the
-realistic figure is smaller, because a border basis still computes normal forms
-against the border — that is what it is.
+**Its ceiling is about `1.2×`, and an earlier revision of this section said
+`2.3×`.**  That was wrong and the error is worth stating, because it is the
+kind that makes a registration flatter itself.  §11.6 splits the
+post-row-selection `C₃` into forward elimination `17 %`, normal forms `40 %`,
+characteristic polynomial `31 %`, eigenvectors and roots `10 %`.  The first
+revision claimed a border basis replaces the first two.  **It cannot replace
+the normal forms: a border basis *is* the normal forms of the border
+monomials.**  That 40 % is the thing being computed, not overhead being
+removed.  Nor does the charpoly of the `64 × 64` multiplication matrix or its
+eigen-solve care how the matrix was reached, so `31 %` and `10 %` survive
+untouched.
+
+What is actually available is the forward elimination — and only the part of it
+spent on rows that never reach the border, since Macaulay's row selection
+(§11.6) has already dropped the 26 Koszul-redundant ones.  Driving **all** of
+it to zero gives `1/(1 − 0.17) ≈ 1.2×`.  The realistic expectation is `≈ 1×` or
+worse, because reducing the border monomials still needs enough of the row
+space to do it.  Registered at `1.2×` so that a measured `0.9×` reads as this
+section having been right about the ceiling, not as the experiment failing.
 
 **And a far larger constant has already failed to matter.**  Decomposing into
 `k − 1` points cut the per-residual constant `580×`, from `0.9` million field
 multiplications to `1,513`, and still landed `1,037×` above rho.  Against
 §11.7's remaining `1,989×` closing as `n^{-1/18}` — about two hundred doublings
-— a `2.3×` is worth roughly one.  **The verdict does not move, and this section
+— a `1.2×` is worth roughly a third of one.  **The verdict does not move, and this section
 says so in advance so that a `C₃` improvement cannot later be read as one.**
 
 **What it might fix that is not a constant.**  `solve_at_degree` carries a
@@ -1873,6 +1883,39 @@ fixed-degree cut, and closing the border is exactly what a border basis does.
 Whether it removes the fallbacks is a **correctness** question, separate from
 the constant, and is registered as its own outcome below.
 
+**The staircase, measured before the build** (`GAUDRY_DEBUG_SOLVE=1`,
+`p = 271`, seed 1, 20 residuals).  It decides how much algorithm this needs,
+so it was looked at rather than assumed:
+
+```text
+  degree 10: rows 226 cols 286 pivots 222 standard(dim) 64
+             maxima [3,4,9] box=false        — identical on all 20
+```
+
+The order ideal is **the same 64 monomials on every residual**, and it is not
+the box `[0,4)³` that `64 = 4³` invites you to guess.  It is
+`z < 2(5 − x − y)`:
+
+| `x` | admissible `z` by `y = 0, 1, 2, 3, 4` |
+|---:|---|
+| 0 | `<10`, `<8`, `<6`, `<4`, `<2` |
+| 1 | `<8`, `<6`, `<4`, `<2` |
+| 2 | `<6`, `<4` |
+| 3 | `<4` |
+
+Two things follow.  **Mourrain's iteration is not needed**: a residual-
+independent order ideal means the staircase and its border can be computed once
+per curve rather than rediscovered on each of the 941 residuals, which is the
+only structural saving on offer here.  And of the 64 products `x · b`, exactly
+**30** leave `O` and need a border normal form; the other 34 are shifts within
+it.
+
+**The coverage outcome is below the resolution of this cell.**  Zero
+`border_unreachable` events in those 20 residuals, and §11.5 recorded one
+fallback in 941 at `p = 271` seed 1 — `0.1 %`.  Whatever the border basis does
+to the fallbacks cannot be established here, and this section will not claim it
+was.
+
 **The falsifier.**  Measured on §11.5's protocol — same `p ∈ {271, 523, 1039,
 2083}`, same seeds, `--cross-check` on so the residual stream is identical and
 every output is compared against the meet-in-the-middle oracle on every
@@ -1881,7 +1924,7 @@ residual:
 | outcome | condition |
 |---|---|
 | **success (engineering)** | `C₃` below §11.6's `0.88 × 10⁶` with **zero** cross-check mismatches |
-| **correctness gain** | the fallback count reaches zero where the Macaulay cut had 1–6 per run |
+| **coverage gain** | the fallback count reaches zero where the Macaulay cut had 1–6 per run.  *Coverage*, not correctness: a fallback residual is not a wrong answer, it is one the fixed-degree cut could not solve algebraically and the meet-in-the-middle oracle solved correctly but more slowly |
 | **failure** | `C₃` at or above `0.88 × 10⁶`, or any cross-check mismatch |
 
 A mismatch is disqualifying on its own, whatever the cost column says: a
@@ -1891,7 +1934,9 @@ cheaper solver that returns a wrong decomposition is not a cheaper solver.
 `--cross-check` off; quoting the `C₃` improvement as a change in `S / rho`
 beyond the same factor; and reporting a fallback reduction as a cost result,
 since the fallbacks are 1–6 residuals of thousands and cannot move `C₃` either
-way.
+way.  Also inadmissible: describing the fallbacks as unsoundness in the current
+solver.  They are residuals it declines and hands on, and the answer that comes
+back is right.
 
 ## References
 

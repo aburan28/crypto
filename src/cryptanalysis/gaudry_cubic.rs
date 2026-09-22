@@ -1567,11 +1567,29 @@ fn solve_at_degree(
         .collect();
     let dim = standard.len();
     if debug {
+        // The staircase itself, not just its size: a border basis is cheap
+        // and fixed-shape when every residual shares one order ideal, and
+        // needs Mourrain's iteration with a commutation test when it does
+        // not.  Printed as the per-variable maxima plus the monomial set so
+        // a box `[0,k)^3` is recognisable at a glance.
+        let mut std_mono: Vec<[u8; 3]> = standard.iter().map(|&c| cols[c]).collect();
+        std_mono.sort_unstable();
+        let mx = |k: usize| std_mono.iter().map(|m| m[k]).max().unwrap_or(0);
+        let is_box = {
+            let (a, b, c) = (mx(0) + 1, mx(1) + 1, mx(2) + 1);
+            std_mono.len() == (a as usize) * (b as usize) * (c as usize)
+                && std_mono
+                    .iter()
+                    .all(|m| m[0] < a && m[1] < b && m[2] < c)
+        };
         eprintln!(
-            "  degree {degree}: rows {} cols {} pivots {} standard(dim) {dim}",
+            "  degree {degree}: rows {} cols {} pivots {} standard(dim) {dim}              maxima [{},{},{}] box={is_box} staircase={std_mono:?}",
             mat.len(),
             cols.len(),
-            pivots.len()
+            pivots.len(),
+            mx(0),
+            mx(1),
+            mx(2),
         );
     }
     if dim == 0 || dim > 64 {
