@@ -99,6 +99,18 @@ fn is_one_u32(v: &u32) -> bool {
 fn is_one_u64(v: &u64) -> bool {
     *v == 1
 }
+fn is_zero_u64(v: &u64) -> bool {
+    *v == 0
+}
+fn is_zero_usize(v: &usize) -> bool {
+    *v == 0
+}
+fn default_targeted_tail_seed() -> u64 {
+    0x5441_5247_4554_5901
+}
+fn is_default_targeted_tail_seed(v: &u64) -> bool {
+    *v == default_targeted_tail_seed()
+}
 fn baseline_is_default(b: &BaselineParams) -> bool {
     let d = BaselineParams::default();
     !b.rho && b.rho_seed == d.rho_seed && b.rho_max_iterations == d.rho_max_iterations
@@ -242,10 +254,16 @@ pub struct CollectionParams {
     pub max_units: usize,
     /// Direct pair lookups per uncovered projected column and targeted
     /// round. Zero disables the targeted tail.
+    #[serde(default, skip_serializing_if = "is_zero_u64")]
     pub targeted_tail_trials: u64,
     /// Targeted rounds allowed before falling back to ordinary units.
+    #[serde(default, skip_serializing_if = "is_zero_usize")]
     pub targeted_tail_rounds: usize,
     /// Independent probe-sequence domain for the targeted tail.
+    #[serde(
+        default = "default_targeted_tail_seed",
+        skip_serializing_if = "is_default_targeted_tail_seed"
+    )]
     pub targeted_tail_seed: u64,
 }
 impl Default for CollectionParams {
@@ -256,7 +274,7 @@ impl Default for CollectionParams {
             max_units: 64,
             targeted_tail_trials: 0,
             targeted_tail_rounds: 0,
-            targeted_tail_seed: 0x5441_5247_4554_5901,
+            targeted_tail_seed: default_targeted_tail_seed(),
         }
     }
 }
@@ -2011,6 +2029,23 @@ mod tests {
         // And a window wider than the base is the base, not the window.
         let clamped = probe_budget(&kc, &fb, &params(1_000, 3, Some(1 << 20), 8));
         assert_eq!(clamped.summands_scanned, full.summands_scanned);
+    }
+
+    #[test]
+    fn disabled_targeted_tail_is_serialization_neutral() {
+        let mut p = params(1_000, 3, Some(64), 1);
+        let collection = serde_json::to_value(&p.collection).unwrap();
+        assert!(collection.get("targeted_tail_trials").is_none());
+        assert!(collection.get("targeted_tail_rounds").is_none());
+        assert!(collection.get("targeted_tail_seed").is_none());
+
+        p.collection.targeted_tail_trials = 10_000;
+        p.collection.targeted_tail_rounds = 4;
+        p.collection.targeted_tail_seed ^= 1;
+        let enabled = serde_json::to_value(&p.collection).unwrap();
+        assert_eq!(enabled["targeted_tail_trials"], 10_000);
+        assert_eq!(enabled["targeted_tail_rounds"], 4);
+        assert!(enabled.get("targeted_tail_seed").is_some());
     }
 
     #[test]
