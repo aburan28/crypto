@@ -1477,6 +1477,74 @@ pub fn gray_find_all(forms: &[QuadraticForm], max_solutions: usize) -> Vec<u64> 
     out
 }
 
+/// Cumulative oracle accounting for [`mq_fes_decompose`] (process-wide).
+///
+/// `points` counts Boolean assignments the Gray walks visited, the native
+/// operation of this oracle.  The `*_ns` fields split its wall time into
+/// system build (template instantiation and form conversion), the walk,
+/// and root checking plus lifting.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct MqFesProfile {
+    pub calls: u64,
+    pub points: u64,
+    pub roots: u64,
+    pub build_ns: u64,
+    pub walk_ns: u64,
+    pub lift_ns: u64,
+}
+
+mod profile_counters {
+    use std::sync::atomic::AtomicU64;
+    pub(super) static CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static POINTS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROOTS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static BUILD_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static WALK_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static LIFT_NS: AtomicU64 = AtomicU64::new(0);
+}
+
+pub fn mq_fes_profile() -> MqFesProfile {
+    use profile_counters::*;
+    use std::sync::atomic::Ordering::Relaxed;
+    MqFesProfile {
+        calls: CALLS.load(Relaxed),
+        points: POINTS.load(Relaxed),
+        roots: ROOTS.load(Relaxed),
+        build_ns: BUILD_NS.load(Relaxed),
+        walk_ns: WALK_NS.load(Relaxed),
+        lift_ns: LIFT_NS.load(Relaxed),
+    }
+}
+
+pub fn mq_fes_profile_reset() {
+    use profile_counters::*;
+    use std::sync::atomic::Ordering::Relaxed;
+    for c in [&CALLS, &POINTS, &ROOTS, &BUILD_NS, &WALK_NS, &LIFT_NS] {
+        c.store(0, Relaxed);
+    }
+}
+
+fn profile_add(counter: &std::sync::atomic::AtomicU64, v: u64) {
+    counter.fetch_add(v, std::sync::atomic::Ordering::Relaxed);
+}
+
+struct LiftTimer(std::time::Instant);
+impl Drop for LiftTimer {
+    fn drop(&mut self) {
+        profile_add(&profile_counters::LIFT_NS, self.0.elapsed().as_nanos() as u64);
+    }
+}
+
+/// Position of Gray codeword `g` in the reflected Gray sequence.
+fn gray_index(mut g: u64) -> u64 {
+    let mut shift = 1;
+    while shift < 64 {
+        g ^= g >> shift;
+        shift <<= 1;
+    }
+    g
+}
+
 /// Solve a quadratic (`m = 2`) Semaev decomposition by Möbius FES.
 ///
 /// Returns the same shape as
@@ -1505,6 +1573,8 @@ pub fn mq_fes_decompose(
         BinaryPoint::Affine { x, .. } => x.clone(),
         BinaryPoint::Infinity => return (None, stats),
     };
+    profile_add(&profile_counters::CALLS, 1);
+    let build_start = std::time::Instant::now();
     let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
         &fb.subspace_basis,
         &x_r,
@@ -1531,9 +1601,17 @@ pub fn mq_fes_decompose(
         }
     };
     stats.solver_calls = 1;
+    profile_add(&profile_counters::BUILD_NS, build_start.elapsed().as_nanos() as u64);
+    let walk_start = std::time::Instant::now();
     // Prefer incremental Gray so a successful lift can stop before a full
     // Möbius transform; fall back to the auto all-roots backend otherwise.
+    let n_vars = forms.first().map_or(0, |f| f.n);
     let roots = if let Some(roots) = gray_incremental_find_all(&forms, 64) {
+        let walked = match roots.last() {
+            Some(&last) if roots.len() >= 64 => gray_index(last) + 1,
+            _ => 1u64 << n_vars,
+        };
+        profile_add(&profile_counters::POINTS, walked);
         roots
     } else {
         match fes_find_all_auto(&forms, 64) {
@@ -1544,10 +1622,13 @@ pub fn mq_fes_decompose(
             }
         }
     };
+    profile_add(&profile_counters::WALK_NS, walk_start.elapsed().as_nanos() as u64);
+    profile_add(&profile_counters::ROOTS, roots.len() as u64);
     if roots.is_empty() {
         stats.refuted = true;
         return (None, stats);
     }
+    let _lift_timer = LiftTimer(std::time::Instant::now());
     for root in roots {
         stats.models += 1;
         if !sys.equations.iter().all(|e| e.eval(root) == 0) {
