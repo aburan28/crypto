@@ -1,0 +1,30 @@
+=== bench ref rep 1
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 11152.948 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 518.61 W, 45
+=== bench topclmad-clsq rep 1
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 13939.419 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 542.14 W, 46
+=== bench topclmad-clsq-onbinv rep 1
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15371.344 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 558.11 W, 47
+=== bench ref rep 2
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 11152.723 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 507.30 W, 46
+=== bench topclmad-clsq rep 2
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 13941.887 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 527.47 W, 46
+=== bench topclmad-clsq-onbinv rep 2
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15377.227 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 514.59 W, 46
+=== bench ref rep 3
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 11150.037 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 506.48 W, 45
+=== bench topclmad-clsq rep 3
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 13932.404 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 495.79 W, 45
+=== bench topclmad-clsq-onbinv rep 3
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15371.983 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 540.50 W, 46
+=== bench ref rep 4
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 11152.744 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 504.03 W, 45
+=== bench topclmad-clsq rep 4
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 13941.999 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 546.68 W, 46
+=== bench topclmad-clsq-onbinv rep 4
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15376.291 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 523.22 W, 46
+=== bench ref rep 5
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 11148.937 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 516.07 W, 46
+=== bench topclmad-clsq rep 5
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 13946.837 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 547.49 W, 47
+=== bench topclmad-clsq-onbinv rep 5
+device: NVIDIA B200, 148 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 15368.580 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 1965 MHz, 524.91 W, 46
