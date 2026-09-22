@@ -654,6 +654,22 @@ impl Member {
     }
 }
 
+/// **The class-wide discrete logarithm.**
+///
+/// One `d` per `(seed, n, r)`, so every member of a class is handed the
+/// same one — see the transport argument in [`measure_member`].  It is
+/// derived arithmetically rather than drawn from a per-member RNG so that
+/// sharing it cannot be undone by a later change to how probes are seeded.
+pub fn class_secret(seed: u64, n: u32, r: u64) -> u64 {
+    let mut h = seed ^ ((n as u64) << 40) ^ 0x9E37_79B9_7F4A_7C15;
+    h ^= h >> 33;
+    h = h.wrapping_mul(0xFF51_AFD7_ED55_8CCD);
+    h ^= h >> 33;
+    h = h.wrapping_mul(0xC4CE_B9FE_1A85_EC53);
+    h ^= h >> 33;
+    1 + h % (r - 1)
+}
+
 /// `k!`, for the small summand counts this module uses.
 fn factorial(k: u32) -> u64 {
     (1..=k as u64).product::<u64>().max(1)
@@ -745,11 +761,27 @@ pub fn measure_member(
     let group = BinaryGroup(&me.fast);
     let mut ops = GroupOps::default();
 
-    // The planted secret and its target.  The secret is planted so that a
-    // wrong answer is detectable; it is never shown to the solver.
-    let mut rng = StdRng::seed_from_u64(opts.seed ^ (a6 << 1) ^ ((n as u64) << 40));
-    let planted = rng.gen_range(1..me.r);
+    // ── the transported instance ────────────────────────────────────
+    //
+    // `d` is a property of the CLASS, not of the member.  An isogeny
+    // `φ: E → E'` of degree coprime to `r` carries `Q = [d]P` to
+    // `φ(Q) = [d]φ(P)`, so the transported instance is a generator of
+    // `E'[r]` paired with **the same `d`**; any other generator `G'` is
+    // `[k]φ(P)` and then `[d]G' = [k]φ(Q)`, i.e. `φ` followed by an
+    // automorphism of the cyclic group.  Sharing `d` across the class is
+    // therefore exactly what transport means for the discrete logarithm,
+    // and it is what makes "every member recovered the same `d`" an
+    // end-to-end check rather than 273 unrelated DLPs.
+    //
+    // `r` is fixed across a class because `#E` is, so
+    // [`class_secret`] returns the same value for every member.
+    let planted = class_secret(opts.seed, n, me.r);
     let q_point = group.mul(&mut ops, me.generator, planted);
+
+    // Probes stay per-member: an attacker on each vertex draws their own
+    // randomness, and independent probe streams are what the sampling
+    // control in [`summarise`] assumes.
+    let mut rng = StdRng::seed_from_u64(opts.seed ^ (a6 << 1) ^ ((n as u64) << 40));
 
     // ── the factor base: abscissae in V, folded by cofactor projection ──
     let basis: Vec<F2mElement> = (0..opts.l).map(|i| to_element(1u64 << i, n)).collect();
@@ -1090,6 +1122,16 @@ pub struct ClassCostSummary {
     /// Rows whose recovered logarithm failed either check.  Any nonzero
     /// value invalidates the sweep.
     pub verification_failures: usize,
+    /// The class-wide logarithm every member was handed — the transported
+    /// instance's `d`.  `None` when nothing was measured.
+    pub transported_secret: Option<u64>,
+    /// Members that recovered exactly that `d`.
+    pub members_recovering_secret: usize,
+    /// Whether **every** measured member recovered the one class-wide `d`.
+    /// This is the end-to-end statement the transport buys: the same
+    /// discrete logarithm, solved independently on every vertex of the
+    /// class.
+    pub all_recovered_transported_secret: bool,
     /// Rows with a contradictory relation.  Likewise fatal.
     pub inconsistent_rows: usize,
 
@@ -1297,6 +1339,14 @@ pub fn summarise(
         f64::NAN
     };
 
+    let transported_secret = rows.first().map(|r| r.planted);
+    let members_recovering_secret = rows
+        .iter()
+        .filter(|r| r.verified && Some(r.planted) == transported_secret && r.log == Some(r.planted))
+        .count();
+    let all_recovered_transported_secret =
+        !rows.is_empty() && members_recovering_secret == rows.len();
+
     let koblitz = rows
         .iter()
         .find(|r| r.is_koblitz)
@@ -1311,6 +1361,9 @@ pub fn summarise(
         measured: rows.len(),
         skipped: attempted.saturating_sub(rows.len()),
         verification_failures: rows.iter().filter(|r| !r.verified).count(),
+        transported_secret,
+        members_recovering_secret,
+        all_recovered_transported_secret,
         inconsistent_rows: rows.iter().filter(|r| r.inconsistent_relations > 0).count(),
         reductions_per_call: spread,
         ns_per_call: Spread::of(&ns),
@@ -1345,6 +1398,12 @@ impl ClassCostSummary {
     /// successful yield conclusion.
     fn unreadable(&self) -> Option<&'static str> {
         if self.verification_failures > 0 || self.inconsistent_rows > 0 {
+            return Some("INVALID");
+        }
+        if self.measured >= 2 && !self.all_recovered_transported_secret {
+            // Members disagreeing about `d` means they were not solving the
+            // transported instance, so the sweep is not a class measurement
+            // at all, whatever its spreads look like.
             return Some("INVALID");
         }
         if self.measured < 2 {
@@ -1526,6 +1585,9 @@ mod tests {
             skipped: 0,
             verification_failures: 0,
             inconsistent_rows: 0,
+            transported_secret: Some(12345),
+            members_recovering_secret: 273,
+            all_recovered_transported_secret: true,
             reductions_per_call: Spread::of(&[1.0, 1.0, 1.0]),
             ns_per_call: Spread::of(&[100.0, 100.0, 100.0]),
             yield_per_probe: Spread::of(&[0.004, 0.004, 0.004]),
@@ -1541,6 +1603,39 @@ mod tests {
             koblitz_reductions_per_call: Some(1.0),
             best_ratio_to_koblitz: Some(1.0),
         }
+    }
+
+    #[test]
+    fn every_member_of_a_class_is_handed_the_same_discrete_logarithm() {
+        // The transported instance: an isogeny carries Q = [d]P to
+        // [d]φ(P), so `d` belongs to the class, not to the member.  An
+        // earlier revision keyed the secret on `a₆` and therefore gave
+        // every vertex an unrelated DLP; this pins the fix.
+        let n = 17;
+        let (_, r, _) = preferred_family(n).expect("n = 17 has a usable family");
+        let d = class_secret(DEFAULT_SEED, n, r);
+        assert!(d >= 1 && d < r);
+        for a6 in [1u64, 13, 4097, 65535] {
+            assert_eq!(
+                class_secret(DEFAULT_SEED, n, r),
+                d,
+                "a₆ = {a6} must not change the class-wide secret"
+            );
+        }
+        // A different class gets a different instance.
+        let (_, r19, _) = preferred_family(19).expect("n = 19 has a usable family");
+        assert_ne!(class_secret(DEFAULT_SEED, 19, r19), d);
+    }
+
+    #[test]
+    fn a_class_whose_members_disagree_about_d_is_invalid() {
+        let split = ClassCostSummary {
+            all_recovered_transported_secret: false,
+            members_recovering_secret: 200,
+            ..clean_summary()
+        };
+        assert_eq!(split.verdict(), "INVALID");
+        assert_eq!(split.yield_verdict(), "INVALID");
     }
 
     #[test]

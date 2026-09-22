@@ -192,6 +192,20 @@ fn main() {
             "   verification failures: {}   inconsistent relation rows: {}",
             summary.verification_failures, summary.inconsistent_rows
         );
+        println!(
+            "   transported instance: d = {} handed to every member; {} of {} recovered it → {}",
+            summary
+                .transported_secret
+                .map(|d| d.to_string())
+                .unwrap_or_else(|| "-".into()),
+            summary.members_recovering_secret,
+            summary.measured,
+            if summary.all_recovered_transported_secret {
+                "THE WHOLE CLASS SOLVED THE SAME DLP"
+            } else {
+                "MEMBERS DISAGREE — not a class measurement"
+            }
+        );
 
         // Per-member table, truncated but always showing the extremes and
         // the Koblitz curve itself — the baseline the folklore is about.
@@ -367,8 +381,10 @@ fn write_json(
             census.twist_order, census.predicted_class_size, census.agrees_with_cm
         ));
         s.push_str(&format!(
-            "      \"summary\": {{\"measured\": {}, \"skipped\": {}, \"verification_failures\": {}, \"inconsistent_rows\": {}, \"verdict\": \"{}\",\n",
-            sum.measured, sum.skipped, sum.verification_failures, sum.inconsistent_rows, sum.verdict()
+            "      \"summary\": {{\"measured\": {}, \"skipped\": {}, \"verification_failures\": {}, \"inconsistent_rows\": {}, \"transported_secret\": {}, \"members_recovering_secret\": {}, \"all_recovered_transported_secret\": {}, \"verdict\": \"{}\",\n",
+            sum.measured, sum.skipped, sum.verification_failures, sum.inconsistent_rows,
+            opt_u64(sum.transported_secret), sum.members_recovering_secret,
+            sum.all_recovered_transported_secret, sum.verdict()
         ));
         s.push_str(&format!(
             "        \"reductions_per_call\": {}, \"ns_per_call\": {}, \"yield_per_probe\": {}, \"normalised_yield\": {}, \"unknowns\": {}, \"yield_verdict\": \"{}\",\n",
