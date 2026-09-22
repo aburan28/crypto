@@ -339,7 +339,114 @@ pub fn reduce(r: &F2BoolPoly, basis: &[F2BoolPoly]) -> F2BoolPoly {
 /// Returns a reduced Gröbner basis (no leading-term redundancy, each
 /// non-leading term irreducible modulo the others).
 pub fn groebner_basis_f2(initial: Vec<F2BoolPoly>, n_vars: usize) -> Vec<F2BoolPoly> {
+    groebner_basis_f2_stats(initial, n_vars).0
+}
+
+/// What one Gröbner run cost.
+///
+/// The degree fields are the quantity Petit–Quisquater's Table 2 calls
+/// the *maximal degree reached*, which is the interesting one because
+/// it comes out **below** the first-fall-degree bound: the bound is
+/// derived from a generic system and these are not generic.  The
+/// operation counts are the metric `AGENTS.md` §6 asks for; `wall_ns`
+/// is the practicality note beside them, never the headline.
+#[derive(Clone, Copy, Debug, Default, serde::Serialize)]
+pub struct GbStats {
+    /// Highest lcm degree of a pair actually processed.  Buchberger
+    /// reduces pairs that contribute nothing, so this runs above the
+    /// degree the computation needed.
+    pub max_pair_degree: u32,
+    /// Highest lcm degree of a pair whose reduction produced a **new
+    /// basis element**.  This is the *solving degree*: the highest
+    /// degree at which the computation actually learned something, and
+    /// the right analogue of the top Macaulay-matrix degree an F4 run
+    /// reports.  It is the column to compare against a degree bound;
+    /// `max_pair_degree` is a property of the pair strategy.
+    pub solving_degree: u32,
+    /// Highest degree of any monomial in any intermediate polynomial,
+    /// which can exceed `max_pair_degree` during a reduction.
+    pub max_poly_degree: u32,
+    pub pairs_considered: u64,
+    /// Pairs the coprime-leading-monomial criterion dropped unreduced.
+    pub pairs_coprime_skipped: u64,
+    pub spolys: u64,
+    pub new_generators: u64,
+    /// Reduction steps, one `acc ← acc + m·b` each.
+    pub reduction_steps: u64,
+    /// Monomials read or written by an addition or a monomial multiply.
+    /// This is the engine's operation count.
+    pub mono_ops: u64,
+    /// Largest number of monomials the basis held at once; at eight
+    /// bytes a monomial that is the engine's own peak footprint, which
+    /// is what this reports in place of an operating-system RSS sample.
+    pub peak_basis_monomials: u64,
+    pub basis_len: u64,
+    pub wall_ns: u64,
+}
+
+impl GbStats {
+    /// The peak footprint in bytes: one `u64` mask per monomial held.
+    pub fn peak_bytes(&self) -> u64 {
+        self.peak_basis_monomials * 8
+    }
+}
+
+fn add_counted(a: &F2BoolPoly, b: &F2BoolPoly, st: &mut GbStats) -> F2BoolPoly {
+    st.mono_ops += (a.terms.len() + b.terms.len()) as u64;
+    a.add(b)
+}
+
+fn mul_mono_counted(a: &F2BoolPoly, m: F2BoolMono, st: &mut GbStats) -> F2BoolPoly {
+    st.mono_ops += a.terms.len() as u64;
+    a.mul_mono(m)
+}
+
+fn note_degree(p: &F2BoolPoly, st: &mut GbStats) {
+    if let Some(d) = p.terms.iter().map(|t| t.degree()).max() {
+        st.max_poly_degree = st.max_poly_degree.max(d);
+    }
+}
+
+/// [`reduce`], counting the steps and the monomials they touch.
+fn reduce_counted(r: &F2BoolPoly, basis: &[F2BoolPoly], st: &mut GbStats) -> F2BoolPoly {
+    let mut acc = r.clone();
+    'outer: loop {
+        note_degree(&acc, st);
+        for term_idx in 0..acc.terms.len() {
+            let term = acc.terms[term_idx];
+            for b in basis {
+                let Some(blt) = b.lt() else { continue };
+                if blt.divides(term) {
+                    let m = term.div(blt);
+                    let scaled = mul_mono_counted(b, m, st);
+                    acc = add_counted(&acc, &scaled, st);
+                    st.reduction_steps += 1;
+                    continue 'outer;
+                }
+            }
+        }
+        return acc;
+    }
+}
+
+fn basis_monomials(basis: &[F2BoolPoly]) -> u64 {
+    basis.iter().map(|p| p.terms.len() as u64).sum()
+}
+
+/// [`groebner_basis_f2`], with the cost of the run beside the basis.
+pub fn groebner_basis_f2_stats(
+    initial: Vec<F2BoolPoly>,
+    n_vars: usize,
+) -> (Vec<F2BoolPoly>, GbStats) {
+    let started = std::time::Instant::now();
+    let mut st = GbStats::default();
     let mut basis: Vec<F2BoolPoly> = initial.into_iter().filter(|p| !p.is_zero()).collect();
+    for p in &basis {
+        if let Some(d) = p.terms.iter().map(|t| t.degree()).max() {
+            st.max_poly_degree = st.max_poly_degree.max(d);
+        }
+    }
+    st.peak_basis_monomials = basis_monomials(&basis);
     // Pair queue with **normal selection strategy**: process the pair
     // whose LCM has the smallest total degree first.  This is the
     // Bayer–Stillman recommendation and prevents intermediate-polynomial
@@ -361,17 +468,25 @@ pub fn groebner_basis_f2(initial: Vec<F2BoolPoly>, n_vars: usize) -> Vec<F2BoolP
             .min_by_key(|(_, p)| p.2)
             .map(|(idx, _)| idx)
             .unwrap();
-        let (i, j, _) = pairs.swap_remove(min_idx);
+        let (i, j, lcm_deg) = pairs.swap_remove(min_idx);
+        st.pairs_considered += 1;
 
         // Criterion 1: coprime leading monomials → S-poly reduces to 0.
         let li = basis[i].lt().unwrap();
         let lj = basis[j].lt().unwrap();
         if li.gcd(lj) == F2BoolMono::one() {
+            st.pairs_coprime_skipped += 1;
             continue;
         }
+        st.max_pair_degree = st.max_pair_degree.max(lcm_deg);
+        st.spolys += 1;
         let s = spoly(&basis[i], &basis[j]);
-        let r = reduce(&s, &basis);
+        st.mono_ops += (basis[i].terms.len() + basis[j].terms.len()) as u64 * 2;
+        note_degree(&s, &mut st);
+        let r = reduce_counted(&s, &basis, &mut st);
         if !r.is_zero() {
+            st.new_generators += 1;
+            st.solving_degree = st.solving_degree.max(lcm_deg);
             let new_idx = basis.len();
             // Add new pairs (k, new_idx) with their LCM degrees.
             let r_lt = r.lt().unwrap();
@@ -380,17 +495,25 @@ pub fn groebner_basis_f2(initial: Vec<F2BoolPoly>, n_vars: usize) -> Vec<F2BoolP
                 pairs.push((k, new_idx, lcm_deg));
             }
             basis.push(r);
+            st.peak_basis_monomials = st.peak_basis_monomials.max(basis_monomials(&basis));
         }
     }
 
     // Inter-reduce to a reduced GB.
-    interreduce(basis, n_vars)
+    let out = interreduce_counted(basis, n_vars, &mut st);
+    st.basis_len = out.len() as u64;
+    st.wall_ns = started.elapsed().as_nanos() as u64;
+    (out, st)
 }
 
 /// Drop redundant leading terms, then reduce each remaining polynomial
 /// against the others.  Returns a (reduced-shape) Gröbner basis whose
 /// leading monomials are pairwise-incomparable.
-fn interreduce(mut basis: Vec<F2BoolPoly>, n_vars: usize) -> Vec<F2BoolPoly> {
+fn interreduce_counted(
+    mut basis: Vec<F2BoolPoly>,
+    n_vars: usize,
+    st: &mut GbStats,
+) -> Vec<F2BoolPoly> {
     // Drop any polynomial whose LT is divisible by some *other*'s LT.
     // For *equal* LTs we drop the earlier index (so each LT-equivalence
     // class contributes exactly one survivor).
@@ -437,7 +560,7 @@ fn interreduce(mut basis: Vec<F2BoolPoly>, n_vars: usize) -> Vec<F2BoolPoly> {
             .filter(|(j, _)| *j != i)
             .map(|(_, q)| q.clone())
             .collect();
-        let r = reduce(&pruned[i], &others);
+        let r = reduce_counted(&pruned[i], &others, st);
         if !r.is_zero() {
             final_basis.push(r);
         }
