@@ -95,3 +95,5 @@ def main(job: str = "benchmarks/two-chains/gpujob.sh", out: str = "/tmp/ecc2k130
                    finishedAt=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
     (outdir / "launch.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print("job exit code", result["exitCode"], "on", result["gpu"], "- results in", outdir / "results")
+    if result["exitCode"] != 0:
+        raise SystemExit(1)
