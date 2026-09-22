@@ -1463,8 +1463,20 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         Gr&ouml;bner solve on the descended system for fixed <code>X&#8321;</code> has a deciding
         degree that grows as <code>&#8467;/2</code>, and the multilinear block structure of these
         systems cannot be used as a Macaulay shift restriction at all, because the only shift that
-        preserves multilinearity is the trivial one. The open direction is a border basis in place
-        of the fixed-degree Macaulay cut, and a merge-level cap for the large-prime linear algebra.</p>
+        preserves multilinearity is the trivial one. <s>The open direction is a border basis in place
+        of the fixed-degree Macaulay cut, and a merge-level cap for the large-prime linear algebra.</s>
+        <strong>Both were built or bounded, and neither helps.</strong> The merge-level cap is
+        measured in &sect;11.11: it lowers the solve exponent
+        0.045&thinsp;&plusmn;&thinsp;0.017 and the eliminator cancels it, leaving the method
+        +0.051&thinsp;&plusmn;&thinsp;0.031 worse end to end. The border basis is bounded in
+        &sect;11.13 without writing it, from the solver's own counters: the staircase is fixed and
+        identical on every residual (not the box 64&thinsp;=&thinsp;4<sup>3</sup> invites, but
+        z&thinsp;&lt;&thinsp;2(5&minus;x&minus;y)); the normal forms reach 67% of the echelon; and
+        the elimination spent on pivots they never reach is 5.6% of C&#8323;, so the whole
+        direction is worth at most <strong>1.06&times;</strong>. What &sect;11.5 already does
+        &mdash; forward elimination plus memoised back-substitution restricted to the monomials
+        actually reached &mdash; is a border-basis computation in all but name, which is why so
+        little was left. Class <span class="chip">engineering</span>, negative, for both.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
     </div>

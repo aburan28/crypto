@@ -1938,6 +1938,68 @@ way.  Also inadmissible: describing the fallbacks as unsoundness in the current
 solver.  They are residuals it declines and hands on, and the answer that comes
 back is right.
 
+### 11.13 The border basis, measured before it was written: a `1.06×` ceiling
+
+**Instrumentation:** `GAUDRY_DEBUG_SOLVE=1`, `p = 271`, seed 1, `--cross-check`,
+25 residuals — §11.5's cell, so these numbers sit beside §11.6's directly.
+`solve_at_degree` now prints the staircase, how much of the echelon the normal
+forms reach, and the elimination cost attributed per pivot column.
+
+§11.12 registered this as `engineering` by construction and put its ceiling at
+`1.2×`.  Three measurements taken before writing the solver put it at **`1.06×`**,
+and that is the result.
+
+**1. The staircase is fixed and is not the box.**  Identical on all 25
+residuals — `rows 226, cols 286, pivots 222, dim 64` — with shape
+`z < 2(5 − x − y)`, maxima `[3, 4, 9]`.  So no Mourrain iteration is needed, and
+of the 64 products `x · b` exactly 30 leave the order ideal.
+
+**2. The normal forms reach `67 %` of the echelon.**  `149` of `222` pivots,
+`183` of `286` columns, again identical on every residual.  A third of the
+elimination produces pivot rows that nothing afterwards consults.
+
+**3. That third is `5.6 %` of `C₃`.**  Attributing elimination multiplications
+to the pivot column that caused them:
+
+| | per residual | of `C₃ ≈ 0.88 × 10⁶` |
+|---|---:|---:|
+| elimination, total | `≈ 150 300` | `17.0 %` |
+| — on pivots the normal forms never reach | `≈ 49 000` | **`5.6 %`** |
+
+`32.4 %` to `32.8 %` of the elimination across 25 residuals, a very tight band.
+The `17.0 %` is worth noting on its own: it reproduces §11.6's `17 %` forward-
+elimination share from an independent counter, so the split that ceiling rests
+on is confirmed rather than assumed.
+
+**The ceiling, therefore, is `1/(1 − 0.056) = 1.06×`** — and that is an
+*upper* bound reached only by an elimination that skips every unreached pivot
+at zero cost.  A real lazy elimination cannot: the unreached columns are zero
+in the reached rows *because* the elimination zeroed them, so skipping a pivot
+leaves live entries below it and the dependency has to be tracked rather than
+assumed away.  The achievable figure is below `1.06×`.
+
+**Why the solver was not then written.**  §11.12's falsifier asks for `C₃`
+below `0.88 × 10⁶`, and §11.12's stop condition says not to reach for a harder
+algorithm when the minimal one does not clear it.  A `1.06×` ceiling clears it
+by `5.6 %` at most, on a phase that §11.5 measures as **flat in `n`** and that
+§11.7 shows is `2 %` of a method sitting `1,989×` from rho.  The implementation
+would confirm a number already bounded by the repo's own counters, at the price
+of a lazy elimination whose correctness surface is the part of this that could
+actually go wrong.
+
+**What this closes.**  The scoreboard has carried "the open direction is a
+border basis in place of the fixed-degree Macaulay cut" since §11.6.  It is not
+open any more, and it did not need the build to close it: **the direction is
+worth at most `1.06×`, measured.**  §11.5's own description of what it already
+does — "forward elimination plus back-substitution restricted, by memoisation,
+to the pivot columns those products actually reach" — is a border-basis
+computation in all but name, which is why so little is left.  The `5.6 %` is
+the gap between *lazy back-substitution*, which this solver has, and *lazy
+elimination*, which it does not.
+
+**Class: `engineering`, negative, and `0 / 25` cross-check mismatches** on the
+instrumented runs — the diagnostics do not touch the arithmetic.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,

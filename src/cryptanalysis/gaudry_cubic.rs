@@ -1556,7 +1556,8 @@ fn solve_at_degree(
     }
     stats.macaulay_rows += mat.len() as u64;
     let before = *muls;
-    let pivots = echelon_mod_p(&mut mat, p, muls);
+    let mut per_pivot: HashMap<usize, u64> = HashMap::new();
+    let pivots = echelon_mod_p_attributed(&mut mat, p, muls, &mut per_pivot);
     stats.echelon_muls += *muls - before;
     let pivot_set: std::collections::HashSet<usize> = pivots.iter().copied().collect();
 
@@ -1641,6 +1642,34 @@ fn solve_at_degree(
     let mut nfs = NormalForms::new(&mat, &pivots, &std_index, dim, p);
     // Multiplication matrix of e₁: column b ↦ NF(e₁ · b).
     let m_e1 = mult_matrix(&cols, &col_index, &standard, [1, 0, 0], &mut nfs, muls);
+    if debug {
+        // How much of the echelon the normal forms actually depend on.  The
+        // forward elimination reduces all 226 rows; if the border reaches
+        // only a fraction of the pivots, a lazier elimination has something
+        // to skip, and if it reaches nearly all of them it has nothing.
+        let reached = nfs.memo.iter().filter(|m| m.is_some()).count();
+        let reached_pivots = pivots
+            .iter()
+            .filter(|&&c| nfs.memo[c].is_some())
+            .count();
+        eprintln!(
+            "  degree {degree}: nf resolved {reached} columns of {}, of which              {reached_pivots} of {} pivots ({:.0}%)",
+            cols.len(),
+            pivots.len(),
+            100.0 * reached_pivots as f64 / pivots.len().max(1) as f64,
+        );
+        let elim: u64 = per_pivot.values().sum();
+        let wasted: u64 = pivots
+            .iter()
+            .filter(|&&c| nfs.memo[c].is_none())
+            .filter_map(|c| per_pivot.get(c))
+            .sum();
+        eprintln!(
+            "  degree {degree}: elimination {elim} muls, {wasted} on pivots the \
+             normal forms never reach ({:.1}% of elimination)",
+            100.0 * wasted as f64 / elim.max(1) as f64,
+        );
+    }
     stats.macaulay_muls += *muls - before;
     let Some(m_e1) = m_e1 else {
         if debug {
@@ -1790,6 +1819,56 @@ fn solve_at_degree(
 /// of the pivot row are multiplied — `muls` counts exactly those.
 /// Returns the pivot columns in order; row `k` is the pivot row of
 /// `pivots[k]` and rows from `pivots.len()` on are zero.
+/// Forward elimination, additionally reporting the multiplications spent on
+/// each pivot column.  A border basis needs only the pivots its normal forms
+/// actually reach, so the work attributed to the rest is the exact ceiling on
+/// what a lazier elimination could skip -- measured rather than estimated.
+fn echelon_mod_p_attributed(
+    m: &mut [Vec<u64>],
+    p: u64,
+    muls: &mut u64,
+    per_pivot: &mut HashMap<usize, u64>,
+) -> Vec<usize> {
+    let rows = m.len();
+    let cols = if rows > 0 { m[0].len() } else { 0 };
+    let mut pivots = Vec::new();
+    let mut r = 0;
+    for c in 0..cols {
+        if r >= rows {
+            break;
+        }
+        let Some(pr) = (r..rows).find(|&i| m[i][c] != 0) else {
+            continue;
+        };
+        let spent_before = *muls;
+        m.swap(r, pr);
+        let inv = inv_mod(m[r][c], p);
+        let mut nz: Vec<usize> = Vec::new();
+        for j in c..cols {
+            if m[r][j] != 0 {
+                m[r][j] = mm(m[r][j], inv, p);
+                nz.push(j);
+            }
+        }
+        *muls += nz.len() as u64;
+        let pivot_row = m[r].clone();
+        for i in (r + 1)..rows {
+            if m[i][c] != 0 {
+                let fct = m[i][c];
+                for &j in &nz {
+                    m[i][j] = sm(m[i][j], mm(fct, pivot_row[j], p), p);
+                }
+                *muls += nz.len() as u64;
+            }
+        }
+        per_pivot.insert(c, *muls - spent_before);
+        pivots.push(c);
+        r += 1;
+    }
+    pivots
+}
+
+#[allow(dead_code)]
 fn echelon_mod_p(m: &mut [Vec<u64>], p: u64, muls: &mut u64) -> Vec<usize> {
     let rows = m.len();
     let cols = if rows > 0 { m[0].len() } else { 0 };
