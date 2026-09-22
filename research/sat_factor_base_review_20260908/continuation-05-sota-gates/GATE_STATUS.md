@@ -1,6 +1,6 @@
 # Koblitz index-calculus SOTA gate status
 
-Current through Stage 139, 2026-09-22. The historical optimization chain is
+Current through Stage 140, 2026-09-22. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -112,6 +112,13 @@ the 10-, 12-, and 14-unit frontier controls only.  The selected speedup is
 therefore attributed to the 15-unit parameter choice, with the lower-unit rank
 frontier retained as charged support.
 
+Stage 140 tests stopping each raw-coverage attempt after the first deterministic
+2,048-probe batch containing an exact relation.  It reduces targeted lookups
+8.01 percent and preserves a complete verified unknown-scalar solve, but a
+matched default-thread ABBA control regresses median full wall 4.24 percent and
+whole-process CPU 0.19 percent.  The candidate is archived and rejected; the
+Stage 139 selected implementation and result remain current.
+
 The campaign has target-independent algebraic factor bases; matched native-XOR,
 WDSat, CryptoMiniSat, direct-MITM, GGMP, and signed-Frobenius-rho controls; a
 balanced 160-instance PDP panel through `n=59`; public unknown-scalar end-to-end
@@ -121,12 +128,12 @@ does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. The Stage 138 frontier plus Stage 139 rank-disabled attribution control charge 21 processes: 1,033.485775 sequential wall-seconds, 3,942.905096 core-seconds and 10,091,528,192 B maximum RSS. These incremental charges do not replace Stage 137's 23 processes. One inherited preliminary harness process has 15.614915 s observed wall but no retained CPU/RSS receipt and remains explicitly excluded. | Execute licensed Magma with complete resources and independently recover or repeat the missing preliminary receipt; preinstalled OS/toolchain acquisition remains excluded. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. The current `n=53` campaign retains 318 measured processes / 1,395.640868 sequential wall-seconds / 3,192.181904 core-seconds. The Stage 138--140 frontier, attribution, and first-hit controls charge 30 processes: 1,667.084223 sequential wall-seconds, 7,749.345571 core-seconds and 10,091,528,192 B maximum RSS. These incremental charges do not replace Stage 137's 23 processes. One inherited preliminary harness process has 15.614915 s observed wall but no retained CPU/RSS receipt and remains explicitly excluded. | Execute licensed Magma with complete resources and independently recover or repeat the missing preliminary receipt; preinstalled OS/toolchain acquisition remains excluded. |
 | 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract, seal the return before truth scoring, and report F4 resources. |
 | 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent** | The selected rank-tail `n=59` receipts report default-thread IC 58.027800 s / 526.896900 core-seconds / 10,072,866,816 B RSS and one-worker IC 431.866038 s / 428.938946 core-seconds / 10,043,244,544 B RSS. Against selected Stage 137, default IC wall improves 38.31% and CPU 29.77%; one-worker wall improves 31.49% and CPU 31.51%. | Supply the same fields for licensed Magma F4. SAT conflicts remain inapplicable to exact pair-table arms and are reported as null. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage including one completed larger IC run** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and `n=59`. Stages 129--130 retain the standard `n=59` cap and width frontier. Stages 131--138 complete and optimize the cofactor-projected `n=59, ell=15, m=3` public unknown-scalar workflow through persisted coverage and sparse-rank tails. | The evidence is finite and toy-sized; it is not an asymptotic scaling law or a literature-scale speed record. |
 | 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, 41, 53, and 59** | Stage 108 archives the `n=53` public hash-seed-53001 run. Stage 138 derives all 16,344 `n=59` logs from 31,727 uniform relations plus 71 public-matrix-selected relations, recovers `d=17861472351607`, and verifies `[d]G=Q` in default and one-worker modes. Neither target scalar nor factor-base logs are supplied. | Repeat on independent public seeds and obtain unaffiliated replay; these strengthen rather than replace the finite gate-5 execution. |
-| 6. Full cost against automorphism-optimized Pollard rho | **Failed for current `n=59`; `n=41` loss; `n=53` default-thread wall pass only** | The corrected Stage 139 attribution is 1.5M uniform probes / 1.536B scans plus 2.95M raw-uncovered-column lookups; the rank-disabled control reproduces the selected relation stream. Full IC improves substantially in both thread classes, but selected absolute IC/rho remains 103.215x default and 773.321x one-worker. | Reduce the same `n=59` full cost without hiding factor-base discovery, the 10 GB construction peak or policy search; preserve the `n=53` result and obtain independent replay. |
+| 6. Full cost against automorphism-optimized Pollard rho | **Failed for current `n=59`; `n=41` loss; `n=53` default-thread wall pass only** | The corrected Stage 139 attribution is 1.5M uniform probes / 1.536B scans plus 2.95M raw-uncovered-column lookups; the rank-disabled control reproduces the selected relation stream. Stage 140's 2.714M-lookup first-hit candidate regresses matched full wall and is rejected. Selected absolute IC/rho remains 103.215x default and 773.321x one-worker. | Reduce the same `n=59` full cost without hiding factor-base discovery, the 10 GB construction peak or policy search; preserve the `n=53` result and obtain independent replay. |
 | 7. Independent external reproduction and novelty review | **Missing** | Issue [#97](https://github.com/aburan28/crypto/issues/97) and [mtrimoska/EC-Index-Calculus-Benchmarks#1](https://github.com/mtrimoska/EC-Index-Calculus-Benchmarks/issues/1) now include the five-run selected panel, current-head source pin, unknown-scalar result, exact verifier boundary, and the `CONCUR` / `QUALIFIED` / `BREAKS` format. Stage 11 archives GitHub Actions run [34428320022](https://github.com/aburan28/crypto/actions/runs/34428320022) as a project-authored Linux degree-23 reproduction (`STAGE11_RESULTS.md`); it is not independent review. Reviewers bind each gate to per-instance records with [the evidence guide](EXTERNAL_REVIEW_EVIDENCE.md) and [review template](EXTERNAL_NOVELTY_REVIEW_TEMPLATE.json); empty fields remain requests, not completed review. | An unaffiliated reviewer must return a sealed reproduction and source-pinned novelty/correctness assessment. Project-authored CI and replays do not satisfy independence. |
 
 The local measurements above are limited to their stated fields. The meter's
@@ -409,6 +416,19 @@ entered the rank fallback.  The rank phase is retained as a lower-prefix
 frontier mechanism, while the selected speedup is attributed to uncovered-column
 targeting after 15 uniform units.  The two correction processes add 36.873650
 wall-seconds, 194.727064 core-seconds and 10,085,711,872 B peak RSS.
+
+Stage 140 evaluates a deterministic first-hit coverage tail.  Thirty-two
+64-probe runs execute in parallel per batch; after the first successful batch,
+only its earliest exact relation is retained.  Candidate lookups fall from
+2,950,000 to 2,713,712 and targeted relations from 71 to 58.  Both matched
+candidate runs emit combined relation SHA-256
+`dcbf0aad8eabce6f22241801f70ade6f4d948e2d1bc67d39a5dd1d2fd140e76c`,
+derive every log, and recover the same public-target scalar.  Across the
+default-thread ABBA pair, median whole wall rises from 78.506868 to 81.833509
+seconds and median CPU from 540.796846 to 541.830480 core-seconds.  The nine
+charged processes consume 633.598448 sequential wall-seconds, 3,806.440475
+core-seconds and 10,080,059,392 B peak RSS.  The source patch is archived but
+not applied to the selected code.
 
 The narrow supported conclusion is unchanged: this is strong internal
 engineering and finite public toy-research evidence. The known SAT-based
