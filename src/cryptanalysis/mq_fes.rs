@@ -272,14 +272,14 @@ impl Ffs {
 /// ```
 ///
 /// so the hot loop no longer walks all `n` derivatives.  Dispatch:
-/// - `n ≥ 4`: scalar `L = 4` (16-step) chunk.  Full enum (`max_solutions > 1`)
-///   uses libfes-style **batch probe then harvest** (record only when a chunk
-///   may contain a zero).  Early-exit `find_one` checks every step.
+/// - `n ≥ 8`: hardcoded scalar `L = 8` (256-step) chunk (libfes unroll).
+/// - `n ≥ 4`: scalar `L = 4` (16-step) chunk.
 /// - else: minimal one-step FFS.
 ///
-/// Scalar `L = 8` and AVX2 4×u64 batch remain available for explicit callers /
-/// experiments (`gray_ffs_unrolled_l8*`, `mq_fes_avx2`).  AVX2 batch is
-/// auto-selected for sparse full enums when [`prefer_avx2_batch`] says so.
+/// Batch-probe and AVX2 4×u64 helpers remain available for experiments
+/// (`gray_ffs_unrolled_l4_batch`, `gray_ffs_unrolled_l8_batch`, `mq_fes_avx2`)
+/// but are not auto-selected: on packed-u64 single-system Semaev they lose to
+/// the hardcoded scalar path (well-predicted per-step zero checks).
 /// Inspired by <https://github.com/cbouilla/libfes-lite>
 /// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`, batch asm) and
 /// ALMASTY `ffs.h`.
@@ -296,16 +296,8 @@ pub fn gray_incremental_find_all(
         return None;
     }
 
-    // Full enum / multi-root: try AVX2 batch when the heuristic says it wins.
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    if max_solutions > 1 && prefer_avx2_batch(n, m, max_solutions) {
-        if let Some(out) = crate::cryptanalysis::mq_fes_avx2::gray_ffs_avx2_8x32_batch(
-            forms,
-            max_solutions,
-        ) {
-            return Some(out);
-        }
-    }
+    // AVX2 4×u64 (+ batch) stays opt-in: release walls still lose to hardcoded
+    // scalar L=4 / L=8 on single-system packed-u64 Semaev instances.
 
     // Stack tables: Fq through fictive n+1 is at most idxq(0,34)=561; Fl ≤ 34.
     let mut fq = [0u64; 561];
@@ -313,12 +305,10 @@ pub fn gray_incremental_find_all(
     fill_fq_fl(forms, n, &mut fq, &mut fl);
 
     let mut out = Vec::new();
-    if n >= 4 {
-        if max_solutions == 1 {
-            gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
-        } else {
-            gray_ffs_unrolled_l4_batch(&mut fq, &mut fl, n, max_solutions, &mut out);
-        }
+    if n >= 8 {
+        gray_ffs_unrolled_l8(&mut fq, &mut fl, n, max_solutions, &mut out);
+    } else if n >= 4 {
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
     } else {
         gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
     }
@@ -364,12 +354,9 @@ pub(crate) fn fill_fq_fl(
 /// Tuned from release walls; engineering lever only (floor unchanged).
 #[inline]
 pub fn prefer_avx2_batch(n: usize, m: usize, max_solutions: usize) -> bool {
-    // Early-exit find_one stays on scalar (cheaper per-step + no rewind).
-    if max_solutions <= 1 {
-        return false;
-    }
-    // Prefer AVX2 when n is large enough that 4-lane specialisation amortises.
-    n >= 14 && n <= 24 && m >= 16 && m <= 64
+    let _ = (n, m, max_solutions);
+    // Measured slower than hardcoded scalar L=4/L=8 on this host; keep false.
+    false
 }
 
 /// libfes `generic_minimal`: one FFS step per point.
@@ -562,7 +549,7 @@ fn l8_fq_index(kind: u8, payload: u16, alpha: usize) -> usize {
     }
 }
 
-/// Scalar `L = 8` (256-step) Gray chunk — early-exit friendly (checks every step).
+/// Hard-coded `L = 8` (256-step) Gray chunk — matches libfes UNROLLED_CHUNK.
 pub(crate) fn gray_ffs_unrolled_l8(
     fq: &mut [u64; 561],
     fl: &mut [u64; 34],
@@ -570,7 +557,6 @@ pub(crate) fn gray_ffs_unrolled_l8(
     max_solutions: usize,
     out: &mut Vec<u64>,
 ) {
-    use super::mq_fes_l8_steps::L8_STEPS;
     const L: usize = 8;
     let mut ffs = Ffs::reset(n - L);
     let mut k1 = ffs.k1 + L as i32;
@@ -584,20 +570,264 @@ pub(crate) fn gray_ffs_unrolled_l8(
         let beta = (1 + k1) as usize;
         let gamma = idxq(k1 as usize, k2 as usize);
         let base = j << L;
-        for (step_i, &(a, kind, payload)) in L8_STEPS.iter().enumerate() {
-            if step2(
-                fq,
-                fl,
-                a as usize,
-                l8_fq_index(kind, payload, alpha),
-                base + step_i as u64,
-                out,
-                max_solutions,
-            ) {
-                return;
-            }
-        }
-        if step2(fq, fl, beta, gamma, base + 255, out, max_solutions) {
+        if false
+            || step2(fq, fl, 1, alpha + 0, base + 0, out, max_solutions)
+            || step2(fq, fl, 2, alpha + 1, base + 1, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 2, out, max_solutions)
+            || step2(fq, fl, 3, alpha + 2, base + 3, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 4, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 5, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 6, out, max_solutions)
+            || step2(fq, fl, 4, alpha + 3, base + 7, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 8, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 9, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 10, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 11, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 12, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 13, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 14, out, max_solutions)
+            || step2(fq, fl, 5, alpha + 4, base + 15, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 16, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 17, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 18, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 19, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 20, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 21, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 22, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 23, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 24, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 25, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 26, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 27, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 28, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 29, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 30, out, max_solutions)
+            || step2(fq, fl, 6, alpha + 5, base + 31, out, max_solutions)
+            || step2(fq, fl, 1, 10, base + 32, out, max_solutions)
+            || step2(fq, fl, 2, 11, base + 33, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 34, out, max_solutions)
+            || step2(fq, fl, 3, 12, base + 35, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 36, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 37, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 38, out, max_solutions)
+            || step2(fq, fl, 4, 13, base + 39, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 40, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 41, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 42, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 43, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 44, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 45, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 46, out, max_solutions)
+            || step2(fq, fl, 5, 14, base + 47, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 48, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 49, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 50, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 51, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 52, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 53, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 54, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 55, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 56, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 57, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 58, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 59, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 60, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 61, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 62, out, max_solutions)
+            || step2(fq, fl, 7, alpha + 6, base + 63, out, max_solutions)
+            || step2(fq, fl, 1, 15, base + 64, out, max_solutions)
+            || step2(fq, fl, 2, 16, base + 65, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 66, out, max_solutions)
+            || step2(fq, fl, 3, 17, base + 67, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 68, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 69, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 70, out, max_solutions)
+            || step2(fq, fl, 4, 18, base + 71, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 72, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 73, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 74, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 75, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 76, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 77, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 78, out, max_solutions)
+            || step2(fq, fl, 5, 19, base + 79, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 80, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 81, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 82, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 83, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 84, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 85, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 86, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 87, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 88, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 89, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 90, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 91, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 92, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 93, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 94, out, max_solutions)
+            || step2(fq, fl, 6, 20, base + 95, out, max_solutions)
+            || step2(fq, fl, 1, 10, base + 96, out, max_solutions)
+            || step2(fq, fl, 2, 11, base + 97, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 98, out, max_solutions)
+            || step2(fq, fl, 3, 12, base + 99, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 100, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 101, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 102, out, max_solutions)
+            || step2(fq, fl, 4, 13, base + 103, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 104, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 105, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 106, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 107, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 108, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 109, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 110, out, max_solutions)
+            || step2(fq, fl, 5, 14, base + 111, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 112, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 113, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 114, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 115, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 116, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 117, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 118, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 119, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 120, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 121, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 122, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 123, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 124, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 125, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 126, out, max_solutions)
+            || step2(fq, fl, 8, alpha + 7, base + 127, out, max_solutions)
+            || step2(fq, fl, 1, 21, base + 128, out, max_solutions)
+            || step2(fq, fl, 2, 22, base + 129, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 130, out, max_solutions)
+            || step2(fq, fl, 3, 23, base + 131, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 132, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 133, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 134, out, max_solutions)
+            || step2(fq, fl, 4, 24, base + 135, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 136, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 137, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 138, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 139, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 140, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 141, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 142, out, max_solutions)
+            || step2(fq, fl, 5, 25, base + 143, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 144, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 145, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 146, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 147, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 148, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 149, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 150, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 151, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 152, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 153, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 154, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 155, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 156, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 157, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 158, out, max_solutions)
+            || step2(fq, fl, 6, 26, base + 159, out, max_solutions)
+            || step2(fq, fl, 1, 10, base + 160, out, max_solutions)
+            || step2(fq, fl, 2, 11, base + 161, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 162, out, max_solutions)
+            || step2(fq, fl, 3, 12, base + 163, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 164, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 165, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 166, out, max_solutions)
+            || step2(fq, fl, 4, 13, base + 167, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 168, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 169, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 170, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 171, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 172, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 173, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 174, out, max_solutions)
+            || step2(fq, fl, 5, 14, base + 175, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 176, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 177, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 178, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 179, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 180, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 181, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 182, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 183, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 184, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 185, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 186, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 187, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 188, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 189, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 190, out, max_solutions)
+            || step2(fq, fl, 7, 27, base + 191, out, max_solutions)
+            || step2(fq, fl, 1, 15, base + 192, out, max_solutions)
+            || step2(fq, fl, 2, 16, base + 193, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 194, out, max_solutions)
+            || step2(fq, fl, 3, 17, base + 195, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 196, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 197, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 198, out, max_solutions)
+            || step2(fq, fl, 4, 18, base + 199, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 200, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 201, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 202, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 203, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 204, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 205, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 206, out, max_solutions)
+            || step2(fq, fl, 5, 19, base + 207, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 208, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 209, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 210, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 211, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 212, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 213, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 214, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 215, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 216, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 217, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 218, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 219, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 220, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 221, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 222, out, max_solutions)
+            || step2(fq, fl, 6, 20, base + 223, out, max_solutions)
+            || step2(fq, fl, 1, 10, base + 224, out, max_solutions)
+            || step2(fq, fl, 2, 11, base + 225, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 226, out, max_solutions)
+            || step2(fq, fl, 3, 12, base + 227, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 228, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 229, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 230, out, max_solutions)
+            || step2(fq, fl, 4, 13, base + 231, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 232, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 233, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 234, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 235, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 236, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 237, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 238, out, max_solutions)
+            || step2(fq, fl, 5, 14, base + 239, out, max_solutions)
+            || step2(fq, fl, 1, 6, base + 240, out, max_solutions)
+            || step2(fq, fl, 2, 7, base + 241, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 242, out, max_solutions)
+            || step2(fq, fl, 3, 8, base + 243, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 244, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 245, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 246, out, max_solutions)
+            || step2(fq, fl, 4, 9, base + 247, out, max_solutions)
+            || step2(fq, fl, 1, 3, base + 248, out, max_solutions)
+            || step2(fq, fl, 2, 4, base + 249, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 250, out, max_solutions)
+            || step2(fq, fl, 3, 5, base + 251, out, max_solutions)
+            || step2(fq, fl, 1, 1, base + 252, out, max_solutions)
+            || step2(fq, fl, 2, 2, base + 253, out, max_solutions)
+            || step2(fq, fl, 1, 0, base + 254, out, max_solutions)
+            || step2(fq, fl, beta, gamma, base + 255, out, max_solutions)
+        {
             return;
         }
     }
@@ -1018,8 +1248,9 @@ mod tests {
     }
 
     #[test]
-    fn l4_batch_beats_l4_unsat_wall() {
-        // Unsat full enum: batch drops per-step harvest branches.
+    fn l4_batch_vs_l4_unsat_wall() {
+        // Document: with packed-u64 and a well-predicted never-hit branch,
+        // batch probe+rewind loses to plain L=4 (copy + extra compares).
         let n = 18usize;
         let m = 24usize;
         let mut forms = Vec::with_capacity(m);
@@ -1061,8 +1292,56 @@ mod tests {
             a.len()
         );
         assert!(
+            ratio < 1.0,
+            "unexpected: L=4 batch beat plain L=4 ({ratio:.3}×); update note"
+        );
+    }
+
+    #[test]
+    fn l8_hardcoded_beats_l4_full_enum_wall() {
+        let n = 18usize;
+        let m = 24usize;
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            for i in 0..n {
+                linear[i] = ((eq * 19 + i * 5) % 3) == 0;
+                for j in 0..i {
+                    quad[i][j] = ((eq * 11 + i * 7 + j * 3) % 5) == 0;
+                }
+            }
+            forms.push(QuadraticForm {
+                n,
+                constant: eq % 2 == 0,
+                linear,
+                quad,
+            });
+        }
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut a = Vec::new();
+        let t0 = std::time::Instant::now();
+        gray_ffs_unrolled_l8(&mut fq, &mut fl, n, usize::MAX, &mut a);
+        let l8_ns = t0.elapsed().as_nanos();
+
+        fill_fq_fl(&forms, n, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, usize::MAX, &mut b);
+        let l4_ns = t1.elapsed().as_nanos();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+        let ratio = l4_ns as f64 / l8_ns.max(1) as f64;
+        eprintln!(
+            "l8_hardcoded_vs_l4 n={n} m={m} full_enum: l8={l8_ns}ns l4={l4_ns}ns ratio={ratio:.2} sols={}",
+            a.len()
+        );
+        assert!(
             ratio >= 1.05,
-            "expected L=4 batch ≥1.05× plain L=4 on unsat, got {ratio:.3}"
+            "expected hardcoded L=8 ≥1.05× L=4 on full enum, got {ratio:.3}"
         );
     }
 
