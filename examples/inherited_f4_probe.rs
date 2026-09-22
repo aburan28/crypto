@@ -16,7 +16,9 @@
 //! reads and writes included.  Stage diagnostic only (AGENTS.md §8).
 
 use crypto_lib::cryptanalysis::inherited_f4::{substitute, InheritCost, ReducedBasis};
-use crypto_lib::cryptanalysis::koblitz_groebner::{FieldStructure, SolverEngine};
+use crypto_lib::cryptanalysis::koblitz_groebner::{
+    f4_profile, f4_profile_reset, FieldStructure, SolverEngine,
+};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, groebner_decompose, KoblitzCurve,
 };
@@ -53,6 +55,7 @@ fn main() {
     let n: u32 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(17);
     let targets: u32 = args.get(3).and_then(|s| s.parse().ok()).unwrap_or(8);
     let degree: u32 = args.get(4).and_then(|s| s.parse().ok()).unwrap_or(3);
+    let m: usize = args.get(5).and_then(|s| s.parse().ok()).unwrap_or(2);
 
     let dump = format!("/tmp/inherited_f4_probe_{}_{}_{}.jsonl", a, n, std::process::id());
     let _ = std::fs::remove_file(&dump);
@@ -63,11 +66,42 @@ fn main() {
     let index_of = fb.index_map();
     let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
     let g = kc.generator().clone();
+    f4_profile_reset();
+    let solve_started = std::time::Instant::now();
+    let mut solve_stats = (0usize, 0usize, 0usize, 0usize);
     for i in 0..targets {
         let target = kc.mul(&g, &target_scalar(i));
-        let _ = groebner_decompose(&kc, &fb, &index_of, &st, &target, 2, SolverEngine::default(), 20_000);
+        let (_, stats) =
+            groebner_decompose(&kc, &fb, &index_of, &st, &target, m, SolverEngine::default(), 20_000);
+        solve_stats.0 += stats.reductions;
+        solve_stats.1 += stats.infeasible_branches;
+        solve_stats.2 += stats.propagations;
+        solve_stats.3 += stats.splits;
     }
+    let solve_wall = solve_started.elapsed();
+    let profile = f4_profile();
     std::env::remove_var("KIC_F4_NODE_DUMP");
+    println!();
+    println!(
+        "=== whole solve, engine {:?}: {} reductions, {} refutations, {} propagations, {} splits, {:.2} s ===",
+        SolverEngine::default().effective(),
+        solve_stats.0,
+        solve_stats.1,
+        solve_stats.2,
+        solve_stats.3,
+        solve_wall.as_secs_f64()
+    );
+    println!(
+        "F4 calls {} · word ops {} (specialisation {}) · rows {} · cols {} · build {:.0} ms · reduce {:.0} ms · readback {:.0} ms",
+        profile.calls,
+        profile.word_ops,
+        profile.specialise_word_ops,
+        profile.rows,
+        profile.cols,
+        profile.build_ns as f64 / 1e6,
+        profile.reduce_ns as f64 / 1e6,
+        profile.readback_ns as f64 / 1e6,
+    );
 
     let file = std::fs::File::open(&dump).expect("dump written");
     let mut systems: Vec<(Vec<F2BoolPoly>, usize)> = Vec::new();
@@ -148,7 +182,7 @@ fn main() {
 
     let per = |x: u64| x as f64 / nodes.max(1) as f64;
     println!();
-    println!("=== inherited F4 probe: K_{a}/2^{n}, {targets} targets, degree {degree} ===");
+    println!("=== inherited F4 probe: K_{a}/2^{n}, m = {m}, {targets} targets, degree {degree} ===");
     println!("node systems captured: {} (reduced: {nodes})", systems.len());
     println!("mean rank per node: {:.1}", per(ranks));
     println!();
@@ -177,7 +211,7 @@ fn main() {
     println!(
         "{}",
         serde_json::json!({
-            "curve": format!("K_{a}/2^{n}"), "targets": targets, "degree": degree,
+            "curve": format!("K_{a}/2^{n}"), "m": m, "targets": targets, "degree": degree,
             "nodes": nodes, "children": children, "mean_rank": per(ranks),
             "raw_decisive_row_differences": raw_mismatches,
             "scratch_parent_word_ops": scratch_parent,

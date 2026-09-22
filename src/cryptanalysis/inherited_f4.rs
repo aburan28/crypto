@@ -17,11 +17,11 @@
 //!     V(S|_{v=c})  =  φ_c( V(S) )  =  span{ φ_c(ρ) : ρ a reduced row of the parent }
 //! ```
 //!
-//! (multipliers range over every variable; a generator whose degree
-//! *drops* under `φ_c` gains multipliers — see [`ReducedBasis::specialise`]
-//! for the completion rows).  So the child's row space is spanned by the
-//! `rank` reduced rows of its parent, specialised — and most of them are
-//! already in echelon form:
+//! (up to multipliers that cannot reach the linear tail, and up to a
+//! generator whose degree *drops* under `φ_c` gaining multipliers — see
+//! [`ReducedBasis::specialise`] for both).  So the child's row space is
+//! spanned by the `rank` reduced rows of its parent, specialised — and most
+//! of them are already in echelon form:
 //!
 //! - under `v := 0` every monomial containing `v` is deleted; a row whose
 //!   leading monomial does not contain `v` keeps it;
@@ -45,6 +45,22 @@
 //! word written — a charge the from-scratch path never pays, since its
 //! matrix build is not counted.  Wall time is reported beside it.
 //!
+//! ## When it pays, and when it does not
+//!
+//! Re-reducing a displaced row costs one XOR per pivot it crosses, so the
+//! method pays when the reduced basis stays **sparse**.  The quadratic
+//! `m = 2` Semaev matrices are near full rank and their reduced rows do
+//! stay sparse: `1.6–7.2×` fewer word operations than rebuilding, on every
+//! instance measured.  The chained cubic `m ≥ 3` matrices are some 40%
+//! rank-deficient — their reduced rows are dense combinations, every
+//! displaced or completion row crosses a hundred-odd pivots, and the
+//! from-scratch echelon of the sparse matrix is cheaper (`0.60×` on
+//! `K_0/2^15`, `m = 3`).  [`super::koblitz_groebner::SolverEngine::effective_for`]
+//! therefore inherits on quadratic systems only.  Cost-triggered fallbacks
+//! and drift-triggered rebuilds were tried and rejected: by the time a
+//! per-node estimate fires, most of the tree has paid the inherited price
+//! (`RESEARCH_INHERITED_F4.md` §3).
+//!
 //! ## What this does not change
 //!
 //! Nothing about the algebra: same degree, same row space, same splitting
@@ -53,7 +69,7 @@
 //! ruled out and not by how one node's matrix is reduced.
 
 use crate::cryptanalysis::koblitz_groebner::{
-    all_variable_mask, echelon_f2_counted, macaulay_columns, macaulay_rows_monos,
+    all_variable_mask, echelon_f2_counted, macaulay_columns, macaulay_rows_monos_with_mask,
     monomials_up_to_mask, pack_rows, rref_f2_counted,
 };
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
@@ -130,9 +146,12 @@ pub struct ReducedBasis {
 
 impl ReducedBasis {
     /// Build and reduce the Macaulay matrix of `system` at `degree` from
-    /// scratch, with multipliers over every variable — the root of a
-    /// splitting tree, or any node whose parent had no basis.  `None` if
-    /// the matrix exceeds the F4 size caps.
+    /// scratch — the root of a splitting tree, or any node whose parent had
+    /// no basis.  Multipliers range over the variables occurring in the
+    /// system, the from-scratch step's own active-multiplier policy: a
+    /// multiplier containing a variable that occurs nowhere adds rows that
+    /// cannot reach the linear tail (see [`ReducedBasis::specialise`]).
+    /// `None` if the matrix exceeds the F4 size caps.
     pub fn from_system(
         system: &[F2BoolPoly],
         n_vars: usize,
@@ -140,7 +159,13 @@ impl ReducedBasis {
     ) -> Option<(Self, InheritCost)> {
         let system: Vec<F2BoolPoly> = system.iter().filter(|p| !p.is_zero()).cloned().collect();
         let generator_degrees: Vec<u32> = system.iter().map(poly_degree).collect();
-        let rows_monos = macaulay_rows_monos(&system, n_vars, degree)?;
+        let occurring = system
+            .iter()
+            .flat_map(|p| p.terms.iter())
+            .fold(0u64, |acc, t| acc | t.mask)
+            & all_variable_mask(n_vars);
+        let rows_monos =
+            macaulay_rows_monos_with_mask(&system, n_vars, degree, occurring, None)?;
         let mut cost = InheritCost::default();
         if rows_monos.is_empty() {
             return Some((
@@ -709,9 +734,15 @@ mod tests {
             }
             for degree in 2..=3u32 {
                 let (root, _) = ReducedBasis::from_system(&system, n_vars, degree).unwrap();
-                // Root spans the F4 row space.
+                // Root: the sandwich with nothing assigned, and the legacy tail.
+                assert_sandwich(&root, &system, n_vars, 0, &format!("trial {trial} degree {degree} root"));
                 let f4 = matrix_f4_f2(&system, n_vars, degree).unwrap();
-                assert_eq!(rref_polys(&f4, n_vars), rref_polys(&basis_polys(&root), n_vars));
+                let mut root_cost = InheritCost::default();
+                assert_eq!(
+                    solver_view(&tail_of(&f4), n_vars),
+                    solver_view(&root.linear_tail(&mut root_cost), n_vars),
+                    "trial {trial} degree {degree}: root tail differs"
+                );
                 // Every one-variable specialisation, both values, then a second one.
                 let occurring = system.iter().flat_map(|p| p.terms.iter()).fold(0, |a, t| a | t.mask);
                 let all = all_variable_mask(n_vars);

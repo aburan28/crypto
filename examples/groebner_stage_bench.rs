@@ -206,6 +206,7 @@ fn main() {
             "readback_ns": p.readback_ns,
             "rows_pruned": p.rows_pruned,
             "criterion_word_ops": p.criterion_word_ops,
+            "specialise_word_ops": p.specialise_word_ops,
             "wall_ns": wall_ns,
             "reductions": stats_total.0,
             "infeasible_branches": stats_total.1,

@@ -1269,6 +1269,11 @@ pub struct F4Profile {
     /// `word_ops`, broken out so the criterion's own cost is visible.
     #[serde(default)]
     pub criterion_word_ops: u64,
+    /// Word reads and writes performed by [`SolverEngine::InheritedF4`]'s
+    /// specialisations; a component of `word_ops`, broken out because it
+    /// is the part of that engine's cost the from-scratch path never pays.
+    #[serde(default)]
+    pub specialise_word_ops: u64,
 }
 
 mod f4_counters {
@@ -1283,8 +1288,9 @@ mod f4_counters {
     pub(super) static WORD_OPS: AtomicU64 = AtomicU64::new(0);
     pub(super) static ROWS_PRUNED: AtomicU64 = AtomicU64::new(0);
     pub(super) static CRITERION_WORD_OPS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static SPECIALISE_WORD_OPS: AtomicU64 = AtomicU64::new(0);
 
-    pub(super) fn all() -> [&'static AtomicU64; 10] {
+    pub(super) fn all() -> [&'static AtomicU64; 11] {
         [
             &CALLS,
             &OVERSIZE,
@@ -1296,6 +1302,7 @@ mod f4_counters {
             &WORD_OPS,
             &ROWS_PRUNED,
             &CRITERION_WORD_OPS,
+            &SPECIALISE_WORD_OPS,
         ]
     }
 }
@@ -1314,6 +1321,7 @@ pub fn f4_profile() -> F4Profile {
         word_ops: f4_counters::WORD_OPS.load(Relaxed),
         rows_pruned: f4_counters::ROWS_PRUNED.load(Relaxed),
         criterion_word_ops: f4_counters::CRITERION_WORD_OPS.load(Relaxed),
+        specialise_word_ops: f4_counters::SPECIALISE_WORD_OPS.load(Relaxed),
     }
 }
 
@@ -1329,7 +1337,7 @@ fn f4_profile_add(f: impl FnOnce(&mut F4Profile)) {
     use std::sync::atomic::Ordering::Relaxed;
     let mut delta = F4Profile::default();
     f(&mut delta);
-    let pairs: [(&std::sync::atomic::AtomicU64, u64); 10] = [
+    let pairs: [(&std::sync::atomic::AtomicU64, u64); 11] = [
         (&f4_counters::CALLS, delta.calls),
         (&f4_counters::OVERSIZE, delta.oversize),
         (&f4_counters::BUILD_NS, delta.build_ns as u64),
@@ -1340,6 +1348,7 @@ fn f4_profile_add(f: impl FnOnce(&mut F4Profile)) {
         (&f4_counters::WORD_OPS, delta.word_ops),
         (&f4_counters::ROWS_PRUNED, delta.rows_pruned),
         (&f4_counters::CRITERION_WORD_OPS, delta.criterion_word_ops),
+        (&f4_counters::SPECIALISE_WORD_OPS, delta.specialise_word_ops),
     ];
     for (counter, delta) in pairs {
         if delta != 0 {
@@ -2511,7 +2520,9 @@ pub enum SolverEngine {
     /// the same tail, verdicts and splitting tree; the work per node is
     /// the re-reduction of the rows whose pivot contained the variable,
     /// plus the specialisation itself, all charged in word operations.
-    /// `KIC_F4_INHERIT=1|0` selects or deselects it over `MatrixF4`.
+    /// Inherits on quadratic systems and reduces as `MatrixF4` on cubic
+    /// ones ([`SolverEngine::effective_for`]); `KIC_F4_INHERIT=1|0`
+    /// forces or disables inheriting.
     InheritedF4 {
         /// Highest Macaulay degree to build before splitting.
         max_degree: u32,
@@ -2537,11 +2548,25 @@ impl Default for SolverEngine {
 }
 
 impl SolverEngine {
-    /// The engine a solve actually runs, after the `KIC_F4_INHERIT`
-    /// override: `1` turns `MatrixF4` into `InheritedF4`, `0` turns
-    /// `InheritedF4` back into `MatrixF4`.  Retained controls can A/B the
-    /// two on a harness that only knows [`SolverEngine::default`].
-    pub fn effective(self) -> Self {
+    /// The engine a solve actually runs on a system of total degree
+    /// `system_degree`.
+    ///
+    /// `InheritedF4` inherits on **quadratic** systems and reduces as
+    /// `MatrixF4` on cubic and higher ones.  The reason is measured, not
+    /// assumed (`RESEARCH_INHERITED_F4.md` §3): the chained `m ≥ 3` Semaev
+    /// systems are cubic and their degree-3 Macaulay matrices are some 40%
+    /// rank-deficient, so the reduced basis rows are dense combinations
+    /// and every displaced row re-reduces through a hundred-odd dense
+    /// pivots — dearer than the from-scratch echelon of the sparse matrix
+    /// it replaces (`0.60×` on `K_0/2^15`, `m = 3`), while the quadratic
+    /// `m = 2` matrices are near full rank, their reduced rows stay sparse
+    /// and inheriting wins `1.6–7.2×` everywhere measured.
+    ///
+    /// `KIC_F4_INHERIT=1` forces inheriting whatever the degree (and turns
+    /// `MatrixF4` into `InheritedF4`); `KIC_F4_INHERIT=0` turns
+    /// `InheritedF4` into `MatrixF4`.  Retained controls can A/B the two on
+    /// a harness that only knows [`SolverEngine::default`].
+    pub fn effective_for(self, system_degree: u32) -> Self {
         match (self, std::env::var("KIC_F4_INHERIT").as_deref()) {
             (SolverEngine::MatrixF4 { max_degree }, Ok("1")) => {
                 SolverEngine::InheritedF4 { max_degree }
@@ -2549,8 +2574,18 @@ impl SolverEngine {
             (SolverEngine::InheritedF4 { max_degree }, Ok("0")) => {
                 SolverEngine::MatrixF4 { max_degree }
             }
+            (SolverEngine::InheritedF4 { .. }, Ok("1")) => self,
+            (SolverEngine::InheritedF4 { max_degree }, _) if system_degree >= 3 => {
+                SolverEngine::MatrixF4 { max_degree }
+            }
             (engine, _) => engine,
         }
+    }
+
+    /// [`SolverEngine::effective_for`] on a quadratic system — the engine
+    /// name a harness records for the `m = 2` regime.
+    pub fn effective(self) -> Self {
+        self.effective_for(2)
     }
 
     /// The Macaulay degree ladder this engine runs on a system whose
@@ -2865,6 +2900,7 @@ impl InheritedBases {
         f4_profile_add(|p| {
             p.build_ns += started.elapsed().as_nanos();
             p.word_ops += word_ops;
+            p.specialise_word_ops += total.specialise_word_ops;
         });
         Self { bases }
     }
@@ -2972,7 +3008,7 @@ pub fn solve_boolean_system_filtered(
     let mut out = Vec::new();
     let mut stop = false;
     let opts = SolveOptions {
-        engine: opts.engine.effective(),
+        engine: opts.engine.effective_for(system_degree(equations)),
         ..*opts
     };
     solve_rec(
@@ -3033,13 +3069,16 @@ fn solve_rec(
     // builds them at its first reduction.  A system that already contains
     // the constant `1` is refuted below without reducing, so nothing is
     // specialised for it either.
-    let inherit = matches!(opts.engine, SolverEngine::InheritedF4 { .. });
     let mut bases = match parent {
-        Some((bases, var, value)) if inherit && !system.iter().any(is_constant_one) => {
+        Some((bases, var, value))
+            if matches!(opts.engine, SolverEngine::InheritedF4 { .. })
+                && !system.iter().any(is_constant_one) =>
+        {
             bases.specialise(var, value)
         }
         _ => InheritedBases::default(),
     };
+    let inherit = matches!(opts.engine, SolverEngine::InheritedF4 { .. });
 
     // Reduce, propagate, repeat until the algebra stops learning.
     loop {
