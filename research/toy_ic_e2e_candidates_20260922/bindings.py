@@ -14,7 +14,9 @@ import indexcalc
 import image_solver
 import pullback
 import cnf
+import decomp
 import nagaocompare
+import nagaodecomp
 
 spec = importlib.util.spec_from_file_location(
     'bounded_lab_cached_pullback',
@@ -36,6 +38,8 @@ def sat_cell(n, d, target_coords, mode, budget, variant):
 
     Based on solver_06/run.py, with expected solutions removed from the
     computation. Ground truth is checked separately after timed runs.
+    chained-s3 uses the repository chained system from solver_02 and
+    nagaocompare (decomp.buildSystem plus decomp.encode).
     """
     import time
     guard(n, d)
@@ -47,7 +51,14 @@ def sat_cell(n, d, target_coords, mode, budget, variant):
     curve = scalar.CountedCurve(f)
     target = tuple(f.fromCoords(x) for x in target_coords)
     c = cnf.Cnf()
-    _, _, variables = stage.previous.s4.s4.encode(n, d, target, c, variant)
+    if variant == 'chained-s3':
+        prog, roots = decomp.buildSystem(n, f.n, 3, min(12, n))
+        xr = target_coords[0]
+        pvars = decomp.encode(prog, roots, n, 3, n, xr, c, orderPoints=False)
+        nagaodecomp.addRestrictedDomain(c, pvars, xr)
+        variables = {'pvars': pvars}
+    else:
+        _, _, variables = stage.previous.s4.s4.encode(n, d, target, c, variant)
     for xs in variables['pvars']:
         for bit in xs[d:]:
             c.addClause([-bit])
