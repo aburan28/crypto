@@ -1,0 +1,225 @@
+diff --git a/src/bin/ic/workflow.rs b/src/bin/ic/workflow.rs
+index 47c80aab..893084af 100644
+--- a/src/bin/ic/workflow.rs
++++ b/src/bin/ic/workflow.rs
+@@ -62,6 +62,7 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
+ use num_bigint::BigUint;
+ use num_traits::Zero;
+ use rand::{rngs::StdRng, Rng, SeedableRng};
++use rayon::prelude::*;
+ use serde::{Deserialize, Serialize};
+ use serde_json::{json, Value};
+ use std::{
+@@ -105,6 +106,9 @@ fn is_zero_u64(v: &u64) -> bool {
+ fn is_zero_usize(v: &usize) -> bool {
+     *v == 0
+ }
++fn is_false(v: &bool) -> bool {
++    !*v
++}
+ fn default_targeted_tail_seed() -> u64 {
+     0x5441_5247_4554_5901
+ }
+@@ -264,6 +268,10 @@ pub struct CollectionParams {
+     /// the targeted tail coverage-only.
+     #[serde(default, skip_serializing_if = "is_zero_usize")]
+     pub targeted_tail_rank_columns: usize,
++    /// Collect every fixed-column attempt of one targeted round in one
++    /// shared Rayon job. False preserves the per-column barriers.
++    #[serde(default, skip_serializing_if = "is_false")]
++    pub targeted_tail_parallel_columns: bool,
+     /// Independent probe-sequence domain for the targeted tail.
+     #[serde(
+         default = "default_targeted_tail_seed",
+@@ -280,6 +288,7 @@ impl Default for CollectionParams {
+             targeted_tail_trials: 0,
+             targeted_tail_rounds: 0,
+             targeted_tail_rank_columns: 0,
++            targeted_tail_parallel_columns: false,
+             targeted_tail_seed: default_targeted_tail_seed(),
+         }
+     }
+@@ -577,6 +586,8 @@ pub struct TargetedTailDocument {
+     pub base_seed: u64,
+     pub trials_per_column: u64,
+     pub rank_columns_per_round: usize,
++    #[serde(default)]
++    pub parallel_columns: bool,
+     pub attempts: Vec<TargetedTailAttempt>,
+ }
+ 
+@@ -1416,6 +1427,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+                 || document.trials_per_column != p.collection.targeted_tail_trials
+                 || document.rank_columns_per_round
+                     != p.collection.targeted_tail_rank_columns
++                || document.parallel_columns != p.collection.targeted_tail_parallel_columns
+             {
+                 return Err(format!(
+                     "{} belongs to a different run or targeted-tail policy",
+@@ -1435,6 +1447,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+                 base_seed: p.collection.targeted_tail_seed,
+                 trials_per_column: p.collection.targeted_tail_trials,
+                 rank_columns_per_round: p.collection.targeted_tail_rank_columns,
++                parallel_columns: p.collection.targeted_tail_parallel_columns,
+                 attempts: Vec::new(),
+             }
+         };
+@@ -1487,7 +1500,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+                     break;
+                 }
+                 let mut round_relations = Vec::new();
+-                for column in columns {
++                let collect_column = |column: usize| {
+                     let fixed_point_index = projected
+                         .factor_point_for_column(column)
+                         .ok_or("uncovered projected column has no factor-base point")?;
+@@ -1495,16 +1508,39 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
+                         ^ (column as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15)
+                         ^ (round as u64).rotate_left(29);
+                     let start = round as u64 * p.collection.targeted_tail_trials;
+-                    let (relations, report) = collector
+-                        .collect_with_forced_point(
+-                            RelationWorkUnit {
+-                                seed,
+-                                start,
+-                                count: p.collection.targeted_tail_trials,
+-                            },
+-                            fixed_point_index,
+-                        )
++                    let unit = RelationWorkUnit {
++                        seed,
++                        start,
++                        count: p.collection.targeted_tail_trials,
++                    };
++                    let collected = if p.collection.targeted_tail_parallel_columns {
++                        collector.collect_with_forced_point_serial(unit, fixed_point_index)
++                    } else {
++                        collector.collect_with_forced_point(unit, fixed_point_index)
++                    };
++                    let (relations, report) = collected
+                         .ok_or("targeted pair lookup is unsupported")?;
++                    Ok::<_, String>((
++                        column,
++                        fixed_point_index,
++                        seed,
++                        start,
++                        relations,
++                        report,
++                    ))
++                };
++                let attempts = if p.collection.targeted_tail_parallel_columns {
++                    columns
++                        .into_par_iter()
++                        .map(collect_column)
++                        .collect::<Result<Vec<_>, _>>()?
++                } else {
++                    columns
++                        .into_iter()
++                        .map(collect_column)
++                        .collect::<Result<Vec<_>, _>>()?
++                };
++                for (column, fixed_point_index, seed, start, relations, report) in attempts {
+                     say(&format!(
+                         "      targeted round {round}, column {column}: {} relations from {} direct pair lookups ({:.3}s)",
+                         report.relations, report.pair_lookups, report.elapsed_seconds
+@@ -2059,16 +2095,19 @@ mod tests {
+         assert!(collection.get("targeted_tail_trials").is_none());
+         assert!(collection.get("targeted_tail_rounds").is_none());
+         assert!(collection.get("targeted_tail_rank_columns").is_none());
++        assert!(collection.get("targeted_tail_parallel_columns").is_none());
+         assert!(collection.get("targeted_tail_seed").is_none());
+ 
+         p.collection.targeted_tail_trials = 10_000;
+         p.collection.targeted_tail_rounds = 4;
+         p.collection.targeted_tail_rank_columns = 8;
++        p.collection.targeted_tail_parallel_columns = true;
+         p.collection.targeted_tail_seed ^= 1;
+         let enabled = serde_json::to_value(&p.collection).unwrap();
+         assert_eq!(enabled["targeted_tail_trials"], 10_000);
+         assert_eq!(enabled["targeted_tail_rounds"], 4);
+         assert_eq!(enabled["targeted_tail_rank_columns"], 8);
++        assert_eq!(enabled["targeted_tail_parallel_columns"], true);
+         assert!(enabled.get("targeted_tail_seed").is_some());
+     }
+ 
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index cd730af6..1309a7f8 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -8028,6 +8028,62 @@ impl<'a> RelationCollector<'a> {
+         };
+         Some((relations, report))
+     }
++
++    /// Serial form of [`Self::collect_with_forced_point`].
++    ///
++    /// This is useful when a caller parallelises independent fixed points
++    /// at the round level and must avoid a nested Rayon job per column.
++    pub fn collect_with_forced_point_serial(
++        &self,
++        unit: RelationWorkUnit,
++        fixed_point_index: usize,
++    ) -> Option<(Vec<CollectedRelation>, TargetedCollectionReport)> {
++        if self.opts.m != 3
++            || self.opts.strategy != DecompositionStrategy::PairTable
++            || fixed_point_index >= self.fb.points.len()
++        {
++            return None;
++        }
++        let (fc, g_fast) = self.fast.as_ref()?;
++        let pair = self.pair_table()?;
++        let begin = std::time::Instant::now();
++        let end = unit.start.saturating_add(unit.count);
++        if end == unit.start {
++            return Some((Vec::new(), TargetedCollectionReport::default()));
++        }
++        let fixed_negated = fc.neg(fc.lift(&self.fb.points[fixed_point_index]));
++        let stride = probe_run_stride(unit.seed, self.r_u64);
++        let stride_point = fc.mul_u64(*g_fast, stride);
++        let first_run = unit.start / PROBE_RUN;
++        let last_run = end.saturating_sub(1) / PROBE_RUN;
++        let mut relations = Vec::new();
++        for run in first_run..=last_run {
++            let run_start = (run * PROBE_RUN).max(unit.start);
++            let run_end = ((run + 1) * PROBE_RUN).min(end);
++            let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
++            let mut point = fc.mul_u64(*g_fast, a);
++            for trial in run_start..run_end {
++                if !point.infinity && a != 0 {
++                    let rest = fc.add(point, fixed_negated);
++                    if let Some(mut points) = pair.decompose_fast(rest, 2) {
++                        points.push(fixed_point_index);
++                        points.sort_unstable();
++                        relations.push(CollectedRelation { trial, a, points });
++                    }
++                }
++                a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
++                point = fc.add(point, stride_point);
++            }
++        }
++        let trials = (end - unit.start) as usize;
++        let report = TargetedCollectionReport {
++            trials,
++            relations: relations.len(),
++            pair_lookups: trials as u64,
++            elapsed_seconds: begin.elapsed().as_secs_f64(),
++        };
++        Some((relations, report))
++    }
+ }
+ 
+ /// Re-check a reported relation in the group: exactly `m` indices, all
+@@ -11522,6 +11578,13 @@ mod tests {
+         }
+         split.sort_by_key(|relation| relation.trial);
+         assert_eq!(whole, split);
++
++        let (serial, serial_report) = collector
++            .collect_with_forced_point_serial(unit, fixed)
++            .expect("serial targeted pair collector");
++        assert_eq!(serial, whole);
++        assert_eq!(serial_report.trials, report.trials);
++        assert_eq!(serial_report.pair_lookups, report.pair_lookups);
+     }
+ 
+     #[test]
