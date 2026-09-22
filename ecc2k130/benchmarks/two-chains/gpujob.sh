@@ -89,7 +89,7 @@ sample() {
 }
 for rep in $(seq 1 "$REPS"); do
   for b in ref c2-256x32 c2-384x32 c2-512x16 ref-alusqr c2-256x32-alusqr; do
-    echo "=== bench $b rep $rep"
+    echo "=== bench $b rep $rep" | tee -a "$R/bench.txt"
     sample "$b" | tee -a "$R/bench.txt"
   done
 done

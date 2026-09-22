@@ -603,12 +603,16 @@ bench-rtx-pro6000:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
+# Architecture of the two RTX PRO 6000 builds below.  Override to run the same
+# knob set on another part, e.g. PRO6000_ARCH="-gencode arch=compute_100,code=sm_100"
+# for a B200 (benchmarks/fast-clmad/gpujob.sh derives it from the compute capability).
+PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
 # The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
 # 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
 # from the step tag, the products inlined, the forward pass software-pipelined.
 # Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
 gpu-rtx-pro6000-20b:
-	$(MAKE) -B ecc2k130 ARCH="-gencode arch=compute_120,code=sm_120" \
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" \
 	    BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
 	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
@@ -625,7 +629,7 @@ gpu-rtx-pro6000-20b:
 CHAINS2_THREADS ?= 256
 CHAINS2_BATCH ?= 32
 gpu-rtx-pro6000-chains2:
-	$(MAKE) -B ecc2k130 ARCH="-gencode arch=compute_120,code=sm_120" \
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" \
 	    BATCH=$(CHAINS2_BATCH) THREADS=$(CHAINS2_THREADS) MINBLOCKS=1 \
 	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
 	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \

@@ -4,20 +4,28 @@ Question: can the table-walk kernel on one RTX PRO 6000 be taken from the
 verified **20.078 B/s** of [ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md) to
 **30 B complete scalar updates per second**?
 
-Answer, derived before anything was built (§1): **no, on this GPU.** 30 B/s
-is 15.2 SM-clocks per update, and the five field products of one affine
-addition alone occupy the carry-less unit for 18.5. The whole kernel's 33.1
-`CLMAD`s per update put its floor at **22.3 B/s** at 100% of the unit, and
-the 20.08 B/s build already sits at 0.90 of it. The remaining tenth is the
-only thing an iteration-function change can still buy on this SKU, and it is
-what this note builds for: a kernel in which every warp carries two
-independent Montgomery chains, so the inversion and the forward pass — the
-two phases the phase profile found idling the unit — overlap inside the warp
-instead of waiting for other warps that are in the same phase. Same
-arithmetic, same walk, same products per update; static cost per update
-unchanged to within 0.5% (§3). **Its rate is not yet measured** (§5 records
-why and the exact command). The GPU that could change the answer is a
-different one (§6).
+Answer, derived before anything was built (§1) and unchanged by what was
+measured (§5): **no, on this GPU.** 30 B/s is 15.2 SM-clocks per update, and
+the five field products of one affine addition alone occupy the carry-less
+unit for 18.5. The whole kernel's 33.1 `CLMAD`s per update put its floor at
+**22.3 B/s** at 100% of the unit, and the 20.08 B/s build already sits at
+0.90 of it. The remaining tenth is the only thing an iteration-function
+change can still buy on this SKU, and it is what this note built for: a
+kernel in which every warp carries two independent Montgomery chains, so the
+inversion and the forward pass — the two phases the phase profile found
+idling the unit — overlap inside the warp instead of waiting for other warps
+that are in the same phase. Same arithmetic, same walk, same products per
+update, the same 1,480,482 distinguished points byte for byte; static cost
+per update unchanged to within 0.5% (§3). Measured on one RTX PRO 6000
+against the reference rebuilt in the same session (§5): **13.90 B/s against
+19.98, 0.696×**, every paired repetition between 0.692 and 0.699. Each warp
+did issue `CLMAD`s 1.42× more often — the overlap the design was for is real
+— but the kernel runs half as many warps, and 1.42 is not 2. **Engineering
+that did not pay**; the reference stays. §6 then asks the question the
+floor makes unavoidable — is the carry-less unit this slow on every GPU? —
+and measures the answer: **no.** On an H100 and a B200 a `CLMAD` costs 2.0
+and 3.8 logic slots instead of 38, so on those parts the unit is not the
+constraint at all, and the same kernel is bound by something else.
 
 ## 1. Boundary
 
@@ -43,7 +51,19 @@ new y), plus 8 products and 20 ONB squarings per 16-slot inversion:
 The budget row is below the product-only row: 30 B/s needs fewer than 4.1
 products per update on this unit, and no affine formula gives fewer than
 five (ITERATION-FUNCTION.md §1 lists the alternatives and why each costs
-more). The other execution resources are not the constraint — Nsight on the
+more). One caveat on the rate itself, so the floor's uncertainty is on the
+page: the tree has two measurements of the unit on this SKU. ONE-BLOCK-
+GEOMETRY's 1.62 lane-CLMADs per SM-clock was taken on the card with the
+kernel's own instruction mix and spacing and is the number the 22.3 rests
+on. `benchmarks/clmad-price/probe.cu`, re-run here in the same session as
+§6 ([probe-6000.txt](benchmarks/fast-clmad/probe/probe-6000.txt)), gives
+**1.69** for a stream of `CLMAD.lo` alone and **1.99** for a stream of
+`lo`+`hi` pairs — the same 1.687 / 2.00 ITERATION-FUNCTION §3.1 recorded on
+the 4500. If the kernel's mix ran at the pair rate the floor would be 27.4
+B/s and the 20 B/s build at 0.73 of it; at the on-card 1.62 it is 22.3 and
+0.90. 30 B/s is above both: at the pair rate the five products alone are
+15.0 SM-clocks against a budget of 15.2, which leaves the inversion,
+squarings and every other cost 0.2 SM-clocks. The other execution resources are not the constraint — Nsight on the
 17.4 B/s build put the ALU pipe at 36–39% and issue at 51% (THROUGHPUT-29B.md
 §5), and a software product on those pipes costs about 800 slot-equivalents
 against 6 `CLMAD`s at 38 slot-equivalents each (THROUGHPUT-30B.md), so
@@ -103,31 +123,48 @@ two-chain loops, whose iterations advance one slot of each chain). Static
 counts both arms of the slot-0 branches; the dynamic `CLMAD` count is the
 static one less the predicated arms, 33.1 for every row with one inversion
 per 16 slots. Measured columns are medians of five alternating repetitions
-of `--bench --steps 1024 --launches 64` at the automatic worker count, and
-are **pending** (§5).
+of `--bench --steps 1024 --launches 64` at the automatic worker count on
+one RTX PRO 6000 Blackwell Server Edition (Modal, driver 580.95.05, nvcc
+13.3.73, 2026-09-22; [summary.json](benchmarks/two-chains/summary.json),
+raw logs beside it). The paired column is this variant over the reference
+*within the same repetition*, so a drifting card cannot manufacture a
+ratio; "verified" is 300 device reports re-walked by the host reference with
+0 dropped, and "same DPs" is the sorted set of every distinguished point the
+binary produced on the forced common 1,540,096 walks, compared by hash to
+the reference's set of 1,480,482.
 
-| variant | threads × blocks / SM | batch | SASS | regs | spills | instr / update (static) | ALU slots / update (static) | `CLMAD` / update (static; dynamic) | B/s | / 22.3 floor | / 20.078 | verified | class |
-|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
-| **reference** `gpu-rtx-pro6000-20b` | 512 × 1 | 16 | 4,920 | 116 | 0 | 2,114.6 | 1,921.4 | 40.25; 33.1 | 20.078 (ONE-BLOCK-GEOMETRY) | 0.90 | 1.000 | 300/300 | reference |
-| reference + `PACKED_ALU_SQR=1` | 512 × 1 | 16 | 5,352 | 116 | 0 | 2,141.5 | 1,953.8 | 39.00; 31.85 | *pending* (19.36 vs 19.43 at an earlier stage of the build, ONE-BLOCK-GEOMETRY §2) | | | | engineering |
-| **two chains** `gpu-rtx-pro6000-chains2` | **256 × 1** | **32 = 2 × 16** | 8,320 | 182 | 0 | 2,123.3 | 1,910.7 | 40.25; 33.1 | *pending* | | | *pending* | engineering |
-| two chains | 384 × 1 | 32 = 2 × 16 | 8,336 | 166 | 0 | 2,125.8 | 1,909.5 | 40.25; 33.1 | *pending* — 118 MB blob, over the L2 window | | | | geometry scout |
-| two chains | 512 × 1 | 16 = 2 × 8 | 8,336 | 128 | 0 | 2,481.2 | 2,244.2 | 44.50; 37.35 | *pending* — one more inversion per 16 updates: floor 19.7 B/s | | | | geometry scout |
-| two chains + `PACKED_ALU_SQR=1` | 256 × 1 | 32 = 2 × 16 | | | | | | 39.00; 31.85 | *pending* | | | | engineering |
-| **30 B/s** | | | | | | | | ≤ 24.6 dynamic | 30 | **1.35** | 1.49 | | **below the floor** |
+| variant | threads × blocks / SM | batch | regs | spills | instr / update (static) | ALU slots / update (static) | `CLMAD` / update (static; dynamic) | B/s, median of 5 | paired / ref (min – max) | / 22.3 floor | verified | same DPs | class |
+|---|---|---|---:|---:|---:|---:|---:|---:|---|---:|---|---|---|
+| **reference** `gpu-rtx-pro6000-20b` | 512 × 1 | 16 | 116 | 0 | 2,114.6 | 1,921.4 | 40.25; 33.1 | **19.981** (ONE-BLOCK-GEOMETRY: 20.078) | 1 | 0.896 | 300/300 | yes | reference |
+| reference + `PACKED_ALU_SQR=1` | 512 × 1 | 16 | 116 | 0 | 2,141.5 | 1,953.8 | 39.00; 31.85 | 19.818 | 0.992 (0.990 – 0.996) | 0.889 | 300/300 | yes | engineering, did not pay (as in ONE-BLOCK-GEOMETRY §2) |
+| **two chains** `gpu-rtx-pro6000-chains2` | **256 × 1** | **32 = 2 × 16** | 182 | 0 | 2,123.3 | 1,910.7 | 40.25; 33.1 | **13.903** | **0.696 (0.692 – 0.699)** | 0.623 | 300/300 | yes | **engineering, did not pay** |
+| two chains | 384 × 1 | 32 = 2 × 16 | 166 | 0 | 2,125.8 | 1,909.5 | 40.25; 33.1 | 15.627 | 0.784 (0.782 – 0.786) | 0.701 | 300/300 | yes | geometry scout, did not pay (118 MB blob, over the L2 window; clock 2362 – 2400 MHz) |
+| two chains | 512 × 1 | 16 = 2 × 8 | 128 | 0 | 2,481.2 | 2,244.2 | 44.50; 37.35 | 15.690 | 0.785 (0.781 – 0.789) | 0.704 (0.80 of its own 19.7 floor) | 300/300 | yes | geometry scout, did not pay (one more inversion per 16 updates) |
+| two chains + `PACKED_ALU_SQR=1` | 256 × 1 | 32 = 2 × 16 | 182 | 0 | | | 39.00; 31.85 | 13.422 | 0.672 (0.669 – 0.675) | 0.602 | 300/300 | yes | engineering, did not pay |
+| **30 B/s** | | | | | | | ≤ 24.6 dynamic | 30 | 1.50 | **1.35** | | | **below the floor** |
 
 Reading the static columns: the two-chain kernel is a rescheduling. Its
 instructions per update are within 0.5% of the reference's, its `CLMAD`
 count is identical, and its SASS is 1.7× longer because both passes carry
 two slots per iteration. What it changes is not in this table; it is the
 fraction of the 20.4 SM-clocks of unit time per update during which the unit
-is actually busy, and only the card measures that.
+is actually busy, and the card measured that at 0.62 against the reference's
+0.90 (§5).
+
+Reading the measured columns: every row below the reference is slower than
+it, every two-chain row by 20 – 30%, and every row is bit-for-bit the same
+walk (six binaries, one distinguished-point hash `6cb064cd…`). The reference
+itself re-measured 0.5% under its receipt, on a card that ran it at
+2400 – 2422 MHz and 562 – 596 W; the two-chain kernel at 256 × 32 held
+2422 MHz at 434 – 468 W throughout — a kernel drawing 130 W less than the
+reference on the same card is a kernel leaving the datapath idle, which is
+the measurement in one number.
 
 Per `AGENTS.md` §3 every row is **engineering**: the floor is the cost of
 the same generic algorithm, the ratio to it is bounded above by 1, and no
 row can be an advance. A row that lowers `CLMAD`/update without changing the
 walk (`ALU_SQR`) moves the floor itself by 3.8%, which is the most any row
-here can move it.
+here can move it, and measured −0.8%.
 
 ## 4. Falsification target, declared before the run
 
@@ -153,14 +190,15 @@ inversion as anything but the cost it is.
 
 ## 5. Measurement
 
-*Pending.* The job is [benchmarks/two-chains/gpujob.sh](benchmarks/two-chains/gpujob.sh):
+The job is [benchmarks/two-chains/gpujob.sh](benchmarks/two-chains/gpujob.sh):
 inside `nvidia/cuda:13.3.1-devel-ubuntu24.04` it builds the six binaries of
 §3 plus `PHASE_PROFILE=1` forms of the reference and the two-chain kernel,
-verifies each (300 re-walks, the distinguished-point sets written and
+verifies each (300 re-walks; the distinguished-point sets written and
 compared), benches them alternating for `REPS` rounds with SM clock, power
 and temperature sampled after every run, and prints the two phase profiles.
 Three launchers run that same script on one RTX PRO 6000 and bring
-`results/` back with a `launch.json` receipt:
+`results/` back with a `launch.json` receipt; the receipts here are from the
+first:
 
 ```sh
 cd ecc2k130
@@ -169,27 +207,85 @@ RUNPOD_API_KEY=… python3 runpod_job.py --job benchmarks/two-chains/gpujob.sh -
 python3 aws/bench_job.py --job benchmarks/two-chains/gpujob.sh --out /tmp/two-chains --env REPS=5
 ```
 
-What stopped the run in the session that wrote this note, recorded so the
-receipt can say where its numbers did not come from:
+(The EC2 launcher could not be used in this session: `RunInstances` returns
+`Blocked` in every region while dry runs pass, and AWS Health carries two
+open risk events on the account, `AWS_RISK_CREDENTIALS_EXPOSURE_SUSPECTED`
+and `AWS_RISK_ACCOUNT_CONSOLE_COMPROMISE`, with a support case open. It is
+recorded because a launcher that was never run is a launcher that was never
+tested end to end.)
 
-- **EC2**: `RunInstances` returns `Blocked` in every region ("This account is
-  currently blocked and not recognized as a valid account") while dry runs
-  pass; AWS Health carries two open risk events on the account,
-  `AWS_RISK_CREDENTIALS_EXPOSURE_SUSPECTED` and
-  `AWS_RISK_ACCOUNT_CONSOLE_COMPROMISE`, with a support case AWS opened.
-  Resource creation stays blocked until the account owner answers that case.
-  S3 still accepts the presigned transfers the launchers use.
-- **Modal / RunPod**: no `MODAL_TOKEN_ID`/`MODAL_TOKEN_SECRET` and no
-  `RUNPOD_API_KEY` were available to the agent environment. Both launchers
-  were written and dry-checked (entry points, generated shell, SDK
-  signatures) and wait on a token.
-- **Datacenter parts**: the account's P-instance quota is 0 in every region,
-  so §6 cannot be tested from it either.
+### 5.1 Against the target
 
-When the job has run, this section gets the `finished:` rates, the paired
-ratios, the identity check, the two phase profiles, and the receipts under
-`benchmarks/two-chains/`; §3's pending cells are filled and §4 is applied as
-written.
+§4 asked for ≥ 1.03× with every paired repetition above 1.0. Measured:
+**0.696×**, every paired repetition between 0.692 and 0.699
+(13.895 / 13.903 / 13.902 / 13.905 / 13.912 against 20.073 / 19.994 /
+19.920 / 19.981 / 19.904). The correctness rows are all green — 300/300
+re-walked with 0 dropped for every binary, and one distinguished-point hash
+across all six — so this is a clean negative: the same walk, 30% slower.
+**The reference stays.** The two geometry scouts (384 × 32 at 0.784, 512 × 16
+at 0.785) bracket it from above and say the loss is not one bad geometry.
+
+### 5.2 Why two chains lost
+
+The phase profiles ([profile-ref-prof.txt](benchmarks/two-chains/raw/profile-ref-prof.txt),
+[profile-c2-256x32-prof.txt](benchmarks/two-chains/raw/profile-c2-256x32-prof.txt)),
+cycles per warp per step, and from them the mean spacing between one warp's
+consecutive `CLMAD`s in each phase:
+
+| | reference, 16 warps/SM × 16 slots | two chains, 8 warps/SM × 32 slots | per-warp gain |
+|---|---:|---:|---:|
+| forward pass | 69,639 cycles (12 `CLMAD`/slot → 363 cycles each) | 110,121 (287) | 1.27× |
+| inversion | 31,087 (68 `CLMAD` → 457) | 41,724 (136 → 307) | 1.49× |
+| reverse pass | 83,560 (18/slot → 290) | 108,103 (188) | 1.54× |
+| **per update** | **11,518 warp-cycles** | **8,123** | **1.42×** |
+| unit fed (unit share at this occupancy / measured) | 0.91 | 0.64 | |
+| throughput | 19.92 (this run) | 13.68 | 0.687 measured; 1.42 × 8/16 = 0.709 predicted from the profile |
+
+The mechanism the kernel was built for is there: with two chains a warp
+issues `CLMAD`s 1.27× to 1.54× more often in every phase, the inversion
+included (§7 of ONE-BLOCK-GEOMETRY said nothing in a warp could overlap it;
+`inv131x2` does, by half). But it does so with half the warps, and the
+per-warp gain needed to break even was **2.0×**. At 2 warps per scheduler
+the unit is fed 64% of the time against 91% at 4; the warp that would have
+covered the other's stall is not there. The forward pass is where the gap
+is widest — 1.27× — because two chains give it two `tableSelectSlot`s per
+iteration, ~1,800 issue-cycles of lookups and ALU during which twelve
+`CLMAD`s from one chain are in flight and the other chain's twelve are
+waiting on the reductions of the first; the selection is on the ALU and MIO
+pipes, and a second copy of it in the same warp does not overlap with the
+first copy. It is the largest phase in the two-chain kernel (42%) where it
+was the second-largest (38%) in the reference.
+
+The register file is the reason 2 warps per scheduler is all there is: two
+chains need 182 registers, 16 warps × 182 × 32 = 93 K of the SM's 64 K
+registers. 384 × 32 (166 registers, 12 warps) and 512 × 16 (128 registers,
+16 warps of two 8-slot chains, one more inversion per 16 updates) are the
+two ways to get more warps back, and both land at 0.78: the first outgrows
+the persisting-L2 window and gives back clock (2362 – 2400 MHz), the second
+pays 12.8% more unit time for the extra inversion and, at 0.80 of its own
+19.7 floor, is still fed worse than the one-chain reference at 0.90.
+
+What this measures, in the terms of §1: on a unit that one warp can drive to
+at most one `CLMAD` per ~63 cycles and that needs one every 79 cycles per
+scheduler to be full, four warps per scheduler with 1.5 `CLMAD`s in flight
+each beat two warps with 3 in flight each, because the stalls that idle the
+unit are not the `CLMAD` latency but the ALU/MIO work between products, and
+that work only overlaps across warps. The one-chain kernel at 512 × 1 is the
+right shape for this SKU, and its remaining tenth is not reachable by
+rescheduling within the warp.
+
+### 5.3 Classification
+
+| change | class | evidence |
+|---|---|---|
+| `PACKED_CHAINS=2` at 256 × 32 | engineering, did not pay | 0.696× paired, 5/5 repetitions; 300/300; identical DPs; unit fed 0.64 vs 0.91 |
+| `PACKED_CHAINS=2` at 384 × 32, 512 × 16 | geometry scouts, did not pay | 0.784×, 0.785× |
+| `PACKED_ALU_SQR=1` on either kernel | engineering, did not pay | 0.992×, 0.965× relative to each kernel's own row |
+| the 22.3 B/s floor and the 30 B/s verdict | unchanged | every row ≤ 0.90 of the floor; the reference re-measured at 0.896 |
+
+`gpu-rtx-pro6000-20b` remains the RTX PRO 6000 build. `PACKED_CHAINS=2`
+stays in the tree behind its knob (off by default) as the measured answer to
+"overlap the inversion inside the warp", so that it is not rebuilt.
 
 ## 6. The GPU where the question changes
 
