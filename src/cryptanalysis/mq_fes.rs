@@ -1528,6 +1528,24 @@ fn profile_add(counter: &std::sync::atomic::AtomicU64, v: u64) {
     counter.fetch_add(v, std::sync::atomic::Ordering::Relaxed);
 }
 
+pub(crate) mod profile {
+    use super::{profile_add, profile_counters::*};
+    pub(crate) fn add_calls(v: u64) {
+        profile_add(&CALLS, v);
+    }
+    pub(crate) fn add_build_ns(v: u64) {
+        profile_add(&BUILD_NS, v);
+    }
+    pub(crate) fn add_walk(points: u64, ns: u64, roots: u64) {
+        profile_add(&POINTS, points);
+        profile_add(&WALK_NS, ns);
+        profile_add(&ROOTS, roots);
+    }
+    pub(crate) fn add_lift_ns(v: u64) {
+        profile_add(&LIFT_NS, v);
+    }
+}
+
 struct LiftTimer(std::time::Instant);
 impl Drop for LiftTimer {
     fn drop(&mut self) {
@@ -1545,12 +1563,30 @@ fn gray_index(mut g: u64) -> u64 {
     g
 }
 
-/// Solve a quadratic (`m = 2`) Semaev decomposition by Möbius FES.
+/// Solve a quadratic (`m = 2`) Semaev decomposition by Gray FES.
 ///
 /// Returns the same shape as
 /// [`crate::cryptanalysis::koblitz_index_calculus::sat_decompose`].
-/// Cubic chained systems (`m ≥ 3`) are reported as exhausted.
+/// Cubic chained systems (`m ≥ 3`) are reported as exhausted.  Runs the
+/// packed, swap-symmetric oracle in [`crate::cryptanalysis::mq_fes_semaev`].
 pub fn mq_fes_decompose(
+    kc: &crate::cryptanalysis::koblitz_index_calculus::KoblitzCurve,
+    fb: &crate::cryptanalysis::koblitz_index_calculus::FrobeniusFactorBase,
+    index_of: &std::collections::HashMap<(num_bigint::BigUint, num_bigint::BigUint), usize>,
+    st: &crate::cryptanalysis::koblitz_groebner::FieldStructure,
+    target: &crate::binary_ecc::BinaryPoint,
+    m: usize,
+) -> (
+    Option<Vec<usize>>,
+    crate::cryptanalysis::koblitz_index_calculus::SatDecompositionStats,
+) {
+    crate::cryptanalysis::mq_fes_semaev::mq_fes_decompose(kc, fb, index_of, st, target, m)
+}
+
+/// The previous oracle: symbolic system rebuild per target, full `2^{2ℓ}`
+/// Gray walk collecting up to 64 roots, then lifting.  Kept as the
+/// cross-check the new oracle is tested against on every target.
+pub fn mq_fes_decompose_reference(
     kc: &crate::cryptanalysis::koblitz_index_calculus::KoblitzCurve,
     fb: &crate::cryptanalysis::koblitz_index_calculus::FrobeniusFactorBase,
     index_of: &std::collections::HashMap<(num_bigint::BigUint, num_bigint::BigUint), usize>,
