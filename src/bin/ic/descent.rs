@@ -28,8 +28,10 @@ pub struct DescentArgs {
     #[arg(long, value_delimiter = ',', default_value = "K,R")]
     pub families: Vec<String>,
     /// Cells as `n:n':m`, e.g. `11:6:2,11:4:3`.  Default is the ladder
-    /// below, which takes `n' = ceil(n/m)` — the square-system choice —
-    /// up to the cap the truth-table descent imposes.
+    /// below, which takes `n' = ceil(n/m)` — the square-system choice.
+    /// The descent is symbolic and holds up to 64 boolean variables
+    /// (`n' ≤ 32` at `m = 2`, `n' ≤ 21` at `m = 3`); what limits a cell
+    /// above that is the engine and the budget.
     #[arg(long, value_delimiter = ',')]
     pub cells: Option<Vec<String>>,
     /// Targets per cell.
@@ -46,7 +48,7 @@ pub struct DescentArgs {
 }
 
 /// `n' = ceil(n/m)` makes the descent square: `m·n'` unknowns against
-/// `n` equations.  Cells past the truth-table cap are dropped rather
+/// `n` equations.  Cells past the descent's cap are dropped rather
 /// than clamped, because clamping would silently change the shape of
 /// the system being reported.
 fn default_cells() -> Vec<(u32, u32, u32)> {
@@ -90,7 +92,7 @@ pub fn run(args: DescentArgs, json_only: bool) -> Result<Value, String> {
         }
         if *np > max_n_prime(*m) {
             return Err(format!(
-                "n' = {np} exceeds the truth-table cap {} at m = {m}",
+                "n' = {np} exceeds the descent's monomial-mask cap {} at m = {m}",
                 max_n_prime(*m)
             ));
         }
