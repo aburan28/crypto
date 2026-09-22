@@ -43,7 +43,11 @@
 //! reduction through the shared kernel, every XOR of the re-reduction, and
 //! the specialisation itself at one word operation per word read and per
 //! word written — a charge the from-scratch path never pays, since its
-//! matrix build is not counted.  Wall time is reported beside it.
+//! matrix build is not counted.  Rows are stored from their first nonzero
+//! word, so a rewrite reads the words from the row's leading word to the
+//! end of its layout and writes those from its image's first word to the
+//! end of the new one; an XOR has always started at the pivot's leading
+//! word.  Wall time is reported beside it.
 //!
 //! ## What decides the cost: which variable the solver splits on
 //!
@@ -135,8 +139,6 @@ const DELETED: u32 = u32::MAX;
 /// `m ∖ v`), and a materialisation XORs them together.
 #[derive(Debug)]
 struct LayoutStep {
-    /// Words per row in the epoch this step maps *from*.
-    from_words: usize,
     map: Rc<[u32]>,
     /// Composed maps from earlier epochs to the epoch this step maps *to*,
     /// built on demand.  Shared with every basis below this step, so a
@@ -188,10 +190,76 @@ impl ChildSystem {
 /// Rows are shared by reference between a basis and the children
 /// specialised from it; a row is rewritten into a newer layout — and
 /// charged for it — only when something needs its content there.
+///
+/// **Trimmed.**  A row is stored from the word it starts in to the end of
+/// its layout.  An echelon row is zero before its leading column, and the
+/// rows the tree rewrites most lead far to the right — a displaced row's
+/// image falls towards the tail, and so do the pivots it hits — so the
+/// words before `lead` are neither stored, read nor written, as the
+/// elimination's XORs have never touched a pivot's words before its
+/// leading column either.
 #[derive(Clone, Debug)]
 struct LazyRow {
     version: u32,
+    /// The layout word `data[0]` holds.
+    start: u32,
+    /// The first word that can be nonzero (`≥ start`); a rewrite reads
+    /// from here.
+    lead: u32,
+    /// Words `start ..` to the end of the layout of `version`.
     data: Rc<Vec<u64>>,
+}
+
+impl LazyRow {
+    /// Word `w` of the row in its own layout.
+    fn word(&self, w: usize) -> u64 {
+        if w < self.lead as usize {
+            0
+        } else {
+            self.data[w - self.start as usize]
+        }
+    }
+
+    /// The words from `w` (at least `lead`) to the end of the layout.
+    fn from_word(&self, w: usize) -> &[u64] {
+        debug_assert!(w >= self.lead as usize);
+        &self.data[w - self.start as usize..]
+    }
+
+    /// The words a rewrite reads.
+    fn live(&self) -> &[u64] {
+        self.from_word(self.lead as usize)
+    }
+}
+
+/// A row being reduced into a basis: words `start ..` to the end of the
+/// current layout.
+struct Draft {
+    start: usize,
+    data: Vec<u64>,
+}
+
+impl Draft {
+    /// A full-width row.
+    fn full(data: Vec<u64>) -> Self {
+        Self { start: 0, data }
+    }
+
+    /// Leading set column at or after word `from` (a layout word).
+    fn leading_column_from(&self, from: usize) -> Option<usize> {
+        self.data[from - self.start..]
+            .iter()
+            .position(|&w| w != 0)
+            .map(|i| {
+                let w = from + i;
+                w * 64 + self.data[w - self.start].trailing_zeros() as usize
+            })
+    }
+}
+
+thread_local! {
+    /// Full-width staging for [`ReducedBasis::rewrite`], zero between uses.
+    static STAGING: RefCell<Vec<u64>> = const { RefCell::new(Vec::new()) };
 }
 
 /// The reduced degree-`degree` Macaulay row space of a system, kept as an
@@ -323,6 +391,8 @@ impl ReducedBasis {
             out.pivot_col.push(c as u32);
             out.rows.push(LazyRow {
                 version: 0,
+                start: 0,
+                lead: (c / 64) as u32,
                 data: Rc::new(row),
             });
         }
@@ -481,34 +551,61 @@ impl ReducedBasis {
     }
 
     /// Rewrite `row` from the layout of epoch `version` into the current
-    /// one.  Charged one word operation per word read and per word written.
-    fn materialised(&self, row: &LazyRow, cost: &mut InheritCost) -> Rc<Vec<u64>> {
+    /// one, trimmed to the first word its image touches; `None` if every
+    /// bit was deleted or the folds cancelled it.  Charged one word
+    /// operation per word read (from the row's `lead`) and per word
+    /// written (from the image's first word to the end of the layout).
+    fn rewrite(&self, row: &LazyRow, cost: &mut InheritCost) -> Option<Draft> {
         debug_assert!(row.version < self.epoch());
         let map = self.composite(row.version);
-        let from_words = self.history[row.version as usize].from_words;
-        let mut out = vec![0u64; self.words];
-        for (wi, &word) in row.data.iter().enumerate() {
-            let mut bits = word;
-            while bits != 0 {
-                let b = bits.trailing_zeros() as usize;
-                bits &= bits - 1;
-                let c = map[wi * 64 + b];
-                if c != DELETED {
-                    out[c as usize / 64] ^= 1u64 << (c % 64);
+        let words = self.words;
+        let live = row.live();
+        let lead = row.lead as usize;
+        cost.specialise_word_ops += live.len() as u64;
+        STAGING.with(|staging| {
+            let mut staging = staging.borrow_mut();
+            if staging.len() < words {
+                staging.resize(words, 0);
+            }
+            let (mut lo, mut hi) = (usize::MAX, 0usize);
+            for (i, &word) in live.iter().enumerate() {
+                let base = (lead + i) * 64;
+                let mut bits = word;
+                while bits != 0 {
+                    let b = bits.trailing_zeros() as usize;
+                    bits &= bits - 1;
+                    let c = map[base + b];
+                    if c != DELETED {
+                        let w = c as usize / 64;
+                        staging[w] ^= 1u64 << (c % 64);
+                        lo = lo.min(w);
+                        hi = hi.max(w);
+                    }
                 }
             }
-        }
-        cost.specialise_word_ops += (from_words + self.words) as u64;
-        Rc::new(out)
+            if lo == usize::MAX {
+                return None;
+            }
+            cost.specialise_word_ops += (words - lo) as u64;
+            let mut data = vec![0u64; words - lo];
+            data[..=hi - lo].copy_from_slice(&staging[lo..=hi]);
+            staging[lo..=hi].fill(0);
+            data.iter().any(|&w| w != 0).then_some(Draft { start: lo, data })
+        })
     }
 
-    /// Bring row `r` into the current layout if it is not there yet.
+    /// Bring row `r` into the current layout if it is not there yet.  A
+    /// kept row's leading monomial survives every step, so its image is
+    /// nonzero.
     fn ensure_current(&mut self, r: usize, cost: &mut InheritCost) {
         if self.rows[r].version != self.epoch() {
-            let data = self.materialised(&self.rows[r], cost);
+            let draft = self.rewrite(&self.rows[r], cost).expect("a kept pivot survives");
+            let lead = draft.start + draft.data.iter().position(|&w| w != 0).expect("nonzero");
             self.rows[r] = LazyRow {
                 version: self.epoch(),
-                data,
+                start: draft.start as u32,
+                lead: lead as u32,
+                data: Rc::new(draft.data),
             };
         }
     }
@@ -520,10 +617,10 @@ impl ReducedBasis {
         }
     }
 
-    /// Row `r`'s content in the current layout, materialising it if needed.
-    fn current_row(&mut self, r: usize, cost: &mut InheritCost) -> Rc<Vec<u64>> {
+    /// Row `r` in the current layout, materialising it if needed.
+    fn current_row(&mut self, r: usize, cost: &mut InheritCost) -> LazyRow {
         self.ensure_current(r, cost);
-        self.rows[r].data.clone()
+        self.rows[r].clone()
     }
 
     /// Restore reduced row echelon form: clear every pivot column from
@@ -555,15 +652,18 @@ impl ReducedBasis {
             };
             let r = r as usize;
             let (w, bit) = (c / 64, 1u64 << (c % 64));
-            let pivot = self.rows[r].data.clone();
+            let pivot = self.rows[r].clone();
             for (i, row) in self.rows.iter_mut().enumerate() {
-                if i != r && row.data[w] & bit != 0 {
+                if i != r && row.word(w) & bit != 0 {
                     let mut data = row.data.to_vec();
-                    for (dst, &src) in data[w..].iter_mut().zip(&pivot[w..]) {
+                    let at = w - row.start as usize;
+                    for (dst, &src) in data[at..].iter_mut().zip(pivot.from_word(w)) {
                         *dst ^= src;
                     }
                     *row = LazyRow {
                         version: epoch,
+                        start: row.start,
+                        lead: row.lead,
                         data: Rc::new(data),
                     };
                     cost.reduce_word_ops += (words - w) as u64;
@@ -596,26 +696,29 @@ impl ReducedBasis {
     /// Insert a row given in the current layout, reducing its leading term
     /// against the existing pivots until it becomes a new pivot or vanishes.
     /// Every pivot it hits is materialised first.
-    fn insert(&mut self, mut row: Vec<u64>, cost: &mut InheritCost) -> Option<usize> {
+    fn insert(&mut self, mut row: Draft, cost: &mut InheritCost) -> Option<usize> {
+        let mut from = row.start;
         loop {
-            let Some(c) = leading_column(&row) else {
-                return None;
-            };
+            let c = row.leading_column_from(from)?;
+            let w = c / 64;
             match self.pivot_of[c] {
                 Some(r) => {
-                    let w = c / 64;
                     let pivot = self.current_row(r as usize, cost);
-                    for (dst, &src) in row[w..].iter_mut().zip(&pivot[w..]) {
+                    let at = w - row.start;
+                    for (dst, &src) in row.data[at..].iter_mut().zip(pivot.from_word(w)) {
                         *dst ^= src;
                     }
                     cost.reduce_word_ops += (self.words - w) as u64;
+                    from = w;
                 }
                 None => {
                     self.pivot_of[c] = Some(self.rows.len() as u32);
                     self.pivot_col.push(c as u32);
                     self.rows.push(LazyRow {
                         version: self.epoch(),
-                        data: Rc::new(row),
+                        start: row.start as u32,
+                        lead: w as u32,
+                        data: Rc::new(row.data),
                     });
                     return Some(self.rows.len() - 1);
                 }
@@ -639,7 +742,6 @@ impl ReducedBasis {
     /// column and rebuild the pivot index.  Rows are left where they are.
     fn adopt_layout(&mut self, columns: Vec<u64>, map: Vec<u32>) {
         let step = LayoutStep {
-            from_words: self.words,
             map: map.into(),
             to_here: RefCell::new(HashMap::new()),
         };
@@ -849,10 +951,8 @@ impl ReducedBasis {
         // the whole basis are touched (`RESEARCH_INHERITED_F4.md` §3.7).
         displaced.sort_unstable_by_key(|&(pc, _)| std::cmp::Reverse(pc));
         for (_, row) in displaced {
-            let image = out.materialised(&row, &mut cost);
-            if image.iter().any(|&w| w != 0) {
-                let inserted =
-                    out.insert(Rc::try_unwrap(image).unwrap_or_else(|rc| (*rc).clone()), &mut cost);
+            if let Some(image) = out.rewrite(&row, &mut cost) {
+                let inserted = out.insert(image, &mut cost);
                 if out.refutes(inserted) {
                     return (out, cost);
                 }
@@ -911,7 +1011,7 @@ impl ReducedBasis {
                         let c = index[&m];
                         row[c / 64] |= 1u64 << (c % 64);
                     }
-                    let inserted = out.insert(row, &mut cost);
+                    let inserted = out.insert(Draft::full(row), &mut cost);
                     if out.refutes(inserted) {
                         return (out, cost);
                     }
@@ -998,12 +1098,13 @@ impl ReducedBasis {
                 let gap = self.degree - self.columns[self.pivot_col[r] as usize].count_ones();
                 let q = self.current_row(r, cost);
                 let mut q_monos: Vec<u64> = Vec::new();
-                for (wi, &word) in q.iter().enumerate() {
+                for (i, &word) in q.live().iter().enumerate() {
+                    let base = (q.lead as usize + i) * 64;
                     let mut bits = word;
                     while bits != 0 {
                         let b = bits.trailing_zeros() as usize;
                         bits &= bits - 1;
-                        q_monos.push(self.columns[wi * 64 + b]);
+                        q_monos.push(self.columns[base + b]);
                     }
                 }
                 for t in monomials_up_to_mask(multipliers, gap) {
@@ -1026,7 +1127,7 @@ impl ReducedBasis {
                     }
                     if !product.is_empty() {
                         products.push(product);
-                        read_words += q.len() as u64;
+                        read_words += q.live().len() as u64;
                     }
                 }
             }
@@ -1072,10 +1173,15 @@ impl ReducedBasis {
         }
         self.materialise_all(cost);
         let was_pivot: Vec<bool> = self.pivot_of.iter().map(Option::is_some).collect();
+        let words = self.words;
         let mut matrix: Vec<Vec<u64>> = self
             .rows
             .iter()
-            .map(|row| Rc::try_unwrap(row.data.clone()).unwrap_or_else(|rc| (*rc).clone()))
+            .map(|row| {
+                let mut full = vec![0u64; words];
+                full[row.start as usize..].copy_from_slice(&row.data);
+                full
+            })
             .collect();
         matrix.extend(batch);
         let rank = rref_f2_counted(&mut matrix, self.columns.len(), &mut cost.reduce_word_ops);
@@ -1091,6 +1197,8 @@ impl ReducedBasis {
             self.pivot_col.push(c as u32);
             self.rows.push(LazyRow {
                 version: epoch,
+                start: 0,
+                lead: (c / 64) as u32,
                 data: Rc::new(row),
             });
             if !was_pivot[c] && self.is_fall(r) {
@@ -1149,7 +1257,7 @@ impl ReducedBasis {
             let c = self.pivot_col[r] as usize;
             let mut packed = vec![0u64; low_words];
             for column in c..self.columns.len() {
-                if row[column / 64] & (1u64 << (column % 64)) != 0 {
+                if row.word(column / 64) & (1u64 << (column % 64)) != 0 {
                     let k = column - low_start;
                     packed[k / 64] |= 1u64 << (k % 64);
                 }
@@ -1354,7 +1462,7 @@ mod tests {
             .map(|row| {
                 F2BoolPoly::from_monos(
                     (0..b.columns.len())
-                        .filter(|c| row.data[c / 64] & (1u64 << (c % 64)) != 0)
+                        .filter(|c| row.word(c / 64) & (1u64 << (c % 64)) != 0)
                         .map(|c| F2BoolMono::from_mask(b.columns[c]))
                         .collect(),
                     b.n_vars,
