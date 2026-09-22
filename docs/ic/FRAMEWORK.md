@@ -143,6 +143,7 @@ so this column is the cause of the `rows` column further along.
 | `targets_tried` | points the oracle was asked about |
 | `relations_found` | how many decomposed |
 | `hit_rate` | `relations_found / targets_tried` |
+| `setup` | what `prepare` cost: the pair table, or nothing for an oracle that builds none — its own phase, inside `S`, so the same base reads the same beside every oracle |
 | `cost` | the whole stage, including the failures |
 | `system` | the algebraic system's shape, when the oracle built one |
 | `solver` | what the polynomial solver cost, when one was used |
@@ -189,9 +190,18 @@ group-addition equivalents and added to the decomposition phase, so
 
 | `priced_by` | meaning |
 |:--|:--|
-| `pinned` | the unit is a word operation (`monomial operations`, `monomial tests`, `word XORs`) and was priced at the repository's pinned `ns_per_word_xor / ns_per_add` ratio from [`calibration.json`](calibration.json) — comparable across hosts and runs |
-| `measured` | the unit has no pinned ratio (SAT conflicts, XL linearisation steps), so the engine's wall time over this host's measured addition time was used — honest, but host-dependent, and §12 of the ledger note is why a ratio between two `measured` rows from different hosts means nothing |
+| `pinned` | the unit is `word XORs` — the dense Macaulay row operation §5 of the ledger note priced matrix-F4 in — and was priced at the repository's pinned `ns_per_word_xor / ns_per_add` ratio from [`calibration.json`](calibration.json): comparable across hosts and runs |
+| `measured` | every other unit (Buchberger monomial operations, SAT conflicts, exhaustive monomial tests): the engine's wall time over this host's measured addition time — honest, but host-dependent, and §12 of the ledger note is why a ratio between two `measured` rows from different hosts means nothing. `ns_per_op` records the conversion the price rests on |
 | `unpriced` | no calibration at all (a library call with `Calibration::default()`); the solver's work is in `ops` and **not** in `S`, and the row says so rather than quietly dropping it |
+
+Only `word XORs` is priced by count on purpose. The first frozen
+solver sweep measured a Buchberger "monomial operation" at about 50 ns
+on the calibration host against 0.4 ns for a word XOR; pricing the one
+at the other's ratio would have flattered the engine a hundredfold,
+which is §6's "changing the unit" in one line of code. An engine whose
+unit deserves a pinned ratio gets one the way §12 of the ledger note
+pinned the others — measured, recorded in `calibration.json`, named —
+not by being added to a list.
 
 A comparison between engines is only as good as the weakest `priced_by`
 in it. Two `pinned` rows compare operation counts; a `pinned` row
@@ -326,8 +336,8 @@ The contract is short and all of it matters:
   row with a reason instead of running the relation phase for nothing.
   `xl-f2` is the shipped example: the repository's XL runs one pass at
   degree `n_vars` with no budget hook — about 150 seconds a call on a
-  12-unknown descent against Buchberger's 40 milliseconds — so it
-  declines above ten unknowns.
+  12-unknown descent against Buchberger's 7 milliseconds on the same
+  systems — so it declines above ten unknowns.
 
 ### `RelationSolver` — the matrix
 

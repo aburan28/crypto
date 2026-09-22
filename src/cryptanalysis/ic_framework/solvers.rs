@@ -58,9 +58,10 @@ const ENUMERATION_CAP: usize = 26;
 /// The largest system `xl-f2` will attempt.  The repository's XL runs
 /// one pass at degree `n_vars`, so its matrix has `2^{n_vars}` columns
 /// and it has no budget hook: on a 12-unknown, 13-equation descent it
-/// measured about 150 seconds a call against Buchberger's 40
-/// milliseconds.  Declining above ten unknowns is what keeps a sweep
-/// row from running for hours; the row is then skipped and says why.
+/// measured about 150 seconds a call against Buchberger's 7
+/// milliseconds on the same systems.  Declining above ten unknowns is
+/// what keeps a sweep row from running for hours; the row is then
+/// skipped and says why.
 const XL_CAP: usize = 10;
 
 fn is_one(gb: &[F2BoolPoly]) -> bool {

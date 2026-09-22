@@ -153,6 +153,10 @@ pub struct DecompositionReport {
     /// Relations per target: the number the factor base moves and every
     /// downstream stage inherits.
     pub hit_rate: f64,
+    /// What `prepare` cost — a pair table, or nothing — as its own
+    /// phase inside `S`, so the same base reads the same beside every
+    /// oracle.
+    pub setup: PhaseCost,
     pub cost: PhaseCost,
     /// The algebraic system, when the oracle built one.
     pub system: Option<SystemShape>,
@@ -167,6 +171,10 @@ pub struct SolverReport {
     pub calls: u64,
     pub ops: u64,
     pub op_unit: String,
+    /// This host's measured nanoseconds per `op_unit`: the conversion
+    /// factor a `measured` price rests on, recorded so the count can be
+    /// re-priced on another host or pinned later.
+    pub ns_per_op: Option<f64>,
     pub wall_ns: u64,
     pub peak_bytes: u64,
     /// Calls that ran out of budget, counted apart from refutations.
@@ -257,9 +265,17 @@ pub fn run_pipeline<G: CountedGroup>(
     fb_cost.wall_ns = fb_cost.wall_ns.max(fb_started.elapsed().as_nanos() as u64);
 
     // ── Stage 2: whatever the oracle precomputes ───────────────────
+    //
+    // Its own phase, not folded into the base: a pair table is the
+    // oracle's cost, and charging it to the base made the same base
+    // read 1,830 GAE beside a table oracle and 0 beside an algebraic
+    // one in the first frozen solver sweep.
     let mut prep_ops = GroupOps::default();
+    let prep_started = Instant::now();
     oracle.prepare(ctx, &fb, &spec.oracle_params, &mut prep_ops)?;
-    fb_cost.group_ops.merge(prep_ops);
+    let mut prep_cost = PhaseCost::default();
+    prep_cost.group_ops.merge(prep_ops);
+    prep_cost.wall_ns = prep_started.elapsed().as_nanos() as u64;
 
     // ── Stages 3 and 4: relations, then the matrix ─────────────────
     //
@@ -297,17 +313,22 @@ pub fn run_pipeline<G: CountedGroup>(
     let mut rel = outcome.relations;
     let mut la = outcome.linear_algebra;
     let mut ver = outcome.verify;
-    for phase in [&mut fb_phase, &mut rel, &mut la, &mut ver] {
+    for phase in [&mut fb_phase, &mut prep_cost, &mut rel, &mut la, &mut ver] {
         price_phase(phase, calib);
     }
-    // The solver's work is engine work in its own unit.  Monomial
-    // operations on 64-bit masks are word operations and price at the
-    // pinned word-XOR ratio; a unit with no pinned ratio prices at this
-    // host's measured wall time over its addition time and says so.
+    // The solver's work is engine work in its own unit.  Only a unit the
+    // calibration carries a ratio for is priced by count — `word XORs`,
+    // the dense Macaulay row operation §5 of the ledger note priced
+    // matrix-F4 in, at the pinned `ns_per_word_xor`.  Every other unit
+    // prices at this host's measured wall time over its addition time
+    // and says so: the first frozen sweep showed why, since a
+    // Buchberger "monomial operation" costs about 50 ns here against
+    // 0.4 ns for a word XOR, and pricing it at the word ratio would have
+    // flattered the engine a hundredfold.  `ns_per_op` records the
+    // measured conversion so the count can be re-priced later.
     let solver_report = oracle.solver_totals().map(|t| {
-        let word_units = ["monomial operations", "monomial tests", "word XORs"];
-        let (gae, priced_by) = match (word_units.contains(&t.op_unit.as_str()), calib.ns_per_word_xor) {
-            (true, Some(ns)) if calib.ns_per_add > 0.0 => (t.ops as f64 * ns / calib.ns_per_add, "pinned"),
+        let (gae, priced_by) = match (t.op_unit.as_str(), calib.ns_per_word_xor) {
+            ("word XORs", Some(ns)) if calib.ns_per_add > 0.0 => (t.ops as f64 * ns / calib.ns_per_add, "pinned"),
             _ if calib.ns_per_add > 0.0 => (t.wall_ns as f64 / calib.ns_per_add, "measured"),
             _ => (0.0, "unpriced"),
         };
@@ -320,6 +341,7 @@ pub fn run_pipeline<G: CountedGroup>(
             calls: t.calls,
             ops: t.ops,
             op_unit: t.op_unit.clone(),
+            ns_per_op: (t.ops > 0).then(|| t.wall_ns as f64 / t.ops as f64),
             wall_ns: t.wall_ns,
             peak_bytes: t.peak_bytes,
             budget_exceeded: t.budget_exceeded,
@@ -332,7 +354,7 @@ pub fn run_pipeline<G: CountedGroup>(
             extra: t.extra.clone(),
         }
     });
-    let total_gae = fb_phase.gae + rel.gae + la.gae + ver.gae;
+    let total_gae = fb_phase.gae + prep_cost.gae + rel.gae + la.gae + ver.gae;
     let sqrt_r = (ctx.r as f64).sqrt();
     let s = total_gae / sqrt_r;
 
@@ -361,6 +383,7 @@ pub fn run_pipeline<G: CountedGroup>(
             targets_tried: outcome.trials,
             relations_found: outcome.relations_found,
             hit_rate: outcome.relations_found as f64 / outcome.trials.max(1) as f64,
+            setup: prep_cost,
             cost: rel,
             system: oracle.last_system(),
             solver: solver_report,
@@ -638,9 +661,12 @@ mod tests {
             Params::default(),
             Some(std::time::Duration::from_secs(60)),
         );
-        // A calibration with the word-XOR ratio pinned, so the solver's
-        // monomial operations price at a repository ratio rather than at
-        // this host's wall time.
+        // A calibration with one nanosecond per addition, so the
+        // solver's measured price reads directly as its wall time: a
+        // Buchberger monomial operation has no pinned ratio (it is not a
+        // word XOR, and pricing it as one would flatter the engine), so
+        // the conversion is this host's measured one and the report
+        // says so.
         let calib = Calibration {
             ns_per_add: 1.0,
             ns_per_word_xor: Some(0.002),
@@ -658,11 +684,16 @@ mod tests {
             .expect("an algebraic oracle reports its solver");
         assert_eq!(solver.name, "buchberger-f2");
         assert!(solver.calls >= 1, "the solver was never called");
-        assert_eq!(solver.priced_by, "pinned");
+        assert_eq!(solver.priced_by, "measured");
         assert!(solver.ops > 0 && solver.gae > 0.0, "solver work was not priced");
         assert!(
-            (solver.gae - solver.ops as f64 * 0.002).abs() < 1e-6,
-            "pinned pricing is ops times the ratio"
+            (solver.gae - solver.wall_ns as f64).abs() < 1e-6,
+            "a measured price is the wall time over the addition time"
+        );
+        let ns_per_op = solver.ns_per_op.expect("a measured conversion is recorded");
+        assert!(
+            (ns_per_op * solver.ops as f64 - solver.wall_ns as f64).abs() < 1.0,
+            "ns_per_op times ops is the wall time"
         );
         assert!(
             report.decomposition.cost.gae >= solver.gae,

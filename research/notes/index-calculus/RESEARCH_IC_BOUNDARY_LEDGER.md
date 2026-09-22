@@ -2446,9 +2446,14 @@ Reading it:
 - **The Koblitz curve and the random one behave identically**, on every
   column.  Whatever the extra automorphism buys elsewhere in this
   ledger, it does not change the shape of this system.
-- **The cost is below enumeration and the margin grows**: `0.6×`,
-  `0.5×`, `0.5×`, `0.4×`.  That is the column that matters, and it is
-  the one a degree table on its own would have hidden.
+- **The count is below enumeration's count and the margin grows**:
+  `0.6×`, `0.5×`, `0.5×`, `0.4×`.  **Corrected in §15.4:** the two
+  counts are in different units — a Buchberger monomial operation
+  measures about `50 ns` on the calibration host and an enumeration
+  test `0.07 ns` — and once each is converted at its own measured
+  factor, as §2 requires, the engine costs about **`75×`** enumeration
+  at `n = 13` rather than `0.4×` of it.  The degree reading stands; the
+  cost reading was a ratio of unlike units and is withdrawn.
 
 **`D_pair` is in the table to keep an earlier mistake visible**, and it
 has a second story now.  The first version of this measurement reported
@@ -2507,6 +2512,9 @@ cannot contribute — gives, paired on the same seed and the same systems:
 Gröbner basis measured 6.5× to 43× *worse* than enumeration, widening
 with `n`; under both it measures 0.4× to 0.6×, narrowing.  The first
 reading was a statement about the engine and was withdrawn, not filed.
+(Both ratios are in raw counts of unlike units; the tenfold-to-
+hundredfold cut in the engine's own count is real, and §15.4 gives the
+converted ratio to enumeration, which is `75×` the other way.)
 The coprime-only ladder stays frozen beside the fixed one as the before
 mark, because deleting it would hide the size of the correction.
 
@@ -2530,10 +2538,14 @@ one with a silently missing cell.
 - No row here is a speed, a crossover, or evidence about any deployed
   curve; the largest field is `GF(2^15)`.
 - `ms` and `KiB` are practicality notes.  The metric is the monomial
-  operation count, as §6 requires.
+  operation count, as §6 requires — and, as §15.4 found, a count in one
+  engine's unit is not comparable with a count in another's until each
+  is converted at a measured factor.
 - The `ops/enum` column is a ratio to *this repository's* enumeration on
-  *these* systems.  It is not a statement about F4, about Magma, or
-  about the symmetrised systems Petit–Quisquater solve.
+  *these* systems, **in raw counts of unlike units**; §15.4 gives the
+  converted ratio, which is the other way round by two orders of
+  magnitude.  It is not a statement about F4, about Magma, or about the
+  symmetrised systems Petit–Quisquater solve.
 - A row whose `timed_out` is non-zero is a statement about the engine's
   budget and not about the system's difficulty.
 - The degrees are not comparable to Petit–Quisquater's row by row, for
@@ -2548,6 +2560,179 @@ ic descent --cells 7:4:2,9:5:2,11:6:2,13:7:2 --targets 8 \
 # The before mark, on the coprime criterion alone, is frozen at
 # docs/ic/runs/ic-descent-degrees-coprime-only-2026-09-22.json
 ```
+
+## 15. The solver inside `S`: the framework's first frozen sweeps
+
+§14 priced the algebraic oracle's systems on their own and said, first,
+that no row of it was a speed.  The benchmarking framework
+(`docs/ic/FRAMEWORK.md`) now lets a *whole run* choose its
+polynomial-system engine, with the engine's work priced into the
+decomposition phase and so into `S`.  This section freezes the first
+two sweeps it ran, and one of them corrects §14.
+
+### 15.1 The boundaries, stated first
+
+- **The reference** is the pair-table oracle on the *same base*, same
+  instance, same walk, same seed: `mitm[m=2]` on
+  `binary-subspace[dimension=6]`.  It is the best thing already solving
+  the same decomposition problem in the same unit, and the algebraic
+  rows have to reach it before they are worth anything.
+- **The method boundary** is rho, which sits at `S ≈ 1.3` on every rung
+  of this ledger (§3).  The sweep did not run rho on this instance, so
+  the `vs rho` column of the frozen table is empty and says so; no
+  ratio to rho is quoted below.
+- **The degree boundary** is §14.3's semi-regular degree, `D_sr = 4` for
+  thirteen quadratics in twelve unknowns.
+
+Everything here is a toy: `E(F_{2^13})`, `r = 4091`, `log₂ r = 12`.  It
+is a measurement of a *capability* — the solver reaching `S` — and of
+an accounting error, not of an attack.
+
+### 15.2 One base, four oracles, whole runs
+
+Frozen at `docs/ic/runs/ic-bench-solver-engines-2026-09-22.json`; two
+planted targets per configuration, the same two for every row.
+`random-binary-n13-b1503`, `binary-subspace[dimension=6]`: 60 signed
+points, 30 columns, walk targets, `incremental-gauss`.  `S` and the
+ratio to the reference are per target; the solver columns are totals
+over the run.
+
+| oracle | engine | trials | rows | hit | S | S / reference | solver calls | solver ops (unit) | ns / op | solver GAE | D_solve | D_sr | priced by | correct |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
+| pair table | — | 126 / 112 | 26 / 20 | 0.206 / 0.179 | 40.5 / 39.7 | 1 | — | — | — | — | — | — | — | yes / yes |
+| descent-algebraic | exhaustive | 126 / 112 | 26 / 20 | 0.206 / 0.179 | 1,049 / 947 | 25.9× / 23.9× | 124 / 111 | 1.61e8 / 1.43e8 (monomial tests) | 0.074 | 6.62e4 / 5.98e4 | — | 4 | measured | yes / yes |
+| descent-algebraic | buchberger-f2 | 126 / 112 | 26 / 20 | 0.206 / 0.179 | 77,765 / 70,202 | 1,920× / 1,768× | 124 / 111 | 1.70e7 / 1.59e7 (monomial operations) | 52.7 / 51.0 | 4.97e6 / 4.49e6 | 2.90 / 2.95 | 4 | measured | yes / yes |
+| descent-algebraic | sat-cdcl | 135 / 112 | 28 / 20 | 0.207 / 0.179 | 188,708 / 164,302 | 4,659× / 4,139× | 133 / 111 | 1.25e5 / 1.10e5 (conflicts) | 17,446 / 17,142 | 1.21e7 / 1.05e7 | — | 4 | measured | yes / yes |
+
+The phases behind the reference row, per target: base `3.9`, pair table
+`1,830`, relations `737 / 687`, matrix `5.0 / 3.4`, verification `15`,
+total `2,591 / 2,539` GAE.  The algebraic rows build no table (their
+`setup` is `0`) and spend it all in the relation phase, which is the
+solver: `4.97e6` of the Buchberger row's `4.97e6`.
+
+Reading it:
+
+- **The solver reaches `S`.**  That is the capability, and it is what
+  §14.1 could not do.  Every algebraic row is a complete logarithm with
+  the engine's work inside its `S`, and every row is verified.
+- **On the same base the pair table wins by three to four orders of
+  magnitude**, and it is not close: `1,900×` for the Gröbner engine,
+  `4,000×` for CDCL, `24×` even for exhaustive search over the
+  subspace.  A table of `C(60, 2)` additions is `1,830` GAE once; a
+  system per target is `40,000` GAE per target for Buchberger.
+- **Exhaustive search is the best algebraic engine here by `75×`**, in
+  the unit — the point §15.4 makes.
+- **The degree reading of §14 stands and does not help.**  `D_solve =
+  2.9` against `D_sr = 4`, a ratio of `0.73`, the same "below the
+  bound" §14.4 reports, on the engine that is `1,900×` the reference.
+  The degree column and the `S` column disagree about which engine is
+  good; the `S` column is the one that is a speed.
+- **The oracles agree target by target.**  The Buchberger and
+  exhaustive rows walked exactly the pair table's targets and found
+  exactly its relations (`126 / 26`, `112 / 20`); the test suite checks
+  the same thing on 150 targets directly.  CDCL's first repeat walked
+  `135` targets to `28` rows: a target with two decompositions lifted
+  to a different pair, and the matrix pinned nine rows later.  Same
+  answer.
+- **One system per run lifted to nothing** (`unliftable_systems = 1` on
+  every algebraic row, `lift_failures` `1`–`3`).  A summation
+  polynomial vanishes over the algebraic closure, so a solution may
+  name a twist abscissa the base never holds.  It is counted, never
+  folded into "did not decompose", and it is why the algebraic hit
+  rates equal the pair table's rather than exceed them.
+
+### 15.3 The relation matrix, on its own
+
+Frozen at `docs/ic/runs/ic-bench-relation-matrix-2026-09-22.json`:
+`bench-20bit`, `r = 1,046,999`, `mitm[negation_folded=1]`, walk
+targets, two planted targets, both eliminations on the same relations,
+pinned calibration.
+
+| base | matrix | rows | rank | row_ops | matrix GAE | S | correct |
+|:--|:--|--:|--:|--:|--:|--:|:--|
+| 64 abscissae | incremental-gauss | 38 / 35 | 38 / 35 | 469 / 382 | 8.11 / 6.60 | 9.125 / 12.040 | yes / yes |
+| 64 abscissae | structured-gauss | 38 / 35 | 38 / 35 | 433 / 358 | 7.49 / 6.19 | 9.124 / 12.039 | yes / yes |
+| 256 abscissae | incremental-gauss | 151 / 110 | 151 / 110 | 2,105 / 1,040 | 36.4 / 18.0 | 67.086 / 66.880 | yes / yes |
+| 256 abscissae | structured-gauss | 151 / 110 | 151 / 110 | 1,869 / 936 | 32.3 / 16.2 | 67.082 / 66.878 | yes / yes |
+
+Same rows, same rank, same logarithm; pivoting on the lightest column
+saves `6`–`11 %` of the `row_ops` on two-summand rows, and the matrix
+is `0.05`–`0.09 %` of `S` at these sizes, so `S` moves in the fourth
+digit.  **Engineering**, bounded, and not a finding — the matrix was
+`0.002 %` of the cost at §11's sizes and is a lever only where the
+relation count is.  (The 256-abscissa base is past the family optimum
+on purpose, to give the matrix rows to work on; its pair table is
+`65,792` of its `68,644` GAE.)
+
+### 15.4 The accounting error, and what it corrects
+
+The first freeze of the solver sweep priced the Buchberger engine's
+"monomial operations" at the pinned word-XOR ratio, on the reasoning
+that a monomial is a 64-bit mask.  Its calibration record says what
+that would have done: a word XOR measures `0.44 ns` on the host, a
+Buchberger monomial operation `51`–`53 ns` (`wall / ops`), an
+enumeration test `0.074 ns`.  Pricing the middle one at the first one's
+ratio would have made the Gröbner row `120×` cheaper than it is — §6's
+"changing the unit", in one line of code, in the flattering direction.
+
+The rule is now the narrow one: only a unit the calibration table
+carries a ratio for is priced by count (`word XORs`, the matrix-F4 unit
+of §5), every other engine unit is priced at the host's measured wall
+time over its addition time and the row says `measured`, and the
+report records `ns_per_op` so the count can be re-priced.  It is
+host-dependent, as §12 says every measured factor is, and it is the
+honest number.
+
+It also corrects §14.4.  That table's `ops/enum` column divided a count
+of Buchberger monomial operations by a count of enumeration tests and
+read `0.4`–`0.6×`; the two are unlike units by a factor of `700`, and
+converted at their measured factors the engine costs `4.97e6` GAE where
+enumeration costs `6.62e4` — **`75×` enumeration, not `0.4×` of it**.
+The degree statistic, which was the point of §14, is unaffected.  The
+cost reading is withdrawn there and here.
+
+By §3 this is **accounting**: numbers changed, no algorithm did, and no
+gain is claimed.  The reading it replaces — a count below enumeration's
+count while the converted cost was two orders of magnitude above it —
+is the **relabelling** pattern, work moved into the price of an
+"operation" where the count did not look.
+
+### 15.5 Classified
+
+| row | class | why |
+|:--|:--|:--|
+| descent-algebraic, any engine, at `n = 13` | measurement | new rows; `24×`–`4,700×` the pair table on the same base, no boundary crossed |
+| the pair table charged to the oracle's `setup`, not the base | accounting | the same base read `1,830` beside one oracle and `0` beside another |
+| solver units priced by measured factor, `ns_per_op` recorded | accounting | the correction of §15.4 |
+| §14.4's `ops/enum` | relabelling → withdrawn | a ratio of unlike units |
+| structured-gauss | engineering | `6`–`11 %` of `row_ops`, `10⁻⁴` of `S` |
+
+### 15.6 What does not count
+
+- Nothing here is a speed against rho: rho was not run on this instance
+  and the table's `vs rho` column is empty.
+- The algebraic rows' prices are `measured`, so their `S` is this
+  host's and a ratio between two `measured` rows from different hosts
+  means nothing (§12); the ratio to the pair-table reference is between
+  a counted row and a measured one and is quoted as such.
+- `xl-f2` is absent because it does not fit: one pass at degree
+  `n_vars`, about `150 s` a call on this shape against Buchberger's
+  `7 ms`, and a modelled rather than counted op figure.  It now
+  declines above ten unknowns, and the sweep file says why.
+- The descent is a truth table, capped at `n' = 8` for two summands;
+  every algebraic row above sits at `n' = 6`.  Nothing here extrapolates.
+
+### 15.7 Reproducing
+
+```
+ic bench --sweep docs/ic/sweeps/solver-engines.json \
+  --out docs/ic/runs/ic-bench-solver-engines-2026-09-22.json
+ic bench --sweep docs/ic/sweeps/relation-matrix.json \
+  --out docs/ic/runs/ic-bench-relation-matrix-2026-09-22.json
+```
+
+The frozen reports carry the calibration and which of its units were
+pinned, so every GAE in them re-derives from its counts.
 
 ## Appendix A. The conversion factors, as measured
 

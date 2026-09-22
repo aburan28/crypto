@@ -18,8 +18,9 @@ use clap::Args;
 use serde_json::{json, Value};
 
 use crypto_lib::cryptanalysis::ic_boundary::{
-    calibrate_group, calibrate_row_ops, koblitz_instance, random_binary_instance, roster_prime_instance, BinaryGroup,
-    BinaryInstance, Calibration, CountedGroup, GroupOps, PrimeInstance,
+    calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor, koblitz_instance,
+    random_binary_instance, roster_prime_instance, BinaryGroup, BinaryInstance, Calibration, CountedGroup,
+    GroupOps, PinOutcome, PrimeInstance,
 };
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
@@ -177,34 +178,45 @@ fn listing() -> Value {
 /// Measure this host, then pin every ratio the repository's table
 /// carries, so two runs of the same counts price the same (§12 of the
 /// ledger note).
+/// The prime regime's calibration: the group, the matrix and the word
+/// XOR measured here, the prime-only units (square roots, Legendre
+/// symbols, inversions) taken from the pinned table for the roster
+/// curves, and every unit the table carries pinned over the measured
+/// value.
 fn calibration_for<G: CountedGroup>(
     g: &G,
     points: &[G::Elt],
     regime: &str,
     instance: &str,
     modulus: u64,
-) -> Calibration {
+) -> (Calibration, PinOutcome) {
     let mut calib = Calibration::default();
     if !points.is_empty() {
         calibrate_group(g, points, &mut calib);
     }
     calibrate_row_ops(modulus, &mut calib);
-    calib.pin(regime, instance);
-    calib
+    calib.ns_per_word_xor = Some(calibrate_word_xor());
+    let pins = calib.pin(regime, instance);
+    (calib, pins)
+}
+
+/// The binary regimes' calibration: the ledger's own measurement of
+/// the group, the Artin–Schreier solve, the Frobenius map, the matrix
+/// and the word XOR, then the pinned ratios where the table has this
+/// instance.  A freshly generated random curve is not in the table, so
+/// its base build is priced at the measured Artin–Schreier factor
+/// rather than left at zero.
+fn calibration_for_binary(inst: &BinaryInstance, regime: &str) -> (Calibration, PinOutcome) {
+    let mut calib = calibrate_binary_instance(inst);
+    calibrate_row_ops(inst.r, &mut calib);
+    let pins = calib.pin(regime, &inst.name);
+    (calib, pins)
 }
 
 fn sample_prime_points(inst: &PrimeInstance) -> Vec<crypto_lib::cryptanalysis::ic_boundary::PrimePoint> {
     let g = inst.generator_point();
     let mut ops = GroupOps::default();
     (1..=8u64).map(|k| inst.curve.mul(&mut ops, g, k)).collect()
-}
-
-fn sample_binary_points(
-    inst: &BinaryInstance,
-) -> Vec<crypto_lib::cryptanalysis::koblitz_fast::FastPoint> {
-    let g = BinaryGroup(&inst.fast);
-    let mut ops = GroupOps::default();
-    (1..=8u64).map(|k| g.mul(&mut ops, inst.generator, k)).collect()
 }
 
 /// One prime-field configuration, over `repeats` targets.
@@ -518,14 +530,11 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         other => return Err(format!("unknown regime `{other}`; try prime, char2 or koblitz")),
     };
 
-    let calib = match &instance {
+    let (calib, pins) = match &instance {
         Instance::Prime(i) => {
             calibration_for(&i.curve, &sample_prime_points(i), "prime", &i.name, i.r)
         }
-        Instance::Binary(i) => {
-            let g = BinaryGroup(&i.fast);
-            calibration_for(&g, &sample_binary_points(i), &regime, &i.name, i.r)
-        }
+        Instance::Binary(i) => calibration_for_binary(i, &regime),
     };
 
     let started = std::time::Instant::now();
@@ -570,6 +579,12 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         ],
         "instance": instance.name(),
         "regime": regime,
+        // The conversion every non-addition unit was priced at, so a
+        // frozen report re-derives its own GAE: nanoseconds per unit on
+        // this host, with the units the repository's table pinned over
+        // the measurement named apart from the ones left measured.
+        "calibration": calib,
+        "calibration_pins": pins,
         "configurations_run": rows.len(),
         "configurations_skipped": failures,
         "all_verified": all_verified,
