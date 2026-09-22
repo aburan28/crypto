@@ -29,7 +29,7 @@
   </nav>
 </header>
 
-<main id="main">
+<main id="main" tabindex="-1">
   <p class="kicker">Certicom ECC2K-130 · Pollard rho · distinguished points</p>
   <h1>Campaign status</h1>
   <p class="sub">
@@ -266,10 +266,11 @@
     <p class="note">
       Lifetime distinguished-point contributors, not the GPUs still walking.
       The headline card above is the live checkpoint count
-      (<span class="mono">walking_slots</span>); this table is every
-      <span class="mono">worker_id</span> that has ever reported a point. A
-      row is marked active when its most recent point is inside the last hour
-      of the snapshot.
+      (<span class="mono">walking_slots</span>). The live ingest feed does
+      not publish per-worker rows &mdash; <span class="mono">worker_id</span>
+      is an upload-object name, not a machine &mdash; so this table fills
+      only when the walker-hop snapshot carries them. A row is marked active
+      when its most recent point is inside the last hour of the snapshot.
     </p>
     <div class="scroll" tabindex="0">
       <table>
@@ -1060,12 +1061,17 @@ cd ec2k-gpu-$V-linux-x86_64
     return isFinite(n) && n >= 0 ? n : null;
   }
 
-  function drawWorkers(workers, snapshotAt, source) {
+  function drawWorkers(workers, snapshotAt, status) {
     var body = el("workers-body");
     var note = el("workers-note");
     body.textContent = "";
     if (!workers.length) {
-      emptyRow(body, 5, source === "ingest-status-feed"
+      var text = String((status && status.source) || "");
+      var ingestOnly = text.indexOf("dp_ingest") !== -1 || text === "ingest-status-feed";
+      // Live ingest omits per_worker even when the store holds points.
+      // Do not read that as "no workers" (272M DPs, 2026-09-21).
+      if (!ingestOnly && Number(status && status.dps) > 0) ingestOnly = true;
+      emptyRow(body, 5, ingestOnly
         ? "Per-worker counts need the walker hop; this snapshot is from the ingest feed."
         : "No workers have reported points.");
       note.textContent = "";
@@ -1708,7 +1714,7 @@ cd ec2k-gpu-$V-linux-x86_64
         emptyRow(historyBody, 7, "Could not read history.json (" + historyError + ").");
       }
     }
-    drawWorkers(status.per_worker || [], generated, status.source);
+    drawWorkers(status.per_worker || [], generated, status);
     drawCampaign(status);
 
     if (historyError) {
