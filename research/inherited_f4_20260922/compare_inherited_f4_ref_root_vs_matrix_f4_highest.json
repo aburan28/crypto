@@ -27,19 +27,19 @@
       "decomposed": 39,
       "verdict_digest": "df59cbf2544e471df6895a24290e287b5940c0e6e086364f96ce567a6c2410ad",
       "baseline_word_ops": 1257665,
-      "candidate_word_ops": 314392,
-      "word_op_ratio": 4.000308532023715,
-      "baseline_wall_ns": 31915123,
-      "candidate_wall_ns": 20631598,
-      "wall_ratio": 1.5469050434193221,
+      "candidate_word_ops": 245583,
+      "word_op_ratio": 5.1211403069430705,
+      "baseline_wall_ns": 32078834,
+      "candidate_wall_ns": 17290371,
+      "wall_ratio": 1.8553005022275115,
       "phases_baseline_ns": {
-        "build": 16800630,
-        "reduce": 8609377,
-        "readback": 678922
+        "build": 16799244,
+        "reduce": 8724439,
+        "readback": 671679
       },
       "phases_candidate_ns": {
-        "build": 14359948,
-        "reduce": 323355,
+        "build": 10899861,
+        "reduce": 302918,
         "readback": 0
       }
     },
@@ -51,19 +51,19 @@
       "decomposed": 15,
       "verdict_digest": "999b8e4840ab86204a585e31884e41270cb98ac27a315ae552c2f7891e1761de",
       "baseline_word_ops": 2026237,
-      "candidate_word_ops": 2524783,
-      "word_op_ratio": 0.8025390696943064,
-      "baseline_wall_ns": 54693210,
-      "candidate_wall_ns": 55167054,
-      "wall_ratio": 0.9914107430859005,
+      "candidate_word_ops": 1783018,
+      "word_op_ratio": 1.136408606082496,
+      "baseline_wall_ns": 55245472,
+      "candidate_wall_ns": 41985690,
+      "wall_ratio": 1.315816698498941,
       "phases_baseline_ns": {
-        "build": 29370991,
-        "reduce": 17107077,
-        "readback": 115507
+        "build": 29726142,
+        "reduce": 17241122,
+        "readback": 117537
       },
       "phases_candidate_ns": {
-        "build": 45288763,
-        "reduce": 691213,
+        "build": 31830114,
+        "reduce": 434133,
         "readback": 0
       }
     },
@@ -75,19 +75,19 @@
       "decomposed": 40,
       "verdict_digest": "cdc4d7d8d75f5b8e71af397663e4a57067ed2c3080ec458cd92f5f5d4de38841",
       "baseline_word_ops": 25336199,
-      "candidate_word_ops": 8302715,
-      "word_op_ratio": 3.051555906712443,
-      "baseline_wall_ns": 148624482,
-      "candidate_wall_ns": 125002456,
-      "wall_ratio": 1.1889724950684168,
+      "candidate_word_ops": 5588277,
+      "word_op_ratio": 4.533812300285043,
+      "baseline_wall_ns": 148111117,
+      "candidate_wall_ns": 78802565,
+      "wall_ratio": 1.8795215231889977,
       "phases_baseline_ns": {
-        "build": 77393633,
-        "reduce": 53471517,
-        "readback": 74817
+        "build": 77611548,
+        "reduce": 52589113,
+        "readback": 75294
       },
       "phases_candidate_ns": {
-        "build": 104235306,
-        "reduce": 826657,
+        "build": 58746352,
+        "reduce": 359962,
         "readback": 0
       }
     },
@@ -101,17 +101,17 @@
       "baseline_word_ops": 107470,
       "candidate_word_ops": 71187,
       "word_op_ratio": 1.509685757230955,
-      "baseline_wall_ns": 3898533,
-      "candidate_wall_ns": 3925294,
-      "wall_ratio": 0.9931824214950523,
+      "baseline_wall_ns": 3901283,
+      "candidate_wall_ns": 4036176,
+      "wall_ratio": 0.966579009438637,
       "phases_baseline_ns": {
-        "build": 1480780,
-        "reduce": 904205,
-        "readback": 78092
+        "build": 1487654,
+        "reduce": 909176,
+        "readback": 78513
       },
       "phases_candidate_ns": {
-        "build": 2421003,
-        "reduce": 80362,
+        "build": 2485834,
+        "reduce": 79403,
         "readback": 0
       }
     },
@@ -123,19 +123,19 @@
       "decomposed": 7,
       "verdict_digest": "2cc836d4d4b1f95bdccaf0f701a01a91f756326b9679326afe91ff937d80f5a5",
       "baseline_word_ops": 62049801,
-      "candidate_word_ops": 6250050,
-      "word_op_ratio": 9.927888736890106,
-      "baseline_wall_ns": 700212378,
-      "candidate_wall_ns": 176391330,
-      "wall_ratio": 3.9696530322663817,
+      "candidate_word_ops": 4136149,
+      "word_op_ratio": 15.001829237776493,
+      "baseline_wall_ns": 696146972,
+      "candidate_wall_ns": 112921364,
+      "wall_ratio": 6.1648827763008605,
       "phases_baseline_ns": {
-        "build": 320096282,
-        "reduce": 333923388,
-        "readback": 12404301
+        "build": 318271492,
+        "reduce": 332415212,
+        "readback": 12034595
       },
       "phases_candidate_ns": {
-        "build": 139573382,
-        "reduce": 3340340,
+        "build": 77122356,
+        "reduce": 2640289,
         "readback": 0
       }
     },
@@ -147,25 +147,25 @@
       "decomposed": 9,
       "verdict_digest": "c6dc024177ef605aabc204bc92a778e24264f83f2528b4c42d26c18960cbe7ae",
       "baseline_word_ops": 883061010,
-      "candidate_word_ops": 44755146,
-      "word_op_ratio": 19.730937979735337,
-      "baseline_wall_ns": 5145475020,
-      "candidate_wall_ns": 831270863,
-      "wall_ratio": 6.189889780847522,
+      "candidate_word_ops": 27236351,
+      "word_op_ratio": 32.42214825326638,
+      "baseline_wall_ns": 5114703348,
+      "candidate_wall_ns": 464239767,
+      "wall_ratio": 11.017374450819075,
       "phases_baseline_ns": {
-        "build": 1940536498,
-        "reduce": 3019166396,
-        "readback": 70760363
+        "build": 1933267198,
+        "reduce": 3001341615,
+        "readback": 66513618
       },
       "phases_candidate_ns": {
-        "build": 720168426,
-        "reduce": 14698354,
+        "build": 362052635,
+        "reduce": 10046242,
         "readback": 0
       }
     }
   ],
-  "total_word_op_ratio": 15.651967421210808,
-  "total_wall_ratio": 5.018868348889408,
-  "min_word_op_ratio": 0.8025390696943064,
-  "min_wall_ratio": 0.9914107430859005
+  "total_word_op_ratio": 24.931497585864413,
+  "total_wall_ratio": 8.411496545929891,
+  "min_word_op_ratio": 1.136408606082496,
+  "min_wall_ratio": 0.966579009438637
 }
