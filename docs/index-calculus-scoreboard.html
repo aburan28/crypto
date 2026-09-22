@@ -2320,7 +2320,30 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
-  <section class="panel" id="fixed-parameter-ic">
+  <!-- BEGIN boolean-degree-replay-20260922 -->
+<section class="panel" id="boolean-degree-replay-20260922">
+  <div class="panel-head"><h2>Boolean degree evidence replay <span class="chip">accounting</span></h2></div>
+  <p>The frozen point-decomposition corpus contains 1,152 systems with at most
+  eight Boolean variables. Exhaustive input-root checks, reduced-basis checks,
+  degree-limited closure replay, and independent SymPy bases all agree.
+  Rebased and membership variants are paired observations, not independent trials.</p>
+  <div class="table-scroll"><table>
+    <caption>Validation coverage; no cost or boundary-ratio comparison</caption>
+    <thead><tr><th>Check</th><th>Records</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Exact input roots</td><td>1,152</td><td>338 SAT; 814 UNSAT</td></tr>
+      <tr><td>Reduced bases and truncated closure</td><td>1,152</td><td>All match</td></tr>
+      <tr><td>Independent SymPy bases</td><td>1,152</td><td>All match</td></tr>
+    </tbody>
+  </table></div>
+  <p>Completion bounds are 2 (559 records), 3 (433), 4 (96), and 6 (64).
+  The degree-six cases already have degree-six inputs. These bounds are not
+  homogeneous regularity or F4/F5 measurements, and imply no result at degree 131.
+  Curve encoding and relation yield are outside this replay.</p>
+  <p><a href="https://github.com/aburan28/crypto/blob/main/research/boolean_degree_replay_20260922/README.md">Corpus, definitions, checker, and tamper tests</a>.</p>
+</section>
+<!-- END boolean-degree-replay-20260922 -->
+<section class="panel" id="fixed-parameter-ic">
     <div class="panel-head"><h2>Fixed parameters and persistent index calculus</h2>
       <p>The CPU <code>ic fixed</code> workflow accepts full-width K_0 parameters through degree 131,
       stores pair tables and verified relations, and resumes both precomputation and target equations.

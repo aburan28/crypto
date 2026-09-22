@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "records": 1152,
+  "corpus_sha256": "b1e0008a6230b933b8784a1b63300c7fa95ef39a3644776dd71de3c3f66f0936",
+  "sources": [
+    {
+      "source": "primary",
+      "records": 768,
+      "raw_sha256": "c8f5d91cb521dbc2c19a3fd3710c87dc2fca20880453cc470550cede5f0c247a",
+      "certificates_sha256": "008abc0892e5bd624615728697807bc82d9a5d400f8e9d1c0b08ade315308d70"
+    },
+    {
+      "source": "followup_d4",
+      "records": 320,
+      "raw_sha256": "e4fc236ae58896e0f1a6494e45c3acc4124dcece864f434c6f43a26a9c7d00ae",
+      "certificates_sha256": "9a0cab3daf59f8ea85bda6a73cd5bf86a84d1a77cf4cb826da281c432cdb6a20"
+    },
+    {
+      "source": "followup_s4",
+      "records": 64,
+      "raw_sha256": "2b939e24d2dfec19267a0017c225ae06a4cc99ef4ffbf72906ea573264094056",
+      "certificates_sha256": "a09b28e0e52513bc5992ba4b01faad6f919e6ce6b9b8bd8821e222e05d6c718b"
+    }
+  ],
+  "scope": "Frozen equations from generated tiny S3/S4 systems; at most eight Boolean variables. Rebased and membership variants are paired, not independent trials.",
+  "monomial_order": "graded lex, x_(n-1)>...>x_0; hex bit j is coefficient of mask j after sorting masks by (popcount, integer value)",
+  "omitted": "Original curve metadata, field-rank probes, timings, and ideal-membership certificates are not replayed here. This corpus validates only the Boolean algebra and truncated-closure bound."
+}
