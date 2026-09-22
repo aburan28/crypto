@@ -252,6 +252,24 @@ mod tests {
         );
     }
 
+    /// The test below compares zero sets, which a generating set with the
+    /// right ideal passes whether or not it is a Gröbner basis.  This one
+    /// asks for the basis.  `b = 1` is the Koblitz coefficient, and it is
+    /// the case the engine left unclosed before it paired basis elements
+    /// with the field equations: 17 standard monomials against 13 points.
+    #[test]
+    fn cached_parameter_basis_is_a_boolean_groebner_basis() {
+        use super::super::pq_groebner_f2::is_boolean_groebner_basis;
+        for b in 1..=3 {
+            let t = DecompositionTemplate::build(&[fe(1), fe(2)], &fe(b), 2, &field()).unwrap();
+            let mut cache = algebra_cache::AlgebraCache::local(1024 * 1024);
+            let g = parameter_basis_cached(&t, &mut cache).unwrap();
+            assert!(
+                is_boolean_groebner_basis(&g),
+                "b = {b}: cached basis is not closed"
+            );
+        }
+    }
     #[test]
     fn cached_parameter_basis_preserves_all_boolean_fibers() {
         let t = DecompositionTemplate::build(&[fe(1), fe(2)], &fe(1), 2, &field()).unwrap();
