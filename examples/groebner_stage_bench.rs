@@ -37,7 +37,8 @@
 //! §5 regardless of how fast one Macaulay matrix reduces.
 
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    f4_profile, f4_profile_reset, F4Profile, FieldStructure, SolverEngine,
+    f4_profile, f4_profile_reset, split_rule_default, F4Profile, FieldStructure, SolveOptions,
+    SolverEngine,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, groebner_decompose, KoblitzCurve,
@@ -239,6 +240,12 @@ fn main() {
             // The engine actually run: `SolverEngine::default()` after the
             // retained-control overrides, so a saved run names its variant.
             "engine": format!("{:?}", SolverEngine::default().effective()),
+            "split_rule": format!(
+                "{:?}",
+                SolveOptions { split_rule: split_rule_default(), ..SolveOptions::default() }
+                    .resolve()
+                    .split_rule
+            ),
             "criterion": std::env::var("KIC_F4_CRITERION").unwrap_or_else(|_| "none".into()),
             "inherit_root": std::env::var("KIC_F4_INHERIT_ROOT").unwrap_or_else(|_| "auto".into()),
             "rows": rows,

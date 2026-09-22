@@ -2719,9 +2719,8 @@ pub enum SolverEngine {
     /// the same tail, verdicts and splitting tree; the work per node is
     /// the re-reduction of the rows whose pivot contained the variable,
     /// plus the specialisation itself, all charged in word operations.
-    /// Inherits on quadratic systems and reduces as `MatrixF4` on cubic
-    /// ones ([`SolverEngine::effective_for`]); `KIC_F4_INHERIT=1|0`
-    /// forces or disables inheriting.
+    /// Runs best under [`SplitRule::HighestFree`], which [`SplitRule::Auto`]
+    /// selects for it; `KIC_F4_INHERIT=1|0` forces or disables inheriting.
     InheritedF4 {
         /// Highest Macaulay degree to build before splitting.
         max_degree: u32,
@@ -2735,37 +2734,33 @@ pub enum SolverEngine {
 }
 
 impl Default for SolverEngine {
-    /// Inherited matrix-F4 through degree 3.  It decides every target of
-    /// the frozen Gröbner-stage ladder and its holdout identically to
-    /// `MatrixF4 { max_degree: 3 }` (the default before it) for a fraction
-    /// of the word operations — see
-    /// `research/notes/ecc2k130/RESEARCH_INHERITED_F4.md`.  `KIC_F4_INHERIT=0`
-    /// restores the from-scratch engine as a retained control.
+    /// Inherited matrix-F4 through degree 3.  Under the same split rule it
+    /// decides every target of the frozen Gröbner-stage ladder and its
+    /// holdout identically to `MatrixF4 { max_degree: 3 }` (the default
+    /// before it) for a fraction of the word operations; with
+    /// [`SplitRule::Auto`] it also splits on the smallest free variable —
+    /// see `research/notes/ecc2k130/RESEARCH_INHERITED_F4.md`.
+    /// `KIC_F4_INHERIT=0` restores the from-scratch engine, and with it the
+    /// historical split rule, as a retained control.
     fn default() -> Self {
         SolverEngine::InheritedF4 { max_degree: 3 }
     }
 }
 
 impl SolverEngine {
-    /// The engine a solve actually runs on a system of total degree
-    /// `system_degree`.
+    /// The engine a solve actually runs, after the `KIC_F4_INHERIT`
+    /// override: `1` turns `MatrixF4` into `InheritedF4`, `0` turns
+    /// `InheritedF4` back into `MatrixF4`.  Retained controls can A/B the
+    /// two on a harness that only knows [`SolverEngine::default`].
     ///
-    /// `InheritedF4` inherits on **quadratic** systems and reduces as
-    /// `MatrixF4` on cubic and higher ones.  The reason is measured, not
-    /// assumed (`RESEARCH_INHERITED_F4.md` §3): the chained `m ≥ 3` Semaev
-    /// systems are cubic and their degree-3 Macaulay matrices are some 40%
-    /// rank-deficient, so the reduced basis rows are dense combinations
-    /// and every displaced row re-reduces through a hundred-odd dense
-    /// pivots — dearer than the from-scratch echelon of the sparse matrix
-    /// it replaces (`0.60×` on `K_0/2^15`, `m = 3`), while the quadratic
-    /// `m = 2` matrices are near full rank, their reduced rows stay sparse
-    /// and inheriting wins `1.6–7.2×` everywhere measured.
-    ///
-    /// `KIC_F4_INHERIT=1` forces inheriting whatever the degree (and turns
-    /// `MatrixF4` into `InheritedF4`); `KIC_F4_INHERIT=0` turns
-    /// `InheritedF4` into `MatrixF4`.  Retained controls can A/B the two on
-    /// a harness that only knows [`SolverEngine::default`].
-    pub fn effective_for(self, system_degree: u32) -> Self {
+    /// An earlier revision routed cubic systems to `MatrixF4` because the
+    /// inherited engine lost on them under the `LowestFree` split rule,
+    /// which displaces half the basis per level deep in the tree.  Under
+    /// [`SplitRule::HighestFree`] — what [`SplitRule::Auto`] resolves to
+    /// for this engine — inheriting wins on the cubic cells as well
+    /// (`RESEARCH_INHERITED_F4.md` §3.5), so the engine inherits on every
+    /// degree.
+    pub fn effective(self) -> Self {
         match (self, std::env::var("KIC_F4_INHERIT").as_deref()) {
             (SolverEngine::MatrixF4 { max_degree }, Ok("1")) => {
                 SolverEngine::InheritedF4 { max_degree }
@@ -2773,18 +2768,8 @@ impl SolverEngine {
             (SolverEngine::InheritedF4 { max_degree }, Ok("0")) => {
                 SolverEngine::MatrixF4 { max_degree }
             }
-            (SolverEngine::InheritedF4 { .. }, Ok("1")) => self,
-            (SolverEngine::InheritedF4 { max_degree }, _) if system_degree >= 3 => {
-                SolverEngine::MatrixF4 { max_degree }
-            }
             (engine, _) => engine,
         }
-    }
-
-    /// [`SolverEngine::effective_for`] on a quadratic system — the engine
-    /// name a harness records for the `m = 2` regime.
-    pub fn effective(self) -> Self {
-        self.effective_for(2)
     }
 
     /// The Macaulay degree ladder this engine runs on a system whose
@@ -2848,18 +2833,36 @@ pub enum SplitRule {
     /// forcing an assignment, so this favours propagation over bulk
     /// term removal.
     MinTermWeight,
+    /// Highest-indexed unassigned variable that still occurs in the
+    /// system — the *smallest* variable under the DegRevLex order the
+    /// Macaulay columns use.  A reduced row's pivot is its largest
+    /// monomial, so pivots are biased toward the large variables; the
+    /// smallest free variable sits in the fewest pivots and displaces the
+    /// fewest rows of an inherited basis ([`SolverEngine::InheritedF4`]).
+    /// Measured on the frozen ladder (`RESEARCH_INHERITED_F4.md` §3.5):
+    /// halves the inherited engine's work at every rung with a tree and
+    /// turns its cubic-system loss into a win, while costing the
+    /// from-scratch engine 25% more on the quadratic rungs.
+    HighestFree,
+    /// The rule the engine runs best with, resolved once the engine is
+    /// known ([`SolveOptions::resolve`]): `HighestFree` under
+    /// `InheritedF4`, `LowestFree` otherwise — so the pre-round default
+    /// configuration, selected with `KIC_F4_INHERIT=0`, still walks the
+    /// tree every earlier measurement walked.
+    Auto,
 }
 
 /// The splitting rule the decomposition entry points use when their
 /// caller does not build [`SolveOptions`] itself, overridable through
-/// the `SOLVER_SPLIT_RULE` environment variable (`lowest`, `frequent`,
-/// `mom`).  Unset means [`SplitRule::LowestFree`], so the production
-/// paths and every earlier measurement are unchanged by default.
+/// the `SOLVER_SPLIT_RULE` environment variable (`auto`, `lowest`,
+/// `highest`, `frequent`, `mom`).  Unset means [`SplitRule::Auto`].
 pub fn split_rule_default() -> SplitRule {
     match std::env::var("SOLVER_SPLIT_RULE").ok().as_deref() {
         Some("frequent") => SplitRule::MostFrequent,
         Some("mom") => SplitRule::MinTermWeight,
-        _ => SplitRule::LowestFree,
+        Some("highest") => SplitRule::HighestFree,
+        Some("lowest") => SplitRule::LowestFree,
+        _ => SplitRule::Auto,
     }
 }
 
@@ -2875,8 +2878,19 @@ fn choose_split(
     rule: SplitRule,
 ) -> Option<usize> {
     let lowest = assignment.iter().position(|a| a.is_none())?;
-    if rule == SplitRule::LowestFree {
+    // `Auto` is resolved by `SolveOptions::resolve` before the solve; an
+    // unresolved one behaves as the historical rule.
+    if matches!(rule, SplitRule::LowestFree | SplitRule::Auto) {
         return Some(lowest);
+    }
+    if rule == SplitRule::HighestFree {
+        let occurring = occurring_vars(system);
+        return Some(
+            (0..assignment.len())
+                .rev()
+                .find(|&v| assignment[v].is_none() && occurring & (1u64 << v) != 0)
+                .unwrap_or(lowest),
+        );
     }
     let mut score = vec![0f64; assignment.len()];
     for p in system {
@@ -2925,6 +2939,26 @@ impl Default for SolveOptions {
             max_solutions: 32,
             node_budget: 4096,
             split_rule: SplitRule::default(),
+        }
+    }
+}
+
+impl SolveOptions {
+    /// The options a solve actually runs with: the engine after its
+    /// environment override, and [`SplitRule::Auto`] resolved for it.
+    pub fn resolve(&self) -> Self {
+        let engine = self.engine.effective();
+        let split_rule = match self.split_rule {
+            SplitRule::Auto => match engine {
+                SolverEngine::InheritedF4 { .. } => SplitRule::HighestFree,
+                _ => SplitRule::LowestFree,
+            },
+            rule => rule,
+        };
+        Self {
+            engine,
+            split_rule,
+            ..*self
         }
     }
 }
@@ -3206,10 +3240,7 @@ pub fn solve_boolean_system_filtered(
     let mut stats = SolveStats::default();
     let mut out = Vec::new();
     let mut stop = false;
-    let opts = SolveOptions {
-        engine: opts.engine.effective_for(system_degree(equations)),
-        ..*opts
-    };
+    let opts = opts.resolve();
     solve_rec(
         equations.to_vec(),
         equations,
@@ -3805,6 +3836,45 @@ mod tests {
         }
     }
 
+    /// `Auto` resolves to the rule each engine runs best with, and an
+    /// explicit rule is left alone.
+    #[test]
+    fn auto_split_rule_follows_the_engine() {
+        // Only meaningful without the environment overrides the controls use.
+        if std::env::var("KIC_F4_INHERIT").is_ok() {
+            return;
+        }
+        let inherited = SolveOptions {
+            engine: SolverEngine::InheritedF4 { max_degree: 3 },
+            split_rule: SplitRule::Auto,
+            ..SolveOptions::default()
+        }
+        .resolve();
+        assert_eq!(inherited.split_rule, SplitRule::HighestFree);
+        let scratch = SolveOptions {
+            engine: SolverEngine::MatrixF4 { max_degree: 3 },
+            split_rule: SplitRule::Auto,
+            ..SolveOptions::default()
+        }
+        .resolve();
+        assert_eq!(scratch.split_rule, SplitRule::LowestFree);
+        let explicit = SolveOptions {
+            engine: SolverEngine::InheritedF4 { max_degree: 3 },
+            split_rule: SplitRule::LowestFree,
+            ..SolveOptions::default()
+        }
+        .resolve();
+        assert_eq!(explicit.split_rule, SplitRule::LowestFree);
+        // The two rules pick opposite ends of the free variables.
+        let system = vec![F2BoolPoly::from_monos(
+            vec![F2BoolMono::from_mask(0b0110), F2BoolMono::var(3), F2BoolMono::one()],
+            5,
+        )];
+        let assignment = vec![None; 5];
+        assert_eq!(choose_split(&system, &assignment, SplitRule::LowestFree), Some(0));
+        assert_eq!(choose_split(&system, &assignment, SplitRule::HighestFree), Some(3));
+    }
+
     /// Same tree on random systems with linear equations mixed in — where
     /// degree drops (completion rows) and forced propagation chains occur.
     #[test]
@@ -3943,13 +4013,15 @@ mod tests {
                 }
             }
 
-            for rule in [
-                SplitRule::LowestFree,
-                SplitRule::MostFrequent,
-                SplitRule::MinTermWeight,
+            for (rule, engine) in [
+                (SplitRule::LowestFree, SolverEngine::MatrixF4 { max_degree: 3 }),
+                (SplitRule::MostFrequent, SolverEngine::MatrixF4 { max_degree: 3 }),
+                (SplitRule::MinTermWeight, SolverEngine::MatrixF4 { max_degree: 3 }),
+                (SplitRule::HighestFree, SolverEngine::MatrixF4 { max_degree: 3 }),
+                (SplitRule::HighestFree, SolverEngine::InheritedF4 { max_degree: 3 }),
             ] {
                 let opts = SolveOptions {
-                    engine: SolverEngine::MatrixF4 { max_degree: 3 },
+                    engine,
                     max_solutions: usize::MAX,
                     node_budget: 100_000,
                     split_rule: rule,
