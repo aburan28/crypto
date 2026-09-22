@@ -11744,6 +11744,17 @@ mod tests {
                 20_000,
             );
             assert_eq!(f4.is_some(), bb.is_some(), "engines disagree on [{k}]G");
+            let (inherited, _) = groebner_decompose(
+                &kc,
+                &fb,
+                &index_of,
+                &st,
+                &target,
+                2,
+                SolverEngine::InheritedF4 { max_degree: 3 },
+                20_000,
+            );
+            assert_eq!(f4, inherited, "inherited F4 disagrees with matrix-F4 on [{k}]G");
         }
     }
 

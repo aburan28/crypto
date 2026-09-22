@@ -204,6 +204,9 @@ fn main() {
             "build_ns": p.build_ns,
             "reduce_ns": p.reduce_ns,
             "readback_ns": p.readback_ns,
+            "rows_pruned": p.rows_pruned,
+            "criterion_word_ops": p.criterion_word_ops,
+            "specialise_word_ops": p.specialise_word_ops,
             "wall_ns": wall_ns,
             "reductions": stats_total.0,
             "infeasible_branches": stats_total.1,
@@ -233,6 +236,11 @@ fn main() {
             "threads": 1,
             "ladder": if std::ptr::eq(ladder, HOLDOUT) { "holdout" } else { "frozen" },
             "reducer": std::env::var("F4_F2_RREF").unwrap_or_else(|_| "m4ri".into()),
+            // The engine actually run: `SolverEngine::default()` after the
+            // retained-control overrides, so a saved run names its variant.
+            "engine": format!("{:?}", SolverEngine::default().effective()),
+            "criterion": std::env::var("KIC_F4_CRITERION").unwrap_or_else(|_| "none".into()),
+            "inherit_root": std::env::var("KIC_F4_INHERIT_ROOT").unwrap_or_else(|_| "auto".into()),
             "rows": rows,
         });
         std::fs::write(&path, serde_json::to_string_pretty(&doc).unwrap()).unwrap();

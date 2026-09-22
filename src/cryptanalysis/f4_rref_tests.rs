@@ -215,7 +215,8 @@ fn fused_flat_packing_matches_materialized_rows() {
     let multiplier_mask = occurring_vars(&polynomials);
     for degree in [2, 3, 4] {
         let rows =
-            macaulay_rows_monos_with_mask(&polynomials, n_vars, degree, multiplier_mask).unwrap();
+            macaulay_rows_monos_with_mask(&polynomials, n_vars, degree, multiplier_mask, None)
+                .unwrap();
         let columns = macaulay_columns(&rows).unwrap();
         let layout = F4ColumnLayout::new(columns);
         let materialized = pack_rows_flat_with_layout(&rows, &layout, true).unwrap();
