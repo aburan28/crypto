@@ -1,0 +1,31 @@
+{
+  "child_system_ms": 67.50699999999999,
+  "child_user_ms": 158.652,
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--release",
+    "-q",
+    "--lib",
+    "cryptanalysis::koblitz_groebner::rref_tests::paired_m4ri_arena_benchmark",
+    "--",
+    "--ignored",
+    "--nocapture"
+  ],
+  "ended_unix_ns": 1790120722437021000,
+  "environment_overrides": {
+    "KIC_F4_M4RI_BENCH_REPEATS": "100"
+  },
+  "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+  "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+  "exit_code": 0,
+  "peak_rss_bytes": 46399488,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790120722047101000,
+  "stderr_bytes": 29439,
+  "stderr_sha256": "0c2f6b92d8e82559daeca176c35a656daa9063fcf47a37e80ba16789ffd0b2f2",
+  "stdout_bytes": 168966,
+  "stdout_sha256": "9f6e8464bae1d6ac7ba9974221f988fc59d4043ddf99a78706e6e2852f2c6672",
+  "task_id": "TASK-KIC-M4RI-ARENA-KERNEL-SYNTHETIC-DFD5-20260922",
+  "wall_ms": 389.919
+}
