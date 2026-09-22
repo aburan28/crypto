@@ -2736,6 +2736,153 @@ ic bench --sweep docs/ic/sweeps/relation-matrix.json \
 The frozen reports carry the calibration and which of its units were
 pinned, so every GAE in them re-derives from its counts.
 
+## 16. The descent, symbolic: past the truth-table cap
+
+§14 and §15 built their boolean systems from a truth table — every one
+of the `2^{m·n'}` points of `V^m` evaluated in the summation
+polynomial and Möbius-transformed into algebraic normal forms — which
+stopped the algebraic rows at `n' = 8` for two summands and `n' = 5`
+for three.  This section replaces the construction with a symbolic
+one, checks that nothing changed, and measures where the table could
+not go.
+
+### 16.1 The construction, and that it is the same one
+
+The symbolic descent (`pq_descent_symbolic`) expands `S_{m+1}` in the
+ring `F_{2^n}[v] / (v² − v)` term by term, with each abscissa the linear
+form `x_i = Σ_k v_{i,k} e_k` over the subspace basis.  A polynomial is a
+map from a boolean monomial (a 64-bit mask over the `v`'s) to its field
+coefficient, and two facts of the ring do all the work: squaring is
+linear, `(Σ c_M M)² = Σ c_M² M`, because `M² = M` and every cross term
+carries a factor of two; and a product of monomials is their union.
+The `S_3` and `S_4` formulas are mirrored operation for operation from
+the evaluating code.  `S_3` comes out quadratic in `2n'` variables with
+at most `n'² + 2n' + 1` field monomials whatever `n'`; `S_4`, a product
+of two cubics in its resultant form, of degree at most six in `3n'`.
+The only cap left is the mask: `m·n' ≤ 64`, so `n' ≤ 32` at two
+summands and `n' ≤ 21` at three.
+
+Three checks, all in the test suite:
+
+- **Monomial for monomial against the truth table.**  The algebraic
+  normal form of a boolean function is unique, so the two
+  constructions of the same function must coincide exactly.  They do,
+  for `S_3` and `S_4`, on random curves at `n = 7, 9, 11, 13` and every
+  `n'` the table can reach.
+- **Against the formulas past the table's reach.**  At `n' = 12`
+  (24 variables) and at three summands with `n' = 7` (21 variables),
+  every equation evaluated at random points of the subspace gives the
+  bit of `S_{m+1}` it stands for, and the word formulas agree with the
+  `F2mElement` ones.
+- **The frozen cells reproduce.**  Re-running §14's `11:6:2` cell for
+  both families through the symbolic path gives the frozen operation
+  counts to the last digit (`499,453.75` and `438,743.75` monomial
+  operations, `D_av = 3.0`, the same enumeration reference), since the
+  target draw is unchanged.  A construction that reproduces the frozen
+  table exactly has changed nothing but its reach.
+
+### 16.2 The boundaries
+
+As in §15.1: the reference is the pair-table oracle on the *same base*,
+same instance, same walk, same two targets; rho was not run on this
+instance and no ratio to it is quoted; the degree boundary is the
+semi-regular degree of the system's shape — `D_sr = 5` for seventeen
+quadratics in eighteen unknowns.  Everything here is a toy,
+`E(F_{2^17})`, `r = 65,309`, `log₂ r = 16.0`, and a measurement of what
+the engines do when the descent no longer stops them.
+
+### 16.3 One base at `n = 17`, `n' = 9`: eighteen unknowns
+
+Frozen at `docs/ic/runs/ic-bench-solver-engines-n17-2026-09-22.json`;
+`random-binary-n17-b1ad26`, `binary-subspace[dimension=9]`: 476 signed
+points, 238 columns, walk targets, `incremental-gauss`, two planted
+targets, every row a verified logarithm.  `S` and the ratio are per
+target; the solver columns are totals over the run.  The 120-second
+per-call budget was never reached.
+
+| oracle | engine | trials | rows | hit | S | S / reference | solver calls | solver ops (unit) | ns / op | solver GAE | D_solve | D_sr | wall | correct |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| pair table | — | 122 / 239 | 69 / 134 | 0.566 / 0.561 | 448.1 / 448.9 | 1 | — | — | — | — | — | — | 0.0 s | yes / yes |
+| descent-algebraic | exhaustive | 122 / 239 | 69 / 134 | 0.566 / 0.561 | 19,793 / 36,432 | 44.2× / 81.2× | 122 / 239 | 2.83e10 / 5.32e10 (monomial tests) | 0.043 | 5.06e6 / 9.31e6 | — | 5 | 1.2 / 2.3 s | yes / yes |
+| descent-algebraic | sat-cdcl | 183 / 222 | 107 / 124 | 0.585 / 0.559 | 4,017,177 / 4,670,150 | 8,966× / 10,404× | 183 / 222 | 6.42e6 / 7.62e6 (conflicts) | 38,853 / 38,023 | 1.03e9 / 1.19e9 | — | 5 | 249 / 290 s | yes / yes |
+| descent-algebraic | buchberger-f2 | 122 / 239 | 69 / 134 | 0.566 / 0.561 | 45,377,987 / 87,187,764 | 101,276× / 194,235× | 122 / 239 | 9.96e9 / 1.92e10 (monomial operations) | 282.8 / 281.7 | 1.16e10 / 2.23e10 | 3.99 / 4.00 | 5 | 2,817 / 5,412 s | yes / yes |
+
+The phases behind the reference row, per target: base `30`, pair table
+`113,526` (`C(476, 2)` additions — this base is far past the family
+optimum for `2^16`, on purpose, so that the descent has eighteen
+unknowns to work on), relations `920 / 1,110`, matrix `8 / 25`,
+verification `20 / 22`.  The algebraic rows build no table and spend
+everything in the solver.
+
+### 16.4 Reading it, against §15
+
+| | `n = 13`, `n' = 6`, 12 unknowns (§15) | `n = 17`, `n' = 9`, 18 unknowns | growth |
+|:--|--:|--:|--:|
+| pair table, `S` | 40.5 / 39.7 | 448.1 / 448.9 | 11× |
+| exhaustive, `S / reference` | 25.9× / 23.9× | 44.2× / 81.2× | |
+| sat-cdcl, `S / reference` | 4,659× / 4,139× | 8,966× / 10,404× | |
+| buchberger-f2, `S / reference` | 1,920× / 1,768× | 101,276× / 194,235× | |
+| buchberger-f2 over exhaustive, in GAE | 75× | 2,293× / 2,394× | 31× |
+| buchberger-f2, ns per monomial operation | 51–53 | 282 | 5.4× |
+| `D_solve / D_sr` | 2.90 / 4 = 0.73 | 3.99 / 5 = 0.80 | |
+
+- **The degree reading holds and keeps not helping.**  `D_solve = 4.0`
+  against `D_sr = 5`: the system is still solved below the semi-regular
+  bound, the phenomenon §14 set out to see, and the engine that sees it
+  is now `10⁵` times the pair table on the same base.
+- **The Gröbner engine's cost grew `2,300×` for six more unknowns**
+  while the exhaustive engine's grew `77×` (`5.06e6` from `6.62e4` GAE,
+  at almost the same call count), and the price of its own unit grew
+  with it: a monomial operation that measured `52 ns` at twelve
+  unknowns measures `282 ns` at eighteen, because the polynomials it
+  operates on are five times longer.  "Monomial operations" is not a
+  stable unit across sizes, which is one more reason the count is
+  priced at a measured factor and the factor is recorded.
+- **CDCL scales best of the three algebraic engines** (`9,000×` the
+  reference from `4,000×`, against exhaustive's `2×` and Buchberger's
+  `50×` worsening), and is still four orders of magnitude off the pair
+  table.  Its per-conflict cost doubled (`17 µs` to `38 µs`).
+- **The reference is not flattered.**  The pair table here is 99 % of
+  the reference row's cost and the base is `10×` past the family
+  optimum; a base at the optimum would make the reference *cheaper*
+  and every ratio above larger.
+- **No system lifted to nothing on this instance** save one in the
+  first CDCL run; the hit rate is `0.56` on every row, and the CDCL rows
+  walked more targets only because a target with several
+  decompositions lifted to a different pair.  Same answers.
+
+By §3 every row here is a **measurement**: new rows at a size the
+table could not reach, no boundary crossed, no gain claimed.  What
+they establish is negative and useful: with the descent no longer the
+cap, the shipped engines are, and by a margin that widens with `n'` —
+the direction §14.5 warned the reader to expect from "the engine was
+the measurement".
+
+### 16.5 What does not count
+
+- Nothing here is a speed against rho; the `vs rho` column is empty.
+- Every algebraic price is `measured` and host-dependent (§12); the
+  ratio to the pair-table reference is between a counted row and a
+  measured one, and is quoted as such.  The frozen file carries its
+  calibration.
+- The pair-table reference is on a base `10×` past the family optimum
+  and is priced accordingly; it is the reference for *these* algebraic
+  rows on *this* base, not the best index-calculus row at `2^16`.
+- The symbolic descent lifts the descent's cap and nothing else: the
+  engines' caps (26 unknowns for the enumerating extractions, 10 for
+  XL, the budget for Buchberger) are where the rows now stop, and §8 of
+  the framework manual says so.
+
+### 16.6 Reproducing
+
+```
+ic bench --sweep docs/ic/sweeps/solver-engines-n17.json \
+  --out docs/ic/runs/ic-bench-solver-engines-n17-2026-09-22.json
+
+# The reproduce check: the frozen 11:6:2 cell through the symbolic path.
+ic descent --cells 11:6:2 --targets 8 --families K,R
+```
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

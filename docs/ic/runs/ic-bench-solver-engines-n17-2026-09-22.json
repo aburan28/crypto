@@ -1,0 +1,1457 @@
+{
+  "all_verified": true,
+  "calibration": {
+    "ns_per_add": 242.884315,
+    "ns_per_as_solve": 14.387595,
+    "ns_per_canon": null,
+    "ns_per_double": 249.652915,
+    "ns_per_frobenius": 13.437665,
+    "ns_per_inversion": null,
+    "ns_per_legendre": null,
+    "ns_per_lookup": 0.0,
+    "ns_per_row_op": 3.5751767578125,
+    "ns_per_s4_pair": null,
+    "ns_per_sqrt": null,
+    "ns_per_word_xor": 0.4713392333984375
+  },
+  "calibration_pins": {
+    "measured": [
+      "ns_per_double",
+      "ns_per_lookup",
+      "ns_per_row_op",
+      "ns_per_as_solve",
+      "ns_per_word_xor",
+      "ns_per_frobenius"
+    ],
+    "pinned": []
+  },
+  "configurations_run": 8,
+  "configurations_skipped": [],
+  "elapsed_seconds": 8772.269962653,
+  "instance": "random-binary-n17-b1ad26",
+  "markdown": "| instance | configuration | base | cols | pts/col | hit rate | trials | rows | rank | D_solve | D_sr | S | vs rho | correct |\n|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|\n| random-binary-n17-b1ad26 | binary-subspace[dimension=9] + mitm[m=2] + — + walk | 476 | 238 | 2.0 | 0.566 | 122 | 69 | 69 | — | — | 448.060 | — | yes |\n| random-binary-n17-b1ad26 | binary-subspace[dimension=9] + mitm[m=2] + — + walk | 476 | 238 | 2.0 | 0.561 | 239 | 134 | 134 | — | — | 448.878 | — | yes |\n| random-binary-n17-b1ad26 | binary-subspace[dimension=9] + descent-algebraic[m=2] + exhaustive + walk | 476 | 238 | 2.0 | 0.566 | 122 | 69 | 69 | — | 5 | 19793.336 | — | yes |\n| random-binary-n17-b1ad26 | binary-subspace[dimension=9] + descent-algebraic[m=2] + exhaustive + walk | 476 | 238 | 2.0 | 0.561 | 239 | 134 | 134 | — | 5 | 36432.075 | — | yes |\n| random-binary-n17-b1ad26 | binary-subspace[dimension=9] + descent-algebraic[m=2] + sat-cdcl + walk | 476 | 238 | 2.0 | 0.585 | 183 | 107 | 107 | — | 5 | 4017177.407 | — | yes |\n| random-binary-n17-b1ad26 | binary-subspace[dimension=9] + descent-algebraic[m=2] + sat-cdcl + walk | 476 | 238 | 2.0 | 0.559 | 222 | 124 | 124 | — | 5 | 4670150.428 | — | yes |\n| random-binary-n17-b1ad26 | binary-subspace[dimension=9] + descent-algebraic[m=2] + buchberger-f2 + walk | 476 | 238 | 2.0 | 0.566 | 122 | 69 | 69 | 4.0 | 5 | 45377986.507 | — | yes |\n| random-binary-n17-b1ad26 | binary-subspace[dimension=9] + descent-algebraic[m=2] + buchberger-f2 + walk | 476 | 238 | 2.0 | 0.561 | 239 | 134 | 134 | 4.0 | 5 | 87187763.835 | — | yes |\n",
+  "operation": "bench",
+  "regime": "char2",
+  "rows": [
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 920.0,
+          "group_ops": {
+            "adds": 449,
+            "doubles": 471,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 122,
+            "relations": 69,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "sqrt_solves": 0,
+            "target_guard_probes": 122,
+            "trials": 122,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 121
+          },
+          "wall_ns": 239502
+        },
+        "description": "a table of pair sums probed once per target (m = 2) or once per R − P (m = 3), built in full",
+        "hit_rate": 0.5655737704918032,
+        "name": "mitm",
+        "relations_found": 69,
+        "setup": {
+          "gae": 113526.0,
+          "group_ops": {
+            "adds": 113526,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 28075120
+        },
+        "solver": null,
+        "summands": 2,
+        "system": null,
+        "targets_tried": 122
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 238,
+        "columns": 238,
+        "cost": {
+          "gae": 30.26980579211136,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 511,
+            "as_solves": 511
+          },
+          "wall_ns": 261705
+        },
+        "description": "points whose abscissa lies in the 9-dimensional subspace spanned by {1, z, …}",
+        "name": "binary-subspace",
+        "points_per_column": 2.0,
+        "signed_points": 476
+      },
+      "group_order": 130618,
+      "instance": "random-binary-n17-b1ad26",
+      "label": "binary-subspace[dimension=9] + mitm[m=2] + — + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 8.272454060652807,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 239,
+            "pinned_by_repeated_row": 0,
+            "rank": 69,
+            "repeated_column_rows": 0,
+            "row_ops": 562,
+            "rows": 69,
+            "single_column_rows": 0,
+            "two_column_rows": 69
+          },
+          "wall_ns": 115232
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 69,
+        "rows": 69,
+        "work": 562,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 15.994994197671385,
+      "r": 65309,
+      "recovered": 15443,
+      "rho_s": null,
+      "s": 448.060024181003,
+      "s_over_rho": null,
+      "spec": {
+        "factor_base": "binary-subspace",
+        "factor_base_params": {
+          "dimension": "9"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "mitm",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 20260922,
+        "solver": null,
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 114504.54225985277,
+      "verified": true,
+      "verify": {
+        "gae": 20.0,
+        "group_ops": {
+          "adds": 7,
+          "doubles": 13,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 4335
+      },
+      "wall_seconds": 0.028732072
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 1110.0,
+          "group_ops": {
+            "adds": 631,
+            "doubles": 479,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 239,
+            "relations": 134,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "sqrt_solves": 0,
+            "target_guard_probes": 239,
+            "trials": 239,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 238
+          },
+          "wall_ns": 308384
+        },
+        "description": "a table of pair sums probed once per target (m = 2) or once per R − P (m = 3), built in full",
+        "hit_rate": 0.5606694560669456,
+        "name": "mitm",
+        "relations_found": 134,
+        "setup": {
+          "gae": 113526.0,
+          "group_ops": {
+            "adds": 113526,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 26000329
+        },
+        "solver": null,
+        "summands": 2,
+        "system": null,
+        "targets_tried": 239
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 238,
+        "columns": 238,
+        "cost": {
+          "gae": 30.26980579211136,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 511,
+            "as_solves": 511
+          },
+          "wall_ns": 201211
+        },
+        "description": "points whose abscissa lies in the 9-dimensional subspace spanned by {1, z, …}",
+        "name": "binary-subspace",
+        "points_per_column": 2.0,
+        "signed_points": 476
+      },
+      "group_order": 130618,
+      "instance": "random-binary-n17-b1ad26",
+      "label": "binary-subspace[dimension=9] + mitm[m=2] + — + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 25.37670960954704,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 239,
+            "pinned_by_repeated_row": 0,
+            "rank": 134,
+            "repeated_column_rows": 0,
+            "row_ops": 1724,
+            "rows": 134,
+            "single_column_rows": 3,
+            "two_column_rows": 131
+          },
+          "wall_ns": 301469
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 134,
+        "rows": 134,
+        "work": 1724,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 15.994994197671385,
+      "r": 65309,
+      "recovered": 55946,
+      "rho_s": null,
+      "s": 448.8782559816678,
+      "s_over_rho": null,
+      "spec": {
+        "factor_base": "binary-subspace",
+        "factor_base_params": {
+          "dimension": "9"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "mitm",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 20301425,
+        "solver": null,
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 114713.64651540165,
+      "verified": true,
+      "verify": {
+        "gae": 22.0,
+        "group_ops": {
+          "adds": 7,
+          "doubles": 15,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 6055
+      },
+      "wall_seconds": 0.026842298
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 5058252.232579881,
+          "group_ops": {
+            "adds": 708,
+            "doubles": 471,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 0,
+            "relations": 69,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 122,
+            "solver_ops": 28279308288,
+            "sqrt_solves": 0,
+            "target_guard_probes": 122,
+            "trials": 122,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 121
+          },
+          "wall_ns": 1241342924
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with exhaustive",
+        "hit_rate": 0.5655737704918032,
+        "name": "descent-algebraic",
+        "relations_found": 69,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 94986
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 122,
+          "degree_over_bound": null,
+          "extra": {},
+          "gae": 5057073.232579881,
+          "name": "exhaustive",
+          "ns_per_op": 0.04343401031917065,
+          "op_unit": "monomial tests",
+          "ops": 28279308288,
+          "peak_bytes": 0,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 0,
+          "solving_degree_mean": null,
+          "wall_ns": 1228283768
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 17,
+          "n_vars": 18,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 122
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 238,
+        "columns": 238,
+        "cost": {
+          "gae": 30.26980579211136,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 511,
+            "as_solves": 511
+          },
+          "wall_ns": 197765
+        },
+        "description": "points whose abscissa lies in the 9-dimensional subspace spanned by {1, z, …}",
+        "name": "binary-subspace",
+        "points_per_column": 2.0,
+        "signed_points": 476
+      },
+      "group_order": 130618,
+      "instance": "random-binary-n17-b1ad26",
+      "label": "binary-subspace[dimension=9] + descent-algebraic[m=2] + exhaustive + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 8.272454060652807,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 239,
+            "pinned_by_repeated_row": 0,
+            "rank": 69,
+            "repeated_column_rows": 0,
+            "row_ops": 562,
+            "rows": 69,
+            "single_column_rows": 0,
+            "two_column_rows": 69
+          },
+          "wall_ns": 309950
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 69,
+        "rows": 69,
+        "work": 562,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 15.994994197671385,
+      "r": 65309,
+      "recovered": 15443,
+      "rho_s": null,
+      "s": 19793.33573463283,
+      "s_over_rho": null,
+      "spec": {
+        "factor_base": "binary-subspace",
+        "factor_base_params": {
+          "dimension": "9"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 20260922,
+        "solver": "exhaustive",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 5058310.774839734,
+      "verified": true,
+      "verify": {
+        "gae": 20.0,
+        "group_ops": {
+          "adds": 7,
+          "doubles": 13,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 5033
+      },
+      "wall_seconds": 1.241977771
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 9310367.10486974,
+          "group_ops": {
+            "adds": 1149,
+            "doubles": 479,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 0,
+            "relations": 134,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 239,
+            "solver_ops": 53216280576,
+            "sqrt_solves": 0,
+            "target_guard_probes": 239,
+            "trials": 239,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 238
+          },
+          "wall_ns": 2284503424
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with exhaustive",
+        "hit_rate": 0.5606694560669456,
+        "name": "descent-algebraic",
+        "relations_found": 134,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 67998
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 239,
+          "degree_over_bound": null,
+          "extra": {},
+          "gae": 9308739.10486974,
+          "name": "exhaustive",
+          "ns_per_op": 0.042485996701161106,
+          "op_unit": "monomial tests",
+          "ops": 53216280576,
+          "peak_bytes": 0,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 0,
+          "solving_degree_mean": null,
+          "wall_ns": 2260946721
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 17,
+          "n_vars": 18,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 239
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 238,
+        "columns": 238,
+        "cost": {
+          "gae": 30.26980579211136,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 511,
+            "as_solves": 511
+          },
+          "wall_ns": 201773
+        },
+        "description": "points whose abscissa lies in the 9-dimensional subspace spanned by {1, z, …}",
+        "name": "binary-subspace",
+        "points_per_column": 2.0,
+        "signed_points": 476
+      },
+      "group_order": 130618,
+      "instance": "random-binary-n17-b1ad26",
+      "label": "binary-subspace[dimension=9] + descent-algebraic[m=2] + exhaustive + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 25.37670960954704,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 239,
+            "pinned_by_repeated_row": 0,
+            "rank": 134,
+            "repeated_column_rows": 0,
+            "row_ops": 1724,
+            "rows": 134,
+            "single_column_rows": 3,
+            "two_column_rows": 131
+          },
+          "wall_ns": 709451
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 134,
+        "rows": 134,
+        "work": 1724,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 15.994994197671385,
+      "r": 65309,
+      "recovered": 55946,
+      "rho_s": null,
+      "s": 36432.0752531768,
+      "s_over_rho": null,
+      "spec": {
+        "factor_base": "binary-subspace",
+        "factor_base_params": {
+          "dimension": "9"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 20301425,
+        "solver": "exhaustive",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 9310444.751385143,
+      "verified": true,
+      "verify": {
+        "gae": 22.0,
+        "group_ops": {
+          "adds": 7,
+          "doubles": 15,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 6188
+      },
+      "wall_seconds": 2.285517957
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 1026614753.4286907,
+          "group_ops": {
+            "adds": 943,
+            "doubles": 471,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 1,
+            "lookups": 0,
+            "relations": 107,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 183,
+            "solver_ops": 6417703,
+            "sqrt_solves": 0,
+            "target_guard_probes": 183,
+            "trials": 183,
+            "unliftable_systems": 1,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 182
+          },
+          "wall_ns": 249649179365
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with sat-cdcl",
+        "hit_rate": 0.5846994535519126,
+        "name": "descent-algebraic",
+        "relations_found": 107,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 95047
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 183,
+          "degree_over_bound": null,
+          "extra": {
+            "decisions": 6762439,
+            "learnt_clauses": 6416830,
+            "propagations": 824883311,
+            "restarts": 20688,
+            "xor_propagations": 0
+          },
+          "gae": 1026613339.4286907,
+          "name": "sat-cdcl",
+          "ns_per_op": 38853.196808421955,
+          "op_unit": "conflicts",
+          "ops": 6417703,
+          "peak_bytes": 0,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 0,
+          "solving_degree_mean": null,
+          "wall_ns": 249348277717
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 17,
+          "n_vars": 18,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 183
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 238,
+        "columns": 238,
+        "cost": {
+          "gae": 30.26980579211136,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 511,
+            "as_solves": 511
+          },
+          "wall_ns": 266600
+        },
+        "description": "points whose abscissa lies in the 9-dimensional subspace spanned by {1, z, …}",
+        "name": "binary-subspace",
+        "points_per_column": 2.0,
+        "signed_points": 476
+      },
+      "group_order": 130618,
+      "instance": "random-binary-n17-b1ad26",
+      "label": "binary-subspace[dimension=9] + descent-algebraic[m=2] + sat-cdcl + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 14.336957749245256,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 239,
+            "pinned_by_repeated_row": 0,
+            "rank": 107,
+            "repeated_column_rows": 0,
+            "row_ops": 974,
+            "rows": 107,
+            "single_column_rows": 0,
+            "two_column_rows": 107
+          },
+          "wall_ns": 1377127
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 107,
+        "rows": 107,
+        "work": 974,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 15.994994197671385,
+      "r": 65309,
+      "recovered": 15443,
+      "rho_s": null,
+      "s": 4017177.407247888,
+      "s_over_rho": null,
+      "spec": {
+        "factor_base": "binary-subspace",
+        "factor_base_params": {
+          "dimension": "9"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 20260922,
+        "solver": "sat-cdcl",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 1026614818.0354542,
+      "verified": true,
+      "verify": {
+        "gae": 20.0,
+        "group_ops": {
+          "adds": 7,
+          "doubles": 13,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 6342
+      },
+      "wall_seconds": 249.650968095
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 1193486084.961081,
+          "group_ops": {
+            "adds": 1070,
+            "doubles": 479,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 0,
+            "relations": 124,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 222,
+            "solver_ops": 7623717,
+            "sqrt_solves": 0,
+            "target_guard_probes": 222,
+            "trials": 222,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 221
+          },
+          "wall_ns": 290231433425
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with sat-cdcl",
+        "hit_rate": 0.5585585585585585,
+        "name": "descent-algebraic",
+        "relations_found": 124,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 80381
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 222,
+          "degree_over_bound": null,
+          "extra": {
+            "decisions": 8030527,
+            "learnt_clauses": 7622574,
+            "propagations": 965174110,
+            "restarts": 24695,
+            "xor_propagations": 0
+          },
+          "gae": 1193484535.961081,
+          "name": "sat-cdcl",
+          "ns_per_op": 38023.27315927388,
+          "op_unit": "conflicts",
+          "ops": 7623717,
+          "peak_bytes": 0,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 0,
+          "solving_degree_mean": null,
+          "wall_ns": 289878673980
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 17,
+          "n_vars": 18,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 222
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 238,
+        "columns": 238,
+        "cost": {
+          "gae": 30.26980579211136,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 511,
+            "as_solves": 511
+          },
+          "wall_ns": 241188
+        },
+        "description": "points whose abscissa lies in the 9-dimensional subspace spanned by {1, z, …}",
+        "name": "binary-subspace",
+        "points_per_column": 2.0,
+        "signed_points": 476
+      },
+      "group_order": 130618,
+      "instance": "random-binary-n17-b1ad26",
+      "label": "binary-subspace[dimension=9] + descent-algebraic[m=2] + sat-cdcl + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 21.299361255808915,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 239,
+            "pinned_by_repeated_row": 0,
+            "rank": 124,
+            "repeated_column_rows": 0,
+            "row_ops": 1447,
+            "rows": 124,
+            "single_column_rows": 2,
+            "two_column_rows": 122
+          },
+          "wall_ns": 1712185
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 124,
+        "rows": 124,
+        "work": 1447,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 15.994994197671385,
+      "r": 65309,
+      "recovered": 55946,
+      "rho_s": null,
+      "s": 4670150.428069515,
+      "s_over_rho": null,
+      "spec": {
+        "factor_base": "binary-subspace",
+        "factor_base_params": {
+          "dimension": "9"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 20301425,
+        "solver": "sat-cdcl",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 1193486158.5302482,
+      "verified": true,
+      "verify": {
+        "gae": 22.0,
+        "group_ops": {
+          "adds": 7,
+          "doubles": 15,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 7004
+      },
+      "wall_seconds": 290.233507129
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 11596628279.827816,
+          "group_ops": {
+            "adds": 708,
+            "doubles": 471,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 0,
+            "relations": 69,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 122,
+            "solver_ops": 9960633418,
+            "sqrt_solves": 0,
+            "target_guard_probes": 122,
+            "trials": 122,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 121
+          },
+          "wall_ns": 2816756637894
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with buchberger-f2",
+        "hit_rate": 0.5655737704918032,
+        "name": "descent-algebraic",
+        "relations_found": 69,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 72747
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 122,
+          "degree_over_bound": 0.798360655737705,
+          "extra": {
+            "basis_len": 1285,
+            "pairs_chain_skipped": 8070222,
+            "pairs_coprime_skipped": 10685253,
+            "pairs_left": 0,
+            "reduction_steps": 26699228,
+            "spolys": 130672
+          },
+          "gae": 11596627100.827816,
+          "name": "buchberger-f2",
+          "ns_per_op": 282.77707967899033,
+          "op_unit": "monomial operations",
+          "ops": 9960633418,
+          "peak_bytes": 579216,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 4,
+          "solving_degree_mean": 3.9918032786885247,
+          "wall_ns": 2816638829695
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 17,
+          "n_vars": 18,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 122
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 238,
+        "columns": 238,
+        "cost": {
+          "gae": 30.26980579211136,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 511,
+            "as_solves": 511
+          },
+          "wall_ns": 212437
+        },
+        "description": "points whose abscissa lies in the 9-dimensional subspace spanned by {1, z, …}",
+        "name": "binary-subspace",
+        "points_per_column": 2.0,
+        "signed_points": 476
+      },
+      "group_order": 130618,
+      "instance": "random-binary-n17-b1ad26",
+      "label": "binary-subspace[dimension=9] + descent-algebraic[m=2] + buchberger-f2 + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 8.272454060652807,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 239,
+            "pinned_by_repeated_row": 0,
+            "rank": 69,
+            "repeated_column_rows": 0,
+            "row_ops": 562,
+            "rows": 69,
+            "single_column_rows": 0,
+            "two_column_rows": 69
+          },
+          "wall_ns": 626150
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 69,
+        "rows": 69,
+        "work": 562,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 15.994994197671385,
+      "r": 65309,
+      "recovered": 15443,
+      "rho_s": null,
+      "s": 45377986.50744007,
+      "s_over_rho": null,
+      "spec": {
+        "factor_base": "binary-subspace",
+        "factor_base_params": {
+          "dimension": "9"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 20260922,
+        "solver": "buchberger-f2",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 11596628338.370075,
+      "verified": true,
+      "verify": {
+        "gae": 20.0,
+        "group_ops": {
+          "adds": 7,
+          "doubles": 13,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 6830
+      },
+      "wall_seconds": 2816.75759797
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 22281378420.22308,
+          "group_ops": {
+            "adds": 1149,
+            "doubles": 479,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 0,
+            "relations": 134,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 239,
+            "solver_ops": 19211031469,
+            "sqrt_solves": 0,
+            "target_guard_probes": 239,
+            "trials": 239,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 238
+          },
+          "wall_ns": 5412042533205
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with buchberger-f2",
+        "hit_rate": 0.5606694560669456,
+        "name": "descent-algebraic",
+        "relations_found": 134,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 85036
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 239,
+          "degree_over_bound": 0.799163179916318,
+          "extra": {
+            "basis_len": 2513,
+            "pairs_chain_skipped": 15218187,
+            "pairs_coprime_skipped": 20464149,
+            "pairs_left": 0,
+            "reduction_steps": 52221454,
+            "spolys": 255312
+          },
+          "gae": 22281376792.22308,
+          "name": "buchberger-f2",
+          "ns_per_op": 281.702570118048,
+          "op_unit": "monomial operations",
+          "ops": 19211031469,
+          "peak_bytes": 621976,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 4,
+          "solving_degree_mean": 3.99581589958159,
+          "wall_ns": 5411796939436
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 17,
+          "n_vars": 18,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 239
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 238,
+        "columns": 238,
+        "cost": {
+          "gae": 30.26980579211136,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 511,
+            "as_solves": 511
+          },
+          "wall_ns": 240030
+        },
+        "description": "points whose abscissa lies in the 9-dimensional subspace spanned by {1, z, …}",
+        "name": "binary-subspace",
+        "points_per_column": 2.0,
+        "signed_points": 476
+      },
+      "group_order": 130618,
+      "instance": "random-binary-n17-b1ad26",
+      "label": "binary-subspace[dimension=9] + descent-algebraic[m=2] + buchberger-f2 + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 25.37670960954704,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 239,
+            "pinned_by_repeated_row": 0,
+            "rank": 134,
+            "repeated_column_rows": 0,
+            "row_ops": 1724,
+            "rows": 134,
+            "single_column_rows": 3,
+            "two_column_rows": 131
+          },
+          "wall_ns": 1353469
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 134,
+        "rows": 134,
+        "work": 1724,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 15.994994197671385,
+      "r": 65309,
+      "recovered": 55946,
+      "rho_s": null,
+      "s": 87187763.83460447,
+      "s_over_rho": null,
+      "spec": {
+        "factor_base": "binary-subspace",
+        "factor_base_params": {
+          "dimension": "9"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 20301425,
+        "solver": "buchberger-f2",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 22281378497.869595,
+      "verified": true,
+      "verify": {
+        "gae": 22.0,
+        "group_ops": {
+          "adds": 7,
+          "doubles": 15,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 6903
+      },
+      "wall_seconds": 5412.044283659
+    }
+  ],
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "1c39dd2856dbc14d89debe13b5e79cf927af3fc7331192e27e6e039ba620c8eb",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete",
+  "what_this_is": "Index-calculus configurations -- each a choice of factor base, target source, decomposition oracle, polynomial solver and relation matrix -- run end to end against a planted logarithm, with every stage's cost in group-addition equivalents and the total divided by sqrt(r).",
+  "what_this_is_not": [
+    "not a speed claim: a configuration on a toy instance is a measurement, and a comparison needs the matched reference rows AGENTS.md section 1 asks for",
+    "not a wall-clock benchmark: operation counts are the metric, wall time rides along",
+    "not a claim about any deployed curve"
+  ]
+}

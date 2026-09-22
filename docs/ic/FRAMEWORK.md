@@ -557,10 +557,13 @@ worse than none:
   rows.** The descent is symbolic and reaches 64 boolean variables;
   the shipped engines do not. `exhaustive` and Buchberger's solution
   extraction enumerate `2^{n_vars}` points and stop at 26 variables,
-  `xl-f2` stops at 10, and Buchberger's basis computation itself runs
-  out of budget long before its cap. An engine that scales is the
-  plug point's purpose (§5); the rows past `n' ≈ 12` are waiting for
-  one.
+  `xl-f2` stops at 10, and Buchberger's basis computation is the wall
+  long before its cap: at `n' = 9` (18 unknowns, ledger §16) it took
+  47 and 90 minutes for runs of 69 and 134 relations, `10⁵` times the
+  pair table on the same base, with six more unknowns costing it
+  2,300× against the exhaustive engine's 77×. An engine that scales
+  is the plug point's purpose (§5); the rows past `n' ≈ 9` are
+  waiting for one.
 - **No F4 or F5 ships.** The `SystemSolver` plug point exists for them
   and is exercised by four engines (Buchberger, XL, CDCL, exhaustive),
   but a signature-based or matrix-F4 engine is yours to plug in; §5
