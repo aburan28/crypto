@@ -783,6 +783,27 @@ ECC_HD P131 sigma131(P131 a,int k){
 #ifndef ECC_PACKED_UNROLL_INV
 #define ECC_PACKED_UNROLL_INV 0
 #endif
+// Two independent products in one out-of-line body.  The inversion is a
+// chain of eight dependent products, and a warp cannot issue a clmad more
+// often than once per ~63 cycles (ONE-BLOCK-GEOMETRY.md section 1), so a
+// single chain leaves the warp idle between links.  Two chains give ptxas
+// twelve independent clmads per link and two independent conversion
+// networks to interleave.  Same arithmetic as mul131, so the results are
+// bit-identical to two mul131 calls.
+static ECC_BIG void mul131x2(MulArg a1, MulArg b1, MulArg a2, MulArg b2, P131 *r1, P131 *r2) {
+#if ECC_PACKED_SINGLE_PRODUCT && !ECC_PACKED_ONB_INV
+    const P131 pa1 = toPolynomial131(a1), pb1 = toPolynomial131(b1);
+    const P131 pa2 = toPolynomial131(a2), pb2 = toPolynomial131(b2);
+    uint32_t h1[9], h2[9];
+    product131(pa1, pb1, h1);
+    product131(pa2, pb2, h2);
+    *r1 = fromPolynomialProduct131(h1);
+    *r2 = fromPolynomialProduct131(h2);
+#else
+    *r1 = mulOnb131(a1, b1);
+    *r2 = mulOnb131(a2, b2);
+#endif
+}
 ECC_HD P131 inv131(P131 a){
 #if ECC_PACKED_ONB_INV
 #define ECC_INV_MUL mulOnb131
@@ -810,6 +831,46 @@ ECC_HD P131 inv131(P131 a){
  return sqr131(acc);
 #endif
 #undef ECC_INV_MUL
+}
+
+// sigma^k of two elements with the repeated squarings of both in one loop
+// body, so the two Frobenius chains interleave instead of running back to
+// back.  Same values as sigma131 on each.
+ECC_HD void sigma131x2(P131 *a, P131 *b, int k) {
+#if ECC_PACKED_PERM_SIGMA & 1
+ if(k>=3 && k<=10) { *a = sigmaWalkNetwork131(*a,k-3); *b = sigmaWalkNetwork131(*b,k-3); return; }
+#endif
+#if ECC_PACKED_PERM_SIGMA & 2
+ if(k==16 || k==32 || k==65) {
+  const int which = k==16?0:k==32?1:2;
+  *a = sigmaInvNetwork131(*a,which); *b = sigmaInvNetwork131(*b,which); return;
+ }
+#endif
+#pragma unroll 1
+ for(int i=0;i<k;i++){ *a=sqr131(*a); *b=sqr131(*b); }
+}
+
+// Two independent inversions, link by link: the same Itoh-Tsujii chain as
+// inv131 (powers 2,4,8,16,32,64,65,130) with every product a mul131x2 and
+// every Frobenius map a sigma131x2, so each of the eight links carries two
+// independent dependency chains.  Bit-identical to inv131 on each input.
+ECC_HD void inv131x2(P131 a, P131 b, P131 *ra, P131 *rb) {
+ P131 xa, xb, ya, yb;
+ mul131x2(sqr131(a), a, sqr131(b), b, &xa, &xb);                  // beta_2
+ ya = sqr131(sqr131(xa)); yb = sqr131(sqr131(xb));
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_4
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 4);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_8
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 8);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_16
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 16);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_32
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 32);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_64
+ mul131x2(sqr131(xa), a, sqr131(xb), b, &xa, &xb);                 // beta_65
+ ya = xa; yb = xb; sigma131x2(&ya, &yb, 65);
+ mul131x2(ya, xa, yb, xb, &xa, &xb);                               // beta_130
+ *ra = sqr131(xa); *rb = sqr131(xb);
 }
 
 } // namespace eccPacked131
