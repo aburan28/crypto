@@ -30,14 +30,15 @@ build() {
   mv ecc2k130 "ecc2k130-$name"
 }
 VARIANTS="ref clsq topclmad topclmad-clsq onbinv c2-256x32"
-build ref            gpu-rtx-pro6000-20b
-build clsq           gpu-rtx-pro6000-20b PACKED_ALU_SQUARE=0
-build topclmad       gpu-rtx-pro6000-20b PACKED_TOP_CLMAD=1
-build topclmad-clsq  gpu-rtx-pro6000-20b PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0
-build onbinv         gpu-rtx-pro6000-20b PACKED_ONB_INV=1
-build c2-256x32      gpu-rtx-pro6000-chains2
-build ref-prof       gpu-rtx-pro6000-20b PHASE_PROFILE=1
-build topclmad-clsq-prof gpu-rtx-pro6000-20b PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PHASE_PROFILE=1
+fail=0
+build ref            gpu-rtx-pro6000-20b || fail=1
+build clsq           gpu-rtx-pro6000-20b PACKED_ALU_SQUARE=0 || fail=1
+build topclmad       gpu-rtx-pro6000-20b PACKED_TOP_CLMAD=1 || fail=1
+build topclmad-clsq  gpu-rtx-pro6000-20b PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 || fail=1
+build onbinv         gpu-rtx-pro6000-20b PACKED_ONB_INV=1 || fail=1
+build c2-256x32      gpu-rtx-pro6000-chains2 || fail=1
+build ref-prof       gpu-rtx-pro6000-20b PHASE_PROFILE=1 || fail=1
+build topclmad-clsq-prof gpu-rtx-pro6000-20b PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PHASE_PROFILE=1 || fail=1
 
 # The automatic worker count of the 512-thread builds on this part, so every
 # binary is verified on the same walks.
@@ -45,29 +46,35 @@ SMS=$(./ecc2k130-ref --curve 131 --packed --bench --steps 1 --launches 1 --verif
 T512=$((SMS * 512)); T256=$((SMS * 256))
 echo "sms: $SMS, verify threads $T512 (512-thread builds) / $T256 (256-thread builds)" | tee -a "$R/host.txt"
 verify() {
-  local b=$1 threads=$2
-  [ -x "ecc2k130-$b" ] || return
+  local b=$1 threads=$2 status=0
+  [ -x "ecc2k130-$b" ] || return 1
   echo "=== verify $b (threads $threads)"
   ./ecc2k130-$b --curve 131 --packed --threads "$threads" --dp-weight 48 --dp-cap 262144 \
       --steps 96 --launches 6 --verify 300 --run-id 7 --dp-file "$R/dp-$b.bin" \
-      > "$R/verify-$b.log" 2>&1
-  grep -E "MISMATCH|finished|packed chains|resident|registers|persist|OVERFLOW" "$R/verify-$b.log" | tee "$R/verify-$b.txt"
+      > "$R/verify-$b.log" 2>&1 || status=$?
+  grep -E "MISMATCH|finished|packed chains|resident|registers|persist|OVERFLOW" "$R/verify-$b.log" | tee "$R/verify-$b.txt" || true
+  return "$status"
 }
-for b in ref clsq topclmad topclmad-clsq onbinv; do verify $b $T512; done
-verify c2-256x32 $T256
-python3 - "$R" $VARIANTS <<'PY' | tee "$R/dp-identity.txt"
+for b in ref clsq topclmad topclmad-clsq onbinv; do verify $b $T512 || fail=1; done
+verify c2-256x32 $T256 || fail=1
+python3 - "$R" $VARIANTS <<'PY' | tee "$R/dp-identity.txt" || fail=1
 import hashlib, os, sys
 r = sys.argv[1]
 ref = None
+bad = 0
 for name in sys.argv[2:]:
     path = os.path.join(r, "dp-%s.bin" % name)
     if not os.path.exists(path):
-        print("%-20s missing" % name); continue
+        print("%-20s missing" % name)
+        bad = 1
+        continue
     data = open(path, "rb").read()
     recs = sorted(data[i:i+32] for i in range(0, len(data) - len(data) % 32, 32))
     digest = hashlib.sha256(b"".join(recs)).hexdigest()
     if ref is None: ref = digest
+    if digest != ref: bad = 1
     print("%-20s %8d records  sha256 %s  %s" % (name, len(recs), digest[:16], "IDENTICAL to ref" if digest == ref else "DIFFERS from ref"))
+sys.exit(bad)
 PY
 
 sample() {
@@ -90,3 +97,4 @@ for b in ref-prof topclmad-clsq-prof; do
       | grep -E "finished|phase profile" | tee "$R/profile-$b.txt"
 done
 echo "=== done"
+exit "$fail"
