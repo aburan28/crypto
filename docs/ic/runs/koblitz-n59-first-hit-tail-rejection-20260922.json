@@ -1,0 +1,526 @@
+{
+  "candidate": {
+    "maximum_batch_probes": 2048,
+    "name": "deterministic_first_hit_batch32",
+    "probe_run": 64,
+    "rank_rounds_unchanged": true,
+    "raw_coverage_only": true,
+    "rule": "scan deterministic 2048-probe batches in order, keep the earliest exact forced-point relation in the first successful batch, and stop later batches",
+    "runs_per_batch": 32
+  },
+  "candidate_params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-first-hit-control-public-59001.json",
+    "sha256": "8e1159b3605e6cfa1b38b653610666acfe6d153155210b194fff7b9638c186ce"
+  },
+  "claim_boundary": "Finite same-target rejected optimization. Deterministic first-hit batching reduces raw targeted pair lookups but regresses matched default-thread full wall and does not improve whole-process CPU. The selected Stage-139 uncovered-column tail remains unchanged. No SOTA claim.",
+  "date": "2026-09-22",
+  "decision": {
+    "reason": "candidate median whole wall is 4.24 percent slower and median whole CPU is 0.19 percent higher despite 8.01 percent fewer targeted pair lookups",
+    "selected_stage139_unchanged": true,
+    "single_worker_followup_run": false,
+    "single_worker_reason": "default-thread full-cost gate already rejects the candidate; an additional 10 GB one-worker run would not change selection",
+    "status": "rejected"
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "parent": {
+      "ell": 15,
+      "kind": "standard_subspace"
+    },
+    "points": 32934,
+    "projected_columns": 16344,
+    "scalar_preimages_retained": false,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "cofactor": 22894,
+    "collection_m": 3,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "public_target_seed": 59001,
+    "subgroup_order": 25179555920633,
+    "target_scalar_constructed_or_supplied": false
+  },
+  "matched_default_abba": {
+    "comparison": {
+      "collect_wall_seconds": {
+        "baseline_median": 61.91538575,
+        "candidate_median": 56.153981313,
+        "candidate_over_baseline": 0.9069471284526399,
+        "change_fraction": -0.09305287154736004
+      },
+      "combined_relations": {
+        "baseline_median": 31798.0,
+        "candidate_median": 31785.0,
+        "candidate_over_baseline": 0.9995911692559281,
+        "change_fraction": -0.0004088307440719542
+      },
+      "ic_wall_seconds": {
+        "baseline_median": 77.833937041,
+        "candidate_median": 81.21652599999999,
+        "candidate_over_baseline": 1.043459049967088,
+        "change_fraction": 0.043459049967087854
+      },
+      "linear_algebra_seconds": {
+        "baseline_median": 0.713392126,
+        "candidate_median": 0.6674550619999999,
+        "candidate_over_baseline": 0.9356075539303049,
+        "change_fraction": -0.06439244606969503
+      },
+      "logs_wall_seconds": {
+        "baseline_median": 15.2055255625,
+        "candidate_median": 24.339939354000002,
+        "candidate_over_baseline": 1.6007298961127245,
+        "change_fraction": 0.6007298961127245
+      },
+      "pair_table_build_wall_seconds": {
+        "baseline_median": 14.6980493535,
+        "candidate_median": 15.673085396000001,
+        "candidate_over_baseline": 1.0663377853107983,
+        "change_fraction": 0.06633778531079833
+      },
+      "relation_units_wall_seconds": {
+        "baseline_median": 44.55872378949999,
+        "candidate_median": 37.677823562,
+        "candidate_over_baseline": 0.8455768109516315,
+        "change_fraction": -0.15442318904836852
+      },
+      "targeted_cpu_seconds": {
+        "baseline_median": 30.501645500000024,
+        "candidate_median": 29.088135499999964,
+        "candidate_over_baseline": 0.9536579100298029,
+        "change_fraction": -0.04634208997019712
+      },
+      "targeted_pair_lookups": {
+        "baseline_median": 2950000.0,
+        "candidate_median": 2713712.0,
+        "candidate_over_baseline": 0.9199023728813559,
+        "change_fraction": -0.08009762711864407
+      },
+      "targeted_relations": {
+        "baseline_median": 71.0,
+        "candidate_median": 58.0,
+        "candidate_over_baseline": 0.8169014084507042,
+        "change_fraction": -0.18309859154929578
+      },
+      "targeted_wall_seconds": {
+        "baseline_median": 2.6380096249999996,
+        "candidate_median": 2.8497600815000013,
+        "candidate_over_baseline": 1.0802690234687835,
+        "change_fraction": 0.08026902346878348
+      },
+      "verification_seconds": {
+        "baseline_median": 4.897860248499997,
+        "candidate_median": 14.795670229999999,
+        "candidate_over_baseline": 3.02084369077931,
+        "change_fraction": 2.02084369077931
+      },
+      "whole_cpu_seconds": {
+        "baseline_median": 540.7968455,
+        "candidate_median": 541.83048,
+        "candidate_over_baseline": 1.0019113175466923,
+        "change_fraction": 0.001911317546692214
+      },
+      "whole_wall_seconds": {
+        "baseline_median": 78.5068675835,
+        "candidate_median": 81.833508771,
+        "candidate_over_baseline": 1.0423738876597233,
+        "change_fraction": 0.0423738876597233
+      }
+    },
+    "decision": "rejected_full_wall_and_cpu_regression",
+    "medians": {
+      "baseline": {
+        "collect_wall_seconds": 61.91538575,
+        "combined_relations": 31798.0,
+        "ic_wall_seconds": 77.833937041,
+        "linear_algebra_seconds": 0.713392126,
+        "logs_wall_seconds": 15.2055255625,
+        "pair_table_build_wall_seconds": 14.6980493535,
+        "relation_units_wall_seconds": 44.55872378949999,
+        "targeted_cpu_seconds": 30.501645500000024,
+        "targeted_pair_lookups": 2950000.0,
+        "targeted_relations": 71.0,
+        "targeted_wall_seconds": 2.6380096249999996,
+        "verification_seconds": 4.897860248499997,
+        "whole_cpu_seconds": 540.7968455,
+        "whole_wall_seconds": 78.5068675835
+      },
+      "candidate": {
+        "collect_wall_seconds": 56.153981313,
+        "combined_relations": 31785.0,
+        "ic_wall_seconds": 81.21652599999999,
+        "linear_algebra_seconds": 0.6674550619999999,
+        "logs_wall_seconds": 24.339939354000002,
+        "pair_table_build_wall_seconds": 15.673085396000001,
+        "relation_units_wall_seconds": 37.677823562,
+        "targeted_cpu_seconds": 29.088135499999964,
+        "targeted_pair_lookups": 2713712.0,
+        "targeted_relations": 58.0,
+        "targeted_wall_seconds": 2.8497600815000013,
+        "verification_seconds": 14.795670229999999,
+        "whole_cpu_seconds": 541.83048,
+        "whole_wall_seconds": 81.833508771
+      }
+    },
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "runs": [
+      {
+        "arm": "baseline",
+        "binary_blake3": "10c1a5adf729c0dc315e4f80e7c8a719b156972fe448c4042af37fc5b66baa79",
+        "collect_wall_seconds": 71.634445583,
+        "combined_relations": 31798,
+        "ic_wall_seconds": 86.865948124,
+        "label": "abba_a1_baseline",
+        "linear_algebra_seconds": 0.656913336,
+        "logs_wall_seconds": 14.513879125,
+        "pair_table_build_wall_seconds": 15.620372291,
+        "peak_rss_bytes": 10076618752,
+        "recovered_scalar": 17861472351607,
+        "relation_units_wall_seconds": 53.35718878899999,
+        "rho_wall_seconds": 0.549477166,
+        "targeted_cpu_seconds": 30.25817200000006,
+        "targeted_pair_lookups": 2950000,
+        "targeted_relations": 71,
+        "targeted_wall_seconds": 2.665668957,
+        "verification_seconds": 4.913006580999996,
+        "verified": true,
+        "whole_cpu_seconds": 566.742655,
+        "whole_wall_seconds": 87.45517775
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "10c1a5adf729c0dc315e4f80e7c8a719b156972fe448c4042af37fc5b66baa79",
+        "collect_wall_seconds": 57.168393084,
+        "combined_relations": 31785,
+        "ic_wall_seconds": 82.01330037499999,
+        "label": "abba_b1_candidate",
+        "linear_algebra_seconds": 0.667554667,
+        "logs_wall_seconds": 24.12064775,
+        "pair_table_build_wall_seconds": 14.677361875,
+        "peak_rss_bytes": 10080059392,
+        "recovered_scalar": 17861472351607,
+        "relation_units_wall_seconds": 39.85010337400001,
+        "rho_wall_seconds": 0.575045584,
+        "targeted_cpu_seconds": 29.550187999999935,
+        "targeted_pair_lookups": 2713712,
+        "targeted_relations": 58,
+        "targeted_wall_seconds": 2.878166326,
+        "verification_seconds": 14.518106498999998,
+        "verified": true,
+        "whole_cpu_seconds": 547.152785,
+        "whole_wall_seconds": 82.633981792
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "10c1a5adf729c0dc315e4f80e7c8a719b156972fe448c4042af37fc5b66baa79",
+        "collect_wall_seconds": 55.139569542,
+        "combined_relations": 31785,
+        "ic_wall_seconds": 80.419751625,
+        "label": "abba_b2_candidate",
+        "linear_algebra_seconds": 0.667355457,
+        "logs_wall_seconds": 24.559230958,
+        "pair_table_build_wall_seconds": 16.668808917,
+        "peak_rss_bytes": 9631924224,
+        "recovered_scalar": 17861472351607,
+        "relation_units_wall_seconds": 35.50554375,
+        "rho_wall_seconds": 0.556247042,
+        "targeted_cpu_seconds": 28.626082999999994,
+        "targeted_pair_lookups": 2713712,
+        "targeted_relations": 58,
+        "targeted_wall_seconds": 2.821353837000002,
+        "verification_seconds": 15.073233961,
+        "verified": true,
+        "whole_cpu_seconds": 536.5081749999999,
+        "whole_wall_seconds": 81.03303575
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "10c1a5adf729c0dc315e4f80e7c8a719b156972fe448c4042af37fc5b66baa79",
+        "collect_wall_seconds": 52.196325917,
+        "combined_relations": 31798,
+        "ic_wall_seconds": 68.801925958,
+        "label": "abba_a2_baseline",
+        "linear_algebra_seconds": 0.769870916,
+        "logs_wall_seconds": 15.897172,
+        "pair_table_build_wall_seconds": 13.775726416,
+        "peak_rss_bytes": 10075848704,
+        "recovered_scalar": 17861472351607,
+        "relation_units_wall_seconds": 35.76025879,
+        "rho_wall_seconds": 0.707600125,
+        "targeted_cpu_seconds": 30.74511899999999,
+        "targeted_pair_lookups": 2950000,
+        "targeted_relations": 71,
+        "targeted_wall_seconds": 2.6103502929999993,
+        "verification_seconds": 4.882713915999998,
+        "verified": true,
+        "whole_cpu_seconds": 514.851036,
+        "whole_wall_seconds": 69.558557417
+      }
+    ],
+    "selected_arm": "baseline_stage139"
+  },
+  "operation": "koblitz_n59_first_hit_tail_rejection",
+  "pilot_controls": {
+    "batch32_first_hit": {
+      "combined_relations": 31785,
+      "decision": "advance_to_matched_default_abba",
+      "linear_algebra": {
+        "attempts": 21,
+        "mode": "sparse",
+        "seconds": 0.659788043,
+        "sparse": {
+          "attempts": 1,
+          "core_dimension": 1697,
+          "core_nonzeros": 23780,
+          "filter": {
+            "columns_in": 16344,
+            "columns_out": 1697,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 15409,
+            "merged_columns": 6740,
+            "nonzeros_in": 95351,
+            "nonzeros_out": 23780,
+            "rows_in": 31785,
+            "rows_out": 1729,
+            "singletons_removed": 7907,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 14647,
+          "wiedemann": {
+            "block_m": 4,
+            "block_n": 4,
+            "dimension": 1698,
+            "extra_steps": 0,
+            "generator_degree": 424,
+            "products": 1283,
+            "sequence_length": 858
+          }
+        }
+      },
+      "peak_rss_bytes": 9353740288,
+      "process_core_seconds": 574.407852,
+      "process_wall_seconds": 111.122469125,
+      "targeted_tail": {
+        "artifact": "targeted-tail.json",
+        "attempts": 295,
+        "attempts_ran_now": 295,
+        "elapsed_seconds": 2.798686672,
+        "enabled": true,
+        "pair_lookups": 2713712,
+        "relations": 58,
+        "remaining_uncovered_column_indices": [],
+        "resources": {
+          "cpu_seconds": 30.718746000000124,
+          "peak_rss_bytes_at_end": 9353740288,
+          "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+        },
+        "trials": 2713712
+      }
+    },
+    "serial_first_hit": {
+      "combined_relations": 31785,
+      "decision": "rejected_parallel_wall_regression",
+      "linear_algebra": {
+        "attempts": 21,
+        "mode": "sparse",
+        "seconds": 0.944782127,
+        "sparse": {
+          "attempts": 1,
+          "core_dimension": 1697,
+          "core_nonzeros": 23780,
+          "filter": {
+            "columns_in": 16344,
+            "columns_out": 1697,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 15409,
+            "merged_columns": 6740,
+            "nonzeros_in": 95351,
+            "nonzeros_out": 23780,
+            "rows_in": 31785,
+            "rows_out": 1729,
+            "singletons_removed": 7907,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 14647,
+          "wiedemann": {
+            "block_m": 4,
+            "block_n": 4,
+            "dimension": 1698,
+            "extra_steps": 0,
+            "generator_degree": 424,
+            "products": 1283,
+            "sequence_length": 858
+          }
+        }
+      },
+      "peak_rss_bytes": 9778642944,
+      "process_core_seconds": 515.20051,
+      "process_wall_seconds": 106.428582792,
+      "targeted_tail": {
+        "artifact": "targeted-tail.json",
+        "attempts": 295,
+        "attempts_ran_now": 295,
+        "elapsed_seconds": 18.07177337400001,
+        "enabled": true,
+        "pair_lookups": 2655627,
+        "relations": 58,
+        "remaining_uncovered_column_indices": [],
+        "resources": {
+          "cpu_seconds": 23.456266000000028,
+          "peak_rss_bytes_at_end": 9778642944,
+          "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+        },
+        "trials": 2655627
+      }
+    }
+  },
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-rank-tail-attribution-correction-20260922.json",
+    "sha256": "dc2dbc1f5c2bbb553f154382411e17de2107877dc101e1d5b26a4fcb925ef5ab"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 10080059392,
+    "retained_processes": 9,
+    "retained_processes_detail": [
+      {
+        "core_seconds": 7.059993,
+        "label": "serial_first_hit_select",
+        "peak_rss_bytes": 292470784,
+        "status": "stopped",
+        "wall_seconds": 6.860965667
+      },
+      {
+        "core_seconds": 515.20051,
+        "label": "serial_first_hit_logs",
+        "peak_rss_bytes": 9778642944,
+        "status": "stopped",
+        "wall_seconds": 106.428582792
+      },
+      {
+        "core_seconds": 3.341787,
+        "label": "batch32_first_hit_select",
+        "peak_rss_bytes": 293470208,
+        "status": "stopped",
+        "wall_seconds": 0.723016292
+      },
+      {
+        "core_seconds": 574.407852,
+        "label": "batch32_first_hit_logs",
+        "peak_rss_bytes": 9353740288,
+        "status": "stopped",
+        "wall_seconds": 111.122469125
+      },
+      {
+        "core_seconds": 541.175682,
+        "label": "batch32_unmatched_default",
+        "peak_rss_bytes": 10075914240,
+        "status": "complete",
+        "wall_seconds": 87.7826615
+      },
+      {
+        "core_seconds": 566.742655,
+        "label": "abba_a1_baseline",
+        "peak_rss_bytes": 10076618752,
+        "status": "complete",
+        "wall_seconds": 87.45517775
+      },
+      {
+        "core_seconds": 547.152785,
+        "label": "abba_b1_candidate",
+        "peak_rss_bytes": 10080059392,
+        "status": "complete",
+        "wall_seconds": 82.633981792
+      },
+      {
+        "core_seconds": 536.5081749999999,
+        "label": "abba_b2_candidate",
+        "peak_rss_bytes": 9631924224,
+        "status": "complete",
+        "wall_seconds": 81.03303575
+      },
+      {
+        "core_seconds": 514.851036,
+        "label": "abba_a2_baseline",
+        "peak_rss_bytes": 10075848704,
+        "status": "complete",
+        "wall_seconds": 69.558557417
+      }
+    ],
+    "retained_sequential_wall_seconds": 633.598448085,
+    "retained_total_core_seconds": 3806.440475,
+    "scope": "serial and deterministic-batch select/logs pilots, one unmatched complete candidate, and four matched default-thread ABBA workflows; compilation excluded"
+  },
+  "relation_streams": {
+    "baseline": {
+      "combined_relations": 31798,
+      "combined_relations_sha256": "32cb1609d40513a12750254ba291fb2a8a262a6eaeb05e598b28212a53fbf3aa",
+      "targeted_relations": 71,
+      "targeted_relations_sha256": "f0be4cf52b83835bf523235d58295131ab7b495e91f56e20d432913e7289d991"
+    },
+    "candidate": {
+      "combined_relations": 31785,
+      "combined_relations_sha256": "dcbf0aad8eabce6f22241801f70ade6f4d948e2d1bc67d39a5dd1d2fd140e76c",
+      "targeted_relations": 58,
+      "targeted_relations_sha256": "1ee438ef6e3083ce543cb2c49870481ac7322f4b27f425bf1a21b70b7947675b"
+    },
+    "candidate_repeated_hash_match": true,
+    "uniform_relations": 31727,
+    "uniform_relations_sha256": "32027eac9300bbf68087f1d5da9dcd3cbc27eb8eccdcfeaa505904dc936702a6"
+  },
+  "schema_version": 1,
+  "software": {
+    "candidate_binary_blake3": "10c1a5adf729c0dc315e4f80e7c8a719b156972fe448c4042af37fc5b66baa79",
+    "selected_source_stack_head": "4c5bec46"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-first-hit-tail-rejected-20260922.patch",
+    "sha256": "9f5d9d24c904f2ae34c258bff8050d4acfe9fe9495d4f700a73ca70a3083c0a7",
+    "status": "archived_rejected_not_applied_to_selected_source"
+  },
+  "unmatched_candidate_default": {
+    "arm": "candidate",
+    "binary_blake3": "02c19617c16dbfda9f8d3ee9cffa2022cb3fb6298c037bdf6b7cb44ce3ffadeb",
+    "collect_wall_seconds": 71.737694542,
+    "combined_relations": 31785,
+    "ic_wall_seconds": 87.177891334,
+    "label": "unmatched_candidate",
+    "linear_algebra_seconds": 0.671820248,
+    "logs_wall_seconds": 14.452155125,
+    "pair_table_build_wall_seconds": 26.052008417,
+    "peak_rss_bytes": 10075914240,
+    "recovered_scalar": 17861472351607,
+    "relation_units_wall_seconds": 42.984972209999995,
+    "rho_wall_seconds": 0.562703042,
+    "targeted_cpu_seconds": 29.34943599999997,
+    "targeted_pair_lookups": 2713712,
+    "targeted_relations": 58,
+    "targeted_wall_seconds": 2.937066199,
+    "verification_seconds": 4.804495791000001,
+    "verified": true,
+    "whole_cpu_seconds": 541.175682,
+    "whole_wall_seconds": 87.7826615
+  },
+  "validation": [
+    "candidate and baseline complete all 16344 relation-derived logs and recover the same verified public-target scalar",
+    "candidate relation stream is deterministic across both matched candidate processes",
+    "every candidate forced-point relation passes the unchanged exact group verifier",
+    "legacy serialization remains unchanged while the candidate switch is false",
+    "the rejected source patch applies cleanly to the Stage-139 selected source"
+  ]
+}
