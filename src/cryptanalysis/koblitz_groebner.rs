@@ -3942,35 +3942,38 @@ mod tests {
                 })
                 .filter(|p| !p.is_zero())
                 .collect();
-            let reference = SolveOptions {
-                max_solutions: 1 << 12,
-                engine: SolverEngine::MatrixF4 { max_degree: 3 },
-                ..SolveOptions::default()
-            };
-            let (mut want, want_stats) = solve_boolean_system(&system, n_vars, &reference);
-            want.sort_unstable();
-            let opts = SolveOptions {
-                engine: SolverEngine::InheritedF4 { max_degree: 3 },
-                ..reference
-            };
-            let (mut got, stats) = solve_boolean_system(&system, n_vars, &opts);
-            got.sort_unstable();
-            assert_eq!(got, want, "trial {trial}: roots differ");
-            assert_eq!(
-                (stats.reductions, stats.infeasible_branches, stats.propagations, stats.splits),
-                (
-                    want_stats.reductions,
-                    want_stats.infeasible_branches,
-                    want_stats.propagations,
-                    want_stats.splits
-                ),
-                "trial {trial}: the splitting tree differs"
-            );
             // Roots are the truth, whichever engine found them.
             let brute: Vec<u64> = (0..(1u64 << n_vars))
                 .filter(|pt| system.iter().all(|e| e.eval(*pt) == 0))
                 .collect();
-            assert_eq!(got, brute, "trial {trial}: roots are not the variety");
+            for split_rule in [SplitRule::LowestFree, SplitRule::HighestFree] {
+                let reference = SolveOptions {
+                    max_solutions: 1 << 12,
+                    engine: SolverEngine::MatrixF4 { max_degree: 3 },
+                    split_rule,
+                    ..SolveOptions::default()
+                };
+                let (mut want, want_stats) = solve_boolean_system(&system, n_vars, &reference);
+                want.sort_unstable();
+                let opts = SolveOptions {
+                    engine: SolverEngine::InheritedF4 { max_degree: 3 },
+                    ..reference
+                };
+                let (mut got, stats) = solve_boolean_system(&system, n_vars, &opts);
+                got.sort_unstable();
+                assert_eq!(got, want, "trial {trial} {split_rule:?}: roots differ");
+                assert_eq!(
+                    (stats.reductions, stats.infeasible_branches, stats.propagations, stats.splits),
+                    (
+                        want_stats.reductions,
+                        want_stats.infeasible_branches,
+                        want_stats.propagations,
+                        want_stats.splits
+                    ),
+                    "trial {trial} {split_rule:?}: the splitting tree differs"
+                );
+                assert_eq!(got, brute, "trial {trial} {split_rule:?}: roots are not the variety");
+            }
         }
     }
 
