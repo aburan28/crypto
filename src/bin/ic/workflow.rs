@@ -576,6 +576,10 @@ pub struct TargetedTailDocument {
     pub spec: FactorBaseSpec,
     pub base_seed: u64,
     pub trials_per_column: u64,
+    /// Least-represented columns forced per targeted round. Older
+    /// coverage-only tail documents predate this knob and deserialize
+    /// as zero, matching a disabled rank tail.
+    #[serde(default)]
     pub rank_columns_per_round: usize,
     pub attempts: Vec<TargetedTailAttempt>,
 }
