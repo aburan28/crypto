@@ -1829,6 +1829,70 @@ lever was measured, and it costs more than it saves.  `S` is untouched at these
 sizes, exactly as §11.10 said in advance it would be, so nothing here moves the
 standing against rho.
 
+### 11.12 Pre-registration: a border basis in place of the fixed-degree Macaulay cut
+
+**Written before the border basis existed.**  The scoreboard has carried "the
+open direction is a border basis in place of the fixed-degree Macaulay cut"
+since §11.6.  This registers it, and registers first the arithmetic that says
+what class of result it can possibly be — because that arithmetic is available
+now, from measurements already in this note, and stating it afterwards would be
+worthless.
+
+**It cannot be an advance.  It is `engineering` by construction.**  §11.5's
+protocol table measures `C₃` at `1.53, 1.53, 1.55, 1.55, 1.57, 1.58, 1.57,
+1.57` (`×10⁶`) across `n = 2^{24.2}` to `2^{33.1}`.  **`C₃` is flat in `n`** —
+the `S₄` system has three unknowns and 64 solutions at every size, so its cost
+does not scale.  A lever on a quantity that does not scale cannot move an
+exponent, and by §3 of `AGENTS.md` that is `engineering`: "legitimate, bounded,
+and not a finding".
+
+**Its ceiling is about `2.3×`.**  §11.6 splits the post-row-selection `C₃` into
+forward elimination `17 %`, normal forms `40 %`, characteristic polynomial
+`31 %`, eigenvectors and roots `10 %`.  A border basis replaces the first two —
+the fixed-degree Macaulay construction and its reduction.  The characteristic
+polynomial of the `64 × 64` multiplication matrix and its eigen-solve are
+properties of that matrix, not of the route taken to it, and survive unchanged.
+So even driving the Macaulay share to **zero** gives `1/0.43 ≈ 2.3×`, and the
+realistic figure is smaller, because a border basis still computes normal forms
+against the border — that is what it is.
+
+**And a far larger constant has already failed to matter.**  Decomposing into
+`k − 1` points cut the per-residual constant `580×`, from `0.9` million field
+multiplications to `1,513`, and still landed `1,037×` above rho.  Against
+§11.7's remaining `1,989×` closing as `n^{-1/18}` — about two hundred doublings
+— a `2.3×` is worth roughly one.  **The verdict does not move, and this section
+says so in advance so that a `C₃` improvement cannot later be read as one.**
+
+**What it might fix that is not a constant.**  `solve_at_degree` carries a
+documented failure: the multiplication matrix needs the normal form of `e₁ · b`
+for every standard `b`, and a product landing on a non-pivot column of degree
+exactly `degree` has none.  The note records that this "recurs identically one
+degree up, which is why every retry in the measured runs ended in the fallback
+and none in a solution".  That is the staircase's border truncated by a
+fixed-degree cut, and closing the border is exactly what a border basis does.
+Whether it removes the fallbacks is a **correctness** question, separate from
+the constant, and is registered as its own outcome below.
+
+**The falsifier.**  Measured on §11.5's protocol — same `p ∈ {271, 523, 1039,
+2083}`, same seeds, `--cross-check` on so the residual stream is identical and
+every output is compared against the meet-in-the-middle oracle on every
+residual:
+
+| outcome | condition |
+|---|---|
+| **success (engineering)** | `C₃` below §11.6's `0.88 × 10⁶` with **zero** cross-check mismatches |
+| **correctness gain** | the fallback count reaches zero where the Macaulay cut had 1–6 per run |
+| **failure** | `C₃` at or above `0.88 × 10⁶`, or any cross-check mismatch |
+
+A mismatch is disqualifying on its own, whatever the cost column says: a
+cheaper solver that returns a wrong decomposition is not a cheaper solver.
+
+**Inadmissible**, by §6: changing the sizes, seeds or residual stream; turning
+`--cross-check` off; quoting the `C₃` improvement as a change in `S / rho`
+beyond the same factor; and reporting a fallback reduction as a cost result,
+since the fallbacks are 1–6 residuals of thousands and cannot move `C₃` either
+way.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,
