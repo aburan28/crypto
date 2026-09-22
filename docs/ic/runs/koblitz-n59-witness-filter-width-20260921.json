@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "operation": "koblitz_n59_witness_filter_width_rejection",
+  "date": "2026-09-21",
+  "claim_boundary": "Finite same-target witnessed-filter A/B. Doubling the power-of-two presence filter preserves relations and slightly lowers CPU but regresses relation-unit and build wall, so four bits per pair remains selected. No SOTA claim.",
+  "instance": {
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "m": 3,
+    "public_target_seed": 59001,
+    "factor_base_kind": "cofactor_projected",
+    "target_scalar_constructed_or_supplied": false
+  },
+  "selected_predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-witness-key-cache-optimization-20260921.json",
+    "sha256": "b00db32420c5fe4eda6e1f1b603af60dc373466907a26c845d8c8b9cf62ff00e"
+  },
+  "source_patch": {
+    "path": "research/ic_candidate_tournament_20260921/n59-public-59001/rejected-witness-filter8.patch",
+    "sha256": "20186db5676cbee64aecaad4db4fb2610103136dfa5ffcaf02967e26b163ae11"
+  },
+  "selected_filter": {
+    "nominal_bits_per_pair": 4,
+    "allocated_filter_bytes": 536870912,
+    "pilot": {
+      "whole_wall_seconds": 17.336308958,
+      "whole_core_seconds": 166.984357,
+      "peak_rss_bytes": 10073538560,
+      "build_wall_seconds": 12.241086625,
+      "build_core_seconds": 137.433409,
+      "relation_unit_wall_seconds": 1.931625666,
+      "relation_unit_core_seconds": 23.697126999999995,
+      "relations": 2157,
+      "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+      "binary_blake3": "91d5881ef8aaa82b6b02dd17f958b8cc81b3945a72c1d5b68c80c8f160035523"
+    }
+  },
+  "candidate_filter": {
+    "nominal_bits_per_pair": 8,
+    "allocated_filter_bytes": 1073741824,
+    "repetitions": [
+      {
+        "whole_wall_seconds": 17.976048834,
+        "whole_core_seconds": 165.10555100000002,
+        "peak_rss_bytes": 10076028928,
+        "build_wall_seconds": 12.653783333,
+        "build_core_seconds": 135.84215099999997,
+        "relation_unit_wall_seconds": 2.090716375,
+        "relation_unit_core_seconds": 23.37406999999999,
+        "relations": 2157,
+        "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "binary_blake3": "2b8367ec9c85ffe80e898142fa2c6f3ae399c13aed61280066fffd8f85760b3f"
+      },
+      {
+        "whole_wall_seconds": 17.806574,
+        "whole_core_seconds": 163.684661,
+        "peak_rss_bytes": 10072145920,
+        "build_wall_seconds": 12.53332025,
+        "build_core_seconds": 134.74068,
+        "relation_unit_wall_seconds": 2.058866125,
+        "relation_unit_core_seconds": 23.06461900000002,
+        "relations": 2157,
+        "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "binary_blake3": "2b8367ec9c85ffe80e898142fa2c6f3ae399c13aed61280066fffd8f85760b3f"
+      }
+    ],
+    "relation_hash_preserved": true,
+    "relation_unit_wall_ratios_vs_selected": [
+      1.0823610453103185,
+      1.0658722138764543
+    ],
+    "relation_unit_cpu_ratios_vs_selected": [
+      0.9863672503422037,
+      0.9733086631134663
+    ],
+    "decision": "rejected_wall_regression"
+  },
+  "process_accounting": {
+    "processes": 2,
+    "sequential_wall_seconds": 35.782622834,
+    "total_core_seconds": 328.790212,
+    "peak_rss_bytes": 10076028928,
+    "scope": "two fresh eight-bit witnessed-filter pilots; the four-bit selected baseline remains charged in Stage135 and is not double-counted"
+  },
+  "gates": {
+    "full_cost_vs_rho": "unchanged_failed",
+    "independent_external_reproduction": "missing"
+  }
+}
