@@ -1,0 +1,454 @@
+{
+  "schema_version": 1,
+  "source": "results/round_01/raw.jsonl",
+  "rows": [
+    {
+      "degree": 13,
+      "curve_a": 0,
+      "split": "holdout",
+      "seeds": 8,
+      "verified_runs": {
+        "baseline": 24,
+        "candidate": 24
+      },
+      "runs_per_arm": 24,
+      "baseline": {
+        "trials": 92.0,
+        "relations": 92.0,
+        "points": 25764771.0,
+        "calls": 92.0,
+        "build_ns": 40533638.0,
+        "walk_ns": 9147106.0,
+        "lift_ns": 2239212.0,
+        "collection_s": 0.05407171499999999,
+        "la_s": 0.00019310500000000003,
+        "elapsed_s": 0.11750345699999999
+      },
+      "candidate": {
+        "trials": 92.0,
+        "relations": 92.0,
+        "points": 135337.0,
+        "calls": 92.0,
+        "build_ns": 6159041.0,
+        "walk_ns": 1405918.0,
+        "lift_ns": 3146744.0,
+        "collection_s": 0.012557889000000001,
+        "la_s": 0.00018318,
+        "elapsed_s": 0.07576648500000001
+      },
+      "points_per_call": {
+        "baseline": 280051.85869565216,
+        "candidate": 1471.054347826087
+      },
+      "build_us_per_call": {
+        "baseline": 440.58302173913046,
+        "candidate": 66.94609782608696
+      },
+      "trials_ratio_candidate_over_baseline": 1.0,
+      "oracle_points_ratio_baseline_over_candidate": 190.37492333951542,
+      "elapsed_ratio_total": 1.5508632477803344,
+      "elapsed_paired_geomean": 1.5421078509996904,
+      "elapsed_paired_ci95": [
+        1.4287354477633467,
+        1.6644765326133262
+      ],
+      "process_paired_geomean": 1.3684181392374057,
+      "process_paired_ci95": [
+        1.2800470579012186,
+        1.4628901275428503
+      ]
+    },
+    {
+      "degree": 13,
+      "curve_a": 0,
+      "split": "train",
+      "seeds": 8,
+      "verified_runs": {
+        "baseline": 24,
+        "candidate": 24
+      },
+      "runs_per_arm": 24,
+      "baseline": {
+        "trials": 126.0,
+        "relations": 126.0,
+        "points": 35287963.0,
+        "calls": 126.0,
+        "build_ns": 55561563.0,
+        "walk_ns": 12445224.0,
+        "lift_ns": 3038720.0,
+        "collection_s": 0.074074883,
+        "la_s": 0.00023944100000000001,
+        "elapsed_s": 0.138387952
+      },
+      "candidate": {
+        "trials": 126.0,
+        "relations": 126.0,
+        "points": 179663.0,
+        "calls": 126.0,
+        "build_ns": 6200248.0,
+        "walk_ns": 1836379.0,
+        "lift_ns": 4238468.0,
+        "collection_s": 0.014707822999999998,
+        "la_s": 0.00022924000000000002,
+        "elapsed_s": 0.07936059
+      },
+      "points_per_call": {
+        "baseline": 280063.1984126984,
+        "candidate": 1425.8968253968253
+      },
+      "build_us_per_call": {
+        "baseline": 440.96478571428577,
+        "candidate": 49.20831746031746
+      },
+      "trials_ratio_candidate_over_baseline": 1.0,
+      "oracle_points_ratio_baseline_over_candidate": 196.4119657358499,
+      "elapsed_ratio_total": 1.7437868342460663,
+      "elapsed_paired_geomean": 1.7383272181285252,
+      "elapsed_paired_ci95": [
+        1.6367290092595221,
+        1.8462320275324937
+      ],
+      "process_paired_geomean": 1.5151224389769289,
+      "process_paired_ci95": [
+        1.4361416994687397,
+        1.5984467312247734
+      ]
+    },
+    {
+      "degree": 17,
+      "curve_a": 1,
+      "split": "holdout",
+      "seeds": 8,
+      "verified_runs": {
+        "baseline": 24,
+        "candidate": 24
+      },
+      "runs_per_arm": 24,
+      "baseline": {
+        "trials": 158.0,
+        "relations": 46.0,
+        "points": 10354688.0,
+        "calls": 158.0,
+        "build_ns": 104095756.0,
+        "walk_ns": 4602839.0,
+        "lift_ns": 2394427.0,
+        "collection_s": 0.11530011000000001,
+        "la_s": 0.000141046,
+        "elapsed_s": 0.12548358699999998
+      },
+      "candidate": {
+        "trials": 164.0,
+        "relations": 48.0,
+        "points": 4448531.0,
+        "calls": 164.0,
+        "build_ns": 9210804.0,
+        "walk_ns": 2371715.0,
+        "lift_ns": 2487560.0,
+        "collection_s": 0.017394777,
+        "la_s": 0.000109376,
+        "elapsed_s": 0.027621347000000004
+      },
+      "points_per_call": {
+        "baseline": 65536.0,
+        "candidate": 27125.189024390245
+      },
+      "build_us_per_call": {
+        "baseline": 658.8338987341772,
+        "candidate": 56.16343902439024
+      },
+      "trials_ratio_candidate_over_baseline": 1.0379746835443038,
+      "oracle_points_ratio_baseline_over_candidate": 2.3276645706189303,
+      "elapsed_ratio_total": 4.542993033612733,
+      "elapsed_paired_geomean": 4.286524578533521,
+      "elapsed_paired_ci95": [
+        3.32051303535146,
+        5.533570495508429
+      ],
+      "process_paired_geomean": 2.480358373162318,
+      "process_paired_ci95": [
+        1.9869944642434605,
+        3.0962228481390546
+      ]
+    },
+    {
+      "degree": 17,
+      "curve_a": 1,
+      "split": "train",
+      "seeds": 8,
+      "verified_runs": {
+        "baseline": 24,
+        "candidate": 24
+      },
+      "runs_per_arm": 24,
+      "baseline": {
+        "trials": 171.0,
+        "relations": 48.0,
+        "points": 11206656.0,
+        "calls": 171.0,
+        "build_ns": 114848734.0,
+        "walk_ns": 4947168.0,
+        "lift_ns": 2637254.0,
+        "collection_s": 0.126974594,
+        "la_s": 0.00013975900000000001,
+        "elapsed_s": 0.137361674
+      },
+      "candidate": {
+        "trials": 171.0,
+        "relations": 48.0,
+        "points": 4801691.0,
+        "calls": 171.0,
+        "build_ns": 9135211.0,
+        "walk_ns": 2502814.0,
+        "lift_ns": 2602403.0,
+        "collection_s": 0.017602091,
+        "la_s": 0.00010837900000000001,
+        "elapsed_s": 0.0277751
+      },
+      "points_per_call": {
+        "baseline": 65536.0,
+        "candidate": 28080.06432748538
+      },
+      "build_us_per_call": {
+        "baseline": 671.6300233918129,
+        "candidate": 53.42228654970761
+      },
+      "trials_ratio_candidate_over_baseline": 1.0,
+      "oracle_points_ratio_baseline_over_candidate": 2.333897787258697,
+      "elapsed_ratio_total": 4.9454970099117554,
+      "elapsed_paired_geomean": 4.644669847581997,
+      "elapsed_paired_ci95": [
+        3.654346022999409,
+        5.903370358817513
+      ],
+      "process_paired_geomean": 2.657495602372887,
+      "process_paired_ci95": [
+        2.1363249777988274,
+        3.3058092518807185
+      ]
+    },
+    {
+      "degree": 23,
+      "curve_a": 0,
+      "split": "holdout",
+      "seeds": 8,
+      "verified_runs": {
+        "baseline": 24,
+        "candidate": 24
+      },
+      "runs_per_arm": 24,
+      "baseline": {
+        "trials": 548.0,
+        "relations": 199.0,
+        "points": 2298478592.0,
+        "calls": 548.0,
+        "build_ns": 1141357851.0,
+        "walk_ns": 697345085.0,
+        "lift_ns": 16967671.0,
+        "collection_s": 1.8817313390000001,
+        "la_s": 0.00041660600000000003,
+        "elapsed_s": 1.9312565550000003
+      },
+      "candidate": {
+        "trials": 577.0,
+        "relations": 215.0,
+        "points": 971214160.0,
+        "calls": 577.0,
+        "build_ns": 31163509.0,
+        "walk_ns": 308582345.0,
+        "lift_ns": 17519901.0,
+        "collection_s": 0.37554601499999996,
+        "la_s": 0.000376105,
+        "elapsed_s": 0.42446592299999997
+      },
+      "points_per_call": {
+        "baseline": 4194304.0,
+        "candidate": 1683213.4488734836
+      },
+      "build_us_per_call": {
+        "baseline": 2082.7698010948907,
+        "candidate": 54.00954766031196
+      },
+      "trials_ratio_candidate_over_baseline": 1.052919708029197,
+      "oracle_points_ratio_baseline_over_candidate": 2.3666032546312956,
+      "elapsed_ratio_total": 4.54985064843474,
+      "elapsed_paired_geomean": 4.4685961356220805,
+      "elapsed_paired_ci95": [
+        3.9434218834438313,
+        5.063711673136536
+      ],
+      "process_paired_geomean": 4.1779886863726095,
+      "process_paired_ci95": [
+        3.6789167031351293,
+        4.744763437721239
+      ]
+    },
+    {
+      "degree": 23,
+      "curve_a": 0,
+      "split": "train",
+      "seeds": 8,
+      "verified_runs": {
+        "baseline": 24,
+        "candidate": 24
+      },
+      "runs_per_arm": 24,
+      "baseline": {
+        "trials": 662.0,
+        "relations": 251.0,
+        "points": 2776629248.0,
+        "calls": 662.0,
+        "build_ns": 1386553944.0,
+        "walk_ns": 843175987.0,
+        "lift_ns": 20919198.0,
+        "collection_s": 2.283629582,
+        "la_s": 0.000509898,
+        "elapsed_s": 2.332416348
+      },
+      "candidate": {
+        "trials": 647.0,
+        "relations": 244.0,
+        "points": 1081697649.0,
+        "calls": 647.0,
+        "build_ns": 31166760.0,
+        "walk_ns": 343835938.0,
+        "lift_ns": 19698397.0,
+        "collection_s": 0.41540628799999996,
+        "la_s": 0.00041508499999999993,
+        "elapsed_s": 0.464397493
+      },
+      "points_per_call": {
+        "baseline": 4194304.0,
+        "candidate": 1671866.5363214838
+      },
+      "build_us_per_call": {
+        "baseline": 2094.492362537764,
+        "candidate": 48.17119010819165
+      },
+      "trials_ratio_candidate_over_baseline": 0.9773413897280967,
+      "oracle_points_ratio_baseline_over_candidate": 2.566918076014049,
+      "elapsed_ratio_total": 5.022456802969865,
+      "elapsed_paired_geomean": 5.02662163266629,
+      "elapsed_paired_ci95": [
+        4.652167863190059,
+        5.431215248682539
+      ],
+      "process_paired_geomean": 4.7129465955690115,
+      "process_paired_ci95": [
+        4.375362418599284,
+        5.076577318090229
+      ]
+    },
+    {
+      "degree": 23,
+      "curve_a": 1,
+      "split": "holdout",
+      "seeds": 8,
+      "verified_runs": {
+        "baseline": 24,
+        "candidate": 24
+      },
+      "runs_per_arm": 24,
+      "baseline": {
+        "trials": 572.0,
+        "relations": 226.0,
+        "points": 2399141888.0,
+        "calls": 572.0,
+        "build_ns": 1285646900.0,
+        "walk_ns": 726795616.0,
+        "lift_ns": 19065393.0,
+        "collection_s": 2.059551937,
+        "la_s": 0.00046668,
+        "elapsed_s": 2.103503359
+      },
+      "candidate": {
+        "trials": 575.0,
+        "relations": 228.0,
+        "points": 961827940.0,
+        "calls": 575.0,
+        "build_ns": 30797713.0,
+        "walk_ns": 304889843.0,
+        "lift_ns": 18569578.0,
+        "collection_s": 0.37284285500000003,
+        "la_s": 0.00039645299999999995,
+        "elapsed_s": 0.41656476699999995
+      },
+      "points_per_call": {
+        "baseline": 4194304.0,
+        "candidate": 1672744.243478261
+      },
+      "build_us_per_call": {
+        "baseline": 2247.634440559441,
+        "candidate": 53.56124
+      },
+      "trials_ratio_candidate_over_baseline": 1.0052447552447552,
+      "oracle_points_ratio_baseline_over_candidate": 2.4943566185028896,
+      "elapsed_ratio_total": 5.049642998251938,
+      "elapsed_paired_geomean": 5.00778621505027,
+      "elapsed_paired_ci95": [
+        4.760827004102234,
+        5.267555984294066
+      ],
+      "process_paired_geomean": 4.687597003711417,
+      "process_paired_ci95": [
+        4.403397266524203,
+        4.990139280925923
+      ]
+    },
+    {
+      "degree": 23,
+      "curve_a": 1,
+      "split": "train",
+      "seeds": 8,
+      "verified_runs": {
+        "baseline": 24,
+        "candidate": 24
+      },
+      "runs_per_arm": 24,
+      "baseline": {
+        "trials": 581.0,
+        "relations": 236.0,
+        "points": 2436890624.0,
+        "calls": 581.0,
+        "build_ns": 1291177445.0,
+        "walk_ns": 737880014.0,
+        "lift_ns": 19845926.0,
+        "collection_s": 2.0786543510000004,
+        "la_s": 0.00048326699999999995,
+        "elapsed_s": 2.123394086
+      },
+      "candidate": {
+        "trials": 560.0,
+        "relations": 228.0,
+        "points": 902367247.0,
+        "calls": 560.0,
+        "build_ns": 30848103.0,
+        "walk_ns": 286645431.0,
+        "lift_ns": 18032894.0,
+        "collection_s": 0.353783038,
+        "la_s": 0.00039688799999999997,
+        "elapsed_s": 0.39801077399999996
+      },
+      "points_per_call": {
+        "baseline": 4194304.0,
+        "candidate": 1611370.0839285713
+      },
+      "build_us_per_call": {
+        "baseline": 2222.3363941480206,
+        "candidate": 55.08589821428571
+      },
+      "trials_ratio_candidate_over_baseline": 0.963855421686747,
+      "oracle_points_ratio_baseline_over_candidate": 2.7005530532071718,
+      "elapsed_ratio_total": 5.33501659932452,
+      "elapsed_paired_geomean": 5.341880501157085,
+      "elapsed_paired_ci95": [
+        4.991300575833794,
+        5.717084526386273
+      ],
+      "process_paired_geomean": 4.9736142893860045,
+      "process_paired_ci95": [
+        4.660061241237569,
+        5.308264810059728
+      ]
+    }
+  ]
+}

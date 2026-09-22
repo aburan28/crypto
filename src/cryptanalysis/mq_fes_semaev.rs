@@ -487,6 +487,130 @@ pub fn symmetric_pair_visit(
     (false, walked)
 }
 
+/// Outcome of [`linear_split_visit`].
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct LinearSplitWork {
+    pub stopped: bool,
+    /// Values of `a` enumerated.
+    pub a_steps: u64,
+    /// `u64` word XORs spent updating the linear system and eliminating.
+    pub word_ops: u64,
+}
+
+/// Enumerate `a` in Gray order and solve the system for `s = a ⊕ b` by
+/// elimination: after `b = a ⊕ s` the Semaev system has no `sᵢsⱼ` terms
+/// (`s` enters only through `s²`, `a·s` and `a²s²`, all linear in `s`
+/// for fixed `a`), so each `a` leaves `n` linear equations in `ℓ` unknowns.
+///
+/// Visits each unordered root `{a, b}` once (as the ordering with `a ≤ b`)
+/// as the old assignment `a | b << ℓ`.  Returns `None` if the substituted
+/// system has an `sᵢsⱼ` term, in which case the caller must walk instead.
+pub fn linear_split_visit(
+    sys: &PackedQuad,
+    ell: usize,
+    visit: &mut dyn FnMut(u64) -> bool,
+) -> Option<LinearSplitWork> {
+    let n = 2 * ell;
+    debug_assert_eq!(sys.n, n);
+    if ell == 0 || ell > 31 {
+        return None;
+    }
+    // Rewrite in (a, s): vars 0..ℓ are a, ℓ..2ℓ are s.
+    let map: Vec<Affine> = (0..n)
+        .map(|i| {
+            if i < ell {
+                Affine { c: false, vars: 1 << i }
+            } else {
+                Affine { c: false, vars: (1 << (i - ell)) | (1 << i) }
+            }
+        })
+        .collect();
+    let q = sys.substitute(&map, n);
+    for i in ell..n {
+        for j in ell..i {
+            if q.quad[idxq(j, i)] != 0 {
+                return None;
+            }
+        }
+    }
+    let qa = |i: usize, j: usize| q.quad[idxq(i.min(j), i.max(j))];
+    // cols[k] = coefficient of s_k at a = 0; dcol[i][k] its change when a_i flips.
+    let mut cols: Vec<u64> = (0..ell).map(|k| q.lin[1 + ell + k]).collect();
+    let dcol: Vec<Vec<u64>> = (0..ell)
+        .map(|i| (0..ell).map(|k| qa(i, ell + k)).collect())
+        .collect();
+    // f(a) = Q(a, 0) with first derivatives d[i] and second derivatives qa(i, j).
+    let mut f = q.lin[0];
+    let mut d: Vec<u64> = (0..ell).map(|i| q.lin[1 + i]).collect();
+    let mut a = 0u64;
+    let mut work = LinearSplitWork::default();
+    let total = 1u64 << ell;
+    let mut pivots: Vec<(u32, u64, u64)> = Vec::with_capacity(ell);
+    let mut kernel: Vec<u64> = Vec::with_capacity(ell);
+    for step in 0..total {
+        if step > 0 {
+            let i = step.trailing_zeros() as usize;
+            f ^= d[i];
+            for (j, dj) in d.iter_mut().enumerate() {
+                if j != i {
+                    *dj ^= qa(i, j);
+                }
+            }
+            for (c, dc) in cols.iter_mut().zip(&dcol[i]) {
+                *c ^= dc;
+            }
+            a ^= 1 << i;
+            work.word_ops += 1 + 2 * ell as u64;
+        }
+        work.a_steps += 1;
+        // Solve Σ s_k cols[k] = f.
+        pivots.clear();
+        kernel.clear();
+        for (k, &c) in cols.iter().enumerate() {
+            let mut v = c;
+            let mut comb = 1u64 << k;
+            for &(bit, pv, pc) in &pivots {
+                if (v >> bit) & 1 == 1 {
+                    v ^= pv;
+                    comb ^= pc;
+                    work.word_ops += 2;
+                }
+            }
+            if v == 0 {
+                kernel.push(comb);
+            } else {
+                pivots.push((v.trailing_zeros(), v, comb));
+            }
+        }
+        let mut t = f;
+        let mut s0 = 0u64;
+        for &(bit, pv, pc) in &pivots {
+            if (t >> bit) & 1 == 1 {
+                t ^= pv;
+                s0 ^= pc;
+                work.word_ops += 2;
+            }
+        }
+        if t != 0 {
+            continue;
+        }
+        for mask in 0..(1u64 << kernel.len()) {
+            let mut s = s0;
+            for (bit, &kv) in kernel.iter().enumerate() {
+                if (mask >> bit) & 1 == 1 {
+                    s ^= kv;
+                }
+            }
+            let b = a ^ s;
+            if a <= b && visit(a | (b << ell)) {
+                work.stopped = true;
+                return Some(work);
+            }
+        }
+    }
+    Some(work)
+}
+
 /// The quadratic Semaev decomposition oracle: same contract and answer set
 /// as [`crate::cryptanalysis::mq_fes::mq_fes_decompose_reference`].
 pub fn mq_fes_decompose(
@@ -553,9 +677,17 @@ pub fn mq_fes_decompose(
         lift_ns += t.elapsed().as_nanos() as u64;
         done
     };
-    let (_, walked) = symmetric_pair_visit(&sys, ell, &mut visit);
+    let linear = linear_split_visit(&sys, ell, &mut visit);
+    let walked = match linear {
+        Some(_) => 0,
+        None => symmetric_pair_visit(&sys, ell, &mut visit).1,
+    };
+    drop(visit);
     let total = walk_start.elapsed().as_nanos() as u64;
-    profile::add_walk(walked, total.saturating_sub(lift_ns), roots);
+    match linear {
+        Some(w) => profile::add_linear(w.a_steps, w.word_ops, total.saturating_sub(lift_ns), roots),
+        None => profile::add_walk(walked, total.saturating_sub(lift_ns), roots),
+    }
     profile::add_lift_ns(lift_ns);
 
     if found.is_some() {
@@ -699,6 +831,44 @@ mod tests {
                 let want = PackedQuad::from_polys(&sys.equations, sys.n_vars).unwrap();
                 assert_eq!(t.instantiate(r), want, "n={n} r={r:#x}");
             }
+        }
+    }
+
+    #[test]
+    fn linear_split_matches_symmetric_walk_on_semaev_systems() {
+        use crate::cryptanalysis::koblitz_index_calculus::{build_frobenius_factor_base, KoblitzCurve};
+        for (a, n) in [(1u8, 7u32), (0, 13), (1, 17), (0, 23)] {
+            let kc = KoblitzCurve::new(a, n).expect("curve");
+            let fb = build_frobenius_factor_base(&kc, 0).expect("factor base");
+            let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+            let t = packed_template(&fb.subspace_basis, &kc.curve.b, &st).expect("template");
+            let ell = t.ell;
+            let mut seed = 0xa11ce ^ n as u64;
+            let mut with_roots = 0;
+            for _ in 0..24 {
+                let sys = t.instantiate(rng(&mut seed) & ((1u64 << n) - 1));
+                let mut lin = Vec::new();
+                let work = linear_split_visit(&sys, ell, &mut |x| {
+                    assert_eq!(sys.eval(x), 0);
+                    lin.push(canonical(x, ell));
+                    false
+                })
+                .expect("Semaev system must be linear in s for fixed a");
+                assert_eq!(work.a_steps, 1u64 << ell);
+                let mut walk = Vec::new();
+                symmetric_pair_visit(&sys, ell, &mut |x| {
+                    walk.push(canonical(x, ell));
+                    false
+                });
+                let before = lin.len();
+                lin.sort_unstable();
+                lin.dedup();
+                assert_eq!(lin.len(), before, "linear split visited a pair twice");
+                walk.sort_unstable();
+                assert_eq!(lin, walk, "n={n}");
+                with_roots += usize::from(!lin.is_empty());
+            }
+            assert!(with_roots > 0, "n={n}: no instance had roots");
         }
     }
 

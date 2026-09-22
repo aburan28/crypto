@@ -1491,6 +1491,11 @@ pub struct MqFesProfile {
     pub build_ns: u64,
     pub walk_ns: u64,
     pub lift_ns: u64,
+    /// `u64` word XORs of the walk/solve stage: two per Gray point, plus
+    /// the updates and elimination of the linear split.
+    pub word_ops: u64,
+    /// Values of `x₁` enumerated by the linear split.
+    pub linear_steps: u64,
 }
 
 mod profile_counters {
@@ -1501,6 +1506,8 @@ mod profile_counters {
     pub(super) static BUILD_NS: AtomicU64 = AtomicU64::new(0);
     pub(super) static WALK_NS: AtomicU64 = AtomicU64::new(0);
     pub(super) static LIFT_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static WORD_OPS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static LINEAR_STEPS: AtomicU64 = AtomicU64::new(0);
 }
 
 pub fn mq_fes_profile() -> MqFesProfile {
@@ -1513,13 +1520,15 @@ pub fn mq_fes_profile() -> MqFesProfile {
         build_ns: BUILD_NS.load(Relaxed),
         walk_ns: WALK_NS.load(Relaxed),
         lift_ns: LIFT_NS.load(Relaxed),
+        word_ops: WORD_OPS.load(Relaxed),
+        linear_steps: LINEAR_STEPS.load(Relaxed),
     }
 }
 
 pub fn mq_fes_profile_reset() {
     use profile_counters::*;
     use std::sync::atomic::Ordering::Relaxed;
-    for c in [&CALLS, &POINTS, &ROOTS, &BUILD_NS, &WALK_NS, &LIFT_NS] {
+    for c in [&CALLS, &POINTS, &ROOTS, &BUILD_NS, &WALK_NS, &LIFT_NS, &WORD_OPS, &LINEAR_STEPS] {
         c.store(0, Relaxed);
     }
 }
@@ -1538,6 +1547,13 @@ pub(crate) mod profile {
     }
     pub(crate) fn add_walk(points: u64, ns: u64, roots: u64) {
         profile_add(&POINTS, points);
+        profile_add(&WORD_OPS, 2 * points);
+        profile_add(&WALK_NS, ns);
+        profile_add(&ROOTS, roots);
+    }
+    pub(crate) fn add_linear(steps: u64, word_ops: u64, ns: u64, roots: u64) {
+        profile_add(&LINEAR_STEPS, steps);
+        profile_add(&WORD_OPS, word_ops);
         profile_add(&WALK_NS, ns);
         profile_add(&ROOTS, roots);
     }
@@ -1648,6 +1664,7 @@ pub fn mq_fes_decompose_reference(
             _ => 1u64 << n_vars,
         };
         profile_add(&profile_counters::POINTS, walked);
+        profile_add(&profile_counters::WORD_OPS, 2 * walked);
         roots
     } else {
         match fes_find_all_auto(&forms, 64) {
