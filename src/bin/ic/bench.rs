@@ -203,8 +203,8 @@ fn run_prime(
     args: &BenchArgs,
     calib: &Calibration,
 ) -> Result<Vec<RunReport>, String> {
-    let (fb_name, _) = parse_plugin(args.factor_base.as_deref().unwrap_or("prime-abscissa"))?;
-    let (or_name, or_params) = parse_plugin(args.oracle.as_deref().unwrap_or("mitm"))?;
+    let fb_name = spec.factor_base.as_str();
+    let or_name = spec.oracle.as_str();
     if fb_name != "prime-abscissa" {
         return Err(format!(
             "factor base `{fb_name}` is not available on a prime-field curve; try prime-abscissa"
@@ -229,10 +229,10 @@ fn run_prime(
         };
         let mut spec = spec.clone();
         spec.seed = spec.seed.wrapping_add(rep as u64 * 0x9E37);
-        let m = or_params.u64_or("m", 2)? as u32;
+        let m = spec.oracle_params.u64_or("m", 2)? as u32;
         let mut subtract = SubtractOracle;
         let mut mitm = MitmOracle::new(m);
-        let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
+        let oracle: &mut dyn DecompositionOracle<_> = match or_name {
             "subtract" => &mut subtract,
             "mitm" => &mut mitm,
             other => {
@@ -255,12 +255,12 @@ fn run_binary(
     args: &BenchArgs,
     calib: &Calibration,
 ) -> Result<Vec<RunReport>, String> {
-    let (fb_name, _) = parse_plugin(args.factor_base.as_deref().unwrap_or("binary-subspace"))?;
-    let (or_name, or_params) = parse_plugin(args.oracle.as_deref().unwrap_or("mitm"))?;
+    let fb_name = spec.factor_base.as_str();
+    let or_name = spec.oracle.as_str();
     let g = BinaryGroup(&inst.fast);
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
-    let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
+    let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         other => {
@@ -286,11 +286,11 @@ fn run_binary(
         };
         let mut spec = spec.clone();
         spec.seed = spec.seed.wrapping_add(rep as u64 * 0x9E37);
-        let m = or_params.u64_or("m", 2)? as u32;
+        let m = spec.oracle_params.u64_or("m", 2)? as u32;
         let mut subtract = SubtractOracle;
         let mut mitm = MitmOracle::new(m);
         let mut frob = FrobeniusMitmOracle::new(m, inst);
-        let oracle: &mut dyn DecompositionOracle<BinaryGroup> = match or_name.as_str() {
+        let oracle: &mut dyn DecompositionOracle<BinaryGroup> = match or_name {
             "subtract" => &mut subtract,
             "mitm" => &mut mitm,
             "mitm-frobenius" => &mut frob,
@@ -368,7 +368,7 @@ fn expand_matrix(
 fn spec_from(
     cfg: &std::collections::BTreeMap<String, String>,
     defaults: &BenchArgs,
-) -> Result<(PipelineSpec, String, String), String> {
+) -> Result<PipelineSpec, String> {
     let fb = cfg
         .get("factor_base")
         .cloned()
@@ -385,22 +385,18 @@ fn spec_from(
         .unwrap_or_else(|| defaults.targets.clone());
     let (fb_name, fb_params) = parse_plugin(&fb)?;
     let (or_name, or_params) = parse_plugin(&or)?;
-    Ok((
-        PipelineSpec {
-            factor_base: fb_name,
-            factor_base_params: fb_params,
-            oracle: or_name,
-            oracle_params: or_params,
-            solver: cfg.get("solver").cloned().or_else(|| defaults.solver.clone()),
-            solver_params: Params::default(),
-            targets: Targets::parse(&tg)?,
-            max_trials: defaults.max_trials,
-            seed: defaults.seed,
-            solver_budget_seconds: defaults.solver_budget_seconds,
-        },
-        fb,
-        or,
-    ))
+    Ok(PipelineSpec {
+        factor_base: fb_name,
+        factor_base_params: fb_params,
+        oracle: or_name,
+        oracle_params: or_params,
+        solver: cfg.get("solver").cloned().or_else(|| defaults.solver.clone()),
+        solver_params: Params::default(),
+        targets: Targets::parse(&tg)?,
+        max_trials: defaults.max_trials,
+        seed: defaults.seed,
+        solver_budget_seconds: defaults.solver_budget_seconds,
+    })
 }
 
 pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
@@ -425,7 +421,7 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
     }
 
     // Either a sweep file or the flags describe the work.
-    let (instance_spec, configs, mut args) = match &args.sweep {
+    let (instance_spec, configs, args) = match &args.sweep {
         Some(path) => {
             let raw = std::fs::read_to_string(path)
                 .map_err(|e| format!("cannot read sweep file {}: {e}", path.display()))?;
@@ -504,9 +500,7 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
     let mut rows: Vec<RunReport> = Vec::new();
     let mut failures: Vec<Value> = Vec::new();
     for cfg in &configs {
-        let (spec, fb, or) = spec_from(cfg, &args)?;
-        args.factor_base = Some(fb);
-        args.oracle = Some(or);
+        let spec = spec_from(cfg, &args)?;
         if !json_only {
             eprintln!("  {} …", spec.label());
         }
