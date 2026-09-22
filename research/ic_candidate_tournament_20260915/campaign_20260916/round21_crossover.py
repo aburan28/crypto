@@ -1,6 +1,22 @@
 #!/usr/bin/env python3
 """Measure where this collector crosses rho, on the cell that was out of reach.
 
+    *** CORRECTED BY round22_crossover.py -- see ROUND22-budget-and-curvature.md ***
+
+    This script checks that the IC arm completed and then measures BOTH arms.
+    `instructions()` reads callgrind's `Collected:` line and never sees the
+    worker's JSON status, so a rho run cut off at `max_trials` contributes a
+    TRUNCATED instruction count as the denominator.  On this script's own
+    draw, 4 of the 64 rho runs at `n37a0` did not complete (64 of 64 did at
+    `n23a1`).  An under-charged denominator inflates IC/rho, so the 1.533
+    [1.238, 1.899] below is an upper-biased reading and the correction runs
+    downward.  `n23a1`'s 0.831 stands.
+
+    The code below is LEFT EXACTLY AS IT RAN.  Fixing it here would make the
+    published numbers unreproducible, which is the one thing a correction
+    must not do; the fix, and the measurement that supersedes these numbers,
+    are in round22_crossover.py.
+
     python3 campaign_20260916/round21_crossover.py WORKER [fixtures]
 
 WORKER is a worker built from the round-0020 winner plus

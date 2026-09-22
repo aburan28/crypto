@@ -1,5 +1,17 @@
 # Round 0021 — the crossover, measured
 
+> **CORRECTION, round 0022.** §4's `n37a0` reading of **1.533 [1.238, 1.899]
+> is upper-biased and superseded**; see `ROUND22-budget-and-curvature.md`.
+> `round21_crossover.py` verified that the IC arm completed and never checked
+> rho's status before charging it — `instructions()` reads callgrind's
+> `Collected:` line, not the worker's JSON — so **4 of the 64 rho runs at
+> `n37a0` were cut off at `max_trials = 4096`** and their truncated counts went
+> into the denominator. An under-charged denominator inflates IC/rho, so the
+> correction runs **downward**. `n23a1`'s 0.831 is unaffected: 64 of 64
+> completed there. The claim in §4 that "both arms complete at both cells" is
+> withdrawn — it was asserted, not checked. Everything below is left as
+> published; §§1–3 (the widening, its cost, the red test) are unaffected.
+
 Rounds 0019 and 0020 established a strict win over rho on the eight-cell panel
 and replicated it, and both classified it `engineering` for one reason: the
 `Θ(r^{2/3})` against `Θ(r^{1/2})` boundary was **derived**, its only measured

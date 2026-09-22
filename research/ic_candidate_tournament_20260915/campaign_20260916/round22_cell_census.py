@@ -117,15 +117,31 @@ def main():
             print(f'n{degree}a{a:<6} {r:>16,} {h:>10,} {str(prime(degree)):>10} '
                   f'{ic_state:>12} {rho_state:>12} {str(window):>10}')
 
-    usable = [x for x in rows if x[3] and x[4] == 'certified' and x[5] == 'complete' and x[6]]
+    certified = [x for x in rows if x[3] and x[4] == 'certified' and x[6]]
+    usable = [x for x in certified if x[5] == 'complete']
     print(f'\n{len(rows)} cells exist in degrees {args.lo}..{args.hi}; '
-          f'{len(usable)} could carry the third crossover point.')
-    for cell, r, *_ in usable:
-        print(f'  {cell:8} r = {r:,}')
-    if not usable:
-        print('  none -- the third cell is not in this degree range, and the')
-        print('  next-proposal\'s two options (amend rho\'s budget, or find another')
-        print('  curve family) stand as written.')
+          f'{len(certified)} carry a certified IC path inside the window; '
+          f'{len(usable)} also complete rho at max_trials={CONFIG["max_trials"]}.')
+    for cell, r, *_ in certified:
+        blocked = '' if (cell, r) in [(c, rr) for c, rr, *_ in usable] else '   rho cut off'
+        print(f'  {cell:8} r = {r:>16,}{blocked}')
+    if certified and not usable:
+        # The census's own answer to the question it was written to ask, and it
+        # is not the one expected.  New prime cells above 41 DO exist and IC
+        # certifies at them; what blocks every one is the same frozen
+        # max_trials that `n41a0` hit.  rho needs roughly sqrt(pi*r/2A) steps:
+        # about 2,200 at `n37a0`, which is under 4096 and is exactly why that
+        # cell looked like the boundary, and about 9,200 at `n43a1`.
+        #
+        # That cap is a config value, not a ceiling.  The worker accepts
+        # max_trials up to 65,536 ("invalid collection limits" above that), so
+        # the amendment the next-proposal calls for is available without
+        # touching the collector -- and raising a cap can only ever help rho,
+        # so it cannot flatter the candidate.
+        print('\n  Every one is blocked by the same thing: rho is cut off by')
+        print(f'  max_trials={CONFIG["max_trials"]}, which the worker itself would allow up to')
+        print('  65,536. The block is a budget, not mathematics -- see')
+        print('  round22_budget_inertness.py for whether raising it is admissible.')
     print('\nOne fixture a cell. Nothing here is evidence about either algorithm;')
     print('rho not completing is the frozen trial budget, never a cost.')
 
