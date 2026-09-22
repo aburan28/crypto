@@ -37,6 +37,21 @@ ic bench --bits 18 \
     --targets walk \
     --repeats 3
 
+# An algebraic oracle: Weil-descend the summation polynomial over the
+# base's subspace and choose the engine that solves it.  The solver's
+# work is priced into S, so this row and the pair-table row above it
+# are comparable end to end.
+ic bench --char2-degree 13 \
+    --factor-base binary-subspace:dimension=6 \
+    --oracle descent-algebraic:m=2 \
+    --solver buchberger-f2
+
+# The relation matrix is a stage too.
+ic bench --bits 20 \
+    --factor-base prime-abscissa:size=256 \
+    --oracle mitm:negation_folded=1 \
+    --linalg structured-gauss
+
 # A sweep: every combination in the matrix, one table.
 ic bench --sweep docs/ic/sweeps/factor-base-size.json \
     --out docs/ic/runs/my-sweep-2026-09-22.json
@@ -135,15 +150,28 @@ so this column is the cause of the `rows` column further along.
 The failures are the expensive part and they are inside `cost`. An
 oracle priced only on its successes is priced wrong.
 
+Two native counters in `cost` belong to algebraic oracles only.
+`lift_failures` counts solver solutions that lifted to no relation;
+`unliftable_systems` counts systems the solver decided satisfiable none
+of whose solutions lifted. Neither is a defect: a summation polynomial
+vanishes over the algebraic closure, so a solution may name abscissae
+whose points lie on the quadratic twist, which the pair table never
+sees. They are counted apart from "did not decompose" so the hit rate
+can be read against what the solver actually found.
+
 ### Solver (algebraic oracles only)
 
 | field | meaning |
 |:--|:--|
+| `name`, `calls` | the engine, and how many systems it was handed |
 | `ops`, `op_unit` | the engine's own count, and what it counts |
-| `solving_degree_mean` | highest degree at which the run learned something |
+| `gae`, `priced_by` | that count in the unit, and how it got there (below) |
+| `solving_degree_mean`, `solving_degree_max` | highest degree at which a run learned something, averaged and at worst |
 | `semi_regular_degree` | the degree a system with **no exploitable structure** would reach |
 | `degree_over_bound` | their ratio — below one is the structure the solver found |
 | `budget_exceeded` | calls that ran out of budget, counted apart from refutations |
+| `wall_ns`, `peak_bytes` | the practicality note: time, and the largest basis or matrix held |
+| `extra` | the engine's own counters (S-polynomials, pairs pruned, conflicts, …) |
 
 The degree bound is derived, not fitted: it is the index of the first
 non-positive coefficient of `(1+t)^v / Π_i (1 + t^{d_i})`
@@ -155,10 +183,26 @@ non-positive coefficient of `(1+t)^v / Π_i (1 + t^{d_i})`
 oracle that reports a timeout as no-solution silently lowers its own hit
 rate, and every downstream number inherits the error.
 
+**How the solver reaches `S`.** The engine's `ops` are converted to
+group-addition equivalents and added to the decomposition phase, so
+`S` carries them; `priced_by` says how the conversion was done:
+
+| `priced_by` | meaning |
+|:--|:--|
+| `pinned` | the unit is a word operation (`monomial operations`, `monomial tests`, `word XORs`) and was priced at the repository's pinned `ns_per_word_xor / ns_per_add` ratio from [`calibration.json`](calibration.json) — comparable across hosts and runs |
+| `measured` | the unit has no pinned ratio (SAT conflicts, XL linearisation steps), so the engine's wall time over this host's measured addition time was used — honest, but host-dependent, and §12 of the ledger note is why a ratio between two `measured` rows from different hosts means nothing |
+| `unpriced` | no calibration at all (a library call with `Calibration::default()`); the solver's work is in `ops` and **not** in `S`, and the row says so rather than quietly dropping it |
+
+A comparison between engines is only as good as the weakest `priced_by`
+in it. Two `pinned` rows compare operation counts; a `pinned` row
+against a `measured` row compares an operation count against a
+stopwatch, and the table should say which is which.
+
 ### Linear algebra, verification, total
 
 | field | meaning |
 |:--|:--|
+| `name` | the matrix: `incremental-gauss` or `structured-gauss` |
 | `rows`, `rank`, `dependent` | relations added, rank reached, and the ones that added nothing |
 | `work`, `work_unit` | the method's own count (`row_ops` for an elimination) |
 | `recovered`, `verified` | the logarithm found, and whether it is the planted one |
@@ -232,8 +276,15 @@ failure rather than a result.
 precomputation. That cost is part of `S`.
 
 An oracle that solves an algebraic system reports the system through
-`last_system` and its cost through `last_solver_cost`, so the degree
-columns are filled from the real system rather than from a model of it.
+`last_system` and its running totals through `solver_totals`, so the
+degree columns are filled from the real systems rather than from a model
+of them, and the runner prices the totals into `S`. The shipped one is
+`descent-algebraic`: it Weil-descends `S_{m+1}` over the base's
+abscissa subspace, hands the boolean system to whichever `SystemSolver`
+was named, and lifts each solution to signed base points summing to the
+target. It needs a base that exposes a subspace (`binary-subspace`,
+`koblitz-orbit`) and, in this release, `n' ≤ 8` at `m = 2` and `n' ≤ 5`
+at `m = 3`, the reach of the truth-table descent (§8).
 
 ### `SystemSolver` — F4, F5, XL, SAT, anything
 
@@ -278,6 +329,25 @@ determined. Behind a trait because the choice between a dense
 incremental elimination, structured Gaussian elimination and an
 iterative method (Wiedemann, Lanczos) is a real lever and the one most
 often left unpriced.
+
+Two ship, chosen with `--linalg` (or the `linalg` key of a sweep):
+
+| name | what it is | pivot | storage |
+|:--|:--|:--|:--|
+| `incremental-gauss` | dense reduced row echelon, maintained as rows arrive | leftmost non-zero | `rank × columns` |
+| `structured-gauss` | sparse reduced row echelon, maintained as rows arrive | lightest column (Markowitz) | the non-zeros |
+
+Both charge one `row_op` per non-zero multiply-subtract, so their
+`work` columns compare directly; on the two- or three-non-zero rows an
+index-calculus relation phase produces the pivot choice is worth a few
+per cent of `row_ops` (538 against 582 on 63 rows over 121 columns),
+and the real difference is the storage and the uncounted column scans,
+which show in `wall_ns` first. The contract both obey: `add_row`
+reduces the new row against the pivots held so far and answers
+`Independent`, `Dependent` or `Inconsistent`; `pinned` says whether one
+column is determined on its own. The loop calls them after every
+relation, so an implementation must answer incrementally; a batch
+method would re-solve on every call.
 
 ---
 
@@ -401,10 +471,18 @@ configurations or a **matrix** whose product is taken.
 ```
 
 - `regime` is `prime`, `char2` or `koblitz`; `degree` is subgroup bits
-  for `prime` and the field degree otherwise.
+  for `prime` and the field degree otherwise. A `char2` instance may
+  set `max_cofactor` (default 8, as on the boundary ladders): a random
+  curve whose cofactor is allowed to be large can hand back a tiny
+  subgroup, and `S = ops / √r` over a tiny `r` means nothing against
+  rho.
 - A plug-in is `name` or `name:key=value,key=value`.
+- The keys are the stages: `factor_base`, `oracle`, `targets`,
+  `solver` (for `descent-algebraic`) and `linalg`. A key left out takes
+  the command line's value.
 - `configurations` takes an explicit list instead of, or as well as, a
-  matrix.
+  matrix — the way to put a reference row (the pair-table oracle on the
+  same base) beside a matrix of candidates.
 - A combination that does not apply to the regime is **skipped and
   reported**, not fatal: a matrix will contain combinations that do not
   exist, and the useful output is the ones that do plus a note on the
@@ -415,6 +493,8 @@ Sweeps that ship, under [`docs/ic/sweeps/`](sweeps/):
 | file | the question it asks |
 |:--|:--|
 | `factor-base-size.json` | what the base size does to the hit rate, the trials, the matrix and `S` |
+| `solver-engines.json` | what the polynomial-system engine does to the whole pipeline: the pair table as the reference row, then `descent-algebraic` once per engine, on one base |
+| `relation-matrix.json` | what the matrix does: same relations, two eliminations, two base sizes |
 
 ---
 
@@ -450,15 +530,19 @@ worse than none:
 
 - **The sizes are toy.** The largest instances here are tens of bits.
   Nothing measured is a statement about a deployed curve.
-- **The algebraic oracle is not yet wired into a full pipeline.** The
-  solver plug point works and is exercised by
-  `ic descent` and by the framework's tests, but the
-  `descent-algebraic` oracle that would let a *whole run* choose its
-  Gröbner engine is not shipped. That is the next piece of work and it
-  is the one that makes the solver column reach the `S` column.
-- **One relation-matrix implementation.** The trait exists and the loop
-  takes any implementation; only the dense incremental elimination is
-  written. Structured elimination and Wiedemann are open.
+- **The descent is a truth table.** `descent-algebraic` builds the
+  boolean system by evaluating the summation polynomial on every point
+  of the subspace, which caps it at `n' ≤ 8` for `m = 2` and `n' ≤ 5`
+  for `m = 3`. A symbolic Weil descent lifts the cap and is the next
+  piece of work; until then the algebraic rows stop at bases of
+  `2^8` abscissae.
+- **No F4 or F5 ships.** The `SystemSolver` plug point exists for them
+  and is exercised by four engines (Buchberger, XL, CDCL, exhaustive),
+  but a signature-based or matrix-F4 engine is yours to plug in; §5
+  shows how.
+- **No iterative matrix.** Two eliminations ship; Wiedemann and Lanczos
+  are open, and the trait is written so that a matrix-vector product is
+  a legitimate `work_unit`.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
@@ -474,9 +558,9 @@ worse than none:
 |:--|:--|:--|
 | factor base | `FactorBaseBuilder` | `prime-abscissa`, `binary-subspace`, `koblitz-orbit` |
 | targets | `Targets` | `random`, `walk` |
-| point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius` |
+| point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic` |
 | polynomial solver | `SystemSolver` | `buchberger-f2`, `xl-f2`, `sat-cdcl`, `exhaustive` |
-| relation matrix | `RelationSolver` | `incremental-gauss` |
+| relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 
 `ic bench --list` prints this with every parameter each plug-in reads.
 
@@ -486,7 +570,8 @@ worse than none:
 |:--|:--|
 | [`stages.rs`](../../src/cryptanalysis/ic_framework/stages.rs) | the traits and their types — the normative contracts |
 | [`solvers.rs`](../../src/cryptanalysis/ic_framework/solvers.rs) | the `SystemSolver` implementations and their registry |
-| [`plugins.rs`](../../src/cryptanalysis/ic_framework/plugins.rs) | the factor bases and decomposition oracles |
+| [`plugins.rs`](../../src/cryptanalysis/ic_framework/plugins.rs) | the factor bases and decomposition oracles, the algebraic one included |
+| [`linalg.rs`](../../src/cryptanalysis/ic_framework/linalg.rs) | the structured elimination and the matrix registry |
 | [`mod.rs`](../../src/cryptanalysis/ic_framework/mod.rs) | the runner and the report |
 | [`bench.rs`](../../src/bin/ic/bench.rs) | the CLI |
 

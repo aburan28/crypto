@@ -21,9 +21,10 @@ use crypto_lib::cryptanalysis::ic_boundary::{
     calibrate_group, calibrate_row_ops, koblitz_instance, random_binary_instance, roster_prime_instance, BinaryGroup,
     BinaryInstance, Calibration, CountedGroup, GroupOps, PrimeInstance,
 };
+use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, FrobeniusMitmOracle, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
-    SubtractOracle,
+    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, KoblitzOrbitBase, MitmOracle,
+    PrimeAbscissaBase, SubtractOracle,
 };
 use crypto_lib::cryptanalysis::ic_framework::solvers::{solver_by_name, solver_registry};
 use crypto_lib::cryptanalysis::ic_framework::stages::{
@@ -46,6 +47,13 @@ pub struct BenchArgs {
     /// Koblitz instance of this field degree.
     #[arg(long)]
     pub koblitz_degree: Option<u32>,
+    /// Largest cofactor a random binary curve may have.  The boundary
+    /// ladders use 8, so `S = ops / sqrt(r)` is taken over a subgroup
+    /// close to the whole group, as on every ledger row; a larger bound
+    /// finds a curve faster but can hand back a tiny `r` that makes `S`
+    /// meaningless against rho.
+    #[arg(long, default_value_t = 8)]
+    pub max_cofactor: u64,
     /// `name` or `name:k=v,k=v`.
     #[arg(long)]
     pub factor_base: Option<String>,
@@ -58,6 +66,9 @@ pub struct BenchArgs {
     /// `random` or `walk`.
     #[arg(long, default_value = "walk")]
     pub targets: String,
+    /// The relation matrix: `incremental-gauss` or `structured-gauss`.
+    #[arg(long, default_value = "incremental-gauss")]
+    pub linalg: String,
     #[arg(long, default_value_t = 2_000_000)]
     pub max_trials: u64,
     #[arg(long, default_value_t = 0x1C_B0_0B_DA_7A)]
@@ -141,6 +152,9 @@ fn listing() -> Value {
                                     {"name": "m", "means": "summands, 2 or 3"}]},
                     {"name": "mitm-frobenius", "summands": "2 or 3", "regimes": ["koblitz"],
                      "parameters": [{"name": "m", "means": "summands, 2 or 3"}]},
+                    {"name": "descent-algebraic", "summands": "2 or 3", "regimes": ["char2", "koblitz"],
+                     "parameters": [{"name": "m", "means": "summands, 2 (descends S3) or 3 (descends S4)"}],
+                     "needs": "a subspace factor base (binary-subspace or koblitz-orbit) and --solver"},
                 ],
             },
             {
@@ -153,10 +167,7 @@ fn listing() -> Value {
                 "stage": "relation matrix",
                 "trait": "RelationSolver",
                 "what_it_chooses": "how relations are accumulated and the logarithm read off",
-                "plugins": [
-                    {"name": "incremental-gauss",
-                     "means": "reduced row echelon maintained as rows arrive, stopping the moment the target column is pinned"},
-                ],
+                "plugins": MATRIX_NAMES.iter().map(|(n, d)| json!({"name": n, "means": d})).collect::<Vec<_>>(),
             },
         ],
         "how_to_add_one": "implement the stage's trait and register it; docs/ic/FRAMEWORK.md walks through a solver end to end",
@@ -241,9 +252,7 @@ fn run_prime(
                 ))
             }
         };
-        out.push(run_pipeline(
-            &ctx, &spec, &base, oracle, None, planted, calib, None,
-        )?);
+        out.push(run_pipeline(&ctx, &spec, &base, oracle, planted, calib, None)?);
     }
     Ok(out)
 }
@@ -290,15 +299,26 @@ fn run_binary(
         let mut subtract = SubtractOracle;
         let mut mitm = MitmOracle::new(m);
         let mut frob = FrobeniusMitmOracle::new(m, inst);
+        let mut algebraic = match or_name.as_str() {
+            "descent-algebraic" => {
+                let raw = spec.solver.as_deref().ok_or(
+                    "descent-algebraic needs --solver (try buchberger-f2, sat-cdcl or exhaustive)",
+                )?;
+                let (sname, sparams) = parse_plugin(raw)?;
+                let budget = (spec.solver_budget_seconds > 0)
+                    .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
+                Some(DescentAlgebraicOracle::new(m, inst, solver_by_name(&sname)?, sparams, budget))
+            }
+            _ => None,
+        };
         let oracle: &mut dyn DecompositionOracle<BinaryGroup> = match or_name.as_str() {
             "subtract" => &mut subtract,
             "mitm" => &mut mitm,
             "mitm-frobenius" => &mut frob,
+            "descent-algebraic" => algebraic.as_mut().expect("built above"),
             other => return Err(format!("oracle `{other}` is not available here")),
         };
-        out.push(run_pipeline(
-            &ctx, &spec, base, oracle, None, planted, calib, None,
-        )?);
+        out.push(run_pipeline(&ctx, &spec, base, oracle, planted, calib, None)?);
     }
     Ok(out)
 }
@@ -341,6 +361,10 @@ struct SweepFile {
 struct SweepInstance {
     regime: String,
     degree: u32,
+    /// `char2` only: the largest cofactor the random curve may have;
+    /// the `--max-cofactor` default when absent.
+    #[serde(default)]
+    max_cofactor: Option<u64>,
 }
 
 /// Every combination of the matrix, in a stable order.
@@ -394,6 +418,7 @@ fn spec_from(
             solver: cfg.get("solver").cloned().or_else(|| defaults.solver.clone()),
             solver_params: Params::default(),
             targets: Targets::parse(&tg)?,
+            linalg: cfg.get("linalg").cloned().unwrap_or_else(|| defaults.linalg.clone()),
             max_trials: defaults.max_trials,
             seed: defaults.seed,
             solver_budget_seconds: defaults.solver_budget_seconds,
@@ -441,6 +466,9 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
             if let Some(v) = file.max_trials {
                 a.max_trials = v;
             }
+            if let Some(v) = file.instance.max_cofactor {
+                a.max_cofactor = v;
+            }
             let mut configs = file.configurations.clone();
             configs.extend(expand_matrix(&file.matrix));
             if configs.is_empty() {
@@ -479,8 +507,12 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
                 .ok_or_else(|| format!("no prime instance at {degree} bits"))?,
         ),
         "char2" => Instance::Binary(
-            random_binary_instance(degree, args.seed, 1 << 20)
-                .ok_or_else(|| format!("no random binary instance at degree {degree}"))?,
+            random_binary_instance(degree, args.seed, args.max_cofactor).ok_or_else(|| {
+                format!(
+                    "no random binary instance at degree {degree} with cofactor at most {}",
+                    args.max_cofactor
+                )
+            })?,
         ),
         "koblitz" => Instance::Binary(
             koblitz_instance(1, degree)

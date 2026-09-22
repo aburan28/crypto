@@ -164,8 +164,9 @@ fn mean(xs: impl Iterator<Item = f64>) -> f64 {
     }
 }
 
-/// Build the `BinaryCurve` an instance describes.
-fn curve_of(inst: &BinaryInstance) -> Option<BinaryCurve> {
+/// Build the `BinaryCurve` an instance describes.  Public because the
+/// framework's algebraic oracle descends over the same curve.
+pub fn curve_of(inst: &BinaryInstance) -> Option<BinaryCurve> {
     let irreducible = find_irreducible_sparse(inst.n)?;
     Some(BinaryCurve {
         m: inst.n,

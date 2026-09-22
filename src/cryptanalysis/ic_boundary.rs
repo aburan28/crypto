@@ -456,10 +456,12 @@ pub struct PhaseCost {
 }
 
 impl PhaseCost {
-    fn count(&mut self, name: &str, by: u64) {
+    /// Add `by` to the native counter `name`, creating it at zero.
+    pub fn count(&mut self, name: &str, by: u64) {
         *self.native.entry(name.to_string()).or_insert(0) += by;
     }
-    fn get(&self, name: &str) -> u64 {
+    /// Read a native counter, zero when it was never touched.
+    pub fn get(&self, name: &str) -> u64 {
         self.native.get(name).copied().unwrap_or(0)
     }
 }
@@ -2301,6 +2303,11 @@ pub struct OracleCounters {
     pub s4_pairs: u64,
     pub s4_hits: u64,
     pub lift_failures: u64,
+    /// Algebraic systems the solver decided satisfiable none of whose
+    /// solutions lifted to a relation over the base — twist solutions,
+    /// which a summation polynomial cannot tell from curve points.
+    /// Counted apart from `lift_failures`, which is per solution.
+    pub unliftable_systems: u64,
     /// Frobenius-orbit canonicalisations of a target abscissa.
     pub canonicalisations: u64,
     /// Folded-table hits whose recovered pair summed to neither `±R`;
@@ -2985,6 +2992,7 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     rel.count("s4_pairs", ctr.s4_pairs);
     rel.count("s4_hits", ctr.s4_hits);
     rel.count("lift_failures", ctr.lift_failures);
+    rel.count("unliftable_systems", ctr.unliftable_systems);
     rel.count("canonicalisations", ctr.canonicalisations);
     rel.count("frobfold_mismatches", ctr.frobfold_mismatches);
     rel.count("direct_relations_skipped", direct_skipped);
