@@ -16,7 +16,8 @@ NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
 CURVES := ecc2k95 k23 k41
 GEN    := $(foreach c,$(CURVES),curve_$(c).h vec_$(c).h) vec_canon.h
 TESTS  := test_ecc2k95 test_k23 test_k41 \
-          $(foreach c,$(CURVES),test_pt_$(c))
+          $(foreach c,$(CURVES),test_pt_$(c)) \
+          $(foreach c,$(CURVES),test_emu_$(c))
 
 HDRS := f2m.cuh koblitz.cuh rho2k.cuh scalar_ring.hpp rho2k_host.hpp \
         pairtable.cuh
@@ -53,6 +54,12 @@ test_$(1): test_cpu2k.cpp $$(HDRS) curve_$(1).h vec_$(1).h
 test_pt_$(1): test_pairtable.cpp $$(HDRS) curve_$(1).h vec_$(1).h vec_canon.h
 	$$(CXX) $$(CXXFLAGS) -DGPU_ECC2K_CURVE_HEADER='"curve_$(1).h"' \
 	  -DGPU_ECC2K_VECTORS_HEADER='"vec_$(1).h"' -o $$@ $$<
+
+# `pairtable_kernel` itself, compiled as host C++ behind a `__CUDACC__`
+# shim and run once per emulated thread.  Everything above tests what the
+# kernel is made of; this is the only thing that tests the kernel.
+test_emu_$(1): test_pairtable_emu.cpp $$(HDRS) curve_$(1).h vec_canon.h
+	$$(CXX) $$(CXXFLAGS) -DGPU_ECC2K_CURVE_HEADER='"curve_$(1).h"' -o $$@ $$<
 endef
 $(foreach c,$(CURVES),$(eval $(call TEST_RULE,$(c))))
 
