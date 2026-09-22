@@ -10,19 +10,24 @@
 //!    target-independent quadratic systems `C, A_k`.  Each is stored once per
 //!    factor base as one `u64` per monomial (bit `e` = equation `e`); a target
 //!    costs at most `n` table XORs instead of a symbolic rebuild.
-//! 2. **Swap symmetry.**  `S₃` depends on `x₁ + x₂` and `x₁x₂` only, so with
-//!    `x₁ = Σ aᵢvᵢ`, `x₂ = Σ bᵢvᵢ` every equation is invariant under `a ↔ b`.
-//!    Substitute `s = a ⊕ b`.  Unordered pairs with `s ≠ 0` are represented
-//!    exactly once by `s_{<j} = 0, s_j = 1, a_j = 0` for `j` the lowest set bit
-//!    of `s`; `s = 0` is the diagonal.  The case split walks
-//!    `2^ℓ + Σ_j 2^{2ℓ-2-j} ≈ 2^{2ℓ-1}` points instead of `2^{2ℓ}`.
-//! 3. **Lift on the fly.**  Each root is checked and lifted when the walk
-//!    reaches it, so a decomposable target stops at its first liftable root
-//!    and there is no root cap.
+//! 2. **Linear split.**  `S₃` depends on `x₁ + x₂` and `x₁x₂` only.  With
+//!    `x₁ = Σ aᵢvᵢ`, `x₂ = Σ bᵢvᵢ` and `s = a ⊕ b`, `s` enters only through
+//!    `s²`, `a·s` and `a²s²`, all linear in `s` once `a` is fixed.  So the
+//!    oracle Gray-enumerates `a` (`2^ℓ` values), updates an `n × ℓ` linear
+//!    system in `s` by XOR deltas, and eliminates: `O(2^ℓ ℓ²)` word
+//!    operations instead of a `2^{2ℓ}` walk ([`linear_split_visit`]).
+//! 3. **Swap-symmetric walk** (fallback if a system is not linear in `s`).
+//!    Unordered pairs with `s ≠ 0` are represented exactly once by
+//!    `s_{<j} = 0, s_j = 1, a_j = 0` for `j` the lowest set bit of `s`; `s = 0`
+//!    is the diagonal.  That walks `2^ℓ + Σ_j 2^{2ℓ-2-j} ≈ 2^{2ℓ-1}` points
+//!    with the register-blocked libfes `L = 4` chunk.
+//! 4. **Lift on the fly.**  Each root is checked and lifted when it is
+//!    reached, so a decomposable target stops at its first liftable root and
+//!    there is no root cap.
 //!
-//! The walk itself is the register-blocked libfes `L = 4` chunk.  None of
-//! this moves the free-oracle floor: the question asked of the oracle is
-//! unchanged.
+//! None of this moves the free-oracle floor: the question asked of the
+//! oracle is unchanged.  The linear split puts this algebraic oracle in the
+//! same `2^ℓ` class as the `enumerate` strategy, which walks the factor base.
 
 use super::koblitz_groebner::{DecompositionSystem, FieldStructure};
 use super::mq_fes::{idxq, Ffs};
@@ -535,80 +540,220 @@ pub fn linear_split_visit(
     }
     let qa = |i: usize, j: usize| q.quad[idxq(i.min(j), i.max(j))];
     // cols[k] = coefficient of s_k at a = 0; dcol[i][k] its change when a_i flips.
-    let mut cols: Vec<u64> = (0..ell).map(|k| q.lin[1 + ell + k]).collect();
-    let dcol: Vec<Vec<u64>> = (0..ell)
-        .map(|i| (0..ell).map(|k| qa(i, ell + k)).collect())
-        .collect();
-    // f(a) = Q(a, 0) with first derivatives d[i] and second derivatives qa(i, j).
-    let mut f = q.lin[0];
-    let mut d: Vec<u64> = (0..ell).map(|i| q.lin[1 + i]).collect();
-    let mut a = 0u64;
-    let mut work = LinearSplitWork::default();
-    let total = 1u64 << ell;
-    let mut pivots: Vec<(u32, u64, u64)> = Vec::with_capacity(ell);
-    let mut kernel: Vec<u64> = Vec::with_capacity(ell);
-    for step in 0..total {
-        if step > 0 {
-            let i = step.trailing_zeros() as usize;
-            f ^= d[i];
-            for (j, dj) in d.iter_mut().enumerate() {
-                if j != i {
-                    *dj ^= qa(i, j);
-                }
-            }
-            for (c, dc) in cols.iter_mut().zip(&dcol[i]) {
-                *c ^= dc;
-            }
-            a ^= 1 << i;
-            work.word_ops += 1 + 2 * ell as u64;
-        }
-        work.a_steps += 1;
-        // Solve Σ s_k cols[k] = f.
-        pivots.clear();
-        kernel.clear();
-        for (k, &c) in cols.iter().enumerate() {
-            let mut v = c;
-            let mut comb = 1u64 << k;
-            for &(bit, pv, pc) in &pivots {
-                if (v >> bit) & 1 == 1 {
-                    v ^= pv;
-                    comb ^= pc;
-                    work.word_ops += 2;
-                }
-            }
-            if v == 0 {
-                kernel.push(comb);
-            } else {
-                pivots.push((v.trailing_zeros(), v, comb));
-            }
-        }
-        let mut t = f;
-        let mut s0 = 0u64;
-        for &(bit, pv, pc) in &pivots {
-            if (t >> bit) & 1 == 1 {
-                t ^= pv;
-                s0 ^= pc;
-                work.word_ops += 2;
-            }
-        }
-        if t != 0 {
-            continue;
-        }
-        for mask in 0..(1u64 << kernel.len()) {
-            let mut s = s0;
-            for (bit, &kv) in kernel.iter().enumerate() {
-                if (mask >> bit) & 1 == 1 {
-                    s ^= kv;
-                }
-            }
-            let b = a ^ s;
-            if a <= b && visit(a | (b << ell)) {
-                work.stopped = true;
-                return Some(work);
+    let mut cols = [0u64; 32];
+    let mut dcol = [[0u64; 32]; 32];
+    // f(a) = Q(a, 0) with first derivatives d[i] and second derivatives dd[i][j].
+    let mut d = [0u64; 32];
+    let mut dd = [[0u64; 32]; 32];
+    for i in 0..ell {
+        cols[i] = q.lin[1 + ell + i];
+        d[i] = q.lin[1 + i];
+        for k in 0..ell {
+            dcol[i][k] = qa(i, ell + k);
+            if k != i {
+                dd[i][k] = qa(i, k);
             }
         }
     }
+    let mut work = LinearSplitWork::default();
+    let init = LaneState { a: 0, f: q.lin[0], d, cols };
+    let lanes = if ell >= 4 { LANES_WIDE } else { 1 };
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if lanes == LANES_WIDE && std::arch::is_x86_feature_detected!("avx2") {
+        // Safety: AVX2 availability was just checked.
+        return Some(unsafe {
+            lane_walk_avx2(init, ell, &dd, &dcol, &mut work, visit);
+            work
+        });
+    }
+    if lanes == LANES_WIDE {
+        lane_walk::<LANES_WIDE>(init, ell, &dd, &dcol, &mut work, visit);
+    } else {
+        lane_walk::<1>(init, ell, &dd, &dcol, &mut work, visit);
+    }
     Some(work)
+}
+
+/// Interleaved lanes per consistency check: independent dependency chains,
+/// and a width the compiler can keep in vector registers.
+const LANES_WIDE: usize = 8;
+
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[target_feature(enable = "avx2")]
+unsafe fn lane_walk_avx2(
+    init: LaneState,
+    ell: usize,
+    dd: &[[u64; 32]; 32],
+    dcol: &[[u64; 32]; 32],
+    work: &mut LinearSplitWork,
+    visit: &mut dyn FnMut(u64) -> bool,
+) {
+    lane_walk::<LANES_WIDE>(init, ell, dd, dcol, work, visit)
+}
+
+/// Gray-walk `a` in `L` lanes split on its top `log2 L` bits.
+#[inline(always)]
+fn lane_walk<const L: usize>(
+    init: LaneState,
+    ell: usize,
+    dd: &[[u64; 32]; 32],
+    dcol: &[[u64; 32]; 32],
+    work: &mut LinearSplitWork,
+    visit: &mut dyn FnMut(u64) -> bool,
+) {
+    let top = L.trailing_zeros() as usize;
+    let low = ell - top;
+    let mut st = [init; L];
+    for (l, lane) in st.iter_mut().enumerate() {
+        for bit in 0..top {
+            if (l >> bit) & 1 == 1 {
+                lane.flip(low + bit, ell, dd, dcol);
+            }
+        }
+    }
+    let ell_u = ell as u64;
+    // Per a: ℓ(ℓ-1)/2 + ℓ masked reduction XORs and, after the first,
+    // 2ℓ + 1 delta XORs.
+    let per_a_reduce = ell_u * (ell_u - 1) / 2 + ell_u;
+    for step in 0..(1u64 << low) {
+        if step > 0 {
+            let i = step.trailing_zeros() as usize;
+            for lane in st.iter_mut() {
+                lane.flip(i, ell, dd, dcol);
+            }
+            work.word_ops += L as u64 * (2 * ell_u + 1);
+        }
+        work.a_steps += L as u64;
+        work.word_ops += L as u64 * per_a_reduce;
+        let consistent = consistent_lanes::<L>(&st, ell);
+        if consistent == 0 {
+            continue;
+        }
+        for (l, lane) in st.iter().enumerate() {
+            if (consistent >> l) & 1 == 1
+                && solve_and_visit(&lane.cols[..ell], lane.f, lane.a, ell, visit)
+            {
+                work.stopped = true;
+                return;
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct LaneState {
+    a: u64,
+    f: u64,
+    d: [u64; 32],
+    cols: [u64; 32],
+}
+
+impl LaneState {
+    #[inline(always)]
+    fn flip(&mut self, i: usize, ell: usize, dd: &[[u64; 32]; 32], dcol: &[[u64; 32]; 32]) {
+        self.f ^= self.d[i];
+        for j in 0..ell {
+            self.d[j] ^= dd[i][j];
+            self.cols[j] ^= dcol[i][j];
+        }
+        self.a ^= 1 << i;
+    }
+}
+
+/// `x ≠ 0` as an all-ones / all-zeros mask, without a compare.
+#[inline(always)]
+fn nonzero_mask(x: u64) -> u64 {
+    0u64.wrapping_sub((x | x.wrapping_neg()) >> 63)
+}
+
+/// Bit `l` set iff lane `l`'s `f` lies in the span of its columns.  Every
+/// lane runs the same fixed-trip elimination: pivot `k` is column `k`
+/// reduced by pivots `< k`, identified by its lowest set bit (zero if the
+/// column fell into the span, which then never fires).
+#[inline(always)]
+fn consistent_lanes<const L: usize>(st: &[LaneState; L], ell: usize) -> u32 {
+    let mut pv = [[0u64; L]; 32];
+    let mut pm = [[0u64; L]; 32];
+    for k in 0..ell {
+        let mut v = [0u64; L];
+        for l in 0..L {
+            v[l] = st[l].cols[k];
+        }
+        for p in 0..k {
+            for l in 0..L {
+                v[l] ^= pv[p][l] & nonzero_mask(v[l] & pm[p][l]);
+            }
+        }
+        for l in 0..L {
+            pv[k][l] = v[l];
+            pm[k][l] = v[l] & v[l].wrapping_neg();
+        }
+    }
+    let mut t = [0u64; L];
+    for l in 0..L {
+        t[l] = st[l].f;
+    }
+    for p in 0..ell {
+        for l in 0..L {
+            t[l] ^= pv[p][l] & nonzero_mask(t[l] & pm[p][l]);
+        }
+    }
+    let mut out = 0u32;
+    for l in 0..L {
+        out |= u32::from(t[l] == 0) << l;
+    }
+    out
+}
+
+/// Every `s` with `Σ s_k cols[k] = f`; visit `(a, a ⊕ s)` when `a ≤ a ⊕ s`.
+#[cold]
+#[inline(never)]
+fn solve_and_visit(
+    cols: &[u64],
+    f: u64,
+    a: u64,
+    ell: usize,
+    visit: &mut dyn FnMut(u64) -> bool,
+) -> bool {
+    let mut pivots: Vec<(u32, u64, u64)> = Vec::with_capacity(cols.len());
+    let mut kernel: Vec<u64> = Vec::new();
+    for (k, &c) in cols.iter().enumerate() {
+        let mut v = c;
+        let mut comb = 1u64 << k;
+        for &(bit, pv, pc) in &pivots {
+            if (v >> bit) & 1 == 1 {
+                v ^= pv;
+                comb ^= pc;
+            }
+        }
+        if v == 0 {
+            kernel.push(comb);
+        } else {
+            pivots.push((v.trailing_zeros(), v, comb));
+        }
+    }
+    let mut t = f;
+    let mut s0 = 0u64;
+    for &(bit, pv, pc) in &pivots {
+        if (t >> bit) & 1 == 1 {
+            t ^= pv;
+            s0 ^= pc;
+        }
+    }
+    debug_assert_eq!(t, 0);
+    for mask in 0..(1u64 << kernel.len()) {
+        let mut s = s0;
+        for (bit, &kv) in kernel.iter().enumerate() {
+            if (mask >> bit) & 1 == 1 {
+                s ^= kv;
+            }
+        }
+        let b = a ^ s;
+        if a <= b && visit(a | (b << ell)) {
+            return true;
+        }
+    }
+    false
 }
 
 /// The quadratic Semaev decomposition oracle: same contract and answer set
@@ -870,6 +1015,39 @@ mod tests {
             }
             assert!(with_roots > 0, "n={n}: no instance had roots");
         }
+    }
+
+    #[test]
+    #[ignore = "timing probe"]
+    fn linear_split_phase_timing_probe() {
+        use crate::cryptanalysis::koblitz_index_calculus::{build_frobenius_factor_base, KoblitzCurve};
+        let kc = KoblitzCurve::new(0, 23).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let t = packed_template(&fb.subspace_basis, &kc.curve.b, &st).unwrap();
+        let ell = t.ell;
+        let mut seed = 99u64;
+        let systems: Vec<_> = (0..200).map(|_| t.instantiate(rng(&mut seed) & ((1 << 23) - 1))).collect();
+        let t0 = std::time::Instant::now();
+        let map: Vec<Affine> = (0..2 * ell)
+            .map(|i| if i < ell { Affine { c: false, vars: 1 << i } } else { Affine { c: false, vars: (1 << (i - ell)) | (1 << i) } })
+            .collect();
+        let mut sink = 0u64;
+        for s in &systems {
+            sink ^= s.substitute(&map, 2 * ell).lin[0];
+        }
+        let sub_ns = t0.elapsed().as_nanos() / 200;
+        let t1 = std::time::Instant::now();
+        for s in &systems {
+            linear_split_visit(s, ell, &mut |_| false).unwrap();
+        }
+        let all_ns = t1.elapsed().as_nanos() / 200;
+        let t2 = std::time::Instant::now();
+        for s in &systems {
+            sink ^= t.instantiate(s.lin[0]).lin[1];
+        }
+        let inst_ns = t2.elapsed().as_nanos() / 200;
+        eprintln!("ell={ell} substitute={sub_ns}ns linear_split_total={all_ns}ns instantiate={inst_ns}ns sink={sink}");
     }
 
     #[test]
