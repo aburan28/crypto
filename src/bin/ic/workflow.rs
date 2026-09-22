@@ -99,6 +99,18 @@ fn is_one_u32(v: &u32) -> bool {
 fn is_one_u64(v: &u64) -> bool {
     *v == 1
 }
+fn is_zero_u64(v: &u64) -> bool {
+    *v == 0
+}
+fn is_zero_usize(v: &usize) -> bool {
+    *v == 0
+}
+fn default_targeted_tail_seed() -> u64 {
+    0x5441_5247_4554_5901
+}
+fn is_default_targeted_tail_seed(v: &u64) -> bool {
+    *v == default_targeted_tail_seed()
+}
 fn baseline_is_default(b: &BaselineParams) -> bool {
     let d = BaselineParams::default();
     !b.rho && b.rho_seed == d.rho_seed && b.rho_max_iterations == d.rho_max_iterations
@@ -240,6 +252,19 @@ pub struct CollectionParams {
     /// Units the driver may collect in total when the relations do not
     /// yet determine every column.
     pub max_units: usize,
+    /// Direct pair lookups per uncovered projected column and targeted
+    /// round. Zero disables the targeted tail.
+    #[serde(default, skip_serializing_if = "is_zero_u64")]
+    pub targeted_tail_trials: u64,
+    /// Targeted rounds allowed before falling back to ordinary units.
+    #[serde(default, skip_serializing_if = "is_zero_usize")]
+    pub targeted_tail_rounds: usize,
+    /// Independent probe-sequence domain for the targeted tail.
+    #[serde(
+        default = "default_targeted_tail_seed",
+        skip_serializing_if = "is_default_targeted_tail_seed"
+    )]
+    pub targeted_tail_seed: u64,
 }
 impl Default for CollectionParams {
     fn default() -> Self {
@@ -247,6 +272,9 @@ impl Default for CollectionParams {
             unit_trials: 4096,
             units: 4,
             max_units: 64,
+            targeted_tail_trials: 0,
+            targeted_tail_rounds: 0,
+            targeted_tail_seed: default_targeted_tail_seed(),
         }
     }
 }
@@ -414,6 +442,12 @@ pub fn load_params(path: &Path) -> Result<WorkflowParams, String> {
     if col.units == 0 || col.max_units < col.units || col.max_units > 100_000 {
         return Err("collection.units must be at least 1 and at most collection.max_units (≤ 100000)".into());
     }
+    if (col.targeted_tail_trials == 0) != (col.targeted_tail_rounds == 0) {
+        return Err("collection targeted-tail trials and rounds must both be zero or both nonzero".into());
+    }
+    if col.targeted_tail_trials > 100_000_000 || col.targeted_tail_rounds > 100_000 {
+        return Err("collection targeted tail exceeds its 100000000-trial / 100000-round cap".into());
+    }
     for (i, t) in p.targets.iter().enumerate() {
         if [t.known_log.is_some(), t.random_seed.is_some(), t.public_hash_seed.is_some()]
             .into_iter().filter(|set| *set).count() != 1
@@ -523,6 +557,35 @@ pub struct RelationUnitDocument {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
+pub struct TargetedTailDocument {
+    pub schema_version: u32,
+    pub params_digest: String,
+    pub degree: u32,
+    pub curve_a: u8,
+    pub subfield: u32,
+    pub curve_b: u64,
+    pub spec: FactorBaseSpec,
+    pub base_seed: u64,
+    pub trials_per_column: u64,
+    pub attempts: Vec<TargetedTailAttempt>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TargetedTailAttempt {
+    pub round: usize,
+    pub column: usize,
+    pub fixed_point_index: usize,
+    pub seed: u64,
+    pub start: u64,
+    pub count: u64,
+    pub pair_lookups: u64,
+    pub relations: Vec<CollectedRelation>,
+    pub elapsed_seconds: f64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Solution {
     pub index: usize,
     pub expected: String,
@@ -567,6 +630,7 @@ const LOGS_FILE: &str = "logs.json";
 const SOLUTIONS_FILE: &str = "solutions.json";
 const RELATIONS_DIR: &str = "relations";
 const BASELINE_FILE: &str = "baseline.json";
+const TARGETED_TAIL_FILE: &str = "targeted-tail.json";
 
 fn unit_path(dir: &Path, unit: usize) -> PathBuf {
     dir.join(RELATIONS_DIR).join(format!("unit-{unit:05}.json"))
@@ -992,6 +1056,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let fb_path = args.dir.join(FACTOR_BASE_FILE);
     let logs_path = args.dir.join(LOGS_FILE);
     let sol_path = args.dir.join(SOLUTIONS_FILE);
+    let targeted_tail_path = args.dir.join(TARGETED_TAIL_FILE);
 
     // Load or initialise state; refuse to mix parameter sets.
     let mut state: WorkflowState = if state_path.exists() {
@@ -1325,14 +1390,134 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             .log_solver(&ic)
             .ok_or("factor base has no projected columns")?;
         solver.push(&merged);
-        let mut loaded = merged.len();
+        let mut targeted_tail: TargetedTailDocument = if targeted_tail_path.exists() {
+            let document: TargetedTailDocument = read_json(&targeted_tail_path)?;
+            if document.schema_version != 1
+                || document.params_digest != digest
+                || !same_curve(
+                    document.degree,
+                    document.curve_a,
+                    document.subfield,
+                    document.curve_b,
+                    &c,
+                )
+                || document.spec != spec
+                || document.base_seed != p.collection.targeted_tail_seed
+                || document.trials_per_column != p.collection.targeted_tail_trials
+            {
+                return Err(format!(
+                    "{} belongs to a different run or targeted-tail policy",
+                    targeted_tail_path.display()
+                ));
+            }
+            document
+        } else {
+            TargetedTailDocument {
+                schema_version: 1,
+                params_digest: digest.clone(),
+                degree: c.n,
+                curve_a: c.a,
+                subfield: c.k,
+                curve_b: c.b_index,
+                spec: spec.clone(),
+                base_seed: p.collection.targeted_tail_seed,
+                trials_per_column: p.collection.targeted_tail_trials,
+                attempts: Vec::new(),
+            }
+        };
+        let prior_targeted: Vec<CollectedRelation> = targeted_tail
+            .attempts
+            .iter()
+            .flat_map(|attempt| attempt.relations.iter().cloned())
+            .collect();
+        solver.push(&prior_targeted);
+        let mut loaded = merged.len() + prior_targeted.len();
         let mut outcome = solver.try_solve();
         let mut extended = 0usize;
+        let mut targeted_ran_now = 0usize;
+        let mut targeted_resources = Value::Null;
+        // A uniform stream can leave one or two coupon-collector tail
+        // columns absent after tens of thousands of relations.  Force a
+        // public point from each such column and ask the exact pair table
+        // for the other two summands.  One trial then costs one direct
+        // lookup rather than a whole collection window.
+        if outcome.is_none()
+            && p.collection.targeted_tail_trials > 0
+            && p.collection.targeted_tail_rounds > 0
+            && p.summands == 3
+            && p.solver == Solver::PairTable
+            && !solver.uncovered_columns().is_empty()
+        {
+            let resource_start = experiment::resource_snapshot();
+            if pair.is_none() {
+                pair = Some(
+                    build_pair_table(&c, &fb, &p).ok_or("field too wide for the pair table")?,
+                );
+            }
+            let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
+                .ok_or("factor base cannot collect a targeted tail")?;
+            let first_round = targeted_tail
+                .attempts
+                .iter()
+                .map(|attempt| attempt.round)
+                .max()
+                .map_or(0, |round| round + 1);
+            'rounds: for round in first_round..p.collection.targeted_tail_rounds {
+                let uncovered = solver.uncovered_columns();
+                if uncovered.is_empty() {
+                    break;
+                }
+                for column in uncovered {
+                    let fixed_point_index = projected
+                        .factor_point_for_column(column)
+                        .ok_or("uncovered projected column has no factor-base point")?;
+                    let seed = p.collection.targeted_tail_seed
+                        ^ (column as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15)
+                        ^ (round as u64).rotate_left(29);
+                    let start = round as u64 * p.collection.targeted_tail_trials;
+                    let (relations, report) = collector
+                        .collect_with_forced_point(
+                            RelationWorkUnit {
+                                seed,
+                                start,
+                                count: p.collection.targeted_tail_trials,
+                            },
+                            fixed_point_index,
+                        )
+                        .ok_or("targeted pair lookup is unsupported")?;
+                    say(&format!(
+                        "      targeted round {round}, column {column}: {} relations from {} direct pair lookups ({:.3}s)",
+                        report.relations, report.pair_lookups, report.elapsed_seconds
+                    ));
+                    solver.push(&relations);
+                    loaded += relations.len();
+                    targeted_tail.attempts.push(TargetedTailAttempt {
+                        round,
+                        column,
+                        fixed_point_index,
+                        seed,
+                        start,
+                        count: p.collection.targeted_tail_trials,
+                        pair_lookups: report.pair_lookups,
+                        relations,
+                        elapsed_seconds: report.elapsed_seconds,
+                    });
+                    write_atomic(&targeted_tail_path, &targeted_tail)?;
+                    targeted_ran_now += 1;
+                    outcome = solver.try_solve();
+                    if outcome.is_some() {
+                        break 'rounds;
+                    }
+                }
+            }
+            targeted_resources = experiment::resource_delta(resource_start);
+        }
         // Undetermined: collect further units up to the budget, solving
         // again after each.  One collector serves every round, and its
         // borrow of the pair table ends with this block so the descent
         // can still build one if collection never ran.
-        if outcome.is_none() {
+        let first_extension = units.keys().max().map_or(0, |m| m + 1);
+        if outcome.is_none() && first_extension < p.collection.max_units {
             let collector = {
                 if ic.strategy == DecompositionStrategy::PairTable && pair.is_none() {
                     pair = Some(
@@ -1345,13 +1530,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             };
             while outcome.is_none() {
                 let report = solver.report();
+                let uncovered = solver.uncovered_columns();
                 let next = units.keys().max().map_or(0, |m| m + 1);
                 if next >= p.collection.max_units {
                     break;
                 }
                 say(&format!(
-                    "      {} accepted relations ({} rejected, {} duplicates) do not determine all {} columns; collecting unit {next:05} …",
-                    report.relations, report.rejected_relations, report.duplicate_relations, report.columns
+                    "      {} accepted relations ({} rejected, {} duplicates; {} uncovered columns) do not determine all {} columns; collecting unit {next:05} …",
+                    report.relations, report.rejected_relations, report.duplicate_relations,
+                    uncovered.len(), report.columns
                 ));
                 let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, next)?;
                 say(&format!(
@@ -1370,6 +1557,38 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 outcome = solver.try_solve();
             }
         }
+        let targeted_trials: u64 = targeted_tail
+            .attempts
+            .iter()
+            .map(|attempt| attempt.count)
+            .sum();
+        let targeted_pair_lookups: u64 = targeted_tail
+            .attempts
+            .iter()
+            .map(|attempt| attempt.pair_lookups)
+            .sum();
+        let targeted_relations: usize = targeted_tail
+            .attempts
+            .iter()
+            .map(|attempt| attempt.relations.len())
+            .sum();
+        let targeted_seconds: f64 = targeted_tail
+            .attempts
+            .iter()
+            .map(|attempt| attempt.elapsed_seconds)
+            .sum();
+        let targeted_summary = json!({
+            "enabled":p.collection.targeted_tail_trials > 0,
+            "artifact":if targeted_tail.attempts.is_empty() { Value::Null } else { Value::from(TARGETED_TAIL_FILE) },
+            "attempts":targeted_tail.attempts.len(),
+            "attempts_ran_now":targeted_ran_now,
+            "trials":targeted_trials,
+            "pair_lookups":targeted_pair_lookups,
+            "relations":targeted_relations,
+            "elapsed_seconds":targeted_seconds,
+            "remaining_uncovered_column_indices":solver.uncovered_columns(),
+            "resources":targeted_resources,
+        });
         let trials_total: u64 = units.values().map(|d| d.count).sum();
         let summands_scanned_total: u64 = units.values().map(|d| d.summands_scanned).sum();
         let outcome = outcome.or_else(|| {
@@ -1395,6 +1614,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     "relations_loaded":merged,"rejected":report.rejected_relations,
                     "duplicates":report.duplicate_relations,"units_used":units.len(),"units_extended":extended,
                     "summands_scanned":summands_scanned_total,
+                    "targeted_tail":targeted_summary,
                     "verification_seconds":report.collection_seconds,
                     "linear_algebra":experiment::linear_algebra_json(&report),
                     "elapsed_seconds":t2.elapsed().as_secs_f64()}));
@@ -1407,10 +1627,11 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 Some(table)
             }
             Some((_, report)) => {
+                let uncovered = solver.uncovered_columns();
                 let reason = format!(
-                    "relations from {} units ({} probes; {} accepted, {} rejected, {} duplicates) did not determine every one of {} columns; raise collection.max_units or collection.unit_trials",
+                    "relations from {} units ({} probes; {} accepted, {} rejected, {} duplicates; {} uncovered columns) did not determine every one of {} columns; raise collection.max_units or collection.unit_trials",
                     units.len(), trials_total, report.relations, report.rejected_relations,
-                    report.duplicate_relations, report.columns
+                    report.duplicate_relations, uncovered.len(), report.columns
                 );
                 state.logs = StageState {
                     status: StageStatus::Failed,
@@ -1422,7 +1643,9 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 stage_reports.push(json!({"stage":"logs","status":"failed","ran":true,"reason":reason,
                     "relations_loaded":merged,"rejected":report.rejected_relations,
                     "duplicates":report.duplicate_relations,"units_used":units.len(),"units_extended":extended,
+                    "uncovered_column_indices":uncovered,
                     "summands_scanned":summands_scanned_total,
+                    "targeted_tail":targeted_summary,
                     "linear_algebra":experiment::linear_algebra_json(&report)}));
                 overall_failed = Some(reason);
                 None
@@ -1661,7 +1884,7 @@ fn finish(
             "verified":s.solutions.iter().filter(|x| x.verified).count(),
             "items":s.solutions})),
         "failure":failure,
-        "artifacts":{"state":STATE_FILE,"factor_base":FACTOR_BASE_FILE,"relations":RELATIONS_DIR,"logs":LOGS_FILE,"solutions":SOLUTIONS_FILE,"baseline":BASELINE_FILE},
+        "artifacts":{"state":STATE_FILE,"factor_base":FACTOR_BASE_FILE,"relations":RELATIONS_DIR,"targeted_tail":TARGETED_TAIL_FILE,"logs":LOGS_FILE,"solutions":SOLUTIONS_FILE,"baseline":BASELINE_FILE},
         "elapsed_seconds":begin.elapsed().as_secs_f64(),"resources":experiment::resources(),
         "scope":"resumable staged pipeline: select → collect → logs → solve; completed stages, work units and solved targets are reused on rerun after re-verification against the reconstructed curve",
         "limitations":["No imported target was used.","This run does not establish scaling or challenge readiness."]})
@@ -1806,6 +2029,23 @@ mod tests {
         // And a window wider than the base is the base, not the window.
         let clamped = probe_budget(&kc, &fb, &params(1_000, 3, Some(1 << 20), 8));
         assert_eq!(clamped.summands_scanned, full.summands_scanned);
+    }
+
+    #[test]
+    fn disabled_targeted_tail_is_serialization_neutral() {
+        let mut p = params(1_000, 3, Some(64), 1);
+        let collection = serde_json::to_value(&p.collection).unwrap();
+        assert!(collection.get("targeted_tail_trials").is_none());
+        assert!(collection.get("targeted_tail_rounds").is_none());
+        assert!(collection.get("targeted_tail_seed").is_none());
+
+        p.collection.targeted_tail_trials = 10_000;
+        p.collection.targeted_tail_rounds = 4;
+        p.collection.targeted_tail_seed ^= 1;
+        let enabled = serde_json::to_value(&p.collection).unwrap();
+        assert_eq!(enabled["targeted_tail_trials"], 10_000);
+        assert_eq!(enabled["targeted_tail_rounds"], 4);
+        assert!(enabled.get("targeted_tail_seed").is_some());
     }
 
     #[test]
