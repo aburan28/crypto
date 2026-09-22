@@ -319,6 +319,14 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 - Extend the `m = 3` ladder past `n = 5` to turn a single gap into a
   scaling claim.  This is the one that matters and the one that is
   blocked on elimination cost, not on degree.
+- **Match the surplus, not the unknown count, when pairing cells.**  The
+  `n = 9` versus `n = 15` comparison proposed above is confounded a third
+  way: those cells carry surplus `n − mℓ` of `−9` and `+3`, opposite signs
+  and twelve bits of decomposition yield apart, so a `D_refute` difference
+  between them is not attributable to field degree alone.  See
+  [`RESEARCH_DESCENT_CROSSOVER.md`](RESEARCH_DESCENT_CROSSOVER.md) §2.1 and
+  §7, which also shows the surplus is unchanged by chaining and so is not
+  visible in the `vars` column this note prints.
 - Sparse elimination (Wiedemann/Lanczos) in place of dense `rref_f2` is
   what would move the frontier; the dense pass is the binding cost, and
   `research/notes/index-calculus/RESEARCH_GROEBNER_F4.md` already lists it as missing.
