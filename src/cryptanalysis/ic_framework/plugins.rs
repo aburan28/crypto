@@ -516,6 +516,44 @@ impl<'i> DescentAlgebraicOracle<'i> {
     pub fn solver_name(&self) -> &str {
         self.harness.solver.name()
     }
+
+    /// The boolean system for a target abscissa, and the map from one
+    /// of its solutions back to abscissae in the field.  `prepare` must
+    /// have run.
+    #[allow(clippy::type_complexity)]
+    fn descend(&self, x_r: F2mElement) -> (BooleanSystem, Box<dyn Fn(u64) -> Vec<u64> + 'i>) {
+        let curve = self.curve.as_ref().expect("prepare builds the curve");
+        // The lift borrows the instance, not the oracle, so the caller
+        // can go on to mutate the oracle's totals while holding it.
+        let instance: &'i BinaryInstance = self.instance;
+        let gf = &instance.gf;
+        match self.summands {
+            2 => {
+                let sys = weil_descend_s3(curve, &x_r, &self.v_basis);
+                let n_vars = sys.n_vars;
+                let eqs = sys.equations.clone();
+                (
+                    BooleanSystem { equations: eqs, n_vars },
+                    Box::new(move |v| {
+                        let (a, b) = sys.lift_solution(v);
+                        vec![gf.from_element(&a), gf.from_element(&b)]
+                    }),
+                )
+            }
+            _ => {
+                let sys = weil_descend_s4(curve, &x_r, &self.v_basis);
+                let n_vars = sys.n_vars;
+                let eqs = sys.equations.clone();
+                (
+                    BooleanSystem { equations: eqs, n_vars },
+                    Box::new(move |v| {
+                        let (a, b, c) = sys.lift_solution(v);
+                        vec![gf.from_element(&a), gf.from_element(&b), gf.from_element(&c)]
+                    }),
+                )
+            }
+        }
+    }
 }
 
 impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
@@ -563,6 +601,20 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         }
         self.curve = Some(curve_of(self.instance).ok_or("no curve for this instance")?);
         self.v_basis = basis.iter().map(|&w| self.instance.gf.to_element(w)).collect();
+        // Every system on one base has the same shape, so descend one
+        // abscissa now and let the engine decline the shape here, once,
+        // with a reason a sweep can report — rather than target by
+        // target, which would run the whole relation phase for nothing.
+        let shape = self.descend(self.instance.gf.to_element(self.instance.generator.x)).0.shape();
+        if !self.harness.solver.accepts(&shape) {
+            return Err(format!(
+                "solver `{}` declines a system of {} unknowns and {} equations; \
+                 use a smaller base or another engine",
+                self.harness.solver.name(),
+                shape.n_vars,
+                shape.n_equations
+            ));
+        }
         Ok(())
     }
 
@@ -574,37 +626,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         counters: &mut OracleCounters,
         point: FastPoint,
     ) -> Option<Vec<usize>> {
-        let curve = self.curve.as_ref()?;
+        self.curve.as_ref()?;
         let x_r = self.instance.gf.to_element(point.x);
         // Descend, solve, and lift every solution until one sums to R.
-        let (system, lift): (BooleanSystem, Box<dyn Fn(u64) -> Vec<u64>>) = match self.summands {
-            2 => {
-                let sys = weil_descend_s3(curve, &x_r, &self.v_basis);
-                let gf = &self.instance.gf;
-                let n_vars = sys.n_vars;
-                let eqs = sys.equations.clone();
-                (
-                    BooleanSystem { equations: eqs, n_vars },
-                    Box::new(move |v| {
-                        let (a, b) = sys.lift_solution(v);
-                        vec![gf.from_element(&a), gf.from_element(&b)]
-                    }),
-                )
-            }
-            _ => {
-                let sys = weil_descend_s4(curve, &x_r, &self.v_basis);
-                let gf = &self.instance.gf;
-                let n_vars = sys.n_vars;
-                let eqs = sys.equations.clone();
-                (
-                    BooleanSystem { equations: eqs, n_vars },
-                    Box::new(move |v| {
-                        let (a, b, c) = sys.lift_solution(v);
-                        vec![gf.from_element(&a), gf.from_element(&b), gf.from_element(&c)]
-                    }),
-                )
-            }
-        };
+        let (system, lift) = self.descend(x_r);
         let shape = system.shape();
         let verdict = self.harness.solve(&system);
         let exceeded = matches!(verdict, SolverVerdict::BudgetExceeded);

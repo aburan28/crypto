@@ -320,7 +320,14 @@ The contract is short and all of it matters:
   this backwards produced a wrong conclusion in this repository once;
   see §14.4 of the ledger note.
 - **Decline what you cannot do.** `accepts` lets a solver opt out of a
-  shape rather than time out on every target of a sweep.
+  shape rather than time out on every target of a sweep. The
+  `descent-algebraic` oracle asks it once, at `prepare`, on the shape
+  every system on that base will have, so a declined engine skips the
+  row with a reason instead of running the relation phase for nothing.
+  `xl-f2` is the shipped example: the repository's XL runs one pass at
+  degree `n_vars` with no budget hook — about 150 seconds a call on a
+  12-unknown descent against Buchberger's 40 milliseconds — so it
+  declines above ten unknowns.
 
 ### `RelationSolver` — the matrix
 

@@ -55,6 +55,14 @@ use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_within, solve_syste
 /// will attempt, since they are `2^n` in the variable count.
 const ENUMERATION_CAP: usize = 26;
 
+/// The largest system `xl-f2` will attempt.  The repository's XL runs
+/// one pass at degree `n_vars`, so its matrix has `2^{n_vars}` columns
+/// and it has no budget hook: on a 12-unknown, 13-equation descent it
+/// measured about 150 seconds a call against Buchberger's 40
+/// milliseconds.  Declining above ten unknowns is what keeps a sweep
+/// row from running for hours; the row is then skipped and says why.
+const XL_CAP: usize = 10;
+
 fn is_one(gb: &[F2BoolPoly]) -> bool {
     gb.len() == 1 && gb[0].terms.len() == 1 && gb[0].terms[0].degree() == 0
 }
@@ -155,7 +163,7 @@ impl SystemSolver for XlF2 {
     }
 
     fn accepts(&self, shape: &SystemShape) -> bool {
-        shape.n_vars <= ENUMERATION_CAP
+        shape.n_vars <= XL_CAP
     }
 
     fn solve(
