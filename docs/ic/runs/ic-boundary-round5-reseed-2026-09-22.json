@@ -1,0 +1,2704 @@
+{
+ "what": "Check that a repricing of the boundary ledger's unit changed only converted numbers: every native counter and group-operation count of every row compared between the two runs, and the distribution of the correction it applied.",
+ "before": "docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json",
+ "after": "docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json",
+ "rows_compared": 537,
+ "rows_identical_in_every_counter": 333,
+ "rows_whose_counters_moved": 204,
+ "counter_mismatches": [
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.rows",
+    "linear_algebra.native.single_column_rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-14bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m3_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.doubles"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.walk_pool_offsets",
+    "relations.native.walk_pool_ops"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations",
+    "relations.native.lookups"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^17)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^17)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^17)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^19)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^19)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^19)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^19)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^19)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^19)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^23)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^23)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^23)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^23)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^23)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^23)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.single_column_rows",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^29)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^29)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^29)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^29)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^29)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^29)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^31)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^31)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^31)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^31)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^31)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^31)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles",
+    "relations.native.canonicalisations"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.two_column_rows",
+    "relations.group_ops.adds",
+    "relations.group_ops.doubles"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 0,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 1,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  },
+  {
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced",
+   "repeat": 2,
+   "fields": [
+    "independent",
+    "linear_algebra.native.rank",
+    "linear_algebra.native.row_ops",
+    "linear_algebra.native.rows"
+   ]
+  }
+ ],
+ "s_after_over_before_median": 1.0,
+ "s_after_over_before_min": 0.539407,
+ "s_after_over_before_max": 1.830803,
+ "rows_repriced_above_2_percent": 131,
+ "largest_repricings": [
+  {
+   "ratio": 0.539407,
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 1.830803,
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 0.546213,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 0.561382,
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 0.582131,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 0.589835,
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 0.608541,
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 1.560962,
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 1.548564,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 1.534582,
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 1.507224,
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 0.722972,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 0.749579,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 1.311599,
+   "regime": "prime",
+   "instance": "bench-16bit",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 0.763869,
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "ratio": 0.773236,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^31)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 0.782028,
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "ratio": 0.789683,
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "ratio": 0.796189,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "ratio": 1.253692,
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 0.797792,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "ratio": 1.251441,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 0.800866,
+   "regime": "prime",
+   "instance": "bench-20bit",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 1.244891,
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "ratio": 1.244797,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 1.243342,
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "ratio": 1.241418,
+   "regime": "char2",
+   "instance": "random-binary-n15-b524b",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "ratio": 0.813092,
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "ratio": 0.828414,
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "ratio": 0.832629,
+   "regime": "prime",
+   "instance": "generated-24bit-10935329",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 1.200843,
+   "regime": "prime",
+   "instance": "bench-18bit",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "ratio": 0.834161,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 1.194526,
+   "regime": "char2",
+   "instance": "random-binary-n24-b5fc9da",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "ratio": 0.84081,
+   "regime": "char2",
+   "instance": "random-binary-n18-b6507",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "ratio": 1.188822,
+   "regime": "prime",
+   "instance": "generated-22bit-3290411",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "ratio": 0.842402,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "ratio": 0.843551,
+   "regime": "char2",
+   "instance": "random-binary-n27-b845462",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "ratio": 1.184937,
+   "regime": "char2",
+   "instance": "random-binary-n21-b1b6f3b",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "ratio": 0.849631,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "ratio": 1.175771,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  }
+ ]
+}
