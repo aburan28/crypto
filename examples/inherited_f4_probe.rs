@@ -17,7 +17,8 @@
 
 use crypto_lib::cryptanalysis::inherited_f4::{substitute, InheritCost, ReducedBasis};
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    f4_profile, f4_profile_reset, FieldStructure, SolverEngine,
+    f4_profile, f4_profile_reset, split_rule_default, FieldStructure, SolveOptions, SolverEngine,
+    SplitRule,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, groebner_decompose, KoblitzCurve,
@@ -129,12 +130,25 @@ fn main() {
     let mut wall_scratch = 0u128;
     let mut wall_inherit = 0u128;
 
+    // Specialise on the variable the production solver would split on:
+    // the smallest free variable under `HighestFree`, the lowest-indexed
+    // one under the historical rule.
+    let rule = SolveOptions {
+        split_rule: split_rule_default(),
+        ..SolveOptions::default()
+    }
+    .resolve()
+    .split_rule;
+    println!("split rule for the probe's children: {rule:?}");
     for (system, n_vars) in &systems {
         let occurring = system.iter().flat_map(|p| p.terms.iter()).fold(0u64, |a, t| a | t.mask);
         if occurring == 0 {
             continue;
         }
-        let v = occurring.trailing_zeros();
+        let v = match rule {
+            SplitRule::HighestFree => 63 - occurring.leading_zeros(),
+            _ => occurring.trailing_zeros(),
+        };
         let Some((root, root_cost)) = ReducedBasis::from_system(system, *n_vars, degree) else {
             continue;
         };

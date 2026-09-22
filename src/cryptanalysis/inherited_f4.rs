@@ -45,21 +45,23 @@
 //! word written — a charge the from-scratch path never pays, since its
 //! matrix build is not counted.  Wall time is reported beside it.
 //!
-//! ## When it pays, and when it does not
+//! ## What decides the cost: which variable the solver splits on
 //!
 //! Re-reducing a displaced row costs one XOR per pivot it crosses, so the
-//! method pays when the reduced basis stays **sparse**.  The quadratic
-//! `m = 2` Semaev matrices are near full rank and their reduced rows do
-//! stay sparse: `1.6–7.2×` fewer word operations than rebuilding, on every
-//! instance measured.  The chained cubic `m ≥ 3` matrices are some 40%
-//! rank-deficient — their reduced rows are dense combinations, every
-//! displaced or completion row crosses a hundred-odd pivots, and the
-//! from-scratch echelon of the sparse matrix is cheaper (`0.60×` on
-//! `K_0/2^15`, `m = 3`).  [`super::koblitz_groebner::SolverEngine::effective_for`]
-//! therefore inherits on quadratic systems only.  Cost-triggered fallbacks
-//! and drift-triggered rebuilds were tried and rejected: by the time a
-//! per-node estimate fires, most of the tree has paid the inherited price
-//! (`RESEARCH_INHERITED_F4.md` §3).
+//! method's cost is the number of displaced rows times the density of the
+//! basis.  Both depend on the **split variable**.  A reduced row's pivot
+//! is its largest monomial under DegRevLex, so pivots are biased toward
+//! the large variables; splitting on the lowest-indexed free variable (the
+//! historical `LowestFree` rule) picks exactly those, and deep in the tree
+//! half the basis is displaced per level.  Splitting on the smallest free
+//! variable ([`super::koblitz_groebner::SplitRule::HighestFree`]) displaces
+//! the fewest rows: the engine's work halves on every quadratic rung and
+//! its loss on the chained cubic `m = 3` systems — whose 40%-rank-deficient
+//! matrices make the reduced rows dense — turns into a `1.9×` win on the
+//! deep `K_0/2^15` cell (`RESEARCH_INHERITED_F4.md` §3.5).  Restoring
+//! reduced form after each level, cost-triggered fallbacks and
+//! drift-triggered rebuilds were all tried and rejected; each cost more
+//! than it saved.
 //!
 //! ## What this does not change
 //!
@@ -91,8 +93,11 @@ fn leading_column(row: &[u64]) -> Option<usize> {
 /// Work counters for one basis operation, all in 64-bit word operations.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct InheritCost {
-    /// XORs in the root reduction or in re-reducing displaced rows.
+    /// XORs in the root reduction, in re-reducing displaced rows, and in
+    /// restoring reduced form ([`ReducedBasis::reduce_fully`]).
     pub reduce_word_ops: u64,
+    /// The part of `reduce_word_ops` spent restoring reduced form.
+    pub rref_word_ops: u64,
     /// Word reads and writes performed by specialisation (deleting or
     /// folding the columns of the assigned variable).
     pub specialise_word_ops: u64,
@@ -109,6 +114,7 @@ impl InheritCost {
     }
     fn add(&mut self, other: InheritCost) {
         self.reduce_word_ops += other.reduce_word_ops;
+        self.rref_word_ops += other.rref_word_ops;
         self.specialise_word_ops += other.specialise_word_ops;
         self.displaced_rows += other.displaced_rows;
         self.completion_rows += other.completion_rows;
@@ -279,6 +285,67 @@ impl ReducedBasis {
         }
     }
 
+    /// Restore reduced row echelon form: clear every pivot column from
+    /// every row but its own.
+    ///
+    /// One pass in **decreasing** pivot-column order suffices.  A row's
+    /// bits all sit at or after its leading column, so when pivot column
+    /// `c` is processed every pivot column beyond `c` has already been
+    /// cleared from its row, and XORing it into another row introduces no
+    /// pivot-column bit.  Only XORs are charged, as in the from-scratch
+    /// kernels; the pivot-column tests are not.
+    ///
+    /// Why it is worth paying: after a specialisation the basis is in
+    /// echelon form but not reduced — a fold `m ∋ v ↦ m ∖ v` can land on
+    /// another row's pivot column, and a freshly inserted pivot has never
+    /// been cleared from the rows above it.  A displaced row reduced
+    /// against such a basis picks up those bits and cascades; against a
+    /// reduced basis it clears one pivot column per XOR and stops.
+    pub fn reduce_fully(&mut self, cost: &mut InheritCost) {
+        let words = self.words;
+        for c in (0..self.pivot_of.len()).rev() {
+            let Some(r) = self.pivot_of[c] else {
+                continue;
+            };
+            let r = r as usize;
+            let (w, bit) = (c / 64, 1u64 << (c % 64));
+            let pivot = std::mem::take(&mut self.rows[r]);
+            for (i, row) in self.rows.iter_mut().enumerate() {
+                if i != r && row[w] & bit != 0 {
+                    for (dst, &src) in row[w..].iter_mut().zip(&pivot[w..]) {
+                        *dst ^= src;
+                    }
+                    cost.reduce_word_ops += (words - w) as u64;
+                    cost.rref_word_ops += (words - w) as u64;
+                }
+            }
+            self.rows[r] = pivot;
+        }
+    }
+
+    /// Should a basis at `depth` be restored to reduced form after its
+    /// specialisation?  `KIC_F4_INHERIT_RREF` names the policy: `0` never
+    /// (the default), `k ≥ 1` every `k` levels.
+    ///
+    /// A retained negative control.  Restoring reduced form does cut the
+    /// cascade — on `K_1/2^23` a displaced row then hits `9.8` pivots
+    /// instead of `40.5` — but the pass itself costs `72 M` word XORs
+    /// against the `49 M` it saves, because a reduced basis is *denser*
+    /// than an echelon one and every specialisation refills some twenty
+    /// pivot columns per row (`RESEARCH_INHERITED_F4.md` §3.5).
+    fn rref_every() -> u32 {
+        std::env::var("KIC_F4_INHERIT_RREF")
+            .ok()
+            .and_then(|v| v.parse::<u32>().ok())
+            .unwrap_or(0)
+    }
+
+    /// Depth of this basis below its root: the number of variables
+    /// specialised away.
+    pub fn depth(&self) -> u32 {
+        self.assigned.count_ones()
+    }
+
     /// The basis of `system|_{var = value}`: the specialised rows, with
     /// the displaced ones re-reduced, plus completion rows for any
     /// generator whose degree dropped.
@@ -447,6 +514,10 @@ impl ReducedBasis {
                 }
                 out.insert(row, &mut cost);
             }
+        }
+        let every = Self::rref_every();
+        if every > 0 && out.depth() % every == 0 {
+            out.reduce_fully(&mut cost);
         }
         (out, cost)
     }

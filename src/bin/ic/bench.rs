@@ -18,12 +18,14 @@ use clap::Args;
 use serde_json::{json, Value};
 
 use crypto_lib::cryptanalysis::ic_boundary::{
-    calibrate_group, calibrate_row_ops, koblitz_instance, random_binary_instance, roster_prime_instance, BinaryGroup,
-    BinaryInstance, Calibration, CountedGroup, GroupOps, PrimeInstance,
+    calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor, koblitz_instance,
+    random_binary_instance, roster_prime_instance, BinaryGroup, BinaryInstance, Calibration, CountedGroup,
+    GroupOps, PinOutcome, PrimeInstance,
 };
+use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, FrobeniusMitmOracle, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase,
-    SubtractOracle,
+    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, KoblitzOrbitBase, MitmOracle,
+    PrimeAbscissaBase, SubtractOracle,
 };
 use crypto_lib::cryptanalysis::ic_framework::solvers::{solver_by_name, solver_registry};
 use crypto_lib::cryptanalysis::ic_framework::stages::{
@@ -46,6 +48,13 @@ pub struct BenchArgs {
     /// Koblitz instance of this field degree.
     #[arg(long)]
     pub koblitz_degree: Option<u32>,
+    /// Largest cofactor a random binary curve may have.  The boundary
+    /// ladders use 8, so `S = ops / sqrt(r)` is taken over a subgroup
+    /// close to the whole group, as on every ledger row; a larger bound
+    /// finds a curve faster but can hand back a tiny `r` that makes `S`
+    /// meaningless against rho.
+    #[arg(long, default_value_t = 8)]
+    pub max_cofactor: u64,
     /// `name` or `name:k=v,k=v`.
     #[arg(long)]
     pub factor_base: Option<String>,
@@ -58,6 +67,9 @@ pub struct BenchArgs {
     /// `random` or `walk`.
     #[arg(long, default_value = "walk")]
     pub targets: String,
+    /// The relation matrix: `incremental-gauss` or `structured-gauss`.
+    #[arg(long, default_value = "incremental-gauss")]
+    pub linalg: String,
     #[arg(long, default_value_t = 2_000_000)]
     pub max_trials: u64,
     #[arg(long, default_value_t = 0x1C_B0_0B_DA_7A)]
@@ -141,6 +153,9 @@ fn listing() -> Value {
                                     {"name": "m", "means": "summands, 2 or 3"}]},
                     {"name": "mitm-frobenius", "summands": "2 or 3", "regimes": ["koblitz"],
                      "parameters": [{"name": "m", "means": "summands, 2 or 3"}]},
+                    {"name": "descent-algebraic", "summands": "2 or 3", "regimes": ["char2", "koblitz"],
+                     "parameters": [{"name": "m", "means": "summands, 2 (descends S3) or 3 (descends S4)"}],
+                     "needs": "a subspace factor base (binary-subspace or koblitz-orbit) and --solver"},
                 ],
             },
             {
@@ -153,10 +168,7 @@ fn listing() -> Value {
                 "stage": "relation matrix",
                 "trait": "RelationSolver",
                 "what_it_chooses": "how relations are accumulated and the logarithm read off",
-                "plugins": [
-                    {"name": "incremental-gauss",
-                     "means": "reduced row echelon maintained as rows arrive, stopping the moment the target column is pinned"},
-                ],
+                "plugins": MATRIX_NAMES.iter().map(|(n, d)| json!({"name": n, "means": d})).collect::<Vec<_>>(),
             },
         ],
         "how_to_add_one": "implement the stage's trait and register it; docs/ic/FRAMEWORK.md walks through a solver end to end",
@@ -166,34 +178,45 @@ fn listing() -> Value {
 /// Measure this host, then pin every ratio the repository's table
 /// carries, so two runs of the same counts price the same (§12 of the
 /// ledger note).
+/// The prime regime's calibration: the group, the matrix and the word
+/// XOR measured here, the prime-only units (square roots, Legendre
+/// symbols, inversions) taken from the pinned table for the roster
+/// curves, and every unit the table carries pinned over the measured
+/// value.
 fn calibration_for<G: CountedGroup>(
     g: &G,
     points: &[G::Elt],
     regime: &str,
     instance: &str,
     modulus: u64,
-) -> Calibration {
+) -> (Calibration, PinOutcome) {
     let mut calib = Calibration::default();
     if !points.is_empty() {
         calibrate_group(g, points, &mut calib);
     }
     calibrate_row_ops(modulus, &mut calib);
-    calib.pin(regime, instance);
-    calib
+    calib.ns_per_word_xor = Some(calibrate_word_xor());
+    let pins = calib.pin(regime, instance);
+    (calib, pins)
+}
+
+/// The binary regimes' calibration: the ledger's own measurement of
+/// the group, the Artin–Schreier solve, the Frobenius map, the matrix
+/// and the word XOR, then the pinned ratios where the table has this
+/// instance.  A freshly generated random curve is not in the table, so
+/// its base build is priced at the measured Artin–Schreier factor
+/// rather than left at zero.
+fn calibration_for_binary(inst: &BinaryInstance, regime: &str) -> (Calibration, PinOutcome) {
+    let mut calib = calibrate_binary_instance(inst);
+    calibrate_row_ops(inst.r, &mut calib);
+    let pins = calib.pin(regime, &inst.name);
+    (calib, pins)
 }
 
 fn sample_prime_points(inst: &PrimeInstance) -> Vec<crypto_lib::cryptanalysis::ic_boundary::PrimePoint> {
     let g = inst.generator_point();
     let mut ops = GroupOps::default();
     (1..=8u64).map(|k| inst.curve.mul(&mut ops, g, k)).collect()
-}
-
-fn sample_binary_points(
-    inst: &BinaryInstance,
-) -> Vec<crypto_lib::cryptanalysis::koblitz_fast::FastPoint> {
-    let g = BinaryGroup(&inst.fast);
-    let mut ops = GroupOps::default();
-    (1..=8u64).map(|k| g.mul(&mut ops, inst.generator, k)).collect()
 }
 
 /// One prime-field configuration, over `repeats` targets.
@@ -203,8 +226,8 @@ fn run_prime(
     args: &BenchArgs,
     calib: &Calibration,
 ) -> Result<Vec<RunReport>, String> {
-    let (fb_name, _) = parse_plugin(args.factor_base.as_deref().unwrap_or("prime-abscissa"))?;
-    let (or_name, or_params) = parse_plugin(args.oracle.as_deref().unwrap_or("mitm"))?;
+    let fb_name = spec.factor_base.as_str();
+    let or_name = spec.oracle.as_str();
     if fb_name != "prime-abscissa" {
         return Err(format!(
             "factor base `{fb_name}` is not available on a prime-field curve; try prime-abscissa"
@@ -229,10 +252,10 @@ fn run_prime(
         };
         let mut spec = spec.clone();
         spec.seed = spec.seed.wrapping_add(rep as u64 * 0x9E37);
-        let m = or_params.u64_or("m", 2)? as u32;
+        let m = spec.oracle_params.u64_or("m", 2)? as u32;
         let mut subtract = SubtractOracle;
         let mut mitm = MitmOracle::new(m);
-        let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
+        let oracle: &mut dyn DecompositionOracle<_> = match or_name {
             "subtract" => &mut subtract,
             "mitm" => &mut mitm,
             other => {
@@ -241,9 +264,7 @@ fn run_prime(
                 ))
             }
         };
-        out.push(run_pipeline(
-            &ctx, &spec, &base, oracle, None, planted, calib, None,
-        )?);
+        out.push(run_pipeline(&ctx, &spec, &base, oracle, planted, calib, None)?);
     }
     Ok(out)
 }
@@ -255,12 +276,12 @@ fn run_binary(
     args: &BenchArgs,
     calib: &Calibration,
 ) -> Result<Vec<RunReport>, String> {
-    let (fb_name, _) = parse_plugin(args.factor_base.as_deref().unwrap_or("binary-subspace"))?;
-    let (or_name, or_params) = parse_plugin(args.oracle.as_deref().unwrap_or("mitm"))?;
+    let fb_name = spec.factor_base.as_str();
+    let or_name = spec.oracle.as_str();
     let g = BinaryGroup(&inst.fast);
     let subspace = BinarySubspaceBase { instance: inst };
     let orbit = KoblitzOrbitBase { instance: inst };
-    let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name.as_str() {
+    let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name {
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         other => {
@@ -286,19 +307,30 @@ fn run_binary(
         };
         let mut spec = spec.clone();
         spec.seed = spec.seed.wrapping_add(rep as u64 * 0x9E37);
-        let m = or_params.u64_or("m", 2)? as u32;
+        let m = spec.oracle_params.u64_or("m", 2)? as u32;
         let mut subtract = SubtractOracle;
         let mut mitm = MitmOracle::new(m);
         let mut frob = FrobeniusMitmOracle::new(m, inst);
-        let oracle: &mut dyn DecompositionOracle<BinaryGroup> = match or_name.as_str() {
+        let mut algebraic = match or_name {
+            "descent-algebraic" => {
+                let raw = spec.solver.as_deref().ok_or(
+                    "descent-algebraic needs --solver (try buchberger-f2, sat-cdcl or exhaustive)",
+                )?;
+                let (sname, sparams) = parse_plugin(raw)?;
+                let budget = (spec.solver_budget_seconds > 0)
+                    .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
+                Some(DescentAlgebraicOracle::new(m, inst, solver_by_name(&sname)?, sparams, budget))
+            }
+            _ => None,
+        };
+        let oracle: &mut dyn DecompositionOracle<BinaryGroup> = match or_name {
             "subtract" => &mut subtract,
             "mitm" => &mut mitm,
             "mitm-frobenius" => &mut frob,
+            "descent-algebraic" => algebraic.as_mut().expect("built above"),
             other => return Err(format!("oracle `{other}` is not available here")),
         };
-        out.push(run_pipeline(
-            &ctx, &spec, base, oracle, None, planted, calib, None,
-        )?);
+        out.push(run_pipeline(&ctx, &spec, base, oracle, planted, calib, None)?);
     }
     Ok(out)
 }
@@ -341,6 +373,10 @@ struct SweepFile {
 struct SweepInstance {
     regime: String,
     degree: u32,
+    /// `char2` only: the largest cofactor the random curve may have;
+    /// the `--max-cofactor` default when absent.
+    #[serde(default)]
+    max_cofactor: Option<u64>,
 }
 
 /// Every combination of the matrix, in a stable order.
@@ -368,7 +404,7 @@ fn expand_matrix(
 fn spec_from(
     cfg: &std::collections::BTreeMap<String, String>,
     defaults: &BenchArgs,
-) -> Result<(PipelineSpec, String, String), String> {
+) -> Result<PipelineSpec, String> {
     let fb = cfg
         .get("factor_base")
         .cloned()
@@ -385,22 +421,19 @@ fn spec_from(
         .unwrap_or_else(|| defaults.targets.clone());
     let (fb_name, fb_params) = parse_plugin(&fb)?;
     let (or_name, or_params) = parse_plugin(&or)?;
-    Ok((
-        PipelineSpec {
-            factor_base: fb_name,
-            factor_base_params: fb_params,
-            oracle: or_name,
-            oracle_params: or_params,
-            solver: cfg.get("solver").cloned().or_else(|| defaults.solver.clone()),
-            solver_params: Params::default(),
-            targets: Targets::parse(&tg)?,
-            max_trials: defaults.max_trials,
-            seed: defaults.seed,
-            solver_budget_seconds: defaults.solver_budget_seconds,
-        },
-        fb,
-        or,
-    ))
+    Ok(PipelineSpec {
+        factor_base: fb_name,
+        factor_base_params: fb_params,
+        oracle: or_name,
+        oracle_params: or_params,
+        solver: cfg.get("solver").cloned().or_else(|| defaults.solver.clone()),
+        solver_params: Params::default(),
+        targets: Targets::parse(&tg)?,
+        linalg: cfg.get("linalg").cloned().unwrap_or_else(|| defaults.linalg.clone()),
+        max_trials: defaults.max_trials,
+        seed: defaults.seed,
+        solver_budget_seconds: defaults.solver_budget_seconds,
+    })
 }
 
 pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
@@ -425,7 +458,7 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
     }
 
     // Either a sweep file or the flags describe the work.
-    let (instance_spec, configs, mut args) = match &args.sweep {
+    let (instance_spec, configs, args) = match &args.sweep {
         Some(path) => {
             let raw = std::fs::read_to_string(path)
                 .map_err(|e| format!("cannot read sweep file {}: {e}", path.display()))?;
@@ -440,6 +473,9 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
             }
             if let Some(v) = file.max_trials {
                 a.max_trials = v;
+            }
+            if let Some(v) = file.instance.max_cofactor {
+                a.max_cofactor = v;
             }
             let mut configs = file.configurations.clone();
             configs.extend(expand_matrix(&file.matrix));
@@ -479,8 +515,12 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
                 .ok_or_else(|| format!("no prime instance at {degree} bits"))?,
         ),
         "char2" => Instance::Binary(
-            random_binary_instance(degree, args.seed, 1 << 20)
-                .ok_or_else(|| format!("no random binary instance at degree {degree}"))?,
+            random_binary_instance(degree, args.seed, args.max_cofactor).ok_or_else(|| {
+                format!(
+                    "no random binary instance at degree {degree} with cofactor at most {}",
+                    args.max_cofactor
+                )
+            })?,
         ),
         "koblitz" => Instance::Binary(
             koblitz_instance(1, degree)
@@ -490,23 +530,18 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         other => return Err(format!("unknown regime `{other}`; try prime, char2 or koblitz")),
     };
 
-    let calib = match &instance {
+    let (calib, pins) = match &instance {
         Instance::Prime(i) => {
             calibration_for(&i.curve, &sample_prime_points(i), "prime", &i.name, i.r)
         }
-        Instance::Binary(i) => {
-            let g = BinaryGroup(&i.fast);
-            calibration_for(&g, &sample_binary_points(i), &regime, &i.name, i.r)
-        }
+        Instance::Binary(i) => calibration_for_binary(i, &regime),
     };
 
     let started = std::time::Instant::now();
     let mut rows: Vec<RunReport> = Vec::new();
     let mut failures: Vec<Value> = Vec::new();
     for cfg in &configs {
-        let (spec, fb, or) = spec_from(cfg, &args)?;
-        args.factor_base = Some(fb);
-        args.oracle = Some(or);
+        let spec = spec_from(cfg, &args)?;
         if !json_only {
             eprintln!("  {} …", spec.label());
         }
@@ -544,6 +579,12 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         ],
         "instance": instance.name(),
         "regime": regime,
+        // The conversion every non-addition unit was priced at, so a
+        // frozen report re-derives its own GAE: nanoseconds per unit on
+        // this host, with the units the repository's table pinned over
+        // the measurement named apart from the ones left measured.
+        "calibration": calib,
+        "calibration_pins": pins,
         "configurations_run": rows.len(),
         "configurations_skipped": failures,
         "all_verified": all_verified,
