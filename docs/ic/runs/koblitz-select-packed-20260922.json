@@ -1,0 +1,237 @@
+{
+ "boundaries": {
+  "floor_adds_per_point": {
+   "derivation": "the field algebra a point cannot avoid: the half-trace lift that produces it, unconverted, plus the single Frobenius step that places it in its orbit. An orbit walk visits every point once, so that is one step per point.",
+   "made_of": {
+    "lift_algebra": 13.51,
+    "one_orbit_step_packed": 0.43
+   },
+   "measured_by": "examples/koblitz_select_decomposition.rs",
+   "normalisation_note": "No halving. A half-trace solve yields two points and every figure here is per point, so 'adds a point' already carries that. The first version of this floor halved both terms and understated the boundary twofold -- it would have reported selection at 13x its floor rather than 5.6x. A floor is only a boundary if it is derived at the same normalisation as the thing it bounds.",
+   "value": 13.93
+  },
+  "generic_floor_S": {
+   "formula": "sqrt(pi/2A), A = 2n = 82",
+   "value": 0.1384
+  },
+  "rho_reference_S": {
+   "pooled_over_targets": 224,
+   "value": 0.1665
+  }
+ },
+ "change": {
+  "nature": "a change of representation, not of algorithm: same iteration order, same decisions, same output",
+  "scope": "odd degrees only; an even degree has no FastCurve and keeps the BigUint walk, which is also the reference the packed one is checked against",
+  "what": "finish_factor_base_domain keys its point index on the packed u64 and walks both orbit structures with the FastCurve",
+  "where": "src/cryptanalysis/koblitz_index_calculus.rs, split into orbit_maps_packed and orbit_maps_bigint"
+ },
+ "classification": {
+  "caveat": "S is still 1.17x rho.",
+  "class": "engineering",
+  "why": "S fell and the ratio to the generic floor fell with it, but nothing the method does changed: the same base is built by the same steps in a different representation. No count the floor bounds moved."
+ },
+ "commit": "cb69e6f19e393e61899dd5f33bf5da659d124845",
+ "composition_after": {
+  "build": 0.328,
+  "collect": 0.544,
+  "descent": 0.0,
+  "linear_algebra": 0.0,
+  "select": 0.127
+ },
+ "control": {
+  "cases": "6 degrees (19, 23, 29, 31, 37, 41) x 3 widths (200, 600, 1500) = 18",
+  "end_to_end": "the best aimed config and its holdout re-run on the packed build: EVERY counter identical to the BigUint build -- points, orbits, columns, tier, stored pairs, scans, trials, relations, units, rejected, duplicates, core dimension, core nonzeros, descent trials, rho steps, 32/32 verified",
+  "test": "factor_base_orbit_maps_agree_in_both_representations",
+  "what_it_checks": "orbit_of, orbits, signed_orbit_of and signed_orbits agree field for field between the two implementations, and the base an odd degree ships with is the packed walk's output",
+  "why_it_matters": "identical maps mean every downstream counter is unchanged by construction, so the only thing this round moved is the time selection takes"
+ },
+ "diagnosis_before_the_change": {
+  "per_point_adds": {
+   "both_orbit_walks_kc_frobenius_biguint": 41.6,
+   "keying_three_times_point_key_biguint": 4.33,
+   "lifts_points_with_x_fast": 13.68,
+   "of_which_lower_to_biguint": 1.66,
+   "the_same_key_packed_fastpoint_pack": 0.02,
+   "the_same_step_packed_fc_frobenius_k": 0.4
+  },
+  "ratio_to_floor": 5.8,
+  "reading": "a BinaryPoint carries two BigUints, so an index key is two allocations and a two-BigUint hash and a Frobenius step is two BigUint squarings. Half the whole call was stepping BigUint-backed points through a Frobenius the pair table has always done in one word.",
+  "rebuild_share_of_selection": 0.897,
+  "selection_adds_per_point": 80.8
+ },
+ "falsification": {
+  "measured": {
+   "S": 0.195,
+   "adds_per_point": 37.3,
+   "selection_total": 587043,
+   "vs_rho": 1.17,
+   "whole_pipeline": 4625665
+  },
+  "met": true,
+  "predicted": {
+   "S": 0.1919,
+   "adds_per_point": 35.3,
+   "selection_total": 555606,
+   "vs_rho": 1.15,
+   "whole_pipeline": 4554273
+  },
+  "registered_before_any_code_changed": true,
+  "success_condition": "the rebuilt base identical on every usable degree and several widths, whole-pipeline total down >= 1.10x, 32/32 verified with 0 rejected",
+  "why_the_prediction_was_optimistic": "the packed path lifts every point from BigUint to the packed form once, about 1.5 adds a point, which the prediction did not account for"
+ },
+ "frozen_at": "2026-09-22T04:58:41.387386+00:00",
+ "instance": {
+  "a": 0,
+  "automorphism_order_A": 82,
+  "curve": "K_0/GF(2^41)",
+  "degree": 41,
+  "sqrt_r": 741456,
+  "subgroup_order": 549756390943
+ },
+ "ledger": {
+  "note": "the aimed least-mentioned config at |F| = 15,744, window 256, 32 targets; only the selection column differs and every other counter is identical",
+  "rows": [
+   {
+    "S": 0.2221,
+    "build": 1519296,
+    "collect": 2517120,
+    "descent": 54,
+    "linear_algebra": 2153,
+    "select": 1230873,
+    "total_adds": 5269495,
+    "variant": "aimed, BigUint base build",
+    "verified": "32/32",
+    "vs_generic_floor": 1.6,
+    "vs_rho": 1.33
+   },
+   {
+    "S": 0.195,
+    "build": 1519296,
+    "collect": 2517120,
+    "descent": 54,
+    "linear_algebra": 2153,
+    "select": 587043,
+    "total_adds": 4625665,
+    "variant": "aimed, packed base build",
+    "verified": "32/32",
+    "vs_generic_floor": 1.41,
+    "vs_rho": 1.17
+   }
+  ]
+ },
+ "limitations": [
+  "One degree end to end (n = 41), though the phase speedup is measured at five widths and the identity control spans six degrees.",
+  "Selection is priced from a timing, not a native count; see unit_caveat. The base-identity control is what makes the comparison sound.",
+  "Even-degree bases keep the BigUint walk and are unmeasured here."
+ ],
+ "measurements": {
+  "protocol": "quiet machine, nothing else running, three passes per width. An earlier pass shared the box with a compiling test suite and is discarded: contention inflates the measured per-addition unit, which DIVIDES the converted total down, so a contended run understates the operation count. It also produced a non-monotone sweep (12,464 points reading slower than 16,400), which is how it was caught.",
+  "selection_at_the_ledger_width": {
+   "after_adds_mean": 587043,
+   "after_adds_passes": [
+    574740,
+    591624,
+    594765
+   ],
+   "after_adds_per_point": 37.3,
+   "before_adds": 1230873,
+   "before_adds_per_point": 78.2,
+   "points": 15744,
+   "ratio_to_floor_after": 2.7,
+   "ratio_to_floor_before": 5.6,
+   "speedup": 2.097,
+   "spread": 0.034
+  },
+  "selection_by_width": [
+   {
+    "after_adds_mean": 185428,
+    "after_adds_passes": [
+     182907,
+     185221,
+     188155
+    ],
+    "after_adds_per_point": 35.3,
+    "before_adds": 409745,
+    "before_adds_per_point": 78.1,
+    "points": 5248,
+    "speedup": 2.21
+   },
+   {
+    "after_adds_mean": 309274,
+    "after_adds_passes": [
+     307504,
+     309671,
+     310646
+    ],
+    "after_adds_per_point": 36.3,
+    "before_adds": 669193,
+    "before_adds_per_point": 78.5,
+    "points": 8528,
+    "speedup": 2.164
+   },
+   {
+    "after_adds_mean": 452708,
+    "after_adds_passes": [
+     453730,
+     452387,
+     452007
+    ],
+    "after_adds_per_point": 36.3,
+    "before_adds": 969811,
+    "before_adds_per_point": 77.8,
+    "points": 12464,
+    "speedup": 2.142
+   },
+   {
+    "after_adds_mean": 618316,
+    "after_adds_passes": [
+     613638,
+     617801,
+     623509
+    ],
+    "after_adds_per_point": 37.7,
+    "before_adds": 1304319,
+    "before_adds_per_point": 79.5,
+    "points": 16400,
+    "speedup": 2.109
+   },
+   {
+    "after_adds_mean": 772161,
+    "after_adds_passes": [
+     782506,
+     774395,
+     759583
+    ],
+    "after_adds_per_point": 38.0,
+    "before_adds": 1613142,
+    "before_adds_per_point": 79.3,
+    "points": 20336,
+    "speedup": 2.089
+   }
+  ],
+  "speedup_on_the_phase": {
+   "max": 2.21,
+   "mean": 2.14,
+   "min": 2.09,
+   "note": "consistent across five widths, both arms monotone in width, pass spread 0.4% to 3.4%"
+  }
+ },
+ "question": "Selecting a factor base costs 78 group-addition equivalents a point. What is the algebra worth, and where does the rest go?",
+ "run": "koblitz-select-packed-20260922",
+ "schema_version": 1,
+ "speedups": {
+  "against_the_rung_this_branch_started_from": 7.26,
+  "definition": "baseline_total_operations / candidate_total_operations",
+  "selection_phase": 2.1,
+  "whole_pipeline": 1.139
+ },
+ "unit": "one batched group addition (Montgomery-shared inversion), measured on this host in the same process",
+ "unit_caveat": "Selection is the one phase priced by converting measured TIME rather than a native count, because its cost is dominated by rebuilding the base and a rebuild has no countable primitive. That was true when selection was first priced and is still true here, so before and after are like for like -- but it does mean this round's gain rests on a timing, which is why the base-identity control below is what the claim actually stands on.",
+ "what_is_left": {
+  "build": "32.8%; |F|^2/4n + |F|, one addition per stored pair, and now the largest single phase after collection",
+  "collect": "54.4%; the relation count is at its counting floor, so this falls only with the column count or the scan constant",
+  "descent": "0.0%",
+  "linear_algebra": "0.0%",
+  "select": "12.7%, and 2.7x its floor. The remainder is the lift itself (13.51 of 13.93 in the floor), so further work here is bounded by about 2.7x and would have to attack the half-trace solve."
+ }
+}

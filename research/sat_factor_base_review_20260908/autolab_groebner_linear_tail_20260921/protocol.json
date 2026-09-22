@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-KIC-GROEBNER-LINEAR-TAIL-20260921",
+  "base_commit": "43705b34c5d5b801e29643c7e8f60eb1f6a9edee",
+  "objective": "Reduce exact Boolean matrix-F4 solver work by computing only decisive linear consequences and avoiding redundant lower-degree passes on wide public-synthetic Koblitz systems.",
+  "fixture": {
+    "curve": "K_0/F_2^31",
+    "summands": 2,
+    "dimension": 16,
+    "paired_prng_seed": 24301,
+    "targets": 2,
+    "node_budget": 50000,
+    "threads": 1
+  },
+  "selected_policy": {
+    "minimum_variables": 24,
+    "degree_schedule": "build only the configured maximum degree, whose row space contains every lower-degree row",
+    "elimination": "forward echelon through degree-at-least-2 columns, then full RREF on the degree-at-most-1 tail",
+    "readback": "materialize only constant-one or single-variable consequences",
+    "controls": {
+      "KIC_F4_MAX_DEGREE_ONLY": "0 restores the degree ladder; 1 forces maximum-degree-only",
+      "KIC_F4_SOLVER_LINEAR_TAIL": "0 restores full RREF; 1 forces linear-tail elimination",
+      "KIC_F4_SOLVER_FULL_READBACK": "1 restores complete nonlinear row readback"
+    }
+  },
+  "acceptance": [
+    "same executable for selected and legacy paired arms",
+    "identical target count, verdict mix, effort, built degree, first-fall degree, and gates",
+    "exact random-matrix row-space-intersection equivalence",
+    "exhaustive small-system root-set equivalence with the selected path forced",
+    "wall, child CPU, peak RSS, phase timing, F4 calls, and word XORs retained"
+  ],
+  "claim_boundary": "Public-synthetic n=31 decomposition-solver evidence only. This is not relation-yield evidence, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim."
+}

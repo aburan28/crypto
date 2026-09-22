@@ -97,6 +97,10 @@ fn fingerprint() -> &'static str {
             include_str!("polynomial_reuse.rs"),
             include_str!("koblitz_groebner.rs"),
             include_str!("pq_groebner_f2.rs"),
+            // Produces the cached symbolic summation polynomials. Without it a
+            // change to the generator would leave every key untouched and the
+            // old bytes would be served as current.
+            include_str!("semaev_leading_form.rs"),
         ] {
             h.update(source.as_bytes());
         }

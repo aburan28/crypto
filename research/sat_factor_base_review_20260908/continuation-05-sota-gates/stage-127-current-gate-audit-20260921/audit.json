@@ -1,0 +1,68 @@
+{
+  "autolab_protocol_sha256": "2d9a716d11e1def8c0b2e0f7711acc30fd712282f7bdf0bacff9e4d47b58a03e",
+  "factor_base_logs_known_by_construction": false,
+  "factor_base_selection_uses_scalar_labels": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "955161267f724f4168b11cc219123ce4dcc1ded435f86c94a3feb50f3a7749ef",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_missing_licensed_magma",
+    "2_same_instance_solver_panel": "partial_missing_licensed_magma_full_panel",
+    "3_single_core_core_memory_conflicts_wall": "partial_missing_magma_and_selected_single_core_refresh",
+    "4_n31_n41_larger_pdp_scaling": "satisfied_finite_execution_coverage",
+    "5_unknown_scalar_without_constructed_base_logs": "satisfied_finite_n23_n31_n41_n53",
+    "6_full_cost_vs_automorphism_rho": "partial_online_wall_pass_full_cost_core_memory_fail",
+    "7_external_reproduction_novelty": "missing"
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "ledger_sha256": "f4804640744a8d3c67435e5744204558e764737a885b8eb03af435d2ba1f9407",
+  "licensed_magma_complete": false,
+  "next_targets": [
+    "reduce exact selected n=53 support below 512 MiB without changing the base or rank-95 solve",
+    "reduce selected direct/rho core ratio to at most one and retain the online wall crossover",
+    "refresh forced-single-core evidence for the selected four-shard route",
+    "execute the frozen 160-input panel under licensed Magma F4",
+    "obtain unaffiliated reproduction and novelty review"
+  ],
+  "predecessors": {
+    "stage108_status": "n53_routing_selection_archive_verified",
+    "stage108_verification_sha256": "f8bf909923e65d11fbaa93cabad9f593b47f67c79fe9f064fb9f40f99f4f3fde",
+    "stage109_audit_sha256": "5196fd73a26e5ee5602a0ab5334618a03754a70e7afe06a7c2e7138eb8fec7ac",
+    "stage109_status": "current_seven_gate_audit_verified",
+    "stage124_audit_sha256": "1a3071fd5308286785624b70a00028f3ca0914afae3766b4da79be7a27ded069",
+    "stage124_status": "current_seven_gate_audit_verified",
+    "stage125_audit_sha256": "6b1e8f826591d9ab3c84df1babaa82526a20e77a23d1c42a4363b47ab4d544dc",
+    "stage125_status": "current_seven_gate_audit_verified",
+    "stage126_audit_sha256": "e171c98865743c5622d2118afee792e77ac9e81d7fa4c0201840dde09daeb739",
+    "stage126_status": "current_seven_gate_audit_verified",
+    "stage99_status": "n53_optimization_chain_verified",
+    "stage99_verification_sha256": "0cf375572da1dcb63bb9925f56301eb29820d47ed3330fd0643938a13f6901ce"
+  },
+  "schema": "koblitz_stage127_current_gate_audit.v1",
+  "scoreboard_sha256": "1757e98d5cd52888393aede0fd3b293288a7af424c44e40703e0a9ab8e2c344b",
+  "selected_n53": {
+    "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+    "fresh_build_ratio": 17.636691639458064,
+    "median_core_ratio": 2.2615649859983002,
+    "median_wall_ratio": 0.8391902594529497,
+    "paired_wall_ratios": [
+      0.8470950666326896,
+      0.8589372990417655,
+      0.8391902594529497,
+      0.8290808707265989,
+      0.8389296438435545
+    ],
+    "routing": "xor_low_and_high_x_windows",
+    "support_bytes": 738197504,
+    "support_entries": 24805379,
+    "support_table_shards": 4,
+    "unknown_scalar_ratio": 0.9874890990570423
+  },
+  "since_stage126": {
+    "reference": "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md",
+    "what_did_not": "every Koblitz gate fact Stage 109 sealed and Stages 124, 125 and 126 re-sealed: the selected n=53 base hash, support entries and bytes, the five paired wall ratios, the core and fresh-build ratios, the unknown-scalar ratio, and the seven gate statuses",
+    "what_moved": "docs/ic/boundary_targets.json, docs/ic/BOUNDARY_TARGETS.md and GATE_STATUS.md: the boundary ledger's Round 4, which pins the unit's conversion ratios in docs/ic/calibration.json instead of measuring them on the host each run. Every row of the ladder is repriced by up to 9.5 per cent, concentrated on rows whose cost is almost all converted work; no native counter moved on any of the 537 rows compared, and the best row of each regime is unchanged to four significant figures"
+  },
+  "status": "current_seven_gate_audit_verified",
+  "target_subgroup_enumerated_for_factor_base": false
+}

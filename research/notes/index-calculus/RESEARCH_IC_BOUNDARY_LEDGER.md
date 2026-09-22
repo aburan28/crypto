@@ -1928,6 +1928,627 @@ that re-pins has to say so in the note and carry the delta the way this
 one does — otherwise the drift returns as a step instead of as noise.
 The reference host is the one named in the file.
 
+### 12.4 The correction, measured
+
+The ladder was rerun with nothing changed but the conversion, and
+`boundary_repricing_check.py` compared every field of `group_ops` and
+every key of `native`, in every phase, row by row and repeat by repeat.
+
+| | |
+|:--|--:|
+| rows compared | 537 |
+| identical in every native counter | **537** |
+| rows whose counters moved | **0** |
+| `S` after over before, median | 1.0000 |
+| range | 0.9048 to 1.0766 |
+| rows repriced by more than 2% | 21 of 537 |
+
+So the round is accounting, as claimed: nothing computed anything
+different, and the correction to individual rows reaches about `±9.5%`.
+The checker's sensitivity is not assumed — run against two runs that
+genuinely differ, the rotation ladder against the shuffle one, it finds
+94 of 537 rows with moved counters and names the fields.
+
+**Where the correction lands, and why.**  A row is repriced in
+proportion to how much of its cost was *not* plain group additions,
+because additions are the unit's numeraire and need no conversion.  The
+share of each variant's cost that goes through a conversion, against the
+largest repricing that variant saw:
+
+| variant | converted share | worst ratio |
+|:--|--:|--:|
+| `semaev_s4_pairs_and_solve_m3` | 0.999 | 0.925 |
+| `…_s4_pairs_and_solve_m3_signed_orbit_columns` | 0.996 | 0.964 |
+| `semaev_s3_roots_m2` | 0.897 | 0.905 |
+| `mitm_m2_negfold` | 0.591 | 0.995 |
+| `mitm_m2_negfold_walk` | 0.247 | 0.996 |
+| `mitm_m2_negfold_walk_balanced` | 0.196 | 0.997 |
+| `mitm_m2_…_frobfold_walk_balanced` | 0.082 | 0.996 |
+| `mitm_m3_signed_orbit_columns_negfold` | 0.011 | 1.0002 |
+| `mitm_m3_signed_orbit_columns` | 0.006 | 1.0001 |
+
+The two ends of that table are the whole story.  A row that is 99.9%
+converted work moves by nine per cent; a row that is 0.6% converted work
+moves by one part in ten thousand.
+
+**And that is why §11's conclusions do not depend on the drift.**  The
+best row of each regime is a walk over a pair table — additions, almost
+all the way down — so the headline figures are unmoved:
+
+| regime | best row | `S` before | `S` after | vs rho |
+|:--|:--|--:|--:|--:|
+| prime, `2^23.4` | balanced `m = 2` walk | 14.281 | 14.280 | 3.63× |
+| binary, `2^24.4` | balanced `m = 2` walk | 50.656 | 50.652 | 21.9× |
+| Koblitz, `2^39.0` | balanced `m = 2` folded walk | 5.924 | 5.926 | 30.3× |
+
+The rows the drift *did* move are the ones this ledger already classes
+baseline or relabelling — Semaev `S₃` roots and `S₄` pairs-and-solve —
+and no conclusion ever rested on them.  So the defect was real, it was
+worth removing, and it was not threatening the answers: it put a floor
+under what a *future* round could resolve, which is the reason to fix it
+rather than a correction to what earlier rounds said.
+
+## 13. Round 5: the restart pool, drawn on first use
+
+§11.6 ended by naming this round's first line, and this is it:
+
+> The pooled offsets are drawn with the jumps at setup: sixteen extra
+> `[c]G + [d]Q`, thirty-two scalar multiplications, once per run whether
+> or not the walk ever restarts. … the fix is obvious: draw the pool on
+> the *first* restart rather than at setup, so a run that never restarts
+> never pays for it.
+
+### 13.1 How much is actually lying there, counted before touching the code
+
+The Round-4 ladder has 204 walk rows.  Their `walk_restarts` counter —
+which counts the opening segment as the first — distributes like this:
+
+| `walk_restarts` | rows | offsets the row used |
+|--:|--:|--:|
+| 1 | 110 | 0 |
+| 2 | 10 | 1 |
+| 3 | 7 | 2 |
+| 4–15 | 29 | 3–14 |
+| ≥ 16 | 48 | 16 |
+
+So **110 of 204 rows drew sixteen offsets and took none**, and another 46
+took fewer than they paid for.  Only the 48 rows that restart at least
+sixteen times used the pool they bought.
+
+What that waste is worth is arithmetic, not a guess, and it is worth
+doing before the measurement so the measurement has something to
+contradict.  One offset is two scalar multiplications and one addition;
+a scalar multiplication by a uniform `k < r` is `⌈log₂r⌉ − 1` doublings
+and about `log₂r/2 − 1` additions, so sixteen offsets cost about
+
+```
+ΔS_max  ≈  (48·log₂r − 48) / √r          group-addition equivalents
+```
+
+in the unit, and that is the *whole* saving on a row that takes no
+offset.  It falls fast:
+
+| `r` | `ΔS_max` |
+|:--|--:|
+| `2^10` | 10.4 |
+| `2^15` | 3.4 |
+| `2^20` | 0.89 |
+| `2^27` | 0.11 |
+| `2^39` | 0.0025 |
+
+That table is the round's honest headline before a single run: this
+removes a real cost, it removes it almost entirely from rungs below
+`2^15`, and **it does essentially nothing inside §1.6's window**.  (That
+last clause was measured and is corrected in §13.5: it is right about
+`ΔS`, which is a function of `r` alone, and wrong about the *ratio*,
+which also depends on the row's `S` — one row inside the window moves by
+`7.2%`.)  The
+three losses §11.6 recorded — `K_1 / GF(2^11)` at `0.597`,
+`K_0 / GF(2^13)` at `0.650`, `bench-10bit`'s three-summand walk at
+`0.656` — are all below `2^20`, and so is all of the gain.
+
+There is one consequence that is not cosmetic.  §11.3 reads the ladder's
+`S / S_family` column as the family law converging to its own optimum,
+and the small rungs are where that column is measured; a fixed setup
+cost that nobody uses inflates exactly those rows.  So the reason to
+land this is the same as Round 4's reason for pinning the unit: it
+raises the resolution of a future measurement rather than improving an
+answer.
+
+**The lever is also nearly exhausted by construction**, and that is
+worth saying now rather than discovering it later.  Drawing offsets one
+at a time on demand — which is what this implements — recovers the whole
+of the 110 rows' waste and most of the 46's.  Nothing else remains in
+the restart: what is left is sixteen jumps at setup, which every segment
+uses, and one addition per restart, which is already the floor for
+moving off a path.
+
+### 13.2 The comparison is exact, by construction
+
+A saving this small is below the run-to-run spread of §11.4, so a
+before-and-after of two ladders would not resolve it.  Two changes make
+it resolvable without any statistics at all:
+
+- **The offsets come off their own random stream.**  `pool_rng` is
+  seeded from the run's seed and is touched by nothing else, so moving
+  the draw earlier or later cannot shift the walk's randomness.
+- **A restart takes offset `k mod 16`**, not a random one, so selecting
+  an offset consumes no randomness either.
+
+With both, the eager and the lazy arm walk **bit-identical
+trajectories**: same steps, same restarts, same trials, same relations,
+same rows, same logarithm.  They differ in exactly one quantity — what
+the offsets cost — and the run reports that quantity directly, as
+`walk_pool_ops`, so the difference between the arms is a subtraction
+rather than an inference.  Both arms come from one binary on one host;
+`--eager-restart-pool` selects the baseline.
+
+**The eager arm is Round 4's pool *policy*, not Round 4's run**, and the
+distinction matters.  Round 4 chose an offset with a draw from the main
+stream, which this round replaces with the fixed cycle; that alone
+shifts every walk's randomness, so the Round-4 file is not a valid
+baseline for a saving this small and is not used as one.  It stays
+frozen for what it was.  Where a cross-round figure is wanted — §11.6's
+three losses were measured against *Round 2* — it is quoted as a
+cross-round figure, with the §12 repricing caveat, and never as the
+paired result.
+
+The test `drawing_the_restart_pool_lazily_changes_the_cost_and_nothing_else`
+asserts the whole of that on two prime rungs and eight seeds.
+
+### 13.3 The falsification target, declared before the ladders were read
+
+The round succeeds only if **all** of these hold:
+
+1. **The pairing holds.**  Every row of the two ladder arms is identical
+   in every native counter except `walk_jumps`, `walk_pool_offsets` and
+   `walk_pool_ops`; zero rows have a moved trajectory.
+2. **The saving accounts for itself exactly.**  On every walk row,
+   `gae_eager − gae_lazy` equals `walk_pool_ops_eager − walk_pool_ops_lazy`
+   to the operation — no row saves more or less than the offsets it
+   stopped drawing.
+3. **The loss is gone and no new one appears.**  `S` falls on each of
+   the three rows §11.6 named, and rises on none anywhere.
+4. **Correctness is preserved.**  `all_verified` on both arms, every
+   recovered logarithm equal to the planted one, and
+   `repeated_column_rows` and `pinned_by_repeated_row` zero everywhere,
+   on the holdout seed as well.
+5. **It is engineering and is reported as engineering.**  Trials and
+   yield against the exact ceiling must be *identical*, since the change
+   touches no decision the search makes.  The fitted exponents may move,
+   because the saving is larger at small `r` than at large: a steepening
+   of the walk rows' fit is expected and must be reported as an artifact
+   of removing a size-independent cost, never as a change in the
+   method's growth.
+
+**Inadmissible**: changing the factor base or the decomposition size;
+changing the operation accounting or the pinned conversion; skipping
+verification; choosing favourable seeds; quoting the relation phase
+instead of the whole-pipeline `S`; or reporting a small-rung saving as
+if it moved a conclusion inside §1.6's window.
+
+**Abandon if** the pairing fails — if any trajectory counter moves, the
+change did more than move a cost and this design is wrong.
+
+### 13.4 The pairing, checked
+
+Six runs, all from one binary (`blake3 ae6dd73f4404`) on one host: the
+ladder, a holdout seed and the eight-repeat headline, each in both arms.
+`boundary_pool_pairing_check.py` compares every native counter and every
+group-operation count of every row, per repeat.
+
+| | ladder | holdout | headline |
+|:--|--:|--:|--:|
+| rows compared | 537 | 106 | 240 |
+| identical in every counter but the pool's | **537** | **106** | **240** |
+| rows whose trajectory moved | **0** | **0** | **0** |
+| walk rows | 204 | 48 | 112 |
+| …that drew fewer offsets | 155 | 31 | 69 |
+| rows whose saving ≠ the offsets they dropped | **0** | **0** | **0** |
+| rows whose `S` rose | **0** | **0** | **0** |
+| `all_verified` | yes | yes | yes |
+
+So the design holds exactly: the two arms did the same work, row for
+row and repeat for repeat, and the only thing that changed is what the
+offsets cost.  The saving is a subtraction.
+
+### 13.5 Where the saving lands, and a correction to §13.1
+
+The closed form of §13.1 is a good predictor.  Per instance, the largest
+saving any walk row realised against `(48·log₂r − 48)/√r`:
+
+| instance | `log₂r` | predicted `ΔS` | measured `ΔS` | measured / predicted |
+|:--|--:|--:|--:|--:|
+| `K_0 / GF(2^15)` | 9.55 | 14.980 | 13.854 | 0.925 |
+| `bench-10bit` | 9.68 | 14.531 | 13.490 | 0.928 |
+| `K_1 / GF(2^11)` | 9.95 | 13.651 | 12.442 | 0.911 |
+| `bench-14bit` | 13.99 | 4.893 | 4.717 | 0.964 |
+| `bench-20bit` | 20.00 | 0.891 | 0.850 | 0.954 |
+| `K_1 / GF(2^23)` | 22.00 | 0.492 | 0.478 | 0.972 |
+| `generated-24bit` | 23.38 | 0.325 | 0.318 | 0.980 |
+| `K_0 / GF(2^37)` | 27.78 | 0.085 | 0.082 | 0.969 |
+| `K_0 / GF(2^41)` | 39.00 | 0.002 | 0.002 | 0.990 |
+
+The formula is high by 1 to 9 per cent across the whole ladder, as it
+should be: it prices sixteen offsets and the best row on each instance
+still took a few.
+
+**§13.1 overstated one thing and it is corrected here.**  It said the
+saving "does essentially nothing inside §1.6's window".  In absolute
+terms that is right — `ΔS ≤ 0.85` at `2^20` and `0.002` at `2^39` — but
+`ΔS` is a function of `r` alone while the *ratio* depends on the row's
+own `S`, and the Koblitz rows are the cheapest on the board because of
+the `2n` fold.  Splitting the walk rows at the window's edge:
+
+| | walk rows | best ratio | largest `ΔS` |
+|:--|--:|--:|--:|
+| below `2^20` | 120 | 0.5825 | 14.633 |
+| at or above `2^20` | 84 | **0.9283** | 0.850 |
+
+That best is `K_1 / GF(2^23)`'s two-summand folded walk at `2^22`: a
+**7.2 per cent** cut, inside the window, on a row whose `S` is about
+`6.7`.  Small, but not nothing, and the prediction should have said so.
+The prime and binary rows at the same sizes move by 1 per cent or less,
+because their `S` is five to eight times larger for the same `ΔS`.
+
+### 13.6 The loss §11.6 recorded is closed
+
+§11.6 measured the eager pool as a straight loss on the rungs that
+barely restart, against Round 2.  The eager arm reproduces those losses
+and the lazy arm removes them:
+
+| row | Round 2 `S` | eager `S` | lazy `S` | lazy vs Round 2 | §11.6 quoted |
+|:--|--:|--:|--:|--:|--:|
+| `K_1 / GF(2^11)` `m = 2` folded walk | 19.22 | 31.66 | 19.21 | **1.001×** | 0.597 |
+| `K_0 / GF(2^13)` `m = 2` folded walk | 18.54 | 28.54 | 18.53 | **1.000×** | 0.650 |
+| `bench-10bit` `m = 3` walk | 26.31 | 39.80 | 26.31 | **1.000×** | 0.656 |
+
+The eager arm's own ratios to Round 2 are `0.607`, `0.649` and `0.661`
+against §11.6's `0.597`, `0.650` and `0.656` — an independent
+reproduction of that measurement two rounds later, on a different random
+stream.  The lazy arm lands on Round 2's figure to three or four
+significant figures, which is what it should do: on a run that never
+takes an offset, drawing the pool lazily means drawing nothing, and the
+row pays exactly the sixteen jumps Round 2 paid.
+
+These are cross-round comparisons and carry §12's repricing caveat.  It
+is negligible here: all three are addition-dominated rows, where §12
+measured the correction at under one part in a thousand.
+
+### 13.7 The re-plumbing is a re-randomisation, and it is bigger than the lever
+
+The eager arm is not the Round-4 file, and the gap between them is the
+most useful number this round produced.  Against Round 4, the eager arm
+(same policy, offsets moved to their own stream and selected by a cycle)
+gives:
+
+| | |
+|:--|--:|
+| rows compared | 537 |
+| identical in every counter | 333 |
+| rows whose counters moved | 204 |
+| distinct variants among them | 68, **every one a walk row** |
+| `S` after over before, median | 1.0000 |
+| range | **0.5394 to 1.8308** |
+| moved by more than 2% | 131 of 537 |
+
+The structure is exactly right: every non-walk row is bit-identical to
+Round 4, so nothing outside the walk changed; every walk row moved,
+because its randomness did.  The median is `1.0000` and the geometric
+mean over variant means is `0.9961`, so the re-seed is unbiased, as an
+algorithm-preserving change must be.
+
+But the *spread* is `0.54` to `1.83` at three repeats, while the lever
+this round set out to measure is at most `7%` inside the window.  **A
+before-and-after of two ladders could not have seen it.**  That is not a
+retrospective justification for the paired design; §13.2 required it in
+advance, and this is the measurement that says by how much.
+
+It is also a warning about reading any single walk row across rounds.
+The best row of each regime, Round 4 against this round:
+
+| regime | best row | Round 4 | eager | lazy | vs rho | lazy / eager |
+|:--|:--|--:|--:|--:|--:|--:|
+| prime, `2^23.4` | balanced `m = 2` walk | 14.280 | 13.966 | **13.966** | 3.55× | 1.00000 |
+| binary, `2^24.4` | balanced `m = 2` walk | 50.652 | 36.929 | **36.929** | 15.96× | 1.00000 |
+| Koblitz, `2^39.0` | balanced `m = 2` folded walk | 5.926 | 5.117 | **5.115** | 26.13× | 0.99952 |
+
+**None of those moves is this round's lever**, and the last column says
+so: the lever is exactly `1.000` on all three, because a row that
+restarts sixteen times or more draws the whole pool either way.  The
+binary row reading `36.9` instead of `50.7` is the same algorithm on a
+different random stream, and it sits inside the `0.54–1.83` spread above.
+Classed by §3 that move is **accounting**: numbers changed, the algorithm
+did not.  It is carried onto the page as the current measurement, with
+Round 4's figure as its before mark and this paragraph as its
+explanation, because hiding it would be worse — but it is not progress
+and this ledger does not count it as any.
+
+### 13.8 Against §13.3's target, and the class
+
+| condition, as declared | result |
+|:--|:--|
+| 1. every row identical but for the three pool counters, zero trajectories moved | **met** — 883 rows over three run pairs, zero |
+| 2. the saving equals the offsets dropped, to the operation | **met** — zero mismatches |
+| 3. `S` falls on §11.6's three rows, rises nowhere | **met** — `0.607`, `0.649`, `0.661`; zero rows rose |
+| 4. correctness preserved, holdout included | **met** — `all_verified` on all six runs, `repeated_column_rows` and `pinned_by_repeated_row` zero throughout |
+| 5. trials and yield identical; any exponent move reported as an artifact | **met, with the move reported below** |
+
+On the fifth: the trials and the yield against the exact ceiling are
+inside "identical in every counter", so they did not move at all.  The
+fitted exponents did, in the direction and for the reason §13.3 named —
+a size-independent cost removed from every row makes the small rungs
+cheaper by more than the large ones, so the slope rises:
+
+| regime | row | eager `α` | lazy `α` |
+|:--|:--|--:|--:|
+| prime | `mitm_m2_negfold_walk` | 0.489 | 0.537 |
+| prime | `mitm_m2_negfold_walk_balanced` | 0.408 | 0.447 |
+| prime | `mitm_m3_negfold_walk` | 0.507 | 0.554 |
+| binary | `mitm_m2_negfold_walk` | 0.533 | 0.542 |
+| Koblitz | `mitm_m2_…_frobfold_walk` | 0.433 | 0.459 |
+| Koblitz | `mitm_m2_…_frobfold_walk_balanced` | 0.411 | 0.431 |
+
+Every walk row steepens, by `0.01` to `0.05`, at equal or better `R²`.
+**This is an artifact of removing a fixed cost, not a change in the
+method's growth**, and it must not be read as one: the underlying
+algorithm is bit-identical between the two columns.  If anything the
+lazy column is the more honest fit, because the eager one was measuring
+a constant that no longer exists.
+
+**The class, by §3's test: engineering.**  `S` fell, on 155 of 204 walk
+rows; the trials, the yield against the ceiling and every other count
+did not move at all; the ratio to the counting boundary is unchanged in
+structure.  The re-plumbing that made the measurement possible is
+**accounting** and is labelled separately, per §13.7.  Neither is an
+advance and neither is reported as one.
+
+### 13.9 What does not count, and what this is not
+
+- The saving is confined to small `r`.  Nothing here moves the family
+  law of §11.2, the crossover extrapolations of §11.3, or the verdict
+  that no variant of this family crosses rho at any size.
+- The binary regime's headline reading `36.9` where Round 4 read `50.7`
+  is re-randomisation (§13.7), not a gain, and is classed accounting.
+- The exponent steepening of §13.8 is an artifact of removing a
+  size-independent constant.  It is not evidence about growth.
+- The cross-round figures of §13.6 are cross-round and carry §12's
+  caveat; only the eager-against-lazy columns are paired.
+- `ΔS_max` in §13.1 is a derivation, checked against measurement in
+  §13.5; the rows of §13.5's right-hand column are the measurement.
+
+**One gap this round surfaced and did not close.**  The holdout's prime
+22-bit curve is generated from the holdout seed, so it is a different
+curve from the ladder's and is not in `docs/ic/calibration.json`; its
+seven non-addition units price at factors measured on the host, and 32
+of the holdout's rows therefore differ between two runs that did
+identical work.  The pairing check reports those separately rather than
+counting them, so no figure here rests on them.  The fix is to price an
+unpinned instance at its regime's median ratio instead of the host's
+measurement, which makes the unit host-independent everywhere rather
+than only on the default ladder.  That is a repricing with its own
+classification and its own before-and-after, so it is the next round's
+line, not this one's.
+
+### 13.10 Reproducing
+
+```
+# One binary, one host, two configurations.
+cargo build --release --bin ic
+ic boundary --out round5-eager.json --eager-restart-pool
+ic boundary --out round5.json
+
+# The holdout seed and the eight-repeat headline, both arms.
+ic boundary --seed 1213743172 --repeats 2 --prime-bits 22,24 \
+  --char2-degrees 24,27 --koblitz-degrees 37,39,41 [--eager-restart-pool] --out ...
+
+ic boundary --repeats 8 --prime-bits 24 --char2-degrees 27 \
+  --koblitz-degrees 37,41 [--eager-restart-pool] --out ...
+
+# The pairing, per run pair.
+python3 docs/ic/tools/boundary_pool_pairing_check.py round5-eager.json round5.json
+
+# The re-plumbing against Round 4, which is not a pairing.
+python3 docs/ic/tools/boundary_repricing_check.py \
+  docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json round5-eager.json
+```
+
+The six runs record `git_commit` as `c730cccb`, the commit that was
+checked out when they started: provenance is captured at start-up (§11.9)
+and the code they ran was committed afterwards.  `binary_blake3`
+(`ae6dd73f4404…`) is the identifier that matters and is the same on all
+six.
+
+## 14. The decomposition systems, in Petit–Quisquater's shape
+
+§5 priced the decomposition oracles per target and §11.3 left the
+algebraic ones as the question this ladder cannot reach: the family
+shape law bounds the *tabled* family, and an algebraic oracle builds no
+table, so its asymptotics sit outside everything §11 established.  This
+section starts measuring them, in the shape Petit and Quisquater's
+Table 2 uses (*On Polynomial Systems Arising from a Weil Descent*,
+ASIACRYPT 2012, p. 461).
+
+Their table reports, per `(curve family, n, n', m)` cell, the average
+maximal degree a Gröbner basis reached, the average time and the peak
+memory — and its point is not the timings.  It is that in every cell
+the degree reached came out **below** the bound derived for a generic
+system, because Semaev's polynomials are sparse and the bound is not.
+
+### 14.1 This is a stage diagnostic, and says so first
+
+Everything in this section prices **one decomposition oracle call on one
+target**.  By §2 that is never a speed, and no row here may be quoted as
+one.  The whole-pipeline unit `S`, the floor and the rho reference stay
+where they are, in §3 and §10–§13.  What this section can do is give the
+algebraic oracle a boundary of its own to be measured against, in the
+way rho's `S ≈ 1.3` is the boundary for the whole method.
+
+### 14.2 What is measured, and what is not reproduced
+
+The descent is the plain one: `x_i = Σ_k v_{i,k} e_k` over a subspace
+`V ⊂ F_{2^n}` of dimension `n'`, substituted into `S_{m+1}(x_1, …, x_m,
+x_R)` and split into `n` boolean equations in `m·n'` unknowns.  `n' =
+⌈n/m⌉` makes that square.  The engine is the repository's boolean-ring
+Buchberger over `F_2[v]/(v²−v)`.
+
+**Their numbers are not reproduced and are not claimed to be.**  Table 2
+solves a *symmetrised* system in `mt + 1 = m² + 1` variables — five at
+`m = 2`, ten at `m = 3` — from the block structure of their Section 4.
+At `(n, n', m) = (11, 6, 2)` that is a five-variable system where this
+one has twelve.  The degrees do not compare row by row.  What carries
+over is the shape of the measurement: a derived degree bound in one
+column, the degree reached beside it, and the ratio.
+
+### 14.3 Two boundaries, both derived before measuring
+
+**The degree bound** is the semi-regular degree.  For equations of
+degrees `d_1, …, d_k` in `v` boolean variables, the Hilbert series of a
+semi-regular quotient is `(1 + t)^v / Π_i (1 + t^{d_i})`, and the degree
+of regularity is the index of its first non-positive coefficient
+(Bardet–Faugère–Salvy).  It is what a system with no exploitable
+structure reaches, so a measured degree below it is structure the solver
+found.  The series is short enough to check by hand and a unit test does:
+`(1+t)^4 / (1+t²)² = 1 + 4t + 4t² − 4t³ + …`, first non-positive at
+three.
+
+**The reference** is what §1 asks for — the cost of the best algorithm
+that already solves the same problem, in the same unit.  At these sizes
+that is exhaustive search over the subspace: evaluate every equation at
+every point, `2^{m·n'} · Σ_i |terms_i|` monomial tests.  Any algebraic
+oracle worth the name has to get below that line before its degree
+behaviour matters at all.
+
+### 14.4 The table
+
+Eight targets per cell, seeded; `K` is the Koblitz curve
+`y² + xy = x³ + a x² + 1` and `R` a random binary curve of the same
+degree.
+
+| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum | ms | KiB | no decomp |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|
+| K | 7 | 4 | 2 | 8 | 7 | 3.0 | 3.0 | 3 | 1.00 | 1.159e4 | 1.830e4 | **0.6×** | 0.4 | 3 | 3/8 |
+| K | 9 | 5 | 2 | 10 | 9 | 3.0 | 3.0 | 4 | 0.75 | 8.198e4 | 1.627e5 | **0.5×** | 3.6 | 9 | 2/8 |
+| K | 11 | 6 | 2 | 12 | 11 | 3.0 | 3.0 | 4 | 0.75 | 4.995e5 | 9.564e5 | **0.5×** | 36.8 | 24 | 3/8 |
+| K | 13 | 7 | 2 | 14 | 13 | 3.2 | 3.2 | 4 | 0.81 | 2.778e6 | 6.642e6 | **0.4×** | 303.0 | 65 | 4/8 |
+| R | 7 | 4 | 2 | 8 | 7 | 3.0 | 3.0 | 3 | 1.00 | 1.098e4 | 1.907e4 | **0.6×** | 0.4 | 3 | 3/8 |
+| R | 9 | 5 | 2 | 10 | 9 | 3.0 | 3.0 | 4 | 0.75 | 8.547e4 | 1.647e5 | **0.5×** | 3.9 | 8 | 3/8 |
+| R | 11 | 6 | 2 | 12 | 11 | 3.0 | 3.0 | 4 | 0.75 | 4.387e5 | 9.728e5 | **0.5×** | 31.4 | 24 | 2/8 |
+| R | 13 | 7 | 2 | 14 | 13 | 3.2 | 3.2 | 4 | 0.81 | 2.683e6 | 6.789e6 | **0.4×** | 298.0 | 65 | 3/8 |
+
+Reading it:
+
+- **The solving degree is flat in `n`.**  `D_av = 3.0` from `n = 7` to
+  `n = 11`, `3.2` at `n = 13`, against a bound that rises from 3 to 4.
+  Six of the eight cells sit below the bound: the phenomenon their table
+  reports, on a different system and a different engine.  It is also,
+  coincidentally, their own `D_av = 3.0` for the `m = 2` rows.
+- **The Koblitz curve and the random one behave identically**, on every
+  column.  Whatever the extra automorphism buys elsewhere in this
+  ledger, it does not change the shape of this system.
+- **The cost is below enumeration and the margin grows**: `0.6×`,
+  `0.5×`, `0.5×`, `0.4×`.  That is the column that matters, and it is
+  the one a degree table on its own would have hidden.
+
+**`D_pair` is in the table to keep an earlier mistake visible**, and it
+has a second story now.  The first version of this measurement reported
+the highest degree of a pair *processed*, which is a property of
+Buchberger's selection strategy and not of the system, and is not what
+an F4 run reports.  Under the coprime criterion alone it read `5.0`
+where the solving degree read `3.0`, and gave a ratio of `1.25` against
+the bound — the opposite conclusion, from the wrong statistic.  Under
+the chain criterion the two columns **coincide** at every cell: the
+pairs the old engine was pushing to degree five were exactly the ones
+that contribute nothing, so pruning them removes the gap the wrong
+statistic was measuring.
+
+**Three summands, where the verdict flips.**  The same measurement at
+`m = 3`, four targets a cell under a 120-second per-target budget:
+
+| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum | ms | KiB | no decomp |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|
+| K | 7 | 3 | 3 | 9 | 7 | 7.0 | 7.0 | 7 | 1.00 | 3.633e7 | 4.291e5 | 84.7x | 19585.5 | 441 | 3/4 |
+| K | 9 | 3 | 3 | 9 | 9 | 7.0 | 7.0 | 7 | 1.00 | 3.606e7 | 5.268e5 | 68.4x | 19481.0 | 430 | 2/4 |
+| K | 11 | 4 | 3 | 12 | 11 | 9.0 | 9.0 | 8 | 1.12 | 4.313e9 | 2.281e7 | 189.1x | 120049.4 | 24567 | 3/4 |
+| ^ | | | | | | — | — | — | — | — | — | — | — | — | 4 of 4 runs hit the budget: every figure on this row is a lower bound |
+| R | 7 | 3 | 3 | 9 | 7 | 7.0 | 7.0 | 7 | 1.00 | 3.531e7 | 4.572e5 | 77.2x | 19451.3 | 441 | 3/4 |
+| R | 9 | 3 | 3 | 9 | 9 | 7.0 | 7.0 | 7 | 1.00 | 3.876e7 | 5.728e5 | 67.7x | 18729.6 | 435 | 3/4 |
+| R | 11 | 4 | 3 | 12 | 11 | 9.0 | 9.0 | 8 | 1.12 | 4.305e9 | 2.341e7 | 183.9x | 120031.9 | 24528 | 1/4 |
+| ^ | | | | | | — | — | — | — | — | — | — | — | — | 4 of 4 runs hit the budget: every figure on this row is a lower bound |
+
+At nine variables the solver finishes and costs **68× to 85× the
+enumeration it is competing with** — the opposite of the two-summand
+rows, which come in at `0.4×`.  At twelve variables it does not finish:
+every run hit the budget, so those rows are lower bounds and are marked
+as such.  Whatever the three-summand descent buys in relations per
+target, this engine does not get it back on the decomposition, and the
+`m = 2` result does not carry over.
+
+### 14.5 The engine was the measurement, twice
+
+Neither of the two corrections above was a tuning choice; both were
+defects found by taking the measurement.
+
+**The pruning that was documented but not implemented.**  The module
+header of `pq_groebner_f2` claimed Buchberger with Gebauer–Möller
+pruning; the code had only the coprime criterion.  Adding the chain
+criterion — if another basis element's leading monomial divides the
+pair's lcm and both of its pairs have left the queue, that S-polynomial
+cannot contribute — gives, paired on the same seed and the same systems:
+
+| cell | ops before | ops after | ratio | ops/enum before → after |
+|:--|--:|--:|--:|:--|
+| `K n = 7` | 1.193e5 | 1.159e4 | 0.097× | 6.5× → 0.6× |
+| `K n = 9` | 1.584e6 | 8.198e4 | 0.052× | 9.7× → 0.5× |
+| `K n = 11` | 2.654e7 | 4.995e5 | 0.019× | 27.8× → 0.5× |
+| `K n = 13` | 2.884e8 | 2.778e6 | 0.010× | 43.4× → 0.4× |
+
+**and it reverses the verdict.**  Under the coprime criterion alone the
+Gröbner basis measured 6.5× to 43× *worse* than enumeration, widening
+with `n`; under both it measures 0.4× to 0.6×, narrowing.  The first
+reading was a statement about the engine and was withdrawn, not filed.
+The coprime-only ladder stays frozen beside the fixed one as the before
+mark, because deleting it would hide the size of the correction.
+
+That the pruning is exact is checked **on the systems being measured**
+rather than inferred from the sixty-seven tests over `pq_*`,
+`koblitz_groebner` and `polynomial_reuse` that also still pass: for six
+targets the variety of the pruned basis is compared against every point
+of the subspace evaluated in the original equations, and must agree,
+with a guard that not every target was inconsistent.
+
+**The cell that never returned.**  At `m = 3` and twelve variables the
+engine ran for four hours and forty-nine minutes without finishing, and
+was killed.  A Gröbner basis has no natural stopping point, so the
+engine now takes a wall-clock budget: a run that exceeds it stops,
+`timed_out` marks it, and the row says every figure on it is a lower
+bound.  A table with an honest "did not finish" row is worth more than
+one with a silently missing cell.
+
+### 14.6 What does not count
+
+- No row here is a speed, a crossover, or evidence about any deployed
+  curve; the largest field is `GF(2^15)`.
+- `ms` and `KiB` are practicality notes.  The metric is the monomial
+  operation count, as §6 requires.
+- The `ops/enum` column is a ratio to *this repository's* enumeration on
+  *these* systems.  It is not a statement about F4, about Magma, or
+  about the symmetrised systems Petit–Quisquater solve.
+- A row whose `timed_out` is non-zero is a statement about the engine's
+  budget and not about the system's difficulty.
+- The degrees are not comparable to Petit–Quisquater's row by row, for
+  the reason §14.2 gives.
+
+### 14.7 Reproducing
+
+```
+ic descent --cells 7:4:2,9:5:2,11:6:2,13:7:2 --targets 8 \
+  --out docs/ic/runs/ic-descent-degrees-2026-09-22.json
+
+# The before mark, on the coprime criterion alone, is frozen at
+# docs/ic/runs/ic-descent-degrees-coprime-only-2026-09-22.json
+```
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

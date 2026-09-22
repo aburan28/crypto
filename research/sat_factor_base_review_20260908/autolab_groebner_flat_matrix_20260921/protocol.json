@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-KIC-GROEBNER-FLAT-MATRIX-20260921",
+  "base_commit": "24641fcc2da75dcee3db2966b189a7418ae29755",
+  "objective": "Replace per-row dense allocations with a contiguous solver-only Boolean Macaulay matrix while preserving exact linear-tail elimination.",
+  "fixture": {
+    "curve": "K_0/F_2^31",
+    "summands": 2,
+    "dimension": 16,
+    "paired_prng_seed": 24301,
+    "targets": 2,
+    "node_budget": 50000,
+    "threads": 1
+  },
+  "selected_policy": {
+    "minimum_variables": 24,
+    "matrix": "one row-major Vec<u64> per solver Macaulay call",
+    "elimination": "forward high-column echelon plus dense low-tail RREF directly on contiguous row slices",
+    "control": "KIC_F4_FLAT_MATRIX=0 restores nested Vec<Vec<u64>> solver matrices"
+  },
+  "acceptance": [
+    "flat and nested arms use the same executable and public targets",
+    "identical verdict mix, effort, built degree, first-fall degree, and gates",
+    "flat and nested linear-tail row spaces agree byte-for-byte",
+    "forced flat path preserves exhaustive roots under every split rule",
+    "frozen and holdout ladder verdict digests and operation counts match"
+  ],
+  "claim_boundary": "Public-synthetic n=31 decomposition-linear-algebra evidence only. This is not relation-yield evidence, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim."
+}

@@ -1,8 +1,12 @@
 //! Research CLI: read-only curve inspection and bounded known-answer experiments.
+#[path = "ic/bench.rs"]
+mod bench;
 #[path = "ic/boundary.rs"]
 mod boundary;
 #[path = "ic/corpus.rs"]
 mod corpus;
+#[path = "ic/descent.rs"]
+mod descent;
 #[path = "ic/experiment.rs"]
 mod experiment;
 #[path = "ic/fixed.rs"]
@@ -72,6 +76,10 @@ enum Action {
     Boundary(boundary::BoundaryArgs),
     /// Write a benchmark corpus of Weil-descended Semaev S4 instances (Magma, DIMACS+XOR, CNF, ANF) with certified labels and planted witnesses.
     Corpus(corpus::CorpusArgs),
+    /// Measure the degree a Weil-descent system actually reaches, against the degree a semi-regular system of the same shape would, with the operation count, wall time and peak footprint beside it.
+    Descent(descent::DescentArgs),
+    /// Run index-calculus configurations end to end and compare them: plug a factor base, a target source, a decomposition oracle, a polynomial solver and a relation matrix together, and see every stage's cost in one unit.
+    Bench(bench::BenchArgs),
     /// Price every decomposition oracle on R and on R − P + Q pairwise: does a solver charge the same for a swapped target?
     Swap(boundary::SwapArgs),
 }
@@ -121,6 +129,8 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Fixed(args)) => fixed::run(args.clone()),
         Some(Action::Boundary(args)) => boundary::run(args.clone(), cli.json),
         Some(Action::Corpus(args)) => corpus::run(args.clone()),
+        Some(Action::Descent(args)) => descent::run(args.clone(), cli.json),
+        Some(Action::Bench(args)) => bench::run(args.clone(), cli.json),
         Some(Action::Swap(args)) => boundary::swap(args.clone(), cli.json),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
