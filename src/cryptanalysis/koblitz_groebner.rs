@@ -109,6 +109,7 @@
 //!   Boolean-ring representation.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
+use crate::cryptanalysis::matrix_f5_f2::F5Criterion;
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, groebner_basis_f2, F2BoolMono, F2BoolPoly};
 
 /// Hard cap: Boolean monomials are `u64` bitmasks in
@@ -720,7 +721,7 @@ fn monomials_up_to(n_vars: usize, deg: u32) -> Vec<u64> {
     out
 }
 
-fn monomials_up_to_mask(variable_mask: u64, degree: u32) -> Vec<u64> {
+pub(crate) fn monomials_up_to_mask(variable_mask: u64, degree: u32) -> Vec<u64> {
     let variables: Vec<u64> = (0..64)
         .filter(|bit| variable_mask & (1u64 << bit) != 0)
         .map(|bit| 1u64 << bit)
@@ -770,7 +771,7 @@ fn cached_monomials_up_to_mask(variable_mask: u64, degree: u32) -> std::rc::Rc<[
     })
 }
 
-fn all_variable_mask(n_vars: usize) -> u64 {
+pub(crate) fn all_variable_mask(n_vars: usize) -> u64 {
     if n_vars >= 64 {
         u64::MAX
     } else {
@@ -830,7 +831,20 @@ pub fn matrix_f4_f2_counted(
     n_vars: usize,
     degree: u32,
 ) -> Option<(Vec<F2BoolPoly>, u64)> {
-    matrix_f4_f2_counted_impl(polys, n_vars, degree, false)
+    matrix_f4_f2_counted_impl(polys, n_vars, degree, false, RowCriterion::None)
+}
+
+/// As [`matrix_f4_f2_counted`], with the rows selected by `criterion`.
+/// Under [`RowCriterion::F5`] the returned count includes the word XORs
+/// the criterion spent, so the two variants are priced on the same
+/// footing.
+pub fn matrix_f4_f2_counted_with(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    criterion: RowCriterion,
+) -> Option<(Vec<F2BoolPoly>, u64)> {
+    matrix_f4_f2_counted_impl(polys, n_vars, degree, false, criterion)
 }
 
 /// Solver-specialized F4 step. The recursive solver only consumes rows that
@@ -852,8 +866,9 @@ fn matrix_f4_f2_solver_consequences(
     polys: &[F2BoolPoly],
     n_vars: usize,
     degree: u32,
+    criterion: RowCriterion,
 ) -> Option<Vec<F2BoolPoly>> {
-    matrix_f4_f2_counted_impl(polys, n_vars, degree, true).map(|(rows, _)| rows)
+    matrix_f4_f2_counted_impl(polys, n_vars, degree, true, criterion).map(|(rows, _)| rows)
 }
 
 enum F4PackedMatrix {
@@ -875,6 +890,7 @@ fn matrix_f4_f2_counted_impl(
     n_vars: usize,
     degree: u32,
     decisive_only: bool,
+    criterion: RowCriterion,
 ) -> Option<(Vec<F2BoolPoly>, u64)> {
     if polys.is_empty() {
         return Some((Vec::new(), 0));
@@ -916,14 +932,22 @@ fn matrix_f4_f2_counted_impl(
             degree,
             multiplier_mask,
             reuse_layout,
+            criterion,
         )
-        .map(|(columns, matrix)| (columns, F4PackedMatrix::Flat(matrix)))
+        .map(|b| (b.columns, F4PackedMatrix::Flat(b.matrix), b.rows_pruned, b.criterion_word_ops))
     } else {
-        build_macaulay_with_multiplier_mask(polys, n_vars, degree, multiplier_mask, reuse_layout)
-            .map(|(columns, matrix)| (columns, F4PackedMatrix::Nested(matrix)))
+        build_macaulay_with_multiplier_mask(
+            polys,
+            n_vars,
+            degree,
+            multiplier_mask,
+            reuse_layout,
+            criterion,
+        )
+        .map(|b| (b.columns, F4PackedMatrix::Nested(b.matrix), b.rows_pruned, b.criterion_word_ops))
     };
     let build_ns = t_build.elapsed().as_nanos();
-    let (cols, mut matrix) = match built {
+    let (cols, mut matrix, rows_pruned, criterion_word_ops) = match built {
         Some(b) => b,
         None => {
             f4_profile_add(|p| {
@@ -937,10 +961,17 @@ fn matrix_f4_f2_counted_impl(
         f4_profile_add(|p| {
             p.calls += 1;
             p.build_ns += build_ns;
+            p.rows_pruned += rows_pruned;
+            p.criterion_word_ops += criterion_word_ops;
+            p.word_ops += criterion_word_ops;
         });
-        return Some((Vec::new(), 0));
+        F4_WORD_OPS_TOTAL.fetch_add(criterion_word_ops, std::sync::atomic::Ordering::Relaxed);
+        return Some((Vec::new(), criterion_word_ops));
     }
-    let mut word_ops = 0u64;
+    // The criterion's echelons are elimination work in the same unit; the
+    // step is priced as a whole, so they enter the count before the
+    // reduction's own XORs.
+    let mut word_ops = criterion_word_ops;
     let t_reduce = std::time::Instant::now();
     let mut linear_tail = None;
     let rank = if use_linear_tail {
@@ -1034,6 +1065,8 @@ fn matrix_f4_f2_counted_impl(
         p.rows += matrix_rows;
         p.cols += cols.len() as u64;
         p.word_ops += word_ops;
+        p.rows_pruned += rows_pruned;
+        p.criterion_word_ops += criterion_word_ops;
     });
     Some((out, word_ops))
 }
@@ -1203,8 +1236,19 @@ pub struct F4Profile {
     pub rows: u64,
     /// Columns summed over all calls.
     pub cols: u64,
-    /// 64-bit word XORs performed by the reductions.
+    /// 64-bit word XORs performed by the reductions — including, under
+    /// [`RowCriterion::F5`], the XORs the criterion's lower-degree
+    /// echelons performed (`criterion_word_ops`), so this is the step's
+    /// whole elimination cost whichever criterion selected the rows.
     pub word_ops: u64,
+    /// Rows (multipliers) the F5 criterion removed before building.
+    /// Zero under [`RowCriterion::None`].
+    #[serde(default)]
+    pub rows_pruned: u64,
+    /// Word XORs spent evaluating the F5 criterion; a component of
+    /// `word_ops`, broken out so the criterion's own cost is visible.
+    #[serde(default)]
+    pub criterion_word_ops: u64,
 }
 
 mod f4_counters {
@@ -1217,10 +1261,21 @@ mod f4_counters {
     pub(super) static ROWS: AtomicU64 = AtomicU64::new(0);
     pub(super) static COLS: AtomicU64 = AtomicU64::new(0);
     pub(super) static WORD_OPS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROWS_PRUNED: AtomicU64 = AtomicU64::new(0);
+    pub(super) static CRITERION_WORD_OPS: AtomicU64 = AtomicU64::new(0);
 
-    pub(super) fn all() -> [&'static AtomicU64; 8] {
+    pub(super) fn all() -> [&'static AtomicU64; 10] {
         [
-            &CALLS, &OVERSIZE, &BUILD_NS, &REDUCE_NS, &READBACK_NS, &ROWS, &COLS, &WORD_OPS,
+            &CALLS,
+            &OVERSIZE,
+            &BUILD_NS,
+            &REDUCE_NS,
+            &READBACK_NS,
+            &ROWS,
+            &COLS,
+            &WORD_OPS,
+            &ROWS_PRUNED,
+            &CRITERION_WORD_OPS,
         ]
     }
 }
@@ -1237,6 +1292,8 @@ pub fn f4_profile() -> F4Profile {
         rows: f4_counters::ROWS.load(Relaxed),
         cols: f4_counters::COLS.load(Relaxed),
         word_ops: f4_counters::WORD_OPS.load(Relaxed),
+        rows_pruned: f4_counters::ROWS_PRUNED.load(Relaxed),
+        criterion_word_ops: f4_counters::CRITERION_WORD_OPS.load(Relaxed),
     }
 }
 
@@ -1252,7 +1309,7 @@ fn f4_profile_add(f: impl FnOnce(&mut F4Profile)) {
     use std::sync::atomic::Ordering::Relaxed;
     let mut delta = F4Profile::default();
     f(&mut delta);
-    let pairs: [(&std::sync::atomic::AtomicU64, u64); 8] = [
+    let pairs: [(&std::sync::atomic::AtomicU64, u64); 10] = [
         (&f4_counters::CALLS, delta.calls),
         (&f4_counters::OVERSIZE, delta.oversize),
         (&f4_counters::BUILD_NS, delta.build_ns as u64),
@@ -1261,6 +1318,8 @@ fn f4_profile_add(f: impl FnOnce(&mut F4Profile)) {
         (&f4_counters::ROWS, delta.rows),
         (&f4_counters::COLS, delta.cols),
         (&f4_counters::WORD_OPS, delta.word_ops),
+        (&f4_counters::ROWS_PRUNED, delta.rows_pruned),
+        (&f4_counters::CRITERION_WORD_OPS, delta.criterion_word_ops),
     ];
     for (counter, delta) in pairs {
         if delta != 0 {
@@ -1284,7 +1343,39 @@ pub(crate) fn macaulay_rows_monos(
     n_vars: usize,
     degree: u32,
 ) -> Option<Vec<Vec<u64>>> {
-    macaulay_rows_monos_with_mask(polys, n_vars, degree, all_variable_mask(n_vars))
+    macaulay_rows_monos_with_mask(polys, n_vars, degree, all_variable_mask(n_vars), None)
+}
+
+/// The Macaulay rows at `degree` with the F5 criterion applied: every
+/// product `t · f_i` the criterion does not prune.  The row space is the
+/// same as [`macaulay_rows_monos`]'s; see
+/// [`crate::cryptanalysis::matrix_f5_f2`] for the argument.
+pub(crate) fn f5_rows_monos_with_mask(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    criterion: &F5Criterion,
+) -> Option<Vec<Vec<u64>>> {
+    macaulay_rows_monos_with_mask(polys, n_vars, degree, multiplier_mask, Some(criterion))
+}
+
+/// Pack monomial rows as bit-rows over `cols` (descending monomial order).
+pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> {
+    let index: std::collections::HashMap<u64, usize> =
+        cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
+    let words = cols.len().div_ceil(64).max(1);
+    rows_monos
+        .iter()
+        .map(|monos| {
+            let mut row = vec![0u64; words];
+            for m in monos {
+                let c = index[m];
+                row[c / 64] |= 1u64 << (c % 64);
+            }
+            row
+        })
+        .collect()
 }
 
 fn macaulay_rows_monos_with_mask(
@@ -1292,10 +1383,11 @@ fn macaulay_rows_monos_with_mask(
     n_vars: usize,
     degree: u32,
     multiplier_mask: u64,
+    criterion: Option<&F5Criterion>,
 ) -> Option<Vec<Vec<u64>>> {
     let mut rows_monos: Vec<Vec<u64>> = Vec::new();
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
-    for p in polys {
+    for (i, p) in polys.iter().enumerate() {
         let pdeg = p
             .terms
             .iter()
@@ -1314,6 +1406,9 @@ fn macaulay_rows_monos_with_mask(
             }
         });
         for &mult in multipliers.iter() {
+            if criterion.is_some_and(|c| c.prunes(i, mult)) {
+                continue;
+            }
             // Multiplying by a monomial is a union of masks, so two
             // distinct terms of `p` can collide — and collide means
             // cancel, in characteristic 2.  Keep the odd multiplicities.
@@ -1405,7 +1500,47 @@ pub(crate) fn build_macaulay(
     n_vars: usize,
     degree: u32,
 ) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
-    build_macaulay_with_multiplier_mask(polys, n_vars, degree, all_variable_mask(n_vars), false)
+    build_macaulay_with_multiplier_mask(
+        polys,
+        n_vars,
+        degree,
+        all_variable_mask(n_vars),
+        false,
+        RowCriterion::None,
+    )
+    .map(|built| (built.columns, built.matrix))
+}
+
+/// Which rows of the Macaulay matrix a step builds.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RowCriterion {
+    /// Every product `t · f_i` with `deg(t · f_i) ≤ degree` — plain F4.
+    None,
+    /// Products the F5 criterion does not predict to reduce to zero
+    /// ([`crate::cryptanalysis::matrix_f5_f2`]).  Same row space.
+    F5,
+}
+
+impl RowCriterion {
+    /// The criterion the `KIC_F4_CRITERION` environment variable selects
+    /// (`f5` or `none`), or `default` when it is unset.
+    fn from_env_or(default: Self) -> Self {
+        match std::env::var("KIC_F4_CRITERION").as_deref() {
+            Ok("f5") => Self::F5,
+            Ok("none") => Self::None,
+            _ => default,
+        }
+    }
+}
+
+/// A packed Macaulay matrix together with what selecting its rows cost.
+struct BuiltMacaulay<P> {
+    columns: Vec<u64>,
+    matrix: P,
+    /// Rows the F5 criterion removed (0 under [`RowCriterion::None`]).
+    rows_pruned: u64,
+    /// Word XORs the criterion spent on its lower-degree echelons.
+    criterion_word_ops: u64,
 }
 
 fn pack_rows_with_layout(
@@ -1480,13 +1615,15 @@ fn build_macaulay_with_multiplier_mask(
     degree: u32,
     multiplier_mask: u64,
     reuse_layout: bool,
-) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    criterion: RowCriterion,
+) -> Option<BuiltMacaulay<Vec<Vec<u64>>>> {
     build_macaulay_packed(
         polys,
         n_vars,
         degree,
         multiplier_mask,
         reuse_layout,
+        criterion,
         pack_rows_with_layout,
     )
 }
@@ -1497,13 +1634,15 @@ fn build_macaulay_flat_with_multiplier_mask(
     degree: u32,
     multiplier_mask: u64,
     reuse_layout: bool,
-) -> Option<(Vec<u64>, FlatF2Matrix)> {
+    criterion: RowCriterion,
+) -> Option<BuiltMacaulay<FlatF2Matrix>> {
     build_macaulay_packed(
         polys,
         n_vars,
         degree,
         multiplier_mask,
         reuse_layout,
+        criterion,
         pack_rows_flat_with_layout,
     )
 }
@@ -1514,23 +1653,42 @@ fn build_macaulay_packed<P: Default>(
     degree: u32,
     multiplier_mask: u64,
     reuse_layout: bool,
+    criterion: RowCriterion,
     pack: impl Fn(&[Vec<u64>], &F4ColumnLayout, bool) -> Option<P>,
-) -> Option<(Vec<u64>, P)> {
+) -> Option<BuiltMacaulay<P>> {
     let subprofile = std::env::var("KIC_F4_BUILD_SUBPROFILE").as_deref() == Ok("1");
     let rows_started = subprofile.then(std::time::Instant::now);
-    let rows_monos = macaulay_rows_monos_with_mask(polys, n_vars, degree, multiplier_mask)?;
+    let f5 = match criterion {
+        RowCriterion::None => None,
+        RowCriterion::F5 => Some(F5Criterion::new(polys, n_vars, degree, multiplier_mask)),
+    };
+    // Pruned *multipliers*: a pruned product that would have been the
+    // empty row (possible in the Boolean ring, rare) is counted too, since
+    // deciding that would cost the row construction the criterion saves.
+    let (rows_pruned, criterion_word_ops) = f5
+        .as_ref()
+        .map(|c| (c.pruned_count(), c.word_ops()))
+        .unwrap_or((0, 0));
+    let rows_monos =
+        macaulay_rows_monos_with_mask(polys, n_vars, degree, multiplier_mask, f5.as_ref())?;
     if let Some(started) = rows_started {
         F4_BUILD_ROWS_NS.fetch_add(
             started.elapsed().as_nanos() as u64,
             std::sync::atomic::Ordering::Relaxed,
         );
     }
+    let finish = |columns: Vec<u64>, matrix: P| BuiltMacaulay {
+        columns,
+        matrix,
+        rows_pruned,
+        criterion_word_ops,
+    };
     if rows_monos.is_empty() {
-        return Some((Vec::new(), P::default()));
+        return Some(finish(Vec::new(), P::default()));
     }
     let pack_started = subprofile.then(std::time::Instant::now);
 
-    let layout_key = (multiplier_mask, degree);
+    let layout_key = (multiplier_mask, degree, criterion == RowCriterion::F5);
     if reuse_layout {
         let cached = F4_LAYOUTS.with(|layouts| layouts.borrow().get(&layout_key).cloned());
         if let Some(layout) = cached {
@@ -1542,7 +1700,7 @@ fn build_macaulay_packed<P: Default>(
                         std::sync::atomic::Ordering::Relaxed,
                     );
                 }
-                return Some((layout.columns.clone(), matrix));
+                return Some(finish(layout.columns.clone(), matrix));
             }
         }
         F4_LAYOUT_MISSES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -1574,7 +1732,7 @@ fn build_macaulay_packed<P: Default>(
             std::sync::atomic::Ordering::Relaxed,
         );
     }
-    Some((layout.columns.clone(), matrix))
+    Some(finish(layout.columns.clone(), matrix))
 }
 
 /// Reduced row echelon form over `F_2`; returns the rank, with the
@@ -1595,8 +1753,10 @@ struct F4ColumnLayout {
     index: std::collections::HashMap<u64, usize>,
 }
 thread_local! {
+    /// Keyed by multiplier mask, degree and whether the F5 criterion
+    /// selected the rows: pruning changes which monomials occur.
     static F4_LAYOUTS: std::cell::RefCell<std::collections::HashMap<
-        (u64, u32),
+        (u64, u32, bool),
         std::rc::Rc<F4ColumnLayout>,
     >> = std::cell::RefCell::new(std::collections::HashMap::new());
 }
@@ -1788,7 +1948,7 @@ fn rref_f2_m4ri_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u
     pivot_row
 }
 
-fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
+pub(crate) fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
     if std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1")
         || matrix.len() < 128
         || n_cols < 256
@@ -1986,7 +2146,7 @@ impl SolvingProfile {
 }
 
 /// Variables occurring in `polys`, as a bitmask.
-fn occurring_vars(polys: &[F2BoolPoly]) -> u64 {
+pub(crate) fn occurring_vars(polys: &[F2BoolPoly]) -> u64 {
     polys
         .iter()
         .flat_map(|p| p.terms.iter())
@@ -2266,6 +2426,16 @@ pub enum SolverEngine {
         /// Highest Macaulay degree to build before splitting.
         max_degree: u32,
     },
+    /// Boolean matrix-F5: the same Macaulay matrices as `MatrixF4`, with
+    /// the rows the F5 criterion predicts to reduce to zero left out
+    /// ([`crate::cryptanalysis::matrix_f5_f2`]).  Identical row space,
+    /// hence identical consequences, verdicts and splitting tree; only
+    /// the work per node changes, and the criterion's own elimination is
+    /// charged into the same word-XOR count.
+    MatrixF5 {
+        /// Highest Macaulay degree to build before splitting.
+        max_degree: u32,
+    },
     /// Full Buchberger Gröbner basis
     /// ([`crate::cryptanalysis::pq_groebner_f2::groebner_basis_f2`]) at
     /// every node.  The reference engine: same answers, far slower on
@@ -2452,13 +2622,38 @@ fn reduce_system(
     })
 }
 
+/// Append one JSON line per solver reduction to `KIC_F4_NODE_DUMP` when that
+/// variable names a file: the node system exactly as the engine receives it.
+/// A diagnostic for probes that need the real node systems (row-space
+/// checks, criterion counts) rather than a synthetic corpus; off by default.
+fn dump_node_system(system: &[F2BoolPoly], n_vars: usize, engine: SolverEngine) {
+    let Ok(path) = std::env::var("KIC_F4_NODE_DUMP") else {
+        return;
+    };
+    use std::io::Write;
+    let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(path) else {
+        return;
+    };
+    let line = serde_json::json!({
+        "n_vars": n_vars,
+        "engine": format!("{engine:?}"),
+        "system": system,
+    });
+    let _ = writeln!(file, "{line}");
+}
+
 fn reduce_system_uncached(
     system: &[F2BoolPoly], n_vars: usize, engine: SolverEngine, stats: &mut SolveStats,
 ) -> Option<Vec<F2BoolPoly>> {
     stats.reductions += 1;
+    dump_node_system(system, n_vars, engine);
     match engine {
         SolverEngine::Buchberger => Some(groebner_basis_f2(system.to_vec(), n_vars)),
-        SolverEngine::MatrixF4 { max_degree } => {
+        SolverEngine::MatrixF4 { max_degree } | SolverEngine::MatrixF5 { max_degree } => {
+            let criterion = RowCriterion::from_env_or(match engine {
+                SolverEngine::MatrixF5 { .. } => RowCriterion::F5,
+                _ => RowCriterion::None,
+            });
             let base = system
                 .iter()
                 .flat_map(|p| p.terms.iter())
@@ -2483,9 +2678,9 @@ fn reduce_system_uncached(
                 let full_readback =
                     std::env::var("KIC_F4_SOLVER_FULL_READBACK").as_deref() == Ok("1");
                 let reduced = if full_readback {
-                    matrix_f4_f2(system, n_vars, d)
+                    matrix_f4_f2_counted_with(system, n_vars, d, criterion).map(|(rows, _)| rows)
                 } else {
-                    matrix_f4_f2_solver_consequences(system, n_vars, d)
+                    matrix_f4_f2_solver_consequences(system, n_vars, d, criterion)
                 };
                 match reduced {
                     Some(rows) => {
