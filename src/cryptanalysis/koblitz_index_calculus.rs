@@ -3073,25 +3073,46 @@ impl PairSumTable {
         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
 
-        let each_row = |i: usize, f: &mut dyn FnMut(u64, u32)| {
+        // Cache the packed sum from the counting pass.  The previous
+        // builder recomputed every one of the `|F|(|F|+1)/2` group
+        // additions during scatter even though this tier already spends
+        // extra memory to buy probe time.  Row-major placement makes the
+        // pair witness implicit in `(row, offset)`, so the temporary
+        // needs only the packed key rather than another pair label.
+        let mut row_start = Vec::with_capacity(n_points + 1);
+        row_start.push(0usize);
+        for i in 0..n_points {
+            row_start.push(row_start[i] + n_points - i);
+        }
+        let total = *row_start.last()?;
+        if total as u128 != pairs {
+            return None;
+        }
+        let mut cached_keys = vec![0u64; total];
+        let cache_slots = cached_keys.as_mut_ptr() as usize;
+        let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
+        (0..n_points).into_par_iter().for_each(|i| {
             let mut sums = Vec::with_capacity(n_points - i);
             let mut scratch = BatchScratch::default();
             curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
             for (offset, sum) in sums.into_iter().enumerate() {
-                f(sum.pack(), (i + offset) as u32);
-            }
-        };
-        let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
-        (0..n_points).into_par_iter().for_each(|i| {
-            each_row(i, &mut |key, _| {
+                let key = sum.pack();
+                // SAFETY: each row owns the disjoint range measured in
+                // `row_start`, with exactly one slot per returned sum.
+                unsafe {
+                    *(cache_slots as *mut u64).add(row_start[i] + offset) = key;
+                }
                 counts[(key >> bucket_shift) as usize + 1].fetch_add(1, Ordering::Relaxed);
-            });
+            }
         });
         let mut bucket_start: Vec<u32> = counts.iter().map(|c| c.load(Ordering::Relaxed)).collect();
+        drop(counts);
         for b in 0..buckets {
             bucket_start[b + 1] += bucket_start[b];
         }
-        let total = bucket_start[buckets] as usize;
+        if bucket_start[buckets] as usize != total {
+            return None;
+        }
         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
         let mut rests = vec![0u32; total];
         let mut compact_witnesses = vec![0u32; total];
@@ -3102,7 +3123,11 @@ impl PairSumTable {
         let rest_slots = rests.as_mut_ptr() as usize;
         let witness_slots = compact_witnesses.as_mut_ptr() as usize;
         (0..n_points).into_par_iter().for_each(|i| {
-            each_row(i, &mut |key, j| {
+            for (offset, &key) in cached_keys[row_start[i]..row_start[i + 1]]
+                .iter()
+                .enumerate()
+            {
+                let j = (i + offset) as u32;
                 let bucket = (key >> bucket_shift) as usize;
                 let slot = cursor[bucket].fetch_add(1, Ordering::Relaxed) as usize;
                 // SAFETY: the bucket cursor gives this pair a unique
@@ -3113,8 +3138,9 @@ impl PairSumTable {
                 }
                 let h = (pair_filter_hash(key) & present_mask) as usize;
                 present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
-            });
+            }
         });
+        drop(cached_keys);
         let present: Vec<u64> = present_atomic
             .iter()
             .map(|w| w.load(Ordering::Relaxed))
