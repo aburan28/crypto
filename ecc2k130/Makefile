@@ -611,6 +611,9 @@ PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
 # 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
 # from the step tag, the products inlined, the forward pass software-pipelined.
 # Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
+# ALU squaring is on in this preset.  The value is expanded into the child
+# make, so a command-line PACKED_ALU_SQUARE reaches the build.
+gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
 gpu-rtx-pro6000-20b:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" \
 	    BATCH=16 THREADS=512 MINBLOCKS=1 \
@@ -618,7 +621,7 @@ gpu-rtx-pro6000-20b:
 	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
 	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
 	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
-	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=1 \
+	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
 	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
 	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 
