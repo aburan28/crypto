@@ -1859,6 +1859,506 @@ python3 docs/ic/tools/boundary_scoreboard_rows.py round3.json
 cargo test --release --lib cryptanalysis::ic_
 ```
 
+## 12. Round 4: the unit, pinned
+
+**Frozen run:** `docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json`
+— the Round-3 ladder rerun with nothing changed but the conversion.
+
+§11.7 found the defect and this round fixes it.  It is **accounting** by
+the `AGENTS.md` §3 test: the numbers move, the algorithm does not, and
+no gain is claimed from it.  It is worth a round of its own because it
+sets how much any later round can claim.
+
+### 12.1 What was wrong with the unit
+
+`S` is group-addition equivalents per `√r`, so every non-addition count
+is converted through `ns_per_<unit> / ns_per_add`.  Through Round 3 both
+factors were measured on the host at the start of each run.  The ratios
+between them then drifted, for the *same* instance and the *same* unit,
+across three ladders on one machine:
+
+| | median | 90th | max |
+|:--|--:|--:|--:|
+| spread of a pinned ratio across three runs | 1.08 | 1.23 | 3.70 |
+
+The worst are `ns_per_sqrt` on `bench-12bit` at `3.70` and
+`ns_per_frobenius` on `K_0 / GF(2^41)` at `2.50`.  The consequence was
+§11.7's: 111 of 166 cross-round rows had identical trials, relations and
+group operations and still moved, by `0.912` to `1.076`.
+
+`AGENTS.md` §6 keeps operation counts as the metric "because they
+survive hardware".  A conversion re-measured per run does not survive
+it, and an eight per cent floor is not a detail when the levers of §11.6
+move rows by `1.10×` to `1.89×`.
+
+### 12.2 What the unit is now
+
+The ratios live in `docs/ic/calibration.json`, compiled into the binary
+and applied per instance after the host measurement, so that
+`Calibration::gae` — which divides by `ns_per_add` — yields exactly the
+pinned ratio whatever the host's speed.  `boundary_pin_calibration.py`
+regenerates the table as the **median** over a set of frozen runs, which
+is what keeps one unlucky measurement from becoming the unit; it
+reproduces the committed table exactly from the three ladders it was
+built from.
+
+Three properties this design keeps, and each matters:
+
+- **The measurement survives.**  Every factor is still taken and still
+  reported, as `calibration_measured`.  It is the wall-clock
+  practicality note of §6, and it is how a host that no longer resembles
+  the reference one becomes visible.  It prices nothing.
+- **The fallback is loud.**  An instance the table does not carry — a
+  new size, a freshly generated curve — keeps the host's factors, and
+  `calibration_pinned` names every unit that fell back.  A row priced
+  the old way says so.  Two consecutive quick runs agree to twelve
+  digits on every pinned row, while the quick configuration's `n = 12`
+  binary curve, which the table does not carry, still moves `1.09×`.
+  That is the fallback working rather than failing quietly.
+- **It prices and gates nothing else.**  Every consumer of a
+  `Calibration` hands it to `price_phase`.  No native count and no
+  branch depends on it, which is what makes the round accounting rather
+  than a change to the method.
+
+### 12.3 Re-pinning is itself a repricing
+
+Regenerating the table reprices every row at once.  So the table records
+the host it came from and the runs it was taken over, and a later round
+that re-pins has to say so in the note and carry the delta the way this
+one does — otherwise the drift returns as a step instead of as noise.
+The reference host is the one named in the file.
+
+### 12.4 The correction, measured
+
+The ladder was rerun with nothing changed but the conversion, and
+`boundary_repricing_check.py` compared every field of `group_ops` and
+every key of `native`, in every phase, row by row and repeat by repeat.
+
+| | |
+|:--|--:|
+| rows compared | 537 |
+| identical in every native counter | **537** |
+| rows whose counters moved | **0** |
+| `S` after over before, median | 1.0000 |
+| range | 0.9048 to 1.0766 |
+| rows repriced by more than 2% | 21 of 537 |
+
+So the round is accounting, as claimed: nothing computed anything
+different, and the correction to individual rows reaches about `±9.5%`.
+The checker's sensitivity is not assumed — run against two runs that
+genuinely differ, the rotation ladder against the shuffle one, it finds
+94 of 537 rows with moved counters and names the fields.
+
+**Where the correction lands, and why.**  A row is repriced in
+proportion to how much of its cost was *not* plain group additions,
+because additions are the unit's numeraire and need no conversion.  The
+share of each variant's cost that goes through a conversion, against the
+largest repricing that variant saw:
+
+| variant | converted share | worst ratio |
+|:--|--:|--:|
+| `semaev_s4_pairs_and_solve_m3` | 0.999 | 0.925 |
+| `…_s4_pairs_and_solve_m3_signed_orbit_columns` | 0.996 | 0.964 |
+| `semaev_s3_roots_m2` | 0.897 | 0.905 |
+| `mitm_m2_negfold` | 0.591 | 0.995 |
+| `mitm_m2_negfold_walk` | 0.247 | 0.996 |
+| `mitm_m2_negfold_walk_balanced` | 0.196 | 0.997 |
+| `mitm_m2_…_frobfold_walk_balanced` | 0.082 | 0.996 |
+| `mitm_m3_signed_orbit_columns_negfold` | 0.011 | 1.0002 |
+| `mitm_m3_signed_orbit_columns` | 0.006 | 1.0001 |
+
+The two ends of that table are the whole story.  A row that is 99.9%
+converted work moves by nine per cent; a row that is 0.6% converted work
+moves by one part in ten thousand.
+
+**And that is why §11's conclusions do not depend on the drift.**  The
+best row of each regime is a walk over a pair table — additions, almost
+all the way down — so the headline figures are unmoved:
+
+| regime | best row | `S` before | `S` after | vs rho |
+|:--|:--|--:|--:|--:|
+| prime, `2^23.4` | balanced `m = 2` walk | 14.281 | 14.280 | 3.63× |
+| binary, `2^24.4` | balanced `m = 2` walk | 50.656 | 50.652 | 21.9× |
+| Koblitz, `2^39.0` | balanced `m = 2` folded walk | 5.924 | 5.926 | 30.3× |
+
+The rows the drift *did* move are the ones this ledger already classes
+baseline or relabelling — Semaev `S₃` roots and `S₄` pairs-and-solve —
+and no conclusion ever rested on them.  So the defect was real, it was
+worth removing, and it was not threatening the answers: it put a floor
+under what a *future* round could resolve, which is the reason to fix it
+rather than a correction to what earlier rounds said.
+
+## 13. Round 5: the restart pool, drawn on first use
+
+§11.6 ended by naming this round's first line, and this is it:
+
+> The pooled offsets are drawn with the jumps at setup: sixteen extra
+> `[c]G + [d]Q`, thirty-two scalar multiplications, once per run whether
+> or not the walk ever restarts. … the fix is obvious: draw the pool on
+> the *first* restart rather than at setup, so a run that never restarts
+> never pays for it.
+
+### 13.1 How much is actually lying there, counted before touching the code
+
+The Round-4 ladder has 204 walk rows.  Their `walk_restarts` counter —
+which counts the opening segment as the first — distributes like this:
+
+| `walk_restarts` | rows | offsets the row used |
+|--:|--:|--:|
+| 1 | 110 | 0 |
+| 2 | 10 | 1 |
+| 3 | 7 | 2 |
+| 4–15 | 29 | 3–14 |
+| ≥ 16 | 48 | 16 |
+
+So **110 of 204 rows drew sixteen offsets and took none**, and another 46
+took fewer than they paid for.  Only the 48 rows that restart at least
+sixteen times used the pool they bought.
+
+What that waste is worth is arithmetic, not a guess, and it is worth
+doing before the measurement so the measurement has something to
+contradict.  One offset is two scalar multiplications and one addition;
+a scalar multiplication by a uniform `k < r` is `⌈log₂r⌉ − 1` doublings
+and about `log₂r/2 − 1` additions, so sixteen offsets cost about
+
+```
+ΔS_max  ≈  (48·log₂r − 48) / √r          group-addition equivalents
+```
+
+in the unit, and that is the *whole* saving on a row that takes no
+offset.  It falls fast:
+
+| `r` | `ΔS_max` |
+|:--|--:|
+| `2^10` | 10.4 |
+| `2^15` | 3.4 |
+| `2^20` | 0.89 |
+| `2^27` | 0.11 |
+| `2^39` | 0.0025 |
+
+That table is the round's honest headline before a single run: this
+removes a real cost, it removes it almost entirely from rungs below
+`2^15`, and **it does essentially nothing inside §1.6's window**.  (That
+last clause was measured and is corrected in §13.5: it is right about
+`ΔS`, which is a function of `r` alone, and wrong about the *ratio*,
+which also depends on the row's `S` — one row inside the window moves by
+`7.2%`.)  The
+three losses §11.6 recorded — `K_1 / GF(2^11)` at `0.597`,
+`K_0 / GF(2^13)` at `0.650`, `bench-10bit`'s three-summand walk at
+`0.656` — are all below `2^20`, and so is all of the gain.
+
+There is one consequence that is not cosmetic.  §11.3 reads the ladder's
+`S / S_family` column as the family law converging to its own optimum,
+and the small rungs are where that column is measured; a fixed setup
+cost that nobody uses inflates exactly those rows.  So the reason to
+land this is the same as Round 4's reason for pinning the unit: it
+raises the resolution of a future measurement rather than improving an
+answer.
+
+**The lever is also nearly exhausted by construction**, and that is
+worth saying now rather than discovering it later.  Drawing offsets one
+at a time on demand — which is what this implements — recovers the whole
+of the 110 rows' waste and most of the 46's.  Nothing else remains in
+the restart: what is left is sixteen jumps at setup, which every segment
+uses, and one addition per restart, which is already the floor for
+moving off a path.
+
+### 13.2 The comparison is exact, by construction
+
+A saving this small is below the run-to-run spread of §11.4, so a
+before-and-after of two ladders would not resolve it.  Two changes make
+it resolvable without any statistics at all:
+
+- **The offsets come off their own random stream.**  `pool_rng` is
+  seeded from the run's seed and is touched by nothing else, so moving
+  the draw earlier or later cannot shift the walk's randomness.
+- **A restart takes offset `k mod 16`**, not a random one, so selecting
+  an offset consumes no randomness either.
+
+With both, the eager and the lazy arm walk **bit-identical
+trajectories**: same steps, same restarts, same trials, same relations,
+same rows, same logarithm.  They differ in exactly one quantity — what
+the offsets cost — and the run reports that quantity directly, as
+`walk_pool_ops`, so the difference between the arms is a subtraction
+rather than an inference.  Both arms come from one binary on one host;
+`--eager-restart-pool` selects the baseline.
+
+**The eager arm is Round 4's pool *policy*, not Round 4's run**, and the
+distinction matters.  Round 4 chose an offset with a draw from the main
+stream, which this round replaces with the fixed cycle; that alone
+shifts every walk's randomness, so the Round-4 file is not a valid
+baseline for a saving this small and is not used as one.  It stays
+frozen for what it was.  Where a cross-round figure is wanted — §11.6's
+three losses were measured against *Round 2* — it is quoted as a
+cross-round figure, with the §12 repricing caveat, and never as the
+paired result.
+
+The test `drawing_the_restart_pool_lazily_changes_the_cost_and_nothing_else`
+asserts the whole of that on two prime rungs and eight seeds.
+
+### 13.3 The falsification target, declared before the ladders were read
+
+The round succeeds only if **all** of these hold:
+
+1. **The pairing holds.**  Every row of the two ladder arms is identical
+   in every native counter except `walk_jumps`, `walk_pool_offsets` and
+   `walk_pool_ops`; zero rows have a moved trajectory.
+2. **The saving accounts for itself exactly.**  On every walk row,
+   `gae_eager − gae_lazy` equals `walk_pool_ops_eager − walk_pool_ops_lazy`
+   to the operation — no row saves more or less than the offsets it
+   stopped drawing.
+3. **The loss is gone and no new one appears.**  `S` falls on each of
+   the three rows §11.6 named, and rises on none anywhere.
+4. **Correctness is preserved.**  `all_verified` on both arms, every
+   recovered logarithm equal to the planted one, and
+   `repeated_column_rows` and `pinned_by_repeated_row` zero everywhere,
+   on the holdout seed as well.
+5. **It is engineering and is reported as engineering.**  Trials and
+   yield against the exact ceiling must be *identical*, since the change
+   touches no decision the search makes.  The fitted exponents may move,
+   because the saving is larger at small `r` than at large: a steepening
+   of the walk rows' fit is expected and must be reported as an artifact
+   of removing a size-independent cost, never as a change in the
+   method's growth.
+
+**Inadmissible**: changing the factor base or the decomposition size;
+changing the operation accounting or the pinned conversion; skipping
+verification; choosing favourable seeds; quoting the relation phase
+instead of the whole-pipeline `S`; or reporting a small-rung saving as
+if it moved a conclusion inside §1.6's window.
+
+**Abandon if** the pairing fails — if any trajectory counter moves, the
+change did more than move a cost and this design is wrong.
+
+### 13.4 The pairing, checked
+
+Six runs, all from one binary (`blake3 ae6dd73f4404`) on one host: the
+ladder, a holdout seed and the eight-repeat headline, each in both arms.
+`boundary_pool_pairing_check.py` compares every native counter and every
+group-operation count of every row, per repeat.
+
+| | ladder | holdout | headline |
+|:--|--:|--:|--:|
+| rows compared | 537 | 106 | 240 |
+| identical in every counter but the pool's | **537** | **106** | **240** |
+| rows whose trajectory moved | **0** | **0** | **0** |
+| walk rows | 204 | 48 | 112 |
+| …that drew fewer offsets | 155 | 31 | 69 |
+| rows whose saving ≠ the offsets they dropped | **0** | **0** | **0** |
+| rows whose `S` rose | **0** | **0** | **0** |
+| `all_verified` | yes | yes | yes |
+
+So the design holds exactly: the two arms did the same work, row for
+row and repeat for repeat, and the only thing that changed is what the
+offsets cost.  The saving is a subtraction.
+
+### 13.5 Where the saving lands, and a correction to §13.1
+
+The closed form of §13.1 is a good predictor.  Per instance, the largest
+saving any walk row realised against `(48·log₂r − 48)/√r`:
+
+| instance | `log₂r` | predicted `ΔS` | measured `ΔS` | measured / predicted |
+|:--|--:|--:|--:|--:|
+| `K_0 / GF(2^15)` | 9.55 | 14.980 | 13.854 | 0.925 |
+| `bench-10bit` | 9.68 | 14.531 | 13.490 | 0.928 |
+| `K_1 / GF(2^11)` | 9.95 | 13.651 | 12.442 | 0.911 |
+| `bench-14bit` | 13.99 | 4.893 | 4.717 | 0.964 |
+| `bench-20bit` | 20.00 | 0.891 | 0.850 | 0.954 |
+| `K_1 / GF(2^23)` | 22.00 | 0.492 | 0.478 | 0.972 |
+| `generated-24bit` | 23.38 | 0.325 | 0.318 | 0.980 |
+| `K_0 / GF(2^37)` | 27.78 | 0.085 | 0.082 | 0.969 |
+| `K_0 / GF(2^41)` | 39.00 | 0.002 | 0.002 | 0.990 |
+
+The formula is high by 1 to 9 per cent across the whole ladder, as it
+should be: it prices sixteen offsets and the best row on each instance
+still took a few.
+
+**§13.1 overstated one thing and it is corrected here.**  It said the
+saving "does essentially nothing inside §1.6's window".  In absolute
+terms that is right — `ΔS ≤ 0.85` at `2^20` and `0.002` at `2^39` — but
+`ΔS` is a function of `r` alone while the *ratio* depends on the row's
+own `S`, and the Koblitz rows are the cheapest on the board because of
+the `2n` fold.  Splitting the walk rows at the window's edge:
+
+| | walk rows | best ratio | largest `ΔS` |
+|:--|--:|--:|--:|
+| below `2^20` | 120 | 0.5825 | 14.633 |
+| at or above `2^20` | 84 | **0.9283** | 0.850 |
+
+That best is `K_1 / GF(2^23)`'s two-summand folded walk at `2^22`: a
+**7.2 per cent** cut, inside the window, on a row whose `S` is about
+`6.7`.  Small, but not nothing, and the prediction should have said so.
+The prime and binary rows at the same sizes move by 1 per cent or less,
+because their `S` is five to eight times larger for the same `ΔS`.
+
+### 13.6 The loss §11.6 recorded is closed
+
+§11.6 measured the eager pool as a straight loss on the rungs that
+barely restart, against Round 2.  The eager arm reproduces those losses
+and the lazy arm removes them:
+
+| row | Round 2 `S` | eager `S` | lazy `S` | lazy vs Round 2 | §11.6 quoted |
+|:--|--:|--:|--:|--:|--:|
+| `K_1 / GF(2^11)` `m = 2` folded walk | 19.22 | 31.66 | 19.21 | **1.001×** | 0.597 |
+| `K_0 / GF(2^13)` `m = 2` folded walk | 18.54 | 28.54 | 18.53 | **1.000×** | 0.650 |
+| `bench-10bit` `m = 3` walk | 26.31 | 39.80 | 26.31 | **1.000×** | 0.656 |
+
+The eager arm's own ratios to Round 2 are `0.607`, `0.649` and `0.661`
+against §11.6's `0.597`, `0.650` and `0.656` — an independent
+reproduction of that measurement two rounds later, on a different random
+stream.  The lazy arm lands on Round 2's figure to three or four
+significant figures, which is what it should do: on a run that never
+takes an offset, drawing the pool lazily means drawing nothing, and the
+row pays exactly the sixteen jumps Round 2 paid.
+
+These are cross-round comparisons and carry §12's repricing caveat.  It
+is negligible here: all three are addition-dominated rows, where §12
+measured the correction at under one part in a thousand.
+
+### 13.7 The re-plumbing is a re-randomisation, and it is bigger than the lever
+
+The eager arm is not the Round-4 file, and the gap between them is the
+most useful number this round produced.  Against Round 4, the eager arm
+(same policy, offsets moved to their own stream and selected by a cycle)
+gives:
+
+| | |
+|:--|--:|
+| rows compared | 537 |
+| identical in every counter | 333 |
+| rows whose counters moved | 204 |
+| distinct variants among them | 68, **every one a walk row** |
+| `S` after over before, median | 1.0000 |
+| range | **0.5394 to 1.8308** |
+| moved by more than 2% | 131 of 537 |
+
+The structure is exactly right: every non-walk row is bit-identical to
+Round 4, so nothing outside the walk changed; every walk row moved,
+because its randomness did.  The median is `1.0000` and the geometric
+mean over variant means is `0.9961`, so the re-seed is unbiased, as an
+algorithm-preserving change must be.
+
+But the *spread* is `0.54` to `1.83` at three repeats, while the lever
+this round set out to measure is at most `7%` inside the window.  **A
+before-and-after of two ladders could not have seen it.**  That is not a
+retrospective justification for the paired design; §13.2 required it in
+advance, and this is the measurement that says by how much.
+
+It is also a warning about reading any single walk row across rounds.
+The best row of each regime, Round 4 against this round:
+
+| regime | best row | Round 4 | eager | lazy | vs rho | lazy / eager |
+|:--|:--|--:|--:|--:|--:|--:|
+| prime, `2^23.4` | balanced `m = 2` walk | 14.280 | 13.966 | **13.966** | 3.55× | 1.00000 |
+| binary, `2^24.4` | balanced `m = 2` walk | 50.652 | 36.929 | **36.929** | 15.96× | 1.00000 |
+| Koblitz, `2^39.0` | balanced `m = 2` folded walk | 5.926 | 5.117 | **5.115** | 26.13× | 0.99952 |
+
+**None of those moves is this round's lever**, and the last column says
+so: the lever is exactly `1.000` on all three, because a row that
+restarts sixteen times or more draws the whole pool either way.  The
+binary row reading `36.9` instead of `50.7` is the same algorithm on a
+different random stream, and it sits inside the `0.54–1.83` spread above.
+Classed by §3 that move is **accounting**: numbers changed, the algorithm
+did not.  It is carried onto the page as the current measurement, with
+Round 4's figure as its before mark and this paragraph as its
+explanation, because hiding it would be worse — but it is not progress
+and this ledger does not count it as any.
+
+### 13.8 Against §13.3's target, and the class
+
+| condition, as declared | result |
+|:--|:--|
+| 1. every row identical but for the three pool counters, zero trajectories moved | **met** — 883 rows over three run pairs, zero |
+| 2. the saving equals the offsets dropped, to the operation | **met** — zero mismatches |
+| 3. `S` falls on §11.6's three rows, rises nowhere | **met** — `0.607`, `0.649`, `0.661`; zero rows rose |
+| 4. correctness preserved, holdout included | **met** — `all_verified` on all six runs, `repeated_column_rows` and `pinned_by_repeated_row` zero throughout |
+| 5. trials and yield identical; any exponent move reported as an artifact | **met, with the move reported below** |
+
+On the fifth: the trials and the yield against the exact ceiling are
+inside "identical in every counter", so they did not move at all.  The
+fitted exponents did, in the direction and for the reason §13.3 named —
+a size-independent cost removed from every row makes the small rungs
+cheaper by more than the large ones, so the slope rises:
+
+| regime | row | eager `α` | lazy `α` |
+|:--|:--|--:|--:|
+| prime | `mitm_m2_negfold_walk` | 0.489 | 0.537 |
+| prime | `mitm_m2_negfold_walk_balanced` | 0.408 | 0.447 |
+| prime | `mitm_m3_negfold_walk` | 0.507 | 0.554 |
+| binary | `mitm_m2_negfold_walk` | 0.533 | 0.542 |
+| Koblitz | `mitm_m2_…_frobfold_walk` | 0.433 | 0.459 |
+| Koblitz | `mitm_m2_…_frobfold_walk_balanced` | 0.411 | 0.431 |
+
+Every walk row steepens, by `0.01` to `0.05`, at equal or better `R²`.
+**This is an artifact of removing a fixed cost, not a change in the
+method's growth**, and it must not be read as one: the underlying
+algorithm is bit-identical between the two columns.  If anything the
+lazy column is the more honest fit, because the eager one was measuring
+a constant that no longer exists.
+
+**The class, by §3's test: engineering.**  `S` fell, on 155 of 204 walk
+rows; the trials, the yield against the ceiling and every other count
+did not move at all; the ratio to the counting boundary is unchanged in
+structure.  The re-plumbing that made the measurement possible is
+**accounting** and is labelled separately, per §13.7.  Neither is an
+advance and neither is reported as one.
+
+### 13.9 What does not count, and what this is not
+
+- The saving is confined to small `r`.  Nothing here moves the family
+  law of §11.2, the crossover extrapolations of §11.3, or the verdict
+  that no variant of this family crosses rho at any size.
+- The binary regime's headline reading `36.9` where Round 4 read `50.7`
+  is re-randomisation (§13.7), not a gain, and is classed accounting.
+- The exponent steepening of §13.8 is an artifact of removing a
+  size-independent constant.  It is not evidence about growth.
+- The cross-round figures of §13.6 are cross-round and carry §12's
+  caveat; only the eager-against-lazy columns are paired.
+- `ΔS_max` in §13.1 is a derivation, checked against measurement in
+  §13.5; the rows of §13.5's right-hand column are the measurement.
+
+**One gap this round surfaced and did not close.**  The holdout's prime
+22-bit curve is generated from the holdout seed, so it is a different
+curve from the ladder's and is not in `docs/ic/calibration.json`; its
+seven non-addition units price at factors measured on the host, and 32
+of the holdout's rows therefore differ between two runs that did
+identical work.  The pairing check reports those separately rather than
+counting them, so no figure here rests on them.  The fix is to price an
+unpinned instance at its regime's median ratio instead of the host's
+measurement, which makes the unit host-independent everywhere rather
+than only on the default ladder.  That is a repricing with its own
+classification and its own before-and-after, so it is the next round's
+line, not this one's.
+
+### 13.10 Reproducing
+
+```
+# One binary, one host, two configurations.
+cargo build --release --bin ic
+ic boundary --out round5-eager.json --eager-restart-pool
+ic boundary --out round5.json
+
+# The holdout seed and the eight-repeat headline, both arms.
+ic boundary --seed 1213743172 --repeats 2 --prime-bits 22,24 \
+  --char2-degrees 24,27 --koblitz-degrees 37,39,41 [--eager-restart-pool] --out ...
+
+ic boundary --repeats 8 --prime-bits 24 --char2-degrees 27 \
+  --koblitz-degrees 37,41 [--eager-restart-pool] --out ...
+
+# The pairing, per run pair.
+python3 docs/ic/tools/boundary_pool_pairing_check.py round5-eager.json round5.json
+
+# The re-plumbing against Round 4, which is not a pairing.
+python3 docs/ic/tools/boundary_repricing_check.py \
+  docs/ic/runs/ic-boundary-ledger-round4-2026-09-21.json round5-eager.json
+```
+
+The six runs record `git_commit` as `c730cccb`, the commit that was
+checked out when they started: provenance is captured at start-up (§11.9)
+and the code they ran was committed afterwards.  `binary_blake3`
+(`ae6dd73f4404…`) is the identifier that matters and is the same on all
+six.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

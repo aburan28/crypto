@@ -176,6 +176,40 @@ pub struct Calibration {
     pub ns_per_canon: Option<f64>,
 }
 
+/// The unit's conversion ratios, pinned in the repository.
+///
+/// Through Round 3 every factor above was measured on the host at the
+/// start of each run, and the *ratios* to `ns_per_add` then drifted by a
+/// median of `1.08` and up to `3.70` between runs on one machine.  That
+/// repriced rows which had done identical native work by up to eight per
+/// cent and put a floor under every cross-run comparison: 111 of 166
+/// rows in the Round-3 comparison moved without an operation changing.
+///
+/// `AGENTS.md` §6 says operation counts are the metric "because they
+/// survive hardware".  A conversion re-measured per run does not, so the
+/// ratios now come from `docs/ic/calibration.json`, compiled in here.
+/// The measured factors are still taken and still reported — they are
+/// the wall-clock practicality note, and they say whether the host has
+/// changed — but they no longer price anything.
+const PINNED_CALIBRATION: &str = include_str!("../../docs/ic/calibration.json");
+
+/// Ratios for one instance, and which units had none.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct PinOutcome {
+    /// Units priced at a ratio from the repository.
+    pub pinned: Vec<String>,
+    /// Units with no entry, left at the host's measured ratio.
+    pub measured: Vec<String>,
+}
+
+/// The pinned ratios for `regime/instance`, or `None` when the table has
+/// no entry for it — a new size or a freshly generated curve.
+fn pinned_ratios(regime: &str, instance: &str) -> Option<serde_json::Map<String, serde_json::Value>> {
+    let doc: serde_json::Value = serde_json::from_str(PINNED_CALIBRATION).ok()?;
+    let row = doc.get("instances")?.get(format!("{regime}/{instance}"))?;
+    Some(row.as_object()?.clone())
+}
+
 impl Calibration {
     /// Group-addition equivalents of `count` native units at
     /// `ns_per_unit`.
@@ -184,6 +218,54 @@ impl Calibration {
             return count as f64;
         }
         count as f64 * ns_per_unit / self.ns_per_add
+    }
+
+    /// Replace the measured factors with the repository's pinned ratios.
+    ///
+    /// Every factor is stored as nanoseconds, and [`Calibration::gae`]
+    /// divides by `ns_per_add`, so writing `ratio · ns_per_add` makes the
+    /// conversion exactly the pinned ratio whatever the host measured.
+    /// A unit the table does not carry keeps its measured value and is
+    /// named in the outcome, so a row priced the old way says so.
+    pub fn pin(&mut self, regime: &str, instance: &str) -> PinOutcome {
+        let mut out = PinOutcome::default();
+        let table = pinned_ratios(regime, instance);
+        let add = self.ns_per_add;
+        let mut apply = |name: &str, slot: &mut Option<f64>, out: &mut PinOutcome| {
+            match table.as_ref().and_then(|t| t.get(name)).and_then(serde_json::Value::as_f64) {
+                Some(ratio) => {
+                    *slot = Some(ratio * add);
+                    out.pinned.push(name.to_string());
+                }
+                None => {
+                    if slot.is_some() {
+                        out.measured.push(name.to_string());
+                    }
+                }
+            }
+        };
+        let mut double = Some(self.ns_per_double);
+        apply("ns_per_double", &mut double, &mut out);
+        self.ns_per_double = double.unwrap_or(self.ns_per_double);
+        let mut lookup = Some(self.ns_per_lookup);
+        apply("ns_per_lookup", &mut lookup, &mut out);
+        self.ns_per_lookup = lookup.unwrap_or(self.ns_per_lookup);
+        let mut row_op = Some(self.ns_per_row_op);
+        apply("ns_per_row_op", &mut row_op, &mut out);
+        self.ns_per_row_op = row_op.unwrap_or(self.ns_per_row_op);
+        for (name, slot) in [
+            ("ns_per_sqrt", &mut self.ns_per_sqrt),
+            ("ns_per_as_solve", &mut self.ns_per_as_solve),
+            ("ns_per_s4_pair", &mut self.ns_per_s4_pair),
+            ("ns_per_word_xor", &mut self.ns_per_word_xor),
+            ("ns_per_legendre", &mut self.ns_per_legendre),
+            ("ns_per_inversion", &mut self.ns_per_inversion),
+            ("ns_per_frobenius", &mut self.ns_per_frobenius),
+            ("ns_per_canon", &mut self.ns_per_canon),
+        ] {
+            apply(name, slot, &mut out);
+        }
+        out
     }
 }
 
@@ -486,7 +568,16 @@ pub struct RegimeInstance {
     pub automorphisms_generic: u32,
     pub floor_s: f64,
     pub floor_ops: f64,
+    /// The factors every conversion in this instance went through: the
+    /// repository's pinned ratios wherever the table has them.
     pub calibration: Calibration,
+    /// What the host measured for the same units.  Kept because it is
+    /// the wall-clock practicality note and because a host that no
+    /// longer resembles the one the ratios came from should be visible;
+    /// it prices nothing.
+    pub calibration_measured: Calibration,
+    /// Which units came from the table and which fell back to the host.
+    pub calibration_pinned: PinOutcome,
     /// Every rho run (best reference first within a repeat).
     pub rho: Vec<RhoResult>,
     /// Mean `S` of the best-reference rho over the repeats.
@@ -2491,6 +2582,19 @@ impl TargetSource {
     }
 }
 
+/// When the walk's restart offsets are drawn.
+///
+/// `Lazy` draws offset `i` the first time a restart reaches for it, so a
+/// run that never restarts pays for none.  `Eager` draws all sixteen at
+/// setup, which is what Rounds 3 and 4 did; it is kept as a
+/// configuration rather than deleted so that the two can be run against
+/// each other from one binary, on one host, in one ladder.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RestartPool {
+    Lazy,
+    Eager,
+}
+
 /// Sixteen jumps `[a]G + [b]Q` with their coefficients, charged to `ops`.
 fn draw_jumps<G: CountedGroup>(
     g: &G,
@@ -2510,6 +2614,26 @@ fn draw_jumps<G: CountedGroup>(
             (g.add(ops, ag, bq), aj, bj)
         })
         .collect()
+}
+
+/// One restart offset `[c]G + [d]Q`, charged to the run's ledger and,
+/// for the report, to the pool's own ledger as well: `walk_pool_ops` is
+/// then the exact number of group additions the offsets cost, which is
+/// what the lazy and the eager arm differ by.
+fn draw_pool_offset<G: CountedGroup>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    rng: &mut StdRng,
+    ops: &mut GroupOps,
+    pool_ops: &mut GroupOps,
+) -> (G::Elt, u64, u64) {
+    let mut local = GroupOps::default();
+    let drawn = draw_jumps(g, generator, target, r, rng, &mut local, 1);
+    ops.merge(local);
+    pool_ops.merge(local);
+    drawn[0]
 }
 
 /// A key for the column part of a row: the same for two relations with
@@ -2538,6 +2662,7 @@ fn collect_and_solve<G: CountedGroup>(
     seed: u64,
     max_trials: u64,
     targets: TargetSource,
+    pool_mode: RestartPool,
     mut oracle: impl FnMut(&mut GroupOps, &mut OracleCounters, G::Elt) -> Option<Vec<usize>>,
 ) -> PipelineOutcome {
     let mut rng = StdRng::seed_from_u64(seed ^ 0x5245_4C41_5449_4F4E);
@@ -2589,12 +2714,33 @@ fn collect_and_solve<G: CountedGroup>(
     // sixteen jumps agree on about one index in sixteen, so two segments
     // that do collide diverge again within a step or two.  Shuffling
     // sixteen indices costs no group operation at all.
+    //
+    // The pool is drawn **on first use**, one offset at a time (§13).
+    // Rounds 3 and 4 drew all sixteen at setup, at two scalar
+    // multiplications each, and 110 of the ladder's 204 walk rows then
+    // restarted exactly once — that is, never took an offset at all —
+    // so more than half the rows paid thirty-two scalar multiplications
+    // for nothing, and on the smallest rungs that setup was most of the
+    // relation phase.  Drawing lazily charges a row for exactly the
+    // offsets it used.
+    //
+    // Two details make the lazy and the eager arm comparable rather than
+    // merely similar.  The offsets come off a **stream of their own**,
+    // so moving the draw cannot shift the walk's randomness; and a
+    // restart takes offset `k mod 16` rather than a random one, so the
+    // selection consumes no randomness either.  The two arms therefore
+    // walk bit-identical trajectories and differ in exactly one thing:
+    // the offsets they paid for.  `walk_pool_ops` reports that cost, so
+    // the difference between the arms is checkable rather than argued.
     let jump_count = 16usize;
     let pool_count = 16usize;
     let shared_jumps = targets == TargetSource::WalkSharedJumps;
     let guarded = targets.is_guarded();
     let mut jumps: Vec<(G::Elt, u64, u64)> = Vec::new();
     let mut pool: Vec<(G::Elt, u64, u64)> = Vec::new();
+    let mut pool_rng = StdRng::seed_from_u64(seed ^ 0x504F_4F4C_5F4F_4646);
+    let mut pool_ops = GroupOps::default();
+    let mut pool_taken = 0u64;
     let mut jump_perm: Vec<usize> = (0..jump_count).collect();
     let mut walk_point = g.identity();
     let (mut wa, mut wb) = (0u64, 0u64);
@@ -2607,9 +2753,12 @@ fn collect_and_solve<G: CountedGroup>(
     if targets.is_walk() {
         jumps = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, jump_count);
         walk_jumps += jump_count as u64;
-        if !shared_jumps {
-            pool = draw_jumps(g, generator, target, r, &mut rng, &mut rel.group_ops, pool_count);
-            walk_jumps += pool_count as u64;
+        if !shared_jumps && pool_mode == RestartPool::Eager {
+            for _ in 0..pool_count {
+                let off =
+                    draw_pool_offset(g, generator, target, r, &mut pool_rng, &mut rel.group_ops, &mut pool_ops);
+                pool.push(off);
+            }
         }
     }
 
@@ -2629,7 +2778,7 @@ fn collect_and_solve<G: CountedGroup>(
             }
             TargetSource::Walk | TargetSource::WalkSharedJumps => {
                 if walk_fresh || segment_steps >= segment_cap {
-                    if walk_restarts == 0 || shared_jumps || pool.is_empty() {
+                    if walk_restarts == 0 || shared_jumps {
                         // The first segment, and every segment of the
                         // unguarded diagnostic, starts from a fresh
                         // `[a]G + [b]Q`.
@@ -2639,7 +2788,23 @@ fn collect_and_solve<G: CountedGroup>(
                         let bq = g.mul(&mut rel.group_ops, target, wb);
                         walk_point = g.add(&mut rel.group_ops, ag, bq);
                     } else {
-                        let (op, oa, ob) = pool[rng.gen_range(0..pool.len())];
+                        // Offset `k mod 16` for the k-th restart, drawn
+                        // here if this is the first restart to reach it.
+                        let idx = (pool_taken as usize) % pool_count;
+                        pool_taken += 1;
+                        if idx == pool.len() {
+                            let off = draw_pool_offset(
+                                g,
+                                generator,
+                                target,
+                                r,
+                                &mut pool_rng,
+                                &mut rel.group_ops,
+                                &mut pool_ops,
+                            );
+                            pool.push(off);
+                        }
+                        let (op, oa, ob) = pool[idx];
                         walk_point = g.add(&mut rel.group_ops, walk_point, op);
                         wa = addmod(wa, oa, r);
                         wb = addmod(wb, ob, r);
@@ -2748,7 +2913,10 @@ fn collect_and_solve<G: CountedGroup>(
     rel.count("repeated_targets_skipped", repeats_skipped);
     rel.count("target_guard_probes", guard_probes);
     if targets.is_walk() {
-        rel.count("walk_jumps", walk_jumps);
+        rel.count("walk_jumps", walk_jumps + pool.len() as u64);
+        rel.count("walk_pool_offsets", pool.len() as u64);
+        rel.count("walk_pool_ops", pool_ops.adds + pool_ops.doubles);
+        rel.count("walk_pool_restarts", pool_taken);
         rel.count("walk_steps", walk_steps);
         rel.count("walk_restarts", walk_restarts);
     }
@@ -3014,6 +3182,12 @@ pub struct BoundaryConfig {
     /// before §10.2 of the note, for the diagnostic that measures what
     /// that cost.  The default guards both sources.
     pub unguarded_targets: bool,
+    /// Draw all sixteen restart offsets at setup, as Rounds 3 and 4 did,
+    /// instead of drawing each the first time a restart reaches for it.
+    /// This is the baseline arm of §13's comparison; the default is
+    /// lazy.  Nothing else about the walk changes with it, which is what
+    /// makes the two arms comparable row by row.
+    pub eager_restart_pool: bool,
 }
 
 impl Default for BoundaryConfig {
@@ -3037,6 +3211,7 @@ impl Default for BoundaryConfig {
             max_folded_table_pairs: 1 << 23,
             m2_floor_divisor: 4,
             unguarded_targets: false,
+            eager_restart_pool: false,
         }
     }
 }
@@ -3048,6 +3223,15 @@ impl BoundaryConfig {
             TargetSource::WalkSharedJumps
         } else {
             TargetSource::Walk
+        }
+    }
+
+    /// When the walk rows draw their restart offsets.
+    pub fn restart_pool(&self) -> RestartPool {
+        if self.eager_restart_pool {
+            RestartPool::Eager
+        } else {
+            RestartPool::Lazy
         }
     }
 
@@ -3181,6 +3365,16 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         .and_then(|f| exact_decomposition_ceiling(curve, &f.points, r, 2));
 
     let floor_s = generic_floor_s(2.0);
+    // The unit's conversion ratios come from the repository, not from
+    // what this host happened to measure a moment ago; see
+    // `PINNED_CALIBRATION`.  `priced` is what every phase below is
+    // converted with, `calib` stays as the host note — which is why the
+    // rebinding to `priced` happens *after* the instance is built, below:
+    // shadowing it here made `calibration_measured` a second copy of the
+    // pinned table, so every prime row claimed the host had measured
+    // exactly what the repository pinned.
+    let mut priced = calib.clone();
+    let pinned = priced.pin("prime", inst.name.as_str());
     let mut out = RegimeInstance {
         regime: "prime".into(),
         curve: serde_json::json!({
@@ -3195,7 +3389,9 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         automorphisms_generic: 2,
         floor_s,
         floor_ops: generic_floor_ops(r as f64, 2.0),
-        calibration: calib.clone(),
+        calibration: priced.clone(),
+        calibration_measured: calib.clone(),
+        calibration_pinned: pinned.clone(),
         rho: Vec::new(),
         rho_s_mean: 0.0,
         rho_verified_all: true,
@@ -3203,6 +3399,7 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         seeds: Vec::new(),
         targets: Vec::new(),
     };
+    let calib = &priced;
     out.curve["factor_base"] = serde_json::json!({
         "description": fb.description,
         "signed_points": fb.points.len(),
@@ -3278,6 +3475,7 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
                 seed,
                 budget,
                 targets,
+                cfg.restart_pool(),
                 |ops, ctr, point| decompose_prime(curve, fb, &oracle, ops, ctr, point),
             );
             let exact = if oracle.summands() == 2 { exact_m2 } else { exact_m3 };
@@ -3341,6 +3539,7 @@ fn run_binary_variant(
         seed,
         budget,
         targets,
+        cfg.restart_pool(),
         |ops, ctr, point| decompose_binary(inst, fb, oracle, ops, ctr, point),
     );
     let mut v = assemble_variant(
@@ -3587,6 +3786,8 @@ fn binary_regime_shell(inst: &BinaryInstance, regime: &str, automorphisms: u32) 
         floor_s: generic_floor_s(automorphisms as f64),
         floor_ops: generic_floor_ops(inst.r as f64, automorphisms as f64),
         calibration: Calibration::default(),
+        calibration_measured: Calibration::default(),
+        calibration_pinned: PinOutcome::default(),
         rho: Vec::new(),
         rho_s_mean: 0.0,
         rho_verified_all: true,
@@ -3655,6 +3856,10 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
     let m2_row = m_used == 3 && admissible.contains(&2) && two_summand_row_fits(cfg, &fb, space, exact_m2);
 
     let mut out = binary_regime_shell(inst, "char2", 2);
+    // Price with the repository's ratios, keep the host's as the note.
+    let instance_name = out.curve["name"].as_str().unwrap_or_default().to_string();
+    out.calibration_measured = calib.clone();
+    out.calibration_pinned = calib.pin("char2", &instance_name);
     out.calibration = calib.clone();
     out.curve["factor_base"] = serde_json::json!({
         "description": fb.description,
@@ -3859,6 +4064,10 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
     });
 
     let mut out = binary_regime_shell(inst, "koblitz", 2 * n);
+    // Price with the repository's ratios, keep the host's as the note.
+    let instance_name = out.curve["name"].as_str().unwrap_or_default().to_string();
+    out.calibration_measured = calib.clone();
+    out.calibration_pinned = calib.pin("koblitz", &instance_name);
     out.calibration = calib.clone();
     out.curve["factor_base"] = serde_json::json!({
         "description": description,
@@ -4459,6 +4668,35 @@ mod tests {
         let inst = roster_prime_instance(12).unwrap();
         let res = run_prime_instance(&inst, &cfg);
         assert!(res.rho_verified_all, "{:?}", res.rho);
+        // `bench-12bit` is in the pinned table, so this row prices with
+        // the repository's ratios — and must still report what the host
+        // measured.  The two came out identical once, because the pinned
+        // copy was bound over `calib` before the instance was built, so
+        // the "host note" was a second copy of the pinned values and a
+        // reader would have concluded the host measured exactly what the
+        // repository pinned.  Moving that rebinding is the fix; this is
+        // the assertion that keeps it moved.
+        assert!(!res.calibration_pinned.pinned.is_empty(), "{:?}", res.calibration_pinned);
+        let priced = &res.calibration;
+        let host = &res.calibration_measured;
+        assert_eq!(priced.ns_per_add, host.ns_per_add, "pinning must not touch ns_per_add");
+        let moved = [
+            (priced.ns_per_sqrt, host.ns_per_sqrt),
+            (priced.ns_per_legendre, host.ns_per_legendre),
+            (priced.ns_per_inversion, host.ns_per_inversion),
+        ]
+        .iter()
+        .filter(|(a, b)| a.is_some() && a != b)
+        .count()
+            + usize::from(priced.ns_per_double != host.ns_per_double)
+            + usize::from(priced.ns_per_lookup != host.ns_per_lookup)
+            + usize::from(priced.ns_per_row_op != host.ns_per_row_op);
+        assert!(
+            moved > 0,
+            "every pinned unit priced at exactly the host's measurement, which means the host \
+             note is a copy of the pinned table rather than the measurement: priced {priced:?} \
+             host {host:?}"
+        );
         // Eight rungs, plus the balanced row wherever `#E^{1/3}` differs
         // from the `2^{⌈bits/3⌉}` rule by more than a tenth.
         assert!((8..=9).contains(&res.variants.len()), "{}", res.variants.len());
@@ -4499,9 +4737,14 @@ mod tests {
         let walk = res.variants.iter().find(|v| v.name == "mitm_m2_negfold_walk").unwrap();
         assert_eq!(walk.targets, "walk");
         assert!(walk.relations.get("walk_steps") > 0);
-        // Sixteen jumps and sixteen restart offsets, drawn once for the
-        // whole run whatever the restarts (Round 3).
-        assert_eq!(walk.relations.get("walk_jumps"), 32);
+        // Sixteen jumps drawn once, and one restart offset per restart
+        // up to sixteen (§13).  Round 3 and Round 4 drew all sixteen
+        // offsets here whatever the restarts, which on a run this small
+        // is the whole of the relation phase's setup.
+        let offsets = walk.relations.get("walk_pool_offsets");
+        assert_eq!(walk.relations.get("walk_jumps"), 16 + offsets);
+        assert_eq!(offsets, walk.relations.get("walk_pool_restarts").min(16));
+        assert!(offsets < 16, "the quick ladder's walk should not need the whole pool");
         let random = res.variants.iter().find(|v| v.name == "mitm_m2_negfold").unwrap();
         assert!(walk.relations.group_ops.scalar_mults < random.relations.group_ops.scalar_mults);
         // No target is ever presented twice, on either source, so no row
@@ -4514,6 +4757,43 @@ mod tests {
             assert_eq!(v.linear_algebra.get("pinned_by_repeated_row"), 0, "{}", v.name);
             assert!(v.relations.get("target_guard_probes") >= v.trials, "{}", v.name);
         }
+    }
+
+    #[test]
+    fn the_unit_prices_the_same_counts_the_same_way_whatever_the_host_measured() {
+        // The defect this fixes: two runs measured the same instance's
+        // `ns_per_add` at 213 ns and 146 ns, and the *ratios* to it moved
+        // by a median of 1.08, so identical native counts came out up to
+        // eight per cent apart.  After pinning, the conversion is the
+        // repository's ratio and the host's speed cancels exactly.
+        let mut fast = Calibration { ns_per_add: 146.0, ..Calibration::default() };
+        let mut slow = Calibration { ns_per_add: 213.0, ..Calibration::default() };
+        // Give the two hosts deliberately different measured ratios.
+        fast.ns_per_sqrt = Some(146.0 * 4.0);
+        slow.ns_per_sqrt = Some(213.0 * 7.0);
+        fast.ns_per_lookup = 146.0 * 0.02;
+        slow.ns_per_lookup = 213.0 * 0.05;
+        let name = "generated-24bit-10935329";
+        let a = fast.pin("prime", name);
+        let b = slow.pin("prime", name);
+        assert_eq!(a.pinned, b.pinned, "the same units pin on either host");
+        assert!(a.pinned.contains(&"ns_per_sqrt".to_string()), "{:?}", a.pinned);
+        for count in [1u64, 97, 1_000_000] {
+            let f = fast.gae(count, fast.ns_per_sqrt.unwrap());
+            let s = slow.gae(count, slow.ns_per_sqrt.unwrap());
+            assert!((f - s).abs() / f.max(1e-9) < 1e-12, "{count}: {f} vs {s}");
+            let fl = fast.gae(count, fast.ns_per_lookup);
+            let sl = slow.gae(count, slow.ns_per_lookup);
+            assert!((fl - sl).abs() / fl.max(1e-9) < 1e-12, "{count}: {fl} vs {sl}");
+        }
+        // An instance the table does not carry keeps the host's numbers
+        // and says so, rather than silently pricing at someone else's.
+        let mut fresh = Calibration { ns_per_add: 100.0, ..Calibration::default() };
+        fresh.ns_per_sqrt = Some(250.0);
+        let out = fresh.pin("prime", "a-curve-generated-tomorrow");
+        assert!(out.pinned.is_empty(), "{:?}", out.pinned);
+        assert!(out.measured.contains(&"ns_per_sqrt".to_string()), "{:?}", out.measured);
+        assert_eq!(fresh.ns_per_sqrt, Some(250.0), "an unpinned unit must not be rewritten");
     }
 
     #[test]
@@ -4570,19 +4850,82 @@ mod tests {
         let oracle = Oracle::Mitm { table: &table, m: 2 };
         let mut restarts = 0u64;
         for seed in 1..=8u64 {
-            let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, |o, c, p| {
-                decompose_prime(curve, &fb, &oracle, o, c, p)
-            });
-            assert_eq!(out.recovered, Some(d), "seed {seed}");
-            assert_eq!(out.linear_algebra.get("repeated_column_rows"), 0);
-            let r = out.relations.get("walk_restarts");
-            restarts += r;
-            // Sixteen jumps and sixteen pool offsets, two scalar
-            // multiplications each, drawn once; the restarts add none.
-            assert_eq!(out.relations.group_ops.scalar_mults, 2 * 32 + 2, "seed {seed}: restarts {r}");
-            assert_eq!(out.relations.get("walk_jumps"), 32);
+            for pool in [RestartPool::Eager, RestartPool::Lazy] {
+                let out =
+                    collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, pool, |o, c, p| {
+                        decompose_prime(curve, &fb, &oracle, o, c, p)
+                    });
+                assert_eq!(out.recovered, Some(d), "seed {seed}");
+                assert_eq!(out.linear_algebra.get("repeated_column_rows"), 0);
+                let r = out.relations.get("walk_restarts");
+                if pool == RestartPool::Eager {
+                    restarts += r;
+                }
+                // Sixteen jumps and the offsets the pool holds, two
+                // scalar multiplications each; the restarts themselves
+                // add none.
+                let offsets = out.relations.get("walk_pool_offsets");
+                assert_eq!(out.relations.group_ops.scalar_mults, 2 * (16 + offsets) + 2, "seed {seed}: restarts {r}");
+                assert_eq!(out.relations.get("walk_jumps"), 16 + offsets);
+                match pool {
+                    RestartPool::Eager => assert_eq!(offsets, 16, "seed {seed}"),
+                    // A run takes offset `k mod 16` on its k-th restart,
+                    // so it holds one per restart until it has sixteen.
+                    RestartPool::Lazy => {
+                        assert_eq!(offsets, out.relations.get("walk_pool_restarts").min(16), "seed {seed}")
+                    }
+                }
+            }
         }
         assert!(restarts > 0, "the guard should have forced a restart somewhere in eight runs");
+    }
+
+    #[test]
+    fn drawing_the_restart_pool_lazily_changes_the_cost_and_nothing_else() {
+        // §13's whole claim in one assertion.  The offsets come off a
+        // stream of their own and are taken in a fixed cycle, so the two
+        // arms must walk the *same* trajectory — same steps, same
+        // restarts, same trials, same relations, same logarithm — and
+        // differ in exactly one quantity: what the offsets cost.  If that
+        // holds, the saving is not an estimate, it is a subtraction.
+        // Two rungs, because the saving lives at one end: a big run
+        // restarts past sixteen and draws the whole pool either way,
+        // and it is the small run that was paying for offsets it never
+        // reached.
+        let mut saved_somewhere = false;
+        for bits in [12u32, 18] {
+            let inst = roster_prime_instance(bits).unwrap();
+            let curve = &inst.curve;
+            let fb = prime_factor_base(&inst, 16);
+            let table = PairTable::build_negation_folded(curve, &fb);
+            let g = inst.generator_point();
+            let mut ops = GroupOps::default();
+            let d = 30_011 % inst.r;
+            let q = curve.mul(&mut ops, g, d);
+            let oracle = Oracle::Mitm { table: &table, m: 2 };
+            for seed in 1..=8u64 {
+                let run = |pool| {
+                    collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, TargetSource::Walk, pool, |o, c, p| {
+                        decompose_prime(curve, &fb, &oracle, o, c, p)
+                    })
+                };
+                let eager = run(RestartPool::Eager);
+                let lazy = run(RestartPool::Lazy);
+                let at = format!("{bits} bits, seed {seed}");
+                assert_eq!(eager.recovered, lazy.recovered, "{at}");
+                assert_eq!(eager.recovered, Some(d), "{at}");
+                for k in ["trials", "relations", "walk_steps", "walk_restarts", "walk_pool_restarts", "repeated_targets_skipped"] {
+                    assert_eq!(eager.relations.get(k), lazy.relations.get(k), "{at}: {k}");
+                }
+                assert_eq!(eager.linear_algebra.native, lazy.linear_algebra.native, "{at}");
+                // The one difference, and it accounts for itself exactly.
+                let pool_saving = eager.relations.get("walk_pool_ops") - lazy.relations.get("walk_pool_ops");
+                let gae_saving = eager.relations.group_ops.gae() - lazy.relations.group_ops.gae();
+                assert_eq!(gae_saving, pool_saving as f64, "{at}");
+                saved_somewhere |= pool_saving > 0;
+            }
+        }
+        assert!(saved_somewhere, "no run took fewer than sixteen offsets; the fixture proves nothing");
     }
 
     #[test]
@@ -4610,7 +4953,7 @@ mod tests {
                 (TargetSource::RandomUnguarded, &mut unguarded_repeats),
                 (TargetSource::Random, &mut guarded_repeats),
             ] {
-                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, |o, c, p| {
+                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, RestartPool::Lazy, |o, c, p| {
                     decompose_prime(curve, &fb, &oracle, o, c, p)
                 });
                 assert_eq!(out.recovered, Some(d), "{source:?} seed {seed}");
@@ -4648,7 +4991,7 @@ mod tests {
                 (TargetSource::WalkSharedJumps, &mut merged_repeats),
                 (TargetSource::Walk, &mut fresh_repeats),
             ] {
-                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, |o, c, p| {
+                let out = collect_and_solve(curve, g, q, inst.r, 1, &fb, seed, 4_000_000, source, RestartPool::Lazy, |o, c, p| {
                     decompose_prime(curve, &fb, &oracle, o, c, p)
                 });
                 assert_eq!(out.recovered, Some(d), "{source:?} seed {seed}");
@@ -4904,7 +5247,7 @@ mod tests {
         }
         eprintln!("ground truth: {truth_hits}/{checked} targets decompose; oracle found {oracle_hits}");
         let t = Instant::now();
-        let outcome = collect_and_solve(&g, inst.generator, target, inst.r, inst.cofactor, &folded, 5, 1_000_000, TargetSource::Random, |ops, ctr, point| {
+        let outcome = collect_and_solve(&g, inst.generator, target, inst.r, inst.cofactor, &folded, 5, 1_000_000, TargetSource::Random, RestartPool::Lazy, |ops, ctr, point| {
             decompose_binary(&inst, &folded, &Oracle::Mitm { table: &table, m: 3 }, ops, ctr, point)
         });
         eprintln!(
@@ -4979,6 +5322,8 @@ mod tests {
             floor_s: 1.0,
             floor_ops: 1.0,
             calibration: Calibration::default(),
+            calibration_measured: Calibration::default(),
+            calibration_pinned: PinOutcome::default(),
             rho: Vec::new(),
             rho_s_mean: 0.0,
             rho_verified_all: true,

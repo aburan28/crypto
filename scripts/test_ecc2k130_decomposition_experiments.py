@@ -59,6 +59,50 @@ class RungTests(unittest.TestCase):
             self.assertIsNotNone(r.G)
 
 
+class RungCensusTests(unittest.TestCase):
+    """E1 pre-registered `29` and `37` as rungs and the first round reported
+    them missing for want of tooling.  They are not rungs: their prime subgroup
+    is a small part of the curve, so `n` would not mean what the ladder's
+    x-axis says."""
+
+    def test_the_pre_registered_upper_rungs_are_not_rungs(self) -> None:
+        census = {r["n"]: r for r in X.rung_census(11, 41)}
+        self.assertFalse(census[29]["is_scale_model_rung"])
+        self.assertEqual(census[29]["largest_prime"], 16067)
+        self.assertGreater(census[29]["cofactor"], 1000)
+        self.assertFalse(census[37]["is_scale_model_rung"])
+
+    def test_exactly_four_degrees_below_62_are_rungs(self) -> None:
+        rungs = [r["n"] for r in X.rung_census(11, 61) if r["is_scale_model_rung"]]
+        self.assertEqual(rungs, [13, 19, 23, 41])
+        # and every one of them has the ECC2K-130 shape
+        for r in X.rung_census(11, 61):
+            if r["is_scale_model_rung"]:
+                self.assertEqual(r["cofactor"], 4, r)
+
+    def test_the_fourth_rung_is_out_of_reach_and_says_so(self) -> None:
+        forty_one = [r for r in X.rung_census(41, 41)][0]
+        self.assertTrue(forty_one["is_scale_model_rung"])
+        self.assertFalse(forty_one["reachable_in_this_harness"])
+        self.assertGreater(forty_one["predicted_oracle_operations"], 1e12)
+
+    def test_a_non_rung_is_excluded_before_its_field_is_built(self) -> None:
+        """Building `Rung(29)` means table-free field arithmetic for a rung
+        that gets thrown away, so the check has to come first."""
+        row = X.run_e1_rung(29)
+        self.assertIn("excluded", row)
+        self.assertFalse(row["is_scale_model_rung"])
+        self.assertEqual(row["cofactor"], 33412)
+
+    def test_the_new_rung_is_usable_and_has_the_right_dimension(self) -> None:
+        r = X.Rung(23)
+        self.assertEqual(r.cofactor, 4)
+        self.assertTrue(r.is_scale_model_rung)
+        self.assertEqual(r.p_torsion_rank, 1)
+        self.assertEqual(X.ladder_dimension(23), 9)
+        self.assertLessEqual(23, X.Rung.MAX_TABLE_DEGREE)
+
+
 class FrobeniusTests(unittest.TestCase):
     def test_the_eigenvalue_is_a_root_of_its_characteristic_polynomial(self) -> None:
         """`pi^2 + pi + 2 = 0` for `K_0`, and the root that acts is settled by
@@ -219,6 +263,39 @@ class DispersionTests(unittest.TestCase):
         self.assertGreater(d["index_of_dispersion_all_subsets"], 2.0)
         self.assertGreater(d["degenerate_subsets"], 0)
         self.assertLess(d["index_of_dispersion"], d["index_of_dispersion_all_subsets"])
+
+
+class LargePrimeRedundancyTests(unittest.TestCase):
+    """E4's "5-11x redundant" divided the rank by however many relations the
+    harness collected.  These pin what that statistic does and does not say."""
+
+    def test_the_published_ratio_moves_with_collection_not_with_the_method(self) -> None:
+        """Same factor base, same rung; only how long the run went."""
+        short = X.e4_pairing_crossing(13, 6, 9, targets=400)
+        long = X.e4_pairing_crossing(13, 6, 9, targets=3000)
+        self.assertEqual(short["factor_base_size"], long["factor_base_size"])
+        self.assertEqual(short["rank_ceiling"], long["rank_ceiling"])
+        # the published statistic falls just by collecting more ...
+        self.assertLess(long["rank_over_relations_as_published"],
+                        short["rank_over_relations_as_published"])
+        # ... while the crossing, which is the cost, does not move with it
+        self.assertAlmostEqual(long["rank_over_relations_at_crossing"],
+                               short["rank_over_relations_at_crossing"], delta=0.12)
+
+    def test_differences_cannot_span_and_the_ceiling_shows_it(self) -> None:
+        """At `m = 2` every paired row is `P_i - P_j`, so the rank is capped at
+        `|F| - 1` however many relations arrive."""
+        d = X.e4_pairing_crossing(19, 7, 10, targets=6000)
+        self.assertLessEqual(d["rank_ceiling"], d["difference_bound"])
+        self.assertGreater(d["ceiling_over_unknowns"], 0.9)
+
+    def test_the_crossing_tracks_graph_connectivity(self) -> None:
+        """Differences are edges, so reaching the ceiling is connectivity:
+        `~(|F|/2) ln|F|` edges, i.e. `rank/relations ~ 2/ln|F|`."""
+        for n, l, lp, t in ((19, 7, 10, 6000), (19, 8, 11, 4000)):
+            d = X.e4_pairing_crossing(n, l, lp, targets=t)
+            self.assertGreater(d["measured_over_prediction"], 0.4, d)
+            self.assertLess(d["measured_over_prediction"], 1.6, d)
 
 
 class OrbitTests(unittest.TestCase):

@@ -72,6 +72,8 @@ enum Action {
     Boundary(boundary::BoundaryArgs),
     /// Write a benchmark corpus of Weil-descended Semaev S4 instances (Magma, DIMACS+XOR, CNF, ANF) with certified labels and planted witnesses.
     Corpus(corpus::CorpusArgs),
+    /// Price every decomposition oracle on R and on R − P + Q pairwise: does a solver charge the same for a swapped target?
+    Swap(boundary::SwapArgs),
 }
 #[derive(Args)]
 #[group(required = true, multiple = false)]
@@ -119,6 +121,7 @@ fn execute(cli: &Cli) -> Result<Value, String> {
         Some(Action::Fixed(args)) => fixed::run(args.clone()),
         Some(Action::Boundary(args)) => boundary::run(args.clone(), cli.json),
         Some(Action::Corpus(args)) => corpus::run(args.clone()),
+        Some(Action::Swap(args)) => boundary::swap(args.clone(), cli.json),
         Some(Action::Run(args)) => experiment::run(args.clone(), cli.json),
         None => {
             if let Some(name) = &cli.profile {

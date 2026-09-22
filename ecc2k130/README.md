@@ -712,6 +712,7 @@ modal run modal_app.py::search --hours 4
 modal run modal_app.py::fanout --count 8 --hours 4
 modal run modal_app.py::merge         # collisions across every run
 modal run modal_app.py::next_run_id   # the next free campaign run id (curve 131)
+modal deploy modal_app.py             # then python3 modal_campaign.py ... (see below)
 ```
 
 The GPU comes from `ECC_GPU`, read when the file is imported and baked into the
@@ -819,14 +820,48 @@ The procedure, once:
 ```
 export ECC_GPU=RTX-PRO-6000 CURVE=131
 ./run.sh next-run-id                 # e.g. {"runId": 8000, "used": [...], ...}
-RUNID=8000 COUNT=4 PASSES=0 ./run.sh fanout      # run ids 8000-8003, until stopped
+RUNID=8000 COUNT=4 PASSES=0 ./run.sh fleet       # run ids 8000-8003, until stopped
 ```
 
-`run.sh` refuses `CURVE=131` without a `RUNID` in range; `fanout` takes it as
-the base of `COUNT` consecutive ids, and every pass of the loop launches the
-same ids so the checkpoints resume. Two operators must not both start from
-the same `next-run-id` answer at the same moment; the volume is the only
-arbiter, and it is read, not locked.
+`run.sh` refuses `CURVE=131` without a `RUNID` in range; `fleet` takes it as
+the base of `COUNT` consecutive ids, and every pass launches the same ids so
+the checkpoints resume. Two operators must not both start from the same
+`next-run-id` answer at the same moment; the volume is the only arbiter, and
+it is read, not locked.
+
+`fleet` deploys the app and drives it with `modal_campaign.py`, and that is
+the shape a campaign needs. `search` and `fanout` run inside an *ephemeral*
+app that Modal stops when the launching shell's connection drops -- on
+2026-09-21 four runners were terminated at 15:23Z that way while the shell
+kept drawing "Running (4/4 containers active)" for four hours -- and
+`--detach` keeps only the last spawned function alive. On the deployed app
+each pass is a call that runs to completion on its own; the driver records
+the call ids in `~/.ecc2k130-modal-campaign/calls.json`, re-attaches to the
+ones still running when it restarts (a second container on one run id would
+fight the first over its checkpoint), spawns the next pass the minute one
+returns, and cancels a call that is half an hour past its deadline.
+
+#### Walking on the container's CPUs too
+
+`CPU_THREADS=32 ./run.sh fleet` (or `ECC_CPU_THREADS` for `modal run`) also
+runs the host client on that many threads in every container, under run id
+`+1000` (8000 → 9000; GPU runs with a CPU walker take 8000-8999 so the pair
+stays in range). Same iteration function, same canonical key -- `validate`
+recovers planted logs through both backends -- so its points are ordinary
+campaign points, and `modal_sync.py` finds its corpus and checkpoint header
+like any run's. The image carries an x86-64-v3 (AVX2) and an x86-64-v4
+(AVX-512) host build; the walker picks v4 when `/proc/cpuinfo` has every flag
+it needs and runs `--test` on its choice before walking.
+
+What it buys, measured 2026-09-21 in an RTX PRO 6000 container: **12.4 M
+it/s per thread** at AVX-512 (49.4 M it/s on 4 threads over a 2-core
+request), against 14,750 M it/s from the GPU beside it. Modal bills CPU at
+`max(request, use)`, $0.047 per physical core-hour against $3.03 for the
+6000, so 32 threads (16 cores) add about **25% to the container's cost for
+about 2.7% more iterations** -- roughly ten times worse per dollar than the
+GPU. It is off by default. It is the right call where cores come with the
+box (`aws/enable-host-cpu.sh` on a g7e; a c7i via `aws/fleet-cpu.sh`), and
+a knowing one here.
 
 Retiring the runs that violated the rules (the state on 2026-09-21):
 

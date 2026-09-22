@@ -446,6 +446,22 @@ impl FrobeniusCanon {
     pub fn degree(&self) -> u32 {
         self.n
     }
+
+    /// The byte tables the change of basis is applied through:
+    /// `tables()[i][b]` is the normal coordinates of the field element
+    /// whose `i`-th byte is `b` and whose other bytes are zero, so
+    /// [`Self::coords`] is their XOR over the bytes of `x`.
+    ///
+    /// Exposed because the basis change is *data*, and a device that
+    /// has to produce the same keys needs to be handed it rather than
+    /// rediscover it: the normal element comes from a randomised search,
+    /// so an independent search would find a different basis and a
+    /// different — equally valid, but incompatible — naming of the same
+    /// orbits.  `gpu/ecc2k/pairtable.cuh`'s `pt_canon` takes these and
+    /// is checked against [`Self::canon`] on them.
+    pub fn tables(&self) -> &[[u64; 256]] {
+        &self.tables
+    }
 }
 
 /// Invert an `n × n` matrix over `F_2` given as its columns, returning
