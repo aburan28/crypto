@@ -1,0 +1,160 @@
+{
+  "attribution": {
+    "correct_mechanism": "public raw-uncovered-column targeting after 15 uniform units",
+    "rank_fallback_role": "It solves the 12- and 14-unit frontier controls and remains capped underdetermined at 10 units; it does not contribute a relation to the selected 15-unit stream.",
+    "reason": "Every selected round begins with 1 to 58 raw-uncovered columns. A rank phase would select exactly 64 columns when raw coverage is empty; no selected round has 64 attempts.",
+    "selected_attempts": 295,
+    "selected_attempts_by_round": {
+      "0": 58,
+      "1": 49,
+      "10": 4,
+      "11": 4,
+      "12": 4,
+      "13": 4,
+      "14": 4,
+      "15": 4,
+      "16": 4,
+      "17": 4,
+      "18": 1,
+      "19": 1,
+      "2": 36,
+      "3": 30,
+      "4": 24,
+      "5": 20,
+      "6": 16,
+      "7": 12,
+      "8": 10,
+      "9": 6
+    },
+    "selected_rank_phase_attempts": 0,
+    "selected_raw_uncovered_phase_attempts": 295,
+    "stage138_selected_rank_columns_parameter": 64
+  },
+  "claim_boundary": "Additive correction to Stage 138 attribution. The selected 15-unit process never entered the new least-represented-column rank phase; it completed while forcing raw-uncovered public columns. The measured speedup is real, but it is attributable to selecting a deeper coverage tail at 15 units. The rank fallback is exercised only by frontier controls. No SOTA claim.",
+  "control_params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-coverage-tail-control-public-59001.json",
+    "sha256": "93f948232b72f649164b867a2d0091a5ab7f771b94490b5a1df79311466558b0",
+    "workflow_blake3": "00a0494ca459bd29b36966c9e2d8e5cfe9484fc9a619c0677f8b6f4cf2466916"
+  },
+  "date": "2026-09-22",
+  "effect_on_results": {
+    "full_cost_gate_passed": false,
+    "scientific_attribution_changed": "Stage-138 speedup is a 15-unit uncovered-column-tail parameter selection; sparse-rank targeting is a frontier fallback, not part of the selected execution.",
+    "selected_performance_measurements_changed": false,
+    "selected_relation_stream_changed": false,
+    "unknown_scalar_result_changed": false
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "parent": {
+      "ell": 15,
+      "kind": "standard_subspace"
+    },
+    "points": 32934,
+    "projected_columns": 16344,
+    "scalar_preimages_retained": false,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "cofactor": 22894,
+    "collection_m": 3,
+    "collection_window": 1024,
+    "curve": "K_1 over GF(2^59)",
+    "descent_m": 2,
+    "ell": 15,
+    "public_target_seed": 59001,
+    "subgroup_order": 25179555920633,
+    "target_scalar_constructed_or_supplied": false
+  },
+  "operation": "koblitz_n59_rank_tail_attribution_correction",
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-rank-tail-20260922.json",
+    "sha256": "6d280df6b44ef3bf14f1a862d8fedf6444c0de4235766de8857e8ae36bfa3f5d"
+  },
+  "process_accounting": {
+    "cumulative_stage138_and_correction_peak_rss_bytes": 10091528192,
+    "cumulative_stage138_and_correction_processes": 21,
+    "cumulative_stage138_and_correction_sequential_wall_seconds": 1033.4857750830001,
+    "cumulative_stage138_and_correction_total_core_seconds": 3942.905096,
+    "incremental_peak_rss_bytes": 10085711872,
+    "incremental_processes": 2,
+    "incremental_sequential_wall_seconds": 36.873650292,
+    "incremental_total_core_seconds": 194.72706399999998,
+    "scope": "one rank-disabled select process and one rank-disabled logs process; compilation excluded; cumulative values add the frozen Stage-138 incremental accounting without replacing it"
+  },
+  "rank_disabled_control": {
+    "combined_relations": 31798,
+    "combined_relations_sha256": "32cb1609d40513a12750254ba291fb2a8a262a6eaeb05e598b28212a53fbf3aa",
+    "exact_match_to_stage138_selected_stream": true,
+    "failure": null,
+    "linear_algebra": {
+      "attempts": 21,
+      "mode": "sparse",
+      "seconds": 0.672627209,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 1693,
+        "core_nonzeros": 23805,
+        "filter": {
+          "columns_in": 16344,
+          "columns_out": 1693,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 15422,
+          "merged_columns": 6746,
+          "nonzeros_in": 95390,
+          "nonzeros_out": 23805,
+          "rows_in": 31798,
+          "rows_out": 1725,
+          "singletons_removed": 7905,
+          "uncovered_columns": 0
+        },
+        "reconstructed_columns": 14651,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 1694,
+          "extra_steps": 0,
+          "generator_degree": 423,
+          "products": 1280,
+          "sequence_length": 856
+        }
+      }
+    },
+    "logs_process": {
+      "core_seconds": 191.38167299999998,
+      "peak_rss_bytes": 10085711872,
+      "status": "stopped",
+      "wall_seconds": 36.214270042
+    },
+    "params_rank_columns_per_round": 0,
+    "select_process": {
+      "core_seconds": 3.3453910000000002,
+      "peak_rss_bytes": 291880960,
+      "status": "stopped",
+      "wall_seconds": 0.65938025
+    },
+    "status": "stopped",
+    "targeted_attempts": 295,
+    "targeted_pair_lookups": 2950000,
+    "targeted_relations": 71,
+    "targeted_relations_sha256": "f0be4cf52b83835bf523235d58295131ab7b495e91f56e20d432913e7289d991",
+    "uniform_relations": 31727,
+    "uniform_relations_sha256": "32027eac9300bbf68087f1d5da9dcd3cbc27eb8eccdcfeaa505904dc936702a6",
+    "uniform_units": 15,
+    "verification_seconds": 13.957054461000002
+  },
+  "schema_version": 1,
+  "software": {
+    "binary_blake3": "b41633577c07b9dafad2b087fba8ea0339c88223da7770298143157e30982d83",
+    "source_stack_head": "36590527eb4a223dbc92ba5761277a615e074c64"
+  }
+}
