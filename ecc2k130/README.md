@@ -31,8 +31,12 @@ reference** measured paired on one RTX PRO 6000: each warp issues `CLMAD`s
 bound by the logic pipe with the unit idle; the ALU→`CLMAD` trades that lost
 on the 6000 win there at par with the slots they remove (`TOP_CLMAD` + the
 `CLMAD` squaring + the ONB inversion: +37.9%, 15.37 B/s, verified), and
-30 B/s is a 1.95× ALU cut away rather than below a floor; per dollar the
-6000 stays 2.7× ahead.
+30 B/s is an ALU cut away rather than below a floor. [AUTOSWEEP.md](AUTOSWEEP.md)
+then lets the card choose: an automatic star-and-greedy sweep of every knob
+and geometry on the B200 finds **19.40 B/s** (`make gpu-b200-19b`: one fused
+pass per step, batch 32, three-limb Karatsuba — three knobs the 6000 had
+rejected), +26.3% paired, verified, 0.97× the 6000 at 2.06× the price; per
+dollar the 6000 stays 2.1× ahead.
 
 The optional [packed CUDA backend](PACKED.md) has measured a **14.637530 billion
 complete scalar walk iterations/s median** on RTX PRO 6000 Blackwell using

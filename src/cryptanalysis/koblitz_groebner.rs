@@ -3182,7 +3182,7 @@ fn reduce_inherited(
                 }
             }
         };
-        let basis = &bases.bases[index];
+        let basis = &mut bases.bases[index];
         debug_assert_eq!(basis.system, system, "basis out of step with the node system");
         let started = std::time::Instant::now();
         let mut cost = InheritCost::default();

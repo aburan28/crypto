@@ -29,17 +29,17 @@
         "reductions": 386,
         "splits": 191,
         "infeasible_branches": 57,
-        "wall_ns": 37417626
+        "wall_ns": 37647999
       },
       "candidate": {
         "word_ops": 1257665,
         "reductions": 338,
         "splits": 185,
         "infeasible_branches": 22,
-        "wall_ns": 31915123
+        "wall_ns": 32078834
       },
       "word_op_ratio": 1.0752863441377474,
-      "wall_ratio": 1.1724105214947784
+      "wall_ratio": 1.1736087103415291
     },
     {
       "curve": "K_0/2^9",
@@ -53,17 +53,17 @@
         "reductions": 285,
         "splits": 171,
         "infeasible_branches": 28,
-        "wall_ns": 62601294
+        "wall_ns": 63033627
       },
       "candidate": {
         "word_ops": 2026237,
         "reductions": 382,
         "splits": 196,
         "infeasible_branches": 67,
-        "wall_ns": 54693210
+        "wall_ns": 55245472
       },
       "word_op_ratio": 2.0553696334634104,
-      "wall_ratio": 1.1445898677367812
+      "wall_ratio": 1.1409736349071287
     },
     {
       "curve": "K_0/2^13",
@@ -77,17 +77,17 @@
         "reductions": 599,
         "splits": 480,
         "infeasible_branches": 0,
-        "wall_ns": 159571431
+        "wall_ns": 159055949
       },
       "candidate": {
         "word_ops": 25336199,
         "reductions": 520,
         "splits": 440,
         "infeasible_branches": 0,
-        "wall_ns": 148624482
+        "wall_ns": 148111117
       },
       "word_op_ratio": 0.8157594988893164,
-      "wall_ratio": 1.0736550859770195
+      "wall_ratio": 1.0738960870844017
     },
     {
       "curve": "K_1/2^15",
@@ -101,17 +101,17 @@
         "reductions": 32,
         "splits": 0,
         "infeasible_branches": 32,
-        "wall_ns": 3900708
+        "wall_ns": 3916767
       },
       "candidate": {
         "word_ops": 107470,
         "reductions": 32,
         "splits": 0,
         "infeasible_branches": 32,
-        "wall_ns": 3898533
+        "wall_ns": 3901283
       },
       "word_op_ratio": 1.0,
-      "wall_ratio": 1.0005579021647373
+      "wall_ratio": 1.0039689507272351
     },
     {
       "curve": "K_1/2^17",
@@ -125,17 +125,17 @@
         "reductions": 1763,
         "splits": 872,
         "infeasible_branches": 877,
-        "wall_ns": 739061375
+        "wall_ns": 735249314
       },
       "candidate": {
         "word_ops": 62049801,
         "reductions": 1769,
         "splits": 876,
         "infeasible_branches": 879,
-        "wall_ns": 700212378
+        "wall_ns": 696146972
       },
       "word_op_ratio": 0.8959727687120221,
-      "wall_ratio": 1.0554817341432374
+      "wall_ratio": 1.0561696647012062
     },
     {
       "curve": "K_1/2^23",
@@ -149,20 +149,20 @@
         "reductions": 4934,
         "splits": 2478,
         "infeasible_branches": 2438,
-        "wall_ns": 5375694569
+        "wall_ns": 5352238538
       },
       "candidate": {
         "word_ops": 883061010,
         "reductions": 4876,
         "splits": 2447,
         "infeasible_branches": 2410,
-        "wall_ns": 5145475020
+        "wall_ns": 5114703348
       },
       "word_op_ratio": 0.7921440309090308,
-      "wall_ratio": 1.0447421371409165
+      "wall_ratio": 1.046441635777935
     }
   ],
   "total_word_op_ratio": 0.8023910183075943,
-  "total_wall_ratio": 1.0482230070029435,
+  "total_wall_ratio": 1.0497431181394359,
   "min_word_op_ratio": 0.7921440309090308
 }

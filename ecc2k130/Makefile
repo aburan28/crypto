@@ -635,6 +635,14 @@ gpu-preset: PACKED_ALU_SQUARE = 1
 gpu-preset:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
 
+# The B200 build the automatic sweep of AUTOSWEEP.md found (sm_100): the 20 B/s
+# knob set with the products' 3-bit correction on the carry-less unit as a
+# three-limb Karatsuba, the squaring on the unit, the ONB inversion, one fused
+# pass per step, and batch 32.  19.40 B/s median on one B200, verified.
+gpu-b200-19b:
+	$(MAKE) gpu-preset PRO6000_ARCH="-gencode arch=compute_100,code=sm_100" \
+	    KNOBS="PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_KARAT3=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=512 MINBLOCKS=1"
+
 # The two-chain form of the 20 B/s build (TWO-CHAINS.md): the same arithmetic
 # and the same state footprint per SM, as 256 threads x 32 slots in two
 # interleaved chains of 16 instead of 512 threads x one chain of 16.
