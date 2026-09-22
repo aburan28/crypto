@@ -1378,7 +1378,7 @@ pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> 
         .collect()
 }
 
-fn macaulay_rows_monos_with_mask(
+pub(crate) fn macaulay_rows_monos_with_mask(
     polys: &[F2BoolPoly],
     n_vars: usize,
     degree: u32,

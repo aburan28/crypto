@@ -154,6 +154,7 @@ pub mod j0_twists;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
 pub mod koblitz_fast;
+pub mod inherited_f4;
 pub mod koblitz_groebner;
 pub mod matrix_f5_f2;
 pub mod polynomial_reuse;
