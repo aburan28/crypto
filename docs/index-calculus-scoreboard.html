@@ -3723,5 +3723,32 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section id="factor-base-accounting-audit-20260922" class="panel">
+  <h2>Factor-base selector: accounting correction <span class="chip">accounting</span></h2>
+  <p>The archived selector comparison measures F4 word XORs during complete toy
+    runs. It does not measure total calibrated operations. The enumeration model
+    in the decomposition note is not a lower bound on arbitrary algebraic
+    solvers. Ratios to rho and a problem-wide floor remain unmeasured; no new
+    solver run or end-to-end speedup is claimed.</p>
+  <p>Source: <a href="../research/factor_base_selector_20260915/end_to_end/summary.json">frozen summary</a>;
+    <a href="../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md">corrected research note</a>.
+    Each row aggregates twelve archived runs on the same toy curve. Counts are
+    preserved; this panel corrects their interpretation.</p>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Divisor</th><th>F4 word XORs</th><th>Verified runs</th><th>Total S</th><th>vs rho / floor</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>0·3</td><td>2,405,397</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>1·3</td><td>9,543,849</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>1·4</td><td>10,144,324</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>3·4</td><td>53,895,954</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>2·4</td><td>88,192,793</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+      <tr><td>2·3</td><td>109,566,018</td><td>12/12</td><td>Unmeasured</td><td>Unmeasured</td><td>Accounting</td></tr>
+    </tbody>
+  </table></div>
+  <p>At extension degree 131 the Frobenius-stable linear-subspace dimensions
+    are exactly {0, 1, 130, 131}. This rules out a small intermediate-dimensional
+    stable linear subspace; it does not rule out all nonlinear invariant sets
+    or all index-calculus algorithms.</p>
+</section>
 </body>
 </html>
