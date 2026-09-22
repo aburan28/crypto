@@ -1940,6 +1940,16 @@ back is right.
 
 ### 11.13 The border basis, measured before it was written: a `1.06×` ceiling
 
+> **Corrected in §11.14 — class `accounting`.**  The `5.6 %` below charges each
+> elimination multiplication to the pivot row doing the subtracting.  What an
+> elimination that builds only the rows it needs can skip is the work done *on*
+> rows nothing reads, and the rows the normal forms depend on — the ones they
+> read and, transitively, every pivot row subtracted from those — are **202 of
+> 222**, not 149.  The skippable work is `1.1 %` of the elimination and `0.19 %`
+> of `C₃`: the ceiling is **`1.002×`**, not `1.06×`.  The staircase is also not
+> identical on every residual, only on `98 %` of them at `p = 271`.  The section
+> is left as it was written; its figures are the "before" marks of §11.14.
+
 **Instrumentation:** `GAUDRY_DEBUG_SOLVE=1`, `p = 271`, seed 1, `--cross-check`,
 25 residuals — §11.5's cell, so these numbers sit beside §11.6's directly.
 `solve_at_degree` now prints the staircase, how much of the echelon the normal
@@ -1999,6 +2009,169 @@ elimination*, which it does not.
 
 **Class: `engineering`, negative, and `0 / 25` cross-check mismatches** on the
 instrumented runs — the diagnostics do not touch the arithmetic.
+
+### 11.14 The border basis, written: the ceiling was `1.002×`, and the solver reaches it
+
+**Runner:** `GAUDRY_LAZY_VERIFY=1 cargo run --release --example gaudry_cubic_bench --
+--protocol --groebner --cross-check --sizes 271,523,1039,2083 --seeds 2 --json …`,
+and the same without the variable for the baseline.
+**Frozen:** `experiments/23_gaudry_lazy_elim_baseline.json` and
+`experiments/23_gaudry_lazy_elim_verify.json` (with their `.log`),
+`experiments/23_gaudry_lazy_elim_lazy.json` (the same run under
+`GAUDRY_LAZY_ELIM=1`, whose operation counts equal the verified run's in every
+cell — verification is uncharged), and `experiments/23_gaudry_lazy_elim_closure.log`
+(the per-residual closure and lazy-cost lines).
+**Summary:** `python3 scripts/summarize_lazy_elim.py <baseline> <verify>`
+**Source:** `src/cryptanalysis/gaudry_cubic.rs` as of commit `55fd0dfa`; both
+arms run the same binary, the switch is the environment variable.
+**Registered in advance:** §11.12 (falsifier); §11.13 (ceiling — corrected below).
+**Suite:** `AGENTS.md` §8's frozen WDSat regression prices a SAT-solver stage on
+binary-field encodings and does not apply to this `F_p` Macaulay solve; the
+matched suite is §11.5's protocol — same sizes, seeds and `--cross-check` —
+run baseline and candidate, full pipeline, cold.
+
+§11.13 declined to write the solver on the strength of a `1.06×` ceiling.  It is
+now written — `GAUDRY_LAZY_ELIM=1`, off by default — and writing it showed the
+ceiling was wrong by a factor of thirty.
+
+**What was built.**  The solve keeps the Macaulay rows exactly as constructed
+and reduces a row only when a normal form first reads it: `NormalForms` asks for
+the pivot row of a column, and that row is cleared left of its leading column —
+finding and reducing, first, each pivot row it has to be cleared with — then
+normalised.  It is the forward elimination taken row by row instead of column
+by column, so a row that is read costs exactly what it costs there and a row
+nothing reads is never touched.  Which row leads which column comes from a plan
+learned once per curve from the first full solve.  Nothing in the plan is
+trusted: a planned row whose entry cancels at its column (an accident of the
+values, about `1/p` per entry) is replaced by another row that leads there, and
+a row that leads at a column the plan does not pivot proves this residual's
+staircase is not the plan's, which sends it back to the full elimination with
+the lazy work still charged.  `GAUDRY_LAZY_VERIFY=1` re-runs every solve through
+the full elimination, uncharged, and counts any `M_{e₁}` entry or staircase that
+differs, and any fallback on a residual whose staircase was the plan's after
+all.  It is a diagnostic, not a guard: it counts, and the lazy answer is used.
+
+**1. The ceiling was `1.002×`, not `1.06×` — class `accounting`.**  §11.13
+charged each elimination multiplication to the pivot row doing the subtracting
+and counted as skippable the work of every pivot the normal forms never read.
+But a pivot nobody reads can still be one that was *subtracted from* a row
+somebody does read, and that subtraction is what puts the read row in echelon
+form; skip it and the row is wrong.  What can be skipped is the work done *on*
+rows outside the **closure**: the pivot rows the normal forms read and,
+transitively, every pivot row subtracted from one of those.  `echelon_traced`
+now records which original row went where at what cost, so both attributions
+are priced on the same residuals (`GAUDRY_DEBUG_SOLVE=1`, seed 1,
+`--cross-check`; the first 300 residuals above `p = 271`):
+
+| `p` | residuals | pivot rows read | closure | work outside the closure | §11.13's attribution |
+|---:|---:|---:|---:|---:|---:|
+| 271 | 727 | 148–151 of 222 | **201–202** of 222 | 1,648 muls, **1.10 %** of elimination | 48,929, 32.6 % |
+| 523 | 300 | 146–151 | 202 | 1,642, 1.09 % | 49,107, 32.6 % |
+| 1039 | 300 | 148–149 | 201–202 | 1,655, 1.10 % | 49,213, 32.6 % |
+| 2083 | 300 | 149 | 202 | 1,643, 1.09 % | 49,260, 32.6 % |
+
+The normal forms read two thirds of the pivot rows, as §11.13 said, but those
+rows were reduced through almost all the rest: the closure is **202 of 222** at
+every size.  Elimination is `17.1 %` of `C₃` (`150,099` of `875,934`), so the
+skippable part is `0.19 %` of `C₃` and the ceiling is
+**`1/(1 − 0.0019) = 1.002×`**.  §11.12 had registered that "the realistic
+expectation is `≈ 1×` or worse, because reducing the border monomials still
+needs enough of the row space to do it"; that sentence was right, and §11.13's
+revision of it was not.
+
+**2. The staircase is not the same on every residual.**  §11.12 and §11.13 saw
+one staircase on 20 and 25 residuals.  Over whole runs it is the same on
+`97.6–98.1 %` of residuals at `p = 271`, rising to `99.6 %` at `p = 2083`; the
+rest — the `border_unreachable` ones among them — have a different order ideal
+(`[0,0,8]` leaves it and the dimension drops to 61, or `[3,0,3]` leaves and
+`[0,4,2]` joins).  No per-curve plan serves those, and they are exactly the lazy
+solver's fallbacks: the verification mode finds **zero** fallbacks on a residual
+whose staircase was the plan's.  The fraction falls roughly as `1/p`.  So
+§11.12's "Mourrain's iteration is not needed" holds for the generic residual
+and not for these.
+
+**3. The measurement.**  Paired cell by cell.  `summarize_lazy_elim.py` first
+asserts that residuals, decompositions, independent relations, the planted
+logarithm, and the charpoly, eigenvector and root counters — none of which the
+elimination touches — are identical in both arms, so the residual streams did
+not diverge and every difference below is exact, not statistical.  `C₃` is
+everything the solve spends per residual, including each lazy attempt that
+fell back and the full elimination that followed; the speedup is `AGENTS.md`
+§8's `baseline_total_operations / candidate_total_operations`, whole method,
+cold.
+
+| `p` | `log₂ n` | baseline `C₃` | lazy `C₃` | ratio | elimination / residual, base → lazy | lazy solves (all verified) | fallbacks | `M_{e₁}` mismatches | cross-check | **speedup** |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 271 | 24.2 | 875,934 | 876,618 | 1.0008 | 150,099 → 150,798 | 713 | 14 | 0 | 0 / 728 | **0.9992** |
+| 271 | 24.2 | 878,665 | 879,905 | 1.0014 | 150,150 → 151,476 | 699 | 17 | 0 | 0 / 719 | **0.9986** |
+| 523 | 27.1 | 890,109 | 889,649 | 0.9995 | 150,623 → 150,161 | 1,587 | 15 | 0 | 0 / 1,604 | **1.0005** |
+| 523 | 27.1 | 888,956 | 888,223 | 0.9992 | 150,621 → 149,931 | 1,430 | 12 | 0 | 0 / 1,444 | **1.0008** |
+| 1039 | 30.1 | 904,961 | 903,920 | 0.9989 | 150,941 → 149,910 | 2,411 | 14 | 0 | 0 / 2,428 | **1.0011** |
+| 1039 | 30.1 | 909,048 | 908,149 | 0.9990 | 150,967 → 150,072 | 2,625 | 18 | 0 | 0 / 2,645 | **1.0009** |
+| 2083 | 33.1 | 919,672 | 918,394 | 0.9986 | 151,096 → 149,830 | 5,257 | 18 | 0 | 0 / 5,276 | **1.0012** |
+| 2083 | 33.1 | 920,087 | 918,826 | 0.9986 | 151,104 → 149,851 | 5,276 | 20 | 0 | 0 / 5,302 | **1.0012** |
+
+**Pooled speedup `1.0009`.**  Every run recovered its planted logarithm;
+`S / rho` moves by the same factor in every cell, below the precision the
+scoreboard draws it at.
+
+On the residuals it solves the lazy elimination spends `148,450` multiplications
+where the full one spends `150,073` (`p = 271`, seed 1): `1,623` saved of the
+`1,648` the closure allows — **`98.5 %` of the ceiling**.  Each fallback costs
+the lazy attempt that found the staircase off the plan, about `120,000`, on top
+of the full elimination.  The two cross at a fallback rate of about `1.3 %`:
+above it, at `p = 271` (`1.9–2.4 %`), the lazy solver loses; below it, from
+`p = 523` on, it wins — by `0.14 %` at `p = 2083` against the `0.18 %` the
+closure allows there.
+
+**Against §11.12's falsifier.**  Zero cross-check mismatches in all eight cells
+(20,146 residuals per arm) and zero `M_{e₁}` mismatches over 19,998 verified
+lazy solves, so the disqualifying condition is not met.  The cost condition was
+written as "`C₃` below §11.6's `0.88 × 10⁶`".  Read literally it passes at
+`p = 271` and fails from `p = 523` on — but only because the baseline itself
+rises from `0.876` to `0.920 × 10⁶` with `p` — `28,000` of the `44,000` is root
+finding, which grows with `log p` — and that says nothing about the solver.  The registration meant the matched
+baseline, and against that: **failure at `p = 271` on both seeds, the
+registered `engineering` success at every larger size on both seeds**, `0.14 %`
+at best.  That is the size §11.12 said in advance it would be.  The **coverage**
+outcome is none: `border_unreachable` and the unsolved count are identical in
+the two arms, because the residuals the fixed-degree cut cannot close are among
+the ones whose staircase no plan fits.  Whether Mourrain's full iteration would
+close them is not answered by this build; they are 0–7 residuals per run of
+thousands, and the meet-in-the-middle oracle solves them correctly.
+
+**Two bugs the guards caught.**  The first version used the plan's row for
+every column and fell back on `53` of `199` test residuals at `p = 271` —
+consistent with a `1/p` chance of cancellation at each of some eighty exposed
+pivot entries — which is what the row substitution is for.  A later version
+passed `unwrap_or` an argument with a side effect, so a row adopted as the pivot
+of an earlier column was filed under the wrong one.  In these runs both showed
+up as fallbacks rather than wrong answers — a row cleared with a misfiled pivot
+leaves the row space and leads at a column the plan calls standard, which the
+solver reads as an off-plan staircase and refuses — and an uncharged full
+elimination on each fallback, now the verification mode's needless-fallback
+count, found the one "off-plan" residual whose staircase was in fact the plan's.
+That, and `the_lazy_elimination_reads_the_same_normal_forms` (200 residuals in
+lockstep against the full solve: identical answers, identical `M_{e₁}`, no
+needless fallback), is the evidence the solver is right; the cross-check column
+is the evidence its answers are.
+
+**Class.**  The ceiling correction is `accounting`: nothing ran faster, a number
+was wrong.  The solver is `engineering` — `−0.14 %` to `+0.14 %` of `C₃`,
+`1.0009×` pooled, on a phase §11.5 measures as flat in `n`, in a method `1,989×`
+from rho.  It does not move the verdict and §11.12 registered that it could not.
+It stays in the tree behind `GAUDRY_LAZY_ELIM`, off by default so every earlier
+run reproduces, because the verified negative is the result and the closure
+diagnostic it brought is the instrument that would have caught §11.13's mistake
+before it was published.
+
+**What this closes.**  With the Macaulay cut, the order of the rows, the row
+selection, the retries and now the elimination itself each measured, what is
+left in `C₃` is the normal forms (`40 %`), which a border basis computes rather
+than avoids, and the characteristic polynomial and eigen-solve (`41 %`), which
+do not care how `M_{e₁}` was reached.  There is no open lever on `C₃` left in
+this design, and none of the ones measured was worth more than its registration
+said.
 
 ## References
 

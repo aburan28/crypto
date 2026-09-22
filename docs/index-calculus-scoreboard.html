@@ -743,10 +743,17 @@
           <div class="num">875,934</div>
           <div class="lbar"><i style="width:18.2%"></i></div>
         </div>
+        <div class="lrow">
+          <div class="name">Border basis: demand-driven elimination, not adopted <span class="chip">engineering</span></div>
+          <div class="num">876,618</div>
+          <div class="lbar"><i style="width:18.2%"></i></div>
+        </div>
       </div>
       <div class="legend" style="padding-top:0">
         <span>5.5&times; total &middot; relation-phase crossover moved 2^111 &rarr; 2^96</span>
         <span>Last step is 0.35% on the protocol stream, 1.0% on random residuals at p = 271</span>
+        <span>Border basis: +0.08% at p = 271, &minus;0.14% at p = 2083, 1.0009&times; pooled end to end;
+          its ceiling is 0.19% (&sect;11.14)</span>
       </div>
     </div>
 
@@ -1131,7 +1138,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         ideal is zero-dimensional, the affine variety carries one F_p-point where a positive-
         dimensional component would carry about p, and a generic change of coordinates rescued none
         of 28. It is the staircase border meeting the degree cut &mdash; a truncation artefact, so
-        the fix is a border basis, not saturation.</p>
+        the fix is a border basis, not saturation. The fixed-staircase border basis built in
+        &sect;11.14 does not reach them: their staircase is not the generic one (dimension 61 at
+        degree 10), so no per-curve plan serves them. Whether Mourrain's full iteration would is
+        untested.</p>
     </div>
     <div class="note">
       <h3>Where the boundaries bite</h3>
@@ -1468,15 +1478,22 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <strong>Both were built or bounded, and neither helps.</strong> The merge-level cap is
         measured in &sect;11.11: it lowers the solve exponent
         0.045&thinsp;&plusmn;&thinsp;0.017 and the eliminator cancels it, leaving the method
-        +0.051&thinsp;&plusmn;&thinsp;0.031 worse end to end. The border basis is bounded in
-        &sect;11.13 without writing it, from the solver's own counters: the staircase is fixed and
-        identical on every residual (not the box 64&thinsp;=&thinsp;4<sup>3</sup> invites, but
-        z&thinsp;&lt;&thinsp;2(5&minus;x&minus;y)); the normal forms reach 67% of the echelon; and
-        the elimination spent on pivots they never reach is 5.6% of C&#8323;, so the whole
-        direction is worth at most <strong>1.06&times;</strong>. What &sect;11.5 already does
-        &mdash; forward elimination plus memoised back-substitution restricted to the monomials
-        actually reached &mdash; is a border-basis computation in all but name, which is why so
-        little was left. Class <span class="chip">engineering</span>, negative, for both.</p>
+        +0.051&thinsp;&plusmn;&thinsp;0.031 worse end to end. The border basis was bounded in
+        &sect;11.13 at <s>1.06&times;</s> and then written (&sect;11.14), which showed the bound
+        charged work to the wrong rows. The normal forms read 149 of the 222 pivot rows, but those
+        were reduced through almost all the rest: the rows they depend on are <strong>202 of
+        222</strong> at every size, the work outside them is 1.1% of the elimination, 0.19% of
+        C&#8323; (<s>5.6%</s> as &sect;11.13 counted it), and the ceiling is
+        <strong>1.002&times;</strong>
+        (<span class="chip">accounting</span>). The solver reaches 98.5% of that on the residuals it
+        solves; the 0.3&ndash;2.4% whose staircase differs from the per-curve plan cost it a wasted
+        attempt, so it loses 0.08&ndash;0.14% at p&thinsp;=&thinsp;271 and gains up to 0.14% by
+        p&thinsp;=&thinsp;2083 &mdash; <strong>1.0009&times;</strong> pooled end to end, zero
+        mismatches over 20,146 cross-checked residuals. It stays off by default. What &sect;11.5
+        already does &mdash; forward elimination plus memoised back-substitution restricted to the
+        monomials actually reached &mdash; is a border-basis computation in all but name, which is
+        why nothing was left. Class <span class="chip">engineering</span> for both, and neither is a
+        finding.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
     </div>
