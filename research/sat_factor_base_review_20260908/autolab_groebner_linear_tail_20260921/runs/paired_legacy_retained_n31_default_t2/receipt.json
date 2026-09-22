@@ -1,0 +1,29 @@
+{
+  "child_system_ms": 618.9449999999999,
+  "child_user_ms": 215335.231,
+  "command": [
+    "target/release/examples/symmetrised_oracle_bench",
+    "--only",
+    "0",
+    "31",
+    "2",
+    "--targets",
+    "2",
+    "--no-sat",
+    "--node-budget",
+    "50000"
+  ],
+  "ended_unix_ns": 1790039717251243000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/symmetrised_oracle_bench",
+  "executable_sha256": "7373e97dea9882474614f05eb0ccf07f155c9b7018bff254c562489e129ced55",
+  "exit_code": 0,
+  "peak_rss_bytes": 445349888,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790039498814661000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 608,
+  "stdout_sha256": "cf27122ccbf5f10ae65dd8d16324373f8eafffa7f8985c6bd408262508a437e1",
+  "task_id": "TASK-KIC-GROEBNER-LINEAR-TAIL-LEGACY-RETAINED-N31-T2-20260921",
+  "wall_ms": 218435.980584
+}
