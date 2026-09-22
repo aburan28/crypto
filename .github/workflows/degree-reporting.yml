@@ -1,0 +1,22 @@
+name: Degree diagnostic reporting
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/koblitz_bench.rs'
+      - 'src/cryptanalysis/koblitz_groebner.rs'
+      - 'examples/dreg_sweep.rs'
+      - 'research/degree_reporting_20260922/**'
+      - '.github/workflows/degree-reporting.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reporting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --lib degree_reporting_
+      - run: cargo test --lib control_arms_are_reported_separately
+      - run: cargo check --example dreg_sweep

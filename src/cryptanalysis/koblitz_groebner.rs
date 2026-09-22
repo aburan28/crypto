@@ -2078,20 +2078,11 @@ pub fn macaulay_profile_sparse(
     })
 }
 
-/// **First fall degree** of `polys`: the smallest `D ≥ 2` whose Macaulay
-/// matrix has `rank < rows` *and* `rank < cols` — a non-trivial syzygy
-/// appears and the system has not saturated.
-///
-/// This is the same operational definition
-/// [`crate::cryptanalysis::ffd_harness`] uses for the full-field
-/// Weil descent of `S₃`, so the numbers are directly comparable: that
-/// harness measures the `2n`-variable system, this one the system
-/// restricted to a Frobenius-invariant subspace, which is the version
-/// the subfield-curve attack actually solves.
-///
-/// Returns the fall degree (if any up to `d_max`) and the per-degree
-/// profiles.  A profile is omitted for degrees whose matrix exceeded
-/// the size limits.
+/// Legacy name for a **rank-deficiency proxy**: the smallest `D >= 2`
+/// with `rank < rows` and `rank < cols` in the original-generator matrix.
+/// Row dependence alone does not certify a degree fall; this is not the
+/// mathematical first fall degree. Duplicate equations can trigger it.
+/// Returns the proxy (if observed) and the per-degree rank profiles.
 pub fn first_fall_degree(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -2114,15 +2105,10 @@ pub fn first_fall_degree(
 
 // ── Solving degree ─────────────────────────────────────────────────
 
-/// What the reduced Macaulay rows at one degree actually *determine*.
-///
-/// [`MacaulayProfile`] records rank; this records whether that rank is
-/// enough to finish.  The distinction is the whole point: the first
-/// fall degree is where the rank first drops below generic, and the
-/// solving degree is where linear algebra alone pins every unknown.
-/// Complexity claims for Semaev systems are stated in terms of the
-/// first and assume it tracks the second, which is precisely the
-/// assumption Kosters–Yeo (arXiv:1503.08001) show can fail.
+/// What bounded multiples of the original equations determine.
+/// A refutation or full pinning is sufficient to decide this diagnostic.
+/// Multi-solution SAT ideals may already have a complete Gröbner basis
+/// while remaining unresolved by this test.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SolvingProfile {
     /// Degree the matrix was built at.
@@ -2354,18 +2340,15 @@ pub fn solving_profile_sparse(
     })
 }
 
-/// **Solving degree** of `polys`: the smallest `D ≥ 1` at which the
-/// reduced Macaulay matrix resolves the system outright — a refutation,
-/// or every occurring variable pinned by a linear row.
+/// Legacy name for the first **bounded-Macaulay resolution degree**:
+/// a refutation or pinning of every occurring variable from bounded
+/// multiples of the original generators. The scan starts at the input
+/// degree (at least one). It is not an iterative F4/F5 trace, a complete
+/// Gröbner-basis test, or homogeneous degree of regularity.
 ///
-/// This is the degree that governs cost: the Macaulay matrix at `D` has
-/// `Θ(binom(n_vars, D))` columns, so an attack's exponent is set by the
-/// solving degree, not by the first fall degree.  Compare against
-/// [`first_fall_degree`] on the same system — the gap between them is
-/// the quantity the first-fall-degree assumption asserts is small.
-///
-/// Returns the solving degree (if reached at or below `d_max`) and the
-/// per-degree profiles.
+/// `None` includes multi-solution SAT systems and resource exhaustion;
+/// it must not be interpreted as a lower bound on solving degree.
+/// Returns the resolution degree, if reached, and per-degree profiles.
 pub fn solving_degree(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -3626,4 +3609,28 @@ mod tests {
         }
         assert!(compared > 100, "the comparison must actually run");
     }
+
+    #[test]
+    fn degree_reporting_duplicate_rows_can_trigger_rank_proxy() {
+        // xy + x has roots (0,0), (0,1), (1,1), and is already a
+        // principal Boolean relation. Duplicating it adds no information.
+        let p = F2BoolPoly::from_monos(
+            vec![F2BoolMono::from_mask(3), F2BoolMono::var(0)], 2);
+        let (single, _) = first_fall_degree(&[p.clone()], 2, 2);
+        let (duplicate, _) = first_fall_degree(&[p.clone(), p], 2, 2);
+        assert_eq!(single, None);
+        assert_eq!(duplicate, Some(2));
+    }
+
+    #[test]
+    fn degree_reporting_multiple_roots_need_not_pin() {
+        let p = F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(3)], 2);
+        // <xy> is a complete Boolean basis with three roots, but neither
+        // variable is pinned. An unresolved diagnostic is expected.
+        let (degree, profiles) = solving_degree(&[p], 2, 3);
+        assert_eq!(degree, None);
+        assert!(profiles.iter().all(|p| !p.refuted && p.vars_determined == 0));
+    }
+
 }
+

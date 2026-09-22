@@ -21,7 +21,7 @@
 //! [`crate::cryptanalysis::koblitz_index_calculus::MAX_N`], out to
 //! `n = 63`, which is where the interesting scaling lives.  It reports
 //! the unknown/equation counts, the degree, the Macaulay rank profile
-//! and the **first fall degree**, using the same operational definition
+//! and a **rank-deficiency proxy**, using the same operational definition
 //! as [`crate::cryptanalysis::ffd_harness`] so the subspace-restricted
 //! numbers are directly comparable with that harness's full-field ones.
 //!
@@ -106,8 +106,9 @@ pub struct SystemProfile {
     pub n_eqs: usize,
     /// Total degree of the system: 2 for `m = 2`, 3 once chained.
     pub degree: u32,
-    /// First fall degree, by the `ffd_harness` definition: smallest
-    /// `D ≥ 2` with `rank < rows` and `rank < cols`.
+    /// Legacy name for the rank-deficiency proxy: smallest
+    /// `D ≥ 2` with `rank < rows` and `rank < cols`. This does not
+    /// certify mathematical first fall degree.
     pub fall_degree: Option<u32>,
     /// Per-degree Macaulay rank profile.
     pub macaulay: Vec<MacaulayProfile>,
@@ -661,14 +662,12 @@ pub fn subspace_ladder(n_max: u32, max_ell: u32) -> Vec<(u32, u32)> {
 
 // ── Solving degree vs first fall degree ────────────────────────────
 
-/// One `(n, m)` cell of the solving-degree sweep.
+/// One cell of the bounded Macaulay diagnostic (legacy type name).
 ///
-/// The first fall degree is what the Petit–Quisquater complexity
-/// argument is stated in; the solving degree is what the linear algebra
-/// actually costs.  `research/notes/index-calculus/RESEARCH_DREG_MEASUREMENT.md` says why the gap
-/// between them is the measurement worth having, and
-/// `control_solve_mean` is the null object that says whether any of it
-/// is structure rather than shape.
+/// These are original-generator rank/refutation/pinning measurements, not
+/// a completed Gröbner basis, F4/F5 solving degree, or degree of regularity.
+/// Targets are field abscissas without a rational-point lifting check.
+/// Both random-control arms have the all-zero solution by construction.
 #[derive(Clone, Debug)]
 pub struct DregSummary {
     /// Extension degree.
@@ -685,20 +684,16 @@ pub struct DregSummary {
     pub degree: u32,
     /// Target draws taken.
     pub trials: usize,
-    /// Mean first fall degree over the draws that fell.
+    /// Mean rank-deficiency degree, conditional on detecting the proxy.
     pub fall_mean: Option<f64>,
-    /// Mean degree at which a **non-decomposable** target was refuted.
-    ///
-    /// This is the number that sets the attack's cost.  The
-    /// decomposition probability is tiny, so almost every call in
-    /// relation collection is a refutation, and the Macaulay matrix at
-    /// this degree is what each of those calls has to build.
+    /// Mean bounded-Macaulay refutation degree, conditional on refutation.
+    /// This is an algebraic event; targets have not been lifted to the curve.
     pub refute_mean: Option<f64>,
     /// Largest refutation degree seen.
     pub refute_max: Option<u32>,
     /// Draws refuted at or below `d_max`.
     pub refuted: usize,
-    /// Mean degree at which a decomposable target had every variable
+    /// Mean degree at which an algebraic system had every occurring variable
     /// pinned.  Reported separately because it is a different event: a
     /// target with two or more decompositions can never be pinned, and
     /// that is a property of the target, not a failure of the algebra.
@@ -718,33 +713,19 @@ pub struct DregSummary {
     /// caps, and nothing about the system's solving degree has been
     /// established.
     pub max_degree_built: Option<u32>,
-    /// Mean refutation degree of the **shape-matched** control: same
-    /// variable count, equation count, total degree and term density,
-    /// no Semaev structure.
-    ///
-    /// Read this together with [`Self::control_is_satisfiable`].  With
-    /// `n_eqs < n_vars` a random system has `2^(n_vars − n_eqs)`
-    /// expected solutions, so it is satisfiable by construction and can
-    /// neither refute nor pin — it cannot produce the event being
-    /// measured, and a `None` here is uninformative rather than a
-    /// finding.  That is why the second control exists.
+    /// Mean pinning degree of the shape-matched, zero-root control.
+    /// Legacy field name: this is not a completed-basis solving degree.
     pub control_solve_mean: Option<f64>,
-    /// Shape-matched control draws that did not resolve.
+    /// Shape-matched control draws that did not pin all occurring variables.
     pub control_unresolved: usize,
-    /// `2^(n_vars − n_eqs)` expected solutions of the shape-matched
-    /// control: when this exceeds 1 the control cannot refute.
+    /// Legacy density heuristic `2^(n_vars - n_eqs)`. This is NOT the
+    /// expected solution count of this generator, which always has zero
+    /// as a root and does not sample uniformly random Boolean functions.
     pub control_expected_solutions: f64,
-    /// Mean refutation degree of the **infeasible** control: same
-    /// variables, degree and term density, but enough equations
-    /// (`n_vars + 4`) that it has no solution with high probability, so
-    /// it refutes and is comparable like for like with the real
-    /// systems' refutation degree.
-    ///
-    /// Shape and feasibility cannot both be matched at once — matching
-    /// the equation count is what makes the first control satisfiable.
-    /// The two controls bracket the question instead.
+    /// Mean pinning degree of the extra-equation (`n_vars + 4`) control.
+    /// Legacy name: this arm is always SAT, never an UNSAT control.
     pub control_unsat_mean: Option<f64>,
-    /// Infeasible-control draws that did not resolve.
+    /// Extra-equation control draws that did not pin all occurring variables.
     pub control_unsat_unresolved: usize,
     /// Highest Macaulay degree built on a **shape-matched** control draw.
     ///
@@ -754,14 +735,14 @@ pub struct DregSummary {
     /// anything.  Omitting it once forced the `n = 5, m = 3` attribution
     /// to be settled by hand-computing the matrix size.
     pub control_shape_max_degree_built: Option<u32>,
-    /// Highest Macaulay degree built on an **infeasible** control draw.
+    /// Highest Macaulay degree built on an **extra-equation** control draw.
     ///
     /// Kept separate from the shape-matched arm rather than folded into
     /// one maximum, because the two arms have different row counts: the
-    /// infeasible arm carries `n_vars + 4` equations against the
+    /// extra-equation arm carries `n_vars + 4` equations against the
     /// shape-matched arm's `n_eqs`, so it reaches the row cap at a
     /// *lower* degree.  A shared `max()` would report a degree the
-    /// infeasible arm never built — and that arm is precisely the one
+    /// extra-equation arm never built — and that arm is precisely the one
     /// whose non-resolution carries the attribution, so the field meant
     /// to prove "not a cap artifact" would have been the field lying
     /// about it.
@@ -769,10 +750,9 @@ pub struct DregSummary {
 }
 
 impl DregSummary {
-    /// `solve_mean − fall_mean`: how far the degree that costs
-    /// anything sits above the degree the complexity claim is stated
-    /// in.  The first-fall-degree assumption is the assertion that this
-    /// stays bounded as `n` grows.
+    /// Difference of conditional means: refutation minus rank proxy.
+    /// The means can use different subsets of draws; this is not a paired
+    /// degree gap or evidence for the first-fall-degree assumption.
     pub fn gap(&self) -> Option<f64> {
         Some(self.refute_mean? - self.fall_mean?)
     }
@@ -782,9 +762,10 @@ impl DregSummary {
 /// over `n_vars` variables, each a sum of `terms_per_eq` monomials of
 /// degree at most `degree`.
 ///
-/// This is the null object for the sweep.  If the Semaev systems
-/// resolve at the same degree as these, then their algebraic structure
-/// is buying nothing and the measurement is of the shape alone.
+/// Each sampled monomial has positive degree. Consequently the all-zero
+/// assignment satisfies every equation, regardless of equation count.
+/// This generator supplies SAT controls only; matching a pinning degree
+/// cannot establish that Semaev structure has no benefit.
 pub fn random_control_system(
     n_vars: usize,
     n_eqs: usize,
@@ -810,12 +791,12 @@ pub fn random_control_system(
         .collect()
 }
 
-/// Measure first fall degree and solving degree on the same systems,
+/// Measure rank-deficiency and bounded-Macaulay resolution on the same systems,
 /// over `trials` independent target draws, against the matched random
 /// control.
 /// `with_control` runs the matched random null object as well.  It is
 /// the expensive half of the sweep by a wide margin — a random system
-/// of this shape does not refute until a high degree, so it pays the
+/// of this shape may remain unpinned at every tested degree, so it pays the
 /// full `binom(n_vars, d_max)` Macaulay cost on every draw, while the
 /// Semaev systems resolve early and stop.  Turn it off to extend the
 /// `n` ladder, on to interpret any single cell.
@@ -875,9 +856,8 @@ pub fn dreg_summary(
 
     let (n_vars, n_eqs, degree, terms_per_eq) = shape?;
 
-    // Matched control, same number of draws.  A random system of this
-    // shape is overwhelmingly infeasible, so its resolving event is a
-    // refutation too, and the two numbers compare like for like.
+    // Both controls have the all-zero root. A resolving event is pinning,
+    // not refutation; do not compare these means as UNSAT evidence.
     let mut control: Vec<u32> = Vec::new();
     let mut control_unresolved = 0usize;
     let mut control_unsat: Vec<u32> = Vec::new();
@@ -904,8 +884,7 @@ pub fn dreg_summary(
             None => control_unresolved += 1,
         }
 
-        // Second control: overdetermined, so infeasible with high
-        // probability, so it can actually refute.
+        // Extra equations change the shape but preserve the all-zero root.
         let unsat = random_control_system(
             n_vars,
             n_vars + 4,
@@ -958,16 +937,14 @@ pub fn dreg_summary(
 /// Render [`DregSummary`] rows as a markdown table.
 pub fn format_dreg_table(rows: &[DregSummary]) -> String {
     let mut out = String::from(
-        "| n | ℓ | m | vars | eqs | deg | FFD | D_refute | gap | ctrl(shape) | ctrl(unsat) | Dc(shape) | Dc(unsat) | refuted | pinned | unres | D_built |\n\
+        "| n | ℓ | m | vars | eqs | deg | D_rank_proxy | D_refute | delta_means | D_pin(shape) | D_pin(extra) | Dc(shape) | Dc(extra) | refuted | pinned | unres | D_built |\n\
          |--:|--:|--:|-----:|----:|----:|----:|---------:|----:|------------:|------------:|----------:|----------:|--------:|-------:|------:|--------:|\n",
     );
     let f = |v: Option<f64>| v.map_or("—".to_string(), |x| format!("{x:.2}"));
-    // A control that reported no degree is either one that never
-    // resolved or one that *could not* resolve because it is
-    // satisfiable by construction. Saying which is the whole point.
-    let ctrl = |v: Option<f64>, unresolved: usize, satisfiable: bool| match v {
+    // Multiple-root SAT systems may have a complete basis without pinning.
+    // No degree is therefore an unresolved diagnostic, not proof of failure.
+    let ctrl = |v: Option<f64>, unresolved: usize| match v {
         Some(x) => format!("{x:.2}"),
-        None if satisfiable => "n/a(sat)".to_string(),
         None if unresolved > 0 => "unres".to_string(),
         None => "—".to_string(),
     };
@@ -983,8 +960,8 @@ pub fn format_dreg_table(rows: &[DregSummary]) -> String {
             f(r.fall_mean),
             f(r.refute_mean),
             f(r.gap()),
-            ctrl(r.control_solve_mean, r.control_unresolved, r.control_expected_solutions > 1.5),
-            ctrl(r.control_unsat_mean, r.control_unsat_unresolved, false),
+            ctrl(r.control_solve_mean, r.control_unresolved),
+            ctrl(r.control_unsat_mean, r.control_unsat_unresolved),
             r.control_shape_max_degree_built
                 .map_or("—".to_string(), |d| d.to_string()),
             r.control_unsat_max_degree_built
@@ -1268,9 +1245,9 @@ mod tests {
     /// never printed, so the sweep still could not tell a control that
     /// exhausted `d_max` from one that hit the size caps; and a single
     /// shared `max()` across both arms, which can report a degree the
-    /// infeasible arm never built, because that arm carries
+    /// extra-equation arm never built, because that arm carries
     /// `n_vars + 4` equations and so reaches the row cap at a lower
-    /// degree.  The infeasible arm is the one whose non-resolution
+    /// degree.  The extra-equation arm is the one whose non-resolution
     /// carries the attribution, so a field that averages it away is
     /// worse than no field at all.
     #[test]
@@ -1284,15 +1261,15 @@ mod tests {
         );
         assert!(
             r.control_unsat_max_degree_built.is_some(),
-            "so must the infeasible arm, independently"
+            "so must the extra-equation arm, independently"
         );
         assert!(
             r.control_expected_solutions > 0.0,
-            "the shape-matched arm's satisfiability must be visible"
+            "the legacy density heuristic is retained for API compatibility"
         );
 
         let table = format_dreg_table(std::slice::from_ref(&r));
-        for col in ["ctrl(shape)", "ctrl(unsat)", "Dc(shape)", "Dc(unsat)"] {
+        for col in ["D_rank_proxy", "D_pin(shape)", "D_pin(extra)", "Dc(shape)", "Dc(extra)"] {
             assert!(
                 table.contains(col),
                 "a field that is stored but never printed cannot do its job; \
@@ -1300,4 +1277,41 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn degree_reporting_controls_always_have_zero_root() {
+        for n_vars in [2, 4, 6] {
+            for n_eqs in [n_vars / 2, n_vars + 4] {
+                for seed in 0..16 {
+                    let polys = random_control_system(n_vars, n_eqs, 2, 5, seed);
+                    assert!(polys.iter().all(|p| p.terms.iter().all(|t| t.mask != 0)));
+                    let (degree, profiles) = solving_degree(&polys, n_vars, 2);
+                    assert!(profiles.iter().all(|p| !p.refuted));
+                    if degree.is_some() {
+                        let last = profiles.last().unwrap();
+                        assert_eq!(last.vars_determined, last.vars_occurring);
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn degree_reporting_does_not_infer_sat_from_density() {
+        let mut row = dreg_summary(7, 0, 2, 2, 1, 7, false).unwrap();
+        row.control_solve_mean = None;
+        row.control_unsat_mean = None;
+        row.control_unresolved = 1;
+        row.control_unsat_unresolved = 1;
+        row.control_expected_solutions = 1024.0;
+        let table = format_dreg_table(&[row]);
+        assert!(table.contains("D_rank_proxy"));
+        assert!(table.contains("D_pin(extra)"));
+        assert!(table.contains("unres"));
+        assert!(!table.contains("n/a(sat)"));
+        assert!(!table.contains("FFD"));
+        assert!(!table.contains("ctrl(unsat)"));
+    }
+
 }
+
