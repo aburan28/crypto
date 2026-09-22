@@ -1,0 +1,291 @@
+{
+  "all_seven_gates_passed": false,
+  "claim_boundary": "strong internal engineering and finite public toy-research improvement; not a Koblitz index-calculus SOTA",
+  "current_n41": {
+    "default_threads": {
+      "baseline_cpu": 0.11850700000000014,
+      "binaries": [
+        "6b6cb60ac699aedd0456acaa6e0f76285e17d58702f1f9765b7224da45977ff5"
+      ],
+      "collect_cpu": 3.1314210000000005,
+      "collect_wall": 0.426996542,
+      "hashes": [
+        "8e51f7adab62f4bc351bcb35225fd6522d7cd56eeeac4f162bc00ef6c9b8058a"
+      ],
+      "ic_over_rho": 4.258366735293329,
+      "ic_wall": 0.503511208,
+      "logs_cpu": 0.009948000000000068,
+      "logs_wall": 0.0110015,
+      "rho_over_ic": 0.23483181749284376,
+      "rho_wall": 0.118236334,
+      "rss": 13221888,
+      "scalars": [
+        "281099696942"
+      ],
+      "select_cpu": 0.06484500000000001,
+      "select_wall": 0.070455875,
+      "solve_cpu": 0.0068350000000001465,
+      "solve_wall": 0.017965042,
+      "verified": 5,
+      "whole_cpu": 3.336178,
+      "whole_wall": 0.651470916
+    },
+    "factor_base": {
+      "collection_m": 3,
+      "curve": "K_0 over GF(2^41)",
+      "descent_m": 2,
+      "ell": 6,
+      "factor_base_abscissae": 2380,
+      "factor_base_logs_known_by_construction": false,
+      "factor_base_points": 4759,
+      "factor_base_spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+          ]
+        }
+      },
+      "input_signed_orbits": 60,
+      "projected_columns": 29,
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "public_hash_counter": 0,
+        "public_hash_seed": 41301,
+        "target_scalar_constructed": false,
+        "x": "1915260858932",
+        "y": "151457671115"
+      },
+      "target_scalar_constructed_or_supplied": false,
+      "target_subgroup_enumerated_for_factor_base": false
+    },
+    "factor_base_logs_known_by_construction": false,
+    "one_thread": {
+      "baseline_cpu": 0.11894199999999966,
+      "binaries": [
+        "6b6cb60ac699aedd0456acaa6e0f76285e17d58702f1f9765b7224da45977ff5"
+      ],
+      "collect_cpu": 2.623956,
+      "collect_wall": 2.748071458,
+      "hashes": [
+        "8e51f7adab62f4bc351bcb35225fd6522d7cd56eeeac4f162bc00ef6c9b8058a"
+      ],
+      "ic_over_rho": 23.817013161907656,
+      "ic_wall": 2.829141792,
+      "logs_cpu": 0.006450000000000067,
+      "logs_wall": 0.01304925,
+      "rho_over_ic": 0.04198679293671363,
+      "rho_wall": 0.118650042,
+      "rss": 10944512,
+      "scalars": [
+        "281099696942"
+      ],
+      "select_cpu": 0.061477,
+      "select_wall": 0.073905667,
+      "solve_cpu": 0.006784999999999819,
+      "solve_wall": 0.017937417,
+      "verified": 5,
+      "whole_cpu": 2.823121,
+      "whole_wall": 2.9757858329999998
+    },
+    "parameter_file": "docs/ic/params/k0n41-fixed-algebraic-single-public-41301.json",
+    "projected_predicate_native_cost": {
+      "canonical_frobenius_coordinate_squarings": 4756,
+      "cofactor_multiplications": 60,
+      "derived_frobenius_coordinate_squarings": 190240,
+      "derived_negations": 2379,
+      "input_points": 4759,
+      "input_signed_orbits": 60,
+      "output_columns": 29
+    },
+    "relation_stream": {
+      "canonical_relations_sha256": "8e51f7adab62f4bc351bcb35225fd6522d7cd56eeeac4f162bc00ef6c9b8058a",
+      "linear_algebra": {
+        "attempts": 1,
+        "mode": "sparse",
+        "seconds": 0.000124125,
+        "sparse": {
+          "attempts": 1,
+          "core_dimension": 3,
+          "core_nonzeros": 27,
+          "filter": {
+            "columns_in": 29,
+            "columns_out": 3,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 0,
+            "merged_columns": 23,
+            "nonzeros_in": 105,
+            "nonzeros_out": 27,
+            "rows_in": 35,
+            "rows_out": 9,
+            "singletons_removed": 3,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 26,
+          "wiedemann": {
+            "block_m": 4,
+            "block_n": 4,
+            "dimension": 4,
+            "extra_steps": 0,
+            "generator_degree": 0,
+            "products": 11,
+            "sequence_length": 10
+          }
+        }
+      },
+      "relations": 35,
+      "summands_scanned": 17088512,
+      "trials": 114688,
+      "units": 14,
+      "verification_seconds": 0.000973958
+    },
+    "science_process_accounting": {
+      "peak_rss_bytes": 14352384,
+      "processes": 12,
+      "scope": "two pilot processes plus five fresh default-thread and five fresh one-worker full workflow processes; compilation and JSON reduction excluded",
+      "sequential_wall_seconds": 21.784402749999998,
+      "total_core_seconds": 37.073066
+    },
+    "solution": {
+      "recovered_scalar": 281099696942,
+      "rho_iterations": 172292,
+      "verification_equation": "[d]G = Q",
+      "verified": true
+    },
+    "target_scalar_constructed_or_supplied": false
+  },
+  "evidence_pins": {
+    "gate_status_sha256": "b83dfcf5c1689f077aa2f34ab004174565de5308689f8297c94b2ed5d8d7ad63",
+    "n41_evidence_sha256": "6aa04e041bf6add90a68a444abc677fa127e9e75eeff6d8ee4b88d21b7d865b5",
+    "n41_params_sha256": "c20907ad561fba8af4bf8350f4b60739cb7351e1dfd0adf6af3a8e83acb92e01"
+  },
+  "full_cost_gate_passed": false,
+  "gates": {
+    "1_all_stage_resource_charging": "partial_missing_licensed_magma_resources",
+    "2_same_instance_solver_panel": "partial_phase_b_native_wdsat_cms_mitm_ggmp_complete_magma_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_current_n53_refreshed_magma_missing",
+    "4_n31_n41_larger_pdp_scaling": "satisfied_finite_execution_coverage_current_n41_unified",
+    "5_unknown_scalar_without_constructed_base_logs": "satisfied_finite_n23_n31_n41_n53",
+    "6_full_cost_vs_automorphism_rho": "partial_n41_and_n53_full_cost_losses_default_n53_wall_pass",
+    "7_external_reproduction_novelty": "missing"
+  },
+  "independent_external_reproduction_satisfied": false,
+  "inherited_current_n53": {
+    "campaign": {
+      "interpretation": "This campaign envelope is research evidence cost, not the cost of one fixed-parameter operational invocation. It is retained so unsuccessful searches and rejected implementations are not hidden.",
+      "peak_rss_bytes": 245972992,
+      "processes": 318,
+      "scope": "All retained target-independent seed/rank selection, matched predecessor controls, parallel and single-core scalar-blind repetitions, independent holdouts, thread-count, width and window diagnostics, and accepted or rejected single-target build-cache, prefetch, canonicalization-lane, projected-predicate-reuse, orbit-derived-projection and cutoff A/B processes. Compiler/test time and rho-free JSON inspection are not scientific runs and are not included.",
+      "sequential_wall_seconds": 1395.640867705,
+      "total_core_seconds": 3192.1819040000005
+    },
+    "default_threads": {
+      "ic_wall_seconds": 0.891977584,
+      "peak_rss_bytes": 128712704,
+      "rho_over_ic_wall_ratio": 1.7779878793456316,
+      "rho_wall_seconds": 1.580089417,
+      "whole_process_cpu_seconds": 8.124213
+    },
+    "factor_base": {
+      "collection_summands": 3,
+      "collection_window": 1139,
+      "curve": "K_0 over GF(2^53)",
+      "descent_summands": 2,
+      "factor_base": "algebraic subgroup-orbit specification, factor-base seed 1, 36000 requested points",
+      "factor_base_logs_known_by_construction": false,
+      "factor_base_points": 36464,
+      "pair_table_stored_pairs": 6290040,
+      "pair_table_tier": "folded",
+      "signed_orbit_columns": 344,
+      "subgroup_order": "21044858204113"
+    },
+    "factor_base_logs_known_by_construction": false,
+    "one_core": {
+      "ic_over_rho_wall_ratio": 3.2871361627537397,
+      "ic_wall_seconds": 5.195076417000001,
+      "peak_rss_bytes": 104644608,
+      "rho_wall_seconds": 1.5804262919999998,
+      "whole_process_cpu_seconds": 6.757385
+    },
+    "parameter_file": "docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json",
+    "projected_predicate_native_cost": {
+      "canonical_frobenius_coordinate_squarings": 72928,
+      "cofactor_multiplications": 344,
+      "derived_frobenius_coordinate_squarings": 1896128,
+      "derived_negations": 18232,
+      "input_points": 36464,
+      "input_signed_orbits": 344,
+      "output_columns": 344
+    },
+    "recovered_scalar": 7892094459170,
+    "relation_hash": "d8e18605b4a27f307101ecbb5ba9973b50fc01ba272d6f39d216c4fd6a615d37",
+    "target_scalar_constructed_or_supplied": false
+  },
+  "inherited_phase_b_same_instance_matrix": {
+    "backends": {
+      "cryptominisat": {
+        "conflicts_reported": 98,
+        "conflicts_sum": 19480743,
+        "peak_rss_bytes": 122703872,
+        "summed_process_wall_seconds": 8137.581155281003,
+        "total_core_seconds": 6237.27352
+      },
+      "native-xor": {
+        "conflicts_reported": 160,
+        "conflicts_sum": 9233732,
+        "peak_rss_bytes": 140333056,
+        "summed_process_wall_seconds": 1278.114042958997,
+        "total_core_seconds": 958.931674
+      },
+      "wdsat": {
+        "conflicts_reported": 81,
+        "conflicts_sum": 7599249,
+        "peak_rss_bytes": 24252416,
+        "summed_process_wall_seconds": 9524.938770589997,
+        "total_core_seconds": 7404.749336
+      }
+    },
+    "cells": [
+      "n31-l5-m3-ggmp-a0-f0",
+      "n31-l5-m3-standard-a1-f0",
+      "n41-l5-m3-standard-a1-f0",
+      "n59-l9-m3-standard-a1-f0"
+    ],
+    "direct_mitm": {
+      "conflicts": null,
+      "group_additions": 4804252,
+      "instances": 160,
+      "maximum_sampled_process_tree_rss_bytes": 85479424,
+      "pair_entries": 4768800,
+      "summed_outer_total_core_seconds": 759.710741,
+      "summed_single_core_elapsed_seconds": 766.5386552010002,
+      "true_negative": 80,
+      "true_positive": 80,
+      "workflow_wall_seconds": 322.0
+    },
+    "instances": 160,
+    "licensed_magma_complete": false
+  },
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "next_targets": [
+    "execute the frozen 160-input packet under licensed Magma F4 with one-core, total-core, wall, RSS and terminal receipts",
+    "run one unified end-to-end algebraic-base IC/rho cost series in the n59 larger PDP regime",
+    "reduce current n41 and n53 one-core IC/rho ratios below one without losing the n53 default-thread wall crossover",
+    "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
+  ],
+  "predecessor": {
+    "stage127_audit_sha256": "47ffeb0ee5d3364c15412331c02f0fdbd345be56d808322666a2796d001e6d2e",
+    "stage127_seal_sha256": "cc6db28a82021e165ac76bae640cc611ccb768fd3e819eeeecf7da86d01dc761",
+    "stage127_status": "current_seven_gate_audit_verified"
+  },
+  "schema": "koblitz_stage128_current_gate_audit.v1",
+  "status": "current_seven_gate_audit_verified"
+}
