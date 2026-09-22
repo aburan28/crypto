@@ -1,6 +1,6 @@
 
 === whole solve, engine InheritedF4 { max_degree: 3 }: 126 reductions, 7 refutations, 124 propagations, 71 splits, 0.04 s ===
-F4 calls 207 · word ops 182558 (specialisation 50072) · rows 8250 · cols 15953 · build 6 ms · reduce 0 ms · readback 0 ms
+F4 calls 207 · word ops 151224 (specialisation 18674) · rows 8250 · cols 15953 · build 4 ms · reduce 0 ms · readback 0 ms
 split rule for the probe's children: HighestFree
 
 === inherited F4 probe: K_0/2^9, m = 2, 16 targets, degree 3 ===
@@ -11,13 +11,13 @@ mean rank per node: 70.1
 |:--|--:|--:|
 | parent from scratch | 394623 | 3555 |
 | children from scratch (both values) | 547699 | 4934 |
-| children inherited (both values) | 99159 | 893 |
+| children inherited (both values) | 38279 | 345 |
 |   of which re-reduction XORs | 14769 | 133 |
-|   of which specialisation reads+writes | 84390 | 760 |
-| displaced rows (both children) | 2570 | 23.2 |
+|   of which specialisation reads+writes | 23510 | 212 |
+| displaced rows (both children) | 3461 | 31.2 |
 | completion rows (both children) | 1544 | 13.91 |
 
-ratio from-scratch / inherited (children): 5.52×
-wall from-scratch / inherited (children): 3.26×
+ratio from-scratch / inherited (children): 14.31×
+wall from-scratch / inherited (children): 7.17×
 children compared: 216; solver-view mismatches: 0; raw decisive-row differences (refuted nodes where the from-scratch tail also holds x_v·1): 0
-{"children":216,"completion_rows":1544,"curve":"K_0/2^9","degree":3,"displaced_rows":2570,"inherited_child_word_ops":99159,"inherited_reduce_word_ops":14769,"inherited_specialise_word_ops":84390,"m":2,"mean_rank":70.11711711711712,"mismatches":0,"nodes":111,"raw_decisive_row_differences":0,"scratch_child_word_ops":547699,"scratch_parent_word_ops":394623,"targets":16,"wall_inherit_ns":4143860,"wall_scratch_ns":13494416}
+{"children":216,"completion_rows":1544,"curve":"K_0/2^9","degree":3,"displaced_rows":3461,"inherited_child_word_ops":38279,"inherited_reduce_word_ops":14769,"inherited_specialise_word_ops":23510,"m":2,"mean_rank":70.11711711711712,"mismatches":0,"nodes":111,"raw_decisive_row_differences":0,"scratch_child_word_ops":547699,"scratch_parent_word_ops":394623,"targets":16,"wall_inherit_ns":1928140,"wall_scratch_ns":13829764}

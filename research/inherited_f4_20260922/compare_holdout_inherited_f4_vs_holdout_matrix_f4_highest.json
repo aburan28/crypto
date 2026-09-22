@@ -27,19 +27,19 @@
       "decomposed": 12,
       "verdict_digest": "68ec64dac8d429669fbeb161f9bfbfe3083fc5a9907127116ec0235e4a13c134",
       "baseline_word_ops": 163178360,
-      "candidate_word_ops": 31800117,
-      "word_op_ratio": 5.131376088962188,
-      "baseline_wall_ns": 333277287,
-      "candidate_wall_ns": 210973591,
-      "wall_ratio": 1.57971092694725,
+      "candidate_word_ops": 22640333,
+      "word_op_ratio": 7.207418724804092,
+      "baseline_wall_ns": 333474168,
+      "candidate_wall_ns": 107876097,
+      "wall_ratio": 3.091270237557816,
       "phases_baseline_ns": {
-        "build": 176216180,
-        "reduce": 139478469,
-        "readback": 75849
+        "build": 176449636,
+        "reduce": 138991069,
+        "readback": 75242
       },
       "phases_candidate_ns": {
-        "build": 190200778,
-        "reduce": 1255743,
+        "build": 88180619,
+        "reduce": 317095,
         "readback": 0
       }
     },
@@ -51,25 +51,25 @@
       "decomposed": 10,
       "verdict_digest": "4415ee474f205caced7e36412be9de6732fa11168e1679102b4880cd71409ef2",
       "baseline_word_ops": 42029541,
-      "candidate_word_ops": 4607771,
-      "word_op_ratio": 9.121447441723992,
-      "baseline_wall_ns": 470598724,
-      "candidate_wall_ns": 113827395,
-      "wall_ratio": 4.13431866731203,
+      "candidate_word_ops": 3011390,
+      "word_op_ratio": 13.95685746449314,
+      "baseline_wall_ns": 468785720,
+      "candidate_wall_ns": 74837890,
+      "wall_ratio": 6.264015727861916,
       "phases_baseline_ns": {
-        "build": 216035403,
-        "reduce": 223419040,
-        "readback": 8335283
+        "build": 214955212,
+        "reduce": 222921043,
+        "readback": 8128907
       },
       "phases_candidate_ns": {
-        "build": 88758263,
-        "reduce": 2216836,
+        "build": 50520051,
+        "reduce": 1827976,
         "readback": 0
       }
     }
   ],
-  "total_word_op_ratio": 5.6363582803814385,
-  "total_wall_ratio": 2.474980205263293,
-  "min_word_op_ratio": 5.131376088962188,
-  "min_wall_ratio": 1.57971092694725
+  "total_word_op_ratio": 7.999770658680511,
+  "total_wall_ratio": 4.390796244843587,
+  "min_word_op_ratio": 7.207418724804092,
+  "min_wall_ratio": 3.091270237557816
 }
