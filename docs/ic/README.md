@@ -834,6 +834,27 @@ rules a comparison has to keep.  `ic descent` measures the algebraic
 oracle's systems on their own, in the shape of Petit–Quisquater's
 Table 2 (§14 of the ledger note); it is a stage diagnostic, never a
 speed, and `ic bench` is where the same solver's cost reaches `S`.
+`ic bench` also runs counted Pollard rho on the same instance and
+planted targets (`--rho-runs`, default 16) and fills the table's
+`vs rho` column from it.
+
+With `--solver` (repeated once per engine), `ic descent` prices
+several registered engines on the same seeded systems instead of the
+built-in Buchberger: every engine solves every target `--repeats`
+times, interleaved per target with the engine order rotated each
+repetition, and every answer is checked against the reference engine
+(`fes-f2` on quadratic cells, `exhaustive` otherwise).  Each system
+carries a blake3 fingerprint and each cell a digest of the reference
+answers, so a later run can prove it saw the same inputs and decided
+them the same way.
+
+    ./target/release/ic descent --cells 17:9:2,21:11:2 --targets 8 --repeats 3 \
+        --solver buchberger-f2 --solver f4-f2 --solver matrix-f5 \
+        --solver crossbred-f2 --solver fes-f2 --solver exhaustive
+
+The matched suite that freezes this comparison, with its whole-pipeline
+counterpart, is
+[`research/ic_framework_engines_20260922/`](../../research/ic_framework_engines_20260922/README.md).
 
 ## A benchmark corpus: `ic corpus`
 

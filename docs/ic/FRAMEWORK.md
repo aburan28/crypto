@@ -44,7 +44,14 @@ ic bench --bits 18 \
 ic bench --char2-degree 13 \
     --factor-base binary-subspace:dimension=6 \
     --oracle descent-algebraic:m=2 \
-    --solver buchberger-f2
+    --solver f4-f2
+
+# The engines on their own, paired: every engine solves the same
+# seeded descent systems, interleaved, checked against the exhaustive
+# reference.  A stage diagnostic, not a speed (§7).
+ic descent --cells 17:9:2 --targets 8 --repeats 3 \
+    --solver buchberger-f2 --solver f4-f2 --solver matrix-f5 \
+    --solver crossbred-f2 --solver fes-f2
 
 # The relation matrix is a stage too.
 ic bench --bits 20 \
@@ -314,10 +321,31 @@ pub trait SystemSolver: Send + Sync {
     fn describe(&self) -> String;
     fn parameters(&self) -> &[(&str, &str)] { &[] }
     fn accepts(&self, shape: &SystemShape) -> bool { true }
+    fn finds_every_solution(&self) -> bool { true }
     fn solve(&self, system: &BooleanSystem, params: &Params, budget: Option<Duration>)
         -> (SolverVerdict, SolverCost);
 }
 ```
+
+What ships behind it (`ic bench --list` prints each one's parameters):
+
+| name | engine | native unit | limits |
+|:--|:--|:--|:--|
+| `f4-f2` | Faugère's F4 over `F_2[v]/(v² − v)`: normal strategy, Gebauer–Möller criteria, the field products `v·g` as pairs, symbolic preprocessing, bit-packed elimination; a full reduced basis, solutions read off its linear elements ([`pq_f4_f2.rs`](../../src/cryptanalysis/pq_f4_f2.rs)) | word XORs (elimination only) | matrix size; the budget |
+| `matrix-f4` | the Koblitz oracle's hybrid: Macaulay matrices to a fixed degree (`max_degree`, default 3), propagation, splitting (`split`) | word XORs (elimination only) | `node_budget` |
+| `matrix-f5` | the same, leaving out the rows the Boolean F5 criterion predicts to reduce to zero | word XORs (elimination only) | `node_budget` |
+| `inherited-f4` | the same, children specialising their parent's reduced basis | word XORs (elimination and specialisation only) | `node_budget` |
+| `crossbred-f2` | Joux–Vitse: a Macaulay left kernel at degree `D`, then `2^k` bit-sliced linear solves | word operations (partial) | parameters that do not fit the system are a budget verdict |
+| `buchberger-f2` | Buchberger over the boolean ring, pairs one at a time, coprime and chain criteria — **no field pairs**, so its basis is not guaranteed complete and its degree is an upper bound (ledger §17.1) | monomial operations | the budget; enumerates for solutions up to 26 unknowns |
+| `xl-f2` | XL: multiply out to degree `n_vars`, linearise | monomial operations (modelled) | declines above 10 unknowns |
+| `sat-cdcl` | CDCL with Tseitin monomials and native parity rows; **one model per call** | conflicts | `sat_conflict_budget` |
+| `fes-f2` | fast exhaustive search, libfes-lite's Gray code: two word XORs per point | word XORs (Gray-code steps) | quadratic systems, ≤ 32 unknowns, ≤ 64 equations |
+| `exhaustive` | every equation at every point, stopping at the first that fails | monomial tests (performed) | 26 unknowns |
+
+The two exhaustive searches are the **reference**, not a strawman:
+`fes-f2` wherever the system is quadratic (every two-summand descent),
+`exhaustive` where it is not. An engine that does not beat them on a
+cell has not earned that cell.
 
 The contract is short and all of it matters:
 
@@ -343,6 +371,20 @@ The contract is short and all of it matters:
   degree `n_vars` with no budget hook — about 150 seconds a call on a
   12-unknown descent against Buchberger's 7 milliseconds on the same
   systems — so it declines above ten unknowns.
+- **Say whether you find every solution.** `finds_every_solution`
+  defaults to `true`. An engine that returns one model per call (a SAT
+  solver) overrides it to `false`: the accounting contract keeps
+  first-solution and complete-enumeration engines on separate
+  leaderboards, and a paired comparison checks a first-solution engine
+  for membership in the reference's solution set rather than equality.
+- **Qualify a partial count.** The runner prices a count by the
+  calibrated word-XOR ratio only when `op_unit` is exactly
+  `word XORs`, which asserts that the count covers the whole run. An
+  engine that counts its elimination but not its matrix build (every
+  F4-family engine here) says so in the unit — `word XORs (elimination
+  only)` — and is priced by measured wall time instead. Leaving the
+  qualifier off would price an incomplete count as a complete one,
+  flattering the engine by whatever it left out.
 
 ### `RelationSolver` — the matrix
 
@@ -439,9 +481,9 @@ impl SystemSolver for F5 {
 ```rust
 pub fn solver_registry() -> Vec<Box<dyn SystemSolver>> {
     vec![
+        Box::new(F4F2),
         Box::new(BuchbergerF2),
-        Box::new(XlF2),
-        Box::new(SatCdcl),
+        // … the other shipped engines …
         Box::new(Exhaustive),
         Box::new(F5),            // ← yours
     ]
@@ -450,22 +492,38 @@ pub fn solver_registry() -> Vec<Box<dyn SystemSolver>> {
 
 **Step 3 — check it agrees with the others.** The module's tests
 already require every registered solver to find the same solution set
-on a fixture and to refute an unsatisfiable system. Your engine is now
-in that loop; if it disagrees, the test names it.
+on random quadratic systems and on descent systems of both summand
+counts, and to refute an unsatisfiable system. Your engine is now in
+that loop; if it disagrees, the test names it.
 
 ```bash
 cargo test --release --lib cryptanalysis::ic_framework
 ```
 
-**Step 4 — measure it against the reference.** `exhaustive` is not a
-strawman: it is the best algorithm that already solves the same
-problem, in the same unit, on the same instance, and its cost is
-exactly `2^n · Σ_i |terms_i|`. If your engine cannot beat it on a cell,
-it has not earned that cell whatever its asymptotics are said to be.
+**Step 4 — measure it against the reference, on its own.** `ic descent
+--solver f5 --solver fes-f2 --solver buchberger-f2 --repeats 3` runs
+your engine on the frozen descent table's seeded targets beside the
+reference and the baseline, interleaved per target, and checks every
+answer against the reference's. `fes-f2` (quadratic systems) and
+`exhaustive` (the rest) are not strawmen: they are the best algorithms
+that already solve the same problem on the same instance. If your
+engine cannot beat them on a cell, it has not earned that cell whatever
+its asymptotics are said to be.
+
+**Step 5 — measure the whole method.** The per-call ratio is a stage
+diagnostic. What your engine does to `S` is the answer:
 
 ```bash
 ic bench --sweep my-solver-sweep.json
 ```
+
+**Step 6 — run the matched suite before claiming anything.**
+[`research/ic_framework_engines_20260922/`](../../research/ic_framework_engines_20260922/README.md)
+freezes the paired baseline/candidate comparison `AGENTS.md` §8 asks
+every performance change to carry: `run.py --add-engine f5` reruns the
+frozen engines with yours beside them, and `compare.py --manifest`
+refuses the comparison if your run saw different inputs or decided them
+differently.
 
 The same four steps apply to a factor base (`FactorBaseBuilder`), an
 oracle (`DecompositionOracle`) or a matrix (`RelationSolver`) — a
@@ -557,17 +615,20 @@ worse than none:
   rows.** The descent is symbolic and reaches 64 boolean variables;
   the shipped engines do not. `exhaustive` and Buchberger's solution
   extraction enumerate `2^{n_vars}` points and stop at 26 variables,
-  `xl-f2` stops at 10, and Buchberger's basis computation is the wall
-  long before its cap: at `n' = 9` (18 unknowns, ledger §16) it took
-  47 and 90 minutes for runs of 69 and 134 relations, `10⁵` times the
-  pair table on the same base, with six more unknowns costing it
-  2,300× against the exhaustive engine's 77×. An engine that scales
-  is the plug point's purpose (§5); the rows past `n' ≈ 9` are
-  waiting for one.
-- **No F4 or F5 ships.** The `SystemSolver` plug point exists for them
-  and is exercised by four engines (Buchberger, XL, CDCL, exhaustive),
-  but a signature-based or matrix-F4 engine is yours to plug in; §5
-  shows how.
+  `fes-f2` at 32, `xl-f2` at 10. Buchberger's basis computation was
+  the wall long before its cap — at `n' = 9` (18 unknowns, ledger §16)
+  it took 47 and 90 minutes for runs of 69 and 134 relations — which is
+  why F4 and F5 now ship beside it; ledger §17 measures how far they
+  move the wall and whether any of them gains on exhaustive search.
+- **F5 ships as matrix-F5 inside a hybrid, not as a signature-based
+  engine.** `matrix-f5` builds the Macaulay matrix to a fixed degree
+  with the rows the F5 criterion predicts to reduce to zero left out,
+  then propagates and splits. At its default degree 3 on the quadratic
+  two-summand descents the criterion prunes only what linear equations
+  allow — the trivial syzygies first appear at degree 4 — so there it
+  tracks `matrix-f4`. An incremental signature-based F5 (or GVW, or a
+  signature-based F4) is not in the registry; it is the obvious next
+  engine to plug in, and §5 shows how.
 - **No iterative matrix.** Two eliminations ship; Wiedemann and Lanczos
   are open, and the trait is written so that a matrix-vector product is
   a legitimate `work_unit`.
@@ -587,7 +648,7 @@ worse than none:
 | factor base | `FactorBaseBuilder` | `prime-abscissa`, `binary-subspace`, `koblitz-orbit` |
 | targets | `Targets` | `random`, `walk` |
 | point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic` |
-| polynomial solver | `SystemSolver` | `buchberger-f2`, `xl-f2`, `sat-cdcl`, `exhaustive` |
+| polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `exhaustive` |
 | relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 
 `ic bench --list` prints this with every parameter each plug-in reads.
@@ -597,7 +658,10 @@ worse than none:
 | file | what is in it |
 |:--|:--|
 | [`stages.rs`](../../src/cryptanalysis/ic_framework/stages.rs) | the traits and their types — the normative contracts |
-| [`solvers.rs`](../../src/cryptanalysis/ic_framework/solvers.rs) | the `SystemSolver` implementations and their registry |
+| [`solvers.rs`](../../src/cryptanalysis/ic_framework/solvers.rs) | the `SystemSolver` adapters and their registry |
+| [`pq_f4_f2.rs`](../../src/cryptanalysis/pq_f4_f2.rs) | the boolean F4 engine: pair selection and criteria, symbolic preprocessing, the packed elimination, solution extraction |
+| [`koblitz_groebner.rs`](../../src/cryptanalysis/koblitz_groebner.rs), [`crossbred.rs`](../../src/cryptanalysis/crossbred.rs), [`mq_fes.rs`](../../src/cryptanalysis/mq_fes.rs) | the hybrid F4/F5 engines, crossbred, and fast exhaustive search the adapters call |
+| [`ic_descent_degrees.rs`](../../src/cryptanalysis/ic_descent_degrees.rs), [`descent.rs`](../../src/bin/ic/descent.rs) | `ic descent`: the degree table, and the paired engine comparison (`--solver`) |
 | [`plugins.rs`](../../src/cryptanalysis/ic_framework/plugins.rs) | the factor bases and decomposition oracles, the algebraic one included |
 | [`pq_descent_symbolic.rs`](../../src/cryptanalysis/pq_descent_symbolic.rs) | the symbolic Weil descent the algebraic oracle builds its systems with |
 | [`linalg.rs`](../../src/cryptanalysis/ic_framework/linalg.rs) | the structured elimination and the matrix registry |
