@@ -11754,7 +11754,24 @@ mod tests {
                 SolverEngine::InheritedF4 { max_degree: 3 },
                 20_000,
             );
-            assert_eq!(f4, inherited, "inherited F4 disagrees with matrix-F4 on [{k}]G");
+            // Under `SplitRule::Auto` the inherited engine splits on the
+            // smallest free variable and the from-scratch one on the
+            // largest, so when several decompositions exist each may
+            // find a different one first.  Both must exist or neither,
+            // and every one returned must sum to the target in the group.
+            assert_eq!(
+                f4.is_some(),
+                inherited.is_some(),
+                "inherited F4 disagrees with matrix-F4 on [{k}]G"
+            );
+            for (name, found) in [("matrix-F4", &f4), ("inherited F4", &inherited)] {
+                if let Some(idxs) = found {
+                    let sum = idxs
+                        .iter()
+                        .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                    assert_eq!(sum, target, "{name} returned a false decomposition of [{k}]G");
+                }
+            }
         }
     }
 
