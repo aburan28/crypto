@@ -52,12 +52,18 @@ The **Contribute compute** section under the worker table is static: it
 carries the [cairn](https://github.com/aburan28/cairn) download link
 (`releases/latest`, plus the one-line installer the cairn README
 documents) for the paid piecework path, and the `ecc2k130/` client
-commands for the unpaid one. It states plainly that no ECC2K-130
-objective is posted on cairn yet — the binary-field checker
-`GF(2^131)` needs is not in cairn's `examples/certicom-ecdlp/` — so the
-download is an invitation to be ready and to work the live rungs, not a
-claim that points on this campaign are payable today. If that changes,
-this section is what has to change with it.
+commands for the unpaid one. cairn now posts this search as
+`objective-ecc2k130-orbit-batch`, paying per novel orbit, so the section
+says where the remaining gap actually is: a point on this curve cannot
+carry `(a, b)` at this walk's step cost, so a claim needs the eight
+branch counters that make a trail verifiable in ~227 group operations,
+and the kernel does not emit them yet. The section says it should: the
+campaign's packed backend has the branch index as a scalar already, so a
+counter is two instructions, and replay is for the points already
+collected without them. It also keeps cairn's own two limits visible, the
+posted tranche and the audit that a witness still needs. When the kernel
+learns to carry those counters, this section is what has to change with
+it.
 
 Open `index.html` from the working tree next to the two JSON files and it
 renders exactly as published; only the site navigation links resolve solely
@@ -70,7 +76,22 @@ Python original is `ecc2k130/examples/rho_toy.py`.
 The dashboard fetches the live S3 `status.json` and the Pages copy together
 and fills missing fields (walk rate, walking slots, per-worker rows) from
 whichever document has them, then measures the rate from `history.json`
-when neither snapshot carries one.
+when neither snapshot carries one. `published_at` is kept from whichever
+source wrote more recently: a healthy Pages job on a frozen ingest feed
+must not inherit the feed's old stamp, or the banner blames the publisher
+for a dead feed. Past the stale threshold, `walking_slots`,
+`off_weight_walking_slots` and `walk_rate` are cleared so a frozen document
+cannot read as "walking now".
+
+Two fields answer whether the points being added can take part in a
+collision at all, both from the ingest host: `work.off_weight_slots` /
+`off_weight_walking_slots` (slots whose iterations per point put them at a
+distinguished-point cutoff other than the campaign's; drawn as a warning on
+the GPU card and a row in the campaign table) and
+`ingest.duplicate_records_last_day` (records dropped because the store
+already held the point under the same seed, i.e. a walk re-walking seeds
+already walked; a row in the campaign table). Neither is folded into the
+headline counts.
 
 See [`scripts/rho_status/README.md`](../../scripts/rho_status/README.md)
 for secrets, the walker hop, and what is (not) published, and

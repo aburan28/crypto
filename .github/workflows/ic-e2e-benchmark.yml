@@ -1,0 +1,82 @@
+name: ic end-to-end benchmark
+# Runs the whole index-calculus method (select → collect → logs → solve) with
+# the signed-Frobenius ρ baseline in the same process on the frozen ledger
+# rungs, then gates the reports against the reference named in IC_E2E_REFERENCE:
+# every target verified by both methods, every seeded counter identical, the
+# same-host ρ/IC end-to-end wall ratio within tolerance, and any rung that
+# crossed ρ end to end when frozen still crossing.  See docs/ic/ci/README.md.
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "docs/ic/params/**"
+      - "docs/ic/ci/**"
+      - "scripts/ic_e2e_benchmark.py"
+      - "scripts/test_ic_e2e_benchmark.py"
+      - ".github/workflows/ic-e2e-benchmark.yml"
+  workflow_dispatch:
+    inputs:
+      wall_ratio_tolerance:
+        description: "Allowed relative fall of the ρ/IC whole-process wall ratio (0.5 = may halve)"
+        default: "0.5"
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: ic-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v4.json
+  IC_E2E_OUTPUT: /tmp/ic-e2e
+jobs:
+  e2e-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Gate self-tests
+        run: python -m unittest discover -s scripts -p 'test_ic_e2e_benchmark.py'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ic-e2e-benchmark
+      - name: Build ic
+        run: cargo build --release --bin ic
+      - name: Run the ledger rungs end to end (IC pipeline + ρ baseline, same process)
+        run: |
+          python scripts/ic_e2e_benchmark.py run \
+            --ic target/release/ic \
+            --output "$IC_E2E_OUTPUT" \
+            --params docs/ic/params/k0n31.json \
+                     docs/ic/params/k0n41-subgroup.json \
+                     docs/ic/params/k0n53-subgroup.json
+      - name: Gate against the frozen reference
+        if: always()
+        run: |
+          set +e
+          python scripts/ic_e2e_benchmark.py check \
+            --output "$IC_E2E_OUTPUT" \
+            --reference "$IC_E2E_REFERENCE" \
+            --wall-ratio-tolerance "${{ github.event.inputs.wall_ratio_tolerance || '0.5' }}" \
+            --summary-markdown "$IC_E2E_OUTPUT/summary.md" \
+            --summary-json "$IC_E2E_OUTPUT/summary.json"
+          status=$?
+          if [ -f "$IC_E2E_OUTPUT/summary.md" ]; then
+            cat "$IC_E2E_OUTPUT/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit $status
+      # The whole directory is a few hundred kilobytes and is the raw evidence:
+      # per-rung reports, stderr, the resumable run state (factor base,
+      # relations, certified logs, solutions, baseline), the manifest and the
+      # summary.  A re-freeze on CI hardware starts from this artifact.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ic-e2e-benchmark-${{ github.run_id }}
+          path: /tmp/ic-e2e
+          if-no-files-found: warn

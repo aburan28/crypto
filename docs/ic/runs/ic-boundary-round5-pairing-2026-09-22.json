@@ -1,0 +1,341 @@
+{
+ "what": "Check that drawing the walk's restart pool on first use moved cost and nothing else: every counter of every row compared between the eager and the lazy arm, the saving checked against the offsets each row stopped drawing, and the size of the saving by instance.",
+ "eager": "docs/ic/runs/ic-boundary-ledger-round5-eager-2026-09-22.json",
+ "lazy": "docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json",
+ "rows_compared": 537,
+ "rows_identical_but_for_the_pool": 537,
+ "rows_whose_trajectory_moved": 0,
+ "trajectory_mismatches": [],
+ "walk_rows": 204,
+ "walk_rows_that_drew_fewer_offsets": 155,
+ "rows_whose_saving_is_not_the_offsets_they_dropped": 0,
+ "accounting_mismatches": [],
+ "rows_whose_s_rose": 0,
+ "rows_that_rose_on_identical_counters_at_unpinned_instances": 0,
+ "instances_the_pinned_table_does_not_carry": {},
+ "largest_savings": [
+  {
+   "log2_r": 9.553,
+   "delta_s": 14.632698,
+   "ratio": 0.582484,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 14.632698,
+   "ratio": 0.679637,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 14.632698,
+   "ratio": 0.670271,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 14.632698,
+   "ratio": 0.767069,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 14.158321,
+   "ratio": 0.685802,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 14.158321,
+   "ratio": 0.610937,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 14.158321,
+   "ratio": 0.672626,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 14.15227,
+   "ratio": 0.647813,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 14.15227,
+   "ratio": 0.652185,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 13.803692,
+   "ratio": 0.658423,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 13.803692,
+   "ratio": 0.659218,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 13.209568,
+   "ratio": 0.62837,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 12.771681,
+   "ratio": 0.705512,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 12.771681,
+   "ratio": 0.650127,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 12.771681,
+   "ratio": 0.69837,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 9.553,
+   "delta_s": 12.771681,
+   "ratio": 0.618198,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^15)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.953,
+   "delta_s": 12.674653,
+   "ratio": 0.611401,
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.953,
+   "delta_s": 12.674653,
+   "ratio": 0.60346,
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.953,
+   "delta_s": 12.515822,
+   "ratio": 0.606829,
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.953,
+   "delta_s": 12.515822,
+   "ratio": 0.612323,
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 12.513953,
+   "ratio": 0.673319,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 12.513953,
+   "ratio": 0.666712,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 9.953,
+   "delta_s": 12.13463,
+   "ratio": 0.610719,
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.953,
+   "delta_s": 12.13463,
+   "ratio": 0.618337,
+   "regime": "koblitz",
+   "instance": "K_1 / GF(2^11)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 11.154499,
+   "ratio": 0.668951,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 10.701347,
+   "ratio": 0.645774,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "log2_r": 10.968,
+   "delta_s": 10.300551,
+   "ratio": 0.647754,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 10.968,
+   "delta_s": 10.300551,
+   "ratio": 0.644873,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 10.968,
+   "delta_s": 9.89836,
+   "ratio": 0.645142,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 10.968,
+   "delta_s": 9.89836,
+   "ratio": 0.648444,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 10.968,
+   "delta_s": 9.831328,
+   "ratio": 0.660969,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 10.968,
+   "delta_s": 9.831328,
+   "ratio": 0.657852,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^13)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 11.925,
+   "delta_s": 7.92151,
+   "ratio": 0.688156,
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 9.685,
+   "delta_s": 7.773291,
+   "ratio": 0.773185,
+   "regime": "prime",
+   "instance": "bench-10bit",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "log2_r": 11.925,
+   "delta_s": 7.74512,
+   "ratio": 0.661471,
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 11.925,
+   "delta_s": 7.74512,
+   "ratio": 0.658022,
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 11.925,
+   "delta_s": 7.504588,
+   "ratio": 0.717918,
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 11.925,
+   "delta_s": 7.344234,
+   "ratio": 0.690766,
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 11.925,
+   "delta_s": 7.055596,
+   "ratio": 0.626426,
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "log2_r": 11.925,
+   "delta_s": 7.055596,
+   "ratio": 0.684593,
+   "regime": "prime",
+   "instance": "bench-12bit",
+   "variant": "mitm_m2_negfold_walk"
+  }
+ ],
+ "best_ratio_below_2_20": 0.582484,
+ "best_ratio_at_or_above_2_20": 0.926861,
+ "largest_delta_s_at_or_above_2_20": 0.760994
+}

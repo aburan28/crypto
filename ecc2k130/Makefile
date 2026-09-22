@@ -13,6 +13,7 @@
 #   BATCH      walks batched into one field inversion per thread (default 32)
 #   THREADS    CUDA block size (default 128)
 #   MINBLOCKS  resident blocks per SM to ask ptxas for (default 2)
+#   WITNESS    carry the cairn witness in the walk (default 1; 0 is the control)
 #   PACKED_SINGLE_PRODUCT  use one polynomial product for packed mul (default 0)
 #   PACKED_ADD_COMBINE  join clmul32 class products with adds, not ors (default 0)
 #   PACKED_PAIR_ILP  independent buffers for the two paired products (default 0)
@@ -25,7 +26,16 @@
 #   PACKED_ALU_SQR  ONB sqr131 on the logic pipe instead of clmad (default 0)
 #   PACKED_SLOT_PIPELINE  overlap next-slot compact loads with the current product
 #   TABLE_ADDEND_GLOBAL  table-walk addends from global, selection in shared
+#   TABLE_TAG_DENOM  reverse pass rebuilds d from the tag in hist; no
+#                    denominator field (default 0; ONE-BLOCK-GEOMETRY.md)
+#   TABLE_FUSED  one fused pass per step, alternating slot order (default 0)
+#   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
+#                      selection (default 0)
+#   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
+#   PHASE_PROFILE  clock64() timing of the walk's three phases, at exit
 #   ARCH     CUDA architectures
+#
+# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md.
 
 MODAL   ?= modal
 NVCC    ?= nvcc
@@ -86,8 +96,34 @@ TABLE_PIVOT_BYTES ?= 0
 TABLE_GLOBAL ?= 0
 # Hybrid: selection tables in shared, addend table in global.
 TABLE_ADDEND_GLOBAL ?= 0
+# Reverse pass rebuilds the denominator from the step tag in hist instead of
+# loading the 17-byte field the forward pass stored (no denominator field).
+TABLE_TAG_DENOM ?= 0
+# One fused pass per step: the reverse pass of step s runs step s+1's
+# selection and chain product on the point it just produced (needs TAG_DENOM).
+TABLE_FUSED ?= 0
+TABLE_FUSED_PIPE ?= 0
+# clock64() phase timing of the two-pass walk, printed at exit (diagnostic).
+PHASE_PROFILE ?= 0
+# Forward pass software-pipelined: slot k's products issue before slot k+1's
+# selection (needs TAG_DENOM; two-pass kernel only).
+TABLE_PIPE_SELECT ?= 0
+# Reverse pass issues the chain product before lambda's.
+PACKED_CHAIN_FIRST ?= 0
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
+# Carry the eight per-branch step counts that make a distinguished point
+# payable on cairn (CAIRN-WITNESS.md).  WITNESS=0 compiles the counting out
+# and is the control for the paired comparison that prices it; it also keeps
+# the checkpoint and corpus formats byte-identical to what shipped before.
+# The table walk cannot carry this witness, so it is not the default there;
+# asking for both explicitly is still refused in walk.h rather than quietly
+# turned off.
+ifeq ($(WALK_TABLE),1)
+WITNESS ?= 0
+else
+WITNESS ?= 1
+endif
 # Keep experimental tuning independent: one change per comparison initially.
 GPUFLAGS = -Xptxas -v
 ifeq ($(GLOBAL_CG),1)
@@ -179,9 +215,11 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_ALU_SQR=$(PACKED_ALU_SQR) \
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
+       -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
-       -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE)
+       -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+       -DECC_WITNESS=$(WITNESS)
 
 all: cpu
 
@@ -251,6 +289,7 @@ check-cli:
 	python3 -m unittest discover -s codegen -p 'testdirectbuild.py'
 	python3 -m unittest discover -s codegen -p 'testnativebench.py'
 	python3 -m unittest discover -s codegen -p 'testirschedule.py'
+	python3 -m unittest discover -s codegen -p 'testwdsat.py'
 
 # The iteration exploits an automorphism group of order 2m, and the usual price
 # for that is fruitless cycles.  This iteration cannot have them -- it is
@@ -284,10 +323,24 @@ build/test-production: src/testproduction.cpp src/main.cu $(HDRS) $(GEN)
 # figure (docs/ecc2k130-status/walk-forest/README.md).  Host only.
 build/trailforest: src/trailforest.cpp $(HDRS) $(GEN)
 	mkdir -p build
-	$(CXX) -O2 -std=c++17 $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	$(CXX) -O2 -std=c++17 -fopenmp $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
 	    -Wno-unknown-pragmas src/trailforest.cpp -o $@
 
 trailforest: build/trailforest
+
+# Orbit witnesses for a corpus: the j-counts a cairn piecework node can check
+# with one double scalar multiplication.  Host only.
+build/witness: src/witness.cpp $(HDRS) $(GEN)
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 $(OMPFLAGS) $(DEFS) -DECC_NO_CUDA -Wall -Wno-unused-function -Wno-unused-variable \
+	    -Wno-unknown-pragmas src/witness.cpp -o $@
+
+witness: build/witness
+
+# The witness generator end to end: corpus -> claims, the structural rules a
+# payer applies, and (with CAIRN_ROOT or --cairn) cairn's own checker.
+test-witness: build/witness ecc2k130-cpu
+	python3 test_witness.py $(if $(CAIRN_ROOT),--cairn $(CAIRN_ROOT),)
 
 test-production: ecc2k130-cpu build/test-production
 	./build/test-production
@@ -300,6 +353,9 @@ test-production: ecc2k130-cpu build/test-production
 	python3 -m unittest discover -s aws -p test_dp_ingest.py -v
 	python3 -m unittest discover -s aws -p test_worker_spool.py -v
 	python3 -m unittest discover -s aws -p test_controlplane.py -v
+	python3 -m unittest discover -s . -p test_modal_sync.py -v
+	python3 -m unittest discover -s . -p test_modal_app.py -v
+	python3 -m unittest discover -s . -p test_modal_campaign.py -v
 
 # The control plane against real Postgres, Redis and S3 rather than SQLite, a
 # fake and a directory.  `services.sh` brings the three up (docker compose
@@ -428,11 +484,11 @@ test-table-walk-host:
 
 test-table-walk-cuda:
 	mkdir -p build
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=%,$(DEFS)) -DECC_WALK_TABLE=1 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_WITNESS=%,$(DEFS)) -DECC_WALK_TABLE=1 -DECC_WITNESS=0 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp
 	./build/test-table-walk-cuda
-	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=%,$(DEFS)) \
-	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 \
+	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_TABLE_ADDEND_GLOBAL=% -DECC_TABLE_PIVOT_BYTES=% -DECC_WITNESS=%,$(DEFS)) \
+	    -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 -DECC_WITNESS=0 \
 	    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda-addend-global -lgomp
 	./build/test-table-walk-cuda-addend-global
 
@@ -538,6 +594,21 @@ bench-rtx-pro6000:
 	$(RTX_PRO6000_ENV) $(MODAL) run modal_app.py::bench --packed \
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
+
+# The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
+# 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
+# from the step tag, the products inlined, the forward pass software-pipelined.
+# Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
+gpu-rtx-pro6000-20b:
+	$(MAKE) -B ecc2k130 ARCH="-gencode arch=compute_120,code=sm_120" \
+	    BATCH=16 THREADS=512 MINBLOCKS=1 \
+	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=1 \
+	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
+	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 
 # Ada preset for the EC2 g6 (L4) and g6e (L40S) instance types, both sm_89.
 # It is the RTX PRO 6000 arithmetic/storage preset. CLMAD is on: the

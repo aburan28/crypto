@@ -1,8 +1,21 @@
 {
   "candidates": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/next-candidates-single-target.json",
-  "baseline_source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0015/source",
+  "baseline_source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0020/source_candidates/both/source",
   "target_count": 1,
   "require_native_progress": true,
-  "next_step": "Use this source (it carries .cargo/config.toml), preserve target count and metric gates, and choose a new campaign seed. A different target count is a separate workload panel.",
-  "comparison_kind": "fixed-support"
+  "panel": {
+    "cells": "13a0,17a1,19a0,23a0,23a1,31a0",
+    "holdout_cells": "19a1,29a1"
+  },
+  "confirmation_allocation": {
+    "n13a0": 12,
+    "n17a1": 12,
+    "n19a0": 12,
+    "n19a1": 12,
+    "n23a0": 12,
+    "n23a1": 40,
+    "n29a1": 12,
+    "n31a0": 12
+  },
+  "next_step": "Use this source (it carries .cargo/config.toml and both round-0018 patches), preserve target count, gates and the eight-cell panel, choose a new seed, and CARRY THE ALLOCATION -- the flat twelve is what made round 0018b unreadable.\n\nCLOSED. The strict win replicates: rounds 0019 and 0020 both hold beats_rho_strict on all eight cells in both metrics on both final stages, on independent seeds, with n23a1 at 0.7498 and 0.7948 on forty fixtures. The seed-dependence question that motivated round 0020 is answered for the cell that mattered: n23a1 moved from p=0.044 on three seeds to p=0.095 on four. Also closed: the factor base (cost rises monotonically with the orbit count at every cell, the base built is the cheapest reachable, and the contract's `points` is inert below one batch of eight orbits) and the pair-table row rule (round 0018).\n\nOPEN, and BLOCKED -- see campaign_20260916/PROBE-degree-ceiling.md. The r^(2/3) against r^(1/2) boundary is still an extrapolation from two points, and the ninth cell that would settle it is NOT reachable with this executable. Three cells do exist above the panel (n37a0 r=2.3e8, n39a0 r=6.9e7, n41a0 r=5.5e11), but koblitz_tiny_ic declares MAX_DEGREE = 31 and its supports() enforces it, so the promoted candidate does not run there at all: above degree 31 the worker falls back to a general sparse path that emits no descent relation, and oracle.py rejects it as \"logarithm not certified as index calculus\". The worker's (5..31) dispatch bound is not an arbitrary guard -- it matches the tiny module's own ceiling, which exists because the packed pair table stores coordinates as u32 and the field lives in one u64. Extending koblitz_tiny_ic past one-word arithmetic is therefore the PREREQUISITE for any further scaling claim, and it is a larger piece of work than a tournament round. Degrees 37 and 41 are prime and would qualify on every other count; 39 is not prime and would still be refused.\n\nLower priority: n13a0 and n31a0 still scatter across seeds beyond within-round sampling (p=0.020 and p=0.0001 over four seeds) on a test that over-rejects. Both sit at combined 0.706 and 0.661, far from the gate, so this is a question about the instrument rather than about the result."
 }

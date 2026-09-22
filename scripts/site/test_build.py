@@ -193,13 +193,23 @@ class BuildTests(unittest.TestCase):
         for name, page in (("dashboard", dashboard), ("landing", landing)):
             self.assertIn("LIVE_FEED_URL", page, name)
             self.assertIn("function mergeSnapshots", page, name)
+            self.assertIn("function publishedMs", page, name)
             self.assertIn("function attachRateFromHistory", page, name)
+            # A frozen ingest feed must not overwrite a fresher Pages stamp:
+            # that is what made a healthy publisher look dead on 2026-09-20.
+            self.assertIn("pagesPub > livePub", page, name)
         self.assertIn("loadStatus", dashboard)
         how = read(os.path.join(self.out, "status", "how.html"))
         self.assertIn("rho-toy.js", how)
         self.assertIn("ecc2k130/examples/rho_toy.py", how)
         toy = read(os.path.join(self.out, "status", "rho-toy.js"))
         self.assertIn("global.RhoToy", toy)
+
+    def test_dashboard_drops_live_figures_when_the_snapshot_is_stale(self):
+        dashboard = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn("walking_slots: 0", dashboard)
+        self.assertIn("delete status.walk_rate", dashboard)
+        self.assertIn("Past STALE_AFTER they are not current", dashboard)
 
     def test_both_pages_read_the_measured_rate_through_one_shared_block(self):
         # Two pages render the same snapshot's rate, so a fix applied to one

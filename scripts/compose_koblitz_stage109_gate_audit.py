@@ -198,12 +198,20 @@ def build(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path) -> dict[str, Any]:
+    # Stage 109 is an immutable historical snapshot.  The mutable documents
+    # it pinned by hash (the boundary ledger and its Markdown twin, the gate
+    # status) moved on 2026-09-21 with the index-calculus boundary ledger, so
+    # recomposing here would compare two points in time and invite rewriting
+    # the frozen audit and seal.  Stage 124 recomposes the current evidence
+    # and chains to this seal (compose_koblitz_stage124_gate_audit.py); this
+    # verify checks the seal and the frozen audit only, as Stage 93's does.
     seal = load(output / "result-seal.json", "Stage-109 seal")
     require(seal.get("schema") == "koblitz_stage109_current_gate_audit_seal.v1", "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    current = compose()
-    require(current == load(output / "audit.json", "Stage-109 audit"), "current audit changed")
-    return current
+    committed = load(output / "audit.json", "Stage-109 audit")
+    require(committed.get("schema") == "koblitz_stage109_current_gate_audit.v1", "committed audit schema changed")
+    require(committed.get("status") == "current_seven_gate_audit_verified", "committed audit status changed")
+    return committed
 
 
 def main() -> None:

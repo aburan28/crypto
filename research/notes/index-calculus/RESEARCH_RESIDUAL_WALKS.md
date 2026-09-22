@@ -1671,6 +1671,164 @@ weight-2 relations that is a cycle, and it arrives long before the
 `|F|`-row system is anywhere near full rank: `38` relations against
 `130` unknowns at `p = 271`.
 
+### 11.10 Pre-registration: does a merge-level cap restore `n^{4/9}`?
+
+**Written before the experiment was built or run.**  §11.7 leaves one loose
+end and names it: the large-prime linear algebra measures `n^{0.56}` against
+its own `4/9`, because row weight grows `8.9 → 17.9` as the eliminator chains
+merges, and "sieve implementations cap the merge level for exactly this reason,
+and that is the piece this module does not have."  This registers the
+experiment that supplies it.
+
+**Where the excess comes from, derived.**  The large-prime variant runs
+Wiedemann, so its linear algebra costs `≈ N² w` — `2N` matrix-vector products
+of `N w` nonzeros each — with `N` unknowns and mean row weight `w`.  The small
+base is Gaudry's rule, `N = |F|^{2/3}` (`SmallBase::Rule`), and `|F| ~ n^{1/3}`,
+so `N ~ n^{2/9}` and
+
+```text
+    N² ~ n^{4/9}                    exactly the relation-phase exponent
+    w  ~ n^{0.113}                  measured, 8.9 → 17.9 over 2^24.2 → 2^33.1
+    N² w ~ n^{0.557}                against the fitted n^{0.56}
+```
+
+**Fill-in is therefore the entire excess.**  Not part of it — all of it.  A cap
+that holds `w` to a constant puts the linear algebra exactly on `n^{4/9}`.
+
+**What it costs.**  `LargePrimeEliminator::feed` loops until every large prime
+is cancelled, subtracting one stored pivot per step and merging that pivot's
+columns in.  A cap abandons a relation once it has been reduced against `k`
+pivots.  Every abandoned relation is a residual that was paid for and thrown
+away, so the relation phase pays for the linear algebra's saving.  **The
+question this experiment answers is whether that repayment is a constant factor
+or a growing one**, because only the first leaves `n^{4/9}` end to end.
+
+**The falsifier, and the three outcomes.**  Fit the end-to-end exponent `e`
+over the same four sizes, same seeds, same `--protocol-la --groebner` as
+`experiments/21_gaudry_cubic_la.json`, with correctness preserved on every run:
+
+| outcome | `e` | what it means |
+|---|---|---|
+| **a** | `e ≤ 0.444` | the cap restores `n^{4/9}` end to end; §11.7's loose end closes, and the exponent is the method's rather than the relation phase's |
+| **b** | `0.444 < e ≤ 0.56` | the cap buys part of the gap; `n^{4/9}` stays a relation-phase exponent and the note says so as a measurement |
+| **c** | `e ≥ 0.56` | the cap does not help |
+
+**Predicted: (b), and (a) is live.**  Capping cannot raise `w` and cannot lower
+`N`, so `e` cannot exceed the uncapped `0.56` except through repayment; and it
+cannot fall below `4/9` at all.  Which of (a) and (b) lands depends entirely on
+how the discarded-residual count scales, which is the thing being measured and
+is not predicted here.
+
+**`S` will not move, and that is not a failure.**  The linear algebra is
+`0.02–0.03 %` of `S` at these four sizes, so any cap changes total cost by well
+under `1 %` and the `S / rho` column stays at its published `1,989×` to
+`4,000×`.  The deliverable is a fitted exponent, not a cheaper attack, and a
+flat `S` column is what a correct run looks like.  By §11.7's own arithmetic
+the exponent does not start paying until `n ≈ 2^{98}`.
+
+**Inadmissible**, by §6 and the standing rules of this note: changing the four
+sizes or the two seeds; changing `SmallBase::Rule`; reporting the linear-algebra
+exponent alone as the end-to-end one, which is the mistake §11.7 exists to
+record; quoting an improvement in `S` from a cap whose LA share is `0.03 %`;
+and counting a run whose recovered logarithm was not checked.
+
+### 11.11 The merge-level cap, measured: the phase improves, the method does not
+
+**Runner:** `cargo run --release --example gaudry_cubic_bench -- --protocol-la
+--groebner --sizes 271,523,1039,2083 --seeds 6 --merge-cap K --json …`
+**Frozen:** `experiments/22_gaudry_merge_cap_uncapped.json`,
+`experiments/22_gaudry_merge_cap_k12.json` (six seeds), and
+`…_k10_2seed.json`, `…_k16_2seed.json` (the bracketing caps, two seeds)
+**Summary:** `python3 scripts/summarize_merge_cap.py <uncapped> <capped>`
+**Registered in advance:** §11.10.  Every one of the 48 runs recovered its
+planted logarithm.
+
+§11.7 named the missing piece — "sieve implementations cap the merge level for
+exactly this reason, and that is the piece this module does not have".  It is
+now built (`GaudryOptions::max_merge_level`) and measured.  **It does not
+help.**
+
+**Paired, because the noise is bigger than the effect.**  The fitted exponent
+moves by about `0.04` between seeds, which is the size of what a cap does, so a
+difference of means across two arms says almost nothing — and a two-seed
+version of this table said the opposite of the truth.  Each seed is therefore
+run capped and uncapped and the statistic is the mean of the per-seed
+differences, which cancels the spread.
+
+| quantity | uncapped | `k = 12` | paired `Δ` | `±` | worse/better |
+|---|---:|---:|---:|---:|---:|
+| **end-to-end total** | 0.424 | 0.475 | **`+0.051`** | 0.031 | 5/1 |
+| linear algebra | 0.516 | 0.507 | `−0.009` | 0.019 | 2/4 |
+| — of which **solve** | 0.542 | 0.498 | **`−0.045`** | 0.017 | 1/5 |
+| — of which **merge** | 0.382 | 0.425 | `+0.043` | 0.030 | 5/1 |
+| residuals | 0.418 | 0.468 | `+0.051` | 0.031 | 5/1 |
+
+**The cap does exactly what it was designed to do.**  The solve exponent falls
+`0.045 ± 0.017`, `2.6σ`, on five of six seeds; row weight at `p = 2083` drops
+from `20.93` to `11.89`.  The sparser matrix is real.
+
+**And the eliminator cancels it exactly.**  Merge work rises `+0.043 ± 0.030`,
+so the linear algebra as a whole moves `−0.009 ± 0.019` — indistinguishable
+from zero, on a 2/4 sign split.  Capping does not lower the linear-algebra
+exponent.  It moves work from the solve into the eliminator.
+
+**End to end it is worse**, `+0.051 ± 0.031` on five of six seeds, and the
+residual row is identical to it: the total is the relation phase, and the cap
+damages the relation phase.
+
+### What the cap actually costs
+
+Not the relations it discards.  Those are `0.3 %` to `2.0 %` of residuals,
+which could never move an exponent.  The cost is the full relations that
+**never form**, because a chain the cap truncates is a relation that would have
+closed:
+
+| `p` | full relations per residual, uncapped | capped | yield |
+|---:|---:|---:|---:|
+| 271 | 0.0192 | 0.0182 | `0.95×` |
+| 523 | 0.0123 | 0.0114 | `0.93×` |
+| 1039 | 0.0105 | 0.0067 | **`0.64×`** |
+| 2083 | 0.0073 | 0.0046 | **`0.64×`** |
+
+**And the loss grows with `n`** — `5 %` at the small sizes, `36 %` at the two
+large ones.  That is the whole mechanism: a yield loss that grows in `n` is a
+residual exponent that rises, which is what the table above measures.  Mean
+merge depth is roughly flat across the ladder (`9.1, 9.8, 12.2, 10.6`), so
+chains are not getting longer on average; **the tail past the cap thickens**,
+and a fixed cap excludes a growing share of exactly the chains that close.
+
+### Against §11.10's registered outcomes
+
+The capped end-to-end exponent is `0.475`, which falls in band **(b)**,
+`0.444 < e ≤ 0.56`.  But reading it as "the cap buys part of the gap" would be
+wrong, and the registration is what is at fault: its three bands were written
+assuming a cap could only help or do nothing.  **The uncapped exponent is
+`0.424 ± 0.016`** — already below `4/9`, so there was no end-to-end gap to buy,
+and the cap moved the number the wrong way.  Recorded here rather than quietly
+re-banded: the prediction (b) was met by coincidence of arithmetic, not because
+the experiment came out as expected.
+
+**Two things §11.7 got right and one it got wrong.**  Right: the linear-algebra
+exponent is genuinely above `4/9` — six seeds give `0.516 ± 0.027`, `2.7σ`
+above — and fill-in is why.  Right: the module lacked the cap.  Wrong: the
+implication that the cap was therefore the fix.  It is not, and the
+`n^{0.56}` that motivated it was itself a two-seed number quoted without an
+error bar; the six-seed value is `0.516 ± 0.027`, and `0.56` sits inside a
+two-seed `±0.046`.
+
+**The `n^{4/9}` is end-to-end here after all.**  §11.7 worried it was "a
+relation-phase exponent, not an end-to-end one".  Measured over these four
+sizes the total is `0.424 ± 0.016`, consistent with `4/9`, because the linear
+algebra is only about `2 %` of the cost.  The higher linear-algebra exponent is
+real and will eventually dominate — §11.7's own arithmetic puts that near
+`n ≈ 2^{98}` — but it does not bite on this ladder, and capping the merge level
+is not how to meet it when it does.
+
+**Class: `engineering`, and negative.**  The algorithm gained a lever, the
+lever was measured, and it costs more than it saves.  `S` is untouched at these
+sizes, exactly as §11.10 said in advance it would be, so nothing here moves the
+standing against rho.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,

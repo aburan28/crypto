@@ -1,0 +1,143 @@
+{
+ "operation": "koblitz_phase_prices_and_degree_calibration",
+ "date": "2026-09-21",
+ "what": "The two phases this thread had left unpriced -- factor-base selection and the linear algebra -- measured in the common unit, giving an admissible whole-pipeline S; and the tier constants' calibration re-examined across degrees.",
+ "why": "AGENTS.md section 8: 'All phases must be priced and final scalar verified before admitting a full-DLP S.' Selection and the linear algebra were null, so every S this thread reported was a lower bound. Separately, fold_is_cheaper's constants were measured at n = 61 and applied at 31, 41 and 53, which looked like an unchecked extrapolation.",
+ "part_1_phase_prices": {
+  "unit": "batched group addition (Montgomery-shared inversion), measured per instance",
+  "selection": "priced by converting its measured time, not by a native count: its cost is dominated by rebuilding the base from the representatives so far, which is not a countable primitive. The native counts it now reports (abscissae drawn, lifts, cofactor multiplications, Frobenius squarings, rebuilds) are recorded beside it. At 0.26 to 1.13 percent of the total, no plausible error in that conversion moves S's third digit.",
+  "linear_algebra": "priced natively: block Wiedemann does `products` matrix-block products, each touching `core_nonzeros` entries for each of `block_n` vectors, and the run reports all three. Only the per-operation conversion is measured.",
+  "rungs": [
+   {
+    "rung": "k0n31-ledger-rung",
+    "degree": 31,
+    "points": 2170,
+    "tier": "folded",
+    "priced": false,
+    "why": "the m=3 scan saturates at r=2^20.5: |F| x C(|F|+1,2)/r puts 1771 hits a target, so the conversion measures the O(|F|) recovery a hit pays rather than probing"
+   },
+   {
+    "rung": "k0n41-subgroup-rung",
+    "degree": 41,
+    "points": 5248,
+    "signed_orbits": 64,
+    "tier": "folded",
+    "priced": true,
+    "targets": 32,
+    "verified": 32,
+    "subgroup_order": "549756390943",
+    "subgroup_bits": 39.0,
+    "phases_group_additions": {
+     "select": 400851,
+     "pair_table_build": 170560,
+     "collect_probes": 34816911,
+     "linear_algebra": 5822,
+     "descent_probes": 864
+    },
+    "phase_share_percent": {
+     "select": 1.133,
+     "pair_table_build": 0.482,
+     "collect_probes": 98.367,
+     "linear_algebra": 0.016,
+     "descent_probes": 0.002
+    },
+    "total_group_additions": 35395008,
+    "S": 1.4918,
+    "rho_S": 0.1705,
+    "over_rho": 8.75,
+    "S_was_lower_bound": 1.4746,
+    "linear_algebra_multiply_adds": 21988,
+    "selection": {
+     "adds": 400851,
+     "draws": 111,
+     "lifts": 64,
+     "rebuilds": 1,
+     "seconds": 0.02,
+     "add_ns": 49.7
+    },
+    "adds_per_multiply_add": 0.2648
+   },
+   {
+    "rung": "k0n53-subgroup-rung",
+    "degree": 53,
+    "points": 15264,
+    "signed_orbits": 144,
+    "tier": "folded",
+    "priced": true,
+    "targets": 32,
+    "verified": 32,
+    "subgroup_order": "21044858204113",
+    "subgroup_bits": 44.26,
+    "phases_group_additions": {
+     "select": 1581890,
+     "pair_table_build": 1106640,
+     "collect_probes": 603860936,
+     "linear_algebra": 10006,
+     "descent_probes": 11003106
+    },
+    "phase_share_percent": {
+     "select": 0.256,
+     "pair_table_build": 0.179,
+     "collect_probes": 97.781,
+     "linear_algebra": 0.002,
+     "descent_probes": 1.782
+    },
+    "total_group_additions": 617562578,
+    "S": 4.2069,
+    "rho_S": 0.2172,
+    "over_rho": 19.36,
+    "S_was_lower_bound": 4.196,
+    "linear_algebra_multiply_adds": 43848,
+    "selection": {
+     "adds": 1581890,
+     "draws": 279,
+     "lifts": 144,
+     "rebuilds": 1,
+     "seconds": 0.091,
+     "add_ns": 57.6
+    },
+    "adds_per_multiply_add": 0.2282
+   }
+  ],
+  "finding": "Collection is 97.8 to 98.4 percent of the whole pipeline. The linear algebra is 0.002 percent -- 10,006 group-addition equivalents at degree 53, from 43,848 multiply-adds mod r -- so the block Wiedemann machinery solves a problem about one sixty-thousandth the size of the cost. Selection is 0.26 to 1.13 percent and the pair-table build 0.18 to 0.48 percent. Pricing the two null phases moved S by about 1 percent, which is what the earlier rounds asserted and did not measure.",
+  "consequence": "The tier work of the previous two rounds optimised a phase that is under half a percent of the pipeline in the configuration it selects. It mattered only because the alternative was expensive: the compact build is 15.4 percent of the compact total at degree 53. Collection is the only phase whose cost is worth attacking next."
+ },
+ "part_2_degree_calibration": {
+  "premise_tested": "that constants measured at n = 61 are an unchecked extrapolation at lower degrees",
+  "verdict": "The premise is wrong in its variable. Over the degrees where the m = 3 scan can be measured cleanly the folded-to-compact scan ratio is flat in n: 1.34 at n = 53 against 1.33 at n = 61. What the constants are really calibrated at is one base WIDTH, and across widths the same ratio moves from 1.33 at 3,904 points to 1.17 at 12,688 and 0.96 at 15,264, because the compact table leaves cache while the folded one never does. The shipped constants give 1.17, right at the width they were taken at.",
+  "why_only_two_clean_degrees": "n does not determine r on this family: the cofactor runs from 4 at n = 41 to 57,284,756 at n = 59, so r is not monotone in n and only 41, 53, 57 and 61 have an r large enough to try. Of those, 41 and 57 still saturate at a width big enough to measure: the m = 3 scan takes |F| x C(|F|+1,2)/r hits a target and each pays an O(|F|) recovery, which is 13.1 percent overhead at n = 41 with 5,248 points and 8.8 percent at n = 57 with 3,648.",
+  "measured_ratio_by_degree_at_matched_width": {
+   "41": 1.21,
+   "53": 1.34,
+   "57": 1.27,
+   "61": 1.33,
+   "note": "3,280 to 3,904 points; the 41 and 57 rows carry 3.2 and 8.8 percent recovery contamination and read low"
+  },
+  "measured_ratio_by_width_at_n61": {
+   "3904": 1.33,
+   "6832": 1.17,
+   "9760": 1.19,
+   "12688": 1.17,
+   "18544": 1.12
+  },
+  "a_correction_to_this_round": "The first pass at this measurement used 5,000 points at every degree and produced an apparently clean degree trend, 1.01 at n = 41 rising to 1.32 at n = 61. It was saturation: 5,248 points is above n = 41's scarcity limit of 4,962 and the 13.1 percent recovery overhead inflated the compact scan, faking a low ratio. That is the third time in this round that saturation contaminated a reading -- n = 31, n = 59, and this -- which is why examples/koblitz_degree_census.rs now computes the width that keeps a degree measurable.",
+  "code_change": "None to the constants. They are correct at the width the ledger rungs run, and replacing a one-width calibration with a different one-width calibration would not be an improvement. What the model is missing is a width term; the doc comment now says so with the numbers, and a degree term is documented as measured unnecessary."
+ },
+ "classification": {
+  "class": "accounting",
+  "why": "The algorithm did not change. What changed is that two phases which had been null are now priced, so S is admissible where it was a lower bound, and a calibration limitation was attributed to the wrong variable and is now attributed to the right one. AGENTS.md section 3: say so and do not claim the gain."
+ },
+ "not_claimed": [
+  "Any improvement. Nothing was made faster in this round.",
+  "A width model for the tier constants. The width dependence is measured but not fitted; five widths at one degree without repeats is not a fit.",
+  "That selection's price is a native operation count. It is a time conversion, marked as such.",
+  "Any change in the standing against rho: the two priced rungs sit at 8.75x and 19.36x rho's S with every phase inside them."
+ ],
+ "harness": {
+  "phase_prices": "examples/koblitz_phase_prices.rs 41 5000 / 53 15000",
+  "degree_sweeps": "examples/koblitz_probe_conversion.rs at 41,53,57,61 x 3000 and 41,53,61 x 5000, two passes each",
+  "census": "examples/koblitz_degree_census.rs",
+  "runs": "scripts/ic_e2e_benchmark.py run on the three ledger rungs",
+  "correctness": "32 of 32 targets recovered and verified as [d]G = Q on every rung"
+ }
+}

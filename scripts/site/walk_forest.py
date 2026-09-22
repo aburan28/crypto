@@ -24,10 +24,10 @@ end on the orbit the corresponding 32-byte record names, and the script
 refuses to draw otherwise.  Nothing here is random; the layout is a
 deterministic function of the trails, so the SVG regenerates identically.
 
-Layout: each tree is grown outward from its root with a persistent heading
-per branch and a small hash-derived wobble, relaxed with springs and short-
-range repulsion, and the trees are then packed onto the canvas largest first.
-Pure Python, no dependencies, a few seconds for a couple of thousand nodes.
+Layout: a circle.  Every distinguished point sits on the rim and every walk
+comes in to it from inside, as far from the rim as it had iterations to go,
+so a walk's seed sits as deep as the walk was long; each walk has its own
+slice of the circle and its own colour.  Pure Python, no dependencies.
 """
 
 from __future__ import annotations
@@ -52,13 +52,14 @@ HIGHLIGHTS = 4
 # The dashboard palette, baked in: an <img> cannot read the page's CSS
 # variables, and the page is dark only.
 COLORS = {
-    "edge": "#8a97bb",
-    "node_stroke": "#d3dbee",
     "node_fill": "#141a2f",
     "dp": "#4fe8ae",
     "walk_a": "#f8cd78",
     "walk_b": "#6f92ff",
     "shared": "#4fe8ae",
+    "ring": "#2a3354",
+    "tick": "#7d89aa",
+    "bg": "#141a2f",
 }
 
 
@@ -220,13 +221,23 @@ def find_meetings(forest, limit):
 
 
 # ---------------------------------------------------------------------------
-# layout
+# layout: a circle
 # ---------------------------------------------------------------------------
+#
+# Every distinguished point sits on the rim and every walk comes in to it
+# from inside: a node's distance from the rim is the number of iterations the
+# walk still had to take from there, so a walk's seed sits as far in as the
+# walk was long and every walker heads outward at the same rate.  Each walk
+# owns an equal slice of the circle, in the order of its start in a
+# depth-first pass over its tree, so a tree's walks sit side by side and
+# their branches join without crossing; a node shared by several walks sits
+# at the mean of their slices.  A small swirl, the same for every trail,
+# turns the spokes into arcs that read as motion toward the rim.
 
-def wobble(key, salt):
-    """A deterministic value in [-1, 1) from an orbit's name."""
-    digest = hashlib.blake2b((key + ":" + salt).encode(), digest_size=4).digest()
-    return int.from_bytes(digest, "big") / 2 ** 31 - 1.0
+RIM = 450.0          # radius of the rim, where the distinguished points sit
+HUB = 36.0           # radius of `depth` iterations to go
+SWIRL = 0.9          # radians of turn across the full depth
+RINGS = 4            # guide rings at every quarter of the depth
 
 
 def children_of(forest, root):
@@ -243,182 +254,68 @@ def children_of(forest, root):
     return order, parent
 
 
-def subtree_sizes(order, parent):
-    size = {node: 1 for node in order}
-    for node in reversed(order):
-        if parent[node] is not None:
-            size[parent[node]] += size[node]
-    return size
-
-
-def grow(forest, root):
-    """Initial positions: grow outward from the root with a persistent heading
-    per branch that turns slowly, fanning at forks, so long chains meander
-    instead of radiating or zigzagging."""
-    order, parent = children_of(forest, root)
-    size = subtree_sizes(order, parent)
-    pos = {root: (0.0, 0.0)}
-    heading = {root: None}
-    turn = {root: 0.0}
-    for node in order:
-        kids = forest.pred.get(node, [])
-        if not kids:
-            continue
-        n = len(kids)
-        # The turn carries momentum, so the wobble is a slow drift rather
-        # than a jitter at every step.  At a fork the branches take their
-        # slots in drift order, so a branch that will curl left starts on
-        # the left and the two do not cross just past the fork.
-        drift = {}
-        for kid in kids:
-            d = 0.6 * turn[node] + 0.16 * wobble(kid, "turn")
-            drift[kid] = max(-0.45, min(0.45, d))
-        kids = sorted(kids, key=lambda k: (drift[k], -size[k]))
-        for i, kid in enumerate(kids):
-            if heading[node] is None:
-                angle = wobble(node, "root") * math.pi + 2 * math.pi * i / n
-            elif n == 1:
-                angle = heading[node] + drift[kid]
-            else:
-                spread = min(2.2, 0.85 * n)
-                angle = heading[node] + spread * ((i + 0.5) / n - 0.5) + drift[kid]
-            heading[kid] = angle
-            turn[kid] = drift[kid]
-            x, y = pos[node]
-            pos[kid] = (x + EDGE * math.cos(angle), y + EDGE * math.sin(angle))
-    return order, parent, pos
-
-
-def relax(nodes, parent, pos, iterations, repel_radius=2.0 * EDGE, step=0.35):
-    """Springs along edges, short-range repulsion between nodes that are not
-    joined, and a little stiffness that keeps chains smooth, on a grid so
-    it stays linear in the node count."""
-    if len(nodes) < 2:
-        return pos
-    cell = repel_radius
-    pos = dict(pos)
-    kids = {node: [] for node in nodes}
-    for node in nodes:
-        if parent[node] is not None:
-            kids[parent[node]].append(node)
-    for it in range(iterations):
-        temp = step * (1.0 - it / iterations) + 0.05
-        grid = {}
-        for node in nodes:
-            x, y = pos[node]
-            grid.setdefault((int(x // cell), int(y // cell)), []).append(node)
-        force = {node: [0.0, 0.0] for node in nodes}
-        for node in nodes:
-            x, y = pos[node]
-            cx, cy = int(x // cell), int(y // cell)
-            for dx in (-1, 0, 1):
-                for dy in (-1, 0, 1):
-                    for other in grid.get((cx + dx, cy + dy), ()):
-                        if other is node or other < node:
-                            continue
-                        if parent[other] is node or parent[node] is other:
-                            continue
-                        ox, oy = pos[other]
-                        vx, vy = x - ox, y - oy
-                        d2 = vx * vx + vy * vy
-                        if d2 >= repel_radius * repel_radius:
-                            continue
-                        d = math.sqrt(d2) or 1e-6
-                        push = (repel_radius - d) / repel_radius
-                        push = push * push * EDGE * 0.9
-                        fx, fy = vx / d * push, vy / d * push
-                        force[node][0] += fx
-                        force[node][1] += fy
-                        force[other][0] -= fx
-                        force[other][1] -= fy
-        for node in nodes:
-            p = parent[node]
-            if p is None:
-                continue
-            x, y = pos[node]
-            px, py = pos[p]
-            vx, vy = px - x, py - y
-            d = math.hypot(vx, vy) or 1e-6
-            pull = (d - EDGE) * 0.5
-            fx, fy = vx / d * pull, vy / d * pull
-            force[node][0] += fx
-            force[node][1] += fy
-            force[p][0] -= fx
-            force[p][1] -= fy
-            # Stiffness: a node inside a chain is drawn toward the midpoint
-            # of its two neighbours.
-            if len(kids[node]) == 1:
-                kx, ky = pos[kids[node][0]]
-                force[node][0] += ((px + kx) / 2 - x) * 0.3
-                force[node][1] += ((py + ky) / 2 - y) * 0.3
-        for node in nodes:
-            fx, fy = force[node]
-            mag = math.hypot(fx, fy)
-            if mag > EDGE:
-                fx, fy = fx / mag * EDGE, fy / mag * EDGE
-            x, y = pos[node]
-            pos[node] = (x + fx * temp, y + fy * temp)
-    return pos
-
-
 def bbox(points):
     xs = [p[0] for p in points]
     ys = [p[1] for p in points]
     return min(xs), min(ys), max(xs), max(ys)
 
 
-def pack(trees, cell=1.7 * EDGE):
-    """Place trees largest first, each at the first spot on a spiral from the
-    centre where none of its nodes lands in a cell another tree occupies.
-    Cell occupancy rather than bounding boxes lets a small tree settle into
-    the bends of a large one, which is what keeps the drawing compact."""
-    occupied = set()
-    offsets = {}
-
-    def cells(points, tx, ty):
-        out = set()
-        for x, y in points:
-            cx, cy = int((x + tx) // cell), int((y + ty) // cell)
-            for dx in (-1, 0, 1):
-                for dy in (-1, 0, 1):
-                    out.add((cx + dx, cy + dy))
-        return out
-
-    for root, points in trees:
-        x0, y0, x1, y1 = bbox(points)
-        cx, cy = -(x0 + x1) / 2, -(y0 + y1) / 2   # translation that centres the tree
-        angle = wobble(root, "spiral") * math.pi
-        k = 0
-        while True:
-            r = 1.3 * EDGE * math.sqrt(k)
-            a = angle + k * 2.399963
-            tx, ty = cx + r * math.cos(a), cy + r * math.sin(a)
-            mine = cells(points, tx, ty)
-            if not (mine & occupied):
-                offsets[root] = (tx, ty)
-                # A tree claims only its own cells; the dilation above is what
-                # keeps the next one a cell away.
-                occupied |= {(int((x + tx) // cell), int((y + ty) // cell)) for x, y in points}
-                break
-            k += 1
-    return offsets
+def walk_hue(slot, walks):
+    """A colour per walk, from its place on the circle: gold at the top
+    through rose and violet to blue at the bottom and back, so neighbours
+    differ and there is no seam.  Greens are left to the distinguished
+    points."""
+    t = (slot + 0.5) / walks
+    tri = 1.0 - abs(2.0 * t - 1.0)
+    return round((45.0 - 180.0 * tri) % 360.0, 1)
 
 
-def layout(forest, iterations=160):
+def layout(forest):
+    """Positions centred on the origin, and the circle's geometry: `depth`
+    is the cap the walks were sampled under, or the longest walk when there
+    was none, and maps to the hub."""
+    depth = int(forest.params.get("cap", 0)) or max(forest.steps)
+    remaining = {}
+    for (seed, orbits), steps in zip(forest.walks, forest.steps):
+        last = len(orbits) - 1
+        for i, orbit in enumerate(orbits):
+            remaining.setdefault(orbit, steps - i * forest.every if i < last else 0)
+
+    preorder = {}
+    for r, root in enumerate(forest.roots):
+        order, parent = children_of(forest, root)
+        for i, node in enumerate(order):
+            preorder.setdefault(node, (r, i))
+    slots = sorted(range(len(forest.walks)), key=lambda w: (preorder[forest.walks[w][1][-1]][0],
+                                                            preorder[forest.walks[w][1][0]][1], w))
+    slot_of = {w: k for k, w in enumerate(slots)}
+    n = len(forest.walks)
+    through = {}
+    for w, (seed, orbits) in enumerate(forest.walks):
+        angle = -math.pi / 2 + 2 * math.pi * (slot_of[w] + 0.5) / n
+        for orbit in orbits:
+            through.setdefault(orbit, []).append(angle)
+
     positions = {}
-    trees = []
-    for root in forest.roots:
-        order, parent, pos = grow(forest, root)
-        pos = relax(order, parent, pos, iterations)
-        trees.append((root, order, parent, pos))
-    trees.sort(key=lambda t: -len(t[1]))
-    offsets = pack([(root, list(pos.values())) for root, order, parent, pos in trees])
-    for root, order, parent, pos in trees:
-        ox, oy = offsets[root]
-        for node in order:
-            x, y = pos[node]
-            positions[node] = (x + ox, y + oy)
-    return positions
+    for node in forest.order:
+        base = sum(through[node]) / len(through[node])
+        frac = min(1.0, remaining[node] / depth)
+        radius = RIM - (RIM - HUB) * frac
+        angle = base + SWIRL * frac
+        positions[node] = (radius * math.cos(angle), radius * math.sin(angle))
+    geometry = {
+        "rim": RIM,
+        "hub": HUB,
+        "depth": depth,
+        "swirl": SWIRL,
+        "hues": [walk_hue(slot_of[w], n) for w in range(n)],
+    }
+    return positions, geometry
+
+
+def ring_radius(k):
+    """Radius of the k-th guide ring, k quarters of the depth to go."""
+    return RIM - (RIM - HUB) * k / RINGS
 
 
 # ---------------------------------------------------------------------------
@@ -430,19 +327,17 @@ def fmt(v):
     return text[:-2] if text.endswith(".0") else text
 
 
-def render(forest, positions, meetings, width, height, checked):
+def render(forest, positions, geometry, meetings, width, height, checked):
     pad = 2 * EDGE
-    x0, y0, x1, y1 = bbox(list(positions.values()))
-    scale = min((width - 2 * pad) / max(x1 - x0, 1.0), (height - 2 * pad) / max(y1 - y0, 1.0))
-    scale = min(scale, 1.0)   # never blow a small forest up
+    scale = min(1.0, (min(width, height) - 2 * pad) / (2 * RIM))
+    cx, cy = width / 2, height / 2
 
     def sx(x):
-        return (x - x0) * scale + (width - (x1 - x0) * scale) / 2
+        return cx + x * scale
 
     def sy(y):
-        return (y - y0) * scale + (height - (y1 - y0) * scale) / 2
+        return cy + y * scale
 
-    highlighted = set()
     lines = []
     p = forest.params
     lines.append('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d" '
@@ -450,68 +345,92 @@ def render(forest, positions, meetings, width, height, checked):
     lines.append('<title id="wf-title">The forest %s walks on GF(2^%s) build on their way to distinguished points</title>'
                  % (len(forest.walks), p.get("curve", "?")))
     lines.append('<desc id="wf-desc">%d orbits drawn, one every %d iterations, over %d iterations in all; '
-                 '%d distinguished points, %d meetings between walks from different starts. Generated by '
-                 'scripts/site/walk_forest.py from trails written by ecc2k130/src/trailforest.cpp. %s</desc>' % (
+                 '%d distinguished points, %d meetings between walks from different starts. Drawn as a circle: '
+                 'each distinguished point on the rim, each walk coming in to it from as far inside as it had '
+                 'iterations to go, up to %d at the hub. Generated by scripts/site/walk_forest.py from trails '
+                 'written by ecc2k130/src/trailforest.cpp. %s</desc>' % (
                      len(positions), forest.every, total_steps(forest), len(forest.roots),
-                     count_meetings(forest), forest.header))
+                     count_meetings(forest), geometry["depth"], forest.header))
     lines.append("<!-- %s; corpus records checked: %d -->" % (forest.header, checked))
     # An <img> evaluates the SVG's own media queries against the box it is
     # drawn in, not the page. At phone width the 1000-unit viewBox is ~360px
     # and a 0.8-unit stroke is a third of a pixel; thicken so the trails
     # stay visible without forcing the page to scroll sideways.
     lines.append("<style>"
-                 ".e{stroke:%s;stroke-width:%s;fill:none;stroke-linecap:round}"
-                 ".n{fill:%s;stroke:%s;stroke-width:%s}"
+                 ".e path{stroke-width:%s;fill:none;stroke-linecap:round;stroke-linejoin:round}"
+                 ".ring{stroke:%s;stroke-width:%s;fill:none}"
+                 ".rim{stroke:%s;stroke-width:%s;fill:none;opacity:.45}"
+                 ".tick{fill:%s;font:11px ui-monospace,Menlo,monospace;text-anchor:middle;paint-order:stroke;stroke:%s;stroke-width:4px}"
+                 ".n{fill:%s;stroke-width:%s}"
                  ".dp{fill:%s;stroke:%s;stroke-width:%s}"
                  ".a{stroke:%s;stroke-width:%s;fill:none;stroke-linecap:round;stroke-linejoin:round}"
                  ".b{stroke:%s;stroke-width:%s;fill:none;stroke-linecap:round;stroke-linejoin:round}"
                  ".s{stroke:%s;stroke-width:%s;fill:none;stroke-linecap:round;stroke-linejoin:round}"
-                 ".na{fill:%s;stroke:%s;stroke-width:%s}"
-                 ".nb{fill:%s;stroke:%s;stroke-width:%s}"
                  "@media(max-width:720px){"
-                 ".e{stroke-width:2.8}"
-                 ".n,.dp,.na,.nb{stroke-width:2.2}"
+                 ".e path{stroke-width:2.8}"
+                 ".n,.dp{stroke-width:2.2}"
                  ".a,.b,.s{stroke-width:4.2}"
+                 ".tick{display:none}"
                  "circle{r:3.4px}"
                  "circle.dp{r:5px}"
                  "}"
                  "</style>" % (
-                     COLORS["edge"], fmt(STROKE * scale),
-                     COLORS["node_fill"], COLORS["node_stroke"], fmt(STROKE * scale),
+                     fmt(STROKE * scale),
+                     COLORS["ring"], fmt(STROKE * scale),
+                     COLORS["dp"], fmt(STROKE * scale),
+                     COLORS["tick"], COLORS["bg"],
+                     COLORS["node_fill"], fmt(STROKE * scale),
                      COLORS["dp"], COLORS["dp"], fmt(STROKE * scale),
                      COLORS["walk_a"], fmt(HIGHLIGHT_STROKE * scale),
                      COLORS["walk_b"], fmt(HIGHLIGHT_STROKE * scale),
-                     COLORS["shared"], fmt(HIGHLIGHT_STROKE * scale),
-                     COLORS["walk_a"], COLORS["walk_a"], fmt(STROKE * scale),
-                     COLORS["walk_b"], COLORS["walk_b"], fmt(STROKE * scale)))
+                     COLORS["shared"], fmt(HIGHLIGHT_STROKE * scale)))
 
-    # Plain edges, one path per tree.
+    # Guide rings, as paths so every <circle> in the drawing is an orbit:
+    # the rim where the walks end, and a ring at each quarter of the depth
+    # labelled, on the right where the short walks leave room, with the
+    # iterations still to go from it.
+    def ring(radius):
+        r = radius * scale
+        return "M%s %sa%s %s 0 1 0 %s 0a%s %s 0 1 0 %s 0" % (
+            fmt(cx - r), fmt(cy), fmt(r), fmt(r), fmt(2 * r), fmt(r), fmt(r), fmt(-2 * r))
+    lines.append('<path class="rim" d="%s"/>' % ring(RIM))
+    lines.append('<path class="ring" d="%s"/>' % "".join(ring(ring_radius(k)) for k in range(1, RINGS)))
+    for k in range(1, RINGS):
+        lines.append('<text class="tick" x="%s" y="%s">%s to go</text>' % (
+            fmt(sx(ring_radius(k))), fmt(cy + 4), "{:,}".format(geometry["depth"] * k // RINGS)))
+
+    # Edges, one path per walk in the walk's own colour; a stride two walks
+    # share is drawn once, in the colour of the first to take it.
+    by_walk = {}
+    for w, (seed, orbits) in enumerate(forest.walks):
+        for a, b in zip(orbits, orbits[1:]):
+            if a not in by_walk:
+                by_walk[a] = w
     lines.append('<g class="e">')
-    for root in forest.roots:
-        order, parent = children_of(forest, root)
+    for w in range(len(forest.walks)):
         d = []
-        for node in order:
-            par = parent[node]
-            if par is None:
+        for a in forest.walks[w][1][:-1]:
+            if by_walk.get(a) != w:
                 continue
-            ax, ay = positions[par]
-            bx, by = positions[node]
+            b = forest.succ[a]
+            ax, ay = positions[a]
+            bx, by = positions[b]
             d.append("M%s %sL%s %s" % (fmt(sx(ax)), fmt(sy(ay)), fmt(sx(bx)), fmt(sy(by))))
         if d:
-            lines.append('<path d="%s"/>' % "".join(d))
+            lines.append('<path stroke="%s" d="%s"/>' % (hsl(geometry["hues"][w], 72, 66), "".join(d)))
     lines.append("</g>")
 
-    # Highlighted trails on top of the plain edges.
-    node_class = {}
+    # Where walks from different starts meet, on top of the plain edges.
     for m in meetings:
         for cls, trail in (("a", m["a"]), ("b", m["b"]), ("s", m["shared"])):
             pts = ["%s %s" % (fmt(sx(positions[o][0])), fmt(sy(positions[o][1]))) for o in trail]
             lines.append('<path class="%s" d="M%s"/>' % (cls, "L".join(pts)))
-            if cls in ("a", "b"):
-                for o in trail[:-1]:
-                    node_class.setdefault(o, "n" + cls)
-        highlighted.add(m["orbit"])
 
+    # Nodes: hollow in the walk's colour, filled green at the rim.
+    first = {}
+    for w, (seed, orbits) in enumerate(forest.walks):
+        for orbit in orbits:
+            first.setdefault(orbit, w)
     lines.append("<g>")
     roots = set(forest.roots)
     for node in forest.order:
@@ -519,11 +438,15 @@ def render(forest, positions, meetings, width, height, checked):
         if node in roots:
             lines.append('<circle class="dp" cx="%s" cy="%s" r="%s"/>' % (fmt(sx(x)), fmt(sy(y)), fmt(DP_R * scale)))
         else:
-            cls = node_class.get(node, "n")
-            lines.append('<circle class="%s" cx="%s" cy="%s" r="%s"/>' % (cls, fmt(sx(x)), fmt(sy(y)), fmt(NODE_R * scale)))
+            lines.append('<circle class="n" stroke="%s" cx="%s" cy="%s" r="%s"/>' % (
+                hsl(geometry["hues"][first[node]], 60, 80), fmt(sx(x)), fmt(sy(y)), fmt(NODE_R * scale)))
     lines.append("</g>")
     lines.append("</svg>")
     return "\n".join(lines) + "\n"
+
+
+def hsl(hue, sat, light):
+    return "hsl(%s %d%% %d%%)" % (fmt(hue), sat, light)
 
 
 def count_meetings(forest):
@@ -536,33 +459,33 @@ def total_steps(forest):
 
 # ---------------------------------------------------------------------------
 
-def build(trails_path, corpus_path=None, width=1000, height=900, iterations=160):
+def build(trails_path, corpus_path=None, width=1000, height=1000):
     forest = read_trails(trails_path)
     checked = bind_to_corpus(forest, read_corpus(corpus_path)) if corpus_path else 0
-    positions = layout(forest, iterations)
+    positions, geometry = layout(forest)
     meetings = find_meetings(forest, HIGHLIGHTS)
-    return render(forest, positions, meetings, width, height, checked), forest
+    return render(forest, positions, geometry, meetings, width, height, checked), forest
 
 
-def export_graph(forest, positions, meetings, checked, title):
+def export_graph(forest, positions, geometry, meetings, checked, title):
     """The same forest as a graph the page can explore: every drawn orbit a
     node with its layout position, every stride an edge, every walk the
-    ordered list of its nodes.  Node names are whatever the trails carry
-    (hash prefixes on the challenge curve), so nothing leaves the trails
-    file that was not already in it.  Positions are the static figure's, so
-    the two agree and the page needs no layout of its own."""
+    ordered list of its nodes and its colour.  Node names are whatever the
+    trails carry (hash prefixes on the challenge curve), so nothing leaves
+    the trails file that was not already in it.  Positions are the static
+    figure's, measured from the circle's top-left corner so the circle's
+    centre is (rim, rim), and the page needs no layout of its own."""
     import json
     index = {node: i for i, node in enumerate(forest.order)}
     roots = set(forest.roots)
-    x0, y0, x1, y1 = bbox(list(positions.values()))
     nodes = []
     for node in forest.order:
         x, y = positions[node]
-        nodes.append([node, round(x - x0, 1), round(y - y0, 1), 1 if node in roots else 0])
+        nodes.append([node, round(x + RIM, 1), round(y + RIM, 1), 1 if node in roots else 0])
     edges = [[index[a], index[b]] for a, b in forest.succ.items()]
     walks = []
     for w, ((seed, orbits), steps) in enumerate(zip(forest.walks, forest.steps)):
-        walks.append({"id": seed, "steps": steps, "nodes": [index[o] for o in orbits]})
+        walks.append({"id": seed, "steps": steps, "hue": geometry["hues"][w], "nodes": [index[o] for o in orbits]})
     highlights = [{"orbit": index[m["orbit"]], "a": [index[o] for o in m["a"]],
                    "b": [index[o] for o in m["b"]], "shared": [index[o] for o in m["shared"]]}
                   for m in meetings]
@@ -581,8 +504,9 @@ def export_graph(forest, positions, meetings, checked, title):
             "iterations": total_steps(forest),
             "longest": max(forest.steps),
         },
-        "width": round(x1 - x0, 1),
-        "height": round(y1 - y0, 1),
+        "circle": {"rim": RIM, "hub": HUB, "depth": geometry["depth"], "rings": RINGS},
+        "width": 2 * RIM,
+        "height": 2 * RIM,
         "nodes": nodes,
         "edges": edges,
         "walks": walks,
@@ -591,12 +515,12 @@ def export_graph(forest, positions, meetings, checked, title):
     return json.dumps(graph, separators=(",", ":"), sort_keys=True) + "\n"
 
 
-def build_graph(trails_path, corpus_path=None, iterations=160, title=""):
+def build_graph(trails_path, corpus_path=None, title=""):
     forest = read_trails(trails_path)
     checked = bind_to_corpus(forest, read_corpus(corpus_path)) if corpus_path else 0
-    positions = layout(forest, iterations)
+    positions, geometry = layout(forest)
     meetings = find_meetings(forest, HIGHLIGHTS)
-    return export_graph(forest, positions, meetings, checked, title), forest
+    return export_graph(forest, positions, geometry, meetings, checked, title), forest
 
 
 def hash_trails(forest, every):
@@ -624,8 +548,7 @@ def main(argv=None):
                         help="what the trails must end on: 32-byte corpus records, or a .hashes file for sampled trails")
     parser.add_argument("--out", required=True, help="SVG to write")
     parser.add_argument("--width", type=int, default=1000)
-    parser.add_argument("--height", type=int, default=900)
-    parser.add_argument("--iterations", type=int, default=160, help="relaxation steps per tree")
+    parser.add_argument("--height", type=int, default=1000)
     parser.add_argument("--check", action="store_true", help="fail if --out would change instead of writing it")
     parser.add_argument("--hash-trails", type=int, default=0, metavar="EVERY",
                         help="instead of drawing, write --trails re-sampled every EVERY steps with orbits hashed to --out")
@@ -640,7 +563,7 @@ def main(argv=None):
         return 0
 
     if args.json:
-        text, forest = build_graph(args.trails, args.corpus, args.iterations, args.title)
+        text, forest = build_graph(args.trails, args.corpus, args.title)
         if args.check:
             with open(args.out, encoding="utf-8") as fh:
                 if fh.read() != text:
@@ -652,7 +575,7 @@ def main(argv=None):
         print("%s: %d walks, %d nodes -> %s" % (args.trails, len(forest.walks), len(forest.order), args.out), file=sys.stderr)
         return 0
 
-    svg, forest = build(args.trails, args.corpus, args.width, args.height, args.iterations)
+    svg, forest = build(args.trails, args.corpus, args.width, args.height)
     if args.check:
         if not os.path.exists(args.out):
             raise SystemExit("%s does not exist" % args.out)

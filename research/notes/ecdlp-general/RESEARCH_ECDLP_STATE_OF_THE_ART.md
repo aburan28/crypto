@@ -342,6 +342,25 @@ provisional** until proceedings are confirmed.
    lattice methods tolerating tiny or noisy bias (the practically dangerous class).
 5. **PQC migration engineering** — hybrid KEX deployment, agility, key-transparency, and
    the 2030/2035/2033 compliance timelines.
+6. **Structural-handle proposals (and how to triage them)** — periodic suggestions that
+   some newly-discovered arithmetic phenomenon bears on ECDLP. The recurring 2024–2026
+   instance is *murmurations* of elliptic curves. See
+   [`RESEARCH_REPRESENTATION_STRUCTURE.md`](RESEARCH_REPRESENTATION_STRUCTURE.md) for the
+   admissibility test any such proposal must pass (R1–R5), derived from the transfers that
+   have actually worked — Weil descent, the Kani-based SIDH break, and (per that note's own
+   F4 audit) **MOV/Frey–Rück and SSSA from §3 above**, which transfer to `F_{q^k}^*` and
+   `(Z_p, +)` rather than to any higher-dimensional variety — and for why murmurations fail
+   it at every requirement, decisively at R4: the payload is the Frobenius trace, already
+   polynomial-time via SEA and already in the parameter set. R5 (the handle must exist at
+   cryptographic parameters, not only in a toy regime) is drawn from the Weil-descent
+   `NO`-certificate in `RESEARCH_ECC2K130_RR_SOLVER_PANEL.md` §9, which is real and expires
+   at `d = 6` against an existence threshold of `d = 45`. That note's §9.5 also records the
+   answer to the obvious follow-up — whether the Kani/higher-dimensional machinery has an
+   analogue for plain curves. It does: Robert (ePrint 2022/1704) applies the embedding lemma
+   to ordinary curves and gets the **endomorphism ring in polynomial time** (given the
+   factorisation of `Δ_π`) and **point counting in `Õ(n² log^{O(1)} p)`**, with no ECDLP
+   claim. The machinery lands on the trace, which SEA already computes — a genuine
+   contribution to computational number theory and nothing against the logarithm.
 
 ---
 

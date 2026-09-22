@@ -47,7 +47,9 @@
     &mdash; <a href="./how.html">how the walk works</a>, as a toy that recovers
     <span class="mono">k</span> in the browser &mdash;
     <a href="https://github.com/aburan28/cairn/releases/latest">download
-    cairn</a> for the paid piecework path, or run the client itself.
+    cairn</a> for the paid piecework path, or run the
+    <a href="https://github.com/aburan28/cryptanalysis/tree/HEAD/ecc2k130">ECC2K-130
+    GPU client</a> yourself.
   </p>
 
   <noscript>
@@ -215,8 +217,8 @@
           <button type="button" id="forest-play">Play the walks</button>
           <button type="button" id="forest-reset">Reset view</button>
         </div>
-        <img src="./walk-forest.svg" width="1000" height="900" loading="lazy"
-             alt="Walk trails on the ECC2K-130 curve drawn as separate meandering chains of hollow nodes, each ending at a filled green node, none of them touching.">
+        <img src="./walk-forest.svg" width="1000" height="1000" loading="lazy"
+             alt="Walk trails on the ECC2K-130 curve drawn as a circle: each walk a coloured arc of hollow nodes running out from its seed to a filled green node on the rim, the longer walks starting nearer the centre, none of them touching.">
         <p class="forest-readout mono" id="forest-readout"></p>
       </div>
       <figcaption>
@@ -239,13 +241,19 @@
         enough to draw. Every trail is checked against the record the client
         wrote for it, the first few against the scalar reference as well, and
         the orbits are named by hash on the page because a distinguished
-        point's orbit is its key. The figure regenerates from the committed
+        point's orbit is its key. The figure is a circle: every
+        distinguished point sits on the rim, and every walk comes in to it
+        from as far inside as it had iterations still to go, so a seed sits
+        as deep as its walk was long and the rings mark each quarter of the
+        cap; the walks are in order of length, which is why their seeds
+        spiral in. The figure regenerates from the committed
         trails with
         <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">walk_forest.py</a>.
         With JavaScript the figure is a graph: drag to pan, wheel or pinch to
         zoom, hover a node for the walk it is on and how far along, click one
         to light every path through it to its distinguished point, and play
-        the walks to watch them set off for theirs. The second forest in the
+        the walks to run them all at once, at the same number of iterations a
+        second, each lighting its trail until it reaches the rim. The second forest in the
         menu is the <span class="mono">GF(2^23)</span> test curve, small
         enough that trails meet, with the same iteration function and
         distinguishing test.
@@ -297,13 +305,20 @@
         <h3>Run a cairn node</h3>
         <p>
           <a href="https://github.com/aburan28/cairn">cairn</a> pays for
-          verified outputs and never for claimed effort. Under its
-          <a href="https://github.com/aburan28/cairn/blob/main/docs/design/rho-piecework.md">rho
-          piecework design</a> the paid artifact is one distinguished point
-          <span class="mono">(x, y, a, b)</span> with
-          <span class="mono">a&middot;P + b&middot;Q = (x, y)</span>: it costs
-          <span class="mono">2^d</span> group operations to find and two scalar
-          multiplications to check, so the proof of work <em>is</em> the work.
+          verified outputs and never for claimed effort, and it now posts
+          <em>this</em> search:
+          <a href="https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/objective-ecc2k130-orbit-batch.json"><span class="mono">objective-ecc2k130-orbit-batch</span></a>
+          pays per novel <strong>orbit</strong>, in batches of up to 64.
+        </p>
+        <p class="note">
+          Not per point, because on a Koblitz curve
+          <span class="mono">&sigma;(x, y) = (x&sup2;, y&sup2;)</span> and
+          negation generate a group of order <span class="mono">2m = 262</span>
+          that the walk respects: two trails have merged when they reach the
+          same orbit, and a unit keyed on one representative would pay 262
+          times for it, to 262 relabellings anybody derives from one published
+          record. So the unit is the orbit's canonical name &mdash; the least
+          cyclic rotation of the abscissa's normal-basis coordinates.
         </p>
         <p class="dl-row">
           <a class="dl" href="https://github.com/aburan28/cairn/releases/latest">Download cairn</a>
@@ -320,50 +335,119 @@ cairn run</code></pre>
           the verifier sandbox is seatbelt and bubblewrap.
         </p>
         <p class="note">
-          <strong>What is and is not posted.</strong> The rho objectives that
-          ship today are prime-field &mdash; a 50-bit rung anyone can finish,
-          and Certicom's ECCp-131 &mdash; and the contributor for them is
-          <span class="mono">crypto cryptanalysis rho-collab work --cairn</span>.
-          An ECC2K-130 objective needs a
-          <span class="mono">GF(2^131)</span> checker, which
-          <a href="https://github.com/aburan28/cairn/blob/main/examples/certicom-ecdlp/README.md">cairn
-          does not carry yet</a>, so points on <em>this</em> campaign are not
-          payable through cairn until it does. Install the node now to have it
-          ready, and to work the rungs that are live.
+          <strong>Why this client cannot claim yet.</strong> A point here
+          cannot carry <span class="mono">(a, b)</span>: tracking the
+          combination would cost a 129-bit modular multiplication per step, and
+          the walk above keeps its whole state in bitsliced field elements at
+          <span class="mono">1.4 &times; 10^10</span> steps a second. So the
+          corpus record is <span class="mono">(seed, canonical x)</span>, which
+          nobody can check for less than the work that made it &mdash; and
+          which anybody can invent for nothing, since a low-weight bit string
+          rotated to its least rotation is a syntactically perfect orbit name.
+        </p>
+        <p class="note">
+          cairn's answer is a <strong>witness</strong>, and it falls out of the
+          walk's own algebra: a step is
+          <span class="mono">R &#8614; R + &sigma;^j(R) = [1 + s^j]R</span> and
+          the endomorphism ring is commutative, so a trail of any length is
+          <span class="mono">[&mu;]R&#8320;</span> with
+          <span class="mono">&mu; = &prod;_j (1 + s^j)^(n_j)</span> &mdash; and
+          the <span class="mono">n_j</span> are just how many steps took each
+          branch. <strong>Eight counters.</strong> One double scalar
+          multiplication checks them: about <span class="mono">227</span> group
+          operations against the <span class="mono">4 &times; 10^7</span> the
+          trail cost, an asymmetry of <span class="mono">2^17.4</span>. The
+          claim is
+          <span class="mono">{x, seed, j: [n&#8323; … n&#8321;&#8320;]}</span>.
+        </p>
+        <p class="note">
+          The kernel does not carry those counters yet, and it should. The
+          campaign runs the <em>packed</em> backend, where the branch index is
+          already a scalar <span class="mono">int</span> beside per-walk state
+          the step touches anyway, so a counter is a scalar increment &mdash;
+          eight 8-bit fields in one <span class="mono">u64</span>, two
+          instructions on a 2,324-slot update,
+          <strong>+0.09%</strong>, about <span class="mono">36</span>
+          GPU-hours across the campaign to make every orbit it produces
+          claimable. Replay keeps the job the kernel cannot do backwards: the
+          points already collected <em>without</em> counters are claimable no
+          other way, and
+          <span class="mono">ecc2k130/build/witness</span> turns those corpus
+          records into checked claims offline, the reference walk having
+          counted the <span class="mono">n_j</span> all along because collision
+          resolution always needed them. Two limits
+          cairn states plainly as well &mdash; the posted pool is one
+          <em>tranche</em>, about
+          <span class="mono">2^46.3</span> of the expected
+          <span class="mono">2^60.8</span> iterations, because the full corpus
+          is <span class="mono">2^35.5</span> orbits (~6.8 TB) and every
+          verifying node holds all of it; and a witness does not prove the
+          counters came from the job's own branch rule, which is what the
+          sampled re-walk audit and <span class="mono">attest slash</span> are
+          for. Install the node now to be ready, and to work the rungs that are
+          live.
         </p>
       </article>
 
       <article class="join-card">
-        <p class="join-kicker">Unpaid, and live today</p>
-        <h3>Run the ECC2K-130 client</h3>
+        <p class="join-kicker">Unpaid</p>
+        <h3>Run the ECC2K-130 GPU client</h3>
         <p>
-          The client that produced every point on this page is in the
-          repository: bitsliced Pollard rho on the Frobenius classes
-          <span class="mono">{&plusmn;&tau;^i P}</span>, with the field
-          arithmetic emitted and self-checked by a code generator. One RTX PRO
-          6000 walks <span class="mono">14.1</span> billion iterations/s while
-          collecting at <span class="mono">HW(x) &le; 34</span>.
+          <span class="mono">ec2k-gpu</span>, from
+          <a href="https://github.com/aburan28/cryptanalysis/tree/HEAD/ecc2k130">aburan28/cryptanalysis</a>,
+          walks what this campaign walks: <span class="mono">R + &sigma;^j(R)</span>
+          from Certicom's challenge points, distinguished at
+          <span class="mono">HW(x) &le; 32</span>. It writes the campaign's
+          32-byte records. Its test suite replays 48 points that the campaign's
+          own client wrote and requires every byte back, so a point it finds is
+          a point of this campaign. It needs an NVIDIA GPU of the Ampere
+          generation or newer (<span class="mono">sm_80+</span>) and a driver
+          for CUDA 13.3, on Linux.
         </p>
-        <pre class="cmd"><code>git clone https://github.com/aburan28/crypto
-cd crypto/ecc2k130
-make test      # 52 checks, GF(2^23) … GF(2^131)
-make gpu
-./ecc2k130 --curve 131 --run-id N \
-           --dp-file dps.bin --checkpoint state.ck</code></pre>
+        <p class="dl-row">
+          <a class="dl" href="https://github.com/aburan28/cryptanalysis/releases?q=ec2k-gpu">Download ec2k-gpu</a>
+          <span class="dl-sub">Linux x86_64 &middot; aarch64 &middot; sm_80 to sm_120</span>
+        </p>
+        <pre class="cmd"><code>V=0.1.0-pre1
+curl -fsSLO https://github.com/aburan28/cryptanalysis/releases/download/ec2k-gpu-v$V/ec2k-gpu-$V-linux-x86_64.tar.gz
+tar xzf ec2k-gpu-$V-linux-x86_64.tar.gz
+cd ec2k-gpu-$V-linux-x86_64
+./ec2k-gpu check --kat campaign-kat.hex
+./ec2k-gpu walk --run-id R \
+    --dp-file dps.bin --checkpoint state.ck</code></pre>
         <p class="note">
-          Every walk seed is derived from that 16-bit
-          <span class="mono">--run-id</span>, so two contributors who pick
-          different ids never repeat each other's trail and their corpora merge
-          by reload. On rented hardware
-          <span class="mono">./run.sh</span> drives the same binary through
-          Modal. A <span class="mono">--curve 131</span> run does not finish —
-          <span class="mono">2^60.9</span> iterations is decades of GPU time, so
-          it is collection, not a solve. Read
-          <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/README.md">ecc2k130/README.md</a>
-          for the client and
-          <a href="https://github.com/aburan28/crypto/blob/main/ecc2k130/aws/README.md">ecc2k130/aws/README.md</a>
-          for the fleet, the slot registry and what the expected
-          <span class="mono">2^60.9</span> costs.
+          One binary covers every card from the A100 and RTX 30-series on,
+          and the CUDA runtime is built in: nothing to install beyond the
+          driver. <span class="mono">check --kat</span> needs no GPU. It
+          replays the campaign's known answers on the CPU, and it is worth
+          running before spending GPU time. Each tarball has a
+          <span class="mono">.sha256</span> beside it. That comes from the
+          same host, so it catches a damaged download, not a substituted one.
+          This is a prerelease: the binary is proven against the campaign's
+          walk on the CPU, but has not yet run on a card. To build from
+          source instead, see
+          <a href="https://github.com/aburan28/cryptanalysis/tree/HEAD/ecc2k130#collecting-for-the-ecc2k-130-campaign">the
+          README</a>.
+        </p>
+        <p class="note">
+          <strong>Pick a run id no one else walks.</strong> Every walk seed
+          carries the 16-bit <span class="mono">--run-id</span>, and two runs
+          under one id repeat each other's trails step for step. The fleet uses
+          ids from 1 upward and its Modal runs use 8000&ndash;9999. Pick one at
+          random in 10000&ndash;65534, a different one for each GPU. The run
+          goes until stopped. It saves every lane to
+          <span class="mono">state.ck</span> every ten minutes and on Ctrl-C,
+          and the same command resumes it. It is collection, not a solve:
+          <span class="mono">2^60.9</span> iterations is decades of one GPU.
+        </p>
+        <p class="note">
+          <strong>Where the points go.</strong> Nowhere yet. The table above
+          takes points only from the campaign's own fleet, and there is no
+          public upload. Until there is, <span class="mono">dps.bin</span> stays
+          on the machine that found it: keep it, since its records are already
+          in the format the store ingests. Read
+          <a href="https://github.com/aburan28/cryptanalysis/tree/HEAD/ecc2k130#collecting-for-the-ecc2k-130-campaign">its
+          README</a> for what makes a point the campaign's.
         </p>
       </article>
 
@@ -944,7 +1028,36 @@ make gpu
     if (isFinite(lifetime) && lifetime > 0) {
       parts.push(num(lifetime) + " lifetime workers reported points");
     }
-    el("gpus-foot").textContent = parts.join(" · ");
+    var foot = el("gpus-foot");
+    foot.textContent = parts.join(" · ");
+    // Slots the ingest host says are not walking at the campaign's cutoff.
+    // Their iterations are in the total above, but walks stop at their own
+    // distinguished point, so their meetings with campaign walks mostly go
+    // unrecorded: they add to the rate and almost nothing to the chance of a
+    // collision. Drawn as a warning, never folded into the count.
+    var offWeight = offWeightWalkingSlots(status);
+    if (offWeight > 0) {
+      var warn = document.createElement("span");
+      warn.className = "warn";
+      var weight = status.work && status.work.campaign_dp_weight;
+      warn.textContent = num(offWeight) + (offWeight === 1 ? " slot is" : " slots are") +
+        " not at the campaign DP weight" + (weight ? " (" + weight + ")" : "") +
+        "; their points mostly cannot collide with the rest";
+      foot.appendChild(document.createTextNode(" · "));
+      foot.appendChild(warn);
+    }
+  }
+
+  function offWeightWalkingSlots(status) {
+    if (!status || !status.work) return 0;
+    var n = Number(status.work.off_weight_walking_slots);
+    return isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function duplicateRecordsLastDay(status) {
+    if (!status || !status.ingest) return null;
+    var n = Number(status.ingest.duplicate_records_last_day);
+    return isFinite(n) && n >= 0 ? n : null;
   }
 
   function drawWorkers(workers, snapshotAt, source) {
@@ -995,6 +1108,33 @@ make gpu
       : "none with a point in the last hour · " + num(workers.length) + " lifetime";
   }
 
+  // Records the store dropped because it already held the point under the
+  // same seed. A resumed worker re-reports a handful; a run that is walking
+  // another run's seeds re-reports everything, and until this row existed
+  // that read as a new worker adding points (Modal runs 1-4, 2026-09-19/20).
+  function reReportCell(status) {
+    var dup = duplicateRecordsLastDay(status);
+    if (dup === null) return "not published by this snapshot";
+    if (dup === 0) return "0";
+    var slots = Number(status.ingest.duplicate_slots_last_day);
+    var text = num(dup) + " already held under the same seed";
+    if (isFinite(slots) && slots > 0) text += " · from " + num(slots) + (slots === 1 ? " slot" : " slots");
+    return text;
+  }
+
+  function offWeightCell(status) {
+    if (!status || !status.work || status.work.off_weight_slots === undefined) {
+      return "not published by this snapshot";
+    }
+    var all = Number(status.work.off_weight_slots) || 0;
+    var walking = offWeightWalkingSlots(status);
+    if (all === 0) return "0";
+    var weight = status.work.campaign_dp_weight;
+    return num(all) + (all === 1 ? " slot" : " slots") + " (" + num(walking) + " walking)" +
+      " report points at a cutoff other than" + (weight ? " weight " + weight : " the campaign's") +
+      "; walks stop at their own distinguished point, so those points mostly cannot collide with the rest";
+  }
+
   function drawCampaign(status) {
     var body = el("campaign-body");
     body.textContent = "";
@@ -1006,6 +1146,8 @@ make gpu
       ["First point", timeCell(status.first_dp_at, true), false],
       ["Latest point", timeCell(status.last_dp_at, true), false],
       ["Latest collision", status.latest_collision_at ? timeCell(status.latest_collision_at, true) : "none recorded", false],
+      ["Re-reported points, 24 h", reReportCell(status), false],
+      ["Slots off the DP weight", offWeightCell(status), false],
       ["Snapshot generated", timeCell(status.generated_at, true), false],
       ["Published to Pages", status.published_at ? timeCell(status.published_at, true) : "not stamped", false],
       ["Snapshot source", status.source || "—", true],
@@ -1354,6 +1496,11 @@ make gpu
     return isFinite(t) ? t : 0;
   }
 
+  function publishedMs(status) {
+    var t = Date.parse(String(status && status.published_at || ""));
+    return isFinite(t) ? t : 0;
+  }
+
   function mergeSnapshots(live, pages) {
     if (!live && !pages) return null;
     if (!live) return pages;
@@ -1374,6 +1521,16 @@ make gpu
     if (!(out.per_worker && out.per_worker.length) && older.per_worker && older.per_worker.length) {
       out.per_worker = older.per_worker;
     }
+    // published_at is when a publisher wrote the file, not when the source
+    // counted. A healthy Pages job on a frozen ingest feed must keep its
+    // fresher stamp: otherwise the banner blames the publisher for a dead
+    // feed (2026-09-20: live and Pages shared generated_at, live won, and
+    // a four-hour-old ingest published_at made a minute-old Action look dead).
+    var livePub = publishedMs(live);
+    var pagesPub = publishedMs(pages);
+    if (pagesPub > livePub) out.published_at = pages.published_at;
+    else if (livePub > 0) out.published_at = live.published_at;
+    else if (pages.published_at) out.published_at = pages.published_at;
     out._fetch_label = (live._fetch_label || "live feed") + " + " + (pages._fetch_label || "Pages snapshot");
     return out;
   }
@@ -1471,6 +1628,19 @@ make gpu
     var snapshotAge = generated ? Date.now() - generated.getTime() : null;
     var publishedAge = published ? Date.now() - published.getTime() : null;
     var stale = snapshotAge !== null && snapshotAge > STALE_AFTER_MS;
+    // "Walking now" fields inside the document are relative to generated_at.
+    // Past STALE_AFTER they are not current — drop them rather than paint a
+    // frozen walking_slots / walk_rate as live (the 2026-09-20 freeze showed
+    // 4 slots and 2.9 B it/s for hours after the feed stopped).
+    if (stale) {
+      if (status.work && typeof status.work === "object") {
+        status.work = Object.assign({}, status.work, { walking_slots: 0, off_weight_walking_slots: 0 });
+      }
+      if (status.walk_rate) {
+        status = Object.assign({}, status);
+        delete status.walk_rate;
+      }
+    }
     var displayState = campaignDisplayState(status);
     var extra = "";
     if (stale) {

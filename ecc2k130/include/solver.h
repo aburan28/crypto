@@ -79,6 +79,12 @@ struct Solver {
     struct WalkResult {
         bool ok;
         Point endPoint;
+        // The trail's start, R_0 = [alpha0]P + Q.  Kept because the witness
+        // check is [mu]R_0 == endPoint, which is ONE scalar multiplication on
+        // a point the walk already built, against the two that rebuilding
+        // [mu*alpha0]P + [mu]Q costs.  Same statement -- R_0 is that sum --
+        // for 196 point operations instead of 392.
+        Point startPt;
         unsigned long long iters;
         unsigned long long counts[8];
         U192 alpha0;
@@ -94,6 +100,7 @@ struct Solver {
         out.iters = 0;
         for (int i = 0; i < 8; ++i) out.counts[i] = 0;
         Point p = R::startPoint(seed, basis, target, &out.alpha0, ell, spow);
+        out.startPt = p;
         out.a = out.alpha0;
         out.b = u192_from(1);
         u64 hist = ECC_HIST_EMPTY;
@@ -119,6 +126,44 @@ struct Solver {
             p = R::step(p, hw);
 #endif
         }
+    }
+
+    // Rebuild a walk's result from a witness the walk itself carried, with no
+    // replay.  This is the whole point of carrying the counts: mu from the
+    // counts sends the start point to the endpoint in about 227 group
+    // operations, against the 2^25.27 steps a replay of one ECC2K-130 trail
+    // costs.  Note what is and is not checked here.  The endpoint is COMPUTED
+    // from mu, so comparing it against mu again would be a tautology; the
+    // binding checks are that the counts sum to the claimed trail length, that
+    // the endpoint is genuinely distinguished, and -- in the caller -- that it
+    // lands on the orbit the corpus record names.  Those three are exactly
+    // what a payer verifying the claim can check, and they are enough: a
+    // forged count vector would have to hit a named low-weight orbit, which is
+    // the search the trail was.
+    WalkResult fromCounts(u64 seed, const unsigned long long *counts,
+                          unsigned long long iters) const {
+        WalkResult out;
+        out.ok = false;
+        out.seed = seed;
+        out.iters = iters;
+        unsigned long long total = 0;
+        for (int i = 0; i < 8; ++i) { out.counts[i] = counts[i]; total += counts[i]; }
+#if ECC_WALK_TABLE
+        (void)total;
+        return out;   // the table walk has no (1 + s^j)^{n_j} factorisation
+#else
+        if (total != iters) return out;
+        out.startPt = R::startPoint(seed, basis, target, &out.alpha0, ell, spow);
+        const U192 mu = multiplier(out.counts);
+        out.a = mod_mul(mu, out.alpha0, ell);
+        out.b = mu;
+        // [mu]R_0, not [mu*alpha0]P + [mu]Q: the same point by R_0's own
+        // definition, reached with one scalar multiplication instead of two.
+        out.endPoint = R::scalarMul(out.startPt, mu);
+        if (R::weight(out.endPoint.x) > dpWeight) return out;
+        out.ok = true;
+        return out;
+#endif
     }
 
     // mu = prod_j (1 + s^j)^{n_j}

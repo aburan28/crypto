@@ -1962,20 +1962,58 @@ Why a block helps this much is worth stating, because the reason is not
 the one the code's comment gave. The key is some 76 ns of dependent work
 before the address it will load is even known, which is long enough that
 consecutive probes' memory round trips do not overlap when the two are
-fused; split, the lookups are adjacent and independent and do overlap. A
-compact table is the control: its key is a `pack`, nine nanoseconds, its
-probes already overlap, and that is why blocking buys it a third where
-it buys the folded table four fifths. Chunk 1 is measured too and comes
-back at 1.00x on the folded table, so the figure is the blocking and not
-the buffer the chunked loop uses.
+fused; split, the lookups are adjacent and independent and do overlap.
+Chunk 1 is measured too and comes back at 1.00x on the folded table, so
+the figure is the blocking and not the buffer the chunked loop uses.
 
-Which *microarchitectural* resource the long key exhausts is not settled
-here. Reorder-buffer capacity fits, and so would the data-dependent
-branch in the rotation's `x < best`, and a 128 MiB filter walked at
-random misses the TLB on most probes; nothing measured separates them,
-and the compact control speaks only to the key's length being the cause,
-not to the mechanism by which length costs. What it does settle is that
-the block must stay.
+Everything in this subsection is a **stage diagnostic** under `AGENTS.md`
+§2: probe cost is one slice of the pipeline, so none of these ratios is
+a speedup and none may be quoted as one. The method's speed is its `S`
+column, cold and whole, and nothing here moves it. By §3 the change is
+**accounting** — the numbers below correct what earlier rounds claimed
+this cost; the algorithm is unchanged, and no gain is claimed.
+
+**The compact table is not the control this wants.** It differs from the
+folded one in the key *and* in the lookup, and the two cannot be told
+apart by comparing them. The control that holds the lookup fixed is to
+canonicalise with `k` rotations instead of `n` on the folded table
+itself: the key is then wrong, which does not matter, because it is
+spread over the same range and the filter turns away the same fraction.
+`examples/probe_window_sweep.rs` does that. What it finds is not a gain
+proportional to the key's length but a **step**:
+
+| `k` | uops a key | key alone | fused − blocked |
+|---|---|---|---|
+| 2 | 46 | 8.9 ns | 95 ns |
+| 4 – 8 | 58 – 82 | 9.3 – 12.2 | 76 – 78 |
+| **10** | **94** | 14.2 | **147** |
+| 12 – 61 | 106 – 400 | 16.2 – 69.0 | 142 – 152 |
+
+Between `k = 8` and `k = 10` the gap doubles, and on either side of that
+it is flat: from `k = 10` to `k = 61` the key grows five times in time
+and four in uops while the gap does not move. The knee is at **82 to 94
+uops**, reproducible across runs, and the rotation is `lea, shr, or,
+and, cmp, cmovb` — six uops a step, which is where those counts come
+from.
+
+So the mechanism is a capacity, and the sweep says *which* capacity.
+This host is a Cascade Lake Xeon: a 224-entry reorder buffer and a
+**97-entry scheduler**. The knee sits on the scheduler, not the ROB —
+the key is one long dependent chain, so its uops wait in the scheduler
+rather than merely occupying the ROB, and it is the smaller structure
+that fills first. Two of the three candidates this note used to leave
+open are now closed: the `x < best` branch is a **`cmovb`** — disassemble
+`canon_key_with` and look — so there is no branch to mispredict; and TLB
+pressure was never a competing hypothesis, since page walks lengthen the
+round trip in *both* loops and so govern how big the exposed cost is,
+not whether it is exposed.
+
+What the sweep does not settle is the residual: at `k = 2` the key costs
+the same nine nanoseconds as a `pack` and blocking still buys 95 ns,
+where the compact table's gap is 32. Key cost held equal, the two tables
+still differ three-fold, so that part is the lookup structure or the
+16 KiB of canon tables in a 32 KiB L1, and nothing here separates those.
+What all of it settles is that the block must stay.
 
 This is a different thing from interleaving lanes, which is measured
 elsewhere in this note and buys the rotation nothing: interleaving fills
@@ -1987,9 +2025,62 @@ makes blocking pay.
 
 One arm still probes one at a time: `m = 4` walks every second half
 `R − (P_k + P_l)` and calls `pairs_for` on each, so it pays the 265
-rather than the 145. It is quadratic in the base and the least used,
-which is presumably why it was never blocked; blocking it is the same
-change the `m = 3` arm already carries.
+rather than the 145. That is the smaller half of what it does one at a
+time, and naming only it was a mistake. The line above the probe is
+`self.curve.add(target, self.curve.neg(pair))`, and `FastCurve::add`
+calls `Gf2::inv` — a Fermat inversion, `n − 1` squarings and as many
+multiplications — once per `(k, l)`, where the `m = 3` arm's `add_many`
+amortises one inversion over a whole block by Montgomery's trick.
+`examples/m4_inversion_cost.rs` prices them at `n = 61`:
+
+| per `(k, l)` | ns |
+|---|---|
+| `Gf2::inv` alone | 1257 |
+| `FastCurve::add`, what `m = 4` does | **1300** |
+| `add_many` 1024 wide, what `m = 3` does | **68** |
+
+The unbatched inversion is **1232 ns a pair, nineteen times the batched
+step and about twelve times the probe penalty named above**. Blocking
+the probe and batching the inversion together would take the inner step
+from some 1565 ns to 212.
+
+It is quadratic in the base and the least used, which is presumably why
+it was never blocked. *Least used* is still true — no parameter set or
+recorded run in this repository asks for `m = 4`, 698 places ask for 3
+and 110 for 2, and nothing sets `max_m`, so no sweep reaches it either.
+
+**It is fixed now anyway.** The arm takes two batched inversions a row
+rather than one and then a row of single ones: the pair sums are one
+`add_many` slice as they always were, and the rests `R − (P_k + P_l)`
+are a second. It keys the row with `keys_of` and prefetches ahead of the
+probe, which is the shape the `m = 3` arm already had. Measured on the
+arm itself — `witnesses_fast` with `m = 4` and a sink that never stops,
+at `n = 61` on `|F| = 976`, where the group is large enough that a
+target has no witnesses at all and the figure is the walk rather than
+the recovery:
+
+| the `m = 4` arm, a `(k, l)` | ns |
+|---|---|
+| before | **1155.5** |
+| after | **123** [115 – 129] |
+
+**9.4×**, and the 1030 ns that went is the Fermat inversion the same
+binary measures alone at 1019 — which is the cross-check that says the
+gain is the thing it was supposed to be and not a measurement artefact.
+
+The isolation matters and was not free to find: at `n = 19` the same
+base decomposes a target tens of thousands of ways, and the `|F|`-long
+compact recovery each hit pays swamps the difference entirely — before
+and after came back 2452 against 2429, a 1% apart, and the fix looked
+like nothing. What the arm costs per `(k, l)` and what a *hit* costs are
+different questions, and the second one drowns the first at any degree
+small enough for hits to be common.
+
+**Engineering** by `AGENTS.md` §3, not an advance: the ratio to the
+floor does not move, and neither does any `S` — nothing runs `m = 4`, so
+no measured end-to-end number changes at all. A stage diagnostic by §2:
+the inner step of one enumeration arm, so the 9.4× is not a speedup and
+no scoreboard row follows.
 
 Measured end to end at equal memory — seconds per decomposed target,
 which is the only figure immune to the fact that a scan stops at its
@@ -2647,3 +2738,649 @@ needs no recovery scan at all, and it was not tested here. Nor that
 flipping the default is free: the ladder is a documented contract with a
 test asserting it, and it is reached by every caller. The measurement
 says what it says; the change is a separate decision.
+
+### The tier order, decided in operations instead of seconds — 2026-09-21
+
+The previous round ended with the measurement and left the change as a
+separate decision. The decision was taken — flip the default to
+fold-first — and then the flip was priced in this repository's unit
+rather than in wall-clock. It did not survive.
+
+**The boundaries, stated before this round's measuring.** The floor is
+the generic-group bound `S ≥ √(π/2A)` with `A = 2n = 122`, which is
+`0.1135` here; the contract's count floor for the `m = 2` descent is
+`N / C(|F|+1, 2)`, which at 12688 points is `2,023,479` probes a target.
+The reference is signed-Frobenius Pollard rho counted on the same
+instance in the same process: `2,263,934` steps a target, `S = 0.1774`.
+Neither moves with the tier — the tier changes no count either bound
+constrains — so no tier choice can be an **advance** in the §3 sense,
+and this round could only ever be engineering, relabelling or
+accounting.
+
+**The falsification target, stated in advance.** The flip is an
+improvement if `baseline_total_operations / candidate_total_operations >
+1` over the whole cold pipeline at fixed base, with every target
+verified on both arms and every other operation count identical.
+Inadmissible: changing the base, the target set, the summand counts or
+the seeds; pricing only the build; quoting seconds.
+
+**The unit.** `S = total operations / √r` in batched group additions.
+The build's count is native — one addition per stored pair — and rho's
+is native too, one per walk step. The probe counts are foreign and are
+converted by a factor measured on the same host, base and process by
+`examples/koblitz_probe_conversion.rs`, in the shape the pipeline
+probes in: `witnesses_fast` with `m = 3` and a never-stopping sink for
+the summand scan, `BLOCK = 1024` with the descent's own 32-key prefetch
+for the descent. Earlier notes quoted `contains_pair` one target at a
+time, which the pipeline never does.
+
+**The flip, at the width it was argued from.** 12688 points, 32 targets,
+32 of 32 verified on every arm, and every operation count but the table
+identical between arms:
+
+| tier | build | collect | descent | **total adds** | `S` | vs rho | vs floor |
+|---|---|---|---|---|---|---|---|
+| full | 80,499,016 | 787,920,000 | 57,487,480 | **925,906,496** | 2.29 | 12.9× | 20.2× |
+| compact | 80,499,016 | 735,157,500 | 51,841,388 | **867,497,904** | 2.14 | 12.1× | 18.9× |
+| folded | 666,120 | 865,305,000 | 70,832,788 | **936,803,908** | 2.31 | 13.0× | 20.4× |
+
+Stored pairs fall `120.85×`; total operations **rise** `1.2%`. That is
+§3 **relabelling** by its exact definition, and it reproduced on an
+independent holdout target set (seeds 900–931, never used to tune
+anything here): `1.016×`. The wall-clock gain the flip was argued from
+is real and is memory traffic — the full build costs 121 ns a stored
+pair against a batched addition's 62 — which is precisely why §6 makes
+operation counts the metric.
+
+**So the question was re-asked over four widths.** Fixed everything but
+the base and the tier; rho off, because rho does not depend on the tier
+and was four fifths of the wall time; each width's conversion measured
+on its own base.
+
+| points | orbits | full | compact | folded | cheapest | verified |
+|---:|---:|---:|---:|---:|:--|:--|
+| 6,832 | 56 | **876,342,501** | 926,956,220 | 1,104,202,174 | full | 32/32 |
+| 9,760 | 80 | 903,649,246 | **880,008,741** | 1,009,804,178 | compact | 32/32 |
+| 12,688 | 104 | 941,440,872 | **887,500,874** | 966,559,218 | compact | 32/32 |
+| 18,544 | 152 | 1,117,432,188 | 1,042,518,063 | **982,920,004** | folded | 32/32 |
+
+`full/folded` crosses one at `|F| ≈ 13,623` and `compact/folded` at
+`≈ 16,052`, both by interpolation between two measured widths rather
+than beyond them. The crossover was **predicted at 13,600 before the
+sweep was analysed**, from the measured per-probe deltas and the sweep's
+probing volume, by
+`|F|²/2 · (1 − 1/2n) > Δ_scan · summands + Δ_blocked · descent`.
+
+**All three tiers are cheapest somewhere, so both fixed orders are
+wrong.** First-that-fits is right only below about 8000 points and
+fold-first only above about 16000; between them the answer is compact,
+which both orders reach second and which fold-first made unreachable by
+default. The tier is not a property of the base: the fold buys a build
+`2n` times cheaper and pays on every probe, so it depends on how much
+probing amortises the build. `ProbeBudget` makes that volume an input.
+
+**Class: accounting** for the round as a whole — the algorithm did not
+change when the answer did, only the unit — and **relabelling** for the
+flip measured on its own. Neither is a result. Nothing here moves the
+standing against rho: every tier costs 12–13× rho's `S` on this instance
+and 19–21× the generic floor, and the tier moves the constant only.
+
+**Not claimed.** That the crossover width generalises: one curve, one
+degree, one host, and the fold's saving carries `1 − 1/2n` while its
+canonicalisation grows with `n`, so both sides move with the degree and
+neither was measured against it. No exponent is fitted — four widths at
+one degree is the minimum for a fit and this round does not make one.
+And the sweep pins the probing volume across widths, which makes each
+width exactly controlled but does not model how a run sizes its own
+collection: relations needed scale as `|F|/2n` while the `m = 3` hit
+rate scales as `|F|³/r`, so a properly sized run at a wider base probes
+less. `13,623` is therefore an **upper bound** on the practical
+crossover, not a two-sided estimate.
+
+### The probing volume is an input, and it moves every rung — 2026-09-21
+
+The previous round made the tier a function of the probing volume and
+then supplied the wrong volume. `build_within` cannot know how much
+probing it is being built for, so it falls back on the volume its
+constants were calibrated at — `351,750,000` summand scans. Every rung
+this repository actually runs probes less than that, some of them by
+three orders of magnitude.
+
+**Boundaries, unchanged and restated.** Floor `S ≥ √(π/2A)` with
+`A = 2n`; the contract's count floor `N / C(|F| + m − 1, m)` per target
+for the descent; reference is signed-Frobenius rho counted on the same
+instance in the same process. The tier moves no count either bound
+constrains, so this round cannot be an advance either.
+
+**The workflow knows its own volume exactly.** Collection scans
+`unit_trials × units × collection_window`, or the whole base when no
+window is set. That is not an approximation: it reproduces
+`summands_scanned_total` exactly on every run checked, including the
+frozen `277,760` of the `k0n31` rung. The descent follows the counting
+bound, which measured `1.26×` high on one degree-61 target set and
+`1.07×` low on an independent one — a fair central estimate rather than
+a bound in either direction.
+
+`units` is the pass the driver plans, not `max_units`, which is the cap
+it may extend to. A run that extends probes more than this says, and
+under-counting probes favours the fold, so the estimate errs the same
+way the calibrated constants already do.
+
+**What the rungs actually probe:**
+
+| rung | summands scanned | against the calibration |
+|:--|--:|--:|
+| `k0n31` | 277,760 | 1,266× less |
+| `k0n41-subgroup` | 15,072,256 | 23× less |
+| `k0n53-subgroup` | 242,514,432 | 1.45× less |
+
+All three move from compact to folded. Priced in group additions with
+conversions re-measured at each rung's **own** degree rather than
+carried over from 61, 32 of 32 verified on both arms, every probe count
+identical between them:
+
+| rung | compact | folded | ratio | `S` compact → folded | vs rho |
+|:--|--:|--:|--:|:--|--:|
+| `k0n41` | 47,988,000 | 34,990,959 | **1.371×** | 2.023 → 1.475 | 8.65× |
+| `k0n53` | 756,950,602 | 615,978,313 | **1.229×** | 5.156 → 4.196 | 19.3× |
+
+**Class: engineering.** `S` fell and the probe counts did not move, so
+the ratio to the counting floor is flat by construction. Legitimate,
+bounded, and not a finding.
+
+**`k0n31` is deliberately not priced, and the reason is worth keeping.**
+Its conversion measurement reads `2,572` adds per summand scanned on the
+compact table against the full tier's `6.71`. That is not a cache
+effect: at `r = 2^20.5` nearly every probe of the `m = 3` scan hits, and
+the never-stopping sink then pays the `O(|F|)` recovery a hit costs —
+which the full tier does not pay at all, because it stores its summands.
+The figure measures recovery, not probing. It would have made the fold
+look catastrophic at small `n` and it means nothing about probing cost,
+so it stays out of the model. The tier chosen at that rung is the
+model's extrapolation below the degrees it was measured at, and is not
+supported by a price here.
+
+**Still not claimed.** That the constants `build_within` *chooses* with
+generalise across degrees — they remain the degree-61 ones, and this
+round only re-measured the conversions used to *check* the choice. No
+exponent: two priced rungs is far short of §5's four sizes.
+
+### Every phase priced, and the calibration's real limitation — 2026-09-21
+
+Two items the previous rounds left standing. One was a genuine gap; the
+other was a question about the wrong variable.
+
+#### `S` is admissible now, and collection is 97.8% of it
+
+`S` had been a lower bound throughout, because factor-base selection and
+the linear algebra were null rather than zero — which under §8 blocks a
+full-DLP `S` outright. Both are priced now.
+
+Selection reports its own counts through
+`build_subgroup_orbit_factor_base_with_cost`; the old signature stays as
+a wrapper, so none of its 39 callers changed. The linear algebra needed
+no new counters at all: block Wiedemann already reports `products`,
+`core_nonzeros` and `block_n`, whose product is the multiply-add count.
+
+| phase | `k0n41` | share | `k0n53` | share |
+|:--|--:|--:|--:|--:|
+| collect probes | 34,816,911 | 98.37% | 603,860,936 | 97.78% |
+| descent probes | 864 | 0.00% | 11,003,106 | 1.78% |
+| select | 400,851 | 1.13% | 1,581,890 | 0.26% |
+| pair table build | 170,560 | 0.48% | 1,106,640 | 0.18% |
+| linear algebra | 5,822 | 0.02% | 10,006 | 0.00% |
+| **total** | **35,395,009** | | **617,562,577** | |
+| `S` | **1.4918** | 8.75× rho | **4.2069** | 19.36× rho |
+| `S` as previously bounded | ≥ 1.4746 | | ≥ 4.196 | |
+
+32 of 32 verified on both. The bound moved by about 1%, which earlier
+rounds asserted and did not measure.
+
+**The linear algebra is one sixty-thousandth of the cost.** 10,006
+group-addition equivalents at degree 53, from 43,848 multiply-adds mod
+`r`. The block Wiedemann machinery — the filter, the Krylov sequence, the
+generator, the reconstruction — is solving a problem that is not
+remotely near the bill, and has not been for some time.
+
+It also puts the last two rounds in proportion. **The tier they spent
+themselves choosing is 0.18% of the pipeline** in the configuration it
+selects. It mattered only because the alternative's build is 15.4% of
+the compact total; the win was in avoiding a cost, not in reducing one.
+Collection at 97.8% is the only phase whose cost is worth attacking.
+
+Selection's price is a **time conversion, not a native count** — its cost
+is dominated by rebuilding the base from the representatives so far,
+which is not a countable primitive. At a quarter of a percent of the
+total, no plausible error in it moves `S`'s third digit; it is marked as
+the weaker kind of number in the evidence file.
+
+#### The tier constants are limited by width, not by degree
+
+The concern was that constants measured at `n = 61` are an unchecked
+extrapolation at 31, 41 and 53. Measured, the premise is wrong in its
+variable. Across `n = 41, 53, 57, 61` at a matched base the
+folded-to-compact scan ratio is **flat in `n`** once the degrees whose
+`m = 3` scan saturates are excluded: `1.34` at `n = 53` against `1.33`
+at `n = 61`.
+
+Only those two of the ten usable degrees admit a clean reading, because
+**`n` does not determine `r` on this family** — the cofactor runs from 4
+at `n = 41` to 57,284,756 at `n = 59`, so `r` is not monotone in `n`, and
+43 and 47 have no usable subgroup at all. At a width big enough to
+measure, `n = 41` and `n = 57` still carry 3.2% and 8.8% recovery
+contamination.
+
+What does move the ratio is the width:
+
+| base | folded/compact scan | compact table |
+|--:|--:|:--|
+| 3,904 | 1.33 | in cache |
+| 12,688 | **1.17** | leaving cache |
+| 15,264 | 0.96 | out of cache |
+
+The shipped constants give `1.17` — right at the width they were taken
+at, wrong in both directions away from it. So they are **not changed**:
+replacing one width's calibration with another's is not an improvement.
+The model lacks a width term, and the doc comment now says that with
+these numbers rather than blaming the degree.
+
+#### A correction inside this round
+
+The first pass at that measurement used 5,000 points at every degree and
+produced an apparently clean degree trend — `1.01` at `n = 41` rising to
+`1.32` at `n = 61`. It was saturation. 5,248 points is above `n = 41`'s
+scarcity limit of 4,962, and the resulting 13.1% recovery overhead
+inflated the compact scan, faking a low ratio at the low degree and a
+trend across the sweep.
+
+That is the **third** reading in this round that saturation contaminated,
+after `n = 31` and `n = 59` — the third after I had already written down
+why it happens. `examples/koblitz_degree_census.rs` now computes, per
+degree, the width that keeps the scan measurable, so the screen is a
+command rather than a thing to remember.
+
+**Class: accounting.** Nothing was made faster. Two null phases are
+priced, and a limitation was attributed to the wrong variable and is now
+attributed to the right one.
+
+## The rungs were scanning the whole base — 2026-09-21
+
+The previous round established that relation collection is 97.8% of the
+whole pipeline and everything else together is 2.2%. This attacks the
+97.8%.
+
+A full `m = 3` scan meets each triple three times — once for each of its
+summands standing as the third — and keeps one sorted witness, throwing
+two away. A window of `w` keeps all three chances at `w/|F|` of the scan,
+so relations per summand scanned rise towards three times the full scan's
+while the cost per probe falls to `w/|F|`. The mechanism already existed
+and most parameter files used it; the three ledger rungs did not, so they
+paid the redundancy on the phase that holds the cost.
+
+Priced end to end at equal *relation yield* — the first attempt sized the
+windows to equal **scans** instead, which made every window over-collect
+and produced ratios of 0.63× and 1.00×; a gain in yield is not a gain in
+cost until the trials come down to bank it. Same curve, base, seed,
+targets and descent, 32 of 32 verified and every column covered on every
+row:
+
+| variant | `|F|` | window | scans | relations | total adds | `S` | `/rho` | speedup |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| n53 full scan | 15,264 | — | 242,514,432 | 458 | 610,287,145 | 4.1573 | 19.14 | — |
+| n53 window 1,908 | 15,264 | 1,908 | 95,636,592 | 444 | 244,576,591 | 1.6660 | 7.67 | 2.495× |
+| n53 window 954 | 15,264 | 954 | 91,091,736 | 444 | 237,061,975 | 1.6148 | 7.43 | 2.574× |
+| **n53 window 477** | 15,264 | 477 | 85,860,000 | 443 | 226,915,356 | 1.5458 | 7.12 | **2.689×** |
+| n53 window 477, holdout | 15,264 | 477 | 85,860,000 | 443 | 222,982,723 | 1.5190 | 6.99 | — |
+| n41 full scan | 5,248 | — | 15,072,256 | 124 | 33,586,338 | 1.4156 | 8.50 | — |
+| n41 window 164 | 5,248 | 164 | 5,432,992 | 120 | 13,760,190 | 0.5799 | 3.48 | 2.441× |
+
+**Class: engineering.** `S` fell by about `2.5×` on both rungs. The
+generic floor is unmoved — the window changes no count it bounds — and
+the contract's count floor is on *attempts*, which the window makes
+**worse**: it spends more trials per relation, not fewer. What falls is
+summand scans, which that floor does not bound. So this is a real
+reduction in the dominant phase and not a statement about the boundary.
+
+The frozen ledger rungs are deliberately **unchanged**. They are the
+regression baseline, and rewriting their parameters would change what the
+gate measures and break comparability with references v1–v4. Whether the
+benchmark should track the best known configuration is a question for the
+repository, raised in the evidence file rather than decided here.
+
+### Re-priced on 2026-09-22
+
+The figures above are not the ones this round first reported. Every row
+had been priced at one adds-per-summand constant per degree, taken from
+the full scan; the next round measured that the constant depends on the
+window and the base width as well. The effect is small and not all in one
+direction: at `n = 53` the windowed constants (`2.42`–`2.48`) sit
+slightly *below* the `2.490` used, so those rows were marginally
+overcharged and `2.715×` becomes `2.689×`; at `n = 41` window 164 was
+undercharged at `2.31` against a measured `2.43`, so `3.24×` rho becomes
+`3.48×`. The original values are retained in
+`docs/ic/runs/koblitz-collection-window-20260921.json` beside the
+re-priced ones.
+
+## Collection was waiting for rank, not coverage — 2026-09-22
+
+Collection is 60% of this pipeline and its cost is proportional to the
+relations banked, so the question of *why* a run needs 333 relations for
+192 columns decides whether anything is left to win. The thread had
+never asked it. Asking it turned out to matter more than any of the
+levers tried on top.
+
+### The boundaries, before measuring
+
+Two floors bound the relation count, and they are different:
+
+- **The counting floor.** The relation matrix has one unknown per
+  projected column, so a determined system needs at least as many
+  independent rows as columns: `R ≥ C`. At `|F| = 15,744` on
+  `K_0/GF(2^41)`, `C = |F|/2n = 192`. This floor moves only with the
+  column count, so it cannot be tuned away.
+- **The coverage threshold.** A column no relation mentions has no
+  equation at all. With `m = 3` summands landing on uniformly random
+  columns, a column is missed with probability `e^{-3R/C}`, so coverage
+  needs `R > C·ln(C)/3 = 330` — which is *above* the counting floor, and
+  is therefore what a swept run actually waits for.
+
+And the reference, on the same instance with the same accounting: rho at
+`S = 0.1635`, pooled over 128 targets. Pooling matters here; rho's step
+count varies about 20% between seed sets, so a single set is not a
+reference. The generic floor is `S ≥ sqrt(pi/2A) = 0.1384` with
+`A = 2n = 82`.
+
+### What a finished run was waiting for
+
+`examples/koblitz_relation_coverage.rs` replays a run's banked relations
+in arrival order and reports where coverage completes and where full
+rank does. On the swept run both complete at relation **330** — the
+coverage threshold, to three figures, and not a coincidence: coverage
+and rank share it when rows are uniform. 62% of the scanning goes on the
+last 10% of columns.
+
+### Aiming at uncovered columns: a measured non-result
+
+The `m = 3` search fixes a third summand `k`, looks `target − P_k` up in
+the pair table, and so finds a triple whenever any of its three indices
+is scanned. A hit therefore always involves `column(k)`. Restrict the
+scan to the columns a run still needs and every relation it returns
+covers one — `Scan::Indices` names the summands, `Targets::Subset` keeps
+the window width the same so scans per trial and the reported counter do
+not move, and `ColumnCoverage` tracks what the matrix has.
+
+It works exactly as designed and buys almost nothing:
+
+| | coverage complete | full rank | total adds |
+|:--|--:|--:|--:|
+| swept | 330 | 330 | 6,911,843 |
+| aimed at uncovered columns | **117** | 309 | 6,773,987 |
+
+Coverage moved by `2.8×` — a hundredfold-style move in the number the
+thread had been tracking — and the total by `1.02×`. **Class:
+relabelling.** Coverage was never the constraint; it only looked like
+one because it sits at the same threshold as rank.
+
+### What it is actually waiting for
+
+The diagnosis is visible at the moment the row count first reaches the
+column count, the earliest a system can possibly be determined:
+
+| at 192 relations | swept | aimed at uncovered |
+|:--|--:|--:|
+| columns covered | 186 | 192 |
+| rank | 183 | **190** |
+| columns without a pivot | 9 | **2** |
+| mentions of those columns | six at 0x, two at 1x, one at 2x | **both exactly 1x** |
+| columns mentioned exactly once | 35 | 21 |
+
+A column mentioned once is pinned only if every other column in its row
+is pinned, so it is the likeliest place for the matrix to fall short. The
+set worth scanning is not "columns with no mention" but "columns with the
+fewest" — and that is a counter, not an elimination.
+
+`ColumnCoverage::missing_points` therefore returns the points of the
+columns at the current *minimum* mention count. One rule, no threshold
+to tune: it is the sweep while nothing is covered, the uncovered columns
+while some are, and the once-mentioned columns after that, which is the
+phase the run was stuck in.
+
+### The result, and why it is terminal
+
+Matched A/B at `|F| = 15,744`, window 256, 32 targets, both arms
+extending collection until the system is determined so neither is
+charged for units it did not need. Every cost priced: selection measured
+at this width, the table build at one addition per stored pair, the scan
+at the constant measured for this window and this base, the descent, and
+the linear algebra.
+
+| variant | relations | vs floor 192 | scans | total adds | `S` | `/rho` | verified | rejected |
+|:--|--:|--:|--:|--:|--:|--:|:--|--:|
+| swept | 333 | 1.73x | 1,459,200 | 6,911,843 | 0.2913 | 1.75 | 32/32 | 0 |
+| aimed at uncovered | 320 | 1.67x | 1,420,800 | 6,773,987 | 0.2855 | 1.71 | 32/32 | 0 |
+| **aimed at least-mentioned** | **197** | **1.03x** | **883,200** | **5,270,523** | **0.2221** | **1.33** | 32/32 | 0 |
+| aimed at least-mentioned, holdout | 197 | 1.03x | 883,200 | 5,270,516 | 0.2221 | 1.33 | 32/32 | 0 |
+
+`speedup = baseline_total_operations / candidate_total_operations`
+`= 6,911,843 / 5,270,523 = 1.311×`, against a pre-registered success
+condition of `1.3×`.
+
+Full rank is reached at **exactly 192 relations** — the counting floor.
+192 unknowns need 192 independent equations, so no collection strategy
+can bank fewer, and the 197 shown is the five-relation overshoot of a
+150-trial unit. The holdout on target seeds 900–931 reproduces 197
+relations and 883,200 scans exactly.
+
+**Class: advance.** The ratio to the counting floor fell from `1.73` to
+`1.03` and cannot fall below `1.00`; this lever is finished. It is worth
+saying just as plainly that the method is still `1.35×` rho: closing the
+relation count to its floor did not produce a crossover, and the
+remaining cost is now split 48% collection, 29% table build, 23%
+selection, with no phase dominant enough for another factor to hide in.
+
+### Two corrections inside this round
+
+**The window constant was measured on the wrong scan shape.** The
+collection-window round priced its scans at `2.31` adds a summand, taken
+from the *full* scan over the whole base. A windowed scan pays the same
+per-target prologue over `w` summands instead of `|F|`, so it costs more
+per summand, and the amount depends on the base width as well as the
+window. Measured with `examples/koblitz_window_cost.rs`:
+
+| base | window 256 | full scan |
+|--:|--:|--:|
+| 5,248 | 2.33 | 2.19 |
+| 8,528 | 2.52 | 2.31 |
+| 15,744 | 2.85 | 2.67 |
+
+`2.31` was right for the 5,248-point base the window was first measured
+on and undercharges every wider one by up to 23%. The rows below are
+re-priced at the constant for the base and window each actually ran.
+
+**A first version of that measurement invented the problem it found.**
+It drew each target with `mul_u64` — a scalar multiplication, about 59
+chained additions — which a narrow window divides over 256 summands and
+a full scan over 15,744. The curve came out at `5.78` adds a summand at
+window 256 against `2.72` at full scan, a fourfold penalty that would
+have cut the collection window's reported gain from `2.7×` to about
+`1.3×`. It was a property of the harness: collection does not multiply
+to reach its next probe, it walks, one addition per trial. Both
+measurements now walk, as `collect_walked` does. **Class: accounting** —
+and a reminder that a correction needs checking as hard as a result
+does, because this one was about to be published.
+
+`ScanScratch` belongs in the same paragraph. It takes four per-trial
+allocations out of the windowed scan's hot loop and measured `5.46 →
+5.58` adds a summand: no change, the allocator was already recycling the
+blocks. It stays, because the buffers are worth holding in one place,
+but not as a result.
+
+### The whole ladder at `n = 41`, re-priced
+
+Every row at the scan constant measured for its own base width and
+window, so the correction above is applied throughout rather than to the
+new rows alone. Superseded figures move here, they are not deleted.
+
+| step | `|F|` | window | adds/scan | relations | total adds | `S` | `/rho` | priced |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|
+| original rung, full scan | 5,248 | full | 2.19 | 124 | 33,589,843 | 1.4157 | 8.50 | measured |
+| + collection window | 5,248 | 164 | 2.43 | 120 | 13,764,117 | 0.5801 | 3.48 | interpolated, windows 128–256 |
+| + wider base | 16,400 | 500 | 2.72 | 675 | 10,980,083 | 0.4628 | 2.78 | interpolated, windows 256–512 |
+| + lean relation target | 16,400 | 256 | 2.78 | 406 | 8,056,053 | 0.3395 | 2.04 | measured |
+| + stop when determined | 15,744 | 256 | 2.85 | 333 | 6,911,843 | 0.2913 | 1.75 | measured |
+| **+ aim at least-mentioned** | 15,744 | 256 | 2.85 | **197** | **5,270,523** | **0.2221** | **1.33** | measured |
+
+`33,589,843 / 5,270,523 = 6.37×` fewer operations than the rung this
+started from, every row 32 of 32 verified against the planted secret,
+zero relations rejected. The three rows the earlier rounds reported at
+`3.24×`, `2.40×` and `1.78×` rho read `3.48×`, `2.78×` and `2.04×` here:
+they were priced at `2.31` adds a summand, which is the 5,248-point
+base's full-scan figure and undercharges a wide base with a narrow
+window. The shape of the ladder is unchanged; two of its steps are
+smaller than reported.
+
+### What is left
+
+| phase | share of the best run | can it fall? |
+|:--|--:|:--|
+| collection | 47.6% | only with the column count or the scan constant — the relation count is at its floor |
+| table build | 28.9% | `\|F\|²/4n + \|F\|`, one addition per stored pair |
+| selection | 23.4% | 79.5 adds a point, and the algebra it performs is far cheaper than that. The next thing to measure. |
+| descent | 0.0% | |
+| linear algebra | 0.06% | |
+
+No phase is dominant enough for another factor to hide in, which is the
+first time that has been true in this thread.
+
+## Selecting a base was 5.6× its floor, and all of it was BigUints — 2026-09-22
+
+With collection's relation count at its counting floor, selecting the
+base became 23.4% of the pipeline: 78.2 group-addition equivalents for
+each of the 15,744 points it produces. The algebra a point *requires* is
+much less than that, so this asks what, and measures the rest against it.
+
+### The boundary, stated first
+
+The floor is the field algebra a point cannot avoid: the half-trace lift
+that produces it, unconverted, plus the single Frobenius step that places
+it in its orbit. An orbit walk visits every point once, so that is one
+step per point.
+
+| | adds a point |
+|:--|--:|
+| lift algebra, no conversion | 13.51 |
+| one orbit step, packed | 0.43 |
+| **floor** | **13.93** |
+
+**No halving anywhere, and the first version of this got that wrong.** A
+half-trace solve yields two points, and every figure in the table is per
+point, so "adds a point" already carries that; halving the lift term
+again — which is what the first draft did, to the orbit step as well —
+understated the boundary twofold and would have reported selection at
+`13×` its floor instead of `5.6×`. A floor is only a boundary if it is
+derived at the same normalisation as the thing it bounds. The reasoning
+is written into `examples/koblitz_select_decomposition.rs` beside the
+computation.
+
+### Where the other 64 additions went
+
+The rebuild is 89.7% of selection. Inside it, per point:
+
+| step | `BigUint` | packed |
+|:--|--:|--:|
+| both orbit walks (`kc.frobenius`) | **41.60** | 0.40 |
+| keying, three times over (`point_key`) | 4.33 | 0.02 |
+| lifts (`points_with_x_fast`) | 13.68 | — |
+| of which `lower()` back to `BigUint` | 1.66 | — |
+
+A `BinaryPoint` carries two `BigUint`s, so an index key is two
+allocations and a two-`BigUint` hash, and a Frobenius step is two
+`BigUint` squarings. Half the whole call was stepping `BigUint`-backed
+points through a Frobenius the pair table has always done in one word.
+
+### The change, and the control it stands on
+
+`finish_factor_base_domain` now keys its point index on the packed `u64`
+and walks both orbit structures with the `FastCurve`, split out as
+`orbit_maps_packed` and `orbit_maps_bigint`. Even degrees have no
+`FastCurve` and keep the `BigUint` walk, which is also the reference the
+packed one is checked against.
+
+This is a change of *representation*, not of algorithm — same iteration
+order, same decisions, same output — so the claim rests entirely on the
+maps coming out identical:
+
+- `factor_base_orbit_maps_agree_in_both_representations` compares
+  `orbit_of`, `orbits`, `signed_orbit_of` and `signed_orbits` field for
+  field over 6 degrees × 3 widths, and checks the base an odd degree
+  ships with is the packed walk's output.
+- End to end, the best aimed config and its holdout re-run on the packed
+  build with **every counter identical**: points, orbits, columns, tier,
+  stored pairs, scans, trials, relations, units, rejected, duplicates,
+  core dimension, core nonzeros, descent trials, rho steps, 32/32
+  verified.
+
+Identical counters mean the only thing this round moved is the time
+selection takes, which is exactly what a representation change should
+move and nothing else.
+
+### What it bought
+
+Quiet machine, nothing else running, three passes a width:
+
+| `|F|` | before | after | speedup | before/pt | after/pt |
+|--:|--:|--:|--:|--:|--:|
+| 5,248 | 409,745 | 185,428 | 2.21× | 78.1 | 35.3 |
+| 8,528 | 669,193 | 309,274 | 2.16× | 78.5 | 36.3 |
+| 12,464 | 969,811 | 452,708 | 2.14× | 77.8 | 36.3 |
+| 16,400 | 1,304,319 | 618,316 | 2.11× | 79.5 | 37.7 |
+| 20,336 | 1,613,142 | 772,161 | 2.09× | 79.3 | 38.0 |
+
+and end to end on the aimed config, only the selection column differing:
+
+| variant | select | build | collect | total adds | `S` | `/rho` |
+|:--|--:|--:|--:|--:|--:|--:|
+| aimed, `BigUint` base build | 1,230,873 | 1,519,296 | 2,517,120 | 5,269,495 | 0.2221 | 1.33 |
+| **aimed, packed base build** | **587,043** | 1,519,296 | 2,517,120 | **4,625,665** | **0.1950** | **1.17** |
+
+`speedup = 5,269,495 / 4,625,665 = 1.139×`, against a registered
+condition of `1.10×`. Selection falls `2.10×` and lands at `2.7×` its
+floor, from `5.6×`.
+
+**Class: engineering.** `S` fell, and the ratio to the generic floor fell
+with it, but nothing the method *does* changed — no count the floor
+bounds moved. `S` is still `1.17×` rho.
+
+### An honest note on the unit, and on a discarded measurement
+
+Selection is the one phase priced by converting measured **time** rather
+than a native count, because its cost is dominated by rebuilding the base
+and a rebuild has no countable primitive. That was true when selection
+was first priced, so before and after are like for like — but it does
+mean this round's number rests on a timing, which is why the
+base-identity control above is what the claim actually stands on rather
+than the stopwatch.
+
+The first post-change measurement is discarded. It shared the machine
+with a compiling test suite, and contention inflates the measured
+per-addition unit, which *divides* the converted total down — so a
+contended run **understates** the operation count, in the flattering
+direction. It was caught because the sweep came out non-monotone, with
+12,464 points reading slower than 16,400, which cannot be true.
+
+The registered prediction was `35.3` adds a point and `1.15×` rho; the
+outcome is `37.3` and `1.17×`. The packed path lifts every point from
+`BigUint` to the packed form once, about 1.5 adds a point, which the
+prediction did not account for.
+
+### What is left
+
+| phase | share | can it fall? |
+|:--|--:|:--|
+| collection | 54.4% | only with the column count or the scan constant — the relation count is at its floor |
+| table build | 32.8% | `\|F\|²/4n + \|F\|`, one addition per stored pair; now the largest phase after collection |
+| selection | 12.7% | bounded by `2.7×`, and the remainder is the half-trace solve itself |
+| descent, linear algebra | 0.0% | |
+
+Against the rung this branch started from, the `n = 41` pipeline is now
+`33,589,843 → 4,625,665` adds, **7.26×** fewer operations.

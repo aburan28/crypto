@@ -55,12 +55,15 @@ use crypto_lib::cryptanalysis::koblitz_factor_base_search::{
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     koblitz_signed_frobenius_rho_with_progress, point_key, points_with_x, FactorBaseLogSolver,
     FactorBaseLogTable,
-    solve_factor_base_logs_from_relations, CollectedRelation, DecompositionStrategy,
+    solve_factor_base_logs_from_relations, CollectedRelation, ColumnCoverage,
+    DecompositionStrategy,
     IndividualLogSolver,
-    FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions, KoblitzSignedRhoOptions, PairSumTable,
+    FactorBaseSelectionCost, FrobeniusFactorBase, KoblitzCurve, KoblitzIcOptions,
+    KoblitzSignedRhoOptions, PairSumTable, ProbeBudget,
     RelationCollector, RelationWorkUnit,
 };
 use num_bigint::BigUint;
+use num_traits::Zero;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -93,6 +96,13 @@ fn one_u32() -> u32 {
 fn one_u64() -> u64 {
     1
 }
+/// `skip_serializing_if` for a flag that is off by default, so adding
+/// one does not change the digest of every parameter file that predates
+/// it.
+fn is_false(b: &bool) -> bool {
+    !*b
+}
+
 fn is_one_u32(v: &u32) -> bool {
     *v == 1
 }
@@ -299,23 +309,61 @@ pub struct WorkflowParams {
     /// probe. A separate selection run must tune this value.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub collection_window: Option<u32>,
+    /// Aim the collection window at the columns the run still needs
+    /// covered, instead of sweeping the whole base.
+    ///
+    /// A relation cannot be used until every column it mentions has a
+    /// log, and the matrix cannot be solved until every column is
+    /// mentioned, so a run's relation count is set by *coverage*, not
+    /// by rank.  Measured at `n = 41` on a 192-column base: coverage and
+    /// full rank both complete at relation 330, where rank alone needs
+    /// 192, and 62% of the scanning goes on the last 10% of columns —
+    /// the coupon-collector tail of relations arriving at uniformly
+    /// random columns.
+    ///
+    /// The `m = 3` scan's hit always involves the column of the summand
+    /// it scanned, so a window restricted to the columns still missing
+    /// returns only relations that cover one.  The window keeps its
+    /// width, so scans per trial and the reported counter are unchanged;
+    /// what falls is the number of relations the run needs.
+    ///
+    /// Off by default, and deliberately: with it on, every unit after
+    /// the first scans a different set, so a run's counters are not the
+    /// swept run's.  The frozen ledger rungs are the regression
+    /// baseline and sweep.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub collection_aim: bool,
     /// Bytes the pair table may occupy, when it should differ from
     /// [`PairSumTable::DEFAULT_BYTE_BUDGET`].
     ///
-    /// The budget does not only refuse a base too wide to hold — it
-    /// *chooses the representation*, because `build_within` takes the
-    /// first tier that fits: summands, then compact rests, then the
-    /// signed-Frobenius fold.  A budget below what the compact table
-    /// wants therefore asks for the fold at a width where the compact
-    /// table would have fitted, which is the only way to compare the
-    /// two tiers at one width.
-    ///
-    /// That comparison is why this exists.  The tiers are ordered by
-    /// what fits, which is the right order for a base whose precompute
-    /// is already paid; it is not obviously the right order when the
-    /// precompute is the bill.
+    /// A budget refuses a base too wide to hold.  It no longer chooses
+    /// the representation: `build_within` takes the *cheapest* tier
+    /// rather than the first that fits, so every budget large enough to
+    /// build anything at all builds the fold.  Naming a tier is what
+    /// [`WorkflowParams::pair_table_tier`] is for.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pair_table_bytes: Option<u64>,
+    /// Build the pair table in a named representation rather than the
+    /// cheapest one.
+    ///
+    /// `build_within` used to pick by what fits — summands, then
+    /// compact rests, then the signed-Frobenius fold — and a byte
+    /// budget was therefore also a tier selector: squeeze it and the
+    /// next tier down was chosen.  Measuring the three tiers at one
+    /// width ranked them the other way round on build, on descent and
+    /// on resident memory at once, so the ladder is now climbed from
+    /// the cheap end and a budget selects nothing.
+    ///
+    /// That leaves the older tiers unreachable from a parameter file,
+    /// and they are the "before" of every comparison this thread makes.
+    /// Naming one here keeps the ladder measurable: `auto` (the
+    /// default) is what a real run does, `full`, `compact` and `folded`
+    /// are for the A/B.  A named tier that will not fit the budget is
+    /// an error rather than a quiet fall to another tier, because a run
+    /// that built a different table than its author believed looks
+    /// exactly like a run that did not.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pair_table_tier: Option<PairTableTier>,
     #[serde(default = "default_solver")]
     pub solver: Solver,
     #[serde(default = "default_seed")]
@@ -862,15 +910,106 @@ fn with_tier(mut summary: Value, pair: Option<&PairSumTable>) -> Value {
 /// `PairSumTable::build_within` picks the first representation that fits
 /// the budget, so the budget is also the choice of tier.  Left unset the
 /// default applies and the tiers fall in their usual order.
+/// The probing this run expects to do, which is what decides the tier.
+///
+/// `PairSumTable::build_within` has to fall back on the volume its
+/// constants were calibrated at, because a library cannot know how much
+/// probing it is being built for.  A workflow can: collection's volume
+/// is in the parameter file exactly, and the descent's follows from the
+/// counting bound.  So the tier is chosen for *this* run rather than
+/// for the run the constants came from.
+///
+/// **Collection** scans `unit_trials × units` probes, each walking
+/// `collection_window` base points — or the whole base when no window
+/// is set.  Only the three-summand pair-table scan walks summands at
+/// all, though: `CollectionReport::summands_scanned` is `trials × |F|`
+/// exactly when `m == 3` and the strategy is the pair table, and zero
+/// otherwise, because no other path tries base points as a third
+/// summand.  This mirrors that condition rather than assuming the
+/// scan, since charging a run for hundreds of millions of scans it
+/// never performs would price the fold out of every `m = 2` and
+/// `m = 4` run.
+///
+/// `units` is the pass the driver plans, not `max_units`, which is the
+/// cap it may extend to when the relations do not yet determine every
+/// column.  A run that does extend probes more than this says, and
+/// under-counting probes favours the fold, so this errs the same way
+/// the calibrated constants already do.
+///
+/// **The descent** spends, per target, about the counting bound
+/// `N / C(|F| + m − 1, m)` — the contract's own floor, which measured
+/// 1.26× high on one target set here and 1.07× low on an independent
+/// one, so it is a fair central estimate rather than a bound in either
+/// direction.
+fn probe_budget(c: &KoblitzCurve, fb: &FrobeniusFactorBase, p: &WorkflowParams) -> ProbeBudget {
+    let points = fb.points.len() as u128;
+    // The same condition `CollectionReport` reports under.
+    let scans_summands = p.summands == 3 && p.solver == Solver::PairTable;
+    let summands_scanned = if scans_summands {
+        let window = p
+            .collection_window
+            .map(u128::from)
+            .unwrap_or(points)
+            .min(points);
+        (p.collection.unit_trials as u128)
+            .saturating_mul(p.collection.units as u128)
+            .saturating_mul(window)
+            .min(u64::MAX as u128) as u64
+    } else {
+        0
+    };
+
+    // Multisets of `m` summands from the base: the largest set of
+    // points one probe can hit, and the denominator of the floor.
+    let m = u32::from(p.descent_summands.unwrap_or(p.summands));
+    let mut reachable = BigUint::from(1u32);
+    for i in 0..m {
+        reachable *= BigUint::from(points + i as u128);
+        reachable /= BigUint::from(i + 1);
+    }
+    let per_target = if reachable.is_zero() {
+        0u64
+    } else {
+        let probes = &c.subgroup_order / reachable;
+        probes.to_u64_digits().first().copied().unwrap_or(0).max(1)
+    };
+    let descent_probes = per_target.saturating_mul(p.targets.len() as u64);
+
+    ProbeBudget { summands_scanned, descent_probes }
+}
+
 fn build_pair_table(
     c: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     p: &WorkflowParams,
 ) -> Option<PairSumTable> {
-    match p.pair_table_bytes {
-        Some(bytes) => PairSumTable::build_within(c, fb, u128::from(bytes)),
-        None => PairSumTable::build(c, fb),
+    let budget = p
+        .pair_table_bytes
+        .map(u128::from)
+        .unwrap_or(PairSumTable::DEFAULT_BYTE_BUDGET);
+    match p.pair_table_tier.unwrap_or(PairTableTier::Auto) {
+        PairTableTier::Auto => {
+            PairSumTable::build_within_for(c, fb, budget, probe_budget(c, fb, p))
+        }
+        PairTableTier::Full => PairSumTable::build_full_within(c, fb, budget),
+        PairTableTier::Compact => PairSumTable::build_compact_within(c, fb, budget),
+        PairTableTier::Folded => PairSumTable::build_folded_within(c, fb, budget),
     }
+}
+
+/// Which representation of the pair table a run should build.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PairTableTier {
+    /// The cheapest tier that fits the budget: what a real run does.
+    Auto,
+    /// Every pair sum with its two summands, sixteen bytes a pair.
+    Full,
+    /// Every pair sum as a bucket and a rest, no summands.
+    Compact,
+    /// One key per orbit of the signed Frobenius group, `2n` times
+    /// fewer.
+    Folded,
 }
 
 pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
@@ -939,15 +1078,19 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     // ── Stage 1: select ────────────────────────────────────────────
     let t0 = Instant::now();
     let mut select_ran = false;
-    let (spec, fb): (FactorBaseSpec, FrobeniusFactorBase) =
+    let (spec, fb, selection_cost): (
+        FactorBaseSpec,
+        FrobeniusFactorBase,
+        Option<FactorBaseSelectionCost>,
+    ) =
         if state.select.status == StageStatus::Complete && fb_path.exists() {
             let doc: FactorBaseDocument = read_json(&fb_path)?;
             if !doc.matches(&c) {
                 return Err("factor_base.json does not belong to this curve".into());
             }
-            let fb = experiment::materialize(&c, &doc.spec)?;
+            let (fb, cost) = experiment::materialize_with_selection_cost(&c, &doc.spec)?;
             say(&format!("[1/4] select: reused {}", FACTOR_BASE_FILE));
-            (doc.spec, fb)
+            (doc.spec, fb, cost)
         } else {
             select_ran = true;
             let (spec, search_report) = match &p.factor_base {
@@ -965,7 +1108,7 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                         "elapsed_ms":report.elapsed_ms,"top":top})))
                 }
             };
-            let fb = experiment::materialize(&c, &spec)?;
+            let (fb, cost) = experiment::materialize_with_selection_cost(&c, &spec)?;
             let doc = FactorBaseDocument {
                 schema_version: 1,
                 degree: c.n,
@@ -991,12 +1134,15 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 fb.points.len(),
                 fb.unknowns()
             ));
-            (spec, fb)
+            (spec, fb, cost)
         };
     if !select_ran {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":false}));
     } else if stage_reports.last().map_or(true, |v| v["stage"] != "select") {
         stage_reports.push(json!({"stage":"select","status":"complete","ran":true}));
+    }
+    if let (Some(cost), Some(report)) = (selection_cost, stage_reports.last_mut()) {
+        report["selection_cost"] = json!(cost);
     }
     let columns = crypto_lib::cryptanalysis::koblitz_index_calculus::projected_signed_orbit_count(&c, &fb);
     if let Some(window) = p.collection_window {
@@ -1007,7 +1153,10 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
             ));
         }
     }
-    let factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
+    let mut factor_base_summary = experiment::factor_base_json(&spec, &fb, columns);
+    if let Some(cost) = selection_cost {
+        factor_base_summary["selection_cost"] = json!(cost);
+    }
     // Projecting the materialized base into signed Frobenius columns is
     // part of constructing its usable predicate. It used to sit between
     // the select and collect timers, which omitted one complete orbit-map
@@ -1064,6 +1213,20 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     let mut relations_now = 0usize;
     let mut trials_now = 0u64;
     let mut summands_scanned_now = 0u64;
+    // Columns already covered by the units on disk, so a resumed run
+    // aims at the same set a straight-through run would, and the report
+    // can state coverage even when every unit was reused.
+    let mut coverage = match p.collection_aim {
+        true => {
+            let mut cov =
+                ColumnCoverage::new(&c, &fb).ok_or("factor base has no projected columns")?;
+            for doc in units.values() {
+                cov.add(&doc.relations);
+            }
+            Some(cov)
+        }
+        false => None,
+    };
     if !wanted.is_empty() {
         say(&format!(
             "[2/4] collect: running {} work unit(s) of {} probes ({} already present) …",
@@ -1081,12 +1244,32 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         let collector = RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
             .ok_or("factor base cannot decompose with this summand count")?;
         for &u in &wanted {
-            let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u)?;
+            // `None` sweeps.  The first unit of a fresh run has every
+            // column at zero mentions, and a window over every column
+            // *is* the sweep, so aiming costs nothing until the counts
+            // start to differ.  It stays on after coverage completes,
+            // aiming then at the once-mentioned columns, because that is
+            // the phase where the run is short of rank rather than of
+            // coverage and where the tail actually is.
+            let aim = coverage
+                .as_ref()
+                .map(|cov| cov.missing_points())
+                .filter(|pts| !pts.is_empty());
+            let doc =
+                collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, u, aim.as_deref())?;
+            if let Some(cov) = coverage.as_mut() {
+                cov.add(&doc.relations);
+            }
             say(&format!(
-                "      unit {u:05}: {} relations from {} probes ({:.2}s)",
+                "      unit {u:05}: {} relations from {} probes ({:.2}s){}",
                 doc.relations.len(),
                 doc.count,
-                doc.elapsed_seconds
+                doc.elapsed_seconds,
+                match coverage.as_ref() {
+                    Some(cov) =>
+                        format!(", {}/{} columns covered", cov.covered(), cov.columns()),
+                    None => String::new(),
+                }
             ));
             units_ran += 1;
             relations_now += doc.relations.len();
@@ -1120,6 +1303,13 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
         "summands_scanned_now":summands_scanned_now,
         "trials_total":trials_total,"relations_total":state.relations_collected,
         "summands_scanned_total":summands_scanned_total,
+        // What the run aimed at, and how far coverage got: the number
+        // aiming exists to move is `relations_total`, and without the
+        // coverage beside it a reader cannot tell a run that finished
+        // from one that ran out of units.
+        "aimed":p.collection_aim,
+        "columns_covered":coverage.as_ref().map(|cov| cov.covered()),
+        "columns":coverage.as_ref().map(|cov| cov.columns()),
         "elapsed_seconds":t1.elapsed().as_secs_f64()}));
     if units_ran == 0 {
         say(&format!(
@@ -1184,6 +1374,17 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                 RelationCollector::with_pair_table(&c, &fb, &ic, pair.as_ref())
                     .ok_or("factor base cannot decompose with this summand count")?
             };
+            // Coverage of every relation the solver already holds, so
+            // the first extension unit aims at what those left out.
+            let mut extend_coverage = match p.collection_aim {
+                true => {
+                    let mut cov = ColumnCoverage::new(&c, &fb)
+                        .ok_or("factor base has no projected columns")?;
+                    cov.add(&merged);
+                    Some(cov)
+                }
+                false => None,
+            };
             while outcome.is_none() {
                 let report = solver.report();
                 let next = units.keys().max().map_or(0, |m| m + 1);
@@ -1194,12 +1395,32 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
                     "      {} accepted relations ({} rejected, {} duplicates) do not determine all {} columns; collecting unit {next:05} …",
                     report.relations, report.rejected_relations, report.duplicate_relations, report.columns
                 ));
-                let doc = collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, next)?;
+                // The extension loop runs precisely when the system is
+                // undetermined, so it is where aiming is worth most —
+                // and measurement says what it should aim at there is
+                // the least-mentioned columns, not the uncovered ones:
+                // at n = 41 a run that has covered every column still
+                // lacks a pivot on two of them, and both are columns
+                // mentioned exactly once.
+                let aim = extend_coverage
+                    .as_ref()
+                    .map(|cov| cov.missing_points())
+                    .filter(|pts| !pts.is_empty());
+                let doc =
+                    collect_unit(&c, &collector, &p, &digest, &spec, &rel_dir, next, aim.as_deref())?;
+                if let Some(cov) = extend_coverage.as_mut() {
+                    cov.add(&doc.relations);
+                }
                 say(&format!(
-                    "      unit {next:05}: {} relations from {} probes ({:.2}s)",
+                    "      unit {next:05}: {} relations from {} probes ({:.2}s){}",
                     doc.relations.len(),
                     doc.count,
-                    doc.elapsed_seconds
+                    doc.elapsed_seconds,
+                    match extend_coverage.as_ref() {
+                        Some(cov) =>
+                            format!(", {}/{} columns covered", cov.covered(), cov.columns()),
+                        None => String::new(),
+                    }
                 ));
                 solver.push(&doc.relations);
                 loaded += doc.relations.len();
@@ -1481,7 +1702,7 @@ fn finish(
         "evidence_scope":evidence_scope(p),
         "name":p.name,"degree":p.curve.degree,"curve_a":p.curve.curve_a,"subfield":p.curve.subfield,"curve_b":p.curve.curve_b,
         "summands":p.summands,"descent_summands":p.descent_summands.unwrap_or(p.summands),
-        "collection_window":p.collection_window,"solver":p.solver,
+        "collection_window":p.collection_window,"collection_aim":p.collection_aim,"solver":p.solver,
         "params_digest":state.params_digest,"run_directory":args.dir.display().to_string(),"run_number":state.runs,
         "resumed":state.runs>1,"stop_after":args.stop_after,
         "factor_base":factor_base,
@@ -1553,6 +1774,7 @@ fn collect_unit(
     spec: &FactorBaseSpec,
     rel_dir: &Path,
     unit: usize,
+    aim: Option<&[u32]>,
 ) -> Result<RelationUnitDocument, String> {
     let work = RelationWorkUnit {
         seed: p.seed,
@@ -1561,7 +1783,7 @@ fn collect_unit(
             .ok_or("work unit range overflows")?,
         count: p.collection.unit_trials,
     };
-    let (relations, report) = collector.collect(work);
+    let (relations, report) = collector.collect_aimed(work, aim);
     let doc = RelationUnitDocument {
         schema_version: 1,
         params_digest: digest.to_string(),
@@ -1581,4 +1803,131 @@ fn collect_unit(
     };
     write_atomic(&unit_path(rel_dir.parent().unwrap_or(rel_dir), unit), &doc)?;
     Ok(doc)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crypto_lib::cryptanalysis::koblitz_index_calculus::build_subgroup_orbit_factor_base;
+
+    fn params(unit_trials: u64, units: usize, window: Option<u32>, targets: usize) -> WorkflowParams {
+        let mut p: WorkflowParams =
+            serde_json::from_value(json!({
+                "schema_version": 1,
+                "curve": {"degree": 19, "curve_a": 0},
+                "factor_base": {"mode": "spec", "spec": {"kind": "subgroup_orbits", "seed": 5, "points": 400}},
+            }))
+            .expect("defaults parse");
+        p.collection.unit_trials = unit_trials;
+        p.collection.units = units;
+        // The cap the driver may extend to, deliberately far above the
+        // planned pass: the budget must not read this one.
+        p.collection.max_units = 512;
+        p.collection_window = window;
+        // The scanning case, so the collection-volume tests exercise a
+        // run that actually walks summands; the condition itself is
+        // pinned in `only_the_three_summand_pair_table_scan_walks_summands`.
+        p.summands = 3;
+        p.solver = Solver::PairTable;
+        p.descent_summands = Some(2);
+        p.targets = (0..targets).map(|i| serde_json::from_value(json!({"random_seed": i})).unwrap()).collect();
+        p
+    }
+
+    #[test]
+    fn the_probe_budget_is_the_run_s_own_collection_volume() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        let points = fb.points.len() as u64;
+
+        // Exactly what the collect stage will report as summands
+        // scanned: probes times the window each probe walks.
+        let b = probe_budget(&kc, &fb, &params(1_000, 3, Some(64), 8));
+        assert_eq!(b.summands_scanned, 1_000 * 3 * 64);
+
+        // `units` is the planned pass; `max_units` is a cap and must not
+        // enter the estimate, or every run would be priced for its worst
+        // case and the fold would never be chosen.
+        let mut wide = params(1_000, 3, Some(64), 8);
+        wide.collection.max_units = 100_000;
+        assert_eq!(probe_budget(&kc, &fb, &wide).summands_scanned, b.summands_scanned);
+
+        // No window is a full scan: the whole base, once per probe.
+        let full = probe_budget(&kc, &fb, &params(1_000, 3, None, 8));
+        assert_eq!(full.summands_scanned, 1_000 * 3 * points);
+        // And a window wider than the base is the base, not the window.
+        let clamped = probe_budget(&kc, &fb, &params(1_000, 3, Some(1 << 20), 8));
+        assert_eq!(clamped.summands_scanned, full.summands_scanned);
+    }
+
+    #[test]
+    fn only_the_three_summand_pair_table_scan_walks_summands() {
+        // `CollectionReport::summands_scanned` is `trials x |F|` exactly
+        // when `m == 3` and the strategy is the pair table, and zero
+        // otherwise: no other path tries base points as a third summand.
+        // Pricing a scan that never happens would charge the fold for
+        // hundreds of millions of probes it does not pay and push every
+        // `m = 2` and `m = 4` run onto the compact tier.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+
+        let mut three = params(1_000, 3, Some(64), 8);
+        three.summands = 3;
+        assert_eq!(probe_budget(&kc, &fb, &three).summands_scanned, 1_000 * 3 * 64);
+
+        for m in [2u8, 4] {
+            let mut other = params(1_000, 3, Some(64), 8);
+            other.summands = m;
+            assert_eq!(
+                probe_budget(&kc, &fb, &other).summands_scanned,
+                0,
+                "m = {m} does not scan summands"
+            );
+        }
+
+        // Nor does another decomposition oracle, whatever the summands.
+        let mut sat = params(1_000, 3, Some(64), 8);
+        sat.summands = 3;
+        sat.solver = Solver::Sat;
+        assert_eq!(probe_budget(&kc, &fb, &sat).summands_scanned, 0);
+
+        // The descent estimate is unaffected either way: it prices
+        // probes the descent makes, not summands collection walks.
+        assert!(probe_budget(&kc, &fb, &three).descent_probes > 0);
+        let mut two = params(1_000, 3, Some(64), 8);
+        two.summands = 2;
+        assert!(probe_budget(&kc, &fb, &two).descent_probes > 0);
+    }
+
+    #[test]
+    fn the_descent_estimate_is_the_counting_bound_per_target() {
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        let points = fb.points.len() as u128;
+        // N / C(|F| + m - 1, m) with m = 2, the contract's own floor.
+        let reachable = points * (points + 1) / 2;
+        let r: u128 = kc.subgroup_order.to_string().parse().unwrap();
+        let expected = (r / reachable).max(1) as u64;
+
+        for targets in [1usize, 8, 32] {
+            let b = probe_budget(&kc, &fb, &params(1_000, 3, Some(64), targets));
+            assert_eq!(b.descent_probes, expected * targets as u64, "{targets} targets");
+        }
+    }
+
+    #[test]
+    fn a_run_that_probes_more_is_priced_for_a_cheaper_probe() {
+        // The whole point of wiring this through: the tier is a function
+        // of the probing volume, so two runs on the same base can want
+        // different representations.  A base wide enough for the fold,
+        // probed a little, keeps it; probed a great deal, it does not.
+        let kc = KoblitzCurve::new(0, 19).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        let (points, orbits) = (fb.points.len(), fb.signed_orbits.len());
+
+        let light = ProbeBudget { summands_scanned: 0, descent_probes: 0 };
+        let heavy = ProbeBudget { summands_scanned: u32::MAX as u64, descent_probes: 0 };
+        assert!(PairSumTable::fold_is_cheaper(points, kc.n, orbits, light));
+        assert!(!PairSumTable::fold_is_cheaper(points, kc.n, orbits, heavy));
+    }
 }

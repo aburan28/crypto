@@ -597,6 +597,41 @@ class Collisions(unittest.TestCase):
         self.assertEqual(hits, 0)
         self.assertEqual(conn.stored, [])
 
+    def progressRow(self, conn):
+        return next(args for q, args in conn.queries if "INSERT INTO dp_ingest_progress" in q)
+
+    def test_a_re_report_from_another_object_is_counted_on_the_progress_row(self):
+        # The 2026-09-20 case in miniature: Modal run 3's point already held
+        # from AWS slot 2 under the same seed. Not a collision -- and not
+        # silent either: the object's progress row carries it, so the page can.
+        conn, (added, seen, hits) = self.ingest(
+            record(7) + record(8), inserted=0,
+            candidates=[self.candidate(b"pk7", 7, 7), self.candidate(b"pk8", 8, 8)])
+        self.assertEqual((added, seen, hits), (0, 2, 0))
+        campaign, key, records, duplicates = self.progressRow(conn)
+        self.assertEqual((records, duplicates), (2, 2))
+        self.assertTrue(any("re-reports" in line for line in self.logged))
+
+    def test_an_objects_own_rows_are_not_re_reports(self):
+        # The join returns the object's own freshly inserted rows too (same
+        # worker_id); a retried partial ingest must not count them.
+        own = list(self.candidate(b"pk", 7, 7))
+        own[5] = dp_ingest.workerId(ORBIT)
+        conn, _ = self.ingest(record(7) + record(8), inserted=1, candidates=[tuple(own)])
+        self.assertEqual(self.progressRow(conn)[3], 0)
+
+    def test_a_collision_is_not_also_a_re_report(self):
+        conn, (_, _, hits) = self.ingest(
+            record(7), inserted=0, candidates=[self.candidate(b"pk", 7, 9)])
+        self.assertEqual(hits, 1)
+        self.assertEqual(self.progressRow(conn)[3], 0)
+
+    def test_the_progress_table_grows_the_column_it_needs(self):
+        self.assertIn("ADD COLUMN IF NOT EXISTS duplicates", dp_ingest.PROGRESS_DUPLICATES_DDL)
+        conn = CollisionConn()
+        dp_ingest.ensureProgress(conn)
+        self.assertTrue(any("duplicates" in q for q, _ in conn.queries))
+
     def test_one_seed_stored_at_another_width_is_not_a_collision(self):
         # verify() already reports that the old ingester's column widths differ
         # from this program's. Comparing bytes would call every legacy
@@ -919,6 +954,8 @@ class SnapshotCursor:
         self.conn.queries.append(flat)
         if "FROM dp_ingest_hourly" in flat:
             self.rows = self.conn.hourly
+        elif "FROM dp_ingest_progress" in flat:
+            self.rows = self.conn.progress
         elif "rho_collisions" in flat:
             self.one = (0, None)
         elif "rho_campaigns" in flat:
@@ -933,9 +970,19 @@ class SnapshotCursor:
         return self.rows
 
 
+def stream(slot, records, duplicates=0, recordsDay=0, duplicatesDay=0, streamId="ab" * 16,
+           covered=None):
+    """One (slot, stream) row as the progress query returns it."""
+    return (str(slot), streamId, records, records if covered is None else covered,
+            duplicates, recordsDay, duplicatesDay)
+
+
 class SnapshotConn:
-    def __init__(self, hourly=()):
+    def __init__(self, hourly=(), progress=()):
         self.hourly = list(hourly)
+        # (slot as text, stream, records, covered, duplicates, records_last_day,
+        #  duplicates_last_day) -- see stream() above.
+        self.progress = list(progress)
         self.queries = []
 
     def cursor(self):
@@ -974,6 +1021,149 @@ class Snapshot(unittest.TestCase):
 
     def test_the_hourly_series_is_still_published(self):
         self.assertEqual([h["dps"] for h in self.payload["hourly"]], [7, 5])
+
+    def test_the_per_slot_counts_come_from_the_progress_table_not_the_points(self):
+        conn = SnapshotConn(progress=[stream(90003, 906324, 813112, 906324, 813112)])
+        snapshot = dp_ingest.campaignSnapshot(conn)
+        self.assertEqual(snapshot["per_slot_records"][90003]["duplicates"], 813112)
+        self.assertEqual(snapshot["per_slot_records"][90003]["records"], 906324)
+        self.assertFalse([q for q in conn.queries if "distinguished_points" in q])
+        self.assertTrue([q for q in conn.queries if "FROM dp_ingest_progress" in q])
+
+    def test_a_re_uploaded_stream_is_counted_once(self):
+        # modal_sync re-sent run 1's whole corpus from offset 0 twice on
+        # 2026-09-21; the bucket listed 4.6M records for a 1.57M-record run.
+        # Within a stream the furthest offset is the count.
+        conn = SnapshotConn(progress=[
+            stream(90001, 4615427, covered=1569577, streamId="aa" * 16),
+            stream(90001, 1000, covered=1000, streamId="bb" * 16),  # a second stream adds
+        ])
+        snapshot = dp_ingest.campaignSnapshot(conn)
+        self.assertEqual(snapshot["per_slot_records"][90001]["records"], 1569577 + 1000)
+        self.assertEqual(snapshot["per_slot_records"][90001]["uploaded"], 4615427 + 1000)
+
+    def test_legacy_objects_without_a_stream_are_summed(self):
+        conn = SnapshotConn(progress=[(str(2), None, 12000000, None, 0, 0, 0),
+                                      stream(2, 2049457, covered=2049457)])
+        snapshot = dp_ingest.campaignSnapshot(conn)
+        self.assertEqual(snapshot["per_slot_records"][2]["records"], 12000000 + 2049457)
+
+
+class CutoffVerdict(unittest.TestCase):
+    """A slot at another distinguished-point weight is named, not averaged in.
+
+    Walks stop at their own distinguished point, so a weight-35 walk meeting a
+    weight-32 walk is recorded about 4% of the time and a weight-34 walk's
+    about 12%. On 2026-09-20 four Modal runs collected at 34 and 35 against the
+    campaign's 32 and lifted the page's rate threefold while adding almost
+    nothing anyone could collide with.
+    """
+
+    def test_the_theoretical_interval_is_the_binomial_tail(self):
+        self.assertAlmostEqual(dp_ingest.theoreticalIterPerDpLog2(32), 29.01, places=2)
+        self.assertAlmostEqual(dp_ingest.theoreticalIterPerDpLog2(34), 25.84, places=2)
+
+    def test_the_estimate_reads_the_live_ratios(self):
+        # dp_ingest --work against the bucket on 2026-09-21, coverage-counted:
+        # the AWS fleet and Modal runs 1-4 at 2^28.41, slots 0/1 and runs
+        # 4243-4245 at 2^25.3 (the documented weight-34 interval), run 4242 at
+        # 2^23.6.
+        self.assertEqual(dp_ingest.estimateDpWeight(28.41), 32)
+        self.assertEqual(dp_ingest.estimateDpWeight(25.27), 34)
+        self.assertEqual(dp_ingest.estimateDpWeight(25.30), 34)
+        self.assertEqual(dp_ingest.estimateDpWeight(23.58), 35)
+
+    def test_a_campaign_slot_passes_and_a_loose_one_does_not(self):
+        # Run 90002 as measured; run 94243's header over the record count the
+        # bucket listed before re-uploads were deduplicated (2^24.26).
+        ratio, weight, ok = dp_ingest.dpWeightVerdict(76797696 * 6160384, 1324201)
+        self.assertTrue(ok)
+        self.assertEqual(weight, 32)
+        self.assertAlmostEqual(ratio, 28.41, places=1)
+        ratio, weight, ok = dp_ingest.dpWeightVerdict(8533504 * 4000000, 1699148)
+        self.assertFalse(ok)
+        self.assertEqual(weight, 35)
+        # Run 4243 coverage-counted: 19576320 steps x 4M walks, 1.9M records.
+        ratio, weight, ok = dp_ingest.dpWeightVerdict(19576320 * 4000000, 1900000)
+        self.assertFalse(ok)
+        self.assertEqual(weight, 34)
+
+    def test_too_few_records_is_no_verdict(self):
+        self.assertEqual(dp_ingest.dpWeightVerdict(10 ** 15, 100), (None, None, None))
+        self.assertEqual(dp_ingest.dpWeightVerdict(0, 10 ** 6), (None, None, None))
+
+    def test_slot_of_key(self):
+        self.assertEqual(dp_ingest.slotOfKey(ORBIT), 140)
+        self.assertEqual(dp_ingest.slotOfKey(LEGACY), 2)
+        self.assertIsNone(dp_ingest.slotOfKey("ckpt/slot-00002.ck"))
+
+    def test_coverage_from_a_listing_dedupes_re_uploaded_stretches(self):
+        sid = "a8b4133d5c5f414ebd1337f15603588d"
+        key = lambda off, sha: "dp/slot-90001/%s-%016d-%s.bin" % (sid, off, sha * 32)
+        objects = [
+            (key(0, "aa"), 100, 1),          # first upload of records 0-99
+            (key(3200, "bb"), 50, 2),        # then 100-149
+            (key(0, "cc"), 150, 3),          # the whole thing again from offset 0
+            (LEGACY, 7, 0),                  # slot 2, legacy shape: summed
+            ("dp/slot-00002/%s-%016d-%s.bin" % ("cd" * 16, 0, "ee" * 32), 5, 4),
+        ]
+        rows = dp_ingest.coverageRows(objects)
+        covered = dp_ingest.coveredRecords(rows)
+        self.assertEqual(covered[90001], 150)
+        self.assertEqual(covered[2], 12)
+
+    def payload(self, progress):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        items = [
+            ("ckpt/slot-90002/%s.ck" % ("ab" * 32), now, ckpt(76797696, 385024, 16, runId=2)),
+            ("ckpt/slot-94243/%s.ck" % ("cd" * 32), now, ckpt(8533504, 250000, 16, runId=4243)),
+            ("ckpt/retired/slot-00007.ck", now, ckpt(8533504, 250000, 16, runId=8)),
+        ]
+        snapshot = dp_ingest.campaignSnapshot(SnapshotConn(progress=progress))
+        return dp_ingest.statusPayload(None, FakeWorkS3(items), "bucket", snapshot=snapshot)
+
+    def test_the_page_gets_the_counts_and_the_rows_stay_private(self):
+        payload = self.payload([
+            stream(90002, 1324201, 0, 1000, 0),
+            stream(94243, 1699148, 0, 1699148, 0),
+            stream(7, 1699148, 0, 0, 0),
+        ])
+        work = payload["work"]
+        self.assertEqual(work["campaign_dp_weight"], 32)
+        self.assertEqual(work["iterations_per_dp_log2_expected"], 28.41)
+        # 94243 and the retired 7 are off weight; only 94243 is still walking.
+        self.assertEqual(work["off_weight_slots"], 2)
+        self.assertEqual(work["off_weight_walking_slots"], 1)
+        rows = {s["slot"]: s for s in work["per_slot"]}
+        self.assertTrue(rows[90002]["dp_weight_ok"])
+        self.assertFalse(rows[94243]["dp_weight_ok"])
+        self.assertEqual(rows[94243]["dp_weight_estimate"], 35)
+        self.assertEqual(rows[94243]["records"], 1699148)
+        public = dp_ingest.publicStatus(payload)
+        self.assertNotIn("per_slot", public["work"])
+        self.assertEqual(public["work"]["off_weight_walking_slots"], 1)
+
+    def test_re_reports_are_published_as_ingest_counts(self):
+        payload = self.payload([
+            stream(90002, 906324, 813112, 906324, 813112),
+            stream(94243, 1699148, 0, 1699148, 0),
+        ])
+        ingest = payload["ingest"]
+        self.assertEqual(ingest["duplicate_records"], 813112)
+        self.assertEqual(ingest["duplicate_records_last_day"], 813112)
+        self.assertEqual(ingest["duplicate_slots_last_day"], 1)
+        rows = {s["slot"]: s for s in payload["work"]["per_slot"]}
+        self.assertEqual(rows[90002]["duplicates"], 813112)
+
+    def test_a_cached_snapshot_without_the_counts_still_publishes(self):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        items = [("ckpt/slot-90001/%s.ck" % ("ab" * 32), now, ckpt(50, 2, 4))]
+        payload = dp_ingest.statusPayload(None, FakeWorkS3(items), "bucket", snapshot={
+            "curve_id": 131, "dps": 1, "dps_last_hour": 0, "dps_last_day": 0,
+            "collisions": 0, "hourly": []})
+        self.assertEqual(payload["work"]["off_weight_slots"], 0)
+        self.assertEqual(payload["ingest"]["duplicate_records"], 0)
+        self.assertIsNone(payload["work"]["per_slot"][0]["dp_weight_ok"])
 
 
 class Windows(unittest.TestCase):
@@ -1023,8 +1213,9 @@ class StatusState(unittest.TestCase):
         self.assertEqual(self.state(60053195, 142035, 0, {"outstanding": 3795}), "COLLECTING")
 
 
-def ckpt(iterBase=10, threads=2, batch=4, runId=1):
-    return struct.pack("<8s6IQ", dp_ingest.CKPT_MAGIC, 1, 131, threads, batch, 64, runId, iterBase)
+def ckpt(iterBase=10, threads=2, batch=4, runId=1, lanes=1):
+    # lanes=1 is the packed engine, which is what the campaign fleet runs.
+    return struct.pack("<8s6IQ", dp_ingest.CKPT_MAGIC, 1, 131, threads, batch, lanes, runId, iterBase)
 
 
 class FakeWorkS3:
@@ -1081,6 +1272,16 @@ class CheckpointWork(unittest.TestCase):
         self.assertEqual(slots[0]["slot"], 140)
         self.assertFalse(slots[0]["retired"])
         self.assertEqual(slots[0]["iterations"], 800)
+
+    def test_bitsliced_lanes_multiply_the_work(self):
+        # walksPerLaunch is threads x BATCH x LANES in the client; the header
+        # carries LANES (1 packed, the word width bitsliced). Reading only
+        # threads x batch undercounted slot 195's 256 lanes by 256x.
+        total, slots = self.work([
+            ("ckpt/slot-00195/%s.ck" % self.hash, self.recent, ckpt(10, 21, 16, lanes=256)),
+        ])
+        self.assertEqual(slots[0]["walks"], 21 * 16 * 256)
+        self.assertEqual(total, 10 * 21 * 16 * 256)
 
     def test_retired_prefix_still_counts(self):
         total, slots = self.work([
@@ -1177,6 +1378,125 @@ class WalkRate(unittest.TestCase):
         self.assertEqual(public["work"]["walking_slots"], 1)
 
 
+class StatusPublisherTests(unittest.TestCase):
+    """Status must keep moving while an ingest pass is stuck."""
+
+    def test_publish_once_writes_without_waiting_for_a_pass(self):
+        puts = []
+
+        class BucketS3:
+            def get_object(self, **kw):
+                raise KeyError("none yet")
+
+            def put_object(self, **kw):
+                puts.append(kw)
+
+            def get_paginator(self, name):
+                class Pages:
+                    def paginate(self, **kw):
+                        return iter([])
+                return Pages()
+
+            def list_objects_v2(self, **kw):
+                return {}
+
+        snapshot = {
+            "curve_id": 131, "dp_mask_bits": 32, "campaign_created_at": None,
+            "dps": 7, "dps_last_hour": 0, "dps_last_day": 0,
+            "first_dp_at": None, "last_dp_at": None, "collisions": 0,
+            "latest_collision_at": None, "hourly": [],
+        }
+
+        class Conn:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def cursor(self):
+                raise AssertionError("publish_once should use the cached snapshot")
+
+        publisher = dp_ingest.StatusPublisher(
+            connect=lambda: Conn(),
+            s3=BucketS3(),
+            bucket="bucket",
+            statusBucket="status",
+            status_every=30.0,
+            snapshot_every=0.0,
+        )
+        publisher._snapshot = snapshot
+        publisher._snap_at = time.time()
+        publisher.update_ingest({"outstanding": 3, "unrecognised": 0, "newest": time.time()})
+        with mock.patch.object(dp_ingest, "campaignSnapshot", return_value=snapshot):
+            publisher.publish_once()
+        self.assertEqual(len(puts), 1)
+        body = json.loads(puts[0]["Body"].decode())
+        self.assertEqual(body["dps"], 7)
+        self.assertEqual(body["ingest"]["outstanding_objects"], 3)
+
+    def test_kick_publishes_without_waiting_out_the_interval(self):
+        puts = []
+
+        class BucketS3:
+            def get_object(self, **kw):
+                raise KeyError("none yet")
+
+            def put_object(self, **kw):
+                puts.append(time.time())
+
+            def list_objects_v2(self, **kw):
+                return {}
+
+        snapshot = {
+            "curve_id": 131, "dp_mask_bits": 32, "campaign_created_at": None,
+            "dps": 1, "dps_last_hour": 0, "dps_last_day": 0,
+            "first_dp_at": None, "last_dp_at": None, "collisions": 0,
+            "latest_collision_at": None, "hourly": [],
+        }
+
+        class Conn:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+        # Long interval: without kick(), a second publish would not arrive in time.
+        publisher = dp_ingest.StatusPublisher(
+            connect=lambda: Conn(),
+            s3=BucketS3(),
+            bucket="bucket",
+            statusBucket="status",
+            status_every=30.0,
+            snapshot_every=0.0,
+        )
+        with mock.patch.object(dp_ingest, "campaignSnapshot", return_value=snapshot):
+            publisher.start()
+            deadline = time.time() + 2.0
+            while not puts and time.time() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(puts, "first publish on start never arrived")
+            before = len(puts)
+            publisher.kick()
+            deadline = time.time() + 2.0
+            while len(puts) <= before and time.time() < deadline:
+                time.sleep(0.01)
+            publisher.stop(timeout=2.0)
+        self.assertGreater(len(puts), before, "kick must publish without waiting out status_every")
+
+    def test_main_wires_the_publisher_thread(self):
+        path = os.path.join(os.path.dirname(__file__), "dp_ingest.py")
+        with open(path, encoding="utf-8") as fh:
+            source = fh.read()
+        self.assertIn("class StatusPublisher", source)
+        self.assertIn("publisher.start()", source)
+        self.assertIn("publisher.update_ingest(ingest)", source)
+        # The old pass-then-publish gate must not come back: it is what froze
+        # the feed whenever onePass ran long.
+        self.assertNotIn("time.time() - published >= args.status_every", source)
+
+
 class Defaults(unittest.TestCase):
     def test_status_every_default_is_three_minutes(self):
         import argparse
@@ -1223,6 +1543,108 @@ class DatabaseUrl(unittest.TestCase):
                 url = dp_ingest.databaseUrl()
         self.assertIn("sslmode=require", url)
         self.assertIn("rho-dp.example.com", url)
+
+
+class LambdaHandler(unittest.TestCase):
+    """The scheduled-invocation wrapper. It must add no rules of its own."""
+
+    def test_every_flag_it_builds_is_one_dp_ingest_accepts(self):
+        # The point of this test is that it goes through the REAL parser. A
+        # flag renamed in dp_ingest.py has to fail here, in a second, rather
+        # than on the first scheduled invocation after a deploy.
+        import ingest_lambda
+
+        for env in (
+            {},
+            {"RHO_INGEST_INDEX": "1"},
+            {"RHO_INGEST_PREFIX": "dp/slot-00140/"},
+            {"RHO_INGEST_INDEX": "1", "RHO_INGEST_PREFIX": "dp/slot-00002/"},
+        ):
+            argv = ingest_lambda.build_argv(env)
+            with mock.patch.dict(os.environ, {"RHO_BUCKET": "b"}, clear=False):
+                parser = self._parser()
+                try:
+                    args = parser.parse_args(argv)
+                except SystemExit:  # argparse exits on an unknown flag
+                    self.fail("dp_ingest rejects argv %r built from env %r" % (argv, env))
+            self.assertTrue(args.once, "a scheduled pass must be --once")
+
+    def _parser(self):
+        # dp_ingest builds its parser inside main(), so borrow it by running
+        # main() up to parse_args with a sentinel that stops it there.
+        import argparse
+
+        captured = {}
+        real = argparse.ArgumentParser.parse_args
+
+        def capture(self, argv=None, namespace=None):
+            captured["parser"] = self
+            raise _StopParsing()
+
+        argparse.ArgumentParser.parse_args = capture
+        try:
+            dp_ingest.main(["--once"])
+        except _StopParsing:
+            pass
+        except SystemExit:
+            pass
+        finally:
+            argparse.ArgumentParser.parse_args = real
+        self.assertIn("parser", captured, "could not borrow dp_ingest's parser")
+        return captured["parser"]
+
+    def test_index_is_skipped_unless_asked_for(self):
+        import ingest_lambda
+
+        # A daemon creates the found_at index once at startup. A function that
+        # starts every two minutes must not try, except on the first run
+        # against a new store.
+        self.assertIn("--no-index", ingest_lambda.build_argv({}))
+        self.assertNotIn("--no-index", ingest_lambda.build_argv({"RHO_INGEST_INDEX": "1"}))
+        # Only real affirmatives count, so a stray "0" or "false" in the
+        # function's environment does not quietly re-enable it.
+        for falsey in ("0", "false", "no", "", "off"):
+            self.assertIn("--no-index", ingest_lambda.build_argv({"RHO_INGEST_INDEX": falsey}))
+
+    def test_it_restates_no_configuration_dp_ingest_already_reads(self):
+        import ingest_lambda
+
+        # If this wrapper started passing --bucket or --threads it would
+        # become a second place the ingest is configured, which is the drift
+        # controlplane/README.md records as having cost a corrupted run id.
+        argv = ingest_lambda.build_argv({"RHO_BUCKET": "b", "RHO_INGEST_THREADS": "12"})
+        for flag in ("--bucket", "--status-bucket", "--threads",
+                     "--pass-objects", "--metric-namespace", "--interval"):
+            self.assertNotIn(flag, argv, "%s belongs to dp_ingest's env defaults" % flag)
+
+    def test_a_successful_pass_returns_rc_zero(self):
+        import ingest_lambda
+
+        with mock.patch.object(dp_ingest, "main", return_value=0) as main:
+            result = ingest_lambda.handler({}, None)
+        self.assertEqual(result["rc"], 0)
+        self.assertEqual(main.call_args[0][0], ingest_lambda.build_argv())
+
+    def test_a_failed_pass_raises_so_the_errors_metric_sees_it(self):
+        import ingest_lambda
+
+        # Returning quietly on failure is how a scheduled function becomes as
+        # silent as the dead instance it replaces.
+        with mock.patch.object(dp_ingest, "main", return_value=1):
+            with self.assertRaises(RuntimeError) as caught:
+                ingest_lambda.handler({}, None)
+        self.assertIn("rc=1", str(caught.exception))
+
+    def test_an_exception_inside_the_pass_is_not_swallowed(self):
+        import ingest_lambda
+
+        with mock.patch.object(dp_ingest, "main", side_effect=OSError("RDS unreachable")):
+            with self.assertRaises(OSError):
+                ingest_lambda.handler({}, None)
+
+
+class _StopParsing(Exception):
+    pass
 
 
 if __name__ == "__main__":
