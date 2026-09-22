@@ -3002,3 +3002,194 @@ command rather than a thing to remember.
 **Class: accounting.** Nothing was made faster. Two null phases are
 priced, and a limitation was attributed to the wrong variable and is now
 attributed to the right one.
+
+## Collection was waiting for rank, not coverage — 2026-09-22
+
+Collection is 60% of this pipeline and its cost is proportional to the
+relations banked, so the question of *why* a run needs 333 relations for
+192 columns decides whether anything is left to win. The thread had
+never asked it. Asking it turned out to matter more than any of the
+levers tried on top.
+
+### The boundaries, before measuring
+
+Two floors bound the relation count, and they are different:
+
+- **The counting floor.** The relation matrix has one unknown per
+  projected column, so a determined system needs at least as many
+  independent rows as columns: `R ≥ C`. At `|F| = 15,744` on
+  `K_0/GF(2^41)`, `C = |F|/2n = 192`. This floor moves only with the
+  column count, so it cannot be tuned away.
+- **The coverage threshold.** A column no relation mentions has no
+  equation at all. With `m = 3` summands landing on uniformly random
+  columns, a column is missed with probability `e^{-3R/C}`, so coverage
+  needs `R > C·ln(C)/3 = 330` — which is *above* the counting floor, and
+  is therefore what a swept run actually waits for.
+
+And the reference, on the same instance with the same accounting: rho at
+`S = 0.1635`, pooled over 128 targets. Pooling matters here; rho's step
+count varies about 20% between seed sets, so a single set is not a
+reference. The generic floor is `S ≥ sqrt(pi/2A) = 0.1384` with
+`A = 2n = 82`.
+
+### What a finished run was waiting for
+
+`examples/koblitz_relation_coverage.rs` replays a run's banked relations
+in arrival order and reports where coverage completes and where full
+rank does. On the swept run both complete at relation **330** — the
+coverage threshold, to three figures, and not a coincidence: coverage
+and rank share it when rows are uniform. 62% of the scanning goes on the
+last 10% of columns.
+
+### Aiming at uncovered columns: a measured non-result
+
+The `m = 3` search fixes a third summand `k`, looks `target − P_k` up in
+the pair table, and so finds a triple whenever any of its three indices
+is scanned. A hit therefore always involves `column(k)`. Restrict the
+scan to the columns a run still needs and every relation it returns
+covers one — `Scan::Indices` names the summands, `Targets::Subset` keeps
+the window width the same so scans per trial and the reported counter do
+not move, and `ColumnCoverage` tracks what the matrix has.
+
+It works exactly as designed and buys almost nothing:
+
+| | coverage complete | full rank | total adds |
+|:--|--:|--:|--:|
+| swept | 330 | 330 | 6,911,843 |
+| aimed at uncovered columns | **117** | 309 | 6,773,987 |
+
+Coverage moved by `2.8×` — a hundredfold-style move in the number the
+thread had been tracking — and the total by `1.02×`. **Class:
+relabelling.** Coverage was never the constraint; it only looked like
+one because it sits at the same threshold as rank.
+
+### What it is actually waiting for
+
+The diagnosis is visible at the moment the row count first reaches the
+column count, the earliest a system can possibly be determined:
+
+| at 192 relations | swept | aimed at uncovered |
+|:--|--:|--:|
+| columns covered | 186 | 192 |
+| rank | 183 | **190** |
+| columns without a pivot | 9 | **2** |
+| mentions of those columns | six at 0x, two at 1x, one at 2x | **both exactly 1x** |
+| columns mentioned exactly once | 35 | 21 |
+
+A column mentioned once is pinned only if every other column in its row
+is pinned, so it is the likeliest place for the matrix to fall short. The
+set worth scanning is not "columns with no mention" but "columns with the
+fewest" — and that is a counter, not an elimination.
+
+`ColumnCoverage::missing_points` therefore returns the points of the
+columns at the current *minimum* mention count. One rule, no threshold
+to tune: it is the sweep while nothing is covered, the uncovered columns
+while some are, and the once-mentioned columns after that, which is the
+phase the run was stuck in.
+
+### The result, and why it is terminal
+
+Matched A/B at `|F| = 15,744`, window 256, 32 targets, both arms
+extending collection until the system is determined so neither is
+charged for units it did not need. Every cost priced: selection measured
+at this width, the table build at one addition per stored pair, the scan
+at the constant measured for this window and this base, the descent, and
+the linear algebra.
+
+| variant | relations | vs floor 192 | scans | total adds | `S` | `/rho` | verified | rejected |
+|:--|--:|--:|--:|--:|--:|--:|:--|--:|
+| swept | 333 | 1.73x | 1,459,200 | 6,911,843 | 0.2913 | 1.75 | 32/32 | 0 |
+| aimed at uncovered | 320 | 1.67x | 1,420,800 | 6,773,987 | 0.2855 | 1.71 | 32/32 | 0 |
+| **aimed at least-mentioned** | **197** | **1.03x** | **883,200** | **5,270,523** | **0.2221** | **1.33** | 32/32 | 0 |
+| aimed at least-mentioned, holdout | 197 | 1.03x | 883,200 | 5,270,516 | 0.2221 | 1.33 | 32/32 | 0 |
+
+`speedup = baseline_total_operations / candidate_total_operations`
+`= 6,911,843 / 5,270,523 = 1.311×`, against a pre-registered success
+condition of `1.3×`.
+
+Full rank is reached at **exactly 192 relations** — the counting floor.
+192 unknowns need 192 independent equations, so no collection strategy
+can bank fewer, and the 197 shown is the five-relation overshoot of a
+150-trial unit. The holdout on target seeds 900–931 reproduces 197
+relations and 883,200 scans exactly.
+
+**Class: advance.** The ratio to the counting floor fell from `1.73` to
+`1.03` and cannot fall below `1.00`; this lever is finished. It is worth
+saying just as plainly that the method is still `1.35×` rho: closing the
+relation count to its floor did not produce a crossover, and the
+remaining cost is now split 48% collection, 29% table build, 23%
+selection, with no phase dominant enough for another factor to hide in.
+
+### Two corrections inside this round
+
+**The window constant was measured on the wrong scan shape.** The
+collection-window round priced its scans at `2.31` adds a summand, taken
+from the *full* scan over the whole base. A windowed scan pays the same
+per-target prologue over `w` summands instead of `|F|`, so it costs more
+per summand, and the amount depends on the base width as well as the
+window. Measured with `examples/koblitz_window_cost.rs`:
+
+| base | window 256 | full scan |
+|--:|--:|--:|
+| 5,248 | 2.33 | 2.19 |
+| 8,528 | 2.52 | 2.31 |
+| 15,744 | 2.85 | 2.67 |
+
+`2.31` was right for the 5,248-point base the window was first measured
+on and undercharges every wider one by up to 23%. The rows below are
+re-priced at the constant for the base and window each actually ran.
+
+**A first version of that measurement invented the problem it found.**
+It drew each target with `mul_u64` — a scalar multiplication, about 59
+chained additions — which a narrow window divides over 256 summands and
+a full scan over 15,744. The curve came out at `5.78` adds a summand at
+window 256 against `2.72` at full scan, a fourfold penalty that would
+have cut the collection window's reported gain from `2.7×` to about
+`1.3×`. It was a property of the harness: collection does not multiply
+to reach its next probe, it walks, one addition per trial. Both
+measurements now walk, as `collect_walked` does. **Class: accounting** —
+and a reminder that a correction needs checking as hard as a result
+does, because this one was about to be published.
+
+`ScanScratch` belongs in the same paragraph. It takes four per-trial
+allocations out of the windowed scan's hot loop and measured `5.46 →
+5.58` adds a summand: no change, the allocator was already recycling the
+blocks. It stays, because the buffers are worth holding in one place,
+but not as a result.
+
+### The whole ladder at `n = 41`, re-priced
+
+Every row at the scan constant measured for its own base width and
+window, so the correction above is applied throughout rather than to the
+new rows alone. Superseded figures move here, they are not deleted.
+
+| step | `|F|` | window | adds/scan | relations | total adds | `S` | `/rho` | priced |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|
+| original rung, full scan | 5,248 | full | 2.19 | 124 | 33,589,843 | 1.4157 | 8.50 | measured |
+| + collection window | 5,248 | 164 | 2.43 | 120 | 13,764,117 | 0.5801 | 3.48 | interpolated, windows 128–256 |
+| + wider base | 16,400 | 500 | 2.72 | 675 | 10,980,083 | 0.4628 | 2.78 | interpolated, windows 256–512 |
+| + lean relation target | 16,400 | 256 | 2.78 | 406 | 8,056,053 | 0.3395 | 2.04 | measured |
+| + stop when determined | 15,744 | 256 | 2.85 | 333 | 6,911,843 | 0.2913 | 1.75 | measured |
+| **+ aim at least-mentioned** | 15,744 | 256 | 2.85 | **197** | **5,270,523** | **0.2221** | **1.33** | measured |
+
+`33,589,843 / 5,270,523 = 6.37×` fewer operations than the rung this
+started from, every row 32 of 32 verified against the planted secret,
+zero relations rejected. The three rows the earlier rounds reported at
+`3.24×`, `2.40×` and `1.78×` rho read `3.48×`, `2.78×` and `2.04×` here:
+they were priced at `2.31` adds a summand, which is the 5,248-point
+base's full-scan figure and undercharges a wide base with a narrow
+window. The shape of the ladder is unchanged; two of its steps are
+smaller than reported.
+
+### What is left
+
+| phase | share of the best run | can it fall? |
+|:--|--:|:--|
+| collection | 47.6% | only with the column count or the scan constant — the relation count is at its floor |
+| table build | 28.9% | `\|F\|²/4n + \|F\|`, one addition per stored pair |
+| selection | 23.4% | 79.5 adds a point, and the algebra it performs is far cheaper than that. The next thing to measure. |
+| descent | 0.0% | |
+| linear algebra | 0.06% | |
+
+No phase is dominant enough for another factor to hide in, which is the
+first time that has been true in this thread.
