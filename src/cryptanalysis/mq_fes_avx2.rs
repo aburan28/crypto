@@ -6,12 +6,15 @@
 //! specialise two outer Boolean variables into 4 independent lanes and run
 //! an `L = 8` (256-step) unrolled FFS Gray chunk with AVX2 XORs.
 //!
-//! Falls back when AVX2 is unavailable, `n < 10`, or the scalar path is
-//! preferred for early-exit `find_one`.  Engineering wall-time lever only;
-//! free-oracle floor unchanged.
+//! **Batch probe** (libfes `BATCH_MODE` / `avx2_asm_enum_batch`): OR equality
+//! masks across the chunk; only on a hit, rewind `Fl` and harvest.  That is
+//! the path auto-selected for sparse full enums.  Per-step harvest remains
+//! available via [`gray_ffs_avx2_8x32`] for explicit callers / early exit.
+//!
+//! Engineering wall-time lever only; free-oracle floor unchanged.
 //!
 //! Inspired by <https://github.com/cbouilla/libfes-lite> `avx2_8x32.c` /
-//! `avx2_codegen.py` (public-domain / study-library port of the ideas).
+//! `avx2_codegen_batch.py` (public-domain / study-library port of the ideas).
 
 #![cfg(any(target_arch = "x86", target_arch = "x86_64"))]
 
@@ -32,18 +35,30 @@ pub fn avx2_4x64_applicable(n: usize, m: usize) -> bool {
     is_x86_feature_detected!("avx2") && n >= OUTER + UNROLL && m > 0 && m <= 64
 }
 
-/// Solve by 4-lane AVX2 Gray FFS; `None` if inapplicable.
+/// Solve by 4-lane AVX2 Gray FFS with per-step harvest; `None` if inapplicable.
 pub fn gray_ffs_avx2_8x32(
     forms: &[QuadraticForm],
     max_solutions: usize,
 ) -> Option<Vec<u64>> {
-    // Name kept for callers; implementation is 4×u64 (see module docs).
     let n = forms.first()?.n;
     let m = forms.len();
     if !avx2_4x64_applicable(n, m) || forms.iter().any(|f| f.n != n) {
         return None;
     }
-    Some(unsafe { gray_ffs_avx2_4x64_inner(forms, n, m, max_solutions) })
+    Some(unsafe { gray_ffs_avx2_4x64_inner(forms, n, m, max_solutions, false) })
+}
+
+/// Solve by 4-lane AVX2 Gray FFS with **batch probe then harvest**.
+pub fn gray_ffs_avx2_8x32_batch(
+    forms: &[QuadraticForm],
+    max_solutions: usize,
+) -> Option<Vec<u64>> {
+    let n = forms.first()?.n;
+    let m = forms.len();
+    if !avx2_4x64_applicable(n, m) || forms.iter().any(|f| f.n != n) {
+        return None;
+    }
+    Some(unsafe { gray_ffs_avx2_4x64_inner(forms, n, m, max_solutions, true) })
 }
 
 #[target_feature(enable = "avx2")]
@@ -52,6 +67,7 @@ unsafe fn gray_ffs_avx2_4x64_inner(
     n: usize,
     m: usize,
     max_solutions: usize,
+    batch: bool,
 ) -> Vec<u64> {
     let n_inner = n - OUTER;
     let fq_len = (n_inner + 1) * (n_inner + 2) / 2;
@@ -80,7 +96,7 @@ unsafe fn gray_ffs_avx2_4x64_inner(
         }
     }
 
-    let mut fq_vec: Vec<__m256i> = fq_lanes
+    let fq_vec: Vec<__m256i> = fq_lanes
         .iter()
         .map(|lane| _mm256_loadu_si256(lane.as_ptr() as *const __m256i))
         .collect();
@@ -105,29 +121,108 @@ unsafe fn gray_ffs_avx2_4x64_inner(
         let gamma = idxq(k1 as usize, k2 as usize);
         let base = j << UNROLL;
 
-        for (step_i, &(a, kind, payload)) in L8_STEPS.iter().enumerate() {
-            if harvest_zeros(fl_vec[0], zero, base + step_i as u64, n_inner, &mut out, max_solutions)
-            {
+        if batch {
+            // Probe: accumulate OR of equality masks; no solution recording.
+            let fl_save: Vec<__m256i> = fl_vec.clone();
+            let mut acc = zero;
+            for &(a, kind, payload) in L8_STEPS.iter() {
+                let cmp = _mm256_cmpeq_epi64(fl_vec[0], zero);
+                acc = _mm256_or_si256(acc, cmp);
+                let a = a as usize;
+                let b = if kind == 0 {
+                    payload as usize
+                } else {
+                    alpha + payload as usize
+                };
+                fl_vec[a] = _mm256_xor_si256(fl_vec[a], fq_vec[b]);
+                fl_vec[0] = _mm256_xor_si256(fl_vec[0], fl_vec[a]);
+            }
+            let cmp = _mm256_cmpeq_epi64(fl_vec[0], zero);
+            acc = _mm256_or_si256(acc, cmp);
+            let updated = _mm256_xor_si256(fl_vec[beta], fq_vec[gamma]);
+            fl_vec[beta] = updated;
+            fl_vec[0] = _mm256_xor_si256(fl_vec[0], updated);
+
+            let mask = _mm256_movemask_epi8(acc) as u32;
+            if mask == 0 {
+                continue;
+            }
+            // Hit: rewind and harvest with per-step recording.
+            fl_vec = fl_save;
+            if harvest_chunk(
+                &fq_vec,
+                &mut fl_vec,
+                zero,
+                alpha,
+                beta,
+                gamma,
+                base,
+                n_inner,
+                &mut out,
+                max_solutions,
+            ) {
                 return out;
             }
-            let a = a as usize;
-            let b = if kind == 0 {
-                payload as usize
-            } else {
-                alpha + payload as usize
-            };
-            fl_vec[a] = _mm256_xor_si256(fl_vec[a], fq_vec[b]);
-            fl_vec[0] = _mm256_xor_si256(fl_vec[0], fl_vec[a]);
-        }
-        if harvest_zeros(fl_vec[0], zero, base + 255, n_inner, &mut out, max_solutions) {
+        } else if harvest_chunk(
+            &fq_vec,
+            &mut fl_vec,
+            zero,
+            alpha,
+            beta,
+            gamma,
+            base,
+            n_inner,
+            &mut out,
+            max_solutions,
+        ) {
             return out;
         }
-        let updated = _mm256_xor_si256(fl_vec[beta], fq_vec[gamma]);
-        fl_vec[beta] = updated;
-        fl_vec[0] = _mm256_xor_si256(fl_vec[0], updated);
     }
     let _ = fq_vec;
     out
+}
+
+#[target_feature(enable = "avx2")]
+#[inline]
+unsafe fn harvest_chunk(
+    fq_vec: &[__m256i],
+    fl_vec: &mut [__m256i],
+    zero: __m256i,
+    alpha: usize,
+    beta: usize,
+    gamma: usize,
+    base: u64,
+    n_inner: usize,
+    out: &mut Vec<u64>,
+    max_solutions: usize,
+) -> bool {
+    for (step_i, &(a, kind, payload)) in L8_STEPS.iter().enumerate() {
+        if harvest_zeros(
+            fl_vec[0],
+            zero,
+            base + step_i as u64,
+            n_inner,
+            out,
+            max_solutions,
+        ) {
+            return true;
+        }
+        let a = a as usize;
+        let b = if kind == 0 {
+            payload as usize
+        } else {
+            alpha + payload as usize
+        };
+        fl_vec[a] = _mm256_xor_si256(fl_vec[a], fq_vec[b]);
+        fl_vec[0] = _mm256_xor_si256(fl_vec[0], fl_vec[a]);
+    }
+    if harvest_zeros(fl_vec[0], zero, base + 255, n_inner, out, max_solutions) {
+        return true;
+    }
+    let updated = _mm256_xor_si256(fl_vec[beta], fq_vec[gamma]);
+    fl_vec[beta] = updated;
+    fl_vec[0] = _mm256_xor_si256(fl_vec[0], updated);
+    false
 }
 
 #[inline(always)]
@@ -227,7 +322,10 @@ fn specialize_lane(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cryptanalysis::mq_fes::{gray_ffs_unrolled_l4, moebius_find_all, QuadraticForm};
+    use crate::cryptanalysis::mq_fes::{
+        fill_fq_fl, gray_ffs_unrolled_l4, gray_ffs_unrolled_l8, gray_ffs_unrolled_l8_batch,
+        moebius_find_all, QuadraticForm,
+    };
     use crate::cryptanalysis::wdsat_oracle::AnfRow;
 
     fn dense_forms(n: usize, m: usize) -> Vec<QuadraticForm> {
@@ -251,34 +349,28 @@ mod tests {
         forms
     }
 
-    fn fill_scalar(forms: &[QuadraticForm], n: usize) -> ([u64; 561], [u64; 34]) {
-        let mut fq = [0u64; 561];
-        let mut fl = [0u64; 34];
-        for (eq, form) in forms.iter().enumerate() {
-            let bit = 1u64 << eq;
-            if form.constant {
-                fl[0] ^= bit;
-            }
+    /// Sparse-ish system: few common zeros (batch probe's happy path).
+    fn sparse_forms(n: usize, m: usize) -> Vec<QuadraticForm> {
+        let mut forms = Vec::with_capacity(m);
+        for eq in 0..m {
+            let mut linear = vec![false; n];
+            let mut quad = (0..n).map(|i| vec![false; i]).collect::<Vec<_>>();
+            // Nearly random dense linear+quad → expected ~2^{n-m} solutions.
             for i in 0..n {
-                if form.linear[i] {
-                    fl[1 + i] ^= bit;
-                }
+                linear[i] = ((eq.wrapping_mul(1103515245).wrapping_add(i * 12345)) & 1) == 1;
                 for j in 0..i {
-                    if form.quad[i][j] {
-                        fq[idxq(j, i)] ^= bit;
-                    }
+                    quad[i][j] =
+                        ((eq.wrapping_mul(1664525).wrapping_add(i * 97 + j * 13)) % 3) == 0;
                 }
             }
+            forms.push(QuadraticForm {
+                n,
+                constant: (eq * 17) % 2 == 0,
+                linear,
+                quad,
+            });
         }
-        for i in 0..n {
-            fq[idxq(i, n)] = 0;
-        }
-        fq[idxq(0, n + 1)] = 0;
-        for i in 1..n {
-            fq[idxq(i, n + 1)] = fq[idxq(i - 1, i)];
-        }
-        fq[idxq(n, n + 1)] = 0;
-        (fq, fl)
+        forms
     }
 
     #[test]
@@ -288,9 +380,28 @@ mod tests {
         }
         let forms = dense_forms(14, 16);
         let mut a = gray_ffs_avx2_8x32(&forms, usize::MAX).expect("avx2");
-        let (mut fq, mut fl) = fill_scalar(&forms, 14);
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, 14, &mut fq, &mut fl);
         let mut b = Vec::new();
         gray_ffs_unrolled_l4(&mut fq, &mut fl, 14, usize::MAX, &mut b);
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn avx2_batch_agrees_with_l8() {
+        if !is_x86_feature_detected!("avx2") {
+            return;
+        }
+        let forms = sparse_forms(14, 20);
+        let mut a = gray_ffs_avx2_8x32_batch(&forms, usize::MAX).expect("avx2 batch");
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, 14, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        gray_ffs_unrolled_l8_batch(&mut fq, &mut fl, 14, usize::MAX, &mut b);
         a.sort_unstable();
         b.sort_unstable();
         assert_eq!(a, b);
@@ -347,16 +458,17 @@ mod tests {
     }
 
     #[test]
-    fn avx2_full_enum_beats_scalar_l4_wall() {
-        if !is_x86_feature_detected!("avx2") {
-            return;
-        }
+    fn l8_beats_l4_full_enum_wall() {
         let forms = dense_forms(16, 24);
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, 16, &mut fq, &mut fl);
+        let mut a = Vec::new();
         let t0 = std::time::Instant::now();
-        let mut a = gray_ffs_avx2_8x32(&forms, usize::MAX).expect("avx2");
-        let avx_ns = t0.elapsed().as_nanos();
+        gray_ffs_unrolled_l8(&mut fq, &mut fl, 16, usize::MAX, &mut a);
+        let l8_ns = t0.elapsed().as_nanos();
 
-        let (mut fq, mut fl) = fill_scalar(&forms, 16);
+        fill_fq_fl(&forms, 16, &mut fq, &mut fl);
         let mut b = Vec::new();
         let t1 = std::time::Instant::now();
         gray_ffs_unrolled_l4(&mut fq, &mut fl, 16, usize::MAX, &mut b);
@@ -364,16 +476,44 @@ mod tests {
         a.sort_unstable();
         b.sort_unstable();
         assert_eq!(a, b);
-        let ratio = l4_ns as f64 / avx_ns.max(1) as f64;
+        let ratio = l4_ns as f64 / l8_ns.max(1) as f64;
         eprintln!(
-            "avx2_4x64_vs_l4 n=16 m=24 full_enum: avx2={avx_ns}ns l4={l4_ns}ns ratio={ratio:.2} sols={}",
+            "l8_vs_l4 n=16 m=24 full_enum: l8={l8_ns}ns l4={l4_ns}ns ratio={ratio:.2} sols={}",
             a.len()
         );
-        // Documented negative vs our packed-u64 scalar L=4 (engineering).
-        // libfes's hand-written asm + multi-system batch is a different regime.
+        // Soft expectation: L=8 should not regress badly; document the ratio.
         assert!(
-            ratio < 1.0,
-            "unexpected: AVX2 beat scalar L=4 ({ratio:.3}×); update the note/scoreboard"
+            ratio >= 0.85,
+            "L=8 unexpectedly slower than L=4 ({ratio:.3}×); investigate"
         );
+    }
+
+    #[test]
+    fn avx2_batch_vs_scalar_l8_sparse_wall() {
+        if !is_x86_feature_detected!("avx2") {
+            return;
+        }
+        // m ≈ n → few solutions → batch probe pays.
+        let forms = sparse_forms(16, 24);
+        let t0 = std::time::Instant::now();
+        let mut a = gray_ffs_avx2_8x32_batch(&forms, usize::MAX).expect("avx2 batch");
+        let avx_ns = t0.elapsed().as_nanos();
+
+        let mut fq = [0u64; 561];
+        let mut fl = [0u64; 34];
+        fill_fq_fl(&forms, 16, &mut fq, &mut fl);
+        let mut b = Vec::new();
+        let t1 = std::time::Instant::now();
+        gray_ffs_unrolled_l8_batch(&mut fq, &mut fl, 16, usize::MAX, &mut b);
+        let l8_ns = t1.elapsed().as_nanos();
+        a.sort_unstable();
+        b.sort_unstable();
+        assert_eq!(a, b);
+        let ratio = l8_ns as f64 / avx_ns.max(1) as f64;
+        eprintln!(
+            "avx2_batch_vs_l8_batch n=16 m=24 sparse: avx2={avx_ns}ns l8={l8_ns}ns ratio={ratio:.2} sols={}",
+            a.len()
+        );
+        // Document; do not hard-fail if AVX2 still loses — heuristic can disable it.
     }
 }

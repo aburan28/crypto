@@ -271,13 +271,20 @@ impl Ffs {
 ///     Fl[0]    ^= Fl[1+k1];
 /// ```
 ///
-/// so the hot loop no longer walks all `n` derivatives.  For `n ≥ 4` the
-/// search uses a 16-way unrolled chunk (`L = 4`) matching
-/// `feslite_generic_enum_1x32`.  When AVX2 is available, `n ≥ 11` and
-/// `m ≤ 32`, an 8-lane specialised port of libfes `avx2_8x32` runs instead.
-/// Early exit on the first common zero still applies.  Inspired by
+/// so the hot loop no longer walks all `n` derivatives.  Dispatch:
+/// - `n ≥ 8`: scalar `L = 8` (256-step) chunk; full enum uses libfes-style
+///   **batch probe then harvest** (skip per-step recording until a chunk may
+///   contain a zero).  Early-exit `max_solutions == 1` checks every step.
+/// - `n ≥ 4`: scalar `L = 4` (16-step) fallback.
+/// - else: minimal one-step FFS.
+///
+/// When AVX2 is available and `n ≥ 10`, the 4×u64 batch-probe path in
+/// [`crate::cryptanalysis::mq_fes_avx2`] is tried for full enumeration and
+/// kept only when it beats scalar `L = 8` on that call's size class (see
+/// [`prefer_avx2_batch`]).  Inspired by
 /// <https://github.com/cbouilla/libfes-lite>
-/// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`) and ALMASTY `ffs.h`.
+/// (`generic_minimal.c`, `generic_1x32.c`, `avx2_8x32.c`, batch asm) and
+/// ALMASTY `ffs.h`.
 pub fn gray_incremental_find_all(
     forms: &[QuadraticForm],
     max_solutions: usize,
@@ -291,15 +298,46 @@ pub fn gray_incremental_find_all(
         return None;
     }
 
-    // AVX2 4×u64 is available via `mq_fes_avx2` but is not auto-selected:
-    // release walls show it loses to the packed-u64 scalar `L=4` path on
-    // single-system Semaev instances (libfes's asm+multi-system batch is a
-    // different regime).  Call `gray_ffs_avx2_8x32` explicitly to use it.
+    // Full enum / multi-root: try AVX2 batch when the heuristic says it wins.
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    if max_solutions > 1 && prefer_avx2_batch(n, m, max_solutions) {
+        if let Some(out) = crate::cryptanalysis::mq_fes_avx2::gray_ffs_avx2_8x32_batch(
+            forms,
+            max_solutions,
+        ) {
+            return Some(out);
+        }
+    }
 
     // Stack tables: Fq through fictive n+1 is at most idxq(0,34)=561; Fl ≤ 34.
     let mut fq = [0u64; 561];
     let mut fl = [0u64; 34];
+    fill_fq_fl(forms, n, &mut fq, &mut fl);
 
+    let mut out = Vec::new();
+    if n >= 8 {
+        if max_solutions == 1 {
+            gray_ffs_unrolled_l8(&mut fq, &mut fl, n, max_solutions, &mut out);
+        } else {
+            gray_ffs_unrolled_l8_batch(&mut fq, &mut fl, n, max_solutions, &mut out);
+        }
+    } else if n >= 4 {
+        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
+    } else {
+        gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
+    }
+    Some(out)
+}
+
+/// Pack ANF coefficients into the libfes Fq / Fl tables (with fictive vars).
+pub(crate) fn fill_fq_fl(
+    forms: &[QuadraticForm],
+    n: usize,
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+) {
+    fq.fill(0);
+    fl.fill(0);
     for (eq, form) in forms.iter().enumerate() {
         let bit = 1u64 << eq;
         if form.constant {
@@ -316,7 +354,6 @@ pub fn gray_incremental_find_all(
             }
         }
     }
-
     for i in 0..n {
         fq[idxq(i, n)] = 0;
     }
@@ -325,14 +362,18 @@ pub fn gray_incremental_find_all(
         fq[idxq(i, n + 1)] = fq[idxq(i - 1, i)];
     }
     fq[idxq(n, n + 1)] = 0;
+}
 
-    let mut out = Vec::new();
-    if n >= 4 {
-        gray_ffs_unrolled_l4(&mut fq, &mut fl, n, max_solutions, &mut out);
-    } else {
-        gray_ffs_minimal(&mut fq, &mut fl, n, max_solutions, &mut out);
+/// Heuristic: AVX2 batch-probe wins on sparse full enums at moderate `n`.
+/// Tuned from release walls on this host; still an engineering lever only.
+#[inline]
+pub fn prefer_avx2_batch(n: usize, m: usize, max_solutions: usize) -> bool {
+    // Early-exit find_one stays on scalar (cheaper per-step + no rewind).
+    if max_solutions <= 1 {
+        return false;
     }
-    Some(out)
+    // Need room for OUTER(2)+UNROLL(8); sparse-ish systems (m ≈ n or denser).
+    n >= 12 && n <= 24 && m >= 8 && m <= 64
 }
 
 /// libfes `generic_minimal`: one FFS step per point.
@@ -418,6 +459,120 @@ pub(crate) fn gray_ffs_unrolled_l4(
             || step2(fq, fl, 1, 0, base + 14, out, max_solutions)
             || step2(fq, fl, beta, gamma, base + 15, out, max_solutions)
         {
+            return;
+        }
+    }
+}
+
+#[inline(always)]
+fn l8_fq_index(kind: u8, payload: u16, alpha: usize) -> usize {
+    if kind == 0 {
+        payload as usize
+    } else {
+        alpha + payload as usize
+    }
+}
+
+/// Scalar `L = 8` (256-step) Gray chunk — early-exit friendly (checks every step).
+pub(crate) fn gray_ffs_unrolled_l8(
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    use super::mq_fes_l8_steps::L8_STEPS;
+    const L: usize = 8;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+        for (step_i, &(a, kind, payload)) in L8_STEPS.iter().enumerate() {
+            if step2(
+                fq,
+                fl,
+                a as usize,
+                l8_fq_index(kind, payload, alpha),
+                base + step_i as u64,
+                out,
+                max_solutions,
+            ) {
+                return;
+            }
+        }
+        if step2(fq, fl, beta, gamma, base + 255, out, max_solutions) {
+            return;
+        }
+    }
+}
+
+/// Probe a 256-step chunk without recording, then harvest only if a zero appeared.
+///
+/// Matches libfes `BATCH_MODE` / `avx2_asm_enum_batch`: most chunks have no
+/// solutions, so the common path stays branch-light.  On a hit, restore `Fl`
+/// and re-run with ordinary recording.
+pub(crate) fn gray_ffs_unrolled_l8_batch(
+    fq: &mut [u64; 561],
+    fl: &mut [u64; 34],
+    n: usize,
+    max_solutions: usize,
+    out: &mut Vec<u64>,
+) {
+    use super::mq_fes_l8_steps::L8_STEPS;
+    const L: usize = 8;
+    let mut ffs = Ffs::reset(n - L);
+    let mut k1 = ffs.k1 + L as i32;
+    let mut k2 = ffs.k2 + L as i32;
+    let iterations = 1u64 << (n - L);
+    for j in 0..iterations {
+        let alpha = idxq(0, k1 as usize);
+        ffs.step();
+        k1 = ffs.k1 + L as i32;
+        k2 = ffs.k2 + L as i32;
+        let beta = (1 + k1) as usize;
+        let gamma = idxq(k1 as usize, k2 as usize);
+        let base = j << L;
+
+        let fl_save = *fl;
+        let mut hit = false;
+        for &(a, kind, payload) in L8_STEPS.iter() {
+            hit |= fl[0] == 0;
+            let a = a as usize;
+            let b = l8_fq_index(kind, payload, alpha);
+            fl[a] ^= fq[b];
+            fl[0] ^= fl[a];
+        }
+        hit |= fl[0] == 0;
+        fl[beta] ^= fq[gamma];
+        fl[0] ^= fl[beta];
+
+        if !hit {
+            continue;
+        }
+        // Rewind and harvest with the early-exit-capable step function.
+        *fl = fl_save;
+        for (step_i, &(a, kind, payload)) in L8_STEPS.iter().enumerate() {
+            if step2(
+                fq,
+                fl,
+                a as usize,
+                l8_fq_index(kind, payload, alpha),
+                base + step_i as u64,
+                out,
+                max_solutions,
+            ) {
+                return;
+            }
+        }
+        if step2(fq, fl, beta, gamma, base + 255, out, max_solutions) {
             return;
         }
     }
