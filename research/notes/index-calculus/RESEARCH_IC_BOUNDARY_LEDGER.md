@@ -2462,6 +2462,28 @@ pairs the old engine was pushing to degree five were exactly the ones
 that contribute nothing, so pruning them removes the gap the wrong
 statistic was measuring.
 
+**Three summands, where the verdict flips.**  The same measurement at
+`m = 3`, four targets a cell under a 120-second per-target budget:
+
+| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum | ms | KiB | no decomp |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|
+| K | 7 | 3 | 3 | 9 | 7 | 7.0 | 7.0 | 7 | 1.00 | 3.633e7 | 4.291e5 | 84.7x | 19585.5 | 441 | 3/4 |
+| K | 9 | 3 | 3 | 9 | 9 | 7.0 | 7.0 | 7 | 1.00 | 3.606e7 | 5.268e5 | 68.4x | 19481.0 | 430 | 2/4 |
+| K | 11 | 4 | 3 | 12 | 11 | 9.0 | 9.0 | 8 | 1.12 | 4.313e9 | 2.281e7 | 189.1x | 120049.4 | 24567 | 3/4 |
+| ^ | | | | | | — | — | — | — | — | — | — | — | — | 4 of 4 runs hit the budget: every figure on this row is a lower bound |
+| R | 7 | 3 | 3 | 9 | 7 | 7.0 | 7.0 | 7 | 1.00 | 3.531e7 | 4.572e5 | 77.2x | 19451.3 | 441 | 3/4 |
+| R | 9 | 3 | 3 | 9 | 9 | 7.0 | 7.0 | 7 | 1.00 | 3.876e7 | 5.728e5 | 67.7x | 18729.6 | 435 | 3/4 |
+| R | 11 | 4 | 3 | 12 | 11 | 9.0 | 9.0 | 8 | 1.12 | 4.305e9 | 2.341e7 | 183.9x | 120031.9 | 24528 | 1/4 |
+| ^ | | | | | | — | — | — | — | — | — | — | — | — | 4 of 4 runs hit the budget: every figure on this row is a lower bound |
+
+At nine variables the solver finishes and costs **68× to 85× the
+enumeration it is competing with** — the opposite of the two-summand
+rows, which come in at `0.4×`.  At twelve variables it does not finish:
+every run hit the budget, so those rows are lower bounds and are marked
+as such.  Whatever the three-summand descent buys in relations per
+target, this engine does not get it back on the decomposition, and the
+`m = 2` result does not carry over.
+
 ### 14.5 The engine was the measurement, twice
 
 Neither of the two corrections above was a tuning choice; both were

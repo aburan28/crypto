@@ -146,6 +146,7 @@ pub mod hyperelliptic_ic_bench;
 pub mod hyperelliptic_index_calculus;
 pub mod ic_boundary;
 pub mod ic_corpus;
+pub mod ic_framework;
 pub mod ic_descent_degrees;
 pub mod ic_oracle_pricing;
 pub mod invalid_curve_attack;
