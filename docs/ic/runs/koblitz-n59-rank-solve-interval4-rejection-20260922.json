@@ -1,0 +1,189 @@
+{
+  "candidate": {
+    "rank_columns_per_round": 64,
+    "rank_solve_interval": 4,
+    "raw_coverage_solve_interval": 1,
+    "rule": "attempt sparse solving after every fourth least-represented-column round and once at the terminal partial cadence; raw-uncovered-column rounds retain immediate cheap attempts",
+    "uniform_units": 14
+  },
+  "candidate_params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-rank-interval4-control-public-59001.json",
+    "sha256": "4fcd15e683e6efbba9b9bc567d3c5222be0f71830f1593afe74a11f25ed43aa7"
+  },
+  "claim_boundary": "Finite single-public-target rejected rank-tail cadence. Solving every fourth least-represented-column round cuts repeated sparse-linear-algebra work but overshoots targeted relation collection and remains more than twice as slow as the selected 15-unit workflow. No SOTA claim.",
+  "comparison": {
+    "versus_interval1_prefix14_frontier": {
+      "boundary": "different process and host-load windows; operation counts and deterministic outputs are exact, timing ratios are descriptive rather than matched AB",
+      "linear_algebra_attempt_ratio": 0.6428571428571429,
+      "linear_algebra_seconds_ratio": 0.3332487704417345,
+      "targeted_lookup_ratio": 1.1060187741579237,
+      "targeted_relation_ratio": 1.0880829015544042
+    },
+    "versus_selected_stage139": {
+      "ic_wall_ratio": 2.1159123824957042,
+      "targeted_lookup_ratio": 6.7898305084745765,
+      "uniform_trial_fraction": 0.9333333333333333,
+      "whole_cpu_ratio": 1.2831200639062403,
+      "whole_wall_ratio": 2.1045492587384715
+    }
+  },
+  "date": "2026-09-22",
+  "decision": {
+    "matched_abba_followup": false,
+    "matched_abba_reason": "the candidate is more than twice the selected absolute IC receipt and cannot recover that gap through cadence timing noise",
+    "reason": "linear algebra falls to 4.934907 seconds, but the cadence overshoots to 20.03 million targeted lookups and full IC takes 122.781740 seconds versus the selected 58.027800-second receipt",
+    "selected_stage140_unchanged": true,
+    "status": "rejected"
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "parent": {
+      "ell": 15,
+      "kind": "standard_subspace"
+    },
+    "points": 32934,
+    "projected_columns": 16344,
+    "scalar_preimages_retained": false,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "cofactor": 22894,
+    "collection_m": 3,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "public_target_seed": 59001,
+    "subgroup_order": 25179555920633,
+    "target_scalar_constructed_or_supplied": false
+  },
+  "operation": "koblitz_n59_rank_solve_interval4_rejection",
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-first-hit-tail-rejection-20260922.json",
+    "sha256": "fd07e92b991c3a026dcd2083439bed4955a9139e2885e72bf9b71a84bd1835ce"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 9350201344,
+    "retained_processes": 1,
+    "retained_sequential_wall_seconds": 123.389416125,
+    "retained_total_core_seconds": 676.0719839999999,
+    "scope": "one complete default-thread interval-4 prefix-14 workflow; compilation excluded"
+  },
+  "result": {
+    "binary_blake3": "332dd5eabda8a2f4511191dd8eae2e2db7a181099c2e4347d51957a5f71dda31",
+    "combined_relations": 29982,
+    "combined_relations_sha256": "43ab82820723024970fa8cffe65d32fd2fc767e0d60a70565a841bc1ea49d272",
+    "conflicts": null,
+    "ic_over_rho_wall_ratio": 218.20413716039437,
+    "ic_wall_seconds": 122.781740458,
+    "linear_algebra": {
+      "attempts": 27,
+      "mode": "sparse",
+      "seconds": 4.934906875999999,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 1702,
+        "core_nonzeros": 23548,
+        "filter": {
+          "columns_in": 16344,
+          "columns_out": 1702,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 13606,
+          "merged_columns": 6721,
+          "nonzeros_in": 89942,
+          "nonzeros_out": 23548,
+          "rows_in": 29982,
+          "rows_out": 1734,
+          "singletons_removed": 7921,
+          "uncovered_columns": 0
+        },
+        "reconstructed_columns": 14642,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 1703,
+          "extra_steps": 0,
+          "generator_degree": 425,
+          "products": 1286,
+          "sequence_length": 860
+        }
+      }
+    },
+    "pair_table_build_wall_seconds": 21.763854792,
+    "peak_rss_bytes": 9350201344,
+    "recovered_scalar": 17861472351607,
+    "relation_units_wall_seconds": 48.386301375,
+    "rho_wall_seconds": 0.562692083,
+    "stages": {
+      "baseline": {
+        "cpu_seconds": 0.5570290000000568,
+        "wall_seconds": 0.56319525
+      },
+      "collect": {
+        "cpu_seconds": 481.77194699999995,
+        "wall_seconds": 72.846355833
+      },
+      "logs": {
+        "cpu_seconds": 190.20621,
+        "wall_seconds": 49.165071291
+      },
+      "select": {
+        "cpu_seconds": 3.518025,
+        "wall_seconds": 0.78437475
+      },
+      "solve": {
+        "cpu_seconds": 0.012066000000004351,
+        "wall_seconds": 0.025398375
+      }
+    },
+    "targeted_relations_sha256": "4bdf7b36da89822dda3fd005459dcbd985e2fb79a515df7a75ce9add876534f0",
+    "targeted_tail": {
+      "artifact": "targeted-tail.json",
+      "attempts": 2003,
+      "attempts_ran_now": 2003,
+      "elapsed_seconds": 24.569641382999986,
+      "enabled": true,
+      "pair_lookups": 20030000,
+      "relations": 420,
+      "remaining_uncovered_column_indices": [],
+      "resources": {
+        "cpu_seconds": 178.86263100000008,
+        "peak_rss_bytes_at_end": 9350201344,
+        "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+      },
+      "trials": 20030000
+    },
+    "uniform_relations": 29562,
+    "uniform_relations_sha256": "618bb4041375341592fe50bcfb2667f6e280d59c7db9588e16532690fd73718a",
+    "uniform_summands_scanned": 1433600000,
+    "uniform_trials": 1400000,
+    "uniform_units": 14,
+    "verification_seconds": 5.186463376000002,
+    "verified": true,
+    "whole_cpu_seconds": 676.0719839999999,
+    "whole_wall_seconds": 123.389416125
+  },
+  "schema_version": 1,
+  "software": {
+    "candidate_binary_blake3": "332dd5eabda8a2f4511191dd8eae2e2db7a181099c2e4347d51957a5f71dda31",
+    "selected_source_stack_head": "457748f0"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-rank-solve-interval4-rejected-20260922.patch",
+    "sha256": "fff8f0fd27097a0644e2487d553fdcd9bccd27c2c44f60bb374d26a23a9ae592",
+    "status": "archived_rejected_not_applied_to_selected_source"
+  },
+  "validation": [
+    "all 16344 factor-base logs are relation-derived and group-certified",
+    "the public hash target recovers scalar 17861472351607 and verifies [d]G=Q",
+    "the source patch preserves legacy parameter serialization at the default interval of one",
+    "the rejected source patch applies cleanly to the Stage-140 selected source"
+  ]
+}

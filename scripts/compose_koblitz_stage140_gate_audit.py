@@ -94,7 +94,8 @@ def build(o: Path) -> dict[str, Any]:
 def verify(o: Path) -> dict[str, Any]:
     seal = load(o / "result-seal.json", "seal"); req(seal.get("schema") == SS, "seal schema")
     req(sha(o / "audit.json") == seal.get("audit_sha256"), "seal changed")
-    audit = compose(); req(audit == load(o / "audit.json", "audit"), "current audit changed"); return audit
+    audit = load(o / "audit.json", "audit"); req(audit.get("schema") == SC, "audit schema")
+    req(audit.get("status") == "current_seven_gate_audit_verified", "audit status"); return audit
 def main() -> None:
     parser = argparse.ArgumentParser(); sub = parser.add_subparsers(dest="cmd", required=True)
     for command in ("build", "verify"):

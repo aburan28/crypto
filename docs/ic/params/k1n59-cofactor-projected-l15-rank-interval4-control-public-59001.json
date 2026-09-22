@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "name": "k1n59-rank-interval4-prefix14-control",
+  "curve": {
+    "degree": 59,
+    "curve_a": 1
+  },
+  "summands": 3,
+  "descent_summands": 2,
+  "collection_window": 1024,
+  "solver": "pair_table",
+  "pair_table_tier": "witnessed_compact",
+  "seed": 59031,
+  "max_trials": 100000000,
+  "linear_algebra": {
+    "mode": "sparse",
+    "sparse": {
+      "wiedemann": {
+        "block_m": 4,
+        "block_n": 4
+      },
+      "filter": {
+        "target_excess": 32,
+        "merge_max_weight": 8
+      }
+    }
+  },
+  "collection": {
+    "unit_trials": 100000,
+    "units": 14,
+    "max_units": 14,
+    "targeted_tail_trials": 10000,
+    "targeted_tail_rounds": 100,
+    "targeted_tail_seed": 7464385765259479815,
+    "targeted_tail_rank_columns": 64,
+    "targeted_tail_solve_interval": 4
+  },
+  "baseline": {
+    "rho": true,
+    "rho_seed": 5929075965221491791,
+    "rho_max_iterations": 268435456
+  },
+  "factor_base": {
+    "mode": "spec",
+    "spec": {
+      "kind": "cofactor_projected",
+      "parent": {
+        "kind": "standard_subspace",
+        "dimension": 15
+      }
+    }
+  },
+  "targets": [
+    {
+      "public_hash_seed": 59001
+    }
+  ],
+  "pair_table_bytes": 8589934592
+}
