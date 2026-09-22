@@ -2072,6 +2072,55 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </table></div>
   </div>
 
+  <div class="panel" id="mq-fes-ic-pipeline-20260922">
+    <div class="panel-head">
+      <h2>mq-fes in the full pipeline: packed bilinear Semaev oracle</h2>
+      <p>Class <span class="chip">engineering</span>. The default <code>--solver mq-fes</code> oracle
+        now uses a packed per-factor-base template in place of a per-target symbolic rebuild. It also
+        uses a bilinear split in place of a full <code>2^{2ℓ}</code> Gray walk: with <code>s = a ⊕ b</code>
+        the <code>m = 2</code> Semaev system has only <code>aᵢsⱼ</code> quadratic terms, so each
+        Gray-enumerated <code>a</code> leaves a linear system in <code>s</code>. The free-oracle floor is
+        unchanged. <code>S</code> and the rho ratio are null: only the oracle stage has an operation counter.
+        Cells are cold end-to-end wall ratios (baseline ÷ variant), paired over 8 independent holdout seeds
+        with 95% intervals, on a shared 4-vCPU host. All 960 runs verified <code>[k]G = Q</code>.
+        Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/mq_fes_ic_pipeline_20260922/README.md">research/mq_fes_ic_pipeline_20260922</a>;
+        raw runs in <code>results/round_02/raw.jsonl</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Matched full DLP, <code>m = 2</code>, legacy factor base 0, relation batch 1. The frozen
+        WDSat suite cannot drive an in-process oracle; the round README documents this.</caption>
+      <thead><tr><th scope="col">Variant</th><th scope="col">oracle µs/call, n=23 a=0</th>
+        <th scope="col">n=17 a=1</th><th scope="col">n=23 a=0</th><th scope="col">n=23 a=1</th>
+        <th scope="col">Verified</th><th scope="col">S / rho / floor</th><th scope="col">Class</th></tr></thead>
+      <tbody>
+        <tr><td>mq-fes reference (symbolic rebuild, full Gray walk)</td><td class="n">3388</td>
+          <td class="n">1.00</td><td class="n">1.00</td><td class="n">1.00</td><td>192/192</td>
+          <td>null / null / flat</td><td>Baseline</td></tr>
+        <tr><td>+ packed template, swap-symmetric walk, lift on the fly</td><td class="n">617 <small>was 3388</small></td>
+          <td class="n">4.40 <small>[3.41, 5.68]</small></td><td class="n">4.49 <small>[3.96, 5.09]</small></td>
+          <td class="n">4.97 <small>[4.72, 5.23]</small></td><td>192/192</td><td>null / null / flat</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td><strong>+ bilinear split, 8 lanes (default)</strong></td><td class="n">141 <small>was 617</small></td>
+          <td class="n">4.53 <small>[3.40, 6.04]</small></td><td class="n">13.05 <small>[11.51, 14.81]</small></td>
+          <td class="n">13.95 <small>[11.99, 16.24]</small></td><td>192/192</td><td>null / null / flat</td>
+          <td><span class="chip">engineering</span></td></tr>
+        <tr><td>Reference <code>enumerate</code></td><td class="n">—</td>
+          <td class="n">0.75 <small>[0.68, 0.82]</small></td><td class="n">0.27 <small>[0.26, 0.29]</small></td>
+          <td class="n">0.26 <small>[0.23, 0.29]</small></td><td>192/192</td><td>null / null / flat</td><td>Reference</td></tr>
+        <tr><td>Reference <code>pair-table</code></td><td class="n">—</td>
+          <td class="n">5.32 <small>[3.97, 7.15]</small></td><td class="n">3.06 <small>[2.50, 3.74]</small></td>
+          <td class="n">2.95 <small>[2.28, 3.83]</small></td><td>192/192</td><td>null / null / flat</td><td>Reference</td></tr>
+      </tbody>
+    </table></div>
+    <p>Exponent facts (stage diagnostic, <code>results/oracle_scaling_01</code>, seven sizes with
+      <code>n ≥ 2ℓ</code>, <code>ℓ ∈ {3, 4, 5, 8, 11, 12, 14}</code>). The reference oracle's word ops
+      fit a log₂ slope of 2.000 in ℓ (prediction <code>2·4^ℓ</code>). The bilinear split's fit 1.014
+      once its <code>ℓ²/2 + 5ℓ/2 + 1</code> factor is divided out (prediction <code>2^ℓ·poly(ℓ)</code>).
+      Against the fastest pre-existing <code>m = 2</code> oracle, <code>pair-table</code>, the split is
+      3.9–4.7× faster at <code>n = 23</code> and 0.85× (slower) at <code>n = 17</code>. Neither moves the
+      floor, and no crossover with rho is claimed.</p>
+  </div>
+
   <div class="panel" id="ec-regression-v2">
     <div class="panel-head">
       <h2>Frozen WDSat regression target</h2>

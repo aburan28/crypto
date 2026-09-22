@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "experiment": "mq_fes_ic_pipeline_20260922",
+  "arms": {
+    "baseline": {
+      "binary_sha256": "c9e4420465d8d27ae7211cf8d2bbc20447b3c8fcb4c84e7108c4a8f2bad1e298",
+      "source_revision": "0236d06c8f4f1299a232b294b027e1eac45c3b3f"
+    },
+    "candidate": {
+      "binary_sha256": "1591bfd43fdb2696f620cd27f5247e16ab390d58f760029b0d755ea252ac4fa6",
+      "source_revision": "248440d21a8176c98d448fb12480031126f855f2"
+    }
+  },
+  "instances": [
+    {
+      "degree": 13,
+      "curve_a": 0,
+      "factor_index": 0,
+      "summands": 2
+    },
+    {
+      "degree": 17,
+      "curve_a": 1,
+      "factor_index": 0,
+      "summands": 2
+    },
+    {
+      "degree": 23,
+      "curve_a": 0,
+      "factor_index": 0,
+      "summands": 2
+    },
+    {
+      "degree": 23,
+      "curve_a": 1,
+      "factor_index": 0,
+      "summands": 2
+    }
+  ],
+  "train_seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "holdout_seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008
+  ],
+  "repetitions": 3,
+  "batch": 1,
+  "order": "per (instance, seed, rep): baseline then candidate",
+  "host": {
+    "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
+    "cpus": 4
+  }
+}

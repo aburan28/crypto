@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "rows": [
+    {
+      "arm": "baseline",
+      "ell": 3,
+      "degree": 7,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 128.0,
+      "walk_us_per_call": 1.4755,
+      "oracle_us_per_call": 46.187
+    },
+    {
+      "arm": "baseline",
+      "ell": 6,
+      "degree": 9,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 8192.0,
+      "walk_us_per_call": 5.423666666666667,
+      "oracle_us_per_call": 161.50366666666665
+    },
+    {
+      "arm": "baseline",
+      "ell": 8,
+      "degree": 17,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 131072.0,
+      "walk_us_per_call": 28.745962962962963,
+      "oracle_us_per_call": 706.2134814814815
+    },
+    {
+      "arm": "baseline",
+      "ell": 10,
+      "degree": 11,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 144027.4,
+      "walk_us_per_call": 31.345299999999998,
+      "oracle_us_per_call": 225.80136363636365
+    },
+    {
+      "arm": "baseline",
+      "ell": 11,
+      "degree": 23,
+      "curve_a": 0,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 8388608.0,
+      "walk_us_per_call": 1270.711948453608,
+      "oracle_us_per_call": 3376.003974025974
+    },
+    {
+      "arm": "baseline",
+      "ell": 11,
+      "degree": 23,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 8388608.0,
+      "walk_us_per_call": 1269.955168831169,
+      "oracle_us_per_call": 3509.1294675324675
+    },
+    {
+      "arm": "baseline",
+      "ell": 12,
+      "degree": 13,
+      "curve_a": 0,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 559958.7692307692,
+      "walk_us_per_call": 99.08085714285714,
+      "oracle_us_per_call": 582.3164615384615
+    },
+    {
+      "arm": "mqfes-linear",
+      "ell": 3,
+      "degree": 7,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 32.0,
+      "walk_us_per_call": 1.4605,
+      "oracle_us_per_call": 45.573
+    },
+    {
+      "arm": "mqfes-linear",
+      "ell": 6,
+      "degree": 9,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 168.0,
+      "walk_us_per_call": 2.0963333333333334,
+      "oracle_us_per_call": 94.284
+    },
+    {
+      "arm": "mqfes-linear",
+      "ell": 8,
+      "degree": 17,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 11693.6,
+      "walk_us_per_call": 6.6875,
+      "oracle_us_per_call": 75.80795454545455
+    },
+    {
+      "arm": "mqfes-linear",
+      "ell": 10,
+      "degree": 11,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 440.0,
+      "walk_us_per_call": 2.2389,
+      "oracle_us_per_call": 44.4447
+    },
+    {
+      "arm": "mqfes-linear",
+      "ell": 11,
+      "degree": 23,
+      "curve_a": 0,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 144534.8108108108,
+      "walk_us_per_call": 57.044117647058826,
+      "oracle_us_per_call": 131.24240449438204
+    },
+    {
+      "arm": "mqfes-linear",
+      "ell": 11,
+      "degree": 23,
+      "curve_a": 1,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 134354.33333333334,
+      "walk_us_per_call": 51.917833333333334,
+      "oracle_us_per_call": 140.11532432432432
+    },
+    {
+      "arm": "mqfes-linear",
+      "ell": 12,
+      "degree": 13,
+      "curve_a": 0,
+      "runs": 5,
+      "verified": 5,
+      "word_ops_per_call": 624.0,
+      "walk_us_per_call": 2.7135714285714285,
+      "oracle_us_per_call": 80.82692857142857
+    }
+  ],
+  "fits": {
+    "baseline": {
+      "sizes": [
+        3,
+        6,
+        8,
+        10,
+        11,
+        12
+      ],
+      "word_ops_log2_slope": 1.6157836908398682,
+      "walk_us_log2_slope": 0.9778489236752607
+    },
+    "mqfes-linear": {
+      "sizes": [
+        3,
+        6,
+        8,
+        10,
+        11,
+        12
+      ],
+      "word_ops_log2_slope": 0.971628722259841,
+      "walk_us_log2_slope": 0.3879478721146902
+    }
+  },
+  "note": "slope is d log2(cost) / d ell; a 2^{c\u00b7ell} cost has slope c"
+}
