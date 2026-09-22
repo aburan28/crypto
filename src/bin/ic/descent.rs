@@ -37,6 +37,12 @@ pub struct DescentArgs {
     pub targets: usize,
     #[arg(long, default_value_t = 0x0DE5_CE47)]
     pub seed: u64,
+    /// Wall-clock budget per target, in seconds.  A run that exceeds it
+    /// stops and the row says so, rather than the cell hanging: twelve
+    /// boolean variables at three summands ran five hours here without
+    /// finishing.  Zero means no budget.
+    #[arg(long, default_value_t = 120)]
+    pub budget_seconds: u64,
 }
 
 /// `n' = ceil(n/m)` makes the descent square: `m·n'` unknowns against
@@ -106,7 +112,9 @@ pub fn run(args: DescentArgs, json_only: bool) -> Result<Value, String> {
             if !json_only {
                 eprintln!("  {family} n={n} n'={n_prime} m={m} …");
             }
-            match price_descent_cell(family, *n, *n_prime, *m, args.targets.max(1), args.seed) {
+            let budget = (args.budget_seconds > 0)
+                .then(|| std::time::Duration::from_secs(args.budget_seconds));
+            match price_descent_cell(family, *n, *n_prime, *m, args.targets.max(1), args.seed, budget) {
                 Some(cell) => measured.push(cell),
                 None => skipped.push(json!({
                     "family": family, "n": n, "n_prime": n_prime, "m": m,
@@ -143,12 +151,14 @@ pub fn run(args: DescentArgs, json_only: bool) -> Result<Value, String> {
             "cells": cells.iter().map(|(n, np, m)| json!({"n": n, "n_prime": np, "m": m})).collect::<Vec<_>>(),
             "targets": args.targets,
             "seed": args.seed,
+            "budget_seconds_per_target": args.budget_seconds,
         },
         "boundary": {
             "what": "the semi-regular degree: the index of the first non-positive coefficient of (1+t)^v / prod_i (1 + t^{d_i}), for v boolean variables and equation degrees d_i (Bardet-Faugere-Salvy)",
             "why": "it is what a system with no exploitable structure reaches, so a measured degree below it is structure the solver found",
         },
         "cells_measured": measured.len(),
+        "cells_with_a_timed_out_run": measured.iter().filter(|c| c.timed_out > 0).count(),
         "cells_skipped": skipped,
         "cells_below_the_semi_regular_degree": below,
         "cells_with_a_bound": with_bound.len(),

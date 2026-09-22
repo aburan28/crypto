@@ -386,6 +386,13 @@ pub struct GbStats {
     pub peak_basis_monomials: u64,
     pub basis_len: u64,
     pub wall_ns: u64,
+    /// The budget ran out with pairs still queued, so the basis
+    /// returned is a truncation and every degree here is a lower
+    /// bound.  A row carrying this is a statement about the engine,
+    /// not about the system.
+    pub timed_out: bool,
+    /// Pairs still queued when the budget ran out.
+    pub pairs_left: u64,
 }
 
 impl GbStats {
@@ -442,7 +449,24 @@ pub fn groebner_basis_f2_stats(
     initial: Vec<F2BoolPoly>,
     n_vars: usize,
 ) -> (Vec<F2BoolPoly>, GbStats) {
+    groebner_basis_f2_within(initial, n_vars, None)
+}
+
+/// [`groebner_basis_f2_stats`] with a wall-clock budget.
+///
+/// A boolean Gröbner basis can take longer than any experiment is
+/// willing to wait — twelve variables at three summands ran for five
+/// hours here without finishing.  With a budget the run stops and says
+/// so, which lets a table carry an honest "did not finish" row instead
+/// of silently omitting the cell.  `timed_out` marks such a result and
+/// its basis is a truncation, not a Gröbner basis.
+pub fn groebner_basis_f2_within(
+    initial: Vec<F2BoolPoly>,
+    n_vars: usize,
+    budget: Option<std::time::Duration>,
+) -> (Vec<F2BoolPoly>, GbStats) {
     let started = std::time::Instant::now();
+    let deadline = budget.map(|b| started + b);
     let mut st = GbStats::default();
     let mut basis: Vec<F2BoolPoly> = initial.into_iter().filter(|p| !p.is_zero()).collect();
     for p in &basis {
@@ -465,6 +489,11 @@ pub fn groebner_basis_f2_stats(
     }
 
     while !pairs.is_empty() {
+        if deadline.is_some_and(|d| std::time::Instant::now() >= d) {
+            st.timed_out = true;
+            st.pairs_left = pairs.len() as u64;
+            break;
+        }
         // Pop the pair with the SMALLEST lcm degree.
         let min_idx = pairs
             .iter()

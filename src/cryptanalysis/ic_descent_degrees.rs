@@ -66,7 +66,7 @@ use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
 use crate::cryptanalysis::ic_boundary::{koblitz_instance, random_binary_instance, BinaryInstance};
 use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 use crate::cryptanalysis::pq_descent::{weil_descend_s3, weil_descend_s4};
-use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_stats, GbStats};
+use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_within, GbStats};
 use num_bigint::BigUint;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -108,6 +108,9 @@ pub struct DescentCell {
     pub targets: usize,
     /// Targets whose system was inconsistent — no decomposition in `V`.
     pub inconsistent: usize,
+    /// Targets whose run hit the budget.  Any degree or cost on a row
+    /// with these is a lower bound and a statement about the engine.
+    pub timed_out: usize,
     /// Mean and max over targets of the **solving degree**: the
     /// highest degree at which the run produced a new basis element.
     /// This is the column the bound is for.
@@ -204,6 +207,7 @@ pub fn price_descent_cell(
     summands: u32,
     targets: usize,
     seed: u64,
+    budget: Option<std::time::Duration>,
 ) -> Option<DescentCell> {
     if n_prime == 0 || n_prime > max_n_prime(summands) {
         return None;
@@ -241,7 +245,7 @@ pub fn price_descent_cell(
         // subspace.  One monomial test per term per point.
         let terms: usize = eqs.iter().map(|p| p.terms.len()).sum();
         brute.push((terms as f64) * 2f64.powi(vars as i32));
-        let (gb, stats) = groebner_basis_f2_stats(eqs, vars);
+        let (gb, stats) = groebner_basis_f2_within(eqs, vars, budget);
         let inconsistent = gb.len() == 1 && gb[0].terms.len() == 1 && gb[0].terms[0].degree() == 0;
         runs.push(TargetRun { stats, inconsistent });
     }
@@ -261,6 +265,7 @@ pub fn price_descent_cell(
         equations,
         targets,
         inconsistent: runs.iter().filter(|r| r.inconsistent).count(),
+        timed_out: runs.iter().filter(|r| r.stats.timed_out).count(),
         d_av,
         d_max: runs.iter().map(|r| r.stats.solving_degree).max().unwrap_or(0),
         d_pair_av: mean(runs.iter().map(|r| r.stats.max_pair_degree as f64)),
@@ -398,6 +403,12 @@ pub fn format_markdown(cells: &[DescentCell]) -> String {
             c.inconsistent,
             c.targets,
         ));
+        if c.timed_out > 0 {
+            out.push_str(&format!(
+                "| ^ | | | | | | \u{2014} | \u{2014} | \u{2014} | \u{2014} | \u{2014} | \u{2014} | \u{2014} | \u{2014} | \u{2014} | {} of {} runs hit the budget: every figure on this row is a lower bound |\n",
+                c.timed_out, c.targets
+            ));
+        }
     }
     out
 }
@@ -411,7 +422,7 @@ mod tests {
     /// that grows with the work done.
     #[test]
     fn a_descent_cell_reports_a_degree_and_a_cost() {
-        let cell = price_descent_cell("K", 11, 4, 2, 3, 7).expect("K_1 over GF(2^11) at n'=4");
+        let cell = price_descent_cell("K", 11, 4, 2, 3, 7, None).expect("K_1 over GF(2^11) at n'=4");
         assert_eq!(cell.n_vars, 8, "two summands over a 4-dimensional subspace");
         assert_eq!(cell.equations, 11, "one equation per field coordinate");
         assert_eq!(cell.per_target.len(), 3);
@@ -433,7 +444,7 @@ mod tests {
     #[test]
     fn both_curve_families_descend_at_the_same_degree() {
         for family in ["K", "R"] {
-            let cell = price_descent_cell(family, 11, 3, 2, 2, 11)
+            let cell = price_descent_cell(family, 11, 3, 2, 2, 11, None)
                 .unwrap_or_else(|| panic!("{family} at n = 11"));
             assert_eq!(cell.equations, 11);
             assert_eq!(cell.n_vars, 6);
@@ -504,7 +515,7 @@ mod tests {
     fn the_subspace_dimension_cap_is_enforced() {
         assert_eq!(max_n_prime(2), 8);
         assert_eq!(max_n_prime(3), 5);
-        assert!(price_descent_cell("K", 17, 9, 2, 1, 3).is_none());
-        assert!(price_descent_cell("K", 17, 6, 3, 1, 3).is_none());
+        assert!(price_descent_cell("K", 17, 9, 2, 1, 3, None).is_none());
+        assert!(price_descent_cell("K", 17, 6, 3, 1, 3, None).is_none());
     }
 }
