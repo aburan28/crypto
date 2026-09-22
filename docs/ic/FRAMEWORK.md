@@ -190,8 +190,8 @@ group-addition equivalents and added to the decomposition phase, so
 
 | `priced_by` | meaning |
 |:--|:--|
-| `pinned` | the unit is `word XORs` — the dense Macaulay row operation §5 of the ledger note priced matrix-F4 in — and was priced at the repository's pinned `ns_per_word_xor / ns_per_add` ratio from [`calibration.json`](calibration.json): comparable across hosts and runs |
-| `measured` | every other unit (Buchberger monomial operations, SAT conflicts, exhaustive monomial tests): the engine's wall time over this host's measured addition time — honest, but host-dependent, and §12 of the ledger note is why a ratio between two `measured` rows from different hosts means nothing. `ns_per_op` records the conversion the price rests on |
+| `pinned` | the unit is `word XORs` — the dense Macaulay row operation §5 of the ledger note priced matrix-F4 in — and the calibration's `ns_per_word_xor` was **replaced by the table's ratio** for this instance (`Calibration::pin` records which units it pinned in `pinned_units`; the report's `calibration_pins` lists them): comparable across hosts and runs |
+| `measured` | priced from this host's own measurement: for `word XORs` on an instance the table does not carry, the count times the measured `ns_per_word_xor` ratio; for every other unit (Buchberger monomial operations, SAT conflicts, exhaustive monomial tests), the engine's wall time over the measured addition time. Honest, but host-dependent, and §12 of the ledger note is why a ratio between two `measured` rows from different hosts means nothing. `ns_per_op` records the factor the price rests on in both cases |
 | `unpriced` | no calibration at all (a library call with `Calibration::default()`); the solver's work is in `ops` and **not** in `S`, and the row says so rather than quietly dropping it |
 
 Only `word XORs` is priced by count on purpose. The first frozen

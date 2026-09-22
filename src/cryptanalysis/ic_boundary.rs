@@ -177,6 +177,13 @@ pub struct Calibration {
     /// coordinates and the least of `n` rotations, with its shift),
     /// Koblitz regime, measured on the instance's field.
     pub ns_per_canon: Option<f64>,
+    /// The factors above that [`Calibration::pin`] replaced with a
+    /// ratio from the repository's table, by field name.  A consumer
+    /// that labels a price `pinned` must check here: a factor that is
+    /// merely present was measured on this host, and a freshly
+    /// generated instance has no table entry at all.
+    #[serde(default)]
+    pub pinned_units: Vec<String>,
 }
 
 /// The unit's conversion ratios, pinned in the repository.
@@ -268,7 +275,15 @@ impl Calibration {
         ] {
             apply(name, slot, &mut out);
         }
+        self.pinned_units = out.pinned.clone();
         out
+    }
+
+    /// Whether `unit` (a field name such as `ns_per_word_xor`) carries
+    /// the repository's pinned ratio rather than this host's
+    /// measurement.
+    pub fn is_pinned(&self, unit: &str) -> bool {
+        self.pinned_units.iter().any(|u| u == unit)
     }
 }
 

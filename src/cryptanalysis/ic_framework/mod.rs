@@ -327,10 +327,21 @@ pub fn run_pipeline<G: CountedGroup>(
     // flattered the engine a hundredfold.  `ns_per_op` records the
     // measured conversion so the count can be re-priced later.
     let solver_report = oracle.solver_totals().map(|t| {
-        let (gae, priced_by) = match (t.op_unit.as_str(), calib.ns_per_word_xor) {
-            ("word XORs", Some(ns)) if calib.ns_per_add > 0.0 => (t.ops as f64 * ns / calib.ns_per_add, "pinned"),
-            _ if calib.ns_per_add > 0.0 => (t.wall_ns as f64 / calib.ns_per_add, "measured"),
-            _ => (0.0, "unpriced"),
+        let wall_per_op = (t.ops > 0).then(|| t.wall_ns as f64 / t.ops as f64);
+        // `pinned` means the ratio came from the repository's table, and
+        // only `Calibration::pin` can say so: a word-XOR factor that is
+        // merely present was measured on this host (every bench
+        // calibration measures one), and a freshly generated curve has
+        // no table entry.  A count priced at the measured ratio is still
+        // `measured`, with that ratio recorded as `ns_per_op`.
+        let (gae, priced_by, ns_per_op) = match (t.op_unit.as_str(), calib.ns_per_word_xor) {
+            ("word XORs", Some(ns)) if calib.ns_per_add > 0.0 => (
+                t.ops as f64 * ns / calib.ns_per_add,
+                if calib.is_pinned("ns_per_word_xor") { "pinned" } else { "measured" },
+                Some(ns),
+            ),
+            _ if calib.ns_per_add > 0.0 => (t.wall_ns as f64 / calib.ns_per_add, "measured", wall_per_op),
+            _ => (0.0, "unpriced", wall_per_op),
         };
         rel.count("solver_calls", t.calls);
         rel.count("solver_ops", t.ops);
@@ -341,7 +352,7 @@ pub fn run_pipeline<G: CountedGroup>(
             calls: t.calls,
             ops: t.ops,
             op_unit: t.op_unit.clone(),
-            ns_per_op: (t.ops > 0).then(|| t.wall_ns as f64 / t.ops as f64),
+            ns_per_op,
             wall_ns: t.wall_ns,
             peak_bytes: t.peak_bytes,
             budget_exceeded: t.budget_exceeded,
@@ -731,6 +742,93 @@ mod tests {
         )
         .unwrap();
         assert_eq!(bare.decomposition.solver.as_ref().unwrap().priced_by, "unpriced");
+    }
+
+    /// An engine that reports its work as `word XORs`, the one unit with
+    /// a pinnable ratio: exhaustive search with its cost relabelled.
+    struct WordXorEngine(Box<dyn super::stages::SystemSolver>);
+
+    impl super::stages::SystemSolver for WordXorEngine {
+        fn name(&self) -> &str {
+            "word-xor-engine"
+        }
+        fn describe(&self) -> String {
+            "exhaustive search reporting its tests as word XORs, for the pricing test".into()
+        }
+        fn accepts(&self, shape: &super::stages::SystemShape) -> bool {
+            self.0.accepts(shape)
+        }
+        fn solve(
+            &self,
+            system: &super::stages::BooleanSystem,
+            params: &Params,
+            budget: Option<std::time::Duration>,
+        ) -> (super::stages::SolverVerdict, super::stages::SolverCost) {
+            let (verdict, mut cost) = self.0.solve(system, params, budget);
+            cost.op_unit = "word XORs".into();
+            (verdict, cost)
+        }
+    }
+
+    /// **`pinned` means the table, and only `Calibration::pin` can say
+    /// so.**  A word-XOR factor that is merely present was measured on
+    /// this host, so a count priced at it is `measured` with the ratio
+    /// recorded; the same count is `pinned` only once the calibration
+    /// records that the table replaced the factor.
+    #[test]
+    fn a_word_xor_price_is_pinned_only_when_the_calibration_says_so() {
+        use super::plugins::{BinarySubspaceBase, DescentAlgebraicOracle};
+        use super::solvers::solver_by_name;
+        use crate::cryptanalysis::ic_boundary::{random_binary_instance, BinaryGroup};
+
+        let inst = random_binary_instance(11, 3, 8).expect("a curve at n = 11");
+        let group = BinaryGroup(&inst.fast);
+        let planted = 1 + 30_011 % (inst.r - 1);
+        let ctx = binary_ctx_and_planted(&inst, &group, planted);
+        let base = BinarySubspaceBase { instance: &inst };
+        let mut spec = PipelineSpec {
+            factor_base: "binary-subspace".into(),
+            oracle: "descent-algebraic".into(),
+            solver: Some("word-xor-engine".into()),
+            targets: Targets::Walk,
+            max_trials: 200_000,
+            seed: 7,
+            ..Default::default()
+        };
+        spec.factor_base_params.set("dimension", "5");
+        let engine = || {
+            DescentAlgebraicOracle::new(
+                2,
+                &inst,
+                Box::new(WordXorEngine(solver_by_name("exhaustive").unwrap())),
+                Params::default(),
+                None,
+            )
+        };
+
+        // Measured on this host: present, not pinned.
+        let mut calib = Calibration {
+            ns_per_add: 2.0,
+            ns_per_word_xor: Some(0.5),
+            ..Default::default()
+        };
+        let mut oracle = engine();
+        let measured = run_pipeline(&ctx, &spec, &base, &mut oracle, planted, &calib, None).unwrap();
+        let s = measured.decomposition.solver.as_ref().unwrap();
+        assert_eq!(s.op_unit, "word XORs");
+        assert_eq!(s.priced_by, "measured");
+        assert!((s.gae - s.ops as f64 * 0.5 / 2.0).abs() < 1e-6, "count times the measured ratio");
+        assert_eq!(s.ns_per_op, Some(0.5));
+
+        // The table replaced the factor: pinned, same arithmetic.
+        calib.pinned_units = vec!["ns_per_word_xor".into()];
+        let mut oracle = engine();
+        let pinned = run_pipeline(&ctx, &spec, &base, &mut oracle, planted, &calib, None).unwrap();
+        let p = pinned.decomposition.solver.as_ref().unwrap();
+        assert_eq!(p.priced_by, "pinned");
+        assert_eq!(p.ops, s.ops, "the same run does the same work");
+        assert!((p.gae - s.gae).abs() < 1e-6);
+        assert!(measured.verified && pinned.verified);
     }
 
     /// **Two oracles that solve the same decomposition problem must agree
