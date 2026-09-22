@@ -1,0 +1,251 @@
+{
+  "candidate": {
+    "artifact_order": "input column order retained by indexed parallel collection",
+    "attempts": 1811,
+    "mathematical_policy_changed": false,
+    "pair_lookups": 18110000,
+    "rank_columns_per_round": 64,
+    "targeted_columns_parallel_per_round": true,
+    "uniform_units": 14
+  },
+  "candidate_params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-parallel-column-control-public-59001.json",
+    "sha256": "4c0eaeffafd14f3bf630bb6837a7ef9842bc48bffa610aa293a5fcbb98e8536f"
+  },
+  "candidate_runs": [
+    {
+      "binary_blake3": "bf07915c6d988dad7fd182785192495214488f6d56b82b135fe775b65041af0e",
+      "collect_wall_seconds": 65.641887834,
+      "combined_relations": 29948,
+      "ic_wall_seconds": 118.33540891800001,
+      "label": "nested_rayon",
+      "linear_algebra": {
+        "attempts": 42,
+        "mode": "sparse",
+        "seconds": 15.388321042000001,
+        "sparse": {
+          "attempts": 1,
+          "core_dimension": 1696,
+          "core_nonzeros": 23519,
+          "filter": {
+            "columns_in": 16344,
+            "columns_out": 1696,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 13572,
+            "merged_columns": 6721,
+            "nonzeros_in": 89840,
+            "nonzeros_out": 23519,
+            "rows_in": 29948,
+            "rows_out": 1728,
+            "singletons_removed": 7927,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 14648,
+          "wiedemann": {
+            "block_m": 4,
+            "block_n": 4,
+            "dimension": 1697,
+            "extra_steps": 0,
+            "generator_degree": 424,
+            "products": 1283,
+            "sequence_length": 858
+          }
+        }
+      },
+      "logs_wall_seconds": 51.814286667,
+      "pair_table_build_wall_seconds": 18.7622215,
+      "peak_rss_bytes": 10082500608,
+      "recovered_scalar": 17861472351607,
+      "relation_units_wall_seconds": 44.143862125,
+      "rho_wall_seconds": 0.607557709,
+      "targeted_tail": {
+        "artifact": "targeted-tail.json",
+        "attempts": 1811,
+        "attempts_ran_now": 1811,
+        "elapsed_seconds": 297.52926909999974,
+        "enabled": true,
+        "pair_lookups": 18110000,
+        "relations": 386,
+        "remaining_uncovered_column_indices": [],
+        "resources": {
+          "cpu_seconds": 167.83168600000005,
+          "peak_rss_bytes_at_end": 10082500608,
+          "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+        },
+        "trials": 18110000
+      },
+      "verification_seconds": 4.770622206000003,
+      "verified": true,
+      "whole_cpu_seconds": 651.606,
+      "whole_wall_seconds": 118.985503708
+    },
+    {
+      "binary_blake3": "8f1d415005ddd443f3fbc5ede007444bb73af882f32eb3ab3e6339eef150601c",
+      "collect_wall_seconds": 67.73252025,
+      "combined_relations": 29948,
+      "ic_wall_seconds": 138.522550917,
+      "label": "round_parallel_serial_columns",
+      "linear_algebra": {
+        "attempts": 42,
+        "mode": "sparse",
+        "seconds": 17.876743583,
+        "sparse": {
+          "attempts": 1,
+          "core_dimension": 1696,
+          "core_nonzeros": 23519,
+          "filter": {
+            "columns_in": 16344,
+            "columns_out": 1696,
+            "dependent_rows_dropped": 0,
+            "duplicates_removed": 0,
+            "excess_rows_removed": 13572,
+            "merged_columns": 6721,
+            "nonzeros_in": 89840,
+            "nonzeros_out": 23519,
+            "rows_in": 29948,
+            "rows_out": 1728,
+            "singletons_removed": 7927,
+            "uncovered_columns": 0
+          },
+          "reconstructed_columns": 14648,
+          "wiedemann": {
+            "block_m": 4,
+            "block_n": 4,
+            "dimension": 1697,
+            "extra_steps": 0,
+            "generator_degree": 424,
+            "products": 1283,
+            "sequence_length": 858
+          }
+        }
+      },
+      "logs_wall_seconds": 70.047122375,
+      "pair_table_build_wall_seconds": 19.224814583,
+      "peak_rss_bytes": 10078175232,
+      "recovered_scalar": 17861472351607,
+      "relation_units_wall_seconds": 45.831214626000005,
+      "rho_wall_seconds": 0.581116208,
+      "targeted_tail": {
+        "artifact": "targeted-tail.json",
+        "attempts": 1811,
+        "attempts_ran_now": 1811,
+        "elapsed_seconds": 334.14422042800015,
+        "enabled": true,
+        "pair_lookups": 18110000,
+        "relations": 386,
+        "remaining_uncovered_column_indices": [],
+        "resources": {
+          "cpu_seconds": 169.20505099999997,
+          "peak_rss_bytes_at_end": 10078175232,
+          "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+        },
+        "trials": 18110000
+      },
+      "verification_seconds": 8.736344787999998,
+      "verified": true,
+      "whole_cpu_seconds": 658.228767,
+      "whole_wall_seconds": 139.147728166
+    }
+  ],
+  "claim_boundary": "Finite same-target rejected scheduling optimization. Parallelising independent forced columns, with nested Rayon or serial per-column scans, preserves the exact relation stream but regresses full wall and CPU on the 10 GB memory-bound pair table. The selected Stage-141 source remains unchanged. No SOTA claim.",
+  "comparison_to_selected_stage139": {
+    "boundary": "candidate and selected receipts are complete exact workflows but not a matched ABBA time series; both candidates exceed selected IC wall by more than two times",
+    "nested_ic_wall_ratio": 2.0392882205716814,
+    "nested_whole_cpu_ratio": 1.2366859626617657,
+    "serial_column_ic_wall_ratio": 2.3871756471837386,
+    "serial_column_whole_cpu_ratio": 1.2492553419843617
+  },
+  "date": "2026-09-22",
+  "decision": {
+    "further_matched_panel": false,
+    "further_matched_panel_reason": "both complete candidates exceed the selected absolute receipt by more than two times",
+    "reason": "nested and single-layer candidates take 118.335409 and 138.522551 seconds of full IC wall versus the selected 58.027800-second receipt; memory-bandwidth contention defeats column-level concurrency",
+    "selected_stage141_unchanged": true,
+    "status": "rejected"
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "parent": {
+      "ell": 15,
+      "kind": "standard_subspace"
+    },
+    "points": 32934,
+    "projected_columns": 16344,
+    "scalar_preimages_retained": false,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "cofactor": 22894,
+    "collection_m": 3,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "public_target_seed": 59001,
+    "subgroup_order": 25179555920633,
+    "target_scalar_constructed_or_supplied": false
+  },
+  "operation": "koblitz_n59_parallel_column_tail_rejection",
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-rank-solve-interval4-rejection-20260922.json",
+    "sha256": "fa9c37cba6693cae0bcb677094f17855e748637388a313a7c1395d2781f154aa"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 10082500608,
+    "retained_processes": 2,
+    "retained_processes_detail": [
+      {
+        "core_seconds": 651.606,
+        "label": "nested_rayon",
+        "peak_rss_bytes": 10082500608,
+        "status": "complete",
+        "wall_seconds": 118.985503708
+      },
+      {
+        "core_seconds": 658.228767,
+        "label": "round_parallel_serial_columns",
+        "peak_rss_bytes": 10078175232,
+        "status": "complete",
+        "wall_seconds": 139.147728166
+      }
+    ],
+    "retained_sequential_wall_seconds": 258.133231874,
+    "retained_total_core_seconds": 1309.8347669999998,
+    "scope": "one nested-Rayon complete workflow and one round-parallel serial-column complete workflow; compilation excluded"
+  },
+  "relation_stream": {
+    "combined_relations": 29948,
+    "combined_relations_sha256": "1b97d125b7f08a1404ee14bcc794e7e008aa2729482fa98d1ffe61a380356b4e",
+    "exact_match_between_candidates": true,
+    "stage138_prefix14_boundary": "same deterministic parameters, relation counts and policy; the earlier frontier artifact did not retain canonical stream hashes for a direct hash comparison",
+    "targeted_relations": 386,
+    "targeted_relations_sha256": "1a8adec27ed103da7a6e051dfb582e29e6e1ffb59616c3d545065ad19ac8d04c",
+    "uniform_relations": 29562,
+    "uniform_relations_sha256": "618bb4041375341592fe50bcfb2667f6e280d59c7db9588e16532690fd73718a"
+  },
+  "schema_version": 1,
+  "software": {
+    "nested_binary_blake3": "bf07915c6d988dad7fd182785192495214488f6d56b82b135fe775b65041af0e",
+    "selected_source_stack_head": "f36eb9c5",
+    "serial_column_binary_blake3": "8f1d415005ddd443f3fbc5ede007444bb73af882f32eb3ab3e6339eef150601c"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-parallel-column-tail-rejected-20260922.patch",
+    "sha256": "d73080ef7006d5e1edf9b6ca0762bfe6d9c31ef1870a4f7600012a4f29f242d6",
+    "status": "archived_final_serial_column_candidate_not_applied_to_selected_source"
+  },
+  "validation": [
+    "both scheduling candidates emit the same uniform, targeted and combined relation hashes",
+    "both candidates derive all 16344 logs, recover scalar 17861472351607 and verify [d]G=Q",
+    "the final archived patch uses one Rayon layer with serial per-column scans",
+    "the candidate parameter is serialization-neutral when disabled",
+    "the rejected patch applies cleanly to the Stage-141 selected source"
+  ]
+}
