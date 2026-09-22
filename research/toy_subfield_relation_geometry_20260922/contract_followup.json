@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "scope": "independent_toy_geometry_holdout_with_nontrivial_odd_prime_factor",
+  "reason": "Three initial full-degree holdout curves had power-of-two group order. Preserve the initial data and test a separate population.",
+  "seed": 22092027,
+  "field_pairs_n_k": [[6, 2], [9, 3], [10, 2], [12, 4]],
+  "curve_selection": "first uniformly sampled nonzero full-degree b with largest odd prime divisor r of #E satisfying #E/r <= 8; stop after 512 attempts per field",
+  "dimension_multipliers": [1, 2],
+  "families": ["generic_linear", "subfield_linear", "scaled_subfield_linear"],
+  "selection_must_not_use": ["product_rank", "factor_base_size", "pair_sum_coverage"],
+  "screening_success": "At dimension k in at least three of the four new cells, some structured family has lower product-span rank and at least as many distinct targets as the generic reference.",
+  "targets": "all points of each selected toy curve; subgroup order is a selection diagnostic, not the target population",
+  "limitations": "A passed screen is not evidence of DLP performance. Use the pair definitions, checks and unmeasured-cost fields from contract.json."
+}
