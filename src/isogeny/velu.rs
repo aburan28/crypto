@@ -252,20 +252,24 @@ pub fn velu_isogeny_2(domain: &SmallCurve, x_t: u64) -> Option<VeluIsogeny> {
 
 // ── ℓ-odd isogeny via cofactor sampling ──────────────────────────────────────
 
-/// Return all `ℓ`-isogenies from the curve as `VeluIsogeny` records.
+/// Return sampled `ℓ`-isogenies with pointwise rational kernels.
 /// `ℓ` must be an odd prime.
+/// This is not a complete rational-isogeny census: a rational isogeny only
+/// requires a Frobenius-stable kernel, and this bounded sampler can also miss
+/// pointwise rational kernels. In particular, when full ell-torsion is rational,
+/// multiplication by #E/ell can annihilate that torsion instead of finding it.
 ///
 /// Algorithm (random-point cofactor method, Schoof 1995 §3):
 ///
 /// 1. Compute `#E(F_p) = p + 1 − t` via [`cm_discriminant`].
-/// 2. If `ℓ ∤ #E`, there is no `F_p`-rational `ℓ`-torsion, so no
-///    isogenies of degree `ℓ` are defined over `F_p`.  Return `[]`.
+/// 2. If `ℓ ∤ #E`, there is no `F_p`-rational `ℓ`-torsion, so this
+///    sampler returns `[]`; rational isogenies may still exist.
 /// 3. Otherwise let `m = #E / ℓ`.  Repeatedly sample random
 ///    `P ∈ E(F_p)` and form `Q = m·P`; if `Q ≠ O`, then `Q` has
 ///    order dividing `ℓ`, and (since `ℓ` is prime) its order is
 ///    exactly `ℓ`, so `⟨Q⟩` is a cyclic subgroup of order `ℓ`.
-/// 4. Stop when we've enumerated every distinct cyclic subgroup
-///    (at most `ℓ+1` of them when `E[ℓ](F_p) ≅ (Z/ℓ)²`).
+/// 4. Stop at `ℓ+1` distinct kernels or the attempt cap. Neither fewer results
+///    nor an empty result certifies the absence of additional rational isogenies.
 ///
 /// Cost: `O(ℓ² · log² p)` total — `O(log² p)` per scalar mult,
 /// `O(ℓ)` samples expected per distinct subgroup, `O(ℓ)` subgroups
@@ -285,7 +289,7 @@ pub fn velu_isogeny_odd(domain: &SmallCurve, ell: u64) -> Vec<VeluIsogeny> {
     }
     let order = cm.order as u64;
     if order % ell != 0 {
-        // No F_p-rational ℓ-torsion → no ℓ-isogenies definable over F_p.
+        // No pointwise rational ell-kernel can be sampled by this backend.
         return Vec::new();
     }
     let cofactor = order / ell;
