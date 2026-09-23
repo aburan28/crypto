@@ -2,7 +2,7 @@
 
 Classification: **engineering experiment; no end-to-end speedup established**. The affine template is correct and reusable across targets. The current serialized cache path adds enough overhead to erase its stage savings in the observed full-run medians. Full parameterized Boolean bases are not promoted. All cache layers remain opt-in.
 
-**2026-09-23, run-002:** a re-run on current `main` reproduces this verdict. No cache mode pays end to end, and the reduction cache is no longer reached by the default Gröbner engine. See [Run 002](#run-002-current-main-against-the-same-reference).
+**2026-09-23, run-002:** a re-run on current `main` reproduces this verdict. At the frozen sizes no cache mode pays end to end, and the reduction cache is no longer reached by the default Gröbner engine. At n = 13, outside the frozen contract, the local preprocessing cache saves about 4–6%. See [Run 002](#run-002-current-main-against-the-same-reference).
 
 ## Frozen scope and checks
 
@@ -136,11 +136,36 @@ The same checks passed. Cold-F4 candidate/baseline for the **template** is 0.75�
 
 The **parameterized** route measures 22.6× and 776× at n = 3 and 5 with ell = 2 (run-001: 124.6× and 4,795×). The chain criterion made the engine faster since then, and the route is still nowhere near promotion. Its full-basis cache was removed in #626. The same three parameterized cells time out on every repetition.
 
+### Diagnostic at n = 13, outside the frozen contract
+
+The counters above say what could change the verdict: more lookups per process. n = 13 is the one larger degree the frozen invocation reaches:
+- n = 11 stops with "K_0 / GF(2^11) has no usable prime-order subgroup in the existing constructor";
+- n = 15 uses all 500 trials without a relation.
+
+[`diagnostic_n13.py`](diagnostic_n13.py) follows `run.py`'s conventions: `IC_*` stripped, `RAYON_NUM_THREADS=1`, 30 s and 2 GiB, raw output kept. It compares only `off` and `preprocess-local`, over 4 seeds × 2 solvers × **5 repetitions**, alternating the mode order between repetitions. The load average was 0.05 at the start and 0.20 at the end. Every one of the 80 processes completed and verified, and `preprocess-local` is identical to `off` in 40 of 40 pairs.
+
+| Solver | Trials per seed | Lookups / hits per process | Cache overhead | local / off, per rep | Median | Faster pairs |
+|---|---|---:|---:|---|---:|---:|
+| groebner | 14, 7, 8, 7 | 9.0 / 8.0 | 3.2% | 0.941, 0.989, 0.924, 0.893, 0.987 | **0.941** | 18 / 20 |
+| sat | 23, 15, 18, 53 | 27.2 / 26.2 | 0.6% | 0.976, 0.928, 1.058, 0.958, 0.962 | **0.962** | 14 / 20 |
+
+The sign flips as the mechanism predicts:
+- **n = 9:** 2.5–3.5 lookups per process, and the cache costs about 9%.
+- **n = 13:** 9–27 lookups, and it saves about 4–6%.
+
+How strong each gain is:
+- **Gröbner:** consistent. All five repetitions are below 1, and 18 of 20 paired runs are faster (one-sided sign test p ≈ 0.0002).
+- **SAT:** smaller and not consistent. One repetition is above 1, and 14 of 20 pairs are faster (one-sided p ≈ 0.06).
+
+This is **engineering, not a finding**, and not an end-to-end speedup claim. n = 13 is outside the frozen contract, and `AGENTS.md` §8 establishes speedups only on the frozen benchmark.
+
 ### Decision after run-002
 
-**Unchanged.** No cache mode improves end-to-end elapsed time at the frozen sizes. Every mode is slower than `off` in the same binary, and the cache's own overhead counters account for the difference. The preprocessing cache stays opt-in and should stay off by default.
+**Unchanged at the frozen sizes.** No cache mode improves end-to-end elapsed time at n = 7 and 9. Every mode is slower than `off` in the same binary, and the cache's own overhead counters account for the difference.
 
-What would change this verdict is a workload with many lookups per process: long relation searches at a degree where the template build is a real fraction of each trial. The frozen suite's degrees, 7 and 9, cannot reach that regime.
+**Outside them, the local preprocessing cache pays.** At n = 13 it saves about 4–6%, consistently for Gröbner. The Redis and reduction modes add nothing: the reduction layer is not reached, and Redis only adds cost.
+
+The preprocessing cache therefore stays opt-in. `IC_PREPROCESS_CACHE=local` is worth setting for long relation searches. Making it the default needs the frozen regression suite (`research/index_calculus_baseline_20260914/regression`) run with it, not this diagnostic.
 
 ## Evidence
 
@@ -151,5 +176,6 @@ What would change this verdict is a workload with many lookups per process: long
 - [Test outcomes](validation/tests.json)
 - [Outage comparison](validation/outage.json)
 - Run 002: [comparison](results/run-002/summary.json), [process statuses](results/run-002/processes.json), [hashes](results/run-002/hashes.json)
+- n = 13 diagnostic: [script](diagnostic_n13.py), [process statuses and raw output](results/diagnostic-n13/processes.json)
 
 `results/run-001/*.stdout` and `*.stderr` preserve every raw run, including timed-out basis jobs. `validation/dependencies.lock.txt` preserves the dependency resolution. Benchmarks were executed locally; no AWS resources were provisioned.
