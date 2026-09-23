@@ -1608,9 +1608,20 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         k&thinsp;=&thinsp;4 the linear algebra is |F|<sup>2</sup>&thinsp;&prop;&thinsp;n<sup>1/2</sup>,
         <em>the same exponent as rho</em>, and the relation phase grows as
         n<sup>1/4</sup>&middot;C&#8324;, so the plain method's ratio to rho tends to a constant
-        instead of growing. That is derived, not measured: whether the constant is below one, and
-        where the relation phase stops dominating, turns on C&#8324;, the cost of one
-        S&#8325; solve over F<sub>p&#8308;</sub>, which nothing here has measured yet.</p>
+        instead of growing. That constant is the sparse solver's cost against rho's and does not
+        depend on the solve; C&#8324;, the cost of one S&#8325; solve over F<sub>p&#8308;</sub>,
+        sets only where the relation phase stops dominating.</p>
+      <p><strong>Derived before building</strong> (&sect;11.16, from &sect;11.7's measured Wiedemann
+        constant and F<sub>p&#8308;</sub> operation counts): the constant is
+        <strong>0.34&ndash;0.63&times; rho</strong>, so a plain k&thinsp;=&thinsp;4 method would
+        eventually beat rho by 1.6&ndash;3&times; and no more. This note's own solver bounds
+        C&#8324; &ge; 7.1&middot;10<sup>10</sup> from the characteristic polynomial of a
+        4,096-dimensional multiplication matrix alone, which puts the handover at
+        <strong>n &asymp; 2<sup>133</sup>&ndash;2<sup>137</sup></strong>, extrapolated on the
+        exponents n<sup>1/4</sup> and n<sup>1/2</sup>. That is about a hundred doublings before the
+        k&thinsp;=&thinsp;3 crossover, and 2.5&middot;10<sup>7</sup>&times; rho at 32 bits. A measured
+        C&#8324; in this design can only move it later. Decomposing into three points instead
+        (Joux&ndash;Vitse) sits near 36&times; rho at every size.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
     </div>
