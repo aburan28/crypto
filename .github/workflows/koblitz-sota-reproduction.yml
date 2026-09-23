@@ -12,6 +12,8 @@ on:
       - "examples/koblitz_pdp_backend.rs"
       - "src/cryptanalysis/koblitz_index_calculus.rs"
       - "src/cryptanalysis/koblitz_pdp_phase_a.rs"
+      - "src/cryptanalysis/pq_f4_f2.rs"
+      - "src/cryptanalysis/ic_framework/solvers.rs"
       - "src/bin/koblitz_pdp_prepare.rs"
       - "scripts/process_meter.py"
       - "scripts/run_koblitz_pdp_matrix.py"
@@ -26,6 +28,10 @@ on:
       - "scripts/build_koblitz_phase_b_wdsat.py"
       - "scripts/test_koblitz_phase_b_wdsat_custody.py"
       - "scripts/build_koblitz_phase_b_tools.py"
+      - "scripts/build_koblitz_phase_b_native_f4.py"
+      - "scripts/run_koblitz_phase_b_native_f4.py"
+      - "scripts/compose_koblitz_stage164_dense_f4.py"
+      - "scripts/verify_koblitz_stage164_dense_f4.py"
       - "scripts/test_koblitz_phase_b_tool_builds.py"
       - "scripts/score_koblitz_blind_pdp_phase_b.py"
       - "scripts/test_koblitz_blind_pdp_phase_b.py"
@@ -100,6 +106,8 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE22_PHASE_B_MAGMA_REPLAY.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-verification.json"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -158,6 +166,11 @@ jobs:
         run: |
           python3 scripts/verify_koblitz_stage163_m4ri.py > /tmp/stage163-m4ri-verification.json
           cmp /tmp/stage163-m4ri-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-163-m4ri-verification.json
+      - name: Verify dense native-F4 supplement
+        run: |
+          cargo test --release --lib cryptanalysis::pq_f4_f2::tests:: -- --test-threads=1
+          python3 scripts/verify_koblitz_stage164_dense_f4.py > /tmp/stage164-dense-f4-verification.json
+          cmp /tmp/stage164-dense-f4-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-verification.json
       - name: Validate licensed Magma Phase-B replay packet controls
         run: |
           python3 scripts/test_koblitz_phase_b_magma_replay.py -v
