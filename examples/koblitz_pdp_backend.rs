@@ -751,6 +751,26 @@ fn fixed_x1_masks(ell: usize, hamming_weight_order: bool) -> Vec<usize> {
     masks
 }
 
+fn build_fixed_x1_batch(
+    candidates: &[(usize, F2mElement)],
+    x2: &SymElement,
+    x3: &SymElement,
+    target_x: &F2mElement,
+    st: &FieldStructure,
+    n_vars: usize,
+    parallel: bool,
+) -> Vec<(usize, BooleanSystem)> {
+    let build = |(x1_mask, x1_value): &(usize, F2mElement)| {
+        let equations = sym_semaev_s4_fixed_x1(x1_value, x2, x3, target_x, st);
+        (*x1_mask, BooleanSystem { equations, n_vars })
+    };
+    if parallel && candidates.len() > 1 {
+        candidates.par_iter().map(build).collect()
+    } else {
+        candidates.iter().map(build).collect()
+    }
+}
+
 fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
     if budget_seconds == 0 {
         return (
@@ -803,6 +823,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
     let solver = F4F2;
     let x2 = SymElement::from_subspace_vars(&instance.basis, 0, instance.n, n_vars);
     let x3 = SymElement::from_subspace_vars(&instance.basis, instance.ell, instance.n, n_vars);
+    let parallel_construction =
+        std::env::var("PQ_F4_DISABLE_PARALLEL_CONSTRUCTION").as_deref() != Ok("1");
     let mut equation_hasher = blake3::Hasher::new();
     let mut costs = F4CostAggregate::default();
     let mut construction_ns = 0u128;
@@ -840,8 +862,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
     let masks = fixed_x1_masks(instance.ell, weight_order);
     let mut mask_cursor = 0usize;
     'mask_batches: while mask_cursor < masks.len() {
-        let mut batch: Vec<(usize, BooleanSystem)> = Vec::with_capacity(x1_batch_size);
-        while batch.len() < x1_batch_size && mask_cursor < masks.len() {
+        let mut candidates: Vec<(usize, F2mElement)> = Vec::with_capacity(x1_batch_size);
+        while candidates.len() < x1_batch_size && mask_cursor < masks.len() {
             let x1_mask = masks[mask_cursor];
             mask_cursor += 1;
             x1_masks_visited += 1;
@@ -868,29 +890,41 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
                 nonrational_x1_skipped += 1;
                 continue;
             }
-            let built = Instant::now();
-            let equations = sym_semaev_s4_fixed_x1(&x1_value, &x2, &x3, target_x, &st);
-            construction_ns = construction_ns.saturating_add(built.elapsed().as_nanos());
+            candidates.push((x1_mask, x1_value));
+        }
+        if candidates.is_empty() {
+            continue;
+        }
+        let built = Instant::now();
+        let batch = build_fixed_x1_batch(
+            &candidates,
+            &x2,
+            &x3,
+            target_x,
+            &st,
+            n_vars,
+            parallel_construction,
+        );
+        construction_ns = construction_ns.saturating_add(built.elapsed().as_nanos());
+        for (x1_mask, system) in &batch {
             systems_constructed += 1;
-            total_equations = total_equations.saturating_add(equations.len());
-            let terms: usize = equations.iter().map(|p| p.terms.len()).sum();
+            total_equations = total_equations.saturating_add(system.equations.len());
+            let terms: usize = system.equations.iter().map(|p| p.terms.len()).sum();
             total_terms = total_terms.saturating_add(terms);
             max_terms = max_terms.max(terms);
             max_degree = max_degree.max(
-                equations
+                system
+                    .equations
                     .iter()
                     .flat_map(|p| p.terms.iter())
                     .map(|term| term.mask.count_ones())
                     .max()
                     .unwrap_or(0),
             );
-            equation_hasher.update(&(x1_mask as u64).to_le_bytes());
-            equation_hasher
-                .update(&serde_json::to_vec(&equations).expect("serialize fixed-X1 S4 equations"));
-            batch.push((x1_mask, BooleanSystem { equations, n_vars }));
-        }
-        if batch.is_empty() {
-            continue;
+            equation_hasher.update(&(*x1_mask as u64).to_le_bytes());
+            equation_hasher.update(
+                &serde_json::to_vec(&system.equations).expect("serialize fixed-X1 S4 equations"),
+            );
         }
         let now = Instant::now();
         if now >= deadline {
@@ -1006,7 +1040,9 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "source_representation":instance.source_representation,
             "solver_representation":"fixed_x1_direct_symmetrised_s4_boolean",
             "solver_constructor":"fixed_x1_constant_linear_specialisation",
-            "solver_schedule":format!("enumerate x1 coefficients in {x1_order}; solve rational systems in deterministic batches of {x1_batch_size}; inspect completed batch results in schedule order"),
+            "solver_schedule":format!("enumerate x1 coefficients in {x1_order}; construct rational systems in deterministic batches of {x1_batch_size} with ordered parallel collection={parallel_construction}; solve each batch in parallel; inspect completed results in schedule order"),
+            "solver_parallel_construction":parallel_construction,
+            "solver_parallel_construction_control":"PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
             "solver_x1_order":x1_order,
             "solver_x1_order_target_independent":true,
             "solver_x1_order_control":"PQ_F4_X1_ORDER=ascending",
@@ -1425,6 +1461,45 @@ mod tests {
             assert!(weighted.windows(2).all(|pair| {
                 (pair[0].count_ones(), pair[0]) <= (pair[1].count_ones(), pair[1])
             }));
+        }
+    }
+
+    #[test]
+    fn parallel_fixed_x1_batch_construction_preserves_order_and_equations() {
+        let n = 7u32;
+        let irreducible = find_irreducible_sparse(n).unwrap();
+        let st = FieldStructure::new(n, &irreducible);
+        let basis: Vec<_> = (0..3)
+            .map(|index| F2mElement::from_bit_positions(&[index], n))
+            .collect();
+        let n_vars = 2 * basis.len();
+        let x2 = SymElement::from_subspace_vars(&basis, 0, n, n_vars);
+        let x3 = SymElement::from_subspace_vars(&basis, basis.len(), n, n_vars);
+        let target = F2mElement::from_bit_positions(&[0, 2, 5], n);
+        let candidates: Vec<_> = fixed_x1_masks(basis.len(), true)
+            .into_iter()
+            .map(|mask| {
+                let value = basis.iter().enumerate().fold(
+                    F2mElement::zero(n),
+                    |value, (index, element)| {
+                        if mask >> index & 1 == 1 {
+                            value.add(element)
+                        } else {
+                            value
+                        }
+                    },
+                );
+                (mask, value)
+            })
+            .collect();
+        let serial = build_fixed_x1_batch(&candidates, &x2, &x3, &target, &st, n_vars, false);
+        let parallel = build_fixed_x1_batch(&candidates, &x2, &x3, &target, &st, n_vars, true);
+        assert_eq!(
+            serial.iter().map(|(mask, _)| *mask).collect::<Vec<_>>(),
+            parallel.iter().map(|(mask, _)| *mask).collect::<Vec<_>>()
+        );
+        for ((_, serial), (_, parallel)) in serial.iter().zip(&parallel) {
+            assert_eq!(serial.equations, parallel.equations);
         }
     }
 
