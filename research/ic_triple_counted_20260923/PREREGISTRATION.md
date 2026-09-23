@@ -184,3 +184,49 @@ and it is registered as a direction, with the point value for reference.
 - **Not in this arm:** a pair path for `n23a1`. That is the switch named on
   #668, and it needs its own design, because the checker fixes the summand
   count per job.
+
+## Addendum, before the confirmation run (after a 4-fixture probe)
+
+Added after `counted-sizing.patch` was built and tested (12 of 12,
+`unit-tests.txt`) and a 4-fixture-a-cell probe from `random.Random(20260925)`
+had been seen (`probe-does-not-count.json`), and before any confirmation seed
+was run.  **The probe does not count.**
+
+**What it showed.**
+
+- Every report verified, with the same logarithm on all three arms.
+- The identity held on every fixture at `n23a1`, `n37a0`, `n59a0` and `n61a1`:
+  the same base, trials, columns and relations, and ratios of 0.968, 0.990,
+  0.999 and 0.997, each inside its band.
+- At `n43a1`, four ratios of 0.74, 1.17, 0.74 and 1.60, with trials of 67,
+  110, 49 and 147 against the triple arm's 339, 152, 289 and 161.  That is a
+  geometric mean of 1.01 [0.75, 1.37], which says nothing at four.
+
+**Two things fixed now.  Both are quantified from `model.py` alone
+(`model_gm.py`, `model-gm-output.txt`), not from the probe.**
+
+1. **The band was computed on means, but the rule scores a geometric mean.**
+   The two arms draw different bases, so a fixture's two trial counts are
+   independent, and the triple arm's count is the heavier-tailed one.
+   Simulating trials as the count says they are, the ratio of means
+   reproduces the registered 0.795 and the geometric mean of ratios is
+   **0.859**.  That point sits inside the registered band, so **the band, the
+   point range and the rules stand unchanged**.
+2. **At 32 fixtures the rule cannot reliably pass even if the prediction is
+   exactly right.** The spread of the log ratio is 0.51, so the expected
+   interval around 0.859 is [0.72, 1.02]. Its upper end would sit above one
+   about half the time. **`n43a1` is extended to 128 fixtures**, expected
+   interval [0.79, 0.94].
+   - The registered 32 come from `random.Random(20260926)` exactly as
+     registered, in the registered order. The other 96 come from a separate
+     stream, `random.Random(20260927)`, appended after all five cells
+     (`check.py --extend n43a1:96:20260927`).
+   - Items 2 and 3 at `n43a1` are scored on all 128. The registered 32 alone
+     are reported beside them, and nothing is decided on them.
+   - Every other cell stays at 32.
+
+**Noted, not changed.** The probe's `counted`/rho at `n61a1` (0.40) is far
+below the registered ≈ 0.76. The triple arm reads the same there (0.40),
+since the two arms are identical at that cell, so this is about rho's cost at
+`n61a1`, not about the sizing. The holdout point values were registered as
+the least-grounded numbers here, and item 3 is scored on direction only.
