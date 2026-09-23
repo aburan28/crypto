@@ -836,13 +836,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             continue;
         }
         let built = Instant::now();
-        let equations = sym_semaev_s4_fixed_x1(
-            &x1_value,
-            &x2,
-            &x3,
-            target_x,
-            &st,
-        );
+        let equations = sym_semaev_s4_fixed_x1(&x1_value, &x2, &x3, target_x, &st);
         construction_ns = construction_ns.saturating_add(built.elapsed().as_nanos());
         systems_constructed += 1;
         total_equations = total_equations.saturating_add(equations.len());
