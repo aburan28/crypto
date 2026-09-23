@@ -3579,6 +3579,166 @@ and the suite file's hash it ran with; `manifest.json` holds every
 system's fingerprint and every cell's verdict digest from the frozen
 run.
 
+## 18. The matched rho: the reference the contract asks for
+
+Through §17, every `vs rho` ratio on the prime and random binary
+curves, and every one `ic bench` printed, divided by `rho_reference`:
+Teske's r-adding walk on points, with no automorphism (`A = 1`).  The
+accounting contract asks for more (`comparison_contract.rho`): "the
+eligible automorphism-aware rho reference on the same subgroup and
+operation unit".  On a generic prime curve and on a binary curve not
+defined over a proper subfield the eligible automorphism is negation
+(`A = 2`); on a Koblitz curve it is negation and the Frobenius
+(`A = 2n`), which the Koblitz regime has used since Round 1 and `ic
+bench` never did.  §17.13 recorded the gap.  This section closes it.
+§18.1 and §18.2 were written and committed before anything below ran.
+
+**What was known when this was written.**  Reading the frozen Round-5
+headline's rho records
+(`docs/ic/runs/ic-boundary-ledger-round5-headline-2026-09-22.json`,
+64 runs per instance) showed the frozen walk is not at its own floor:
+its walk steps over `√(πr/2)` average `2.31` on the 24-bit prime
+curve, `1.48` on the `n = 27` binary curve and `1.70`–`1.72` on the
+Koblitz curves' plain rows (medians `1.40` on the prime curve).  Its
+walks average `846` steps against the `512` its distinguished-point
+rate predicts.  The explanation offered here is a prediction, not a
+finding: with walks of about `θ = √r/8` steps, a walk closes a cycle
+with no distinguished point with probability about `θ²/r ≈ 2 %`, and
+each such walk pays the whole `20θ` cap.  The frozen walk also pays two
+scalar multiplications per walk start and about `560` operations for
+its table, which is most of `S` at `r ≈ 2^{12}` (`S = 16.2` there,
+§17.11).  A unit test of the new walk on `Z/(10^9 + 7)` asserts that
+the plain-to-negation walk ratio lies in `[1.2, 1.65]` and each walk
+within `[0.8, 1.3]` of its own floor; it passes, and its values were
+not printed.  One smoke test of `ic bench` touched an evaluation
+instance before this was committed: eight runs on the `W13` curve of
+seed `20260922` with the provisional rule below, negation walk
+`S = 2.70` against the frozen walk's `18.4` on the same eight seeds;
+and one on `K_1 / GF(2^17)`, which no evaluation uses, where the
+negation walk (`2.15`) came in under the signed-Frobenius walk
+(`3.51`).  Neither is used below.
+
+### 18.1 The boundaries, stated before measuring
+
+- **The floor** is the generic one, `√(πr/2A)` operations, with the
+  `A` of the curve: `S_floor = 0.886` for `A = 2`, `√(π/4n)` for a
+  Koblitz curve (§3).  The walk has its own version of it: walk
+  operations over `√(πr/2A)`, reported per run as
+  `steps_over_expected`.
+- **The reference for the reference** is what is known about adding
+  walks: a random-mapping walk needs `√(πr/2A)` steps; an adding walk
+  with `J` jumps needs about `1/√(1 − 1/J)` times more (Teske;
+  Bernstein–Lange); the negation map's look-ahead adds about `1/(2J)`
+  additions a step.  So the matched walk should sit about `1.03`–`1.1`
+  above its own floor at `J = 16`, more at small `J`.
+- **Everything is inside `S`**: the table, the start stride, one
+  addition per walk start, the walk with its rejected look-ahead
+  additions and its cycle-escape doublings, and the verification
+  `[d]G = Q` of every candidate.  Not charged, as in the frozen walk:
+  the hash of each point, the comparisons with recent points, and,
+  under negation, one field negation and one key comparison per
+  canonicalisation, which the report counts
+  (`canonicalisations_uncharged`).
+
+### 18.2 The walk, the calibration and the targets, declared before any of them ran
+
+**The walk** (`ic_boundary::rho_reference_walk`), the same code for
+both automorphism counts so that a paired run isolates the `√2`:
+
+- van Oorschot–Wiener with distinguished points every `2^{⌊bits(r)/4⌋}`
+  steps, walks of about `r^{1/4}`;
+- walk `k` starts at `[k]T` for one random `T`, one addition a start;
+- `J` jumps `[a_j]G + [b_j]Q`, coefficients of `min(12, 3·log₂J)` bits,
+  by joint double-and-add;
+- under negation (`RhoWalk::negation`): the walk moves between
+  canonical representatives of `{P, −P}` (the smaller key), with the
+  Wiener–Zuccherato look-ahead against the fruitless 2-cycle (a jump
+  whose sum flips sign and would take the same jump again is replaced
+  by the next jump), every step compared with the last sixteen points,
+  and a detected cycle left by doubling its smallest-key point — a
+  choice every walk entering that cycle makes identically — with a
+  walk that falls back into the cycle it just left abandoned;
+- the tuned walk on points (`RhoWalk::plain`) is the same code without
+  the canonicalisation and the look-ahead.
+
+**The calibration.**  The jump count `J` is the walk's one free
+parameter: it trades table set-up (about `1.75·w·J` operations) against
+the adding walk's randomness and, under negation, the rate of
+fruitless cycles.  It is fixed on curves no evaluation uses: the
+roster prime curves at `12`, `14`, `16`, `18` and `20` bits, prime
+curves generated at `22`, `24` and `26` bits, and random binary curves
+at `n = 13, 15, …, 27`, both from seed `0xCA11B`, `128` runs each,
+`J ∈ {4, 8, 16}` for both tuned walks.  The rule: at each size the `J`
+whose negation walk has the lowest mean `S`, with anything within
+`3 %` of the lowest going to the larger `J`; the size thresholds between
+the chosen counts go into `rho_jumps_for` and are not changed after any
+evaluation run.  The code as committed with this declaration carries a
+provisional rule (`4` to 18 bits, `8` to 23, `16` above) that the
+calibration either confirms or replaces.
+
+**The evaluation.**  (a) A ladder on fresh curves, seed `0xE7A1`: prime
+curves generated at `12, 14, …, 26` bits (`--generated-primes`, so none
+is a roster or calibration curve) and random binary curves at `n = 13,
+15, …, 27`, `128` runs each, the three walks paired on the same planted
+logarithms and seeds.  (b) The re-pricing of every frozen report whose
+`vs rho` the scoreboard or this note quotes on a prime or random binary
+curve: the Round-5 headline (`prime` 24-bit, `char2` `n = 27`) and the
+§17.11 whole-method runs (`W13-*`, `W15-*`, `W17-*` in
+`research/ic_framework_engines_20260922/results/baseline_v1/`).  Each
+instance is rebuilt from what its report recorded, the frozen walk is
+re-run on the recorded seeds first, and the matched walk then runs on
+the same seeds and targets.  The index-calculus rows are not re-run;
+their counts did not change.
+
+**Targets:**
+
+1. **Correct.**  Every run of every walk, calibration and evaluation,
+   recovers the planted logarithm and verifies `[d]G = Q`; walks
+   abandoned in a cycle stay under `1 %` of walks.
+2. **Identity.**  The frozen walk re-run on the recorded seeds
+   reproduces every recorded run exactly: steps, walks, distinguished
+   points, additions, doublings, scalar multiplications, the logarithm
+   and `S`, in the headline and in all seven `W` reports.
+3. **At its own floor.**  At every evaluation size with `r ≥ 2^{20}`,
+   the negation walk's mean walk operations over `√(πr/4)` lie in
+   `[0.9, 1.2]`.
+4. **The `√2`, paired.**  The tuned walk on points over the negation
+   walk, in walk operations, lies in `[1.25, 1.55]` pooled over the
+   evaluation sizes with `r ≥ 2^{20}`, with a `95 %` bootstrap interval
+   inside that range.
+5. **Flat.**  The negation walk's whole `S` is at most `1.5 × 0.886`
+   at every evaluation size with `r ≥ 2^{20}`, and its total operations
+   fit `r^α` with `α` within `0.5 ± 0.05` over the ladder's sizes from
+   `2^{20}` up, at least four of them.
+6. **Matched.**  Every instance priced has no eligible automorphism
+   beyond negation: prime curves with `a, b ≠ 0` or outside the
+   `j = 0`, `j = 1728` congruences; binary curves whose `b` lies in no
+   proper subfield.
+
+**Abandon** the new reference, and leave every ratio against the frozen
+walk, if target 1 or 2 fails; if target 3 or 4 fails the walk is
+mis-built and nothing is re-priced with it; target 5 failing at the
+small sizes is reported and does not stop the re-pricing, since the
+reference is then still the best counted walk the repository has.
+
+**On Koblitz curves in `ic bench`** both eligible walks run on the
+same seeds, the repository's signed-Frobenius walk (`A = 2n`, priced
+as the Koblitz regime prices it) and the negation walk, and the one
+with the lower mean `S` prices the column; both are in the report.
+That is a choice of the cheaper of two references, which can only make
+the reference stronger.
+
+**Class, fixed in advance: accounting.**  The reference moves; no
+index-calculus row's counts change.  Every `vs rho` ratio is expected
+to rise, and a ratio that rises is not a regression of any method.
+
+**Inadmissible:** re-tuning `J`, the distinguished-point rate, the
+window or the look-ahead after an evaluation run; dropping or re-seeding
+a failed run; leaving set-up, starts or verification out of `S`;
+dividing an index-calculus row by a rho mean from other seeds, targets
+or curves than the row's own; and reading the frozen walk's before mark
+as a property of rho rather than of that walk.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

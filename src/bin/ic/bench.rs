@@ -19,8 +19,9 @@ use serde_json::{json, Value};
 
 use crypto_lib::cryptanalysis::ic_boundary::{
     calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor, generic_floor_ops,
-    koblitz_instance, random_binary_instance, rho_reference, roster_prime_instance, BinaryGroup,
-    BinaryInstance, Calibration, CountedGroup, GroupOps, PinOutcome, PrimeInstance,
+    koblitz_instance, random_binary_instance, rho_reference, rho_reference_negation, roster_prime_instance,
+    signed_frobenius_rho, BinaryGroup, BinaryInstance, Calibration, CountedGroup, GroupOps, PinOutcome,
+    PrimeInstance, RhoResult,
 };
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
@@ -234,27 +235,36 @@ struct RhoRun {
     planted: u64,
     seed: u64,
     s: f64,
+    /// Walk operations over `√r`: the part the `√(πr/2A)` floor is about.
+    s_walk: f64,
     steps: u64,
     steps_over_expected: f64,
     verified: bool,
 }
 
-/// **The method boundary, measured on the instance.**  The repository's
-/// counted Pollard rho (`ic_boundary::rho_reference`, the reference every
-/// ledger row is priced against), run on the logarithms the
-/// configurations plant, several walks averaged because one rho run's
-/// cost is a draw from a wide distribution.
+/// **The method boundary, measured on the instance.**  A counted Pollard
+/// rho run on the logarithms the configurations plant, several walks
+/// averaged because one rho run's cost is a draw from a wide
+/// distribution.
 #[derive(serde::Serialize)]
 struct RhoReference {
     method: String,
+    /// Automorphisms the walk uses: `2` for the negation map, `2n` for
+    /// the signed Frobenius, `1` for the plain walk.
+    automorphisms: u32,
     runs: usize,
     mean_s: f64,
     min_s: f64,
     max_s: f64,
+    mean_s_walk: f64,
     all_verified: bool,
     per_run: Vec<RhoRun>,
 }
 
+/// `runs` rho runs of one walk on the configurations' planted
+/// logarithms.  `walk(target, planted, seed, max_steps)` runs one; the
+/// seeds and targets are the same for every walk, so two references on
+/// one instance are paired.
 fn rho_reference_for<G: CountedGroup>(
     g: &G,
     generator: G::Elt,
@@ -262,24 +272,27 @@ fn rho_reference_for<G: CountedGroup>(
     seed: u64,
     repeats: usize,
     runs: usize,
+    mut walk: impl FnMut(G::Elt, u64, u64, u64) -> RhoResult,
 ) -> Option<RhoReference> {
     if runs == 0 || r < 3 {
         return None;
     }
     let max_steps = (generic_floor_ops(r as f64, 1.0) * 64.0) as u64 + 4096;
     let mut per_run = Vec::with_capacity(runs);
-    let mut method = String::new();
+    let (mut method, mut automorphisms) = (String::new(), 1);
     for k in 0..runs {
         let planted = planted_log(seed, k % repeats.max(1), r);
         let mut ops = GroupOps::default();
         let target = g.mul(&mut ops, generator, planted);
         let run_seed = seed ^ (0x5248_4F00 + k as u64);
-        let res = rho_reference(g, generator, target, r, run_seed, max_steps);
+        let res = walk(target, planted, run_seed, max_steps);
         method = res.method.clone();
+        automorphisms = res.automorphisms;
         per_run.push(RhoRun {
             planted,
             seed: run_seed,
             s: res.s,
+            s_walk: res.s_walk,
             steps: res.steps,
             steps_over_expected: res.steps_over_expected,
             verified: res.verified && res.recovered == Some(planted),
@@ -288,13 +301,90 @@ fn rho_reference_for<G: CountedGroup>(
     let s: Vec<f64> = per_run.iter().map(|r| r.s).collect();
     Some(RhoReference {
         method,
+        automorphisms,
         runs,
         mean_s: s.iter().sum::<f64>() / runs as f64,
         min_s: s.iter().copied().fold(f64::INFINITY, f64::min),
         max_s: s.iter().copied().fold(0.0, f64::max),
+        mean_s_walk: per_run.iter().map(|r| r.s_walk).sum::<f64>() / runs as f64,
         all_verified: per_run.iter().all(|r| r.verified),
         per_run,
     })
+}
+
+/// The references an instance is priced against.
+struct RhoReferences {
+    /// The matched reference: the `vs rho` column divides by its mean.
+    matched: Option<RhoReference>,
+    /// The plain walk (`A = 1`) every run was priced against through
+    /// ledger §17, on the same seeds: the before mark.
+    plain: Option<RhoReference>,
+    /// The other eligible automorphism-aware walks that were run on the
+    /// same seeds (Koblitz curves), kept beside the one chosen.
+    candidates: Vec<RhoReference>,
+    /// How the matched reference was chosen.
+    rule: &'static str,
+}
+
+/// **The matched rho** (accounting contract, `comparison_contract.rho`):
+/// the negation map on the prime and random binary curves; on a Koblitz
+/// curve both eligible walks — the repository's signed-Frobenius walk
+/// (`A = 2n`) and the negation walk — and the one with the lower mean
+/// `S`, because on toy subgroups the signed walk's set-up (thirty-two
+/// parallel walks started by scalar multiplications) outweighs what
+/// the Frobenius saves.  The plain walk rides along as the before mark.
+fn matched_rho(instance: &Instance, seed: u64, repeats: usize, runs: usize) -> RhoReferences {
+    match instance {
+        Instance::Prime(i) => {
+            let (g, gen, r) = (&i.curve, i.generator_point(), i.r);
+            RhoReferences {
+                matched: rho_reference_for(g, gen, r, seed, repeats, runs, |t, _, s, cap| {
+                    rho_reference_negation(g, gen, t, r, s, cap)
+                }),
+                plain: rho_reference_for(g, gen, r, seed, repeats, runs, |t, _, s, cap| {
+                    rho_reference(g, gen, t, r, s, cap)
+                }),
+                candidates: Vec::new(),
+                rule: "negation map (A = 2): the only eligible automorphism of this curve",
+            }
+        }
+        Instance::Binary(i) => {
+            let bg = BinaryGroup(&i.fast);
+            let (gen, r) = (i.generator, i.r);
+            let negation = rho_reference_for(&bg, gen, r, seed, repeats, runs, |t, _, s, cap| {
+                rho_reference_negation(&bg, gen, t, r, s, cap)
+            });
+            let plain = rho_reference_for(&bg, gen, r, seed, repeats, runs, |t, _, s, cap| {
+                rho_reference(&bg, gen, t, r, s, cap)
+            });
+            if i.koblitz.is_none() {
+                return RhoReferences {
+                    matched: negation,
+                    plain,
+                    candidates: Vec::new(),
+                    rule: "negation map (A = 2): the only eligible automorphism of this curve",
+                };
+            }
+            let signed = rho_reference_for(&bg, gen, r, seed, repeats, runs, |t, planted, s, _| {
+                signed_frobenius_rho(i, t, planted, s).expect("a Koblitz instance carries its curve")
+            });
+            let mut candidates: Vec<RhoReference> = signed.into_iter().chain(negation).collect();
+            // The cheaper of the eligible walks, among those that verified.
+            let best = candidates
+                .iter()
+                .enumerate()
+                .filter(|(_, c)| c.all_verified)
+                .min_by(|a, b| a.1.mean_s.total_cmp(&b.1.mean_s))
+                .map(|(k, _)| k);
+            let matched = best.map(|k| candidates.remove(k));
+            RhoReferences {
+                matched,
+                plain,
+                candidates,
+                rule: "Koblitz curve: the signed-Frobenius walk (A = 2n) and the negation walk (A = 2) on the same seeds; the lower mean S prices the column, the other is kept in rho_reference_candidates",
+            }
+        }
+    }
 }
 
 /// One prime-field configuration, over `repeats` targets.
@@ -619,31 +709,27 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
 
     let started = std::time::Instant::now();
     // The method boundary on this instance, before any configuration:
-    // every row's `vs rho` is its S over this mean.
-    let rho = match &instance {
-        Instance::Prime(i) => {
-            rho_reference_for(&i.curve, i.generator_point(), i.r, args.seed, args.repeats, args.rho_runs)
-        }
-        Instance::Binary(i) => rho_reference_for(
-            &BinaryGroup(&i.fast),
-            i.generator,
-            i.r,
-            args.seed,
-            args.repeats,
-            args.rho_runs,
-        ),
-    };
+    // every row's `vs rho` is its S over the matched reference's mean.
+    let references = matched_rho(&instance, args.seed, args.repeats, args.rho_runs);
+    let rho = &references.matched;
     let rho_s = rho.as_ref().filter(|r| r.all_verified).map(|r| r.mean_s);
     if !json_only {
-        if let Some(r) = &rho {
+        if let Some(r) = rho {
             eprintln!(
-                "  rho reference: S = {:.3} (mean of {}, {:.3}–{:.3}){}",
+                "  rho reference (A = {}): S = {:.3} (mean of {}, {:.3}–{:.3}){}",
+                r.automorphisms,
                 r.mean_s,
                 r.runs,
                 r.min_s,
                 r.max_s,
                 if r.all_verified { "" } else { " — a run failed to verify; the column is left empty" }
             );
+        }
+        if let Some(p) = &references.plain {
+            eprintln!("  before mark, plain walk (A = 1): S = {:.3}", p.mean_s);
+        }
+        for c in &references.candidates {
+            eprintln!("  also run (A = {}): S = {:.3}", c.automorphisms, c.mean_s);
         }
     }
     let mut rows: Vec<RunReport> = Vec::new();
@@ -694,6 +780,9 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         "calibration": calib,
         "calibration_pins": pins,
         "rho_reference": rho,
+        "rho_reference_rule": references.rule,
+        "rho_reference_plain": references.plain,
+        "rho_reference_candidates": references.candidates,
         "configurations_run": rows.len(),
         "configurations_skipped": failures,
         "all_verified": all_verified,

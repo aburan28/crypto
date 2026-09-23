@@ -43,12 +43,17 @@
 //!   trials over that number; a value near one says the base is as good
 //!   as a random one and nothing structural is being exploited.
 //! - **Reference.**  Pollard rho, run on the same instance in the same
-//!   process with the same accounting, counted exactly: an
-//!   r-adding walk with distinguished points for the prime and generic
-//!   binary regimes (`A = 1` measured, `A = 2` stated as the floor), and
-//!   the repository's signed-Frobenius walk (`A = 2n`, measured) on the
-//!   Koblitz curves.  Every rho run verifies `[d]G = Q`; a rho that does
-//!   not finish is not a reference.
+//!   process with the same accounting, counted exactly, and matched to
+//!   the automorphisms the curve has (the accounting contract's
+//!   `comparison_contract.rho`): the negation-map walk
+//!   ([`rho_reference_negation`], `A = 2`) on the prime and generic
+//!   binary regimes, and the repository's signed-Frobenius walk
+//!   ([`signed_frobenius_rho`], `A = 2n`) on the Koblitz curves.  The
+//!   plain walk on points ([`rho_reference`], `A = 1`), which priced
+//!   every prime and generic-binary row through §17 of the note, runs
+//!   beside the matched walk on the same seeds as the before mark (§18).
+//!   Every rho run verifies `[d]G = Q`; a rho that does not finish is
+//!   not a reference.
 //!
 //! ## The regimes and their variants
 //!
@@ -94,7 +99,7 @@
 //! Koblitz subgroup, and the point of the exercise is to have a concrete
 //! boundary to iterate against rather than an opinion.
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap, VecDeque};
 use std::hash::{BuildHasherDefault, Hasher};
 use std::time::Instant;
 
@@ -572,6 +577,13 @@ pub struct RhoResult {
     pub wall_ns: u64,
     pub recovered: Option<u64>,
     pub verified: bool,
+    /// The walk's own counters: its shape (jumps, distinguished-point
+    /// bits), the breakdown of the charged operations (look-ahead
+    /// additions, cycle escapes, walk starts), and the native work the
+    /// unit does not charge (canonicalisations).  Empty for the walks
+    /// that predate it, so their reports are unchanged.
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    pub counters: BTreeMap<String, u64>,
 }
 
 /// One instance of one regime: the curve, the boundaries, the reference
@@ -1005,7 +1017,497 @@ pub fn rho_reference<G: CountedGroup>(
         wall_ns,
         verified: recovered.is_some(),
         recovered,
+        counters: BTreeMap::new(),
     }
+}
+
+// ── The matched reference: a tuned, automorphism-aware counted rho ──
+
+/// How [`rho_reference_walk`] walks.
+///
+/// [`RhoWalk::negation`] is the matched reference on a curve whose only
+/// eligible automorphism is negation (`A = 2`, the accounting
+/// contract's `generic_prime` and `binary_non_subfield` families).
+/// [`RhoWalk::plain`] is the same walk on points (`A = 1`): same jump
+/// table, same starts, same distinguished points for a given seed.
+/// Running the two paired separates the automorphism's `√2` from the
+/// tuning they share.  [`rho_reference`], the walk every ledger row was
+/// priced against through §17 of the note, stays as it was, as the
+/// "before" mark.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub struct RhoWalk {
+    /// Walk on the classes `{P, −P}`, one canonical representative
+    /// each, instead of on points.
+    pub negation: bool,
+    /// Jumps in the r-adding table; `0` takes [`rho_jumps_for`].
+    pub jumps: usize,
+    /// Distinguished-point bits; `None` takes `⌊bits(r)/4⌋`, walks of
+    /// about `r^{1/4}` steps.
+    pub dp_bits: Option<u32>,
+    /// The Wiener–Zuccherato look-ahead (negation only): a jump whose
+    /// result, after a sign flip, would take the same jump again — the
+    /// fruitless 2-cycle — is replaced by the next jump.
+    pub look_ahead: bool,
+    /// Recent points each step is compared with, to catch a short
+    /// cycle; `0` turns detection off.
+    pub cycle_window: usize,
+}
+
+impl RhoWalk {
+    /// The matched reference for `A = 2`.
+    pub const fn negation() -> Self {
+        Self {
+            negation: true,
+            jumps: 0,
+            dp_bits: None,
+            look_ahead: true,
+            cycle_window: 16,
+        }
+    }
+
+    /// The same walk on points, `A = 1`.
+    pub const fn plain() -> Self {
+        Self {
+            negation: false,
+            jumps: 0,
+            dp_bits: None,
+            look_ahead: false,
+            cycle_window: 16,
+        }
+    }
+}
+
+/// Jumps in the tuned walk's table for a subgroup of order `r`.
+///
+/// The table is set-up cost, about `1.75·w` operations a jump for
+/// `w`-bit coefficients, while too few jumps make an adding walk less
+/// random and, under the negation map, make fruitless cycles common.
+/// On the toy subgroups the ledger runs, the table is a visible share
+/// of `√r`, so the count grows with the size.
+pub fn rho_jumps_for(r: u64) -> usize {
+    let bits = 64 - r.leading_zeros();
+    match bits {
+        0..=18 => 4,
+        19..=23 => 8,
+        _ => 16,
+    }
+}
+
+/// Coefficient bits for a table of `jumps` jumps: enough that no small
+/// signed combination of the coefficient vectors vanishes over the
+/// integers (such a relation is a fruitless cycle waiting to happen),
+/// and no more, because each bit is an operation of set-up.
+fn jump_coefficient_bits(jumps: usize) -> u32 {
+    let log = usize::BITS - 1 - jumps.max(2).leading_zeros();
+    (3 * log).clamp(6, 12)
+}
+
+/// `[a]P + [b]Q` by one joint double-and-add (Shamir's trick), with
+/// `P + Q` supplied.  Every operation is counted; the pair counts as one
+/// scalar multiplication.
+fn joint_mul<G: CountedGroup>(
+    g: &G,
+    ops: &mut GroupOps,
+    p: G::Elt,
+    q: G::Elt,
+    pq: G::Elt,
+    a: u64,
+    b: u64,
+) -> G::Elt {
+    ops.scalar_mults += 1;
+    let top = 64 - (a | b).leading_zeros();
+    if top == 0 {
+        return g.identity();
+    }
+    let pick = |i: u32| match ((a >> i) & 1, (b >> i) & 1) {
+        (1, 0) => Some(p),
+        (0, 1) => Some(q),
+        (1, 1) => Some(pq),
+        _ => None,
+    };
+    let mut acc = pick(top - 1).expect("the top bit of a | b is set");
+    for i in (0..top - 1).rev() {
+        acc = g.double(ops, acc);
+        if let Some(t) = pick(i) {
+            acc = g.add(ops, acc, t);
+        }
+    }
+    acc
+}
+
+#[inline]
+fn negmod(a: u64, m: u64) -> u64 {
+    if a == 0 {
+        0
+    } else {
+        m - a
+    }
+}
+
+/// The class representative of `p` under the walk's automorphisms, with
+/// its coefficients: under negation, whichever of `±P` has the smaller
+/// key, and `(a, b) → (−a, −b)` when that is `−P`.  Returns whether it
+/// flipped.
+#[inline]
+fn rho_canon<G: CountedGroup>(
+    g: &G,
+    negation: bool,
+    p: G::Elt,
+    a: u64,
+    b: u64,
+    r: u64,
+    canonicalisations: &mut u64,
+) -> (G::Elt, u64, u64, bool) {
+    if !negation {
+        return (p, a, b, false);
+    }
+    *canonicalisations += 1;
+    let n = g.neg(p);
+    if g.key(&n) < g.key(&p) {
+        (n, negmod(a, r), negmod(b, r), true)
+    } else {
+        (p, a, b, false)
+    }
+}
+
+/// **Pollard rho, tuned and automorphism-aware, counted.**  The matched
+/// reference of the accounting contract (`negation` for the generic
+/// prime and random binary families).
+///
+/// Van Oorschot–Wiener with distinguished points, like
+/// [`rho_reference`], with three changes that take the set-up out of
+/// `S` on the toy subgroups and one that takes the `√2`:
+///
+/// - **starts cost one addition.**  Walk `k` starts at `[k]T` for one
+///   random `T = [s]G + [t]Q`, so a start is `X ← X + T` instead of two
+///   scalar multiplications;
+/// - **walks of about `r^{1/4}` steps** (`⌊bits(r)/4⌋` distinguished
+///   bits).  With cheap starts the walk count costs nothing, and short
+///   walks almost never close a cycle without a distinguished point —
+///   the old walk's `√r/8` walks did so about `θ²/r ≈ 2%` of the time
+///   and paid the whole `20θ` cap for each;
+/// - **a table sized to the subgroup** ([`rho_jumps_for`]), built by
+///   joint double-and-add on short coefficients;
+/// - **the negation map** (`walk.negation`): the walk moves between
+///   canonical representatives of `{P, −P}`, so it searches `r/2`
+///   classes and expects `√(πr/4)` steps.  The fruitless cycles that
+///   this creates are handled the standard way (Wiener–Zuccherato
+///   look-ahead against 2-cycles; Bos–Kleinjung–Lenstra and
+///   Bernstein–Lange–Schwabe detection of the rest): each step is
+///   compared with the last `cycle_window` points, and a detected cycle
+///   is left by doubling its smallest-key point, a choice every walk
+///   entering that cycle makes identically, so merged walks stay
+///   merged.  A walk that falls back into the cycle it just left is
+///   abandoned.
+///
+/// Every addition and doubling is charged, including the look-ahead's
+/// rejected additions, the escapes, the starts, the table and the
+/// verification `[d]G = Q`.  What is not charged is what
+/// [`rho_reference`] does not charge either: the hash of each point, the
+/// comparisons with recent points, and, under negation, one negation and
+/// one key comparison per canonicalisation, which the report counts.
+pub fn rho_reference_walk<G: CountedGroup>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    seed: u64,
+    max_steps: u64,
+    walk: RhoWalk,
+) -> RhoResult {
+    let start = Instant::now();
+    let mut ops = GroupOps::default();
+    let mut rng = StdRng::seed_from_u64(seed);
+    let bits = 64 - r.leading_zeros();
+    let jump_count = if walk.jumps == 0 { rho_jumps_for(r) } else { walk.jumps }.max(1);
+    let dp_bits = walk.dp_bits.unwrap_or(bits / 4).min(40);
+    let dp_mask = if dp_bits == 0 { 0 } else { (1u64 << dp_bits) - 1 };
+    let coefficient_bits = jump_coefficient_bits(jump_count);
+    let short = r.min(1u64 << coefficient_bits).max(2);
+    let look_ahead = walk.look_ahead && walk.negation;
+    let window = walk.cycle_window;
+    let index = |x: &G::Elt| -> usize { ((mix(g.key(x)) >> 24) % jump_count as u64) as usize };
+    let distinguished = |x: &G::Elt| -> bool { mix(g.key(x)) & dp_mask == 0 };
+
+    // Set-up: G + Q once, the table, the start stride.
+    let gq = g.add(&mut ops, generator, target);
+    let jumps: Vec<(G::Elt, u64, u64)> = (0..jump_count)
+        .map(|_| {
+            let a = rng.gen_range(1..short);
+            let b = rng.gen_range(1..short);
+            (joint_mul(g, &mut ops, generator, target, gq, a, b), a % r, b % r)
+        })
+        .collect();
+    let (ta, tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
+    let stride = joint_mul(g, &mut ops, generator, target, gq, ta, tb);
+    let setup = ops;
+
+    let mut table: FastMap<(u64, u64)> = fast_map(1024);
+    let automorphisms = if walk.negation { 2 } else { 1 };
+    let expected = generic_floor_ops(r as f64, automorphisms as f64);
+    let walk_cap = (1u64 << dp_bits) * 20 + 64;
+    let (mut steps, mut walks, mut dps) = (0u64, 0u64, 0u64);
+    let (mut look_ahead_adds, mut escapes, mut start_adds) = (0u64, 0u64, 0u64);
+    let (mut cycles_2, mut cycles_4, mut cycles_other) = (0u64, 0u64, 0u64);
+    let (mut abandoned, mut capped, mut useless) = (0u64, 0u64, 0u64);
+    let (mut canonicalisations, mut verification_ops) = (0u64, 0u64);
+    let mut recovered = None;
+    // The next walk's start, `[k]T`, and its coefficients.
+    let (mut sx, mut sa, mut sb) = (stride, ta % r, tb % r);
+    // (key, point, a, b) of the walk's most recent points, oldest first.
+    let mut recent: VecDeque<(u64, G::Elt, u64, u64)> = VecDeque::with_capacity(window + 1);
+    let walk_ops = |steps: u64, look: u64, esc: u64| steps + look + esc;
+
+    'outer: while walk_ops(steps, look_ahead_adds, escapes) < max_steps && walks < max_steps {
+        walks += 1;
+        if walks > 1 {
+            sx = g.add(&mut ops, sx, stride);
+            sa = addmod(sa, ta, r);
+            sb = addmod(sb, tb, r);
+            start_adds += 1;
+        }
+        if g.is_identity(&sx) {
+            continue;
+        }
+        let (mut x, mut a, mut b, _) = rho_canon(g, walk.negation, sx, sa, sb, r, &mut canonicalisations);
+        recent.clear();
+        let mut last_escape: Option<u64> = None;
+        let mut len = 0u64;
+        loop {
+            // One step, with the look-ahead when it is on.
+            let j0 = index(&x);
+            let mut tried = 0usize;
+            let (y, ya, yb) = loop {
+                let j = (j0 + tried) % jump_count;
+                let (m, aj, bj) = jumps[j];
+                let sum = g.add(&mut ops, x, m);
+                let (y, ya, yb, flipped) =
+                    rho_canon(g, walk.negation, sum, addmod(a, aj, r), addmod(b, bj, r), r, &mut canonicalisations);
+                tried += 1;
+                if look_ahead && flipped && tried < jump_count && !g.is_identity(&y) && index(&y) == j {
+                    look_ahead_adds += 1;
+                    continue;
+                }
+                break (y, ya, yb);
+            };
+            x = y;
+            a = ya;
+            b = yb;
+            steps += 1;
+            len += 1;
+            if g.is_identity(&x) {
+                break;
+            }
+            // A short cycle: this point is one of the last `window`.
+            if window > 0 {
+                let key = g.key(&x);
+                if let Some(pos) = recent.iter().position(|e| e.0 == key) {
+                    // The cycle is the `c` most recent points.
+                    let c = recent.len() - pos;
+                    match c {
+                        2 => cycles_2 += 1,
+                        4 => cycles_4 += 1,
+                        _ => cycles_other += 1,
+                    }
+                    // Leave it from the member with the smallest key.
+                    let (min_key, mp, ma, mb) = recent
+                        .iter()
+                        .skip(pos)
+                        .copied()
+                        .min_by_key(|e| e.0)
+                        .expect("a cycle has members");
+                    if last_escape == Some(min_key) {
+                        abandoned += 1;
+                        break;
+                    }
+                    last_escape = Some(min_key);
+                    let d2 = g.double(&mut ops, mp);
+                    escapes += 1;
+                    let (e, ea, eb, _) =
+                        rho_canon(g, walk.negation, d2, addmod(ma, ma, r), addmod(mb, mb, r), r, &mut canonicalisations);
+                    x = e;
+                    a = ea;
+                    b = eb;
+                    recent.clear();
+                    if g.is_identity(&x) {
+                        break;
+                    }
+                }
+                recent.push_back((g.key(&x), x, a, b));
+                if recent.len() > window {
+                    recent.pop_front();
+                }
+            }
+            if distinguished(&x) {
+                dps += 1;
+                let key = g.key(&x);
+                match table.get(&key) {
+                    Some(&(a2, b2)) => {
+                        if b2 != b {
+                            // a + b d = a2 + b2 d  ⇒  d = (a − a2)/(b2 − b)
+                            let num = submod(a, a2, r);
+                            let den = submod(b2, b, r);
+                            if let Some(inv) = invmod(den, r) {
+                                let d = mulmod(num, inv, r);
+                                let before = ops.gae();
+                                let check = g.mul(&mut ops, generator, d);
+                                verification_ops += (ops.gae() - before) as u64;
+                                if check == target {
+                                    recovered = Some(d);
+                                    break 'outer;
+                                }
+                            }
+                        }
+                        useless += 1;
+                        break;
+                    }
+                    None => {
+                        table.insert(key, (a, b));
+                        break;
+                    }
+                }
+            }
+            if len > walk_cap {
+                capped += 1;
+                break;
+            }
+            if walk_ops(steps, look_ahead_adds, escapes) >= max_steps {
+                break;
+            }
+        }
+    }
+    let wall_ns = start.elapsed().as_nanos() as u64;
+    let gae = ops.gae();
+    let walked = walk_ops(steps, look_ahead_adds, escapes);
+    let mut counters = BTreeMap::new();
+    for (k, v) in [
+        ("jumps", jump_count as u64),
+        ("jump_coefficient_bits", coefficient_bits as u64),
+        ("distinguished_point_bits", dp_bits as u64),
+        ("setup_additions", setup.adds),
+        ("setup_doublings", setup.doubles),
+        ("start_additions", start_adds),
+        ("walk_operations", walked),
+        ("verification_operations", verification_ops),
+        ("look_ahead_additions", look_ahead_adds),
+        ("cycle_escape_doublings", escapes),
+        ("cycles_length_2", cycles_2),
+        ("cycles_length_4", cycles_4),
+        ("cycles_other_length", cycles_other),
+        ("walks_abandoned_in_a_cycle", abandoned),
+        ("walks_capped", capped),
+        ("useless_collisions", useless),
+        ("canonicalisations_uncharged", canonicalisations),
+    ] {
+        counters.insert(k.to_string(), v);
+    }
+    RhoResult {
+        method: if walk.negation {
+            "negation-map r-adding walk: look-ahead, short-cycle escape by doubling, distinguished points, stride starts".into()
+        } else {
+            "r-adding walk: distinguished points, stride starts".into()
+        },
+        automorphisms,
+        group_ops: ops,
+        steps,
+        walks,
+        distinguished_points: dps,
+        gae,
+        s: gae / (r as f64).sqrt(),
+        s_walk: walked as f64 / (r as f64).sqrt(),
+        expected_steps: expected,
+        steps_over_expected: walked as f64 / expected,
+        wall_ns,
+        verified: recovered.is_some(),
+        recovered,
+        counters,
+    }
+}
+
+/// The matched reference for `A = 2`: [`rho_reference_walk`] with
+/// [`RhoWalk::negation`].
+pub fn rho_reference_negation<G: CountedGroup>(
+    g: &G,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    seed: u64,
+    max_steps: u64,
+) -> RhoResult {
+    rho_reference_walk(g, generator, target, r, seed, max_steps, RhoWalk::negation())
+}
+
+/// The native work of a signed-Frobenius run that the unit prices at
+/// zero, carried so a reader can price it: Frobenius maps and the
+/// canonicalisations built from them.
+fn signed_rho_counters(report: &crate::cryptanalysis::koblitz_index_calculus::KoblitzSignedRhoReport) -> BTreeMap<String, u64> {
+    let c = &report.charges;
+    let mut out = BTreeMap::new();
+    for (k, v) in [
+        ("setup_group_additions", c.setup_group_additions),
+        ("setup_scalar_multiplications", c.setup_scalar_multiplications),
+        ("verification_scalar_multiplications", c.candidate_verification_scalar_multiplications),
+        ("walk_group_additions", c.walk_group_additions),
+        ("canonicalisations_uncharged", c.canonicalizations),
+        ("frobenius_maps_uncharged", c.frobenius_maps),
+        ("negations_examined_uncharged", c.negations_examined),
+        ("partition_hashes_uncharged", c.partition_hashes),
+        ("failed_collisions", c.failed_collisions),
+        ("jump_table_rebuilds", report.jump_table_rebuilds as u64),
+    ] {
+        out.insert(k.to_string(), v);
+    }
+    out
+}
+
+/// **The matched reference on a Koblitz curve**: the repository's
+/// signed-Frobenius walk ([`koblitz_signed_frobenius_rho_reference`],
+/// `A = 2n`), priced in the unit.  Walk and set-up additions are exact;
+/// each scalar multiplication (walk starts, the table, the verification)
+/// is charged at `1.5·log₂ r` additions, the double-and-add average.
+/// The Frobenius maps and canonicalisations are counted and not charged
+/// (see the counters).  `planted` is the logarithm the run must
+/// recover; `None` when the instance is not a Koblitz curve.
+pub fn signed_frobenius_rho(inst: &BinaryInstance, target: FastPoint, planted: u64, seed: u64) -> Option<RhoResult> {
+    let kc = inst.koblitz.as_ref()?;
+    let (r, n) = (inst.r, inst.n);
+    let bits = (r as f64).log2();
+    let target_big = inst.fast.lower(target);
+    let opts = KoblitzSignedRhoOptions {
+        seed,
+        ..Default::default()
+    };
+    let start = Instant::now();
+    let report = koblitz_signed_frobenius_rho_reference(kc, &target_big, &opts, &mut |_| {});
+    let wall = start.elapsed().as_nanos() as u64;
+    let c = &report.charges;
+    let scalar_adds =
+        (c.setup_scalar_multiplications + c.candidate_verification_scalar_multiplications) as f64 * 1.5 * bits;
+    let gops = GroupOps {
+        adds: c.walk_group_additions + c.setup_group_additions,
+        doubles: 0,
+        scalar_mults: c.setup_scalar_multiplications + c.candidate_verification_scalar_multiplications,
+    };
+    let gae = gops.gae() + scalar_adds;
+    let expected = generic_floor_ops(r as f64, 2.0 * n as f64);
+    let recovered = report.recovered_log.as_ref().and_then(|v| v.to_u64());
+    Some(RhoResult {
+        method: "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)".into(),
+        automorphisms: 2 * n,
+        group_ops: gops,
+        steps: report.iterations,
+        walks: report.parallel_walks as u64 * report.restarts_attempted as u64,
+        distinguished_points: c.collisions + c.failed_collisions,
+        gae,
+        s: gae / (r as f64).sqrt(),
+        s_walk: report.iterations as f64 / (r as f64).sqrt(),
+        expected_steps: expected,
+        steps_over_expected: report.iterations as f64 / expected,
+        wall_ns: wall,
+        recovered,
+        verified: report.verified && recovered == Some(planted),
+        counters: signed_rho_counters(&report),
+    })
 }
 
 // ── Prime-field curves on one word ─────────────────────────────────
@@ -3390,7 +3892,9 @@ impl TableCost {
     }
 }
 
-fn rho_cap(r: u64, multiple: f64) -> u64 {
+/// The step cap a ladder rho run gets: `multiple` times the `A = 1` floor,
+/// plus a margin for the tiny groups.
+pub fn rho_cap(r: u64, multiple: f64) -> u64 {
     (generic_floor_ops(r as f64, 1.0) * multiple) as u64 + 4096
 }
 
@@ -3550,10 +4054,17 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
         out.targets.push(d);
         let mut rho_s = 0.0;
         for k in 0..cfg.rho_repeats.max(1) {
-            let rho = rho_reference(curve, g, target, r, seed ^ (k as u64 * 0x5EED), rho_cap(r, cfg.rho_cap_multiple));
-            out.rho_verified_all &= rho.verified && rho.recovered == Some(d);
-            rho_s += rho.s / cfg.rho_repeats.max(1) as f64;
-            out.rho.push(rho);
+            // The matched reference (negation, `A = 2`), then the plain
+            // walk every row was priced against through §17, kept as the
+            // before mark.
+            let rho_seed = seed ^ (k as u64 * 0x5EED);
+            let matched = rho_reference_negation(curve, g, target, r, rho_seed, rho_cap(r, cfg.rho_cap_multiple));
+            out.rho_verified_all &= matched.verified && matched.recovered == Some(d);
+            rho_s += matched.s / cfg.rho_repeats.max(1) as f64;
+            out.rho.push(matched);
+            let plain = rho_reference(curve, g, target, r, rho_seed, rho_cap(r, cfg.rho_cap_multiple));
+            out.rho_verified_all &= plain.verified && plain.recovered == Some(d);
+            out.rho.push(plain);
         }
 
         let random = cfg.random_source();
@@ -3618,8 +4129,23 @@ pub fn run_prime_instance(inst: &PrimeInstance, cfg: &BoundaryConfig) -> RegimeI
             out.variants.push(v);
         }
     }
-    out.rho_s_mean = out.rho.iter().map(|x| x.s).sum::<f64>() / out.rho.len().max(1) as f64;
+    out.rho_s_mean = matched_rho_s_mean(&out);
     out
+}
+
+/// Mean `S` of the matched reference: the runs whose automorphism count
+/// is the one the instance's generic algorithm may use (`2` on the
+/// prime and random binary curves, `2n` on a Koblitz curve).  The other
+/// runs are the before mark or a cross-regime comparison, and price
+/// nothing.
+pub fn matched_rho_s_mean(inst: &RegimeInstance) -> f64 {
+    let matched: Vec<f64> = inst
+        .rho
+        .iter()
+        .filter(|x| x.automorphisms == inst.automorphisms_generic)
+        .map(|x| x.s)
+        .collect();
+    matched.iter().sum::<f64>() / matched.len().max(1) as f64
 }
 
 /// One binary-regime variant on one target: the relation loop, the
@@ -4017,10 +4543,17 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
         out.targets.push(d);
         let mut rho_s = 0.0;
         for k in 0..cfg.rho_repeats.max(1) {
-            let rho = rho_reference(&g, inst.generator, target, r, seed ^ (k as u64 * 0x5EED), rho_cap(r, cfg.rho_cap_multiple));
-            out.rho_verified_all &= rho.verified && rho.recovered == Some(d);
-            rho_s += rho.s / cfg.rho_repeats.max(1) as f64;
-            out.rho.push(rho);
+            // The matched reference (negation, `A = 2`), then the plain
+            // walk kept as the before mark, as in the prime regime.
+            let rho_seed = seed ^ (k as u64 * 0x5EED);
+            let cap = rho_cap(r, cfg.rho_cap_multiple);
+            let matched = rho_reference_negation(&g, inst.generator, target, r, rho_seed, cap);
+            out.rho_verified_all &= matched.verified && matched.recovered == Some(d);
+            rho_s += matched.s / cfg.rho_repeats.max(1) as f64;
+            out.rho.push(matched);
+            let plain = rho_reference(&g, inst.generator, target, r, rho_seed, cap);
+            out.rho_verified_all &= plain.verified && plain.recovered == Some(d);
+            out.rho.push(plain);
         }
 
         let random = cfg.random_source();
@@ -4080,7 +4613,7 @@ pub fn run_char2_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Option
             out.variants.push(v);
         }
     }
-    out.rho_s_mean = out.rho.iter().map(|x| x.s).sum::<f64>() / out.rho.len().max(1) as f64;
+    out.rho_s_mean = matched_rho_s_mean(&out);
     Some(out)
 }
 
@@ -4228,7 +4761,6 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
     }
     let mut rng = StdRng::seed_from_u64(cfg.seed ^ r ^ 0x4B);
     let mut ops = GroupOps::default();
-    let bits = (r as f64).log2();
     for rep in 0..cfg.repeats {
         let seed = cfg.seed.wrapping_add(rep as u64 * 0x9E37);
         let d = rng.gen_range(1..r);
@@ -4237,48 +4769,10 @@ pub fn run_koblitz_instance(inst: &BinaryInstance, cfg: &BoundaryConfig) -> Opti
         out.targets.push(d);
 
         // Signed-Frobenius rho: the reference on this curve.
-        let target_big = inst.fast.lower(target);
         let mut rho_s = 0.0;
         for k in 0..cfg.rho_repeats.max(1) {
-            let opts = KoblitzSignedRhoOptions {
-                seed: seed ^ (k as u64 * 0x5EED),
-                ..Default::default()
-            };
-            let start = Instant::now();
-            let report = koblitz_signed_frobenius_rho_reference(kc, &target_big, &opts, &mut |_| {});
-            let wall = start.elapsed().as_nanos() as u64;
-            let c = &report.charges;
-            // Scalar multiplications are charged at 1.5·log2(r) additions
-            // each, the double-and-add average; walk additions are exact.
-            let scalar_adds = (c.setup_scalar_multiplications
-                + c.candidate_verification_scalar_multiplications) as f64
-                * 1.5
-                * bits;
-            let gops = GroupOps {
-                adds: c.walk_group_additions + c.setup_group_additions,
-                doubles: 0,
-                scalar_mults: c.setup_scalar_multiplications
-                    + c.candidate_verification_scalar_multiplications,
-            };
-            let gae = gops.gae() + scalar_adds;
-            let expected = generic_floor_ops(r as f64, 2.0 * n as f64);
-            let recovered = report.recovered_log.as_ref().and_then(|v| v.to_u64());
-            let signed = RhoResult {
-                method: "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)".into(),
-                automorphisms: 2 * n,
-                group_ops: gops,
-                steps: report.iterations,
-                walks: report.parallel_walks as u64 * report.restarts_attempted as u64,
-                distinguished_points: c.collisions + c.failed_collisions,
-                gae,
-                s: gae / (r as f64).sqrt(),
-                s_walk: report.iterations as f64 / (r as f64).sqrt(),
-                expected_steps: expected,
-                steps_over_expected: report.iterations as f64 / expected,
-                wall_ns: wall,
-                recovered,
-                verified: report.verified && recovered == Some(d),
-            };
+            let signed = signed_frobenius_rho(inst, target, d, seed ^ (k as u64 * 0x5EED))
+                .expect("a Koblitz instance carries its curve");
             out.rho_verified_all &= signed.verified;
             rho_s += signed.s / cfg.rho_repeats.max(1) as f64;
             out.rho.push(signed);
@@ -4613,7 +5107,7 @@ pub fn format_markdown(ledger: &BoundaryLedger) -> String {
             let reference: Vec<&RhoResult> = inst
                 .rho
                 .iter()
-                .filter(|x| x.automorphisms == inst.automorphisms_generic || inst.automorphisms_generic <= 2)
+                .filter(|x| x.automorphisms == inst.automorphisms_generic)
                 .collect();
             let rho_walk = reference.iter().map(|x| x.s_walk).sum::<f64>() / reference.len().max(1) as f64;
             out.push_str(&format!(
@@ -4722,6 +5216,152 @@ mod tests {
         assert!(res.verified);
         assert!(res.steps > 0 && res.group_ops.adds >= res.steps);
         assert!(res.steps_over_expected < 8.0, "{res:?}");
+    }
+
+    /// Every charged operation of a tuned walk lands in exactly one of
+    /// the counters: set-up, starts, walk, verification.
+    fn assert_tuned_rho_closes(res: &RhoResult) {
+        let c = &res.counters;
+        let parts = c["setup_additions"]
+            + c["setup_doublings"]
+            + c["start_additions"]
+            + c["walk_operations"]
+            + c["verification_operations"];
+        assert_eq!(parts as f64, res.gae, "{res:?}");
+        assert_eq!(
+            c["walk_operations"],
+            res.steps + c["look_ahead_additions"] + c["cycle_escape_doublings"],
+            "{res:?}"
+        );
+        assert_eq!(c["start_additions"] + 1, res.walks, "{res:?}");
+    }
+
+    #[test]
+    fn tuned_rho_recovers_and_verifies_on_prime_and_binary_curves() {
+        let prime = roster_prime_instance(18).unwrap();
+        let g = prime.generator_point();
+        for seed in 0..6u64 {
+            let mut ops = GroupOps::default();
+            let d = 1 + (seed * 7919 + 12_345) % (prime.r - 1);
+            let q = prime.curve.mul(&mut ops, g, d);
+            for walk in [RhoWalk::negation(), RhoWalk::plain()] {
+                let res = rho_reference_walk(&prime.curve, g, q, prime.r, seed, 1 << 24, walk);
+                assert_eq!(res.recovered, Some(d), "{walk:?} seed {seed}: {res:?}");
+                assert!(res.verified);
+                assert_eq!(res.automorphisms, if walk.negation { 2 } else { 1 });
+                assert_tuned_rho_closes(&res);
+                if !walk.negation {
+                    assert_eq!(res.counters["canonicalisations_uncharged"], 0);
+                    assert_eq!(res.counters["look_ahead_additions"], 0);
+                }
+            }
+        }
+        let binary = random_binary_instance(15, 3, 8).expect("a curve at n = 15");
+        let bg = BinaryGroup(&binary.fast);
+        for seed in 0..6u64 {
+            let mut ops = GroupOps::default();
+            let d = 1 + (seed * 104_729 + 7) % (binary.r - 1);
+            let q = bg.mul(&mut ops, binary.generator, d);
+            let res = rho_reference_negation(&bg, binary.generator, q, binary.r, seed, 1 << 24);
+            assert_eq!(res.recovered, Some(d), "seed {seed}: {res:?}");
+            assert_tuned_rho_closes(&res);
+        }
+    }
+
+    /// On a group where the walk is the only cost the negation map buys
+    /// its `√2`: over many paired runs the plain walk's operations over
+    /// the negation walk's sit near `√2` (a little under: the look-ahead
+    /// adds about `1/(2·jumps)`), and each walk sits near its own floor.
+    #[test]
+    fn the_negation_map_buys_root_two_on_a_cyclic_group() {
+        let r = 1_000_000_007u64;
+        let grp = Cyclic(r);
+        let gen = 5u64;
+        let runs = 120u64;
+        let (mut plain, mut neg) = (0.0f64, 0.0f64);
+        for seed in 0..runs {
+            let d = 1 + mix(seed) % (r - 1);
+            let q = mulmod(gen, d, r);
+            let p = rho_reference_walk(&grp, gen, q, r, seed, 1 << 32, RhoWalk::plain());
+            let n = rho_reference_walk(&grp, gen, q, r, seed, 1 << 32, RhoWalk::negation());
+            assert_eq!(p.recovered, Some(d), "plain seed {seed}");
+            assert_eq!(n.recovered, Some(d), "negation seed {seed}");
+            plain += p.counters["walk_operations"] as f64;
+            neg += n.counters["walk_operations"] as f64;
+        }
+        let ratio = plain / neg;
+        let plain_over_floor = plain / runs as f64 / generic_floor_ops(r as f64, 1.0);
+        let neg_over_floor = neg / runs as f64 / generic_floor_ops(r as f64, 2.0);
+        assert!((1.2..1.65).contains(&ratio), "plain/negation = {ratio}");
+        assert!((0.8..1.3).contains(&plain_over_floor), "plain/floor = {plain_over_floor}");
+        assert!((0.8..1.3).contains(&neg_over_floor), "negation/floor = {neg_over_floor}");
+    }
+
+    /// Two jumps and no look-ahead make fruitless 2-cycles a quarter of
+    /// all steps.  Detection and the doubling escape still reach the
+    /// logarithm; with detection off the walks stall at the cap.
+    #[test]
+    fn fruitless_cycles_are_detected_and_escaped() {
+        let r = 1_000_003u64;
+        let grp = Cyclic(r);
+        let gen = 3u64;
+        let d = 777_777u64;
+        let q = mulmod(gen, d, r);
+        let forced = RhoWalk {
+            negation: true,
+            jumps: 2,
+            dp_bits: None,
+            look_ahead: false,
+            cycle_window: 16,
+        };
+        let res = rho_reference_walk(&grp, gen, q, r, 11, 1 << 26, forced);
+        assert_eq!(res.recovered, Some(d), "{res:?}");
+        assert!(res.counters["cycles_length_2"] > 0, "{res:?}");
+        assert!(res.counters["cycle_escape_doublings"] > 0, "{res:?}");
+        assert_tuned_rho_closes(&res);
+        let blind = RhoWalk { cycle_window: 0, ..forced };
+        let stalled = rho_reference_walk(&grp, gen, q, r, 11, 1 << 20, blind);
+        assert!(stalled.counters["walks_capped"] > 0, "{stalled:?}");
+    }
+
+    #[test]
+    fn joint_double_and_add_matches_two_scalar_multiplications() {
+        let inst = roster_prime_instance(20).unwrap();
+        let g = inst.generator_point();
+        let mut ops = GroupOps::default();
+        let q = inst.curve.mul(&mut ops, g, 123_457);
+        let gq = inst.curve.add(&mut ops, g, q);
+        let mut rng = StdRng::seed_from_u64(3);
+        for _ in 0..200 {
+            let a = rng.gen_range(0..inst.r);
+            let b = rng.gen_range(0..inst.r);
+            let mut counted = GroupOps::default();
+            let joint = joint_mul(&inst.curve, &mut counted, g, q, gq, a, b);
+            let ag = inst.curve.mul(&mut ops, g, a);
+            let bq = inst.curve.mul(&mut ops, q, b);
+            assert_eq!(joint, inst.curve.add(&mut ops, ag, bq), "a = {a}, b = {b}");
+            let top = (64 - (a | b).leading_zeros()) as u64;
+            assert_eq!(counted.doubles, top.saturating_sub(1));
+            assert!(counted.adds < top.max(1));
+        }
+    }
+
+    #[test]
+    fn a_point_and_its_negative_share_one_representative() {
+        let inst = roster_prime_instance(16).unwrap();
+        let g = inst.generator_point();
+        let r = inst.r;
+        let mut ops = GroupOps::default();
+        let mut canons = 0u64;
+        for k in 1..200u64 {
+            let p = inst.curve.mul(&mut ops, g, k);
+            let (c1, a1, _, _) = rho_canon(&inst.curve, true, p, k, 0, r, &mut canons);
+            let (c2, a2, _, _) = rho_canon(&inst.curve, true, inst.curve.neg(p), r - k, 0, r, &mut canons);
+            assert_eq!(c1, c2);
+            assert_eq!(a1, a2);
+            assert_eq!(inst.curve.mul(&mut ops, g, a1), c1, "the coefficients follow the flip");
+        }
+        assert_eq!(canons, 2 * 199);
     }
 
     #[test]
