@@ -363,7 +363,11 @@ def isolated_backend_status(run: dict, backend: str, manifest: dict) -> dict:
             cost = report.get("cost")
             cost_valid = (
                 isinstance(cost, dict)
-                and cost.get("op_unit") == "word XORs (elimination only)"
+                and cost.get("op_unit")
+                in {
+                    "word XORs (elimination only)",
+                    "word XORs (elimination, including M4RI tables)",
+                }
                 and isinstance(cost.get("ops"), int)
                 and cost["ops"] >= 0
                 and isinstance(cost.get("wall_ns"), int)

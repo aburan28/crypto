@@ -360,6 +360,8 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
         for report in f4_reports
         if isinstance(report, dict) and isinstance(report.get("cost"), dict)
     ]
+    operation_units = {cost.get("op_unit") for cost in f4_costs}
+    require(len(operation_units) == 1, "native F4 tasks disagree on their operation unit")
     f4_processes = [processes[index] for index in range(2, len(processes), 3)]
     summary = {
         "schema": RUN_SUMMARY_SCHEMA,
@@ -370,7 +372,7 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
         "cells": dict(sorted(Counter(task["cell_id"] for task in tasks).items())),
         "backend": BACKEND,
         "solver": "f4-f2",
-        "solver_operation_unit": "word XORs (elimination only)",
+        "solver_operation_unit": next(iter(operation_units)),
         "solver_word_xors": sum(cost["ops"] for cost in f4_costs),
         "solver_peak_internal_matrix_bytes": max(
             (cost["peak_bytes"] for cost in f4_costs), default=0
