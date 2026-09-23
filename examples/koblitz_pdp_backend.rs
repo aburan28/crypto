@@ -742,6 +742,14 @@ impl F4CostAggregate {
 /// the exact curve lift all live inside one charged budget.  This is a native
 /// F4 arm, but it is intentionally reported as a different formulation from
 /// Magma's frozen direct-F4 source.
+fn fixed_x1_masks(ell: usize, hamming_weight_order: bool) -> Vec<usize> {
+    let mut masks: Vec<usize> = (0..1usize << ell).collect();
+    if hamming_weight_order {
+        masks.sort_unstable_by_key(|mask| (mask.count_ones(), *mask));
+    }
+    masks
+}
+
 fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
     if budget_seconds == 0 {
         return (
@@ -811,7 +819,15 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
     let mut status = "unsat";
     let mut exhaustive = true;
     let x1_count = 1usize << instance.ell;
-    for x1_mask in 0..x1_count {
+    let weight_order = std::env::var("PQ_F4_X1_ORDER").as_deref() != Ok("ascending");
+    let x1_order = if weight_order {
+        "hamming_weight_then_mask"
+    } else {
+        "ascending_bitmask"
+    };
+    let mut x1_masks_visited = 0usize;
+    for x1_mask in fixed_x1_masks(instance.ell, weight_order) {
+        x1_masks_visited += 1;
         if Instant::now() >= deadline {
             status = "unknown_inconclusive";
             exhaustive = false;
@@ -934,7 +950,10 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "source_representation":instance.source_representation,
             "solver_representation":"fixed_x1_direct_symmetrised_s4_boolean",
             "solver_constructor":"fixed_x1_constant_linear_specialisation",
-            "solver_schedule":"enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
+            "solver_schedule":format!("enumerate x1 coefficients in {x1_order}; run full f4-f2 on x2,x3"),
+            "solver_x1_order":x1_order,
+            "solver_x1_order_target_independent":true,
+            "solver_x1_order_control":"PQ_F4_X1_ORDER=ascending",
             "solver":"f4-f2",
             "solver_description":solver.describe(),
             "solver_internal_mask_hasher":"splitmix64_for_trusted_u64_masks_with_exact_key_equality",
@@ -948,6 +967,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "source_variables":instance.n_vars,
             "solver_variables":n_vars,
             "fixed_x1_values":x1_count,
+            "fixed_x1_masks_visited":x1_masks_visited,
             "fixed_x1_nonrational_skipped":nonrational_x1_skipped,
             "fixed_x1_systems_constructed":systems_constructed,
             "fixed_x1_systems_completed":systems_completed,
@@ -1329,6 +1349,21 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn fixed_x1_weight_order_is_an_exact_target_independent_permutation() {
+        for ell in 0..=12usize {
+            let ascending = fixed_x1_masks(ell, false);
+            let weighted = fixed_x1_masks(ell, true);
+            assert_eq!(ascending, (0..1usize << ell).collect::<Vec<_>>());
+            let mut restored = weighted.clone();
+            restored.sort_unstable();
+            assert_eq!(restored, ascending);
+            assert!(weighted.windows(2).all(|pair| {
+                (pair[0].count_ones(), pair[0]) <= (pair[1].count_ones(), pair[1])
+            }));
+        }
+    }
 
     #[test]
     fn fixed_x1_native_f4_recovers_an_exact_small_relation() {
