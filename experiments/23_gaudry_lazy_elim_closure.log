@@ -4885,7 +4885,10 @@
  degree 10: nf resolved 183 columns of 286, of which 149 of 222 pivots (67%)
  degree 10: elimination 151173 muls, 49319 on pivots the normal forms never reach (32.6% of elimination)
  degree 10: closure 202 of 222 pivot rows; 1644 muls on rows outside it (1.1% of elimination)
-## lazy_271_s1 (GAUDRY_LAZY_ELIM=1): rows and multiplications per lazily solved residual, and each fallback
+## lazy_271_s1 (GAUDRY_LAZY_ELIM=1), in solve order: each lazily solved residual's rows and multiplications; for the plan-learning solve and each fallback, the full path's lines
+ degree 10: nf resolved 183 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 150734 muls, 49201 on pivots the normal forms never reach (32.6% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1644 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148457 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 149053 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148648 muls
@@ -4963,6 +4966,9 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148792 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 185 columns of 286, of which 151 of 222 pivots (68%)
+ degree 10: elimination 150100 muls, 46649 on pivots the normal forms never reach (31.1% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1644 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148444 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148847 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148415 muls
@@ -5104,6 +5110,9 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 149116 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 185 columns of 286, of which 151 of 222 pivots (68%)
+ degree 10: elimination 149667 muls, 46705 on pivots the normal forms never reach (31.2% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1619 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148205 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148851 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148995 muls
@@ -5202,12 +5211,18 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148848 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 185 columns of 286, of which 151 of 222 pivots (68%)
+ degree 10: elimination 148800 muls, 46186 on pivots the normal forms never reach (31.0% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1588 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148890 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148703 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148522 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 145466 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 182 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 147548 muls, 48647 on pivots the normal forms never reach (33.0% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1654 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148396 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148808 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148821 muls
@@ -5248,9 +5263,15 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 147949 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 182 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 150426 muls, 49118 on pivots the normal forms never reach (32.7% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1638 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 145632 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 183 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 150607 muls, 49204 on pivots the normal forms never reach (32.7% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1642 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148260 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 147611 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148263 muls
@@ -5371,6 +5392,9 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148622 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 182 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 150488 muls, 48965 on pivots the normal forms never reach (32.5% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1640 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 147445 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148383 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148430 muls
@@ -5395,6 +5419,9 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 149072 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 182 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 150716 muls, 49175 on pivots the normal forms never reach (32.6% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1644 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148809 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148650 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148002 muls
@@ -5585,6 +5612,9 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 149083 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 182 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 147710 muls, 47783 on pivots the normal forms never reach (32.3% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1634 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148969 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148105 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 149123 muls
@@ -5592,8 +5622,14 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148010 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 182 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 150314 muls, 49183 on pivots the normal forms never reach (32.7% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1644 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 182 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 148686 muls, 48298 on pivots the normal forms never reach (32.5% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1594 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 146314 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148498 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 149137 muls
@@ -5606,6 +5642,9 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148300 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 185 columns of 286, of which 151 of 222 pivots (68%)
+ degree 10: elimination 150083 muls, 46730 on pivots the normal forms never reach (31.1% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1644 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148791 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 149189 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148535 muls
@@ -5616,6 +5655,9 @@
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148950 muls
  degree 10: lazy elimination found no normal form (staircase off the plan: false)
  degree 10: lazy elimination fell back to the full one
+ degree 10: nf resolved 182 columns of 286, of which 149 of 222 pivots (67%)
+ degree 10: elimination 150349 muls, 48997 on pivots the normal forms never reach (32.6% of elimination)
+ degree 10: closure 202 of 222 pivot rows; 1644 muls on rows outside it (1.1% of elimination)
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148885 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 148447 muls
  degree 10: lazy elimination reduced 202 of 222 planned pivot rows, 149129 muls

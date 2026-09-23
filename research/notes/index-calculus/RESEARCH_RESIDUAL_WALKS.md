@@ -2010,7 +2010,7 @@ elimination*, which it does not.
 **Class: `engineering`, negative, and `0 / 25` cross-check mismatches** on the
 instrumented runs — the diagnostics do not touch the arithmetic.
 
-### 11.14 The border basis, written: the ceiling was `1.002×`, and the solver reaches it
+### 11.14 The border basis, written: the ceiling was `1.002×`, and the solver gets 99 % of it where it runs
 
 **Runner:** `GAUDRY_LAZY_VERIFY=1 cargo run --release --example gaudry_cubic_bench --
 --protocol --groebner --cross-check --sizes 271,523,1039,2083 --seeds 2 --json …`,
@@ -2094,7 +2094,11 @@ and not for these.
 asserts that residuals, decompositions, independent relations, the planted
 logarithm, and the charpoly, eigenvector and root counters — none of which the
 elimination touches — are identical in both arms, so the residual streams did
-not diverge and every difference below is exact, not statistical.  `C₃` is
+not diverge and every difference below is exact, not statistical.  The equal
+charpoly and root counters prove more than that: a lazy attempt that got as far
+as `M_{e₁}` and then fell back would have paid for a second characteristic
+polynomial, so every one of the 128 fallbacks happened before the random stream
+was touched.  `C₃` is
 everything the solve spends per residual, including each lazy attempt that
 fell back and the full elimination that followed; the speedup is `AGENTS.md`
 §8's `baseline_total_operations / candidate_total_operations`, whole method,
@@ -2115,9 +2119,10 @@ cold.
 `S / rho` moves by the same factor in every cell, below the precision the
 scoreboard draws it at.
 
-On the residuals it solves the lazy elimination spends `148,450` multiplications
-where the full one spends `150,073` (`p = 271`, seed 1): `1,623` saved of the
-`1,648` the closure allows — **`98.5 %` of the ceiling**.  Each fallback costs
+On the 713 residuals it solves at `p = 271`, seed 1, the lazy elimination spends
+`148,450` multiplications where the full one spends `150,080` on the same
+residuals: `1,630` saved of the `1,648` their closure allows — **`98.9 %` of the
+ceiling**.  Each fallback costs
 the lazy attempt that found the staircase off the plan, about `120,000`, on top
 of the full elimination.  The two cross at a fallback rate of about `1.3 %`:
 above it, at `p = 271` (`1.9–2.4 %`), the lazy solver loses; below it, from
