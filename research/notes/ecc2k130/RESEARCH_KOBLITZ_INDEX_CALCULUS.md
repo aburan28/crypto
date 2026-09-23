@@ -898,7 +898,14 @@ class, no scoreboard row.  A follow-up closes the loop on the host:
 built, and it answers exactly as the CPU's own table does on every
 stored pair at both sizes.  Every `gpu/ecc2k` kernel now also compiles
 under `nvcc` for `sm_90`, `sm_100` and `sm_120` in CI.  Still nothing ran
-on a device, so again no class and no scoreboard row.
+on a device, so again no class and no scoreboard row.  A third round
+stores the table on the device as well: count and fill kernels with
+atomics, checked on concurrent CPU threads and under ThreadSanitizer
+against the CPU's table, and a launcher (`gpu/ecc2k/fold2k.cu`) that
+builds from a plan the CPU writes.  The launcher is compiled and never
+run.  It is correctness and tooling only, so again no class and no
+scoreboard row.  A device run would measure wall-clock, not the operation
+count `S` is priced in.
 
 ## Beyond Koblitz: subfield curves `E/GF(2^k)` over `GF(2^{ke})` — 2026-09-11
 

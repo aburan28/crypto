@@ -35,7 +35,9 @@ on:
       # to how the CPU builds one moves what the fold kernel must match.
       - 'examples/dump_fold_vectors.rs'
       - 'src/cryptanalysis/koblitz_index_calculus.rs'
-      # `make test` ends by loading the emulated kernel's table with this.
+      # `make test` writes plans with the first and loads the emulated
+      # build's tables with the second.
+      - 'examples/dump_fold_plan.rs'
       - 'examples/load_fold_table.rs'
       - '.github/workflows/gpu-ecc2k-host-verification.yml'
 jobs:
@@ -55,7 +57,16 @@ jobs:
       # pair-table ones decline for `ecc2k95` at m = 97 > 62, which is
       # `pt_low64`'s ceiling and `FrobeniusCanon`'s too, and say so
       # rather than passing silently.  Then the round trip: the folded
-      # tables the emulated kernel built, loaded and probed on the CPU.
+      # tables the emulated device build made, loaded and probed on the
+      # CPU; and the emulation again under ThreadSanitizer, with a
+      # control that must be reported.
+      # `make test` ends with the emulation under ThreadSanitizer.  GCC
+      # 13's TSan cannot place its shadow memory when 32 bits of mmap
+      # addresses are randomised, as they are on ubuntu-24.04 runners,
+      # and aborts with "unexpected memory mapping"; 28 is what it
+      # expects.
+      - name: Let ThreadSanitizer map its shadow memory
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
       - name: Host tests for the ecc2k kernels
         run: make -C gpu/ecc2k test
 

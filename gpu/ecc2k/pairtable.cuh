@@ -305,8 +305,7 @@ struct PtFoldGeometry {
  * at the compiled field degree -- the first folded kernel was handed
  * the wrong `n` for exactly this, so there is no parameter to get
  * wrong. */
-inline int pt_fold_geometry(int n_orbits, int n_reps, int n_points,
-                                   PtFoldGeometry *g) {
+inline int pt_fold_geometry(int n_orbits, int n_reps, int n_points, PtFoldGeometry *g) {
     if (n_reps <= 0 || n_points <= 0 || (uint32_t)n_orbits > PT_MAX_TAGGED_ORBITS) return 0;
     const uint64_t pairs = pt_folded_pair_count((uint64_t)n_reps, (uint64_t)n_points);
     if (pairs > 0xffffffffull) return 0;
@@ -320,8 +319,7 @@ inline int pt_fold_geometry(int n_orbits, int n_reps, int n_points,
  * `n_points - suffix[rep_orbit[r]]` of them.  `row_offset` holds
  * `n_reps + 1`; the last is the total, which is returned. */
 inline uint64_t pt_fold_row_offsets(int n_points, const uint32_t *suffix,
-                                           const uint32_t *rep_orbit, int n_reps,
-                                           uint32_t *row_offset) {
+                                    const uint32_t *rep_orbit, int n_reps, uint32_t *row_offset) {
     uint64_t total = 0;
     for (int r = 0; r < n_reps; r++) {
         row_offset[r] = (uint32_t)total;
@@ -331,7 +329,42 @@ inline uint64_t pt_fold_row_offsets(int n_points, const uint32_t *suffix,
     return total;
 }
 
-/* **Assembly, host side**, in the CPU build's two passes.
+/* A folded build's work, in chunks of at most `chunk` entries of one
+ * row: row `r` has `n_points - suffix[rep_orbit[r]]` entries and so
+ * `ceil(that / chunk)` chunks, and `chunk_start` (`n_reps + 1` words)
+ * holds where each row's chunks begin.  The total is returned.
+ *
+ * Why chunks and not rows: a fold has only about one row per signed
+ * orbit -- some fourteen hundred at the widest base the note built --
+ * which is far too few threads for a GPU, and a row-per-thread kernel
+ * needs `2|F|` elements of scratch per thread, eight gigabytes at that
+ * base.  A chunk is `chunk` additions under one batched inversion, with
+ * `2 chunk` elements of scratch, and there are `entries / chunk` of
+ * them.  The stored table cannot depend on the split, and the tests run
+ * several. */
+inline uint64_t pt_fold_chunks(int n_points, const uint32_t *suffix, const uint32_t *rep_orbit,
+                               int n_reps, int chunk, uint32_t *chunk_start) {
+    uint64_t items = 0;
+    for (int r = 0; r < n_reps; r++) {
+        chunk_start[r] = (uint32_t)items;
+        const uint64_t k = (uint64_t)(n_points - (int)suffix[rep_orbit[r]]);
+        items += (k + (uint64_t)chunk - 1) / (uint64_t)chunk;
+    }
+    chunk_start[n_reps] = (uint32_t)items;
+    return items;
+}
+
+/* `bucket_start[1..]` holding each bucket's count becomes the bucket
+ * offsets, in place; the total is returned.  The step between the
+ * count and the fill, on the host whichever side counted. */
+inline uint32_t pt_fold_scan(uint32_t *bucket_start, uint32_t buckets) {
+    bucket_start[0] = 0;
+    for (uint32_t b = 0; b < buckets; b++) bucket_start[b + 1] += bucket_start[b];
+    return bucket_start[buckets];
+}
+
+/* **Assembly, host side**, in the CPU build's two passes, over the
+ * `(key, tag)` output of `pairtable_fold_kernel`.
  *
  * Count: `bucket_start` (`buckets + 1` words, zeroed) becomes the
  * bucket offsets.  Fill: each entry's word lands at its bucket's cursor
@@ -339,24 +372,20 @@ inline uint64_t pt_fold_row_offsets(int n_points, const uint32_t *suffix,
  * (`present`, zeroed, `2^filter_bits / 64` words for the filter width
  * `pt_filter_bits(bucket_start[buckets])`).
  *
- * These run on the host over the kernel's `(key, tag)` output.  A device
- * version is the same two loops with an atomic add on the counts and
- * cursors and an atomic or on the presence words -- and it is left for
- * a device on purpose: the emulation runs threads one after another,
- * so it could not say anything about contended atomics, and this file
- * keeps to what has been checked. */
-inline void pt_fold_count(const uint64_t *keys, uint64_t entries,
-                                 const PtFoldGeometry &g, uint32_t *bucket_start) {
+ * `pairtable_fold_count_kernel` and `pairtable_fold_fill_kernel` are the
+ * same two passes on the device, straight from the rows with no
+ * `(key, tag)` array in between. */
+inline void pt_fold_count(const uint64_t *keys, uint64_t entries, const PtFoldGeometry &g,
+                          uint32_t *bucket_start) {
     for (uint64_t e = 0; e < entries; e++) {
         bucket_start[(pt_filter_hash(keys[e]) >> g.bucket_shift) + 1]++;
     }
-    for (uint32_t b = 0; b < g.buckets; b++) bucket_start[b + 1] += bucket_start[b];
+    pt_fold_scan(bucket_start, g.buckets);
 }
 
 inline void pt_fold_fill(const uint64_t *keys, const uint32_t *tags, uint64_t entries,
-                                const PtFoldGeometry &g, const uint32_t *bucket_start,
-                                uint32_t *cursor, uint32_t *words, uint64_t *present,
-                                uint64_t present_mask) {
+                         const PtFoldGeometry &g, const uint32_t *bucket_start, uint32_t *cursor,
+                         uint32_t *words, uint64_t *present, uint64_t present_mask) {
     for (uint32_t b = 0; b < g.buckets; b++) cursor[b] = bucket_start[b];
     for (uint64_t e = 0; e < entries; e++) {
         const uint64_t h = pt_filter_hash(keys[e]);
@@ -365,6 +394,130 @@ inline void pt_fold_fill(const uint64_t *keys, const uint32_t *tags, uint64_t en
         present[bit >> 6] |= 1ull << (bit & 63);
     }
 }
+
+/* The atomics the device passes need, relaxed: the count only has to
+ * add up, and the fill's cursor only has to hand each slot out once --
+ * no entry's write is ordered against another's, and the passes are
+ * separated by a kernel boundary.  `atomicAdd` returns the old value,
+ * which is the slot; so does `__atomic_fetch_add`.
+ *
+ * On `__CUDA_ARCH__`, not `__CUDACC__`: the host emulation defines the
+ * latter to reach the kernels, and runs them on CPU threads with the
+ * compiler's own atomics.  `PT_EMU_RACY` swaps those for a plain
+ * read-modify-write, which is the race a missing atomic would be; the
+ * emulation's ThreadSanitizer build is required to report it. */
+G2_HD uint32_t pt_atomic_add(uint32_t *p, uint32_t v) {
+#if defined(__CUDA_ARCH__)
+    return atomicAdd(p, v);
+#elif defined(PT_EMU_RACY)
+    const uint32_t old = *p;
+    *p = old + v;
+    return old;
+#else
+    return __atomic_fetch_add(p, v, __ATOMIC_RELAXED);
+#endif
+}
+
+G2_HD void pt_atomic_or(uint64_t *p, uint64_t v) {
+#if defined(__CUDA_ARCH__)
+    /* `uint64_t` is `unsigned long` on LP64 Linux, and `atomicOr` takes
+     * `unsigned long long`: the same width, a different type. */
+    atomicOr(reinterpret_cast<unsigned long long *>(p), (unsigned long long)v);
+#elif defined(PT_EMU_RACY)
+    *p |= v;
+#else
+    __atomic_fetch_or(p, v, __ATOMIC_RELAXED);
+#endif
+}
+
+/* The row plan of a folded build as the kernels read it: the base
+ * sorted by signed orbit, one representative per row with its orbit,
+ * where each orbit's points begin, the chunking, and the basis.  One
+ * struct so that the three fold kernels cannot be handed three
+ * different plans. */
+struct PtFoldRows {
+    const pt2k *by_orbit;
+    int n_points;
+    const pt2k *rep_pts;
+    const uint32_t *rep_orbit;
+    int n_reps;
+    const uint32_t *suffix;
+    const uint32_t *chunk_start; /* pt_fold_chunks */
+    int chunk;
+    uint64_t items;              /* chunk_start[n_reps] */
+    const uint64_t *canon_tables;
+    int canon_bytes;
+};
+
+/* **One chunk of one row**: work item `w`'s sums and their keys, handed
+ * to `emit(row, orbit, position in row, key)`.  The whole of what the
+ * fold kernels compute; they differ only in what they do with a key.
+ * `den` and `scr` hold `rows.chunk` elements each.
+ *
+ * The row is found by bisecting `chunk_start`, largest `r` with
+ * `chunk_start[r] <= w`, which also steps over a row with no chunks. */
+template <class Emit>
+G2_HD void pt_fold_item(const PtFoldRows &rows, uint64_t w, f2e *den, f2e *scr, const Emit &emit) {
+    int lo = 0, hi = rows.n_reps;
+    while (hi - lo > 1) {
+        const int mid = (lo + hi) / 2;
+        if (rows.chunk_start[mid] <= w) lo = mid;
+        else hi = mid;
+    }
+    const uint32_t orbit = rows.rep_orbit[lo];
+    const uint32_t first = (uint32_t)(w - rows.chunk_start[lo]) * (uint32_t)rows.chunk;
+    const uint32_t from = rows.suffix[orbit] + first;
+    const int left = rows.n_points - (int)from;
+    const int len = left < rows.chunk ? left : rows.chunk;
+    const pt2k P = rows.rep_pts[lo];
+    const pt2k *q = rows.by_orbit + from;
+    for (int t = 0; t < len; t++) den[t] = F2::add(P.x, q[t].x);
+    pt_batch_inv(den, scr, len);
+    for (int t = 0; t < len; t++) {
+        emit(lo, orbit, first + (uint32_t)t,
+             pt_canon(pt_sum_with_inv(P, q[t], den[t]), rows.canon_tables, rows.canon_bytes,
+                      F2M_M));
+    }
+}
+
+/* What `pairtable_fold_kernel` does with a key: write it and its tag at
+ * the entry's own slot, `row_offset[row] + position`. */
+struct PtFoldWrite {
+    const uint32_t *row_offset;
+    uint64_t *keys;
+    uint32_t *tags;
+    G2_HD void operator()(int row, uint32_t orbit, uint32_t at, uint64_t key) const {
+        keys[row_offset[row] + at] = key;
+        tags[row_offset[row] + at] = orbit;
+    }
+};
+
+/* The count pass: one more entry in the key's bucket. */
+struct PtFoldCount {
+    uint32_t *bucket_start;
+    int bucket_shift;
+    G2_HD void operator()(int, uint32_t, uint32_t, uint64_t key) const {
+        pt_atomic_add(&bucket_start[(pt_filter_hash(key) >> bucket_shift) + 1], 1u);
+    }
+};
+
+/* The fill pass: the next slot of the key's bucket, and its presence
+ * bit.  Each slot is handed out once, so the word's store needs no
+ * atomic -- only the cursor and the filter word, which entries share. */
+struct PtFoldFill {
+    uint32_t *cursor;
+    uint32_t *words;
+    uint64_t *present;
+    uint64_t present_mask;
+    int bucket_shift;
+    G2_HD void operator()(int, uint32_t orbit, uint32_t, uint64_t key) const {
+        const uint64_t h = pt_filter_hash(key);
+        const uint32_t slot = pt_atomic_add(&cursor[h >> bucket_shift], 1u);
+        words[slot] = pt_tagged_word(key, orbit);
+        const uint64_t bit = h & present_mask;
+        pt_atomic_or(&present[bit >> 6], 1ull << (bit & 63));
+    }
+};
 
 #ifdef __CUDACC__
 
@@ -416,48 +569,67 @@ __global__ void pairtable_kernel(const pt2k *pts, int n, const uint32_t *row_off
     }
 }
 
-/* **The folded table**: one thread per signed-orbit row, grid-stride.
+/* **The folded table**, as `(key, tag)` per entry: grid-stride over the
+ * chunks of `rows` (`pt_fold_item`), each entry written at its own slot
+ * `row_offset[row] + position` (`pt_fold_row_offsets`).  `pt_fold_count`
+ * and `pt_fold_fill` turn that into the stored table on the host.  The
+ * device build below does not need this array; it is the form the
+ * emulation checks entry by entry against unbatched addition.
  *
- * Row `r` is `rep_pts[r] + by_orbit[suffix[rep_orbit[r]] ..]`, written
- * from `row_offset[r]` (`pt_fold_row_offsets`): the key of every sum,
- * and the row's orbit as its tag.  `pt_fold_count` and `pt_fold_fill`
- * turn that into the stored table.
+ * `rows.n_points` is `|F|`; the fold's degree is the field's, which is
+ * compile-time.  The first folded kernel read an `n` that meant `|F|` as
+ * the degree, which is why nothing here is called `n`.
  *
- * `n_points` is `|F|`, the length of `by_orbit`; the fold's degree is
- * the field's, which is compile-time.  The parameter is not called `n`
- * because the first folded kernel read an `n` that meant `|F|` as the
- * degree.
- *
- * The rows shorten as `r` grows -- row 0 walks the whole base, the last
- * only its own orbit -- so this has the same triangular imbalance as
- * `pairtable_kernel` and takes the same grid stride.  `scratch` is
- * `pt_scratch_elems(n_points)` elements per thread, as there. */
-__global__ void pairtable_fold_kernel(const pt2k *by_orbit, int n_points,
-                                      const pt2k *rep_pts, const uint32_t *rep_orbit,
-                                      int n_reps, const uint32_t *suffix,
-                                      const uint32_t *row_offset, uint64_t *keys,
-                                      uint32_t *tags, f2e *scratch, int scratch_stride,
-                                      const uint64_t *canon_tables, int canon_bytes) {
-    const int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    const int stride = gridDim.x * blockDim.x;
-    for (int r = tid; r < n_reps; r += stride) {
-        f2e *den = scratch + (size_t)tid * scratch_stride;
-        f2e *scr = den + n_points;
-        const uint32_t orbit = rep_orbit[r];
-        const pt2k P = rep_pts[r];
-        const pt2k *q = by_orbit + suffix[orbit];
-        const int k = n_points - (int)suffix[orbit];
-        for (int t = 0; t < k; t++) den[t] = F2::add(P.x, q[t].x);
-        pt_batch_inv(den, scr, k);
-        const uint32_t base = row_offset[r];
-        for (int t = 0; t < k; t++) {
-            keys[base + t] = pt_canon(pt_sum_with_inv(P, q[t], den[t]), canon_tables,
-                                      canon_bytes, F2M_M);
-            tags[base + t] = orbit;
-        }
-    }
+ * `scratch` is `pt_scratch_elems(rows.chunk)` elements per thread:
+ * scratch follows the chunk, not the base. */
+__global__ void pairtable_fold_kernel(PtFoldRows rows, const uint32_t *row_offset,
+                                      uint64_t *keys, uint32_t *tags, f2e *scratch,
+                                      int scratch_stride) {
+    const uint64_t tid = (uint64_t)blockIdx.x * blockDim.x + threadIdx.x;
+    const uint64_t stride = (uint64_t)gridDim.x * blockDim.x;
+    f2e *den = scratch + tid * (uint64_t)scratch_stride;
+    f2e *scr = den + rows.chunk;
+    const PtFoldWrite emit{row_offset, keys, tags};
+    for (uint64_t w = tid; w < rows.items; w += stride) pt_fold_item(rows, w, den, scr, emit);
 }
 
+/* **The device build, pass one**: every entry's bucket counted into
+ * `bucket_start[bucket + 1]` (`buckets + 1` words, zeroed).  The host
+ * then scans it (`pt_fold_scan`), which gives the total the presence
+ * filter is sized from -- so the build is two launches, not one.
+ *
+ * Both passes recompute every row, as `build_folded_within` does on the
+ * CPU: twice the curve arithmetic, and no per-entry array at all, so
+ * the device holds the table and nothing else.  Keeping the keys from
+ * the first pass would halve the arithmetic for three times the
+ * table's memory; which is faster is a question for a device. */
+__global__ void pairtable_fold_count_kernel(PtFoldRows rows, int bucket_shift,
+                                            uint32_t *bucket_start, f2e *scratch,
+                                            int scratch_stride) {
+    const uint64_t tid = (uint64_t)blockIdx.x * blockDim.x + threadIdx.x;
+    const uint64_t stride = (uint64_t)gridDim.x * blockDim.x;
+    f2e *den = scratch + tid * (uint64_t)scratch_stride;
+    f2e *scr = den + rows.chunk;
+    const PtFoldCount emit{bucket_start, bucket_shift};
+    for (uint64_t w = tid; w < rows.items; w += stride) pt_fold_item(rows, w, den, scr, emit);
+}
+
+/* **The device build, pass two**: every entry's tagged word at the next
+ * slot of its bucket, and its presence bit.  `cursor` starts as a copy
+ * of the scanned `bucket_start` and ends as its shift by one bucket;
+ * `present` (zeroed) is `2^pt_filter_bits(total) / 64` words.  Order
+ * within a bucket is whatever the atomics made it, as on the CPU. */
+__global__ void pairtable_fold_fill_kernel(PtFoldRows rows, int bucket_shift, uint32_t *cursor,
+                                           uint32_t *words, uint64_t *present,
+                                           uint64_t present_mask, f2e *scratch,
+                                           int scratch_stride) {
+    const uint64_t tid = (uint64_t)blockIdx.x * blockDim.x + threadIdx.x;
+    const uint64_t stride = (uint64_t)gridDim.x * blockDim.x;
+    f2e *den = scratch + tid * (uint64_t)scratch_stride;
+    f2e *scr = den + rows.chunk;
+    const PtFoldFill emit{cursor, words, present, present_mask, bucket_shift};
+    for (uint64_t w = tid; w < rows.items; w += stride) pt_fold_item(rows, w, den, scr, emit);
+}
 #endif /* __CUDACC__ */
 
 #endif /* GPU_ECC2K_PAIRTABLE_CUH */
