@@ -4536,6 +4536,74 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-linear-fibers-20260923">
+  <div class="panel-head">
+    <h2>Exact linear fibers: query count falls, complete-cost gain rejected <span class="chip">engineering</span></h2>
+    <p>The SIMD fiber candidate passes 0/18 dramatic and 1/18 incremental comparisons
+      against the pointwise fastest fixed reference. The matched scalar-column gate
+      passes 17/18 and is also rejected universally. All 168 systems complete with
+      verified results; there is no confirmation eligibility.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/CONCLUSION.md">decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/CORRECTNESS.md">exact selection, screening and recovery</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/run_01/results.json">recorded costs and paired intervals</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/SUMMARY.json">individual cases and work counts</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/RUN_LEDGER.json">immutable run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete standalone solve plus validation milliseconds on two fresh n24
+      holdout seeds and seven repetitions. Display ratios use pooled planted costs relative
+      to retained direct SIMD. Acceptance uses paired fastest-reference costs over 31 controls;
+      all 32 measured methods are shown. Calibrated IC-operation and rho comparisons are absent.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Direct SIMD / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>20.276459</td><td>26.065313</td><td>126.155937</td><td>0.128</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>68.772166</td><td>50.899687</td><td>513.035354</td><td>0.038</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>235.042229</td><td>170.269083</td><td>1760.644084</td><td>0.011</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>129.278416</td><td>89.139417</td><td>808.516667</td><td>0.020</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>23.387625</td><td>29.699292</td><td>148.162521</td><td>0.111</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>20.576042</td><td>26.291375</td><td>131.962458</td><td>0.126</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>17.889646</td><td>22.693646</td><td>111.392792</td><td>0.145</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>7.578250</td><td>9.555167</td><td>45.521791</td><td>0.343</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>4.477958</td><td>5.729937</td><td>27.890125</td><td>0.581</td><td>PASS</td></tr>
+      <tr><td>Full RREF, list</td><td>233.075979</td><td>69.649104</td><td>402.975000</td><td>0.011</td><td>PASS</td></tr>
+      <tr><td>Full RREF, wide</td><td>49.221750</td><td>15.239688</td><td>90.753042</td><td>0.053</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, list</td><td>34.739730</td><td>23.479625</td><td>210.481458</td><td>0.075</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, wide</td><td>10.178250</td><td>7.162834</td><td>65.169875</td><td>0.256</td><td>PASS</td></tr>
+      <tr><td>Packed without diagnostic hashing</td><td>3.074937</td><td>4.047271</td><td>19.832270</td><td>0.846</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, list</td><td>172.130958</td><td>159.895625</td><td>421.451542</td><td>0.015</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, compact</td><td>18.144458</td><td>15.882125</td><td>45.553271</td><td>0.143</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, scalar</td><td>17.895333</td><td>16.017187</td><td>20.737167</td><td>0.145</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, SIMD</td><td>2.601812</td><td>2.535916</td><td>3.105292</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, scalar</td><td>3.599833</td><td>5.628312</td><td>26.941083</td><td>0.723</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, SIMD</td><td>1.604062</td><td>2.678062</td><td>12.073583</td><td>1.622</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, scalar</td><td>2.904375</td><td>5.419834</td><td>21.291812</td><td>0.896</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, SIMD</td><td>0.529583</td><td>0.968480</td><td>3.802375</td><td>4.913</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, scalar</td><td>15.881062</td><td>15.826667</td><td>20.688625</td><td>0.164</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, SIMD</td><td>2.081021</td><td>2.191229</td><td>2.849396</td><td>1.250</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, list/scalar</td><td>15.594229</td><td>7.857625</td><td>20.597230</td><td>0.167</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, packed/SIMD</td><td>2.456291</td><td>1.116708</td><td>2.844771</td><td>1.059</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, scalar</td><td>2.921396</td><td>5.488542</td><td>21.114354</td><td>0.891</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, SIMD</td><td>0.509312</td><td>0.938187</td><td>3.716312</td><td>5.108</td><td>PASS</td></tr>
+      <tr><td>Fibers with row elimination</td><td>2.786709</td><td>2.241522</td><td>7.505500</td><td>0.934</td><td>PASS</td></tr>
+      <tr><td>Fibers with scalar column membership</td><td>2.525792</td><td>2.043166</td><td>7.146187</td><td>1.030</td><td>PASS</td></tr>
+      <tr><td>Fibers with SIMD screening</td><td>0.953291</td><td>0.743417</td><td>2.458729</td><td>2.729</td><td>PASS</td></tr>
+      <tr><td>Fibers with zero-only SIMD screen</td><td>1.453480</td><td>1.221750</td><td>3.667479</td><td>1.790</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>The run contains 37,632 observations: 128 SAT and 40 UNSAT fixtures per arm.
+    One solve per fixture totals 25,304,736 screened outside assignments and 105,861
+    complete linear queries (about 0.4183%). These counts do not remove screening,
+    setup or recovery cost. The prior seed2097153 exception remains at ratio 0.121522.</p>
+  <p>Three systems select six variables and use the documented scalar-screen fallback.
+    The matched n24 cross-planted holdout interval is [1.024697, 3.404951], missing
+    its 1.05 lower-bound threshold. Validation includes 49 Rust tests and 26 Python
+    evidence/census tests. Whole-worker peak RSS is 29,818,880 bytes; candidate-specific
+    memory, calibrated operations, production, full-IC and rho costs remain unmeasured.</p>
+  <p>A separate discovery census rules out the simple untouched-row shortcut for the
+    current n24 variable selections. Partial byte-syndrome filtering is the next
+    documented representation hypothesis; its implementation and complete cost remain
+    unmeasured. Prior measurements and rejections remain below.</p>
+</section>
 <section class="panel" id="boolean-initial-restriction-20260923">
   <div class="panel-head">
     <h2>One initial affine restriction: fewer assignments, dramatic gate rejected <span class="chip">engineering</span></h2>
@@ -4597,8 +4665,9 @@ factor base, and this prices a decomposition oracle.</p>
     index-calculus cost and rho ratio remain unmeasured. No confirmation run was launched.</p>
   <p>A separate exact discovery census finds independent variable sets of size 2&ndash;3
     at n16 and 4&ndash;5 at n24, so fixing the remaining variables leaves a small linear system.
-    Its solver and complete cost remain unimplemented and unmeasured; the existing SIMD
-    method already evaluates sixteen points together. Earlier figures remain below.</p>
+    At that run's close its solver and complete cost were unimplemented and unmeasured.
+    The <a href="#boolean-linear-fibers-20260923">subsequent implementation above</a> retains
+    that historical result and records the measured follow-up. Earlier figures remain below.</p>
 </section>
 <section class="panel" id="boolean-affine-substitution-20260923">
   <div class="panel-head">
