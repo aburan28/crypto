@@ -4265,6 +4265,41 @@ factor base, and this prices a decomposition oracle.</p>
   calibrated rows, fitted exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
 <!-- END ic-crossover-20260922 -->
+<!-- BEGIN ic-triple-table-20260923 -->
+<section class="panel" id="ic-triple-table-20260923">
+<div class="panel-head"><h2>A triple-sum table moves the crossover <span class="chip">engineering</span></h2>
+<p>The collector above is a pair table: <code>&Theta;(r<sup>2/3</sup>)</code> at its own
+  optimum, a boundary its model scopes to &ldquo;this pair-table collector, not index
+  calculus&rdquo;. Tabulating <em>triple</em> sums <code>C<sub>o</sub> + P<sub>j</sub> + P<sub>l</sub></code>
+  under the same Frobenius orbit names and scanning one summand per probe gives four-term
+  relations and <code>&Theta;(r<sup>3/5</sup>)</code>, so the ratio to rho grows as
+  <code>r<sup>1/10</sup></code> rather than <code>r<sup>1/6</sup></code> &mdash; derived, not
+  fitted. A patch against the <code>scaled</code> tree, on two orbits where the pair table uses
+  8, 16 and 24; pre-registered before it existed. <strong>Not a tournament round</strong>: no
+  native-time gate, no confirmation or replay stage, nothing promoted.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/RESULTS.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/PREREGISTRATION.md">pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/triple-table.patch">the patch</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/check.py">the paired check</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Instruction unit Ir, complete DLP, 32 paired fixtures a cell (seed 20260924), every report
+  of both arms verified by <code>oracle.py</code> with the same logarithm. Geometric mean of the
+  paired ratios, 95% bootstrap interval. The rho columns are secondary and were not
+  pre-registered.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>triple / <code>scaled</code></th><th><code>scaled</code> / rho</th><th>triple / rho</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>1.493 [1.411, 1.575]</td><td>0.689 [0.621, 0.769]</td><td>1.029 [0.940, 1.130]</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td><strong>0.589</strong> [0.535, 0.643]</td><td>1.381 [1.152, 1.649]</td><td><strong>0.813</strong> [0.700, 0.941]</td></tr>
+<tr><td>n43a1</td><td>4,644,189,029</td><td><strong>0.409</strong> [0.337, 0.494]</td><td>2.281 [1.864, 2.754]</td><td><strong>0.933</strong> [0.753, 1.159]</td></tr>
+</tbody></table></div>
+<p><strong>The gain grows with <code>r</code>, with disjoint intervals</strong> &mdash; the signature
+  of a rate change, which no constant-factor lever produces &mdash; and the pre-registered rule reads
+  <em>supported</em>. In instructions, <code>n37a0</code> moves from 1.38&times; rho to 0.81&times;,
+  its whole interval below one, and <code>n43a1</code> from 2.28&times; to 0.93&times;, its interval
+  spanning one. <strong><code>n23a1</code> gets worse</strong>, 1.49&times; the pair table: the
+  checker needs two columns and at two orbits the triple table costs more than the whole pair-table
+  job there. The same harness reproduces the crossover panel above (0.69, 1.38, 2.28 against 0.83,
+  1.40, 2.21). A collector that switches by the model at run time would read 0.69, 0.81 and 0.93,
+  below rho at every cell measured &mdash; arithmetic on this table, not a run, and to be
+  pre-registered before it is one.</p>
+</section>
+<!-- END ic-triple-table-20260923 -->
 <section class="panel" id="radical-pair-image-20260921">
   <div class="panel-head">
     <h2>Radical unordered-pair image <span class="chip">engineering diagnostic</span></h2>
