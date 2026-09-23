@@ -559,6 +559,36 @@
       </div>
     </div>
 
+    <div class="panel" id="phase-b-native-f4-fresh-holdout">
+      <div class="panel-head">
+        <h2>Phase-B native F4, preregistered fresh n = 59 holdout: exhaustive true negative <span class="chip">holdout</span></h2>
+        <p>Stage 169 selects blind-bundle ordinal 13 by a committed presentation-order rule before execution or truth scoring. The factor base, sparse fixed-X1 order, batch size 39, twelve-thread pool, 300-second F4 budget, and no-retry policy were frozen first. Native F4 exhausts all 512 masks and all 242 rational systems; post-run scoring then identifies the target as nondecomposable. This is one finite holdout, not an expected-time law.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Same authenticated <code>n=59, ell=9, m=3</code> target and exported source bytes. Local arms share the arm64 host.</caption>
+          <thead><tr><th>Backend</th><th>Terminal</th><th>Wall s</th><th>Core s</th><th>Peak RSS</th><th>Native work / conflicts</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Native F4, batch 39 / 12 threads</strong></td><td><strong>UNSAT, exhaustive true negative</strong></td><td class="n"><strong>20.539819</strong></td><td class="n">169.094100</td><td class="n">2,872.5 MB</td><td>99.20 billion word XORs; 242 F4 calls; conflicts null</td><td><span class="chip">holdout</span></td></tr>
+            <tr><td>Direct MITM</td><td>UNSAT, exhaustive true negative</td><td class="n"><strong>2.953129</strong></td><td class="n"><strong>2.948281</strong></td><td class="n"><strong>45.0 MB</strong></td><td>117,369 additions; 116,635 pair entries</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Native XOR SAT</td><td>inconclusive</td><td class="n">8.986403</td><td class="n">8.963603</td><td class="n">167.6 MB</td><td>100,000 conflicts</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>WDSat</td><td>timeout, inconclusive</td><td class="n">120.002468</td><td class="n">119.898830</td><td class="n">13.9 MB</td><td>conflicts unavailable before kill</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>CryptoMiniSat</td><td>timeout, inconclusive</td><td class="n">120.007540</td><td class="n">119.650196</td><td class="n">210.5 MB</td><td>conflicts unavailable before kill</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>Licensed Magma F4</td><td>not run</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td><span class="chip">missing gate</span></td></tr>
+            <tr><td>GGMP</td><td>not the same n = 59 construction</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td><span class="chip">not comparable</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">fresh target</span> selected by committed blind-bundle order; truth and witness were not consulted before the sealed run</span>
+        <span><span class="chip">exhaustive</span> 512 masks visited, 270 non-rational values skipped, 242 systems completed, 14,278 equations and zero roots</span>
+        <span><span class="chip">reference</span> F4 is 6.96&times; direct MITM by wall, 57.35&times; by CPU, and 63.80&times; by RSS on this nondecomposable target</span>
+        <span><span class="chip">selection check</span> the fresh negative costs 4.119&times; the wall and 6.205&times; the F4 systems of the post-hoc selected positive target; Stage 168 is not generic fresh-target timing</span>
+        <span>measured campaign lower bound through Stage 169: 8,261.489665 sequential wall-seconds, 8,801.978114 core-seconds, 6.31 GB maximum process RSS; complete campaign cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-20260923/result.json</code>; licensed Magma, the full native-F4 panel, full IC/rho cost and independent review remain open</span>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-head">
         <h2>What one target costs each decomposition oracle</h2>

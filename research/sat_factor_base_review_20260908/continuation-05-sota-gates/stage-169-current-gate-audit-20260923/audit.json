@@ -1,0 +1,51 @@
+{
+  "all_seven_gates_passed": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "67b8d9793e7ed4b221bd184895cac3ce58b99968b304dee85c8ccf47fbe62844",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_two_native_f4_n59_targets_one_preregistered_holdout_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "next_targets": [
+    "execute the full frozen 160-input packet under licensed Magma F4",
+    "expand preregistered native-F4 holdouts beyond one positive and one negative target",
+    "reduce fresh-target F4 full cost relative to direct MITM and automorphism rho",
+    "preserve complete outer metering for every future development command",
+    "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
+  ],
+  "predecessor": {
+    "stage168_audit_sha256": "991023754f29c1b04e7d91814df16cfae121669668079a77752944bf960b0d1b",
+    "stage168_seal_sha256": "9ef0cd0f927fb25cb4f9d09b71da862068b5baacdf5d0564c6459610ff6a066c",
+    "stage168_status": "current_seven_gate_audit_verified"
+  },
+  "schema": "koblitz_stage169_current_gate_audit.v1",
+  "scoreboard_sha256": "2928649ff3405df1b89432708023dac275bd1663e13f94bec410503b56a84080",
+  "stage169": {
+    "blind_instance_id": "b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4",
+    "classification": "true_negative",
+    "complete_campaign_cost": null,
+    "direct_mitm_wall_seconds": 2.9531290830054786,
+    "f4_over_direct_mitm_wall": 6.9552729375118805,
+    "f4_peak_rss_bytes": 2872541184,
+    "f4_single_core_seconds": null,
+    "f4_systems_completed": 242,
+    "f4_total_core_seconds": 169.0941,
+    "f4_wall_seconds": 20.53981879200728,
+    "f4_word_xors": 99199976264,
+    "fresh_target_holdout_complete": true,
+    "result_seal_sha256": "41996f05ebd077313c7fe7acb9374cdc498534c04d5e31d5c825c80e46dfdcd8",
+    "result_sha256": "f75a0f6573fdcc46eba16f02418ad55ff3dce0231a2cd853fd1899c66b86abe8",
+    "source_commit": "509e43c79bcf36425f4329a09c34fd20c75949ed",
+    "verification_sha256": "f846849d3a792823e1a0df780778637885e758c5d69625cb27221fc5b17c2146"
+  },
+  "status": "current_seven_gate_audit_verified"
+}
