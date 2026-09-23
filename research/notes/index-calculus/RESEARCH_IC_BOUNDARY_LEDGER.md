@@ -3703,6 +3703,58 @@ and targets.  The rule the calibration fixes is a function of the
 subgroup's bit length alone; the overlap is disclosed here rather than
 avoided.
 
+### 18.3 The calibration, and the rule it fixed
+
+Frozen at `research/ic_rho_reference_20260923/calibration/`: sixteen
+curves, 128 runs each, every run of every walk verified, `J = 4, 8, 16`
+for both tuned walks.  Mean `S` of the negation walk, and what the
+declared rule chose:
+
+| bits(r) | curve | log₂ r | frozen walk `S` | negation `S`, J = 4 | J = 8 | J = 16 | chosen | its walk / own floor | tuned plain at that J, walk / own floor | J = 4 walks capped |
+|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 12 | char2 `random-binary-n13-ba3f` | 12.0 | 14.77 | 2.56 | 3.52 | 6.31 | **4** | 1.56 | 1.28 | 1 |
+| 12 | prime `bench-12bit` | 11.9 | 15.35 | 2.59 | 3.62 | 6.71 | **4** | 1.54 | 1.37 | 0 |
+| 13 | char2 `random-binary-n15-b2493` | 13.0 | 12.20 | 2.17 | 2.83 | 4.93 | **4** | 1.44 | 1.20 | 1 |
+| 14 | prime `bench-14bit` | 14.0 | 8.90 | 1.99 | 2.32 | 3.83 | **4** | 1.46 | 1.29 | 4 |
+| 16 | prime `bench-16bit` | 16.0 | 5.66 | 1.90 | 1.85 | 2.41 | **8** | 1.33 | 1.18 | 15 |
+| 17 | char2 `random-binary-n17-bbe86` | 16.0 | 5.68 | 1.87 | 1.85 | 2.41 | **8** | 1.33 | 1.15 | 14 |
+| 18 | prime `bench-18bit` | 18.0 | 4.34 | 1.68 | 1.41 | 1.71 | **8** | 1.17 | 1.12 | 13 |
+| 19 | char2 `random-binary-n19-b5f57e` | 18.0 | 4.05 | 1.62 | 1.47 | 1.72 | **8** | 1.23 | 1.11 | 21 |
+| 19 | char2 `random-binary-n21-b10cc7b` | 19.0 | 3.58 | 1.61 | 1.29 | 1.44 | **8** | 1.14 | 1.04 | 34 |
+| 20 | prime `bench-20bit` | 20.0 | 3.05 | 2.09 | 1.22 | 1.37 | **8** | 1.16 | 1.10 | 100 |
+| 22 | prime `generated-22bit-3914087` | 21.9 | 2.56 | 2.01 | 1.09 | 1.14 | **8** | 1.10 | 1.14 | 173 |
+| 23 | char2 `random-binary-n23-b3a296b` | 22.0 | 2.38 | 1.92 | 1.14 | 1.13 | **16** | 1.04 | 1.06 | 177 |
+| 24 | char2 `random-binary-n25-b1448ace` | 24.0 | 2.36 | 3.26 | 1.13 | 1.04 | **16** | 1.05 | 1.04 | 626 |
+| 24 | prime `generated-24bit-11921101` | 23.5 | 2.28 | 3.02 | 1.10 | 1.05 | **16** | 1.05 | 1.03 | 471 |
+| 25 | char2 `random-binary-n27-b3bfa9c2` | 24.4 | 1.99 | 2.96 | 1.15 | 1.06 | **16** | 1.09 | 1.13 | 623 |
+| 26 | prime `generated-26bit-38313677` | 25.2 | 2.71 | 3.14 | 1.06 | 0.99 | **16** | 1.03 | 1.00 | 888 |
+
+The rule, now in `rho_jumps_for`: **four jumps to 15 bits, eight from
+16 to 22, sixteen from 23.**  It replaces the provisional one at 16–18
+bits (four there became eight) and at 23 (eight became sixteen); the
+three sizes where two counts came within `3 %` (16, 17 and 23 bits) went
+to the larger, as declared; there is no curve at 15 bits, and the
+eight-over-four ratio falls from `1.17` at 14 bits to `0.97` at 16, so
+15 stays with four.
+
+What the calibration shows beyond the rule, read before any evaluation
+ran:
+
+- **Four jumps break down as walks lengthen.**  The four-jump negation
+  walk runs `3.0`–`3.5×` its own floor at 24–26 bits, with 470–890 of
+  its walks running to the cap: fruitless cycles longer than the
+  sixteen-point window go undetected there.  Where the rule uses it
+  (at most 15 bits) it caps at most four walks in 128 runs and is
+  `1.4`–`1.6×` its floor, the price of a table cheap enough to be worth
+  it when `√r` is 64.
+- **The tuned walks sit near their floors where the table is not the
+  cost**: `1.03`–`1.17×` for the negation walk from 18 bits up, and
+  `1.00`–`1.14×` for the tuned walk on points.  Their paired walk ratio
+  is the evaluation's target 4, not read here.
+- **The frozen walk's `S` is mostly not rho.**  At 12 bits it is
+  `14.8`–`15.4` where the negation walk is `2.6`; at 24–26 bits `2.0`–`2.7`
+  where the negation walk is `1.0`–`1.1`.
+
 **Targets:**
 
 1. **Correct.**  Every run of every walk, calibration and evaluation,

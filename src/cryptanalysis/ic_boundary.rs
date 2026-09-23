@@ -1084,11 +1084,19 @@ impl RhoWalk {
 /// random and, under the negation map, make fruitless cycles common.
 /// On the toy subgroups the ledger runs, the table is a visible share
 /// of `√r`, so the count grows with the size.
+///
+/// The thresholds are the calibration of ledger §18.2
+/// (`research/ic_rho_reference_20260923/calibration/`): at each size of
+/// sixteen curves no evaluation uses, the count in `{4, 8, 16}` whose
+/// negation walk had the lowest mean `S` over 128 runs, a count within
+/// 3 % of the lowest going to the larger.  Four jumps stop paying above
+/// about 2^16: the walks lengthen, and fruitless cycles longer than the
+/// detection window leave walks running to the cap.
 pub fn rho_jumps_for(r: u64) -> usize {
     let bits = 64 - r.leading_zeros();
     match bits {
-        0..=18 => 4,
-        19..=23 => 8,
+        0..=15 => 4,
+        16..=22 => 8,
         _ => 16,
     }
 }

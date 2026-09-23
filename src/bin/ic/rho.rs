@@ -31,8 +31,8 @@ use rand::{Rng, SeedableRng};
 use serde_json::{json, Value};
 
 use crypto_lib::cryptanalysis::ic_boundary::{
-    find_prime_order_curve, generic_floor_ops, generic_floor_s, koblitz_instance, prime_instance_for,
-    random_binary_instance,
+    find_prime_order_curve, generic_floor_ops, generic_floor_s, koblitz_instance, koblitz_instance_best,
+    prime_instance_for, random_binary_instance,
     rho_cap, rho_reference, rho_reference_walk, roster_prime_instance, signed_frobenius_rho, BinaryGroup,
     BinaryInstance, CountedGroup, GroupOps, PrimeInstance, RhoResult, RhoWalk,
 };
@@ -46,6 +46,12 @@ pub struct RhoArgs {
     /// Random binary ladder, in field degrees (cofactor at most 8).
     #[arg(long, value_delimiter = ',')]
     pub char2_degrees: Vec<u32>,
+    /// Koblitz ladder, in field degrees (`K_a` with the smaller
+    /// cofactor): the frozen walk, the negation walk and the repository's
+    /// signed-Frobenius walk, paired — the two walks `ic bench` chooses
+    /// between on a Koblitz curve.
+    #[arg(long, value_delimiter = ',')]
+    pub koblitz_degrees: Vec<u32>,
     /// Runs per instance and walk; each plants a fresh logarithm, and
     /// every walk sees the same ones.
     #[arg(long, default_value_t = 64)]
@@ -171,6 +177,37 @@ fn ladder_instance<G: CountedGroup>(
         .collect()
 }
 
+/// The Koblitz walks on one instance, paired like [`ladder_instance`]:
+/// the frozen walk, the negation walk, and the signed-Frobenius walk
+/// priced as the Koblitz regime prices it.
+fn koblitz_ladder_instance(inst: &BinaryInstance, seed: u64, runs: usize) -> Vec<Value> {
+    let bg = BinaryGroup(&inst.fast);
+    let (gen, r) = (inst.generator, inst.r);
+    let mut rng = StdRng::seed_from_u64(seed ^ r.rotate_left(17));
+    let draws: Vec<(u64, u64)> = (0..runs)
+        .map(|_| (rng.gen_range(1..r), rng.gen::<u64>()))
+        .collect();
+    let cap = rho_cap(r, 64.0);
+    let mut out = Vec::new();
+    for name in ["frozen-plain", "negation", "signed-frobenius"] {
+        let results: Vec<(u64, u64, RhoResult)> = draws
+            .iter()
+            .map(|&(planted, s)| {
+                let mut ops = GroupOps::default();
+                let q = bg.mul(&mut ops, gen, planted);
+                let res = match name {
+                    "frozen-plain" => rho_reference(&bg, gen, q, r, s, cap),
+                    "negation" => rho_reference_walk(&bg, gen, q, r, s, cap, RhoWalk::negation()),
+                    _ => signed_frobenius_rho(inst, q, planted, s).expect("a Koblitz instance"),
+                };
+                (planted, s, res)
+            })
+            .collect();
+        out.push(summarise(name, r, &results));
+    }
+    out
+}
+
 /// Automorphisms beyond negation a generic algorithm could use on a
 /// prime curve: `j = 0` (`a = 0`, order 6 when `p ≡ 1 mod 3`) and
 /// `j = 1728` (`b = 0`, order 4 when `p ≡ 1 mod 4`).
@@ -292,6 +329,20 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
             "cofactor": inst.cofactor, "exclusions": binary_exclusions(&inst), "walks": rows,
         }));
     }
+    for &n in &args.koblitz_degrees {
+        if !(5..=62).contains(&n) {
+            return Err(format!("field degrees must lie in 5..=62, got {n}"));
+        }
+        let inst = koblitz_instance_best(n).ok_or_else(|| format!("no usable Koblitz curve at n = {n}"))?;
+        if !json_only {
+            eprintln!("  koblitz {n}: {} r = {}", inst.name, inst.r);
+        }
+        let rows = koblitz_ladder_instance(&inst, args.seed, args.runs);
+        instances.push(json!({
+            "regime": "koblitz", "instance": inst.name, "r": inst.r, "log2_r": (inst.r as f64).log2(),
+            "cofactor": inst.cofactor, "exclusions": binary_exclusions(&inst), "walks": rows,
+        }));
+    }
 
     // The table: one unit, every walk a row, ratios to the floor (A = 2,
     // what a generic algorithm may use on these curves) and to the matched
@@ -301,11 +352,13 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
     );
     for inst in &instances {
         let rows = inst["walks"].as_array().cloned().unwrap_or_default();
+        // The matched reference: the negation walk, or on a Koblitz
+        // curve the cheaper of it and the signed-Frobenius walk.
         let matched = rows
             .iter()
-            .find(|w| w["walk"] == "negation")
-            .and_then(|w| w["mean_s"].as_f64())
-            .unwrap_or(f64::NAN);
+            .filter(|w| w["walk"] == "negation" || w["walk"] == "signed-frobenius")
+            .filter_map(|w| w["mean_s"].as_f64())
+            .fold(f64::NAN, f64::min);
         for w in &rows {
             let s = w["mean_s"].as_f64().unwrap_or(f64::NAN);
             let jumps = w["counters_summed"]["jumps"].as_u64().map(|j| j / w["runs"].as_u64().unwrap_or(1).max(1));
@@ -332,9 +385,17 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
     // walk, over every size the ladder ran.
     let mut fits = Vec::new();
     md.push_str("\n| regime | walk | α (total ops ∝ r^α) | R² | sizes |\n|:--|:--|--:|--:|--:|\n");
-    for regime in ["prime", "char2"] {
-        for w in &walks {
-            let name = w.name();
+    for regime in ["prime", "char2", "koblitz"] {
+        let mut names: Vec<String> = Vec::new();
+        for i in instances.iter().filter(|i| i["regime"] == regime) {
+            for w in i["walks"].as_array().into_iter().flatten() {
+                let n = w["walk"].as_str().unwrap_or("?").to_string();
+                if !names.contains(&n) {
+                    names.push(n);
+                }
+            }
+        }
+        for name in names {
             let pts: Vec<(f64, f64)> = instances
                 .iter()
                 .filter(|i| i["regime"] == regime)
@@ -785,8 +846,8 @@ pub fn run(args: RhoArgs, json_only: bool) -> Result<Value, String> {
     if let Some(path) = &args.reprice {
         return reprice(path, &args, json_only);
     }
-    if args.prime_bits.is_empty() && args.char2_degrees.is_empty() {
-        return Err("give --prime-bits and/or --char2-degrees, or --reprice FILE".into());
+    if args.prime_bits.is_empty() && args.char2_degrees.is_empty() && args.koblitz_degrees.is_empty() {
+        return Err("give --prime-bits, --char2-degrees and/or --koblitz-degrees, or --reprice FILE".into());
     }
     ladder(&args, json_only)
 }
