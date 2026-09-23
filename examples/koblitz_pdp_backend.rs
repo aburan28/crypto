@@ -18,7 +18,7 @@ use crypto_lib::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePo
 use crypto_lib::cryptanalysis::binary_semaev_s4::{weil_descend_s4, S4System};
 use crypto_lib::cryptanalysis::ic_framework::solvers::F4F2;
 use crypto_lib::cryptanalysis::ic_framework::stages::{
-    BooleanSystem, Params, SolverVerdict, SystemSolver,
+    BooleanSystem, Params, SolverCost, SolverVerdict, SystemSolver,
 };
 use crypto_lib::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, sym_semaev_s4, DecompositionSystem, FieldStructure, SymElement,
@@ -33,7 +33,7 @@ use crypto_lib::cryptanalysis::semaev_sat::{
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 use serde_json::{json, Value};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 use std::time::{Duration, Instant};
@@ -664,15 +664,78 @@ fn source_point_witness(
     None
 }
 
-/// Run the repository's full Boolean Faugere F4 implementation on a direct
-/// symmetrised-S4 formulation of the same authenticated PDP instance.
+#[derive(Default)]
+struct F4CostAggregate {
+    calls: u64,
+    ops: u64,
+    wall_ns: u64,
+    peak_bytes: u64,
+    degree_reached: Option<u32>,
+    solving_degree: Option<u32>,
+    timed_out: bool,
+    extra: BTreeMap<String, u64>,
+}
+
+impl F4CostAggregate {
+    fn add(&mut self, cost: SolverCost) {
+        self.calls += 1;
+        self.ops = self.ops.saturating_add(cost.ops);
+        self.wall_ns = self.wall_ns.saturating_add(cost.wall_ns);
+        self.peak_bytes = self.peak_bytes.max(cost.peak_bytes);
+        self.degree_reached = Some(
+            self.degree_reached
+                .unwrap_or(0)
+                .max(cost.degree_reached.unwrap_or(0)),
+        );
+        self.solving_degree = Some(
+            self.solving_degree
+                .unwrap_or(0)
+                .max(cost.solving_degree.unwrap_or(0)),
+        );
+        self.timed_out |= cost.timed_out;
+        for (key, value) in cost.extra {
+            let aggregate_by_max = key.ends_with("_max")
+                || matches!(
+                    key.as_str(),
+                    "basis_len" | "oversize" | "symbolic_bytes_estimate_max" | "symbolic_cap_hit"
+                );
+            let entry = self.extra.entry(key).or_default();
+            if aggregate_by_max {
+                *entry = (*entry).max(value);
+            } else {
+                *entry = entry.saturating_add(value);
+            }
+        }
+    }
+
+    fn json(&self) -> Value {
+        let mut extra = self.extra.clone();
+        extra.insert("f4_calls".to_string(), self.calls);
+        json!({
+            "ops":self.ops,
+            "op_unit":"word XORs (elimination only)",
+            "wall_ns":self.wall_ns,
+            "peak_bytes":self.peak_bytes,
+            "degree_reached":self.degree_reached,
+            "solving_degree":self.solving_degree,
+            "timed_out":self.timed_out,
+            "extra":extra,
+        })
+    }
+}
+
+/// Run the repository's full Boolean Faugere F4 implementation on the same
+/// authenticated PDP instance, fixing one summand and solving the remaining
+/// direct symmetrised-S4 systems.
 ///
-/// The frozen cross-solver exports retain their historical S4-with-
-/// correspondence-variables or chained-S3 representation.  This arm first
-/// verifies those bytes exactly, then independently derives the direct S4
-/// equations from the same public algebraic basis and affine target.  That
-/// keeps n, ell, m, basis, curve and target identical while allowing the
-/// native Boolean-ring F4 implementation to operate on 3*ell variables.
+/// Expanding the direct S4 in all `3*ell` variables is already a multi-GB
+/// construction at the frozen `n=59, ell=9` cell, before F4 starts.  The
+/// fixed-X1 route enumerates the `2^ell` public subspace coefficients for the
+/// first summand and hands each lower-degree `2*ell`-variable system to the
+/// same full F4 engine.  Construction, every failed branch, extraction and
+/// the exact curve lift all live inside one charged budget.  This is a native
+/// F4 arm, but it is intentionally reported as a different formulation from
+/// Magma's frozen direct-F4 source.
 fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
     if budget_seconds == 0 {
         return (
@@ -689,8 +752,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             false,
         );
     }
-    let n_vars = 3usize.saturating_mul(instance.ell);
-    if n_vars > 64 {
+    let n_vars = 2usize.saturating_mul(instance.ell);
+    if n_vars > 64 || instance.ell >= usize::BITS as usize {
         return (
             json!({
                 "schema":"koblitz_pdp_isolated_backend.v1",
@@ -701,7 +764,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
                 "source_artifacts":instance.artifact_receipts,
                 "regenerated_source_exact":true,
                 "source_representation":instance.source_representation,
-                "solver_representation":"direct_symmetrised_s4_boolean",
+                "solver_representation":"fixed_x1_direct_symmetrised_s4_boolean",
                 "source_variables":instance.n_vars,
                 "solver_variables":n_vars,
                 "variable_cap":64,
@@ -715,68 +778,126 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
         );
     }
 
-    let construction_started = Instant::now();
+    let whole_started = Instant::now();
+    let deadline = whole_started + Duration::from_secs(budget_seconds);
     let st = FieldStructure::new(instance.n, &instance.curve.irreducible);
     let target_x = match &instance.target {
         BinaryPoint::Affine { x, .. } => x,
         BinaryPoint::Infinity => unreachable!(),
     };
-    let x1 = SymElement::from_subspace_vars(&instance.basis, 0, instance.n, n_vars);
-    let x2 = SymElement::from_subspace_vars(&instance.basis, instance.ell, instance.n, n_vars);
-    let x3 = SymElement::from_subspace_vars(&instance.basis, 2 * instance.ell, instance.n, n_vars);
-    let equations = sym_semaev_s4(&x1, &x2, &x3, target_x, &st);
-    let equation_fingerprint =
-        blake3::hash(&serde_json::to_vec(&equations).expect("serialize direct S4 equations"))
-            .to_hex()
-            .to_string();
-    let construction_ns = construction_started.elapsed().as_nanos();
-    let source_degree = equations
-        .iter()
-        .flat_map(|p| p.terms.iter())
-        .map(|term| term.mask.count_ones())
-        .max()
-        .unwrap_or(0);
-    let source_terms: usize = equations.iter().map(|p| p.terms.len()).sum();
-    let system = BooleanSystem { equations, n_vars };
     let solver = F4F2;
-    let (verdict, cost) = solver.solve(
-        &system,
-        &Params::default(),
-        Some(Duration::from_secs(budget_seconds)),
-    );
-
-    let mut algebraic_roots = None;
+    let x2 = SymElement::from_subspace_vars(&instance.basis, 0, instance.n, n_vars);
+    let x3 = SymElement::from_subspace_vars(&instance.basis, instance.ell, instance.n, n_vars);
+    let mut equation_hasher = blake3::Hasher::new();
+    let mut costs = F4CostAggregate::default();
+    let mut construction_ns = 0u128;
+    let mut systems_constructed = 0usize;
+    let mut systems_completed = 0usize;
+    let mut total_equations = 0usize;
+    let mut total_terms = 0usize;
+    let mut max_terms = 0usize;
+    let mut max_degree = 0u32;
+    let mut algebraic_roots = 0usize;
     let mut source_model_valid = None;
     let mut witness: Option<Vec<BinaryPoint>> = None;
-    let (status, exhaustive) = match verdict {
-        SolverVerdict::BudgetExceeded => ("unknown_inconclusive", false),
-        SolverVerdict::Unsatisfiable => {
-            algebraic_roots = Some(0usize);
-            ("unsat", true)
+    let mut status = "unsat";
+    let mut exhaustive = true;
+    let x1_count = 1usize << instance.ell;
+    for x1_mask in 0..x1_count {
+        if Instant::now() >= deadline {
+            status = "unknown_inconclusive";
+            exhaustive = false;
+            break;
         }
-        SolverVerdict::Solved(roots) => {
-            algebraic_roots = Some(roots.len());
-            source_model_valid = Some(
-                roots
+        let x1_value = instance.basis.iter().enumerate().fold(
+            F2mElement::zero(instance.n),
+            |value, (index, basis_element)| {
+                if x1_mask >> index & 1 == 1 {
+                    value.add(basis_element)
+                } else {
+                    value
+                }
+            },
+        );
+        let built = Instant::now();
+        let equations = sym_semaev_s4(
+            &SymElement::constant(&x1_value, instance.n, n_vars),
+            &x2,
+            &x3,
+            target_x,
+            &st,
+        );
+        construction_ns = construction_ns.saturating_add(built.elapsed().as_nanos());
+        systems_constructed += 1;
+        total_equations = total_equations.saturating_add(equations.len());
+        let terms: usize = equations.iter().map(|p| p.terms.len()).sum();
+        total_terms = total_terms.saturating_add(terms);
+        max_terms = max_terms.max(terms);
+        max_degree = max_degree.max(
+            equations
+                .iter()
+                .flat_map(|p| p.terms.iter())
+                .map(|term| term.mask.count_ones())
+                .max()
+                .unwrap_or(0),
+        );
+        equation_hasher.update(&(x1_mask as u64).to_le_bytes());
+        equation_hasher
+            .update(&serde_json::to_vec(&equations).expect("serialize fixed-X1 S4 equations"));
+        let now = Instant::now();
+        if now >= deadline {
+            status = "unknown_inconclusive";
+            exhaustive = false;
+            break;
+        }
+        let system = BooleanSystem { equations, n_vars };
+        let (verdict, cost) = solver.solve(
+            &system,
+            &Params::default(),
+            Some(deadline.saturating_duration_since(now)),
+        );
+        costs.add(cost);
+        match verdict {
+            SolverVerdict::BudgetExceeded => {
+                status = "unknown_inconclusive";
+                exhaustive = false;
+                break;
+            }
+            SolverVerdict::Unsatisfiable => {
+                systems_completed += 1;
+            }
+            SolverVerdict::Solved(roots) => {
+                systems_completed += 1;
+                algebraic_roots = algebraic_roots.saturating_add(roots.len());
+                let models_valid = roots
                     .iter()
-                    .all(|root| system.equations.iter().all(|p| p.eval(*root) == 0)),
-            );
-            if source_model_valid != Some(true) {
-                ("sat_invalid_model", false)
-            } else {
+                    .all(|root| system.equations.iter().all(|p| p.eval(*root) == 0));
+                source_model_valid = Some(models_valid);
+                if !models_valid {
+                    status = "sat_invalid_model";
+                    exhaustive = false;
+                    break;
+                }
                 witness = roots.iter().find_map(|root| {
-                    source_point_witness(&instance.curve, &instance.basis, &instance.target, *root)
+                    let x2_mask = root & ((1u64 << instance.ell) - 1);
+                    let x3_mask = root >> instance.ell;
+                    let combined = (x1_mask as u64)
+                        | (x2_mask << instance.ell)
+                        | (x3_mask << (2 * instance.ell));
+                    source_point_witness(
+                        &instance.curve,
+                        &instance.basis,
+                        &instance.target,
+                        combined,
+                    )
                 });
                 if witness.is_some() {
-                    ("sat", true)
-                } else {
-                    // F4 returned the complete Boolean variety and every root
-                    // was checked under all rational sign lifts.
-                    ("unsat", true)
+                    status = "sat";
+                    break;
                 }
             }
         }
-    };
+    }
     let witness_json = witness
         .as_ref()
         .map(|points| points.iter().map(point_json).collect::<Vec<_>>());
@@ -788,6 +909,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
         ) == instance.target
     });
     let accepted = status != "sat_invalid_model";
+    let equation_fingerprint = equation_hasher.finalize().to_hex().to_string();
 
     (
         json!({
@@ -800,16 +922,21 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "regenerated_source_exact":true,
             "same_instance_fields":["n","ell","m","curve","algebraic_factor_base","affine_target"],
             "source_representation":instance.source_representation,
-            "solver_representation":"direct_symmetrised_s4_boolean",
+            "solver_representation":"fixed_x1_direct_symmetrised_s4_boolean",
+            "solver_schedule":"enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
             "solver":"f4-f2",
             "solver_description":solver.describe(),
             "single_thread_requested":true,
             "budget_seconds":budget_seconds,
             "source_variables":instance.n_vars,
             "solver_variables":n_vars,
-            "solver_equations":system.equations.len(),
-            "solver_terms":source_terms,
-            "solver_max_degree":source_degree,
+            "fixed_x1_values":x1_count,
+            "fixed_x1_systems_constructed":systems_constructed,
+            "fixed_x1_systems_completed":systems_completed,
+            "solver_equations_total":total_equations,
+            "solver_terms_total":total_terms,
+            "solver_terms_max_per_system":max_terms,
+            "solver_max_degree":max_degree,
             "solver_equations_blake3":equation_fingerprint,
             "algebraic_roots":algebraic_roots,
             "source_model_valid":source_model_valid,
@@ -817,16 +944,17 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "witness_points":witness_json,
             "exhaustive":exhaustive,
             "conflicts":Value::Null,
-            "cost":cost,
+            "cost":costs.json(),
             "timing_ns":{
                 "source_verification":instance.verification_ns,
-                "direct_s4_construction":construction_ns,
+                "fixed_x1_s4_construction":construction_ns,
+                "native_f4_whole":whole_started.elapsed().as_nanos(),
             },
             "factor_base_contract":{
                 "target_subgroup_enumerated":false,
                 "discrete_log_labels_used":false,
             },
-            "interpretation":"Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires a complete F4 basis and exhaustive root extraction/lift checking",
+            "interpretation":"Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
         }),
         accepted,
     )
@@ -1176,5 +1304,58 @@ fn main() {
             eprintln!("koblitz_pdp_backend: {error}");
             std::process::exit(2);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fixed_x1_native_f4_recovers_an_exact_small_relation() {
+        let n = 7u32;
+        let irreducible = find_irreducible_sparse(n).unwrap();
+        let curve = BinaryCurve {
+            m: n,
+            irreducible,
+            a: F2mElement::one(n),
+            b: F2mElement::one(n),
+            generator: BinaryPoint::Infinity,
+            order: BigUint::zero(),
+            cofactor: BigUint::one(),
+        };
+        let basis: Vec<_> = (0..2)
+            .map(|index| F2mElement::from_bit_positions(&[index], n))
+            .collect();
+        let points = materialise_factor_points(&curve, &basis);
+        let target = points
+            .iter()
+            .flat_map(|p0| points.iter().map(move |p1| (p0, p1)))
+            .flat_map(|(p0, p1)| points.iter().map(move |p2| (p0, p1, p2)))
+            .map(|(p0, p1, p2)| point_add(&curve, &point_add(&curve, p0, p1), p2))
+            .find(|sum| *sum != BinaryPoint::Infinity)
+            .unwrap();
+        let instance = VerifiedInstance {
+            id: "small-fixed-x1-fixture".to_string(),
+            n,
+            ell: basis.len(),
+            conflict_budget_from_manifest: 1,
+            curve,
+            basis,
+            target,
+            rows: Vec::new(),
+            n_vars: 0,
+            source_representation: "fixture".to_string(),
+            source: SourceSystem::SymmetrisedS4,
+            artifact_receipts: json!({}),
+            verification_ns: 0,
+        };
+        let (report, accepted) = native_f4(instance, 5);
+        assert!(accepted);
+        assert_eq!(report["status"], "sat");
+        assert_eq!(report["source_witness_valid"], true);
+        assert_eq!(report["conflicts"], Value::Null);
+        assert!(report["fixed_x1_systems_constructed"].as_u64().unwrap() <= 4);
+        assert!(report["cost"]["extra"]["f4_calls"].as_u64().unwrap() >= 1);
     }
 }

@@ -131,11 +131,58 @@ pub struct F4Stats {
     pub timed_out: bool,
     /// A matrix would have exceeded [`MAX_MATRIX_WORDS`].
     pub oversize: bool,
+    /// Conservative peak for the sparse symbolic-preprocessing objects
+    /// held before a packed matrix exists.
+    pub symbolic_bytes_estimate_max: u64,
+    /// Symbolic preprocessing crossed [`MAX_SYMBOLIC_BYTES`] and stopped
+    /// before allocating the packed matrix.
+    pub symbolic_cap_hit: bool,
     pub pairs_left: u64,
 }
 
 /// The largest matrix a step may build, in 64-bit words (1 GiB).
 pub const MAX_MATRIX_WORDS: u64 = 1 << 27;
+
+/// The symbolic row and monomial sets can be materially larger than the
+/// packed matrix they are preparing.  Stop at the same one-GiB envelope
+/// before allocator overhead turns a nominally bounded F4 call into a
+/// multi-gigabyte process.  The estimate below deliberately overprices hash
+/// entries and sparse terms; reaching it is a censored resource terminal.
+pub const MAX_SYMBOLIC_BYTES: u64 = 1 << 30;
+
+fn symbolic_bytes_estimate(
+    examined: usize,
+    queued: usize,
+    row_terms: usize,
+    rows: usize,
+    seen_rows: usize,
+) -> u64 {
+    (examined as u64)
+        .saturating_mul(64)
+        .saturating_add((queued as u64).saturating_mul(8))
+        .saturating_add((row_terms as u64).saturating_mul(16))
+        .saturating_add((rows as u64).saturating_mul(32))
+        .saturating_add((seen_rows as u64).saturating_mul(32))
+}
+
+fn symbolic_cap_exceeded(
+    st: &mut F4Stats,
+    examined: usize,
+    queued: usize,
+    row_terms: usize,
+    rows: usize,
+    seen_rows: usize,
+) -> bool {
+    let estimate = symbolic_bytes_estimate(examined, queued, row_terms, rows, seen_rows);
+    st.symbolic_bytes_estimate_max = st.symbolic_bytes_estimate_max.max(estimate);
+    if estimate > MAX_SYMBOLIC_BYTES {
+        st.oversize = true;
+        st.symbolic_cap_hit = true;
+        true
+    } else {
+        false
+    }
+}
 
 const NONE: u32 = u32::MAX;
 
@@ -346,9 +393,18 @@ impl State {
 
     /// Active basis elements whose leading monomial divides `m`, the
     /// shortest first.
-    fn reducer_for(&self, m: u64, active: &[usize], st: &mut F4Stats) -> Option<usize> {
+    fn reducer_for(
+        &self,
+        m: u64,
+        active: &[usize],
+        st: &mut F4Stats,
+        deadline: Option<Instant>,
+    ) -> Result<Option<usize>, ()> {
         let mut best: Option<usize> = None;
-        for &g in active {
+        for (index, &g) in active.iter().enumerate() {
+            if index % 1024 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
+                return Err(());
+            }
             st.divisor_tests += 1;
             if self.lm[g] & !m == 0
                 && best.is_none_or(|b| self.polys[g].terms.len() < self.polys[b].terms.len())
@@ -356,7 +412,7 @@ impl State {
                 best = Some(g);
             }
         }
-        best
+        Ok(best)
     }
 }
 
@@ -436,7 +492,8 @@ pub fn groebner_basis_f4(
         let mut half_rows: Vec<F2BoolPoly> = Vec::new();
         let mut field_rows: Vec<F2BoolPoly> = Vec::new();
         let mut lcm_columns: HashSet<u64> = HashSet::new();
-        for (selected_index, p) in selected.iter().enumerate() {
+        let mut row_terms = 0usize;
+        'selected_pairs: for (selected_index, p) in selected.iter().enumerate() {
             if selected_index % 128 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
                 st.timed_out = true;
                 break;
@@ -448,7 +505,20 @@ pub fn groebner_basis_f4(
                     for g in [i, j] {
                         let mult = p.lcm & !s.lm[g];
                         if seen_rows.insert((mult, g)) {
-                            half_rows.push(s.polys[g].mul_mono(F2BoolMono::from_mask(mult)));
+                            let source_terms = s.polys[g].terms.len();
+                            if symbolic_cap_exceeded(
+                                &mut st,
+                                lcm_columns.len(),
+                                0,
+                                row_terms.saturating_add(source_terms),
+                                half_rows.len() + field_rows.len() + 1,
+                                seen_rows.len(),
+                            ) {
+                                break 'selected_pairs;
+                            }
+                            let row = s.polys[g].mul_mono(F2BoolMono::from_mask(mult));
+                            row_terms = row_terms.saturating_add(row.terms.len());
+                            half_rows.push(row);
                         }
                     }
                 }
@@ -458,15 +528,27 @@ pub fn groebner_basis_f4(
                     // disjoint from it, so the two kinds of key never meet.
                     let mult = 1u64 << v;
                     if seen_rows.insert((mult, g)) {
+                        let source_terms = s.polys[g].terms.len();
+                        if symbolic_cap_exceeded(
+                            &mut st,
+                            lcm_columns.len(),
+                            0,
+                            row_terms.saturating_add(source_terms),
+                            half_rows.len() + field_rows.len() + 1,
+                            seen_rows.len(),
+                        ) {
+                            break 'selected_pairs;
+                        }
                         let prod = s.polys[g].mul_mono(F2BoolMono::from_mask(mult));
                         if !prod.is_zero() {
+                            row_terms = row_terms.saturating_add(prod.terms.len());
                             field_rows.push(prod);
                         }
                     }
                 }
             }
         }
-        if st.timed_out {
+        if st.timed_out || st.oversize {
             st.build_ns += t.elapsed().as_nanos() as u64;
             s.pairs.extend(selected);
             break;
@@ -478,12 +560,29 @@ pub fn groebner_basis_f4(
         let mut examined: HashSet<u64> = lcm_columns.clone();
         let mut no_divisor: HashSet<u64> = HashSet::new();
         let mut queue: Vec<u64> = Vec::new();
-        for p in half_rows.iter().chain(field_rows.iter()) {
+        'seed_queue: for p in half_rows.iter().chain(field_rows.iter()) {
             for t in &p.terms {
                 if examined.insert(t.mask) {
                     queue.push(t.mask);
+                    if queue.len() % 1024 == 0
+                        && symbolic_cap_exceeded(
+                            &mut st,
+                            examined.len(),
+                            queue.len(),
+                            row_terms,
+                            half_rows.len() + field_rows.len(),
+                            seen_rows.len(),
+                        )
+                    {
+                        break 'seed_queue;
+                    }
                 }
             }
+        }
+        if st.oversize {
+            st.build_ns += t.elapsed().as_nanos() as u64;
+            s.pairs.extend(selected);
+            break;
         }
         let mut reducers: Vec<F2BoolPoly> = Vec::new();
         let mut symbolic_steps = 0usize;
@@ -493,27 +592,70 @@ pub fn groebner_basis_f4(
                 break;
             }
             symbolic_steps += 1;
-            match s.reducer_for(m, &active, &mut st) {
-                Some(g) => {
+            match s.reducer_for(m, &active, &mut st, deadline) {
+                Err(()) => {
+                    st.timed_out = true;
+                    break;
+                }
+                Ok(Some(g)) => {
+                    let source_terms = s.polys[g].terms.len();
+                    if symbolic_cap_exceeded(
+                        &mut st,
+                        examined.len(),
+                        queue.len(),
+                        row_terms.saturating_add(source_terms),
+                        half_rows.len() + field_rows.len() + reducers.len() + 1,
+                        seen_rows.len(),
+                    ) {
+                        break;
+                    }
                     let r = s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g]));
                     debug_assert_eq!(
                         r.lt().map(|t| t.mask),
                         Some(m),
                         "a reducer must lead with its monomial"
                     );
-                    for t in &r.terms {
+                    row_terms = row_terms.saturating_add(r.terms.len());
+                    for (term_index, t) in r.terms.iter().enumerate() {
                         if examined.insert(t.mask) {
                             queue.push(t.mask);
                         }
+                        if term_index % 1024 == 0
+                            && symbolic_cap_exceeded(
+                                &mut st,
+                                examined.len(),
+                                queue.len(),
+                                row_terms,
+                                half_rows.len() + field_rows.len() + reducers.len() + 1,
+                                seen_rows.len(),
+                            )
+                        {
+                            break;
+                        }
+                    }
+                    if st.oversize {
+                        break;
                     }
                     reducers.push(r);
                 }
-                None => {
+                Ok(None) => {
                     no_divisor.insert(m);
                 }
             }
         }
-        if st.timed_out {
+        if st.timed_out || st.oversize {
+            st.build_ns += t.elapsed().as_nanos() as u64;
+            s.pairs.extend(selected);
+            break;
+        }
+        if symbolic_cap_exceeded(
+            &mut st,
+            examined.len(),
+            queue.len(),
+            row_terms,
+            half_rows.len() + field_rows.len() + reducers.len(),
+            seen_rows.len(),
+        ) {
             st.build_ns += t.elapsed().as_nanos() as u64;
             s.pairs.extend(selected);
             break;
@@ -944,5 +1086,22 @@ mod tests {
         let eqs = random_quadratic(18, 17, &mut rng);
         let (_, st) = groebner_basis_f4(eqs, 18, Some(Duration::from_nanos(1)));
         assert!(st.timed_out);
+    }
+
+    #[test]
+    fn symbolic_memory_cap_is_reported_as_oversize() {
+        let mut st = F4Stats::default();
+        assert!(!symbolic_cap_exceeded(&mut st, 100, 100, 100, 10, 10));
+        assert!(symbolic_cap_exceeded(
+            &mut st,
+            (MAX_SYMBOLIC_BYTES / 64 + 1) as usize,
+            0,
+            0,
+            0,
+            0,
+        ));
+        assert!(st.oversize);
+        assert!(st.symbolic_cap_hit);
+        assert!(st.symbolic_bytes_estimate_max > MAX_SYMBOLIC_BYTES);
     }
 }

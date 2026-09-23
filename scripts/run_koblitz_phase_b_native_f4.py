@@ -355,7 +355,11 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
     )
     statuses = Counter(task["result"]["status"] for task in tasks)
     f4_reports = [task["result"]["backend_report"] for task in tasks]
-    f4_costs = [report.get("cost") for report in f4_reports if isinstance(report.get("cost"), dict)]
+    f4_costs = [
+        report["cost"]
+        for report in f4_reports
+        if isinstance(report, dict) and isinstance(report.get("cost"), dict)
+    ]
     f4_processes = [processes[index] for index in range(2, len(processes), 3)]
     summary = {
         "schema": RUN_SUMMARY_SCHEMA,

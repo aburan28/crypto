@@ -182,6 +182,8 @@ impl SystemSolver for F4F2 {
             ("eliminate_ns", st.eliminate_ns),
             ("pairs_left", st.pairs_left),
             ("oversize", st.oversize as u64),
+            ("symbolic_bytes_estimate_max", st.symbolic_bytes_estimate_max),
+            ("symbolic_cap_hit", st.symbolic_cap_hit as u64),
         ] {
             extra.insert(k.to_string(), v);
         }
