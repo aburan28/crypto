@@ -1,7 +1,8 @@
 # Koblitz index-calculus SOTA gate status
 
 Current through Stage 128, plus the additive Stage 159 native-F4
-single-target supplement, 2026-09-22. The historical optimization chain is
+single-target supplement and Stage 160 fixed-X1 construction specialization,
+2026-09-23. The historical optimization chain is
 `stage-99-optimization-chain-20260913/verification.json`. Stage 108 adds the
 machine-replayable four-shard and direct-routing chain, five host-identified
 routing comparisons, the selected five-pair `n=53` panel, and the refreshed
@@ -45,9 +46,9 @@ does not establish a new state of the art.
 
 | Gate | Status | Current evidence | Remaining requirement |
 |:--|:--|:--|:--|
-| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. Stages 99 and 108 retain separately metered build, base/support construction, direct, rho, wall, core-second, RSS, collection, query, validation, LA, and output charges. The selected Stage 107 panel has 318.511978 available build+science core-seconds / 112.437872 sequential wall-seconds / 1,720,258,560 B maximum sampled tree RSS. Stage 159 adds a 1,565.839519 core-second / 1,596.064123 sequential-wall-second measured native-F4 campaign lower bound. | Licensed Magma process resources are absent. Stage 159's complete campaign total is `null` because early incremental checks lacked an outer meter. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
-| 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. Stage 159 adds one exact-target `n=59` true-positive from the repository's native F4, with same-target SAT and MITM receipts. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract. The one-target native-F4 supplement is a different formulation and does not replace licensed Magma or a full native-F4 panel. |
-| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent and selected CPU-0 is stale** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. Stage 159's selected native F4 records 100.179380 wall / 99.920352 core-seconds / 921,681,920 B RSS / 87,513,949,370 elimination word XORs; conflicts are `null`. The selected Stage 107 panel reports median direct 3.630413 wall / 9.739701 core-seconds / 1,055,776,768 B RSS versus rho 4.308264 wall / 4.307199 core-seconds. Stage 92 pins CPU 0, but predates the four-shard route. | Supply the same fields for licensed Magma F4 and refresh forced-single-core on the selected stack. Requested one-thread execution and CPU time are recorded; observed affinity was not pinned for Stage 159. |
+| 1. Charge every stage and resource | **Partial overall** | The corrected Phase-B matrix charges 21,038.596137 core-seconds. Stages 99 and 108 retain separately metered build, base/support construction, direct, rho, wall, core-second, RSS, collection, query, validation, LA, and output charges. The selected Stage 107 panel has 318.511978 available build+science core-seconds / 112.437872 sequential wall-seconds / 1,720,258,560 B maximum sampled tree RSS. Through Stage 160 the native-F4 campaign's measured lower bound is 2,281.647854 core-seconds / 2,319.762066 sequential wall-seconds / 6,310,576,128 B maximum process RSS. | Licensed Magma process resources are absent. The complete native-F4 campaign total is `null` because incremental compiles and focused checks lacked an outer meter. Preinstalled OS/toolchain acquisition remains an explicit exclusion. |
+| 2. WDSat, CryptoMiniSat, Magma F4, MITM, GGMP | **Partial** | Native XOR SAT, WDSat, CryptoMiniSat, and direct MITM ran on the exact 160-input packet. Standard `n=31`/`n=41` and GGMP `n=31` are represented. The Stage-32 successor removes the two original WDSat buffer errors without rewriting Stage 26. Stages 159 and 160 retain one exact-target `n=59` true-positive from the repository's native F4, with the same-target SAT and MITM receipts and an equation-identical optimized constructor. | Execute all 160 Stage-22 Magma inputs on a licensed host under the frozen one-thread/no-retry contract. The one-target native-F4 supplement is a different formulation and does not replace licensed Magma or a full native-F4 panel. |
+| 3. Single-core, core-seconds, memory, conflicts, wall | **Partial because Magma is absent and selected CPU-0 is stale** | Every executed Phase-B arm retains wall, core-seconds, peak RSS, conflicts or operations, tree memory, and workflow wall. Stage 160's selected native F4 records 73.757990 wall / 73.585054 core-seconds / 910,934,016 B RSS / 87,513,949,370 elimination word XORs; conflicts are `null`. The selected Stage 107 panel reports median direct 3.630413 wall / 9.739701 core-seconds / 1,055,776,768 B RSS versus rho 4.308264 wall / 4.307199 core-seconds. Stage 92 pins CPU 0, but predates the four-shard route. | Supply the same fields for licensed Magma F4 and refresh forced-single-core on the selected stack. Requested one-thread execution and CPU time are recorded; observed affinity was not pinned for Stage 160. |
 | 4. Scale through `n=31`, `n=41`, and a larger PDP regime | **Satisfied for finite execution coverage** | Phase B covers `n=31`, GGMP `n=31`, `n=41`, and PDP-only `n=59`. Unknown-scalar end-to-end controls cover `n=31` and `n=41`. Stage 42 constructs, ranks, solves, and verifies an exact same-target known-answer `n=53` instance. | The evidence is finite and toy-sized; it is not an asymptotic scaling law. The `n=59` arm remains PDP-only. |
 | 5. Unknown scalar with no constructed factor-base logs | **Satisfied for finite degrees 23, 31, 41, and 53** | Stage 108 archives public hash-seed-53001 without constructing or supplying its scalar, derives all 94 factor-base logs from 95 verified relations, and has direct IC and rho independently recover `d=7892094459170` with `[d]G=Q`. Selected direct is 4.307977 seconds versus 4.362556 rho, ratio 0.987489. | Repeat on independent n=53 public seeds and obtain unaffiliated replay; these strengthen rather than replace the finite gate-5 execution. |
 | 6. Full cost against automorphism-optimized Pollard rho | **Online wall gate passed; full-cost/core gate false** | Stage 108 selects the four-shard direct route after five direct/mixed wins with 0.904540 median wall and 0.912199 median core ratios. Its identified EPYC 9V74 panel has five direct/rho wins and 0.839190 median wall ratio. Median direct core remains 2.261565 times rho, retained support is 738,197,504 B, and fresh build plus direct is 17.636692 times rho. | Reduce memory below 512 MiB, core ratio to at most 1, and full-build cost while retaining the online wall result; refresh selected CPU-0 and obtain independent replay. All improvements are finite constants, not exponent changes. |
@@ -217,3 +218,36 @@ and 6,310,576,128 bytes maximum process RSS. Complete campaign cost remains
 160-input native-F4 panel, licensed Magma, end-to-end IC/rho cost, and
 unaffiliated review remain open. The canonical result is
 [`stage-159-native-f4-single-target-20260922/result.json`](stage-159-native-f4-single-target-20260922/result.json).
+
+## Stage 160 fixed-X1 constant-linear construction
+
+Stage 160 preserves the exact Stage 159 factor base, blind target, X1 schedule,
+65 F4 calls, 3,864,601 Boolean terms, equation fingerprint, 87,513,949,370
+elimination word XORs, algebraic roots, and group-verified witness. It changes
+only how each fixed-X1 S4 system is constructed. The shared symbolic `X2*X3`
+product is formed once, while fixed `X1` and target powers act through exact
+linear multiplication maps in the polynomial basis. A unit gate compares the
+complete specialized and generic polynomial vectors across 60 field/value
+cases.
+
+The clean blind run reduces fixed-X1 construction from 26.323585 seconds to
+0.973558 seconds, a 27.04x construction improvement. Whole-target F4 wall
+falls from 100.179380 to 73.757990 seconds and core cost from 99.920352 to
+73.585054 seconds, a 1.36x wall improvement. Peak RSS falls slightly from
+921,681,920 to 910,934,016 bytes. The clean one-job build plus custody run is
+241.262254 wall seconds / 236.554363 core-seconds / 1,683,472,384 bytes peak
+RSS.
+
+Direct MITM remains 24.59x faster by same-host wall, 24.60x cheaper by CPU,
+and 19.87x smaller by RSS. Four other metered ideas are retained as rejected:
+global matrix ordering, trailing-zero row trimming, a hashed reducer index,
+and a dense reducer index. Through this stage the measured campaign lower
+bound is 2,319.762066 sequential wall-seconds, 2,281.647854 core-seconds, and
+6,310,576,128 bytes maximum process RSS. Complete campaign cost remains
+`null` because the incremental compiles and focused tests were not outer
+metered.
+
+This remains one finite toy-PDP target. Licensed Magma, the full native-F4
+panel, end-to-end IC/rho cost, and unaffiliated reproduction remain open. The
+canonical additive result is
+[`stage-160-fixed-x1-constant-specialisation-20260922/result.json`](stage-160-fixed-x1-constant-specialisation-20260922/result.json).

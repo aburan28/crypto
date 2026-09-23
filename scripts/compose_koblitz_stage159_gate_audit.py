@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compose the current seven-gate audit with the Stage-159 F4 supplement."""
+"""Compose or historically verify the Stage-159 seven-gate audit."""
 
 from __future__ import annotations
 
@@ -173,9 +173,36 @@ def verify(output: Path) -> dict[str, Any]:
     seal = load(output / "result-seal.json", "Stage-159 audit seal")
     require(seal.get("schema") == SEAL_SCHEMA, "Stage-159 audit seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "Stage-159 audit seal changed")
-    current = compose()
-    require(current == load(output / "audit.json", "Stage-159 audit"), "current Stage-159 audit changed")
-    return current
+    stored = load(output / "audit.json", "Stage-159 audit")
+    stage128 = replay(
+        "compose_koblitz_stage128_gate_audit.py",
+        "verify",
+        "--output",
+        str(STAGE128),
+    )
+    stage159 = replay("verify_koblitz_stage159_native_f4.py")
+    committed_verification = load(STAGE159_VERIFICATION, "Stage-159 verification")
+    require(stage159 == committed_verification, "Stage-159 verification output changed")
+    require(
+        stored.get("schema") == SCHEMA
+        and stored.get("status") == "current_seven_gate_audit_verified"
+        and stored["predecessor"]["stage128_audit_sha256"] == sha256(STAGE128 / "audit.json")
+        and stored["predecessor"]["stage128_seal_sha256"]
+        == sha256(STAGE128 / "result-seal.json")
+        and stored["stage159"]["result_sha256"] == sha256(STAGE159 / "result.json")
+        and stored["stage159"]["result_seal_sha256"]
+        == sha256(STAGE159 / "result-seal.json")
+        and stored["stage159"]["verification_sha256"] == sha256(STAGE159_VERIFICATION)
+        and stored["stage159"]["selected_wall_seconds"] == stage159["selected_wall_seconds"]
+        and stored["all_seven_gates_passed"] is False
+        and stored["koblitz_index_calculus_sota"] is False,
+        "historical Stage-159 audit dependencies changed",
+    )
+    require(
+        stage128.get("status") == "current_seven_gate_audit_verified",
+        "Stage-128 historical audit changed",
+    )
+    return stored
 
 
 def main() -> None:

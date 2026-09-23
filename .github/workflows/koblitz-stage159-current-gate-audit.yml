@@ -1,4 +1,4 @@
-name: Koblitz Stage 159 current gate audit
+name: Koblitz Stage 159 historical gate audit
 
 on:
   pull_request:
@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Verify historical Stage 128 and current Stage 159
+      - name: Verify historical Stage 128 and Stage 159
         run: |
           python3 -m py_compile \
             scripts/compose_koblitz_stage128_gate_audit.py \

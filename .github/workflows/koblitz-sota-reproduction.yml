@@ -141,6 +141,11 @@ jobs:
         run: |
           python3 scripts/verify_koblitz_stage159_native_f4.py > /tmp/stage159-native-f4-verification.json
           cmp /tmp/stage159-native-f4-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-verification.json
+      - name: Verify fixed-X1 constant-linear supplement
+        run: |
+          cargo test --release --lib fixed_x1_specialisation_matches_the_generic_s4_system -- --test-threads=1
+          python3 scripts/verify_koblitz_stage160_fixed_x1.py > /tmp/stage160-fixed-x1-verification.json
+          cmp /tmp/stage160-fixed-x1-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-160-fixed-x1-verification.json
       - name: Validate licensed Magma Phase-B replay packet controls
         run: |
           python3 scripts/test_koblitz_phase_b_magma_replay.py -v
