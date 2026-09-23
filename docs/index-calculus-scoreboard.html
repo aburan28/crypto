@@ -1730,10 +1730,55 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p>With Route 3 closed, the ECC2K-130 routes thread has met its own finishing condition. Its
         ledger is the close-out at the end of
         <code>research/notes/ecc2k130/RESEARCH_ECC2K130_ROUTE_TARGETS.md</code>. No oracle built
-        there beats enumeration per relation at any size measured. The items left open (the
-        m&thinsp;=&thinsp;4 fall degree, Crossbred&rsquo;s &alpha; over four rungs, Crossbred on the
-        symmetrised system, and a second literature pass) are left open by choice, with the
-        reasons given there. Class <span class="chip">accounting</span>.</p>
+        there beats enumeration per relation at any size measured. The m&thinsp;=&thinsp;4 fall
+        degree has since been measured (the panel below). The items still open (Crossbred&rsquo;s
+        &alpha; over four rungs, Crossbred on the symmetrised system, and a second literature
+        pass) are left open by choice, with the reasons given there. Class
+        <span class="chip">accounting</span>.</p>
+    </div>
+  </div>
+
+  <div class="panel" id="ecc2k130-x5-fall-20260923">
+    <div class="panel-head">
+      <h2>ECC2K-130 Route 4: the symmetrised chain falls one degree later, and not more</h2>
+      <p>A structural measurement: no cost moves, so no <code>S</code> and none of the four
+        classes. H1 of the Koblitz scaling target says every chained decomposition system has its
+        first fall at exactly degree 3. X5&prime; tested it on the one chained family H1 had not
+        measured: the symmetrised S<sub>3</sub>, chained at m&thinsp;=&thinsp;4 through two
+        intermediate points. That system has Boolean degree 3, like the x-chained systems. It
+        was registered before any code for it existed. Frozen:
+        <code>experiments/27_koblitz_x5_fall.json</code>, with an unregistered supplement that
+        only raises the Macaulay size caps in
+        <code>experiments/27_koblitz_x5_fall_raised_caps.json</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>First fall degree (the first Macaulay degree that loses rank, H1&rsquo;s definition)
+        over 16 draws per cell, one shared non-invariant V per rung. &ldquo;Censored&rdquo; means
+        the degree-4 matrix exceeded the registered default caps; the supplement removes that.</caption>
+      <thead>
+        <tr><th scope="col" class="n">n</th><th scope="col" class="n">Unknowns (sym / x)</th>
+          <th scope="col">Symmetrised chain, registered</th><th scope="col">Symmetrised chain, raised caps</th>
+          <th scope="col">x-chained</th><th scope="col">Class</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">9</td><td class="n">31 / 34</td><td>4 on 16/16</td><td>4 on 16/16</td><td>2&ndash;3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">11</td><td class="n">35 / 38</td><td>4 on 16/16</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">13</td><td class="n">43 / 46</td><td>censored at 3</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">15</td><td class="n">47 / 50</td><td>censored at 3</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">17</td><td class="n">55 / 58</td><td>censored at 3</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">19</td><td class="n">59 / 62</td><td>censored at 3</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><b>H1 is falsified for the symmetrised chain.</b> It falls at 4 on every rung measured,
+        96 draws, where the x-chain falls at 3. <b>The offset is one degree and flat in n</b>, so
+        X5&rsquo;s original falsifier, a fall degree that grows with n, does not fire. An
+        invariant-V cross-check at n = 15 reads the same. The difference at degree 3 is a single
+        rank dependency the x-chain has on every draw and the symmetrised chain lacks. The note
+        does not identify that dependency, so the measured statement is &ldquo;one degree later
+        under H1&rsquo;s definition&rdquo;, not &ldquo;harder to solve&rdquo;. The one registered solve
+        (K<sub>1</sub>/F<sub>2</sub><sup>11</sup>) agrees with 4-sum enumeration on all 16
+        targets. Nothing here bears on ECC2K-130&rsquo;s cost.</p>
     </div>
   </div>
 

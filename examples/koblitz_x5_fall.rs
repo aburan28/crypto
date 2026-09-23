@@ -22,6 +22,10 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 struct Report {
+    /// `F4_F2_MAX_ROWS` / `F4_F2_MAX_COLS` when raised (`--allow-raised-caps`):
+    /// an unregistered supplement that removes the censoring, never the
+    /// registered run.
+    raised_caps: Option<(String, String)>,
     rungs: Vec<X5Rung>,
     cross_check: Option<X5Rung>,
     solve: Option<X5Solve>,
@@ -40,7 +44,10 @@ fn print_rung(tag: &str, r: &X5Rung) {
 
 fn main() {
     // The registered engine and matrices are the defaults: every knob that
-    // changes what is built or counted must be unset.
+    // changes what is built or counted must be unset.  The one exception is
+    // the size caps under `--allow-raised-caps`, recorded in the output.
+    let raised = env::args().any(|a| a == "--allow-raised-caps");
+    let caps = ["F4_F2_MAX_ROWS", "F4_F2_MAX_COLS"];
     for var in [
         "F4_F2_MAX_ROWS",
         "F4_F2_MAX_COLS",
@@ -49,6 +56,9 @@ fn main() {
         "SOLVER_SPLIT_RULE",
         "KIC_F4_MAX_DEGREE_ONLY",
     ] {
+        if raised && caps.contains(&var) {
+            continue;
+        }
         assert!(
             env::var(var).is_err(),
             "the registered run needs {var} unset"
@@ -88,12 +98,19 @@ fn main() {
                 json = Some(args[i].clone());
             }
             "--rungs-only" => skip_extras = true,
+            "--allow-raised-caps" => {}
             other => panic!("unknown argument {other}"),
         }
         i += 1;
     }
     let ell = |n: u32| ((n as f64 + 24f64.log2()) / 4.0).ceil() as usize;
     let mut report = Report {
+        raised_caps: raised.then(|| {
+            (
+                env::var(caps[0]).unwrap_or_default(),
+                env::var(caps[1]).unwrap_or_default(),
+            )
+        }),
         rungs: Vec::new(),
         cross_check: None,
         solve: None,
