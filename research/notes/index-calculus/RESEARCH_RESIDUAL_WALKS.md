@@ -2467,6 +2467,54 @@ Renault symmetries on curves with rational torsion.  Any of them would be
 registered as `engineering`: none changes `r∞`, which caps a plain `k = 4`
 method at `1.6–3×` better than rho however cheap the solve gets.
 
+### 11.18 Pre-registration: measuring `r∞`, the one claim that puts `k = 4` below rho
+
+**Written before the measurement exists.**  §11.16 derived that a plain `k = 4`
+method tends to `r∞ = c_LA / c_rho = 0.34–0.63×` rho, and §11.17 carried it
+into the scoreboard as "would eventually beat rho by `1.6–3×`".  It is the only
+statement in §11 that puts anything below rho, and every input to it is
+borrowed or derived: the Wiedemann constant from `k = 3` rescaled to row
+weight `5`, the filtering fraction `φ` from `k = 3`, the decomposition rate from
+a count, rho's `S` from the thread's convention.  None of them needs the `S₅`
+solve, so all of them can be measured directly, at sizes where the method
+runs end to end.
+
+**What runs.**  Prime-order curves over `F_{p⁴}` for `p ∈ {269, 521, 769, 1033}`
+(`n ≈ 2^{32.3}, 2^{36.1}, 2^{38.3}, 2^{40.0}`), two seeds each.  Relations come
+from the meet-in-the-middle oracle of §11.17 — **not** the `S₅` solve: the
+relation phase is not what is measured here, and its cost is reported beside
+the table and kept out of the ratio.  Relations are filtered to a square core
+and solved by the §11.7 Wiedemann, with every attempt's operations counted;
+the logarithm is accepted only if `[d]G = Q`.  Rho runs `16` times per curve on
+the same group, because a single rho run's `S` moves by `2×` between seeds.
+
+**The statistic.**  On each curve, both measured in `F_p` multiplications:
+
+```text
+r  =  LA  /  rho  =  (la_ops · 16)  /  (S_rho · √n · c_add)
+```
+
+with multiplications mod `n` charged `16` and `c_add` the measured `97.0`, as
+§11.16 did.  Both terms grow as `n^{1/2}` if §11.16 is right, so `r` should be
+flat across the four sizes; its value is `r∞`.  Reported beside it, each input
+§11.16 derived: the decomposition rate against `1/24`, `φ` against `0.73`, the
+Wiedemann constant `la_ops / N²` against `20`, the row weight against `5`, rho's
+`S` against `1.3`, and the linear algebra's exponent in `n` against `1/2`.
+
+**Registered outcomes.**
+
+| outcome | condition |
+|---|---|
+| **confirmed** | `r` flat within its seed spread and inside `0.34–0.63` |
+| **corrected** | `r` flat and below `1`, but outside `0.34–0.63`: the cap becomes `1/r` |
+| **withdrawn** | `r ≥ 1`, or `r` rising with `n`: a plain `k = 4` method never beats rho, and §11.16–11.17's "`1.6–3×`" comes off the scoreboard |
+
+**Inadmissible:** changing the `16` charge or `c_add` after seeing the data;
+dropping filtering or failed Wiedemann attempts from `la_ops`; excluding a
+seed; using fewer than `16` rho runs for any curve; any run without a verified
+logarithm.  An `S₅`-based relation phase would change nothing here, since
+`r∞` does not depend on the solve.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,
