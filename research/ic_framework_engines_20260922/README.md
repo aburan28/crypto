@@ -48,7 +48,9 @@ checked against the exhaustive reference on every target; `budget` →
 | `run.py` | runs parts into `results/<run-id>/`, append-only, with a provenance record per part |
 | `compare.py` | reads a run, checks it, evaluates the declared targets, writes `compare.json` and `compare.md` |
 | `manifest.json` | the frozen run's input fingerprints and verdict digests, per cell |
+| `confirm_20260923.json`, `strength_20260923.json`, `hybrids_20260923.json`, `hybrids_34_20260923.json` | the checks declared after parts of the frozen run were read (ledger §17.3–§17.5), each its own frozen protocol |
 | `results/baseline_v1/` | the frozen run |
+| `results/confirm_v1/`, `strength_v1/`, `hybrids_v1/` (a failed first attempt, kept), `hybrids_v2/`, `hybrids_v3/` | the checks |
 
 ## The protocol, in brief
 
@@ -58,8 +60,9 @@ table, eight targets a cell, families `K` (Koblitz) and `R` (random
 curve), three repetitions interleaved per target with the engine order
 rotated each repetition, a 120-second budget per call, one thread.
 The reference is `fes-f2` on the quadratic (two-summand) cells and
-`exhaustive` on the three-summand ones; the baseline is
-`buchberger-f2`.  Every engine's answer on every target is compared
+`exhaustive` on the three-summand ones — and `fes-f2-wide`, the vector
+form of the fast search, wherever a run lists it (the checks from ledger
+§17.4 on); the baseline is `buchberger-f2`.  Every engine's answer on every target is compared
 with the reference's.
 
 **Bench parts** (`ic bench --sweep …`): whole runs — factor base,
@@ -110,4 +113,16 @@ otherwise.
 
 ## Results
 
-See `results/baseline_v1/compare.md` and the ledger's §17.3 onward.
+The frozen run is `results/baseline_v1/`; its `compare.md` grades the
+targets of ledger §17.2.  `confirm_v1`, `strength_v1`, `hybrids_v2` and
+`hybrids_v3` are the checks declared in §17.3–§17.5, each run from its
+own suite file.  The ledger reads them in §17.6–§17.14:
+
+- targets 1 (reach) and 2 (the contract's gate) are met by every
+  F4-family engine;
+- target 3 (a stage crossing) is met by crossbred against the scalar
+  `fes-f2` and confirmed on a holdout, and does not survive the vector
+  `fes-f2-wide` (`2.45`–`3.0×`);
+- the inherited-F4 hybrid is `1.20×` the vector reference at 34
+  unknowns, with a crossing extrapolated near 35;
+- nothing measured end to end is below rho.

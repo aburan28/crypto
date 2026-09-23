@@ -340,7 +340,7 @@ What ships behind it (`ic bench --list` prints each one's parameters):
 | `xl-f2` | XL: multiply out to degree `n_vars`, linearise | monomial operations (modelled) | declines above 10 unknowns |
 | `sat-cdcl` | CDCL with Tseitin monomials and native parity rows; **one model per call** | conflicts | `sat_conflict_budget` |
 | `fes-f2` | fast exhaustive search, libfes-lite's Gray code: two word XORs per point | word XORs (Gray-code steps) | quadratic systems, ≤ 32 unknowns, ≤ 64 equations |
-| `fes-f2-wide` | the same over 16 (AVX-512) or 8 (AVX2) sub-cubes per Gray-code step, the last four or three unknowns fixed per 32-bit lane; the scalar walk where the lanes do not fit ([`mq_fes.rs`](../../src/cryptanalysis/mq_fes.rs)) | vector XORs (Gray-code steps, *k* lanes) | quadratic systems; lanes need ≤ 32 equations |
+| `fes-f2-wide` | the same over 16 (AVX-512) or 8 (AVX2) sub-cubes per Gray-code step, the last four or three unknowns fixed per 32-bit lane; the first 32 equations in the lanes, the rest filtering the candidates; the scalar walk where the lanes do not fit ([`mq_fes.rs`](../../src/cryptanalysis/mq_fes.rs)) | vector XORs (Gray-code steps, *k* lanes) | quadratic systems, ≤ 36 unknowns; 3–4× `fes-f2` here |
 | `exhaustive` | every equation at every point, stopping at the first that fails | monomial tests (performed) | 26 unknowns |
 
 The exhaustive searches are the **reference**, not a strawman:
@@ -614,14 +614,20 @@ worse than none:
 - **The sizes are toy.** The largest instances here are tens of bits.
   Nothing measured is a statement about a deployed curve.
 - **The engines, not the descent, are the ceiling on the algebraic
-  rows.** The descent is symbolic and reaches 64 boolean variables;
-  the shipped engines do not. `exhaustive` and Buchberger's solution
-  extraction enumerate `2^{n_vars}` points and stop at 26 variables,
-  `fes-f2` at 32, `xl-f2` at 10. Buchberger's basis computation was
-  the wall long before its cap — at `n' = 9` (18 unknowns, ledger §16)
-  it took 47 and 90 minutes for runs of 69 and 134 relations — which is
-  why F4 and F5 now ship beside it; ledger §17 measures how far they
-  move the wall and whether any of them gains on exhaustive search.
+  rows, and F4 moved it.** The descent is symbolic and reaches 64
+  boolean variables. Buchberger's basis computation stops deciding
+  targets at twenty unknowns; `f4-f2` decides every two-summand target
+  through twenty-eight (a degree-five matrix outgrows its 1 GiB cap at
+  thirty), the matrix hybrids through thirty-four. `exhaustive`
+  enumerates to 26 unknowns, `fes-f2` to 32, `fes-f2-wide` to 36, and
+  `xl-f2` stops at 10. Ledger §17 has the measurements.
+- **No engine here beats exhaustive search, and nothing beats rho.**
+  In ledger §17 the F4-family engines cut the Gröbner row's whole-method
+  `S` by `12×` to `1,535×`. Crossbred at its defaults crossed the scalar
+  fast exhaustive search at 26–28 unknowns but not its vector form
+  (`2.45`–`3.0×`). The inherited-F4 hybrid is `1.20×` the vector form at
+  34 unknowns, with a crossing extrapolated near 35. The best whole
+  row on every instance measured is still the pair table.
 - **F5 ships as matrix-F5 inside a hybrid, not as a signature-based
   engine.** `matrix-f5` builds the Macaulay matrix to a fixed degree
   with the rows the F5 criterion predicts to reduce to zero left out,

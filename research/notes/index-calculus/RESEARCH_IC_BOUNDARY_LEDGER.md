@@ -2962,7 +2962,9 @@ point the engines the thread did not have:
 | `fes-f2` | fast exhaustive search, libfes-lite's Gray code: two word XORs per point | `mq_fes` |
 
 and asks whether any of them moves an algebraic row.  §17.1 and §17.2
-were written and committed before the suite in §17.3 ran.
+were written and committed before the suite ran; §17.3–§17.5 are checks
+declared after reading parts of it, each committed before it ran; §17.6
+onward reads the results.
 
 ### 17.1 The boundaries, stated before measuring
 
@@ -3219,6 +3221,349 @@ candidates a call), tested against the scalar search on systems of 33
 to 55 equations.  The cell is rerun on both seeds, unchanged otherwise
 (`hybrids_34_20260923.json`, `results/hybrids_v3/`); the first run's
 rows are kept and read only at thirty-two unknowns.
+
+### 17.6 Reach: target 1, met
+
+**The answer first.**  F4 and F5 move the algebraic rows, and move them
+a long way: the F4-family engines decide the two-summand targets the
+pair-only Buchberger could not reach past eighteen unknowns — `f4-f2`
+through twenty-eight, the matrix hybrids through thirty-four — and take
+the Gröbner row's whole-method `S` down by `12×` to `1,535×` — engineering,
+with no boundary crossed, since the best algebraic row is still at
+least `24×` the pair table on its base and `333×` rho.  The one stage
+crossing the suite found, crossbred below fast exhaustive search at
+twenty-six and twenty-eight unknowns, was against a scalar reference and
+did not survive its vector form.  What survives is a lead: the inherited
+hybrid gaining on the vector reference at half a ratio per two unknowns,
+`1.20×` at thirty-four, with a crossing extrapolated near thirty-five.
+
+Frozen at `research/ic_framework_engines_20260922/results/baseline_v1/`
+(parts `A1`–`A3`, `B`, `H1`, `H2`) and `results/confirm_v1/`; every
+system is fingerprinted in the reports and `manifest.json`.  Two-summand
+cells, both families and both seeds pooled where they exist: targets
+decided within the 120-second budget in all three repetitions, and the
+median over targets of each target's median wall time.
+
+| unknowns | `D_sr` | `buchberger-f2` | `f4-f2` | `matrix-f4` | `matrix-f5` | `inherited-f4` | `crossbred-f2` | `sat-cdcl` (first) | `fes-f2` | `exhaustive` |
+|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 12 | 4 | 16/16 · 36 ms | 16/16 · 2.1 ms | 16/16 · 1.6 ms | 16/16 · 1.6 ms | 16/16 · 1.4 ms | 16/16 · 0.98 ms | 16/16 · 3.9 ms | 16/16 · 0.049 ms | 16/16 · 0.097 ms |
+| 14 | 4 | 16/16 · 372 ms | 16/16 · 4.5 ms | 16/16 · 5.6 ms | 16/16 · 5.8 ms | 16/16 · 3.0 ms | 16/16 · 1.5 ms | 16/16 · 68 ms | 16/16 · 0.085 ms | 16/16 · 0.49 ms |
+| 16 | 4–5 | 32/32 · 2.1 s | 32/32 · 9.9 ms | 32/32 · 11.7 ms | 32/32 · 11.9 ms | 32/32 · 5.4 ms | 32/32 · 2.1 ms | 32/32 · 160 ms | 32/32 · 0.15 ms | 32/32 · 2.2 ms |
+| 18 | 5 | 32/32 · 21 s | 32/32 · 21 ms | 32/32 · 30 ms | 32/32 · 30 ms | 32/32 · 10 ms | 32/32 · 4.1 ms | 32/32 · 1.2 s | 32/32 · 0.28 ms | 32/32 · 9.2 ms |
+| 20 | 5 | **2/16** · 80 s | 16/16 · 39 ms | 16/16 · 83 ms | 16/16 · 83 ms | 16/16 · 29 ms | 16/16 · 4.2 ms | 14/16 · 6.7 s | 16/16 · 0.78 ms | 16/16 · 45 ms |
+| 22 | 5 | **0/16** | 16/16 · 694 ms | 16/16 · 210 ms | 16/16 · 207 ms | 16/16 · 38 ms | 16/16 · 5.0 ms | 6/16 · 6.6 s | 16/16 · 2.6 ms | 16/16 · 197 ms |
+| 24 | 6 | — | 32/32 · 2.8 s | 32/32 · 130 ms | 32/32 · 137 ms | 32/32 · 77 ms | 32/32 · 10 ms | — | 32/32 · 9.7 ms | 32/32 · 947 ms |
+| 26 | 6 | — | 16/16 · 7.7 s | 16/16 · 295 ms | 16/16 · 311 ms | 16/16 · 178 ms | 16/16 · 29 ms | — | 16/16 · 39 ms | 16/16 · 4.5 s |
+| 28 | 6 | — | 16/16 · 17.5 s | 16/16 · 710 ms | 16/16 · 738 ms | 16/16 · 620 ms | 16/16 · 105 ms | — | 16/16 · 154 ms | declines |
+| 30 | 6 | — | **5/16** · 30 s | 16/16 · 1.7 s | 16/16 · 1.8 s | 16/16 · 760 ms | **0/16** | — | 16/16 · 612 ms | declines |
+
+Every decided answer on every target and repetition equals the
+reference's; the suite's `disagreements` list is empty in every part.
+
+- **Target 1 is met by all four F4-family engines**, on both seeds:
+  every two-summand target from sixteen to twenty-two unknowns decided,
+  inside the budget, in every repetition.  Where the pair-only
+  Buchberger decided 2 of 16 targets at twenty unknowns and none at
+  twenty-two, `f4-f2` takes 39 ms and 0.69 s, and the hybrids 29–210 ms.
+- **The wall moved ten unknowns for F4 and sixteen for the hybrids.**
+  `f4-f2` decides every target through twenty-eight unknowns (17.5 s a
+  call) and stops at thirty, where eleven of sixteen systems need a
+  degree-five matrix past its 1 GiB cap; the matrix hybrids decide
+  everything through thirty-four and `inherited-f4` through thirty-two,
+  leaving two of sixteen at thirty-four (§17.9).  At the sizes both
+  decide, the paired per-call ratio of
+  `f4-f2` to `buchberger-f2` is `0.04–0.05` at twelve unknowns, `0.004–
+  0.006` at sixteen and `0.0007–0.0014` at eighteen: 20× to 1,400×,
+  growing with the size, on every cell's interval.
+- `sat-cdcl`, on its own first-solution leaderboard, runs out of its
+  conflict budget on 2 of 16 targets at twenty unknowns and 10 of 16 at
+  twenty-two.  `crossbred-f2` at its module defaults (`D = 3`, `k = 8`)
+  decides everything through twenty-eight and nothing at thirty, where
+  those parameters stop fitting the system: a budget verdict on every
+  target, never a wrong one.
+
+### 17.7 The degree column, re-read: accounting
+
+The same runs, the engine's own degree statistics (mean over the decided
+targets; `D_learn` the highest step degree that produced a new element,
+`D_reach` the highest processed):
+
+| unknowns | `D_sr` | `f4-f2` `D_learn` | `f4-f2` `D_reach` | `buchberger-f2` `D_solve` |
+|--:|:--|--:|--:|--:|
+| 12 | 4 | 3.00 | 3.69 | 3.00 |
+| 14 | 4 | 3.00 | 3.56 | 3.25 |
+| 16 | 4–5 | 3.00 | 3.81 | 3.84 |
+| 18 | 5 | 3.00 | 3.56 | 3.97 |
+| 20 | 5 | 3.00 | 3.44 | 4.00 (2 targets) |
+| 22 | 5 | 3.50 | 4.25 | — |
+| 24 | 6 | 3.66 | 4.66 | — |
+| 26 | 6 | 3.62 | 4.62 | — |
+| 28 | 6 | 3.94 | 4.94 | — |
+
+§16.5 read the descended systems as solved at `0.80` of the semi-regular
+bound from eighteen unknowns on, with the pair-only engine's `D_solve =
+4`.  An engine that closes the boolean ideal — the field products as
+pairs, §17.1 — learns everything it needs at degree **three** through
+twenty unknowns: `0.60` of the bound.  The ideal did not change; the
+engine that measured it did, and the extra degree was the pair-only
+engine rediscovering what a field product gives for free.  By §3 that
+is **accounting** on the degree column: §14–§16's degree readings stand
+as statements about that engine, and the statement about the systems is
+now `0.60`, with `D_learn` rising to `3.5`–`3.9` (`0.60`–`0.70` of a
+bound that itself rises to six) from twenty-two unknowns on.  Petit and
+Quisquater's phenomenon is stronger here than §16 said, and — as §14.5
+warned — it is still a statement about degrees, not costs: `f4-f2` is
+the engine that measures it and the one whose cost grows fastest past
+twenty unknowns, because its processed degree reaches five.
+
+### 17.8 The stage against the scalar reference: target 3, met, and confirmed
+
+Wall time over `fes-f2`, per target (each target's median over
+repetitions), median over the targets with a 95 % percentile bootstrap
+interval, both families and both seeds pooled:
+
+| engine | 16 | 18 | 20 | 22 | 24 | 26 | 28 | 30 |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| `buchberger-f2` | 14,834 | 71,649 | — | — | — | — | — | — |
+| `f4-f2` | 70.2 [60, 74] | 71.1 [56, 81] | 47.7 [45, 78] | 260 [43, 282] | 288 [284, 293] | 180 / 206 | 114 [110, 121] | 49.2 (5 of 16 decided) |
+| `matrix-f4` | 84.5 | 105 | 103 | 81.0 | 13.4 | 7.76 / 7.78 | 4.56 | 2.75 |
+| `matrix-f5` | 82.3 | 105 | 105 | 79.8 | 14.2 | 8.01 / 8.09 | 4.81 | 2.87 |
+| `inherited-f4` | 37.3 | 35.7 | 38.4 | 14.4 | 8.07 | 4.83 / 4.50 | 4.10 | 1.24 |
+| `crossbred-f2` | 14.5 [14.2, 14.8] | 14.5 [14.1, 14.8] | 5.33 [5.0, 5.6] | 1.91 [1.8, 2.0] | 1.05 [1.03, 1.07] | **0.77** [0.72, 0.79] / **0.735** [0.69, 0.77] | **0.686** [0.66, 0.74] / **0.67** [0.65, 0.70] | fails |
+
+(Sixteen to twenty-four unknowns pool the frozen suite's main and holdout seeds; `26` is the frozen `B` part / §17.3's holdout; `28` pools §17.3's two seeds, crossbred shown per seed; `30` is §17.3's main seed.)
+
+- **Target 3 is met, against this reference.**  `crossbred-f2` falls
+  below `fes-f2` at twenty-six unknowns (`0.77 [0.72, 0.79]`, the `R`
+  curve; `K` has no instance at `n = 25`), and §17.3's confirmation,
+  declared after that number was read, holds on all three of its cells:
+  `0.735` on the holdout at twenty-six, `0.686` and `0.67` on the two
+  seeds at twenty-eight, every interval below one.  At twenty-four
+  unknowns it is `1.05 [1.03, 1.07]` over thirty-two targets.
+- **The abandon condition is not triggered.**  `matrix-f4`, `matrix-f5`,
+  `inherited-f4` and `crossbred-f2` all have a lower ratio at twenty-six
+  unknowns than at sixteen; `f4-f2` does not (`70 → 180`), because its
+  processed degree reaches five from twenty-two unknowns on.
+- **The crossing is a window, not an asymptote.**  At thirty unknowns
+  `crossbred-f2`'s default parameters stop fitting, and a larger `k` or
+  `D` is a tuned crossbred, which §17.2 put out of this round.
+
+### 17.9 Against the vector reference: the crossing was the implementation's, and the hybrids close in
+
+Frozen at `results/strength_v1/` (§17.4), `results/hybrids_v2/` (§17.5,
+read at thirty-two unknowns only) and `results/hybrids_v3/` (§17.5's
+amended thirty-four-unknown cell).  `fes-f2-wide` answers exactly as
+the scalar search on every target both run, and is `3.0`–`4.0×` faster:
+`3.4`–`3.5 ms` against `10.5`–`10.7 ms` at twenty-four unknowns, `0.65`–
+`0.68 s` against `2.4`–`2.6 s` at thirty-two, `2.6`–`2.7 s` at thirty-four
+where the scalar walk stops.  Sixteen lanes buy four, not sixteen: the
+walk is bound by its dependent table updates and the zero test, not by
+the XORs.  Ratios to it, as in §17.8:
+
+| engine | 24 | 26 | 28 | 30 | 32 | 34 |
+|:--|--:|--:|--:|--:|--:|--:|
+| `crossbred-f2` | 3.00 [2.81, 3.10] | 2.54 [2.46, 2.59] | 2.45 [2.36, 2.55] | defaults fail | defaults fail | defaults fail |
+| `inherited-f4` | 22.6 [21.7, 23.2] | 15.4 [14.7, 15.8] | 14.8 [14.5, 15.8] | 4.55 [4.47, 4.62] | 2.09 [2.03, 2.11] | 1.20 [1.20, 1.23], 14 of 16 decided |
+| `matrix-f4` / `matrix-f5` | | | | | 5.40 / 5.42 | 2.45 / 2.48 |
+| `fes-f2`, the scalar walk | 3.06 | 3.60 | 3.86 | 3.95 | 3.6–3.9 | declines |
+
+Every cell pools both seeds and both families where an instance exists
+(`K` has none at `n = 25`, `27` or `33`); no engine disagreed with the
+reference on any target.
+
+- **§17.4's check: the crossing does not stand.**  `crossbred-f2` is
+  `2.45`–`3.0×` the vector form of the reference wherever its default
+  parameters apply, on both seeds.  As declared, §17.3's crossing is
+  recorded as a crossing of the scalar implementation only.  There is
+  nothing to extrapolate at these defaults: the ratio flattens (`3.00 →
+  2.54 → 2.45`) and the parameters stop fitting at thirty unknowns.
+- **§17.5's check: no hybrid crosses at thirty-two or thirty-four.**
+  `inherited-f4` is `2.09×` at thirty-two and `1.20×` at thirty-four
+  on the targets it decides; at thirty-four it leaves two of the
+  holdout's eight undecided (its node budget), so it is not below the
+  reference on that cell whatever the ratio on the rest.  The matrix
+  hybrids decide everything and are `2.45`–`2.48×`.
+- **Against the scalar walk it would have been a second crossing.**  At
+  thirty-two unknowns `inherited-f4` takes `0.55×` the scalar search's
+  time (every one of the thirty-two targets between `0.48` and `0.62`),
+  a cleaner crossing than crossbred's; against the vector form it is
+  `2.09×`.  Two engines crossed the scalar reference in this round and
+  neither crosses the strengthened one, which is the reason §17.4
+  strengthened it before reading either.
+- **The trajectory, extrapolated and marked as such.**  `inherited-f4`'s
+  ratio to the vector reference falls `×0.54` per two unknowns on a
+  log-linear fit over the six sizes 24–34, which puts the crossing at
+  `34.9` unknowns.  The fit is poor in shape (flat from twenty-six to
+  twenty-eight, residual `+0.55` there, steep after), the engine starts
+  leaving targets undecided at thirty-four, and thirty-six unknowns is
+  where both the vector reference (thirty-two walked, four in the lanes)
+  and a practical curve constructor (an exhaustive `2^{35}` point count)
+  stop.  It is the most specific lead this round leaves — a hybrid F4
+  gaining on the strongest exhaustive search at about half a ratio per
+  two unknowns — and it is not a result.
+
+### 17.10 Three summands
+
+Reference `exhaustive` (the `S_4` descents are of degree six, so no
+fast exhaustive search applies); nine unknowns at `7:3:3` and `9:3:3`,
+twelve at `11:4:3`, both families, and the holdout at `9:3:3`:
+
+| unknowns | `D_sr` | `exhaustive` | `matrix-f4` | `matrix-f5` | `inherited-f4` | `f4-f2` (`D_learn`) | `sat-cdcl` | `buchberger-f2` |
+|--:|:--|--:|--:|--:|--:|--:|--:|--:|
+| 9 | 7 | 0.04 ms | 2.0–2.2 ms (44–62×) | 2.2–2.4 ms (47–65×) | 8.5–9.6 ms | 7–18 ms (7.0) | 10–23 ms | 20 s |
+| 12 | 8 | 1.2–1.3 ms | 14.8–14.9 ms (12×) | 14.8–14.9 ms (13×) | 116–118 ms | 244–416 ms (7.0) | 0.6–0.75 s | over budget, 16/16 |
+
+Nothing algebraic comes near enumeration at these sizes; the matrix
+hybrid's ratio falls from `44`–`62×` to `12×` between nine and twelve
+unknowns, two sizes and no fit.  `F4` learns at degree seven on both
+shapes: at the semi-regular bound on nine unknowns, one below it on
+twelve.  `crossbred-f2`'s defaults do not apply to degree-six systems.
+
+### 17.11 The whole method: target 2, met; `S` against rho
+
+Frozen at `results/baseline_v1/W13-*`, `W15-*` and `W17-*`: complete,
+verified logarithms, every phase inside `S`, two planted targets per
+curve, counted rho on every instance.  Medians over curves and targets.
+
+| row | `n = 13`, 12 unknowns: `S` · / pair table · / rho | `n = 15`, 16 unknowns | `n = 17`, 18 unknowns |
+|:--|--:|--:|--:|
+| counted rho, `S` (per curve) | 16.2 · 18.7 · 14.6 | 13.1 · 9.2 · 8.9 | 5.2 |
+| pair table (the oracle reference) | 51.1 · 1 · 3.5× | 267 · 1 · 29× | 448 · 1 · 86× |
+| descent + `fes-f2` | 370 · 7.2× · 22× | 367 · 1.37× · 40× | 763 · 1.70× · 146× |
+| descent + `exhaustive` | 827 · 16× · 50× | 6,512 · 24× · 710× | 28,199 · 63× · 5,413× |
+| descent + `crossbred-f2` | 8,514 · 167× · 509× | 6,597 · 25× · 722× | 10,929 · 24× · 2,098× |
+| descent + `inherited-f4` | 5,564 · 109× · 344× | 17,861 · 67× · 1,949× | 28,719 · 64× · 5,513× |
+| descent + `f4-f2` | 5,211 · 102× · 333× | 27,143 · 102× · 2,961× | 42,647 · 95× · 8,186× |
+| descent + `matrix-f4` / `matrix-f5` | 6,440 / 6,663 · 126–130× | 36,406 / 37,356 · 136–140× | 77,482 / 77,954 · 173–174× |
+| descent + `sat-cdcl` (first solution) | 149,661 · 2,927× | 1.11×10⁶ · 4,157× | 4.45×10⁶ · 9,932× |
+| descent + `buchberger-f2` (the baseline) | 63,622 · 1,244× · 3,832× | 7.74×10⁶ · 29,029× · 844,785× | 6.55×10⁷ · 145,974× · 1.26×10⁷× |
+
+`n = 13` is §15's base (`dimension = 6`, thirteen equations in twelve
+unknowns) on three curves, `n = 15` a square base (`dimension = 8`)
+on three curves, `n = 17` §16.3's base and curve; two planted targets
+each, every logarithm verified, 140 rows.  The fresh `buchberger-f2`
+rows at `n = 17` reproduce §16.3's frozen ones to 3 % (`46.2` and
+`84.7` million against `45.4` and `87.2`), on a host that was running
+three other parts beside them.
+
+**Target 2 — the contract's gate — is met** at `n = 13` and `n = 15`,
+by every F4-family engine, on all three curves: total cost per verified
+relation over `buchberger-f2`'s, median over the six (curve, target)
+pairs with a 95 % bootstrap interval,
+
+| | `f4-f2` | `inherited-f4` | `matrix-f4` | `matrix-f5` |
+|:--|--:|--:|--:|--:|
+| `n = 13` | 0.088 [0.074, 0.102] | 0.091 [0.082, 0.108] | 0.132 [0.107, 0.155] | 0.115 [0.106, 0.157] |
+| `n = 15` | 0.0035 [0.0034, 0.0036] | 0.0022 [0.0021, 0.0024] | 0.0045 [0.0044, 0.0047] | 0.0046 [0.0045, 0.0050] |
+| `n = 17` (one curve, two targets; not graded) | 0.00065 | 0.00043 | 0.0012 | 0.0012 |
+
+against a gate of `0.8`.  The Gröbner row's `S` falls `12×` at
+`n = 13`, `285×` at `n = 15` and `1,535×` at `n = 17` (medians),
+the factor growing with the size as the per-call ratios of §17.6
+do.
+
+Reading it:
+
+- **Nothing is below rho, and nothing moved toward it that a generic
+  algorithm could not.**  The best row on every instance is still the
+  pair table, `3.5×`, `29×` and `86×` rho on bases chosen past the
+  family optimum so the descent has unknowns to work on (§16.3); every
+  algebraic row is at least `333×` rho.  F4 took the Gröbner row from
+  `1,244×` the pair table to `102×` at `n = 13` and from `145,974×`
+  to `95×` at `n = 17`, and left it two orders of magnitude above the
+  exhaustive-search row on the same base.
+- **The stage ranking does not carry over unchanged**, which is why §2
+  makes only this table a speed.  `crossbred-f2` is the fastest
+  algebraic engine per call on every square stage cell from twelve to
+  twenty-eight unknowns (§17.6), and the slowest F4-family row at
+  `n = 13` (`167×` the pair table against `f4-f2`'s `102×`).  The
+  §15 base descends thirteen equations in twelve unknowns and four in
+  five of its systems have no decomposition; `f4-f2` refutes an
+  inconsistent system at about half what a consistent one costs it
+  (`0.61 ms` a call in the run; `0.8`–`2.4 ms` against `2.1`–`5.1 ms`
+  on the twelve- and fourteen-unknown stage cells), while crossbred's
+  `2^k` linear solves and exhaustive search cost the same either
+  way.  At `n = 15` and `n =
+  17`, square bases, crossbred is again the best algebraic row
+  (`25×` and `24×` the pair table).
+- **The exhaustive-search row is the reference's, not a candidate's.**
+  Descent plus `fes-f2` sits at `1.37×` the pair table at `n = 15`
+  (below it on two of six targets) and `1.70×` at `n = 17`.  Its cost
+  is `2^{2n'}` points per target, over a number of targets that grows
+  with the base, against a table of about `2^{2n'}/2` additions built
+  once; a word XOR costs `1/415`–`1/557` of an addition on this host
+  (the reports' calibrations), which is why the two meet near `n' = 8`
+  on these deliberately large bases.  It is the boundary every
+  algebraic engine here still has to reach inside a whole run;
+  crossbred-descent sits `14×`–`18×` above it at `n = 15` and `17`.
+
+### 17.12 Classified
+
+| change | class | why |
+|:--|:--|:--|
+| F4-family engines in place of `buchberger-f2` in the descent oracle | **engineering** | `S` falls `12×`, `285×` and `1,535×` at `n = 13`, `15`, `17`, the contract's gate met with room; no boundary crossed: every algebraic row stays at least `333×` rho and `24×` the pair table on its base |
+| every two-summand target decided from sixteen to twenty-two unknowns; `f4-f2` to twenty-eight, the matrix hybrids to thirty-four | **engineering** | the same systems decided within the budget where the baseline stopped at eighteen |
+| `D_learn = 3` where the pair-only engine read `4` | **accounting** | the ideal did not change; the engine that measured it did (§17.7) |
+| `exhaustive` counts the tests it performs | **accounting** | a modelled count replaced by the work done; wall-priced rows unaffected |
+| the `vs rho` column filled | measurement | the reference §15 and §16 left empty, sixteen counted runs per instance |
+| `crossbred-f2` below `fes-f2` at twenty-six and twenty-eight unknowns | **advance against the declared reference, withdrawn** | against the vector form of the same algorithm it is `2.45`–`3.0×` (§17.9) |
+| `fes-f2-wide` | **accounting**: the boundary moved | the stage reference is `3`–`4×` stronger; every stage ratio is now read against it |
+| the hybrids at thirty-two and thirty-four unknowns | measurement | `2.09×` and `1.20×` the vector reference; a crossing extrapolated near thirty-five, marked as such |
+
+### 17.13 What does not count
+
+- Nothing in §17.6–§17.10 is a speed.  They price one oracle call; the
+  speed is §17.11, and there nothing is below rho.
+- §17.8's crossing is against the scalar reference only (§17.9).
+- Every price here is `measured`: wall time on one host (an Intel Xeon
+  at 2.1 GHz with AVX-512, four cores), with parts running concurrently
+  on separate cores.  The stage cells are paired within one process and
+  interleaved per target; the whole-method rows are not interleaved, and
+  their host was running three other parts beside them.  Ratios between
+  rows from different hosts mean nothing (§12).
+- The vector reference is `3`–`4×` the scalar one, not the sixteen its
+  lanes suggest; a better vector kernel would raise every stage ratio
+  read against it and move any crossing further out.
+- `crossbred-f2` ran at its module defaults only; §17.2 put a tuned
+  crossbred in a round of its own.
+- `n = 17` is one curve and two targets; its gate ratios are reported,
+  not graded.
+- Engines whose solutions come back in a different order walk different
+  target sequences (a target with two decompositions lifts to a
+  different pair), so rows on one instance are not identical workloads;
+  cost per verified relation is the paired statistic for that reason,
+  and the trials column shows how far the walks diverged.
+- The hybrids' `D_reach` is their fixed Macaulay degree (three, or six
+  on three summands), not a solving degree; only `f4-f2` reports
+  `D_learn`.
+- The `K` family has no instance at `n = 21`, `25`, `27` or `33`;
+  those cells are `R` only.  `xl-f2` is not in the suite (§15.6).
+- The first run of the thirty-four-unknown cell had no reference and is
+  not read (§17.5's amendment).
+
+### 17.14 Reproducing
+
+```
+cargo build --release --bin ic
+S=research/ic_framework_engines_20260922
+
+python3 $S/run.py --run-id baseline_v1                                  # §17.2
+python3 $S/compare.py --run baseline_v1
+python3 $S/run.py --run-id confirm_v1  --suite confirm_20260923.json    # §17.3
+python3 $S/run.py --run-id strength_v1 --suite strength_20260923.json   # §17.4
+python3 $S/run.py --run-id hybrids_v2  --suite hybrids_20260923.json    # §17.5
+python3 $S/run.py --run-id hybrids_v3  --suite hybrids_34_20260923.json # its amendment
+# and compare.py --run <id> --suite <file> for each
+
+# A new engine against the frozen baseline, paired on this host:
+python3 $S/run.py --run-id candidate_x --add-engine x
+python3 $S/compare.py --run candidate_x --manifest $S/manifest.json
+```
+
+Each part's provenance names the commit, the binary's hash, the host
+and the suite file's hash it ran with; `manifest.json` holds every
+system's fingerprint and every cell's verdict digest from the frozen
+run.
 
 ## Appendix A. The conversion factors, as measured
 
