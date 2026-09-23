@@ -501,6 +501,40 @@ without them the infinity branch is never taken and the test would claim
 coverage it does not have. `ecc2k95` skips it: at `m = 97` a point does
 not fit in a `u64` and `FastCurve` refuses the same case.
 
+**CI runs it** — `.github/workflows/gpu-ecc2k-host-verification.yml`, on
+any pull request touching `gpu/ecc2k/**`, and also on
+`examples/dump_canon_vectors.rs` and `src/cryptanalysis/koblitz_fast.rs`,
+because `vec_canon.h` is generated from those and a change to either
+moves what the C++ side is checked against. No GPU: `G2_HD` is `inline`
+without `__CUDACC__`, so everything but the kernels builds under g++.
+
+**And `pairtable_kernel` itself runs on the host.** Its body is plain
+C++ once `__global__` and the four thread-index builtins are supplied,
+so `test_pairtable_emu.cpp` includes the header behind a `__CUDACC__`
+shim and calls the kernel as a function, once per emulated thread —
+which is the same computation as running them together, because this
+kernel's threads write disjoint rows through disjoint scratch. It checks
+every entry of the triangle against unbatched addition in both the
+packed and the folded key, and that 4 and 7 threads give the same table
+as one, which is what exercises the grid-stride loop and the scratch
+split.
+
+It exists because of a bug nothing else could see. The first folded
+kernel passed its own `n` — |F|, the point count — to `pt_canon` as the
+field degree. Every building block was correct and separately tested;
+the one line that assembled them was wrong. Put back, that line makes
+this test fail with 960 of 1176 keys wrong on `k23`, and the test also
+asserts on every run that the wrong degree *would* change keys on its
+base, so it cannot quietly stop being able to tell the two apart.
+
+What it does not cover is how a kernel runs on a device — launch
+geometry, occupancy, memory placement, and whatever `nvcc` does
+differently from `g++`. And it covers only this kernel: the ones in
+`kernels2k.cuh` are where `pairtable_kernel` was before it. The device
+functions they call — the walk, the batched steppers, an end-to-end
+solve on a toy curve — are tested by `test_cpu2k.cpp`, but the
+`__global__` wrappers themselves are compiled by nothing on the host.
+
 ## Files
 
 | File | What it is |

@@ -256,7 +256,9 @@ __global__ void pairtable_kernel(const pt2k *pts, int n, const uint32_t *row_off
             } else {
                 s = Koblitz::add_with_inv(P, Q, den[t]);
             }
-            keys[base + t] = canon_tables ? pt_canon(s, canon_tables, canon_bytes, n)
+            /* `n` here is `|F|`, the number of base points; the fold's
+             * degree is the field's, which is compile-time. */
+            keys[base + t] = canon_tables ? pt_canon(s, canon_tables, canon_bytes, F2M_M)
                                           : pt_pack(s, n);
             idx_i[base + t] = (uint32_t)i;
             idx_j[base + t] = (uint32_t)(i + t);
