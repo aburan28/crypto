@@ -1,0 +1,25 @@
+# round24_pairinv_check.py, default cells
+config {"batch_trials": 1, "linear_algebra": "sparse", "max_trials": 65536, "solver": "pair_table", "summands": 3}; 6 fixtures a cell from round-0023 development+selection
+
+cell      n  same  pairinv/scaled           95% band     min     max
+n13a0     6     6          0.9964   [0.9961, 0.9968]  0.9960  0.9971
+n23a1     6     6          0.9689   [0.9636, 0.9741]  0.9594  0.9791
+n37a0     6     6          0.9350   [0.9306, 0.9393]  0.9243  0.9388
+n43a1     6     6          0.9170   [0.9155, 0.9184]  0.9155  0.9205
+
+IDENTICAL REPORTS ON EVERY JOB
+
+# round24_pairinv_check.py ... 6 n17a1,n19a0,n19a1,n23a0,n29a1,n31a0,n59a0,n61a1
+config {"batch_trials": 1, "linear_algebra": "sparse", "max_trials": 65536, "solver": "pair_table", "summands": 3}; 6 fixtures a cell from round-0023
+
+cell      n  same  pairinv/scaled           95% band     min     max
+n17a1     6     6          0.9956   [0.9951, 0.9961]  0.9947  0.9963
+n19a0     6     6          0.9883   [0.9846, 0.9920]  0.9796  0.9922
+n19a1     6     6          0.9856   [0.9821, 0.9892]  0.9800  0.9911
+n23a0     6     6          0.9788   [0.9756, 0.9821]  0.9739  0.9836
+n29a1     6     6          0.9974   [0.9972, 0.9977]  0.9970  0.9979
+n31a0     6     6          0.9788   [0.9747, 0.9829]  0.9731  0.9857
+n59a0     6     6          0.9604   [0.9553, 0.9655]  0.9517  0.9699
+n61a1     6     6          0.9124   [0.9089, 0.9159]  0.9088  0.9194
+
+IDENTICAL REPORTS ON EVERY JOB

@@ -2467,6 +2467,150 @@ Renault symmetries on curves with rational torsion.  Any of them would be
 registered as `engineering`: none changes `r∞`, which caps a plain `k = 4`
 method at `1.6–3×` better than rho however cheap the solve gets.
 
+### 11.18 Pre-registration: measuring `r∞`, the one claim that puts `k = 4` below rho
+
+**Written before the measurement exists.**  §11.16 derived that a plain `k = 4`
+method tends to `r∞ = c_LA / c_rho = 0.34–0.63×` rho, and §11.17 carried it
+into the scoreboard as "would eventually beat rho by `1.6–3×`".  It is the only
+statement in §11 that puts anything below rho, and every input to it is
+borrowed or derived: the Wiedemann constant from `k = 3` rescaled to row
+weight `5`, the filtering fraction `φ` from `k = 3`, the decomposition rate from
+a count, rho's `S` from the thread's convention.  None of them needs the `S₅`
+solve, so all of them can be measured directly, at sizes where the method
+runs end to end.
+
+**What runs.**  Prime-order curves over `F_{p⁴}` for `p ∈ {269, 521, 769, 1033}`
+(`n ≈ 2^{32.3}, 2^{36.1}, 2^{38.3}, 2^{40.0}`), two seeds each.  Relations come
+from the meet-in-the-middle oracle of §11.17 — **not** the `S₅` solve: the
+relation phase is not what is measured here, and its cost is reported beside
+the table and kept out of the ratio.  Relations are filtered to a square core
+and solved by the §11.7 Wiedemann, with every attempt's operations counted;
+the logarithm is accepted only if `[d]G = Q`.  Rho runs `16` times per curve on
+the same group, because a single rho run's `S` moves by `2×` between seeds.
+
+**The statistic.**  On each curve, both measured in `F_p` multiplications:
+
+```text
+r  =  LA  /  rho  =  (la_ops · 16)  /  (S_rho · √n · c_add)
+```
+
+with multiplications mod `n` charged `16` and `c_add` the measured `97.0`, as
+§11.16 did.  Both terms grow as `n^{1/2}` if §11.16 is right, so `r` should be
+flat across the four sizes; its value is `r∞`.  Reported beside it, each input
+§11.16 derived: the decomposition rate against `1/24`, `φ` against `0.73`, the
+Wiedemann constant `la_ops / N²` against `20`, the row weight against `5`, rho's
+`S` against `1.3`, and the linear algebra's exponent in `n` against `1/2`.
+
+**Registered outcomes.**
+
+| outcome | condition |
+|---|---|
+| **confirmed** | `r` flat within its seed spread and inside `0.34–0.63` |
+| **corrected** | `r` flat and below `1`, but outside `0.34–0.63`: the cap becomes `1/r` |
+| **withdrawn** | `r ≥ 1`, or `r` rising with `n`: a plain `k = 4` method never beats rho, and §11.16–11.17's "`1.6–3×`" comes off the scoreboard |
+
+**Inadmissible:** changing the `16` charge or `c_add` after seeing the data;
+dropping filtering or failed Wiedemann attempts from `la_ops`; excluding a
+seed; using fewer than `16` rho runs for any curve; any run without a verified
+logarithm.  An `S₅`-based relation phase would change nothing here, since
+`r∞` does not depend on the solve.
+
+### 11.19 `r∞`, measured: `0.52×` rho, inside the band §11.16 derived
+
+**Runner:** `cargo run --release --example gaudry_quartic_la -- --sizes
+269,521,769,1033 --seeds 2 --rho-runs 16 --json …`.
+**Frozen:** `experiments/25_gaudry_quartic_la.json` (and `.log`).
+**Summary:** `python3 scripts/summarize_quartic_la.py
+experiments/25_gaudry_quartic_la.json experiments/24_gaudry_quartic_c4.json`
+**Source:** `src/cryptanalysis/gaudry_quartic.rs` (`run_k4_la`, `rho4`),
+`examples/gaudry_quartic_la.rs`.
+**Registered in advance:** §11.18, pushed before the pipeline existed.
+
+Eight curves, two per size, run as §11.18 registered.  Relations come from the
+meet-in-the-middle oracle.  They are filtered to a square core and solved by
+the §11.7 Wiedemann, with every attempt counted.  The logarithm is accepted
+only if `[d]G = Q`, and rho runs `16` times on each curve.  **Every logarithm
+verified, and all `128` rho runs.**  Every Wiedemann solve succeeded on its
+first attempt, no seed was excluded, and nothing deviated from §11.18.
+
+| `p` | `log₂ n` | `\|F\|` | rate (`1/24 = 0.042`) | `φ` (`0.73`) | row weight (`5`) | LA, mod-`n` mults | LA `/ N²` (`20`) | rho `S`, 16 runs | `r`, this curve's rho | **`r`, pooled rho** | MITM relation phase `/` rho (not in `r`) |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 269 | 32.3 | 132 | 0.0374 | 0.909 | 5.00 | `2.89·10⁵` | 20.05 | 1.454 ± 0.230 | 0.453 | **0.499** | 1,301 |
+| 269 | 32.3 | 145 | 0.0612 | 0.910 | 5.00 | `3.49·10⁵` | 20.05 | 1.297 ± 0.134 | 0.614 | **0.604** | 1,054 |
+| 521 | 36.1 | 264 | 0.0418 | 0.913 | 5.00 | `1.16·10⁶` | 20.02 | 1.231 ± 0.183 | 0.574 | **0.536** | 2,469 |
+| 521 | 36.1 | 259 | 0.0363 | 0.907 | 5.00 | `1.11·10⁶` | 20.03 | 1.277 ± 0.227 | 0.526 | **0.509** | 2,689 |
+| 769 | 38.3 | 404 | 0.0503 | 0.889 | 5.00 | `2.58·10⁶` | 20.02 | 1.574 ± 0.158 | 0.457 | **0.546** | 3,371 |
+| 769 | 38.3 | 371 | 0.0355 | 0.884 | 5.00 | `2.15·10⁶` | 20.02 | 1.047 ± 0.177 | 0.574 | **0.455** | 3,704 |
+| 1033 | 40.1 | 496 | 0.0348 | 0.883 | 5.00 | `3.84·10⁶` | 20.01 | 1.291 ± 0.201 | 0.460 | **0.450** | 4,988 |
+| 1033 | 40.1 | 548 | 0.0538 | 0.878 | 5.00 | `4.63·10⁶` | 20.01 | 1.381 ± 0.155 | 0.518 | **0.543** | 4,353 |
+
+Rho's `S` does not depend on `n`, and one curve's `16` runs leave it a
+standard error near `15 %`, so the ratio is taken against rho pooled over all
+`128` runs: **`S = 1.319 ± 0.065`**.  The per-curve column is kept for
+comparison.  By size, `r` averages `0.551, 0.523, 0.500, 0.496`.
+
+**1. The registered outcome: confirmed.**  **`r∞ = 0.518 ± 0.031`**, inside
+§11.16's `0.34–0.63`.  `r` is flat.  Its fitted exponent in `n` is `−0.021 ±
+0.017`, and the two-standard-error interval `[−0.054, +0.013]` contains zero.
+The linear algebra itself grows as `n^{0.479 ± 0.017}` against the `n^{1/2}`
+§11.16 derived.  The confirmation does not rest on pooling rho.  §11.18
+registered `r` against each curve's own rho, and on that statistic every one
+of the eight curves lands at `0.453–0.614`, inside the band too.  So a plain `k = 4` method's linear algebra costs about half
+of rho.  Past the handover such a method would beat rho by **`1/r∞ ≈ 1.9×`**
+and no more.  That replaces the derived `1.6–3×`.
+
+**2. The inputs, measured against what §11.16 derived.**
+
+| input | derived | measured | effect on `r∞` |
+|---|---:|---:|---|
+| decomposition rate | `1/24 = 0.0417` | `0.0439` | none: it sets how many residuals are tried, not the matrix |
+| filtering fraction `φ` | `0.73`, borrowed from `k = 3` | `0.897` | `r∞ = 0.634·φ²`: the one input that was off |
+| row weight | `5` | `5.00` | — |
+| Wiedemann constant, `la_ops / N²` | `20` | `20.03` | — |
+| rho's `S` | `1.3`, the convention | `1.319 ± 0.065` | — |
+| linear algebra's exponent in `n` | `1/2` | `0.479 ± 0.017` | — |
+
+The only derived input that moved is `φ`.  Filtering keeps `0.897` of the
+unknowns at `k = 4`, against the `0.73` §11.16 borrowed from `k = 3`.  §11.16's
+band was `r∞ = 0.634·φ²` over `φ ∈ [0.73, 1]`.  At the measured `φ` that
+formula gives `0.510`, and the measurement is `0.518`, `1.6 %` above it.  So
+the model §11.16 wrote down holds, and its band was wide only because one of
+its inputs was borrowed.  The run-to-run scatter in `r` follows the core size:
+`N/(p/2)` ranges over `0.85–0.98`, and `r` goes as its square.
+
+One drift is worth recording and not extrapolating.  `φ` falls by `0.016` per
+doubling of `p` across these sizes, which is what the linear algebra's
+exponent sitting a shade under `1/2` reflects.  At sizes that fit, it moves
+`r` less than the seed spread does.
+
+**3. The crossover, re-derived at the measured `r∞`.**  §11.17 carried the
+derived band into `n* ≈ 2^{149.4}–2^{152.8}`.  At the measured value, with
+§11.17's `C₄ = 1.213·10¹²`, the measured rho `S` and `c_add = 97.0`:
+
+| | `r∞` | `n*` (extrapolated) |
+|---|---:|---:|
+| §11.17, derived band | `0.338–0.634` | ~~`2^{149.4}–2^{152.8}`~~ |
+| **measured** | **`0.518 ± 0.031`** | **`2^{151.1}`** (`2^{150.8}–2^{151.5}`) |
+
+This is still an extrapolation.  It rests on the same exponents, `n^{1/4}` for
+relations and `n^{1/2}` for the linear algebra and rho, and on §11.17's `C₄`.
+`scripts/summarize_quartic_c4.py` keeps §11.17's derived `r∞` constants,
+because it prints §11.17's frozen view; this section supersedes them.
+
+**4. What this does not say.**  `r∞` is a ratio of two phases, the linear
+algebra against rho, and at these sizes the method's `S` is nowhere near it.
+Here the meet-in-the-middle oracle stands in for the `S₅` solve.  Its relation
+phase is `1,054–4,988×` rho, reported beside the table and kept out of `r` as
+§11.18 registered, and it grows with `p`.  The `S₅` relation phase §11.17
+measured is `4.3·10⁸×` rho at `p = 269`.  No end-to-end `k = 4` `S` below rho
+exists, and none is claimed.  What is measured is the ceiling on what such an
+`S` could ever reach.
+
+**Class.**  A stage diagnostic: it prices one phase against the reference.
+No existing method's cost changed, so none of §3's four classes applies.
+§11.18's prediction is confirmed.  Wall-clock, as a practicality note: `1.9` h
+for the eight curves on four cores.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,

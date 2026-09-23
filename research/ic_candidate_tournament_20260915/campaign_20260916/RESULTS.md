@@ -816,6 +816,89 @@ a coincidence the model does not explain rather than a confirmation of it.
 4096 trials with a base that is optimal there, and both facts still hold. The
 classification stays **engineering** under AGENTS.md §3.
 
+## Round 0023: the crossover cells in the harness, and the base rule out of sample
+
+[ROUND23-crossover-panel.md](ROUND23-crossover-panel.md) is the
+pre-registration; [report](../runs/round-0023/REPORT.md). Seed 2026092323,
+twelve cells (`13a0,17a1,19a0,23a0,23a1,31a0,37a0,43a1` in every stage, with
+`19a1,29a1,59a0,61a1` held out to confirmation and replay), 172 confirmation cases, 3,648
+trials, audit VERIFIED over 3,648 receipts and 453 source files.
+
+**Result: `retained`, as registered.** `scaled` — the incumbent with the orbit
+count set by `8·round((r/4,196,903)^0.157)` — passes every gate against the
+incumbent on both final stages and fails `rho_gate` at the four crossover
+cells, so it is not promoted and `beats_rho_strict` is false. This is the
+first round in which the tournament itself, rather than an ad-hoc script,
+scores cells where rho wins.
+
+| `scaled` / incumbent | confirmation | replay |
+|---|---|---|
+| instructions | 0.7982 [0.6501, 0.9515] | 0.7982 [0.6501, 0.9515] |
+| native wall | 0.8244 [0.6781, 0.9690] | 0.8327 [0.6881, 0.9775] |
+
+| cell | r | `scaled` / incumbent | `scaled` / rho | incumbent / rho |
+|:--|--:|--:|--:|--:|
+| eight panel cells | ≤ 4.2·10⁶ | 1.0001 – 1.0006 | 0.570 – 0.841 | 0.570 – 0.841 |
+| `n37a0` | 2.3·10⁸ | **0.679** | 1.085 | 1.596 |
+| `n43a1` | 4.6·10⁹ | **0.402** | 2.613 | 6.492 |
+| `n59a0` (holdout) | 1.0·10¹⁰ | **0.540** | 1.235 | 2.288 |
+| `n61a1` (holdout) | 1.2·10¹⁰ | **0.452** | 1.897 | 4.194 |
+
+Confirmation, instructions; replay agrees to the fourth digit on every cell.
+Over the whole panel `scaled`/rho is 0.8998 [0.7011, 1.2122] in instructions
+and 1.097 [0.929, 1.361] natively.
+
+**All three arms recover the same logarithm on every one of the 1,032
+final-stage (case, repetition) pairs**, and the two IC arms build
+byte-identical factor bases on all 744 panel-cell pairs, as the amended patch
+makes them by construction; on the 288 crossover-cell pairs the bases differ,
+as designed.
+
+### Predictions: five confirmed, one missed
+
+**1 confirmed** — the policy is inert on the panel: every panel cell reads
+1.0001–1.0006, inside [0.995, 1.005]. The residue is 285–412 instructions a
+job, the rule's own cost, so the ratio is largest where the job is smallest.
+**2 confirmed** — `n37a0` 0.679 in [0.65, 0.95], `n43a1` 0.402 in
+[0.28, 0.50]. **3 confirmed** — the rule holds out of sample: 0.540 at `n59a0`
+and 0.452 at `n61a1`, both below 0.70. **4 confirmed** — `scaled`/rho below one
+on all eight panel cells, `n23a1` at 0.841 < 0.95. **6 confirmed** —
+`retained`, every incumbent gate passed on both stages, `rho_gate` failed.
+
+**5 is missed at `n37a0`.** `scaled`/rho reads **1.085**, below the registered
+[1.15, 1.70]; `n43a1` at 2.613 is inside [1.8, 2.8] and both holdouts are above
+one. The miss is rho's: its median iteration count on this round's twelve
+`n37a0` fixtures is 1.195× the `sqrt(πr/4n)` model, and at `n43a1` 0.768×
+(`measurements.json`, `rho_health`). rho's cost is right-skewed and twelve
+fixtures is the allocation round 0019 showed too small to pin it; the ladder's
+1.396 came from 64. The direction is not in dispute — rho wins at `n37a0` in
+this round too — but the magnitude is not measured to the band's precision.
+
+### Where the cost is past the crossing
+
+Share of `scaled`'s confirmation instructions by phase:
+
+| cell | collection and decomposition | factor base and tables | curve and targets |
+|:--|--:|--:|--:|
+| `n23a1` | 43.8% | 31.8% | 6.7% |
+| `n37a0` | 64.6% | 27.3% | 2.3% |
+| `n43a1` | 80.7% | 15.5% | 0.8% |
+| `n59a0` | 41.9% | 8.6% | 48.2% |
+| `n61a1` | 78.3% | 16.8% | 0.9% |
+
+`n59a0` is the exception because its cofactor is 5.7·10⁷: finding the subgroup
+point and targets is half the job, and rho pays it too. Everywhere else the
+crossover is a collection problem, which is what round 0024 attacks.
+
+### Scope
+
+One seed, twelve fixtures at each crossover cell, this collector and this
+checker. The eight-cell strict win of rounds 0019 and 0020 is not re-tested
+here — the objective gate is scored on all twelve cells — although every
+panel cell stays below rho. Two of the four crossover cells are in-sample for
+the base rule; `n59a0` and `n61a1` are its first out-of-sample test and it
+held. Classification **accounting**, in the round's own decision record.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.

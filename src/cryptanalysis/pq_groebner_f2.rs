@@ -166,6 +166,15 @@ pub fn cmp_mono(a: F2BoolMono, b: F2BoolMono) -> Ordering {
     }
 }
 
+/// An integer key whose natural order is [`cmp_mono`]: degree first, and
+/// within a degree the monomial lacking the highest differing variable is
+/// larger, i.e. the one with the *smaller* mask.  Sorting by the key is a
+/// few integer compares where the comparator recomputes two popcounts.
+#[inline]
+pub fn mono_key(m: F2BoolMono) -> u128 {
+    (u128::from(m.degree()) << 64) | u128::from(!m.mask)
+}
+
 // ── Polynomial ─────────────────────────────────────────────────────
 
 /// A polynomial in `F_2[v_0, …, v_{n-1}] / (v_i² − v_i)`.
@@ -206,7 +215,8 @@ impl F2BoolPoly {
     /// Construct from an unordered monomial list.  Sorts; cancels
     /// duplicate pairs (since `1 + 1 = 0` in `F_2`).
     pub fn from_monos(mut monos: Vec<F2BoolMono>, n_vars: usize) -> Self {
-        monos.sort_by(|a, b| cmp_mono(*b, *a)); // descending
+        // descending; equal keys are equal monomials, so unstable is exact
+        monos.sort_unstable_by_key(|m| std::cmp::Reverse(mono_key(*m)));
         let mut out: Vec<F2BoolMono> = Vec::with_capacity(monos.len());
         for m in monos {
             if out.last() == Some(&m) {
@@ -259,7 +269,7 @@ impl F2BoolPoly {
         // After mul, sort order may change AND duplicates may appear
         // (because two distinct monos can collide on union with m).
         // Use `from_monos` to renormalise.
-        monos.sort_by(|a, b| cmp_mono(*b, *a));
+        monos.sort_unstable_by_key(|m| std::cmp::Reverse(mono_key(*m)));
         let mut out: Vec<F2BoolMono> = Vec::with_capacity(monos.len());
         for mn in monos {
             if out.last() == Some(&mn) {
@@ -799,6 +809,26 @@ pub fn solution_set(gb: &[F2BoolPoly], n_vars: usize) -> HashSet<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mono_key_orders_exactly_like_cmp_mono() {
+        let mut x = 0x9e37_79b9_7f4a_7c15u64;
+        let mut next = || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            // sparse masks, so equal degrees and shared high bits are common
+            x & (x >> 3) & (x >> 5)
+        };
+        let mut masks: Vec<u64> = vec![0, 1, 2, 3, u64::MAX, 1 << 63, (1 << 63) | 1];
+        masks.extend((0..300).map(|_| next()));
+        for &a in &masks {
+            for &b in &masks {
+                let (a, b) = (F2BoolMono::from_mask(a), F2BoolMono::from_mask(b));
+                assert_eq!(mono_key(a).cmp(&mono_key(b)), cmp_mono(a, b), "{a:?} {b:?}");
+            }
+        }
+    }
 
     /// Monomial constructors and basic operators.
     #[test]

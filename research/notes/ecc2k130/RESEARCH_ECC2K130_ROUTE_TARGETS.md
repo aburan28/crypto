@@ -189,6 +189,9 @@ recording either way.
 
 ## X4 — The symmetrised oracle end to end: advance or engineering?
 
+> **Cannot run as registered; see X4′ below.**  Its boundary needs a
+> Frobenius-stable `V ∋ 1`, which the E1 ladder excludes by construction.
+
 **Question.** The symmetrised oracle is measured at ~350× the chained
 `x`-system at `m = 3`. §3 says a constant that leaves the ratio flat is
 engineering. **The pre-registered prediction is engineering**, and the
@@ -238,6 +241,274 @@ printed beside any ratio.
 
 **Depends on** the merged `frobenius_view_of_symmetrised`.
 
+## X4′ — X4 cannot run as registered, and what replaces it
+
+**Registered before any registered run.**  The code it names exists
+(`subspace_gate_bench`, `examples/koblitz_symmetrised_gate.rs`), and one
+timing pilot ran, disclosed below; nothing else has been measured.
+
+### Why X4 cannot run
+
+X4's boundary is `Λ = m/n` "for a Frobenius-stable base", and its ladder is
+E1's.  **The two are mutually exclusive.**  E1 chose prime `n` with `2`
+primitive, so that `xⁿ − 1 = (x − 1)·Φₙ` with `Φₙ` irreducible and the only
+Frobenius-stable subspaces have dimension `0, 1, n − 1, n`: the obstruction
+that defines ECC2K-130.  That is why E1's own `x`-frame base is a
+non-invariant subspace of dimension `l` on every rung, with floor `Λ = m`,
+not `m/n`.
+
+The symmetrised base needs `1 ∈ V`.  Where `2` is primitive, the only
+Frobenius-stable `V ∋ 1` are `F₂` and the whole field, and
+
+```text
+V = F₂:   u ∈ {0, 1}   →   u = 0 is x = ∞,   u = 1 is x = 0   →   F_u = {T}
+```
+
+one point, the rational 2-torsion.  On those degrees an `F_u` with orbit
+structure does not exist, and `frobenius_view_of_symmetrised`, which X4 relied
+on for the `m/n` floor, has nothing to act on.
+
+| `n` | `ord_n(2)` | invariant `V ∋ 1`, by dimension | role |
+|---:|---:|---|---|
+| 13 | 12 | 1, 13 | E1 rung (runs note §0.6) |
+| 19 | 18 | 1, 19 | E1 rung |
+| 23 | 11 | 1, **12**, 23 | E1 rung; an invariant `V ∋ 1` exists, at dimension 12, not at E1's `l = 9` |
+| 41 | 20 | 1, 21, 41 | cofactor 4, unreachable (§0.6) |
+| **131** | **130** | **1, 131** | **ECC2K-130** |
+
+**At ECC2K-130 itself the symmetrised oracle has no Frobenius collapse to
+offer**, for the same reason the `x`-frame has none.  X4's ladder is also out
+of date: it names `n = 11 … 37`, which §0.6 of
+[`RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md`](RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md)
+corrected to `13, 19, 23` (cofactor 4, the ECC2K-130 shape).  On that
+ladder an invariant `F_u` exists at one rung only, and at a dimension other
+than the rung's `l`, and one rung cannot fit X4's four-rung slope.
+
+This is a fact about the family, in the same class as §0.6, and it changes no
+measurement: **accounting** by `AGENTS.md` §3.
+
+### What the question becomes
+
+On the target's structure both arms use a non-invariant `V`, so both sit on
+the same floor, `Λ = m`, and Route 3 reduces to what each oracle costs per
+relation.  `Λ` is total collection cost over `2^n`, and collection needs a
+fixed number of relations, so an oracle lowers `Λ` exactly when it finds a
+relation for less than the enumeration E1's product law charges.  Two things
+follow before anything runs:
+
+- **A constant `Q_sym / Q_x` is engineering by construction.**  It moves `Λ`
+  by a constant at every `n`.  The registered prediction, engineering, is now
+  forced *unless the ratio moves with `n`*.
+- **Wiring the symmetrised oracle into collection lowers `Λ` only if it costs
+  less per relation than enumeration on the same base.**  If it is dearer, an
+  end-to-end run would price a known loss.
+
+So X4′ is a **stage gate**.  T7 and T8 (end-to-end wiring and the ladder run)
+are built only if it passes.
+
+### The gate, fixed now
+
+1. **Rungs.**  `K₀`, `m = 3`, E1's `l = ⌈(n + log₂ 6)/3⌉`.  The E1 rungs
+   `n = 13, 19, 23` (`l = 6, 8, 9`) are reported in their own column, and
+   `n = 15` (`l = 6`, cofactor `44`) is added **for the fit only**.  It is not
+   ECC2K-130-shaped, but an oracle's cost depends on `(n, l)`, not on the
+   cofactor.  That makes four sizes, the minimum `AGENTS.md` §5 asks of an
+   exponent.  `K₀` has no usable subgroup at `n = 17` or `21`; the curve
+   constructor declines both.
+2. **One `V` per rung, shared by both arms.**  A uniformly random
+   `l`-dimensional `V ∋ 1`, redrawn if Frobenius-stable, from seed
+   `0x5EED0004 ⊕ (n ≪ 32)`.  `F_x = {x ∈ V}` for the `x`-chained arm and
+   `F_u = {u ∈ V}` for the symmetrised arm.  They differ as sets, so each
+   arm is compared with enumeration on its own base, and found and refuted
+   counts go beside every figure.
+3. **Targets.**  `16` per rung from the prime-order subgroup, the same for
+   both arms.  Every verdict is gated against exhaustive enumeration on the
+   arm's own base, and every relation is re-summed in the group.  A gate
+   failure invalidates the rung.  The symmetrised oracle also returns 3-sums
+   to `R + T`.  Those are covered by enumerating `R` alone: `F_u` contains `T`
+   and is closed under `+ T` away from `T` itself (`u ↦ u + 1`, `1 ∈ V`), so
+   `R` and `R + T` are 3-sums over `F_u` together.
+   `pair_enumeration_over_r_covers_the_decompositions_through_t` checks this
+   on 700 targets at `n = 13, 15, 19`, and the bench asserts it again on
+   every target against the library's two-pass enumeration.
+4. **Engine.**  The production default, `InheritedF4`, with split rule `Auto`,
+   which resolves to `HighestFree` for that engine.  It is named here so it
+   cannot be switched after the rows are seen; §18 of the exotic-coordinates
+   note shows the rule alone flips `n = 17`.  No SAT; node budget `20 000`
+   splits per target.  A target that hits the budget counts at what it spent
+   and is flagged.  Budget-limited targets are expected on the `x`-chained arm
+   at `n = 23`, where §17 found it inconclusive on every target (at a larger
+   base, `l = 12`), and the rung stays admissible.  Where one arm is budget-limited on more than half of a
+   rung's targets, that rung's `Q_sym / Q_x` is only a bound: it is printed as
+   one and left out of the slope fit.  Every engine knob stays at its default,
+   and the driver refuses to start otherwise.  One default is asymmetric and
+   is named here: at `24` unknowns and above the engine builds only the
+   top-degree Macaulay matrix at each node, and below that every degree up to
+   the cap.  The `x`-chained arm (`31–50` unknowns) is always in the first
+   mode, and the symmetrised arm (`16–25`) is in the second until `n = 23`.
+   At `d = 3` the root ladders are one degree either way.  Each arm's mode is
+   recorded with its row.
+5. **Pairing: the fair diagonal only.**  `x`-chained at Macaulay cap `d`
+   against symmetrised at cap `d + 1`, which gives each arm the same number of
+   rounds above its own degree (§17).  `d = 3` is the verdict pair on every
+   rung.  `d = 4` runs where each cell finishes in two hours, and is reported
+   but decides nothing.
+6. **Unit: group-addition equivalents (GAE) per relation found.**  An arm's
+   cost is the word XORs `InheritedF4` charges to the thread (elimination and
+   specialisation, from `f4_word_ops_thread()` deltas), summed over all 16
+   targets and divided by the relations found.  The Macaulay build and the
+   polynomial substitutions are not counted, so **every oracle cost below is a
+   lower bound**.  Word XORs are priced at the raw rate the boundary ledger
+   uses (`ic_boundary::calibrate_word_xor`) over one single-word curve
+   addition, both measured at the rung; `docs/ic/calibration.json`'s frozen
+   ratio is printed beside it where it has an entry.  The per-XOR cost inside
+   the solver's own elimination, splits and wall-clock are practicality
+   columns.
+7. **Reference: the cheaper enumeration rule per relation on the same base.**
+   The `full` rule (every pair `{i ≤ j}`, one addition and one lookup each,
+   every decomposition harvested) costs its steps over the decompositions
+   found; `first_hit` stops at the first and pays the full enumeration where
+   there is none.  Both are timed per step on the same host.  The product law
+   prices `full`.  The reference is the cheaper of the two, which is how
+   `AGENTS.md` §1 defines a reference (the best algorithm that already solves
+   the problem).  That makes it the harder bar for the oracle to clear, and
+   both rules are printed, so the `full` reading can be taken instead.
+
+**The pilot, and what it changed.**  Two runs at `n = 13`, four targets each,
+seed `99` (not the registered seed), with the registered engine and caps,
+run to size the node budget while another measurement loaded the machine.
+Their rows are not used.  They changed two things, before any registered row
+existed.
+
+- **The conversion.**  The first pilot priced a word XOR at what the solver's
+  own dense elimination pays per counted XOR.  That is about `4×` the raw
+  price the boundary ledger puts on the unit, and it was replaced by the raw
+  price.  The raw price is the repository's convention, and for a count that
+  is already a lower bound it is the conservative direction.
+- **The unit.**  Per target against the full `C(|F|, 2)`, the second pilot
+  put the `x`-chained oracle at `0.83×` enumeration and the symmetrised one at
+  `1.25×`.  Per relation against the cheaper rule, it put them at `13.9×` and
+  `4.9×`.  The per-target reading compares an oracle that stops at the first
+  decomposition with an enumeration that harvests all of them, about `4.5`
+  per target on the `x` base, so it charges enumeration for relations the
+  oracle never delivers.  `Λ` is priced per relation, so that is the verdict
+  unit.  The per-target ratio against the full `C(|F|, 2)` is printed as a
+  column, so the difference stays visible.
+
+### What each outcome means
+
+**The gate (decides T7/T8).**  `Q_sym` is a lower bound, so the negative
+direction is decisive and the positive is not:
+
+- **closed at the gate** — `Q_sym ≥ Q_ref` at `n = 23`, the largest E1 rung,
+  and the least-squares slope of `log₂(Q_sym/Q_ref)` against `n` over the four
+  rungs is not negative with a two-standard-error interval excluding zero.
+  The symmetrised oracle costs more per relation than the enumeration it
+  would replace, even priced from below, by a margin that does not shrink.
+  Wiring it into collection would raise `Λ`, so T7 and T8 are not built.
+- **open** — anything else.  T7 and T8 are built, and X4's end-to-end question
+  is asked on `Λ` with every phase priced.
+- If the frozen calibration's ratio, where it has an entry, would change the
+  verdict, the gate is reported as **undetermined by the conversion**.
+
+**The `350×` (X4's question).**  The `350×` was measured under `MatrixF4`
+with `LowestFree` at equal caps (§8, §17 of the exotic-coordinates note).
+This gate runs the production engine on the fair diagonal, so its ratio is a
+new measurement of the same question, not a re-measurement of that number.
+The least-squares slope of
+`log₂(Q_sym/Q_x)` against `n`, per relation, on the `d = 3` diagonal:
+
+- **engineering (predicted)** — the slope's two-standard-error interval
+  includes zero, or the slope is positive;
+- **advance candidate** — the slope is negative with its interval excluding
+  zero, *and* the wall-clock ratio per relation slopes the same way.  Both
+  units are partial, and a slope that holds in one and not the other is
+  reported as undetermined, not as either.
+
+Nothing here can be reported as threatening ECC2K-130: the frame's scale
+table already puts an oracle linear in `|F|` at `2^{27.78}×` rho.
+
+**Inadmissible.**  Changing `l`, the engine, the split rule, the caps, the
+node budget, the seed or the targets after the registered rows are seen;
+dropping budget-limited targets; reporting the `d = 4` pair as the verdict;
+pricing a word XOR at anything but the recorded rates.
+
+### X4′, run: **closed at the gate**
+
+**Runner:** `cargo run --release --example koblitz_symmetrised_gate --
+--rungs 13,15,19,23 --targets 16 --x-caps 3 --json …`, built at the
+registration commit `ff197bfa`.
+**Frozen:** `experiments/26_koblitz_symmetrised_gate.json` (and `.log`).
+**Summary:** `python3 scripts/summarize_symmetrised_gate.py
+experiments/26_koblitz_symmetrised_gate.json` (committed before the `n = 23`
+rung finished).
+
+Every rung ran as registered: `K₀`, E1's `l`, one shared non-invariant `V`,
+16 targets, the default engine on the `d = 3` diagonal, a budget of 20 000
+splits.  The registered `d = 4` pair decides nothing.  It was not in this
+run: it was started after this section was first written, rung by rung, with
+a two-hour limit per rung (stricter than the registered two hours per cell).
+Its rows are appended below when it finishes.  **Zero gate failures on all 128 oracle calls.**  Every found relation
+re-summed to its target, no refutation contradicted enumeration, and the
+via-`T` equivalence held on every target.  Costs are GAE per relation found,
+and every oracle cost is a lower bound.
+
+| `n` | shape | arm (cap) | vars | found / refuted / budget | GAE per relation | reference (full, first-hit) | **÷ reference** | ms per relation |
+|---:|---|---|---:|---|---:|---|---:|---:|
+| 13 | E1 | `x`-chained (3) | 31 | 16 / 0 / 0 | 3,430 | 399 (792, 399) | 8.60 | 34.6 |
+| 13 | E1 | symmetrised (4) | 16 | 11 / 5 / 0 | 7,241 | 890 (890, 1,682) | **8.14** | 117.0 |
+| 15 | fit only | `x`-chained (3) | 33 | 14 / 2 / 0 | 18,175 | 2,025 (2,906, 2,025) | 8.97 | 175.3 |
+| 15 | fit only | symmetrised (4) | 16 | 7 / 9 / 0 | 13,580 | 4,386 (4,386, 15,249) | **3.10** | 231.0 |
+| 19 | E1 | `x`-chained (3) | 43 | 16 / 0 / 0 | 64,555 | 4,421 (10,878, 4,421) | 14.60 | 710.4 |
+| 19 | E1 | symmetrised (4) | 22 | 9 / 0 / 7 | 225,921 | 15,359 (15,359, 70,091) | **14.71** | 3,296.1 |
+| 23 | E1 | `x`-chained (3) | 50 | 4 / 0 / **12** | 708,508 | 45,495 (70,161, 45,495) | 15.57 | 16,119.1 |
+| 23 | E1 | symmetrised (4) | 25 | 10 / 0 / 6 | 196,407 | 54,629 (54,629, 151,303) | **3.60** | 4,483.7 |
+
+Word XORs were priced at `0.0060, 0.0051, 0.0039, 0.0026` GAE by the raw
+rate.  The solver's own elimination pays `3.6–4.4×` that per counted XOR.
+The frozen ledger has `K₀` entries at `n = 13, 15` only, at `0.0023` and
+`0.0020`.  An enumeration step measured `1.75–3.04` GAE.  That is above the
+ledger's `1 +` lookup because of the hash map, so it prices the reference
+high, the conservative direction for this verdict.
+
+**The gate: closed.**  Per relation, the symmetrised oracle costs **`3.1–14.7×`**
+the enumeration it would replace, on every rung and priced from below.  The
+ratios are `8.14, 3.10, 14.71, 3.60` at `n = 13, 15, 19, 23`.  At `n = 23` it
+is `3.60`, and the slope of `log₂(Q_sym/Q_ref)` is `−0.029 ± 0.167` per bit:
+not falling.  Re-priced with the frozen calibration where it has an entry, the
+ratios are `6.66, 3.74, 14.71, 3.60`, and the gate is still closed.  So wiring
+the symmetrised oracle into collection would raise `Λ` above what E1's
+enumeration pays, and **T7 and T8 are not built.**  Route 3 ends here, one
+phase before the end-to-end run, which would have priced a loss already
+measured.
+
+The margin at `n = 23` is the thinnest, so here is what it rests on.  The
+ratio stays at or above `1` for any word-XOR price above `0.00072` GAE.  The
+ledger's own degree-23 entry, for `K₁`, is `0.0012` and gives `1.66`.  The
+cheapest entry anywhere in the ledger, `K₀/F₂⁴¹` at `0.0007`, would give
+`0.97`.  At the price the solver's own elimination actually pays, the ratio is
+`13.5`.  Nothing on the table gets the oracle below enumeration by more than a
+few per cent, and only at a price measured on a field eighteen bits larger.
+
+**The `350×` (X4's question): engineering by the registered rule, and weakly
+determined.**  Per relation, `Q_sym/Q_x` is `2.11, 0.75, 3.50` at
+`n = 13, 15, 19`.  At `n = 23` the `x`-chained arm hit its budget on 12 of 16
+targets.  Its measured ratio, `0.28`, is therefore printed as a bound, not a
+value, and left out of the fit, as registered.  Over the
+three rungs left, the slope is `+0.18 ± 0.32`, and the wall-clock slope is
+`+0.13 ± 0.28`: no evidence that the ratio falls, so **engineering**.  Three
+rungs are one fewer than `AGENTS.md` §5 asks of an exponent, and the interval
+is wide.  The label means "no advance shown", not "a constant measured".  On what was
+measured at `n = 23`, the symmetrised system is the better algebraic oracle:
+`0.28×` the `x`-chained cost per relation and `4,484` against `16,119` ms.
+That is the pattern §17 of the exotic-coordinates note saw at that size.  Both
+algebraic oracles still lose to enumeration there, by `3.6×` and `15.6×`.
+
+**Classes.**  X4's structural finding is **accounting**.  The gate is a
+**stage diagnostic** that closes Route 3 at the oracle.  The `350×` is
+**engineering**.  No existing method's cost changed, and nothing here bears
+on ECC2K-130's security.
+
 ## X5 — `m = 4` via a chained symmetrised `S₃`
 
 **Question.** The conditional theory wants `m ≈ n^{1/3} ≈ 5.1` at
@@ -286,7 +557,8 @@ rather than whether to read more.
 | T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | X1 admissibility | short |
 | T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | Route 1 verdict | hours |
 | T6 | X3: repeat T5 on the symmetrised systems | Route 2 verdict | hours |
-| T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input | X4 | medium |
+| T6′ | X4′: run the gate over `n = 13, 15, 19, 23`; freeze under `experiments/` — **done: closed**, `experiments/26_koblitz_symmetrised_gate.json` | T7, T8 | minutes |
+| T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input — **not built: X4′ closed** | X4 | medium |
 | T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
 | T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | Route 4 verdict | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |
@@ -303,7 +575,8 @@ Any one of:
 - **`α` measured over ≥4 rungs**, whatever its value. A number closes
   Route 1 either way; the current state is that nobody has one.
 - **X4 classified.** Engineering or advance, labelled by the §3 test and
-  not by how the 350× felt.
+  not by how the 350× felt — or Route 3 closed at X4′'s gate, which answers
+  the same question one phase earlier.
 - **H1 falsified at `m = 4`** — a first fall degree that grows, which
   would matter to the FFD controversy directly and is the one place
   where this repository's measurements are the state of the art.

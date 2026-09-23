@@ -1632,8 +1632,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         sets only where the relation phase stops dominating.</p>
       <p><strong>Derived before building</strong> (&sect;11.16, from &sect;11.7's measured Wiedemann
         constant and F<sub>p&#8308;</sub> operation counts): the constant is
-        <strong>0.34&ndash;0.63&times; rho</strong>, so a plain k&thinsp;=&thinsp;4 method would
-        eventually beat rho by 1.6&ndash;3&times; and no more. This note's own solver bounds
+        <s>0.34&ndash;0.63&times; rho</s>, so a plain k&thinsp;=&thinsp;4 method would
+        eventually beat rho by <s>1.6&ndash;3&times;</s> and no more (measured below). This note's own solver bounds
         C&#8324; &ge; 7.1&middot;10<sup>10</sup> from the characteristic polynomial of a
         4,096-dimensional multiplication matrix alone, which put the handover at
         <s>n &asymp; 2<sup>133</sup>&ndash;2<sup>137</sup></s>, extrapolated on the exponents
@@ -1647,12 +1647,81 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <strong>C&#8324; = 1.21&middot;10<sup>12</sup></strong>, 17&times; the floor. The same
         solver on generic systems of the same degrees predicts it within 4%, so the summation
         polynomial is no cheaper than any four octics. The handover moves to
-        <strong>n &asymp; 2<sup>149</sup>&ndash;2<sup>153</sup></strong> (extrapolated), with the
+        <s>n &asymp; 2<sup>149</sup>&ndash;2<sup>153</sup></s> (extrapolated over the derived
+        constant; narrowed below), with the
         relation phase at 4.3&middot;10<sup>8</sup>&times; rho at 32 bits &mdash; still about
         eighty doublings before the k&thinsp;=&thinsp;3 crossover. A stage diagnostic: no
         end-to-end S exists for k&thinsp;=&thinsp;4, and none is claimed.</p>
+      <p><strong>Then the constant, measured</strong> (&sect;11.19, registered in &sect;11.18: eight
+        prime-order curves over F<sub>p&#8308;</sub> at p&thinsp;=&thinsp;269&ndash;1033,
+        n&thinsp;&asymp;&thinsp;2<sup>32</sup>&ndash;2<sup>40</sup>, relations from a
+        meet-in-the-middle oracle, the linear algebra run to a verified logarithm on every curve,
+        rho run 16 times on each, all 128 verified): the linear algebra costs
+        <strong>r&#8734; = 0.518 &plusmn; 0.031&times; rho</strong>, flat in n (fitted exponent
+        &minus;0.021 &plusmn; 0.017), inside the derived band. So a plain k&thinsp;=&thinsp;4
+        method would beat rho by <strong>1.9&times;</strong> and no more. The one derived input
+        that was off was the filtering fraction, 0.897 measured against the 0.73 borrowed from
+        k&thinsp;=&thinsp;3, and at the measured value the derived formula gives 0.510. The
+        handover narrows to <strong>n &asymp; 2<sup>151.1</sup></strong>
+        (2<sup>150.8</sup>&ndash;2<sup>151.5</sup>), extrapolated on the same exponents and
+        C&#8324;. Class: a stage diagnostic. It prices the linear algebra against rho, while the
+        stand-in relation phase at these sizes is 1,054&ndash;4,988&times; rho and the
+        S&#8325; one 4.3&middot;10<sup>8</sup>&times;. The registered outcome was
+        <em>confirmed</em>.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
+    </div>
+  </div>
+
+  <div class="panel" id="ecc2k130-route3-gate-20260923">
+    <div class="panel-head">
+      <h2>ECC2K-130 Route 3: the symmetrised oracle closes at the gate</h2>
+      <p>Class <span class="chip">accounting</span> for the structural finding,
+        <span class="chip">engineering</span> for the oracle ratio, and the gate itself is a stage
+        diagnostic. X4 asked whether the 2-torsion frame&rsquo;s symmetrised oracle, measured
+        at 350&times; the chained x-system, is an advance end to end. <b>It could not run as
+        registered.</b> Its floor, &Lambda; = m/n, needs a Frobenius-stable V &ni; 1. On E1&rsquo;s
+        ladder, and at ECC2K-130&rsquo;s n = 131 where 2 is primitive, the only such V are
+        F<sub>2</sub> and the field, and the symmetrised base over F<sub>2</sub> is the single
+        point T. So both frames must use a non-invariant V, both sit on &Lambda; = m, and the
+        question is cost per relation. X4&prime; registered that as a gate before any run. The
+        end-to-end build happens only if the symmetrised oracle is cheaper per relation than
+        the enumeration it would replace. Frozen source:
+        <code>experiments/26_koblitz_symmetrised_gate.json</code>; rules in
+        <code>research/notes/ecc2k130/RESEARCH_ECC2K130_ROUTE_TARGETS.md</code> &sect;X4&prime;.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>K<sub>0</sub>, m = 3, E1&rsquo;s l, one shared non-invariant V, 16 targets per rung,
+        default engine (InheritedF4) on the fair diagonal (x at Macaulay cap 3, symmetrised at 4).
+        Group-addition equivalents per relation found, with word XORs priced at the raw rate, so
+        every oracle cost is a lower bound. The reference is the cheaper enumeration rule on
+        the same base. Zero gate failures on 128 calls.</caption>
+      <thead>
+        <tr><th scope="col" class="n">n</th><th scope="col">Shape</th>
+          <th scope="col" class="n">Enumeration, GAE / relation</th>
+          <th scope="col" class="n">x-chained &divide; enumeration</th>
+          <th scope="col" class="n">Symmetrised &divide; enumeration</th>
+          <th scope="col" class="n">Symmetrised &divide; x-chained</th>
+          <th scope="col">Class</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">13</td><td>E1</td><td class="n">399 (x) / 890 (u)</td><td class="n">8.60</td><td class="n"><b>8.14</b></td><td class="n">2.11</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">15</td><td>fit only</td><td class="n">2,025 / 4,386</td><td class="n">8.97</td><td class="n"><b>3.10</b></td><td class="n">0.75</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">19</td><td>E1</td><td class="n">4,421 / 15,359</td><td class="n">14.60</td><td class="n"><b>14.71</b></td><td class="n">3.50</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">23</td><td>E1</td><td class="n">45,495 / 54,629</td><td class="n">15.57</td><td class="n"><b>3.60</b></td><td class="n">0.28, a bound (x budget-limited on 12/16)</td><td><span class="chip">stage diagnostic</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><b>The gate is closed.</b> Per relation, the symmetrised oracle costs 3.1&ndash;14.7&times; the
+        enumeration it would replace on every rung, priced from below. The fitted slope in n is
+        &minus;0.029 &plusmn; 0.167, so the ratio is not falling, and the frozen calibration gives
+        the same verdict. Wiring the oracle into collection would raise &Lambda;, so the end-to-end
+        build is not done. The thinnest margin is at n = 23: the ratio stays above 1 for any
+        word-XOR price over 0.00072 GAE, and the ledger&rsquo;s degree-23 entry gives 1.66. The 350&times;
+        question is <span class="chip">engineering</span> by the registered slope rule, +0.18
+        &plusmn; 0.32 over three unbounded rungs, which is weakly determined. At n = 23 the
+        symmetrised system is the better algebraic oracle, but both lose to enumeration. Nothing
+        here bears on ECC2K-130&rsquo;s security.</p>
     </div>
   </div>
 
@@ -4863,5 +4932,42 @@ factor base, and this prices a decomposition oracle.</p>
     off it is <code>2<sup>4.4</sup></code> off <code>2<sup>131</sup></code>.</p>
 </section>
 <!-- END inherited-f4-20260922 -->
+<!-- BEGIN ic-tournament-round-0023 -->
+<section class="panel" id="ic-tournament-round-0023">
+<p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,860</td><td>1</td><td>1.017</td><td>5.111e+05</td><td>24/24</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,367</td><td>0.8275</td><td>0.8412</td><td>3.381e+05</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,814</td><td>0.9837</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,842</td><td>1</td><td>0.9488</td><td>5.078e+05</td><td>72/72</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,639</td><td>0.9287</td><td>0.8812</td><td>3.77e+05</td><td>72/72</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,995</td><td>1.054</td><td>1</td><td>unmeasured</td><td>72/72</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,729</td><td>1</td><td>1.127</td><td>1.063e+06</td><td>516/516</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,976</td><td>0.7982</td><td>0.8998</td><td>6.086e+05</td><td>516/516</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3,308</td><td>0.8871</td><td>1</td><td>unmeasured</td><td>516/516</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: False.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2.798</td><td>1</td><td>reference</td><td>1.331</td><td>516/516</td></tr>
+<tr><td>scaled</td><td>2.306</td><td>0.8244</td><td>[0.6780891092338177, 0.9689753816226493]</td><td>1.097</td><td>516/516</td></tr>
+<tr><td>rho</td><td>2.102</td><td>0.7512</td><td>[0.500494577703393, 1.0414858798124165]</td><td>1</td><td>516/516</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0023 -->
 </body>
 </html>

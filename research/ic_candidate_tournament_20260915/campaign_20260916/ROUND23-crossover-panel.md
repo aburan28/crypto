@@ -139,3 +139,14 @@ Prediction 1 is therefore now an identity at the base level; its
 **Second run: 9 passed, 0 failed**, including the policy's own test. The
 amended `round23-scaled-base.patch` rebuilds, through `round23_candidates.py`,
 to the tree tested here byte for byte.
+
+## 6. Outcome (appended after the round; §1–5 unchanged)
+
+`retained`, `beats_rho_strict` false: prediction 6. Audit VERIFIED over 3,648
+receipts. Predictions 1–4 and 6 are confirmed. Prediction 5 is missed at
+`n37a0`, where `scaled`/rho reads 1.085 against the registered [1.15, 1.70].
+rho's median iteration count on those twelve fixtures is 1.195× its model,
+and `n43a1` (2.613) and both holdouts fall inside their registrations. All three
+arms recover identical logarithms on every final-stage case. Full account:
+[RESULTS.md](RESULTS.md#round-0023-the-crossover-cells-in-the-harness-and-the-base-rule-out-of-sample),
+[report](../runs/round-0023/REPORT.md).
