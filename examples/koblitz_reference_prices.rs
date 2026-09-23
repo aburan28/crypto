@@ -21,9 +21,10 @@
 //!   take; its step *count* is not measured here;
 //! - **(c) the folded table's build**, `build_folded_within` on a base of
 //!   `points` points, per stored pair;
-//! - a diagnostic that nothing in §19.1 declared: `add_pairwise` over
+//! - two diagnostics that nothing in §19.1 declared: `add_pairwise` over
 //!   1,024 independent pairs, the batched addition a parallel walk would
-//!   actually run.
+//!   actually run; and one affine addition with its own inversion, the
+//!   unit of the boundary ledger's single-target rows (§18.8).
 //!
 //! Each quantity is divided by the unit measured in the same round, and
 //! the report gives the median over rounds with the range.
@@ -78,6 +79,7 @@ fn main() {
     let mut out: Vec<FastPoint> = Vec::with_capacity(1024);
     let (mut unit, mut canon_units, mut bailey_units, mut pairwise_units, mut build_units) =
         (Vec::new(), Vec::new(), Vec::new(), Vec::new(), Vec::new());
+    let mut affine_units = Vec::new();
     let mut stored = 0usize;
     let mut sink = 0u64;
     for _ in 0..rounds {
@@ -119,6 +121,14 @@ fn main() {
         pairwise_units.push(t.elapsed().as_secs_f64() * 1e9 / (reps * batch.len()) as f64 / add_ns);
         sink ^= out[5].y;
 
+        // Diagnostic: one affine addition, its own inversion included.
+        let t = Instant::now();
+        for i in 0..ADDS / 4 {
+            let s = fc.add(batch[i & 1023], gathered[i & 1023]);
+            sink ^= s.x;
+        }
+        affine_units.push(t.elapsed().as_secs_f64() * 1e9 / (ADDS / 4) as f64 / add_ns);
+
         // (c) the folded table's build, on one thread.
         if let Some(fb) = &fb {
             let t = Instant::now();
@@ -144,6 +154,7 @@ fn main() {
         "b_bailey_overhead_units": median_range(&bailey_units),
         "b_bailey_step_units": 1.0 + bailey_m,
         "diagnostic_add_pairwise_units": median_range(&pairwise_units),
+        "diagnostic_affine_add_units": median_range(&affine_units),
         "c_build": fb.as_ref().map(|fb| json!({
             "base_points": fb.points.len(),
             "signed_orbits": fb.signed_orbits.len(),
