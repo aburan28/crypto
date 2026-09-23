@@ -122,8 +122,13 @@ pub fn run(args: DescentArgs, json_only: bool) -> Result<Value, String> {
                 max_n_prime(*m)
             ));
         }
-        if *n < 5 || *n > 32 {
-            return Err(format!("field degree {n} outside 5..=32"));
+        // The field arithmetic reaches n = 63 and the descent's mask
+        // m·n' = 64; the bound is the curve constructors' cost: the
+        // random family counts points exhaustively, 2^n x-coordinates,
+        // which is minutes at n = 33 and grows fourfold per two degrees.
+        // 36 is also as far as the vector exhaustive search reaches.
+        if *n < 5 || *n > 36 {
+            return Err(format!("field degree {n} outside 5..=36"));
         }
     }
     for f in &args.families {
