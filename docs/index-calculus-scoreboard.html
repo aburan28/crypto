@@ -175,6 +175,9 @@
     font-family: var(--mono); font-size: 11.5px; color: var(--muted);
   }
   .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  /* A legend line that is prose, not a swatch key: one block of text, so the
+     <b>, <code> and <sup> inside it stay inline instead of becoming flex items. */
+  .legend > span:not(:has(> .swatch)) { display: block; }
   .swatch { width: 18px; height: 9px; border-radius: 2px; background: var(--data); flex: none; }
   .swatch.ghost { background: none; border-top: 1.5px dashed var(--muted); height: 0; border-radius: 0; }
   .swatch.bound { background: var(--bound); width: 3px; height: 14px; }
@@ -319,21 +322,29 @@
       their generic-group floor and matched Pollard rho reference. On elliptic curves nothing
       measured end to end is below rho: the residual-walk thread's 500&times;-or-worse verdict on
       E(F<sub>p</sub><sup>3</sup>) is unchanged, and the three-regime ledger that heads the page
-      puts the best whole-pipeline variant at 3.55&times; rho on a 23-bit prime-order curve,
-      16.0&times; on a 24-bit random binary curve and &mdash; after the collection and selection
-      rounds of 2026-09-21 and 2026-09-22 &mdash; <b>1.17&times;</b> on a 39-bit Koblitz subgroup,
-      with no fitted exponent below the reference's. Two independent things moved those numbers
-      and they must not be confused. The first two read lower than Round 4&rsquo;s 3.63 and 21.9
-      for a reason that is <em>not</em> progress and is not counted as any: Round 5 re-seeded the
+      puts the best whole-pipeline variant at <b>13.5&times;</b> the matched rho on a 23-bit
+      prime-order curve, <b>38.2&times;</b> on a 24-bit random binary curve and &mdash; after the
+      collection and selection rounds of 2026-09-21 and 2026-09-22 &mdash; <b>1.17&times;</b> on a
+      39-bit Koblitz subgroup, with no fitted exponent below the reference's. The first two were
+      3.55&times; and 16.0&times; until the reference was matched (ledger &sect;18, 2026-09-23): the
+      prime and binary rows had been priced against a walk that used no automorphism and paid
+      most of its <code>S</code> in set-up, and against the negation-map walk the contract asks for
+      they read 2.4&ndash;3.8&times; higher &mdash; an accounting change that moves no index-calculus
+      count and makes the verdict below stronger. Before that, two independent things moved those
+      numbers and they must not be confused. Round 5 read lower than Round 4&rsquo;s 3.63 and 21.9
+      for a reason that is <em>not</em> progress and is not counted as any: it re-seeded the
       walk rows, which moves a single row by up to a factor 1.8 in either direction at three
       repeats, and its own lever is exactly 1.000&times; on all three (see the panel below). That
       same re-seed took the Koblitz row from 30.3&times; to 26.1&times;. The 1.17&times; is
       separate and is progress: it is the collection and selection rounds measured end to end
       against a rho reference pooled over 224 targets of their own runs, so it is not the
       re-seeded row re-measured and the two references are not interchangeable. It is the
-      closest anything here has come to rho on an elliptic curve and it is still above it; the
-      rounds that produced it also drove the relation count to its counting floor, so that lever
-      is spent rather than promising. Round 3 turns the general statement from a
+      closest anything here has come to rho on an elliptic curve and it is still above it &mdash;
+      <em>as priced</em>: like every Koblitz reference on this page it charges nothing for the
+      canonicalisation each rho step performs, while the index-calculus side pays for its Frobenius
+      work, so 1.17&times; is an upper bound and a declared round must price the reference before
+      it is read as a margin (&sect;18.8). The rounds that produced it also drove the relation count
+      to its counting floor, so that lever is spent rather than promising. Round 3 turns the general statement from a
       report into a <strong>boundary</strong>. The pair-table family has a derived shape law &mdash; a
       two-summand row pays <code>F&sup2;/4t</code> for its table and about
       <code>c&middot;#E/(2kF)</code> for its relations, least at
@@ -384,13 +395,14 @@
       <div class="fact">
         <dt>Boundary 2 · the reference</dt>
         <dd>rho, counted</dd>
-        <p>S &asymp; 1.3 on E(F<sub>p</sub><sup>3</sup>) with the residual-walk accounting; 0.20 to 23 on the three-regime ledger with the setup inside, the walk alone 0.13 to 4.2.</p>
+        <p>S &asymp; 1.3 on E(F<sub>p</sub><sup>3</sup>) with the residual-walk accounting. On the three-regime ledger, matched to the curve&rsquo;s automorphisms with the setup inside: 0.97 to 3.6 on the prime and binary ladders (the negation-map walk, walk alone 0.87 to 1.6; the plain walk they were priced against until &sect;18 read 2.3 to 23), 0.20 to 19 on the Koblitz ladder (signed Frobenius, canonicalisation unpriced).</p>
       </div>
       <div class="fact">
         <dt>Closest to rho</dt>
-        <dd>3.63&times; at 2<sup>23.4</sup></dd>
+        <dd>13.5&times; at 2<sup>23.4</sup></dd>
         <p>Meet in the middle, m = 2, prime field, folded table, walked targets and a base at the
-          family optimum (222 signed points against the rule&rsquo;s 512); every phase counted.</p>
+          family optimum (222 signed points against the rule&rsquo;s 512); every phase counted; against
+          the matched negation-map rho. It read 3.55&times; against the plain walk (3.63&times; in Round 4).</p>
       </div>
       <div class="fact">
         <dt>Boundary 3 &middot; the family&rsquo;s own floor</dt>
@@ -451,10 +463,13 @@
       <table>
         <caption>Frozen source: <code>docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json</code>
           (<code>ic boundary --oracles</code>). Means over three targets; rho over eight walks per
-          target. Every logarithm on the board recovered and verified as [d]G = Q. The Koblitz
-          reference and floor use all 2n signed-Frobenius automorphisms; the prime and binary
-          references use none, so their &ldquo;vs rho&rdquo; is generous to index calculus by
-          &radic;2.</caption>
+          target. Every logarithm on the board recovered and verified as [d]G = Q. The prime and
+          binary references are the matched negation-map walk (A = 2) on the same seeds and targets,
+          re-priced in ledger &sect;18 (<code>research/ic_rho_reference_20260923/reprice/</code>): each
+          &ldquo;vs rho&rdquo; reads against it, with the plain walk&rsquo;s figure as &ldquo;was&rdquo;. The
+          Koblitz reference and floor use all 2n signed-Frobenius automorphisms; that reference prices
+          its per-step canonicalisation at zero (&sect;18.8), so its &ldquo;vs rho&rdquo; is an upper bound,
+          by about 1.07&times; at n = 41.</caption>
         <thead>
           <tr>
             <th scope="col">Variant</th>
@@ -467,25 +482,25 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="group"><td colspan="7">Prime field, generic curve &middot; generated-24bit-10935329 &middot; r = 2<sup>23.4</sup> &middot; rho S = 3.93 &middot; floor S = 0.886</td></tr>
-          <tr><td>Semaev S&#8323; roots, m = 2</td><td class="n">5,109</td><td class="n">1,300&times;</td><td class="n">5,765&times;</td><td class="n">457&times;</td><td>yes</td><td title="baseline: one square root per base abscissa per target"><span class="chip">baseline</span></td></tr>
-          <tr><td>Direct subtraction, m = 2</td><td class="n">2,037</td><td class="n">518&times;</td><td class="n">2,298&times;</td><td class="n">182&times;</td><td>yes</td><td title="accounting: the same enumeration, priced by additions instead of square roots"><span class="chip">accounting</span></td></tr>
-          <tr><td>Meet in the middle, m = 2</td><td class="n">268</td><td class="n">68.3&times;</td><td class="n">303&times;</td><td class="n">24.0&times;</td><td>yes</td><td title="engineering: memory for time, ratio to the counting boundary unmoved"><span class="chip">engineering</span></td></tr>
-          <tr><td>Meet in the middle, m = 3</td><td class="n">56.8</td><td class="n">14.5&times;</td><td class="n">64.1&times;</td><td class="n">5.08&times;</td><td>yes</td><td title="engineering: memory for time, one probe per subtraction"><span class="chip">engineering</span></td></tr>
-          <tr><td>Meet in the middle, m = 2, negation-folded table</td><td class="n">248 <small>was 268</small></td><td class="n">63.2&times;</td><td class="n">280&times;</td><td class="n">22.2&times;</td><td>yes</td><td title="engineering: half the table&#x27;s additions build entries the abscissa key already held; same trials, same yield"><span class="chip">engineering</span></td></tr>
-          <tr><td>&hellip; and walk targets</td><td class="n">24.8 <small>was 248</small></td><td class="n">6.32&times;</td><td class="n">28.0&times;</td><td class="n">2.22&times;</td><td>yes</td><td title="engineering: one addition per target instead of two scalar multiplications; same yield against the ceiling"><span class="chip">engineering</span></td></tr>
-          <tr><td>Meet in the middle, m = 3, negation-folded table</td><td class="n">37.0 <small>was 56.8</small></td><td class="n">9.41&times;</td><td class="n">41.7&times;</td><td class="n">3.31&times;</td><td>yes</td><td title="engineering: the table&#x27;s additions halve; same trials, same yield"><span class="chip">engineering</span></td></tr>
-          <tr><td>&hellip; and walk targets</td><td class="n">31.7 <small>was 37.0</small></td><td class="n">8.06&times;</td><td class="n">35.7&times;</td><td class="n">2.83&times;</td><td>yes</td><td title="engineering: the target&#x27;s two scalar multiplications become one addition; the |F| subtractions per target remain"><span class="chip">engineering</span></td></tr>
-          <tr><td>&hellip; and a base at the family optimum (|F| = #E<sup>1/3</sup>)</td><td class="n">14.0 <small>was 24.8</small></td><td class="n">3.55&times;</td><td class="n">15.8&times;</td><td class="n">1.25&times;</td><td>yes</td><td title="engineering: the base size that minimises the family&#x27;s table-plus-relations cost, F = #E^(1/3) signed points; its own row, its own table"><span class="chip">engineering</span></td></tr>
-          <tr class="group"><td colspan="7">Binary field, random curve &middot; random-binary-n27-b845462 &middot; r = 2<sup>24.4</sup> &middot; rho S = 2.31 &middot; floor S = 0.886</td></tr>
-          <tr><td>Meet in the middle, m = 3</td><td class="n">206</td><td class="n">89.1&times;</td><td class="n">233&times;</td><td class="n">4.96&times;</td><td>yes</td><td title="baseline: the table pipeline on the random binary curve"><span class="chip">baseline</span></td></tr>
-          <tr><td>S&#8324; pairs-and-solve, m = 3</td><td class="n">115,459</td><td class="n">49,906&times;</td><td class="n">130,282&times;</td><td class="n">2,778&times;</td><td>yes</td><td title="relabelling: the pair table&#x27;s memory is paid back as a per-target loop over |F|^2/2 pairs; S rises"><span class="chip relabel">relabelling</span></td></tr>
-          <tr><td>Meet in the middle, m = 3, negation-folded table</td><td class="n">191 <small>was 206</small></td><td class="n">82.7&times;</td><td class="n">216&times;</td><td class="n">4.61&times;</td><td>yes</td><td title="engineering: the table&#x27;s additions halve; same trials, same yield"><span class="chip">engineering</span></td></tr>
-          <tr><td>&hellip; and walk targets</td><td class="n">169 <small>was 191</small></td><td class="n">73.2&times;</td><td class="n">191&times;</td><td class="n">4.07&times;</td><td>yes</td><td title="engineering: the target&#x27;s two scalar multiplications become one addition; the |F| subtractions per target remain"><span class="chip">engineering</span></td></tr>
-          <tr><td>Meet in the middle, m = 2, negation-folded table</td><td class="n">1,645 <small>was 206</small></td><td class="n">711&times;</td><td class="n">1,856&times;</td><td class="n">39.6&times;</td><td>yes</td><td title="engineering: half the table&#x27;s additions build entries the abscissa key already held; same trials, same yield"><span class="chip">engineering</span></td></tr>
-          <tr><td>&hellip; and walk targets</td><td class="n">41.7 <small>was 1,645</small></td><td class="n">18.0&times;</td><td class="n">47.0&times;</td><td class="n">1.00&times;</td><td>yes</td><td title="engineering: one addition per target instead of two scalar multiplications; same yield against the ceiling"><span class="chip">engineering</span></td></tr>
-          <tr><td>&hellip; and a base at the family optimum (|F| = #E<sup>1/3</sup>)</td><td class="n">36.9 <small>was 41.7</small></td><td class="n">16.0&times;</td><td class="n">41.7&times;</td><td class="n">0.89&times;</td><td>yes</td><td title="engineering: the base size that minimises the family&#x27;s table-plus-relations cost, F = #E^(1/3) signed points; its own row, its own table"><span class="chip">engineering</span></td></tr>
-          <tr class="group"><td colspan="7">Koblitz curve, signed-Frobenius reference &middot; K_0 / GF(2^41) &middot; r = 2<sup>39.0</sup> &middot; rho S = 0.20 &middot; floor S = 0.138</td></tr>
+          <tr class="group"><td colspan="7">Prime field, generic curve &middot; generated-24bit-10935329 &middot; r = 2<sup>23.4</sup> &middot; rho S = 1.04, matched (A = 2) <small>was 3.93, plain walk</small> &middot; floor S = 0.886</td></tr>
+          <tr><td>Semaev S&#8323; roots, m = 2</td><td class="n">5,109</td><td class="n">4,922&times; <small>was 1,300&times;</small></td><td class="n">5,765&times;</td><td class="n">457&times;</td><td>yes</td><td title="baseline: one square root per base abscissa per target"><span class="chip">baseline</span></td></tr>
+          <tr><td>Direct subtraction, m = 2</td><td class="n">2,037</td><td class="n">1,962&times; <small>was 518&times;</small></td><td class="n">2,298&times;</td><td class="n">182&times;</td><td>yes</td><td title="accounting: the same enumeration, priced by additions instead of square roots"><span class="chip">accounting</span></td></tr>
+          <tr><td>Meet in the middle, m = 2</td><td class="n">268</td><td class="n">258&times; <small>was 68.3&times;</small></td><td class="n">303&times;</td><td class="n">24.0&times;</td><td>yes</td><td title="engineering: memory for time, ratio to the counting boundary unmoved"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 3</td><td class="n">56.8</td><td class="n">54.7&times; <small>was 14.5&times;</small></td><td class="n">64.1&times;</td><td class="n">5.08&times;</td><td>yes</td><td title="engineering: memory for time, one probe per subtraction"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 2, negation-folded table</td><td class="n">248 <small>was 268</small></td><td class="n">239&times; <small>was 63.2&times;</small></td><td class="n">280&times;</td><td class="n">22.2&times;</td><td>yes</td><td title="engineering: half the table&#x27;s additions build entries the abscissa key already held; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">24.8 <small>was 248</small></td><td class="n">23.9&times; <small>was 6.32&times;</small></td><td class="n">28.0&times;</td><td class="n">2.22&times;</td><td>yes</td><td title="engineering: one addition per target instead of two scalar multiplications; same yield against the ceiling"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 3, negation-folded table</td><td class="n">37.0 <small>was 56.8</small></td><td class="n">35.6&times; <small>was 9.41&times;</small></td><td class="n">41.7&times;</td><td class="n">3.31&times;</td><td>yes</td><td title="engineering: the table&#x27;s additions halve; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">31.7 <small>was 37.0</small></td><td class="n">30.5&times; <small>was 8.06&times;</small></td><td class="n">35.7&times;</td><td class="n">2.83&times;</td><td>yes</td><td title="engineering: the target&#x27;s two scalar multiplications become one addition; the |F| subtractions per target remain"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and a base at the family optimum (|F| = #E<sup>1/3</sup>)</td><td class="n">14.0 <small>was 24.8</small></td><td class="n">13.5&times; <small>was 3.55&times;</small></td><td class="n">15.8&times;</td><td class="n">1.25&times;</td><td>yes</td><td title="engineering: the base size that minimises the family&#x27;s table-plus-relations cost, F = #E^(1/3) signed points; its own row, its own table"><span class="chip">engineering</span></td></tr>
+          <tr class="group"><td colspan="7">Binary field, random curve &middot; random-binary-n27-b845462 &middot; r = 2<sup>24.4</sup> &middot; rho S = 0.97, matched (A = 2) <small>was 2.31, plain walk</small> &middot; floor S = 0.886</td></tr>
+          <tr><td>Meet in the middle, m = 3</td><td class="n">206</td><td class="n">213&times; <small>was 89.1&times;</small></td><td class="n">233&times;</td><td class="n">4.96&times;</td><td>yes</td><td title="baseline: the table pipeline on the random binary curve"><span class="chip">baseline</span></td></tr>
+          <tr><td>S&#8324; pairs-and-solve, m = 3</td><td class="n">115,459</td><td class="n">119,465&times; <small>was 49,906&times;</small></td><td class="n">130,282&times;</td><td class="n">2,778&times;</td><td>yes</td><td title="relabelling: the pair table&#x27;s memory is paid back as a per-target loop over |F|^2/2 pairs; S rises"><span class="chip relabel">relabelling</span></td></tr>
+          <tr><td>Meet in the middle, m = 3, negation-folded table</td><td class="n">191 <small>was 206</small></td><td class="n">198&times; <small>was 82.7&times;</small></td><td class="n">216&times;</td><td class="n">4.61&times;</td><td>yes</td><td title="engineering: the table&#x27;s additions halve; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">169 <small>was 191</small></td><td class="n">175&times; <small>was 73.2&times;</small></td><td class="n">191&times;</td><td class="n">4.07&times;</td><td>yes</td><td title="engineering: the target&#x27;s two scalar multiplications become one addition; the |F| subtractions per target remain"><span class="chip">engineering</span></td></tr>
+          <tr><td>Meet in the middle, m = 2, negation-folded table</td><td class="n">1,645 <small>was 206</small></td><td class="n">1,702&times; <small>was 711&times;</small></td><td class="n">1,856&times;</td><td class="n">39.6&times;</td><td>yes</td><td title="engineering: half the table&#x27;s additions build entries the abscissa key already held; same trials, same yield"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and walk targets</td><td class="n">41.7 <small>was 1,645</small></td><td class="n">43.1&times; <small>was 18.0&times;</small></td><td class="n">47.0&times;</td><td class="n">1.00&times;</td><td>yes</td><td title="engineering: one addition per target instead of two scalar multiplications; same yield against the ceiling"><span class="chip">engineering</span></td></tr>
+          <tr><td>&hellip; and a base at the family optimum (|F| = #E<sup>1/3</sup>)</td><td class="n">36.9 <small>was 41.7</small></td><td class="n">38.2&times; <small>was 16.0&times;</small></td><td class="n">41.7&times;</td><td class="n">0.89&times;</td><td>yes</td><td title="engineering: the base size that minimises the family&#x27;s table-plus-relations cost, F = #E^(1/3) signed points; its own row, its own table"><span class="chip">engineering</span></td></tr>
+          <tr class="group"><td colspan="7">Koblitz curve, signed-Frobenius reference &middot; K_0 / GF(2^41) &middot; r = 2<sup>39.0</sup> &middot; rho S = 0.20, canonicalisation unpriced (&sect;18.8) &middot; floor S = 0.138</td></tr>
           <tr><td>Meet in the middle, signed-orbit columns</td><td class="n">58.8</td><td class="n">301&times;</td><td class="n">425&times;</td><td class="n">4.05&times;</td><td>yes</td><td title="advance, count: K falls by the orbit length 2n against the control; S moves little because the factor base dominates"><span class="chip advance">advance, count</span></td></tr>
           <tr><td>Signed-orbit columns, negation-folded table</td><td class="n">50.4 <small>was 58.8</small></td><td class="n">257&times;</td><td class="n">364&times;</td><td class="n">3.47&times;</td><td>yes</td><td title="engineering: the table&#x27;s additions halve; same trials, same yield"><span class="chip">engineering</span></td></tr>
           <tr><td>&hellip; Frobenius-folded table (|F|&sup2;/4n entries)</td><td class="n">45.2 <small>was 58.8</small></td><td class="n">231&times;</td><td class="n">326&times;</td><td class="n">10.7&times;</td><td>yes</td><td title="engineering: the table shrinks by the orbit length 2n, the automorphism group the floor already credits to a generic walk; one canonicalisation per probe, priced"><span class="chip">engineering</span></td></tr>
@@ -505,7 +520,53 @@
       <span><b>the restart pool is drawn on first use</b> (Round 5): 110 of Round 4&rsquo;s 204 walk rows bought sixteen offsets and took none, at two scalar multiplications each. Drawn lazily, 155 of 204 rows draw fewer, and the saving is exactly <code>(48&thinsp;log&#8322;r &minus; 48)/&radic;r</code> to within 1&ndash;9&percnt; &mdash; so it is large below 2<sup>15</sup> (best ratio 0.58) and small above 2<sup>20</sup> (best 0.93, at Koblitz 2<sup>22</sup>, where S is lowest; 1.000 on all three rows of this panel). This closes the loss the previous line records: against Round 2, K&#8321;/GF(2<sup>11</sup>) goes 0.597 &rarr; <b>1.001</b>, K&#8320;/GF(2<sup>13</sup>) 0.650 &rarr; <b>1.000</b>, bench-10bit&rsquo;s m&thinsp;=&thinsp;3 walk 0.656 &rarr; <b>1.000</b>. Class engineering</span>
       <span><b>and a caution this round measured</b>: moving the offsets to their own random stream changes no cost at all, yet it moved 204 of 537 rows &mdash; every walk row, and only walk rows &mdash; with a median of 1.0000 and a range of <b>0.54 to 1.83</b>. So a single walk row&rsquo;s S at three repeats is not resolvable to better than about that, which is why the Round-5 lever was measured by an exactly paired design and not by two ladders, and why this panel&rsquo;s three headline rows read 14.0, 36.9 and 5.11 where Round 4 read 14.3, 50.7 and 5.93. That move is re-randomisation of the same algorithm, classed accounting, and is not a gain</span>
       <span>every fitted total exponent is above rho&rsquo;s one half, so all three gaps widen with size; the walk rows&rsquo; exponents rise by 0.01&ndash;0.05 in Round 5 because a size-independent setup cost was removed from every rung, which steepens the fit without touching the algorithm</span>
-      <span>rho&rsquo;s setup is inside its S and dominates below 2<sup>20</sup>, so &ldquo;vs rho&rdquo; flatters index calculus at small sizes; &ldquo;vs floor&rdquo; does not</span>
+      <span>rho&rsquo;s setup is inside its S: the matched walk&rsquo;s is small, but it still reads 3.6 at 2<sup>9.7</sup> against 1.04 at 2<sup>23.4</sup>, so &ldquo;vs rho&rdquo; flatters index calculus somewhat at small sizes; &ldquo;vs floor&rdquo; does not. The plain walk&rsquo;s setup had put the 12-bit prime rung&rsquo;s best row below it, 0.84&times;, never quoted as a crossing; against the matched walk it is 5.5&times;</span>
+      <span><span class="chip">accounting</span> <b>the reference matched</b> (ledger &sect;18): the prime and binary rows are re-priced against the negation-map walk, A = 2, on the same seeds and targets, after replaying all 616 recorded runs of the old walk exactly. Every ratio rises 2.1&ndash;6.5&times;, of which the automorphism is 1.36&times; paired and the rest is the old walk&rsquo;s setup; no index-calculus count moved, so no row changes class</span>
+    </div>
+  </div>
+
+  <!-- ============ THE MATCHED REFERENCE ============ -->
+  <div class="panel" id="matched-rho-20260923">
+    <div class="panel-head">
+      <h2>The reference, matched: rho with the negation map <span class="chip">accounting</span></h2>
+      <p>Ledger &sect;18. The accounting contract prices a whole attack against &ldquo;the eligible
+        automorphism-aware rho reference&rdquo;. Through &sect;17 the prime and binary rows on this page,
+        and every <code>ic bench</code> row, divided by a plain walk that used no automorphism and paid
+        most of its <code>S</code> in setup: two scalar multiplications per walk start, a 560-operation
+        table, and walks long enough that about one in fifty cycled without a distinguished point and
+        ran to its cap. The matched walk is a tuned van Oorschot&ndash;Wiener walk on the classes
+        {P, &minus;P}: one addition per walk start, a distinguished point every r<sup>1/4</sup> steps, a
+        jump table sized to the subgroup and calibrated on sixteen curves no evaluation used, and the
+        Wiener&ndash;Zuccherato look-ahead with a deterministic doubling escape from fruitless cycles, every
+        operation charged. Its six targets were declared and committed before it ran; all six are met,
+        the exponent target at its edge. Frozen source: <code>research/ic_rho_reference_20260923/</code>
+        (<code>analysis.json</code> for every figure here).</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>The evaluation ladder: seed 0xE7A1, sixteen fresh curves (eight shown), 128 runs a walk,
+        the three walks paired on the same planted logarithms and seeds. <code>S</code> is total group
+        operations over &radic;r with the table, starts, walk and verification inside; every run
+        verified. The last column is the paired walk-operation ratio, the &radic;2 less the look-ahead.</caption>
+      <thead><tr><th scope="col">Curve</th><th scope="col" class="n">log&#8322; r</th><th scope="col" class="n">jumps</th>
+        <th scope="col" class="n">plain walk (frozen)</th><th scope="col" class="n">tuned, on points</th>
+        <th scope="col" class="n">negation, matched</th><th scope="col" class="n">vs floor 0.886</th>
+        <th scope="col" class="n">points / negation</th></tr></thead>
+      <tbody>
+        <tr><td>prime &middot; <code>generated-12bit-3529</code></td><td class="n">11.8</td><td class="n">4</td><td class="n">15.05</td><td class="n">3.00</td><td class="n"><b>2.80</b></td><td class="n">3.16&times;</td><td class="n">1.10</td></tr>
+        <tr><td>prime &middot; <code>generated-16bit-53411</code></td><td class="n">15.7</td><td class="n">8</td><td class="n">6.21</td><td class="n">2.28</td><td class="n"><b>1.82</b></td><td class="n">2.06&times;</td><td class="n">1.39</td></tr>
+        <tr><td>prime &middot; <code>generated-22bit-2434423</code></td><td class="n">21.2</td><td class="n">8</td><td class="n">3.01</td><td class="n">1.41</td><td class="n"><b>1.20</b></td><td class="n">1.35&times;</td><td class="n">1.19</td></tr>
+        <tr><td>prime &middot; <code>generated-26bit-42652151</code></td><td class="n">25.3</td><td class="n">16</td><td class="n">2.45</td><td class="n">1.34</td><td class="n"><b>0.98</b></td><td class="n">1.10&times;</td><td class="n">1.39</td></tr>
+        <tr><td>binary &middot; <code>random-binary-n13-b168f</code></td><td class="n">10.4</td><td class="n">4</td><td class="n">21.10</td><td class="n">3.53</td><td class="n"><b>3.17</b></td><td class="n">3.57&times;</td><td class="n">1.22</td></tr>
+        <tr><td>binary &middot; <code>random-binary-n17-b10103</code></td><td class="n">14.4</td><td class="n">4</td><td class="n">9.03</td><td class="n">2.25</td><td class="n"><b>2.06</b></td><td class="n">2.32&times;</td><td class="n">1.10</td></tr>
+        <tr><td>binary &middot; <code>random-binary-n23-b480f9a</code></td><td class="n">22.0</td><td class="n">16</td><td class="n">2.87</td><td class="n">1.51</td><td class="n"><b>1.13</b></td><td class="n">1.28&times;</td><td class="n">1.39</td></tr>
+        <tr><td>binary &middot; <code>random-binary-n27-b227199e</code></td><td class="n">26.0</td><td class="n">16</td><td class="n">2.28</td><td class="n">1.46</td><td class="n"><b>1.06</b></td><td class="n">1.20&times;</td><td class="n">1.39</td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>declared and met</b>: every run verified (21,096 runs, 0.011% of walks abandoned in a cycle); the old walk replayed exactly on all 616 recorded runs of the ten re-priced reports; the matched walk 1.02&ndash;1.20&times; its own floor from 2<sup>20</sup>; the &radic;2 paired, 1.362 [1.296, 1.430]; <code>S</code> at most 1.20 from 2<sup>20</sup> with the pooled exponent 0.452 over six sizes, <em>at the bound&rsquo;s edge</em>, because setup is still visible there; no curve with an automorphism beyond negation</span>
+      <span><b>re-priced</b>, every figure on this page that divided by the plain walk: the boundary panel&rsquo;s best rows 3.55&times; &rarr; 13.5&times; and 16.0&times; &rarr; 38.2&times;; the Round-5 headline 4.19&times; &rarr; 13.1&times; and 21.4&times; &rarr; 45.3&times;; its holdout 4.7&ndash;16.8&times; &rarr; 12.7&ndash;37.1&times;; &sect;17&rsquo;s pair table 3.5&times;, 29&times;, 86&times; &rarr; 21.0&times;, 133&times;, 257&times;; the rho exponent 0.27 / 0.30 &rarr; 0.37 / 0.39. The frozen ladder&rsquo;s one row below its rho, 0.84&times; at 12 bits, was the plain walk&rsquo;s setup; it is 5.5&times;</span>
+      <span><span class="chip">accounting</span> the reference moved and no index-calculus count did: ratios rise 2.1&ndash;6.5&times;, of which 1.36&times; is the automorphism and the rest the old walk&rsquo;s setup, and no row changes class</span>
+      <span><b>open, and in the other direction</b>: the Koblitz reference, the signed-Frobenius walk, canonicalises every step by n Frobenius maps and charges none of them. Priced with the canonicalisation the index-calculus rows pay for, it rises about 7% in the affine unit, and by more in the collection thread&rsquo;s batched unit. So every Koblitz &ldquo;vs rho&rdquo; here, the 1.17&times; included, is an upper bound until a declared round prices it (&sect;18.8). Below 2<sup>20</sup> the same walk&rsquo;s 97 setup scalar multiplications make it up to 4.8&times; weaker than the negation walk, the opposite error; <code>ic bench</code> now takes the cheaper of the two</span>
     </div>
   </div>
 
@@ -516,7 +577,9 @@
         <h2>The exponents, per regime</h2>
         <p>Fitted growth of the whole cost in the subgroup order over each ladder,
           <code>ops &prop; r<sup>&alpha;</sup></code>, from the run&rsquo;s <code>fits</code>. Rho&rsquo;s one
-          half is the reference mark; its measured 0.25&ndash;0.30 here is its unamortised setup.
+          half is the reference mark; its measured 0.37&ndash;0.39 on the prime and binary ladders
+          (the matched walk, &sect;18; 0.27&ndash;0.30 with the plain walk) and 0.25 on the Koblitz
+          ladder is its unamortised setup.
           Anything to the right of one half loses as the group grows, whatever its constant.</p>
       </div>
       <div class="exp">
@@ -526,7 +589,7 @@
         <div class="erow"><div class="name">char2: Meet in the middle, m = 3</div><div class="track"><i class="dot" style="left:57.6%" title="r^0.62 (R² 0.99, 5 sizes)"></i></div><div class="num">0.62</div></div>
         <div class="erow"><div class="name">char2: Meet in the middle, m = 3, negation-folded table</div><div class="track"><i class="dot" style="left:56.6%" title="r^0.62 (R² 0.99, 5 sizes)"></i></div><div class="num">0.62</div></div>
         <div class="erow"><div class="name">char2: &hellip; and walk targets</div><div class="track"><i class="dot" style="left:59.3%" title="r^0.64 (R² 0.99, 5 sizes)"></i></div><div class="num">0.64</div></div>
-        <div class="erow"><div class="name">char2: rho reference</div><div class="track"><i class="dot" style="left:8.0%" title="r^0.30 (R² 0.97, 5 sizes)"></i></div><div class="num">0.30</div></div>
+        <div class="erow"><div class="name">char2: rho reference, matched (was 0.30 with the plain walk)</div><div class="track"><i class="dot" style="left:21.8%" title="r^0.39 (R² 1.00, 5 sizes); the plain walk read r^0.30"></i></div><div class="num">0.39</div></div>
         <div class="erow"><div class="name">char2: S&#8324; pairs-and-solve, m = 3</div><div class="track"><i class="dot" style="left:100.0%" title="r^1.06 (R² 0.99, 5 sizes)"></i></div><div class="num">1.06</div></div>
         <div class="erow"><div class="name">koblitz: Two summands, Frobenius-folded table, walk targets</div><div class="track"><i class="dot" style="left:32.2%" title="r^0.46 (R² 0.82, 11 sizes)"></i></div><div class="num">0.46</div></div>
         <div class="erow"><div class="name">koblitz: Balanced base, m = 2, folded table, walk</div><div class="track"><i class="dot" style="left:27.9%" title="r^0.43 (R² 0.82, 4 sizes)"></i></div><div class="num">0.43</div></div>
@@ -545,7 +608,7 @@
         <div class="erow"><div class="name">prime: Meet in the middle, m = 3</div><div class="track"><i class="dot" style="left:54.0%" title="r^0.60 (R² 0.98, 8 sizes)"></i></div><div class="num">0.60</div></div>
         <div class="erow"><div class="name">prime: Meet in the middle, m = 3, negation-folded table</div><div class="track"><i class="dot" style="left:50.4%" title="r^0.58 (R² 0.99, 8 sizes)"></i></div><div class="num">0.58</div></div>
         <div class="erow"><div class="name">prime: &hellip; and walk targets</div><div class="track"><i class="dot" style="left:46.7%" title="r^0.55 (R² 0.98, 8 sizes)"></i></div><div class="num">0.55</div></div>
-        <div class="erow"><div class="name">prime: rho reference</div><div class="track"><i class="dot" style="left:3.7%" title="r^0.27 (R² 0.90, 8 sizes)"></i></div><div class="num">0.27</div></div>
+        <div class="erow"><div class="name">prime: rho reference, matched (was 0.27 with the plain walk)</div><div class="track"><i class="dot" style="left:18.8%" title="r^0.37 (R² 1.00, 8 sizes); the plain walk read r^0.27"></i></div><div class="num">0.37</div></div>
         <div class="erow"><div class="name">prime: Semaev S&#8323; roots, m = 2</div><div class="track"><i class="dot" style="left:100.0%" title="r^0.93 (R² 0.96, 8 sizes)"></i></div><div class="num">0.93</div></div>
         <div class="exp-axis">
           <div></div>
@@ -599,8 +662,8 @@
           row is a complete, verified logarithm on one instance, over one subspace base, the same walk and the
           same two targets; the algebraic rows carry their engine&rsquo;s work inside S. The pair table on the
           same base is the reference; rho was not run on these instances when this panel was frozen, and no
-          ratio to it is quoted here &mdash; the &sect;17 panel below measures it on the same curves (counted rho
-          <code>S</code> = 5.2 at n = 17). Per target, first target / second target.</p>
+          ratio to it is quoted here &mdash; the &sect;17 panel below measures it on the same curves (the matched
+          rho <code>S</code> = 1.74 at n = 17; the plain walk read 5.2). Per target, first target / second target.</p>
       </div>
       <div class="ledger">
         <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>13</sup></sub>), binary-subspace[dimension=6]</strong> &middot; 60 signed points, 30 columns, 13 quadratics in 12 unknowns, D<sub>sr</sub> = 4 (&sect;15)</div><div class="num">S &middot; ratio to the pair table</div></div>
@@ -640,19 +703,19 @@
           it are stage diagnostics and never a speed.</p>
       </div>
       <div class="ledger">
-        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>17</sup></sub>), binary-subspace[dimension=9]</strong> &middot; &sect;16.3&rsquo;s base and curve, 18 unknowns, two planted targets, counted rho <code>S</code> = 5.2 on the same subgroup</div><div class="num">S &middot; ratio to the pair table &middot; to rho</div></div>
-        <div class="lrow"><div class="name">Pair table (mitm, m = 2) &middot; the oracle reference</div><div class="num">448 &middot; 1 &middot; 86&times;</div><div class="lbar"><i style="width:33.1%"></i></div></div>
-        <div class="lrow"><div class="name">Weil descent + fast exhaustive search &middot; the stage reference&rsquo;s own row</div><div class="num">763 &middot; 1.70&times; &middot; 146&times;</div><div class="lbar"><i style="width:36.0%"></i></div></div>
-        <div class="lrow"><div class="name">Weil descent + crossbred (D = 3, k = 8) &middot; the best algebraic row</div><div class="num">10,929 &middot; 24&times; &middot; 2,098&times;</div><div class="lbar"><i style="width:50.5%"></i></div></div>
+        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>17</sup></sub>), binary-subspace[dimension=9]</strong> &middot; &sect;16.3&rsquo;s base and curve, 18 unknowns, two planted targets, matched rho <code>S</code> = 1.74 on the same subgroup (the plain walk read 5.2)</div><div class="num">S &middot; ratio to the pair table &middot; to rho</div></div>
+        <div class="lrow"><div class="name">Pair table (mitm, m = 2) &middot; the oracle reference</div><div class="num">448 &middot; 1 &middot; 257&times; <span class="was">was 86&times;</span></div><div class="lbar"><i style="width:33.1%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + fast exhaustive search &middot; the stage reference&rsquo;s own row</div><div class="num">763 &middot; 1.70&times; &middot; 437&times; <span class="was">was 146&times;</span></div><div class="lbar"><i style="width:36.0%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + crossbred (D = 3, k = 8) &middot; the best algebraic row</div><div class="num">10,929 &middot; 24&times; &middot; 6,264&times; <span class="was">was 2,098&times;</span></div><div class="lbar"><i style="width:50.5%"></i></div></div>
         <div class="lrow"><div class="name">Weil descent + inherited F4 (hybrid, degree 3 then splitting)</div><div class="num">28,719 &middot; 64&times;</div><div class="lbar"><i style="width:55.7%"></i></div></div>
         <div class="lrow"><div class="name">Weil descent + F4 (native, field pairs, reduced basis) &middot; D<sub>learn</sub> 3.0 against D<sub>sr</sub> 5</div><div class="num">42,647 <span class="was">was 6.55&times;10<sup>7</sup></span> &middot; 95&times;</div><div class="lbar"><i style="width:57.9%"></i></div></div>
         <div class="lrow"><div class="name">Weil descent + matrix F4 / matrix F5 (hybrid)</div><div class="num">77,482 / 77,954 &middot; 173&times;</div><div class="lbar"><i style="width:61.1%"></i></div></div>
         <div class="lrow"><div class="name">Weil descent + CDCL (first solution, its own leaderboard)</div><div class="num">4.45&times;10<sup>6</sup> &middot; 9,932&times;</div><div class="lbar"><i style="width:83.1%"></i></div></div>
         <div class="lrow"><div class="name">Weil descent + Buchberger (pair-only) &middot; the baseline, rerun; &sect;16.3 froze 4.54 / 8.72&times;10<sup>7</sup></div><div class="num">6.55&times;10<sup>7</sup> &middot; 145,974&times;</div><div class="lbar"><i style="width:97.7%"></i></div></div>
-        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>15</sup></sub>), dimension 8, three curves</strong> &middot; 16 unknowns, rho <code>S</code> 8.9&ndash;13.1</div><div class="num"></div></div>
+        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>15</sup></sub>), dimension 8, three curves</strong> &middot; 16 unknowns, matched rho <code>S</code> 1.76&ndash;2.21 (plain walk 8.9&ndash;13.1)</div><div class="num"></div></div>
         <div class="lrow"><div class="name">Pair table &middot; descent + fast exhaustive search &middot; descent + crossbred</div><div class="num">267 &middot; 367 (1.37&times;) &middot; 6,597 (25&times;)</div><div class="lbar"><i style="width:30.3%"></i></div></div>
         <div class="lrow"><div class="name">Descent + F4 (native)</div><div class="num">27,143 <span class="was">was 7.74&times;10<sup>6</sup></span> &middot; 102&times;</div><div class="lbar"><i style="width:55.4%"></i></div></div>
-        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>13</sup></sub>), dimension 6, three curves</strong> &middot; &sect;15&rsquo;s base, 12 unknowns, rho <code>S</code> 14.6&ndash;18.7</div><div class="num"></div></div>
+        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>13</sup></sub>), dimension 6, three curves</strong> &middot; &sect;15&rsquo;s base, 12 unknowns, matched rho <code>S</code> 2.44&ndash;3.10 (plain walk 14.6&ndash;18.7)</div><div class="num"></div></div>
         <div class="lrow"><div class="name">Pair table &middot; descent + fast exhaustive search &middot; descent + F4</div><div class="num">51 &middot; 370 (7.2&times;) &middot; 5,211 (102&times;)</div><div class="lbar"><i style="width:21.4%"></i></div></div>
         <div class="lrow"><div class="name">Descent + F4 (native)</div><div class="num">5,211 <span class="was">was 63,622</span> &middot; 102&times;</div><div class="lbar"><i style="width:46.5%"></i></div></div>
       </div>
@@ -674,11 +737,11 @@
       </div>
       <div class="legend" style="padding-top:0">
         <span>bars on a log<sub>10</sub> scale from 1 to 10<sup>8</sup>; every figure from <code>research/ic_framework_engines_20260922/results/</code> (<code>baseline_v1</code>, <code>confirm_v1</code>, <code>strength_v1</code>, <code>hybrids_v2</code>), each part with its provenance, and the suite&rsquo;s <code>manifest.json</code></span>
-        <span><span class="chip">engineering</span> the F4-family engines replace the pair-only Buchberger: <code>S</code> falls 12&times; at n = 13, 285&times; at 15 and 1,535&times; at 17, the contract&rsquo;s 20% gate met with the interval below 0.16 at n = 13 and 0.005 at 15; they decide every two-summand target from 16 to 22 unknowns (declared target 1) where Buchberger decided 2 of 16 at 20 and none at 22. No boundary moved: every algebraic row is at least 333&times; rho and 24&times; the pair table on its base</span>
+        <span><span class="chip">engineering</span> the F4-family engines replace the pair-only Buchberger: <code>S</code> falls 12&times; at n = 13, 285&times; at 15 and 1,535&times; at 17, the contract&rsquo;s 20% gate met with the interval below 0.16 at n = 13 and 0.005 at 15; they decide every two-summand target from 16 to 22 unknowns (declared target 1) where Buchberger decided 2 of 16 at 20 and none at 22. No boundary moved: every algebraic row is at least 2,024&times; the matched rho (333&times; the plain walk) and 24&times; the pair table on its base</span>
         <span><span class="chip">accounting</span> the degree column: an engine that closes the boolean ideal (the field products as pairs) learns everything at degree 3 from 12 to 20 unknowns, where the pair-only engine read 4 &mdash; 0.60 of the semi-regular bound, not &sect;16&rsquo;s 0.80. The ideal did not change; the engine measuring it did</span>
         <span><span class="chip">accounting</span> the reference strengthened: crossbred at its defaults crossed the scalar fast exhaustive search at 26 and 28 unknowns on both seeds (0.67&ndash;0.77, every interval below one), and against the vector search &mdash; the same algorithm, sixteen sub-cubes per Gray-code step &mdash; it is 2.45&ndash;3.0&times;: the crossing was the implementation&rsquo;s. At 30 unknowns its default parameters stop fitting</span>
         <span><span class="chip">measurement</span> the hybrids past thirty unknowns (&sect;17.5, declared after the strength check was read): inherited F4 is 2.09&times; the vector reference at 32 unknowns and 1.20&times; at 34 on the targets it decides (it leaves 2 of 16 undecided there, so it is not below the reference on that cell); against the scalar walk it would have read as a second crossing, 0.55&times; at 32 on every target. A log-linear fit over 24&ndash;34 puts a crossing near 35 unknowns &mdash; <em>extrapolation</em>, at the reach of both the vector reference and the curve constructor, not a result</span>
-        <span><span class="chip">measurement</span> the <code>vs rho</code> column is filled: sixteen counted rho runs per instance on the same subgroup, <code>S</code> 5.2 at n = 17 and 8.9&ndash;18.7 at n = 13&ndash;15, where rho&rsquo;s setup dominates at these toy orders; the ratio is to the rho measured on the same instance, never to the asymptotic 1.3. It is the plain walk (A = 1): the contract&rsquo;s negation-aware walk would be up to &radic;2 cheaper on these curves, so every ratio to rho here is understated by up to that factor and the verdict only strengthens (&sect;17.13)</span>
+        <span><span class="chip">measurement</span> the <code>vs rho</code> column is filled: sixteen counted rho runs per instance on the same subgroup, <code>S</code> 5.2 at n = 17 and 8.9&ndash;18.7 at n = 13&ndash;15, where rho&rsquo;s setup dominates at these toy orders; the ratio is to the rho measured on the same instance, never to the asymptotic 1.3. It was the plain walk (A = 1). Ledger &sect;18 re-prices it against the matched negation-map walk, 3.0&ndash;6.1&times; cheaper on these curves &mdash; mostly the plain walk&rsquo;s setup, not the &radic;2 &sect;17.13 expected &mdash; and the pair table reads 21.0&times;, 133&times; and 257&times; rho at n = 13, 15 and 17 (medians over curves and targets)</span>
         <span>every <code>buchberger-f2</code> figure is the pair-only engine&rsquo;s; <code>main</code> has since closed it under the field equations (34154ed9), so a rerun on current code measures a different engine</span>
         <span>the per-call ranking does not carry over: crossbred is the fastest algebraic engine on every square stage cell and the slowest F4-family row on &sect;15&rsquo;s overdetermined base, where four systems in five are inconsistent and F4 refutes them at half its cost on a consistent one</span>
       </div>
@@ -1212,7 +1275,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         curves, by the Frobenius; targets drawn by an r-adding walk instead of two scalar
         multiplications each; two-summand rows wherever the cofactor classes admit them; a Koblitz
         base sized to the folded table &mdash; takes the best rows to 6.2&times;, 31&times; and
-        26&times; the counted rho, worth 1.3&ndash;2.9&times; per instance on the prime and binary
+        26&times; the counted rho (the prime and binary figures against the plain walk they were priced
+        against then; the matched walk of ledger &sect;18 reads them 2.4&ndash;3.8&times; higher), worth 1.3&ndash;2.9&times; per instance on the prime and binary
         ladders and 3&ndash;49&times; on the Koblitz one. Nothing crosses rho and no fitted exponent
         falls below the reference's, so every rung is engineering, not an advance. The counting
         ceiling is now computed exactly from the base's cofactor classes rather than argued: the

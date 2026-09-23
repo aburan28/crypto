@@ -3468,7 +3468,8 @@ Reading it:
   algorithm could not.**  The best row on every instance is still the
   pair table, `3.5×`, `29×` and `86×` rho on bases chosen past the
   family optimum so the descent has unknowns to work on (§16.3); every
-  algebraic row is at least `333×` rho.  F4 took the Gröbner row from
+  algebraic row is at least `333×` rho.  (Against the matched rho of
+  §18: `21.0×`, `133×` and `257×`, and at least `2,024×`.)  F4 took the Gröbner row from
   `1,244×` the pair table to `102×` at `n = 13` and from `145,974×`
   to `95×` at `n = 17`, and left it two orders of magnitude above the
   exhaustive-search row on the same base.
@@ -3553,7 +3554,9 @@ Reading it:
   every ratio to rho here is understated by up to that factor, and the
   verdict — nothing below rho — only strengthens.  On a Koblitz curve
   the gap would be about `√(2n)`, and none of this round's whole runs
-  was on one.
+  was on one.  *§18.6 re-prices this table against the matched walk,
+  and the gap was not `√2` but `3.0`–`6.1×`, mostly the plain walk's
+  set-up: the pair table reads `21.0×`, `133×` and `257×` rho.*
 
 ### 17.14 Reproducing
 
@@ -3754,6 +3757,237 @@ ran:
 - **The frozen walk's `S` is mostly not rho.**  At 12 bits it is
   `14.8`–`15.4` where the negation walk is `2.6`; at 24–26 bits `2.0`–`2.7`
   where the negation walk is `1.0`–`1.1`.
+
+### 18.4 The targets, graded
+
+Frozen at `research/ic_rho_reference_20260923/` (`evaluation/`,
+`reprice/`); `analyse.py` grades them and writes `analysis.json`, which
+every number below comes from.
+
+| target | declared | measured | |
+|:--|:--|:--|:--|
+| 1. correct | every run verified; abandoned walks under `1 %` | 21,096 runs (calibration, evaluation, re-pricing), none unverified; 88 of 821,867 tuned walks abandoned in a cycle, `0.011 %` | **met** |
+| 2. identity | the frozen walk reproduces every recorded run | all 616 recorded runs of the ten reports, exactly: steps, walks, distinguished points, additions, doublings, scalar multiplications, logarithm, `S` | **met** |
+| 3. at its own floor | `[0.9, 1.2]` from `2^{20}` | `1.02`–`1.20` at the six sizes from `2^{20}` (the 22-bit prime curve at `1.197`, eight jumps) | **met**, one size at the edge |
+| 4. the `√2`, paired | `[1.25, 1.55]`, interval inside | pooled `1.362`, `95 %` interval `[1.296, 1.430]`; per size `1.19` at eight jumps, `1.37`–`1.45` at sixteen | **met** |
+| 5. flat | `S ≤ 1.33` from `2^{20}`; `α` within `0.5 ± 0.05` over at least four sizes from `2^{20}` | `S` `0.98`–`1.20`; `α = 0.452` pooled over the six sizes from `2^{20}`, the only fit with four or more (each regime has three there: prime `0.429`, binary `0.473`) | **met on the pooled fit, at its lower edge** |
+| 6. matched | no automorphism beyond negation | none on the sixteen evaluation curves or the 26 re-priced instances: every prime curve has `a, b ≠ 0`, no binary `b` lies in a proper subfield | **met** |
+
+Target 5 is the one to read with care.  The exponent is below one half
+because set-up is still visible at these sizes: `S` falls from `1.20` at
+`2^{21}` to `0.98` at `2^{25}`.  The table, the stride and the
+distinguished-point tail are a few hundred operations against `√r` of a
+few thousand.  Over every size of the ladder the fit is `0.394` (prime)
+and `0.397` (binary).  So "flat" holds in the sense declared, `S` inside
+`1.5×` the floor from `2^{20}`, and the pooled exponent clears its bound
+by `0.002`.  Neither is an asymptotic statement; the asymptote the walk
+is heading for is its floor times the adding-walk penalty, about
+`0.886 × 1.03`–`1.07`.
+
+### 18.5 The evaluation ladder
+
+Seed `0xE7A1`, sixteen curves no other run used, 128 runs a walk, all
+three walks on the same planted logarithms and seeds:
+
+| regime | curve | log₂ r | J | frozen walk `S` | tuned, points `S` | **negation `S`** (median) | negation walk / own floor | points / negation, walk ops | frozen / negation, `S` |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| prime | `generated-12bit-3529` | 11.8 | 4 | 15.05 | 3.00 | **2.80** (2.57) | 1.727 | 1.104 | 5.37× |
+| prime | `generated-14bit-14389` | 13.8 | 4 | 9.46 | 2.37 | **2.09** (1.95) | 1.540 | 1.160 | 4.52× |
+| prime | `generated-16bit-53411` | 15.7 | 8 | 6.21 | 2.28 | **1.82** (1.75) | 1.235 | 1.388 | 3.41× |
+| prime | `generated-18bit-212099` | 17.7 | 8 | 4.42 | 1.77 | **1.49** (1.42) | 1.216 | 1.246 | 2.97× |
+| prime | `generated-20bit-563153` | 19.1 | 8 | 4.14 | 1.62 | **1.38** (1.29) | 1.272 | 1.205 | 3.00× |
+| prime | `generated-22bit-2434423` | 21.2 | 8 | 3.01 | 1.41 | **1.20** (1.19) | 1.197 | 1.193 | 2.50× |
+| prime | `generated-24bit-16483309` | 24.0 | 16 | 2.56 | 1.49 | **1.06** (1.04) | 1.075 | 1.445 | 2.42× |
+| prime | `generated-26bit-42652151` | 25.3 | 16 | 2.45 | 1.34 | **0.98** (0.91) | 1.024 | 1.391 | 2.50× |
+| char2 | `random-binary-n13-b168f` | 10.4 | 4 | 21.10 | 3.53 | **3.17** (3.11) | 1.408 | 1.219 | 6.66× |
+| char2 | `random-binary-n15-b157a` | 14.0 | 4 | 9.06 | 2.40 | **2.08** (1.93) | 1.550 | 1.180 | 4.35× |
+| char2 | `random-binary-n17-b10103` | 14.4 | 4 | 9.03 | 2.25 | **2.06** (1.97) | 1.590 | 1.096 | 4.38× |
+| char2 | `random-binary-n19-b770f7` | 18.0 | 8 | 4.39 | 1.73 | **1.38** (1.32) | 1.141 | 1.322 | 3.18× |
+| char2 | `random-binary-n21-b968e` | 18.0 | 8 | 4.28 | 1.78 | **1.47** (1.40) | 1.235 | 1.263 | 2.91× |
+| char2 | `random-binary-n23-b480f9a` | 22.0 | 16 | 2.87 | 1.51 | **1.13** (1.11) | 1.047 | 1.395 | 2.53× |
+| char2 | `random-binary-n25-b1a9b772` | 22.4 | 16 | 2.27 | 1.51 | **1.14** (1.10) | 1.082 | 1.374 | 1.99× |
+| char2 | `random-binary-n27-b227199e` | 26.0 | 16 | 2.28 | 1.46 | **1.06** (1.06) | 1.127 | 1.392 | 2.15× |
+
+Reading it:
+
+- **The reference moved `2.0`–`6.7×`.**  Most of that is the frozen
+  walk's tuning, not the automorphism.  Frozen over tuned-on-points is
+  `1.5`–`6.0×`, and tuned-on-points over negation is `1.10`–`1.45×` in
+  walk operations.  The `√2` is the second factor; the first is the
+  frozen walk's per-walk scalar multiplications, its `560`-operation
+  table and its trapped walks (§18 opening).
+- **The `√2` is paid for by the jump count.**  At sixteen jumps the
+  paired walk ratio is `1.37`–`1.45`, the `√2` less the look-ahead's
+  `1/32`.  At eight it is `1.19`–`1.39`, and at four `1.10`–`1.22`,
+  where the look-ahead's `1/8` and the fruitless cycles it cannot stop
+  eat most of it.  The calibration chose four jumps at these sizes
+  anyway, because a table costs more there than the `√2` saves.
+- **The fitted exponents** of the whole cost over all eight sizes:
+  frozen walk `0.311` (prime) and `0.287` (binary), tuned on points
+  `0.417` and `0.420`, negation `0.394` and `0.397`, every `R²` above
+  `0.96`.  The frozen walk's exponent was its set-up's; the tuned walks'
+  are closer to one half and still under it, for the set-up reason
+  §18.4 gives.
+
+### 18.6 The frozen reports, re-priced
+
+Every recorded run of the frozen walk replayed exactly (target 2), so
+these ratios differ from the frozen ones only in the reference.  The
+matched walk's mean `S`, on the same curves, seeds and targets:
+
+| report | curve | log₂ r | frozen rho `S` | matched rho `S` | frozen / matched |
+|:--|:--|--:|--:|--:|--:|
+| Round-5 ladder | `bench-10bit` … `bench-20bit` | 9.7–20.0 | 22.66 · 18.58 · 8.91 · 6.36 · 4.20 · 2.68 | 3.60 · 2.85 · 2.03 · 1.74 · 1.45 · 1.29 | 2.1–6.5× |
+| | `generated-22bit-3290411` · `-24bit-10935329` | 21.7 · 23.4 | 2.98 · 3.93 | 1.22 · 1.04 | 2.45× · 3.79× |
+| | `random-binary-n15` · `n18` · `n21` · `n24` · `n27` | 14.0–24.4 | 8.36 · 7.56 · 3.18 · 2.52 · 2.31 | 2.01 · 2.01 · 1.36 · 1.18 · 0.97 | 2.1–4.2× |
+| Round-5 headline | `generated-24bit-10935329` · `random-binary-n27-b845462` | 23.4 · 24.4 | 3.28 · 2.18 | 1.05 · 1.03 | 3.12× · 2.12× |
+| Round-5 holdout | two prime, two binary | 21.0–26.0 | 2.96 · 2.66 · 2.43 · 1.99 | 1.12 · 0.88 · 0.96 · 0.90 | 2.2–3.0× |
+| §17.11 `W13` | three curves | 11.0–12.0 | 16.2 · 18.7 · 14.6 | 2.65 · 3.10 · 2.44 | 6.0–6.1× |
+| §17.11 `W15` | three curves | 12.4–14.0 | 13.1 · 9.2 · 8.9 | 2.21 · 2.06 · 1.76 | 4.5–5.9× |
+| §17.11 `W17` | one curve | 16.0 | 5.21 | 1.74 | 2.99× |
+
+**The boundary panel's rows** (the Round-5 ladder's largest prime and
+binary rungs, means over three targets), `vs rho` frozen → matched:
+
+| variant | 24-bit prime | `n = 27` binary |
+|:--|--:|--:|
+| Semaev `S₃` roots / `S₄` pairs-and-solve | 1,300× → 4,922× | 49,906× → 119,465× |
+| direct subtraction, `m = 2` | 518× → 1,962× | — |
+| meet in the middle, `m = 2` / `m = 3` | 68.3× → 258× · 14.5× → 54.7× | — / 89.1× → 213× |
+| … negation-folded table | 63.2× → 239× (`m = 2`) · 9.41× → 35.6× (`m = 3`) | 711× → 1,702× (`m = 2`) · 82.7× → 198× (`m = 3`) |
+| … and walk targets | 6.32× → 23.9× (`m = 2`) · 8.06× → 30.5× (`m = 3`) | 18.0× → 43.1× (`m = 2`) · 73.2× → 175× (`m = 3`) |
+| … and a base at the family optimum | **3.55× → 13.5×** | **16.0× → 38.2×** |
+
+The best row on every other rung, frozen → matched: prime `1.01×`,
+`0.84×`, `1.47×`, `1.84×`, `2.00×`, `3.99×`, `4.28×` from 10 to 22 bits
+become `6.3×`, `5.5×`, `6.4×`, `6.7×`, `5.8×`, `8.3×`, `10.5×`; binary
+`3.15×`, `2.82×`, `7.66×`, `10.8×` at `n = 15`–`24` become `13.1×`,
+`10.6×`, `18.0×`, `23.0×`.  **The frozen ladder had a row below its
+rho**, the 12-bit prime rung's `mitm_m2_negfold_walk` at `0.84×`.  No
+earlier round quoted it: the page showed the largest rungs, and its
+legend warned that the frozen `vs rho` "flatters index calculus at
+small sizes".  It was the plain walk's set-up, `S = 18.6` on a
+subgroup of 3,889 elements, and not a crossing.  Against the matched
+walk it is `5.5×`.  The headline's best rows go from `4.19×` and
+`21.4×` to `13.1×` and `45.3×`; the holdout's from `4.80×`, `4.74×`,
+`11.8×` and `16.8×` to `12.7×`, `14.4×`, `29.8×` and `37.1×`.
+
+**§17.11 re-priced**, medians over curves and targets as there:
+
+| row | `n = 13`: / rho, frozen → matched | `n = 15` | `n = 17` |
+|:--|--:|--:|--:|
+| pair table (the oracle reference) | 3.5× → **21.0×** | 29.1× → **133×** | 86.1× → **257×** |
+| descent + `fes-f2` | 22.4× → 135× | 40.0× → 178× | 146× → 437× |
+| descent + `exhaustive` | 50.1× → 302× | 710× → 3,163× | 5,413× → 16,163× |
+| descent + `crossbred-f2` | 509× → 3,093× | 722× → 3,216× | 2,098× → 6,264× |
+| descent + `inherited-f4` | 344× → 2,089× | 1,949× → 8,676× | 5,513× → 16,460× |
+| descent + `f4-f2` | 333× → 2,024× | 2,961× → 13,185× | 8,186× → 24,443× |
+| descent + `matrix-f4` / `matrix-f5` | 362× / 387× → 2,180× / 2,335× | 3,972× / 4,075× → 17,685× / 18,146× | 14,873× / 14,963× → 44,410× / 44,680× |
+| descent + `sat-cdcl` (first solution) | 9,035× → 54,427× | 1.04×10⁵× → 5.64×10⁵× | 8.55×10⁵× → 2.55×10⁶× |
+| descent + `buchberger-f2` | 3,832× → 23,091× | 8.45×10⁵× → 3.76×10⁶× | 1.26×10⁷× → 3.75×10⁷× |
+
+**The rho exponent on the Round-5 ladder**, the mark the page's exponent
+panel draws, moves from `0.274` to `0.372` (prime, eight rungs) and
+from `0.302` to `0.392` (binary, five).  The reference still carries
+set-up at the ladder's small rungs, so it is still under one half.
+Every index-calculus exponent on that panel is fitted to the IC rows'
+own totals and does not move.
+
+### 18.7 Classified
+
+| change | class | why |
+|:--|:--|:--|
+| the matched walk prices every prime and random binary `vs rho`, `ic bench`'s included | **accounting** | the reference moved and no index-calculus count changed; every ratio rises, `2.1`–`6.5×` on the re-priced reports; nothing changes class, and the verdict — nothing below rho — now holds on every rung, the frozen `0.84×` included |
+| the tuned walk's set-up: stride starts, distinguished points every `r^{1/4}`, a table sized to `r` | engineering of the reference | frozen over tuned-on-points `1.5`–`6.0×` on the evaluation ladder; a better-built reference, not a property of rho |
+| the negation map | the automorphism the floor always credited | `1.36×` pooled and paired (§18.4, target 4); `√2` less the look-ahead |
+| `ic bench` on a Koblitz curve: the cheaper of the signed-Frobenius and negation walks | accounting | the negation walk is cheaper to `r ≈ 2^{18}`, the signed walk from `2^{20.5}` (§18.8), and the reference is whichever a generic attacker would run |
+
+### 18.8 An open item: the Koblitz reference does not price its canonicalisation
+
+The Koblitz diagnostic
+(`research/ic_rho_reference_20260923/diagnostic/koblitz.json`, seven
+curves, 64 runs each, all verified) was run to support `ic bench`'s
+rule, and found two things about the signed-Frobenius walk that the
+Koblitz regime has used as its reference since Round 1.
+
+- **Set-up at small rungs.**  The walk starts 32 parallel walks and a
+  16-jump table by scalar multiplication, about 97 of them, so below
+  about `2^{20}` it is far weaker than the negation walk:
+
+  | curve | log₂ r | signed-Frobenius `S` | negation `S` |
+  |:--|--:|--:|--:|
+  | `K_0 / GF(2^13)` | 11.0 | 13.5 | **2.78** |
+  | `K_1 / GF(2^17)` | 16.0 | 3.56 | **1.80** |
+  | `K_1 / GF(2^19)` | 18.0 | 2.10 | **1.38** |
+  | `K_0 / GF(2^31)` | 20.5 | **1.10** | 1.19 |
+  | `K_1 / GF(2^23)` | 22.0 | **0.88** | 1.17 |
+  | `K_0 / GF(2^37)` | 27.8 | **0.42** | 0.93 |
+  | `K_0 / GF(2^41)` | 39.0 | **0.16** | 1.03 |
+
+  So the Koblitz ladder's `vs rho` below about `2^{20}` flatters index
+  calculus by up to `4.8×`, as the prime and binary ladders' did.
+- **Canonicalisation is free.**  Every step canonicalises by `n`
+  Frobenius maps.  The counters read 13.0, 17.0, 19.1, 23.2, 31.2, 37.4
+  and 41.1 maps a step, and the unit charges none of them.  The
+  index-calculus rows on the same curves pay for theirs: the folded
+  tables charge a canonicalisation per probe, `0.063`–`0.074` additions
+  at the pinned ratio.  Priced as implemented, at the pinned Frobenius
+  ratio, the maps would add `1.7 %` (`n = 13`) to `101 %` (`n = 41`) to
+  the walk's cost.  Priced with the primitive the index-calculus rows
+  are charged for, one canonicalisation a step, they would add about
+  `7 %`.  A walk that needs no per-step canonicalisation would pay less
+  than that: Bailey et al.'s `P + φ^j(P)`, with `j` read from an
+  orbit invariant, commutes with the Frobenius and canonicalises only
+  at distinguished points.  It is not built here.
+
+So every Koblitz `vs rho` on the ledger and the page is off in both
+directions: generous below `2^{20}`, harsh above.  At the boundary
+panel's `n = 41` row the second effect is about `1.07×` on the affine
+unit.  The collection thread's `1.17×` (`K_0 / GF(2^41)`, a
+batched-addition unit, reference `S` = rho iterations over `√r`)
+carries the same asymmetry.  A batched addition shares its inversion,
+so a canonicalisation is a larger fraction of it than of an affine
+addition, and that correction is larger than `7 %`, possibly enough to
+take `1.17×` below one.  That is not measured here and is not a result.
+Until a declared round prices the Koblitz reference, `1.17×` is an
+upper bound, not a margin.  The instruction-count panel
+(`ic-crossover-20260922`) is not affected: an instruction count
+charges rho's canonicalisation like everything else.
+
+### 18.9 What does not count
+
+- The matched walk's `S` at toy sizes is still partly set-up: `3.6` at
+  `2^{9.7}`.  It is the cheapest counted walk the repository has, not
+  the asymptotic `0.886`.
+- Target 5 is met on the pooled fit only, by `0.002`; §18.4 says why.
+- The calibration's roster curves are also rungs of the re-priced
+  Round-5 ladder (§18.2's amendment).  The rule depends on bit length
+  alone.
+- The matched walk leaves the same native work uncharged as the frozen
+  walk — the hash per point — plus, under negation, one field negation
+  and one key comparison per canonicalisation and up to sixteen key
+  comparisons a step against recent points.  All are counted, none is
+  a group operation, and each is a small fraction of an addition.
+- The re-pricing re-uses the frozen index-calculus rows.  Their counts
+  are the frozen ones, which is why this is accounting.
+- `ic bench` on a Koblitz curve takes the cheaper of two walks by mean
+  `S`.  That is a choice between references, and it can only make the
+  reference stronger.
+- The Koblitz reference in `ic boundary` is unchanged, with both of
+  §18.8's defects.
+
+### 18.10 Reproducing
+
+```
+cargo build --release --bin ic
+sh research/ic_rho_reference_20260923/run.sh      # calibration, evaluation, re-pricing
+python3 research/ic_rho_reference_20260923/analyse.py
+```
+
+`ic rho --koblitz-degrees 13,17,19,23,31,37,41 --runs 64 --seed 59297`
+is §18.8's diagnostic.  Every report names the binary's hash and the
+commit it ran from; each re-pricing report names its source file's
+blake3.
 
 **Targets:**
 
