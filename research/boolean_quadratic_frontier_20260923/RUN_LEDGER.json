@@ -1,0 +1,24 @@
+{
+  "artifacts": [
+    {
+      "kind": "instrumented discovery diagnostic",
+      "manifest_sha256": "549c971307812210e0f1656049157d2e135d0d9447600813e4d91054c9edb544",
+      "path": "profile_01"
+    },
+    {
+      "kind": "uninstrumented complete-solve comparison",
+      "manifest_sha256": "41ebfea1c806051880c8bdfadcb7e653d3774bae815fe21a68ac3030200a648d",
+      "path": "run_01"
+    }
+  ],
+  "current_frontier_dramatic_gate": "REJECTED",
+  "full_ic_cost": null,
+  "historical_seven_gate": "REJECTED",
+  "incremental_improvement_gate": "PASS",
+  "production_solver_cost": null,
+  "rho_ratio": null,
+  "schema_version": 1,
+  "scope": "Complete standalone generic Boolean solves on generated public systems. No curve inputs, imported targets, scalar/key recovery, production solver changes, index-calculus or rho campaigns. This driver is not the repository inherited-F4 solver.",
+  "source_lineage_sha256": "ff1092b02add7b02332e9ce9821695d2d1a85a7f875fc5c56fef6d6ae1ac46a3",
+  "summary_sha256": "fd0150d25f00514f0e4964973670f8d64751ccc2823b77d75d2387490c72d9c5"
+}

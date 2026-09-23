@@ -4305,6 +4305,47 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-quadratic-frontier-20260923">
+  <div class="panel-head">
+    <h2>Packed residual coefficients: 1.56&ndash;1.67&times; beyond the current frontier <span class="chip">engineering</span></h2>
+    <p>One coefficient word per equation, a stack affine basis and exact hash-assisted
+      deduplication preserve the complete search and improve every regression/holdout timing
+      comparison. All 18 incremental lower bounds exceed 1.0. The stronger 2&times; gate
+      remains <strong>REJECTED</strong> (0/18); the cumulative historical-seven gate also
+      remains rejected (17/18). Its new n16 cross-planted failure is retained.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_frontier_20260923/CONCLUSION.md">decision and all paired comparisons</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_frontier_20260923/README.md">representation contract</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_frontier_20260923/run_01/RESULT.md">frozen complete-solve table</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_frontier_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_frontier_20260923/RUN_LEDGER.json">profile and run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete-solve plus validation milliseconds at 24 variables, pooling two fresh
+      holdout seeds and nine balanced repetitions. Displayed ratios use the retained quadratic
+      method on planted inputs; gates use paired minima over all eight current controls.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Quadratic / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>53.764896</td><td>44.279021</td><td>127.432626</td><td>0.357</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>253.129771</td><td>147.513229</td><td>527.080687</td><td>0.076</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>1050.400459</td><td>549.571083</td><td>1767.499937</td><td>0.018</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>447.711125</td><td>253.588729</td><td>884.726334</td><td>0.043</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>61.827375</td><td>51.415292</td><td>149.500770</td><td>0.310</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>56.283229</td><td>46.981979</td><td>131.702937</td><td>0.341</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>47.039854</td><td>38.542645</td><td>111.184270</td><td>0.408</td><td>PASS</td></tr>
+      <tr><td>Retained fixed-quadratic state</td><td>19.183375</td><td>15.664146</td><td>46.031709</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Packed residual coefficients</td><td>11.966916</td><td>9.869708</td><td>28.152125</td><td>1.603</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 5,832 observations across 72 distinct generated systems complete with verified results.
+    The previous confirmation grid, including both failed groups, is retained as regression
+    input. All four search-only representations agree on outcomes/models, logical counters
+    and trace digests. The separate instrumented discovery profile is not timing-promotion
+    evidence. Intervals describe repeated timings on fixed fixtures, not arbitrary systems.</p>
+  <p>The mutable state shrinks from 384 to 304 bytes while immutable tables grow; total
+    candidate-specific memory is unmeasured. Whole-worker peak RSS is 28,950,528 bytes.
+    This is bounded generic Boolean solving with unchanged logical search. Calibrated
+    operation ratios, full index-calculus cost and rho ratios remain null.</p>
+</section>
 <section class="panel" id="boolean-quadratic-state-20260923">
   <div class="panel-head">
     <h2>Fixed quadratic state: about 2.4&times; on larger complete solves; universal confirmation rejected <span class="chip">engineering</span></h2>
