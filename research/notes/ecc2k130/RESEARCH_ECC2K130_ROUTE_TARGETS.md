@@ -448,7 +448,7 @@ Every rung ran as registered: `K₀`, E1's `l`, one shared non-invariant `V`,
 splits.  The registered `d = 4` pair decides nothing.  It was not in this
 run: it was started after this section was first written, rung by rung, with
 a two-hour limit per rung (stricter than the registered two hours per cell).
-Its rows are appended below when it finishes.  **Zero gate failures on all 128 oracle calls.**  Every found relation
+Its rows are under **The `d = 4` pair** below.  **Zero gate failures on all 128 oracle calls.**  Every found relation
 re-summed to its target, no refutation contradicted enumeration, and the
 via-`T` equivalence held on every target.  Costs are GAE per relation found,
 and every oracle cost is a lower bound.
@@ -503,6 +503,41 @@ measured at `n = 23`, the symmetrised system is the better algebraic oracle:
 `0.28×` the `x`-chained cost per relation and `4,484` against `16,119` ms.
 That is the pattern §17 of the exotic-coordinates note saw at that size.  Both
 algebraic oracles still lose to enumeration there, by `3.6×` and `15.6×`.
+
+**The `d = 4` pair (registered, decides nothing).**  The `x`-chained oracle
+ran at cap 4 and the symmetrised at cap 5.  The binary, `V`, targets and
+budget were those of the `d = 3` run.  The raw XOR price was re-measured at
+each rung, and the enumeration was re-timed, so its reference moves by a few
+per cent with host timing.
+**Frozen:** `experiments/26_koblitz_symmetrised_gate_d4.json` (and `.log`,
+which carries each rung's exit status and wall time).
+
+| `n` | arm (cap) | found / refuted / budget | GAE per relation | **÷ reference** | splits | built degree | oversize targets | ms per relation |
+|---:|---|---|---:|---:|---:|---:|---:|---:|
+| 13 | `x`-chained (4) | 16 / 0 / 0 | 784,486 | **1,987** | 12 | 4 | 0 | 1,109.6 |
+| 13 | symmetrised (5) | 11 / 5 / 0 | 65,193 | **74.5** | 40 | 5 | 0 | 265.9 |
+| 15 | `x`-chained (4) | 14 / 2 / 0 | 4,837,739 | **2,338** | 27 | 4 | 0 | 4,048.4 |
+| 15 | symmetrised (5) | 7 / 9 / 0 | 89,126 | **29.6** | 45 | 5 | 0 | 484.5 |
+| 19 | `x`-chained (4) | 16 / 0 / 0 | 35,869,770 | **7,524** | 57 | 4 | **16** | 76,929.0 |
+| 19 | symmetrised (5) | 9 / 7 / 0 | 15,613,672 | **1,101** | 569 | 5 | 0 | 14,209.7 |
+| 23 | both | — | — | **timed out** | — | — | — | — |
+
+Zero gate failures.  A Macaulay degree more cuts both oracles' splits by
+`6–30×`.  It also multiplies their cost per relation by `7–560×`, so both land
+further from enumeration than at `d = 3`: `30–7,500×` rather than `3–16×`.  At `n = 19` the `x`-chained arm's degree-4 matrix exceeded the size
+caps on all 16 targets.  That cell is not clean cap-4 algebra, and the engine
+split on what it had.  The symmetrised arm is the cheaper of the two on every
+completed `d = 4` rung, by `2.3–54×`, and it refutes all 7 of its
+non-decomposable targets at `n = 19` within budget, where at `d = 3` it hit
+the budget on every one.  The `n = 23` rung ran for its full two hours and
+wrote nothing.  It is reproducible with
+
+```bash
+cargo run --release --example koblitz_symmetrised_gate -- --rungs 23 --targets 16 --x-caps 4
+```
+
+Nothing here moves the gate: `d = 4` decides nothing by registration, and it
+is further from enumeration than `d = 3` on every rung it finished.
 
 **Classes.**  X4's structural finding is **accounting**.  The gate is a
 **stage diagnostic** that closes Route 3 at the oracle.  The `350×` is
