@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--offline",
+    "--jobs",
+    "1",
+    "--target-dir",
+    "/Volumes/SSD990/koblitz-native-f4-build3-f438115d/build",
+    "--example",
+    "koblitz_pdp_export",
+    "--example",
+    "koblitz_pdp_backend"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 170.27433429200028,
+    "user_seconds": 161.830811,
+    "system_seconds": 4.278218,
+    "total_core_seconds": 166.10902900000002,
+    "single_core_seconds": 166.10902900000002,
+    "peak_rss_bytes": 1684684800,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}
