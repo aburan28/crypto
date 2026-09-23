@@ -1,0 +1,29 @@
+name: Koblitz Stage 152 current gate audit
+on:
+  pull_request:
+    paths:
+      - "docs/ic/patches/koblitz-n59-window-block2048-rejected-20260922.patch"
+      - "docs/ic/runs/koblitz-n59-window-block2048-rejection-20260922.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-151-current-gate-audit-20260922/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-152-current-gate-audit-20260922/**"
+      - "scripts/compose_koblitz_stage151_gate_audit.py"
+      - "scripts/compose_koblitz_stage152_gate_audit.py"
+      - ".github/workflows/koblitz-stage152-current-gate-audit.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replay Stage 151 historical audit and Stage 152 current audit
+        run: |
+          python3 -m py_compile scripts/compose_koblitz_stage151_gate_audit.py scripts/compose_koblitz_stage152_gate_audit.py
+          python3 -m json.tool docs/ic/runs/koblitz-n59-window-block2048-rejection-20260922.json >/dev/null
+          python3 scripts/compose_koblitz_stage151_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-151-current-gate-audit-20260922 > "$RUNNER_TEMP/stage151-historical.json"
+          python3 scripts/compose_koblitz_stage152_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-152-current-gate-audit-20260922 > "$RUNNER_TEMP/stage152-current.json"
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
