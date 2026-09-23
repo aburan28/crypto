@@ -1,0 +1,931 @@
+{
+  "cells": [
+    {
+      "cell": "n16-17-planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 788708,
+        "affine_sl_basis_list": 10461084,
+        "basis_list": 2262708,
+        "basis_wide": 474708,
+        "bucket": 44549250,
+        "flat": 6291083,
+        "gray_delta_scalar": 26667,
+        "gray_delta_simd": 6750,
+        "gray_scalar": 31708,
+        "gray_simd": 7167,
+        "hybrid": 10888041,
+        "initial_list": 39875,
+        "initial_simd": 11166,
+        "merge_search": 2786750,
+        "packed_gray12_scalar": 109417,
+        "packed_gray12_simd": 45958,
+        "packed_gray16_delta_scalar": 31083,
+        "packed_gray16_delta_simd": 8958,
+        "packed_gray16_scalar": 34375,
+        "packed_gray16_simd": 9584,
+        "packed_state": 705375,
+        "packed_untraced": 473208,
+        "quadratic_state": 1140833,
+        "search": 3219042,
+        "small_flat": 4638084,
+        "tail_list": 4983208,
+        "tail_wide": 1357583,
+        "word_tail": 4064333
+      },
+      "family": "planted",
+      "n": 16,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        },
+        "initial_list": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        },
+        "initial_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.2655593220338983,
+        "gray_delta_simd": 1.0,
+        "initial_list": 0.1825583038869258,
+        "initial_simd": 0.6418592154755508,
+        "packed_gray16_delta_scalar": 0.23412971757966863,
+        "packed_gray16_delta_simd": 0.8000669792364367
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n16-17-cross_planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 545833,
+        "affine_sl_basis_list": 6728958,
+        "basis_list": 2874542,
+        "basis_wide": 585875,
+        "bucket": 23079500,
+        "flat": 3322000,
+        "gray_delta_scalar": 29250,
+        "gray_delta_simd": 6875,
+        "gray_scalar": 31250,
+        "gray_simd": 6708,
+        "hybrid": 6590750,
+        "initial_list": 41625,
+        "initial_simd": 9583,
+        "merge_search": 3234041,
+        "packed_gray12_scalar": 117875,
+        "packed_gray12_simd": 48750,
+        "packed_gray16_delta_scalar": 27375,
+        "packed_gray16_delta_simd": 8500,
+        "packed_gray16_scalar": 32292,
+        "packed_gray16_simd": 8125,
+        "packed_state": 810958,
+        "packed_untraced": 547916,
+        "quadratic_state": 1339750,
+        "search": 3690875,
+        "small_flat": 3080334,
+        "tail_list": 2894500,
+        "tail_wide": 733667,
+        "word_tail": 2740541
+      },
+      "family": "cross_planted",
+      "n": 16,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        },
+        "initial_list": {
+          "affine_eliminated": 1,
+          "enumeration_batches": 750,
+          "enumeration_points": 12000
+        },
+        "initial_simd": {
+          "affine_eliminated": 1,
+          "enumeration_batches": 750,
+          "enumeration_points": 12000
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1500,
+          "enumeration_points": 24000
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.24654513378418114,
+        "gray_delta_simd": 0.9514181818181818,
+        "initial_list": 0.1699992397171748,
+        "initial_simd": 0.6885263157894737,
+        "packed_gray16_delta_scalar": 0.2389406392694064,
+        "packed_gray16_delta_simd": 0.7695294117647059
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n16-17-unplanted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 988000,
+        "affine_sl_basis_list": 12855084,
+        "basis_list": 8740458,
+        "basis_wide": 1699166,
+        "bucket": 47281916,
+        "flat": 6398833,
+        "gray_delta_scalar": 68959,
+        "gray_delta_simd": 14333,
+        "gray_scalar": 81917,
+        "gray_simd": 15583,
+        "hybrid": 12732375,
+        "initial_list": 78875,
+        "initial_simd": 19000,
+        "merge_search": 2747250,
+        "packed_gray12_scalar": 118292,
+        "packed_gray12_simd": 51375,
+        "packed_gray16_delta_scalar": 70834,
+        "packed_gray16_delta_simd": 16625,
+        "packed_gray16_scalar": 82916,
+        "packed_gray16_simd": 17875,
+        "packed_state": 705209,
+        "packed_untraced": 477959,
+        "quadratic_state": 1083833,
+        "search": 3164625,
+        "small_flat": 4545166,
+        "tail_list": 5280208,
+        "tail_wide": 1340625,
+        "word_tail": 4005000
+      },
+      "family": "unplanted",
+      "n": 16,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "initial_list": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "initial_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.22597485462376193,
+        "gray_delta_simd": 1.087211330496058,
+        "initial_list": 0.197253164556962,
+        "initial_simd": 0.8385621266749179,
+        "packed_gray16_delta_scalar": 0.2199932235931897,
+        "packed_gray16_delta_simd": 0.9516335877862595
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n16-937-planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 784666,
+        "affine_sl_basis_list": 9343416,
+        "basis_list": 2251166,
+        "basis_wide": 405459,
+        "bucket": 62821958,
+        "flat": 6467209,
+        "gray_delta_scalar": 18500,
+        "gray_delta_simd": 5584,
+        "gray_scalar": 19459,
+        "gray_simd": 4000,
+        "hybrid": 14165500,
+        "initial_list": 28541,
+        "initial_simd": 9625,
+        "merge_search": 2732750,
+        "packed_gray12_scalar": 99875,
+        "packed_gray12_simd": 42875,
+        "packed_gray16_delta_scalar": 18000,
+        "packed_gray16_delta_simd": 7875,
+        "packed_gray16_scalar": 20000,
+        "packed_gray16_simd": 6750,
+        "packed_state": 704667,
+        "packed_untraced": 452333,
+        "quadratic_state": 1132250,
+        "search": 3079042,
+        "small_flat": 4365125,
+        "tail_list": 5721875,
+        "tail_wide": 1283625,
+        "word_tail": 3777583
+      },
+      "family": "planted",
+      "n": 16,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        },
+        "initial_list": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        },
+        "initial_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.22273528160884623,
+        "gray_delta_simd": 0.7142857142857143,
+        "initial_list": 0.14014925896079325,
+        "initial_simd": 0.4155844155844156,
+        "packed_gray16_delta_scalar": 0.21381227282446014,
+        "packed_gray16_delta_simd": 0.482392667631452
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n16-937-cross_planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 387458,
+        "affine_sl_basis_list": 4475292,
+        "basis_list": 1036584,
+        "basis_wide": 195459,
+        "bucket": 28120833,
+        "flat": 3030333,
+        "gray_delta_scalar": 16458,
+        "gray_delta_simd": 4875,
+        "gray_scalar": 18750,
+        "gray_simd": 4416,
+        "hybrid": 6742084,
+        "initial_list": 37958,
+        "initial_simd": 9208,
+        "merge_search": 2174792,
+        "packed_gray12_scalar": 74416,
+        "packed_gray12_simd": 35250,
+        "packed_gray16_delta_scalar": 18083,
+        "packed_gray16_delta_simd": 6833,
+        "packed_gray16_scalar": 19958,
+        "packed_gray16_simd": 6583,
+        "packed_state": 561542,
+        "packed_untraced": 378458,
+        "quadratic_state": 911750,
+        "search": 2518250,
+        "small_flat": 2322667,
+        "tail_list": 3008125,
+        "tail_wide": 741708,
+        "word_tail": 1898166
+      },
+      "family": "cross_planted",
+      "n": 16,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        },
+        "initial_list": {
+          "affine_eliminated": 1,
+          "enumeration_batches": 385,
+          "enumeration_points": 6160
+        },
+        "initial_simd": {
+          "affine_eliminated": 1,
+          "enumeration_batches": 385,
+          "enumeration_points": 6160
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 832,
+          "enumeration_points": 13312
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.26831935836675175,
+        "gray_delta_simd": 0.9137181874612043,
+        "initial_list": 0.11633911164971811,
+        "initial_simd": 0.4751303214596003,
+        "packed_gray16_delta_scalar": 0.24420726649339158,
+        "packed_gray16_delta_simd": 0.6624662466246625
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n16-937-unplanted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 1235625,
+        "affine_sl_basis_list": 16807709,
+        "basis_list": 9032459,
+        "basis_wide": 1796292,
+        "bucket": 70518500,
+        "flat": 7852042,
+        "gray_delta_scalar": 71250,
+        "gray_delta_simd": 14833,
+        "gray_scalar": 84292,
+        "gray_simd": 15750,
+        "hybrid": 15992125,
+        "initial_list": 77834,
+        "initial_simd": 18500,
+        "merge_search": 3495625,
+        "packed_gray12_scalar": 119625,
+        "packed_gray12_simd": 51417,
+        "packed_gray16_delta_scalar": 70417,
+        "packed_gray16_delta_simd": 16166,
+        "packed_gray16_scalar": 85541,
+        "packed_gray16_simd": 15042,
+        "packed_state": 866291,
+        "packed_untraced": 583292,
+        "quadratic_state": 1375541,
+        "search": 4022625,
+        "small_flat": 5444542,
+        "tail_list": 6616667,
+        "tail_wide": 1622000,
+        "word_tail": 4829917
+      },
+      "family": "unplanted",
+      "n": 16,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "initial_list": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "initial_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 4096,
+          "enumeration_points": 65536
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.2111157894736842,
+        "gray_delta_simd": 1.0140902042742534,
+        "initial_list": 0.19524415254017288,
+        "initial_simd": 0.8108108108108109,
+        "packed_gray16_delta_scalar": 0.2130167431160089,
+        "packed_gray16_delta_simd": 0.9326038298930615
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n24-17-planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 19205583,
+        "affine_sl_basis_list": 172002209,
+        "basis_list": 245585166,
+        "basis_wide": 55071875,
+        "bucket": 1251488250,
+        "flat": 345507375,
+        "gray_delta_scalar": 12900167,
+        "gray_delta_simd": 2401959,
+        "gray_scalar": 15532250,
+        "gray_simd": 2282875,
+        "hybrid": 613489708,
+        "initial_list": 12653625,
+        "initial_simd": 2395708,
+        "merge_search": 73615208,
+        "packed_gray12_scalar": 18464041,
+        "packed_gray12_simd": 8156709,
+        "packed_gray16_delta_scalar": 12314958,
+        "packed_gray16_delta_simd": 2805667,
+        "packed_gray16_scalar": 14909291,
+        "packed_gray16_simd": 2620625,
+        "packed_state": 18794834,
+        "packed_untraced": 13414292,
+        "quadratic_state": 30488625,
+        "search": 83994417,
+        "small_flat": 98207000,
+        "tail_list": 159297125,
+        "tail_wide": 49263916,
+        "word_tail": 88135041
+      },
+      "family": "planted",
+      "n": 24,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 776741,
+          "enumeration_points": 12427856
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 776741,
+          "enumeration_points": 12427856
+        },
+        "initial_list": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 776741,
+          "enumeration_points": 12427856
+        },
+        "initial_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 776741,
+          "enumeration_points": 12427856
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 731295,
+          "enumeration_points": 11700720
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 731295,
+          "enumeration_points": 11700720
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.17281851238187912,
+        "gray_delta_simd": 0.9497633782307973,
+        "initial_list": 0.18024832836774504,
+        "initial_simd": 0.9557940915041875,
+        "packed_gray16_delta_scalar": 0.18537416043156624,
+        "packed_gray16_delta_simd": 0.8091832260566303
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n24-17-cross_planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 12715375,
+        "affine_sl_basis_list": 109777542,
+        "basis_list": 89483292,
+        "basis_wide": 20568291,
+        "bucket": 578798041,
+        "flat": 163085209,
+        "gray_delta_scalar": 12962208,
+        "gray_delta_simd": 2398750,
+        "gray_scalar": 15396125,
+        "gray_simd": 2246916,
+        "hybrid": 245182667,
+        "initial_list": 6337250,
+        "initial_simd": 1213583,
+        "merge_search": 70435708,
+        "packed_gray12_scalar": 17862041,
+        "packed_gray12_simd": 8011125,
+        "packed_gray16_delta_scalar": 12285500,
+        "packed_gray16_delta_simd": 2825084,
+        "packed_gray16_scalar": 14854209,
+        "packed_gray16_simd": 2551458,
+        "packed_state": 17995292,
+        "packed_untraced": 12993375,
+        "quadratic_state": 29458791,
+        "search": 80791667,
+        "small_flat": 92967375,
+        "tail_list": 70572000,
+        "tail_wide": 21972833,
+        "word_tail": 84142333
+      },
+      "family": "cross_planted",
+      "n": 24,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 776741,
+          "enumeration_points": 12427856
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 776741,
+          "enumeration_points": 12427856
+        },
+        "initial_list": {
+          "affine_eliminated": 1,
+          "enumeration_batches": 386524,
+          "enumeration_points": 6184384
+        },
+        "initial_simd": {
+          "affine_eliminated": 1,
+          "enumeration_batches": 386524,
+          "enumeration_points": 6184384
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 729311,
+          "enumeration_points": 11668976
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 729311,
+          "enumeration_points": 11668976
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.17476951552216835,
+        "gray_delta_simd": 0.936390620114643,
+        "initial_list": 0.3562151321786691,
+        "initial_simd": 1.8508556893100843,
+        "packed_gray16_delta_scalar": 0.18417848488638952,
+        "packed_gray16_delta_simd": 0.7953684955752213
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n24-17-unplanted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 37091708,
+        "affine_sl_basis_list": 344473500,
+        "basis_list": 336131292,
+        "basis_wide": 76941500,
+        "bucket": 904476875,
+        "flat": 371593625,
+        "gray_delta_scalar": 17610708,
+        "gray_delta_simd": 3231291,
+        "gray_scalar": 20838875,
+        "gray_simd": 3085292,
+        "hybrid": 491724542,
+        "initial_list": 17307000,
+        "initial_simd": 3244750,
+        "merge_search": 83623250,
+        "packed_gray12_scalar": 24478334,
+        "packed_gray12_simd": 10954583,
+        "packed_gray16_delta_scalar": 17854875,
+        "packed_gray16_delta_simd": 4052167,
+        "packed_gray16_scalar": 21334458,
+        "packed_gray16_simd": 3807375,
+        "packed_state": 21321042,
+        "packed_untraced": 15413583,
+        "quadratic_state": 34299083,
+        "search": 96510417,
+        "small_flat": 109767208,
+        "tail_list": 162211958,
+        "tail_wide": 51778875,
+        "word_tail": 99841250
+      },
+      "family": "unplanted",
+      "n": 24,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1048576,
+          "enumeration_points": 16777216
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1048576,
+          "enumeration_points": 16777216
+        },
+        "initial_list": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1048576,
+          "enumeration_points": 16777216
+        },
+        "initial_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1048576,
+          "enumeration_points": 16777216
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1046528,
+          "enumeration_points": 16744448
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1046528,
+          "enumeration_points": 16744448
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.1785577579388757,
+        "gray_delta_simd": 0.9548171303667791,
+        "initial_list": 0.17958799834736472,
+        "initial_simd": 0.9508566145311658,
+        "packed_gray16_delta_scalar": 0.17279829738376773,
+        "packed_gray16_delta_simd": 0.7577157511125825
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n24-937-planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 22419292,
+        "affine_sl_basis_list": 212031167,
+        "basis_list": 272006500,
+        "basis_wide": 59272666,
+        "bucket": 1081470875,
+        "flat": 359968458,
+        "gray_delta_scalar": 15404125,
+        "gray_delta_simd": 2886583,
+        "gray_scalar": 18543042,
+        "gray_simd": 2660042,
+        "hybrid": 504208708,
+        "initial_list": 15274250,
+        "initial_simd": 2877500,
+        "merge_search": 86335792,
+        "packed_gray12_scalar": 18773041,
+        "packed_gray12_simd": 8035083,
+        "packed_gray16_delta_scalar": 11746542,
+        "packed_gray16_delta_simd": 2686583,
+        "packed_gray16_scalar": 14122750,
+        "packed_gray16_simd": 2489375,
+        "packed_state": 21762750,
+        "packed_untraced": 15677875,
+        "quadratic_state": 35129417,
+        "search": 97927084,
+        "small_flat": 114588208,
+        "tail_list": 195918666,
+        "tail_wide": 57074125,
+        "word_tail": 102633959
+      },
+      "family": "planted",
+      "n": 24,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 934720,
+          "enumeration_points": 14955520
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 934720,
+          "enumeration_points": 14955520
+        },
+        "initial_list": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 934720,
+          "enumeration_points": 14955520
+        },
+        "initial_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 934720,
+          "enumeration_points": 14955520
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 691956,
+          "enumeration_points": 11071296
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 691956,
+          "enumeration_points": 11071296
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.1640228635435198,
+        "gray_delta_simd": 0.8620713537952956,
+        "initial_list": 0.16270573023225363,
+        "initial_simd": 0.8636691572545613,
+        "packed_gray16_delta_scalar": 0.21319682227861508,
+        "packed_gray16_delta_simd": 0.9288760979256214
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n24-937-cross_planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 14824708,
+        "affine_sl_basis_list": 166582083,
+        "basis_list": 153493083,
+        "basis_wide": 33932042,
+        "bucket": 256553375,
+        "flat": 78360083,
+        "gray_delta_scalar": 15241083,
+        "gray_delta_simd": 2877708,
+        "gray_scalar": 18482083,
+        "gray_simd": 3246292,
+        "hybrid": 127503459,
+        "initial_list": 7595458,
+        "initial_simd": 1454792,
+        "merge_search": 92393292,
+        "packed_gray12_scalar": 21333000,
+        "packed_gray12_simd": 9409916,
+        "packed_gray16_delta_scalar": 14544208,
+        "packed_gray16_delta_simd": 3263416,
+        "packed_gray16_scalar": 17117333,
+        "packed_gray16_simd": 3007250,
+        "packed_state": 23195209,
+        "packed_untraced": 16722917,
+        "quadratic_state": 37632000,
+        "search": 105743667,
+        "small_flat": 120762958,
+        "tail_list": 38750917,
+        "tail_wide": 12074375,
+        "word_tail": 109999125
+      },
+      "family": "cross_planted",
+      "n": 24,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 934720,
+          "enumeration_points": 14955520
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 934720,
+          "enumeration_points": 14955520
+        },
+        "initial_list": {
+          "affine_eliminated": 1,
+          "enumeration_batches": 467360,
+          "enumeration_points": 7477760
+        },
+        "initial_simd": {
+          "affine_eliminated": 1,
+          "enumeration_batches": 467360,
+          "enumeration_points": 7477760
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 839153,
+          "enumeration_points": 13426448
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 839153,
+          "enumeration_points": 13426448
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.19731209389778928,
+        "gray_delta_simd": 1.045015686094628,
+        "initial_list": 0.3959274081957928,
+        "initial_simd": 2.079642223393235,
+        "packed_gray16_delta_scalar": 0.20708002425243624,
+        "packed_gray16_delta_simd": 0.9078948282071881
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n24-937-unplanted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 65005917,
+        "affine_sl_basis_list": 619702166,
+        "basis_list": 477304542,
+        "basis_wide": 101583083,
+        "bucket": 2214569042,
+        "flat": 549121000,
+        "gray_delta_scalar": 17759750,
+        "gray_delta_simd": 3212833,
+        "gray_scalar": 20800583,
+        "gray_simd": 2966333,
+        "hybrid": 1090543292,
+        "initial_list": 18013667,
+        "initial_simd": 3242666,
+        "merge_search": 120665583,
+        "packed_gray12_scalar": 26132459,
+        "packed_gray12_simd": 11644708,
+        "packed_gray16_delta_scalar": 17742292,
+        "packed_gray16_delta_simd": 4063292,
+        "packed_gray16_scalar": 21305000,
+        "packed_gray16_simd": 3702584,
+        "packed_state": 31234083,
+        "packed_untraced": 22222416,
+        "quadratic_state": 50369458,
+        "search": 140037292,
+        "small_flat": 165843208,
+        "tail_list": 293210584,
+        "tail_wide": 82454708,
+        "word_tail": 145776000
+      },
+      "family": "unplanted",
+      "n": 24,
+      "new_work": {
+        "gray_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1048576,
+          "enumeration_points": 16777216
+        },
+        "gray_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1048576,
+          "enumeration_points": 16777216
+        },
+        "initial_list": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1048576,
+          "enumeration_points": 16777216
+        },
+        "initial_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1048576,
+          "enumeration_points": 16777216
+        },
+        "packed_gray16_delta_scalar": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1042432,
+          "enumeration_points": 16678912
+        },
+        "packed_gray16_delta_simd": {
+          "affine_eliminated": 0,
+          "enumeration_batches": 1042432,
+          "enumeration_points": 16678912
+        }
+      },
+      "retained_ratio": {
+        "gray_delta_scalar": 0.16764405737190366,
+        "gray_delta_simd": 0.9263155889594078,
+        "initial_list": 0.16715313989095057,
+        "initial_simd": 0.9196862380343371,
+        "packed_gray16_delta_scalar": 0.16693638003477793,
+        "packed_gray16_delta_simd": 0.7319119639964139
+      },
+      "seed": 937,
+      "verified": true
+    }
+  ],
+  "observations": 1008,
+  "promotion": null,
+  "scope": "Discovery only; generated public Boolean systems, no holdouts or promotion."
+}

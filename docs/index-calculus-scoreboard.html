@@ -4478,6 +4478,70 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-initial-restriction-20260923">
+  <div class="panel-head">
+    <h2>One initial affine restriction: fewer assignments, dramatic gate rejected <span class="chip">engineering</span></h2>
+    <p>All three new treatments pass 0/18 dramatic comparisons against the current
+      reference, which includes every predecessor SIMD method. Incremental comparisons
+      pass in 5/18 groups for direct block transport, 10/18 for initial restriction and
+      0/18 for transported leaves. No universal gain or confirmation eligibility is established.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/CONCLUSION.md">decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/CORRECTNESS.md">exact coefficient and rank arguments</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/run_01/results.json">recorded costs and paired intervals</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/SUMMARY.json">individual cases and rank counts</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/RUN_LEDGER.json">immutable run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete standalone solve plus validation milliseconds on two fresh n24
+      holdout seeds and seven repetitions. Display ratios use pooled planted costs relative
+      to retained direct SIMD; acceptance uses paired fastest-reference costs. These are
+      solver diagnostics with no calibrated IC-operation or rho comparison.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Direct SIMD / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>58.977604</td><td>66.921708</td><td>131.455542</td><td>0.028</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>211.675750</td><td>154.656688</td><td>496.847625</td><td>0.008</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>834.953604</td><td>569.018396</td><td>2017.926459</td><td>0.002</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>425.680834</td><td>258.226729</td><td>1070.070500</td><td>0.004</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>69.096271</td><td>76.453354</td><td>152.386209</td><td>0.024</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>60.876854</td><td>67.377167</td><td>137.764104</td><td>0.027</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>51.737938</td><td>59.208897</td><td>115.901396</td><td>0.032</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>21.899041</td><td>24.354313</td><td>48.403396</td><td>0.075</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>13.286791</td><td>14.862875</td><td>29.163438</td><td>0.123</td><td>PASS</td></tr>
+      <tr><td>Full RREF, list</td><td>263.747000</td><td>189.058312</td><td>362.392271</td><td>0.006</td><td>PASS</td></tr>
+      <tr><td>Full RREF, wide</td><td>57.391458</td><td>42.091729</td><td>80.346542</td><td>0.029</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, list</td><td>103.822063</td><td>75.383938</td><td>230.920729</td><td>0.016</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, wide</td><td>31.455313</td><td>22.961083</td><td>64.298438</td><td>0.052</td><td>PASS</td></tr>
+      <tr><td>Packed without diagnostic hashing</td><td>9.358438</td><td>10.563563</td><td>20.912500</td><td>0.175</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, list</td><td>201.793584</td><td>194.776563</td><td>511.947521</td><td>0.008</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, compact</td><td>21.520312</td><td>22.411625</td><td>51.417437</td><td>0.076</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, scalar</td><td>10.418708</td><td>10.400021</td><td>20.718916</td><td>0.157</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, SIMD</td><td>1.638146</td><td>1.641104</td><td>3.135958</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, scalar</td><td>11.177500</td><td>13.295917</td><td>27.136333</td><td>0.147</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, SIMD</td><td>5.024521</td><td>5.933875</td><td>12.128438</td><td>0.326</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, scalar</td><td>9.101875</td><td>10.794166</td><td>21.356188</td><td>0.180</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, SIMD</td><td>1.657396</td><td>1.985146</td><td>3.804146</td><td>0.988</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, scalar</td><td>10.239313</td><td>10.295500</td><td>20.634563</td><td>0.160</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, SIMD</td><td>1.431812</td><td>1.428292</td><td>2.839542</td><td>1.144</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, list/scalar</td><td>10.395687</td><td>5.240375</td><td>20.388834</td><td>0.158</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, packed/SIMD</td><td>1.423979</td><td>0.732729</td><td>2.839938</td><td>1.150</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, scalar</td><td>9.078062</td><td>11.037646</td><td>21.386854</td><td>0.180</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, SIMD</td><td>1.592000</td><td>1.878562</td><td>3.727667</td><td>1.029</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 28,224 observations over 144 distinct systems complete: 107 SAT and 37 UNSAT
+    fixtures per arm. Initial restriction finds affine rank one on 48 fixtures; a sound
+    projected-rank certificate proves an empty affine intersection on the other 96.
+    The fresh n24 cross-planted paired ratio is 1.991582, with interval [1.835488, 2.152253];
+    its lower bound misses 2.0. The prior seed2097153 failure remains, with initial-restriction
+    ratio 0.160432 against the expanded reference.</p>
+  <p>The evidence includes 42 Rust tests and 20 Python checks. Whole-worker peak RSS is
+    29,769,728 bytes. Candidate-specific memory, calibrated-operation ratios, production
+    index-calculus cost and rho ratio remain unmeasured. No confirmation run was launched.</p>
+  <p>A separate exact discovery census finds independent variable sets of size 2&ndash;3
+    at n16 and 4&ndash;5 at n24, so fixing the remaining variables leaves a small linear system.
+    Its solver and complete cost remain unimplemented and unmeasured; the existing SIMD
+    method already evaluates sixteen points together. Earlier figures remain below.</p>
+</section>
 <section class="panel" id="boolean-affine-substitution-20260923">
   <div class="panel-head">
     <h2>Affine substitution and SIMD evaluation: universal gain rejected <span class="chip">engineering</span></h2>
