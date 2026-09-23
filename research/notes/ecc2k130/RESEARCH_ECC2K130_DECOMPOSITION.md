@@ -467,6 +467,14 @@ method given the same table, and rho is cheaper than both while storing
 nothing.  There is no memory budget at which buying a table turns
 decomposition into a win.
 
+*(Superseded in part by §6.2.  Every tabulated row above, and every cell in
+this table, was priced without the orbit collapse its own base qualifies
+for.  With it, the decomposition column falls by 8–14 bits and **beats
+BSGS as priced here at every budget** — so the first sentence of this
+paragraph is withdrawn.  The second survives unchanged: **rho is cheaper
+than every corrected cell at every budget, while storing nothing.**  The
+rows are kept as the "before" marks.)*
+
 ### 5.3 What the oracle would have to cost
 
 Turn the product law around.  At the `(m, l)` that minimises the free-oracle
@@ -607,6 +615,105 @@ for designing them.  The verdict is unchanged — seven bits off `2^71.77` is
 still `2^64` times rho — and the identity in §5.3 is unchanged with it, since
 the required oracle speed-up becomes `2^{70.19 + log₂ m − log₂ n}` and is still
 the product law read backwards.
+
+### 6.2 A second accounting correction: the tabulated rows never took the collapse
+
+**Script:** `scripts/ecc2k130_tabulated_collapse.py` (imports this note's
+`cost_cell` unchanged) · **Artefact:** `experiments/ecc2k130_tabulated_collapse.json`
+· everything below is **derived**; nothing is a run.
+
+§6.1 corrected the enumeration family and stopped there.  But §6's own
+condition for the collapse is only that the base be **materialised**, and
+every tabulated row in §5.2 materialises the base by construction.  Its
+pair-table, triple-table and memory-capped rows were nonetheless built with
+`cost_cell(..., frobenius=False)`.  And `cost_cell`'s collapse path, where it
+is used, folds the relation count and the linear algebra but not the
+subset-sum table.  A table of sums of an orbit-union base can be folded too,
+one representative per σ-orbit of sums, with the lookup canonicalised.
+
+**It was found by disagreement, not by re-reading.**  The IC candidate
+tournament (`research/ic_candidate_tournament_20260915/campaign_20260916/RESULTS.md`,
+round 0022) has **measured** the IC/rho crossover for this method family on
+Koblitz curves with Frobenius-orbit bases — `0.831` at `n23a1`, `1.396` at
+`n37a0`, `2.207` at `n43a1`, every run required to complete, every IC answer
+checked by an oracle — with a rate of `r^[0.13, 0.19]` and a family model
+(`docs/ic/README.md`, Round 3)
+
+```text
+    ops(F) = F²/(4t) + c·#E/(2kF),   least at F = (c·#E·t/k)^{1/3}
+```
+
+which is a folded pair table plus walked targets: the §5.2 pair-table row.
+At ECC2K-130 its optimum base is `F* ≈ 2^43.67`; the §5.2 row sits at
+`dim V = 43.25`.  Same method, same operating point, and the two numbers for
+it disagreed by about `2^{11}`.  Every bit of that is accounted for:
+
+| `m = 2`, unbounded memory | `dim V` | table | `log₂` ops | ratio to rho | moved by |
+|---|--:|--:|--:|--:|--:|
+| §5.2 as committed, no collapse | 43.25 | `2^85.50` | 89.36 | `2^+28.55` | |
+| + orbit collapse on relations and linear algebra (§6's path) | 41.75 | `2^82.50` | 83.90 | `2^+23.09` | −5.46 |
+| + subset-sum table folded by `n` | 44.00 | `2^79.97` | **81.57** | **`2^+20.76`** | −2.33 |
+| tournament family model, `t = k = n` | 43.67 | `2^78.30` | 79.88 | `2^+19.07` | −1.69 |
+| tournament's **measured** rate carried to `r = 2^129` | — | — | — | `2^+17.29` | −1.78 |
+
+`m = 3` moves the same way: `2^+29.77` as committed, `2^+24.15` with the
+collapse, **`2^+21.82`** with the folded table.
+
+- **7.8 bits** are this note's: the collapse its own §6 licenses, not applied
+  to the rows it applies to.  That is the error.
+- **1.7 bits** separate the corrected row from the tournament's model, and
+  are constants — the model's `0.75`, the negation fold its `F²/4` carries
+  and `C(|F|, 2)` does not, and linear algebra, which this note charges and
+  the model omits.
+- **1.8 bits** separate the model from its own measured rate carried out 97
+  bits, and sit inside the measured band: the rate range `[0.075, 0.188]`
+  lands at `2^+8.4` to `2^+19.4`.  That carry is **extrapolation from three
+  cells whose rate ranges overlap**; the lane reports no resolvable curvature,
+  and its measured best base grows as `r^0.157` where the model's grows as
+  `r^{1/3}`.
+
+**What it changes.**  The honest distance from rho for the best family this
+repository has *measured* is about **`2^{19}`–`2^{21}` with unbounded memory**,
+not the `2^{28.5}`–`2^{29.8}` §5.2 printed — derived here, and bracketed by an
+independent measurement carried to scale.  ECC2K-130 is no less safe: the
+optimum needs a folded table of `2^{80}` entries, and capped at `2^{60}` the
+same `m = 2` family is `2^{30.2}` above rho (the script's capped `m = 2`
+search; each 10 bits of memory buys 5 of time).
+
+**What it changes about memory.**  Re-running §5.2's capped search with both
+folds:
+
+| table entries | best cell, as committed | best cell, corrected | BSGS as §5.2 prices it | rho, no memory |
+|--:|--:|--:|--:|--:|
+| `2^30` | `2^110.08` | `2^95.87` (`m = 5`) | `2^99.00` | `2^60.81` |
+| `2^40` | `2^100.49` | `2^86.77` (`m = 7`) | `2^89.00` | `2^60.81` |
+| `2^50` | `2^90.30` | `2^76.27` (`m = 8`) | `2^79.00` | `2^60.81` |
+| `2^60` | `2^81.55` | `2^67.53` (`m = 8`) | `2^69.00` | `2^60.81` |
+| `2^70` | `2^72.88` | `2^64.85` (`m = 8`) | `2^70.00` | `2^60.81` |
+
+The corrected cells beat BSGS **as §5.2 prices it** at every budget, so §5.2's
+"at every budget the generic algorithm is cheaper" is withdrawn.  That
+comparison was never even-handed once corrected: the decomposition side now
+uses the `⟨−1⟩ × ⟨π⟩` symmetry and `max(M, r/M)` does not, and an
+automorphism-aware BSGS is not priced here, so no claim is made against it.
+The comparison that does not depend on that choice is the last column, and
+**it is unchanged: rho beats every corrected cell at every budget, by `2^4`
+at `2^70` entries and `2^35` at `2^30`, while storing nothing.**  Every
+corrected capped cell is also a tabulate-every-`m`-subset cell on a base of
+`2^9`–`2^11` points, the §5.2 "generic in costume" class.
+
+**Class.**  **Accounting**, as §6.1 was: the numbers changed, no algorithm
+did, and no gain is claimed.  §5.3's identity is untouched — the product law
+and the required-speed-up invariant in §5.3 price the *implicit-base*
+enumeration family, and this correction does not reach it.  The committed
+§5.2 rows stay as the "before" marks; `experiments/ecc2k130_point_decomposition.json`
+is not regenerated.
+
+**And the two lanes validate each other.**  The tournament's crossover at
+`n ≈ 23` and this note's cost at `n = 131` are two ends of one law once the
+note applies its own collapse: the measured rate, carried out 97 bits, lands
+within 2^3.5 of this note's own code, inside the measured band.  Neither
+number was fitted to the other.
 
 ## 7. What this does not settle
 

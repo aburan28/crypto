@@ -85,6 +85,8 @@ use std::collections::{HashMap, HashSet};
 use std::hash::{BuildHasherDefault, Hasher};
 use std::time::{Duration, Instant};
 
+use rayon::prelude::*;
+
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
 
 /// What one F4 run cost, and how far it got.
@@ -392,17 +394,75 @@ struct EchelonOutput {
     trimmed_word_xors_avoided: u64,
 }
 
-/// Streaming forward elimination: each row in turn is reduced by the pivots
-/// found so far and becomes a pivot if anything survives.
+/// Rows times words of a matrix's non-leading rows below which reductions by
+/// the leading block stay on one thread.
+const PAR_WORDS: usize = 1 << 16;
+
+/// Streaming forward elimination. The initial block of rows with distinct
+/// leads becomes pivots unchanged; reductions of the remaining rows by only
+/// that fixed block are independent and may run in parallel. The serial pass
+/// then resumes at exactly the point reached by the original row-at-a-time
+/// loop, preserving pivots and the charged XOR count.
 fn echelon_streaming(
-    rows: Vec<Row>,
+    mut rows: Vec<Row>,
     n_cols: usize,
     word_xors: &mut u64,
     deadline: Option<Instant>,
 ) -> Option<EchelonOutput> {
     let mut pivot_of = vec![NONE; n_cols];
     let mut pivots: Vec<(usize, Row)> = Vec::with_capacity(rows.len());
-    for (k, mut row) in rows.into_iter().enumerate() {
+    let mut fixed = 0usize;
+    while fixed < rows.len() {
+        match rows[fixed].lead() {
+            Some(lead) if pivot_of[lead] != NONE => break,
+            Some(lead) => pivot_of[lead] = 0,
+            None => {}
+        }
+        fixed += 1;
+    }
+    let rest = rows.split_off(fixed);
+    for mut row in rows {
+        if let Some(lead) = row.lead() {
+            pivot_of[lead] = pivots.len() as u32;
+            pivots.push((lead, row));
+        }
+    }
+    let mut rest = rest;
+    {
+        let (pivot_of, fixed_pivots) = (&pivot_of, &pivots);
+        let expired = std::sync::atomic::AtomicBool::new(false);
+        let by_fixed = |row: &mut Row| -> u64 {
+            if deadline.is_some_and(|d| Instant::now() >= d) {
+                expired.store(true, std::sync::atomic::Ordering::Relaxed);
+                return 0;
+            }
+            let mut xors = 0u64;
+            while let Some(lead) = row.lead() {
+                let p = pivot_of[lead];
+                if p == NONE {
+                    break;
+                }
+                let pivot = &fixed_pivots[p as usize].1;
+                let (from, to) = (lead / 64, pivot.end);
+                for (a, b) in row.bits[from..to].iter_mut().zip(&pivot.bits[from..to]) {
+                    *a ^= *b;
+                }
+                xors += (to - from) as u64;
+                row.end = row.end.max(to);
+            }
+            xors
+        };
+        let words = n_cols.div_ceil(64).max(1);
+        *word_xors += if rest.len() > 1 && rest.len() * words > PAR_WORDS {
+            rest.par_iter_mut().map(by_fixed).sum::<u64>()
+        } else {
+            rest.iter_mut().map(by_fixed).sum::<u64>()
+        };
+        if expired.load(std::sync::atomic::Ordering::Relaxed) {
+            return None;
+        }
+    }
+    for (k, mut row) in rest.into_iter().enumerate() {
         if k % 128 == 0 && deadline.is_some_and(|d| Instant::now() >= d) {
             return None;
         }

@@ -104,6 +104,12 @@ symmetrised systems are *too* small for the technique.
 
 ## Route 3 — Wire the symmetrised oracle into end-to-end collection
 
+> **Closed at its gate; do not wire.**  On ECC2K-130's structure the only
+> Frobenius-stable `V ∋ 1` are `F₂` and the field, so the symmetrised base
+> loses its orbit collapse.  Per relation, the oracle then costs `3.1–14.7×`
+> the enumeration it would replace (`n = 13–23`, priced from below).  See
+> §X4′ of [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md).
+
 **Why it is open.** The symmetrised oracle is measured at ~350× the
 chained `x`-system at `m = 3` (10 291 ms → 29 ms, `K₀/F₂¹⁵`) and **none
 of it reaches the attack**: `DecompositionStrategy` has four variants and

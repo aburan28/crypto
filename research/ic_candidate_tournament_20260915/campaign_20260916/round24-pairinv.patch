@@ -1,0 +1,54 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -1038,6 +1038,9 @@
+     logs: Option<Vec<u64>>,
+     // scratch
+     dens: Vec<u64>,
++    // Which entry of `dens` holds each block position's inverse: +P and -P
++    // share an abscissa, hence a denominator, and are inverted once.
++    slot: Vec<usize>,
+     scratch: Vec<u64>,
+ }
+ 
+@@ -1307,6 +1310,7 @@
+             solve_attempts: 0,
+             logs: None,
+             dens: Vec::with_capacity(size),
++            slot: Vec::with_capacity(size),
+             scratch: Vec::with_capacity(size),
+         })
+     }
+@@ -1408,9 +1412,15 @@
+             let end = offset + len;
+             // The block, wrapping around the end of the base.
+             self.dens.clear();
++            self.slot.clear();
+             for t in 0..len {
+                 let i = (offset + t) % size;
+                 let q = self.negated[i];
++                if t > 0 && q.x == self.negated[(offset + t - 1) % size].x {
++                    self.slot.push(self.dens.len() - 1);
++                    continue;
++                }
++                self.slot.push(self.dens.len());
+                 self.dens.push(if q.x == target.x { 0 } else { target.x ^ q.x });
+             }
+             self.arith.batch_inv(&mut self.dens, &mut self.scratch);
+@@ -1418,7 +1428,7 @@
+             for t in 0..len {
+                 let i = (offset + t) % size;
+                 let q = self.negated[i];
+-                let inv = self.dens[t];
++                let inv = self.dens[self.slot[t]];
+                 rests.push(if inv == 0 {
+                     let sum = self.arith.add(target, q);
+                     if sum.infinity { u64::MAX } else { sum.x }
+@@ -1443,7 +1453,7 @@
+                 }
+                 // The orbit matched, so this rest is worth its ordinate.
+                 let q = self.negated[i];
+-                let inv = self.dens[t];
++                let inv = self.dens[self.slot[t]];
+                 let rest = if inv == 0 {
+                     self.arith.add(target, q)
+                 } else {
