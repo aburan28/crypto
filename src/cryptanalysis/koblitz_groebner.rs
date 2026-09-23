@@ -2077,6 +2077,19 @@ fn echelon_f2_suffix_counted(
     pivot_row
 }
 
+/// Pivots per Four Russians block: four, or `KIC_F4_M4RI_BLOCK` (clamped to
+/// `2 ..= 10`) for bounded ablation runs.
+fn m4ri_block_width() -> usize {
+    static BLOCK_WIDTH: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    *BLOCK_WIDTH.get_or_init(|| {
+        std::env::var("KIC_F4_M4RI_BLOCK")
+            .ok()
+            .and_then(|value| value.parse::<usize>().ok())
+            .unwrap_or(4)
+            .clamp(2, 10)
+    })
+}
+
 /// Method of Four Russians elimination over `F_2`. A small pivot block is
 /// reduced together; its row combinations are materialized once, then each
 /// non-pivot row clears the whole block with one suffix XOR. The default block
@@ -2094,14 +2107,7 @@ fn echelon_f2_m4ri_counted(
     word_ops: &mut u64,
     reduce_above: bool,
 ) -> usize {
-    static BLOCK_WIDTH: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
-    let block_width = *BLOCK_WIDTH.get_or_init(|| {
-        std::env::var("KIC_F4_M4RI_BLOCK")
-            .ok()
-            .and_then(|value| value.parse::<usize>().ok())
-            .unwrap_or(4)
-            .clamp(2, 10)
-    });
+    let block_width = m4ri_block_width();
     let words = n_cols.div_ceil(64);
     let rows = matrix.len();
     let mut pivot_row = 0usize;
@@ -2206,6 +2212,137 @@ fn echelon_f2_m4ri_counted(
     pivot_row
 }
 
+/// Four Russians row echelon form with each block's table built on demand.
+///
+/// [`echelon_f2_m4ri_counted`] builds all `2^k − 1` combinations of a
+/// block's pivots before clearing the rows below it, which pays when the
+/// rows need most of them.  The degree-3 Macaulay matrices of the
+/// decomposition systems are sparse — a row below a block meets its `k`
+/// pivot columns once or twice, if at all — so here a combination is
+/// built the first time a row needs it, from the combination with its
+/// lowest pivot removed (built the same way if it is missing), and a
+/// single pivot is XORed from its own row.  The block's pivots are reduced
+/// against each other as they are found, in place rather than in the row
+/// and a copy.  At the same block width the result is exactly
+/// [`echelon_f2_m4ri_counted`]'s — the same pivot search, the same rows
+/// out — for fewer XORs, in the same unit: every word XOR is charged,
+/// each table entry built included.
+pub(crate) fn echelon_f2_m4ri_lazy_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+    block_width: usize,
+) -> usize {
+    let words = n_cols.div_ceil(64);
+    let rows = matrix.len();
+    let mut pivot_row = 0usize;
+    let mut column = 0usize;
+    let mut table: Vec<u64> = Vec::new();
+    let mut built: Vec<bool> = Vec::new();
+    let mut chain: Vec<usize> = Vec::new();
+    let mut pivot_columns: Vec<usize> = Vec::with_capacity(block_width);
+    while pivot_row < rows && column < n_cols {
+        let block_start = pivot_row;
+        pivot_columns.clear();
+        while pivot_columns.len() < block_width && pivot_row < rows && column < n_cols {
+            let (word, bit) = (column / 64, 1u64 << (column % 64));
+            let mut found = None;
+            for row in pivot_row..rows {
+                for (index, &pivot_column) in pivot_columns.iter().enumerate() {
+                    let (pivot_word, pivot_bit) = (pivot_column / 64, 1u64 << (pivot_column % 64));
+                    if matrix[row][pivot_word] & pivot_bit != 0 {
+                        let (head, tail) = matrix.split_at_mut(row);
+                        let pivot = &head[block_start + index][pivot_word..words];
+                        for (target, source) in tail[0][pivot_word..words].iter_mut().zip(pivot) {
+                            *target ^= *source;
+                        }
+                        *word_ops += (words - pivot_word) as u64;
+                    }
+                }
+                if matrix[row][word] & bit != 0 {
+                    found = Some(row);
+                    break;
+                }
+            }
+            if let Some(found) = found {
+                matrix.swap(pivot_row, found);
+                let (head, tail) = matrix.split_at_mut(pivot_row);
+                let pivot = &tail[0][word..words];
+                for previous in head[block_start..].iter_mut() {
+                    if previous[word] & bit != 0 {
+                        for (target, source) in previous[word..words].iter_mut().zip(pivot) {
+                            *target ^= *source;
+                        }
+                        *word_ops += (words - word) as u64;
+                    }
+                }
+                pivot_columns.push(column);
+                pivot_row += 1;
+            }
+            column += 1;
+        }
+        if pivot_columns.is_empty() {
+            break;
+        }
+
+        let block_rows = pivot_columns.len();
+        let first_word = pivot_columns[0] / 64;
+        let suffix_words = words - first_word;
+        let combinations = 1usize << block_rows;
+        if table.len() < combinations * suffix_words {
+            table.resize(combinations * suffix_words, 0);
+        }
+        built.clear();
+        built.resize(combinations, false);
+        let (pivots, below) = matrix[block_start..].split_at_mut(block_rows);
+        for row in below.iter_mut() {
+            let mut pattern = 0usize;
+            for (index, &pivot_column) in pivot_columns.iter().enumerate() {
+                if row[pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
+                    pattern |= 1usize << index;
+                }
+            }
+            if pattern == 0 {
+                continue;
+            }
+            if !pattern.is_power_of_two() && !built[pattern] {
+                chain.clear();
+                let mut p = pattern;
+                while !p.is_power_of_two() && !built[p] {
+                    chain.push(p);
+                    p &= p - 1;
+                }
+                for &q in chain.iter().rev() {
+                    let low = &pivots[q.trailing_zeros() as usize][first_word..words];
+                    let rest = q & (q - 1);
+                    let (done, todo) = table.split_at_mut(q * suffix_words);
+                    let entry = &mut todo[..suffix_words];
+                    let source = if rest.is_power_of_two() {
+                        &pivots[rest.trailing_zeros() as usize][first_word..words]
+                    } else {
+                        &done[rest * suffix_words..(rest + 1) * suffix_words]
+                    };
+                    for ((target, &a), &b) in entry.iter_mut().zip(source).zip(low) {
+                        *target = a ^ b;
+                    }
+                    built[q] = true;
+                    *word_ops += suffix_words as u64;
+                }
+            }
+            let source: &[u64] = if pattern.is_power_of_two() {
+                &pivots[pattern.trailing_zeros() as usize][first_word..words]
+            } else {
+                &table[pattern * suffix_words..(pattern + 1) * suffix_words]
+            };
+            for (target, source) in row[first_word..words].iter_mut().zip(source) {
+                *target ^= *source;
+            }
+            *word_ops += suffix_words as u64;
+        }
+    }
+    pivot_row
+}
+
 /// `KIC_F4_RREF_SUFFIX=1` pins the column-at-a-time kernel; read once, since
 /// every tail reduction of the inherited engine passes through here.
 fn suffix_kernel_forced() -> bool {
@@ -2213,15 +2350,19 @@ fn suffix_kernel_forced() -> bool {
     *FORCED.get_or_init(|| std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1"))
 }
 
+/// The shapes the Four Russians kernels are used on: at least 128 rows and
+/// 256 columns, and at most four columns per row.  A wider matrix leaves
+/// most columns without a pivot, and there the pivot search — uncharged,
+/// as in every kernel here — outweighs what the tables save.
+fn four_russians_shape(rows: usize, n_cols: usize) -> bool {
+    !suffix_kernel_forced() && rows >= 128 && n_cols >= 256 && n_cols <= rows.saturating_mul(4)
+}
+
 pub(crate) fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
-    if suffix_kernel_forced()
-        || matrix.len() < 128
-        || n_cols < 256
-        || n_cols > matrix.len().saturating_mul(4)
-    {
-        rref_f2_suffix_counted(matrix, n_cols, word_ops)
-    } else {
+    if four_russians_shape(matrix.len(), n_cols) {
         rref_f2_m4ri_counted(matrix, n_cols, word_ops)
+    } else {
+        rref_f2_suffix_counted(matrix, n_cols, word_ops)
     }
 }
 
@@ -2234,14 +2375,25 @@ pub(crate) fn echelon_f2_counted(
     n_cols: usize,
     word_ops: &mut u64,
 ) -> usize {
-    if suffix_kernel_forced()
-        || matrix.len() < 128
-        || n_cols < 256
-        || n_cols > matrix.len().saturating_mul(4)
-    {
-        echelon_f2_suffix_counted(matrix, n_cols, word_ops, false)
-    } else {
+    if four_russians_shape(matrix.len(), n_cols) {
         echelon_f2_m4ri_counted(matrix, n_cols, word_ops, false)
+    } else {
+        echelon_f2_suffix_counted(matrix, n_cols, word_ops, false)
+    }
+}
+
+/// [`echelon_f2_counted`] with the Four Russians branch building its
+/// tables on demand ([`echelon_f2_m4ri_lazy_counted`], at the same block
+/// width): the same matrix out, the same pivot search, fewer XORs.
+pub(crate) fn echelon_f2_on_demand_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+) -> usize {
+    if four_russians_shape(matrix.len(), n_cols) {
+        echelon_f2_m4ri_lazy_counted(matrix, n_cols, word_ops, m4ri_block_width())
+    } else {
+        echelon_f2_suffix_counted(matrix, n_cols, word_ops, false)
     }
 }
 

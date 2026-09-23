@@ -100,6 +100,55 @@ fn rref_matches_reference_across_shapes_and_word_boundaries() {
     }
 }
 
+/// Leading columns strictly increase over the first `rank` rows, and the
+/// rest are zero.
+fn assert_echelon(matrix: &[Vec<u64>], rank: usize, cols: usize, what: &str) {
+    let lead = |row: &Vec<u64>| (0..cols).find(|&c| row[c / 64] & (1 << (c % 64)) != 0);
+    let mut previous = None;
+    for row in &matrix[..rank] {
+        let pivot = lead(row).unwrap_or_else(|| panic!("{what}: a rank row is zero"));
+        assert!(previous.is_none_or(|p| p < pivot), "{what}: leading columns not increasing");
+        previous = Some(pivot);
+    }
+    assert!(matrix[rank..].iter().all(|row| lead(row).is_none()), "{what}: a row past the rank is nonzero");
+}
+
+#[test]
+fn on_demand_four_russians_echelon_is_the_full_table_kernel_for_fewer_word_ops() {
+    // The comparison is at the shared kernel's default block width.
+    if std::env::var("KIC_F4_M4RI_BLOCK").is_ok() {
+        return;
+    }
+    for rows in [0, 1, 2, 7, 65, 129, 200] {
+        for cols in [0usize, 1, 63, 64, 65, 129, 257, 700] {
+            for kind in ["dense", "sparse", "deficient"] {
+                for seed in [17, 937] {
+                    let input = synthetic(rows, cols, kind, seed);
+                    let what = format!("{rows}x{cols} {kind} seed {seed}");
+                    let (mut full, mut lazy) = (input.clone(), input.clone());
+                    let (mut full_ops, mut lazy_ops) = (0, 0);
+                    let rank = echelon_f2_m4ri_counted(&mut full, cols, &mut full_ops, false);
+                    assert_eq!(rank, echelon_f2_m4ri_lazy_counted(&mut lazy, cols, &mut lazy_ops, 4), "{what}");
+                    assert_eq!(full, lazy, "{what}: the two kernels disagree");
+                    assert!(lazy_ops <= full_ops, "{what}: {lazy_ops} > {full_ops} word operations");
+                    let mut span = input.clone();
+                    let mut ops = 0;
+                    reference(&mut span, cols, &mut ops);
+                    for width in [1, 2, 3, 5, 8] {
+                        let mut m = input.clone();
+                        let mut ops = 0;
+                        let r = echelon_f2_m4ri_lazy_counted(&mut m, cols, &mut ops, width);
+                        assert_eq!(r, rank, "{what} width {width}: rank");
+                        assert_echelon(&m, r, cols, &format!("{what} width {width}"));
+                        reference(&mut m, cols, &mut ops);
+                        assert_eq!(m, span, "{what} width {width}: row space differs");
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[test]
 fn rref_skips_zero_prefix_words_and_preserves_padding() {
     // Pivots start beyond a full empty word, including a skipped-column gap.

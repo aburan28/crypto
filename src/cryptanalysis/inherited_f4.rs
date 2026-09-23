@@ -75,8 +75,8 @@
 //! ruled out and not by how one node's matrix is reduced.
 
 use crate::cryptanalysis::koblitz_groebner::{
-    all_variable_mask, echelon_f2_counted, macaulay_columns, macaulay_rows_monos_with_mask,
-    monomials_up_to_mask, pack_rows, rref_f2_counted,
+    all_variable_mask, echelon_f2_counted, echelon_f2_on_demand_counted, macaulay_columns,
+    macaulay_rows_monos_with_mask, monomials_up_to_mask, pack_rows, rref_f2_counted,
 };
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
 use std::cell::RefCell;
@@ -132,6 +132,38 @@ impl InheritCost {
 
 /// A column a layout step deletes (`v := 0` on a monomial containing `v`).
 const DELETED: u32 = u32::MAX;
+
+/// How a basis built from scratch is reduced.  `KIC_F4_INHERIT_ROOT`
+/// selects a control: `ref` for the echelon form through the shared
+/// kernels, `rref` for the fully reduced form through them.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum RootKernel {
+    /// Echelon form through the shared shape selection, with the Four
+    /// Russians tables built on demand ([`echelon_f2_on_demand_counted`]):
+    /// the same basis as `Shared` for fewer XORs.  Wide matrices stay on
+    /// the column-at-a-time kernel.  Four Russians on them does charge
+    /// fewer XORs, but it tests up to a block's worth of pivot bits on
+    /// every row it scans past, in a search the unit does not count and
+    /// that dominates there — the stage's wall time rises with it — so the
+    /// saving would be work moved, not work removed
+    /// (`RESEARCH_INHERITED_F4.md` §3.1).
+    OnDemand,
+    /// Echelon form through [`echelon_f2_counted`].
+    Shared,
+    /// Reduced row echelon form through [`rref_f2_counted`].
+    Rref,
+}
+
+impl RootKernel {
+    fn get() -> Self {
+        static KERNEL: std::sync::OnceLock<RootKernel> = std::sync::OnceLock::new();
+        *KERNEL.get_or_init(|| match std::env::var("KIC_F4_INHERIT_ROOT").as_deref() {
+            Ok("rref") => RootKernel::Rref,
+            Ok("ref") => RootKernel::Shared,
+            _ => RootKernel::OnDemand,
+        })
+    }
+}
 
 /// One change of column layout: how the columns of one epoch map to the
 /// columns of the next.  [`DELETED`] marks a deleted column (`v := 0`);
@@ -369,16 +401,14 @@ impl ReducedBasis {
         // and a rewrite skips a row's leading zeros, the children no longer
         // earn it back on any rung (`RESEARCH_INHERITED_F4.md` §3.1).  A
         // middle ground, clearing only the pivot columns of degree below
-        // `D`, was tried and costs what it saves.
-        // `KIC_F4_INHERIT_ROOT=rref` restores the fully reduced root as a
-        // control.
-        static ROOT_POLICY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-        let full = *ROOT_POLICY
-            .get_or_init(|| std::env::var("KIC_F4_INHERIT_ROOT").as_deref() == Ok("rref"));
-        let rank = if full {
-            rref_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops)
-        } else {
-            echelon_f2_counted(&mut matrix, columns.len(), &mut cost.reduce_word_ops)
+        // `D`, was tried and costs what it saves.  See [`RootKernel`] for
+        // the elimination.
+        let n_cols = columns.len();
+        let words = &mut cost.reduce_word_ops;
+        let rank = match RootKernel::get() {
+            RootKernel::OnDemand => echelon_f2_on_demand_counted(&mut matrix, n_cols, words),
+            RootKernel::Shared => echelon_f2_counted(&mut matrix, n_cols, words),
+            RootKernel::Rref => rref_f2_counted(&mut matrix, n_cols, words),
         };
         matrix.truncate(rank);
         let mut out = empty(columns);
