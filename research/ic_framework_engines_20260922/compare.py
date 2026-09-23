@@ -209,14 +209,21 @@ def main():
         if any(v["cells"] for v in reach.values()) else None
 
     # Target 3: a stage crossover against fes-f2.
-    crossings = []
+    crossings, partial = [], []
     for c in two:
         if c["reference"] not in ("fes-f2", "fes-f2-wide"):
             continue
         for e in alg:
-            ci = c["engines"].get(e, {}).get("vs_reference")
+            r = c["engines"].get(e, {})
+            ci = r.get("vs_reference")
+            # The ratio is over the targets both engines decided; an engine
+            # that left a target undecided is not below the reference on the
+            # cell, however fast it was on the rest.
+            every = r.get("decided") == r.get("targets")
             if ci and ci["median"] < 1 and ci["hi"] < 1:
-                crossings.append({"part": c["part"], "family": c["family"], "n": c["n"], "vars": c["vars"], "engine": e, "ci": ci})
+                (crossings if every else partial).append(
+                    {"part": c["part"], "family": c["family"], "n": c["n"], "vars": c["vars"], "engine": e,
+                     "ci": ci, "decided": r.get("decided"), "targets": r.get("targets")})
     t3 = bool(crossings)
 
     # The trajectory: pooled over families and parts at each size.
@@ -302,7 +309,7 @@ def main():
         "targets": {
             "1_reach": {"met": t1, "by_engine": reach},
             "2_gate": {"met": t2, "by_n": {str(k): v for k, v in t2_by_n.items()}, "ratios": {str(k): v for k, v in gate.items()}},
-            "3_question": {"met": t3, "crossings": crossings},
+            "3_question": {"met": t3, "crossings": crossings, "below_on_decided_targets_only": partial},
             "abandon": {"triggered": abandon, "gaining_16_to_26": gaining},
         },
         "trajectory_vs_fes": {e: {str(v): ci for v, ci in t.items()} for e, t in traj.items()},
@@ -319,7 +326,8 @@ def main():
     md.append(f"- **1 reach**: {verdict(t1)} — " + ", ".join(f"{e}: {v['cells']} cells, all decided {v['all_decided']}, agree {v['all_agree']}" for e, v in reach.items()))
     md.append(f"- **2 gate**: {verdict(t2)} — " + "; ".join(f"n={n}: {v}" for n, v in t2_by_n.items()))
     md.append(f"- **3 question**: {'met' if t3 else 'not met'} — {len(crossings)} crossing cell(s)" + "".join(
-        f"; {c['engine']} at {c['vars']} unknowns ({c['family']}, {c['part']}): {fmt_ci(c['ci'])}" for c in crossings))
+        f"; {c['engine']} at {c['vars']} unknowns ({c['family']}, {c['part']}): {fmt_ci(c['ci'])}" for c in crossings)
+        + "".join(f"; not counted, {c['engine']} at {c['vars']} unknowns ({c['family']}, {c['part']}) below the reference on the {c['decided']} of {c['targets']} targets it decided: {fmt_ci(c['ci'])}" for c in partial))
     md.append(f"- **abandon**: {verdict(abandon, 'triggered', 'not triggered')} — gaining 16→26: {gaining}\n")
     refs = sorted({c["reference"] for c in two if c["reference"] in ("fes-f2", "fes-f2-wide")})
     md.append(f"## Stage: wall / the cell's reference ({', '.join(refs) or 'none'}), pooled over families, median [95% CI] (pairs)\n")
