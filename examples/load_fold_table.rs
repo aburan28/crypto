@@ -18,14 +18,23 @@
 //! the stored pairs those words answered for must go missing here, or
 //! this check could not see misplaced words.
 //!
-//! Usage: `cargo run --release --example load_fold_table -- TABLE...`
-//! (`make -C gpu/ecc2k roundtrip` writes the tables and runs this).
+//! Before any probe, the stored state itself: bucket offsets and presence
+//! words equal to the CPU's, and the same multiset of words in every
+//! bucket.  That costs a pass over the words, so it holds at any size;
+//! asking every stored pair is `|F|²/2` probes, which a wide base cannot
+//! afford, so `--sample N` asks the pairs of `N` evenly spaced rows
+//! instead (and the control is then judged on stored state alone).
+//!
+//! Usage: `cargo run --release --example load_fold_table -- [--sample N] TABLE...`
+//! (`make -C gpu/ecc2k roundtrip` writes the tables and runs this;
+//! `make device-roundtrip` does the same with tables a GPU built).
 use std::io::Read;
 use std::process::ExitCode;
 
 use crypto_lib::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    build_subgroup_orbit_factor_base, FoldedParts, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
+    build_subgroup_orbit_factor_base, FoldedParts, FoldedStorage, FrobeniusFactorBase,
+    KoblitzCurve, PairSumTable,
 };
 
 struct TableFile {
@@ -122,18 +131,48 @@ struct Tally {
     absent_targets: usize,
 }
 
+/// Where two tables' stored state differs, if anywhere: the geometry,
+/// the bucket offsets, the presence words, or the multiset of words in
+/// some bucket.  Order within a bucket is whatever a build's parallel
+/// cursors made it, on either side, so each bucket is compared sorted.
+fn stored_difference(a: &FoldedStorage<'_>, b: &FoldedStorage<'_>) -> Option<String> {
+    if a.bucket_shift != b.bucket_shift || a.present_mask != b.present_mask {
+        return Some("bucket or filter geometry".into());
+    }
+    if a.bucket_start != b.bucket_start {
+        return Some("bucket offsets".into());
+    }
+    if a.present != b.present {
+        return Some("presence words".into());
+    }
+    let differ = (0..a.bucket_start.len() - 1)
+        .filter(|&k| {
+            let run = |s: &FoldedStorage<'_>| {
+                let mut w =
+                    s.words[s.bucket_start[k] as usize..s.bucket_start[k + 1] as usize].to_vec();
+                w.sort_unstable();
+                w
+            };
+            run(a) != run(b)
+        })
+        .count();
+    (differ > 0).then(|| format!("the words of {differ} buckets"))
+}
+
 fn compare(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     cpu: &PairSumTable,
     candidate: &PairSumTable,
+    sample: Option<usize>,
 ) -> Tally {
     let curve = FastCurve::new(&kc.curve).expect("single-word curve");
     let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
     let mut tally = Tally::default();
     let (mut sums, mut scratch) = (Vec::new(), BatchScratch::default());
     let (mut a, mut b) = (Vec::new(), Vec::new());
-    for i in 0..points.len() {
+    let step = sample.map_or(1, |n| (points.len() / n.max(1)).max(1));
+    for i in (0..points.len()).step_by(step) {
         sums.clear();
         curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
         for (offset, &sum) in sums.iter().enumerate() {
@@ -169,7 +208,7 @@ fn compare(
     tally
 }
 
-fn check(path: &str) -> Result<(), String> {
+fn check(path: &str, sample: Option<usize>) -> Result<(), String> {
     let file = read_table(path)?;
     let kc = KoblitzCurve::new(0, file.degree).ok_or("no Koblitz curve at that degree")?;
     let fb = build_subgroup_orbit_factor_base(&kc, file.seed, file.base_request)?;
@@ -193,14 +232,24 @@ fn check(path: &str) -> Result<(), String> {
         parts
     };
     let loaded = PairSumTable::from_folded_parts(&kc, &fb, file.parts)?;
-    let tally = compare(&kc, &fb, &cpu, &loaded);
+    let (ours, theirs) = (
+        loaded.folded_storage().expect("folded"),
+        cpu.folded_storage().expect("folded"),
+    );
+    if let Some(what) = stored_difference(&ours, &theirs) {
+        return Err(format!(
+            "{path}: stored state differs from the CPU's in {what}"
+        ));
+    }
+    let tally = compare(&kc, &fb, &cpu, &loaded, sample);
     println!(
-        "{path}: n = {}, {} points, {} stored words; {} stored pairs, {} probes absent \
-         from the CPU's table",
+        "{path}: n = {}, {} points, {} stored words, stored state identical to the CPU's; \
+         {} stored pairs asked{}, {} probes absent from the CPU's table",
         file.degree,
         fb.points.len(),
         loaded.len(),
         tally.stored_pairs,
+        sample.map_or(String::new(), |n| format!(" (rows sampled: {n})")),
         tally.absent_targets,
     );
     if tally.disagreements != 0 || tally.missed_pairs != 0 {
@@ -217,7 +266,24 @@ fn check(path: &str) -> Result<(), String> {
     }
     println!("  loaded: agrees with the CPU's table on every question, and finds every pair");
     let control = PairSumTable::from_folded_parts(&kc, &fb, moved)?;
-    let tally = compare(&kc, &fb, &cpu, &control);
+    let control_stored = stored_difference(&control.folded_storage().expect("folded"), &theirs);
+    if control_stored.is_none() {
+        return Err(format!(
+            "{path}: a bucket's words in the wrong bucket left the stored state the \
+             CPU's, so that comparison cannot see them"
+        ));
+    }
+    if sample.is_some() {
+        // The sampled rows need not reach the moved bucket's pairs, so
+        // the stored state is what decides here.
+        println!(
+            "  control: one bucket's words in the wrong bucket load, and the stored \
+             state shows it ({})",
+            control_stored.unwrap()
+        );
+        return Ok(());
+    }
+    let tally = compare(&kc, &fb, &cpu, &control, None);
     if tally.disagreements == 0 || tally.missed_pairs == 0 {
         return Err(format!(
             "{path}: a bucket's words in the wrong bucket lost no stored pair, so \
@@ -234,14 +300,26 @@ fn check(path: &str) -> Result<(), String> {
 }
 
 fn main() -> ExitCode {
-    let paths: Vec<String> = std::env::args().skip(1).collect();
+    let mut args: Vec<String> = std::env::args().skip(1).collect();
+    let mut sample = None;
+    if args.first().map(String::as_str) == Some("--sample") && args.len() >= 2 {
+        match args[1].parse::<usize>() {
+            Ok(n) if n > 0 => sample = Some(n),
+            _ => {
+                eprintln!("--sample takes a positive row count");
+                return ExitCode::FAILURE;
+            }
+        }
+        args.drain(..2);
+    }
+    let paths = args;
     if paths.is_empty() {
-        eprintln!("usage: load_fold_table TABLE...");
+        eprintln!("usage: load_fold_table [--sample N] TABLE...");
         return ExitCode::FAILURE;
     }
     let mut ok = true;
     for path in &paths {
-        if let Err(e) = check(path) {
+        if let Err(e) = check(path, sample) {
             eprintln!("FAIL {e}");
             ok = false;
         }
