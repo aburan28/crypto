@@ -137,6 +137,7 @@ pub mod f4_fp;
 pub mod ffd_harness;
 pub mod fght_snfs;
 pub mod gaudry_cubic;
+pub mod gaudry_quartic;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
 pub mod groebner_f4;

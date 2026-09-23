@@ -65,11 +65,11 @@ pub const FP_MULS_PER_ADD: f64 = 60.0;
 // ── F_p helpers ──────────────────────────────────────────────────────────
 
 #[inline]
-fn mm(a: u64, b: u64, p: u64) -> u64 {
+pub(crate) fn mm(a: u64, b: u64, p: u64) -> u64 {
     ((a as u128 * b as u128) % p as u128) as u64
 }
 #[inline]
-fn am(a: u64, b: u64, p: u64) -> u64 {
+pub(crate) fn am(a: u64, b: u64, p: u64) -> u64 {
     let s = a + b;
     if s >= p {
         s - p
@@ -78,7 +78,7 @@ fn am(a: u64, b: u64, p: u64) -> u64 {
     }
 }
 #[inline]
-fn sm(a: u64, b: u64, p: u64) -> u64 {
+pub(crate) fn sm(a: u64, b: u64, p: u64) -> u64 {
     if a >= b {
         a - b
     } else {
@@ -589,7 +589,7 @@ impl SubspaceBase {
 // ── Univariate polynomials over F_p (small degree) ───────────────────────
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct UPoly(Vec<u64>); // coefficients, low to high, trimmed
+pub(crate) struct UPoly(pub(crate) Vec<u64>); // coefficients, low to high, trimmed
 
 fn trim(mut v: Vec<u64>) -> Vec<u64> {
     while v.last() == Some(&0) {
@@ -598,13 +598,13 @@ fn trim(mut v: Vec<u64>) -> Vec<u64> {
     v
 }
 
-struct PolyRing {
+pub(crate) struct PolyRing {
     p: u64,
-    muls: Cell<u64>,
+    pub(crate) muls: Cell<u64>,
 }
 
 impl PolyRing {
-    fn new(p: u64) -> Self {
+    pub(crate) fn new(p: u64) -> Self {
         PolyRing {
             p,
             muls: Cell::new(0),
@@ -702,7 +702,7 @@ impl PolyRing {
         acc
     }
     /// All roots in `F_p` of `f` (Cantor–Zassenhaus).
-    fn roots(&self, f: &UPoly, rng: &mut StdRng) -> Vec<u64> {
+    pub(crate) fn roots(&self, f: &UPoly, rng: &mut StdRng) -> Vec<u64> {
         let f = {
             let inv = match f.0.last() {
                 Some(&l) => inv_mod(l, self.p),
@@ -1274,7 +1274,7 @@ fn grevlex_cmp(a: &[u8; 3], b: &[u8; 3]) -> std::cmp::Ordering {
 /// Row-reduce `m` (rows × cols) over `F_p` to reduced row echelon form;
 /// returns the pivot column of each non-zero row, in order.  Counts
 /// multiplications.
-fn rref_mod_p(m: &mut [Vec<u64>], p: u64, muls: &mut u64) -> Vec<usize> {
+pub(crate) fn rref_mod_p(m: &mut [Vec<u64>], p: u64, muls: &mut u64) -> Vec<usize> {
     let rows = m.len();
     let cols = if rows > 0 { m[0].len() } else { 0 };
     let mut pivots = Vec::new();
@@ -1313,7 +1313,7 @@ fn rref_mod_p(m: &mut [Vec<u64>], p: u64, muls: &mut u64) -> Vec<usize> {
 /// Characteristic polynomial of a square matrix over `F_p` (Hessenberg
 /// reduction, then the standard recurrence).  Coefficients low to high,
 /// monic.
-fn charpoly_mod_p(a: &[Vec<u64>], p: u64, muls: &mut u64) -> UPoly {
+pub(crate) fn charpoly_mod_p(a: &[Vec<u64>], p: u64, muls: &mut u64) -> UPoly {
     let n = a.len();
     let mut h: Vec<Vec<u64>> = a.to_vec();
     // Reduce to upper Hessenberg form by similarity transforms.
@@ -1368,7 +1368,7 @@ fn charpoly_mod_p(a: &[Vec<u64>], p: u64, muls: &mut u64) -> UPoly {
 }
 
 /// Kernel basis of `(m − λI)` for a square matrix `m` over `F_p`.
-fn eigenvectors_mod_p(m: &[Vec<u64>], lambda: u64, p: u64, muls: &mut u64) -> Vec<Vec<u64>> {
+pub(crate) fn eigenvectors_mod_p(m: &[Vec<u64>], lambda: u64, p: u64, muls: &mut u64) -> Vec<Vec<u64>> {
     let n = m.len();
     let mut a: Vec<Vec<u64>> = m.to_vec();
     for i in 0..n {
@@ -2711,7 +2711,7 @@ fn mult_matrix(
 /// functionals that are simultaneous eigenvectors.  Vectors of an
 /// eigenvalue whose kernel is still degenerate are returned as they
 /// are (for a further split by the next variable).
-fn split_eigenspace(
+pub(crate) fn split_eigenspace(
     w: &[Vec<u64>],
     mv: &[Vec<u64>],
     p: u64,
