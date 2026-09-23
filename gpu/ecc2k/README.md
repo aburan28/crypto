@@ -483,13 +483,34 @@ its own would find a different basis and name the same orbits
 differently — valid on its own, and unable to read a table the CPU
 built. `n ≤ 62` is the ceiling, so the fold does not reach `ecc2k95`.
 
-**What is keyed is not yet what is stored.** `pairtable_kernel` takes
-the tables and keys by orbit when given them, but it still emits one
-entry per pair: the table is the same size and merely named
-differently. The fold's actual saving needs the base sorted by orbit
-host-side and one entry per signed orbit, and then the orbit tag that
-makes summand recovery `O(n)` instead of `O(|F|)`. Both are the next
-steps.
+**Stored by orbit: `pairtable_fold_kernel`.** Keying by orbit is not
+the saving; `pairtable_kernel` with the tables still emits one entry per
+pair, the same size and merely named differently. The saving is in
+*which pairs are summed*. The fold kernel takes the base sorted by
+signed orbit and one representative per orbit, and row `r` sums that
+representative with the orbit-sorted suffix starting at its own orbit —
+every orbit of pairs is reached, and each sum orbit is kept from one of
+its two summands rather than both. That is about `orbits·|F|/2` sums
+against `|F|²/2`, `2n` times fewer. Each entry carries its row's orbit
+as the tag, which is what lets the CPU recover a hit's summands by
+walking `2n` points instead of the base. `pt_fold_count` and
+`pt_fold_fill` then store it in the CPU's own layout: the bucket from the
+top of `pt_filter_hash(key)`, the word `(orbit << 16) | (hash & 0xffff)`,
+and a presence bit.
+
+The row plan (sorted base, representatives, suffix starts) is host data
+from `PairSumTable::folded_rows`, uploaded the way the basis is, so
+there is one derivation of it and not two. The bucket width comes from
+the CPU's pair *estimate*, not from the sums, because that is how the
+CPU sizes its buckets. Only tagged words are built. The CPU falls back
+to untagged words past `2^16` orbits, and that is two terabytes of table
+at `n = 61`, so this refuses such a base rather than store it
+unchecked.
+
+The count and fill passes run on the host over the kernel's output. A
+device scatter is the same two loops with atomics, and it is left for a
+device because the emulation below runs threads one after another and
+cannot say anything about contended atomics.
 
 `make test` runs `test_pt_*` for every curve: batch inversion against
 one-at-a-time inversion (with a planted zero, which every real row has
@@ -500,6 +521,72 @@ deliberately includes negated points so that `P_i + P_j = O` occurs —
 without them the infinity branch is never taken and the test would claim
 coverage it does not have. `ecc2k95` skips it: at `m = 97` a point does
 not fit in a `u64` and `FastCurve` refuses the same case.
+
+**CI runs it** — `.github/workflows/gpu-ecc2k-host-verification.yml`, on
+any pull request touching `gpu/ecc2k/**`, and also on
+`examples/dump_canon_vectors.rs`, `examples/dump_fold_vectors.rs`,
+`src/cryptanalysis/koblitz_fast.rs` and
+`src/cryptanalysis/koblitz_index_calculus.rs`, because `vec_canon.h` and
+`vec_fold.h` are generated from those and a change to any of them moves
+what the C++ side is checked against. No GPU: `G2_HD` is `inline`
+without `__CUDACC__`, so everything but the kernels builds under g++.
+
+**And the kernels themselves run on the host.** Their bodies are plain
+C++ once `__global__` and the four thread-index builtins are supplied,
+so `test_pairtable_emu.cpp` includes the header behind a `__CUDACC__`
+shim and calls each kernel as a function, once per emulated thread —
+which is the same computation as running them together, because these
+kernels' threads write disjoint rows through disjoint scratch. For
+`pairtable_kernel` it checks every entry of the triangle against
+unbatched addition in both the packed and the folded key, and that 4
+and 7 threads give the same table as one, which is what exercises the
+grid-stride loop and the scratch split.
+
+It exists because of a bug nothing else could see. The first folded
+kernel passed its own `n` — |F|, the point count — to `pt_canon` as the
+field degree. Every building block was correct and separately tested;
+the one line that assembled them was wrong. Put back, that line makes
+this test fail with 960 of 1176 keys wrong on `k23`, and the test also
+asserts on every run that the wrong degree *would* change keys on its
+base, so it cannot quietly stop being able to tell the two apart.
+
+**The fold is checked against the table the CPU stored.**
+`examples/dump_fold_vectors.rs` builds a folded table with
+`PairSumTable::build_folded_within` at `n = 23` and `n = 41` (sixteen
+signed orbits each, 736 and 1312 points; the same trinomials as `k23`
+and `k41`) and dumps what it stored, plus the plan it was built from,
+into `vec_fold.h`. The test first checks the setup:
+
+- the bucket width against the CPU's over a grid of 576
+  (orbits, points, degree) points, through the public
+  `folded_byte_size`;
+- every dumped point lies on this curve;
+- the CPU's basis is `vec_canon.h`'s and names every base point alike.
+
+Then it runs the fold kernel and checks the result in three steps:
+
+- every entry is `pt_canon` of the unbatched sum, tagged with its row,
+  with infinity exactly once per row;
+- the assembled table has the CPU's bucket offsets and presence words
+  exactly, and the same multiset of words in every bucket (order
+  within a bucket comes from the CPU's parallel cursors);
+- 3 and 5 threads give the same output as one.
+
+On `k23` that is 6256 stored words for 736 points against 271216
+unfolded (43.4×, with `2n = 46`), and on `k41` 11152 for 1312 against
+861328 (77.2×, `2n = 82`). These are entry counts, not speed. Three
+mistakes must each fail the comparison: rows over the whole base, a base
+not sorted by orbit, and tags taken from the second summand.
+
+What the emulation does not cover is how a kernel runs on a device:
+launch geometry, occupancy, memory placement, real concurrency, and
+whatever `nvcc` does differently from `g++`. A kernel whose threads
+shared one scratch buffer would pass here. The fold's performance is
+likewise unmeasured. And it covers only the two pair-table kernels: the
+ones in `kernels2k.cuh` are where `pairtable_kernel` was before it. The device
+functions they call — the walk, the batched steppers, an end-to-end
+solve on a toy curve — are tested by `test_cpu2k.cpp`, but the
+`__global__` wrappers themselves are compiled by nothing on the host.
 
 ## Files
 

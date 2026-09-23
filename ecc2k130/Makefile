@@ -635,6 +635,16 @@ gpu-preset: PACKED_ALU_SQUARE = 1
 gpu-preset:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
 
+# The RTX PRO 4500 build of POWER-BOUND.md: the 20 B/s knob set with one fused
+# pass per step, which does the same work per clock as the 20 B/s build and
+# 7% more per joule; on a 165 W part that sits on its power limit, per joule is
+# the rate.  Predicted 7.2 - 7.4 B/s on a 4500 (receipts: 5.107 / 5.552);
+# measured only on an RTX PRO 6000 so far.  RTX4500_EXTRA adds knobs, e.g.
+# PACKED_ALU_SQUARE=0 for the second arm POWER-BOUND.md section 4 names.
+RTX4500_EXTRA ?=
+gpu-rtx-pro4500:
+	$(MAKE) gpu-preset KNOBS="TABLE_FUSED=1 TABLE_PIPE_SELECT=0 $(RTX4500_EXTRA)"
+
 # The B200 build the automatic sweep of AUTOSWEEP.md found (sm_100): the 20 B/s
 # knob set with the products' 3-bit correction on the carry-less unit as a
 # three-limb Karatsuba, the squaring on the unit, the ONB inversion, one fused
