@@ -4334,6 +4334,86 @@ factor base, and this prices a decomposition oracle.</p>
   calibrated rows, fitted exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
 <!-- END ic-crossover-20260922 -->
+<!-- BEGIN ic-triple-table-20260923 -->
+<section class="panel" id="ic-triple-table-20260923">
+<div class="panel-head"><h2>A triple-sum table moves the crossover <span class="chip">engineering</span></h2>
+<p>The collector above is a pair table: <code>&Theta;(r<sup>2/3</sup>)</code> at its own
+  optimum, a boundary its model scopes to &ldquo;this pair-table collector, not index
+  calculus&rdquo;. Tabulating <em>triple</em> sums <code>C<sub>o</sub> + P<sub>j</sub> + P<sub>l</sub></code>
+  under the same Frobenius orbit names and scanning one summand per probe gives four-term
+  relations and <code>&Theta;(r<sup>3/5</sup>)</code>, so the ratio to rho grows as
+  <code>r<sup>1/10</sup></code> rather than <code>r<sup>1/6</sup></code> &mdash; derived, not
+  fitted. A patch against the <code>scaled</code> tree, on two orbits where the pair table uses
+  8, 16 and 24; pre-registered before it existed. <strong>Not a tournament round</strong>: no
+  native-time gate, no confirmation or replay stage, nothing promoted.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/RESULTS.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/PREREGISTRATION.md">pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/triple-table.patch">the patch</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/check.py">the paired check</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Instruction unit Ir, complete DLP, 32 paired fixtures a cell (seed 20260924), every report
+  of both arms verified by <code>oracle.py</code> with the same logarithm. Geometric mean of the
+  paired ratios, 95% bootstrap interval. The rho columns are secondary and were not
+  pre-registered.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>triple / <code>scaled</code></th><th><code>scaled</code> / rho</th><th>triple / rho</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>1.493 [1.411, 1.575]</td><td>0.689 [0.621, 0.769]</td><td>1.029 [0.940, 1.130]</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td><strong>0.589</strong> [0.535, 0.643]</td><td>1.381 [1.152, 1.649]</td><td><strong>0.813</strong> [0.700, 0.941]</td></tr>
+<tr><td>n43a1</td><td>4,644,189,029</td><td><strong>0.409</strong> [0.337, 0.494]</td><td>2.281 [1.864, 2.754]</td><td><strong>0.933</strong> [0.753, 1.159]</td></tr>
+</tbody></table></div>
+<p><strong>The gain grows with <code>r</code>, with disjoint intervals</strong> &mdash; the signature
+  of a rate change, which no constant-factor lever produces &mdash; and the pre-registered rule reads
+  <em>supported</em>. In instructions, <code>n37a0</code> moves from 1.38&times; rho to 0.81&times;,
+  its whole interval below one, and <code>n43a1</code> from 2.28&times; to 0.93&times;, its interval
+  spanning one. <strong><code>n23a1</code> gets worse</strong>, 1.49&times; the pair table: the
+  checker needs two columns and at two orbits the triple table costs more than the whole pair-table
+  job there. The same harness reproduces the crossover panel above (0.69, 1.38, 2.28 against 0.83,
+  1.40, 2.21). A collector that switches by the model at run time would read 0.69, 0.81 and 0.93,
+  below rho at every cell measured &mdash; arithmetic on this table, not a run, and to be
+  pre-registered before it is one.</p>
+<p><strong>Correction (same PR):</strong> the rho columns are against the worker&rsquo;s rho, which
+  names each Frobenius class by squaring through the orbit &mdash; about 9,100 of its 9,930
+  instructions a step at <code>n43a1</code> &mdash; where the IC arm uses a normal-basis rotation.
+  Given that one piece of the IC arm&rsquo;s code, rho is below this pipeline at every cell measured
+  (panel below). &ldquo;Below rho&rdquo; in this panel does not mean below a matched rho.</p>
+</section>
+<!-- END ic-triple-table-20260923 -->
+<!-- BEGIN ic-triple-counted-20260923 -->
+<section class="panel" id="ic-triple-counted-20260923">
+<div class="panel-head"><h2>Counted sizing, and a matched rho <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
+<p>Two pre-registered measurements on the same 256 fixtures. First, the triple collector sized
+  by counting the four-sums a target can be, in place of the pair model&rsquo;s units: the count
+  predicts the triple arm&rsquo;s trials unfitted (5.9, 37.1, 396.1 against 6.1, 36.3, 387.6) and
+  moves one cell, <code>n43a1</code>, from two orbits to three. Second, a control prompted by a
+  profile taken during the first: the worker&rsquo;s rho with the IC arm&rsquo;s own normal-basis
+  orbit naming in place of its squaring chain, and nothing else changed. <strong>Not a tournament
+  round</strong>; instructions only.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/PREREGISTRATION.md">sizing pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/PREREGISTRATION-rho-control.md">control pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/rho-normal-basis.patch">the control patch</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Instruction unit Ir, complete DLP, 32 paired fixtures a cell (128 at <code>n43a1</code>),
+  every report of every arm verified by <code>oracle.py</code> with the same logarithm. Geometric
+  mean of paired ratios, 95% bootstrap interval. &ldquo;Worker rho&rdquo; is the tournament&rsquo;s
+  matched rho; &ldquo;control&rdquo; is that rho with the IC arm&rsquo;s orbit naming.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>counted / triple</th><th>counted / worker rho</th><th>counted / control</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>0.968 (identity)</td><td>1.210 [1.121, 1.303]</td><td>1.501 [1.433, 1.574]&dagger;</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td>0.991 (identity)</td><td>0.795 [0.679, 0.935]</td><td><strong>1.723</strong> [1.569, 1.892]</td></tr>
+<tr><td>n43a1</td><td>4,644,189,029</td><td><strong>0.773</strong> [0.708, 0.843]</td><td>0.824 [0.752, 0.904]</td><td><strong>2.882</strong> [2.680, 3.095]</td></tr>
+<tr><td>n59a0</td><td>10,063,074,221</td><td>0.999 (identity)</td><td>0.823 [0.763, 0.889]</td><td><strong>1.192</strong> [1.148, 1.242]</td></tr>
+<tr><td>n61a1</td><td>11,514,943,771</td><td>0.997 (identity)</td><td>0.714 [0.580, 0.874]</td><td>2.736 [2.306, 3.258]&dagger;</td></tr>
+</tbody></table></div>
+<p><strong>The sizing is supported</strong>: 0.773&times; the triple arm at <code>n43a1</code>, below
+  its predicted 0.795&ndash;0.890, and an exact identity (same base, trials, relations, logarithm)
+  at the other four. <strong>Against the worker&rsquo;s rho the pipeline is below one at four
+  cells</strong>, as registered. <strong>Against the control it is above one at all five</strong>:
+  the worker&rsquo;s rho spends about 9,100 of its 9,930 instructions a step walking the Frobenius
+  orbit by squaring, a cost the IC arm engineered away in round 0007, and every cell where this
+  pipeline &ldquo;beat rho&rdquo; is one where it loses to a rho given that same code. By the
+  control rule&rsquo;s letter the verdict is <em>partial</em>: &dagger; marks two cells left unscored
+  because walk lengths fell outside a band that proved too tight for 32 fixtures &mdash; both
+  bootstrap intervals contain one, and a longer control walk only lowers these ratios. The control
+  still costs about 3,000 instructions a step against an IC probe&rsquo;s 1,100, so a lean rho would
+  widen every ratio. <strong>Class: accounting</strong> &mdash; what the ratios were counted against
+  changed; no algorithm got worse. It bears on every IC-below-rho result taken against the
+  worker&rsquo;s rho, including the tournament&rsquo;s <code>beats_rho_strict</code> rounds, and says
+  nothing new about ECC2K-130.</p>
+</section>
+<!-- END ic-triple-counted-20260923 -->
 <section class="panel" id="radical-pair-image-20260921">
   <div class="panel-head">
     <h2>Radical unordered-pair image <span class="chip">engineering diagnostic</span></h2>
@@ -4392,6 +4472,52 @@ factor base, and this prices a decomposition oracle.</p>
   <p>The prior binary <code>k=4</code> probe is censored after 90 seconds;
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
+</section>
+<section class="panel" id="boolean-basis-transport-20260923">
+  <div class="panel-head">
+    <h2>Quadratic row-space transport: correct inference, rejected complete-solve gain <span class="chip">engineering</span></h2>
+    <p>Packed matrix backends beat their matched list implementations by 3.03&ndash;5.20&times;,
+      but both inference policies fail their strongest-reference improvement and dramatic-gain
+      gates. Full RREF passes only 3/18 incremental comparisons and 0/18 dramatic comparisons;
+      source-branching echelon/affine-tail transport passes 0/18 of either. The retained packed
+      solver remains best by pooled median on the fresh n24 families.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/CONCLUSION.md">decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/README.md">row-space contract</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/run_01/RESULT.md">all paired comparisons</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/RUN_LEDGER.json">immutable run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete-solve plus validation milliseconds at 24 variables, pooling two fresh
+      holdout seeds and thirteen balanced repetitions. Displayed ratios compare pooled planted
+      costs with packed_state; gates use paired minima over all twelve competing arms.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Packed / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>66.217584</td><td>40.276479</td><td>77.027376</td><td>0.222</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>306.182646</td><td>181.077229</td><td>315.948980</td><td>0.048</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>1209.731875</td><td>577.337396</td><td>1029.723521</td><td>0.012</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>564.794188</td><td>258.394334</td><td>402.785188</td><td>0.026</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>77.067354</td><td>48.026376</td><td>89.620125</td><td>0.190</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>68.757750</td><td>42.481395</td><td>79.346271</td><td>0.213</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>58.147124</td><td>35.623875</td><td>67.757313</td><td>0.252</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>24.245251</td><td>14.992396</td><td>27.964833</td><td>0.605</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>14.673687</td><td>9.026291</td><td>16.798105</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Full row-space RREF, list</td><td>125.438604</td><td>51.116333</td><td>268.847458</td><td>0.117</td><td>PASS</td></tr>
+      <tr><td>Full row-space RREF, wide</td><td>32.977396</td><td>12.047854</td><td>64.268354</td><td>0.445</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine-tail, list</td><td>115.883104</td><td>74.345251</td><td>135.799709</td><td>0.127</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine-tail, wide</td><td>36.544917</td><td>23.088125</td><td>44.602750</td><td>0.402</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 16,224 observations across 96 distinct systems finish with verified results. Each
+    list/packed pair matches models, counters and trace digests within its inference policy.
+    Earlier failures remain in the regression inputs. Regrouped legacy gates do not replace
+    earlier frozen verdicts. Whole-worker peak RSS is 29,360,128 bytes; candidate-specific
+    memory, calibrated-operation ratios, full index-calculus cost and rho ratios remain unmeasured.</p>
+  <p>A separate discovery-only diagnostic reproduces the exact search and finds unused nonunit
+    affine relations at 47,962 of 52,864 branching decisions (90.73%), with rank sum 189,283.
+    These repeat across search states and are not independent relations or a speedup.
+    <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/AFFINE_SUBSTITUTION_NEXT.md">General affine substitution is the next documented contract</a>;
+    its implementation and complete cost remain unmeasured.</p>
 </section>
 <section class="panel" id="boolean-quadratic-frontier-20260923">
   <div class="panel-head">
@@ -4852,5 +4978,42 @@ factor base, and this prices a decomposition oracle.</p>
     off it is <code>2<sup>4.4</sup></code> off <code>2<sup>131</sup></code>.</p>
 </section>
 <!-- END inherited-f4-20260922 -->
+<!-- BEGIN ic-tournament-round-0023 -->
+<section class="panel" id="ic-tournament-round-0023">
+<p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,860</td><td>1</td><td>1.017</td><td>5.111e+05</td><td>24/24</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,367</td><td>0.8275</td><td>0.8412</td><td>3.381e+05</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,814</td><td>0.9837</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,842</td><td>1</td><td>0.9488</td><td>5.078e+05</td><td>72/72</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,639</td><td>0.9287</td><td>0.8812</td><td>3.77e+05</td><td>72/72</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,995</td><td>1.054</td><td>1</td><td>unmeasured</td><td>72/72</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,729</td><td>1</td><td>1.127</td><td>1.063e+06</td><td>516/516</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,976</td><td>0.7982</td><td>0.8998</td><td>6.086e+05</td><td>516/516</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3,308</td><td>0.8871</td><td>1</td><td>unmeasured</td><td>516/516</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: False.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2.798</td><td>1</td><td>reference</td><td>1.331</td><td>516/516</td></tr>
+<tr><td>scaled</td><td>2.306</td><td>0.8244</td><td>[0.6780891092338177, 0.9689753816226493]</td><td>1.097</td><td>516/516</td></tr>
+<tr><td>rho</td><td>2.102</td><td>0.7512</td><td>[0.500494577703393, 1.0414858798124165]</td><td>1</td><td>516/516</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0023 -->
 </body>
 </html>
