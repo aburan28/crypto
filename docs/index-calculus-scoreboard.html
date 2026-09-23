@@ -4324,6 +4324,42 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-construction-reduction-20260922">
+  <div class="panel-head">
+    <h2>Construction plus canonical reduction: both new candidates lose to staged processing <span class="chip">engineering</span></h2>
+    <p>Charging full forward and backward elimination narrows the construction-only gains.
+      At 36 Boolean variables the best retained staged path is about 1.38&ndash;1.50&times;
+      faster than the sorted baseline on successor holdouts. Ambient streaming and the
+      nonzero-word/pivot-incidence reducer each pass <strong>0/9</strong> dramatic combined-cost
+      gates. Both produce the exact canonical RREF, but neither beats the fastest prior
+      pipeline. The two runs verify 151,320 reduced outputs.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_construction_reduction_20260922/CONCLUSION.md">combined-cost decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_construction_reduction_20260922/run_01/RESULT.md">streaming run</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_construction_reduction_20260922/run_02/RESULT.md">incidence run</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_construction_reduction_20260922/SOURCE_CONTRACT.json">read-only source-contract audit</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Successor cold milliseconds per batch of eight at n=36, including construction,
+      complete canonical reduction, exact validation and destruction. Medians pool two
+      holdout seeds and thirty balanced repetitions. Ratios describe the quadratic column.</caption>
+    <thead><tr><th>Pipeline</th><th>Quadratic (ms)</th><th>Linear drop (ms)</th><th>Restricted cycle (ms)</th><th>Sorted / arm</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Sorted construction + common reducer</td><td>1.489562</td><td>2.441646</td><td>0.272854</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Ranked construction + common reducer</td><td>1.168688</td><td>2.074896</td><td>0.257354</td><td>1.275</td><td>PASS</td></tr>
+      <tr><td>Sparse construction + common reducer</td><td>0.996125</td><td>1.771021</td><td>0.183812</td><td>1.495</td><td>PASS</td></tr>
+      <tr><td>Ambient-coordinate streaming</td><td>1.912479</td><td>2.882667</td><td>0.343083</td><td>0.779</td><td>PASS</td></tr>
+      <tr><td>Sparse construction + incidence reducer</td><td>1.634313</td><td>2.035062</td><td>0.256021</td><td>0.911</td><td>PASS</td></tr>
+      <tr><td>Dense lookup + common reducer</td><td>NOT_EXECUTED</td><td>NOT_EXECUTED</td><td>NOT_EXECUTED</td><td>null</td><td>not measured</td></tr>
+    </tbody>
+  </table></div>
+  <p>The incidence reducer cuts quadratic word XORs by about 40%, yet reduction time rises
+    from 0.533188 to 1.172268 ms. Its additional preparation and data access are charged;
+    XOR counts alone are not a speed result. The source audit also distinguishes full-span
+    reduction from the specialized consumer&rsquo;s existing linear-tail/flat-storage path.
+    This full-RREF experiment is not a replacement benchmark for that consumer and does not
+    measure complete polynomial solving or index calculus. Those costs and rho ratios remain null.</p>
+</section>
 <section class="panel" id="boolean-rank-coordinates-20260922">
   <div class="panel-head">
     <h2>Combinatorial coordinates reach 36 variables; sparse intermediates help but the universal gate fails <span class="chip">engineering</span></h2>

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-schedule-o254zqsg/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 13795328,
+  "process_wall_ns": 269610417,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 8 tests\ntest tests::changed_context_and_invalid_input_are_checked ... ok\ntest tests::current_column_caps_and_narrow_outputs_in_wide_contexts ... ok\ntest tests::pivot_order_and_word_boundaries_are_canonical ... ok\ntest tests::dependent_source_rows_still_consume_the_row_budget ... ok\ntest tests::small_boolean_solution_sets_are_preserved ... ok\ntest tests::exhaustive_small_matrices_match_oracle_and_row_span ... ok\ntest tests::exhaustive_boolean_coefficients_all_construction_paths ... ok\ntest tests::larger_fixtures_match_canonical_oracle_and_logical_eliminations ... ok\n\ntest result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s\n\n",
+  "stdout_sha256": "afa983856edbb2b9d2e600377c8016a7f799533197f782ac43e1251261f58a4b",
+  "system_seconds": 0.004018,
+  "timed_out": false,
+  "user_seconds": 0.061689999999999995
+}
