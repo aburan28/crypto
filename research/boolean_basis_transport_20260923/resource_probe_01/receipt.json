@@ -1,0 +1,72 @@
+{
+  "scope": "One-repetition discovery-only resource and feasibility probe, not promotion evidence. All eleven methods run on n24 seed17; no held-out fixtures.",
+  "started_utc": "2026-09-23T14:54:36.232871+00:00",
+  "source_hashes": {
+    "worker.rs": "df8f813a44f8a86b0a5300e58a63ef3e4d958e3a472f2a7c1281805439890050",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464",
+    "basis.rs": "34e6c5ce46e08b438094205320448496076879c92121ea9fa6b33daae59a77a7",
+    "basis_tests.rs": "0cedecca4cb41bbf555816e2621bdced3b41b4ccb9be537a8ade6ec13a737ef5"
+  },
+  "worker_sha256": "ed051df2f8f3c97be15f4216944a74e2dcb4f7ee25eb9c5c2a58c7ff4175ef11",
+  "compiler_command": [
+    "rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "research/boolean_basis_transport_20260923/worker.rs",
+    "-o",
+    "/tmp/boolean-basis-probe"
+  ],
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "receipts": [
+    {
+      "command": [
+        "/tmp/boolean-basis-probe",
+        "24",
+        "17",
+        "planted",
+        "1",
+        "200000",
+        "with-basis"
+      ],
+      "exit_code": 0,
+      "process_ns": 3489759709,
+      "stdout_sha256": "e882199c4bfcb48cc0dace7bef4f82f9bd2472bcddccf1d323057b74b2fb45a1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-basis-probe",
+        "24",
+        "17",
+        "cross_planted",
+        "1",
+        "200000",
+        "with-basis"
+      ],
+      "exit_code": 0,
+      "process_ns": 1581482166,
+      "stdout_sha256": "5478ead1895ced76debf769fd23e32c93371953028a3ace0b44f43f90892ff09",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-basis-probe",
+        "24",
+        "17",
+        "unplanted",
+        "1",
+        "200000",
+        "with-basis"
+      ],
+      "exit_code": 0,
+      "process_ns": 2769709542,
+      "stdout_sha256": "52114c62d722142e970a6b2f1f9dc04f7aa937ed419ae544d43dd95ee867f6a8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "complete": true,
+  "ended_utc": "2026-09-23T14:54:44.090504+00:00"
+}

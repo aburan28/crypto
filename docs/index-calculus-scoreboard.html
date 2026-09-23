@@ -4473,6 +4473,52 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-basis-transport-20260923">
+  <div class="panel-head">
+    <h2>Quadratic row-space transport: correct inference, rejected complete-solve gain <span class="chip">engineering</span></h2>
+    <p>Packed matrix backends beat their matched list implementations by 3.03&ndash;5.20&times;,
+      but both inference policies fail their strongest-reference improvement and dramatic-gain
+      gates. Full RREF passes only 3/18 incremental comparisons and 0/18 dramatic comparisons;
+      source-branching echelon/affine-tail transport passes 0/18 of either. The retained packed
+      solver remains best by pooled median on the fresh n24 families.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/CONCLUSION.md">decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/README.md">row-space contract</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/run_01/RESULT.md">all paired comparisons</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/RUN_LEDGER.json">immutable run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete-solve plus validation milliseconds at 24 variables, pooling two fresh
+      holdout seeds and thirteen balanced repetitions. Displayed ratios compare pooled planted
+      costs with packed_state; gates use paired minima over all twelve competing arms.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Packed / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>66.217584</td><td>40.276479</td><td>77.027376</td><td>0.222</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>306.182646</td><td>181.077229</td><td>315.948980</td><td>0.048</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>1209.731875</td><td>577.337396</td><td>1029.723521</td><td>0.012</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>564.794188</td><td>258.394334</td><td>402.785188</td><td>0.026</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>77.067354</td><td>48.026376</td><td>89.620125</td><td>0.190</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>68.757750</td><td>42.481395</td><td>79.346271</td><td>0.213</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>58.147124</td><td>35.623875</td><td>67.757313</td><td>0.252</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>24.245251</td><td>14.992396</td><td>27.964833</td><td>0.605</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>14.673687</td><td>9.026291</td><td>16.798105</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Full row-space RREF, list</td><td>125.438604</td><td>51.116333</td><td>268.847458</td><td>0.117</td><td>PASS</td></tr>
+      <tr><td>Full row-space RREF, wide</td><td>32.977396</td><td>12.047854</td><td>64.268354</td><td>0.445</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine-tail, list</td><td>115.883104</td><td>74.345251</td><td>135.799709</td><td>0.127</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine-tail, wide</td><td>36.544917</td><td>23.088125</td><td>44.602750</td><td>0.402</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 16,224 observations across 96 distinct systems finish with verified results. Each
+    list/packed pair matches models, counters and trace digests within its inference policy.
+    Earlier failures remain in the regression inputs. Regrouped legacy gates do not replace
+    earlier frozen verdicts. Whole-worker peak RSS is 29,360,128 bytes; candidate-specific
+    memory, calibrated-operation ratios, full index-calculus cost and rho ratios remain unmeasured.</p>
+  <p>A separate discovery-only diagnostic reproduces the exact search and finds unused nonunit
+    affine relations at 47,962 of 52,864 branching decisions (90.73%), with rank sum 189,283.
+    These repeat across search states and are not independent relations or a speedup.
+    <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/AFFINE_SUBSTITUTION_NEXT.md">General affine substitution is the next documented contract</a>;
+    its implementation and complete cost remain unmeasured.</p>
+</section>
 <section class="panel" id="boolean-quadratic-frontier-20260923">
   <div class="panel-head">
     <h2>Packed residual coefficients: 1.56&ndash;1.67&times; beyond the current frontier <span class="chip">engineering</span></h2>
