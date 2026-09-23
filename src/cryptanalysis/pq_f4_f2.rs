@@ -436,7 +436,11 @@ pub fn groebner_basis_f4(
         let mut half_rows: Vec<F2BoolPoly> = Vec::new();
         let mut field_rows: Vec<F2BoolPoly> = Vec::new();
         let mut lcm_columns: HashSet<u64> = HashSet::new();
-        for p in &selected {
+        for (selected_index, p) in selected.iter().enumerate() {
+            if selected_index % 128 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
+                st.timed_out = true;
+                break;
+            }
             match p.kind {
                 PairKind::Critical(i, j) => {
                     st.pairs_reduced += 1;
@@ -462,6 +466,11 @@ pub fn groebner_basis_f4(
                 }
             }
         }
+        if st.timed_out {
+            st.build_ns += t.elapsed().as_nanos() as u64;
+            s.pairs.extend(selected);
+            break;
+        }
 
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
@@ -477,11 +486,21 @@ pub fn groebner_basis_f4(
             }
         }
         let mut reducers: Vec<F2BoolPoly> = Vec::new();
+        let mut symbolic_steps = 0usize;
         while let Some(m) = queue.pop() {
+            if symbolic_steps % 128 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
+                st.timed_out = true;
+                break;
+            }
+            symbolic_steps += 1;
             match s.reducer_for(m, &active, &mut st) {
                 Some(g) => {
                     let r = s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g]));
-                    debug_assert_eq!(r.lt().map(|t| t.mask), Some(m), "a reducer must lead with its monomial");
+                    debug_assert_eq!(
+                        r.lt().map(|t| t.mask),
+                        Some(m),
+                        "a reducer must lead with its monomial"
+                    );
                     for t in &r.terms {
                         if examined.insert(t.mask) {
                             queue.push(t.mask);
@@ -494,10 +513,21 @@ pub fn groebner_basis_f4(
                 }
             }
         }
+        if st.timed_out {
+            st.build_ns += t.elapsed().as_nanos() as u64;
+            s.pairs.extend(selected);
+            break;
+        }
         st.reducer_rows += reducers.len() as u64;
 
         let n_rows = reducers.len() + half_rows.len() + field_rows.len();
         let cols = Columns::from_monomials(examined.iter().copied());
+        if deadline.is_some_and(|limit| Instant::now() >= limit) {
+            st.timed_out = true;
+            st.build_ns += t.elapsed().as_nanos() as u64;
+            s.pairs.extend(selected);
+            break;
+        }
         let words = cols.words() as u64;
         if words * n_rows as u64 > MAX_MATRIX_WORDS {
             st.oversize = true;
@@ -516,7 +546,19 @@ pub fn groebner_basis_f4(
         for p in reducers.iter().chain(s_rows.iter().copied()) {
             st.max_poly_degree = st.max_poly_degree.max(degree(p));
         }
-        let rows: Vec<Row> = reducers.iter().chain(s_rows.into_iter()).map(|p| cols.pack(p)).collect();
+        let mut rows: Vec<Row> = Vec::with_capacity(n_rows);
+        for (row_index, p) in reducers.iter().chain(s_rows.into_iter()).enumerate() {
+            if row_index % 128 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
+                st.timed_out = true;
+                break;
+            }
+            rows.push(cols.pack(p));
+        }
+        if st.timed_out {
+            st.build_ns += t.elapsed().as_nanos() as u64;
+            s.pairs.extend(selected);
+            break;
+        }
         st.build_ns += t.elapsed().as_nanos() as u64;
 
         let t = Instant::now();

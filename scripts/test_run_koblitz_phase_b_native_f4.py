@@ -67,6 +67,18 @@ class AccountingTests(unittest.TestCase):
         self.assertEqual(got["single_core_seconds"], 4.0)
         self.assertEqual(got["maximum_individual_process_rss_bytes"], 250)
 
+    def test_watchdog_timeout_needs_no_backend_json_identity(self) -> None:
+        native_f4.validate_f4_result(
+            {
+                "solver": "native-f4",
+                "status": "timeout_inconclusive",
+                "timed_out": True,
+                "source_instance_id": None,
+                "backend_report": None,
+            },
+            {"source_instance": {"id_blake3": "source-id"}},
+        )
+
 
 class ScoringTests(unittest.TestCase):
     def make_run(self, root: Path, solver_status: str) -> tuple[Path, Path]:

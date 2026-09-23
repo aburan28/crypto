@@ -121,6 +121,13 @@ def compact_tool_identity(identity: dict[str, Any]) -> dict[str, Any]:
 
 def validate_f4_result(row: dict[str, Any], manifest: dict[str, Any]) -> None:
     require(row["solver"] == BACKEND, "native F4 parser returned the wrong backend")
+    if row["status"] == "timeout_inconclusive":
+        require(row["timed_out"] is True, "native F4 timeout lacks a watchdog receipt")
+        # A watchdog kill can occur before the backend serialises its report.
+        # The command, input receipts and unchanged-source check still bind the
+        # attempt to this manifest; there is deliberately no scientific
+        # terminal to authenticate or reinterpret.
+        return
     require(
         row["source_instance_id"] == manifest["source_instance"]["id_blake3"],
         "native F4 changed the authenticated source identity",
