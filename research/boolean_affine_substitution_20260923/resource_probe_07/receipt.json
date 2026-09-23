@@ -1,0 +1,80 @@
+{
+  "scope": "Discovery-only leaf-width comparison: n24 seed17, three families, thirty-two methods, one repetition; no holdouts or promotion claim.",
+  "source_hashes": {
+    "worker.rs": "975a12b1e7334d6b830926db708a4c49273c7305e814eae3b583516fbfdbd05a",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464",
+    "basis.rs": "716b439439daf82512904bf20b4afd7d0c54379be2043f7a8dfc37dfc879eabc",
+    "basis_tests.rs": "58331a341cfe02a2bfac5622727f3e9f58e5e293ce5270bfe0c8f85b02507046",
+    "affine.rs": "a20a64c7ecb516f58168a894ae76fcb72b76b9ce904510c5cbbce3e06a4063b9",
+    "affine_tests.rs": "28f59747902a5c2de6a2c8c74d11133539b1d27a5c859b18d589df767d0a915c",
+    "compact.rs": "563c1662a73bfac3dbe6fd316138256ce50249abe283a0d2891ebc5778fc584b",
+    "linearization.rs": "842aa9addfed48dc8c0fc6e6d4a8d5d08178056f82aaa4218c0f107d614a6898",
+    "linearization_tests.rs": "542e34dc6b2720855adc177d602bc394538f6346a9fa816b0e0dbaad967abb57",
+    "syndrome.rs": "6f218f3fdf6868534d2792c3c9c71d2b6b4f9bc4aed865d5fb6ef2105cb54f0e",
+    "syndrome_tests.rs": "0b8753973005333f798d2e0ad46c55f4cf50317cb6397e727010150c4efe5cc3",
+    "leaf.rs": "64335be4700f073daa96f79f319bc320450b818d61b8b76803ab948499b69998"
+  },
+  "worker_sha256": "d0c818d113075f815dec26556a84a12659bbdd9543026e09c2f57accf7a0f0bc",
+  "compiler_command": [
+    "rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "research/boolean_affine_substitution_20260923/worker.rs",
+    "-o",
+    "/tmp/boolean-gray16-probe"
+  ],
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "started_utc": "2026-09-23T19:28:59.864464+00:00",
+  "receipts": [
+    {
+      "command": [
+        "/tmp/boolean-gray16-probe",
+        "24",
+        "17",
+        "planted",
+        "1",
+        "200000",
+        "with-leaf16"
+      ],
+      "exit_code": 0,
+      "process_ns": 4608090750,
+      "stdout_sha256": "5f72f12426cac9c8ea3f5da45e5200abc7dadf19d7bc074ec1b08265083c4f05",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-gray16-probe",
+        "24",
+        "17",
+        "cross_planted",
+        "1",
+        "200000",
+        "with-leaf16"
+      ],
+      "exit_code": 0,
+      "process_ns": 2310411584,
+      "stdout_sha256": "4ed4de6fd07bb3b7dc873a59441caba2c52206e94713556ebf36d61a100bc519",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-gray16-probe",
+        "24",
+        "17",
+        "unplanted",
+        "1",
+        "200000",
+        "with-leaf16"
+      ],
+      "exit_code": 0,
+      "process_ns": 4744753708,
+      "stdout_sha256": "6dabce0491169b9f45f1be55a79c8b5193606268b25fe2939f69c19a494c6993",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "complete": true,
+  "ended_utc": "2026-09-23T19:29:11.529319+00:00"
+}

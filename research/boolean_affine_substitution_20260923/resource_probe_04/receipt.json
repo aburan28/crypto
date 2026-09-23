@@ -1,0 +1,77 @@
+{
+  "scope": "One-repetition discovery-only whole-word affine-image formula probe. n24 seed17, all families and twenty matched methods; no holdouts or promotion claim.",
+  "source_hashes": {
+    "worker.rs": "9fc418c3acdd0519a06cd7c43b889348f55966780507c3d644fa044c75164c99",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464",
+    "basis.rs": "716b439439daf82512904bf20b4afd7d0c54379be2043f7a8dfc37dfc879eabc",
+    "basis_tests.rs": "58331a341cfe02a2bfac5622727f3e9f58e5e293ce5270bfe0c8f85b02507046",
+    "affine.rs": "69db941537ab3c8a37bab3059b73744b4b89335510772786b7495d444412a02a",
+    "affine_tests.rs": "1832bfc714e86e1f6b747f0312ccd426c8925cd89d09c998ea00707407c5081b",
+    "compact.rs": "563c1662a73bfac3dbe6fd316138256ce50249abe283a0d2891ebc5778fc584b",
+    "linearization.rs": "df83d01b75e948e0d13d1d7af3ec76b04ba683df1bc3333ffbe933ca1b119109",
+    "linearization_tests.rs": "542e34dc6b2720855adc177d602bc394538f6346a9fa816b0e0dbaad967abb57"
+  },
+  "worker_sha256": "1f7fae2ef5593b1b689894b9a1c7b33c2bf8fe39f3940ca57a8cc1fa5169e953",
+  "compiler_command": [
+    "rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "research/boolean_affine_substitution_20260923/worker.rs",
+    "-o",
+    "/tmp/boolean-affine-fast-probe"
+  ],
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "started_utc": "2026-09-23T18:05:46.579768+00:00",
+  "receipts": [
+    {
+      "command": [
+        "/tmp/boolean-affine-fast-probe",
+        "24",
+        "17",
+        "planted",
+        "1",
+        "200000",
+        "with-fast"
+      ],
+      "exit_code": 0,
+      "process_ns": 3990215250,
+      "stdout_sha256": "80b71b35dbdbe845f204233e6fd5093630d6d43326e3f0d0bf5c86f370ba618e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-affine-fast-probe",
+        "24",
+        "17",
+        "cross_planted",
+        "1",
+        "200000",
+        "with-fast"
+      ],
+      "exit_code": 0,
+      "process_ns": 2023520500,
+      "stdout_sha256": "73f114ff82faf17eb70ef51b42d6bd10a85f0e51a627c4f837cf700f92ee1d31",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-affine-fast-probe",
+        "24",
+        "17",
+        "unplanted",
+        "1",
+        "200000",
+        "with-fast"
+      ],
+      "exit_code": 0,
+      "process_ns": 3990138041,
+      "stdout_sha256": "ef6e9170d1b0e3d5ef3a19382b08efc6d5c9e924a430f2047317db1ba0a34d8b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "complete": true,
+  "ended_utc": "2026-09-23T18:05:56.585902+00:00"
+}
