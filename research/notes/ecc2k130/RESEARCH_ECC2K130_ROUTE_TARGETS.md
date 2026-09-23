@@ -619,3 +619,68 @@ Any one of:
 None of these threatens a deployed curve, and none is claimed to. The
 `α ≤ 0.38` row of the scale table is what that would take, and nothing
 on the table is within `2^27` of it.
+
+## Close-out, 2026-09-23: what the routes established
+
+The finishing condition above is met.  X4 is classified: X4′ closed Route 3 at
+its gate, one phase before the end-to-end run.  The ledger below covers all
+six experiments, and the items left open are left open by choice, with the
+reason given.
+
+| experiment | route | status | what was measured | verdict |
+|---|---|---|---|---|
+| X1 | 1, Crossbred | run on two rungs per `m` ([`RESEARCH_ECC2K130_CROSSBRED.md`](RESEARCH_ECC2K130_CROSSBRED.md) §2–4) | oracle `xb/F4 = 0.023` in bit operations; wall-clock `0.696` at `n = 9, m = 3`, rising `17×` in one rung; end to end, enumeration beats every algebraic oracle by `3.4×` to `1,800×` | falsifier (`xb/F4 ≥ 1`) not fired; **`α` never fitted** (two rungs per `m`, not four) |
+| X2 | 1, 2 | the `(D, k)` frontier is in the frozen `crossbred_bench` output (CROSSBRED §2) | no filters at any `(D, k)`; at `D = 2` no space below `k = 5` | recorded there, not re-tabulated here |
+| X3 | 2, Crossbred on the symmetrised system | **not run** | — | open; bounded below |
+| X4 → X4′ | 3, symmetrised oracle end to end | X4 cannot run as registered; the X4′ gate ran | `3.1–14.7×` enumeration per relation at `d = 3`, `30–1,101×` at `d = 4`, priced from below | gate **closed**; the `350×` is **engineering** (weakly determined) |
+| X5 | 4, `m = 4` | **not built** | — | open: H1 of the scaling target |
+| X6 | 5, literature | **not run** | — | open, no code |
+
+**What the thread established.**
+
+1. **The product law holds where it was measured.**  `Λ = 3.08` at the
+   relation budget on E1's rungs, against a predicted `3`
+   ([`RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md`](RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md)
+   §0.5).
+2. **No oracle built here beats enumeration per relation, at any size
+   measured.**
+   - Crossbred, Gröbner and SAT lose end to end (CROSSBRED §4).
+   - The `x`-chained and symmetrised systems lose per relation on every X4′
+     rung that finished, at both Macaulay caps, even priced from below.
+   - The algebra buys smaller searches and loses on cost.
+3. **On ECC2K-130's structure the Frobenius collapse is unavailable to every
+   frame.**  At `n = 131` the only Frobenius-stable `V ∋ 1` are `F₂` and the
+   field (X4′), and the `x`-frame has the same obstruction (E1's definition).
+4. **Against rho nothing is close.**
+   - The frame's scale table puts enumeration at `2^{71.78}×` rho at
+     `n = 131`, and an oracle linear in `|F|` still at `2^{27.78}×`.
+   - On the Koblitz pipeline actually built, a matched rho with the pipeline's
+     own canonical form beats it at all five cells of that round, by `1.19–2.88×`
+     (`research/ic_triple_counted_20260923/RESULTS.md`, #668).
+
+**What is left, and why it is not next here.**
+
+- **X5 (H1, the first fall degree at `m = 4`)** is the one open item of
+  independent interest.
+  - Nobody has a rigorous bound on these systems' fall degree in either
+    direction, so a measurement is new evidence on the fall-degree question.
+  - It does not bear on ECC2K-130's cost.  A fall degree that stays at 3
+    would still leave the `m = 4` oracle needing to beat enumeration per
+    relation, which no oracle here does at `m = 3`.
+  - If run, it needs its own registration: the chained symmetrised `S₃`
+    system, 16 draws per instance, and the falsifier "the fall degree grows
+    with `n`".
+- **X1's `α` over four rungs** needs Crossbred to finish at `m = 3` past
+  `n = 9`, where its edge over F4 was already nearly gone.  The question it
+  would answer, whether the oracle scales, matters only if the oracle first
+  beats enumeration per relation, and at the measured rungs it does not.
+- **X3** is bounded by what was measured.  X4′ put the symmetrised systems
+  under the default engine at `3.1–14.7×` enumeration per relation.  So
+  Crossbred would have to beat that engine by more than that factor, and keep
+  the lead as `n` grows, where on the `x`-systems its edge over F4 fell from
+  `0.04` to `0.70` in one rung.
+- **X6** costs one research run and no code.  It is the cheapest thing left,
+  and nothing measured here depends on it.
+
+**Class.**  **Accounting**: a ledger.  No measurement changed, and nothing
+here bears on ECC2K-130's security.
