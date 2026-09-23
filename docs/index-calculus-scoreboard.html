@@ -1402,9 +1402,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         the artefact. Finding one is what costs: relations &times; targets &times; oracle
         = m&thinsp;&middot;&thinsp;2<sup>131</sup> <em>independently of the factor-base dimension</em>,
         so the best implicit-base variant is 2<sup>132.58</sup>, 2<sup>+71.77</sup>&times; rho, and no
-        table rescues it &mdash; at 2<sup>30</sup> through 2<sup>70</sup> entries plain BSGS on the
-        same memory is cheaper than the best decomposition cell, and rho is cheaper than both while
-        storing nothing. Stated as a demand on the oracle: it would have to beat exhaustive search
+        table rescues it &mdash; at 2<sup>30</sup> through 2<sup>70</sup> entries rho is cheaper than
+        the best decomposition cell while storing nothing. (This sentence also said plain BSGS on the
+        same memory beat every cell; that part is withdrawn by the second accounting correction below.)
+        Stated as a demand on the oracle: it would have to beat exhaustive search
         over its own candidate set by 2<sup>70.19&thinsp;+&thinsp;log&#8322;&thinsp;m</sup>, a number
         that does not move with m or with l because it <em>is</em> the product law
         (<code>experiments/ecc2k130_point_decomposition.json</code>).</p>
@@ -1432,6 +1433,23 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         implicit base, not the collapse itself. Seven bits against a gap of sixty-four; class
         <span class="chip">accounting</span>, not a gain
         (<code>experiments/ecc2k130_decomposition_targets.json</code>).</p>
+      <p><strong>Second accounting correction: the tabulated rows never took the collapse.</strong>
+        The collapse needs only a materialised base, and every tabulated row materialises one, yet the
+        pair-table, triple-table and memory-capped rows were priced without it &mdash; and
+        <code>cost_cell</code>&rsquo;s collapse path never folded the subset-sum table. It surfaced as a
+        disagreement: the IC tournament&rsquo;s <em>measured</em> crossover for this family on Koblitz
+        orbit bases (0.831, 1.396, 2.207 &times; rho at n23a1, n37a0, n43a1) carried to r&thinsp;=&thinsp;2<sup>129</sup>
+        sat about 2<sup>11</sup> below the pair-table row. With both folds the m&thinsp;=&thinsp;2 row
+        moves from 2<sup>+28.55</sup> to <strong>2<sup>+20.76</sup>&times; rho</strong> (m&thinsp;=&thinsp;3:
+        2<sup>+29.77</sup> to 2<sup>+21.82</sup>), within 1.7 bits of the tournament&rsquo;s family model
+        (2<sup>+19.07</sup>) and inside its measured rate band carried out 97 bits (2<sup>+8.4</sup> to
+        2<sup>+19.4</sup>, an extrapolation from three cells). The optimum needs a 2<sup>80</sup>-entry
+        folded table. Capped at 2<sup>30</sup>&ndash;2<sup>70</sup> entries the corrected cells now beat
+        BSGS as that comparison priced it (max(M,&thinsp;r/M), no automorphisms), so that claim is
+        withdrawn; rho still beats every corrected cell at every budget, by 2<sup>4</sup> at
+        2<sup>70</sup> entries and 2<sup>35</sup> at 2<sup>30</sup>. The implicit-base product law and the
+        required-speed-up invariant are untouched. Class <span class="chip">accounting</span>, not a gain
+        (<code>experiments/ecc2k130_tabulated_collapse.json</code>).</p>
       <p><strong>Deciding is localising, for any detector that takes its target as input.</strong>
         A hypothetical decomposition oracle that answers only yes/no for the <em>whole</em> factor
         base looks far weaker than one that hands over the summands. It is not. Let R decompose;
