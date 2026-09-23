@@ -1649,7 +1649,10 @@ mod tests {
                 assert!(!seen[j], "a={a} n={n}: index map is not injective");
                 seen[j] = true;
             }
-            assert!(seen.iter().all(|&b| b), "a={a} n={n}: index map misses a point");
+            assert!(
+                seen.iter().all(|&b| b),
+                "a={a} n={n}: index map misses a point"
+            );
 
             // Every abscissa really is in V, read back through u.
             let v_span: std::collections::HashSet<u64> =
@@ -1685,7 +1688,10 @@ mod tests {
                     assert_eq!(img, next, "a={a} n={n}: orbit is not a π-cycle");
                 }
             }
-            assert!(covered.iter().all(|&b| b), "a={a} n={n}: orbits miss a point");
+            assert!(
+                covered.iter().all(|&b| b),
+                "a={a} n={n}: orbits miss a point"
+            );
         }
     }
 
@@ -2565,7 +2571,13 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
     let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
 
     let g = kc.generator().clone();
-    let r_u64 = kc.subgroup_order.to_u64_digits().first().copied().unwrap_or(2).max(2);
+    let r_u64 = kc
+        .subgroup_order
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(2)
+        .max(2);
     let mut targets: Vec<BinaryPoint> = Vec::new();
     while targets.len() < opts.targets {
         let p = kc.mul(&g, &BigUint::from(rng.gen_range(1..r_u64)));
@@ -2627,15 +2639,23 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
     }
     // Cross-check the pair enumeration against the library's.
     for (ti, t) in targets.iter().enumerate() {
-        assert_eq!(truth[ti].0, enumerate_decompose(&kc, &fb_x, &index_x, t, m).is_some());
-        assert_eq!(truth[ti].1, enumerate_symmetrised(&kc, &fb_u, t, m).is_some());
+        assert_eq!(
+            truth[ti].0,
+            enumerate_decompose(&kc, &fb_x, &index_x, t, m).is_some()
+        );
+        assert_eq!(
+            truth[ti].1,
+            enumerate_symmetrised(&kc, &fb_u, t, m).is_some()
+        );
     }
 
     let mut arms = Vec::new();
     for &cap in &opts.x_caps {
         for (arm, sym) in [("x-chained", false), ("symmetrised", true)] {
             let arm_cap = if sym { cap + 1 } else { cap };
-            let engine = SolverEngine::InheritedF4 { max_degree: arm_cap };
+            let engine = SolverEngine::InheritedF4 {
+                max_degree: arm_cap,
+            };
             let mut rows = Vec::new();
             let (mut n_vars, mut degree, mut built, mut oversize) = (0, 0, 0, 0);
             for (ti, target) in targets.iter().enumerate() {
@@ -2643,7 +2663,13 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
                 let t0 = Instant::now();
                 let (relation_ok, found, complete, splits) = if sym {
                     let o = symmetrised_groebner_decompose(
-                        &kc, &fb_u, &st, target, m, engine, opts.node_budget,
+                        &kc,
+                        &fb_u,
+                        &st,
+                        target,
+                        m,
+                        engine,
+                        opts.node_budget,
                     )?;
                     n_vars = o.n_vars;
                     degree = o.degree;
@@ -2656,20 +2682,34 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
                     (ok, o.relation.is_some(), o.complete, o.effort as usize)
                 } else {
                     let (rel, stats) = groebner_decompose(
-                        &kc, &fb_x, &index_x, &st, target, m, engine, opts.node_budget,
+                        &kc,
+                        &fb_x,
+                        &index_x,
+                        &st,
+                        target,
+                        m,
+                        engine,
+                        opts.node_budget,
                     );
                     let x_r = match target {
                         BinaryPoint::Affine { x, .. } => x.clone(),
                         BinaryPoint::Infinity => unreachable!(),
                     };
-                    let sys = build_decomposition_system(&fb_x.subspace_basis, &x_r, &kc.curve.b, m, &st)?;
+                    let sys = build_decomposition_system(
+                        &fb_x.subspace_basis,
+                        &x_r,
+                        &kc.curve.b,
+                        m,
+                        &st,
+                    )?;
                     n_vars = sys.n_vars;
                     degree = system_degree(&sys.equations);
                     built = built.max(stats.max_degree_built);
                     oversize += usize::from(stats.oversize > 0);
                     let ok = rel.as_ref().map(|idx| {
-                        idx.iter().fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb_x.points[i]))
-                            == *target
+                        idx.iter().fold(BinaryPoint::Infinity, |acc, &i| {
+                            kc.add(&acc, &fb_x.points[i])
+                        }) == *target
                     });
                     (ok, rel.is_some(), !stats.exhausted, stats.splits)
                 };
@@ -2681,10 +2721,19 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
                     (false, true) => ("refuted", !exists),
                     (false, false) => ("budget", true),
                 };
-                rows.push(GateTarget { verdict, word_xors, splits, ms, gate_ok });
+                rows.push(GateTarget {
+                    verdict,
+                    word_xors,
+                    splits,
+                    ms,
+                    gate_ok,
+                });
             }
             let by = |v: &str| -> Vec<f64> {
-                rows.iter().filter(|r| r.verdict == v).map(|r| r.word_xors as f64).collect()
+                rows.iter()
+                    .filter(|r| r.verdict == v)
+                    .map(|r| r.word_xors as f64)
+                    .collect()
             };
             let k = rows.len() as f64;
             arms.push(GateArm {
@@ -2795,13 +2844,21 @@ mod gate_tests {
                 decomposable += usize::from(over_r);
                 checked += 1;
             }
-            assert!(decomposable > count / 10 && decomposable < count, "n = {n}: {decomposable}/{count}");
+            assert!(
+                decomposable > count / 10 && decomposable < count,
+                "n = {n}: {decomposable}/{count}"
+            );
         }
     }
 
     #[test]
     fn gate_bench_agrees_with_enumeration_and_counts_its_work() {
-        let opts = GateOptions { targets: 4, seed: 11, node_budget: 20_000, x_caps: vec![3] };
+        let opts = GateOptions {
+            targets: 4,
+            seed: 11,
+            node_budget: 20_000,
+            x_caps: vec![3],
+        };
         let b = subspace_gate_bench(0, 13, 6, &opts).unwrap();
         assert_eq!(b.arms.len(), 2);
         for arm in &b.arms {
@@ -2856,7 +2913,10 @@ pub fn random_subspace_containing_one_in(
             span.extend(added);
             basis.push(from_bits(v, n));
         }
-        if !basis.iter().all(|b| span.contains(&bits_of(&b.square(irr)))) {
+        if !basis
+            .iter()
+            .all(|b| span.contains(&bits_of(&b.square(irr))))
+        {
             return basis;
         }
     }
@@ -2888,8 +2948,13 @@ pub fn build_chained_symmetrised_system(
     }
     let eps = 4 * ell_w;
     let (off1, off2) = (eps + 1, eps + 1 + n as usize);
-    let w_basis: Vec<F2mElement> = v_basis[1..].iter().map(|b| artin_schreier_in(b, irr)).collect();
-    let unit: Vec<F2mElement> = (0..n).map(|k| F2mElement::from_bit_positions(&[k], n)).collect();
+    let w_basis: Vec<F2mElement> = v_basis[1..]
+        .iter()
+        .map(|b| artin_schreier_in(b, irr))
+        .collect();
+    let unit: Vec<F2mElement> = (0..n)
+        .map(|k| F2mElement::from_bit_positions(&[k], n))
+        .collect();
     let as_unit: Vec<F2mElement> = unit.iter().map(|e| artin_schreier_in(e, irr)).collect();
     let w: Vec<SymElement> = (0..4)
         .map(|i| SymElement::from_subspace_vars(&w_basis, i * ell_w, n, n_vars))
@@ -2911,7 +2976,11 @@ pub fn build_chained_symmetrised_system(
         .add(&SymElement::constant(&u_r, n, n_vars))
         .add(&eps_el);
     let mut equations = sym_polynomial(&[w[0].clone(), w[1].clone(), w_q1.clone(), s1], &terms, st);
-    equations.extend(sym_polynomial(&[w_q1, w[2].clone(), w_q2.clone(), s2], &terms, st));
+    equations.extend(sym_polynomial(
+        &[w_q1, w[2].clone(), w_q2.clone(), s2],
+        &terms,
+        st,
+    ));
     equations.extend(sym_polynomial(&[w_q2, w[3].clone(), w_r, s3], &terms, st));
     Some(SymmetrisedSystem {
         equations,
@@ -3044,7 +3113,16 @@ fn fall_cell(
         censored,
         mean_deficit: deficits
             .into_iter()
-            .map(|(d, v)| (d, if v.is_empty() { f64::NAN } else { v.iter().sum::<f64>() / v.len() as f64 }))
+            .map(|(d, v)| {
+                (
+                    d,
+                    if v.is_empty() {
+                        f64::NAN
+                    } else {
+                        v.iter().sum::<f64>() / v.len() as f64
+                    },
+                )
+            })
             .collect(),
         falls,
         profiled_to,
@@ -3070,7 +3148,10 @@ pub fn x5_fall_rung(
     let st = FieldStructure::new(n, &irr);
     let mut rng = StdRng::seed_from_u64(seed ^ ((n as u64) << 32));
     let (v, stable) = match invariant_divisor {
-        None => (random_subspace_containing_one_in(n, &irr, ell, &mut rng), false),
+        None => (
+            random_subspace_containing_one_in(n, &irr, ell, &mut rng),
+            false,
+        ),
         Some(idx) => {
             let raw = subspace_basis_for_divisor(n, idx, &irr)?;
             let span = span_f2(&raw, n);
@@ -3103,7 +3184,9 @@ pub fn x5_fall_rung(
     let t0 = Instant::now();
     let sym: Vec<(Vec<F2BoolPoly>, usize)> = xs
         .iter()
-        .map(|x| build_chained_symmetrised_system(&v, &irr, x, &st).map(|s| (s.equations, s.n_vars)))
+        .map(|x| {
+            build_chained_symmetrised_system(&v, &irr, x, &st).map(|s| (s.equations, s.n_vars))
+        })
         .collect::<Option<_>>()?;
     let sym_cell = {
         let mut c = fall_cell("symmetrised chain", &sym, d_max, 0.0);
@@ -3153,7 +3236,14 @@ pub struct X5Solve {
     pub mean_ms: f64,
 }
 
-pub fn x5_solve_gate(a: u8, n: u32, ell: usize, targets: usize, node_budget: usize, seed: u64) -> Option<X5Solve> {
+pub fn x5_solve_gate(
+    a: u8,
+    n: u32,
+    ell: usize,
+    targets: usize,
+    node_budget: usize,
+    seed: u64,
+) -> Option<X5Solve> {
     let kc = KoblitzCurve::new(a, n)?;
     let st = FieldStructure::new(n, &kc.curve.irreducible);
     let mut rng = StdRng::seed_from_u64(seed ^ ((n as u64) << 32));
@@ -3163,13 +3253,20 @@ pub fn x5_solve_gate(a: u8, n: u32, ell: usize, targets: usize, node_budget: usi
     let pts: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
     let index: HashMap<u64, usize> = pts.iter().enumerate().map(|(i, p)| (p.pack(), i)).collect();
     let g = kc.generator().clone();
-    let r = kc.subgroup_order.to_u64_digits().first().copied().unwrap_or(2).max(2);
+    let r = kc
+        .subgroup_order
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(2)
+        .max(2);
     let (mut found, mut refuted, mut budget, mut decomposable, mut gate_failures) = (0, 0, 0, 0, 0);
     let (mut splits, mut xors, mut ms) = (0.0, 0.0, 0.0);
     let mut drawn = 0;
     while drawn < targets {
         let t = kc.mul(&g, &BigUint::from(rng.gen_range(1..r)));
-        if !matches!(&t, BinaryPoint::Affine { x, .. } if *x != F2mElement::one(n) && !x.is_zero()) {
+        if !matches!(&t, BinaryPoint::Affine { x, .. } if *x != F2mElement::one(n) && !x.is_zero())
+        {
             continue;
         }
         drawn += 1;
@@ -3261,12 +3358,16 @@ mod x5_tests {
             let q2 = kc.add(&q1, &pts[2]);
             let r = kc.add(&q2, &pts[3]);
             let (x1, x2, xr) = match (&q1, &q2, &r) {
-                (BinaryPoint::Affine { x: a, .. }, BinaryPoint::Affine { x: b, .. }, BinaryPoint::Affine { x: c, .. }) => {
-                    (a.clone(), b.clone(), c.clone())
-                }
+                (
+                    BinaryPoint::Affine { x: a, .. },
+                    BinaryPoint::Affine { x: b, .. },
+                    BinaryPoint::Affine { x: c, .. },
+                ) => (a.clone(), b.clone(), c.clone()),
                 _ => continue,
             };
-            if [&x1, &x2, &xr].iter().any(|x| x.is_zero() || **x == F2mElement::one(n))
+            if [&x1, &x2, &xr]
+                .iter()
+                .any(|x| x.is_zero() || **x == F2mElement::one(n))
                 || pts.iter().any(|p| *p == fb.two_torsion)
             {
                 continue;
@@ -3319,9 +3420,14 @@ mod x5_tests {
             root |= bits_of(&uq1) << (4 * ell_w + 1);
             root |= bits_of(&uq2) << (4 * ell_w + 1 + n as usize);
             for (k, eq) in sys.equations.iter().enumerate() {
-                assert_eq!(eq.eval(root), 0, "trial {trial}: equation {k} does not vanish");
+                assert_eq!(
+                    eq.eval(root),
+                    0,
+                    "trial {trial}: equation {k} does not vanish"
+                );
             }
-            let lifted = lift_symmetrised_root(&kc, &fb, &sys, root, &r).expect("the planted root lifts");
+            let lifted =
+                lift_symmetrised_root(&kc, &fb, &sys, root, &r).expect("the planted root lifts");
             assert_eq!(fb.sum(&kc, &lifted.0), r);
             planted += 1;
             if planted == 8 {
