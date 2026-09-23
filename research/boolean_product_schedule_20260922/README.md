@@ -53,3 +53,12 @@ protocol, records compiler identity and actual executable hashes, launches
 each fixed cell as a fresh metered process, retains every sample, verifies
 stdout hashes and the full expected grid, and writes a SHA-256 manifest.
 The report keeps cold and retained costs visible even if the candidate loses.
+
+`run_01` is the original experiment. `run_02` repeats the unchanged grid with
+only the schedule's retained column capacity compacted, declared in the
+protocol amendment before execution. Both runs reject performance promotion;
+the compacted schedule trades a little space for slower replay at 12 variables.
+See [the decision](CONCLUSION.md) for both tables and the mathematical result.
+
+Run `python3 research/boolean_product_schedule_20260922/test_evidence.py` to
+replay the retained summaries and test fail-closed evidence checks.

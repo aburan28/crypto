@@ -4219,17 +4219,20 @@ factor base, and this prices a decomposition oracle.</p>
     <h2>Exact-support product schedules: no reuse across changed Boolean systems <span class="chip">accounting</span></h2>
     <p>Over F2, complete normalized support determines the polynomial. A matching full-system
       key repeats the identical matrix. The standalone bounded experiment verified 174,080
-      matrix outputs across 256 cells; exact schedule hits on changed systems were zero.
+      matrix outputs across 256 cells in each of two retained runs; exact schedule hits on changed systems were zero.
       The schedule passed all eight held-out comparisons against layout-only reuse and failed
       all eight against the simpler packed-matrix cache. No production solver integration or
-      full-pipeline improvement is claimed.</p>
+      full-pipeline improvement is claimed. Compacting retained column storage preserves the
+      timing rejection but gives the schedule a 12.2% storage saving at the largest toy size,
+      in exchange for slower replay.</p>
     <p>Sources:
       <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_product_schedule_20260922/CONCLUSION.md">decision and mathematical boundary</a>,
-      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_product_schedule_20260922/run_01/results.json">retained comparisons</a>,
-      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_product_schedule_20260922/run_01/manifest.json">manifest</a>.</p>
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_product_schedule_20260922/run_02/results.json">compacted comparisons</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_product_schedule_20260922/run_02/manifest.json">manifest</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_product_schedule_20260922/run_01/results.json">original comparisons</a>.</p>
   </div>
   <div class="table-scroll"><table>
-    <caption>Standalone construction diagnostic: cold batch plus verification in milliseconds,
+    <caption>Original retained run: standalone construction diagnostic, cold batch plus verification in milliseconds,
       64 repeated identical inputs, two holdout seeds, eight repetitions per seed.</caption>
     <thead><tr><th>Variant</th><th>6 variables</th><th>8 variables</th><th>10 variables</th><th>12 variables</th></tr></thead>
     <tbody>
@@ -4237,6 +4240,17 @@ factor base, and this prices a decomposition oracle.</p>
       <tr><td>Verified layout reuse</td><td>0.485042</td><td>0.988375</td><td>1.710438</td><td>2.754792</td></tr>
       <tr><td>Exact product schedule</td><td>0.084417</td><td>0.148959</td><td>0.243229</td><td>0.367833</td></tr>
       <tr><td>Exact packed-matrix cache</td><td>0.070375</td><td>0.122396</td><td>0.201166</td><td>0.308166</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Compacted schedule amendment: same fixed grid, milliseconds per cold batch of 64.
+      Read paired within-cell comparisons; cross-run timing changes are not an optimization claim.</caption>
+    <thead><tr><th>Variant</th><th>6 variables</th><th>8 variables</th><th>10 variables</th><th>12 variables</th></tr></thead>
+    <tbody>
+      <tr><td>Direct construction</td><td>0.571125</td><td>1.122459</td><td>1.995958</td><td>8.434125</td></tr>
+      <tr><td>Verified layout reuse</td><td>0.502396</td><td>0.968792</td><td>2.798437</td><td>2.801292</td></tr>
+      <tr><td>Exact product schedule, compact columns</td><td>0.082334</td><td>0.145250</td><td>0.244792</td><td>0.385563</td></tr>
+      <tr><td>Exact packed-matrix cache</td><td>0.070646</td><td>0.117395</td><td>0.198708</td><td>0.310896</td></tr>
     </tbody>
   </table></div>
   <div class="panel-head">

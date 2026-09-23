@@ -19,7 +19,7 @@ class EvidenceTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="boolean-evidence-test-")
         self.root = Path(self.temp.name) / "run"
-        shutil.copytree(HERE / "run_01", self.root)
+        shutil.copytree(HERE / "run_02", self.root)
 
     def tearDown(self):
         self.temp.cleanup()
@@ -33,6 +33,14 @@ class EvidenceTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             analysis.main(self.root)
         self.assertEqual(expected, (self.root / "results.json").read_bytes())
+
+    def test_initial_evidence_still_replays(self):
+        original = Path(self.temp.name) / "initial"
+        shutil.copytree(HERE / "run_01", original)
+        expected = (original / "results.json").read_bytes()
+        with contextlib.redirect_stdout(io.StringIO()):
+            analysis.main(original)
+        self.assertEqual(expected, (original / "results.json").read_bytes())
 
     def test_changed_source_is_rejected(self):
         with (self.root / "worker.rs").open("a") as out:
