@@ -254,8 +254,16 @@ impl Gf2 {
         self.reduce(self.clmul(a, b))
     }
 
+    /// With `pclmulqdq`, `a·a` is one instruction and beats the
+    /// twelve-step bit spread; without it the spread is the cheap path.
     #[inline]
     pub fn sqr(&self, a: u64) -> u64 {
+        #[cfg(target_arch = "x86_64")]
+        if self.has_clmul {
+            // SAFETY: guarded by the runtime feature detection recorded
+            // in `has_clmul` at construction.
+            return self.reduce(unsafe { clmul_u64(a, a) });
+        }
         let w = (spread32(a) as u128) | ((spread32(a >> 32) as u128) << 64);
         self.reduce(w)
     }
@@ -270,24 +278,29 @@ impl Gf2 {
 
     /// `a^{-1}` by Fermat: `a^(2^n − 2)`.  Zero maps to zero.
     ///
-    /// Still `n` squarings and `n` multiplications — which is why the
-    /// code above it goes to some length to need only one per *row* of
-    /// the pair loop rather than one per polynomial division.
+    /// Itoh–Tsujii addition chain: with `β_k = a^{2^k − 1}`, walk the
+    /// bits of `n − 1` using `β_{2k} = β_k^{2^k} · β_k` and
+    /// `β_{k+1} = β_k² · a`, then square once.  That is `n − 1`
+    /// squarings but only `⌊log₂(n−1)⌋ + popcount(n−1) − 1`
+    /// multiplications, against `n − 2` for square-and-multiply —
+    /// 7 instead of 22 at `n = 24`.
     pub fn inv(&self, a: u64) -> u64 {
-        if a == 0 {
-            return 0;
+        if a == 0 || self.n <= 1 {
+            return a;
         }
-        let mut result = 1u64;
-        let mut base = a;
-        for _ in 1..self.n {
-            base = self.sqr(base);
-            result = if result == 1 {
-                base
-            } else {
-                self.mul(result, base)
-            };
+        let e = self.n - 1;
+        let mut beta = a;
+        let mut len = 1u32;
+        for bit in (0..(31 - e.leading_zeros())).rev() {
+            beta = self.mul(self.sqr_k(beta, len), beta);
+            len *= 2;
+            if (e >> bit) & 1 == 1 {
+                beta = self.mul(self.sqr(beta), a);
+                len += 1;
+            }
         }
-        result
+        debug_assert_eq!(len, e);
+        self.sqr(beta)
     }
 
     /// Invert a whole slice with **one** field inversion, by
@@ -799,7 +812,11 @@ impl SubspaceOracle {
         let mut sorted = span.clone();
         sorted.sort_unstable();
         sorted.dedup();
-        assert_eq!(sorted.len(), span.len(), "subspace basis is not independent");
+        assert_eq!(
+            sorted.len(),
+            span.len(),
+            "subspace basis is not independent"
+        );
         let lv = subspace_poly_for_basis(basis, gf);
         Self { l, b, span, lv }
     }
@@ -815,11 +832,9 @@ impl SubspaceOracle {
     /// keep their own index of factor-base abscissae).
     pub fn contains(&self, x: u64, gf: &Gf2) -> bool {
         // L_V(x) = 0 exactly on the subspace.
-        self.lv
-            .iter()
-            .enumerate()
-            .fold(0u64, |acc, (i, &ai)| acc ^ gf.mul(ai, gf.sqr_k(x, i as u32)))
-            == 0
+        self.lv.iter().enumerate().fold(0u64, |acc, (i, &ai)| {
+            acc ^ gf.mul(ai, gf.sqr_k(x, i as u32))
+        }) == 0
     }
 
     /// **Does `x_R` decompose over the subspace?**  Returns a witness
@@ -905,6 +920,29 @@ mod tests {
         *state ^= *state << 25;
         *state ^= *state >> 27;
         state.wrapping_mul(0x2545_F491_4F6C_DD1D)
+    }
+
+    /// The Itoh–Tsujii inverse is a true inverse at every one-word
+    /// field size, where the chain's shape follows the bits of `n − 1`.
+    #[test]
+    fn itoh_tsujii_inverse_roundtrips_at_every_width() {
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        let mut s = 0x0DDB_A11C_AFE0_F00Du64;
+        for n in 2u32..=63 {
+            let Some(irr) = find_irreducible_sparse(n) else {
+                continue;
+            };
+            let gf = Gf2::new(&irr);
+            assert_eq!(gf.inv(0), 0);
+            assert_eq!(gf.inv(1), 1);
+            for _ in 0..50 {
+                let a = xorshift(&mut s) & gf.mask;
+                if a == 0 {
+                    continue;
+                }
+                assert_eq!(gf.mul(a, gf.inv(a)), 1, "n = {n}, a = {a:#x}");
+            }
+        }
     }
 
     /// The one-word field must agree with the general implementation —
@@ -1158,112 +1196,122 @@ mod tests {
         let gf = Gf2::new(&irr);
         let mut state = 0x5EED_5EED_5EED_5EEDu64;
         for a in [0u64, 1] {
-        let b = (xorshift(&mut state) & gf.mask) | 2; // b ∉ {0, 1}
-        // The curve coefficient a₂ does not enter S₃ or S₄; both values
-        // are checked so that stays a fact rather than an assumption.
-        let curve = BinaryCurve {
-            m: n,
-            irreducible: irr.clone(),
-            a: gf.to_element(a),
-            b: gf.to_element(b),
-            generator: BinaryPoint::Infinity,
-            order: BigUint::from(1u32),
-            cofactor: BigUint::from(1u32),
-        };
-        let fast = FastCurve::new(&curve).unwrap();
-        let random_point = |state: &mut u64| loop {
-            let x = xorshift(state) & gf.mask;
-            if x == 0 {
-                continue;
-            }
-            let pts = points_with_x(&curve, &gf.to_element(x));
-            if let Some(p) = pts.first() {
-                return fast.lift(p);
-            }
-        };
+            let b = (xorshift(&mut state) & gf.mask) | 2; // b ∉ {0, 1}
+                                                          // The curve coefficient a₂ does not enter S₃ or S₄; both values
+                                                          // are checked so that stays a fact rather than an assumption.
+            let curve = BinaryCurve {
+                m: n,
+                irreducible: irr.clone(),
+                a: gf.to_element(a),
+                b: gf.to_element(b),
+                generator: BinaryPoint::Infinity,
+                order: BigUint::from(1u32),
+                cofactor: BigUint::from(1u32),
+            };
+            let fast = FastCurve::new(&curve).unwrap();
+            let random_point = |state: &mut u64| loop {
+                let x = xorshift(state) & gf.mask;
+                if x == 0 {
+                    continue;
+                }
+                let pts = points_with_x(&curve, &gf.to_element(x));
+                if let Some(p) = pts.first() {
+                    return fast.lift(p);
+                }
+            };
 
-        // S₄ vanishes on genuine sums …
-        for _ in 0..50 {
-            let p1 = random_point(&mut state);
-            let p2 = random_point(&mut state);
-            let p3 = random_point(&mut state);
-            let r = fast.add(fast.add(p1, p2), p3);
-            if r.infinity {
-                continue;
+            // S₄ vanishes on genuine sums …
+            for _ in 0..50 {
+                let p1 = random_point(&mut state);
+                let p2 = random_point(&mut state);
+                let p3 = random_point(&mut state);
+                let r = fast.add(fast.add(p1, p2), p3);
+                if r.infinity {
+                    continue;
+                }
+                assert_eq!(
+                    eval_s4_general(p1.x, p2.x, p3.x, r.x, b, &gf),
+                    0,
+                    "S₄ must vanish on a point sum"
+                );
             }
-            assert_eq!(
-                eval_s4_general(p1.x, p2.x, p3.x, r.x, b, &gf),
-                0,
-                "S₄ must vanish on a point sum"
-            );
-        }
-        // … and not on random quadruples.
-        let nonzero = (0..50)
-            .filter(|_| {
-                let xs: Vec<u64> = (0..4).map(|_| xorshift(&mut state) & gf.mask).collect();
-                eval_s4_general(xs[0], xs[1], xs[2], xs[3], b, &gf) != 0
-            })
-            .count();
-        assert!(nonzero > 40, "S₄ vanished on {} of 50 random quadruples", 50 - nonzero);
-
-        // A random 5-dimensional subspace, a planted sum, a found witness.
-        let basis: Vec<u64> = loop {
-            let cand: Vec<u64> = (0..5).map(|_| xorshift(&mut state) & gf.mask).collect();
-            let mut span = std::collections::HashSet::new();
-            for idx in 0..32u64 {
-                let v = (0..5).filter(|j| (idx >> j) & 1 == 1).fold(0u64, |a, j| a ^ cand[j]);
-                span.insert(v);
-            }
-            if span.len() == 32 {
-                break cand;
-            }
-        };
-        let oracle = SubspaceOracle::new(&basis, b, &gf);
-        let base_points: Vec<crate::cryptanalysis::koblitz_fast::FastPoint> = oracle
-            .span
-            .iter()
-            .filter(|&&x| x != 0)
-            .flat_map(|&x| points_with_x(&curve, &gf.to_element(x)))
-            .map(|p| fast.lift(&p))
-            .collect();
-        assert!(base_points.len() >= 6, "subspace has too few points");
-        let mut planted = 0;
-        for _ in 0..20 {
-            let pick = |state: &mut u64| base_points[(xorshift(state) % base_points.len() as u64) as usize];
-            let (p1, p2, p3) = (pick(&mut state), pick(&mut state), pick(&mut state));
-            let r = fast.add(fast.add(p1, p2), p3);
-            if r.infinity {
-                continue;
-            }
-            let (found, _) = oracle.decompose(r.x, &gf);
-            let [a, bb, c] = found.expect("a planted sum must be found");
-            assert!(oracle.contains(a, &gf) && oracle.contains(bb, &gf) && oracle.contains(c, &gf));
-            assert_eq!(eval_s4_general(a, bb, c, r.x, b, &gf), 0);
-            // Lift: some choice of signs sums to R or −R.
-            let lifts: Vec<Vec<crate::cryptanalysis::koblitz_fast::FastPoint>> = [a, bb, c]
-                .iter()
-                .map(|&x| {
-                    points_with_x(&curve, &gf.to_element(x))
-                        .iter()
-                        .map(|p| fast.lift(p))
-                        .collect()
+            // … and not on random quadruples.
+            let nonzero = (0..50)
+                .filter(|_| {
+                    let xs: Vec<u64> = (0..4).map(|_| xorshift(&mut state) & gf.mask).collect();
+                    eval_s4_general(xs[0], xs[1], xs[2], xs[3], b, &gf) != 0
                 })
+                .count();
+            assert!(
+                nonzero > 40,
+                "S₄ vanished on {} of 50 random quadruples",
+                50 - nonzero
+            );
+
+            // A random 5-dimensional subspace, a planted sum, a found witness.
+            let basis: Vec<u64> = loop {
+                let cand: Vec<u64> = (0..5).map(|_| xorshift(&mut state) & gf.mask).collect();
+                let mut span = std::collections::HashSet::new();
+                for idx in 0..32u64 {
+                    let v = (0..5)
+                        .filter(|j| (idx >> j) & 1 == 1)
+                        .fold(0u64, |a, j| a ^ cand[j]);
+                    span.insert(v);
+                }
+                if span.len() == 32 {
+                    break cand;
+                }
+            };
+            let oracle = SubspaceOracle::new(&basis, b, &gf);
+            let base_points: Vec<crate::cryptanalysis::koblitz_fast::FastPoint> = oracle
+                .span
+                .iter()
+                .filter(|&&x| x != 0)
+                .flat_map(|&x| points_with_x(&curve, &gf.to_element(x)))
+                .map(|p| fast.lift(&p))
                 .collect();
-            let mut ok = false;
-            for q1 in &lifts[0] {
-                for q2 in &lifts[1] {
-                    for q3 in &lifts[2] {
-                        let s = fast.add(fast.add(*q1, *q2), *q3);
-                        if s == r || s == fast.neg(r) {
-                            ok = true;
+            assert!(base_points.len() >= 6, "subspace has too few points");
+            let mut planted = 0;
+            for _ in 0..20 {
+                let pick = |state: &mut u64| {
+                    base_points[(xorshift(state) % base_points.len() as u64) as usize]
+                };
+                let (p1, p2, p3) = (pick(&mut state), pick(&mut state), pick(&mut state));
+                let r = fast.add(fast.add(p1, p2), p3);
+                if r.infinity {
+                    continue;
+                }
+                let (found, _) = oracle.decompose(r.x, &gf);
+                let [a, bb, c] = found.expect("a planted sum must be found");
+                assert!(
+                    oracle.contains(a, &gf) && oracle.contains(bb, &gf) && oracle.contains(c, &gf)
+                );
+                assert_eq!(eval_s4_general(a, bb, c, r.x, b, &gf), 0);
+                // Lift: some choice of signs sums to R or −R.
+                let lifts: Vec<Vec<crate::cryptanalysis::koblitz_fast::FastPoint>> = [a, bb, c]
+                    .iter()
+                    .map(|&x| {
+                        points_with_x(&curve, &gf.to_element(x))
+                            .iter()
+                            .map(|p| fast.lift(p))
+                            .collect()
+                    })
+                    .collect();
+                let mut ok = false;
+                for q1 in &lifts[0] {
+                    for q2 in &lifts[1] {
+                        for q3 in &lifts[2] {
+                            let s = fast.add(fast.add(*q1, *q2), *q3);
+                            if s == r || s == fast.neg(r) {
+                                ok = true;
+                            }
                         }
                     }
                 }
+                assert!(ok, "witness abscissae do not lift to a decomposition");
+                planted += 1;
             }
-            assert!(ok, "witness abscissae do not lift to a decomposition");
-            planted += 1;
-        }
-        assert!(planted >= 10);
+            assert!(planted >= 10);
         }
     }
 
