@@ -175,25 +175,30 @@ pub fn build_decomposition_system_reusing(
     Some(template.instantiate(x_r))
 }
 
-/// Offline experiment only. Caller must enforce a process timeout/RSS budget;
-/// the existing Buchberger engine has no interrupt hook. The 16-variable cap
-/// prevents accidentally applying this toy experiment to production fields.
-pub fn parameter_basis_cached(
-    template: &DecompositionTemplate,
-    cache: &mut algebra_cache::AlgebraCache,
-) -> Option<Vec<F2BoolPoly>> {
-    let total = template.n_vars + template.n as usize;
-    if total > 16 {
-        return None;
-    }
-    let key = serde_json::to_vec(template).ok()?;
-    cache.memoize(Layer::Parameterized, &key, || {
-        Some(super::pq_groebner_f2::groebner_basis_f2(
-            template.parameterized_generators()?,
-            total,
-        ))
-    })
-}
+// There is deliberately no cache for a Gröbner basis of
+// `parameterized_generators()`.  `parameter_basis_cached` held one, under
+// `Layer::Parameterized`, until it was measured on every template its
+// 16-variable cap admitted (n = 3, 4; m = 2, 3; every ell and b = 1..3; 24
+// templates, 288 targets):
+//
+//   * computing the basis once cost 1.5x to 821x more operations than
+//     solving EVERY target in the field from scratch.  A cache of the 2^n
+//     answers dominates a cache of the basis, and no reuse pattern can
+//     amortise a basis that costs more than everything it could replace;
+//   * completing from the specialized basis was cheaper than solving from
+//     scratch in 17 of 24 templates and dearer in 7; where it was cheaper
+//     the systems cost 24 to 650 operations to begin with;
+//   * the specialization stayed a Gröbner basis for 100% of targets at
+//     ell = 1, 85% at ell = 2 and 47% at ell = 3.  Completing from it is
+//     correct either way, since it generates the right ideal; genericity
+//     only decides the cost.
+//
+// The 2026-09-14 experiment reached the same verdict on wall time
+// (research/polynomial_reuse_20260914/RESULTS.md: "failed its promotion
+// criterion"), on an engine that had not yet closed under the field
+// equations and so did less work than a correct one.  `parameterized_generators`
+// and `specialize_parameter_basis` remain: they are exact, cheap, and that
+// experiment's benchmark reproduces through them.
 
 #[cfg(test)]
 mod tests {
@@ -252,38 +257,37 @@ mod tests {
         );
     }
 
-    /// The test below compares zero sets, which a generating set with the
-    /// right ideal passes whether or not it is a Gröbner basis.  This one
-    /// asks for the basis.  `b = 1` is the Koblitz coefficient, and it is
-    /// the case the engine left unclosed before it paired basis elements
-    /// with the field equations: 17 standard monomials against 13 points.
+    /// Specializing a Gröbner basis of the parametric system gives a
+    /// generating set of the target's ideal, generic target or not, so
+    /// completing it must land on the target's own reduced basis: reduced
+    /// Gröbner bases are unique.  Zero sets alone cannot show that — a
+    /// generating set with the right ideal has the right zero set whether or
+    /// not anything was closed — so this compares the bases.  `b = 1` is
+    /// the Koblitz coefficient, where the engine used to stop short.
     #[test]
-    fn cached_parameter_basis_is_a_boolean_groebner_basis() {
-        use super::super::pq_groebner_f2::is_boolean_groebner_basis;
+    fn specialized_parameter_basis_completes_to_the_targets_basis() {
+        use super::super::pq_groebner_f2::{groebner_basis_f2, is_boolean_groebner_basis};
         for b in 1..=3 {
             let t = DecompositionTemplate::build(&[fe(1), fe(2)], &fe(b), 2, &field()).unwrap();
-            let mut cache = algebra_cache::AlgebraCache::local(1024 * 1024);
-            let g = parameter_basis_cached(&t, &mut cache).unwrap();
+            let total = t.n_vars + t.n as usize;
+            let g = groebner_basis_f2(t.parameterized_generators().unwrap(), total);
             assert!(
                 is_boolean_groebner_basis(&g),
-                "b = {b}: cached basis is not closed"
+                "b = {b}: parametric basis not closed"
             );
-        }
-    }
-    #[test]
-    fn cached_parameter_basis_preserves_all_boolean_fibers() {
-        let t = DecompositionTemplate::build(&[fe(1), fe(2)], &fe(1), 2, &field()).unwrap();
-        let mut cache = algebra_cache::AlgebraCache::local(1024 * 1024);
-        let g = parameter_basis_cached(&t, &mut cache).unwrap();
-        assert_eq!(g, parameter_basis_cached(&t, &mut cache).unwrap());
-        assert_eq!(cache.stats[2].local_hits, 1);
-        for r in 0..8 {
-            let specialized = t.specialize_parameter_basis(&g, r);
-            let original = t.instantiate(&fe(r));
-            for x in 0..16 {
+            for r in 0..8 {
+                let specialized = t.specialize_parameter_basis(&g, r);
+                let original = t.instantiate(&fe(r)).equations;
+                for x in 0..16 {
+                    assert_eq!(
+                        specialized.iter().all(|p| p.eval(x) == 0),
+                        original.iter().all(|p| p.eval(x) == 0)
+                    );
+                }
                 assert_eq!(
-                    specialized.iter().all(|p| p.eval(x) == 0),
-                    original.equations.iter().all(|p| p.eval(x) == 0)
+                    groebner_basis_f2(specialized, t.n_vars),
+                    groebner_basis_f2(original, t.n_vars),
+                    "b = {b}, r = {r}"
                 );
             }
         }
