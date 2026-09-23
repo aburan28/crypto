@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean matrix construction on 12,20,28,36 variables. No production solver integration, curve inputs, targets, scalar recovery, relation collection or rho campaigns.",
+  "variables": [
+    12,
+    20,
+    28,
+    36
+  ],
+  "matrix_degree": 3,
+  "discovery_seeds": [
+    17,
+    937
+  ],
+  "holdout_seeds": [
+    20260928,
+    155921
+  ],
+  "families": [
+    "quadratic",
+    "linear_drop",
+    "restricted_cycle"
+  ],
+  "batches": [
+    1,
+    8,
+    32
+  ],
+  "repetitions": 20,
+  "variants": [
+    "sorted",
+    "binary",
+    "ranked",
+    "sparse_rank"
+  ],
+  "bridge_variants": [
+    "sorted",
+    "binary",
+    "ranked",
+    "sparse_rank",
+    "dense"
+  ],
+  "bridge_n": 12,
+  "limits": {
+    "variables": 36,
+    "matrix_degree": 3,
+    "generators": 12,
+    "terms_per_generator": 32,
+    "rows": 4096,
+    "columns": 8192,
+    "batch": 32,
+    "worker_seconds": 30,
+    "campaign_seconds": 300,
+    "dense_max_n": 12
+  },
+  "fixture_generators": 8,
+  "fixtures": "Each generator has 16 distinct quadratic support monomials, a constant and the first min(n,10) linear terms. Every input samples its coefficients anew and forces a quadratic term except explicit first-generator degree changes. All inputs in a batch must be distinct. Fixtures depend only on the supplied seed; no performance screening.",
+  "families_contract": {
+    "quadratic": "All generators remain quadratic; all variables eligible for multipliers.",
+    "linear_drop": "All variables eligible; first generator cycles quadratic, linear, quadratic, zero.",
+    "restricted_cycle": "Exactly eight evenly spaced variables eligible for multipliers; first generator cycles quadratic, linear, constant, zero."
+  },
+  "candidate": "Sparse intermediate rows with the same combinatorial ranker. Reuse one ambient scratch bitmap and marked/touched-word lists per application. Each intermediate row retains only nonzero (word index,word value) pairs; scratch and marks reset after every product even when cancellation empties a word. Build the final dense matrix only after actual-column compaction. Cold setup, sparse allocations, final dense output and validation are all charged.",
+  "controls": {
+    "sorted": "Port of direct sort/parity/compact constructor to u64 monomials, matching current caps.",
+    "binary": "Same packed rows and occupancy compaction as candidate, with binary search in the sorted ambient basis. Strong scalable lookup control.",
+    "dense": "Same packed constructor with a 2^n direct lookup; executed only at the n=12 bridge. Larger dimensions are NOT_EXECUTED by design, not failures or inferred times.",
+    "ranked": "Initial combinatorially indexed dense-intermediate constructor, freshly rerun in this binary."
+  },
+  "correctness": "Independent recursive multiplier enumeration, set parity and column-major incidence oracle. Exhaustive rank agreement with numeric enumeration through n=12; independent combination enumeration at n=20/28/36. All 6144 n=3 coefficient/degree/active-mask cases checked across all constructors, plus context changes, invalid inputs, current caps and a full-width constant-generator resource refusal. Sparse arm joins all exhaustive and larger fixture checks; an eighth test exercises word cancellation/reactivation, scratch reset between rows and full-support compaction.",
+  "accounting": "Cold setup, every application, intermediate and final allocation, support compaction, exact validation and destruction. Fixtures/oracles are common supplied-input costs outside arm timings, inside process receipts. Twenty repetitions rotate four arms, or five at the bridge. All raw samples retained.",
+  "memory": "Retained Rust structure and Vec capacities, excluding allocator metadata. Separate output payload, total rows/columns and lookup-entry count. Fresh-worker peak RSS includes all variants and reference matrices and is not candidate-specific. Ranked removes only the exponential lookup, not the ambient degree<=D basis or dense-row footprint.",
+  "performance_gate": "At n=20,28,36, batch32, every family: sparse_rank must have a 95 percent paired-bootstrap lower bound above 2.0 against sorted, and above 1.05 against both binary and ranked. All 27 gates required; bridge at n=12 reported separately. No post-holdout tuning.",
+  "classification": "Finite generic construction engineering diagnostic. Full solver time, operation calibration, end-to-end IC cost and rho ratio remain null. Goal of dramatic complete-algorithm improvement is not proven by this stage experiment.",
+  "enable_sparse": true,
+  "candidate_arm": "sparse_rank",
+  "comparison_controls": [
+    "sorted",
+    "binary",
+    "ranked"
+  ],
+  "predecessor": "run_01 is retained unchanged: rank indexing removed the exponential lookup but the 18-gate dramatic scaling requirement failed. run_02 tests sparse intermediates on new holdouts with fresh same-binary controls.",
+  "predecessor_worker_sha256": "d252873fe1e2f0ea0ebec4afc4dfc7b8bcf723f9e63dda255b29f7241182687f"
+}

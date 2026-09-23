@@ -2178,6 +2178,295 @@ do not care how `M_{e₁}` was reached.  There is no open lever on `C₃` left i
 this design, and none of the ones measured was worth more than its registration
 said.
 
+### 11.15 Close-out: what §11 established, and what would count now
+
+§11.14 closed the last lever this section had listed.  This is the ledger of
+all of them, in the note's unit, and the one question left open by the
+arithmetic rather than by a missing build.
+
+**The ledger.**  Every row was measured end to end and every run recovered its
+planted logarithm.  The class column is the one each section recorded; §11.4
+and §11.7 predate the practice and recorded none, so those rows say what
+moved instead of being classed after the fact.
+
+| § | lever | what moved | class, as recorded | result |
+|---|---|---|---|---|
+| 11.4 | `O(1)` Gröbner solve replaces the loop over the base | relation phase `n^{0.69} → n^{1/3}` | — | `C₃ = 4.82·10⁶`, flat in `n`; dearer than the loop below `n ≈ 2^{34}` |
+| 11.5 | honest multiplication count | the count, not the algorithm | accounting | `C₃ = 3.23·10⁶` |
+| 11.5 | echelon form with back-substitution | `C₃` | engineering | `1.53·10⁶` |
+| 11.6 | Macaulay's row selection | `C₃` | engineering | `0.879·10⁶` |
+| 11.8 | no retries once the border is unreachable | `C₃` | engineering | `0.876·10⁶` |
+| 11.7 | Wiedemann with filtering | linear algebra `n^{0.85} → n^{0.68}` | engineering | plain method bottoms at `≈ 200×` rho near `2^{50}`, then rises |
+| 11.7 | double large primes, `\|F'\| = \|F\|^{2/3}` | total exponent `0.32 → 0.44`, *below* rho's `1/2` | — | `1,989×` rho at `2^{33.1}` (`3.8×` the plain method's work), closing as `n^{-1/18}` |
+| 11.9 | Joux–Vitse: decompose into `k − 1 = 2` points | `C₃ → 1,513`, `580×`; residuals `n^{1/3} → n^{2/3}` | advance below `2^{28.5}`, relabelling above | `1,037×` rho at `2^{33.1}`, exponent worse |
+| 11.11 | merge-level cap on the large-prime eliminator | solve exponent `−0.045 ± 0.017`, merge `+0.043 ± 0.030` | engineering, negative | end to end `+0.051 ± 0.031` **worse** |
+| 11.14 | border basis (demand-driven elimination) | `C₃` by at most `0.19 %` | accounting (ceiling) + engineering | `1.0009×` pooled; off by default |
+
+**The verdict, restated with nothing left to try at `k = 3`.**  On
+`E(F_{p³})` the best variant measured is the plain method at `528×` rho
+(`2^{33.1}`).  Its linear algebra grows as `n^{0.68}`, faster than rho's
+`n^{1/2}`, so it bottoms near `200×` rho around `2^{50}` and loses ground
+after.  The double-large-prime variant is the only one with an exponent below
+rho's — `n^{0.424 ± 0.016}` end to end over six seeds, against the theorem's
+`4/9` — and it closes the measured `1,989×` at `n^{-1/18}`: past `2^{230}`,
+extrapolated on those two exponents.  The four constant levers since §11.4
+bought `5.5×` on `C₃`, and §11.12 showed before the last of them that no `C₃`
+lever can move an exponent, because `C₃` is flat in `n`.
+
+**What would count now is a change in the closing rate, not in a constant.**
+Two exponents set it: the relation phase's, and the linear algebra's over
+`|F| ∝ n^{1/k}` unknowns.  At `k = 3` the linear algebra is the obstacle —
+`|F|² ∝ n^{2/3}` for any sparse solver — and the large-prime cure trades it
+for a residual count that closes only at `n^{-1/18}`.  **The one structural
+lever left is the extension degree.**  Derived, not measured: at `k = 4`,
+`|F| ∝ n^{1/4}`, so the linear algebra is `|F|² ∝ n^{1/2}` — *the same
+exponent as rho* — and the relation phase is `k!·|F|·C₄ ∝ n^{1/4}`.  The plain
+method's `S / rho` then tends to a constant instead of growing without bound
+as it does at `k = 3`.  That constant is `c_LA / c_rho`, the sparse solver's
+cost against rho's, and it does **not** depend on the solve: it follows from
+§11.7's measured Wiedemann counters and the cost of `F_{p⁴}` arithmetic, and
+§11.16 derives it.  `C₄`, the cost of one `S₅` solve over `F_{p⁴}`, which
+nothing in this module has measured, sets only *where* the relation phase
+stops dominating.
+
+**What does not count, and is not worth building here:**
+
+- any lever on `C₃`, `C₄` or the linear-algebra constant at fixed `k`: flat in
+  `n`, `engineering` by construction (§11.12);
+- Mourrain's full border-basis iteration for the residuals whose staircase is
+  not the generic one: `0–7` residuals per run of thousands, already solved
+  correctly by the fallback oracle, and unable to move cost (§11.14);
+- a larger merge cap, a different large-prime budget, or a different small
+  base at `k = 3`: §11.11 measured the family and the method got worse.
+
+### 11.16 Pre-registration: `k = 4`, derived before anything is built
+
+**Written before any `F_{p⁴}` code exists.**  §11.15 named the extension degree
+as the one lever that changes the closing rate.  Most of what decides the
+`k = 4` question can be derived from counters this note has already measured,
+so it is derived here first — as §11.12 did for the border basis — and the
+build is registered only for the part the derivation cannot reach.
+Everything below is derived or extrapolated, and says which.
+
+**The setting.**  `E` over `F_{p⁴}`, base `F = {P : x(P) ∈ F_p}` with
+`|F| ≈ p/2`, group order `n ≈ p⁴`.  A residual decomposes as a signed sum of
+four base points; the Weil restriction of the symmetrised `S₅` gives four
+equations over `F_p` in `e₁, …, e₄`, each of total degree `≤ 8`, with
+`8⁴ = 2^{k(k−1)} = 4,096` solutions — against `4³ = 64` at `k = 3`, which §11.4
+measured the solver attaining.
+
+**Inputs, and where each comes from.**
+
+| input | value | source |
+|---|---:|---|
+| residuals per relation | `k! = 24` | the count of §11.3; `≈ 6` at `k = 3` measured `0.15–0.18` against `1/6` |
+| `F_p` multiplications per `F_{p⁴}` multiplication | `19` | schoolbook with `t⁴ = c`, the convention behind §11.1's `11` at `k = 3` |
+| per `F_{p⁴}` inversion | `40` | norm to `F_{p²}`: `24` multiplications plus the `F_p` inversion, charged `16` as `Fp3::inv`'s count of `30` implies (it performs `14`) |
+| per affine addition, `c_add` | **`97`** | one inversion and three multiplications, the decomposition that gives exactly `63` at `k = 3` |
+| per multiplication mod `n` | `16` | schoolbook limbs, as §11.7 charges `9` for `n ≈ p³` |
+| Wiedemann, per unknown² | `(5 + 3w) = 20` at row weight `w = k + 1 = 5` | §11.7 measured `17.0·N²` at `w = 4` at all four sizes; the split `2N` dot products, `3wN²` mat-vecs, `≈ 2N²` Berlekamp–Massey reproduces the `17` |
+| unknowns after filtering, `φ` | `0.73–1.0` of `\|F\|` | `0.71–0.76` measured at `k = 3`; `1.0` if filtering finds nothing to drop |
+| rho | `S ≈ 1.3` | the reference `AGENTS.md` fixes for this thread's unit |
+
+**1. The asymptotic constant: `r∞ = c_LA / c_rho ≈ 0.34–0.63`.**  With
+`N = φp/2` unknowns, the linear algebra costs `20·16·(φp/2)² = 80φ² p²` `F_p`
+multiplications and rho `1.3 · p² · 97 = 126 p²`, both `∝ n^{1/2}`.  Their ratio
+is `r∞ = 0.634 φ²`: **`0.34`** at `k = 3`'s filtering rate, `0.63` with none.
+Below one either way, so the plain `k = 4` method, unlike `k = 3`'s, does have
+a regime where it beats rho — by a factor between `1.6` and `3`, never more,
+because the linear algebra it would converge to is itself `∝ n^{1/2}`.  This
+number does not depend on the solve at all.
+
+**2. Where the relation phase hands over.**  `24|F| = 12p` residuals at `C₄`
+each put the relation phase at `12p·C₄ / 126p² = 0.095·C₄/p` of rho, so
+
+```text
+S / rho  =  0.095 · C₄ / p  +  r∞        crossover:  p* = 0.095 · C₄ / (1 − r∞)
+```
+
+**3. A floor on `C₄`, from this note's own solver.**  §11.4–11.6's design reads
+the eigenvalues off the characteristic polynomial of a `D × D` multiplication
+matrix.  That step alone measured `272,392 = 1.039·64³` per solve at `k = 3`
+(`experiments/23_gaudry_lazy_elim_baseline.json`, `p = 271`, seed 1).  At
+`D = 4,096` it is **`C₄ ≥ 7.1·10¹⁰`** before any Macaulay elimination — whose
+matrix at the regularity degree `4·7 + 1 = 29` has `C(33, 4) = 40,920` columns
+against `k = 3`'s `286` — or any normal form.  At `k = 3` the characteristic
+polynomial was `31 %` of `C₃`.
+
+**4. The crossover the floor implies — extrapolated on the exponents
+`n^{1/4}` (relations) and `n^{1/2}` (linear algebra and rho).**
+
+| `C₄` | `r∞ = 0.34` (`φ = 0.73`) | `r∞ = 0.63` (`φ = 1`) |
+|---|---:|---:|
+| floor, `7.1·10¹⁰` | **`n* ≈ 2^{133}`** | `2^{136.5}` |
+| `3×` the floor | `2^{139}` | `2^{143}` |
+| `10×` the floor | `2^{146}` | `2^{150}` |
+
+At the smallest size this note runs, `p = 271` (`n ≈ 2^{32}`), the formula puts
+`k = 4` at **`2.5·10⁷×` rho**, against `k = 3`'s `528×` at `2^{33}`.  Past
+`n*` it would sit at `0.34–0.63×` rho; before it, the relation phase decides
+everything.  Against `k = 3`'s double-large-prime crossover past `2^{230}`,
+`k = 4` hands over about a hundred doublings sooner.  That is a statement
+about exponents already derived, not a measurement.
+
+**What a measurement can and cannot change.**  A measured `C₄` in this design
+cannot fall below the floor, so it can only move `n*` **later** — by `4 log₂ m`
+bits for a `C₄` that is `m×` the floor.  It cannot touch `r∞`.  What is not in
+this design is not bounded by it: an `F₄` / sparse-FGLM solver, or the
+symmetries Faugère, Gaudry, Huot and Renault use on curves with rational
+torsion, lower `D` or the `D³`, and in this model a factor `f` off `C₄` moves
+`n*` about `4 log₂ f` bits earlier.  Those are levers on a constant, and would
+be registered as `engineering` if built.
+
+**Two variants the derivation settles without a build.**
+
+- **Joux–Vitse, decompositions into `k − 1 = 3` points.**  A residual is a
+  three-point sum about `1/(6p)` of the time, so `≈ 3p²` residuals —
+  `∝ n^{1/2}`, rho's exponent again — at `C′` each, where `C′` is the
+  overdetermined `S₄` solve.  `S / rho` tends to `3C′/126 + r∞`: below one only
+  if `C′ < 28` `F_p` multiplications (`15` if `φ = 1`).  `k = 3`'s two-point
+  solve already costs `1,513`, so at any `C′` of that order this variant sits
+  near **`36×` rho at every size**.  The solve cost enters its asymptote; it
+  does not enter the full-decomposition variant's.
+- **Double large primes.**  They trade the `p²` linear algebra for more
+  residuals, `Õ(p^{3/2})` of them.  The extra residuals cost a factor
+  `∝ p^{1/2}` of `C₄` each and save linear algebra `∝ p²`, so the variant beats
+  the plain method only once `p^{1/2}` outgrows `C₄` up to constants — `p` of
+  order `C₄²`, far past `n*`.  It is the asymptote (`n^{3/8}`, closing on rho
+  as `n^{-1/8}`), not the crossover.
+
+**The build this leaves.**  Only `C₄` — the one measured input the crossover
+depends on, and the check that the `S₅` system behaves generically
+(`D = 4,096`, regularity `29`).  Registered target: `C₄` per residual, for a
+full solve in §11.4–11.6's design, at `p = 271` on at least three residuals,
+with **every** output cross-checked against a meet-in-the-middle decomposition
+oracle (zero mismatches), counted under this note's accounting.  Prediction:
+`C₄ ≥ 7.1·10¹⁰`, so `n* ≥ 2^{133}`.  Inadmissible: a special curve family or
+symmetry without registering it as a separate lever; changing the
+multiplication charges above; quoting `n*` as anything but an extrapolation.
+Abandoned, with whatever bound was reached recorded, if the degree-`29` solve
+cannot run in this container (`15 GB`; a dense `36,824 × 40,920` matrix is
+`6 GB` in `u32` and `12 GB` in `u64`) or takes more than a few hours a
+residual.
+
+**What it costs.**  None of the `k = 3` code carries over directly: `Fp3`,
+`E3`, the symbolic `S₄` and the solver are all hard-wired to three.  The build
+is `F_{p⁴}` arithmetic and a curve generator; `S₅` via
+`Res_Y(S₄(x₁, x₂, x₃, Y), S₃(x₄, x₅, Y))`, symmetrised into `e₁, …, e₄`, which
+is `≤ 495 · 9` coefficients; its Weil restriction; a four-variable Macaulay
+solve at degree `29` with row selection, normal forms and a `4,096`-dimensional
+eigen-solve; and a meet-in-the-middle oracle to check it.  That is days of
+work, and runs of minutes to hours per residual.  Its payoff is one number
+that can only confirm the floor or move `n*` later.
+
+### 11.17 `C₄`, measured: `17×` the floor, and the crossover moves to `2^{150}`
+
+**Runner:** `cargo run --release --example gaudry_quartic_c4 -- --p 269 --seed 1
+--residuals 4 --json …`, and `-- --generic 2,3,4,5,6,7` for the scaling panel.
+**Frozen:** `experiments/24_gaudry_quartic_c4.json` (and `.log`, with the phase
+progress), `experiments/24_gaudry_quartic_generic.json` (and `.log`).
+**Summary:** `python3 scripts/summarize_quartic_c4.py <c4> <generic>`
+**Source:** `src/cryptanalysis/gaudry_quartic.rs`, `examples/gaudry_quartic_c4.rs`.
+**Registered in advance:** §11.16, pushed (`4d4f4cb8`) before any `F_{p⁴}` code
+existed (`220b8883`).
+
+**One deviation from the registration.**  §11.16 named `p = 271`.  For
+`p ≡ 3 (mod 4)` every binomial `t⁴ − c` is reducible, so `F_p[t]/(t⁴ − c)` is not
+a field there; the run uses `p = 269`, the nearest prime `≡ 1 (mod 4)`.  `C₄`
+depends on `p` only through root finding, `10⁻⁶` of it.
+
+**What was built** (`gaudry_quartic`): `F_{p⁴}` under `Fp3`'s counting
+convention; a curve with coefficients outside `F_{p²}`; `S₅` evaluated
+numerically as `Res_Y(S₃(x₁, x₂, Y), S₄(x₃, x₄, x₅, Y))`; the symmetrised `S₅` by
+interpolation — `495` `e`-monomials by `9` powers of `x_R`, solved once per curve
+(`1.2·10⁹` multiplications, outside `C₄` as `k = 3`'s precomputation is) and
+checked against fresh resultant evaluations; and the §11.4–11.6 solver in four
+unknowns — Macaulay matrix at degree `29` with Macaulay's row selection, forward
+elimination by leading column, normal forms memoised right to left, `M_{e₁}`,
+and the characteristic polynomial, roots and eigenvectors through the same
+counted routines as `k = 3`.  A meet-in-the-middle oracle over pairs of base
+points checks every decomposition.  Tests: `S₅` vanishes on four-point sums and
+is symmetric in its first four arguments; the solver recovers planted roots of
+random quadrics and cubics in four unknowns at the Bézout dimension `d⁴`.
+
+**1. The inputs §11.16 derived hold.**  `F_p` multiplications per `F_{p⁴}`
+addition measure **`97.0`**, the derived figure.  The quotient has dimension
+**`4,096`** on every residual at the Macaulay bound `29`: the `S₅` system is as
+generic as §11.16 assumed.  The matrix is `41,780 × 40,920` (`3.4 GB` as `u16`),
+rank `36,824`.
+
+**2. `C₄`.**
+
+| residual | `C₄` | elimination | normal forms | charpoly | eigenvectors | rational eigenvalues | solver = oracle | wall |
+|---|---:|---:|---:|---:|---:|---:|---|---:|
+| 0, constructed | `1.227·10¹²` | `5.825·10¹¹` | `5.461·10¹¹` | `7.06·10¹⁰` | `2.77·10¹⁰` | 2 | `{41, 122, 180, 226}` = planted | `1,625 s` |
+| 1 | `1.213·10¹²` | `5.825·10¹¹` | `5.460·10¹¹` | `7.06·10¹⁰` | `1.39·10¹⁰` | 1 | `∅ = ∅` | `1,460 s` |
+| 2 | `1.213·10¹²` | `5.825·10¹¹` | `5.461·10¹¹` | `7.06·10¹⁰` | `1.39·10¹⁰` | 1 | `∅ = ∅` | `1,499 s` |
+| 3 | `1.199·10¹²` | `5.825·10¹¹` | `5.460·10¹¹` | `7.06·10¹⁰` | `0` | 0 | `∅ = ∅` | `1,450 s` |
+
+**`C₄ = 1.213·10¹²`, `17.0×` the registered floor.**  The `2.3 %` spread is the
+eigenvector step alone, which scales with the number of rational eigenvalues;
+elimination, normal forms and the characteristic polynomial agree to four
+figures on every residual.  The cross-check agrees on all four, but three of
+those agreements are on the empty set — a residual decomposes about one time in
+`24` — so the constructed residual, whose planted decomposition both the solver
+and the oracle return, is the check that carries weight.
+
+Elimination is `48 %` of `C₄` and the normal forms `45 %`, each alone about `8×`
+the floor.  The characteristic polynomial costs `1.027·D³`, a shade under the
+`1.039` §11.16 carried over from `k = 3`: the generic runs show the coefficient
+drifting down with `D` (`1.063` at `81`, `1.032` at `2,401`), so the floor's own
+component was `1.2 %` high.  It is `6 %` of `C₄`.
+
+**3. The same solver on generic systems predicts it.**  Four random equations of
+degree `d` in four unknowns with a planted root, every root found, every
+quotient at the Bézout dimension:
+
+| `d` | columns | `D = d⁴` | `C` | elimination / normal forms | charpoly / `D³` | wall |
+|---:|---:|---:|---:|---|---:|---:|
+| 2 | 126 | 16 | `4.6·10⁴` | 44 % / 31 % | 1.010 | — |
+| 3 | 715 | 81 | `6.2·10⁶` | 47 % / 41 % | 1.063 | — |
+| 4 | 2,380 | 256 | `2.3·10⁸` | 46 % / 42 % | 1.054 | `1 s` |
+| 5 | 5,985 | 625 | `3.7·10⁹` | 47 % / 44 % | 1.045 | `5 s` |
+| 6 | 12,650 | 1,296 | `3.5·10¹⁰` | 47 % / 44 % | 1.038 | `58 s` |
+| 7 | 23,751 | 2,401 | `2.4·10¹¹` | 47 % / 44 % | 1.032 | `419 s` |
+
+`C ∝ D^{3.11}` over `d = 4 … 7` predicts `1.26·10¹²` at `D = 4,096`, **`4 %`**
+above the `S₅` measurement.  Nothing about the summation polynomial makes this
+system cheaper or dearer than a generic one of its degrees: `C₄` is what a
+Macaulay solve of four octics in four unknowns costs, and `C_k` in this design
+is `≈ D^{3.1}` with `D = 2^{k(k−1)}`.
+
+**4. The crossover, extrapolated** on §11.16's formula
+`p* = 0.095·C₄ / (1 − r∞)` and the exponents `n^{1/4}` and `n^{1/2}`:
+
+| `C₄` | `r∞ = 0.34` | `r∞ = 0.63` |
+|---|---:|---:|
+| registered floor, `7.1·10¹⁰` | ~~`2^{133}`~~ | ~~`2^{136.5}`~~ |
+| **measured, `1.21·10¹²`** | **`n* ≈ 2^{149.4}`** | **`2^{152.8}`** |
+
+`17×` the floor moves `n*` `4 log₂ 17 ≈ 16` bits later — the only direction the
+registration allowed.  At `p = 269` (`n ≈ 2^{32}`) the relation phase alone
+would be **`4.3·10⁸×` rho**.  Against `k = 3`'s double-large-prime crossover
+past `2^{230}`, the full-decomposition `k = 4` method still hands over about
+**eighty doublings sooner**, and past `n*` it would sit at `0.34–0.63×` rho
+rather than tend to zero.
+
+**Class.**  A stage diagnostic: `C₄` prices one phase, and `n*` extrapolates the
+method from it on derived exponents.  No end-to-end `S` exists for `k = 4`, and
+none is claimed.  Nothing here changes an existing method's cost, so none of
+§3's four classes applies.  §11.16's prediction — `C₄ ≥ 7.1·10¹⁰`,
+`n* ≥ 2^{133}` — is met, and its abandonment condition was not reached: each
+solve took under half an hour in `3.7 GB`.
+
+**What this leaves.**  At `k = 4` the crossover is a question about one
+constant.  Every factor `f` taken off `C₄` moves `n*` about `4 log₂ f` bits
+earlier, and in this design `C₄ ≈ D^{3.1}`, so the levers are the ones that
+shrink `D` or its exponent — `F₄` with sparse FGLM, or the Faugère–Gaudry–Huot–
+Renault symmetries on curves with rational torsion.  Any of them would be
+registered as `engineering`: none changes `r∞`, which caps a plain `k = 4`
+method at `1.6–3×` better than rho however cheap the solve gets.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,
