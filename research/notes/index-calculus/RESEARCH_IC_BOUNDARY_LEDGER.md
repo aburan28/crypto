@@ -4003,6 +4003,13 @@ upper bound, not a margin.  The instruction-count panel
 (`ic-crossover-20260922`) is not affected: an instruction count
 charges rho's canonicalisation like everything else.
 
+*Settled in §19.*  Priced in the batched unit, a canonical step costs
+`2.74` units, so the correction guessed at above is real and large.  But
+a larger error ran the other way: `1.17×` compared 32 targets solved
+together with rho solving one.  Against batch rho at `k = 32` it reads
+`6.51×`, and `6.38×` with rho's step and the index-calculus build both
+priced (§19.5).  Nothing went below one.
+
 ### 18.9 What does not count
 
 - The matched walk's `S` at toy sizes is still partly set-up: `3.6` at
@@ -4148,6 +4155,244 @@ is matched to the problem the figures solve.
 **Abandon** the re-pricing if target 1 fails.  If target 2 fails, the
 batch mode is mis-built, and the page gets the formula's reading,
 marked as a model, instead of a measurement.
+
+### 19.2 What ran
+
+The walk of §18 is now generic over the classes it moves between
+(`RhoClasses`: points, `{P, −P}`, and on a Koblitz curve `{±φ^t(P)}`).
+Its step, look-ahead, cycle escape and cap are one piece of code, shared
+by the single-target walk and the batch.  The single-target walk replays
+all 3,072 runs of eight instances of the frozen §18 evaluation ladder
+exactly — steps, operations and every counter — so §18's numbers stand as
+measured.
+
+- **(a)** `rho_batch_with`, run by `ic rho --batch-koblitz`: the tuned
+  walk on `SignedFrobeniusClasses`.  A point's representative is the
+  conjugate whose abscissa has the least normal-basis rotation, carried
+  there by table-applied Frobenius powers (`FrobeniusPowers`), then the
+  sign with the smaller ordinate.  It is `[±λ^t]P`, which a test checks on
+  every member of the class.  Sixteen jumps `[c_j]G` with full-size `c_j`,
+  distinguished points every `2^{⌊bits(r)/4⌋}` steps, one table for the
+  batch.
+- **(b) and (c)**: `examples/koblitz_reference_prices.rs`, one thread,
+  seven interleaved rounds, every quantity divided by the unit measured in
+  its own round; medians with the range over rounds.
+
+Everything is in `research/ic_rho_koblitz_20260923/`, run from commit
+`3e8dd352` with a clean tree (`provenance.txt`) and seed `0xBA7C4`.  Three
+things ran that §19.1 did not declare, and each is labelled in its file:
+
+- the build price on the base of every other quoted figure, so that no
+  base carries another's price.  One of these, `n = 41, |F| = 16,400`, was
+  added after the first pass and before any analysis;
+- a lone affine addition, to price the canonicalisation in the
+  three-regime ledger's unit;
+- `add_pairwise`, the batched addition a parallel walk actually runs.
+
+### 19.3 (a) Batch rho: the batch law holds — targets 1 and 2 met
+
+| curve | k | batches | S per target (95 % CI) | over k = 1 (95 % CI) | batch law | over floor | own / earlier trail | ok |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|
+| K_0 / GF(2^41) | 1 | 16 | 0.1429 [0.1030, 0.1828] | 1.000 [1.000, 1.000] | 1.000 | 1.032 | 16 / 0 | 16/16 |
+| K_0 / GF(2^41) | 4 | 16 | 0.0742 [0.0664, 0.0819] | 0.519 [0.409, 0.705] | 0.547 | 0.536 | 28 / 36 | 64/64 |
+| K_0 / GF(2^41) | 16 | 16 | 0.0396 [0.0367, 0.0425] | 0.277 [0.220, 0.372] | 0.280 | 0.286 | 40 / 216 | 256/256 |
+| K_0 / GF(2^41) | 32 | 16 | 0.0300 [0.0287, 0.0312] | 0.210 [0.168, 0.280] | 0.199 | 0.216 | 43 / 469 | 512/512 |
+| K_0 / GF(2^53) | 1 | 16 | 0.1052 [0.0682, 0.1422] | 1.000 [1.000, 1.000] | 1.000 | 0.864 | 16 / 0 | 16/16 |
+| K_0 / GF(2^53) | 4 | 16 | 0.0626 [0.0552, 0.0700] | 0.595 [0.435, 0.830] | 0.547 | 0.515 | 27 / 37 | 64/64 |
+| K_0 / GF(2^53) | 16 | 16 | 0.0340 [0.0313, 0.0367] | 0.323 [0.239, 0.447] | 0.280 | 0.279 | 42 / 214 | 256/256 |
+| K_0 / GF(2^53) | 32 | 16 | 0.0252 [0.0240, 0.0263] | 0.239 [0.177, 0.329] | 0.199 | 0.207 | 41 / 471 | 512/512 |
+| K_0 / GF(2^61) | 1 | 8 | 0.1151 [0.0503, 0.1798] | 1.000 [1.000, 1.000] | 1.000 | 1.014 | 8 / 0 | 8/8 |
+| K_0 / GF(2^61) | 32 | 8 | 0.0219 [0.0205, 0.0233] | 0.190 [0.131, 0.320] | 0.199 | 0.193 | 21 / 235 | 256/256 |
+
+- **Target 1 met.**  All 1,960 targets were recovered and verified, and
+  no batch was dropped.
+- **Target 2 met on all three curves.**  Per-target cost at `k = 32` over
+  `k = 1` is `0.210` `[0.168, 0.280]`, `0.239`
+  `[0.177, 0.329]` and `0.190` `[0.131, 0.320]` (batches
+  resampled), against Kuhn–Struik's `0.199` and the declared
+  `[0.09, 0.35]`.  The sizes in between follow the law as well: `0.519`
+  and `0.277` at `n = 41`, where the law gives `0.547` and `0.280`.
+- **Later targets finish on earlier trails.**  At `k = 32`, 469 of 512
+  targets at `n = 41` did.
+- **Fruitless cycles are rare on these classes.**  A Frobenius shift
+  `t ≠ 0` never undoes the jump just taken; only the `t = 0` negation
+  does, and the look-ahead catches it.  Between 0 and 22 short cycles
+  were detected per size, and 4 walks in the whole run reached the cap,
+  all charged.
+- **One target alone** costs `1.03`, `0.86` and `1.01` times its floor,
+  with the wide intervals that sixteen (at `n = 61`, eight) single rho
+  runs carry.  The thread's single-target references were the
+  repository's implemented walk, counted the same way.  They sat at
+  `1.20–1.23`, `1.78` and `1.56` times the same floors.
+
+### 19.4 (b) and (c): the step and the stored pair, priced
+
+A step, in units of one batched addition (`add_many` over 1,024 points):
+
+| curve | unit (ns) | canonical step | Bailey step | add_pairwise | affine add | canonicalisation in affine units |
+|:--|--:|--:|--:|--:|--:|--:|
+| n = 41 | 43.8 | 2.74 [2.59, 2.89] | 1.39 [1.38, 1.54] | 1.06 | 14.8 | 0.117 |
+| n = 53 | 50.6 | 2.83 [2.75, 2.87] | 1.38 [1.36, 1.42] | 0.98 | 18.7 | 0.098 |
+| n = 61 | 54.0 | 2.92 [2.72, 3.04] | 1.41 [1.37, 1.44] | 1.04 | 21.0 | 0.091 |
+
+A stored pair of the folded table, in the same unit:
+
+| base | orbits | stored pairs | units per stored pair | range | declared |
+|:--|--:|--:|--:|--:|:--|
+| n = 41, F = 5,248 | 64 | 170,560 | 4.47 | [3.80, 4.96] | no |
+| n = 41, F = 15,744 | 192 | 1,519,296 | 6.14 | [5.48, 6.76] | yes |
+| n = 41, F = 16,400 | 200 | 1,648,200 | 5.69 | [4.69, 6.95] | no |
+| n = 53, F = 15,264 | 144 | 1,106,640 | 5.87 | [5.23, 6.71] | no |
+| n = 61, F = 6,832 | 56 | 194,712 | 4.96 | [3.80, 6.77] | no |
+| n = 61, F = 9,760 | 80 | 395,280 | 5.18 | [4.70, 5.64] | no |
+| n = 61, F = 12,688 | 104 | 666,120 | 5.56 | [5.34, 5.92] | no |
+| n = 61, F = 18,544 | 152 | 1,418,616 | 5.86 | [5.12, 7.81] | no |
+
+- **A canonical step costs `2.74–2.92` units, not one.**  The table-driven
+  canonicalisation costs more than the addition it follows (`1.74–1.92`
+  units), because the least rotation is a serial scan over `n` rotations.
+- **Bailey et al.'s step costs `1.38–1.41` units**, because that walk
+  never canonicalises.  Its step *count* was not measured here, so any
+  figure priced at its step is a model, and is marked as one.
+- **The unit is fair to rho.**  The batched addition of 1,024 independent
+  walks (`add_pairwise`) costs `0.98–1.06` units.
+- **A stored pair costs `4.5–6.1` units, not one**, and
+  `6.14` `[5.48, 6.76]` on the declared base.  The folded
+  build makes two passes over every row, one to count and one to fill.
+  Each pass computes a batched addition and a canonical key per pair,
+  then scatters the pair into its bucket.  A one-pass build would roughly
+  halve that; it was not measured.
+- **In the three-regime ledger's unit**, a lone affine addition with its
+  own inversion (`14.8–21.0` units here), the canonicalisation costs
+  `0.09–0.12` of an addition.  §18.8 had estimated about 7%.  Those rows
+  are single-target, so they are not re-read here (§19.7).
+
+### 19.5 The re-read — target 3 met
+
+Every 32-target Koblitz figure on the page, from its frozen file
+(`analyse.py` lists the file and field of each).  The columns are:
+
+- **quoted**: as the page had it, against single-target rho;
+- **re-read**: against batch rho at `k = 32` on the same curve, both sides
+  counted as the thread counts, one unit per rho step and per stored pair;
+- **+ (b) canonical**: rho's step priced at the canonical walk it ran;
+- **+ (b) Bailey, model**: priced at Bailey's step, holding the step count
+  (a model, see §19.4);
+- **+ (c)**: the index-calculus build priced per stored pair, where the
+  table is folded and its base was measured;
+- **+ (b) and (c)**: both, with the canonical step;
+- **cold**: one target alone — the whole pipeline less the other 31
+  targets' descents, against the `k = 1` measurement.
+
+`≥` marks rows whose `S` leaves selection and the linear algebra unpriced.
+
+| panel | row | n | quoted | re-read (k = 32) | + (b) canonical | + (b) Bailey, model | + (c) | + (b) and (c) | cold | cold + (b), (c) |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| select-packed-20260922 | aimed, BigUint base build | 41 | 1.33× | **7.41×** | 2.70× | 5.32× | 18.4× | 6.71× | 49.7× | 45.0× |
+| select-packed-20260922 | aimed, packed base build | 41 | 1.17× | **6.51×** | 2.37× | 4.67× | 17.5× | 6.38× | 43.7× | 42.8× |
+| collection-aim-20260922 | original rung, full scan | 41 | 8.50× | **47.3×** | 17.2× | 33.9× | 48.1× | 17.5× | 317× | 118× |
+| collection-aim-20260922 | + collection window 164 | 41 | 3.48× | **19.4×** | 7.06× | 13.9× | 20.2× | 7.36× | 130× | 49.4× |
+| collection-aim-20260922 | + wider base 16,400 | 41 | 2.78× | **15.4×** | 5.63× | 11.1× | 26.3× | 9.60× | 104× | 64.4× |
+| collection-aim-20260922 | + lean relation target | 41 | 2.04× | **11.3×** | 4.13× | 8.13× | 22.2× | 8.10× | 76.0× | 54.3× |
+| collection-aim-20260922 | + stop when determined | 41 | 1.75× | **9.73×** | 3.55× | 6.98× | 20.7× | 7.55× | 65.2× | 50.7× |
+| collection-aim-20260922 | + aim at uncovered columns (relabelling, not kept) | 41 | 1.71× | **9.53×** | 3.47× | 6.84× | 20.5× | 7.48× | 63.9× | 50.2× |
+| collection-aim-20260922 | + aim at least-mentioned | 41 | 1.33× | **7.42×** | 2.70× | 5.32× | 18.4× | 6.71× | 49.8× | 45.0× |
+| collection-aim-20260922 | + aim at least-mentioned (holdout, seeds 900-931) | 41 | 1.33× | **7.42×** | 2.70× | 5.32× | 18.4× | 6.71× | 49.8× | 45.0× |
+| phase-prices-20260921 | k0n41-subgroup-rung | 41 | 8.75× | **49.8×** | 18.2× | 35.7× | 50.6× | 18.5× | 334× | 124× |
+| phase-prices-20260921 | k0n53-subgroup-rung | 53 | 19.4× | **167×** | 59.1× | 121× | 169× | 59.7× | 1,257× | 449× |
+| collection-window-20260921 | baseline_full_scan | 53 | 19.1× | **165×** | 58.4× | 119× | 167× | 59.0× | 1,242× | 443× |
+| collection-window-20260921 | window_1908 | 53 | 7.67× | **66.2×** | 23.4× | 47.9× | 67.7× | 23.9× | 485× | 175× |
+| collection-window-20260921 | window_954 | 53 | 7.43× | **64.2×** | 22.7× | 46.4× | 65.7× | 23.2× | 469× | 170× |
+| collection-window-20260921 | window_477 | 53 | 7.12× | **61.4×** | 21.7× | 44.4× | 62.9× | 22.2× | 448× | 162× |
+| collection-window-20260921 | window_477_holdout | 53 | 6.99× | **60.4×** | 21.4× | 43.7× | 61.8× | 21.9× | 448× | 162× |
+| collection-window-20260921 | baseline_full_scan | 41 | 8.50× | **47.3×** | 17.2× | 33.9× | 48.1× | 17.5× | 317× | 118× |
+| collection-window-20260921 | window_164 | 41 | 3.48× | **19.4×** | 7.06× | 13.9× | 20.2× | 7.36× | 130× | 49.4× |
+| probe-volume-20260921 | k0n41-subgroup-rung compact | 41 | ≥ 11.9× | **≥ 67.5×** | ≥ 24.6× | ≥ 48.4× | — | — | ≥ 453× | — |
+| probe-volume-20260921 | k0n41-subgroup-rung folded | 41 | ≥ 8.65× | **≥ 49.2×** | ≥ 17.9× | ≥ 35.3× | ≥ 50.1× | ≥ 18.3× | ≥ 330× | ≥ 122× |
+| probe-volume-20260921 | k0n53-subgroup-rung compact | 53 | ≥ 23.7× | **≥ 205×** | ≥ 72.5× | ≥ 148× | — | — | ≥ 1,548× | — |
+| probe-volume-20260921 | k0n53-subgroup-rung folded | 53 | ≥ 19.3× | **≥ 167×** | ≥ 59.0× | ≥ 121× | ≥ 168× | ≥ 59.5× | ≥ 1,254× | ≥ 447× |
+| tier-crossover-20260921 | 6832 points full | 61 | ≥ 12.1× | **≥ 98.0×** | ≥ 33.6× | ≥ 69.4× | — | — | ≥ 505× | — |
+| tier-crossover-20260921 | 6832 points compact | 61 | ≥ 12.8× | **≥ 104×** | ≥ 35.5× | ≥ 73.4× | — | — | ≥ 529× | — |
+| tier-crossover-20260921 | 6832 points folded | 61 | ≥ 15.2× | **≥ 124×** | ≥ 42.3× | ≥ 87.4× | ≥ 124× | ≥ 42.4× | ≥ 601× | ≥ 206× |
+| tier-crossover-20260921 | 9760 points full | 61 | ≥ 12.5× | **≥ 101×** | ≥ 34.6× | ≥ 71.5× | — | — | ≥ 552× | — |
+| tier-crossover-20260921 | 9760 points compact | 61 | ≥ 12.2× | **≥ 98.4×** | ≥ 33.7× | ≥ 69.6× | — | — | ≥ 535× | — |
+| tier-crossover-20260921 | 9760 points folded | 61 | ≥ 13.9× | **≥ 113×** | ≥ 38.7× | ≥ 79.9× | ≥ 113× | ≥ 38.8× | ≥ 600× | ≥ 206× |
+| tier-crossover-20260921 | 12688 points full | 61 | ≥ 13.0× | **≥ 105×** | ≥ 36.1× | ≥ 74.5× | — | — | ≥ 605× | — |
+| tier-crossover-20260921 | 12688 points compact | 61 | ≥ 12.2× | **≥ 99.3×** | ≥ 34.0× | ≥ 70.2× | — | — | ≥ 573× | — |
+| tier-crossover-20260921 | 12688 points folded | 61 | ≥ 13.3× | **≥ 108×** | ≥ 37.1× | ≥ 76.5× | ≥ 108× | ≥ 37.2× | ≥ 608× | ≥ 209× |
+| tier-crossover-20260921 | 18544 points full | 61 | ≥ 15.4× | **≥ 125×** | ≥ 42.8× | ≥ 88.4× | — | — | ≥ 745× | — |
+| tier-crossover-20260921 | 18544 points compact | 61 | ≥ 14.4× | **≥ 117×** | ≥ 40.0× | ≥ 82.5× | — | — | ≥ 695× | — |
+| tier-crossover-20260921 | 18544 points folded | 61 | ≥ 13.6× | **≥ 110×** | ≥ 37.7× | ≥ 77.8× | ≥ 111× | ≥ 37.9× | ≥ 651× | ≥ 225× |
+
+**The headline.**
+
+| | `vs rho` |
+|:--|--:|
+| quoted, against single-target rho | 1.17× |
+| re-read, against batch rho at `k = 32` | **6.51×** |
+| rho's step priced at the canonical walk | 2.37× |
+| rho's step priced at Bailey's step (a model) | 4.67× |
+| the build priced per stored pair | 17.5× |
+| both, canonical step | **6.38×** |
+| both, Bailey's step (a model) | 12.6× |
+| cold, one target | 43.7× |
+| cold, with both | 42.8× |
+
+With both corrections, the build becomes 75% of that pipeline rather
+than 33%, and collection falls from 54% to 20%.
+
+**Where the factor comes from.**  The thread's reference over batch rho at
+`k = 32` is `5.56×` at `n = 41`, `8.63×` at `n = 53` and `8.10×` at
+`n = 61`.  The batch accounts for `4.6–5.2×` of it: the single-target floor
+over the `k = 32` measurement.  The rest comes from the thread's
+single-target walk sitting `1.20–1.78×` above that floor.
+
+**The two corrections pull in opposite directions, and on the headline row
+they nearly cancel.**  Pricing rho's step lowers every ratio, by
+`2.74–2.92×` at the canonical walk and `1.38–1.41×` at Bailey's step.
+Pricing the build raises each row by as much as its build weighs.  The
+n = 41 rows on the 15,744- and 16,400-point bases rise `1.7–2.7×`, the
+5,248-point rows `2–4%`, and the n = 53 and n = 61 rows `0.1–2.4%`.  The
+lowest reading anywhere in the table is `2.37×`, and it is the lopsided
+one: the headline row with rho's step priced and the build still at one
+unit a pair.  Priced on both sides, the closest figure is **`6.38×`**.
+
+**Cold, one target costs from `43.7×` rho** (the headline row; `42.8×`
+with both corrections) **to `≥ 1,548×`**.  The `k = 1` measurement it
+divides by carries a 95% interval of `±28%` at `n = 41`, `±35%` at
+`n = 53` and `±56%` at `n = 61`.
+
+### 19.6 Classification
+
+**Accounting.**  No index-calculus count changed.  The reference was
+matched to the problem the figures solve, and the thread's own two
+uncharged costs were priced.  The thread's engineering steps stand as
+measured, because they are ratios of index-calculus totals on the same
+instances and do not depend on the reference: `1.139×` for the packed
+selection, `1.311×` for the least-mention aim, `7.26×` from the rung it
+started from.  What falls is the distance to rho, which those steps were
+read against.  The closest figure moves from `1.17×` to `6.5×` batch rho
+as counted.  It moves to `6.4×` with every rho step and stored pair priced
+by time, or to `12.6×` if Bailey's step is taken with the canonical walk's
+count.  On the curves, bases and target counts these figures cover,
+nothing measured end to end on an elliptic curve is below rho.
+
+### 19.7 What stays open
+
+- **Bailey's walk, counted.**  Its step costs half a canonical step.
+  Until its step count is measured, the `4.67×` and `12.6×` readings are
+  models.
+- **The one-target references are thin.**  Sixteen (eight) runs put
+  `±28–56%` on every cold figure.
+- **The thread's single-target walk is `1.56–1.78×` its floor at
+  `n = 53` and `61`.**  Any single-target figure priced against it there
+  is flattered by as much.
+- **The three-regime ledger's Koblitz rows** are single-target and in the
+  affine unit.  Priced at the table-driven canonicalisation, their
+  reference's step rises by `9–12%` (§19.4), so those rows would read
+  `8–11%` lower.  They are not re-read here.
+- **The build's two passes** are the thread's largest phase once priced,
+  and the obvious next lever for it.
 
 ## Appendix A. The conversion factors, as measured
 

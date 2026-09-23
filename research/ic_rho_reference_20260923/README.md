@@ -55,8 +55,12 @@ went, and the tests check that the counters add up to the total.
   `3.55×` and `16.0×` to `13.5×` and `38.2×`, and §17.11's pair table from
   `3.5×`, `29×` and `86×` to `21.0×`, `133×` and `257×`. The frozen ladder's
   one row below its rho (`0.84×` at 12 bits) reads `5.5×`.
-- **Open:** the Koblitz reference charges nothing for its per-step
-  canonicalisation (§18.8), so every Koblitz `vs rho` is an upper bound.
+- **Left open here, settled in §19** (`research/ic_rho_koblitz_20260923/`):
+  the Koblitz reference charges nothing for its per-step canonicalisation
+  (§18.8).  Priced, a canonical step costs `2.74–2.92` batched additions;
+  but the collection thread's figures had a larger error the other way,
+  32 targets against one, and against batch rho they read `5.6–8.6×`
+  higher (`1.17×` → `6.51×`).
 
 ## Reproducing
 

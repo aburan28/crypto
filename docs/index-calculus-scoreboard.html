@@ -323,9 +323,14 @@
       measured end to end is below rho: the residual-walk thread's 500&times;-or-worse verdict on
       E(F<sub>p</sub><sup>3</sup>) is unchanged, and the three-regime ledger that heads the page
       puts the best whole-pipeline variant at <b>13.5&times;</b> the matched rho on a 23-bit
-      prime-order curve, <b>38.2&times;</b> on a 24-bit random binary curve and &mdash; after the
-      collection and selection rounds of 2026-09-21 and 2026-09-22 &mdash; <b>1.17&times;</b> on a
-      39-bit Koblitz subgroup, with no fitted exponent below the reference's. The first two were
+      prime-order curve, <b>38.2&times;</b> on a 24-bit random binary curve and <b>6.5&times;</b> on
+      a 39-bit Koblitz subgroup, with no fitted exponent below the reference's. The Koblitz figure
+      read 1.17&times; after the collection and selection rounds of 2026-09-21 and 2026-09-22 until
+      ledger &sect;19 (2026-09-23) matched its reference to its problem: it is 32 targets solved
+      together, per target, and it had been divided by rho solving one. Against batch rho on the
+      same 32 targets it is 6.5&times;; priced by time on both sides &mdash; rho&rsquo;s canonicalisation
+      each step, the pair table&rsquo;s two passes each stored pair &mdash; 6.4&times;; one target alone,
+      44&times;. The first two were
       3.55&times; and 16.0&times; until the reference was matched (ledger &sect;18, 2026-09-23): the
       prime and binary rows had been priced against a walk that used no automorphism and paid
       most of its <code>S</code> in set-up, and against the negation-map walk the contract asks for
@@ -335,16 +340,16 @@
       for a reason that is <em>not</em> progress and is not counted as any: it re-seeded the
       walk rows, which moves a single row by up to a factor 1.8 in either direction at three
       repeats, and its own lever is exactly 1.000&times; on all three (see the panel below). That
-      same re-seed took the Koblitz row from 30.3&times; to 26.1&times;. The 1.17&times; is
-      separate and is progress: it is the collection and selection rounds measured end to end
-      against a rho reference pooled over 224 targets of their own runs, so it is not the
-      re-seeded row re-measured and the two references are not interchangeable. It is the
-      closest anything here has come to rho on an elliptic curve and it is still above it &mdash;
-      <em>as priced</em>: like every Koblitz reference on this page it charges nothing for the
-      canonicalisation each rho step performs, while the index-calculus side pays for its Frobenius
-      work, so 1.17&times; is an upper bound and a declared round must price the reference before
-      it is read as a margin (&sect;18.8). The rounds that produced it also drove the relation count
-      to its counting floor, so that lever is spent rather than promising. Round 3 turns the general statement from a
+      same re-seed took the Koblitz row from 30.3&times; to 26.1&times;. The collection and
+      selection rounds behind the 6.5&times; are real progress between index-calculus variants
+      &mdash; 7.26&times; fewer operations than the rung they started from, every phase priced
+      &mdash; but their distance to rho was read against the wrong reference, which is the mistake the
+      repository&rsquo;s own multi-target rule warns about: a batch win over single rho measures the
+      baseline. The correction is accounting and is almost entirely the batch: batch rho at
+      <code>k</code> = 32 costs 0.19&ndash;0.22 of its single-target floor per target, as the
+      Kuhn&ndash;Struik law predicts, and the thread&rsquo;s single-target walk had also sat
+      1.2&ndash;1.8&times; above that floor. The rounds also drove the relation count to its counting
+      floor, so that lever is spent rather than promising. Round 3 turns the general statement from a
       report into a <strong>boundary</strong>. The pair-table family has a derived shape law &mdash; a
       two-summand row pays <code>F&sup2;/4t</code> for its table and about
       <code>c&middot;#E/(2kF)</code> for its relations, least at
@@ -395,14 +400,16 @@
       <div class="fact">
         <dt>Boundary 2 · the reference</dt>
         <dd>rho, counted</dd>
-        <p>S &asymp; 1.3 on E(F<sub>p</sub><sup>3</sup>) with the residual-walk accounting. On the three-regime ledger, matched to the curve&rsquo;s automorphisms with the setup inside: 0.97 to 3.6 on the prime and binary ladders (the negation-map walk, walk alone 0.87 to 1.6; the plain walk they were priced against until &sect;18 read 2.3 to 23), 0.20 to 19 on the Koblitz ladder (signed Frobenius, canonicalisation unpriced).</p>
+        <p>S &asymp; 1.3 on E(F<sub>p</sub><sup>3</sup>) with the residual-walk accounting. On the three-regime ledger, matched to the curve&rsquo;s automorphisms with the setup inside: 0.97 to 3.6 on the prime and binary ladders (the negation-map walk, walk alone 0.87 to 1.6; the plain walk they were priced against until &sect;18 read 2.3 to 23), 0.20 to 19 on the Koblitz ladder (signed Frobenius, canonicalisation unpriced). For a figure that solves 32 targets together, batch rho at <code>k</code> = 32 on the same curve: 0.022&ndash;0.030 a target (&sect;19).</p>
       </div>
       <div class="fact">
-        <dt>Closest to rho</dt>
+        <dt>Closest to rho, one target</dt>
         <dd>13.5&times; at 2<sup>23.4</sup></dd>
         <p>Meet in the middle, m = 2, prime field, folded table, walked targets and a base at the
           family optimum (222 signed points against the rule&rsquo;s 512); every phase counted; against
-          the matched negation-map rho. It read 3.55&times; against the plain walk (3.63&times; in Round 4).</p>
+          the matched negation-map rho. It read 3.55&times; against the plain walk (3.63&times; in Round 4).
+          Amortised over 32 targets, the Koblitz collection thread is 6.5&times; batch rho; one target
+          alone, 44&times; (&sect;19).</p>
       </div>
       <div class="fact">
         <dt>Boundary 3 &middot; the family&rsquo;s own floor</dt>
@@ -566,7 +573,80 @@
       <span><b>declared and met</b>: every run verified (21,096 runs, 0.011% of walks abandoned in a cycle); the old walk replayed exactly on all 616 recorded runs of the ten re-priced reports; the matched walk 1.02&ndash;1.20&times; its own floor from 2<sup>20</sup>; the &radic;2 paired, 1.362 [1.296, 1.430]; <code>S</code> at most 1.20 from 2<sup>20</sup> with the pooled exponent 0.452 over six sizes, <em>at the bound&rsquo;s edge</em>, because setup is still visible there; no curve with an automorphism beyond negation</span>
       <span><b>re-priced</b>, every figure on this page that divided by the plain walk: the boundary panel&rsquo;s best rows 3.55&times; &rarr; 13.5&times; and 16.0&times; &rarr; 38.2&times;; the Round-5 headline 4.19&times; &rarr; 13.1&times; and 21.4&times; &rarr; 45.3&times;; its holdout 4.7&ndash;16.8&times; &rarr; 12.7&ndash;37.1&times;; &sect;17&rsquo;s pair table 3.5&times;, 29&times;, 86&times; &rarr; 21.0&times;, 133&times;, 257&times;; the rho exponent 0.27 / 0.30 &rarr; 0.37 / 0.39. The frozen ladder&rsquo;s one row below its rho, 0.84&times; at 12 bits, was the plain walk&rsquo;s setup; it is 5.5&times;</span>
       <span><span class="chip">accounting</span> the reference moved and no index-calculus count did: ratios rise 2.1&ndash;6.5&times;, of which 1.36&times; is the automorphism and the rest the old walk&rsquo;s setup, and no row changes class</span>
-      <span><b>open, and in the other direction</b>: the Koblitz reference, the signed-Frobenius walk, canonicalises every step by n Frobenius maps and charges none of them. Priced with the canonicalisation the index-calculus rows pay for, it rises about 7% in the affine unit, and by more in the collection thread&rsquo;s batched unit. So every Koblitz &ldquo;vs rho&rdquo; here, the 1.17&times; included, is an upper bound until a declared round prices it (&sect;18.8). Below 2<sup>20</sup> the same walk&rsquo;s 97 setup scalar multiplications make it up to 4.8&times; weaker than the negation walk, the opposite error; <code>ic bench</code> now takes the cheaper of the two</span>
+      <span><b>left open here, settled in &sect;19</b>: the Koblitz reference canonicalises every step and charges none of it. &sect;19 prices it: a table-driven canonicalisation costs 0.09&ndash;0.12 of an affine addition, so the single-target Koblitz rows of the three-regime panel would read 8&ndash;11% lower (they are not re-read). The collection thread&rsquo;s 32-target figures had a larger error in the other direction, and are re-read in the panel below. Below 2<sup>20</sup> the same walk&rsquo;s 97 setup scalar multiplications make it up to 4.8&times; weaker than the negation walk, the opposite error; <code>ic bench</code> now takes the cheaper of the two</span>
+    </div>
+  </div>
+
+  <div class="panel" id="koblitz-references-20260923">
+    <div class="panel-head">
+      <h2>The Koblitz references: 32 targets against 32 targets <span class="chip">accounting</span></h2>
+      <p>Ledger &sect;19. Every <code>vs rho</code> the Koblitz collection thread quoted &mdash; 1.17&times;
+        at its best &mdash; divided the cost of 32 targets solved together, per target, by rho solving one.
+        The repository&rsquo;s own rule (Kuhn&ndash;Struik; <code>ecc_safety::check_multi_target_margin</code>)
+        says <code>k</code> logarithms in one group cost about &radic;(kr) together, so rho per target falls
+        as 1/&radic;k, and a batch win over single-target rho measures the baseline. The thread also counted
+        each rho step and each stored pair of its folded table as one addition; both do more. Declared and
+        committed before anything ran: batch rho on the signed-Frobenius classes, the step and the stored
+        pair priced in the thread&rsquo;s unit, and every 32-target figure re-read against batch rho at
+        <code>k</code> = 32 on its own curve. All three targets are met. Frozen source:
+        <code>research/ic_rho_koblitz_20260923/</code> (<code>analysis.json</code> for every figure here).</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>Batch rho: the tuned walk of &sect;18 on the classes {&plusmn;&phi;<sup>t</sup>(P)}
+        (A = 2n), jumps in G only, one distinguished-point table for the batch, targets solved in sequence
+        so a later target can finish on an earlier one&rsquo;s trail. <code>S</code> per target is the
+        batch&rsquo;s group operations over k&radic;r, with the table, starts, walks and verification
+        inside. Every batch draws fresh targets; intervals are 95% over batches.</caption>
+      <thead><tr><th scope="col">Curve</th><th scope="col" class="n">batches</th>
+        <th scope="col" class="n">k = 1</th><th scope="col" class="n">k = 4</th>
+        <th scope="col" class="n">k = 16</th><th scope="col" class="n">k = 32</th>
+        <th scope="col" class="n">k = 32 over k = 1</th><th scope="col" class="n">Kuhn&ndash;Struik</th>
+        <th scope="col" class="n">floor, one target</th><th scope="col">Verified</th></tr></thead>
+      <tbody>
+        <tr><td><code>K_0/GF(2<sup>41</sup>)</code> &middot; r = 2<sup>39.0</sup></td><td class="n">16</td><td class="n">0.143</td><td class="n">0.074</td><td class="n">0.040</td><td class="n"><b>0.0300</b></td><td class="n">0.210 [0.168, 0.280]</td><td class="n">0.199</td><td class="n">0.1384</td><td>848/848</td></tr>
+        <tr><td><code>K_0/GF(2<sup>53</sup>)</code> &middot; r = 2<sup>44.26</sup></td><td class="n">16</td><td class="n">0.105</td><td class="n">0.063</td><td class="n">0.034</td><td class="n"><b>0.0252</b></td><td class="n">0.239 [0.177, 0.329]</td><td class="n">0.199</td><td class="n">0.1217</td><td>848/848</td></tr>
+        <tr><td><code>K_0/GF(2<sup>61</sup>)</code> &middot; r = 2<sup>47.21</sup></td><td class="n">8</td><td class="n">0.115</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n"><b>0.0219</b></td><td class="n">0.190 [0.131, 0.320]</td><td class="n">0.199</td><td class="n">0.1135</td><td>264/264</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>Prices in the thread&rsquo;s unit, one batched addition (<code>add_many</code> over 1,024
+        points), measured on one thread in seven interleaved rounds; medians. (b) is one step of rho; (c) is
+        one stored pair of the folded pair table, the whole build over the pairs it stores.</caption>
+      <thead><tr><th scope="col">Curve</th><th scope="col" class="n">canonical step</th>
+        <th scope="col" class="n">Bailey et al.&rsquo;s step (model)</th>
+        <th scope="col" class="n">1,024 walks&rsquo; addition</th><th scope="col">stored pair, folded build</th></tr></thead>
+      <tbody>
+        <tr><td>n = 41</td><td class="n">2.74</td><td class="n">1.39</td><td class="n">1.06</td><td><b>6.14</b> at <code>|F|</code> = 15,744 (declared); 4.47 at 5,248; 5.69 at 16,400</td></tr>
+        <tr><td>n = 53</td><td class="n">2.83</td><td class="n">1.38</td><td class="n">0.98</td><td>5.87 at 15,264</td></tr>
+        <tr><td>n = 61</td><td class="n">2.92</td><td class="n">1.41</td><td class="n">1.04</td><td>4.96&ndash;5.86 at 6,832&ndash;18,544</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-scroll"><table>
+      <caption>The re-read, selected rows; all 37 are in ledger &sect;19.5 and re-read on their own panels
+        below. Each row divides by rho on its own curve. <b>Re-read</b>: batch rho at k = 32, both sides
+        counted as the thread counts. <b>(b)</b>: rho&rsquo;s step priced at the canonical walk it ran, or
+        at Bailey&rsquo;s step with the same count (a model). <b>(c)</b>: the build priced per stored pair.
+        <b>Cold</b>: one target alone, against rho at k = 1. &ge;: <code>S</code> leaves selection and the
+        linear algebra unpriced.</caption>
+      <thead><tr><th scope="col">Figure</th><th scope="col" class="n">quoted</th><th scope="col" class="n">re-read</th>
+        <th scope="col" class="n">+ (b)</th><th scope="col" class="n">+ (b), Bailey</th><th scope="col" class="n">+ (c)</th>
+        <th scope="col" class="n">+ (b) and (c)</th><th scope="col" class="n">cold</th></tr></thead>
+      <tbody>
+        <tr><td>n = 41 &middot; aimed, packed base build &mdash; the closest</td><td class="n">1.17&times;</td><td class="n"><b>6.51&times;</b></td><td class="n">2.37&times;</td><td class="n">4.67&times;</td><td class="n">17.5&times;</td><td class="n"><b>6.38&times;</b></td><td class="n">43.7&times;</td></tr>
+        <tr><td>n = 41 &middot; aimed at least-mentioned</td><td class="n">1.33&times;</td><td class="n">7.42&times;</td><td class="n">2.70&times;</td><td class="n">5.32&times;</td><td class="n">18.4&times;</td><td class="n">6.71&times;</td><td class="n">49.8&times;</td></tr>
+        <tr><td>n = 41 &middot; original rung, full scan</td><td class="n">8.50&times;</td><td class="n">47.3&times;</td><td class="n">17.2&times;</td><td class="n">33.9&times;</td><td class="n">48.1&times;</td><td class="n">17.5&times;</td><td class="n">317&times;</td></tr>
+        <tr><td>n = 53 &middot; window 477</td><td class="n">7.12&times;</td><td class="n">61.4&times;</td><td class="n">21.7&times;</td><td class="n">44.4&times;</td><td class="n">62.9&times;</td><td class="n">22.2&times;</td><td class="n">448&times;</td></tr>
+        <tr><td>n = 53 &middot; full scan, every phase priced</td><td class="n">19.36&times;</td><td class="n">167&times;</td><td class="n">59.1&times;</td><td class="n">121&times;</td><td class="n">169&times;</td><td class="n">59.7&times;</td><td class="n">1,257&times;</td></tr>
+        <tr><td>n = 61 &middot; 12,688 points, compact</td><td class="n">&ge; 12.25&times;</td><td class="n">&ge; 99.3&times;</td><td class="n">&ge; 34.0&times;</td><td class="n">&ge; 70.2&times;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&ge; 573&times;</td></tr>
+        <tr><td>n = 61 &middot; 18,544 points, folded</td><td class="n">&ge; 13.57&times;</td><td class="n">&ge; 110&times;</td><td class="n">&ge; 37.7&times;</td><td class="n">&ge; 77.8&times;</td><td class="n">&ge; 111&times;</td><td class="n">&ge; 37.9&times;</td><td class="n">&ge; 651&times;</td></tr>
+      </tbody>
+    </table></div>
+    <div class="legend" style="padding-top:0">
+      <span><b>declared and met</b>: 1,960 of 1,960 targets recovered and verified, no batch dropped; per-target cost at k = 32 over k = 1 inside the declared [0.09, 0.35] on all three curves, each interval covering the law&rsquo;s 0.199; one target alone 1.03, 0.86 and 1.01&times; its floor; 37 figures re-read</span>
+      <span><b>where the factor comes from</b>: the thread&rsquo;s reference over batch rho at k = 32 is 5.6&times;, 8.6&times; and 8.1&times;. The batch is 4.6&ndash;5.2&times; of it &mdash; the one-target floor over the k = 32 measurement &mdash; and the rest is the thread&rsquo;s single-target walk sitting 1.20&ndash;1.78&times; above that floor</span>
+      <span><b>the two prices pull in opposite directions</b>: a canonical rho step costs 2.74&ndash;2.92 units and a stored pair 4.5&ndash;6.1, since the build makes two passes over every row, each an addition and a canonical key. Pricing rho&rsquo;s step lowers every ratio; pricing the build raises the rows whose build weighs. On the closest row they nearly cancel, 6.51&times; &rarr; 6.38&times;, and the build becomes 75% of that pipeline instead of 33%. The lowest reading anywhere, 2.37&times;, prices rho&rsquo;s step but not the build</span>
+      <span><span class="chip">accounting</span> no index-calculus count changed, and the thread&rsquo;s steps stand as measured between its own variants (1.139&times;, 1.311&times;, 7.26&times; from its first rung). Every Koblitz 32-target <code>vs rho</code> on this page now divides by batch rho at k = 32, with the single-target figure as its &ldquo;was&rdquo;</span>
+      <span><b>open</b>: Bailey&rsquo;s step costs half a canonical step, but its walk&rsquo;s step count is unmeasured, so its readings are models; the cold figures inherit &plusmn;28&ndash;56% from 16 (8) single rho runs; the thread&rsquo;s single-target walk is 1.56&ndash;1.78&times; its floor at n = 53 and 61</span>
     </div>
   </div>
 
@@ -1693,21 +1773,21 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       </thead>
       <tbody>
         <tr class="group"><td colspan="6"><code>k0n31-ledger-rung</code> &middot; n = 31 &middot; 2,170 points &middot; tier folded &mdash; <em>not priced:</em> the m=3 scan saturates at r=2^20.5: |F| x C(|F|+1,2)/r puts 1771 hits a target, so the conversion measures the O(|F|) recovery a hit pays rather than probing</td></tr>
-        <tr class="group"><td colspan="6"><code>k0n41-subgroup-rung</code> &middot; n = 41 &middot; 5,248 points, 64 orbits &middot; r = 2<sup>39.0</sup> &middot; tier folded &middot; rho <code>S</code> = 0.1705</td></tr>
+        <tr class="group"><td colspan="6"><code>k0n41-subgroup-rung</code> &middot; n = 41 &middot; 5,248 points, 64 orbits &middot; r = 2<sup>39.0</sup> &middot; tier folded &middot; rho <code>S</code> = 0.0300 a target at k = 32 (&sect;19), 0.1705 alone</td></tr>
         <tr><td>collect probes</td><td class="n">34,816,911</td><td class="n">98.367%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
         <tr><td>descent probes</td><td class="n">864</td><td class="n">0.002%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
         <tr><td>select</td><td class="n">400,851</td><td class="n">1.133%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
         <tr><td>pair table build</td><td class="n">170,560</td><td class="n">0.482%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
         <tr><td>linear algebra</td><td class="n">5,822</td><td class="n">0.016%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
-        <tr><td><b>whole pipeline</b></td><td class="n"><b>35,395,008</b></td><td class="n">100%</td><td class="n"><b>1.4918</b></td><td class="n"><b>8.75&times;</b></td><td>32/32</td></tr>
+        <tr><td><b>whole pipeline</b></td><td class="n"><b>35,395,008</b></td><td class="n">100%</td><td class="n"><b>1.4918</b></td><td class="n"><b>49.8&times;</b> <span class="was">was 8.75&times;</span></td><td>32/32</td></tr>
         <tr><td><em>the same rung as previously bounded</em></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&ge; 1.4746</td><td class="n">&mdash;</td><td><em>select and the linear algebra were null</em></td></tr>
-        <tr class="group"><td colspan="6"><code>k0n53-subgroup-rung</code> &middot; n = 53 &middot; 15,264 points, 144 orbits &middot; r = 2<sup>44.26</sup> &middot; tier folded &middot; rho <code>S</code> = 0.2172</td></tr>
+        <tr class="group"><td colspan="6"><code>k0n53-subgroup-rung</code> &middot; n = 53 &middot; 15,264 points, 144 orbits &middot; r = 2<sup>44.26</sup> &middot; tier folded &middot; rho <code>S</code> = 0.0252 a target at k = 32 (&sect;19), 0.2172 alone</td></tr>
         <tr><td>collect probes</td><td class="n">603,860,936</td><td class="n">97.781%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
         <tr><td>descent probes</td><td class="n">11,003,106</td><td class="n">1.782%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
         <tr><td>select</td><td class="n">1,581,890</td><td class="n">0.256%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
         <tr><td>pair table build</td><td class="n">1,106,640</td><td class="n">0.179%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
         <tr><td>linear algebra</td><td class="n">10,006</td><td class="n">0.002%</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>&mdash;</td></tr>
-        <tr><td><b>whole pipeline</b></td><td class="n"><b>617,562,578</b></td><td class="n">100%</td><td class="n"><b>4.2069</b></td><td class="n"><b>19.36&times;</b></td><td>32/32</td></tr>
+        <tr><td><b>whole pipeline</b></td><td class="n"><b>617,562,578</b></td><td class="n">100%</td><td class="n"><b>4.2069</b></td><td class="n"><b>167&times;</b> <span class="was">was 19.36&times;</span></td><td>32/32</td></tr>
         <tr><td><em>the same rung as previously bounded</em></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&ge; 4.196</td><td class="n">&mdash;</td><td><em>select and the linear algebra were null</em></td></tr>
       </tbody>
     </table></div>
@@ -1748,7 +1828,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         Frobenius the pair table has always done in one word. Keying the point index on the packed
         <code>u64</code> and walking both orbit structures with the <code>FastCurve</code> takes selection
         to <b>37.3 adds a point</b>, <b>2.7&times;</b> its floor, and the whole pipeline to
-        <b>1.17&times; rho</b>. Frozen source:
+        <b>1.17&times;</b> single-target rho &mdash; <b>6.51&times;</b> batch rho on the same 32 targets
+        (&sect;19). Frozen source:
         <code>docs/ic/runs/koblitz-select-packed-20260922.json</code>.</p>
     </div>
     <div class="table-scroll"><table>
@@ -1797,7 +1878,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </table></div>
     <div class="table-scroll"><table>
       <caption>End to end at <code>|F|</code> = 15,744, window 256, 32 targets, aimed at the
-        least-mentioned columns.</caption>
+        least-mentioned columns. <code>vs rho</code> is against batch rho at k = 32 on the same curve,
+        <code>S</code> = 0.0300 a target (&sect;19); the single-target figure is the &ldquo;was&rdquo;.</caption>
       <thead>
         <tr><th scope="col">Variant</th><th scope="col" class="n">Select</th><th scope="col" class="n">Build</th>
           <th scope="col" class="n">Collect</th><th scope="col" class="n">Total adds</th>
@@ -1807,10 +1889,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <tbody>
         <tr><td>aimed, BigUint base build</td><td class="n">1,230,873</td><td class="n">1,519,296</td>
           <td class="n">2,517,120</td><td class="n">5,269,495</td><td class="n">0.2221</td>
-          <td class="n">1.33&times;</td><td>32/32, 0 rejected</td></tr>
+          <td class="n">7.41&times; <span class="was">was 1.33&times;</span></td><td>32/32, 0 rejected</td></tr>
         <tr><td><b>aimed, packed base build</b></td><td class="n"><b>587,043</b></td>
           <td class="n">1,519,296</td><td class="n">2,517,120</td><td class="n"><b>4,625,665</b></td>
-          <td class="n"><b>0.1950</b></td><td class="n"><b>1.17&times;</b></td>
+          <td class="n"><b>0.1950</b></td><td class="n"><b>6.51&times;</b> <span class="was">was 1.17&times;</span></td>
           <td>32/32, 0 rejected</td></tr>
       </tbody>
     </table></div>
@@ -1838,7 +1920,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         adds a point, which the prediction did not account for.</span>
       <span><b>What is left.</b> Collection 54.4%, table build 32.8%, selection 12.7%, descent and linear
         algebra 0.0%. Selection is now bounded by 2.7&times; and the remainder is the half-trace solve
-        itself; the table build is the largest phase after collection.</span>
+        itself; the table build is the largest phase after collection. <em>Priced per stored pair
+        (&sect;19, 6.14 units a pair, not one) the build is the largest phase outright: 75.0%, collection
+        20.2%, selection 4.7%.</em></span>
     </div>
   </div>
 
@@ -1861,7 +1945,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         trial count is sized so every row banks the same relations. Unit is a batched group addition.
         Re-priced on 2026-09-22 at the scan constant measured for each row's own base width and window
         &mdash; the original figures, which used one full-scan constant per degree, stay on their rows as
-        the &ldquo;before&rdquo; mark and in the frozen file.</caption>
+        the &ldquo;before&rdquo; mark and in the frozen file. <code>vs rho</code> is against batch rho at
+        k = 32 on each curve (&sect;19): 0.0252 a target at n = 53, 0.0300 at n = 41.</caption>
       <thead>
         <tr><th scope="col">Variant</th><th scope="col" class="n">|F|</th><th scope="col" class="n">Window</th>
           <th scope="col" class="n">Scans</th><th scope="col" class="n">Relations</th>
@@ -1871,26 +1956,26 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <tbody>
         <tr><td>n53 full scan</td><td class="n">15,264</td><td class="n">&mdash;</td>
           <td class="n">242,514,432</td><td class="n">458</td><td class="n">610,287,145</td>
-          <td class="n">4.1573</td><td class="n">19.14&times;</td><td class="n">&mdash;</td></tr>
+          <td class="n">4.1573</td><td class="n">165&times; <span class="was">was 19.14&times;</span></td><td class="n">&mdash;</td></tr>
         <tr><td>n53 window 1,908</td><td class="n">15,264</td><td class="n">1,908</td>
           <td class="n">95,636,592</td><td class="n">444</td><td class="n">244,576,591</td>
-          <td class="n">1.6660</td><td class="n">7.67&times;</td><td class="n">2.495&times;</td></tr>
+          <td class="n">1.6660</td><td class="n">66.2&times; <span class="was">was 7.67&times;</span></td><td class="n">2.495&times;</td></tr>
         <tr><td>n53 window 954</td><td class="n">15,264</td><td class="n">954</td>
           <td class="n">91,091,736</td><td class="n">444</td><td class="n">237,061,975</td>
-          <td class="n">1.6148</td><td class="n">7.43&times;</td><td class="n">2.574&times;</td></tr>
+          <td class="n">1.6148</td><td class="n">64.2&times; <span class="was">was 7.43&times;</span></td><td class="n">2.574&times;</td></tr>
         <tr><td><b>n53 window 477</b></td><td class="n">15,264</td><td class="n">477</td>
           <td class="n">85,860,000</td><td class="n">443</td><td class="n">226,915,356</td>
-          <td class="n">1.5458</td><td class="n">7.12&times;</td>
+          <td class="n">1.5458</td><td class="n">61.4&times; <span class="was">was 7.12&times;</span></td>
           <td class="n"><b>2.689&times;</b> <span class="was">was 2.715&times;</span></td></tr>
         <tr><td>&nbsp;&nbsp;holdout</td><td class="n">15,264</td><td class="n">477</td>
           <td class="n">85,860,000</td><td class="n">443</td><td class="n">222,982,723</td>
-          <td class="n">1.5190</td><td class="n">6.99&times;</td><td class="n">&mdash;</td></tr>
+          <td class="n">1.5190</td><td class="n">60.4&times; <span class="was">was 6.99&times;</span></td><td class="n">&mdash;</td></tr>
         <tr><td>n41 full scan</td><td class="n">5,248</td><td class="n">&mdash;</td>
           <td class="n">15,072,256</td><td class="n">124</td><td class="n">33,586,338</td>
-          <td class="n">1.4156</td><td class="n">8.50&times;</td><td class="n">&mdash;</td></tr>
+          <td class="n">1.4156</td><td class="n">47.3&times; <span class="was">was 8.50&times;</span></td><td class="n">&mdash;</td></tr>
         <tr><td>n41 window 164</td><td class="n">5,248</td><td class="n">164</td>
           <td class="n">5,432,992</td><td class="n">120</td><td class="n">13,760,190</td>
-          <td class="n">0.5799</td><td class="n">3.48&times; <span class="was">was 3.24&times;</span></td>
+          <td class="n">0.5799</td><td class="n">19.4&times; <span class="was">was 3.48&times;, first 3.24&times;</span></td>
           <td class="n">2.441&times;</td></tr>
       </tbody>
     </table></div>
@@ -1923,7 +2008,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         tracked number &mdash; and the total by 1.02&times;. Aiming it at the <em>least-mentioned</em>
         columns reaches full rank at <b>exactly 192 relations, the counting floor</b>: 192 unknowns need
         192 independent equations, so no collection strategy can bank fewer and this lever is finished.
-        <code>S</code> is still <b>1.33&times; rho</b>. Frozen source:
+        <code>S</code> is still <b>1.33&times;</b> single-target rho, which is <b>7.42&times;</b> batch rho
+        on the same 32 targets (&sect;19). Frozen source:
         <code>docs/ic/runs/koblitz-collection-aim-20260922.json</code>.</p>
     </div>
     <div class="table-scroll"><table>
@@ -1932,8 +2018,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         did not need. Unit is a batched group addition. Every phase priced: selection measured at this
         width, the build at one addition per stored pair, the scan at the constant measured for this base
         and window, the descent and the linear algebra converted on the same host. Floor is the counting
-        bound <code>R &ge; C</code>; rho is pooled over 224 targets because its step count varies about
-        20% between seed sets.</caption>
+        bound <code>R &ge; C</code>. <code>vs rho</code> is against batch rho at k = 32 on this curve,
+        0.0300 a target (&sect;19); the &ldquo;was&rdquo; is single-target rho pooled over 224 targets.</caption>
       <thead>
         <tr><th scope="col">Arm</th><th scope="col" class="n">Relations</th>
           <th scope="col" class="n">&divide; floor 192</th><th scope="col" class="n">Scans</th>
@@ -1942,18 +2028,18 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       </thead>
       <tbody>
         <tr><td>swept</td><td class="n">333</td><td class="n">1.73&times;</td><td class="n">1,459,200</td>
-          <td class="n">6,911,843</td><td class="n">0.2913</td><td class="n">1.75&times;</td>
+          <td class="n">6,911,843</td><td class="n">0.2913</td><td class="n">9.73&times; <span class="was">was 1.75&times;</span></td>
           <td>32/32, 0 rejected</td></tr>
         <tr><td>aimed at uncovered columns</td><td class="n">320</td><td class="n">1.67&times;</td>
           <td class="n">1,420,800</td><td class="n">6,773,987</td><td class="n">0.2855</td>
-          <td class="n">1.71&times;</td><td>32/32, 0 rejected</td></tr>
+          <td class="n">9.53&times; <span class="was">was 1.71&times;</span></td><td>32/32, 0 rejected</td></tr>
         <tr><td><b>aimed at least-mentioned columns</b></td><td class="n"><b>197</b></td>
           <td class="n"><b>1.03&times;</b></td><td class="n"><b>883,200</b></td>
           <td class="n"><b>5,270,523</b></td><td class="n"><b>0.2221</b></td>
-          <td class="n"><b>1.33&times;</b></td><td>32/32, 0 rejected</td></tr>
+          <td class="n"><b>7.42&times;</b> <span class="was">was 1.33&times;</span></td><td>32/32, 0 rejected</td></tr>
         <tr><td>&nbsp;&nbsp;holdout, target seeds 900&ndash;931</td><td class="n">197</td>
           <td class="n">1.03&times;</td><td class="n">883,200</td><td class="n">5,270,516</td>
-          <td class="n">0.2221</td><td class="n">1.33&times;</td><td>32/32, 0 rejected</td></tr>
+          <td class="n">0.2221</td><td class="n">7.42&times; <span class="was">was 1.33&times;</span></td><td>32/32, 0 rejected</td></tr>
       </tbody>
     </table></div>
     <div class="table-scroll"><table>
@@ -1981,7 +2067,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         the earlier rounds reported at 3.24&times;, 2.40&times; and 1.78&times; rho read 3.48&times;,
         2.78&times; and 2.04&times;, because they were priced at 2.31 adds a summand &mdash; the
         5,248-point base's full-scan figure, which undercharges a wide base with a narrow window by up to
-        23%. The shape of the ladder is unchanged; two of its steps are smaller than reported.</caption>
+        23%. The shape of the ladder is unchanged; two of its steps are smaller than reported.
+        <code>vs rho</code> is now against batch rho at k = 32 (&sect;19); both earlier readings stay as the &ldquo;was&rdquo;.</caption>
       <thead>
         <tr><th scope="col">Step</th><th scope="col" class="n">|F|</th><th scope="col" class="n">Window</th>
           <th scope="col" class="n">Adds/scan</th><th scope="col" class="n">Relations</th>
@@ -1991,24 +2078,24 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <tbody>
         <tr><td>original rung, full scan</td><td class="n">5,248</td><td class="n">full</td>
           <td class="n">2.19</td><td class="n">124</td><td class="n">33,589,843</td>
-          <td class="n">1.4157</td><td class="n">8.50&times;</td><td>measured</td></tr>
+          <td class="n">1.4157</td><td class="n">47.3&times; <span class="was">was 8.50&times;</span></td><td>measured</td></tr>
         <tr><td>+ collection window</td><td class="n">5,248</td><td class="n">164</td><td class="n">2.43</td>
           <td class="n">120</td><td class="n">13,764,117</td><td class="n">0.5801</td>
-          <td class="n">3.48&times; <span class="was">was 3.24&times;</span></td>
+          <td class="n">19.4&times; <span class="was">was 3.48&times;, first 3.24&times;</span></td>
           <td>interpolated, windows 128&ndash;256</td></tr>
         <tr><td>+ wider base</td><td class="n">16,400</td><td class="n">500</td><td class="n">2.72</td>
           <td class="n">675</td><td class="n">10,980,083</td><td class="n">0.4628</td>
-          <td class="n">2.78&times; <span class="was">was 2.40&times;</span></td>
+          <td class="n">15.4&times; <span class="was">was 2.78&times;, first 2.40&times;</span></td>
           <td>interpolated, windows 256&ndash;512</td></tr>
         <tr><td>+ lean relation target</td><td class="n">16,400</td><td class="n">256</td><td class="n">2.78</td>
           <td class="n">406</td><td class="n">8,056,053</td><td class="n">0.3395</td>
-          <td class="n">2.04&times; <span class="was">was 1.78&times;</span></td><td>measured</td></tr>
+          <td class="n">11.3&times; <span class="was">was 2.04&times;, first 1.78&times;</span></td><td>measured</td></tr>
         <tr><td>+ stop when determined</td><td class="n">15,744</td><td class="n">256</td><td class="n">2.85</td>
           <td class="n">333</td><td class="n">6,911,843</td><td class="n">0.2913</td>
-          <td class="n">1.75&times;</td><td>measured</td></tr>
+          <td class="n">9.73&times; <span class="was">was 1.75&times;</span></td><td>measured</td></tr>
         <tr><td><b>+ aim at least-mentioned</b></td><td class="n">15,744</td><td class="n">256</td>
           <td class="n">2.85</td><td class="n"><b>197</b></td><td class="n"><b>5,270,523</b></td>
-          <td class="n"><b>0.2221</b></td><td class="n"><b>1.33&times;</b></td><td>measured</td></tr>
+          <td class="n"><b>0.2221</b></td><td class="n"><b>7.42&times;</b> <span class="was">was 1.33&times;</span></td><td>measured</td></tr>
       </tbody>
     </table></div>
     <div class="facts">
@@ -2031,9 +2118,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <span><b><code>ScanScratch</code> is not a gain.</b> Taking four per-trial allocations out of the
         scan's hot loop measured 5.46 &rarr; 5.58 adds a summand &mdash; no change, the allocator was
         already recycling the blocks. Kept as a refactor, not claimed.</span>
-      <span><b>What is left.</b> Collection 47.6%, table build 28.9%, selection 23.4%, descent 0.0%,
-        linear algebra 0.06%. No phase is dominant enough for another factor to hide in, which is a first
-        for this thread. Selection spends 79.5 adds a point on algebra far cheaper than that, and is the
+      <span><b>What is left.</b> <em>Priced per stored pair (&sect;19), the build is 71.3%, collection 19.2%
+        and selection 9.4%; as first counted,</em> collection 47.6%, table build 28.9%, selection 23.4%, descent 0.0%,
+        linear algebra 0.06%. As counted, no phase is dominant enough for another factor to hide in, which
+        was a first for this thread; priced, the build is. Selection spends 79.5 adds a point on algebra far cheaper than that, and is the
         next thing to measure.</span>
     </div>
   </div>
@@ -2063,12 +2151,12 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       </thead>
       <tbody>
         <tr><td><code>k0n31-ledger-rung</code> &middot; n = 31 &middot; 2,170 points</td><td class="n">277,760</td><td colspan="4">Not priced &mdash; at r = 2<sup>20.46</sup> the <code>m = 3</code> scan measurement is dominated by the <code>O(|F|)</code> recovery a hit pays, not by probing</td><td>32/32</td><td><span class="chip">accounting</span></td></tr>
-        <tr class="group"><td colspan="8"><code>k0n41-subgroup-rung</code> &middot; n = 41 &middot; 5,248 points, 64 orbits &middot; r = 2<sup>39.0</sup> &middot; rho <code>S</code> = 0.1705</td></tr>
-        <tr><td>compact <em>(v3 chose this)</em></td><td class="n">15,072,256</td><td class="n">13,773,376</td><td class="n">47,988,000</td><td class="n">2.022</td><td class="n">11.86&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
-        <tr><td>folded <em>(v4 chooses this)</em></td><td class="n">15,072,256</td><td class="n">173,184</td><td class="n">34,990,959</td><td class="n">1.475</td><td class="n">8.65&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
-        <tr class="group"><td colspan="8"><code>k0n53-subgroup-rung</code> &middot; n = 53 &middot; 15,264 points, 144 orbits &middot; r = 2<sup>44.26</sup> &middot; rho <code>S</code> = 0.2172</td></tr>
-        <tr><td>compact <em>(v3 chose this)</em></td><td class="n">242,514,432</td><td class="n">116,502,480</td><td class="n">756,950,602</td><td class="n">5.156</td><td class="n">23.73&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
-        <tr><td>folded <em>(v4 chooses this)</em></td><td class="n">242,514,432</td><td class="n">1,114,272</td><td class="n">615,978,313</td><td class="n">4.196</td><td class="n">19.31&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr class="group"><td colspan="8"><code>k0n41-subgroup-rung</code> &middot; n = 41 &middot; 5,248 points, 64 orbits &middot; r = 2<sup>39.0</sup> &middot; rho <code>S</code> = 0.0300 a target at k = 32 (&sect;19), 0.1705 alone</td></tr>
+        <tr><td>compact <em>(v3 chose this)</em></td><td class="n">15,072,256</td><td class="n">13,773,376</td><td class="n">47,988,000</td><td class="n">2.022</td><td class="n">67.5&times; <span class="was">was 11.86&times;</span></td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>folded <em>(v4 chooses this)</em></td><td class="n">15,072,256</td><td class="n">173,184</td><td class="n">34,990,959</td><td class="n">1.475</td><td class="n">49.2&times; <span class="was">was 8.65&times;</span></td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr class="group"><td colspan="8"><code>k0n53-subgroup-rung</code> &middot; n = 53 &middot; 15,264 points, 144 orbits &middot; r = 2<sup>44.26</sup> &middot; rho <code>S</code> = 0.0252 a target at k = 32 (&sect;19), 0.2172 alone</td></tr>
+        <tr><td>compact <em>(v3 chose this)</em></td><td class="n">242,514,432</td><td class="n">116,502,480</td><td class="n">756,950,602</td><td class="n">5.156</td><td class="n">205&times; <span class="was">was 23.73&times;</span></td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>folded <em>(v4 chooses this)</em></td><td class="n">242,514,432</td><td class="n">1,114,272</td><td class="n">615,978,313</td><td class="n">4.196</td><td class="n">167&times; <span class="was">was 19.31&times;</span></td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table></div>
     <div class="legend" style="padding-top:0">
@@ -2085,8 +2173,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <span>The superseded figures move rather than vanish: v3 chose compact on all three rungs and is
         the baseline row of each pair. The wall-clock &rho;/IC ratios went 1.79 &rarr; 3.39 at degree 41 and
         1.51 &rarr; 3.00 at degree 53, which is a practicality note and never the metric (&sect;6).</span>
-      <span>Nothing here moves the standing against rho &mdash; the two priced rungs sit at 8.65&times; and 19.3&times;
-        rho&rsquo;s <code>S</code> &mdash; and no exponent is fitted: two priced rungs is far short of &sect;5&rsquo;s four sizes.</span>
+      <span>Nothing here moves the standing against rho &mdash; the two priced rungs sit at 49.2&times; and 167&times;
+        batch rho&rsquo;s <code>S</code> at k = 32 (8.65&times; and 19.3&times; against rho solving one target,
+        &sect;19) &mdash; and no exponent is fitted: two priced rungs is far short of &sect;5&rsquo;s four sizes.</span>
     </div>
   </div>
 
@@ -2105,7 +2194,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
     <div class="table-scroll"><table>
       <caption><code>K_0 / GF(2^61)</code> &middot; r = 2<sup>47.21</sup> &middot; 32 targets &middot;
-        rho <code>S</code> = 0.1774 (2,263,934 steps a target, counted in the same process) &middot;
+        rho <code>S</code> = 0.0219 a target at k = 32, batch rho on the same curve (&sect;19), which every
+        <code>vs rho</code> below divides by; 0.1774 for one target alone (2,263,934 steps a target, counted in
+        the same process), the &ldquo;was&rdquo; &middot;
         floor <code>S</code> = &radic;(&pi;/2A) = 0.1135 with A = 2n = 122.
         Unit is a batched group addition (62 ns on the measuring host). The build&rsquo;s count is
         native, one addition per stored pair; probe counts are converted by a factor measured on the
@@ -2126,21 +2217,21 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       </thead>
       <tbody>
         <tr class="group"><td colspan="8">6,832 points &middot; 56 signed orbits</td></tr>
-        <tr><td>full <em>(cheapest here)</em></td><td class="n">23,341,528</td><td class="n">876,342,501</td><td class="n">2.146</td><td class="n">12.10&times;</td><td class="n">18.91&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
-        <tr><td>compact</td><td class="n">23,341,528</td><td class="n">926,956,220</td><td class="n">2.270</td><td class="n">12.79&times;</td><td class="n">20.00&times;</td><td>32/32</td><td><span title="no §3 class applies: S rose and no headline count fell — simply dearer here">—</span></td></tr>
-        <tr><td>folded</td><td class="n">194,712</td><td class="n">1,104,202,174</td><td class="n">2.704</td><td class="n">15.24&times;</td><td class="n">23.82&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 119.88x, total operations rose 26.0%"><span class="chip relabel">relabelling</span></td></tr>
+        <tr><td>full <em>(cheapest here)</em></td><td class="n">23,341,528</td><td class="n">876,342,501</td><td class="n">2.146</td><td class="n">98.0&times; <span class="was">was 12.10&times;</span></td><td class="n">18.91&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>compact</td><td class="n">23,341,528</td><td class="n">926,956,220</td><td class="n">2.270</td><td class="n">104&times; <span class="was">was 12.79&times;</span></td><td class="n">20.00&times;</td><td>32/32</td><td><span title="no §3 class applies: S rose and no headline count fell — simply dearer here">—</span></td></tr>
+        <tr><td>folded</td><td class="n">194,712</td><td class="n">1,104,202,174</td><td class="n">2.704</td><td class="n">124&times; <span class="was">was 15.24&times;</span></td><td class="n">23.82&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 119.88x, total operations rose 26.0%"><span class="chip relabel">relabelling</span></td></tr>
         <tr class="group"><td colspan="8">9,760 points &middot; 80 signed orbits</td></tr>
-        <tr><td>full</td><td class="n">47,633,680</td><td class="n">903,649,246</td><td class="n">2.213</td><td class="n">12.47&times;</td><td class="n">19.49&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
-        <tr><td>compact <em>(cheapest here)</em></td><td class="n">47,633,680</td><td class="n">880,008,741</td><td class="n">2.155</td><td class="n">12.15&times;</td><td class="n">18.98&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
-        <tr><td>folded</td><td class="n">395,280</td><td class="n">1,009,804,178</td><td class="n">2.473</td><td class="n">13.94&times;</td><td class="n">21.78&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 120.51x, total operations rose 11.7%"><span class="chip relabel">relabelling</span></td></tr>
+        <tr><td>full</td><td class="n">47,633,680</td><td class="n">903,649,246</td><td class="n">2.213</td><td class="n">101&times; <span class="was">was 12.47&times;</span></td><td class="n">19.49&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>compact <em>(cheapest here)</em></td><td class="n">47,633,680</td><td class="n">880,008,741</td><td class="n">2.155</td><td class="n">98.4&times; <span class="was">was 12.15&times;</span></td><td class="n">18.98&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>folded</td><td class="n">395,280</td><td class="n">1,009,804,178</td><td class="n">2.473</td><td class="n">113&times; <span class="was">was 13.94&times;</span></td><td class="n">21.78&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 120.51x, total operations rose 11.7%"><span class="chip relabel">relabelling</span></td></tr>
         <tr class="group"><td colspan="8">12,688 points &middot; 104 signed orbits &mdash; the width the flip was argued from</td></tr>
-        <tr><td>full</td><td class="n">80,499,016</td><td class="n">941,440,872</td><td class="n">2.305</td><td class="n">12.99&times;</td><td class="n">20.31&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
-        <tr><td>compact <em>(cheapest here)</em></td><td class="n">80,499,016</td><td class="n">887,500,874</td><td class="n">2.173</td><td class="n">12.25&times;</td><td class="n">19.15&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
-        <tr><td>folded <em>(the flip)</em></td><td class="n">666,120</td><td class="n">966,559,218</td><td class="n">2.367</td><td class="n">13.34&times;</td><td class="n">20.85&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 120.85x, total operations rose 2.7%"><span class="chip relabel">relabelling</span></td></tr>
+        <tr><td>full</td><td class="n">80,499,016</td><td class="n">941,440,872</td><td class="n">2.305</td><td class="n">105&times; <span class="was">was 12.99&times;</span></td><td class="n">20.31&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>compact <em>(cheapest here)</em></td><td class="n">80,499,016</td><td class="n">887,500,874</td><td class="n">2.173</td><td class="n">99.3&times; <span class="was">was 12.25&times;</span></td><td class="n">19.15&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>folded <em>(the flip)</em></td><td class="n">666,120</td><td class="n">966,559,218</td><td class="n">2.367</td><td class="n">108&times; <span class="was">was 13.34&times;</span></td><td class="n">20.85&times;</td><td>32/32</td><td title="relabelling: stored pairs fell 120.85x, total operations rose 2.7%"><span class="chip relabel">relabelling</span></td></tr>
         <tr class="group"><td colspan="8">18,544 points &middot; 152 signed orbits</td></tr>
-        <tr><td>full</td><td class="n">171,949,240</td><td class="n">1,117,432,188</td><td class="n">2.736</td><td class="n">15.42&times;</td><td class="n">24.11&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
-        <tr><td>compact</td><td class="n">171,949,240</td><td class="n">1,042,518,063</td><td class="n">2.553</td><td class="n">14.39&times;</td><td class="n">22.49&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
-        <tr><td>folded <em>(cheapest here)</em></td><td class="n">1,418,616</td><td class="n">982,920,004</td><td class="n">2.407</td><td class="n">13.57&times;</td><td class="n">21.20&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>full</td><td class="n">171,949,240</td><td class="n">1,117,432,188</td><td class="n">2.736</td><td class="n">125&times; <span class="was">was 15.42&times;</span></td><td class="n">24.11&times;</td><td>32/32</td><td><span class="chip">baseline</span></td></tr>
+        <tr><td>compact</td><td class="n">171,949,240</td><td class="n">1,042,518,063</td><td class="n">2.553</td><td class="n">117&times; <span class="was">was 14.39&times;</span></td><td class="n">22.49&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
+        <tr><td>folded <em>(cheapest here)</em></td><td class="n">1,418,616</td><td class="n">982,920,004</td><td class="n">2.407</td><td class="n">110&times; <span class="was">was 13.57&times;</span></td><td class="n">21.20&times;</td><td>32/32</td><td><span class="chip">engineering</span></td></tr>
       </tbody>
     </table></div>
     <div class="legend" style="padding-top:0">
@@ -2160,8 +2251,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         round does not make one &mdash; and the crossover width is calibrated at <code>n</code> = 61 on one host, so it
         is a heuristic, not a law. The sweep also pins the probing volume across widths, which makes
         13,623 an <em>upper</em> bound on the practical crossover.</span>
-      <span>Nothing here moves the standing against rho: every tier costs 12&ndash;15&times; rho&rsquo;s <code>S</code> on this
-        instance and 19&ndash;24&times; the generic floor. The tier moves the constant only, which is why no row
+      <span>Nothing here moves the standing against rho: every tier costs 98&ndash;125&times; batch rho&rsquo;s <code>S</code> at
+        k = 32 on this instance (12&ndash;15&times; rho solving one target, &sect;19) and 19&ndash;24&times; the generic floor. The tier moves the constant only, which is why no row
         carries an <span class="chip advance">advance</span> chip.</span>
     </div>
   </div>

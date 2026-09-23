@@ -844,10 +844,13 @@ Koblitz curve the cheaper of the signed-Frobenius and negation walks.
 The plain walk every report used through ledger §17 rides along as the
 before mark. `ic rho` runs the walks paired over a ladder, and
 `ic rho --reprice FILE` re-prices a frozen report against the matched
-walk (ledger §18).
+walk (ledger §18). `ic rho --batch-koblitz a/n` runs batch rho, `k`
+targets in one group solved together, which is the reference for any
+figure that amortises one build over `k` targets (ledger §19).
 
     ./target/release/ic rho --prime-bits 16,20,24 --char2-degrees 17,21,25 --runs 64
     ./target/release/ic rho --reprice docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json
+    ./target/release/ic rho --batch-koblitz 0/41 --batch-sizes 1,32 --batches 16
 
 With `--solver` (repeated once per engine), `ic descent` prices
 several registered engines on the same seeded systems instead of the

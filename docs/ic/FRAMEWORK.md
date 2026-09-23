@@ -255,6 +255,25 @@ negation walk measures `2.6`. So a frozen report's `vs rho` from before
 one against the matched walk. It first replays the frozen walk on the
 recorded seeds and refuses to re-price if any run differs.
 
+**A figure that solves `k` targets at once needs rho at the same `k`.**
+`ic bench` and `ic boundary` solve one target, so the single-target walk
+is their reference.  A pipeline that amortises one build over `k`
+targets and quotes its total over `k·√r` must divide by batch rho
+(Kuhn–Struik): `k` targets in sequence, jumps in `G` only, and one table
+of distinguished points, so a later target can finish on an earlier
+one's trail (`ic_boundary::rho_batch_with`).  At `k = 32` that costs
+about a fifth of one target alone (ledger §19).
+
+    ./target/release/ic rho --batch-koblitz 0/41,0/53 --batch-sizes 1,4,16,32 --batches 16
+
+The walk is generic over the classes it moves between
+(`ic_boundary::RhoClasses`): points, `{P, −P}`, and on a Koblitz curve
+the signed Frobenius classes (`SignedFrobeniusClasses`).  Those are
+canonicalised by the least normal-basis rotation, and `x` and `y` are
+carried there by table.  The count charges group operations only.  What
+a step's canonicalisation costs on top, in a batched unit, is measured
+by `examples/koblitz_reference_prices.rs`.
+
 ---
 
 ## 4. The stage contracts
