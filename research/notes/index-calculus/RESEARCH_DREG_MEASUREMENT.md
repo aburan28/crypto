@@ -220,43 +220,79 @@ differ in surplus — `S = −7` and `S = −2` — so yield is a third
 uncontrolled variable across the pair, the same confound recorded under
 "Next".  This is a second cell, not a scaling claim.
 
-### The blocker: the control is the whole budget
+### The control at `d_max = 6`: `n = 7` is controlled after all
 
 The note's standard is that a cell being *interpreted* is re-run with the
-controls on.  **That could not be done for `n = 7` here**, and the size of
-the obstacle is worth recording rather than leaving as a gap:
+controls on. At `d_max = 7` that does not fit on a four-core box — the
+budget table below — but it does not have to be run there. **The real
+system refutes at degree 6**, so capping `d_max = 6` still asks the
+question the control exists to answer, and the top degree is where the
+control's cost lives:
+
+| n | ℓ | m | vars | eqs | FFD | `D_refute` | gap | ctrl(shape) | **ctrl(unsat)** | `Dc` | s |
+|--:|--:|--:|-----:|----:|----:|---------:|----:|:--|:--|--:|--:|
+| 5 | 4 | 3 | 17 | 10 | 3.00 | 6.00 | 3.00 | n/a(sat) | **unres** | 6 | 517.5 |
+| **7** | 3 | 3 | 16 | 14 | 3.00 | 6.00 | 3.00 | n/a(sat) | **unres** | 6 | **92.5** |
+
+One draw a cell, controls on, same caps, `89ebde0`. **The `n = 7` cell is
+controlled**: the infeasible control — which carries *more* equations than
+the real system — does not resolve by degree 6, where the Semaev system
+refutes. That is the same structure-not-shape reading as the `n = 5` cell
+below, now at the second rung, and it cost 92.5 s rather than hours.
+
+What this version does *not* establish is the control's non-resolution at
+degree **7**, which the `n = 5` read below does establish. The comparison
+is one degree shallower, bounded exactly where the real system stops.
+
+### The budget, and a discrepancy not yet explained
 
 | run | `d_max` | draws | controls | outcome |
 |---|--:|--:|:--|---|
 | recorded above, `n = 5` | 7 | 1 | on | 494 s (this note, "Raising the caps settles it") |
 | `n = 5` | 7 | 1 | **off** | 88.7 s |
+| `n = 5` | 6 | 1 | on | 517.5 s |
+| `n = 7` | 6 | 1 | on | 92.5 s |
 | `n = 5` | 7 | 1 | **on** | **13 349 s** |
 | `n = 5` + `n = 7` | 7 | 4 | on | killed at 14 400 s, no cell emitted |
 | `n = 5` + `n = 7` | 7 | 1 | on | killed at 14 400 s; `n = 5` done at 13 349 s, `n = 7` never started |
 
 Both kills are resource limits and are not evidence about any degree.
 
-The interesting part is the third row against the first two. The
-**non-control path reproduces this note's own timing** — 88.7 s here
-against the ~89 s implied by 494 s minus its degree-7 control share — while
-the control path costs about **33×** what that 494 s figure implies. So
-this is not a slow machine and there is no evidence of a broad regression:
-something specific to the control path is far more expensive than the
-recorded figure assumes. **It has not been bisected and no regression is
-claimed here** — it is recorded because it changes what the next rung
-costs, not because its cause is known.
+**The identical command costs 27× here what this note records** — 13 349 s
+against 494 s. The internal structure is roughly preserved: this note
+attributes degree 7 about fourteen times degree 6, and the ratio measured
+here is 13 349 / 517.5 ≈ 26, the same order. A uniform environment factor
+therefore fits better than a targeted regression, and the sharpest form of
+that is the `d_max = 6` row: 517.5 s here for roughly a fourteenth of the
+work this note priced at 494 s.
 
-Two things follow for whoever plans the next run, and both are budget
-facts rather than findings:
+**No cause is established and none is claimed.** The candidates are a
+slower machine, a regression somewhere in the dense path, and a recorded
+figure that was never reproducible; nothing measured here separates them.
+A baseline build at `2795774` — the commit that introduced the 494 s row —
+run on this same box is what would, and that is item two under "Next".
 
-- `n = 7` with controls at `d_max = 7` does not fit on a machine of this
-  class; `n = 5` alone consumes the budget, and there is no `--n-min` to
-  skip it.
+**Correction.** An earlier revision of this section claimed the
+non-control path "reproduces this note's own timing", 88.7 s against "the
+~89 s implied by 494 s minus its degree-7 control share", and concluded
+the cost was specific to the control path. That was circular: the control
+share it subtracted had itself been derived by assuming the real system
+cost the same here as there. This note's own attribution is that degree-7
+work is ~466 s of the 494 s, so the real system there cost *at most* ~28 s
+against 88.7 s here — slower too, not reproduced. The `d_max = 6` row
+added above makes the point without the arithmetic. Per `AGENTS.md` §3
+this is **accounting**: nothing measured changed, and the conclusion it
+supported is withdrawn rather than restated.
+
+Two budget facts for whoever plans the next rung:
+
+- `n = 7` with controls is affordable at `d_max = 6` (92.5 s) and not at
+  `d_max = 7` on a machine of this class, where `n = 5` alone consumes the
+  budget and there is no `--n-min` to skip it.
 - The `n = 9`/`n = 15` estimate under "What it unblocks" (2.3 and 3.7 days
-  per draw) is a real-system figure and **carries no control**. If the
-  control costs anything like what it cost here, that pair with controls is
-  out of reach at this scale, and the estimate should be re-derived before
-  days are committed to it.
+  per draw) is a real-system figure and **carries no control**. Whatever
+  the 27× turns out to be, that estimate should be re-derived on the
+  machine that will run it before days are committed.
 
 No scoreboard row: this prices no variant and computes no `S` or ratio, as
 with Results 1 and 2. It is a stage diagnostic on solving degree.
@@ -398,8 +434,14 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   cargo run --release --example dreg_sweep -- --d-max 7 --trials 4 --n-max 7 --m 3 --no-control
 
-# the same pair WITH controls: does not finish. n = 5 alone took 13 349 s
-# and n = 7 never started inside 14 400 s.  See "The blocker" above.
+# the same pair WITH controls at d_max = 6, where the real system refutes:
+# 517.5 s and 92.5 s.  This is the controlled read of both cells.
+F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
+  cargo run --release --example dreg_sweep -- --d-max 6 --trials 1 --n-max 7 --m 3
+
+# the same pair WITH controls at d_max = 7: does not finish. n = 5 alone
+# took 13 349 s and n = 7 never started inside 14 400 s.  See the budget
+# table above.
 F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   cargo run --release --example dreg_sweep -- --d-max 7 --trials 1 --n-max 7 --m 3
 ```
@@ -412,12 +454,15 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   step and does not finish the job**: `n = 7` is measured at four draws,
   the gap is 3 there as at `n = 5`, and two rungs differing in `ℓ` and in
   surplus are still not a scaling claim.
-- **Re-run `n = 7` with the controls on, on a machine that can afford
-  them.**  Result 3's blocker, not a degree question: the control path cost
-  33× what this note's own 494 s figure implies, so the cell is measured
-  but not yet interpretable to this note's standard.  Worth bisecting why
-  before buying more hardware — if the control has regressed, the fix is
-  cheaper than the machine.
+- **Settle the 27×.**  The identical `d_max = 7` command costs 13 349 s
+  here against the 494 s recorded above, and nothing measured separates a
+  slower machine from a regression from a figure that never reproduced.
+  Build `2795774`, the commit that introduced that row, and run
+  `--d-max 6 --trials 1 --n-max 7 --m 3` with controls on the same box:
+  against the 517.5 s and 92.5 s above it is a direct old-code/new-code
+  read, and at ten minutes a side it is far cheaper than the `d_max = 7`
+  version of the same question.  `n = 7` at `d_max = 7` with controls
+  needs different hardware either way.
 - Give `dreg_sweep` an `--n-min`.  Every attempt at `n = 7` with controls
   re-paid `n = 5` first and died there; one flag would have made the cell
   reachable at this scale.
