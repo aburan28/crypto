@@ -1,0 +1,247 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -895,10 +895,15 @@
+ /// relations, `r^(3/5)`, so its ratio to rho grows as `r^(1/10)` rather
+ /// than `r^(1/6)`.  Everything else -- base sampler, canonical orbit names,
+ /// block scan, rows, descent -- is shared.
++///
++/// `TripleCounted` is `Triple` exactly, sized by [`counted_orbits`] and
++/// [`counted_rows`] -- a count of the four-sums a target can be -- in place
++/// of [`triple_orbits`] and [`triple_rows`].
+ #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+ pub enum Collector {
+     Pair,
+     Triple,
++    TripleCounted,
+ }
+ 
+ impl Collector {
+@@ -906,9 +911,14 @@
+     pub fn summands(self) -> usize {
+         match self {
+             Collector::Pair => 3,
+-            Collector::Triple => 4,
++            Collector::Triple | Collector::TripleCounted => 4,
+         }
+     }
++
++    /// Whether relations are found through the triple table.
++    fn is_triple(self) -> bool {
++        matches!(self, Collector::Triple | Collector::TripleCounted)
++    }
+ }
+ 
+ /// A stored triple sum `C_o + P_j + P_l`, `j ≤ l`, with the rotation that
+@@ -1027,6 +1037,64 @@
+         .unwrap_or(2)
+ }
+ 
++/// The triple collector's expected work counted rather than modelled: table
++/// entries plus rests scanned.  A fresh target is found exactly when it is a
++/// sum of four base points with a summand in one of the first `rows` orbits,
++/// which happens with chance `p = 1 − exp(−[C(|F|+3,4) − C(|F|−2n·rows+3,4)]/r)`;
++/// it needs `K` relations for rank and one descent, and each target costs
++/// `|F|` rests.  W₃ ([`triple_work`]) models `|F|·C(|F|+2,3)/r` witnesses a
++/// target, about four times the four-sums that exist.
++fn counted_work(n: u32, r: u64, orbits: usize, rows: usize) -> f64 {
++    let size = (2 * n as usize * orbits) as f64;
++    let rest = size - (2 * n as usize * rows) as f64;
++    let four = |m: f64| m * (m + 1.0) * (m + 2.0) * (m + 3.0) / 24.0;
++    let p = -(-(four(size) - four(rest)) / r as f64).exp_m1();
++    rows as f64 * size * (size + 1.0) / 2.0 + (orbits as f64 + 1.0) * size / p.max(1e-300)
++}
++
++/// Rows minimising [`counted_work`] at `orbits`, with that work.  The table
++/// term grows with the row count, so the search stops once one more row's
++/// table alone exceeds the best total.
++fn counted_rows_work(n: u32, r: u64, orbits: usize) -> (usize, f64) {
++    let size = (2 * n as usize * orbits) as f64;
++    let mut best = (1, counted_work(n, r, orbits, 1));
++    for rows in 2..=orbits {
++        if rows as f64 * size * (size + 1.0) / 2.0 >= best.1 {
++            break;
++        }
++        let w = counted_work(n, r, orbits, rows);
++        if w < best.1 {
++            best = (rows, w);
++        }
++    }
++    best
++}
++
++/// Rows for the counted collector at `orbits`.
++fn counted_rows(n: u32, r: u64, orbits: usize) -> usize {
++    counted_rows_work(n, r, orbits).0
++}
++
++/// Orbits for the counted collector: the `K ≥ 2` minimising [`counted_work`]
++/// at its own rows, under the same ceiling as [`triple_orbits`].  One row's
++/// table grows with `K`, so the search stops once it alone exceeds the best
++/// total.  A fixed function of `(n, r)`.
++fn counted_orbits(n: u32, r: u64) -> usize {
++    let limit = (usize::from(u16::MAX) / (2 * n as usize)).min(usize::from(u8::MAX)).min(64).max(2);
++    let mut best = (2, counted_rows_work(n, r, 2).1);
++    for k in 3..=limit {
++        let size = (2 * n as usize * k) as f64;
++        if size * (size + 1.0) / 2.0 >= best.1 {
++            break;
++        }
++        let (_, w) = counted_rows_work(n, r, k);
++        if w < best.1 {
++            best = (k, w);
++        }
++    }
++    best.0
++}
++
+ // ── Scalar-field rows ───────────────────────────────────────────────
+ 
+ #[inline]
+@@ -1279,6 +1347,10 @@
+                 let k3 = triple_orbits(n, r);
+                 (2 * n as usize * k3, k3)
+             }
++            Collector::TripleCounted => {
++                let k3 = counted_orbits(n, r);
++                (2 * n as usize * k3, k3)
++            }
+         };
+         if target == 0 {
+             return Err("a factor base needs at least one point".into());
+@@ -1400,17 +1472,18 @@
+                 .min_by(|&a, &b| expected_work(a).total_cmp(&expected_work(b)))
+                 .unwrap_or(orbits),
+             Collector::Triple => triple_rows(n, r, orbits),
++            Collector::TripleCounted => counted_rows(n, r, orbits),
+         };
+         let mut sums: Vec<FastPoint> = Vec::with_capacity(size);
+         let mut dens = Vec::with_capacity(size);
+         let mut scratch = Vec::with_capacity(size);
+         let mut table = PairTable::with_capacity(match collector {
+             Collector::Pair => table_rows * size,
+-            Collector::Triple => 0,
++            Collector::Triple | Collector::TripleCounted => 0,
+         });
+         let mut triple = TripleTable::with_capacity(match collector {
+             Collector::Pair => 0,
+-            Collector::Triple => table_rows * size * (size + 1) / 2,
++            Collector::Triple | Collector::TripleCounted => table_rows * size * (size + 1) / 2,
+         });
+         match collector {
+             Collector::Pair => {
+@@ -1435,7 +1508,7 @@
+                     }
+                 }
+             }
+-            Collector::Triple => {
++            Collector::Triple | Collector::TripleCounted => {
+                 // Row `o` holds `C_o + P_j + P_l` for every `j ≤ l`: the
+                 // pair sums `C_o + P_j` once, then each one plus the tail
+                 // `P_j, …, P_{|F|-1}` in one batched inversion.  A pair sum
+@@ -1489,7 +1562,7 @@
+         // already at or below 16, are unchanged.
+         let per_rest = match collector {
+             Collector::Pair => lambda_pairs * coverage(table_rows),
+-            Collector::Triple => {
++            Collector::Triple | Collector::TripleCounted => {
+                 let s = size as f64;
+                 let lambda = s * (s + 1.0) * (s + 2.0) / 6.0 / r as f64;
+                 let rest = (orbits - table_rows) as f64 / orbits as f64;
+@@ -1792,7 +1865,9 @@
+     fn find(&mut self, target: FastPoint, start: usize) -> Option<Vec<usize>> {
+         match self.collector {
+             Collector::Pair => self.decompose(target, start).map(|w| w.to_vec()),
+-            Collector::Triple => self.decompose_triple(target, start).map(|w| w.to_vec()),
++            Collector::Triple | Collector::TripleCounted => {
++                self.decompose_triple(target, start).map(|w| w.to_vec())
++            }
+         }
+     }
+ 
+@@ -2234,9 +2309,13 @@
+             if n < 13 { continue; }
+             let Some(kc) = KoblitzCurve::new(a, n) else { continue };
+             let spec = FactorBaseSpec::SubgroupOrbits { seed: 43, points: 6 * n as usize };
+-            for seed in [1u64, 2, 3] {
+-                let mut tiny = TinyIc::new_with(&kc, &spec, seed, 4096, Collector::Triple).unwrap();
+-                assert_eq!(tiny.collector(), Collector::Triple);
++            for (seed, collector) in [1u64, 2, 3]
++                .into_iter()
++                .flat_map(|s| [(s, Collector::Triple), (s, Collector::TripleCounted)])
++            {
++                let mut tiny = TinyIc::new_with(&kc, &spec, seed, 4096, collector).unwrap();
++                assert_eq!(tiny.collector(), collector);
++                assert!(collector.is_triple());
+                 assert!(tiny.columns() >= 2, "the checker needs more than one column");
+                 let mut all = Vec::new();
+                 let mut solved = false;
+@@ -2288,6 +2367,7 @@
+     fn collectors_name_their_summand_counts() {
+         assert_eq!(Collector::Pair.summands(), 3);
+         assert_eq!(Collector::Triple.summands(), 4);
++        assert_eq!(Collector::TripleCounted.summands(), 4);
+         for (n, r) in [(23u32, 4_196_903u64), (37, 230_603_167), (43, 4_644_189_029)] {
+             let k = triple_orbits(n, r);
+             assert!(k >= 2, "n={n}: {k}");
+@@ -2295,6 +2375,32 @@
+         }
+     }
+ 
++    /// The counted sizing reproduces `research/ic_triple_counted_20260923/model.py`
++    /// at the five cells its pre-registration names: three orbits at `n43a1`,
++    /// two everywhere else, one row throughout.
++    #[test]
++    fn counted_sizing_matches_its_preregistered_model() {
++        for (n, r, k) in [
++            (23u32, 4_196_903u64, 2usize),
++            (37, 230_603_167, 2),
++            (43, 4_644_189_029, 3),
++            (59, 10_063_074_221, 2),
++            (61, 11_514_943_771, 2),
++        ] {
++            assert_eq!(counted_orbits(n, r), k, "n={n}");
++            assert_eq!(counted_rows(n, r, k), 1, "n={n}");
++            assert_eq!(triple_orbits(n, r), 2, "n={n}: W3's choice, unchanged");
++        }
++        // The early stop is only a shortcut: the full search agrees.
++        for (n, r) in [(23u32, 4_196_903u64), (43, 4_644_189_029), (59, 10_063_074_221)] {
++            let full = (2..=64)
++                .flat_map(|k| (1..=k).map(move |t| (k, t)))
++                .min_by(|a, b| counted_work(n, r, a.0, a.1).total_cmp(&counted_work(n, r, b.0, b.1)))
++                .unwrap();
++            assert_eq!(full, (counted_orbits(n, r), counted_rows(n, r, counted_orbits(n, r))), "n={n}");
++        }
++    }
++
+     #[test]
+     fn seeded_chacha_matches_std_rng() {
+         use rand::{rngs::StdRng, Rng, SeedableRng};
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -330,7 +330,10 @@
+     // The fast path takes each collector only at its own summand count, so a
+     // `pair_table` job at four summands still goes to the general path, as it
+     // did before the fast path learned four.
+-    let fast = matches!((cfg.solver.as_str(), cfg.summands), ("pair_table", 3) | ("triple_table", 4));
++    let fast = matches!(
++        (cfg.solver.as_str(), cfg.summands),
++        ("pair_table", 3) | ("triple_table", 4) | ("triple_counted", 4)
++    );
+     if fast && cfg.collection_window.is_none()
+         && koblitz_tiny_ic::supports(&c, &job.factor_base, cfg.summands) {
+         return run_tiny(job, &c, &targets, metadata, start);
+@@ -472,10 +475,10 @@
+ /// field and its JSON type match the general path.
+ fn run_tiny(job: &Job, c: &KoblitzCurve, targets: &[BinaryPoint], metadata: Value, start: Instant) -> Result<Report, String> {
+     let cfg = &job.config;
+-    let collector = if cfg.solver == "triple_table" {
+-        koblitz_tiny_ic::Collector::Triple
+-    } else {
+-        koblitz_tiny_ic::Collector::Pair
++    let collector = match cfg.solver.as_str() {
++        "triple_table" => koblitz_tiny_ic::Collector::Triple,
++        "triple_counted" => koblitz_tiny_ic::Collector::TripleCounted,
++        _ => koblitz_tiny_ic::Collector::Pair,
+     };
+     let mut ic = TinyIc::new_with(c, &job.factor_base, job.algorithm_seed, cfg.max_trials, collector)?;
+     let expected_columns = ic.columns();
