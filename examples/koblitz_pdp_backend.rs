@@ -21,7 +21,8 @@ use crypto_lib::cryptanalysis::ic_framework::stages::{
     BooleanSystem, Params, SolverCost, SolverVerdict, SystemSolver,
 };
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, sym_semaev_s4, DecompositionSystem, FieldStructure, SymElement,
+    build_decomposition_system, sym_semaev_s4_fixed_x1, DecompositionSystem, FieldStructure,
+    SymElement,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     factor_x_n_minus_1, find_irreducible_sparse, invariant_subspace_basis, points_with_x,
@@ -732,7 +733,10 @@ impl F4CostAggregate {
 /// construction at the frozen `n=59, ell=9` cell, before F4 starts.  The
 /// fixed-X1 route enumerates the `2^ell` public subspace coefficients for the
 /// first summand and hands each lower-degree `2*ell`-variable system to the
-/// same full F4 engine.  Construction, every failed branch, extraction and
+/// same full F4 engine.  The fixed summand and target powers are applied as
+/// exact linear field maps, and the shared symbolic `X2*X3` product is formed
+/// once; an exhaustive unit gate proves this constructor byte-identical to the
+/// generic S4 expansion.  Construction, every failed branch, extraction and
 /// the exact curve lift all live inside one charged budget.  This is a native
 /// F4 arm, but it is intentionally reported as a different formulation from
 /// Magma's frozen direct-F4 source.
@@ -830,8 +834,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             continue;
         }
         let built = Instant::now();
-        let equations = sym_semaev_s4(
-            &SymElement::constant(&x1_value, instance.n, n_vars),
+        let equations = sym_semaev_s4_fixed_x1(
+            &x1_value,
             &x2,
             &x3,
             target_x,
@@ -933,6 +937,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "same_instance_fields":["n","ell","m","curve","algebraic_factor_base","affine_target"],
             "source_representation":instance.source_representation,
             "solver_representation":"fixed_x1_direct_symmetrised_s4_boolean",
+            "solver_constructor":"fixed_x1_constant_linear_specialisation",
             "solver_schedule":"enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
             "solver":"f4-f2",
             "solver_description":solver.describe(),
