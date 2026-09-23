@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "fetch",
+    "--locked",
+    "--manifest-path",
+    "/Volumes/SSD990/koblitz-native-f4-build-6560f4c0/source/Cargo.toml"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 1.4800684170004388,
+    "user_seconds": 0.35612299999999997,
+    "system_seconds": 0.666082,
+    "total_core_seconds": 1.022205,
+    "single_core_seconds": 1.022205,
+    "peak_rss_bytes": 112164864,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

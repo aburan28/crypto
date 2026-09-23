@@ -1,0 +1,462 @@
+{
+  "backends": [
+    {
+      "backend_report": {
+        "backend": "native-sat",
+        "conflict_budget": 100000,
+        "initial_cnf_clauses": 6495,
+        "interpretation": "Unknown is inconclusive; SAT is accepted only after exact source-row and rational point-witness validation",
+        "manifest_conflict_budget": 100000,
+        "max_models": 64,
+        "models_examined": 0,
+        "native_xor_rows": 110,
+        "nonlifting_models_blocked": 0,
+        "regenerated_source_exact": true,
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "solver_variables": 2000,
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+            "bytes": 219207,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+            "bytes": 404158,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+            "bytes": 255940,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+        "source_instance_verified": true,
+        "source_model_valid": null,
+        "source_variables": 78,
+        "source_witness_valid": null,
+        "stats": {
+          "analyze_lit_visits": 294781728,
+          "clause_lit_visits": 101980194,
+          "clause_visits": 102910259,
+          "conflicts": 100000,
+          "decisions": 105286,
+          "learnt_clauses": 99999,
+          "learnt_lits_kept": 30759408,
+          "learnt_lits_raw": 92676918,
+          "max_level": 27,
+          "phase_ns": {
+            "analyze": 10602590880,
+            "minimize": 4253961456,
+            "propagate_clauses": 7778251779,
+            "propagate_xors": 7418068313,
+            "reduce_db": 12093955
+          },
+          "propagations": 79568487,
+          "restarts": 254,
+          "xor_conflicts": 99717,
+          "xor_passes": 399577,
+          "xor_propagations": 3133350,
+          "xor_reason_lits": 89373738,
+          "xor_repivots": 8092673,
+          "xor_row_ops": 40859031,
+          "xor_row_scans": 27161498
+        },
+        "status": "unknown_inconclusive",
+        "timing_ns": {
+          "encoding": 100908838,
+          "solve": 26304467104,
+          "source_verification": 110678890
+        }
+      },
+      "command": [
+        "/home/runner/work/_temp/stage26-tools/koblitz_pdp_backend",
+        "native-sat",
+        "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+        "100000"
+      ],
+      "conflicts": 100000,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 138280960,
+        "single_core_seconds": 19.388701,
+        "system_seconds": 0.117286,
+        "total_core_seconds": 19.388701,
+        "user_seconds": 19.271415,
+        "wall_seconds": 26.543271139000012
+      },
+      "process": {
+        "command": [
+          "/home/runner/work/_temp/stage26-tools/koblitz_pdp_backend",
+          "native-sat",
+          "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+          "100000"
+        ],
+        "inputs": [
+          {
+            "bytes": 4344,
+            "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+            "sha256": "4c7815c6b9de683b5a74e41581823a55795cf23eb9d947ed442cbee200c1610a"
+          },
+          {
+            "bytes": 255940,
+            "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+            "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+          },
+          {
+            "bytes": 219207,
+            "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf",
+            "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+          },
+          {
+            "bytes": 404158,
+            "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.magma",
+            "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+          }
+        ],
+        "intent_path": "native-xor.intent.json",
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 138280960,
+          "single_core_seconds": 19.388701,
+          "system_seconds": 0.117286,
+          "total_core_seconds": 19.388701,
+          "user_seconds": 19.271415,
+          "wall_seconds": 26.543271139000012
+        },
+        "metrics_path": "native-xor.metrics.json",
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "role": "native-xor",
+        "stderr_bytes": 0,
+        "stderr_path": "native-xor.stderr",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 2179,
+        "stdout_path": "native-xor.stdout",
+        "stdout_sha256": "50f7957ecc3b7c3fcfa923efc308aae9c079c9b5136319739a7edeb21a868fcd",
+        "timed_out": false,
+        "watchdog_seconds": 120.0
+      },
+      "returncode": 0,
+      "solver": "native-xor",
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_model_valid": null,
+      "source_witness_valid": null,
+      "status": "unknown_inconclusive",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "/home/runner/work/_temp/stage26-tools/wdsat_solver",
+        "-i",
+        "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+        "-g",
+        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
+      ],
+      "conflicts": null,
+      "magma_terminal": null,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 19632128,
+        "single_core_seconds": 88.060134,
+        "system_seconds": 0.020749999999999998,
+        "total_core_seconds": 88.060134,
+        "user_seconds": 88.039384,
+        "wall_seconds": 120.00305557999997
+      },
+      "point_witness_validation": null,
+      "process": {
+        "command": [
+          "/home/runner/work/_temp/stage26-tools/wdsat_solver",
+          "-i",
+          "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+          "-g",
+          "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
+        ],
+        "inputs": [
+          {
+            "bytes": 255940,
+            "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+            "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+          }
+        ],
+        "intent_path": "wdsat.intent.json",
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 19632128,
+          "single_core_seconds": 88.060134,
+          "system_seconds": 0.020749999999999998,
+          "total_core_seconds": 88.060134,
+          "user_seconds": 88.039384,
+          "wall_seconds": 120.00305557999997
+        },
+        "metrics_path": "wdsat.metrics.json",
+        "orphan_group_terminated": false,
+        "returncode": -15,
+        "role": "wdsat",
+        "stderr_bytes": 0,
+        "stderr_path": "wdsat.stderr",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 0,
+        "stdout_path": "wdsat.stdout",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timed_out": true,
+        "watchdog_seconds": 120.0
+      },
+      "returncode": -15,
+      "solver": "wdsat",
+      "source_model_valid": null,
+      "source_witness_valid": null,
+      "status": "timeout_inconclusive",
+      "timed_out": true
+    },
+    {
+      "command": [
+        "/home/runner/work/_temp/stage26-tools/cryptominisat5",
+        "--verb",
+        "1",
+        "--threads",
+        "1",
+        "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf"
+      ],
+      "conflicts": null,
+      "magma_terminal": null,
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 69353472,
+        "single_core_seconds": 87.983526,
+        "system_seconds": 0.126468,
+        "total_core_seconds": 87.983526,
+        "user_seconds": 87.857058,
+        "wall_seconds": 120.005938571
+      },
+      "point_witness_validation": null,
+      "process": {
+        "command": [
+          "/home/runner/work/_temp/stage26-tools/cryptominisat5",
+          "--verb",
+          "1",
+          "--threads",
+          "1",
+          "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf"
+        ],
+        "inputs": [
+          {
+            "bytes": 219207,
+            "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf",
+            "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+          }
+        ],
+        "intent_path": "cryptominisat.intent.json",
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 69353472,
+          "single_core_seconds": 87.983526,
+          "system_seconds": 0.126468,
+          "total_core_seconds": 87.983526,
+          "user_seconds": 87.857058,
+          "wall_seconds": 120.005938571
+        },
+        "metrics_path": "cryptominisat.metrics.json",
+        "orphan_group_terminated": false,
+        "returncode": -15,
+        "role": "cryptominisat",
+        "stderr_bytes": 0,
+        "stderr_path": "cryptominisat.stderr",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 55031,
+        "stdout_path": "cryptominisat.stdout",
+        "stdout_sha256": "b43a2bfb9ce008ae40486df501f42d7a7d22b22a164cca563d3c5ded331a3290",
+        "timed_out": true,
+        "watchdog_seconds": 120.0
+      },
+      "returncode": -15,
+      "solver": "cryptominisat",
+      "source_model_valid": null,
+      "source_witness_valid": null,
+      "status": "timeout_inconclusive",
+      "timed_out": true
+    }
+  ],
+  "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+  "cell_id": "n59-l9-m3-standard-a1-f0",
+  "input_origin": "exact authenticated Stage-20 export; exporter not rerun",
+  "ordinal": 0,
+  "schema": "koblitz_stage26_frozen_export_task.v1",
+  "source_artifacts_after": {
+    "exports": {
+      "cryptominisat_xor_dimacs": {
+        "bytes": 219207,
+        "manifest_blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+        "path": "instance.xor.cnf",
+        "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+      },
+      "magma_boolean_f4": {
+        "bytes": 404158,
+        "manifest_blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+        "path": "instance.magma",
+        "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+      },
+      "wdsat_anf": {
+        "bytes": 255940,
+        "manifest_blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+        "path": "instance.anf",
+        "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+      }
+    },
+    "manifest": {
+      "bytes": 4344,
+      "path": "manifest.json",
+      "sha256": "4c7815c6b9de683b5a74e41581823a55795cf23eb9d947ed442cbee200c1610a"
+    }
+  },
+  "source_artifacts_before": {
+    "exports": {
+      "cryptominisat_xor_dimacs": {
+        "bytes": 219207,
+        "manifest_blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+        "path": "instance.xor.cnf",
+        "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+      },
+      "magma_boolean_f4": {
+        "bytes": 404158,
+        "manifest_blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+        "path": "instance.magma",
+        "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+      },
+      "wdsat_anf": {
+        "bytes": 255940,
+        "manifest_blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+        "path": "instance.anf",
+        "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+      }
+    },
+    "manifest": {
+      "bytes": 4344,
+      "path": "manifest.json",
+      "sha256": "4c7815c6b9de683b5a74e41581823a55795cf23eb9d947ed442cbee200c1610a"
+    }
+  },
+  "source_artifacts_unchanged": true,
+  "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+  "source_verification": {
+    "process": {
+      "command": [
+        "/home/runner/work/_temp/stage26-tools/koblitz_pdp_backend",
+        "verify-source",
+        "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json"
+      ],
+      "inputs": [
+        {
+          "bytes": 4344,
+          "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+          "sha256": "4c7815c6b9de683b5a74e41581823a55795cf23eb9d947ed442cbee200c1610a"
+        },
+        {
+          "bytes": 255940,
+          "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+          "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+        },
+        {
+          "bytes": 219207,
+          "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf",
+          "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+        },
+        {
+          "bytes": 404158,
+          "path": "/home/runner/work/_temp/stage26-n59-l9-m3-standard-a1-f0/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.magma",
+          "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+        }
+      ],
+      "intent_path": "source-verification.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 14270464,
+        "single_core_seconds": 0.080656,
+        "system_seconds": 0.003934,
+        "total_core_seconds": 0.080656,
+        "user_seconds": 0.076722,
+        "wall_seconds": 0.10913370000002942
+      },
+      "metrics_path": "source-verification.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "source-verification",
+      "stderr_bytes": 0,
+      "stderr_path": "source-verification.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 1130,
+      "stdout_path": "source-verification.stdout",
+      "stdout_sha256": "a74bba5bd1e2f277a9407af8c935755cee5bf9a8e7502974e0a336f32a1502a1",
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    "regenerated_source_exact": true,
+    "report": {
+      "ell": 9,
+      "interpretation": "The algebraic factor base, explicit affine target, source identity, and all exported equations were independently reconstructed without running a solver",
+      "n": 59,
+      "regenerated_source_exact": true,
+      "schema": "koblitz_pdp_source_verification.v1",
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_instance_verified": true,
+      "source_variables": 78,
+      "status": "verified",
+      "timing_ns": {
+        "source_verification": 103405701
+      }
+    },
+    "source_artifacts": {
+      "cryptominisat_xor_dimacs": {
+        "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+        "bytes": 219207,
+        "path": "instance.xor.cnf",
+        "valid": true
+      },
+      "magma_boolean_f4": {
+        "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+        "bytes": 404158,
+        "path": "instance.magma",
+        "valid": true
+      },
+      "wdsat_anf": {
+        "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+        "bytes": 255940,
+        "path": "instance.anf",
+        "valid": true
+      }
+    },
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "source_instance_verified": true,
+    "status": "verified"
+  },
+  "status": "terminal_outputs_recorded",
+  "target": {
+    "x": "342002423881678665",
+    "y": "482559600513111561"
+  }
+}

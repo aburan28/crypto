@@ -137,6 +137,10 @@ jobs:
           python3 scripts/test_koblitz_blind_pdp_phase_b.py --preparer target/release/koblitz_pdp_prepare --exporter "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_export" --backend "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_backend" -v
       - name: Verify terminal Phase-B result evidence
         run: python3 scripts/verify_stage20_phase_b_terminal_evidence.py
+      - name: Verify native-F4 single-target supplement
+        run: |
+          python3 scripts/verify_koblitz_stage159_native_f4.py > /tmp/stage159-native-f4-verification.json
+          cmp /tmp/stage159-native-f4-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-verification.json
       - name: Validate licensed Magma Phase-B replay packet controls
         run: |
           python3 scripts/test_koblitz_phase_b_magma_replay.py -v

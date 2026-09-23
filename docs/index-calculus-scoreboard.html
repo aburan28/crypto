@@ -592,6 +592,41 @@
       </div>
     </div>
 
+    <div class="panel" id="phase-b-native-f4-single-target">
+      <div class="panel-head">
+        <h2>Phase-B native F4, one frozen n = 59 target: a complete relation, still 33.40&times; direct MITM <span class="chip">engineering</span></h2>
+        <p>Stage 159, one authenticated <code>n=59, ell=9, m=3</code> public target. The factor base is
+          <code>span(1,z,...,z^8)</code>; no target-subgroup enumeration, factor-base log, truth class or
+          witness reaches the solver. Full <code>f4-f2</code> fixes one summand, solves the remaining
+          18-variable direct-S4 systems, then accepts only an exact three-point curve sum. This is a
+          PDP-stage diagnostic. It is a different formulation from the unexecuted licensed Magma source,
+          and it prices neither relation collection nor a logarithm.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Same mathematical target. Local rows share the arm64 host; frozen WDSat and CryptoMiniSat receipts are Linux x86_64 and are not used for wall-time ratios.</caption>
+          <thead><tr><th>Backend</th><th>Terminal</th><th>Wall s</th><th>Core s</th><th>Peak RSS</th><th>Native work</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, same local binary</td><td>SAT, group verified</td><td class="n">2.999661</td><td class="n">2.991745</td><td class="n">45.8 MB</td><td>117,015 additions; 116,635 pair entries</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Native XOR SAT, same local binary</td><td>inconclusive at 100,000 conflicts</td><td class="n">8.906472</td><td class="n">8.890455</td><td class="n">168.4 MB</td><td>100,000 conflicts</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>Native F4, fixed-X1 baseline</td><td>SAT, group verified</td><td class="n">205.702959</td><td class="n">204.982191</td><td class="n">950.9 MB</td><td>182.73 billion word XORs; 138 calls</td><td><span class="chip">baseline</span></td></tr>
+            <tr><td><strong>Native F4, skip non-rational X1</strong></td><td><strong>SAT, same witness</strong></td><td class="n"><strong>100.179380</strong></td><td class="n"><strong>99.920352</strong></td><td class="n">921.7 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">engineering</span> 2.05&times; stage gain</td></tr>
+            <tr><td>Native F4 + trace equation</td><td>SAT, same target</td><td class="n">118.368718</td><td class="n">117.960326</td><td class="n"><strong>637.3 MB</strong></td><td>138.96 billion word XORs</td><td><span class="chip">rejected</span> speed regression</td></tr>
+            <tr><td>WDSat, frozen Linux receipt</td><td>timeout, inconclusive</td><td class="n">120.003056</td><td class="n">88.060134</td><td class="n">19.6 MB</td><td>conflicts unavailable</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>CryptoMiniSat, frozen Linux receipt</td><td>timeout, inconclusive</td><td class="n">120.005939</td><td class="n">87.983526</td><td class="n">69.4 MB</td><td>conflicts unavailable before kill</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>Licensed Magma F4</td><td>not run</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td><span class="chip">missing gate</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">engineering</span> exact rational-X1 membership costs 8.8 ms and skips 73 impossible masks before the first witness mask; selected/baseline ratios are 0.487 wall, 0.487 CPU and 0.479 word XORs, with identical witness x-coordinates</span>
+        <span><span class="chip">reference</span> selected F4 remains 33.40&times; direct MITM by same-host wall and CPU, and 20.11&times; by RSS; build plus the selected run is 268.59 wall seconds / 263.87 core-seconds</span>
+        <span><span class="chip">accounting</span> conflicts are <code>null</code> for F4 and MITM because neither exposes SAT conflicts; caps and watchdogs remain censored rather than UNSAT</span>
+        <span>measured campaign lower bound: 1,596.064123 sequential wall-seconds, 1,565.839519 core-seconds, 6.31 GB maximum process RSS; complete campaign cost remains <code>null</code> because early incremental checks lacked an outer meter</span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/result.json</code>; licensed Magma, the full 160-input native-F4 panel, end-to-end IC/rho cost and independent review remain open</span>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-head">
         <h2>The solver inside S: one base, four oracles, whole runs <span class="chip">accounting</span></h2>
