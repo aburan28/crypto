@@ -12,8 +12,14 @@ linear algebra's exponent in n, and r both per curve and with rho's S pooled
 over every curve (rho's S does not depend on n, and one curve's 16 runs leave
 a standard error near 15 %).
 
+With the frozen C4 measurement as a second argument it also re-derives the
+crossover section 11.17 extrapolated at the derived r_inf range, now at the
+measured r_inf: p* = 12 C4 / (S_rho c_add (1 - r_inf)), n* = p*^4.  That is
+still an extrapolation, on the exponents n^(1/4) (relations) and n^(1/2)
+(linear algebra and rho), and is printed as one.
+
 Usage:
-    python3 scripts/summarize_quartic_la.py LA.json
+    python3 scripts/summarize_quartic_la.py LA.json [C4.json]
 """
 
 from __future__ import annotations
@@ -40,8 +46,8 @@ def main() -> None:
     s_pool = statistics.mean(all_s)
     s_se = statistics.stdev(all_s) / math.sqrt(len(all_s))
     print("| p | log2 n | |F| | rate (1/24 = 0.042) | phi (0.73) | weight (5) | LA mod-n muls | LA / N^2 (20) "
-          "| rho S, 16 runs | r (this curve's rho) | r (pooled rho) |")
-    print("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+          "| rho S, 16 runs | r (this curve's rho) | r (pooled rho) | MITM relation phase / rho (not in r) |")
+    print("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
     r_pool = []
     for r in rows:
         la_fp = r["la_ops"] * MODN
@@ -51,7 +57,7 @@ def main() -> None:
         print(f"| {r['p']} | {r['bits']:.1f} | {r['base']} | {r['decomposition_rate']:.4f} | {r['phi']:.3f} "
               f"| {r['row_weight']:.2f} | {r['la_ops']:.3e} | {r['wiedemann_constant']:.2f} "
               f"| {r['rho_s_mean']:.3f} ± {r['rho_s_sd'] / math.sqrt(len(r['rho'])):.3f} "
-              f"| {r['r']:.3f} | {rp:.3f} |")
+              f"| {r['r']:.3f} | {rp:.3f} | {r['relation_group_ops'] / (s_pool * math.sqrt(r['n'])):.1f} |")
     print()
     print(f"rho S pooled over {len(all_s)} runs on {len(rows)} curves: {s_pool:.3f} ± {s_se:.3f} (s.e.)")
     xs = [math.log(r["n"]) for r in rows]
@@ -81,6 +87,16 @@ def main() -> None:
     else:
         verdict = "CORRECTED: below 1 but outside 0.34-0.63"
     print(f"registered outcome: {verdict}")
+    if len(sys.argv) > 2:
+        c4_rep = json.load(open(sys.argv[2]))
+        c4 = statistics.mean(r["solve"]["total_muls"] for r in c4_rep["residuals"])
+        c_add = statistics.mean(r["fp_muls_per_add"] for r in rows)
+        print()
+        print(f"crossover at the measured r_inf (extrapolated; C4 = {c4:.4e}, rho S {s_pool:.3f}, "
+              f"c_add {c_add:.1f}):")
+        for name, ri in [("r_inf - unc", r_all - r_unc), ("r_inf", r_all), ("r_inf + unc", r_all + r_unc)]:
+            pstar = 12.0 * c4 / (s_pool * c_add * (1.0 - ri))
+            print(f"  {name} = {ri:.3f}: p* = 2^{math.log2(pstar):.2f}, n* = 2^{4 * math.log2(pstar):.1f}")
 
 
 if __name__ == "__main__":
