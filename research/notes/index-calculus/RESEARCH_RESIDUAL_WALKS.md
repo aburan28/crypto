@@ -2178,6 +2178,65 @@ do not care how `M_{e₁}` was reached.  There is no open lever on `C₃` left i
 this design, and none of the ones measured was worth more than its registration
 said.
 
+### 11.15 Close-out: what §11 established, and what would count now
+
+§11.14 closed the last lever this section had listed.  This is the ledger of
+all of them, in the note's unit, and the one question left open by the
+arithmetic rather than by a missing build.
+
+**The ledger.**  Every row was measured end to end and every run recovered its
+planted logarithm.  The class column is the one each section recorded; §11.4
+and §11.7 predate the practice and recorded none, so those rows say what
+moved instead of being classed after the fact.
+
+| § | lever | what moved | class, as recorded | result |
+|---|---|---|---|---|
+| 11.4 | `O(1)` Gröbner solve replaces the loop over the base | relation phase `n^{0.69} → n^{1/3}` | — | `C₃ = 4.82·10⁶`, flat in `n`; dearer than the loop below `n ≈ 2^{34}` |
+| 11.5 | honest multiplication count | the count, not the algorithm | accounting | `C₃ = 3.23·10⁶` |
+| 11.5 | echelon form with back-substitution | `C₃` | engineering | `1.53·10⁶` |
+| 11.6 | Macaulay's row selection | `C₃` | engineering | `0.879·10⁶` |
+| 11.8 | no retries once the border is unreachable | `C₃` | engineering | `0.876·10⁶` |
+| 11.7 | Wiedemann with filtering | linear algebra `n^{0.85} → n^{0.68}` | engineering | plain method bottoms at `≈ 200×` rho near `2^{50}`, then rises |
+| 11.7 | double large primes, `\|F'\| = \|F\|^{2/3}` | total exponent `0.32 → 0.44`, *below* rho's `1/2` | — | `1,989×` rho at `2^{33.1}` (`3.8×` the plain method's work), closing as `n^{-1/18}` |
+| 11.9 | Joux–Vitse: decompose into `k − 1 = 2` points | `C₃ → 1,513`, `580×`; residuals `n^{1/3} → n^{2/3}` | advance below `2^{28.5}`, relabelling above | `1,037×` rho at `2^{33.1}`, exponent worse |
+| 11.11 | merge-level cap on the large-prime eliminator | solve exponent `−0.045 ± 0.017`, merge `+0.043 ± 0.030` | engineering, negative | end to end `+0.051 ± 0.031` **worse** |
+| 11.14 | border basis (demand-driven elimination) | `C₃` by at most `0.19 %` | accounting (ceiling) + engineering | `1.0009×` pooled; off by default |
+
+**The verdict, restated with nothing left to try at `k = 3`.**  On
+`E(F_{p³})` the best variant measured is the plain method at `528×` rho
+(`2^{33.1}`).  Its linear algebra grows as `n^{0.68}`, faster than rho's
+`n^{1/2}`, so it bottoms near `200×` rho around `2^{50}` and loses ground
+after.  The double-large-prime variant is the only one with an exponent below
+rho's — `n^{0.424 ± 0.016}` end to end over six seeds, against the theorem's
+`4/9` — and it closes the measured `1,989×` at `n^{-1/18}`: past `2^{230}`,
+extrapolated on those two exponents.  The four constant levers since §11.4
+bought `5.5×` on `C₃`, and §11.12 showed before the last of them that no `C₃`
+lever can move an exponent, because `C₃` is flat in `n`.
+
+**What would count now is a change in the closing rate, not in a constant.**
+Two exponents set it: the relation phase's, and the linear algebra's over
+`|F| ∝ n^{1/k}` unknowns.  At `k = 3` the linear algebra is the obstacle —
+`|F|² ∝ n^{2/3}` for any sparse solver — and the large-prime cure trades it
+for a residual count that closes only at `n^{-1/18}`.  **The one structural
+lever left is the extension degree.**  Derived, not measured: at `k = 4`,
+`|F| ∝ n^{1/4}`, so the linear algebra is `|F|² ∝ n^{1/2}` — *the same
+exponent as rho* — and the relation phase is `k!·|F|·C₄ ∝ n^{1/4}`.  The plain
+method's `S / rho` then tends to a constant, the ratio of the sparse solver's
+constant to rho's, instead of growing without bound as it does at `k = 3`.
+Whether that constant is below one, and at what size the relation phase stops
+dominating, depends on `C₄`, the cost of one `S₅` solve over `F_{p⁴}`, which
+nothing in this module has measured.  §11.16 registers that experiment.
+
+**What does not count, and is not worth building here:**
+
+- any lever on `C₃`, `C₄` or the linear-algebra constant at fixed `k`: flat in
+  `n`, `engineering` by construction (§11.12);
+- Mourrain's full border-basis iteration for the residuals whose staircase is
+  not the generic one: `0–7` residuals per run of thousands, already solved
+  correctly by the fallback oracle, and unable to move cost (§11.14);
+- a larger merge cap, a different large-prime budget, or a different small
+  base at `k = 3`: §11.11 measured the family and the method got worse.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,
