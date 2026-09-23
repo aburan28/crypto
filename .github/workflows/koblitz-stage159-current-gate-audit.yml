@@ -33,6 +33,10 @@ jobs:
           python3 scripts/compose_koblitz_stage128_gate_audit.py verify \
             --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-128-current-gate-audit-20260922 \
             > "$RUNNER_TEMP/stage128-historical-audit.json"
+          python3 scripts/verify_koblitz_stage159_native_f4.py \
+            > "$RUNNER_TEMP/stage159-result-verification.json"
+          cmp "$RUNNER_TEMP/stage159-result-verification.json" \
+            research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-verification.json
           python3 scripts/compose_koblitz_stage159_gate_audit.py verify \
             --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-current-gate-audit-20260922 \
             > "$RUNNER_TEMP/stage159-current-audit.json"

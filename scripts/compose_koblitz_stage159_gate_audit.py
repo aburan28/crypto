@@ -49,7 +49,11 @@ def replay(script: str, *args: str) -> dict[str, Any]:
         cwd=REPO,
         text=True,
         capture_output=True,
-        check=True,
+        check=False,
+    )
+    require(
+        completed.returncode == 0,
+        f"{script} replay failed ({completed.returncode}): {completed.stderr.strip()}",
     )
     value = json.loads(completed.stdout)
     require(isinstance(value, dict), f"{script} replay must be an object")
