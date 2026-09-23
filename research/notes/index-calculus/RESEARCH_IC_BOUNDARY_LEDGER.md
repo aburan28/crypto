@@ -3207,6 +3207,19 @@ recorded, and any crossing it implies is extrapolated from the six
 sizes 24–34 and marked as extrapolation.  Either way it is a stage
 diagnostic: no whole-method `S` exists at these sizes.
 
+**Amendment, before the thirty-four-unknown cell was rerun.**  The
+declaration above says the vector search's lanes reach thirty-six
+unknowns; they do, but a lane holds 32 equations and `33:17:2` has 33,
+so on the first run (`results/hybrids_v2/`) the search declined that
+cell and it had no exhaustive reference at all — the comparison fell
+back to `inherited-f4` checking itself.  The search now walks the
+first 32 equations and filters its candidates with the rest, as libfes
+does for more equations than a word (about `2^{n−32}` spurious
+candidates a call), tested against the scalar search on systems of 33
+to 55 equations.  The cell is rerun on both seeds, unchanged otherwise
+(`hybrids_34_20260923.json`, `results/hybrids_v3/`); the first run's
+rows are kept and read only at thirty-two unknowns.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

@@ -566,7 +566,7 @@ impl SystemSolver for FesWide {
     }
 
     fn describe(&self) -> String {
-        "fast exhaustive search over 8 (AVX2) or 16 (AVX-512) sub-cubes per Gray-code step where the system fits the lanes (≤ 32 equations), the scalar search otherwise: quadratic systems".into()
+        "fast exhaustive search over 8 (AVX2) or 16 (AVX-512) sub-cubes per Gray-code step, the first 32 equations in the lanes and the rest as a filter; the scalar search where the lanes do not fit: quadratic systems".into()
     }
 
     fn accepts(&self, shape: &SystemShape) -> bool {
@@ -579,7 +579,9 @@ impl SystemSolver for FesWide {
             return false;
         };
         let k = lanes.trailing_zeros() as usize;
-        shape.n_vars <= 32 + k && shape.n_equations <= 32 && shape.degrees.iter().all(|&d| d <= 2)
+        // More than 32 equations: the lanes walk the first 32 and the
+        // rest filter the candidates (see `solve`).
+        shape.n_vars <= 32 + k && shape.degrees.iter().all(|&d| d <= 2)
     }
 
     fn solve(
@@ -598,16 +600,23 @@ impl SystemSolver for FesWide {
                 QuadraticForm::from_anf_row(&crate::cryptanalysis::wdsat_oracle::AnfRow::from_poly(p), n)
             })
             .collect();
-        let Some((points, lanes)) = forms.as_deref().and_then(|fs| gray_find_all_wide(fs, usize::MAX)) else {
+        // A lane holds 32 equations.  With more, the walk enumerates the
+        // roots of the first 32 — a superset of the system's — and every
+        // candidate is checked against all the equations below, as
+        // libfes does: about `2^{n−32}` spurious candidates per call.
+        let found = forms.as_deref().and_then(|fs| gray_find_all_wide(&fs[..fs.len().min(32)], usize::MAX));
+        let Some((candidates, lanes)) = found else {
             // No lanes on this host, or a system the lanes do not fit:
             // the scalar walk, which reports its own unit.
             return FesF2.solve(system, params, budget);
         };
         let mut tests = 0u64;
-        let points = verified(points, system, &mut tests);
+        let candidate_count = candidates.len() as u64;
+        let points = verified(candidates, system, &mut tests);
         let mut extra = BTreeMap::new();
         extra.insert("points".into(), 1u64 << n);
         extra.insert("lanes".into(), lanes as u64);
+        extra.insert("candidates".into(), candidate_count);
         extra.insert("verification_tests".into(), tests);
         let cost = SolverCost {
             // Two vector XORs per Gray-code step, one step per `lanes`
@@ -984,6 +993,45 @@ mod tests {
                 "{} said {verdict:?} on an unsatisfiable system",
                 solver.name()
             );
+        }
+    }
+
+    /// **With more equations than a lane holds**, the vector search
+    /// walks the first 32 and filters with the rest; the answer must be
+    /// exactly the scalar search's, which packs up to 64 in a word.
+    #[test]
+    fn the_wide_search_filters_the_equations_past_a_lane() {
+        use rand::{Rng, SeedableRng};
+        if crate::cryptanalysis::mq_fes::wide_lanes().is_none() {
+            return;
+        }
+        let mut rng = rand::rngs::StdRng::seed_from_u64(33);
+        for trial in 0..12usize {
+            let n = 10 + trial % 7;
+            let m = 33 + trial * 2;
+            let planted: u64 = rng.gen::<u64>() & ((1u64 << n) - 1);
+            let mut sys = random_quadratic(n, m, &mut rng);
+            // Make `planted` a root so the answer is never trivially empty.
+            for e in &mut sys.equations {
+                if e.eval(planted) != 0 {
+                    *e = e.add(&F2BoolPoly::one(n));
+                }
+            }
+            let shape = sys.shape();
+            assert!(FesWide.accepts(&shape) && FesF2.accepts(&shape));
+            let (wide, cost) = FesWide.solve(&sys, &Params::default(), None);
+            let (scalar, _) = FesF2.solve(&sys, &Params::default(), None);
+            let sorted = |v: SolverVerdict| match v {
+                SolverVerdict::Solved(mut s) => {
+                    s.sort_unstable();
+                    s
+                }
+                other => panic!("trial {trial}: {other:?} on a system with a planted root"),
+            };
+            let (wide, scalar) = (sorted(wide), sorted(scalar));
+            assert!(scalar.contains(&planted));
+            assert_eq!(wide, scalar, "trial {trial} (n = {n}, m = {m})");
+            assert!(cost.op_unit.starts_with("vector XORs"), "the lanes ran: {}", cost.op_unit);
         }
     }
 
