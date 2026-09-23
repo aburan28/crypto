@@ -377,6 +377,64 @@ comparison for some `m`, that `m` is inconclusive rather than flat.
 A single `n` is the test the note committed to, not a replication.  A
 second `n` follows only if this one is not inconclusive.
 
+### 8.1 Outcome: inconclusive, under every reading
+
+Appended after the run; §8 above is unchanged.  **Artefact:**
+`docs/ic/runs/ic-descent-surplus-n11-2026-09-23.json` (status `complete`,
+2 333 s, built at `0bb6f78`, binary blake3 `e1425639…`, four-core Xeon
+container at 2.80 GHz).
+
+| `m` | `n'` | vars | `S` | `D_sr` | `D_av` (K) | **`D_av/D_sr` (K)** | (R) | floored? | budget |
+|--:|--:|--:|--:|:--|--:|--:|--:|:--|:--|
+| 2 | 2 | 4 | `+7` | 2 | 1.88 | 0.938 | 0.688 | **yes** (input degree 2) | |
+| 2 | 3 | 6 | `+5` | 2–3 | 2.00 | 1.000 | 1.000 | on some targets | |
+| 2 | 4 | 8 | `+3` | 3 | 2.00 | 0.667 | 0.667 | | |
+| 2 | 5 | 10 | `+1` | 3–4 | 2.62 | 0.875 | 0.917 | | |
+| 2 | 6 | 12 | `−1` | 4 | 3.00 | 0.750 | 0.750 | | |
+| 3 | 2 | 6 | `+5` | 5–6 | 5.38 | 1.075 | 1.406 | **yes** (input degree ≤ 6) | |
+| 3 | 3 | 9 | `+2` | 7 | 7.00 | 1.000 | 1.000 | | |
+| 3 | 4 | 12 | `−1` | 8 | ≥ 9.00 | **≥ 1.125** | ≥ 1.125 | | **8/8 hit the 120 s budget** |
+
+Input degrees are the code's, not inferred: `S₃` descends to quadratics and
+`S₄` to degree at most six (`pq_descent_symbolic.rs`).  The table's
+`d_poly` column is not used for the confound; it tracks the degree *reached*
+and rises with `n'`.
+
+The rule applied three ways, so the verdict does not rest on a reading chosen
+after the fact:
+
+| reading of the confound clause | `m = 2` | `m = 3` | verdict |
+|---|---|---|---|
+| ignored | `−0.19`: moves | `+0.05`, a lower bound: flat on its face | **inconclusive** |
+| a floored endpoint voids that `m` | void | void | **inconclusive** |
+| drop floored cells, compare the rest | `+0.08` | `≥ +0.125`: moves | **inconclusive** |
+
+**§4's scoping rule is neither withdrawn nor supported.**  It stands as an
+untested derivation, and by §8 no second `n` follows.
+
+**What the run shows, which is not the verdict.**
+
+- **The test was underpowered, and that is the design's fault.**  At `m = 2`
+  adjacent cells read `0.938, 1.000, 0.667, 0.875, 0.750`: cell-to-cell
+  scatter of `0.33` at eight targets, against a decision threshold of `0.10`
+  on two endpoints.  A rule that compares endpoints cannot resolve an effect
+  smaller than the scatter it sits in.  A re-run should register a slope in
+  `S` with an interval, over enough targets that the interval is narrower
+  than the effect it is looking for.
+- **Koblitz and random curves agree** at six of eight cells, exactly
+  (`1.000`, `0.667`, `0.750`, `1.000`, `≥ 1.125`) or nearly (`0.875` vs
+  `0.917`).  They differ only at the two floored cells.  So whatever this
+  ratio measures, it is not Koblitz structure.
+- **At `m = 3` no measured cell has a degree advantage over a structureless
+  system of the same shape**: `1.000` at `S = +2` and at least `1.125` at the
+  square cell.
+- **The part of the axis that matters most is out of reach here.**  The
+  `m = 3` square cell — twelve unknowns, eleven equations — ran out of the
+  120 s budget on all eight targets.  That is a resource limit and says
+  nothing about its degree beyond the lower bound printed.  The regime §3
+  argues the attack is driven towards, `S → 0` at `m ≥ 3`, is where this
+  engine stops, at `n = 11`.
+
 ## References
 
 - **I. Semaev**, *Summation polynomials and the discrete logarithm problem on
