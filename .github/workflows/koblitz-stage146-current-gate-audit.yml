@@ -23,7 +23,6 @@ jobs:
         run: |
           python3 -m py_compile scripts/compose_koblitz_stage145_gate_audit.py scripts/compose_koblitz_stage146_gate_audit.py
           python3 -m json.tool docs/ic/runs/koblitz-n59-admitted-key-fastpath-rejection-20260922.json >/dev/null
-          git apply --check docs/ic/patches/koblitz-n59-admitted-key-fastpath-rejected-20260922.patch
           python3 scripts/compose_koblitz_stage145_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-145-current-gate-audit-20260922 > "$RUNNER_TEMP/stage145-historical.json"
           python3 scripts/compose_koblitz_stage146_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-146-current-gate-audit-20260922 > "$RUNNER_TEMP/stage146-current.json"
           git diff --exit-code

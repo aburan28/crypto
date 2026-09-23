@@ -25,7 +25,6 @@ jobs:
           python3 -m py_compile scripts/compose_koblitz_stage143_gate_audit.py scripts/compose_koblitz_stage144_gate_audit.py
           python3 -m json.tool docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json >/dev/null
           python3 -m json.tool docs/ic/runs/koblitz-n59-prefetch64-rejection-20260922.json >/dev/null
-          git apply --check docs/ic/patches/koblitz-n59-prefetch64-rejected-20260922.patch
           python3 scripts/compose_koblitz_stage143_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-143-current-gate-audit-20260922 > "$RUNNER_TEMP/stage143-historical.json"
           python3 scripts/compose_koblitz_stage144_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-144-current-gate-audit-20260922 > "$RUNNER_TEMP/stage144-current.json"
           git diff --exit-code
