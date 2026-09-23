@@ -6,10 +6,12 @@
 # `test_pairtable_emu.cpp`: their bodies are plain C++ once `__global__`
 # and the thread indices are supplied, so that test compiles them as host
 # functions and runs them once per emulated thread.  The folded one is
-# checked against the table the CPU itself stored (`vec_fold.h`).  What
-# stays uncovered is how a kernel *runs* on a device — launch geometry,
-# occupancy, concurrency, and whatever nvcc does differently from g++ —
-# not what it computes.
+# checked against the table the CPU itself stored (`vec_fold.h`), and its
+# table is then loaded by `PairSumTable::from_folded_parts` and probed
+# (`examples/load_fold_table.rs`).  The second job compiles every kernel
+# with nvcc.  What stays uncovered is how a kernel *runs* on a device —
+# launch geometry, occupancy, concurrency — not what it computes or
+# whether it builds.
 #
 # That matters most for `pt_canon`, the folded pair table's key.  Its
 # correctness is not a thing a reviewer can eyeball: it has to name
@@ -33,6 +35,8 @@ on:
       # to how the CPU builds one moves what the fold kernel must match.
       - 'examples/dump_fold_vectors.rs'
       - 'src/cryptanalysis/koblitz_index_calculus.rs'
+      # `make test` ends by loading the emulated kernel's table with this.
+      - 'examples/load_fold_table.rs'
       - '.github/workflows/gpu-ecc2k-host-verification.yml'
 jobs:
   host-tests:
@@ -50,6 +54,31 @@ jobs:
       # and the pair-table kernels themselves run on the host.  The two
       # pair-table ones decline for `ecc2k95` at m = 97 > 62, which is
       # `pt_low64`'s ceiling and `FrobeniusCanon`'s too, and say so
-      # rather than passing silently.
+      # rather than passing silently.  Then the round trip: the folded
+      # tables the emulated kernel built, loaded and probed on the CPU.
       - name: Host tests for the ecc2k kernels
         run: make -C gpu/ecc2k test
+
+  # The same kernels through nvcc, for Hopper and both Blackwell targets.
+  # The host tests compile them with g++ behind a shim and the walk has
+  # been compiled with clang; this is the compiler a device build uses,
+  # with warnings as errors.  Compile only: no GPU, no driver.
+  nvcc-compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      # nvcc and the runtime headers from NVIDIA's apt repository, nothing
+      # else.  12.9 is the ptxas the occupancy tables in the README quote,
+      # and the first 12.x with all of sm_90, sm_100 and sm_120.
+      - name: Install nvcc
+        run: |
+          curl -sSfLO https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+          sudo dpkg -i cuda-keyring_1.1-1_all.deb
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends cuda-nvcc-12-9 cuda-cudart-dev-12-9
+          echo /usr/local/cuda-12.9/bin >> "$GITHUB_PATH"
+      - name: Compile every ecc2k kernel with nvcc
+        run: make -C gpu/ecc2k nvcc-check
