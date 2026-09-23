@@ -3135,6 +3135,49 @@ reported as seed-dependent.  Thirty unknowns is recorded, not graded.
 This was declared after the numbers it checks were read, and says so:
 it can weaken the finding or support it, not create it.
 
+### 17.4 Is the reference strong enough?  Declared before the vector search ran
+
+The crossing of §17.3 is against this repository's fast exhaustive
+search: a faithful port of libfes-lite's scalar kernel — every equation
+one bit of a 64-bit word, sixteen Gray-code steps unrolled per focus
+advance, two word XORs a point — measured at `0.58 ns` a point on this
+host, about 1.2 cycles at its 2.1 GHz base clock.  That is close to what
+a scalar walk can do, and it is not the best exhaustive search there
+is.  libfes-lite's vector kernels fix a few variables differently in
+each lane of a SIMD register and walk every lane's sub-cube with one
+Gray code: the quadratic part of the free variables is the same in
+every lane, so one broadcast second derivative and one vector XOR
+advance them all.  With at most 32 equations a 32-bit lane holds a
+system, so AVX-512 walks sixteen sub-cubes a step.  §1 asks for the best
+algorithm that already solves the problem, and a crossing against a
+reference that a known technique makes several times faster may be a
+crossing of the implementation rather than of the algorithm.  So the
+reference is strengthened before the crossing is read as anything:
+
+- **`fes-f2-wide`** (new): libfes-lite's unrolled kernel with the
+  first-derivative table held as vectors of 32-bit lanes — sixteen on
+  AVX-512, eight on AVX2 — and the second derivatives broadcast;
+  `2^{n−4}` vector steps for `2^n` points.  It is checked against the
+  scalar search on random systems with planted roots from the smallest
+  size the unrolled chunk takes to 32 equations, and it joins the
+  registry's agreement tests with every other engine.
+- **The check** (`strength_20260923.json`, results in
+  `results/strength_v1/`): `crossbred-f2`, `fes-f2`, `fes-f2-wide` and
+  `inherited-f4` on `23:12:2`, `25:13:2`, `27:14:2` and `29:15:2`
+  (twenty-four to thirty unknowns), both seeds, both families where an
+  instance exists, the suite's protocol otherwise.  `fes-f2-wide` is the
+  reference wherever it applies.
+
+**The crossing stands** if `crossbred-f2 / fes-f2-wide` is below one
+with its interval below one at some size on both seeds.  **If it does
+not**, §17.3's crossing is recorded as a crossing of the scalar
+reference only, and the size at which the strengthened reference would
+be crossed is extrapolated from the measured ratios and marked as
+extrapolation.  Either way the vector search replaces the scalar one as
+the stage reference from here on, and the frozen suite's rows against
+`fes-f2` stay as they are, labelled with the reference they were read
+against.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

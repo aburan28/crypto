@@ -211,7 +211,7 @@ def main():
     # Target 3: a stage crossover against fes-f2.
     crossings = []
     for c in two:
-        if c["reference"] != "fes-f2":
+        if c["reference"] not in ("fes-f2", "fes-f2-wide"):
             continue
         for e in alg:
             ci = c["engines"].get(e, {}).get("vs_reference")
@@ -224,7 +224,7 @@ def main():
     for e in alg:
         by_vars = defaultdict(list)
         for c in two:
-            if c["reference"] == "fes-f2" and e in c["engines"]:
+            if c["reference"] in ("fes-f2", "fes-f2-wide") and e in c["engines"]:
                 by_vars[c["vars"]] += c["engines"][e]["_vs_ref_pairs"]
         traj[e] = {v: bootstrap_median(p, boot["resamples"], boot["seed"] ^ v, boot["interval"]) for v, p in sorted(by_vars.items()) if p}
     gaining = {e: (t[26]["median"] < t[16]["median"]) if (t.get(26) and t.get(16)) else None for e, t in traj.items()}

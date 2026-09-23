@@ -21,16 +21,18 @@
 //! | `xl-f2` | XL: multiply out to a degree, then linearise | monomial operations (modelled) |
 //! | `sat-cdcl` | CDCL with Tseitin monomials and native parity rows | conflicts |
 //! | `fes-f2` | fast exhaustive search, libfes-lite Gray code, quadratic systems only | word XORs (Gray-code steps) |
+//! | `fes-f2-wide` | the same over 8 or 16 sub-cubes per step in the lanes of an AVX2 or AVX-512 register, ≤ 32 equations | vector XORs (Gray-code steps) |
 //! | `exhaustive` | evaluate every equation at every point, stopping at the first that fails | monomial tests |
 //!
-//! The two exhaustive searches are not strawmen.  They are the
+//! The exhaustive searches are not strawmen.  They are the
 //! **reference** the others are measured against, in the sense
 //! `AGENTS.md` §1 means: the best algorithm that already solves the same
-//! problem, priced in the same unit on the same instances.  `fes-f2` is
-//! the stronger of the two wherever it applies — two XORs per point of
-//! `{0,1}^n` against a pass over the terms — and a solver that cannot
-//! beat it on a cell has not earned its place in that cell, however good
-//! its asymptotics are said to be.
+//! problem, priced in the same unit on the same instances.  `fes-f2-wide`
+//! is the strongest wherever it applies, `fes-f2` next — two XORs per
+//! point of `{0,1}^n`, or per sixteen points in the vector form, against
+//! a pass over the terms — and a solver that cannot beat the strongest
+//! one on a cell has not earned its place in that cell, however good its
+//! asymptotics are said to be.
 //!
 //! ## Why every unit here is qualified
 //!
@@ -547,6 +549,77 @@ impl SystemSolver for FesF2 {
     }
 }
 
+/// The same search with the last three or four unknowns fixed per
+/// 32-bit lane of a vector register, so one Gray-code walk enumerates 8
+/// (AVX2) or 16 (AVX-512) sub-cubes at once
+/// ([`crate::cryptanalysis::mq_fes::gray_find_all_wide`]): the vector form
+/// of libfes-lite's enumeration.  It is the strongest exhaustive search
+/// this host runs for the shape: the lanes wherever the host has the
+/// instructions and the system fits them (at most 32 equations, one per
+/// lane bit, and enough unknowns for the unrolled walk), the scalar
+/// [`FesF2`] otherwise, and the unit it reports says which ran.
+pub struct FesWide;
+
+impl SystemSolver for FesWide {
+    fn name(&self) -> &str {
+        "fes-f2-wide"
+    }
+
+    fn describe(&self) -> String {
+        "fast exhaustive search over 8 (AVX2) or 16 (AVX-512) sub-cubes per Gray-code step where the system fits the lanes (≤ 32 equations), the scalar search otherwise: quadratic systems".into()
+    }
+
+    fn accepts(&self, shape: &SystemShape) -> bool {
+        FesF2.accepts(shape)
+    }
+
+    fn solve(
+        &self,
+        system: &BooleanSystem,
+        params: &Params,
+        budget: Option<Duration>,
+    ) -> (SolverVerdict, SolverCost) {
+        use crate::cryptanalysis::mq_fes::{gray_find_all_wide, QuadraticForm};
+        let started = Instant::now();
+        let n = system.n_vars;
+        let forms: Option<Vec<QuadraticForm>> = system
+            .equations
+            .iter()
+            .map(|p| {
+                QuadraticForm::from_anf_row(&crate::cryptanalysis::wdsat_oracle::AnfRow::from_poly(p), n)
+            })
+            .collect();
+        let Some((points, lanes)) = forms.as_deref().and_then(|fs| gray_find_all_wide(fs, usize::MAX)) else {
+            // No lanes on this host, or a system the lanes do not fit:
+            // the scalar walk, which reports its own unit.
+            return FesF2.solve(system, params, budget);
+        };
+        let mut tests = 0u64;
+        let points = verified(points, system, &mut tests);
+        let mut extra = BTreeMap::new();
+        extra.insert("points".into(), 1u64 << n);
+        extra.insert("lanes".into(), lanes as u64);
+        extra.insert("verification_tests".into(), tests);
+        let cost = SolverCost {
+            // Two vector XORs per Gray-code step, one step per `lanes`
+            // points; the per-lane table setup is negligible beside it.
+            ops: 2 * ((1u64 << n) / lanes as u64),
+            op_unit: format!("vector XORs (Gray-code steps, {lanes} lanes of 32 bits)"),
+            wall_ns: started.elapsed().as_nanos() as u64,
+            peak_bytes: 0,
+            degree_reached: None,
+            solving_degree: None,
+            timed_out: false,
+            extra,
+        };
+        if points.is_empty() {
+            (SolverVerdict::Unsatisfiable, cost)
+        } else {
+            (SolverVerdict::Solved(points), cost)
+        }
+    }
+}
+
 // ── Buchberger over the boolean ring ───────────────────────────────
 
 /// The repository's boolean-ring Buchberger, with the coprime and
@@ -807,6 +880,7 @@ pub fn solver_registry() -> Vec<Box<dyn SystemSolver>> {
         Box::new(XlF2),
         Box::new(SatCdcl),
         Box::new(FesF2),
+        Box::new(FesWide),
         Box::new(Exhaustive),
     ]
 }

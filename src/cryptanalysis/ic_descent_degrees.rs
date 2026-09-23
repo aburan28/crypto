@@ -484,9 +484,10 @@ fn median(mut xs: Vec<f64>) -> f64 {
 /// seed)`, so the cell is the frozen §14/§16 cell; every engine solves
 /// every target `repeats` times, interleaved per target with the engine
 /// order rotated each repetition, so host drift falls on all of them
-/// alike.  The reference engine — `fes-f2` where it applies, else
-/// `exhaustive`, else the first listed — sets the answers every other
-/// engine is checked against.
+/// alike.  The reference engine — the strongest exhaustive search listed
+/// that applies (`fes-f2-wide`, then `fes-f2`, then `exhaustive`), else
+/// the first listed engine that enumerates every solution — sets the
+/// answers every other engine is checked against.
 #[allow(clippy::too_many_arguments)]
 pub fn price_engine_cell(
     engines: &[(String, Box<dyn crate::cryptanalysis::ic_framework::stages::SystemSolver>, crate::cryptanalysis::ic_framework::stages::Params)],
@@ -579,7 +580,7 @@ pub fn price_engine_cell(
     // the first listed engine that enumerates every solution — a
     // first-solution engine cannot say what the full answer is.
     let applies = |name: &str| engines.iter().any(|(n, s, _)| n == name && s.accepts(&shape));
-    let reference = ["fes-f2", "exhaustive"]
+    let reference = ["fes-f2-wide", "fes-f2", "exhaustive"]
         .into_iter()
         .find(|r| applies(r))
         .map(str::to_string)

@@ -340,12 +340,14 @@ What ships behind it (`ic bench --list` prints each one's parameters):
 | `xl-f2` | XL: multiply out to degree `n_vars`, linearise | monomial operations (modelled) | declines above 10 unknowns |
 | `sat-cdcl` | CDCL with Tseitin monomials and native parity rows; **one model per call** | conflicts | `sat_conflict_budget` |
 | `fes-f2` | fast exhaustive search, libfes-lite's Gray code: two word XORs per point | word XORs (Gray-code steps) | quadratic systems, ≤ 32 unknowns, ≤ 64 equations |
+| `fes-f2-wide` | the same over 16 (AVX-512) or 8 (AVX2) sub-cubes per Gray-code step, the last four or three unknowns fixed per 32-bit lane; the scalar walk where the lanes do not fit ([`mq_fes.rs`](../../src/cryptanalysis/mq_fes.rs)) | vector XORs (Gray-code steps, *k* lanes) | quadratic systems; lanes need ≤ 32 equations |
 | `exhaustive` | every equation at every point, stopping at the first that fails | monomial tests (performed) | 26 unknowns |
 
-The two exhaustive searches are the **reference**, not a strawman:
-`fes-f2` wherever the system is quadratic (every two-summand descent),
-`exhaustive` where it is not. An engine that does not beat them on a
-cell has not earned that cell.
+The exhaustive searches are the **reference**, not a strawman:
+`fes-f2-wide` (or `fes-f2` on a host without the vector instructions)
+wherever the system is quadratic (every two-summand descent),
+`exhaustive` where it is not. An engine that does not beat the
+strongest of them on a cell has not earned that cell.
 
 The contract is short and all of it matters:
 
@@ -648,7 +650,7 @@ worse than none:
 | factor base | `FactorBaseBuilder` | `prime-abscissa`, `binary-subspace`, `koblitz-orbit` |
 | targets | `Targets` | `random`, `walk` |
 | point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic` |
-| polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `exhaustive` |
+| polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `fes-f2-wide`, `exhaustive` |
 | relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 
 `ic bench --list` prints this with every parameter each plug-in reads.
