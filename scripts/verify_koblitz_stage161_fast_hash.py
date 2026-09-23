@@ -202,9 +202,8 @@ def verify() -> dict[str, Any]:
     )
     require(
         'id="phase-b-native-f4-single-target"' in scoreboard
-        and "still 20.22&times; direct MITM" in scoreboard
         and "60.645599" in scoreboard,
-        "canonical scoreboard lacks Stage 161",
+        "canonical scoreboard no longer retains Stage 161",
     )
     return {
         "schema": "koblitz_stage161_fast_hash_verification.v1",

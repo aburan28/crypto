@@ -594,8 +594,8 @@
 
     <div class="panel" id="phase-b-native-f4-single-target">
       <div class="panel-head">
-        <h2>Phase-B native F4, one frozen n = 59 target: a complete relation, still 20.22&times; direct MITM <span class="chip">engineering</span></h2>
-        <p>Stages 159&ndash;161, one authenticated <code>n=59, ell=9, m=3</code> public target. The factor base is
+        <h2>Phase-B native F4, one frozen n = 59 target: a complete relation, still 19.29&times; direct MITM <span class="chip">engineering</span></h2>
+        <p>Stages 159&ndash;162, one authenticated <code>n=59, ell=9, m=3</code> public target. The factor base is
           <code>span(1,z,...,z^8)</code>; no target-subgroup enumeration, factor-base log, truth class or
           witness reaches the solver. Full <code>f4-f2</code> fixes one summand, solves the remaining
           18-variable direct-S4 systems, then accepts only an exact three-point curve sum. Stage 160
@@ -614,7 +614,8 @@
             <tr><td>Native F4, fixed-X1 baseline</td><td>SAT, group verified</td><td class="n">205.702959</td><td class="n">204.982191</td><td class="n">950.9 MB</td><td>182.73 billion word XORs; 138 calls</td><td><span class="chip">baseline</span></td></tr>
             <tr><td>Native F4, skip non-rational X1</td><td>SAT, same witness</td><td class="n">100.179380</td><td class="n">99.920352</td><td class="n">921.7 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">Stage 159</span> 2.05&times; stage gain</td></tr>
             <tr><td>Native F4, constant-linear fixed-X1 constructor</td><td>SAT, identical equations and witness</td><td class="n">73.757990</td><td class="n">73.585054</td><td class="n">910.9 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">Stage 160</span> 27.04&times; construction; 1.36&times; whole target</td></tr>
-            <tr><td><strong>Native F4, fast trusted-mask hashing</strong></td><td><strong>SAT, identical F4 structure and witness</strong></td><td class="n"><strong>60.645599</strong></td><td class="n"><strong>60.498754</strong></td><td class="n">964.3 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">engineering</span> 1.77&times; matrix build; 1.22&times; whole target</td></tr>
+            <tr><td>Native F4, fast trusted-mask hashing</td><td>SAT, identical F4 structure and witness</td><td class="n">60.645599</td><td class="n">60.498754</td><td class="n">964.3 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">Stage 161</span> 1.77&times; matrix build; 1.22&times; whole target</td></tr>
+            <tr><td><strong>Native F4, grouped exact pair selection</strong></td><td><strong>SAT, identical F4 structure and witness</strong></td><td class="n"><strong>57.862894</strong></td><td class="n"><strong>57.736423</strong></td><td class="n">968.1 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">engineering</span> 3,600-case UPDATE equivalence; 1.048&times; whole target</td></tr>
             <tr><td>Native F4 + trace equation</td><td>SAT, same target</td><td class="n">118.368718</td><td class="n">117.960326</td><td class="n"><strong>637.3 MB</strong></td><td>138.96 billion word XORs</td><td><span class="chip">rejected</span> speed regression</td></tr>
             <tr><td>WDSat, frozen Linux receipt</td><td>timeout, inconclusive</td><td class="n">120.003056</td><td class="n">88.060134</td><td class="n">19.6 MB</td><td>conflicts unavailable</td><td><span class="chip">censored</span></td></tr>
             <tr><td>CryptoMiniSat, frozen Linux receipt</td><td>timeout, inconclusive</td><td class="n">120.005939</td><td class="n">87.983526</td><td class="n">69.4 MB</td><td>conflicts unavailable before kill</td><td><span class="chip">censored</span></td></tr>
@@ -623,11 +624,11 @@
         </table>
       </div>
       <div class="legend" style="padding-top:0">
-        <span><span class="chip">engineering</span> Stage 159 skips 73 non-rational X1 masks; Stage 160 reduces equation construction 27.04&times;; Stage 161 replaces SipHash only for solver-constructed monomial masks and reduces symbolic/matrix build from 30.523303 to 17.204156 seconds with every F4 structural counter unchanged</span>
-        <span><span class="chip">reference</span> selected F4 remains 20.22&times; direct MITM by same-host wall and CPU, and 21.03&times; by RSS; clean build plus run is 228.35 wall seconds / 224.54 core-seconds</span>
+        <span><span class="chip">engineering</span> Stage 159 skips 73 non-rational X1 masks; Stage 160 reduces equation construction 27.04&times;; Stage 161 replaces SipHash only for solver-constructed monomial masks; Stage 162 replaces the quadratic new-pair LCM scan with grouped exact submask lookup while preserving pair order and every structural counter</span>
+        <span><span class="chip">reference</span> selected F4 remains 19.29&times; direct MITM by same-host wall, 19.30&times; by CPU, and 21.12&times; by RSS; clean build plus run is 225.35 wall seconds / 221.60 core-seconds</span>
         <span><span class="chip">accounting</span> conflicts are <code>null</code> for F4 and MITM because neither exposes SAT conflicts; caps and watchdogs remain censored rather than UNSAT</span>
-        <span>measured campaign lower bound through Stage 161: 2,684.534288 sequential wall-seconds, 2,641.558033 core-seconds, 6.31 GB maximum process RSS; complete campaign cost remains <code>null</code> because one interrupted profiler attempt and incremental checks lack complete outer receipts</span>
-        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-161-fast-mask-hash-20260923/result.json</code>; licensed Magma, the full 160-input native-F4 panel, end-to-end IC/rho cost and independent review remain open</span>
+        <span>measured campaign lower bound through Stage 162: 3,029.348391 sequential wall-seconds, 2,981.632960 core-seconds, 6.31 GB maximum process RSS; complete campaign cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-162-grouped-pair-selection-20260923/result.json</code>; licensed Magma, the full 160-input native-F4 panel, end-to-end IC/rho cost and independent review remain open</span>
       </div>
     </div>
 

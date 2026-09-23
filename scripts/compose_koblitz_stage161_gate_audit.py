@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compose the current seven-gate audit with the Stage-161 F4 result."""
+"""Compose or historically verify the Stage-161 seven-gate audit."""
 
 from __future__ import annotations
 
@@ -176,15 +176,37 @@ def verify(output: Path) -> dict[str, Any]:
     seal = load(output / "result-seal.json", "Stage-161 audit seal")
     require(seal.get("schema") == SEAL_SCHEMA, "Stage-161 audit seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "Stage-161 audit seal changed")
-    current = compose()
     stored = load(output / "audit.json", "Stage-161 audit")
-    current_scientific = dict(current)
-    stored_scientific = dict(stored)
-    for value in (current_scientific, stored_scientific):
-        value.pop("gate_status_sha256", None)
-        value.pop("scoreboard_sha256", None)
-    require(current_scientific == stored_scientific, "current Stage-161 scientific audit changed")
-    return current
+    stage160 = replay(
+        "compose_koblitz_stage160_gate_audit.py",
+        "verify",
+        "--output",
+        str(STAGE160_AUDIT),
+    )
+    stage161 = replay("verify_koblitz_stage161_fast_hash.py")
+    committed_verification = load(STAGE161_VERIFICATION, "Stage-161 verification")
+    require(stage161 == committed_verification, "Stage-161 verification output changed")
+    require(
+        stored.get("schema") == SCHEMA
+        and stored.get("status") == "current_seven_gate_audit_verified"
+        and stored["predecessor"]["stage160_audit_sha256"]
+        == sha256(STAGE160_AUDIT / "audit.json")
+        and stored["predecessor"]["stage160_seal_sha256"]
+        == sha256(STAGE160_AUDIT / "result-seal.json")
+        and stored["stage161"]["result_sha256"] == sha256(STAGE161 / "result.json")
+        and stored["stage161"]["result_seal_sha256"]
+        == sha256(STAGE161 / "result-seal.json")
+        and stored["stage161"]["verification_sha256"] == sha256(STAGE161_VERIFICATION)
+        and stored["stage161"]["selected_wall_seconds"] == stage161["selected_wall_seconds"]
+        and stored["all_seven_gates_passed"] is False
+        and stored["koblitz_index_calculus_sota"] is False,
+        "historical Stage-161 audit dependencies changed",
+    )
+    require(
+        stage160.get("status") == "current_seven_gate_audit_verified",
+        "Stage-160 historical audit changed",
+    )
+    return stored
 
 
 def main() -> None:
