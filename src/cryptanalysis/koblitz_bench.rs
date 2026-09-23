@@ -785,6 +785,12 @@ impl DregSummary {
 /// This is the null object for the sweep.  If the Semaev systems
 /// resolve at the same degree as these, then their algebraic structure
 /// is buying nothing and the measurement is of the shape alone.
+/// # Panics
+///
+/// Panics before sampling if `n_vars` is outside `1..=64`, or
+/// `degree.max(1) > n_vars`. Squarefree monomials cannot have more
+/// variables than the system; attempting to sample one would never finish.
+/// Degree zero retains its historical interpretation as degree one.
 pub fn random_control_system(
     n_vars: usize,
     n_eqs: usize,
@@ -792,6 +798,14 @@ pub fn random_control_system(
     terms_per_eq: usize,
     seed: u64,
 ) -> Vec<F2BoolPoly> {
+    assert!(
+        (1..=64).contains(&n_vars),
+        "random controls require 1..=64 Boolean variables"
+    );
+    assert!(
+        degree.max(1) <= n_vars as u32,
+        "random control degree cannot exceed the variable count"
+    );
     let mut rng = StdRng::seed_from_u64(seed);
     (0..n_eqs)
         .map(|_| {
@@ -1109,6 +1123,47 @@ pub fn elimination_comparison(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    #[should_panic(expected = "random controls require 1..=64 Boolean variables")]
+    fn control_input_rejects_zero_variables() {
+        random_control_system(0, 1, 1, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random controls require 1..=64 Boolean variables")]
+    fn control_input_rejects_mask_overflow() {
+        random_control_system(65, 1, 1, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random control degree cannot exceed the variable count")]
+    fn control_input_rejects_unreachable_degree() {
+        random_control_system(1, 1, 2, 1, 7);
+    }
+
+    #[test]
+    #[should_panic(expected = "random control degree cannot exceed the variable count")]
+    fn control_input_rejects_extreme_degree_before_sampling() {
+        random_control_system(2, 1, u32::MAX, 1, 7);
+    }
+
+    #[test]
+    fn control_input_preserves_supported_boundaries() {
+        for n_vars in [1, 64] {
+            let zero = random_control_system(n_vars, 3, 0, 1, 7);
+            let one = random_control_system(n_vars, 3, 1, 1, 7);
+            let masks = |polys: &[F2BoolPoly]| {
+                polys.iter().map(|p| p.terms.iter().map(|t| t.mask).collect::<Vec<_>>())
+                    .collect::<Vec<_>>()
+            };
+            assert_eq!(masks(&zero), masks(&one));
+            assert!(one.iter().all(|p| p.terms.len() == 1
+                && p.terms[0].mask.count_ones() == 1));
+        }
+        assert!(random_control_system(2, 0, 2, 1, 7).is_empty());
+    }
+
 
     #[test]
     fn cost_model_matches_the_built_system() {
