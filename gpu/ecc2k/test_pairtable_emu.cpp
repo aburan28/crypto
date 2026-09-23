@@ -60,6 +60,10 @@
  * 2^16 signed orbits, which no base these tests can build reaches, and
  * `pairtable.cuh` refuses such a base rather than store it unchecked.
  *
+ * Given a path, it also writes the folded table it built there, and
+ * `examples/load_fold_table.rs` loads that into a `PairSumTable` and asks
+ * it every question the CPU's own table answers (`make roundtrip`).
+ *
  * What this does not cover: anything about how the kernel *runs* on a
  * device -- launch geometry, occupancy, memory placement, and whatever
  * `nvcc` does differently from `g++`.  It covers what the kernel
@@ -338,7 +342,53 @@ static void test_fold_geometry() {
     }
 }
 
-static void test_fold() {
+/* The emulated build's table, written for `examples/load_fold_table.rs`
+ * to load into a `PairSumTable` and probe -- the one check that runs a
+ * table this file assembled through the lookups the descent uses.
+ *
+ * Little-endian, which is what an x86 host writes natively; the loader
+ * reads it that way whatever it runs on.
+ *
+ *     0   "PTFOLD1\0"
+ *     8   u32 degree, u32 base_request, u64 seed      the base to rebuild
+ *     24  u32 bucket_shift, u32 buckets, u32 words, u32 present_words
+ *     40  u64 present_mask
+ *     48  u32 canon_bytes, u32 0
+ *     56  u64 canon_tables[canon_bytes * 256]
+ *         u32 bucket_start[buckets + 1]
+ *         u32 words[words]
+ *         u64 present[present_words]
+ */
+static bool write_table(const char *path, const FoldVectors &v, const Stored &s) {
+    const uint16_t probe = 1;
+    if (*(const uint8_t *)&probe != 1) {
+        printf("  not writing %s: this host is big-endian and the format is not\n", path);
+        return false;
+    }
+    FILE *f = fopen(path, "wb");
+    if (!f) {
+        printf("  cannot open %s for writing\n", path);
+        return false;
+    }
+    const uint32_t head32a[2] = {(uint32_t)v.n, (uint32_t)v.base_request};
+    const uint64_t seed = v.seed;
+    const uint32_t head32b[4] = {(uint32_t)s.g.bucket_shift, s.g.buckets,
+                                 (uint32_t)s.words.size(), (uint32_t)s.present.size()};
+    const uint32_t head32c[2] = {(uint32_t)v.canon_bytes, 0};
+    bool ok = fwrite("PTFOLD1", 1, 8, f) == 8 && fwrite(head32a, 4, 2, f) == 2 &&
+              fwrite(&seed, 8, 1, f) == 1 && fwrite(head32b, 4, 4, f) == 4 &&
+              fwrite(&s.present_mask, 8, 1, f) == 1 && fwrite(head32c, 4, 2, f) == 2;
+    const size_t tables = (size_t)v.canon_bytes * 256;
+    ok = ok && fwrite(v.canon_tables, 8, tables, f) == tables;
+    ok = ok && fwrite(s.bucket_start.data(), 4, s.bucket_start.size(), f) == s.bucket_start.size();
+    ok = ok && fwrite(s.words.data(), 4, s.words.size(), f) == s.words.size();
+    ok = ok && fwrite(s.present.data(), 8, s.present.size(), f) == s.present.size();
+    ok = (fclose(f) == 0) && ok;
+    if (!ok) printf("  writing %s failed\n", path);
+    return ok;
+}
+
+static void test_fold(const char *table_out) {
     printf("=== folded storage: pairtable_fold_kernel against the CPU's table ===\n");
     test_fold_geometry();
     const FoldVectors *v = nullptr;
@@ -434,6 +484,14 @@ static void test_fold() {
     CHECK(assemble(one, plan, stored), "pt_fold_geometry refused the base");
     const int diff = differences(stored, *v, true);
     CHECK(diff == 0, "the table is not the CPU's");
+    /* Written only once it matches: the loader's check is of the
+     * lookups, and a table already known to differ would fail it for a
+     * reason this file has reported above. */
+    if (table_out && diff == 0) {
+        const bool written = write_table(table_out, *v, stored);
+        CHECK(written, "could not write the table to %s", table_out);
+        if (written) printf("  written to %s for examples/load_fold_table.rs\n", table_out);
+    }
     const uint64_t unfolded = (uint64_t)n_points * (n_points + 1) / 2;
     if (diff == 0) {
         printf("  table: identical to the CPU's -- %zu words in %d buckets, presence filter "
@@ -497,7 +555,10 @@ static void test_fold() {
     }
 }
 
-int main() {
+/* `argv[1]`, if given, is where to write the folded table the emulated
+ * kernel built -- see `write_table`. */
+int main(int argc, char **argv) {
+    const char *table_out = argc > 1 ? argv[1] : nullptr;
     printf("gpu/ecc2k pair-table kernel, run on the host: n=%d\n\n", F2M_M);
     if (F2M_M > 62) {
         printf("field too wide to pack into a u64 (m = %d > 62); neither key is "
@@ -568,7 +629,7 @@ int main() {
         }
     }
 
-    test_fold();
+    test_fold(table_out);
 
     printf("\n%s (%d failures)\n", failures ? "FAILED" : "all checks passed", failures);
     return failures ? 1 : 0;
