@@ -4556,6 +4556,60 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-affine-substitution-20260923">
+  <div class="panel-head">
+    <h2>Affine substitution and SIMD evaluation: universal gain rejected <span class="chip">engineering</span></h2>
+    <p>Direct SIMD Gray evaluation passes 16/18 strongest-reference comparisons;
+      packed search with 16-variable SIMD leaves passes 15/18. Both fail the required
+      universal 2&times; gate. Affine substitution and the 12-variable hybrid pass 0/18.
+      All matched-backend gates pass, but confirmation was correctly stopped before launch.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/CONCLUSION.md">decision and failed intervals</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/README.md">algebra and accounting contract</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/SUMMARY.json">recorded figures and individual cases</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/RUN_LEDGER.json">immutable run ledger</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/CONFIRMATION_GUARD.json">unstarted-confirmation receipt</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete standalone solve plus validation milliseconds at 24 variables,
+      pooling two fresh holdout seeds and 22 balanced repetitions. Descriptive ratios
+      use the untraced packed planted cost; acceptance uses paired fastest-reference
+      costs over the frozen 19-arm roster. No calibrated IC-operation comparison is available.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Untraced packed / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>79.291375</td><td>80.110521</td><td>143.931354</td><td>0.156</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>261.296500</td><td>156.635917</td><td>510.276729</td><td>0.047</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>932.561834</td><td>539.046000</td><td>1861.392605</td><td>0.013</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>323.089250</td><td>197.977687</td><td>826.881042</td><td>0.038</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>90.098479</td><td>90.386396</td><td>165.173479</td><td>0.138</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>78.273562</td><td>77.630188</td><td>145.692750</td><td>0.158</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>69.558688</td><td>70.610833</td><td>126.581771</td><td>0.178</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>28.146959</td><td>28.916208</td><td>51.876855</td><td>0.441</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>17.568792</td><td>17.828833</td><td>32.550312</td><td>0.706</td><td>PASS</td></tr>
+      <tr><td>Full RREF, list</td><td>237.259479</td><td>48.409396</td><td>357.864375</td><td>0.052</td><td>PASS</td></tr>
+      <tr><td>Full RREF, wide</td><td>53.390625</td><td>11.743813</td><td>82.236834</td><td>0.232</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, list</td><td>125.170687</td><td>85.458624</td><td>229.339000</td><td>0.099</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, wide</td><td>40.682292</td><td>26.818541</td><td>70.524333</td><td>0.305</td><td>PASS</td></tr>
+      <tr><td>Packed, diagnostic hashing removed</td><td>12.401042</td><td>12.482542</td><td>22.925854</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Affine substitution and products, list</td><td>266.847854</td><td>60.621437</td><td>471.918396</td><td>0.046</td><td>PASS</td></tr>
+      <tr><td>Affine substitution and products, compact</td><td>30.022771</td><td>7.068459</td><td>42.978333</td><td>0.413</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, scalar</td><td>5.292791</td><td>13.534583</td><td>20.737104</td><td>2.343</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, SIMD</td><td>0.802625</td><td>2.098875</td><td>3.210771</td><td>15.451</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, scalar</td><td>12.976146</td><td>12.147833</td><td>28.111251</td><td>0.956</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, SIMD</td><td>5.622458</td><td>5.275979</td><td>12.244438</td><td>2.206</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, scalar</td><td>9.533771</td><td>9.073272</td><td>21.378792</td><td>1.301</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, SIMD</td><td>1.691271</td><td>1.596583</td><td>3.761563</td><td>7.332</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 58,080 observations over 120 distinct systems complete: 89 SAT and 31 UNSAT
+    fixtures per arm. The recorded checks include 34 Rust tests and 30 Python evidence
+    checks. The direct-SIMD n24 cross-planted holdout ratios differ sharply by fixture:
+    6.839063 and 0.228740. Its grouped interval is [0.236, 5.913], so the pooled median
+    does not establish a uniform gain. The failures remain retained.</p>
+  <p>Whole-worker peak RSS is 29,966,336 bytes; candidate-specific memory and calibrated
+    operation ratios remain unmeasured. Production solver, full index-calculus and rho
+    costs remain null. A size-based dispatch is a new, unimplemented hypothesis;
+    it cannot replace the rejected primary result. Prior scoreboard figures remain below.</p>
+</section>
 <section class="panel" id="boolean-basis-transport-20260923">
   <div class="panel-head">
     <h2>Quadratic row-space transport: correct inference, rejected complete-solve gain <span class="chip">engineering</span></h2>
@@ -4599,8 +4653,9 @@ factor base, and this prices a decomposition oracle.</p>
   <p>A separate discovery-only diagnostic reproduces the exact search and finds unused nonunit
     affine relations at 47,962 of 52,864 branching decisions (90.73%), with rank sum 189,283.
     These repeat across search states and are not independent relations or a speedup.
-    <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/AFFINE_SUBSTITUTION_NEXT.md">General affine substitution is the next documented contract</a>;
-    its implementation and complete cost remain unmeasured.</p>
+    <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/AFFINE_SUBSTITUTION_NEXT.md">General affine substitution was the next documented contract at the close of this run</a>.
+    The <a href="#boolean-affine-substitution-20260923">subsequent implementation and comparison</a>
+    above retain its original negative verdict and separately report the measured follow-up.</p>
 </section>
 <section class="panel" id="boolean-quadratic-frontier-20260923">
   <div class="panel-head">
