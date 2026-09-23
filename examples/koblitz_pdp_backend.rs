@@ -9,14 +9,19 @@
 //!
 //! ```text
 //! koblitz_pdp_backend native-sat /tmp/pdp/manifest.json 100000
+//! koblitz_pdp_backend native-f4 /tmp/pdp/manifest.json 115
 //! koblitz_pdp_backend direct-mitm /tmp/pdp/manifest.json
 //! ```
 
 use crypto_lib::binary_ecc::curve::{point_add, point_neg};
 use crypto_lib::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::binary_semaev_s4::{weil_descend_s4, S4System};
+use crypto_lib::cryptanalysis::ic_framework::solvers::F4F2;
+use crypto_lib::cryptanalysis::ic_framework::stages::{
+    BooleanSystem, Params, SolverVerdict, SystemSolver,
+};
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, DecompositionSystem, FieldStructure,
+    build_decomposition_system, sym_semaev_s4, DecompositionSystem, FieldStructure, SymElement,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     factor_x_n_minus_1, find_irreducible_sparse, invariant_subspace_basis, points_with_x,
@@ -31,7 +36,7 @@ use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Row {
@@ -55,6 +60,7 @@ struct VerifiedInstance {
     target: BinaryPoint,
     rows: Vec<Row>,
     n_vars: u32,
+    source_representation: String,
     source: SourceSystem,
     artifact_receipts: Value,
     verification_ns: u128,
@@ -526,6 +532,7 @@ fn verify_instance(manifest_path: &Path) -> Result<VerifiedInstance, String> {
         target,
         rows,
         n_vars,
+        source_representation: representation.to_string(),
         source,
         artifact_receipts,
         verification_ns: started.elapsed().as_nanos(),
@@ -605,6 +612,224 @@ fn source_point_witness_valid(
                 .any(|p2| point_add(curve, &point_add(curve, p0, p1), p2) == *target)
         })
     })
+}
+
+fn point_json(point: &BinaryPoint) -> Value {
+    match point {
+        BinaryPoint::Infinity => Value::Null,
+        BinaryPoint::Affine { x, y } => json!({
+            "x":x.to_biguint().to_string(),
+            "y":y.to_biguint().to_string(),
+        }),
+    }
+}
+
+/// Return one exact lift of the three Boolean x-coordinate blocks whose
+/// group sum is the authenticated target.  The F4 engine decides the
+/// polynomial system; this separate curve check is what turns one Boolean
+/// root into a PDP relation.
+fn source_point_witness(
+    curve: &BinaryCurve,
+    basis: &[F2mElement],
+    target: &BinaryPoint,
+    root: u64,
+) -> Option<Vec<BinaryPoint>> {
+    let assignment: Vec<bool> = (0..3 * basis.len())
+        .map(|index| root & (1u64 << index) != 0)
+        .collect();
+    let xs: Vec<_> = (0..3)
+        .map(|summand| {
+            basis
+                .iter()
+                .enumerate()
+                .fold(F2mElement::zero(curve.m), |x, (index, element)| {
+                    if assignment[summand * basis.len() + index] {
+                        x.add(element)
+                    } else {
+                        x
+                    }
+                })
+        })
+        .collect();
+    let lifts: Vec<_> = xs.iter().map(|x| points_with_x(curve, x)).collect();
+    for p0 in &lifts[0] {
+        for p1 in &lifts[1] {
+            for p2 in &lifts[2] {
+                if point_add(curve, &point_add(curve, p0, p1), p2) == *target {
+                    return Some(vec![p0.clone(), p1.clone(), p2.clone()]);
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Run the repository's full Boolean Faugere F4 implementation on a direct
+/// symmetrised-S4 formulation of the same authenticated PDP instance.
+///
+/// The frozen cross-solver exports retain their historical S4-with-
+/// correspondence-variables or chained-S3 representation.  This arm first
+/// verifies those bytes exactly, then independently derives the direct S4
+/// equations from the same public algebraic basis and affine target.  That
+/// keeps n, ell, m, basis, curve and target identical while allowing the
+/// native Boolean-ring F4 implementation to operate on 3*ell variables.
+fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
+    if budget_seconds == 0 {
+        return (
+            json!({
+                "schema":"koblitz_pdp_isolated_backend.v1",
+                "backend":"native-f4",
+                "status":"backend_contract_error",
+                "source_instance_id":instance.id,
+                "source_instance_verified":true,
+                "source_artifacts":instance.artifact_receipts,
+                "regenerated_source_exact":true,
+                "reason":"F4 budget must be positive",
+            }),
+            false,
+        );
+    }
+    let n_vars = 3usize.saturating_mul(instance.ell);
+    if n_vars > 64 {
+        return (
+            json!({
+                "schema":"koblitz_pdp_isolated_backend.v1",
+                "backend":"native-f4",
+                "status":"not_run_resource_cap",
+                "source_instance_id":instance.id,
+                "source_instance_verified":true,
+                "source_artifacts":instance.artifact_receipts,
+                "regenerated_source_exact":true,
+                "source_representation":instance.source_representation,
+                "solver_representation":"direct_symmetrised_s4_boolean",
+                "source_variables":instance.n_vars,
+                "solver_variables":n_vars,
+                "variable_cap":64,
+                "exhaustive":false,
+                "source_model_valid":Value::Null,
+                "source_witness_valid":Value::Null,
+                "conflicts":Value::Null,
+                "interpretation":"The native Boolean F4 monomial representation cannot encode this instance; this is censored, not UNSAT",
+            }),
+            true,
+        );
+    }
+
+    let construction_started = Instant::now();
+    let st = FieldStructure::new(instance.n, &instance.curve.irreducible);
+    let target_x = match &instance.target {
+        BinaryPoint::Affine { x, .. } => x,
+        BinaryPoint::Infinity => unreachable!(),
+    };
+    let x1 = SymElement::from_subspace_vars(&instance.basis, 0, instance.n, n_vars);
+    let x2 = SymElement::from_subspace_vars(&instance.basis, instance.ell, instance.n, n_vars);
+    let x3 = SymElement::from_subspace_vars(&instance.basis, 2 * instance.ell, instance.n, n_vars);
+    let equations = sym_semaev_s4(&x1, &x2, &x3, target_x, &st);
+    let equation_fingerprint =
+        blake3::hash(&serde_json::to_vec(&equations).expect("serialize direct S4 equations"))
+            .to_hex()
+            .to_string();
+    let construction_ns = construction_started.elapsed().as_nanos();
+    let source_degree = equations
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .map(|term| term.mask.count_ones())
+        .max()
+        .unwrap_or(0);
+    let source_terms: usize = equations.iter().map(|p| p.terms.len()).sum();
+    let system = BooleanSystem { equations, n_vars };
+    let solver = F4F2;
+    let (verdict, cost) = solver.solve(
+        &system,
+        &Params::default(),
+        Some(Duration::from_secs(budget_seconds)),
+    );
+
+    let mut algebraic_roots = None;
+    let mut source_model_valid = None;
+    let mut witness: Option<Vec<BinaryPoint>> = None;
+    let (status, exhaustive) = match verdict {
+        SolverVerdict::BudgetExceeded => ("unknown_inconclusive", false),
+        SolverVerdict::Unsatisfiable => {
+            algebraic_roots = Some(0usize);
+            ("unsat", true)
+        }
+        SolverVerdict::Solved(roots) => {
+            algebraic_roots = Some(roots.len());
+            source_model_valid = Some(
+                roots
+                    .iter()
+                    .all(|root| system.equations.iter().all(|p| p.eval(*root) == 0)),
+            );
+            if source_model_valid != Some(true) {
+                ("sat_invalid_model", false)
+            } else {
+                witness = roots.iter().find_map(|root| {
+                    source_point_witness(&instance.curve, &instance.basis, &instance.target, *root)
+                });
+                if witness.is_some() {
+                    ("sat", true)
+                } else {
+                    // F4 returned the complete Boolean variety and every root
+                    // was checked under all rational sign lifts.
+                    ("unsat", true)
+                }
+            }
+        }
+    };
+    let witness_json = witness
+        .as_ref()
+        .map(|points| points.iter().map(point_json).collect::<Vec<_>>());
+    let source_witness_valid = witness.as_ref().map(|points| {
+        point_add(
+            &instance.curve,
+            &point_add(&instance.curve, &points[0], &points[1]),
+            &points[2],
+        ) == instance.target
+    });
+    let accepted = status != "sat_invalid_model";
+
+    (
+        json!({
+            "schema":"koblitz_pdp_isolated_backend.v1",
+            "backend":"native-f4",
+            "status":status,
+            "source_instance_id":instance.id,
+            "source_instance_verified":true,
+            "source_artifacts":instance.artifact_receipts,
+            "regenerated_source_exact":true,
+            "same_instance_fields":["n","ell","m","curve","algebraic_factor_base","affine_target"],
+            "source_representation":instance.source_representation,
+            "solver_representation":"direct_symmetrised_s4_boolean",
+            "solver":"f4-f2",
+            "solver_description":solver.describe(),
+            "single_thread_requested":true,
+            "budget_seconds":budget_seconds,
+            "source_variables":instance.n_vars,
+            "solver_variables":n_vars,
+            "solver_equations":system.equations.len(),
+            "solver_terms":source_terms,
+            "solver_max_degree":source_degree,
+            "solver_equations_blake3":equation_fingerprint,
+            "algebraic_roots":algebraic_roots,
+            "source_model_valid":source_model_valid,
+            "source_witness_valid":source_witness_valid,
+            "witness_points":witness_json,
+            "exhaustive":exhaustive,
+            "conflicts":Value::Null,
+            "cost":cost,
+            "timing_ns":{
+                "source_verification":instance.verification_ns,
+                "direct_s4_construction":construction_ns,
+            },
+            "factor_base_contract":{
+                "target_subgroup_enumerated":false,
+                "discrete_log_labels_used":false,
+            },
+            "interpretation":"Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires a complete F4 basis and exhaustive root extraction/lift checking",
+        }),
+        accepted,
+    )
 }
 
 fn validate_assignment(
@@ -868,7 +1093,7 @@ fn direct_mitm(instance: VerifiedInstance) -> (Value, bool) {
 }
 
 fn usage() -> &'static str {
-    "usage: koblitz_pdp_backend <verify-source|native-sat|direct-mitm|validate-model> <manifest.json> [conflict-budget|assignment.json]"
+    "usage: koblitz_pdp_backend <verify-source|native-sat|native-f4|direct-mitm|validate-model> <manifest.json> [conflict-budget|budget-seconds|assignment.json]"
 }
 
 fn run(args: &[String]) -> Result<(Value, bool), String> {
@@ -881,6 +1106,9 @@ fn run(args: &[String]) -> Result<(Value, bool), String> {
     }
     if backend == "native-sat" && args.len() != 4 {
         return Err("native-sat requires a conflict budget".to_string());
+    }
+    if backend == "native-f4" && args.len() != 4 {
+        return Err("native-f4 requires a positive wall budget in seconds".to_string());
     }
     if backend == "validate-model" && args.len() != 4 {
         return Err("validate-model requires an assignment JSON file".to_string());
@@ -915,6 +1143,12 @@ fn run(args: &[String]) -> Result<(Value, bool), String> {
                 ));
             }
             Ok(native_sat(instance, budget))
+        }
+        "native-f4" => {
+            let budget = args[3]
+                .parse::<u64>()
+                .map_err(|_| "F4 wall budget must be an unsigned integer".to_string())?;
+            Ok(native_f4(instance, budget))
         }
         "direct-mitm" => Ok(direct_mitm(instance)),
         "validate-model" => validate_assignment(instance, Path::new(&args[3])),

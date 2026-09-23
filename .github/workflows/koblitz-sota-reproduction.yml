@@ -127,6 +127,8 @@ jobs:
         run: |
           python3 scripts/test_koblitz_phase_b_tool_builds.py -v
           python3 scripts/test_koblitz_phase_b_wdsat_custody.py -v
+          python3 scripts/test_run_koblitz_pdp_matrix.py -v
+          python3 scripts/test_run_koblitz_phase_b_native_f4.py -v
           # Cargo normally hard-links example binaries on Linux. Make dedicated
           # byte copies for the single-link immutable-artifact custody checks.
           mkdir "$RUNNER_TEMP/phase-b-tools"

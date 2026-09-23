@@ -359,6 +359,50 @@ def isolated_backend_status(run: dict, backend: str, manifest: dict) -> dict:
                 status = "sat_invalid_model"
             else:
                 status = "backend_contract_error"
+        elif backend == "native-f4":
+            cost = report.get("cost")
+            cost_valid = (
+                isinstance(cost, dict)
+                and cost.get("op_unit") == "word XORs (elimination only)"
+                and isinstance(cost.get("ops"), int)
+                and cost["ops"] >= 0
+                and isinstance(cost.get("wall_ns"), int)
+                and cost["wall_ns"] >= 0
+                and report.get("conflicts") is None
+            )
+            if (
+                run["returncode"] == 0
+                and result_status == "not_run_resource_cap"
+                and report.get("exhaustive") is False
+            ):
+                status = "not_run_resource_cap"
+            elif not cost_valid:
+                status = "backend_contract_error"
+            elif (
+                run["returncode"] == 0
+                and result_status == "sat"
+                and report.get("source_model_valid") is True
+                and report.get("source_witness_valid") is True
+                and report.get("exhaustive") is True
+            ):
+                status = "sat"
+            elif (
+                run["returncode"] == 0
+                and result_status == "unsat"
+                and report.get("exhaustive") is True
+                and report.get("source_witness_valid") is None
+            ):
+                status = "unsat"
+            elif (
+                run["returncode"] == 0
+                and result_status == "unknown_inconclusive"
+                and report.get("exhaustive") is False
+            ):
+                status = "unknown_inconclusive"
+            elif run["returncode"] == 2 and result_status == "sat_invalid_model":
+                status = "sat_invalid_model"
+            else:
+                status = "backend_contract_error"
         elif (
             run["returncode"] == 0
             and result_status == "sat"
@@ -385,7 +429,7 @@ def isolated_backend_status(run: dict, backend: str, manifest: dict) -> dict:
     return {
         "solver": backend,
         "status": status,
-        "conflicts": stats.get("conflicts"),
+        "conflicts": None if backend == "native-f4" else stats.get("conflicts"),
         "source_model_valid": (
             report.get("source_model_valid") if isinstance(report, dict) else None
         ),
