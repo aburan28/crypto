@@ -146,6 +146,10 @@ jobs:
           cargo test --release --lib fixed_x1_specialisation_matches_the_generic_s4_system -- --test-threads=1
           python3 scripts/verify_koblitz_stage160_fixed_x1.py > /tmp/stage160-fixed-x1-verification.json
           cmp /tmp/stage160-fixed-x1-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-160-fixed-x1-verification.json
+      - name: Verify trusted-mask hashing supplement
+        run: |
+          python3 scripts/verify_koblitz_stage161_fast_hash.py > /tmp/stage161-fast-hash-verification.json
+          cmp /tmp/stage161-fast-hash-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-161-fast-hash-verification.json
       - name: Validate licensed Magma Phase-B replay packet controls
         run: |
           python3 scripts/test_koblitz_phase_b_magma_replay.py -v

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compose the current seven-gate audit with the Stage-160 F4 result."""
+"""Compose or historically verify the Stage-160 seven-gate audit."""
 
 from __future__ import annotations
 
@@ -176,20 +176,37 @@ def verify(output: Path) -> dict[str, Any]:
     seal = load(output / "result-seal.json", "Stage-160 audit seal")
     require(seal.get("schema") == SEAL_SCHEMA, "Stage-160 audit seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "Stage-160 audit seal changed")
-    current = compose()
     stored = load(output / "audit.json", "Stage-160 audit")
-    # The two documentation hashes are local byte receipts. Git checkout may
-    # normalize text bytes across hosts, while `compose()` separately checks
-    # the required Stage-160 claims and values in both pages. Keep the frozen
-    # hashes in the audit, but compare the scientific and custody payload
-    # independently of those two presentation receipts.
-    current_scientific = dict(current)
-    stored_scientific = dict(stored)
-    for value in (current_scientific, stored_scientific):
-        value.pop("gate_status_sha256", None)
-        value.pop("scoreboard_sha256", None)
-    require(current_scientific == stored_scientific, "current Stage-160 scientific audit changed")
-    return current
+    stage159 = replay(
+        "compose_koblitz_stage159_gate_audit.py",
+        "verify",
+        "--output",
+        str(STAGE159_AUDIT),
+    )
+    stage160 = replay("verify_koblitz_stage160_fixed_x1.py")
+    committed_verification = load(STAGE160_VERIFICATION, "Stage-160 verification")
+    require(stage160 == committed_verification, "Stage-160 verification output changed")
+    require(
+        stored.get("schema") == SCHEMA
+        and stored.get("status") == "current_seven_gate_audit_verified"
+        and stored["predecessor"]["stage159_audit_sha256"]
+        == sha256(STAGE159_AUDIT / "audit.json")
+        and stored["predecessor"]["stage159_seal_sha256"]
+        == sha256(STAGE159_AUDIT / "result-seal.json")
+        and stored["stage160"]["result_sha256"] == sha256(STAGE160 / "result.json")
+        and stored["stage160"]["result_seal_sha256"]
+        == sha256(STAGE160 / "result-seal.json")
+        and stored["stage160"]["verification_sha256"] == sha256(STAGE160_VERIFICATION)
+        and stored["stage160"]["selected_wall_seconds"] == stage160["selected_wall_seconds"]
+        and stored["all_seven_gates_passed"] is False
+        and stored["koblitz_index_calculus_sota"] is False,
+        "historical Stage-160 audit dependencies changed",
+    )
+    require(
+        stage159.get("status") == "current_seven_gate_audit_verified",
+        "Stage-159 historical audit changed",
+    )
+    return stored
 
 
 def main() -> None:

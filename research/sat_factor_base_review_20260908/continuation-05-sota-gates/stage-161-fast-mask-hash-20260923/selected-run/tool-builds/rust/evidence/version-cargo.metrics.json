@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "--version",
+    "--verbose"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.012374999998428393,
+    "user_seconds": 0.004719999999999999,
+    "system_seconds": 0.004033,
+    "total_core_seconds": 0.008753,
+    "single_core_seconds": 0.008753,
+    "peak_rss_bytes": 12959744,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

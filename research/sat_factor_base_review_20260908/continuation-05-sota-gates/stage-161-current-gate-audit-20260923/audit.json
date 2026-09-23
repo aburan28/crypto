@@ -1,0 +1,47 @@
+{
+  "all_seven_gates_passed": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "3dc8363fa527c2ec8c3b4cf0a387d7756c971e9670b787eec52040cc8f84c599",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_one_native_f4_n59_target_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "next_targets": [
+    "execute the full frozen 160-input packet under licensed Magma F4",
+    "run a complete native-F4 panel rather than one selected n59 target",
+    "reduce selected native-F4 cost below same-target direct MITM or retain it only as a solver control",
+    "preserve complete outer metering for every future development command",
+    "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
+  ],
+  "predecessor": {
+    "stage160_audit_sha256": "97ed602473e398b28570e0ff02366fb92b6713043796b7eb1fd0f764567f4751",
+    "stage160_seal_sha256": "e4a7c02cb62281bd0d2d3f0ec9ecea44d60773dc7e5659c16618b76d76bde6a0",
+    "stage160_status": "current_seven_gate_audit_verified"
+  },
+  "schema": "koblitz_stage161_current_gate_audit.v1",
+  "scoreboard_sha256": "6d3b2be69c97c78c4de6636c744af9df19728390cc6921e699f0943781e099b8",
+  "stage161": {
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "build_phase_speedup": 1.7741820149264196,
+    "complete_campaign_cost": null,
+    "result_seal_sha256": "6a7aee2867d80d75f32553d06dc0eef9330a150504c5798e2f1dc5430d8e3136",
+    "result_sha256": "5b11308459b09c85dfc2ee8d3c3d80d654ac17deb02ea97b691808d1d7f7444b",
+    "same_host_f4_over_mitm_wall": 20.217485830358083,
+    "selected_core_seconds": 60.498754000000005,
+    "selected_peak_rss_bytes": 964263936,
+    "selected_wall_seconds": 60.645598709001206,
+    "source_commit": "6906d0a26e4cb7e84a99e864c6f471fef36e5526",
+    "verification_sha256": "c6c85c65e92460f6f87fac7c172fb28661bfe50ae87cd226610b323f44a12e29",
+    "whole_target_speedup": 1.216213407405157
+  },
+  "status": "current_seven_gate_audit_verified"
+}
