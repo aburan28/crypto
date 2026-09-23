@@ -197,3 +197,41 @@ not fit this machine.
 - **Class: stage diagnostic.** It prices no variant and computes no `S`
   ratio or rho ratio, like Results 1–3 of the DREG note. So it owes the
   scoreboard no row. The DREG note gets the result, whichever way it goes.
+
+## Addendum, before any large cell starts: the probe, and the watchdog
+
+**The cost probe did not finish.** The degree-6 sparse elimination on the
+27-unknown probe cell (about 362k × 398k) had used **3 h 18 min of CPU**
+(3 h 21 min wall) at a steady **6.34 GB** when it was stopped, unfinished.
+Its final time is therefore unknown; it is a lower bound. It was stopped
+to free memory for the ladder, since each large cell's own draws time the
+same cost at the cell's real size.
+
+This departs from "fixes a per-cell watchdog from the finished probe"
+above, and says so. The watchdog below is set from the lower bound instead.
+
+**Known when this was written.** Three small cells have run, and their raw
+output is committed under `runs/`. None of it is scored, and none of it
+changes a cell, a degree cap or a rule:
+
+| cell | `S` | resolving degree, 4 unsatisfiable draws | control |
+|---|--:|---|---|
+| `(7, 3)` | `−2` | 6 6 6 6 | resolved at 7, by pinning |
+| `(5, 2)` | `−1` | 5 5 5 5 | not resolved by 7 |
+| `(9, 3)` | `0` | 6 6 6 6 | still running |
+
+`(7, 2)` has not run.
+
+**The watchdog, fixed now:**
+
+- each large cell runs as its own process under a **96-hour wall limit**;
+- **at most two large cells at a time**, because the probe held 6.3 GB on a
+  matrix smaller than `(13, 5)`'s, and this machine has 15 GB;
+- **order:** `(11, 4)` and `(13, 4)` now, then `(13, 5)`, then `(15, 5)`;
+- **completed draws stand.** A cell stopped by the watchdog, by memory or
+  by the container being reclaimed has its unfinished draws excluded as
+  resource limits, per the rules above.
+- Raw output is committed as cells finish, and at each check-in.
+
+The cells, `d_max`, draw counts, controls, seed, binary and decision rules
+are unchanged.
