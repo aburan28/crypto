@@ -32,42 +32,6 @@ use crypto_lib::cryptanalysis::ic_framework::stages::{
     DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, Targets,
 };
 use crypto_lib::cryptanalysis::ic_framework::{format_markdown, run_pipeline, PipelineSpec, RunReport};
-use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    koblitz_signed_frobenius_rho_reference, KoblitzSignedRhoOptions,
-};
-use num_traits::ToPrimitive;
-
-/// `S` of the automorphism-aware Pollard rho on this Koblitz instance and
-/// this target: the signed-Frobenius r-adding walk, which uses the order-`2n`
-/// group of `±π^k` and is the rho a Koblitz index calculus actually has to
-/// beat.  Priced exactly as `ic boundary` prices it, so a bench row and a
-/// ledger row read against the same reference: walk and setup additions are
-/// counted, and each scalar multiplication is charged at `1.5·log2(r)`
-/// additions, the double-and-add average.
-///
-/// `None` when the curve is not Koblitz or the walk fails to verify: a
-/// reference that did not recover the logarithm is not a reference, and the
-/// row then carries no ratio rather than a wrong one.
-fn signed_rho_s(inst: &BinaryInstance, target: crypto_lib::cryptanalysis::koblitz_fast::FastPoint, planted: u64, seed: u64) -> Option<f64> {
-    let kc = inst.koblitz.as_ref()?;
-    let q = inst.fast.lower(target);
-    let opts = KoblitzSignedRhoOptions { seed, ..Default::default() };
-    let report = koblitz_signed_frobenius_rho_reference(kc, &q, &opts, &mut |_| {});
-    let recovered = report.recovered_log.as_ref().and_then(|v| v.to_u64());
-    if !(report.verified && recovered == Some(planted)) {
-        return None;
-    }
-    let c = &report.charges;
-    let bits = (inst.r as f64).log2();
-    let scalar_adds =
-        (c.setup_scalar_multiplications + c.candidate_verification_scalar_multiplications) as f64 * 1.5 * bits;
-    let gops = GroupOps {
-        adds: c.walk_group_additions + c.setup_group_additions,
-        doubles: 0,
-        scalar_mults: c.setup_scalar_multiplications + c.candidate_verification_scalar_multiplications,
-    };
-    Some((gops.gae() + scalar_adds) / (inst.r as f64).sqrt())
-}
 
 #[derive(Args, Clone)]
 pub struct BenchArgs {
@@ -366,8 +330,7 @@ fn run_binary(
             "descent-algebraic" => algebraic.as_mut().expect("built above"),
             other => return Err(format!("oracle `{other}` is not available here")),
         };
-        let rho_s = signed_rho_s(inst, q, planted, spec.seed ^ 0x5EED);
-        out.push(run_pipeline(&ctx, &spec, base, oracle, planted, calib, rho_s)?);
+        out.push(run_pipeline(&ctx, &spec, base, oracle, planted, calib, None)?);
     }
     Ok(out)
 }
