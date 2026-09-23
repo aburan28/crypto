@@ -1632,8 +1632,8 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         sets only where the relation phase stops dominating.</p>
       <p><strong>Derived before building</strong> (&sect;11.16, from &sect;11.7's measured Wiedemann
         constant and F<sub>p&#8308;</sub> operation counts): the constant is
-        <strong>0.34&ndash;0.63&times; rho</strong>, so a plain k&thinsp;=&thinsp;4 method would
-        eventually beat rho by 1.6&ndash;3&times; and no more. This note's own solver bounds
+        <s>0.34&ndash;0.63&times; rho</s>, so a plain k&thinsp;=&thinsp;4 method would
+        eventually beat rho by <s>1.6&ndash;3&times;</s> and no more (measured below). This note's own solver bounds
         C&#8324; &ge; 7.1&middot;10<sup>10</sup> from the characteristic polynomial of a
         4,096-dimensional multiplication matrix alone, which put the handover at
         <s>n &asymp; 2<sup>133</sup>&ndash;2<sup>137</sup></s>, extrapolated on the exponents
@@ -1647,10 +1647,27 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <strong>C&#8324; = 1.21&middot;10<sup>12</sup></strong>, 17&times; the floor. The same
         solver on generic systems of the same degrees predicts it within 4%, so the summation
         polynomial is no cheaper than any four octics. The handover moves to
-        <strong>n &asymp; 2<sup>149</sup>&ndash;2<sup>153</sup></strong> (extrapolated), with the
+        <s>n &asymp; 2<sup>149</sup>&ndash;2<sup>153</sup></s> (extrapolated over the derived
+        constant; narrowed below), with the
         relation phase at 4.3&middot;10<sup>8</sup>&times; rho at 32 bits &mdash; still about
         eighty doublings before the k&thinsp;=&thinsp;3 crossover. A stage diagnostic: no
         end-to-end S exists for k&thinsp;=&thinsp;4, and none is claimed.</p>
+      <p><strong>Then the constant, measured</strong> (&sect;11.19, registered in &sect;11.18: eight
+        prime-order curves over F<sub>p&#8308;</sub> at p&thinsp;=&thinsp;269&ndash;1033,
+        n&thinsp;&asymp;&thinsp;2<sup>32</sup>&ndash;2<sup>40</sup>, relations from a
+        meet-in-the-middle oracle, the linear algebra run to a verified logarithm on every curve,
+        rho run 16 times on each, all 128 verified): the linear algebra costs
+        <strong>r&#8734; = 0.518 &plusmn; 0.031&times; rho</strong>, flat in n (fitted exponent
+        &minus;0.021 &plusmn; 0.017), inside the derived band. So a plain k&thinsp;=&thinsp;4
+        method would beat rho by <strong>1.9&times;</strong> and no more. The one derived input
+        that was off was the filtering fraction, 0.897 measured against the 0.73 borrowed from
+        k&thinsp;=&thinsp;3, and at the measured value the derived formula gives 0.510. The
+        handover narrows to <strong>n &asymp; 2<sup>151.1</sup></strong>
+        (2<sup>150.8</sup>&ndash;2<sup>151.5</sup>), extrapolated on the same exponents and
+        C&#8324;. Class: a stage diagnostic. It prices the linear algebra against rho, while the
+        stand-in relation phase at these sizes is 1,054&ndash;4,988&times; rho and the
+        S&#8325; one 4.3&middot;10<sup>8</sup>&times;. The registered outcome was
+        <em>confirmed</em>.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
     </div>
