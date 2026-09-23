@@ -23,7 +23,7 @@ import resource
 import time
 from typing import Any
 
-import build_koblitz_phase_b_tools as tool_builder
+import build_koblitz_phase_b_native_f4 as tool_builder
 import run_koblitz_blind_pdp_phase_b as phase_b
 import run_koblitz_pdp_matrix as matrix
 
@@ -263,14 +263,12 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
         name: phase_b.executable_identity(path, name, executable=name != "meter")
         for name, path in tools.items()
     }
-    source_objects = tool_builder.rust_source_objects(REPO, state["commit"])
+    source_objects = tool_builder.source_objects(REPO, state["commit"])
     build = tool_builder.validate_receipt(
         args.rust_build_receipt.resolve(strict=True),
-        "rust",
-        identities,
+        {name: identities[name] for name in ("exporter", "backend")},
         source_objects,
         state,
-        require_clean_implementation=True,
     )
     environment = phase_b.safe_child_environment()
     require(environment.get("RAYON_NUM_THREADS") == "1", "F4 must be bound to one Rayon thread")
