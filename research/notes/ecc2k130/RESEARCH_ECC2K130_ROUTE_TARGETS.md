@@ -433,6 +433,79 @@ node budget, the seed or the targets after the registered rows are seen;
 dropping budget-limited targets; reporting the `d = 4` pair as the verdict;
 pricing a word XOR at anything but the recorded rates.
 
+### X4′, run: **closed at the gate**
+
+**Runner:** `cargo run --release --example koblitz_symmetrised_gate --
+--rungs 13,15,19,23 --targets 16 --x-caps 3 --json …`, built at the
+registration commit `ff197bfa`.
+**Frozen:** `experiments/26_koblitz_symmetrised_gate.json` (and `.log`).
+**Summary:** `python3 scripts/summarize_symmetrised_gate.py
+experiments/26_koblitz_symmetrised_gate.json` (committed before the `n = 23`
+rung finished).
+
+Every rung ran as registered: `K₀`, E1's `l`, one shared non-invariant `V`,
+16 targets, the default engine on the `d = 3` diagonal, a budget of 20 000
+splits.  **Zero gate failures on all 128 oracle calls.**  Every found relation
+re-summed to its target, no refutation contradicted enumeration, and the
+via-`T` equivalence held on every target.  Costs are GAE per relation found,
+and every oracle cost is a lower bound.
+
+| `n` | shape | arm (cap) | vars | found / refuted / budget | GAE per relation | reference (full, first-hit) | **÷ reference** | ms per relation |
+|---:|---|---|---:|---|---:|---|---:|---:|
+| 13 | E1 | `x`-chained (3) | 31 | 16 / 0 / 0 | 3,430 | 399 (792, 399) | 8.60 | 34.6 |
+| 13 | E1 | symmetrised (4) | 16 | 11 / 5 / 0 | 7,241 | 890 (890, 1,682) | **8.14** | 117.0 |
+| 15 | fit only | `x`-chained (3) | 33 | 14 / 2 / 0 | 18,175 | 2,025 (2,906, 2,025) | 8.97 | 175.3 |
+| 15 | fit only | symmetrised (4) | 16 | 7 / 9 / 0 | 13,580 | 4,386 (4,386, 15,249) | **3.10** | 231.0 |
+| 19 | E1 | `x`-chained (3) | 43 | 16 / 0 / 0 | 64,555 | 4,421 (10,878, 4,421) | 14.60 | 710.4 |
+| 19 | E1 | symmetrised (4) | 22 | 9 / 0 / 7 | 225,921 | 15,359 (15,359, 70,091) | **14.71** | 3,296.1 |
+| 23 | E1 | `x`-chained (3) | 50 | 4 / 0 / **12** | 708,508 | 45,495 (70,161, 45,495) | 15.57 | 16,119.1 |
+| 23 | E1 | symmetrised (4) | 25 | 10 / 0 / 6 | 196,407 | 54,629 (54,629, 151,303) | **3.60** | 4,483.7 |
+
+Word XORs were priced at `0.0060, 0.0051, 0.0039, 0.0026` GAE by the raw
+rate.  The solver's own elimination pays `3.6–4.4×` that per counted XOR.
+The frozen ledger has `K₀` entries at `n = 13, 15` only, at `0.0023` and
+`0.0020`.  An enumeration step measured `1.75–3.04` GAE.  That is above the
+ledger's `1 +` lookup because of the hash map, so it prices the reference
+high, the conservative direction for this verdict.
+
+**The gate: closed.**  Per relation, the symmetrised oracle costs **`3.1–14.7×`**
+the enumeration it would replace, on every rung and priced from below.  The
+ratios are `8.14, 3.10, 14.71, 3.60` at `n = 13, 15, 19, 23`.  At `n = 23` it
+is `3.60`, and the slope of `log₂(Q_sym/Q_ref)` is `−0.029 ± 0.167` per bit:
+not falling.  Re-priced with the frozen calibration where it has an entry, the
+ratios are `6.66, 3.74, 14.71, 3.60`, and the gate is still closed.  So wiring
+the symmetrised oracle into collection would raise `Λ` above what E1's
+enumeration pays, and **T7 and T8 are not built.**  Route 3 ends here, one
+phase before the end-to-end run, which would have priced a loss already
+measured.
+
+The margin at `n = 23` is the thinnest, so here is what it rests on.  The
+ratio stays at or above `1` for any word-XOR price above `0.00072` GAE.  The
+ledger's own degree-23 entry, for `K₁`, is `0.0012` and gives `1.66`.  The
+cheapest entry anywhere in the ledger, `K₀/F₂⁴¹` at `0.0007`, would give
+`0.97`.  At the price the solver's own elimination actually pays, the ratio is
+`13.5`.  Nothing on the table gets the oracle below enumeration by more than a
+few per cent, and only at a price measured on a field eighteen bits larger.
+
+**The `350×` (X4's question): engineering by the registered rule, and weakly
+determined.**  Per relation, `Q_sym/Q_x` is `2.11, 0.75, 3.50` at
+`n = 13, 15, 19`.  At `n = 23` the `x`-chained arm hit its budget on 12 of 16
+targets.  Its measured ratio, `0.28`, is therefore printed as a bound, not a
+value, and left out of the fit, as registered.  Over the
+three rungs left, the slope is `+0.18 ± 0.32`, and the wall-clock slope is
+`+0.13 ± 0.28`: no evidence that the ratio falls, so **engineering**.  Three
+rungs are one fewer than `AGENTS.md` §5 asks of an exponent, and the interval
+is wide.  The label means "no advance shown", not "a constant measured".  On what was
+measured at `n = 23`, the symmetrised system is the better algebraic oracle:
+`0.28×` the `x`-chained cost per relation and `4,484` against `16,119` ms.
+That is the pattern §17 of the exotic-coordinates note saw at that size.  Both
+algebraic oracles still lose to enumeration there, by `3.6×` and `15.6×`.
+
+**Classes.**  X4's structural finding is **accounting**.  The gate is a
+**stage diagnostic** that closes Route 3 at the oracle.  The `350×` is
+**engineering**.  No existing method's cost changed, and nothing here bears
+on ECC2K-130's security.
+
 ## X5 — `m = 4` via a chained symmetrised `S₃`
 
 **Question.** The conditional theory wants `m ≈ n^{1/3} ≈ 5.1` at
@@ -481,8 +554,8 @@ rather than whether to read more.
 | T4 | Fix the `(D, k)` selection rule in writing, *before* T5 | X1 admissibility | short |
 | T5 | X1: fit `α` over ≥4 rungs, cross-check every call against matrix-F4 | Route 1 verdict | hours |
 | T6 | X3: repeat T5 on the symmetrised systems | Route 2 verdict | hours |
-| T6′ | X4′: run the gate over `n = 13, 15, 19, 23`; freeze under `experiments/` | T7, T8 | hours |
-| T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input — only if X4′ is open | X4 | medium |
+| T6′ | X4′: run the gate over `n = 13, 15, 19, 23`; freeze under `experiments/` — **done: closed**, `experiments/26_koblitz_symmetrised_gate.json` | T7, T8 | minutes |
+| T7 | Add `DecompositionStrategy::Symmetrised`, gated to agree with `Enumerate` on every input — **not built: X4′ closed** | X4 | medium |
 | T8 | X4: ladder end-to-end with every phase priced | Route 3 verdict | days |
 | T9 | X5: build the chained symmetrised `S₃` at `m = 4`; FFD over 16 draws | Route 4 verdict | medium |
 | T10 | X6: second literature pass | Route 5 verdict | one run |

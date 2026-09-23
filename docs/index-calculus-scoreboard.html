@@ -1673,6 +1673,58 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
   </div>
 
+  <div class="panel" id="ecc2k130-route3-gate-20260923">
+    <div class="panel-head">
+      <h2>ECC2K-130 Route 3: the symmetrised oracle closes at the gate</h2>
+      <p>Class <span class="chip">accounting</span> for the structural finding,
+        <span class="chip">engineering</span> for the oracle ratio, and the gate itself is a stage
+        diagnostic. X4 asked whether the 2-torsion frame&rsquo;s symmetrised oracle, measured
+        at 350&times; the chained x-system, is an advance end to end. <b>It could not run as
+        registered.</b> Its floor, &Lambda; = m/n, needs a Frobenius-stable V &ni; 1. On E1&rsquo;s
+        ladder, and at ECC2K-130&rsquo;s n = 131 where 2 is primitive, the only such V are
+        F<sub>2</sub> and the field, and the symmetrised base over F<sub>2</sub> is the single
+        point T. So both frames must use a non-invariant V, both sit on &Lambda; = m, and the
+        question is cost per relation. X4&prime; registered that as a gate before any run. The
+        end-to-end build happens only if the symmetrised oracle is cheaper per relation than
+        the enumeration it would replace. Frozen source:
+        <code>experiments/26_koblitz_symmetrised_gate.json</code>; rules in
+        <code>research/notes/ecc2k130/RESEARCH_ECC2K130_ROUTE_TARGETS.md</code> &sect;X4&prime;.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>K<sub>0</sub>, m = 3, E1&rsquo;s l, one shared non-invariant V, 16 targets per rung,
+        default engine (InheritedF4) on the fair diagonal (x at Macaulay cap 3, symmetrised at 4).
+        Group-addition equivalents per relation found, with word XORs priced at the raw rate, so
+        every oracle cost is a lower bound. The reference is the cheaper enumeration rule on
+        the same base. Zero gate failures on 128 calls.</caption>
+      <thead>
+        <tr><th scope="col" class="n">n</th><th scope="col">Shape</th>
+          <th scope="col" class="n">Enumeration, GAE / relation</th>
+          <th scope="col" class="n">x-chained &divide; enumeration</th>
+          <th scope="col" class="n">Symmetrised &divide; enumeration</th>
+          <th scope="col" class="n">Symmetrised &divide; x-chained</th>
+          <th scope="col">Class</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">13</td><td>E1</td><td class="n">399 (x) / 890 (u)</td><td class="n">8.60</td><td class="n"><b>8.14</b></td><td class="n">2.11</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">15</td><td>fit only</td><td class="n">2,025 / 4,386</td><td class="n">8.97</td><td class="n"><b>3.10</b></td><td class="n">0.75</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">19</td><td>E1</td><td class="n">4,421 / 15,359</td><td class="n">14.60</td><td class="n"><b>14.71</b></td><td class="n">3.50</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">23</td><td>E1</td><td class="n">45,495 / 54,629</td><td class="n">15.57</td><td class="n"><b>3.60</b></td><td class="n">0.28, a bound (x budget-limited on 12/16)</td><td><span class="chip">stage diagnostic</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><b>The gate is closed.</b> Per relation, the symmetrised oracle costs 3.1&ndash;14.7&times; the
+        enumeration it would replace on every rung, priced from below. The fitted slope in n is
+        &minus;0.029 &plusmn; 0.167, so the ratio is not falling, and the frozen calibration gives
+        the same verdict. Wiring the oracle into collection would raise &Lambda;, so the end-to-end
+        build is not done. The thinnest margin is at n = 23: the ratio stays above 1 for any
+        word-XOR price over 0.00072 GAE, and the ledger&rsquo;s degree-23 entry gives 1.66. The 350&times;
+        question is <span class="chip">engineering</span> by the registered slope rule, +0.18
+        &plusmn; 0.32 over three unbounded rungs, which is weakly determined. At n = 23 the
+        symmetrised system is the better algebraic oracle, but both lose to enumeration. Nothing
+        here bears on ECC2K-130&rsquo;s security.</p>
+    </div>
+  </div>
+
   <div class="panel" id="koblitz-phase-prices-20260921">
     <div class="panel-head">
       <h2>Every phase priced: the linear algebra is 0.002% of the cost</h2>
