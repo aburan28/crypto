@@ -656,7 +656,7 @@ close-out above already records that no oracle beats enumeration per relation.
 **Inadmissible.**  Changing `d_max`, `ℓ`, `V`, the seed or the draws after rows
 are seen; reporting single draws; dropping a censored rung.
 
-### X5′, run: **the symmetrised chain falls at 4, one degree after the `x`-chain, flat in `n`**
+### X5′, run: **the symmetrised chain falls at 4 and the `x`-chain at 3, because the `x`-chain carries one hidden linear equation**
 
 **Runner:** `cargo run --release --example koblitz_x5_fall -- --json …`, built
 at `7bcc6460`, the code commit after the registration (`dc363f5f`).
@@ -708,28 +708,59 @@ does not fire.  H1's operational one, `fall_min ≥ 4`, does.  The
 invariant-`V` cross-check at `n = 15` reads the same as the random-`V` rung,
 so the kind of `V` is not what moves it.
 
-**3. What the one degree is, and what it is not.**
-- **The two systems have the same shape.**  Both have `2n` degree-3
-  equations from the two links with unknown intermediates, and `n` degree-2
-  equations from the last link, where `R` is known.  Neither has a zero or
-  duplicated equation.
-- **The difference at `D = 3` is one dependency.**  The `x`-chain loses rank
-  there by exactly one on every draw from `n = 11` up, and the symmetrised
-  chain by none.
-- **This section does not identify that dependency.**  H1's definition counts
-  any rank loss in the Macaulay matrix, so the measured difference may be one
-  structural identity of the `x`-chained `S₃` links, rather than a difference
-  in how hard the two systems are to solve.
-- **What is established** is the measured statement: under H1's own
-  definition, the chained symmetrised system falls one degree later than the
-  `x`-chained system, at every size measured, and the offset does not grow.
+**3. What the one degree is: a single hidden linear equation in the `x`-chain.**
+**Diagnostic:** `cargo run --release --example koblitz_x5_syzygy`, frozen as
+`experiments/27_koblitz_x5_syzygy.log`.
+
+- **Where the dependency lives.**  The `x`-chain's one dependency at `D = 3`
+  lies entirely among its last link's `n` degree-2 equations (the link where
+  `R` is known) and their variable multiples: 21–42 rows on the four draws
+  checked at `n = 11`.  Its coefficients change with the target.  The
+  symmetrised chain has none.
+- **Why it is there.**  With `x_R` known, that link is
+  `S₃ = t² + x_R·t + x_R²(a + b) + 1` with `t = ab + x_R(a + b)`.  The map
+  `t ↦ t² + x_R·t` is `F₂`-linear with the one-dimensional kernel
+  `{0, x_R}`.  So one functional of the link's `n` equations kills every
+  quadratic term and leaves a **linear equation `λ`**.  That is a degree fall
+  from 2 to 1.  Its Boolean identity `λ(λ + 1) = 0` is the single rank loss
+  that H1's definition records at `D = 3`.
+- **The measurement agrees.**  The quadratic parts of the `x`-chain's
+  degree-2 equations have rank **`n − 1`** on every draw at every rung
+  (`n = 9 … 19`).  The symmetrised chain's last link has rank **`n`**: its
+  quadratic part is `w_R·w₁·w₂`, with no such kernel.
+- **It is H1's table too.**  The same holds on H1's own protocol (invariant
+  `V`, the same seeds): rank `n − 1` at `n = 9, 15, 21, 31` for `m = 3`, and at
+  `n = 9, 15` for `m = 4`.  So H1's "every chained system falls at exactly 3"
+  is this one linear equation, on every chained row of its table that was
+  checked (all but `n = 7`).
+- **What "4" means for the symmetrised chain.**  At `D = 4`, the trivial
+  syzygies of the `n` degree-2 equations appear: `f(f + 1) = 0` and
+  `f_i f_j = f_j f_i`, which number `n + C(n, 2) = 45` at `n = 9` if
+  independent.  So any system with degree-2 equations loses rank there.  The
+  measured kernels at `D = 4`, `n = 9`, are 89 (symmetrised) and 84 (`x`).
+  Whether any of the symmetrised chain's are non-trivial is not separated
+  here.
+
+**The corrected reading.**  The symmetrised chain is not shown to be harder
+than the `x`-chain.  What is shown is narrower:
+
+- The `x`-chain's last link hands the solver one free linear equation, and
+  that equation accounts for H1's "fall at 3" on every chained row checked.
+- The symmetrisation removes it.
+- The symmetrised chain has no rank loss below the degree where trivial
+  syzygies force one.
+
+H1 is falsified for the symmetrised chain by H1's letter.  In substance, its
+"fall at 3" was one linear equation all along, and the symmetrised system
+does not have it.  The **accounting** caveat this puts on H1's table is noted
+in [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](RESEARCH_KOBLITZ_SCALING_TARGET.md).
 
 **Class.**  A structural measurement; no cost moves.  X5 is closed as run.
 
 **What this does not settle.**
-- **The source of the `x`-chain's single degree-3 dependency.**  Its left
-  kernel at `n = 11` is one vector, and reading it would say whether the
-  symmetrised chain lacks a genuine fall or only an identity.
+- **Whether any of the symmetrised chain's `D = 4` dependencies is
+  non-trivial.**  Separating them from the trivial syzygies needs the
+  syzygy module, not a rank.
 - **Whether the constant offset survives past `n = 19`.**  Both arms reach 64
   unknowns there, and `MAX_VARS` is a `u64` mask.
 - **Anything about ECC2K-130's cost.**  The close-out already records that no
@@ -806,7 +837,7 @@ reason given.
 | X2 | 1, 2 | the `(D, k)` frontier is in the frozen `crossbred_bench` output (CROSSBRED §2) | no filters at any `(D, k)`; at `D = 2` no space below `k = 5` | recorded there, not re-tabulated here |
 | X3 | 2, Crossbred on the symmetrised system | **not run** | — | open; bounded below |
 | X4 → X4′ | 3, symmetrised oracle end to end | X4 cannot run as registered; the X4′ gate ran | `3.1–14.7×` enumeration per relation at `d = 3`, `30–1,101×` at `d = 4`, priced from below | gate **closed**; the `350×` is **engineering** (weakly determined) |
-| X5 → X5′ | 4, `m = 4` | run | the symmetrised `S₃` chained at `m = 4` falls at 4 on every rung `n = 9 … 19` (96 draws), the `x`-chain at 3 | **H1 falsified for the symmetrised chain**; flat in `n`, so X5's "grows with `n`" does not fire |
+| X5 → X5′ | 4, `m = 4` | run | the symmetrised chain falls at 4 on every rung `n = 9 … 19` (96 draws), the `x`-chain at 3 | H1 falsified for the symmetrised chain by its letter; the `x`-chain's "fall at 3" is one hidden linear equation of its last link, which the symmetrisation removes; flat in `n` |
 | X6 | 5, literature | **not run** | — | open, no code |
 
 **What the thread established.**
@@ -833,9 +864,11 @@ reason given.
 
 **What is left, and why it is not next here.**
 
-- **X5 (H1, the first fall degree at `m = 4`)**, since run as X5′ (above):
-  the symmetrised chain falls at 4, one degree after the `x`-chain, flat in
-  `n`.  It was the one open item of independent interest.
+- **X5 (H1, the first fall degree at `m = 4`)**, since run as X5′ (above).
+  The `x`-chain's "fall at 3" turns out to be one hidden linear equation in
+  its last link, on every chained row of H1's table that was checked.  The symmetrised chain lacks it
+  and falls at 4, flat in `n`.  It was the one open item of independent
+  interest.
   - Nobody has a rigorous bound on these systems' fall degree in either
     direction, so a measurement is new evidence on the fall-degree question.
   - It does not bear on ECC2K-130's cost.  A fall degree that stays at 3

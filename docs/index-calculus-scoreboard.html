@@ -1740,7 +1740,7 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
 
   <div class="panel" id="ecc2k130-x5-fall-20260923">
     <div class="panel-head">
-      <h2>ECC2K-130 Route 4: the symmetrised chain falls one degree later, and not more</h2>
+      <h2>ECC2K-130 Route 4: the x-chain&rsquo;s &ldquo;fall at 3&rdquo; is one hidden linear equation, which the symmetrised chain does not have</h2>
       <p>A structural measurement: no cost moves, so no <code>S</code> and none of the four
         classes. H1 of the Koblitz scaling target says every chained decomposition system has its
         first fall at exactly degree 3. X5&prime; tested it on the one chained family H1 had not
@@ -1770,15 +1770,21 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       </tbody>
     </table></div>
     <div class="panel-head">
-      <p><b>H1 is falsified for the symmetrised chain.</b> It falls at 4 on every rung measured,
-        96 draws, where the x-chain falls at 3. <b>The offset is one degree and flat in n</b>, so
-        X5&rsquo;s original falsifier, a fall degree that grows with n, does not fire. An
-        invariant-V cross-check at n = 15 reads the same. The difference at degree 3 is a single
-        rank dependency the x-chain has on every draw and the symmetrised chain lacks. The note
-        does not identify that dependency, so the measured statement is &ldquo;one degree later
-        under H1&rsquo;s definition&rdquo;, not &ldquo;harder to solve&rdquo;. The one registered solve
-        (K<sub>1</sub>/F<sub>2</sub><sup>11</sup>) agrees with 4-sum enumeration on all 16
-        targets. Nothing here bears on ECC2K-130&rsquo;s cost.</p>
+      <p><b>By H1&rsquo;s letter, H1 is falsified for the symmetrised chain.</b> It falls at 4 on
+        every rung measured, 96 draws, where the x-chain falls at 3, and the offset is flat in n.
+        <b>A diagnostic then explains the one degree.</b> With x(R) known, the x-chain&rsquo;s last
+        link is t&sup2; + x<sub>R</sub>t + &hellip;, and t &#8614; t&sup2; + x<sub>R</sub>t has a
+        one-dimensional kernel, so one combination of its n quadratic equations is linear. The
+        measured quadratic-part rank is n&nbsp;&minus;&nbsp;1 on every draw. That linear equation&rsquo;s
+        Boolean identity is the single rank loss H1 records at 3. It also holds on every chained
+        row of H1&rsquo;s own table that was checked (all but n&nbsp;=&nbsp;7), and that table now
+        carries an <span class="chip">accounting</span> caveat.
+        The symmetrised last link has full rank n, so it has no such equation and shows no rank
+        loss below degree 4, where trivial syzygies force one. So the symmetrised system is not
+        shown to be harder. What the diagnostic shows is that the x-chain gets one free linear
+        equation and the symmetrisation removes it (<code>experiments/27_koblitz_x5_syzygy.log</code>).
+        The one registered solve (K<sub>1</sub>/F<sub>2</sub><sup>11</sup>) agrees with 4-sum
+        enumeration on all 16 targets. Nothing here bears on ECC2K-130&rsquo;s cost.</p>
     </div>
   </div>
 
