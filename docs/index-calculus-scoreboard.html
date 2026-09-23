@@ -4273,6 +4273,46 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-packed-construction-20260922">
+  <div class="panel-head">
+    <h2>Packed direct Boolean construction: 3.48&ndash;4.90&times; in two fixed seed sets <span class="chip">engineering</span></h2>
+    <p>Building packed rows in ambient coordinates, collecting occupied columns and compacting
+      once beats the fastest legacy constructor in every predeclared batch-64 changing-input
+      cell. Paired median ratios are 3.48&ndash;4.53&times; in the primary run and 3.55&ndash;4.90&times;
+      on disjoint confirmation seeds. The lowest 95% lower bounds are 3.41&times; and 3.47&times;.
+      Both runs pass all eight 2&times; construction gates, with 1,066,240 oracle-verified outputs
+      in total. This is a <strong>cold matrix-construction diagnostic</strong>, with setup and
+      validation charged; the complete-algorithm improvement remains unmeasured.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_packed_construction_20260922/CONCLUSION.md">decision and per-size intervals</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_packed_construction_20260922/run_01/RESULT.md">primary frozen table</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_packed_construction_20260922/run_02/RESULT.md">confirmation frozen table</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_packed_construction_20260922/run_01/manifest.json">primary manifest</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_packed_construction_20260922/run_02/manifest.json">confirmation manifest</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold milliseconds per batch of 64; medians pool n=6/8/10/12, two holdout seeds and
+      fourteen rotated repetitions. Ratios below use the coefficient-changing direct baseline;
+      the 2&times; acceptance gate uses paired minima over all five legacy arms.</caption>
+    <thead><tr><th>Variant</th><th>Primary coefficients (ms)</th><th>Primary degree cycle (ms)</th><th>Confirmation coefficients (ms)</th><th>Confirmation degree cycle (ms)</th><th>Primary direct / arm</th><th>Confirmation direct / arm</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Direct construction</td><td>1.448730</td><td>1.609520</td><td>1.571417</td><td>1.639750</td><td>1.000</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Verified layout reuse</td><td>1.540104</td><td>1.661208</td><td>1.809438</td><td>1.637417</td><td>0.941</td><td>0.868</td><td>PASS</td></tr>
+      <tr><td>Exact product schedule</td><td>1.438396</td><td>1.623917</td><td>1.759542</td><td>1.614562</td><td>1.007</td><td>0.893</td><td>PASS</td></tr>
+      <tr><td>Exact packed-matrix cache</td><td>1.453021</td><td>1.601625</td><td>1.450812</td><td>1.613021</td><td>0.997</td><td>1.083</td><td>PASS</td></tr>
+      <tr><td>Original support envelope</td><td>1.836625</td><td>1.982729</td><td>1.847271</td><td>1.989396</td><td>0.789</td><td>0.851</td><td>PASS</td></tr>
+      <tr><td>Packed support envelope</td><td>0.586687</td><td>0.647167</td><td>0.775875</td><td>0.613354</td><td>2.469</td><td>2.025</td><td>PASS</td></tr>
+      <tr><td>Packed direct</td><td>0.319625</td><td>0.371125</td><td>0.332417</td><td>0.343000</td><td>4.533</td><td>4.727</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>Packed direct retains a median 2,386 bytes and needs no generator envelope or cached products.
+    The packed envelope fails its universal 2&times; gate and every attribution gate against
+    packed direct. Exact matrix caching still wins on identical repeated inputs. Both seed sets
+    ran on the same host with identical worker source, so this is not external reproduction.
+    The present coordinate lookup has 2<sup>n</sup> entries; scaling beyond these bounded generic
+    matrices and the effect on complete solving remain unresolved. Historical results below
+    and the full-method verdict remain unchanged.</p>
+</section>
 <section class="panel" id="boolean-support-envelope-20260922">
   <div class="panel-head">
     <h2>Parameterized support envelopes: coefficient reuse verified, performance rejected <span class="chip">engineering</span></h2>
