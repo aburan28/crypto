@@ -2359,6 +2359,114 @@ eigen-solve; and a meet-in-the-middle oracle to check it.  That is days of
 work, and runs of minutes to hours per residual.  Its payoff is one number
 that can only confirm the floor or move `n*` later.
 
+### 11.17 `C₄`, measured: `17×` the floor, and the crossover moves to `2^{150}`
+
+**Runner:** `cargo run --release --example gaudry_quartic_c4 -- --p 269 --seed 1
+--residuals 4 --json …`, and `-- --generic 2,3,4,5,6,7` for the scaling panel.
+**Frozen:** `experiments/24_gaudry_quartic_c4.json` (and `.log`, with the phase
+progress), `experiments/24_gaudry_quartic_generic.json` (and `.log`).
+**Summary:** `python3 scripts/summarize_quartic_c4.py <c4> <generic>`
+**Source:** `src/cryptanalysis/gaudry_quartic.rs`, `examples/gaudry_quartic_c4.rs`.
+**Registered in advance:** §11.16, pushed (`4d4f4cb8`) before any `F_{p⁴}` code
+existed (`220b8883`).
+
+**One deviation from the registration.**  §11.16 named `p = 271`.  For
+`p ≡ 3 (mod 4)` every binomial `t⁴ − c` is reducible, so `F_p[t]/(t⁴ − c)` is not
+a field there; the run uses `p = 269`, the nearest prime `≡ 1 (mod 4)`.  `C₄`
+depends on `p` only through root finding, `10⁻⁶` of it.
+
+**What was built** (`gaudry_quartic`): `F_{p⁴}` under `Fp3`'s counting
+convention; a curve with coefficients outside `F_{p²}`; `S₅` evaluated
+numerically as `Res_Y(S₃(x₁, x₂, Y), S₄(x₃, x₄, x₅, Y))`; the symmetrised `S₅` by
+interpolation — `495` `e`-monomials by `9` powers of `x_R`, solved once per curve
+(`1.2·10⁹` multiplications, outside `C₄` as `k = 3`'s precomputation is) and
+checked against fresh resultant evaluations; and the §11.4–11.6 solver in four
+unknowns — Macaulay matrix at degree `29` with Macaulay's row selection, forward
+elimination by leading column, normal forms memoised right to left, `M_{e₁}`,
+and the characteristic polynomial, roots and eigenvectors through the same
+counted routines as `k = 3`.  A meet-in-the-middle oracle over pairs of base
+points checks every decomposition.  Tests: `S₅` vanishes on four-point sums and
+is symmetric in its first four arguments; the solver recovers planted roots of
+random quadrics and cubics in four unknowns at the Bézout dimension `d⁴`.
+
+**1. The inputs §11.16 derived hold.**  `F_p` multiplications per `F_{p⁴}`
+addition measure **`97.0`**, the derived figure.  The quotient has dimension
+**`4,096`** on every residual at the Macaulay bound `29`: the `S₅` system is as
+generic as §11.16 assumed.  The matrix is `41,780 × 40,920` (`3.4 GB` as `u16`),
+rank `36,824`.
+
+**2. `C₄`.**
+
+| residual | `C₄` | elimination | normal forms | charpoly | eigenvectors | rational eigenvalues | solver = oracle | wall |
+|---|---:|---:|---:|---:|---:|---:|---|---:|
+| 0, constructed | `1.227·10¹²` | `5.825·10¹¹` | `5.461·10¹¹` | `7.06·10¹⁰` | `2.77·10¹⁰` | 2 | `{41, 122, 180, 226}` = planted | `1,625 s` |
+| 1 | `1.213·10¹²` | `5.825·10¹¹` | `5.460·10¹¹` | `7.06·10¹⁰` | `1.39·10¹⁰` | 1 | `∅ = ∅` | `1,460 s` |
+| 2 | `1.213·10¹²` | `5.825·10¹¹` | `5.461·10¹¹` | `7.06·10¹⁰` | `1.39·10¹⁰` | 1 | `∅ = ∅` | `1,499 s` |
+| 3 | `1.199·10¹²` | `5.825·10¹¹` | `5.460·10¹¹` | `7.06·10¹⁰` | `0` | 0 | `∅ = ∅` | `1,450 s` |
+
+**`C₄ = 1.213·10¹²`, `17.0×` the registered floor.**  The `2.3 %` spread is the
+eigenvector step alone, which scales with the number of rational eigenvalues;
+elimination, normal forms and the characteristic polynomial agree to four
+figures on every residual.  The cross-check agrees on all four, but three of
+those agreements are on the empty set — a residual decomposes about one time in
+`24` — so the constructed residual, whose planted decomposition both the solver
+and the oracle return, is the check that carries weight.
+
+Elimination is `48 %` of `C₄` and the normal forms `45 %`, each alone about `8×`
+the floor.  The characteristic polynomial costs `1.027·D³`, a shade under the
+`1.039` §11.16 carried over from `k = 3`: the generic runs show the coefficient
+drifting down with `D` (`1.063` at `81`, `1.032` at `2,401`), so the floor's own
+component was `1.2 %` high.  It is `6 %` of `C₄`.
+
+**3. The same solver on generic systems predicts it.**  Four random equations of
+degree `d` in four unknowns with a planted root, every root found, every
+quotient at the Bézout dimension:
+
+| `d` | columns | `D = d⁴` | `C` | elimination / normal forms | charpoly / `D³` | wall |
+|---:|---:|---:|---:|---|---:|---:|
+| 2 | 126 | 16 | `4.6·10⁴` | 44 % / 31 % | 1.010 | — |
+| 3 | 715 | 81 | `6.2·10⁶` | 47 % / 41 % | 1.063 | — |
+| 4 | 2,380 | 256 | `2.3·10⁸` | 46 % / 42 % | 1.054 | `1 s` |
+| 5 | 5,985 | 625 | `3.7·10⁹` | 47 % / 44 % | 1.045 | `5 s` |
+| 6 | 12,650 | 1,296 | `3.5·10¹⁰` | 47 % / 44 % | 1.038 | `58 s` |
+| 7 | 23,751 | 2,401 | `2.4·10¹¹` | 47 % / 44 % | 1.032 | `419 s` |
+
+`C ∝ D^{3.11}` over `d = 4 … 7` predicts `1.26·10¹²` at `D = 4,096`, **`4 %`**
+above the `S₅` measurement.  Nothing about the summation polynomial makes this
+system cheaper or dearer than a generic one of its degrees: `C₄` is what a
+Macaulay solve of four octics in four unknowns costs, and `C_k` in this design
+is `≈ D^{3.1}` with `D = 2^{k(k−1)}`.
+
+**4. The crossover, extrapolated** on §11.16's formula
+`p* = 0.095·C₄ / (1 − r∞)` and the exponents `n^{1/4}` and `n^{1/2}`:
+
+| `C₄` | `r∞ = 0.34` | `r∞ = 0.63` |
+|---|---:|---:|
+| registered floor, `7.1·10¹⁰` | ~~`2^{133}`~~ | ~~`2^{136.5}`~~ |
+| **measured, `1.21·10¹²`** | **`n* ≈ 2^{149.4}`** | **`2^{152.8}`** |
+
+`17×` the floor moves `n*` `4 log₂ 17 ≈ 16` bits later — the only direction the
+registration allowed.  At `p = 269` (`n ≈ 2^{32}`) the relation phase alone
+would be **`4.3·10⁸×` rho**.  Against `k = 3`'s double-large-prime crossover
+past `2^{230}`, the full-decomposition `k = 4` method still hands over about
+**eighty doublings sooner**, and past `n*` it would sit at `0.34–0.63×` rho
+rather than tend to zero.
+
+**Class.**  A stage diagnostic: `C₄` prices one phase, and `n*` extrapolates the
+method from it on derived exponents.  No end-to-end `S` exists for `k = 4`, and
+none is claimed.  Nothing here changes an existing method's cost, so none of
+§3's four classes applies.  §11.16's prediction — `C₄ ≥ 7.1·10¹⁰`,
+`n* ≥ 2^{133}` — is met, and its abandonment condition was not reached: each
+solve took under half an hour in `3.7 GB`.
+
+**What this leaves.**  At `k = 4` the crossover is a question about one
+constant.  Every factor `f` taken off `C₄` moves `n*` about `4 log₂ f` bits
+earlier, and in this design `C₄ ≈ D^{3.1}`, so the levers are the ones that
+shrink `D` or its exponent — `F₄` with sparse FGLM, or the Faugère–Gaudry–Huot–
+Renault symmetries on curves with rational torsion.  Any of them would be
+registered as `engineering`: none changes `r∞`, which caps a plain `k = 4`
+method at `1.6–3×` better than rho however cheap the solve gets.
+
 ## References
 
 - J. M. Pollard, *Monte Carlo methods for index computation (mod p)*,

@@ -1616,12 +1616,22 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <strong>0.34&ndash;0.63&times; rho</strong>, so a plain k&thinsp;=&thinsp;4 method would
         eventually beat rho by 1.6&ndash;3&times; and no more. This note's own solver bounds
         C&#8324; &ge; 7.1&middot;10<sup>10</sup> from the characteristic polynomial of a
-        4,096-dimensional multiplication matrix alone, which puts the handover at
-        <strong>n &asymp; 2<sup>133</sup>&ndash;2<sup>137</sup></strong>, extrapolated on the
-        exponents n<sup>1/4</sup> and n<sup>1/2</sup>. That is about a hundred doublings before the
-        k&thinsp;=&thinsp;3 crossover, and 2.5&middot;10<sup>7</sup>&times; rho at 32 bits. A measured
-        C&#8324; in this design can only move it later. Decomposing into three points instead
-        (Joux&ndash;Vitse) sits near 36&times; rho at every size.</p>
+        4,096-dimensional multiplication matrix alone, which put the handover at
+        <s>n &asymp; 2<sup>133</sup>&ndash;2<sup>137</sup></s>, extrapolated on the exponents
+        n<sup>1/4</sup> and n<sup>1/2</sup>, and a measured C&#8324; in this design could only
+        move it later. Decomposing into three points instead (Joux&ndash;Vitse) sits near
+        36&times; rho at every size.</p>
+      <p><strong>Then measured</strong> (&sect;11.17, four residuals at p&thinsp;=&thinsp;269, each
+        solve cross-checked against a meet-in-the-middle oracle, the constructed one returning
+        its planted decomposition): the S&#8325; system has the predicted dimension 4,096,
+        an F<sub>p&#8308;</sub> addition costs the derived 97 multiplications, and
+        <strong>C&#8324; = 1.21&middot;10<sup>12</sup></strong>, 17&times; the floor. The same
+        solver on generic systems of the same degrees predicts it within 4%, so the summation
+        polynomial is no cheaper than any four octics. The handover moves to
+        <strong>n &asymp; 2<sup>149</sup>&ndash;2<sup>153</sup></strong> (extrapolated), with the
+        relation phase at 4.3&middot;10<sup>8</sup>&times; rho at 32 bits &mdash; still about
+        eighty doublings before the k&thinsp;=&thinsp;3 crossover. A stage diagnostic: no
+        end-to-end S exists for k&thinsp;=&thinsp;4, and none is claimed.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
     </div>
