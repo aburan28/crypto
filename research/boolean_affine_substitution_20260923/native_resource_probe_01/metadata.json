@@ -1,0 +1,20 @@
+{
+  "scope": "Discovery-only native SAT feasibility probe. Python wrapper, not a same-binary performance comparison; no promotion claim. Solver context, encoding, solve, model checking and destruction are timed; interpreter/import startup is excluded.",
+  "started_utc": "2026-09-23T18:15:02.202548+00:00",
+  "python": "3.14.7 (main, Aug  5 2026, 10:29:49) [Clang 21.0.0 (clang-2100.1.1.101)]",
+  "executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+  "machine": "arm64",
+  "binding_path": "/opt/homebrew/opt/cryptominisat/lib/python3.14/site-packages/pycryptosat.cpython-314-darwin.so",
+  "binding_sha256": "3a93bc7cede5a69458d033095f677aedf8415dfbcdf478fbe44264f61cfc51bd",
+  "library_sha256": "7952e5a5c77ac8b56253c7a2ad88c62648f20698004338bad9a443efb55b2f84",
+  "threads": 1,
+  "time_limit_seconds": 5.0,
+  "conflict_limit": 200000,
+  "source_fixtures": {
+    "planted": "80b71b35dbdbe845f204233e6fd5093630d6d43326e3f0d0bf5c86f370ba618e",
+    "cross_planted": "73f114ff82faf17eb70ef51b42d6bd10a85f0e51a627c4f837cf700f92ee1d31",
+    "unplanted": "ef6e9170d1b0e3d5ef3a19382b08efc6d5c9e924a430f2047317db1ba0a34d8b"
+  },
+  "complete": true,
+  "ended_utc": "2026-09-23T18:15:05.787406+00:00"
+}
