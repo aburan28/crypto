@@ -174,6 +174,18 @@ What the two misses are and are not:
   beating a matched rho at any cell. The cheapest way to keep that honest is
   for the tournament's rho to carry the same orbit naming as its IC arm.
 
+## Related: #650
+
+Another lane's open draft, #650 ("Matched rho references"), builds matched rho
+references for the scoreboard's `ic bench` and `ic boundary` figures, and
+re-prices those figures against them.  Its Koblitz classes are named the same
+way as this control's, by least normal-basis rotation.  The two were found
+independently, and they agree on the direction.
+
+#650 does not touch the tournament worker's `koblitz_signed_frobenius_rho`,
+which is the rho every IC/rho ratio in this note and in the tournament was
+taken against.  This control is the corresponding check for that code path.
+
 ## Scope
 
 - **Instructions only, one container.** Native time was not measured.
