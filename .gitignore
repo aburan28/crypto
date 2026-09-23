@@ -41,6 +41,14 @@ hdl/**/e~*
 gpu/ecc2k/curve_*.h
 gpu/ecc2k/vec_*.h
 gpu/ecc2k/fold_table_*.bin
+gpu/ecc2k/fold_plan_*.bin
+gpu/ecc2k/test_tsan_*
+gpu/ecc2k/test_racy_*
+gpu/ecc2k/tsan_*.log
+gpu/ecc2k/racy_*.log
+gpu/ecc2k/fold2k_k23
+gpu/ecc2k/fold2k_k41
+gpu/ecc2k/nvcc_check_fold2k
 gpu/ecc2k/test_ecc2k95
 gpu/ecc2k/test_k23
 gpu/ecc2k/test_k41
