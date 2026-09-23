@@ -360,6 +360,426 @@ fn semi_regular_degree_of(
     semi_regular_degree(n_vars, &degrees)
 }
 
+// ── Any engine, several at once: the matched stage suite ───────────
+
+/// One engine's answer to one target in one repetition.
+#[derive(Clone, Debug, Serialize)]
+pub struct EngineRun {
+    /// `solved`, `unsatisfiable`, `budget` or `declined`.
+    pub verdict: String,
+    /// The solutions returned, sorted.
+    pub solutions: Vec<u64>,
+    pub ops: u64,
+    pub wall_ns: u64,
+    pub degree_reached: Option<u32>,
+    pub solving_degree: Option<u32>,
+    pub peak_bytes: u64,
+    pub extra: std::collections::BTreeMap<String, u64>,
+    /// The unit `ops` counts, as the engine named it; carried on the
+    /// summary rather than repeated on every run.
+    #[serde(skip)]
+    pub op_unit: String,
+}
+
+/// One target of a cell: the system's fingerprint and every engine's
+/// runs on it, repetition by repetition.
+#[derive(Clone, Debug, Serialize)]
+pub struct EngineTarget {
+    pub x_r: u64,
+    /// blake3 over the canonical system (variable count, then each
+    /// equation's term masks in ascending order), so a later run can
+    /// prove it solved the same inputs.
+    pub system_blake3: String,
+    pub terms: u64,
+    pub semi_regular_degree: Option<u32>,
+    /// Engine name → its runs on this target in repetition order.  An
+    /// engine that exhausted the budget has one run here, not `repeats`.
+    pub runs: std::collections::BTreeMap<String, Vec<EngineRun>>,
+}
+
+/// One engine over one cell.
+#[derive(Clone, Debug, Serialize)]
+pub struct EngineSummary {
+    pub engine: String,
+    pub op_unit: String,
+    /// `complete enumeration` or `first solution`: the accounting
+    /// contract keeps the two on separate leaderboards.
+    pub workload: String,
+    pub declined: bool,
+    /// Targets decided (solved or refuted) in every repetition.
+    pub decided: usize,
+    /// Targets with a budget verdict in some repetition.
+    pub over_budget: usize,
+    /// Every decided answer equals the reference engine's (CDCL: its
+    /// one model is a reference solution).
+    pub agrees_with_reference: bool,
+    /// Mean and max over decided targets of the solving degree (highest
+    /// degree that produced a new element) and of the highest degree
+    /// processed, where the engine reports them.
+    pub d_learn_mean: Option<f64>,
+    pub d_learn_max: Option<u32>,
+    pub d_reach_mean: Option<f64>,
+    pub d_reach_max: Option<u32>,
+    /// Means over targets of the per-target median over repetitions.
+    pub ops_mean: f64,
+    pub ms_mean: f64,
+    pub ms_max: f64,
+    pub peak_kib_max: f64,
+    /// Summed median wall over the targets both decided, this engine over
+    /// the reference.  A wall-time ratio: `measured`, host-dependent.
+    pub wall_over_reference: Option<f64>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct EngineCell {
+    pub family: String,
+    pub curve: String,
+    pub n: u32,
+    pub n_prime: u32,
+    pub summands: u32,
+    pub n_vars: usize,
+    pub equations: usize,
+    pub targets: usize,
+    pub repeats: usize,
+    pub reference_engine: String,
+    pub d_semireg_min: Option<u32>,
+    pub d_semireg_max: Option<u32>,
+    /// blake3 over every target's index and reference solution set: two
+    /// runs that decided the cell identically have the same digest.
+    pub verdict_digest: String,
+    pub engines: Vec<EngineSummary>,
+    pub per_target: Vec<EngineTarget>,
+}
+
+fn system_blake3(eqs: &[crate::cryptanalysis::pq_groebner_f2::F2BoolPoly], n_vars: usize) -> String {
+    let mut h = blake3::Hasher::new();
+    h.update(&(n_vars as u64).to_le_bytes());
+    h.update(&(eqs.len() as u64).to_le_bytes());
+    for e in eqs {
+        let mut masks: Vec<u64> = e.terms.iter().map(|t| t.mask).collect();
+        masks.sort_unstable();
+        h.update(&(masks.len() as u64).to_le_bytes());
+        for m in masks {
+            h.update(&m.to_le_bytes());
+        }
+    }
+    h.finalize().to_hex().to_string()
+}
+
+fn median(mut xs: Vec<f64>) -> f64 {
+    if xs.is_empty() {
+        return f64::NAN;
+    }
+    xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let k = xs.len();
+    if k % 2 == 1 {
+        xs[k / 2]
+    } else {
+        0.5 * (xs[k / 2 - 1] + xs[k / 2])
+    }
+}
+
+/// **Price several engines on one cell, paired.**  The targets are the
+/// ones [`price_descent_cell`] draws for the same `(family, n, n', m,
+/// seed)`, so the cell is the frozen §14/§16 cell; every engine solves
+/// every target `repeats` times, interleaved per target with the engine
+/// order rotated each repetition, so host drift falls on all of them
+/// alike.  The reference engine — the strongest exhaustive search listed
+/// that applies (`fes-f2-wide`, then `fes-f2`, then `exhaustive`), else
+/// the first listed engine that enumerates every solution — sets the
+/// answers every other engine is checked against.
+#[allow(clippy::too_many_arguments)]
+pub fn price_engine_cell(
+    engines: &[(String, Box<dyn crate::cryptanalysis::ic_framework::stages::SystemSolver>, crate::cryptanalysis::ic_framework::stages::Params)],
+    family: &str,
+    n: u32,
+    n_prime: u32,
+    summands: u32,
+    targets: usize,
+    seed: u64,
+    budget: Option<std::time::Duration>,
+    repeats: usize,
+) -> Option<EngineCell> {
+    use crate::cryptanalysis::ic_framework::stages::{BooleanSystem, SolverVerdict};
+    if n_prime == 0 || n_prime > max_n_prime(summands) || engines.is_empty() {
+        return None;
+    }
+    let inst = instance_for(family, n, seed)?;
+    let v_basis = standard_basis(n_prime);
+    let mut rng = StdRng::seed_from_u64(seed ^ ((n as u64) << 32) ^ ((summands as u64) << 16));
+    let repeats = repeats.max(1);
+    let mut per_target: Vec<EngineTarget> = Vec::with_capacity(targets);
+    let (mut n_vars, mut equations) = (0usize, 0usize);
+    let mut shape = None;
+    for _ in 0..targets {
+        let x_r = rng.gen::<u64>() & inst.gf.mask;
+        let d = descend(&inst.gf, inst.b, x_r, &v_basis, summands).ok()?;
+        let system = BooleanSystem { equations: d.equations, n_vars: d.n_vars };
+        let sh = system.shape();
+        n_vars = system.n_vars;
+        equations = system.equations.len();
+        let mut runs: std::collections::BTreeMap<String, Vec<EngineRun>> = Default::default();
+        for rep in 0..repeats {
+            for k in 0..engines.len() {
+                let (name, solver, params) = &engines[(k + rep) % engines.len()];
+                // A call that exhausted its budget is not repeated on the
+                // same target: its verdict is already "at least the
+                // budget", and repeating it would spend the budget again
+                // to learn nothing.  Such a target has one run, not
+                // `repeats`, and every count on it is a lower bound.
+                if runs.get(name).is_some_and(|rs| rs.iter().any(|r| r.verdict == "budget")) {
+                    continue;
+                }
+                let run = if !solver.accepts(&sh) {
+                    EngineRun {
+                        verdict: "declined".into(),
+                        solutions: Vec::new(),
+                        ops: 0,
+                        wall_ns: 0,
+                        degree_reached: None,
+                        solving_degree: None,
+                        peak_bytes: 0,
+                        extra: Default::default(),
+                        op_unit: String::new(),
+                    }
+                } else {
+                    let (verdict, cost) = solver.solve(&system, params, budget);
+                    let (verdict, mut solutions) = match verdict {
+                        SolverVerdict::Solved(s) => ("solved", s),
+                        SolverVerdict::Unsatisfiable => ("unsatisfiable", Vec::new()),
+                        SolverVerdict::BudgetExceeded => ("budget", Vec::new()),
+                    };
+                    solutions.sort_unstable();
+                    EngineRun {
+                        verdict: verdict.into(),
+                        solutions,
+                        ops: cost.ops,
+                        wall_ns: cost.wall_ns,
+                        degree_reached: cost.degree_reached,
+                        solving_degree: cost.solving_degree,
+                        peak_bytes: cost.peak_bytes,
+                        extra: cost.extra,
+                        op_unit: cost.op_unit,
+                    }
+                };
+                runs.entry(name.clone()).or_default().push(run);
+            }
+        }
+        per_target.push(EngineTarget {
+            x_r,
+            system_blake3: system_blake3(&system.equations, system.n_vars),
+            terms: system.equations.iter().map(|p| p.terms.len() as u64).sum(),
+            semi_regular_degree: sh.semi_regular_degree,
+            runs,
+        });
+        shape = Some(sh);
+    }
+    let shape = shape?;
+
+    // The reference: the strongest exhaustive search that applies, else
+    // the first listed engine that enumerates every solution — a
+    // first-solution engine cannot say what the full answer is.
+    let applies = |name: &str| engines.iter().any(|(n, s, _)| n == name && s.accepts(&shape));
+    let reference = ["fes-f2-wide", "fes-f2", "exhaustive"]
+        .into_iter()
+        .find(|r| applies(r))
+        .map(str::to_string)
+        .or_else(|| {
+            engines
+                .iter()
+                .find(|(_, s, _)| s.finds_every_solution() && s.accepts(&shape))
+                .map(|(n, _, _)| n.clone())
+        })
+        .unwrap_or_else(|| engines[0].0.clone());
+    let decided = |r: &EngineRun| r.verdict == "solved" || r.verdict == "unsatisfiable";
+    let reference_answer = |t: &EngineTarget| -> Option<Vec<u64>> {
+        let runs = &t.runs[&reference];
+        runs.iter().all(decided).then(|| runs[0].solutions.clone())
+    };
+
+    let mut digest = blake3::Hasher::new();
+    for (i, t) in per_target.iter().enumerate() {
+        digest.update(&(i as u64).to_le_bytes());
+        match reference_answer(t) {
+            Some(sols) => {
+                digest.update(&(sols.len() as u64).to_le_bytes());
+                for s in sols {
+                    digest.update(&s.to_le_bytes());
+                }
+            }
+            None => {
+                digest.update(b"undecided");
+            }
+        }
+    }
+
+    let mut summaries = Vec::new();
+    for (name, solver, _) in engines {
+        let declined = !solver.accepts(&shape);
+        let every = solver.finds_every_solution();
+        let op_unit = per_target
+            .iter()
+            .flat_map(|t| t.runs[name].iter())
+            .map(|r| r.op_unit.as_str())
+            .find(|u| !u.is_empty())
+            .unwrap_or("")
+            .to_string();
+        let mut ok = true;
+        let (mut n_decided, mut n_budget) = (0usize, 0usize);
+        let (mut learn, mut reach): (Vec<u32>, Vec<u32>) = (Vec::new(), Vec::new());
+        let (mut ops, mut ms, mut peak) = (Vec::new(), Vec::new(), 0f64);
+        let (mut mine_sum, mut ref_sum) = (0f64, 0f64);
+        for t in &per_target {
+            let runs = &t.runs[name];
+            if runs.iter().any(|r| r.verdict == "budget") {
+                n_budget += 1;
+            }
+            ops.push(median(runs.iter().map(|r| r.ops as f64).collect()));
+            let my_ms = median(runs.iter().map(|r| r.wall_ns as f64 / 1e6).collect());
+            ms.push(my_ms);
+            peak = runs.iter().map(|r| r.peak_bytes as f64 / 1024.0).fold(peak, f64::max);
+            if declined || !runs.iter().all(decided) {
+                continue;
+            }
+            n_decided += 1;
+            if let Some(d) = runs[0].solving_degree {
+                learn.push(d);
+            }
+            if let Some(d) = runs[0].degree_reached {
+                reach.push(d);
+            }
+            if let Some(expect) = reference_answer(t) {
+                for r in runs {
+                    // A first-solution engine is checked for membership:
+                    // its answer must be one of the reference's, and it
+                    // may report no solution only where there is none.
+                    let fine = if every {
+                        r.solutions == expect
+                    } else {
+                        r.solutions.iter().all(|s| expect.contains(s))
+                            && r.solutions.is_empty() == expect.is_empty()
+                    };
+                    ok &= fine;
+                }
+                let ref_ms = median(t.runs[&reference].iter().map(|r| r.wall_ns as f64 / 1e6).collect());
+                mine_sum += my_ms;
+                ref_sum += ref_ms;
+            }
+        }
+        let mean_u = |v: &[u32]| (!v.is_empty()).then(|| v.iter().sum::<u32>() as f64 / v.len() as f64);
+        summaries.push(EngineSummary {
+            engine: name.clone(),
+            op_unit,
+            workload: if every { "complete enumeration" } else { "first solution" }.into(),
+            declined,
+            decided: n_decided,
+            over_budget: n_budget,
+            agrees_with_reference: ok,
+            d_learn_mean: mean_u(&learn),
+            d_learn_max: learn.iter().copied().max(),
+            d_reach_mean: mean_u(&reach),
+            d_reach_max: reach.iter().copied().max(),
+            ops_mean: mean(ops.into_iter()),
+            ms_mean: mean(ms.iter().copied()),
+            ms_max: ms.iter().copied().fold(0.0, f64::max),
+            peak_kib_max: peak,
+            wall_over_reference: (ref_sum > 0.0 && n_decided > 0).then(|| mine_sum / ref_sum),
+        });
+    }
+
+    let bounds: Vec<u32> = per_target.iter().filter_map(|t| t.semi_regular_degree).collect();
+    Some(EngineCell {
+        family: family.into(),
+        curve: inst.name.clone(),
+        n,
+        n_prime,
+        summands,
+        n_vars,
+        equations,
+        targets,
+        repeats,
+        reference_engine: reference,
+        d_semireg_min: bounds.iter().copied().min(),
+        d_semireg_max: bounds.iter().copied().max(),
+        verdict_digest: digest.finalize().to_hex().to_string(),
+        engines: summaries,
+        per_target,
+    })
+}
+
+fn short_unit(unit: &str) -> &'static str {
+    if unit.starts_with("word XORs") {
+        "wx"
+    } else if unit.starts_with("word operations") {
+        "wo"
+    } else if unit.starts_with("monomial operations") {
+        "mo"
+    } else if unit.starts_with("monomial tests") {
+        "mt"
+    } else if unit.starts_with("conflicts") {
+        "cf"
+    } else {
+        "?"
+    }
+}
+
+/// The engine table: one row per cell and engine.
+pub fn format_engine_markdown(cells: &[EngineCell]) -> String {
+    let mut out = String::new();
+    out.push_str("| E | n | n' | m | vars | engine | finds | decided | over budget | D_learn | D_reach | D_sr | ops | ms | wall / reference | agrees |\n");
+    out.push_str("|:--|--:|--:|--:|--:|:--|:--|--:|--:|--:|--:|:--|--:|--:|--:|:--|\n");
+    for c in cells {
+        let bound = match (c.d_semireg_min, c.d_semireg_max) {
+            (Some(a), Some(b)) if a == b => format!("{a}"),
+            (Some(a), Some(b)) => format!("{a}–{b}"),
+            _ => "—".into(),
+        };
+        for e in &c.engines {
+            if e.declined {
+                out.push_str(&format!(
+                    "| {} | {} | {} | {} | {} | {} | | declined | | | | {} | | | | |\n",
+                    c.family, c.n, c.n_prime, c.summands, c.n_vars, e.engine, bound
+                ));
+                continue;
+            }
+            let deg = |m: Option<f64>| m.map(|v| format!("{v:.1}")).unwrap_or_else(|| "—".into());
+            let reference = if e.engine == c.reference_engine {
+                "ref".to_string()
+            } else {
+                e.wall_over_reference.map(|r| format!("{r:.1}×")).unwrap_or_else(|| "—".into())
+            };
+            // Agreement over nothing decided is vacuous, so it is not shown.
+            let agrees = match (e.decided, e.agrees_with_reference) {
+                (0, _) => "—",
+                (_, true) => "yes",
+                (_, false) => "NO",
+            };
+            out.push_str(&format!(
+                "| {} | {} | {} | {} | {} | {} | {} | {}/{} | {} | {} | {} | {} | {:.3e} {} | {:.1} | {} | {} |\n",
+                c.family,
+                c.n,
+                c.n_prime,
+                c.summands,
+                c.n_vars,
+                e.engine,
+                if e.workload == "first solution" { "first" } else { "all" },
+                e.decided,
+                c.targets,
+                e.over_budget,
+                deg(e.d_learn_mean),
+                deg(e.d_reach_mean),
+                bound,
+                e.ops_mean,
+                short_unit(&e.op_unit),
+                e.ms_mean,
+                reference,
+                agrees
+            ));
+        }
+    }
+    out
+}
+
 /// The table, in the shape of Petit–Quisquater's Table 2.
 pub fn format_markdown(cells: &[DescentCell]) -> String {
     let mut out = String::new();
@@ -518,5 +938,55 @@ mod tests {
         // exactly what the series gives for seventeen quadratics in
         // eighteen unknowns.
         assert_eq!(cell.d_semireg_min, semi_regular_degree(18, &[2; 17]));
+    }
+
+    /// **The paired cell solves the frozen table's targets, and checks
+    /// every engine against the reference.**  Same draw as
+    /// [`price_descent_cell`], the reference is the fast exhaustive
+    /// search on a quadratic cell, a first-solution engine is checked
+    /// for membership rather than equality, and the digest of the
+    /// reference answers is a function of the inputs alone, so two runs
+    /// of one cell agree on it.
+    #[test]
+    fn a_paired_engine_cell_is_the_frozen_cell_checked_against_its_reference() {
+        use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
+        use crate::cryptanalysis::ic_framework::stages::Params;
+        let engines = |names: &[&str]| -> Vec<_> {
+            names
+                .iter()
+                .map(|n| (n.to_string(), solver_by_name(n).unwrap(), Params::default()))
+                .collect()
+        };
+        let list = engines(&["f4-f2", "buchberger-f2", "sat-cdcl", "fes-f2", "exhaustive"]);
+        let cell = price_engine_cell(&list, "K", 11, 5, 2, 4, 7, None, 2).expect("K at n = 11");
+        let frozen = price_descent_cell("K", 11, 5, 2, 4, 7, None).unwrap();
+        assert_eq!(cell.reference_engine, "fes-f2", "the quadratic cell's reference");
+        assert_eq!(cell.n_vars, frozen.n_vars);
+        for (t, run) in cell.per_target.iter().zip(&frozen.per_target) {
+            // The same target: the Buchberger engine inside the paired
+            // cell does exactly the work the frozen cell recorded.
+            assert_eq!(t.runs["buchberger-f2"][0].ops, run.stats.mono_ops);
+            assert_eq!(t.runs["f4-f2"].len(), 2, "every repetition is kept");
+        }
+        for e in &cell.engines {
+            assert!(e.agrees_with_reference, "{} disagrees", e.engine);
+            assert_eq!(e.decided, 4, "{} left a target undecided", e.engine);
+        }
+        let cdcl = cell.engines.iter().find(|e| e.engine == "sat-cdcl").unwrap();
+        assert_eq!(cdcl.workload, "first solution");
+        // The reference order does not depend on the listed order, and the
+        // digest depends on the inputs and answers only.
+        let reordered = engines(&["exhaustive", "f4-f2", "fes-f2"]);
+        let again = price_engine_cell(&reordered, "K", 11, 5, 2, 4, 7, None, 1).unwrap();
+        assert_eq!(again.reference_engine, "fes-f2");
+        assert_eq!(again.verdict_digest, cell.verdict_digest);
+        assert_eq!(
+            again.per_target.iter().map(|t| &t.system_blake3).collect::<Vec<_>>(),
+            cell.per_target.iter().map(|t| &t.system_blake3).collect::<Vec<_>>()
+        );
+        // A cubic cell has no quadratic reference, so the general one is used.
+        let cubic = price_engine_cell(&reordered, "K", 7, 2, 3, 2, 7, None, 1).unwrap();
+        assert_eq!(cubic.reference_engine, "exhaustive");
+        assert!(cubic.engines.iter().find(|e| e.engine == "fes-f2").unwrap().declined);
     }
 }

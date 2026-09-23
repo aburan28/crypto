@@ -18,9 +18,9 @@ use clap::Args;
 use serde_json::{json, Value};
 
 use crypto_lib::cryptanalysis::ic_boundary::{
-    calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor, koblitz_instance,
-    random_binary_instance, roster_prime_instance, BinaryGroup, BinaryInstance, Calibration, CountedGroup,
-    GroupOps, PinOutcome, PrimeInstance,
+    calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor, generic_floor_ops,
+    koblitz_instance, random_binary_instance, rho_reference, roster_prime_instance, BinaryGroup,
+    BinaryInstance, Calibration, CountedGroup, GroupOps, PinOutcome, PrimeInstance,
 };
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
@@ -80,6 +80,10 @@ pub struct BenchArgs {
     /// Per-solver-call budget in seconds; 0 for none.
     #[arg(long, default_value_t = 120)]
     pub solver_budget_seconds: u64,
+    /// Counted Pollard-rho runs on the same instance and planted targets,
+    /// averaged into the `vs rho` column; 0 leaves the column empty.
+    #[arg(long, default_value_t = 16)]
+    pub rho_runs: usize,
     /// A JSON file of configurations to sweep.  See the framework
     /// documentation for the schema.
     #[arg(long)]
@@ -219,12 +223,87 @@ fn sample_prime_points(inst: &PrimeInstance) -> Vec<crypto_lib::cryptanalysis::i
     (1..=8u64).map(|k| inst.curve.mul(&mut ops, g, k)).collect()
 }
 
+/// The logarithm a configuration's `rep`-th repeat plants.
+fn planted_log(seed: u64, rep: usize, r: u64) -> u64 {
+    1 + (seed.wrapping_add(rep as u64 * 0x9E37)) % (r - 1)
+}
+
+/// One counted rho run.
+#[derive(serde::Serialize)]
+struct RhoRun {
+    planted: u64,
+    seed: u64,
+    s: f64,
+    steps: u64,
+    steps_over_expected: f64,
+    verified: bool,
+}
+
+/// **The method boundary, measured on the instance.**  The repository's
+/// counted Pollard rho (`ic_boundary::rho_reference`, the reference every
+/// ledger row is priced against), run on the logarithms the
+/// configurations plant, several walks averaged because one rho run's
+/// cost is a draw from a wide distribution.
+#[derive(serde::Serialize)]
+struct RhoReference {
+    method: String,
+    runs: usize,
+    mean_s: f64,
+    min_s: f64,
+    max_s: f64,
+    all_verified: bool,
+    per_run: Vec<RhoRun>,
+}
+
+fn rho_reference_for<G: CountedGroup>(
+    g: &G,
+    generator: G::Elt,
+    r: u64,
+    seed: u64,
+    repeats: usize,
+    runs: usize,
+) -> Option<RhoReference> {
+    if runs == 0 || r < 3 {
+        return None;
+    }
+    let max_steps = (generic_floor_ops(r as f64, 1.0) * 64.0) as u64 + 4096;
+    let mut per_run = Vec::with_capacity(runs);
+    let mut method = String::new();
+    for k in 0..runs {
+        let planted = planted_log(seed, k % repeats.max(1), r);
+        let mut ops = GroupOps::default();
+        let target = g.mul(&mut ops, generator, planted);
+        let run_seed = seed ^ (0x5248_4F00 + k as u64);
+        let res = rho_reference(g, generator, target, r, run_seed, max_steps);
+        method = res.method.clone();
+        per_run.push(RhoRun {
+            planted,
+            seed: run_seed,
+            s: res.s,
+            steps: res.steps,
+            steps_over_expected: res.steps_over_expected,
+            verified: res.verified && res.recovered == Some(planted),
+        });
+    }
+    let s: Vec<f64> = per_run.iter().map(|r| r.s).collect();
+    Some(RhoReference {
+        method,
+        runs,
+        mean_s: s.iter().sum::<f64>() / runs as f64,
+        min_s: s.iter().copied().fold(f64::INFINITY, f64::min),
+        max_s: s.iter().copied().fold(0.0, f64::max),
+        all_verified: per_run.iter().all(|r| r.verified),
+        per_run,
+    })
+}
+
 /// One prime-field configuration, over `repeats` targets.
 fn run_prime(
     inst: &PrimeInstance,
     spec: &PipelineSpec,
     args: &BenchArgs,
     calib: &Calibration,
+    rho_s: Option<f64>,
 ) -> Result<Vec<RunReport>, String> {
     let fb_name = spec.factor_base.as_str();
     let or_name = spec.oracle.as_str();
@@ -238,7 +317,7 @@ fn run_prime(
     for rep in 0..args.repeats.max(1) {
         let mut ops = GroupOps::default();
         let g = inst.generator_point();
-        let planted = 1 + (spec.seed.wrapping_add(rep as u64 * 0x9E37)) % (inst.r - 1);
+        let planted = planted_log(spec.seed, rep, inst.r);
         let q = inst.curve.mul(&mut ops, g, planted);
         let ctx = InstanceCtx {
             group: &inst.curve,
@@ -264,7 +343,7 @@ fn run_prime(
                 ))
             }
         };
-        out.push(run_pipeline(&ctx, &spec, &base, oracle, planted, calib, None)?);
+        out.push(run_pipeline(&ctx, &spec, &base, oracle, planted, calib, rho_s)?);
     }
     Ok(out)
 }
@@ -275,6 +354,7 @@ fn run_binary(
     spec: &PipelineSpec,
     args: &BenchArgs,
     calib: &Calibration,
+    rho_s: Option<f64>,
 ) -> Result<Vec<RunReport>, String> {
     let fb_name = spec.factor_base.as_str();
     let or_name = spec.oracle.as_str();
@@ -293,7 +373,7 @@ fn run_binary(
     let mut out = Vec::new();
     for rep in 0..args.repeats.max(1) {
         let mut ops = GroupOps::default();
-        let planted = 1 + (spec.seed.wrapping_add(rep as u64 * 0x9E37)) % (inst.r - 1);
+        let planted = planted_log(spec.seed, rep, inst.r);
         let q = g.mul(&mut ops, inst.generator, planted);
         let ctx = InstanceCtx {
             group: &g,
@@ -330,7 +410,7 @@ fn run_binary(
             "descent-algebraic" => algebraic.as_mut().expect("built above"),
             other => return Err(format!("oracle `{other}` is not available here")),
         };
-        out.push(run_pipeline(&ctx, &spec, base, oracle, planted, calib, None)?);
+        out.push(run_pipeline(&ctx, &spec, base, oracle, planted, calib, rho_s)?);
     }
     Ok(out)
 }
@@ -538,6 +618,34 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
     };
 
     let started = std::time::Instant::now();
+    // The method boundary on this instance, before any configuration:
+    // every row's `vs rho` is its S over this mean.
+    let rho = match &instance {
+        Instance::Prime(i) => {
+            rho_reference_for(&i.curve, i.generator_point(), i.r, args.seed, args.repeats, args.rho_runs)
+        }
+        Instance::Binary(i) => rho_reference_for(
+            &BinaryGroup(&i.fast),
+            i.generator,
+            i.r,
+            args.seed,
+            args.repeats,
+            args.rho_runs,
+        ),
+    };
+    let rho_s = rho.as_ref().filter(|r| r.all_verified).map(|r| r.mean_s);
+    if !json_only {
+        if let Some(r) = &rho {
+            eprintln!(
+                "  rho reference: S = {:.3} (mean of {}, {:.3}–{:.3}){}",
+                r.mean_s,
+                r.runs,
+                r.min_s,
+                r.max_s,
+                if r.all_verified { "" } else { " — a run failed to verify; the column is left empty" }
+            );
+        }
+    }
     let mut rows: Vec<RunReport> = Vec::new();
     let mut failures: Vec<Value> = Vec::new();
     for cfg in &configs {
@@ -550,8 +658,8 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         // combinations that do not exist, and the useful output is the
         // ones that do plus a note on the ones that do not.
         let outcome = match &instance {
-            Instance::Prime(i) => run_prime(i, &spec, &args, &calib),
-            Instance::Binary(i) => run_binary(i, &spec, &args, &calib),
+            Instance::Prime(i) => run_prime(i, &spec, &args, &calib, rho_s),
+            Instance::Binary(i) => run_binary(i, &spec, &args, &calib, rho_s),
         };
         match outcome {
             Ok(mut got) => rows.append(&mut got),
@@ -585,6 +693,7 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
         // the measurement named apart from the ones left measured.
         "calibration": calib,
         "calibration_pins": pins,
+        "rho_reference": rho,
         "configurations_run": rows.len(),
         "configurations_skipped": failures,
         "all_verified": all_verified,

@@ -598,8 +598,9 @@
         <p>The benchmarking framework&rsquo;s first frozen sweeps (&sect;15 and &sect;16 of the ledger note). Every
           row is a complete, verified logarithm on one instance, over one subspace base, the same walk and the
           same two targets; the algebraic rows carry their engine&rsquo;s work inside S. The pair table on the
-          same base is the reference; rho was not run on these instances and no ratio to it is quoted. Per
-          target, first target / second target.</p>
+          same base is the reference; rho was not run on these instances when this panel was frozen, and no
+          ratio to it is quoted here &mdash; the &sect;17 panel below measures it on the same curves (counted rho
+          <code>S</code> = 5.2 at n = 17). Per target, first target / second target.</p>
       </div>
       <div class="ledger">
         <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>13</sup></sub>), binary-subspace[dimension=6]</strong> &middot; 60 signed points, 30 columns, 13 quadratics in 12 unknowns, D<sub>sr</sub> = 4 (&sect;15)</div><div class="num">S &middot; ratio to the pair table</div></div>
@@ -622,6 +623,64 @@
         <span>the pair table charged to the oracle&rsquo;s own <code>setup</code> phase, no longer to the base: the same base read 1,830 GAE beside one oracle and 0 beside another</span>
         <span>the oracles agree target by target: Buchberger and exhaustive walked the pair table&rsquo;s 126 / 112 targets to its 26 / 20 relations; CDCL&rsquo;s first target lifted one two-way decomposition to a different pair and pinned at 135 / 28, same answer; one system per run named a twist abscissa and lifted to nothing, counted as such</span>
         <span><span class="chip">engineering</span> the second sweep, <code>docs/ic/runs/ic-bench-relation-matrix-2026-09-22.json</code>: structured elimination (lightest-column pivot) does 6&ndash;11% fewer row_ops than the dense one on the same 20-bit relations, same rank, same logarithm; the matrix is 0.05&ndash;0.09% of S there, so S moves in the fourth digit &mdash; not a finding</span>
+      </div>
+    </div>
+
+    <div class="panel" id="f4-f5-engines">
+      <div class="panel-head">
+        <h2>F4 and F5 behind the plug point: what the engines move <span class="chip">engineering</span></h2>
+        <p>&sect;17 of the ledger note. A native boolean F4 (<code>f4-f2</code>), the Koblitz oracle&rsquo;s three
+          hybrid F4/F5 engines, Joux&ndash;Vitse crossbred and fast exhaustive search &mdash; scalar and vector
+          &mdash; now sit behind the <code>SystemSolver</code> plug point beside the pair-only Buchberger every
+          earlier algebraic row used. The boundaries, the suite and three targets were declared and committed
+          before any of it ran; a matched suite (&sect;8 of <code>AGENTS.md</code>) froze 6,452 solver calls and
+          140 verified whole runs under <code>research/ic_framework_engines_20260922/</code>, and the three checks
+          declared after reading it added 2,650 calls, with no disagreement between any engine and the reference
+          on any target. Whole-method <code>S</code> first; the per-call rows below
+          it are stage diagnostics and never a speed.</p>
+      </div>
+      <div class="ledger">
+        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>17</sup></sub>), binary-subspace[dimension=9]</strong> &middot; &sect;16.3&rsquo;s base and curve, 18 unknowns, two planted targets, counted rho <code>S</code> = 5.2 on the same subgroup</div><div class="num">S &middot; ratio to the pair table &middot; to rho</div></div>
+        <div class="lrow"><div class="name">Pair table (mitm, m = 2) &middot; the oracle reference</div><div class="num">448 &middot; 1 &middot; 86&times;</div><div class="lbar"><i style="width:33.1%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + fast exhaustive search &middot; the stage reference&rsquo;s own row</div><div class="num">763 &middot; 1.70&times; &middot; 146&times;</div><div class="lbar"><i style="width:36.0%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + crossbred (D = 3, k = 8) &middot; the best algebraic row</div><div class="num">10,929 &middot; 24&times; &middot; 2,098&times;</div><div class="lbar"><i style="width:50.5%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + inherited F4 (hybrid, degree 3 then splitting)</div><div class="num">28,719 &middot; 64&times;</div><div class="lbar"><i style="width:55.7%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + F4 (native, field pairs, reduced basis) &middot; D<sub>learn</sub> 3.0 against D<sub>sr</sub> 5</div><div class="num">42,647 <span class="was">was 6.55&times;10<sup>7</sup></span> &middot; 95&times;</div><div class="lbar"><i style="width:57.9%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + matrix F4 / matrix F5 (hybrid)</div><div class="num">77,482 / 77,954 &middot; 173&times;</div><div class="lbar"><i style="width:61.1%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + CDCL (first solution, its own leaderboard)</div><div class="num">4.45&times;10<sup>6</sup> &middot; 9,932&times;</div><div class="lbar"><i style="width:83.1%"></i></div></div>
+        <div class="lrow"><div class="name">Weil descent + Buchberger (pair-only) &middot; the baseline, rerun; &sect;16.3 froze 4.54 / 8.72&times;10<sup>7</sup></div><div class="num">6.55&times;10<sup>7</sup> &middot; 145,974&times;</div><div class="lbar"><i style="width:97.7%"></i></div></div>
+        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>15</sup></sub>), dimension 8, three curves</strong> &middot; 16 unknowns, rho <code>S</code> 8.9&ndash;13.1</div><div class="num"></div></div>
+        <div class="lrow"><div class="name">Pair table &middot; descent + fast exhaustive search &middot; descent + crossbred</div><div class="num">267 &middot; 367 (1.37&times;) &middot; 6,597 (25&times;)</div><div class="lbar"><i style="width:30.3%"></i></div></div>
+        <div class="lrow"><div class="name">Descent + F4 (native)</div><div class="num">27,143 <span class="was">was 7.74&times;10<sup>6</sup></span> &middot; 102&times;</div><div class="lbar"><i style="width:55.4%"></i></div></div>
+        <div class="lrow"><div class="name"><strong>E(F<sub>2<sup>13</sup></sub>), dimension 6, three curves</strong> &middot; &sect;15&rsquo;s base, 12 unknowns, rho <code>S</code> 14.6&ndash;18.7</div><div class="num"></div></div>
+        <div class="lrow"><div class="name">Pair table &middot; descent + fast exhaustive search &middot; descent + F4</div><div class="num">51 &middot; 370 (7.2&times;) &middot; 5,211 (102&times;)</div><div class="lbar"><i style="width:21.4%"></i></div></div>
+        <div class="lrow"><div class="name">Descent + F4 (native)</div><div class="num">5,211 <span class="was">was 63,622</span> &middot; 102&times;</div><div class="lbar"><i style="width:46.5%"></i></div></div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>The stage: one oracle call, wall time over the exhaustive reference on the same target, median over targets (both families, both seeds where they exist). Scalar reference <code>fes-f2</code>, 0.58 ns a point; vector reference <code>fes-f2-wide</code>, 16 lanes of AVX-512, 3.0&ndash;4.0&times; faster. A stage diagnostic, never a speed.</caption>
+          <thead><tr><th>engine</th><th class="n">16</th><th class="n">20</th><th class="n">24</th><th class="n">26</th><th class="n">28</th><th class="n">30</th><th class="n">32</th><th class="n">34</th><th>class</th></tr></thead>
+          <tbody>
+            <tr class="group"><td colspan="10">against the scalar reference (the declared one)</td></tr>
+            <tr><td>crossbred</td><td class="n">14.5</td><td class="n">5.33</td><td class="n">1.05</td><td class="n"><b>0.74&ndash;0.77</b></td><td class="n"><b>0.67&ndash;0.69</b></td><td class="n">fails</td><td class="n">fails</td><td class="n">fails</td><td>target 3 met</td></tr>
+            <tr><td>inherited F4</td><td class="n">37.3</td><td class="n">38.4</td><td class="n">8.07</td><td class="n">4.83</td><td class="n">4.10</td><td class="n">1.24</td><td class="n"><b>0.55</b></td><td class="n">&mdash;</td><td>below the scalar walk at 32</td></tr>
+            <tr><td>F4 (native)</td><td class="n">70.2</td><td class="n">47.7</td><td class="n">288</td><td class="n">180</td><td class="n">114</td><td class="n">5 of 16 fit</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>measurement</td></tr>
+            <tr class="group"><td colspan="10">against the vector reference (&sect;17.4, declared after the crossing was read)</td></tr>
+            <tr><td>crossbred</td><td class="n"></td><td class="n"></td><td class="n">3.00</td><td class="n">2.54</td><td class="n">2.45</td><td class="n">fails</td><td class="n">fails</td><td class="n">fails</td><td><span class="chip">accounting</span> withdrawn</td></tr>
+            <tr><td>inherited F4</td><td class="n"></td><td class="n"></td><td class="n">22.6</td><td class="n">15.4</td><td class="n">14.8</td><td class="n">4.55</td><td class="n">2.09</td><td class="n">1.20 (14 of 16)</td><td>measurement; crossing extrapolated near 35</td></tr>
+            <tr><td>matrix F4 / F5</td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n">5.40 / 5.42</td><td class="n">2.45 / 2.48</td><td>measurement</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span>bars on a log<sub>10</sub> scale from 1 to 10<sup>8</sup>; every figure from <code>research/ic_framework_engines_20260922/results/</code> (<code>baseline_v1</code>, <code>confirm_v1</code>, <code>strength_v1</code>, <code>hybrids_v2</code>), each part with its provenance, and the suite&rsquo;s <code>manifest.json</code></span>
+        <span><span class="chip">engineering</span> the F4-family engines replace the pair-only Buchberger: <code>S</code> falls 12&times; at n = 13, 285&times; at 15 and 1,535&times; at 17, the contract&rsquo;s 20% gate met with the interval below 0.16 at n = 13 and 0.005 at 15; they decide every two-summand target from 16 to 22 unknowns (declared target 1) where Buchberger decided 2 of 16 at 20 and none at 22. No boundary moved: every algebraic row is at least 333&times; rho and 24&times; the pair table on its base</span>
+        <span><span class="chip">accounting</span> the degree column: an engine that closes the boolean ideal (the field products as pairs) learns everything at degree 3 from 12 to 20 unknowns, where the pair-only engine read 4 &mdash; 0.60 of the semi-regular bound, not &sect;16&rsquo;s 0.80. The ideal did not change; the engine measuring it did</span>
+        <span><span class="chip">accounting</span> the reference strengthened: crossbred at its defaults crossed the scalar fast exhaustive search at 26 and 28 unknowns on both seeds (0.67&ndash;0.77, every interval below one), and against the vector search &mdash; the same algorithm, sixteen sub-cubes per Gray-code step &mdash; it is 2.45&ndash;3.0&times;: the crossing was the implementation&rsquo;s. At 30 unknowns its default parameters stop fitting</span>
+        <span><span class="chip">measurement</span> the hybrids past thirty unknowns (&sect;17.5, declared after the strength check was read): inherited F4 is 2.09&times; the vector reference at 32 unknowns and 1.20&times; at 34 on the targets it decides (it leaves 2 of 16 undecided there, so it is not below the reference on that cell); against the scalar walk it would have read as a second crossing, 0.55&times; at 32 on every target. A log-linear fit over 24&ndash;34 puts a crossing near 35 unknowns &mdash; <em>extrapolation</em>, at the reach of both the vector reference and the curve constructor, not a result</span>
+        <span><span class="chip">measurement</span> the <code>vs rho</code> column is filled: sixteen counted rho runs per instance on the same subgroup, <code>S</code> 5.2 at n = 17 and 8.9&ndash;18.7 at n = 13&ndash;15, where rho&rsquo;s setup dominates at these toy orders; the ratio is to the rho measured on the same instance, never to the asymptotic 1.3. It is the plain walk (A = 1): the contract&rsquo;s negation-aware walk would be up to &radic;2 cheaper on these curves, so every ratio to rho here is understated by up to that factor and the verdict only strengthens (&sect;17.13)</span>
+        <span>every <code>buchberger-f2</code> figure is the pair-only engine&rsquo;s; <code>main</code> has since closed it under the field equations (34154ed9), so a rerun on current code measures a different engine</span>
+        <span>the per-call ranking does not carry over: crossbred is the fastest algebraic engine on every square stage cell and the slowest F4-family row on &sect;15&rsquo;s overdetermined base, where four systems in five are inconsistent and F4 refutes them at half its cost on a consistent one</span>
       </div>
     </div>
   </div>

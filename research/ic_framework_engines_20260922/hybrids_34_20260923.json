@@ -1,0 +1,95 @@
+{
+ "suite": "ic-framework-engines-hybrids-34",
+ "version": "2026-09-23.1",
+ "declared_in": "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md \u00a717.5 and its amendment: the declared 33:17:2 cell rerun once the reference covers its 33 equations",
+ "parent_suite": "suite.json",
+ "parent_contract": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+ "baseline_engine": "buchberger-f2",
+ "reference_engine": {
+  "quadratic": "fes-f2-wide",
+  "general": "exhaustive"
+ },
+ "f4_family": [
+  "f4-f2",
+  "matrix-f4",
+  "matrix-f5",
+  "inherited-f4"
+ ],
+ "algebraic_engines": [
+  "buchberger-f2",
+  "f4-f2",
+  "matrix-f4",
+  "matrix-f5",
+  "inherited-f4",
+  "crossbred-f2"
+ ],
+ "first_solution_engines": [
+  "sat-cdcl"
+ ],
+ "stage_defaults": {
+  "targets": 8,
+  "repeats": 3,
+  "budget_seconds": 120,
+  "families": [
+   "K",
+   "R"
+  ]
+ },
+ "stage_parts": [
+  {
+   "id": "Y1-main-34",
+   "seed": 233164359,
+   "cells": [
+    "33:17:2"
+   ],
+   "engines": [
+    "inherited-f4",
+    "matrix-f4",
+    "matrix-f5",
+    "crossbred-f2",
+    "fes-f2",
+    "fes-f2-wide"
+   ]
+  },
+  {
+   "id": "Y2-holdout-34",
+   "seed": 256859885,
+   "cells": [
+    "33:17:2"
+   ],
+   "engines": [
+    "inherited-f4",
+    "matrix-f4",
+    "matrix-f5",
+    "crossbred-f2",
+    "fes-f2",
+    "fes-f2-wide"
+   ]
+  }
+ ],
+ "bench_parts": [],
+ "environment_must_be_unset": [
+  "KIC_F4_INHERIT",
+  "KIC_F4_CRITERION",
+  "KIC_F4_MAX_DEGREE_ONLY",
+  "KIC_F4_INHERIT_RREF",
+  "SOLVER_SPLIT_RULE",
+  "IC_REDUCTION_CACHE"
+ ],
+ "analysis": {
+  "pairing_unit_stage": "a target: each engine's median wall over its repetitions on that target",
+  "pairing_unit_bench": "a (curve seed, planted target) pair, matched by the recovered logarithm",
+  "bootstrap": {
+   "resamples": 10000,
+   "seed": 20260922,
+   "interval": 0.95,
+   "statistic": "median of per-pair ratios"
+  },
+  "target_1_reach": "some f4_family engine decides every two-summand target at 16-22 unknowns (main and holdout) in every repetition within budget, zero disagreements",
+  "target_2_gate": "at n=13 and n=15, all three curves pooled per n: some f4_family engine's total_gae per verified relation over buchberger-f2's has median <= 0.8 and bootstrap upper bound < 1",
+  "target_3_question": "on some two-summand stage cell (family, n), some algebraic engine's median over targets of wall/fes-f2 is < 1 with bootstrap upper bound < 1",
+  "abandon": "no algebraic engine's pooled median ratio to fes-f2 at 26 unknowns is below its pooled median ratio at 16 unknowns",
+  "hybrid_target": "some hybrid (inherited-f4, matrix-f4, matrix-f5) / fes-f2-wide median below one with its 95% bootstrap interval below one at 32 or 34 unknowns on both seeds"
+ },
+ "checks": "the 34-unknown cell of \u00a717.5 with fes-f2-wide as its reference"
+}
