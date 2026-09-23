@@ -2553,7 +2553,9 @@ comparison.  By size, `r` averages `0.551, 0.523, 0.500, 0.496`.
 §11.16's `0.34–0.63`.  `r` is flat.  Its fitted exponent in `n` is `−0.021 ±
 0.017`, and the two-standard-error interval `[−0.054, +0.013]` contains zero.
 The linear algebra itself grows as `n^{0.479 ± 0.017}` against the `n^{1/2}`
-§11.16 derived.  So a plain `k = 4` method's linear algebra costs about half
+§11.16 derived.  The confirmation does not rest on pooling rho.  §11.18
+registered `r` against each curve's own rho, and on that statistic every one
+of the eight curves lands at `0.453–0.614`, inside the band too.  So a plain `k = 4` method's linear algebra costs about half
 of rho.  Past the handover such a method would beat rho by **`1/r∞ ≈ 1.9×`**
 and no more.  That replaces the derived `1.6–3×`.
 
