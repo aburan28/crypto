@@ -81,10 +81,13 @@
 //! - M. Brickenstein, *Boolean Gröbner bases*, PhD thesis, TU
 //!   Kaiserslautern 2010 — the boolean ring and its field pairs.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::time::{Duration, Instant};
 
-use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
+use rayon::prelude::*;
+
+use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
+use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, mono_key, F2BoolMono, F2BoolPoly};
 
 /// What one F4 run cost, and how far it got.
 #[derive(Clone, Copy, Debug, Default, serde::Serialize)]
@@ -181,15 +184,13 @@ impl Row {
 /// first set bit of a row is its leading monomial.
 struct Columns {
     monos: Vec<u64>,
-    index: HashMap<u64, usize>,
+    index: FxMap<u64, usize>,
 }
 
 impl Columns {
     fn from_monomials(set: impl IntoIterator<Item = u64>) -> Self {
         let mut monos: Vec<u64> = set.into_iter().collect();
-        monos.sort_unstable_by(|a, b| {
-            cmp_mono(F2BoolMono::from_mask(*b), F2BoolMono::from_mask(*a))
-        });
+        monos.sort_unstable_by_key(|&m| std::cmp::Reverse(mono_key(F2BoolMono::from_mask(m))));
         monos.dedup();
         let index = monos.iter().enumerate().map(|(i, &m)| (m, i)).collect();
         Self { monos, index }
@@ -228,18 +229,83 @@ impl Columns {
     }
 }
 
+/// Rows × words of a matrix's non-leading rows below which the reductions
+/// by the leading block run on one thread.
+const PAR_WORDS: usize = 1 << 16;
+
 /// Forward elimination: each row in turn is reduced by the pivots found
 /// so far and becomes a pivot if anything survives.  Returns the pivot
 /// rows with their lead columns, or `None` if the deadline passed.
+///
+/// The leading block of rows with pairwise distinct leads — the reducers
+/// of symbolic preprocessing — become pivots untouched, and every later
+/// row is first reduced by them alone for as long as its lead is one of
+/// theirs.  Those reductions are independent across rows and run in
+/// parallel; the serial pass then resumes each row exactly where the
+/// one-row-at-a-time loop would stand at that point, so the pivots and
+/// the XOR count are identical to it.
 fn echelon(
-    rows: Vec<Row>,
+    mut rows: Vec<Row>,
     n_cols: usize,
     word_xors: &mut u64,
     deadline: Option<Instant>,
 ) -> Option<Vec<(usize, Row)>> {
     let mut pivot_of = vec![NONE; n_cols];
     let mut pivots: Vec<(usize, Row)> = Vec::with_capacity(rows.len());
-    for (k, mut row) in rows.into_iter().enumerate() {
+    // the leading block: rows until the first repeated lead (zero rows
+    // are skipped by the serial loop too)
+    let mut fixed = 0usize;
+    while fixed < rows.len() {
+        match rows[fixed].lead() {
+            Some(lead) if pivot_of[lead] != NONE => break,
+            Some(lead) => pivot_of[lead] = 0,
+            None => {}
+        }
+        fixed += 1;
+    }
+    let rest = rows.split_off(fixed);
+    for mut row in rows {
+        if let Some(lead) = row.lead() {
+            pivot_of[lead] = pivots.len() as u32;
+            pivots.push((lead, row));
+        }
+    }
+    let mut rest = rest;
+    {
+        let (pivot_of, fixed_pivots) = (&pivot_of, &pivots);
+        let expired = std::sync::atomic::AtomicBool::new(false);
+        let by_fixed = |row: &mut Row| -> u64 {
+            if deadline.is_some_and(|d| Instant::now() >= d) {
+                expired.store(true, std::sync::atomic::Ordering::Relaxed);
+                return 0;
+            }
+            let mut xors = 0u64;
+            while let Some(lead) = row.lead() {
+                let p = pivot_of[lead];
+                if p == NONE {
+                    break;
+                }
+                let pivot = &fixed_pivots[p as usize].1;
+                let (from, to) = (lead / 64, pivot.end);
+                for (a, b) in row.bits[from..to].iter_mut().zip(&pivot.bits[from..to]) {
+                    *a ^= *b;
+                }
+                xors += (to - from) as u64;
+                row.end = row.end.max(to);
+            }
+            xors
+        };
+        let words = n_cols.div_ceil(64).max(1);
+        *word_xors += if rest.len() > 1 && rest.len() * words > PAR_WORDS {
+            rest.par_iter_mut().map(by_fixed).sum::<u64>()
+        } else {
+            rest.iter_mut().map(by_fixed).sum::<u64>()
+        };
+        if expired.load(std::sync::atomic::Ordering::Relaxed) {
+            return None;
+        }
+    }
+    for (k, mut row) in rest.into_iter().enumerate() {
         if k % 128 == 0 && deadline.is_some_and(|d| Instant::now() >= d) {
             return None;
         }
@@ -432,10 +498,10 @@ pub fn groebner_basis_f4(
         // The rows the step reduces: both halves of every critical pair
         // (their common leading monomial is the lcm, which one half will
         // pivot and the other lose), and every field product.
-        let mut seen_rows: HashSet<(u64, usize)> = HashSet::new();
+        let mut seen_rows: FxSet<(u64, usize)> = FxSet::default();
         let mut half_rows: Vec<F2BoolPoly> = Vec::new();
         let mut field_rows: Vec<F2BoolPoly> = Vec::new();
-        let mut lcm_columns: HashSet<u64> = HashSet::new();
+        let mut lcm_columns: FxSet<u64> = FxSet::default();
         for p in &selected {
             match p.kind {
                 PairKind::Critical(i, j) => {
@@ -466,8 +532,8 @@ pub fn groebner_basis_f4(
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
         let active: Vec<usize> = (0..s.polys.len()).filter(|&g| s.active[g]).collect();
-        let mut examined: HashSet<u64> = lcm_columns.clone();
-        let mut no_divisor: HashSet<u64> = HashSet::new();
+        let mut examined: FxSet<u64> = lcm_columns.clone();
+        let mut no_divisor: FxSet<u64> = FxSet::default();
         let mut queue: Vec<u64> = Vec::new();
         for p in half_rows.iter().chain(field_rows.iter()) {
             for t in &p.terms {
@@ -512,7 +578,8 @@ pub fn groebner_basis_f4(
         // Reducers first, each on a column of its own; then the S-rows by
         // leading monomial, so the second half of a pair meets the first.
         let mut s_rows: Vec<&F2BoolPoly> = half_rows.iter().chain(field_rows.iter()).collect();
-        s_rows.sort_by(|a, b| cmp_mono(b.lt().unwrap(), a.lt().unwrap()));
+        // stable: rows sharing a leading monomial keep their order
+        s_rows.sort_by_cached_key(|p| std::cmp::Reverse(mono_key(p.lt().unwrap())));
         for p in reducers.iter().chain(s_rows.iter().copied()) {
             st.max_poly_degree = st.max_poly_degree.max(degree(p));
         }
@@ -575,7 +642,7 @@ fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -
         }
     }
     let lms: Vec<u64> = minimal.iter().map(|p| p.lt().unwrap().mask).collect();
-    let mut examined: HashSet<u64> = lms.iter().copied().collect();
+    let mut examined: FxSet<u64> = lms.iter().copied().collect();
     let mut queue: Vec<u64> = Vec::new();
     for p in &minimal {
         for t in &p.terms[1..] {
