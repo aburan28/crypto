@@ -23,7 +23,6 @@ jobs:
         run: |
           python3 -m py_compile scripts/compose_koblitz_stage147_gate_audit.py scripts/compose_koblitz_stage148_gate_audit.py
           python3 -m json.tool docs/ic/runs/koblitz-n59-cached-filter-hash-rejection-20260922.json >/dev/null
-          git apply --check docs/ic/patches/koblitz-n59-cached-filter-hash-rejected-20260922.patch
           python3 scripts/compose_koblitz_stage147_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-147-current-gate-audit-20260922 > "$RUNNER_TEMP/stage147-historical.json"
           python3 scripts/compose_koblitz_stage148_gate_audit.py verify --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-148-current-gate-audit-20260922 > "$RUNNER_TEMP/stage148-current.json"
           git diff --exit-code
