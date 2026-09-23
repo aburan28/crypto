@@ -42,6 +42,8 @@ on:
       - "scripts/verify_koblitz_stage168_single_batch.py"
       - "scripts/compose_koblitz_stage169_fresh_holdout.py"
       - "scripts/verify_koblitz_stage169_fresh_holdout.py"
+      - "scripts/compose_koblitz_stage170_parallel_construction.py"
+      - "scripts/verify_koblitz_stage170_parallel_construction.py"
       - "scripts/test_koblitz_phase_b_tool_builds.py"
       - "scripts/score_koblitz_blind_pdp_phase_b.py"
       - "scripts/test_koblitz_blind_pdp_phase_b.py"
@@ -129,6 +131,8 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-preregistration-20260923.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-20260923/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-verification.json"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -213,6 +217,10 @@ jobs:
         run: |
           python3 scripts/verify_koblitz_stage169_fresh_holdout.py > /tmp/stage169-fresh-holdout-verification.json
           cmp /tmp/stage169-fresh-holdout-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-verification.json
+      - name: Verify parallel fixed-X1 construction
+        run: |
+          python3 scripts/verify_koblitz_stage170_parallel_construction.py > /tmp/stage170-parallel-construction-verification.json
+          cmp /tmp/stage170-parallel-construction-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-verification.json
       - name: Validate licensed Magma Phase-B replay packet controls
         run: |
           python3 scripts/test_koblitz_phase_b_magma_replay.py -v
