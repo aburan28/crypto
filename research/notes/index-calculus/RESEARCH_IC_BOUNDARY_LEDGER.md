@@ -3110,6 +3110,31 @@ the first-solution engine against the complete enumerators; and
 tuning `crossbred-f2`'s `D` and `k` per cell in this round — a tuned
 crossbred is a separate round with its own declaration.
 
+### 17.3 A confirmation, declared after the stage parts were read
+
+The frozen stage parts met target 3 on exactly one cell:
+`crossbred-f2` below `fes-f2` at twenty-six unknowns (`25:13:2`, the
+`R` curve — `K` has no instance at `n = 25`), a median ratio of `0.77`
+over eight targets with a `95 %` interval of `[0.72, 0.79]`; at
+twenty-four unknowns, over thirty-two targets on both seeds and both
+families, the same ratio is `1.04 [1.03, 1.07]`.  One curve and one
+seed at the one size that crosses is thin, so before anything is read
+into it this confirmation was written down, committed, and then run
+(`confirm_20260923.json`, results in `results/confirm_v1/`):
+
+- the holdout seed `0x0F4F5EED` at `25:13:2` — a new `R` curve and new
+  targets;
+- one size further, `27:14:2` (twenty-eight unknowns), on both seeds,
+  and `29:15:2` (thirty) on the main seed;
+- the `B` part's engines, and the suite's protocol unchanged.
+
+**It confirms** if `crossbred-f2 / fes-f2` is below one with its
+interval below one on the holdout at twenty-six unknowns and on each
+seed at twenty-eight.  A miss on any of the three and the crossing is
+reported as seed-dependent.  Thirty unknowns is recorded, not graded.
+This was declared after the numbers it checks were read, and says so:
+it can weaken the finding or support it, not create it.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

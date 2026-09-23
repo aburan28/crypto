@@ -106,6 +106,8 @@ def bench_command(binary, part, out, extra_engines, scratch):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--run-id", required=True)
+    ap.add_argument("--suite", default="suite.json",
+                    help="the frozen suite file in this directory (default suite.json)")
     ap.add_argument("--parts", help="comma-separated part ids; default all, in suite order")
     ap.add_argument("--binary", default=str(ROOT / "target" / "release" / "ic"))
     ap.add_argument("--add-engine", action="append", default=[],
@@ -113,7 +115,8 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    suite = json.loads((HERE / "suite.json").read_text())
+    suite_path = HERE / args.suite
+    suite = json.loads(suite_path.read_text())
     set_vars = [v for v in suite["environment_must_be_unset"] if v in os.environ]
     if set_vars:
         sys.exit(f"refusing to run: {', '.join(set_vars)} set; these override the engines under test")
@@ -121,7 +124,7 @@ def main():
     if not binary.exists():
         sys.exit(f"no binary at {binary}; build it with `cargo build --release --bin ic` first")
 
-    parts = [("stage", p) for p in suite["stage_parts"]] + [("bench", p) for p in suite["bench_parts"]]
+    parts = [("stage", p) for p in suite["stage_parts"]] + [("bench", p) for p in suite.get("bench_parts", [])]
     if args.parts:
         wanted = args.parts.split(",")
         known = {p["id"] for _, p in parts}
@@ -154,8 +157,9 @@ def main():
         prov = {
             "part": part["id"],
             "kind": kind,
+            "suite_file": args.suite,
             "suite_version": suite["version"],
-            "suite_sha256": sha256_file(HERE / "suite.json"),
+            "suite_sha256": sha256_file(suite_path),
             "sweep_sha256": sha256_file(HERE / part["sweep"]) if kind == "bench" else None,
             "command": cmd,
             "added_engines": args.add_engine,

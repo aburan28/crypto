@@ -134,18 +134,20 @@ def fmt_ci(ci, digits=2):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--run", required=True)
+    ap.add_argument("--suite", default="suite.json",
+                    help="the frozen suite file in this directory (default suite.json)")
     ap.add_argument("--manifest", help="check input fingerprints and verdict digests against this frozen manifest")
     ap.add_argument("--freeze-manifest", action="store_true", help="write manifest.json from this run")
     args = ap.parse_args()
 
-    suite = json.loads((HERE / "suite.json").read_text())
+    suite = json.loads((HERE / args.suite).read_text())
     boot = suite["analysis"]["bootstrap"]
     run_dir = HERE / "results" / args.run
     problems = []
 
     stage, bench = [], []
     for kind, key in (("stage", "stage_parts"), ("bench", "bench_parts")):
-        for part in suite[key]:
+        for part in suite.get(key, []):
             path = run_dir / f"{part['id']}.json"
             if not path.exists():
                 problems.append(f"missing part {part['id']}")
@@ -203,7 +205,8 @@ def main():
             "all_decided": bool(span) and all(c["engines"][e]["decided"] == c["engines"][e]["targets"] for c in span),
             "all_agree": all(c["engines"][e]["agrees"] for c in span),
         }
-    t1 = any(v["all_decided"] and v["all_agree"] and v["cells"] for v in reach.values())
+    t1 = any(v["all_decided"] and v["all_agree"] and v["cells"] for v in reach.values()) \
+        if any(v["cells"] for v in reach.values()) else None
 
     # Target 3: a stage crossover against fes-f2.
     crossings = []
@@ -224,8 +227,8 @@ def main():
             if c["reference"] == "fes-f2" and e in c["engines"]:
                 by_vars[c["vars"]] += c["engines"][e]["_vs_ref_pairs"]
         traj[e] = {v: bootstrap_median(p, boot["resamples"], boot["seed"] ^ v, boot["interval"]) for v, p in sorted(by_vars.items()) if p}
-    gaining = {e: (t.get(26) and t.get(16) and t[26]["median"] < t[16]["median"]) for e, t in traj.items()}
-    abandon = not any(gaining.values())
+    gaining = {e: (t[26]["median"] < t[16]["median"]) if (t.get(26) and t.get(16)) else None for e, t in traj.items()}
+    abandon = (not any(gaining.values())) if any(g is not None for g in gaining.values()) else None
 
     # Extrapolation, marked as such: log-linear fit of the ratio in the
     # number of unknowns over the sizes each engine decided, 16 and up.
@@ -268,7 +271,7 @@ def main():
     for n, engines in sorted(by_n.items()):
         gate[n] = {e: bootstrap_median(v, boot["resamples"], boot["seed"] ^ n, boot["interval"]) for e, v in engines.items()}
     t2_by_n = {n: any(ci and ci["median"] <= 0.8 and ci["hi"] < 1 for e, ci in g.items() if e in f4) for n, g in gate.items()}
-    t2 = bool(t2_by_n) and all(t2_by_n.get(n, False) for n in (13, 15))
+    t2 = all(t2_by_n.get(n, False) for n in (13, 15)) if t2_by_n else None
 
     whole = {}
     for n, engines in sorted(s_rows.items()):
@@ -312,10 +315,12 @@ def main():
     md = [f"# Engine suite: run `{args.run}`\n"]
     md.append("Problems: " + ("none" if not problems else "; ".join(problems)) + "\n")
     md.append("## Declared targets (ledger §17.2)\n")
-    md.append(f"- **1 reach**: {'met' if t1 else 'not met'} — " + ", ".join(f"{e}: {v['cells']} cells, all decided {v['all_decided']}, agree {v['all_agree']}" for e, v in reach.items()))
-    md.append(f"- **2 gate**: {'met' if t2 else 'not met'} — " + "; ".join(f"n={n}: {v}" for n, v in t2_by_n.items()))
-    md.append(f"- **3 question**: {'met' if t3 else 'not met'} — {len(crossings)} crossing cell(s)")
-    md.append(f"- **abandon**: {'triggered' if abandon else 'not triggered'} — gaining 16→26: {gaining}\n")
+    verdict = lambda v, yes="met", no="not met": "no data in this run" if v is None else (yes if v else no)
+    md.append(f"- **1 reach**: {verdict(t1)} — " + ", ".join(f"{e}: {v['cells']} cells, all decided {v['all_decided']}, agree {v['all_agree']}" for e, v in reach.items()))
+    md.append(f"- **2 gate**: {verdict(t2)} — " + "; ".join(f"n={n}: {v}" for n, v in t2_by_n.items()))
+    md.append(f"- **3 question**: {'met' if t3 else 'not met'} — {len(crossings)} crossing cell(s)" + "".join(
+        f"; {c['engine']} at {c['vars']} unknowns ({c['family']}, {c['part']}): {fmt_ci(c['ci'])}" for c in crossings))
+    md.append(f"- **abandon**: {verdict(abandon, 'triggered', 'not triggered')} — gaining 16→26: {gaining}\n")
     md.append("## Stage: wall / fes-f2, pooled over families, median [95% CI] (pairs)\n")
     sizes = sorted({v for t in traj.values() for v in t})
     md.append("| engine | " + " | ".join(f"{v}" for v in sizes) + " |")
