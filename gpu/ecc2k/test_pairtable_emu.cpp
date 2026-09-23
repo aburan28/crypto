@@ -1,4 +1,4 @@
-/* test_pairtable_emu.cpp -- run `pairtable_kernel` itself, on the host.
+/* test_pairtable_emu.cpp -- run the pair-table kernels themselves, on the host.
  *
  * `test_pairtable.cpp` checks everything the kernel is *made of* --
  * batch inversion, row sums, `pt_pack`, `pt_canon` -- and never the
@@ -9,12 +9,14 @@
  * correct and tested; the one line that assembled them was wrong, and
  * nothing that compiled it existed.
  *
- * The kernel's body turns out to be plain C++ once `__global__` and the
- * four thread-index builtins are supplied, so this compiles it as a
- * host function and runs it -- once per emulated thread, since the
- * threads of this kernel write disjoint rows through disjoint scratch
- * and share nothing, which makes running them one after another the
- * same computation as running them together.
+ * A kernel's body turns out to be plain C++ once `__global__` and the
+ * four thread-index builtins are supplied, so this compiles each as a
+ * host function and runs every emulated GPU thread on a CPU thread of
+ * its own, all at once (`launch`).  Where the threads of a kernel share
+ * memory -- the device build's counts, cursors and presence words --
+ * they share it for real, through the atomics `pairtable.cuh` uses, and
+ * the ThreadSanitizer build of this file (`make tsan`) reports any
+ * shared write that is not synchronised.
  *
  *   1. unfolded, one thread     every key is `pt_pack` of the true sum,
  *                               every index pair is right, every slot of
@@ -49,9 +51,16 @@
  *                               the CPU's exactly, and every bucket holds
  *                               the same multiset of tagged words (order
  *                               within a bucket is the CPU's parallel
- *                               cursors' and not reproducible); the same
- *                               with 1, 3 and 5 threads
- *   8. what it can see          rows over the whole base (the second
+ *                               cursors' and not reproducible); the rows
+ *                               identical on 3, 5 and 16 concurrent
+ *                               threads, in whole rows and in chunks
+ *   8. the device build         `pairtable_fold_count_kernel`, the scan
+ *                               and `pairtable_fold_fill_kernel` on
+ *                               concurrent threads with real atomics,
+ *                               at five splits of threads and chunk
+ *                               size: each the CPU's table, with every
+ *                               cursor ending at the next bucket
+ *   9. what it can see          rows over the whole base (the second
  *                               halving left out), a base that is not
  *                               sorted by orbit, and tags taken from the
  *                               second summand each fail (7)
@@ -60,14 +69,18 @@
  * 2^16 signed orbits, which no base these tests can build reaches, and
  * `pairtable.cuh` refuses such a base rather than store it unchecked.
  *
- * Given a path, it also writes the folded table it built there, and
- * `examples/load_fold_table.rs` loads that into a `PairSumTable` and asks
+ * `--table PATH` writes the device build's table there, and
+ * `examples/load_fold_table.rs` loads it into a `PairSumTable` and asks
  * it every question the CPU's own table answers (`make roundtrip`).
+ * `--plan PATH` reads a plan `examples/dump_fold_plan.rs` wrote and
+ * requires it to be `vec_fold.h`'s, field by field -- the plan file is
+ * what `fold2k.cu` builds from on a device.
  *
- * What this does not cover: anything about how the kernel *runs* on a
- * device -- launch geometry, occupancy, memory placement, and whatever
- * `nvcc` does differently from `g++`.  It covers what the kernel
- * computes.
+ * What this does not cover: anything about how the kernels *run* on a
+ * device -- launch geometry, occupancy, memory placement, CUDA's memory
+ * model (ThreadSanitizer checks C++'s), and the time a build takes.
+ * `make nvcc-check` compiles them with the device compiler; nothing
+ * here runs them on one.
  */
 
 /* Everything except `pairtable.cuh` is included first, as ordinary host
@@ -87,17 +100,25 @@
 #include <algorithm>
 #include <iostream>
 #include <memory>
+#include <string>
+#include <thread>
 
 #include "rho2k_host.hpp"
 #include "koblitz.cuh"
+#include "fold_io.hpp"
 #include "vec_canon.h"
 #include "vec_fold.h"
 
+/* The launch geometry is the same for every thread of a launch, and is
+ * written before any of them starts; a thread's own indices are its
+ * own.  So `blockIdx` and `threadIdx` are per CPU thread, and a kernel
+ * emulated on several CPU threads at once reads what a device thread
+ * would. */
 struct emu_dim3 {
     unsigned x, y, z;
 };
-static emu_dim3 blockIdx{0, 0, 0}, blockDim{1, 1, 1}, gridDim{1, 1, 1},
-    threadIdx{0, 0, 0};
+static emu_dim3 blockDim{1, 1, 1}, gridDim{1, 1, 1};
+static thread_local emu_dim3 blockIdx{0, 0, 0}, threadIdx{0, 0, 0};
 
 #define __CUDACC__ 1
 #define __global__
@@ -114,6 +135,27 @@ static int failures = 0;
             printf("\n");                                                 \
         }                                                                 \
     } while (0)
+
+/* **Launch** `kernel` as `threads` threads of one block, each on a CPU
+ * thread of its own, all running at once.  What they share is shared
+ * for real -- the fold's counts, cursors and presence words are hit by
+ * several threads through the same atomics a device uses -- which is
+ * what the ThreadSanitizer build (`test_tsan_*`) watches. */
+template <class Kernel>
+static void launch(int threads, const Kernel &kernel) {
+    gridDim = {1, 1, 1};
+    blockDim = {(unsigned)threads, 1, 1};
+    std::vector<std::thread> pool;
+    pool.reserve(threads);
+    for (int tid = 0; tid < threads; tid++) {
+        pool.emplace_back([tid, &kernel] {
+            blockIdx = {0, 0, 0};
+            threadIdx = {(unsigned)tid, 0, 0};
+            kernel();
+        });
+    }
+    for (std::thread &t : pool) t.join();
+}
 
 /* The same base `test_pairtable.cpp`'s row test uses: multiples of G
  * and their negations, so that `P_i + P_j = O` occurs and the infinity
@@ -158,15 +200,10 @@ static Table emulate(const std::vector<pt2k> &pts, int threads,
     const int stride = (int)pt_scratch_elems((size_t)n);
     std::vector<f2e> scratch((size_t)threads * stride);
 
-    blockIdx = {0, 0, 0};
-    gridDim = {1, 1, 1};
-    blockDim = {(unsigned)threads, 1, 1};
-    for (int tid = 0; tid < threads; tid++) {
-        threadIdx = {(unsigned)tid, 0, 0};
-        pairtable_kernel(pts.data(), n, row_offset.data(), t.keys.data(),
-                         t.idx_i.data(), t.idx_j.data(), scratch.data(), stride,
-                         canon_tables, canon_bytes);
-    }
+    launch(threads, [&] {
+        pairtable_kernel(pts.data(), n, row_offset.data(), t.keys.data(), t.idx_i.data(),
+                         t.idx_j.data(), scratch.data(), stride, canon_tables, canon_bytes);
+    });
     return t;
 }
 
@@ -203,76 +240,123 @@ static bool same_table(const Table &a, const Table &b) {
 
 /* ---- the folded table ------------------------------------------------ */
 
-static pt2k from_u64(uint64_t x, uint64_t y) {
-    pt2k p;
-    memset(&p, 0, sizeof p);
-    p.x.v[0] = (uint32_t)x;
-    p.x.v[1] = (uint32_t)(x >> 32);
-    p.y.v[0] = (uint32_t)y;
-    p.y.v[1] = (uint32_t)(y >> 32);
-    p.inf = 0;
-    return p;
+/* The rows of `plan` in chunks of `chunk`, as the fold kernels read
+ * them; `chunk_start` is the storage `rows.chunk_start` points into. */
+static PtFoldRows rows_of(const PtFoldPlan &plan, int chunk, std::vector<uint32_t> &chunk_start) {
+    const int n_points = (int)plan.by_orbit.size(), n_reps = (int)plan.rep_pts.size();
+    chunk_start.assign(n_reps + 1, 0);
+    PtFoldRows rows;
+    rows.by_orbit = plan.by_orbit.data();
+    rows.n_points = n_points;
+    rows.rep_pts = plan.rep_pts.data();
+    rows.rep_orbit = plan.rep_orbit.data();
+    rows.n_reps = n_reps;
+    rows.suffix = plan.suffix.data();
+    rows.chunk = chunk;
+    rows.items = pt_fold_chunks(n_points, plan.suffix.data(), plan.rep_orbit.data(), n_reps,
+                                chunk, chunk_start.data());
+    rows.chunk_start = chunk_start.data();
+    rows.canon_tables = plan.canon_tables.data();
+    rows.canon_bytes = plan.canon_bytes;
+    return rows;
 }
-
-struct FoldPlan {
-    std::vector<pt2k> by_orbit, rep_pts;
-    std::vector<uint32_t> suffix, rep_orbit;
-    int n_orbits;
-};
 
 struct FoldOut {
     std::vector<uint64_t> keys;
     std::vector<uint32_t> tags;
 };
 
-static FoldOut emulate_fold(const FoldPlan &p, int threads, const uint64_t *canon_tables,
-                            int canon_bytes) {
+/* `pairtable_fold_kernel` on `threads` concurrent threads, in chunks of
+ * `chunk` entries (the whole base: one chunk per row). */
+static FoldOut emulate_fold(const PtFoldPlan &p, int threads, int chunk = 0) {
     const int n_points = (int)p.by_orbit.size();
     const int n_reps = (int)p.rep_pts.size();
-    std::vector<uint32_t> row_offset(n_reps + 1);
+    if (chunk <= 0) chunk = n_points;
+    std::vector<uint32_t> row_offset(n_reps + 1), chunk_start;
     const uint64_t total = pt_fold_row_offsets(n_points, p.suffix.data(), p.rep_orbit.data(),
                                                n_reps, row_offset.data());
     FoldOut o;
     o.keys.assign(total, UNWRITTEN);
     o.tags.assign(total, 0xffffffffu);
-    const int stride = (int)pt_scratch_elems((size_t)n_points);
+    const PtFoldRows rows = rows_of(p, chunk, chunk_start);
+    /* Sized with the helper the host is told to use: scratch follows
+     * the chunk, not the base. */
+    const int stride = (int)pt_scratch_elems((size_t)chunk);
     std::vector<f2e> scratch((size_t)threads * stride);
-    blockIdx = {0, 0, 0};
-    gridDim = {1, 1, 1};
-    blockDim = {(unsigned)threads, 1, 1};
-    for (int tid = 0; tid < threads; tid++) {
-        threadIdx = {(unsigned)tid, 0, 0};
-        pairtable_fold_kernel(p.by_orbit.data(), n_points, p.rep_pts.data(),
-                              p.rep_orbit.data(), n_reps, p.suffix.data(), row_offset.data(),
-                              o.keys.data(), o.tags.data(), scratch.data(), stride,
-                              canon_tables, canon_bytes);
-    }
+    launch(threads, [&] {
+        pairtable_fold_kernel(rows, row_offset.data(), o.keys.data(), o.tags.data(),
+                              scratch.data(), stride);
+    });
     return o;
 }
 
 struct Stored {
     PtFoldGeometry g;
-    std::vector<uint32_t> bucket_start, words;
-    std::vector<uint64_t> present;
-    uint64_t present_mask;
+    PtFoldTable t;
 };
 
-static bool assemble(const FoldOut &o, const FoldPlan &p, Stored &s) {
+/* The filter and the word array for a counted, scanned table. */
+static void size_filter(Stored &s) {
+    const uint64_t total = s.t.bucket_start[s.g.buckets];
+    const int filter_bits = pt_filter_bits(total);
+    s.t.present_mask = (1ull << filter_bits) - 1;
+    s.t.present.assign((size_t)((1ull << filter_bits) / 64), 0);
+    s.t.words.assign(total, 0);
+}
+
+/* The host assembly, over `pairtable_fold_kernel`'s output. */
+static bool assemble(const FoldOut &o, const PtFoldPlan &p, Stored &s) {
     if (!pt_fold_geometry(p.n_orbits, (int)p.rep_pts.size(), (int)p.by_orbit.size(), &s.g)) {
         return false;
     }
+    s.t.bucket_shift = s.g.bucket_shift;
     const uint64_t entries = o.keys.size();
-    s.bucket_start.assign(s.g.buckets + 1, 0);
-    pt_fold_count(o.keys.data(), entries, s.g, s.bucket_start.data());
-    const uint64_t total = s.bucket_start[s.g.buckets];
-    const int filter_bits = pt_filter_bits(total);
-    s.present_mask = (1ull << filter_bits) - 1;
-    s.present.assign((size_t)((1ull << filter_bits) / 64), 0);
-    s.words.assign(total, 0);
+    s.t.bucket_start.assign(s.g.buckets + 1, 0);
+    pt_fold_count(o.keys.data(), entries, s.g, s.t.bucket_start.data());
+    size_filter(s);
     std::vector<uint32_t> cursor(s.g.buckets);
-    pt_fold_fill(o.keys.data(), o.tags.data(), entries, s.g, s.bucket_start.data(),
-                 cursor.data(), s.words.data(), s.present.data(), s.present_mask);
+    pt_fold_fill(o.keys.data(), o.tags.data(), entries, s.g, s.t.bucket_start.data(),
+                 cursor.data(), s.t.words.data(), s.t.present.data(), s.t.present_mask);
     return true;
+}
+
+/* **The device build**, as `fold2k.cu` runs it: the count kernel, the
+ * scan, the fill kernel -- here on concurrent CPU threads, the count
+ * and the fill each with their own thread count and chunk, since the
+ * table must not depend on either.  Also checks what the fill leaves
+ * behind: every cursor at the end of its own bucket, so every slot was
+ * handed out exactly once. */
+static bool device_build(const PtFoldPlan &p, int count_threads, int count_chunk,
+                         int fill_threads, int fill_chunk, Stored &s) {
+    if (!pt_fold_geometry(p.n_orbits, (int)p.rep_pts.size(), (int)p.by_orbit.size(), &s.g)) {
+        return false;
+    }
+    s.t.bucket_shift = s.g.bucket_shift;
+    s.t.bucket_start.assign(s.g.buckets + 1, 0);
+    std::vector<uint32_t> chunk_start;
+    {
+        const PtFoldRows rows = rows_of(p, count_chunk, chunk_start);
+        const int stride = (int)pt_scratch_elems((size_t)count_chunk);
+        std::vector<f2e> scratch((size_t)count_threads * stride);
+        launch(count_threads, [&] {
+            pairtable_fold_count_kernel(rows, s.g.bucket_shift, s.t.bucket_start.data(),
+                                        scratch.data(), stride);
+        });
+    }
+    pt_fold_scan(s.t.bucket_start.data(), s.g.buckets);
+    size_filter(s);
+    std::vector<uint32_t> cursor(s.t.bucket_start.begin(), s.t.bucket_start.end() - 1);
+    {
+        const PtFoldRows rows = rows_of(p, fill_chunk, chunk_start);
+        const int stride = (int)pt_scratch_elems((size_t)fill_chunk);
+        std::vector<f2e> scratch((size_t)fill_threads * stride);
+        launch(fill_threads, [&] {
+            pairtable_fold_fill_kernel(rows, s.g.bucket_shift, cursor.data(), s.t.words.data(),
+                                       s.t.present.data(), s.t.present_mask, scratch.data(),
+                                       stride);
+        });
+    }
+    return std::equal(cursor.begin(), cursor.end(), s.t.bucket_start.begin() + 1);
 }
 
 /* How many parts of `s` differ from the CPU's table: geometry, bucket
@@ -288,19 +372,21 @@ static int differences(const Stored &s, const FoldVectors &v, bool report) {
         note("bucket geometry");
         return bad;
     }
-    if (memcmp(s.bucket_start.data(), v.bucket_start, (v.buckets + 1) * sizeof(uint32_t)) != 0) {
+    if (memcmp(s.t.bucket_start.data(), v.bucket_start, (v.buckets + 1) * sizeof(uint32_t)) !=
+        0) {
         note("bucket offsets");
         return bad;
     }
-    if ((int)s.present.size() != v.present_words || s.present_mask != v.present_mask) {
+    if ((int)s.t.present.size() != v.present_words || s.t.present_mask != v.present_mask) {
         note("presence-filter width");
-    } else if (memcmp(s.present.data(), v.present, s.present.size() * sizeof(uint64_t)) != 0) {
+    } else if (memcmp(s.t.present.data(), v.present, s.t.present.size() * sizeof(uint64_t)) !=
+               0) {
         note("presence words");
     }
     int buckets_differ = 0;
     for (int b = 0; b < v.buckets; b++) {
         const uint32_t lo = v.bucket_start[b], hi = v.bucket_start[b + 1];
-        std::vector<uint32_t> mine(s.words.begin() + lo, s.words.begin() + hi);
+        std::vector<uint32_t> mine(s.t.words.begin() + lo, s.t.words.begin() + hi);
         std::vector<uint32_t> cpu(v.words + lo, v.words + hi);
         std::sort(mine.begin(), mine.end());
         std::sort(cpu.begin(), cpu.end());
@@ -342,53 +428,30 @@ static void test_fold_geometry() {
     }
 }
 
-/* The emulated build's table, written for `examples/load_fold_table.rs`
- * to load into a `PairSumTable` and probe -- the one check that runs a
- * table this file assembled through the lookups the descent uses.
- *
- * Little-endian, which is what an x86 host writes natively; the loader
- * reads it that way whatever it runs on.
- *
- *     0   "PTFOLD1\0"
- *     8   u32 degree, u32 base_request, u64 seed      the base to rebuild
- *     24  u32 bucket_shift, u32 buckets, u32 words, u32 present_words
- *     40  u64 present_mask
- *     48  u32 canon_bytes, u32 0
- *     56  u64 canon_tables[canon_bytes * 256]
- *         u32 bucket_start[buckets + 1]
- *         u32 words[words]
- *         u64 present[present_words]
- */
-static bool write_table(const char *path, const FoldVectors &v, const Stored &s) {
-    const uint16_t probe = 1;
-    if (*(const uint8_t *)&probe != 1) {
-        printf("  not writing %s: this host is big-endian and the format is not\n", path);
-        return false;
-    }
-    FILE *f = fopen(path, "wb");
-    if (!f) {
-        printf("  cannot open %s for writing\n", path);
-        return false;
-    }
-    const uint32_t head32a[2] = {(uint32_t)v.n, (uint32_t)v.base_request};
-    const uint64_t seed = v.seed;
-    const uint32_t head32b[4] = {(uint32_t)s.g.bucket_shift, s.g.buckets,
-                                 (uint32_t)s.words.size(), (uint32_t)s.present.size()};
-    const uint32_t head32c[2] = {(uint32_t)v.canon_bytes, 0};
-    bool ok = fwrite("PTFOLD1", 1, 8, f) == 8 && fwrite(head32a, 4, 2, f) == 2 &&
-              fwrite(&seed, 8, 1, f) == 1 && fwrite(head32b, 4, 4, f) == 4 &&
-              fwrite(&s.present_mask, 8, 1, f) == 1 && fwrite(head32c, 4, 2, f) == 2;
-    const size_t tables = (size_t)v.canon_bytes * 256;
-    ok = ok && fwrite(v.canon_tables, 8, tables, f) == tables;
-    ok = ok && fwrite(s.bucket_start.data(), 4, s.bucket_start.size(), f) == s.bucket_start.size();
-    ok = ok && fwrite(s.words.data(), 4, s.words.size(), f) == s.words.size();
-    ok = ok && fwrite(s.present.data(), 8, s.present.size(), f) == s.present.size();
-    ok = (fclose(f) == 0) && ok;
-    if (!ok) printf("  writing %s failed\n", path);
-    return ok;
+/* Whether two plans are the same plan, field by field. */
+static bool same_plan(const PtFoldPlan &a, const PtFoldPlan &b) {
+    auto same_points = [](const std::vector<pt2k> &x, const std::vector<pt2k> &y) {
+        if (x.size() != y.size()) return false;
+        for (size_t i = 0; i < x.size(); i++) {
+            if (pt_low64(x[i].x) != pt_low64(y[i].x) || pt_low64(x[i].y) != pt_low64(y[i].y)) {
+                return false;
+            }
+        }
+        return true;
+    };
+    return a.degree == b.degree && a.base_request == b.base_request && a.seed == b.seed &&
+           a.n_orbits == b.n_orbits && a.canon_bytes == b.canon_bytes &&
+           a.canon_tables == b.canon_tables && a.suffix == b.suffix &&
+           a.rep_orbit == b.rep_orbit && same_points(a.by_orbit, b.by_orbit) &&
+           same_points(a.rep_pts, b.rep_pts);
 }
 
-static void test_fold(const char *table_out) {
+/* `table_out`: where to write the table, for `load_fold_table.rs`.
+ * `plan_in`: a plan file `dump_fold_plan.rs` wrote for the same base,
+ * which has to be `vec_fold.h`'s plan exactly -- the device launcher
+ * reads plans, and this is what checks that one says what the CPU
+ * meant. */
+static void test_fold(const char *table_out, const char *plan_in) {
     printf("=== folded storage: pairtable_fold_kernel against the CPU's table ===\n");
     test_fold_geometry();
     const FoldVectors *v = nullptr;
@@ -401,15 +464,31 @@ static void test_fold(const char *table_out) {
           F2M_M);
     if (!v) return;
 
-    FoldPlan plan;
+    PtFoldPlan plan;
+    plan.degree = (uint32_t)v->n;
+    plan.base_request = (uint32_t)v->base_request;
+    plan.seed = v->seed;
     plan.n_orbits = v->n_orbits;
-    for (int i = 0; i < v->n_points; i++) plan.by_orbit.push_back(from_u64(v->x[i], v->y[i]));
+    plan.canon_bytes = v->canon_bytes;
+    plan.canon_tables.assign(v->canon_tables, v->canon_tables + (size_t)v->canon_bytes * 256);
+    for (int i = 0; i < v->n_points; i++) plan.by_orbit.push_back(pt_from_u64(v->x[i], v->y[i]));
     for (int r = 0; r < v->n_reps; r++) {
-        plan.rep_pts.push_back(from_u64(v->rep_x[r], v->rep_y[r]));
+        plan.rep_pts.push_back(pt_from_u64(v->rep_x[r], v->rep_y[r]));
         plan.rep_orbit.push_back(v->rep_orbit[r]);
     }
     plan.suffix.assign(v->suffix, v->suffix + v->n_orbits + 1);
     const int n_points = v->n_points, n_reps = v->n_reps;
+    if (plan_in) {
+        PtFoldPlan read;
+        std::string err;
+        const bool loaded = pt_read_plan(plan_in, read, err);
+        CHECK(loaded, "%s", err.c_str());
+        CHECK(!loaded || same_plan(read, plan), "%s is not vec_fold.h's plan", plan_in);
+        if (loaded && same_plan(read, plan)) {
+            printf("  %s: the plan dump_fold_plan.rs wrote is vec_fold.h's, field by field\n",
+                   plan_in);
+        }
+    }
 
     /* Gates.  Each rules out a way for (7) to fail that has nothing to
      * do with the fold. */
@@ -448,7 +527,7 @@ static void test_fold(const char *table_out) {
            n_points + n_reps, v->bucket_shift, v->buckets);
 
     /* The rows, against unbatched addition. */
-    const FoldOut one = emulate_fold(plan, 1, v->canon_tables, v->canon_bytes);
+    const FoldOut one = emulate_fold(plan, 1);
     size_t unwritten = 0, bad_key = 0, bad_tag = 0, zero = 0, e = 0;
     for (int r = 0; r < n_reps; r++) {
         const uint32_t from = plan.suffix[plan.rep_orbit[r]];
@@ -484,36 +563,73 @@ static void test_fold(const char *table_out) {
     CHECK(assemble(one, plan, stored), "pt_fold_geometry refused the base");
     const int diff = differences(stored, *v, true);
     CHECK(diff == 0, "the table is not the CPU's");
-    /* Written only once it matches: the loader's check is of the
-     * lookups, and a table already known to differ would fail it for a
-     * reason this file has reported above. */
-    if (table_out && diff == 0) {
-        const bool written = write_table(table_out, *v, stored);
-        CHECK(written, "could not write the table to %s", table_out);
-        if (written) printf("  written to %s for examples/load_fold_table.rs\n", table_out);
-    }
     const uint64_t unfolded = (uint64_t)n_points * (n_points + 1) / 2;
     if (diff == 0) {
         printf("  table: identical to the CPU's -- %zu words in %d buckets, presence filter "
                "of %zu words\n",
-               stored.words.size(), v->buckets, stored.present.size());
+               stored.t.words.size(), v->buckets, stored.t.present.size());
         printf("  %zu stored entries for %d points in %d signed orbits, against %llu "
                "unfolded: %.1f times fewer (2n = %d)\n",
-               stored.words.size(), n_points, n_reps, (unsigned long long)unfolded,
-               (double)unfolded / (double)stored.words.size(), 2 * F2M_M);
+               stored.t.words.size(), n_points, n_reps, (unsigned long long)unfolded,
+               (double)unfolded / (double)stored.t.words.size(), 2 * F2M_M);
     }
-    for (int threads : {3, 5}) {
-        const FoldOut many = emulate_fold(plan, threads, v->canon_tables, v->canon_bytes);
+    /* Concurrent threads, and rows split into chunks: every entry is
+     * still written once, at its own slot, with the same key. */
+    const int splits[][2] = {{3, 0}, {5, 7}, {16, 1}};
+    for (const auto &tc : splits) {
+        const FoldOut many = emulate_fold(plan, tc[0], tc[1]);
         const bool same = many.keys == one.keys && many.tags == one.tags;
-        CHECK(same, "%d threads produced different rows than 1", threads);
-        if (same) printf("  %d threads: identical to 1\n", threads);
+        CHECK(same, "%d threads in chunks of %d produced different rows than 1", tc[0],
+              tc[1] ? tc[1] : n_points);
+        if (same) {
+            printf("  %d concurrent threads, chunks of %d: identical to 1 thread, whole rows\n",
+                   tc[0], tc[1] ? tc[1] : n_points);
+        }
+    }
+
+    /* The device build: count, scan, fill, on concurrent threads with
+     * real atomics, straight from the rows. */
+    printf("=== the device build: pairtable_fold_count_kernel + pairtable_fold_fill_kernel ===\n");
+    const int builds[][4] = {
+        {1, 0, 1, 0}, {3, 7, 5, 64}, {16, 1, 4, 33}, {64, 33, 64, 1}, {7, 256, 29, 5},
+    };
+    Stored written;
+    bool writable = false;
+    for (const auto &b : builds) {
+        const int cc = b[1] ? b[1] : n_points, fc = b[3] ? b[3] : n_points;
+        Stored dev;
+        const bool filled = device_build(plan, b[0], cc, b[2], fc, dev);
+        const int d = differences(dev, *v, true);
+        CHECK(filled, "count %d x %d, fill %d x %d: a bucket's cursor did not end at the next "
+                      "bucket's start",
+              b[0], cc, b[2], fc);
+        CHECK(d == 0, "count %d x %d, fill %d x %d: not the CPU's table", b[0], cc, b[2], fc);
+        if (filled && d == 0) {
+            printf("  count on %2d threads in chunks of %4d, fill on %2d in chunks of %4d: "
+                   "the CPU's table\n",
+                   b[0], cc, b[2], fc);
+        }
+        /* The table `fold2k.cu` would write is this path's, so this is
+         * the one the round trip loads: the last build, whose order
+         * within each bucket the atomics chose. */
+        writable = filled && d == 0;
+        written = dev;
+    }
+    /* Written only once it matches: the loader's check is of the
+     * lookups, and a table already known to differ would fail it for a
+     * reason this file has reported above. */
+    if (table_out && writable) {
+        std::string err;
+        const bool ok = pt_write_table(table_out, plan, written.t, err);
+        CHECK(ok, "%s", err.c_str());
+        if (ok) printf("  written to %s for examples/load_fold_table.rs\n", table_out);
     }
 
     /* What (7) can see.  Each is a plausible way to get the fold wrong,
      * and each has to fail the comparison, or passing it would mean
      * less than it says. */
     printf("=== the mistakes the folded comparison has to catch ===\n");
-    auto must_differ = [&](const char *what, const FoldOut &o, const FoldPlan &p) {
+    auto must_differ = [&](const char *what, const FoldOut &o, const PtFoldPlan &p) {
         Stored s;
         const bool built = assemble(o, p, s);
         const int d = built ? differences(s, *v, false) : 1;
@@ -523,19 +639,17 @@ static void test_fold(const char *table_out) {
     {
         /* The second halving left out: every row walks the whole base,
          * so each sum orbit is stored from both of its summands. */
-        FoldPlan whole = plan;
+        PtFoldPlan whole = plan;
         std::fill(whole.suffix.begin(), whole.suffix.end(), 0u);
-        must_differ("rows over the whole base", emulate_fold(whole, 1, v->canon_tables,
-                                                             v->canon_bytes),
-                    whole);
+        whole.suffix.back() = (uint32_t)n_points;
+        must_differ("rows over the whole base", emulate_fold(whole, 1), whole);
     }
     {
         /* The base in some other order than by orbit: the same suffix
          * starts now name the wrong points. */
-        FoldPlan unsorted = plan;
+        PtFoldPlan unsorted = plan;
         std::reverse(unsorted.by_orbit.begin(), unsorted.by_orbit.end());
-        must_differ("a base not sorted by orbit",
-                    emulate_fold(unsorted, 1, v->canon_tables, v->canon_bytes), unsorted);
+        must_differ("a base not sorted by orbit", emulate_fold(unsorted, 1), unsorted);
     }
     {
         /* The tag taken from the second summand rather than the row.
@@ -555,10 +669,19 @@ static void test_fold(const char *table_out) {
     }
 }
 
-/* `argv[1]`, if given, is where to write the folded table the emulated
- * kernel built -- see `write_table`. */
+/* `--table PATH` writes the folded table the emulated kernel built, for
+ * `examples/load_fold_table.rs`; `--plan PATH` checks a plan file
+ * `examples/dump_fold_plan.rs` wrote against `vec_fold.h`. */
 int main(int argc, char **argv) {
-    const char *table_out = argc > 1 ? argv[1] : nullptr;
+    const char *table_out = nullptr, *plan_in = nullptr;
+    for (int i = 1; i + 1 < argc; i += 2) {
+        if (!strcmp(argv[i], "--table")) table_out = argv[i + 1];
+        else if (!strcmp(argv[i], "--plan")) plan_in = argv[i + 1];
+        else {
+            fprintf(stderr, "usage: %s [--table PATH] [--plan PATH]\n", argv[0]);
+            return 2;
+        }
+    }
     printf("gpu/ecc2k pair-table kernel, run on the host: n=%d\n\n", F2M_M);
     if (F2M_M > 62) {
         printf("field too wide to pack into a u64 (m = %d > 62); neither key is "
@@ -629,7 +752,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    test_fold(table_out);
+    test_fold(table_out, plan_in);
 
     printf("\n%s (%d failures)\n", failures ? "FAILED" : "all checks passed", failures);
     return failures ? 1 : 0;
