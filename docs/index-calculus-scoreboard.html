@@ -4852,5 +4852,42 @@ factor base, and this prices a decomposition oracle.</p>
     off it is <code>2<sup>4.4</sup></code> off <code>2<sup>131</sup></code>.</p>
 </section>
 <!-- END inherited-f4-20260922 -->
+<!-- BEGIN ic-tournament-round-0023 -->
+<section class="panel" id="ic-tournament-round-0023">
+<p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
+<div class="panel-head"><h2>Complete IC candidate tournament</h2>
+<p><strong>retained: incumbent</strong>. Cold complete-DLP instruction costs; fixed compiler and amd64 ISA. Targets per cold job: 1. No arithmetic-complexity or family-wide claim.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/REPORT.md">full result</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/measurements.json">frozen reporting data</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/runs/round-0023/audit.json">independent audit</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Smoke — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,860</td><td>1</td><td>1.017</td><td>5.111e+05</td><td>24/24</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,367</td><td>0.8275</td><td>0.8412</td><td>3.381e+05</td><td>24/24</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,814</td><td>0.9837</td><td>1</td><td>unmeasured</td><td>24/24</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Development — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2,842</td><td>1</td><td>0.9488</td><td>5.078e+05</td><td>72/72</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,639</td><td>0.9287</td><td>0.8812</td><td>3.77e+05</td><td>72/72</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>2,995</td><td>1.054</td><td>1</td><td>unmeasured</td><td>72/72</td><td>reference</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Confirmation — instruction unit Ir; all variants on matched fixtures.</caption>
+<thead><tr><th>Variant</th><th>S (Ir / √r)</th><th>Cost / incumbent</th><th>Cost / rho</th><th>Cost / floor</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>3,729</td><td>1</td><td>1.127</td><td>1.063e+06</td><td>516/516</td><td>reference</td></tr>
+<tr><td>scaled</td><td>2,976</td><td>0.7982</td><td>0.8998</td><td>6.086e+05</td><td>516/516</td><td>engineering experiment</td></tr>
+<tr><td>rho</td><td>3,308</td><td>0.8871</td><td>1</td><td>unmeasured</td><td>516/516</td><td>reference</td></tr>
+</tbody></table></div>
+<h3>Native cold process time — confirmation</h3>
+<p>Paired confidence intervals; fixed CPU/resources. Rho parity: False.</p>
+<div class="table-scroll"><table><thead><tr><th>Variant</th><th>ms</th><th>Time / incumbent</th><th>95% CI</th><th>Time / rho</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>2.798</td><td>1</td><td>reference</td><td>1.331</td><td>516/516</td></tr>
+<tr><td>scaled</td><td>2.306</td><td>0.8244</td><td>[0.6780891092338177, 0.9689753816226493]</td><td>1.097</td><td>516/516</td></tr>
+<tr><td>rho</td><td>2.102</td><td>0.7512</td><td>[0.500494577703393, 1.0414858798124165]</td><td>1</td><td>516/516</td></tr>
+</tbody></table></div>
+<p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
+</section>
+<!-- END ic-tournament-round-0023 -->
 </body>
 </html>
