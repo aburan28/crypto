@@ -150,6 +150,15 @@ pub struct F4Stats {
     pub divisor_tests: u64,
     pub divisor_submask_lookups: u64,
     pub divisor_linear_tests: u64,
+    /// Dense boolean-domain multiplication by a monomial.  For small
+    /// systems this toggles equal output masks in an epoch-stamped array,
+    /// then sorts only the surviving terms instead of sorting every input
+    /// term before duplicate cancellation.
+    pub dense_mul_calls: u64,
+    pub dense_mul_input_terms: u64,
+    pub dense_mul_output_terms: u64,
+    pub dense_mul_cancelled_terms: u64,
+    pub dense_mul_scratch_bytes_max: u64,
     /// Elements added to the basis after the initial echelon.
     pub new_elements: u64,
     /// Highest step degree processed.
@@ -381,6 +390,92 @@ impl Columns {
         }
         F2BoolPoly::from_monos(monos, n_vars)
     }
+}
+
+struct DenseMulScratch {
+    generation: u32,
+    n_vars: u32,
+    mask_bits: u32,
+    state: Vec<u32>,
+    touched: Vec<u32>,
+}
+
+impl DenseMulScratch {
+    fn new(n_vars: usize) -> Self {
+        debug_assert!(n_vars <= 20);
+        let size = 1usize << n_vars;
+        Self {
+            generation: 0,
+            n_vars: n_vars as u32,
+            mask_bits: (size - 1) as u32,
+            state: vec![0; size],
+            touched: Vec::new(),
+        }
+    }
+
+    fn bytes(&self) -> u64 {
+        (self.state.capacity() * std::mem::size_of::<u32>()
+            + self.touched.capacity() * std::mem::size_of::<u32>()) as u64
+    }
+
+    fn multiply(&mut self, p: &F2BoolPoly, multiplier: u64) -> F2BoolPoly {
+        debug_assert_eq!(p.n_vars, self.n_vars as usize);
+        debug_assert_eq!(multiplier & !u64::from(self.mask_bits), 0);
+        self.generation = self.generation.wrapping_add(2);
+        if self.generation == 0 {
+            self.state.fill(0);
+            self.generation = 2;
+        }
+        self.touched.clear();
+        self.touched.reserve(p.terms.len());
+        for term in &p.terms {
+            let mask = (term.mask | multiplier) as u32;
+            let index = mask as usize;
+            if self.state[index] & !1 != self.generation {
+                self.state[index] = self.generation | 1;
+                let order_key = ((self.n_vars - mask.count_ones()) << self.n_vars) | mask;
+                self.touched.push(order_key);
+            } else {
+                self.state[index] ^= 1;
+            }
+        }
+        let state = &self.state;
+        let mask_bits = self.mask_bits;
+        self.touched
+            .retain(|&key| state[(key & mask_bits) as usize] & 1 != 0);
+        self.touched.sort_unstable();
+        F2BoolPoly {
+            terms: self
+                .touched
+                .iter()
+                .map(|&key| F2BoolMono::from_mask((key & mask_bits) as u64))
+                .collect(),
+            n_vars: p.n_vars,
+        }
+    }
+}
+
+fn dense_mul_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("PQ_F4_DISABLE_DENSE_MUL").as_deref() != Ok("1"))
+}
+
+fn multiply_for_f4(
+    p: &F2BoolPoly,
+    multiplier: u64,
+    scratch: &mut Option<DenseMulScratch>,
+    st: &mut F4Stats,
+) -> F2BoolPoly {
+    let Some(scratch) = scratch else {
+        return p.mul_mono(F2BoolMono::from_mask(multiplier));
+    };
+    st.dense_mul_calls += 1;
+    st.dense_mul_input_terms += p.terms.len() as u64;
+    let product = scratch.multiply(p, multiplier);
+    st.dense_mul_output_terms += product.terms.len() as u64;
+    st.dense_mul_cancelled_terms += (p.terms.len().saturating_sub(product.terms.len())) as u64;
+    st.dense_mul_scratch_bytes_max = st.dense_mul_scratch_bytes_max.max(scratch.bytes());
+    product
 }
 
 struct EchelonOutput {
@@ -1299,6 +1394,11 @@ pub fn groebner_basis_f4(
     let started = Instant::now();
     let deadline = budget.map(|b| started + b);
     let mut st = F4Stats::default();
+    let mut dense_mul_scratch = if n_vars <= 20 && dense_mul_enabled() {
+        Some(DenseMulScratch::new(n_vars))
+    } else {
+        None
+    };
     let one = || vec![F2BoolPoly::one(n_vars)];
     let finish = |basis: Vec<F2BoolPoly>, mut st: F4Stats| {
         st.basis_len = basis.len() as u64;
@@ -1408,7 +1508,8 @@ pub fn groebner_basis_f4(
                             ) {
                                 break 'selected_pairs;
                             }
-                            let row = s.polys[g].mul_mono(F2BoolMono::from_mask(mult));
+                            let row =
+                                multiply_for_f4(&s.polys[g], mult, &mut dense_mul_scratch, &mut st);
                             row_terms = row_terms.saturating_add(row.terms.len());
                             half_rows.push(row);
                         }
@@ -1431,7 +1532,8 @@ pub fn groebner_basis_f4(
                         ) {
                             break 'selected_pairs;
                         }
-                        let prod = s.polys[g].mul_mono(F2BoolMono::from_mask(mult));
+                        let prod =
+                            multiply_for_f4(&s.polys[g], mult, &mut dense_mul_scratch, &mut st);
                         if !prod.is_zero() {
                             row_terms = row_terms.saturating_add(prod.terms.len());
                             field_rows.push(prod);
@@ -1502,7 +1604,8 @@ pub fn groebner_basis_f4(
                     ) {
                         break;
                     }
-                    let r = s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g]));
+                    let r =
+                        multiply_for_f4(&s.polys[g], m & !s.lm[g], &mut dense_mul_scratch, &mut st);
                     debug_assert_eq!(
                         r.lt().map(|t| t.mask),
                         Some(m),
@@ -1649,7 +1752,7 @@ pub fn groebner_basis_f4(
         .filter(|&g| s.active[g])
         .map(|g| s.polys[g].clone())
         .collect();
-    let reduced = interreduce(active, s.n_vars, &mut st);
+    let reduced = interreduce(active, s.n_vars, &mut dense_mul_scratch, &mut st);
     finish(reduced, st)
 }
 
@@ -1657,7 +1760,12 @@ pub fn groebner_basis_f4(
 /// by Gauss–Jordan on the symbolic-preprocessing matrix of that minimal
 /// basis.  Returns the reduced Gröbner basis, sorted by leading monomial,
 /// largest first.
-fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -> Vec<F2BoolPoly> {
+fn interreduce(
+    mut elements: Vec<F2BoolPoly>,
+    n_vars: usize,
+    dense_mul_scratch: &mut Option<DenseMulScratch>,
+    st: &mut F4Stats,
+) -> Vec<F2BoolPoly> {
     let t = Instant::now();
     elements.sort_by(|a, b| cmp_mono(a.lt().unwrap(), b.lt().unwrap()));
     let mut minimal: Vec<F2BoolPoly> = Vec::new();
@@ -1688,7 +1796,7 @@ fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -
             }
         }
         if let Some(k) = best {
-            let r = minimal[k].mul_mono(F2BoolMono::from_mask(m & !lms[k]));
+            let r = multiply_for_f4(&minimal[k], m & !lms[k], dense_mul_scratch, st);
             for t in &r.terms {
                 if examined.insert(t.mask) {
                     queue.push(t.mask);
@@ -1839,6 +1947,32 @@ mod tests {
             assert_eq!(
                 cmp_mono_mask_descending(a, b),
                 cmp_mono(F2BoolMono::from_mask(b), F2BoolMono::from_mask(a))
+            );
+        }
+    }
+
+    #[test]
+    fn dense_monomial_multiply_matches_sorted_reference() {
+        let mut rng = StdRng::seed_from_u64(0x37c8_d51a_24e6_90bf);
+        for n_vars in 0..=20usize {
+            let cap = (1u64 << n_vars) - 1;
+            let mut scratch = DenseMulScratch::new(n_vars);
+            for _ in 0..1_000 {
+                let terms = (0..rng.gen_range(0..=96usize))
+                    .map(|_| F2BoolMono::from_mask(rng.gen::<u64>() & cap))
+                    .collect();
+                let p = F2BoolPoly::from_monos(terms, n_vars);
+                let multiplier = rng.gen::<u64>() & cap;
+                assert_eq!(
+                    scratch.multiply(&p, multiplier),
+                    p.mul_mono(F2BoolMono::from_mask(multiplier))
+                );
+            }
+            scratch.generation = u32::MAX - 1;
+            let p = poly(&[0, 1 & cap, 2 & cap, 3 & cap, cap], n_vars);
+            assert_eq!(
+                scratch.multiply(&p, cap >> 1),
+                p.mul_mono(F2BoolMono::from_mask(cap >> 1))
             );
         }
     }

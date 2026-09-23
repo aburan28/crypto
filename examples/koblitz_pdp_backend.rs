@@ -961,6 +961,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_pair_installer":"order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
             "solver_symbolic_reducer_selector":"exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
             "solver_column_index":"dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+            "solver_monomial_multiply":if std::env::var("PQ_F4_DISABLE_DENSE_MUL").as_deref() == Ok("1") { "sort_all_mapped_terms_then_cancel" } else { "epoch_dense_parity_cancel_then_encoded_u32_order_sort" },
+            "solver_monomial_multiply_control":"PQ_F4_DISABLE_DENSE_MUL=1",
             "solver_echelon_policy":"shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
             "single_thread_requested":true,
             "budget_seconds":budget_seconds,

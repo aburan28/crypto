@@ -147,8 +147,14 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis"
-            .into()
+        let products = if std::env::var("PQ_F4_DISABLE_DENSE_MUL").as_deref() == Ok("1") {
+            "sorted-input monomial products"
+        } else {
+            "dense duplicate-cancelling monomial products"
+        };
+        format!(
+            "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, {products}, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis"
+        )
     }
 
     fn accepts(&self, shape: &SystemShape) -> bool {
@@ -206,6 +212,14 @@ impl SystemSolver for F4F2 {
             ("divisor_tests", st.divisor_tests),
             ("divisor_submask_lookups", st.divisor_submask_lookups),
             ("divisor_linear_tests", st.divisor_linear_tests),
+            ("dense_mul_calls", st.dense_mul_calls),
+            ("dense_mul_input_terms", st.dense_mul_input_terms),
+            ("dense_mul_output_terms", st.dense_mul_output_terms),
+            ("dense_mul_cancelled_terms", st.dense_mul_cancelled_terms),
+            (
+                "dense_mul_scratch_bytes_max",
+                st.dense_mul_scratch_bytes_max,
+            ),
             ("new_elements", st.new_elements),
             ("basis_len", st.basis_len),
             ("build_ns", st.build_ns),
