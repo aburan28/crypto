@@ -1,0 +1,1023 @@
+{
+ "run": "confirm_v1",
+ "suite_version": "2026-09-23.1",
+ "problems": [],
+ "targets": {
+  "1_reach": {
+   "met": null,
+   "by_engine": {
+    "f4-f2": {
+     "cells": 0,
+     "all_decided": false,
+     "all_agree": true
+    },
+    "matrix-f4": {
+     "cells": 0,
+     "all_decided": false,
+     "all_agree": true
+    },
+    "matrix-f5": {
+     "cells": 0,
+     "all_decided": false,
+     "all_agree": true
+    },
+    "inherited-f4": {
+     "cells": 0,
+     "all_decided": false,
+     "all_agree": true
+    }
+   }
+  },
+  "2_gate": {
+   "met": null,
+   "by_n": {},
+   "ratios": {}
+  },
+  "3_question": {
+   "met": true,
+   "crossings": [
+    {
+     "part": "C1-holdout-26",
+     "family": "R",
+     "n": 25,
+     "vars": 26,
+     "engine": "crossbred-f2",
+     "ci": {
+      "median": 0.7353924830656975,
+      "lo": 0.6931042921637041,
+      "hi": 0.7674357364312127,
+      "pairs": 8
+     }
+    },
+    {
+     "part": "C2-main-28-30",
+     "family": "R",
+     "n": 27,
+     "vars": 28,
+     "engine": "crossbred-f2",
+     "ci": {
+      "median": 0.6861169814313511,
+      "lo": 0.6609004749214739,
+      "hi": 0.7381426679625136,
+      "pairs": 8
+     }
+    },
+    {
+     "part": "C3-holdout-28",
+     "family": "R",
+     "n": 27,
+     "vars": 28,
+     "engine": "crossbred-f2",
+     "ci": {
+      "median": 0.6704959068863752,
+      "lo": 0.6510808542478517,
+      "hi": 0.6948205864251819,
+      "pairs": 8
+     }
+    }
+   ]
+  },
+  "abandon": {
+   "triggered": null,
+   "gaining_16_to_26": {
+    "buchberger-f2": null,
+    "f4-f2": null,
+    "matrix-f4": null,
+    "matrix-f5": null,
+    "inherited-f4": null,
+    "crossbred-f2": null
+   }
+  }
+ },
+ "trajectory_vs_fes": {
+  "buchberger-f2": {},
+  "f4-f2": {
+   "26": {
+    "median": 205.8154771797713,
+    "lo": 190.98250845138193,
+    "hi": 209.51142869338696,
+    "pairs": 8
+   },
+   "28": {
+    "median": 114.16474644918989,
+    "lo": 110.03694566976037,
+    "hi": 120.87243558820707,
+    "pairs": 16
+   },
+   "30": {
+    "median": 49.24825539399786,
+    "lo": 31.66095192562194,
+    "hi": 49.94884097446228,
+    "pairs": 5
+   }
+  },
+  "matrix-f4": {
+   "26": {
+    "median": 7.77902231530887,
+    "lo": 7.263082892862828,
+    "hi": 8.215016019093758,
+    "pairs": 8
+   },
+   "28": {
+    "median": 4.563180095580497,
+    "lo": 4.399806041307309,
+    "hi": 4.836290489186038,
+    "pairs": 16
+   },
+   "30": {
+    "median": 2.746647026983924,
+    "lo": 2.653200924187951,
+    "hi": 2.8153857038846595,
+    "pairs": 16
+   }
+  },
+  "matrix-f5": {
+   "26": {
+    "median": 8.092513500195885,
+    "lo": 7.677052531952778,
+    "hi": 8.50304663091305,
+    "pairs": 8
+   },
+   "28": {
+    "median": 4.811061991943289,
+    "lo": 4.747807237842006,
+    "hi": 4.873381871436746,
+    "pairs": 16
+   },
+   "30": {
+    "median": 2.8730379033284077,
+    "lo": 2.7575481370678148,
+    "hi": 2.9706162427543514,
+    "pairs": 16
+   }
+  },
+  "inherited-f4": {
+   "26": {
+    "median": 4.497903167627916,
+    "lo": 4.308261774826472,
+    "hi": 4.643356972987874,
+    "pairs": 8
+   },
+   "28": {
+    "median": 4.104607776332353,
+    "lo": 3.9531933592217436,
+    "hi": 4.373929945496022,
+    "pairs": 16
+   },
+   "30": {
+    "median": 1.2369715681470224,
+    "lo": 1.200331832336174,
+    "hi": 1.2506832064269482,
+    "pairs": 16
+   }
+  },
+  "crossbred-f2": {
+   "26": {
+    "median": 0.7353924830656975,
+    "lo": 0.6931042921637041,
+    "hi": 0.7674357364312127,
+    "pairs": 8
+   },
+   "28": {
+    "median": 0.6780446382034588,
+    "lo": 0.6655373634955207,
+    "hi": 0.7095288509649909,
+    "pairs": 16
+   }
+  }
+ },
+ "extrapolation": {},
+ "whole_method": {},
+ "cells": [
+  {
+   "family": "R",
+   "n": 25,
+   "n_prime": 13,
+   "m": 2,
+   "vars": 26,
+   "reference": "fes-f2",
+   "verdict_digest": "74b211bd80ab15bf9c9029a7ad1feb7e60c098343fabb8fd0ad8858f852bec3f",
+   "d_sr": [
+    6,
+    6
+   ],
+   "engines": {
+    "f4-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": 3.5,
+     "d_learn_max": 4,
+     "d_reach_mean": 4.5,
+     "d_reach_max": 5,
+     "ms_mean": 7526.35390275,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 5464292023.0,
+     "vs_reference": {
+      "median": 205.8154771797713,
+      "lo": 190.98250845138193,
+      "hi": 209.51142869338696,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 299.257636,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 39143654.875,
+     "vs_reference": {
+      "median": 7.77902231530887,
+      "lo": 7.263082892862828,
+      "hi": 8.215016019093758,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f5": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 309.23784862499997,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 39143654.875,
+     "vs_reference": {
+      "median": 8.092513500195885,
+      "lo": 7.677052531952778,
+      "hi": 8.426609129172117,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "inherited-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 173.37339725,
+     "op_unit": "word XORs (elimination and specialisation only)",
+     "ops_mean": 10719030.5,
+     "vs_reference": {
+      "median": 4.497903167627916,
+      "lo": 4.308261774826472,
+      "hi": 4.643356972987874,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "crossbred-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 28.040102,
+     "op_unit": "word operations (partial: extraction, transform and filter; per-point solves in solve_row_ops)",
+     "ops_mean": 820208.5,
+     "vs_reference": {
+      "median": 0.7353924830656975,
+      "lo": 0.6931042921637041,
+      "hi": 0.7674357364312127,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "fes-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 38.27611050000001,
+     "op_unit": "word XORs (Gray-code steps)",
+     "ops_mean": 134220310.875,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "exhaustive": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 4191.287815625001,
+     "op_unit": "monomial tests",
+     "ops_mean": 13190893443.625,
+     "vs_reference": {
+      "median": 115.44983900262119,
+      "lo": 90.65312044614434,
+      "hi": 122.4849748048632,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    }
+   },
+   "part": "C1-holdout-26"
+  },
+  {
+   "family": "K",
+   "n": 29,
+   "n_prime": 15,
+   "m": 2,
+   "vars": 30,
+   "reference": "fes-f2",
+   "verdict_digest": "d29ecf4526f08630969728eae9ba1b90c2704dd3700c5b6d5c5e9351c23ade3f",
+   "d_sr": [
+    6,
+    6
+   ],
+   "engines": {
+    "f4-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 3,
+     "targets": 8,
+     "over_budget": 5,
+     "agrees": true,
+     "d_learn_mean": 3.0,
+     "d_learn_max": 3,
+     "d_reach_mean": 4.0,
+     "d_reach_max": 4,
+     "ms_mean": 27261.3664835,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 28162922328.875,
+     "vs_reference": {
+      "median": 49.63414063906014,
+      "lo": 49.24825539399786,
+      "hi": 49.94884097446228,
+      "pairs": 3
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 1702.6055255,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 301199299.5,
+     "vs_reference": {
+      "median": 2.7240380336568366,
+      "lo": 2.549535023245419,
+      "hi": 2.9095815571448833,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f5": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 1758.0493076249998,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 301199299.5,
+     "vs_reference": {
+      "median": 2.911708112961269,
+      "lo": 2.6044705225250517,
+      "hi": 2.9774239857899873,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "inherited-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 769.791404,
+     "op_unit": "word XORs (elimination and specialisation only)",
+     "ops_mean": 52967572.875,
+     "vs_reference": {
+      "median": 1.2392184636936476,
+      "lo": 1.1697318481263475,
+      "hi": 1.2589332804675448,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "crossbred-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 0,
+     "targets": 8,
+     "over_budget": 8,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 11.3874195,
+     "op_unit": "word operations (partial: extraction, transform and filter; per-point solves in solve_row_ops)",
+     "ops_mean": 2229177.5,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "fes-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 623.130722625,
+     "op_unit": "word XORs (Gray-code steps)",
+     "ops_mean": 2147487069.0,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "exhaustive": {
+     "workload": "complete enumeration",
+     "declined": true,
+     "decided": 0,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 0.0,
+     "op_unit": "",
+     "ops_mean": 0.0,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    }
+   },
+   "part": "C2-main-28-30"
+  },
+  {
+   "family": "R",
+   "n": 27,
+   "n_prime": 14,
+   "m": 2,
+   "vars": 28,
+   "reference": "fes-f2",
+   "verdict_digest": "9b5b924265bb4d88748b1cded9ff194874c50554be22cf3e4fcf711674a328cb",
+   "d_sr": [
+    6,
+    6
+   ],
+   "engines": {
+    "f4-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": 3.875,
+     "d_learn_max": 4,
+     "d_reach_mean": 4.875,
+     "d_reach_max": 5,
+     "ms_mean": 17218.527500125,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 14456918847.5,
+     "vs_reference": {
+      "median": 110.60050405429654,
+      "lo": 106.28935949053964,
+      "hi": 115.61813010915516,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 711.7798972500001,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 110620086.75,
+     "vs_reference": {
+      "median": 4.450066522918497,
+      "lo": 4.3806372146833255,
+      "hi": 4.945250956746733,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f5": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 741.5727254999999,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 110617587.5,
+     "vs_reference": {
+      "median": 4.803556631456509,
+      "lo": 4.415475985402566,
+      "hi": 5.129031022207942,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "inherited-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 655.5862507500001,
+     "op_unit": "word XORs (elimination and specialisation only)",
+     "ops_mean": 41848214.75,
+     "vs_reference": {
+      "median": 4.288727716041319,
+      "lo": 3.8894466673538446,
+      "hi": 4.5205152368212556,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "crossbred-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 109.02020675,
+     "op_unit": "word operations (partial: extraction, transform and filter; per-point solves in solve_row_ops)",
+     "ops_mean": 1393211.75,
+     "vs_reference": {
+      "median": 0.6861169814313511,
+      "lo": 0.6609004749214739,
+      "hi": 0.7381426679625136,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "fes-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 155.262847125,
+     "op_unit": "word XORs (Gray-code steps)",
+     "ops_mean": 536873942.0,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "exhaustive": {
+     "workload": "complete enumeration",
+     "declined": true,
+     "decided": 0,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 0.0,
+     "op_unit": "",
+     "ops_mean": 0.0,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    }
+   },
+   "part": "C2-main-28-30"
+  },
+  {
+   "family": "R",
+   "n": 29,
+   "n_prime": 15,
+   "m": 2,
+   "vars": 30,
+   "reference": "fes-f2",
+   "verdict_digest": "c84fa41d20608abf06860ac3dd28ed8b6792017831a62681f57b417e25474765",
+   "d_sr": [
+    6,
+    6
+   ],
+   "engines": {
+    "f4-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 2,
+     "targets": 8,
+     "over_budget": 6,
+     "agrees": true,
+     "d_learn_mean": 3.0,
+     "d_learn_max": 3,
+     "d_reach_mean": 4.0,
+     "d_reach_max": 4,
+     "ms_mean": 26886.771056999998,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 28791502624.375,
+     "vs_reference": {
+      "median": 39.675080269053076,
+      "lo": 31.66095192562194,
+      "hi": 47.689208612484215,
+      "pairs": 2
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 1703.7684076249998,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 303303588.375,
+     "vs_reference": {
+      "median": 2.7677945432796696,
+      "lo": 2.6548841689312845,
+      "hi": 2.8323079775146915,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f5": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 1767.5062810000002,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 303303588.375,
+     "vs_reference": {
+      "median": 2.857398429985916,
+      "lo": 2.7840557324335706,
+      "hi": 2.9459679844706175,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "inherited-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 762.1972235,
+     "op_unit": "word XORs (elimination and specialisation only)",
+     "ops_mean": 52485616.625,
+     "vs_reference": {
+      "median": 1.227638632456669,
+      "lo": 1.1702970664693073,
+      "hi": 1.30548178307114,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "crossbred-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 0,
+     "targets": 8,
+     "over_budget": 8,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 11.76532225,
+     "op_unit": "word operations (partial: extraction, transform and filter; per-point solves in solve_row_ops)",
+     "ops_mean": 2229177.5,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "fes-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 619.3286712500001,
+     "op_unit": "word XORs (Gray-code steps)",
+     "ops_mean": 2147487083.0,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "exhaustive": {
+     "workload": "complete enumeration",
+     "declined": true,
+     "decided": 0,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 0.0,
+     "op_unit": "",
+     "ops_mean": 0.0,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    }
+   },
+   "part": "C2-main-28-30"
+  },
+  {
+   "family": "R",
+   "n": 27,
+   "n_prime": 14,
+   "m": 2,
+   "vars": 28,
+   "reference": "fes-f2",
+   "verdict_digest": "f3e36b585a4fd4c3176748b0e32aa74355337a50ab44583c2e2235ee2b8e1c78",
+   "d_sr": [
+    6,
+    6
+   ],
+   "engines": {
+    "f4-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": 4.0,
+     "d_learn_max": 4,
+     "d_reach_mean": 5.0,
+     "d_reach_max": 5,
+     "ms_mean": 17971.716354,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 15221470285.875,
+     "vs_reference": {
+      "median": 120.17976773071763,
+      "lo": 110.93231135670305,
+      "hi": 122.93216303564212,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 707.1008645,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 114374704.625,
+     "vs_reference": {
+      "median": 4.597352489417598,
+      "lo": 4.48252623262798,
+      "hi": 4.877119133994607,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "matrix-f5": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 745.5969713750001,
+     "op_unit": "word XORs (elimination only)",
+     "ops_mean": 114374701.875,
+     "vs_reference": {
+      "median": 4.811061991943289,
+      "lo": 4.785842154413837,
+      "hi": 4.850536999560872,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "inherited-f4": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 625.98943175,
+     "op_unit": "word XORs (elimination and specialisation only)",
+     "ops_mean": 40869019.875,
+     "vs_reference": {
+      "median": 4.042161596275829,
+      "lo": 3.945880137515164,
+      "hi": 4.33462597628804,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "crossbred-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": 3.0,
+     "d_reach_max": 3,
+     "ms_mean": 102.89176599999999,
+     "op_unit": "word operations (partial: extraction, transform and filter; per-point solves in solve_row_ops)",
+     "ops_mean": 1406229.125,
+     "vs_reference": {
+      "median": 0.6704959068863752,
+      "lo": 0.6510808542478517,
+      "hi": 0.6948205864251819,
+      "pairs": 8
+     },
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "fes-f2": {
+     "workload": "complete enumeration",
+     "declined": false,
+     "decided": 8,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 151.913807125,
+     "op_unit": "word XORs (Gray-code steps)",
+     "ops_mean": 536874036.5,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    },
+    "exhaustive": {
+     "workload": "complete enumeration",
+     "declined": true,
+     "decided": 0,
+     "targets": 8,
+     "over_budget": 0,
+     "agrees": true,
+     "d_learn_mean": null,
+     "d_learn_max": null,
+     "d_reach_mean": null,
+     "d_reach_max": null,
+     "ms_mean": 0.0,
+     "op_unit": "",
+     "ops_mean": 0.0,
+     "vs_reference": null,
+     "vs_baseline": null,
+     "baseline_budget_but_decided_here": 0
+    }
+   },
+   "part": "C3-holdout-28"
+  }
+ ]
+}
