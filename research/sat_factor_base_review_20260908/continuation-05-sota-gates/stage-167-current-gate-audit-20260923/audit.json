@@ -1,0 +1,51 @@
+{
+  "all_seven_gates_passed": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "09ff429fdea0324ba03aed426a502b992322967bc92a14e86aee5a5f27850480",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_one_native_f4_n59_target_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "next_targets": [
+    "execute the full frozen 160-input packet under licensed Magma F4",
+    "run fresh-target native-F4 schedule and batch-width holdouts",
+    "reduce parallel F4 wall below same-target direct MITM without worsening full cost",
+    "preserve complete outer metering for every future development command",
+    "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
+  ],
+  "predecessor": {
+    "stage166_audit_sha256": "e9bb3748dba93c40d55aac011d0cafadc054442a038b5f98a198b3006437b146",
+    "stage166_seal_sha256": "a2847b55576dae0861f997f0049dfe4a573678d6f7d1d3d4ba10b45f19d8bd4c",
+    "stage166_status": "current_seven_gate_audit_verified"
+  },
+  "schema": "koblitz_stage167_current_gate_audit.v1",
+  "scoreboard_sha256": "c82463f471ba92fae1423ed01e094748b6078de4a74eaa9a8de33dc2e764fc6d",
+  "stage167": {
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "complete_campaign_cost": null,
+    "parallel_peak_rss_bytes": 3033563136,
+    "parallel_single_core_seconds": null,
+    "parallel_total_core_seconds": 36.302718,
+    "parallel_wall_seconds": 5.589951040994492,
+    "result_seal_sha256": "f00ba35c874a3e203694ca72acc10683c8febc0f6fdfc9178c1ebed931e0e58b",
+    "result_sha256": "26762b47328b9ef36f40843d866b11bbf0f4f2bf074b85809765e894b03f64e8",
+    "same_binary_wall_speedup": 3.5471615233451015,
+    "same_host_parallel_f4_over_mitm_wall": 1.8635277475944445,
+    "selection_caveat": "batch width selected post hoc on this target; 39 rational systems divide into three batches of 13 without speculative systems",
+    "single_core_seconds": 19.805719000000003,
+    "single_peak_rss_bytes": 904085504,
+    "single_wall_seconds": 19.82845924999856,
+    "source_commit": "509e43c79bcf36425f4329a09c34fd20c75949ed",
+    "verification_sha256": "123b99ac68520a0986a5f843c0434d8a0b4357969075329c05882d5b4fce66c9"
+  },
+  "status": "current_seven_gate_audit_verified"
+}
