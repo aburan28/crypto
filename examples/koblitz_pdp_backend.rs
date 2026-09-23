@@ -791,6 +791,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
     let mut equation_hasher = blake3::Hasher::new();
     let mut costs = F4CostAggregate::default();
     let mut construction_ns = 0u128;
+    let mut factor_base_membership_ns = 0u128;
+    let mut nonrational_x1_skipped = 0usize;
     let mut systems_constructed = 0usize;
     let mut systems_completed = 0usize;
     let mut total_equations = 0usize;
@@ -819,6 +821,14 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
                 }
             },
         );
+        let membership_started = Instant::now();
+        let x1_is_rational = !points_with_x(&instance.curve, &x1_value).is_empty();
+        factor_base_membership_ns =
+            factor_base_membership_ns.saturating_add(membership_started.elapsed().as_nanos());
+        if !x1_is_rational {
+            nonrational_x1_skipped += 1;
+            continue;
+        }
         let built = Instant::now();
         let equations = sym_semaev_s4(
             &SymElement::constant(&x1_value, instance.n, n_vars),
@@ -931,6 +941,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "source_variables":instance.n_vars,
             "solver_variables":n_vars,
             "fixed_x1_values":x1_count,
+            "fixed_x1_nonrational_skipped":nonrational_x1_skipped,
             "fixed_x1_systems_constructed":systems_constructed,
             "fixed_x1_systems_completed":systems_completed,
             "solver_equations_total":total_equations,
@@ -947,6 +958,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "cost":costs.json(),
             "timing_ns":{
                 "source_verification":instance.verification_ns,
+                "factor_base_x1_membership":factor_base_membership_ns,
                 "fixed_x1_s4_construction":construction_ns,
                 "native_f4_whole":whole_started.elapsed().as_nanos(),
             },
