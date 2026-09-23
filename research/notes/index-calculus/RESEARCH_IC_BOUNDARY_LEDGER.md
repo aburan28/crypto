@@ -3706,6 +3706,55 @@ and targets.  The rule the calibration fixes is a function of the
 subgroup's bit length alone; the overlap is disclosed here rather than
 avoided.
 
+**Targets:**
+
+1. **Correct.**  Every run of every walk, calibration and evaluation,
+   recovers the planted logarithm and verifies `[d]G = Q`; walks
+   abandoned in a cycle stay under `1 %` of walks.
+2. **Identity.**  The frozen walk re-run on the recorded seeds
+   reproduces every recorded run exactly: steps, walks, distinguished
+   points, additions, doublings, scalar multiplications, the logarithm
+   and `S`, in the headline and in all seven `W` reports.
+3. **At its own floor.**  At every evaluation size with `r ≥ 2^{20}`,
+   the negation walk's mean walk operations over `√(πr/4)` lie in
+   `[0.9, 1.2]`.
+4. **The `√2`, paired.**  The tuned walk on points over the negation
+   walk, in walk operations, lies in `[1.25, 1.55]` pooled over the
+   evaluation sizes with `r ≥ 2^{20}`, with a `95 %` bootstrap interval
+   inside that range.
+5. **Flat.**  The negation walk's whole `S` is at most `1.5 × 0.886`
+   at every evaluation size with `r ≥ 2^{20}`, and its total operations
+   fit `r^α` with `α` within `0.5 ± 0.05` over the ladder's sizes from
+   `2^{20}` up, at least four of them.
+6. **Matched.**  Every instance priced has no eligible automorphism
+   beyond negation: prime curves with `a, b ≠ 0` or outside the
+   `j = 0`, `j = 1728` congruences; binary curves whose `b` lies in no
+   proper subfield.
+
+**Abandon** the new reference, and leave every ratio against the frozen
+walk, if target 1 or 2 fails; if target 3 or 4 fails the walk is
+mis-built and nothing is re-priced with it; target 5 failing at the
+small sizes is reported and does not stop the re-pricing, since the
+reference is then still the best counted walk the repository has.
+
+**On Koblitz curves in `ic bench`** both eligible walks run on the
+same seeds, the repository's signed-Frobenius walk (`A = 2n`, priced
+as the Koblitz regime prices it) and the negation walk, and the one
+with the lower mean `S` prices the column; both are in the report.
+That is a choice of the cheaper of two references, which can only make
+the reference stronger.
+
+**Class, fixed in advance: accounting.**  The reference moves; no
+index-calculus row's counts change.  Every `vs rho` ratio is expected
+to rise, and a ratio that rises is not a regression of any method.
+
+**Inadmissible:** re-tuning `J`, the distinguished-point rate, the
+window or the look-ahead after an evaluation run; dropping or re-seeding
+a failed run; leaving set-up, starts or verification out of `S`;
+dividing an index-calculus row by a rho mean from other seeds, targets
+or curves than the row's own; and reading the frozen walk's before mark
+as a property of rho rather than of that walk.
+
 ### 18.3 The calibration, and the rule it fixed
 
 Frozen at `research/ic_rho_reference_20260923/calibration/`: sixteen
@@ -3989,54 +4038,116 @@ is §18.8's diagnostic.  Every report names the binary's hash and the
 commit it ran from; each re-pricing report names its source file's
 blake3.
 
+## 19. The Koblitz references: what the collection thread's `vs rho` compares
+
+§18.8 left one item open: the Koblitz reference prices its per-step
+canonicalisation at zero.  Reading how the collection thread builds its
+`vs rho` turned up a larger mismatch as well, and this section tests
+both.  The sources are `scripts/ic_e2e_benchmark.py::rho_s_of` and the
+frozen `docs/ic/runs/koblitz-*` runs.  §19.1 was written and committed
+before anything below it ran; the probe it discloses is the only
+measurement made first.
+
+**Three facts, read from the code and the frozen runs.**
+
+1. **Thirty-two targets against one.**  Every collection-thread figure
+   is `total operations / (32·√r)`: `1.17×`, `1.33×`, `8.65×`, `19.3×`
+   and the `n = 61` panel.  The 32 targets share one factor-base
+   selection, one table build and one collection.  The descent adds
+   about two operations a target (`koblitz-select-packed-20260922.json`:
+   54 over 32).  The reference beside each figure is single-target rho,
+   run separately for each target and averaged.  The repository's own
+   rule is `src/ecc_safety.rs::check_multi_target_margin` and §5 of
+   `RESEARCH_ECC2K130_RR_SOLVER_PANEL.md` (Kuhn–Struik;
+   Galbraith–Lin–Scott).  It says `k` logarithms in one group cost about
+   `√(k·r)` in total, so per-target rho falls as `1/√k`, and "a batch
+   win over `k` independent rho runs measures the baseline, not the
+   algorithm."
+2. **The reference's step is counted as its addition.**
+   `rho_S = rho_group_additions / (targets·√r)`, while each step also
+   canonicalises over the `2n` conjugates.
+3. **The index-calculus build is counted as its additions.**  One
+   addition per stored pair, while each stored pair is also
+   canonicalised: its key is the normal-basis canonical form of the
+   sum's abscissa.
+
+**The probe**, run before this was written: `examples/koblitz_rho_price.rs`,
+16 targets.  The thread's unit is one batched affine addition, `42.8 ns`
+at `n = 41` and `54.1 ns` at `n = 53` on this host.  In that unit:
+
+- The implemented walk's step costs `20.9` and `23.3` units.  Of that,
+  `18.3` and `21.1` are its canonicalisation, a chain of about `1.5n`
+  dependent squarings.
+- A normal-basis rotation with `y` lifted by squarings costs `7.0` and
+  `8.1`.
+- Priced by time, the implemented walk is `S = 3.95` at `n = 41`,
+  twenty-one times the `0.185` the thread counts for it.
+
+That is a slow canonicalisation, not rho.  A walk that canonicalises by
+table pays a fraction of an addition a step, and so does one that never
+canonicalises at all (Bailey et al.'s `P ↦ P + φ^j(P)`, with `j` an
+orbit invariant).  Pricing rho as implemented would manufacture a
+crossing.
+
+### 19.1 Declared before anything below ran
+
+**Boundaries.**  For one target the floor is `√(π/4n)` in `S`.  For `k`
+targets the generic bound falls as `1/√k` per target (Yun's `Ω(√(kr))`
+in total).  The reference for a `k`-target figure is batch rho at the
+same `k`, measured.
+
+**Measurements.**
+
+- **(a) Batch rho.**  A batch mode of the tuned walk (§18.2) on the
+  signed-Frobenius classes (`A = 2n`), with counted operations per
+  target and every logarithm verified:
+  - jumps in `G` only;
+  - one table of distinguished points shared by every target;
+  - targets solved in sequence, so a later walk can finish on an
+    earlier target's trail.
+
+  It runs on the thread's two rung curves, `K_0 / GF(2^41)` and
+  `K_0 / GF(2^53)`, at `k = 1, 4, 16, 32`, with 16 batches each on
+  fresh targets.  On the `n = 61` panel's curve it runs at `k = 1` and
+  `32`, with 8 batches.
+- **(b) Step price,** in the thread's unit, measured in the same
+  process.  Two well-built walks, each timed by its per-step primitives:
+  - a canonical walk: one batched addition plus a table-driven
+    canonicalisation (normal-basis coordinates, least rotation, and two
+    Frobenius powers applied by table);
+  - Bailey et al.'s walk: one batched addition plus the coordinates, a
+    popcount and two table-applied Frobenius powers.
+- **(c) Build price,** in the thread's unit, measured in the same
+  process: the folded table's build time per stored pair, on the
+  thread's `n = 41` base (`|F| = 15,744`).
+
 **Targets:**
 
-1. **Correct.**  Every run of every walk, calibration and evaluation,
-   recovers the planted logarithm and verifies `[d]G = Q`; walks
-   abandoned in a cycle stay under `1 %` of walks.
-2. **Identity.**  The frozen walk re-run on the recorded seeds
-   reproduces every recorded run exactly: steps, walks, distinguished
-   points, additions, doublings, scalar multiplications, the logarithm
-   and `S`, in the headline and in all seven `W` reports.
-3. **At its own floor.**  At every evaluation size with `r ≥ 2^{20}`,
-   the negation walk's mean walk operations over `√(πr/4)` lie in
-   `[0.9, 1.2]`.
-4. **The `√2`, paired.**  The tuned walk on points over the negation
-   walk, in walk operations, lies in `[1.25, 1.55]` pooled over the
-   evaluation sizes with `r ≥ 2^{20}`, with a `95 %` bootstrap interval
-   inside that range.
-5. **Flat.**  The negation walk's whole `S` is at most `1.5 × 0.886`
-   at every evaluation size with `r ≥ 2^{20}`, and its total operations
-   fit `r^α` with `α` within `0.5 ± 0.05` over the ladder's sizes from
-   `2^{20}` up, at least four of them.
-6. **Matched.**  Every instance priced has no eligible automorphism
-   beyond negation: prime curves with `a, b ≠ 0` or outside the
-   `j = 0`, `j = 1728` congruences; binary curves whose `b` lies in no
-   proper subfield.
+1. **Correct.**  Every target of every batch is recovered and verified.
+2. **The batch law holds for this walk.**  Per-target cost at `k = 32`
+   over `k = 1` lies in `[0.09, 0.35]`, a factor of two either side of
+   `1/√32`.
+3. **Re-read.**  Every 32-target Koblitz figure on the page is re-read
+   against batch rho at `k = 32` on its own curve.  That is measured at
+   `n = 41` and `53`, and at `n = 61` too if (a) completes there.
+   Beside each re-read go (b) and (c) as measured corrections, and
+   beside those the one-target (cold) figure.
 
-**Abandon** the new reference, and leave every ratio against the frozen
-walk, if target 1 or 2 fails; if target 3 or 4 fails the walk is
-mis-built and nothing is re-priced with it; target 5 failing at the
-small sizes is reported and does not stop the re-pricing, since the
-reference is then still the best counted walk the repository has.
+**Class: accounting.**  No index-calculus count changes; the reference
+is matched to the problem the figures solve.
 
-**On Koblitz curves in `ic bench`** both eligible walks run on the
-same seeds, the repository's signed-Frobenius walk (`A = 2n`, priced
-as the Koblitz regime prices it) and the negation walk, and the one
-with the lower mean `S` prices the column; both are in the report.
-That is a choice of the cheaper of two references, which can only make
-the reference stronger.
+**Inadmissible:**
 
-**Class, fixed in advance: accounting.**  The reference moves; no
-index-calculus row's counts change.  Every `vs rho` ratio is expected
-to rise, and a ratio that rises is not a regression of any method.
+- pricing the reference at its implemented canonicalisation, the
+  probe's `20.9` units a step;
+- using the `1/√k` formula where the batch measurement exists;
+- comparing a 32-target figure with batch rho at a different `k`;
+- dropping a failed batch;
+- using the batch reference for a cold figure.
 
-**Inadmissible:** re-tuning `J`, the distinguished-point rate, the
-window or the look-ahead after an evaluation run; dropping or re-seeding
-a failed run; leaving set-up, starts or verification out of `S`;
-dividing an index-calculus row by a rho mean from other seeds, targets
-or curves than the row's own; and reading the frozen walk's before mark
-as a property of rho rather than of that walk.
+**Abandon** the re-pricing if target 1 fails.  If target 2 fails, the
+batch mode is mis-built, and the page gets the formula's reading,
+marked as a model, instead of a measurement.
 
 ## Appendix A. The conversion factors, as measured
 
