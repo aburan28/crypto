@@ -45,7 +45,11 @@ CONFIG = dict(FROZEN, max_trials=65536)
 # Same point counts round 0021 swept at `n37a0`, extended upward: the optimum
 # is expected to move up with `r`, so the sweep has to be able to find it there.
 POINTS = (222, 1777, 2400, 3600, 7200, 14400)
-CELLS = [('n37a0', 37, 0, 230_603_167), ('n43a1', 43, 1, 4_644_189_029)]
+# `n23a1` is here because the ladder must not mix a tuned base at two cells
+# with the default at the third: if its optimum is also interior, its 0.831
+# moves and both rates move with it.
+CELLS = [('n23a1', 23, 1, 4_196_903),
+         ('n37a0', 37, 0, 230_603_167), ('n43a1', 43, 1, 4_644_189_029)]
 
 
 def run(worker, job, env, timeout=3600):
