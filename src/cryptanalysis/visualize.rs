@@ -169,7 +169,7 @@ pub fn format_signed_bars(values: &[i32], title: &str, max_width: usize) -> Stri
     s.push_str("```\n");
     use crate::visualize::color::{paint, signed_color};
     for (i, &v) in values.iter().enumerate() {
-        let bar_width = ((v.abs() as usize) * half) / (max_abs as usize);
+        let bar_width = ((v.unsigned_abs() as usize) * half) / (max_abs as usize);
         let bar_str = "═".repeat(bar_width);
         let colored_bar = paint(&bar_str, signed_color(v));
         let mut line = String::new();

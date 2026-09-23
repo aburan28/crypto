@@ -52,6 +52,7 @@ impl E4 {
 
 /// `F_{p⁴}` with a multiplication counter in `F_p` multiplications, charged
 /// by the convention [`super::gaudry_cubic::Fp3`] uses at `k = 3`.
+#[derive(Clone)]
 pub struct Fp4 {
     pub p: u64,
     pub c: u64,
@@ -212,7 +213,7 @@ impl Fp4 {
 
 // ── The curve `y² = x³ + a x + b` over `F_{p⁴}` ─────────────────────────
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Pt4 {
     pub x: E4,
     pub y: E4,
@@ -227,10 +228,13 @@ impl Pt4 {
     };
 }
 
+#[derive(Clone)]
 pub struct Curve4 {
     pub f: Fp4,
     pub a: E4,
     pub b: E4,
+    /// Group operations (additions and doublings) performed.
+    ops: Cell<u64>,
 }
 
 impl Curve4 {
@@ -247,7 +251,12 @@ impl Curve4 {
             let a3 = f.mul(&f.sq(&a), &a);
             let disc = f.add(&f.scale(&a3, 4), &f.scale(&f.sq(&b), 27));
             if !disc.is_zero() {
-                return Curve4 { f, a, b };
+                return Curve4 {
+                    f,
+                    a,
+                    b,
+                    ops: Cell::new(0),
+                };
             }
         }
     }
@@ -280,6 +289,7 @@ impl Curve4 {
     /// distinct points, the decomposition behind §11.16's `c_add`.
     pub fn add(&self, p1: &Pt4, p2: &Pt4) -> Pt4 {
         let f = &self.f;
+        self.ops.set(self.ops.get() + 1);
         if p1.inf {
             return *p2;
         }
@@ -307,6 +317,34 @@ impl Curve4 {
     }
     pub fn sub(&self, p1: &Pt4, p2: &Pt4) -> Pt4 {
         self.add(p1, &self.neg(p2))
+    }
+    pub fn ops(&self) -> u64 {
+        self.ops.get()
+    }
+    /// A fresh curve with its own counters, for a worker thread.
+    pub fn with_params(p: u64, a: E4, b: E4) -> Curve4 {
+        Curve4 {
+            f: Fp4::new(p),
+            a,
+            b,
+            ops: Cell::new(0),
+        }
+    }
+    pub fn reset_ops(&self) {
+        self.ops.set(0);
+    }
+    /// Double-and-add.
+    pub fn mul(&self, pt: &Pt4, mut k: u64) -> Pt4 {
+        let mut acc = Pt4::INF;
+        let mut base = *pt;
+        while k > 0 {
+            if k & 1 == 1 {
+                acc = self.add(&acc, &base);
+            }
+            base = self.add(&base, &base);
+            k >>= 1;
+        }
+        acc
     }
 }
 
@@ -1290,6 +1328,395 @@ pub fn base_quadruples(sols: &[[u64; 4]], base: &[Pt4]) -> BTreeSet<[u64; 4]> {
         .collect()
 }
 
+// ── r∞: the linear algebra and rho at k = 4, measured (§11.18) ───────────
+
+/// A prime-order curve over `F_{p⁴}` with a planted logarithm `Q = [d]G`.
+pub struct Instance4 {
+    pub curve: Curve4,
+    pub n: u64,
+    pub g: Pt4,
+    pub d: u64,
+    pub q: Pt4,
+}
+
+/// The same instance as plain data, shareable across threads.
+#[derive(Clone, Copy)]
+pub struct Spec4 {
+    pub p: u64,
+    pub a: E4,
+    pub b: E4,
+    pub n: u64,
+    pub g: Pt4,
+    pub d: u64,
+    pub q: Pt4,
+}
+
+impl Instance4 {
+    pub fn spec(&self) -> Spec4 {
+        Spec4 {
+            p: self.curve.f.p,
+            a: self.curve.a,
+            b: self.curve.b,
+            n: self.n,
+            g: self.g,
+            d: self.d,
+            q: self.q,
+        }
+    }
+}
+
+fn random_point(curve: &Curve4, rng: &mut StdRng) -> Pt4 {
+    loop {
+        let x = curve.f.random(rng);
+        if let Some(pt) = curve.lift_x(&x, rng) {
+            return pt;
+        }
+    }
+}
+
+/// `#E(F_{p⁴})` when it is prime: baby-step giant-step for the multiple of a
+/// random point's order inside the Hasse interval `q + 1 ± 2p²`, accepted
+/// only when that multiple is prime (then it is the point's order, and the
+/// group's, since the interval is shorter than the order).
+fn prime_group_order(curve: &Curve4, rng: &mut StdRng) -> Option<u64> {
+    let p = curve.f.p;
+    let q = p.pow(4);
+    let lo = q + 1 - 2 * p * p;
+    let width = 4 * p * p;
+    let pt = random_point(curve, rng);
+    let steps = (width as f64).sqrt() as u64 + 1;
+    let mut table: HashMap<(E4, E4), u64> = HashMap::new();
+    let mut jp = Pt4::INF;
+    for j in 0..steps {
+        if !jp.inf {
+            table.entry((jp.x, jp.y)).or_insert(j);
+        }
+        jp = curve.add(&jp, &pt);
+    }
+    let giant = curve.mul(&pt, steps);
+    let mut t = curve.mul(&pt, lo);
+    let mut i = 0u64;
+    while i * steps <= width + steps {
+        let m = if t.inf {
+            Some(lo + i * steps)
+        } else {
+            let neg = curve.neg(&t);
+            table.get(&(neg.x, neg.y)).map(|&j| lo + i * steps + j)
+        };
+        if let Some(m) = m {
+            return super::residual_walk::is_prime_u64(m).then_some(m);
+        }
+        t = curve.add(&t, &giant);
+        i += 1;
+    }
+    None
+}
+
+pub fn generate_instance4(p: u64, seed: u64) -> Instance4 {
+    let mut rng = <StdRng as rand::SeedableRng>::seed_from_u64(seed ^ 0x4A11);
+    loop {
+        let curve = Curve4::random(p, &mut rng);
+        let Some(n) = prime_group_order(&curve, &mut rng) else {
+            continue;
+        };
+        let g = random_point(&curve, &mut rng);
+        if !curve.mul(&g, n).inf {
+            continue;
+        }
+        let d = rng.gen_range(1..n);
+        let q = curve.mul(&g, d);
+        curve.reset_ops();
+        curve.f.reset_muls();
+        return Instance4 { curve, n, g, d, q };
+    }
+}
+
+/// `x(P_i + s·P_j) ↦ (i, j, s, y)` over the base, built once per curve.
+pub struct PairTable {
+    map: HashMap<E4, Vec<(u32, u32, i8, E4)>>,
+}
+
+pub fn pair_table(curve: &Curve4, base: &[Pt4]) -> PairTable {
+    let mut map: HashMap<E4, Vec<(u32, u32, i8, E4)>> = HashMap::new();
+    for i in 0..base.len() {
+        for j in (i + 1)..base.len() {
+            for (s, v) in [(1i8, curve.add(&base[i], &base[j])), (-1, curve.sub(&base[i], &base[j]))] {
+                if !v.inf {
+                    map.entry(v.x).or_default().push((i as u32, j as u32, s, v.y));
+                }
+            }
+        }
+    }
+    PairTable { map }
+}
+
+/// Every decomposition `R = Σ s_t P_{i_t}` over four distinct base points,
+/// with its signs, by meet in the middle against the pair table.
+pub fn mitm_signed(curve: &Curve4, base: &[Pt4], table: &PairTable, r: &Pt4) -> Vec<Vec<(usize, i64)>> {
+    let n = base.len();
+    let mut out: BTreeSet<Vec<(usize, i64)>> = BTreeSet::new();
+    for k in 0..n {
+        for sk in [1i64, -1] {
+            let pk = if sk == 1 { base[k] } else { curve.neg(&base[k]) };
+            let tk = curve.sub(r, &pk);
+            for l in (k + 1)..n {
+                for sl in [1i64, -1] {
+                    let pl = if sl == 1 { base[l] } else { curve.neg(&base[l]) };
+                    let v = curve.sub(&tk, &pl);
+                    if v.inf {
+                        continue;
+                    }
+                    let Some(cands) = table.map.get(&v.x) else {
+                        continue;
+                    };
+                    for &(i, j, s, y) in cands {
+                        let (i, j) = (i as usize, j as usize);
+                        if i == k || i == l || j == k || j == l {
+                            continue;
+                        }
+                        let t: i64 = if v.y == y { 1 } else { -1 };
+                        let mut terms = vec![(k, sk), (l, sl), (i, t), (j, t * s as i64)];
+                        terms.sort_unstable();
+                        out.insert(terms);
+                    }
+                }
+            }
+        }
+    }
+    out.into_iter().collect()
+}
+
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct RhoRun4 {
+    pub seed: u64,
+    pub steps: u64,
+    pub group_ops: u64,
+    pub s: f64,
+    pub correct: bool,
+}
+
+/// r-adding Pollard rho with exhaustive storage, as `gaudry_cubic::run_rho3`
+/// runs it, charging every group operation including the walk's setup.
+pub fn rho4(inst: &Spec4, seed: u64) -> RhoRun4 {
+    let curve = Curve4::with_params(inst.p, inst.a, inst.b);
+    let n = inst.n;
+    let mut rng = <StdRng as rand::SeedableRng>::seed_from_u64(seed ^ 0x8D04);
+    let r = 32usize;
+    let mults: Vec<(u64, u64, Pt4)> = (0..r)
+        .map(|_| {
+            let al = rng.gen_range(0..n);
+            let be = rng.gen_range(1..n);
+            (al, be, curve.add(&curve.mul(&inst.g, al), &curve.mul(&inst.q, be)))
+        })
+        .collect();
+    let mut table: HashMap<Pt4, (u64, u64)> = HashMap::new();
+    let mut steps = 0u64;
+    let mut found = None;
+    'outer: loop {
+        let mut a = rng.gen_range(0..n);
+        let mut b = rng.gen_range(1..n);
+        let mut l = curve.add(&curve.mul(&inst.g, a), &curve.mul(&inst.q, b));
+        loop {
+            steps += 1;
+            if let Some(&(a2, b2)) = table.get(&l) {
+                let db = (b + n - b2) % n;
+                if db != 0 {
+                    let da = (a2 + n - a) % n;
+                    found = Some(mm(da, inv_mod(db, n), n));
+                    break 'outer;
+                }
+                break;
+            }
+            table.insert(l, (a, b));
+            let h = l.x.0[0] ^ l.x.0[1].wrapping_mul(0x9E37_79B9) ^ l.x.0[2].rotate_left(17);
+            let j = (super::residual_walk::mix64(h) % r as u64) as usize;
+            l = curve.add(&l, &mults[j].2);
+            a = (a + mults[j].0) % n;
+            b = (b + mults[j].1) % n;
+            if steps > 64 * (n as f64).sqrt() as u64 + 1_000_000 {
+                break 'outer;
+            }
+        }
+    }
+    let ops = curve.ops();
+    RhoRun4 {
+        seed,
+        steps,
+        group_ops: ops,
+        s: ops as f64 / (n as f64).sqrt(),
+        correct: found == Some(inst.d),
+    }
+}
+
+/// One `k = 4` run of §11.18: relations from [`mitm_signed`], filtered and
+/// solved as §11.7 does, the logarithm verified, and rho on the same group.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct K4LaReport {
+    pub p: u64,
+    pub seed: u64,
+    pub n: u64,
+    pub bits: f64,
+    pub base: usize,
+    pub residuals: u64,
+    pub decompositions: u64,
+    pub decomposition_rate: f64,
+    pub relations: usize,
+    /// Unknowns in the square core the successful solve used.
+    pub unknowns: usize,
+    pub filtered_out: usize,
+    pub phi: f64,
+    pub row_weight: f64,
+    pub la_attempts: u64,
+    /// Multiplications mod `n`, every attempt.
+    pub la_ops: u64,
+    pub la_ops_last: u64,
+    /// `la_ops / unknowns²`, against §11.16's `20`.
+    pub wiedemann_constant: f64,
+    pub solved: bool,
+    pub correct: bool,
+    /// Group operations the relation phase spent (residuals and the oracle),
+    /// kept out of `r`.
+    pub relation_group_ops: u64,
+    pub fp_muls_per_add: f64,
+    pub rho: Vec<RhoRun4>,
+    pub rho_s_mean: f64,
+    pub rho_s_sd: f64,
+    /// `LA / rho` in `F_p` multiplications: `la_ops·16 / (S_rho·√n·c_add)`.
+    pub r: f64,
+    pub wall_ms: f64,
+}
+
+pub fn run_k4_la(p: u64, seed: u64, rho_runs: usize) -> K4LaReport {
+    use super::gaudry_cubic::{square_core, wiedemann_u64, SparseRel};
+    let start = Instant::now();
+    let inst = generate_instance4(p, seed);
+    let curve = &inst.curve;
+    let n = inst.n;
+    let mut rng = <StdRng as rand::SeedableRng>::seed_from_u64(seed ^ 0x1A4);
+    let base = factor_base(curve, &mut rng);
+    let fp_per_add = {
+        curve.f.reset_muls();
+        let mut acc = base[0];
+        for _ in 0..64 {
+            acc = curve.add(&acc, &base[1]);
+        }
+        curve.f.muls() as f64 / 64.0
+    };
+    curve.reset_ops();
+    let table = pair_table(curve, &base);
+    let spec = inst.spec();
+    let small = base.len();
+    let unknowns = small + 1;
+    let mut rep = K4LaReport {
+        p,
+        seed,
+        n,
+        bits: (n as f64).log2(),
+        base: small,
+        fp_muls_per_add: fp_per_add,
+        ..Default::default()
+    };
+    let mut rel_ops = curve.ops();
+    let mut full_rels: Vec<SparseRel> = Vec::new();
+    let mut next_attempt = unknowns;
+    let mut la_ops = 0u64;
+    'collect: while rep.residuals < 50_000_000 {
+        let batch: Vec<(u64, u64)> = (0..64)
+            .map(|_| (rng.gen_range(0..n), rng.gen_range(1..n)))
+            .collect();
+        let found: Vec<(u64, u64, Pt4, Vec<Vec<(usize, i64)>>, u64)> = batch
+            .par_iter()
+            .map(|&(a, b)| {
+                let c = Curve4::with_params(spec.p, spec.a, spec.b);
+                let r = c.add(&c.mul(&spec.g, a), &c.mul(&spec.q, b));
+                let decs = mitm_signed(&c, &base, &table, &r);
+                (a, b, r, decs, c.ops())
+            })
+            .collect();
+        for (a, b, r, decs, ops) in found {
+            rep.residuals += 1;
+            rel_ops += ops;
+            for terms in decs {
+                // Verify aG + bQ = Σ s P before using it.
+                let mut acc = r;
+                for &(i, s) in &terms {
+                    acc = if s == 1 {
+                        curve.sub(&acc, &base[i])
+                    } else {
+                        curve.add(&acc, &base[i])
+                    };
+                }
+                if !acc.inf {
+                    continue;
+                }
+                rep.decompositions += 1;
+                let mut cols: Vec<(usize, u64)> = terms
+                    .iter()
+                    .map(|&(i, s)| (i, if s == 1 { 1 } else { n - 1 }))
+                    .collect();
+                cols.push((small, (n - b) % n));
+                cols.sort_unstable();
+                full_rels.push(SparseRel { cols, rhs: a });
+            }
+            if full_rels.len() >= next_attempt {
+                if let Some(core) = square_core(&full_rels, small) {
+                    rep.la_attempts += 1;
+                    let mut map = vec![usize::MAX; unknowns];
+                    let mut k = 0;
+                    for c in 0..unknowns {
+                        if core.columns.get(c).copied().unwrap_or(false) {
+                            map[c] = k;
+                            k += 1;
+                        }
+                    }
+                    let sel: Vec<SparseRel> = core
+                        .rows
+                        .iter()
+                        .map(|&i| SparseRel {
+                            cols: full_rels[i].cols.iter().map(|&(c, v)| (map[c], v)).collect(),
+                            rhs: full_rels[i].rhs,
+                        })
+                        .collect();
+                    let before = la_ops;
+                    let x = wiedemann_u64(&sel, sel.len(), n, &mut rng, &mut la_ops);
+                    let dd = x.map(|x| x[map[small]]);
+                    if dd.is_some_and(|dd| curve.mul(&inst.g, dd) == inst.q) {
+                        rep.solved = true;
+                        rep.correct = dd == Some(inst.d);
+                        rep.unknowns = sel.len();
+                        rep.filtered_out = full_rels.len() - sel.len();
+                        rep.la_ops_last = la_ops - before;
+                        break 'collect;
+                    }
+                    next_attempt = full_rels.len() + (sel.len() / 20).max(1);
+                } else {
+                    next_attempt = full_rels.len() + (unknowns / 20).max(1);
+                }
+            }
+        }
+    }
+    rep.relations = full_rels.len();
+    rep.relation_group_ops = rel_ops;
+    rep.la_ops = la_ops;
+    rep.decomposition_rate = rep.decompositions as f64 / rep.residuals.max(1) as f64;
+    rep.phi = rep.unknowns as f64 / small as f64;
+    rep.row_weight = full_rels.iter().map(|r| r.cols.len()).sum::<usize>() as f64
+        / full_rels.len().max(1) as f64;
+    rep.wiedemann_constant = la_ops as f64 / (rep.unknowns.max(1) as f64).powi(2);
+    rep.rho = (0..rho_runs as u64)
+        .into_par_iter()
+        .map(|k| rho4(&spec, seed * 1000 + k))
+        .collect();
+    let ss: Vec<f64> = rep.rho.iter().map(|r| r.s).collect();
+    rep.rho_s_mean = ss.iter().sum::<f64>() / ss.len().max(1) as f64;
+    rep.rho_s_sd = (ss.iter().map(|s| (s - rep.rho_s_mean).powi(2)).sum::<f64>()
+        / (ss.len().max(2) - 1) as f64)
+        .sqrt();
+    rep.r = la_ops as f64 * 16.0 / (rep.rho_s_mean * (n as f64).sqrt() * fp_per_add);
+    rep.wall_ms = start.elapsed().as_secs_f64() * 1e3;
+    rep
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1391,5 +1818,19 @@ mod tests {
     #[test]
     fn the_solver_finds_planted_roots_of_cubics() {
         planted(3, 7);
+    }
+
+    /// §11.18's pipeline end to end at a toy size: a prime-order curve,
+    /// relations from the meet-in-the-middle oracle, filtering, Wiedemann,
+    /// the planted logarithm recovered — and rho recovering it too.
+    #[test]
+    fn k4_linear_algebra_and_rho_recover_the_planted_logarithm() {
+        let rep = run_k4_la(29, 3, 4);
+        assert!(rep.solved && rep.correct, "{rep:?}");
+        assert!(super::super::residual_walk::is_prime_u64(rep.n));
+        assert!(rep.rho.iter().all(|r| r.correct), "{:?}", rep.rho);
+        assert!(rep.la_ops > 0 && rep.r > 0.0);
+        assert!((rep.row_weight - 5.0).abs() < 1e-9, "four points and d: {}", rep.row_weight);
+        assert_eq!(rep.fp_muls_per_add, 97.0);
     }
 }
