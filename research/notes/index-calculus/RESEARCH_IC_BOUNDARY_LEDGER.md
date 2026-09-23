@@ -3178,6 +3178,35 @@ the stage reference from here on, and the frozen suite's rows against
 `fes-f2` stay as they are, labelled with the reference they were read
 against.
 
+### 17.5 The hybrids past thirty unknowns, declared after §17.4 was read
+
+§17.4's check settled the question it was declared for (§17.9 reports
+it) and showed something it was not looking for: against the vector
+reference, `inherited-f4` falls from `14.8×` at twenty-eight unknowns
+to `4.55×` at thirty, on both seeds and both families, because its
+cost per call barely grows there (`0.67 s` to `0.77 s`) while the
+reference's quadruples.  A ratio that falls three-fold in one step is a
+trend or an accident of two sizes, and the only way to tell is to
+measure further out.  So, declared after reading §17.4 and before
+running:
+
+- `31:16:2` and `33:17:2` (thirty-two and thirty-four unknowns), both
+  seeds, both families where an instance exists
+  (`hybrids_20260923.json`, results in `results/hybrids_v1/`);
+- engines `inherited-f4`, `matrix-f4`, `matrix-f5`, `crossbred-f2` (to
+  record where its defaults stand), `fes-f2` (which stops at
+  thirty-two) and `fes-f2-wide`, whose lanes reach thirty-six and which
+  is the reference; the suite's protocol otherwise.  At thirty-four
+  unknowns no scalar search checks the reference, so there the
+  hybrids' agreement with it, by an unrelated algorithm, is the check.
+
+**A stage crossing against the strengthened reference** is some hybrid
+below `fes-f2-wide` with its interval below one at thirty-two or
+thirty-four unknowns on both seeds.  If none is, the trajectory is
+recorded, and any crossing it implies is extrapolated from the six
+sizes 24–34 and marked as extrapolation.  Either way it is a stage
+diagnostic: no whole-method `S` exists at these sizes.
+
 ## Appendix A. The conversion factors, as measured
 
 Nanoseconds per native unit on the run's host, per instance, from the

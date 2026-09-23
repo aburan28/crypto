@@ -570,7 +570,16 @@ impl SystemSolver for FesWide {
     }
 
     fn accepts(&self, shape: &SystemShape) -> bool {
-        FesF2.accepts(shape)
+        if FesF2.accepts(shape) {
+            return true;
+        }
+        // Past the scalar walk's 32 unknowns the lanes still reach: the
+        // walk covers only the `n − k` unknowns the lanes do not fix.
+        let Some(lanes) = crate::cryptanalysis::mq_fes::wide_lanes() else {
+            return false;
+        };
+        let k = lanes.trailing_zeros() as usize;
+        shape.n_vars <= 32 + k && shape.n_equations <= 32 && shape.degrees.iter().all(|&d| d <= 2)
     }
 
     fn solve(

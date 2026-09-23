@@ -321,7 +321,8 @@ def main():
     md.append(f"- **3 question**: {'met' if t3 else 'not met'} — {len(crossings)} crossing cell(s)" + "".join(
         f"; {c['engine']} at {c['vars']} unknowns ({c['family']}, {c['part']}): {fmt_ci(c['ci'])}" for c in crossings))
     md.append(f"- **abandon**: {verdict(abandon, 'triggered', 'not triggered')} — gaining 16→26: {gaining}\n")
-    md.append("## Stage: wall / fes-f2, pooled over families, median [95% CI] (pairs)\n")
+    refs = sorted({c["reference"] for c in two if c["reference"] in ("fes-f2", "fes-f2-wide")})
+    md.append(f"## Stage: wall / the cell's reference ({', '.join(refs) or 'none'}), pooled over families, median [95% CI] (pairs)\n")
     sizes = sorted({v for t in traj.values() for v in t})
     md.append("| engine | " + " | ".join(f"{v}" for v in sizes) + " |")
     md.append("|:--|" + "--:|" * len(sizes))
