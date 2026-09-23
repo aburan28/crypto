@@ -169,15 +169,15 @@ pub fn verify_with_g(
     }
 }
 
-/// ── Part 2: RSA DSKS ─────────────────────────────────────────────
-///
-/// Given Alice's RSA signature `s` over message `m` with public key
-/// `(e, N)`, Eve forges `(e', N')` with `s^e' ≡ pad(m) mod N'`.
-///
-/// We restrict to a *toy* RSA size so Pohlig-Hellman over `p'-1` and
-/// `q'-1` is tractable.  Real-world attack against 2048-bit RSA
-/// needs a careful smooth-prime search; for the demo we use small
-/// smooth primes whose discrete logs we can solve with BSGS.
+// ── Part 2: RSA DSKS ─────────────────────────────────────────────
+//
+// Given Alice's RSA signature `s` over message `m` with public key
+// `(e, N)`, Eve forges `(e', N')` with `s^e' ≡ pad(m) mod N'`.
+//
+// We restrict to a *toy* RSA size so Pohlig-Hellman over `p'-1` and
+// `q'-1` is tractable.  Real-world attack against 2048-bit RSA
+// needs a careful smooth-prime search; for the demo we use small
+// smooth primes whose discrete logs we can solve with BSGS.
 
 /// EMSA-PKCS1-v1_5 padding for SHA-256 — minimal stub used here.
 /// Returns the BigUint encoding of `0x00 01 FF .. FF 00 || DIGEST_INFO || H`.
