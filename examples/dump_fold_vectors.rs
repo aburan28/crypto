@@ -96,6 +96,10 @@ fn main() {
     println!("    const uint64_t *present;");
     println!("    uint64_t present_mask;");
     println!("    int tagged;");
+    println!("    /* How the base was chosen, so the CPU can rebuild it:");
+    println!("       build_subgroup_orbit_factor_base(kc, seed, base_request). */");
+    println!("    uint64_t seed;");
+    println!("    int base_request;");
     println!("}};");
     println!();
 
@@ -178,7 +182,7 @@ fn main() {
             "    {{ {n}, {}, fold_x_{n}, fold_y_{n}, fold_canon_{n}, {}, fold_suffix_{n}, \
              {}, fold_rep_orbit_{n}, fold_rep_x_{n}, fold_rep_y_{n}, {}, \
              fold_canon_tables_{n}, {}, {}, fold_bucket_start_{n}, fold_words_{n}, {}, \
-             fold_present_{n}, {}ull, {} }},",
+             fold_present_{n}, {}ull, {}, {seed}ull, {want} }},",
             by_orbit.len(),
             fb.signed_orbits.len(),
             reps.len(),

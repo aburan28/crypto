@@ -22,7 +22,7 @@ TESTS  := test_ecc2k95 test_k23 test_k41 \
 HDRS := f2m.cuh koblitz.cuh rho2k.cuh scalar_ring.hpp rho2k_host.hpp \
         pairtable.cuh
 
-.PHONY: all test bench clean gen
+.PHONY: all test bench clean gen roundtrip nvcc-check
 all: test
 
 gen: $(GEN)
@@ -75,10 +75,48 @@ $(foreach c,$(CURVES),$(eval $(call TEST_RULE,$(c))))
 
 test: $(TESTS)
 	@rc=0; for t in $(TESTS); do \
-	  echo "=== ./$$t ==="; ./$$t || rc=1; done; exit $$rc
+	  echo "=== ./$$t ==="; ./$$t || rc=1; done; \
+	echo "=== roundtrip ==="; $(MAKE) --no-print-directory roundtrip || rc=1; \
+	exit $$rc
+
+# The fold's round trip: the table the emulated kernel built, written out
+# and taken over by `PairSumTable::from_folded_parts`, then asked every
+# question the CPU's own table answers.  `test_emu_*` compares stored
+# state; this compares answers, and is what runs every tag through the
+# recovery that reads it.
+FOLD_TABLES := fold_table_k23.bin fold_table_k41.bin
+fold_table_%.bin: test_emu_%
+	./test_emu_$* $@ > /dev/null
+
+roundtrip: $(FOLD_TABLES)
+	cd ../.. && $(CARGO) run --release --quiet --example load_fold_table -- \
+	  $(addprefix gpu/ecc2k/,$(FOLD_TABLES))
+
+# Compile, don't run: every kernel here through nvcc.  Nothing else does --
+# the host tests build `pairtable.cuh`'s kernels with g++ behind a
+# `__CUDACC__` shim, and `ptx_stats2k.sh` compiles the walk with clang --
+# so this is the one check that the code a device would run gets past the
+# compiler a device build would use.  No GPU needed.  Warnings are errors,
+# and ptxas reports what each pair-table kernel takes in registers and
+# stack.  `bench2k.cu` stands in for `kernels2k.cuh`, which it includes.
+NVCC_ARCHS ?= sm_90 sm_100 sm_120
+NVCC_CHECK_FLAGS := -O3 -std=c++17 -Werror all-warnings
+nvcc-check: $(HDRS) kernels2k.cuh bench2k.cu curve_k23.h curve_k41.h curve_ecc2k95.h
+	@for a in $(NVCC_ARCHS); do \
+	  for c in k23 k41; do \
+	    echo "=== nvcc -arch=$$a pairtable.cuh, $$c ==="; \
+	    out=$$($(NVCC) $(NVCC_CHECK_FLAGS) -arch=$$a -Xptxas -v -x cu -c -o /dev/null \
+	      -DGPU_ECC2K_CURVE_HEADER="\"curve_$$c.h\"" pairtable.cuh 2>&1) \
+	      || { echo "$$out"; exit 1; }; \
+	    echo "$$out" | grep -E "entry function|Used"; \
+	  done; \
+	  echo "=== nvcc -arch=$$a bench2k.cu, ecc2k95 ==="; \
+	  $(NVCC) $(NVCC_CHECK_FLAGS) -arch=$$a -c -o /dev/null \
+	    -DGPU_ECC2K_CURVE_HEADER='"curve_ecc2k95.h"' bench2k.cu || exit 1; \
+	done
 
 bench: bench2k.cu $(HDRS) kernels2k.cuh curve_ecc2k95.h
 	$(NVCC) $(NVCCFLAGS) -DGPU_ECC2K_CURVE_HEADER='"curve_ecc2k95.h"' -o $@ $<
 
 clean:
-	rm -f $(GEN) $(TESTS) bench
+	rm -f $(GEN) $(TESTS) $(FOLD_TABLES) bench

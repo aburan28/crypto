@@ -893,7 +893,12 @@ the CPU's layout. On the host emulation it reproduces the table
 `PairSumTable::build_folded_within` stores, word for word, at `n = 23`
 and `n = 41` (`gpu/ecc2k/README.md`, *Stored by orbit*). Nothing ran on
 a device and nothing was timed, so this is a correctness step: no
-class, no scoreboard row.
+class, no scoreboard row.  A follow-up closes the loop on the host:
+`PairSumTable::from_folded_parts` loads the table the emulated kernel
+built, and it answers exactly as the CPU's own table does on every
+stored pair at both sizes.  Every `gpu/ecc2k` kernel now also compiles
+under `nvcc` for `sm_90`, `sm_100` and `sm_120` in CI.  Still nothing ran
+on a device, so again no class and no scoreboard row.
 
 ## Beyond Koblitz: subfield curves `E/GF(2^k)` over `GF(2^{ke})` — 2026-09-11
 

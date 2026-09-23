@@ -305,7 +305,7 @@ struct PtFoldGeometry {
  * at the compiled field degree -- the first folded kernel was handed
  * the wrong `n` for exactly this, so there is no parameter to get
  * wrong. */
-static inline int pt_fold_geometry(int n_orbits, int n_reps, int n_points,
+inline int pt_fold_geometry(int n_orbits, int n_reps, int n_points,
                                    PtFoldGeometry *g) {
     if (n_reps <= 0 || n_points <= 0 || (uint32_t)n_orbits > PT_MAX_TAGGED_ORBITS) return 0;
     const uint64_t pairs = pt_folded_pair_count((uint64_t)n_reps, (uint64_t)n_points);
@@ -319,7 +319,7 @@ static inline int pt_fold_geometry(int n_orbits, int n_reps, int n_points,
 /* Where each row's entries start in the kernel's output: row `r` has
  * `n_points - suffix[rep_orbit[r]]` of them.  `row_offset` holds
  * `n_reps + 1`; the last is the total, which is returned. */
-static inline uint64_t pt_fold_row_offsets(int n_points, const uint32_t *suffix,
+inline uint64_t pt_fold_row_offsets(int n_points, const uint32_t *suffix,
                                            const uint32_t *rep_orbit, int n_reps,
                                            uint32_t *row_offset) {
     uint64_t total = 0;
@@ -345,7 +345,7 @@ static inline uint64_t pt_fold_row_offsets(int n_points, const uint32_t *suffix,
  * a device on purpose: the emulation runs threads one after another,
  * so it could not say anything about contended atomics, and this file
  * keeps to what has been checked. */
-static inline void pt_fold_count(const uint64_t *keys, uint64_t entries,
+inline void pt_fold_count(const uint64_t *keys, uint64_t entries,
                                  const PtFoldGeometry &g, uint32_t *bucket_start) {
     for (uint64_t e = 0; e < entries; e++) {
         bucket_start[(pt_filter_hash(keys[e]) >> g.bucket_shift) + 1]++;
@@ -353,7 +353,7 @@ static inline void pt_fold_count(const uint64_t *keys, uint64_t entries,
     for (uint32_t b = 0; b < g.buckets; b++) bucket_start[b + 1] += bucket_start[b];
 }
 
-static inline void pt_fold_fill(const uint64_t *keys, const uint32_t *tags, uint64_t entries,
+inline void pt_fold_fill(const uint64_t *keys, const uint32_t *tags, uint64_t entries,
                                 const PtFoldGeometry &g, const uint32_t *bucket_start,
                                 uint32_t *cursor, uint32_t *words, uint64_t *present,
                                 uint64_t present_mask) {
