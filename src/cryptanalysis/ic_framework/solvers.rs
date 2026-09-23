@@ -147,7 +147,7 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, shape-selected block-4 M4RI/streaming bit-packed elimination, reduced basis"
+        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis"
             .into()
     }
 
@@ -171,18 +171,40 @@ impl SystemSolver for F4F2 {
             ("field_pairs_reduced", st.field_pairs_reduced),
             ("pairs_product_skipped", st.pairs_product_skipped),
             ("pairs_chain_skipped", st.pairs_chain_skipped),
+            ("pair_prune_tests", st.pair_prune_tests),
+            ("pair_prune_submask_lookups", st.pair_prune_submask_lookups),
+            ("pair_prune_linear_tests", st.pair_prune_linear_tests),
+            ("pair_prune_passes", st.pair_prune_passes),
+            ("batch_insert_groups", st.batch_insert_groups),
+            ("batch_insert_elements", st.batch_insert_elements),
+            ("active_candidate_visits", st.active_candidate_visits),
+            ("active_deactivation_tests", st.active_deactivation_tests),
+            ("pair_dense_select_calls", st.pair_dense_select_calls),
+            ("pair_sorted_select_calls", st.pair_sorted_select_calls),
+            ("pair_lcm_groups", st.pair_lcm_groups),
+            ("pair_cover_lookups", st.pair_cover_lookups),
+            ("pair_dense_scratch_bytes_max", st.pair_dense_scratch_bytes_max),
+            ("dense_column_matrices", st.dense_column_matrices),
+            ("dense_column_bytes_max", st.dense_column_bytes_max),
             ("reducer_rows", st.reducer_rows),
             ("matrix_rows_max", st.matrix_rows_max),
             ("matrix_cols_max", st.matrix_cols_max),
             ("matrix_rows_sum", st.matrix_rows_sum),
             ("m4ri_matrices", st.m4ri_matrices),
+            ("m4ri_block_width_max", st.m4ri_block_width_max),
             ("m4ri_table_word_xors", st.m4ri_table_word_xors),
+            ("m4ri_blocks", st.m4ri_blocks),
+            ("m4ri_consecutive_blocks", st.m4ri_consecutive_blocks),
+            ("m4ri_trimmed_word_xors_avoided", st.m4ri_trimmed_word_xors_avoided),
             ("m4ri_scratch_bytes_max", st.m4ri_scratch_bytes_max),
             ("divisor_tests", st.divisor_tests),
+            ("divisor_submask_lookups", st.divisor_submask_lookups),
+            ("divisor_linear_tests", st.divisor_linear_tests),
             ("new_elements", st.new_elements),
             ("basis_len", st.basis_len),
             ("build_ns", st.build_ns),
             ("eliminate_ns", st.eliminate_ns),
+            ("pair_update_ns", st.pair_update_ns),
             ("pairs_left", st.pairs_left),
             ("oversize", st.oversize as u64),
             ("symbolic_bytes_estimate_max", st.symbolic_bytes_estimate_max),
