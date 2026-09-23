@@ -112,3 +112,30 @@ test it. Nothing here bears on sect163k1 or on any curve outside the census.
 
 ## 5. Arm tests (filled in before the first stage runs)
 
+`cargo test --release --offline --locked --lib cryptanalysis::koblitz_tiny_ic`
+on the `scaled` tree, which contains every line of the incumbent's plus the
+policy.
+
+**First run: 8 passed, 1 failed.** `base_matches_general_construction`
+panicked on the degree-7 toy curve — `drew 114689 abscissae without reaching
+112 subgroup points`. The first version of the patch replaced the job's
+`points` with `2·n·policy_orbits(r)` everywhere, so where the rule says "one
+batch" it demanded a full eight orbits' worth of points; a group too small to
+hold them made the arm fail to build any base where the incumbent builds one.
+
+That is a defect in the candidate, and exactly the class of error the harness
+cannot see: `oracle.py` checks what a report certifies, never what an arm
+declines to produce. It is the second time a run of an arm's own tests has
+caught one (round 0021 found `complete_solve_verifies_in_general_arithmetic`
+red since round 0018).
+
+**Amended before any stage ran:** where the rule says one batch, the job's own
+`points` is kept, so the base is the incumbent's by construction rather than
+by argument. Past the panel the rule is unchanged — 16 orbits at `n37a0`, 24
+at `n43a1`, `n59a0` and `n61a1`, the same targets the holdout probe measured.
+Prediction 1 is therefore now an identity at the base level; its
+[0.995, 1.005] instruction band is kept as registered.
+
+**Second run: 9 passed, 0 failed**, including the policy's own test. The
+amended `round23-scaled-base.patch` rebuilds, through `round23_candidates.py`,
+to the tree tested here byte for byte.

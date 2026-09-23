@@ -1,6 +1,6 @@
 diff -ru a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
 --- a/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-22 15:29:14.301208147 +0000
-+++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-23 00:54:33.681011755 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-23 01:01:44.881696515 +0000
 @@ -1041,6 +1041,31 @@
      scratch: Vec<u64>,
  }
@@ -33,20 +33,27 @@ diff -ru a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny
  impl TinyIc {
      /// Build the base, its columns and the pair table.  `Err` describes
      /// an unsupported job; callers should check [`supports`] first.
-@@ -1068,7 +1093,15 @@
+@@ -1068,7 +1093,22 @@
          // hashed container, and the hashing was a third of the setup.
          let mut rng = SeededChaCha12::seed_from_u64(*seed);
          let cap = 1u64 << n;
 -        let target = *points;
-+        // Factor-base POLICY: the orbit count follows the subgroup order and
-+        // the job's `points` is ignored.  The sampler builds orbits in batches
-+        // of eight, which is optimal on every cell up to r = 4.2e6 and not
-+        // beyond it: round 0022 measured the best base at 8, 16 and 24 orbits
-+        // at n23a1, n37a0 and n43a1, and the pinned single batch cost the
-+        // candidate 2.6x at n43a1.  The rule is fitted to those three optima
-+        // and frozen before any cell it is scored on was measured with it.
-+        let _ = points;
-+        let target = 2 * n as usize * policy_orbits(r);
++        // Factor-base POLICY: past the panel, the orbit count follows the
++        // subgroup order.  The sampler builds orbits in batches of eight,
++        // which is optimal on every cell up to r = 4.2e6 and not beyond it:
++        // round 0022 measured the best base at 8, 16 and 24 orbits at n23a1,
++        // n37a0 and n43a1, and the pinned single batch cost the candidate
++        // 2.6x at n43a1.  The rule is fitted to those three optima and frozen
++        // before any cell it is scored on was measured with it.
++        //
++        // Where the rule says one batch, the job's own `points` is kept, so
++        // the base is the incumbent's exactly.  The first version asked for
++        // a full batch's worth of points instead, and on a toy group too
++        // small to hold eight orbits it failed to build any base where the
++        // incumbent builds one -- caught by `base_matches_general_construction`
++        // before any measurement.
++        let policy = policy_orbits(r);
++        let target = if policy > 8 { 2 * n as usize * policy } else { *points };
          if target == 0 {
              return Err("a factor base needs at least one point".into());
          }
