@@ -1,0 +1,45 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed kernel: 104 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 0
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed L2 persist: 0
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 0
+packed alu onb square: 0
+packed profile ranges: 0
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 48, 96 steps per launch
+WARNING: --verify 300 replays reports on the CPU; campaign collection uses --verify 0 so a cutoff-32 trail cannot stall the GPU
+      30.4 s       4.868 M it/s   147849216 iterations    246622 dp    246622 stored         0 dropped
+      50.4 s       5.869 M it/s   295698432 iterations    493275 dp    493275 stored         0 dropped
+      70.4 s       6.299 M it/s   443547648 iterations    739521 dp    739521 stored         0 dropped
+      90.4 s       6.543 M it/s   591396864 iterations    986086 dp    986086 stored         0 dropped
+     110.3 s       6.700 M it/s   739246080 iterations   1232486 dp   1232486 stored         0 dropped
+     130.6 s       6.794 M it/s   887095296 iterations   1478764 dp   1478764 stored         0 dropped
+  finished: 6.794 M it/s, 1478764 distinguished points (300 verified against the reference, 0 dropped)
