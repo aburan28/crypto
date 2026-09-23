@@ -525,11 +525,12 @@ not fit in a `u64` and `FastCurve` refuses the same case.
 **CI runs it** — `.github/workflows/gpu-ecc2k-host-verification.yml`, on
 any pull request touching `gpu/ecc2k/**`, and also on
 `examples/dump_canon_vectors.rs`, `examples/dump_fold_vectors.rs`,
-`src/cryptanalysis/koblitz_fast.rs` and
-`src/cryptanalysis/koblitz_index_calculus.rs`, because `vec_canon.h` and
-`vec_fold.h` are generated from those and a change to any of them moves
+`examples/load_fold_table.rs`, `src/cryptanalysis/koblitz_fast.rs` and
+`src/cryptanalysis/koblitz_index_calculus.rs`, because the vectors and
+the round trip are built from those and a change to any of them moves
 what the C++ side is checked against. No GPU: `G2_HD` is `inline`
 without `__CUDACC__`, so everything but the kernels builds under g++.
+A second job, `nvcc-compile`, builds the kernels themselves (below).
 
 **And the kernels themselves run on the host.** Their bodies are plain
 C++ once `__global__` and the four thread-index builtins are supplied,
@@ -578,15 +579,70 @@ unfolded (43.4×, with `2n = 46`), and on `k41` 11152 for 1312 against
 mistakes must each fail the comparison: rows over the whole base, a base
 not sorted by orbit, and tags taken from the second summand.
 
-What the emulation does not cover is how a kernel runs on a device:
-launch geometry, occupancy, memory placement, real concurrency, and
-whatever `nvcc` does differently from `g++`. A kernel whose threads
-shared one scratch buffer would pass here. The fold's performance is
-likewise unmeasured. And it covers only the two pair-table kernels: the
-ones in `kernels2k.cuh` are where `pairtable_kernel` was before it. The device
-functions they call — the walk, the batched steppers, an end-to-end
-solve on a toy curve — are tested by `test_cpu2k.cpp`, but the
-`__global__` wrappers themselves are compiled by nothing on the host.
+**The CPU loads the table and answers from it.** Stored state agreeing
+is not yet a table the descent can use, so `make test` ends with
+`make roundtrip`. Each `test_emu_*` run writes the table it assembled to
+`fold_table_k23.bin` / `fold_table_k41.bin` (the format is documented at
+`write_table` in `test_pairtable_emu.cpp`). `examples/load_fold_table.rs`
+rebuilds the same base, loads the file with
+`PairSumTable::from_folded_parts`, and asks it, beside the CPU's own
+table:
+
+- for every stored pair `P_i + P_j`, `i ≤ j` (271,216 at `k23`, 861,328
+  at `k41`), whether it is present and which pairs sum to it, and the
+  loaded table's answer must include `(i, j)`; recovery walks the orbit
+  a word's tag names, so this reads every tag;
+- 19,999 multiples of the generator, most of them absent, and
+  three-summand decompositions of every hundredth.
+
+The loaded table agrees on every question and finds every pair. The
+control shifts one bucket's words into the next. That leaves the table
+well-formed, and it has to lose stored pairs here, which it does (368 at
+`k23`, 738 at `k41`). A single word is not enough, because the fold
+stores some sum orbits twice: 430 of the 6,256 words at `k23` have an
+exact copy beside them.
+
+`from_folded_parts` itself checks what a lookup relies on and refuses
+the rest:
+
+- bucket offsets that do not partition the words;
+- a presence filter that is not a whole power of two;
+- a tag naming no orbit of the base;
+- keys named in a basis other than the one this side would use.
+
+The last one matters most: such a table is well-formed and wrong, and
+would report a decomposition absent when it is there. It does not check
+that the words came from this base, which only a rebuild could show.
+That is the builder's to prove, and the round trip proves it for this
+one.
+
+**Every kernel builds under `nvcc`.** `make nvcc-check` compiles
+`pairtable.cuh` for `k23` and `k41` and `bench2k.cu` (and with it
+`kernels2k.cuh`) for `ecc2k95`, at `sm_90`, `sm_100` and `sm_120`, with
+`-Werror all-warnings`. CI runs it on CUDA 12.9 from NVIDIA's apt
+repository, compile only. The first run found something `g++` had let
+through: the host helpers were `static inline`, which `nvcc` warns are
+declared and never referenced in any translation unit that does not
+call them, and which now fails the build. Registers and stack per thread, from `ptxas` 12.9.86:
+
+| kernel | curve | sm_90 | sm_100 | sm_120 | stack |
+|---|---|---|---|---|---|
+| `pairtable_fold_kernel` | `k23` | 62 | 56 | 56 | 56 B |
+| `pairtable_fold_kernel` | `k41` | 72 | 70 | 72 | 56 B |
+| `pairtable_kernel` | `k23` | 64 | 56 | 62 | 56 B |
+| `pairtable_kernel` | `k41` | 64 | 72 | 80 | 56 B |
+
+These are static figures, not measurements of anything running.
+
+What none of this covers is how a kernel runs on a device: launch
+geometry, occupancy under load, memory placement and real concurrency.
+A kernel whose threads shared one scratch buffer would pass every check
+here. The fold's performance is likewise unmeasured. The emulation also
+covers only the two pair-table kernels. The ones in `kernels2k.cuh` now
+compile under `nvcc`, and the device functions they call — the walk,
+the batched steppers, an end-to-end solve on a toy curve — are tested by
+`test_cpu2k.cpp`, but the `__global__` wrappers themselves are run by
+nothing on the host.
 
 ## Files
 

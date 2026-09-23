@@ -2488,6 +2488,42 @@ pub struct FoldedStorage<'a> {
     pub canon_tables: &'a [[u64; 256]],
 }
 
+impl FoldedStorage<'_> {
+    /// The same state, owned, as [`PairSumTable::from_folded_parts`]
+    /// takes it.
+    pub fn to_parts(&self) -> FoldedParts {
+        FoldedParts {
+            bucket_start: self.bucket_start.to_vec(),
+            bucket_shift: self.bucket_shift,
+            words: self.words.to_vec(),
+            present: self.present.to_vec(),
+            present_mask: self.present_mask,
+            canon_tables: self.canon_tables.to_vec(),
+        }
+    }
+}
+
+/// **A folded table's stored state, owned**: what a builder outside this
+/// module hands [`PairSumTable::from_folded_parts`].
+#[derive(Clone, Debug)]
+pub struct FoldedParts {
+    /// `bucket_start[b]..bucket_start[b + 1]` is bucket `b`'s run of
+    /// `words`, `b` being the top `64 − bucket_shift` bits of the key's
+    /// hash; `2^(64 − bucket_shift) + 1` entries.
+    pub bucket_start: Vec<u32>,
+    pub bucket_shift: u32,
+    /// The stored words, bucket by bucket, in any order within a bucket:
+    /// `(orbit << 16) | hash16` on a tagged table, the hash's low word
+    /// otherwise.
+    pub words: Vec<u32>,
+    /// One bit per `pair_filter_hash(key) & present_mask`.
+    pub present: Vec<u64>,
+    pub present_mask: u64,
+    /// The normal basis the keys were named in, as
+    /// [`FrobeniusCanon::tables`] gives it.
+    pub canon_tables: Vec<[u64; 256]>,
+}
+
 #[derive(Clone, Debug)]
 pub struct PairSumTable {
     /// `(packed sum, i, j)` with `i ≤ j`, sorted by the packed sum.
@@ -3324,7 +3360,6 @@ impl PairSumTable {
         let bucket_shift = 64 - bucket_bits;
         let buckets = 1usize << bucket_bits;
         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
-        let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
 
         // The orbit of one summand survives the fold, because `G` maps
         // orbits to themselves — so tagging each stored word with it
@@ -3400,33 +3435,157 @@ impl PairSumTable {
             .iter()
             .map(|w| w.load(Ordering::Relaxed))
             .collect();
+        Some(Self::assemble_folded(
+            curve,
+            points,
+            fb,
+            canon,
+            FoldedParts {
+                bucket_start,
+                bucket_shift,
+                words: rests,
+                present,
+                present_mask,
+                canon_tables: Vec::new(),
+            },
+            tagged,
+        ))
+    }
+
+    /// A folded table around stored words, however they were built:
+    /// everything a lookup needs beyond the words themselves comes from
+    /// the base.  `parts.canon_tables` is not read — `canon` is the basis
+    /// in use.
+    fn assemble_folded(
+        curve: FastCurve,
+        points: Vec<FastPoint>,
+        fb: &FrobeniusFactorBase,
+        canon: Option<FrobeniusCanon>,
+        parts: FoldedParts,
+        tagged: bool,
+    ) -> Self {
+        let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
         let index_of_point = PointIndex::build(&points);
         // The orbits flat, in the order `reps` indexes them, so a tag is
         // a slice of `orbit_members` and nothing is allocated per hit.
         let mut orbit_start = Vec::with_capacity(fb.signed_orbits.len() + 1);
-        let mut orbit_members: Vec<u32> = Vec::with_capacity(n_points);
+        let mut orbit_members: Vec<u32> = Vec::with_capacity(points.len());
         orbit_start.push(0u32);
         for orbit in &fb.signed_orbits {
             orbit_members.extend(orbit.iter().map(|&i| i as u32));
             orbit_start.push(orbit_members.len() as u32);
         }
-        Some(Self {
+        Self {
             entries: Vec::new(),
-            rests,
+            rests: parts.words,
             index_of_point,
             curve,
             points,
             negated,
-            bucket_start,
-            bucket_shift,
-            present,
-            present_mask,
+            bucket_start: parts.bucket_start,
+            bucket_shift: parts.bucket_shift,
+            present: parts.present,
+            present_mask: parts.present_mask,
             fold: true,
             canon,
             orbit_start,
             orbit_members,
             tagged,
-        })
+        }
+    }
+
+    /// **A folded table built somewhere else**, taken over as stored.
+    ///
+    /// `gpu/ecc2k/pairtable.cuh`'s fold kernel and its host assembly
+    /// produce exactly these parts, so this is how a table built on a
+    /// device reaches the descent.  `kc` and `fb` must be the curve and
+    /// base it was built over: they supply what the words do not carry —
+    /// the points, their orbits, the index recovery searches — and they
+    /// are not checked against the words, because the words are hashes
+    /// and nothing short of rebuilding the table could confirm where they
+    /// came from.  That the content is right is the builder's to show;
+    /// `examples/load_fold_table.rs` shows it for the GPU one.
+    ///
+    /// What is checked is everything a lookup relies on, so that a
+    /// malformed table is refused here rather than answering wrongly or
+    /// indexing out of bounds later:
+    ///
+    /// - the bucket offsets number `2^(64 − bucket_shift) + 1`, start at
+    ///   zero, never decrease and end at the number of words;
+    /// - the presence filter is a power of two of at least 64 bits, and
+    ///   `present` holds all of it;
+    /// - on a tagged table, every tag names a signed orbit of `fb`;
+    /// - the keys were named in the basis this side would use.
+    ///
+    /// The last matters most.  A table keyed in another basis is
+    /// well-formed and wrong: every lookup would name its target's orbit
+    /// differently from how the pair was stored, and report absent a
+    /// decomposition that is there.
+    pub fn from_folded_parts(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        parts: FoldedParts,
+    ) -> Result<Self, String> {
+        if fb.points.is_empty() || fb.points.len() > u32::MAX as usize {
+            return Err(format!("a base of {} points", fb.points.len()));
+        }
+        let curve = FastCurve::new(&kc.curve).ok_or("field too wide for single-word arithmetic")?;
+        let canon = FrobeniusCanon::new(&curve.field, curve.n)
+            .ok_or("no normal basis on this side, so no key here can match a stored one")?;
+        if canon.tables() != parts.canon_tables.as_slice() {
+            return Err("the table was keyed in a different basis from this side's".into());
+        }
+        let bucket_bits = 64u32.checked_sub(parts.bucket_shift).unwrap_or(0);
+        if !(1..=32).contains(&bucket_bits) {
+            return Err(format!(
+                "bucket shift {} is out of range",
+                parts.bucket_shift
+            ));
+        }
+        if parts.bucket_start.len() != (1usize << bucket_bits) + 1 {
+            return Err(format!(
+                "{} bucket offsets for {} buckets",
+                parts.bucket_start.len(),
+                1u64 << bucket_bits
+            ));
+        }
+        if parts.bucket_start[0] != 0
+            || parts.bucket_start.windows(2).any(|w| w[0] > w[1])
+            || parts.bucket_start[1usize << bucket_bits] as usize != parts.words.len()
+        {
+            return Err("the bucket offsets do not partition the words".into());
+        }
+        // The width first: the shifts below are only defined inside it.
+        let filter_bits = 64 - parts.present_mask.leading_zeros();
+        if !(6..=32).contains(&filter_bits)
+            || parts.present_mask != (1u64 << filter_bits) - 1
+            || parts.present.len() != (1usize << filter_bits) / 64
+        {
+            return Err(format!(
+                "a presence filter of {} words under mask {:#x}",
+                parts.present.len(),
+                parts.present_mask
+            ));
+        }
+        let tagged = fb.signed_orbits.len() <= Self::MAX_TAGGED_ORBITS;
+        if tagged {
+            let orbits = fb.signed_orbits.len() as u32;
+            if let Some(&word) = parts.words.iter().find(|&&w| w >> 16 >= orbits) {
+                return Err(format!(
+                    "a word tagged with orbit {} of a base with {orbits}",
+                    word >> 16
+                ));
+            }
+        }
+        let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+        Ok(Self::assemble_folded(
+            curve,
+            points,
+            fb,
+            Some(canon),
+            parts,
+            tagged,
+        ))
     }
 
     /// **The rows a folded build walks**: one per non-empty signed
@@ -10875,6 +11034,127 @@ mod tests {
             hits > 0 && misses > 0,
             "degree {degree}: the test checked only one side"
         );
+    }
+
+    /// A folded table and a candidate for the same one agree on every
+    /// question a descent asks: presence and recovered pairs for every
+    /// stored pair sum among the first points and for a run of
+    /// multiples of the generator, and three-summand decompositions.
+    fn assert_same_answers(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        a: &PairSumTable,
+        b: &PairSumTable,
+    ) {
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let g = fc.lift(kc.generator());
+        let mut targets: Vec<FastPoint> = (1u64..600).map(|t| fc.mul_u64(g, t)).collect();
+        for i in 0..fb.points.len().min(48) {
+            for j in i..fb.points.len().min(48) {
+                targets.push(fc.add(fc.lift(&fb.points[i]), fc.lift(&fb.points[j])));
+            }
+        }
+        let (mut x, mut y) = (Vec::new(), Vec::new());
+        let mut hits = 0usize;
+        for &t in targets.iter().filter(|t| !t.infinity) {
+            assert_eq!(a.contains_pair(t), b.contains_pair(t));
+            a.pairs_for(t, &mut x);
+            b.pairs_for(t, &mut y);
+            x.sort_unstable();
+            y.sort_unstable();
+            assert_eq!(x, y);
+            hits += usize::from(!x.is_empty());
+        }
+        assert!(
+            hits > 0 && hits < targets.len(),
+            "only one side of the answer was asked"
+        );
+        for t in (1u64..60).map(|t| fc.mul_u64(g, 7919 * t)) {
+            assert_eq!(a.decompose_fast(t, 3), b.decompose_fast(t, 3));
+        }
+    }
+
+    #[test]
+    fn a_folded_table_loads_from_its_own_words_in_any_order() {
+        let kc = KoblitzCurve::new(0, 31).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
+        let built = PairSumTable::build_folded_within(&kc, &fb, u128::MAX).unwrap();
+        let mut parts = built.folded_storage().unwrap().to_parts();
+        // Another builder's order within each bucket.  The CPU's own is
+        // whatever its parallel cursors produced, so a loader that
+        // depended on it would be depending on nothing.
+        for b in 0..parts.bucket_start.len() - 1 {
+            let (lo, hi) = (
+                parts.bucket_start[b] as usize,
+                parts.bucket_start[b + 1] as usize,
+            );
+            parts.words[lo..hi].reverse();
+        }
+        let loaded = PairSumTable::from_folded_parts(&kc, &fb, parts).unwrap();
+        assert!(loaded.is_folded());
+        assert_eq!(loaded.len(), built.len());
+        assert_same_answers(&kc, &fb, &built, &loaded);
+    }
+
+    #[test]
+    fn a_folded_table_is_refused_when_a_lookup_could_not_trust_it() {
+        let kc = KoblitzCurve::new(0, 23).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 5, 300).unwrap();
+        let built = PairSumTable::build_folded_within(&kc, &fb, u128::MAX).unwrap();
+        let good = built.folded_storage().unwrap().to_parts();
+        assert!(PairSumTable::from_folded_parts(&kc, &fb, good.clone()).is_ok());
+        let orbits = fb.signed_orbits.len() as u32;
+        let nonempty = (0..good.bucket_start.len() - 1)
+            .find(|&b| good.bucket_start[b] < good.bucket_start[b + 1])
+            .unwrap();
+        let broken: Vec<(&str, Box<dyn Fn(&mut FoldedParts)>)> = vec![
+            (
+                "an offset short",
+                Box::new(|p| {
+                    p.bucket_start.pop();
+                }),
+            ),
+            (
+                "offsets that decrease",
+                Box::new(move |p| {
+                    p.bucket_start[nonempty] = p.bucket_start[nonempty + 1] + 1;
+                }),
+            ),
+            ("a word the offsets miss", Box::new(|p| p.words.push(0))),
+            ("no bucket bits", Box::new(|p| p.bucket_shift = 64)),
+            (
+                "a filter mask that is not all ones",
+                Box::new(|p| p.present_mask <<= 1),
+            ),
+            (
+                "a filter mask of every bit",
+                Box::new(|p| p.present_mask = u64::MAX),
+            ),
+            (
+                "a filter shorter than its mask",
+                Box::new(|p| {
+                    p.present.pop();
+                }),
+            ),
+            (
+                "a tag naming no orbit",
+                Box::new(move |p| {
+                    p.words[0] = (orbits << 16) | (p.words[0] & 0xffff);
+                }),
+            ),
+            (
+                "keys named in another basis",
+                Box::new(|p| p.canon_tables[0][1] ^= 1),
+            ),
+        ];
+        for (what, damage) in broken {
+            let mut parts = good.clone();
+            damage(&mut parts);
+            assert!(
+                PairSumTable::from_folded_parts(&kc, &fb, parts).is_err(),
+                "accepted {what}"
+            );
+        }
     }
 
     #[test]
