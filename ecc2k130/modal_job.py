@@ -136,12 +136,18 @@ def main(job: str = "benchmarks/two-chains/gpujob.sh", out: str = "/tmp/ecc2k130
     (outdir / "launch.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print("spawned", call.object_id, "token", token, "- if this client dies, collect with:",
           "modal run modal_job.py --fetch-token", token, "--out", out, flush=True)
+    # The client's link to Modal drops now and then (gRPC "Deadline exceeded");
+    # the app is detached, so wait it out and keep polling.  Results are in the
+    # Volume either way, and --fetch-token collects them if this process dies.
     while True:
         try:
             meta = call.get(timeout=60)
             break
         except TimeoutError:
             continue
+        except Exception as exc:  # noqa: BLE001 - modal.exception.ConnectionError and friends
+            print(time.strftime("%H:%M:%S"), "client error, retrying:", type(exc).__name__, flush=True)
+            time.sleep(30)
     fetched = fetch(token, outdir)
     meta = fetched or meta
     receipt.update(exitCode=meta["exitCode"], seconds=meta["seconds"], deviceLine=meta["gpu"],

@@ -165,7 +165,7 @@ fn main() {
                 continue; // the solver refutes before reducing
             }
             let t0 = std::time::Instant::now();
-            let Some((scratch, mut scratch_cost)) =
+            let Some((mut scratch, mut scratch_cost)) =
                 ReducedBasis::from_system(&child_system, *n_vars, degree)
             else {
                 continue;
@@ -174,7 +174,7 @@ fn main() {
             wall_scratch += t0.elapsed().as_nanos();
 
             let t1 = std::time::Instant::now();
-            let (child, mut cost) = root.specialise(v, value);
+            let (mut child, mut cost) = root.specialise(v, value);
             let child_rows = child.decisive_rows(&mut cost);
             wall_inherit += t1.elapsed().as_nanos();
 

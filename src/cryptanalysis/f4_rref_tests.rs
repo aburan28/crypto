@@ -114,6 +114,189 @@ fn rref_skips_zero_prefix_words_and_preserves_padding() {
 }
 
 #[test]
+fn m4ri_arena_matches_the_allocating_implementation() {
+    let mut scratch = F4M4riScratch::default();
+    for (rows, cols) in [(129usize, 257usize), (257, 511)] {
+        for kind in ["dense", "sparse", "deficient"] {
+            for seed in [17, 937] {
+                let input = synthetic(rows, cols, kind, seed);
+                for block_width in [2, 3, 4, 5] {
+                    for reduce_above in [false, true] {
+                        let mut allocating = input.clone();
+                        let mut arena = input.clone();
+                        let mut allocating_ops = 0;
+                        let mut arena_ops = 0;
+                        let allocating_rank = echelon_f2_m4ri_allocating_counted(
+                            &mut allocating,
+                            cols,
+                            &mut allocating_ops,
+                            block_width,
+                            reduce_above,
+                        );
+                        let arena_rank = echelon_f2_m4ri_arena_counted(
+                            &mut arena,
+                            cols,
+                            &mut arena_ops,
+                            block_width,
+                            reduce_above,
+                            &mut scratch,
+                        );
+                        assert_eq!(arena_rank, allocating_rank);
+                        assert_eq!(arena_ops, allocating_ops);
+                        assert_eq!(arena, allocating);
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn m4ri_bench_repeats() -> usize {
+    std::env::var("KIC_F4_M4RI_BENCH_REPEATS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(20)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_paired_m4ri_case(
+    input: &[Vec<u64>],
+    cols: usize,
+    reduce_above: bool,
+    phase: &str,
+    case: &str,
+    seed: u64,
+    extra: serde_json::Value,
+    scratch: &mut F4M4riScratch,
+) {
+    let input_hash = blake3::hash(&serde_json::to_vec(input).unwrap())
+        .to_hex()
+        .to_string();
+    let mut allocating = input.to_vec();
+    let mut arena = input.to_vec();
+    let (mut allocating_ops, mut arena_ops) = (0, 0);
+    let allocating_rank = echelon_f2_m4ri_allocating_counted(
+        &mut allocating,
+        cols,
+        &mut allocating_ops,
+        4,
+        reduce_above,
+    );
+    let arena_rank =
+        echelon_f2_m4ri_arena_counted(&mut arena, cols, &mut arena_ops, 4, reduce_above, scratch);
+    assert_eq!(
+        (arena_rank, arena_ops, &arena),
+        (allocating_rank, allocating_ops, &allocating)
+    );
+
+    for rep in 0..m4ri_bench_repeats() {
+        let mut allocating = input.to_vec();
+        let mut arena = input.to_vec();
+        let mut ns = [0u128; 2];
+        let mut ops = [0u64; 2];
+        let mut ranks = [0usize; 2];
+        for variant in if rep % 2 == 0 { [0, 1] } else { [1, 0] } {
+            let started = Instant::now();
+            ranks[variant] = if variant == 0 {
+                echelon_f2_m4ri_allocating_counted(
+                    black_box(&mut allocating),
+                    cols,
+                    &mut ops[variant],
+                    4,
+                    reduce_above,
+                )
+            } else {
+                echelon_f2_m4ri_arena_counted(
+                    black_box(&mut arena),
+                    cols,
+                    &mut ops[variant],
+                    4,
+                    reduce_above,
+                    scratch,
+                )
+            };
+            ns[variant] = started.elapsed().as_nanos();
+        }
+        assert_eq!((ranks[0], ops[0], &allocating), (ranks[1], ops[1], &arena));
+        let mut row = json!({
+            "phase": phase, "case": case, "seed": seed, "rep": rep,
+            "rows": input.len(), "cols": cols, "reduce_above": reduce_above,
+            "input_hash": input_hash, "allocating_ns": ns[0], "arena_ns": ns[1],
+            "word_ops": ops[0], "rank": ranks[0], "correct": true,
+        });
+        row.as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        println!("{row}");
+    }
+}
+
+#[test]
+#[ignore = "paired release benchmark for M4RI allocation policies"]
+fn paired_m4ri_arena_benchmark() {
+    let mut scratch = F4M4riScratch::default();
+    for (rows, cols, kind, seed) in [
+        (129usize, 257usize, "sparse", 17u64),
+        (257, 511, "dense", 937),
+        (512, 768, "deficient", 20260914),
+    ] {
+        let input = synthetic(rows, cols, kind, seed);
+        for reduce_above in [false, true] {
+            run_paired_m4ri_case(
+                &input,
+                cols,
+                reduce_above,
+                "m4ri-arena-kernel",
+                &format!("{kind}-{rows}x{cols}"),
+                seed,
+                json!({}),
+                &mut scratch,
+            );
+        }
+    }
+}
+
+#[test]
+#[ignore = "paired release benchmark on Semaev root matrices"]
+fn paired_m4ri_semaev_root_benchmark() {
+    let mut scratch = F4M4riScratch::default();
+    for (n, ell, seed) in [
+        (13u32, 12usize, 17u64),
+        (19, 18, 937),
+        (23, 11, 20260914),
+        (31, 16, 66142),
+    ] {
+        let fe = |x| F2mElement::from_biguint(&num_bigint::BigUint::from(x), n);
+        let structure = FieldStructure::new(
+            n,
+            &crate::cryptanalysis::koblitz_index_calculus::find_irreducible(n).unwrap(),
+        );
+        let basis: Vec<_> = (0..ell).map(|bit| fe(1u64 << bit)).collect();
+        let system = build_decomposition_system(&basis, &fe(seed), &fe(1), 2, &structure).unwrap();
+        let rows = macaulay_rows_monos_with_mask(
+            &system.equations,
+            system.n_vars,
+            3,
+            occurring_vars(&system.equations),
+            None,
+        )
+        .unwrap();
+        let columns = macaulay_columns(&rows).unwrap();
+        let input = pack_rows(&rows, &columns);
+        run_paired_m4ri_case(
+            &input,
+            columns.len(),
+            system.n_vars < 24,
+            "m4ri-arena-semaev-root",
+            &format!("binary-n{n}-ell{ell}-m2-d3"),
+            seed,
+            json!({"variables":system.n_vars,"generators":system.equations.len()}),
+            &mut scratch,
+        );
+    }
+}
+
+#[test]
 fn solver_linear_tail_matches_full_rref_row_space_intersection() {
     for rows in [0, 1, 7, 65, 129] {
         for cols in [1usize, 63, 64, 65, 129, 257] {
@@ -191,6 +374,169 @@ fn cached_layout_requires_exact_column_support() {
 }
 
 #[test]
+fn inherited_root_layout_cache_matches_uncached_builds() {
+    let n_vars = 8;
+    let systems = [
+        vec![
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b0000_0011),
+                    F2BoolMono::from_mask(0b0001_0100),
+                    F2BoolMono::var(6),
+                    F2BoolMono::one(),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b1010_0100),
+                    F2BoolMono::from_mask(0b0100_1000),
+                    F2BoolMono::var(1),
+                ],
+                n_vars,
+            ),
+        ],
+        vec![
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b1000_0010),
+                    F2BoolMono::from_mask(0b0001_0101),
+                    F2BoolMono::var(6),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b0010_1100),
+                    F2BoolMono::from_mask(0b0100_0001),
+                    F2BoolMono::var(1),
+                    F2BoolMono::one(),
+                ],
+                n_vars,
+            ),
+        ],
+    ];
+    F4_LAYOUTS.with(|layouts| layouts.borrow_mut().clear());
+    for degree in [2, 3, 4] {
+        for system in &systems {
+            let mask = occurring_vars(system);
+            assert_eq!(mask, 0xff);
+            let uncached =
+                build_inherited_macaulay_with_layout(system, n_vars, degree, mask, false).unwrap();
+            let cached =
+                build_inherited_macaulay_with_layout(system, n_vars, degree, mask, true).unwrap();
+            assert_eq!(cached, uncached);
+            let layout = cached_f4_layout((mask, degree, false));
+            let hit =
+                build_inherited_macaulay_with_layout(system, n_vars, degree, mask, true).unwrap();
+            assert_eq!(hit, uncached);
+            if !uncached.1.is_empty() {
+                let before = layout.expect("nonempty build retains its layout");
+                let after = cached_f4_layout((mask, degree, false)).unwrap();
+                assert!(
+                    std::rc::Rc::ptr_eq(&before, &after),
+                    "exact hit rebuilt the layout"
+                );
+                assert_eq!(after.columns, uncached.0);
+            }
+        }
+    }
+}
+
+#[test]
+fn cached_layouts_obey_changed_matrix_caps() {
+    // Each child runs only this test: changing process environment cannot
+    // race with other tests or with a policy OnceLock initialized elsewhere.
+    const CHILD: &str = "KIC_F4_CAP_TEST_CHILD";
+    let Ok(mode) = std::env::var(CHILD) else {
+        for mode in [
+            "inherited-fused",
+            "inherited-materialized",
+            "flat-fused",
+            "flat-materialized",
+        ] {
+            let output = std::process::Command::new(std::env::current_exe().unwrap())
+                .args([
+                    "--exact",
+                    "cryptanalysis::koblitz_groebner::rref_tests::cached_layouts_obey_changed_matrix_caps",
+                    "--test-threads=1",
+                ])
+                .env(CHILD, mode)
+                .env("KIC_F4_DISABLE_INHERIT_FUSED_PACK", if mode.ends_with("materialized") { "1" } else { "0" })
+                .env("KIC_F4_DISABLE_FUSED_PACK", if mode.ends_with("materialized") { "1" } else { "0" })
+                .output()
+                .unwrap();
+            assert!(
+                output.status.success(),
+                "{mode}: {}{}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        return;
+    };
+    let polynomial = |masks: &[u64]| {
+        vec![F2BoolPoly::from_monos(
+            masks.iter().copied().map(F2BoolMono::from_mask).collect(),
+            2,
+        )]
+    };
+    let wide = polynomial(&[0, 1, 2, 3]);
+    let small = polynomial(&[1, 2, 3]);
+    let build = |system: &[F2BoolPoly], reuse| {
+        if mode.starts_with("inherited") {
+            build_inherited_macaulay_with_layout(system, 2, 2, 3, reuse)
+        } else {
+            build_macaulay_flat_with_multiplier_mask(system, 2, 2, 3, reuse, RowCriterion::None)
+                .map(|built| {
+                    let rows = if built.matrix.words == 0 {
+                        Vec::new()
+                    } else {
+                        built
+                            .matrix
+                            .data
+                            .chunks_exact(built.matrix.words)
+                            .map(<[u64]>::to_vec)
+                            .collect()
+                    };
+                    (built.columns, rows)
+                })
+        }
+    };
+    std::env::set_var("F4_F2_MAX_ROWS", "1");
+    std::env::set_var("F4_F2_MAX_COLS", "4");
+    F4_LAYOUTS.with(|layouts| layouts.borrow_mut().clear());
+    let expected = build(&wide, false).unwrap();
+    assert_eq!(build(&wide, true).unwrap(), expected); // cold cache
+    assert_eq!(build(&wide, true).unwrap(), expected); // exact-cap hit
+
+    std::env::set_var("F4_F2_MAX_COLS", "3");
+    assert!(build(&wide, false).is_none());
+    assert!(
+        build(&wide, true).is_none(),
+        "warm cache bypassed the current column cap"
+    );
+    let smaller = build(&small, false).unwrap();
+    assert_eq!(
+        build(&small, true).unwrap(),
+        smaller,
+        "oversized old layout must allow a smaller rebuild"
+    );
+    assert_eq!(build(&small, true).unwrap(), smaller);
+
+    std::env::set_var("F4_F2_MAX_ROWS", "0");
+    assert!(build(&small, false).is_none());
+    assert!(build(&small, true).is_none());
+    std::env::set_var("F4_F2_MAX_ROWS", "1");
+    std::env::set_var("F4_F2_MAX_COLS", "4");
+    assert_eq!(
+        build(&wide, true).unwrap(),
+        expected,
+        "raising caps must restore construction"
+    );
+}
+
+#[test]
 fn fused_flat_packing_matches_materialized_rows() {
     let n_vars = 8;
     let polynomials = vec![
@@ -219,6 +565,11 @@ fn fused_flat_packing_matches_materialized_rows() {
                 .unwrap();
         let columns = macaulay_columns(&rows).unwrap();
         let layout = F4ColumnLayout::new(columns);
+        let materialized_nested = pack_rows_with_layout(&rows, &layout, true).unwrap();
+        let fused_nested =
+            pack_polynomials_nested_fused(&polynomials, n_vars, degree, multiplier_mask, &layout)
+                .unwrap();
+        assert_eq!(fused_nested, materialized_nested);
         let materialized = pack_rows_flat_with_layout(&rows, &layout, true).unwrap();
         let fused =
             pack_polynomials_flat_fused(&polynomials, n_vars, degree, multiplier_mask, &layout)
@@ -230,6 +581,14 @@ fn fused_flat_packing_matches_materialized_rows() {
         let mut missing_columns = layout.columns.clone();
         missing_columns.pop();
         let missing = F4ColumnLayout::new(missing_columns);
+        assert!(pack_polynomials_nested_fused(
+            &polynomials,
+            n_vars,
+            degree,
+            multiplier_mask,
+            &missing,
+        )
+        .is_none());
         assert!(pack_polynomials_flat_fused(
             &polynomials,
             n_vars,
@@ -242,10 +601,95 @@ fn fused_flat_packing_matches_materialized_rows() {
         let mut extra_columns = layout.columns.clone();
         extra_columns.push(1u64 << 63);
         let extra = F4ColumnLayout::new(extra_columns);
+        assert!(pack_polynomials_nested_fused(
+            &polynomials,
+            n_vars,
+            degree,
+            multiplier_mask,
+            &extra,
+        )
+        .is_none());
         assert!(
             pack_polynomials_flat_fused(&polynomials, n_vars, degree, multiplier_mask, &extra,)
                 .is_none()
         );
+    }
+}
+
+#[test]
+#[ignore = "paired release benchmark for inherited-root fused packing"]
+fn paired_inherited_root_fused_packing_benchmark() {
+    let repeats = std::env::var("KIC_F4_FUSED_BENCH_REPEATS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(50);
+    for (n, ell, seed) in [
+        (13u32, 12usize, 17u64),
+        (19, 18, 937),
+        (23, 11, 20260914),
+        (31, 16, 66142),
+    ] {
+        let fe = |x| F2mElement::from_biguint(&num_bigint::BigUint::from(x), n);
+        let structure = FieldStructure::new(
+            n,
+            &crate::cryptanalysis::koblitz_index_calculus::find_irreducible(n).unwrap(),
+        );
+        let basis: Vec<_> = (0..ell).map(|bit| fe(1u64 << bit)).collect();
+        let system = build_decomposition_system(&basis, &fe(seed), &fe(1), 2, &structure).unwrap();
+        let mask = occurring_vars(&system.equations);
+        let rows =
+            macaulay_rows_monos_with_mask(&system.equations, system.n_vars, 3, mask, None).unwrap();
+        let layout = F4ColumnLayout::new(macaulay_columns(&rows).unwrap());
+        let fixture_hash =
+            blake3::hash(&serde_json::to_vec(&(&system.equations, &layout.columns)).unwrap())
+                .to_hex()
+                .to_string();
+        for rep in 0..repeats {
+            let mut elapsed = [0u128; 2];
+            let mut matrices = [None, None];
+            for variant in if rep % 2 == 0 { [0, 1] } else { [1, 0] } {
+                let started = Instant::now();
+                matrices[variant] = Some(if variant == 0 {
+                    let rows = macaulay_rows_monos_with_mask(
+                        black_box(&system.equations),
+                        system.n_vars,
+                        3,
+                        mask,
+                        None,
+                    )
+                    .unwrap();
+                    pack_rows_with_layout(&rows, &layout, true).unwrap()
+                } else {
+                    pack_polynomials_nested_fused(
+                        black_box(&system.equations),
+                        system.n_vars,
+                        3,
+                        mask,
+                        &layout,
+                    )
+                    .unwrap()
+                });
+                elapsed[variant] = started.elapsed().as_nanos();
+            }
+            assert_eq!(matrices[0], matrices[1]);
+            println!(
+                "{}",
+                json!({
+                    "phase":"inherited-root-fused-pack",
+                    "case":format!("binary-n{n}-ell{ell}-m2-d3"),
+                    "seed":seed,
+                    "rep":rep,
+                    "variables":system.n_vars,
+                    "generators":system.equations.len(),
+                    "rows":matrices[0].as_ref().unwrap().len(),
+                    "cols":layout.columns.len(),
+                    "fixture_hash":fixture_hash,
+                    "materialized_ns":elapsed[0],
+                    "fused_ns":elapsed[1],
+                    "correct":true,
+                })
+            );
+        }
     }
 }
 

@@ -32,19 +32,25 @@ the specialisation of a row its parent has already reduced, and the rows whose
 pivot does not contain the assigned variable are *still reduced* after
 specialisation.  Building nothing below the root and re-reducing only the
 displaced rows, on the tree the solver has always walked, cuts the stage's
-counted work by **`6.28×`** across the frozen ladder, deciding all 176 targets
-identically.  How many rows are displaced is decided by *which variable the
-solver splits on*: a pivot is a row's largest monomial, so the historical rule
-— split on the lowest-indexed free variable, the largest in the order — picks
-the variable most pivots contain and displaces half the basis per level deep
-in the tree.  Splitting on the smallest free variable instead halves the
-engine's work at every rung with a tree and turns its one loss (the chained
-cubic systems, `0.60×`) into a `2.05×` win; against the pre-round default the
-shipped configuration costs **`12.57×`** fewer word operations on the ladder
-(`15.82×` on the rung that dominates it) and `4.13×` on the holdout, with the
-same targets decomposed and every decomposition verified in the group, on a
-tree of the same size but a different shape.  Class: **engineering**, per §3
-of `AGENTS.md` — the floor below has no term this work can move.
+counted work by **`6.93×`** across the frozen ladder, deciding all 176 targets
+identically.  Two further facts, both measured before they were used, take it
+from there.  *Which variable the solver splits on* decides how many rows are
+displaced: a pivot is a row's largest monomial, so the historical rule — split
+on the lowest-indexed free variable, the largest in the order — picks the
+variable most pivots contain and displaces half the basis per level deep in
+the tree; splitting on the smallest free variable halves the engine's work at
+every rung with a tree and turns its one loss (the chained cubic systems,
+`0.60×`) into a win.  And *three quarters of the rows a level keeps are never
+touched at that level*, so a kept row is not rewritten into the child's layout
+at all: it is shared by reference and materialised only when something needs
+it, through the composition of every layout step since, charged once.
+Against the pre-round default the shipped configuration costs **`20.95×`**
+fewer word operations on the ladder (`27.7×` on the rung that dominates it,
+`29.9×` on the deep cubic cell) and `5.87×` on the holdout, with the same
+targets decomposed and every decomposition verified in the group, on a tree of
+the same size but a different shape; `26.1×` against the from-scratch engine
+on the very same tree.  Class: **engineering**, per §3 of `AGENTS.md` — the
+floor below has no term this work can move.
 
 ## 0. The boundaries, stated before anything is measured
 
@@ -205,6 +211,21 @@ deep; `inherited_and_f5_engines_walk_the_same_tree_as_matrix_f4` pins identical
 roots and identical `(reductions, refutations, propagations, splits)` on Semaev
 systems for `m = 2` and the chained cubic `m = 3`.
 
+**Lazy materialisation.**  Instrumented on `K_1/2^23`, `148` of the `194`
+rows a specialisation keeps — `76%` — are neither displaced nor hit as a
+pivot while a displaced row reduces, nor read for the tail; the eager
+implementation rewrote every one of them into the child's layout and charged
+one word read and one written per word for it.  Now a kept row is shared by
+reference between the parent and both children, tagged with the layout epoch
+it was last written in; each basis records its layout steps, and a row is
+materialised only when its content is needed, through the composition of
+every step since it was last written, in one pass charged once.  Its pivot
+column is tracked through the steps meanwhile, which is all `specialise`
+needs to decide whether it stays a pivot.  The composed maps are memoised on
+the shared steps, so a child composes one step on top of what its parent
+already built.  Nothing about the row space changes; the same rows are
+reduced by the same pivots, later.
+
 **Which root.**  The root builds its Macaulay matrix with multipliers over the
 variables occurring in the system (the from-scratch step's own
 active-multiplier policy) and reduces it as the from-scratch step reduces that
@@ -219,65 +240,67 @@ cheaper where the tree is shallow.  Both are retained as controls
 One unit, one table, every variant a row.  Medians of three repetitions; word
 operations are deterministic and identical across all three on every side.
 Ratios are reference / candidate.  The reference is the pre-round default,
-`MatrixF4` splitting on the lowest free variable.  The three candidate columns
-are: the inherited engine on the **same tree** (`compare.py` accepts it, clauses
-(a) and (b) apply); the from-scratch engine on the **new tree** of §3.5; and
-the inherited engine on the new tree, which is the configuration shipped.  The
-last two are cross-tree against the reference and same-tree against each
+`MatrixF4` splitting on the lowest free variable.  The candidate columns are:
+the inherited engine on the **same tree** (`compare.py` accepts it, clauses (a)
+and (b) apply); the from-scratch engine on the **new tree** of §3.5; the
+inherited engine on the new tree with eager materialisation, the default of the
+round before this one, kept as the before-mark; and the inherited engine on the
+new tree with lazy materialisation (§2), which is the configuration shipped.
+The last three are cross-tree against the reference and same-tree against each
 other; the `nodes` column shows the size of each tree.
 
-| rung | `m` | `ℓ` | targets | decomposed | nodes L → H | reference (F4, lowest) | F5 criterion | inherited, lowest (same tree) | F4, highest | **inherited, highest (default)** | ratio to reference | ratio to floor | wall | class | correct |
-|:--|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|:--|--:|:--|:--|
-| `K_0/2^9`  | 2 | 6 | 40 | 39 | 386 → 338 | 1,352,350 | 1,348,747 | 664,322 (2.04×) | 1,257,665 | **475,686** | **2.84×** | flat | 1.76× | engineering | ✓ verified |
-| `K_0/2^9`  | 3 | 6 | 16 | 15 | 285 → 382 | 4,164,666 | 4,149,441 | 3,943,077 (1.06×) | 2,026,237 | **2,524,783** | **1.65×** | flat | 1.14× | engineering; F4-highest cheaper here, §3.5 | ✓ verified |
-| `K_0/2^13` | 2 | 12 | 40 | 40 | 599 → 520 | 20,668,245 | 19,776,482 | 11,642,531 (1.78×) | 25,336,199 | **8,302,715** | **2.49×** | flat | 1.28× | engineering | ✓ verified |
-| `K_1/2^15` | 2 | 4 | 32 | 0 | 32 → 32 | 107,470 | 107,470 | 107,470 (1.00×) | 107,470 | 107,470 | 1.00× | flat | 0.92× | — (no tree) | ✓ identical |
-| `K_1/2^17` | 2 | 8 | 32 | 7 | 1,763 → 1,769 | 55,594,932 | 55,594,932 | 10,059,990 (5.53×) | 62,049,801 | **6,535,588** | **8.51×** | flat | 4.50× | engineering | ✓ verified |
-| `K_1/2^23` | 2 | 11 | 16 | 9 | 4,934 → 4,876 | 699,511,508 | 699,511,508 | 97,826,189 (7.15×) | 883,061,010 | **44,225,148** | **15.82×** | flat | 7.47× | engineering | ✓ verified |
-| **total**  |   |   | 176 | 110 | 7,999 → 7,917 | 781,399,171 | 780,488,580 (1.001×) | 124,243,579 (**6.29×**) | 973,838,382 (0.80×) | **62,171,390** | **12.57×** | flat | **5.86×** | engineering | ✓ |
+| rung | `m` | `ℓ` | targets | decomposed | nodes L → H | reference (F4, lowest) | F5 criterion | inherited, lowest (same tree) | F4, highest | inherited, highest, eager (before) | **inherited, highest, lazy (default)** | ratio to reference | ratio to floor | wall | class | correct |
+|:--|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|:--|:--|
+| `K_0/2^9`  | 2 | 6 | 40 | 39 | 386 → 338 | 1,352,350 | 1,348,747 | 606,611 (2.23×) | 1,257,665 | 475,686 | **391,693** | **3.45×** | flat | 2.15× | engineering | ✓ verified |
+| `K_0/2^9`  | 3 | 6 | 16 | 15 | 285 → 382 | 4,164,666 | 4,149,441 | 2,760,501 (1.51×) | 2,026,237 | 2,524,783 | **1,783,018** | **2.34×** | flat | 1.51× | engineering | ✓ verified |
+| `K_0/2^13` | 2 | 12 | 40 | 40 | 599 → 520 | 20,668,245 | 19,776,482 | 10,777,601 (1.92×) | 25,336,199 | 8,302,715 | **5,588,277** | **3.70×** | flat | 2.02× | engineering | ✓ verified |
+| `K_1/2^15` | 2 | 4 | 32 | 0 | 32 → 32 | 107,470 | 107,470 | 107,470 (1.00×) | 107,470 | 107,470 | 107,470 | 1.00× | flat | 0.90× | — (no tree) | ✓ identical |
+| `K_1/2^17` | 2 | 8 | 32 | 7 | 1,763 → 1,769 | 55,594,932 | 55,594,932 | 8,733,728 (6.37×) | 62,049,801 | 6,535,588 | **4,205,307** | **13.22×** | flat | 6.85× | engineering | ✓ verified |
+| `K_1/2^23` | 2 | 11 | 16 | 9 | 4,934 → 4,876 | 699,511,508 | 699,511,508 | 89,762,781 (7.79×) | 883,061,010 | 44,225,148 | **25,226,634** | **27.73×** | flat | 12.33× | engineering | ✓ verified |
+| **total**  |   |   | 176 | 110 | 7,999 → 7,917 | 781,399,171 | 780,488,580 (1.001×) | 112,748,692 (**6.93×**) | 973,838,382 (0.80×) | 62,171,390 (12.57×) | **37,302,399** | **20.95×** | flat | **9.29×** | engineering | ✓ |
 
-*Same-tree, under the new rule:* `F4, highest` against `inherited, highest`
-is `15.66×` in total, accepted by `compare.py` rung for rung; the inherited
-engine wins every rung with a tree except the shallow cubic `K_0/2^9`,
-`m = 3` (`0.80×`, discussed in §3.5).  *Same-tree, under the old rule:*
-`6.29×`, every rung with a tree improved.  *Correct* reads "verified" rather
-than "identical" wherever the tree changed: the same targets decompose and
-none is exhausted, and every decomposition returned was lifted and checked
-against the group identity; where several exist, a different one may be found
-first, so the verdict digest differs.  `K_1/2^15` refutes every target at its
-root (`32` reductions, `0` splits): there is no tree to inherit along and no
-choice of split variable to make, so the row is flat rather than improved.
+*Same-tree, under the new rule:* `F4, highest` against the default is
+`26.11×` in total, accepted by `compare.py` rung for rung, and the inherited
+engine now wins every rung with a tree — including the shallow cubic
+`K_0/2^9`, `m = 3`, where the eager engine had lost `0.80×` on the same tree.
+*Same-tree, under the old rule:* `6.93×`, every rung with a tree improved
+(`6.29×` before lazy materialisation).  *Correct* reads "verified" rather than
+"identical" wherever the tree changed: the same targets decompose and none is
+exhausted, and every decomposition returned was lifted and checked against
+the group identity; where several exist, a different one may be found first,
+so the verdict digest differs.  `K_1/2^15` refutes every target at its root
+(`32` reductions, `0` splits): there is no tree to inherit along and no choice
+of split variable to make, so the row is flat rather than improved.
 
 ### 3.1 The root controls
 
-All under the shipped rule, same tree as the default:
+All under the shipped rule with lazy materialisation, same tree as the default:
 
 | variant | total word ops | ratio to reference | min rung ratio vs default | wall |
 |:--|--:|--:|--:|--:|
-| root as the from-scratch shape policy (**default**) | 62,171,390 | 12.57× | — | 5.86× |
-| echelon-only root everywhere | 62,218,273 | 12.56× | 0.99× (`K_1/2^23`) | 5.27× |
-| fully reduced root everywhere | 70,124,293 | 11.14× | 0.52× (`K_0/2^13`) | 5.85× |
+| root as the from-scratch shape policy (**default**) | 37,302,399 | 20.95× | — | 9.29× |
+| echelon-only root everywhere | 39,060,565 | 20.01× | 0.93× (`K_1/2^23`) | 8.83× |
+| fully reduced root everywhere | 45,006,527 | 17.36× | 0.43× (`K_0/2^13`) | 9.16× |
 
-Under the old rule the root policy mattered (`5.53×` / `6.29×` / `5.98×` for
-the same three, in the earlier evidence); under the new one the echelon-only
-and shape-policy roots are within `0.1%` of each other, because far fewer
-displaced rows cascade through the root's pivots.  The default stays with the
-policy that never regressed a rung.
+The echelon-only root wins the two shallow rungs and loses `8%` on
+`K_1/2^23`; the fully reduced root loses `57%` on `K_0/2^13`.  The default
+takes each regime's better half and is the only one of the three that never
+regresses a rung.
 
 ### 3.2 Holdout
 
 Two instances the tuning never saw, from the predecessor note's holdout ladder:
 
-| instance | targets | decomposed | nodes L → H | reference | F4, highest | **inherited, highest** | ratio to reference | same-tree ratio | wall | correct |
+| instance | targets | decomposed | nodes L → H | reference | F4, highest | **default** | ratio to reference | same-tree ratio | wall | correct |
 |:--|--:|--:|:--|--:|--:|--:|--:|--:|--:|:--|
-| `K_0/2^19`, m=2 (`ℓ = 18`, 36 unknowns, the widest matrices) | 12 | 12 | 228 → 228 | 116,912,104 | 163,178,360 | **31,800,117** | **3.68×** | 5.13× | 1.54× | ✓ identical tree |
-| `K_1/2^17`, m=2, divisor 1 | 24 | 10 | 1,062 → 1,198 | 33,578,834 | 42,029,541 | **4,607,771** | **7.29×** | 9.12× | 3.92× | ✓ verified |
-| **total** | 36 | 22 | | 150,490,938 | 205,207,901 | **36,407,888** | **4.13×** | **5.64×** | 2.37× | ✓ |
+| `K_0/2^19`, m=2 (`ℓ = 18`, 36 unknowns, the widest matrices) | 12 | 12 | 228 → 228 | 116,912,104 | 163,178,360 | **22,640,333** | **5.16×** | 7.21× | 3.01× | ✓ identical tree |
+| `K_1/2^17`, m=2, divisor 1 | 24 | 10 | 1,062 → 1,198 | 33,578,834 | 42,029,541 | **3,011,390** | **11.15×** | 13.96× | 5.94× | ✓ verified |
+| **total** | 36 | 22 | | 150,490,938 | 205,207,901 | **25,651,723** | **5.87×** | **8.00×** | 4.21× | ✓ |
 
 `K_0/2^19` has 18 F4 calls per target and its tree does not change shape under
 the new rule at all; the earlier `1.56×` on this rung, the floor of the method
-when almost all the work is the root, becomes `3.68×` once the root's rows are
-displaced less often below it.
+when almost all the work is the root, is `5.16×` once the root's rows are
+displaced less often and rewritten only when touched.
 
 ### 3.3 Where the inherited engine's operations go
 
@@ -290,31 +313,33 @@ a refutation; otherwise the same forced variables):
 
 | cell | `m` | nodes | mean rank | children from scratch | children inherited | of which re-reduction | of which specialisation | ratio | mismatches |
 |:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
-| `K_1/2^23` | 2 | 1,022 | 338 | 138,248 / node | 9,761 / node | 949 | 8,812 | **14.2×** | 0 of 2,044 |
-| `K_1/2^17` | 2 | 442 | 197 | 34,099 / node | 3,199 / node | 265 | 2,933 | **10.7×** | 0 of 884 |
-| `K_0/2^13` | 2 | 96 | 233 | 89,913 / node | 32,699 / node | 18,805 | 13,894 | **2.75×** | 0 of 192 |
-| `K_0/2^9`  | 2 | 111 | 70 | 4,934 / node | 893 / node | 133 | 760 | **5.52×** | 0 of 216 |
-| `K_0/2^9`  | 3 | 165 | 154 | 13,140 / node | 8,261 / node | 2,009 | 6,252 | **1.59×** | 0 of 318 |
-| `K_0/2^15` | 3 | 3,672 | 289 | 38,469 / node | 13,566 / node | 1,594 | 11,972 | **2.84×** | 0 of 7,344 |
+| `K_1/2^23` | 2 | 1,022 | 338 | 138,248 / node | 3,436 / node | 949 | 2,487 | **40.2×** | 0 of 2,044 |
+| `K_1/2^17` | 2 | 442 | 197 | 34,099 / node | 1,169 / node | 265 | 903 | **29.2×** | 0 of 884 |
+| `K_0/2^13` | 2 | 96 | 233 | 89,913 / node | 20,556 / node | 18,805 | 1,751 | **4.37×** | 0 of 192 |
+| `K_0/2^9`  | 2 | 111 | 70 | 4,934 / node | 345 / node | 133 | 212 | **14.3×** | 0 of 216 |
+| `K_0/2^9`  | 3 | 165 | 154 | 13,140 / node | 3,260 / node | 2,009 | 1,251 | **4.03×** | 0 of 318 |
+| `K_0/2^15` | 3 | 3,672 | 289 | 38,469 / node | 4,758 / node | 1,594 | 3,164 | **8.09×** | 0 of 7,344 |
 
-With the smallest free variable assigned, re-reduction all but disappears one
-level below a root: `949` of `9,761` operations per node at `n = 23`.  The
-whole ladder run agrees; the profile's `specialise_word_ops` counter splits
-the dominant rung exactly:
+One level below a root, the specialisation charge is now what the displaced
+rows and the pivots they hit cost to materialise and nothing else.  The whole
+ladder run, where a row skipped at one level is materialised through several
+steps at once when it is finally needed, splits the dominant rung as follows
+(the eager column is the round before, for the before-mark):
 
-| `K_1/2^23`, whole ladder run, shipped configuration | word operations | share |
-|:--|--:|--:|
-| root reductions (16 targets, degrees 2 and 3) | 6,719,658 | 15% |
-| re-reduction of displaced rows | 7,150,501 | 16% |
-| specialisation (word reads and writes) | 30,228,073 | **68%** |
-| tail RREF | 126,916 | 0.3% |
-| **inherited F4 total** | **44,225,148** | |
+| `K_1/2^23`, whole ladder run | eager (before) | share | **lazy (default)** | share |
+|:--|--:|--:|--:|--:|
+| root reductions (16 targets, degrees 2 and 3) | 6,719,658 | 15% | 6,719,658 | 27% |
+| re-reduction of displaced rows | 7,150,501 | 16% | 7,150,501 | 28% |
+| specialisation (word reads and writes) | 30,228,073 | 68% | **11,229,559** | 45% |
+| tail RREF | 126,916 | 0.3% | 126,916 | 0.5% |
+| **inherited F4 total** | **44,225,148** | | **25,226,634** | |
 
-Under the old rule the same rung spent `60.4 M` on re-reduction (§3.5).  What
-is left is the specialisation charge — one word read and one written per word
-of every row at every level — which is now two thirds of the engine's cost and
-is the next lever: rows that no displaced row touches at a level need not be
-materialised at that level.
+Of the `11.2 M` that remain, `7.9 M` materialise displaced rows and `3.3 M`
+the pivots they hit; the tail rows cost nothing, because a row leading in a
+low column is rarely disturbed.  Both remaining components are proportional
+to the number of displaced rows, as is the re-reduction — which is what §3.6
+tried, and failed, to lower further.  The roots are now the largest fixed
+cost.
 
 ### 3.4 Where it lost, and why: the cubic systems under the old rule
 
@@ -327,8 +352,8 @@ target):
 
 | cell | unknowns | equations | reference (F4, lowest) | inherited, lowest | ratio | class |
 |:--|--:|--:|--:|--:|--:|:--|
-| `K_0/2^9`, m=3 | 27 | 18 | 2,134,142 | 1,997,844 | 1.07× | engineering |
-| `K_0/2^15`, m=3 | 30 | 30 | 1,653,034,947 | 2,746,829,713 | **0.60×** | **regression, superseded by §3.5** |
+| `K_0/2^9`, m=3 | 27 | 18 | 2,134,142 | 1,394,941 | 1.53× | engineering |
+| `K_0/2^15`, m=3 | 30 | 30 | 1,653,034,947 | 2,670,183,123 | **0.62×** | **regression, superseded by §3.5** |
 
 The `K_0/2^15` cell is 8,920 reductions deep and its degree-3 matrices are
 `≈ 1,020` rows of rank `≈ 600`: some `40%` rank-deficient, against `< 5%` on
@@ -356,52 +381,74 @@ was the first thing tried: it does cut the cascade to `9.8` pivots per
 displaced row, but the pass costs `71.9 M` word XORs against the `49 M` it
 saves, because a reduced basis is denser than an echelon one and every
 specialisation refills some twenty pivot columns per row; it is retained as
-the `KIC_F4_INHERIT_RREF` control (`94,996,759` on the ladder against the
-default's `62,171,390`).
+the `KIC_F4_INHERIT_RREF` control (`94,952,249` on the ladder against the
+default's `37,302,399`).
 
 `SplitRule::HighestFree` splits on the **smallest** free variable that still
 occurs.  It is as exhaustive as every other rule — a node's subtree still
 covers both values of some free variable — and the algebra at each node is
 the same reduction of the same kind of system; only the order of the tree's
-levels changes.  Its effect, per engine, on the same targets:
+levels changes.  Its effect, per engine, on the same targets (all inherited
+figures with lazy materialisation):
 
 | configuration | ladder total | ratio to reference | cubic `K_0/2^9` | cubic `K_0/2^15` |
 |:--|--:|--:|--:|--:|
 | `MatrixF4`, lowest (reference) | 781,399,171 | 1.00× | 2,134,142 | 1,653,034,947 |
 | `MatrixF4`, highest | 973,838,382 | 0.80× | 1,026,870 (2.08×) | 305,067,403 (5.42×) |
-| `InheritedF4`, lowest | 124,243,579 | 6.29× | 1,997,844 (1.07×) | 2,746,829,713 (0.60×) |
-| **`InheritedF4`, highest (shipped)** | **62,171,390** | **12.57×** | 1,337,274 (1.60×) | **148,488,873 (11.13×)** |
+| `InheritedF4`, lowest | 112,748,692 | 6.93× | 1,394,941 (1.53×) | 2,670,183,123 (0.62×) |
+| **`InheritedF4`, highest (shipped)** | **37,302,399** | **20.95×** | **942,041 (2.27×)** | **55,202,947 (29.94×)** |
 
 The from-scratch engine pays `25%` more on the quadratic rungs under the new
 rule — same matrix shapes, same tree size within `2%`, `28%` more XORs per
 elimination — and `2–5×` less on the cubic cells; the inherited engine gains
 everywhere, because the number of displaced rows falls: on `K_1/2^23` its
 re-reduction goes from `60.4 M` to `7.15 M` word operations.  On the cubic
-cells it now wins on the same tree as `MatrixF4, highest` where the tree is
-deep (`K_0/2^15`: `2.05×`) and loses where it is shallow (`K_0/2^9`, `m = 3`:
-`0.77×`, on a `1.3 M`-operation solve), so the engine inherits on every degree
-and the intermediate degree routing is gone.  `SplitRule::Auto`, the new
-default of `split_rule_default()`, resolves to `HighestFree` under the
+cells it now wins on the same tree as `MatrixF4, highest` on both
+(`K_0/2^9`, `m = 3`: `1.09×`; `K_0/2^15`: `5.53×`), so the engine inherits on
+every degree and the intermediate degree routing is gone.  `SplitRule::Auto`,
+the new default of `split_rule_default()`, resolves to `HighestFree` under the
 inherited engine and to `LowestFree` otherwise, which is why
 `KIC_F4_INHERIT=0` still reproduces the reference to the digit.
+
+### 3.6 Rejected: splitting on the variable in the fewest pivots
+
+`HighestFree` picks the variable *likely* to be in the fewest pivots; the
+basis knows the actual count.  A rule that picked, at every node, the free
+occurring variable contained in the fewest pivot columns of the current bases
+was measured on the ladder against the default and rejected: the per-level
+work falls as intended, but the variable that displaces the fewest rows is
+also the one that constrains the system least, and the tree grows to
+compensate — `4,876 → 8,660` reductions on `K_1/2^23`, `382 → 8,904` on the
+cubic `K_0/2^9`, `m = 3`.  Ladder total `73,616,817` against `37,302,399`
+(`0.51×`), every rung with a tree worse, the same targets decomposed.  The
+split variable must be chosen for the algebra first; `HighestFree` happens to
+be good for both.
 
 ## 4. The phases
 
 Stage wall on the `K_1/2^23` rung, the one that dominates, on the merged tree
 (the reference arm carries `main`'s fused flat-matrix packing, #601):
 
-| phase | reference (F4, lowest) | inherited F4, highest (default) |
+| phase | reference (F4, lowest) | inherited F4 (default) |
 |:--|--:|--:|
-| build (reference: Macaulay build; inherited: root build **and every specialisation**) | 1,993 ms | 609 ms |
-| reduce (reference: elimination; inherited: tail RREF of the low block) | 3,173 ms | 15 ms |
-| readback | 74 ms | 0 ms |
-| **stage wall** | **5,376 ms** | **720 ms** |
+| build (reference: Macaulay build; inherited: root build, every layout step **and every materialisation**) | 1,981 ms | 333 ms |
+| reduce (reference: elimination; inherited: tail RREF of the low block) | 3,164 ms | 10 ms |
+| readback | 70 ms | 0 ms |
+| **stage wall** | **5,352 ms** | **434 ms** |
 
 The elimination phase, which the unit has always measured and every earlier
-round optimised, is `0.5%` of what it was: there is almost nothing left to
-eliminate at a child.  What remains is the specialisation, booked under build
-because that is what it replaces.  The `27%` readback the predecessor note
-found is gone with the matrices it read from.
+round optimised, is `0.3%` of what it was: there is almost nothing left to
+eliminate at a child.  What remains is booked under build because that is
+what it replaces, and it is now mostly bookkeeping outside the unit:
+materialising and inserting the displaced rows (`207 ms`), substituting the
+system at every level (`64 ms`, once in the solver and once in the basis),
+and the solver's own overhead around the reductions.  A round of
+metric-neutral work took the build phase from `609` to `333 ms` — the new
+layout is a merge of two sorted lists rather than a comparison sort, the
+column index is built only when completion rows need it, the composed maps
+are shared with the parent — and none of it moved a word operation.  The
+`27%` readback the predecessor note found is gone with the matrices it read
+from.
 
 ## 5. What this does not establish
 
@@ -411,7 +458,7 @@ Per `AGENTS.md` §8, and because the number is large enough to tempt:
   collection, which is one phase of the attack.  No crossover, exponent or rho
   comparison follows; none is claimed.  The oracle's cost at `n = 131` is set
   by the counting argument of `RESEARCH_ECC2K130_DECOMPOSITION.md` §5, and
-  `12.6×` off the stage is `2^{3.7}` off `2^{131}`.
+  `21×` off the stage is `2^{4.4}` off `2^{131}`.
 - **The algebra is unchanged; the tree is not.**  Same degree, same row space
   at every node (up to the tail-preserving sandwich of §2), same node budget,
   same refutation power at a node.  The split rule changes the order of the
@@ -437,14 +484,17 @@ Per `AGENTS.md` §8, and because the number is large enough to tempt:
   everywhere); both comparison scripts refuse a comparison in which it does.
 - **The accounting is asymmetric against the candidate**, deliberately: the
   reference's matrix build is not in the unit, the candidate's specialisation
-  is — `30.2 M` of its `44.2 M` operations at `n = 23`.  Dropping that charge
-  would read `50×` on that rung; it is not dropped, and the `15.82×` stands.
-- **One cell is cheaper from scratch.**  On the shallow cubic `K_0/2^9`,
-  `m = 3` the from-scratch engine under the new rule costs `0.77×` of the
-  inherited one on the same tree (`1.03 M` against `1.34 M` word operations);
-  the shipped default takes the `1.60×` over the pre-round default there and
-  the `11.13×` on the deep cubic cell rather than a per-degree exception.
-- **Wall time is a practicality note.**  `5.9×` on the ladder and `7.5×` on
+  is — `11.2 M` of its `25.2 M` operations at `n = 23`.  Dropping that charge
+  would read `50×` on that rung; it is not dropped, and the `27.7×` stands.
+  Lazy materialisation lowered that charge by doing less of the work, not by
+  charging less for it: a row is still charged one read and one write per
+  word every time it is rewritten, and index bookkeeping (the layout steps
+  and their composition) is uncharged on both sides, as the from-scratch
+  build's column indexing always was.
+- **The tree is the same size, not the same shape.**  Reductions differ from
+  the reference by `−1%` to `+34%` per rung (`+1%` over the ladder), in both
+  directions; the ratios above are whole-solve totals that include that.
+- **Wall time is a practicality note.**  `9.3×` on the ladder and `12.3×` on
   its dominant rung on this host, single thread, no pinning.  The `ic run`
   end-to-end effect is not measured here.
 
@@ -467,6 +517,7 @@ python3 research/groebner_stage_20260915/compare.py /tmp/gs/matrix_f4_highest /t
 python3 research/inherited_f4_20260922/compare_cross_tree.py /tmp/gs/baseline /tmp/gs/inherited_f4
 
 # holdout, root and RREF controls, node-level probe (args: a n targets degree m)
+# (the rejected fewest-pivots rule of §3.6 was an uncommitted experiment; its numbers are in the note only)
 KIC_F4_INHERIT=0 ./target/release/examples/groebner_stage_bench --ladder holdout --out /tmp/gs/holdout_baseline/rep1
 ./target/release/examples/groebner_stage_bench --ladder holdout --out /tmp/gs/holdout_inherited_f4/rep1
 KIC_F4_INHERIT_ROOT=ref  ./target/release/examples/groebner_stage_bench --out /tmp/gs/ref_root/rep1

@@ -13,7 +13,7 @@
 //! | name | engine | native unit |
 //! |:--|:--|:--|
 //! | `f4-f2` | Faugère's F4: batched pairs, symbolic preprocessing, bit-packed elimination, field pairs; a full reduced basis | word XORs (elimination only) |
-//! | `buchberger-f2` | boolean-ring Buchberger with the coprime and chain criteria, pairs one at a time | monomial operations |
+//! | `buchberger-f2` | boolean-ring Buchberger with the coprime and chain criteria and the field-equation pairs, one pair at a time | monomial operations |
 //! | `matrix-f4` | the Koblitz oracle's hybrid: Macaulay matrices to a fixed degree, then splitting | word XORs (elimination only) |
 //! | `matrix-f5` | the same hybrid, rows the Boolean F5 criterion predicts to vanish left out | word XORs (elimination only) |
 //! | `inherited-f4` | the same hybrid, children specialising their parent's reduced basis | word XORs (elimination and specialisation only) |
@@ -1106,8 +1106,8 @@ mod tests {
 
     /// **The new engines against the reference, on random quadratic
     /// systems** of two to eleven unknowns, consistent and not.  (Dense
-    /// random systems are far harder for the pair-only Buchberger than
-    /// descents of the same size, which is what bounds the size here.)
+    /// random systems are far harder for Buchberger than descents of the
+    /// same size, which is what bounds the size here.)
     #[test]
     fn every_engine_agrees_on_random_quadratic_systems() {
         use rand::SeedableRng;
@@ -1123,7 +1123,7 @@ mod tests {
 
     /// **And on the systems the framework actually solves**: two- and
     /// three-summand Weil descents of random targets.  The three-summand
-    /// one is kept at `n' = 2`: at `n' = 3` its degree-six system costs
+    /// one is kept at `n' = 2`: at `n' = 3` its degree-six system cost
     /// the pair-only Buchberger about twenty seconds a target (§14.4).
     #[test]
     fn every_engine_agrees_on_descent_systems() {

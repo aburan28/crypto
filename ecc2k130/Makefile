@@ -635,6 +635,24 @@ gpu-preset: PACKED_ALU_SQUARE = 1
 gpu-preset:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
 
+# The RTX PRO 4500 build of POWER-BOUND.md: the 20 B/s knob set with one fused
+# pass per step, which does the same work per clock as the 20 B/s build and
+# 7% more per joule; on a 165 W part that sits on its power limit, per joule is
+# the rate.  Predicted 7.2 - 7.4 B/s on a 4500 (receipts: 5.107 / 5.552);
+# measured only on an RTX PRO 6000 so far.  RTX4500_EXTRA adds knobs, e.g.
+# PACKED_ALU_SQUARE=0 for the second arm POWER-BOUND.md section 4 names.
+RTX4500_EXTRA ?=
+gpu-rtx-pro4500:
+	$(MAKE) gpu-preset KNOBS="TABLE_FUSED=1 TABLE_PIPE_SELECT=0 $(RTX4500_EXTRA)"
+
+# The B200 build the automatic sweep of AUTOSWEEP.md found (sm_100): the 20 B/s
+# knob set with the products' 3-bit correction on the carry-less unit as a
+# three-limb Karatsuba, the squaring on the unit, the ONB inversion, one fused
+# pass per step, and batch 32.  19.40 B/s median on one B200, verified.
+gpu-b200-19b:
+	$(MAKE) gpu-preset PRO6000_ARCH="-gencode arch=compute_100,code=sm_100" \
+	    KNOBS="PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_KARAT3=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=512 MINBLOCKS=1"
+
 # The two-chain form of the 20 B/s build (TWO-CHAINS.md): the same arithmetic
 # and the same state footprint per SM, as 256 threads x 32 slots in two
 # interleaved chains of 16 instead of 512 threads x one chain of 16.

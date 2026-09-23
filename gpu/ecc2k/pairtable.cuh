@@ -86,6 +86,26 @@ G2_HD void pt_batch_inv(f2e *vals, f2e *scratch, int k) {
     }
 }
 
+/* `P + Q`, given `inv = 1 / (x(P) + x(Q))` from a batch inversion.
+ *
+ * The cases the batch cannot cover are decided here, once, for every
+ * row builder in this file -- `pt_row`, `pairtable_kernel` and
+ * `pairtable_fold_kernel` -- so they cannot drift apart. */
+G2_HD pt2k pt_sum_with_inv(const pt2k &P, const pt2k &Q, const f2e &inv) {
+    if (P.inf) return Q;
+    if (Q.inf) return P;
+    if (F2::eq(P.x, Q.x)) {
+        /* Same abscissa: either a doubling or the point at infinity.
+         * The doubling needs its own inversion, and an unfolded row
+         * meets this case once (`j == i`), a folded row twice (its
+         * representative and that point's negation), so it costs at
+         * most one inversion per row on top of the batch and never
+         * diverges a warp for long. */
+        return F2::eq(F2::add(P.y, Q.y), P.x) ? Koblitz::infinity() : Koblitz::dbl(P);
+    }
+    return Koblitz::add_with_inv(P, Q, inv);
+}
+
 /* One row of the table: `P_i + P_j` for every `j` in `[i, n)`.
  *
  * `out[j - i]` receives the sum.  `den` and `scratch` must each hold at
@@ -102,25 +122,7 @@ G2_HD void pt_row(const pt2k *pts, int n, int i, pt2k *out, f2e *den,
         den[t] = F2::add(P.x, pts[i + t].x);
     }
     pt_batch_inv(den, scratch, k);
-    for (int t = 0; t < k; t++) {
-        const pt2k Q = pts[i + t];
-        if (P.inf) { out[t] = Q; continue; }
-        if (Q.inf) { out[t] = P; continue; }
-        if (F2::eq(P.x, Q.x)) {
-            /* Same abscissa: either a doubling or the point at
-             * infinity.  Both need their own inversion, and there is at
-             * most one such `j` per row (`j == i`), so this costs one
-             * inversion per row on top of the batch and never diverges
-             * a warp for long. */
-            if (F2::eq(F2::add(P.y, Q.y), P.x)) {
-                out[t] = Koblitz::infinity();
-            } else {
-                out[t] = Koblitz::dbl(P);
-            }
-            continue;
-        }
-        out[t] = Koblitz::add_with_inv(P, Q, den[t]);
-    }
+    for (int t = 0; t < k; t++) out[t] = pt_sum_with_inv(P, pts[i + t], den[t]);
 }
 
 /* The low 64 bits of a field element.  Valid while `m <= 62`, which is
@@ -200,6 +202,170 @@ G2_HD uint64_t pt_canon(const pt2k &P, const uint64_t *tables, int canon_bytes, 
     return best + 1ull;
 }
 
+/* ---------------------------------------------------------------------
+ * Folded storage: one entry per signed Frobenius orbit of pairs.
+ *
+ * `PairSumTable::build_folded_within` is the CPU side, and everything
+ * below reproduces what it stores, word for word -- a table built here
+ * is only worth building if the CPU can probe it.
+ *
+ * The fold's saving is in *which pairs are summed*, not in how a sum is
+ * named.  The factor base is closed under `pi` and under negation, so
+ * the set of pair sums is too, and one representative per orbit of
+ * pairs answers every probe.  Walking one representative `P_rep(r)` of
+ * each signed orbit `r` against the base reaches every orbit of pairs
+ * (the `g` carrying `P_a` to its orbit's representative carries the
+ * pair along with it), and keeping only the second summands whose orbit
+ * is `>= r` stores each sum orbit once rather than once from each of
+ * its two summands.  Sorting the base by orbit makes that a suffix:
+ * row `r` is `P_rep(r) + by_orbit[suffix[orbit(r)] ..]`.  About
+ * `orbits * |F| / 2` sums in all, against `|F|^2 / 2` unfolded -- `2n`
+ * times fewer.
+ *
+ * The row plan -- the sorted base, the representatives and the suffix
+ * starts -- is host data from `PairSumTable::folded_rows`, uploaded the
+ * way the canon basis is, so there is one derivation of it and not two.
+ *
+ * Each entry is stored as a 32-bit word in a hash bucket:
+ *
+ *     bucket  = pt_filter_hash(key) >> bucket_shift
+ *     word    = (orbit << 16) | (pt_filter_hash(key) & 0xffff)
+ *     present : bit  pt_filter_hash(key) & present_mask
+ *
+ * `orbit` is the row's signed orbit, which a summand of the sum really
+ * lies in; it is what lets the CPU recover a hit's summands by walking
+ * `2n` points instead of the base.
+ * ------------------------------------------------------------------- */
+
+/* `pair_filter_hash` in `koblitz_index_calculus.rs`, constants and all:
+ * bucket, word and presence bit all come from it. */
+G2_HD uint64_t pt_filter_hash(uint64_t key) {
+    uint64_t h = key * 0xff51afd7ed558ccdull;
+    h ^= h >> 33;
+    return h * 0xc4ceb9fe1a85ec53ull;
+}
+
+/* `PairSumTable::tagged_rest`: the orbit in the high half, sixteen bits
+ * of the key's hash in the low half. */
+G2_HD uint32_t pt_tagged_word(uint64_t key, uint32_t orbit) {
+    return (orbit << 16) | ((uint32_t)pt_filter_hash(key) & 0xffffu);
+}
+
+/* A tag is sixteen bits.  The CPU stores an untagged word past this
+ * many signed orbits; this file does not, and refuses such a base.
+ * It is not a limit anything reaches: 2^16 orbits of `2n` points is a
+ * folded table of `2^16 * |F| / 2` words, some two terabytes at
+ * `n = 61`. */
+#define PT_MAX_TAGGED_ORBITS (1u << 16)
+
+G2_HD int pt_bitlen(uint64_t v) {
+    int b = 0;
+    while (v) {
+        b++;
+        v >>= 1;
+    }
+    return b;
+}
+
+/* `PairSumTable::folded_pair_count`: the pair *estimate* the bucket
+ * width is chosen from.  Not the number of sums the rows produce -- the
+ * CPU sizes buckets before it has summed anything, and so must this, or
+ * the two pick different widths and no bucket lines up. */
+G2_HD uint64_t pt_folded_pair_count(uint64_t orbits, uint64_t points) {
+    return orbits * points / 2 + points;
+}
+
+/* `folded_bucket_bits(compact_bucket_bits)`: about one bucket per
+ * sixteen pairs, capped at 26 bits and at the key's width. */
+G2_HD int pt_folded_bucket_bits(uint64_t pairs, int degree) {
+    int bits = pt_bitlen((pairs ? pairs : 1) >> 4);
+    if (bits < 1) bits = 1;
+    if (bits > degree + 2) bits = degree + 2;
+    if (bits > 26) bits = 26;
+    if (bits > degree + 1) bits = degree + 1;
+    return bits;
+}
+
+/* Presence-filter width from the *actual* stored count, about four bits
+ * per word, clamped to `[6, 32]` as the CPU clamps it. */
+G2_HD int pt_filter_bits(uint64_t total) {
+    int bits = pt_bitlen((total ? total : 1) * 4);
+    return bits < 6 ? 6 : (bits > 32 ? 32 : bits);
+}
+
+struct PtFoldGeometry {
+    int bucket_bits;
+    int bucket_shift;
+    uint32_t buckets;
+};
+
+/* The bucket geometry the CPU would give this base, or 0 where the CPU
+ * would store a table this file does not: an empty plan, more orbits
+ * than a tag names, or more pairs than a 32-bit offset reaches.  Always
+ * at the compiled field degree -- the first folded kernel was handed
+ * the wrong `n` for exactly this, so there is no parameter to get
+ * wrong. */
+static inline int pt_fold_geometry(int n_orbits, int n_reps, int n_points,
+                                   PtFoldGeometry *g) {
+    if (n_reps <= 0 || n_points <= 0 || (uint32_t)n_orbits > PT_MAX_TAGGED_ORBITS) return 0;
+    const uint64_t pairs = pt_folded_pair_count((uint64_t)n_reps, (uint64_t)n_points);
+    if (pairs > 0xffffffffull) return 0;
+    g->bucket_bits = pt_folded_bucket_bits(pairs, F2M_M);
+    g->bucket_shift = 64 - g->bucket_bits;
+    g->buckets = 1u << g->bucket_bits;
+    return 1;
+}
+
+/* Where each row's entries start in the kernel's output: row `r` has
+ * `n_points - suffix[rep_orbit[r]]` of them.  `row_offset` holds
+ * `n_reps + 1`; the last is the total, which is returned. */
+static inline uint64_t pt_fold_row_offsets(int n_points, const uint32_t *suffix,
+                                           const uint32_t *rep_orbit, int n_reps,
+                                           uint32_t *row_offset) {
+    uint64_t total = 0;
+    for (int r = 0; r < n_reps; r++) {
+        row_offset[r] = (uint32_t)total;
+        total += (uint64_t)(n_points - (int)suffix[rep_orbit[r]]);
+    }
+    row_offset[n_reps] = (uint32_t)total;
+    return total;
+}
+
+/* **Assembly, host side**, in the CPU build's two passes.
+ *
+ * Count: `bucket_start` (`buckets + 1` words, zeroed) becomes the
+ * bucket offsets.  Fill: each entry's word lands at its bucket's cursor
+ * (`cursor`, `buckets` words, overwritten) and its presence bit is set
+ * (`present`, zeroed, `2^filter_bits / 64` words for the filter width
+ * `pt_filter_bits(bucket_start[buckets])`).
+ *
+ * These run on the host over the kernel's `(key, tag)` output.  A device
+ * version is the same two loops with an atomic add on the counts and
+ * cursors and an atomic or on the presence words -- and it is left for
+ * a device on purpose: the emulation runs threads one after another,
+ * so it could not say anything about contended atomics, and this file
+ * keeps to what has been checked. */
+static inline void pt_fold_count(const uint64_t *keys, uint64_t entries,
+                                 const PtFoldGeometry &g, uint32_t *bucket_start) {
+    for (uint64_t e = 0; e < entries; e++) {
+        bucket_start[(pt_filter_hash(keys[e]) >> g.bucket_shift) + 1]++;
+    }
+    for (uint32_t b = 0; b < g.buckets; b++) bucket_start[b + 1] += bucket_start[b];
+}
+
+static inline void pt_fold_fill(const uint64_t *keys, const uint32_t *tags, uint64_t entries,
+                                const PtFoldGeometry &g, const uint32_t *bucket_start,
+                                uint32_t *cursor, uint32_t *words, uint64_t *present,
+                                uint64_t present_mask) {
+    for (uint32_t b = 0; b < g.buckets; b++) cursor[b] = bucket_start[b];
+    for (uint64_t e = 0; e < entries; e++) {
+        const uint64_t h = pt_filter_hash(keys[e]);
+        words[cursor[h >> g.bucket_shift]++] = pt_tagged_word(keys[e], tags[e]);
+        const uint64_t bit = h & present_mask;
+        present[bit >> 6] |= 1ull << (bit & 63);
+    }
+}
+
 #ifdef __CUDACC__
 
 /* One thread per row, grid-stride so the triangular load can be
@@ -211,17 +377,10 @@ G2_HD uint64_t pt_canon(const pt2k &P, const uint64_t *tables, int canon_bytes, 
  */
 /* `canon_tables` null keys on `pt_pack`, which is the unfolded table
  * this kernel has always built.  Non-null keys on `pt_canon` instead —
- * one name per Frobenius orbit — and the host is then responsible for
- * uploading `FrobeniusCanon::tables()` and for knowing that the result
- * is a folded table.
- *
- * **What this does not do yet.**  Keying by orbit is not the same as
- * *storing* by orbit: this still writes one entry per pair, so the
- * table is the same size and merely named differently.  The fold's
- * whole point is `2n` times fewer entries, which needs the base sorted
- * by orbit host-side and one entry emitted per signed orbit, and then
- * the orbit tag (`(orbit << 16) | ...`) that makes recovery `O(n)`
- * rather than `O(|F|)`.  Both are the next steps and neither is here.
+ * one name per Frobenius orbit — but still stores one entry per pair,
+ * so the table is the same size and merely named differently.  The
+ * fold proper, one entry per orbit of pairs with its orbit tag, is
+ * `pairtable_fold_kernel` below.
  *
  * The tables are read from global memory.  They are 16 KiB at `n = 61`,
  * which fits shared memory comfortably, and moving them there is worth
@@ -246,20 +405,55 @@ __global__ void pairtable_kernel(const pt2k *pts, int n, const uint32_t *row_off
         const pt2k P = pts[i];
         const uint32_t base = row_offset[i];
         for (int t = 0; t < k; t++) {
-            const pt2k Q = pts[i + t];
-            pt2k s;
-            if (P.inf) s = Q;
-            else if (Q.inf) s = P;
-            else if (F2::eq(P.x, Q.x)) {
-                s = F2::eq(F2::add(P.y, Q.y), P.x) ? Koblitz::infinity()
-                                                 : Koblitz::dbl(P);
-            } else {
-                s = Koblitz::add_with_inv(P, Q, den[t]);
-            }
-            keys[base + t] = canon_tables ? pt_canon(s, canon_tables, canon_bytes, n)
+            const pt2k s = pt_sum_with_inv(P, pts[i + t], den[t]);
+            /* `n` here is `|F|`, the number of base points; the fold's
+             * degree is the field's, which is compile-time. */
+            keys[base + t] = canon_tables ? pt_canon(s, canon_tables, canon_bytes, F2M_M)
                                           : pt_pack(s, n);
             idx_i[base + t] = (uint32_t)i;
             idx_j[base + t] = (uint32_t)(i + t);
+        }
+    }
+}
+
+/* **The folded table**: one thread per signed-orbit row, grid-stride.
+ *
+ * Row `r` is `rep_pts[r] + by_orbit[suffix[rep_orbit[r]] ..]`, written
+ * from `row_offset[r]` (`pt_fold_row_offsets`): the key of every sum,
+ * and the row's orbit as its tag.  `pt_fold_count` and `pt_fold_fill`
+ * turn that into the stored table.
+ *
+ * `n_points` is `|F|`, the length of `by_orbit`; the fold's degree is
+ * the field's, which is compile-time.  The parameter is not called `n`
+ * because the first folded kernel read an `n` that meant `|F|` as the
+ * degree.
+ *
+ * The rows shorten as `r` grows -- row 0 walks the whole base, the last
+ * only its own orbit -- so this has the same triangular imbalance as
+ * `pairtable_kernel` and takes the same grid stride.  `scratch` is
+ * `pt_scratch_elems(n_points)` elements per thread, as there. */
+__global__ void pairtable_fold_kernel(const pt2k *by_orbit, int n_points,
+                                      const pt2k *rep_pts, const uint32_t *rep_orbit,
+                                      int n_reps, const uint32_t *suffix,
+                                      const uint32_t *row_offset, uint64_t *keys,
+                                      uint32_t *tags, f2e *scratch, int scratch_stride,
+                                      const uint64_t *canon_tables, int canon_bytes) {
+    const int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    const int stride = gridDim.x * blockDim.x;
+    for (int r = tid; r < n_reps; r += stride) {
+        f2e *den = scratch + (size_t)tid * scratch_stride;
+        f2e *scr = den + n_points;
+        const uint32_t orbit = rep_orbit[r];
+        const pt2k P = rep_pts[r];
+        const pt2k *q = by_orbit + suffix[orbit];
+        const int k = n_points - (int)suffix[orbit];
+        for (int t = 0; t < k; t++) den[t] = F2::add(P.x, q[t].x);
+        pt_batch_inv(den, scr, k);
+        const uint32_t base = row_offset[r];
+        for (int t = 0; t < k; t++) {
+            keys[base + t] = pt_canon(pt_sum_with_inv(P, q[t], den[t]), canon_tables,
+                                      canon_bytes, F2M_M);
+            tags[base + t] = orbit;
         }
     }
 }

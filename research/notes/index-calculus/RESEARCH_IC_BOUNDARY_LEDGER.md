@@ -3505,7 +3505,7 @@ Reading it:
 | every two-summand target decided from sixteen to twenty-two unknowns; `f4-f2` to twenty-eight, the matrix hybrids to thirty-four | **engineering** | the same systems decided within the budget where the baseline stopped at eighteen |
 | `D_learn = 3` where the pair-only engine read `4` | **accounting** | the ideal did not change; the engine that measured it did (§17.7) |
 | `exhaustive` counts the tests it performs | **accounting** | a modelled count replaced by the work done; wall-priced rows unaffected |
-| the `vs rho` column filled | measurement | the reference §15 and §16 left empty, sixteen counted runs per instance |
+| the `vs rho` column filled | measurement | the reference §15 and §16 left empty, sixteen counted runs per instance; the plain walk, not the negation-aware one (§17.13) |
 | `crossbred-f2` below `fes-f2` at twenty-six and twenty-eight unknowns | **advance against the declared reference, withdrawn** | against the vector form of the same algorithm it is `2.45`–`3.0×` (§17.9) |
 | `fes-f2-wide` | **accounting**: the boundary moved | the stage reference is `3`–`4×` stronger; every stage ratio is now read against it |
 | the hybrids at thirty-two and thirty-four unknowns | measurement | `2.09×` and `1.20×` the vector reference; a crossing extrapolated near thirty-five, marked as such |
@@ -3540,6 +3540,20 @@ Reading it:
   those cells are `R` only.  `xl-f2` is not in the suite (§15.6).
 - The first run of the thirty-four-unknown cell had no reference and is
   not read (§17.5's amendment).
+- **Every `buchberger-f2` row here is the pair-only engine's.**  While
+  this suite ran, `main` closed the repository's Buchberger under the
+  field equations (34154ed9, 794496b4), the defect §17.1 described.
+  The frozen rows measure the engine their provenance names; a rerun of
+  the baseline on current code measures a different engine, and would
+  be a new row.
+- **The `vs rho` column is the plain walk's.**  `rho_reference` runs
+  Teske's walk with no automorphism (`A = 1`).  On these random binary
+  curves the eligible automorphism is negation, and the contract's
+  matched reference is the negation-aware walk, about `√2` cheaper; so
+  every ratio to rho here is understated by up to that factor, and the
+  verdict — nothing below rho — only strengthens.  On a Koblitz curve
+  the gap would be about `√(2n)`, and none of this round's whole runs
+  was on one.
 
 ### 17.14 Reproducing
 

@@ -336,7 +336,7 @@ What ships behind it (`ic bench --list` prints each one's parameters):
 | `matrix-f5` | the same, leaving out the rows the Boolean F5 criterion predicts to reduce to zero | word XORs (elimination only) | `node_budget` |
 | `inherited-f4` | the same, children specialising their parent's reduced basis | word XORs (elimination and specialisation only) | `node_budget` |
 | `crossbred-f2` | Joux–Vitse: a Macaulay left kernel at degree `D`, then `2^k` bit-sliced linear solves | word operations (partial) | parameters that do not fit the system are a budget verdict |
-| `buchberger-f2` | Buchberger over the boolean ring, pairs one at a time, coprime and chain criteria — **no field pairs**, so its basis is not guaranteed complete and its degree is an upper bound (ledger §17.1) | monomial operations | the budget; enumerates for solutions up to 26 unknowns |
+| `buchberger-f2` | Buchberger over the boolean ring, one pair at a time, coprime and chain criteria, closed under the field equations since 34154ed9 — the frozen rows of ledger §14–§17 were measured on the earlier pair-only engine, whose degree is an upper bound (§17.1, §17.7) | monomial operations | the budget; enumerates for solutions up to 26 unknowns |
 | `xl-f2` | XL: multiply out to degree `n_vars`, linearise | monomial operations (modelled) | declines above 10 unknowns |
 | `sat-cdcl` | CDCL with Tseitin monomials and native parity rows; **one model per call** | conflicts | `sat_conflict_budget` |
 | `fes-f2` | fast exhaustive search, libfes-lite's Gray code: two word XORs per point | word XORs (Gray-code steps) | quadratic systems, ≤ 32 unknowns, ≤ 64 equations |

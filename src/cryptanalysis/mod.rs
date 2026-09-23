@@ -100,6 +100,7 @@ pub mod avalanche;
 pub mod b_seed_profile;
 pub mod binary_isogeny;
 pub mod binary_semaev;
+pub mod binary_velu;
 pub mod binary_semaev_s4;
 pub mod bleichenbacher;
 pub mod boolean;

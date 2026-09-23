@@ -128,7 +128,7 @@
 //!   Boolean-ring representation.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
-use crate::cryptanalysis::inherited_f4::{InheritCost, ReducedBasis};
+use crate::cryptanalysis::inherited_f4::{ChildSystem, InheritCost, ReducedBasis};
 use crate::cryptanalysis::matrix_f5_f2::F5Criterion;
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, groebner_basis_f2, F2BoolMono, F2BoolPoly};
 
@@ -1540,6 +1540,71 @@ pub(crate) fn build_macaulay(
     .map(|built| (built.columns, built.matrix))
 }
 
+/// Build an inherited-F4 root with exact column-layout reuse.  A cached
+/// layout is accepted only when packing observes every cached column and no
+/// product falls outside it; otherwise the ordinary support build replaces
+/// the cache entry. The default applies to quadratic generators, whose root
+/// support repeats across targets; `KIC_F4_INHERIT_LAYOUT_CACHE=0|1` disables
+/// or forces it as a same-binary control, and
+/// `KIC_F4_DISABLE_INHERIT_FUSED_PACK=1` retains materialized sparse rows on
+/// layout hits.
+pub(crate) fn build_inherited_macaulay(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    quadratic_generators: bool,
+) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    static REUSE_LAYOUT: std::sync::OnceLock<Option<bool>> = std::sync::OnceLock::new();
+    let override_policy = *REUSE_LAYOUT.get_or_init(|| {
+        match std::env::var("KIC_F4_INHERIT_LAYOUT_CACHE").as_deref() {
+            Ok("0") => Some(false),
+            Ok("1") => Some(true),
+            _ => None,
+        }
+    });
+    let reuse_layout = override_policy.unwrap_or(quadratic_generators);
+    build_inherited_macaulay_with_layout(polys, n_vars, degree, multiplier_mask, reuse_layout)
+}
+
+fn build_inherited_macaulay_with_layout(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    reuse_layout: bool,
+) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    static FUSED_PACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let fused = reuse_layout
+        && *FUSED_PACK.get_or_init(|| {
+            std::env::var("KIC_F4_DISABLE_INHERIT_FUSED_PACK").as_deref() != Ok("1")
+        });
+    if fused {
+        let layout_key = (multiplier_mask, degree, false);
+        let cached = cached_f4_layout(layout_key);
+        if let Some(layout) = cached {
+            if let Some(matrix) =
+                pack_polynomials_nested_fused(polys, n_vars, degree, multiplier_mask, &layout)
+            {
+                F4_LAYOUT_HITS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                return Some((layout.columns.clone(), matrix));
+            }
+            F4_LAYOUTS.with(|layouts| {
+                layouts.borrow_mut().remove(&layout_key);
+            });
+        }
+    }
+    build_macaulay_with_multiplier_mask(
+        polys,
+        n_vars,
+        degree,
+        multiplier_mask,
+        reuse_layout,
+        RowCriterion::None,
+    )
+    .map(|built| (built.columns, built.matrix))
+}
+
 /// Which rows of the Macaulay matrix a step builds.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RowCriterion {
@@ -1725,6 +1790,91 @@ fn pack_polynomials_flat_fused(
     Some(FlatF2Matrix { data, rows, words })
 }
 
+fn pack_polynomials_nested_fused(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    layout: &F4ColumnLayout,
+) -> Option<Vec<Vec<u64>>> {
+    let words = layout.columns.len().div_ceil(64);
+    let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
+    let mut gaps = Vec::with_capacity(polys.len());
+    let mut estimated_rows = 0usize;
+    for polynomial in polys {
+        let polynomial_degree = polynomial
+            .terms
+            .iter()
+            .map(|term| term.mask.count_ones())
+            .max()
+            .unwrap_or(0);
+        if polynomial_degree > degree {
+            gaps.push(None);
+            continue;
+        }
+        let gap = (degree - polynomial_degree) as usize;
+        let multipliers = schedules[gap].get_or_insert_with(|| {
+            if multiplier_mask == all_variable_mask(n_vars) {
+                monomials_up_to_mask(multiplier_mask, gap as u32).into()
+            } else {
+                cached_monomials_up_to_mask(multiplier_mask, gap as u32)
+            }
+        });
+        estimated_rows = estimated_rows.saturating_add(multipliers.len());
+        gaps.push(Some(gap));
+    }
+    let mut seen = vec![false; layout.columns.len()];
+    let mut matrix = Vec::with_capacity(estimated_rows.min(max_f4_rows()));
+    let max_terms = polys.iter().map(|polynomial| polynomial.terms.len()).max().unwrap_or(0);
+    let mut product = Vec::with_capacity(max_terms);
+    for (polynomial, gap) in polys.iter().zip(gaps) {
+        let Some(gap) = gap else {
+            continue;
+        };
+        let multipliers = schedules[gap].as_ref().unwrap();
+        for &multiplier in multipliers.iter() {
+            product.clear();
+            product.extend(
+                polynomial
+                    .terms
+                    .iter()
+                    .map(|term| term.mask | multiplier),
+            );
+            product.sort_unstable();
+            let mut read = 0usize;
+            let mut write = 0usize;
+            while read < product.len() {
+                let mut end = read + 1;
+                while end < product.len() && product[end] == product[read] {
+                    end += 1;
+                }
+                if (end - read) % 2 == 1 {
+                    product[write] = product[read];
+                    write += 1;
+                }
+                read = end;
+            }
+            if write == 0 {
+                continue;
+            }
+            if matrix.len() == max_f4_rows() {
+                return None;
+            }
+            let mut row = vec![0u64; words];
+            for monomial in &product[..write] {
+                let &column = layout.index.get(monomial)?;
+                row[column / 64] |= 1 << (column % 64);
+                seen[column] = true;
+            }
+            matrix.push(row);
+        }
+    }
+    if seen.iter().any(|present| !present) {
+        return None;
+    }
+    Some(matrix)
+}
+
 fn build_macaulay_with_multiplier_mask(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -1760,7 +1910,7 @@ fn build_macaulay_flat_with_multiplier_mask(
         && std::env::var("KIC_F4_DISABLE_FUSED_PACK").as_deref() != Ok("1");
     if fused {
         let layout_key = (multiplier_mask, degree, false);
-        let cached = F4_LAYOUTS.with(|layouts| layouts.borrow().get(&layout_key).cloned());
+        let cached = cached_f4_layout(layout_key);
         if let Some(layout) = cached {
             if let Some(matrix) =
                 pack_polynomials_flat_fused(polys, n_vars, degree, multiplier_mask, &layout)
@@ -1832,7 +1982,7 @@ fn build_macaulay_packed<P: Default>(
 
     let layout_key = (multiplier_mask, degree, criterion == RowCriterion::F5);
     if reuse_layout {
-        let cached = F4_LAYOUTS.with(|layouts| layouts.borrow().get(&layout_key).cloned());
+        let cached = cached_f4_layout(layout_key);
         if let Some(layout) = cached {
             if let Some(matrix) = pack(&rows_monos, &layout, true) {
                 F4_LAYOUT_HITS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -1969,6 +2119,20 @@ thread_local! {
     >> = std::cell::RefCell::new(std::collections::HashMap::new());
 }
 
+/// A cached layout must obey the current column cap just like a fresh one.
+/// Reject only the cache entry: a changed system may have smaller support
+/// that the ordinary builder can still accept under the new cap.
+fn cached_f4_layout(key: (u64, u32, bool)) -> Option<std::rc::Rc<F4ColumnLayout>> {
+    let column_cap = max_f4_cols();
+    F4_LAYOUTS.with(|layouts| {
+        layouts
+            .borrow()
+            .get(&key)
+            .filter(|layout| layout.columns.len() <= column_cap)
+            .cloned()
+    })
+}
+
 /// Exact column-layout reuse counts since the last reset.
 pub fn f4_layout_stats() -> (u64, u64) {
     use std::sync::atomic::Ordering::Relaxed;
@@ -2080,7 +2244,10 @@ fn echelon_f2_suffix_counted(
 /// Method of Four Russians elimination over `F_2`. A small pivot block is
 /// reduced together; its row combinations are materialized once, then each
 /// non-pivot row clears the whole block with one suffix XOR. The default block
-/// width is four and `KIC_F4_M4RI_BLOCK` permits bounded ablation runs.
+/// width is four and `KIC_F4_M4RI_BLOCK` permits bounded ablation runs. Pivot
+/// rows and combination tables reuse a per-thread arena;
+/// `KIC_F4_DISABLE_M4RI_SCRATCH=1` limits reuse to one matrix, while
+/// `KIC_F4_M4RI_ALLOCATING=1` restores the allocating implementation.
 fn rref_f2_m4ri_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
     echelon_f2_m4ri_counted(matrix, n_cols, word_ops, true)
 }
@@ -2094,11 +2261,191 @@ fn echelon_f2_m4ri_counted(
     word_ops: &mut u64,
     reduce_above: bool,
 ) -> usize {
-    let block_width = std::env::var("KIC_F4_M4RI_BLOCK")
-        .ok()
-        .and_then(|value| value.parse::<usize>().ok())
-        .unwrap_or(4)
-        .clamp(2, 10);
+    static BLOCK_WIDTH: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    let block_width = *BLOCK_WIDTH.get_or_init(|| {
+        std::env::var("KIC_F4_M4RI_BLOCK")
+            .ok()
+            .and_then(|value| value.parse::<usize>().ok())
+            .unwrap_or(4)
+            .clamp(2, 10)
+    });
+    if std::env::var("KIC_F4_M4RI_ALLOCATING").as_deref() == Ok("1") {
+        return echelon_f2_m4ri_allocating_counted(
+            matrix,
+            n_cols,
+            word_ops,
+            block_width,
+            reduce_above,
+        );
+    }
+    if std::env::var("KIC_F4_DISABLE_M4RI_SCRATCH").as_deref() == Ok("1") {
+        let mut scratch = F4M4riScratch::default();
+        return echelon_f2_m4ri_arena_counted(
+            matrix,
+            n_cols,
+            word_ops,
+            block_width,
+            reduce_above,
+            &mut scratch,
+        );
+    }
+    F4_M4RI_SCRATCH.with(|scratch| {
+        let mut scratch = scratch.borrow_mut();
+        echelon_f2_m4ri_arena_counted(
+            matrix,
+            n_cols,
+            word_ops,
+            block_width,
+            reduce_above,
+            &mut scratch,
+        )
+    })
+}
+
+#[derive(Default)]
+struct F4M4riScratch {
+    pivot_columns: Vec<usize>,
+    block_pivots: Vec<Vec<u64>>,
+    table: Vec<u64>,
+}
+
+thread_local! {
+    static F4_M4RI_SCRATCH: std::cell::RefCell<F4M4riScratch> =
+        std::cell::RefCell::new(F4M4riScratch::default());
+}
+
+fn echelon_f2_m4ri_arena_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+    block_width: usize,
+    reduce_above: bool,
+    scratch: &mut F4M4riScratch,
+) -> usize {
+    let words = n_cols.div_ceil(64);
+    let rows = matrix.len();
+    scratch.pivot_columns.resize(block_width, 0);
+    scratch.block_pivots.resize_with(block_width, Vec::new);
+    for pivot in &mut scratch.block_pivots {
+        pivot.resize(words, 0);
+    }
+    scratch.table.resize((1usize << block_width) * words, 0);
+    let F4M4riScratch {
+        pivot_columns,
+        block_pivots,
+        table,
+    } = scratch;
+
+    let mut pivot_row = 0usize;
+    let mut column = 0usize;
+    while pivot_row < rows && column < n_cols {
+        let block_start = pivot_row;
+        let mut block_rows = 0usize;
+        while block_rows < block_width && pivot_row < rows && column < n_cols {
+            let next_pivot = block_start + block_rows;
+            let (word, bit) = (column / 64, 1u64 << (column % 64));
+            let mut found = None;
+            for row in next_pivot..rows {
+                for (index, &pivot_column) in pivot_columns[..block_rows].iter().enumerate() {
+                    let (pivot_word, pivot_bit) =
+                        (pivot_column / 64, 1u64 << (pivot_column % 64));
+                    if matrix[row][pivot_word] & pivot_bit != 0 {
+                        for (target, &source) in matrix[row][pivot_word..words]
+                            .iter_mut()
+                            .zip(&block_pivots[index][pivot_word..words])
+                        {
+                            *target ^= source;
+                        }
+                        *word_ops += (words - pivot_word) as u64;
+                    }
+                }
+                if matrix[row][word] & bit != 0 {
+                    found = Some(row);
+                    break;
+                }
+            }
+            if let Some(found) = found {
+                matrix.swap(next_pivot, found);
+                block_pivots[block_rows].copy_from_slice(&matrix[next_pivot]);
+                let (previous_pivots, current_pivots) = block_pivots.split_at_mut(block_rows);
+                let pivot = &current_pivots[0];
+                for previous in block_start..next_pivot {
+                    if matrix[previous][word] & bit != 0 {
+                        let block_index = previous - block_start;
+                        for (target, &source) in
+                            matrix[previous][word..words].iter_mut().zip(&pivot[word..words])
+                        {
+                            *target ^= source;
+                        }
+                        for (target, &source) in previous_pivots[block_index][word..words]
+                            .iter_mut()
+                            .zip(&pivot[word..words])
+                        {
+                            *target ^= source;
+                        }
+                        *word_ops += 2 * (words - word) as u64;
+                    }
+                }
+                pivot_columns[block_rows] = column;
+                block_rows += 1;
+            }
+            column += 1;
+        }
+        if block_rows == 0 {
+            break;
+        }
+
+        let first_word = pivot_columns[0] / 64;
+        let suffix_words = words - first_word;
+        let combinations = 1usize << block_rows;
+        table[..suffix_words].fill(0);
+        for mask in 1..combinations {
+            let bit_index = mask.trailing_zeros() as usize;
+            let previous = mask & (mask - 1);
+            let pivot = &block_pivots[bit_index][first_word..words];
+            let target_offset = mask * suffix_words;
+            let source_offset = previous * suffix_words;
+            for index in 0..suffix_words {
+                table[target_offset + index] = table[source_offset + index] ^ pivot[index];
+            }
+            *word_ops += suffix_words as u64;
+        }
+
+        let first_target = if reduce_above { 0 } else { block_start + block_rows };
+        for row in first_target..rows {
+            if (block_start..block_start + block_rows).contains(&row) {
+                continue;
+            }
+            let mut pattern = 0usize;
+            for (index, &pivot_column) in pivot_columns[..block_rows].iter().enumerate() {
+                if matrix[row][pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
+                    pattern |= 1usize << index;
+                }
+            }
+            if pattern != 0 {
+                let table_offset = pattern * suffix_words;
+                for (target, &source) in matrix[row][first_word..words]
+                    .iter_mut()
+                    .zip(&table[table_offset..table_offset + suffix_words])
+                {
+                    *target ^= source;
+                }
+                *word_ops += suffix_words as u64;
+            }
+        }
+        pivot_row += block_rows;
+    }
+    pivot_row
+}
+
+/// Retained same-binary control for the pre-arena implementation.
+fn echelon_f2_m4ri_allocating_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+    block_width: usize,
+    reduce_above: bool,
+) -> usize {
     let words = n_cols.div_ceil(64);
     let rows = matrix.len();
     let mut pivot_row = 0usize;
@@ -2203,8 +2550,15 @@ fn echelon_f2_m4ri_counted(
     pivot_row
 }
 
+/// `KIC_F4_RREF_SUFFIX=1` pins the column-at-a-time kernel; read once, since
+/// every tail reduction of the inherited engine passes through here.
+fn suffix_kernel_forced() -> bool {
+    static FORCED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *FORCED.get_or_init(|| std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1"))
+}
+
 pub(crate) fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
-    if std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1")
+    if suffix_kernel_forced()
         || matrix.len() < 128
         || n_cols < 256
         || n_cols > matrix.len().saturating_mul(4)
@@ -2224,7 +2578,7 @@ pub(crate) fn echelon_f2_counted(
     n_cols: usize,
     word_ops: &mut u64,
 ) -> usize {
-    if std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1")
+    if suffix_kernel_forced()
         || matrix.len() < 128
         || n_cols < 256
         || n_cols > matrix.len().saturating_mul(4)
@@ -3112,17 +3466,25 @@ impl InheritedBases {
         self.bases.iter().position(|b| b.degree == degree)
     }
 
-    /// The bases of `system|_{var = value}`.  Specialisation replaces the
+    /// The bases of `system|_{var = value}`, given `substituted` — the
+    /// solver's own image of the node's system, aligned generator for
+    /// generator with the bases' (the solver substitutes it anyway, so the
+    /// bases do not substitute it again).  Specialisation replaces the
     /// child's matrix build, so its wall time is charged to the build
     /// phase; its word operations enter the stage unit.
-    fn specialise(&self, var: u32, value: bool) -> Self {
+    fn specialise(&self, var: u32, value: bool, substituted: &[F2BoolPoly]) -> Self {
         let started = std::time::Instant::now();
         let mut total = InheritCost::default();
+        let child = self
+            .bases
+            .first()
+            .map(|b| ChildSystem::new(b.generator_degrees(), substituted));
         let bases = self
             .bases
             .iter()
             .map(|b| {
-                let (next, cost) = b.specialise(var, value);
+                let child = child.as_ref().expect("a basis exists");
+                let (next, cost) = b.specialise_shared(var, value, child);
                 total.reduce_word_ops += cost.reduce_word_ops;
                 total.specialise_word_ops += cost.specialise_word_ops;
                 next
@@ -3139,6 +3501,18 @@ impl InheritedBases {
     }
 }
 
+/// Rounds of degree-fall closure the inherited engine runs per node on its
+/// top-degree basis (`KIC_F4_CLOSURE_ROUNDS`, `0` for none).
+fn closure_rounds() -> u32 {
+    static ROUNDS: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    *ROUNDS.get_or_init(|| {
+        std::env::var("KIC_F4_CLOSURE_ROUNDS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0)
+    })
+}
+
 /// The inherited engine's reduction: read the decisive rows off the node's
 /// bases, building a basis from scratch only for a degree no ancestor has
 /// reached.  Mirrors `reduce_system_uncached`'s ladder, decisiveness test
@@ -3153,6 +3527,7 @@ fn reduce_inherited(
     stats.reductions += 1;
     dump_node_system(system, n_vars, engine);
     let ladder = engine.degree_ladder(system_degree(system), n_vars)?;
+    let top = *ladder.end();
     let mut best: Option<Vec<F2BoolPoly>> = None;
     for d in ladder {
         if system.is_empty() {
@@ -3163,7 +3538,8 @@ fn reduce_inherited(
             Some(i) => i,
             None => {
                 let started = std::time::Instant::now();
-                match ReducedBasis::from_system(system, n_vars, d) {
+                let rounds = if d == top { closure_rounds() } else { 0 };
+                match ReducedBasis::from_system_closed(system, n_vars, d, rounds) {
                     Some((basis, cost)) => {
                         let word_ops = cost.word_ops();
                         charge_word_ops(word_ops);
@@ -3182,8 +3558,8 @@ fn reduce_inherited(
                 }
             }
         };
-        let basis = &bases.bases[index];
-        debug_assert_eq!(basis.system, system, "basis out of step with the node system");
+        let basis = &mut bases.bases[index];
+        debug_assert_eq!(basis.system.as_slice(), system, "basis out of step with the node system");
         let started = std::time::Instant::now();
         let mut cost = InheritCost::default();
         let rows = basis.decisive_rows(&mut cost);
@@ -3304,7 +3680,7 @@ fn solve_rec(
             if matches!(opts.engine, SolverEngine::InheritedF4 { .. })
                 && !system.iter().any(is_constant_one) =>
         {
-            bases.specialise(var, value)
+            bases.specialise(var, value, &system)
         }
         _ => InheritedBases::default(),
     };
@@ -3346,8 +3722,11 @@ fn solve_rec(
                     assignment[v as usize] = Some(val);
                     system = system.iter().map(|p| substitute(p, v, val)).collect();
                     if inherit {
-                        bases = bases.specialise(v, val);
+                        bases = bases.specialise(v, val, &system);
                     }
+                    // Keep the solver's system aligned with the bases',
+                    // which drop generators that vanish.
+                    system.retain(|p| !p.is_zero());
                 }
             }
         }
@@ -3907,35 +4286,38 @@ mod tests {
                 })
                 .filter(|p| !p.is_zero())
                 .collect();
-            let reference = SolveOptions {
-                max_solutions: 1 << 12,
-                engine: SolverEngine::MatrixF4 { max_degree: 3 },
-                ..SolveOptions::default()
-            };
-            let (mut want, want_stats) = solve_boolean_system(&system, n_vars, &reference);
-            want.sort_unstable();
-            let opts = SolveOptions {
-                engine: SolverEngine::InheritedF4 { max_degree: 3 },
-                ..reference
-            };
-            let (mut got, stats) = solve_boolean_system(&system, n_vars, &opts);
-            got.sort_unstable();
-            assert_eq!(got, want, "trial {trial}: roots differ");
-            assert_eq!(
-                (stats.reductions, stats.infeasible_branches, stats.propagations, stats.splits),
-                (
-                    want_stats.reductions,
-                    want_stats.infeasible_branches,
-                    want_stats.propagations,
-                    want_stats.splits
-                ),
-                "trial {trial}: the splitting tree differs"
-            );
             // Roots are the truth, whichever engine found them.
             let brute: Vec<u64> = (0..(1u64 << n_vars))
                 .filter(|pt| system.iter().all(|e| e.eval(*pt) == 0))
                 .collect();
-            assert_eq!(got, brute, "trial {trial}: roots are not the variety");
+            for split_rule in [SplitRule::LowestFree, SplitRule::HighestFree] {
+                let reference = SolveOptions {
+                    max_solutions: 1 << 12,
+                    engine: SolverEngine::MatrixF4 { max_degree: 3 },
+                    split_rule,
+                    ..SolveOptions::default()
+                };
+                let (mut want, want_stats) = solve_boolean_system(&system, n_vars, &reference);
+                want.sort_unstable();
+                let opts = SolveOptions {
+                    engine: SolverEngine::InheritedF4 { max_degree: 3 },
+                    ..reference
+                };
+                let (mut got, stats) = solve_boolean_system(&system, n_vars, &opts);
+                got.sort_unstable();
+                assert_eq!(got, want, "trial {trial} {split_rule:?}: roots differ");
+                assert_eq!(
+                    (stats.reductions, stats.infeasible_branches, stats.propagations, stats.splits),
+                    (
+                        want_stats.reductions,
+                        want_stats.infeasible_branches,
+                        want_stats.propagations,
+                        want_stats.splits
+                    ),
+                    "trial {trial} {split_rule:?}: the splitting tree differs"
+                );
+                assert_eq!(got, brute, "trial {trial} {split_rule:?}: roots are not the variety");
+            }
         }
     }
 

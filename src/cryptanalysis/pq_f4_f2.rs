@@ -783,10 +783,12 @@ mod tests {
 
     /// **The field pairs are what makes it a boolean basis.**  On
     /// `v_0v_1 + v_0 + v_1`, whose only root is `(0, 0)`, the basis is
-    /// `{v_0, v_1}`: `v_0·g = v_0` and `v_1·g = v_1`.  The pair-only
-    /// Buchberger returns the generator itself — three standard
-    /// monomials for one solution — which is the defect this engine is
-    /// built to avoid.
+    /// `{v_0, v_1}`: `v_0·g = v_0` and `v_1·g = v_1`.  The repository's
+    /// Buchberger used to return the generator itself — three standard
+    /// monomials for one solution — and was closed under the field
+    /// equations after this engine was written (34154ed9); the two now
+    /// agree here, and the ledger's §14–§17 rows record which engine
+    /// they measured.
     #[test]
     fn the_field_pairs_close_the_toy_ideal() {
         let g = poly(&[3, 1, 2], 2);
@@ -797,8 +799,8 @@ mod tests {
         assert!(gb.iter().all(|p| p.terms.len() == 1), "{gb:?}");
         assert_eq!(standard_monomials(&gb, 2), 1);
         assert!(st.field_pairs_reduced > 0);
-        let pairs_only = groebner_basis_f2(vec![g], 2);
-        assert_eq!(standard_monomials(&pairs_only, 2), 3, "the pair-only engine's known gap");
+        let buchberger = groebner_basis_f2(vec![g], 2);
+        assert_eq!(standard_monomials(&buchberger, 2), 1, "Buchberger closes under the field equations too");
     }
 
     /// **Certified on random systems**: the output is a Gröbner basis of
@@ -838,10 +840,11 @@ mod tests {
         assert!(consistent > 5 && inconsistent > 5, "{consistent} / {inconsistent}");
     }
 
-    /// **Batched Buchberger is Buchberger.**  On the descent systems the
-    /// pair-only engine's output is certified a boolean basis, and there
-    /// the reduced bases must coincide polynomial for polynomial: the
-    /// reduced Gröbner basis of an ideal is unique.
+    /// **Batched Buchberger is Buchberger.**  Wherever the Buchberger
+    /// output is certified a boolean basis — everywhere, since it closes
+    /// under the field equations — the reduced bases must coincide
+    /// polynomial for polynomial: the reduced Gröbner basis of an ideal
+    /// is unique.
     #[test]
     fn f4_and_buchberger_agree_where_buchberger_is_certified() {
         use crate::cryptanalysis::ic_boundary::random_binary_instance;

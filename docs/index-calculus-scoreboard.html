@@ -350,9 +350,11 @@
       rho on an eight-cell Koblitz panel reads 0.831 [0.772, 0.894] at
       <code>r</code>&thinsp;=&thinsp;4.2&times;10<sup>6</sup> and 1.533 [1.238, 1.899] at
       <code>r</code>&thinsp;=&thinsp;2.3&times;10<sup>8</sup>, both bands clear of one in opposite
-      directions, growing as <code>r<sup>0.153</sup></code>
-      (<a href="#ic-crossover-20260922">below</a>). Two cells fix a rate and no curvature, so that
-      is agreement worth what a two-point rate is worth. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
+      directions, and beyond the crossing the ratio grows at
+      <code>r<sup>[0.13, 0.19]</sup></code> across three certified cells and 1100&times; in
+      <code>r</code> (<a href="#ic-crossover-20260922">below</a>). The derived exponent lies
+      inside that range &mdash; but at a factor base measurably not where the same derivation puts
+      it, so the agreement is not yet confirmation of the model. That bounds the <em>tabled</em> family only; an algebraic decomposition oracle builds
       no such table and its asymptotics are the question this ladder cannot reach. It is also not
       blanket across problems: on hyperelliptic Jacobians at genus 3 and 4 index calculus measures
       <strong>below</strong> a real distinguished-point rho &mdash; 0.21 at
@@ -398,8 +400,8 @@
           problem</strong> &mdash; its relation term counts K/2 edges, and a multigraph closes
           earlier &mdash; so a row may sit under it. On a prime-order curve it is
           &Theta;(r<sup>1/6</sup>) where the reference is flat, which is the round&rsquo;s result &mdash;
-          measured at <code>r<sup>0.153</sup></code> between two certified cells two decades of
-          <code>r</code> apart.</p>
+          measured at <code>r<sup>[0.13, 0.19]</sup></code> across three certified cells spanning
+          1100&times; in <code>r</code>, each at its own swept base.</p>
       </div>
     </dl>
   </header>
@@ -571,14 +573,14 @@
         <div class="lrow"><div class="name">Meet in the middle, one probe</div><div class="num">0.51</div><div class="lbar"><i style="width:8.4%"></i></div></div>
         <div class="lrow"><div class="name">Enumeration of the base</div><div class="num">1,310</div><div class="lbar"><i style="width:48.5%"></i></div></div>
         <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 3.2&times;10<sup>7</sup> word XORs found, 1.1&times;10<sup>8</sup> refuted &middot; was 6.8&times;10<sup>7</sup> / 2.3&times;10<sup>8</sup> at the freeze</div><div class="num">8.8&times;10<sup>4</sup></div><div class="lbar"><i style="width:70.0%"></i></div></div>
-        <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable (default engine since 2026-09-22) &middot; 1.4&times;10<sup>6</sup> word ops found, 4.3&times;10<sup>6</sup> refuted &middot; was 3.3&times;10<sup>6</sup> / 9.7&times;10<sup>6</sup> on the historical tree &middot; the from-scratch engine on the same binary: 2.2&times;10<sup>7</sup> / 7.3&times;10<sup>7</sup> &middot; identical found/refuted verdicts, tree of the same size</div><div class="num">3.9&times;10<sup>3</sup></div><div class="lbar"><i style="width:54.2%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable, rows materialised lazily (default engine since 2026-09-22) &middot; 8.9&times;10<sup>5</sup> word ops found, 2.4&times;10<sup>6</sup> refuted &middot; was 1.4&times;10<sup>6</sup> / 4.3&times;10<sup>6</sup> with eager rows and 3.3&times;10<sup>6</sup> / 9.7&times;10<sup>6</sup> on the historical tree &middot; the from-scratch engine on the same binary: 2.2&times;10<sup>7</sup> / 7.3&times;10<sup>7</sup> &middot; identical found/refuted verdicts, tree of the same size</div><div class="num">2.2&times;10<sup>3</sup></div><div class="lbar"><i style="width:51.2%"></i></div></div>
         <div class="lrow"><div class="name">CDCL with native parity rows &middot; 29,000 conflicts found, 188,000 refuted</div><div class="num">1.3&times;10<sup>7</sup></div><div class="lbar"><i style="width:95.4%"></i></div></div>
         <div class="lrow"><div class="name"><strong>n = 15, m = 3</strong> &middot; 30 unknowns, 30 equations, first fall degree 3, hit rate 0.38</div><div class="num"></div></div>
         <div class="lrow"><div class="name">Meet in the middle</div><div class="num">24.7</div><div class="lbar"><i style="width:28.1%"></i></div></div>
         <div class="lrow"><div class="name">Enumeration of the base</div><div class="num">467</div><div class="lbar"><i style="width:43.2%"></i></div></div>
         <div class="lrow"><div class="name">S&#8324; pairs-and-solve</div><div class="num">1,118</div><div class="lbar"><i style="width:47.6%"></i></div></div>
         <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 6.5&times;10<sup>7</sup> word XORs found, 6.3&times;10<sup>8</sup> refuted &middot; was 1.7&times;10<sup>8</sup> / 1.7&times;10<sup>9</sup> at the freeze</div><div class="num">8.7&times;10<sup>5</sup></div><div class="lbar"><i style="width:81.7%"></i></div></div>
-        <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable &middot; 7.7&times;10<sup>6</sup> word ops found, 2.6&times;10<sup>7</sup> refuted (1.5&times;10<sup>8</sup> total against the from-scratch engine&rsquo;s 1.7&times;10<sup>9</sup>) &middot; on the historical tree, inheriting cost <strong>1.66&times; more</strong> here (2.7&times;10<sup>9</sup>): the loss that the split variable reversed &middot; identical found/refuted verdicts</div><div class="num">3.9&times;10<sup>4</sup></div><div class="lbar"><i style="width:65.9%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable, rows materialised lazily &middot; 2.8&times;10<sup>6</sup> word ops found, 9.6&times;10<sup>6</sup> refuted (5.5&times;10<sup>7</sup> total against the from-scratch engine&rsquo;s 1.7&times;10<sup>9</sup>; was 1.5&times;10<sup>8</sup> with eager rows) &middot; on the historical tree, inheriting cost <strong>1.6&times; more</strong> here (2.7&times;10<sup>9</sup>): the loss that the split variable reversed &middot; identical found/refuted verdicts</div><div class="num">1.4&times;10<sup>4</sup></div><div class="lbar"><i style="width:60.9%"></i></div></div>
         <div class="lrow"><div class="name">CDCL &middot; no answer on 8 of 8 targets at 200,000 conflicts</div><div class="num">&ge; 4.0&times;10<sup>7</sup></div><div class="lbar"><i style="width:100%"></i></div></div>
       </div>
       <div class="legend" style="padding-top:0">
@@ -586,7 +588,7 @@
         <span>zero disagreements between oracles on every target of every cell, S&#8324; witnesses lifted in the group and compared both ways</span>
         <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 4.1&times;10<sup>3</sup>, 22&times; the whole measured cost of the tabled fold (9.2&times;10<sup>3</sup> and 49&times; at the freeze) &mdash; an extrapolation</span>
         <span>matrix-F4 rows from the lift-checked re-run on the merged tree, <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>: same verdicts, fall degrees and SAT conflicts as the freeze, 1.4&ndash;2.7&times; fewer word XORs after main&rsquo;s sparse elimination (#405) &mdash; engineering, ratio to the probe unmoved</span>
-        <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical found/refuted verdicts on all 13 cells, zero disagreements, no inconclusive target; 1.6&ndash;15.8&times; fewer word operations on every cell with a tree, the specialisation&rsquo;s reads and writes charged; the default splits on the smallest free variable, so its tree has the same size and a different shape from the reference&rsquo;s &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
+        <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical found/refuted verdicts on all 13 cells, zero disagreements, no inconclusive target; 2.3&ndash;29.9&times; fewer word operations on every cell with a tree, the specialisation&rsquo;s reads and writes charged; the default splits on the smallest free variable, so its tree has the same size and a different shape from the reference&rsquo;s &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
       </div>
     </div>
 
@@ -676,7 +678,8 @@
         <span><span class="chip">accounting</span> the degree column: an engine that closes the boolean ideal (the field products as pairs) learns everything at degree 3 from 12 to 20 unknowns, where the pair-only engine read 4 &mdash; 0.60 of the semi-regular bound, not &sect;16&rsquo;s 0.80. The ideal did not change; the engine measuring it did</span>
         <span><span class="chip">accounting</span> the reference strengthened: crossbred at its defaults crossed the scalar fast exhaustive search at 26 and 28 unknowns on both seeds (0.67&ndash;0.77, every interval below one), and against the vector search &mdash; the same algorithm, sixteen sub-cubes per Gray-code step &mdash; it is 2.45&ndash;3.0&times;: the crossing was the implementation&rsquo;s. At 30 unknowns its default parameters stop fitting</span>
         <span><span class="chip">measurement</span> the hybrids past thirty unknowns (&sect;17.5, declared after the strength check was read): inherited F4 is 2.09&times; the vector reference at 32 unknowns and 1.20&times; at 34 on the targets it decides (it leaves 2 of 16 undecided there, so it is not below the reference on that cell); against the scalar walk it would have read as a second crossing, 0.55&times; at 32 on every target. A log-linear fit over 24&ndash;34 puts a crossing near 35 unknowns &mdash; <em>extrapolation</em>, at the reach of both the vector reference and the curve constructor, not a result</span>
-        <span><span class="chip">measurement</span> the <code>vs rho</code> column is filled: sixteen counted rho runs per instance on the same subgroup, <code>S</code> 5.2 at n = 17 and 8.9&ndash;18.7 at n = 13&ndash;15, where rho&rsquo;s setup dominates at these toy orders; the ratio is to the rho measured on the same instance, never to the asymptotic 1.3</span>
+        <span><span class="chip">measurement</span> the <code>vs rho</code> column is filled: sixteen counted rho runs per instance on the same subgroup, <code>S</code> 5.2 at n = 17 and 8.9&ndash;18.7 at n = 13&ndash;15, where rho&rsquo;s setup dominates at these toy orders; the ratio is to the rho measured on the same instance, never to the asymptotic 1.3. It is the plain walk (A = 1): the contract&rsquo;s negation-aware walk would be up to &radic;2 cheaper on these curves, so every ratio to rho here is understated by up to that factor and the verdict only strengthens (&sect;17.13)</span>
+        <span>every <code>buchberger-f2</code> figure is the pair-only engine&rsquo;s; <code>main</code> has since closed it under the field equations (34154ed9), so a rerun on current code measures a different engine</span>
         <span>the per-call ranking does not carry over: crossbred is the fastest algebraic engine on every square stage cell and the slowest F4-family row on &sect;15&rsquo;s overdetermined base, where four systems in five are inconsistent and F4 refutes them at half its cost on a consistent one</span>
       </div>
     </div>
@@ -846,10 +849,17 @@
           <div class="num">875,934</div>
           <div class="lbar"><i style="width:18.2%"></i></div>
         </div>
+        <div class="lrow">
+          <div class="name">Border basis: demand-driven elimination, not adopted <span class="chip">engineering</span></div>
+          <div class="num">876,618</div>
+          <div class="lbar"><i style="width:18.2%"></i></div>
+        </div>
       </div>
       <div class="legend" style="padding-top:0">
         <span>5.5&times; total &middot; relation-phase crossover moved 2^111 &rarr; 2^96</span>
         <span>Last step is 0.35% on the protocol stream, 1.0% on random residuals at p = 271</span>
+        <span>Border basis: +0.08% at p = 271, &minus;0.14% at p = 2083, 1.0009&times; pooled end to end;
+          its ceiling is 0.19% (&sect;11.14)</span>
       </div>
     </div>
 
@@ -1234,7 +1244,10 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         ideal is zero-dimensional, the affine variety carries one F_p-point where a positive-
         dimensional component would carry about p, and a generic change of coordinates rescued none
         of 28. It is the staircase border meeting the degree cut &mdash; a truncation artefact, so
-        the fix is a border basis, not saturation.</p>
+        the fix is a border basis, not saturation. The fixed-staircase border basis built in
+        &sect;11.14 does not reach them: their staircase is not the generic one (dimension 61 at
+        degree 10), so no per-curve plan serves them. Whether Mourrain's full iteration would is
+        untested.</p>
     </div>
     <div class="note">
       <h3>Where the boundaries bite</h3>
@@ -1566,8 +1579,27 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         Gr&ouml;bner solve on the descended system for fixed <code>X&#8321;</code> has a deciding
         degree that grows as <code>&#8467;/2</code>, and the multilinear block structure of these
         systems cannot be used as a Macaulay shift restriction at all, because the only shift that
-        preserves multilinearity is the trivial one. The open direction is a border basis in place
-        of the fixed-degree Macaulay cut, and a merge-level cap for the large-prime linear algebra.</p>
+        preserves multilinearity is the trivial one. <s>The open direction is a border basis in place
+        of the fixed-degree Macaulay cut, and a merge-level cap for the large-prime linear algebra.</s>
+        <strong>Both were built or bounded, and neither helps.</strong> The merge-level cap is
+        measured in &sect;11.11: it lowers the solve exponent
+        0.045&thinsp;&plusmn;&thinsp;0.017 and the eliminator cancels it, leaving the method
+        +0.051&thinsp;&plusmn;&thinsp;0.031 worse end to end. The border basis was bounded in
+        &sect;11.13 at <s>1.06&times;</s> and then written (&sect;11.14), which showed the bound
+        charged work to the wrong rows. The normal forms read 149 of the 222 pivot rows, but those
+        were reduced through almost all the rest: the rows they depend on are <strong>202 of
+        222</strong> at every size, the work outside them is 1.1% of the elimination, 0.19% of
+        C&#8323; (<s>5.6%</s> as &sect;11.13 counted it), and the ceiling is
+        <strong>1.002&times;</strong>
+        (<span class="chip">accounting</span>). The solver gets 98.9% of that on the residuals it
+        solves; the 0.3&ndash;2.4% whose staircase differs from the per-curve plan cost it a wasted
+        attempt, so it loses 0.08&ndash;0.14% at p&thinsp;=&thinsp;271 and gains up to 0.14% by
+        p&thinsp;=&thinsp;2083 &mdash; <strong>1.0009&times;</strong> pooled end to end, zero
+        mismatches over 20,146 cross-checked residuals. It stays off by default. What &sect;11.5
+        already does &mdash; forward elimination plus memoised back-substitution restricted to the
+        monomials actually reached &mdash; is a border-basis computation in all but name, which is
+        why nothing was left. Class <span class="chip">engineering</span> for both, and neither is a
+        finding.</p>
       <p>Nothing here threatens a deployed curve, and nothing is claimed to. The point is to locate
         the crossovers by measurement rather than extrapolation.</p>
     </div>
@@ -4130,49 +4162,56 @@ factor base, and this prices a decomposition oracle.</p>
 <!-- BEGIN ic-crossover-20260922 -->
 <section class="panel" id="ic-crossover-20260922">
 <div class="panel-head"><h2>Where the tournament collector crosses rho <span class="chip">engineering</span></h2>
-<p>Rounds 0019 and 0020 put this collector strictly below rho on an eight-cell
-  Koblitz panel whose largest subgroup order is 4.2&times;10<sup>6</sup>, and classified the gain
-  engineering because the <code>&Theta;(r<sup>2/3</sup>)</code> against
-  <code>&Theta;(r<sup>1/2</sup>)</code> shape was <em>derived</em>. Round 0021 measures it: the
-  promoted implementation was capped at degree 31 only because its pair table packed coordinates
-  into <code>u32</code>, so widening that field to <code>u64</code> opens <code>n37a0</code> at
-  <code>r</code> = 230,603,167, 55&times; the panel's largest cell. Sixty-four independent
-  fixtures a cell, pooled over two seed streams, every index-calculus report checked by the
-  independent <code>oracle.py</code> certificate checker. <strong>No tournament ran and nothing
-  was promoted</strong> &mdash; this is a measurement against the round-0020 winner source, so it
-  has no stage summaries, no evidence pack and no effect on the promoted winner.</p>
-<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND21-crossover.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round21_crossover.py">measurement script</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round21-wide-pair-table.patch">pair-table widening</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/PROBE-degree-ceiling.md">why the cell was out of reach</a>.</p></div>
+<p>Rounds 0019 and 0020 put this collector strictly below rho on an eight-cell Koblitz panel
+  whose largest subgroup order is 4.2&times;10<sup>6</sup>, and classified the gain engineering
+  because the <code>&Theta;(r<sup>2/3</sup>)</code> against <code>&Theta;(r<sup>1/2</sup>)</code>
+  shape was <em>derived</em>. The collector was capped at degree 31 only because its pair table
+  packed coordinates into <code>u32</code>; widening that field to <code>u64</code> opens
+  <code>n37a0</code> and <code>n43a1</code>, 55&times; and 1100&times; the panel's largest cell.
+  <strong>These numbers supersede round 0021's</strong>, which charged rho on four fixtures where
+  it had not finished and measured every cell at a factor base that is optimal only on the panel.
+  64 fixtures a configuration over two seed streams, both arms required to complete, every
+  index-calculus report checked by the independent <code>oracle.py</code> certificate checker.
+  <strong>No tournament ran and nothing was promoted</strong> &mdash; this is a measurement against
+  the round-0020 winner source, with no stage summaries and no evidence pack.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND22-budget-and-curvature.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_ladder.py">the ladder</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_base_sweep.py">factor-base sweep</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/round22_budget_effect.py">what the trial cap is worth</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/campaign_20260916/ROUND21-crossover.md">the superseded round</a>.</p></div>
 <div class="table-scroll"><table>
-<caption>Instruction unit Ir, complete DLP, 64 fixtures a cell over seeds 20260922 and 4242;
-  base at the sampler's default 8 orbits, which is the cheapest measured size at both cells.</caption>
-<thead><tr><th>Cell</th><th>r</th><th>IC / rho</th><th>95% band</th><th>per-case sd(log)</th><th>Certified</th><th>Verdict</th></tr></thead><tbody>
-<tr><td>n23a1</td><td>4,196,903</td><td>0.831</td><td>[0.772, 0.894]</td><td>0.300</td><td>64/64</td><td>IC ahead</td></tr>
-<tr><td>n37a0</td><td>230,603,167</td><td>1.533</td><td>[1.238, 1.899]</td><td>0.872</td><td>64/64</td><td>rho ahead</td></tr>
+<caption>Instruction unit Ir, complete DLP, 64 fixtures a configuration, seeds 20260922 and 4242.
+  Each cell at its best measured base, fixed from an independent sweep before the draw.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>Best base</th><th>IC / rho</th><th>95% band</th><th>per-case sd(log)</th><th>Complete</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>8 orbits</td><td>0.831</td><td>[0.772, 0.894]</td><td>0.300</td><td>64/64</td><td>IC ahead</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td>16 orbits</td><td>1.396</td><td>[1.244, 1.567]</td><td>0.472</td><td>64/64</td><td>rho ahead</td></tr>
+<tr><td>n43a1</td><td>4,644,189,029</td><td>24 orbits</td><td>2.207</td><td>[1.933, 2.519]</td><td>0.540</td><td>64/64</td><td>rho ahead</td></tr>
 </tbody></table></div>
-<p><strong>Both bands exclude one, in opposite directions, so the collector crosses rho between
-  these two subgroup orders.</strong> The ratio grows as <code>r<sup>0.153</sup></code> between
-  them, against the <code>r<sup>1/6</sup> = r<sup>0.167</sup></code> the pair-table shape law
-  derives for the balanced optimum. Two cells fix one rate and no curvature, and they differ in
-  degree as well as in <code>r</code>, so that agreement is worth exactly what a two-point rate is
-  worth &mdash; but it is the first measured support the boundary has had beyond the panel. The
-  <code>n23a1</code> row doubles as a cross-check on the widened build: 0.831 here against 0.7498
-  in round 0019 and 0.7948 in round 0020.</p>
+<p><strong>The crossing lies between <code>n23a1</code> and <code>n37a0</code>, with both bands
+  clear of one in opposite directions.</strong> Beyond it the ratio grows at
+  <code>r<sup>[0.130, 0.188]</sup></code> over the first step and
+  <code>r<sup>[0.075, 0.187]</sup></code> over the second &mdash; each a range over every base
+  size inside that cell's flat region, since the ladder must not depend on choosing between sizes
+  the data cannot separate. <strong>The ranges overlap, so no curvature is resolvable here</strong>,
+  and the derived <code>r<sup>1/6</sup> = r<sup>0.167</sup></code> lies inside both. Overlapping
+  ranges are an absence of evidence for two rates, not evidence for one.</p>
 <div class="table-scroll"><table>
-<caption>What the widening cost: widened build against the promoted worker, three confirmation
-  fixtures at each panel cell. All 24 returned the same logarithms and the same factor-base hash.</caption>
-<thead><tr><th>Cell</th><th>n13a0</th><th>n17a1</th><th>n19a0</th><th>n19a1</th><th>n23a0</th><th>n23a1</th><th>n29a1</th><th>n31a0</th></tr></thead><tbody>
-<tr><td>widened / promoted Ir</td><td>1.0011</td><td>1.0008</td><td>1.0015</td><td>1.0006</td><td>1.0003</td><td>1.0002</td><td>1.0004</td><td>1.0004</td></tr>
+<caption>Why the base had to be swept: the sampler's default single batch is optimal on the panel
+  and nowhere beyond it, and reporting it overstates the candidate's loss.</caption>
+<thead><tr><th>Cell</th><th>8 orbits</th><th>16</th><th>24</th><th>32</th><th>40</th><th>48</th></tr></thead><tbody>
+<tr><td>n23a1</td><td><strong>0.831</strong></td><td>1.043</td><td>1.337</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+<tr><td>n37a0</td><td>1.763</td><td><strong>1.396</strong></td><td>1.519</td><td>1.709</td><td>1.846</td><td>&mdash;</td></tr>
+<tr><td>n43a1</td><td>5.794</td><td>3.006</td><td><strong>2.207</strong></td><td>2.261</td><td>&mdash;</td><td>2.449</td></tr>
 </tbody></table></div>
-<p>0.07% panel-wide, worst cell 0.15%. Two claims are withdrawn here: a pre-computed prediction
-  that <code>n37a0</code> would need 32 orbits (8 solve it, and are the best size measured), and
-  the derived orbit count for <code>n41a0</code>. <strong><code>n41a0</code> yields no
-  comparison</strong> at all: index calculus completes at <code>r</code> = 5.5&times;10<sup>11</sup>
-  and rho does not, returning in 0.06s against the ~72,600 steps it needs, which is the frozen
-  trial budget cutting rho off rather than rho being out-run &mdash; a budget exhaustion is never
-  evidence about an algorithm. The rounds-0019/0020 strict win is unchanged and stays scoped to
-  its eight cells, its two seeds and its subgroup orders; this panel adds the measured cell beyond
-  that scope, where the same collector loses. Earlier calibrated rows, fitted exponents and the
-  page's end-to-end verdict are unchanged.</p>
+<p>The best base grows with <code>r</code> &mdash; 8, 16, 24 orbits across 1100&times; in
+  <code>r</code>, about <code>r<sup>0.157</sup></code> &mdash; which is <em>far slower</em> than
+  the <code>F = (c&middot;#E&middot;t/k)<sup>1/3</sup></code> the same model derives, and that
+  model predicts 30 and 83 orbits at the two cells rather than 16 and 24. The two predictions are
+  not independent: <code>r<sup>1/6</sup></code> is derived <em>from</em> the base sitting at that
+  optimum. So the agreement on the rate, at a base measurably not where the derivation puts it, is
+  a coincidence the model does not yet explain rather than a confirmation of it.</p>
+<p>The trial cap was raised from 4096 to 65,536 so rho finishes at every cell. That is a protocol
+  change, not an extension &mdash; <code>max_trials</code> is rho's iterations-per-restart &mdash;
+  but it is worth <strong>at most 14 ppm</strong> in instructions on either arm, both signs, and
+  <code>n23a1</code> reads 0.831 at both caps to three decimals. The rounds-0019/0020 strict win is
+  untouched and stays scoped to its eight cells, its two seeds and its subgroup orders. Earlier
+  calibrated rows, fitted exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
 <!-- END ic-crossover-20260922 -->
 <section class="panel" id="radical-pair-image-20260921">
@@ -4236,7 +4275,13 @@ factor base, and this prices a decomposition oracle.</p>
 </section>
 <section class="panel" id="inherited-f4-20260922">
   <div class="panel-head">
-    <h2>F5 for the Koblitz Gr&ouml;bner stage: the criterion prunes nothing at degree 3; inheriting the parent&rsquo;s reduced basis, and splitting on the variable that displaces the fewest of its rows, cuts the stage 12.6&times; <span class="chip">engineering</span></h2>
+    <p><strong>Cache-limit correctness audit:</strong> cached and fresh layouts now obey the same
+      current column cap, including after the cap is lowered. Oversized cached layouts fall back
+      to fresh support construction; a resource-limit refusal remains distinct from a mathematical
+      refutation. The cache test checks thread-local layout identity instead of process-wide
+      counters. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_F4_CACHE_LIMIT_AUDIT.md">Audit and small Boolean regression</a>.
+      Historical fixed-cap measurements remain unchanged; this correction adds no performance or rho claim.</p>
+    <h2>F5 for the Koblitz Gr&ouml;bner stage: the criterion prunes nothing at degree 3; inheriting the parent&rsquo;s reduced basis, splitting on the variable that displaces the fewest of its rows, and rewriting only the rows a level touches cuts the stage 21&times; <span class="chip">engineering</span></h2>
     <p>Two F5 ideas applied to the matrix-F4 splitting solver behind the Koblitz decomposition
       oracle. <strong>The F5 criterion</strong>, stated correctly for the Boolean ring (the textbook
       <code>F_2</code> rule &ldquo;prune <code>t&middot;f_i</code> for <code>t &isin; LM&lang;f_1..f_i&rang;</code>&rdquo;
@@ -4247,18 +4292,20 @@ factor base, and this prices a decomposition oracle.</p>
       <strong>Inherited matrix-F4</strong> applies F5&rsquo;s idea to the axis the solver actually iterates
       along: substitution is a ring homomorphism, so a child&rsquo;s Macaulay row space is the image of its
       parent&rsquo;s reduced rows, and only the rows whose pivot contains the assigned variable need
-      re-reducing. No matrix is built below the root. <strong>Which variable</strong> decides how many that is:
-      a pivot is a row&rsquo;s largest DegRevLex monomial, so the historical rule &mdash; split on the
-      lowest-indexed free variable, the largest in the order &mdash; picks the variable most pivots contain and
-      displaces half the basis per level deep in the tree. Splitting on the <em>smallest</em> free variable
-      halves the engine&rsquo;s work on every rung with a tree and turns its one loss (the chained cubic
-      systems, <code>0.60&times;</code>) into an <code>11&times;</code> win.</p>
+      re-reducing. No matrix is built below the root. Two measured facts then set the constant.
+      <strong>Which variable</strong> decides how many rows are displaced: a pivot is a row&rsquo;s largest
+      DegRevLex monomial, so the historical rule &mdash; split on the lowest-indexed free variable, the largest in
+      the order &mdash; picks the variable most pivots contain and displaces half the basis per level deep in the
+      tree; splitting on the <em>smallest</em> free variable halves the engine&rsquo;s work and turns its one loss
+      (the chained cubic systems, <code>0.60&times;</code>) into a win. And <strong>three quarters of the rows a
+      level keeps are never touched at that level</strong>, so a kept row is shared by reference and rewritten
+      into a newer layout only when something needs it, through the composition of every step since, charged once.</p>
     <p>Boundary: the <code>m&middot;2<sup>131</sup></code> candidate-tuple count of the ECC2K-130
       decomposition note &mdash; no term for how a Macaulay matrix is reduced or how many are built, so
       the ratio to it is <strong>flat by construction</strong>. Reference:
       <code>SolverEngine::MatrixF4 { max_degree: 3 }</code> splitting on the lowest free variable, the pre-round
       default, on the same binary (<code>KIC_F4_INHERIT=0</code>). Unit: 64-bit word operations; the candidate is
-      additionally charged one per word read and written by specialisation, which the reference&rsquo;s matrix
+      additionally charged one per word read and written every time a row is rewritten, which the reference&rsquo;s matrix
       build never pays. Two comparisons are drawn and named: <em>same-tree</em>, accepted by the frozen suite&rsquo;s
       <code>compare.py</code> (identical verdict digest and node counts), and <em>cross-tree</em> against the
       pre-round default, where the split rule changed the tree&rsquo;s shape &mdash; same instances, same targets
@@ -4275,47 +4322,49 @@ factor base, and this prices a decomposition oracle.</p>
   <div class="table-scroll"><table>
     <caption>Frozen Gr&ouml;bner-stage ladder of <code>research/groebner_stage_20260915</code>, 176 targets, medians of 3;
       word operations are deterministic and identical across repetitions. &ldquo;L&rdquo; and &ldquo;H&rdquo; are the
-      split rules (lowest, highest free variable); &ldquo;nodes&rdquo; are the reductions each tree took. Ratios are
-      reference / candidate. Stage diagnostic (AGENTS.md &sect;8): no <code>S</code>, rho ratio or end-to-end claim.</caption>
-    <thead><tr><th>Rung</th><th>m</th><th>Nodes L &rarr; H</th><th>Reference (F4, L)</th><th>F5 criterion</th><th>Inherited, L (same tree)</th><th>F4, H</th><th>Inherited, H (default)</th><th>Ratio to reference</th><th>Floor ratio</th><th>Wall</th><th>Correct</th><th>Class</th></tr></thead>
+      split rules (lowest, highest free variable); &ldquo;eager&rdquo; is the default of the previous round, kept as the
+      before-mark; &ldquo;nodes&rdquo; are the reductions each tree took. Ratios are reference / candidate. Stage diagnostic
+      (AGENTS.md &sect;8): no <code>S</code>, rho ratio or end-to-end claim.</caption>
+    <thead><tr><th>Rung</th><th>m</th><th>Nodes L &rarr; H</th><th>Reference (F4, L)</th><th>F5 criterion</th><th>Inherited, L (same tree)</th><th>F4, H</th><th>Inherited, H, eager (before)</th><th>Inherited, H, lazy (default)</th><th>Ratio to reference</th><th>Floor ratio</th><th>Wall</th><th>Correct</th><th>Class</th></tr></thead>
     <tbody>
-      <tr><td><code>K_0/2^9</code></td><td>2</td><td>386 &rarr; 338</td><td class="n">1,352,350</td><td class="n">1,348,747</td><td class="n">664,322 (2.04&times;)</td><td class="n">1,257,665</td><td class="n">475,686</td><td class="n">2.84&times;</td><td>flat</td><td class="n">1.76&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_0/2^9</code></td><td>3</td><td>285 &rarr; 382</td><td class="n">4,164,666</td><td class="n">4,149,441</td><td class="n">3,943,077 (1.06&times;)</td><td class="n">2,026,237</td><td class="n">2,524,783</td><td class="n">1.65&times;</td><td>flat</td><td class="n">1.14&times;</td><td>verified</td><td><span class="chip">engineering</span>; F4-H cheaper on this shallow cubic cell (0.80&times;)</td></tr>
-      <tr><td><code>K_0/2^13</code></td><td>2</td><td>599 &rarr; 520</td><td class="n">20,668,245</td><td class="n">19,776,482</td><td class="n">11,642,531 (1.78&times;)</td><td class="n">25,336,199</td><td class="n">8,302,715</td><td class="n">2.49&times;</td><td>flat</td><td class="n">1.28&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_1/2^15</code></td><td>2</td><td>32 &rarr; 32</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">1.00&times;</td><td>flat</td><td class="n">0.92&times;</td><td>identical</td><td>no tree to inherit along</td></tr>
-      <tr><td><code>K_1/2^17</code></td><td>2</td><td>1,763 &rarr; 1,769</td><td class="n">55,594,932</td><td class="n">55,594,932</td><td class="n">10,059,990 (5.53&times;)</td><td class="n">62,049,801</td><td class="n">6,535,588</td><td class="n">8.51&times;</td><td>flat</td><td class="n">4.50&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><code>K_1/2^23</code></td><td>2</td><td>4,934 &rarr; 4,876</td><td class="n">699,511,508</td><td class="n">699,511,508</td><td class="n">97,826,189 (7.15&times;)</td><td class="n">883,061,010</td><td class="n">44,225,148</td><td class="n"><strong>15.82&times;</strong></td><td>flat</td><td class="n">7.47&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><strong>total</strong></td><td></td><td>7,999 &rarr; 7,917</td><td class="n">781,399,171</td><td class="n">780,488,580 (1.001&times;)</td><td class="n">124,243,579 (6.29&times;)</td><td class="n">973,838,382 (0.80&times;)</td><td class="n"><strong>62,171,390</strong></td><td class="n"><strong>12.57&times;</strong></td><td>flat</td><td class="n">5.86&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>same-tree: F4, H &rarr; inherited, H</td><td></td><td>7,917</td><td class="n">973,838,382</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">62,171,390</td><td class="n">15.66&times;</td><td>flat</td><td class="n">5.59&times;</td><td>identical</td><td><span class="chip">engineering</span> (compare.py accepts every rung)</td></tr>
-      <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td>228 &rarr; 228</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">74,984,242 (1.56&times;)</td><td class="n">163,178,360</td><td class="n">31,800,117</td><td class="n">3.68&times;</td><td>flat</td><td class="n">1.54&times;</td><td>identical tree</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td>1,062 &rarr; 1,198</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,475,463 (5.19&times;)</td><td class="n">42,029,541</td><td class="n">4,607,771</td><td class="n">7.29&times;</td><td>flat</td><td class="n">3.92&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,746,829,713 (<strong>0.60&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n"><strong>11.13&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.60&times; is the superseded loss</td></tr>
+      <tr><td><code>K_0/2^9</code></td><td>2</td><td>386 &rarr; 338</td><td class="n">1,352,350</td><td class="n">1,348,747</td><td class="n">606,611 (2.23&times;)</td><td class="n">1,257,665</td><td class="n">475,686</td><td class="n">391,693</td><td class="n">3.45&times;</td><td>flat</td><td class="n">2.15&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_0/2^9</code></td><td>3</td><td>285 &rarr; 382</td><td class="n">4,164,666</td><td class="n">4,149,441</td><td class="n">2,760,501 (1.51&times;)</td><td class="n">2,026,237</td><td class="n">2,524,783</td><td class="n">1,783,018</td><td class="n">2.34&times;</td><td>flat</td><td class="n">1.51&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_0/2^13</code></td><td>2</td><td>599 &rarr; 520</td><td class="n">20,668,245</td><td class="n">19,776,482</td><td class="n">10,777,601 (1.92&times;)</td><td class="n">25,336,199</td><td class="n">8,302,715</td><td class="n">5,588,277</td><td class="n">3.70&times;</td><td>flat</td><td class="n">2.02&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_1/2^15</code></td><td>2</td><td>32 &rarr; 32</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">107,470</td><td class="n">1.00&times;</td><td>flat</td><td class="n">0.90&times;</td><td>identical</td><td>no tree to inherit along</td></tr>
+      <tr><td><code>K_1/2^17</code></td><td>2</td><td>1,763 &rarr; 1,769</td><td class="n">55,594,932</td><td class="n">55,594,932</td><td class="n">8,733,728 (6.37&times;)</td><td class="n">62,049,801</td><td class="n">6,535,588</td><td class="n">4,205,307</td><td class="n">13.22&times;</td><td>flat</td><td class="n">6.85&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><code>K_1/2^23</code></td><td>2</td><td>4,934 &rarr; 4,876</td><td class="n">699,511,508</td><td class="n">699,511,508</td><td class="n">89,762,781 (7.79&times;)</td><td class="n">883,061,010</td><td class="n">44,225,148</td><td class="n">25,226,634</td><td class="n"><strong>27.73&times;</strong></td><td>flat</td><td class="n">12.33&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><strong>total</strong></td><td></td><td>7,999 &rarr; 7,917</td><td class="n">781,399,171</td><td class="n">780,488,580 (1.001&times;)</td><td class="n">112,748,692 (6.93&times;)</td><td class="n">973,838,382 (0.80&times;)</td><td class="n">62,171,390 (12.57&times;)</td><td class="n"><strong>37,302,399</strong></td><td class="n"><strong>20.95&times;</strong></td><td>flat</td><td class="n">9.29&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>same-tree: F4, H &rarr; default</td><td></td><td>7,917</td><td class="n">973,838,382</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">37,302,399</td><td class="n">26.11&times;</td><td>flat</td><td class="n">8.85&times;</td><td>identical</td><td><span class="chip">engineering</span> (compare.py accepts every rung; every rung with a tree improves)</td></tr>
+      <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td>228 &rarr; 228</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">74,984,242 (1.56&times;)</td><td class="n">163,178,360</td><td class="n">31,800,117</td><td class="n">22,640,333</td><td class="n">5.16&times;</td><td>flat</td><td class="n">3.01&times;</td><td>identical tree</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td>1,062 &rarr; 1,198</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,475,463 (5.19&times;)</td><td class="n">42,029,541</td><td class="n">4,607,771</td><td class="n">3,011,390</td><td class="n">11.15&times;</td><td>flat</td><td class="n">5.94&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,670,183,123 (<strong>0.62&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n">55,202,947</td><td class="n"><strong>29.94&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.62&times; is the superseded loss</td></tr>
     </tbody>
   </table></div>
   <div class="table-scroll"><table>
     <caption>Where the inherited engine&rsquo;s operations go on the rung that dominates, <code>K_1/2^23</code>, whole ladder run,
-      before and after the split rule. The re-reduction of displaced rows &mdash; the cascade the historical rule caused &mdash;
-      falls 8.4&times;; what remains is the specialisation charge, one word read and one written per word of every row at
-      every level, which is the next lever.</caption>
-    <thead><tr><th>Component</th><th>Inherited, L</th><th>Share</th><th>Inherited, H (default)</th><th>Share</th></tr></thead>
+      across the three rounds. The historical rule&rsquo;s cascade of displaced rows was the first cost to fall; the rewriting
+      of every kept row at every level the second. What remains is proportional to the displaced rows, plus the roots.</caption>
+    <thead><tr><th>Component</th><th>Inherited, L</th><th>Inherited, H, eager</th><th>Inherited, H, lazy (default)</th><th>Share now</th></tr></thead>
     <tbody>
-      <tr><td>root reductions (16 targets, degrees 2 and 3)</td><td class="n">6,719,658</td><td class="n">7%</td><td class="n">6,719,658</td><td class="n">15%</td></tr>
-      <tr><td>re-reduction of displaced rows</td><td class="n">60,351,941</td><td class="n">62%</td><td class="n">7,150,501</td><td class="n">16%</td></tr>
-      <tr><td>specialisation (word reads and writes, charged to the candidate only)</td><td class="n">30,626,267</td><td class="n">31%</td><td class="n">30,228,073</td><td class="n">68%</td></tr>
-      <tr><td>tail RREF</td><td class="n">128,323</td><td class="n">0.1%</td><td class="n">126,916</td><td class="n">0.3%</td></tr>
-      <tr><td><strong>inherited F4 total</strong> &middot; reference 699,511,508</td><td class="n"><strong>97,826,189</strong></td><td class="n"></td><td class="n"><strong>44,225,148</strong></td><td class="n"></td></tr>
+      <tr><td>root reductions (16 targets, degrees 2 and 3)</td><td class="n">6,719,658</td><td class="n">6,719,658</td><td class="n">6,719,658</td><td class="n">27%</td></tr>
+      <tr><td>re-reduction of displaced rows</td><td class="n">60,351,941</td><td class="n">7,150,501</td><td class="n">7,150,501</td><td class="n">28%</td></tr>
+      <tr><td>specialisation (word reads and writes, charged to the candidate only)</td><td class="n">30,626,267</td><td class="n">30,228,073</td><td class="n">11,229,559</td><td class="n">45%</td></tr>
+      <tr><td>tail RREF</td><td class="n">128,323</td><td class="n">126,916</td><td class="n">126,916</td><td class="n">0.5%</td></tr>
+      <tr><td><strong>inherited F4 total</strong> &middot; reference 699,511,508</td><td class="n"><strong>97,826,189</strong></td><td class="n"><strong>44,225,148</strong></td><td class="n"><strong>25,226,634</strong></td><td class="n"></td></tr>
     </tbody>
   </table></div>
-  <p>Controls retained in the evidence, all under the shipped rule: an echelon-only root everywhere
-    (<code>62,218,273</code>, within 0.1% of the default), a fully reduced root everywhere (<code>70,124,293</code>),
-    restoring reduced form after every level (<code>94,996,759</code> &mdash; it cuts the cascade from 40.5 to 9.8 pivots per
-    displaced row but costs 72 M word XORs to save 49 M on <code>n = 23</code>, because a reduced basis is denser), and, from the
-    historical rule, two rejected cubic-system rescues (drift-triggered rebuilds, a cost-triggered fallback; 0.45&ndash;0.48&times;).
-    The node-level probe cross-checks 10,998 children on six cells against from-scratch reductions with zero solver-view
-    mismatches. The split rule alone costs the from-scratch engine 0.80&times; on the quadratic rungs, so <code>SplitRule::Auto</code>
-    gives it to the inherited engine only and <code>KIC_F4_INHERIT=0</code> still reproduces the reference to the digit.
-    Existing calibrated rows, exponents and the page&rsquo;s end-to-end verdict are unchanged: the stage is one phase of
-    relation collection, and <code>12.6&times;</code> off it is <code>2<sup>3.7</sup></code> off <code>2<sup>131</sup></code>.</p>
+  <p>Controls retained in the evidence, all under the shipped rule with lazy rows: an echelon-only root everywhere
+    (<code>39,060,565</code>), a fully reduced root everywhere (<code>45,006,527</code>), restoring reduced form after
+    every level (<code>94,952,249</code> &mdash; it cuts the cascade from 40.5 to 9.8 pivots per displaced row but costs 72 M
+    word XORs to save 49 M, because a reduced basis is denser), and, from the historical rule, two rejected cubic-system
+    rescues (drift-triggered rebuilds, a cost-triggered fallback; 0.45&ndash;0.48&times;). Rejected in this round, numbers in
+    the note: splitting on the variable in the fewest pivots (the tree grows to compensate, <code>0.51&times;</code>), and
+    carrying only the top-degree basis (a wash). The node-level probe cross-checks 10,998 children on six cells against
+    from-scratch reductions with zero solver-view mismatches. The split rule alone costs the from-scratch engine
+    0.80&times; on the quadratic rungs, so <code>SplitRule::Auto</code> gives it to the inherited engine only and
+    <code>KIC_F4_INHERIT=0</code> still reproduces the reference to the digit. Existing calibrated rows, exponents and the
+    page&rsquo;s end-to-end verdict are unchanged: the stage is one phase of relation collection, and <code>21&times;</code>
+    off it is <code>2<sup>4.4</sup></code> off <code>2<sup>131</sup></code>.</p>
 </section>
 <!-- END inherited-f4-20260922 -->
 </body>

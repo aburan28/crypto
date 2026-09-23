@@ -2,6 +2,8 @@
 
 Classification: **engineering experiment; no end-to-end speedup established**. The affine template is correct and reusable across targets. The current serialized cache path adds enough overhead to erase its stage savings in the observed full-run medians. Full parameterized Boolean bases are not promoted. All cache layers remain opt-in.
 
+**2026-09-23, run-002:** a re-run on current `main` reproduces this verdict. At the frozen sizes no cache mode pays end to end, and the reduction cache is no longer reached by the default Gröbner engine. At n = 13, outside the frozen contract, the local preprocessing cache saves about 4–6%. See [Run 002](#run-002-current-main-against-the-same-reference).
+
 ## Frozen scope and checks
 
 Run `results/run-001` contains all **159 process records**: 63 stage processes and 96 full-DLP attempts. Of the stage processes, 54 completed and 9 parameterized-basis jobs hit the declared 30-second limit. All **1,080 completed target/repetition/variant checks** agree with exhaustive ANF truth and both SAT and F4 solution extraction. This represents 152 distinct field/layout/target systems for baseline/template, with 56 also completed by the parameterized route; repetitions are not independent instances.
@@ -69,6 +71,102 @@ For a fixed workload, if solver/preprocessing fraction f has fraction h eliminat
 
 Next engineering step: retain the decoded preprocessing object per worker to avoid repeatedly deserializing a small reusable template, then repeat the same matched suite with larger verified workloads. For parameterized algebra, test target-independent chain-prefix reductions or limited-degree reusable consequences before attempting a full basis over all target bits. The current full-parameter basis route failed its promotion criterion.
 
+## Run 002: current main against the same reference
+
+Re-run on 2026-09-23 with `run.py`, `compare.py` and `contract.json` **unchanged**. It is kept beside run-001 rather than replacing it. The setup:
+
+- **Candidate:** `main` at `6db529ea`, built with `--features redis-cache`. The run includes the decoded-value local layer (PR #531) and the field-closed Gröbner engine (PR #626).
+- **Reference:** a fresh build of `01fa842`. Its binary hash differs from run-001's (`3ea7c7ec…` against `a0b9f9e4…`), but its outputs are identical in all 16 reference runs: status, result and every logical counter. It is the same reference.
+- **Host:** Redis 7.0.15; 4 cores; `RAYON_NUM_THREADS=1` as the script sets.
+- **Timing:** one sample per cell. The load average was 4.18 at the start (the tail of the two builds) and 1.05 at the end.
+
+### What `compare.py` says, and why
+
+**Admission fails**, with `all_dlp_outcomes_match_reference: false`. Everything else is healthy:
+- all 159 processes are recorded;
+- every stage answer matches exhaustive truth;
+- there are 0 Redis errors;
+- there are 16 warm new-process hits;
+- the same 9 parameterized jobs time out as in run-001.
+
+The failing rows are **20 of 96: every n = 9 Gröbner solve, in every mode, including `off`**.
+- **The results are identical and verified.** Only the path differs: seed 101 takes 3 trials and 28 F4 reductions where the reference takes 2 and 24.
+- **The cause is the solver, not the cache.** #612 made `InheritedF4` the default engine, and it splits on the smallest free variable. At `01fa842` the default was `MatrixF4 { max_degree: 3 }`. So the candidate's solver is no longer the reference's.
+- **#626 is not the cause.** `main` at `4428148f`, just before #626, gives the same counters on all four seeds.
+
+The admission test assumes the candidate solver equals the reference solver. That no longer holds, so the reference column is a correctness anchor (same answers, all verified) and no longer a counter-level match.
+
+What that test protects is that **the cache must not change behaviour**. With the reference behind, the form of that invariant that still applies is: every cache mode must match `off` in the same binary. It holds in **64 of 64** mode runs, in status, result and every logical counter.
+
+### Complete pipeline comparison
+
+The unit is the same as above: end-to-end elapsed milliseconds summed over the four n = 9 seeds. **The ratio to `off` is the primary reading**, because `off` is the same binary with the cache disabled. The ratio to the reference also carries every solver change since `01fa842`.
+
+| Solver | Mode | Total elapsed ms | / off | / reference | Verified | run-001 / off |
+|---|---|---:|---:|---:|---:|---:|
+| groebner | reference | 30.122 | 2.722 | 1.000 | 4/4 | 1.016 |
+| groebner | off | 11.067 | 1.000 | 0.367 | 4/4 | 1.000 |
+| groebner | preprocess-local | 12.082 | 1.092 | 0.401 | 4/4 | 1.062 |
+| groebner | both-local | 12.279 | 1.110 | 0.408 | 4/4 | 1.358 |
+| groebner | both-redis-cold | 14.906 | 1.347 | 0.495 | 4/4 | 1.921 |
+| groebner | both-redis-warm | 14.458 | 1.306 | 0.480 | 4/4 | 1.532 |
+| sat | reference | 14.030 | 1.293 | 1.000 | 4/4 | 0.845 |
+| sat | off | 10.847 | 1.000 | 0.773 | 4/4 | 1.000 |
+| sat | preprocess-local | 11.870 | 1.094 | 0.846 | 4/4 | 0.996 |
+| sat | both-local | 11.872 | 1.094 | 0.846 | 4/4 | 0.942 |
+| sat | both-redis-cold | 14.204 | 1.309 | 1.012 | 4/4 | 1.073 |
+| sat | both-redis-warm | 13.017 | 1.200 | 0.928 | 4/4 | 1.004 |
+
+These single-sample differences are backed by the cache's own counters, not left to noise:
+- **Preprocessing layer.** It records 1.03–1.11 ms of overhead over the four solves, 8.6–9.4% of elapsed time. That accounts for the measured 1.09×.
+- **Why it cannot pay.** Each `ic run` process makes 2.5–3.5 lookups: one cold miss (key construction, admission encoding and hashing) and 1.5–2.5 hits. A template that builds in microseconds, reused once or twice more, cannot repay a cold miss.
+- **Redis modes.** They record 3.0–3.7 ms (21–25%) of overhead.
+- **The #531 fix.** Holding decoded values cut the local Gröbner penalty (`both-local` from 1.358 to 1.110 of `off`) but did not reverse it.
+
+**The exact-reduction layer is no longer reached on the default engine.** It records **0 lookups** in run-002:
+- `InheritedF4` reduces through `reduce_inherited`, which does not consult the memo (`koblitz_groebner.rs`, `solve_rec`). So `IC_REDUCTION_CACHE` has no effect on the default Gröbner path, and the `both-*` modes now differ from `preprocess-local` only by noise.
+- This is also why warm new-process Redis hits fell from 175 to 16: the reduction layer's hits are gone.
+- Its absence is not a loss. In run-001 that layer recorded 6 local hits in 109 lookups, and 22–48% of elapsed time as overhead.
+
+The Gröbner `off / reference` ratio of 0.367 comes from the engine change, not from caching. The two sides also take different trial paths, so this is not the same work done faster. It is recorded here and is not claimed.
+
+### Stage comparison, run-002
+
+The same checks passed. Cold-F4 candidate/baseline for the **template** is 0.75–1.05 (run-001: 0.64–1.00). The template still saves at stage level, where it is held as a plain Rust object with no cache machinery.
+
+The **parameterized** route measures 22.6× and 776× at n = 3 and 5 with ell = 2 (run-001: 124.6× and 4,795×). The chain criterion made the engine faster since then, and the route is still nowhere near promotion. Its full-basis cache was removed in #626. The same three parameterized cells time out on every repetition.
+
+### Diagnostic at n = 13, outside the frozen contract
+
+The counters above say what could change the verdict: more lookups per process. n = 13 is the one larger degree the frozen invocation reaches:
+- n = 11 stops with "K_0 / GF(2^11) has no usable prime-order subgroup in the existing constructor";
+- n = 15 uses all 500 trials without a relation.
+
+[`diagnostic_n13.py`](diagnostic_n13.py) follows `run.py`'s conventions: `IC_*` stripped, `RAYON_NUM_THREADS=1`, 30 s and 2 GiB, raw output kept. It compares only `off` and `preprocess-local`, over 4 seeds × 2 solvers × **5 repetitions**, alternating the mode order between repetitions. The load average was 0.05 at the start and 0.20 at the end. Every one of the 80 processes completed and verified, and `preprocess-local` is identical to `off` in 40 of 40 pairs.
+
+| Solver | Trials per seed | Lookups / hits per process | Cache overhead | local / off, per rep | Median | Faster pairs |
+|---|---|---:|---:|---|---:|---:|
+| groebner | 14, 7, 8, 7 | 9.0 / 8.0 | 3.2% | 0.941, 0.989, 0.924, 0.893, 0.987 | **0.941** | 18 / 20 |
+| sat | 23, 15, 18, 53 | 27.2 / 26.2 | 0.6% | 0.976, 0.928, 1.058, 0.958, 0.962 | **0.962** | 14 / 20 |
+
+The sign flips as the mechanism predicts:
+- **n = 9:** 2.5–3.5 lookups per process, and the cache costs about 9%.
+- **n = 13:** 9–27 lookups, and it saves about 4–6%.
+
+How strong each gain is:
+- **Gröbner:** consistent. All five repetitions are below 1, and 18 of 20 paired runs are faster (one-sided sign test p ≈ 0.0002).
+- **SAT:** smaller and not consistent. One repetition is above 1, and 14 of 20 pairs are faster (one-sided p ≈ 0.06).
+
+This is **engineering, not a finding**, and not an end-to-end speedup claim. n = 13 is outside the frozen contract, and `AGENTS.md` §8 establishes speedups only on the frozen benchmark.
+
+### Decision after run-002
+
+**Unchanged at the frozen sizes.** No cache mode improves end-to-end elapsed time at n = 7 and 9. Every mode is slower than `off` in the same binary, and the cache's own overhead counters account for the difference.
+
+**Outside them, the local preprocessing cache pays.** At n = 13 it saves about 4–6%, consistently for Gröbner. The Redis and reduction modes add nothing: the reduction layer is not reached, and Redis only adds cost.
+
+The preprocessing cache therefore stays opt-in. `IC_PREPROCESS_CACHE=local` is worth setting for long relation searches. Making it the default needs the frozen regression suite (`research/index_calculus_baseline_20260914/regression`) run with it, not this diagnostic.
+
 ## Evidence
 
 - [Frozen contract](contract.json)
@@ -77,5 +175,7 @@ Next engineering step: retain the decoded preprocessing object per worker to avo
 - [Source and binary hashes](results/run-001/hashes.json)
 - [Test outcomes](validation/tests.json)
 - [Outage comparison](validation/outage.json)
+- Run 002: [comparison](results/run-002/summary.json), [process statuses](results/run-002/processes.json), [hashes](results/run-002/hashes.json)
+- n = 13 diagnostic: [script](diagnostic_n13.py), [process statuses and raw output](results/diagnostic-n13/processes.json)
 
 `results/run-001/*.stdout` and `*.stderr` preserve every raw run, including timed-out basis jobs. `validation/dependencies.lock.txt` preserves the dependency resolution. Benchmarks were executed locally; no AWS resources were provisioned.
