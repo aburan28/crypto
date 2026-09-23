@@ -1,0 +1,25 @@
+{
+  "campaign_seconds": 10.844365917000687,
+  "complete": true,
+  "ended_utc": "2026-09-23T07:05:15.327047+00:00",
+  "git_base": "8f42e0813a5607d308369f66d2ac607a3c9d9df3",
+  "git_status": "?? ./\n",
+  "host": {
+    "cpus": 14,
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "system": "Darwin"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean degree-3 construction plus canonical GF2 reduced-row-space computation. This is a complete bounded linear-algebra workload, not complete Groebner closure or polynomial solving. No production solver integration, curve inputs, scalar recovery, relation campaigns or rho runs.",
+  "source_hashes": {
+    "analyze.py": "83cd4311264b2813d1543def141554f398d4beac50b22b23d1fbf43091757424",
+    "protocol.json": "b6f6d9e62d4455ef2ac3be31be37ef387ece639e01892cabb8f25305d3df1d15",
+    "run.py": "7c106f517b375d23a161317db0d775b0b71f22c2d5150819093f63111bdf33b3",
+    "worker.rs": "d167aa39a5ed7babd438a079357fe0dd3da8bf7fd9c4bb8f2010f8d7d54601b9"
+  },
+  "started_utc": "2026-09-23T07:05:01.796373+00:00",
+  "test_executable_sha256": "7620b3f236f4717619b28c8246193ddd77c68940491e58afb67490fedd2a932d",
+  "worker_sha256": "23c82503dcc84e50ca3de04b63594f5523fb66b5f70028bdf055974fbc5c71b9"
+}
