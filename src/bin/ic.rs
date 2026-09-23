@@ -452,6 +452,14 @@ fn display(report: &Value) {
                 report["all_verified"]
             );
         }
+        Some("rho-batch") => {
+            println!(
+                "Batch rho: {}; {} curves, all verified: {}",
+                report["status"],
+                report["curves"].as_array().map_or(0, |a| a.len()),
+                report["all_verified"]
+            );
+        }
         Some("rho-reprice") => {
             println!(
                 "Re-priced {}: {}; the frozen walk reproduced on every recorded seed: {}",

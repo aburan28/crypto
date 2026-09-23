@@ -22,6 +22,13 @@
 //! matched walk on the same seeds and targets and divides every recorded
 //! row's `S` by the new mean.  The index-calculus rows themselves are not
 //! re-run: their counts did not change, only the reference did.
+//!
+//! **Batch mode** (`--batch-koblitz 0/41 --batch-sizes 1,4,16,32
+//! --batches 16`) solves `k` targets at a time by batch rho on a Koblitz
+//! curve's signed-Frobenius classes, the reference for a figure that
+//! amortises one build over `k` targets (ledger §19).  Every batch draws
+//! fresh targets, every logarithm is checked against the planted one, and
+//! the cost per target is the batch's total over `k·√r`.
 
 use std::path::PathBuf;
 
@@ -33,8 +40,9 @@ use serde_json::{json, Value};
 use crypto_lib::cryptanalysis::ic_boundary::{
     find_prime_order_curve, generic_floor_ops, generic_floor_s, koblitz_instance, koblitz_instance_best,
     prime_instance_for, random_binary_instance,
-    rho_cap, rho_reference, rho_reference_walk, roster_prime_instance, signed_frobenius_rho, BinaryGroup,
-    BinaryInstance, CountedGroup, GroupOps, PrimeInstance, RhoResult, RhoWalk,
+    rho_cap, rho_reference, rho_reference_walk, roster_prime_instance, signed_frobenius_rho,
+    signed_frobenius_rho_batch, BinaryGroup, BinaryInstance, CountedGroup, GroupOps, PrimeInstance, RhoResult,
+    RhoWalk,
 };
 
 #[derive(Args, Clone, Debug)]
@@ -75,6 +83,17 @@ pub struct RhoArgs {
     /// has one, so a run's curves are disjoint from another seed's.
     #[arg(long)]
     pub generated_primes: bool,
+    /// Batch mode (ledger §19): Koblitz curves as `a/n` (`0/41,0/53`),
+    /// each solved in batches of every size in `--batch-sizes` by batch
+    /// rho on the signed-Frobenius classes, fresh targets every batch.
+    #[arg(long, value_delimiter = ',')]
+    pub batch_koblitz: Vec<String>,
+    /// Targets per batch.
+    #[arg(long, value_delimiter = ',', default_value = "1,4,16,32")]
+    pub batch_sizes: Vec<usize>,
+    /// Batches per curve and size.
+    #[arg(long, default_value_t = 16)]
+    pub batches: usize,
 }
 
 /// The walks a ladder runs, by name.
@@ -842,12 +861,178 @@ fn reprice(path: &PathBuf, args: &RhoArgs, json_only: bool) -> Result<Value, Str
     }))
 }
 
+// ── Batch rho ──────────────────────────────────────────────────────
+
+/// A seed for one piece of one batch, from the run's seed.
+fn derive(seed: u64, parts: &[u64]) -> u64 {
+    let mut h = seed ^ 0x9E37_79B9_7F4A_7C15;
+    for &p in parts {
+        h = (h ^ p).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        h ^= h >> 31;
+    }
+    h
+}
+
+/// The batch law's per-target share at `k` targets, relative to one
+/// target alone: `Σ_{i<k} C(2i, i)/4^i / k` (Kuhn–Struik), about
+/// `√(2/πk)` for large `k`.
+fn batch_law(k: usize) -> f64 {
+    let mut term = 1.0f64;
+    let mut sum = 0.0f64;
+    for i in 0..k {
+        sum += term;
+        // C(2i+2, i+1)/4^{i+1} = C(2i, i)/4^i · (2i+1)/(2i+2)
+        term *= (2 * i + 1) as f64 / (2 * i + 2) as f64;
+    }
+    sum / k.max(1) as f64
+}
+
+fn mean_sd(v: &[f64]) -> (f64, f64) {
+    let n = v.len() as f64;
+    if v.is_empty() {
+        return (f64::NAN, f64::NAN);
+    }
+    let m = v.iter().sum::<f64>() / n;
+    let var = if v.len() > 1 { v.iter().map(|x| (x - m).powi(2)).sum::<f64>() / (n - 1.0) } else { 0.0 };
+    (m, var.sqrt())
+}
+
+fn batch(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
+    let mut curves = Vec::new();
+    for spec in &args.batch_koblitz {
+        let (a, n) = spec
+            .split_once('/')
+            .and_then(|(a, n)| Some((a.trim().parse::<u8>().ok()?, n.trim().parse::<u32>().ok()?)))
+            .ok_or_else(|| format!("a Koblitz curve is `a/n`, e.g. 0/41; got {spec:?}"))?;
+        if a > 1 || !(5..=62).contains(&n) {
+            return Err(format!("no Koblitz curve K_{a} / GF(2^{n}) here"));
+        }
+        let inst = koblitz_instance(a, n).ok_or_else(|| format!("K_{a} / GF(2^{n}) is not usable"))?;
+        curves.push((a, inst));
+    }
+    if args.batch_sizes.is_empty() || args.batch_sizes.contains(&0) {
+        return Err("batch sizes must be positive".into());
+    }
+    let mut out = Vec::new();
+    let mut md = String::from(
+        "| curve | log₂ r | A | k | batches | S per target | sd | walk S per target | over k = 1 | batch law | floor S (one target) | own trail | earlier trail | ok |\n|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|\n",
+    );
+    for (a, inst) in &curves {
+        let (n, r) = (inst.n, inst.r);
+        let bg = BinaryGroup(&inst.fast);
+        let floor = generic_floor_s(2.0 * n as f64);
+        if !json_only {
+            eprintln!("  {}: r = {r} (2^{:.2}), A = {}", inst.name, (r as f64).log2(), 2 * n);
+        }
+        let mut sizes = Vec::new();
+        let mut single_mean = None;
+        for &k in &args.batch_sizes {
+            let mut runs = Vec::new();
+            let mut s_values = Vec::new();
+            let mut walk_values = Vec::new();
+            let (mut own, mut earlier) = (0u64, 0u64);
+            let mut all_ok = true;
+            for b in 0..args.batches {
+                let tseed = derive(args.seed, &[u64::from(*a), n as u64, k as u64, b as u64, 1]);
+                let wseed = derive(args.seed, &[u64::from(*a), n as u64, k as u64, b as u64, 2]);
+                let mut rng = StdRng::seed_from_u64(tseed);
+                let planted: Vec<u64> = (0..k).map(|_| rng.gen_range(1..r)).collect();
+                let mut ops = GroupOps::default();
+                let targets: Vec<_> = planted.iter().map(|&d| bg.mul(&mut ops, inst.generator, d)).collect();
+                let res = signed_frobenius_rho_batch(inst, &targets, wseed).ok_or("not a Koblitz instance")?;
+                let ok = res.per_target.iter().zip(&planted).all(|(t, &d)| t.verified && t.recovered == Some(d));
+                all_ok &= ok;
+                own += res.counters["solved_on_own_trail"];
+                earlier += res.counters["solved_on_an_earlier_trail"];
+                s_values.push(res.s_per_target);
+                walk_values.push(res.s_walk_per_target);
+                if !json_only {
+                    eprintln!(
+                        "    k = {k:>2} batch {b:>2}: S/target {:.4}, {} of {k} verified, {:.1} s",
+                        res.s_per_target,
+                        res.per_target.iter().filter(|t| t.verified).count(),
+                        res.wall_ns as f64 / 1e9
+                    );
+                }
+                runs.push(json!({
+                    "batch": b, "target_seed": tseed, "walk_seed": wseed, "planted": planted,
+                    "all_verified": ok, "gae": res.gae, "setup_gae": res.setup_ops.gae(),
+                    "s_per_target": res.s_per_target, "s_walk_per_target": res.s_walk_per_target,
+                    "wall_ms": res.wall_ns as f64 / 1e6, "counters": res.counters,
+                    "per_target": res.per_target.iter().zip(&planted).map(|(t, &d)| json!({
+                        "planted": d, "recovered": t.recovered, "verified": t.verified && t.recovered == Some(d),
+                        "solved_by": t.solved_by, "gae": t.gae, "group_ops": t.group_ops, "steps": t.steps,
+                        "walks": t.walks, "distinguished_points": t.distinguished_points,
+                        "wall_ms": t.wall_ns as f64 / 1e6,
+                    })).collect::<Vec<_>>(),
+                }));
+            }
+            let (mean, sd) = mean_sd(&s_values);
+            let (walk_mean, _) = mean_sd(&walk_values);
+            if k == 1 {
+                single_mean = Some(mean);
+            }
+            let over_one = single_mean.map(|s1| mean / s1);
+            md.push_str(&format!(
+                "| {} | {:.2} | {} | {k} | {} | {} | {} | {} | {} | {:.3} | {:.4} | {own} | {earlier} | {} |\n",
+                inst.name,
+                (r as f64).log2(),
+                2 * n,
+                args.batches,
+                fmt(mean),
+                fmt(sd),
+                fmt(walk_mean),
+                over_one.map_or("—".into(), fmt),
+                batch_law(k),
+                floor,
+                if all_ok { "✓" } else { "✗" },
+            ));
+            sizes.push(json!({
+                "k": k, "batches": args.batches, "mean_s_per_target": mean, "sd_s_per_target": sd,
+                "mean_s_walk_per_target": walk_mean, "per_target_over_k1": over_one,
+                "batch_law": batch_law(k), "solved_on_own_trail": own, "solved_on_an_earlier_trail": earlier,
+                "all_verified": all_ok, "runs": runs,
+            }));
+        }
+        out.push(json!({
+            "regime": "koblitz", "instance": inst.name, "a": a, "n": n, "r": r, "log2_r": (r as f64).log2(),
+            "cofactor": inst.cofactor, "automorphisms": 2 * n, "floor_s_single": floor,
+            "curve": inst.describe(), "exclusions": binary_exclusions(inst), "sizes": sizes,
+        }));
+    }
+    let all_verified = out
+        .iter()
+        .all(|c| c["sizes"].as_array().is_some_and(|s| s.iter().all(|x| x["all_verified"] == true)));
+    if !json_only {
+        eprintln!("\n{md}");
+    }
+    Ok(json!({
+        "schema_version": 1,
+        "operation": "rho-batch",
+        "status": if all_verified && !out.is_empty() { "complete" } else { "incomplete" },
+        "what_this_is": "Batch Pollard rho (Kuhn-Struik) on Koblitz curves: k targets solved in sequence by the tuned walk on the signed-Frobenius classes (A = 2n), jumps in G only, one distinguished-point table shared by the batch, so a later target's walk can finish on an earlier target's trail. S per target = the batch's group-addition equivalents (the shared jump table, each target's start stride, starts, walks and verification) / (k sqrt r). Every target is fresh and its recovered logarithm is checked against the planted one.",
+        "what_this_is_not": [
+            "not an index-calculus result: no relation is collected here",
+            "not the price of a step: canonicalisations are counted (canonicalisations_uncharged) and not charged, as in every rho count in the ledger",
+            "not a wall-clock benchmark: wall time is a practicality note"
+        ],
+        "config": {"batch_koblitz": args.batch_koblitz, "batch_sizes": args.batch_sizes, "batches": args.batches,
+                   "seed": args.seed, "walk": "RhoWalk::negation() shape on SignedFrobeniusClasses; per-target budget rho_cap(r, 64)"},
+        "all_verified": all_verified,
+        "curves": out,
+        "markdown": md,
+    }))
+}
+
 pub fn run(args: RhoArgs, json_only: bool) -> Result<Value, String> {
     if let Some(path) = &args.reprice {
         return reprice(path, &args, json_only);
     }
+    if !args.batch_koblitz.is_empty() {
+        return batch(&args, json_only);
+    }
     if args.prime_bits.is_empty() && args.char2_degrees.is_empty() && args.koblitz_degrees.is_empty() {
-        return Err("give --prime-bits, --char2-degrees and/or --koblitz-degrees, or --reprice FILE".into());
+        return Err("give --prime-bits, --char2-degrees and/or --koblitz-degrees, --batch-koblitz a/n, or --reprice FILE".into());
     }
     ladder(&args, json_only)
 }

@@ -1152,29 +1152,158 @@ fn negmod(a: u64, m: u64) -> u64 {
     }
 }
 
-/// The class representative of `p` under the walk's automorphisms, with
-/// its coefficients: under negation, whichever of `±P` has the smaller
-/// key, and `(a, b) → (−a, −b)` when that is `−P`.  Returns whether it
-/// flipped.
+/// The classes a tuned walk moves between: one representative per orbit
+/// of an automorphism group the curve has, and the multiplier that takes
+/// a point to its representative.  The walk multiplies its coefficients
+/// by that multiplier, so a representative is always `[a]G + [b]Q` with
+/// known `a`, `b`.
+pub trait RhoClasses<G: CountedGroup> {
+    /// Order of the automorphism group the classes are orbits of: the
+    /// `A` of the floor `√(πr/2A)`.
+    fn automorphisms(&self) -> u32;
+    /// The representative of `p`'s class and `μ` with `rep = [μ]p`
+    /// (mod `r`); `μ = 1` when `p` is its own representative.
+    fn canon(&self, g: &G, p: G::Elt) -> (G::Elt, u64);
+    /// Points only: no canonicalisation is performed or counted.
+    fn trivial(&self) -> bool {
+        false
+    }
+    /// The walk's name in reports.
+    fn method(&self) -> &'static str;
+}
+
+/// Points: every point its own class (`A = 1`).
+pub struct PointClasses;
+
+impl<G: CountedGroup> RhoClasses<G> for PointClasses {
+    fn automorphisms(&self) -> u32 {
+        1
+    }
+    fn canon(&self, _g: &G, p: G::Elt) -> (G::Elt, u64) {
+        (p, 1)
+    }
+    fn trivial(&self) -> bool {
+        true
+    }
+    fn method(&self) -> &'static str {
+        "r-adding walk: distinguished points, stride starts"
+    }
+}
+
+/// `{P, −P}` (`A = 2`): whichever of the two has the smaller key.
+pub struct NegationClasses {
+    pub r: u64,
+}
+
+impl<G: CountedGroup> RhoClasses<G> for NegationClasses {
+    fn automorphisms(&self) -> u32 {
+        2
+    }
+    fn canon(&self, g: &G, p: G::Elt) -> (G::Elt, u64) {
+        let n = g.neg(p);
+        if g.key(&n) < g.key(&p) {
+            (n, self.r - 1)
+        } else {
+            (p, 1)
+        }
+    }
+    fn method(&self) -> &'static str {
+        "negation-map r-adding walk: look-ahead, short-cycle escape by doubling, distinguished points, stride starts"
+    }
+}
+
+/// `{±φ^t(P)}` on a Koblitz curve (`A = 2n`): the conjugate whose
+/// abscissa has the least normal-basis rotation ([`FrobeniusCanon`]),
+/// with `x` and `y` carried there by table ([`FrobeniusPowers`]), then
+/// the sign with the smaller ordinate.  `φ^t(P) = [λ^t]P` on the
+/// subgroup, so the multiplier is `±λ^t`.  This is the canonicalisation
+/// the index-calculus side's folded tables pay for per probe, so the two
+/// sides of a comparison do the same work for the same automorphisms.
+pub struct SignedFrobeniusClasses {
+    n: u32,
+    r: u64,
+    canon: FrobeniusCanon,
+    powers: crate::cryptanalysis::koblitz_fast::FrobeniusPowers,
+    lambda_pow: Vec<u64>,
+}
+
+impl SignedFrobeniusClasses {
+    /// The classes of a Koblitz instance, or `None` for any other curve.
+    pub fn new(inst: &BinaryInstance) -> Option<Self> {
+        let kc = inst.koblitz.as_ref()?;
+        if kc.k != 1 {
+            return None;
+        }
+        let r = inst.r;
+        let lambda = (&kc.lambda % BigUint::from(r)).to_u64()?;
+        let n = inst.n;
+        let mut lambda_pow = Vec::with_capacity(n as usize);
+        let mut current = 1u64;
+        for _ in 0..n {
+            lambda_pow.push(current);
+            current = mulmod(current, lambda, r);
+        }
+        Some(Self {
+            n,
+            r,
+            canon: FrobeniusCanon::new(&inst.fast.field, n)?,
+            powers: crate::cryptanalysis::koblitz_fast::FrobeniusPowers::new(&inst.fast.field, n),
+            lambda_pow,
+        })
+    }
+}
+
+impl RhoClasses<BinaryGroup<'_>> for SignedFrobeniusClasses {
+    fn automorphisms(&self) -> u32 {
+        2 * self.n
+    }
+    fn canon(&self, _g: &BinaryGroup<'_>, p: FastPoint) -> (FastPoint, u64) {
+        if p.infinity {
+            return (p, 1);
+        }
+        let (_, t) = self.canon.canon_with_shift(p.x);
+        let (x, y) = if t == 0 {
+            (p.x, p.y)
+        } else {
+            (self.powers.apply(t, p.x), self.powers.apply(t, p.y))
+        };
+        let lambda_t = self.lambda_pow[t as usize];
+        // −(x, y) = (x, x + y).
+        let negated = x ^ y;
+        if negated < y {
+            (FastPoint::affine(x, negated), negmod(lambda_t, self.r))
+        } else {
+            (FastPoint::affine(x, y), lambda_t)
+        }
+    }
+    fn method(&self) -> &'static str {
+        "signed-Frobenius r-adding walk: normal-basis canonicalisation, look-ahead, short-cycle escape by doubling, distinguished points, stride starts"
+    }
+}
+
+/// The class representative of `p` with its coefficients, and whether
+/// the canonicalisation was exactly a negation — the one case in which a
+/// jump repeated from the representative walks straight back (the
+/// fruitless 2-cycle the look-ahead guards against).
 #[inline]
-fn rho_canon<G: CountedGroup>(
+fn rho_canon<G: CountedGroup, C: RhoClasses<G>>(
     g: &G,
-    negation: bool,
+    classes: &C,
     p: G::Elt,
     a: u64,
     b: u64,
     r: u64,
     canonicalisations: &mut u64,
 ) -> (G::Elt, u64, u64, bool) {
-    if !negation {
+    if classes.trivial() {
         return (p, a, b, false);
     }
     *canonicalisations += 1;
-    let n = g.neg(p);
-    if g.key(&n) < g.key(&p) {
-        (n, negmod(a, r), negmod(b, r), true)
+    let (rep, mu) = classes.canon(g, p);
+    if mu == 1 {
+        (rep, a, b, false)
     } else {
-        (p, a, b, false)
+        (rep, mulmod(a, mu, r), mulmod(b, mu, r), mu == r - 1)
     }
 }
 
@@ -1223,23 +1352,285 @@ pub fn rho_reference_walk<G: CountedGroup>(
     max_steps: u64,
     walk: RhoWalk,
 ) -> RhoResult {
+    if walk.negation {
+        rho_walk_with(g, &NegationClasses { r }, generator, target, r, seed, max_steps, walk)
+    } else {
+        rho_walk_with(g, &PointClasses, generator, target, r, seed, max_steps, walk)
+    }
+}
+
+/// The tuned walk's shape for a subgroup of order `r`.
+struct WalkShape {
+    jumps: usize,
+    dp_bits: u32,
+    dp_mask: u64,
+    coefficient_bits: u32,
+    walk_cap: u64,
+}
+
+impl WalkShape {
+    fn of(r: u64, walk: RhoWalk) -> Self {
+        let bits = 64 - r.leading_zeros();
+        let jumps = if walk.jumps == 0 { rho_jumps_for(r) } else { walk.jumps }.max(1);
+        let dp_bits = walk.dp_bits.unwrap_or(bits / 4).min(40);
+        Self {
+            jumps,
+            dp_bits,
+            dp_mask: if dp_bits == 0 { 0 } else { (1u64 << dp_bits) - 1 },
+            coefficient_bits: jump_coefficient_bits(jumps),
+            walk_cap: (1u64 << dp_bits) * 20 + 64,
+        }
+    }
+}
+
+/// A tuned walk's counters: one set per run, or per target of a batch.
+#[derive(Clone, Copy, Debug, Default)]
+struct WalkTally {
+    steps: u64,
+    look_ahead_adds: u64,
+    escapes: u64,
+    cycles_2: u64,
+    cycles_4: u64,
+    cycles_other: u64,
+    abandoned: u64,
+    capped: u64,
+    canonicalisations: u64,
+}
+
+impl WalkTally {
+    /// The charged walk operations: steps, the look-ahead's rejected
+    /// additions, and the escapes' doublings.
+    fn walk_ops(&self) -> u64 {
+        self.steps + self.look_ahead_adds + self.escapes
+    }
+
+    fn merge(&mut self, o: &WalkTally) {
+        self.steps += o.steps;
+        self.look_ahead_adds += o.look_ahead_adds;
+        self.escapes += o.escapes;
+        self.cycles_2 += o.cycles_2;
+        self.cycles_4 += o.cycles_4;
+        self.cycles_other += o.cycles_other;
+        self.abandoned += o.abandoned;
+        self.capped += o.capped;
+        self.canonicalisations += o.canonicalisations;
+    }
+}
+
+/// How one walk ended.
+enum WalkEnd<E> {
+    /// At a distinguished point, `[a]G + [b]Q`.
+    Distinguished(E, u64, u64),
+    /// At the identity, back in the cycle it had just left, at the cap,
+    /// or out of budget.
+    Lost,
+}
+
+/// Everything a tuned walk does between a start and a distinguished
+/// point, shared by the single-target walk and the batch: the step and
+/// its look-ahead, the short-cycle detection and escape, the cap.  What
+/// happens at a distinguished point is the caller's.
+struct TunedWalker<'a, G: CountedGroup, C: RhoClasses<G>> {
+    g: &'a G,
+    classes: &'a C,
+    r: u64,
+    /// `(M_j, a_j, b_j)` with `M_j = [a_j]G + [b_j]Q`.
+    jumps: Vec<(G::Elt, u64, u64)>,
+    dp_mask: u64,
+    walk_cap: u64,
+    look_ahead: bool,
+    window: usize,
+    /// `(key, point, a, b)` of the walk's most recent points, oldest first.
+    recent: VecDeque<(u64, G::Elt, u64, u64)>,
+}
+
+impl<'a, G: CountedGroup, C: RhoClasses<G>> TunedWalker<'a, G, C> {
+    fn new(g: &'a G, classes: &'a C, r: u64, jumps: Vec<(G::Elt, u64, u64)>, shape: &WalkShape, walk: RhoWalk) -> Self {
+        Self {
+            g,
+            classes,
+            r,
+            jumps,
+            dp_mask: shape.dp_mask,
+            walk_cap: shape.walk_cap,
+            look_ahead: walk.look_ahead && !classes.trivial(),
+            window: walk.cycle_window,
+            recent: VecDeque::with_capacity(walk.cycle_window + 1),
+        }
+    }
+
+    fn index(&self, x: &G::Elt) -> usize {
+        ((mix(self.g.key(x)) >> 24) % self.jumps.len() as u64) as usize
+    }
+
+    /// One walk from `[a]G + [b]Q = start`, until a distinguished point
+    /// or until it is lost; `budget` bounds the tally's walk operations.
+    fn walk(
+        &mut self,
+        ops: &mut GroupOps,
+        tally: &mut WalkTally,
+        start: G::Elt,
+        a: u64,
+        b: u64,
+        budget: u64,
+    ) -> WalkEnd<G::Elt> {
+        let (g, r) = (self.g, self.r);
+        let jump_count = self.jumps.len();
+        let (mut x, mut a, mut b, _) = rho_canon(g, self.classes, start, a, b, r, &mut tally.canonicalisations);
+        self.recent.clear();
+        let mut last_escape: Option<u64> = None;
+        let mut len = 0u64;
+        loop {
+            // One step, with the look-ahead when it is on.
+            let j0 = self.index(&x);
+            let mut tried = 0usize;
+            let (y, ya, yb) = loop {
+                let j = (j0 + tried) % jump_count;
+                let (m, aj, bj) = self.jumps[j];
+                let sum = g.add(ops, x, m);
+                let (y, ya, yb, flipped) = rho_canon(
+                    g,
+                    self.classes,
+                    sum,
+                    addmod(a, aj, r),
+                    addmod(b, bj, r),
+                    r,
+                    &mut tally.canonicalisations,
+                );
+                tried += 1;
+                if self.look_ahead && flipped && tried < jump_count && !g.is_identity(&y) && self.index(&y) == j {
+                    tally.look_ahead_adds += 1;
+                    continue;
+                }
+                break (y, ya, yb);
+            };
+            x = y;
+            a = ya;
+            b = yb;
+            tally.steps += 1;
+            len += 1;
+            if g.is_identity(&x) {
+                return WalkEnd::Lost;
+            }
+            // A short cycle: this point is one of the last `window`.
+            if self.window > 0 {
+                let key = g.key(&x);
+                if let Some(pos) = self.recent.iter().position(|e| e.0 == key) {
+                    // The cycle is the `c` most recent points.
+                    let c = self.recent.len() - pos;
+                    match c {
+                        2 => tally.cycles_2 += 1,
+                        4 => tally.cycles_4 += 1,
+                        _ => tally.cycles_other += 1,
+                    }
+                    // Leave it from the member with the smallest key.
+                    let (min_key, mp, ma, mb) = self
+                        .recent
+                        .iter()
+                        .skip(pos)
+                        .copied()
+                        .min_by_key(|e| e.0)
+                        .expect("a cycle has members");
+                    if last_escape == Some(min_key) {
+                        tally.abandoned += 1;
+                        return WalkEnd::Lost;
+                    }
+                    last_escape = Some(min_key);
+                    let d2 = g.double(ops, mp);
+                    tally.escapes += 1;
+                    let (e, ea, eb, _) = rho_canon(
+                        g,
+                        self.classes,
+                        d2,
+                        addmod(ma, ma, r),
+                        addmod(mb, mb, r),
+                        r,
+                        &mut tally.canonicalisations,
+                    );
+                    x = e;
+                    a = ea;
+                    b = eb;
+                    self.recent.clear();
+                    if g.is_identity(&x) {
+                        return WalkEnd::Lost;
+                    }
+                }
+                self.recent.push_back((g.key(&x), x, a, b));
+                if self.recent.len() > self.window {
+                    self.recent.pop_front();
+                }
+            }
+            if mix(g.key(&x)) & self.dp_mask == 0 {
+                return WalkEnd::Distinguished(x, a, b);
+            }
+            if len > self.walk_cap {
+                tally.capped += 1;
+                return WalkEnd::Lost;
+            }
+            if tally.walk_ops() >= budget {
+                return WalkEnd::Lost;
+            }
+        }
+    }
+}
+
+/// The counters a tuned walk reports, in one order for every report.
+fn tuned_counters(
+    shape: &WalkShape,
+    setup: GroupOps,
+    start_adds: u64,
+    tally: &WalkTally,
+    verification_ops: u64,
+    useless: u64,
+) -> BTreeMap<String, u64> {
+    let mut counters = BTreeMap::new();
+    for (k, v) in [
+        ("jumps", shape.jumps as u64),
+        ("jump_coefficient_bits", shape.coefficient_bits as u64),
+        ("distinguished_point_bits", shape.dp_bits as u64),
+        ("setup_additions", setup.adds),
+        ("setup_doublings", setup.doubles),
+        ("start_additions", start_adds),
+        ("walk_operations", tally.walk_ops()),
+        ("verification_operations", verification_ops),
+        ("look_ahead_additions", tally.look_ahead_adds),
+        ("cycle_escape_doublings", tally.escapes),
+        ("cycles_length_2", tally.cycles_2),
+        ("cycles_length_4", tally.cycles_4),
+        ("cycles_other_length", tally.cycles_other),
+        ("walks_abandoned_in_a_cycle", tally.abandoned),
+        ("walks_capped", tally.capped),
+        ("useless_collisions", useless),
+        ("canonicalisations_uncharged", tally.canonicalisations),
+    ] {
+        counters.insert(k.to_string(), v);
+    }
+    counters
+}
+
+/// [`rho_reference_walk`] on any [`RhoClasses`]: the same walk, the same
+/// draws from the seed, the same counters, moving between the classes'
+/// representatives.  `walk.negation` is ignored here; the classes decide.
+#[allow(clippy::too_many_arguments)]
+pub fn rho_walk_with<G: CountedGroup, C: RhoClasses<G>>(
+    g: &G,
+    classes: &C,
+    generator: G::Elt,
+    target: G::Elt,
+    r: u64,
+    seed: u64,
+    max_steps: u64,
+    walk: RhoWalk,
+) -> RhoResult {
     let start = Instant::now();
     let mut ops = GroupOps::default();
     let mut rng = StdRng::seed_from_u64(seed);
-    let bits = 64 - r.leading_zeros();
-    let jump_count = if walk.jumps == 0 { rho_jumps_for(r) } else { walk.jumps }.max(1);
-    let dp_bits = walk.dp_bits.unwrap_or(bits / 4).min(40);
-    let dp_mask = if dp_bits == 0 { 0 } else { (1u64 << dp_bits) - 1 };
-    let coefficient_bits = jump_coefficient_bits(jump_count);
-    let short = r.min(1u64 << coefficient_bits).max(2);
-    let look_ahead = walk.look_ahead && walk.negation;
-    let window = walk.cycle_window;
-    let index = |x: &G::Elt| -> usize { ((mix(g.key(x)) >> 24) % jump_count as u64) as usize };
-    let distinguished = |x: &G::Elt| -> bool { mix(g.key(x)) & dp_mask == 0 };
+    let shape = WalkShape::of(r, walk);
+    let short = r.min(1u64 << shape.coefficient_bits).max(2);
 
     // Set-up: G + Q once, the table, the start stride.
     let gq = g.add(&mut ops, generator, target);
-    let jumps: Vec<(G::Elt, u64, u64)> = (0..jump_count)
+    let jumps: Vec<(G::Elt, u64, u64)> = (0..shape.jumps)
         .map(|_| {
             let a = rng.gen_range(1..short);
             let b = rng.gen_range(1..short);
@@ -1250,23 +1641,18 @@ pub fn rho_reference_walk<G: CountedGroup>(
     let stride = joint_mul(g, &mut ops, generator, target, gq, ta, tb);
     let setup = ops;
 
+    let mut walker = TunedWalker::new(g, classes, r, jumps, &shape, walk);
     let mut table: FastMap<(u64, u64)> = fast_map(1024);
-    let automorphisms = if walk.negation { 2 } else { 1 };
+    let automorphisms = classes.automorphisms();
     let expected = generic_floor_ops(r as f64, automorphisms as f64);
-    let walk_cap = (1u64 << dp_bits) * 20 + 64;
-    let (mut steps, mut walks, mut dps) = (0u64, 0u64, 0u64);
-    let (mut look_ahead_adds, mut escapes, mut start_adds) = (0u64, 0u64, 0u64);
-    let (mut cycles_2, mut cycles_4, mut cycles_other) = (0u64, 0u64, 0u64);
-    let (mut abandoned, mut capped, mut useless) = (0u64, 0u64, 0u64);
-    let (mut canonicalisations, mut verification_ops) = (0u64, 0u64);
+    let mut tally = WalkTally::default();
+    let (mut walks, mut dps, mut start_adds) = (0u64, 0u64, 0u64);
+    let (mut useless, mut verification_ops) = (0u64, 0u64);
     let mut recovered = None;
     // The next walk's start, `[k]T`, and its coefficients.
     let (mut sx, mut sa, mut sb) = (stride, ta % r, tb % r);
-    // (key, point, a, b) of the walk's most recent points, oldest first.
-    let mut recent: VecDeque<(u64, G::Elt, u64, u64)> = VecDeque::with_capacity(window + 1);
-    let walk_ops = |steps: u64, look: u64, esc: u64| steps + look + esc;
 
-    'outer: while walk_ops(steps, look_ahead_adds, escapes) < max_steps && walks < max_steps {
+    while tally.walk_ops() < max_steps && walks < max_steps {
         walks += 1;
         if walks > 1 {
             sx = g.add(&mut ops, sx, stride);
@@ -1277,147 +1663,43 @@ pub fn rho_reference_walk<G: CountedGroup>(
         if g.is_identity(&sx) {
             continue;
         }
-        let (mut x, mut a, mut b, _) = rho_canon(g, walk.negation, sx, sa, sb, r, &mut canonicalisations);
-        recent.clear();
-        let mut last_escape: Option<u64> = None;
-        let mut len = 0u64;
-        loop {
-            // One step, with the look-ahead when it is on.
-            let j0 = index(&x);
-            let mut tried = 0usize;
-            let (y, ya, yb) = loop {
-                let j = (j0 + tried) % jump_count;
-                let (m, aj, bj) = jumps[j];
-                let sum = g.add(&mut ops, x, m);
-                let (y, ya, yb, flipped) =
-                    rho_canon(g, walk.negation, sum, addmod(a, aj, r), addmod(b, bj, r), r, &mut canonicalisations);
-                tried += 1;
-                if look_ahead && flipped && tried < jump_count && !g.is_identity(&y) && index(&y) == j {
-                    look_ahead_adds += 1;
-                    continue;
-                }
-                break (y, ya, yb);
-            };
-            x = y;
-            a = ya;
-            b = yb;
-            steps += 1;
-            len += 1;
-            if g.is_identity(&x) {
-                break;
-            }
-            // A short cycle: this point is one of the last `window`.
-            if window > 0 {
-                let key = g.key(&x);
-                if let Some(pos) = recent.iter().position(|e| e.0 == key) {
-                    // The cycle is the `c` most recent points.
-                    let c = recent.len() - pos;
-                    match c {
-                        2 => cycles_2 += 1,
-                        4 => cycles_4 += 1,
-                        _ => cycles_other += 1,
-                    }
-                    // Leave it from the member with the smallest key.
-                    let (min_key, mp, ma, mb) = recent
-                        .iter()
-                        .skip(pos)
-                        .copied()
-                        .min_by_key(|e| e.0)
-                        .expect("a cycle has members");
-                    if last_escape == Some(min_key) {
-                        abandoned += 1;
-                        break;
-                    }
-                    last_escape = Some(min_key);
-                    let d2 = g.double(&mut ops, mp);
-                    escapes += 1;
-                    let (e, ea, eb, _) =
-                        rho_canon(g, walk.negation, d2, addmod(ma, ma, r), addmod(mb, mb, r), r, &mut canonicalisations);
-                    x = e;
-                    a = ea;
-                    b = eb;
-                    recent.clear();
-                    if g.is_identity(&x) {
-                        break;
-                    }
-                }
-                recent.push_back((g.key(&x), x, a, b));
-                if recent.len() > window {
-                    recent.pop_front();
-                }
-            }
-            if distinguished(&x) {
-                dps += 1;
-                let key = g.key(&x);
-                match table.get(&key) {
-                    Some(&(a2, b2)) => {
-                        if b2 != b {
-                            // a + b d = a2 + b2 d  ⇒  d = (a − a2)/(b2 − b)
-                            let num = submod(a, a2, r);
-                            let den = submod(b2, b, r);
-                            if let Some(inv) = invmod(den, r) {
-                                let d = mulmod(num, inv, r);
-                                let before = ops.gae();
-                                let check = g.mul(&mut ops, generator, d);
-                                verification_ops += (ops.gae() - before) as u64;
-                                if check == target {
-                                    recovered = Some(d);
-                                    break 'outer;
-                                }
-                            }
+        let WalkEnd::Distinguished(x, a, b) = walker.walk(&mut ops, &mut tally, sx, sa, sb, max_steps) else {
+            continue;
+        };
+        dps += 1;
+        let key = g.key(&x);
+        match table.get(&key) {
+            Some(&(a2, b2)) => {
+                if b2 != b {
+                    // a + b d = a2 + b2 d  ⇒  d = (a − a2)/(b2 − b)
+                    let num = submod(a, a2, r);
+                    let den = submod(b2, b, r);
+                    if let Some(inv) = invmod(den, r) {
+                        let d = mulmod(num, inv, r);
+                        let before = ops.gae();
+                        let check = g.mul(&mut ops, generator, d);
+                        verification_ops += (ops.gae() - before) as u64;
+                        if check == target {
+                            recovered = Some(d);
+                            break;
                         }
-                        useless += 1;
-                        break;
-                    }
-                    None => {
-                        table.insert(key, (a, b));
-                        break;
                     }
                 }
+                useless += 1;
             }
-            if len > walk_cap {
-                capped += 1;
-                break;
-            }
-            if walk_ops(steps, look_ahead_adds, escapes) >= max_steps {
-                break;
+            None => {
+                table.insert(key, (a, b));
             }
         }
     }
     let wall_ns = start.elapsed().as_nanos() as u64;
     let gae = ops.gae();
-    let walked = walk_ops(steps, look_ahead_adds, escapes);
-    let mut counters = BTreeMap::new();
-    for (k, v) in [
-        ("jumps", jump_count as u64),
-        ("jump_coefficient_bits", coefficient_bits as u64),
-        ("distinguished_point_bits", dp_bits as u64),
-        ("setup_additions", setup.adds),
-        ("setup_doublings", setup.doubles),
-        ("start_additions", start_adds),
-        ("walk_operations", walked),
-        ("verification_operations", verification_ops),
-        ("look_ahead_additions", look_ahead_adds),
-        ("cycle_escape_doublings", escapes),
-        ("cycles_length_2", cycles_2),
-        ("cycles_length_4", cycles_4),
-        ("cycles_other_length", cycles_other),
-        ("walks_abandoned_in_a_cycle", abandoned),
-        ("walks_capped", capped),
-        ("useless_collisions", useless),
-        ("canonicalisations_uncharged", canonicalisations),
-    ] {
-        counters.insert(k.to_string(), v);
-    }
+    let walked = tally.walk_ops();
     RhoResult {
-        method: if walk.negation {
-            "negation-map r-adding walk: look-ahead, short-cycle escape by doubling, distinguished points, stride starts".into()
-        } else {
-            "r-adding walk: distinguished points, stride starts".into()
-        },
+        method: classes.method().into(),
         automorphisms,
         group_ops: ops,
-        steps,
+        steps: tally.steps,
         walks,
         distinguished_points: dps,
         gae,
@@ -1428,6 +1710,217 @@ pub fn rho_reference_walk<G: CountedGroup>(
         wall_ns,
         verified: recovered.is_some(),
         recovered,
+        counters: tuned_counters(&shape, setup, start_adds, &tally, verification_ops, useless),
+    }
+}
+
+/// One target's share of a [`rho_batch_with`] run.
+#[derive(Clone, Debug, Serialize)]
+pub struct RhoBatchTarget {
+    /// Charged to this target alone: `G + Q_i` and its start stride, the
+    /// walk starts, the walks, the verification.
+    pub group_ops: GroupOps,
+    pub gae: f64,
+    pub steps: u64,
+    pub walks: u64,
+    pub distinguished_points: u64,
+    /// `own`: two of its own walks met; `earlier`: one of its walks met
+    /// the trail of an earlier target, whose logarithm was known; `none`:
+    /// not solved within the budget.
+    pub solved_by: &'static str,
+    pub recovered: Option<u64>,
+    pub verified: bool,
+    pub wall_ns: u64,
+}
+
+/// `k` logarithms in one group by one batch of the tuned walk.
+#[derive(Clone, Debug, Serialize)]
+pub struct RhoBatchResult {
+    pub method: String,
+    pub automorphisms: u32,
+    pub targets: usize,
+    /// The shared set-up: the jump table.
+    pub setup_ops: GroupOps,
+    /// The set-up and every target's share.
+    pub group_ops: GroupOps,
+    pub gae: f64,
+    /// `gae / (k·√r)`: the batch's cost per target, the unit a `k`-target
+    /// figure is in.
+    pub s_per_target: f64,
+    /// Walk operations per target over `√r`.
+    pub s_walk_per_target: f64,
+    /// One target's floor in operations, `√(πr/2A)`.
+    pub expected_single: f64,
+    pub per_target: Vec<RhoBatchTarget>,
+    pub all_verified: bool,
+    pub wall_ns: u64,
+    pub counters: BTreeMap<String, u64>,
+}
+
+/// **Batch rho** (Kuhn–Struik): `k` logarithms in one group, the tuned
+/// walk of [`rho_walk_with`] on `classes`, with the changes that let the
+/// targets share work.
+///
+/// - **Jumps in `G` only**, `M_j = [c_j]G` with full-size `c_j`, so a
+///   walk's next point depends on its point and not on its target: two
+///   walks that meet follow one trail, whatever their targets.  (Short
+///   multipliers would be cheaper to set up, but on one coordinate they
+///   leave small integer relations among the jumps, each a fruitless
+///   cycle in waiting.)
+/// - **One table of distinguished points for the whole batch**, each
+///   tagged with the target whose walk stored it.
+/// - **Targets in sequence.**  Walks for `Q_i` start at `[k]T_i`,
+///   `T_i = [s]G + [u]Q_i`, and are points `[a]G + [b]Q_i`.  A walk that
+///   reaches a distinguished point stored by an earlier target `j`, whose
+///   logarithm `d_j` is known, solves `Q_i` from one collision:
+///   `[a]G + [b]Q_i = [a₂ + b₂d_j]G`.  So each target's walks can end on
+///   every trail walked before, and the `i`-th target costs about
+///   `√(πr/2A)·C(2i−2, i−1)/4^{i−1}`: `√(2kr/A)` for the batch instead of
+///   `k·√(πr/2A)`.
+///
+/// Charged exactly as [`rho_walk_with`] charges: the shared table to the
+/// batch, and to each target its `G + Q_i`, stride, starts, walks and
+/// verification.  `max_steps` bounds each target's walk operations; a
+/// target that runs out is reported unsolved, and its trail, whose
+/// logarithm stays unknown, ends later walks without solving them.
+#[allow(clippy::too_many_arguments)]
+pub fn rho_batch_with<G: CountedGroup, C: RhoClasses<G>>(
+    g: &G,
+    classes: &C,
+    generator: G::Elt,
+    targets: &[G::Elt],
+    r: u64,
+    seed: u64,
+    max_steps: u64,
+    walk: RhoWalk,
+) -> RhoBatchResult {
+    let start = Instant::now();
+    let mut rng = StdRng::seed_from_u64(seed);
+    let shape = WalkShape::of(r, walk);
+    let mut setup = GroupOps::default();
+    let jumps: Vec<(G::Elt, u64, u64)> = (0..shape.jumps)
+        .map(|_| {
+            let c = rng.gen_range(1..r.max(2));
+            (g.mul(&mut setup, generator, c), c % r, 0)
+        })
+        .collect();
+    let mut walker = TunedWalker::new(g, classes, r, jumps, &shape, walk);
+    // Distinguished point → (a, b, the target whose walk stored it).
+    let mut table: FastMap<(u64, u64, u32)> = fast_map(1024);
+    let mut logs: Vec<Option<u64>> = Vec::with_capacity(targets.len());
+    let mut per_target = Vec::with_capacity(targets.len());
+    let mut total = setup;
+    let mut tally_all = WalkTally::default();
+    let (mut start_adds_all, mut useless_all, mut verification_all) = (0u64, 0u64, 0u64);
+    let mut target_setup = GroupOps::default();
+
+    for (i, &q) in targets.iter().enumerate() {
+        let t0 = Instant::now();
+        let mut ops = GroupOps::default();
+        let mut tally = WalkTally::default();
+        let gq = g.add(&mut ops, generator, q);
+        let (ta, tb) = (rng.gen_range(1..r.max(2)), rng.gen_range(1..r.max(2)));
+        let stride = joint_mul(g, &mut ops, generator, q, gq, ta, tb);
+        target_setup.merge(ops);
+        let (mut sx, mut sa, mut sb) = (stride, ta % r, tb % r);
+        let (mut walks, mut dps, mut start_adds) = (0u64, 0u64, 0u64);
+        let (mut useless, mut verification_ops) = (0u64, 0u64);
+        let mut recovered = None;
+        let mut solved_by = "none";
+        while tally.walk_ops() < max_steps && walks < max_steps {
+            walks += 1;
+            if walks > 1 {
+                sx = g.add(&mut ops, sx, stride);
+                sa = addmod(sa, ta, r);
+                sb = addmod(sb, tb, r);
+                start_adds += 1;
+            }
+            if g.is_identity(&sx) {
+                continue;
+            }
+            let WalkEnd::Distinguished(x, a, b) = walker.walk(&mut ops, &mut tally, sx, sa, sb, max_steps) else {
+                continue;
+            };
+            dps += 1;
+            let key = g.key(&x);
+            let Some(&(a2, b2, j)) = table.get(&key) else {
+                table.insert(key, (a, b, i as u32));
+                continue;
+            };
+            let (candidate, how) = if j as usize == i {
+                // a + b d = a2 + b2 d  ⇒  d = (a − a2)/(b2 − b)
+                let d = if b2 != b {
+                    invmod(submod(b2, b, r), r).map(|inv| mulmod(submod(a, a2, r), inv, r))
+                } else {
+                    None
+                };
+                (d, "own")
+            } else {
+                // [a]G + [b]Q_i = [a2 + b2 d_j]G  ⇒  d = (a2 + b2 d_j − a)/b
+                let d = logs[j as usize].and_then(|dj| {
+                    let e = addmod(a2, mulmod(b2, dj, r), r);
+                    invmod(b, r).map(|inv| mulmod(submod(e, a, r), inv, r))
+                });
+                (d, "earlier")
+            };
+            if let Some(d) = candidate {
+                let before = ops.gae();
+                let check = g.mul(&mut ops, generator, d);
+                verification_ops += (ops.gae() - before) as u64;
+                if check == q {
+                    recovered = Some(d);
+                    solved_by = how;
+                    break;
+                }
+            }
+            useless += 1;
+        }
+        logs.push(recovered);
+        total.merge(ops);
+        tally_all.merge(&tally);
+        start_adds_all += start_adds;
+        useless_all += useless;
+        verification_all += verification_ops;
+        per_target.push(RhoBatchTarget {
+            group_ops: ops,
+            gae: ops.gae(),
+            steps: tally.steps,
+            walks,
+            distinguished_points: dps,
+            solved_by,
+            recovered,
+            verified: recovered.is_some(),
+            wall_ns: t0.elapsed().as_nanos() as u64,
+        });
+    }
+    let k = targets.len().max(1) as f64;
+    let sqrt_r = (r as f64).sqrt();
+    let gae = total.gae();
+    let mut counters = tuned_counters(&shape, setup, start_adds_all, &tally_all, verification_all, useless_all);
+    for (name, v) in [
+        ("targets", targets.len() as u64),
+        ("target_setup_additions", target_setup.adds),
+        ("target_setup_doublings", target_setup.doubles),
+        ("solved_on_own_trail", per_target.iter().filter(|t| t.solved_by == "own").count() as u64),
+        ("solved_on_an_earlier_trail", per_target.iter().filter(|t| t.solved_by == "earlier").count() as u64),
+        ("unsolved", per_target.iter().filter(|t| t.recovered.is_none()).count() as u64),
+        ("distinguished_points_stored", table.len() as u64),
+    ] {
+        counters.insert(name.to_string(), v);
+    }
+    RhoBatchResult {
+        method: format!("batch (targets in sequence, one distinguished-point table, jumps in G) {}", classes.method()),
+        automorphisms: classes.automorphisms(),
+        targets: targets.len(),
+        setup_ops: setup,
+        group_ops: total,
+        gae,
+        s_per_target: gae / (k * sqrt_r),
+        s_walk_per_target: tally_all.walk_ops() as f64 / (k * sqrt_r),
+        expected_single: generic_floor_ops(r as f64, classes.automorphisms() as f64),
+        all_verified: !per_target.is_empty() && per_target.iter().all(|t| t.verified),
+        per_target,
+        wall_ns: start.elapsed().as_nanos() as u64,
         counters,
     }
 }
@@ -1516,6 +2009,25 @@ pub fn signed_frobenius_rho(inst: &BinaryInstance, target: FastPoint, planted: u
         verified: report.verified && recovered == Some(planted),
         counters: signed_rho_counters(&report),
     })
+}
+
+/// The tuned walk of ledger §18.2 on a Koblitz instance's
+/// signed-Frobenius classes (`A = 2n`), one target: [`rho_walk_with`] with
+/// [`SignedFrobeniusClasses`].  `None` for any other curve.
+pub fn signed_frobenius_rho_tuned(inst: &BinaryInstance, target: FastPoint, seed: u64, max_steps: u64) -> Option<RhoResult> {
+    let classes = SignedFrobeniusClasses::new(inst)?;
+    let g = BinaryGroup(&inst.fast);
+    Some(rho_walk_with(&g, &classes, inst.generator, target, inst.r, seed, max_steps, RhoWalk::negation()))
+}
+
+/// Batch rho on a Koblitz instance's signed-Frobenius classes
+/// (`A = 2n`): [`rho_batch_with`] with [`SignedFrobeniusClasses`] and the
+/// tuned walk's shape, each target's budget [`rho_cap`]`(r, 64)`.  `None`
+/// for any other curve.
+pub fn signed_frobenius_rho_batch(inst: &BinaryInstance, targets: &[FastPoint], seed: u64) -> Option<RhoBatchResult> {
+    let classes = SignedFrobeniusClasses::new(inst)?;
+    let g = BinaryGroup(&inst.fast);
+    Some(rho_batch_with(&g, &classes, inst.generator, targets, inst.r, seed, rho_cap(inst.r, 64.0), RhoWalk::negation()))
 }
 
 // ── Prime-field curves on one word ─────────────────────────────────
@@ -5332,6 +5844,103 @@ mod tests {
         assert!(stalled.counters["walks_capped"] > 0, "{stalled:?}");
     }
 
+    /// The signed-Frobenius classes name one representative per class
+    /// `{±φ^t(P)}` and the multiplier that reaches it: `rep = [μ]P` on the
+    /// subgroup, and every conjugate names the same representative.
+    #[test]
+    fn signed_frobenius_classes_name_the_class_and_its_multiplier() {
+        let inst = koblitz_instance_best(23).expect("a Koblitz curve at n = 23");
+        let classes = SignedFrobeniusClasses::new(&inst).expect("Koblitz classes");
+        let bg = BinaryGroup(&inst.fast);
+        let mut ops = GroupOps::default();
+        let mut rng = StdRng::seed_from_u64(19);
+        for _ in 0..64 {
+            let d = rng.gen_range(1..inst.r);
+            let p = bg.mul(&mut ops, inst.generator, d);
+            let (rep, mu) = classes.canon(&bg, p);
+            assert_eq!(rep, bg.mul(&mut ops, inst.generator, mulmod(d, mu, inst.r)), "d = {d}");
+            for s in [1u32, 5, inst.n - 1] {
+                let conj = inst.fast.frobenius_k(p, s);
+                for q in [conj, bg.neg(conj)] {
+                    assert_eq!(classes.canon(&bg, q).0, rep, "d = {d}, s = {s}");
+                }
+            }
+        }
+    }
+
+    /// Every charged operation of a batch lands in exactly one counter.
+    fn assert_batch_closes(res: &RhoBatchResult) {
+        let c = &res.counters;
+        let parts = c["setup_additions"]
+            + c["setup_doublings"]
+            + c["target_setup_additions"]
+            + c["target_setup_doublings"]
+            + c["start_additions"]
+            + c["walk_operations"]
+            + c["verification_operations"];
+        assert_eq!(parts as f64, res.gae, "{c:?}");
+        let shares: f64 = res.per_target.iter().map(|t| t.gae).sum();
+        assert_eq!(shares + res.setup_ops.gae(), res.gae, "{c:?}");
+    }
+
+    /// A batch on a Koblitz curve recovers every target, most of them on
+    /// an earlier target's trail.
+    #[test]
+    fn batch_rho_recovers_every_target_on_a_koblitz_curve() {
+        let inst = koblitz_instance_best(31).expect("a Koblitz curve at n = 31");
+        let bg = BinaryGroup(&inst.fast);
+        let mut ops = GroupOps::default();
+        let planted: Vec<u64> = (0..32u64).map(|i| 1 + (i * 0x9E37_79B9 + 12_345) % (inst.r - 1)).collect();
+        let targets: Vec<FastPoint> = planted.iter().map(|&d| bg.mul(&mut ops, inst.generator, d)).collect();
+        let res = signed_frobenius_rho_batch(&inst, &targets, 7).expect("a Koblitz instance");
+        assert_eq!(res.automorphisms, 2 * inst.n);
+        for (t, &d) in res.per_target.iter().zip(&planted) {
+            assert_eq!(t.recovered, Some(d), "{t:?}");
+        }
+        assert!(res.all_verified);
+        assert_batch_closes(&res);
+        assert!(res.counters["solved_on_an_earlier_trail"] > 16, "{:?}", res.counters);
+        // One target is the tuned walk with its jumps in G.
+        let one = signed_frobenius_rho_batch(&inst, &targets[..1], 8).expect("a Koblitz instance");
+        assert_eq!(one.per_target[0].recovered, Some(planted[0]));
+        assert_eq!(one.per_target[0].solved_by, "own");
+        assert_batch_closes(&one);
+    }
+
+    /// The batch law on a group where the walk is the only cost: sixteen
+    /// targets cost each about `Σ_{i<16} C(2i, i)/4^i / 16 ≈ 0.28` of one
+    /// target alone (Kuhn–Struik).
+    #[test]
+    fn batch_rho_per_target_cost_falls_as_the_batch_law_says() {
+        let r = 1_000_000_007u64;
+        let grp = Cyclic(r);
+        let gen = 5u64;
+        let classes = NegationClasses { r };
+        let walk_ops = |res: &RhoBatchResult| res.counters["walk_operations"] as f64 / res.targets as f64;
+        let (mut single, mut batched) = (0.0f64, 0.0f64);
+        let (singles, batches) = (48u64, 6u64);
+        for seed in 0..singles {
+            let d = 1 + mix(seed) % (r - 1);
+            let res = rho_batch_with(&grp, &classes, gen, &[mulmod(gen, d, r)], r, seed, 1 << 32, RhoWalk::negation());
+            assert_eq!(res.per_target[0].recovered, Some(d));
+            single += walk_ops(&res) / singles as f64;
+        }
+        for seed in 0..batches {
+            let planted: Vec<u64> = (0..16u64).map(|i| 1 + mix(seed * 64 + i + 1000) % (r - 1)).collect();
+            let targets: Vec<u64> = planted.iter().map(|&d| mulmod(gen, d, r)).collect();
+            let res = rho_batch_with(&grp, &classes, gen, &targets, r, 100 + seed, 1 << 32, RhoWalk::negation());
+            for (t, &d) in res.per_target.iter().zip(&planted) {
+                assert_eq!(t.recovered, Some(d), "{t:?}");
+            }
+            assert_batch_closes(&res);
+            batched += walk_ops(&res) / batches as f64;
+        }
+        let ratio = batched / single;
+        assert!((0.18..0.42).contains(&ratio), "per-target k = 16 over k = 1: {ratio}");
+        let over_floor = single / generic_floor_ops(r as f64, 2.0);
+        assert!((0.75..1.35).contains(&over_floor), "k = 1 over its floor: {over_floor}");
+    }
+
     #[test]
     fn joint_double_and_add_matches_two_scalar_multiplications() {
         let inst = roster_prime_instance(20).unwrap();
@@ -5363,8 +5972,8 @@ mod tests {
         let mut canons = 0u64;
         for k in 1..200u64 {
             let p = inst.curve.mul(&mut ops, g, k);
-            let (c1, a1, _, _) = rho_canon(&inst.curve, true, p, k, 0, r, &mut canons);
-            let (c2, a2, _, _) = rho_canon(&inst.curve, true, inst.curve.neg(p), r - k, 0, r, &mut canons);
+            let (c1, a1, _, _) = rho_canon(&inst.curve, &NegationClasses { r }, p, k, 0, r, &mut canons);
+            let (c2, a2, _, _) = rho_canon(&inst.curve, &NegationClasses { r }, inst.curve.neg(p), r - k, 0, r, &mut canons);
             assert_eq!(c1, c2);
             assert_eq!(a1, a2);
             assert_eq!(inst.curve.mul(&mut ops, g, a1), c1, "the coefficients follow the flip");
