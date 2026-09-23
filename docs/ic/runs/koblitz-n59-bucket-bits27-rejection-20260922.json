@@ -1,0 +1,248 @@
+{
+  "candidate": {
+    "baseline_bucket_bits": 26,
+    "baseline_target_run_length": 16,
+    "candidate_bucket_bits": 27,
+    "candidate_target_run_length": 8,
+    "mathematical_output_changed": false,
+    "theoretical_bucket_index_increase_bytes": 268435456
+  },
+  "claim_boundary": "Finite same-target rejected table-shape trade. Doubling bucket-index entries reduces CPU slightly but regresses wall and raises memory, so Stage 149 remains selected. No SOTA claim.",
+  "date": "2026-09-22",
+  "decision": {
+    "full_workflow_followup": false,
+    "reason": "candidate median unit CPU improves 1.95 percent but unit wall regresses 1.79 percent and median peak RSS rises about 9.3 percent",
+    "selected_stage149_unchanged": true,
+    "status": "rejected_wall_and_memory_regression"
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "points": 32934,
+    "projected_columns": 16344,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "collection_m": 3,
+    "collection_window": 1024,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "uniform_summands_scanned": 102400000,
+    "uniform_trials": 100000,
+    "uniform_units": 1
+  },
+  "operation": "koblitz_n59_bucket_bits27_rejection",
+  "panel": {
+    "comparison": {
+      "pair_table_build_cpu_seconds": {
+        "baseline_median": 141.831653,
+        "candidate_median": 139.2266975,
+        "candidate_over_baseline": 0.981633468658791,
+        "change_fraction": -0.018366531341209063
+      },
+      "pair_table_build_wall_seconds": {
+        "baseline_median": 16.668695813,
+        "candidate_median": 16.691838583,
+        "candidate_over_baseline": 1.0013883971643391,
+        "change_fraction": 0.0013883971643390718
+      },
+      "peak_rss_bytes": {
+        "baseline_median": 9715990528.0,
+        "candidate_median": 10618896384.0,
+        "candidate_over_baseline": 1.0929298822799347,
+        "change_fraction": 0.09292988227993464
+      },
+      "relation_unit_cpu_seconds": {
+        "baseline_median": 23.06488800000001,
+        "candidate_median": 22.6146435,
+        "candidate_over_baseline": 0.9804792245251739,
+        "change_fraction": -0.019520775474826092
+      },
+      "relation_unit_wall_seconds": {
+        "baseline_median": 2.5891457705,
+        "candidate_median": 2.6355807705,
+        "candidate_over_baseline": 1.0179344865511502,
+        "change_fraction": 0.017934486551150243
+      },
+      "relations": {
+        "baseline_median": 2157.0,
+        "candidate_median": 2157.0,
+        "candidate_over_baseline": 1.0,
+        "change_fraction": 0.0
+      },
+      "whole_cpu_seconds": {
+        "baseline_median": 170.9413885,
+        "candidate_median": 167.88622049999998,
+        "candidate_over_baseline": 0.982127394501654,
+        "change_fraction": -0.017872605498346055
+      },
+      "whole_wall_seconds": {
+        "baseline_median": 22.5578320835,
+        "candidate_median": 22.636796416499998,
+        "candidate_over_baseline": 1.003500528450948,
+        "change_fraction": 0.0035005284509479527
+      }
+    },
+    "exact_relation_equality": true,
+    "medians": {
+      "baseline": {
+        "pair_table_build_cpu_seconds": 141.831653,
+        "pair_table_build_wall_seconds": 16.668695813,
+        "peak_rss_bytes": 9715990528.0,
+        "relation_unit_cpu_seconds": 23.06488800000001,
+        "relation_unit_wall_seconds": 2.5891457705,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 170.9413885,
+        "whole_wall_seconds": 22.5578320835
+      },
+      "candidate": {
+        "pair_table_build_cpu_seconds": 139.2266975,
+        "pair_table_build_wall_seconds": 16.691838583,
+        "peak_rss_bytes": 10618896384.0,
+        "relation_unit_cpu_seconds": 22.6146435,
+        "relation_unit_wall_seconds": 2.6355807705,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 167.88622049999998,
+        "whole_wall_seconds": 22.636796416499998
+      }
+    },
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+    "runs": [
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "label": "a1",
+        "pair_table_build_cpu_seconds": 143.645187,
+        "pair_table_build_wall_seconds": 17.417515334,
+        "peak_rss_bytes": 9351692288,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.784592000000004,
+        "relation_unit_wall_seconds": 2.610349083,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 173.462011,
+        "whole_wall_seconds": 23.286242917
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "4bc834cf7a52dd26decb0277a17b4bc0c067ce67d133374788ba06d034d6d935",
+        "label": "b1",
+        "pair_table_build_cpu_seconds": 136.44945299999998,
+        "pair_table_build_wall_seconds": 16.666951916,
+        "peak_rss_bytes": 10620682240,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.28009499999999,
+        "relation_unit_wall_seconds": 2.7082838750000002,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 164.771596,
+        "whole_wall_seconds": 22.711707333
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "label": "a2",
+        "pair_table_build_cpu_seconds": 140.01811899999998,
+        "pair_table_build_wall_seconds": 15.919876292,
+        "peak_rss_bytes": 10080288768,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.345184000000017,
+        "relation_unit_wall_seconds": 2.567942458,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 168.420766,
+        "whole_wall_seconds": 21.82942125
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "4bc834cf7a52dd26decb0277a17b4bc0c067ce67d133374788ba06d034d6d935",
+        "label": "b2",
+        "pair_table_build_cpu_seconds": 142.003942,
+        "pair_table_build_wall_seconds": 16.71672525,
+        "peak_rss_bytes": 10617110528,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.94919200000001,
+        "relation_unit_wall_seconds": 2.562877666,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 171.000845,
+        "whole_wall_seconds": 22.5618855
+      }
+    ]
+  },
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json",
+    "sha256": "f837bf3ca5be26da1431c759e00309e2ac637445da2256d92a9719574a84c288"
+  },
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-bucket-bits25-rejection-20260922.json",
+    "sha256": "45575cf72b4dfb141d6c23a16f27f5d851caf14bb1173c510a28339baf8ffcf2"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 10620682240,
+    "retained_processes": 4,
+    "retained_processes_detail": [
+      {
+        "core_seconds": 173.462011,
+        "label": "a1",
+        "peak_rss_bytes": 9351692288,
+        "status": "stopped",
+        "wall_seconds": 23.286242917
+      },
+      {
+        "core_seconds": 164.771596,
+        "label": "b1",
+        "peak_rss_bytes": 10620682240,
+        "status": "stopped",
+        "wall_seconds": 22.711707333
+      },
+      {
+        "core_seconds": 168.420766,
+        "label": "a2",
+        "peak_rss_bytes": 10080288768,
+        "status": "stopped",
+        "wall_seconds": 21.82942125
+      },
+      {
+        "core_seconds": 171.000845,
+        "label": "b2",
+        "peak_rss_bytes": 10617110528,
+        "status": "stopped",
+        "wall_seconds": 22.5618855
+      }
+    ],
+    "retained_sequential_wall_seconds": 90.389257,
+    "retained_total_core_seconds": 677.655218,
+    "scope": "four complete one-unit stop-after-collect workflows; compilation excluded"
+  },
+  "schema_version": 1,
+  "software": {
+    "baseline_binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+    "candidate_binary_blake3": "4bc834cf7a52dd26decb0277a17b4bc0c067ce67d133374788ba06d034d6d935",
+    "selected_source_stack_head": "00ac5cee"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-bucket-bits27-rejected-20260922.patch",
+    "sha256": "65ef4d986bf6cd72a3c90d299716e7df60d1837a686ec5b3b17ce45e812fcb8a",
+    "status": "archived_rejected_not_applied_to_selected_source"
+  },
+  "validation": [
+    "all four arms emit exactly 2157 relations with one canonical hash",
+    "candidate passes compact/full exact-answer test",
+    "source-pinned binaries distinguish candidate and Stage-149 baseline",
+    "rejected patch applies cleanly to Stage-156 selected source"
+  ]
+}
