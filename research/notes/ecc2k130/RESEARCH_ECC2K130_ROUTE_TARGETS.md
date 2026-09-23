@@ -546,6 +546,9 @@ on ECC2K-130's security.
 
 ## X5 — `m = 4` via a chained symmetrised `S₃`
 
+> **Restated as X5′ below**: the count named here is a degree-4 system, and the
+> literal chain of symmetrised `S₃` links is the one comparable with H1's table.
+
 **Question.** The conditional theory wants `m ≈ n^{1/3} ≈ 5.1` at
 `n = 131`; the harness reaches `m = 3`. `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md`
 §8.5 names the missing arm — chain the *symmetrised* `S₃`, giving
@@ -561,6 +564,97 @@ draws per instance at `m = 4`.
 **Falsifier.** FFD growing with `n`. That closes the route *and* is a
 result: it is H1 of the scaling target, and per the literature survey
 nobody has a rigorous answer in either direction.
+
+## X5′ — X5 as it can run: the symmetrised `S₃` chained at `m = 4`, against H1
+
+**Registered before any chained-symmetrised code exists.**  Nothing below
+has been measured.
+
+**Why X5 needs restating.**
+
+- **The topology.**  X5 names `4(ℓ − 1) + 1 + n` unknowns.  That count is one
+  intermediate point `Q`: the symmetrised `S₃` link `P₁ + P₂ + Q` and the
+  symmetrised `S₄` link `Q + P₃ + P₄ + R`.  The `S₄` link has Boolean degree 4
+  (its `w_Q·w₃·w₄·w_R·s` term, with `w_R` known), so its equations enter a
+  Macaulay matrix only at degree 4.  That system is not comparable with the
+  `x`-chained systems in H1's table, which are degree 3 throughout.
+- **What "chain the symmetrised `S₃`" means at `m = 4`.**  Taken literally, it
+  is three `S₃` links through two intermediate points: `P₁ + P₂ + Q₁`,
+  `Q₁ + P₃ + Q₂` and `Q₂ + P₄ + R`.
+  - `AS` is `F₂`-linear, so each `w_Q = AS(u_Q)` is linear in its `n` free bits,
+    and every link has Boolean degree 3, like the `x`-chained links.
+  - The parity bits fold, because `AS(u + 1) = AS(u)`.  `ε₁ + ε₂` goes into
+    `u_{Q₁}` and `ε₃` into `u_{Q₂}`, which leaves one parity bit, on the last
+    link.
+  - The system has **`4(ℓ − 1) + 1 + 2n` unknowns** and `3n` equations.
+- **The primary metric.**  X5's primary, a solve with a clean gate under 64
+  unknowns, is out of reach where the question is interesting.  X4′'s
+  `x`-chained arm at 50 unknowns hit its budget on 12 of 16 targets.  So the
+  deliverable is the first fall degree, as H1 registered it, and a solve is
+  attempted only on the smallest rung.
+
+**The protocol, fixed now.**
+
+1. **Two arms, one system each.**
+   - The symmetrised chain above.  Its layout puts the summand bits first, then
+     the parity bit, then `u_{Q₁}` and `u_{Q₂}`, so the existing four-summand
+     lift reads it unchanged.
+   - The `x`-chained `m = 4` system, `build_decomposition_system`, with
+     `4ℓ + 2n` unknowns.  This is the family H1's table measured.
+2. **Rungs.**
+
+   | `n` | `ℓ` | symmetrised chain | `x`-chained | equations |
+   |---:|---:|---:|---:|---:|
+   | 9 | 4 | 31 | 34 | 27 |
+   | 11 | 4 | 35 | 38 | 33 |
+   | 13 | 5 | 43 | 46 | 39 |
+   | 15 | 5 | 47 | 50 | 45 |
+   | 17 | 6 | 55 | 58 | 51 |
+   | 19 | 6 | 59 | 62 | 57 |
+
+   `ℓ = ⌈(n + log₂ 24)/4⌉`.  The fall degree is a property of the system, and
+   the system needs only the field and `b = 1`.  So no curve is needed, and
+   the rungs are not limited to degrees where one exists.
+3. **One `V` per rung, shared by both arms.**  A uniformly random
+   `ℓ`-dimensional `V ∋ 1`, redrawn if Frobenius-stable, from seed
+   `0x5EED0005 ⊕ (n ≪ 32)`.  That is the only kind of `V` that exists at
+   ECC2K-130's `n = 131` (X4′).  H1's table used invariant subspaces, so one
+   cross-check cell is added: at `n = 15`, the invariant
+   `V = ker (x + 1)(x⁴ + x + 1)`, of dimension `5 ∋ 1`, runs through both
+   arms.  It is a cross-check, not a rung.
+4. **Draws.**  H1's protocol: 16 draws of a uniform `x(R) ∈ F_{2^n}` with
+   `u(R)` finite and non-zero, the same 16 for both arms.
+5. **The fall degree.**  `first_fall_degree` with `d_max = 4`: the first
+   degree at which the Macaulay matrix loses rank, which is H1's definition.
+   The report gives the minimum, the maximum and the no-fall count over the 16
+   draws, never a single draw.  Where the degree-4 matrix exceeds the engine's
+   size caps, the cell is reported as censored at 3.
+6. **Correctness of the new system.**  A unit test plants
+   `R = P₁ + P₂ + P₃ + P₄` over `F_u` on a small curve.  The chained system
+   must vanish at the planted root, and the root must lift back to that
+   relation.  At `n = 11` (`K₁`, a curve exists) the solver's verdict is also
+   checked against exhaustive 4-sum enumeration on 16 subgroup targets.  That
+   is the one rung where a solve is attempted.
+
+**What each outcome means.**
+
+- **H1 not falsified for the symmetrised chain.**  Every rung has
+  `fall_min ≤ 3`.  The chained symmetrised system is as benign as the
+  `x`-chain.  X5 then closes, and with it the last open route that needs code.
+- **H1 falsified.**  Some rung has `fall_min ≥ 4`, or no fall at `d ≤ 4` on any
+  of its 16 draws.  The symmetrised chain then falls later than the `x`-chain.
+  That is a fact about the fall-degree question, and it is reported as one
+  whatever the `x` arm does.
+- **Either way, the paired arm is reported beside it.**  If the `x`-chained arm
+  also rises somewhere on this ladder, H1 is falsified for the family the
+  table measured too.
+
+**Class.**  A structural measurement.  No cost moves, so none of `AGENTS.md`
+§3's four classes applies.  Nothing here bears on ECC2K-130's cost: the
+close-out above already records that no oracle beats enumeration per relation.
+
+**Inadmissible.**  Changing `d_max`, `ℓ`, `V`, the seed or the draws after rows
+are seen; reporting single draws; dropping a censored rung.
 
 ## X6 — Second literature pass on the under-searched items
 
@@ -633,7 +727,7 @@ reason given.
 | X2 | 1, 2 | the `(D, k)` frontier is in the frozen `crossbred_bench` output (CROSSBRED §2) | no filters at any `(D, k)`; at `D = 2` no space below `k = 5` | recorded there, not re-tabulated here |
 | X3 | 2, Crossbred on the symmetrised system | **not run** | — | open; bounded below |
 | X4 → X4′ | 3, symmetrised oracle end to end | X4 cannot run as registered; the X4′ gate ran | `3.1–14.7×` enumeration per relation at `d = 3`, `30–1,101×` at `d = 4`, priced from below | gate **closed**; the `350×` is **engineering** (weakly determined) |
-| X5 | 4, `m = 4` | **not built** | — | open: H1 of the scaling target |
+| X5 → X5′ | 4, `m = 4` | **registered as X5′**, not yet run | — | open: H1 of the scaling target |
 | X6 | 5, literature | **not run** | — | open, no code |
 
 **What the thread established.**
@@ -667,9 +761,8 @@ reason given.
   - It does not bear on ECC2K-130's cost.  A fall degree that stays at 3
     would still leave the `m = 4` oracle needing to beat enumeration per
     relation, which no oracle here does at `m = 3`.
-  - If run, it needs its own registration: the chained symmetrised `S₃`
-    system, 16 draws per instance, and the falsifier "the fall degree grows
-    with `n`".
+  - It is registered as X5′: three symmetrised `S₃` links, the fall degree
+    over 16 draws per rung, and H1's own falsifier.
 - **X1's `α` over four rungs** needs Crossbred to finish at `m = 3` past
   `n = 9`, where its edge over F4 was already nearly gone.  The question it
   would answer, whether the oracle scales, matters only if the oracle first
