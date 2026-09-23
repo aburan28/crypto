@@ -1,0 +1,225 @@
+{
+ "panel": {
+  "1024": {
+   "rows": [
+    {
+     "block": 0,
+     "order": "ic_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 50.08,
+     "rho_wall_s": 38.01,
+     "ic_over_rho": 1.3175480136806104,
+     "ic_peak_rss": 10639802368,
+     "rho_peak_rss": 212369408,
+     "ic_charged_ms": 43102.41051100002,
+     "rho_group_additions": 20633320,
+     "load_ic": "9.83 14.80 17.41",
+     "load_rho": "8.41 13.63 16.82"
+    },
+    {
+     "block": 1,
+     "order": "rho_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 49.78,
+     "rho_wall_s": 37.69,
+     "ic_over_rho": 1.3207747413106925,
+     "ic_peak_rss": 10642718720,
+     "rho_peak_rss": 212172800,
+     "ic_charged_ms": 42732.360763000004,
+     "rho_group_additions": 20633320,
+     "load_ic": "10.29 14.25 15.54",
+     "load_rho": "12.57 15.13 15.90"
+    },
+    {
+     "block": 2,
+     "order": "ic_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 58.46,
+     "rho_wall_s": 40.25,
+     "ic_over_rho": 1.4524223602484472,
+     "ic_peak_rss": 10639851520,
+     "rho_peak_rss": 211976192,
+     "ic_charged_ms": 50093.910123000016,
+     "rho_group_additions": 20633320,
+     "load_ic": "15.57 21.28 19.51",
+     "load_rho": "20.25 21.34 19.62"
+    }
+   ],
+   "median_ic_over_rho": 1.3207747413106925,
+   "min": 1.3175480136806104,
+   "max": 1.4524223602484472,
+   "verdict": "rho_faster",
+   "all_match": true,
+   "rho_additions_deterministic": true
+  },
+  "2048": {
+   "rows": [
+    {
+     "block": 0,
+     "order": "ic_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 69.93,
+     "rho_wall_s": 56.49,
+     "ic_over_rho": 1.237918215613383,
+     "ic_peak_rss": 10641883136,
+     "rho_peak_rss": 212008960,
+     "ic_charged_ms": 56450.54901499997,
+     "rho_group_additions": 28940863,
+     "load_ic": "7.87 12.85 16.39",
+     "load_rho": "12.80 13.07 16.18"
+    },
+    {
+     "block": 1,
+     "order": "rho_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 79.13,
+     "rho_wall_s": 53.54,
+     "ic_over_rho": 1.477960403436683,
+     "ic_peak_rss": 10479648768,
+     "rho_peak_rss": 211976192,
+     "ic_charged_ms": 64252.55980499998,
+     "rho_group_additions": 28940863,
+     "load_ic": "11.66 13.69 15.18",
+     "load_rho": "11.30 13.95 15.36"
+    },
+    {
+     "block": 2,
+     "order": "ic_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 78.93,
+     "rho_wall_s": 56.46,
+     "ic_over_rho": 1.3979808714133901,
+     "ic_peak_rss": 10639245312,
+     "rho_peak_rss": 212533248,
+     "ic_charged_ms": 63908.64893999994,
+     "rho_group_additions": 28940863,
+     "load_ic": "20.15 21.15 19.64",
+     "load_rho": "21.77 21.24 19.79"
+    }
+   ],
+   "median_ic_over_rho": 1.3979808714133901,
+   "min": 1.237918215613383,
+   "max": 1.477960403436683,
+   "verdict": "rho_faster",
+   "all_match": true,
+   "rho_additions_deterministic": true
+  },
+  "4096": {
+   "rows": [
+    {
+     "block": 0,
+     "order": "ic_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 110.28,
+     "rho_wall_s": 87.34,
+     "ic_over_rho": 1.262651705976643,
+     "ic_peak_rss": 10405117952,
+     "rho_peak_rss": 417300480,
+     "ic_charged_ms": 85124.95471399995,
+     "rho_group_additions": 40146334,
+     "load_ic": "10.71 12.53 15.79",
+     "load_rho": "13.10 12.24 15.24"
+    },
+    {
+     "block": 1,
+     "order": "rho_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 162.95,
+     "rho_wall_s": 83.89,
+     "ic_over_rho": 1.9424246036476336,
+     "ic_peak_rss": 10560241664,
+     "rho_peak_rss": 418152448,
+     "ic_charged_ms": 132979.10219699983,
+     "rho_group_additions": 40146334,
+     "load_ic": "26.85 17.61 16.41",
+     "load_rho": "17.97 14.85 15.47"
+    },
+    {
+     "block": 2,
+     "order": "ic_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 119.14,
+     "rho_wall_s": 92.16,
+     "ic_over_rho": 1.2927517361111112,
+     "ic_peak_rss": 10643193856,
+     "rho_peak_rss": 395329536,
+     "ic_charged_ms": 93120.90842000002,
+     "rho_group_additions": 40146334,
+     "load_ic": "15.63 19.68 19.31",
+     "load_rho": "17.61 19.43 19.27"
+    }
+   ],
+   "median_ic_over_rho": 1.2927517361111112,
+   "min": 1.262651705976643,
+   "max": 1.9424246036476336,
+   "verdict": "rho_faster",
+   "all_match": true,
+   "rho_additions_deterministic": true
+  },
+  "8192": {
+   "rows": [
+    {
+     "block": 0,
+     "order": "ic_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 196.75,
+     "rho_wall_s": 108.18,
+     "ic_over_rho": 1.8187280458495099,
+     "ic_peak_rss": 10004512768,
+     "rho_peak_rss": 417906688,
+     "ic_charged_ms": 146330.24682900019,
+     "rho_group_additions": 58260320,
+     "load_ic": "25.22 15.44 16.12",
+     "load_rho": "16.75 15.90 16.21"
+    },
+    {
+     "block": 1,
+     "order": "rho_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 227.18,
+     "rho_wall_s": 132.68,
+     "ic_over_rho": 1.712239975881821,
+     "ic_peak_rss": 9715826688,
+     "rho_peak_rss": 417579008,
+     "ic_charged_ms": 178368.50614199997,
+     "rho_group_additions": 58260320,
+     "load_ic": "24.74 21.65 18.63",
+     "load_rho": "21.38 19.63 17.50"
+    },
+    {
+     "block": 2,
+     "order": "ic_first",
+     "targets_match": true,
+     "ic_all_solved": true,
+     "ic_wall_s": 238.95,
+     "rho_wall_s": 137.33,
+     "ic_over_rho": 1.7399694167334157,
+     "ic_peak_rss": 10058711040,
+     "rho_peak_rss": 395362304,
+     "ic_charged_ms": 184877.17403700022,
+     "rho_group_additions": 58260320,
+     "load_ic": "23.87 20.65 19.73",
+     "load_rho": "22.20 21.11 20.13"
+    }
+   ],
+   "median_ic_over_rho": 1.7399694167334157,
+   "min": 1.712239975881821,
+   "max": 1.8187280458495099,
+   "verdict": "rho_faster",
+   "all_match": true,
+   "rho_additions_deterministic": true
+  }
+ },
+ "complete": true
+}
