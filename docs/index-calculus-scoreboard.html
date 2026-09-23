@@ -4273,6 +4273,40 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-support-envelope-20260922">
+  <div class="panel-head">
+    <h2>Parameterized support envelopes: coefficient reuse verified, performance rejected <span class="chip">engineering</span></h2>
+    <p>A standalone Boolean-matrix constructor now retains coefficient-to-product parity masks.
+      Changing coefficients, cancelled products, generator degree drops and newly required
+      multipliers are handled explicitly. Across 256 fixed cells, all 272,000 matrix outputs
+      matched an independent oracle; the envelope recorded 35,520 changed-input hits and
+      3,360 support-escape fallbacks. It passed <strong>0 of 48</strong> preregistered cold-cost
+      holdout gates. Correct reuse does not repay this representation&rsquo;s runtime and storage costs.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_support_envelope_20260922/CONCLUSION.md">decision and contract</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_support_envelope_20260922/run_01/RESULT.md">frozen comparison table</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_support_envelope_20260922/run_01/results.json">paired per-size gates</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_support_envelope_20260922/run_01/manifest.json">manifest</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Standalone construction diagnostic: cold milliseconds per batch of 64, including validation.
+      Medians pool four toy sizes (6/8/10/12 variables), two holdout seeds and ten repetitions.
+      Ratios describe the changing-coefficient column; acceptance uses the separate paired gates.</caption>
+    <thead><tr><th>Variant</th><th>Repeat (ms)</th><th>Coefficients (ms)</th><th>Degree cycle (ms)</th><th>Escape (ms)</th><th>Direct / arm</th><th>Matrix cache / arm</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Direct construction</td><td>1.657479</td><td>1.594291</td><td>1.825187</td><td>1.567375</td><td>1.000</td><td>0.993</td><td>PASS</td></tr>
+      <tr><td>Verified layout reuse</td><td>1.399625</td><td>1.659000</td><td>2.159729</td><td>1.562709</td><td>0.961</td><td>0.954</td><td>PASS</td></tr>
+      <tr><td>Exact product schedule</td><td>0.215458</td><td>1.631145</td><td>1.816083</td><td>1.550729</td><td>0.977</td><td>0.970</td><td>PASS</td></tr>
+      <tr><td>Exact packed-matrix cache</td><td>0.165813</td><td>1.582396</td><td>1.739000</td><td>1.615521</td><td>1.008</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Parameterized support envelope</td><td>1.610500</td><td>2.081271</td><td>2.184021</td><td>2.195896</td><td>0.766</td><td>0.760</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>The envelope retains a median 100,715 bytes versus 4,878 bytes for exact matrix caching
+    across these holdouts. The coefficient-changing application cost is also worse than direct
+    construction in all eight size/seed cells at batch 64, so setup amortization alone does not
+    explain the rejection. The earlier exact-support experiments below remain unchanged.
+    No production solver path changes; full-pipeline cost and rho ratio remain unmeasured.</p>
+</section>
 <section class="panel" id="inherited-f4-20260922">
   <div class="panel-head" id="boolean-product-schedule-20260922">
     <h2>Exact-support product schedules: no reuse across changed Boolean systems <span class="chip">accounting</span></h2>
