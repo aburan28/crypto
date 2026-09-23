@@ -326,6 +326,57 @@ Ordered by cost, all inside what this repository already has:
 3. **Then the `m = 4` cells**, which is Route 4's own falsifier, read with
    the surplus named.
 
+## 8. Pre-registration: the surplus sweep
+
+Written and committed **before any result of this run existed**, per
+`AGENTS.md` §4.  The run is §7 item 1, the note's own falsification target.
+
+**Why it is needed.**  `ic descent`'s default ladder hard-codes
+`n' = ⌈n/m⌉` — its own comment calls it "the square-system choice" — so
+every cell it has published sits at surplus `S ∈ {0, −1, −2}`.  The axis
+this note says governs the descent has never been varied.
+
+**The run.**  `n = 11` fixed, `n'` swept, both families (`K` Koblitz, `R`
+random binary), 8 targets a cell, the tool's default 120 s a target, four-
+core Xeon container at 2.80 GHz, `0bb6f78`:
+
+| `m` | `n'` | `vars = m·n'` | `S = n − m·n'` |
+|--:|--:|--:|--:|
+| 2 | 2, 3, 4, 5, 6 | 4, 6, 8, 10, 12 | `+7, +5, +3, +1, −1` |
+| 3 | 2, 3, 4 | 6, 9, 12 | `+5, +2, −1` |
+
+**Statistic.**  `D_av/D_sr` on family `K`: the degree the Semaev descent
+reaches over the degree a structureless system *of the same shape*
+reaches.  Dividing by the shape is what stops "overdetermined systems are
+easier" from counting as a finding.  `R` is reported beside it as a second
+null object.
+
+**Decision rule, fixed now.**  For each `m`, compare `D_av/D_sr` at the
+lowest surplus against the highest:
+
+- **flat** — the difference is at most `0.05` for both `m`: §4's scoping
+  rule is **withdrawn**, as §7 already commits to.
+- **moves** — the difference exceeds `0.10` for both `m`, in either
+  direction: the rule survives, and the direction and size are the first
+  measured rate at which the structural effect changes toward the attack's
+  regime.
+- anything else: **inconclusive**, and reported as that.
+
+No direction is predicted.  The note argues that surplus *matters*, not
+which way the ratio goes, and inventing a direction now would only be a
+second thing to be wrong about.
+
+**A known confound, named in advance so it cannot be used afterwards.**
+At large surplus both degrees can sit at the system's own total degree,
+because nothing resolves below it.  That pins `D_av/D_sr` at `1` for a
+reason that has nothing to do with structure.  Any cell where `D_sr`
+equals the system degree is **uninformative about structure**: it is
+reported, and it counts toward neither verdict.  If that removes a
+comparison for some `m`, that `m` is inconclusive rather than flat.
+
+A single `n` is the test the note committed to, not a replication.  A
+second `n` follows only if this one is not inconclusive.
+
 ## References
 
 - **I. Semaev**, *Summation polynomials and the discrete logarithm problem on
