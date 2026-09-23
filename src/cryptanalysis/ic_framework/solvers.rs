@@ -147,7 +147,7 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, bit-packed elimination, reduced basis"
+        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, shape-selected block-4 M4RI/streaming bit-packed elimination, reduced basis"
             .into()
     }
 
@@ -175,6 +175,9 @@ impl SystemSolver for F4F2 {
             ("matrix_rows_max", st.matrix_rows_max),
             ("matrix_cols_max", st.matrix_cols_max),
             ("matrix_rows_sum", st.matrix_rows_sum),
+            ("m4ri_matrices", st.m4ri_matrices),
+            ("m4ri_table_word_xors", st.m4ri_table_word_xors),
+            ("m4ri_scratch_bytes_max", st.m4ri_scratch_bytes_max),
             ("divisor_tests", st.divisor_tests),
             ("new_elements", st.new_elements),
             ("basis_len", st.basis_len),
@@ -189,7 +192,7 @@ impl SystemSolver for F4F2 {
         }
         let mut cost = SolverCost {
             ops: st.word_xors,
-            op_unit: "word XORs (elimination only)".into(),
+            op_unit: "word XORs (elimination, including M4RI tables)".into(),
             wall_ns: 0,
             peak_bytes: st.peak_matrix_bytes,
             degree_reached: Some(st.degree_reached),

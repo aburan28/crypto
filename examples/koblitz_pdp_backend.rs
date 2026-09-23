@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 //! Run one native backend against an exported binary-Koblitz PDP instance.
 //!
 //! The exporter writes the source system and a canonical identity into its
@@ -714,7 +716,7 @@ impl F4CostAggregate {
         extra.insert("f4_calls".to_string(), self.calls);
         json!({
             "ops":self.ops,
-            "op_unit":"word XORs (elimination only)",
+            "op_unit":"word XORs (elimination, including M4RI tables)",
             "wall_ns":self.wall_ns,
             "peak_bytes":self.peak_bytes,
             "degree_reached":self.degree_reached,
@@ -943,6 +945,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_description":solver.describe(),
             "solver_internal_mask_hasher":"splitmix64_for_trusted_u64_masks_with_exact_key_equality",
             "solver_pair_selector":"grouped_lcm_exact_submask_equivalent_to_quadratic_update",
+            "solver_echelon_policy":"block4_m4ri_for_rows_ge_128_cols_ge_256_and_cols_le_4x_rows_else_streaming",
             "single_thread_requested":true,
             "budget_seconds":budget_seconds,
             "source_variables":instance.n_vars,

@@ -52,9 +52,9 @@
 //! ## What is counted
 //!
 //! `word_xors`: 64-bit XORs in the eliminations — the forward pass of
-//! every step and of the initial echelon, and the backward pass of the
-//! final inter-reduction — counting only the words between a pivot's
-//! lead and its last non-zero word, which is the work performed.  The
+//! every step and of the initial echelon, M4RI combination-table formation,
+//! and the backward pass of the final inter-reduction — counting only the
+//! words actually XORed. The
 //! construction of the matrices (the products, the column map, the
 //! packing) is **not** in that count; its wall time is reported beside
 //! it as `build_ns`, so a reader can see what share of the run the unit
@@ -105,8 +105,14 @@ pub struct F4Stats {
     pub matrix_rows_max: u64,
     pub matrix_cols_max: u64,
     pub matrix_rows_sum: u64,
-    /// The unit: 64-bit XORs performed by the eliminations.
+    /// The unit: 64-bit XORs performed by elimination and M4RI tables.
     pub word_xors: u64,
+    /// Matrices routed through block-4 Method of Four Russians elimination.
+    pub m4ri_matrices: u64,
+    /// XORs used to construct M4RI combination tables (also in `word_xors`).
+    pub m4ri_table_word_xors: u64,
+    /// Largest reusable M4RI pivot/table scratch allocation.
+    pub m4ri_scratch_bytes_max: u64,
     /// Divisibility tests made by symbolic preprocessing, one word
     /// operation each; reported, not in `word_xors`.
     pub divisor_tests: u64,
@@ -306,15 +312,21 @@ impl Columns {
     }
 }
 
-/// Forward elimination: each row in turn is reduced by the pivots found
-/// so far and becomes a pivot if anything survives.  Returns the pivot
-/// rows with their lead columns, or `None` if the deadline passed.
-fn echelon(
+struct EchelonOutput {
+    pivots: Vec<(usize, Row)>,
+    m4ri: bool,
+    table_word_xors: u64,
+    scratch_bytes: u64,
+}
+
+/// Streaming forward elimination: each row in turn is reduced by the pivots
+/// found so far and becomes a pivot if anything survives.
+fn echelon_streaming(
     rows: Vec<Row>,
     n_cols: usize,
     word_xors: &mut u64,
     deadline: Option<Instant>,
-) -> Option<Vec<(usize, Row)>> {
+) -> Option<EchelonOutput> {
     let mut pivot_of = vec![NONE; n_cols];
     let mut pivots: Vec<(usize, Row)> = Vec::with_capacity(rows.len());
     for (k, mut row) in rows.into_iter().enumerate() {
@@ -340,7 +352,211 @@ fn echelon(
             }
         }
     }
-    Some(pivots)
+    Some(EchelonOutput {
+        pivots,
+        m4ri: false,
+        table_word_xors: 0,
+        scratch_bytes: 0,
+    })
+}
+
+const PQ_M4RI_BLOCK: usize = 4;
+
+#[derive(Default)]
+struct PqM4riScratch {
+    pivot_columns: Vec<usize>,
+    block_pivots: Vec<Vec<u64>>,
+    table: Vec<u64>,
+}
+
+thread_local! {
+    static PQ_M4RI_SCRATCH: std::cell::RefCell<PqM4riScratch> =
+        std::cell::RefCell::new(PqM4riScratch::default());
+}
+
+/// Block-4 Method of Four Russians row echelon form. Pivot combinations are
+/// materialized once per block, then each remaining row clears all block
+/// columns with one suffix XOR. The returned rows span the same space and use
+/// the same pivot columns as ordinary left-to-right Gaussian elimination.
+fn echelon_m4ri(
+    rows: Vec<Row>,
+    n_cols: usize,
+    word_xors: &mut u64,
+    deadline: Option<Instant>,
+) -> Option<EchelonOutput> {
+    let mut matrix: Vec<Vec<u64>> = rows.into_iter().map(|row| row.bits).collect();
+    let n_rows = matrix.len();
+    let words = n_cols.div_ceil(64).max(1);
+    PQ_M4RI_SCRATCH.with(|scratch| {
+        let mut scratch = scratch.borrow_mut();
+        scratch.pivot_columns.resize(PQ_M4RI_BLOCK, 0);
+        scratch.block_pivots.resize_with(PQ_M4RI_BLOCK, Vec::new);
+        for pivot in &mut scratch.block_pivots {
+            pivot.resize(words, 0);
+        }
+        scratch.table.resize((1usize << PQ_M4RI_BLOCK) * words, 0);
+        let scratch_bytes = (scratch.pivot_columns.capacity()
+            * std::mem::size_of::<usize>()
+            + scratch
+                .block_pivots
+                .iter()
+                .map(|row| row.capacity() * std::mem::size_of::<u64>())
+                .sum::<usize>()
+            + scratch.table.capacity() * std::mem::size_of::<u64>())
+            as u64;
+        let PqM4riScratch {
+            pivot_columns,
+            block_pivots,
+            table,
+        } = &mut *scratch;
+        let mut all_pivots = Vec::with_capacity(n_rows.min(n_cols));
+        let mut pivot_row = 0usize;
+        let mut column = 0usize;
+        let mut table_word_xors = 0u64;
+        while pivot_row < n_rows && column < n_cols {
+            if deadline.is_some_and(|limit| Instant::now() >= limit) {
+                return None;
+            }
+            let block_start = pivot_row;
+            let mut block_rows = 0usize;
+            while block_rows < PQ_M4RI_BLOCK && pivot_row < n_rows && column < n_cols {
+                let next_pivot = block_start + block_rows;
+                let (word, bit) = (column / 64, 1u64 << (column % 64));
+                let mut found = None;
+                for row in next_pivot..n_rows {
+                    if row % 128 == 0
+                        && deadline.is_some_and(|limit| Instant::now() >= limit)
+                    {
+                        return None;
+                    }
+                    for (index, &pivot_column) in
+                        pivot_columns[..block_rows].iter().enumerate()
+                    {
+                        let (pivot_word, pivot_bit) =
+                            (pivot_column / 64, 1u64 << (pivot_column % 64));
+                        if matrix[row][pivot_word] & pivot_bit != 0 {
+                            for (target, &source) in matrix[row][pivot_word..words]
+                                .iter_mut()
+                                .zip(&block_pivots[index][pivot_word..words])
+                            {
+                                *target ^= source;
+                            }
+                            *word_xors += (words - pivot_word) as u64;
+                        }
+                    }
+                    if matrix[row][word] & bit != 0 {
+                        found = Some(row);
+                        break;
+                    }
+                }
+                if let Some(found) = found {
+                    matrix.swap(next_pivot, found);
+                    block_pivots[block_rows].copy_from_slice(&matrix[next_pivot]);
+                    let (previous_pivots, current_pivots) =
+                        block_pivots.split_at_mut(block_rows);
+                    let pivot = &current_pivots[0];
+                    for previous in block_start..next_pivot {
+                        if matrix[previous][word] & bit != 0 {
+                            let block_index = previous - block_start;
+                            for (target, &source) in matrix[previous][word..words]
+                                .iter_mut()
+                                .zip(&pivot[word..words])
+                            {
+                                *target ^= source;
+                            }
+                            for (target, &source) in previous_pivots[block_index][word..words]
+                                .iter_mut()
+                                .zip(&pivot[word..words])
+                            {
+                                *target ^= source;
+                            }
+                            *word_xors += 2 * (words - word) as u64;
+                        }
+                    }
+                    pivot_columns[block_rows] = column;
+                    block_rows += 1;
+                }
+                column += 1;
+            }
+            if block_rows == 0 {
+                break;
+            }
+
+            let first_word = pivot_columns[0] / 64;
+            let suffix_words = words - first_word;
+            let combinations = 1usize << block_rows;
+            table[..suffix_words].fill(0);
+            for mask in 1..combinations {
+                let bit_index = mask.trailing_zeros() as usize;
+                let previous = mask & (mask - 1);
+                let pivot = &block_pivots[bit_index][first_word..words];
+                let target_offset = mask * suffix_words;
+                let source_offset = previous * suffix_words;
+                for index in 0..suffix_words {
+                    table[target_offset + index] =
+                        table[source_offset + index] ^ pivot[index];
+                }
+                *word_xors += suffix_words as u64;
+                table_word_xors += suffix_words as u64;
+            }
+            for row in block_start + block_rows..n_rows {
+                if row % 128 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
+                    return None;
+                }
+                let mut pattern = 0usize;
+                for (index, &pivot_column) in pivot_columns[..block_rows].iter().enumerate() {
+                    if matrix[row][pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
+                        pattern |= 1usize << index;
+                    }
+                }
+                if pattern != 0 {
+                    let offset = pattern * suffix_words;
+                    for (target, &source) in matrix[row][first_word..words]
+                        .iter_mut()
+                        .zip(&table[offset..offset + suffix_words])
+                    {
+                        *target ^= source;
+                    }
+                    *word_xors += suffix_words as u64;
+                }
+            }
+            all_pivots.extend_from_slice(&pivot_columns[..block_rows]);
+            pivot_row += block_rows;
+        }
+
+        let mut pivots = Vec::with_capacity(all_pivots.len());
+        for (bits, lead) in matrix.into_iter().take(all_pivots.len()).zip(all_pivots) {
+            let start = lead / 64;
+            let mut end = bits.len();
+            while end > start && bits[end - 1] == 0 {
+                end -= 1;
+            }
+            pivots.push((lead, Row { bits, start, end }));
+        }
+        Some(EchelonOutput {
+            pivots,
+            m4ri: true,
+            table_word_xors,
+            scratch_bytes,
+        })
+    })
+}
+
+fn echelon(
+    rows: Vec<Row>,
+    n_cols: usize,
+    word_xors: &mut u64,
+    deadline: Option<Instant>,
+) -> Option<EchelonOutput> {
+    let use_m4ri = rows.len() >= 128
+        && n_cols >= 256
+        && n_cols <= 4 * rows.len()
+        && std::env::var("PQ_F4_DISABLE_M4RI").as_deref() != Ok("1");
+    if use_m4ri {
+        echelon_m4ri(rows, n_cols, word_xors, deadline)
+    } else {
+        echelon_streaming(rows, n_cols, word_xors, deadline)
+    }
 }
 
 fn is_one(p: &F2BoolPoly) -> bool {
@@ -528,11 +744,17 @@ pub fn groebner_basis_f4(
     let rows: Vec<Row> = inputs.iter().map(|p| cols.pack(p)).collect();
     st.build_ns += t.elapsed().as_nanos() as u64;
     let t = Instant::now();
-    let Some(pivots) = echelon(rows, cols.monos.len(), &mut st.word_xors, deadline) else {
+    let Some(initial_echelon) = echelon(rows, cols.monos.len(), &mut st.word_xors, deadline) else {
         st.timed_out = true;
         st.eliminate_ns += t.elapsed().as_nanos() as u64;
         return finish(inputs, st);
     };
+    st.m4ri_matrices += u64::from(initial_echelon.m4ri);
+    st.m4ri_table_word_xors += initial_echelon.table_word_xors;
+    st.m4ri_scratch_bytes_max = st
+        .m4ri_scratch_bytes_max
+        .max(initial_echelon.scratch_bytes);
+    let pivots = initial_echelon.pivots;
     st.eliminate_ns += t.elapsed().as_nanos() as u64;
     let mut start: Vec<F2BoolPoly> = pivots.iter().map(|(_, r)| cols.unpack(r, n_vars)).collect();
     if start.iter().any(is_one) {
@@ -782,11 +1004,15 @@ pub fn groebner_basis_f4(
         st.build_ns += t.elapsed().as_nanos() as u64;
 
         let t = Instant::now();
-        let Some(pivots) = echelon(rows, cols.monos.len(), &mut st.word_xors, deadline) else {
+        let Some(step_echelon) = echelon(rows, cols.monos.len(), &mut st.word_xors, deadline) else {
             st.timed_out = true;
             st.eliminate_ns += t.elapsed().as_nanos() as u64;
             break;
         };
+        st.m4ri_matrices += u64::from(step_echelon.m4ri);
+        st.m4ri_table_word_xors += step_echelon.table_word_xors;
+        st.m4ri_scratch_bytes_max = st.m4ri_scratch_bytes_max.max(step_echelon.scratch_bytes);
+        let pivots = step_echelon.pivots;
         st.eliminate_ns += t.elapsed().as_nanos() as u64;
 
         let mut fresh: Vec<F2BoolPoly> = pivots
@@ -1049,6 +1275,96 @@ mod tests {
                 assert_eq!(stats.pairs_chain_skipped, expected.1);
                 assert_eq!(stats.pairs_product_skipped, expected.2);
             }
+        }
+    }
+
+    fn canonical_rref(mut matrix: Vec<Vec<u64>>, n_cols: usize) -> Vec<Vec<u64>> {
+        let words = n_cols.div_ceil(64);
+        let mut pivot_row = 0usize;
+        for column in 0..n_cols {
+            let (word, bit) = (column / 64, 1u64 << (column % 64));
+            let Some(found) = (pivot_row..matrix.len()).find(|&row| matrix[row][word] & bit != 0)
+            else {
+                continue;
+            };
+            matrix.swap(pivot_row, found);
+            let pivot = matrix[pivot_row].clone();
+            for row in 0..matrix.len() {
+                if row != pivot_row && matrix[row][word] & bit != 0 {
+                    for index in word..words {
+                        matrix[row][index] ^= pivot[index];
+                    }
+                }
+            }
+            pivot_row += 1;
+            if pivot_row == matrix.len() {
+                break;
+            }
+        }
+        matrix.truncate(pivot_row);
+        matrix
+    }
+
+    #[test]
+    fn m4ri_and_streaming_have_the_same_row_space() {
+        let mut seed = 0x9a71_d05c_3f28_44e1u64;
+        let mut next = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        for (n_rows, n_cols, keep_mask) in [
+            (128usize, 257usize, 1u64),
+            (173, 319, 3),
+            (211, 385, 7),
+            (257, 511, 15),
+        ] {
+            let words = n_cols.div_ceil(64);
+            let mut raw = Vec::with_capacity(n_rows);
+            for _ in 0..n_rows {
+                let mut bits: Vec<u64> = (0..words)
+                    .map(|_| {
+                        let value = next();
+                        if keep_mask == 1 {
+                            value
+                        } else {
+                            value & next() & keep_mask.wrapping_neg()
+                        }
+                    })
+                    .collect();
+                if n_cols % 64 != 0 {
+                    *bits.last_mut().unwrap() &= (1u64 << (n_cols % 64)) - 1;
+                }
+                raw.push(bits);
+            }
+            let rows = |source: &[Vec<u64>]| {
+                source
+                    .iter()
+                    .cloned()
+                    .map(|bits| Row { bits, start: 0, end: words })
+                    .collect::<Vec<_>>()
+            };
+            let mut streaming_ops = 0u64;
+            let streaming =
+                echelon_streaming(rows(&raw), n_cols, &mut streaming_ops, None).unwrap();
+            let mut m4ri_ops = 0u64;
+            let m4ri = echelon_m4ri(rows(&raw), n_cols, &mut m4ri_ops, None).unwrap();
+            let mut streaming_columns: Vec<_> =
+                streaming.pivots.iter().map(|(lead, _)| *lead).collect();
+            let mut m4ri_columns: Vec<_> = m4ri.pivots.iter().map(|(lead, _)| *lead).collect();
+            streaming_columns.sort_unstable();
+            m4ri_columns.sort_unstable();
+            assert_eq!(m4ri_columns, streaming_columns, "shape {n_rows}x{n_cols}");
+            let streaming_space = canonical_rref(
+                streaming.pivots.into_iter().map(|(_, row)| row.bits).collect(),
+                n_cols,
+            );
+            let m4ri_space = canonical_rref(
+                m4ri.pivots.into_iter().map(|(_, row)| row.bits).collect(),
+                n_cols,
+            );
+            assert_eq!(m4ri_space, streaming_space, "shape {n_rows}x{n_cols}");
         }
     }
 
