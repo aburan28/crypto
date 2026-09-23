@@ -359,6 +359,71 @@ struct State {
     pairs: Vec<Pair>,
 }
 
+/// Becker--Weispfenning `UPDATE` selection for the pairs made by one new
+/// leading monomial.  The direct formulation checks every candidate against
+/// every other candidate.  Here equal LCMs are grouped and proper divisor
+/// LCMs are found by exact submask lookup.  Iterating the original candidates
+/// in reverse at the end preserves the direct algorithm's pair order and its
+/// lowest-index representative for duplicate non-coprime LCMs.
+fn select_new_pairs(
+    lh: u64,
+    lm: &[u64],
+    active: &[bool],
+    st: &mut F4Stats,
+) -> Vec<(usize, u64)> {
+    let candidates: Vec<(usize, u64)> = (0..lm.len())
+        .filter(|&g| active[g])
+        .map(|g| (g, lh | lm[g]))
+        .collect();
+    if candidates.is_empty() {
+        return Vec::new();
+    }
+
+    let mut grouped = candidates.clone();
+    grouped.sort_unstable_by_key(|&(g, lcm)| (lcm, g));
+    let lcms: FastU64Set = grouped.iter().map(|&(_, lcm)| lcm).collect();
+    let mut survivor = FastU64Map::default();
+    let mut start = 0usize;
+    while start < grouped.len() {
+        let lcm = grouped[start].1;
+        let mut end = start + 1;
+        while end < grouped.len() && grouped[end].1 == lcm {
+            end += 1;
+        }
+        let group = &grouped[start..end];
+        let has_coprime = group.iter().any(|&(g, _)| lh & lm[g] == 0);
+        let mut proper = (lcm - 1) & lcm;
+        let mut proper_cover = false;
+        while proper != 0 {
+            if lcms.contains(&proper) {
+                proper_cover = true;
+                break;
+            }
+            proper = (proper - 1) & lcm;
+        }
+        let mut noncoprime = group.iter().filter(|&&(g, _)| lh & lm[g] != 0);
+        let first = noncoprime.next().map(|&(g, _)| g);
+        let count = usize::from(first.is_some()) + noncoprime.count();
+        if proper_cover || has_coprime {
+            st.pairs_chain_skipped += count as u64;
+        } else if let Some(g) = first {
+            survivor.insert(lcm, g);
+            st.pairs_chain_skipped += count.saturating_sub(1) as u64;
+        }
+        start = end;
+    }
+
+    let mut selected = Vec::with_capacity(survivor.len());
+    for (g, lcm) in candidates.into_iter().rev() {
+        if lh & lm[g] == 0 {
+            st.pairs_product_skipped += 1;
+        } else if survivor.get(&lcm) == Some(&g) {
+            selected.push((g, lcm));
+        }
+    }
+    selected
+}
+
 impl State {
     /// Becker–Weispfenning `UPDATE` for the critical pairs, plus the
     /// field pairs of the new element.
@@ -377,21 +442,8 @@ impl State {
             self.pairs.push(Pair { kind: PairKind::Field(h, v), lcm: lh, deg: dh + 1 });
         }
 
-        // New pairs (h, g): keep one per minimal lcm (chain criterion).
-        let mut c: Vec<(usize, u64)> = (0..h)
-            .filter(|&g| self.active[g])
-            .map(|g| (g, lh | self.lm[g]))
-            .collect();
-        let mut d: Vec<(usize, u64)> = Vec::with_capacity(c.len());
-        while let Some((g1, l1)) = c.pop() {
-            let coprime = lh & self.lm[g1] == 0;
-            let covered = c.iter().chain(d.iter()).any(|&(_, l2)| l2 & !l1 == 0);
-            if coprime || !covered {
-                d.push((g1, l1));
-            } else {
-                st.pairs_chain_skipped += 1;
-            }
-        }
+        // New pairs (h, g): keep one per minimal LCM (chain criterion).
+        let selected = select_new_pairs(lh, &self.lm, &self.active, st);
         // Old pairs whose lcm `h` divides strictly on both sides.
         let lm = &self.lm;
         let mut dropped = 0u64;
@@ -406,13 +458,8 @@ impl State {
             }
         });
         st.pairs_chain_skipped += dropped;
-        // Product criterion on what survived.
-        for (g, l) in d {
-            if lh & self.lm[g] == 0 {
-                st.pairs_product_skipped += 1;
-            } else {
-                self.pairs.push(Pair { kind: PairKind::Critical(g, h), lcm: l, deg: l.count_ones() });
-            }
+        for (g, l) in selected {
+            self.pairs.push(Pair { kind: PairKind::Critical(g, h), lcm: l, deg: l.count_ones() });
         }
         for g in 0..h {
             if self.active[g] && lh & !self.lm[g] == 0 {
@@ -945,6 +992,64 @@ mod tests {
 
     fn brute_force(eqs: &[F2BoolPoly], n: usize) -> Vec<u64> {
         (0u64..1 << n).filter(|v| eqs.iter().all(|e| e.eval(*v) == 0)).collect()
+    }
+
+    fn reference_new_pairs(
+        lh: u64,
+        lm: &[u64],
+        active: &[bool],
+    ) -> (Vec<(usize, u64)>, u64, u64) {
+        let mut c: Vec<(usize, u64)> = (0..lm.len())
+            .filter(|&g| active[g])
+            .map(|g| (g, lh | lm[g]))
+            .collect();
+        let mut d = Vec::with_capacity(c.len());
+        let mut chain = 0u64;
+        while let Some((g1, l1)) = c.pop() {
+            let coprime = lh & lm[g1] == 0;
+            let covered = c.iter().chain(d.iter()).any(|&(_, l2)| l2 & !l1 == 0);
+            if coprime || !covered {
+                d.push((g1, l1));
+            } else {
+                chain += 1;
+            }
+        }
+        let mut product = 0u64;
+        let mut selected = Vec::new();
+        for (g, lcm) in d {
+            if lh & lm[g] == 0 {
+                product += 1;
+            } else {
+                selected.push((g, lcm));
+            }
+        }
+        (selected, chain, product)
+    }
+
+    #[test]
+    fn grouped_pair_selection_matches_quadratic_update() {
+        let mut state = 0x7c3a_59d1_a641_2f0bu64;
+        let mut next = || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state
+        };
+        for n_vars in 1..=18usize {
+            let cap = (1u64 << n_vars) - 1;
+            for _ in 0..200 {
+                let len = 1 + (next() as usize % 96);
+                let lh = (next() & cap).max(1);
+                let lm: Vec<u64> = (0..len).map(|_| (next() & cap).max(1)).collect();
+                let active: Vec<bool> = (0..len).map(|_| next() & 3 != 0).collect();
+                let expected = reference_new_pairs(lh, &lm, &active);
+                let mut stats = F4Stats::default();
+                let actual = select_new_pairs(lh, &lm, &active, &mut stats);
+                assert_eq!(actual, expected.0);
+                assert_eq!(stats.pairs_chain_skipped, expected.1);
+                assert_eq!(stats.pairs_product_skipped, expected.2);
+            }
+        }
     }
 
     fn standard_monomials(gb: &[F2BoolPoly], n: usize) -> u64 {

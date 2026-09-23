@@ -942,6 +942,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver":"f4-f2",
             "solver_description":solver.describe(),
             "solver_internal_mask_hasher":"splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+            "solver_pair_selector":"grouped_lcm_exact_submask_equivalent_to_quadratic_update",
             "single_thread_requested":true,
             "budget_seconds":budget_seconds,
             "source_variables":instance.n_vars,
