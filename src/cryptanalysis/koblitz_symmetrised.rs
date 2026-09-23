@@ -2443,6 +2443,10 @@ pub struct GateArm {
     pub arm: &'static str,
     pub cap: u32,
     pub n_vars: usize,
+    /// The engine builds only the top-degree Macaulay matrix at each node
+    /// (its default at `24` unknowns and above, `KIC_F4_MAX_DEGREE_ONLY`
+    /// unset) rather than every degree from the system's own up to the cap.
+    pub top_degree_only: bool,
     pub degree: u32,
     pub found: usize,
     pub refuted: usize,
@@ -2687,6 +2691,11 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
                 arm,
                 cap: arm_cap,
                 n_vars,
+                top_degree_only: match std::env::var("KIC_F4_MAX_DEGREE_ONLY").as_deref() {
+                    Ok("1") => true,
+                    Ok("0") => false,
+                    _ => n_vars >= 24,
+                },
                 degree,
                 found: rows.iter().filter(|r| r.verdict == "found").count(),
                 refuted: rows.iter().filter(|r| r.verdict == "refuted").count(),
@@ -2751,6 +2760,43 @@ mod gate_tests {
         }
         let signed: usize = fb_x.signed_orbits.iter().map(Vec::len).sum();
         assert_eq!(signed, fb_x.points.len());
+    }
+
+    #[test]
+    fn pair_enumeration_over_r_covers_the_decompositions_through_t() {
+        // The symmetrised oracle also returns 3-sums to R + T.  F_u is closed
+        // under + T away from T itself and contains T, so R and R + T are
+        // 3-sums over F_u together, and enumerating R alone decides the
+        // question the oracle answers.  Checked on every subgroup target
+        // drawn, and against the library's two-pass enumeration.
+        for (n, l, count) in [(13u32, 6usize, 300), (15, 6, 300), (19, 8, 100)] {
+            let kc = KoblitzCurve::new(0, n).unwrap();
+            let mut rng = StdRng::seed_from_u64(0xA7 ^ n as u64);
+            let v = random_subspace_containing_one(&kc, l, &mut rng);
+            let fb = build_symmetrised_factor_base_from_basis(&kc, v).unwrap();
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let pts: Vec<FastPoint> = fb.points.iter().map(|p| fc.lift(p)).collect();
+            let idx: HashMap<u64, usize> =
+                pts.iter().enumerate().map(|(i, p)| (p.pack(), i)).collect();
+            let t2 = fc.lift(&fb.two_torsion);
+            let g = kc.generator().clone();
+            let r = kc.subgroup_order.to_u64_digits()[0];
+            let (mut checked, mut decomposable) = (0, 0);
+            while checked < count {
+                let t = kc.mul(&g, &BigUint::from(rng.gen_range(1..r)));
+                if !matches!(&t, BinaryPoint::Affine { x, .. } if *x != F2mElement::one(n)) {
+                    continue;
+                }
+                let ft = fc.lift(&t);
+                let over_r = enumerate_pairs(&fc, &pts, &idx, ft).0.is_some();
+                let over_rt = enumerate_pairs(&fc, &pts, &idx, fc.add(ft, t2)).0.is_some();
+                assert_eq!(over_r, over_rt, "n = {n}, target {t:?}");
+                assert_eq!(over_r, enumerate_symmetrised(&kc, &fb, &t, 3).is_some());
+                decomposable += usize::from(over_r);
+                checked += 1;
+            }
+            assert!(decomposable > count / 10 && decomposable < count, "n = {n}: {decomposable}/{count}");
+        }
     }
 
     #[test]

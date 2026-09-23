@@ -6,7 +6,7 @@
 //! budget and the verdict rules before this driver existed.
 //!
 //! ```text
-//! cargo run --release --example koblitz_symmetrised_gate -- --rungs 13,15,17,19,21,23 --targets 16 --x-caps 3 --json experiments/26_koblitz_symmetrised_gate.json
+//! cargo run --release --example koblitz_symmetrised_gate -- --rungs 13,15,19,23 --targets 16 --x-caps 3 --json experiments/26_koblitz_symmetrised_gate.json
 //! ```
 //!
 //! `l = ⌈(n + log₂ 6)/3⌉`, E1's factor-base dimension at `m = 3`.  Each rung
@@ -18,14 +18,25 @@ use std::fs;
 use crypto_lib::cryptanalysis::koblitz_symmetrised::{subspace_gate_bench, GateBench, GateOptions};
 
 fn main() {
-    assert!(
-        env::var("IC_REDUCTION_CACHE").is_err()
-            && env::var("KIC_F4_INHERIT").is_err()
-            && env::var("SOLVER_SPLIT_RULE").is_err(),
-        "the registered engine and counts need IC_REDUCTION_CACHE, KIC_F4_INHERIT and SOLVER_SPLIT_RULE unset"
-    );
+    // The registered engine is the default one: every knob that changes what
+    // it builds, reuses or counts must be unset.
+    for var in [
+        "IC_REDUCTION_CACHE",
+        "KIC_F4_INHERIT",
+        "SOLVER_SPLIT_RULE",
+        "KIC_F4_MAX_DEGREE_ONLY",
+        "KIC_F4_CLOSURE_ROUNDS",
+        "KIC_F4_SOLVER_FULL_READBACK",
+        "F4_F2_MAX_ROWS",
+        "F4_F2_MAX_COLS",
+    ] {
+        assert!(
+            env::var(var).is_err(),
+            "the registered run needs {var} unset"
+        );
+    }
     let args: Vec<String> = env::args().skip(1).collect();
-    let mut rungs: Vec<u32> = vec![13, 15, 17, 19, 21, 23];
+    let mut rungs: Vec<u32> = vec![13, 15, 19, 23];
     let mut opts = GateOptions {
         targets: 16,
         seed: 0x5EED_0004,
