@@ -1,0 +1,40 @@
+name: Koblitz Stage 159 current gate audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/index-calculus-scoreboard.html"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-128-current-gate-audit-20260922/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-current-gate-audit-20260922/**"
+      - "scripts/compose_koblitz_stage128_gate_audit.py"
+      - "scripts/compose_koblitz_stage159_gate_audit.py"
+      - "scripts/verify_koblitz_stage159_native_f4.py"
+      - ".github/workflows/koblitz-stage159-current-gate-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-current-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical Stage 128 and current Stage 159
+        run: |
+          python3 -m py_compile \
+            scripts/compose_koblitz_stage128_gate_audit.py \
+            scripts/compose_koblitz_stage159_gate_audit.py \
+            scripts/verify_koblitz_stage159_native_f4.py
+          python3 scripts/compose_koblitz_stage128_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-128-current-gate-audit-20260922 \
+            > "$RUNNER_TEMP/stage128-historical-audit.json"
+          python3 scripts/compose_koblitz_stage159_gate_audit.py verify \
+            --output research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-current-gate-audit-20260922 \
+            > "$RUNNER_TEMP/stage159-current-audit.json"
+          git diff --exit-code
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
