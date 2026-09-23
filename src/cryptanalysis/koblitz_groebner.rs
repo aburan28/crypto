@@ -1581,7 +1581,7 @@ fn build_inherited_macaulay_with_layout(
         });
     if fused {
         let layout_key = (multiplier_mask, degree, false);
-        let cached = F4_LAYOUTS.with(|layouts| layouts.borrow().get(&layout_key).cloned());
+        let cached = cached_f4_layout(layout_key);
         if let Some(layout) = cached {
             if let Some(matrix) =
                 pack_polynomials_nested_fused(polys, n_vars, degree, multiplier_mask, &layout)
@@ -1910,7 +1910,7 @@ fn build_macaulay_flat_with_multiplier_mask(
         && std::env::var("KIC_F4_DISABLE_FUSED_PACK").as_deref() != Ok("1");
     if fused {
         let layout_key = (multiplier_mask, degree, false);
-        let cached = F4_LAYOUTS.with(|layouts| layouts.borrow().get(&layout_key).cloned());
+        let cached = cached_f4_layout(layout_key);
         if let Some(layout) = cached {
             if let Some(matrix) =
                 pack_polynomials_flat_fused(polys, n_vars, degree, multiplier_mask, &layout)
@@ -1982,7 +1982,7 @@ fn build_macaulay_packed<P: Default>(
 
     let layout_key = (multiplier_mask, degree, criterion == RowCriterion::F5);
     if reuse_layout {
-        let cached = F4_LAYOUTS.with(|layouts| layouts.borrow().get(&layout_key).cloned());
+        let cached = cached_f4_layout(layout_key);
         if let Some(layout) = cached {
             if let Some(matrix) = pack(&rows_monos, &layout, true) {
                 F4_LAYOUT_HITS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -2117,6 +2117,20 @@ thread_local! {
         (u64, u32, bool),
         std::rc::Rc<F4ColumnLayout>,
     >> = std::cell::RefCell::new(std::collections::HashMap::new());
+}
+
+/// A cached layout must obey the current column cap just like a fresh one.
+/// Reject only the cache entry: a changed system may have smaller support
+/// that the ordinary builder can still accept under the new cap.
+fn cached_f4_layout(key: (u64, u32, bool)) -> Option<std::rc::Rc<F4ColumnLayout>> {
+    let column_cap = max_f4_cols();
+    F4_LAYOUTS.with(|layouts| {
+        layouts
+            .borrow()
+            .get(&key)
+            .filter(|layout| layout.columns.len() <= column_cap)
+            .cloned()
+    })
 }
 
 /// Exact column-layout reuse counts since the last reset.

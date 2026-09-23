@@ -416,7 +416,7 @@ fn inherited_root_layout_cache_matches_uncached_builds() {
             ),
         ],
     ];
-    f4_layout_stats_reset();
+    F4_LAYOUTS.with(|layouts| layouts.borrow_mut().clear());
     for degree in [2, 3, 4] {
         for system in &systems {
             let mask = occurring_vars(system);
@@ -426,18 +426,114 @@ fn inherited_root_layout_cache_matches_uncached_builds() {
             let cached =
                 build_inherited_macaulay_with_layout(system, n_vars, degree, mask, true).unwrap();
             assert_eq!(cached, uncached);
+            let layout = cached_f4_layout((mask, degree, false));
             let hit =
                 build_inherited_macaulay_with_layout(system, n_vars, degree, mask, true).unwrap();
             assert_eq!(hit, uncached);
+            if !uncached.1.is_empty() {
+                let before = layout.expect("nonempty build retains its layout");
+                let after = cached_f4_layout((mask, degree, false)).unwrap();
+                assert!(
+                    std::rc::Rc::ptr_eq(&before, &after),
+                    "exact hit rebuilt the layout"
+                );
+                assert_eq!(after.columns, uncached.0);
+            }
         }
     }
-    let (hits, misses) = f4_layout_stats();
-    assert!(hits >= 5, "hits={hits}, misses={misses}");
+}
+
+#[test]
+fn cached_layouts_obey_changed_matrix_caps() {
+    // Each child runs only this test: changing process environment cannot
+    // race with other tests or with a policy OnceLock initialized elsewhere.
+    const CHILD: &str = "KIC_F4_CAP_TEST_CHILD";
+    let Ok(mode) = std::env::var(CHILD) else {
+        for mode in [
+            "inherited-fused",
+            "inherited-materialized",
+            "flat-fused",
+            "flat-materialized",
+        ] {
+            let output = std::process::Command::new(std::env::current_exe().unwrap())
+                .args([
+                    "--exact",
+                    "cryptanalysis::koblitz_groebner::rref_tests::cached_layouts_obey_changed_matrix_caps",
+                    "--test-threads=1",
+                ])
+                .env(CHILD, mode)
+                .env("KIC_F4_DISABLE_INHERIT_FUSED_PACK", if mode.ends_with("materialized") { "1" } else { "0" })
+                .env("KIC_F4_DISABLE_FUSED_PACK", if mode.ends_with("materialized") { "1" } else { "0" })
+                .output()
+                .unwrap();
+            assert!(
+                output.status.success(),
+                "{mode}: {}{}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        return;
+    };
+    let polynomial = |masks: &[u64]| {
+        vec![F2BoolPoly::from_monos(
+            masks.iter().copied().map(F2BoolMono::from_mask).collect(),
+            2,
+        )]
+    };
+    let wide = polynomial(&[0, 1, 2, 3]);
+    let small = polynomial(&[1, 2, 3]);
+    let build = |system: &[F2BoolPoly], reuse| {
+        if mode.starts_with("inherited") {
+            build_inherited_macaulay_with_layout(system, 2, 2, 3, reuse)
+        } else {
+            build_macaulay_flat_with_multiplier_mask(system, 2, 2, 3, reuse, RowCriterion::None)
+                .map(|built| {
+                    let rows = if built.matrix.words == 0 {
+                        Vec::new()
+                    } else {
+                        built
+                            .matrix
+                            .data
+                            .chunks_exact(built.matrix.words)
+                            .map(<[u64]>::to_vec)
+                            .collect()
+                    };
+                    (built.columns, rows)
+                })
+        }
+    };
+    std::env::set_var("F4_F2_MAX_ROWS", "1");
+    std::env::set_var("F4_F2_MAX_COLS", "4");
+    F4_LAYOUTS.with(|layouts| layouts.borrow_mut().clear());
+    let expected = build(&wide, false).unwrap();
+    assert_eq!(build(&wide, true).unwrap(), expected); // cold cache
+    assert_eq!(build(&wide, true).unwrap(), expected); // exact-cap hit
+
+    std::env::set_var("F4_F2_MAX_COLS", "3");
+    assert!(build(&wide, false).is_none());
     assert!(
-        misses >= 5,
-        "the changed support must take the exact fallback: hits={hits}, misses={misses}"
+        build(&wide, true).is_none(),
+        "warm cache bypassed the current column cap"
     );
-    assert_eq!(hits, misses);
+    let smaller = build(&small, false).unwrap();
+    assert_eq!(
+        build(&small, true).unwrap(),
+        smaller,
+        "oversized old layout must allow a smaller rebuild"
+    );
+    assert_eq!(build(&small, true).unwrap(), smaller);
+
+    std::env::set_var("F4_F2_MAX_ROWS", "0");
+    assert!(build(&small, false).is_none());
+    assert!(build(&small, true).is_none());
+    std::env::set_var("F4_F2_MAX_ROWS", "1");
+    std::env::set_var("F4_F2_MAX_COLS", "4");
+    assert_eq!(
+        build(&wide, true).unwrap(),
+        expected,
+        "raising caps must restore construction"
+    );
 }
 
 #[test]

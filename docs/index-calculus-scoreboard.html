@@ -4216,6 +4216,12 @@ factor base, and this prices a decomposition oracle.</p>
 </section>
 <section class="panel" id="inherited-f4-20260922">
   <div class="panel-head">
+    <p><strong>Cache-limit correctness audit:</strong> cached and fresh layouts now obey the same
+      current column cap, including after the cap is lowered. Oversized cached layouts fall back
+      to fresh support construction; a resource-limit refusal remains distinct from a mathematical
+      refutation. The cache test checks thread-local layout identity instead of process-wide
+      counters. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_F4_CACHE_LIMIT_AUDIT.md">Audit and small Boolean regression</a>.
+      Historical fixed-cap measurements remain unchanged; this correction adds no performance or rho claim.</p>
     <h2>F5 for the Koblitz Gr&ouml;bner stage: the criterion prunes nothing at degree 3; inheriting the parent&rsquo;s reduced basis, splitting on the variable that displaces the fewest of its rows, and rewriting only the rows a level touches cuts the stage 21&times; <span class="chip">engineering</span></h2>
     <p>Two F5 ideas applied to the matrix-F4 splitting solver behind the Koblitz decomposition
       oracle. <strong>The F5 criterion</strong>, stated correctly for the Boolean ring (the textbook
