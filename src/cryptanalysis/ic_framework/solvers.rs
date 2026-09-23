@@ -16,6 +16,17 @@
 //! | `xl-f2` | XL: multiply out to a degree, then linearise | monomial operations |
 //! | `sat-cdcl` | CDCL with Tseitin monomials and native parity rows | conflicts |
 //! | `exhaustive` | evaluate every equation at every point | monomial tests |
+//! | `matrix-f4` | boolean matrix-F4 with DPLL splitting ([`crate::cryptanalysis::koblitz_groebner`]) | 64-bit word XORs |
+//! | `matrix-f5` | the same Macaulay matrices with the F5 criterion's zero rows never built ([`crate::cryptanalysis::matrix_f5_f2`]) | 64-bit word XORs |
+//! | `inherited-f4` | matrix-F4 at the root, then each child specialises its parent's reduced basis ([`crate::cryptanalysis::inherited_f4`]) | 64-bit word XORs |
+//!
+//! The three F4-family engines are the ones the Koblitz decomposition
+//! oracle already runs; registering them here is what lets the
+//! end-to-end benchmark ask what a *complete* ECDLP costs when Semaev's
+//! systems are solved by F4 or F5, against rho, instead of pricing the
+//! engines on the decomposition stage alone.  All three share one row
+//! space at every node, hence one verdict and one splitting tree on the
+//! same split rule; only the work per node differs.
 //!
 //! `exhaustive` is not a strawman.  It is the **reference** the others
 //! are measured against, in the sense `AGENTS.md` §1 means: the best
@@ -49,6 +60,9 @@ use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
 use super::stages::{BooleanSystem, Params, SolverCost, SolverVerdict, SystemShape, SystemSolver};
+use crate::cryptanalysis::koblitz_groebner::{
+    f4_word_ops_thread, solve_boolean_system, split_rule_default, SolveOptions, SolverEngine,
+};
 use crate::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_within, solve_system_f2, F2BoolPoly};
 
 /// The largest system `exhaustive` and the model-enumerating solvers
@@ -324,6 +338,122 @@ impl SystemSolver for Exhaustive {
     }
 }
 
+// ── The F4 family: matrix-F4, matrix-F5, inherited F4 ──────────────
+
+/// Which of the Koblitz oracle's Macaulay engines a [`F4Family`] runs.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum F4Variant {
+    /// Build the degree-`D` Macaulay matrix and row-reduce it.
+    MatrixF4,
+    /// The same matrices without the rows the F5 criterion proves reduce
+    /// to zero.
+    MatrixF5,
+    /// Reduce at the root; every child specialises its parent's basis.
+    InheritedF4,
+}
+
+/// A boolean Macaulay engine with DPLL splitting: when a reduction
+/// neither refutes the system nor fixes a variable, the solver branches
+/// on a free variable and recurses, so the search is exhaustive unless
+/// its node budget runs out.
+///
+/// That last clause is the whole of its budget story.  The engines have
+/// no interrupt hook, so the wall-clock `budget` cannot stop a
+/// reduction mid-matrix; what bounds a call is `node_budget`, and a call
+/// that exhausts it is reported as [`SolverVerdict::BudgetExceeded`] —
+/// never as unsatisfiable, since an unexplored branch may hold a root.
+pub struct F4Family {
+    name: &'static str,
+    variant: F4Variant,
+}
+
+impl F4Family {
+    pub const fn new(name: &'static str, variant: F4Variant) -> Self {
+        Self { name, variant }
+    }
+
+    fn engine(&self, max_degree: u32) -> SolverEngine {
+        match self.variant {
+            F4Variant::MatrixF4 => SolverEngine::MatrixF4 { max_degree },
+            F4Variant::MatrixF5 => SolverEngine::MatrixF5 { max_degree },
+            F4Variant::InheritedF4 => SolverEngine::InheritedF4 { max_degree },
+        }
+    }
+}
+
+impl SystemSolver for F4Family {
+    fn name(&self) -> &str {
+        self.name
+    }
+
+    fn describe(&self) -> String {
+        match self.variant {
+            F4Variant::MatrixF4 => "boolean matrix-F4 through a degree cap, DPLL splitting when it stalls",
+            F4Variant::MatrixF5 => "boolean matrix-F4 with the F5 criterion's zero rows left out, DPLL splitting",
+            F4Variant::InheritedF4 => "matrix-F4 at the root, each child specialising its parent's reduced basis",
+        }
+        .into()
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            ("max_degree", "highest Macaulay degree built before splitting (default 3)"),
+            ("node_budget", "reductions before the search gives up (default 4096)"),
+            ("max_solutions", "stop after this many verified roots (default 32)"),
+        ]
+    }
+
+    fn accepts(&self, shape: &SystemShape) -> bool {
+        // Roots come back as `u64` assignments.
+        shape.n_vars <= 64
+    }
+
+    fn solve(
+        &self,
+        system: &BooleanSystem,
+        params: &Params,
+        _budget: Option<Duration>,
+    ) -> (SolverVerdict, SolverCost) {
+        let max_degree = params.u64_or("max_degree", 3).unwrap_or(3) as u32;
+        let options = SolveOptions {
+            engine: self.engine(max_degree),
+            max_solutions: params.u64_or("max_solutions", 32).unwrap_or(32) as usize,
+            node_budget: params.u64_or("node_budget", 4096).unwrap_or(4096) as usize,
+            split_rule: split_rule_default(),
+        };
+        let started = Instant::now();
+        // The engines charge every elimination to a per-thread counter,
+        // read around the call so other threads' work never lands here.
+        let before = f4_word_ops_thread();
+        let (roots, st) = solve_boolean_system(&system.equations, system.n_vars, &options);
+        let ops = f4_word_ops_thread() - before;
+        let mut extra = BTreeMap::new();
+        extra.insert("reductions".into(), st.reductions as u64);
+        extra.insert("splits".into(), st.splits as u64);
+        extra.insert("oversize".into(), st.oversize as u64);
+        let cost = SolverCost {
+            ops,
+            op_unit: "64-bit word XORs".into(),
+            wall_ns: started.elapsed().as_nanos() as u64,
+            peak_bytes: 0,
+            degree_reached: Some(st.max_degree_built),
+            solving_degree: None,
+            timed_out: st.exhausted,
+            extra,
+        };
+        if st.exhausted {
+            // An empty or partial answer from a truncated search is not
+            // a verdict.
+            return (SolverVerdict::BudgetExceeded, cost);
+        }
+        if roots.is_empty() {
+            (SolverVerdict::Unsatisfiable, cost)
+        } else {
+            (SolverVerdict::Solved(roots), cost)
+        }
+    }
+}
+
 /// Every solver the framework knows, by name.
 pub fn solver_registry() -> Vec<Box<dyn SystemSolver>> {
     vec![
@@ -331,6 +461,9 @@ pub fn solver_registry() -> Vec<Box<dyn SystemSolver>> {
         Box::new(XlF2),
         Box::new(SatCdcl),
         Box::new(Exhaustive),
+        Box::new(F4Family::new("matrix-f4", F4Variant::MatrixF4)),
+        Box::new(F4Family::new("matrix-f5", F4Variant::MatrixF5)),
+        Box::new(F4Family::new("inherited-f4", F4Variant::InheritedF4)),
     ]
 }
 
@@ -340,7 +473,7 @@ pub fn solver_by_name(name: &str) -> Result<Box<dyn SystemSolver>, String> {
         .into_iter()
         .find(|s| s.name() == name)
         .ok_or_else(|| {
-            let known: Vec<&str> = vec!["buchberger-f2", "xl-f2", "sat-cdcl", "exhaustive"];
+            let known: Vec<String> = solver_registry().iter().map(|s| s.name().to_string()).collect();
             format!("unknown solver `{name}`; known: {}", known.join(", "))
         })
 }
