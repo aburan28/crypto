@@ -78,3 +78,25 @@ there: the best predicted cell, `n43a1`, stays at 1.24–1.43 × rho.  What this
 would move is the crossover and the rate, not the verdict at 131 bits.  This is
 an **engineering** candidate for the tournament, not a claim against rho, and it
 is offered to that lane's harness rather than scored outside it.
+
+## Addendum, before the confirmation run (after a 4-seed probe)
+
+Added after the collector was built and a 4-fixture-per-cell probe had been
+seen, and before the confirmation run.  **The probe does not count.**  What it
+showed: every report verified with the same logarithm on both arms, and
+medians of 1.339 at `n23a1`, 0.702 at `n37a0` and 0.386 at `n43a1`.
+
+**One deviation from the design above, forced by the checker.**  `oracle.py`
+requires more than one log column, so the triple collector cannot run the
+`K = 1` base the model chose at `n23a1`; `triple_orbits` floors at `K = 2`.
+The constraint was named before the probe but not quantified.  Quantified now,
+after the probe, so it is **not** a prediction: at `K = 2` the model gives
+`W₃/W₂ = 2.01` at `n23a1`, a whole-job ratio of 1.65–1.81.  The band scored
+at `n23a1` remains the one registered above, 0.938–0.951.
+
+**The statistic, fixed now.**  Per cell, the geometric mean of the paired
+triple/`scaled` instruction ratios, with a 95% percentile bootstrap interval
+(10,000 resamples); the median is reported beside it.  32 fixtures a cell,
+seeds drawn from `random.Random(20260924)`, disjoint from the probe's
+`random.Random(20260923)`.  Every report goes through `oracle.py`; any failure
+or any differing logarithm voids the run.
