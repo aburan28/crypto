@@ -4305,6 +4305,64 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-quadratic-state-20260923">
+  <div class="panel-head">
+    <h2>Fixed quadratic state: about 2.4&times; on larger complete solves; universal confirmation rejected <span class="chip">engineering</span></h2>
+    <p>Immutable quadratic coefficients and exact residual affine updates preserve the entire
+      search while avoiding monomial-list rebuilding. Primary holdouts pass 9/9 comparisons.
+      The unchanged confirmation passes 7/9: its two 16-variable lower confidence bounds miss
+      2&times;. Every 20- and 24-variable comparison passes in both runs, but the universal
+      two-run gate remains <strong>REJECTED</strong>. Logical search work is unchanged.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_state_20260923/CONCLUSION.md">decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_state_20260923/README.md">coefficient-update contract</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_state_20260923/run_01/RESULT.md">primary comparison</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_state_20260923/run_02/RESULT.md">confirmation comparison</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_state_20260923/SUMMARY.json">frozen figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_quadratic_state_20260923/RUN_LEDGER.json">run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Confirmation cold complete-solve plus validation milliseconds at 24 variables.
+      Medians over two holdout seeds and eight rotated repetitions. Displayed ratios compare
+      pooled planted costs with ordered specialization; gates use the fastest of seven controls.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Ordered / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>83.948353</td><td>50.172584</td><td>172.670625</td><td>0.881</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>324.505584</td><td>110.399500</td><td>562.174501</td><td>0.228</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>1039.781000</td><td>340.670584</td><td>2074.648312</td><td>0.071</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>432.203792</td><td>156.305584</td><td>920.137104</td><td>0.171</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>98.751625</td><td>57.306479</td><td>201.832708</td><td>0.749</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>86.087291</td><td>49.644729</td><td>175.701604</td><td>0.859</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>73.976250</td><td>43.469708</td><td>151.862917</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>30.557917</td><td>17.770312</td><td>62.343125</td><td>2.421</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Paired fastest-control / candidate ratios with 95% repeated-timing intervals.
+      Different holdout seeds are used in the primary and confirmation runs.</caption>
+    <thead><tr><th>Variables</th><th>Family</th><th>Primary ratio [interval]</th><th>Confirmation ratio [interval]</th><th>Primary / confirmation gate</th></tr></thead>
+    <tbody>
+      <tr><td>16</td><td>planted</td><td>2.458 [2.428, 2.519]</td><td>2.439 [1.950, 2.609]</td><td>PASS / REJECTED</td></tr>
+      <tr><td>16</td><td>cross_planted</td><td>2.457 [2.368, 2.539]</td><td>2.102 [1.994, 2.237]</td><td>PASS / REJECTED</td></tr>
+      <tr><td>16</td><td>unplanted</td><td>2.507 [2.472, 2.540]</td><td>2.553 [2.517, 2.611]</td><td>PASS / PASS</td></tr>
+      <tr><td>20</td><td>planted</td><td>2.423 [2.369, 2.459]</td><td>2.435 [2.423, 2.479]</td><td>PASS / PASS</td></tr>
+      <tr><td>20</td><td>cross_planted</td><td>2.472 [2.426, 2.501]</td><td>2.441 [2.373, 2.501]</td><td>PASS / PASS</td></tr>
+      <tr><td>20</td><td>unplanted</td><td>2.458 [2.437, 2.479]</td><td>2.450 [2.417, 2.523]</td><td>PASS / PASS</td></tr>
+      <tr><td>24</td><td>planted</td><td>2.412 [2.405, 2.431]</td><td>2.409 [2.399, 2.426]</td><td>PASS / PASS</td></tr>
+      <tr><td>24</td><td>cross_planted</td><td>2.422 [2.411, 2.447]</td><td>2.448 [2.392, 2.464]</td><td>PASS / PASS</td></tr>
+      <tr><td>24</td><td>unplanted</td><td>2.401 [2.367, 2.556]</td><td>2.430 [2.412, 2.451]</td><td>PASS / PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 6,144 observations across 96 run cells finish with verified results; the grids contain
+    72 distinct systems because discovery fixtures repeat. All three search-only arms match
+    models, logical counters and trace digests. SAT models are checked on original equations;
+    UNSAT requires a completed retained search reference. The same host ran both grids, and
+    the intervals describe those fixed fixtures, not a population-wide guarantee. Whole-worker
+    peak RSS is 23,117,824 bytes; candidate-specific memory is unmeasured.</p>
+  <p>The general support-envelope constructor below remains a separate experiment. This
+    quadratic state generates no multipliers and changes no production solver. Complete
+    index-calculus cost, calibrated operation ratios and rho ratios remain null. Earlier
+    measurements and the full-method verdict are preserved.</p>
+</section>
 <section class="panel" id="boolean-solve-trace-20260923">
   <div class="panel-head">
     <h2>Complete generic Boolean solves: cheaper search wins; the new specialization gain is 1.04&ndash;1.14&times; <span class="chip">engineering</span></h2>
