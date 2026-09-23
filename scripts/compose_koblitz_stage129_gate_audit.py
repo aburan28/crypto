@@ -1,18 +1,19 @@
 """Compose the current seven-gate audit through the Stage 108 selection,
-re-sealed over the boundary ledger as updated by Round 5 on 2026-09-22.
+re-sealed after the gate-6 rho control was re-measured on 2026-09-22.
 
 Stage 109 sealed this audit on 2026-09-13 by pinning the mutable gate
-documents (the boundary ledger and its Markdown twin, the gate status, the
-autolab protocol) by hash; Stages 124, 125, 126 and 127 re-sealed it as the
-index-calculus boundary ledger's first four rounds moved them.  Round 5
-(research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md section 13)
-moved them once more: the walk's sixteen restart offsets are now drawn on
-first use instead of at setup, so a row is charged for the offsets it took
-rather than for a pool it may never reach.  The saving is confined to the
-small rungs and no Koblitz gate fact moved.  Stage 128 recomposes the same
-seven gates over the current documents and chains to the Stage 127, 126,
-125, 124 and 109 seals, all of which verify as immutable historical
-snapshots by their own scripts.
+documents by hash; Stages 124 to 128 re-sealed it as the index-calculus
+boundary ledger moved them, and no Koblitz gate fact moved.  Stage 129
+moves one: the selected n=53 route passed the online wall gate against
+koblitz_rho_fixture, a correct but unbatched control (one inversion per
+step, squaring-chain canonicalisation, every point stored, one thread).
+Against a batched signed-Frobenius rho on the same target and host
+(aburan28/cryptanalysis suite/examples/koblitz_batched_rho.rs) the selected
+direct takes a median 17.3 s against 0.49 s (1 thread) and 0.20 s (4
+threads), 46.3M support queries against about 0.56M rho steps.  Gate 6 is
+therefore false outright.  The sealed Stage 108 measurements themselves are
+unchanged, and this audit chains to the Stage 128, 127, 126, 125, 124 and
+109 seals, all of which verify as immutable historical snapshots.
 """
 
 from __future__ import annotations
@@ -35,24 +36,26 @@ STAGE124 = EVIDENCE / "stage-124-current-gate-audit-20260921"
 STAGE125 = EVIDENCE / "stage-125-current-gate-audit-20260921"
 STAGE126 = EVIDENCE / "stage-126-current-gate-audit-20260921"
 STAGE127 = EVIDENCE / "stage-127-current-gate-audit-20260921"
+STAGE128 = EVIDENCE / "stage-128-current-gate-audit-20260922"
 LEDGER = REPO / "docs/ic/boundary_targets.json"
 SCOREBOARD = REPO / "docs/ic/BOUNDARY_TARGETS.md"
 GATE_STATUS = EVIDENCE / "GATE_STATUS.md"
 AUTOLAB_PROTOCOL = REPO / "research/sat_factor_base_review_20260908/autolab/protocol.json"
 
-SCHEMA = "koblitz_stage128_current_gate_audit.v1"
-SEAL_SCHEMA = "koblitz_stage128_current_gate_audit_seal.v1"
+SCHEMA = "koblitz_stage129_current_gate_audit.v1"
+SEAL_SCHEMA = "koblitz_stage129_current_gate_audit_seal.v1"
 LEDGER_UPDATED = "2026-09-22"
-GATE_STATUS_MARKER = "Current through Stage 128"
+GATE_STATUS_MARKER = "Current through Stage 129"
+BATCHED_RHO_MARKER = "## The n=53 crossover against a batched rho"
 
 
-class Stage128Error(RuntimeError):
+class Stage129Error(RuntimeError):
     pass
 
 
 def require(condition: bool, message: str) -> None:
     if not condition:
-        raise Stage128Error(message)
+        raise Stage129Error(message)
 
 
 def load(path: Path, context: str) -> dict[str, Any]:
@@ -81,7 +84,7 @@ def replay(script: str, output: Path) -> dict[str, Any]:
 def compose() -> dict[str, Any]:
     historical = replay("verify_koblitz_stage99_optimization_chain.py", STAGE99)
     selected = replay("verify_koblitz_stage108_routing_archive.py", STAGE108)
-    # Stages 109, 124, 125, 126 and 127 verify as historical snapshots: their
+    # Stages 109 and 124 to 128 verify as historical snapshots: their
     # own scripts check the seal and the frozen audit, never the documents
     # that have moved since.
     stage109 = replay("compose_koblitz_stage109_gate_audit.py", STAGE109)
@@ -89,6 +92,7 @@ def compose() -> dict[str, Any]:
     stage125 = replay("compose_koblitz_stage125_gate_audit.py", STAGE125)
     stage126 = replay("compose_koblitz_stage126_gate_audit.py", STAGE126)
     stage127 = replay("compose_koblitz_stage127_gate_audit.py", STAGE127)
+    stage128 = replay("compose_koblitz_stage128_gate_audit.py", STAGE128)
     ledger = load(LEDGER, "boundary ledger")
     require(
         ledger.get("schema_version") == 2 and ledger.get("updated") == LEDGER_UPDATED,
@@ -118,6 +122,7 @@ def compose() -> dict[str, Any]:
     require(stage125["selected_n53"] == stage109["selected_n53"], "Stage 125 and Stage 109 sealed different facts")
     require(stage126["selected_n53"] == stage109["selected_n53"], "Stage 126 and Stage 109 sealed different facts")
     require(stage127["selected_n53"] == stage109["selected_n53"], "Stage 127 and Stage 109 sealed different facts")
+    require(stage128["selected_n53"] == stage109["selected_n53"], "Stage 128 and Stage 109 sealed different facts")
     sealed = stage109["selected_n53"]
     require(sealed["base_hash"] == factor["base_hash"], "selected base hash moved since Stage 109")
     require(sealed["support_entries"] == factor["support_index_entries"], "support entries moved since Stage 109")
@@ -132,6 +137,11 @@ def compose() -> dict[str, Any]:
     score_text = SCOREBOARD.read_text()
     require(GATE_STATUS_MARKER in gate_text, "gate-status version changed")
     require("17.636692 times rho" in gate_text, "gate-status full-cost boundary missing")
+    require(BATCHED_RHO_MARKER in gate_text, "gate-status batched-rho control missing")
+    require(
+        "**False. The online wall gate passed only against the fixture rho control" in gate_text,
+        "gate-status gate-6 verdict changed",
+    )
     require("0.8392x" in score_text and "below 512 MiB" in score_text, "scoreboard boundary missing")
     protocol = load(AUTOLAB_PROTOCOL, "autolab protocol")
     n53 = protocol["beats"]["koblitz.vs_rho.n53_probe"]
@@ -186,6 +196,7 @@ def compose() -> dict[str, Any]:
             "stage125_audit_sha256": sha256(STAGE125 / "audit.json"),
             "stage126_audit_sha256": sha256(STAGE126 / "audit.json"),
             "stage127_audit_sha256": sha256(STAGE127 / "audit.json"),
+            "stage128_audit_sha256": sha256(STAGE128 / "audit.json"),
             "stage99_status": historical["status"],
             "stage108_status": selected["status"],
             "stage109_status": stage109["status"],
@@ -193,10 +204,12 @@ def compose() -> dict[str, Any]:
             "stage125_status": stage125["status"],
             "stage126_status": stage126["status"],
             "stage127_status": stage127["status"],
+            "stage128_status": stage128["status"],
         },
-        "since_stage127": {
-            "what_moved": "docs/ic/boundary_targets.json, docs/ic/BOUNDARY_TARGETS.md and GATE_STATUS.md: the boundary ledger's Round 5, which draws the walk's sixteen restart offsets on first use instead of at setup. On the Round-4 ladder 110 of 204 walk rows had bought all sixteen and taken none. The offsets now come off their own random stream and are taken in a fixed cycle, so the eager and the lazy arm walk bit-identical trajectories: 537 of 537 rows identical in every counter but the pool's, zero trajectories moved, and zero rows whose saving differs from the offsets they stopped drawing, with the same on a holdout seed and an eight-repeat headline. The saving is confined to the small rungs, matching (48 log2 r - 48)/sqrt r to within 1 to 9 per cent. The same round measures that re-seeding the walk alone, at no change of cost, moves 204 of 537 rows with a median of 1.0000 and a range of 0.54 to 1.83, so the headline rows read lower than Round 4 for a reason classed accounting rather than progress", "what_did_not": "every Koblitz gate fact Stage 109 sealed and Stages 124, 125, 126 and 127 re-sealed: the selected n=53 base hash, support entries and bytes, the five paired wall ratios, the core and fresh-build ratios, the unknown-scalar ratio, and the seven gate statuses",
-            "reference": "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md",
+        "since_stage128": {
+            "what_moved": "GATE_STATUS.md: the gate-6 rho control. The Stage 108 online wall crossing was measured against koblitz_rho_fixture, which inverts once per step, canonicalises by squaring chains, stores every point and runs on one thread (about 9.5 us a step). A batched signed-Frobenius rho (one inversion shared across 64 walks, normal-basis orbit key, distinguished points only; aburan28/cryptanalysis suite/examples/koblitz_batched_rho.rs, PR #54) on the same target and host solves in a median 0.49 s on 1 thread and 0.20 s on 4 threads against 17.3 s for the selected direct, every run verified by [d]G=Q. That is 46.3M support queries against about 0.56M rho steps; the query count r/(n|F|) grows as r^(2/3) against rho's r^(1/2). The host is an M4 Pro without the x86 PCLMUL paths, so the EPYC ratios need their own rerun",
+            "what_did_not": "the Stage 108 measurements Stage 109 sealed and Stages 124 to 128 re-sealed: the selected n=53 base hash, support entries and bytes, the five paired wall ratios against the fixture control, the core and fresh-build ratios, and the unknown-scalar ratio; gates 1 to 5 and 7",
+            "reference": "suite/docs/ic/runs/koblitz-n53-rho-control-20260922.json in aburan28/cryptanalysis",
         },
         "gates": {
             "1_all_stage_resource_charging": "partial_missing_licensed_magma",
@@ -204,7 +217,7 @@ def compose() -> dict[str, Any]:
             "3_single_core_core_memory_conflicts_wall": "partial_missing_magma_and_selected_single_core_refresh",
             "4_n31_n41_larger_pdp_scaling": "satisfied_finite_execution_coverage",
             "5_unknown_scalar_without_constructed_base_logs": "satisfied_finite_n23_n31_n41_n53",
-            "6_full_cost_vs_automorphism_rho": "partial_online_wall_pass_full_cost_core_memory_fail",
+            "6_full_cost_vs_automorphism_rho": "false_online_wall_pass_only_vs_fixture_rho_loses_to_batched_rho",
             "7_external_reproduction_novelty": "missing",
         },
         "selected_n53": {
@@ -222,6 +235,7 @@ def compose() -> dict[str, Any]:
         "next_targets": [
             "reduce exact selected n=53 support below 512 MiB without changing the base or rank-95 solve",
             "reduce selected direct/rho core ratio to at most one and retain the online wall crossover",
+            "beat a batched signed-Frobenius rho, not the fixture control, on the EPYC gate host",
             "refresh forced-single-core evidence for the selected four-shard route",
             "execute the frozen 160-input panel under licensed Magma F4",
             "obtain unaffiliated reproduction and novelty review",
@@ -263,20 +277,16 @@ def build(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path) -> dict[str, Any]:
-    # Stage 128 is now an immutable historical snapshot.  The gate status it
-    # pinned by hash moved on 2026-09-22 when the gate-6 online wall crossing
-    # was re-measured against a batched signed-Frobenius rho and did not hold,
-    # so recomposing here would compare two points in time.  Stage 129
-    # recomposes the current evidence and chains to this seal
-    # (compose_koblitz_stage129_gate_audit.py); this verify checks the seal and
-    # the frozen audit only, as Stage 109's, 124's, 125's, 126's and 127's do.
-    seal = load(output / "result-seal.json", "Stage-128 seal")
+    # Stage 129 is the current audit: recompose from the live documents and
+    # require the result to equal the sealed one.  When the documents it pins
+    # move again, the next stage re-seals and this verify becomes historical,
+    # exactly as Stage 109's and 124's to 128's did.
+    seal = load(output / "result-seal.json", "Stage-129 seal")
     require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    committed = load(output / "audit.json", "Stage-128 audit")
-    require(committed.get("schema") == SCHEMA, "committed audit schema changed")
-    require(committed.get("status") == "current_seven_gate_audit_verified", "committed audit status changed")
-    return committed
+    current = compose()
+    require(current == load(output / "audit.json", "Stage-129 audit"), "current audit changed")
+    return current
 
 
 def main() -> None:
@@ -290,8 +300,8 @@ def main() -> None:
     try:
         value = build(args.output.resolve()) if args.command == "build" else verify(args.output.resolve(strict=True))
         print(json.dumps(value, indent=2, sort_keys=True))
-    except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Stage128Error) as error:
-        raise SystemExit(f"stage128-gate-audit: {error}")
+    except (OSError, ValueError, KeyError, subprocess.CalledProcessError, Stage129Error) as error:
+        raise SystemExit(f"stage129-gate-audit: {error}")
 
 
 if __name__ == "__main__":
