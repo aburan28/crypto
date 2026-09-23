@@ -3,10 +3,11 @@ import json, re, statistics as st, pathlib, sys
 LAB = pathlib.Path(__file__).resolve().parent
 D = LAB / "runs" / "panel_v2"
 def wall(p): return float(re.search(r"([\d.]+) real", p.read_text()).group(1))
+def user(p): return float(re.search(r"([\d.]+) user", p.read_text()).group(1))
 def rss(p): return int(re.search(r"(\d+)\s+maximum resident", p.read_text()).group(1))
 def lines(p, kind): return [json.loads(l) for l in p.open() if f'"kind":"{kind}"' in l]
 out = {"panel": {}, "complete": True}
-for L in (1024, 2048, 4096, 8192):
+for L in (1024, 2048, 4096, 8192, 16384):
     rows = []
     for b in (0, 1, 2):
         icp, ksp = D / f"ic{L}_b{b}", D / f"ks{L}_b{b}"
@@ -23,6 +24,7 @@ for L in (1024, 2048, 4096, 8192):
         rows.append(dict(block=b, order="ic_first" if b % 2 == 0 else "rho_first", targets_match=match,
             ic_all_solved=bool(ic_sum and ic_sum[0]["all_fixtures_solved"]),
             ic_wall_s=icw, rho_wall_s=ksw, ic_over_rho=icw / ksw,
+            user_ratio=user(icp.with_suffix('.time')) / user(ksp.with_suffix('.time')),
             ic_peak_rss=rss(icp.with_suffix(".time")), rho_peak_rss=rss(ksp.with_suffix(".time")),
             ic_charged_ms=ic_sum[0]["full_algorithm_charged_total_ms"] if ic_sum else None,
             rho_group_additions=ks_sum[0]["charges"]["group_additions"] if ks_sum else None,
@@ -35,5 +37,5 @@ for L in (1024, 2048, 4096, 8192):
         rho_additions_deterministic=len({x["rho_group_additions"] for x in rows}) == 1)
     print(f"L={L:5d} blocks={len(rows)} IC/rho median={st.median(r):.3f} [{min(r):.3f},{max(r):.3f}] "
           f"IC wall med={st.median(x['ic_wall_s'] for x in rows):.1f}s rho={st.median(x['rho_wall_s'] for x in rows):.1f}s "
-          f"match={out['panel'][L]['all_match']} verdict={verdict}")
+          f"user-CPU IC/rho med={st.median(x['user_ratio'] for x in rows):.3f} match={out['panel'][L]['all_match']} verdict={verdict}")
 (LAB / "runs" / "panel_v2_summary.json").write_text(json.dumps(out, indent=1))

@@ -8,20 +8,50 @@
       "executable": "../autolab_n53_eta_sweep_20260912/frozen/current/koblitz_rank_fixture",
       "sha256": "6884b57da55794965fbde979567345d126fa32063cd5f368defd018a71cc0b5e",
       "args": "53 0 1 10 531310 signed_expanded independent pair_pair_guided_256 <L>",
-      "env": ["KIC_BATCH_CORPUS=<corpus>", "KIC_SHARED_PUBLIC_FIXTURE_DOMAIN=1", "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION=1", "KIC_REQUIRED_SURPLUS_RELATIONS=0"]
+      "env": [
+        "KIC_BATCH_CORPUS=<corpus>",
+        "KIC_SHARED_PUBLIC_FIXTURE_DOMAIN=1",
+        "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION=1",
+        "KIC_REQUIRED_SURPLUS_RELATIONS=0"
+      ]
     },
     "rho_ks": {
       "executable": "frozen/v2/koblitz_rho_batch_ks",
       "args": "53 0 signed_frobenius <L> 531310",
-      "env": ["KIC_RHO_BATCH_CORPUS=<corpus>", "KIC_RHO_DP_BITS=4"],
+      "env": [
+        "KIC_RHO_BATCH_CORPUS=<corpus>",
+        "KIC_RHO_DP_BITS=4"
+      ],
       "dp_bits_selection": "chosen on disjoint corpus n53-ks-dp-tuning-v1 (batch_seed 777001, L=1024) by total group additions; d=2 was 2.4% fewer additions at 3.9x the memory"
     }
   },
-  "panel": {"L": [1024, 2048, 4096, 8192], "blocks": 3, "order": "block parity alternates which arm runs first", "corpus": "n53-ks-scaling-<L>-v1"},
+  "panel": {
+    "L": [
+      1024,
+      2048,
+      4096,
+      8192
+    ],
+    "blocks": 3,
+    "order": "block parity alternates which arm runs first",
+    "corpus": "n53-ks-scaling-<L>-v1"
+  },
   "matching": "every fixture's published_fixture_scalar, published_q and recovered scalar must agree between arms",
   "primary_metric": "per-block process wall ratio IC/rho (from /usr/bin/time real), median over blocks",
-  "secondary": ["peak RSS", "rho deterministic group additions", "load average at each run"],
+  "secondary": [
+    "peak RSS",
+    "rho deterministic group additions",
+    "load average at each run"
+  ],
   "decision_rule": "IC is said to overtake at L only if all 3 block ratios at L are < 1. Mixed blocks are reported as unresolved.",
   "prior_panel": "runs/paired_L32_L1024 used producer v1 (scalar-multiplication walk starts, d=8)",
-  "host_caveat": "shared host; other sessions active; load average recorded per run"
+  "host_caveat": "shared host; other sessions active; load average recorded per run",
+  "addendum_16384": {
+    "declared": "2026-09-22T18:07-07:00",
+    "L": 16384,
+    "blocks": 3,
+    "corpus": "n53-ks-scaling-16384-v1",
+    "same_arms_and_decision_rule": true,
+    "note": "host contended by another session's ~9-core job at launch; load recorded per run; user CPU reported as secondary"
+  }
 }

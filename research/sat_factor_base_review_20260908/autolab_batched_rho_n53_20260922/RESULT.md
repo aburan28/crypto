@@ -6,7 +6,7 @@ table, and its jump points depended on that target's Q. This lab reruns the
 comparison against rho that also shares work across targets.
 
 When rho shares work across targets, IC does not win at any batch size tested
-(32–8,192). It uses 10 GB against rho's 9–395 MB. IC keeps one advantage: at
+(32–16,384). It uses 10 GB against rho's 9–395 MB. IC keeps one advantage: at
 equal precomputation time, its warm per-target queries are about 2x cheaper.
 
 ## Arms
@@ -50,6 +50,12 @@ The distinguished-point density d=4 was chosen on a disjoint tuning corpus
 | 2,048 | 78.9 s | 56.5 s | 1.40 (1.24–1.48) | 1.14 (1.01–1.21) | rho faster |
 | 4,096 | 119.1 s | 87.3 s | 1.29 (1.26–1.94) | 1.02 (0.98–1.60) | wall: rho; charged: unresolved |
 | 8,192 | 227.2 s | 132.7 s | 1.74 (1.71–1.82) | 1.35 (1.35–1.36) | rho faster |
+| 16,384 † | 495.6 s | 165.3 s | 3.01 (2.64–3.12) | 2.37 (2.01–2.57) | rho faster |
+
+† Addendum run (`paired_16k.sh`, corpus `n53-ks-scaling-16384-v1`) under heavy
+contention from another session's ~9-core job. IC recorded 41–143 s of system time
+per run. The user-CPU ratio, which is less sensitive to contention, is 2.15. Rho used
+81,351,961 group additions in every block, √16 = 4x its L=1,024 count.
 
 How each charged figure is built:
 - IC charged is `full_algorithm_charged_total_ms`. It excludes reference validation (~4 ms/target) and fixture generation (~2 ms/target).
@@ -59,7 +65,9 @@ The two cost curves have different shapes:
 - IC's cost per extra target is flat, averaging about 13 ms. The paper's 7.49 ms is the median.
 - Batched rho's cost per extra target falls roughly as 1/√i. Its median over the second half of targets was 17.8 ms at L=1,024 and 6.7 ms at L=8,192.
 
-So the gap widens with L, and this panel shows no crossover.
+So the gap widens with L, and this panel shows no crossover. At L=16,384, IC's mean
+online cost per target was 18–25 ms under contention. Rho's median over the last quarter
+of targets was 3.8–4.8 ms.
 
 ## 3. Warm queries after precomputation (producer v3, d=6, frozen table)
 
@@ -85,7 +93,7 @@ for the Bernstein–Lange rows (25–175x less).
 - The 25.26x n=53 batch advantage holds only against unbatched rho. It should not
   be cited as an IC advantage.
 - Against Kuhn–Struik batched rho on this host, IC does not win on process wall at
-  L ∈ {32, 1,024, 2,048, 4,096, 8,192}. It wins on charged time in only one block
+  L ∈ {32, 1,024, 2,048, 4,096, 8,192, 16,384}. It wins on charged time in only one block
   of twelve (L=4,096, by 1.8%).
 - With precomputation excluded, IC's warm query beats a Bernstein–Lange table built
   with equal time. A table built with ~1.7x the time matches IC, and ~3x beats it.
