@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compose or historically verify the Stage-162 seven-gate audit."""
+"""Compose the current seven-gate audit with the Stage-163 M4RI result."""
 
 from __future__ import annotations
 
@@ -14,13 +14,13 @@ from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
 GATES = REPO / "research/sat_factor_base_review_20260908/continuation-05-sota-gates"
-PREDECESSOR = GATES / "stage-161-current-gate-audit-20260923"
-STAGE = GATES / "stage-162-grouped-pair-selection-20260923"
-VERIFICATION = GATES / "stage-162-pair-selection-verification.json"
+PREDECESSOR = GATES / "stage-162-current-gate-audit-20260923"
+STAGE = GATES / "stage-163-m4ri-echelons-20260923"
+VERIFICATION = GATES / "stage-163-m4ri-verification.json"
 GATE_STATUS = GATES / "GATE_STATUS.md"
 SCOREBOARD = REPO / "docs/index-calculus-scoreboard.html"
-SCHEMA = "koblitz_stage162_current_gate_audit.v1"
-SEAL_SCHEMA = "koblitz_stage162_current_gate_audit_seal.v1"
+SCHEMA = "koblitz_stage163_current_gate_audit.v1"
+SEAL_SCHEMA = "koblitz_stage163_current_gate_audit_seal.v1"
 
 
 class AuditError(RuntimeError):
@@ -53,18 +53,18 @@ def replay(script: str, *args: str) -> dict[str, Any]:
 
 def compose() -> dict[str, Any]:
     predecessor = replay(
-        "compose_koblitz_stage161_gate_audit.py", "verify", "--output", str(PREDECESSOR)
+        "compose_koblitz_stage162_gate_audit.py", "verify", "--output", str(PREDECESSOR)
     )
-    verification = replay("verify_koblitz_stage162_pair_selection.py")
-    require(verification == load(VERIFICATION, "Stage-162 verification"), "verification changed")
-    result = load(STAGE / "result.json", "Stage-162 result")
-    seal = load(STAGE / "result-seal.json", "Stage-162 seal")
+    verification = replay("verify_koblitz_stage163_m4ri.py")
+    require(verification == load(VERIFICATION, "Stage-163 verification"), "verification changed")
+    result = load(STAGE / "result.json", "Stage-163 result")
+    seal = load(STAGE / "result-seal.json", "Stage-163 seal")
     require(
         predecessor.get("status") == "current_seven_gate_audit_verified"
         and verification.get("status") == "verified"
         and verification["result_sha256"] == seal["result_sha256"]
-        and result["comparisons"]["selected_over_stage161"]["wall_ratio"] < 0.955
-        and result["comparisons"]["selected_over_same_host_direct_mitm"]["wall_ratio"] > 19,
+        and result["comparisons"]["same_binary_m4ri_over_streaming"]["wall_ratio"] < 0.935
+        and result["comparisons"]["selected_over_same_host_direct_mitm"]["wall_ratio"] > 18,
         "scientific boundary changed",
     )
     require(
@@ -78,23 +78,23 @@ def compose() -> dict[str, Any]:
     gate_text = GATE_STATUS.read_text()
     scoreboard = SCOREBOARD.read_text()
     require(
-        "Stage 162 grouped critical-pair selection" in gate_text
-        and "Stages 161 and 162 trusted-mask hashing and grouped critical-pair selection" in gate_text,
-        "gate status lacks Stage 162",
+        "Stage 163 shape-selected block-4 M4RI" in gate_text
+        and "plus Stage 163 shape-selected block-4 M4RI elimination" in gate_text,
+        "gate status lacks Stage 163",
     )
     require(
-        "still 19.29&times; direct MITM" in scoreboard and "57.862894" in scoreboard,
-        "scoreboard lacks Stage 162",
+        "still 18.26&times; direct MITM" in scoreboard and "54.773779" in scoreboard,
+        "scoreboard lacks Stage 163",
     )
     return {
         "schema": SCHEMA,
         "status": "current_seven_gate_audit_verified",
         "predecessor": {
-            "stage161_audit_sha256": sha256(PREDECESSOR / "audit.json"),
-            "stage161_seal_sha256": sha256(PREDECESSOR / "result-seal.json"),
-            "stage161_status": predecessor["status"],
+            "stage162_audit_sha256": sha256(PREDECESSOR / "audit.json"),
+            "stage162_seal_sha256": sha256(PREDECESSOR / "result-seal.json"),
+            "stage162_status": predecessor["status"],
         },
-        "stage162": {
+        "stage163": {
             "result_sha256": sha256(STAGE / "result.json"),
             "result_seal_sha256": sha256(STAGE / "result-seal.json"),
             "verification_sha256": sha256(VERIFICATION),
@@ -103,7 +103,8 @@ def compose() -> dict[str, Any]:
             "selected_wall_seconds": verification["selected_wall_seconds"],
             "selected_core_seconds": verification["selected_core_seconds"],
             "selected_peak_rss_bytes": verification["selected_peak_rss_bytes"],
-            "whole_target_speedup": verification["whole_target_speedup"],
+            "selected_word_xors": verification["selected_word_xors"],
+            "same_binary_wall_speedup": verification["same_binary_wall_speedup"],
             "same_host_f4_over_mitm_wall": verification["same_host_f4_over_mitm_wall"],
             "complete_campaign_cost": None,
         },
@@ -143,30 +144,18 @@ def build(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path) -> dict[str, Any]:
-    seal = load(output / "result-seal.json", "Stage-162 audit seal")
+    seal = load(output / "result-seal.json", "Stage-163 audit seal")
     require(seal.get("schema") == SEAL_SCHEMA, "audit seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    stored = load(output / "audit.json", "Stage-162 audit")
-    predecessor = replay(
-        "compose_koblitz_stage161_gate_audit.py", "verify", "--output", str(PREDECESSOR)
-    )
-    verification = replay("verify_koblitz_stage162_pair_selection.py")
-    require(verification == load(VERIFICATION, "Stage-162 verification"), "verification changed")
-    require(
-        stored.get("schema") == SCHEMA
-        and stored.get("status") == "current_seven_gate_audit_verified"
-        and stored["predecessor"]["stage161_audit_sha256"] == sha256(PREDECESSOR / "audit.json")
-        and stored["predecessor"]["stage161_seal_sha256"] == sha256(PREDECESSOR / "result-seal.json")
-        and stored["stage162"]["result_sha256"] == sha256(STAGE / "result.json")
-        and stored["stage162"]["result_seal_sha256"] == sha256(STAGE / "result-seal.json")
-        and stored["stage162"]["verification_sha256"] == sha256(VERIFICATION)
-        and stored["stage162"]["selected_wall_seconds"] == verification["selected_wall_seconds"]
-        and stored["all_seven_gates_passed"] is False
-        and stored["koblitz_index_calculus_sota"] is False,
-        "historical Stage-162 audit dependencies changed",
-    )
-    require(predecessor.get("status") == "current_seven_gate_audit_verified", "Stage-161 historical audit changed")
-    return stored
+    current = compose()
+    stored = load(output / "audit.json", "Stage-163 audit")
+    current_scientific = dict(current)
+    stored_scientific = dict(stored)
+    for value in (current_scientific, stored_scientific):
+        value.pop("gate_status_sha256", None)
+        value.pop("scoreboard_sha256", None)
+    require(current_scientific == stored_scientific, "current scientific audit changed")
+    return current
 
 
 def main() -> None:
@@ -179,7 +168,7 @@ def main() -> None:
         value = build(args.output.resolve()) if args.command == "build" else verify(args.output.resolve(strict=True))
         print(json.dumps(value, indent=2, sort_keys=True))
     except (OSError, ValueError, KeyError, AuditError) as error:
-        raise SystemExit(f"stage162-gate-audit: {error}")
+        raise SystemExit(f"stage163-gate-audit: {error}")
 
 
 if __name__ == "__main__":
