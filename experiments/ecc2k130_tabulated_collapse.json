@@ -1,0 +1,198 @@
+{
+  "curve": "K0 over F_2^131 (ECC2K-130)",
+  "class": "accounting (AGENTS.md section 3): the note's own collapse, applied where its own section 6 says it applies; no algorithm changed",
+  "rho_log2": 60.809,
+  "reconciliation": [
+    {
+      "m": 2,
+      "variant": "as committed (no collapse)",
+      "log2_base": 43.25,
+      "log2_table_entries": 85.5,
+      "log2_total": 89.36,
+      "log2_ratio_to_rho": 28.55
+    },
+    {
+      "m": 2,
+      "variant": "+ orbit collapse (the note's own frobenius path)",
+      "log2_base": 41.75,
+      "log2_table_entries": 82.5,
+      "log2_total": 83.9,
+      "log2_ratio_to_rho": 23.09
+    },
+    {
+      "m": 2,
+      "variant": "+ collapse + folded table",
+      "log2_base": 44.0,
+      "log2_table_entries": 79.97,
+      "log2_total": 81.57,
+      "log2_ratio_to_rho": 20.76
+    },
+    {
+      "m": 3,
+      "variant": "as committed (no collapse)",
+      "log2_base": 43.5,
+      "log2_table_entries": 86.0,
+      "log2_total": 90.58,
+      "log2_ratio_to_rho": 29.77
+    },
+    {
+      "m": 3,
+      "variant": "+ orbit collapse (the note's own frobenius path)",
+      "log2_base": 42.25,
+      "log2_table_entries": 83.5,
+      "log2_total": 84.96,
+      "log2_ratio_to_rho": 24.15
+    },
+    {
+      "m": 3,
+      "variant": "+ collapse + folded table",
+      "log2_base": 44.5,
+      "log2_table_entries": 80.97,
+      "log2_total": 82.63,
+      "log2_ratio_to_rho": 21.82
+    }
+  ],
+  "tournament_family_model": [
+    {
+      "t": 1,
+      "k": 1,
+      "log2_base": 43.67,
+      "log2_table_entries": 85.33,
+      "log2_total": 86.92,
+      "log2_ratio_to_rho": 26.11
+    },
+    {
+      "t": 131,
+      "k": 131,
+      "log2_base": 43.67,
+      "log2_table_entries": 78.3,
+      "log2_total": 79.88,
+      "log2_ratio_to_rho": 19.07
+    }
+  ],
+  "tournament_measured_rate_extrapolated": {
+    "anchor_cell": "n43a1",
+    "anchor_log2_r": 32.11,
+    "anchor_log2_ratio": 1.14,
+    "log2_ratio_at_2^129": {
+      "low": 8.41,
+      "step1_low": 13.74,
+      "derived": 17.29,
+      "high": 19.36
+    },
+    "status": "extrapolation over 97 bits from three cells whose rate ranges overlap; the lane itself reports no resolvable curvature"
+  },
+  "memory_capped": [
+    {
+      "log2_entries_cap": 30,
+      "as_committed": {
+        "log2_total": 110.08,
+        "m": 4,
+        "split": 4
+      },
+      "corrected": {
+        "log2_total": 95.87,
+        "m": 5,
+        "split": 5,
+        "log2_base": 8.75
+      },
+      "bsgs_as_priced_by_the_note": 99.0,
+      "rho": 60.809,
+      "corrected_minus_rho": 35.06
+    },
+    {
+      "log2_entries_cap": 40,
+      "as_committed": {
+        "log2_total": 100.49,
+        "m": 6,
+        "split": 6
+      },
+      "corrected": {
+        "log2_total": 86.77,
+        "m": 7,
+        "split": 7,
+        "log2_base": 8.25
+      },
+      "bsgs_as_priced_by_the_note": 89.0,
+      "rho": 60.809,
+      "corrected_minus_rho": 25.96
+    },
+    {
+      "log2_entries_cap": 50,
+      "as_committed": {
+        "log2_total": 90.3,
+        "m": 8,
+        "split": 8
+      },
+      "corrected": {
+        "log2_total": 76.27,
+        "m": 8,
+        "split": 8,
+        "log2_base": 9.0
+      },
+      "bsgs_as_priced_by_the_note": 79.0,
+      "rho": 60.809,
+      "corrected_minus_rho": 15.46
+    },
+    {
+      "log2_entries_cap": 60,
+      "as_committed": {
+        "log2_total": 81.55,
+        "m": 8,
+        "split": 8
+      },
+      "corrected": {
+        "log2_total": 67.53,
+        "m": 8,
+        "split": 8,
+        "log2_base": 10.25
+      },
+      "bsgs_as_priced_by_the_note": 69.0,
+      "rho": 60.809,
+      "corrected_minus_rho": 6.72
+    },
+    {
+      "log2_entries_cap": 70,
+      "as_committed": {
+        "log2_total": 72.88,
+        "m": 8,
+        "split": 8
+      },
+      "corrected": {
+        "log2_total": 64.85,
+        "m": 8,
+        "split": 8,
+        "log2_base": 10.75
+      },
+      "bsgs_as_priced_by_the_note": 70,
+      "rho": 60.809,
+      "corrected_minus_rho": 4.04
+    }
+  ],
+  "pair_family_m2_capped": [
+    {
+      "log2_entries_cap": 40,
+      "log2_base": 24.0,
+      "log2_total": 100.97,
+      "log2_ratio_to_rho": 40.16
+    },
+    {
+      "log2_entries_cap": 50,
+      "log2_base": 29.0,
+      "log2_total": 95.97,
+      "log2_ratio_to_rho": 35.16
+    },
+    {
+      "log2_entries_cap": 60,
+      "log2_base": 34.0,
+      "log2_total": 90.97,
+      "log2_ratio_to_rho": 30.16
+    },
+    {
+      "log2_entries_cap": 70,
+      "log2_base": 39.0,
+      "log2_total": 85.97,
+      "log2_ratio_to_rho": 25.16
+    }
+  ]
+}
