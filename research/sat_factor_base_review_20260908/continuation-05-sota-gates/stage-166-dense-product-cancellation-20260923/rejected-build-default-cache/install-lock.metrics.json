@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/bin/cp",
+    "/Volumes/SSD990/koblitz-native-f4-build16-ac3e385c/source/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock",
+    "/Volumes/SSD990/koblitz-native-f4-build16-ac3e385c/source/Cargo.lock"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.002723124998738058,
+    "user_seconds": 0.0006389999999999999,
+    "system_seconds": 0.001187,
+    "total_core_seconds": 0.001826,
+    "single_core_seconds": 0.001826,
+    "peak_rss_bytes": 1294336,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}
