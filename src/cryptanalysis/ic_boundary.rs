@@ -177,6 +177,13 @@ pub struct Calibration {
     /// coordinates and the least of `n` rotations, with its shift),
     /// Koblitz regime, measured on the instance's field.
     pub ns_per_canon: Option<f64>,
+    /// The factors above that [`Calibration::pin`] replaced with a
+    /// ratio from the repository's table, by field name.  A consumer
+    /// that labels a price `pinned` must check here: a factor that is
+    /// merely present was measured on this host, and a freshly
+    /// generated instance has no table entry at all.
+    #[serde(default)]
+    pub pinned_units: Vec<String>,
 }
 
 /// The unit's conversion ratios, pinned in the repository.
@@ -268,7 +275,15 @@ impl Calibration {
         ] {
             apply(name, slot, &mut out);
         }
+        self.pinned_units = out.pinned.clone();
         out
+    }
+
+    /// Whether `unit` (a field name such as `ns_per_word_xor`) carries
+    /// the repository's pinned ratio rather than this host's
+    /// measurement.
+    pub fn is_pinned(&self, unit: &str) -> bool {
+        self.pinned_units.iter().any(|u| u == unit)
     }
 }
 
@@ -456,10 +471,12 @@ pub struct PhaseCost {
 }
 
 impl PhaseCost {
-    fn count(&mut self, name: &str, by: u64) {
+    /// Add `by` to the native counter `name`, creating it at zero.
+    pub fn count(&mut self, name: &str, by: u64) {
         *self.native.entry(name.to_string()).or_insert(0) += by;
     }
-    fn get(&self, name: &str) -> u64 {
+    /// Read a native counter, zero when it was never touched.
+    pub fn get(&self, name: &str) -> u64 {
         self.native.get(name).copied().unwrap_or(0)
     }
 }
@@ -2301,6 +2318,11 @@ pub struct OracleCounters {
     pub s4_pairs: u64,
     pub s4_hits: u64,
     pub lift_failures: u64,
+    /// Algebraic systems the solver decided satisfiable none of whose
+    /// solutions lifted to a relation over the base — twist solutions,
+    /// which a summation polynomial cannot tell from curve points.
+    /// Counted apart from `lift_failures`, which is per solution.
+    pub unliftable_systems: u64,
     /// Frobenius-orbit canonicalisations of a target abscissa.
     pub canonicalisations: u64,
     /// Folded-table hits whose recovered pair summed to neither `±R`;
@@ -2985,6 +3007,7 @@ pub fn collect_and_solve_with<G: CountedGroup, L: RelationSolver + ?Sized>(
     rel.count("s4_pairs", ctr.s4_pairs);
     rel.count("s4_hits", ctr.s4_hits);
     rel.count("lift_failures", ctr.lift_failures);
+    rel.count("unliftable_systems", ctr.unliftable_systems);
     rel.count("canonicalisations", ctr.canonicalisations);
     rel.count("frobfold_mismatches", ctr.frobfold_mismatches);
     rel.count("direct_relations_skipped", direct_skipped);

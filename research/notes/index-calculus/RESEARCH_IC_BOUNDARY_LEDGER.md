@@ -2446,9 +2446,14 @@ Reading it:
 - **The Koblitz curve and the random one behave identically**, on every
   column.  Whatever the extra automorphism buys elsewhere in this
   ledger, it does not change the shape of this system.
-- **The cost is below enumeration and the margin grows**: `0.6×`,
-  `0.5×`, `0.5×`, `0.4×`.  That is the column that matters, and it is
-  the one a degree table on its own would have hidden.
+- **The count is below enumeration's count and the margin grows**:
+  `0.6×`, `0.5×`, `0.5×`, `0.4×`.  **Corrected in §15.4:** the two
+  counts are in different units — a Buchberger monomial operation
+  measures about `50 ns` on the calibration host and an enumeration
+  test `0.07 ns` — and once each is converted at its own measured
+  factor, as §2 requires, the engine costs about **`75×`** enumeration
+  at `n = 13` rather than `0.4×` of it.  The degree reading stands; the
+  cost reading was a ratio of unlike units and is withdrawn.
 
 **`D_pair` is in the table to keep an earlier mistake visible**, and it
 has a second story now.  The first version of this measurement reported
@@ -2507,6 +2512,9 @@ cannot contribute — gives, paired on the same seed and the same systems:
 Gröbner basis measured 6.5× to 43× *worse* than enumeration, widening
 with `n`; under both it measures 0.4× to 0.6×, narrowing.  The first
 reading was a statement about the engine and was withdrawn, not filed.
+(Both ratios are in raw counts of unlike units; the tenfold-to-
+hundredfold cut in the engine's own count is real, and §15.4 gives the
+converted ratio to enumeration, which is `75×` the other way.)
 The coprime-only ladder stays frozen beside the fixed one as the before
 mark, because deleting it would hide the size of the correction.
 
@@ -2530,10 +2538,14 @@ one with a silently missing cell.
 - No row here is a speed, a crossover, or evidence about any deployed
   curve; the largest field is `GF(2^15)`.
 - `ms` and `KiB` are practicality notes.  The metric is the monomial
-  operation count, as §6 requires.
+  operation count, as §6 requires — and, as §15.4 found, a count in one
+  engine's unit is not comparable with a count in another's until each
+  is converted at a measured factor.
 - The `ops/enum` column is a ratio to *this repository's* enumeration on
-  *these* systems.  It is not a statement about F4, about Magma, or
-  about the symmetrised systems Petit–Quisquater solve.
+  *these* systems, **in raw counts of unlike units**; §15.4 gives the
+  converted ratio, which is the other way round by two orders of
+  magnitude.  It is not a statement about F4, about Magma, or about the
+  symmetrised systems Petit–Quisquater solve.
 - A row whose `timed_out` is non-zero is a statement about the engine's
   budget and not about the system's difficulty.
 - The degrees are not comparable to Petit–Quisquater's row by row, for
@@ -2548,6 +2560,1024 @@ ic descent --cells 7:4:2,9:5:2,11:6:2,13:7:2 --targets 8 \
 # The before mark, on the coprime criterion alone, is frozen at
 # docs/ic/runs/ic-descent-degrees-coprime-only-2026-09-22.json
 ```
+
+## 15. The solver inside `S`: the framework's first frozen sweeps
+
+§14 priced the algebraic oracle's systems on their own and said, first,
+that no row of it was a speed.  The benchmarking framework
+(`docs/ic/FRAMEWORK.md`) now lets a *whole run* choose its
+polynomial-system engine, with the engine's work priced into the
+decomposition phase and so into `S`.  This section freezes the first
+two sweeps it ran, and one of them corrects §14.
+
+### 15.1 The boundaries, stated first
+
+- **The reference** is the pair-table oracle on the *same base*, same
+  instance, same walk, same seed: `mitm[m=2]` on
+  `binary-subspace[dimension=6]`.  It is the best thing already solving
+  the same decomposition problem in the same unit, and the algebraic
+  rows have to reach it before they are worth anything.
+- **The method boundary** is rho, which sits at `S ≈ 1.3` on every rung
+  of this ledger (§3).  The sweep did not run rho on this instance, so
+  the `vs rho` column of the frozen table is empty and says so; no
+  ratio to rho is quoted below.
+- **The degree boundary** is §14.3's semi-regular degree, `D_sr = 4` for
+  thirteen quadratics in twelve unknowns.
+
+Everything here is a toy: `E(F_{2^13})`, `r = 4091`, `log₂ r = 12`.  It
+is a measurement of a *capability* — the solver reaching `S` — and of
+an accounting error, not of an attack.
+
+### 15.2 One base, four oracles, whole runs
+
+Frozen at `docs/ic/runs/ic-bench-solver-engines-2026-09-22.json`; two
+planted targets per configuration, the same two for every row.
+`random-binary-n13-b1503`, `binary-subspace[dimension=6]`: 60 signed
+points, 30 columns, walk targets, `incremental-gauss`.  `S` and the
+ratio to the reference are per target; the solver columns are totals
+over the run.
+
+| oracle | engine | trials | rows | hit | S | S / reference | solver calls | solver ops (unit) | ns / op | solver GAE | D_solve | D_sr | priced by | correct |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|
+| pair table | — | 126 / 112 | 26 / 20 | 0.206 / 0.179 | 40.5 / 39.7 | 1 | — | — | — | — | — | — | — | yes / yes |
+| descent-algebraic | exhaustive | 126 / 112 | 26 / 20 | 0.206 / 0.179 | 1,049 / 947 | 25.9× / 23.9× | 124 / 111 | 1.61e8 / 1.43e8 (monomial tests) | 0.074 | 6.62e4 / 5.98e4 | — | 4 | measured | yes / yes |
+| descent-algebraic | buchberger-f2 | 126 / 112 | 26 / 20 | 0.206 / 0.179 | 77,765 / 70,202 | 1,920× / 1,768× | 124 / 111 | 1.70e7 / 1.59e7 (monomial operations) | 52.7 / 51.0 | 4.97e6 / 4.49e6 | 2.90 / 2.95 | 4 | measured | yes / yes |
+| descent-algebraic | sat-cdcl | 135 / 112 | 28 / 20 | 0.207 / 0.179 | 188,708 / 164,302 | 4,659× / 4,139× | 133 / 111 | 1.25e5 / 1.10e5 (conflicts) | 17,446 / 17,142 | 1.21e7 / 1.05e7 | — | 4 | measured | yes / yes |
+
+The phases behind the reference row, per target: base `3.9`, pair table
+`1,830`, relations `737 / 687`, matrix `5.0 / 3.4`, verification `15`,
+total `2,591 / 2,539` GAE.  The algebraic rows build no table (their
+`setup` is `0`) and spend it all in the relation phase, which is the
+solver: `4.97e6` of the Buchberger row's `4.97e6`.
+
+Reading it:
+
+- **The solver reaches `S`.**  That is the capability, and it is what
+  §14.1 could not do.  Every algebraic row is a complete logarithm with
+  the engine's work inside its `S`, and every row is verified.
+- **On the same base the pair table wins by three to four orders of
+  magnitude**, and it is not close: `1,900×` for the Gröbner engine,
+  `4,000×` for CDCL, `24×` even for exhaustive search over the
+  subspace.  A table of `C(60, 2)` additions is `1,830` GAE once; a
+  system per target is `40,000` GAE per target for Buchberger.
+- **Exhaustive search is the best algebraic engine here by `75×`**, in
+  the unit — the point §15.4 makes.
+- **The degree reading of §14 stands and does not help.**  `D_solve =
+  2.9` against `D_sr = 4`, a ratio of `0.73`, the same "below the
+  bound" §14.4 reports, on the engine that is `1,900×` the reference.
+  The degree column and the `S` column disagree about which engine is
+  good; the `S` column is the one that is a speed.
+- **The oracles agree target by target.**  The Buchberger and
+  exhaustive rows walked exactly the pair table's targets and found
+  exactly its relations (`126 / 26`, `112 / 20`); the test suite checks
+  the same thing on 150 targets directly.  CDCL's first repeat walked
+  `135` targets to `28` rows: a target with two decompositions lifted
+  to a different pair, and the matrix pinned nine rows later.  Same
+  answer.
+- **One system per run lifted to nothing** (`unliftable_systems = 1` on
+  every algebraic row, `lift_failures` `1`–`3`).  A summation
+  polynomial vanishes over the algebraic closure, so a solution may
+  name a twist abscissa the base never holds.  It is counted, never
+  folded into "did not decompose", and it is why the algebraic hit
+  rates equal the pair table's rather than exceed them.
+
+### 15.3 The relation matrix, on its own
+
+Frozen at `docs/ic/runs/ic-bench-relation-matrix-2026-09-22.json`:
+`bench-20bit`, `r = 1,046,999`, `mitm[negation_folded=1]`, walk
+targets, two planted targets, both eliminations on the same relations,
+pinned calibration.
+
+| base | matrix | rows | rank | row_ops | matrix GAE | S | correct |
+|:--|:--|--:|--:|--:|--:|--:|:--|
+| 64 abscissae | incremental-gauss | 38 / 35 | 38 / 35 | 469 / 382 | 8.11 / 6.60 | 9.125 / 12.040 | yes / yes |
+| 64 abscissae | structured-gauss | 38 / 35 | 38 / 35 | 433 / 358 | 7.49 / 6.19 | 9.124 / 12.039 | yes / yes |
+| 256 abscissae | incremental-gauss | 151 / 110 | 151 / 110 | 2,105 / 1,040 | 36.4 / 18.0 | 67.086 / 66.880 | yes / yes |
+| 256 abscissae | structured-gauss | 151 / 110 | 151 / 110 | 1,869 / 936 | 32.3 / 16.2 | 67.082 / 66.878 | yes / yes |
+
+Same rows, same rank, same logarithm; pivoting on the lightest column
+saves `6`–`11 %` of the `row_ops` on two-summand rows, and the matrix
+is `0.05`–`0.09 %` of `S` at these sizes, so `S` moves in the fourth
+digit.  **Engineering**, bounded, and not a finding — the matrix was
+`0.002 %` of the cost at §11's sizes and is a lever only where the
+relation count is.  (The 256-abscissa base is past the family optimum
+on purpose, to give the matrix rows to work on; its pair table is
+`65,792` of its `68,644` GAE.)
+
+### 15.4 The accounting error, and what it corrects
+
+The first freeze of the solver sweep priced the Buchberger engine's
+"monomial operations" at the pinned word-XOR ratio, on the reasoning
+that a monomial is a 64-bit mask.  Its calibration record says what
+that would have done: a word XOR measures `0.44 ns` on the host, a
+Buchberger monomial operation `51`–`53 ns` (`wall / ops`), an
+enumeration test `0.074 ns`.  Pricing the middle one at the first one's
+ratio would have made the Gröbner row `120×` cheaper than it is — §6's
+"changing the unit", in one line of code, in the flattering direction.
+
+The rule is now the narrow one: only a unit the calibration table
+carries a ratio for is priced by count (`word XORs`, the matrix-F4 unit
+of §5), every other engine unit is priced at the host's measured wall
+time over its addition time and the row says `measured`, and the
+report records `ns_per_op` so the count can be re-priced.  It is
+host-dependent, as §12 says every measured factor is, and it is the
+honest number.
+
+It also corrects §14.4.  That table's `ops/enum` column divided a count
+of Buchberger monomial operations by a count of enumeration tests and
+read `0.4`–`0.6×`; the two are unlike units by a factor of `700`, and
+converted at their measured factors the engine costs `4.97e6` GAE where
+enumeration costs `6.62e4` — **`75×` enumeration, not `0.4×` of it**.
+The degree statistic, which was the point of §14, is unaffected.  The
+cost reading is withdrawn there and here.
+
+By §3 this is **accounting**: numbers changed, no algorithm did, and no
+gain is claimed.  The reading it replaces — a count below enumeration's
+count while the converted cost was two orders of magnitude above it —
+is the **relabelling** pattern, work moved into the price of an
+"operation" where the count did not look.
+
+### 15.5 Classified
+
+| row | class | why |
+|:--|:--|:--|
+| descent-algebraic, any engine, at `n = 13` | measurement | new rows; `24×`–`4,700×` the pair table on the same base, no boundary crossed |
+| the pair table charged to the oracle's `setup`, not the base | accounting | the same base read `1,830` beside one oracle and `0` beside another |
+| solver units priced by measured factor, `ns_per_op` recorded | accounting | the correction of §15.4 |
+| §14.4's `ops/enum` | relabelling → withdrawn | a ratio of unlike units |
+| structured-gauss | engineering | `6`–`11 %` of `row_ops`, `10⁻⁴` of `S` |
+
+### 15.6 What does not count
+
+- Nothing here is a speed against rho: rho was not run on this instance
+  and the table's `vs rho` column is empty.
+- The algebraic rows' prices are `measured`, so their `S` is this
+  host's and a ratio between two `measured` rows from different hosts
+  means nothing (§12); the ratio to the pair-table reference is between
+  a counted row and a measured one and is quoted as such.
+- `xl-f2` is absent because it does not fit: one pass at degree
+  `n_vars`, about `150 s` a call on this shape against Buchberger's
+  `7 ms`, and a modelled rather than counted op figure.  It now
+  declines above ten unknowns, and the sweep file says why.
+- The descent these rows were built with was a truth table, capped at
+  `n' = 8` for two summands; every algebraic row above sits at
+  `n' = 6`.  §16 replaces the construction with a symbolic one and
+  measures past the cap.  Nothing here extrapolates.
+
+### 15.7 Reproducing
+
+```
+ic bench --sweep docs/ic/sweeps/solver-engines.json \
+  --out docs/ic/runs/ic-bench-solver-engines-2026-09-22.json
+ic bench --sweep docs/ic/sweeps/relation-matrix.json \
+  --out docs/ic/runs/ic-bench-relation-matrix-2026-09-22.json
+```
+
+The frozen reports carry the calibration and which of its units were
+pinned, so every GAE in them re-derives from its counts.
+
+## 16. The descent, symbolic: past the truth-table cap
+
+§14 and §15 built their boolean systems from a truth table — every one
+of the `2^{m·n'}` points of `V^m` evaluated in the summation
+polynomial and Möbius-transformed into algebraic normal forms — which
+stopped the algebraic rows at `n' = 8` for two summands and `n' = 5`
+for three.  This section replaces the construction with a symbolic
+one, checks that nothing changed, and measures where the table could
+not go.
+
+### 16.1 The construction, and that it is the same one
+
+The symbolic descent (`pq_descent_symbolic`) expands `S_{m+1}` in the
+ring `F_{2^n}[v] / (v² − v)` term by term, with each abscissa the linear
+form `x_i = Σ_k v_{i,k} e_k` over the subspace basis.  A polynomial is a
+map from a boolean monomial (a 64-bit mask over the `v`'s) to its field
+coefficient, and two facts of the ring do all the work: squaring is
+linear, `(Σ c_M M)² = Σ c_M² M`, because `M² = M` and every cross term
+carries a factor of two; and a product of monomials is their union.
+The `S_3` and `S_4` formulas are mirrored operation for operation from
+the evaluating code.  `S_3` comes out quadratic in `2n'` variables with
+at most `n'² + 2n' + 1` field monomials whatever `n'`; `S_4`, a product
+of two cubics in its resultant form, of degree at most six in `3n'`.
+The only cap left is the mask: `m·n' ≤ 64`, so `n' ≤ 32` at two
+summands and `n' ≤ 21` at three.
+
+Three checks, all in the test suite:
+
+- **Monomial for monomial against the truth table.**  The algebraic
+  normal form of a boolean function is unique, so the two
+  constructions of the same function must coincide exactly.  They do,
+  for `S_3` and `S_4`, on random curves at `n = 7, 9, 11, 13` and every
+  `n'` the table can reach.
+- **Against the formulas past the table's reach.**  At `n' = 12`
+  (24 variables) and at three summands with `n' = 7` (21 variables),
+  every equation evaluated at random points of the subspace gives the
+  bit of `S_{m+1}` it stands for, and the word formulas agree with the
+  `F2mElement` ones.
+- **The frozen cells reproduce.**  Re-running §14's `11:6:2` cell for
+  both families through the symbolic path gives the frozen operation
+  counts to the last digit (`499,453.75` and `438,743.75` monomial
+  operations, `D_av = 3.0`, the same enumeration reference), since the
+  target draw is unchanged.  A construction that reproduces the frozen
+  table exactly has changed nothing but its reach.
+
+### 16.2 The boundaries
+
+As in §15.1: the reference is the pair-table oracle on the *same base*,
+same instance, same walk, same two targets; rho was not run on this
+instance and no ratio to it is quoted; the degree boundary is the
+semi-regular degree of the system's shape — `D_sr = 5` for seventeen
+quadratics in eighteen unknowns.  Everything here is a toy,
+`E(F_{2^17})`, `r = 65,309`, `log₂ r = 16.0`, and a measurement of what
+the engines do when the descent no longer stops them.
+
+### 16.3 One base at `n = 17`, `n' = 9`: eighteen unknowns
+
+Frozen at `docs/ic/runs/ic-bench-solver-engines-n17-2026-09-22.json`;
+`random-binary-n17-b1ad26`, `binary-subspace[dimension=9]`: 476 signed
+points, 238 columns, walk targets, `incremental-gauss`, two planted
+targets, every row a verified logarithm.  `S` and the ratio are per
+target; the solver columns are totals over the run.  The 120-second
+per-call budget was never reached.
+
+| oracle | engine | trials | rows | hit | S | S / reference | solver calls | solver ops (unit) | ns / op | solver GAE | D_solve | D_sr | wall | correct |
+|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| pair table | — | 122 / 239 | 69 / 134 | 0.566 / 0.561 | 448.1 / 448.9 | 1 | — | — | — | — | — | — | 0.0 s | yes / yes |
+| descent-algebraic | exhaustive | 122 / 239 | 69 / 134 | 0.566 / 0.561 | 19,793 / 36,432 | 44.2× / 81.2× | 122 / 239 | 2.83e10 / 5.32e10 (monomial tests) | 0.043 | 5.06e6 / 9.31e6 | — | 5 | 1.2 / 2.3 s | yes / yes |
+| descent-algebraic | sat-cdcl | 183 / 222 | 107 / 124 | 0.585 / 0.559 | 4,017,177 / 4,670,150 | 8,966× / 10,404× | 183 / 222 | 6.42e6 / 7.62e6 (conflicts) | 38,853 / 38,023 | 1.03e9 / 1.19e9 | — | 5 | 249 / 290 s | yes / yes |
+| descent-algebraic | buchberger-f2 | 122 / 239 | 69 / 134 | 0.566 / 0.561 | 45,377,987 / 87,187,764 | 101,276× / 194,235× | 122 / 239 | 9.96e9 / 1.92e10 (monomial operations) | 282.8 / 281.7 | 1.16e10 / 2.23e10 | 3.99 / 4.00 | 5 | 2,817 / 5,412 s | yes / yes |
+
+The phases behind the reference row, per target: base `30`, pair table
+`113,526` (`C(476, 2)` additions — this base is far past the family
+optimum for `2^16`, on purpose, so that the descent has eighteen
+unknowns to work on), relations `920 / 1,110`, matrix `8 / 25`,
+verification `20 / 22`.  The algebraic rows build no table and spend
+everything in the solver.
+
+### 16.4 Reading it, against §15
+
+| | `n = 13`, `n' = 6`, 12 unknowns (§15) | `n = 17`, `n' = 9`, 18 unknowns | growth |
+|:--|--:|--:|--:|
+| pair table, `S` | 40.5 / 39.7 | 448.1 / 448.9 | 11× |
+| exhaustive, `S / reference` | 25.9× / 23.9× | 44.2× / 81.2× | |
+| sat-cdcl, `S / reference` | 4,659× / 4,139× | 8,966× / 10,404× | |
+| buchberger-f2, `S / reference` | 1,920× / 1,768× | 101,276× / 194,235× | |
+| buchberger-f2 over exhaustive, in GAE | 75× | 2,293× / 2,394× | 31× |
+| buchberger-f2, ns per monomial operation | 51–53 | 282 | 5.4× |
+| `D_solve / D_sr` | 2.90 / 4 = 0.73 | 3.99 / 5 = 0.80 | |
+
+- **The degree reading holds and keeps not helping.**  `D_solve = 4.0`
+  against `D_sr = 5`: the system is still solved below the semi-regular
+  bound, the phenomenon §14 set out to see, and the engine that sees it
+  is now `10⁵` times the pair table on the same base.
+- **The Gröbner engine's cost grew `2,300×` for six more unknowns**
+  while the exhaustive engine's grew `77×` (`5.06e6` from `6.62e4` GAE,
+  at almost the same call count), and the price of its own unit grew
+  with it: a monomial operation that measured `52 ns` at twelve
+  unknowns measures `282 ns` at eighteen, because the polynomials it
+  operates on are five times longer.  "Monomial operations" is not a
+  stable unit across sizes, which is one more reason the count is
+  priced at a measured factor and the factor is recorded.
+- **CDCL scales best of the three algebraic engines** (`9,000×` the
+  reference from `4,000×`, against exhaustive's `2×` and Buchberger's
+  `50×` worsening), and is still four orders of magnitude off the pair
+  table.  Its per-conflict cost doubled (`17 µs` to `38 µs`).
+- **The reference is not flattered.**  The pair table here is 99 % of
+  the reference row's cost and the base is `10×` past the family
+  optimum; a base at the optimum would make the reference *cheaper*
+  and every ratio above larger.
+- **No system lifted to nothing on this instance** save one in the
+  first CDCL run; the hit rate is `0.56` on every row, and the CDCL rows
+  walked more targets only because a target with several
+  decompositions lifted to a different pair.  Same answers.
+
+By §3 every row here is a **measurement**: new rows at a size the
+table could not reach, no boundary crossed, no gain claimed.  What
+they establish is negative and useful: with the descent no longer the
+cap, the shipped engines are, and by a margin that widens with `n'` —
+the direction §14.5 warned the reader to expect from "the engine was
+the measurement".
+
+### 16.5 The degree ladder past the cap
+
+§14.4 stopped at `n = 13`, `n' = 7`, fourteen unknowns, because the
+table did.  The same measurement — eight targets a cell, the Koblitz
+curve `K` and a random curve `R` at each degree, `n' = ⌈n/2⌉` so the
+system is square, a 120-second budget per target — continues here from
+sixteen to twenty-two unknowns.  Frozen at
+`docs/ic/runs/ic-descent-degrees-symbolic-2026-09-22.json`; the `K`
+family has no instance at `n = 21` in the roster, so that cell is
+recorded as skipped rather than filled from elsewhere.
+
+| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum (raw counts) | ms | KiB | no decomp | budget hit |
+|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| K | 15 | 8 | 2 | 16 | 15 | 3.8 | 3.8 | 4–5 | 0.94 | 1.976e7 | 3.703e7 | 0.5× | 3,514 | 395 | 2/8 | 0/8 |
+| K | 17 | 9 | 2 | 18 | 17 | 4.0 | 4.0 | 5 | 0.80 | 9.345e7 | 2.103e8 | 0.4× | 22,293 | 706 | 3/8 | 0/8 |
+| K | 19 | 10 | 2 | 20 | 19 | ≥ 4.0 | ≥ 4.0 | 5 | ≥ 0.80 | ≥ 3.387e8 | 1.226e9 | — | ≥ 114,059 | 1,696 | 6/8 | **6/8** |
+| R | 15 | 8 | 2 | 16 | 15 | 3.6 | 3.6 | 4–5 | 0.91 | 1.194e7 | 3.749e7 | 0.3× | 1,705 | 171 | 1/8 | 0/8 |
+| R | 17 | 9 | 2 | 18 | 17 | 4.0 | 4.0 | 5 | 0.80 | 9.763e7 | 2.124e8 | 0.5× | 22,704 | 706 | 5/8 | 0/8 |
+| R | 19 | 10 | 2 | 20 | 19 | ≥ 4.0 | ≥ 4.0 | 5 | ≥ 0.80 | ≥ 3.640e8 | 1.233e9 | — | ≥ 114,096 | 1,657 | 3/8 | **7/8** |
+| R | 21 | 11 | 2 | 22 | 21 | ≥ 4.0 | ≥ 4.0 | 5 | ≥ 0.80 | ≥ 1.053e9 | 6.671e9 | — | ≥ 120,003 | 3,620 | 4/8 | **8/8** |
+
+A row with a budget hit carries lower bounds in every measured column
+— a run that was stopped had not finished raising its degree or
+spending its operations — and its `ops/enum` is left blank, since a
+lower bound over a fixed reference says nothing.  `D_sr` reads `4–5`
+where the bound differs between targets of one cell: a target whose
+descended system carries a linear coordinate equation has a lower
+bound than one whose equations are all quadratic.
+
+Reading it:
+
+- **The solving degree is `4` from eighteen unknowns on, against a
+  bound of `5`**: every one of the thirty-two finished runs at
+  `n' ≥ 9` reached exactly degree four, on both families, and so did
+  every run the budget stopped.  §14's phenomenon — the descended
+  system solved below the semi-regular degree — holds at every cell
+  the symbolic descent reached, at `0.80` of the bound; at sixteen
+  unknowns, where the bound is `4` or `5` by target, it holds at
+  `0.91`–`0.94`.
+- **`K` and `R` still behave identically**, on the degree and on the
+  cost, as they did in §14.4.
+- **The engine is the wall.**  Per target, the finished runs cost
+  `1.7`–`3.5 s` at sixteen unknowns and `22 s` at eighteen (`8`–`51 s`
+  by target); at twenty, thirteen of sixteen runs hit the 120-second
+  budget, and at twenty-two all eight did.  That is a factor of six to
+  thirteen per two unknowns, the growth §16.4 saw from the inside of a
+  whole run, and it is the reason the algebraic rows stop where they
+  do: not the descent any more, and not the degree, which is flat.
+- **The `ops/enum` column is in raw counts of unlike units** and is
+  kept only to line up with §14.4; §15.4 is the correction, and the
+  converted ratio (about `2,300×` at eighteen unknowns, §16.4) is the
+  one that means something.
+
+By §3 these rows are **measurements**: the degree ladder extended by
+three rungs, no boundary crossed, the timed-out cells marked as the
+lower bounds they are.
+
+### 16.6 What does not count
+
+- Nothing here is a speed against rho; the `vs rho` column is empty.
+- Every algebraic price is `measured` and host-dependent (§12); the
+  ratio to the pair-table reference is between a counted row and a
+  measured one, and is quoted as such.  The frozen file carries its
+  calibration.
+- The pair-table reference is on a base `10×` past the family optimum
+  and is priced accordingly; it is the reference for *these* algebraic
+  rows on *this* base, not the best index-calculus row at `2^16`.
+- The symbolic descent lifts the descent's cap and nothing else: the
+  engines' caps (26 unknowns for the enumerating extractions, 10 for
+  XL, the budget for Buchberger) are where the rows now stop, and §8 of
+  the framework manual says so.
+
+### 16.7 Reproducing
+
+```
+ic bench --sweep docs/ic/sweeps/solver-engines-n17.json \
+  --out docs/ic/runs/ic-bench-solver-engines-n17-2026-09-22.json
+
+ic descent --cells 15:8:2,17:9:2,19:10:2,21:11:2 --targets 8 \
+  --families K,R --budget-seconds 120 \
+  --out docs/ic/runs/ic-descent-degrees-symbolic-2026-09-22.json
+
+# The reproduce check: the frozen 11:6:2 cell through the symbolic path.
+ic descent --cells 11:6:2 --targets 8 --families K,R
+```
+
+## 17. F4 and F5 behind the plug point
+
+§16 ended on "the engine is the wall": the only Gröbner engine behind
+the `SystemSolver` plug point was a Buchberger that takes pairs one at a
+time, and it cost six to thirteen times more per two extra unknowns
+until it hit the budget at twenty.  This round puts behind that plug
+point the engines the thread did not have:
+
+| engine | what it is | module |
+|:--|:--|:--|
+| `f4-f2` | Faugère's F4 over `F_2[v]/(v² − v)`: normal strategy, Gebauer–Möller criteria, the field products `v·g` as pairs, symbolic preprocessing, bit-packed elimination; a full reduced basis, solutions read off its linear elements | `pq_f4_f2` (new) |
+| `matrix-f4` | the Koblitz oracle's hybrid: Macaulay matrices to a fixed degree, propagation, splitting | `koblitz_groebner` |
+| `matrix-f5` | the same, with the rows the Boolean F5 criterion predicts to reduce to zero left out | `koblitz_groebner` |
+| `inherited-f4` | the same, children specialising their parent's reduced basis | `koblitz_groebner` |
+| `crossbred-f2` | Joux–Vitse: a Macaulay left kernel at degree `D`, then `2^k` bit-sliced linear solves | `crossbred` |
+| `fes-f2` | fast exhaustive search, libfes-lite's Gray code: two word XORs per point | `mq_fes` |
+
+and asks whether any of them moves an algebraic row.  §17.1 and §17.2
+were written and committed before the suite ran; §17.3–§17.5 are checks
+declared after reading parts of it, each committed before it ran; §17.6
+onward reads the results.
+
+### 17.1 The boundaries, stated before measuring
+
+**At the stage** — one decomposition oracle call on one target, a stage
+diagnostic and never a speed:
+
+- **The reference is exhaustive search, not Buchberger.**  `fes-f2`
+  wherever the system is quadratic, which is every two-summand descent
+  (`S₃` descends to quadratics, §16.1), and the `exhaustive` evaluator
+  where it is not (three summands, degree up to six).  It is the best
+  algorithm that already decides these systems at these sizes, and a
+  Gröbner engine that does not beat it on a cell has not earned its
+  place in that cell.
+- **The baseline is `buchberger-f2`**, the engine every frozen algebraic
+  row so far used (§14–§16).  Beating it is engineering; beating the
+  reference is the question.
+- **The degree floor is `D_sr`**, the semi-regular degree of the
+  system's shape (§14.3), derived per target: `5` from eighteen
+  unknowns on for two summands (§16.5), `7` and `8` at nine and twelve
+  unknowns for three.  The column it bounds is `D_learn`, the highest
+  step degree at which an engine produced a new basis element.
+
+**For the whole method** — `S`, every phase priced:
+
+- **The method reference is counted Pollard rho on the same subgroup.**
+  `ic bench` now runs it (`--rho-runs 16`: sixteen counted runs over the
+  planted targets, with its spread), so the `vs rho` column §15 and §16
+  left empty is filled from this round on.  At these toy orders rho's
+  `S` is setup-dominated — a development run put it at `16.2` (range
+  `10.1`–`33.1`) at `r = 4,091` — and the column is the ratio to the rho
+  measured on the same instance, never to the asymptotic `1.3`.
+- **The oracle reference is the pair table on the same base** (§15.1),
+  and the **floor** is the generic one, `√(π/2A)` in `S` (§3).
+
+**A known caveat on the baseline's degree, stated here because it
+changes how §14–§16's degree column reads.**  The boolean Buchberger
+processes S-pairs only, never the field products `v_i·g` for `v_i` in a
+leading monomial.  Its output is therefore not guaranteed to be a
+Gröbner basis of the boolean ideal: on the toy system
+`{v₀v₁ + v₀ + v₁}` it stops with three standard monomials for one
+solution, where `v₀·g = v₀` closes it.  A development check certified
+its outputs as boolean bases on all thirty-two descent targets probed
+(`n = 7`–`13`: every S-pair and every field product reduces to zero,
+and the standard monomials number the solutions); the whole-pipeline
+rows of §15 and §16.3 were verified end to end, logarithm and all; and
+the suite below compares its verdict with the reference's on every
+target, which is the check for the cells in between.  Its *degree* is
+another matter: an engine that must
+rediscover what a field product gives for free can need a higher
+degree to do it, so a `D_solve` from the pair-only engine is an upper
+bound on what the ideal needs, and the F4 engine, which processes field
+pairs at sugar degree `deg LM + 1`, is the one whose `D_learn` is
+compared with `D_sr` from here on.
+
+### 17.2 The suite, and the target, declared before the suite ran
+
+**The protocol.**  The WDSat regression suite of `AGENTS.md` §8 is a
+SAT-counter protocol and says of itself that it is not an adapter for
+other engines, so this round freezes an equivalent matched suite under
+the parent accounting contract, at
+`research/ic_framework_engines_20260922/`:
+
+- **Stage cells**, `ic descent --solver …`, the descent of §14/§16 with
+  the same target draw: two summands at `n:n' = 7:4, 9:5, 11:6, 13:7,
+  15:8, 17:9, 19:10, 21:11` (eight to twenty-two unknowns, square
+  systems) and three summands at `7:3, 9:3, 11:4`; families `K` and `R`
+  (`K` has no instance at `n = 21`); eight targets a cell; seed
+  `0x0DE5CE47`; three repetitions, interleaved per target with the
+  engine order rotated each repetition; a 120-second budget per call.
+  Engines: `buchberger-f2` (baseline), `f4-f2`, `matrix-f4`,
+  `matrix-f5`, `inherited-f4`, `crossbred-f2` at its module defaults
+  (`D = 3`, `k = 8`), `fes-f2`, `exhaustive`, and `sat-cdcl` on the
+  separate first-solution leaderboard.
+- **Past Buchberger's reach**, `23:12` and `25:13` (twenty-four and
+  twenty-six unknowns), the same protocol without `buchberger-f2`, whose
+  every call at twenty-two unknowns already hit the budget (§16.5), and
+  without `sat-cdcl`, which is on a separate leaderboard and was
+  `5,000×` the reference at twenty-two in development.
+- **A holdout**: seed `0x0F4F5EED` — new targets, and for `R` a new
+  curve — at `15:8, 17:9, 21:11, 23:12` and `9:3:3`, same engines.
+- **The whole method**, `ic bench`: the §15 base at `n = 13` and a
+  square base at `n = 15` (`dimension = 8`), each on three curves
+  (seeds `20260922`, `20260923`, `20260924`), and the §16.3 base at
+  `n = 17` on its curve; two planted targets each; the pair table, then
+  the descent oracle once per engine including `buchberger-f2`; rho on
+  every instance.
+- **Checks**: every system fingerprinted with blake3 and every cell's
+  reference answers digested, so a later run proves it saw the same
+  inputs; every engine's answers compared with the reference's on every
+  target and repetition; a call that exhausts its budget is recorded,
+  never repeated on that target and never read as "no solution";
+  every whole-pipeline logarithm verified against the planted one.
+- **Not in it**: `xl-f2`, for §15.6's reasons (one pass at degree
+  `n_vars`, no budget hook, a modelled count; it declines above ten
+  unknowns).
+
+What was known when this was written, disclosed so that the target can
+be judged against it: a one-target development probe per cell, run to
+size the budget and to check that no engine hangs, put `f4-f2` at
+`0.76 s` a call at twenty-two unknowns (Buchberger: over the 120-second
+budget on every §16.5 target), and `crossbred-f2` at `4.2×` and `1.8×`
+`fes-f2`'s wall time at twenty and twenty-two unknowns on one target
+each.  None of the probe's numbers is used below.
+
+**Success, all three:**
+
+1. **Reach.**  An F4-family engine (`f4-f2`, `matrix-f4`, `matrix-f5`,
+   `inherited-f4`) decides every two-summand target at sixteen to
+   twenty-two unknowns, main and holdout, within the budget, with zero
+   disagreements against the reference.
+2. **Engineering gate.**  The contract's promotion gate, on the whole
+   method: at `n = 13` and `n = 15` on all three curves, the best
+   F4-family row costs at least `20 %` less than the `buchberger-f2`
+   row per verified relation, all phases priced, with a `95 %` paired
+   bootstrap interval that excludes no improvement.
+3. **The question.**  Some algebraic engine's per-call wall time falls
+   below the reference's on a two-summand cell of the stage suite: the
+   median over the cell's targets of `engine / fes-f2` (each target's
+   median over repetitions) below one, with its `95 %` bootstrap
+   interval below one too.  A ratio that falls from sixteen to
+   twenty-six unknowns without crossing is recorded, and the crossover
+   it implies is extrapolated and marked as extrapolation; it does not
+   meet this target.
+
+**Abandon** the algebraic engines for two-summand descents at these
+sizes if no algebraic engine's ratio to `fes-f2` at twenty-six unknowns
+is below its ratio at sixteen: the engines are then not gaining on
+enumeration over the range this repository can reach, and more
+engineering on them is engineering on the wrong side of the boundary.
+
+**Classes, fixed in advance.**  A lower wall time than the baseline's
+is **engineering**, however large.  A `D_learn` below the baseline's
+`D_solve` is **accounting** on the degree column, not an advance: the
+ideal did not change, only whether the engine closed it (§17.1).  An
+**advance** at the stage is target 3's first clause; for the method it
+would be a whole-pipeline `S` below the same instance's pair-table
+row, which nothing in development came near.
+
+**Inadmissible**: changing a cell, a seed, a target count, the budget or
+an engine's parameters after reading the suite's numbers; dropping a
+budget-exhausted or declined call from a row; pricing an
+elimination-only count at the word-XOR ratio (every candidate engine's
+count is qualified and priced by measured wall time, §15.4); ranking
+the first-solution engine against the complete enumerators; and
+tuning `crossbred-f2`'s `D` and `k` per cell in this round — a tuned
+crossbred is a separate round with its own declaration.
+
+### 17.3 A confirmation, declared after the stage parts were read
+
+The frozen stage parts met target 3 on exactly one cell:
+`crossbred-f2` below `fes-f2` at twenty-six unknowns (`25:13:2`, the
+`R` curve — `K` has no instance at `n = 25`), a median ratio of `0.77`
+over eight targets with a `95 %` interval of `[0.72, 0.79]`; at
+twenty-four unknowns, over thirty-two targets on both seeds and both
+families, the same ratio is `1.04 [1.03, 1.07]`.  One curve and one
+seed at the one size that crosses is thin, so before anything is read
+into it this confirmation was written down, committed, and then run
+(`confirm_20260923.json`, results in `results/confirm_v1/`):
+
+- the holdout seed `0x0F4F5EED` at `25:13:2` — a new `R` curve and new
+  targets;
+- one size further, `27:14:2` (twenty-eight unknowns), on both seeds,
+  and `29:15:2` (thirty) on the main seed;
+- the `B` part's engines, and the suite's protocol unchanged.
+
+**It confirms** if `crossbred-f2 / fes-f2` is below one with its
+interval below one on the holdout at twenty-six unknowns and on each
+seed at twenty-eight.  A miss on any of the three and the crossing is
+reported as seed-dependent.  Thirty unknowns is recorded, not graded.
+This was declared after the numbers it checks were read, and says so:
+it can weaken the finding or support it, not create it.
+
+### 17.4 Is the reference strong enough?  Declared before the vector search ran
+
+The crossing of §17.3 is against this repository's fast exhaustive
+search: a faithful port of libfes-lite's scalar kernel — every equation
+one bit of a 64-bit word, sixteen Gray-code steps unrolled per focus
+advance, two word XORs a point — measured at `0.58 ns` a point on this
+host, about 1.2 cycles at its 2.1 GHz base clock.  That is close to what
+a scalar walk can do, and it is not the best exhaustive search there
+is.  libfes-lite's vector kernels fix a few variables differently in
+each lane of a SIMD register and walk every lane's sub-cube with one
+Gray code: the quadratic part of the free variables is the same in
+every lane, so one broadcast second derivative and one vector XOR
+advance them all.  With at most 32 equations a 32-bit lane holds a
+system, so AVX-512 walks sixteen sub-cubes a step.  §1 asks for the best
+algorithm that already solves the problem, and a crossing against a
+reference that a known technique makes several times faster may be a
+crossing of the implementation rather than of the algorithm.  So the
+reference is strengthened before the crossing is read as anything:
+
+- **`fes-f2-wide`** (new): libfes-lite's unrolled kernel with the
+  first-derivative table held as vectors of 32-bit lanes — sixteen on
+  AVX-512, eight on AVX2 — and the second derivatives broadcast;
+  `2^{n−4}` vector steps for `2^n` points.  It is checked against the
+  scalar search on random systems with planted roots from the smallest
+  size the unrolled chunk takes to 32 equations, and it joins the
+  registry's agreement tests with every other engine.
+- **The check** (`strength_20260923.json`, results in
+  `results/strength_v1/`): `crossbred-f2`, `fes-f2`, `fes-f2-wide` and
+  `inherited-f4` on `23:12:2`, `25:13:2`, `27:14:2` and `29:15:2`
+  (twenty-four to thirty unknowns), both seeds, both families where an
+  instance exists, the suite's protocol otherwise.  `fes-f2-wide` is the
+  reference wherever it applies.
+
+**The crossing stands** if `crossbred-f2 / fes-f2-wide` is below one
+with its interval below one at some size on both seeds.  **If it does
+not**, §17.3's crossing is recorded as a crossing of the scalar
+reference only, and the size at which the strengthened reference would
+be crossed is extrapolated from the measured ratios and marked as
+extrapolation.  Either way the vector search replaces the scalar one as
+the stage reference from here on, and the frozen suite's rows against
+`fes-f2` stay as they are, labelled with the reference they were read
+against.
+
+### 17.5 The hybrids past thirty unknowns, declared after §17.4 was read
+
+§17.4's check settled the question it was declared for (§17.9 reports
+it) and showed something it was not looking for: against the vector
+reference, `inherited-f4` falls from `14.8×` at twenty-eight unknowns
+to `4.55×` at thirty, on both seeds and both families, because its
+cost per call barely grows there (`0.67 s` to `0.77 s`) while the
+reference's quadruples.  A ratio that falls three-fold in one step is a
+trend or an accident of two sizes, and the only way to tell is to
+measure further out.  So, declared after reading §17.4 and before
+running:
+
+- `31:16:2` and `33:17:2` (thirty-two and thirty-four unknowns), both
+  seeds, both families where an instance exists
+  (`hybrids_20260923.json`, results in `results/hybrids_v1/`);
+- engines `inherited-f4`, `matrix-f4`, `matrix-f5`, `crossbred-f2` (to
+  record where its defaults stand), `fes-f2` (which stops at
+  thirty-two) and `fes-f2-wide`, whose lanes reach thirty-six and which
+  is the reference; the suite's protocol otherwise.  At thirty-four
+  unknowns no scalar search checks the reference, so there the
+  hybrids' agreement with it, by an unrelated algorithm, is the check.
+
+**A stage crossing against the strengthened reference** is some hybrid
+below `fes-f2-wide` with its interval below one at thirty-two or
+thirty-four unknowns on both seeds.  If none is, the trajectory is
+recorded, and any crossing it implies is extrapolated from the six
+sizes 24–34 and marked as extrapolation.  Either way it is a stage
+diagnostic: no whole-method `S` exists at these sizes.
+
+**Amendment, before the thirty-four-unknown cell was rerun.**  The
+declaration above says the vector search's lanes reach thirty-six
+unknowns; they do, but a lane holds 32 equations and `33:17:2` has 33,
+so on the first run (`results/hybrids_v2/`) the search declined that
+cell and it had no exhaustive reference at all — the comparison fell
+back to `inherited-f4` checking itself.  The search now walks the
+first 32 equations and filters its candidates with the rest, as libfes
+does for more equations than a word (about `2^{n−32}` spurious
+candidates a call), tested against the scalar search on systems of 33
+to 55 equations.  The cell is rerun on both seeds, unchanged otherwise
+(`hybrids_34_20260923.json`, `results/hybrids_v3/`); the first run's
+rows are kept and read only at thirty-two unknowns.
+
+### 17.6 Reach: target 1, met
+
+**The answer first.**  F4 and F5 move the algebraic rows, and move them
+a long way: the F4-family engines decide the two-summand targets the
+pair-only Buchberger could not reach past eighteen unknowns — `f4-f2`
+through twenty-eight, the matrix hybrids through thirty-four — and take
+the Gröbner row's whole-method `S` down by `12×` to `1,535×` — engineering,
+with no boundary crossed, since the best algebraic row is still at
+least `24×` the pair table on its base and `333×` rho.  The one stage
+crossing the suite found, crossbred below fast exhaustive search at
+twenty-six and twenty-eight unknowns, was against a scalar reference and
+did not survive its vector form.  What survives is a lead: the inherited
+hybrid gaining on the vector reference at half a ratio per two unknowns,
+`1.20×` at thirty-four, with a crossing extrapolated near thirty-five.
+
+Frozen at `research/ic_framework_engines_20260922/results/baseline_v1/`
+(parts `A1`–`A3`, `B`, `H1`, `H2`) and `results/confirm_v1/`; every
+system is fingerprinted in the reports and `manifest.json`.  Two-summand
+cells, both families and both seeds pooled where they exist: targets
+decided within the 120-second budget in all three repetitions, and the
+median over targets of each target's median wall time.
+
+| unknowns | `D_sr` | `buchberger-f2` | `f4-f2` | `matrix-f4` | `matrix-f5` | `inherited-f4` | `crossbred-f2` | `sat-cdcl` (first) | `fes-f2` | `exhaustive` |
+|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 12 | 4 | 16/16 · 36 ms | 16/16 · 2.1 ms | 16/16 · 1.6 ms | 16/16 · 1.6 ms | 16/16 · 1.4 ms | 16/16 · 0.98 ms | 16/16 · 3.9 ms | 16/16 · 0.049 ms | 16/16 · 0.097 ms |
+| 14 | 4 | 16/16 · 372 ms | 16/16 · 4.5 ms | 16/16 · 5.6 ms | 16/16 · 5.8 ms | 16/16 · 3.0 ms | 16/16 · 1.5 ms | 16/16 · 68 ms | 16/16 · 0.085 ms | 16/16 · 0.49 ms |
+| 16 | 4–5 | 32/32 · 2.1 s | 32/32 · 9.9 ms | 32/32 · 11.7 ms | 32/32 · 11.9 ms | 32/32 · 5.4 ms | 32/32 · 2.1 ms | 32/32 · 160 ms | 32/32 · 0.15 ms | 32/32 · 2.2 ms |
+| 18 | 5 | 32/32 · 21 s | 32/32 · 21 ms | 32/32 · 30 ms | 32/32 · 30 ms | 32/32 · 10 ms | 32/32 · 4.1 ms | 32/32 · 1.2 s | 32/32 · 0.28 ms | 32/32 · 9.2 ms |
+| 20 | 5 | **2/16** · 80 s | 16/16 · 39 ms | 16/16 · 83 ms | 16/16 · 83 ms | 16/16 · 29 ms | 16/16 · 4.2 ms | 14/16 · 6.7 s | 16/16 · 0.78 ms | 16/16 · 45 ms |
+| 22 | 5 | **0/16** | 16/16 · 694 ms | 16/16 · 210 ms | 16/16 · 207 ms | 16/16 · 38 ms | 16/16 · 5.0 ms | 6/16 · 6.6 s | 16/16 · 2.6 ms | 16/16 · 197 ms |
+| 24 | 6 | — | 32/32 · 2.8 s | 32/32 · 130 ms | 32/32 · 137 ms | 32/32 · 77 ms | 32/32 · 10 ms | — | 32/32 · 9.7 ms | 32/32 · 947 ms |
+| 26 | 6 | — | 16/16 · 7.7 s | 16/16 · 295 ms | 16/16 · 311 ms | 16/16 · 178 ms | 16/16 · 29 ms | — | 16/16 · 39 ms | 16/16 · 4.5 s |
+| 28 | 6 | — | 16/16 · 17.5 s | 16/16 · 710 ms | 16/16 · 738 ms | 16/16 · 620 ms | 16/16 · 105 ms | — | 16/16 · 154 ms | declines |
+| 30 | 6 | — | **5/16** · 30 s | 16/16 · 1.7 s | 16/16 · 1.8 s | 16/16 · 760 ms | **0/16** | — | 16/16 · 612 ms | declines |
+
+Every decided answer on every target and repetition equals the
+reference's; the suite's `disagreements` list is empty in every part.
+
+- **Target 1 is met by all four F4-family engines**, on both seeds:
+  every two-summand target from sixteen to twenty-two unknowns decided,
+  inside the budget, in every repetition.  Where the pair-only
+  Buchberger decided 2 of 16 targets at twenty unknowns and none at
+  twenty-two, `f4-f2` takes 39 ms and 0.69 s, and the hybrids 29–210 ms.
+- **The wall moved ten unknowns for F4 and sixteen for the hybrids.**
+  `f4-f2` decides every target through twenty-eight unknowns (17.5 s a
+  call) and stops at thirty, where eleven of sixteen systems need a
+  degree-five matrix past its 1 GiB cap; the matrix hybrids decide
+  everything through thirty-four and `inherited-f4` through thirty-two,
+  leaving two of sixteen at thirty-four (§17.9).  At the sizes both
+  decide, the paired per-call ratio of
+  `f4-f2` to `buchberger-f2` is `0.04–0.05` at twelve unknowns, `0.004–
+  0.006` at sixteen and `0.0007–0.0014` at eighteen: 20× to 1,400×,
+  growing with the size, on every cell's interval.
+- `sat-cdcl`, on its own first-solution leaderboard, runs out of its
+  conflict budget on 2 of 16 targets at twenty unknowns and 10 of 16 at
+  twenty-two.  `crossbred-f2` at its module defaults (`D = 3`, `k = 8`)
+  decides everything through twenty-eight and nothing at thirty, where
+  those parameters stop fitting the system: a budget verdict on every
+  target, never a wrong one.
+
+### 17.7 The degree column, re-read: accounting
+
+The same runs, the engine's own degree statistics (mean over the decided
+targets; `D_learn` the highest step degree that produced a new element,
+`D_reach` the highest processed):
+
+| unknowns | `D_sr` | `f4-f2` `D_learn` | `f4-f2` `D_reach` | `buchberger-f2` `D_solve` |
+|--:|:--|--:|--:|--:|
+| 12 | 4 | 3.00 | 3.69 | 3.00 |
+| 14 | 4 | 3.00 | 3.56 | 3.25 |
+| 16 | 4–5 | 3.00 | 3.81 | 3.84 |
+| 18 | 5 | 3.00 | 3.56 | 3.97 |
+| 20 | 5 | 3.00 | 3.44 | 4.00 (2 targets) |
+| 22 | 5 | 3.50 | 4.25 | — |
+| 24 | 6 | 3.66 | 4.66 | — |
+| 26 | 6 | 3.62 | 4.62 | — |
+| 28 | 6 | 3.94 | 4.94 | — |
+
+§16.5 read the descended systems as solved at `0.80` of the semi-regular
+bound from eighteen unknowns on, with the pair-only engine's `D_solve =
+4`.  An engine that closes the boolean ideal — the field products as
+pairs, §17.1 — learns everything it needs at degree **three** through
+twenty unknowns: `0.60` of the bound.  The ideal did not change; the
+engine that measured it did, and the extra degree was the pair-only
+engine rediscovering what a field product gives for free.  By §3 that
+is **accounting** on the degree column: §14–§16's degree readings stand
+as statements about that engine, and the statement about the systems is
+now `0.60`, with `D_learn` rising to `3.5`–`3.9` (`0.60`–`0.70` of a
+bound that itself rises to six) from twenty-two unknowns on.  Petit and
+Quisquater's phenomenon is stronger here than §16 said, and — as §14.5
+warned — it is still a statement about degrees, not costs: `f4-f2` is
+the engine that measures it and the one whose cost grows fastest past
+twenty unknowns, because its processed degree reaches five.
+
+### 17.8 The stage against the scalar reference: target 3, met, and confirmed
+
+Wall time over `fes-f2`, per target (each target's median over
+repetitions), median over the targets with a 95 % percentile bootstrap
+interval, both families and both seeds pooled:
+
+| engine | 16 | 18 | 20 | 22 | 24 | 26 | 28 | 30 |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| `buchberger-f2` | 14,834 | 71,649 | — | — | — | — | — | — |
+| `f4-f2` | 70.2 [60, 74] | 71.1 [56, 81] | 47.7 [45, 78] | 260 [43, 282] | 288 [284, 293] | 180 / 206 | 114 [110, 121] | 49.2 (5 of 16 decided) |
+| `matrix-f4` | 84.5 | 105 | 103 | 81.0 | 13.4 | 7.76 / 7.78 | 4.56 | 2.75 |
+| `matrix-f5` | 82.3 | 105 | 105 | 79.8 | 14.2 | 8.01 / 8.09 | 4.81 | 2.87 |
+| `inherited-f4` | 37.3 | 35.7 | 38.4 | 14.4 | 8.07 | 4.83 / 4.50 | 4.10 | 1.24 |
+| `crossbred-f2` | 14.5 [14.2, 14.8] | 14.5 [14.1, 14.8] | 5.33 [5.0, 5.6] | 1.91 [1.8, 2.0] | 1.05 [1.03, 1.07] | **0.77** [0.72, 0.79] / **0.735** [0.69, 0.77] | **0.686** [0.66, 0.74] / **0.67** [0.65, 0.70] | fails |
+
+(Sixteen to twenty-four unknowns pool the frozen suite's main and holdout seeds; `26` is the frozen `B` part / §17.3's holdout; `28` pools §17.3's two seeds, crossbred shown per seed; `30` is §17.3's main seed.)
+
+- **Target 3 is met, against this reference.**  `crossbred-f2` falls
+  below `fes-f2` at twenty-six unknowns (`0.77 [0.72, 0.79]`, the `R`
+  curve; `K` has no instance at `n = 25`), and §17.3's confirmation,
+  declared after that number was read, holds on all three of its cells:
+  `0.735` on the holdout at twenty-six, `0.686` and `0.67` on the two
+  seeds at twenty-eight, every interval below one.  At twenty-four
+  unknowns it is `1.05 [1.03, 1.07]` over thirty-two targets.
+- **The abandon condition is not triggered.**  `matrix-f4`, `matrix-f5`,
+  `inherited-f4` and `crossbred-f2` all have a lower ratio at twenty-six
+  unknowns than at sixteen; `f4-f2` does not (`70 → 180`), because its
+  processed degree reaches five from twenty-two unknowns on.
+- **The crossing is a window, not an asymptote.**  At thirty unknowns
+  `crossbred-f2`'s default parameters stop fitting, and a larger `k` or
+  `D` is a tuned crossbred, which §17.2 put out of this round.
+
+### 17.9 Against the vector reference: the crossing was the implementation's, and the hybrids close in
+
+Frozen at `results/strength_v1/` (§17.4), `results/hybrids_v2/` (§17.5,
+read at thirty-two unknowns only) and `results/hybrids_v3/` (§17.5's
+amended thirty-four-unknown cell).  `fes-f2-wide` answers exactly as
+the scalar search on every target both run, and is `3.0`–`4.0×` faster:
+`3.4`–`3.5 ms` against `10.5`–`10.7 ms` at twenty-four unknowns, `0.65`–
+`0.68 s` against `2.4`–`2.6 s` at thirty-two, `2.6`–`2.7 s` at thirty-four
+where the scalar walk stops.  Sixteen lanes buy four, not sixteen: the
+walk is bound by its dependent table updates and the zero test, not by
+the XORs.  Ratios to it, as in §17.8:
+
+| engine | 24 | 26 | 28 | 30 | 32 | 34 |
+|:--|--:|--:|--:|--:|--:|--:|
+| `crossbred-f2` | 3.00 [2.81, 3.10] | 2.54 [2.46, 2.59] | 2.45 [2.36, 2.55] | defaults fail | defaults fail | defaults fail |
+| `inherited-f4` | 22.6 [21.7, 23.2] | 15.4 [14.7, 15.8] | 14.8 [14.5, 15.8] | 4.55 [4.47, 4.62] | 2.09 [2.03, 2.11] | 1.20 [1.20, 1.23], 14 of 16 decided |
+| `matrix-f4` / `matrix-f5` | | | | | 5.40 / 5.42 | 2.45 / 2.48 |
+| `fes-f2`, the scalar walk | 3.06 | 3.60 | 3.86 | 3.95 | 3.6–3.9 | declines |
+
+Every cell pools both seeds and both families where an instance exists
+(`K` has none at `n = 25`, `27` or `33`); no engine disagreed with the
+reference on any target.
+
+- **§17.4's check: the crossing does not stand.**  `crossbred-f2` is
+  `2.45`–`3.0×` the vector form of the reference wherever its default
+  parameters apply, on both seeds.  As declared, §17.3's crossing is
+  recorded as a crossing of the scalar implementation only.  There is
+  nothing to extrapolate at these defaults: the ratio flattens (`3.00 →
+  2.54 → 2.45`) and the parameters stop fitting at thirty unknowns.
+- **§17.5's check: no hybrid crosses at thirty-two or thirty-four.**
+  `inherited-f4` is `2.09×` at thirty-two and `1.20×` at thirty-four
+  on the targets it decides; at thirty-four it leaves two of the
+  holdout's eight undecided (its node budget), so it is not below the
+  reference on that cell whatever the ratio on the rest.  The matrix
+  hybrids decide everything and are `2.45`–`2.48×`.
+- **Against the scalar walk it would have been a second crossing.**  At
+  thirty-two unknowns `inherited-f4` takes `0.55×` the scalar search's
+  time (every one of the thirty-two targets between `0.48` and `0.62`),
+  a cleaner crossing than crossbred's; against the vector form it is
+  `2.09×`.  Two engines crossed the scalar reference in this round and
+  neither crosses the strengthened one, which is the reason §17.4
+  strengthened it before reading either.
+- **The trajectory, extrapolated and marked as such.**  `inherited-f4`'s
+  ratio to the vector reference falls `×0.54` per two unknowns on a
+  log-linear fit over the six sizes 24–34, which puts the crossing at
+  `34.9` unknowns.  The fit is poor in shape (flat from twenty-six to
+  twenty-eight, residual `+0.55` there, steep after), the engine starts
+  leaving targets undecided at thirty-four, and thirty-six unknowns is
+  where both the vector reference (thirty-two walked, four in the lanes)
+  and a practical curve constructor (an exhaustive `2^{35}` point count)
+  stop.  It is the most specific lead this round leaves — a hybrid F4
+  gaining on the strongest exhaustive search at about half a ratio per
+  two unknowns — and it is not a result.
+
+### 17.10 Three summands
+
+Reference `exhaustive` (the `S_4` descents are of degree six, so no
+fast exhaustive search applies); nine unknowns at `7:3:3` and `9:3:3`,
+twelve at `11:4:3`, both families, and the holdout at `9:3:3`:
+
+| unknowns | `D_sr` | `exhaustive` | `matrix-f4` | `matrix-f5` | `inherited-f4` | `f4-f2` (`D_learn`) | `sat-cdcl` | `buchberger-f2` |
+|--:|:--|--:|--:|--:|--:|--:|--:|--:|
+| 9 | 7 | 0.04 ms | 2.0–2.2 ms (44–62×) | 2.2–2.4 ms (47–65×) | 8.5–9.6 ms | 7–18 ms (7.0) | 10–23 ms | 20 s |
+| 12 | 8 | 1.2–1.3 ms | 14.8–14.9 ms (12×) | 14.8–14.9 ms (13×) | 116–118 ms | 244–416 ms (7.0) | 0.6–0.75 s | over budget, 16/16 |
+
+Nothing algebraic comes near enumeration at these sizes; the matrix
+hybrid's ratio falls from `44`–`62×` to `12×` between nine and twelve
+unknowns, two sizes and no fit.  `F4` learns at degree seven on both
+shapes: at the semi-regular bound on nine unknowns, one below it on
+twelve.  `crossbred-f2`'s defaults do not apply to degree-six systems.
+
+### 17.11 The whole method: target 2, met; `S` against rho
+
+Frozen at `results/baseline_v1/W13-*`, `W15-*` and `W17-*`: complete,
+verified logarithms, every phase inside `S`, two planted targets per
+curve, counted rho on every instance.  Medians over curves and targets.
+
+| row | `n = 13`, 12 unknowns: `S` · / pair table · / rho | `n = 15`, 16 unknowns | `n = 17`, 18 unknowns |
+|:--|--:|--:|--:|
+| counted rho, `S` (per curve) | 16.2 · 18.7 · 14.6 | 13.1 · 9.2 · 8.9 | 5.2 |
+| pair table (the oracle reference) | 51.1 · 1 · 3.5× | 267 · 1 · 29× | 448 · 1 · 86× |
+| descent + `fes-f2` | 370 · 7.2× · 22× | 367 · 1.37× · 40× | 763 · 1.70× · 146× |
+| descent + `exhaustive` | 827 · 16× · 50× | 6,512 · 24× · 710× | 28,199 · 63× · 5,413× |
+| descent + `crossbred-f2` | 8,514 · 167× · 509× | 6,597 · 25× · 722× | 10,929 · 24× · 2,098× |
+| descent + `inherited-f4` | 5,564 · 109× · 344× | 17,861 · 67× · 1,949× | 28,719 · 64× · 5,513× |
+| descent + `f4-f2` | 5,211 · 102× · 333× | 27,143 · 102× · 2,961× | 42,647 · 95× · 8,186× |
+| descent + `matrix-f4` / `matrix-f5` | 6,440 / 6,663 · 126–130× | 36,406 / 37,356 · 136–140× | 77,482 / 77,954 · 173–174× |
+| descent + `sat-cdcl` (first solution) | 149,661 · 2,927× | 1.11×10⁶ · 4,157× | 4.45×10⁶ · 9,932× |
+| descent + `buchberger-f2` (the baseline) | 63,622 · 1,244× · 3,832× | 7.74×10⁶ · 29,029× · 844,785× | 6.55×10⁷ · 145,974× · 1.26×10⁷× |
+
+`n = 13` is §15's base (`dimension = 6`, thirteen equations in twelve
+unknowns) on three curves, `n = 15` a square base (`dimension = 8`)
+on three curves, `n = 17` §16.3's base and curve; two planted targets
+each, every logarithm verified, 140 rows.  The fresh `buchberger-f2`
+rows at `n = 17` reproduce §16.3's frozen ones to 3 % (`46.2` and
+`84.7` million against `45.4` and `87.2`), on a host that was running
+three other parts beside them.
+
+**Target 2 — the contract's gate — is met** at `n = 13` and `n = 15`,
+by every F4-family engine, on all three curves: total cost per verified
+relation over `buchberger-f2`'s, median over the six (curve, target)
+pairs with a 95 % bootstrap interval,
+
+| | `f4-f2` | `inherited-f4` | `matrix-f4` | `matrix-f5` |
+|:--|--:|--:|--:|--:|
+| `n = 13` | 0.088 [0.074, 0.102] | 0.091 [0.082, 0.108] | 0.132 [0.107, 0.155] | 0.115 [0.106, 0.157] |
+| `n = 15` | 0.0035 [0.0034, 0.0036] | 0.0022 [0.0021, 0.0024] | 0.0045 [0.0044, 0.0047] | 0.0046 [0.0045, 0.0050] |
+| `n = 17` (one curve, two targets; not graded) | 0.00065 | 0.00043 | 0.0012 | 0.0012 |
+
+against a gate of `0.8`.  The Gröbner row's `S` falls `12×` at
+`n = 13`, `285×` at `n = 15` and `1,535×` at `n = 17` (medians),
+the factor growing with the size as the per-call ratios of §17.6
+do.
+
+Reading it:
+
+- **Nothing is below rho, and nothing moved toward it that a generic
+  algorithm could not.**  The best row on every instance is still the
+  pair table, `3.5×`, `29×` and `86×` rho on bases chosen past the
+  family optimum so the descent has unknowns to work on (§16.3); every
+  algebraic row is at least `333×` rho.  F4 took the Gröbner row from
+  `1,244×` the pair table to `102×` at `n = 13` and from `145,974×`
+  to `95×` at `n = 17`, and left it two orders of magnitude above the
+  exhaustive-search row on the same base.
+- **The stage ranking does not carry over unchanged**, which is why §2
+  makes only this table a speed.  `crossbred-f2` is the fastest
+  algebraic engine per call on every square stage cell from twelve to
+  twenty-eight unknowns (§17.6), and the slowest F4-family row at
+  `n = 13` (`167×` the pair table against `f4-f2`'s `102×`).  The
+  §15 base descends thirteen equations in twelve unknowns and four in
+  five of its systems have no decomposition; `f4-f2` refutes an
+  inconsistent system at about half what a consistent one costs it
+  (`0.61 ms` a call in the run; `0.8`–`2.4 ms` against `2.1`–`5.1 ms`
+  on the twelve- and fourteen-unknown stage cells), while crossbred's
+  `2^k` linear solves and exhaustive search cost the same either
+  way.  At `n = 15` and `n =
+  17`, square bases, crossbred is again the best algebraic row
+  (`25×` and `24×` the pair table).
+- **The exhaustive-search row is the reference's, not a candidate's.**
+  Descent plus `fes-f2` sits at `1.37×` the pair table at `n = 15`
+  (below it on two of six targets) and `1.70×` at `n = 17`.  Its cost
+  is `2^{2n'}` points per target, over a number of targets that grows
+  with the base, against a table of about `2^{2n'}/2` additions built
+  once; a word XOR costs `1/415`–`1/557` of an addition on this host
+  (the reports' calibrations), which is why the two meet near `n' = 8`
+  on these deliberately large bases.  It is the boundary every
+  algebraic engine here still has to reach inside a whole run;
+  crossbred-descent sits `14×`–`18×` above it at `n = 15` and `17`.
+
+### 17.12 Classified
+
+| change | class | why |
+|:--|:--|:--|
+| F4-family engines in place of `buchberger-f2` in the descent oracle | **engineering** | `S` falls `12×`, `285×` and `1,535×` at `n = 13`, `15`, `17`, the contract's gate met with room; no boundary crossed: every algebraic row stays at least `333×` rho and `24×` the pair table on its base |
+| every two-summand target decided from sixteen to twenty-two unknowns; `f4-f2` to twenty-eight, the matrix hybrids to thirty-four | **engineering** | the same systems decided within the budget where the baseline stopped at eighteen |
+| `D_learn = 3` where the pair-only engine read `4` | **accounting** | the ideal did not change; the engine that measured it did (§17.7) |
+| `exhaustive` counts the tests it performs | **accounting** | a modelled count replaced by the work done; wall-priced rows unaffected |
+| the `vs rho` column filled | measurement | the reference §15 and §16 left empty, sixteen counted runs per instance; the plain walk, not the negation-aware one (§17.13) |
+| `crossbred-f2` below `fes-f2` at twenty-six and twenty-eight unknowns | **advance against the declared reference, withdrawn** | against the vector form of the same algorithm it is `2.45`–`3.0×` (§17.9) |
+| `fes-f2-wide` | **accounting**: the boundary moved | the stage reference is `3`–`4×` stronger; every stage ratio is now read against it |
+| the hybrids at thirty-two and thirty-four unknowns | measurement | `2.09×` and `1.20×` the vector reference; a crossing extrapolated near thirty-five, marked as such |
+
+### 17.13 What does not count
+
+- Nothing in §17.6–§17.10 is a speed.  They price one oracle call; the
+  speed is §17.11, and there nothing is below rho.
+- §17.8's crossing is against the scalar reference only (§17.9).
+- Every price here is `measured`: wall time on one host (an Intel Xeon
+  at 2.1 GHz with AVX-512, four cores), with parts running concurrently
+  on separate cores.  The stage cells are paired within one process and
+  interleaved per target; the whole-method rows are not interleaved, and
+  their host was running three other parts beside them.  Ratios between
+  rows from different hosts mean nothing (§12).
+- The vector reference is `3`–`4×` the scalar one, not the sixteen its
+  lanes suggest; a better vector kernel would raise every stage ratio
+  read against it and move any crossing further out.
+- `crossbred-f2` ran at its module defaults only; §17.2 put a tuned
+  crossbred in a round of its own.
+- `n = 17` is one curve and two targets; its gate ratios are reported,
+  not graded.
+- Engines whose solutions come back in a different order walk different
+  target sequences (a target with two decompositions lifts to a
+  different pair), so rows on one instance are not identical workloads;
+  cost per verified relation is the paired statistic for that reason,
+  and the trials column shows how far the walks diverged.
+- The hybrids' `D_reach` is their fixed Macaulay degree (three, or six
+  on three summands), not a solving degree; only `f4-f2` reports
+  `D_learn`.
+- The `K` family has no instance at `n = 21`, `25`, `27` or `33`;
+  those cells are `R` only.  `xl-f2` is not in the suite (§15.6).
+- The first run of the thirty-four-unknown cell had no reference and is
+  not read (§17.5's amendment).
+- **Every `buchberger-f2` row here is the pair-only engine's.**  While
+  this suite ran, `main` closed the repository's Buchberger under the
+  field equations (34154ed9, 794496b4), the defect §17.1 described.
+  The frozen rows measure the engine their provenance names; a rerun of
+  the baseline on current code measures a different engine, and would
+  be a new row.
+- **The `vs rho` column is the plain walk's.**  `rho_reference` runs
+  Teske's walk with no automorphism (`A = 1`).  On these random binary
+  curves the eligible automorphism is negation, and the contract's
+  matched reference is the negation-aware walk, about `√2` cheaper; so
+  every ratio to rho here is understated by up to that factor, and the
+  verdict — nothing below rho — only strengthens.  On a Koblitz curve
+  the gap would be about `√(2n)`, and none of this round's whole runs
+  was on one.
+
+### 17.14 Reproducing
+
+```
+cargo build --release --bin ic
+S=research/ic_framework_engines_20260922
+
+python3 $S/run.py --run-id baseline_v1                                  # §17.2
+python3 $S/compare.py --run baseline_v1
+python3 $S/run.py --run-id confirm_v1  --suite confirm_20260923.json    # §17.3
+python3 $S/run.py --run-id strength_v1 --suite strength_20260923.json   # §17.4
+python3 $S/run.py --run-id hybrids_v2  --suite hybrids_20260923.json    # §17.5
+python3 $S/run.py --run-id hybrids_v3  --suite hybrids_34_20260923.json # its amendment
+# and compare.py --run <id> --suite <file> for each
+
+# A new engine against the frozen baseline, paired on this host:
+python3 $S/run.py --run-id candidate_x --add-engine x
+python3 $S/compare.py --run candidate_x --manifest $S/manifest.json
+```
+
+Each part's provenance names the commit, the binary's hash, the host
+and the suite file's hash it ran with; `manifest.json` holds every
+system's fingerprint and every cell's verdict digest from the frozen
+run.
 
 ## Appendix A. The conversion factors, as measured
 

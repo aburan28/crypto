@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-KIC-GROEBNER-M4RI-ARENA-20260922",
+  "base_commit": "dfd5fb0838b42782d3f6354df08ef5d78d3fdbe0",
+  "objective": "Reuse the Four-Russians pivot and combination-table allocations across blocks and calls in the matrix-F4 and inherited-F4 root kernels.",
+  "selected_policy": {
+    "kernel": "block-4 Four Russians elimination with a thread-local reusable pivot/table arena",
+    "pivot_storage": "one retained Vec per pivot row, preserving the allocating implementation's locality",
+    "controls": {
+      "KIC_F4_M4RI_ALLOCATING": "1 restores the pre-arena allocation policy in the same binary",
+      "KIC_F4_DISABLE_M4RI_SCRATCH": "1 keeps one arena per matrix but disables reuse across calls",
+      "KIC_F4_M4RI_BLOCK": "selects a bounded block width from 2 through 10"
+    }
+  },
+  "fixtures": {
+    "synthetic_kernel": "sparse 129x257, dense 257x511, and rank-deficient 512x768 matrices, each in echelon and full-RREF modes",
+    "semaev_roots": [
+      "binary n=13, ell=12, m=2, degree=3",
+      "binary n=19, ell=18, m=2, degree=3",
+      "binary n=23, ell=11, m=2, degree=3",
+      "binary n=31, ell=16, m=2, degree=3"
+    ],
+    "stage_panels": {
+      "frozen": 13,
+      "holdout": 15,
+      "unit": "fresh-process paired repetitions per policy"
+    }
+  },
+  "acceptance": [
+    "arena and allocating implementations return byte-identical matrices, ranks, and word-operation counts for 96 exact cases",
+    "all six synthetic kernel cells have median speedup greater than one",
+    "all four real Semaev root cells have median speedup greater than one",
+    "frozen and holdout stage panels preserve every verdict digest, tree counter, matrix counter, and word-operation count"
+  ],
+  "claim_boundary": "Public-synthetic decomposition-stage engineering evidence only. The retained result changes allocation overhead, not the Macaulay row space, solver tree, relation yield, asymptotic complexity, Pollard-rho comparison, external-target capability, or any key-recovery result."
+}

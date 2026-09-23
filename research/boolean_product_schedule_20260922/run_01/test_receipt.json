@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-schedule-p439zflt/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 2932736,
+  "process_wall_ns": 243313542,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 4 tests\ntest tests::all_arms_honor_lowered_caps_and_smaller_fallback ... ok\ntest tests::changed_supports_and_degrees_fall_back ... ok\ntest tests::exact_support_means_identical_matrix ... ok\ntest tests::exhaustive_small_supports_and_evaluations ... ok\n\ntest result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+  "stdout_sha256": "a787ba688555c7c4d57e85339392e75f2eada94a4bc626a4e5927fd97f14f8e7",
+  "system_seconds": 0.004438,
+  "timed_out": false,
+  "user_seconds": 0.005813
+}

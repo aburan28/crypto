@@ -811,6 +811,51 @@ lever that makes an existing row cheaper without renaming it.  It also
 records which first-round rows reproduce the frozen counts and which the
 target guard moved.
 
+## The pluggable benchmarking framework: `ic bench`
+
+`ic bench` runs one index-calculus *configuration* — a factor base, a
+target source, a decomposition oracle, a polynomial-system solver and a
+relation matrix, each chosen by name — end to end against a planted
+logarithm, and prices every stage in the ledger's unit so that swapping
+one stage shows what it changes and nothing else.  `ic bench --list`
+prints what can be plugged in at each stage; `--sweep` runs a matrix of
+configurations from a JSON file and prints one table.
+
+    ./target/release/ic bench --list
+    ./target/release/ic bench --char2-degree 13 \
+        --factor-base binary-subspace:dimension=6 \
+        --oracle descent-algebraic:m=2 --solver buchberger-f2
+    ./target/release/ic bench --sweep docs/ic/sweeps/solver-engines.json
+
+[`FRAMEWORK.md`](FRAMEWORK.md) is the manual: the unit, the report
+columns, the stage contracts, a worked example of adding a solver (the
+plug point for F4, F5, XL, SAT), the sweep schema and the reporting
+rules a comparison has to keep.  `ic descent` measures the algebraic
+oracle's systems on their own, in the shape of Petit–Quisquater's
+Table 2 (§14 of the ledger note); it is a stage diagnostic, never a
+speed, and `ic bench` is where the same solver's cost reaches `S`.
+`ic bench` also runs counted Pollard rho on the same instance and
+planted targets (`--rho-runs`, default 16) and fills the table's
+`vs rho` column from it.
+
+With `--solver` (repeated once per engine), `ic descent` prices
+several registered engines on the same seeded systems instead of the
+built-in Buchberger: every engine solves every target `--repeats`
+times, interleaved per target with the engine order rotated each
+repetition, and every answer is checked against the reference engine
+(`fes-f2` on quadratic cells, `exhaustive` otherwise).  Each system
+carries a blake3 fingerprint and each cell a digest of the reference
+answers, so a later run can prove it saw the same inputs and decided
+them the same way.
+
+    ./target/release/ic descent --cells 17:9:2,21:11:2 --targets 8 --repeats 3 \
+        --solver buchberger-f2 --solver f4-f2 --solver matrix-f5 \
+        --solver crossbred-f2 --solver fes-f2 --solver exhaustive
+
+The matched suite that freezes this comparison, with its whole-pipeline
+counterpart, is
+[`research/ic_framework_engines_20260922/`](../../research/ic_framework_engines_20260922/README.md).
+
 ## A benchmark corpus: `ic corpus`
 
     ./target/release/ic corpus --degree 19 --dimension 6 --sat 5 --unsat 5 --dir corpus/n19l6

@@ -1,0 +1,68 @@
+{
+  "round": "inherited-f4-20260922",
+  "scope": "decomposition-oracle Gröbner stage only (matrix-F4 / Boolean F5 criterion / inherited F4 / split variable / lazy materialisation); not an end-to-end ECDLP cost",
+  "git_head_of_measured_sources": "the commit that lands this manifest; every file here except oracle_ladder/K0_15_m3_rejected_*.json was produced by binaries built from the sources hashed below",
+  "note": "every file here except oracle_ladder/K0_15_m3_rejected_*.json was produced by binaries built from the sources hashed below; the rejected-policy files come from an exploratory build whose code was removed before commit 1b409578",
+  "baseline": "SolverEngine::MatrixF4 { max_degree: 3 } splitting on the lowest free variable — the pre-round default — selected on the final binary with KIC_F4_INHERIT=0 (SplitRule::Auto then resolves to LowestFree), so both sides of every comparison are the same build",
+  "unit": "64-bit word operations: elimination XORs on both sides; the inherited engine additionally charges one word operation per word read and per word written every time a row is rewritten into a newer layout (specialise_word_ops), which the from-scratch build never pays; layout steps and their composition are index bookkeeping and uncharged on both sides",
+  "host": {
+    "cpu_cores": 4,
+    "note": "shared cloud VM, no CPU pinning; wall time is a practicality note, not the metric"
+  },
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "measured_sources_sha256": {
+    "src/cryptanalysis/koblitz_groebner.rs": "95255dae7bf4d56a589317d110fb1510b7916e8f1541b7e82052ee59e82b592e",
+    "src/cryptanalysis/inherited_f4.rs": "86090315abf4bb3212511d4a71dec8d40f2986a8fbc35f405538f7e0a9af6b10",
+    "src/cryptanalysis/matrix_f5_f2.rs": "ee91ea0a7e3de886b262a5a21554d9cb00f20d71aeb61d8dcfd0db88bc1f654c",
+    "src/cryptanalysis/pq_groebner_f2.rs": "ae33e4565d1b7c3889259f3b5e188ba799ce3bf88ea9aad7a1c1082af9edb114",
+    "src/cryptanalysis/ic_oracle_pricing.rs": "420f629fad6aea691f0b7684c8c7d502be41a8f48a3c3f4baf078ff15b01a047",
+    "examples/groebner_stage_bench.rs": "b2d916889dbdc4311ca621b4d12cb38045f06b8fcc18dd027be6a0d376a4076a",
+    "examples/inherited_f4_probe.rs": "079892f91f3891cb3f1dd3313ba727fb02b9e69aefaa3772adfbfe1f58b92a8b"
+  },
+  "comparisons": {
+    "same_tree": "research/groebner_stage_20260915/compare.py — refuses unless verdict digest and every solver counter match rung for rung",
+    "cross_tree": "compare_cross_tree.py (this directory) — same instances, same targets decomposed, no exhausted budget, same oversize count; every counted decomposition was lifted and verified in the group by groebner_decompose; the tree's shape may differ"
+  },
+  "variants": {
+    "baseline": "KIC_F4_INHERIT=0 (MatrixF4, LowestFree)",
+    "f5_criterion": "KIC_F4_INHERIT=0 KIC_F4_CRITERION=f5 (MatrixF4, LowestFree, rows filtered by the Boolean F5 criterion; criterion XORs charged)",
+    "inherited_f4": "the shipped default: InheritedF4 on every degree, SplitRule::Auto → HighestFree, rows materialised lazily; root RREF below 24 variables, echelon-only at 24+",
+    "inherited_f4_lowest": "SOLVER_SPLIT_RULE=lowest (InheritedF4, lazy rows, on the historical tree; same tree as baseline)",
+    "matrix_f4_highest": "KIC_F4_INHERIT=0 SOLVER_SPLIT_RULE=highest (MatrixF4 on the new tree; same tree as inherited_f4)",
+    "inherited_f4_ref_root": "KIC_F4_INHERIT_ROOT=ref (default rule and lazy rows, echelon-only root everywhere)",
+    "inherited_f4_rref_root": "KIC_F4_INHERIT_ROOT=rref (default rule and lazy rows, fully reduced root everywhere)",
+    "inherited_f4_rref_every_level": "KIC_F4_INHERIT_RREF=1 (default rule and lazy rows, reduced form restored after every specialisation) — rejected control",
+    "holdout_*": "--ladder holdout for baseline, matrix_f4_highest and the default",
+    "probes/": "inherited_f4_probe under the shipped configuration: every captured node system reduced from scratch and specialised on the variable the production rule splits on, both values; decisive rows cross-checked against a from-scratch child reduction (args: a n targets degree m)",
+    "oracle_ladder/cubic_cells_*.json": "ic boundary --oracles on the K_0/2^9 m=3 and K_0/2^15 m=3 cells: reference (F4, lowest), F4 highest, inherited lowest, inherited default (highest, lazy)",
+    "oracle_ladder/K0_15_m3_rejected_*.json": "the two rejected per-node rescue policies under the historical rule — a drift-triggered basis rebuild (factor 1) and a cost-triggered switch of the subtree to the from-scratch engine (factor 2) — from an exploratory build; 0.48x and 0.45x against the reference"
+  },
+  "paired_oracle_pricing_runs": [
+    "docs/ic/runs/ic-oracle-pricing-matrix-f4-reference-2026-09-22.json",
+    "docs/ic/runs/ic-oracle-pricing-inherited-f4-2026-09-22.json"
+  ],
+  "commands": [
+    "cargo build --release --bin ic --example groebner_stage_bench --example inherited_f4_probe",
+    "KIC_F4_INHERIT=0 ./target/release/examples/groebner_stage_bench --out <dir>/baseline/repN",
+    "KIC_F4_INHERIT=0 KIC_F4_CRITERION=f5 ./target/release/examples/groebner_stage_bench --out <dir>/f5_criterion/repN",
+    "./target/release/examples/groebner_stage_bench --out <dir>/inherited_f4/repN",
+    "SOLVER_SPLIT_RULE=lowest ./target/release/examples/groebner_stage_bench --out <dir>/inherited_f4_lowest/repN",
+    "SOLVER_SPLIT_RULE=highest KIC_F4_INHERIT=0 ./target/release/examples/groebner_stage_bench --out <dir>/matrix_f4_highest/repN",
+    "KIC_F4_INHERIT_ROOT=ref ./target/release/examples/groebner_stage_bench --out <dir>/inherited_f4_ref_root/repN",
+    "KIC_F4_INHERIT_ROOT=rref ./target/release/examples/groebner_stage_bench --out <dir>/inherited_f4_rref_root/repN",
+    "KIC_F4_INHERIT_RREF=1 ./target/release/examples/groebner_stage_bench --out <dir>/inherited_f4_rref_every_level/repN",
+    "<same three configurations> --ladder holdout --out <dir>/holdout_{baseline,matrix_f4_highest,inherited_f4}/repN",
+    "python3 research/groebner_stage_20260915/compare.py <dir>/<reference> <dir>/<candidate> --output <dir>/compare_<candidate>_vs_<reference>.json",
+    "python3 <dir>/compare_cross_tree.py <dir>/baseline <dir>/<candidate> --output <dir>/compare_cross_tree_<candidate>_vs_baseline.json",
+    "./target/release/examples/inherited_f4_probe <a> <n> <targets> 3 <m> > <dir>/probes/probe_K<a>_<n>_m<m>_<targets>targets_deg3.txt",
+    "KIC_F4_INHERIT=0 ./target/release/ic boundary --regime koblitz --koblitz-degrees 11 --repeats 1 --seed 123212651130 --no-fold-max-degree 31 --s4-max-degree 31 --oracles --oracle-targets 8 --json --out docs/ic/runs/ic-oracle-pricing-matrix-f4-reference-2026-09-22.json",
+    "./target/release/ic boundary --regime koblitz --koblitz-degrees 11 --repeats 1 --seed 123212651130 --no-fold-max-degree 31 --s4-max-degree 31 --oracles --oracle-targets 8 --json --out docs/ic/runs/ic-oracle-pricing-inherited-f4-2026-09-22.json",
+    "<configuration env> ./target/release/ic boundary ... --oracle-cells 9:3,15:3 --oracle-targets 8 --json --out <dir>/oracle_ladder/cubic_cells_<variant>.json"
+  ],
+  "superseded_figures": {
+    "note": "earlier rounds' defaults are quoted in the note and on the scoreboard as before-marks; their evidence directories were regenerated in place at each round, so the figures live in the git history of this directory",
+    "inherited_f4_eager_highest_default_ladder_total": 62171390,
+    "inherited_f4_eager_lowest_ladder_total": 124243579,
+    "inherited_f4_eager_highest_K1_23": 44225148
+  }
+}

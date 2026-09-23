@@ -32,10 +32,13 @@
 #   TABLE_PIPE_SELECT  forward pass issues slot k's products before slot k+1's
 #                      selection (default 0)
 #   PACKED_CHAIN_FIRST  reverse pass issues inv*d before inv*W (default 0)
+#   PACKED_CHAINS  independent Montgomery chains per thread, 1 or 2 (default 1;
+#                  TWO-CHAINS.md; 2 needs TAG_DENOM and an even BATCH)
 #   PHASE_PROFILE  clock64() timing of the walk's three phases, at exit
 #   ARCH     CUDA architectures
 #
-# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md.
+# `make gpu-rtx-pro6000-20b` is the 20 B/s build of ONE-BLOCK-GEOMETRY.md;
+# `make gpu-rtx-pro6000-chains2` its two-chain form (TWO-CHAINS.md).
 
 MODAL   ?= modal
 NVCC    ?= nvcc
@@ -110,6 +113,10 @@ PHASE_PROFILE ?= 0
 TABLE_PIPE_SELECT ?= 0
 # Reverse pass issues the chain product before lambda's.
 PACKED_CHAIN_FIRST ?= 0
+# Two independent Montgomery chains of BATCH/2 slots per thread, interleaved
+# slot by slot with a paired inversion (TWO-CHAINS.md).  Needs TAG_DENOM and
+# an even BATCH; BATCH=32 keeps the one-chain BATCH=16 inversion share.
+PACKED_CHAINS ?= 1
 # Polynomial squaring on the logic pipe instead of the carryless one.
 PACKED_ALU_SQUARE ?= 0
 # Carry the eight per-branch step counts that make a distinguished point
@@ -216,6 +223,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_WALK_TABLE=$(WALK_TABLE) -DECC_TABLE_BRANCHES=$(TABLE_BRANCHES) \
        -DECC_TABLE_PIVOT_BYTES=$(TABLE_PIVOT_BYTES) \
        -DECC_TABLE_TAG_DENOM=$(TABLE_TAG_DENOM) -DECC_TABLE_FUSED=$(TABLE_FUSED) -DECC_TABLE_FUSED_PIPE=$(TABLE_FUSED_PIPE) -DECC_PHASE_PROFILE=$(PHASE_PROFILE) -DECC_TABLE_PIPE_SELECT=$(TABLE_PIPE_SELECT) -DECC_PACKED_CHAIN_FIRST=$(PACKED_CHAIN_FIRST) \
+       -DECC_PACKED_CHAINS=$(PACKED_CHAINS) \
        -DECC_TABLE_GLOBAL=$(TABLE_GLOBAL) \
        -DECC_TABLE_ADDEND_GLOBAL=$(TABLE_ADDEND_GLOBAL) \
        -DECC_PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
@@ -595,19 +603,72 @@ bench-rtx-pro6000:
 	    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
 	    --steps 1024 --launches 32 --repeats 3 --workers $(RTX_PRO6000_WORKERS)
 
+# Architecture of the two RTX PRO 6000 builds below.  Override to run the same
+# knob set on another part, e.g. PRO6000_ARCH="-gencode arch=compute_100,code=sm_100"
+# for a B200 (benchmarks/fast-clmad/gpujob.sh derives it from the compute capability).
+PRO6000_ARCH ?= -gencode arch=compute_120,code=sm_120
 # The 20 B/s configuration of ONE-BLOCK-GEOMETRY.md: the table walk in one
 # 512-thread block per SM (64 KB of L1 instead of 28), denominators rebuilt
 # from the step tag, the products inlined, the forward pass software-pipelined.
 # Local nvcc build (CUDA 13.3+); measured 20.08 B/s median on an RTX PRO 6000.
-gpu-rtx-pro6000-20b:
-	$(MAKE) -B ecc2k130 ARCH="-gencode arch=compute_120,code=sm_120" \
-	    BATCH=16 THREADS=512 MINBLOCKS=1 \
+# ALU squaring is on in this preset.  The value is expanded into the child
+# make, so a command-line PACKED_ALU_SQUARE reaches the build.
+# The knob set itself, so the recipe below and gpu-preset cannot drift apart.
+PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
 	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
 	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
 	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
-	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=1 \
+	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
 	    TABLE_TAG_DENOM=1 TABLE_PIPE_SELECT=1 PACKED_CHAIN_FIRST=1 \
+	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
+gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
+gpu-rtx-pro6000-20b:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS)
+
+# The same knob set with overrides appended: on a make command line the last
+# assignment of a variable wins, so every knob and the geometry are reachable
+# from KNOBS, which the recipes above cannot offer for the values they name.
+#   make gpu-preset KNOBS="THREADS=256 MINBLOCKS=2 PACKED_TOP_CLMAD=1"
+# benchmarks/autosweep/gpujob.sh builds its arms this way.
+gpu-preset: PACKED_ALU_SQUARE = 1
+gpu-preset:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS) $(KNOBS)
+
+# The RTX PRO 4500 build of POWER-BOUND.md: the 20 B/s knob set with one fused
+# pass per step, which does the same work per clock as the 20 B/s build and
+# 7% more per joule; on a 165 W part that sits on its power limit, per joule is
+# the rate.  Predicted 7.2 - 7.4 B/s on a 4500 (receipts: 5.107 / 5.552);
+# measured only on an RTX PRO 6000 so far.  RTX4500_EXTRA adds knobs, e.g.
+# PACKED_ALU_SQUARE=0 for the second arm POWER-BOUND.md section 4 names.
+RTX4500_EXTRA ?=
+gpu-rtx-pro4500:
+	$(MAKE) gpu-preset KNOBS="TABLE_FUSED=1 TABLE_PIPE_SELECT=0 $(RTX4500_EXTRA)"
+
+# The B200 build the automatic sweep of AUTOSWEEP.md found (sm_100): the 20 B/s
+# knob set with the products' 3-bit correction on the carry-less unit as a
+# three-limb Karatsuba, the squaring on the unit, the ONB inversion, one fused
+# pass per step, and batch 32.  19.40 B/s median on one B200, verified.
+gpu-b200-19b:
+	$(MAKE) gpu-preset PRO6000_ARCH="-gencode arch=compute_100,code=sm_100" \
+	    KNOBS="PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_KARAT3=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=512 MINBLOCKS=1"
+
+# The two-chain form of the 20 B/s build (TWO-CHAINS.md): the same arithmetic
+# and the same state footprint per SM, as 256 threads x 32 slots in two
+# interleaved chains of 16 instead of 512 threads x one chain of 16.
+# CHAINS2_THREADS and CHAINS2_BATCH are the geometry knobs of that note.
+CHAINS2_THREADS ?= 256
+CHAINS2_BATCH ?= 32
+gpu-rtx-pro6000-chains2: PACKED_ALU_SQUARE = 1
+gpu-rtx-pro6000-chains2:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" \
+	    BATCH=$(CHAINS2_BATCH) THREADS=$(CHAINS2_THREADS) MINBLOCKS=1 \
+	    PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 \
+	    PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
+	    PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 \
+	    PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 \
+	    WALK_TABLE=1 TABLE_PIVOT_BYTES=1 PACKED_PAIR_ILP=1 PACKED_L2_PERSIST=1 PACKED_ALU_SQUARE=$(PACKED_ALU_SQUARE) \
+	    TABLE_TAG_DENOM=1 PACKED_CHAINS=2 \
 	    PACKED_INLINE_POLY=3 UNROLL_SLOTS=1 PACKED_FROM_REDUCED=1
 
 # Ada preset for the EC2 g6 (L4) and g6e (L40S) instance types, both sm_89.

@@ -727,6 +727,95 @@ adds the measured cell beyond that scope, where the same collector loses. By
 AGENTS.md §3 the campaign's gains remain **engineering**, with a measurement
 rather than a derivation now behind the reason why.
 
+## Round 0022: two checks round 0021 did not run, and both failed
+
+[ROUND22-budget-and-curvature.md](ROUND22-budget-and-curvature.md) is the full
+write-up. **Round 0021's crossing survives; both of its numbers do not.**
+
+| cell | r | best base | IC/rho | 95% band |
+|:--|--:|--:|--:|:--|
+| `n23a1` | 4,196,903 | 8 orbits | **0.831** | [0.772, 0.894] |
+| `n37a0` | 230,603,167 | 16 orbits | **1.396** | [1.244, 1.567] |
+| `n43a1` | 4,644,189,029 | 24 orbits | **2.207** | [1.933, 2.519] |
+
+64 fixtures a configuration over two seed streams, both arms required to
+complete, every IC report checked by `oracle.py`
+([round22_ladder.py](round22_ladder.py)). No tournament ran and nothing was
+promoted.
+
+### rho was charged while it was still running
+
+`round21_crossover.py` checks that the IC arm completed and then measures both
+arms, and `instructions()` reads callgrind's `Collected:` line rather than the
+worker's JSON — so it cannot tell a solved rho from one that ran out of budget.
+**Four of the 64 rho runs at `n37a0` were cut off and charged anyway**; 64 of 64
+completed at `n23a1`.
+
+My first correction said this inflated the ratio. That was reasoning rather than
+measurement and it was wrong: an `incomplete` rho has exhausted its restarts, so
+it did a great deal of work and produced nothing, where a completed run often
+finds its collision early. Charging it **over**-charged the denominator. 1.533
+was a *lower* bound; with every rho run required to finish, the same
+default-base configuration reads 1.763 [1.547, 2.009].
+
+### The factor base was optimal only on the panel
+
+Round 0021 carried round 0019's "bigger is monotonically worse" from the
+eight-cell panel to the new cells and reported the sampler's default single
+batch. That holds at `n23a1`, where 8 orbits is best and the curve rises to
+9.949 at 159 orbits. **It does not hold further out**
+([round22_base_sweep.py](round22_base_sweep.py)):
+
+| cell | 8 orbits | 16 | 24 | 32 | 40 | 48 |
+|:--|--:|--:|--:|--:|--:|--:|
+| `n23a1` | **0.831** | 1.043 | 1.337 | — | — | — |
+| `n37a0` | 1.763 | **1.396** | 1.519 | 1.709 | 1.846 | — |
+| `n43a1` | 5.794 | 3.006 | **2.207** | 2.261 | — | 2.449 |
+
+At `n43a1` the default costs the candidate **2.6×**. Note the direction: the
+default *overstated* the candidate's loss, which is the one direction a result
+already going against the candidate will not be challenged on.
+
+### The rate, at the third attempt
+
+| step | r ratio | rate |
+|:--|--:|:--|
+| `n23a1` → `n37a0` | 55× | r^[0.130, 0.188] |
+| `n37a0` → `n43a1` | 20× | r^[0.075, 0.187] |
+
+Each step is a range over every base size in that cell's flat region — the
+minimum plus every size whose band overlaps it — because the ladder must not
+depend on choosing between sizes the data cannot separate. **The ranges overlap,
+so no curvature is resolvable**, and the derived `r^{1/6} = r^0.167` lies inside
+both.
+
+The two earlier answers were artifacts. At the default base the rate appeared to
+**accelerate** (r^0.188 then r^0.396) — a handicap widening with `r`. On a base
+grid that skipped 16 orbits it appeared to **decelerate** on disjoint ranges
+(r^[0.180, 0.199] then r^[0.060, 0.120]), with `n43a1`'s minimum on the edge of
+the grid, which is how a minimum outside it announces itself. Filling the hole
+moved `n37a0`'s best base from 32 orbits to 16 and its ratio from 1.709 to
+1.396. Both spurious results were more interesting than the real one.
+
+### What the trial cap is worth, and what the optima say
+
+Raising `max_trials` from 4096 to 65,536 is a protocol change rather than an
+extension — it is rho's iterations-per-restart — but
+[round22_budget_effect.py](round22_budget_effect.py) bounds it at **14 ppm** on
+either arm, both signs, with identical logarithms and factor bases everywhere;
+`n23a1` reads 0.831 at both caps.
+
+The model's rate survives and its other prediction does not.
+`F = (c·#E·t/k)^{1/3}` predicts 30 and 83 orbits at the two new cells; measured
+best bases are 16 and 24, growing about `r^0.157` rather than `r^{1/3}`. These
+are not independent predictions — `r^{1/6}` is derived *from* that base — so the
+agreement on the rate, at a base measurably not where the derivation puts it, is
+a coincidence the model does not explain rather than a confirmation of it.
+
+**The eight-cell panel is untouched.** Rounds 0019 and 0020 were measured at
+4096 trials with a base that is optimal there, and both facts still hold. The
+classification stays **engineering** under AGENTS.md §3.
+
 ## Interpretation
 
 Every ratio uses a fresh matched rho run in the same round. The 16-target panel charges all setup once to the complete job and solves every target; it is separate from the single-target result, and no ratio combines the two panels. Rho uses the existing per-target solver API on the same constructed curve. Additional cross-target rho optimizations, and a rho specialised like the round-0006 winner, have not been measured here.

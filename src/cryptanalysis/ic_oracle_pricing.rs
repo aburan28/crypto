@@ -54,8 +54,8 @@ use crate::cryptanalysis::ic_boundary::{
 };
 use crate::cryptanalysis::koblitz_fast::FastPoint;
 use crate::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, f4_word_ops_total, first_fall_degree, FieldStructure,
-    SolverEngine,
+    build_decomposition_system, f4_profile, f4_word_ops_total, first_fall_degree,
+    FieldStructure, SolverEngine,
 };
 use crate::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, groebner_decompose, sat_decompose_with,
@@ -485,6 +485,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
 
         // matrix-F4 with splitting
         let before = f4_word_ops_total();
+        let profile_before = f4_profile();
         let t0 = Instant::now();
         let (by_f4, stats) = groebner_decompose(
             kc,
@@ -498,6 +499,7 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
         );
         let wall = t0.elapsed().as_nanos() as u64;
         let words = f4_word_ops_total() - before;
+        let profile = f4_profile();
         let verdict = match (&by_f4, stats.exhausted) {
             (Some(_), _) => Verdict::Found,
             (None, false) => Verdict::Refuted,
@@ -511,6 +513,15 @@ pub fn price_cell(n: u32, m: u32, cfg: &OraclePricingConfig) -> Option<OracleCel
         extra.insert("splits".into(), stats.splits as u64);
         extra.insert("infeasible_branches".into(), stats.infeasible_branches as u64);
         extra.insert("max_degree_built".into(), stats.max_degree_built as u64);
+        // Where the engine's word operations went, for the stage profile:
+        // the inherited engine's specialisation share is zero under the
+        // from-scratch engine.
+        extra.insert(
+            "f4_specialise_word_ops".into(),
+            profile.specialise_word_ops - profile_before.specialise_word_ops,
+        );
+        extra.insert("f4_calls".into(), profile.calls - profile_before.calls);
+        extra.insert("f4_rows".into(), profile.rows - profile_before.rows);
         f4_rows.push(TargetPrice {
             verdict,
             native: words,

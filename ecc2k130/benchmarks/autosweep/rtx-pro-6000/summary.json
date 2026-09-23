@@ -1,0 +1,368 @@
+{
+  "note": "AUTOSWEEP.md",
+  "unit": "billions of complete scalar updates per second, `finished:` line",
+  "host": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB, 12.0\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\nsource: 1ee6c9ea21e5788d87615d0d423600cefe478192 (uncommitted changes)\narch: PRO6000_ARCH=-gencode arch=compute_120,code=sm_120\nbase:",
+  "launch": {
+    "provider": "modal",
+    "gpu": "RTX-PRO-6000",
+    "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "gitRev": "1ee6c9ea21e5788d87615d0d423600cefe478192",
+    "gitDirty": true,
+    "startedAt": "2026-09-22T19:48:04Z",
+    "finishedAt": "2026-09-22T20:34:44Z",
+    "exitCode": 0,
+    "seconds": 1900.653077363968,
+    "deviceLine": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05",
+    "token": "e8ccaf7b6eb549ef84afc845bca180f8"
+  },
+  "baseKnobs": [
+    "base: "
+  ],
+  "screenCommand": "--bench --steps 1024 --launches 32, two passes alternating, median",
+  "finalCommand": "--bench --steps 1024 --launches 64, alternating, five repetitions",
+  "baseScreenedBps": 19.9605,
+  "star": [
+    {
+      "arm": "geo-640x1",
+      "knobs": "THREADS=640 MINBLOCKS=1",
+      "screenedBps": 20.0649,
+      "ratioToBase": 1.0052,
+      "registers": 96,
+      "spillBytes": 0
+    },
+    {
+      "arm": "fused",
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0",
+      "screenedBps": 19.9918,
+      "ratioToBase": 1.0016,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-pair-ilp",
+      "knobs": "PACKED_PAIR_ILP=0",
+      "screenedBps": 19.9727,
+      "ratioToBase": 1.0006,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "clmul-flat",
+      "knobs": "PACKED_CLMUL_FLAT=1",
+      "screenedBps": 19.9657,
+      "ratioToBase": 1.0003,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-pipe-select",
+      "knobs": "TABLE_PIPE_SELECT=0",
+      "screenedBps": 19.9309,
+      "ratioToBase": 0.9985,
+      "registers": 92,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-chain-first",
+      "knobs": "PACKED_CHAIN_FIRST=0",
+      "screenedBps": 19.9265,
+      "ratioToBase": 0.9983,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "alu-sqr",
+      "knobs": "PACKED_ALU_SQR=1",
+      "screenedBps": 19.8764,
+      "ratioToBase": 0.9958,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-from-reduced",
+      "knobs": "PACKED_FROM_REDUCED=0",
+      "screenedBps": 19.8646,
+      "ratioToBase": 0.9952,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "unroll2",
+      "knobs": "UNROLL_SLOTS=2",
+      "screenedBps": 19.7955,
+      "ratioToBase": 0.9917,
+      "registers": 118,
+      "spillBytes": 0
+    },
+    {
+      "arm": "fused-pipe",
+      "knobs": "TABLE_FUSED=1 TABLE_FUSED_PIPE=1 TABLE_PIPE_SELECT=0",
+      "screenedBps": 19.5508,
+      "ratioToBase": 0.9795,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "pivot-nibble",
+      "knobs": "TABLE_PIVOT_BYTES=0",
+      "screenedBps": 19.5402,
+      "ratioToBase": 0.9789,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "inline-poly-1",
+      "knobs": "PACKED_INLINE_POLY=1",
+      "screenedBps": 19.3137,
+      "ratioToBase": 0.9676,
+      "registers": 124,
+      "spillBytes": 0
+    },
+    {
+      "arm": "inline-poly-0",
+      "knobs": "PACKED_INLINE_POLY=0",
+      "screenedBps": 19.164,
+      "ratioToBase": 0.9601,
+      "registers": 124,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-l2-persist",
+      "knobs": "PACKED_L2_PERSIST=0",
+      "screenedBps": 18.7407,
+      "ratioToBase": 0.9389,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "geo-768x1",
+      "knobs": "THREADS=768 MINBLOCKS=1",
+      "screenedBps": 18.5917,
+      "ratioToBase": 0.9314,
+      "registers": 80,
+      "spillBytes": 20
+    },
+    {
+      "arm": "geo-384x1",
+      "knobs": "THREADS=384 MINBLOCKS=1",
+      "screenedBps": 18.4348,
+      "ratioToBase": 0.9236,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "geo-256x2",
+      "knobs": "THREADS=256 MINBLOCKS=2",
+      "screenedBps": 18.129,
+      "ratioToBase": 0.9082,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "batch32-256x1",
+      "knobs": "BATCH=32 THREADS=256 MINBLOCKS=1",
+      "screenedBps": 17.1895,
+      "ratioToBase": 0.8612,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "batch32-512x1",
+      "knobs": "BATCH=32 THREADS=512 MINBLOCKS=1",
+      "screenedBps": 16.9935,
+      "ratioToBase": 0.8514,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "karat3-not-topclmad",
+      "knobs": "PACKED_KARAT3=1 PACKED_TOP_CLMAD=0",
+      "screenedBps": 13.8936,
+      "ratioToBase": 0.6961,
+      "registers": 116,
+      "spillBytes": 0
+    }
+  ],
+  "greedy": [
+    {
+      "name": "combo1",
+      "from": "base",
+      "added": "geo-640x1",
+      "screenedBps": 20.23415,
+      "against": 19.96045,
+      "knobs": "THREADS=640 MINBLOCKS=1",
+      "registers": 96,
+      "spillBytes": 0,
+      "decision": "keep"
+    }
+  ],
+  "greedyResult": [
+    "greedy result: combo1 (THREADS=640 MINBLOCKS=1) at 20.23415 B/s"
+  ],
+  "final": {
+    "base": {
+      "knobs": "",
+      "samplesBps": [
+        19.991743999999997,
+        19.981133999999997,
+        19.951233,
+        19.935192,
+        19.932774000000002
+      ],
+      "medianBps": 19.951233,
+      "smClockMHz": [
+        2422,
+        2422,
+        2422,
+        2422,
+        2422
+      ],
+      "powerW": [
+        517.01,
+        566.01,
+        574.18,
+        587.59,
+        576.45
+      ],
+      "tempC": [
+        47,
+        64,
+        69,
+        76,
+        79
+      ],
+      "verify": {
+        "distinguishedPoints": 1480482,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 116,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1480482,
+        "sha256_16": "6cb064cdc55d1a81",
+        "identicalToRef": true
+      },
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "geo-640x1": {
+      "knobs": "THREADS=640 MINBLOCKS=1",
+      "samplesBps": [
+        20.271669999999997,
+        20.189763,
+        19.99275,
+        19.799396,
+        19.754555
+      ],
+      "medianBps": 19.99275,
+      "smClockMHz": [
+        2422,
+        2415,
+        2385,
+        2362,
+        2355
+      ],
+      "powerW": [
+        598.39,
+        561.98,
+        564.08,
+        585.27,
+        577.52
+      ],
+      "tempC": [
+        50,
+        57,
+        65,
+        77,
+        78
+      ],
+      "verify": {
+        "distinguishedPoints": 1480482,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 96,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1480482,
+        "sha256_16": "6cb064cdc55d1a81",
+        "identicalToRef": true
+      },
+      "registers": 96,
+      "spillBytes": 0,
+      "pairedRatioToBase": [
+        1.0140020800586482,
+        1.0104412992776086,
+        1.0020809240210868,
+        0.9931881268061026,
+        0.9910589966052893
+      ],
+      "pairedRatioMedian": 1.0020809240210868,
+      "pairedRatioMin": 0.9910589966052893,
+      "pairedRatioMax": 1.0140020800586482
+    },
+    "combo1": {
+      "knobs": "THREADS=640 MINBLOCKS=1",
+      "samplesBps": [
+        20.264126,
+        20.132391,
+        19.907218,
+        19.753829000000003,
+        19.743796
+      ],
+      "medianBps": 19.907218,
+      "smClockMHz": [
+        2422,
+        2415,
+        2377,
+        2355,
+        2355
+      ],
+      "powerW": [
+        566.81,
+        578.47,
+        555.53,
+        594.92,
+        560.9
+      ],
+      "tempC": [
+        54,
+        61,
+        67,
+        78,
+        73
+      ],
+      "verify": {
+        "distinguishedPoints": 1480482,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 96,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1480482,
+        "sha256_16": "6cb064cdc55d1a81",
+        "identicalToRef": true
+      },
+      "registers": 96,
+      "spillBytes": 0,
+      "pairedRatioToBase": [
+        1.0136247242861856,
+        1.0075699907722955,
+        0.9977938706845838,
+        0.9909023700398774,
+        0.9905192322955148
+      ],
+      "pairedRatioMedian": 0.9977938706845838,
+      "pairedRatioMin": 0.9905192322955148,
+      "pairedRatioMax": 1.0136247242861856
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "child_system_ms": 34.208999999999996,
+  "child_user_ms": 503.00499999999994,
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--release",
+    "-q",
+    "--lib",
+    "cryptanalysis::koblitz_groebner::rref_tests::paired_inherited_root_fused_packing_benchmark",
+    "--",
+    "--ignored",
+    "--nocapture"
+  ],
+  "ended_unix_ns": 1790124730135497000,
+  "environment_overrides": {
+    "KIC_F4_FUSED_BENCH_REPEATS": "100"
+  },
+  "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+  "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+  "exit_code": 0,
+  "peak_rss_bytes": 45989888,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790124729540424000,
+  "stderr_bytes": 29439,
+  "stderr_sha256": "e7f660a36c474fa77ae9473c78bc39a6c19ad771f286e0897021ac240bf1ff5f",
+  "stdout_bytes": 114575,
+  "stdout_sha256": "e74d4d5db1322cf8738cf40cfb8808d9d566a5a258062c8674367762a4bae30f",
+  "task_id": "TASK-KIC-INHERITED-FUSED-ROOT-KERNEL-NORESCAN-20260922",
+  "wall_ms": 595.076583
+}

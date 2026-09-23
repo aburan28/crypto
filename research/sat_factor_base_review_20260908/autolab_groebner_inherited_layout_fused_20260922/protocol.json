@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-KIC-INHERITED-LAYOUT-FUSED-20260922",
+  "base_commit": "97f9dd319b2ff3966c0ac9fee6103db9a3935d9f",
+  "objective": "Reuse exact root column layouts across quadratic public targets and fuse inherited-root products directly into the cached nested matrix.",
+  "selected_policy": {
+    "layout_cache": "automatic for quadratic generator systems; cubic systems retain uncached construction",
+    "exact_guard": "a hit is accepted only if every product maps and every cached column is observed",
+    "fused_pack": "on an exact hit, form, cancel, and pack each shifted polynomial row directly into the nested dense matrix",
+    "controls": {
+      "KIC_F4_INHERIT_LAYOUT_CACHE": "0 disables and 1 forces layout reuse; unset selects quadratic systems",
+      "KIC_F4_DISABLE_INHERIT_FUSED_PACK": "1 retains materialized sparse rows on layout hits"
+    }
+  },
+  "fixtures": {
+    "fused_root_kernel": [
+      "binary n=13, ell=12, m=2, degree=3",
+      "binary n=19, ell=18, m=2, degree=3",
+      "binary n=23, ell=11, m=2, degree=3",
+      "binary n=31, ell=16, m=2, degree=3"
+    ],
+    "stage_policies": ["auto cached and fused", "auto cached and materialized", "fully uncached"],
+    "stage_repetitions_per_policy": 10
+  },
+  "acceptance": [
+    "cached and uncached inherited-root matrices are byte-identical",
+    "missing or extra cached support falls back to a fresh layout",
+    "nested fused and materialized matrices are byte-identical at degrees 2 through 4",
+    "all four real Semaev root packing cells improve",
+    "every quadratic frozen and holdout rung improves against fully uncached construction",
+    "the cubic rung is bypassed by the automatic cache policy",
+    "all stage verdict digests, tree counters, matrix counters, and word-operation counts match"
+  ],
+  "claim_boundary": "Public-synthetic decomposition-stage engineering evidence only. This changes root construction overhead, not the factor base, Macaulay row space, solver tree, relation yield, asymptotic complexity, Pollard-rho comparison, external-target capability, or any key-recovery result."
+}

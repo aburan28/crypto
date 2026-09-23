@@ -2456,6 +2456,38 @@ impl PointIndex {
     }
 }
 
+/// The row plan of a folded table ([`PairSumTable::folded_rows`]).
+#[doc(hidden)]
+#[derive(Clone, Debug)]
+pub struct FoldedRows {
+    /// `(signed orbit, representative point)` per non-empty orbit, in
+    /// orbit order: row `r` sums `points[reps[r].1]` with the suffix of
+    /// its orbit and tags every entry with `reps[r].0`.
+    pub reps: Vec<(u32, usize)>,
+    /// Point indices sorted by `(signed orbit, index)`.
+    pub order: Vec<u32>,
+    /// `order[suffix[o]..]` is every point in an orbit `≥ o`.
+    /// `signed_orbits.len() + 1` entries.
+    pub suffix: Vec<u32>,
+}
+
+/// A folded table's stored state ([`PairSumTable::folded_storage`]).
+#[doc(hidden)]
+#[derive(Clone, Copy, Debug)]
+pub struct FoldedStorage<'a> {
+    pub bucket_start: &'a [u32],
+    pub bucket_shift: u32,
+    /// The stored words, bucket by bucket; order within a bucket is
+    /// whatever the parallel build's cursors produced.
+    pub words: &'a [u32],
+    pub present: &'a [u64],
+    pub present_mask: u64,
+    pub tagged: bool,
+    /// The normal basis the keys were named in; empty if the build fell
+    /// back to the squaring chain.
+    pub canon_tables: &'a [[u64; 256]],
+}
+
 #[derive(Clone, Debug)]
 pub struct PairSumTable {
     /// `(packed sum, i, j)` with `i ≤ j`, sorted by the packed sum.
@@ -3263,17 +3295,11 @@ impl PairSumTable {
         if n_points > u32::MAX as usize {
             return None;
         }
-        // One representative per signed Frobenius orbit.
-        // `(orbit index, representative point)`, keeping the orbit's own
-        // index rather than a position among the non-empty ones: the
-        // stored tag names an orbit of `signed_orbits`, and the two
-        // would drift apart if any orbit were empty.
-        let reps: Vec<(u32, usize)> = fb
-            .signed_orbits
-            .iter()
-            .enumerate()
-            .filter_map(|(o, orbit)| orbit.first().map(|&i| (o as u32, i)))
-            .collect();
+        let FoldedRows {
+            reps,
+            order,
+            suffix,
+        } = Self::folded_rows(fb);
         if reps.is_empty() {
             return None;
         }
@@ -3320,23 +3346,9 @@ impl PairSumTable {
         // skips the mirror image, and nothing else does.
         //
         // Ordering the base by orbit makes "orbit at least `α`" a
-        // suffix, so a row is a slice and no addend list is ever built.
-        let orbit_of_point: Vec<u32> = fb
-            .signed_orbit_of
-            .iter()
-            .map(|&(o, _, _)| o as u32)
-            .collect();
-        let mut order: Vec<u32> = (0..n_points as u32).collect();
-        order.sort_unstable_by_key(|&i| (orbit_of_point[i as usize], i));
+        // suffix, so a row is a slice and no addend list is ever built
+        // ([`Self::folded_rows`]).
         let by_orbit: Vec<FastPoint> = order.iter().map(|&i| points[i as usize]).collect();
-        // `suffix[o]` is where the points of orbit `o` begin.
-        let mut suffix = vec![0u32; fb.signed_orbits.len() + 1];
-        for (position, &i) in order.iter().enumerate() {
-            suffix[orbit_of_point[i as usize] as usize + 1] = position as u32 + 1;
-        }
-        for o in 0..fb.signed_orbits.len() {
-            suffix[o + 1] = suffix[o + 1].max(suffix[o]);
-        }
         let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
         let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
             let mut sums = Vec::with_capacity(n_points);
@@ -3414,6 +3426,68 @@ impl PairSumTable {
             orbit_start,
             orbit_members,
             tagged,
+        })
+    }
+
+    /// **The rows a folded build walks**: one per non-empty signed
+    /// orbit, each over the orbit-sorted suffix of the base that starts
+    /// at its own orbit.
+    ///
+    /// Factored out of [`Self::build_folded_within`] so that anything
+    /// else building the same table — `gpu/ecc2k/pairtable.cuh`'s
+    /// `pairtable_fold_kernel` — is handed the plan this build uses
+    /// rather than a second derivation of it.
+    #[doc(hidden)]
+    pub fn folded_rows(fb: &FrobeniusFactorBase) -> FoldedRows {
+        // One representative per signed Frobenius orbit.
+        // `(orbit index, representative point)`, keeping the orbit's own
+        // index rather than a position among the non-empty ones: the
+        // stored tag names an orbit of `signed_orbits`, and the two
+        // would drift apart if any orbit were empty.
+        let reps: Vec<(u32, usize)> = fb
+            .signed_orbits
+            .iter()
+            .enumerate()
+            .filter_map(|(o, orbit)| orbit.first().map(|&i| (o as u32, i)))
+            .collect();
+        let orbit_of_point: Vec<u32> = fb
+            .signed_orbit_of
+            .iter()
+            .map(|&(o, _, _)| o as u32)
+            .collect();
+        let mut order: Vec<u32> = (0..fb.points.len() as u32).collect();
+        order.sort_unstable_by_key(|&i| (orbit_of_point[i as usize], i));
+        // `suffix[o]` is where the points of orbit `o` begin.
+        let mut suffix = vec![0u32; fb.signed_orbits.len() + 1];
+        for (position, &i) in order.iter().enumerate() {
+            suffix[orbit_of_point[i as usize] as usize + 1] = position as u32 + 1;
+        }
+        for o in 0..fb.signed_orbits.len() {
+            suffix[o + 1] = suffix[o + 1].max(suffix[o]);
+        }
+        FoldedRows {
+            reps,
+            order,
+            suffix,
+        }
+    }
+
+    /// The stored state of a folded table, word for word, so a table
+    /// built elsewhere can be compared with this one.  `None` unless the
+    /// table is folded.
+    #[doc(hidden)]
+    pub fn folded_storage(&self) -> Option<FoldedStorage<'_>> {
+        if !self.fold {
+            return None;
+        }
+        Some(FoldedStorage {
+            bucket_start: &self.bucket_start,
+            bucket_shift: self.bucket_shift,
+            words: &self.rests,
+            present: &self.present,
+            present_mask: self.present_mask,
+            tagged: self.tagged,
+            canon_tables: self.canon.as_ref().map_or(&[], |c| c.tables()),
         })
     }
 
@@ -11744,6 +11818,34 @@ mod tests {
                 20_000,
             );
             assert_eq!(f4.is_some(), bb.is_some(), "engines disagree on [{k}]G");
+            let (inherited, _) = groebner_decompose(
+                &kc,
+                &fb,
+                &index_of,
+                &st,
+                &target,
+                2,
+                SolverEngine::InheritedF4 { max_degree: 3 },
+                20_000,
+            );
+            // Under `SplitRule::Auto` the inherited engine splits on the
+            // smallest free variable and the from-scratch one on the
+            // largest, so when several decompositions exist each may
+            // find a different one first.  Both must exist or neither,
+            // and every one returned must sum to the target in the group.
+            assert_eq!(
+                f4.is_some(),
+                inherited.is_some(),
+                "inherited F4 disagrees with matrix-F4 on [{k}]G"
+            );
+            for (name, found) in [("matrix-F4", &f4), ("inherited F4", &inherited)] {
+                if let Some(idxs) = found {
+                    let sum = idxs
+                        .iter()
+                        .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                    assert_eq!(sum, target, "{name} returned a false decomposition of [{k}]G");
+                }
+            }
         }
     }
 

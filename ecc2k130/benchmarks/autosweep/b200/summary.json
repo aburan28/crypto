@@ -1,0 +1,423 @@
+{
+  "note": "AUTOSWEEP.md",
+  "unit": "billions of complete scalar updates per second, `finished:` line",
+  "host": "NVIDIA B200, 580.95.05, 1965 MHz, 1000.00 W, 183359 MiB, 10.0\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\nsource: 1ee6c9ea21e5788d87615d0d423600cefe478192\narch: PRO6000_ARCH=-gencode arch=compute_100,code=sm_100\nbase: PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1",
+  "launch": {
+    "provider": "modal",
+    "gpu": "B200",
+    "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "gitRev": "1ee6c9ea21e5788d87615d0d423600cefe478192",
+    "gitDirty": false,
+    "startedAt": "2026-09-22T18:32:15Z",
+    "finishedAt": null,
+    "exitCode": 0,
+    "seconds": 3027.981840610504,
+    "deviceLine": "NVIDIA B200, 580.95.05",
+    "token": "8d767ab3b9584e08bae71eb5f74cf0d2"
+  },
+  "baseKnobs": [
+    "base: PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1"
+  ],
+  "screenCommand": "--bench --steps 1024 --launches 32, two passes alternating, median",
+  "finalCommand": "--bench --steps 1024 --launches 64, alternating, five repetitions",
+  "baseScreenedBps": 15.3716,
+  "star": [
+    {
+      "arm": "fused",
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0",
+      "screenedBps": 17.4559,
+      "ratioToBase": 1.1356,
+      "registers": 102,
+      "spillBytes": 0
+    },
+    {
+      "arm": "fused-pipe",
+      "knobs": "TABLE_FUSED=1 TABLE_FUSED_PIPE=1 TABLE_PIPE_SELECT=0",
+      "screenedBps": 17.1444,
+      "ratioToBase": 1.1153,
+      "registers": 106,
+      "spillBytes": 0
+    },
+    {
+      "arm": "batch32-256x1",
+      "knobs": "BATCH=32 THREADS=256 MINBLOCKS=1",
+      "screenedBps": 16.1534,
+      "ratioToBase": 1.0509,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "karat3-not-topclmad",
+      "knobs": "PACKED_KARAT3=1 PACKED_TOP_CLMAD=0",
+      "screenedBps": 16.0616,
+      "ratioToBase": 1.0449,
+      "registers": 113,
+      "spillBytes": 0
+    },
+    {
+      "arm": "batch32-512x1",
+      "knobs": "BATCH=32 THREADS=512 MINBLOCKS=1",
+      "screenedBps": 15.9094,
+      "ratioToBase": 1.035,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-pipe-select",
+      "knobs": "TABLE_PIPE_SELECT=0",
+      "screenedBps": 15.786,
+      "ratioToBase": 1.027,
+      "registers": 96,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-chain-first",
+      "knobs": "PACKED_CHAIN_FIRST=0",
+      "screenedBps": 15.3976,
+      "ratioToBase": 1.0017,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-pair-ilp",
+      "knobs": "PACKED_PAIR_ILP=0",
+      "screenedBps": 15.356,
+      "ratioToBase": 0.999,
+      "registers": 117,
+      "spillBytes": 0
+    },
+    {
+      "arm": "unroll2",
+      "knobs": "UNROLL_SLOTS=2",
+      "screenedBps": 15.3411,
+      "ratioToBase": 0.998,
+      "registers": 118,
+      "spillBytes": 0
+    },
+    {
+      "arm": "clmul-flat",
+      "knobs": "PACKED_CLMUL_FLAT=1",
+      "screenedBps": 15.3071,
+      "ratioToBase": 0.9958,
+      "registers": 114,
+      "spillBytes": 0
+    },
+    {
+      "arm": "inline-poly-0",
+      "knobs": "PACKED_INLINE_POLY=0",
+      "screenedBps": 15.3033,
+      "ratioToBase": 0.9956,
+      "registers": 118,
+      "spillBytes": 0
+    },
+    {
+      "arm": "geo-640x1",
+      "knobs": "THREADS=640 MINBLOCKS=1",
+      "screenedBps": 15.2955,
+      "ratioToBase": 0.9951,
+      "registers": 96,
+      "spillBytes": 0
+    },
+    {
+      "arm": "geo-768x1",
+      "knobs": "THREADS=768 MINBLOCKS=1",
+      "screenedBps": 15.2368,
+      "ratioToBase": 0.9912,
+      "registers": 80,
+      "spillBytes": 52
+    },
+    {
+      "arm": "no-l2-persist",
+      "knobs": "PACKED_L2_PERSIST=0",
+      "screenedBps": 15.2263,
+      "ratioToBase": 0.9905,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "no-from-reduced",
+      "knobs": "PACKED_FROM_REDUCED=0",
+      "screenedBps": 15.2165,
+      "ratioToBase": 0.9899,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "geo-256x2",
+      "knobs": "THREADS=256 MINBLOCKS=2",
+      "screenedBps": 15.026,
+      "ratioToBase": 0.9775,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "geo-384x1",
+      "knobs": "THREADS=384 MINBLOCKS=1",
+      "screenedBps": 14.948,
+      "ratioToBase": 0.9724,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "inline-poly-1",
+      "knobs": "PACKED_INLINE_POLY=1",
+      "screenedBps": 14.8501,
+      "ratioToBase": 0.9661,
+      "registers": 114,
+      "spillBytes": 0
+    },
+    {
+      "arm": "pivot-nibble",
+      "knobs": "TABLE_PIVOT_BYTES=0",
+      "screenedBps": 14.8223,
+      "ratioToBase": 0.9643,
+      "registers": 116,
+      "spillBytes": 0
+    },
+    {
+      "arm": "alu-sqr",
+      "knobs": "PACKED_ALU_SQR=1",
+      "screenedBps": 14.6209,
+      "ratioToBase": 0.9512,
+      "registers": 116,
+      "spillBytes": 0
+    }
+  ],
+  "greedy": [
+    {
+      "name": "combo1",
+      "from": "base",
+      "added": "fused",
+      "screenedBps": 17.4816,
+      "against": 15.3716,
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0",
+      "registers": 102,
+      "spillBytes": 0,
+      "decision": "keep"
+    },
+    {
+      "name": "combo2",
+      "from": "combo1",
+      "added": "fused-pipe",
+      "screenedBps": 17.15075,
+      "against": 17.4816,
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0 TABLE_FUSED=1 TABLE_FUSED_PIPE=1 TABLE_PIPE_SELECT=0",
+      "registers": 106,
+      "spillBytes": 0,
+      "decision": "drop"
+    },
+    {
+      "name": "combo3",
+      "from": "combo1",
+      "added": "batch32-256x1",
+      "screenedBps": 17.7529,
+      "against": 17.4816,
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1",
+      "registers": 102,
+      "spillBytes": 0,
+      "decision": "keep"
+    },
+    {
+      "name": "combo4",
+      "from": "combo3",
+      "added": "karat3-not-topclmad",
+      "screenedBps": 18.64145,
+      "against": 17.7529,
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0",
+      "registers": 106,
+      "spillBytes": 0,
+      "decision": "keep"
+    },
+    {
+      "name": "combo5",
+      "from": "combo4",
+      "added": "batch32-512x1",
+      "screenedBps": 19.4024,
+      "against": 18.64145,
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0 BATCH=32 THREADS=512 MINBLOCKS=1",
+      "registers": 106,
+      "spillBytes": 0,
+      "decision": "keep"
+    },
+    {
+      "name": "combo6",
+      "from": "combo5",
+      "added": "no-pipe-select",
+      "screenedBps": 19.39715,
+      "against": 19.4024,
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0 BATCH=32 THREADS=512 MINBLOCKS=1 TABLE_PIPE_SELECT=0",
+      "registers": 106,
+      "spillBytes": 0,
+      "decision": "drop"
+    }
+  ],
+  "greedyResult": [
+    "greedy result: combo5 (TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0 BATCH=32 THREADS=512 MINBLOCKS=1) at 19.4024 B/s"
+  ],
+  "final": {
+    "base": {
+      "knobs": "",
+      "samplesBps": [
+        15.370537,
+        15.358223,
+        15.364925999999999,
+        15.365299,
+        15.366798000000001
+      ],
+      "medianBps": 15.365299,
+      "smClockMHz": [
+        1965,
+        1965,
+        1965,
+        1965,
+        1965
+      ],
+      "powerW": [
+        548.92,
+        518.49,
+        524.88,
+        539.4,
+        561.38
+      ],
+      "tempC": [
+        46,
+        47,
+        48,
+        48,
+        49
+      ],
+      "verify": {
+        "distinguishedPoints": 1165426,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 116,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1165426,
+        "sha256_16": "626a6fcef0ef40ba",
+        "identicalToRef": true
+      },
+      "registers": 116,
+      "spillBytes": 0
+    },
+    "fused": {
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0",
+      "samplesBps": [
+        17.479454,
+        17.478201000000002,
+        17.477880000000003,
+        17.479764,
+        17.478073000000002
+      ],
+      "medianBps": 17.478201000000002,
+      "smClockMHz": [
+        1965,
+        1965,
+        1965,
+        1965,
+        1965
+      ],
+      "powerW": [
+        529.04,
+        538.24,
+        537.71,
+        529.47,
+        544.94
+      ],
+      "tempC": [
+        45,
+        47,
+        47,
+        48,
+        47
+      ],
+      "verify": {
+        "distinguishedPoints": 1165426,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 102,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1165426,
+        "sha256_16": "626a6fcef0ef40ba",
+        "identicalToRef": true
+      },
+      "registers": 102,
+      "spillBytes": 0,
+      "pairedRatioToBase": [
+        1.1372051607565825,
+        1.1380353703680433,
+        1.1375180069204371,
+        1.1376130070752284,
+        1.1373919927886083
+      ],
+      "pairedRatioMedian": 1.1375180069204371,
+      "pairedRatioMin": 1.1372051607565825,
+      "pairedRatioMax": 1.1380353703680433
+    },
+    "combo5": {
+      "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0 BATCH=32 THREADS=512 MINBLOCKS=1",
+      "samplesBps": [
+        19.401619,
+        19.400063,
+        19.401138,
+        19.401633999999998,
+        19.401546999999997
+      ],
+      "medianBps": 19.401546999999997,
+      "smClockMHz": [
+        1965,
+        1965,
+        1965,
+        1965,
+        1965
+      ],
+      "powerW": [
+        631.14,
+        629.82,
+        664.68,
+        634.01,
+        624.55
+      ],
+      "tempC": [
+        48,
+        49,
+        50,
+        50,
+        49
+      ],
+      "verify": {
+        "distinguishedPoints": 1165426,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 106,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1165426,
+        "sha256_16": "626a6fcef0ef40ba",
+        "identicalToRef": true
+      },
+      "registers": 106,
+      "spillBytes": 0,
+      "pairedRatioToBase": [
+        1.2622603231103766,
+        1.263171071288651,
+        1.262689973254671,
+        1.2626916013804872,
+        1.2625627668171338
+      ],
+      "pairedRatioMedian": 1.262689973254671,
+      "pairedRatioMin": 1.2622603231103766,
+      "pairedRatioMax": 1.263171071288651
+    }
+  }
+}

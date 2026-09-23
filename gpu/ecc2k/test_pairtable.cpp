@@ -14,8 +14,9 @@
  *   4. packing           distinct points must not collide, and `P` and
  *                        `-P` must not either
  *
- * Build: see the Makefile.  Needs no GPU; the kernel's launch structure
- * is the only thing left uncovered.
+ * Build: see the Makefile.  Needs no GPU.  The kernel is not in here --
+ * it sits behind `#ifdef __CUDACC__` -- and `test_pairtable_emu.cpp`
+ * runs it separately, as host code behind a shim.
  */
 #include <cstdio>
 #include <cstdlib>
