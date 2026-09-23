@@ -86,16 +86,17 @@ pub fn frobenius_trace(curve: &SmallCurve) -> i64 {
 //
 //   1.  Pick a random point P ∈ E(F_p).
 //   2.  Use BSGS in the Hasse interval [p+1−2√p, p+1+2√p] to find
-//       the unique k in that interval with k·P = O.  k is a multiple
+//       a k in that interval with k·P = O.  k is a multiple
 //       of ord(P).
-//   3.  Strip small prime factors q from k as long as (k/q)·P = O —
+//   3.  Factor k completely and strip prime factors q while (k/q)·P = O —
 //       this yields ord(P) exactly.
 //   4.  If ord(P) > 4√p the Hasse interval contains exactly one
 //       multiple of ord(P), so #E(F_p) is determined.  Otherwise
 //       (rare for random points) draw another P and combine via lcm.
 //
 // Complexity: O(p^{1/4}) Point operations per random draw; usually
-// one or two draws suffice.
+// one or two draws suffice. Exact order certification additionally uses
+// trial division of the annihilator, suitable only for this small-field backend.
 
 /// Compute the Frobenius trace using BSGS in the Hasse interval.
 /// Returns `None` if the heuristic gives up (e.g., couldn't find a
@@ -327,32 +328,42 @@ fn bsgs_find_zero_in_hasse(
     None
 }
 
-/// Strip small prime factors `q` from `k` as long as `(k/q)·P = O`.
-/// The result is `ord(P)`.  Trial-divides primes up to `√k`.
+/// Refine a verified annihilator to the exact point order. Every prime
+/// factor must be tested: stopping at a fixed small-prime bound can leave
+/// an extraneous factor and falsely certify a unique curve order.
 fn refine_point_order(curve: &SmallCurve, point: &crate::ecc::point::Point, mut k: u64) -> u64 {
     use crate::ecc::point::Point;
     let cp = curve.to_curve_params();
     let a_fe = cp.a_fe();
-    let primes: &[u64] = &[
-        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89,
-        97,
-    ];
-    for &q in primes {
-        while k > 1 && k % q == 0 {
+    // Factor a separate copy: factors required by the point order remain in k.
+    let mut remainder = k;
+    let mut factors = Vec::new();
+    let mut q = 2;
+    while q <= remainder / q {
+        if remainder % q == 0 {
+            factors.push(q);
+            while remainder % q == 0 {
+                remainder /= q;
+            }
+        }
+        q += 1;
+    }
+    if remainder > 1 {
+        factors.push(remainder);
+    }
+    for q in factors {
+        while k % q == 0 {
             let candidate = k / q;
-            let test = point.scalar_mul(&BigUint::from(candidate), &a_fe);
-            if matches!(test, Point::Infinity) {
+            if matches!(
+                point.scalar_mul(&BigUint::from(candidate), &a_fe),
+                Point::Infinity
+            ) {
                 k = candidate;
             } else {
                 break;
             }
         }
-        if q * q > k {
-            break;
-        }
     }
-    // Try remaining cofactor: if k is itself prime > 97, the residue
-    // after small-prime stripping is already the order, no more to do.
     k
 }
 
@@ -637,6 +648,25 @@ pub fn verify_cm(curve: &SmallCurve, expected_disc: i64) -> bool {
 mod tests {
     use super::*;
     use crate::isogeny::{toy_curve_a, toy_curve_b, toy_curve_j0, SmallCurve};
+
+    #[test]
+    fn point_order_refinement_removes_large_extraneous_factors() {
+        use crate::ecc::{field::FieldElement, point::Point};
+        let curve = SmallCurve {
+            name: "order-two",
+            p: 5,
+            a: 1,
+            b: 0,
+        };
+        let zero = FieldElement::new(BigUint::from(0u64), BigUint::from(5u64));
+        let point = Point::Affine {
+            x: zero.clone(),
+            y: zero,
+        };
+        for annihilator in [2, 4, 2 * 101, 2 * 101 * 103, 8 * 127 * 127] {
+            assert_eq!(refine_point_order(&curve, &point, annihilator), 2);
+        }
+    }
 
     /// Direct cross-check: BSGS-derived trace equals brute-force
     /// trace at a scale where both run.

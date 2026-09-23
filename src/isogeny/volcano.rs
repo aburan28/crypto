@@ -136,6 +136,8 @@ pub fn neighbors_ell(curve: &SmallCurve, ell: u64) -> Vec<VeluIsogeny> {
 }
 
 /// Enumerate a capped neighborhood. Buckets are BFS distances, never strata.
+/// The vertex cap limits discovery, not edges between retained vertices.
+/// Vertices at the depth boundary are retained but are not expanded.
 /// `start_on_crater` is unknown unless separately justified by conductor data.
 pub fn map_volcano(
     curve: &SmallCurve,
@@ -168,7 +170,7 @@ pub fn map_volcano(
     let mut visited = 1usize;
 
     while let Some((c, d)) = frontier.pop_front() {
-        if d >= max_depth || visited >= max_vertices {
+        if d >= max_depth {
             continue;
         }
         let neighbours = neighbors_ell(&c, ell);

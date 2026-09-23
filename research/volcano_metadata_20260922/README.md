@@ -88,3 +88,10 @@ semantics; no performance iteration or speedup claim is made here.
 
 This correction is independent of the separate GF(256) decomposition study.
 That study's paired regularity observations are not target-size ECDLP results.
+
+## Follow-up validation
+
+The [bounded exhaustive follow-up](../volcano_metadata_20260923/README.md)
+found and fixed a false point-count certificate, missing retained-vertex edges
+at the vertex cap, and a broken published evidence link. It preserves the
+original counterexamples and rerun evidence.
