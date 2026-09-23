@@ -4305,6 +4305,44 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-solve-trace-20260923">
+  <div class="panel-head">
+    <h2>Complete generic Boolean solves: cheaper search wins; the new specialization gain is 1.04&ndash;1.14&times; <span class="chip">engineering</span></h2>
+    <p>Charging complete propagation and search changes the kernel-only conclusion.
+      The degree-3 hybrid is slower than the flat-kernel solver with identical search traces.
+      Search-only often wins despite many more nodes. Selective one-word degree-2 inference
+      improves its matched implementation but does not beat the strongest prior solver.
+      Ordered specialization preserves the search exactly and improves paired medians by
+      1.04&ndash;1.14&times;; every universal dramatic gate remains <strong>REJECTED</strong>.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_solve_trace_20260923/CONCLUSION.md">whole-solve decision and scope</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_solve_trace_20260923/run_03/RESULT.md">latest frozen comparison</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_solve_trace_20260923/run_03/results.json">paired gates and traces</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_solve_trace_20260923/RUN_LEDGER.json">retained run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete-solve plus verification milliseconds at 24 variables. Medians over
+      two holdout seeds and seven rotated repetitions. The displayed ratio uses the planted
+      flat-kernel baseline; promotion requires the fastest prior whole-solve reference.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Flat / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>98.194229</td><td>86.760063</td><td>146.671084</td><td>3.033</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>297.822917</td><td>125.040250</td><td>597.041521</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>1068.500479</td><td>466.614896</td><td>2137.548020</td><td>0.279</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>429.624542</td><td>176.332562</td><td>928.377542</td><td>0.693</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>114.024709</td><td>99.104333</td><td>171.460291</td><td>2.612</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>99.382437</td><td>85.962625</td><td>151.653458</td><td>2.997</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>87.016291</td><td>76.643687</td><td>128.637125</td><td>3.423</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 4,848 full-solve observations across 144 cells finish with verified results. SAT
+    assignments are checked on the original equations; UNSAT requires the completed
+    search reference. Matching policy groups retain identical models, logical counters
+    and trace digests. Resource-censoring tests keep completion costs null. This is a
+    standalone generated-system driver, not the repository inherited-F4 solver, and
+    does not establish production or index-calculus performance. The earlier kernel
+    results below remain scoped to their own workloads.</p>
+</section>
 <section class="panel" id="boolean-linear-tail-20260923">
   <div class="panel-head">
     <h2>Specialized linear tails: 3.59&times; on the declared mix; guarded promotion remains rejected <span class="chip">engineering</span></h2>

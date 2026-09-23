@@ -1,0 +1,19 @@
+{
+  "purpose": "Discovery-only resource sizing before the benchmark protocol; no holdout data",
+  "command": [
+    "/tmp/boolean-solve-resource-worker",
+    "24",
+    "17",
+    "planted",
+    "1",
+    "200000"
+  ],
+  "exit_code": 0,
+  "timed_out": false,
+  "wall_seconds": 2.8447698340023635,
+  "source_hashes": {
+    "worker.rs": "960ccc666e1f8a391661924b477e8dde2b69cc6a3d4d3f9980f310a4a9777531",
+    "kernel.rs": "9d8a1bd48a33bb11427a5f78aa4a0c4598ec9a5b50e12628f2661dd596e433e4"
+  },
+  "executable_sha256": "39fb61d27eca3e1703bee57c6f0890578e122099f31f82f627dce7690dc7b79f"
+}
