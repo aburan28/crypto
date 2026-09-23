@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "base_commit": "c515c3407b9727d74a01bc04c1d43830ba74bc86",
+  "files": {
+    "src/cryptanalysis/koblitz_groebner.rs": "74ff0cb5016236dd7bec2474b7fe7433eea0028d3d36b02112afc8f54234c8eb",
+    "src/cryptanalysis/pq_groebner_f2.rs": "ac0508993b41aa7c350635c70c69abb726ec70e13c2578c859bfda193ceb084f",
+    "src/cryptanalysis/sparse_macaulay.rs": "664eb9d4c400f7d396a0c90a95492337c694f4f6041dcd34e6fb26d102024835"
+  },
+  "symbols": [
+    "f4_solver_linear_tail_flat",
+    "pack_polynomials_flat_fused",
+    "build_macaulay_flat_with_multiplier_mask",
+    "FastU64Hasher",
+    "cmp_mono",
+    "eliminate_high_columns",
+    "xor_sorted",
+    "monomials_up_to_mask"
+  ],
+  "preserved": [
+    "degree-reverse-lex high-first order",
+    "exact-support cache validation and fallback",
+    "flat column-pivot elimination",
+    "minimum-weight sparse-bucket elimination",
+    "complete linear-tail row-space output",
+    "descending DegRevLex input terms in the source-order run",
+    "degree-layered multiplier enumeration in the source-order run"
+  ],
+  "differences": [
+    "standalone bounded generic input types and caps",
+    "local per-batch caches instead of thread-local production caches",
+    "cache multiplier schedules for all masks, strengthening the control",
+    "one-word affine canonicalizer for n<=36 in every arm",
+    "no F5 pruning, environment dispatch or profiling atomics",
+    "no solver branching, imported targets or production execution"
+  ],
+  "ordering_history": {
+    "run_01": "Inherited numeric term and multiplier order; exact mathematical outputs verified, but not a source-order timing reproduction.",
+    "run_02": "Term order and degree-layered multiplier order matched to the source; fresh holdouts, same gates."
+  }
+}
