@@ -61,11 +61,16 @@ class AccountingTests(unittest.TestCase):
                 }
             },
         ]
-        got = native_f4.process_resources(records)
+        got = native_f4.process_resources(records, single_thread_requested=True)
         self.assertEqual(got["summed_process_wall_seconds"], 5.0)
         self.assertEqual(got["total_core_seconds"], 4.0)
         self.assertEqual(got["single_core_seconds"], 4.0)
         self.assertEqual(got["maximum_individual_process_rss_bytes"], 250)
+        parallel = native_f4.process_resources(
+            records, single_thread_requested=False
+        )
+        self.assertEqual(parallel["total_core_seconds"], 4.0)
+        self.assertIsNone(parallel["single_core_seconds"])
 
     def test_watchdog_timeout_needs_no_backend_json_identity(self) -> None:
         native_f4.validate_f4_result(

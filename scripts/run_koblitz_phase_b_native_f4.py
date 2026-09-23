@@ -88,25 +88,26 @@ def select_instances(bundle: dict[str, Any], args: argparse.Namespace) -> list[d
     return selected
 
 
-def process_resources(records: list[dict[str, Any]]) -> dict[str, Any]:
+def process_resources(
+    records: list[dict[str, Any]], single_thread_requested: bool
+) -> dict[str, Any]:
     metrics = [record["metrics"] for record in records]
+    total_core_seconds = round(
+        math.fsum(row["total_core_seconds"] for row in metrics), 12
+    )
     return {
         "process_receipts": len(records),
         "summed_process_wall_seconds": round(
             math.fsum(row["wall_seconds"] for row in metrics), 12
         ),
-        "total_core_seconds": round(
-            math.fsum(row["total_core_seconds"] for row in metrics), 12
-        ),
-        "single_core_seconds": round(
-            math.fsum(row["single_core_seconds"] for row in metrics), 12
-        ),
+        "total_core_seconds": total_core_seconds,
+        "single_core_seconds": total_core_seconds if single_thread_requested else None,
         "maximum_individual_process_rss_bytes": max(
             (row["peak_rss_bytes"] for row in metrics), default=0
         ),
         "single_core_semantics": (
             "sum of user plus system CPU from sequential processes whose child environment "
-            "requests one thread; wall time is reported separately"
+            "requests one thread; null when the F4 child requests parallel execution"
         ),
         "peak_rss_semantics": (
             "maximum fresh-process high-water RSS; processes run sequentially, so this is "
@@ -169,6 +170,8 @@ def run_one(
     environment: dict[str, str],
     f4_budget_seconds: int,
     watchdog_seconds: int,
+    x1_batch_size: int,
+    rayon_threads: int,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     prepared = phase_b.export_one_task(
         index=ordinal,
@@ -210,6 +213,13 @@ def run_one(
         phase_b.process_record_for_matrix(record), BACKEND, manifest
     )
     validate_f4_result(row, manifest)
+    if row["status"] != "timeout_inconclusive":
+        require(
+            row["backend_report"].get("solver_x1_batch_size") == x1_batch_size
+            and row["backend_report"].get("solver_rayon_threads_requested")
+            == rayon_threads,
+            "native F4 parallel execution contract changed",
+        )
     task = {
         "schema": TASK_SCHEMA,
         "ordinal": ordinal,
@@ -252,6 +262,10 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
     selected = select_instances(bundle, args)
     require(not args.output.exists() and not args.output.is_symlink(), "run output must be new")
     require(args.f4_budget_seconds > 0, "--f4-budget-seconds must be positive")
+    require(
+        1 <= args.x1_batch_size <= 64 and 1 <= args.rayon_threads <= 64,
+        "X1 batch size and Rayon thread count must be in 1..=64",
+    )
     watchdog = args.watchdog_seconds or protocol["execution"]["per_process_watchdog_seconds"]
     require(
         watchdog > args.f4_budget_seconds,
@@ -278,7 +292,9 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
         state,
     )
     environment = phase_b.safe_child_environment()
-    require(environment.get("RAYON_NUM_THREADS") == "1", "F4 must be bound to one Rayon thread")
+    environment["RAYON_NUM_THREADS"] = str(args.rayon_threads)
+    environment["PQ_F4_X1_BATCH"] = str(args.x1_batch_size)
+    single_thread_requested = args.x1_batch_size == 1 and args.rayon_threads == 1
     plan = {
         "schema": RUN_PLAN_SCHEMA,
         "created_at": phase_b.now(),
@@ -305,7 +321,9 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
         "f4_budget_seconds": args.f4_budget_seconds,
         "watchdog_seconds": watchdog,
         "one_process_at_a_time": True,
-        "single_thread_requested": True,
+        "single_thread_requested": single_thread_requested,
+        "x1_batch_size": args.x1_batch_size,
+        "rayon_threads_requested": args.rayon_threads,
         "conflicts": None,
         "truth_labels_present": False,
         "known_witnesses_present": False,
@@ -336,6 +354,8 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
             environment=environment,
             f4_budget_seconds=args.f4_budget_seconds,
             watchdog_seconds=watchdog,
+            x1_batch_size=args.x1_batch_size,
+            rayon_threads=args.rayon_threads,
         )
         tasks.append(task)
         processes.extend(task_processes)
@@ -379,8 +399,12 @@ def run_panel(args: argparse.Namespace) -> dict[str, Any]:
         ),
         "solver_conflicts": None,
         "solver_conflict_semantics": "F4 exposes algebraic and matrix counters, not SAT conflicts",
-        "f4_process_resources": process_resources(f4_processes),
-        "all_task_process_resources": process_resources(processes),
+        "f4_process_resources": process_resources(
+            f4_processes, single_thread_requested
+        ),
+        "all_task_process_resources": process_resources(
+            processes, single_thread_requested
+        ),
         "outer_resources": {
             "wall_seconds": outer_wall,
             "total_core_seconds": outer_core,
@@ -555,6 +579,8 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument("--max-instances", type=int)
     run.add_argument("--f4-budget-seconds", type=int, default=115)
     run.add_argument("--watchdog-seconds", type=int)
+    run.add_argument("--x1-batch-size", type=int, default=1)
+    run.add_argument("--rayon-threads", type=int, default=1)
     run.add_argument("--plan", action="store_true")
     score = sub.add_parser("score", help="score an already sealed native-F4 run")
     score.add_argument("--run", type=Path, required=True)
