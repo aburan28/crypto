@@ -14,7 +14,7 @@ ARCH    ?= sm_90
 NVCCFLAGS ?= -O3 -std=c++17 -arch=$(ARCH) -lineinfo
 
 CURVES := ecc2k95 k23 k41
-GEN    := $(foreach c,$(CURVES),curve_$(c).h vec_$(c).h) vec_canon.h
+GEN    := $(foreach c,$(CURVES),curve_$(c).h vec_$(c).h) vec_canon.h vec_fold.h
 TESTS  := test_ecc2k95 test_k23 test_k41 \
           $(foreach c,$(CURVES),test_pt_$(c)) \
           $(foreach c,$(CURVES),test_emu_$(c))
@@ -43,6 +43,15 @@ vec_canon.h: ../../examples/dump_canon_vectors.rs ../../src/cryptanalysis/koblit
 	cd ../.. && $(CARGO) run --release --quiet --example dump_canon_vectors \
 	  > gpu/ecc2k/vec_canon.h
 
+# A folded pair table as `PairSumTable::build_folded_within` stored it, and
+# the row plan it was built from, so `pairtable_fold_kernel` can be checked
+# against the table it has to reproduce rather than against a second
+# account of what that table is.  Explicit for the same reason as above.
+vec_fold.h: ../../examples/dump_fold_vectors.rs ../../src/cryptanalysis/koblitz_fast.rs \
+            ../../src/cryptanalysis/koblitz_index_calculus.rs
+	cd ../.. && $(CARGO) run --release --quiet --example dump_fold_vectors \
+	  > gpu/ecc2k/vec_fold.h
+
 define TEST_RULE
 # F2M_COUNT_OPS turns on the field-operation counters, so the per-step cost
 # table in README.md is counted by the harness rather than derived by hand.
@@ -55,10 +64,11 @@ test_pt_$(1): test_pairtable.cpp $$(HDRS) curve_$(1).h vec_$(1).h vec_canon.h
 	$$(CXX) $$(CXXFLAGS) -DGPU_ECC2K_CURVE_HEADER='"curve_$(1).h"' \
 	  -DGPU_ECC2K_VECTORS_HEADER='"vec_$(1).h"' -o $$@ $$<
 
-# `pairtable_kernel` itself, compiled as host C++ behind a `__CUDACC__`
-# shim and run once per emulated thread.  Everything above tests what the
-# kernel is made of; this is the only thing that tests the kernel.
-test_emu_$(1): test_pairtable_emu.cpp $$(HDRS) curve_$(1).h vec_canon.h
+# `pairtable_kernel` and `pairtable_fold_kernel` themselves, compiled as
+# host C++ behind a `__CUDACC__` shim and run once per emulated thread.
+# Everything above tests what the kernels are made of; this is the only
+# thing that tests the kernels, and the fold against the CPU's own table.
+test_emu_$(1): test_pairtable_emu.cpp $$(HDRS) curve_$(1).h vec_canon.h vec_fold.h
 	$$(CXX) $$(CXXFLAGS) -DGPU_ECC2K_CURVE_HEADER='"curve_$(1).h"' -o $$@ $$<
 endef
 $(foreach c,$(CURVES),$(eval $(call TEST_RULE,$(c))))
