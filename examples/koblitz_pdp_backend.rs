@@ -26,7 +26,6 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     factor_x_n_minus_1, find_irreducible_sparse, invariant_subspace_basis, points_with_x,
 };
-use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use crypto_lib::cryptanalysis::sat::{SolveResult, SolverStats};
 use crypto_lib::cryptanalysis::semaev_sat::{
     encode_boolean_system_with, encode_semaev_s4_with, S4Options, XorEncoding,
@@ -665,37 +664,6 @@ fn source_point_witness(
     None
 }
 
-fn absolute_trace_bit(x: &F2mElement, n: u32, irreducible: &IrreduciblePoly) -> bool {
-    let mut trace = F2mElement::zero(n);
-    let mut power = x.clone();
-    for _ in 0..n {
-        trace = trace.add(&power);
-        power = power.square(irreducible);
-    }
-    debug_assert!(trace.is_zero() || trace == F2mElement::one(n));
-    !trace.is_zero()
-}
-
-fn fixed_x1_trace_equation(
-    basis_trace: &[bool],
-    x1_trace: bool,
-    target_trace: bool,
-    ell: usize,
-    n_vars: usize,
-) -> F2BoolPoly {
-    let mut terms = Vec::new();
-    for (index, contributes) in basis_trace.iter().copied().enumerate() {
-        if contributes {
-            terms.push(F2BoolMono::var(index as u32));
-            terms.push(F2BoolMono::var((ell + index) as u32));
-        }
-    }
-    if x1_trace ^ target_trace {
-        terms.push(F2BoolMono::one());
-    }
-    F2BoolPoly::from_monos(terms, n_vars)
-}
-
 #[derive(Default)]
 struct F4CostAggregate {
     calls: u64,
@@ -817,14 +785,6 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
         BinaryPoint::Affine { x, .. } => x,
         BinaryPoint::Infinity => unreachable!(),
     };
-    let trace_setup_started = Instant::now();
-    let basis_trace: Vec<bool> = instance
-        .basis
-        .iter()
-        .map(|value| absolute_trace_bit(value, instance.n, &instance.curve.irreducible))
-        .collect();
-    let target_trace = absolute_trace_bit(target_x, instance.n, &instance.curve.irreducible);
-    let trace_setup_ns = trace_setup_started.elapsed().as_nanos();
     let solver = F4F2;
     let x2 = SymElement::from_subspace_vars(&instance.basis, 0, instance.n, n_vars);
     let x3 = SymElement::from_subspace_vars(&instance.basis, instance.ell, instance.n, n_vars);
@@ -870,20 +830,13 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             continue;
         }
         let built = Instant::now();
-        let mut equations = sym_semaev_s4(
+        let equations = sym_semaev_s4(
             &SymElement::constant(&x1_value, instance.n, n_vars),
             &x2,
             &x3,
             target_x,
             &st,
         );
-        equations.push(fixed_x1_trace_equation(
-            &basis_trace,
-            absolute_trace_bit(&x1_value, instance.n, &instance.curve.irreducible),
-            target_trace,
-            instance.ell,
-            n_vars,
-        ));
         construction_ns = construction_ns.saturating_add(built.elapsed().as_nanos());
         systems_constructed += 1;
         total_equations = total_equations.saturating_add(equations.len());
@@ -981,7 +934,6 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "source_representation":instance.source_representation,
             "solver_representation":"fixed_x1_direct_symmetrised_s4_boolean",
             "solver_schedule":"enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
-            "trace_constraint":"Tr(x1+x2+x3)=Tr(xR)",
             "solver":"f4-f2",
             "solver_description":solver.describe(),
             "single_thread_requested":true,
@@ -1006,7 +958,6 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "cost":costs.json(),
             "timing_ns":{
                 "source_verification":instance.verification_ns,
-                "trace_setup":trace_setup_ns,
                 "factor_base_x1_membership":factor_base_membership_ns,
                 "fixed_x1_s4_construction":construction_ns,
                 "native_f4_whole":whole_started.elapsed().as_nanos(),
