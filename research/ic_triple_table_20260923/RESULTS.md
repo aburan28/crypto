@@ -94,6 +94,20 @@ Two misses, stated:
 
 ## Secondary, not pre-registered: against rho on the same fixtures
 
+> **Correction (added later, same PR):** read this section against
+> `research/ic_triple_counted_20260923/RESULTS.md` §3.
+>
+> The worker's rho spends about 9,100 of its 9,930 instructions a step at
+> `n43a1` walking the Frobenius orbit by squaring. The IC arm names the same
+> orbits with a normal-basis rotation. Given that one piece of the IC arm's
+> code, rho beats this pipeline at every cell measured there, by 1.19× to
+> 2.88×.
+>
+> The rows below are correct measurements against the worker's rho, and that
+> rho is not a matched baseline. "Below rho" here does not mean below a
+> matched rho, and the switch arithmetic at the end of the section inherits
+> the same caveat. Nothing above this section is affected.
+
 Added after the confirmation run.  **No decision above rests on it**, and the
 tournament's own gates decide `beats_rho_strict`.  It exists because the
 tempting alternative — multiplying the triple/`scaled` ratio by the

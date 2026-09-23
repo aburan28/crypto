@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Rebuild both IC arms of the counted-sizing check from committed inputs.
+# Rebuild the three arms of the counted-sizing check and its rho control from committed inputs.
 #
 #   triple  = round-0020 `both` + round21-wide-pair-table.patch + round23-scaled-base.patch
 #             + ../ic_triple_table_20260923/triple-table.patch
 #   counted = triple + counted-sizing.patch (this directory)
+#   control = triple + rho-normal-basis.patch (this directory): rho with the IC
+#             arm's canonical form, PREREGISTRATION-rho-control.md
 #
-# Rho is the `triple` build's rho mode; neither patch touches it.
+# The registered rho is the `triple` build's rho mode; counted-sizing.patch does not touch it.
 #
 #   research/ic_triple_counted_20260923/build_arms.sh /absolute/work/dir
 #
@@ -39,3 +41,5 @@ build() {
 build triple  "$CAMPAIGN/round21-wide-pair-table.patch" "$CAMPAIGN/round23-scaled-base.patch" "$TRIPLE"
 build counted "$CAMPAIGN/round21-wide-pair-table.patch" "$CAMPAIGN/round23-scaled-base.patch" "$TRIPLE" \
               "$HERE/counted-sizing.patch"
+build control "$CAMPAIGN/round21-wide-pair-table.patch" "$CAMPAIGN/round23-scaled-base.patch" "$TRIPLE" \
+              "$HERE/rho-normal-basis.patch"

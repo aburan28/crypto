@@ -4298,8 +4298,53 @@ factor base, and this prices a decomposition oracle.</p>
   1.40, 2.21). A collector that switches by the model at run time would read 0.69, 0.81 and 0.93,
   below rho at every cell measured &mdash; arithmetic on this table, not a run, and to be
   pre-registered before it is one.</p>
+<p><strong>Correction (same PR):</strong> the rho columns are against the worker&rsquo;s rho, which
+  names each Frobenius class by squaring through the orbit &mdash; about 9,100 of its 9,930
+  instructions a step at <code>n43a1</code> &mdash; where the IC arm uses a normal-basis rotation.
+  Given that one piece of the IC arm&rsquo;s code, rho is below this pipeline at every cell measured
+  (panel below). &ldquo;Below rho&rdquo; in this panel does not mean below a matched rho.</p>
 </section>
 <!-- END ic-triple-table-20260923 -->
+<!-- BEGIN ic-triple-counted-20260923 -->
+<section class="panel" id="ic-triple-counted-20260923">
+<div class="panel-head"><h2>Counted sizing, and a matched rho <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
+<p>Two pre-registered measurements on the same 256 fixtures. First, the triple collector sized
+  by counting the four-sums a target can be, in place of the pair model&rsquo;s units: the count
+  predicts the triple arm&rsquo;s trials unfitted (5.9, 37.1, 396.1 against 6.1, 36.3, 387.6) and
+  moves one cell, <code>n43a1</code>, from two orbits to three. Second, a control prompted by a
+  profile taken during the first: the worker&rsquo;s rho with the IC arm&rsquo;s own normal-basis
+  orbit naming in place of its squaring chain, and nothing else changed. <strong>Not a tournament
+  round</strong>; instructions only.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/PREREGISTRATION.md">sizing pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/PREREGISTRATION-rho-control.md">control pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/rho-normal-basis.patch">the control patch</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Instruction unit Ir, complete DLP, 32 paired fixtures a cell (128 at <code>n43a1</code>),
+  every report of every arm verified by <code>oracle.py</code> with the same logarithm. Geometric
+  mean of paired ratios, 95% bootstrap interval. &ldquo;Worker rho&rdquo; is the tournament&rsquo;s
+  matched rho; &ldquo;control&rdquo; is that rho with the IC arm&rsquo;s orbit naming.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>counted / triple</th><th>counted / worker rho</th><th>counted / control</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>0.968 (identity)</td><td>1.210 [1.121, 1.303]</td><td>1.501 [1.433, 1.574]&dagger;</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td>0.991 (identity)</td><td>0.795 [0.679, 0.935]</td><td><strong>1.723</strong> [1.569, 1.892]</td></tr>
+<tr><td>n43a1</td><td>4,644,189,029</td><td><strong>0.773</strong> [0.708, 0.843]</td><td>0.824 [0.752, 0.904]</td><td><strong>2.882</strong> [2.680, 3.095]</td></tr>
+<tr><td>n59a0</td><td>10,063,074,221</td><td>0.999 (identity)</td><td>0.823 [0.763, 0.889]</td><td><strong>1.192</strong> [1.148, 1.242]</td></tr>
+<tr><td>n61a1</td><td>11,514,943,771</td><td>0.997 (identity)</td><td>0.714 [0.580, 0.874]</td><td>2.736 [2.306, 3.258]&dagger;</td></tr>
+</tbody></table></div>
+<p><strong>The sizing is supported</strong>: 0.773&times; the triple arm at <code>n43a1</code>, below
+  its predicted 0.795&ndash;0.890, and an exact identity (same base, trials, relations, logarithm)
+  at the other four. <strong>Against the worker&rsquo;s rho the pipeline is below one at four
+  cells</strong>, as registered. <strong>Against the control it is above one at all five</strong>:
+  the worker&rsquo;s rho spends about 9,100 of its 9,930 instructions a step walking the Frobenius
+  orbit by squaring, a cost the IC arm engineered away in round 0007, and every cell where this
+  pipeline &ldquo;beat rho&rdquo; is one where it loses to a rho given that same code. By the
+  control rule&rsquo;s letter the verdict is <em>partial</em>: &dagger; marks two cells left unscored
+  because walk lengths fell outside a band that proved too tight for 32 fixtures &mdash; both
+  bootstrap intervals contain one, and a longer control walk only lowers these ratios. The control
+  still costs about 3,000 instructions a step against an IC probe&rsquo;s 1,100, so a lean rho would
+  widen every ratio. <strong>Class: accounting</strong> &mdash; what the ratios were counted against
+  changed; no algorithm got worse. It bears on every IC-below-rho result taken against the
+  worker&rsquo;s rho, including the tournament&rsquo;s <code>beats_rho_strict</code> rounds, and says
+  nothing new about ECC2K-130.</p>
+</section>
+<!-- END ic-triple-counted-20260923 -->
 <section class="panel" id="radical-pair-image-20260921">
   <div class="panel-head">
     <h2>Radical unordered-pair image <span class="chip">engineering diagnostic</span></h2>
