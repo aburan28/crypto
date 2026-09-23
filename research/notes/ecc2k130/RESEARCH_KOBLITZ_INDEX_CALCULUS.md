@@ -885,6 +885,16 @@ machines rather than cores: every unit is independent, the merge is one
 scalar multiplication per relation, and the linear algebra of the
 previous entry is what turns the merged relations into the database.
 
+*GPU side of the table, 2026-09-23.* `gpu/ecc2k/pairtable.cuh` now
+builds the folded table itself, not just its key. `pairtable_fold_kernel`
+takes one row per signed orbit over the orbit-sorted suffix and tags
+every entry with its orbit, and the host assembles those entries into
+the CPU's layout. On the host emulation it reproduces the table
+`PairSumTable::build_folded_within` stores, word for word, at `n = 23`
+and `n = 41` (`gpu/ecc2k/README.md`, *Stored by orbit*). Nothing ran on
+a device and nothing was timed, so this is a correctness step: no
+class, no scoreboard row.
+
 ## Beyond Koblitz: subfield curves `E/GF(2^k)` over `GF(2^{ke})` — 2026-09-11
 
 **Modules:** `koblitz_index_calculus::{KoblitzCurve::subfield, invariant_factors,

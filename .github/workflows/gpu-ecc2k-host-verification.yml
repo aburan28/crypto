@@ -2,12 +2,14 @@
 # when `__CUDACC__` is not defined, so everything but the kernels
 # compiles and runs under g++ with no GPU.  Nothing ran it.
 #
-# `pairtable_kernel` is covered too, by `test_pairtable_emu.cpp`: its
-# body is plain C++ once `__global__` and the thread indices are
-# supplied, so that test compiles it as a host function and runs it once
-# per emulated thread.  What stays uncovered is how a kernel *runs* on a
-# device — launch geometry, occupancy, and whatever nvcc does
-# differently from g++ — not what it computes.
+# `pairtable_kernel` and `pairtable_fold_kernel` are covered too, by
+# `test_pairtable_emu.cpp`: their bodies are plain C++ once `__global__`
+# and the thread indices are supplied, so that test compiles them as host
+# functions and runs them once per emulated thread.  The folded one is
+# checked against the table the CPU itself stored (`vec_fold.h`).  What
+# stays uncovered is how a kernel *runs* on a device — launch geometry,
+# occupancy, concurrency, and whatever nvcc does differently from g++ —
+# not what it computes.
 #
 # That matters most for `pt_canon`, the folded pair table's key.  Its
 # correctness is not a thing a reviewer can eyeball: it has to name
@@ -27,6 +29,10 @@ on:
       # change to either moves what the C++ side is checked against.
       - 'examples/dump_canon_vectors.rs'
       - 'src/cryptanalysis/koblitz_fast.rs'
+      # `vec_fold.h` is a folded table `PairSumTable` built, so a change
+      # to how the CPU builds one moves what the fold kernel must match.
+      - 'examples/dump_fold_vectors.rs'
+      - 'src/cryptanalysis/koblitz_index_calculus.rs'
       - '.github/workflows/gpu-ecc2k-host-verification.yml'
 jobs:
   host-tests:
@@ -41,7 +47,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@1.90.0
       # `make test` builds nine binaries and runs them, three per curve:
       # the field and curve harness, the pair table's building blocks,
-      # and the pair-table kernel itself run on the host.  The two
+      # and the pair-table kernels themselves run on the host.  The two
       # pair-table ones decline for `ecc2k95` at m = 97 > 62, which is
       # `pt_low64`'s ceiling and `FrobeniusCanon`'s too, and say so
       # rather than passing silently.
