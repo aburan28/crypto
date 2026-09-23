@@ -445,7 +445,10 @@ rung finished).
 
 Every rung ran as registered: `K₀`, E1's `l`, one shared non-invariant `V`,
 16 targets, the default engine on the `d = 3` diagonal, a budget of 20 000
-splits.  **Zero gate failures on all 128 oracle calls.**  Every found relation
+splits.  The registered `d = 4` pair decides nothing.  It was not in this
+run: it was started after this section was first written, rung by rung, with
+a two-hour limit per rung (stricter than the registered two hours per cell).
+Its rows are appended below when it finishes.  **Zero gate failures on all 128 oracle calls.**  Every found relation
 re-summed to its target, no refutation contradicted enumeration, and the
 via-`T` equivalence held on every target.  Costs are GAE per relation found,
 and every oracle cost is a lower bound.
