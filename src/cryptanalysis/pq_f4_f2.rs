@@ -82,6 +82,7 @@
 //!   Kaiserslautern 2010 — the boolean ring and its field pairs.
 
 use std::collections::{HashMap, HashSet};
+use std::hash::{BuildHasherDefault, Hasher};
 use std::time::{Duration, Instant};
 
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
@@ -186,6 +187,36 @@ fn symbolic_cap_exceeded(
 
 const NONE: u32 = u32::MAX;
 
+/// Deterministic SplitMix-style hashing for trusted internal monomial masks.
+/// Hash-map key equality still resolves collisions exactly; this only avoids
+/// SipHash's adversarial-input cost on masks constructed inside the solver.
+#[derive(Default)]
+struct FastU64Hasher(u64);
+
+impl Hasher for FastU64Hasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        let mut value = 0xcbf29ce484222325u64;
+        for &byte in bytes {
+            value = (value ^ u64::from(byte)).wrapping_mul(0x100000001b3);
+        }
+        self.write_u64(value);
+    }
+
+    fn write_u64(&mut self, value: u64) {
+        let mut mixed = value.wrapping_add(0x9e3779b97f4a7c15);
+        mixed = (mixed ^ (mixed >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
+        mixed = (mixed ^ (mixed >> 27)).wrapping_mul(0x94d049bb133111eb);
+        self.0 = mixed ^ (mixed >> 31);
+    }
+}
+
+type FastU64Map<V> = HashMap<u64, V, BuildHasherDefault<FastU64Hasher>>;
+type FastU64Set = HashSet<u64, BuildHasherDefault<FastU64Hasher>>;
+
 #[derive(Clone, Copy, Debug)]
 enum PairKind {
     /// The S-polynomial of basis elements `i` and `j`.
@@ -228,7 +259,7 @@ impl Row {
 /// first set bit of a row is its leading monomial.
 struct Columns {
     monos: Vec<u64>,
-    index: HashMap<u64, usize>,
+    index: FastU64Map<usize>,
 }
 
 impl Columns {
@@ -491,7 +522,7 @@ pub fn groebner_basis_f4(
         let mut seen_rows: HashSet<(u64, usize)> = HashSet::new();
         let mut half_rows: Vec<F2BoolPoly> = Vec::new();
         let mut field_rows: Vec<F2BoolPoly> = Vec::new();
-        let mut lcm_columns: HashSet<u64> = HashSet::new();
+        let mut lcm_columns = FastU64Set::default();
         let mut row_terms = 0usize;
         'selected_pairs: for (selected_index, p) in selected.iter().enumerate() {
             if selected_index % 128 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
@@ -557,8 +588,8 @@ pub fn groebner_basis_f4(
         // Symbolic preprocessing.  Every monomial other than an S-pair's
         // lcm is examined once; a divisible one gets a reducer led by it.
         let active: Vec<usize> = (0..s.polys.len()).filter(|&g| s.active[g]).collect();
-        let mut examined: HashSet<u64> = lcm_columns.clone();
-        let mut no_divisor: HashSet<u64> = HashSet::new();
+        let mut examined = lcm_columns.clone();
+        let mut no_divisor = FastU64Set::default();
         let mut queue: Vec<u64> = Vec::new();
         'seed_queue: for p in half_rows.iter().chain(field_rows.iter()) {
             for t in &p.terms {
@@ -759,7 +790,7 @@ fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -
         }
     }
     let lms: Vec<u64> = minimal.iter().map(|p| p.lt().unwrap().mask).collect();
-    let mut examined: HashSet<u64> = lms.iter().copied().collect();
+    let mut examined: FastU64Set = lms.iter().copied().collect();
     let mut queue: Vec<u64> = Vec::new();
     for p in &minimal {
         for t in &p.terms[1..] {
@@ -826,7 +857,7 @@ fn interreduce(mut elements: Vec<F2BoolPoly>, n_vars: usize, st: &mut F4Stats) -
         }
     }
     st.eliminate_ns += t.elapsed().as_nanos() as u64;
-    let lm_set: HashSet<u64> = lms.iter().copied().collect();
+    let lm_set: FastU64Set = lms.iter().copied().collect();
     let mut out: Vec<F2BoolPoly> = rows
         .iter()
         .filter(|(lead, _)| lm_set.contains(&cols.monos[*lead]))
