@@ -1,0 +1,255 @@
+{
+  "basis": "standard",
+  "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+  "cell_id": "n59-l9-m3-standard-a1-f0",
+  "curve_a": 1,
+  "ell": 9,
+  "export": {
+    "command": [
+      "/Volumes/SSD990/koblitz-native-f4-build4-a0f6152c/bin/koblitz_pdp_export",
+      "59",
+      "9",
+      "standard",
+      "207239054604238230",
+      "100000",
+      "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/attempt-02-budgeted-terminal/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance",
+      "1",
+      "0",
+      "--target-x",
+      "342002423881678665",
+      "--target-y",
+      "482559600513111561",
+      "--blind-instance-id",
+      "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+      "--export-only"
+    ],
+    "inputs": [],
+    "intent_path": "export.intent.json",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 13729792,
+      "single_core_seconds": 0.081001,
+      "system_seconds": 0.002807,
+      "total_core_seconds": 0.081001,
+      "user_seconds": 0.078194,
+      "wall_seconds": 0.48096358299881103
+    },
+    "metrics_path": "export.metrics.json",
+    "orphan_group_terminated": false,
+    "returncode": 0,
+    "role": "export",
+    "stderr_bytes": 0,
+    "stderr_path": "export.stderr",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_bytes": 4344,
+    "stdout_path": "export.stdout",
+    "stdout_sha256": "3179ebb5f87b6ba114ed00e980e8d629371b188420aed009ff85684d185a06b5",
+    "timed_out": false,
+    "watchdog_seconds": 120.0
+  },
+  "factor_index": 0,
+  "known_witnesses_present": false,
+  "m": 3,
+  "n": 59,
+  "ordinal": 0,
+  "result": {
+    "backend_report": null,
+    "command": [
+      "/Volumes/SSD990/koblitz-native-f4-build4-a0f6152c/bin/koblitz_pdp_backend",
+      "native-f4",
+      "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/attempt-02-budgeted-terminal/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+      "30"
+    ],
+    "conflicts": null,
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 6310576128,
+      "single_core_seconds": 119.79722699999999,
+      "system_seconds": 0.869046,
+      "total_core_seconds": 119.79722699999999,
+      "user_seconds": 118.928181,
+      "wall_seconds": 120.08162662500035
+    },
+    "returncode": -15,
+    "solver": "native-f4",
+    "source_instance_id": null,
+    "source_model_valid": null,
+    "source_witness_valid": null,
+    "status": "timeout_inconclusive",
+    "timed_out": true
+  },
+  "schema": "koblitz_phase_b_native_f4_task.v1",
+  "source_artifacts_after": {
+    "exports": {
+      "cryptominisat_xor_dimacs": {
+        "bytes": 219207,
+        "manifest_blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+        "path": "instance.xor.cnf",
+        "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+      },
+      "magma_boolean_f4": {
+        "bytes": 404158,
+        "manifest_blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+        "path": "instance.magma",
+        "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+      },
+      "wdsat_anf": {
+        "bytes": 255940,
+        "manifest_blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+        "path": "instance.anf",
+        "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+      }
+    },
+    "manifest": {
+      "bytes": 4343,
+      "path": "manifest.json",
+      "sha256": "ad13a62de370bf2ea2eca038320627229706320a15191e3ab5e65d1e61c49c36"
+    }
+  },
+  "source_artifacts_before": {
+    "exports": {
+      "cryptominisat_xor_dimacs": {
+        "bytes": 219207,
+        "manifest_blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+        "path": "instance.xor.cnf",
+        "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+      },
+      "magma_boolean_f4": {
+        "bytes": 404158,
+        "manifest_blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+        "path": "instance.magma",
+        "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+      },
+      "wdsat_anf": {
+        "bytes": 255940,
+        "manifest_blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+        "path": "instance.anf",
+        "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+      }
+    },
+    "manifest": {
+      "bytes": 4343,
+      "path": "manifest.json",
+      "sha256": "ad13a62de370bf2ea2eca038320627229706320a15191e3ab5e65d1e61c49c36"
+    }
+  },
+  "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+  "source_system_id": "x-4b8824db5204cff67a887d4166992386cf86804e7547c89717f385097a92d886",
+  "source_verification": {
+    "process": {
+      "command": [
+        "/Volumes/SSD990/koblitz-native-f4-build4-a0f6152c/bin/koblitz_pdp_backend",
+        "verify-source",
+        "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/attempt-02-budgeted-terminal/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json"
+      ],
+      "inputs": [
+        {
+          "bytes": 4343,
+          "path": "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/attempt-02-budgeted-terminal/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+          "sha256": "ad13a62de370bf2ea2eca038320627229706320a15191e3ab5e65d1e61c49c36"
+        },
+        {
+          "bytes": 255940,
+          "path": "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/attempt-02-budgeted-terminal/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+          "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+        },
+        {
+          "bytes": 219207,
+          "path": "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/attempt-02-budgeted-terminal/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf",
+          "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+        },
+        {
+          "bytes": 404158,
+          "path": "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/attempt-02-budgeted-terminal/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.magma",
+          "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+        }
+      ],
+      "intent_path": "source-verification.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 11796480,
+        "single_core_seconds": 0.040929999999999994,
+        "system_seconds": 0.0023569999999999997,
+        "total_core_seconds": 0.040929999999999994,
+        "user_seconds": 0.038572999999999996,
+        "wall_seconds": 0.25562416600223514
+      },
+      "metrics_path": "source-verification.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "source-verification",
+      "stderr_bytes": 0,
+      "stderr_path": "source-verification.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 1129,
+      "stdout_path": "source-verification.stdout",
+      "stdout_sha256": "05b0afde21cfac22e5c62015900873949198206e7188057af13704b4acd852ba",
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    "regenerated_source_exact": true,
+    "report": {
+      "ell": 9,
+      "interpretation": "The algebraic factor base, explicit affine target, source identity, and all exported equations were independently reconstructed without running a solver",
+      "n": 59,
+      "regenerated_source_exact": true,
+      "schema": "koblitz_pdp_source_verification.v1",
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_instance_verified": true,
+      "source_variables": 78,
+      "status": "verified",
+      "timing_ns": {
+        "source_verification": 38489208
+      }
+    },
+    "source_artifacts": {
+      "cryptominisat_xor_dimacs": {
+        "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+        "bytes": 219207,
+        "path": "instance.xor.cnf",
+        "valid": true
+      },
+      "magma_boolean_f4": {
+        "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+        "bytes": 404158,
+        "path": "instance.magma",
+        "valid": true
+      },
+      "wdsat_anf": {
+        "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+        "bytes": 255940,
+        "path": "instance.anf",
+        "valid": true
+      }
+    },
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "source_instance_verified": true,
+    "status": "verified"
+  },
+  "status": "terminal_native_f4_recorded",
+  "target": {
+    "x": "342002423881678665",
+    "y": "482559600513111561"
+  },
+  "truth_labels_present": false
+}
