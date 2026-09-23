@@ -32,6 +32,8 @@ on:
       - "scripts/run_koblitz_phase_b_native_f4.py"
       - "scripts/compose_koblitz_stage164_dense_f4.py"
       - "scripts/verify_koblitz_stage164_dense_f4.py"
+      - "scripts/compose_koblitz_stage165_x1_order.py"
+      - "scripts/verify_koblitz_stage165_x1_order.py"
       - "scripts/test_koblitz_phase_b_tool_builds.py"
       - "scripts/score_koblitz_blind_pdp_phase_b.py"
       - "scripts/test_koblitz_blind_pdp_phase_b.py"
@@ -108,6 +110,8 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz.sha256"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-20260923/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-165-x1-weight-order-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-165-x1-weight-order-verification.json"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -171,6 +175,11 @@ jobs:
           cargo test --release --lib cryptanalysis::pq_f4_f2::tests:: -- --test-threads=1
           python3 scripts/verify_koblitz_stage164_dense_f4.py > /tmp/stage164-dense-f4-verification.json
           cmp /tmp/stage164-dense-f4-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-verification.json
+      - name: Verify sparse fixed-X1 order supplement
+        run: |
+          cargo test --release --example koblitz_pdp_backend -- --test-threads=1
+          python3 scripts/verify_koblitz_stage165_x1_order.py > /tmp/stage165-x1-order-verification.json
+          cmp /tmp/stage165-x1-order-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-165-x1-weight-order-verification.json
       - name: Validate licensed Magma Phase-B replay packet controls
         run: |
           python3 scripts/test_koblitz_phase_b_magma_replay.py -v

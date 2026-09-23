@@ -1,0 +1,48 @@
+{
+  "all_seven_gates_passed": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "7a4d40ad45e31ce3c28823bd73835e883fd66419fd3563daaf75649f557ed535",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_one_native_f4_n59_target_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "next_targets": [
+    "execute the full frozen 160-input packet under licensed Magma F4",
+    "run a fresh-target native-F4 schedule holdout rather than infer generality from this target",
+    "reduce selected native-F4 cost below same-target direct MITM or retain it only as a solver control",
+    "preserve complete outer metering for every future development command",
+    "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
+  ],
+  "predecessor": {
+    "stage164_audit_sha256": "cdc79b8053853547e94abcfabe7fd3dc074e4cbd41938702024dfa42ca3db6a4",
+    "stage164_seal_sha256": "7847c905ad8582c72095a7e801f1c8c2c57f5af75885213e78583a3899afa85c",
+    "stage164_status": "current_seven_gate_audit_verified"
+  },
+  "schema": "koblitz_stage165_current_gate_audit.v1",
+  "scoreboard_sha256": "8c242cb02ecb7fbbe31217e5ad3bc807384a5de0b7899ae1dad21a6d652a0f25",
+  "stage165": {
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "complete_campaign_cost": null,
+    "result_seal_sha256": "c8b7058d6eeacc74df4f1687b3531bb157cdb2deb8affb4eb780dd53d41d5bff",
+    "result_sha256": "87d75029b9088f2ce8e8bea3d01d1cd4c7d60cc5bb90cdacce99eb0ec6ad4807",
+    "same_binary_ascending_speedup": 1.6012670283217958,
+    "same_host_f4_over_mitm_wall": 7.171507408298489,
+    "selected_core_seconds": 21.484441,
+    "selected_peak_rss_bytes": 948502528,
+    "selected_wall_seconds": 21.512089291005395,
+    "selected_word_xors": 16821055616,
+    "selection_caveat": "chosen post hoc after inspecting this target; generalization untested",
+    "source_commit": "341e46d02d49da94ca24837f7116c812ff2299d3",
+    "verification_sha256": "7a3b4b9900aa2c721ffe1d64ea9500ee54da3d15c140dfe524673e6e0c6fdb0b"
+  },
+  "status": "current_seven_gate_audit_verified"
+}
