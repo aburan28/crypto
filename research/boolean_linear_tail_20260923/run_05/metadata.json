@@ -1,0 +1,25 @@
+{
+  "campaign_seconds": 6.84670404100325,
+  "complete": true,
+  "ended_utc": "2026-09-23T08:38:39.471747+00:00",
+  "git_base": "c515c3407b9727d74a01bc04c1d43830ba74bc86",
+  "git_status": "?? ./\n",
+  "host": {
+    "cpus": 14,
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "system": "Darwin"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean degree-3 linear-tail row-space computation on public synthetic inputs. No curve inputs, targets, scalar recovery, complete polynomial solving, production integration or rho runs.",
+  "source_hashes": {
+    "analyze.py": "34489fd9fc03223bd30fe7349a04e3989a277d12b35af40bdc891858fc2c2d81",
+    "protocol.json": "d9f3d6485eaca6fc22af6c82cac9504a4c305ccd5aed54ef41cbadb2a7ff76ab",
+    "run.py": "851b3be302727870166e986958ac10b02d8549383ad4d08d2c81d0000ff1e3b4",
+    "worker.rs": "7bd57b026affaa75b5dfc78a4dc854f974b61fa8e513a06ac14b28944fd9d545"
+  },
+  "started_utc": "2026-09-23T08:38:29.695117+00:00",
+  "test_executable_sha256": "29ab75d7b849d7255f9a80a990fefea88ce72ff8fc25f763074ccf1b06b09f69",
+  "worker_sha256": "c1aee76af62c2a633ffa09b0183618208eb21601f126dd54209b5c06f01635cb"
+}

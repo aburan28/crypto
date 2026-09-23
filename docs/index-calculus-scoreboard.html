@@ -4305,6 +4305,48 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-linear-tail-20260923">
+  <div class="panel-head">
+    <h2>Specialized linear tails: 3.59&times; on the declared mix; guarded promotion remains rejected <span class="chip">engineering</span></h2>
+    <p>Sparse high terms, an affine word, lighter-pivot exchange and an exact bitmap column
+      census reduce complete linear-tail kernel cost. The latest declared mixture is
+      3.59&times; faster than the pointwise better retained flat/bucket control, with a 95%
+      interval [3.57, 3.62], and 1.64&times; faster than the best prior experimental arms.
+      All identical-control checks pass. Four small-case non-regression intervals still
+      miss the frozen 0.95 lower bound, so <strong>portfolio promotion remains REJECTED</strong>.
+      The universal per-cell 2&times; gate remains rejected as well; the hybrid reuses the
+      flat method on small active spaces.</p>
+    <p>Sources:
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_tail_20260923/CONCLUSION.md">decision, guards and experimental history</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_tail_20260923/run_09/RESULT.md">latest frozen table</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_tail_20260923/run_09/results.json">paired gates</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_tail_20260923/RUN_LEDGER.json">immutable run ledger</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_tail_20260923/SOURCE_PORTS.json">retained source strategies</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold milliseconds per batch of eight at nominal n=36, including all kernel work,
+      exact validation and destruction. Two holdout seeds, 42 observations each; each observation
+      sums sixteen independently reset cold batches and the displayed values divide by sixteen.
+      The last ratio describes the quadratic column; mixture gates use paired control minima.</caption>
+    <thead><tr><th>Method</th><th>Quadratic (ms)</th><th>Linear drop (ms)</th><th>Eight-active cycle (ms)</th><th>Cross cancellation (ms)</th><th>Flat / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Cached flat tail</td><td>1.481716</td><td>2.955561</td><td>0.074004</td><td>1.590747</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Existing sparse bucket</td><td>0.943720</td><td>1.195530</td><td>0.591923</td><td>0.943421</td><td>1.570</td><td>PASS</td></tr>
+      <tr><td>Plain sparse streaming</td><td>0.441522</td><td>0.564499</td><td>0.579945</td><td>0.435589</td><td>3.356</td><td>PASS</td></tr>
+      <tr><td>Pivot-exchange streaming</td><td>0.437848</td><td>0.565529</td><td>0.466715</td><td>0.423594</td><td>3.384</td><td>PASS</td></tr>
+      <tr><td>Exact bitmap census</td><td>0.213036</td><td>0.302470</td><td>0.444639</td><td>0.226766</td><td>6.955</td><td>PASS</td></tr>
+      <tr><td>Fixed hybrid dispatcher</td><td>0.213638</td><td>0.301923</td><td>0.082290</td><td>0.223602</td><td>6.936</td><td>PASS</td></tr>
+      <tr><td>Identical flat alias</td><td>1.484120</td><td>2.994671</td><td>0.076327</td><td>1.607216</td><td>0.998</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All nine large-active quadratic, linear-drop and cross-cancel cells pass the 2&times; gate
+    against both retained controls; the smallest confidence lower bound is 3.13&times;.
+    The small-case guard failures are retained. Predecessor-balanced timing, matched pairing,
+    an identical alias and longer observations are recorded alongside earlier unsuccessful
+    schedules and one zero-measurement launcher failure. Mixture weights are declared
+    benchmark weights, not solver-call frequencies. No production solver integration,
+    complete polynomial-solving result or rho claim follows from these kernel measurements.</p>
+</section>
 <section class="panel" id="boolean-construction-reduction-20260922">
   <div class="panel-head">
     <h2>Construction plus canonical reduction: both new candidates lose to staged processing <span class="chip">engineering</span></h2>

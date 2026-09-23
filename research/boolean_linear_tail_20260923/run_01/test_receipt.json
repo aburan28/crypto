@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-schedule-01kp0h1y/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 7602176,
+  "process_wall_ns": 454894916,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 6 tests\ntest tests::caps_count_sources_and_cache_revalidates_smaller_support ... ok\ntest tests::encoded_order_matches_source_degrevlex ... ok\ntest tests::cancellation_constant_empty_and_invalid_inputs ... ok\ntest tests::exhaustive_boolean_coefficients_all_arms ... ok\ntest tests::small_split_matrices_match_explicit_intersection ... ok\ntest tests::all_larger_families_and_hidden_affine_consequences_match ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s\n\n",
+  "stdout_sha256": "164dcc842ef39585adbb1909b6f194056c66a15ad0fb5d85865c8f3a5f6e1a91",
+  "system_seconds": 0.004567,
+  "timed_out": false,
+  "user_seconds": 0.094369
+}
