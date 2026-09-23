@@ -3690,6 +3690,19 @@ re-run on the recorded seeds first, and the matched walk then runs on
 the same seeds and targets.  The index-calculus rows are not re-run;
 their counts did not change.
 
+*Amendment, written while the calibration ran and before any of its
+output was read.*  The scoreboard's boundary panel, its verdict
+(`3.55×`, `16.0×`) and its exponent marks for rho cite the Round-5
+ladder, `docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json`, not
+the headline.  So (b) covers that ladder too — eight prime rungs from
+10 to 24 bits and five binary rungs from `n = 15` to `27` — and its
+holdout, `…-round5-holdout-2026-09-22.json`, and target 2 covers every
+one of their recorded runs.  The ladder's prime rungs from 12 to 20
+bits are the roster curves the calibration also runs, on other seeds
+and targets.  The rule the calibration fixes is a function of the
+subgroup's bit length alone; the overlap is disclosed here rather than
+avoided.
+
 **Targets:**
 
 1. **Correct.**  Every run of every walk, calibration and evaluation,
