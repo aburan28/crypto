@@ -14,7 +14,7 @@ groebner --summands 3` (whole logarithms).
 this round keeps and whose split rule it keeps; only the order the variables are
 handed to that rule, and what the solver does with a linear generator, change.
 
-**Status: registered, then amended (§5), then measured.**  §0–§4 were
+**Status: registered, amended (§5), measured (§6): T1 not met as registered; T1′, T2, T3 met; engineering.**  §0–§4 were
 committed before any registered run (`2809b498`); §1 lists every run made
 before registration.  §5 is a dated amendment made after the registered runs
 and before any run of the supplementary holdout it registers.  Results are
@@ -331,3 +331,197 @@ reference exhausts its budget is reported and left out, as in T1).  The
 candidate ships as the default only if T1′, T2 and T3 hold; otherwise the
 engine's default reverts to the reference and the rest stays as retained
 controls.
+
+## 6. Results
+
+*Appended after every registered run; §0–§5 are not edited.  Every number below
+is read from `research/chain_split_order_20260924/` (`tables.md` for the stage
+ladders, `comparisons/` for the acceptance of each pair, `oracle_ladder/` and
+`e2e/` for T3 and §4).  Word operations are deterministic and identical across
+the three repetitions of every arm.*
+
+**Bottom line.**  The registered candidate — interleaved order plus linear
+elimination, completing on a degree drop — costs **`4.91×`** fewer word
+operations than the reference on the supplementary holdout T1′ (nine cells, all
+comparable, `1.68–33.3×` per rung, the same targets decomposed on every one),
+**`7.25×`** on the four cells of the original holdout, `1.82×` on the tuning
+ladder and `1.04×` on the frozen ladder, where only its one cubic rung moves
+(`1.84×`).  T1 is **not met as registered** (four comparable rungs of the six it
+required, §5); T1′, T2 and T3 are met, so by §5 the candidate is the engine's
+default.  The degree-drop rule `D = rebuild` fails its own gate and stays a
+retained control.  Class: **engineering** — the floor has no term this moves,
+and the whole-logarithm runs of §4 show what the stage gain is worth end to end
+here: every counted phase does the same or less work, but the pipeline's `S`
+stays null.
+
+### 6.1 The table
+
+Candidate against reference, with the single-factor arms beside them (all eight
+arms of the factorial are in `tables.md`).  Ratios are reference / arm; "nodes"
+are the reductions each tree took.
+
+| suite | rung | targets | decomposed | nodes ref → cand | reference | `L` alone | `O` alone | **candidate `O+L`** | `D` (same tree as ref) | class |
+|:--|:--|--:|--:|:--|--:|--:|--:|--:|--:|:--|
+| frozen | `K_0/2^9` m=2 | 40 | 39 | 338 → 289 | 219,979 | 1.08× | 1.00× | **1.08×** | 1.05× | engineering |
+| frozen | `K_0/2^9` m=3 | 16 | 15 | 382 → 215 | 1,142,867 | 1.29× | 0.66× | **1.84×** | 1.08× | engineering |
+| frozen | `K_0/2^13` m=2 | 40 | 40 | 520 → 520 | 5,295,231 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
+| frozen | `K_1/2^15` m=2 | 32 | 0 | 32 → 32 | 70,779 | 1.00× | 1.00× | **1.00×** | 1.00× | flat (no tree) |
+| frozen | `K_1/2^17` m=2 | 32 | 7 | 1,769 → 1,769 | 1,985,821 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
+| frozen | `K_1/2^23` m=2 | 16 | 9 | 4,876 → 4,876 | 7,982,169 | 1.00× | 1.00× | **1.00×** | 1.00× | flat |
+| frozen | **total** | 176 | 110 | | **16,696,846** | 1.02× | 0.97× | **1.04×** | 1.01× | engineering |
+| chain (tuning) | `K_0/2^13` m=3 | 8 | 8 | 200 → 200 | 9,743,787 | 1.16× | 1.19× | **1.62×** | 1.16× | engineering |
+| chain (tuning) | `K_0/2^9` m=4 | 8 | 7 | 758 → 156 | 2,868,312 | 1.95× | 0.45× | **3.13×** | 1.12× | engineering |
+| chain (tuning) | **total** (with `K_0/2^9` m=3) | | | | **13,754,966** | 1.28× | 0.85× | **1.82×** | 1.14× | engineering |
+| holdout | `K_1/2^9` m=4 | 8 | 8 | 257 → 174 | 3,199,188 | 2.18× | 1.32× | **2.74×** | **0.88×** | engineering |
+| holdout | `K_0/2^15` m=4 (refutation only; base of 1 point) | 8 | 0 | 7,203 → 264 | 21,561,148 | 1.68× | 2.82× | **3.82×** | 1.64× | engineering |
+| holdout | `K_1/2^15` m=4 | 8 | 5 | 58,955 → 7,858 | 345,384,853 | 2.58× | **0.19×** | **8.74×** | 2.19× | engineering |
+| holdout | `K_0/2^13` m=3, targets 1000… | 8 | 8 | 200 → 200 | 9,121,538 | 1.09× | 1.26× | **1.53×** | 1.09× | engineering |
+| holdout | **total** (4 of 11 cells comparable) | | | | **379,266,727** | 2.42× | 0.21× | **7.25×** | 2.07× | engineering |
+| T1′ | `K_1/2^11` m=4 | 4 | 4 | 48,328 → 124 | 99,422,940 | | | **33.32×** | | engineering |
+| T1′ | `K_0/2^15` m=3, divisor 1 | 8 | 6 | 1,557 → 258 | 6,960,048 | | | **3.58×** | | engineering |
+| T1′ | `K_0/2^15` m=4, divisor 1 | 8 | 7 | 21,535 → 4,771 | 149,499,912 | | | **5.05×** | | engineering |
+| T1′ | `K_0/2^15` m=3, divisor 2 (refutation only) | 8 | 0 | 4,281 → 387 | 9,137,800 | | | **3.31×** | | engineering |
+| T1′ | `K_0/2^15` m=4, divisor 2 (refutation only) | 8 | 0 | 94,018 → 8,369 | 436,103,847 | | | **6.73×** | | engineering |
+| T1′ | `K_1/2^15` m=4, divisor 1 (refutation only; base of 1 point) | 8 | 0 | 8,229 → 264 | 28,328,427 | | | **4.82×** | | engineering |
+| T1′ | `K_1/2^15` m=4, divisor 2 (refutation only) | 8 | 0 | 50,138 → 2,870 | 205,293,663 | | | **6.07×** | | engineering |
+| T1′ | `K_0/2^23` m=3 | 4 | 4 | 9,279 → 2,380 | 65,321,230 | | | **1.68×** | | engineering |
+| T1′ | `K_0/2^23` m=3, divisor 1 | 4 | 4 | 19,166 → 4,758 | 104,466,517 | | | **2.36×** | | engineering |
+| T1′ | **total** (9 of 9 comparable) | 60 | 25 | | **1,104,534,384** | | | **4.91×** | | engineering |
+
+Ratio to the floor: flat on every row, by construction (§0).  Correctness:
+every pair above was accepted — the `D` pairs by the frozen suite's
+`compare.py` (identical verdict digests and node counts: rebuilding on a drop
+keeps the tree, as the sandwich argument says), every other pair by
+`compare_cross_tree.py` (same instances, same targets decomposed, none
+exhausted on either side, same oversize count; each counted decomposition was
+lifted and verified in the group).  Wall, medians of three, a practicality
+note: the holdout `8.48 → 1.29 s`, T1′ `24.8 → 4.4 s`, the frozen ladder
+`0.6 → 0.6 s`.
+
+### 6.2 Against the registered targets
+
+- **T1: not met as registered** — the count clause (§5).  On the four cells
+  that ran, every other clause of T1 holds (`7.25×`, every rung above `1`).
+- **T1′: met.**  Nine comparable rungs of nine, total `4.91×` (threshold
+  `2.0×`), every rung with a reference tree above `1.0` (the least,
+  `K_0/2^23 m=3`, `1.68×`), none exhausted on either side.
+- **T2: met.**  No frozen rung rises; four are flat, two fall (`1.08×`,
+  `1.84×`).
+- **T3: met.**  The pinned same-tree tests, `linear_elimination_keeps_every_root`
+  and `interleaved_chain_solve_has_the_same_roots` pass (50 tests of the three
+  modules); on the oracle-pricing ladder both arms report identical found /
+  refuted / inconclusive counts for matrix-F4 on every cell and zero
+  disagreements between any two oracles on any target (§6.4).
+- **The degree-drop rule: fails its gate.**  Same-tree against its `complete`
+  twin it is `0.88×` on the holdout's `K_1/2^9 m=4` with `L = 0`, and under
+  `L = 1` it costs `47,868,319` against the candidate's `39,537,587` on
+  `K_1/2^15 m=4` (`0.83×`).  It stays a control, off by default — a clean
+  negative: rebuilding a basis from scratch on every drop is dearer than
+  completing it wherever the dropped generators are few, and the drops that
+  mattered (to degree one) are exactly the ones linear elimination removes.
+
+### 6.3 Why the two changes only work together
+
+The order alone is a loss wherever the chain is long enough to matter —
+`0.19×` on `K_1/2^15 m=4`, `0.21×` over the holdout — and linear elimination
+alone is a modest gain (`2.42×` there); together they are `7.25×`.  That is the
+mechanism of the question, measured: fixing `x_m` first leaves the last link's
+`n` generators at degree one, and without elimination the inherited engine
+multiplies every one of them by every monomial of degree `≤ 2` over the
+occurring variables and inserts the products against the parent's basis
+(completion rows).  The tree shrinks — `58,955 → 7,858` reductions on
+`K_1/2^15 m=4`, `48,328 → 124` on `K_1/2^11 m=4` — but under the order alone
+each of its nodes pays for that completion.  Elimination removes the
+intermediate point's variables instead, the node rebuilds a small basis over
+what is left, and the hybrid *guess a summand, eliminate the intermediate
+point, reduce the rest* of the question runs at the cost of its tree.  A
+reader should not try the order by itself.
+
+### 6.4 The oracle-pricing ladder (T3)
+
+`ic boundary --regime koblitz --oracles`, seed `123212651130`, 8 targets per
+cell, both arms on one binary (`oracle_ladder/{reference,candidate}.json`).
+Matrix-F4's word XORs over the eight targets, with the other oracles on the same
+targets for scale; GAE per target and the projected relation-phase `S` are
+converted at the factor each run measures on its host (the two arms' factors
+differ by up to `14%`: CDCL's identical conflict counts price at `6.77 × 10⁷`
+and `5.93 × 10⁷` GAE per target), so the word-operation ratio is the
+comparison and the GAE columns are context.  The projected `S` is an
+extrapolation (the ladder's own column: `(K+1)/hit rate` targets at the mean
+price).
+
+| cell | oracle | word XORs, reference | candidate | ratio | GAE/target ref → cand | projected `S` ref → cand |
+|:--|:--|--:|--:|--:|:--|:--|
+| `n = 9`, m=3, 27 unknowns, hit 1.0 | matrix-F4 | 560,420 | 354,877 | **1.58×** | 356 → 221 | 158 → 98 |
+| | enumeration / meet in the middle | | | | 5.0 / 2.0 | 2.2 / 0.90 |
+| `n = 15`, m=3, 30 unknowns, hit 0.38 | matrix-F4 | 25,639,588 | 7,187,062 | **3.57×** | 9,927 → 2,434 | 3,864 → 948 |
+| | enumeration / meet in the middle / `S₄` pairs | | | | 467 / 24.9 / 1,730 | 182 / 9.7 / — |
+| `n = 9, 11, 13, 15, 17, 23`, m=2 | matrix-F4 | | | 1.00–1.03× | | |
+
+The same cells on the 2026-09-22 freeze of the inherited engine read `942,041`
+and `55,202,947` word XORs; the fresh reference here, `560,420` and
+`25,639,588`, is the current main (the rounds since moved it; this round cites
+its own measurement).  After this round matrix-F4 at `n = 15, m = 3` is still
+`5×` enumeration and `100×` meet in the middle per target: the Gröbner oracle
+remains the slowest route that finishes, as the scoreboard has said.
+
+### 6.5 Whole logarithms (§4)
+
+`ic run --solver groebner --summands 3 --random-target --batch 1`, both arms on
+one binary, the same seeds (`e2e/`).  All 40 runs **complete, with the planted
+`k` recovered and `[k]G = Q` verified**.
+
+| cell | runs | trials ref / cand | relations ref / cand | oracle word ops ref → cand | ratio (per run) | whole-process wall ref → cand | wall ratio, geometric mean [95% paired bootstrap] |
+|:--|--:|:--|:--|:--|:--|:--|:--|
+| `K_0/2^13`, seeds 1–10, holdout 101–105 | 15 + 15 | 207 / 207 (every seed equal) | 206 / 206 | 234,370,439 → 151,807,846 | **1.54×** (1.50–1.57) | 3.40 → 3.23 s | 1.062× [1.025, 1.097] |
+| `K_0/2^9`, seeds 1–5 | 5 + 5 | 20 / 19 (seed 2: 4 → 3) | 20 / 19 | 1,501,482 → 803,023 | **1.87×** (1.60–2.19) | 0.068 → 0.052 s | 1.32× [1.14, 1.49] |
+
+What this shows, and all it shows: on every run the candidate does the same
+work as the reference in every counted phase but the oracle — same trials,
+same relations, same matrix — except `K_0/2^9` seed 2, where a different first
+decomposition closed the matrix one trial earlier, so it did *less* work in
+every phase.  So `baseline_total / candidate_total > 1` on every run.  Its size
+cannot be stated in one unit: `ic run` counts the oracle in word operations and
+the rest in wall time only, with no measured conversion (§4), so the method's
+`S` is **null** and the only whole-pipeline number is the wall ratio, a
+practicality note — and a weak one here: the arms ran back to back rather than
+interleaved on a shared host, so host drift is not excluded, and on `K_0/2^13`
+the relation collection is `95%` of the wall and the Gröbner stage only part
+of that.  No end-to-end speedup is claimed beyond the sign.
+
+### 6.6 What this does not establish
+
+- **An advance.**  The floor has no term for the split order or for linear
+  elimination; the ratio to it is flat on every row.  Nothing here changes a
+  first fall degree or a solving degree.
+- **Anything about `m = 2`.**  The order is the identity there, and linear
+  generators appear only when a whole summand is fixed, which the degree-3
+  algebra rarely lets the tree reach: the quadratic rungs are flat.
+- **The two largest exploratory ratios.**  `K_1/2^17` and `K_0/2^15` at
+  `m = 3` are inadmissible (§5); the production oracle never runs them.
+- **A crossing.**  The Gröbner oracle is still the most expensive route that
+  finishes a decomposition on the oracle ladder; the page's verdict is
+  unchanged.
+- **Other chained entry points.**  Only `groebner_decompose` renames a chain.
+  The symmetrised and Weil-chart oracles, and `ic bench`'s
+  `descent-algebraic` (which descends `S₄` directly and has no intermediate
+  point), get linear elimination with the inherited engine's default and
+  nothing else.
+
+### 6.7 Reproducing
+
+```bash
+cargo build --release --example groebner_stage_bench --example chain_ladder_screen --bin ic
+research/chain_split_order_20260924/run.sh          # the O × L × D factorial, three suites
+research/chain_split_order_20260924/run_t1prime.sh  # T1′
+research/chain_split_order_20260924/compare_all.sh  # every registered pair
+research/chain_split_order_20260924/oracle_ladder.sh
+research/chain_split_order_20260924/e2e.sh
+python3 research/chain_split_order_20260924/table.py > research/chain_split_order_20260924/tables.md
+./target/release/examples/chain_ladder_screen > research/chain_split_order_20260924/screen.json
+cargo test --release --lib -- cryptanalysis::koblitz_groebner cryptanalysis::inherited_f4 cryptanalysis::matrix_f5_f2
+```
+
+The retained controls: `KIC_CHAIN_ORDER=layout`, `KIC_LINEAR_ELIM=0|1`,
+`KIC_F4_DROP=rebuild`; `KIC_CHAIN_ORDER=layout KIC_LINEAR_ELIM=0` reproduces
+the pre-round default to the digit.

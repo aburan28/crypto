@@ -397,6 +397,8 @@ figures with lazy materialisation):
 | `MatrixF4`, highest | 973,838,382 | 0.80× | 1,026,870 (2.08×) | 305,067,403 (5.42×) |
 | `InheritedF4`, lowest | 112,748,692 | 6.93× | 1,394,941 (1.53×) | 2,670,183,123 (0.62×) |
 | **`InheritedF4`, highest (shipped)** | **37,302,399** | **20.95×** | **942,041 (2.27×)** | **55,202,947 (29.94×)** |
+| *before-mark, 2026-09-24: the same engine on the current main (fresh reference of [`RESEARCH_CHAIN_SPLIT_ORDER.md`](RESEARCH_CHAIN_SPLIT_ORDER.md) §6.4)* | *16,696,846* | | *560,420* | *25,639,588* |
+| *`InheritedF4`, interleaved chain order + linear elimination (default since 2026-09-24)* | *16,125,634* | | *354,877* | *7,187,062* |
 
 The from-scratch engine pays `25%` more on the quadratic rungs under the new
 rule — same matrix shapes, same tree size within `2%`, `28%` more XORs per
@@ -421,8 +423,14 @@ also the one that constrains the system least, and the tree grows to
 compensate — `4,876 → 8,660` reductions on `K_1/2^23`, `382 → 8,904` on the
 cubic `K_0/2^9`, `m = 3`.  Ladder total `73,616,817` against `37,302,399`
 (`0.51×`), every rung with a tree worse, the same targets decomposed.  The
-split variable must be chosen for the algebra first; `HighestFree` happens to
-be good for both.
+split variable must be chosen for the algebra first; ~~`HighestFree` happens to
+be good for both~~ *(struck 2026-09-24: for a chain, `m ≥ 3`, it is not — in the
+layout order it branches first on the `n` coordinates of the intermediate
+point, the least constrained unknowns in the system.  Handing it the
+variables in the interleaved order, so that it fixes the last summand first,
+and eliminating the linear generators that leaves costs `4.91×` fewer word
+operations on a registered holdout; see
+[`RESEARCH_CHAIN_SPLIT_ORDER.md`](RESEARCH_CHAIN_SPLIT_ORDER.md) §6)*.
 
 ## 4. The phases
 

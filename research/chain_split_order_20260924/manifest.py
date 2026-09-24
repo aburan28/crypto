@@ -39,8 +39,17 @@ def main():
         "note": "research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md",
         "scope": "decomposition-oracle Groebner stage (stage diagnostic) plus whole-logarithm runs; see the note",
         "git_head": git("rev-parse", "HEAD"),
+        # The commits the measured binaries were built from.  No file under
+        # src/ differs between them (`git diff --stat 2809b498 0fdb05d0 -- src`
+        # is empty); the harness gained the chain-holdout-2 ladder.
+        "built_from": {
+            "run.sh (frozen, chain, chain-holdout)": "2809b498",
+            "run_t1prime.sh, oracle_ladder.sh, e2e.sh": "0fdb05d0",
+        },
+        "src_identical_between_builds": git("diff", "--stat", "2809b498", "0fdb05d0", "--", "src") == "",
         "working_tree_clean_for_sources": git("status", "--porcelain", "--", *SOURCES) == "",
-        "sources_sha256": {s: sha256(s) for s in SOURCES},
+        "measured_sources_unchanged_since_build": git("diff", "--stat", "0fdb05d0", "HEAD", "--", *SOURCES[:4]) == "",
+        "sources_sha256_at_head": {s: sha256(s) for s in SOURCES},
         "binaries_sha256": {b: sha256(b) for b in BINARIES if (ROOT / b).exists()},
         "host": {
             "cpu": cpu,
@@ -56,6 +65,7 @@ def main():
         "commands": [
             "cargo build --release --example groebner_stage_bench --bin ic",
             "research/chain_split_order_20260924/run.sh",
+            "research/chain_split_order_20260924/run_t1prime.sh",
             "research/chain_split_order_20260924/compare_all.sh",
             "research/chain_split_order_20260924/oracle_ladder.sh",
             "research/chain_split_order_20260924/e2e.sh",
