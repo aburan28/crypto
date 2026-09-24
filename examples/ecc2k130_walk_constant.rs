@@ -128,7 +128,11 @@ fn returns_formally(tags: &[u32], n: u32) -> bool {
     branches.sort_unstable();
     branches.dedup();
     branches.iter().all(|&h| {
-        let mut ks: Vec<u32> = tags.iter().filter(|t| *t & 0xffff == h).map(|t| (t >> 16) & 0xff).collect();
+        let mut ks: Vec<u32> = tags
+            .iter()
+            .filter(|t| *t & 0xffff == h)
+            .map(|t| (t >> 16) & 0xff)
+            .collect();
         ks.sort_unstable();
         ks.dedup();
         // Start just after the largest gap between consecutive k (cyclically).
@@ -176,9 +180,7 @@ fn splitmix(mut z: u64) -> u64 {
 /// the branch distribution of the device's selection at degree `n`.
 fn weight_branch_probabilities(n: u32, h: usize) -> Vec<f64> {
     // log C(n, k), summed in logs to stay finite at n = 131.
-    let ln_c = |k: u32| -> f64 {
-        (1..=k).map(|i| ((n - k + i) as f64 / i as f64).ln()).sum()
-    };
+    let ln_c = |k: u32| -> f64 { (1..=k).map(|i| ((n - k + i) as f64 / i as f64).ln()).sum() };
     let mut p = vec![0.0; h];
     let mut total = 0.0;
     for k in (0..=n).step_by(2) {
@@ -301,7 +303,10 @@ impl Setup {
             Dist::Uniform => (splitmix(key ^ m.salt) as usize) % self.branches,
             Dist::Ecc2k130 => {
                 let u = splitmix(key ^ m.salt);
-                self.cdf.iter().position(|&c| u < c).unwrap_or(self.branches - 1)
+                self.cdf
+                    .iter()
+                    .position(|&c| u < c)
+                    .unwrap_or(self.branches - 1)
             }
         }
     }
@@ -313,9 +318,15 @@ impl Setup {
     fn frame(&self, p: &FastPoint) -> (u32, bool) {
         let c = self.canon.coords(p.x);
         let least = self.canon.canon(p.x);
-        let r = (0..self.n).find(|&r| self.rotl(c, r) == least).expect("a rotation");
+        let r = (0..self.n)
+            .find(|&r| self.rotl(c, r) == least)
+            .expect("a rotation");
         // σ^j rotates the coordinates by j one way or the other.
-        let j = if self.squaring_rotates_left { r } else { (self.n - r) % self.n };
+        let j = if self.squaring_rotates_left {
+            r
+        } else {
+            (self.n - r) % self.n
+        };
         let q = self.curve.frobenius_k(*p, j);
         let neg = self.curve.neg(q);
         let eps = self.canon.coords(neg.y) < self.canon.coords(q.y);
@@ -337,7 +348,10 @@ impl Setup {
         let table = match self.walk {
             Walk::Sigma => Vec::new(),
             Walk::Table | Walk::Adding => (0..self.branches)
-                .map(|_| self.curve.mul_u64(self.generator, rng.gen_range(1..self.ell)))
+                .map(|_| {
+                    self.curve
+                        .mul_u64(self.generator, rng.gen_range(1..self.ell))
+                })
                 .collect(),
         };
         Mapping {
@@ -347,7 +361,9 @@ impl Setup {
     }
 
     fn start(&self, rng: &mut StdRng) -> WalkState {
-        let p = self.curve.mul_u64(self.generator, rng.gen_range(1..self.ell));
+        let p = self
+            .curve
+            .mul_u64(self.generator, rng.gen_range(1..self.ell));
         WalkState {
             p,
             hist: [TAG_NONE; 3],
@@ -460,7 +476,9 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let get = |name: &str| -> Option<String> {
-        args.iter().position(|a| a == name).and_then(|i| args.get(i + 1).cloned())
+        args.iter()
+            .position(|a| a == name)
+            .and_then(|i| args.get(i + 1).cloned())
     };
     let n: u32 = get("--n").map_or(41, |v| v.parse().expect("--n"));
     let walk = match get("--walk").as_deref().unwrap_or("sigma") {
@@ -483,7 +501,10 @@ fn main() {
         },
         |v| v.parse().expect("--branches"),
     );
-    assert!(walk != Walk::Sigma || branches == 8, "the sigma walk has eight branches");
+    assert!(
+        walk != Walk::Sigma || branches == 8,
+        "the sigma walk has eight branches"
+    );
     assert!(branches <= 1 << 16, "at most 2^16 branches");
     let trials: u64 = get("--trials").map_or(1000, |v| v.parse().expect("--trials"));
     let seed: u64 = get("--seed").map_or(1, |v| v.parse().expect("--seed"));
@@ -494,7 +515,10 @@ fn main() {
     );
 
     let kc = KoblitzCurve::new(0, n).expect("a Koblitz curve with a = 0 at this degree");
-    let ell = kc.subgroup_order.to_u64().expect("a subgroup order below 2^64");
+    let ell = kc
+        .subgroup_order
+        .to_u64()
+        .expect("a subgroup order below 2^64");
     let curve = FastCurve::new(&kc.curve).expect("a single-word field");
     let canon = FrobeniusCanon::new(&curve.field, n).expect("a normal element");
     let generator = curve.lift(kc.generator());
@@ -511,7 +535,11 @@ fn main() {
     let mut acc = 0.0;
     for &p in &p131 {
         acc += p;
-        cdf.push(if acc >= 1.0 { u64::MAX } else { (acc * 2f64.powi(64)) as u64 });
+        cdf.push(if acc >= 1.0 {
+            u64::MAX
+        } else {
+            (acc * 2f64.powi(64)) as u64
+        });
     }
     let fixed_mapping = args.iter().any(|a| a == "--fixed-mapping");
     let mut setup = Setup {
@@ -546,7 +574,8 @@ fn main() {
                     branch_counts: vec![0; setup.branches],
                     ..Tally::default()
                 };
-                let mut rng = StdRng::seed_from_u64(splitmix(seed.wrapping_mul(1_000_003) + tid as u64));
+                let mut rng =
+                    StdRng::seed_from_u64(splitmix(seed.wrapping_mul(1_000_003) + tid as u64));
                 while next_trial.fetch_add(1, Ordering::Relaxed) < trials {
                     trial(setup, &mut rng, &mut t);
                 }
@@ -574,7 +603,11 @@ fn main() {
     // collisions are suppressed only when the frames agree, 1/2n of them.
     let injective = 1.0 / (1.0 - s2).sqrt();
     let class_frame = 1.0 / (1.0 - s2 / (2.0 * n as f64)).sqrt();
-    let model = if walk == Walk::Sigma { injective } else { class_frame };
+    let model = if walk == Walk::Sigma {
+        injective
+    } else {
+        class_frame
+    };
     // Leading order (WALK-CONSTANT.md §5): 4 pairwise 6-step patterns pass
     // the rule, three branches each drawn twice, (Σp²/2n)³; and 24 4-step
     // τ-relations, one branch drawn four times, Σp⁴/(2n)³.

@@ -24,8 +24,8 @@ Answer: **keep the σ walk, and raise `maxIters`.**
   a walk to where it started.  No two of those tags cancel, so the rule, which
   looks only for pairs, never fires.  Neither does it catch six-step pairwise
   cycles.  The rate of both is measured on the device's own walk and on an
-  emulation, and matches a count of the patterns: 790 τ-relation
-  returns seen against 888 predicted.
+  emulation, and matches a count of the patterns: 796 τ-relation
+  returns seen against 895 predicted.
 - **What the cycles cost.** At the live bucket's `dpWeight = 32` those
   cycles trap **54%** of the table walk's trails (H = 8).  Each trapped trail
   runs to the `maxIters = 2^30` guard and is discarded, so a completed trail
@@ -193,6 +193,7 @@ steps per trial, that ended about 14% of trials early and gave
 | 37 | sigma | 8 | ecc2k130 | emulation | 64 | 40,000 | 1.0870 | 0.0028 | 1.0700 | 1.0159 | matrix-v1.jsonl |
 | 37 | sigma | 8 | native | emulation | 16 | 40,000 | 1.2170 | 0.0033 | 1.1075 | 1.0988 | matrix-v1.jsonl |
 | 41 | sigma | 8 | ecc2k130 | emulation | 16 | 8,000 | 1.0910 | 0.0064 | 1.0700 | 1.0196 | matrix-v1.jsonl |
+| 59 | table | 8 | ecc2k130 | emulation | 16 | 20,000 | 0.9949 | 0.0037 | 1.0005 | 0.9943 | matrix-v2.jsonl |
 | 59 | sigma | 8 | ecc2k130 | emulation | 16 | 20,000 | 1.0817 | 0.0040 | 1.0700 | 1.0109 | matrix-v2.jsonl |
 
 **Reading it.**
@@ -274,16 +275,17 @@ Measured against that count:
 | 37 | table | 8 | ecc2k130 | emulation | 88,204,046 | 2 | 1.8 | 8 | 11.0 |
 | 37 | table | 8 | ecc2k130 | emulation | 86,328,362 | 2 | 1.7 | 10 | 10.7 |
 | 37 | table | 8 | native | emulation | 88,011,299 | 12 | 5.5 | 46 | 46.4 |
+| 59 | table | 8 | ecc2k130 | emulation | 229,988,097 | 2 | 1.1 | 6 | 7.1 |
 
 **Reading it.**
 
 - The τ-relation rate follows `24Σp⁴/(2n)³` on the device walk and in the
-  emulation, across a factor of 85 in predicted rate: 790 seen against 888 predicted, 0.89 ± 0.03 overall.
+  emulation, across a factor of 343 in predicted rate: 796 seen against 895 predicted, 0.89 ± 0.03 overall.
 - Where it falls short, as at `n = 19`, the walks are short.  A `W = 8`
   trial there ends after about nine steps per walk, which cuts off windows
-  at both ends.  The ratio is 70 seen against 79 predicted, 0.88 ± 0.11 on the rows at `n ≥ 37`, where walks
+  at both ends.  The ratio is 76 seen against 86 predicted, 0.88 ± 0.10 on the rows at `n ≥ 37`, where walks
   run thousands of steps.
-- The pairwise count is small and noisy: 79 seen against 110 predicted, 0.72 ± 0.08 overall, 17 seen against 11 predicted, 1.58 ± 0.38 at
+- The pairwise count is small and noisy: 81 seen against 111 predicted, 0.73 ± 0.08 overall, 19 seen against 12 predicted, 1.59 ± 0.37 at
   `n ≥ 37`.
 - The pairwise term is 14% of the `n = 131` rate, so the pricing below
   rests mainly on the τ-relation law, which the device walk confirms
