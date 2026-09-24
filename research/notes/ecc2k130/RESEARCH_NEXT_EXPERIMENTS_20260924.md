@@ -103,7 +103,7 @@ unowned speculative tasks.
   research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md.
 - Certified toy F5 neighbor comparison: PR #701.
 - Degree-263 structural preflight and representative replay: PR #703.
-- Toy PDP affine-screen grouped holdout: the reproducible source, raw cases,
-  charged native counters and decision accompany this ledger update.
+- Toy PDP affine-screen grouped holdout: PR #706 contains the reproducible
+  source, raw cases, charged native counters and decision.
 - The compact orbit and normal-x degree-53 local artifacts still need
   main-based review before they are promoted from provisional evidence.
