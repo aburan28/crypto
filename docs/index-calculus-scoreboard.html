@@ -5793,6 +5793,10 @@ factor base, and this prices a decomposition oracle.</p>
     3&times; enumeration and 60&times; meet in the middle per target. The lesson is for accounting: row building has never been
     charged, and this round shows an uncharged phase can grow and hide a regression. Pricing it is the next round&rsquo;s first,
     registered, change.</p>
+  <p>Follow-up, same day: environment lookups moved out of the per-row and per-node loops (a profile found 1.4% of a chained cell&rsquo;s
+    instructions in <code>getenv</code>). Every counter of 30 ladder runs and 120 whole logarithms is identical; the ladders run
+    1.03&ndash;1.07&times; faster in wall time and the whole logarithms are flat &mdash; <span class="chip">engineering</span> on uncounted work, no
+    claim in the unit (<a href="https://github.com/aburan28/crypto/blob/main/research/env_reads_20260924/README.md">evidence</a>).</p>
 </section>
 <!-- END support-local-multipliers-20260924 -->
 <!-- BEGIN ic-tournament-round-0023 -->
