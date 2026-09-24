@@ -496,7 +496,9 @@ of that.  No end-to-end speedup is claimed beyond the sign.
   first fall degree or a solving degree.
 - **Anything about `m = 2`.**  The order is the identity there, and linear
   generators appear only when a whole summand is fixed, which the degree-3
-  algebra rarely lets the tree reach: the quadratic rungs are flat.
+  algebra rarely lets the tree reach: four of the five quadratic rungs are
+  flat, and `K_0/2^9, m = 2` moves `1.08×` on a different tree because linear
+  generators do appear there.
 - **The two largest exploratory ratios.**  `K_1/2^17` and `K_0/2^15` at
   `m = 3` are inadmissible (§5); the production oracle never runs them.
 - **A crossing.**  The Gröbner oracle is still the most expensive route that

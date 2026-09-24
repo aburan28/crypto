@@ -3269,6 +3269,10 @@ pub enum SolverEngine {
     /// plus the specialisation itself, all charged in word operations.
     /// Runs best under [`SplitRule::HighestFree`], which [`SplitRule::Auto`]
     /// selects for it; `KIC_F4_INHERIT=1|0` forces or disables inheriting.
+    /// The same tree holds with linear elimination off
+    /// (`KIC_LINEAR_ELIM=0`); by default this engine also eliminates a
+    /// node's linear generators (`eliminate_linear_generators`), which
+    /// changes the tree and keeps every root.
     InheritedF4 {
         /// Highest Macaulay degree to build before splitting.
         max_degree: u32,
@@ -3282,14 +3286,19 @@ pub enum SolverEngine {
 }
 
 impl Default for SolverEngine {
-    /// Inherited matrix-F4 through degree 3.  Under the same split rule it
-    /// decides every target of the frozen Gröbner-stage ladder and its
-    /// holdout identically to `MatrixF4 { max_degree: 3 }` (the default
-    /// before it) for a fraction of the word operations; with
-    /// [`SplitRule::Auto`] it also splits on the smallest free variable —
-    /// see `research/notes/ecc2k130/RESEARCH_INHERITED_F4.md`.
-    /// `KIC_F4_INHERIT=0` restores the from-scratch engine, and with it the
-    /// historical split rule, as a retained control.
+    /// Inherited matrix-F4 through degree 3.  Under the same split rule and
+    /// with `KIC_LINEAR_ELIM=0` it decides every target of the frozen
+    /// Gröbner-stage ladder and its holdout identically to
+    /// `MatrixF4 { max_degree: 3 }` (the default before it) for a fraction
+    /// of the word operations; with [`SplitRule::Auto`] it also splits on
+    /// the smallest free variable — see
+    /// `research/notes/ecc2k130/RESEARCH_INHERITED_F4.md`.  Since
+    /// 2026-09-24 it also eliminates linear generators, and the
+    /// decomposition oracle hands it a chain in the interleaved order
+    /// (`research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md`): the same
+    /// decompositions found, on a different tree.  `KIC_F4_INHERIT=0`
+    /// restores the from-scratch engine, and with it the historical split
+    /// rule and no elimination, as a retained control.
     fn default() -> Self {
         SolverEngine::InheritedF4 { max_degree: 3 }
     }
@@ -3536,7 +3545,7 @@ pub struct SolveStats {
     /// caps (the engine then split on what it had).
     pub oversize: usize,
     /// Variables linear elimination defined by an affine form in others
-    /// rather than fixed ([`eliminate_linear_generators`]); those it fixed
+    /// rather than fixed (`eliminate_linear_generators`); those it fixed
     /// outright are counted as propagations.
     pub eliminated: usize,
 }
