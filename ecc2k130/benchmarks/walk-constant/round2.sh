@@ -37,6 +37,9 @@ D=../../build/walk-constant-host-h8
   "$D" --n 23 --walk table --dist ecc2k130 --walks 8 --trials 20000 --seed 230 --threads 4
   "$D" --n 23 --walk table --dist native --walks 8 --trials 60000 --seed 230 --threads 4
   "$D" --n 41 --walk table --dist ecc2k130 --walks 16 --trials 300 --seed 410 --threads 4
+  # The replicate declared in section 11 item 3, after the first two rows
+  # (a new seed; appended by hand to the files the lines above wrote).
+  "$D" --n 23 --walk table --dist ecc2k130 --walks 8 --trials 40000 --seed 231 --threads 4
 } > device-v3.jsonl 2> device-v3.log
 
 # The residual probe: two uniform branches make rule v2's six-step survivors

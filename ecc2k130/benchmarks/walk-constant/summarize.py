@@ -255,15 +255,32 @@ if diffs:
     pooled_diff = sum(wi * d for wi, (d, _) in zip(w, diffs)) / sum(w)
     print(f"c (v2) - c (v1), pooled over {len(diffs)} matched rows: {pooled_diff:+.4f} ± {sqrt(1 / sum(w)):.4f}; "
           f"rows beyond two SE: {sum(abs(d) > 2 * sqrt(v) for d, v in diffs)}")
-for d in sorted(d3, key=lambda r: (r["n"], r["dist"])):
+chi2, dof = 0.0, 0
+for d in sorted(d3, key=lambda r: (r["n"], r["dist"], r["seed"])):
     if d["walk"] != "device-table":
         continue
     emu = [r for r in v3 if r["walk"] == "table" and (r["n"], r["dist"], r["branches"], r["walks"]) ==
            (d["n"], d["dist"], d["branches"], d["walks"])]
     if emu:
         e = emu[0]
-        print(f"device against emulation under v2, n = {d['n']}, {d['dist']}, H = {d['branches']}: "
-              f"{d['c']:.4f} against {e['c']:.4f}, difference / SE {(d['c'] - e['c']) / sqrt(d['c_se'] ** 2 + e['c_se'] ** 2):+.1f}")
+        z = (d["c"] - e["c"]) / sqrt(d["c_se"] ** 2 + e["c_se"] ** 2)
+        chi2, dof = chi2 + z * z, dof + 1
+        print(f"device against emulation under v2, n = {d['n']}, {d['dist']}, H = {d['branches']}, seed {d['seed']}: "
+              f"{d['c']:.4f} ± {d['c_se']:.4f} against {e['c']:.4f}, difference / SE {z:+.1f}")
+if dof:
+    print(f"device against emulation under v2: chi^2 = {chi2:.1f} on {dof} rows")
+# The same device row twice, on two seeds (the replicate section 11 declared).
+twice = {}
+for d in d3:
+    twice.setdefault((d["n"], d["dist"], d["branches"], d["walks"], d["walk"]), []).append(d)
+for key, ds in sorted(twice.items()):
+    if len(ds) == 2:
+        a, b = ds
+        w = [1 / a["c_se"] ** 2, 1 / b["c_se"] ** 2]
+        pooled_c = (w[0] * a["c"] + w[1] * b["c"]) / sum(w)
+        print(f"device, n = {key[0]}, {key[1]}, H = {key[2]}, seeds {a['seed']} and {b['seed']}: {a['c']:.4f} and "
+              f"{b['c']:.4f}, apart by {(a['c'] - b['c']) / sqrt(a['c_se'] ** 2 + b['c_se'] ** 2):+.1f} SE; "
+              f"pooled {pooled_c:.4f} ± {sqrt(1 / sum(w)):.4f}")
 c_table_v2, se_table_v2, sel_v2 = 0.0, 0.0, []
 sel_v2 = [r for r in v3 + d3 if r["walk"] in ("table", "device-table") and r["dist"] == "ecc2k130"
           and r["branches"] == 8 and not r.get("fixed_mapping")]
@@ -273,6 +290,10 @@ if sel_v2:
     se_table_v2 = sqrt(1 / sum(w))
     print(f"table walk under v2, ECC2K-130 branches, H = 8, pooled: c = {c_table_v2:.4f} ± {se_table_v2:.4f} "
           f"over {len(sel_v2)} rows (n = {sorted(set(r['n'] for r in sel_v2))})")
+    emu_only = [r for r in sel_v2 if r["walk"] == "table"]
+    w = [1 / r["c_se"] ** 2 for r in emu_only]
+    c_emu_v2 = sum(wi * r["c"] for wi, r in zip(w, emu_only)) / sum(w)
+    print(f"  the emulation's rows alone: c = {c_emu_v2:.4f} ± {sqrt(1 / sum(w)):.4f} over {len(emu_only)} rows")
 
 # The residual probe: two uniform branches make the five-determined survivors
 # common enough to see.  At H = 2 the rule can refuse both branches (at H = 8
@@ -333,3 +354,6 @@ if c_table_v2:
     vals = [c_table_v2 * (1 + delta_v2 / 2) / cs * (rs / rt) * loss_table_v2 / loss_sigma
             for _, rs, rt in PAIRED for cs in (sigma_lo, sigma_hi)]
     print(f"  table / sigma = {min(vals):.3f} - {max(vals):.3f} (projection: the v1 kernel's paired rates)")
+    vals = [c_emu_v2 * (1 + delta_v2 / 2) / cs * (rs / rt) * loss_table_v2 / loss_sigma
+            for _, rs, rt in PAIRED for cs in (sigma_lo, sigma_hi)]
+    print(f"  with the emulation's constant alone: {min(vals):.3f} - {max(vals):.3f}")

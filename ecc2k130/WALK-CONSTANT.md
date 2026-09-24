@@ -628,8 +628,8 @@ independent, which overstates the uncertainty of the correlated ones.
 **2. Returns: met as declared, and the declaration missed a class.**
 
 - **What v2 had to remove.** There were no τ-relation 4-step returns and no
-  pairwise returns in 2.36 × 10⁹ table steps across both harnesses.  Rule v1's
-  count predicts 1150 on the same rows.
+  pairwise returns in 2.37 × 10⁹ table steps across both harnesses.  Rule v1's
+  count predicts 1156 on the same rows.
 - **What it leaves.** One return was of a kind item 2 does not name: a
   six-step τ-relation return at `n = 23`, native, H = 16.  The residual count
   of item 1 predicts 0.81 there and 2.13 over all rows.  Item 2 listed
@@ -651,23 +651,24 @@ independent, which overstates the uncertainty of the correlated ones.
 
 **3. `c`: not met as declared; no shift pooled.**
 
-| n | branches | H | harness | W | c (v2) | ± | c (v1) | ± | difference / SE |
-|---:|---|---:|---|---:|---:|---:|---:|---:|---:|
-| 23 | ecc2k130 | 8 | device | 8 | 1.0121 | 0.0037 | 1.0076 | 0.0037 | +0.9 |
-| 23 | ecc2k130 | 8 | emulation | 8 | 1.0038 | 0.0012 | 1.0037 | 0.0012 | +0.0 |
-| 23 | ecc2k130 | 16 | emulation | 8 | 1.0019 | 0.0012 | 1.0021 | 0.0012 | -0.1 |
-| 23 | native | 8 | device | 8 | 1.0016 | 0.0021 | 1.0080 | 0.0021 | -2.1 |
-| 23 | native | 8 | emulation | 8 | 1.0044 | 0.0012 | 1.0050 | 0.0012 | -0.4 |
-| 23 | native | 16 | emulation | 8 | 1.0055 | 0.0012 | 1.0046 | 0.0012 | +0.6 |
-| 23 | uniform | 8 | emulation | 8 | 1.0027 | 0.0012 | 1.0026 | 0.0012 | +0.1 |
-| 37 | ecc2k130 | 8 | emulation | 16 | 1.0032 | 0.0026 | 1.0036 | 0.0026 | -0.1 |
-| 37 | native | 8 | emulation | 16 | 1.0032 | 0.0026 | 1.0015 | 0.0026 | +0.5 |
-| 41 | ecc2k130 | 8 | device | 16 | 1.0638 | 0.0302 | 1.0051 | 0.0299 | +1.4 |
-| 41 | ecc2k130 | 8 | emulation | 16 | 0.9906 | 0.0058 | 1.0125 | 0.0059 | -2.6 |
-| 41 | native | 8 | emulation | 16 | 1.0060 | 0.0059 | 1.0084 | 0.0059 | -0.3 |
-| 59 | ecc2k130 | 8 | emulation | 16 | 1.0031 | 0.0037 | 0.9949 | 0.0037 | +1.6 |
+| n | branches | H | harness | W | trials (v2) | seed | c (v2) | ± | c (v1) | ± | difference / SE |
+|---:|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 23 | ecc2k130 | 8 | device | 8 | 19,995 | 230 | 1.0121 | 0.0037 | 1.0076 | 0.0037 | +0.9 |
+| 23 | ecc2k130 | 8 | device | 8 | 39,991 | 231 | 0.9999 | 0.0026 | 1.0076 | 0.0037 | -1.7 |
+| 23 | ecc2k130 | 8 | emulation | 8 | 199,973 | 23 | 1.0038 | 0.0012 | 1.0037 | 0.0012 | +0.0 |
+| 23 | ecc2k130 | 16 | emulation | 8 | 199,974 | 23 | 1.0019 | 0.0012 | 1.0021 | 0.0012 | -0.1 |
+| 23 | native | 8 | device | 8 | 59,990 | 230 | 1.0016 | 0.0021 | 1.0080 | 0.0021 | -2.1 |
+| 23 | native | 8 | emulation | 8 | 199,981 | 23 | 1.0044 | 0.0012 | 1.0050 | 0.0012 | -0.4 |
+| 23 | native | 16 | emulation | 8 | 199,980 | 23 | 1.0055 | 0.0012 | 1.0046 | 0.0012 | +0.6 |
+| 23 | uniform | 8 | emulation | 8 | 199,979 | 23 | 1.0027 | 0.0012 | 1.0026 | 0.0012 | +0.1 |
+| 37 | ecc2k130 | 8 | emulation | 16 | 39,999 | 37 | 1.0032 | 0.0026 | 1.0036 | 0.0026 | -0.1 |
+| 37 | native | 8 | emulation | 16 | 39,998 | 37 | 1.0032 | 0.0026 | 1.0015 | 0.0026 | +0.5 |
+| 41 | ecc2k130 | 8 | device | 16 | 300 | 410 | 1.0638 | 0.0302 | 1.0051 | 0.0299 | +1.4 |
+| 41 | ecc2k130 | 8 | emulation | 16 | 8,000 | 41 | 0.9906 | 0.0058 | 1.0125 | 0.0059 | -2.6 |
+| 41 | native | 8 | emulation | 16 | 8,000 | 41 | 1.0060 | 0.0059 | 1.0084 | 0.0059 | -0.3 |
+| 59 | ecc2k130 | 8 | emulation | 16 | 20,000 | 59 | 1.0031 | 0.0037 | 0.9949 | 0.0037 | +1.6 |
 
-- **Pooled.** Over the 13 matched rows, `c(v2) − c(v1) = -0.0002 ± 0.0007`.
+- **Pooled.** Over the 14 matched rows, `c(v2) − c(v1) = -0.0003 ± 0.0007`.
 - **Per row.** Two rows miss the declared two standard errors, both on the
   low side:
   - the device's `n = 23` native row (−2.1: 1.0016 against v1's 1.0080);
@@ -676,8 +677,8 @@ independent, which overstates the uncertainty of the correlated ones.
   In both, the v1 row is the outlier against its model (1.0080 against
   1.0026, 1.0125 against 1.0008).  The v2 rows sit within two standard errors
   of theirs.
-- **Chance.** If the 13 comparisons were independent, they would miss
-  two standard errors 2 or more times with probability 0.12.
+- **Chance.** If the 14 comparisons were independent, they would miss
+  two standard errors 2 or more times with probability 0.13.
 - **Device against emulation under v2.**
   - At `n = 23`: +2.1 standard errors for ECC2K-130's distribution (1.0121
     against 1.0038) and −1.1 for native.
@@ -690,11 +691,23 @@ independent, which overstates the uncertainty of the correlated ones.
     also sits more than two standard errors above the emulation, the two
     harnesses disagree under v2, and the pooled `c` below is not used until
     that is explained.
+  - **The replicate:** 0.9999 ± 0.0026 over 39,991 trials, −1.3 standard
+    errors from the emulation.  The condition is not met, so the pooled `c`
+    stands.
+  - **What it also shows.** The two device runs of the same row, on seeds 230
+    and 231, are 2.7 standard errors apart.  Pooled, they give
+    1.0039 ± 0.0021, which is the emulation's 1.0038.  Over the four device
+    rows under v2, χ² = 13.3 on 4 degrees of freedom (p ≈ 0.01), with signs
+    +, −, −, +.  So under v2 the device harness scatters more than its
+    standard errors allow, and why is unexplained.
+  - **It does not reach the cost.** The constant pooled from the emulation's
+    rows alone is 1.0032 ± 0.0010, against the pool's 1.0034 ± 0.0009.  The cost ratio
+    of item 6 moves in its third digit: 0.811–0.863 against 0.811–0.864.
 - **The lesson.** A per-row test was the wrong one to declare for a change
   expected to do nothing across a dozen rows.  The pooled difference is the
   right test.
 - **The pooled constant.** The table walk under v2 is at the floor, as under
-  v1: `c = 1.0039 ± 0.0010` pooled over the ECC2K-130 rows at H = 8.
+  v1: `c = 1.0034 ± 0.0009` pooled over the ECC2K-130 rows at H = 8.
 
 **4. Merge parting: met, narrowly.**
 
@@ -798,7 +811,7 @@ independent, which overstates the uncertainty of the correlated ones.
 
 | change | class | why |
 |---|---|---|
-| rule v1 → v2 | **engineering** | `c` is at the floor before and after (pooled difference `-0.0002 ± 0.0007`); the cost per solve against σ falls from 4.85–6.26 to 0.81–0.86 (projection) by removing a loss, not by crossing the floor |
+| rule v1 → v2 | **engineering** | `c` is at the floor before and after (pooled difference `-0.0003 ± 0.0007`); the cost per solve against σ falls from 4.85–6.26 to 0.81–0.86 (projection) by removing a loss, not by crossing the floor |
 | `maxIters` `2^30` → `2^32`, witness default with it | **engineering** | σ's guard loss ×1.185 → ×1.00007; expected work on the campaign's configuration `2^61.15–61.17` → `2^60.91–60.92` (§6 bracket) |
 | §6's five-tag sketch → four 16-bit tags | **accounting** | a correction to this note's own sketch; nothing measured changes |
 | the residual six-step relations | **accounting** | §6's 0.81–0.86 assumed every cycle caught; what is built leaves `2.0 × 10⁻⁵` of trails trapped, a ×1.0002 difference, so the projection is unchanged to two digits |
