@@ -3791,14 +3791,16 @@ impl PairSumTable {
             return;
         }
         if let Some(canon) = self.canon.as_ref() {
-            // A rotation has no dependency chain worth interleaving.
-            // (An eight-lane AVX-512 key was tried and measured slower:
-            // its run loop is as long as the worst of eight lanes.)
-            out.extend(
-                points
-                    .iter()
-                    .map(|p| if p.infinity { 0 } else { canon.canon(p.x) + 1 }),
-            );
+            // In bulk: `canon_in_place` is branch-free on AVX-512.  On its
+            // own it is slower than the scalar key, but inside the scan it
+            // is faster, and the pipeline with it is 26 % faster at n = 53
+            // (`FrobeniusCanon::canon_many` has the figures and what they
+            // do not explain).
+            out.extend(points.iter().map(|p| p.x));
+            canon.canon_in_place(out);
+            for (key, p) in out.iter_mut().zip(points) {
+                *key = if p.infinity { 0 } else { *key + 1 };
+            }
             return;
         }
         const LANES: usize = 8;
