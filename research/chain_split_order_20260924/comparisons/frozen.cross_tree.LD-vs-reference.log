@@ -1,0 +1,11 @@
+instance        word ops ref          cand  ratio  nodes ref   cand  same tree
+K_0/2^9 m=2           219979        203411   1.08        338    289  False
+K_0/2^9 m=3          1142867        889385   1.29        382    356  False
+K_0/2^13 m=2         5295231       5273806   1.00        520    520  True
+K_1/2^15 m=2           70779         70779   1.00         32     32  True
+K_1/2^17 m=2         1985821       1982352   1.00       1769   1769  True
+K_1/2^23 m=2         7982169       7974980   1.00       4876   4876  True
+total               16696846      16394713   1.02
+
+Same instances and the same verified answers on every rung; the tree is not required to match.
+Wrote /home/user/crypto/research/chain_split_order_20260924/comparisons/frozen.cross_tree.LD-vs-reference.json

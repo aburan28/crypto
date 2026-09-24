@@ -1,0 +1,8 @@
+instance       word XORs base          cand  ratio  wall ratio
+K_0/2^9 m=3           1142867       1058240   1.08        0.86
+K_0/2^13 m=3          9743787       8408962   1.16        1.30
+K_0/2^9 m=4           2868312       2551612   1.12        0.59
+total                13754966      12018814   1.14        0.89
+
+Every instance decided identically; ratios are baseline / candidate.
+Wrote /home/user/crypto/research/chain_split_order_20260924/comparisons/chain.same_tree.D-vs-reference.json

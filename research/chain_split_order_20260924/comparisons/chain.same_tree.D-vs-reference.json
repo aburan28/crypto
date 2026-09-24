@@ -1,0 +1,99 @@
+{
+  "unit": "64-bit word XORs in the Macaulay elimination",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "verdict_digest",
+    "reductions",
+    "infeasible_branches",
+    "propagations",
+    "splits",
+    "oversize",
+    "targets",
+    "decomposed",
+    "f4_calls",
+    "ell",
+    "factor_base_points"
+  ],
+  "repetitions": {
+    "baseline": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_0/2^9",
+      "m": 3,
+      "ell": 6,
+      "targets": 16,
+      "decomposed": 15,
+      "verdict_digest": "999b8e4840ab86204a585e31884e41270cb98ac27a315ae552c2f7891e1761de",
+      "baseline_word_ops": 1142867,
+      "candidate_word_ops": 1058240,
+      "word_op_ratio": 1.079969572119746,
+      "baseline_wall_ns": 44154225,
+      "candidate_wall_ns": 51203120,
+      "wall_ratio": 0.8623346585129968,
+      "phases_baseline_ns": {
+        "build": 31957896,
+        "reduce": 492339,
+        "readback": 0
+      },
+      "phases_candidate_ns": {
+        "build": 39498837,
+        "reduce": 464012,
+        "readback": 0
+      }
+    },
+    {
+      "curve": "K_0/2^13",
+      "m": 3,
+      "ell": 12,
+      "targets": 8,
+      "decomposed": 8,
+      "verdict_digest": "a8365d9882f09a9ead35457739fd85b737f0208da518a1596cf769abd64aafbe",
+      "baseline_word_ops": 9743787,
+      "candidate_word_ops": 8408962,
+      "word_op_ratio": 1.1587383793623993,
+      "baseline_wall_ns": 129806709,
+      "candidate_wall_ns": 99761012,
+      "wall_ratio": 1.3011767462824053,
+      "phases_baseline_ns": {
+        "build": 102711558,
+        "reduce": 654748,
+        "readback": 0
+      },
+      "phases_candidate_ns": {
+        "build": 75365846,
+        "reduce": 592010,
+        "readback": 0
+      }
+    },
+    {
+      "curve": "K_0/2^9",
+      "m": 4,
+      "ell": 6,
+      "targets": 8,
+      "decomposed": 7,
+      "verdict_digest": "7b29f94aa9bff31a9a2c690216164bcbe3e4c7bb312e9ff808f8c17563fc1746",
+      "baseline_word_ops": 2868312,
+      "candidate_word_ops": 2551612,
+      "word_op_ratio": 1.1241176166282334,
+      "baseline_wall_ns": 77962746,
+      "candidate_wall_ns": 132096180,
+      "wall_ratio": 0.5901968247681348,
+      "phases_baseline_ns": {
+        "build": 62117356,
+        "reduce": 894821,
+        "readback": 0
+      },
+      "phases_candidate_ns": {
+        "build": 117117472,
+        "reduce": 931526,
+        "readback": 0
+      }
+    }
+  ],
+  "total_word_op_ratio": 1.144452855331649,
+  "total_wall_ratio": 0.8900000081961331,
+  "min_word_op_ratio": 1.079969572119746,
+  "min_wall_ratio": 0.5901968247681348
+}
