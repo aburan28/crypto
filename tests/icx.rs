@@ -10,11 +10,7 @@ fn icx() -> Command {
 
 /// Parse the top-level JSON object printed by an `icx --json` invocation.
 fn run_json(args: &[&str]) -> serde_json::Value {
-    let out = icx()
-        .args(args)
-        .arg("--json")
-        .output()
-        .expect("run icx");
+    let out = icx().args(args).arg("--json").output().expect("run icx");
     assert!(
         out.status.success(),
         "icx {:?} exited with failure: {}",
@@ -30,7 +26,11 @@ fn list_reports_every_family() {
     let v = run_json(&["list"]);
     assert_eq!(v["operation"], "list");
     let curves = v["curves"].as_array().expect("curves array");
-    assert!(curves.len() >= 35, "catalog unexpectedly small: {}", curves.len());
+    assert!(
+        curves.len() >= 35,
+        "catalog unexpectedly small: {}",
+        curves.len()
+    );
     // Every named field family is represented.
     let families: std::collections::HashSet<&str> =
         curves.iter().filter_map(|c| c["family"].as_str()).collect();
@@ -53,7 +53,10 @@ fn inspect_verifies_every_catalog_curve() {
     for c in &curves {
         let name = c["name"].as_str().unwrap();
         let rep = run_json(&["inspect", name]);
-        assert_eq!(rep["status"], "checks_passed", "curve {name} failed inspect");
+        assert_eq!(
+            rep["status"], "checks_passed",
+            "curve {name} failed inspect"
+        );
         assert_eq!(rep["verified"], true, "curve {name} not verified");
         checked += 1;
     }

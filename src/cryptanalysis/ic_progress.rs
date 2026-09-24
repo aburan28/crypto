@@ -117,9 +117,7 @@ impl ProgressReporter {
         if self.json {
             self.emit_json("stage_begin", detail, None);
         } else {
-            let t = total
-                .map(|t| format!(" (target {t})"))
-                .unwrap_or_default();
+            let t = total.map(|t| format!(" (target {t})")).unwrap_or_default();
             let d = if detail.is_empty() {
                 String::new()
             } else {
@@ -263,7 +261,10 @@ impl ProgressReporter {
         }
         let elapsed = self.total_elapsed();
         if self.json {
-            self.emit_json_line("summary", &format!("{line} (total {})", format_hms(elapsed)));
+            self.emit_json_line(
+                "summary",
+                &format!("{line} (total {})", format_hms(elapsed)),
+            );
         } else {
             let _ = writeln!(
                 std::io::stderr(),

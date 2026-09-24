@@ -315,7 +315,12 @@ fn prime_curves(v: &mut Vec<CatalogCurve>) {
             "NIST FIPS 186-4 / SEC 2",
             CurveParams::p256,
         ),
-        ("sm2", &["sm2p256v1"], "GM/T 0003-2012 (China)", CurveParams::sm2),
+        (
+            "sm2",
+            &["sm2p256v1"],
+            "GM/T 0003-2012 (China)",
+            CurveParams::sm2,
+        ),
         (
             "gost-2012-256-test",
             &[],
@@ -350,17 +355,42 @@ fn prime_curves(v: &mut Vec<CatalogCurve>) {
         ("secp160k1", &[], "SEC 2 v1", CurveParams::secp160k1),
         ("secp160r1", &[], "SEC 2 v1", CurveParams::secp160r1),
         ("secp160r2", &[], "SEC 2 v1", CurveParams::secp160r2),
-        ("secp192k1", &["ansix9p192k1"], "SEC 2 v1", CurveParams::secp192k1),
-        ("secp224k1", &["ansix9p224k1"], "SEC 2 v1", CurveParams::secp224k1),
+        (
+            "secp192k1",
+            &["ansix9p192k1"],
+            "SEC 2 v1",
+            CurveParams::secp192k1,
+        ),
+        (
+            "secp224k1",
+            &["ansix9p224k1"],
+            "SEC 2 v1",
+            CurveParams::secp224k1,
+        ),
         (
             "p192",
             &["secp192r1", "prime192v1", "nistp192"],
             "NIST FIPS 186-4",
             CurveParams::p192,
         ),
-        ("p224", &["secp224r1", "nistp224"], "NIST FIPS 186-4", CurveParams::p224),
-        ("p384", &["secp384r1", "nistp384"], "NIST FIPS 186-4", CurveParams::p384),
-        ("p521", &["secp521r1", "nistp521"], "NIST FIPS 186-4", CurveParams::p521),
+        (
+            "p224",
+            &["secp224r1", "nistp224"],
+            "NIST FIPS 186-4",
+            CurveParams::p224,
+        ),
+        (
+            "p384",
+            &["secp384r1", "nistp384"],
+            "NIST FIPS 186-4",
+            CurveParams::p384,
+        ),
+        (
+            "p521",
+            &["secp521r1", "nistp521"],
+            "NIST FIPS 186-4",
+            CurveParams::p521,
+        ),
         (
             "brainpoolp192r1",
             &[],
@@ -398,9 +428,24 @@ fn prime_curves(v: &mut Vec<CatalogCurve>) {
             CurveParams::brainpool_p512r1,
         ),
         ("frp256v1", &[], "ANSSI (France)", CurveParams::frp256v1),
-        ("gost-cryptopro-a", &[], "RFC 4357", CurveParams::gost_cryptopro_a),
-        ("gost-cryptopro-b", &[], "RFC 4357", CurveParams::gost_cryptopro_b),
-        ("gost-cryptopro-c", &[], "RFC 4357", CurveParams::gost_cryptopro_c),
+        (
+            "gost-cryptopro-a",
+            &[],
+            "RFC 4357",
+            CurveParams::gost_cryptopro_a,
+        ),
+        (
+            "gost-cryptopro-b",
+            &[],
+            "RFC 4357",
+            CurveParams::gost_cryptopro_b,
+        ),
+        (
+            "gost-cryptopro-c",
+            &[],
+            "RFC 4357",
+            CurveParams::gost_cryptopro_c,
+        ),
         (
             "gost-tc26-256-a",
             &[],
@@ -493,6 +538,84 @@ fn binary_curves(v: &mut Vec<CatalogCurve>) {
             "RFC 2409 (EC2N; subgroup curve)",
             BinaryCurve::ike_oakley_group3,
         ),
+        // Full NIST/SECG binary curve suite (added with this engine).
+        (
+            "sect193r1",
+            &[],
+            Family::BinaryRandom,
+            "SEC 2 v2",
+            BinaryCurve::sect193r1,
+        ),
+        (
+            "sect193r2",
+            &[],
+            Family::BinaryRandom,
+            "SEC 2 v2",
+            BinaryCurve::sect193r2,
+        ),
+        (
+            "sect233k1",
+            &["k-233", "nist-k233", "ansit233k1"],
+            Family::Koblitz,
+            "SEC 2 / NIST K-233",
+            BinaryCurve::sect233k1,
+        ),
+        (
+            "sect233r1",
+            &["b-233", "nist-b233", "ansit233r1"],
+            Family::BinaryRandom,
+            "SEC 2 / NIST B-233",
+            BinaryCurve::sect233r1,
+        ),
+        (
+            "sect239k1",
+            &["ansit239k1"],
+            Family::Koblitz,
+            "SEC 2 v2",
+            BinaryCurve::sect239k1,
+        ),
+        (
+            "sect283k1",
+            &["k-283", "nist-k283", "ansit283k1"],
+            Family::Koblitz,
+            "SEC 2 / NIST K-283",
+            BinaryCurve::sect283k1,
+        ),
+        (
+            "sect283r1",
+            &["b-283", "nist-b283", "ansit283r1"],
+            Family::BinaryRandom,
+            "SEC 2 / NIST B-283",
+            BinaryCurve::sect283r1,
+        ),
+        (
+            "sect409k1",
+            &["k-409", "nist-k409", "ansit409k1"],
+            Family::Koblitz,
+            "SEC 2 / NIST K-409",
+            BinaryCurve::sect409k1,
+        ),
+        (
+            "sect409r1",
+            &["b-409", "nist-b409", "ansit409r1"],
+            Family::BinaryRandom,
+            "SEC 2 / NIST B-409",
+            BinaryCurve::sect409r1,
+        ),
+        (
+            "sect571k1",
+            &["k-571", "nist-k571", "ansit571k1"],
+            Family::Koblitz,
+            "SEC 2 / NIST K-571",
+            BinaryCurve::sect571k1,
+        ),
+        (
+            "sect571r1",
+            &["b-571", "nist-b571", "ansit571r1"],
+            Family::BinaryRandom,
+            "SEC 2 / NIST B-571",
+            BinaryCurve::sect571r1,
+        ),
     ];
     for (name, aliases, family, std, ctor) in bin {
         v.push(CatalogCurve {
@@ -515,7 +638,8 @@ mod tests {
         // grows, so we assert a lower bound per family plus that every entry
         // that IS present verifies.  A family collapsing to zero still fails.
         let all = all();
-        let mut per_family: std::collections::HashMap<&str, usize> = std::collections::HashMap::new();
+        let mut per_family: std::collections::HashMap<&str, usize> =
+            std::collections::HashMap::new();
         for c in &all {
             let checks = c.verify();
             for chk in &checks {
@@ -538,8 +662,9 @@ mod tests {
             per_family.get("binary")
         );
         assert!(
-            *per_family.get("koblitz").unwrap_or(&0) >= 1,
-            "expected at least 1 Koblitz curve"
+            *per_family.get("koblitz").unwrap_or(&0) >= 5,
+            "expected the NIST Koblitz suite (K-163..K-571), got {:?}",
+            per_family.get("koblitz")
         );
     }
 

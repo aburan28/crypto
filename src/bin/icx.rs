@@ -259,10 +259,7 @@ fn display(report: &Value) {
                 cu["order_bits"],
                 cu["cofactor"].as_str().unwrap_or("?"),
             );
-            println!(
-                "Generic (rho) security: {} bits",
-                cu["rho_security_bits"]
-            );
+            println!("Generic (rho) security: {} bits", cu["rho_security_bits"]);
             for k in report["checks"].as_array().into_iter().flatten() {
                 println!(
                     "  {:<22} {:<5} {}",
@@ -273,7 +270,11 @@ fn display(report: &Value) {
             }
             println!(
                 "Verified: {}",
-                if report["verified"] == true { "yes" } else { "NO" }
+                if report["verified"] == true {
+                    "yes"
+                } else {
+                    "NO"
+                }
             );
         }
         Some("estimate") => {
