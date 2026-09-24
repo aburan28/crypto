@@ -195,6 +195,7 @@ steps per trial, that ended about 14% of trials early and gave
 | 41 | table | 8 | ecc2k130 | device | 16 | 300 | 1.0051 | 0.0299 | 1.0008 | 1.0043 | device-v2.jsonl |
 | 41 | table | 8 | ecc2k130 | emulation | 16 | 8,000 | 1.0125 | 0.0059 | 1.0008 | 1.0118 | matrix-v2.jsonl |
 | 41 | table | 8 | native | emulation | 16 | 8,000 | 1.0084 | 0.0059 | 1.0011 | 1.0073 | matrix-v2.jsonl |
+| 41 | sigma | 8 | ecc2k130 | device | 16 | 300 | 1.0997 | 0.0336 | 1.0700 | 1.0278 | device-v2.jsonl |
 | 41 | sigma | 8 | ecc2k130 | emulation | 16 | 8,000 | 1.0910 | 0.0064 | 1.0700 | 1.0196 | matrix-v1.jsonl |
 | 59 | table | 8 | ecc2k130 | emulation | 16 | 20,000 | 0.9949 | 0.0037 | 1.0005 | 0.9943 | matrix-v2.jsonl |
 | 59 | table | 8 | native | emulation | 16 | 20,000 | 1.0050 | 0.0037 | 1.0006 | 1.0043 | matrix-v2.jsonl |
