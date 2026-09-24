@@ -3110,17 +3110,7 @@ pub fn solving_degree(
 
 /// Specialise `p` by setting variable `var` to `value`.
 fn substitute(p: &F2BoolPoly, var: u32, value: bool) -> F2BoolPoly {
-    let bit = 1u64 << var;
-    let mut monos = Vec::with_capacity(p.terms.len());
-    for t in &p.terms {
-        if t.mask & bit == 0 {
-            monos.push(*t);
-        } else if value {
-            monos.push(F2BoolMono::from_mask(t.mask & !bit));
-        }
-        // v = 0 kills every term containing v.
-    }
-    F2BoolPoly::from_monos(monos, p.n_vars)
+    p.substitute(var, value)
 }
 
 /// A basis element that has collapsed to `v_i` or `v_i + 1` forces its

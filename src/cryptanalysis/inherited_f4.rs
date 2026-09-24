@@ -1342,16 +1342,7 @@ impl ReducedBasis {
 
 /// Specialise `p` by setting variable `var` to `value`.
 pub fn substitute(p: &F2BoolPoly, var: u32, value: bool) -> F2BoolPoly {
-    let bit = 1u64 << var;
-    let mut monos = Vec::with_capacity(p.terms.len());
-    for t in &p.terms {
-        if t.mask & bit == 0 {
-            monos.push(*t);
-        } else if value {
-            monos.push(F2BoolMono::from_mask(t.mask & !bit));
-        }
-    }
-    F2BoolPoly::from_monos(monos, p.n_vars)
+    p.substitute(var, value)
 }
 
 #[cfg(test)]
@@ -1578,7 +1569,7 @@ mod tests {
                     .iter()
                     .flat_map(|p| p.terms.iter())
                     .fold(0, |a, t| a | t.mask);
-                let _all = all_variable_mask(n_vars);
+                let all = all_variable_mask(n_vars);
                 for v in 0..n_vars as u32 {
                     if occurring & (1 << v) == 0 {
                         continue;
