@@ -74,7 +74,7 @@
 //! at `n = 131`, which is bounded by how many candidate tuples must be
 //! ruled out and not by how one node's matrix is reduced.
 
-use crate::cryptanalysis::fx_hash::FxMap as HashMap;
+use crate::cryptanalysis::fx_hash::{FxMap as HashMap, MaskMap};
 use crate::cryptanalysis::koblitz_groebner::{
     all_variable_mask, build_inherited_macaulay, build_inherited_macaulay_support_local,
     echelon_f2_counted, macaulay_columns, macaulay_rows_monos_with_mask, monomials_up_to_mask,
@@ -428,7 +428,7 @@ pub struct ReducedBasis {
     columns: Vec<u64>,
     /// Monomial → column, built only when a row has to be packed from
     /// monomials (completion), which most levels never do.
-    column_index: Option<HashMap<u64, usize>>,
+    column_index: Option<MaskMap<usize>>,
     words: usize,
     /// Layout steps since the root: `history[e]` maps epoch `e` to `e + 1`.
     /// The current epoch is `history.len()`.
@@ -602,7 +602,7 @@ impl ReducedBasis {
     }
 
     /// Monomial → current column, built on first use after a layout change.
-    fn column_index(&mut self) -> &HashMap<u64, usize> {
+    fn column_index(&mut self) -> &MaskMap<usize> {
         if self.column_index.is_none() {
             self.column_index = Some(
                 self.columns
@@ -1438,7 +1438,7 @@ impl ReducedBasis {
         columns.sort_by(|a, b| {
             cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse()
         });
-        let index: HashMap<u64, usize> = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
+        let index: MaskMap<usize> = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
         let map: Vec<u32> = self.columns.iter().map(|m| index[m] as u32).collect();
         self.adopt_layout(columns, map);
     }

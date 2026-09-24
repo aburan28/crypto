@@ -1481,7 +1481,7 @@ pub(crate) fn f5_rows_monos_with_mask(
 
 /// Pack monomial rows as bit-rows over `cols` (descending monomial order).
 pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> {
-    let index: crate::cryptanalysis::fx_hash::FxMap<u64, usize> =
+    let index: crate::cryptanalysis::fx_hash::MaskMap<usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
     let words = cols.len().div_ceil(64).max(1);
     let pack = |monos: &Vec<u64>| {
@@ -2254,32 +2254,7 @@ impl F4ColumnIndex {
     }
 }
 
-type FastColumnMap =
-    std::collections::HashMap<u64, usize, std::hash::BuildHasherDefault<FastU64Hasher>>;
-
-#[derive(Default)]
-struct FastU64Hasher(u64);
-
-impl std::hash::Hasher for FastU64Hasher {
-    fn finish(&self) -> u64 {
-        self.0
-    }
-
-    fn write(&mut self, bytes: &[u8]) {
-        let mut value = 0xcbf29ce484222325u64;
-        for &byte in bytes {
-            value = (value ^ u64::from(byte)).wrapping_mul(0x100000001b3);
-        }
-        self.write_u64(value);
-    }
-
-    fn write_u64(&mut self, value: u64) {
-        let mut mixed = value.wrapping_add(0x9e3779b97f4a7c15);
-        mixed = (mixed ^ (mixed >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
-        mixed = (mixed ^ (mixed >> 27)).wrapping_mul(0x94d049bb133111eb);
-        self.0 = mixed ^ (mixed >> 31);
-    }
-}
+type FastColumnMap = crate::cryptanalysis::fx_hash::MaskMap<usize>;
 thread_local! {
     /// Keyed by multiplier mask, degree and whether the F5 criterion
     /// selected the rows: pruning changes which monomials occur.
