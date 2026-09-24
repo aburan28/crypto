@@ -3665,6 +3665,7 @@ fn closure_rounds() -> u32 {
 /// and counters so a solve is comparable call for call.
 fn reduce_inherited(
     system: &[F2BoolPoly],
+    canonical: bool,
     n_vars: usize,
     engine: SolverEngine,
     bases: &mut InheritedBases,
@@ -3672,7 +3673,20 @@ fn reduce_inherited(
 ) -> Option<Vec<F2BoolPoly>> {
     stats.reductions += 1;
     dump_node_system(system, n_vars, engine);
-    let ladder = engine.degree_ladder(system_degree(system), n_vars)?;
+    // A canonical polynomial lists its terms highest degree first, so its
+    // degree is its first term's; otherwise scan every term.
+    let degree = if canonical {
+        debug_assert!(system.iter().all(F2BoolPoly::is_canonical));
+        system
+            .iter()
+            .filter_map(|p| p.terms.first())
+            .map(|t| t.degree())
+            .max()
+            .unwrap_or(0)
+    } else {
+        system_degree(system)
+    };
+    let ladder = engine.degree_ladder(degree, n_vars)?;
     let top = *ladder.end();
     let mut best: Option<Vec<F2BoolPoly>> = None;
     for d in ladder {
@@ -3850,7 +3864,7 @@ fn solve_rec(
             return;
         }
         let reduced = if inherit {
-            reduce_inherited(&system, n_vars, opts.engine, &mut bases, stats)
+            reduce_inherited(&system, canonical, n_vars, opts.engine, &mut bases, stats)
         } else {
             reduce_system(&system, n_vars, opts.engine, stats)
         };
