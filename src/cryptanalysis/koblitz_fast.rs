@@ -770,7 +770,7 @@ mod simd512 {
         /// The field-shape half of [`Self::new`], without the CPU check.
         pub(super) fn for_field(field: &Gf2) -> Option<Self> {
             let n = field.n;
-            if n < 2 || n > 63 {
+            if !(2..=63).contains(&n) {
                 return None;
             }
             let tail = field.irr ^ (1u64 << n);
