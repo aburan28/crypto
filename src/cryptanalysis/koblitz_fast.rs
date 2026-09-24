@@ -62,6 +62,20 @@ impl FastPoint {
     }
 }
 
+/// A point in López–Dahab projective coordinates, `(X : Y : Z)` for the
+/// affine `(X/Z, Y/Z²)`, with `Z = 0` standing for `O`.  Internal to the
+/// scalar multiplication; nothing outside [`FastCurve`] sees one.
+#[derive(Clone, Copy, Debug)]
+struct LdPoint {
+    x: u64,
+    y: u64,
+    z: u64,
+}
+
+impl LdPoint {
+    const INFINITY: Self = Self { x: 1, y: 0, z: 0 };
+}
+
 /// `y² + xy = x³ + ax² + b` over `F_{2^n}`, `n ≤ 62`, in one word per
 /// coordinate.
 #[derive(Clone, Debug)]
@@ -228,6 +242,65 @@ impl FastCurve {
         }
     }
 
+    /// [`Self::add_many`] without the ordinates: each sum's `x` and `O`
+    /// flag are final, its `y` is left at `0`, and its slope `λ` is
+    /// appended to `lambdas` for [`Self::finish_lazy`] to complete it
+    /// later.  Degenerate sums (an `O` operand, `Q_j = ±P`) come back
+    /// complete, marked by `λ = LAZY_DONE`.
+    ///
+    /// A decomposition scan keys every `R − P_k` by its abscissa alone
+    /// and looks at the full point only for the few the table's filter
+    /// admits, so computing `y` for the rest is a multiplication per
+    /// point spent on nothing.
+    pub fn add_many_lazy(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        lambdas: &mut Vec<u64>,
+        scratch: &mut BatchScratch,
+    ) {
+        let f = &self.field;
+        scratch.dens.clear();
+        scratch.dens.extend(qs.iter().map(|q| {
+            if p.infinity || q.infinity || q.x == p.x {
+                0
+            } else {
+                p.x ^ q.x
+            }
+        }));
+        f.batch_inv(&mut scratch.dens, &mut scratch.acc);
+        out.reserve(qs.len());
+        lambdas.reserve(qs.len());
+        for (q, &inv) in qs.iter().zip(&scratch.dens) {
+            if inv == 0 {
+                out.push(self.add(p, *q));
+                lambdas.push(Self::LAZY_DONE);
+                continue;
+            }
+            let lambda = f.mul(p.y ^ q.y, inv);
+            let x3 = f.sqr(lambda) ^ lambda ^ p.x ^ q.x ^ self.a;
+            out.push(FastPoint::affine(x3, 0));
+            lambdas.push(lambda);
+        }
+    }
+
+    /// The `λ` [`Self::add_many_lazy`] records for a sum it already
+    /// completed.  No real slope equals it: a field element has fewer
+    /// than 63 bits.
+    pub const LAZY_DONE: u64 = u64::MAX;
+
+    /// Complete a sum from [`Self::add_many_lazy`]: `y₃ = λ(x_P + x₃) +
+    /// x₃ + y_P`, exactly as [`Self::add`] computes it.
+    #[inline]
+    pub fn finish_lazy(&self, p: FastPoint, sum: FastPoint, lambda: u64) -> FastPoint {
+        if lambda == Self::LAZY_DONE {
+            return sum;
+        }
+        let y3 = self.field.mul(lambda, p.x ^ sum.x) ^ sum.x ^ p.y;
+        FastPoint::affine(sum.x, y3)
+    }
+
     /// `P_i + Q_i` for every `i`, appended to `out`, with **one** field
     /// inversion for the whole slice.  This is what lets many
     /// independent walks share the cost of the one inversion a point
@@ -268,14 +341,7 @@ impl FastCurve {
         if k == 0 || p.infinity {
             return FastPoint::INFINITY;
         }
-        let mut result = FastPoint::INFINITY;
-        for i in (0..64 - k.leading_zeros()).rev() {
-            result = self.double(result);
-            if (k >> i) & 1 == 1 {
-                result = self.add(result, p);
-            }
-        }
-        result
+        self.ladder(p, 64 - k.leading_zeros() as u64, |i| (k >> i) & 1 == 1)
     }
 
     /// `[k]P` for a scalar of any size.
@@ -284,14 +350,111 @@ impl FastCurve {
         if bits == 0 || p.infinity {
             return FastPoint::INFINITY;
         }
-        let mut result = FastPoint::INFINITY;
+        self.ladder(p, bits, |i| k.bit(i))
+    }
+
+    /// Left-to-right double-and-add over the `bits` low bits of a scalar,
+    /// in López–Dahab coordinates with **one** inversion at the end.
+    ///
+    /// The affine double-and-add this replaces paid a Fermat inversion —
+    /// `n − 1` squarings and several multiplications — on every doubling
+    /// and every addition.  López–Dahab `(X : Y : Z) ↦ (X/Z, Y/Z²)` needs
+    /// none: a doubling is five squarings and four multiplications, a
+    /// mixed addition of the affine `P` nine multiplications and five
+    /// squarings, and the single inversion converts the result back.
+    /// The point is the same, so everything downstream — the probe, the
+    /// pair table, the pinned counters — sees no difference.
+    fn ladder(&self, p: FastPoint, bits: u64, bit: impl Fn(u64) -> bool) -> FastPoint {
+        let mut r = LdPoint::INFINITY;
         for i in (0..bits).rev() {
-            result = self.double(result);
-            if k.bit(i) {
-                result = self.add(result, p);
+            r = self.ld_double(r);
+            if bit(i) {
+                r = self.ld_add_affine(r, p);
             }
         }
-        result
+        self.ld_to_affine(r)
+    }
+
+    /// López–Dahab doubling (Hankerson–Menezes–Vanstone, Alg. 3.24):
+    /// `Z₃ = X₁²Z₁²`, `X₃ = X₁⁴ + bZ₁⁴`,
+    /// `Y₃ = bZ₁⁴·Z₃ + X₃·(aZ₃ + Y₁² + bZ₁⁴)`.  `O` and the 2-torsion
+    /// point (`X₁ = 0`) both give `Z₃ = 0`, which is `O`.
+    #[inline]
+    fn ld_double(&self, p: LdPoint) -> LdPoint {
+        if p.z == 0 {
+            return LdPoint::INFINITY;
+        }
+        let f = &self.field;
+        let x2 = f.sqr(p.x);
+        let z2 = f.sqr(p.z);
+        let z3 = f.mul(x2, z2);
+        let bz4 = f.mul(self.b, f.sqr(z2));
+        let x3 = f.sqr(x2) ^ bz4;
+        let az3 = match self.a {
+            0 => 0,
+            1 => z3,
+            a => f.mul(a, z3),
+        };
+        let y3 = f.mul(bz4, z3) ^ f.mul(x3, az3 ^ f.sqr(p.y) ^ bz4);
+        LdPoint {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
+    }
+
+    /// López–Dahab `P + Q` for an affine `Q ≠ O`
+    /// (Hankerson–Menezes–Vanstone, Alg. 3.25, general `a`):
+    /// `A = Y₁ + y₂Z₁²`, `B = X₁ + x₂Z₁`, `C = BZ₁`, `Z₃ = C²`,
+    /// `X₃ = A² + C(A + B² + aC)`,
+    /// `Y₃ = (x₂Z₃ + X₃)(AC + Z₃) + (x₂ + y₂)Z₃²`.
+    /// `B = 0` means equal abscissae: `Q` again (double it) or `−Q` (`O`).
+    #[inline]
+    fn ld_add_affine(&self, p: LdPoint, q: FastPoint) -> LdPoint {
+        let affine_q = LdPoint {
+            x: q.x,
+            y: q.y,
+            z: 1,
+        };
+        if p.z == 0 {
+            return affine_q;
+        }
+        let f = &self.field;
+        let z1_2 = f.sqr(p.z);
+        let a_ = p.y ^ f.mul(q.y, z1_2);
+        let b_ = p.x ^ f.mul(q.x, p.z);
+        if b_ == 0 {
+            return if a_ == 0 {
+                self.ld_double(affine_q)
+            } else {
+                LdPoint::INFINITY
+            };
+        }
+        let c = f.mul(b_, p.z);
+        let z3 = f.sqr(c);
+        let ac = match self.a {
+            0 => 0,
+            1 => c,
+            a => f.mul(a, c),
+        };
+        let x3 = f.sqr(a_) ^ f.mul(c, a_ ^ f.sqr(b_) ^ ac);
+        let y3 = f.mul(f.mul(q.x, z3) ^ x3, f.mul(a_, c) ^ z3) ^ f.mul(q.x ^ q.y, f.sqr(z3));
+        LdPoint {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
+    }
+
+    /// Back to affine: `(X/Z, Y/Z²)`, one inversion.
+    #[inline]
+    fn ld_to_affine(&self, p: LdPoint) -> FastPoint {
+        if p.z == 0 {
+            return FastPoint::INFINITY;
+        }
+        let f = &self.field;
+        let zi = f.inv(p.z);
+        FastPoint::affine(f.mul(p.x, zi), f.mul(p.y, f.sqr(zi)))
     }
 
     /// The `2^k`-power Frobenius `(x, y) ↦ (x^{2^k}, y^{2^k})`.
@@ -369,9 +532,7 @@ impl FrobeniusCanon {
         // Column `j` of the inverse, so a set bit of `x` contributes one
         // XOR rather than one parity.
         let by_bit: Vec<u64> = (0..n)
-            .map(|j| {
-                (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i))
-            })
+            .map(|j| (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i)))
             .collect();
         let bytes = ((n + 7) / 8) as usize;
         let tables = (0..bytes)
@@ -408,17 +569,7 @@ impl FrobeniusCanon {
     /// element outside it.
     #[inline]
     pub fn canon(&self, x: u64) -> u64 {
-        let c = self.coords(x);
-        let n = self.n;
-        let mut best = c;
-        let mut v = c;
-        for _ in 1..n {
-            v = ((v << 1) | (v >> (n - 1))) & self.mask;
-            if v < best {
-                best = v;
-            }
-        }
-        best
+        self.least_rotation(self.coords(x)).0
     }
 
     /// The canonical name together with the rotation that produced it:
@@ -427,14 +578,65 @@ impl FrobeniusCanon {
     /// power: `coords(x') = rotl^{t − t'}(coords(x))`, so `x' = x^{2^{t − t'}}`.
     #[inline]
     pub fn canon_with_shift(&self, x: u64) -> (u64, u32) {
-        let c = self.coords(x);
+        self.least_rotation(self.coords(x))
+    }
+
+    /// `rotl^t` on `n`-bit words, `0 ≤ t < n`.
+    #[inline(always)]
+    fn rotl(&self, v: u64, t: u32) -> u64 {
+        if t == 0 {
+            v
+        } else {
+            ((v << t) | (v >> (self.n - t))) & self.mask
+        }
+    }
+
+    /// The least of the `n` cyclic rotations of `c`, and the smallest
+    /// `t` with `rotl^t(c)` equal to it.
+    ///
+    /// Trying all `n` rotations is a serial chain of `n − 1` rotate-and-
+    /// compare steps per point.  It need not be: `rotl^t(c)` has as many
+    /// leading zeros as the zero run of `c` that ends at bit `n − 1 − t`,
+    /// and more leading zeros is a smaller word, so the least rotation
+    /// starts at one of the *longest* cyclic zero runs of `c`.  Those are
+    /// found with one AND-with-rotate per bit of run length —
+    /// `Z_k = Z_{k−1} ∧ rotl^{k−1}(¬c)` has bit `p` set exactly when bits
+    /// `p, p−1, …, p−k+1` of `c` are all zero — which for a random word is
+    /// about `log₂ n` steps.  Only the rotations that begin at one of the
+    /// `Z_L` positions are then compared, usually one or two.
+    ///
+    /// Bit-for-bit the same answer as the exhaustive scan (the tests
+    /// check it on every word pattern class, including periodic ones where
+    /// several rotations tie and the smallest `t` must win).
+    #[inline]
+    fn least_rotation(&self, c: u64) -> (u64, u32) {
         let n = self.n;
-        let mut best = c;
+        let zeros = !c & self.mask;
+        if zeros == 0 || c == 0 {
+            // All ones, or all zeros: every rotation is the same word.
+            return (c, 0);
+        }
+        // Grow the run length while some run is still that long.
+        let mut run = zeros;
+        let mut len = 1u32;
+        loop {
+            let next = run & self.rotl(zeros, len);
+            if next == 0 {
+                break;
+            }
+            run = next;
+            len += 1;
+        }
+        // `run` marks the top bit `p` of every zero run of length `len`.
+        let mut best = u64::MAX;
         let mut best_t = 0u32;
-        let mut v = c;
-        for t in 1..n {
-            v = ((v << 1) | (v >> (n - 1))) & self.mask;
-            if v < best {
+        let mut tops = run;
+        while tops != 0 {
+            let p = tops.trailing_zeros();
+            tops &= tops - 1;
+            let t = n - 1 - p;
+            let v = self.rotl(c, t);
+            if v < best || (v == best && t < best_t) {
                 best = v;
                 best_t = t;
             }
@@ -469,9 +671,7 @@ impl FrobeniusCanon {
 fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
     // Row `i` carries, in bit `k`, the `i`-th bit of column `k`.
     let mut a: Vec<u64> = (0..n)
-        .map(|i| {
-            (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k))
-        })
+        .map(|i| (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k)))
         .collect();
     let mut inv: Vec<u64> = (0..n).map(|i| 1u64 << i).collect();
     for c in 0..n as usize {
@@ -498,6 +698,62 @@ pub struct BatchScratch {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The run-based least rotation against the exhaustive scan, on
+    /// random words and on the patterns where it could go wrong: all
+    /// zeros and ones, single bits, periodic words where several
+    /// rotations tie, and runs that wrap around bit `n − 1`.
+    #[test]
+    fn least_rotation_matches_exhaustive_scan() {
+        fn brute(c: u64, n: u32, mask: u64) -> (u64, u32) {
+            let (mut best, mut best_t, mut v) = (c, 0u32, c);
+            for t in 1..n {
+                v = ((v << 1) | (v >> (n - 1))) & mask;
+                if v < best {
+                    best = v;
+                    best_t = t;
+                }
+            }
+            (best, best_t)
+        }
+        let mut s = 0x2545_F491_4F6C_DD1Du64;
+        for n in 2u32..=63 {
+            let mask = (1u64 << n) - 1;
+            let canon = FrobeniusCanon {
+                n,
+                mask,
+                tables: Vec::new(),
+            };
+            let mut words = vec![0, mask, 1, 1 << (n - 1), mask ^ 1, mask >> 1];
+            for period in 1..=n.min(12) {
+                if n % period == 0 {
+                    for pat in 1..(1u64 << period).min(64) {
+                        let mut w = 0u64;
+                        for k in 0..n / period {
+                            w |= pat << (k * period);
+                        }
+                        words.push(w & mask);
+                    }
+                }
+            }
+            for _ in 0..400 {
+                s ^= s << 13;
+                s ^= s >> 7;
+                s ^= s << 17;
+                words.push(s & mask);
+                // Sparse and dense words have long runs of one kind.
+                words.push(s & (s >> 3) & (s >> 7) & mask);
+                words.push((s | (s >> 5) | (s >> 11)) & mask);
+            }
+            for c in words {
+                assert_eq!(
+                    canon.least_rotation(c),
+                    brute(c, n, mask),
+                    "n = {n}, c = {c:#x}"
+                );
+            }
+        }
+    }
     use crate::binary_ecc::curve::{point_add, point_double, scalar_mul};
     use crate::cryptanalysis::koblitz_index_calculus::{pack_point, KoblitzCurve};
     use rand::rngs::StdRng;
@@ -670,6 +926,104 @@ mod tests {
         // failure of the normal-element search, which is not what this
         // test is about.
         assert!(checked >= 10, "the sweep only reached {checked} curves");
+    }
+
+    /// The lazy batched addition, completed, equals the eager one on
+    /// every sum, degenerate ones included, and its abscissae are final
+    /// before completion.
+    #[test]
+    fn lazy_batched_additions_equal_eager_ones() {
+        let kc = KoblitzCurve::new(1, 19).unwrap();
+        let fc = FastCurve::new(&kc.curve).unwrap();
+        let points: Vec<FastPoint> = random_points(&kc, 40, 99)
+            .iter()
+            .map(|p| fc.lift(p))
+            .collect();
+        let mut qs = points.clone();
+        // Q = P, Q = −P and O, the degenerate cases.
+        for &p in points.iter().take(3) {
+            qs.push(p);
+            qs.push(fc.neg(p));
+        }
+        let mut scratch = BatchScratch::default();
+        for &p in &points {
+            let (mut eager, mut lazy, mut lambdas) = (Vec::new(), Vec::new(), Vec::new());
+            fc.add_many(p, &qs, &mut eager, &mut scratch);
+            fc.add_many_lazy(p, &qs, &mut lazy, &mut lambdas, &mut scratch);
+            assert_eq!(lazy.len(), eager.len());
+            for ((&l, &lambda), &e) in lazy.iter().zip(&lambdas).zip(&eager) {
+                assert_eq!((l.x, l.infinity), (e.x, e.infinity));
+                assert_eq!(fc.finish_lazy(p, l, lambda), e);
+            }
+        }
+    }
+
+    /// The López–Dahab ladder against affine double-and-add, on both
+    /// Koblitz curves at several degrees, over scalars that reach every
+    /// special case: `0`, `1`, `2`, the subgroup order and its neighbours
+    /// (where the ladder passes through `±P` and `O`), and wide random
+    /// scalars; `P` ranges over subgroup points, points outside the
+    /// subgroup, and `O`.
+    #[test]
+    fn projective_ladder_matches_affine_double_and_add() {
+        fn affine(fc: &FastCurve, p: FastPoint, k: &BigUint) -> FastPoint {
+            let mut r = FastPoint::INFINITY;
+            for i in (0..k.bits()).rev() {
+                r = fc.double(r);
+                if k.bit(i) {
+                    r = fc.add(r, p);
+                }
+            }
+            r
+        }
+        let mut rng = StdRng::seed_from_u64(0x1ad0);
+        let mut curves = 0;
+        for (a, n) in [
+            (0u8, 9u32),
+            (1, 11),
+            (0, 13),
+            (1, 15),
+            (1, 19),
+            (0, 31),
+            (0, 41),
+            (0, 53),
+        ] {
+            // Not every (a, n) has a usable prime-order subgroup.
+            let Some(kc) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            curves += 1;
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let r = &kc.subgroup_order;
+            let h = &kc.cofactor;
+            let mut scalars: Vec<BigUint> = [0u64, 1, 2, 3, 4, 5, 7, 8]
+                .iter()
+                .map(|&v| BigUint::from(v))
+                .collect();
+            scalars.extend([
+                r - 1u32,
+                r.clone(),
+                r + 1u32,
+                r * h,
+                r * h - 1u32,
+                r * 2u32 - 1u32,
+            ]);
+            for _ in 0..12 {
+                scalars.push(BigUint::from(rng.gen::<u64>()));
+                scalars.push(BigUint::from(rng.gen::<u128>()));
+            }
+            for p in random_points(&kc, 6, 31 + u64::from(n)) {
+                let fp = fc.lift(&p);
+                for k in &scalars {
+                    let want = affine(&fc, fp, k);
+                    assert_eq!(fc.mul(fp, k), want, "n = {n}, k = {k}");
+                    if let Some(&k64) = k.to_u64_digits().first().filter(|_| k.bits() <= 64) {
+                        assert_eq!(fc.mul_u64(fp, k64), want, "mul_u64, n = {n}, k = {k}");
+                    }
+                }
+            }
+        }
+        assert!(curves >= 5, "only {curves} curves checked");
     }
 
     #[test]

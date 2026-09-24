@@ -310,21 +310,24 @@ impl Gf2 {
     /// elements, so the inversion's cost per element goes to zero.
     ///
     /// Zeros are left as zero and skipped.
+    ///
+    /// Both passes walk `xs` and `scratch` together as zipped slices, so
+    /// the loops carry no bounds checks and no `Vec` growth checks.
     pub fn batch_inv(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
         scratch.clear();
-        scratch.reserve(xs.len());
+        scratch.resize(xs.len(), 0);
         let mut acc = 1u64;
-        for &x in xs.iter() {
-            scratch.push(acc);
+        for (&x, prefix) in xs.iter().zip(scratch.iter_mut()) {
+            *prefix = acc;
             if x != 0 {
                 acc = self.mul(acc, x);
             }
         }
         let mut inv_acc = self.inv(acc);
-        for i in (0..xs.len()).rev() {
-            if xs[i] != 0 {
-                let xi = xs[i];
-                xs[i] = self.mul(inv_acc, scratch[i]);
+        for (x, &prefix) in xs.iter_mut().zip(scratch.iter()).rev() {
+            if *x != 0 {
+                let xi = *x;
+                *x = self.mul(inv_acc, prefix);
                 inv_acc = self.mul(inv_acc, xi);
             }
         }
