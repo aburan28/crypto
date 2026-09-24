@@ -19,14 +19,22 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
 };
 
 fn main() {
+    // `--wide` widens the grid (§R2.2 of RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md).
+    let wide = std::env::args().any(|a| a == "--wide");
+    let degrees: &[u32] = if wide {
+        &[9, 11, 13, 15, 17, 19, 23, 25, 27, 29, 31]
+    } else {
+        &[9, 11, 13, 15, 17, 19, 23]
+    };
+    let factor_indices = if wide { 8usize } else { 4 };
     let mut cells = Vec::new();
-    for n in [9u32, 11, 13, 15, 17, 19, 23] {
+    for &n in degrees {
         for a in [0u8, 1] {
             let Some(kc) = KoblitzCurve::new(a, n) else {
                 cells.push(serde_json::json!({"a": a, "n": n, "curve": false}));
                 continue;
             };
-            for factor_index in 0..4usize {
+            for factor_index in 0..factor_indices {
                 let Some(fb) = build_frobenius_factor_base(&kc, factor_index) else {
                     continue;
                 };

@@ -1,0 +1,24 @@
+instance        word ops ref          cand  ratio  nodes ref   cand  same tree
+K_0/2^31 m=3       181125174     124804422   1.45       1135   1135  True
+K_0/2^31 m=3       192421646     134536953   1.43       1134   1134  True
+K_0/2^31 m=3       191366716     133102089   1.44       1132   1132  True
+K_1/2^29 m=4        31468437      19317940   1.63         16     16  True
+K_0/2^9 m=3           689513        343892   2.01        235    237  False
+K_0/2^9 m=4          1063560        353017   3.01        180    180  True
+K_1/2^9 m=4          1111857        340417   3.27        162    162  False
+K_1/2^11 m=4         2871110        804056   3.57        124    124  True
+K_0/2^13 m=3         5899264       2696800   2.19        200    200  True
+K_0/2^15 m=4         5766348       2207721   2.61        264    264  True
+K_0/2^15 m=3         2390355       1631233   1.47        397    397  True
+K_0/2^15 m=4        17051211      11139891   1.53       2444   2444  True
+K_0/2^15 m=3         2768333       1922811   1.44        396    396  True
+K_0/2^15 m=4        64996674      45027269   1.44       8408   8418  False
+K_1/2^15 m=4        67009381      47999600   1.40      13862  13862  True
+K_1/2^15 m=4         5995856       2366077   2.53        264    264  True
+K_1/2^15 m=4        34277889      21558599   1.59       2893   2893  True
+K_0/2^23 m=3        38863012      19539953   1.99       1940   1940  True
+K_0/2^23 m=3        41493840      22245291   1.87       3970   3970  True
+total              888630176     591938031   1.50
+
+Same instances and the same verified answers on every rung; the tree is not required to match.
+Wrote /home/user/crypto/research/support_local_multipliers_20260924/comparisons/r2-holdout.cross_tree.candidate-vs-reference.json

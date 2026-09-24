@@ -1,0 +1,28 @@
+# callgrind, ic run --degree 13 --curve-a 0 --summands 3 --solver groebner --random-target --seed 210 --batch 1
+# arm/binary: support.fixed  (unsuffixed = binary built from 1f0d9751; .fixed = d69936e1)
+312,779,400 (100.0%)  PROGRAM TOTALS
+
+## root build (ReducedBasis::from_system_with), inclusive, and its callees
+110,219,720 (35.24%)  *  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::from_system_with 
+ 39,374,070 (12.59%)  >   ???:crypto_lib::cryptanalysis::koblitz_groebner::echelon_f2_suffix_counted (6x) 
+ 24,067,751 ( 7.69%)  >   ???:crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns (3x) 
+ 20,862,857 ( 6.67%)  >   ???:crypto_lib::cryptanalysis::koblitz_groebner::build_inherited_macaulay (3x) 
+ 14,564,089 ( 4.66%)  >   ???:crypto_lib::cryptanalysis::koblitz_groebner::macaulay_rows_monos_with_mask (78x) 
+  8,084,032 ( 2.58%)  >   ???:crypto_lib::cryptanalysis::koblitz_groebner::pack_rows (3x) 
+    812,497 ( 0.26%)  >   ???:__rustc::__rust_alloc (1,968x) 
+    612,035 ( 0.20%)  >   ???:__rustc::__rust_dealloc (3,168x) 
+    176,960 ( 0.06%)  >   ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::from_system_with::{{closure}} (6x) 
+
+## top exclusive
+46,163,700 (14.76%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::add 
+39,411,168 (12.60%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::echelon_f2_suffix_counted 
+18,802,821 ( 6.01%)  ???:0x000000000050b300 
+16,338,952 ( 5.22%)  ???:core::slice::sort::unstable::quicksort::quicksort'2 
+13,412,639 ( 4.29%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::is_irreducible_f2 
+13,114,359 ( 4.19%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::substitute_popcnt 
+12,835,676 ( 4.10%)  ???:core::slice::sort::shared::smallsort::small_sort_network 
+10,262,394 ( 3.28%)  ???:std::thread::local::LocalKey<T>::with 
+ 8,034,636 ( 2.57%)  ???:core::slice::sort::unstable::quicksort::quicksort 
+ 7,650,163 ( 2.45%)  ./malloc/./malloc/malloc.c:_int_free 
+ 6,533,058 ( 2.09%)  ???:<core::iter::adapters::map::Map<I,F> as core::iter::traits::iterator::Iterator>::fold'2 
+ 5,829,311 ( 1.86%)  ./malloc/./malloc/malloc.c:malloc 

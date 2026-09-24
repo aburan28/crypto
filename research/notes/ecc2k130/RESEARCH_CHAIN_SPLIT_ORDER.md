@@ -464,6 +464,12 @@ and `55,202,947` word XORs; the fresh reference here, `560,420` and
 its own measurement).  After this round matrix-F4 at `n = 15, m = 3` is still
 `5×` enumeration and `100×` meet in the middle per target: the Gröbner oracle
 remains the slowest route that finishes, as the scoreboard has said.
+*Superseded as the default's figure on 2026-09-24 by
+[`RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md`](RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md)
+§5.3: support-local multipliers take `n = 15, m = 3` from `7,187,062` to
+`4,736,391` word XORs (`1.52×`), with identical verdicts.  That is about `3×`
+enumeration and `60×` meet in the middle per target.  The `7,187,062` above
+stands as this round's measurement.*
 
 ### 6.5 Whole logarithms (§4)
 

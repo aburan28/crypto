@@ -1,0 +1,8 @@
+instance        word ops ref          cand  ratio  nodes ref   cand  same tree
+K_0/2^9 m=3           620306        308276   2.01        215    217  False
+K_0/2^13 m=3         6009659       2748990   2.19        200    200  True
+K_0/2^9 m=4           917450        294112   3.12        156    156  True
+total                7547415       3351378   2.25
+
+Same instances and the same verified answers on every rung; the tree is not required to match.
+Wrote /home/user/crypto/research/support_local_multipliers_20260924/comparisons/chain.cross_tree.candidate-vs-reference.json

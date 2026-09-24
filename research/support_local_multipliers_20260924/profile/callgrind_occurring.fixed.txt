@@ -1,0 +1,28 @@
+# callgrind, ic run --degree 13 --curve-a 0 --summands 3 --solver groebner --random-target --seed 210 --batch 1
+# arm/binary: occurring.fixed  (unsuffixed = binary built from 1f0d9751; .fixed = d69936e1)
+417,310,076 (100.0%)  PROGRAM TOTALS
+
+## root build (ReducedBasis::from_system_with), inclusive, and its callees
+  199,794,680 (47.88%)  *  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::from_system_with 
+  108,248,800 (25.94%)  >   ???:crypto_lib::cryptanalysis::koblitz_groebner::build_inherited_macaulay (6x) 
+   87,109,828 (20.87%)  >   ???:crypto_lib::cryptanalysis::koblitz_groebner::echelon_f2_suffix_counted (6x) 
+    1,241,577 ( 0.30%)  >   ???:__rustc::__rust_alloc (2,904x) 
+      626,390 ( 0.15%)  >   ???:__rustc::__rust_dealloc (2,970x) 
+      299,492 ( 0.07%)  >   ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms (2,898x) [/usr/lib/x86_64-linux-gnu/libc.so.6]
+      277,649 ( 0.07%)  >   ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::from_system_with::{{closure}} (6x) 
+      164,856 ( 0.04%)  >   ???:alloc::raw_vec::RawVec<T,A>::grow_one (102x) 
+       98,124 ( 0.02%)  >   ???:alloc::rc::rc_inner_layout_for_value_layout (5,772x) 
+
+## top exclusive
+87,177,109 (20.89%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::echelon_f2_suffix_counted 
+46,163,700 (11.06%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::add 
+28,102,386 ( 6.73%)  ???:core::slice::sort::unstable::quicksort::quicksort'2 
+19,662,006 ( 4.71%)  ???:core::slice::sort::shared::smallsort::small_sort_network 
+18,802,821 ( 4.51%)  ???:0x000000000050b300 
+17,027,685 ( 4.08%)  ???:crypto_lib::cryptanalysis::koblitz_groebner::F4ColumnIndex::get 
+14,415,953 ( 3.45%)  ???:std::thread::local::LocalKey<T>::with 
+13,412,639 ( 3.21%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::is_irreducible_f2 
+13,114,359 ( 3.14%)  ???:crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly::substitute_popcnt 
+12,066,536 ( 2.89%)  ???:core::slice::sort::unstable::quicksort::quicksort 
+ 8,113,540 ( 1.94%)  ./malloc/./malloc/malloc.c:_int_free 
+ 6,998,869 ( 1.68%)  ???:crypto_lib::cryptanalysis::inherited_f4::ReducedBasis::composite_to 
