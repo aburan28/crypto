@@ -2946,6 +2946,7 @@ impl CompactOrbitExtractionIndex {
     fn new(
         curve: &KoblitzCurve,
         regular: &HashMap<(usize, usize, usize), [u64; 2]>,
+        regular_keys: Vec<(usize, usize, usize)>,
         representative_x_codes: &[u64],
         gf: &Gf2,
     ) -> Self {
@@ -2957,17 +2958,25 @@ impl CompactOrbitExtractionIndex {
                 shifted[index][exponent] = gf.sqr(shifted[index][exponent - 1]);
             }
         }
-        // Fix both the witness tie-break and target scan order. HashMap's
-        // randomized iteration otherwise changes the first lifted relation.
-        let mut regular_keys: Vec<_> = regular.keys().copied().collect();
-        regular_keys.sort_unstable();
+        // The scan-order vector is sorted before the HashMap is built. Reuse
+        // it rather than sorting millions of randomized map keys per index.
+        debug_assert_eq!(regular_keys.len(), regular.len());
+        debug_assert!(regular_keys.is_sorted());
         let mut by_canonical: HashMap<u64, u64> = HashMap::with_capacity(regular.len() * 2);
-        for &(left, right, relative) in &regular_keys {
-            let roots = &regular[&(left, right, relative)];
+        // Scan the map directly; for colliding roots retain the smallest
+        // lexicographic state, independent of the map's random iteration.
+        for (&(left, right, relative), roots) in regular {
+            let candidate = pack_pair_witness(left, right, relative, 0);
             for &root in roots {
                 by_canonical
                     .entry(root)
-                    .or_insert(pack_pair_witness(left, right, relative, 0));
+                    .and_modify(|prior| {
+                        let (old_left, old_right, old_relative, _) = unpack_pair_witness(*prior);
+                        if (left, right, relative) < (old_left, old_right, old_relative) {
+                            *prior = candidate;
+                        }
+                    })
+                    .or_insert(candidate);
             }
         }
         let index_entries = by_canonical.len();
@@ -2990,12 +2999,14 @@ fn extract_orbit_relation(
     base: &PointBase,
     target: &BinaryPoint,
     regular: &HashMap<(usize, usize, usize), [u64; 2]>,
+    regular_keys: Vec<(usize, usize, usize)>,
     representative_x_codes: &[u64],
     gf: &Gf2,
     b: u64,
 ) -> (Option<ExtractedOrbitRelation>, usize, f64) {
     let started = Instant::now();
-    let index = CompactOrbitExtractionIndex::new(curve, regular, representative_x_codes, gf);
+    let index =
+        CompactOrbitExtractionIndex::new(curve, regular, regular_keys, representative_x_codes, gf);
     let result = extract_orbit_relation_with_index(curve, base, target, regular, &index, gf, b);
     let elapsed = started.elapsed().as_secs_f64() * 1000.0;
     (result, index.index_entries, elapsed)
@@ -5765,6 +5776,15 @@ fn main() {
             })
             .collect();
         let (states, scan_ms) = scan_regular_relative_states(&curve, &codes);
+        let mut regular_keys: Vec<_> = states
+            .iter()
+            .map(|&(left, right, relative, _)| (left, right, relative))
+            .collect();
+        // The parallel scan currently collects by left-representative order.
+        // Keep the order contract exact if scheduling changes.
+        if !regular_keys.is_sorted() {
+            regular_keys.sort_unstable();
+        }
         let map = states
             .into_iter()
             .map(|(left, right, relative, roots)| ((left, right, relative), roots))
@@ -5781,8 +5801,13 @@ fn main() {
             let order = curve.subgroup_order.to_u64().unwrap();
             assert!(scalars.iter().all(|scalar| *scalar > 0 && *scalar < order));
             let index_started = Instant::now();
-            let index =
-                CompactOrbitExtractionIndex::new(&curve, &map, &codes, &lazy_relative_field.gf);
+            let index = CompactOrbitExtractionIndex::new(
+                &curve,
+                &map,
+                regular_keys,
+                &codes,
+                &lazy_relative_field.gf,
+            );
             compact_batch_index_build_ms = index_started.elapsed().as_secs_f64() * 1000.0;
             compact_index_entries = index.index_entries;
             let b = curve.curve.b.raw_bits().first().copied().unwrap_or(0);
@@ -5814,6 +5839,7 @@ fn main() {
                 &base,
                 &target,
                 &map,
+                regular_keys,
                 &codes,
                 &lazy_relative_field.gf,
                 curve.curve.b.raw_bits().first().copied().unwrap_or(0),
@@ -6581,6 +6607,16 @@ mod tests {
         let curve = KoblitzCurve::new(1, 7).unwrap();
         let gf = Gf2::new(&curve.curve.irreducible);
         let representatives = [1u64, 2u64];
+        let scan_keys = || {
+            let (states, _) = scan_regular_relative_states(&curve, &representatives);
+            states
+                .iter()
+                .map(|&(left, right, relative, _)| (left, right, relative))
+                .collect::<Vec<_>>()
+        };
+        let first_scan = scan_keys();
+        assert!(first_scan.is_sorted());
+        assert_eq!(first_scan, scan_keys());
         let entries = [
             ((1usize, 0usize, 0usize), [3u64, 4u64]),
             ((0usize, 1usize, 1usize), [3u64, 5u64]),
@@ -6593,9 +6629,21 @@ mod tests {
         for &(key, roots) in entries.iter().rev() {
             reverse.insert(key, roots);
         }
-        let first = CompactOrbitExtractionIndex::new(&curve, &forward, &representatives, &gf);
-        let second = CompactOrbitExtractionIndex::new(&curve, &reverse, &representatives, &gf);
         let expected_order = vec![(0, 1, 1), (1, 0, 0)];
+        let first = CompactOrbitExtractionIndex::new(
+            &curve,
+            &forward,
+            expected_order.clone(),
+            &representatives,
+            &gf,
+        );
+        let second = CompactOrbitExtractionIndex::new(
+            &curve,
+            &reverse,
+            expected_order.clone(),
+            &representatives,
+            &gf,
+        );
         assert_eq!(first.regular_keys, expected_order);
         assert_eq!(second.regular_keys, expected_order);
         assert_eq!(first.by_canonical, second.by_canonical);
