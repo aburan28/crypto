@@ -388,12 +388,7 @@ pub fn artin_schreier_root(gf: &Gf2, n: u32, c: u64) -> Option<u64> {
     if n > 20 {
         return None;
     }
-    for v in 0..(1u64 << n) {
-        if (gf.sqr(v) ^ v) == c {
-            return Some(v);
-        }
-    }
-    None
+    (0..(1u64 << n)).find(|&v| (gf.sqr(v) ^ v) == c)
 }
 
 /// Pack `(x, y)` exactly as [`crate::cryptanalysis::koblitz_index_calculus::pack_point`]
