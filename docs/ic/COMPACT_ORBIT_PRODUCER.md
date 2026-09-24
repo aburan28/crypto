@@ -4,6 +4,8 @@ This page records the source promotion for `examples/koblitz_s5_sat_instance.rs`
 
 The example and `src/cryptanalysis/koblitz_fast_arith.rs` are copied byte-for-byte from feature-branch merge `70bbbd618c5077a2a9c8d1afa16704c5a5c06bb8` (PR #714); their Git blob IDs are `3af182a7ddb8f18d17c8e45e587b64b0a25c76b3` and `af761afbcba3e94620948c6f0bdc84aaeb9a4e2e`. The main-branch integration adds the arithmetic module declaration and the SAT solver methods actually called by the producer: lazy theory clauses and deterministic saved-phase controls. It also preserves root UNSAT and XOR row counts when exporting extended DIMACS, which the producer's empty-edge-domain test requires.
 
+The independent n=53 replay from PR #714 is retained under `research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/`: `results.json`, `claim_relation_yield.json`, `independent_replay_20260924_codex/replay.py`, and its certified `base_header.jsonl.gz`. These are the script's exact local inputs. After the release build, run `python3 research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay_20260924_codex/replay.py --variant deterministic --out /tmp/compact-orbit-replay` to recompute twelve archived public synthetic witnesses with independent Python field and group arithmetic. Choose a fresh output directory. The replay is positive relation evidence only.
+
 The producer's CLI is:
 
 ```text
