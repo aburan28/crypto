@@ -235,3 +235,20 @@ changes a cell, a degree cap or a rule:
 
 The cells, `d_max`, draw counts, controls, seed, binary and decision rules
 are unchanged.
+
+## Addendum: the `(9, 3)` control was stopped, at the user's direction
+
+The `(9, 3)` cell's infeasible control, a random system of 22 equations in
+18 unknowns run to degree 7, had used **9 h 10 min of CPU** (33,399 s wall
+for the whole cell) without finishing. It was **stopped on 2026-09-24 at
+about 02:17 UTC, at the user's direction**, so that the queued `(7, 2)`
+cell could run.
+
+- **The `(9, 3)` cell's four measured draws stand** (6, 6, 6, 6, FFD
+  recorded), and are committed under `runs/`.
+- **Its control is unfinished.** That is a resource limit, reported, never
+  evidence. Controls are secondary and nothing is decided on them, so no
+  rule and no pair is affected.
+- Earlier, while it ran, that process's `oom_score_adj` was raised to 800,
+  so that a memory shortage would take the control rather than the primary
+  large cell `(13, 5)`. No shortage occurred.
