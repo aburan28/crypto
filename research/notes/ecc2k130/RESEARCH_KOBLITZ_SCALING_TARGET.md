@@ -213,6 +213,11 @@ happened, in the autolab entry, even when the answer is "no change".
 >   in this repository's convention.
 > - **Not an observation.**  It was published in 2015 for these systems,
 >   and the paper was already in this thread's survey when H1 was written.
+> - **The chained rows measure one link** (X5″, 2026-09-24, unregistered
+>   localisation).  Through degree 4, every fall of the chained `m = 4`
+>   systems, in either convention, comes from the single link whose third
+>   coordinate `x(R)` is known.  The cubic links contribute no kernel and
+>   no degree fall.
 Over 16 draws per instance, every system falls at `D = 2` or `D = 3`,
 and every chained (`m ≥ 3`) system falls at exactly 3.
 *Falsifier:* any `(n, m)` on the ladder with `fall_min ≥ 4` at

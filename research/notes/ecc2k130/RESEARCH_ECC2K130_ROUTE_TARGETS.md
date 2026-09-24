@@ -768,9 +768,10 @@ in [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](RESEARCH_KOBLITZ_SCALING_TARGET.md).
 **Class.**  A structural measurement; no cost moves.  X5 is closed as run.
 
 **What this does not settle.**
-- **Whether any of the symmetrised chain's `D = 4` dependencies is
+- ~~**Whether any of the symmetrised chain's `D = 4` dependencies is
   non-trivial.**  Separating them from the trivial syzygies needs the
-  syzygy module, not a rank.
+  syzygy module, not a rank.~~  *Answered by X5″ (below): 26–56 of them
+  are, and by the literature's definition the chain falls genuinely at 3.*
 - **Whether the constant offset survives past `n = 19`.**  Both arms reach 64
   unknowns there, and `MAX_VARS` is a `u64` mask.
 - **Anything about ECC2K-130's cost.**  The close-out already records that no
@@ -1244,3 +1245,104 @@ beyond that.
 **Inadmissible.**  Changing the rungs, draws, seeds or definitions above
 after the rows are seen; dropping draws; reporting the positive control's
 failure as a result.
+
+### X5″, run: **the symmetrised chain has genuine falls at 3, one degree above the `x`-chain in both conventions, and all of it is the last link**
+
+`cargo run --release --example koblitz_x5_syzygy_split -- --json experiments/29_koblitz_x5_syzygy_split.json`,
+frozen as `experiments/29_koblitz_x5_syzygy_split.{json,log}`.
+
+- **Coverage.**  18 draws per arm (8 at `n = 9`, 8 at `n = 11`, 2 at
+  `n = 13`), 3 min 17 s in all.
+- **Controls.**  The positive control held on every draw (the `x`-chain's
+  `R^h_2 = 1`).  No generator failed: every trivial syzygy, Boolean
+  identity and multiple was checked to lie in its kernel.
+- **Cross-check.**  `K_4` reproduces X5′'s diagnostic (89 and 84 at
+  `n = 9`, draws 0–1).
+
+| arm | `n` | literature: `R^h_2`, `R^h_3` | first fall (literature) | linear `L_2 / L_3 / L_4` | H1: `K_4` | `T_4` (`= n + C(n,2)`) | `+ Λ_4 (+ K_3` multiples) | residual `r_4` |
+|---|---:|---|---:|---|---:|---:|---:|---:|
+| symmetrised | 9 | 0, **18** | **3** | 0 / 0 / 4–6 | 87–89 | 45 | 45 (45) | **42–44** |
+| symmetrised | 11 | 0, **22** | **3** | 0 / 0 / 4–10 | 116–122 | 66 | 66 (66) | **50–56** |
+| symmetrised | 13 | 0, **26** | **3** | 0 / 0 / 0 | 117 | 91 | 91 (91) | **26** |
+| `x`-chain | 9 | **1**, 39 | **2** | 1 / 1 / 1 | 84 | 45 | 78 (78) | 6 |
+| `x`-chain | 11 | **1**, 45 | **2** | 1 / 1 / 1 | 111 | 66 | 103 (103) | 8 |
+| `x`-chain | 13 | **1**, 54 | **2** | 1 / 1 / 1 | 145 | 91 | 136 (136) | 9 |
+
+Ranges are over draws; every other cell is the same on every draw.  At
+`D = 4` the graded `R^h` count includes multiples of the falls at 3 and is
+left in the JSON.
+
+**Against the registered outcomes.**  The symmetrised arm reads
+`R^h_3 > 0` and `r_4 > 0`, with `L_3 = 0`.  That is not any row of the
+table exactly (the second row needed `r_4 = 0`), so it is **"anything else",
+reported as measured.**
+
+1. **By the literature's definition, the symmetrised chain has a genuine
+   first fall at 3,** on every draw.  There are exactly `2n` falls, all to
+   degree 2 (no linear equation appears below degree 4).  The `x`-chain's is
+   at 2 (KY's trace).  So the one-degree offset X5′ measured in H1's
+   convention (4 against 3) is the same offset in the literature's (3 against
+   2).
+   - **The `2n` is derived, and the count matches.**  The symmetrised last
+     link's top part is `w_R·U·W` (X5′), which is bilinear.  Multiplying by
+     `U` gives `w_R·U²·W`, and by `W` gives `w_R·U·W²`.  Both are still
+     bilinear, because squaring is `F₂`-linear.  So each of the two
+     multipliers' `n` coordinates falls from 3 to 2.
+   - **The `x`-link has no such fall.**  Its top part contains `a²b²`, and
+     `a·a²b² = a³b²` is cubic.
+2. **In H1's convention, the symmetrised chain's rank loss at 4 is not all
+   trivial.**
+   - `n + C(n, 2)` of it is the Koszul and field syzygies of its `n`
+     degree-2 equations, independent on every draw.
+   - The remaining **26–56** are not in the degree-4 trivial span.  They are
+     not Boolean identities of linear falls, because there are none below
+     degree 4.  They are not multiples of `K_3`, which is 0.
+   - The `x`-chain has a residual too, 6–9, after its trace equation's
+     identities and their multiples.
+   - What the symmetrised residual is, is **not determined here**.
+3. **X5′'s reading, sharpened.**
+   - "No rank loss below the degree where trivial syzygies force one" is
+     true of rank loss.  It is not true of degree falls: the symmetrised
+     chain falls genuinely at 3.
+   - So "the symmetrised system is not shown to be harder" becomes firmer.
+     By the definition the literature uses, it falls one degree after the
+     `x`-chain, from a standard Frobenius mechanism.  It does not avoid
+     falling.
+
+**Unregistered localisation** (computed after the registered quantities, and
+unable to change them).
+
+- **All of the above is the last link.**  For each link alone:
+  - the two cubic links have no `D = 4` kernel and no graded fall at 3,
+    on every draw and in both arms;
+  - the last link alone has the whole system's `K_4` and the whole graded
+    `R^h_3`.
+- **So through degree 4, a chain's fall degree, in either convention, is
+  the fall degree of the single `S₃` whose third coordinate is known.**  For
+  the `x`-frame that is exactly Kosters–Yeo's system.  That puts one more
+  line under H1's caveat: H1's chained rows measure one link.
+- **A hypothesis tried and falsified.**  The residual is not produced by
+  multipliers in the last link's small unknown block (the summand's 4–5
+  bits).  Restricted to those multipliers, the kernel is 0 in both arms.
+
+**The first run, and the fix.**  The first run built `Λ_4` from the
+echelon form of `M_3` only.
+
+- **What went wrong.**  When the combination representing a linear
+  polynomial used degree-3 rows, the monomial multiples that fit at its true
+  degree were left out.  So the `x`-chain's `T_4 + Λ_4` changed from draw to
+  draw (45 or 78 at `n = 9`).
+- **The fix.**  The linear pivots of `M_2` were added, so each identity is
+  taken at the lowest degree it appears at.  That is what the registration
+  asked for ("`s` of whatever degree still fits").
+- **What it affected.**  Only the `x`-chain's `Λ_4` column.  The symmetrised
+  arm has no linear falls below 4, and its rows are identical in both runs.
+- **Where it is kept.**  The first run's partial output, stopped at
+  `n = 13` for the fix, is `experiments/29_prefix/`.
+
+**Class.**  A structural measurement; no cost moves.
+
+**What is still open.**  What the symmetrised last link's 26–56 residual
+syzygies at degree 4 are.  They sit in `n` quadratic equations in `n + 4`
+or `n + 5` unknowns, and they are not trivial, not linear-fall identities and
+not small-block multiples.  Nothing measured here bears on ECC2K-130's cost.

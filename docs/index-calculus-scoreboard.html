@@ -1807,6 +1807,42 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         The one registered solve (K<sub>1</sub>/F<sub>2</sub><sup>11</sup>) agrees with 4-sum
         enumeration on all 16 targets. Nothing here bears on ECC2K-130&rsquo;s cost.</p>
     </div>
+    <div class="table-scroll"><table>
+      <caption>X5&Prime; (2026-09-24, registered before its code): the degree-4 kernel split, per arm, over
+        8, 8 and 2 draws at n&thinsp;=&thinsp;9, 11, 13. &ldquo;Literature&rdquo; is the degree-fall
+        definition (graded top parts, trivial syzygies removed). &ldquo;Trivial&rdquo; is the
+        degree-4 span of the Koszul and field syzygies, which is n&thinsp;+&thinsp;C(n,2) in every
+        row. &ldquo;Identities&rdquo; are the Boolean identities of linear falls below degree 4.
+        Frozen: <code>experiments/29_koblitz_x5_syzygy_split.json</code>.</caption>
+      <thead>
+        <tr><th scope="col" class="n">n</th><th scope="col">Arm</th><th scope="col" class="n">First fall (literature)</th>
+          <th scope="col" class="n">Falls at that degree</th><th scope="col" class="n">K<sub>4</sub> (H1)</th>
+          <th scope="col" class="n">Trivial + identities</th><th scope="col" class="n">Residual</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">9</td><td>symmetrised</td><td class="n">3</td><td class="n">18 (= 2n)</td><td class="n">87&ndash;89</td><td class="n">45</td><td class="n">42&ndash;44</td></tr>
+        <tr><td class="n">11</td><td>symmetrised</td><td class="n">3</td><td class="n">22 (= 2n)</td><td class="n">116&ndash;122</td><td class="n">66</td><td class="n">50&ndash;56</td></tr>
+        <tr><td class="n">13</td><td>symmetrised</td><td class="n">3</td><td class="n">26 (= 2n)</td><td class="n">117</td><td class="n">91</td><td class="n">26</td></tr>
+        <tr><td class="n">9</td><td>x-chain</td><td class="n">2</td><td class="n">1 (KY&rsquo;s trace)</td><td class="n">84</td><td class="n">78</td><td class="n">6</td></tr>
+        <tr><td class="n">11</td><td>x-chain</td><td class="n">2</td><td class="n">1</td><td class="n">111</td><td class="n">103</td><td class="n">8</td></tr>
+        <tr><td class="n">13</td><td>x-chain</td><td class="n">2</td><td class="n">1</td><td class="n">145</td><td class="n">136</td><td class="n">9</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><b>X5&Prime;: the symmetrised chain falls genuinely at 3, one degree above the x-chain in
+        both conventions.</b> By the literature&rsquo;s definition its first fall is at 3 on every
+        draw, with exactly 2n falls, all to quadratics. The count is derived: its last link&rsquo;s
+        top part w<sub>R</sub>UW stays bilinear when multiplied by U or by W, because squaring is
+        F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
+        4-against-3 is the literature&rsquo;s 3-against-2, and the symmetrised system is not shown
+        to be harder. In H1&rsquo;s convention its rank loss at 4 is n&thinsp;+&thinsp;C(n,2)
+        trivial syzygies plus 26&ndash;56 that are not trivial and not identities of linear falls
+        (there are none). What those are is left open. An unregistered localisation puts all of
+        it, in both arms and both conventions, in the single link whose x(R) is known: the two
+        cubic links show no kernel and no fall through degree 4. A first run that under-counted
+        the x-chain&rsquo;s identities is kept and disclosed (<code>experiments/29_prefix/</code>);
+        the symmetrised rows are unchanged by the fix. A structural measurement: no cost moves.</p>
+    </div>
   </div>
 
   <div class="panel" id="koblitz-phase-prices-20260921">
