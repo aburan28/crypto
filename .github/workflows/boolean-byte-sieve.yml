@@ -1,0 +1,24 @@
+name: Standalone Boolean projected syndromes
+on:
+  pull_request:
+    paths:
+      - 'research/boolean_byte_sieve_20260923/**'
+      - '.github/workflows/boolean-byte-sieve.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact projections, Gray schedules and complete models
+        run: |
+          rustc --edition 2021 -O --test research/boolean_byte_sieve_20260923/worker.rs -o /tmp/boolean-byte-tests
+          /tmp/boolean-byte-tests
+      - name: Frozen evidence, randomized orders and corruption checks
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -m unittest discover -s research/boolean_byte_sieve_20260923 -p 'test_*.py' -v
