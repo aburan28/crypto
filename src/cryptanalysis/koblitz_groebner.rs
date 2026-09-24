@@ -146,8 +146,7 @@ pub const MAX_VARS: usize = 64;
 /// This is all a symbolic multiplication needs: the coordinates of a
 /// product are `F_2`-bilinear in the coordinates of the operands, with
 /// these structure constants.
-#[derive(Clone, Debug)]
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct FieldStructure {
     /// Extension degree.
     pub n: u32,
@@ -180,8 +179,7 @@ impl FieldStructure {
 
 /// An element of `F_{2^n}` whose coordinates are Boolean polynomials —
 /// i.e. a symbolic field element in the Weil restriction.
-#[derive(Clone, Debug)]
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct SymElement {
     /// `coords[k]` multiplies `z^k`.  Length `n`.
     pub coords: Vec<F2BoolPoly>,
@@ -437,8 +435,7 @@ pub fn sym_semaev_s4(
 
 /// The Boolean system whose roots are the `m`-point decompositions of a
 /// target with abscissa `x_r` over the subspace spanned by `basis`.
-#[derive(Clone, Debug)]
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct DecompositionSystem {
     /// The equations, `n` per `S₃` link.
     pub equations: Vec<F2BoolPoly>,
@@ -956,7 +953,14 @@ fn matrix_f4_f2_counted_impl(
             reuse_layout,
             criterion,
         )
-        .map(|b| (b.columns, F4PackedMatrix::Flat(b.matrix), b.rows_pruned, b.criterion_word_ops))
+        .map(|b| {
+            (
+                b.columns,
+                F4PackedMatrix::Flat(b.matrix),
+                b.rows_pruned,
+                b.criterion_word_ops,
+            )
+        })
     } else {
         build_macaulay_with_multiplier_mask(
             polys,
@@ -966,7 +970,14 @@ fn matrix_f4_f2_counted_impl(
             reuse_layout,
             criterion,
         )
-        .map(|b| (b.columns, F4PackedMatrix::Nested(b.matrix), b.rows_pruned, b.criterion_word_ops))
+        .map(|b| {
+            (
+                b.columns,
+                F4PackedMatrix::Nested(b.matrix),
+                b.rows_pruned,
+                b.criterion_word_ops,
+            )
+        })
     };
     let build_ns = t_build.elapsed().as_nanos();
     let (cols, mut matrix, rows_pruned, criterion_word_ops) = match built {
@@ -1428,8 +1439,19 @@ pub(crate) fn macaulay_rows_monos_with_mask(
 
 /// The number of rows [`macaulay_rows_monos`] would return, without
 /// materialising them: `None` exactly when it would be `None`.
-pub(crate) fn macaulay_row_count(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<usize> {
-    visit_macaulay_rows(polys, n_vars, degree, all_variable_mask(n_vars), None, |_| {})
+pub(crate) fn macaulay_row_count(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<usize> {
+    visit_macaulay_rows(
+        polys,
+        n_vars,
+        degree,
+        all_variable_mask(n_vars),
+        None,
+        |_| {},
+    )
 }
 
 /// Hand every non-empty Macaulay row (ascending monomial masks, odd
@@ -1781,12 +1803,7 @@ fn pack_polynomials_flat_fused(
         let mut product = Vec::with_capacity(polynomial.terms.len());
         for &multiplier in multipliers.iter() {
             product.clear();
-            product.extend(
-                polynomial
-                    .terms
-                    .iter()
-                    .map(|term| term.mask | multiplier),
-            );
+            product.extend(polynomial.terms.iter().map(|term| term.mask | multiplier));
             product.sort_unstable();
             let mut read = 0usize;
             let mut write = 0usize;
@@ -1859,7 +1876,11 @@ fn pack_polynomials_nested_fused(
     }
     let mut seen = vec![false; layout.columns.len()];
     let mut matrix = Vec::with_capacity(estimated_rows.min(max_f4_rows()));
-    let max_terms = polys.iter().map(|polynomial| polynomial.terms.len()).max().unwrap_or(0);
+    let max_terms = polys
+        .iter()
+        .map(|polynomial| polynomial.terms.len())
+        .max()
+        .unwrap_or(0);
     let mut product = Vec::with_capacity(max_terms);
     for (polynomial, gap) in polys.iter().zip(gaps) {
         let Some(gap) = gap else {
@@ -1868,12 +1889,7 @@ fn pack_polynomials_nested_fused(
         let multipliers = schedules[gap].as_ref().unwrap();
         for &multiplier in multipliers.iter() {
             product.clear();
-            product.extend(
-                polynomial
-                    .terms
-                    .iter()
-                    .map(|term| term.mask | multiplier),
-            );
+            product.extend(polynomial.terms.iter().map(|term| term.mask | multiplier));
             product.sort_unstable();
             let mut read = 0usize;
             let mut write = 0usize;
@@ -2115,11 +2131,8 @@ impl F4ColumnIndex {
     }
 }
 
-type FastColumnMap = std::collections::HashMap<
-    u64,
-    usize,
-    std::hash::BuildHasherDefault<FastU64Hasher>,
->;
+type FastColumnMap =
+    std::collections::HashMap<u64, usize, std::hash::BuildHasherDefault<FastU64Hasher>>;
 
 #[derive(Default)]
 struct FastU64Hasher(u64);
@@ -2408,8 +2421,7 @@ fn echelon_f2_m4ri_arena_counted_with(
             let mut found = None;
             for row in next_pivot..rows {
                 for (index, &pivot_column) in pivot_columns[..block_rows].iter().enumerate() {
-                    let (pivot_word, pivot_bit) =
-                        (pivot_column / 64, 1u64 << (pivot_column % 64));
+                    let (pivot_word, pivot_bit) = (pivot_column / 64, 1u64 << (pivot_column % 64));
                     if matrix[row][pivot_word] & pivot_bit != 0 {
                         for (target, &source) in matrix[row][pivot_word..words]
                             .iter_mut()
@@ -2433,8 +2445,9 @@ fn echelon_f2_m4ri_arena_counted_with(
                 for previous in block_start..next_pivot {
                     if matrix[previous][word] & bit != 0 {
                         let block_index = previous - block_start;
-                        for (target, &source) in
-                            matrix[previous][word..words].iter_mut().zip(&pivot[word..words])
+                        for (target, &source) in matrix[previous][word..words]
+                            .iter_mut()
+                            .zip(&pivot[word..words])
                         {
                             *target ^= source;
                         }
@@ -2472,7 +2485,11 @@ fn echelon_f2_m4ri_arena_counted_with(
             *word_ops += suffix_words as u64;
         }
 
-        let first_target = if reduce_above { 0 } else { block_start + block_rows };
+        let first_target = if reduce_above {
+            0
+        } else {
+            block_start + block_rows
+        };
         // Each target row clears the whole block with one XOR of a table
         // row chosen by its own bits: independent across rows, so large
         // blocks run in parallel.  The XORs, and the count, are the same.
@@ -2506,7 +2523,11 @@ fn echelon_f2_m4ri_arena_counted_with(
                 .map(clear)
                 .sum::<u64>();
         } else {
-            *word_ops += above.iter_mut().chain(below.iter_mut()).map(clear).sum::<u64>();
+            *word_ops += above
+                .iter_mut()
+                .chain(below.iter_mut())
+                .map(clear)
+                .sum::<u64>();
         }
         pivot_row += block_rows;
     }
@@ -2598,7 +2619,11 @@ fn echelon_f2_m4ri_allocating_counted(
             *word_ops += suffix_words as u64;
         }
 
-        let first_target = if reduce_above { 0 } else { block_start + block_rows };
+        let first_target = if reduce_above {
+            0
+        } else {
+            block_start + block_rows
+        };
         for row in first_target..rows {
             if (block_start..block_start + block_rows).contains(&row) {
                 continue;
@@ -2888,11 +2913,7 @@ pub fn system_degree(polys: &[F2BoolPoly]) -> u32 {
 /// equations admit more solutions, so an infeasible subsystem forces an
 /// infeasible system — but reporting one would make the returned degree
 /// mean two different things, so the guard applies to both.
-pub fn solving_profile(
-    polys: &[F2BoolPoly],
-    n_vars: usize,
-    degree: u32,
-) -> Option<SolvingProfile> {
+pub fn solving_profile(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<SolvingProfile> {
     if degree < system_degree(polys) {
         return None;
     }
@@ -3205,7 +3226,11 @@ impl SolverEngine {
     /// generators have total degree `system_degree`: from the system's own
     /// degree (at least 2) up to `max_degree`, or the top degree alone for
     /// wide systems, as the `MatrixF4` policy has always done.
-    fn degree_ladder(self, system_degree: u32, n_vars: usize) -> Option<std::ops::RangeInclusive<u32>> {
+    fn degree_ladder(
+        self,
+        system_degree: u32,
+        n_vars: usize,
+    ) -> Option<std::ops::RangeInclusive<u32>> {
         let max_degree = match self {
             SolverEngine::MatrixF4 { max_degree }
             | SolverEngine::MatrixF5 { max_degree }
@@ -3429,8 +3454,8 @@ fn reduce_system(
     }
     let key = serde_json::to_vec(&(n_vars, format!("{engine:?}"), system)).unwrap();
     let mut miss_oversize = 0;
-    let value: Option<(Vec<F2BoolPoly>, u32, usize)> = algebra_cache::memoize(
-        Layer::ExactReduction, &key, || {
+    let value: Option<(Vec<F2BoolPoly>, u32, usize)> =
+        algebra_cache::memoize(Layer::ExactReduction, &key, || {
             let mut measured = SolveStats::default();
             let rows = reduce_system_uncached(system, n_vars, engine, &mut measured);
             // Preserve the metadata even when no reduction could be computed.
@@ -3439,7 +3464,9 @@ fn reduce_system(
             rows.map(|r| (r, measured.max_degree_built, measured.oversize))
         });
     stats.reductions += 1;
-    if value.is_none() { stats.oversize += miss_oversize; }
+    if value.is_none() {
+        stats.oversize += miss_oversize;
+    }
     value.map(|(rows, degree, oversize)| {
         stats.oversize += oversize;
         stats.max_degree_built = stats.max_degree_built.max(degree);
@@ -3456,7 +3483,11 @@ fn dump_node_system(system: &[F2BoolPoly], n_vars: usize, engine: SolverEngine) 
         return;
     };
     use std::io::Write;
-    let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(path) else {
+    let Ok(mut file) = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+    else {
         return;
     };
     let line = serde_json::json!({
@@ -3468,7 +3499,10 @@ fn dump_node_system(system: &[F2BoolPoly], n_vars: usize, engine: SolverEngine) 
 }
 
 fn reduce_system_uncached(
-    system: &[F2BoolPoly], n_vars: usize, engine: SolverEngine, stats: &mut SolveStats,
+    system: &[F2BoolPoly],
+    n_vars: usize,
+    engine: SolverEngine,
+    stats: &mut SolveStats,
 ) -> Option<Vec<F2BoolPoly>> {
     stats.reductions += 1;
     dump_node_system(system, n_vars, engine);
@@ -3634,7 +3668,11 @@ fn reduce_inherited(
             }
         };
         let basis = &mut bases.bases[index];
-        debug_assert_eq!(basis.system.as_slice(), system, "basis out of step with the node system");
+        debug_assert_eq!(
+            basis.system.as_slice(),
+            system,
+            "basis out of step with the node system"
+        );
         let started = std::time::Instant::now();
         let mut cost = InheritCost::default();
         let rows = basis.decisive_rows(&mut cost);
@@ -4257,7 +4295,10 @@ mod tests {
             SolverEngine::InheritedF4 { max_degree: 3 },
             SolverEngine::MatrixF5 { max_degree: 3 },
         ];
-        for (m, raws) in [(2usize, vec![1u64, 9, 23, 64, 300, 511]), (3, vec![1u64, 23, 300])] {
+        for (m, raws) in [
+            (2usize, vec![1u64, 9, 23, 64, 300, 511]),
+            (3, vec![1u64, 23, 300]),
+        ] {
             for raw in raws {
                 let sys =
                     build_decomposition_system(basis, &fe(raw, kc.n), &kc.curve.b, m, &st).unwrap();
@@ -4266,15 +4307,24 @@ mod tests {
                     engine: SolverEngine::MatrixF4 { max_degree: 3 },
                     ..SolveOptions::default()
                 };
-                let (mut want, want_stats) = solve_boolean_system(&sys.equations, sys.n_vars, &reference);
+                let (mut want, want_stats) =
+                    solve_boolean_system(&sys.equations, sys.n_vars, &reference);
                 want.sort_unstable();
                 for engine in engines {
-                    let opts = SolveOptions { engine, ..reference };
+                    let opts = SolveOptions {
+                        engine,
+                        ..reference
+                    };
                     let (mut got, stats) = solve_boolean_system(&sys.equations, sys.n_vars, &opts);
                     got.sort_unstable();
                     assert_eq!(got, want, "{engine:?} m={m} x_R={raw}: roots differ");
                     assert_eq!(
-                        (stats.reductions, stats.infeasible_branches, stats.propagations, stats.splits),
+                        (
+                            stats.reductions,
+                            stats.infeasible_branches,
+                            stats.propagations,
+                            stats.splits
+                        ),
                         (
                             want_stats.reductions,
                             want_stats.infeasible_branches,
@@ -4321,12 +4371,22 @@ mod tests {
         assert_eq!(explicit.split_rule, SplitRule::LowestFree);
         // The two rules pick opposite ends of the free variables.
         let system = vec![F2BoolPoly::from_monos(
-            vec![F2BoolMono::from_mask(0b0110), F2BoolMono::var(3), F2BoolMono::one()],
+            vec![
+                F2BoolMono::from_mask(0b0110),
+                F2BoolMono::var(3),
+                F2BoolMono::one(),
+            ],
             5,
         )];
         let assignment = vec![None; 5];
-        assert_eq!(choose_split(&system, &assignment, SplitRule::LowestFree), Some(0));
-        assert_eq!(choose_split(&system, &assignment, SplitRule::HighestFree), Some(3));
+        assert_eq!(
+            choose_split(&system, &assignment, SplitRule::LowestFree),
+            Some(0)
+        );
+        assert_eq!(
+            choose_split(&system, &assignment, SplitRule::HighestFree),
+            Some(3)
+        );
     }
 
     /// Same tree on random systems with linear equations mixed in — where
@@ -4382,7 +4442,12 @@ mod tests {
                 got.sort_unstable();
                 assert_eq!(got, want, "trial {trial} {split_rule:?}: roots differ");
                 assert_eq!(
-                    (stats.reductions, stats.infeasible_branches, stats.propagations, stats.splits),
+                    (
+                        stats.reductions,
+                        stats.infeasible_branches,
+                        stats.propagations,
+                        stats.splits
+                    ),
                     (
                         want_stats.reductions,
                         want_stats.infeasible_branches,
@@ -4391,7 +4456,10 @@ mod tests {
                     ),
                     "trial {trial} {split_rule:?}: the splitting tree differs"
                 );
-                assert_eq!(got, brute, "trial {trial} {split_rule:?}: roots are not the variety");
+                assert_eq!(
+                    got, brute,
+                    "trial {trial} {split_rule:?}: roots are not the variety"
+                );
             }
         }
     }
@@ -4471,11 +4539,26 @@ mod tests {
             }
 
             for (rule, engine) in [
-                (SplitRule::LowestFree, SolverEngine::MatrixF4 { max_degree: 3 }),
-                (SplitRule::MostFrequent, SolverEngine::MatrixF4 { max_degree: 3 }),
-                (SplitRule::MinTermWeight, SolverEngine::MatrixF4 { max_degree: 3 }),
-                (SplitRule::HighestFree, SolverEngine::MatrixF4 { max_degree: 3 }),
-                (SplitRule::HighestFree, SolverEngine::InheritedF4 { max_degree: 3 }),
+                (
+                    SplitRule::LowestFree,
+                    SolverEngine::MatrixF4 { max_degree: 3 },
+                ),
+                (
+                    SplitRule::MostFrequent,
+                    SolverEngine::MatrixF4 { max_degree: 3 },
+                ),
+                (
+                    SplitRule::MinTermWeight,
+                    SolverEngine::MatrixF4 { max_degree: 3 },
+                ),
+                (
+                    SplitRule::HighestFree,
+                    SolverEngine::MatrixF4 { max_degree: 3 },
+                ),
+                (
+                    SplitRule::HighestFree,
+                    SolverEngine::InheritedF4 { max_degree: 3 },
+                ),
             ] {
                 let opts = SolveOptions {
                     engine,
@@ -4504,7 +4587,9 @@ mod tests {
     use rand::{rngs::StdRng, Rng, SeedableRng};
 
     fn eval_f2(p: &F2BoolPoly, a: u64) -> bool {
-        p.terms.iter().fold(false, |acc, t| acc ^ (t.mask & a == t.mask))
+        p.terms
+            .iter()
+            .fold(false, |acc, t| acc ^ (t.mask & a == t.mask))
     }
 
     /// Brute-force solution count over the cube — deliberately
@@ -4634,7 +4719,6 @@ mod tests {
         assert_eq!(p.vars_determined, 2);
     }
 
-
     /// The sparse path must answer **exactly** what the dense path
     /// answers.
     ///
@@ -4726,10 +4810,7 @@ mod tests {
                 ],
                 n,
             ),
-            F2BoolPoly::from_monos(
-                vec![F2BoolMono::from_mask(0b011000), F2BoolMono::var(0)],
-                n,
-            ),
+            F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(0b011000), F2BoolMono::var(0)], n),
         ];
         let (cols, _) = build_macaulay_sparse(&polys, n, 4).unwrap();
         let start = low_column_start(&cols);
@@ -4741,7 +4822,6 @@ mod tests {
             }
         }
     }
-
 
     /// The sparse rank must equal the dense rank, degree by degree.
     ///

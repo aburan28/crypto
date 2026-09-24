@@ -108,7 +108,11 @@ use std::collections::{HashMap, HashSet};
 
 /// Degree of a Boolean polynomial (`0` for a constant or zero).
 fn poly_degree(p: &F2BoolPoly) -> u32 {
-    p.terms.iter().map(|t| t.mask.count_ones()).max().unwrap_or(0)
+    p.terms
+        .iter()
+        .map(|t| t.mask.count_ones())
+        .max()
+        .unwrap_or(0)
 }
 
 /// Product `p · s` as a set of monomial masks with even multiplicities
@@ -608,14 +612,22 @@ mod tests {
         let n_vars = 4;
         let f1 = poly(n_vars, &[&[0], &[1]]);
         let f2 = poly(n_vars, &[&[2], &[3], &[]]);
-        let c = F5Criterion::new(&[f1.clone(), f2.clone()], n_vars, 2, all_variable_mask(n_vars));
+        let c = F5Criterion::new(
+            &[f1.clone(), f2.clone()],
+            n_vars,
+            2,
+            all_variable_mask(n_vars),
+        );
         assert!(c.prunes(1, f1.lt().unwrap().mask));
         assert!(c.prunes(1, f2.lt().unwrap().mask));
         assert!(c.prunes(0, f1.lt().unwrap().mask));
         assert!(!c.prunes(0, f2.lt().unwrap().mask));
         let f4 = matrix_f4_f2(&[f1.clone(), f2.clone()], n_vars, 2).unwrap();
         let (f5, report) = matrix_f5_f2(&[f1, f2], n_vars, 2).unwrap();
-        assert_eq!(row_space_canonical(&f4, n_vars), row_space_canonical(&f5, n_vars));
+        assert_eq!(
+            row_space_canonical(&f4, n_vars),
+            row_space_canonical(&f5, n_vars)
+        );
         assert_eq!(report.rows_pruned, 3);
     }
 
@@ -638,7 +650,10 @@ mod tests {
             .iter()
             .filter_map(|p| p.lt().map(|m| m.mask))
             .collect();
-        assert!(naive.contains(&0b01) && naive.contains(&0b10), "x₀ and x₁ are naive LMs");
+        assert!(
+            naive.contains(&0b01) && naive.contains(&0b10),
+            "x₀ and x₁ are naive LMs"
+        );
         // Rows kept by the naive rule, and their span:
         let kept: Vec<F2BoolPoly> = monomials_up_to_mask(all_variable_mask(n_vars), degree - 2)
             .into_iter()
@@ -654,7 +669,10 @@ mod tests {
         // The sound criterion keeps the full row space.
         let (f5, report) = matrix_f5_f2(&[f], n_vars, degree).unwrap();
         assert_eq!(f5.len(), full.len());
-        assert_eq!(row_space_canonical(&full, n_vars), row_space_canonical(&f5, n_vars));
+        assert_eq!(
+            row_space_canonical(&full, n_vars),
+            row_space_canonical(&f5, n_vars)
+        );
         assert!(report.rows_pruned > 0);
     }
 
