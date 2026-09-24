@@ -3789,6 +3789,8 @@ impl PairSumTable {
         }
         if let Some(canon) = self.canon.as_ref() {
             // A rotation has no dependency chain worth interleaving.
+            // (An eight-lane AVX-512 key was tried and measured slower:
+            // its run loop is as long as the worst of eight lanes.)
             out.extend(
                 points
                     .iter()

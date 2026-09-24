@@ -73,9 +73,6 @@ COUNTER_PATHS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("factor_base_points", ("factor_base", "points")),
     ("factor_base_columns", ("factor_base", "columns")),
     ("pair_table_stored_pairs", ("factor_base", "pair_table_stored_pairs")),
-    ("collection_trials", ("stages.collect", "trials_total")),
-    ("collection_summands_scanned", ("stages.collect", "summands_scanned_total")),
-    ("collection_relations", ("stages.collect", "relations_total")),
     ("descent_trials", ("stages.baseline", "vs_rho", "ic", "descent_trials_total")),
     ("rho_iterations", ("stages.baseline", "vs_rho", "rho", "iterations_total")),
 )
@@ -125,8 +122,40 @@ def tier_of(report: dict[str, Any]) -> str:
     return tier
 
 
-def counters_of(report: dict[str, Any]) -> dict[str, int]:
+# The collection counters, read from the logs stage.  A run whose planned
+# units leave a column undetermined collects further units inside that
+# stage, until the system is determined; the collect stage reports only
+# the planned units, so reading the counters there would pin a fraction
+# of the work and let every extension unit change unseen.  The logs
+# stage totals every unit the logs were solved from, planned and
+# extended, and equals the collect stage's totals when nothing was
+# extended — which is why references frozen before this read still hold.
+COLLECTION_PATHS: tuple[tuple[str, str, str], ...] = (
+    ("collection_trials", "trials", "trials_total"),
+    ("collection_summands_scanned", "summands_scanned", "summands_scanned_total"),
+    ("collection_relations", "relations_loaded", "relations_total"),
+)
+
+
+def collection_counters_of(report: dict[str, Any]) -> dict[str, int]:
+    logs = _stage(report, "logs")
+    collect = _stage(report, "collect")
+    if logs is None or not logs.get("ran"):
+        raise CheckFailure("logs stage missing or reused: the collection counters need a fresh logs stage")
     out: dict[str, int] = {}
+    for label, logs_key, collect_key in COLLECTION_PATHS:
+        value = logs.get(logs_key)
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise CheckFailure(f"counter {label!r} missing or not an integer in the logs stage")
+        planned = (collect or {}).get(collect_key)
+        if isinstance(planned, int) and value < planned:
+            raise CheckFailure(f"counter {label!r}: logs total {value} is below the collect stage's {planned}")
+        out[label] = value
+    return out
+
+
+def counters_of(report: dict[str, Any]) -> dict[str, int]:
+    out: dict[str, int] = collection_counters_of(report)
     for label, path in COUNTER_PATHS:
         value = _lookup(report, path)
         if not isinstance(value, int) or isinstance(value, bool):
