@@ -1,0 +1,11 @@
+n = 131, dpWeight 34: distinguished with probability 2^-25.27 per step, trail 2^25.27; guard maxIters = 2^30
+
+H = 8: sum p^2 = 0.12655, sum p^4 = 0.002099; pairwise 6-cycles 4.508e-10/step, tau-relation 4-cycles 2.801e-09/step
+  as built (rule: 2- and 4-step pairwise): 11.62% of trails trapped; cost x4.951 at maxIters 2^30, x1.655 at the best guard 2^27.00
+  rule also refuses the tau-relation 4-cycles: 1.79% of trails trapped; cost x1.493 at maxIters 2^30, x1.126 at the best guard 2^27.75
+  no fruitless cycles (sigma walk): 0.00% of trails trapped; cost x1.000 at maxIters 2^30, x1.000 at the best guard 2^30.75
+
+H = 16: sum p^2 = 0.09857, sum p^4 = 0.001349; pairwise 6-cycles 2.130e-10/step, tau-relation 4-cycles 1.801e-09/step
+  as built (rule: 2- and 4-step pairwise): 7.53% of trails trapped; cost x3.338 at maxIters 2^30, x1.440 at the best guard 2^27.25
+  rule also refuses the tau-relation 4-cycles: 0.85% of trails trapped; cost x1.231 at maxIters 2^30, x1.067 at the best guard 2^28.00
+  no fruitless cycles (sigma walk): 0.00% of trails trapped; cost x1.000 at maxIters 2^30, x1.000 at the best guard 2^30.75
