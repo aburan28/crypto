@@ -1,0 +1,17 @@
+{
+  "artifact_references": 60,
+  "checks": 306,
+  "claim_boundary": "same-target native-F4 engineering; not SOTA",
+  "ok": true,
+  "optional_external_artifacts_checked": 3,
+  "result_sha256": "36f1be8e74940f710b526a297a311f51a2c69643fc5ae138704a8858669a1a1a",
+  "schema": "koblitz_stage174_verification.v1",
+  "selected_pair_medians": {
+    "candidate_over_control_build_ns": 1.0323395929568833,
+    "candidate_over_control_core": 0.8687721390225857,
+    "candidate_over_control_eliminate_ns": 0.7983126339623956,
+    "candidate_over_control_rss": 1.0090537744690633,
+    "candidate_over_control_wall": 0.9015658100530108
+  },
+  "source_commit": "e51efb219edd4511a08d545de21184928e5e771c"
+}

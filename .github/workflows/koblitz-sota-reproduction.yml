@@ -136,6 +136,7 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-171-dense-symbolic-sets-20260923/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-172-native-f4-single-core-20260923/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-173-ggmp-same-cell-availability-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-174-size-gated-flat-m4ri-20260923/**"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -224,7 +225,7 @@ jobs:
         run: |
           python3 scripts/verify_koblitz_stage170_parallel_construction.py > /tmp/stage170-parallel-construction-verification.json
           cmp /tmp/stage170-parallel-construction-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-verification.json
-      - name: Verify Stage 171-173 native-F4 supplements
+      - name: Verify Stage 171-174 native-F4 supplements
         env:
           KIC_VERIFY_NO_WRITE: "1"
         run: |
@@ -232,6 +233,7 @@ jobs:
           python3 "$stage_root/stage-171-dense-symbolic-sets-20260923/verify_stage171.py"
           python3 "$stage_root/stage-172-native-f4-single-core-20260923/verify_stage172.py"
           python3 "$stage_root/stage-173-ggmp-same-cell-availability-20260923/verify_stage173.py"
+          python3 "$stage_root/stage-174-size-gated-flat-m4ri-20260923/verify_stage174.py"
           python3 - <<'PY'
           import hashlib
           import json
@@ -242,6 +244,7 @@ jobs:
               "stage-171-dense-symbolic-sets-20260923",
               "stage-172-native-f4-single-core-20260923",
               "stage-173-ggmp-same-cell-availability-20260923",
+              "stage-174-size-gated-flat-m4ri-20260923",
           )
           for name in names:
               root = stage_root / name
