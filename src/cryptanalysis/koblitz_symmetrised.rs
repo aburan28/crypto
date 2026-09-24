@@ -3368,7 +3368,7 @@ mod x5_tests {
             if [&x1, &x2, &xr]
                 .iter()
                 .any(|x| x.is_zero() || **x == F2mElement::one(n))
-                || pts.iter().any(|p| *p == fb.two_torsion)
+                || pts.contains(&fb.two_torsion)
             {
                 continue;
             }
