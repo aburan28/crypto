@@ -1855,7 +1855,14 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         the small block (either alone gives 0). An unregistered regularity at &ell;&thinsp;=&thinsp;4
         (residual = a per-rung constant + the number of small-block points where the local system is
         consistent, on all 16 draws) breaks at &ell;&thinsp;=&thinsp;5, and is recorded only as an
-        observation. The x-arm failed one registered gate, and the cause is identified and checked:
+        observation. At &ell;&thinsp;=&thinsp;5 a different regularity holds, and it survived an
+        unregistered supplement whose prediction was stated before it ran (n&thinsp;=&thinsp;15, 8 of 8
+        draws): the residual is exactly 2n. It splits as n syzygies realisable with multipliers of
+        U-degree &le;&thinsp;1, plus n with small-block degree &le;&thinsp;1, and none with only
+        bidegree-(1,1) multipliers. The link is an affine bilinear system in (U, &sigma;). The theory
+        it now has to be checked against is Faug&egrave;re&ndash;Safey El Din&ndash;Spaenlehauer&rsquo;s
+        Jacobian-kernel description of bilinear syzygies (JSC 2011), which is not claimed to explain
+        it here. The x-arm failed one registered gate, and the cause is identified and checked:
         X5&Prime;&rsquo;s last-link matrix used the whole chain&rsquo;s variables as multipliers.
         Frozen: <code>experiments/30_koblitz_x5_residual.json</code>. No cost moves, and no further
         run is proposed.</p>

@@ -361,6 +361,12 @@ struct Arm {
     residual_u_deg_le1: usize,
     residual_small_deg0: usize,
     residual_small_deg_le1: usize,
+    /// Added after the registered run (same draws, descriptive): multipliers
+    /// of bidegree ≤ (1, 1), i.e. {1, U_k, σ_l, U_k σ_l}.
+    residual_both_le1: usize,
+    /// Added after the registered run: the span of the U-deg ≤ 1 and the
+    /// small-deg ≤ 1 kernels together.
+    residual_union_le1: usize,
     /// Descriptive: small-block points with ψ_σ = 0, and consistent ones.
     points_psi_zero: usize,
     points_consistent: usize,
@@ -642,20 +648,32 @@ fn analyse(name: &str, link: &Link, x5pp: Option<(usize, usize)>) -> Arm {
 
     // Descriptive: the residual realised with restricted multipliers.
     let small_mask = !u_mask;
-    let restricted = |allow: &dyn Fn(u64) -> bool| -> usize {
+    let kernel_in = |allow: &dyn Fn(u64) -> bool| -> Vec<Vec<u64>> {
         let m = Mac::full(eqs, nv, 4, allow);
-        let el = eliminate(&m);
+        eliminate(&m)
+            .kernel
+            .iter()
+            .map(|kv| rowvec(&m4, kv.iter().map(|&r| m.keys[r]), &mut 0))
+            .collect()
+    };
+    let realised = |ks: &[&Vec<Vec<u64>>]| -> usize {
         let mut vs = triv.clone();
-        for kv in &el.kernel {
-            let keys: Vec<(usize, u64)> = kv.iter().map(|&r| m.keys[r]).collect();
-            vs.push(rowvec(&m4, keys, &mut 0));
+        for k in ks {
+            vs.extend(k.iter().cloned());
         }
         rank_of(&vs) - trivial_4
     };
-    let residual_u_deg0 = restricted(&|t| t & u_mask == 0);
-    let residual_u_deg_le1 = restricted(&|t| popc(t & u_mask) <= 1);
-    let residual_small_deg0 = restricted(&|t| t & small_mask == 0);
-    let residual_small_deg_le1 = restricted(&|t| popc(t & small_mask) <= 1);
+    let k_u0 = kernel_in(&|t| t & u_mask == 0);
+    let k_u1 = kernel_in(&|t| popc(t & u_mask) <= 1);
+    let k_s0 = kernel_in(&|t| t & small_mask == 0);
+    let k_s1 = kernel_in(&|t| popc(t & small_mask) <= 1);
+    let k_b1 = kernel_in(&|t| popc(t & u_mask) <= 1 && popc(t & small_mask) <= 1);
+    let residual_u_deg0 = realised(&[&k_u0]);
+    let residual_u_deg_le1 = realised(&[&k_u1]);
+    let residual_small_deg0 = realised(&[&k_s0]);
+    let residual_small_deg_le1 = realised(&[&k_s1]);
+    let residual_both_le1 = realised(&[&k_b1]);
+    let residual_union_le1 = realised(&[&k_u1, &k_s1]);
 
     Arm {
         arm: name.into(),
@@ -671,6 +689,8 @@ fn analyse(name: &str, link: &Link, x5pp: Option<(usize, usize)>) -> Arm {
         residual_u_deg_le1,
         residual_small_deg0,
         residual_small_deg_le1,
+        residual_both_le1,
+        residual_union_le1,
         points_psi_zero: psi_zero,
         points_consistent: consistent,
         gate_constant_in_u: gate_constant,
@@ -888,10 +908,10 @@ fn main() {
 
             for a in &arms {
                 println!(
-                    "n={n:>2} draw {di} {:<17} N {} (small {}) | K4 {} T4 {} +identities {} | P4 {} explained {} unexplained {} | residual by multiplier class: U-deg0 {} U-deg<=1 {} small-deg0 {} small-deg<=1 {} | psi=0 at {} points, consistent at {} | gates: constant-in-U {} X5'' {:?} failures {} | {:.0} ms",
+                    "n={n:>2} draw {di} {:<17} N {} (small {}) | K4 {} T4 {} +identities {} | P4 {} explained {} unexplained {} | residual by multiplier class: U-deg0 {} U-deg<=1 {} small-deg0 {} small-deg<=1 {} both<=1 {} union {} | psi=0 at {} points, consistent at {} | gates: constant-in-U {} X5'' {:?} failures {} | {:.0} ms",
                     a.arm, a.n_vars, a.small_bits, a.kernel_4, a.trivial_4, a.identities_4, a.p4, a.explained,
                     a.residual_unexplained, a.residual_u_deg0, a.residual_u_deg_le1, a.residual_small_deg0,
-                    a.residual_small_deg_le1, a.points_psi_zero, a.points_consistent, a.gate_constant_in_u,
+                    a.residual_small_deg_le1, a.residual_both_le1, a.residual_union_le1, a.points_psi_zero, a.points_consistent, a.gate_constant_in_u,
                     a.gate_x5pp, a.generator_failures, a.ms
                 );
                 ok &=
