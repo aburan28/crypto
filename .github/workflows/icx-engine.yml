@@ -1,0 +1,59 @@
+name: icx engine (multi-arch)
+
+# Builds and tests the `icx` index-calculus engine and its standardized-curve
+# catalog on x86-64, Linux aarch64, and Apple silicon, and runs the binary
+# against every curve in the catalog. This is the completion gate for
+# "run icx against every standardized curve" across architectures.
+
+on:
+  pull_request:
+    paths:
+      - "src/bin/icx.rs"
+      - "src/bin/icx/**"
+      - "src/cryptanalysis/curve_catalog.rs"
+      - "src/cryptanalysis/ic_engine.rs"
+      - "src/cryptanalysis/ic_progress.rs"
+      - "src/cryptanalysis/field_dispatch.rs"
+      - "src/cryptanalysis/gf3m.rs"
+      - "tests/icx.rs"
+      - "Cargo.toml"
+      - "docs/ic/ENGINE_AUDIT_AND_DESIGN.md"
+      - ".github/workflows/icx-engine.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-run:
+    name: build+run (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            arch: linux-x86_64
+          - runner: ubuntu-24.04-arm
+            arch: linux-aarch64
+          - runner: macos-14
+            arch: macos-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build icx
+        run: cargo build --release --bin icx
+      - name: Unit tests (catalog, engine, progress)
+        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress
+      - name: Integration tests (run binary over the whole catalog)
+        run: cargo test --release --test icx
+      - name: List the catalog (log which curves ran on ${{ matrix.arch }})
+        run: ./target/release/icx list
+      - name: Estimate one curve per family
+        run: |
+          set -e
+          for c in p256 sect163k1 sect163r2 oakley-group-3; do
+            echo "== $c =="
+            ./target/release/icx estimate "$c"
+          done
