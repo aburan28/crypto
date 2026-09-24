@@ -114,6 +114,76 @@ fn rref_skips_zero_prefix_words_and_preserves_padding() {
 }
 
 #[test]
+fn macaulay_row_count_matches_the_materialised_rows() {
+    // includes products that cancel to zero (`x0·(x0x1 + x1)` = 0), which
+    // neither count may include
+    let mut x = 0x2545_f491_4f6c_dd1du64;
+    let mut next = move || {
+        x ^= x << 13;
+        x ^= x >> 7;
+        x ^= x << 17;
+        x
+    };
+    for n_vars in [4usize, 7, 10] {
+        let mut polys: Vec<F2BoolPoly> = (0..n_vars)
+            .map(|_| {
+                let monos: Vec<F2BoolMono> = (0..6)
+                    .map(|_| F2BoolMono::from_mask(next() & next() & ((1 << n_vars) - 1)))
+                    .collect();
+                F2BoolPoly::from_monos(monos, n_vars)
+            })
+            .filter(|p| !p.is_zero())
+            .collect();
+        polys.push(F2BoolPoly::from_monos(
+            vec![F2BoolMono::from_mask(0b11), F2BoolMono::from_mask(0b10)],
+            n_vars,
+        ));
+        for degree in 1..=4 {
+            let rows = macaulay_rows_monos(&polys, n_vars, degree).map(|r| r.len());
+            assert_eq!(macaulay_row_count(&polys, n_vars, degree), rows);
+        }
+    }
+}
+
+#[test]
+fn m4ri_parallel_table_application_matches_the_serial_one() {
+    // threshold 0 sends every block through the parallel path; the rows,
+    // the rank and the word count must be the serial implementation's
+    let mut scratch = F4M4riScratch::default();
+    for (rows, cols) in [(129usize, 257usize), (300, 700)] {
+        for kind in ["dense", "sparse", "deficient"] {
+            for seed in [17, 937] {
+                let input = synthetic(rows, cols, kind, seed);
+                for reduce_above in [false, true] {
+                    let mut allocating = input.clone();
+                    let mut parallel = input.clone();
+                    let (mut allocating_ops, mut parallel_ops) = (0, 0);
+                    let allocating_rank = echelon_f2_m4ri_allocating_counted(
+                        &mut allocating,
+                        cols,
+                        &mut allocating_ops,
+                        4,
+                        reduce_above,
+                    );
+                    let parallel_rank = echelon_f2_m4ri_arena_counted_with(
+                        &mut parallel,
+                        cols,
+                        &mut parallel_ops,
+                        4,
+                        reduce_above,
+                        &mut scratch,
+                        0,
+                    );
+                    assert_eq!(parallel_rank, allocating_rank);
+                    assert_eq!(parallel_ops, allocating_ops);
+                    assert_eq!(parallel, allocating);
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn m4ri_arena_matches_the_allocating_implementation() {
     let mut scratch = F4M4riScratch::default();
     for (rows, cols) in [(129usize, 257usize), (257, 511)] {

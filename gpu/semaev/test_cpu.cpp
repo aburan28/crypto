@@ -74,6 +74,66 @@ static void test_field() {
     }
     printf("  %llu values swept for sqr==a*a and a*inv(a)==1\n",
            (unsigned long long)lim);
+
+    /* The word-level reduction, both ways of forming `H * (f - z^n)`,
+     * against the bit-at-a-time reference -- on random products and on
+     * the widest one, (z^n - 1)^2, which leaves the most above z^n. */
+    const uint64_t mask = gf_mask(F);
+    uint64_t s = 0x9E3779B97F4A7C15ull;
+    int checked = 0;
+    for (int i = 0; i <= 20000; i++) {
+        s ^= s << 13; s ^= s >> 7; s ^= s << 17;
+        uint64_t a = (i == 20000) ? mask : (s & mask);
+        s ^= s << 13; s ^= s >> 7; s ^= s << 17;
+        uint64_t b = (i == 20000) ? mask : (s & mask);
+        uint64_t hi, lo;
+        gf_clmul_sw(a, b, &hi, &lo);
+        uint64_t hn, ln;
+        gf_clmul_sw_n(a, b, SEM_N, &hn, &ln);
+        CHECK(hn == hi && ln == lo, "bounded clmul of %llu*%llu",
+              (unsigned long long)a, (unsigned long long)b);
+        uint64_t want = gf_reduce128_ref(hi, lo, F);
+        CHECK(gf_reduce128_fold<false>(hi, lo, F) == want,
+              "term fold of %llu*%llu", (unsigned long long)a, (unsigned long long)b);
+        CHECK(gf_reduce128_fold<true>(hi, lo, F) == want,
+              "clmul fold of %llu*%llu", (unsigned long long)a, (unsigned long long)b);
+        /* The spread squaring against the software product. */
+        gf_clmul_sw(a, a, &hi, &lo);
+        CHECK(gf_sqr(a, F) == gf_reduce128_ref(hi, lo, F), "spread sqr %llu",
+              (unsigned long long)a);
+        checked++;
+    }
+    printf("  %d products: both folds and the spread square match the bitwise reduction\n",
+           checked);
+
+    /* The fold's round count is n - 2 over n - deg r, so a low-tail f
+     * barely exercises it.  Reduction modulo f is well defined whether
+     * or not f is irreducible, so check it on random dense tails with
+     * deg r right up to n - 1, where it takes the most rounds. */
+    int dense = 0;
+    for (int n = 2; n <= 63; n++) {
+        for (int rep = 0; rep < 200; rep++) {
+            s ^= s << 13; s ^= s >> 7; s ^= s << 17;
+            const uint64_t nmask = (1ull << n) - 1ull;
+            uint64_t r = (s & nmask) | 1ull;
+            if (rep & 1) r |= 1ull << (n - 1); /* deg r = n - 1 */
+            const Gf2n g = {n, r};
+            s ^= s << 13; s ^= s >> 7; s ^= s << 17;
+            uint64_t a = s & nmask;
+            s ^= s << 13; s ^= s >> 7; s ^= s << 17;
+            uint64_t b = (rep == 0) ? nmask : (s & nmask);
+            if (rep == 0) a = nmask;
+            uint64_t hi, lo;
+            gf_clmul_sw(a, b, &hi, &lo);
+            uint64_t want = gf_reduce128_ref(hi, lo, g);
+            CHECK(gf_reduce128_fold<false>(hi, lo, g) == want,
+                  "dense term fold n=%d r=%llx", n, (unsigned long long)r);
+            CHECK(gf_reduce128_fold<true>(hi, lo, g) == want,
+                  "dense clmul fold n=%d r=%llx", n, (unsigned long long)r);
+            dense++;
+        }
+    }
+    printf("  %d dense-tail reductions, n = 2..63, match the bitwise reduction\n", dense);
 }
 
 /* ── 2. the subspace polynomial ────────────────────────────────────── */

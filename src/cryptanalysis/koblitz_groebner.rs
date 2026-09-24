@@ -130,7 +130,9 @@
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::inherited_f4::{ChildSystem, InheritCost, ReducedBasis};
 use crate::cryptanalysis::matrix_f5_f2::F5Criterion;
-use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, groebner_basis_f2, F2BoolMono, F2BoolPoly};
+use crate::cryptanalysis::pq_groebner_f2::{
+    cmp_mono, groebner_basis_f2, mono_key, F2BoolMono, F2BoolPoly,
+};
 
 /// Hard cap: Boolean monomials are `u64` bitmasks in
 /// [`crate::cryptanalysis::pq_groebner_f2`].
@@ -1402,20 +1404,23 @@ pub(crate) fn f5_rows_monos_with_mask(
 
 /// Pack monomial rows as bit-rows over `cols` (descending monomial order).
 pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> {
-    let index: std::collections::HashMap<u64, usize> =
+    let index: crate::cryptanalysis::fx_hash::FxMap<u64, usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
     let words = cols.len().div_ceil(64).max(1);
-    rows_monos
-        .iter()
-        .map(|monos| {
-            let mut row = vec![0u64; words];
-            for m in monos {
-                let c = index[m];
-                row[c / 64] |= 1u64 << (c % 64);
-            }
-            row
-        })
-        .collect()
+    let pack = |monos: &Vec<u64>| {
+        let mut row = vec![0u64; words];
+        for m in monos {
+            let c = index[m];
+            row[c / 64] |= 1u64 << (c % 64);
+        }
+        row
+    };
+    if rows_monos.len() * words >= M4RI_PARALLEL_WORDS {
+        use rayon::prelude::*;
+        rows_monos.par_iter().map(pack).collect()
+    } else {
+        rows_monos.iter().map(pack).collect()
+    }
 }
 
 pub(crate) fn macaulay_rows_monos_with_mask(
@@ -1426,7 +1431,44 @@ pub(crate) fn macaulay_rows_monos_with_mask(
     criterion: Option<&F5Criterion>,
 ) -> Option<Vec<Vec<u64>>> {
     let mut rows_monos: Vec<Vec<u64>> = Vec::new();
+    visit_macaulay_rows(polys, n_vars, degree, multiplier_mask, criterion, |row| {
+        rows_monos.push(row.to_vec())
+    })?;
+    Some(rows_monos)
+}
+
+/// The number of rows [`macaulay_rows_monos`] would return, without
+/// materialising them: `None` exactly when it would be `None`.
+pub(crate) fn macaulay_row_count(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+) -> Option<usize> {
+    visit_macaulay_rows(
+        polys,
+        n_vars,
+        degree,
+        all_variable_mask(n_vars),
+        None,
+        |_| {},
+    )
+}
+
+/// Hand every non-empty Macaulay row (ascending monomial masks, odd
+/// multiplicities kept) to `visit`, in generator-then-multiplier order;
+/// returns the row count, or `None` once it exceeds the size limits.
+fn visit_macaulay_rows(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    criterion: Option<&F5Criterion>,
+    mut visit: impl FnMut(&[u64]),
+) -> Option<usize> {
+    let mut count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
+    let mut all: Vec<u64> = Vec::new();
+    let mut row: Vec<u64> = Vec::new();
     for (i, p) in polys.iter().enumerate() {
         let pdeg = p
             .terms
@@ -1452,9 +1494,10 @@ pub(crate) fn macaulay_rows_monos_with_mask(
             // Multiplying by a monomial is a union of masks, so two
             // distinct terms of `p` can collide — and collide means
             // cancel, in characteristic 2.  Keep the odd multiplicities.
-            let mut all: Vec<u64> = p.terms.iter().map(|t| t.mask | mult).collect();
+            all.clear();
+            all.extend(p.terms.iter().map(|t| t.mask | mult));
             all.sort_unstable();
-            let mut row: Vec<u64> = Vec::with_capacity(all.len());
+            row.clear();
             let mut i = 0;
             while i < all.len() {
                 let mut j = i;
@@ -1467,14 +1510,15 @@ pub(crate) fn macaulay_rows_monos_with_mask(
                 i = j;
             }
             if !row.is_empty() {
-                rows_monos.push(row);
+                visit(&row);
+                count += 1;
             }
-            if rows_monos.len() > max_f4_rows() {
+            if count > max_f4_rows() {
                 return None;
             }
         }
     }
-    Some(rows_monos)
+    Some(count)
 }
 
 /// Column masks of the Macaulay matrix at `degree`, in descending
@@ -1492,7 +1536,8 @@ pub(crate) fn macaulay_columns(rows_monos: &[Vec<u64>]) -> Option<Vec<u64>> {
     if cols.len() > max_f4_cols() {
         return None;
     }
-    cols.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
+    // `mono_key` orders exactly as `cmp_mono`; the masks are distinct
+    cols.sort_unstable_by_key(|&m| std::cmp::Reverse(mono_key(F2BoolMono::from_mask(m))));
     Some(cols)
 }
 
@@ -2316,6 +2361,10 @@ thread_local! {
         std::cell::RefCell::new(F4M4riScratch::default());
 }
 
+/// Target-row words per block below which the Four Russians table is
+/// applied on one thread.
+const M4RI_PARALLEL_WORDS: usize = 1 << 20;
+
 fn echelon_f2_m4ri_arena_counted(
     matrix: &mut [Vec<u64>],
     n_cols: usize,
@@ -2323,6 +2372,29 @@ fn echelon_f2_m4ri_arena_counted(
     block_width: usize,
     reduce_above: bool,
     scratch: &mut F4M4riScratch,
+) -> usize {
+    echelon_f2_m4ri_arena_counted_with(
+        matrix,
+        n_cols,
+        word_ops,
+        block_width,
+        reduce_above,
+        scratch,
+        M4RI_PARALLEL_WORDS,
+    )
+}
+
+/// [`echelon_f2_m4ri_arena_counted`] with the parallel threshold as a
+/// parameter, so a test can force the parallel table application on a
+/// small matrix.
+fn echelon_f2_m4ri_arena_counted_with(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+    block_width: usize,
+    reduce_above: bool,
+    scratch: &mut F4M4riScratch,
+    parallel_words: usize,
 ) -> usize {
     let words = n_cols.div_ceil(64);
     let rows = matrix.len();
@@ -2418,26 +2490,44 @@ fn echelon_f2_m4ri_arena_counted(
         } else {
             block_start + block_rows
         };
-        for row in first_target..rows {
-            if (block_start..block_start + block_rows).contains(&row) {
-                continue;
-            }
+        // Each target row clears the whole block with one XOR of a table
+        // row chosen by its own bits: independent across rows, so large
+        // blocks run in parallel.  The XORs, and the count, are the same.
+        let clear = |row: &mut Vec<u64>| -> u64 {
             let mut pattern = 0usize;
             for (index, &pivot_column) in pivot_columns[..block_rows].iter().enumerate() {
-                if matrix[row][pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
+                if row[pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
                     pattern |= 1usize << index;
                 }
             }
-            if pattern != 0 {
-                let table_offset = pattern * suffix_words;
-                for (target, &source) in matrix[row][first_word..words]
-                    .iter_mut()
-                    .zip(&table[table_offset..table_offset + suffix_words])
-                {
-                    *target ^= source;
-                }
-                *word_ops += suffix_words as u64;
+            if pattern == 0 {
+                return 0;
             }
+            let table_offset = pattern * suffix_words;
+            for (target, &source) in row[first_word..words]
+                .iter_mut()
+                .zip(&table[table_offset..table_offset + suffix_words])
+            {
+                *target ^= source;
+            }
+            suffix_words as u64
+        };
+        let (head, tail) = matrix.split_at_mut(block_start);
+        let above = &mut head[first_target.min(block_start)..];
+        let below = &mut tail[block_rows..];
+        if (above.len() + below.len()) * suffix_words >= parallel_words {
+            use rayon::prelude::*;
+            *word_ops += above
+                .par_iter_mut()
+                .chain(below.par_iter_mut())
+                .map(clear)
+                .sum::<u64>();
+        } else {
+            *word_ops += above
+                .iter_mut()
+                .chain(below.iter_mut())
+                .map(clear)
+                .sum::<u64>();
         }
         pivot_row += block_rows;
     }
@@ -3448,7 +3538,7 @@ fn reduce_system_uncached(
                 match reduced {
                     Some(rows) => {
                         stats.max_degree_built = stats.max_degree_built.max(d);
-                        let decisive = rows.iter().any(is_constant_one)
+                        let decisive = rows.iter().any(|p| is_constant_one(p))
                             || rows.iter().any(|p| forced_assignment(p).is_some());
                         best = Some(rows);
                         if decisive {

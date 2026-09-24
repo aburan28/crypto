@@ -526,6 +526,77 @@ fn basis_monomials(basis: &[F2BoolPoly]) -> u64 {
     basis.iter().map(|p| p.terms.len() as u64).sum()
 }
 
+/// The S-pair queue of [`groebner_basis_f2_within`].
+///
+/// The queue is a `Vec` popped by "first entry of smallest degree" and
+/// `swap_remove`, and that order decides which pairs the chain criterion
+/// later sees as treated, so it is part of the engine's trajectory and
+/// its counts.  This keeps the `Vec` exactly as it was and indexes it:
+/// per degree, the ordered set of positions holding that degree, so the
+/// pop finds the same entry as the linear `min_by_key` scan did; and the
+/// set of queued pairs, so the chain criterion's "is `(a, b)` still
+/// queued?" is a lookup instead of a scan of the whole queue.
+struct PairQueue {
+    pairs: Vec<(usize, usize, u32)>,
+    by_degree: Vec<std::collections::BTreeSet<usize>>,
+    queued: crate::cryptanalysis::fx_hash::FxSet<(usize, usize)>,
+}
+
+impl PairQueue {
+    fn new() -> Self {
+        PairQueue {
+            pairs: Vec::new(),
+            by_degree: Vec::new(),
+            queued: Default::default(),
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.pairs.len()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.pairs.is_empty()
+    }
+
+    /// Queue `(i, j)` with `i < j`.
+    fn push(&mut self, i: usize, j: usize, degree: u32) {
+        let d = degree as usize;
+        if self.by_degree.len() <= d {
+            self.by_degree.resize_with(d + 1, Default::default);
+        }
+        self.by_degree[d].insert(self.pairs.len());
+        self.queued.insert((i, j));
+        self.pairs.push((i, j, degree));
+    }
+
+    /// The first entry of smallest degree, removed by `swap_remove`.
+    fn pop_min(&mut self) -> (usize, usize, u32) {
+        let set = self
+            .by_degree
+            .iter_mut()
+            .find(|set| !set.is_empty())
+            .expect("pop from an empty pair queue");
+        let idx = set.pop_first().unwrap();
+        let last = self.pairs.len() - 1;
+        if idx != last {
+            // the last entry moves into the hole
+            let moved = self.pairs[last].2 as usize;
+            self.by_degree[moved].remove(&last);
+            self.by_degree[moved].insert(idx);
+        }
+        let p = self.pairs.swap_remove(idx);
+        self.queued.remove(&(p.0, p.1));
+        p
+    }
+
+    /// Is the pair `{a, b}` still queued?
+    fn contains(&self, a: usize, b: usize) -> bool {
+        let (a, b) = if a < b { (a, b) } else { (b, a) };
+        self.queued.contains(&(a, b))
+    }
+}
+
 /// [`groebner_basis_f2`], with the cost of the run beside the basis.
 pub fn groebner_basis_f2_stats(
     initial: Vec<F2BoolPoly>,
@@ -562,11 +633,11 @@ pub fn groebner_basis_f2_within(
     // Bayer–Stillman recommendation and prevents intermediate-polynomial
     // degree blowup that LIFO ordering causes — the classic source of
     // 10–100× speedups on dense boolean systems like Weil-descended PQ.
-    let mut pairs: Vec<(usize, usize, u32)> = Vec::new(); // (i, j, lcm_degree)
+    let mut pairs = PairQueue::new(); // (i, j, lcm_degree)
     for i in 0..basis.len() {
         for j in (i + 1)..basis.len() {
             let lcm_deg = basis[i].lt().unwrap().lcm(basis[j].lt().unwrap()).degree();
-            pairs.push((i, j, lcm_deg));
+            pairs.push(i, j, lcm_deg);
         }
     }
     // Field pairs, `(element, variable, degree)`: the degree is that of
@@ -636,7 +707,7 @@ pub fn groebner_basis_f2_within(
                 let r_lt = r.lt().unwrap();
                 for j in 0..new_idx {
                     let lcm_deg = basis[j].lt().unwrap().lcm(r_lt).degree();
-                    pairs.push((j, new_idx, lcm_deg));
+                    pairs.push(j, new_idx, lcm_deg);
                 }
                 pending.push(queue_field_pairs(new_idx, &r, &mut field));
                 basis.push(r);
@@ -646,13 +717,7 @@ pub fn groebner_basis_f2_within(
             continue;
         }
         // Pop the pair with the SMALLEST lcm degree.
-        let min_idx = pairs
-            .iter()
-            .enumerate()
-            .min_by_key(|(_, p)| p.2)
-            .map(|(idx, _)| idx)
-            .unwrap();
-        let (i, j, lcm_deg) = pairs.swap_remove(min_idx);
+        let (i, j, lcm_deg) = pairs.pop_min();
         st.pairs_considered += 1;
 
         // Criterion 1: coprime leading monomials → S-poly reduces to 0.
@@ -669,10 +734,7 @@ pub fn groebner_basis_f2_within(
         // reduced and cannot contribute.  Skipping it is exact, not an
         // approximation — the basis returned is the same one.
         let lcm_ij = li.lcm(lj);
-        let queued = |a: usize, b: usize| {
-            let (a, b) = if a < b { (a, b) } else { (b, a) };
-            pairs.iter().any(|p| p.0 == a && p.1 == b)
-        };
+        let queued = |a: usize, b: usize| pairs.contains(a, b);
         if (0..basis.len()).any(|k| {
             k != i
                 && k != j
@@ -697,7 +759,7 @@ pub fn groebner_basis_f2_within(
             let r_lt = r.lt().unwrap();
             for k in 0..new_idx {
                 let lcm_deg = basis[k].lt().unwrap().lcm(r_lt).degree();
-                pairs.push((k, new_idx, lcm_deg));
+                pairs.push(k, new_idx, lcm_deg);
             }
             pending.push(queue_field_pairs(new_idx, &r, &mut field));
             basis.push(r);
@@ -807,6 +869,47 @@ pub fn solution_set(gb: &[F2BoolPoly], n_vars: usize) -> HashSet<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pair_queue_pops_what_the_linear_scan_popped() {
+        // the old queue: a Vec, `min_by_key` (first minimum) and
+        // `swap_remove`, membership by scanning
+        let mut x = 0x0123_4567_89ab_cdefu64;
+        let mut next = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for _ in 0..50 {
+            let mut old: Vec<(usize, usize, u32)> = Vec::new();
+            let mut new = PairQueue::new();
+            let mut n = 0usize;
+            for _ in 0..400 {
+                if next() % 3 != 0 || old.is_empty() {
+                    // a new element pairs with every earlier one
+                    n += 1;
+                    for k in 0..n - 1 {
+                        let d = (next() % 7) as u32;
+                        old.push((k, n - 1, d));
+                        new.push(k, n - 1, d);
+                    }
+                } else {
+                    let idx = old
+                        .iter()
+                        .enumerate()
+                        .min_by_key(|(_, p)| p.2)
+                        .map(|(i, _)| i)
+                        .unwrap();
+                    assert_eq!(new.pop_min(), old.swap_remove(idx));
+                }
+                assert_eq!(new.len(), old.len());
+                let (a, b) = ((next() % 12) as usize, (next() % 12) as usize);
+                let scan = old.iter().any(|p| (p.0, p.1) == (a.min(b), a.max(b)));
+                assert_eq!(new.contains(a, b), scan);
+            }
+        }
+    }
 
     #[test]
     fn mono_key_orders_exactly_like_cmp_mono() {

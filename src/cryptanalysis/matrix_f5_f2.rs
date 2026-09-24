@@ -441,7 +441,7 @@ pub fn matrix_f5_f2(
     degree: u32,
 ) -> Option<(Vec<F2BoolPoly>, F5Report)> {
     use crate::cryptanalysis::koblitz_groebner::{
-        f5_rows_monos_with_mask, macaulay_rows_monos, pack_rows, rref_f2_counted,
+        f5_rows_monos_with_mask, macaulay_row_count, pack_rows, rref_f2_counted,
     };
     let mut report = F5Report {
         degree,
@@ -454,7 +454,7 @@ pub fn matrix_f5_f2(
     let criterion = F5Criterion::new(polys, n_vars, degree, mask);
     report.criterion_word_ops = criterion.word_ops();
     report.criterion_rows = criterion.lower_level_rows().0;
-    report.rows_f4 = macaulay_rows_monos(polys, n_vars, degree)?.len() as u64;
+    report.rows_f4 = macaulay_row_count(polys, n_vars, degree)? as u64;
     let rows_monos = f5_rows_monos_with_mask(polys, n_vars, degree, mask, &criterion)?;
     report.rows_built = rows_monos.len() as u64;
     report.rows_pruned = report.rows_f4 - report.rows_built;
@@ -470,14 +470,22 @@ pub fn matrix_f5_f2(
     report.zero_reductions = report.rows_built - rank as u64;
     report.reduce_word_ops = word_ops;
     let n_vars_out = polys[0].n_vars;
-    let out = matrix
-        .iter()
-        .take(rank)
+    // one polynomial per pivot row, independently: dense rows after the
+    // back-substitution make this as long as the elimination on one thread
+    use rayon::prelude::*;
+    let out = matrix[..rank]
+        .par_iter()
         .map(|row| {
-            let monos: Vec<F2BoolMono> = (0..cols.len())
-                .filter(|c| row[c / 64] & (1u64 << (c % 64)) != 0)
-                .map(|c| F2BoolMono::from_mask(cols[c]))
-                .collect();
+            // walk the set bits, not every column
+            let mut monos: Vec<F2BoolMono> = Vec::new();
+            for (w, &word) in row.iter().enumerate() {
+                let mut bits = word;
+                while bits != 0 {
+                    let c = w * 64 + bits.trailing_zeros() as usize;
+                    bits &= bits - 1;
+                    monos.push(F2BoolMono::from_mask(cols[c]));
+                }
+            }
             F2BoolPoly::from_monos(monos, n_vars_out)
         })
         .filter(|p| !p.is_zero())

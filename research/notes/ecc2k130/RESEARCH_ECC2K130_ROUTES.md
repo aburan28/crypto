@@ -1,5 +1,10 @@
 # Routes: where to take ECC2K-130 index calculus next
 
+> **Closed out, 2026-09-23.**  Route 3 closed at its gate (X4′), which meets
+> the thread's finishing condition; the ledger of all five routes, and what is
+> left open and why, is the close-out at the end of
+> [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md).
+
 Ranked. Each route says why it is open, what to run, the one number that
 decides it, and what would close it. Companion to
 [`research/notes/ecc2k130/RESEARCH_ECC2K130_IC_LITERATURE.md`](RESEARCH_ECC2K130_IC_LITERATURE.md)

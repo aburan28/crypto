@@ -186,6 +186,18 @@ Each has a falsifier and a bar.  State which you tested and what
 happened, in the autolab entry, even when the answer is "no change".
 
 **H1 — the fall degree stays ≤ 3 across the ladder.**
+
+> **Accounting caveat (2026-09-23, from §X5′ of
+> [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md)).**
+> The chained rows' "fall at exactly 3" is one hidden linear equation.  The
+> last `S₃` link, with `x(R)` known, is `t² + x_R·t + …`, and
+> `t ↦ t² + x_R·t` has a one-dimensional kernel, so one combination of its
+> `n` quadratic equations is linear.  The measured quadratic-part rank is
+> `n − 1` on this table's own protocol at `n = 9, 15, 21, 31` (`m = 3`) and
+> `n = 9, 15` (`m = 4`).  That equation's Boolean identity is the single rank
+> loss this definition records at `D = 3`.  The table's numbers stand; what
+> they measure is that one equation, not a general weakness of the chained
+> systems.
 Over 16 draws per instance, every system falls at `D = 2` or `D = 3`,
 and every chained (`m ≥ 3`) system falls at exactly 3.
 *Falsifier:* any `(n, m)` on the ladder with `fall_min ≥ 4` at
