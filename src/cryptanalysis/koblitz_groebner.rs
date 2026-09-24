@@ -2657,7 +2657,36 @@ fn suffix_kernel_forced() -> bool {
     *FORCED.get_or_init(|| std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1"))
 }
 
+/// `KIC_F4_KERNEL=legacy` keeps the reduced row echelon form on the
+/// kernels below instead of [`crate::cryptanalysis::gf2_elim`]; read
+/// once, as a same-binary control for the kernel swap.
+fn legacy_rref_kernel() -> bool {
+    static LEGACY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *LEGACY.get_or_init(|| std::env::var("KIC_F4_KERNEL").as_deref() == Ok("legacy"))
+}
+
+/// Reduced row echelon form, which is unique: whichever kernel runs, the
+/// matrix comes back the same, and only the time and the word XORs
+/// charged differ.  Matrices of at least 128 rows and 256 columns go to
+/// the Four Russians kernel of [`crate::cryptanalysis::gf2_elim`]
+/// (`gf2_elim_bench` has it 1.5–4.5× faster on the oracle's own Macaulay
+/// matrices); smaller ones stay on the column-at-a-time kernel, where a
+/// table would cost more to build than it saves.
 pub(crate) fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
+    if !legacy_rref_kernel() && !suffix_kernel_forced() && matrix.len() >= 128 && n_cols >= 256 {
+        return crate::cryptanalysis::gf2_elim::rref_counted(matrix, n_cols, word_ops);
+    }
+    rref_f2_legacy_counted(matrix, n_cols, word_ops)
+}
+
+/// The reduced row echelon form as it was computed before
+/// [`crate::cryptanalysis::gf2_elim`]: the column-at-a-time kernel on
+/// small or wide matrices, block-width-4 Four Russians otherwise.
+pub(crate) fn rref_f2_legacy_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+) -> usize {
     if suffix_kernel_forced()
         || matrix.len() < 128
         || n_cols < 256
