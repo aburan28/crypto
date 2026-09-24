@@ -84,6 +84,10 @@ pub struct FastCurve {
     pub n: u32,
     pub a: u64,
     pub b: u64,
+    /// The eight-lane AVX-512 kernel for [`Self::add_many_lazy`], when
+    /// the CPU has it and the field's reduction polynomial suits it.
+    #[cfg(target_arch = "x86_64")]
+    simd: Option<simd512::Simd512>,
 }
 
 impl FastCurve {
@@ -100,6 +104,8 @@ impl FastCurve {
         let a = field.from_element(&curve.a);
         let b = field.from_element(&curve.b);
         Some(Self {
+            #[cfg(target_arch = "x86_64")]
+            simd: simd512::Simd512::new(&field),
             field,
             n: curve.m,
             a,
@@ -253,6 +259,25 @@ impl FastCurve {
     /// admits, so computing `y` for the rest is a multiplication per
     /// point spent on nothing.
     pub fn add_many_lazy(
+        &self,
+        p: FastPoint,
+        qs: &[FastPoint],
+        out: &mut Vec<FastPoint>,
+        lambdas: &mut Vec<u64>,
+        scratch: &mut BatchScratch,
+    ) {
+        #[cfg(target_arch = "x86_64")]
+        if let Some(simd) = &self.simd {
+            if simd.add_many_lazy(self, p, qs, out, lambdas, scratch) {
+                return;
+            }
+        }
+        self.add_many_lazy_scalar(p, qs, out, lambdas, scratch);
+    }
+
+    /// The portable body of [`Self::add_many_lazy`]; also what the SIMD
+    /// kernel falls back to on a block with a degenerate sum.
+    fn add_many_lazy_scalar(
         &self,
         p: FastPoint,
         qs: &[FastPoint],
@@ -693,6 +718,219 @@ fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
 pub struct BatchScratch {
     dens: Vec<u64>,
     acc: Vec<u64>,
+    /// Structure-of-arrays copies of a block's addends, for the SIMD path.
+    qx: Vec<u64>,
+    qy: Vec<u64>,
+}
+
+/// Eight-lane AVX-512 field arithmetic for the decomposition scan.
+///
+/// The scan's inner loop is `R − P_k` for a block of base points: a
+/// batched inversion of the denominators `x_R + x_k`, then a slope and an
+/// abscissa per point — about five field multiplications each, all
+/// independent across `k`.  `vpclmulqdq` forms four 64 × 64 carry-less
+/// products per instruction, so two of them multiply eight lanes.
+///
+/// **Reduction without a table.**  The scalar field folds the high half
+/// through byte-indexed tables; a vector version would need gathers.
+/// Instead, write the product as `L + z^n·H`: since `z^n ≡ t(z)`, the
+/// tail of the reduction polynomial, it equals `L + H·t`, and when `t`
+/// is short (`n + deg t ≤ 65`) `H·t` fits in one word and is a handful
+/// of shifts and XORs over `t`'s terms.  A second such fold finishes
+/// when `2·deg t ≤ n + 1`.  Every field the pipeline runs — the
+/// low-tail polynomials `find_irreducible_sparse` picks — qualifies; a
+/// field that does not simply never builds a [`Simd512`].
+///
+/// The results are the same field elements as the scalar path, lane for
+/// lane (the tests compare them), so nothing downstream can tell which
+/// ran — the pinned counters included.
+#[cfg(target_arch = "x86_64")]
+mod simd512 {
+    use super::{BatchScratch, FastCurve, FastPoint};
+    use crate::cryptanalysis::semaev_decomp::Gf2;
+    use std::arch::x86_64::*;
+
+    /// A field the kernel can reduce, on a CPU that has the kernel.
+    #[derive(Clone, Copy, Debug)]
+    pub(super) struct Simd512 {
+        n: u32,
+        mask: u64,
+        terms: [u32; 8],
+        nterms: usize,
+    }
+
+    impl Simd512 {
+        pub(super) fn new(field: &Gf2) -> Option<Self> {
+            if !(is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("vpclmulqdq")) {
+                return None;
+            }
+            Self::for_field(field)
+        }
+
+        /// The field-shape half of [`Self::new`], without the CPU check.
+        pub(super) fn for_field(field: &Gf2) -> Option<Self> {
+            let n = field.n;
+            if n < 2 || n > 63 {
+                return None;
+            }
+            let tail = field.irr ^ (1u64 << n);
+            let t_max = 63 - tail.leading_zeros();
+            // H has at most n − 1 bits, so H·t has degree ≤ n − 2 + deg t,
+            // which must stay inside one word; the second fold's input has
+            // degree ≤ deg t − 2, and its output must land below z^n.
+            if n + t_max > 65 || 2 * t_max > n + 1 || tail.count_ones() as usize > 8 {
+                return None;
+            }
+            let mut terms = [0u32; 8];
+            let mut nterms = 0;
+            for t in 0..n {
+                if (tail >> t) & 1 == 1 {
+                    terms[nterms] = t;
+                    nterms += 1;
+                }
+            }
+            Some(Self {
+                n,
+                mask: (1u64 << n) - 1,
+                terms,
+                nterms,
+            })
+        }
+
+        /// [`FastCurve::add_many_lazy`] eight lanes at a time.  Returns
+        /// `false`, having written nothing, when a sum is degenerate
+        /// (`R = O`, or some `x_k = x_R`) — the caller then takes the
+        /// scalar path, which handles those one by one.
+        pub(super) fn add_many_lazy(
+            &self,
+            curve: &FastCurve,
+            p: FastPoint,
+            qs: &[FastPoint],
+            out: &mut Vec<FastPoint>,
+            lambdas: &mut Vec<u64>,
+            scratch: &mut BatchScratch,
+        ) -> bool {
+            if p.infinity || qs.is_empty() {
+                return false;
+            }
+            let padded = qs.len().div_ceil(8) * 8;
+            let BatchScratch { dens, acc, qx, qy } = scratch;
+            dens.clear();
+            qx.clear();
+            qy.clear();
+            for q in qs {
+                if q.infinity || q.x == p.x {
+                    return false;
+                }
+                qx.push(q.x);
+                qy.push(q.y);
+                dens.push(p.x ^ q.x);
+            }
+            // Pad to whole vectors with a harmless denominator of 1.
+            qx.resize(padded, 0);
+            qy.resize(padded, 0);
+            dens.resize(padded, 1);
+            acc.clear();
+            acc.resize(padded, 0);
+            // SAFETY: a `Simd512` is only built after detecting avx512f
+            // and vpclmulqdq; every slice holds `padded` words.
+            unsafe { self.kernel(curve, p, dens, acc, qx, qy) };
+            // `acc` now holds the abscissae and `dens` the slopes.
+            out.reserve(qs.len());
+            lambdas.reserve(qs.len());
+            out.extend(acc[..qs.len()].iter().map(|&x| FastPoint::affine(x, 0)));
+            lambdas.extend_from_slice(&dens[..qs.len()]);
+            true
+        }
+
+        /// Montgomery's trick across eight lanes, then the slope and
+        /// abscissa of every sum.  On return `pre` holds `x₃` and `dens`
+        /// holds `λ`, lane for lane.
+        #[target_feature(enable = "avx512f,vpclmulqdq")]
+        unsafe fn kernel(
+            &self,
+            curve: &FastCurve,
+            p: FastPoint,
+            dens: &mut [u64],
+            pre: &mut [u64],
+            qx: &[u64],
+            qy: &[u64],
+        ) {
+            let groups = dens.len() / 8;
+            let ld = |s: &[u64], g: usize| _mm512_loadu_si512(s.as_ptr().add(8 * g) as *const _);
+            let mut acc = _mm512_set1_epi64(1);
+            for g in 0..groups {
+                _mm512_storeu_si512(pre.as_mut_ptr().add(8 * g) as *mut _, acc);
+                acc = self.mul(acc, ld(dens, g));
+            }
+            // The eight lane products are non-zero; invert them together.
+            let mut lanes = [0u64; 8];
+            _mm512_storeu_si512(lanes.as_mut_ptr() as *mut _, acc);
+            let mut tmp = Vec::with_capacity(8);
+            curve.field.batch_inv(&mut lanes, &mut tmp);
+            let mut inv_acc = _mm512_loadu_si512(lanes.as_ptr() as *const _);
+            let py = _mm512_set1_epi64(p.y as i64);
+            let px_a = _mm512_set1_epi64((p.x ^ curve.a) as i64);
+            for g in (0..groups).rev() {
+                let d = ld(dens, g);
+                let inv = self.mul(inv_acc, ld(pre, g));
+                inv_acc = self.mul(inv_acc, d);
+                let lambda = self.mul(_mm512_xor_si512(py, ld(qy, g)), inv);
+                let x3 = _mm512_xor_si512(
+                    _mm512_xor_si512(self.mul(lambda, lambda), lambda),
+                    _mm512_xor_si512(px_a, ld(qx, g)),
+                );
+                _mm512_storeu_si512(pre.as_mut_ptr().add(8 * g) as *mut _, x3);
+                _mm512_storeu_si512(dens.as_mut_ptr().add(8 * g) as *mut _, lambda);
+            }
+        }
+
+        /// Eight field multiplications: two `vpclmulqdq` for the 128-bit
+        /// products, then two shift-and-XOR folds by the tail.
+        #[inline]
+        #[target_feature(enable = "avx512f,vpclmulqdq")]
+        unsafe fn mul(&self, a: __m512i, b: __m512i) -> __m512i {
+            let even = _mm512_clmulepi64_epi128::<0x00>(a, b);
+            let odd = _mm512_clmulepi64_epi128::<0x11>(a, b);
+            let lo = _mm512_unpacklo_epi64(even, odd);
+            let hi = _mm512_unpackhi_epi64(even, odd);
+            let n = _mm_cvtsi64_si128(i64::from(self.n));
+            let n_rev = _mm_cvtsi64_si128(i64::from(64 - self.n));
+            let mask = _mm512_set1_epi64(self.mask as i64);
+            let h = _mm512_or_si512(_mm512_srl_epi64(lo, n), _mm512_sll_epi64(hi, n_rev));
+            let f = self.times_tail(h);
+            let low = _mm512_xor_si512(_mm512_and_si512(lo, mask), _mm512_and_si512(f, mask));
+            let f2 = self.times_tail(_mm512_srl_epi64(f, n));
+            _mm512_xor_si512(low, f2)
+        }
+
+        /// `h · t` for the tail `t`, as one word per lane: the caller
+        /// guarantees the product fits.
+        #[inline]
+        #[target_feature(enable = "avx512f")]
+        unsafe fn times_tail(&self, h: __m512i) -> __m512i {
+            let mut acc = _mm512_setzero_si512();
+            for &t in &self.terms[..self.nterms] {
+                acc = _mm512_xor_si512(acc, _mm512_sll_epi64(h, _mm_cvtsi64_si128(i64::from(t))));
+            }
+            acc
+        }
+
+        /// Test hook: multiply eight pairs through the kernel's `mul`.
+        #[cfg(test)]
+        pub(super) fn mul8(&self, a: &[u64; 8], b: &[u64; 8]) -> [u64; 8] {
+            let mut out = [0u64; 8];
+            // SAFETY: tests call this only after the CPU check.
+            unsafe {
+                let r = self.mul(
+                    _mm512_loadu_si512(a.as_ptr() as *const _),
+                    _mm512_loadu_si512(b.as_ptr() as *const _),
+                );
+                _mm512_storeu_si512(out.as_mut_ptr() as *mut _, r);
+            }
+            out
+        }
+    }
 }
 
 #[cfg(test)]
@@ -956,6 +1194,82 @@ mod tests {
                 assert_eq!(fc.finish_lazy(p, l, lambda), e);
             }
         }
+    }
+
+    /// The eight-lane kernel against the scalar field and the scalar
+    /// batched addition, on every degree whose polynomial it accepts and
+    /// on blocks of every length around the lane width, plus a block with
+    /// a degenerate sum (which must fall back and still agree).  Skipped
+    /// on a CPU without AVX-512 and VPCLMULQDQ.
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn avx512_kernel_matches_scalar_arithmetic() {
+        if !(is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("vpclmulqdq")) {
+            eprintln!("skipped: no AVX-512 + VPCLMULQDQ on this CPU");
+            return;
+        }
+        let mut rng = StdRng::seed_from_u64(0x512);
+        let mut accepted = 0;
+        for n in 2u32..=62 {
+            let field = nb_field(n);
+            let Some(simd) = simd512::Simd512::for_field(&field) else {
+                continue;
+            };
+            accepted += 1;
+            for _ in 0..200 {
+                let a: [u64; 8] = std::array::from_fn(|_| rng.gen::<u64>() & field.mask);
+                let b: [u64; 8] = std::array::from_fn(|i| {
+                    if i == 7 {
+                        field.mask
+                    } else {
+                        rng.gen::<u64>() & field.mask
+                    }
+                });
+                let got = simd.mul8(&a, &b);
+                for l in 0..8 {
+                    assert_eq!(got[l], field.mul(a[l], b[l]), "n = {n}, lane {l}");
+                }
+            }
+        }
+        assert!(
+            accepted >= 50,
+            "the kernel accepted only {accepted} degrees"
+        );
+
+        let mut curves = 0;
+        for (a, n) in [(1u8, 19u32), (0, 31), (0, 41), (0, 53)] {
+            let Some(kc) = KoblitzCurve::new(a, n) else {
+                continue;
+            };
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            if fc.simd.is_none() {
+                continue;
+            }
+            curves += 1;
+            let points: Vec<FastPoint> = random_points(&kc, 40, 7 * u64::from(n))
+                .iter()
+                .map(|p| fc.lift(p))
+                .filter(|p| !p.infinity)
+                .collect();
+            let mut scratch = BatchScratch::default();
+            for len in (1..=17).chain([31, 40]) {
+                let qs = &points[..len.min(points.len())];
+                for &p in points.iter().take(6) {
+                    let skip_degenerate = qs.iter().all(|q| q.x != p.x);
+                    let (mut want, mut want_l) = (Vec::new(), Vec::new());
+                    fc.add_many_lazy_scalar(p, qs, &mut want, &mut want_l, &mut scratch);
+                    let (mut got, mut got_l) = (Vec::new(), Vec::new());
+                    fc.add_many_lazy(p, qs, &mut got, &mut got_l, &mut scratch);
+                    assert_eq!(
+                        got, want,
+                        "n = {n}, len = {len}, degenerate = {}",
+                        !skip_degenerate
+                    );
+                    assert_eq!(got_l, want_l, "n = {n}, len = {len}");
+                }
+            }
+        }
+        assert!(curves >= 2, "only {curves} curves exercised the kernel");
     }
 
     /// The López–Dahab ladder against affine double-and-add, on both
