@@ -4536,6 +4536,84 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-projected-fibers-20260923">
+  <div class="panel-head">
+    <h2>Complete recovery is verified; the dramatic-gain gate is rejected <span class="chip">engineering</span></h2>
+    <p>Exact equation-space projection, affine kernel recovery and original-equation checks are implemented.
+      All 89,856 observations over 216 generated systems and 52 methods complete and verify.
+      The table reports complete generic solver time; full-IC and rho costs remain null.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_projected_fibers_20260923/CONCLUSION.md">results and paired gates</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_projected_fibers_20260923/run_01/results.json">frozen measurements</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_projected_fibers_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_projected_fibers_20260923/RUN_LEDGER.json">source and evidence hashes</a>.</p>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Groups above 2.0</th><th>Groups above 1.0</th><th>Dramatic decision</th></tr></thead><tbody>
+<tr><td>projected4</td><td>0/18</td><td>0/18</td><td>REJECTED</td></tr>
+<tr><td>projected5</td><td>0/18</td><td>0/18</td><td>REJECTED</td></tr>
+<tr><td>projected6</td><td>0/18</td><td>0/18</td><td>REJECTED</td></tr>
+  </tbody></table></div>
+  <p>Fresh n24 holdouts; milliseconds per cold solve plus validation. The dispatcher ratio uses pooled planted medians
+    and is descriptive. Acceptance requires all 18 paired groups, shown in the linked note. No tuning followed holdout timing.</p>
+  <div class="table-wrap"><table><thead><tr><th>Method</th><th>Planted ms</th><th>Cross-planted ms</th><th>Unplanted ms</th><th>Dispatcher / arm, planted</th><th>Correctness</th></tr></thead><tbody>
+<tr><td>search</td><td>80.001708</td><td>47.048313</td><td>144.082667</td><td>0.006</td><td>PASS</td></tr>
+<tr><td>flat</td><td>293.787812</td><td>149.567542</td><td>551.156271</td><td>0.002</td><td>PASS</td></tr>
+<tr><td>bucket</td><td>1063.146729</td><td>522.085438</td><td>2073.274041</td><td>0.000</td><td>PASS</td></tr>
+<tr><td>hybrid</td><td>514.655333</td><td>217.043645</td><td>929.048666</td><td>0.001</td><td>PASS</td></tr>
+<tr><td>small_flat</td><td>95.769917</td><td>55.280020</td><td>168.129188</td><td>0.005</td><td>PASS</td></tr>
+<tr><td>word_tail</td><td>78.956625</td><td>48.750083</td><td>148.793167</td><td>0.006</td><td>PASS</td></tr>
+<tr><td>merge_search</td><td>67.071146</td><td>41.841020</td><td>125.967833</td><td>0.007</td><td>PASS</td></tr>
+<tr><td>quadratic_state</td><td>27.550375</td><td>16.624250</td><td>50.572479</td><td>0.018</td><td>PASS</td></tr>
+<tr><td>packed_state</td><td>16.797020</td><td>10.198187</td><td>31.142854</td><td>0.029</td><td>PASS</td></tr>
+<tr><td>basis_list</td><td>282.821000</td><td>145.705105</td><td>473.644334</td><td>0.002</td><td>PASS</td></tr>
+<tr><td>basis_wide</td><td>62.981354</td><td>33.804167</td><td>101.966166</td><td>0.008</td><td>PASS</td></tr>
+<tr><td>tail_list</td><td>132.341771</td><td>63.002187</td><td>261.885167</td><td>0.004</td><td>PASS</td></tr>
+<tr><td>tail_wide</td><td>40.335729</td><td>19.494583</td><td>74.902167</td><td>0.012</td><td>PASS</td></tr>
+<tr><td>packed_untraced</td><td>12.085312</td><td>7.211729</td><td>22.438917</td><td>0.040</td><td>PASS</td></tr>
+<tr><td>affine_sl_basis_list</td><td>261.098875</td><td>109.415937</td><td>570.792292</td><td>0.002</td><td>PASS</td></tr>
+<tr><td>affine_sl_basis_fast</td><td>22.341000</td><td>11.336166</td><td>59.270583</td><td>0.022</td><td>PASS</td></tr>
+<tr><td>gray_scalar</td><td>12.095083</td><td>12.198167</td><td>20.990667</td><td>0.040</td><td>PASS</td></tr>
+<tr><td>gray_simd</td><td>1.786687</td><td>1.735084</td><td>3.127355</td><td>0.271</td><td>PASS</td></tr>
+<tr><td>packed_gray12_scalar</td><td>14.836375</td><td>10.110437</td><td>27.358458</td><td>0.033</td><td>PASS</td></tr>
+<tr><td>packed_gray12_simd</td><td>6.599166</td><td>4.629062</td><td>12.401625</td><td>0.073</td><td>PASS</td></tr>
+<tr><td>packed_gray16_scalar</td><td>11.702291</td><td>9.840834</td><td>21.972292</td><td>0.041</td><td>PASS</td></tr>
+<tr><td>packed_gray16_simd</td><td>2.139625</td><td>1.859104</td><td>3.849729</td><td>0.226</td><td>PASS</td></tr>
+<tr><td>gray_delta_scalar</td><td>11.774125</td><td>11.606979</td><td>20.919500</td><td>0.041</td><td>PASS</td></tr>
+<tr><td>gray_delta_simd</td><td>1.632521</td><td>1.648708</td><td>2.863208</td><td>0.297</td><td>PASS</td></tr>
+<tr><td>initial_list</td><td>11.813999</td><td>5.895625</td><td>21.233896</td><td>0.041</td><td>PASS</td></tr>
+<tr><td>initial_simd</td><td>1.626167</td><td>0.865980</td><td>2.890875</td><td>0.298</td><td>PASS</td></tr>
+<tr><td>packed_gray16_delta_scalar</td><td>11.444187</td><td>9.950750</td><td>22.081146</td><td>0.042</td><td>PASS</td></tr>
+<tr><td>packed_gray16_delta_simd</td><td>2.035855</td><td>1.855229</td><td>3.784687</td><td>0.238</td><td>PASS</td></tr>
+<tr><td>fiber_rows</td><td>4.458437</td><td>4.303229</td><td>8.958771</td><td>0.109</td><td>PASS</td></tr>
+<tr><td>fiber_columns</td><td>4.115854</td><td>4.017104</td><td>8.536625</td><td>0.118</td><td>PASS</td></tr>
+<tr><td>fiber_simd</td><td>1.554646</td><td>1.470374</td><td>3.321729</td><td>0.312</td><td>PASS</td></tr>
+<tr><td>fiber_zero_simd</td><td>2.315125</td><td>2.065333</td><td>4.517771</td><td>0.209</td><td>PASS</td></tr>
+<tr><td>gray_quiet</td><td>1.618208</td><td>1.631375</td><td>2.724959</td><td>0.299</td><td>PASS</td></tr>
+<tr><td>wide64_quiet</td><td>1.013438</td><td>1.018417</td><td>1.798479</td><td>0.478</td><td>PASS</td></tr>
+<tr><td>byte_scalar</td><td>4.101854</td><td>4.145062</td><td>7.269125</td><td>0.118</td><td>PASS</td></tr>
+<tr><td>byte_simd</td><td>1.143271</td><td>1.085000</td><td>1.937355</td><td>0.424</td><td>PASS</td></tr>
+<tr><td>leaf16_quiet</td><td>1.929312</td><td>1.649083</td><td>3.457562</td><td>0.251</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_scalar</td><td>4.417916</td><td>3.702125</td><td>8.282917</td><td>0.110</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_simd</td><td>1.428667</td><td>1.224229</td><td>2.714583</td><td>0.339</td><td>PASS</td></tr>
+<tr><td>byte_single_quiet</td><td>1.304167</td><td>1.289146</td><td>2.367167</td><td>0.372</td><td>PASS</td></tr>
+<tr><td>leaf16_single_quiet</td><td>1.688063</td><td>1.388875</td><td>3.103000</td><td>0.287</td><td>PASS</td></tr>
+<tr><td>byte_planes</td><td>1.149563</td><td>1.148270</td><td>2.101666</td><td>0.422</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_planes</td><td>1.493667</td><td>1.286229</td><td>2.807771</td><td>0.324</td><td>PASS</td></tr>
+<tr><td>byte_unrolled</td><td>0.882062</td><td>0.897208</td><td>1.582542</td><td>0.549</td><td>PASS</td></tr>
+<tr><td>wide64_unrolled</td><td>0.481604</td><td>0.487708</td><td>0.847584</td><td>1.006</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_unrolled</td><td>1.238458</td><td>1.030750</td><td>2.281375</td><td>0.391</td><td>PASS</td></tr>
+<tr><td>word16_unrolled</td><td>0.897208</td><td>0.873667</td><td>1.550771</td><td>0.540</td><td>PASS</td></tr>
+<tr><td>word_dispatch</td><td>0.484604</td><td>0.485542</td><td>0.848666</td><td>1.000</td><td>PASS</td></tr>
+<tr><td>leaf16_word_unrolled</td><td>1.228167</td><td>1.086000</td><td>2.281417</td><td>0.395</td><td>PASS</td></tr>
+<tr><td>projected4</td><td>1.575000</td><td>1.532229</td><td>3.701479</td><td>0.308</td><td>PASS</td></tr>
+<tr><td>projected5</td><td>1.586854</td><td>1.449938</td><td>2.955208</td><td>0.305</td><td>PASS</td></tr>
+<tr><td>projected6</td><td>1.518646</td><td>1.398583</td><td>2.735750</td><td>0.319</td><td>PASS</td></tr>
+  </tbody></table></div>
+  <p>Projection is necessary only: every free extension remains subject to the original equations.
+    Quotient dimensions do not establish independent conditional constraints or predicted yield.
+    Whole-worker peak RSS: 24,625,152 bytes; campaign: 1972.255 seconds.
+    These are finite mathematical solver diagnostics. Earlier negative and inconclusive construction results remain below.</p>
+</section>
+
 <section class="panel" id="boolean-schedule-construction-20260923">
   <div class="panel-head">
     <h2>Construction cost diagnostic: limited bounds, no optimized solver <span class="chip">accounting</span></h2>
