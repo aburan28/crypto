@@ -139,6 +139,8 @@ regression on any gated layer is reverted, not explained away.
 | 2026-09-24 | B (part): decomposition systems instantiated from a per-thread `DecompositionTemplate` memo; Macaulay row cap read once per matrix | L2 | system build was 29 % of an m = 2 decomposition at n = 23 (callgrind); stage-ladder wall within its noise (tens of ms) | equations identical (new test) |
 | 2026-09-24 | L1 frozen: `examples/pdp_bench.rs`, balanced ladder m = 2…6 | — | see §6 | `pdp-reference-v1.json` (a few frontier timings overlapped another job on the host; hits and statuses are unaffected) |
 | 2026-09-24 | E.1: descent walk steps all 64 walks with `add_many_lazy(G, walks)` (the AVX-512 kernel) instead of `add_pairwise` | L3 | k0n53 descent 0.729 s → 0.622 s (−15 %, paired, 3 runs each); k0n41 unchanged within noise | v5, every counter identical |
+| 2026-09-24 | E.1: the workflow's solve stage decides its targets in parallel (rayon, state written per target under a lock) | L3 wall only | solve-stage wall: k0n53 0.756 s → 0.183 s (4.1×), k0n41 0.212 s → 0.068 s (3.1×). The gated `descent_seconds_total` sums per-target walls, so the gate prices the same work as before — by design, since ρ runs on one core | v5, every counter identical |
+| 2026-09-24 | D.2 probe: summand-first splitting (`SOLVER_SPLIT_RULE=lowest`) at n = 31, m = 3 | L1 | planted 0/2 → 1/2, at 63 s a target against meet in the middle's 0.1 ms | exploratory; default unchanged |
 
 ## 6. What the L1 ladder says (pdp-reference-v1)
 
