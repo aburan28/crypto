@@ -5663,6 +5663,112 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0023 -->
+<!-- BEGIN ic-autolab-20260924 -->
+<section id="ic-autolab-20260924">
+<h2>IC autolab — native development checkpoint, 2026-09-24</h2>
+<p>888/960 verified jobs across six audited development screens; 72 retained rejections and an earlier reporting failure are preserved. No promoted winner, operation-count result, ECC2K-130 gain or global-optimum claim. Native wall times have uncontrolled affinity, OS caches and host activity; A/A variation is recorded.</p>
+<p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.json">frozen measurements</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.md">report and limits</a>. S and ratios to an operation floor are unmeasured. Classification: accounting and integration engineering.</p>
+<h3>implementation_v2</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>21.8719</td><td>1.0000</td><td>3.0034</td><td>2.8149</td><td>2.9752</td><td>12/12</td></tr>
+<tr><td>implementation_01</td><td>14.0861</td><td>0.5871</td><td>1.7632</td><td>1.6526</td><td>1.7467</td><td>12/12</td></tr>
+<tr><td>implementation_02</td><td>11.3661</td><td>0.4663</td><td>1.4006</td><td>1.3127</td><td>1.3874</td><td>12/12</td></tr>
+<tr><td>implementation_03</td><td>17.1487</td><td>0.5512</td><td>1.6556</td><td>1.5517</td><td>1.6401</td><td>12/12</td></tr>
+<tr><td>implementation_04</td><td>14.0995</td><td>0.6559</td><td>1.9698</td><td>1.8462</td><td>1.9513</td><td>12/12</td></tr>
+<tr><td>implementation_05</td><td>19.3113</td><td>0.7642</td><td>2.2953</td><td>2.1513</td><td>2.2738</td><td>12/12</td></tr>
+<tr><td>implementation_06</td><td>14.7324</td><td>0.6011</td><td>1.8053</td><td>1.6920</td><td>1.7884</td><td>12/12</td></tr>
+<tr><td>implementation_07</td><td>25.8580</td><td>1.0254</td><td>3.0798</td><td>2.8865</td><td>3.0509</td><td>12/12</td></tr>
+<tr><td>implementation_08</td><td>12.4010</td><td>0.5899</td><td>1.7718</td><td>1.6606</td><td>1.7551</td><td>12/12</td></tr>
+<tr><td>implementation_09</td><td>15.7062</td><td>0.6501</td><td>1.9525</td><td>1.8299</td><td>1.9341</td><td>12/12</td></tr>
+<tr><td>implementation_10</td><td>35.1935</td><td>1.1015</td><td>3.3083</td><td>3.1006</td><td>3.2772</td><td>12/12</td></tr>
+<tr><td>implementation_11</td><td>18.5262</td><td>0.8513</td><td>2.5567</td><td>2.3962</td><td>2.5327</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>19.7760</td><td>0.8546</td><td>2.5668</td><td>2.4057</td><td>2.5427</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>8.0088</td><td>0.3330</td><td>1.0000</td><td>0.9372</td><td>0.9906</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>8.4347</td><td>0.3553</td><td>1.0670</td><td>1.0000</td><td>1.0569</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>7.9121</td><td>0.3361</td><td>1.0095</td><td>0.9461</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>algebra</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>17.5033</td><td>1.0000</td><td>2.4006</td><td>2.8468</td><td>2.0742</td><td>12/12</td></tr>
+<tr><td>algebra_01</td><td>14.9381</td><td>0.8749</td><td>2.1003</td><td>2.4905</td><td>1.8147</td><td>12/12</td></tr>
+<tr><td>algebra_02</td><td>14.6655</td><td>0.8676</td><td>2.0828</td><td>2.4699</td><td>1.7996</td><td>12/12</td></tr>
+<tr><td>algebra_03</td><td>14.4003</td><td>0.9063</td><td>2.1758</td><td>2.5801</td><td>1.8799</td><td>12/12</td></tr>
+<tr><td>algebra_04</td><td>26.4680</td><td>1.5454</td><td>3.7100</td><td>4.3994</td><td>3.2055</td><td>12/12</td></tr>
+<tr><td>algebra_05</td><td>25.9082</td><td>1.8775</td><td>4.5072</td><td>5.3447</td><td>3.8943</td><td>12/12</td></tr>
+<tr><td>algebra_06</td><td>25.2754</td><td>1.1423</td><td>2.7424</td><td>3.2520</td><td>2.3694</td><td>12/12</td></tr>
+<tr><td>algebra_07</td><td>26.2983</td><td>1.5179</td><td>3.6440</td><td>4.3212</td><td>3.1485</td><td>12/12</td></tr>
+<tr><td>algebra_08</td><td>20.8496</td><td>1.1332</td><td>2.7205</td><td>3.2260</td><td>2.3505</td><td>12/12</td></tr>
+<tr><td>algebra_09</td><td>21.6427</td><td>1.2295</td><td>2.9515</td><td>3.5000</td><td>2.5502</td><td>12/12</td></tr>
+<tr><td>algebra_10</td><td>18.0390</td><td>1.1084</td><td>2.6608</td><td>3.1552</td><td>2.2989</td><td>12/12</td></tr>
+<tr><td>algebra_11</td><td>16.4471</td><td>0.9716</td><td>2.3326</td><td>2.7660</td><td>2.0154</td><td>12/12</td></tr>
+<tr><td>algebra_12</td><td>33.6458</td><td>2.0596</td><td>4.9444</td><td>5.8632</td><td>4.2720</td><td>12/12</td></tr>
+<tr><td>algebra_13</td><td>27.8681</td><td>1.5900</td><td>3.8170</td><td>4.5263</td><td>3.2979</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>12.9528</td><td>0.8363</td><td>2.0078</td><td>2.3809</td><td>1.7347</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>7.4675</td><td>0.4166</td><td>1.0000</td><td>1.1858</td><td>0.8640</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>6.1080</td><td>0.3513</td><td>0.8433</td><td>1.0000</td><td>0.7286</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>7.3074</td><td>0.4821</td><td>1.1574</td><td>1.3725</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>factor_base</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>23.3162</td><td>1.0000</td><td>3.0396</td><td>2.7568</td><td>2.9965</td><td>12/12</td></tr>
+<tr><td>factor_base_01</td><td>29.1259</td><td>1.2987</td><td>3.9474</td><td>3.5801</td><td>3.8915</td><td>12/12</td></tr>
+<tr><td>factor_base_02</td><td>28.2757</td><td>1.2220</td><td>3.7142</td><td>3.3687</td><td>3.6616</td><td>12/12</td></tr>
+<tr><td>factor_base_03</td><td>26.6037</td><td>1.0804</td><td>3.2841</td><td>2.9786</td><td>3.2376</td><td>12/12</td></tr>
+<tr><td>factor_base_04</td><td>27.0244</td><td>1.1541</td><td>3.5080</td><td>3.1816</td><td>3.4583</td><td>12/12</td></tr>
+<tr><td>factor_base_05</td><td>29.1676</td><td>1.1071</td><td>3.3651</td><td>3.0520</td><td>3.3174</td><td>12/12</td></tr>
+<tr><td>factor_base_06</td><td>28.1824</td><td>1.2344</td><td>3.7521</td><td>3.4031</td><td>3.6990</td><td>12/12</td></tr>
+<tr><td>factor_base_07</td><td>642.5599</td><td>8.9549</td><td>27.2189</td><td>24.6867</td><td>26.8337</td><td>12/12</td></tr>
+<tr><td>factor_base_08</td><td>599.7235</td><td>6.7610</td><td>20.5505</td><td>18.6387</td><td>20.2597</td><td>12/12</td></tr>
+<tr><td>factor_base_09</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>factor_base_10</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>factor_base_11</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>factor_base_12</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>aa_control</td><td>24.2085</td><td>0.9175</td><td>2.7886</td><td>2.5292</td><td>2.7492</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>7.2721</td><td>0.3290</td><td>1.0000</td><td>0.9070</td><td>0.9858</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>8.1195</td><td>0.3627</td><td>1.1026</td><td>1.0000</td><td>1.0870</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>8.7662</td><td>0.3337</td><td>1.0144</td><td>0.9200</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>union_followup</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>22.8911</td><td>1.0000</td><td>2.6607</td><td>2.8439</td><td>2.5425</td><td>12/12</td></tr>
+<tr><td>union_1</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>6/12</td></tr>
+<tr><td>union_2</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>union_3</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>6/12</td></tr>
+<tr><td>union_4</td><td>16.6916</td><td>0.8995</td><td>2.3933</td><td>2.5581</td><td>2.2870</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>19.3925</td><td>0.9468</td><td>2.5192</td><td>2.6926</td><td>2.4073</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>8.0198</td><td>0.3758</td><td>1.0000</td><td>1.0689</td><td>0.9556</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>6.9927</td><td>0.3516</td><td>0.9356</td><td>1.0000</td><td>0.8940</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>9.1493</td><td>0.3933</td><td>1.0465</td><td>1.1185</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>interactions</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>36.2327</td><td>1.0000</td><td>3.8099</td><td>4.0160</td><td>3.8757</td><td>12/12</td></tr>
+<tr><td>combination_01</td><td>23.7385</td><td>0.6503</td><td>2.4777</td><td>2.6117</td><td>2.5204</td><td>12/12</td></tr>
+<tr><td>combination_02</td><td>26.7312</td><td>0.7665</td><td>2.9205</td><td>3.0784</td><td>2.9708</td><td>12/12</td></tr>
+<tr><td>union_4</td><td>38.6873</td><td>0.8036</td><td>3.0618</td><td>3.2274</td><td>3.1146</td><td>12/12</td></tr>
+<tr><td>implementation_01</td><td>28.2180</td><td>0.7802</td><td>2.9727</td><td>3.1334</td><td>3.0239</td><td>12/12</td></tr>
+<tr><td>implementation_10</td><td>35.7428</td><td>0.9813</td><td>3.7386</td><td>3.9408</td><td>3.8031</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>27.4043</td><td>0.9142</td><td>3.4829</td><td>3.6713</td><td>3.5430</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>10.1807</td><td>0.2625</td><td>1.0000</td><td>1.0541</td><td>1.0172</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>9.4395</td><td>0.2490</td><td>0.9487</td><td>1.0000</td><td>0.9651</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>8.1268</td><td>0.2580</td><td>0.9830</td><td>1.0362</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>interaction_replication</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>38.4235</td><td>1.0000</td><td>4.4269</td><td>3.8557</td><td>4.7951</td><td>12/12</td></tr>
+<tr><td>combination_01</td><td>27.1512</td><td>0.8077</td><td>3.5757</td><td>3.1143</td><td>3.8731</td><td>12/12</td></tr>
+<tr><td>combination_02</td><td>33.2033</td><td>0.8791</td><td>3.8916</td><td>3.3894</td><td>4.2152</td><td>12/12</td></tr>
+<tr><td>union_4</td><td>38.6317</td><td>0.9238</td><td>4.0894</td><td>3.5618</td><td>4.4296</td><td>12/12</td></tr>
+<tr><td>implementation_01</td><td>28.0912</td><td>0.7138</td><td>3.1600</td><td>2.7522</td><td>3.4228</td><td>12/12</td></tr>
+<tr><td>implementation_10</td><td>44.8494</td><td>1.1014</td><td>4.8759</td><td>4.2467</td><td>5.2814</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>37.3434</td><td>0.8617</td><td>3.8149</td><td>3.3226</td><td>4.1322</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>10.3586</td><td>0.2259</td><td>1.0000</td><td>0.8710</td><td>1.0832</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>10.6090</td><td>0.2594</td><td>1.1482</td><td>1.0000</td><td>1.2436</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>8.5442</td><td>0.2085</td><td>0.9232</td><td>0.8041</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+</section>
+<!-- END ic-autolab-20260924 -->
+
 <section class="panel" id="toy-symmetry-quotient-20260924">
 <div class="panel-head"><h2>Fixed seven-bit symmetry quotient: exact coverage, solver costs unmeasured <span class="chip">accounting</span></h2></div>
 <p>All 90 complete-enumeration measurements agree with exhaustive point ground truth.

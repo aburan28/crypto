@@ -247,7 +247,7 @@ def verify(report, expected_fixture, *, expected_mode='ic', summands=3):
         require(isinstance(rel, dict), 'missing descent relation: logarithm not certified as index calculus')
         a, b, ids = rel.get('a'), rel.get('b'), rel.get('points')
         require(type(a) is int and type(b) is int and 0 <= a < c.r and 0 < b < c.r, 'invalid descent scalars')
-        require(isinstance(ids, list) and len(ids) in (0, summands)
+        require(isinstance(ids, list) and len(ids) == summands
                 and all(type(i) is int and 0 <= i < len(base) for i in ids), 'bad descent relation indices')
         q = targets[s['index']]
         probe = c.add(c.mul(c.g, a), c.mul(q, b))
