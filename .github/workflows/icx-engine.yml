@@ -20,6 +20,7 @@ on:
       - "tests/icx.rs"
       - "Cargo.toml"
       - "docs/ic/ENGINE_AUDIT_AND_DESIGN.md"
+      - "gpu/fes/**"
       - ".github/workflows/icx-engine.yml"
   workflow_dispatch:
 
@@ -70,3 +71,33 @@ jobs:
           ./target/release/icx run p256 --bits 16 --rho-runs 4
           echo "== Gray-code FES solver plugged in =="
           ./target/release/icx run sect233k1 --degree 11 --oracle descent-algebraic --solver fes-f2 --rho-runs 0
+      - name: GPU FES kernel — host verification (no GPU needed)
+        run: make -C gpu/fes test
+      - name: GPU FES kernel — Metal shader compile-check (Apple silicon)
+        if: matrix.arch == 'macos-arm64'
+        run: make -C gpu/fes metal
+
+  gpu-fes-cuda:
+    name: GPU FES CUDA compile-check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CUDA_PKG_VERSION: 12-8
+      CUDA_DIR_VERSION: "12.8"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install nvcc (compiler + CUDA headers only)
+        run: |
+          distro="ubuntu$(lsb_release -rs | tr -d .)"
+          curl -fsSL -o /tmp/cuda-keyring.deb \
+            "https://developer.download.nvidia.com/compute/cuda/repos/$distro/x86_64/cuda-keyring_1.1-1_all.deb"
+          sudo dpkg -i /tmp/cuda-keyring.deb
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            "cuda-nvcc-$CUDA_PKG_VERSION" "cuda-cudart-dev-$CUDA_PKG_VERSION"
+          echo "/usr/local/cuda-$CUDA_DIR_VERSION/bin" >> "$GITHUB_PATH"
+      - run: nvcc --version
+      - name: Generate the system header
+        run: make -C gpu/fes gen
+      - name: Compile the FES kernel for sm_70/80/90 (no GPU needed)
+        run: make -C gpu/fes nvcc-check
