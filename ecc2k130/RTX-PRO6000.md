@@ -102,7 +102,9 @@ Blackwell Server Edition (`g7e.2xlarge`, CUDA 13.3.1, `sm_120`, the preset
 knobs above, binaries rebuilt on the host). It is a different iteration
 function, so its distinguished points cannot collide with the shipping walk's;
 `aws/campaign.json` carries the choice as `"walk"` and it enters the campaign
-identity.
+identity. Rate is not the whole comparison: [WALK-CONSTANT.md](WALK-CONSTANT.md)
+prices both walks per solve, and the table walk as built loses to fruitless
+cycles its rule does not refuse.
 
 | Workload | Variant | Median B/s | Throughput / control | Correctness |
 |---|---|---:|---:|---|

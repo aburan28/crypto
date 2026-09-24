@@ -490,6 +490,17 @@ test-table-walk-host:
 	./build/test-table-walk-host-nibble
 	./build/test-table-walk-host-bytes
 
+# The walks' iteration constants on the device walks' own host reference
+# (WALK-CONSTANT.md): the n = 23 rows of benchmarks/walk-constant, at the
+# campaign's H = 8.  About ten minutes on four cores; not part of `test`.
+WALK_CONSTANT_FLAGS = -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function -pthread
+walk-constant:
+	mkdir -p build
+	$(CXX) $(WALK_CONSTANT_FLAGS) -DECC_TABLE_BRANCHES=8 src/walkconstant.cpp -o build/walk-constant-host-h8
+	$(CXX) $(WALK_CONSTANT_FLAGS) -DECC_TABLE_BRANCHES=16 src/walkconstant.cpp -o build/walk-constant-host-h16
+	for d in ecc2k130 native; do ./build/walk-constant-host-h8 --n 23 --walk table --dist $$d --walks 8 --trials 20000 --seed 230; done
+	for d in ecc2k130 native; do ./build/walk-constant-host-h8 --n 23 --walk sigma --dist $$d --walks 8 --trials 20000 --seed 230; done
+
 test-table-walk-cuda:
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_WITNESS=%,$(DEFS)) -DECC_WALK_TABLE=1 -DECC_WITNESS=0 \
@@ -844,5 +855,6 @@ clean:
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
+	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host walk-constant test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
