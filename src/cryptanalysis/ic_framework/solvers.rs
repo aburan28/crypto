@@ -215,6 +215,8 @@ impl SystemSolver for F4F2 {
                 st.m4ri_trimmed_word_xors_avoided,
             ),
             ("m4ri_scratch_bytes_max", st.m4ri_scratch_bytes_max),
+            ("flat_m4ri_matrices", st.flat_m4ri_matrices),
+            ("flat_m4ri_order_bytes_max", st.flat_m4ri_order_bytes_max),
             ("divisor_tests", st.divisor_tests),
             ("divisor_submask_lookups", st.divisor_submask_lookups),
             ("divisor_linear_tests", st.divisor_linear_tests),
