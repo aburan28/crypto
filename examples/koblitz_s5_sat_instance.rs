@@ -9,9 +9,11 @@
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::binary_semaev::binary_semaev_s3;
+use crypto_lib::cryptanalysis::koblitz_fast_arith::{s3_x_roots, FastBinaryCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_groebner::FieldStructure;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{point_key, points_with_x, KoblitzCurve};
 use crypto_lib::cryptanalysis::sat::{to_dimacs_xor, Lit, SolveResult, Solver};
+use crypto_lib::cryptanalysis::semaev_decomp::Gf2;
 use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use rand::rngs::StdRng;
@@ -118,15 +120,35 @@ fn signed_orbit(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPoint> {
 }
 
 fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
-    let cofactor = curve.cofactor.to_u64().unwrap();
+    // Single-word field for the hot arithmetic below (per-x lifts and the
+    // cofactor/subgroup/label scalar multiplications).  Every swap is
+    // covered by lib bit-exactness tests; the collected sets, sort orders,
+    // keys, and labels are unchanged, so the emitted base is identical.
+    let fast = FastBinaryCurve::new(&curve.curve.irreducible, curve.a as u64)
+        .expect("Koblitz n <= 63 fits in one word");
+    let b_word = fast.gf.from_element(&curve.curve.b);
+    let to_binary = |p: FastPoint| -> BinaryPoint {
+        match p {
+            None => BinaryPoint::Infinity,
+            Some((x, y)) => BinaryPoint::Affine {
+                x: fast.element(x),
+                y: fast.element(y),
+            },
+        }
+    };
+    let to_fast = |p: &BinaryPoint| -> FastPoint {
+        match p {
+            BinaryPoint::Infinity => None,
+            BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+        }
+    };
     let mut seen_orbits = HashSet::new();
     let mut orbits = Vec::new();
     let mut scanned_x = 0u64;
     for raw_x in 0..(1u64 << curve.n) {
         scanned_x += 1;
-        let x = F2mElement::from_biguint(&BigUint::from(raw_x), curve.n);
-        for point in points_with_x(&curve.curve, &x) {
-            let projected = curve.mul(&point, &BigUint::from(cofactor));
+        for point in fast.points_with_x(b_word, raw_x) {
+            let projected = to_binary(fast.scalar_mul(point, &curve.cofactor));
             if projected == BinaryPoint::Infinity {
                 continue;
             }
@@ -135,9 +157,14 @@ fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
             if !seen_orbits.insert(canonical) {
                 continue;
             }
-            assert!(orbit.iter().all(|member| {
-                curve.mul(member, &curve.subgroup_order) == BinaryPoint::Infinity
-            }));
+            // Representative-only subgroup check: Frobenius and negation
+            // preserve the subgroup, so the whole orbit is in `<G>` iff
+            // the representative is; every member is additionally
+            // re-checked transitively by the batched label verification
+            // below (`[c]R == P` with `R` checked here).
+            assert!(fast
+                .scalar_mul(to_fast(&orbit[0]), &curve.subgroup_order)
+                .is_none());
             orbits.push(orbit);
             if orbits.len() == columns {
                 break;
@@ -148,7 +175,9 @@ fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
         }
     }
     assert_eq!(orbits.len(), columns);
-    orbits.sort_by_key(|orbit| point_key(&orbit[0]));
+    // Cached keys: identical order to sort_by_key (both stable, same keys),
+    // computed once per orbit instead of once per comparison.
+    orbits.sort_by_cached_key(|orbit| point_key(&orbit[0]));
     let signed_size = orbits[0].len();
     assert!(orbits.iter().all(|orbit| orbit.len() == signed_size));
     let modulus = curve.subgroup_order.to_u64().unwrap();
@@ -170,19 +199,63 @@ fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
         }
     }
     let mut points: Vec<_> = orbits.into_iter().flatten().collect();
-    points.sort_by_key(point_key);
+    points.sort_by_cached_key(point_key);
     points.dedup_by_key(|point| point_key(point));
     assert_eq!(points.len(), columns * signed_size);
     let point_labels: Vec<_> = points
         .iter()
         .map(|point| labels_by_key[&point_key(point)])
         .collect();
-    assert!(points
-        .iter()
-        .zip(&point_labels)
-        .all(|(point, &(column, coefficient))| {
-            curve.mul(&representatives[column], &BigUint::from(coefficient)) == *point
-        }));
+    // Batched label verification: for column members `P_j` with labels
+    // `c_j` and rep `R`, check `[C0]R == Σ P_j` and `[C1]R == Σ (j+1)·P_j`
+    // with `C0 = Σ c_j`, `C1 = Σ (j+1)·c_j` (mod r).  Any single wrong
+    // point or label breaks the first equation outright (and the second
+    // weights it nonzero), so a failing column panics exactly as the
+    // per-point check would — at 2 scalar muls per column plus 3 point
+    // additions per member instead of 1 scalar mul per member.  The
+    // second weight uses running accumulation over the reversed member
+    // order (`run += P`, `wsum += run`), so no scalar multiplications
+    // are needed for weighting.
+    let mut members: Vec<(FastPoint, u64)> = Vec::new();
+    for (column, representative) in representatives.iter().enumerate() {
+        let rep = to_fast(representative);
+        members.clear();
+        for (point, &(col, coeff)) in points.iter().zip(&point_labels) {
+            if col == column {
+                members.push((to_fast(point), coeff));
+            }
+        }
+        assert!(members.len() == signed_size, "column {column} member count");
+        let mut sum_c0: u128 = 0;
+        let mut sum_c1: u128 = 0;
+        let mut sum_p: FastPoint = None;
+        let mut weight = 0u64;
+        for &(pf, coeff) in &members {
+            weight += 1;
+            sum_c0 += coeff as u128;
+            sum_c1 += coeff as u128 * weight as u128;
+            sum_p = fast.add(sum_p, pf);
+        }
+        // Reversed running accumulation yields the same (j+1) weights:
+        // members[j] enters `run` at reversed step (m-1-j) and stays for
+        // (j+1) steps.
+        let mut run: FastPoint = None;
+        let mut wsum: FastPoint = None;
+        for &(pf, _) in members.iter().rev() {
+            run = fast.add(run, pf);
+            wsum = fast.add(wsum, run);
+        }
+        let c0 = BigUint::from((sum_c0 % modulus as u128) as u64);
+        let c1 = BigUint::from((sum_c1 % modulus as u128) as u64);
+        assert!(
+            to_binary(fast.scalar_mul(rep, &c0)) == to_binary(sum_p),
+            "label batch weight-1 mismatch in column {column}"
+        );
+        assert!(
+            to_binary(fast.scalar_mul(rep, &c1)) == to_binary(wsum),
+            "label batch weight-2 mismatch in column {column}"
+        );
+    }
     let mut x_codes: Vec<_> = points
         .iter()
         .filter_map(|point| match point {
@@ -252,7 +325,8 @@ fn point_defined_base_from_jsonl(
     assert_eq!(points.len(), columns * signed_size);
     assert!(point_labels
         .iter()
-        .all(|&(column, coefficient)| column < columns && coefficient < curve.subgroup_order.to_u64().unwrap()));
+        .all(|&(column, coefficient)| column < columns
+            && coefficient < curve.subgroup_order.to_u64().unwrap()));
     let mut x_codes: Vec<_> = points
         .iter()
         .filter_map(|point| match point {
@@ -655,26 +729,14 @@ impl CircuitBuilder {
 
     fn mux_wire(&mut self, select: u32, when_false: u32, when_true: u32) -> u32 {
         let output = self.variable();
-        self.clauses.push(vec![
-            select as Lit,
-            -(when_false as Lit),
-            output as Lit,
-        ]);
-        self.clauses.push(vec![
-            select as Lit,
-            when_false as Lit,
-            -(output as Lit),
-        ]);
-        self.clauses.push(vec![
-            -(select as Lit),
-            -(when_true as Lit),
-            output as Lit,
-        ]);
-        self.clauses.push(vec![
-            -(select as Lit),
-            when_true as Lit,
-            -(output as Lit),
-        ]);
+        self.clauses
+            .push(vec![select as Lit, -(when_false as Lit), output as Lit]);
+        self.clauses
+            .push(vec![select as Lit, when_false as Lit, -(output as Lit)]);
+        self.clauses
+            .push(vec![-(select as Lit), -(when_true as Lit), output as Lit]);
+        self.clauses
+            .push(vec![-(select as Lit), when_true as Lit, -(output as Lit)]);
         self.and_gates += 1;
         output
     }
@@ -698,7 +760,9 @@ impl CircuitBuilder {
         };
         let mut images: Vec<u64> = (0..n).map(|bit| 1u64 << bit).collect();
         for _ in 0..power {
-            images.iter_mut().for_each(|image| *image = square_code(*image));
+            images
+                .iter_mut()
+                .for_each(|image| *image = square_code(*image));
         }
         (0..n)
             .map(|output| {
@@ -908,11 +972,7 @@ impl CircuitBuilder {
         }
     }
 
-    fn field_inverse_witness(
-        &mut self,
-        input: &[u32],
-        structure: &FieldStructure,
-    ) -> Vec<u32> {
+    fn field_inverse_witness(&mut self, input: &[u32], structure: &FieldStructure) -> Vec<u32> {
         let inverse = self.field_variables(structure.n as usize);
         let product = self.field_mul(input, &inverse, structure);
         self.constrain_field_constant(&product, 1);
@@ -957,10 +1017,8 @@ impl CircuitBuilder {
         }
         let half_trace_square = self.field_square(&half_trace, structure);
         for bit in 0..structure.n as usize {
-            self.xors.push((
-                vec![half_trace_square[bit], half_trace[bit], d[bit]],
-                false,
-            ));
+            self.xors
+                .push((vec![half_trace_square[bit], half_trace[bit], d[bit]], false));
         }
         let mut selected_root = half_trace;
         selected_root[0] = self.xor_wire(&[selected_root[0], root_selector], false);
@@ -1799,8 +1857,10 @@ fn encode_balanced_s5_factorized(
     let cardinality_offset = selector_offset + domain_selector_variables;
     let root_selector_offset = cardinality_offset + cardinality_auxiliaries;
     let root_selector_variables = usize::from(rooted) * 2;
-    let reserved_variables =
-        problem_variables + domain_selector_variables + cardinality_auxiliaries + root_selector_variables;
+    let reserved_variables = problem_variables
+        + domain_selector_variables
+        + cardinality_auxiliaries
+        + root_selector_variables;
 
     let summands: [Vec<u32>; 4] = std::array::from_fn(|summand| {
         (0..width)
@@ -2022,8 +2082,7 @@ fn encode_balanced_s5_frobenius_orbits(
     let representatives = representative_x_codes.len();
     let representative_index_width =
         ((usize::BITS - representatives.saturating_sub(1).leading_zeros()) as usize).max(1);
-    let frobenius_width =
-        ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let frobenius_width = ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
     let binary_representatives = representative_encoding == "binary";
     let representative_variables = if binary_representatives {
         4 * representative_index_width
@@ -2067,9 +2126,7 @@ fn encode_balanced_s5_frobenius_orbits(
                 .collect()
         } else {
             let selectors: Vec<u32> = (0..representatives)
-                .map(|index| {
-                    (representative_offset + summand * representatives + index + 1) as u32
-                })
+                .map(|index| (representative_offset + summand * representatives + index + 1) as u32)
                 .collect();
             (0..width)
                 .map(|bit| {
@@ -2085,19 +2142,12 @@ fn encode_balanced_s5_frobenius_orbits(
                 .collect()
         };
         for exponent_bit in 0..frobenius_width {
-            let transformed = builder.frobenius_wire(
-                &current,
-                1usize << exponent_bit,
-                structure,
-            );
-            let select =
-                (frobenius_offset + summand * frobenius_width + exponent_bit + 1) as u32;
+            let transformed = builder.frobenius_wire(&current, 1usize << exponent_bit, structure);
+            let select = (frobenius_offset + summand * frobenius_width + exponent_bit + 1) as u32;
             current = current
                 .iter()
                 .zip(&transformed)
-                .map(|(&when_false, &when_true)| {
-                    builder.mux_wire(select, when_false, when_true)
-                })
+                .map(|(&when_false, &when_true)| builder.mux_wire(select, when_false, when_true))
                 .collect();
         }
         for (&coordinate, &derived) in summands[summand].iter().zip(&current) {
@@ -2201,7 +2251,8 @@ fn encode_balanced_s5_frobenius_orbits(
     // then the same pair-then-pair orbit schedule (still pair_table_entries=0).
     // `intermediates_then_pair_then_pair` decides only the Semaev intermediate
     // wires u/v (offsets 4n/5n — the pair_sum_trie domain) before the pair schedule.
-    let branch_order = std::env::var("KIC_ORBIT_BRANCH_ORDER").unwrap_or_else(|_| "reps_then_shift".to_owned());
+    let branch_order =
+        std::env::var("KIC_ORBIT_BRANCH_ORDER").unwrap_or_else(|_| "reps_then_shift".to_owned());
     let mut priorities: Vec<u32> = Vec::new();
     let pair_then_pair_family = matches!(
         branch_order.as_str(),
@@ -2235,51 +2286,55 @@ fn encode_balanced_s5_frobenius_orbits(
             &pairing_indices[2..]
         };
         for &summand in first {
-            priorities.extend((0..rep_stride).map(|index| {
-                (representative_offset + summand * rep_stride + index + 1) as u32
-            }));
+            priorities
+                .extend((0..rep_stride).map(|index| {
+                    (representative_offset + summand * rep_stride + index + 1) as u32
+                }));
         }
         for &summand in first {
-            priorities.extend((0..frobenius_width).map(|index| {
-                (frobenius_offset + summand * frobenius_width + index + 1) as u32
-            }));
+            priorities
+                .extend((0..frobenius_width).map(|index| {
+                    (frobenius_offset + summand * frobenius_width + index + 1) as u32
+                }));
         }
         for &summand in second {
-            priorities.extend((0..rep_stride).map(|index| {
-                (representative_offset + summand * rep_stride + index + 1) as u32
-            }));
+            priorities
+                .extend((0..rep_stride).map(|index| {
+                    (representative_offset + summand * rep_stride + index + 1) as u32
+                }));
         }
         for &summand in second {
-            priorities.extend((0..frobenius_width).map(|index| {
-                (frobenius_offset + summand * frobenius_width + index + 1) as u32
-            }));
+            priorities
+                .extend((0..frobenius_width).map(|index| {
+                    (frobenius_offset + summand * frobenius_width + index + 1) as u32
+                }));
         }
     } else if branch_order == "shift_then_reps" {
         // Decide Frobenius shifts before orbit representatives.
+        priorities
+            .extend((0..frobenius_variables).map(|index| (frobenius_offset + index + 1) as u32));
         priorities.extend(
-            (0..frobenius_variables).map(|index| (frobenius_offset + index + 1) as u32),
+            (0..representative_variables).map(|index| (representative_offset + index + 1) as u32),
         );
-        priorities.extend((0..representative_variables).map(|index| {
-            (representative_offset + index + 1) as u32
-        }));
     } else {
-        priorities.extend((0..representative_variables).map(|index| {
-            (representative_offset + index + 1) as u32
-        }));
         priorities.extend(
-            (0..frobenius_variables).map(|index| (frobenius_offset + index + 1) as u32),
+            (0..representative_variables).map(|index| (representative_offset + index + 1) as u32),
         );
+        priorities
+            .extend((0..frobenius_variables).map(|index| (frobenius_offset + index + 1) as u32));
     }
-    priorities.extend((0..root_selector_variables).map(|index| {
-        (root_selector_offset + index + 1) as u32
-    }));
+    priorities.extend(
+        (0..root_selector_variables).map(|index| (root_selector_offset + index + 1) as u32),
+    );
     solver.set_branch_priority(&priorities);
     S5Encoding {
         solver,
         equations: Vec::new(),
         problem_variables,
         monomials: nonlinear_auxiliaries,
-        selector_variables: representative_variables + frobenius_variables + root_selector_variables,
+        selector_variables: representative_variables
+            + frobenius_variables
+            + root_selector_variables,
         cardinality_auxiliaries,
         domain_encoding: if binary_representatives {
             "binary_representative_plus_binary_frobenius_shift"
@@ -2555,7 +2610,12 @@ fn decode_partial_code(assignment: &[Option<bool>], offset: usize, width: usize)
     })
 }
 
-fn push_forbidden_binary_assignment(clause: &mut Vec<Lit>, offset: usize, width: usize, value: usize) {
+fn push_forbidden_binary_assignment(
+    clause: &mut Vec<Lit>,
+    offset: usize,
+    width: usize,
+    value: usize,
+) {
     for bit in 0..width {
         let variable = (offset + bit + 1) as Lit;
         if ((value >> bit) & 1) == 1 {
@@ -2580,7 +2640,7 @@ fn digest_relative_pair_support(
     exceptional_relative_states: &[(usize, usize, usize)],
 ) -> String {
     let mut hasher = blake3::Hasher::new();
-    hasher.update(b"relative-frobenius-pair-support-cert-v1");
+    hasher.update(b"relative-frobenius-pair-support-cert-v2");
     hasher.update(&(representative_x_codes.len() as u32).to_le_bytes());
     for &code in representative_x_codes {
         hasher.update(&code.to_le_bytes());
@@ -2600,12 +2660,13 @@ fn scan_exceptional_relative_states(
 ) -> (Vec<(usize, usize, usize)>, f64) {
     let started = Instant::now();
     let width = curve.n as usize;
+    let field = scan_field(curve);
     let representatives = representative_x_codes.len();
     let mut shifted = vec![vec![0u64; width]; representatives];
     for (index, &code) in representative_x_codes.iter().enumerate() {
         shifted[index][0] = code;
         for exponent in 1..width {
-            shifted[index][exponent] = frobenius_code(curve, shifted[index][exponent - 1], 1);
+            shifted[index][exponent] = field.gf.sqr(shifted[index][exponent - 1]);
         }
     }
     let exceptional_states: Vec<(usize, usize, usize)> = (0..representatives)
@@ -2616,7 +2677,7 @@ fn scan_exceptional_relative_states(
             for right_rep in 0..representatives {
                 for relative_shift in 0..width {
                     let right = shifted[right_rep][relative_shift];
-                    if regular_s3_x_roots(curve, left, right).is_none() {
+                    if s3_x_roots(&field.gf, field.b, left, right).is_none() {
                         local.push((left_rep, right_rep, relative_shift));
                     }
                 }
@@ -2632,11 +2693,12 @@ fn load_relative_pair_support_certificate(
     representative_x_codes: &[u64],
     n: u32,
 ) -> RelativePairSupportCertificate {
-    let value: serde_json::Value =
-        serde_json::from_str(&std::fs::read_to_string(path).expect("read pair-support certificate"))
-            .expect("parse pair-support certificate");
+    let value: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string(path).expect("read pair-support certificate"),
+    )
+    .expect("parse pair-support certificate");
     assert_eq!(value["kind"], "relative_frobenius_pair_support_certificate");
-    assert_eq!(value["schema_version"], "1.0");
+    assert_eq!(value["schema_version"], "2.0");
     assert_eq!(value["n"].as_u64().unwrap() as u32, n);
     assert_eq!(value["pair_table_entries"].as_u64().unwrap_or(0), 0);
     assert_eq!(value["edge_selectors"].as_u64().unwrap_or(0), 0);
@@ -2650,7 +2712,8 @@ fn load_relative_pair_support_certificate(
         cert_reps, representative_x_codes,
         "pair-support certificate representatives must match the live orbit factor base"
     );
-    let exceptional_relative_states: Vec<(usize, usize, usize)> = value["exceptional_relative_states"]
+    let exceptional_relative_states: Vec<(usize, usize, usize)> = value
+        ["exceptional_relative_states"]
         .as_array()
         .expect("exceptional_relative_states")
         .iter()
@@ -2667,7 +2730,8 @@ fn load_relative_pair_support_certificate(
         .as_str()
         .expect("support_digest_blake3")
         .to_owned();
-    let recomputed = digest_relative_pair_support(representative_x_codes, &exceptional_relative_states);
+    let recomputed =
+        digest_relative_pair_support(representative_x_codes, &exceptional_relative_states);
     assert_eq!(
         support_digest_blake3, recomputed,
         "pair-support certificate digest mismatch"
@@ -2688,7 +2752,7 @@ fn write_relative_pair_support_certificate(
     support_digest_blake3: &str,
 ) {
     let payload = json!({
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "kind": "relative_frobenius_pair_support_certificate",
         "n": n,
         "orbit_representatives": representative_x_codes.len(),
@@ -2701,9 +2765,320 @@ fn write_relative_pair_support_certificate(
         "support_digest_blake3": support_digest_blake3,
         "pair_table_entries": 0,
         "edge_selectors": 0,
-        "claim_boundary": "Reusable compressed exceptional relative-Frobenius pair-support certificate only. Not an edge/pair table, not unrestricted extraction, not vs_rho, not ledger promotion."
+        "claim_boundary": "Reusable compressed exceptional relative-Frobenius pair-support certificate only (schema 2.0: degenerate diagonal/zero-side pairs carry their single S3 root and are not exceptional). Not an edge/pair table, not unrestricted extraction, not vs_rho, not ledger promotion."
     });
-    std::fs::write(path, serde_json::to_vec_pretty(&payload).unwrap()).expect("write pair-support certificate");
+    std::fs::write(path, serde_json::to_vec_pretty(&payload).unwrap())
+        .expect("write pair-support certificate");
+}
+
+/// Lazy relative-Frobenius pair support.
+///
+/// When one Semaev side's orbit representatives and Frobenius exponents are
+/// assigned, look up the regular root (or an exceptional nogood) and force
+/// agreeing intermediate bits. This does not enumerate pair edges or build a
+/// target-feasibility join: `pair_table_entries` stays 0.
+fn lazy_relative_support_update(
+    assignment: &[Option<bool>],
+    seen: &mut [HashSet<(usize, usize, usize, usize)>; 2],
+    regular: &HashMap<(usize, usize, usize), [u64; 2]>,
+    gf: &Gf2,
+    pairing_indices: [usize; 4],
+    representative_offset: usize,
+    representatives: usize,
+    frobenius_offset: usize,
+    frobenius_width: usize,
+    width: usize,
+) -> (Vec<Vec<Lit>>, usize, usize) {
+    let mut learned = Vec::new();
+    let mut exceptional = 0usize;
+    let mut forced_bits = 0usize;
+    let sides = [
+        (pairing_indices[0], pairing_indices[1], 4 * width),
+        (pairing_indices[2], pairing_indices[3], 5 * width),
+    ];
+    for (side, &(left_summand, right_summand, intermediate_offset)) in sides.iter().enumerate() {
+        let Some(left_rep) = assigned_one_hot(
+            assignment,
+            representative_offset + left_summand * representatives,
+            representatives,
+        ) else {
+            continue;
+        };
+        let Some(right_rep) = assigned_one_hot(
+            assignment,
+            representative_offset + right_summand * representatives,
+            representatives,
+        ) else {
+            continue;
+        };
+        let left_shift_offset = frobenius_offset + left_summand * frobenius_width;
+        let right_shift_offset = frobenius_offset + right_summand * frobenius_width;
+        if !(0..frobenius_width).all(|bit| {
+            assignment[left_shift_offset + bit].is_some()
+                && assignment[right_shift_offset + bit].is_some()
+        }) {
+            continue;
+        }
+        let left_shift =
+            decode_partial_code(assignment, left_shift_offset, frobenius_width) as usize;
+        let right_shift =
+            decode_partial_code(assignment, right_shift_offset, frobenius_width) as usize;
+        if left_shift >= width || right_shift >= width {
+            continue;
+        }
+        if !seen[side].insert((left_rep, right_rep, left_shift, right_shift)) {
+            continue;
+        }
+        let relative = (right_shift + width - left_shift) % width;
+        let mut guard = vec![
+            -((representative_offset + left_summand * representatives + left_rep + 1) as Lit),
+            -((representative_offset + right_summand * representatives + right_rep + 1) as Lit),
+        ];
+        push_forbidden_binary_assignment(
+            &mut guard,
+            left_shift_offset,
+            frobenius_width,
+            left_shift,
+        );
+        push_forbidden_binary_assignment(
+            &mut guard,
+            right_shift_offset,
+            frobenius_width,
+            right_shift,
+        );
+        let Some(roots) = regular.get(&(left_rep, right_rep, relative)).copied() else {
+            exceptional += 1;
+            learned.push(guard);
+            continue;
+        };
+        let mut shifted = [roots[0], roots[1]];
+        for root in &mut shifted {
+            for _ in 0..left_shift {
+                *root = gf.sqr(*root);
+            }
+        }
+        for bit in 0..width {
+            let first = ((shifted[0] >> bit) & 1) == 1;
+            let second = ((shifted[1] >> bit) & 1) == 1;
+            if first != second {
+                continue;
+            }
+            let variable = (intermediate_offset + bit + 1) as Lit;
+            let mut clause = guard.clone();
+            clause.push(if first { variable } else { -variable });
+            learned.push(clause);
+            forced_bits += 1;
+        }
+    }
+    (learned, exceptional, forced_bits)
+}
+
+fn assigned_one_hot(assignment: &[Option<bool>], offset: usize, count: usize) -> Option<usize> {
+    let mut found = None;
+    for index in 0..count {
+        match assignment.get(offset + index).copied().flatten() {
+            Some(true) => {
+                if found.is_some() {
+                    return None;
+                }
+                found = Some(index);
+            }
+            Some(false) | None => {}
+        }
+    }
+    found
+}
+
+fn pack_pair_witness(left: usize, right: usize, left_shift: usize, right_shift: usize) -> u64 {
+    assert!(left < 1 << 16 && right < 1 << 16);
+    assert!(left_shift < 1 << 16 && right_shift < 1 << 16);
+    (left as u64)
+        | ((right as u64) << 16)
+        | ((left_shift as u64) << 32)
+        | ((right_shift as u64) << 48)
+}
+
+fn unpack_pair_witness(packed: u64) -> (usize, usize, usize, usize) {
+    (
+        (packed & 0xffff) as usize,
+        ((packed >> 16) & 0xffff) as usize,
+        ((packed >> 32) & 0xffff) as usize,
+        ((packed >> 48) & 0xffff) as usize,
+    )
+}
+
+fn witness_for_absolute_root(
+    by_canonical: &HashMap<u64, u64>,
+    gf: &Gf2,
+    absolute: u64,
+    width: usize,
+) -> Option<(usize, usize, usize, usize)> {
+    let mut canonical = absolute;
+    for steps in 0..width {
+        if let Some(&packed) = by_canonical.get(&canonical) {
+            let (left, right, relative, _) = unpack_pair_witness(packed);
+            let left_shift = (width - steps) % width;
+            let right_shift = (left_shift + relative) % width;
+            return Some((left, right, left_shift, right_shift));
+        }
+        canonical = gf.sqr(canonical);
+    }
+    None
+}
+
+struct ExtractedOrbitRelation {
+    codes: [u64; 4],
+    first: (usize, usize, usize, usize),
+    second: (usize, usize, usize, usize),
+    intermediates: [u64; 2],
+    trials: u64,
+    extract_ms: f64,
+}
+
+struct CompactOrbitExtractionIndex {
+    shifted: Vec<Vec<u64>>,
+    regular_keys: Vec<(usize, usize, usize)>,
+    by_canonical: HashMap<u64, u64>,
+    index_entries: usize,
+}
+
+impl CompactOrbitExtractionIndex {
+    fn new(
+        curve: &KoblitzCurve,
+        regular: &HashMap<(usize, usize, usize), [u64; 2]>,
+        representative_x_codes: &[u64],
+        gf: &Gf2,
+    ) -> Self {
+        let width = curve.n as usize;
+        let mut shifted = vec![vec![0u64; width]; representative_x_codes.len()];
+        for (index, &code) in representative_x_codes.iter().enumerate() {
+            shifted[index][0] = code;
+            for exponent in 1..width {
+                shifted[index][exponent] = gf.sqr(shifted[index][exponent - 1]);
+            }
+        }
+        // Fix both the witness tie-break and target scan order. HashMap's
+        // randomized iteration otherwise changes the first lifted relation.
+        let mut regular_keys: Vec<_> = regular.keys().copied().collect();
+        regular_keys.sort_unstable();
+        let mut by_canonical: HashMap<u64, u64> = HashMap::with_capacity(regular.len() * 2);
+        for &(left, right, relative) in &regular_keys {
+            let roots = &regular[&(left, right, relative)];
+            for &root in roots {
+                by_canonical
+                    .entry(root)
+                    .or_insert(pack_pair_witness(left, right, relative, 0));
+            }
+        }
+        let index_entries = by_canonical.len();
+        Self {
+            shifted,
+            regular_keys,
+            by_canonical,
+            index_entries,
+        }
+    }
+}
+
+/// Meet the published target from the compact regular-root table.
+///
+/// The table is indexed by absolute pair-sum x. No point-pair edge list is
+/// built: each hit is one regular state on each side of the balanced split,
+/// then a group lift through the factor base.
+fn extract_orbit_relation(
+    curve: &KoblitzCurve,
+    base: &PointBase,
+    target: &BinaryPoint,
+    regular: &HashMap<(usize, usize, usize), [u64; 2]>,
+    representative_x_codes: &[u64],
+    gf: &Gf2,
+    b: u64,
+) -> (Option<ExtractedOrbitRelation>, usize, f64) {
+    let started = Instant::now();
+    let index = CompactOrbitExtractionIndex::new(curve, regular, representative_x_codes, gf);
+    let result = extract_orbit_relation_with_index(curve, base, target, regular, &index, gf, b);
+    let elapsed = started.elapsed().as_secs_f64() * 1000.0;
+    (result, index.index_entries, elapsed)
+}
+
+fn extract_orbit_relation_with_index(
+    curve: &KoblitzCurve,
+    base: &PointBase,
+    target: &BinaryPoint,
+    regular: &HashMap<(usize, usize, usize), [u64; 2]>,
+    index: &CompactOrbitExtractionIndex,
+    gf: &Gf2,
+    b: u64,
+) -> Option<ExtractedOrbitRelation> {
+    let started = Instant::now();
+    let width = curve.n as usize;
+    let target_x = match target {
+        BinaryPoint::Affine { x, .. } => x.raw_bits().first().copied().unwrap_or(0),
+        BinaryPoint::Infinity => return None,
+    };
+    let mut trials = 0u64;
+    for &(left, right, relative) in &index.regular_keys {
+        let roots = &regular[&(left, right, relative)];
+        for left_shift in 0..width {
+            let right_shift = (left_shift + relative) % width;
+            let x_left = index.shifted[left][left_shift];
+            let x_right = index.shifted[right][right_shift];
+            for &root in roots {
+                let mut absolute = root;
+                for _ in 0..left_shift {
+                    absolute = gf.sqr(absolute);
+                }
+                let Some(partners) = s3_x_roots(gf, b, absolute, target_x) else {
+                    continue;
+                };
+                for partner in partners {
+                    trials += 1;
+                    let Some((second_left, second_right, second_left_shift, second_right_shift)) =
+                        witness_for_absolute_root(&index.by_canonical, gf, partner, width)
+                    else {
+                        continue;
+                    };
+                    let codes = [
+                        x_left,
+                        x_right,
+                        index.shifted[second_left][second_left_shift],
+                        index.shifted[second_right][second_right_shift],
+                    ];
+                    if lift_x_tuple(curve, base, &codes, target).is_some() {
+                        return Some(ExtractedOrbitRelation {
+                            codes,
+                            first: (left, right, left_shift, right_shift),
+                            second: (
+                                second_left,
+                                second_right,
+                                second_left_shift,
+                                second_right_shift,
+                            ),
+                            intermediates: [absolute, partner],
+                            trials,
+                            extract_ms: started.elapsed().as_secs_f64() * 1000.0,
+                        });
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
+fn force_one_hot(solver: &mut Solver, offset: usize, index: usize) {
+    assert!(solver.add_clause(vec![(offset + index + 1) as Lit]));
+}
+
+fn force_binary(solver: &mut Solver, offset: usize, width: usize, value: usize) {
+    for bit in 0..width {
+        let variable = (offset + bit + 1) as Lit;
+        assert!(solver.add_clause(vec![if ((value >> bit) & 1) == 1 {
+            variable
+        } else {
+            -variable
+        }]));
+    }
 }
 
 fn scan_regular_relative_states(
@@ -2712,12 +3087,13 @@ fn scan_regular_relative_states(
 ) -> (Vec<(usize, usize, usize, [u64; 2])>, f64) {
     let started = Instant::now();
     let width = curve.n as usize;
+    let field = scan_field(curve);
     let representatives = representative_x_codes.len();
     let mut shifted = vec![vec![0u64; width]; representatives];
     for (index, &code) in representative_x_codes.iter().enumerate() {
         shifted[index][0] = code;
         for exponent in 1..width {
-            shifted[index][exponent] = frobenius_code(curve, shifted[index][exponent - 1], 1);
+            shifted[index][exponent] = field.gf.sqr(shifted[index][exponent - 1]);
         }
     }
     let regular_states: Vec<(usize, usize, usize, [u64; 2])> = (0..representatives)
@@ -2728,7 +3104,7 @@ fn scan_regular_relative_states(
             for right_rep in 0..representatives {
                 for relative_shift in 0..width {
                     let right = shifted[right_rep][relative_shift];
-                    if let Some(roots) = regular_s3_x_roots(curve, left, right) {
+                    if let Some(roots) = s3_x_roots(&field.gf, field.b, left, right) {
                         local.push((left_rep, right_rep, relative_shift, roots));
                     }
                 }
@@ -2843,11 +3219,11 @@ fn install_relative_orbit_pair_support_positive_relative_frame(
     } else {
         4 * representatives.saturating_sub(1)
     };
-    let frobenius_width =
-        ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let frobenius_width = ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
     let problem_variables = 6 * width;
     let representative_offset = problem_variables;
-    let frobenius_offset = representative_offset + representative_variables + cardinality_auxiliaries;
+    let frobenius_offset =
+        representative_offset + representative_variables + cardinality_auxiliaries;
     let pairing_indices = match pairing {
         0 => [0, 1, 2, 3],
         1 => [0, 2, 1, 3],
@@ -2897,16 +3273,12 @@ fn install_relative_orbit_pair_support_positive_relative_frame(
                     );
                 } else {
                     witness_guard.push(
-                        -((representative_offset
-                            + left_summand * representatives
-                            + left_rep
-                            + 1) as Lit),
+                        -((representative_offset + left_summand * representatives + left_rep + 1)
+                            as Lit),
                     );
                     witness_guard.push(
-                        -((representative_offset
-                            + right_summand * representatives
-                            + right_rep
-                            + 1) as Lit),
+                        -((representative_offset + right_summand * representatives + right_rep + 1)
+                            as Lit),
                     );
                 }
                 push_forbidden_binary_assignment(
@@ -3039,11 +3411,11 @@ fn install_relative_orbit_pair_support_positive(
     } else {
         4 * representatives.saturating_sub(1)
     };
-    let frobenius_width =
-        ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let frobenius_width = ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
     let problem_variables = 6 * width;
     let representative_offset = problem_variables;
-    let frobenius_offset = representative_offset + representative_variables + cardinality_auxiliaries;
+    let frobenius_offset =
+        representative_offset + representative_variables + cardinality_auxiliaries;
     let pairing_indices = match pairing {
         0 => [0, 1, 2, 3],
         1 => [0, 2, 1, 3],
@@ -3055,20 +3427,24 @@ fn install_relative_orbit_pair_support_positive(
         ([pairing_indices[2], pairing_indices[3]], 5 * width),
     ];
 
-    let (regular_states, scan_ms) =
-        scan_regular_relative_states(curve, representative_x_codes);
+    let field = scan_field(curve);
+    let (regular_states, scan_ms) = scan_regular_relative_states(curve, representative_x_codes);
     let expand_started = Instant::now();
     let mut positive_clauses = 0usize;
     let mut root_selectors = 0usize;
     let mut absolute_alignments = 0usize;
-    for &( [left_summand, right_summand], third_offset) in &sides {
+    for &([left_summand, right_summand], third_offset) in &sides {
         for &(left_rep, right_rep, relative_shift, roots_at_left0) in &regular_states {
             for left_shift in 0..width {
                 absolute_alignments += 1;
                 let right_shift = (left_shift + relative_shift) % width;
                 let twisted = [
-                    frobenius_code(curve, roots_at_left0[0], left_shift),
-                    frobenius_code(curve, roots_at_left0[1], left_shift),
+                    field
+                        .gf
+                        .sqr_k(roots_at_left0[0], (left_shift % width) as u32),
+                    field
+                        .gf
+                        .sqr_k(roots_at_left0[1], (left_shift % width) as u32),
                 ];
                 let selector = solver.add_vars(1).next().unwrap();
                 root_selectors += 1;
@@ -3095,16 +3471,12 @@ fn install_relative_orbit_pair_support_positive(
                     );
                 } else {
                     guard.push(
-                        -((representative_offset
-                            + left_summand * representatives
-                            + left_rep
-                            + 1) as Lit),
+                        -((representative_offset + left_summand * representatives + left_rep + 1)
+                            as Lit),
                     );
                     guard.push(
-                        -((representative_offset
-                            + right_summand * representatives
-                            + right_rep
-                            + 1) as Lit),
+                        -((representative_offset + right_summand * representatives + right_rep + 1)
+                            as Lit),
                     );
                 }
                 push_forbidden_binary_assignment(
@@ -3119,13 +3491,9 @@ fn install_relative_orbit_pair_support_positive(
                     frobenius_width,
                     right_shift,
                 );
-                for clause in guarded_s3_root_clauses(
-                    &guard,
-                    third_offset,
-                    selector,
-                    twisted,
-                    width,
-                ) {
+                for clause in
+                    guarded_s3_root_clauses(&guard, third_offset, selector, twisted, width)
+                {
                     assert!(solver.add_clause(clause));
                     positive_clauses += 1;
                 }
@@ -3179,11 +3547,11 @@ fn install_relative_orbit_pair_support_nogoods(
     } else {
         4 * representatives.saturating_sub(1)
     };
-    let frobenius_width =
-        ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let frobenius_width = ((usize::BITS - width.saturating_sub(1).leading_zeros()) as usize).max(1);
     let problem_variables = 6 * width;
     let representative_offset = problem_variables;
-    let frobenius_offset = representative_offset + representative_variables + cardinality_auxiliaries;
+    let frobenius_offset =
+        representative_offset + representative_variables + cardinality_auxiliaries;
     let pairing_indices = match pairing {
         0 => [0, 1, 2, 3],
         1 => [0, 2, 1, 3],
@@ -3250,16 +3618,12 @@ fn install_relative_orbit_pair_support_nogoods(
                     );
                 } else {
                     clause.push(
-                        -((representative_offset
-                            + left_summand * representatives
-                            + left_rep
-                            + 1) as Lit),
+                        -((representative_offset + left_summand * representatives + left_rep + 1)
+                            as Lit),
                     );
                     clause.push(
-                        -((representative_offset
-                            + right_summand * representatives
-                            + right_rep
-                            + 1) as Lit),
+                        -((representative_offset + right_summand * representatives + right_rep + 1)
+                            as Lit),
                     );
                 }
                 push_forbidden_binary_assignment(
@@ -3303,44 +3667,27 @@ fn install_relative_orbit_pair_support_nogoods(
     })
 }
 
-fn regular_s3_x_roots(curve: &KoblitzCurve, left: u64, right: u64) -> Option<[u64; 2]> {
-    let n = curve.n;
-    let irr = &curve.curve.irreducible;
-    let left = F2mElement::from_biguint(&BigUint::from(left), n);
-    let right = F2mElement::from_biguint(&BigUint::from(right), n);
-    let sum = left.add(&right);
-    let a = sum.square(irr);
-    let product = left.mul(&right, irr);
-    let product_square = product.square(irr);
-    let inverse_combined = a.mul(&product_square, irr).flt_inverse(irr)?;
-    let inverse_a = product_square.mul(&inverse_combined, irr);
-    let inverse_product_square = a.mul(&inverse_combined, irr);
-    let q = product.mul(&inverse_a, irr);
-    let c = product_square.add(&curve.curve.b);
-    let d = c.mul(&a, irr).mul(&inverse_product_square, irr);
-    let mut half_trace = d.clone();
-    let mut power = d.clone();
-    for _ in 0..(n - 1) / 2 {
-        power = power.square(irr).square(irr);
-        half_trace = half_trace.add(&power);
-    }
-    if half_trace.square(irr).add(&half_trace) != d {
-        return None;
-    }
-    let first = q.mul(&half_trace, irr);
-    let second = first.add(&q);
-    assert!(binary_semaev_s3(&left, &right, &first, &curve.curve.b, irr).is_zero());
-    assert!(binary_semaev_s3(&left, &right, &second, &curve.curve.b, irr).is_zero());
-    let raw = |value: &F2mElement| value.raw_bits().first().copied().unwrap_or(0);
-    Some([raw(&first), raw(&second)])
-}
-
 fn frobenius_code(curve: &KoblitzCurve, code: u64, exponent: usize) -> u64 {
     let mut value = F2mElement::from_biguint(&BigUint::from(code), curve.n);
     for _ in 0..exponent % curve.n as usize {
         value = value.square(&curve.curve.irreducible);
     }
     value.raw_bits().first().copied().unwrap_or(0)
+}
+
+/// Single-word field plus curve `b` for the S3 scan kernels.
+///
+/// Constructed once per scan and shared across the rayon pool (`Gf2` is
+/// `Sync`); per-state construction would cost more than the kernel itself.
+struct ScanField {
+    gf: Gf2,
+    b: u64,
+}
+
+fn scan_field(curve: &KoblitzCurve) -> ScanField {
+    let gf = Gf2::new(&curve.curve.irreducible);
+    let b = gf.from_element(&curve.curve.b);
+    ScanField { gf, b }
 }
 
 fn factor_base_frobenius_coordinates(
@@ -3359,13 +3706,18 @@ fn factor_base_frobenius_coordinates(
     for (representative, &code) in representatives.iter().enumerate() {
         let mut current = code;
         for exponent in 0..curve.n as usize {
-            assert!(coordinates.insert(current, (representative, exponent)).is_none());
+            assert!(coordinates
+                .insert(current, (representative, exponent))
+                .is_none());
             current = frobenius_code(curve, current, 1);
         }
         assert_eq!(current, code);
     }
     assert_eq!(coordinates.len(), base.x_codes.len());
-    assert!(base.x_codes.iter().all(|code| coordinates.contains_key(code)));
+    assert!(base
+        .x_codes
+        .iter()
+        .all(|code| coordinates.contains_key(code)));
     (representatives, coordinates)
 }
 
@@ -3378,12 +3730,13 @@ fn relative_frobenius_pair_stats(
     let swap_reduced = std::env::var("KIC_RELATIVE_SWAP_REDUCED").as_deref() == Ok("1");
     let (representatives, coordinates) = factor_base_frobenius_coordinates(curve, base);
     let degree = curve.n as usize;
+    let field = scan_field(curve);
     let mut shifted_representatives = vec![vec![0u64; degree]; representatives.len()];
     for (index, &code) in representatives.iter().enumerate() {
         shifted_representatives[index][0] = code;
         for exponent in 1..degree {
             shifted_representatives[index][exponent] =
-                frobenius_code(curve, shifted_representatives[index][exponent - 1], 1);
+                field.gf.sqr(shifted_representatives[index][exponent - 1]);
         }
     }
 
@@ -3408,7 +3761,7 @@ fn relative_frobenius_pair_stats(
                     block_digest.update(&(right_index as u32).to_le_bytes());
                     block_digest.update(&(relative_shift as u32).to_le_bytes());
                     let right = shifted_representatives[right_index][relative_shift];
-                    match regular_s3_x_roots(curve, left, right) {
+                    match s3_x_roots(&field.gf, field.b, left, right) {
                         Some(mut roots) => {
                             roots.sort_unstable();
                             regular += 1;
@@ -3487,15 +3840,17 @@ fn relative_frobenius_pair_stats(
                 left_shift,
             )
         };
-        let canonical = regular_s3_x_roots(
-            curve,
+        let canonical = s3_x_roots(
+            &field.gf,
+            field.b,
             representatives[canonical_left],
             shifted_representatives[canonical_right][canonical_shift],
         );
-        let actual = regular_s3_x_roots(curve, left, right);
+        let actual = s3_x_roots(&field.gf, field.b, left, right);
         match (canonical, actual) {
             (Some(canonical), Some(mut actual)) => {
-                let mut expanded = canonical.map(|root| frobenius_code(curve, root, common_shift));
+                let mut expanded =
+                    canonical.map(|root| field.gf.sqr_k(root, (common_shift % degree) as u32));
                 expanded.sort_unstable();
                 actual.sort_unstable();
                 assert_eq!(expanded, actual);
@@ -3673,7 +4028,10 @@ fn check_exported_assignment(dimacs: &str, model: &[bool]) -> Result<(usize, usi
         }
         if !value {
             return Err(if xor {
-                format!("violated XOR constraint at line {}: {line}", line_number + 1)
+                format!(
+                    "violated XOR constraint at line {}: {line}",
+                    line_number + 1
+                )
             } else {
                 format!("violated CNF clause at line {}: {line}", line_number + 1)
             });
@@ -4609,6 +4967,7 @@ fn main() {
             | "coverage"
             | "relative_pair_stats"
             | "batch_external_rank"
+            | "batch_orbit_extract"
     ));
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53));
     assert!(conflict_budget > 0 && model_cap > 0);
@@ -4623,14 +4982,14 @@ fn main() {
         eta_denominator,
     );
     let factor_base_input_path = std::env::var("KIC_FACTOR_BASE_JSONL").ok();
-    let (base, factor_base_input_hash, factor_base_input_blake3) =
-        if let Some(path) = factor_base_input_path.as_deref() {
-            let (base, base_hash, source_hash) =
-                point_defined_base_from_jsonl(&curve, columns, path);
-            (base, Some(base_hash), Some(source_hash))
-        } else {
-            (point_defined_base(&curve, columns), None, None)
-        };
+    let (base, factor_base_input_hash, factor_base_input_blake3) = if let Some(path) =
+        factor_base_input_path.as_deref()
+    {
+        let (base, base_hash, source_hash) = point_defined_base_from_jsonl(&curve, columns, path);
+        (base, Some(base_hash), Some(source_hash))
+    } else {
+        (point_defined_base(&curve, columns), None, None)
+    };
     assert_eq!(base.signed_size, signed_size);
     let base_ms = construction_started.elapsed().as_secs_f64() * 1000.0;
     let modulus = curve.subgroup_order.to_u64().unwrap();
@@ -4835,17 +5194,10 @@ fn main() {
     assert!(pairing < 3);
     assert!(matches!(
         algebra_encoding.as_str(),
-        "expanded"
-            | "factorized"
-            | "rooted"
-            | "pair_table"
-            | "lazy_s3"
-            | "orbit_factorized"
+        "expanded" | "factorized" | "rooted" | "pair_table" | "lazy_s3" | "orbit_factorized"
     ));
-    let allow_partial_pairing =
-        std::env::var("KIC_ALLOW_PARTIAL_PAIRING").as_deref() == Ok("1");
-    let orbit_lazy_pair_roots =
-        std::env::var("KIC_ORBIT_LAZY_PAIR_ROOTS").as_deref() == Ok("1");
+    let allow_partial_pairing = std::env::var("KIC_ALLOW_PARTIAL_PAIRING").as_deref() == Ok("1");
+    let orbit_lazy_pair_roots = std::env::var("KIC_ORBIT_LAZY_PAIR_ROOTS").as_deref() == Ok("1");
     assert!(!orbit_lazy_pair_roots || algebra_encoding == "orbit_factorized");
     assert!(!orbit_lazy_pair_roots || allow_partial_pairing);
     assert!(
@@ -4862,15 +5214,13 @@ fn main() {
         matches!(
             algebra_encoding.as_str(),
             "factorized" | "rooted" | "pair_table" | "lazy_s3" | "orbit_factorized"
-        )
-            || multiplication_encoding == "schoolbook"
+        ) || multiplication_encoding == "schoolbook"
     );
     assert!(
         matches!(
             algebra_encoding.as_str(),
             "factorized" | "pair_table" | "lazy_s3"
-        )
-            || domain_encoding != "binary_index"
+        ) || domain_encoding != "binary_index"
     );
     assert!(algebra_encoding != "pair_table" || domain_encoding == "binary_index");
     let pair_table_direct_implications =
@@ -5042,8 +5392,7 @@ fn main() {
             &representative_encoding,
         );
     }
-    let planted_x_root_units =
-        std::env::var("KIC_PLANTED_X_ROOT_UNITS").as_deref() == Ok("1");
+    let planted_x_root_units = std::env::var("KIC_PLANTED_X_ROOT_UNITS").as_deref() == Ok("1");
     let planted_chain_root_units =
         std::env::var("KIC_PLANTED_CHAIN_ROOT_UNITS").as_deref() == Ok("1");
     assert!(!planted_chain_root_units || planted_x_root_units);
@@ -5104,11 +5453,9 @@ fn main() {
     // Orbit lazy-pair-roots now install static half-trace selectors in-circuit.
     // The expensive root-theory layer is opt-in via KIC_S3_ROOT_THEORY so
     // selector-native roots can be measured without flooding the clause DB.
-    let s3_root_theory = pure_lazy_s3
-        || std::env::var("KIC_S3_ROOT_THEORY").as_deref() == Ok("1");
+    let s3_root_theory = pure_lazy_s3 || std::env::var("KIC_S3_ROOT_THEORY").as_deref() == Ok("1");
     let s3_root_theory_block_exceptional =
-        pure_lazy_s3
-            || std::env::var("KIC_S3_ROOT_THEORY_BLOCK_EXCEPTIONAL").as_deref() == Ok("1");
+        pure_lazy_s3 || std::env::var("KIC_S3_ROOT_THEORY_BLOCK_EXCEPTIONAL").as_deref() == Ok("1");
     let s3_final_theory =
         pure_lazy_s3 || std::env::var("KIC_S3_FINAL_THEORY").as_deref() == Ok("1");
     assert!(!s3_root_theory_block_exceptional || (s3_root_theory && allow_partial_pairing));
@@ -5118,8 +5465,7 @@ fn main() {
             || (matches!(
                 algebra_encoding.as_str(),
                 "factorized" | "lazy_s3" | "orbit_factorized"
-            )
-                && matches!(domain_encoding.as_str(), "trie" | "binary_index")
+            ) && matches!(domain_encoding.as_str(), "trie" | "binary_index")
                 && backend == "internal"
                 && !planted_x_root_units),
         "KIC_S3_ROOT_THEORY requires the unfixed factorized/trie internal arm"
@@ -5383,23 +5729,150 @@ fn main() {
     } else {
         0
     };
-    let trigger_variables: Vec<u32> = [pairing_indices[0], pairing_indices[1]]
-        .into_iter()
-        .flat_map(|summand| {
-            if theory_index_width == 0 {
-                (0..n as usize)
-                    .map(|bit| (summand * n as usize + bit + 1) as u32)
-                    .collect::<Vec<_>>()
-            } else {
-                (0..theory_index_width)
-                    .map(|bit| {
-                        (encoding.problem_variables + summand * theory_index_width + bit + 1)
-                            as u32
-                    })
-                    .collect::<Vec<_>>()
+    let lazy_relative_support = algebra_encoding == "orbit_factorized"
+        && std::env::var("KIC_ORBIT_LAZY_RELATIVE_SUPPORT").as_deref() == Ok("1");
+    let compact_batch_only = std::env::var("KIC_ORBIT_BATCH_ONLY").as_deref() == Ok("1");
+    assert!(
+        !lazy_relative_support || backend == "internal",
+        "KIC_ORBIT_LAZY_RELATIVE_SUPPORT requires the internal solver"
+    );
+    assert!(
+        !lazy_relative_support
+            || std::env::var("KIC_ORBIT_REP_ENCODING").unwrap_or_else(|_| "one_hot".to_owned())
+                == "one_hot",
+        "lazy relative support reads one-hot orbit representatives"
+    );
+    assert!(
+        !(lazy_relative_support && s3_root_theory),
+        "lazy relative support is a separate theory arm from KIC_S3_ROOT_THEORY"
+    );
+    let lazy_relative_field = scan_field(&curve);
+    let mut compact_relation: Option<ExtractedOrbitRelation> = None;
+    let mut compact_batch_relations: Vec<(u64, ExtractedOrbitRelation)> = Vec::new();
+    let mut compact_batch_failures: Vec<u64> = Vec::new();
+    let mut compact_batch_targets_requested = 0usize;
+    let mut compact_batch_index_build_ms = 0.0f64;
+    let mut compact_batch_query_ms = 0.0f64;
+    let mut compact_index_entries = 0usize;
+    let mut compact_extract_ms = 0.0;
+    let (lazy_regular_states, lazy_relative_scan_ms) = if lazy_relative_support {
+        let codes: Vec<u64> = base
+            .representatives
+            .iter()
+            .map(|point| match point {
+                BinaryPoint::Affine { x, .. } => x.raw_bits().first().copied().unwrap_or(0),
+                BinaryPoint::Infinity => panic!("factor-base representative must be affine"),
+            })
+            .collect();
+        let (states, scan_ms) = scan_regular_relative_states(&curve, &codes);
+        let map = states
+            .into_iter()
+            .map(|(left, right, relative, roots)| ((left, right, relative), roots))
+            .collect::<HashMap<_, _>>();
+        if let Ok(list_path) = std::env::var("KIC_ORBIT_TARGET_SCALARS") {
+            let scalars: Vec<u64> = std::fs::read_to_string(&list_path)
+                .expect("read KIC_ORBIT_TARGET_SCALARS")
+                .lines()
+                .filter(|line| !line.trim().is_empty())
+                .map(|line| line.trim().parse().expect("target scalar must be u64"))
+                .collect();
+            assert!(!scalars.is_empty(), "target scalar list must not be empty");
+            compact_batch_targets_requested = scalars.len();
+            let order = curve.subgroup_order.to_u64().unwrap();
+            assert!(scalars.iter().all(|scalar| *scalar > 0 && *scalar < order));
+            let index_started = Instant::now();
+            let index =
+                CompactOrbitExtractionIndex::new(&curve, &map, &codes, &lazy_relative_field.gf);
+            compact_batch_index_build_ms = index_started.elapsed().as_secs_f64() * 1000.0;
+            compact_index_entries = index.index_entries;
+            let b = curve.curve.b.raw_bits().first().copied().unwrap_or(0);
+            for scalar in scalars {
+                let target = curve.mul(curve.generator(), &BigUint::from(scalar));
+                let query_started = Instant::now();
+                let relation = extract_orbit_relation_with_index(
+                    &curve,
+                    &base,
+                    &target,
+                    &map,
+                    &index,
+                    &lazy_relative_field.gf,
+                    b,
+                );
+                let query_ms = query_started.elapsed().as_secs_f64() * 1000.0;
+                compact_batch_query_ms += query_ms;
+                if let Some(relation) = relation {
+                    let lifted = lift_x_tuple(&curve, &base, &relation.codes, &target);
+                    assert!(lifted.is_some(), "batch relation failed group lift");
+                    compact_batch_relations.push((scalar, relation));
+                } else {
+                    compact_batch_failures.push(scalar);
+                }
             }
-        })
-        .collect();
+        } else {
+            let (extracted, entries, extract_ms) = extract_orbit_relation(
+                &curve,
+                &base,
+                &target,
+                &map,
+                &codes,
+                &lazy_relative_field.gf,
+                curve.curve.b.raw_bits().first().copied().unwrap_or(0),
+            );
+            compact_relation = extracted;
+            compact_index_entries = entries;
+            compact_extract_ms = extract_ms;
+        }
+        (map, scan_ms)
+    } else {
+        (HashMap::new(), 0.0)
+    };
+    let lazy_representatives = base.representatives.len();
+    let lazy_width = n as usize;
+    let lazy_frobenius_width =
+        ((usize::BITS - lazy_width.saturating_sub(1).leading_zeros()) as usize).max(1);
+    let lazy_representative_offset = 6 * lazy_width;
+    let lazy_frobenius_offset = lazy_representative_offset
+        + 4 * lazy_representatives
+        + 4 * lazy_representatives.saturating_sub(1);
+    // The internal lazy solver invokes the theory only once every trigger
+    // variable is assigned. Watching the first Semaev pair (and not all four
+    // endpoints) makes exceptional and target-conditioned clauses appear as
+    // soon as that pair is chosen. `pair_then_pair` decides this pair first.
+    let trigger_variables: Vec<u32> = if lazy_relative_support {
+        let mut triggers = Vec::new();
+        for &summand in &pairing_indices[..2] {
+            for index in 0..lazy_representatives {
+                triggers.push(
+                    (lazy_representative_offset + summand * lazy_representatives + index + 1)
+                        as u32,
+                );
+            }
+            for bit in 0..lazy_frobenius_width {
+                triggers.push(
+                    (lazy_frobenius_offset + summand * lazy_frobenius_width + bit + 1) as u32,
+                );
+            }
+        }
+        triggers
+    } else {
+        [pairing_indices[0], pairing_indices[1]]
+            .into_iter()
+            .flat_map(|summand| {
+                if theory_index_width == 0 {
+                    (0..n as usize)
+                        .map(|bit| (summand * n as usize + bit + 1) as u32)
+                        .collect::<Vec<_>>()
+                } else {
+                    (0..theory_index_width)
+                        .map(|bit| {
+                            (encoding.problem_variables + summand * theory_index_width + bit + 1)
+                                as u32
+                        })
+                        .collect::<Vec<_>>()
+                }
+            })
+            .collect()
+    };
     let theory_specs = if s3_root_theory && !pure_lazy_s3 {
         vec![
             (
@@ -5419,6 +5892,10 @@ fn main() {
         Vec::new()
     };
     let mut theory_seen = [HashSet::new(), HashSet::new()];
+    let mut lazy_relative_seen = [HashSet::new(), HashSet::new()];
+    let mut lazy_relative_clauses = 0usize;
+    let mut lazy_relative_exceptional = 0usize;
+    let mut lazy_relative_forced_bits = 0usize;
     let mut final_theory_seen = HashSet::new();
     let mut theory_patterns = 0usize;
     let mut theory_clauses = 0usize;
@@ -5427,7 +5904,34 @@ fn main() {
     let mut final_theory_infeasible_patterns = 0usize;
     let mut final_theory_compatible_patterns = 0usize;
     let mut final_theory_clauses = 0usize;
+    // Single-word field for the per-pair S3 theory callbacks below. Each
+    // distinct endpoint pair is still decided exactly once (`theory_seen`
+    // memoizes), but the decision itself drops from ~6µs of allocating
+    // general-field arithmetic to ~100ns.
+    let theory_field = scan_field(&curve);
+    let theory_b = theory_field.b;
     let mut theory = |assignment: &[Option<bool>]| {
+        if lazy_relative_support && !s3_root_theory {
+            let (learned, exceptional, forced_bits) = lazy_relative_support_update(
+                assignment,
+                &mut lazy_relative_seen,
+                &lazy_regular_states,
+                &lazy_relative_field.gf,
+                pairing_indices,
+                lazy_representative_offset,
+                lazy_representatives,
+                lazy_frobenius_offset,
+                lazy_frobenius_width,
+                lazy_width,
+            );
+            if learned.is_empty() {
+                return None;
+            }
+            lazy_relative_clauses += learned.len();
+            lazy_relative_exceptional += exceptional;
+            lazy_relative_forced_bits += forced_bits;
+            return Some(learned);
+        }
         let mut learned = Vec::new();
         if pure_lazy_s3 {
             let mut roots_by_side = [None, None];
@@ -5450,7 +5954,7 @@ fn main() {
                 let right = base.x_codes[indices[1]];
                 endpoint_codes[summands[0]] = left;
                 endpoint_codes[summands[1]] = right;
-                let roots = regular_s3_x_roots(&curve, left, right);
+                let roots = s3_x_roots(&theory_field.gf, theory_b, left, right);
                 roots_by_side[side] = roots;
                 if theory_seen[side].insert((left, right)) {
                     theory_patterns += 1;
@@ -5472,8 +5976,7 @@ fn main() {
                 }
             }
             if all_endpoints_assigned {
-                if let (Some(left_roots), Some(right_roots)) =
-                    (roots_by_side[0], roots_by_side[1])
+                if let (Some(left_roots), Some(right_roots)) = (roots_by_side[0], roots_by_side[1])
                 {
                     if final_theory_seen.insert(endpoint_codes) {
                         final_theory_patterns += 1;
@@ -5528,12 +6031,11 @@ fn main() {
         let mut roots_by_side = [None, None];
         let mut endpoint_codes = [0u64; 4];
         let mut all_endpoints_assigned = true;
-        for (side, &(left_offset, right_offset, third_offset, selector))
-            in theory_specs.iter().enumerate()
+        for (side, &(left_offset, right_offset, third_offset, selector)) in
+            theory_specs.iter().enumerate()
         {
             if !(0..n as usize).all(|bit| {
-                assignment[left_offset + bit].is_some()
-                    && assignment[right_offset + bit].is_some()
+                assignment[left_offset + bit].is_some() && assignment[right_offset + bit].is_some()
             }) {
                 all_endpoints_assigned = false;
                 continue;
@@ -5542,7 +6044,7 @@ fn main() {
             let right = decode_partial_code(assignment, right_offset, n as usize);
             endpoint_codes[pairing_indices[2 * side]] = left;
             endpoint_codes[pairing_indices[2 * side + 1]] = right;
-            let roots = regular_s3_x_roots(&curve, left, right);
+            let roots = s3_x_roots(&theory_field.gf, theory_b, left, right);
             roots_by_side[side] = roots;
             if !theory_seen[side].insert((left, right)) {
                 continue;
@@ -5663,8 +6165,74 @@ fn main() {
             Some(learned)
         }
     };
+    if let Some(relation) = &compact_relation {
+        eprintln!(
+            "compact_orbit_extraction group_valid trials={} index_entries={} extract_ms={:.3} x={:?}",
+            relation.trials,
+            compact_index_entries,
+            compact_extract_ms,
+            relation.codes
+        );
+        encoding.solver.conflict_budget = encoding.solver.conflict_budget.min(2_000);
+        for (&summand, (rep, _, _, _)) in pairing_indices[..2]
+            .iter()
+            .zip([(relation.first.0, 0, 0, 0), (relation.first.1, 0, 0, 0)])
+        {
+            force_one_hot(
+                &mut encoding.solver,
+                lazy_representative_offset + summand * lazy_representatives,
+                rep,
+            );
+        }
+        force_binary(
+            &mut encoding.solver,
+            lazy_frobenius_offset + pairing_indices[0] * lazy_frobenius_width,
+            lazy_frobenius_width,
+            relation.first.2,
+        );
+        force_binary(
+            &mut encoding.solver,
+            lazy_frobenius_offset + pairing_indices[1] * lazy_frobenius_width,
+            lazy_frobenius_width,
+            relation.first.3,
+        );
+        for (summand, rep) in [
+            (pairing_indices[2], relation.second.0),
+            (pairing_indices[3], relation.second.1),
+        ] {
+            force_one_hot(
+                &mut encoding.solver,
+                lazy_representative_offset + summand * lazy_representatives,
+                rep,
+            );
+        }
+        force_binary(
+            &mut encoding.solver,
+            lazy_frobenius_offset + pairing_indices[2] * lazy_frobenius_width,
+            lazy_frobenius_width,
+            relation.second.2,
+        );
+        force_binary(
+            &mut encoding.solver,
+            lazy_frobenius_offset + pairing_indices[3] * lazy_frobenius_width,
+            lazy_frobenius_width,
+            relation.second.3,
+        );
+        // u and v are the S3 roots the extractor already computed; pinning
+        // them leaves the formula a propagation check of the witness.
+        for (offset, value) in [
+            (4 * lazy_width, relation.intermediates[0]),
+            (5 * lazy_width, relation.intermediates[1]),
+        ] {
+            force_binary(&mut encoding.solver, offset, lazy_width, value as usize);
+        }
+    }
     let outcome = loop {
-        let solve_result = if s3_root_theory {
+        let solve_result = if compact_batch_only {
+            SolveResult::Unknown
+        } else if compact_relation.is_some() {
+            encoding.solver.solve()
+        } else if s3_root_theory || lazy_relative_support {
             encoding
                 .solver
                 .solve_with_lazy_clauses(&trigger_variables, &mut theory)
@@ -5752,9 +6320,9 @@ fn main() {
             {
                 phase_restart_shots_used += 1;
                 encoding.solver.reset_search();
-                encoding
-                    .solver
-                    .scramble_saved_phases(seed ^ (0x9E37_79B9_7F4A_7C15 ^ phase_restart_shots_used));
+                encoding.solver.scramble_saved_phases(
+                    seed ^ (0x9E37_79B9_7F4A_7C15 ^ phase_restart_shots_used),
+                );
                 encoding.solver.conflict_budget =
                     conflicts_per_phase_shot.saturating_mul(phase_restart_shots_used + 1);
                 continue;
@@ -5861,6 +6429,51 @@ fn main() {
             "pair_table_propagation":encoding.pair_table_propagation,
             "relative_pair_support_nogoods":relative_pair_support_nogoods,
             "relative_pair_support_positive":relative_pair_support_positive,
+            "lazy_relative_support":{
+                "enabled":lazy_relative_support,
+                "pair_table_entries":0,
+                "edge_selectors":0,
+                "regular_states":lazy_regular_states.len(),
+                "scan_ms":lazy_relative_scan_ms,
+                "learned_clauses":lazy_relative_clauses,
+                "exceptional_nogoods":lazy_relative_exceptional,
+                "forced_intermediate_bits":lazy_relative_forced_bits
+            },
+            "compact_orbit_extraction":{
+                "enabled":lazy_relative_support,
+                "pair_table_entries":0,
+                "edge_selectors":0,
+                "group_valid":compact_relation.is_some(),
+                "index_entries":compact_index_entries,
+                "trials":compact_relation.as_ref().map(|relation| relation.trials).unwrap_or(0),
+                "extract_ms":compact_extract_ms,
+                "x_codes":compact_relation.as_ref().map(|relation| relation.codes),
+                "pinned_intermediates":compact_relation.as_ref().map(|relation| relation.intermediates)
+            },
+            "compact_orbit_batch":if compact_batch_targets_requested > 0 {
+                Some(json!({
+                    "targets_requested":compact_batch_targets_requested,
+                    "targets_extracted":compact_batch_relations.len(),
+                    "failed_target_scalars":compact_batch_failures,
+                    "target_scalars":compact_batch_relations.iter().map(|(scalar, _)| scalar).collect::<Vec<_>>(),
+                    "relations":compact_batch_relations.iter().map(|(scalar, relation)| json!({
+                        "scalar":scalar,
+                        "x_codes":relation.codes,
+                        "pinned_intermediates":relation.intermediates,
+                        "trials":relation.trials,
+                        "query_ms":relation.extract_ms
+                    })).collect::<Vec<_>>(),
+                    "index_entries":compact_index_entries,
+                    "regular_states":lazy_regular_states.len(),
+                    "regular_state_scan_ms":lazy_relative_scan_ms,
+                    "root_index_build_ms":compact_batch_index_build_ms,
+                    "query_ms_sum":compact_batch_query_ms,
+                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms,
+                    "sat_verification_included":true,
+                    "sat_verification_wall_ms":solve_ms,
+                    "charged_total_with_sat_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms + solve_ms
+            }))
+            } else { None },
             "final_support_clauses":encoding.final_support_clauses,
             "final_compatible_selector_pairs":encoding.final_compatible_selector_pairs,
             "final_s3_circuit_installed":encoding.final_s3_circuit_installed,
@@ -5961,6 +6574,36 @@ mod tests {
             }
         }
         result
+    }
+
+    #[test]
+    fn compact_index_order_is_independent_of_map_insertion() {
+        let curve = KoblitzCurve::new(1, 7).unwrap();
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let representatives = [1u64, 2u64];
+        let entries = [
+            ((1usize, 0usize, 0usize), [3u64, 4u64]),
+            ((0usize, 1usize, 1usize), [3u64, 5u64]),
+        ];
+        let mut forward = HashMap::new();
+        let mut reverse = HashMap::new();
+        for &(key, roots) in &entries {
+            forward.insert(key, roots);
+        }
+        for &(key, roots) in entries.iter().rev() {
+            reverse.insert(key, roots);
+        }
+        let first = CompactOrbitExtractionIndex::new(&curve, &forward, &representatives, &gf);
+        let second = CompactOrbitExtractionIndex::new(&curve, &reverse, &representatives, &gf);
+        let expected_order = vec![(0, 1, 1), (1, 0, 0)];
+        assert_eq!(first.regular_keys, expected_order);
+        assert_eq!(second.regular_keys, expected_order);
+        assert_eq!(first.by_canonical, second.by_canonical);
+        assert_eq!(
+            first.by_canonical[&3],
+            pack_pair_witness(0, 1, 1, 0),
+            "the first sorted state wins a colliding-root tie"
+        );
     }
 
     #[test]
