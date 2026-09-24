@@ -139,7 +139,7 @@ pub fn random_uniform_cloud(n: usize, p: u64, seed: u64) -> Vec<(u64, u64)> {
 
 /// Compute orbit `{[k]·G}` for `k = 1, …, N` on `E: y² = x³ + a x + b`
 /// over `F_p`.  Returns the list of `(x, y)` coordinates.
-pub fn ec_orbit(a: i64, b: i64, p: u64, g: (u64, u64), n: usize) -> Vec<(u64, u64)> {
+pub fn ec_orbit(a: i64, _b: i64, p: u64, g: (u64, u64), n: usize) -> Vec<(u64, u64)> {
     let mut orbit = Vec::with_capacity(n);
     let p_i = p as i128;
     let a_n = ((a as i128 % p_i) + p_i) % p_i;
@@ -373,7 +373,7 @@ mod tests {
         None
     }
 
-    fn mod_pow(mut base: u64, mut exp: u64, modulus: u64) -> u64 {
+    fn mod_pow(base: u64, mut exp: u64, modulus: u64) -> u64 {
         let mut result: u128 = 1;
         let mut base = base as u128 % modulus as u128;
         let m = modulus as u128;

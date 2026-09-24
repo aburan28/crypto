@@ -339,7 +339,7 @@ fn expand_s3_in_xs(a: &FieldElement, b: &FieldElement) -> MPoly {
 ///    X_{i_2}^{a_2} … X_{i_n}^{a_n}` in `f` (with `a_1 ≥ a_2 ≥ … ≥
 ///    a_n`, by symmetry).
 /// 2. Form the corresponding e-monomial
-///       `e_1^{a_1 - a_2} e_2^{a_2 - a_3} … e_{n-1}^{a_{n-1} - a_n}
+///    `e_1^{a_1 - a_2} e_2^{a_2 - a_3} … e_{n-1}^{a_{n-1} - a_n}
 ///        e_n^{a_n}`,
 ///    multiplied by the leading coefficient.
 /// 3. Subtract this from `f` (after expanding the e-monomial back as
@@ -480,7 +480,7 @@ mod tests {
 
     /// **Symmetric decomposition round-trip**: build `p = X_1² + X_2²
     /// + X_3²`, which is the power sum `p_2 = e_1² - 2 e_2`, decompose,
-    /// and verify the result.
+    ///   and verify the result.
     #[test]
     fn decompose_power_sum_2() {
         let p = p_271();

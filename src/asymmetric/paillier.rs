@@ -117,7 +117,7 @@ pub fn paillier_keygen(bits: u64) -> Result<PaillierPrivateKey, &'static str> {
     if bits < 2048 {
         return Err("Paillier modulus must be ≥ 2048 bits (NIST 2030+ recommendation)");
     }
-    if bits % 2 != 0 {
+    if !bits.is_multiple_of(2) {
         return Err("modulus bit-size must be even");
     }
     let half = bits / 2;
@@ -287,7 +287,7 @@ mod tests {
         let sk = paillier_keygen(2048).unwrap();
         // n should be ~2048 bits.
         let bits = sk.public.n.bits();
-        assert!(bits >= 2047 && bits <= 2048, "modulus has {} bits", bits);
+        assert!((2047..=2048).contains(&bits), "modulus has {} bits", bits);
         // If n is 2047 bits, n² can be 4093 bits; if n is 2048 bits, n² can
         // be 4095-4096 bits. All are valid for two 1024-bit primes.
         assert!(sk.public.n_squared.bits() >= 4093);

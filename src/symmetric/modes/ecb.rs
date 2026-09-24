@@ -27,7 +27,7 @@ pub fn pkcs7_pad<const N: usize>(data: &[u8]) -> Vec<u8> {
 
 /// Strip PKCS#7 padding; returns `None` if invalid.
 pub fn pkcs7_unpad<const N: usize>(data: &[u8]) -> Option<Vec<u8>> {
-    if data.is_empty() || data.len() % N != 0 {
+    if data.is_empty() || !data.len().is_multiple_of(N) {
         return None;
     }
     let pad = *data.last()? as usize;
@@ -63,7 +63,7 @@ pub fn ecb_decrypt<C: BlockCipher<N>, const N: usize>(
     cipher: &C,
     ciphertext: &[u8],
 ) -> Option<Vec<u8>> {
-    if ciphertext.is_empty() || ciphertext.len() % N != 0 {
+    if ciphertext.is_empty() || !ciphertext.len().is_multiple_of(N) {
         return None;
     }
     let mut out = Vec::with_capacity(ciphertext.len());

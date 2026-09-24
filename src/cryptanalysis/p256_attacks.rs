@@ -176,7 +176,7 @@ pub fn p256_negation_rho(
             Pt2::Inf => 0u8,
             Pt2::Aff(cx, _) => {
                 let bytes = cx.to_signed_bytes_be();
-                (bytes.last().copied().unwrap_or(0) % 3) as u8
+                bytes.last().copied().unwrap_or(0) % 3
             }
         };
         match bucket {
@@ -418,7 +418,7 @@ pub fn hybrid_rho_filter(
             Pt2::Inf => 0u8,
             Pt2::Aff(cx, _) => {
                 let bytes = cx.to_signed_bytes_be();
-                (bytes.last().copied().unwrap_or(0) % 3) as u8
+                bytes.last().copied().unwrap_or(0) % 3
             }
         };
         match bucket {
@@ -604,12 +604,12 @@ mod tests {
         if n < 4 {
             return true;
         }
-        if n % 2 == 0 {
+        if n.is_multiple_of(2) {
             return false;
         }
         let mut d = 3u64;
         while d.saturating_mul(d) <= n {
-            if n % d == 0 {
+            if n.is_multiple_of(d) {
                 return false;
             }
             d += 2;
@@ -680,7 +680,7 @@ mod tests {
         let n_u = n.to_biguint().unwrap();
         let d_planted = BigUint::from(42u32);
         let d_bi = d_planted.to_bigint().unwrap();
-        let h = pt_scalar_mul(&g, &d_bi, &a, &p_mod);
+        let _h = pt_scalar_mul(&g, &d_bi, &a, &p_mod);
         // Simulate a biased ECDSA transcript.  For this toy curve
         // we don't have actual ECDSA — synthesise consistent
         // (r, s, z, k_bits) tuples by picking biased k and

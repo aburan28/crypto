@@ -566,7 +566,8 @@
           Semaev systems, the algebraic ones included although none finishes a logarithm at these
           sizes. Matrix-F4 is counted in 64-bit word XORs, exactly; SAT in conflicts; both converted
           at the host&rsquo;s measured factors. First fall degree 2 on every m = 2 system and 3 on
-          every m = 3 one.</p>
+          every m = 3 one (Macaulay rank loss; the m = 3 fall is Kosters&ndash;Yeo&rsquo;s trace
+          equation, see the ECC2K-130 Route 4 panel).</p>
       </div>
       <div class="ledger">
         <div class="lrow"><div class="name"><strong>n = 23, m = 2</strong> &middot; 22 unknowns, 23 equations, first fall degree 2, hit rate 0.5</div><div class="num">GAE / target</div></div>
@@ -1732,15 +1733,26 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <code>research/notes/ecc2k130/RESEARCH_ECC2K130_ROUTE_TARGETS.md</code>. No oracle built
         there beats enumeration per relation at any size measured. The m&thinsp;=&thinsp;4 fall
         degree has since been measured (the panel below). The items still open (Crossbred&rsquo;s
-        &alpha; over four rungs, Crossbred on the symmetrised system, and a second literature
-        pass) are left open by choice, with the reasons given there. Class
+        &alpha; over four rungs and Crossbred on the symmetrised system<s>, and a second literature
+        pass</s>) are left open by choice, with the reasons given there. Class
         <span class="chip">accounting</span>.</p>
+      <p><b>The second literature pass has since run (X6&prime;, 2026-09-24).</b>
+        <b>Nothing reopens Route 5.</b>
+        Outside the survey&rsquo;s exclusion set, no source gives an operation count at prime n
+        with q&thinsp;=&thinsp;2. GGMP&rsquo;s three
+        Frobenius-invariant constructions do not exist at q&thinsp;=&thinsp;2, n&thinsp;=&thinsp;131:
+        ord<sub>131</sub>(2)&thinsp;=&thinsp;130, Couveignes&ndash;Lercier with a torus needs n&thinsp;|&thinsp;3,
+        and with an elliptic curve it needs a multiple of n below 6. The &ldquo;Koblitz structure beyond
+        Frobenius&rdquo; item is empty by structure: End(E)&thinsp;=&thinsp;Z[&tau;] is the maximal
+        order of Q(&radic;&minus;7), with class number 1 and automorphisms &plusmn;1. The pass also found
+        that X5&prime;&rsquo;s explanation was Kosters&ndash;Yeo&rsquo;s, and that is recorded in the
+        panel below. Class <span class="chip">accounting</span>.</p>
     </div>
   </div>
 
   <div class="panel" id="ecc2k130-x5-fall-20260923">
     <div class="panel-head">
-      <h2>ECC2K-130 Route 4: the x-chain&rsquo;s &ldquo;fall at 3&rdquo; is one hidden linear equation, which the symmetrised chain does not have</h2>
+      <h2>ECC2K-130 Route 4: the x-chain&rsquo;s &ldquo;fall at 3&rdquo; is one hidden linear equation, Kosters&ndash;Yeo&rsquo;s trace equation (2015), which the symmetrised chain does not have</h2>
       <p>A structural measurement: no cost moves, so no <code>S</code> and none of the four
         classes. H1 of the Koblitz scaling target says every chained decomposition system has its
         first fall at exactly degree 3. X5&prime; tested it on the one chained family H1 had not
@@ -1753,7 +1765,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     </div>
     <div class="table-scroll"><table>
       <caption>First fall degree (the first Macaulay degree that loses rank, H1&rsquo;s definition)
-        over 16 draws per cell, one shared non-invariant V per rung. &ldquo;Censored&rdquo; means
+        over 16 draws per cell, one shared non-invariant V per rung. Under the degree-fall
+        definition that Kosters&ndash;Yeo and HKY use, the same event is recorded at 2, one degree
+        earlier. &ldquo;Censored&rdquo; means
         the degree-4 matrix exceeded the registered default caps; the supplement removes that.</caption>
       <thead>
         <tr><th scope="col" class="n">n</th><th scope="col" class="n">Unknowns (sym / x)</th>
@@ -1772,7 +1786,13 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
     <div class="panel-head">
       <p><b>By H1&rsquo;s letter, H1 is falsified for the symmetrised chain.</b> It falls at 4 on
         every rung measured, 96 draws, where the x-chain falls at 3, and the offset is flat in n.
-        <b>A diagnostic then explains the one degree.</b> With x(R) known, the x-chain&rsquo;s last
+        <b>A diagnostic then explains the one degree, and the explanation was already
+        published.</b> It is Kosters&ndash;Yeo&rsquo;s trace equation (arXiv 1503.08001,
+        Prop.&nbsp;4.9 and Cor.&nbsp;4.11; HKY, CRYPTO 2015, Prop.&nbsp;5). Both papers apply it to chained
+        S<sub>3</sub> systems of this kind (KY derive a fall at 2; HKY report &ldquo;usually 2&rdquo;), and the paper was already in this thread&rsquo;s literature
+        survey. X6&prime; checks the identification on 96 of 96 draws, and a wrong-functional
+        control matches on none (<code>experiments/28_koblitz_x5_trace_identity.log</code>).
+        That re-attribution is <span class="chip">accounting</span>. With x(R) known, the x-chain&rsquo;s last
         link is t&sup2; + x<sub>R</sub>t + &hellip;, and t &#8614; t&sup2; + x<sub>R</sub>t has a
         one-dimensional kernel, so one combination of its n quadratic equations is linear. The
         measured quadratic-part rank is n&nbsp;&minus;&nbsp;1 on every draw. That linear equation&rsquo;s
@@ -1780,11 +1800,49 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         row of H1&rsquo;s own table that was checked (all but n&nbsp;=&nbsp;7), and that table now
         carries an <span class="chip">accounting</span> caveat.
         The symmetrised last link has full rank n, so it has no such equation and shows no rank
-        loss below degree 4, where trivial syzygies force one. So the symmetrised system is not
+        loss below degree 4, where trivial syzygies force one. That part, and the removal of the
+        trace equation by symmetrising under T, is not in the ten sources X6&prime; read. It is
+        recorded as absent from those sources, not as new. So the symmetrised system is not
         shown to be harder. What the diagnostic shows is that the x-chain gets one free linear
         equation and the symmetrisation removes it (<code>experiments/27_koblitz_x5_syzygy.log</code>).
         The one registered solve (K<sub>1</sub>/F<sub>2</sub><sup>11</sup>) agrees with 4-sum
         enumeration on all 16 targets. Nothing here bears on ECC2K-130&rsquo;s cost.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>X5&Prime; (2026-09-24, registered before its code): the degree-4 kernel split, per arm, over
+        8, 8 and 2 draws at n&thinsp;=&thinsp;9, 11, 13. &ldquo;Literature&rdquo; is the degree-fall
+        definition (graded top parts, trivial syzygies removed). &ldquo;Trivial&rdquo; is the
+        degree-4 span of the Koszul and field syzygies, which is n&thinsp;+&thinsp;C(n,2) in every
+        row. &ldquo;Identities&rdquo; are the Boolean identities of linear falls below degree 4.
+        Frozen: <code>experiments/29_koblitz_x5_syzygy_split.json</code>.</caption>
+      <thead>
+        <tr><th scope="col" class="n">n</th><th scope="col">Arm</th><th scope="col" class="n">First fall (literature)</th>
+          <th scope="col" class="n">Falls at that degree</th><th scope="col" class="n">K<sub>4</sub> (H1)</th>
+          <th scope="col" class="n">Trivial + identities</th><th scope="col" class="n">Residual</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">9</td><td>symmetrised</td><td class="n">3</td><td class="n">18 (= 2n)</td><td class="n">87&ndash;89</td><td class="n">45</td><td class="n">42&ndash;44</td></tr>
+        <tr><td class="n">11</td><td>symmetrised</td><td class="n">3</td><td class="n">22 (= 2n)</td><td class="n">116&ndash;122</td><td class="n">66</td><td class="n">50&ndash;56</td></tr>
+        <tr><td class="n">13</td><td>symmetrised</td><td class="n">3</td><td class="n">26 (= 2n)</td><td class="n">117</td><td class="n">91</td><td class="n">26</td></tr>
+        <tr><td class="n">9</td><td>x-chain</td><td class="n">2</td><td class="n">1 (KY&rsquo;s trace)</td><td class="n">84</td><td class="n">78</td><td class="n">6</td></tr>
+        <tr><td class="n">11</td><td>x-chain</td><td class="n">2</td><td class="n">1</td><td class="n">111</td><td class="n">103</td><td class="n">8</td></tr>
+        <tr><td class="n">13</td><td>x-chain</td><td class="n">2</td><td class="n">1</td><td class="n">145</td><td class="n">136</td><td class="n">9</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><b>X5&Prime;: the symmetrised chain falls genuinely at 3, one degree above the x-chain in
+        both conventions.</b> By the literature&rsquo;s definition its first fall is at 3 on every
+        draw, with exactly 2n falls, all to quadratics. The count is derived: its last link&rsquo;s
+        top part w<sub>R</sub>UW stays bilinear when multiplied by U or by W, because squaring is
+        F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
+        4-against-3 is the literature&rsquo;s 3-against-2, and the symmetrised system is not shown
+        to be harder. In H1&rsquo;s convention its rank loss at 4 is n&thinsp;+&thinsp;C(n,2)
+        trivial syzygies plus 26&ndash;56 that are not trivial and not identities of linear falls
+        (there are none). What those are is left open. An unregistered localisation puts all of
+        it, in both arms and both conventions, in the single link whose x(R) is known: the two
+        cubic links show no kernel and no fall through degree 4. A first run that under-counted
+        the x-chain&rsquo;s identities is kept and disclosed (<code>experiments/29_prefix/</code>);
+        the symmetrised rows are unchanged by the fix. A structural measurement: no cost moves.</p>
     </div>
   </div>
 

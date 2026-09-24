@@ -4,11 +4,10 @@
 //! Mirrors the structure of `SIKE_challenge.m`'s `for j in CartesianPower(...)
 //! ... if Does22ChainSplit(...) then ...` loop.
 
-use crate::ec::{iota_on_e1728, pushing_3_chain, two_iota_on_e1728, Aff, Montgomery};
-use crate::field::{F2, Fp2};
-use crate::glue::from_prod_to_jac_with_partition;
-use crate::glue_bridge::{gluing_divisor_map_fp, GluingSolution};
-use crate::jacobian::{self, Curve, Div};
+use crate::ec::{pushing_3_chain, two_iota_on_e1728, Aff, Montgomery};
+use crate::field::{Fp2, F2};
+use crate::glue_bridge::gluing_divisor_map_fp;
+use crate::jacobian::{Curve, Div};
 use crate::richelot::does_22_chain_split;
 use crate::uvtable;
 use num_bigint::BigInt;
@@ -50,6 +49,7 @@ pub enum GuessResult {
 ///   2. K_distort = u·K_3 + v·(2ι)(K_3)
 ///   3. Push3Chain(E_0, K_distort, n) → codomain curve C, with Alice's 2^a-torsion
 ///      basis pushed through to give P_c, Q_c on C.
+///
 /// Returns (C, P_c, Q_c).
 pub fn build_kani_source(
     params: &AttackParams,
@@ -83,11 +83,7 @@ pub fn build_kani_source(
 ///
 /// `setup` is a closure that produces the chain-input tuple (h, D1, D2, a)
 /// for a given guess (or returns an error string for degenerate guesses).
-pub fn try_guesses<F>(
-    candidates: u64,
-    fp2: &Fp2,
-    mut setup: F,
-) -> (Option<u64>, Vec<GuessResult>)
+pub fn try_guesses<F>(candidates: u64, fp2: &Fp2, mut setup: F) -> (Option<u64>, Vec<GuessResult>)
 where
     F: FnMut(u64) -> Result<(Curve, Div, Div, u32), String>,
 {
@@ -97,7 +93,11 @@ where
         match setup(j) {
             Ok((h, d1, d2, a)) => {
                 let split = does_22_chain_split(&h, &d1, &d2, a, fp2);
-                results.push(if split { GuessResult::Split } else { GuessResult::NoSplit });
+                results.push(if split {
+                    GuessResult::Split
+                } else {
+                    GuessResult::NoSplit
+                });
                 if split && found.is_none() {
                     found = Some(j);
                 }
@@ -113,16 +113,16 @@ where
 /// Simulate Bob's SIDH keygen: pick secret `m_b`, compute his image curve
 /// E_B = E_0/⟨P_B + m_b · Q_B⟩, and the images of Alice's 2^a-torsion basis
 /// under his secret 3^b-isogeny. Returns (E_B, φ_B(P_A), φ_B(Q_A)).
-pub fn simulate_bob_keygen(
-    params: &AttackParams,
-    m_b: &BigInt,
-    fp2: &Fp2,
-) -> BobPublicKey {
+pub fn simulate_bob_keygen(params: &AttackParams, m_b: &BigInt, fp2: &Fp2) -> BobPublicKey {
     let m_qb = params.e0.mul(m_b, &params.q_b, fp2);
     let r_b = params.e0.add(&params.p_b, &m_qb, fp2);
     let mut aux = vec![params.p_a.clone(), params.q_a.clone()];
     let eb = pushing_3_chain(&params.e0, &r_b, params.b_exp, &mut aux, fp2);
-    BobPublicKey { eb, phi_pa: aux.remove(0), phi_qa: aux.remove(0) }
+    BobPublicKey {
+        eb,
+        phi_pa: aux.remove(0),
+        phi_qa: aux.remove(0),
+    }
 }
 
 /// Castryck-Decru bit-by-bit recovery driver. For each uvtable-driven chunk
@@ -150,9 +150,11 @@ pub fn recover_bob_secret(
     let mut acc: u64 = 0;
     let mut i: u32 = 0;
 
-    while i + 1 <= params.b_exp.saturating_sub(3) + 1 && i < params.b_exp {
+    while i < params.b_exp.saturating_sub(3) + 1 && i < params.b_exp {
         let remaining = params.b_exp.saturating_sub(3).saturating_sub(i);
-        if remaining == 0 { break; }
+        if remaining == 0 {
+            break;
+        }
         // Pick largest usable uvtable entry with n ≤ remaining and exp ≤ a.
         let entry = uvtable::largest_usable(remaining as u64, params.a_exp as u64);
         let (n, exp, u, v) = match entry {
@@ -167,7 +169,8 @@ pub fn recover_bob_secret(
         let pb_scaled = pubkey.eb.mul(&two_alp, &pubkey.phi_pa, fp2);
         let qb_scaled = pubkey.eb.mul(&two_alp, &pubkey.phi_qa, fp2);
         let beta = match two_torsion_xs(&pubkey.eb, fp2) {
-            Some(b) => b, None => break,
+            Some(b) => b,
+            None => break,
         };
         let ppt_xy = match &pb_scaled {
             Aff::P(x, y) => (x.clone(), y.clone()),
@@ -179,10 +182,9 @@ pub fn recover_bob_secret(
         };
 
         let (found, _results) = try_guesses(candidates, fp2, |j| {
-            let full_guess = acc + j * 3u64.pow(i as u32);
-            let (c, p_c, q_c) = build_kani_source(
-                params, full_guess, i + (n as u32), u as u64, v as u64, fp2,
-            );
+            let full_guess = acc + j * 3u64.pow(i);
+            let (c, p_c, q_c) =
+                build_kani_source(params, full_guess, i + (n as u32), u as u64, v as u64, fp2);
             let p_c_s = c.mul(&two_alp, &p_c, fp2);
             let q_c_s = c.mul(&two_alp, &q_c, fp2);
             let alpha = two_torsion_xs(&c, fp2).ok_or("no 2-tor on C")?;
@@ -194,12 +196,12 @@ pub fn recover_bob_secret(
                 Aff::P(x, y) => (x.clone(), y.clone()),
                 _ => return Err("Q_c is ∞".into()),
             };
-            let sols1 = gluing_divisor_map_fp(
-                &fp2.fp.p, &alpha, &beta, &pc_xy, &ppt_xy, msolve_script,
-            ).map_err(|e| format!("gluing PcP: {e}"))?;
-            let sols2 = gluing_divisor_map_fp(
-                &fp2.fp.p, &alpha, &beta, &qc_xy, &qpt_xy, msolve_script,
-            ).map_err(|e| format!("gluing QcQ: {e}"))?;
+            let sols1 =
+                gluing_divisor_map_fp(&fp2.fp.p, &alpha, &beta, &pc_xy, &ppt_xy, msolve_script)
+                    .map_err(|e| format!("gluing PcP: {e}"))?;
+            let sols2 =
+                gluing_divisor_map_fp(&fp2.fp.p, &alpha, &beta, &qc_xy, &qpt_xy, msolve_script)
+                    .map_err(|e| format!("gluing QcQ: {e}"))?;
             let d1: Div = sols1.first().ok_or("no PcP solution")?.to_div(fp2);
             let d2: Div = sols2.first().ok_or("no QcQ solution")?.to_div(fp2);
             let (h, _partition) = from_prod_to_jac_with_partition(&alpha, &beta, fp2);
@@ -208,7 +210,7 @@ pub fn recover_bob_secret(
 
         match found {
             Some(j) => {
-                acc += j * 3u64.pow(i as u32);
+                acc += j * 3u64.pow(i);
                 for k in 0..n {
                     recovered.push((j / 3u64.pow(k as u32)) % 3);
                 }
@@ -224,7 +226,7 @@ pub fn recover_bob_secret(
 /// M_A. For the Kani gluing, we need these as inputs to `from_prod_to_jac`.
 /// (M_A's 2-torsion: x = 0 and the two roots of x² + Ax + 1.)
 pub fn two_torsion_xs(curve: &Montgomery, fp2: &Fp2) -> Option<[F2; 3]> {
-    let one = fp2.one();
+    let _one = fp2.one();
     let two = fp2.from_int(2);
     let four = fp2.from_int(4);
     // Discriminant A² − 4
@@ -241,6 +243,7 @@ pub fn two_torsion_xs(curve: &Montgomery, fp2: &Fp2) -> Option<[F2; 3]> {
 mod tests {
     use super::*;
     use crate::field::{Fp, Fp2};
+    use crate::glue::from_prod_to_jac_with_partition;
     use num_bigint::BigInt;
 
     fn ctx() -> Fp2 {
@@ -264,8 +267,14 @@ mod tests {
         // 2-torsion divisors with u-poly = monic(G_i); v = 0. The Kani
         // partition gives non-monic factors of h, but `does_22_chain_split`
         // only needs G_1 · G_2 | h, which is invariant under scaling.
-        let d1 = Div { u: partition[0].make_monic(&fp2), v: crate::poly::Poly::zero() };
-        let d2 = Div { u: partition[1].make_monic(&fp2), v: crate::poly::Poly::zero() };
+        let d1 = Div {
+            u: partition[0].make_monic(&fp2),
+            v: crate::poly::Poly::zero(),
+        };
+        let d2 = Div {
+            u: partition[1].make_monic(&fp2),
+            v: crate::poly::Poly::zero(),
+        };
         assert!(d1.is_valid(&h, &fp2));
         assert!(d2.is_valid(&h, &fp2));
 
@@ -277,7 +286,7 @@ mod tests {
             } else {
                 // Construct a divisor pair that's NOT the natural Kani split.
                 // Use the curve's f and a random non-partitioned 2-torsion pair.
-                Ok((h.clone(), d2.clone(), d1.clone(), 2))  // swapped — same split actually
+                Ok((h.clone(), d2.clone(), d1.clone(), 2)) // swapped — same split actually
             }
         });
         assert_eq!(found, Some(0), "candidate 0 should be detected as split");
@@ -305,12 +314,13 @@ mod tests {
                     && !e0.mul(&BigInt::from(9), &s, &fp2).is_inf()
                     && e0.mul(&BigInt::from(27), &s, &fp2).is_inf()
                 {
-                    p_b = s; break;
+                    p_b = s;
+                    break;
                 }
             }
         }
         assert!(!p_b.is_inf());
-        let q_b = e0.dbl(&p_b, &fp2);  // second basis element (not truly indep, but OK for smoke test)
+        let q_b = e0.dbl(&p_b, &fp2); // second basis element (not truly indep, but OK for smoke test)
 
         // Find any 2-power-torsion point: cofactor 432/16 = 27 (the 2-power
         // part of E(F_p) has order ≤ 16, so this annihilates the 3-part).
@@ -321,7 +331,8 @@ mod tests {
             if let Some(p) = e0.lift(&x, &fp2) {
                 let s = e0.mul(&cofactor_to_16, &p, &fp2);
                 if !s.is_inf() {
-                    p_a = s; break;
+                    p_a = s;
+                    break;
                 }
             }
         }
@@ -329,7 +340,13 @@ mod tests {
         let q_a = e0.dbl(&p_a, &fp2);
 
         let params = AttackParams {
-            e0, p_a, q_a, p_b, q_b, a_exp: 4, b_exp: 3,
+            e0,
+            p_a,
+            q_a,
+            p_b,
+            q_b,
+            a_exp: 4,
+            b_exp: 3,
         };
 
         // m_B = 0 keeps the kernel R_B = P_B + 0·Q_B = P_B which has full
@@ -349,10 +366,7 @@ mod tests {
         );
 
         // Run recovery. At b=3 the loop is empty — `recovered` is [].
-        let script = format!(
-            "{}/scripts/msolve_bridge.py",
-            env!("CARGO_MANIFEST_DIR")
-        );
+        let script = format!("{}/scripts/msolve_bridge.py", env!("CARGO_MANIFEST_DIR"));
         let recovered = recover_bob_secret(&params, &pubkey, &fp2, &script);
         // At b=3 (the textbook toy), b − 3 = 0, so nothing to recover. The
         // driver returns an empty Vec without crashing — that's the
@@ -398,9 +412,12 @@ mod tests {
         let q_a = q_b.clone();
         let params = AttackParams {
             e0: e0.clone(),
-            p_a, q_a,
-            p_b: p_b.clone(), q_b,
-            a_exp: 4, b_exp: 3,
+            p_a,
+            q_a,
+            p_b: p_b.clone(),
+            q_b,
+            a_exp: 4,
+            b_exp: 3,
         };
         // Try j=0 with one-step chain (n=1) and uvtable[1] = (3, 1, 1).
         let (c, p_c, q_c) = build_kani_source(&params, 0, 1, 1, 1, &fp2);
@@ -409,9 +426,6 @@ mod tests {
             c.contains(&p_c, &fp2),
             "P_c should land on the codomain after 3-chain"
         );
-        assert!(
-            c.contains(&q_c, &fp2),
-            "Q_c should land on the codomain"
-        );
+        assert!(c.contains(&q_c, &fp2), "Q_c should land on the codomain");
     }
 }

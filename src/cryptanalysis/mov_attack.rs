@@ -60,7 +60,6 @@
 //! - **A. Menezes**, *An introduction to pairing-based cryptography*,
 //!   2009 survey.
 
-use crate::cryptanalysis::pohlig_hellman::crt_combine;
 use crate::ecc::curve::CurveParams;
 use crate::ecc::point::Point;
 use num_bigint::BigUint;
@@ -204,7 +203,7 @@ pub fn mov_attack_supersingular_k2(
 fn small_field_dlp(alpha: &BigUint, beta: &BigUint, n: &BigUint) -> Option<BigUint> {
     let n_iter = n
         .to_u64_digits()
-        .get(0)
+        .first()
         .copied()
         .unwrap_or(0)
         .min(1_000_000);
@@ -220,7 +219,7 @@ fn small_field_dlp(alpha: &BigUint, beta: &BigUint, n: &BigUint) -> Option<BigUi
 
 /// Render a Markdown visualization of the MOV attack outcome.
 pub fn format_visualization(report: &MovAttackReport) -> String {
-    use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_RED, FG_BRIGHT_YELLOW};
+    use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_YELLOW};
     let mut s = String::new();
     s.push_str("# MOV / Frey-Rück pairing reduction on ECDLP\n\n");
     s.push_str(&format!("**Curve**: `{}`\n\n", report.curve_name));

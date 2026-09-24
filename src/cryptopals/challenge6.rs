@@ -58,9 +58,10 @@ pub fn run() -> Report {
         }
         let pt = xor_repeating(&ct, &key);
         let score = crate::cryptopals::low_util::score_english(&pt);
-        if best.as_ref().map_or(true, |(_, prev, _)| {
-            crate::cryptopals::low_util::score_english(prev) < score
-        }) {
+        if best
+            .as_ref()
+            .is_none_or(|(_, prev, _)| crate::cryptopals::low_util::score_english(prev) < score)
+        {
             best = Some((k, pt, key));
         }
     }

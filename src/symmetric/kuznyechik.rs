@@ -156,7 +156,7 @@ fn inv_gf256(a: u8) -> u8 {
     if a == 0 {
         return 0;
     }
-    let mut result = a;
+    let mut result;
     let mut base = a;
     // 254 = 11111110_2 = sum of 2^i for i ∈ {1, 2, 3, 4, 5, 6, 7}
     base = gmul(base, base);

@@ -58,6 +58,7 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum Cmd {
     /// Hash a message with the given algorithm (sha256 | sha3 | blake3)
     Hash { algorithm: String, message: String },
@@ -207,6 +208,7 @@ enum VisualOp {
 }
 
 #[derive(Subcommand)]
+#[allow(clippy::large_enum_variant)]
 enum CryptanalysisOp {
     /// List all registered ciphers known to the auto-attack runner.
     ListCiphers,
@@ -1231,7 +1233,7 @@ fn cmd_isogeny(op: IsogenyOp) {
             // Cap scales with √n.  Hasse interval is centred at p, so
             // √n ≈ √p = 2^{bits/2}.  Allow 8× headroom for the
             // geometric-distribution tail.
-            let half_bits = (cfg.bits.min(60) / 2) as u32;
+            let half_bits = cfg.bits.min(60) / 2;
             cfg.rho_max_iters =
                 rho_cap.unwrap_or_else(|| 8u64.checked_shl(half_bits).unwrap_or(u64::MAX));
             eprintln!(
@@ -1790,7 +1792,7 @@ fn cmd_rsa(op: RsaOp) {
             let kp = RsaKeyPair::generate(1024);
             println!(
                 "n (256-bit prefix): {}…",
-                to_hex(&bigint_to_bytes_be(&kp.public.n, 128))[..64].to_string()
+                &to_hex(&bigint_to_bytes_be(&kp.public.n, 128))[..64]
             );
             println!("e: {}", kp.public.e);
         }

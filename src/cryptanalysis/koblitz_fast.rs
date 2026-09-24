@@ -369,11 +369,9 @@ impl FrobeniusCanon {
         // Column `j` of the inverse, so a set bit of `x` contributes one
         // XOR rather than one parity.
         let by_bit: Vec<u64> = (0..n)
-            .map(|j| {
-                (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i))
-            })
+            .map(|j| (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i)))
             .collect();
-        let bytes = ((n + 7) / 8) as usize;
+        let bytes = n.div_ceil(8) as usize;
         let tables = (0..bytes)
             .map(|bi| {
                 let mut table = [0u64; 256];
@@ -469,9 +467,7 @@ impl FrobeniusCanon {
 fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
     // Row `i` carries, in bit `k`, the `i`-th bit of column `k`.
     let mut a: Vec<u64> = (0..n)
-        .map(|i| {
-            (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k))
-        })
+        .map(|i| (0..n).fold(0u64, |acc, k| acc | (((columns[k as usize] >> i) & 1) << k)))
         .collect();
     let mut inv: Vec<u64> = (0..n).map(|i| 1u64 << i).collect();
     for c in 0..n as usize {

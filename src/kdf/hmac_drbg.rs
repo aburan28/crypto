@@ -25,7 +25,6 @@
 //! Reseeding can be done at any time by calling `update` with new
 //! entropy.
 
-use crate::hash::sha256::sha256;
 use crate::kdf::hkdf::hmac_sha256;
 
 /// HMAC-DRBG state.
@@ -100,6 +99,7 @@ pub fn drbg_expand(seed: &[u8], n: usize) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::hash::sha256::sha256;
 
     /// Same seed → same output.
     #[test]

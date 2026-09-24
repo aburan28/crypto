@@ -4,12 +4,12 @@ name: Rust lint
 # (src/, tests/, examples/, benches/) and cd_attack/. The crates under
 # research/ are archived snapshots and are not linted.
 #
-# Both checks are ratchets, because the tree predates them:
-# - Format is PR-scoped: a changed .rs file must be rustfmt-clean, the
-#   rest of the tree is left alone until someone touches it.
-# - Clippy denies the `correctness` and `suspicious` groups (likely bugs)
-#   and the compiler's own warnings stay warnings. Tighten by adding
-#   groups here once the tree is clean for them.
+# - Format is PR-scoped, because the tree predates the check: a changed
+#   .rs file must be rustfmt-clean, the rest of the tree is left alone
+#   until someone touches it.
+# - Clippy runs with -D warnings: every compiler and clippy warning fails
+#   the build. The allow list lives in Cargo.toml `[lints]`, and each
+#   remaining exception is an item-level #[allow] next to the code.
 
 on:
   pull_request:
@@ -38,6 +38,9 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
+  # Pinned: under -D warnings, lints added by a new stable clippy would turn
+  # main red with no code change. Bump deliberately, fixing what it flags.
+  RUST_TOOLCHAIN: "1.98"
 
 jobs:
   fmt:
@@ -49,8 +52,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: rustfmt
       - name: Changed Rust files are formatted
         env:
@@ -95,11 +99,12 @@ jobs:
         working-directory: ${{ matrix.dir }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: ${{ matrix.dir }}
       - name: Clippy
-        run: cargo clippy --all-targets -- -D clippy::correctness -D clippy::suspicious
+        run: cargo clippy --all-targets -- -D warnings

@@ -484,8 +484,8 @@ mod tests {
     fn oil_space_too_small_for_plain_uov() {
         // The MAYO premise: o < m, so the un-whipped central map cannot
         // be inverted (o unknowns, m equations).
-        assert!(O < M);
-        assert!(K * O >= M);
+        const { assert!(O < M) };
+        const { assert!(K * O >= M) };
     }
 
     #[test]

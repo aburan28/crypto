@@ -1304,7 +1304,7 @@ mod tests {
         let v = F2BoolMono::var;
         let g = F2BoolPoly::from_monos(vec![v(0).mul(v(1)), v(2)], 3);
         assert!(
-            !is_boolean_groebner_basis(&[g.clone()]),
+            !is_boolean_groebner_basis(std::slice::from_ref(&g)),
             "the checker must reject the input"
         );
         let gb = groebner_basis_f2(vec![g], 3);

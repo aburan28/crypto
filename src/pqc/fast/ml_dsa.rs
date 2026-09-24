@@ -206,7 +206,10 @@ const fn build_f() -> i32 {
 
 // Compile-time checks on the two constants that are easy to get wrong.
 const _: () = {
-    assert!((Q as i64 * QINV as i64) as u32 == 1, "QINV is not the inverse of q mod 2^32");
+    assert!(
+        (Q as i64 * QINV as i64) as u32 == 1,
+        "QINV is not the inverse of q mod 2^32"
+    );
     assert!(F == 41978, "F is not R squared over 256 mod q");
 };
 
@@ -237,7 +240,7 @@ fn ntt(a: &mut Poly) {
             while j < start + len {
                 let t = montgomery_reduce(zeta * (a[j + len] as i64));
                 a[j + len] = a[j] - t;
-                a[j] = a[j] + t;
+                a[j] += t;
                 j += 1;
             }
             start += 2 * len;
@@ -1097,7 +1100,10 @@ mod tests {
         assert_eq!((256i64 * 8_347_681) % Q as i64, 1);
         // F = R²/256 mod q, and the pq-crystals value for it.
         assert_eq!(F, 41978);
-        assert_eq!(((F as i64).rem_euclid(Q as i64) * 256) % Q as i64, (r * r) % Q as i64);
+        assert_eq!(
+            ((F as i64).rem_euclid(Q as i64) * 256) % Q as i64,
+            (r * r) % Q as i64
+        );
         // ZETAS[k] = ζ^{brv(k)}·R, spot-checked against the published table.
         assert_eq!(ZETAS[1], 25847);
         assert_eq!(ZETAS[2], -2608894);
@@ -1139,10 +1145,23 @@ mod tests {
             }
             acc
         };
-        for a in [0i64, 1, 12345, -999, 4_190_208, -8_380_416, 1 << 40, -(1 << 40)] {
+        for a in [
+            0i64,
+            1,
+            12345,
+            -999,
+            4_190_208,
+            -8_380_416,
+            1 << 40,
+            -(1 << 40),
+        ] {
             let got = montgomery_reduce(a) as i64;
             assert!(got.abs() < Q as i64);
-            assert_eq!(got.rem_euclid(Q as i64), (a * r_inv).rem_euclid(Q as i64), "a={a}");
+            assert_eq!(
+                got.rem_euclid(Q as i64),
+                (a * r_inv).rem_euclid(Q as i64),
+                "a={a}"
+            );
         }
     }
 
@@ -1256,7 +1275,9 @@ mod tests {
             1 => vec![i; 1],
             2 => b"the quick brown fox jumps over the lazy dog".to_vec(),
             3 => (0..136u16).map(|j| (j as u8) ^ i).collect(),
-            _ => (0..500u16).map(|j| (j as u8).wrapping_mul(11) ^ i).collect(),
+            _ => (0..500u16)
+                .map(|j| (j as u8).wrapping_mul(11) ^ i)
+                .collect(),
         }
     }
 
@@ -1337,7 +1358,10 @@ mod tests {
             // A different message under the same key must not verify.
             let mut other = msg.clone();
             other.push(0x01);
-            assert!(!ml_dsa_65_verify(&fpk, &other, &fsig), "wrong message, index {i}");
+            assert!(
+                !ml_dsa_65_verify(&fpk, &other, &fsig),
+                "wrong message, index {i}"
+            );
         }
     }
 
@@ -1389,7 +1413,11 @@ mod tests {
         let mut longer = sig.clone();
         longer.push(0);
         assert!(!ml_dsa_65_verify(&pk, &msg, &longer));
-        assert!(!ml_dsa_65_verify(&MlDsaPublicKey(pk.0[..10].to_vec()), &msg, &sig));
+        assert!(!ml_dsa_65_verify(
+            &MlDsaPublicKey(pk.0[..10].to_vec()),
+            &msg,
+            &sig
+        ));
     }
 
     #[test]
@@ -1403,7 +1431,9 @@ mod tests {
         let sig = ml_dsa_65_sign(&sk, &msg, &rnd);
         let mut state = 0x243f_6a88_85a3_08d3u64;
         for _ in 0..64 {
-            state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
             let pos = (state >> 11) as usize % SIG_BYTES;
             let bit = (state >> 3) as u32 % 8;
             let mut bad = sig.clone();
@@ -1472,7 +1502,11 @@ mod tests {
         use crate::hash::sha3::sha3_256;
         let sk = MlDsaSecretKey(hx(KAT_SIG_SK));
         let sig = ml_dsa_65_sign(&sk, &hx(KAT_SIG_MSG), &[0u8; SEED_BYTES]);
-        assert_eq!(hex::encode(sha3_256(&sig)), KAT_SIG_SHA3, "signature mismatch");
+        assert_eq!(
+            hex::encode(sha3_256(&sig)),
+            KAT_SIG_SHA3,
+            "signature mismatch"
+        );
     }
 
     #[test]
@@ -1483,8 +1517,16 @@ mod tests {
         assert!(ok(KAT_SV_VALID_PK, KAT_SV_VALID_MSG, KAT_SV_VALID_SIG));
         // Modified hint: exercises the HintBitUnpack canonicity rules (FIPS 204
         // Algorithm 21) that a random bit flip essentially never reaches.
-        assert!(!ok(KAT_SV_BADHINT_PK, KAT_SV_BADHINT_MSG, KAT_SV_BADHINT_SIG));
+        assert!(!ok(
+            KAT_SV_BADHINT_PK,
+            KAT_SV_BADHINT_MSG,
+            KAT_SV_BADHINT_SIG
+        ));
         // Modified commitment hash.
-        assert!(!ok(KAT_SV_BADCOMM_PK, KAT_SV_BADCOMM_MSG, KAT_SV_BADCOMM_SIG));
+        assert!(!ok(
+            KAT_SV_BADCOMM_PK,
+            KAT_SV_BADCOMM_MSG,
+            KAT_SV_BADCOMM_SIG
+        ));
     }
 }

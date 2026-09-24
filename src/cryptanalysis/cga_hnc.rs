@@ -311,7 +311,7 @@ fn largest_smooth_divisor(n: u64, b: u64) -> u64 {
     let mut smooth: u64 = 1;
     let mut p: u64 = 2;
     while p <= b && p.saturating_mul(p) <= residue {
-        while residue % p == 0 {
+        while residue.is_multiple_of(p) {
             smooth = smooth.saturating_mul(p);
             residue /= p;
         }
@@ -561,7 +561,7 @@ pub fn point_order(p: &Pt2, n_curve: u64, a: &BigInt, p_mod: &BigInt) -> u64 {
     let mut divisors: Vec<u64> = Vec::new();
     let mut d = 1u64;
     while d * d <= n_curve {
-        if n_curve % d == 0 {
+        if n_curve.is_multiple_of(d) {
             divisors.push(d);
             if d != n_curve / d {
                 divisors.push(n_curve / d);
@@ -605,7 +605,7 @@ pub fn pohlig_hellman_dlp(
     let mut prime: u64 = 2;
     while prime <= smoothness_bound && prime * prime <= residue {
         let mut e = 0u32;
-        while residue % prime == 0 {
+        while residue.is_multiple_of(prime) {
             residue /= prime;
             e += 1;
         }
@@ -664,7 +664,7 @@ fn crt_combine(pairs: &[(u64, u64)]) -> BigInt {
         let m_inv = modular_inverse(&m_red, &mi_bi).unwrap_or(BigInt::one());
         let k = mod_pos(m_inv * diff, &mi_bi);
         x = &x + &m * &k;
-        m = m * mi_bi;
+        m *= mi_bi;
     }
     x
 }
@@ -782,7 +782,7 @@ pub fn cga_hnc_attack_verbose(
                 // due to an off-by-one in ord(P_i) propagation through
                 // composed isogenies.
                 let d_partial_p = pt_scalar_mul(&p_curve, &d_partial, &a, p_mod);
-                if &d_partial_p == &q_curve {
+                if d_partial_p == q_curve {
                     let prev_modulus = combined_modulus(&crt_pairs);
                     add_crt_factors(&mut crt_pairs, &d_partial, p_order, smoothness_bound);
                     let new_modulus = combined_modulus(&crt_pairs);
@@ -821,7 +821,7 @@ pub fn cga_hnc_attack_verbose(
 
     let (d_known, modulus) = crt_combine_map(&crt_pairs);
     let _ = last_modulus; // keep for potential future use
-    debug_assert!(&modulus == &combined_modulus(&crt_pairs));
+    debug_assert!(modulus == combined_modulus(&crt_pairs));
 
     // ── Residual cleanup via BSGS on the original curve ────────────
     //
@@ -848,7 +848,7 @@ pub fn cga_hnc_attack_verbose(
             residual_bsgs_cost = Some(0);
         } else if let Some(m) = modulus_to_u64(&modulus) {
             // Slow path: residual BSGS for u ∈ [0, ord(P)/M).
-            if m > 0 && p_order_full % m == 0 {
+            if m > 0 && p_order_full.is_multiple_of(m) {
                 let u_range = p_order_full / m;
                 if u_range > 1 && u_range <= residual_bsgs_max {
                     let dknown_p = pt_scalar_mul(p_pt, &d_known, a_0, p_mod);
@@ -887,7 +887,7 @@ pub fn cga_hnc_attack_verbose(
 fn combined_modulus(pairs: &std::collections::HashMap<u64, (u64, u64)>) -> BigInt {
     let mut m = BigInt::one();
     for &(_, pe) in pairs.values() {
-        m = m * BigInt::from(pe);
+        m *= BigInt::from(pe);
     }
     m
 }
@@ -903,7 +903,7 @@ fn crt_combine_map(pairs: &std::collections::HashMap<u64, (u64, u64)>) -> (BigIn
         let m_inv = modular_inverse(&m_red, &mi_bi).unwrap_or(BigInt::one());
         let k = mod_pos(m_inv * diff, &mi_bi);
         d = &d + &m * &k;
-        m = m * mi_bi;
+        m *= mi_bi;
     }
     (d, m)
 }
@@ -983,7 +983,7 @@ fn add_crt_factors(
     let mut prime: u64 = 2;
     while prime <= smoothness_bound && prime * prime <= residue {
         let mut e = 0u32;
-        while residue % prime == 0 {
+        while residue.is_multiple_of(prime) {
             residue /= prime;
             e += 1;
         }
@@ -1076,7 +1076,7 @@ fn crt_combine_pairs(pairs: &[(u64, u64)]) -> (BigInt, BigInt) {
         let m_inv = modular_inverse(&m_red, &mi_bi).unwrap_or(BigInt::one());
         let k = mod_pos(m_inv * diff, &mi_bi);
         d = &d + &m * &k;
-        m = m * mi_bi;
+        m *= mi_bi;
     }
     (d, m)
 }
@@ -1202,7 +1202,7 @@ mod tests {
         let a = BigInt::from(1);
         let b = BigInt::from(1);
         let orbit = bfs_two_isogeny_orbit(&a, &b, &p, 50);
-        assert!(orbit.len() >= 1, "orbit must contain start curve");
+        assert!(!orbit.is_empty(), "orbit must contain start curve");
         let starting_j = j_invariant(&a, &b, &p).unwrap();
         assert_eq!(orbit[0].0, starting_j, "first visited = start");
     }
@@ -1611,7 +1611,7 @@ mod tests {
                 p_order, // residual_bsgs_max — allow full BSGS
             );
             let m_u = modulus_to_u64(&result.modulus).unwrap_or(1);
-            let residual_range = if m_u > 0 { p_order / m_u } else { p_order };
+            let residual_range = p_order.checked_div(m_u).unwrap_or(p_order);
             let bsgs_ops = result
                 .residual_bsgs_cost
                 .unwrap_or(((residual_range as f64).sqrt().ceil()) as u64);

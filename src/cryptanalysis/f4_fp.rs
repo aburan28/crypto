@@ -953,7 +953,7 @@ fn solve_rec(
             let i = *vars.iter().next().unwrap();
             let coeffs: Vec<(u32, u64)> = g.iter().map(|(e, c)| (e[i], *c)).collect();
             let roots = roots_univariate(&coeffs, p);
-            if best.as_ref().map_or(true, |(_, rs)| roots.len() < rs.len()) {
+            if best.as_ref().is_none_or(|(_, rs)| roots.len() < rs.len()) {
                 best = Some((i, roots));
             }
         }

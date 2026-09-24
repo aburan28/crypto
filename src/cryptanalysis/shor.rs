@@ -370,7 +370,7 @@ pub fn shor_order_find(a: u64, n: u64, precision_qubits: usize, rng_seed: u64) -
 /// The caller is responsible for handling the "even `n`" case
 /// classically (`n / 2`) and prime-power case (try roots).
 pub fn shor_factor(n: u64, max_retries: u32, mut rng_seed: u64) -> Option<u64> {
-    if n < 4 || n % 2 == 0 {
+    if n < 4 || n.is_multiple_of(2) {
         return None;
     }
     // Pick `a` coprime to n.  We try small candidates; in real
@@ -415,7 +415,7 @@ pub fn shor_factor(n: u64, max_retries: u32, mut rng_seed: u64) -> Option<u64> {
                 continue; // a^(r/2) ≡ -1; useless
             }
             let f1 = n.gcd(&(xr + 1));
-            let f2 = n.gcd(&(if xr >= 1 { xr - 1 } else { 0 }));
+            let f2 = n.gcd(&xr.saturating_sub(1));
             for f in [f1, f2] {
                 if f != 1 && f != n {
                     return Some(f);

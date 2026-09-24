@@ -3,7 +3,7 @@
 //! Coefficients are stored low-to-high (coeffs[i] = coefficient of x^i).
 //! Normalized form has no trailing zeros; the zero polynomial is an empty vec.
 
-use crate::field::{F2, Fp2};
+use crate::field::{Fp2, F2};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Poly {
@@ -13,31 +13,51 @@ pub struct Poly {
 impl Poly {
     /// Build from raw coefficient vector and normalize (strip trailing zeros).
     pub fn new(mut coeffs: Vec<F2>, fp2: &Fp2) -> Self {
-        while coeffs.last().map_or(false, |c| fp2.is_zero(c)) {
+        while coeffs.last().is_some_and(|c| fp2.is_zero(c)) {
             coeffs.pop();
         }
         Poly { coeffs }
     }
-    pub fn zero() -> Self { Poly { coeffs: vec![] } }
-    pub fn one(fp2: &Fp2) -> Self { Poly { coeffs: vec![fp2.one()] } }
+    pub fn zero() -> Self {
+        Poly { coeffs: vec![] }
+    }
+    pub fn one(fp2: &Fp2) -> Self {
+        Poly {
+            coeffs: vec![fp2.one()],
+        }
+    }
     pub fn x(fp2: &Fp2) -> Self {
-        Poly { coeffs: vec![fp2.zero(), fp2.one()] }
+        Poly {
+            coeffs: vec![fp2.zero(), fp2.one()],
+        }
     }
     pub fn constant(c: F2, fp2: &Fp2) -> Self {
-        if fp2.is_zero(&c) { Self::zero() } else { Poly { coeffs: vec![c] } }
+        if fp2.is_zero(&c) {
+            Self::zero()
+        } else {
+            Poly { coeffs: vec![c] }
+        }
     }
     /// Build monomial c · x^n.
     pub fn monomial(c: F2, n: usize, fp2: &Fp2) -> Self {
-        if fp2.is_zero(&c) { return Self::zero(); }
+        if fp2.is_zero(&c) {
+            return Self::zero();
+        }
         let mut v = vec![fp2.zero(); n];
         v.push(c);
         Poly { coeffs: v }
     }
 
-    pub fn is_zero(&self) -> bool { self.coeffs.is_empty() }
+    pub fn is_zero(&self) -> bool {
+        self.coeffs.is_empty()
+    }
     /// Returns None for the zero polynomial.
     pub fn degree(&self) -> Option<usize> {
-        if self.is_zero() { None } else { Some(self.coeffs.len() - 1) }
+        if self.is_zero() {
+            None
+        } else {
+            Some(self.coeffs.len() - 1)
+        }
     }
     pub fn leading(&self, fp2: &Fp2) -> F2 {
         self.coeffs.last().cloned().unwrap_or_else(|| fp2.zero())
@@ -79,7 +99,9 @@ impl Poly {
     }
 
     pub fn mul(&self, other: &Self, fp2: &Fp2) -> Self {
-        if self.is_zero() || other.is_zero() { return Self::zero(); }
+        if self.is_zero() || other.is_zero() {
+            return Self::zero();
+        }
         let n = self.coeffs.len() + other.coeffs.len() - 1;
         let mut out = vec![fp2.zero(); n];
         for (i, a) in self.coeffs.iter().enumerate() {
@@ -91,7 +113,9 @@ impl Poly {
     }
 
     pub fn scalar_mul(&self, c: &F2, fp2: &Fp2) -> Self {
-        if fp2.is_zero(c) { return Self::zero(); }
+        if fp2.is_zero(c) {
+            return Self::zero();
+        }
         Poly::new(self.coeffs.iter().map(|x| fp2.mul(x, c)).collect(), fp2)
     }
 
@@ -99,7 +123,7 @@ impl Poly {
     /// self = q·other + r,  deg(r) < deg(other).  Panics if `other` is zero.
     pub fn div_rem(&self, other: &Self, fp2: &Fp2) -> (Self, Self) {
         assert!(!other.is_zero(), "polynomial division by zero");
-        if self.degree().map_or(true, |d| d < other.degree().unwrap()) {
+        if self.degree().is_none_or(|d| d < other.degree().unwrap()) {
             return (Self::zero(), self.clone());
         }
         let mut r = self.coeffs.clone();
@@ -131,7 +155,9 @@ impl Poly {
     }
 
     pub fn make_monic(&self, fp2: &Fp2) -> Self {
-        if self.is_zero() { return Self::zero(); }
+        if self.is_zero() {
+            return Self::zero();
+        }
         let inv = fp2.inv(&self.leading(fp2));
         self.scalar_mul(&inv, fp2)
     }
@@ -170,12 +196,17 @@ pub fn ext_gcd(a: &Poly, b: &Poly, fp2: &Fp2) -> (Poly, Poly, Poly) {
         let (q, r) = r0.div_rem(&r1, fp2);
         let s_new = s0.sub(&q.mul(&s1, fp2), fp2);
         let t_new = t0.sub(&q.mul(&t1, fp2), fp2);
-        r0 = r1; r1 = r;
-        s0 = s1; s1 = s_new;
-        t0 = t1; t1 = t_new;
+        r0 = r1;
+        r1 = r;
+        s0 = s1;
+        s1 = s_new;
+        t0 = t1;
+        t1 = t_new;
     }
     // Normalize to monic g; scale s, t accordingly.
-    if r0.is_zero() { return (Poly::zero(), s0, t0); }
+    if r0.is_zero() {
+        return (Poly::zero(), s0, t0);
+    }
     let lc_inv = fp2.inv(&r0.leading(fp2));
     let g = r0.scalar_mul(&lc_inv, fp2);
     let u = s0.scalar_mul(&lc_inv, fp2);
@@ -189,7 +220,9 @@ mod tests {
     use crate::field::{Fp, Fp2};
     use num_bigint::BigInt;
 
-    fn ctx() -> Fp2 { Fp2::new(Fp::new(BigInt::from(431u64))) }
+    fn ctx() -> Fp2 {
+        Fp2::new(Fp::new(BigInt::from(431u64)))
+    }
 
     #[test]
     fn poly_basics() {
@@ -200,7 +233,9 @@ mod tests {
         let xp1 = x.add(&one, &fp2);
         let sq = xp1.mul(&xp1, &fp2);
         let expected = Poly::new(
-            vec![fp2.from_int(1), fp2.from_int(2), fp2.from_int(1)], &fp2);
+            vec![fp2.from_int(1), fp2.from_int(2), fp2.from_int(1)],
+            &fp2,
+        );
         assert_eq!(sq, expected);
     }
 
@@ -209,7 +244,9 @@ mod tests {
         let fp2 = ctx();
         // (x^2 + 2x + 1) / (x + 1) = (x + 1) remainder 0
         let num = Poly::new(
-            vec![fp2.from_int(1), fp2.from_int(2), fp2.from_int(1)], &fp2);
+            vec![fp2.from_int(1), fp2.from_int(2), fp2.from_int(1)],
+            &fp2,
+        );
         let den = Poly::new(vec![fp2.from_int(1), fp2.from_int(1)], &fp2);
         let (q, r) = num.div_rem(&den, &fp2);
         assert_eq!(q, den);

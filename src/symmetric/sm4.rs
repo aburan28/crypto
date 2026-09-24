@@ -52,7 +52,7 @@ const CK: [u32; 32] = {
     let mut i = 0;
     while i < 32 {
         let i4 = i * 4;
-        let b0 = (i4) as u32 * 7 & 0xff;
+        let b0 = ((i4) as u32 * 7) & 0xff;
         let b1 = ((i4 + 1) as u32 * 7) & 0xff;
         let b2 = ((i4 + 2) as u32 * 7) & 0xff;
         let b3 = ((i4 + 3) as u32 * 7) & 0xff;
@@ -66,7 +66,7 @@ const CK: [u32; 32] = {
 
 #[inline]
 fn rotl(x: u32, n: u32) -> u32 {
-    (x << n) | (x >> (32 - n))
+    x.rotate_left(n)
 }
 
 /// Non-linear byte-wise S-box layer τ.
