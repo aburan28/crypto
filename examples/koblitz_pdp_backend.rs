@@ -852,7 +852,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
         .ok()
         .and_then(|value| value.parse::<usize>().ok())
         .unwrap_or(1)
-        .clamp(1, 64);
+        .clamp(1, x1_count);
     let rayon_threads_requested = std::env::var("RAYON_NUM_THREADS")
         .ok()
         .and_then(|value| value.parse::<usize>().ok());
@@ -1047,6 +1047,7 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_x1_order_target_independent":true,
             "solver_x1_order_control":"PQ_F4_X1_ORDER=ascending",
             "solver_x1_batch_size":x1_batch_size,
+            "solver_x1_batch_cap":x1_count,
             "solver_x1_batch_control":"PQ_F4_X1_BATCH=1",
             "solver_x1_batches_completed":x1_batches_completed,
             "solver_x1_speculative_systems_completed":speculative_systems_completed,
@@ -1057,6 +1058,8 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
             "solver_pair_selector":"epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
             "solver_pair_installer":"order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
             "solver_symbolic_reducer_selector":"exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+            "solver_symbolic_monomial_sets":if std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() == Ok("1") { "splitmix64_hash_sets" } else { "reused_bit_packed_complete_boolean_domain_to_20_variables_else_splitmix64_hash_sets" },
+            "solver_symbolic_monomial_set_control":"PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
             "solver_column_index":"dense_monomial_domain_to_20_variables_else_splitmix64_hash",
             "solver_monomial_multiply":if std::env::var("PQ_F4_DISABLE_DENSE_MUL").as_deref() == Ok("1") { "sort_all_mapped_terms_then_cancel" } else { "epoch_dense_parity_cancel_then_encoded_u32_order_sort" },
             "solver_monomial_multiply_control":"PQ_F4_DISABLE_DENSE_MUL=1",

@@ -159,6 +159,10 @@ pub struct F4Stats {
     pub dense_mul_output_terms: u64,
     pub dense_mul_cancelled_terms: u64,
     pub dense_mul_scratch_bytes_max: u64,
+    /// Symbolic-preprocessing monomial sets backed by the complete Boolean
+    /// mask domain rather than hash tables.
+    pub dense_symbolic_set_steps: u64,
+    pub dense_symbolic_set_bytes_max: u64,
     /// Elements added to the basis after the initial echelon.
     pub new_elements: u64,
     /// Highest step degree processed.
@@ -266,6 +270,90 @@ impl Hasher for FastU64Hasher {
 
 type FastU64Map<V> = HashMap<u64, V, BuildHasherDefault<FastU64Hasher>>;
 type FastU64Set = HashSet<u64, BuildHasherDefault<FastU64Hasher>>;
+
+enum MonomialMembership {
+    Dense(Vec<u64>),
+    Sparse(FastU64Set),
+}
+
+struct MonomialSet {
+    masks: Vec<u64>,
+    membership: MonomialMembership,
+}
+
+impl MonomialSet {
+    fn new(n_vars: usize) -> Self {
+        let dense =
+            n_vars <= 20 && std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() != Ok("1");
+        Self {
+            masks: Vec::new(),
+            membership: if dense {
+                MonomialMembership::Dense(vec![0; (1usize << n_vars).div_ceil(64)])
+            } else {
+                MonomialMembership::Sparse(FastU64Set::default())
+            },
+        }
+    }
+
+    fn clear(&mut self) {
+        self.masks.clear();
+        match &mut self.membership {
+            MonomialMembership::Dense(bits) => bits.fill(0),
+            MonomialMembership::Sparse(set) => set.clear(),
+        }
+    }
+
+    fn insert(&mut self, mask: u64) -> bool {
+        let inserted = match &mut self.membership {
+            MonomialMembership::Dense(bits) => {
+                let (word, bit) = (mask as usize / 64, 1u64 << (mask % 64));
+                let inserted = bits[word] & bit == 0;
+                bits[word] |= bit;
+                inserted
+            }
+            MonomialMembership::Sparse(set) => set.insert(mask),
+        };
+        if inserted {
+            self.masks.push(mask);
+        }
+        inserted
+    }
+
+    fn contains(&self, mask: &u64) -> bool {
+        match &self.membership {
+            MonomialMembership::Dense(bits) => {
+                bits[*mask as usize / 64] & (1u64 << (*mask % 64)) != 0
+            }
+            MonomialMembership::Sparse(set) => set.contains(mask),
+        }
+    }
+
+    fn copy_from(&mut self, source: &Self) {
+        self.clear();
+        self.masks.reserve(source.len());
+        for &mask in &source.masks {
+            self.insert(mask);
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.masks.len()
+    }
+
+    fn iter(&self) -> impl Iterator<Item = &u64> {
+        self.masks.iter()
+    }
+
+    fn dense_bytes(&self) -> Option<u64> {
+        let MonomialMembership::Dense(bits) = &self.membership else {
+            return None;
+        };
+        Some(
+            (bits.capacity() * std::mem::size_of::<u64>()
+                + self.masks.capacity() * std::mem::size_of::<u64>()) as u64,
+        )
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum PairKind {
@@ -1455,6 +1543,9 @@ pub fn groebner_basis_f4(
         pairs: Vec::new(),
         pair_select_scratch: PairSelectScratch::default(),
     };
+    let mut lcm_columns = MonomialSet::new(n_vars);
+    let mut examined = MonomialSet::new(n_vars);
+    let mut no_divisor = MonomialSet::new(n_vars);
     let t = Instant::now();
     if batch_basis_insert_enabled() {
         s.insert_batch(start, &mut st);
@@ -1483,7 +1574,7 @@ pub fn groebner_basis_f4(
         let mut seen_rows: HashSet<(u64, usize)> = HashSet::new();
         let mut half_rows: Vec<F2BoolPoly> = Vec::new();
         let mut field_rows: Vec<F2BoolPoly> = Vec::new();
-        let mut lcm_columns = FastU64Set::default();
+        lcm_columns.clear();
         let mut row_terms = 0usize;
         'selected_pairs: for (selected_index, p) in selected.iter().enumerate() {
             if selected_index % 128 == 0 && deadline.is_some_and(|limit| Instant::now() >= limit) {
@@ -1552,8 +1643,8 @@ pub fn groebner_basis_f4(
         // lcm is examined once; a divisible one gets a reducer led by it.
         let active = s.active_indices.clone();
         let active_by_lm = active_leading_monomial_index(&s, &active);
-        let mut examined = lcm_columns.clone();
-        let mut no_divisor = FastU64Set::default();
+        examined.copy_from(&lcm_columns);
+        no_divisor.clear();
         let mut queue: Vec<u64> = Vec::new();
         'seed_queue: for p in half_rows.iter().chain(field_rows.iter()) {
             for t in &p.terms {
@@ -1655,6 +1746,16 @@ pub fn groebner_basis_f4(
             st.build_ns += t.elapsed().as_nanos() as u64;
             s.pairs.extend(selected);
             break;
+        }
+        if let (Some(lcm_bytes), Some(examined_bytes), Some(no_divisor_bytes)) = (
+            lcm_columns.dense_bytes(),
+            examined.dense_bytes(),
+            no_divisor.dense_bytes(),
+        ) {
+            st.dense_symbolic_set_steps += 1;
+            st.dense_symbolic_set_bytes_max = st
+                .dense_symbolic_set_bytes_max
+                .max(lcm_bytes + examined_bytes + no_divisor_bytes);
         }
         st.reducer_rows += reducers.len() as u64;
 
@@ -1974,6 +2075,32 @@ mod tests {
                 scratch.multiply(&p, cap >> 1),
                 p.mul_mono(F2BoolMono::from_mask(cap >> 1))
             );
+        }
+    }
+
+    #[test]
+    fn dense_symbolic_monomial_sets_match_hash_sets() {
+        let mut rng = StdRng::seed_from_u64(0x728e_4bf1_93a5_c06d);
+        let mut dense = MonomialSet::new(18);
+        let mut copied = MonomialSet::new(18);
+        let mut reference = FastU64Set::default();
+        assert!(dense.dense_bytes().is_some());
+        for _ in 0..200 {
+            dense.clear();
+            reference.clear();
+            for _ in 0..2_000 {
+                let mask = rng.gen::<u64>() & ((1 << 18) - 1);
+                assert_eq!(dense.insert(mask), reference.insert(mask));
+            }
+            assert_eq!(dense.len(), reference.len());
+            assert!(dense.iter().all(|mask| reference.contains(mask)));
+            for _ in 0..200 {
+                let mask = rng.gen::<u64>() & ((1 << 18) - 1);
+                assert_eq!(dense.contains(&mask), reference.contains(&mask));
+            }
+            copied.copy_from(&dense);
+            assert_eq!(copied.len(), dense.len());
+            assert!(dense.iter().all(|mask| copied.contains(mask)));
         }
     }
 

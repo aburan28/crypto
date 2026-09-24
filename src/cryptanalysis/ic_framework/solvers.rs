@@ -152,8 +152,14 @@ impl SystemSolver for F4F2 {
         } else {
             "dense duplicate-cancelling monomial products"
         };
+        let symbolic_sets =
+            if std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() == Ok("1") {
+                "hash-backed symbolic monomial sets"
+            } else {
+                "bit-packed symbolic monomial sets on bounded Boolean domains"
+            };
         format!(
-            "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, {products}, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis"
+            "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, {products}, {symbolic_sets}, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis"
         )
     }
 
@@ -219,6 +225,11 @@ impl SystemSolver for F4F2 {
             (
                 "dense_mul_scratch_bytes_max",
                 st.dense_mul_scratch_bytes_max,
+            ),
+            ("dense_symbolic_set_steps", st.dense_symbolic_set_steps),
+            (
+                "dense_symbolic_set_bytes_max",
+                st.dense_symbolic_set_bytes_max,
             ),
             ("new_elements", st.new_elements),
             ("basis_len", st.basis_len),
