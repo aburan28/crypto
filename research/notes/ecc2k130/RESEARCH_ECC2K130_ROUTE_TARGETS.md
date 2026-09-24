@@ -658,6 +658,16 @@ are seen; reporting single draws; dropping a censored rung.
 
 ### X5′, run: **the symmetrised chain falls at 4 and the `x`-chain at 3, because the `x`-chain carries one hidden linear equation**
 
+> **Attribution (2026-09-24, X6′ at the end of this note).**
+> The hidden linear equation below is **Kosters–Yeo's trace equation**
+> (arXiv 1503.08001, Prop. 4.9, Cor. 4.11, Rem. 4.12).  HKY (CRYPTO 2015,
+> §5.2, Prop. 5) state it too.  Both apply it to chained `S₃` systems of
+> this kind: KY derive a first fall degree of 2, and HKY report "usually 2"
+> for the subspace-restricted chain.  X6′ checks the
+> identification on every draw.  This section rediscovered it: the
+> measurements stand, and the diagnosis is theirs.  KY and HKY were already
+> in this thread's literature survey.
+
 **Runner:** `cargo run --release --example koblitz_x5_fall -- --json …`, built
 at `7bcc6460`, the code commit after the registration (`dc363f5f`).
 **Frozen:** `experiments/27_koblitz_x5_fall.json` (and `.log`), the registered
@@ -708,7 +718,7 @@ does not fire.  H1's operational one, `fall_min ≥ 4`, does.  The
 invariant-`V` cross-check at `n = 15` reads the same as the random-`V` rung,
 so the kind of `V` is not what moves it.
 
-**3. What the one degree is: a single hidden linear equation in the `x`-chain.**
+**3. What the one degree is: a single hidden linear equation in the `x`-chain** (published: Kosters–Yeo Prop. 4.9; see X6′).
 **Diagnostic:** `cargo run --release --example koblitz_x5_syzygy`, frozen as
 `experiments/27_koblitz_x5_syzygy.log`.
 
@@ -758,9 +768,10 @@ in [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](RESEARCH_KOBLITZ_SCALING_TARGET.md).
 **Class.**  A structural measurement; no cost moves.  X5 is closed as run.
 
 **What this does not settle.**
-- **Whether any of the symmetrised chain's `D = 4` dependencies is
+- ~~**Whether any of the symmetrised chain's `D = 4` dependencies is
   non-trivial.**  Separating them from the trivial syzygies needs the
-  syzygy module, not a rank.
+  syzygy module, not a rank.~~  *Answered by X5″ (below): 26–56 of them
+  are, and by the literature's definition the chain falls genuinely at 3.*
 - **Whether the constant offset survives past `n = 19`.**  Both arms reach 64
   unknowns there, and `MAX_VARS` is a `u64` mask.
 - **Anything about ECC2K-130's cost.**  The close-out already records that no
@@ -817,8 +828,10 @@ Any one of:
   not by how the 350× felt — or Route 3 closed at X4′'s gate, which answers
   the same question one phase earlier.
 - **H1 falsified at `m = 4`** — a first fall degree that grows, which
-  would matter to the FFD controversy directly and is the one place
-  where this repository's measurements are the state of the art.
+  would matter to the FFD controversy directly ~~and is the one place
+  where this repository's measurements are the state of the art~~.
+  *(Struck 2026-09-24, X6′: the `x`-chain's fall is Kosters–Yeo's trace
+  equation, published in 2015 for these chained systems.)*
 
 None of these threatens a deployed curve, and none is claimed to. The
 `α ≤ 0.38` row of the scale table is what that would take, and nothing
@@ -838,7 +851,7 @@ reason given.
 | X3 | 2, Crossbred on the symmetrised system | **not run** | — | open; bounded below |
 | X4 → X4′ | 3, symmetrised oracle end to end | X4 cannot run as registered; the X4′ gate ran | `3.1–14.7×` enumeration per relation at `d = 3`, `30–1,101×` at `d = 4`, priced from below | gate **closed**; the `350×` is **engineering** (weakly determined) |
 | X5 → X5′ | 4, `m = 4` | run | the symmetrised chain falls at 4 on every rung `n = 9 … 19` (96 draws), the `x`-chain at 3 | H1 falsified for the symmetrised chain by its letter; the `x`-chain's "fall at 3" is one hidden linear equation of its last link, which the symmetrisation removes; flat in `n` |
-| X6 | 5, literature | **not run** | — | open, no code |
+| X6 → X6′ | 5, literature | ~~**not run**~~ run 2026-09-24 (X6′, below) | 4 queries and 13 sources; the trace identity checked on 96 draws | no operation count at prime `n` with `q = 2` outside the survey's exclusion set; item 5 is empty by structure (`End(E) = Z[τ]`, class number 1); X5′'s mechanism is Kosters–Yeo's |
 
 **What the thread established.**
 
@@ -867,10 +880,18 @@ reason given.
 - **X5 (H1, the first fall degree at `m = 4`)**, since run as X5′ (above).
   The `x`-chain's "fall at 3" turns out to be one hidden linear equation in
   its last link, on every chained row of H1's table that was checked.  The symmetrised chain lacks it
-  and falls at 4, flat in `n`.  It was the one open item of independent
-  interest.
-  - Nobody has a rigorous bound on these systems' fall degree in either
-    direction, so a measurement is new evidence on the fall-degree question.
+  and falls at 4, flat in `n`.  ~~It was the one open item of independent
+  interest.~~
+  - ~~Nobody has a rigorous bound on these systems' fall degree in either
+    direction, so a measurement is new evidence on the fall-degree question.~~
+    *Struck 2026-09-24 (X6′).*
+    - For the `x`-chain it is not new evidence: Kosters–Yeo Cor. 4.11 proves
+      the degree fall these rows record.
+    - It is still true that no rigorous bound on the **degree of regularity**
+      exists.
+    - Not found in the sources X6′ read: the symmetrised chain's rank profile,
+      and the observation that symmetrising under `T` removes the trace
+      equation.
   - It does not bear on ECC2K-130's cost.  A fall degree that stays at 3
     would still leave the `m = 4` oracle needing to beat enumeration per
     relation, which no oracle here does at `m = 3`.
@@ -890,3 +911,443 @@ reason given.
 
 **Class.**  **Accounting**: a ledger.  No measurement changed, and nothing
 here bears on ECC2K-130's security.
+
+## X6′ — X6 as it runs, and a priority check on X5′
+
+**Registered 2026-09-24, before the identification below was run and before the
+queries listed here.**  Two things had already happened, and they are
+disclosed here.
+
+- **The priority check was proposed in chat** before any reading: "check
+  whether 'the `x`-chain's fall at 3 is one hidden linear equation' is already
+  in the literature".
+- **Five papers were read before this text was written.**  They are
+  Huang–Kosters–Yeo (CRYPTO 2015, eprint 2015/573), Kosters–Yeo (arXiv
+  1503.08001), Kousidis–Wiemers (arXiv 1906.05594), Galbraith–Gebregiyorgis
+  (eprint 2014/806) and Galbraith–Gaudry (eprint 2015/1022).
+  - **Kosters–Yeo appear to state X5′'s mechanism outright** (Prop. 4.9,
+    Cor. 4.11, Rem. 4.12, §5).  That reading is what this registration
+    tests.
+  - **HKY and KY were already in
+    [`RESEARCH_ECC2K130_IC_LITERATURE.md`](RESEARCH_ECC2K130_IC_LITERATURE.md)'s
+    source list.**  That survey quotes HKY §5.2's chained-`S₃` reductio.  So
+    the paper was in hand when H1 and X5′ were written.
+
+**Question 1: the priority check.**  Is X5′'s diagnosis the same statement as
+Kosters–Yeo Prop. 4.9 on the systems this repository builds, or only an
+analogue?
+
+- **KY Prop. 4.9.**  Take `F = F_{2ⁿ}`, an ordinary `E` and
+  `T = S₃(X₁, X₂, x(P))`.  Then
+  `Tr(T/b²) = Tr((X₁ + X₂ + x(P) + a₂)/a₁²)` with `b = a₁(a₁x(P) + a₃)`.
+- **On `K₀` it says:** `a₁ = 1`, `a₂ = a₃ = 0`, `b = x_R`, so the functional
+  that kills the quadratic parts should be `c ↦ Tr(c·x_R⁻²)`.
+- **Identification.** A new diagnostic,
+  `examples/koblitz_x5_trace_identity.rs`, frozen as
+  `experiments/28_koblitz_x5_trace_identity.log`, checks two things.
+  - **(a)** The left null space of the quadratic parts of the `x`-chain's
+    degree-2 equations (the link where `x_R` is known) is one-dimensional,
+    and its vector is `c_j = Tr(z^j·x_R⁻²)` in the polynomial basis the
+    equations are written in.
+  - **(b)** `Σ_j c_j f_j` equals, as a reduced Boolean polynomial, the Weil
+    descent of `Tr(e + x_m) + Tr(a₆·x_R⁻²)`, where `e` and `x_m` are that
+    link's two unknown field elements.
+- **Coverage.**  Every draw of X5′'s quadratic-rank protocol (random `V`,
+  `n = 9 … 19`, 8 draws, seed `0x5EED0005`), and every row of H1's own
+  protocol that X5′ checked.
+- **Predicted outcome** (a theorem, so this checks the code against KY):
+  both hold on every draw.
+- **What would contradict it.**  A mismatch on any draw would mean the
+  repository's link is not KY's `T` (a different normalisation, or a
+  different equation set).  X5′'s diagnosis would then be an analogue and
+  would be reported as one.
+
+**Question 2: is anything in X5′ not in the literature?**  Two candidates.
+
+- **The definitional offset.**  H1 records rank loss of the Macaulay matrix,
+  and KY, HKY and Kousidis–Wiemers record degree falls (Hodges–Petit–Schlather's
+  definition).  If both are the same event, H1's "3" is KY's "2".
+- **The symmetrised side.**
+  - Symmetrising under `T` (`w = u² + u`, `u = 1/(x + 1)`) removes the
+    linear equation.
+  - The symmetrised chain has no rank loss below the degree where trivial
+    syzygies force one.
+- **Sources for this.**  The papers above, plus the two that symmetrise under
+  small torsion and could have noticed:
+  - Faugère–Gaudry–Huot–Renault, *Using symmetries in the index calculus for
+    elliptic curves discrete logarithm* (J. Cryptology 2014);
+  - Faugère–Huot–Joux–Renault–Vitse, *Symmetrized summation polynomials*
+    (EUROCRYPT 2014).
+- **Search terms:** `fall`, `trace`, `Kosters`, `linear`.  An empty result is
+  reported as "not in the sources read", with the list, never as "new".
+
+**Question 3: X6 itself.**  Items 4 and 5 of the survey.
+
+- **Queries,** recorded with their hits:
+  1. `summation polynomial splitting 2-torsion invariant variables binary
+     elliptic curve first fall degree trace morphism`
+  2. `Koblitz curve index calculus tau-adic decomposition Frobenius
+     endomorphism factor base point decomposition`
+  3. `index calculus prime extension degree elliptic curve without subfield
+     invariant subspace factor base 2020..2026`
+  4. `Koblitz curve endomorphism ring class group index calculus discrete
+     logarithm Z[tau]`
+- **Item 4's concrete test.**  Does any construction in the sources give a
+  factor base or decomposition at prime `n` with `ord_n(2) = n − 1` and
+  `q = 2`, with an operation count?
+- **Item 5's test.**  Is there Koblitz structure beyond `⟨−1⟩ × ⟨τ⟩` that an
+  index calculus could use?
+
+**Outcomes.**
+
+| outcome | what follows |
+|---|---|
+| (a) and (b) hold on every draw | X5′'s diagnosis **is** KY Prop. 4.9; X5′ is re-attributed, and the sentences that claimed novelty are struck, not deleted.  **Accounting** |
+| (a) or (b) fails on some draw | X5′'s diagnosis is an analogue of KY; say where it differs |
+| question 2 empty | the definitional offset and the symmetrised side are "not in the sources read (list)"; step 2 (the `D = 4` syzygy split) is registered separately |
+| X6 finds an operation count at prime `n` with `q = 2` | Route 5 reopens with that count as its target |
+| X6 finds none | items 4 and 5 are recorded as the registered outcome, with the queries |
+
+**Class.**  Accounting, whatever the outcome.  No cost moves.
+
+**Inadmissible.**  Calling the X5′ mechanism new, or "independently
+discovered", once (a) and (b) hold.  Deleting the claims it corrects.
+Reporting an empty search as evidence of absence.
+
+### X6′, run: X5′'s hidden linear equation is Kosters–Yeo's trace, and Route 5 stays closed
+
+**1. The identification: identical on every draw.**
+`cargo run --release --example koblitz_x5_trace_identity`, frozen as
+`experiments/28_koblitz_x5_trace_identity.log`.
+
+| protocol | draws | quadratic-part null space | (a) null vector `= Tr(z^j·x_R⁻²)` | (b) `Σ c_j f_j = Tr(e + x_m) + Tr(a₆x_R⁻²)` | control `Tr(z^j·x_R⁻¹)` | symmetrised chain's null space |
+|---|---:|---|---:|---:|---:|---|
+| X5′'s: random `V`, `m = 4`, `n = 9 … 19` | 48 | dimension 1 on 48/48 | 48/48 | 48/48 | 0/48 | dimension 0 on 48/48 |
+| H1's own: invariant `V`, `(n, m) = (9,3), (15,3), (21,3), (31,3), (9,4), (15,4)` | 48 | dimension 1 on 48/48 | 48/48 | 48/48 | 0/48 | — |
+
+The registered outcome is the one that held: **X5′'s diagnosis is Kosters–Yeo
+Prop. 4.9**, on the systems this repository builds.
+
+- **The functional.**  `c ↦ Tr(c·x_R⁻²)` is KY's `Tr(T/b²)` with
+  `b = a₁(a₁x_R + a₃) = x_R` on `K₀`.
+- **The linear equation.**  It is `Tr(e + x_m) = Tr(a₆x_R⁻²)`.  When `x_R`
+  is the abscissa of a curve point, the curve equation's trace condition
+  `Tr(x + a₂ + a₆/x²) = 0` turns the right side into KY's `Tr(x_R + a₂)`.
+- **What it is.**  HKY state it as a surjective morphism
+  `E(F) → F₂, P ↦ Tr((x(P) + a₂)/a₁²)` with kernel `2E(F)` (Prop. 5), citing
+  Kosters' thesis.  KY §5 applies it to a chain of `S₃` links and derives a
+  first fall degree of 2.  HKY §5.2 apply it to the chain with its summands
+  restricted to a subspace, and report "usually 2".  KY also note that the
+  equation can be added to any decomposition system from the start
+  (Rem. 4.8, Prop. 4.2), which is to say the `x`-frame's free equation is a
+  known and usable feature.
+- **The control.**  The wrong functional `Tr(z^j·x_R⁻¹)` matches on no draw.
+
+**2. Why H1 says 3 where KY say 2.**  It is the same event under two
+definitions.
+
+- **KY, HKY and Kousidis–Wiemers** use the degree-fall definition
+  (Hodges–Petit–Schlather; in Magma, the first step degree at which a
+  lower-degree polynomial appears).  The trace combination drops from degree
+  2 to degree 1, so `D_ff = 2`.
+- **H1** records the first degree at which the Macaulay matrix loses rank.
+  A degree fall to `λ` shows up there only through `λ² + λ = 0`, one degree
+  later.
+- So H1's "every chained system falls at exactly 3" is KY Cor. 4.11 in this
+  repository's convention.  H1's note also says "the existing literature
+  measures the full-field case".  That is wrong: KY and HKY restrict `X₁, X₂`
+  to a random subspace of dimension `⌈n/2⌉`, following Petit–Quisquater.  It
+  is struck in the scaling-target note.
+
+**3. What the sources read do not contain** (question 2).  Each of the
+following was searched for `fall`, `trace`, `Kosters` and `linear`.
+
+| source | what it has | the symmetrised chain? |
+|---|---|---|
+| Kosters–Yeo, arXiv 1503.08001 | the trace equation; `D_ff = 2` for `S₃(X₁, X₂, x(P))` (measured on a random subspace, `n ≤ 40`) and for a chain of links (§5) | no |
+| Huang–Kosters–Yeo, eprint 2015/573 (CRYPTO 2015) | the same, as Prop. 5; the chained-`S₃` reductio (§5.2) | no |
+| Kousidis–Wiemers, arXiv 1906.05594 (JMC 2019) | `D_ff ≤ m² − m + 1` for `m ≥ 3`; `m = 2` called "pathological", citing KY | no |
+| Galbraith–Gaudry, eprint 2015/1022 (DCC 2016) | §9.2: symmetric variables in the chain; "an open problem to exploit larger symmetry groups in this situation" | named as open |
+| Galbraith–Gebregiyorgis, eprint 2014/806 | 2-torsion invariants `t(t + 1)` in characteristic 2; degree of regularity only | zero hits for `fall`, `trace`, `Kosters` |
+| Faugère–Gaudry–Huot–Renault, eprint 2012/199 (JoC 2014) | symmetries of small torsion; degree of regularity | zero hits |
+| Faugère–Huot–Joux–Renault–Vitse, hal-00935050 (EUROCRYPT 2014) | symmetrised summation polynomials, 2-torsion | zero hits |
+| Semaev, arXiv 1504.01175 | the chained system; "first fall degree is proved to be 4" | no (KY §5 answers it) |
+| Courtois, eprint 2016/003 | trace functions give extra linear equations when splitting over binary curves | no |
+| Huang–Petit–Shinohara–Takagi, eprint 2015/358 | splitting strategies; degree of regularity about 4 at `m = 3, 4` | no |
+
+- **Not found in these sources.**  First, that symmetrising the chain under
+  `T` removes the trace equation.  Second, the symmetrised chain's rank
+  profile: no rank loss below the degree where trivial syzygies force one.
+  Both are "not in the sources read", not "new".
+- **Why the symmetrised side lacks it** (an explanation, not a further
+  measurement).  The morphism still exists, and on `K₀` it is constant on
+  `{P, P + T}`, because `Tr(x(T) + a₂) = Tr(a₂) = 0`.  But in the `u`-frame
+  its formula is `Tr(1/u) + Tr(1)`, which is not a linear form in the
+  symmetrised unknowns.  No combination of the symmetrised last link's
+  quadratic parts vanishes on any of the 48 draws.
+- **The rest of X5′.**  Whether the symmetrised chain's `D = 4` kernel is
+  all trivial syzygies is not in these sources either.  It is registered
+  separately, as step 2.
+
+**4. X6 proper: items 4 and 5 of the survey** (question 3).
+
+The registered queries and their relevant hits:
+
+1. `summation polynomial splitting 2-torsion invariant variables binary
+   elliptic curve first fall degree trace morphism` returned KY, eprint
+   2016/003 (Courtois), FHJRV, and Galbraith–Gebregiyorgis.
+2. `Koblitz curve index calculus tau-adic decomposition Frobenius
+   endomorphism factor base point decomposition` returned GGMP (eprint
+   2020/1315, SAC 2020).  The rest were τ-adic *scalar multiplication*.
+3. `index calculus prime extension degree elliptic curve without subfield
+   invariant subspace factor base 2020..2026` returned GGMP, quasi-subfield
+   polynomials (in the survey's exclusion set), and McGuire–Mueller (eprint
+   2017/1262).  McGuire–Mueller work over prime fields and state that their
+   algorithms "are worse than … Pollard-Rho".
+4. `Koblitz curve endomorphism ring class group index calculus discrete
+   logarithm Z[tau]` returned Koblitz curves over quadratic fields (eprint
+   2016/603, arithmetic) and Gaudry's index calculus for abelian varieties
+   of small dimension (for small `n` relative to `q`).  Nothing uses `Z[τ]` or its class group for
+   index calculus.
+
+**Item 4** (a factor base or decomposition at prime `n`, with no subfield
+and no invariant subspace).  The literature's own route around a large
+`ord_n(q)` is GGMP §4.  None of its three constructions exists at
+`q = 2, n = 131`:
+
+- **Linearised polynomials** give a Frobenius-invariant base only when
+  `ord_n(2)` is small, and it is 130.
+- **Couveignes–Lercier with a torus** needs `n | q + 1 = 3`.
+- **Couveignes–Lercier with an elliptic curve `H/F_q`** needs a squarefree
+  multiple `N` of `n` with `q + 1 − 2√q < N < q + 1 + 2√q`, that is `N ≤ 5`.
+
+Couveignes and Lercier conjecture that higher-dimensional groups might
+contribute.  Even if one did, GGMP's collapse is worth `1/n` on the relation
+search.  That would leave an oracle linear in `|F|` near
+`2^{27.78}/131 ≈ 2^{20.7}×` rho at `n = 131`: a bound on a hypothetical,
+from the frame's scale table.  **No source outside the survey's exclusion set
+gives an operation count at prime `n` with `q = 2`.**  The one inside it is
+Petit–Quisquater and Kousidis–Wiemers's conditional `2^{86}` at `n = 131`,
+already in the survey (§2), from the subspace bases the survey excludes.
+
+**Item 5** (Koblitz structure beyond Frobenius) is empty by structure,
+before any search.
+
+- `τ` satisfies `τ² − μτ + 2 = 0`, with discriminant `μ² − 8 = −7`.  That is
+  a fundamental discriminant, so `Z[τ]` is the maximal order of `Q(√−7)`.
+- `E` is ordinary, so `End(E) = Z[τ]`: every endomorphism is `a + bτ`, and
+  `Aut(E) = {±1}`.
+- "CM by `(1 ± √−7)/2`" is `τ` itself.  The class group of `Z[τ]` is trivial,
+  since `h(−7) = 1`.
+- τ-adic expansions are representations of scalars in `Z[τ]`.  The queries
+  found them only in scalar multiplication.
+- So the Koblitz structure available is `⟨−1⟩ × ⟨τ⟩`, which rho's `√(2n)` and
+  the GGMP collapse already use.
+
+**Verdict.** Every registered outcome that could be checked came out the
+way it was predicted.
+
+| question | outcome |
+|---|---|
+| 1, priority | X5′'s mechanism **is** Kosters–Yeo Prop. 4.9 (96/96 draws, control 0/96).  Re-attributed, and the novelty claims struck in place |
+| 2, anything left | the symmetrised side is not in the 10 sources read; the `D = 4` syzygy split is registered separately |
+| 3, X6 | no operation count at prime `n` with `q = 2` outside the survey's exclusion set; item 5 empty by structure.  **Route 5 stays closed** |
+
+**Class.**  **Accounting.**  The X5′ numbers stand.  What moves is where the
+diagnosis is attributed and the sentences that claimed novelty:
+- the finishing condition's "state of the art";
+- the close-out's "new evidence" and "independent interest";
+- `RESEARCH_ECC2K130_ROUTES.md`'s "not re-deriving known results";
+- H1's "the existing literature measures the full-field case".
+
+Each is struck in place.  The one uncomfortable part is also recorded:
+KY and HKY were already in the survey's source list, and the survey quotes
+HKY §5.2's chained-`S₃` reductio.  H1 was written, and X5′ run, with the
+explanation already in hand.
+
+## X5″ — the symmetrised chain's `D = 4` kernel, split
+
+**Registered 2026-09-24, before any code for it existed.**  This is the item
+X5′ left open ("whether any of the symmetrised chain's `D = 4` dependencies
+is non-trivial") and X6′ found in none of the sources it read.  It is
+reframed here in the light of X6′.  The question is no longer "sharpen a
+novel finding".  It is: **what the symmetrised chain's rank loss at 4 is, in
+H1's convention and in the literature's.**
+
+**A convention has to be fixed first.**  Over the Boolean ring
+`B = F₂[x]/(x_k² + x_k)`, every syzygy is trivial *as a module element*.
+- **Why.**  `B` is the ring of functions on `F₂^N`, so a syzygy is a
+  pointwise kernel vector.
+- **The generators span it at every point.**  At a point where `f` is zero,
+  the field syzygies `(f_i + 1)e_i` span everything.  Elsewhere, those with
+  `f_i = 0` together with the Koszul `f_j e_i + f_i e_j` among `f_i = 1`
+  span the kernel.
+- **So "non-trivial at degree `D`" is always degree-relative:** a syzygy is
+  non-trivial if it is not in the span of the degree-`≤ D` monomial
+  multiples of those generators.  The two conventions measured here make
+  that precise in different ways.
+
+**Systems.**
+- X5′'s chained systems at `m = 4`, on X5′'s quadratic-rank protocol: a
+  random `V ∋ 1` of dimension `ℓ = ⌈(n + log₂ 24)/4⌉`, seed
+  `0x5EED0005 ⊕ (n ≪ 32)`, the same eight `x_R` draws per rung.
+- Both arms: the symmetrised chain, and the `x`-chain as the control.
+- Rungs `n = 9` and `n = 11`, all 8 draws.  `n = 13` on its first 2 draws,
+  if one arm-draw finishes within an hour; otherwise it is reported as not
+  run.
+
+**Measurements, per draw and arm.**
+
+1. **(G) The literature's first fall degree** (Hodges–Petit–Schlather, as
+   used by KY and HKY).
+   - For `D = 2, 3, 4`, build the top-degree Macaulay matrix.  Its rows are
+     `t·f_i` with `deg t = D − deg f_i`, keeping only the degree-`D` part
+     (products in `F₂[x]/(x_k²)`); rows whose top part vanishes are dropped.
+   - `K^h_D` is its left kernel.  `T^h_D` is the span of the trivial ones:
+     `s·(f_j^h e_i + f_i^h e_j)` and `s·f_i^h e_i`, with monomials `s` of
+     the degree that makes the total `D`.
+   - Check that `T^h_D ⊆ K^h_D`, then report `R^h_D = dim K^h_D − dim T^h_D`.
+     The first fall degree is the least `D` with `R^h_D > 0`.
+   - **Positive control:** the `x`-chain has `R^h_2 = 1` on every draw (KY's
+     trace equation).  If the control fails, the tool is wrong and nothing
+     else is reported.
+2. **(L) Linear equations derivable at degree `D`.**
+   `L_D = dim(rowspace(M_D) ∩ Poly_{≤1})`, where `M_D` is the full Boolean
+   Macaulay matrix of degree `≤ D` (rows `t·f_i`, `deg t ≤ D − deg f_i`), for
+   `D = 2, 3, 4`.  The `x`-chain should give `L_2 = 1`.
+3. **(F) H1's convention at `D = 4`.**
+   - `K_4` is the left kernel of `M_4` (rows whose Boolean product vanishes
+     are dropped, as X5′'s diagnostic did).
+   - `T_4` is the span of the degree-`≤ 4` monomial multiples of the Koszul
+     and field syzygies, with Boolean-reduced products.
+   - `Λ_4` is the span of the Boolean identities of every linear polynomial
+     `h = Σ g_i f_i` derivable at `D ≤ 3`: `s·(h + 1)·g` and
+     `s·(h_b·g_a + h_a·g_b)`, with `s` of whatever degree still fits in 4.
+   - Check both are in `K_4`, then report `dim K_4`, `dim T_4`,
+     `dim(T_4 + Λ_4)` and the residual `r_4 = dim K_4 − dim(T_4 + Λ_4)`.
+
+**What is expected, and what is not.**  At `n = 9` X5′ measured
+`dim K_4 = 89` for the symmetrised chain.  Its `n` degree-2 equations have
+at most `n + C(n, 2) = 45` trivial syzygies at degree 4.  Its degree-3
+equations have none there (their Koszul and field syzygies start at 6), so a
+positive residual after `T_4` alone is expected.  Nothing is predicted
+beyond that.
+
+**Outcomes.**
+
+| (G) and (F) read | what it means |
+|---|---|
+| `R^h_D = 0` for `D ≤ 4`, and `r_4 > 0` with `L_3 = 0` | a genuine exact syzygy at 4 with no degree fall below it |
+| `R^h_3 > 0`, and `r_4 = 0` | the symmetrised chain has a genuine degree fall at 3.  Its rank loss at 4 is trivial syzygies plus the Boolean identities of what fell at 3.  So it sits one degree above the `x`-chain in **both** conventions (literature: 3 against 2; H1: 4 against 3), and the offset is where the first fall happens, not a difference in kind |
+| `R^h_D = 0` for `D ≤ 4`, and `r_4 = 0` | no degree fall through 4: H1's "fall at 4" is entirely trivial syzygies, and by the literature's definition the symmetrised chain has no first fall at or below 4 |
+| anything else | reported as measured, with the residual's dimension |
+
+**Class.**  A structural measurement: no cost moves.
+
+**Inadmissible.**  Changing the rungs, draws, seeds or definitions above
+after the rows are seen; dropping draws; reporting the positive control's
+failure as a result.
+
+### X5″, run: **the symmetrised chain has genuine falls at 3, one degree above the `x`-chain in both conventions, and all of it is the last link**
+
+`cargo run --release --example koblitz_x5_syzygy_split -- --json experiments/29_koblitz_x5_syzygy_split.json`,
+frozen as `experiments/29_koblitz_x5_syzygy_split.{json,log}`.
+
+- **Coverage.**  18 draws per arm (8 at `n = 9`, 8 at `n = 11`, 2 at
+  `n = 13`), 3 min 17 s in all.
+- **Controls.**  The positive control held on every draw (the `x`-chain's
+  `R^h_2 = 1`).  No generator failed: every trivial syzygy, Boolean
+  identity and multiple was checked to lie in its kernel.
+- **Cross-check.**  `K_4` reproduces X5′'s diagnostic (89 and 84 at
+  `n = 9`, draws 0–1).
+
+| arm | `n` | literature: `R^h_2`, `R^h_3` | first fall (literature) | linear `L_2 / L_3 / L_4` | H1: `K_4` | `T_4` (`= n + C(n,2)`) | `+ Λ_4 (+ K_3` multiples) | residual `r_4` |
+|---|---:|---|---:|---|---:|---:|---:|---:|
+| symmetrised | 9 | 0, **18** | **3** | 0 / 0 / 4–6 | 87–89 | 45 | 45 (45) | **42–44** |
+| symmetrised | 11 | 0, **22** | **3** | 0 / 0 / 4–10 | 116–122 | 66 | 66 (66) | **50–56** |
+| symmetrised | 13 | 0, **26** | **3** | 0 / 0 / 0 | 117 | 91 | 91 (91) | **26** |
+| `x`-chain | 9 | **1**, 39 | **2** | 1 / 1 / 1 | 84 | 45 | 78 (78) | 6 |
+| `x`-chain | 11 | **1**, 45 | **2** | 1 / 1 / 1 | 111 | 66 | 103 (103) | 8 |
+| `x`-chain | 13 | **1**, 54 | **2** | 1 / 1 / 1 | 145 | 91 | 136 (136) | 9 |
+
+Ranges are over draws; every other cell is the same on every draw.  At
+`D = 4` the graded `R^h` count includes multiples of the falls at 3 and is
+left in the JSON.
+
+**Against the registered outcomes.**  The symmetrised arm reads
+`R^h_3 > 0` and `r_4 > 0`, with `L_3 = 0`.  That is not any row of the
+table exactly (the second row needed `r_4 = 0`), so it is **"anything else",
+reported as measured.**
+
+1. **By the literature's definition, the symmetrised chain has a genuine
+   first fall at 3,** on every draw.  There are exactly `2n` falls, all to
+   degree 2 (no linear equation appears below degree 4).  The `x`-chain's is
+   at 2 (KY's trace).  So the one-degree offset X5′ measured in H1's
+   convention (4 against 3) is the same offset in the literature's (3 against
+   2).
+   - **The `2n` is derived, and the count matches.**  The symmetrised last
+     link's top part is `w_R·U·W` (X5′), which is bilinear.  Multiplying by
+     `U` gives `w_R·U²·W`, and by `W` gives `w_R·U·W²`.  Both are still
+     bilinear, because squaring is `F₂`-linear.  So each of the two
+     multipliers' `n` coordinates falls from 3 to 2.
+   - **The mechanism does not carry over to the `x`-link as stated.**  Its
+     top part contains `a²b²`, and `a·a²b² = a³b²` is cubic.  The `x`-chain
+     still has 39–54 graded falls at 3.  At most one per unknown (34–46)
+     can be multiples of the trace fall at 2, so at least 5–8 are not.
+     Neither part is analysed here.
+2. **In H1's convention, the symmetrised chain's rank loss at 4 is not all
+   trivial.**
+   - `n + C(n, 2)` of it is the Koszul and field syzygies of its `n`
+     degree-2 equations, independent on every draw.
+   - The remaining **26–56** are not in the degree-4 trivial span.  They are
+     not Boolean identities of linear falls, because there are none below
+     degree 4.  They are not multiples of `K_3`, which is 0.
+   - The `x`-chain has a residual too, 6–9, after its trace equation's
+     identities and their multiples.
+   - What the symmetrised residual is, is **not determined here**.
+3. **X5′'s reading, sharpened.**
+   - "No rank loss below the degree where trivial syzygies force one" is
+     true of rank loss.  It is not true of degree falls: the symmetrised
+     chain falls genuinely at 3.
+   - So "the symmetrised system is not shown to be harder" becomes firmer.
+     By the definition the literature uses, it falls one degree after the
+     `x`-chain, from a standard Frobenius mechanism.  It does not avoid
+     falling.
+
+**Unregistered localisation** (computed after the registered quantities, and
+unable to change them).
+
+- **All of the above is the last link.**  For each link alone:
+  - the two cubic links have no `D = 4` kernel and no graded fall at 3,
+    on every draw and in both arms;
+  - the last link alone has the whole system's `K_4` and the whole graded
+    `R^h_3`.
+- **So through degree 4, a chain's fall degree, in either convention, is
+  the fall degree of the single `S₃` whose third coordinate is known.**  For
+  the `x`-frame that is exactly Kosters–Yeo's system.  That puts one more
+  line under H1's caveat: H1's chained rows measure one link.
+- **A hypothesis tried and falsified.**  The residual is not produced by
+  multipliers in the last link's small unknown block (the summand's 4–5
+  bits).  Restricted to those multipliers, the kernel is 0 in both arms.
+
+**The first run, and the fix.**  The first run built `Λ_4` from the
+echelon form of `M_3` only.
+
+- **What went wrong.**  When the combination representing a linear
+  polynomial used degree-3 rows, the monomial multiples that fit at its true
+  degree were left out.  So the `x`-chain's `T_4 + Λ_4` changed from draw to
+  draw (45 or 78 at `n = 9`).
+- **The fix.**  The linear pivots of `M_2` were added, so each identity is
+  taken at the lowest degree it appears at.  That is what the registration
+  asked for ("`s` of whatever degree still fits").
+- **What it affected.**  Only the `x`-chain's `Λ_4` column.  The symmetrised
+  arm has no linear falls below 4, and its rows are identical in both runs.
+- **Where it is kept.**  The first run's partial output, stopped at
+  `n = 13` for the fix, is `experiments/29_prefix/`.
+
+**Class.**  A structural measurement; no cost moves.
+
+**What is still open.**  What the symmetrised last link's 26–56 residual
+syzygies at degree 4 are.  They sit in `n` quadratic equations in `n + 4`
+or `n + 5` unknowns, and they are not trivial, not linear-fall identities and
+not small-block multiples.  Nothing measured here bears on ECC2K-130's cost.

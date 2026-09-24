@@ -1,0 +1,17 @@
+== X5' quadratic-rank protocol: random V, m = 4, seed 0x5EED0005, 8 draws per rung
+n= 9 m=4 l=4  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8  | symmetrised chain null dim ["0", "0", "0", "0", "0", "0", "0", "0"]
+n=11 m=4 l=4  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8  | symmetrised chain null dim ["0", "0", "0", "0", "0", "0", "0", "0"]
+n=13 m=4 l=5  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8  | symmetrised chain null dim ["0", "0", "0", "0", "0", "0", "0", "0"]
+n=15 m=4 l=5  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8  | symmetrised chain null dim ["0", "0", "0", "0", "0", "0", "0", "0"]
+n=17 m=4 l=6  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8  | symmetrised chain null dim ["0", "0", "0", "0", "0", "0", "0", "0"]
+n=19 m=4 l=6  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8  | symmetrised chain null dim ["0", "0", "0", "0", "0", "0", "0", "0"]
+
+== H1's own protocol: invariant V (factor index 0), x(R) from seed 0x5EED + t, 8 draws
+n= 9 m=3 l=6  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8
+n=15 m=3 l=4  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8
+n=21 m=3 l=6  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8
+n=31 m=3 l=5  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8
+n= 9 m=4 l=6  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8
+n=15 m=4 l=4  draws 8/8  null dim [1, 1, 1, 1, 1, 1, 1, 1]  (a) null vector = Tr(z^j x_R^-2): 8/8  (b) sum = Tr(e + x_m) + Tr(a6 x_R^-2): 8/8  control Tr(z^j x_R^-1): 0/8
+
+RESULT: (a) and (b) hold on every draw: the x-chain's hidden linear equation is Kosters-Yeo Prop. 4.9.

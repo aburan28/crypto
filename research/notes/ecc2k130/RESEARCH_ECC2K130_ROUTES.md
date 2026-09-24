@@ -30,8 +30,12 @@ or citations rather than expectations:
 3. **Our measurements are the state of the art, not a reproduction of
    it.** No rigorous bound on `D_reg` for these systems exists in either
    direction; the only rigorous Weil-restriction bound is numerically
-   vacuous at `n = 131` (solving degree ≤ 263). So the FFD ladder is
-   contributing evidence, not re-deriving known results.
+   vacuous at `n = 131` (solving degree ≤ 263). ~~So the FFD ladder is
+   contributing evidence, not re-deriving known results.~~
+   *(Struck 2026-09-24.  The chained rows' first fall re-derives
+   Kosters–Yeo Cor. 4.11, the trace equation; see §X6′ of
+   [`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md).
+   The `D_reg` half of this point stands.)*
 
 ---
 
