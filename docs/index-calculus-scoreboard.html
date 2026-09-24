@@ -5759,5 +5759,113 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0023 -->
+<section class="panel" id="toy-symmetry-quotient-20260924">
+<div class="panel-head"><h2>Fixed seven-bit symmetry quotient: exact coverage, solver costs unmeasured <span class="chip">accounting</span></h2></div>
+<p>All 90 complete-enumeration measurements agree with exhaustive point ground truth.
+The unit below is tuple sum checks; the floor counts point multisets for explicit enumeration,
+not a universal solver lower bound. These stage ratios are not ECDLP speedups.
+Gr&ouml;bner degree, F4 matrices, full-DLP S and rho ratios remain unmeasured.</p>
+<table><thead><tr><th>Support</th><th>Variant</th><th>Tuple checks</th><th>Enumeration floor</th><th>Checks / floor</th><th>Checks / ordered</th><th>Solvable targets</th><th>Correctness</th><th>Class</th></tr></thead><tbody>
+<tr><td>orbit-s101</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s101</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s101</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>invariant_lift</td><td>697</td><td>680</td><td>1.025000</td><td>0.206519</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>ordered</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>permutation</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>invariant_lift</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+</tbody></table>
+<p>Same-dimensional invariant coordinate subspaces yield 1 versus 15 factor-base points;
+matching dimension alone does not match the decomposition workload.
+Six invariant-support Frobenius audits pass and four non-invariant controls are rejected.
+The 20 target orbits do not imply 20 independent solver calls or independent relations.</p>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/results/pilot-001/results.json">raw runs</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/results/pilot-001/certificates.json">certificates</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/RESULTS.md">interpretation and limitations</a>.</p>
+</section>
+
+<section class="panel" id="toy-f5-neighbors-20260924">
+<div class="panel-head"><h2>Fixed eight-bit F5 criterion and descending neighbors: no consistent advantage <span class="chip">accounting</span></h2></div>
+<p>1,280 systems, 7,680 repeated solver executions; all exact row spaces, roots,
+point lifts and four isogeny certificates verified. Neighbor/source completion
+budget: 133 lower, 775 equal, 116 higher. The frozen success condition fails.
+This is a bounded Python reference of the Boolean matrix-F5 row criterion,
+not full signature-based F5 or intrinsic degree of regularity.</p>
+<p>Unit: one at-most-64-bit row XOR, including criterion overhead, summed over
+64 systems per row and all degree budgets, per repetition. Ratios compare the
+same solver, split and encoding on the source. Non-matrix costs and completion
+checks are separate. Full-DLP S, rho/floor ratios and speedup are null for every
+row. These stage costs do not establish an end-to-end improvement.</p>
+<table><thead><tr><th>Split</th><th>Encoding</th><th>Model</th><th>Matrix variant</th><th>Degree range</th><th>Matrix XORs</th><th>Criterion XORs (included)</th><th>Cost/source</th><th>Correctness</th><th>Class</th></tr></thead><tbody>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_224</td><td>f4</td><td>4–7</td><td>148915</td><td>0</td><td>0.996000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_224</td><td>f5</td><td>4–7</td><td>148718</td><td>112</td><td>0.995102</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_225</td><td>f4</td><td>4–7</td><td>127815</td><td>0</td><td>0.854875</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_225</td><td>f5</td><td>4–7</td><td>127359</td><td>567</td><td>0.852185</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_92</td><td>f4</td><td>4–7</td><td>150620</td><td>0</td><td>1.007404</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_92</td><td>f5</td><td>4–7</td><td>150154</td><td>286</td><td>1.004711</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_93</td><td>f4</td><td>4–7</td><td>138967</td><td>0</td><td>0.929464</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_93</td><td>f5</td><td>4–7</td><td>138842</td><td>382</td><td>0.929020</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>source</td><td>f4</td><td>4–7</td><td>149513</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>source</td><td>f5</td><td>4–7</td><td>149450</td><td>439</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_224</td><td>f4</td><td>4–8</td><td>168543</td><td>0</td><td>1.078654</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_224</td><td>f5</td><td>4–8</td><td>168302</td><td>205</td><td>1.079343</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_225</td><td>f4</td><td>4–8</td><td>153385</td><td>0</td><td>0.981645</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_225</td><td>f5</td><td>4–8</td><td>152576</td><td>789</td><td>0.978490</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_92</td><td>f4</td><td>4–8</td><td>177279</td><td>0</td><td>1.134564</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_92</td><td>f5</td><td>4–8</td><td>176675</td><td>317</td><td>1.133040</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_93</td><td>f4</td><td>4–8</td><td>160471</td><td>0</td><td>1.026995</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_93</td><td>f5</td><td>4–8</td><td>160170</td><td>726</td><td>1.027192</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>source</td><td>f4</td><td>4–8</td><td>156253</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>source</td><td>f5</td><td>4–8</td><td>155930</td><td>594</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_224</td><td>f4</td><td>4–7</td><td>159486</td><td>0</td><td>1.075653</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_224</td><td>f5</td><td>4–7</td><td>159072</td><td>436</td><td>1.080520</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_225</td><td>f4</td><td>4–7</td><td>143040</td><td>0</td><td>0.964733</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_225</td><td>f5</td><td>4–7</td><td>142426</td><td>1215</td><td>0.967450</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_92</td><td>f4</td><td>4–7</td><td>141676</td><td>0</td><td>0.955534</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_92</td><td>f5</td><td>4–7</td><td>141161</td><td>679</td><td>0.958857</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_93</td><td>f4</td><td>4–7</td><td>146447</td><td>0</td><td>0.987712</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_93</td><td>f5</td><td>4–7</td><td>145840</td><td>26</td><td>0.990640</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>source</td><td>f4</td><td>4–7</td><td>148269</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>source</td><td>f5</td><td>4–7</td><td>147218</td><td>482</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_224</td><td>f4</td><td>4–8</td><td>140862</td><td>0</td><td>0.832139</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_224</td><td>f5</td><td>4–8</td><td>140443</td><td>500</td><td>0.839222</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_225</td><td>f4</td><td>4–8</td><td>161450</td><td>0</td><td>0.953762</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_225</td><td>f5</td><td>4–8</td><td>160697</td><td>1139</td><td>0.960251</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_92</td><td>f4</td><td>4–8</td><td>178330</td><td>0</td><td>1.053480</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_92</td><td>f5</td><td>4–8</td><td>177693</td><td>1420</td><td>1.061811</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_93</td><td>f4</td><td>4–8</td><td>149907</td><td>0</td><td>0.885572</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_93</td><td>f5</td><td>4–8</td><td>149060</td><td>144</td><td>0.890713</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>source</td><td>f4</td><td>4–8</td><td>169277</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>source</td><td>f5</td><td>4–8</td><td>167349</td><td>1976</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+</tbody></table>
+<p>The neighbors are Frobenius-related; these are transported workloads, not
+independent curve samples. This eight-bit matrix experiment is separate from
+the seven-bit enumeration pilot above; its earlier figures remain unchanged.</p>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/results/raw.json.gz">raw traces and certificates</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/results/summary.json">summary</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/RESULTS.md">results and limitations</a>.</p>
+</section>
 </body>
 </html>
