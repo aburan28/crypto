@@ -14,6 +14,7 @@ on:
       - "src/cryptanalysis/ic_engine.rs"
       - "src/cryptanalysis/ic_progress.rs"
       - "src/cryptanalysis/ic_run.rs"
+      - "src/cryptanalysis/semaev_decomp.rs"
       - "src/cryptanalysis/field_dispatch.rs"
       - "src/cryptanalysis/gf3m.rs"
       - "tests/icx.rs"
@@ -45,8 +46,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Build icx
         run: cargo build --release --bin icx
-      - name: Unit tests (catalog, engine, progress, run)
-        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress cryptanalysis::ic_run
+      - name: Unit tests (catalog, engine, progress, run, field backend)
+        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress cryptanalysis::ic_run cryptanalysis::semaev_decomp::tests::clmul_path_matches_independent_reference
       - name: Integration tests (run binary over the whole catalog)
         run: cargo test --release --test icx
       - name: List the catalog (log which curves ran on ${{ matrix.arch }})
