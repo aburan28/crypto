@@ -699,7 +699,12 @@ independent, which overstates the uncertainty of the correlated ones.
     1.0039 ± 0.0021, which is the emulation's 1.0038.  Over the four device
     rows under v2, χ² = 13.3 on 4 degrees of freedom (p ≈ 0.01), with signs
     +, −, −, +.  So under v2 the device harness scatters more than its
-    standard errors allow, and why is unexplained.
+    standard errors allow, and why is unexplained.  Two limits on that
+    reading:
+    - the `n = 41` term is measured against the emulation row that is
+      itself item 3's −2.6 outlier, so it is not cleanly the device's;
+    - no v1 replicate exists, so "under v2" is the scope of the observation.
+      It does not show a change from v1.
   - **It does not reach the cost.** The constant pooled from the emulation's
     rows alone is 1.0032 ± 0.0010, against the pool's 1.0034 ± 0.0009.  The cost ratio
     of item 6 moves in its third digit: 0.811–0.863 against 0.811–0.864.

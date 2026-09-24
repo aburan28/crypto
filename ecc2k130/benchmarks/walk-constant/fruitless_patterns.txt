@@ -1,3 +1,4 @@
+rule v1, offsets |d| <= 6, at most 3 determined tags
 L = 2: none
 L = 3: none
 L = 4: 24 with 3 determined tags in groups of (4,)
