@@ -58,6 +58,9 @@ class IdentityTests(unittest.TestCase):
                                     ('factor_base', 'nominal_bound', 65)]:
             changed = copy.deepcopy(self.method)
             changed[section][key] = value
+            if key == 'source_manifest_sha256':
+                for stage in STAGE_FIELDS:
+                    changed[stage]['source_sha256'] = value
             self.assertNotEqual(original, candidate_manifest(FIXTURE, REPORT, changed))
 
     def test_unknown_stage_and_isogeny_are_not_results(self):
