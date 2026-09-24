@@ -7,6 +7,8 @@ import platform
 import subprocess
 from pathlib import Path
 
+from identity import curve_record, factor_base_inventory, write_immutable
+from measurement import legacy_ledger
 from oracle import require, verify
 from tournament import PHASES, child_env, digest, execute, parse_profiles, read, write
 
@@ -64,7 +66,8 @@ def main():
         'memory_bytes': 8 * 1024**3, 'cpu': cpu,
         'input_sha256': digest(out / 'inputs.json'),
         'evaluator_sha256': {name: digest(Path(__file__).with_name(name))
-                             for name in ('ci_smoke.py', 'tournament.py', 'oracle.py', 'portfolio.py')},
+                             for name in ('ci_smoke.py', 'tournament.py', 'oracle.py', 'portfolio.py',
+                                          'identity.py', 'measurement.py')},
     }, exclusive=True)
     outcomes = []
     fixtures = {}
@@ -87,13 +90,19 @@ def main():
                 fixtures[key] = read(directory / 'fixture/stdout.json')['fixture']
             fixture = fixtures[key]
             write(directory / 'expected-fixture.json', fixture, exclusive=True)
+            write_immutable(directory / 'curve-manifest.json', curve_record(fixture))
             process = execute([str(worker)], job, directory / 'native', 60, 8 * 1024**3, cpu)
             receipt['native_process'] = process
             require(process['exit_code'] == 0 and process['process_status'] == 'EXITED',
                     'native worker failed or incomplete')
-            proof = verify(read(directory / 'native/stdout.json'), fixture,
+            report = read(directory / 'native/stdout.json')
+            proof = verify(report, fixture,
                            expected_mode=job['mode'], summands=job['config']['summands'])
             receipt['certificate'] = proof
+            if job['mode'] == 'ic':
+                inventory = factor_base_inventory(report, fixture)
+                write_immutable(directory / 'factor-base-inventory.json', inventory)
+                receipt['factor_base_inventory'] = inventory
             if profile:
                 profile_dir = directory / 'profile'
                 command = ['valgrind', '--tool=callgrind', '--cache-sim=no', '--branch-sim=no',
@@ -116,6 +125,11 @@ def main():
                 # Existing intervals combine some scientific stages. They must not
                 # be relabelled as the new exclusive T_* phase decomposition.
                 receipt['raw_profiler_intervals'] = intervals
+                if job['mode'] == 'ic':
+                    ledger = legacy_ledger(intervals, unit='valgrind-3.22-amd64-Ir',
+                                           process_operations=sum(intervals.values()))
+                    require(ledger['cold_operations'] is None, 'legacy stages became a scientific total')
+                    write(directory / 'scientific-phase-ledger.json', ledger, exclusive=True)
             receipt['status'] = 'VERIFIED'
         except Exception as exc:
             receipt['reason'] = f'{type(exc).__name__}: {exc}'
