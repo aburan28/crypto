@@ -1,0 +1,21 @@
+name: Toy binary elimination audit
+on:
+  pull_request:
+    paths:
+      - 'research/toy_binary_elimination_20260924/**'
+      - 'research/toy_binary_formula_audit_20260924/audit.py'
+      - '.github/workflows/toy-binary-elimination.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Replay both protocols and verify independent algebra checks
+        run: python3 research/toy_binary_elimination_20260924/verify.py
