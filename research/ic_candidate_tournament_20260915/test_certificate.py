@@ -32,7 +32,7 @@ class DescentCertificateTests(unittest.TestCase):
     def test_relation_must_hold_in_the_group(self):
         self.rejects(lambda r: r['solutions'][0]['relation'].update(a=13), 'does not hold in the group')
         self.rejects(lambda r: r['solutions'][0]['relation'].update(points=[0, 9, 26]), 'does not hold in the group')
-        self.rejects(lambda r: r['solutions'][0]['relation'].update(points=[]), 'does not hold in the group')
+        self.rejects(lambda r: r['solutions'][0]['relation'].update(points=[]), 'bad descent relation indices')
 
     def test_relation_belongs_to_its_own_target(self):
         def swap(r):
@@ -54,8 +54,11 @@ class DescentCertificateTests(unittest.TestCase):
         proof = verify(report, FIXTURE, expected_mode='ic', summands=3)
         self.assertEqual(proof['certified_descents'], 2)
 
-    def test_degenerate_relation_is_only_accepted_when_the_probe_is_infinity(self):
-        self.rejects(lambda r: r['solutions'][1]['relation'].update(points=[]), 'does not hold in the group')
+    def test_generic_direct_collision_is_not_certified_as_index_calculus(self):
+        # This equation really holds and recovers the correct scalar, but uses
+        # no factor-base logs. It must not satisfy IC admission.
+        self.rejects(lambda r: r['solutions'][1]['relation'].update(a=702, b=1, points=[]),
+                     'bad descent relation indices')
 
 
 class DegreeBoundTests(unittest.TestCase):

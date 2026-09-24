@@ -5,6 +5,13 @@ description: Independently audit an index-calculus tournament's raw evidence, co
 
 # Audit an IC result
 
+For portable development screens, audit with the round's frozen `autolab.py
+verify --round PATH`; these always retain `promotion_eligible=false`. See
+[AUTOLAB.md](../../AUTOLAB.md) for native timing limitations, rho quality checks,
+source identity and the separate calibrated promotion path. New checker versions
+reject empty descent relations even when a generic direct collision yields the
+correct scalar. Historical rounds use their own unchanged frozen checkers.
+
 Read the repository's `AGENTS.md`, the selected round's sealed `contract.json`,
 `calibration.json` and `decision.json`, and the operational guide under
 `research/ic_candidate_tournament_20260915/OPERATIONS.md`.
