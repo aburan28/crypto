@@ -1700,6 +1700,52 @@ pub(crate) fn build_inherited_macaulay(
     build_inherited_macaulay_with_layout(polys, n_vars, degree, multiplier_mask, reuse_layout)
 }
 
+/// [`build_inherited_macaulay`] with **support-local multipliers**: each
+/// generator `f` is multiplied only by the monomials of degree at most
+/// `degree − deg f` in the variables of `multiplier_mask ∩ supp(f)`.  Where
+/// every generator's support already contains `multiplier_mask` — a
+/// quadratic system in all its unknowns — the rows are exactly
+/// [`build_inherited_macaulay`]'s and that path, with its layout cache, is
+/// taken, so such a root is built identically.
+pub(crate) fn build_inherited_macaulay_support_local(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    quadratic_generators: bool,
+) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    let support = |p: &F2BoolPoly| p.terms.iter().fold(0u64, |acc, t| acc | t.mask);
+    if polys.iter().all(|p| multiplier_mask & !support(p) == 0) {
+        return build_inherited_macaulay(
+            polys,
+            n_vars,
+            degree,
+            multiplier_mask,
+            quadratic_generators,
+        );
+    }
+    let mut rows_monos: Vec<Vec<u64>> = Vec::new();
+    for p in polys {
+        let rows = macaulay_rows_monos_with_mask(
+            std::slice::from_ref(p),
+            n_vars,
+            degree,
+            multiplier_mask & support(p),
+            None,
+        )?;
+        rows_monos.extend(rows);
+        if rows_monos.len() > max_f4_rows() {
+            return None;
+        }
+    }
+    if rows_monos.is_empty() {
+        return Some((Vec::new(), Vec::new()));
+    }
+    let columns = macaulay_columns(&rows_monos)?;
+    let matrix = pack_rows(&rows_monos, &columns);
+    Some((columns, matrix))
+}
+
 fn build_inherited_macaulay_with_layout(
     polys: &[F2BoolPoly],
     n_vars: usize,
@@ -3296,7 +3342,11 @@ impl Default for SolverEngine {
     /// 2026-09-24 it also eliminates linear generators, and the
     /// decomposition oracle hands it a chain in the interleaved order
     /// (`research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md`): the same
-    /// decompositions found, on a different tree.  `KIC_F4_INHERIT=0`
+    /// decompositions found, on a different tree.  It builds every basis
+    /// with support-local multipliers
+    /// (`research/notes/ecc2k130/RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md`;
+    /// `KIC_F4_MULTIPLIERS=occurring` restores the from-scratch step's
+    /// policy).  `KIC_F4_INHERIT=0`
     /// restores the from-scratch engine, and with it the historical split
     /// rule and no elimination, as a retained control.
     fn default() -> Self {
@@ -3759,17 +3809,22 @@ struct InheritPolicy {
     /// work at a node (`KIC_LINEAR_ELIM=1|0`); see
     /// [`eliminate_linear_generators`].
     linear_elimination: bool,
+    /// Build every basis with support-local multipliers
+    /// (`KIC_F4_MULTIPLIERS=support|occurring`); see
+    /// [`ReducedBasis::from_system_with`].
+    support_local: bool,
 }
 
 impl InheritPolicy {
     /// The policy of a solve with `engine` (already resolved): linear
-    /// elimination on under [`SolverEngine::InheritedF4`] and off otherwise,
-    /// so the from-scratch reference (`KIC_F4_INHERIT=0`) walks the tree it
-    /// always walked, and completion on a degree drop; each can be set from
-    /// the environment.
+    /// elimination and support-local multipliers on under
+    /// [`SolverEngine::InheritedF4`] and off otherwise, so the from-scratch
+    /// reference (`KIC_F4_INHERIT=0`) walks the tree it always walked, and
+    /// completion on a degree drop; each can be set from the environment.
     fn resolve(engine: SolverEngine) -> Self {
-        static OVERRIDES: std::sync::OnceLock<(bool, Option<bool>)> = std::sync::OnceLock::new();
-        let &(rebuild, linear) = OVERRIDES.get_or_init(|| {
+        static OVERRIDES: std::sync::OnceLock<(bool, Option<bool>, bool)> =
+            std::sync::OnceLock::new();
+        let &(rebuild, linear, occurring) = OVERRIDES.get_or_init(|| {
             (
                 std::env::var("KIC_F4_DROP").as_deref() == Ok("rebuild"),
                 match std::env::var("KIC_LINEAR_ELIM").as_deref() {
@@ -3777,12 +3832,14 @@ impl InheritPolicy {
                     Ok("0") => Some(false),
                     _ => None,
                 },
+                std::env::var("KIC_F4_MULTIPLIERS").as_deref() == Ok("occurring"),
             )
         });
         let inherited = matches!(engine, SolverEngine::InheritedF4 { .. });
         Self {
             rebuild_on_drop: inherited && rebuild,
             linear_elimination: linear.unwrap_or(inherited),
+            support_local: inherited && !occurring,
         }
     }
 }
@@ -3815,6 +3872,7 @@ fn reduce_inherited(
     canonical: bool,
     n_vars: usize,
     engine: SolverEngine,
+    support_local: bool,
     bases: &mut InheritedBases,
     stats: &mut SolveStats,
 ) -> Option<Vec<F2BoolPoly>> {
@@ -3846,7 +3904,13 @@ fn reduce_inherited(
             None => {
                 let started = std::time::Instant::now();
                 let rounds = if d == top { closure_rounds() } else { 0 };
-                match ReducedBasis::from_system_closed(system, n_vars, d, rounds) {
+                match ReducedBasis::from_system_closed_with(
+                    system,
+                    n_vars,
+                    d,
+                    rounds,
+                    support_local,
+                ) {
                     Some((basis, cost)) => {
                         let word_ops = cost.word_ops();
                         charge_word_ops(word_ops);
@@ -4241,7 +4305,15 @@ fn solve_rec(
             }
         }
         let reduced = if inherit {
-            reduce_inherited(&system, canonical, n_vars, opts.engine, &mut bases, stats)
+            reduce_inherited(
+                &system,
+                canonical,
+                n_vars,
+                opts.engine,
+                policy.support_local,
+                &mut bases,
+                stats,
+            )
         } else {
             reduce_system(&system, n_vars, opts.engine, stats)
         };
@@ -4349,6 +4421,7 @@ mod tests {
         [false, true].map(|rebuild_on_drop| InheritPolicy {
             rebuild_on_drop,
             linear_elimination: false,
+            support_local: false,
         })
     }
 
@@ -4975,7 +5048,9 @@ mod tests {
                 SolverEngine::InheritedF4 { max_degree: 3 },
             ] {
                 for split_rule in [SplitRule::LowestFree, SplitRule::HighestFree] {
-                    for rebuild_on_drop in [false, true] {
+                    for (rebuild_on_drop, support_local) in
+                        [(false, false), (true, false), (false, true), (true, true)]
+                    {
                         let opts = SolveOptions {
                             max_solutions: 1 << 13,
                             engine,
@@ -4985,6 +5060,7 @@ mod tests {
                         let policy = InheritPolicy {
                             rebuild_on_drop,
                             linear_elimination: true,
+                            support_local,
                         };
                         let (mut got, stats) = solve_pinned(&system, n_vars, &opts, policy);
                         got.sort_unstable();
@@ -5134,10 +5210,13 @@ mod tests {
                     .iter()
                     .map(|e| permute_poly(e, &perm))
                     .collect();
-                for rebuild_on_drop in [false, true] {
+                for (rebuild_on_drop, support_local) in
+                    [(false, false), (true, false), (false, true), (true, true)]
+                {
                     let policy = InheritPolicy {
                         rebuild_on_drop,
                         linear_elimination: true,
+                        support_local,
                     };
                     let (got, stats) = solve_pinned(&permuted, sys.n_vars, &opts, policy);
                     assert!(!stats.exhausted);
@@ -5154,6 +5233,57 @@ mod tests {
             }
         }
         assert!(roots > 0, "no system had a root; the comparison is vacuous");
+    }
+
+    /// Support-local multipliers build exactly the occurring-variable rows
+    /// when every generator spans every variable, and otherwise a subset
+    /// of them: every support-local row is a row of the occurring-variable
+    /// Macaulay matrix.
+    #[test]
+    fn support_local_rows_are_occurring_rows() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base(&kc, 0)
+            .unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let basis = &fb.subspace_basis;
+        for (m, raw) in [(2usize, 23u64), (3, 23), (3, 300), (4, 1)] {
+            let sys =
+                build_decomposition_system(basis, &fe(raw, kc.n), &kc.curve.b, m, &st).unwrap();
+            let occurring = occurring_vars(&sys.equations);
+            let rows = |support_local: bool| -> std::collections::BTreeSet<Vec<u64>> {
+                let (columns, matrix) = if support_local {
+                    build_inherited_macaulay_support_local(
+                        &sys.equations,
+                        sys.n_vars,
+                        3,
+                        occurring,
+                        false,
+                    )
+                } else {
+                    build_inherited_macaulay(&sys.equations, sys.n_vars, 3, occurring, false)
+                }
+                .unwrap();
+                matrix
+                    .iter()
+                    .map(|row| {
+                        (0..columns.len())
+                            .filter(|&c| row[c / 64] >> (c % 64) & 1 == 1)
+                            .map(|c| columns[c])
+                            .collect()
+                    })
+                    .collect()
+            };
+            let (local, full) = (rows(true), rows(false));
+            assert!(
+                local.is_subset(&full),
+                "m={m}: a support-local row is not a Macaulay row"
+            );
+            if m == 2 {
+                assert_eq!(local, full, "m=2: every generator spans every variable");
+            } else {
+                assert!(local.len() < full.len(), "m={m}: nothing was left out");
+            }
+        }
     }
 
     /// An unsatisfiable system is rejected by the basis, not by search.

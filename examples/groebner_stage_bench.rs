@@ -144,6 +144,34 @@ const CHAIN_HOLDOUT_2: &[Instance] = &[
     Instance { a: 0, n: 23, factor_index: 1, m: 3, targets: 4, first: 0 },
 ];
 
+/// The round-2 holdout, selected with `--ladder r2-holdout`
+/// (`RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md` §2): the four admissible cells
+/// the widened screen found that no ladder had used, and fresh targets
+/// (`5000…`) on every admissible cell of the original screen.  Registered
+/// before any arm ran on it.
+#[rustfmt::skip]
+const R2_HOLDOUT: &[Instance] = &[
+    Instance { a: 0, n: 31, factor_index: 0, m: 3, targets: 8, first: 0 },
+    Instance { a: 0, n: 31, factor_index: 1, m: 3, targets: 8, first: 0 },
+    Instance { a: 0, n: 31, factor_index: 5, m: 3, targets: 8, first: 0 },
+    Instance { a: 1, n: 29, factor_index: 0, m: 4, targets: 8, first: 0 },
+    Instance { a: 0, n: 9, factor_index: 0, m: 3, targets: 16, first: 5000 },
+    Instance { a: 0, n: 9, factor_index: 0, m: 4, targets: 8, first: 5000 },
+    Instance { a: 1, n: 9, factor_index: 0, m: 4, targets: 8, first: 5000 },
+    Instance { a: 1, n: 11, factor_index: 0, m: 4, targets: 4, first: 5000 },
+    Instance { a: 0, n: 13, factor_index: 0, m: 3, targets: 8, first: 5000 },
+    Instance { a: 0, n: 15, factor_index: 0, m: 4, targets: 8, first: 5000 },
+    Instance { a: 0, n: 15, factor_index: 1, m: 3, targets: 8, first: 5000 },
+    Instance { a: 0, n: 15, factor_index: 1, m: 4, targets: 8, first: 5000 },
+    Instance { a: 0, n: 15, factor_index: 2, m: 3, targets: 8, first: 5000 },
+    Instance { a: 0, n: 15, factor_index: 2, m: 4, targets: 8, first: 5000 },
+    Instance { a: 1, n: 15, factor_index: 0, m: 4, targets: 8, first: 5000 },
+    Instance { a: 1, n: 15, factor_index: 1, m: 4, targets: 8, first: 5000 },
+    Instance { a: 1, n: 15, factor_index: 2, m: 4, targets: 8, first: 5000 },
+    Instance { a: 0, n: 23, factor_index: 0, m: 3, targets: 4, first: 5000 },
+    Instance { a: 0, n: 23, factor_index: 1, m: 3, targets: 4, first: 5000 },
+];
+
 /// Deterministic target scalars: a fixed multiplier sequence, so every
 /// run decides the same points in the same order.
 fn target_scalar(i: u32) -> BigUint {
@@ -171,6 +199,7 @@ fn main() {
         Some("chain") => (CHAIN, "chain"),
         Some("chain-holdout") => (CHAIN_HOLDOUT, "chain-holdout"),
         Some("chain-holdout-2") => (CHAIN_HOLDOUT_2, "chain-holdout-2"),
+        Some("r2-holdout") => (R2_HOLDOUT, "r2-holdout"),
         _ => (LADDER, "frozen"),
     };
 
@@ -323,6 +352,7 @@ fn main() {
             // The retained controls of RESEARCH_CHAIN_SPLIT_ORDER.md, as
             // set for this run (unset means the engine's default).
             "policy": {
+                "KIC_F4_MULTIPLIERS": std::env::var("KIC_F4_MULTIPLIERS").ok(),
                 "KIC_F4_DROP": std::env::var("KIC_F4_DROP").ok(),
                 "KIC_LINEAR_ELIM": std::env::var("KIC_LINEAR_ELIM").ok(),
                 "KIC_CHAIN_ORDER": std::env::var("KIC_CHAIN_ORDER").ok(),
