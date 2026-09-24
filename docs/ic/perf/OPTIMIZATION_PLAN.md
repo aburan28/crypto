@@ -149,6 +149,10 @@ regression on any gated layer is reverted, not explained away.
 | 2026-09-24 | C: `wide_groebner` — the chained system in `u128` monomials (≤ 128 unknowns), solved by branching on summand bits only with a linearisation step (`gf2_elim`) at every node and a group lift at the leaves | L1 | n = 31, m = 3: planted 0/2 → **2/2** (82 s a target); n = 31, m = 4 (86 vars): **1/1 planted, 241 s** — the first m = 4 Gröbner decomposition at this size; n = 39, m = 3 (78 vars) and n = 31, m = 5 (123 vars): no target decided in 400 s; n = 31, m = 6 (154 vars) exceeds 128. Meet in the middle on the same cells: 0.1–0.6 ms, 7 ms (m = 5), 0.21 s (m = 6) | engine agrees with enumerate on every reach cell |
 | 2026-09-24 | D (symmetry): `wide_groebner` searches only summands in non-decreasing order, branching each summand from its highest coordinate down (`KIC_WIDE_ORDER=0` / `KIC_WIDE_BRANCH=low` are the controls) | L1 | s a target, unordered → ordered: n = 15, m = 3 0.090 → 0.067; n = 15, m = 4 0.88 → 0.38; **n = 15, m = 5 4.95 → 0.62 (8×)**; n = 31, m = 4 241 → 75 (the branch order; ordering itself flat there) | answers identical |
 | 2026-09-24 | **Correction:** the wide engine's "n = 31, m = 3: 2/2 planted at 82 s a target" (row C) did not reproduce. Rerun with the same seeds, both the commit that reported it (d8c4df66) and the current one fail to decide the cell's first target within 600 s. Whatever produced the earlier figure, it is not a property of the engine; the cell is recorded as unreached | L1 | — | row C's n = 31, m = 3 figure withdrawn |
+| 2026-09-25 | D (hybrid finish): once m − 1 summands are fixed the last is looked up in the base (≤ 2^(m−1) additions) instead of branched over (`KIC_WIDE_FINISH=0` control) | L1 | s a target: n = 15, m = 4 0.39 → 0.24; n = 15, m = 5 0.56 → 0.44; n = 31, m = 4 75 → 57, and all four targets decided within the budget | answers identical |
+| 2026-09-25 | C (past 128 unknowns): when the whole chain does not fit, branch on the k trailing summands with the chain *suffix* that does (`WideSystem::build_suffix`, k·(ℓ + n) unknowns) and decompose the remainder recursively | L1 | makes n = 31, m = 6 (154 unknowns) runnable at all; recursion tested on small curves by lowering the cap | new test |
+| 2026-09-25 | Engineering: linearisation columns laid out by a counting pass and indexed with `FxMap` (a comparator sort and SipHash were ~50 % of a search) | L1 | n = 31, m = 4, ℓ = 5: 0.97 → 0.76 s and 3.86 → 2.74 s a target, node counts identical | same search |
+| 2026-09-25 | **Degree experiment** (`KIC_WIDE_PROLONG=D`, off by default): prolong every node's system to degree D (each equation of degree < D times every variable present) before splitting. n = 31, m = 4, ℓ = 5, two planted targets | L1 | nodes 1,639 / 4,505 → 993 / 3,745 (D = 3) → 931 / 3,443 (D = 4); leaves 191 / 1,308 → 1 / 1; time 0.67 / 2.77 s → 15.6 / 46 s (D = 3) → 56 / 255 s (D = 4) | see below |
 
 ## 6. What the L1 ladder says (pdp-reference-v1)
 
@@ -191,3 +195,31 @@ targets that it previously missed, or when its seconds per target fall on
 an unchanged cell; it counts as a crossover only when it beats the
 meet-in-the-middle column on the same cell.** End-to-end work (E) proceeds
 alongside it.
+
+## 7. What raising the degree does (and does not do)
+
+The degree experiment is the question behind "high degree of regularity"
+asked directly, on a cell where the answer can be measured (n = 31,
+m = 4, ℓ = 5, chained system of 80 unknowns). Prolonging each node's
+system from its own degree (3) to degree 3 and 4 behaves the same way
+at both degrees:
+
+- **Near the leaves it is decisive.** Leaves fall from hundreds to one:
+  once enough summands are fixed, the degree-3 matrix pins the rest down
+  algebraically.
+- **Above that it barely prunes.** Nodes fall only 1.2–1.7×, while each
+  node's matrix grows from 93 × 7,378 to 4,728 × 24,527 (D = 3) and
+  7,084 × 251,572 (D = 4). Net: 20× (D = 3) to 100× (D = 4) slower.
+
+The search tree is the number of partial summand assignments that are
+still consistent. For a first summand fixed, the chain's first link has
+about 2|F| solutions (x₂, u₁), and no Macaulay degree below the system's
+regularity can refute those, because they are real. So an algebraic
+search like this one enumerates about |F|^(m−2) partial decompositions
+before algebra finishes them. Exact meet in the middle does the same
+enumeration with a table lookup in place of each finish. That is why the
+Gröbner route trails it by orders of magnitude, and why neither faster
+elimination nor higher degree has closed the gap. A formulation that
+refutes *partial* decompositions early (the symmetrised S_{m+1}, whose
+unknowns are the summands alone) is the lever left; it is where the
+Gröbner track goes next.

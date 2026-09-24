@@ -495,7 +495,22 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
         }
         if linear.is_empty() {
             *eqs = reduced;
-            return true;
+            // Optional prolongation (`KIC_WIDE_PROLONG=D`): the degree-D
+            // Macaulay matrix — every equation of degree < D times every
+            // variable still present — may hold linear consequences, or a
+            // `1`, that the equations' own degree does not.
+            let d = prolong_degree();
+            if d == 0 {
+                return true;
+            }
+            match prolong(eqs, d, stats) {
+                Prolonged::Refuted => return false,
+                Prolonged::Nothing => return true,
+                Prolonged::Linear(extra) => {
+                    eqs.extend(extra);
+                    continue;
+                }
+            }
         }
         *eqs = reduced;
         for (v, form) in linear {
@@ -518,6 +533,131 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
             }
             subs.push((v, f));
         }
+    }
+}
+
+fn prolong_degree() -> u32 {
+    static D: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    *D.get_or_init(|| {
+        std::env::var("KIC_WIDE_PROLONG")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0)
+    })
+}
+
+enum Prolonged {
+    Refuted,
+    Nothing,
+    Linear(Vec<WPoly>),
+}
+
+/// Most columns a prolongation may build before it is skipped.
+const MAX_PROLONG_COLS: usize = 1 << 18;
+
+/// Reduce the degree-`d` Macaulay matrix of `eqs` and return what it
+/// adds: a `1`, or its linear rows, or nothing.
+fn prolong(eqs: &[WPoly], d: u32, stats: &mut WideStats) -> Prolonged {
+    let vars: u128 = eqs
+        .iter()
+        .flat_map(|p| p.terms.iter())
+        .fold(0, |acc, &m| acc | m);
+    let mut rows: Vec<WPoly> = eqs.to_vec();
+    for p in eqs {
+        if p.degree() >= d {
+            continue;
+        }
+        let mut v = vars;
+        while v != 0 {
+            let b = v.trailing_zeros() as usize;
+            v &= v - 1;
+            let q = p.mul(&WPoly::var(b));
+            if !q.is_zero() && q.degree() <= d {
+                rows.push(q);
+            }
+        }
+    }
+    let mut all: Vec<Mono> = rows.iter().flat_map(|p| p.terms.iter().copied()).collect();
+    all.sort_unstable();
+    all.dedup();
+    if all.len() > MAX_PROLONG_COLS {
+        return Prolonged::Nothing;
+    }
+    let max_deg = all.iter().map(|m| m.count_ones()).max().unwrap_or(0) as usize;
+    let mut start = vec![0usize; max_deg + 2];
+    for m in &all {
+        start[max_deg - m.count_ones() as usize + 1] += 1;
+    }
+    for i in 1..start.len() {
+        start[i] += start[i - 1];
+    }
+    let mut cols = vec![0 as Mono; all.len()];
+    let mut index: FxMap<Mono, usize> = FxMap::default();
+    index.reserve(all.len());
+    for &m in all.iter().rev() {
+        let slot = &mut start[max_deg - m.count_ones() as usize];
+        cols[*slot] = m;
+        index.insert(m, *slot);
+        *slot += 1;
+    }
+    let words = cols.len().div_ceil(64);
+    let mut matrix: Vec<Vec<u64>> = rows
+        .iter()
+        .map(|p| {
+            let mut row = vec![0u64; words];
+            for m in &p.terms {
+                let c = index[m];
+                row[c / 64] |= 1 << (c % 64);
+            }
+            row
+        })
+        .collect();
+    stats.reductions += 1;
+    stats.max_rows = stats.max_rows.max(matrix.len());
+    stats.max_cols = stats.max_cols.max(cols.len());
+    let mut ops = 0;
+    let rank = gf2_elim::eliminate(
+        &mut matrix,
+        cols.len(),
+        true,
+        gf2_elim::Config::from_env(),
+        &mut ops,
+    );
+    let mut linear = Vec::new();
+    for row in &matrix[..rank] {
+        // Leading column: the first set bit; linear or constant rows
+        // have it among the trailing (degree ≤ 1) columns.
+        let lead = row
+            .iter()
+            .enumerate()
+            .find(|(_, &w)| w != 0)
+            .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
+            .expect("rank row is nonzero");
+        let deg = cols[lead].count_ones();
+        if deg > 1 {
+            continue;
+        }
+        let mut terms = Vec::new();
+        for (w, &word) in row.iter().enumerate() {
+            let mut bits = word;
+            while bits != 0 {
+                let b = bits.trailing_zeros() as usize;
+                bits &= bits - 1;
+                terms.push(cols[w * 64 + b]);
+            }
+        }
+        let p = WPoly::from_monos(terms);
+        if p.is_one() {
+            return Prolonged::Refuted;
+        }
+        linear.push(p);
+    }
+    // Only rows the equations themselves did not already carry are news;
+    // the caller's own-degree pass found no linear row, so any is.
+    if linear.is_empty() {
+        Prolonged::Nothing
+    } else {
+        Prolonged::Linear(linear)
     }
 }
 
