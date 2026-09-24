@@ -489,6 +489,12 @@ pub fn wide_groebner_decompose(
         return (None, stats);
     };
     let summand_vars = m * sys.ell;
+    // Summands are unordered, so every decomposition is also a root with
+    // its abscissae in non-decreasing order (as coordinate vectors over
+    // the basis, highest coordinate first): searching only those skips up
+    // to m! copies of every subtree.  `KIC_WIDE_ORDER=0` searches them
+    // all, as a same-binary control.
+    let order = std::env::var("KIC_WIDE_ORDER").as_deref() != Ok("0");
     // Depth-first over summand bits; each frame carries its own system.
     struct Frame {
         eqs: Vec<WPoly>,
@@ -523,7 +529,15 @@ pub fn wide_groebner_decompose(
                 }
             }
         }
-        let next = (0..summand_vars).find(|&v| fixed >> v & 1 == 0);
+        if order && !summands_ordered(fixed, values, m, sys.ell) {
+            stats.refuted += 1;
+            continue;
+        }
+        // Each summand from its highest coordinate down, so the order
+        // test above decides as early as it can.
+        let next = (0..m)
+            .flat_map(|i| (0..sys.ell).rev().map(move |t| i * sys.ell + t))
+            .find(|&v| fixed >> v & 1 == 0);
         let Some(v) = next else {
             stats.leaves += 1;
             let xs: Vec<F2mElement> = (0..m)
@@ -552,6 +566,31 @@ pub fn wide_groebner_decompose(
         }
     }
     (None, stats)
+}
+
+/// Whether the fixed bits already contradict `x_0 ≤ x_1 ≤ … ≤ x_{m−1}`,
+/// comparing each adjacent pair from its highest coordinate down:
+/// `false` only on a definite violation — the first coordinate where both
+/// are fixed and differ has the earlier summand's bit set and the later
+/// one's clear, with every higher coordinate fixed and equal in both.
+fn summands_ordered(fixed: u128, values: u128, m: usize, ell: usize) -> bool {
+    for i in 1..m {
+        let (lo, hi) = ((i - 1) * ell, i * ell);
+        for t in (0..ell).rev() {
+            let (a, b) = (lo + t, hi + t);
+            if fixed >> a & 1 == 0 || fixed >> b & 1 == 0 {
+                break;
+            }
+            let (va, vb) = (values >> a & 1, values >> b & 1);
+            if va != vb {
+                if va > vb {
+                    return false;
+                }
+                break;
+            }
+        }
+    }
+    true
 }
 
 #[cfg(test)]
@@ -638,6 +677,21 @@ mod tests {
                 assert_eq!(p.substitute(v, &form).eval(bits), p.eval(with));
             }
         }
+    }
+
+    #[test]
+    fn the_order_test_refuses_only_definite_violations() {
+        let ell = 3;
+        // Summand 0 = 0b101, summand 1 = 0b011: 5 > 3, a violation.
+        let all = 0b111_111u128;
+        assert!(!summands_ordered(all, 0b011_101, 2, ell));
+        assert!(summands_ordered(all, 0b101_011, 2, ell));
+        assert!(summands_ordered(all, 0b101_101, 2, ell)); // equal is allowed
+                                                           // Top bits differ in the violating direction but a lower bit is
+                                                           // unfixed: still a violation, the top bit decides.
+        assert!(!summands_ordered(0b100_100, 0b000_100, 2, ell));
+        // Top bit of the later summand unfixed: undecided, not refused.
+        assert!(summands_ordered(0b000_111, 0b000_101, 2, ell));
     }
 
     #[test]
