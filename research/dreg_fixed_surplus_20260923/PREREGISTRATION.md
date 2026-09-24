@@ -252,3 +252,49 @@ cell could run.
 - Earlier, while it ran, that process's `oom_score_adj` was raised to 800,
   so that a memory shortage would take the control rather than the primary
   large cell `(13, 5)`. No shortage occurred.
+
+## Addendum: a container reboot, and one process per draw
+
+**What was lost.** At about 05:17 UTC on 2026-09-24 the container rebooted.
+Two runs were in flight:
+
+- **`(13, 4)`'s control**, which was unfinished. It is secondary, and it is
+  recorded as a resource limit. All four of that cell's draws were already
+  committed.
+- **`(13, 5)`'s first unsatisfiable draw**, about 4.5 hours in. No draw of
+  that cell had finished.
+
+Nothing committed was lost.
+
+**What changed in the harness.** Its measurements did not change.
+
+- `ladder_draw` is split into `ladder_sample` (the random part) and
+  `ladder_measure`. This is a pure refactor, pinned by
+  `replayed_samples_measure_as_the_sequential_draws`.
+- `dreg_ladder` gains `--unsat-index K` and `--control-only`.
+  - `--unsat-index K` replays the cell's draws through the exact solution
+    count alone, and measures only the `K`-th unsatisfiable draw.
+  - `--control-only` runs the cell's control with the same seed the
+    sequential run uses.
+
+So a cell can run one process per draw, and a restart loses only the draws
+in flight.
+
+**Identity check, before this binary measured anything registered.** On
+the four small cells, all 16 unsatisfiable draws and both fast controls
+reproduce the frozen `f03dc02` binary's committed rows exactly: draw index,
+subspace, target, solution count, outcome and FFD. The output is in
+`runs/identity-check-draws.jsonl` and `runs/identity-check-controls.jsonl`,
+and there are **0 mismatches in 18**.
+
+**How the rest runs.** `run_queue.py` runs one process per draw, at most
+two at a time:
+
+1. `(13, 5)` draws 0–3 first, since it is the primary cell;
+2. then `(15, 5)` draws 0–3;
+3. then the controls of `(13, 5)`, `(15, 5)` and `(13, 4)`.
+
+After a restart, the same command skips every job that has a finished line.
+
+The watchdog is now per draw, still 96 hours. The cells, `d_max`, draw
+counts, seeds and decision rules are unchanged.

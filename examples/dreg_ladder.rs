@@ -83,6 +83,51 @@ fn main() {
     let controls = num("--controls", 0) as usize;
     let seed = num("--seed", 0x5EED);
 
+    // `--unsat-index K`: measure only the cell's K-th unsatisfiable draw
+    // (from 0), replaying the draws before it through the exact solution
+    // count alone.  `--control-only`: run only the cell's control.  Both give
+    // what the sequential run gives at that position, from the same seed, so a
+    // cell can be measured one process per draw and a restart loses only the
+    // draws in flight.
+    let only_unsat = flag("--unsat-index").map(|v| v.parse::<usize>().expect("--unsat-index K"));
+    let control_only = args.iter().any(|a| a == "--control-only");
+    if only_unsat.is_some() || control_only {
+        assert_eq!(cells.len(), 1, "one cell per process in this mode");
+        let (n, ell, d_max) = cells[0];
+        let cell_seed = seed ^ (u64::from(n) << 40) ^ ((ell as u64) << 32);
+        if let Some(k) = only_unsat {
+            measure_one(n, ell, d_max, ffd_max, cell_seed, k, max_draws);
+        }
+        if control_only {
+            let n_vars = 3 * ell + n as usize;
+            for t in 0..controls.max(1) {
+                let terms = ladder_terms_per_eq(
+                    n,
+                    ell,
+                    cell_seed ^ 0x0C01_7201_u64.wrapping_mul(t as u64 + 1),
+                );
+                let started = std::time::Instant::now();
+                let o = ladder_control(
+                    n_vars,
+                    3,
+                    terms,
+                    d_max,
+                    cell_seed
+                        .wrapping_mul(0x9E37_79B9_7F4A_7C15)
+                        .wrapping_add(t as u64),
+                );
+                println!(
+                    r#"{{"cell":"n{n}l{ell}","control":{t},"n_vars":{n_vars},"n_eqs":{},"terms_per_eq":{terms},"d_max":{d_max},"outcome":{},"secs":{:.3}}}"#,
+                    n_vars + 4,
+                    outcome_json(&o),
+                    started.elapsed().as_secs_f64()
+                );
+                eprintln!("n={n} ℓ={ell}: control {t} -> {}", outcome_short(&o));
+            }
+        }
+        return;
+    }
+
     let mut table = Vec::new();
     for &(n, ell, d_max) in &cells {
         let cell_seed = seed ^ (u64::from(n) << 40) ^ ((ell as u64) << 32);
@@ -172,6 +217,58 @@ fn main() {
             }
         );
     }
+}
+
+/// The cell's `k`-th unsatisfiable draw, measured; the draws before it only
+/// counted.  Prints the draw's JSON line exactly as the sequential run does.
+fn measure_one(
+    n: u32,
+    ell: usize,
+    d_max: u32,
+    ffd_max: u32,
+    cell_seed: u64,
+    k: usize,
+    max_draws: usize,
+) {
+    use crypto_lib::binary_ecc::F2mElement;
+    use crypto_lib::cryptanalysis::koblitz_bench::{
+        chained_s3_solution_count, ladder_measure, ladder_sample,
+    };
+    use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+    let irr = find_irreducible_sparse(n).expect("field");
+    let b = F2mElement::one(n);
+    let mut rng = StdRng::seed_from_u64(cell_seed);
+    let mut unsat_seen = 0usize;
+    for drawn in 0..max_draws {
+        let (basis, x_r) = ladder_sample(n, ell, &mut rng);
+        if chained_s3_solution_count(&basis, &x_r, &b, &irr) > 0 {
+            continue;
+        }
+        if unsat_seen < k {
+            unsat_seen += 1;
+            continue;
+        }
+        let d = ladder_measure(n, &basis, &x_r, d_max, ffd_max).expect("cell builds");
+        println!(
+            r#"{{"cell":"n{n}l{ell}","n":{n},"ell":{ell},"surplus":{},"d_max":{d_max},"draw":{drawn},"n_vars":{},"n_eqs":{},"v_basis":{:?},"x_r":{},"solutions":{},"outcome":{},"ffd":{},"secs":{:.3},"unsat_index":{k}}}"#,
+            n as i64 - 3 * ell as i64,
+            d.n_vars,
+            d.n_eqs,
+            d.v_basis,
+            d.x_r,
+            d.solutions,
+            outcome_json(&d.outcome),
+            d.ffd.map_or("null".to_string(), |f| f.to_string()),
+            d.secs
+        );
+        eprintln!(
+            "n={n} ℓ={ell}: unsat draw {k} (draw {drawn}) -> {} ({:.1}s)",
+            outcome_short(&d.outcome),
+            d.secs
+        );
+        return;
+    }
+    eprintln!("n={n} ℓ={ell}: no unsatisfiable draw {k} within {max_draws} draws");
 }
 
 /// Mean terms per equation of one fresh draw of the cell, for the control's

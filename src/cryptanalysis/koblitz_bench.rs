@@ -1231,25 +1231,33 @@ pub struct LadderDraw {
     pub secs: f64,
 }
 
-/// Draw one `(V, x_R)` for the `m = 3` cell `(n, ℓ)` and measure it.  The
+/// The random part of one ladder draw: a subspace basis, then a target
+/// abscissa, consuming `rng` exactly as [`ladder_draw`] does.  Replaying it
+/// reproduces a cell's draw sequence without measuring anything, so a single
+/// draw can be measured on its own (`dreg_ladder --unsat-index`).
+pub fn ladder_sample(n: u32, ell: usize, rng: &mut StdRng) -> (Vec<F2mElement>, F2mElement) {
+    let basis = random_subspace_basis(n, ell, rng);
+    let x_r = F2mElement::from_biguint(&BigUint::from(rng.gen::<u64>() & ((1u64 << n) - 1)), n);
+    (basis, x_r)
+}
+
+/// Measure one sampled draw of the `m = 3` cell `(n, ℓ = basis.len())`.  The
 /// exact solution count comes first; only a system with none goes through
 /// [`first_fall_degree`] (to `ffd_max`) and [`solving_degree`] (to `d_max`).
-pub fn ladder_draw(
+pub fn ladder_measure(
     n: u32,
-    ell: usize,
+    basis: &[F2mElement],
+    x_r: &F2mElement,
     d_max: u32,
     ffd_max: u32,
-    rng: &mut StdRng,
 ) -> Option<LadderDraw> {
     use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
     let started = Instant::now();
     let irr = find_irreducible_sparse(n)?;
     let st = FieldStructure::new(n, &irr);
     let b = F2mElement::one(n);
-    let basis = random_subspace_basis(n, ell, rng);
-    let x_r = F2mElement::from_biguint(&BigUint::from(rng.gen::<u64>() & ((1u64 << n) - 1)), n);
-    let sys = build_decomposition_system(&basis, &x_r, &b, 3, &st)?;
-    let solutions = chained_s3_solution_count(&basis, &x_r, &b, &irr);
+    let sys = build_decomposition_system(basis, x_r, &b, 3, &st)?;
+    let solutions = chained_s3_solution_count(basis, x_r, &b, &irr);
     let word = |e: &F2mElement| e.raw_bits().first().copied().unwrap_or(0);
     let mut ffd = None;
     let outcome = if solutions > 0 {
@@ -1269,16 +1277,29 @@ pub fn ladder_draw(
     };
     Some(LadderDraw {
         n,
-        ell: ell as u32,
+        ell: basis.len() as u32,
         n_vars: sys.n_vars,
         n_eqs: sys.equations.len(),
         v_basis: basis.iter().map(word).collect(),
-        x_r: word(&x_r),
+        x_r: word(x_r),
         solutions,
         outcome,
         ffd,
         secs: started.elapsed().as_secs_f64(),
     })
+}
+
+/// Draw one `(V, x_R)` for the `m = 3` cell `(n, ℓ)` and measure it:
+/// [`ladder_sample`] then [`ladder_measure`].
+pub fn ladder_draw(
+    n: u32,
+    ell: usize,
+    d_max: u32,
+    ffd_max: u32,
+    rng: &mut StdRng,
+) -> Option<LadderDraw> {
+    let (basis, x_r) = ladder_sample(n, ell, rng);
+    ladder_measure(n, &basis, &x_r, d_max, ffd_max)
 }
 
 /// The infeasible null object for a ladder cell: same unknowns, degree and
@@ -1426,6 +1447,41 @@ mod tests {
                 .collect();
             assert_eq!(span.len(), 1usize << ell, "n={n} ℓ={ell}");
             assert!(words.iter().all(|&w| w < 1u64 << n));
+        }
+    }
+
+    /// Replaying the samples and measuring one of them is the draw
+    /// `ladder_draw` would have made at that position -- same subspace, same
+    /// target, same outcome -- so a cell measured one draw per process is the
+    /// cell measured in one process.
+    #[test]
+    fn replayed_samples_measure_as_the_sequential_draws() {
+        let seq: Vec<LadderDraw> = {
+            let mut rng = StdRng::seed_from_u64(0x1ADD_E7);
+            (0..10)
+                .map(|_| ladder_draw(5, 2, 7, 4, &mut rng).unwrap())
+                .collect()
+        };
+        let mut rng = StdRng::seed_from_u64(0x1ADD_E7);
+        for want in &seq {
+            let (basis, x_r) = ladder_sample(5, 2, &mut rng);
+            let got = ladder_measure(5, &basis, &x_r, 7, 4).unwrap();
+            assert_eq!(
+                (
+                    got.v_basis.clone(),
+                    got.x_r,
+                    got.solutions,
+                    got.outcome,
+                    got.ffd
+                ),
+                (
+                    want.v_basis.clone(),
+                    want.x_r,
+                    want.solutions,
+                    want.outcome,
+                    want.ffd
+                )
+            );
         }
     }
 
