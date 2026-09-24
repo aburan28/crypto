@@ -125,6 +125,25 @@ const CHAIN_HOLDOUT: &[Instance] = &[
     Instance { a: 1, n: 17, factor_index: 0, m: 3, targets: 4, first: 1000 },
 ];
 
+/// The supplementary holdout, selected with `--ladder chain-holdout-2`:
+/// every cell of `examples/chain_ladder_screen.rs`'s grid that exists, is
+/// admissible for its `m`, fits in 64 unknowns and on which no arm of the
+/// change had run when it was registered (§5 of
+/// `RESEARCH_CHAIN_SPLIT_ORDER.md`); the first registered holdout lost seven
+/// of its eleven cells to admissibility.
+#[rustfmt::skip]
+const CHAIN_HOLDOUT_2: &[Instance] = &[
+    Instance { a: 1, n: 11, factor_index: 0, m: 4, targets: 4, first: 0 },
+    Instance { a: 0, n: 15, factor_index: 1, m: 3, targets: 8, first: 0 },
+    Instance { a: 0, n: 15, factor_index: 1, m: 4, targets: 8, first: 0 },
+    Instance { a: 0, n: 15, factor_index: 2, m: 3, targets: 8, first: 0 },
+    Instance { a: 0, n: 15, factor_index: 2, m: 4, targets: 8, first: 0 },
+    Instance { a: 1, n: 15, factor_index: 1, m: 4, targets: 8, first: 0 },
+    Instance { a: 1, n: 15, factor_index: 2, m: 4, targets: 8, first: 0 },
+    Instance { a: 0, n: 23, factor_index: 0, m: 3, targets: 4, first: 0 },
+    Instance { a: 0, n: 23, factor_index: 1, m: 3, targets: 4, first: 0 },
+];
+
 /// Deterministic target scalars: a fixed multiplier sequence, so every
 /// run decides the same points in the same order.
 fn target_scalar(i: u32) -> BigUint {
@@ -151,6 +170,7 @@ fn main() {
         Some("holdout") => (HOLDOUT, "holdout"),
         Some("chain") => (CHAIN, "chain"),
         Some("chain-holdout") => (CHAIN_HOLDOUT, "chain-holdout"),
+        Some("chain-holdout-2") => (CHAIN_HOLDOUT_2, "chain-holdout-2"),
         _ => (LADDER, "frozen"),
     };
 
@@ -248,6 +268,7 @@ fn main() {
         rows.push(serde_json::json!({
             "curve": format!("K_{}/2^{}", inst.a, inst.n),
             "a": inst.a, "n": inst.n, "m": inst.m,
+            "factor_index": inst.factor_index,
             "ell": fb.ell,
             "factor_base_points": fb.points.len(),
             "targets": inst.targets,

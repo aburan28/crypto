@@ -14,9 +14,12 @@ groebner --summands 3` (whole logarithms).
 this round keeps and whose split rule it keeps; only the order the variables are
 handed to that rule, and what the solver does with a linear generator, change.
 
-**Status: registered, not yet measured.**  §0–§4 were committed before any
-registered run; §1 lists every run made before registration.  Results are
-appended below §4 and do not edit it.
+**Status: registered, then amended (§5), then measured.**  §0–§4 were
+committed before any registered run (`2809b498`); §1 lists every run made
+before registration.  §5 is a dated amendment made after the registered runs
+and before any run of the supplementary holdout it registers.  Results are
+appended below §5 and do not edit it; corrections to §0–§4 are struck in place
+and point to §5.
 
 ## The question
 
@@ -90,12 +93,15 @@ registration: that selection reproduces `main`'s frozen ladder to the digit —
 word operations, specialisation operations, reductions, propagations, splits,
 refutations, F4 calls, oversize and verdict digest on all six rungs.
 
-On this host the frozen ladder's reference total is `16,734,846` word operations
-(`K_1/2^23`: `7,982,169`, `4,876` reductions).
+On this host the frozen ladder's reference total is ~~`16,734,846`~~
+**`16,696,846`** word operations (`K_1/2^23`: `7,982,169`, `4,876` reductions;
+*arithmetic correction, §5: the six rungs sum to the second figure*).
 [`RESEARCH_INHERITED_F4.md`](RESEARCH_INHERITED_F4.md) records `37,302,399` for the
-same configuration on the same tree (`4,876` reductions); the rounds merged since
-(#620 and the rest) lowered it.  Every ratio below is against the figure measured
-in this round, never the note's.
+same configuration on the same tree (`4,876` reductions); ~~the rounds merged since
+(#620 and the rest) lowered it~~ *(struck, §5: not bisected; the rounds since that
+were checked all report their counts unchanged, so which one lowered it is not
+known)*.  Every ratio below is against the figure measured in this round, never
+the note's.
 
 **The unit.**  64-bit word operations, as the stage has always counted them:
 elimination XORs and the inherited engine's specialisation reads and writes.
@@ -272,3 +278,56 @@ which is a practicality note.  The per-target oracle price in group-addition
 equivalents, and the relation phase it would imply, come from the oracle-pricing
 ladder of T3, which converts at its host's measured factor and marks its
 projection as an extrapolation.
+
+## 5. Amendment, 2026-09-24: T1 as registered has four comparable rungs, not six
+
+*Written after the registered runs of §2 (committed as `d0b048ac`) and before
+any run of the supplementary holdout below.*
+
+**What happened.**  Seven of the eleven holdout cells of §2 were skipped by the
+harness.  `K_0/2^11`, `K_1/2^13` and `K_0/2^17` have no curve in the
+constructor (no usable prime-order subgroup).  At `K_1/2^9`, `K_1/2^11` and
+`K_1/2^15` with `m = 3`, and at `K_1/2^17` with fresh targets, the factor base
+admits no `m = 3` relation for its cofactor
+(`FrobeniusFactorBase::m_can_decompose`), so the decomposition oracle never
+enters the Gröbner stage there.  The list was written without either check.  Four
+holdout rungs ran — `K_1/2^9 m=4`, `K_0/2^15 m=4`, `K_1/2^15 m=4` and fresh
+targets on `K_0/2^13 m=3` — and T1 needs six.  **T1 is not met as registered**,
+on its count clause alone; it is recorded that way and not re-read.
+
+The same check removes two cells from the chain (tuning) ladder: `K_0/2^15`
+and `K_1/2^17` with `m = 3` are inadmissible.  Two of §1's exploratory rows —
+including its largest ratio, `5.75×` on `K_1/2^17, m = 3` — therefore describe
+refutations the pipeline never asks for.  They stay in §1 as what was run; they
+are not evidence for this change.
+
+**T1′, the supplementary holdout.**  `examples/chain_ladder_screen.rs` screens
+the grid `n ∈ {9, 11, 13, 15, 17, 19, 23}`, `a ∈ {0, 1}`, factor index `0…3`,
+`m ∈ {3, 4}` for a curve and a factor base that exist, admissibility for `m`,
+and at most 64 unknowns; it decides no target
+(`research/chain_split_order_20260924/screen.json`).  Fifteen cells pass.  T1′
+is **every one of them on which no arm of this change has run** — nine cells,
+no other selection:
+
+| cell | factor index | `ℓ` | base points | unknowns | targets |
+|:--|--:|--:|--:|--:|--:|
+| `K_1/2^11`, m=4 | 0 | 10 | 991 | 62 | 4 |
+| `K_0/2^15`, m=3 | 1 | 4 | 31 | 27 | 8 |
+| `K_0/2^15`, m=4 | 1 | 4 | 31 | 46 | 8 |
+| `K_0/2^15`, m=3 | 2 | 4 | 21 | 27 | 8 |
+| `K_0/2^15`, m=4 | 2 | 4 | 21 | 46 | 8 |
+| `K_1/2^15`, m=4 | 1 | 4 | 1 | 46 | 8 |
+| `K_1/2^15`, m=4 | 2 | 4 | 11 | 46 | 8 |
+| `K_0/2^23`, m=3 | 0 | 11 | 2,025 | 56 | 4 |
+| `K_0/2^23`, m=3 | 1 | 11 | 2,071 | 56 | 4 |
+
+(`groebner_stage_bench --ladder chain-holdout-2`, targets `0…`, node budget
+`20,000`, four targets where a cell has 56 or more unknowns.)  Arms: the
+reference and the registered candidate only, three repetitions each
+(`run_t1prime.sh`).  **T1′ holds** if `compare_cross_tree.py` accepts, the total
+word-operation ratio is at least `2.0×`, the ratio exceeds `1.0` on every rung
+whose reference run splits, and at least six rungs are comparable (a rung whose
+reference exhausts its budget is reported and left out, as in T1).  The
+candidate ships as the default only if T1′, T2 and T3 hold; otherwise the
+engine's default reverts to the reference and the rest stays as retained
+controls.

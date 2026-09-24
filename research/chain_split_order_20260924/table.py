@@ -13,7 +13,7 @@ Unit: 64-bit word operations of the Groebner stage; a stage diagnostic.
 import json, pathlib, statistics, sys
 
 ARMS = ["reference", "D", "L", "LD", "O", "OD", "candidate", "OLD"]
-SUITES = ["frozen", "chain", "chain-holdout"]
+SUITES = ["frozen", "chain", "chain-holdout", "chain-holdout-2"]
 
 
 def load(root, suite, arm):
@@ -36,6 +36,8 @@ def main():
         totals = {a: 0 for a in docs}
         for i, row in enumerate(ref[0]["rows"]):
             name = f"`{row['curve']}` m={row['m']}" + (
+                f" divisor {row['factor_index']}" if row.get("factor_index") else ""
+            ) + (
                 f" (targets {row.get('first_target', 0)}…)" if row.get("first_target") else ""
             )
             cells = []
