@@ -340,7 +340,7 @@ pub fn e0_in_rowspace(rows: &[Vec<u64>], cols: usize, base_rank: usize) -> bool 
     if rows.is_empty() || cols == 0 {
         return false;
     }
-    let words = (cols + 63) / 64;
+    let words = cols.div_ceil(64);
     let mut augmented = rows.to_vec();
     let mut e0 = vec![0u64; words];
     e0[0] = 1; // column 0 = the constant monomial `1`
@@ -402,7 +402,7 @@ pub fn rank_and_refute(rows: &mut [Vec<u64>], cols: usize) -> (usize, bool) {
     // Reduce e₀ (only column 0 set) against the echelon basis: for each
     // pivot whose column is currently set in the working vector, XOR in the
     // pivot row. `1` ∈ row-space ⇔ the result is zero.
-    let words = (cols + 63) / 64;
+    let words = cols.div_ceil(64);
     let mut w = vec![0u64; words];
     w[0] = 1;
     for &(prow, pcol) in &pivots {

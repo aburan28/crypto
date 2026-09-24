@@ -116,7 +116,7 @@ pub fn x448_keygen(seed: &[u8; 56]) -> ([u8; 56], [u8; 56]) {
 /// Montgomery ladder.  RFC 7748 §5 pseudocode, with `bits = 448`
 /// (iterate from bit 447 down to 0).
 fn ladder(scalar: &BigUint, u: &BigUint) -> BigUint {
-    let mut x1 = u.clone();
+    let x1 = u.clone();
     let mut x2 = BigUint::from(1u32);
     let mut z2 = BigUint::from(0u32);
     let mut x3 = u.clone();

@@ -88,7 +88,7 @@ pub fn run() -> Report {
         let block_idx = prefix_blocks + recovered.len() / block_size;
         let pad_extra = block_size - 1 - (recovered.len() % block_size);
         let mut prefix_in = pad_attacker.clone();
-        prefix_in.extend(std::iter::repeat(b'A').take(pad_extra));
+        prefix_in.extend(std::iter::repeat_n(b'A', pad_extra));
         let target_ct = oracle(&prefix_in);
         let tgt = &target_ct[block_idx * block_size..(block_idx + 1) * block_size];
         let mut found = false;

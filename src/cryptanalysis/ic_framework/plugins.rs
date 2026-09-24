@@ -37,7 +37,6 @@ use super::stages::{
     BooleanSystem, DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost,
     SolverTotals, SolverVerdict, SystemShape, SystemSolver,
 };
-use crate::cryptanalysis::pq_descent_symbolic::{descend, max_n_prime, SymbolicDescent};
 use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
     prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
@@ -45,6 +44,7 @@ use crate::cryptanalysis::ic_boundary::{
 };
 use crate::cryptanalysis::koblitz_fast::FastPoint;
 use crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base_from_divisor;
+use crate::cryptanalysis::pq_descent_symbolic::{descend, max_n_prime, SymbolicDescent};
 
 // ── Factor bases ───────────────────────────────────────────────────
 
@@ -203,7 +203,10 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzOrbitBase<'_> {
             self.instance,
             &frob,
             fold,
-            format!("invariant subspace, divisor {idx:?}, dimension {}", frob.ell),
+            format!(
+                "invariant subspace, divisor {idx:?}, dimension {}",
+                frob.ell
+            ),
         )
         .ok_or_else(|| "the invariant subspace produced no usable factor base".into())
     }
@@ -374,15 +377,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
         point: FastPoint,
     ) -> Option<Vec<usize>> {
         let table = self.table.as_ref()?;
-        decompose_mitm_frobenius(
-            ctx.group,
-            fb,
-            table,
-            self.m,
-            ops,
-            counters,
-            point,
-        )
+        decompose_mitm_frobenius(ctx.group, fb, table, self.m, ops, counters, point)
     }
 }
 
@@ -498,8 +493,10 @@ impl<'i> DescentAlgebraicOracle<'i> {
         solver_params: Params,
         budget: Option<Duration>,
     ) -> Self {
-        let mut totals = SolverTotals::default();
-        totals.solver = solver.name().to_string();
+        let totals = SolverTotals {
+            solver: solver.name().to_string(),
+            ..Default::default()
+        };
         Self {
             summands,
             instance,
@@ -517,8 +514,14 @@ impl<'i> DescentAlgebraicOracle<'i> {
     /// The descended system for a target abscissa; its `lift` maps a
     /// solution back to abscissae.  `prepare` must have run.
     fn descend(&self, x_r: u64) -> SymbolicDescent {
-        descend(&self.instance.gf, self.instance.b, x_r, &self.v_basis, self.summands)
-            .expect("prepare checked the dimension")
+        descend(
+            &self.instance.gf,
+            self.instance.b,
+            x_r,
+            &self.v_basis,
+            self.summands,
+        )
+        .expect("prepare checked the dimension")
     }
 }
 
@@ -558,7 +561,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
         _ops: &mut GroupOps,
     ) -> Result<(), String> {
         if !(2..=3).contains(&self.summands) {
-            return Err(format!("descent-algebraic takes m = 2 or 3, got {}", self.summands));
+            return Err(format!(
+                "descent-algebraic takes m = 2 or 3, got {}",
+                self.summands
+            ));
         }
         let basis = fb.subspace_basis.as_ref().ok_or(
             "descent-algebraic needs a factor base whose abscissae form an F_2-subspace; \

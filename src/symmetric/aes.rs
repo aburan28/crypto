@@ -474,7 +474,7 @@ fn padded_blocks(data: &[u8]) -> Vec<[u8; 16]> {
     if data.is_empty() {
         return Vec::new();
     }
-    let mut out = Vec::with_capacity((data.len() + 15) / 16);
+    let mut out = Vec::with_capacity(data.len().div_ceil(16));
     for chunk in data.chunks(16) {
         let mut block = [0u8; 16];
         block[..chunk.len()].copy_from_slice(chunk);

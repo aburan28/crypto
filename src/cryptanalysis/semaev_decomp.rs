@@ -172,7 +172,7 @@ impl Gf2 {
 
         // `pow[i] = z^{n+i} mod irr`, enough of them to cover the
         // `n − 1` high bits a product of two field elements can have.
-        let positions = ((n as usize - 1) + 7) / 8;
+        let positions = (n as usize - 1).div_ceil(8);
         let positions = positions.max(1);
         let mut pow = vec![0u64; positions * 8];
         let mut cur = bits ^ (1u64 << n); // z^n ≡ the low terms
@@ -375,6 +375,7 @@ impl Poly {
         self.deg().is_none()
     }
 
+    #[allow(dead_code)]
     fn add(&self, other: &Self) -> Self {
         let mut out = *self;
         for i in 0..=MAX_DEG {

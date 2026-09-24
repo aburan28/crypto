@@ -225,6 +225,7 @@ impl LazyRow {
     }
 
     /// The words from `w` (at least `lead`) to the end of the layout.
+    #[allow(clippy::wrong_self_convention)]
     fn from_word(&self, w: usize) -> &[u64] {
         debug_assert!(w >= self.lead as usize);
         &self.data[w - self.start as usize..]
@@ -1054,7 +1055,7 @@ impl ReducedBasis {
             out.pending.clear();
         }
         let every = Self::rref_every();
-        if every > 0 && out.depth() % every == 0 {
+        if every > 0 && out.depth().is_multiple_of(every) {
             out.reduce_fully(&mut cost);
         }
         (out, cost)
@@ -1568,7 +1569,7 @@ mod tests {
                     .iter()
                     .flat_map(|p| p.terms.iter())
                     .fold(0, |a, t| a | t.mask);
-                let all = all_variable_mask(n_vars);
+                let _all = all_variable_mask(n_vars);
                 for v in 0..n_vars as u32 {
                     if occurring & (1 << v) == 0 {
                         continue;

@@ -3528,7 +3528,7 @@ fn reduce_system_uncached(
                 match reduced {
                     Some(rows) => {
                         stats.max_degree_built = stats.max_degree_built.max(d);
-                        let decisive = rows.iter().any(|p| is_constant_one(p))
+                        let decisive = rows.iter().any(is_constant_one)
                             || rows.iter().any(|p| forced_assignment(p).is_some());
                         best = Some(rows);
                         if decisive {

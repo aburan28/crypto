@@ -43,7 +43,7 @@ fn factorise(mut v: u64) -> Vec<(u64, u32)> {
     let mut d = 2u64;
     while d.saturating_mul(d) <= v {
         let mut e = 0;
-        while v % d == 0 {
+        while v.is_multiple_of(d) {
             v /= d;
             e += 1;
         }
@@ -94,7 +94,10 @@ fn main() {
         let f = factorise(base.order);
         let (r, e) = *f.last().expect("a factor");
         if e != 1 || r < 50 {
-            println!("\n── n={n} a₂={a2}: #E = {} has no clean prime subgroup; skipped.", base.order);
+            println!(
+                "\n── n={n} a₂={a2}: #E = {} has no clean prime subgroup; skipped.",
+                base.order
+            );
             continue;
         }
         let cofactor = base.order / r;
@@ -168,7 +171,14 @@ fn main() {
                     "FAIL"
                 }
             );
-            one_hop_rows.push((n, a2, *a6p, rep.order_preserved, rep.transported, rep.image_order_ok));
+            one_hop_rows.push((
+                n,
+                a2,
+                *a6p,
+                rep.order_preserved,
+                rep.transported,
+                rep.image_order_ok,
+            ));
         }
 
         // ── part 2: a walk, composing hops ──────────────────────────
@@ -211,11 +221,10 @@ fn main() {
                 };
                 let g2 = next.group();
                 let mut o2 = GroupOps::default();
-                let ok = g2.mul(&mut o2, pp, r).infinity
-                    && {
-                        let dp = g2.mul(&mut o2, pp, d % r);
-                        !dp.infinity && dp.x == qq.x
-                    };
+                let ok = g2.mul(&mut o2, pp, r).infinity && {
+                    let dp = g2.mul(&mut o2, pp, d % r);
+                    !dp.infinity && dp.x == qq.x
+                };
                 if ok {
                     verified += 1;
                 } else {
@@ -227,10 +236,12 @@ fn main() {
             }
         }
 
-        let by_depth = depth.values().fold(BTreeMap::new(), |mut m: BTreeMap<u32, usize>, d| {
-            *m.entry(*d).or_insert(0) += 1;
-            m
-        });
+        let by_depth = depth
+            .values()
+            .fold(BTreeMap::new(), |mut m: BTreeMap<u32, usize>, d| {
+                *m.entry(*d).or_insert(0) += 1;
+                m
+            });
         println!(
             "      reached {} vertices by composed 3-isogenies; depth histogram {:?}",
             reached.len(),
@@ -259,13 +270,24 @@ fn main() {
             degs,
             reached.len()
         );
-        walk_rows.push((n, a2, reached.len(), verified, failed, cls.class_size.to_string(), degs.join(",")));
+        walk_rows.push((
+            n,
+            a2,
+            reached.len(),
+            verified,
+            failed,
+            cls.class_size.to_string(),
+            degs.join(","),
+        ));
     }
 
     // ── part 3: the reach, in the same units as the cost sweep ──────
     println!("\n════════════════════════════════════════════════════════════════");
     println!("── Part 3: what this route can and cannot name ──");
-    println!("\n   {:>4} {:>14} {:>22} {:>14} {:>16}", "n", "class size", "isogeny degrees ℓ|c", "deg ψ_ℓ", "kernel route");
+    println!(
+        "\n   {:>4} {:>14} {:>22} {:>14} {:>16}",
+        "n", "class size", "isogeny degrees ℓ|c", "deg ψ_ℓ", "kernel route"
+    );
     for n in [8u32, 12, 16, 17, 19, 20] {
         let cls = koblitz_isogeny_class(n, 5_000_000);
         let degs: Vec<u64> = cls
@@ -279,7 +301,10 @@ fn main() {
             "   {:>4} {:>14} {:>22} {:>14} {:>16}",
             n,
             cls.class_size.to_string(),
-            degs.iter().map(|d| d.to_string()).collect::<Vec<_>>().join(","),
+            degs.iter()
+                .map(|d| d.to_string())
+                .collect::<Vec<_>>()
+                .join(","),
             psideg,
             if maxd == 3 {
                 "roots of ψ₃"

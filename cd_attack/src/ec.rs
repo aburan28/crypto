@@ -9,11 +9,10 @@
 //! the starting curve E_0 = M_6 (Montgomery A=6), the j=1728 curve
 //! E_{1728} = M_0, and the 2-isogeny between them.
 
-use num_bigint::{BigInt, Sign};
-use num_integer::Integer;
+use num_bigint::BigInt;
 use num_traits::{One, Zero};
 
-use crate::field::{F2, Fp2};
+use crate::field::{Fp2, F2};
 
 // ---- Affine point on a Weierstrass / Montgomery curve --------------------
 
@@ -37,7 +36,9 @@ impl Aff {
             Aff::P(_, y) => Some(y),
         }
     }
-    pub fn is_inf(&self) -> bool { matches!(self, Aff::Inf) }
+    pub fn is_inf(&self) -> bool {
+        matches!(self, Aff::Inf)
+    }
 }
 
 // ---- Montgomery curve  y² = x³ + A x² + x  -------------------------------
@@ -48,7 +49,9 @@ pub struct Montgomery {
 }
 
 impl Montgomery {
-    pub fn new(a: F2) -> Self { Montgomery { a } }
+    pub fn new(a: F2) -> Self {
+        Montgomery { a }
+    }
 
     /// Is (x, y) on the curve?
     pub fn contains(&self, p: &Aff, fp2: &Fp2) -> bool {
@@ -105,19 +108,13 @@ impl Montgomery {
             let den = fp2.mul(&two, y1);
             let lam = fp2.div(&num, &den);
             // x₃ = λ² − A − 2x₁
-            let x3 = fp2.sub(
-                &fp2.sub(&fp2.sq(&lam), &self.a),
-                &fp2.mul(&two, x1),
-            );
+            let x3 = fp2.sub(&fp2.sub(&fp2.sq(&lam), &self.a), &fp2.mul(&two, x1));
             let y3 = fp2.sub(&fp2.mul(&lam, &fp2.sub(x1, &x3)), y1);
             Aff::P(x3, y3)
         } else {
             // Chord: λ = (y₂ − y₁) / (x₂ − x₁)
             let lam = fp2.div(&fp2.sub(y2, y1), &fp2.sub(x2, x1));
-            let x3 = fp2.sub(
-                &fp2.sub(&fp2.sub(&fp2.sq(&lam), &self.a), x1),
-                x2,
-            );
+            let x3 = fp2.sub(&fp2.sub(&fp2.sub(&fp2.sq(&lam), &self.a), x1), x2);
             let y3 = fp2.sub(&fp2.mul(&lam, &fp2.sub(x1, &x3)), y1);
             Aff::P(x3, y3)
         }
@@ -163,10 +160,7 @@ impl Montgomery {
 pub fn iota_on_e1728(p: &Aff, fp2: &Fp2) -> Aff {
     match p {
         Aff::Inf => Aff::Inf,
-        Aff::P(x, y) => Aff::P(
-            fp2.neg(x),
-            fp2.mul(&fp2.i(), y),
-        ),
+        Aff::P(x, y) => Aff::P(fp2.neg(x), fp2.mul(&fp2.i(), y)),
     }
 }
 
@@ -304,7 +298,9 @@ mod tests {
     use super::*;
     use crate::field::{Fp, Fp2};
 
-    fn ctx() -> Fp2 { Fp2::new(Fp::new(BigInt::from(431u64))) }
+    fn ctx() -> Fp2 {
+        Fp2::new(Fp::new(BigInt::from(431u64)))
+    }
 
     #[test]
     fn lift_and_check_e1728() {
@@ -366,10 +362,7 @@ mod tests {
         assert!(!p.is_inf());
         // ι(P) on E_0
         let ip = iota_on_e1728(&p, &fp2);
-        assert!(
-            e0.contains(&ip, &fp2),
-            "ι(P) must lie on E_0; got {ip:?}"
-        );
+        assert!(e0.contains(&ip, &fp2), "ι(P) must lie on E_0; got {ip:?}");
         // ι(ι(P)) = -P  (since ι² = [-1])
         let i2p = iota_on_e1728(&ip, &fp2);
         let neg_p = e0.neg(&p, &fp2);
@@ -426,10 +419,7 @@ mod tests {
         let phi_x = isog3_push_x(q_pt.x().unwrap(), &x_k, &fp2);
         let x_sq = fp2.sq(&phi_x);
         let x_cube = fp2.mul(&x_sq, &phi_x);
-        let rhs = fp2.add(
-            &fp2.add(&x_cube, &fp2.mul(&e_new.a, &x_sq)),
-            &phi_x,
-        );
+        let rhs = fp2.add(&fp2.add(&x_cube, &fp2.mul(&e_new.a, &x_sq)), &phi_x);
         assert!(
             fp2.is_square(&rhs),
             "phi_x must be a valid x-coord on the codomain"

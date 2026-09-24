@@ -102,7 +102,7 @@ const LOG_TAB: [u8; 256] = [
 
 #[inline]
 fn rol8(x: u8, n: u32) -> u8 {
-    (x << n) | (x >> (8 - n))
+    x.rotate_left(n)
 }
 
 #[inline]
@@ -125,7 +125,7 @@ fn ipht(x: &mut u8, y: &mut u8) {
 // same 64-bit input key.
 
 fn expand_userkey(user_key: &[u8; 8], nof_rounds: usize) -> Vec<u8> {
-    assert!(nof_rounds >= 1 && nof_rounds <= MAX_ROUNDS);
+    assert!((1..=MAX_ROUNDS).contains(&nof_rounds));
     let mut key = Vec::with_capacity(1 + 16 * nof_rounds);
     key.push(nof_rounds as u8);
 

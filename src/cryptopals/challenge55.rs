@@ -364,8 +364,8 @@ pub fn run() -> Report {
         Some((m, m_prime)) => {
             let m_bytes = words_to_bytes(&m);
             let mp_bytes = words_to_bytes(&m_prime);
-            r.line(format!("M  = {}", hex::encode(&m_bytes)));
-            r.line(format!("M' = {}", hex::encode(&mp_bytes)));
+            r.line(format!("M  = {}", hex::encode(m_bytes)));
+            r.line(format!("M' = {}", hex::encode(mp_bytes)));
             r.line(format!(
                 "MD4(M)  = {}",
                 hex::encode_upper(state_to_bytes(&compress_words(&m)))

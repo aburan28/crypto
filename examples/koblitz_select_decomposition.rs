@@ -42,9 +42,18 @@ use std::time::Instant;
 const ADDS: usize = 2_000_000;
 
 fn main() {
-    let degree: u32 = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(41);
-    let points: usize = std::env::args().nth(2).and_then(|s| s.parse().ok()).unwrap_or(15300);
-    let seed: u64 = std::env::args().nth(3).and_then(|s| s.parse().ok()).unwrap_or(1);
+    let degree: u32 = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(41);
+    let points: usize = std::env::args()
+        .nth(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(15300);
+    let seed: u64 = std::env::args()
+        .nth(3)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(1);
     let kc = KoblitzCurve::new(0, degree).expect("curve");
     let fc = FastCurve::new(&kc.curve).expect("fast curve");
 
@@ -52,8 +61,9 @@ fn main() {
     // scoreboard.
     let seedfb = build_subgroup_orbit_factor_base(&kc, seed, 64).expect("seed base");
     let g = fc.lift(kc.generator());
-    let batch: Vec<FastPoint> =
-        (0..1024).map(|i| fc.lift(&seedfb.points[i % seedfb.points.len()])).collect();
+    let batch: Vec<FastPoint> = (0..1024)
+        .map(|i| fc.lift(&seedfb.points[i % seedfb.points.len()]))
+        .collect();
     let mut scratch = BatchScratch::default();
     let mut out: Vec<FastPoint> = Vec::with_capacity(batch.len());
     let rounds = ADDS / batch.len();
@@ -68,8 +78,8 @@ fn main() {
     // The base this is all about, and its representatives, so each phase
     // can be re-run on exactly the inputs the real call gave it.
     let t = Instant::now();
-    let (fb, cost) = build_subgroup_orbit_factor_base_with_cost(&kc, seed, points)
-        .expect("selection");
+    let (fb, cost) =
+        build_subgroup_orbit_factor_base_with_cost(&kc, seed, points).expect("selection");
     let whole_ns = t.elapsed().as_secs_f64() * 1e9;
     let n_points = fb.points.len();
     let n_orbits = fb.signed_orbits.len();
@@ -114,9 +124,12 @@ fn main() {
          BEFORE this round and no longer performs; their share column is what\n\
          they would be, not what the call above spends."
     );
-    println!("\n{:<44}{:>11}{:>13}{:>13}{:>9}", "phase", "ms", "adds", "adds/point", "share");
+    println!(
+        "\n{:<44}{:>11}{:>13}{:>13}{:>9}",
+        "phase", "ms", "adds", "adds/point", "share"
+    );
 
-    let mut row = |name: &str, ns: f64| {
+    let row = |name: &str, ns: f64| {
         let (adds, app) = per(ns);
         println!(
             "{name:<44}{:>11.2}{:>13.0}{:>13.2}{:>8.1}%",
@@ -132,7 +145,11 @@ fn main() {
     let t = Instant::now();
     let rebuilt = build_explicit_frobenius_orbit_factor_base(&kc, &reps).expect("rebuild");
     let rebuild_ns = t.elapsed().as_secs_f64() * 1e9;
-    assert_eq!(rebuilt.points.len(), n_points, "the rebuild is not the same base");
+    assert_eq!(
+        rebuilt.points.len(),
+        n_points,
+        "the rebuild is not the same base"
+    );
     row("rebuild: build_explicit_..._factor_base", rebuild_ns);
 
     // Inside it: the lifts, which are the algebra plus a `lower`.
@@ -166,7 +183,10 @@ fn main() {
     let key_ns = t.elapsed().as_secs_f64() * 1e9;
     std::hint::black_box(keyed);
     row("  [counterfactual] point_key over the base, once", key_ns);
-    row("  [counterfactual] point_key x3, the old builder", key_ns * 3.0);
+    row(
+        "  [counterfactual] point_key x3, the old builder",
+        key_ns * 3.0,
+    );
 
     // The orbit walks' step: `kc.frobenius` on a BigUint-backed point.
     let t = Instant::now();
@@ -176,8 +196,14 @@ fn main() {
     }
     let frob_ns = t.elapsed().as_secs_f64() * 1e9;
     std::hint::black_box(walked);
-    row("  [counterfactual] kc.frobenius over the base, once", frob_ns);
-    row("  [counterfactual] kc.frobenius x2, the old walks", frob_ns * 2.0);
+    row(
+        "  [counterfactual] kc.frobenius over the base, once",
+        frob_ns,
+    );
+    row(
+        "  [counterfactual] kc.frobenius x2, the old walks",
+        frob_ns * 2.0,
+    );
 
     // The same step in single words, for comparison: what the walk would
     // cost if the builder used the representation the rest of the
@@ -189,7 +215,10 @@ fn main() {
     }
     let fastfrob_ns = t.elapsed().as_secs_f64() * 1e9;
     std::hint::black_box(fastwalk);
-    row("  orbit step, packed (fc.frobenius_k) <- now used", fastfrob_ns);
+    row(
+        "  orbit step, packed (fc.frobenius_k) <- now used",
+        fastfrob_ns,
+    );
 
     // And the packed key, likewise.
     let t = Instant::now();
@@ -218,7 +247,10 @@ fn main() {
     // normalisation as the thing it bounds.
     let floor_ns = (lift_ns - lower_ns) + fastfrob_ns;
     println!();
-    let floor_adds = row("FLOOR: lift algebra + one orbit step, unconverted", floor_ns);
+    let floor_adds = row(
+        "FLOOR: lift algebra + one orbit step, unconverted",
+        floor_ns,
+    );
     let whole_adds = whole_ns / add_ns;
     println!(
         "\nselection is {:.1}x its floor ({:.1} adds a point against {:.2})",

@@ -62,7 +62,7 @@ use crate::cryptanalysis::j0_twists::enumerate_twists;
 use crate::ecc::curve::CurveParams;
 use crate::utils::random::random_scalar;
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::Zero;
 use std::ops::Range;
 use std::time::Instant;
 
@@ -1110,7 +1110,7 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
             h_name, theo, measured, verdict,
         ));
     }
-    out.push_str("\n");
+    out.push('\n');
     out.push_str(
         "**Direction #1** (Weil descent on twists of j=0): stage 1 \
          implemented — twist enumeration + smoothness detection.  Full \
@@ -1137,6 +1137,7 @@ pub fn run_full_bench(samples_per_scale: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num_traits::One;
 
     /// Synthetic data with a known exponent should be recovered by
     /// log-log regression.
@@ -1359,7 +1360,7 @@ mod tests {
         let n_pairs = 1usize << 20;
         let samples: Vec<BoomerangDecaySample> = (1..=6)
             .map(|r| {
-                let count = ((n_pairs as f64) * 2f64.powi(-(2 * r as i32))) as u64;
+                let count = ((n_pairs as f64) * 2f64.powi(-(2 * r))) as u64;
                 BoomerangDecaySample {
                     rounds: r as u32,
                     elapsed_ms: 1,

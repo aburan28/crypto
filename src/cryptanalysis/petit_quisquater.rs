@@ -341,7 +341,7 @@ fn try_finalise(
 /// Random scalar in `[0, n)`.
 fn random_scalar_biguint(rng: &mut StdRng, n: &BigUint) -> BigUint {
     let bits = n.bits().max(1);
-    let n_bytes = ((bits + 7) / 8) as usize;
+    let n_bytes = bits.div_ceil(8) as usize;
     loop {
         let mut buf = vec![0u8; n_bytes];
         rng.fill(&mut buf[..]);
@@ -1108,7 +1108,7 @@ mod tests {
         let mut max_p = 1u64;
         let mut d = 2u64;
         while d * d <= n {
-            while n % d == 0 {
+            while n.is_multiple_of(d) {
                 max_p = d;
                 n /= d;
             }
@@ -1203,7 +1203,7 @@ mod tests {
                 k += 1;
             }
             *order_histogram.entry(k).or_insert(0) += 1;
-            if k % 3 == 0 {
+            if k.is_multiple_of(3) {
                 had_order_div_3 = true;
                 if sample_div_3.is_none() {
                     sample_div_3 = Some(p.clone());
@@ -1272,7 +1272,7 @@ mod tests {
         );
         // sanity: order divides count
         assert!(
-            count % k == 0,
+            count.is_multiple_of(k),
             "point order {} should divide group order {}",
             k,
             count
@@ -1567,7 +1567,7 @@ mod tests {
         // Brute-force log_G(Q).
         let mut bf = None;
         let mut acc = BinaryPoint::Infinity;
-        let n_u64 = n.to_u64_digits().get(0).copied().unwrap_or(1);
+        let n_u64 = n.to_u64_digits().first().copied().unwrap_or(1);
         for k in 1u64..=n_u64 {
             acc = point_add(&curve, &acc, &g);
             if acc == q {

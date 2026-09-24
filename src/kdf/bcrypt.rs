@@ -376,17 +376,17 @@ fn b64_decode(chars: &[u8], out_len: usize) -> Option<Vec<u8>> {
     while out.len() < out_len {
         let c1 = b64_index(*chars.get(i)?)?;
         let c2 = b64_index(*chars.get(i + 1)?)?;
-        out.push(((c1 << 2) | ((c2 & 0x30) >> 4)) & 0xff);
+        out.push((c1 << 2) | ((c2 & 0x30) >> 4));
         if out.len() == out_len {
             break;
         }
         let c3 = b64_index(*chars.get(i + 2)?)?;
-        out.push((((c2 & 0x0f) << 4) | ((c3 & 0x3c) >> 2)) & 0xff);
+        out.push(((c2 & 0x0f) << 4) | ((c3 & 0x3c) >> 2));
         if out.len() == out_len {
             break;
         }
         let c4 = b64_index(*chars.get(i + 3)?)?;
-        out.push((((c3 & 0x03) << 6) | c4) & 0xff);
+        out.push(((c3 & 0x03) << 6) | c4);
         i += 4;
     }
     Some(out)

@@ -29,7 +29,7 @@ use crypto_lib::cryptanalysis::coordinate_quotients::{
     format_quotient, linearised_chart, run_quotient_boxed, torsion_points, two_torsion_frame,
     Chart, Line, PointMap, Seed,
 };
-use crypto_lib::cryptanalysis::coordinate_search::{Auto, Curve, FrameKind, Gf, Mobius, Pt, Rng64};
+use crypto_lib::cryptanalysis::coordinate_search::{Auto, Curve, Gf, Mobius, Pt, Rng64};
 use std::time::Instant;
 
 fn points(m: usize) -> Vec<Seed> {

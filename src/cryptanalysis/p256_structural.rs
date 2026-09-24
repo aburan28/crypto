@@ -285,7 +285,7 @@ pub fn pollard_rho_factor(n: &BigUint, max_iters: u64, seed: u64) -> Option<BigU
         }
         if &g == n {
             // Restart with different c.
-            c = c + BigUint::one();
+            c += BigUint::one();
             x = BigUint::from(seed.max(2));
             y = x.clone();
         }
@@ -564,7 +564,7 @@ pub fn classify_phase10(p: &BigUint, n: &BigUint) -> Phase10Status {
 pub fn write_curve_report_markdown(report: &CurveStructuralReport) -> String {
     let mut out = String::new();
     out.push_str(&format!("## {} \n\n", report.name));
-    out.push_str(&format!("### Parameters\n\n"));
+    out.push_str("### Parameters\n\n");
     out.push_str(&format!("- p: {}-bit prime\n", report.p_bits));
     out.push_str(&format!("- p (hex): `0x{:X}`\n", report.p));
     out.push_str(&format!("- n: {}-bit prime  (cofactor 1)\n", report.n_bits));
@@ -581,7 +581,7 @@ pub fn write_curve_report_markdown(report: &CurveStructuralReport) -> String {
         report.t.magnitude(),
         t_bits
     ));
-    out.push_str("\n");
+    out.push('\n');
 
     out.push_str("### CM discriminant\n\n");
     out.push_str(&format!(
@@ -630,7 +630,7 @@ pub fn write_curve_report_markdown(report: &CurveStructuralReport) -> String {
         "- Class number h(O_K) heuristic estimate: ≈ 2^{}  (CSIDH-walk infeasible)\n",
         report.cm_disc_bits / 2
     ));
-    out.push_str("\n");
+    out.push('\n');
 
     out.push_str("### Twist order\n\n");
     let twist_factor_str: Vec<String> = report
@@ -673,7 +673,7 @@ pub fn write_curve_report_markdown(report: &CurveStructuralReport) -> String {
         "- Max twist-attack leakage per query: log₂(smooth part) ≈ {:.1} bits\n",
         report.max_twist_leak_bits
     ));
-    out.push_str("\n");
+    out.push('\n');
 
     out.push_str("### Extension-field orders\n\n");
     out.push_str("| k | |E(F_{p^k})| bit-length |\n");
@@ -681,7 +681,7 @@ pub fn write_curve_report_markdown(report: &CurveStructuralReport) -> String {
     for (k, ord) in &report.extension_orders {
         out.push_str(&format!("| {} | {} bits |\n", k, ord.bits()));
     }
-    out.push_str("\n");
+    out.push('\n');
 
     out.push_str("### Phase 10/14 Frobenius-mod-2 obstruction check\n\n");
     out.push_str(&format!(
@@ -712,7 +712,7 @@ pub fn write_curve_report_markdown(report: &CurveStructuralReport) -> String {
         "- (N, N)-cover for any N ≥ 2: **STRUCTURALLY BLOCKED** (Phase 10/14, parity {}{})\n",
         report.target_parity.0, report.target_parity.1
     ));
-    out.push_str("\n");
+    out.push('\n');
     out
 }
 
@@ -1095,7 +1095,7 @@ mod multi_curve_report {
                 a.name, a.family, a.p_bits, a.n_bits, a.deployment
             ));
         }
-        md.push_str("\n");
+        md.push('\n');
 
         md.push_str("---\n\n## Regime 2 — Statistical-rarity protected\n\n");
         md.push_str(
@@ -1114,7 +1114,7 @@ mod multi_curve_report {
                 a.name, a.family, a.p_bits, a.cofactor, a.deployment
             ));
         }
-        md.push_str("\n");
+        md.push('\n');
 
         md.push_str("---\n\n## Regime 3 — NOT blocked (Teske/GHS applies)\n\n");
         md.push_str(
@@ -1134,7 +1134,7 @@ mod multi_curve_report {
                 a.name, a.family, a.n_bits, a.cofactor, a.deployment
             ));
         }
-        md.push_str("\n");
+        md.push('\n');
 
         md.push_str("---\n\n## Per-curve detail\n\n");
         for a in &audits {
@@ -1520,7 +1520,7 @@ mod multi_curve_report {
                 if report.blocked { "YES" } else { "NO" }
             ));
         }
-        out.push_str("\n");
+        out.push('\n');
 
         // Write to file.
         let mut f = File::create("/Volumes/Volume/crypto/CURVE_COMPARISON_REPORT.md")

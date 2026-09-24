@@ -51,12 +51,12 @@
 //!   provide the framework; production-grade STARK needs the
 //!   coset LDE + appropriate query counts (typically 80–120).
 
-use super::merkle::{merkle_proof, merkle_verify, MerkleProof, MerkleTree};
-use super::polynomial::{fr_add, fr_mul, fr_neg, fr_pow, fr_reduce, fr_sub, Poly};
+use super::merkle::{merkle_verify, MerkleProof, MerkleTree};
+use super::polynomial::{fr_add, fr_mul, fr_sub};
 use crate::bls12_381::fq::scalar_modulus;
 use crate::hash::sha256::sha256;
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::One;
 
 const FS_TAG: &str = "ZK-STARK/v1";
 
@@ -102,10 +102,10 @@ impl Air {
         if trace.len() != self.n {
             return false;
         }
-        if &trace[0] != &self.boundary_start {
+        if trace[0] != self.boundary_start {
             return false;
         }
-        if &trace[self.n - 1] != &self.boundary_end {
+        if trace[self.n - 1] != self.boundary_end {
             return false;
         }
         for i in 0..(self.n - 1) {
@@ -470,6 +470,7 @@ pub fn verify(air: &Air, proof: &StarkProof) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use super::super::polynomial::Poly;
     use super::*;
     use std::sync::Arc;
 
@@ -529,7 +530,7 @@ mod tests {
         let commitment = fri_commit(&evals, &domain, &mut transcript_state);
 
         // Query at a few positions.
-        let positions = vec![0usize, 3, 7];
+        let positions = [0usize, 3, 7];
         let queries: Vec<(usize, FriQueryOpening)> = positions
             .iter()
             .map(|&p| (p, fri_query(&commitment, p)))

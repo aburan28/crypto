@@ -235,7 +235,10 @@ impl<const RATE: usize> Default for Sponge<RATE> {
 
 impl<const RATE: usize> Sponge<RATE> {
     pub fn new() -> Self {
-        Sponge { s: [0u64; 25], pos: 0 }
+        Sponge {
+            s: [0u64; 25],
+            pos: 0,
+        }
     }
 
     /// XOR one byte into the state at byte offset `i`.
@@ -249,7 +252,7 @@ impl<const RATE: usize> Sponge<RATE> {
         let mut off = 0;
         // Finish a partially filled block one byte at a time; whole blocks
         // below go eight bytes at a time.
-        while off < data.len() && self.pos % 8 != 0 {
+        while off < data.len() && !self.pos.is_multiple_of(8) {
             self.xor_byte(self.pos, data[off]);
             self.pos += 1;
             off += 1;
@@ -305,7 +308,7 @@ impl<const RATE: usize> Sponge<RATE> {
             let take = (RATE - self.pos).min(out.len() - off);
             let mut i = 0;
             // Ragged head: up to seven bytes to reach a lane boundary.
-            while i < take && (self.pos + i) % 8 != 0 {
+            while i < take && !(self.pos + i).is_multiple_of(8) {
                 let j = self.pos + i;
                 out[off + i] = (self.s[j / 8] >> (8 * (j % 8))) as u8;
                 i += 1;
@@ -448,11 +451,19 @@ mod tests {
             for outlen in [1usize, 32, 135, 136, 168, 169, 504, 600] {
                 let mut got = vec![0u8; outlen];
                 shake128_into(&mut got, &msg[..len]);
-                assert_eq!(got, slow::shake128(&msg[..len], outlen), "shake128 {len}->{outlen}");
+                assert_eq!(
+                    got,
+                    slow::shake128(&msg[..len], outlen),
+                    "shake128 {len}->{outlen}"
+                );
 
                 let mut got = vec![0u8; outlen];
                 shake256_into(&mut got, &msg[..len]);
-                assert_eq!(got, slow::shake256(&msg[..len], outlen), "shake256 {len}->{outlen}");
+                assert_eq!(
+                    got,
+                    slow::shake256(&msg[..len], outlen),
+                    "shake256 {len}->{outlen}"
+                );
             }
         }
     }

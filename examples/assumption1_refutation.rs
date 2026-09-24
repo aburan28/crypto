@@ -56,7 +56,13 @@ use rand::{Rng, SeedableRng};
 use std::collections::HashSet;
 
 /// `S3(x1,x2,x3) = (x1x2 + x1x3 + x2x3)^2 + x1x2x3 + b` on `y^2+xy=x^3+b`.
-fn s3(x1: &F2mElement, x2: &F2mElement, x3: &F2mElement, b: &F2mElement, irr: &IrreduciblePoly) -> F2mElement {
+fn s3(
+    x1: &F2mElement,
+    x2: &F2mElement,
+    x3: &F2mElement,
+    b: &F2mElement,
+    irr: &IrreduciblePoly,
+) -> F2mElement {
     let p12 = x1.mul(x2, irr);
     let p13 = x1.mul(x3, irr);
     let p23 = x2.mul(x3, irr);
@@ -65,7 +71,10 @@ fn s3(x1: &F2mElement, x2: &F2mElement, x3: &F2mElement, b: &F2mElement, irr: &I
 }
 
 fn elem(bits: u64, n: u32) -> F2mElement {
-    F2mElement::from_bit_positions(&(0..n).filter(|i| (bits >> i) & 1 == 1).collect::<Vec<_>>(), n)
+    F2mElement::from_bit_positions(
+        &(0..n).filter(|i| (bits >> i) & 1 == 1).collect::<Vec<_>>(),
+        n,
+    )
 }
 
 fn bits_of(e: &F2mElement) -> u64 {
@@ -93,7 +102,7 @@ fn random_subspace_basis(n: u32, k: u32, rng: &mut StdRng) -> Option<Vec<F2mElem
             continue;
         }
         pivots.push((63 - v.leading_zeros(), v));
-        pivots.sort_by(|a, b| b.0.cmp(&a.0));
+        pivots.sort_by_key(|p| std::cmp::Reverse(p.0));
         basis.push(elem(bits, n));
     }
     None
@@ -254,7 +263,10 @@ fn degree_closure(
             Some(r) => r,
             None => return (gens, round - 1, Closure::SizeCap),
         };
-        let next: Vec<_> = reduced.into_iter().filter(|p| !p.terms.is_empty()).collect();
+        let next: Vec<_> = reduced
+            .into_iter()
+            .filter(|p| !p.terms.is_empty())
+            .collect();
         let sig = signature(&next);
         if sig == prev {
             return (next, round, Closure::Converged);
@@ -289,14 +301,17 @@ fn main() {
     println!("On a target with no decomposition the only resolution is a refutation, so");
     println!("the swap symmetry cannot confound the verdict (cf. assumption1_closure.rs).");
     println!("  REFUTES     => degree {d} decides this instance");
-    println!("  NO REFUTE   => no degree-<= {d} computation can decide it => d_F4 >= {}", d + 1);
+    println!(
+        "  NO REFUTE   => no degree-<= {d} computation can decide it => d_F4 >= {}",
+        d + 1
+    );
     println!();
     println!("| n | k | vars | field | decomposable | non-dec | rounds | converged | refuted | verdict |");
     println!("|--:|--:|-----:|------:|-------------:|--------:|-------:|:---------:|:-------:|:--------|");
 
     let mut rng = StdRng::seed_from_u64(seed);
     for n in (n_min..=n_max).step_by(2) {
-        let k = (n + 1) / 2; // ceil(n/2)
+        let k = n.div_ceil(2); // ceil(n/2)
         let irr = match find_irreducible_sparse(n) {
             Some(i) => i,
             None => continue,
@@ -313,7 +328,13 @@ fn main() {
         let field_sz = 1u64 << n;
         let non_dec: Vec<u64> = (0..field_sz).filter(|x| !dec.contains(x)).collect();
         if non_dec.is_empty() {
-            println!("| {} | {} | — | {} | {} | 0 | — | — | no non-decomposable target exists |", n, k, field_sz, dec.len());
+            println!(
+                "| {} | {} | — | {} | {} | 0 | — | — | no non-decomposable target exists |",
+                n,
+                k,
+                field_sz,
+                dec.len()
+            );
             continue;
         }
 
@@ -333,7 +354,10 @@ fn main() {
             }
             let _ = target_bits;
             if solvable {
-                println!("| {} | {} | — | — | — | — | — | — | GATE FAILED: target is decomposable |", n, k);
+                println!(
+                    "| {} | {} | — | — | — | — | — | — | GATE FAILED: target is decomposable |",
+                    n, k
+                );
                 continue;
             }
             let sys = match build_decomposition_system(&basis, &x_r, &b, m, &st) {
@@ -371,7 +395,11 @@ fn main() {
                 dec.len(),
                 non_dec.len(),
                 used,
-                if outcome == Closure::Converged { "yes" } else { "NO" },
+                if outcome == Closure::Converged {
+                    "yes"
+                } else {
+                    "NO"
+                },
                 refuted,
                 verdict
             );

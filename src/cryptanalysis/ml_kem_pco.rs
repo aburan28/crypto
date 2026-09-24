@@ -531,7 +531,7 @@ mod tests {
         for d in [1usize, 4, 5, 10, 11] {
             for y in 0..(1u16 << d) {
                 let x = decompress(y, d);
-                assert!(x >= 0 && x < Q);
+                assert!((0..Q).contains(&x));
                 assert_eq!(compress(x, d), y, "d = {d}, y = {y}");
             }
         }

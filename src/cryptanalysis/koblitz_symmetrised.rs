@@ -1669,7 +1669,7 @@ mod tests {
             let mut covered = vec![false; view.points.len()];
             for orbit in &view.orbits {
                 assert!(
-                    n as usize % orbit.len() == 0,
+                    (n as usize).is_multiple_of(orbit.len()),
                     "a={a} n={n}: orbit of length {} does not divide n",
                     orbit.len()
                 );
@@ -3368,7 +3368,7 @@ mod x5_tests {
             if [&x1, &x2, &xr]
                 .iter()
                 .any(|x| x.is_zero() || **x == F2mElement::one(n))
-                || pts.iter().any(|p| *p == fb.two_torsion)
+                || pts.contains(&fb.two_torsion)
             {
                 continue;
             }

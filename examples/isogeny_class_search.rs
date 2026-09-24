@@ -69,7 +69,9 @@ const SUBGROUP_ORDER: f64 = 680564733841876926932320129493409985129f64;
 /// `m = 2` (negation), so dividing that by `√(2·131)` applies negation twice and
 /// understates ρ by half a bit — the error this function replaces.
 fn log2_rho(m: f64) -> f64 {
-    (std::f64::consts::PI * SUBGROUP_ORDER / (2.0 * m)).sqrt().log2()
+    (std::f64::consts::PI * SUBGROUP_ORDER / (2.0 * m))
+        .sqrt()
+        .log2()
 }
 
 /// ECC2K-130's automorphism group: negation together with the 131 Frobenius
@@ -429,12 +431,11 @@ fn main() {
         ("2^N enumeration of V × V", enumeration, "yes", "reference"),
     ];
     println!(
-        "\n   {:<56} {:>10} {:>12} {:>8}  {}",
+        "\n   {:<56} {:>10} {:>12} {:>8}  class",
         format!("variant (n={n_t}, l={l_t}, ω={OMEGA})"),
         "log₂ ops",
         "ratio/floor",
-        "correct",
-        "class"
+        "correct"
     );
     let mut table_rows = Vec::new();
     for (label, cost, correct, klass) in &rows {

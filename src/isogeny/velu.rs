@@ -52,7 +52,6 @@
 
 use super::SmallCurve;
 use num_bigint::BigUint;
-use num_integer::Integer;
 
 /// An `ℓ`-isogeny `φ: E → E'` constructed via Vélu's formulas.
 #[derive(Clone, Debug)]
@@ -284,7 +283,7 @@ pub fn velu_isogeny_odd(domain: &SmallCurve, ell: u64) -> Vec<VeluIsogeny> {
         return Vec::new();
     }
     let order = cm.order as u64;
-    if order % ell != 0 {
+    if !order.is_multiple_of(ell) {
         // No F_p-rational ℓ-torsion → no ℓ-isogenies definable over F_p.
         return Vec::new();
     }
@@ -298,7 +297,8 @@ pub fn velu_isogeny_odd(domain: &SmallCurve, ell: u64) -> Vec<VeluIsogeny> {
     // run out of attempts.
     let mut seen_subgroups: HashSet<Vec<u64>> = HashSet::new();
     let mut result = Vec::new();
-    let mut rng_state: u64 = (domain.p as u64)
+    let mut rng_state: u64 = domain
+        .p
         .wrapping_mul(0x9E3779B97F4A7C15)
         .wrapping_add(domain.a)
         .wrapping_mul(0xC6BC279692B5C323)
