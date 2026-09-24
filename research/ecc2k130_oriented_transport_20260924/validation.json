@@ -1,0 +1,622 @@
+{
+  "schema": "oriented-binary-velu-validation-v1",
+  "status": "PASS",
+  "timestamp_utc": "2026-09-24T23:35:27.470260+00:00",
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "research/ecc2k130_oriented_transport_20260924/validate.py",
+    "--out",
+    "/private/tmp/oriented-velu-validation-final.json"
+  ],
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "sha256": {
+    "ecc2k130_oriented_transport_20260924/PROTOCOL.md": "3d4e23d446cbcd6b977c36754ba3b26d3076c628893dad43f82bc2a82808ae44",
+    "ecc2k130_oriented_transport_20260924/oriented_velu.py": "a1a656cc32efd612250b1ecf50dff18af79a8f62f970ee79841bfd390603423b",
+    "ecc2k130_oriented_transport_20260924/validate.py": "60612a0a429b633a80a18817dd3b955fc1ab6a769268494a7aa53ed9187d1668",
+    "ecc2k130_direction_review_20260924/twist_torsion_results.json": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368",
+    "ecc2k130_relations/fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "ecc2k130_relations/relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f",
+    "ecc2k130_direction_review_20260924/redteam_velu_replay.py": "c08fbb8de9d54906d783be967a36a6073b2a1d1a3583292badd3adcdd7126790"
+  },
+  "full_ECDLP_cost": null,
+  "PDP_cost": null,
+  "end_to_end_speedup": null,
+  "toy_rows": [
+    {
+      "n": 3,
+      "modulus": "0xb",
+      "source_a": 0,
+      "kernel_a": 1,
+      "degree": 7,
+      "source_order": 4,
+      "codomain_b": "0x1",
+      "codomain_checks": 4,
+      "full_additivity_checks": 16,
+      "rational_kernel_inputs": 0,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": [
+        {
+          "reverse_kernel_a": 1,
+          "scalar_sign": -1,
+          "all_point_equalities": 4
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "modulus": "0xb",
+      "source_a": 1,
+      "kernel_a": 1,
+      "degree": 7,
+      "source_order": 14,
+      "codomain_b": "0x1",
+      "codomain_checks": 14,
+      "full_additivity_checks": 196,
+      "rational_kernel_inputs": 6,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": [
+        {
+          "reverse_kernel_a": 1,
+          "scalar_sign": 1,
+          "all_point_equalities": 14
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "modulus": "0x25",
+      "source_a": 0,
+      "kernel_a": 0,
+      "degree": 11,
+      "source_order": 44,
+      "codomain_b": "0x1",
+      "codomain_checks": 44,
+      "full_additivity_checks": 1936,
+      "rational_kernel_inputs": 10,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": [
+        {
+          "reverse_kernel_a": 0,
+          "scalar_sign": -1,
+          "all_point_equalities": 44
+        },
+        {
+          "reverse_kernel_a": 1,
+          "scalar_sign": -1,
+          "all_point_equalities": 44
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "modulus": "0x25",
+      "source_a": 1,
+      "kernel_a": 0,
+      "degree": 11,
+      "source_order": 22,
+      "codomain_b": "0x1",
+      "codomain_checks": 22,
+      "full_additivity_checks": 484,
+      "rational_kernel_inputs": 0,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": [
+        {
+          "reverse_kernel_a": 1,
+          "scalar_sign": 1,
+          "all_point_equalities": 22
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "modulus": "0x25",
+      "source_a": 0,
+      "kernel_a": 1,
+      "degree": 11,
+      "source_order": 44,
+      "codomain_b": "0x1",
+      "codomain_checks": 44,
+      "full_additivity_checks": 1936,
+      "rational_kernel_inputs": 0,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": [
+        {
+          "reverse_kernel_a": 0,
+          "scalar_sign": -1,
+          "all_point_equalities": 44
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "modulus": "0x25",
+      "source_a": 1,
+      "kernel_a": 1,
+      "degree": 11,
+      "source_order": 22,
+      "codomain_b": "0x1",
+      "codomain_checks": 22,
+      "full_additivity_checks": 484,
+      "rational_kernel_inputs": 10,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": [
+        {
+          "reverse_kernel_a": 0,
+          "scalar_sign": 1,
+          "all_point_equalities": 22
+        },
+        {
+          "reverse_kernel_a": 1,
+          "scalar_sign": 1,
+          "all_point_equalities": 22
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "modulus": "0x83",
+      "source_a": 0,
+      "kernel_a": 0,
+      "degree": 29,
+      "source_order": 116,
+      "codomain_b": "0x1",
+      "codomain_checks": 116,
+      "full_additivity_checks": 13456,
+      "rational_kernel_inputs": 28,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": []
+    },
+    {
+      "n": 7,
+      "modulus": "0x83",
+      "source_a": 1,
+      "kernel_a": 0,
+      "degree": 29,
+      "source_order": 142,
+      "codomain_b": "0x1",
+      "codomain_checks": 142,
+      "full_additivity_checks": 20164,
+      "rational_kernel_inputs": 0,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": []
+    },
+    {
+      "n": 7,
+      "modulus": "0x83",
+      "source_a": 0,
+      "kernel_a": 1,
+      "degree": 71,
+      "source_order": 116,
+      "codomain_b": "0x1",
+      "codomain_checks": 116,
+      "full_additivity_checks": 13456,
+      "rational_kernel_inputs": 0,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": []
+    },
+    {
+      "n": 7,
+      "modulus": "0x83",
+      "source_a": 1,
+      "kernel_a": 1,
+      "degree": 71,
+      "source_order": 142,
+      "codomain_b": "0x1",
+      "codomain_checks": 142,
+      "full_additivity_checks": 20164,
+      "rational_kernel_inputs": 70,
+      "infinity_checks": 1,
+      "two_torsion_checks": 1,
+      "rejected_invalid_inputs": 11,
+      "normalized_dual_compositions": []
+    }
+  ],
+  "generic_interface_control": {
+    "n": 5,
+    "source_a": 0,
+    "source_b": 7,
+    "source_order": 36,
+    "degree": 9,
+    "direct_rational_coordinate_checks": 27,
+    "full_additivity_checks": 1296,
+    "parameter_rejections": 4
+  },
+  "exact_rows": [
+    {
+      "seed": 20260924,
+      "line": [
+        1,
+        0
+      ],
+      "orbit_length": 131,
+      "codomain_b": "0x3aad5ebb6187af0a2c53cbc9010d36552",
+      "oriented_images": {
+        "P": [
+          "0x48514383b5b38c33f631acdfa4167fe3c",
+          "0x35844139cebd1c1de6b013d5d1ded758a"
+        ],
+        "Q": [
+          "0x6c6fb6ee18ae4c58dbb4964d944cd788d",
+          "0x6e7fed5d7c25ab3f78375ae828bba25dd"
+        ],
+        "P+Q": [
+          "0x37c91248a5ac4cf12173e595bd6c11831",
+          "0x6e59c479329b67fc25284588a20212748"
+        ],
+        "2P": [
+          "0x7dfc6187b4d41a25c5890f04de5270eab",
+          "0x1fd1010f41e23c9302861c49cf4c473b3"
+        ],
+        "2-torsion": [
+          "0x0",
+          "0x55eac751209601ca8754ed4089ed7c3bf"
+        ]
+      },
+      "independent_full_coordinate_checks": 5,
+      "planted_scalar_checks": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "subgroup_order_checks": 2,
+      "full_additivity_checks": 1,
+      "negative_sign_controls": 1,
+      "infinity_checks": 2,
+      "rational_kernel_inputs_on_twist": 262,
+      "invalid_kernel_abscissa_inputs_rejected": 1
+    },
+    {
+      "seed": 20260924,
+      "line": [
+        1,
+        4
+      ],
+      "orbit_length": 131,
+      "codomain_b": "0x3248ef31f25d6830126239dd3fd7c593a",
+      "oriented_images": {
+        "P": [
+          "0x6a78733b864d938937f30f7ca57185755",
+          "0x7e0d3da523a0959f279bdf02f7393b1cd"
+        ],
+        "Q": [
+          "0x1ff9ed45c93ebc5eacdb6c6418e7bd1de",
+          "0x3c92557ef0c3a2987307323f9ea1ab8ba"
+        ],
+        "P+Q": [
+          "0x3164a612a93c37771a3e8b5963853f8b7",
+          "0x47506d2fd2a91224c77338ab7ac0ff1d0"
+        ],
+        "2P": [
+          "0x5f7de3e1cf48c40ff5be7ba4052a6b46c",
+          "0x1f3806b4bc6e9fccce2db88f20554c56e"
+        ],
+        "2-torsion": [
+          "0x0",
+          "0x31ac4e23f32628817f72908e8f41db46e"
+        ]
+      },
+      "independent_full_coordinate_checks": 5,
+      "planted_scalar_checks": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "subgroup_order_checks": 2,
+      "full_additivity_checks": 1,
+      "negative_sign_controls": 1,
+      "infinity_checks": 2,
+      "rational_kernel_inputs_on_twist": 262,
+      "invalid_kernel_abscissa_inputs_rejected": 1
+    },
+    {
+      "seed": 20260924,
+      "line": [
+        1,
+        39
+      ],
+      "orbit_length": 1,
+      "codomain_b": "0x1",
+      "oriented_images": {
+        "P": [
+          "0x491f95c8b4769c6a8e9dc9d69863f1ae6",
+          "0x4f7d11079a9c49ff464c74f012327d17"
+        ],
+        "Q": [
+          "0x76d3ed147372bcc637fe8e42041980445",
+          "0x4962586e8f8f957e6b35301338490a5aa"
+        ],
+        "P+Q": [
+          "0x52080f4b7c3141cfaa9fd573c5be0eed2",
+          "0x5af28278f50d24052e22827bf52b48d84"
+        ],
+        "2P": [
+          "0x53296b4625a48871d4dc9e73469051356",
+          "0x3d6389d0204d776117d696fe5a5793063"
+        ],
+        "2-torsion": [
+          "0x0",
+          "0x1"
+        ]
+      },
+      "independent_full_coordinate_checks": 5,
+      "planted_scalar_checks": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "subgroup_order_checks": 2,
+      "full_additivity_checks": 1,
+      "negative_sign_controls": 1,
+      "infinity_checks": 2,
+      "rational_kernel_inputs_on_twist": 262,
+      "invalid_kernel_abscissa_inputs_rejected": 1
+    },
+    {
+      "seed": 20260924,
+      "line": [
+        1,
+        64
+      ],
+      "orbit_length": 1,
+      "codomain_b": "0x1",
+      "oriented_images": {
+        "P": [
+          "0x24960265dcbe3428c86cfc13bce1bb49d",
+          "0x51292dd841789bcc51aed7a767413f1f0"
+        ],
+        "Q": [
+          "0x7f88ba6c2d4b2bc5ef92732bd8fefbdef",
+          "0x34f39b1cb84d87253a9ef85c9fec0802c"
+        ],
+        "P+Q": [
+          "0x67b5ba1eb07e45ae38e0e89f75f4cc86b",
+          "0x6d04d2cb8068bf9260cb804917122c324"
+        ],
+        "2P": [
+          "0x4b2af822b8d66519f235991c6403bd8b4",
+          "0x5c2cb6ba849cfce0830292761134c68d6"
+        ],
+        "2-torsion": [
+          "0x0",
+          "0x1"
+        ]
+      },
+      "independent_full_coordinate_checks": 5,
+      "planted_scalar_checks": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "subgroup_order_checks": 2,
+      "full_additivity_checks": 1,
+      "negative_sign_controls": 1,
+      "infinity_checks": 2,
+      "rational_kernel_inputs_on_twist": 262,
+      "invalid_kernel_abscissa_inputs_rejected": 1
+    },
+    {
+      "seed": 20260925,
+      "line": [
+        1,
+        0
+      ],
+      "orbit_length": 131,
+      "codomain_b": "0x33804ac2d6f98bb4947ddda6f5532523e",
+      "oriented_images": {
+        "P": [
+          "0x7fbdad924c83630909d1f5eb25bfb39bd",
+          "0x59ffbbdfa74dd962749e6660bfda50501"
+        ],
+        "Q": [
+          "0x676b45d8f84b3ad6e02b88f8d0a8402",
+          "0x5b831ce3643cea715e7956693a3bba658"
+        ],
+        "P+Q": [
+          "0x355fb94920a4491ce4030e403f7a104e3",
+          "0x67269e388b66a376cbf667bc8c8ff777f"
+        ],
+        "2P": [
+          "0x7408ef106dd07744c7ebce27368f745a3",
+          "0x54456232b5b82f11c2f457164f25b16d5"
+        ],
+        "2-torsion": [
+          "0x0",
+          "0x481775947d9b40c5b2c73300165906ba1"
+        ]
+      },
+      "independent_full_coordinate_checks": 5,
+      "planted_scalar_checks": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "subgroup_order_checks": 2,
+      "full_additivity_checks": 1,
+      "negative_sign_controls": 1,
+      "infinity_checks": 2,
+      "rational_kernel_inputs_on_twist": 262,
+      "invalid_kernel_abscissa_inputs_rejected": 1
+    },
+    {
+      "seed": 20260925,
+      "line": [
+        1,
+        2
+      ],
+      "orbit_length": 131,
+      "codomain_b": "0x1cec9f43ce245075b0ea308b7973cd86d",
+      "oriented_images": {
+        "P": [
+          "0x6d3ff2514417f598ee033c693b19880bb",
+          "0x1fe6408ef4cb61cb154fe843ed04d31f6"
+        ],
+        "Q": [
+          "0x17d05b813e855d68803b3412977c644f2",
+          "0x5a3afac0ef640f455c593989bb548bb8c"
+        ],
+        "P+Q": [
+          "0x51305a1b1d33cc304b146e7b60a30a8a0",
+          "0x78176c58c8d736faadbe9f47c7fc6596e"
+        ],
+        "2P": [
+          "0x441e20e18a86fdfe446982175750ede2e",
+          "0x8ce2227f04f3a35342eed03ef51ed3b8"
+        ],
+        "2-torsion": [
+          "0x0",
+          "0x1a6f6c03bac6dc9bda445ec557a88a30f"
+        ]
+      },
+      "independent_full_coordinate_checks": 5,
+      "planted_scalar_checks": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "subgroup_order_checks": 2,
+      "full_additivity_checks": 1,
+      "negative_sign_controls": 1,
+      "infinity_checks": 2,
+      "rational_kernel_inputs_on_twist": 262,
+      "invalid_kernel_abscissa_inputs_rejected": 1
+    },
+    {
+      "seed": 20260925,
+      "line": [
+        1,
+        30
+      ],
+      "orbit_length": 1,
+      "codomain_b": "0x1",
+      "oriented_images": {
+        "P": [
+          "0x24960265dcbe3428c86cfc13bce1bb49d",
+          "0x51292dd841789bcc51aed7a767413f1f0"
+        ],
+        "Q": [
+          "0x7f88ba6c2d4b2bc5ef92732bd8fefbdef",
+          "0x34f39b1cb84d87253a9ef85c9fec0802c"
+        ],
+        "P+Q": [
+          "0x67b5ba1eb07e45ae38e0e89f75f4cc86b",
+          "0x6d04d2cb8068bf9260cb804917122c324"
+        ],
+        "2P": [
+          "0x4b2af822b8d66519f235991c6403bd8b4",
+          "0x5c2cb6ba849cfce0830292761134c68d6"
+        ],
+        "2-torsion": [
+          "0x0",
+          "0x1"
+        ]
+      },
+      "independent_full_coordinate_checks": 5,
+      "planted_scalar_checks": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "subgroup_order_checks": 2,
+      "full_additivity_checks": 1,
+      "negative_sign_controls": 1,
+      "infinity_checks": 2,
+      "rational_kernel_inputs_on_twist": 262,
+      "invalid_kernel_abscissa_inputs_rejected": 1
+    },
+    {
+      "seed": 20260925,
+      "line": [
+        1,
+        142
+      ],
+      "orbit_length": 1,
+      "codomain_b": "0x1",
+      "oriented_images": {
+        "P": [
+          "0x491f95c8b4769c6a8e9dc9d69863f1ae6",
+          "0x4f7d11079a9c49ff464c74f012327d17"
+        ],
+        "Q": [
+          "0x76d3ed147372bcc637fe8e42041980445",
+          "0x4962586e8f8f957e6b35301338490a5aa"
+        ],
+        "P+Q": [
+          "0x52080f4b7c3141cfaa9fd573c5be0eed2",
+          "0x5af28278f50d24052e22827bf52b48d84"
+        ],
+        "2P": [
+          "0x53296b4625a48871d4dc9e73469051356",
+          "0x3d6389d0204d776117d696fe5a5793063"
+        ],
+        "2-torsion": [
+          "0x0",
+          "0x1"
+        ]
+      },
+      "independent_full_coordinate_checks": 5,
+      "planted_scalar_checks": [
+        0,
+        1,
+        -1,
+        2,
+        3,
+        17,
+        263
+      ],
+      "subgroup_order_checks": 2,
+      "full_additivity_checks": 1,
+      "negative_sign_controls": 1,
+      "infinity_checks": 2,
+      "rational_kernel_inputs_on_twist": 262,
+      "invalid_kernel_abscissa_inputs_rejected": 1
+    }
+  ],
+  "elapsed_seconds": 12.674889667017851
+}
