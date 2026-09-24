@@ -676,9 +676,18 @@ independent, which overstates the uncertainty of the correlated ones.
   of theirs.
 - **Chance.** A dozen comparisons at two standard errors miss twice about
   one time in ten.
-- **Device against emulation under v2, `n = 23`.** +2.1 standard errors for
-  ECC2K-130's distribution (1.0121 against 1.0038) and −1.1 for native.  The
-  two signs are opposite.
+- **Device against emulation under v2.**
+  - At `n = 23`: +2.1 standard errors for ECC2K-130's distribution (1.0121
+    against 1.0038) and −1.1 for native.
+  - At `n = 41`: +2.4 for ECC2K-130's distribution (1.0638 ± 0.0302 over 300
+    trials, against 0.9906).
+  - Under v1 the same comparisons were +1.0, +1.2 and −0.2.
+  - Round 1 declared device/emulation agreement at `n = 23` as a control
+    (§7), so a replicate was declared before it ran.  It repeats the device's
+    `n = 23` ECC2K-130 row with 40,000 trials on a new seed (231).  If it
+    also sits more than two standard errors above the emulation, the two
+    harnesses disagree under v2, and the pooled `c` below is not used until
+    that is explained.
 - **The lesson.** A per-row test was the wrong one to declare for a change
   expected to do nothing across a dozen rows.  The pooled difference is the
   right test.
