@@ -31,6 +31,7 @@ def prove(source):
     if not match:
         raise ValueError('unsupported spread32p source shape')
     body = re.sub(r'//[^\n]*', '', match.group(1))
+    body = re.sub(r'/\*.*?\*/', '', body, flags=re.S)
     # Fail closed if the native operands, zero extension, result selection,
     # type, guards or return expression change.
     native, fallback = body.split('#else')
