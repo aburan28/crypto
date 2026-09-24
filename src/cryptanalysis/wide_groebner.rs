@@ -495,6 +495,7 @@ pub fn wide_groebner_decompose(
     // to m! copies of every subtree.  `KIC_WIDE_ORDER=0` searches them
     // all, as a same-binary control.
     let order = std::env::var("KIC_WIDE_ORDER").as_deref() != Ok("0");
+    let high_first = std::env::var("KIC_WIDE_BRANCH").as_deref() != Ok("low");
     // Depth-first over summand bits; each frame carries its own system.
     struct Frame {
         eqs: Vec<WPoly>,
@@ -535,9 +536,13 @@ pub fn wide_groebner_decompose(
         }
         // Each summand from its highest coordinate down, so the order
         // test above decides as early as it can.
-        let next = (0..m)
-            .flat_map(|i| (0..sys.ell).rev().map(move |t| i * sys.ell + t))
-            .find(|&v| fixed >> v & 1 == 0);
+        let next = if high_first {
+            (0..m)
+                .flat_map(|i| (0..sys.ell).rev().map(move |t| i * sys.ell + t))
+                .find(|&v| fixed >> v & 1 == 0)
+        } else {
+            (0..summand_vars).find(|&v| fixed >> v & 1 == 0)
+        };
         let Some(v) = next else {
             stats.leaves += 1;
             let xs: Vec<F2mElement> = (0..m)
