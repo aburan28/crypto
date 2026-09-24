@@ -95,6 +95,68 @@ fn unknown_curve_errors_cleanly() {
 }
 
 #[test]
+fn fes_cpu_backend_solves() {
+    // The in-process CPU FES backend recovers the planted solution.
+    let v = run_json(&[
+        "fes",
+        "--n",
+        "16",
+        "--m",
+        "20",
+        "--seed",
+        "1",
+        "--backend",
+        "cpu",
+    ]);
+    assert_eq!(v["operation"], "fes");
+    assert_eq!(v["backend"], "cpu");
+    assert_eq!(
+        v["planted_found"], true,
+        "cpu FES missed the planted solution"
+    );
+}
+
+#[test]
+fn fes_worker_path_when_available() {
+    // When a worker executable is provided (CI builds the host-emulation worker
+    // and sets ICX_FES_WORKER; a GPU machine would point this at fes_cuda /
+    // fes_metal), the binary drives it as a subprocess, re-verifies, and finds
+    // the planted solution. Skipped where no worker is configured.
+    let worker = match std::env::var("ICX_FES_WORKER") {
+        Ok(w) if std::path::Path::new(&w).is_file() => w,
+        _ => {
+            eprintln!("no ICX_FES_WORKER configured; skipping worker-path test");
+            return;
+        }
+    };
+    let v = run_json(&[
+        "fes",
+        "--n",
+        "18",
+        "--m",
+        "20",
+        "--seed",
+        "1",
+        "--backend",
+        "gpu",
+    ]);
+    assert_eq!(
+        v["planted_found"], true,
+        "worker FES missed the planted solution"
+    );
+    assert_ne!(v["backend"], "cpu", "expected the worker backend, got cpu");
+    assert!(v["backend"].as_str().unwrap().contains(
+        std::path::Path::new(&worker)
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap()
+    ));
+    // The worker's proposals must all verify (a worker can only propose).
+    assert_eq!(v["verified"], v["solutions"]);
+}
+
+#[test]
 fn run_koblitz_analogue_recovers_a_logarithm() {
     // `icx run` on a Koblitz curve executes a small same-family analogue and
     // must recover a verified logarithm, labelled as scaled.
