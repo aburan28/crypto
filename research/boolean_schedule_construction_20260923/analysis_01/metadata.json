@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "complete": true,
+  "started_utc": "2026-09-24T01:40:55.138775+00:00",
+  "input_manifest_sha256": "5bf26a1260ca188b1b50fcf9c5a8c3cd2881f347479313c1f05246ff78d09a90",
+  "input_metadata_sha256": "cfc47dd2c15c5f88e98fdfe41af3dc724f0a93ac8f8e4f05cb5552e838ecba83",
+  "original_analyzer_sha256": "677376d13d3bf0b4f3b764141caf6ed579aca153af15189bc6b9f9baaa5058d6",
+  "corrected_analyzer_sha256": "46d7ebcf3133de1fa0b1079c5668af0129e163a54d5b93958b0f66202cccea5d",
+  "correction": "Use construction_dispatch_* for the dispatch arms and write analysis only to the new output directory. Cost formulas, guards, thresholds and observations are unchanged.",
+  "ended_utc": "2026-09-24T01:40:55.807856+00:00"
+}

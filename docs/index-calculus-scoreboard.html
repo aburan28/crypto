@@ -4478,6 +4478,96 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-schedule-construction-20260923">
+  <div class="panel-head">
+    <h2>Construction cost diagnostic: limited bounds, no optimized solver <span class="chip">accounting</span></h2>
+    <p>Even free construction misses 2&times; in six guarded 16-point groups and three
+      dispatcher groups under the measured unchanged-scan assumption. Every 64-point
+      group remains inconclusive because extraction exceeded the declared timing tolerance.
+      No constructor optimization or performance promotion is implemented.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/CONCLUSION.md">decisions, phases and limitations</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/analysis_01/results.json">corrected diagnostic results</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/ANALYSIS_CORRECTION.md">preserved analysis failure</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/RUN_LEDGER.json">artifact ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold solve plus validation milliseconds on two n24 discovery seeds and
+      eight random/reverse repetitions. Profiled arms include observer work. Display
+      ratios use pooled planted costs relative to the retained dispatcher; no speedup
+      or holdout promotion is claimed. All 55 methods are included.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Dispatcher / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>search</td><td>92.869396</td><td>93.909291</td><td>119.293480</td><td>0.007</td><td>PASS</td></tr>
+      <tr><td>flat</td><td>359.675958</td><td>121.436750</td><td>464.239875</td><td>0.002</td><td>PASS</td></tr>
+      <tr><td>bucket</td><td>1192.472812</td><td>415.240312</td><td>1587.468188</td><td>0.001</td><td>PASS</td></tr>
+      <tr><td>hybrid</td><td>561.672042</td><td>189.090563</td><td>799.997146</td><td>0.001</td><td>PASS</td></tr>
+      <tr><td>small_flat</td><td>108.459709</td><td>109.787001</td><td>139.168250</td><td>0.006</td><td>PASS</td></tr>
+      <tr><td>word_tail</td><td>97.579708</td><td>99.022750</td><td>125.447687</td><td>0.007</td><td>PASS</td></tr>
+      <tr><td>merge_search</td><td>81.550938</td><td>82.529605</td><td>104.025729</td><td>0.008</td><td>PASS</td></tr>
+      <tr><td>quadratic_state</td><td>33.265979</td><td>33.999875</td><td>43.020625</td><td>0.020</td><td>PASS</td></tr>
+      <tr><td>packed_state</td><td>20.445124</td><td>20.981834</td><td>26.395771</td><td>0.033</td><td>PASS</td></tr>
+      <tr><td>basis_list</td><td>266.550125</td><td>124.032333</td><td>414.505187</td><td>0.003</td><td>PASS</td></tr>
+      <tr><td>basis_wide</td><td>58.842500</td><td>27.874146</td><td>90.740146</td><td>0.012</td><td>PASS</td></tr>
+      <tr><td>tail_list</td><td>182.814979</td><td>56.310396</td><td>233.922708</td><td>0.004</td><td>PASS</td></tr>
+      <tr><td>tail_wide</td><td>53.833166</td><td>17.131605</td><td>67.274230</td><td>0.013</td><td>PASS</td></tr>
+      <tr><td>packed_untraced</td><td>14.541896</td><td>14.836000</td><td>18.862250</td><td>0.047</td><td>PASS</td></tr>
+      <tr><td>affine_sl_basis_list</td><td>195.860125</td><td>142.035521</td><td>488.362396</td><td>0.003</td><td>PASS</td></tr>
+      <tr><td>affine_sl_basis_fast</td><td>21.255646</td><td>13.536500</td><td>51.402083</td><td>0.032</td><td>PASS</td></tr>
+      <tr><td>gray_scalar</td><td>17.070687</td><td>17.033062</td><td>20.704833</td><td>0.040</td><td>PASS</td></tr>
+      <tr><td>gray_simd</td><td>2.581895</td><td>2.660458</td><td>3.165625</td><td>0.262</td><td>PASS</td></tr>
+      <tr><td>packed_gray12_scalar</td><td>18.688542</td><td>19.668750</td><td>25.630000</td><td>0.036</td><td>PASS</td></tr>
+      <tr><td>packed_gray12_simd</td><td>8.194771</td><td>8.753479</td><td>11.484187</td><td>0.083</td><td>PASS</td></tr>
+      <tr><td>packed_gray16_scalar</td><td>14.625250</td><td>16.118833</td><td>21.349541</td><td>0.046</td><td>PASS</td></tr>
+      <tr><td>packed_gray16_simd</td><td>2.590396</td><td>2.906417</td><td>3.843958</td><td>0.262</td><td>PASS</td></tr>
+      <tr><td>gray_delta_scalar</td><td>16.773521</td><td>16.542021</td><td>20.425604</td><td>0.040</td><td>PASS</td></tr>
+      <tr><td>gray_delta_simd</td><td>2.327104</td><td>2.326604</td><td>2.846458</td><td>0.291</td><td>PASS</td></tr>
+      <tr><td>initial_list</td><td>16.637687</td><td>8.244188</td><td>20.450084</td><td>0.041</td><td>PASS</td></tr>
+      <tr><td>initial_simd</td><td>2.322583</td><td>1.188708</td><td>2.813687</td><td>0.292</td><td>PASS</td></tr>
+      <tr><td>packed_gray16_delta_scalar</td><td>14.789146</td><td>16.062771</td><td>21.265729</td><td>0.046</td><td>PASS</td></tr>
+      <tr><td>packed_gray16_delta_simd</td><td>2.528708</td><td>2.798480</td><td>3.713583</td><td>0.268</td><td>PASS</td></tr>
+      <tr><td>fiber_rows</td><td>4.229188</td><td>3.758208</td><td>8.149166</td><td>0.160</td><td>PASS</td></tr>
+      <tr><td>fiber_columns</td><td>3.526687</td><td>3.272333</td><td>7.715667</td><td>0.192</td><td>PASS</td></tr>
+      <tr><td>fiber_simd</td><td>1.329166</td><td>1.182208</td><td>3.093291</td><td>0.510</td><td>PASS</td></tr>
+      <tr><td>fiber_zero_simd</td><td>1.788125</td><td>1.797125</td><td>4.555396</td><td>0.379</td><td>PASS</td></tr>
+      <tr><td>gray_quiet</td><td>2.212813</td><td>2.296750</td><td>2.633729</td><td>0.306</td><td>PASS</td></tr>
+      <tr><td>wide64_quiet</td><td>1.446834</td><td>1.450521</td><td>1.774126</td><td>0.468</td><td>PASS</td></tr>
+      <tr><td>byte_scalar</td><td>5.831583</td><td>6.254875</td><td>7.116667</td><td>0.116</td><td>PASS</td></tr>
+      <tr><td>byte_simd</td><td>1.524188</td><td>1.431355</td><td>1.916980</td><td>0.445</td><td>PASS</td></tr>
+      <tr><td>leaf16_quiet</td><td>2.284250</td><td>2.644229</td><td>3.345354</td><td>0.297</td><td>PASS</td></tr>
+      <tr><td>leaf16_byte_scalar</td><td>5.504105</td><td>5.863208</td><td>8.037125</td><td>0.123</td><td>PASS</td></tr>
+      <tr><td>leaf16_byte_simd</td><td>1.768625</td><td>1.666062</td><td>2.664292</td><td>0.383</td><td>PASS</td></tr>
+      <tr><td>byte_single_quiet</td><td>1.819042</td><td>1.706916</td><td>2.322625</td><td>0.373</td><td>PASS</td></tr>
+      <tr><td>leaf16_single_quiet</td><td>2.050604</td><td>1.940000</td><td>3.063292</td><td>0.330</td><td>PASS</td></tr>
+      <tr><td>byte_planes</td><td>1.605292</td><td>1.545000</td><td>2.002667</td><td>0.422</td><td>PASS</td></tr>
+      <tr><td>leaf16_byte_planes</td><td>1.832104</td><td>1.832229</td><td>2.836500</td><td>0.370</td><td>PASS</td></tr>
+      <tr><td>byte_unrolled</td><td>1.246729</td><td>1.149334</td><td>1.514771</td><td>0.544</td><td>PASS</td></tr>
+      <tr><td>wide64_unrolled</td><td>0.692105</td><td>0.684729</td><td>0.831125</td><td>0.979</td><td>PASS</td></tr>
+      <tr><td>leaf16_byte_unrolled</td><td>1.488333</td><td>1.439625</td><td>2.257500</td><td>0.455</td><td>PASS</td></tr>
+      <tr><td>word16_unrolled</td><td>1.073771</td><td>1.105145</td><td>1.307125</td><td>0.631</td><td>PASS</td></tr>
+      <tr><td>word_dispatch</td><td>0.677625</td><td>0.680750</td><td>0.843646</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>leaf16_word_unrolled</td><td>1.381709</td><td>1.554812</td><td>2.051083</td><td>0.490</td><td>PASS</td></tr>
+      <tr><td>construction16_rebound</td><td>1.261729</td><td>1.288312</td><td>1.555959</td><td>0.537</td><td>PASS</td></tr>
+      <tr><td>construction16_profile</td><td>1.278917</td><td>1.298083</td><td>1.554917</td><td>0.530</td><td>PASS</td></tr>
+      <tr><td>construction64_rebound</td><td>0.863166</td><td>0.850355</td><td>1.060958</td><td>0.785</td><td>PASS</td></tr>
+      <tr><td>construction64_profile</td><td>0.854437</td><td>0.857854</td><td>1.044750</td><td>0.793</td><td>PASS</td></tr>
+      <tr><td>construction_dispatch_rebound</td><td>0.867812</td><td>0.866667</td><td>1.055271</td><td>0.781</td><td>PASS</td></tr>
+      <tr><td>construction_dispatch_profile</td><td>0.858792</td><td>0.911833</td><td>1.045521</td><td>0.789</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 10,560 observations across 24 systems complete with verified results. The
+    original analysis-only naming failure is preserved; an additive correction changes
+    neither measurements nor thresholds. Validation includes 63 Rust tests and 20 Python
+    evidence/census tests. Whole-worker peak RSS is 19,873,792 bytes.</p>
+  <p>Relevant guarded outcomes: 16-point scans 6/9 below the target and 3/9 inconclusive;
+    64-point scans 9/9 inconclusive; dispatcher 3/9 below the target and 6/9 inconclusive.
+    These conditional timing ceilings do not rule out changing the scan itself.</p>
+  <p>An exact discovery census annihilates low-block quadratic coefficient vectors in
+    equation space, leaving a necessary affine subsystem. At n24 the quotient dimensions
+    are 21&ndash;23 for four low variables, 18&ndash;20 for five, and 14&ndash;17 for six.
+    Original-equation checks remain mandatory. Its complete solver and speed are unmeasured;
+    production, full-IC, calibrated-operation and rho costs remain null.</p>
+</section>
 <section class="panel" id="boolean-byte-sieve-20260923">
   <div class="panel-head">
     <h2>Compiled Gray schedules: limited 2&times; groups, universal gain rejected <span class="chip">engineering</span></h2>
@@ -4559,9 +4649,10 @@ factor base, and this prices a decomposition oracle.</p>
     tests. Whole-worker peak RSS is 29,851,648 bytes; calibrated operations, production,
     full-IC and rho costs remain unmeasured.</p>
   <p>The evidence-test scratch copies were moved to the checkout volume after system
-    temporary storage was exhausted; frozen measurements were unchanged. Direct
-    schedule construction is a prospective experiment requiring a measured cost split
-    first. Historical figures and verdicts remain below.</p>
+    temporary storage was exhausted; frozen measurements were unchanged. Direct schedule construction was prospective at that run's close. The
+    <a href="#boolean-schedule-construction-20260923">subsequent cost diagnostic above</a>
+    records guarded bounds and inconclusive cases without implementing the optimization.
+    Historical figures and verdicts remain below.</p>
 </section>
 <section class="panel" id="boolean-linear-fibers-20260923">
   <div class="panel-head">
