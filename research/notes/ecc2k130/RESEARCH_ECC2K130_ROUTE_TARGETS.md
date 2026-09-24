@@ -1521,3 +1521,17 @@ family of rank-`(n − 1)` linear systems parameterised by a small Boolean
 block.  The measurements here are enough to check such a description
 against.  Nothing here bears on ECC2K-130's cost, and no further run is
 proposed.
+
+**Supplement at `n = 15` (`ℓ = 5`): unregistered, with its prediction stated
+before it runs** (2026-09-24).
+
+- **Why.**  The `ℓ = 5` rung (`n = 13`) read residual `26 = 2n` on both draws,
+  whatever the number of consistent points (14 and 16).  Its two one-sided
+  columns read `13 = n` each.  So did a column added after the registered run,
+  multipliers of bidegree `≤ (1, 1)`, which gives 0 there.
+- **The test.**  `n = 15` has `ℓ = 5` too.  The prediction, for all 8 of its
+  draws, symmetrised arm: residual **30**, `U`-degree-`≤ 1` column **15**,
+  small-degree-`≤ 1` column **15**, bidegree-`≤ (1, 1)` column **0**, and
+  the span of the two one-sided kernels **30**.
+- **What it counts as.**  A miss on any draw is reported as a miss.  Either
+  way the result is a descriptive regularity, not an explanation.
