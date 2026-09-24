@@ -133,6 +133,9 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-verification.json"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-20260923/**"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-171-dense-symbolic-sets-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-172-native-f4-single-core-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-173-ggmp-same-cell-availability-20260923/**"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -221,6 +224,37 @@ jobs:
         run: |
           python3 scripts/verify_koblitz_stage170_parallel_construction.py > /tmp/stage170-parallel-construction-verification.json
           cmp /tmp/stage170-parallel-construction-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-verification.json
+      - name: Verify Stage 171-173 native-F4 supplements
+        env:
+          KIC_VERIFY_NO_WRITE: "1"
+        run: |
+          stage_root="research/sat_factor_base_review_20260908/continuation-05-sota-gates"
+          python3 "$stage_root/stage-171-dense-symbolic-sets-20260923/verify_stage171.py"
+          python3 "$stage_root/stage-172-native-f4-single-core-20260923/verify_stage172.py"
+          python3 "$stage_root/stage-173-ggmp-same-cell-availability-20260923/verify_stage173.py"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          stage_root = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates")
+          names = (
+              "stage-171-dense-symbolic-sets-20260923",
+              "stage-172-native-f4-single-core-20260923",
+              "stage-173-ggmp-same-cell-availability-20260923",
+          )
+          for name in names:
+              root = stage_root / name
+              seal = json.loads((root / "result-seal.json").read_text())
+              assert hashlib.sha256((root / "result.json").read_bytes()).hexdigest() == seal["result_sha256"]
+              inventory = seal["inventory"]
+              encoded = json.dumps(inventory, sort_keys=True, separators=(",", ":")).encode()
+              assert hashlib.sha256(encoded).hexdigest() == seal["inventory_sha256"]
+              for item in inventory:
+                  path = root / item["path"]
+                  assert path.is_file() and path.stat().st_size == item["bytes"]
+                  assert hashlib.sha256(path.read_bytes()).hexdigest() == item["sha256"]
+          PY
       - name: Validate licensed Magma Phase-B replay packet controls
         run: |
           python3 scripts/test_koblitz_phase_b_magma_replay.py -v

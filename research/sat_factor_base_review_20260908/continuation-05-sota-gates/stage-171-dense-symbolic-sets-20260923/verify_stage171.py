@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import statistics
 import subprocess
 from pathlib import Path
@@ -106,13 +107,15 @@ def main() -> None:
     external_backend = Path(
         "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend"
     )
-    checks["external_clean_archive"] = (
-        external_archive.is_file()
-        and sha256(external_archive) == result["source_revision"]["archive_sha256"]
-    )
-    checks["external_clean_backend"] = (
-        external_backend.is_file()
-        and sha256(external_backend) == result["source_revision"]["backend_sha256"]
+    external_clean_artifacts_present = external_archive.is_file() or external_backend.is_file()
+    checks["external_clean_artifacts_if_present"] = (
+        not external_clean_artifacts_present
+        or (
+            external_archive.is_file()
+            and external_backend.is_file()
+            and sha256(external_archive) == result["source_revision"]["archive_sha256"]
+            and sha256(external_backend) == result["source_revision"]["backend_sha256"]
+        )
     )
 
     selected = result["selected_native_f4"]
@@ -196,9 +199,11 @@ def main() -> None:
         "status": "pass",
         "result_sha256": sha256(RESULT),
         "artifact_receipts_verified": artifact_count,
+        "external_clean_artifacts_present": external_clean_artifacts_present,
         "checks": checks,
     }
-    (HERE / "verification.json").write_text(json.dumps(verification, indent=2, sort_keys=True) + "\n")
+    if os.environ.get("KIC_VERIFY_NO_WRITE") != "1":
+        (HERE / "verification.json").write_text(json.dumps(verification, indent=2, sort_keys=True) + "\n")
     print(json.dumps(verification, indent=2, sort_keys=True))
 
 

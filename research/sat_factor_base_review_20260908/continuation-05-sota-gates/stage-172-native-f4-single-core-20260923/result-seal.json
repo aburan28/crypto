@@ -1,6 +1,11 @@
 {
   "inventory": [
     {
+      "bytes": 19,
+      "path": ".gitignore",
+      "sha256": "862263fa1f46c20f0d1e4dac5ffcc75abd55c08211b2c3864c5f8764b9d87793"
+    },
+    {
       "bytes": 1687,
       "path": "RESULTS.md",
       "sha256": "9d48e7384702105b3d10719ebd8a93fa0a5684234b41e1465121a75cee67a4c1"
@@ -61,9 +66,9 @@
       "sha256": "521f7b622ce3bfe975225f280f9bcc754dbd35b14357030fe82a90e530a45ef8"
     },
     {
-      "bytes": 1374,
+      "bytes": 1490,
       "path": "seal_stage172.py",
-      "sha256": "558b9077a3db5392217f1793f64abc6475b498abb6e02b039c003a67fa408e24"
+      "sha256": "2bd19941f2be3ee4603ab12f509b1135f4019f2dd2fa7e286aeae5c9dbbbeef7"
     },
     {
       "bytes": 650,
@@ -71,14 +76,14 @@
       "sha256": "14aa0fb6973cc13cbd21dfa07cdc79a5dd81874546001ce072721f0e763a6456"
     },
     {
-      "bytes": 5450,
+      "bytes": 5517,
       "path": "verify_stage172.py",
-      "sha256": "ced089a282bb762cd61f77735960ac57f9f2e1ca785c3a109af3ca35162ed932"
+      "sha256": "22d7d8d0e3dfedb42b6beae89c2ead128c754ff1ff792589781b4fd6c419b71a"
     }
   ],
-  "inventory_sha256": "09579257d5cfcac132fa3be8b4927d3cb8616e0f9ced852a884c86385a0da361",
+  "inventory_sha256": "6613247c89c7fb8e288eff84c8b6ea47bb82802cfd3160aef36d3f74aaeaa826",
   "result_sha256": "9bd040e1e9ec3dca070f1fe3f0120c9fc539d3fef7323b9aa95dad5684f05524",
   "schema": "koblitz_stage172_native_f4_single_core_seal.v1",
-  "seal_payload_sha256": "84b6ca6cf9de633d8c31145417f6c0311579e8d74a4b0397251ba10dcc357968",
+  "seal_payload_sha256": "e41271a3f1c6df14148593a7a2d31a3ed75d86e315d790892a6e5301bf1fd8c5",
   "status": "stage172_native_f4_single_core_result_frozen"
 }

@@ -18,7 +18,14 @@ def digest(data: bytes) -> str:
 
 def main() -> None:
     inventory = []
-    for path in sorted(path for path in HERE.rglob("*") if path.is_file() and path != SEAL):
+    for path in sorted(
+        path
+        for path in HERE.rglob("*")
+        if path.is_file()
+        and path != SEAL
+        and "__pycache__" not in path.parts
+        and path.suffix != ".pyc"
+    ):
         data = path.read_bytes()
         inventory.append(
             {"path": path.relative_to(HERE).as_posix(), "bytes": len(data), "sha256": digest(data)}

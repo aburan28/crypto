@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import subprocess
 from pathlib import Path
 
@@ -137,7 +138,8 @@ def main() -> None:
         "artifact_receipts_verified": artifact_count,
         "checks": checks,
     }
-    (HERE / "verification.json").write_text(json.dumps(verification, indent=2, sort_keys=True) + "\n")
+    if os.environ.get("KIC_VERIFY_NO_WRITE") != "1":
+        (HERE / "verification.json").write_text(json.dumps(verification, indent=2, sort_keys=True) + "\n")
     print(json.dumps(verification, indent=2, sort_keys=True))
 
 

@@ -6,8 +6,7 @@
     "campaign_accounting": true,
     "claim_boundary": true,
     "development_accounting": true,
-    "external_clean_archive": true,
-    "external_clean_backend": true,
+    "external_clean_artifacts_if_present": true,
     "measured_improvement": true,
     "paired_medians": true,
     "same_binary_control": true,
@@ -18,6 +17,7 @@
     "status": true,
     "tests": true
   },
+  "external_clean_artifacts_present": true,
   "result_sha256": "e3a24ca36961044de09696523c0a8efcae95ba49511e330332ac16b8c49fb7c7",
   "schema": "koblitz_stage171_dense_symbolic_sets_verification.v1",
   "status": "pass"

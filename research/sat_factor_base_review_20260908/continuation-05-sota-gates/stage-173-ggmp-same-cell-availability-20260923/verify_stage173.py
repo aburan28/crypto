@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import subprocess
 from pathlib import Path
 
@@ -120,11 +121,15 @@ def main() -> None:
     binary = Path(
         "/Volumes/SSD990/koblitz-ggmp-build25-c6205c56/bin/koblitz_public_factor_base_discovery"
     )
-    checks["external_source_and_binary"] = (
-        archive.is_file()
-        and binary.is_file()
-        and sha256(archive) == result["source_revision"]["archive_sha256"]
-        and sha256(binary) == result["source_revision"]["discovery_binary_sha256"]
+    external_source_or_binary_present = archive.is_file() or binary.is_file()
+    checks["external_source_and_binary_if_present"] = (
+        not external_source_or_binary_present
+        or (
+            archive.is_file()
+            and binary.is_file()
+            and sha256(archive) == result["source_revision"]["archive_sha256"]
+            and sha256(binary) == result["source_revision"]["discovery_binary_sha256"]
+        )
     )
     rows = metered()
     accounting = result["stage173_development_accounting"]
@@ -150,9 +155,11 @@ def main() -> None:
         "status": "pass",
         "result_sha256": sha256(RESULT),
         "artifact_receipts_verified": artifact_count,
+        "external_source_and_binary_present": external_source_or_binary_present,
         "checks": checks,
     }
-    (HERE / "verification.json").write_text(json.dumps(verification, indent=2, sort_keys=True) + "\n")
+    if os.environ.get("KIC_VERIFY_NO_WRITE") != "1":
+        (HERE / "verification.json").write_text(json.dumps(verification, indent=2, sort_keys=True) + "\n")
     print(json.dumps(verification, indent=2, sort_keys=True))
 
 
