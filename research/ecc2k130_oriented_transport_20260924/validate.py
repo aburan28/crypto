@@ -144,6 +144,50 @@ def toy_checks(receipt, deadline):
                              "normalized_dual_compositions": compositions})
 
 
+def generic_interface_checks(receipt):
+    field = FastGF2m(5, 0b100101)
+    for b in range(2, 32):
+        source = Koblitz(field, a=0, b=b)
+        inputs = points(source)
+        degree, generator = largest_odd_generator(source, inputs)
+        if degree > 3 and any(degree % d == 0 for d in range(2, degree)):
+            break
+    else:
+        raise AssertionError("no composite cyclic control found")
+    phi = BinaryVeluMap.from_generator(source, source, generator, degree)
+    kernel, current, total = [], generator, 0
+    for _ in range((degree-1)//2):
+        kernel.append(current)
+        total ^= current[0]
+        current = source.add(current, generator)
+    images = {p: phi(p) for p in inputs}
+    direct_checks = 0
+    for p in inputs:
+        if p is None or p[0] in phi.kernel_abscissae:
+            continue
+        x, y = p
+        for point in kernel:
+            negative = source.neg(point)
+            plus, minus = source.add(p, point), source.add(p, negative)
+            x ^= plus[0] ^ minus[0]
+            y ^= plus[1] ^ minus[1] ^ point[1] ^ negative[1]
+        check(images[p] == (x, y ^ total), "generic direct rational Velu")
+        direct_checks += 1
+    for p in inputs:
+        for q in inputs:
+            check(images[source.add(p, q)] == phi.codomain.add(images[p], images[q]), "composite additivity")
+    invalid = 0
+    invalid += expect_rejection(lambda: BinaryVeluMap.from_generator(source, Koblitz(field, b=b ^ 1), generator, degree))
+    invalid += expect_rejection(lambda: BinaryVeluMap.from_generator(source, Koblitz(FastGF2m(3, 0b1011)), generator, degree))
+    invalid += expect_rejection(lambda: BinaryVeluMap.from_generator(source, source, generator, degree+2))
+    other = BinaryVeluMap.from_generator(Koblitz(field, a=1, b=b), source, generator, degree)
+    invalid += expect_rejection(lambda: phi.then(other))
+    receipt["generic_interface_control"] = {"n": 5, "source_a": 0, "source_b": b,
+        "source_order": len(inputs), "degree": degree,
+        "direct_rational_coordinate_checks": direct_checks,
+        "full_additivity_checks": len(inputs)**2, "parameter_rejections": invalid}
+
+
 def exact_checks(receipt, frozen, deadline):
     p = CHALLENGE_PX, CHALLENGE_PY
     q = CHALLENGE_QX, CHALLENGE_QY
@@ -221,6 +265,7 @@ def main():
                "full_ECDLP_cost": None, "PDP_cost": None, "end_to_end_speedup": None}
     try:
         toy_checks(receipt, start+180)
+        generic_interface_checks(receipt)
         exact_checks(receipt, json.loads(args.input.read_text()), start+180)
         check(time.monotonic() < start+180, "validation time limit")
         receipt["status"] = "PASS"
