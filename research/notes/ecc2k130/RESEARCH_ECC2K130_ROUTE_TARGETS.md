@@ -1161,3 +1161,86 @@ Each is struck in place.  The one uncomfortable part is also recorded:
 KY and HKY were already in the survey's source list, and the survey quotes
 HKY §5.2's chained-`S₃` reductio.  H1 was written, and X5′ run, with the
 explanation already in hand.
+
+## X5″ — the symmetrised chain's `D = 4` kernel, split
+
+**Registered 2026-09-24, before any code for it existed.**  This is the item
+X5′ left open ("whether any of the symmetrised chain's `D = 4` dependencies
+is non-trivial") and X6′ found in none of the sources it read.  It is
+reframed here in the light of X6′.  The question is no longer "sharpen a
+novel finding".  It is: **what the symmetrised chain's rank loss at 4 is, in
+H1's convention and in the literature's.**
+
+**A convention has to be fixed first.**  Over the Boolean ring
+`B = F₂[x]/(x_k² + x_k)`, every syzygy is trivial *as a module element*.
+- **Why.**  `B` is the ring of functions on `F₂^N`, so a syzygy is a
+  pointwise kernel vector.
+- **The generators span it at every point.**  At a point where `f` is zero,
+  the field syzygies `(f_i + 1)e_i` span everything.  Elsewhere, those with
+  `f_i = 0` together with the Koszul `f_j e_i + f_i e_j` among `f_i = 1`
+  span the kernel.
+- **So "non-trivial at degree `D`" is always degree-relative:** a syzygy is
+  non-trivial if it is not in the span of the degree-`≤ D` monomial
+  multiples of those generators.  The two conventions measured here make
+  that precise in different ways.
+
+**Systems.**
+- X5′'s chained systems at `m = 4`, on X5′'s quadratic-rank protocol: a
+  random `V ∋ 1` of dimension `ℓ = ⌈(n + log₂ 24)/4⌉`, seed
+  `0x5EED0005 ⊕ (n ≪ 32)`, the same eight `x_R` draws per rung.
+- Both arms: the symmetrised chain, and the `x`-chain as the control.
+- Rungs `n = 9` and `n = 11`, all 8 draws.  `n = 13` on its first 2 draws,
+  if one arm-draw finishes within an hour; otherwise it is reported as not
+  run.
+
+**Measurements, per draw and arm.**
+
+1. **(G) The literature's first fall degree** (Hodges–Petit–Schlather, as
+   used by KY and HKY).
+   - For `D = 2, 3, 4`, build the top-degree Macaulay matrix.  Its rows are
+     `t·f_i` with `deg t = D − deg f_i`, keeping only the degree-`D` part
+     (products in `F₂[x]/(x_k²)`); rows whose top part vanishes are dropped.
+   - `K^h_D` is its left kernel.  `T^h_D` is the span of the trivial ones:
+     `s·(f_j^h e_i + f_i^h e_j)` and `s·f_i^h e_i`, with monomials `s` of
+     the degree that makes the total `D`.
+   - Check that `T^h_D ⊆ K^h_D`, then report `R^h_D = dim K^h_D − dim T^h_D`.
+     The first fall degree is the least `D` with `R^h_D > 0`.
+   - **Positive control:** the `x`-chain has `R^h_2 = 1` on every draw (KY's
+     trace equation).  If the control fails, the tool is wrong and nothing
+     else is reported.
+2. **(L) Linear equations derivable at degree `D`.**
+   `L_D = dim(rowspace(M_D) ∩ Poly_{≤1})`, where `M_D` is the full Boolean
+   Macaulay matrix of degree `≤ D` (rows `t·f_i`, `deg t ≤ D − deg f_i`), for
+   `D = 2, 3, 4`.  The `x`-chain should give `L_2 = 1`.
+3. **(F) H1's convention at `D = 4`.**
+   - `K_4` is the left kernel of `M_4` (rows whose Boolean product vanishes
+     are dropped, as X5′'s diagnostic did).
+   - `T_4` is the span of the degree-`≤ 4` monomial multiples of the Koszul
+     and field syzygies, with Boolean-reduced products.
+   - `Λ_4` is the span of the Boolean identities of every linear polynomial
+     `h = Σ g_i f_i` derivable at `D ≤ 3`: `s·(h + 1)·g` and
+     `s·(h_b·g_a + h_a·g_b)`, with `s` of whatever degree still fits in 4.
+   - Check both are in `K_4`, then report `dim K_4`, `dim T_4`,
+     `dim(T_4 + Λ_4)` and the residual `r_4 = dim K_4 − dim(T_4 + Λ_4)`.
+
+**What is expected, and what is not.**  At `n = 9` X5′ measured
+`dim K_4 = 89` for the symmetrised chain.  Its `n` degree-2 equations have
+at most `n + C(n, 2) = 45` trivial syzygies at degree 4.  Its degree-3
+equations have none there (their Koszul and field syzygies start at 6), so a
+positive residual after `T_4` alone is expected.  Nothing is predicted
+beyond that.
+
+**Outcomes.**
+
+| (G) and (F) read | what it means |
+|---|---|
+| `R^h_D = 0` for `D ≤ 4`, and `r_4 > 0` with `L_3 = 0` | a genuine exact syzygy at 4 with no degree fall below it |
+| `R^h_3 > 0`, and `r_4 = 0` | the symmetrised chain has a genuine degree fall at 3.  Its rank loss at 4 is trivial syzygies plus the Boolean identities of what fell at 3.  So it sits one degree above the `x`-chain in **both** conventions (literature: 3 against 2; H1: 4 against 3), and the offset is where the first fall happens, not a difference in kind |
+| `R^h_D = 0` for `D ≤ 4`, and `r_4 = 0` | no degree fall through 4: H1's "fall at 4" is entirely trivial syzygies, and by the literature's definition the symmetrised chain has no first fall at or below 4 |
+| anything else | reported as measured, with the residual's dimension |
+
+**Class.**  A structural measurement: no cost moves.
+
+**Inadmissible.**  Changing the rungs, draws, seeds or definitions above
+after the rows are seen; dropping draws; reporting the positive control's
+failure as a result.
