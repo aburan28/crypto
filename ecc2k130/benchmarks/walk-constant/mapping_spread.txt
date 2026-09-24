@@ -12,3 +12,10 @@ random mapping 2: c = 1.0035 +- 0.0068
 random mapping 3: c = 0.9992 +- 0.0068
 random mapping 4: c = 0.9755 +- 0.0066
 N = 45562, W = 64: mean 0.9950, sd over mappings 0.0111
+$ python3 mapping_spread.py 45562 16 6000 5
+random mapping 0: c = 0.9869 +- 0.0065
+random mapping 1: c = 1.0093 +- 0.0067
+random mapping 2: c = 0.9949 +- 0.0067
+random mapping 3: c = 0.9602 +- 0.0066
+random mapping 4: c = 1.0197 +- 0.0068
+N = 45562, W = 16: mean 0.9942, sd over mappings 0.0228
