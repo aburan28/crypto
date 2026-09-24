@@ -582,6 +582,7 @@
         <div class="lrow"><div class="name">S&#8324; pairs-and-solve</div><div class="num">1,118</div><div class="lbar"><i style="width:47.6%"></i></div></div>
         <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 6.5&times;10<sup>7</sup> word XORs found, 6.3&times;10<sup>8</sup> refuted &middot; was 1.7&times;10<sup>8</sup> / 1.7&times;10<sup>9</sup> at the freeze</div><div class="num">8.7&times;10<sup>5</sup></div><div class="lbar"><i style="width:81.7%"></i></div></div>
         <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable, rows materialised lazily &middot; 2.8&times;10<sup>6</sup> word ops found, 9.6&times;10<sup>6</sup> refuted (5.5&times;10<sup>7</sup> total against the from-scratch engine&rsquo;s 1.7&times;10<sup>9</sup>; was 1.5&times;10<sup>8</sup> with eager rows) &middot; on the historical tree, inheriting cost <strong>1.6&times; more</strong> here (2.7&times;10<sup>9</sup>): the loss that the split variable reversed &middot; identical found/refuted verdicts</div><div class="num">1.4&times;10<sup>4</sup></div><div class="lbar"><i style="width:60.9%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4 in the chain&rsquo;s interleaved order, linear generators eliminated (default since 2026-09-24) &middot; <strong>7.2&times;10<sup>6</sup> word ops</strong> over the 8 targets against <strong>2.6&times;10<sup>7</sup></strong> for the same engine on today&rsquo;s main (3.57&times;; the 5.5&times;10<sup>7</sup> above is its 2026-09-22 freeze) &middot; identical found/refuted verdicts, zero disagreements &middot; still 5&times; enumeration and 100&times; meet in the middle per target</div><div class="num">2.4&times;10<sup>3</sup></div><div class="lbar"><i style="width:51.7%"></i></div></div>
         <div class="lrow"><div class="name">CDCL &middot; no answer on 8 of 8 targets at 200,000 conflicts</div><div class="num">&ge; 4.0&times;10<sup>7</sup></div><div class="lbar"><i style="width:100%"></i></div></div>
       </div>
       <div class="legend" style="padding-top:0">
@@ -589,6 +590,7 @@
         <span>zero disagreements between oracles on every target of every cell, S&#8324; witnesses lifted in the group and compared both ways</span>
         <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 4.1&times;10<sup>3</sup>, 22&times; the whole measured cost of the tabled fold (9.2&times;10<sup>3</sup> and 49&times; at the freeze) &mdash; an extrapolation</span>
         <span>matrix-F4 rows from the lift-checked re-run on the merged tree, <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>: same verdicts, fall degrees and SAT conflicts as the freeze, 1.4&ndash;2.7&times; fewer word XORs after main&rsquo;s sparse elimination (#405) &mdash; engineering, ratio to the probe unmoved</span>
+        <span>interleaved-order row from the paired 2026-09-24 re-run, <code>research/chain_split_order_20260924/oracle_ladder/{reference,candidate}.json</code>, both arms on one binary: identical found/refuted verdicts on every cell, zero disagreements; matrix-F4 3.57&times; fewer word XORs at n = 15, m = 3 and 1.58&times; at n = 9, m = 3, the m = 2 cells 1.00&ndash;1.03&times;; GAE converted at each run&rsquo;s own host-measured factor (the two differ by up to 14%), so the word-XOR ratio is the comparison; projected relation phase at n = 15, m = 3: S &asymp; 948 against 3,864 &mdash; an extrapolation &mdash; engineering (<a href="#chain-split-order-20260924">the round</a>)</span>
         <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical found/refuted verdicts on all 13 cells, zero disagreements, no inconclusive target; 2.3&ndash;29.9&times; fewer word operations on every cell with a tree, the specialisation&rsquo;s reads and writes charged; the default splits on the smallest free variable, so its tree has the same size and a different shape from the reference&rsquo;s &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
       </div>
     </div>
@@ -1833,8 +1835,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><b>X5&Prime;: the symmetrised chain falls genuinely at 3, one degree above the x-chain in
         both conventions.</b> By the literature&rsquo;s definition its first fall is at 3 on every
         draw, with exactly 2n falls, all to quadratics. The count is derived: its last link&rsquo;s
-        top part w<sub>R</sub>UW stays bilinear when multiplied by U or by W, because squaring is
-        F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
+        top part w<sub>R</sub>&middot;w<sub>Q2</sub>&middot;w<sub>4</sub> stays bilinear when multiplied by
+        either symmetric coordinate w<sub>Q2</sub>&thinsp;=&thinsp;AS(U<sub>2</sub>) or w<sub>4</sub>
+        (<s>by U or by W</s>, corrected in X5&tprime;), because squaring is F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
         4-against-3 is the literature&rsquo;s 3-against-2, and the symmetrised system is not shown
         to be harder. In H1&rsquo;s convention its rank loss at 4 is n&thinsp;+&thinsp;C(n,2)
         trivial syzygies plus 26&ndash;56 that are not trivial and not identities of linear falls
@@ -1843,6 +1846,28 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         cubic links show no kernel and no fall through degree 4. A first run that under-counted
         the x-chain&rsquo;s identities is kept and disclosed (<code>experiments/29_prefix/</code>);
         the symmetrised rows are unchanged by the fix. A structural measurement: no cost moves.</p>
+      <p><b>X5&tprime; (2026-09-24, registered before its code): the residual is not the pointwise
+        trace, and it stays open.</b> For each value &sigma; of its small block, the symmetrised last
+        link is an F<sub>2</sub>-linear system in the chain unknown, a(U<sup>2</sup>&thinsp;+&thinsp;U)&thinsp;+&thinsp;U<sup>2</sup>&thinsp;+&thinsp;d.
+        Its cokernel is killed by &psi;<sub>&sigma;</sub>(z)&thinsp;=&thinsp;Tr(z(1&thinsp;+&thinsp;a)/a<sup>2</sup>):
+        Kosters&ndash;Yeo&rsquo;s trace, but with coefficients that depend on &sigma;. That structure is
+        confirmed on every draw. The registered hypothesis, that the residual syzygies are pointwise
+        multiples of &psi;<sub>&sigma;</sub>, is falsified: <b>no such syzygy exists at degree 4 on any
+        of 18 draws</b>, in either arm. The residual needs multipliers that mix the chain unknown with
+        the small block (either alone gives 0). An unregistered regularity at &ell;&thinsp;=&thinsp;4
+        (residual = a per-rung constant + the number of small-block points where the local system is
+        consistent, on all 16 draws) breaks at &ell;&thinsp;=&thinsp;5, and is recorded only as an
+        observation. At &ell;&thinsp;=&thinsp;5 a different regularity holds, and it survived an
+        unregistered supplement whose prediction was stated before it ran (n&thinsp;=&thinsp;15, 8 of 8
+        draws): the residual is exactly 2n. It splits as n syzygies realisable with multipliers of
+        U-degree &le;&thinsp;1, plus n with small-block degree &le;&thinsp;1, and none with only
+        bidegree-(1,1) multipliers. The link is an affine bilinear system in (U, &sigma;). The theory
+        it now has to be checked against is Faug&egrave;re&ndash;Safey El Din&ndash;Spaenlehauer&rsquo;s
+        Jacobian-kernel description of bilinear syzygies (JSC 2011), which is not claimed to explain
+        it here. The x-arm failed one registered gate, and the cause is identified and checked:
+        X5&Prime;&rsquo;s last-link matrix used the whole chain&rsquo;s variables as multipliers.
+        Frozen: <code>experiments/30_koblitz_x5_residual.json</code>. No cost moves, and no further
+        run is proposed.</p>
     </div>
   </div>
 
@@ -5596,7 +5621,7 @@ factor base, and this prices a decomposition oracle.</p>
       <tr><td>same-tree: F4, H &rarr; default</td><td></td><td>7,917</td><td class="n">973,838,382</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">37,302,399</td><td class="n">26.11&times;</td><td>flat</td><td class="n">8.85&times;</td><td>identical</td><td><span class="chip">engineering</span> (compare.py accepts every rung; every rung with a tree improves)</td></tr>
       <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td>228 &rarr; 228</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">74,984,242 (1.56&times;)</td><td class="n">163,178,360</td><td class="n">31,800,117</td><td class="n">22,640,333</td><td class="n">5.16&times;</td><td>flat</td><td class="n">3.01&times;</td><td>identical tree</td><td><span class="chip">engineering</span></td></tr>
       <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td>1,062 &rarr; 1,198</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,475,463 (5.19&times;)</td><td class="n">42,029,541</td><td class="n">4,607,771</td><td class="n">3,011,390</td><td class="n">11.15&times;</td><td>flat</td><td class="n">5.94&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,670,183,123 (<strong>0.62&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n">55,202,947</td><td class="n"><strong>29.94&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.62&times; is the superseded loss</td></tr>
+      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,670,183,123 (<strong>0.62&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n">55,202,947 (default until 2026-09-24; <a href="#chain-split-order-20260924">7,187,062 after</a>, against 25,639,588 for the same engine on that day&rsquo;s main)</td><td class="n"><strong>29.94&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.62&times; is the superseded loss</td></tr>
     </tbody>
   </table></div>
   <div class="table-scroll"><table>
@@ -5626,6 +5651,77 @@ factor base, and this prices a decomposition oracle.</p>
     off it is <code>2<sup>4.4</sup></code> off <code>2<sup>131</sup></code>.</p>
 </section>
 <!-- END inherited-f4-20260922 -->
+<!-- BEGIN chain-split-order-20260924 -->
+<section class="panel" id="chain-split-order-20260924">
+  <div class="panel-head">
+    <h2>The chained Koblitz system: fix the last summand first, eliminate the intermediate point &mdash; 4.91&times; on a registered holdout, only together <span class="chip">engineering</span></h2>
+    <p>For <code>m &ge; 3</code> the decomposition oracle solves the chain <code>S&#8323;(x&#8321;,x&#8322;,e&#8321;), &hellip;, S&#8323;(e<sub>m&minus;2</sub>,x<sub>m</sub>,x<sub>R</sub>)</code>,
+      and the inherited engine&rsquo;s split rule, handed the layout order, branches first on the <code>n</code> coordinates of the
+      intermediate point &mdash; the least constrained unknowns in the system. The system is multilinear in its blocks, so once the
+      <code>&ell;</code> coordinates of <code>x<sub>m</sub></code> are fixed the last link is <em>linear</em> in <code>e<sub>m&minus;2</sub></code>.
+      Two changes act on that: <strong>the order</strong> (<code>groebner_decompose</code> renames the chain
+      <code>x&#8321;, x&#8322;, e&#8321;, x&#8323;, &hellip;, x<sub>m</sub></code> so the same rule fixes <code>x<sub>m</sub></code> first, and renames each
+      root back before lifting it), and <strong>linear elimination</strong> (a node&rsquo;s degree-one generators are Gauss&ndash;Jordaned
+      and substituted away &mdash; an affine substitution is a Boolean-ring endomorphism, so every root is kept &mdash; and the node
+      rebuilds a small basis over what is left). They only work together: the order alone is <code>0.21&times;</code> on the holdout,
+      because the last link&rsquo;s generators drop to degree one and the engine multiplies each by every monomial of degree
+      <code>&le; 2</code>; elimination alone is <code>2.42&times;</code>; both are <code>7.25&times;</code>. A third, same-tree change &mdash;
+      rebuilding a child&rsquo;s basis on any degree drop instead of completing it &mdash; failed its own registered gate
+      (<code>0.88&times;</code> on one holdout rung) and stays a retained control.</p>
+    <p>Boundary: the <code>m&middot;2<sup>131</sup></code> candidate-tuple count of the ECC2K-130 decomposition note, no term for the
+      split order or for how a node is reduced &mdash; the ratio to it is <strong>flat by construction</strong>. Reference: the shipped
+      default on <code>main</code> (<code>KIC_CHAIN_ORDER=layout KIC_LINEAR_ELIM=0</code>), which reproduces main&rsquo;s frozen ladder to
+      the digit; unit: 64-bit word operations, with the elimination&rsquo;s row operations and every monomial its substitution writes
+      charged to the candidate. <strong>Registered, and the registration bit:</strong> the first holdout was written without an
+      admissibility check, seven of its eleven cells never enter the Gr&ouml;bner stage, and T1 needed six comparable rungs &mdash;
+      <strong>T1 is not met as registered</strong>. The supplementary holdout T1&prime;, every admissible cell of a screen that no arm had
+      touched (nine), was registered before any run on it and met the same thresholds; so did the frozen-ladder no-regression target
+      and the correctness target. Two of the exploration&rsquo;s cells, including its largest ratio, turned out to be inadmissible and
+      are not evidence.
+      Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/tables.md">all eight arms</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/comparisons/chain-holdout-2.cross_tree.candidate-vs-reference.json">T1&prime;</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/comparisons/chain-holdout.cross_tree.candidate-vs-reference.json">holdout</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/comparisons/frozen.cross_tree.candidate-vs-reference.json">frozen ladder</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/screen.json">admissibility screen</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/manifest.json">manifest</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md">note</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Word operations, medians of 3 (identical across repetitions); ratios are reference / arm. &ldquo;O&rdquo; is the order,
+      &ldquo;L&rdquo; linear elimination, &ldquo;D&rdquo; rebuild-on-drop (same tree as the reference, <code>compare.py</code>). Every pair
+      accepted: the same targets decomposed, none exhausted, every decomposition lifted and verified in the group. Stage diagnostic
+      (AGENTS.md &sect;8).</caption>
+    <thead><tr><th>Suite</th><th>Rungs</th><th>Nodes ref &rarr; cand</th><th>Reference</th><th>L alone</th><th>O alone</th><th>O + L (default)</th><th>D (control)</th><th>Floor ratio</th><th>Wall</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>frozen ladder (5 quadratic rungs, 1 cubic)</td><td class="n">6</td><td>7,917 &rarr; 7,701</td><td class="n">16,696,846</td><td class="n">1.02&times;</td><td class="n">0.97&times;</td><td class="n"><strong>1.04&times;</strong> (cubic rung 1.84&times;; no rung rises)</td><td class="n">1.01&times;</td><td>flat</td><td class="n">0.6 &rarr; 0.6 s</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>chain ladder (tuning set)</td><td class="n">3</td><td>1,340 &rarr; 571</td><td class="n">13,754,966</td><td class="n">1.28&times;</td><td class="n">0.85&times;</td><td class="n"><strong>1.82&times;</strong></td><td class="n">1.14&times;</td><td>flat</td><td class="n">0.25 &rarr; 0.18 s</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>holdout as registered (4 of 11 cells run; T1 needed 6)</td><td class="n">4</td><td>66,615 &rarr; 8,496</td><td class="n">379,266,727</td><td class="n">2.42&times;</td><td class="n"><strong>0.21&times;</strong></td><td class="n"><strong>7.25&times;</strong> (1.53&ndash;8.74&times;)</td><td class="n"><strong>2.07&times;, one rung 0.88&times;</strong></td><td>flat</td><td class="n">8.5 &rarr; 1.3 s</td><td><span class="chip">engineering</span>; T1 not met as registered</td></tr>
+      <tr><td>supplementary holdout T1&prime; (every untouched admissible cell)</td><td class="n">9</td><td>256,531 &rarr; 24,181</td><td class="n">1,104,534,384</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n"><strong>4.91&times;</strong> (1.68&ndash;33.3&times;)</td><td class="n">&mdash;</td><td>flat</td><td class="n">24.8 &rarr; 4.4 s</td><td><span class="chip">engineering</span>; T1&prime; met</td></tr>
+      <tr><td>oracle-pricing ladder, <code>n = 15</code>, m = 3</td><td class="n">1</td><td></td><td class="n">25,639,588</td><td class="n"></td><td class="n"></td><td class="n"><strong>3.57&times;</strong> (7,187,062)</td><td class="n"></td><td>flat</td><td class="n"></td><td><span class="chip">engineering</span>; zero oracle disagreements</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Whole logarithms, <code>ic run --solver groebner --summands 3</code>, both arms on one binary and the same seeds; every run
+      recovered the planted <code>k</code> and verified <code>[k]G = Q</code>. The pipeline counts its oracle in word operations and the
+      rest only in wall time, with no measured conversion, so <code>S</code> is <strong>null</strong>; the only whole-pipeline number is the
+      wall ratio, a practicality note (the arms ran back to back, not interleaved, on a shared host). Reading: on every
+      <code>K_0/2^13</code> seed the candidate does the same work in every other counted phase, so the total falls by an amount the
+      unit cannot state; on one <code>K_0/2^9</code> seed a different first decomposition closed the matrix a trial earlier, less work
+      in every phase.</caption>
+    <thead><tr><th>Cell</th><th>Runs verified</th><th>Trials ref / cand</th><th>Relations ref / cand</th><th>Oracle word ops, ref &rarr; cand</th><th>Wall ratio [95% paired bootstrap]</th><th>S</th></tr></thead>
+    <tbody>
+      <tr><td><code>K_0/2^13</code>, 10 seeds + 5 holdout</td><td class="n">30 / 30</td><td class="n">207 / 207</td><td class="n">206 / 206</td><td class="n">234,370,439 &rarr; 151,807,846 (1.54&times;)</td><td class="n">1.062&times; [1.025, 1.097]</td><td>null</td></tr>
+      <tr><td><code>K_0/2^9</code>, 5 seeds</td><td class="n">10 / 10</td><td class="n">20 / 19</td><td class="n">20 / 19</td><td class="n">1,501,482 &rarr; 803,023 (1.87&times;)</td><td class="n">1.32&times; [1.14, 1.49]</td><td>null</td></tr>
+    </tbody>
+  </table></div>
+  <p>Retained controls: <code>KIC_CHAIN_ORDER=layout</code>, <code>KIC_LINEAR_ELIM=0|1</code>, <code>KIC_F4_DROP=rebuild</code>. Tests pin that
+    linear elimination returns exactly the variety (brute force, both engines, both split rules, both drop rules) and that the
+    interleaved chain solve has the pre-round default&rsquo;s roots at m = 3 and 4. Only <code>groebner_decompose</code> renames a chain;
+    the <code>m = 2</code> rungs are flat because the order is the identity there. Nothing here changes a first fall degree, a solving
+    degree, a fitted exponent or the page&rsquo;s verdict: the Gr&ouml;bner oracle is still 5&times; enumeration and 100&times; meet in the
+    middle per target at <code>n = 15</code>, m = 3.</p>
+</section>
+<!-- END chain-split-order-20260924 -->
 <!-- BEGIN ic-tournament-round-0023 -->
 <section class="panel" id="ic-tournament-round-0023">
 <p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>

@@ -144,8 +144,9 @@ use crate::cryptanalysis::crossbred::{
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
-    matrix_f4_f2, solve_boolean_system_filtered, split_rule_default, FieldStructure, SolveOptions,
-    SolveStats, SolverEngine,
+    chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
+    solve_boolean_system_filtered, split_rule_default, FieldStructure, SolveOptions, SolveStats,
+    SolverEngine,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
@@ -4667,7 +4668,29 @@ pub fn groebner_decompose(
         split_rule: split_rule_default(),
     };
     let mut found: Option<Vec<usize>> = None;
-    let (_, stats) = solve_boolean_system_filtered(&sys.equations, sys.n_vars, &opts, |root| {
+    // A chain is solved in its interleaved order, so the splitter fixes
+    // the last summand first and the intermediate points are eliminated
+    // rather than split on; the roots are renamed back to the layout the
+    // lift reads.  The system's own layout is untouched.
+    let order = (m >= 3 && chain_order_interleaved(opts.resolve().split_rule))
+        .then(|| sys.interleaved_order(kc.n));
+    let reordered: Vec<F2BoolPoly>;
+    let equations = match &order {
+        Some(perm) => {
+            reordered = sys
+                .equations
+                .iter()
+                .map(|e| permute_poly(e, perm))
+                .collect();
+            &reordered
+        }
+        None => &sys.equations,
+    };
+    let back = order.as_deref().map(invert_permutation);
+    let (_, stats) = solve_boolean_system_filtered(equations, sys.n_vars, &opts, |root| {
+        let root = back
+            .as_deref()
+            .map_or(root, |inverse| permute_mask(root, inverse));
         let xs: Vec<F2mElement> = (0..m)
             .map(|i| sys.summand_x(&fb.subspace_basis, root, i, kc.n))
             .collect();

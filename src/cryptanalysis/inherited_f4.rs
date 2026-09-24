@@ -287,6 +287,12 @@ impl ChildSystem {
         &self.system
     }
 
+    /// Whether some generator's degree dropped, so specialising a basis
+    /// into this child would insert completion rows.
+    pub fn has_dropped(&self) -> bool {
+        !self.dropped.is_empty()
+    }
+
     /// The child of a system whose generators have degrees
     /// `parent_degrees`, given `substituted[i]` — the image of the parent's
     /// `i`-th generator, zero or not.
