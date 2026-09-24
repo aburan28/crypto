@@ -1833,8 +1833,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><b>X5&Prime;: the symmetrised chain falls genuinely at 3, one degree above the x-chain in
         both conventions.</b> By the literature&rsquo;s definition its first fall is at 3 on every
         draw, with exactly 2n falls, all to quadratics. The count is derived: its last link&rsquo;s
-        top part w<sub>R</sub>UW stays bilinear when multiplied by U or by W, because squaring is
-        F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
+        top part w<sub>R</sub>&middot;w<sub>Q2</sub>&middot;w<sub>4</sub> stays bilinear when multiplied by
+        either symmetric coordinate w<sub>Q2</sub>&thinsp;=&thinsp;AS(U<sub>2</sub>) or w<sub>4</sub>
+        (<s>by U or by W</s>, corrected in X5&tprime;), because squaring is F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
         4-against-3 is the literature&rsquo;s 3-against-2, and the symmetrised system is not shown
         to be harder. In H1&rsquo;s convention its rank loss at 4 is n&thinsp;+&thinsp;C(n,2)
         trivial syzygies plus 26&ndash;56 that are not trivial and not identities of linear falls
@@ -1843,6 +1844,21 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         cubic links show no kernel and no fall through degree 4. A first run that under-counted
         the x-chain&rsquo;s identities is kept and disclosed (<code>experiments/29_prefix/</code>);
         the symmetrised rows are unchanged by the fix. A structural measurement: no cost moves.</p>
+      <p><b>X5&tprime; (2026-09-24, registered before its code): the residual is not the pointwise
+        trace, and it stays open.</b> For each value &sigma; of its small block, the symmetrised last
+        link is an F<sub>2</sub>-linear system in the chain unknown, a(U<sup>2</sup>&thinsp;+&thinsp;U)&thinsp;+&thinsp;U<sup>2</sup>&thinsp;+&thinsp;d.
+        Its cokernel is killed by &psi;<sub>&sigma;</sub>(z)&thinsp;=&thinsp;Tr(z(1&thinsp;+&thinsp;a)/a<sup>2</sup>):
+        Kosters&ndash;Yeo&rsquo;s trace, but with coefficients that depend on &sigma;. That structure is
+        confirmed on every draw. The registered hypothesis, that the residual syzygies are pointwise
+        multiples of &psi;<sub>&sigma;</sub>, is falsified: <b>no such syzygy exists at degree 4 on any
+        of 18 draws</b>, in either arm. The residual needs multipliers that mix the chain unknown with
+        the small block (either alone gives 0). An unregistered regularity at &ell;&thinsp;=&thinsp;4
+        (residual = a per-rung constant + the number of small-block points where the local system is
+        consistent, on all 16 draws) breaks at &ell;&thinsp;=&thinsp;5, and is recorded only as an
+        observation. The x-arm failed one registered gate, and the cause is identified and checked:
+        X5&Prime;&rsquo;s last-link matrix used the whole chain&rsquo;s variables as multipliers.
+        Frozen: <code>experiments/30_koblitz_x5_residual.json</code>. No cost moves, and no further
+        run is proposed.</p>
     </div>
   </div>
 

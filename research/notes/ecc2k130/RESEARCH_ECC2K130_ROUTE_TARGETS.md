@@ -1285,11 +1285,16 @@ reported as measured.**
    at 2 (KY's trace).  So the one-degree offset X5′ measured in H1's
    convention (4 against 3) is the same offset in the literature's (3 against
    2).
-   - **The `2n` is derived, and the count matches.**  The symmetrised last
+   - **The `2n` is derived, and the count matches.**  ~~The symmetrised last
      link's top part is `w_R·U·W` (X5′), which is bilinear.  Multiplying by
-     `U` gives `w_R·U²·W`, and by `W` gives `w_R·U·W²`.  Both are still
-     bilinear, because squaring is `F₂`-linear.  So each of the two
-     multipliers' `n` coordinates falls from 3 to 2.
+     `U` gives `w_R·U²·W`, and by `W` gives `w_R·U·W²`.~~
+     *(Corrected in X5‴.  The top part is `w_R·w_{Q₂}·w₄`, with
+     `w_{Q₂} = AS(U₂)` and `w₄ = AS(v)`.  The multipliers are those two
+     symmetric coordinates, not the chain unknown `U₂`.  Multiplying by
+     `w_{Q₂}` gives `w_R·w_{Q₂}²·w₄`, and by `w₄` gives `w_R·w_{Q₂}·w₄²`.
+     Multiplying by `U₂` would give `U₂·AS(U₂)`, which is not linear.)*
+     Both are still bilinear, because squaring is `F₂`-linear.  So each of
+     the two multipliers' `n` coordinates falls from 3 to 2.
    - **The mechanism does not carry over to the `x`-link as stated.**  Its
      top part contains `a²b²`, and `a·a²b² = a³b²` is cubic.  The `x`-chain
      still has 39–54 graded falls at 3.  At most one per unknown (34–46)
@@ -1439,3 +1444,80 @@ ECC2K-130's cost.
 
 **Inadmissible.**  Changing the draws, the definition of `P_4`, or `T_4`
 after the rows are seen; dropping draws.
+
+### X5‴, run: **H is falsified.  The link is a Kosters–Yeo trace system at every small-block point, but no degree-4 syzygy follows that trace**
+
+`cargo run --release --example koblitz_x5_residual -- --json experiments/30_koblitz_x5_residual.json`,
+frozen as `experiments/30_koblitz_x5_residual.{json,log}`.  18 draws per arm,
+9.5 s in all.
+
+| `n` (`ℓ`) | symmetrised `K_4` | `T_4` | `P_4` | unexplained | residual with multipliers of `U`-degree 0 / `≤ 1` | of small-block degree 0 / `≤ 1` | small-block points: `ψ_σ = 0` / consistent |
+|---|---:|---:|---:|---:|---|---|---|
+| 9 (4) | 87–89 | 45 | **0** | 42–44 | 0 / 24–26 | 0 / 18–20 | 2 / 6–8 |
+| 11 (4) | 116–122 | 66 | **0** | 50–56 | 0 / 28–34 | 0 / 20–26 | 2 / 4–10 |
+| 13 (5) | 117 | 91 | **0** | 26 | 0 / 13 | 0 / 13 | 2 / 14–16 |
+
+**Gates.**
+
+- **(i) holds on every draw of both arms.**  At every small-block point,
+  `Σ_j ψ_{σ,j} f_j` is constant in the chain unknown.  So the derivation is
+  right: the link is, pointwise, a Kosters–Yeo trace system whose
+  functional depends on `σ`.
+- **(ii) holds for the symmetrised arm** (`K_4` and `T_4` equal X5″'s on all
+  18 draws).
+- **(ii) fails for the `x`-arm** (`K_4` 63, 88, 117 against X5″'s 84, 111,
+  145).
+  - **The cause, identified and checked.**  X5″ built its last-link matrix
+    with multipliers over the whole chain's variables, and this driver uses
+    the link's own `N`.  Recomputed over the chain's variables, the `x`-link
+    gives X5″'s 84, 111 and 145 on all 18 draws, with `K_3 = 1`
+    (`experiments/30_koblitz_x5_residual_padcheck.log`).  So the excess is
+    exactly (the variables outside the link) × `dim K_3`: the trace identity
+    `λ(λ + 1)` times each outside variable.
+  - **What that means for the `x`-arm's numbers.**  That is a difference in
+    the reference quantity, not in the tool.  The registration still says a
+    failed gate leaves the arm unreported, so the `x`-arm's numbers are
+    reported only as a disclosed secondary.  Its `P_4` is 0 on every draw,
+    and its unexplained residual is 6, 8, 9, the same as X5″'s.
+  - **The symmetrised arm is unaffected:** its `K_3 = 0`, so the two variable
+    sets agree.
+
+**Against the registered outcomes: H fails, and the item stays open.**  The
+reason is not a small shortfall.  **`P_4 = 0` on every draw of both arms:**
+no degree-4 syzygy is, at every point, a multiple of the local trace
+functional.
+
+**What the run does establish** (descriptive, as registered).
+
+- **The residual needs multipliers that mix the chain unknown and the small
+  block.**
+  - Restricted to multipliers in the small block alone, it is 0; restricted
+    to the chain unknown alone, also 0.
+  - Allowing `U`-degree `≤ 1` realises 24–34 of the 42–56 at `ℓ = 4`, and
+    small-block degree `≤ 1` realises 18–26.  At `ℓ = 5` either restriction
+    realises exactly half (13 of 26).
+- **An unregistered regularity, found after the rows were seen, that does
+  not generalise.**
+  - **At `ℓ = 4`,** on all 16 draws, the residual is a constant for the rung
+    plus the number of small-block points where the local system is
+    consistent (`ψ_σ(d_σ) = 0`).  That is `36 + #consistent` at `n = 9` and
+    `46 + #consistent` at `n = 11`.  The `U`-degree-`≤ 1` column (18 and 24)
+    and the small-degree-`≤ 1` column (12 and 16) follow the same pattern.
+  - **At `ℓ = 5` it breaks:** `n = 13` has residual 26 on both draws, with 14
+    and 16 consistent points.
+  - It is recorded as an observation about two rungs, not as a finding.
+
+**Class.**  A structural measurement; no cost moves.
+
+**Where this leaves the item.**  What the 26–56 residual syzygies are is
+still not known.  Three candidate descriptions have now been eliminated:
+- trivial syzygies;
+- Boolean identities of linear falls;
+- small-block-only multipliers (X5″), and now also chain-unknown-only
+  multipliers and pointwise trace multiples.
+
+The next step would need theory: a description of the syzygy module of a
+family of rank-`(n − 1)` linear systems parameterised by a small Boolean
+block.  The measurements here are enough to check such a description
+against.  Nothing here bears on ECC2K-130's cost, and no further run is
+proposed.
