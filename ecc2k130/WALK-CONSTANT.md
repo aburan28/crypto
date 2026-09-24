@@ -628,11 +628,11 @@ independent, which overstates the uncertainty of the correlated ones.
 **2. Returns: met as declared, and the declaration missed a class.**
 
 - **What v2 had to remove.** There were no τ-relation 4-step returns and no
-  pairwise returns in 1.50 × 10⁹ table steps across both harnesses.  Rule v1's
-  count predicts 839 on the same rows.
+  pairwise returns in 2.36 × 10⁹ table steps across both harnesses.  Rule v1's
+  count predicts 1150 on the same rows.
 - **What it leaves.** One return was of a kind item 2 does not name: a
   six-step τ-relation return at `n = 23`, native, H = 16.  The residual count
-  of item 1 predicts 0.81 there and 1.96 over all rows.  Item 2 listed
+  of item 1 predicts 0.81 there and 2.13 over all rows.  Item 2 listed
   what the rule must remove and not what it leaves.  Item 1's count found the
   class, and the probe below tests it.
 - **The probe.** At `n = 23` with two uniform branches, where the six-step
@@ -662,10 +662,12 @@ independent, which overstates the uncertainty of the correlated ones.
 | 23 | uniform | 8 | emulation | 8 | 1.0027 | 0.0012 | 1.0026 | 0.0012 | +0.1 |
 | 37 | ecc2k130 | 8 | emulation | 16 | 1.0032 | 0.0026 | 1.0036 | 0.0026 | -0.1 |
 | 37 | native | 8 | emulation | 16 | 1.0032 | 0.0026 | 1.0015 | 0.0026 | +0.5 |
+| 41 | ecc2k130 | 8 | device | 16 | 1.0638 | 0.0302 | 1.0051 | 0.0299 | +1.4 |
 | 41 | ecc2k130 | 8 | emulation | 16 | 0.9906 | 0.0058 | 1.0125 | 0.0059 | -2.6 |
+| 41 | native | 8 | emulation | 16 | 1.0060 | 0.0059 | 1.0084 | 0.0059 | -0.3 |
 | 59 | ecc2k130 | 8 | emulation | 16 | 1.0031 | 0.0037 | 0.9949 | 0.0037 | +1.6 |
 
-- **Pooled.** Over the 11 matched rows, `c(v2) − c(v1) = -0.0002 ± 0.0007`.
+- **Pooled.** Over the 13 matched rows, `c(v2) − c(v1) = -0.0002 ± 0.0007`.
 - **Per row.** Two rows miss the declared two standard errors, both on the
   low side:
   - the device's `n = 23` native row (−2.1: 1.0016 against v1's 1.0080);
@@ -674,8 +676,8 @@ independent, which overstates the uncertainty of the correlated ones.
   In both, the v1 row is the outlier against its model (1.0080 against
   1.0026, 1.0125 against 1.0008).  The v2 rows sit within two standard errors
   of theirs.
-- **Chance.** A dozen comparisons at two standard errors miss twice about
-  one time in ten.
+- **Chance.** If the 13 comparisons were independent, they would miss
+  two standard errors 2 or more times with probability 0.12.
 - **Device against emulation under v2.**
   - At `n = 23`: +2.1 standard errors for ECC2K-130's distribution (1.0121
     against 1.0038) and −1.1 for native.
@@ -692,7 +694,7 @@ independent, which overstates the uncertainty of the correlated ones.
   expected to do nothing across a dozen rows.  The pooled difference is the
   right test.
 - **The pooled constant.** The table walk under v2 is at the floor, as under
-  v1: `c = 1.0038 ± 0.0010` pooled over the ECC2K-130 rows at H = 8.
+  v1: `c = 1.0039 ± 0.0010` pooled over the ECC2K-130 rows at H = 8.
 
 **4. Merge parting: met, narrowly.**
 
