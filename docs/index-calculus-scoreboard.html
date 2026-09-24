@@ -4593,6 +4593,90 @@ factor base, and this prices a decomposition oracle.</p>
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
+<section class="panel" id="boolean-implicit-minors-20260923">
+  <div class="panel-head">
+    <h2>Exact minors verified; the fixed prepass does not justify a complete candidate <span class="chip">engineering</span></h2>
+    <p>All 5,280 observations on 12 discovery systems and 55 arms complete and verify.
+      All six measured preprocessing opportunity bounds miss two, even granting later recovery free.
+      No complete candidate or holdout promotion follows. Full-IC and rho costs remain null.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_implicit_minors_20260923/CONCLUSION.md">costs, overlaps and limitations</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_implicit_minors_20260923/run_01/results.json">frozen result</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_implicit_minors_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_implicit_minors_20260923/RUN_LEDGER.json">evidence hashes</a>.</p>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Variables</th><th>Family</th><th>Reference / prepass</th><th>95% interval</th><th>Conditional decision</th></tr></thead><tbody>
+<tr><td>12</td><td>cross_planted</td><td>0.011738</td><td>[0.009875, 0.013883]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>12</td><td>planted</td><td>0.010903</td><td>[0.008474, 0.015090]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>12</td><td>unplanted</td><td>0.012081</td><td>[0.009786, 0.013399]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>16</td><td>cross_planted</td><td>0.019185</td><td>[0.011461, 0.056777]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>16</td><td>planted</td><td>0.022413</td><td>[0.007921, 0.056610]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>16</td><td>unplanted</td><td>0.047025</td><td>[0.034008, 0.081790]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+  </tbody></table></div>
+  <p>n16 discovery medians, milliseconds including validation. Kind distinguishes complete solves from necessary filters.
+    The dispatcher ratio uses pooled planted medians and is descriptive; a filter row does not establish a full-solver speedup.</p>
+  <div class="table-wrap"><table><thead><tr><th>Arm</th><th>Kind</th><th>Planted ms</th><th>Cross-planted ms</th><th>Unplanted ms</th><th>Dispatcher / arm, planted</th><th>Correctness</th></tr></thead><tbody>
+<tr><td>search</td><td>complete solve</td><td>3.161792</td><td>3.622229</td><td>3.848584</td><td>0.0015</td><td>PASS</td></tr>
+<tr><td>flat</td><td>complete solve</td><td>6.724417</td><td>3.217792</td><td>7.329375</td><td>0.0007</td><td>PASS</td></tr>
+<tr><td>bucket</td><td>complete solve</td><td>63.313041</td><td>28.751771</td><td>60.618333</td><td>0.0001</td><td>PASS</td></tr>
+<tr><td>hybrid</td><td>complete solve</td><td>14.092563</td><td>7.393916</td><td>15.796083</td><td>0.0003</td><td>PASS</td></tr>
+<tr><td>small_flat</td><td>complete solve</td><td>4.851021</td><td>2.852708</td><td>5.503917</td><td>0.0010</td><td>PASS</td></tr>
+<tr><td>word_tail</td><td>complete solve</td><td>4.267812</td><td>2.452062</td><td>4.680438</td><td>0.0011</td><td>PASS</td></tr>
+<tr><td>merge_search</td><td>complete solve</td><td>2.786104</td><td>3.276916</td><td>3.520771</td><td>0.0017</td><td>PASS</td></tr>
+<tr><td>quadratic_state</td><td>complete solve</td><td>1.140750</td><td>1.227062</td><td>1.284312</td><td>0.0042</td><td>PASS</td></tr>
+<tr><td>packed_state</td><td>complete solve</td><td>0.693875</td><td>0.695875</td><td>0.867395</td><td>0.0069</td><td>PASS</td></tr>
+<tr><td>basis_list</td><td>complete solve</td><td>2.276937</td><td>1.975521</td><td>9.229458</td><td>0.0021</td><td>PASS</td></tr>
+<tr><td>basis_wide</td><td>complete solve</td><td>0.459854</td><td>0.462166</td><td>1.790209</td><td>0.0105</td><td>PASS</td></tr>
+<tr><td>tail_list</td><td>complete solve</td><td>5.717791</td><td>3.070208</td><td>6.134750</td><td>0.0008</td><td>PASS</td></tr>
+<tr><td>tail_wide</td><td>complete solve</td><td>1.346812</td><td>0.748834</td><td>1.615541</td><td>0.0036</td><td>PASS</td></tr>
+<tr><td>packed_untraced</td><td>complete solve</td><td>0.481687</td><td>0.557000</td><td>0.594771</td><td>0.0100</td><td>PASS</td></tr>
+<tr><td>affine_sl_basis_list</td><td>complete solve</td><td>10.589729</td><td>6.691959</td><td>17.195958</td><td>0.0005</td><td>PASS</td></tr>
+<tr><td>affine_sl_basis_fast</td><td>complete solve</td><td>0.802208</td><td>0.546333</td><td>1.251105</td><td>0.0060</td><td>PASS</td></tr>
+<tr><td>gray_scalar</td><td>complete solve</td><td>0.031771</td><td>0.025229</td><td>0.083104</td><td>0.1515</td><td>PASS</td></tr>
+<tr><td>gray_simd</td><td>complete solve</td><td>0.005895</td><td>0.005834</td><td>0.015709</td><td>0.8163</td><td>PASS</td></tr>
+<tr><td>packed_gray12_scalar</td><td>complete solve</td><td>0.109917</td><td>0.114625</td><td>0.123458</td><td>0.0438</td><td>PASS</td></tr>
+<tr><td>packed_gray12_simd</td><td>complete solve</td><td>0.050188</td><td>0.044916</td><td>0.054937</td><td>0.0959</td><td>PASS</td></tr>
+<tr><td>packed_gray16_scalar</td><td>complete solve</td><td>0.034959</td><td>0.031355</td><td>0.086146</td><td>0.1377</td><td>PASS</td></tr>
+<tr><td>packed_gray16_simd</td><td>complete solve</td><td>0.010333</td><td>0.009458</td><td>0.019291</td><td>0.4657</td><td>PASS</td></tr>
+<tr><td>gray_delta_scalar</td><td>complete solve</td><td>0.025916</td><td>0.031626</td><td>0.083896</td><td>0.1857</td><td>PASS</td></tr>
+<tr><td>gray_delta_simd</td><td>complete solve</td><td>0.007104</td><td>0.005959</td><td>0.013999</td><td>0.6774</td><td>PASS</td></tr>
+<tr><td>initial_list</td><td>complete solve</td><td>0.027354</td><td>0.045437</td><td>0.085104</td><td>0.1759</td><td>PASS</td></tr>
+<tr><td>initial_simd</td><td>complete solve</td><td>0.007187</td><td>0.013750</td><td>0.015354</td><td>0.6696</td><td>PASS</td></tr>
+<tr><td>packed_gray16_delta_scalar</td><td>complete solve</td><td>0.034354</td><td>0.036333</td><td>0.088041</td><td>0.1401</td><td>PASS</td></tr>
+<tr><td>packed_gray16_delta_simd</td><td>complete solve</td><td>0.009876</td><td>0.009874</td><td>0.017229</td><td>0.4873</td><td>PASS</td></tr>
+<tr><td>fiber_rows</td><td>complete solve</td><td>0.034792</td><td>0.022396</td><td>0.075521</td><td>0.1383</td><td>PASS</td></tr>
+<tr><td>fiber_columns</td><td>complete solve</td><td>0.032771</td><td>0.023334</td><td>0.070708</td><td>0.1469</td><td>PASS</td></tr>
+<tr><td>fiber_simd</td><td>complete solve</td><td>0.014250</td><td>0.011938</td><td>0.037583</td><td>0.3377</td><td>PASS</td></tr>
+<tr><td>fiber_zero_simd</td><td>complete solve</td><td>0.014209</td><td>0.013833</td><td>0.055083</td><td>0.3387</td><td>PASS</td></tr>
+<tr><td>gray_quiet</td><td>complete solve</td><td>0.006021</td><td>0.006167</td><td>0.016063</td><td>0.7993</td><td>PASS</td></tr>
+<tr><td>wide64_quiet</td><td>complete solve</td><td>0.005916</td><td>0.004938</td><td>0.010021</td><td>0.8135</td><td>PASS</td></tr>
+<tr><td>byte_scalar</td><td>complete solve</td><td>0.015459</td><td>0.013104</td><td>0.034042</td><td>0.3113</td><td>PASS</td></tr>
+<tr><td>byte_simd</td><td>complete solve</td><td>0.006042</td><td>0.005521</td><td>0.013416</td><td>0.7965</td><td>PASS</td></tr>
+<tr><td>leaf16_quiet</td><td>complete solve</td><td>0.009000</td><td>0.010042</td><td>0.019166</td><td>0.5347</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_scalar</td><td>complete solve</td><td>0.018021</td><td>0.015583</td><td>0.036166</td><td>0.2670</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_simd</td><td>complete solve</td><td>0.009021</td><td>0.009437</td><td>0.017167</td><td>0.5335</td><td>PASS</td></tr>
+<tr><td>byte_single_quiet</td><td>complete solve</td><td>0.005396</td><td>0.006208</td><td>0.014020</td><td>0.8919</td><td>PASS</td></tr>
+<tr><td>leaf16_single_quiet</td><td>complete solve</td><td>0.009666</td><td>0.009187</td><td>0.017542</td><td>0.4979</td><td>PASS</td></tr>
+<tr><td>byte_planes</td><td>complete solve</td><td>0.007062</td><td>0.006625</td><td>0.012729</td><td>0.6815</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_planes</td><td>complete solve</td><td>0.009104</td><td>0.009270</td><td>0.016459</td><td>0.5286</td><td>PASS</td></tr>
+<tr><td>byte_unrolled</td><td>complete solve</td><td>0.009166</td><td>0.007625</td><td>0.012542</td><td>0.5250</td><td>PASS</td></tr>
+<tr><td>wide64_unrolled</td><td>complete solve</td><td>0.007374</td><td>0.007333</td><td>0.009521</td><td>0.6526</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_unrolled</td><td>complete solve</td><td>0.011730</td><td>0.011833</td><td>0.016958</td><td>0.4103</td><td>PASS</td></tr>
+<tr><td>word16_unrolled</td><td>complete solve</td><td>0.004063</td><td>0.003916</td><td>0.008292</td><td>1.1846</td><td>PASS</td></tr>
+<tr><td>word_dispatch</td><td>complete solve</td><td>0.004812</td><td>0.004916</td><td>0.008833</td><td>1.0000</td><td>PASS</td></tr>
+<tr><td>leaf16_word_unrolled</td><td>complete solve</td><td>0.008688</td><td>0.007812</td><td>0.011500</td><td>0.5540</td><td>PASS</td></tr>
+<tr><td>projected4</td><td>complete solve</td><td>0.015041</td><td>0.013771</td><td>0.032250</td><td>0.3199</td><td>PASS</td></tr>
+<tr><td>projected5</td><td>complete solve</td><td>0.014958</td><td>0.010500</td><td>0.033562</td><td>0.3217</td><td>PASS</td></tr>
+<tr><td>projected6</td><td>complete solve</td><td>0.022708</td><td>0.020688</td><td>0.112792</td><td>0.2119</td><td>PASS</td></tr>
+<tr><td>numeric_minor4</td><td>necessary filter</td><td>0.605666</td><td>0.608313</td><td>0.674958</td><td>0.0079</td><td>PASS</td></tr>
+<tr><td>symbolic_minor4</td><td>necessary filter</td><td>0.210646</td><td>0.183667</td><td>0.149229</td><td>0.0228</td><td>PASS</td></tr>
+<tr><td>affine_filter</td><td>necessary filter</td><td>0.043229</td><td>0.041521</td><td>0.042271</td><td>0.1113</td><td>PASS</td></tr>
+  </tbody></table></div>
+  <p>The four minors leave 1,410&ndash;1,920 outside assignments at n16; exact affine consistency leaves 5&ndash;15.
+    Every filter bit is checked and all 417,792 original assignments are covered. Product cancellations, degree drops,
+    zero/duplicate controls and rank-deficient insufficiency remain explicit. Whole-worker RSS: 6,881,280 bytes.
+    Campaign: 6.472 seconds. The prior complete projected-fiber comparison remains below.</p>
+</section>
+
 <section class="panel" id="boolean-projected-fibers-20260923">
   <div class="panel-head">
     <h2>Complete recovery is verified; the dramatic-gain gate is rejected <span class="chip">engineering</span></h2>
