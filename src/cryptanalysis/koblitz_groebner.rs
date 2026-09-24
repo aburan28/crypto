@@ -2884,12 +2884,37 @@ pub(crate) fn occurring_vars(polys: &[F2BoolPoly]) -> u64 {
 
 /// Total degree of a boolean system.
 pub fn system_degree(polys: &[F2BoolPoly]) -> u32 {
-    polys
-        .iter()
-        .flat_map(|p| p.terms.iter())
-        .map(|t| t.mask.count_ones())
-        .max()
-        .unwrap_or(0)
+    // Called at every node of the solver, and `count_ones` on the baseline
+    // x86-64 target is a dozen-instruction bit trick; where the CPU has
+    // `popcnt`, run the same scan compiled with it.  The loop is written
+    // out so it is compiled inside the feature-enabled function (an
+    // iterator chain compiles to a separate generic `fold` that would not
+    // inherit the feature).  The result is identical either way.
+    #[cfg(target_arch = "x86_64")]
+    {
+        if std::arch::is_x86_feature_detected!("popcnt") {
+            // SAFETY: the feature was just detected on this CPU.
+            return unsafe { system_degree_popcnt(polys) };
+        }
+    }
+    system_degree_body(polys)
+}
+
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "popcnt")]
+unsafe fn system_degree_popcnt(polys: &[F2BoolPoly]) -> u32 {
+    system_degree_body(polys)
+}
+
+#[inline(always)]
+fn system_degree_body(polys: &[F2BoolPoly]) -> u32 {
+    let mut degree = 0u32;
+    for p in polys {
+        for t in &p.terms {
+            degree = degree.max(t.mask.count_ones());
+        }
+    }
+    degree
 }
 
 /// Build the Macaulay matrix of `polys` at `degree`, reduce it, and
@@ -3108,9 +3133,15 @@ pub fn solving_degree(
 
 // ── Gröbner solve with splitting ───────────────────────────────────
 
-/// Specialise `p` by setting variable `var` to `value`.
-fn substitute(p: &F2BoolPoly, var: u32, value: bool) -> F2BoolPoly {
-    p.substitute(var, value)
+/// Specialise `p` by setting variable `var` to `value`, inside a solve
+/// whose inputs were checked canonical (`canonical`), which then skips the
+/// per-call order check.
+fn substitute_in_solve(p: &F2BoolPoly, var: u32, value: bool, canonical: bool) -> F2BoolPoly {
+    if canonical {
+        p.substitute_canonical(var, value)
+    } else {
+        p.substitute(var, value)
+    }
 }
 
 /// A basis element that has collapsed to `v_i` or `v_i + 1` forces its
@@ -3571,19 +3602,28 @@ impl InheritedBases {
     /// bases do not substitute it again).  Specialisation replaces the
     /// child's matrix build, so its wall time is charged to the build
     /// phase; its word operations enter the stage unit.
-    fn specialise(&self, var: u32, value: bool, substituted: &[F2BoolPoly]) -> Self {
+    ///
+    /// The system is taken by value: with bases, the child system is built
+    /// from it by move and handed back, zeros dropped, for the solver to
+    /// keep — one copy of the generators per node instead of two.  Without
+    /// bases it comes back as it went in.
+    fn specialise_owned(
+        &self,
+        var: u32,
+        value: bool,
+        substituted: Vec<F2BoolPoly>,
+    ) -> (Self, std::rc::Rc<Vec<F2BoolPoly>>) {
+        let Some(first) = self.bases.first() else {
+            return (Self::default(), std::rc::Rc::new(substituted));
+        };
         let started = std::time::Instant::now();
         let mut total = InheritCost::default();
-        let child = self
-            .bases
-            .first()
-            .map(|b| ChildSystem::new(b.generator_degrees(), substituted));
+        let child = ChildSystem::from_owned(first.generator_degrees(), substituted);
         let bases = self
             .bases
             .iter()
             .map(|b| {
-                let child = child.as_ref().expect("a basis exists");
-                let (next, cost) = b.specialise_shared(var, value, child);
+                let (next, cost) = b.specialise_shared(var, value, &child);
                 total.reduce_word_ops += cost.reduce_word_ops;
                 total.specialise_word_ops += cost.specialise_word_ops;
                 next
@@ -3596,7 +3636,14 @@ impl InheritedBases {
             p.word_ops += word_ops;
             p.specialise_word_ops += total.specialise_word_ops;
         });
-        Self { bases }
+        (Self { bases }, child.system().clone())
+    }
+}
+
+/// Drop the zero generators, cloning the shared system only if it has any.
+fn drop_zeros(system: &mut std::rc::Rc<Vec<F2BoolPoly>>) {
+    if system.iter().any(|p| p.is_zero()) {
+        std::rc::Rc::make_mut(system).retain(|p| !p.is_zero());
     }
 }
 
@@ -3720,8 +3767,13 @@ pub fn solve_boolean_system_filtered(
     let mut out = Vec::new();
     let mut stop = false;
     let opts = opts.resolve();
+    // Every polynomial the solve substitutes is an input equation or the
+    // result of a substitution, which is canonical; so when the inputs
+    // are, the order check can be done once here instead of per call.
+    let canonical = equations.iter().all(F2BoolPoly::is_canonical);
     solve_rec(
         equations.to_vec(),
+        canonical,
         equations,
         vec![None; n_vars],
         n_vars,
@@ -3737,7 +3789,8 @@ pub fn solve_boolean_system_filtered(
 
 #[allow(clippy::too_many_arguments)]
 fn solve_rec(
-    mut system: Vec<F2BoolPoly>,
+    system: Vec<F2BoolPoly>,
+    canonical: bool,
     original: &[F2BoolPoly],
     mut assignment: Vec<Option<bool>>,
     n_vars: usize,
@@ -3778,20 +3831,20 @@ fn solve_rec(
     // builds them at its first reduction.  A system that already contains
     // the constant `1` is refuted below without reducing, so nothing is
     // specialised for it either.
-    let mut bases = match parent {
+    let (mut bases, mut system) = match parent {
         Some((bases, var, value))
             if matches!(opts.engine, SolverEngine::InheritedF4 { .. })
                 && !system.iter().any(is_constant_one) =>
         {
-            bases.specialise(var, value, &system)
+            bases.specialise_owned(var, value, system)
         }
-        _ => InheritedBases::default(),
+        _ => (InheritedBases::default(), std::rc::Rc::new(system)),
     };
     let inherit = matches!(opts.engine, SolverEngine::InheritedF4 { .. });
 
     // Reduce, propagate, repeat until the algebra stops learning.
     loop {
-        system.retain(|p| !p.is_zero());
+        drop_zeros(&mut system);
         if system.iter().any(is_constant_one) {
             stats.infeasible_branches += 1;
             return;
@@ -3823,13 +3876,18 @@ fn solve_rec(
                 None => {
                     stats.propagations += 1;
                     assignment[v as usize] = Some(val);
-                    system = system.iter().map(|p| substitute(p, v, val)).collect();
+                    let substituted: Vec<F2BoolPoly> = system
+                        .iter()
+                        .map(|p| substitute_in_solve(p, v, val, canonical))
+                        .collect();
                     if inherit {
-                        bases = bases.specialise(v, val, &system);
+                        (bases, system) = bases.specialise_owned(v, val, substituted);
+                    } else {
+                        system = std::rc::Rc::new(substituted);
                     }
                     // Keep the solver's system aligned with the bases',
                     // which drop generators that vanish.
-                    system.retain(|p| !p.is_zero());
+                    drop_zeros(&mut system);
                 }
             }
         }
@@ -3862,10 +3920,11 @@ fn solve_rec(
                 branch[free] = Some(value);
                 let specialised: Vec<F2BoolPoly> = system
                     .iter()
-                    .map(|p| substitute(p, free as u32, value))
+                    .map(|p| substitute_in_solve(p, free as u32, value, canonical))
                     .collect();
                 solve_rec(
                     specialised,
+                    canonical,
                     original,
                     branch,
                     n_vars,
