@@ -6048,5 +6048,23 @@ Full-DLP S, rho/floor ratios and speedup are null for every row.</p>
 <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_quotient_controls_20260924/results/run-002/raw.json.gz">raw run</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/toy_quotient_controls_20260924/results/run-002/summary.json">per-model summary</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/toy_quotient_controls_20260924/RESULTS.md">results and limitations</a>. Earlier pilot and neighbor figures above remain unchanged.</p>
 </section>
 <!-- END toy-quotient-controls-20260924 -->
+<section id="toy-binary-elimination-20260924">
+<h2>Tiny binary isogeny-class elimination audit — accounting</h2>
+<p>53 curves, 106 systems, 40,064 point-pair checks, and 53 Frobenius controls.
+All checks passed. Full Boolean-ideal saturation at degree six reflects an
+ambient-dimension floor; it is not degree of regularity.</p>
+<table><thead><tr><th>Field</th><th>Systems</th><th>Unsatisfiable</th><th>Linear completion degree</th></tr></thead>
+<tbody><tr><td>GF(8)</td><td>14</td><td>0</td><td>5</td></tr>
+<tr><td>GF(16)</td><td>30</td><td>10</td><td>4–5</td></tr>
+<tr><td>GF(32)</td><td>62</td><td>36</td><td>4–5</td></tr></tbody></table>
+<p>306 polynomial-zero triples versus 206 rational-lifted triples, including
+transported controls. No matched positive rational-lift comparison between
+nonconjugate curves was found under the frozen matching criteria. No explicit
+isogeny neighbors or F4/F5 traces were constructed. End-to-end costs and speedup remain unset.</p>
+<p>Evidence:
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_elimination_20260924/README.md">analysis and limits</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_elimination_20260924/refined.json">refined raw results</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_elimination_20260924/receipt.json">verification receipt</a>.</p>
+</section>
 </body>
 </html>
