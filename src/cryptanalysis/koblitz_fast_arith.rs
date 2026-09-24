@@ -781,11 +781,9 @@ mod tests {
                 // The slow kernel is known-None on every degenerate pair
                 // (its combined inversion hits zero) — pin that, so a
                 // future reader sees the divergence is deliberate.
-                if x == 0 || true {
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
-                }
+                assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
+                assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
+                assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
             }
         }
     }
