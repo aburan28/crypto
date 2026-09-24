@@ -55,6 +55,48 @@ enum Action {
     Inspect(CurveArg),
     /// Report the generic-attack cost and the IC picture for this curve.
     Estimate(EstimateArgs),
+    /// Run the index-calculus pipeline on the curve (or a same-family analogue).
+    Run(RunArgs),
+}
+
+#[derive(Args)]
+struct RunArgs {
+    /// Curve name or alias.
+    curve: String,
+    /// Factor base plugin: `name` or `name:k=v,...` (default per family).
+    #[arg(long)]
+    factor_base: Option<String>,
+    /// Decomposition oracle (subtract | mitm | mitm-frobenius | descent-algebraic).
+    #[arg(long)]
+    oracle: Option<String>,
+    /// Polynomial solver for descent-algebraic (f4-f2 | matrix-f5 | xl-f2 |
+    /// crossbred-f2 | fes-f2 | fes-f2-wide | sat-cdcl | buchberger-f2 | exhaustive).
+    #[arg(long)]
+    solver: Option<String>,
+    /// Relation matrix (incremental-gauss | structured-gauss).
+    #[arg(long, default_value = "incremental-gauss")]
+    linalg: String,
+    /// Analogue field degree for binary/Koblitz families.
+    #[arg(long)]
+    degree: Option<u32>,
+    /// Analogue prime size in bits (7|10|12|14|16|18|20).
+    #[arg(long)]
+    bits: Option<u32>,
+    #[arg(long, default_value_t = 20_260_922)]
+    seed: u64,
+    #[arg(long, default_value_t = 2_000_000)]
+    max_trials: u64,
+    #[arg(long, default_value_t = 1)]
+    repeats: usize,
+    /// Counted Pollard-rho reference runs to average (0 to skip).
+    #[arg(long, default_value_t = 8)]
+    rho_runs: usize,
+    /// End-to-end envelope in subgroup-order bits.
+    #[arg(long, default_value_t = ic_engine::ATTACK_ENVELOPE_BITS)]
+    envelope: u64,
+    /// Per-solver-call budget in seconds (0 for none).
+    #[arg(long, default_value_t = 60)]
+    solver_budget_seconds: u64,
 }
 
 #[derive(Args)]
@@ -300,6 +342,50 @@ fn display(report: &Value) {
                 println!("  - {}", n.as_str().unwrap_or(""));
             }
         }
+        Some("run") => {
+            let r = &report["result"];
+            let an = &r["analogue"];
+            println!(
+                "Run: {} [{}]  regime={}  ic_relevant={}",
+                r["curve"].as_str().unwrap_or("?"),
+                an["family"].as_str().unwrap_or("?"),
+                r["regime"].as_str().unwrap_or("?"),
+                r["ic_relevant"],
+            );
+            println!(
+                "Instance run: {} (order {} bits){}",
+                an["instance"].as_str().unwrap_or("?"),
+                an["run_order_bits"],
+                if an["is_named_curve"] == true {
+                    " — the named curve"
+                } else {
+                    " — scaled analogue"
+                },
+            );
+            println!("Config: {}", r["config_label"].as_str().unwrap_or("?"));
+            for (i, rep) in r["reports"].as_array().into_iter().flatten().enumerate() {
+                let s = rep["s"].as_f64().unwrap_or(0.0);
+                let sr = rep.get("s_over_rho").and_then(|v| v.as_f64());
+                println!(
+                    "  config {}: verified={}  S={:.3e}{}",
+                    i + 1,
+                    rep["verified"],
+                    s,
+                    sr.map(|x| format!("  ({x:.2}x rho)")).unwrap_or_default(),
+                );
+            }
+            if let Some(rho) = r.get("rho").filter(|v| !v.is_null()) {
+                println!(
+                    "Rho reference: {} runs, mean S={:.3e}, all verified={}",
+                    rho["runs"],
+                    rho["mean_s"].as_f64().unwrap_or(0.0),
+                    rho["all_verified"],
+                );
+            }
+            if let Some(note) = r["extrapolation_note"].as_str() {
+                println!("\nScope: {note}");
+            }
+        }
         Some("error") => {
             eprintln!("icx: {}", report["message"].as_str().unwrap_or("failed"));
         }
@@ -309,11 +395,54 @@ fn display(report: &Value) {
     }
 }
 
+fn run_cmd(args: &RunArgs, json: bool) -> Result<Value, String> {
+    use crypto_lib::cryptanalysis::ic_progress::ProgressReporter;
+    use crypto_lib::cryptanalysis::ic_run::{run_curve, RunConfig};
+
+    let curve = curve_catalog::by_name(&args.curve)
+        .ok_or_else(|| format!("unknown curve '{}'; try `icx list`", args.curve))?;
+    let cfg = RunConfig {
+        factor_base: args.factor_base.clone(),
+        oracle: args.oracle.clone(),
+        solver: args.solver.clone(),
+        linalg: args.linalg.clone(),
+        degree: args.degree,
+        bits: args.bits,
+        seed: args.seed,
+        max_trials: args.max_trials,
+        repeats: args.repeats,
+        rho_runs: args.rho_runs,
+        envelope_bits: args.envelope,
+        solver_budget_seconds: args.solver_budget_seconds,
+    };
+    // In JSON mode the progress log would interleave with the document, so
+    // silence it; in human mode it streams the CADO-style stage lines to stderr.
+    let mut progress = ProgressReporter::new(false, json);
+    let result = run_curve(&curve, &cfg, &mut progress)?;
+    let verified_any = result.reports.iter().any(|r| r.verified);
+    if !json {
+        progress.summary(&format!(
+            "{} — {} of {} configuration(s) verified",
+            result.curve,
+            result.reports.iter().filter(|r| r.verified).count(),
+            result.reports.len()
+        ));
+    }
+    Ok(json!({
+        "schema_version": 1,
+        "operation": "run",
+        "status": if verified_any { "complete" } else { "incomplete" },
+        "verified": verified_any,
+        "result": serde_json::to_value(&result).map_err(|e| e.to_string())?,
+    }))
+}
+
 fn execute(cli: &Cli) -> Result<Value, String> {
     match &cli.command {
         Some(Action::List(a)) => list(a),
         Some(Action::Inspect(a)) => inspect(&a.curve),
         Some(Action::Estimate(a)) => estimate(a),
+        Some(Action::Run(a)) => run_cmd(a, cli.json),
         None => {
             let name = cli
                 .curve

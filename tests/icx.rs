@@ -93,3 +93,40 @@ fn unknown_curve_errors_cleanly() {
     let out = icx().args(["inspect", "no-such-curve"]).output().unwrap();
     assert!(!out.status.success());
 }
+
+#[test]
+fn run_koblitz_analogue_recovers_a_logarithm() {
+    // `icx run` on a Koblitz curve executes a small same-family analogue and
+    // must recover a verified logarithm, labelled as scaled.
+    let v = run_json(&["run", "sect163k1", "--degree", "13", "--rho-runs", "0"]);
+    assert_eq!(v["operation"], "run");
+    assert_eq!(v["verified"], true, "koblitz analogue did not verify");
+    assert_eq!(v["result"]["analogue"]["family"], "koblitz");
+    assert_eq!(v["result"]["analogue"]["is_named_curve"], false);
+    assert!(v["result"]["extrapolation_note"].is_string());
+}
+
+#[test]
+fn run_prime_analogue_recovers_a_logarithm() {
+    let v = run_json(&["run", "p256", "--bits", "14", "--rho-runs", "0"]);
+    assert_eq!(v["verified"], true, "prime analogue did not verify");
+    assert_eq!(v["result"]["ic_relevant"], false);
+}
+
+#[test]
+fn run_with_gray_code_fes_solver() {
+    // The Gray-code FES solver plugs into the descent-algebraic oracle.
+    let v = run_json(&[
+        "run",
+        "sect163k1",
+        "--degree",
+        "11",
+        "--oracle",
+        "descent-algebraic",
+        "--solver",
+        "fes-f2",
+        "--rho-runs",
+        "0",
+    ]);
+    assert_eq!(v["verified"], true, "FES-solved analogue did not verify");
+}

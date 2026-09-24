@@ -13,6 +13,7 @@ on:
       - "src/cryptanalysis/curve_catalog.rs"
       - "src/cryptanalysis/ic_engine.rs"
       - "src/cryptanalysis/ic_progress.rs"
+      - "src/cryptanalysis/ic_run.rs"
       - "src/cryptanalysis/field_dispatch.rs"
       - "src/cryptanalysis/gf3m.rs"
       - "tests/icx.rs"
@@ -44,8 +45,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Build icx
         run: cargo build --release --bin icx
-      - name: Unit tests (catalog, engine, progress)
-        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress
+      - name: Unit tests (catalog, engine, progress, run)
+        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress cryptanalysis::ic_run
       - name: Integration tests (run binary over the whole catalog)
         run: cargo test --release --test icx
       - name: List the catalog (log which curves ran on ${{ matrix.arch }})
@@ -57,3 +58,14 @@ jobs:
             echo "== $c =="
             ./target/release/icx estimate "$c"
           done
+      - name: Run the pipeline on a same-family analogue (each architecture)
+        run: |
+          set -e
+          echo "== Koblitz analogue (sect163k1) =="
+          ./target/release/icx run sect163k1 --degree 13 --rho-runs 4
+          echo "== Random binary analogue (sect163r2) =="
+          ./target/release/icx run sect163r2 --degree 13 --rho-runs 0
+          echo "== Prime analogue (p256) =="
+          ./target/release/icx run p256 --bits 16 --rho-runs 4
+          echo "== Gray-code FES solver plugged in =="
+          ./target/release/icx run sect233k1 --degree 11 --oracle descent-algebraic --solver fes-f2 --rho-runs 0
