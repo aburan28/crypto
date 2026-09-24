@@ -60,12 +60,19 @@ for r in sorted(rows, key=lambda r: (r["n"], "sigma" in r["walk"], r["walk"], r[
           f"{m:.4f} | {r['c'] / m:.4f} | {r['source']} |")
 
 print()
-print("One mapping at a time (n = 37, W = 16):")
-print("| walk | seed | c | ± |")
-print("|---|---:|---:|---:|")
-for r in rows:
-    if r.get("fixed_mapping"):
-        print(f"| {r['walk']} {r['dist']} H = {r['branches']} | {r['seed']} | {r['c']:.4f} | {r['c_se']:.4f} |")
+print("One mapping at a time (W = 16):")
+print("| n | walk | mappings (seed: c) | mean | spread (sd) | per-mapping ± |")
+print("|---:|---|---|---:|---:|---:|")
+spread = {}
+for key in sorted({(r["n"], r["walk"]) for r in rows if r.get("fixed_mapping")}):
+    sel = [r for r in rows if r.get("fixed_mapping") and (r["n"], r["walk"]) == key]
+    cs = [r["c"] for r in sel]
+    m = sum(cs) / len(cs)
+    sd = sqrt(sum((c - m) ** 2 for c in cs) / (len(cs) - 1)) if len(cs) > 1 else float("nan")
+    se = sum(r["c_se"] for r in sel) / len(sel)
+    spread[key] = (m, sd, se, len(cs))
+    listing = ", ".join(f"{r['seed']}: {r['c']:.4f}" for r in sorted(sel, key=lambda r: r["seed"]))
+    print(f"| {key[0]} | {key[1]} ecc2k130 H = 8 | {listing} | {m:.4f} | {sd:.4f} | {se:.4f} |")
 
 print()
 print("Fruitless returns, measured against the leading-order prediction:")

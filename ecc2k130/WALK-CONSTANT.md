@@ -24,8 +24,8 @@ Answer: **keep the σ walk, and raise `maxIters`.**
   a walk to where it started.  No two of those tags cancel, so the rule, which
   looks only for pairs, never fires.  Neither does it catch six-step pairwise
   cycles.  The rate of both is measured on the device's own walk and on an
-  emulation, and matches a count of the patterns: 796 τ-relation
-  returns seen against 895 predicted.
+  emulation, and matches a count of the patterns: 811 τ-relation
+  returns seen against 946 predicted.
 - **What the cycles cost.** At the live bucket's `dpWeight = 32` those
   cycles trap **54%** of the table walk's trails (H = 8).  Each trapped trail
   runs to the `maxIters = 2^30` guard and is discarded, so a completed trail
@@ -192,8 +192,10 @@ steps per trial, that ended about 14% of trials early and gave
 | 37 | sigma | 8 | ecc2k130 | emulation | 16 | 40,000 | 1.0949 | 0.0028 | 1.0700 | 1.0233 | matrix-v1.jsonl |
 | 37 | sigma | 8 | ecc2k130 | emulation | 64 | 40,000 | 1.0870 | 0.0028 | 1.0700 | 1.0159 | matrix-v1.jsonl |
 | 37 | sigma | 8 | native | emulation | 16 | 40,000 | 1.2170 | 0.0033 | 1.1075 | 1.0988 | matrix-v1.jsonl |
+| 41 | table | 8 | ecc2k130 | device | 16 | 300 | 1.0051 | 0.0299 | 1.0008 | 1.0043 | device-v2.jsonl |
 | 41 | sigma | 8 | ecc2k130 | emulation | 16 | 8,000 | 1.0910 | 0.0064 | 1.0700 | 1.0196 | matrix-v1.jsonl |
 | 59 | table | 8 | ecc2k130 | emulation | 16 | 20,000 | 0.9949 | 0.0037 | 1.0005 | 0.9943 | matrix-v2.jsonl |
+| 59 | table | 8 | native | emulation | 16 | 20,000 | 1.0050 | 0.0037 | 1.0006 | 1.0043 | matrix-v2.jsonl |
 | 59 | sigma | 8 | ecc2k130 | emulation | 16 | 20,000 | 1.0817 | 0.0040 | 1.0700 | 1.0109 | matrix-v2.jsonl |
 | 59 | sigma | 8 | native | emulation | 16 | 20,000 | 1.1221 | 0.0042 | 1.0850 | 1.0342 | matrix-v2.jsonl |
 
@@ -216,20 +218,25 @@ steps per trial, that ended about 14% of trials early and gave
   [output](benchmarks/walk-constant/sigma_classes.txt)) reproduces the
   `1.006`, and gives `1.087 ± 0.011` at `n = 23`: a third implementation,
   agreeing with the other two.
+- One mapping at a time, both walks' constants stray from the average over
+  mappings far more than their standard errors allow: σ 1.108 with a standard deviation of 0.034 over 6 mappings, each ± 0.003; table 0.995 with a standard deviation of 0.041 over 3 mappings, each ± 0.003.  A random
+  mapping on 3.1M classes would stray by about 0.1%.  The suspected cause is
+  accidental short relations mod `ℓ` among a mapping's steps, since
+  `(2Hn)³ ≈ ℓ` at `n = 37`; at ECC2K-130's `ℓ ≈ 2^129` no short relation
+  can be accidental.  At `n = 59` (`ℓ ≈ 2^33`) the spread is (running).
 - With the device's own weight branches, σ is at `1.122–1.217` at
-  `n = 23–59`.  Part of that is the narrower small-degree distribution (the
-  model column).  Part of it is a further excess that varies with the
-  degree without a trend (`c/model` 1.010–1.099).
-- One mapping at a time, the hashed σ constant spreads by (running)
-  (below), so the native excess is not the ordinary spread of mappings.  It
-  is a property of weight-based branches, which the device uses.  Whether
-  it persists at `n = 131` is not measured.  It could only make σ dearer, so
-  §6 uses the hashed bracket, which is the less favourable choice for
-  switching.
+  `n = 23–59`, with `c/model` 1.010–1.099.  Each of those rows is a single
+  mapping, and the scatter, including `n = 37`'s 1.217, is within the
+  one-mapping spread just described.  So these rows establish no effect of
+  weight-based branches beyond the model column's `Σp²`.
+- §6 uses the hashed σ bracket.  That is the conservative choice for
+  switching, since any extra cost of the native branches would only make σ
+  dearer.
 
-| walk | seed | c | ± |
-|---|---:|---:|---:|
-| (running) | | | |
+| n | walk | mappings (seed: c) | mean | spread (sd) | per-mapping ± |
+|---:|---|---|---:|---:|---:|
+| 37 | sigma ecc2k130 H = 8 | 1: 1.0810, 2: 1.0752, 3: 1.1057, 4: 1.0960, 5: 1.1680, 6: 1.1239 | 1.1083 | 0.0341 | 0.0029 |
+| 37 | table ecc2k130 H = 8 | 1: 0.9810, 2: 1.0412, 3: 0.9630 | 0.9951 | 0.0409 | 0.0026 |
 
 ## 5. Fruitless cycles
 
@@ -276,17 +283,19 @@ Measured against that count:
 | 37 | table | 8 | ecc2k130 | emulation | 88,204,046 | 2 | 1.8 | 8 | 11.0 |
 | 37 | table | 8 | ecc2k130 | emulation | 86,328,362 | 2 | 1.7 | 10 | 10.7 |
 | 37 | table | 8 | native | emulation | 88,011,299 | 12 | 5.5 | 46 | 46.4 |
+| 41 | table | 8 | ecc2k130 | device | 30,937,515 | 0 | 0.5 | 4 | 2.8 |
 | 59 | table | 8 | ecc2k130 | emulation | 229,988,097 | 2 | 1.1 | 6 | 7.1 |
+| 59 | table | 8 | native | emulation | 232,323,976 | 1 | 1.9 | 11 | 15.2 |
 
 **Reading it.**
 
 - The τ-relation rate follows `24Σp⁴/(2n)³` on the device walk and in the
-  emulation, across a factor of 343 in predicted rate: 796 seen against 895 predicted, 0.89 ± 0.03 overall.
+  emulation, across a factor of 343 in predicted rate: 811 seen against 946 predicted, 0.86 ± 0.03 overall.
 - Where it falls short, as at `n = 19`, the walks are short.  A `W = 8`
   trial there ends after about nine steps per walk, which cuts off windows
-  at both ends.  The ratio is 76 seen against 86 predicted, 0.88 ± 0.10 on the rows at `n ≥ 37`, where walks
+  at both ends.  The ratio is 91 seen against 137 predicted, 0.66 ± 0.07 on the rows at `n ≥ 37`, where walks
   run thousands of steps.
-- The pairwise count is small and noisy: 81 seen against 111 predicted, 0.73 ± 0.08 overall, 19 seen against 12 predicted, 1.59 ± 0.37 at
+- The pairwise count is small and noisy: 82 seen against 119 predicted, 0.69 ± 0.08 overall, 20 seen against 20 predicted, 1.02 ± 0.23 at
   `n ≥ 37`.
 - The pairwise term is 14% of the `n = 131` rate, so the pricing below
   rests mainly on the τ-relation law, which the device walk confirms
