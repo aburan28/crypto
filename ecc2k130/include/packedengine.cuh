@@ -339,6 +339,7 @@ struct PackedCudaEngine : CudaEngine<CfgF131> {
         printf("packed profile ranges: %d\n", ECC_PROFILE_RANGE);
 #if ECC_WALK_TABLE
         printf("packed table pivot bytes: %d, table shared bytes %zu\n", ECC_TABLE_PIVOT_BYTES, eccPacked131::TW_SHARED_BYTES);
+        printf("packed table phase popc: %d\n", ECC_TABLE_PHASE_POPC);
         printf("packed table global: %d\n", ECC_TABLE_GLOBAL);
         printf("packed table addend global: %d\n", ECC_TABLE_ADDEND_GLOBAL);
 #endif

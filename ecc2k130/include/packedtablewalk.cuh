@@ -46,6 +46,21 @@
 #if ECC_TABLE_PIVOT_BYTES != 0 && ECC_TABLE_PIVOT_BYTES != 1
 #error "ECC_TABLE_PIVOT_BYTES must be 0 or 1"
 #endif
+// ECC_TABLE_PHASE_POPC=1: compute the Frobenius phase with eight bit-plane
+// popcounts against L-bit masks (the reference's TableWalkConsts::phase),
+// instead of 17 byte-table lookups.  Drops 4,352 bytes of shared phase table
+// and 17 LDS.U8; adds 8×5 mask words and ~40 POPC/AND.  Priced in
+// CHEAPER-SELECTION.md against the MIO-bound forward pass of the 20 B/s
+// build; off by default until a paired GPU run clears the target there.
+#ifndef ECC_TABLE_PHASE_POPC
+#define ECC_TABLE_PHASE_POPC 0
+#endif
+#if ECC_TABLE_PHASE_POPC != 0 && ECC_TABLE_PHASE_POPC != 1
+#error "ECC_TABLE_PHASE_POPC must be 0 or 1"
+#endif
+#if ECC_TABLE_PHASE_POPC && !ECC_WALK_TABLE
+#error "ECC_TABLE_PHASE_POPC requires ECC_WALK_TABLE"
+#endif
 #ifndef ECC_TABLE_GLOBAL
 #define ECC_TABLE_GLOBAL 0
 #endif
@@ -96,18 +111,30 @@ static const int TW_MASK_OFF = TW_TABLE_WORDS;
 static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;      // 131 x 4 words
 static const int TW_ROWTOP_OFF = TW_ROW_OFF + 131 * 4;    // 17 words, 4 bits per row
 static const int TW_INV_OFF = TW_ROWTOP_OFF + 17;
+#if ECC_TABLE_PHASE_POPC
+static const int TW_PLANE_OFF = TW_INV_OFF + 132;         // 8 x 5 words
+static const int TW_MAX_OFF = TW_PLANE_OFF + 8 * 5;       // 17 * 256 bytes
+static const int TW_LINV_OFF = TW_MAX_OFF + 17 * 64;      // 131 bytes, padded
+#else
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;         // 17 * 256 bytes
 static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;     // 17 * 256 bytes
 static const int TW_LINV_OFF = TW_MAX_OFF + 17 * 64;      // 131 bytes, padded
+#endif
 #else
 static const int TW_ENTRY = 9;
 static const int TW_TABLE_WORDS = 131 * TW_H * TW_ENTRY;
 static const int TW_MASK_OFF = TW_TABLE_WORDS;
 static const int TW_ROW_OFF = TW_MASK_OFF + 131 * 5;
 static const int TW_INV_OFF = TW_ROW_OFF + 131 * 5;
+#if ECC_TABLE_PHASE_POPC
+static const int TW_PLANE_OFF = TW_INV_OFF + 132;
+static const int TW_MAX_OFF = TW_PLANE_OFF + 8 * 5;       // 33 * 16 bytes
+static const int TW_LINV_OFF = TW_MAX_OFF + 33 * 4;
+#else
 static const int TW_PHASE_OFF = TW_INV_OFF + 132;        // 17 * 256 bytes
 static const int TW_MAX_OFF = TW_PHASE_OFF + 17 * 64;    // 33 * 16 bytes
 static const int TW_LINV_OFF = TW_MAX_OFF + 33 * 4;      // 131 bytes, padded
+#endif
 #endif
 static const int TW_WORDS = TW_LINV_OFF + 33;
 // Hybrid occupancy path: keep phase/pivot/sign tables in shared memory and
@@ -131,14 +158,30 @@ __device__ __forceinline__ void twLoadShared(uint32_t *shared, const uint32_t *g
 __device__ __forceinline__ uint32_t twByte(uint32_t w, int t) { return __byte_perm(w, 0u, 0x4440u | unsigned(t)); }
 __device__ __forceinline__ unsigned twMax(unsigned a, unsigned b) { return max(a, b); }
 __device__ __forceinline__ int twParity(uint32_t t) { return int(__popc(t) & 1u); }
+__device__ __forceinline__ int twPopc(uint32_t t) { return int(__popc(t)); }
 #else
 #define TW_FN static inline
 static inline uint32_t twByte(uint32_t w, int t) { return (w >> (8 * t)) & 0xFFu; }
 static inline unsigned twMax(unsigned a, unsigned b) { return a > b ? a : b; }
 static inline int twParity(uint32_t t) { return __builtin_popcount(t) & 1; }
+static inline int twPopc(uint32_t t) { return __builtin_popcount(t); }
 #endif
 
 // Frobenius phase k(x) = (sum_e L(e) x_e) * HW(x)^-1 mod 131 of a normal-basis x.
+#if ECC_TABLE_PHASE_POPC
+TW_FN int twPhase(const P131 &x, int hw, const uint32_t *plane, const uint32_t *inv) {
+    unsigned s = 0;
+#pragma unroll
+    for (int b = 0; b < 8; ++b) {
+        const uint32_t *m = plane + b * 5;
+        unsigned c = 0;
+#pragma unroll
+        for (int i = 0; i < 5; ++i) c += unsigned(twPopc(x.v[i] & m[i]));
+        s += c << b;
+    }
+    return int(((s % 131u) * inv[hw]) % 131u);
+}
+#else
 TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *inv) {
     unsigned s = 0;
 #pragma unroll
@@ -148,6 +191,7 @@ TW_FN int twPhase(const P131 &x, int hw, const uint8_t *phase, const uint32_t *i
     s += phase[16 * 256 + (x.v[4] & 0xFFu)];
     return int(((s % 131u) * inv[hw]) % 131u);
 }
+#endif
 
 // Index of the support element whose L is last before k in cyclic order:
 // among set bits with L < k if any, else among all set bits, the largest L.
@@ -206,7 +250,11 @@ TW_FN int twCoordinate(const P131 &yp, int p, const uint32_t *fromRow) {
 TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
                             unsigned long long *hist, const uint32_t *shared) {
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(shared);
+#if ECC_TABLE_PHASE_POPC
+    const int k = twPhase(x, hw, shared + (TW_PLANE_OFF - TW_SEL0), shared + (TW_INV_OFF - TW_SEL0));
+#else
     const int k = twPhase(x, hw, bytes + 4 * (TW_PHASE_OFF - TW_SEL0), shared + (TW_INV_OFF - TW_SEL0));
+#endif
     const int p = twPivot(x, k, shared + (TW_MASK_OFF - TW_SEL0), bytes + 4 * (TW_MAX_OFF - TW_SEL0),
                           bytes + 4 * (TW_LINV_OFF - TW_SEL0));
     const int eps = twCoordinate(yp, p, shared + (TW_ROW_OFF - TW_SEL0));
@@ -313,7 +361,12 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
     // Coordinate i (1-based in the reference) sits at bit i - 1.
     auto L = [&](int bit) { return bit < 131 ? walk.consts.L[bit + 1] : -1; };
     uint8_t *bytes = reinterpret_cast<uint8_t *>(out);
-    uint8_t *phase = bytes + 4 * TW_PHASE_OFF, *maxL = bytes + 4 * TW_MAX_OFF, *linv = bytes + 4 * TW_LINV_OFF;
+#if ECC_TABLE_PHASE_POPC
+    for (int b = 0; b < 8; ++b)
+        for (int i = 0; i < 5; ++i)
+            out[TW_PLANE_OFF + b * 5 + i] = uint32_t(walk.consts.plane[b][i / 2] >> (32 * (i & 1)));
+#else
+    uint8_t *phase = bytes + 4 * TW_PHASE_OFF;
     for (int i = 0; i < 17; ++i)
         for (int v = 0; v < 256; ++v) {
             unsigned s = 0;
@@ -321,6 +374,8 @@ inline void twFillConsts(const TW &walk, uint32_t *out) {
                 if ((v >> t) & 1) s += unsigned(L(8 * i + t) < 0 ? 0 : L(8 * i + t));
             phase[i * 256 + v] = uint8_t(s % 131u);
         }
+#endif
+    uint8_t *maxL = bytes + 4 * TW_MAX_OFF, *linv = bytes + 4 * TW_LINV_OFF;
 #if ECC_TABLE_PIVOT_BYTES
     for (int i = 0; i < 17; ++i)
         for (int v = 0; v < 256; ++v) {

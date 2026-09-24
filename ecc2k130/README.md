@@ -18,6 +18,8 @@ the tree's previous best configuration rebuilt in the same session on the same
 card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
 22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
 serial inversion (§7 there). The campaign default below is unchanged.
+[CHEAPER-SELECTION.md](CHEAPER-SELECTION.md) prices the remaining forward-pass
+lever (phase via popc planes, `TABLE_PHASE_POPC`) against that 0.90 floor.
 [TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× that
 ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
 SM-clocks 30 B/s allows) and builds the kernel for the remaining tenth:
@@ -1219,22 +1221,19 @@ what the instrument is for: finding where the curve bends, if it does.
 
 ## What is not done
 
-* Throughput on real hardware is unmeasured. The client has now run on an
-  RTX PRO 6000 Blackwell (sm_120): the whole validation suite passes there and
-  every planted discrete logarithm is recovered on the device itself, through
-  both backends. What has not been measured is how fast it walks. `bench` is
-  the number that settles that, and `autotune` decides the build knobs —
-  including whether the register-budget leaf, which is chosen from static ptxas
-  analysis and measures *worse* on the host, is right on a GPU. The §6 layout
-  question — one thread per bitsliced multiply versus 32 threads cooperating —
-  is likewise only partly answered: the register data says the leaf fits, but
-  the 16 KB per-thread stack frame means occupancy needs measurement.
+* Throughput on real hardware is measured. Peak on one RTX PRO 6000 is the
+  table-walk 20.08 B/s build (`make gpu-rtx-pro6000-20b`); the live campaign
+  still ships the audited sigma / packed preset at about 14.1–14.6 B/s
+  (`aws/campaign.json`). Remaining single-GPU work is closing the last tenth
+  against the CLMAD floor, not proving that the client walks — see
+  [ONE-BLOCK-GEOMETRY.md](ONE-BLOCK-GEOMETRY.md) and [TWO-CHAINS.md](TWO-CHAINS.md).
 * The multiplier is optimal only within the Karatsuba family. Toom-3 over
   GF(2), which is where Bernstein's 11961-bit-operation chain comes from, is not
   implemented; a search over balanced and unbalanced Karatsuba splits and the
   guide's 128+3 decomposition found nothing better than 8859 instructions.
-* No server. Corpora are files that can be reloaded and merged, but there is no
-  UDP protocol, no hash-routed sharding, and no live multi-machine merging.
+* No live UDP/hash-sharded server. Corpora are files that can be reloaded and
+  merged (AWS ingest, Modal volume, local merge); there is no UDP protocol and
+  no live multi-machine merging beyond those batch paths.
 * The start-point PRF is a mixing function rather than AES. Any client that
   wants to interoperate with a different implementation must agree on it.
 * Multi-GPU is not implemented: one process drives one device.
