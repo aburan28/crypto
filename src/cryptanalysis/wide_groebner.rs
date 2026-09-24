@@ -763,7 +763,7 @@ fn decompose_rec(
             node_budget,
             opts,
             stats,
-            &mut |values, is_head, _stats| {
+            &|values, is_head, _stats| {
                 let count = if is_head { m - 1 } else { m };
                 let xs: Vec<F2mElement> = (0..count)
                     .map(|i| summand_x(&fb.subspace_basis, ell, values, i, kc.n))
@@ -788,7 +788,7 @@ fn decompose_rec(
         node_budget,
         opts,
         stats,
-        &mut |values, _is_head, stats| {
+        &|values, _is_head, stats| {
             // The k trailing summands are known up to sign: for each
             // choice of base points, decompose what is left.
             let choices: Vec<Vec<usize>> = (0..k)
@@ -859,52 +859,40 @@ fn summand_x(basis: &[F2mElement], ell: usize, bits: u128, i: usize, n: u32) -> 
     F2mElement::from_bit_positions(&positions, n)
 }
 
-/// Depth-first over the summand bits of `sys` (`count` summands), each
-/// node linearised.  A node whose first `head` summands are all fixed is
-/// handed to `leaf` with `is_head = true` (the last-summand shortcut); a
-/// node with every summand fixed, with `false`.  `leaf` returning `Some`
-/// ends the search.
-#[allow(clippy::type_complexity)]
-fn search(
-    sys: &WideSystem,
+/// One search frame: the node's system, its substitutions, and which
+/// summand bits it has fixed to which values.
+struct Frame {
+    eqs: Vec<WPoly>,
+    subs: Vec<(usize, WPoly)>,
+    fixed: u128,
+    values: u128,
+}
+
+/// What processing one node gave.
+enum Step {
+    /// No root below: refuted by the linearisation or the order test.
+    Closed,
+    /// A leaf: `is_head` for the last-summand shortcut.
+    Leaf { values: u128, is_head: bool },
+    /// Two children, pushed in this order (the second is explored first).
+    Split([Frame; 2]),
+}
+
+/// The search's fixed shape, shared by every thread.
+struct Shape<'a> {
     count: usize,
-    head: Option<usize>,
-    node_budget: usize,
-    opts: &SearchOptions,
-    stats: &mut WideStats,
-    leaf: &mut dyn FnMut(u128, bool, &mut WideStats) -> Option<Vec<usize>>,
-) -> Option<Vec<usize>> {
-    let ell = sys.ell;
-    let summand_vars = count * ell;
-    struct Frame {
-        eqs: Vec<WPoly>,
-        subs: Vec<(usize, WPoly)>,
-        fixed: u128,
-        values: u128,
-    }
-    let mut stack = vec![Frame {
-        eqs: sys.equations.clone(),
-        subs: Vec::new(),
-        fixed: 0,
-        values: 0,
-    }];
-    let head_mask = head.map(|h| {
-        let bits = h * ell;
-        if bits >= 128 {
-            u128::MAX
-        } else {
-            (1u128 << bits) - 1
-        }
-    });
-    while let Some(mut f) = stack.pop() {
-        if stats.nodes >= node_budget {
-            stats.exhausted = true;
-            return None;
-        }
-        stats.nodes += 1;
+    ell: usize,
+    head_mask: Option<u128>,
+    opts: &'a SearchOptions,
+}
+
+impl Shape<'_> {
+    fn step(&self, mut f: Frame, stats: &mut WideStats) -> Step {
+        let (count, ell) = (self.count, self.ell);
+        let summand_vars = count * ell;
         if !linearise(&mut f.eqs, stats, &mut f.subs) {
             stats.refuted += 1;
-            continue;
+            return Step::Closed;
         }
         // Summand bits fixed by substitution to constants count as fixed.
         let mut fixed = f.fixed;
@@ -917,25 +905,21 @@ fn search(
                 }
             }
         }
-        if opts.order && !summands_ordered(fixed, values, count, ell) {
+        if self.opts.order && !summands_ordered(fixed, values, count, ell) {
             stats.refuted += 1;
-            continue;
+            return Step::Closed;
         }
-        if let Some(mask) = head_mask {
+        if let Some(mask) = self.head_mask {
             if fixed & mask == mask {
-                stats.leaves += 1;
-                if let Some(found) = leaf(values, true, stats) {
-                    return Some(found);
-                }
-                if stats.exhausted {
-                    return None;
-                }
-                continue;
+                return Step::Leaf {
+                    values,
+                    is_head: true,
+                };
             }
         }
         // Each summand from its highest coordinate down, so the order
         // test above decides as early as it can.
-        let next = if opts.high_first {
+        let next = if self.opts.high_first {
             (0..count)
                 .flat_map(|i| (0..ell).rev().map(move |t| i * ell + t))
                 .find(|&v| fixed >> v & 1 == 0)
@@ -943,16 +927,12 @@ fn search(
             (0..summand_vars).find(|&v| fixed >> v & 1 == 0)
         };
         let Some(v) = next else {
-            stats.leaves += 1;
-            if let Some(found) = leaf(values, false, stats) {
-                return Some(found);
-            }
-            if stats.exhausted {
-                return None;
-            }
-            continue;
+            return Step::Leaf {
+                values,
+                is_head: false,
+            };
         };
-        for value in [true, false] {
+        let child = |value: bool| {
             let form = if value { WPoly::one() } else { WPoly::zero() };
             let mut eqs: Vec<WPoly> = f.eqs.iter().map(|p| p.substitute(v, &form)).collect();
             eqs.retain(|p| !p.is_zero());
@@ -961,15 +941,155 @@ fn search(
                 *g = g.substitute(v, &form);
             }
             subs.push((v, form));
-            stack.push(Frame {
+            Frame {
                 eqs,
                 subs,
                 fixed: fixed | 1u128 << v,
                 values: if value { values | 1u128 << v } else { values },
-            });
+            }
+        };
+        Step::Split([child(true), child(false)])
+    }
+}
+
+/// Subtrees handed to each thread, about: the tree is expanded breadth
+/// first until it has this many per thread, then searched in parallel.
+const SUBTREES_PER_THREAD: usize = 16;
+
+type Leaf<'a> = dyn Fn(u128, bool, &mut WideStats) -> Option<Vec<usize>> + Sync + 'a;
+
+/// Depth-first over the summand bits of `sys` (`count` summands), each
+/// node linearised.  A node whose first `head` summands are all fixed is
+/// handed to `leaf` with `is_head = true` (the last-summand shortcut); a
+/// node with every summand fixed, with `false`.  `leaf` returning `Some`
+/// ends the search.
+///
+/// The tree is first expanded breadth-first, serially, into a frontier of
+/// about [`SUBTREES_PER_THREAD`] subtrees a thread; the subtrees are then
+/// searched in parallel, sharing the node budget and a stop flag.  The
+/// first decomposition any thread finds is returned — which one, when
+/// several exist, can differ between runs; every one is verified.
+fn search(
+    sys: &WideSystem,
+    count: usize,
+    head: Option<usize>,
+    node_budget: usize,
+    opts: &SearchOptions,
+    stats: &mut WideStats,
+    leaf: &Leaf<'_>,
+) -> Option<Vec<usize>> {
+    use rayon::prelude::*;
+    use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+
+    let ell = sys.ell;
+    let shape = Shape {
+        count,
+        ell,
+        head_mask: head.map(|h| {
+            let bits = h * ell;
+            if bits >= 128 {
+                u128::MAX
+            } else {
+                (1u128 << bits) - 1
+            }
+        }),
+        opts,
+    };
+    let nodes = AtomicUsize::new(stats.nodes);
+    let stop = AtomicBool::new(false);
+    // Serial breadth-first expansion into a frontier.
+    let want = SUBTREES_PER_THREAD * rayon::current_num_threads().max(1);
+    let mut frontier = vec![Frame {
+        eqs: sys.equations.clone(),
+        subs: Vec::new(),
+        fixed: 0,
+        values: 0,
+    }];
+    while !frontier.is_empty() && frontier.len() < want {
+        let mut next = Vec::with_capacity(frontier.len() * 2);
+        for f in frontier {
+            if nodes.fetch_add(1, Ordering::Relaxed) >= node_budget {
+                stats.exhausted = true;
+                stats.nodes = nodes.load(Ordering::Relaxed);
+                return None;
+            }
+            match shape.step(f, stats) {
+                Step::Closed => {}
+                Step::Leaf { values, is_head } => {
+                    stats.leaves += 1;
+                    if let Some(found) = leaf(values, is_head, stats) {
+                        stats.nodes = nodes.load(Ordering::Relaxed);
+                        return Some(found);
+                    }
+                    if stats.exhausted {
+                        return None;
+                    }
+                }
+                Step::Split([a, b]) => {
+                    next.push(b);
+                    next.push(a);
+                }
+            }
+        }
+        frontier = next;
+    }
+    // Each subtree depth-first, in parallel.
+    let results: Vec<(Option<Vec<usize>>, WideStats)> = frontier
+        .into_par_iter()
+        .with_max_len(1)
+        .map(|root| {
+            let mut local = WideStats::default();
+            let mut stack = vec![root];
+            while let Some(f) = stack.pop() {
+                if stop.load(Ordering::Relaxed) {
+                    break;
+                }
+                if nodes.fetch_add(1, Ordering::Relaxed) >= node_budget {
+                    local.exhausted = true;
+                    stop.store(true, Ordering::Relaxed);
+                    break;
+                }
+                match shape.step(f, &mut local) {
+                    Step::Closed => {}
+                    Step::Leaf { values, is_head } => {
+                        local.leaves += 1;
+                        if let Some(found) = leaf(values, is_head, &mut local) {
+                            stop.store(true, Ordering::Relaxed);
+                            return (Some(found), local);
+                        }
+                        if local.exhausted {
+                            stop.store(true, Ordering::Relaxed);
+                            break;
+                        }
+                    }
+                    Step::Split([a, b]) => {
+                        stack.push(a);
+                        stack.push(b);
+                    }
+                }
+            }
+            (None, local)
+        })
+        .collect();
+    let mut found = None;
+    for (r, local) in results {
+        stats.reductions += local.reductions;
+        stats.refuted += local.refuted;
+        stats.leaves += local.leaves;
+        stats.max_rows = stats.max_rows.max(local.max_rows);
+        stats.max_cols = stats.max_cols.max(local.max_cols);
+        stats.exhausted |= local.exhausted;
+        if found.is_none() {
+            found = r;
         }
     }
-    None
+    stats.nodes = nodes.load(Ordering::Relaxed);
+    if found.is_some() {
+        // A decomposition was found: the budget running out elsewhere
+        // does not make this answer incomplete.
+        stats.exhausted = false;
+    }
+    found
 }
 
 /// With the abscissae of all but the last summand known, find the last:
