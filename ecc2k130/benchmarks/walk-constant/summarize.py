@@ -5,6 +5,8 @@ emulation, examples/ecc2k130_walk_constant.rs, table and adding walks on the
 device's cycle rule), matrix-v1.jsonl (its sigma rows; its table and adding
 rows used a previous-class rule only and are superseded), device-v2.jsonl and
 device-v1.jsonl (ecc2k130's own reference walks, src/walkconstant.cpp).
+Section 11 (round 2, the extended cycle rule): matrix-v3.jsonl, device-v3.jsonl,
+merge.jsonl, and the rule's residual count in fruitless_patterns_v2.txt.
 The sigma walk at n = 19 is degenerate and excluded from the aggregates: two of
 its eight multipliers fall in one class (1 + s^10 = s^-9 (1 + s^9) when
 n = 19; every n >= 21 has eight distinct ones), see sigma_classes.py.  The
@@ -14,7 +16,8 @@ model of trap_cost.py.
 Run: python3 summarize.py
 """
 import json
-from math import log2, sqrt
+import re
+from math import log2, prod, sqrt
 
 import trap_cost
 
@@ -185,6 +188,26 @@ for label, table_loss, sigma_loss in (
 v3 = load("matrix-v3.jsonl")
 d3 = load("device-v3.jsonl")
 merges = load("merge.jsonl")
+probe = load("residual-check.jsonl")
+
+# What rule v2 lets through, counted by fruitless_patterns.py --residual into
+# fruitless_patterns_v2.txt: (determined tags, group sizes, patterns).  A
+# pattern with groups of sizes s_g and d determined tags is entered at
+# prod_g sum p^{s_g} / (2n)^d per step, as in section 5.
+RESIDUAL = [(int(m[2]), tuple(int(x) for x in m[1].split(",") if x.strip()), int(m[3]))
+            for m in re.finditer(r"residual v2: L = \d+, groups \(([\d, ]+)\), (\d+) determined tags: (\d+) patterns",
+                                 open("fruitless_patterns_v2.txt").read())]
+
+
+def residual_rate(p, n):
+    return sum(count * prod(sum(x ** s for x in p) for s in sizes) / (2 * n) ** det
+               for det, sizes, count in RESIDUAL)
+
+
+def row_probabilities(r):
+    if r["dist"] == "uniform":
+        return [1 / r["branches"]] * r["branches"]
+    return trap_cost.branch_probabilities(131 if r["dist"] == "ecc2k130" else r["n"], r["branches"])
 
 print()
 print("Round 2: the table walk under the extended rule (v2), against the same rows under v1:")
@@ -211,8 +234,36 @@ seen_v3 = sum(sum(r["fruitless"].values()) + sum(r["relation"].values()) for r i
 count_v3 = sum((r["fruitless_predicted"] + r["relation_predicted"]) * r["steps"] for r in v3 + d3
                if r["walk"] in ("table", "device-table"))
 steps_v3 = sum(r["steps"] for r in v3 + d3 if r["walk"] in ("table", "device-table"))
+residual_v3 = sum(residual_rate(row_probabilities(r), r["n"]) * r["steps"] for r in v3 + d3
+                  if r["walk"] in ("table", "device-table"))
 print(f"formal returns under v2: {seen_v3} in {steps_v3:,} table steps, where rule v1's count predicts "
-      f"{count_v3:.0f}")
+      f"{count_v3:.0f} and v2's residual count {residual_v3:.2f}")
+for r in v3 + d3:
+    for kind in ("fruitless", "relation"):
+        for length, seen in r[kind].items():
+            print(f"  {seen} {'pairwise' if kind == 'fruitless' else 'τ-relation'} return of length {length}: "
+                  f"n = {r['n']}, {r['dist']}, H = {r['branches']}, {r['walk']}, {r['steps']:,} steps; "
+                  f"v2's residual count predicts {residual_rate(row_probabilities(r), r['n']) * r['steps']:.2f} there")
+diffs = []
+for r in v3 + d3:
+    same = [o for o in old_rows if (o["n"], o["dist"], o["branches"], o["walk"], o["walks"]) ==
+            (r["n"], r["dist"], r["branches"], r["walk"], r["walks"])]
+    if same and not r.get("fixed_mapping") and r["walk"] in ("table", "device-table"):
+        diffs.append((r["c"] - same[0]["c"], r["c_se"] ** 2 + same[0]["c_se"] ** 2))
+if diffs:
+    w = [1 / v for _, v in diffs]
+    pooled_diff = sum(wi * d for wi, (d, _) in zip(w, diffs)) / sum(w)
+    print(f"c (v2) - c (v1), pooled over {len(diffs)} matched rows: {pooled_diff:+.4f} ± {sqrt(1 / sum(w)):.4f}; "
+          f"rows beyond two SE: {sum(abs(d) > 2 * sqrt(v) for d, v in diffs)}")
+for d in sorted(d3, key=lambda r: (r["n"], r["dist"])):
+    if d["walk"] != "device-table":
+        continue
+    emu = [r for r in v3 if r["walk"] == "table" and (r["n"], r["dist"], r["branches"], r["walks"]) ==
+           (d["n"], d["dist"], d["branches"], d["walks"])]
+    if emu:
+        e = emu[0]
+        print(f"device against emulation under v2, n = {d['n']}, {d['dist']}, H = {d['branches']}: "
+              f"{d['c']:.4f} against {e['c']:.4f}, difference / SE {(d['c'] - e['c']) / sqrt(d['c_se'] ** 2 + e['c_se'] ** 2):+.1f}")
 c_table_v2, se_table_v2, sel_v2 = 0.0, 0.0, []
 sel_v2 = [r for r in v3 + d3 if r["walk"] in ("table", "device-table") and r["dist"] == "ecc2k130"
           and r["branches"] == 8 and not r.get("fixed_mapping")]
@@ -222,6 +273,24 @@ if sel_v2:
     se_table_v2 = sqrt(1 / sum(w))
     print(f"table walk under v2, ECC2K-130 branches, H = 8, pooled: c = {c_table_v2:.4f} ± {se_table_v2:.4f} "
           f"over {len(sel_v2)} rows (n = {sorted(set(r['n'] for r in sel_v2))})")
+
+# The residual probe: two uniform branches make the five-determined survivors
+# common enough to see.  At H = 2 the rule can refuse both branches (at H = 8
+# it refuses at most five: four negations and one tau-relation), and the step
+# is then taken anyway; the short pairwise returns and the 4-step tau returns
+# are those, which the count does not model.
+for r in probe:
+    p = row_probabilities(r)
+    s = {k: sum(x ** k for x in p) for k in (2, 4, 6)}
+    by_len = {6: 1920 * s[6] / (2 * r["n"]) ** 5,
+              8: next(c for d, z, c in RESIDUAL if z == (4, 4)) * s[4] ** 2 / (2 * r["n"]) ** 6,
+              10: (s[2] / (2 * r["n"])) ** 5}
+    print(f"residual probe, n = {r['n']}, H = {r['branches']}, {r['dist']}, {r['steps']:,} steps: "
+          f"τ-relation returns by length {r['relation']} against the count's "
+          + ", ".join(f"{L}: {rate * r['steps']:.1f}" for L, rate in by_len.items() if L < 10)
+          + f"; pairwise {r['fruitless']} against 10: {by_len[10] * r['steps']:.2f} "
+          "(lengths 2 and 4 are steps whose branches were all refused; the count does not model those, so the pairwise "
+          "column here is not a test of it)")
 
 print()
 print("Merge parting: two walks meet at one point with different pasts; parted within 16 steps:")
@@ -243,20 +312,24 @@ print(f"at n = 131, H = 8 (q = sum p^2 / 2n = {q131:.3e}): merges parted {delta_
       f"under v2; iteration factor 1 + delta / 2 = {1 + delta_v1 / 2:.4f} and {1 + delta_v2 / 2:.4f}")
 
 # Cost to solve with the extended rule, dpWeight 32, maxIters 2^32 (both walks
-# at the new guard).  The table walk's trap loss under v2 is bounded from the
-# enumeration: nothing survives at four determined tags or fewer, so the
-# residual starts at order (2n)^-5; even a thousand such patterns would trap
-# a fraction below 1e-5 of trails, a loss under x1.0002 at twelve trail
-# lengths.  The GPU rate of the v2 kernel is not measured here; the rows use
-# the v1 kernel's paired rates, so they are projections until it is.
+# at the new guard).  The table walk's trap rate under v2 is the residual
+# count: nothing survives at four determined tags or fewer, and the five- and
+# six-determined survivors (fruitless_patterns_v2.txt) are priced at their
+# leading order; seven and more are left out, at 1/262 per extra tag.  The GPU
+# rate of the v2 kernel is not measured here; the rows use the v1 kernel's
+# paired rates, so they are projections until it is.
 guard = 2 ** 32
+r_v2 = residual_rate(p8, 131)
 loss_sigma = trap_cost.overhead(0.0, th, guard)
-trap_bound = 1000 * q131 ** 5 / th
-loss_table_v2 = trap_cost.overhead(1000 * q131 ** 5, th, guard)
+loss_table_v2 = trap_cost.overhead(r_v2, th, guard)
+print()
+print(f"rule v2 residual at n = 131, H = 8: {r_v2:.3e} per step; by signature "
+      + ", ".join(f"{sizes}: {count * prod(sum(x ** s for x in p8) for s in sizes) / 262 ** det:.2e}"
+                  for det, sizes, count in RESIDUAL)
+      + f"; trails trapped at dpWeight 32 {r_v2 / (r_v2 + th):.1e}")
 if c_table_v2:
-    print()
     print(f"cost to solve, table (v2) / sigma, dpWeight 32, maxIters 2^32: sigma loss x{loss_sigma:.5f}, table trap "
-          f"loss <= x{loss_table_v2:.5f} (bound; trapped fraction <= {trap_bound:.1e}), merge factor x{1 + delta_v2 / 2:.4f}")
+          f"loss x{loss_table_v2:.5f} (the residual count), merge factor x{1 + delta_v2 / 2:.4f}")
     vals = [c_table_v2 * (1 + delta_v2 / 2) / cs * (rs / rt) * loss_table_v2 / loss_sigma
             for _, rs, rt in PAIRED for cs in (sigma_lo, sigma_hi)]
-    print(f"  table / sigma = {min(vals):.2f} - {max(vals):.2f} (projection: the v1 kernel's paired rates)")
+    print(f"  table / sigma = {min(vals):.3f} - {max(vals):.3f} (projection: the v1 kernel's paired rates)")
