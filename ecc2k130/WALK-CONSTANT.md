@@ -192,6 +192,7 @@ steps per trial, that ended about 14% of trials early and gave
 | 37 | sigma | 8 | ecc2k130 | emulation | 16 | 40,000 | 1.0949 | 0.0028 | 1.0700 | 1.0233 | matrix-v1.jsonl |
 | 37 | sigma | 8 | ecc2k130 | emulation | 64 | 40,000 | 1.0870 | 0.0028 | 1.0700 | 1.0159 | matrix-v1.jsonl |
 | 37 | sigma | 8 | native | emulation | 16 | 40,000 | 1.2170 | 0.0033 | 1.1075 | 1.0988 | matrix-v1.jsonl |
+| 41 | adding | 256 | uniform | emulation | 16 | 8,000 | 1.0089 | 0.0059 | 1.0000 | 1.0089 | matrix-v2.jsonl |
 | 41 | table | 8 | ecc2k130 | device | 16 | 300 | 1.0051 | 0.0299 | 1.0008 | 1.0043 | device-v2.jsonl |
 | 41 | table | 8 | ecc2k130 | emulation | 16 | 8,000 | 1.0125 | 0.0059 | 1.0008 | 1.0118 | matrix-v2.jsonl |
 | 41 | table | 8 | native | emulation | 16 | 8,000 | 1.0084 | 0.0059 | 1.0011 | 1.0073 | matrix-v2.jsonl |
@@ -286,6 +287,7 @@ Measured against that count:
 | 37 | table | 8 | ecc2k130 | emulation | 88,204,046 | 2 | 1.8 | 8 | 11.0 |
 | 37 | table | 8 | ecc2k130 | emulation | 86,328,362 | 2 | 1.7 | 10 | 10.7 |
 | 37 | table | 8 | native | emulation | 88,011,299 | 12 | 5.5 | 46 | 46.4 |
+| 41 | adding | 256 | uniform | emulation | 828,193,268 | 0 | 0.0 | 0 | 0.0 |
 | 41 | table | 8 | ecc2k130 | device | 30,937,515 | 0 | 0.5 | 4 | 2.8 |
 | 41 | table | 8 | ecc2k130 | emulation | 831,148,159 | 16 | 12.2 | 77 | 75.9 |
 | 41 | table | 8 | native | emulation | 827,739,841 | 28 | 32.9 | 257 | 275.2 |
