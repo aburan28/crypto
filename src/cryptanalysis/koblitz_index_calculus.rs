@@ -8847,7 +8847,11 @@ impl<'a> IndividualLogSolver<'a> {
                         &self.kc.subgroup_order,
                     ) {
                         if self.kc.mul(self.kc.generator(), &d) == *q {
-                            report.relation = Some(DescentRelation { a: *a, b: *b, points: Vec::new() });
+                            report.relation = Some(DescentRelation {
+                                a: *a,
+                                b: *b,
+                                points: Vec::new(),
+                            });
                             return Some(Some(d));
                         }
                     }
@@ -8860,7 +8864,11 @@ impl<'a> IndividualLogSolver<'a> {
                     continue;
                 };
                 if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
-                    report.relation = Some(DescentRelation { a: *a, b: *b, points: idxs });
+                    report.relation = Some(DescentRelation {
+                        a: *a,
+                        b: *b,
+                        points: idxs,
+                    });
                     return Some(Some(d));
                 }
             }
@@ -8914,7 +8922,11 @@ impl<'a> IndividualLogSolver<'a> {
                     if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
                         if kc.mul(g, &d) == *q {
                             report.log = Some(d.clone());
-                            report.relation = Some(DescentRelation { a, b, points: Vec::new() });
+                            report.relation = Some(DescentRelation {
+                                a,
+                                b,
+                                points: Vec::new(),
+                            });
                             return Some((d, report));
                         }
                     }
@@ -8949,7 +8961,9 @@ impl<'a> IndividualLogSolver<'a> {
             if kc.mul(g, &d) == *q {
                 report.log = Some(d.clone());
                 report.relation = Some(DescentRelation {
-                    a: a.to_u64_digits()[0], b: b.to_u64_digits()[0], points: idxs,
+                    a: a.to_u64_digits()[0],
+                    b: b.to_u64_digits()[0],
+                    points: idxs,
                 });
                 return Some((d, report));
             }
@@ -9732,12 +9746,22 @@ mod tests {
     fn descent_certificates_bind_actual_probes_and_trial_caps() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
-        let opts = KoblitzIcOptions { m: 2, strategy: DecompositionStrategy::PairTable,
-            allow_direct_relation: false, ..KoblitzIcOptions::default() };
+        let opts = KoblitzIcOptions {
+            m: 2,
+            strategy: DecompositionStrategy::PairTable,
+            allow_direct_relation: false,
+            ..KoblitzIcOptions::default()
+        };
         let (table, _) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
         let pair = PairSumTable::build(&kc, &fb).unwrap();
-        for strategy in [DecompositionStrategy::PairTable, DecompositionStrategy::Enumerate] {
-            let options = KoblitzIcOptions { strategy, ..opts.clone() };
+        for strategy in [
+            DecompositionStrategy::PairTable,
+            DecompositionStrategy::Enumerate,
+        ] {
+            let options = KoblitzIcOptions {
+                strategy,
+                ..opts.clone()
+            };
             let solver = IndividualLogSolver::new(&kc, &fb, &table, &options, Some(&pair)).unwrap();
             for d in [1u64, 2, 17, 31, 58] {
                 let q = kc.mul(kc.generator(), &BigUint::from(d));
@@ -9745,22 +9769,35 @@ mod tests {
                 assert_eq!(found, BigUint::from(d));
                 let relation = report.relation.expect("actual relation retained");
                 assert_eq!(relation.points.len(), options.m);
-                let sum = relation.points.iter().fold(BinaryPoint::Infinity,
-                    |acc, &i| kc.add(&acc, &fb.points[i]));
-                assert_eq!(sum, kc.add(&kc.mul(kc.generator(), &BigUint::from(relation.a)),
-                                      &kc.mul(&q, &BigUint::from(relation.b))));
+                let sum = relation
+                    .points
+                    .iter()
+                    .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                assert_eq!(
+                    sum,
+                    kc.add(
+                        &kc.mul(kc.generator(), &BigUint::from(relation.a)),
+                        &kc.mul(&q, &BigUint::from(relation.b))
+                    )
+                );
             }
         }
         // Inspect exhausted walk reports too: a 64-way batch must not silently
         // spend 64 probes when the declared budget is only one.
-        let options = KoblitzIcOptions { max_trials: 1, ..opts };
+        let options = KoblitzIcOptions {
+            max_trials: 1,
+            ..opts
+        };
         let solver = IndividualLogSolver::new(&kc, &fb, &table, &options, Some(&pair)).unwrap();
         for d in 1..100u64 {
             let q = kc.mul(kc.generator(), &BigUint::from(d));
             let mut report = IndividualLogReport::default();
             solver.solve_by_walking(&q, &mut report);
             assert!(report.trials <= 1);
-            assert!(report.relation.as_ref().is_none_or(|rel| !rel.points.is_empty()));
+            assert!(report
+                .relation
+                .as_ref()
+                .is_none_or(|rel| !rel.points.is_empty()));
         }
     }
 

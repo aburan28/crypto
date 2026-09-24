@@ -186,3 +186,25 @@ worker against its own untuned configuration.
 
 The initial bounded runs and retained reporting failure are recorded in
 [`autolab_20260924/RESULTS.md`](autolab_20260924/RESULTS.md).
+
+## Linux integration gate
+
+The `IC autolab integration` GitHub Actions workflow runs on Ubuntu 24.04 amd64,
+with Rust 1.94.1, the checked-in `ci/Cargo.lock`, and Valgrind 3.22.0. It runs the
+harness/accounting regressions and release descent/rho regressions, then
+`ci_smoke.py` executes 34 complete-solve checks: all seven PDP adapters with both
+relation-LA modes on two degree-9 curves, two additional profiled IC checks, two
+profiled rho checks, and two degree-13 factor-base recipes. Four profiled jobs
+must have the same certificates as their native executions and exclusive dump
+intervals that sum to Callgrind's collected instruction count. Each process has
+a 60-second timeout and an 8 GiB address-space cap; the CI job stops at 30 minutes.
+Failures and raw profiles are uploaded with the inputs and receipts.
+
+These are fixed integration vectors. No candidate is ranked or promoted. CI
+artifacts expire after 30 days; any later research claim must archive its own
+evidence durably in the repository's normal evidence system. The existing dump
+intervals combine some scientific stages and are not the new exclusive `T_*`
+accounting schema. Before a new comparative research campaign, implement the
+user's canonical curve/candidate/workload/run manifests and exclusive phase
+export; missing phase costs keep the end-to-end total and speedup unknown.
+Historical evidence and its original identifiers remain unchanged.
