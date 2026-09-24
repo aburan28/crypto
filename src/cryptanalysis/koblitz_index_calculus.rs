@@ -2634,6 +2634,9 @@ pub struct ScanScratch {
     gather: Vec<FastPoint>,
     /// `target − P_k` for each scanned summand.
     rests: Vec<FastPoint>,
+    /// On a folded table, the slope of each rest, so its ordinate can be
+    /// completed only if the filter admits its key.
+    lambdas: Vec<u64>,
     /// Workspace for the shared-inversion batch addition.
     batch: BatchScratch,
     /// Canonical keys of one block of remainders.
@@ -4274,21 +4277,34 @@ impl PairSumTable {
         let ScanScratch {
             gather,
             rests,
+            lambdas,
             batch,
             keys,
             pairs,
         } = scratch;
         rests.clear();
+        lambdas.clear();
+        // On a folded table the key reads only the abscissa, so the rests
+        // are formed without their ordinates — by the batched kernel, eight
+        // lanes wide on AVX-512 — and only those the filter admits are
+        // completed, exactly as the full scan does.
+        let fold = self.fold;
+        let mut add = |summands: &[FastPoint], rests: &mut Vec<FastPoint>| {
+            if fold {
+                self.curve
+                    .add_many_lazy(target, summands, rests, lambdas, batch);
+            } else {
+                self.curve.add_many(target, summands, rests, batch);
+            }
+        };
         let mut tail = len;
         match scan {
             Scan::Cyclic { start, len } => {
                 let start = start % base;
                 tail = len.min(base - start);
-                self.curve
-                    .add_many(target, &self.negated[start..start + tail], rests, batch);
+                add(&self.negated[start..start + tail], rests);
                 if tail < len {
-                    self.curve
-                        .add_many(target, &self.negated[..len - tail], rests, batch);
+                    add(&self.negated[..len - tail], rests);
                 }
             }
             Scan::Indices(idxs) => {
@@ -4297,7 +4313,7 @@ impl PairSumTable {
                 for &i in idxs {
                     gather.push(self.negated[i as usize]);
                 }
-                self.curve.add_many(target, gather, rests, batch);
+                add(gather, rests);
             }
         }
         // Keys a block at a time: enough to keep `LANES`
@@ -4333,7 +4349,11 @@ impl PairSumTable {
                     }
                     Scan::Indices(idxs) => idxs[offset] as usize,
                 };
-                self.pairs_for_key(*rest, keys[within], pairs);
+                let rest = match lambdas.get(offset) {
+                    Some(&lambda) => self.curve.finish_lazy(target, *rest, lambda),
+                    None => *rest,
+                };
+                self.pairs_for_key(rest, keys[within], pairs);
                 for &(i, j) in pairs.iter() {
                     if !sink(&[i as usize, j as usize, k]) {
                         return;
