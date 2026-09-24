@@ -21,3 +21,7 @@ research/sat_factor_base_review_20260908/autolab_groebner_fused_hash_20260922/ru
 
 # Preserve hash-bound compiler diagnostics in the projected-syndrome experiment.
 research/boolean_byte_sieve_20260923/**/worker-compile.txt whitespace=-blank-at-eof
+
+# Preserve the exact executed runner and its matching replay source.
+research/boolean_implicit_minors_20260923/run.py whitespace=-blank-at-eof
+research/boolean_implicit_minors_20260923/run_01/run.py whitespace=-blank-at-eof

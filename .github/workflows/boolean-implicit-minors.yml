@@ -1,0 +1,24 @@
+name: Standalone Boolean implicit minors
+on:
+  pull_request:
+    paths:
+      - 'research/boolean_implicit_minors_20260923/**'
+      - '.github/workflows/boolean-implicit-minors.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exact determinants and retained algebra
+        run: |
+          rustc --edition 2021 -O --test research/boolean_implicit_minors_20260923/measure.rs -o /tmp/boolean-minor-tests
+          /tmp/boolean-minor-tests
+      - name: Independent truth tables and evidence checks
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -m unittest discover -s research/boolean_implicit_minors_20260923 -p 'test_*.py' -v
