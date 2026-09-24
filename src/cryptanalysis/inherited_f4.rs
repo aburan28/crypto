@@ -1569,7 +1569,7 @@ mod tests {
                     .iter()
                     .flat_map(|p| p.terms.iter())
                     .fold(0, |a, t| a | t.mask);
-                let all = all_variable_mask(n_vars);
+                let _all = all_variable_mask(n_vars);
                 for v in 0..n_vars as u32 {
                     if occurring & (1 << v) == 0 {
                         continue;
