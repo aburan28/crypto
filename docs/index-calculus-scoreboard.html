@@ -582,7 +582,8 @@
         <div class="lrow"><div class="name">S&#8324; pairs-and-solve</div><div class="num">1,118</div><div class="lbar"><i style="width:47.6%"></i></div></div>
         <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 6.5&times;10<sup>7</sup> word XORs found, 6.3&times;10<sup>8</sup> refuted &middot; was 1.7&times;10<sup>8</sup> / 1.7&times;10<sup>9</sup> at the freeze</div><div class="num">8.7&times;10<sup>5</sup></div><div class="lbar"><i style="width:81.7%"></i></div></div>
         <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable, rows materialised lazily &middot; 2.8&times;10<sup>6</sup> word ops found, 9.6&times;10<sup>6</sup> refuted (5.5&times;10<sup>7</sup> total against the from-scratch engine&rsquo;s 1.7&times;10<sup>9</sup>; was 1.5&times;10<sup>8</sup> with eager rows) &middot; on the historical tree, inheriting cost <strong>1.6&times; more</strong> here (2.7&times;10<sup>9</sup>): the loss that the split variable reversed &middot; identical found/refuted verdicts</div><div class="num">1.4&times;10<sup>4</sup></div><div class="lbar"><i style="width:60.9%"></i></div></div>
-        <div class="lrow"><div class="name">Inherited matrix-F4 in the chain&rsquo;s interleaved order, linear generators eliminated (default since 2026-09-24) &middot; <strong>7.2&times;10<sup>6</sup> word ops</strong> over the 8 targets against <strong>2.6&times;10<sup>7</sup></strong> for the same engine on today&rsquo;s main (3.57&times;; the 5.5&times;10<sup>7</sup> above is its 2026-09-22 freeze) &middot; identical found/refuted verdicts, zero disagreements &middot; still 5&times; enumeration and 100&times; meet in the middle per target</div><div class="num">2.4&times;10<sup>3</sup></div><div class="lbar"><i style="width:51.7%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4 in the chain&rsquo;s interleaved order, linear generators eliminated (default 2026-09-24, until support-local multipliers below) &middot; <strong>7.2&times;10<sup>6</sup> word ops</strong> over the 8 targets against <strong>2.6&times;10<sup>7</sup></strong> for the same engine on today&rsquo;s main (3.57&times;; the 5.5&times;10<sup>7</sup> above is its 2026-09-22 freeze) &middot; identical found/refuted verdicts, zero disagreements &middot; still 5&times; enumeration and 100&times; meet in the middle per target</div><div class="num">2.4&times;10<sup>3</sup></div><div class="lbar"><i style="width:51.7%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4 as above, each generator multiplied only by monomials in its own variables (support-local multipliers, default since 2026-09-24, second round) &middot; <strong>4.7&times;10<sup>6</sup> word ops</strong> over the 8 targets, was 7.2&times;10<sup>6</sup> (1.52&times;) &middot; identical found/refuted verdicts, zero disagreements &middot; the same run prices the previous default at 2.3&times;10<sup>3</sup> GAE per target &middot; still 3&times; enumeration and 60&times; meet in the middle per target</div><div class="num">1.5&times;10<sup>3</sup></div><div class="lbar"><i style="width:49.2%"></i></div></div>
         <div class="lrow"><div class="name">CDCL &middot; no answer on 8 of 8 targets at 200,000 conflicts</div><div class="num">&ge; 4.0&times;10<sup>7</sup></div><div class="lbar"><i style="width:100%"></i></div></div>
       </div>
       <div class="legend" style="padding-top:0">
@@ -590,6 +591,7 @@
         <span>zero disagreements between oracles on every target of every cell, S&#8324; witnesses lifted in the group and compared both ways</span>
         <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 4.1&times;10<sup>3</sup>, 22&times; the whole measured cost of the tabled fold (9.2&times;10<sup>3</sup> and 49&times; at the freeze) &mdash; an extrapolation</span>
         <span>matrix-F4 rows from the lift-checked re-run on the merged tree, <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>: same verdicts, fall degrees and SAT conflicts as the freeze, 1.4&ndash;2.7&times; fewer word XORs after main&rsquo;s sparse elimination (#405) &mdash; engineering, ratio to the probe unmoved</span>
+        <span>support-local row from the paired second 2026-09-24 re-run, <code>research/support_local_multipliers_20260924/oracle_ladder/{reference,candidate}.json</code>, both arms on one binary: identical found/refuted verdicts on every cell, zero disagreements; matrix-F4 1.52&times; fewer word XORs at n = 15, m = 3 and 2.06&times; at n = 9, m = 3, the m = 2 cells 1.00&ndash;1.03&times;, none rising; GAE at that run&rsquo;s own host-measured factor; projected relation phase at n = 15, m = 3: S &asymp; 579 against 878 &mdash; an extrapolation &mdash; engineering (<a href="#support-local-multipliers-20260924">the round</a>)</span>
         <span>interleaved-order row from the paired 2026-09-24 re-run, <code>research/chain_split_order_20260924/oracle_ladder/{reference,candidate}.json</code>, both arms on one binary: identical found/refuted verdicts on every cell, zero disagreements; matrix-F4 3.57&times; fewer word XORs at n = 15, m = 3 and 1.58&times; at n = 9, m = 3, the m = 2 cells 1.00&ndash;1.03&times;; GAE converted at each run&rsquo;s own host-measured factor (the two differ by up to 14%), so the word-XOR ratio is the comparison; projected relation phase at n = 15, m = 3: S &asymp; 948 against 3,864 &mdash; an extrapolation &mdash; engineering (<a href="#chain-split-order-20260924">the round</a>)</span>
         <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical found/refuted verdicts on all 13 cells, zero disagreements, no inconclusive target; 2.3&ndash;29.9&times; fewer word operations on every cell with a tree, the specialisation&rsquo;s reads and writes charged; the default splits on the smallest free variable, so its tree has the same size and a different shape from the reference&rsquo;s &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
       </div>
@@ -5621,7 +5623,7 @@ factor base, and this prices a decomposition oracle.</p>
       <tr><td>same-tree: F4, H &rarr; default</td><td></td><td>7,917</td><td class="n">973,838,382</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">37,302,399</td><td class="n">26.11&times;</td><td>flat</td><td class="n">8.85&times;</td><td>identical</td><td><span class="chip">engineering</span> (compare.py accepts every rung; every rung with a tree improves)</td></tr>
       <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td>228 &rarr; 228</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">74,984,242 (1.56&times;)</td><td class="n">163,178,360</td><td class="n">31,800,117</td><td class="n">22,640,333</td><td class="n">5.16&times;</td><td>flat</td><td class="n">3.01&times;</td><td>identical tree</td><td><span class="chip">engineering</span></td></tr>
       <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td>1,062 &rarr; 1,198</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,475,463 (5.19&times;)</td><td class="n">42,029,541</td><td class="n">4,607,771</td><td class="n">3,011,390</td><td class="n">11.15&times;</td><td>flat</td><td class="n">5.94&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,670,183,123 (<strong>0.62&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n">55,202,947 (default until 2026-09-24; <a href="#chain-split-order-20260924">7,187,062 after</a>, against 25,639,588 for the same engine on that day&rsquo;s main)</td><td class="n"><strong>29.94&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.62&times; is the superseded loss</td></tr>
+      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,670,183,123 (<strong>0.62&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n">55,202,947 (default until 2026-09-24; <a href="#chain-split-order-20260924">7,187,062 after</a>, <a href="#support-local-multipliers-20260924">4,736,391 after the second round</a>, against 25,639,588 for the same engine on that day&rsquo;s main)</td><td class="n"><strong>29.94&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.62&times; is the superseded loss</td></tr>
     </tbody>
   </table></div>
   <div class="table-scroll"><table>
@@ -5722,6 +5724,77 @@ factor base, and this prices a decomposition oracle.</p>
     middle per target at <code>n = 15</code>, m = 3.</p>
 </section>
 <!-- END chain-split-order-20260924 -->
+<!-- BEGIN support-local-multipliers-20260924 -->
+<section class="panel" id="support-local-multipliers-20260924">
+  <div class="panel-head">
+    <h2>Support-local multipliers: build each root row from the generator&rsquo;s own variables &mdash; 1.50&times; on a registered holdout, and a hidden cost the unit did not see <span class="chip">engineering</span></h2>
+    <p>The inherited engine built a root&rsquo;s Macaulay matrix, and every completion after a degree drop, by multiplying <em>every</em>
+      generator by every monomial of the allowed degree over <em>every variable occurring in the system</em>. For the chained systems of
+      the <a href="#chain-split-order-20260924">previous round</a> that is mostly wasted: the links are block-multilinear, and a product of the
+      last link with a variable of the first summand makes monomials that nothing the tail reads can use. <strong>Support-local
+      multipliers</strong> multiply each generator only by monomials in its own variables. That is a subset of the old rows, so every
+      consequence is still in the ideal and no root is lost; the tail can only be weaker, so the tree can only grow (it grows by at most
+      ten nodes on any rung). Quadratic <code>m = 2</code> roots already span every variable and are built identically.</p>
+    <p>Boundary: the <code>m&middot;2<sup>131</sup></code> candidate-tuple count, with no term for which rows a root is built from &mdash;
+      <strong>flat by construction</strong>. Reference: the previous round&rsquo;s default on <code>main</code>, selected on the same binary with
+      <code>KIC_F4_MULTIPLIERS=occurring</code>, which reproduces that round&rsquo;s frozen runs to the digit. Unit: 64-bit word
+      operations; building a row is uncharged in both arms, as it always was. <strong>Registered</strong> before any run: a new holdout of
+      19 rungs (four cells no ladder had used, including <code>K_0/2^31</code> at 46 unknowns, and fresh targets on the fifteen known
+      admissible cells), a <code>1.3&times;</code> threshold with no rung allowed to rise more than 2%, the frozen ladder, and identical oracle
+      verdicts. <strong>All three targets are met.</strong></p>
+    <p><strong>What the unit missed.</strong> On the registered code the whole logarithms did <code>2.19&times;</code> less oracle work and ran
+      <strong>18% slower</strong> (<code>0.82&times;</code>, interleaved, 95% interval <code>[0.80, 0.84]</code>). A profile found that the new root
+      builder packed rows through an <code>FxHash</code> index. On one word that hash is <code>x&middot;K</code>, which keeps <code>x</code>&rsquo;s
+      trailing zeros, so the tail links&rsquo; monomials (the low-index variables absent) fell into a few buckets. Packing cost
+      151&thinsp;M instructions against 39&thinsp;M for the elimination it served. That is the relabelling pattern of AGENTS.md &sect;3, seen
+      in wall time because <code>S</code> is null here. A post-registration amendment gives <code>pack_rows</code> and the engine&rsquo;s column
+      index the splitmix hasher the cached layouts already used. Every counter of all 60 amendment ladder runs and every whole-log run is
+      identical to the registered runs. After the fix the whole logarithms run <strong>1.41&times;</strong> faster than the reference.
+      Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/tables.md">stage tables</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/comparisons/r2-holdout.cross_tree.candidate-vs-reference.json">R2 holdout</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/comparisons/frozen.cross_tree.candidate-vs-reference.json">frozen ladder</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/screen_wide.json">admissibility screen</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/postfix_identity.md">amendment identity check</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/e2e_tables.md">whole logarithms</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/profile/">profiles</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/manifest.json">manifest</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md">note</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Word operations, medians of 3 (identical across repetitions, and identical again on the amended binary); ratios are
+      reference / candidate. Every pair accepted by <code>compare_cross_tree.py</code>: the same targets decomposed, none exhausted, every
+      decomposition lifted and verified in the group. Wall is the interleaved rerun on the fixed binary, a practicality note. Stage
+      diagnostic (AGENTS.md &sect;8).</caption>
+    <thead><tr><th>Suite</th><th>Rungs</th><th>Nodes ref &rarr; cand</th><th>Reference</th><th>Support-local (default)</th><th>Per rung</th><th>Floor ratio</th><th>Wall ref/cand</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>frozen ladder (5 quadratic rungs, 1 cubic)</td><td class="n">6</td><td>7,701 &rarr; 7,704</td><td class="n">16,125,634 <span class="was">was 16,696,846 before #690</span></td><td class="n"><strong>15,816,123 (1.02&times;)</strong></td><td class="n">0.9988&ndash;2.01&times; (two rungs +0.12%, +0.05%)</td><td>flat</td><td class="n">1.00&times;</td><td><span class="chip">engineering</span>; T2 met</td></tr>
+      <tr><td>chain ladder (tuning)</td><td class="n">3</td><td>571 &rarr; 573</td><td class="n">7,547,415</td><td class="n"><strong>3,351,378 (2.25&times;)</strong></td><td class="n">2.01&ndash;3.12&times;</td><td>flat</td><td class="n">1.49&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>chain holdout (tuning)</td><td class="n">4</td><td>8,496 &rarr; 8,496</td><td class="n">52,305,605</td><td class="n"><strong>32,779,266 (1.60&times;)</strong></td><td class="n">1.43&ndash;3.30&times;</td><td>flat</td><td class="n">1.29&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>previous round&rsquo;s T1&prime; (tuning)</td><td class="n">9</td><td>24,181 &rarr; 24,189</td><td class="n">225,078,474 <span class="was">was 1,104,534,384 before #690</span></td><td class="n"><strong>136,355,549 (1.65&times;)</strong></td><td class="n">1.46&ndash;3.55&times;</td><td>flat</td><td class="n">1.21&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><strong>R2 holdout</strong> (registered here)</td><td class="n">19</td><td>39,156 &rarr; 39,168</td><td class="n">888,630,176</td><td class="n"><strong>591,938,031 (1.50&times;)</strong></td><td class="n">1.40&ndash;3.57&times;, none rising</td><td>flat</td><td class="n">1.08&times;</td><td><span class="chip">engineering</span>; T1 met</td></tr>
+      <tr><td>oracle-pricing ladder, <code>n = 15</code>, m = 3</td><td class="n">1</td><td></td><td class="n">7,187,062</td><td class="n"><strong>4,736,391 (1.52&times;)</strong></td><td class="n">n = 9, m = 3: 2.06&times;</td><td>flat</td><td class="n"></td><td><span class="chip">engineering</span>; T3 met, zero disagreements</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Whole logarithms, <code>ic run --solver groebner --summands 3</code>; every run recovered the planted <code>k</code> and verified
+      <code>[k]G = Q</code>; trials, relations and oracle word operations identical, seed by seed, on both binaries. <code>S</code> is
+      <strong>null</strong> (the pipeline counts only its oracle in operations), so the wall ratio &mdash; paired, interleaved, geometric mean
+      over seeds with a 95% bootstrap interval &mdash; is a practicality note. The first row is the registered code; the fix changes no
+      counter.</caption>
+    <thead><tr><th>Cell</th><th>Trials = relations</th><th>Oracle word ops, ref &rarr; cand</th><th>Wall ref/cand, registered code</th><th>Wall ref/cand, after the hash fix</th><th>Hash fix alone, reference arm</th><th>S</th></tr></thead>
+    <tbody>
+      <tr><td><code>K_0/2^13</code>, 10 seeds + 5 holdout</td><td class="n">141</td><td class="n">104,865,593 &rarr; 47,966,249 (2.19&times;)</td><td class="n"><strong>0.82&times;</strong> [0.80, 0.84]</td><td class="n"><strong>1.41&times;</strong> [1.37, 1.44]</td><td class="n">1.01&times; [0.99, 1.03]</td><td>null</td></tr>
+      <tr><td><code>K_0/2^9</code>, 5 seeds</td><td class="n">17</td><td class="n">750,778 &rarr; 361,523 (2.08&times;)</td><td class="n">1.05&times; [1.00, 1.10]</td><td class="n"><strong>1.24&times;</strong> [1.18, 1.30]</td><td class="n">1.03&times; [0.96, 1.11]</td><td>null</td></tr>
+    </tbody>
+  </table></div>
+  <p>Retained control: <code>KIC_F4_MULTIPLIERS=occurring</code>. Tests pin that support-local rows are a subset of the occurring-variable
+    rows (equal at <code>m = 2</code>) and that every policy keeps every root with either multiplier choice. Nothing here moves a first fall
+    degree, a solving degree, a fitted exponent or the page&rsquo;s verdict: at <code>n = 15</code>, m = 3 the Gr&ouml;bner oracle is still
+    3&times; enumeration and 60&times; meet in the middle per target. The lesson is for accounting: row building has never been
+    charged, and this round shows an uncharged phase can grow and hide a regression. Pricing it is the next round&rsquo;s first,
+    registered, change.</p>
+</section>
+<!-- END support-local-multipliers-20260924 -->
 <!-- BEGIN ic-tournament-round-0023 -->
 <section class="panel" id="ic-tournament-round-0023">
 <p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
