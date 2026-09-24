@@ -22,7 +22,7 @@ from math import comb, exp, log2
 
 N_DEG = 131
 M_DEFAULT = 2 ** 30          # aws/campaign.json "maxIters"
-DP_WEIGHT = 34               # aws/campaign.json "dpWeight"
+DP_WEIGHTS = (32, 34)        # aws/campaign.json "dpWeight" (the live bucket); the benchmarks' 34
 
 
 def branch_probabilities(n, h):
@@ -52,23 +52,23 @@ def best_guard(r, th):
 
 
 if __name__ == "__main__":
-    th = theta(N_DEG, DP_WEIGHT)
     two_m = 2 * N_DEG
-    print(f"n = {N_DEG}, dpWeight {DP_WEIGHT}: distinguished with probability 2^{log2(th):.2f} per step, "
-          f"trail 2^{-log2(th):.2f}; guard maxIters = 2^{log2(M_DEFAULT):.0f}")
-    for H in (8, 16):
-        p = branch_probabilities(N_DEG, H)
-        s2, s4 = sum(x * x for x in p), sum(x ** 4 for x in p)
-        pair = 4 * (s2 / two_m) ** 3
-        rel = 24 * s4 / two_m ** 3
-        print(f"\nH = {H}: sum p^2 = {s2:.5f}, sum p^4 = {s4:.6f}; pairwise 6-cycles {pair:.3e}/step, "
-              f"tau-relation 4-cycles {rel:.3e}/step")
-        for label, r in (("as built (rule: 2- and 4-step pairwise)", pair + rel),
-                         ("rule also refuses the tau-relation 4-cycles", pair),
-                         ("no fruitless cycles (sigma walk)", 0.0)):
-            f = r / (r + th)
-            ov30 = overhead(r, th, M_DEFAULT)
-            line = f"  {label}: {100 * f:.2f}% of trails trapped; cost x{ov30:.3f} at maxIters 2^30"
-            ov, M = best_guard(r, th)
-            line += f", x{ov:.3f} at the best guard 2^{log2(M):.2f}"
-            print(line)
+    for dp_weight in DP_WEIGHTS:
+        th = theta(N_DEG, dp_weight)
+        print(f"n = {N_DEG}, dpWeight {dp_weight}: distinguished with probability 2^{log2(th):.2f} per step, "
+              f"trail 2^{-log2(th):.2f}; guard maxIters = 2^{log2(M_DEFAULT):.0f}")
+        for H in (8, 16):
+            p = branch_probabilities(N_DEG, H)
+            s2, s4 = sum(x * x for x in p), sum(x ** 4 for x in p)
+            pair = 4 * (s2 / two_m) ** 3
+            rel = 24 * s4 / two_m ** 3
+            print(f"  H = {H}: sum p^2 = {s2:.5f}, sum p^4 = {s4:.6f}; pairwise 6-cycles {pair:.3e}/step, "
+                  f"tau-relation 4-cycles {rel:.3e}/step")
+            for label, r in (("as built (rule: 2- and 4-step pairwise)", pair + rel),
+                             ("rule also refuses the tau-relation 4-cycles", pair),
+                             ("no fruitless cycles (sigma walk)", 0.0)):
+                f = r / (r + th)
+                ov, M = best_guard(r, th)
+                print(f"    {label}: {100 * f:.2f}% of trails trapped; cost x{overhead(r, th, M_DEFAULT):.3f} "
+                      f"at maxIters 2^30, x{ov:.3f} at the best guard 2^{log2(M):.2f}")
+        print()
