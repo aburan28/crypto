@@ -41,7 +41,7 @@ use crate::binary_ecc::{BinaryPoint, F2mElement};
 use crate::cryptanalysis::gf2_elim;
 use crate::cryptanalysis::koblitz_groebner::FieldStructure;
 use crate::cryptanalysis::koblitz_index_calculus::{
-    lift_candidate, FrobeniusFactorBase, KoblitzCurve,
+    lift_candidate, point_key, points_with_x, FrobeniusFactorBase, KoblitzCurve,
 };
 
 /// Most unknowns a [`WPoly`] can carry.
@@ -496,6 +496,7 @@ pub fn wide_groebner_decompose(
     // all, as a same-binary control.
     let order = std::env::var("KIC_WIDE_ORDER").as_deref() != Ok("0");
     let high_first = std::env::var("KIC_WIDE_BRANCH").as_deref() != Ok("low");
+    let finish = std::env::var("KIC_WIDE_FINISH").as_deref() != Ok("0");
     // Depth-first over summand bits; each frame carries its own system.
     struct Frame {
         eqs: Vec<WPoly>,
@@ -536,6 +537,27 @@ pub fn wide_groebner_decompose(
         }
         // Each summand from its highest coordinate down, so the order
         // test above decides as early as it can.
+        // Last-summand shortcut: once the first m − 1 summands are fixed
+        // the last is determined up to the signs of the others, so it is
+        // looked up in the base directly (at most 2^(m−1) additions)
+        // instead of branching over its ℓ bits.  `KIC_WIDE_FINISH=0`
+        // branches to the leaves, as a same-binary control.
+        let head = (m - 1) * sys.ell;
+        let head_mask = if head == 128 {
+            u128::MAX
+        } else {
+            (1u128 << head) - 1
+        };
+        if finish && m >= 2 && fixed & head_mask == head_mask {
+            stats.leaves += 1;
+            let xs: Vec<F2mElement> = (0..m - 1)
+                .map(|i| sys.summand_x(&fb.subspace_basis, values, i, kc.n))
+                .collect();
+            if let Some(idxs) = finish_last(kc, fb, index_of, &xs, target) {
+                return (Some(idxs), stats);
+            }
+            continue;
+        }
         let next = if high_first {
             (0..m)
                 .flat_map(|i| (0..sys.ell).rev().map(move |t| i * sys.ell + t))
@@ -571,6 +593,74 @@ pub fn wide_groebner_decompose(
         }
     }
     (None, stats)
+}
+
+/// With the abscissae of all but the last summand known, find the last:
+/// for every choice of factor-base points with those abscissae (each is
+/// one of `±P`), the remainder `target − ΣP_i` must itself be a base
+/// point.  Returns the indices, last summand included.
+fn finish_last(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    xs: &[F2mElement],
+    target: &BinaryPoint,
+) -> Option<Vec<usize>> {
+    let choices: Vec<Vec<usize>> = xs
+        .iter()
+        .map(|x| {
+            points_with_x(&kc.curve, x)
+                .iter()
+                .filter_map(|p| index_of.get(&point_key(p)).copied())
+                .collect()
+        })
+        .collect();
+    if choices.iter().any(Vec::is_empty) {
+        return None;
+    }
+    fn walk(
+        kc: &KoblitzCurve,
+        fb: &FrobeniusFactorBase,
+        index_of: &HashMap<(BigUint, BigUint), usize>,
+        choices: &[Vec<usize>],
+        depth: usize,
+        rest: &BinaryPoint,
+        chosen: &mut Vec<usize>,
+    ) -> bool {
+        if depth == choices.len() {
+            if let Some(&last) = index_of.get(&point_key(rest)) {
+                chosen.push(last);
+                return true;
+            }
+            return false;
+        }
+        for &i in &choices[depth] {
+            let p = &fb.points[i];
+            let neg = match p {
+                BinaryPoint::Affine { x, y } => BinaryPoint::Affine {
+                    x: x.clone(),
+                    y: x.add(y),
+                },
+                BinaryPoint::Infinity => BinaryPoint::Infinity,
+            };
+            chosen.push(i);
+            if walk(
+                kc,
+                fb,
+                index_of,
+                choices,
+                depth + 1,
+                &kc.add(rest, &neg),
+                chosen,
+            ) {
+                return true;
+            }
+            chosen.pop();
+        }
+        false
+    }
+    let mut chosen = Vec::with_capacity(xs.len() + 1);
+    walk(kc, fb, index_of, &choices, 0, target, &mut chosen).then_some(chosen)
 }
 
 /// Whether the fixed bits already contradict `x_0 ≤ x_1 ≤ … ≤ x_{m−1}`,
