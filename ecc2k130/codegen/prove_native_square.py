@@ -34,11 +34,14 @@ def prove(source):
     # Fail closed if the native operands, zero extension, result selection,
     # type, guards or return expression change.
     native, fallback = body.split('#else')
-    expected = '''#if ECC_PACKED_CLMAD_SQUARE && defined(__CUDA_ARCH__)
-        const uint64_t a = uint64_t(x);
-        uint64_t r;
-        asm("clmad.lo.u64 %0, %1, %1, 0;" : "=l"(r) : "l"(a));
-        return r;'''
+    # Must match packed131.h: CLMAD product builds emit the native square on
+    # sm_80+ via ECC_USE_CLMAD_INSN (Turing keeps the software fallback in the
+    # same fat binary). The historical ECC_PACKED_CLMAD_SQUARE gate was absorbed
+    # into that path; ALU_SQUARE/ALU_SQR are the measured opt-outs.
+    expected = '''#if ECC_USE_CLMAD_INSN
+ uint64_t r;
+ asm("clmad.lo.u64 %0, %1, %1, 0;" : "=l"(r) : "l"((uint64_t)x));
+ return r;'''
     compact = lambda text: re.sub(r'\s+', '', text)
     if compact(native) != compact(expected):
         raise ValueError('native branch is outside the proved source contract')

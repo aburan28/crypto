@@ -42,6 +42,10 @@ def environment(mode='0', generated='0', tile='0', clmad='0', weighted='0', comp
                subprocess=subprocess, time=time, json=json, benchResult=benchResult,
                summarizeSamples=summarizeSamples, bestResult=bestResult,
                CUDA_VERSION='13.0.0', DEFAULT_GPU='RTX-PRO-6000', BAKED_ARCHES=('120',), REMOTE='/unused',
+               # modal_app.image bakes ECC_CPU_THREADS and the dual host binaries;
+               # keep the fixture defaults aligned with the module's off-by-default CPU walker.
+               CPU_THREADS=0,
+               CPU_BINARIES={"v3": "ecc2k130-cpu-v3", "v4": "ecc2k130-cpu-v4"},
                print=lambda *a, **k: None,
                bakedIntact=[True], computeCapability=lambda: '120', gpuName=lambda: 'fixture GPU')
     for key in ('SINGLE_PRODUCT', 'CACHE_DENOM', 'BY_VALUE', 'POLY_CHAIN',
@@ -97,6 +101,7 @@ class DirectBuildTests(unittest.TestCase):
                        GENCODE='fixture', LOCAL=ROOT)
             assignment('image', env)
             self.assertEqual(image.calls['env'][0]['ECC_PACKED_DIRECT_REDUCE'], mode)
+            self.assertEqual(image.calls['env'][0]['ECC_CPU_THREADS'], '0')
             builds = [c for c in image.calls['run_commands'] if 'make gpu ' in c]
             self.assertEqual(len(builds), 1)
             self.assertIn('PACKED_DIRECT_REDUCE=' + mode, builds[0])
