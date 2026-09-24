@@ -64,8 +64,9 @@ stalemate worth caring about:
 *Consequence for this repository:* neither a rigorous upper nor lower
 bound on the cost of solving these systems exists, so **our own measured
 `D_reg` growth at small `n` is as good as the published state of the
-art.** The FFD ladder in `research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md` is not
-duplicating a settled question.
+art.** ~~The FFD ladder in `research/notes/ecc2k130/RESEARCH_KOBLITZ_SCALING_TARGET.md` is not
+duplicating a settled question.~~ *(Corrected 2026-09-24, see the addendum
+after §5: its chained rows re-derive Kosters–Yeo Cor. 4.11.)*
 
 ## 2. The number that actually decides it
 
@@ -184,6 +185,45 @@ already tested against Koblitz decomposition systems at `m = 2` and
 `m = 3`. The survey found **no publication combining the two**. That is
 the one place where "novel idea not yet seen" and "already half-built"
 coincide.
+
+## Addendum, 2026-09-24: the second pass (X6′)
+
+A second pass, registered as §X6′ of
+[`RESEARCH_ECC2K130_ROUTE_TARGETS.md`](RESEARCH_ECC2K130_ROUTE_TARGETS.md),
+changed four things.  The survey text above is left as it was, except that
+§1's "not duplicating a settled question" is struck.
+
+- **§1 had the answer to its own FFD ladder and did not apply it.**
+  - Kosters–Yeo (Prop. 4.9, Cor. 4.11) and HKY (Prop. 5) prove that a trace
+    combination of the descended `S₃(X₁, X₂, x(P))` equations is linear.
+    So the first fall degree is 2 for those systems and for the chained
+    ones.
+  - The scaling target's H1 table ("every chained system falls at exactly
+    3") measures that equation, in a rank-loss convention that sees it one
+    degree late.
+  - The identification is checked on 96 draws
+    (`experiments/28_koblitz_x5_trace_identity.log`).
+  - The `D_reg` half of §1's consequence stands: no rigorous bound on the
+    degree of regularity exists.
+- **Item 4 has a concrete negative.**  GGMP §4's Frobenius-invariant
+  constructions do not exist at `q = 2, n = 131`:
+  - linearised polynomials need a small `ord_n(2)`, and it is 130;
+  - Couveignes–Lercier with a torus needs `n | 3`;
+  - Couveignes–Lercier with an elliptic curve needs a multiple of `n` in the
+    Hasse interval `N ≤ 5`.
+
+  No source read gives an operation count at prime `n` with `q = 2`.
+- **Item 5 is empty by structure.**
+  - `End(E) = Z[τ]` is the maximal order of `Q(√−7)`, and its class number
+    is 1.
+  - `Aut(E) = {±1}`.
+  - So the Koblitz structure available is `⟨−1⟩ × ⟨τ⟩`, already used by rho
+    and GGMP.
+- **One gap in the literature.**  In the sources read, none measures a fall
+  degree for a chain symmetrised under the 2-torsion point.  None notes
+  that the symmetrisation removes the trace equation, and Galbraith–Gaudry
+  (2016, §9.2) call exploiting larger symmetry groups in the chain "an open
+  problem".  That is absence in 10 sources, not evidence of absence.
 
 ## Honest limits
 

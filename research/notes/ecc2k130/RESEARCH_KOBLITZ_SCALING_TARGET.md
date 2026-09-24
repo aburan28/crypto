@@ -198,6 +198,21 @@ happened, in the autolab entry, even when the answer is "no change".
 > loss this definition records at `D = 3`.  The table's numbers stand; what
 > they measure is that one equation, not a general weakness of the chained
 > systems.
+>
+> **Attribution (2026-09-24, from §X6′ of the same note).**
+> - **The equation is Kosters–Yeo's.**  It is their trace equation
+>   (arXiv 1503.08001, Prop. 4.9, Cor. 4.11), also HKY (CRYPTO 2015) Prop. 5.
+>   `experiments/28_koblitz_x5_trace_identity.log` identifies it on the six
+>   chained rows of this table that X5′ checked (48/48 draws), and on X5′'s
+>   own protocol (48/48).
+> - **Why this table says 3.**  KY derive `D_ff = 2` for a chain of `S₃`
+>   links (§5), and HKY §5.2 report "usually 2" for the subspace-restricted
+>   chain.  They count a degree fall (2 → 1), and this table
+>   counts Macaulay rank loss, which the fall causes only via `λ² + λ = 0`
+>   at `D = 3`.  So "every chained system falls at exactly 3" is KY Cor. 4.11
+>   in this repository's convention.
+> - **Not an observation.**  It was published in 2015 for these systems,
+>   and the paper was already in this thread's survey when H1 was written.
 Over 16 draws per instance, every system falls at `D = 2` or `D = 3`,
 and every chained (`m ≥ 3`) system falls at exactly 3.
 *Falsifier:* any `(n, m)` on the ladder with `fall_min ≥ 4` at
@@ -207,7 +222,10 @@ fit) and report min/max/no-fall.  Report the distribution, never a
 single draw — the spread at `n = 9, m = 2` (7 falls, 9 non-falls) is
 what that rule is there for. If H1 holds out to `n = 63`, that is a
 publishable-shaped empirical statement about subspace-restricted Semaev
-systems; the existing literature measures the full-field case.
+systems~~; the existing literature measures the full-field case~~.
+*(Struck 2026-09-24.  KY and HKY measure `S₃(X₁, X₂, x(P))` with `X₁, X₂`
+restricted to a random subspace of dimension `⌈n/2⌉`, and HKY's chain
+restricts the summands to a subspace too.  See the attribution above.)*
 
 **H2 — the 64-variable cap, not the algebra, is what stops the sweep.**
 **FALSIFIED, 2026-09-08.** The cap is real (`koblitz_groebner::MAX_VARS`,
