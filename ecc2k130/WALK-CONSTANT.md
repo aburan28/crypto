@@ -10,7 +10,29 @@ really need, and which is cheaper per solve?  The choice has to be made
 before the first distinguished point is collected, because the two walks
 cannot share a corpus.
 
-Answer: **keep the σ walk, and raise `maxIters`.**
+Answer, after round 2 (§11): **`maxIters` is raised, and the table walk's
+cycle rule now refuses the fruitless cycles that disqualified it.  Priced end
+to end it is projected at 0.81–0.86× the σ walk's cost per solve.  The
+campaign still runs σ until one measurement is in: the new kernel's paired
+rate on the card.**
+
+- **Round 2.** The rule now refuses a step that undoes any of the last four,
+  or that closes a τ-relation with the last three.  No fruitless cycle with
+  four or fewer determined tags survives it, and every one the old rule let
+  through is gone.  What it leaves is counted at `2 × 10⁻⁵` of trails trapped
+  at `dpWeight = 32`: mostly six-step relations such as
+  `τ⁴ + τ³ + τ² − τ − 2 = 0`, one of which was seen.  The table walk's `c` is
+  unchanged.  Walks that meet with different histories part 0.97% of the time,
+  which costs ×1.0048 in iterations.  The projection uses the old kernel's
+  paired rates; the switch pays unless the new rule costs the kernel 14–19% of
+  its rate.  `aws/campaign.json` still names σ, and the switch is the campaign
+  owner's.
+- **`maxIters`** is `2^32` in `aws/campaign.json` and in the witness
+  generator's default, up from `2^30`.  The bucket copy, which is what
+  workers read, is the owner's to republish.
+
+Round 1's answer was **keep the σ walk, and raise `maxIters`**, on these
+findings (the fruitless-cycle ones are about the rule as it was then):
 
 - **Iterations.** The table walk needs `c = 1.00` times a random mapping's
   iterations at every degree measured.  With ECC2K-130's branch distribution
@@ -44,7 +66,8 @@ Answer: **keep the σ walk, and raise `maxIters`.**
 Everything below follows `AGENTS.md`: §1 gives the boundary and unit, §2 the
 method, §3 why the walks differ, §4 the single table, §5 the fruitless
 cycles, §6 the cost to solve, §7 the falsification target, §8 the
-classification, and §9 what this changes elsewhere.
+classification, and §9 what this changes elsewhere.  §11 is round 2: the
+cycle rule extended, with its own target, results, cost and classification.
 
 ## 1. Boundary and unit
 
@@ -455,25 +478,28 @@ None is an advance: no row moves the ratio to the floor below one.
 
 ## 9. What this changes elsewhere
 
-- `aws/campaign.json` is unchanged: `"walk": "sigma"` stays.  The
-  `maxIters` change is the campaign owner's to make, for two reasons: the
+- `aws/campaign.json` keeps `"walk": "sigma"`.  *(Round 2 made the
+  `maxIters` change below in the repository, §11.)*  Round 1 left the
+  `maxIters` change to the campaign owner, for two reasons: the
   bucket copy is what workers read, and `maxIters` is part of the campaign
   contract (`campaignContract` in `aws/protocol.py`), so changing it starts a
   new corpus.  That costs nothing now and costs the corpus later, so the
   change has the same deadline as the walk choice.  Recommended before
   collection: `maxIters ≥ 2^32` at `dpWeight = 32`.  The witness generator
   `src/witness.cpp` has to move with it.  It refuses a trail longer than its
-  own `--max-iters`, which defaults to `2^30`, and a cairn job's
+  own `--max-iters`, which defaulted to `2^30`, and a cairn job's
   `max_steps_per_walker` can lower that.  Unless both are raised, the
   distinguished points the longer guard recovers (trails of `2^30` to `2^32`
   steps, about 5% at `dpWeight = 32`) would be refused there.
 - [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) said that choosing the
   table walk later "is a configuration change and not a code change".  That
-  no longer holds: the walk needs a cycle check first.  Its §6.2 ratio
+  did not hold: the walk needed a cycle check first, which §11 builds.  Its §6.2 ratio
   `0.96 ± 0.07` on `GF(2^41)` is consistent with the `0.928–0.938` measured
   here; the `1 + 1/(2H)` it was compared with is the injective model, which
   §3 shows does not apply.
-- `README.md` quotes `2^60.9` for ECC2K-130 and now points here.
+- `README.md` quotes `2^60.9` for ECC2K-130 and now points here.  Its
+  "measured for this walk" figure read `2^60.94`, from a draft of §6; round 2
+  corrects it to §6's `2^60.91–60.92` (accounting).
 
 ## 10. Reproduce
 
@@ -490,8 +516,18 @@ python3 sigma_classes.py 19 130873 41811 8,2 15000   # σ on classes: why n = 19
 python3 mapping_spread.py 45562 16 6000 5             # one-mapping spread of random mappings (W = 8, 16, 64 in the output)
 ```
 
-Every row names its seed.  The full matrices took about an hour on four
-cores: `matrix-v2` in the emulation, and `device-v2` on the reference walks.
+Round 2 (§11), from the same directory:
+
+```
+./round2.sh                                           # merge, matrix-v3, device-v3 and the residual probe (about two hours on four cores)
+python3 fruitless_patterns.py --residual 8            # what rule v2 passes, by signature (fruitless_patterns_v2.txt)
+python3 fruitless_patterns.py 8 4 4 --rule v2         # brute force: nothing at four determined tags or fewer (L = 8 runs for hours)
+make -C ../.. test-cycle-rule                         # the rule alone: every cycle it must break, and covariance
+python3 summarize.py                                  # the round-2 tables, after round 1's
+```
+
+`matrix-v3` and `device-v3` repeat `matrix-v2`'s and `device-v2`'s table
+rows with the same seeds, under rule v2.
 
 ## 11. Round 2: the cycle rule extended
 
@@ -550,3 +586,237 @@ correction to §6's sketch, and §6's projection is unaffected by it.
 Inadmissible: changing `H`, `dpWeight` or the history layout's meaning
 without saying so; scoring a formal return as a collision; dropping the
 16-point return detector the harnesses use as the independent check.
+
+### 11.1 Results
+
+Sources are the frozen files `matrix-v3.jsonl`, `device-v3.jsonl`,
+`merge.jsonl`, `residual-check.jsonl` and `fruitless_patterns_v2.txt` in
+[benchmarks/walk-constant](benchmarks/walk-constant/), printed by
+`summarize.py`.  [round2.sh](benchmarks/walk-constant/round2.sh) holds the
+command lines.  `matrix-v3` and `device-v3` repeat round 1's table rows with
+the same seeds.  Where trials are long (`n ≥ 37`) the two rules' walks part
+early and a v1/v2 pair is two independent measurements.  At `n = 23` many
+trials never reach a step where the rules differ, so the pairs are
+correlated: the emulation's differences there are a tenth of the
+independent standard error.  The standard errors below treat every pair as
+independent, which overstates the uncertainty of the correlated ones.
+
+**1. The count: met.**
+
+- Nothing with four or fewer determined tags survives the rule, at any
+  length.  The brute force finds nothing through `L = 7`.  The count by
+  signature covers every signature with at most four determined tags, the
+  last at `L = 8`, and finds zero in each.  A branch's steps come in even
+  numbers, since every power of `τ` is `1 mod τ̄` and `τ̄` has norm 2, so
+  there are no other signatures.  A pair needs ten steps, since both of its
+  tags must be at least five steps apart around the cycle.
+- The first survivors have five determined tags:
+  - **1,920 six-step cycles on one branch**, the orders of the nine
+    irreducible six-term relations in `Z[τ]`.  An example is
+    `τ⁴ + τ³ + τ² − τ − 2 = (τ² + τ + 2)(τ² − 1) = 0`.  None contains a
+    pair, and in none do four consecutive steps form a τ-relation.
+  - one **10-step pairwise cycle**.
+- At six determined tags there are 17,856 interleavings of two τ-relations
+  on two branches, and 258 more patterns.  Seven or more are not counted:
+  each further determined tag costs a factor of `2n = 262`.
+- The brute force over five determined tags finds the same 1,920, and spans
+  up to 18 add none.
+- At `n = 131`, H = 8, ECC2K-130's distribution, the survivors are entered at
+  `5.7 × 10⁻¹⁴` per step, 99.6% of it through the six-step cycles.  That traps
+  `2.0 × 10⁻⁵` of DP-32 trails, fifty times under the target's 0.1%.
+
+**2. Returns: met as declared, and the declaration missed a class.**
+
+- **What v2 had to remove.** There were no τ-relation 4-step returns and no
+  pairwise returns in 1.50 × 10⁹ table steps across both harnesses.  Rule v1's
+  count predicts 839 on the same rows.
+- **What it leaves.** One return was of a kind item 2 does not name: a
+  six-step τ-relation return at `n = 23`, native, H = 16.  The residual count
+  of item 1 predicts 0.81 there and 1.96 over all rows.  Item 2 listed
+  what the rule must remove and not what it leaves.  Item 1's count found the
+  class, and the probe below tests it.
+- **The probe.** At `n = 23` with two uniform branches, where the six-step
+  cycles are entered about a thousand times more often than at H = 8, 52.6M steps show 21
+  six-step and 3 eight-step τ-relation returns.  The count gives 15.3 and 1.5.
+- **Why the probe is only a bound.**
+  - At H = 2 the rule can refuse both branches, and the step is then taken
+    anyway.  The probe's 15,646 two-step and 58 four-step pairwise returns,
+    and its 25 four-step τ-relation returns, are such steps.
+  - At H = 8 this cannot happen.  The rule refuses at most five branches:
+    four by negation, one per history slot, and one by the τ test, which
+    needs the last three tags on one branch.
+  - The count does not model the forced steps, so the probe's excess of 1.4×
+    bounds the count rather than checks it.  At twice the count the trap loss
+    would be ×1.0006, and item 6's projection would move in its fourth digit.
+
+**3. `c`: not met as declared; no shift pooled.**
+
+| n | branches | H | harness | W | c (v2) | ± | c (v1) | ± | difference / SE |
+|---:|---|---:|---|---:|---:|---:|---:|---:|---:|
+| 23 | ecc2k130 | 8 | device | 8 | 1.0121 | 0.0037 | 1.0076 | 0.0037 | +0.9 |
+| 23 | ecc2k130 | 8 | emulation | 8 | 1.0038 | 0.0012 | 1.0037 | 0.0012 | +0.0 |
+| 23 | ecc2k130 | 16 | emulation | 8 | 1.0019 | 0.0012 | 1.0021 | 0.0012 | -0.1 |
+| 23 | native | 8 | device | 8 | 1.0016 | 0.0021 | 1.0080 | 0.0021 | -2.1 |
+| 23 | native | 8 | emulation | 8 | 1.0044 | 0.0012 | 1.0050 | 0.0012 | -0.4 |
+| 23 | native | 16 | emulation | 8 | 1.0055 | 0.0012 | 1.0046 | 0.0012 | +0.6 |
+| 23 | uniform | 8 | emulation | 8 | 1.0027 | 0.0012 | 1.0026 | 0.0012 | +0.1 |
+| 37 | ecc2k130 | 8 | emulation | 16 | 1.0032 | 0.0026 | 1.0036 | 0.0026 | -0.1 |
+| 37 | native | 8 | emulation | 16 | 1.0032 | 0.0026 | 1.0015 | 0.0026 | +0.5 |
+| 41 | ecc2k130 | 8 | emulation | 16 | 0.9906 | 0.0058 | 1.0125 | 0.0059 | -2.6 |
+| 59 | ecc2k130 | 8 | emulation | 16 | 1.0031 | 0.0037 | 0.9949 | 0.0037 | +1.6 |
+
+- **Pooled.** Over the 11 matched rows, `c(v2) − c(v1) = -0.0002 ± 0.0007`.
+- **Per row.** Two rows miss the declared two standard errors, both on the
+  low side:
+  - the device's `n = 23` native row (−2.1: 1.0016 against v1's 1.0080);
+  - the emulation's `n = 41` ECC2K-130 row (−2.6: 0.9906 against 1.0125).
+
+  In both, the v1 row is the outlier against its model (1.0080 against
+  1.0026, 1.0125 against 1.0008).  The v2 rows sit within two standard errors
+  of theirs.
+- **Chance.** A dozen comparisons at two standard errors miss twice about
+  one time in ten.
+- **Device against emulation under v2, `n = 23`.** +2.1 standard errors for
+  ECC2K-130's distribution (1.0121 against 1.0038) and −1.1 for native.  The
+  two signs are opposite.
+- **The lesson.** A per-row test was the wrong one to declare for a change
+  expected to do nothing across a dozen rows.  The pooled difference is the
+  right test.
+- **The pooled constant.** The table walk under v2 is at the floor, as under
+  v1: `c = 1.0038 ± 0.0010` pooled over the ECC2K-130 rows at H = 8.
+
+**4. Merge parting: met, narrowly.**
+
+- Two walks that meet at one point with different histories part when the
+  rule refuses a step for one and not the other.
+- Under v2 the first step after the meeting has four history slots still
+  holding different tags, the next three, then two, then one.  Each slot
+  refuses with probability `q = Σp²/2n`, for either walk.  That predicts
+  `2(4 + 3 + 2 + 1)q = 20q`.  Under v1, only the step that undoes the last
+  one (at first order), so `2q`.
+- Measured over nine v2 rows, including the device's own walk at `n = 23`
+  and `41`: 0.93–1.00 of `20q`, parted in the proportions 4 : 3 : 2 : 1 over
+  the first four steps.  For v1, 0.98–1.10 of `2q`.
+
+| n | branches | rule | harness | merges | parted | rate | ± | 20q or 2q |
+|---:|---|---|---|---:|---:|---:|---:|---:|
+| 23 | ecc2k130 | v1 | emulation | 399,987 | 2,227 | 5.57e-03 | 1.2e-04 | 5.50e-03 |
+| 23 | ecc2k130 | v2 | device | 40,000 | 2,209 | 5.52e-02 | 1.1e-03 | 5.50e-02 |
+| 23 | ecc2k130 | v2 | emulation | 399,989 | 21,438 | 5.36e-02 | 3.6e-04 | 5.50e-02 |
+| 23 | native | v1 | emulation | 399,995 | 4,054 | 1.01e-02 | 1.6e-04 | 1.02e-02 |
+| 23 | native | v2 | device | 40,000 | 3,799 | 9.50e-02 | 1.5e-03 | 1.02e-01 |
+| 23 | native | v2 | emulation | 399,996 | 38,111 | 9.53e-02 | 4.6e-04 | 1.02e-01 |
+| 41 | ecc2k130 | v1 | emulation | 400,000 | 1,355 | 3.39e-03 | 9.2e-05 | 3.09e-03 |
+| 41 | ecc2k130 | v2 | device | 4,000 | 122 | 3.05e-02 | 2.7e-03 | 3.08e-02 |
+| 41 | ecc2k130 | v2 | emulation | 400,000 | 12,313 | 3.08e-02 | 2.7e-04 | 3.09e-02 |
+| 41 | native | v1 | emulation | 400,000 | 1,755 | 4.39e-03 | 1.0e-04 | 4.30e-03 |
+| 41 | native | v2 | emulation | 400,000 | 16,599 | 4.15e-02 | 3.2e-04 | 4.30e-02 |
+| 59 | ecc2k130 | v1 | emulation | 400,000 | 889 | 2.22e-03 | 7.4e-05 | 2.15e-03 |
+| 59 | ecc2k130 | v2 | emulation | 400,000 | 8,528 | 2.13e-02 | 2.3e-04 | 2.15e-02 |
+| 59 | native | v1 | emulation | 400,000 | 1,002 | 2.50e-03 | 7.9e-05 | 2.55e-03 |
+| 59 | native | v2 | emulation | 400,000 | 9,966 | 2.49e-02 | 2.5e-04 | 2.55e-02 |
+
+- At `n = 131`, H = 8: 0.97% of merges part under v2, against 0.10% under
+  v1.  A parted merge is a lost collision, so the expected number of
+  collisions a solve needs grows by `1/(1 − δ)`, and its iterations by
+  `1/√(1 − δ) = ×1.0048`.
+- The 1% limit holds by a margin of 3%.  The rule costs this because
+  refusing more patterns means refusing on more of each walk's history.
+
+**5. Agreement and tests: met.**
+
+- `make test-cycle-rule` runs the rule alone, from random histories, at
+  `m = 23, 41, 131`, and every check passes:
+  - all 19,200 τ-relation 4-cycles (both relations, all 12 orders each,
+    phases across the wrap) are refused within the first lap;
+  - every pairwise cycle of 2, 4, 6 and 8 steps, in all its matchings, is
+    refused within the first lap;
+  - the 10-step one is refused in 2–7 of 200 laps, only by accidental
+    matches with the history;
+  - an empty history never fires;
+  - the τ test fires 0 times on 200,000 random quadruples;
+  - conjugating every tag by `σᶜ` or negating it changes the rule's answer
+    0 times in 200,000 per degree, about 67,000 of which fire.
+- **Device against reference.**
+  - The host probe (`make test-table-walk-host`), in both pivot layouts,
+    finds 0 mismatches in phase, pivot, sign, tag and addend words on
+    4,096 points.  The new histories trip the rule on 2,560 of them.
+  - The CUDA probe, `testtablewalkcuda.cu`, carries the same new
+    histories.  It compiles here with `nvcc` 12.9, but no GPU runs it.
+  - The client's covariance self-test adds a τ-relation history.
+- **Other tests.**
+  - `test-production` passes in both builds.  The table build needed a new
+    collision fixture, since the rule change moves trajectories;
+    `test-production --find-fixture` found one that resolves to the same
+    discrete log.
+  - `certify-local`, the planted small-curve logs (8 of 8) and the table
+    client's `--test` pass.
+  - The CUDA sources compile, including the 20b-knob preset with
+    `PACKED_CLMAD=0`; its `PACKED_CLMAD` needs CUDA 13.3.
+
+**6. Cost to solve: a projection.**
+
+- The inputs, at `dpWeight = 32` with both walks at `maxIters = 2^32`:
+  - the pooled v2 constant over the σ bracket `[1.070, 1.082]`;
+  - the merge factor ×1.0048;
+  - the table walk's trap loss ×1.00031 from item 1's count, against σ's
+    guard loss ×1.00007;
+  - the v1 kernel's three paired rate sessions (§6).
+- Together they give:
+
+| configuration (`dpWeight = 32`, `maxIters = 2^32`) | table / σ | kind |
+|---|---:|---|
+| rule v2 (this round) | 0.81–0.86 | projection: the v1 kernel's paired rates |
+| every fruitless cycle caught and escaped (§6) | 0.81–0.86 | projection (§6) |
+| rule v1, both at `maxIters = 2^30` (§6) | 4.85–6.26 | measured rates × model loss (§6) |
+
+- **What the projection does not know.** The v2 kernel's own rate on the
+  card is unmeasured.  Its rule reads four history slots instead of three
+  and adds the τ test, a few integer comparisons per step.  It fires about
+  four times as often as v1's, `4q` against `q` per step (0.43% against 0.11%
+  at `n = 59`, about 0.2% at `n = 131`), and each firing repeats the check on
+  the next branch.
+  None of that touches the point arithmetic, but none of it is measured.  If the v2
+  kernel loses less than 14–19% of the v1 kernel's rate, the table walk costs
+  less per solve than σ.
+- **Before it is chosen,** that paired measurement is required: v2 table
+  kernel against the σ kernel, alternating, in one session on one card, as
+  §6's rows are.
+
+### 11.2 Classification
+
+| change | class | why |
+|---|---|---|
+| rule v1 → v2 | **engineering** | `c` is at the floor before and after (pooled difference `-0.0002 ± 0.0007`); the cost per solve against σ falls from 4.85–6.26 to 0.81–0.86 (projection) by removing a loss, not by crossing the floor |
+| `maxIters` `2^30` → `2^32`, witness default with it | **engineering** | σ's guard loss ×1.185 → ×1.00007; expected work on the campaign's configuration `2^61.15–61.17` → `2^60.91–60.92` (§6 bracket) |
+| §6's five-tag sketch → four 16-bit tags | **accounting** | a correction to this note's own sketch; nothing measured changes |
+| the residual six-step relations | **accounting** | §6's 0.81–0.86 assumed every cycle caught; what is built leaves `2.0 × 10⁻⁵` of trails trapped, a ×1.0002 difference, so the projection is unchanged to two digits |
+| `README.md`'s `2^60.94` → `2^60.91–60.92` | **accounting** | a figure from a draft of §6 left in the README |
+
+None is an advance: no row moves the ratio to the floor below one.
+
+### 11.3 What changes elsewhere
+
+- `aws/campaign.json`:
+  - `maxIters` is `2^32`, and `src/witness.cpp`'s default `--max-iters` is
+    `2^32` with it.  The bucket copy is still what workers read, and
+    republishing it is the campaign owner's.
+  - `maxIters` is in the campaign contract, so the change is free only
+    before the first distinguished point.  `docs/ecc2k130-status/history.json`
+    is still empty.
+  - Every counter the guard compares, and every record field, is 64-bit.
+    The witness's per-branch step counts are 32-bit.  A trail of at most
+    `2^32` steps plus one guard period overflows one only by taking nearly
+    every step on one branch, and the record's own sum check catches a
+    wrapped count.
+  - `"walk"` stays `"sigma"`.
+- `aws/protocol.py` names the rule inside the table walk's definition, so
+  the table walk under v2 is a new walk identity.  No table-walk point
+  exists, so nothing forks.
+- Switching needs three things, in order:
+  1. the paired rate above;
+  2. the owner's decision;
+  3. both before the first distinguished point, since the walk and
+     `maxIters` are both in the contract.
+- [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) and the [README](README.md)
+  now point here, not at round 1's verdict.
