@@ -182,18 +182,51 @@ def candidate_base(E):
     raise AssertionError(f"only {len(base)} unique useful base points")
 
 
-def target_stream(E, G):
+def target_stream(E, G, meter):
+    before = meter.snapshot()
     secret = 1 + int.from_bytes(
         hashlib.sha256(f"degree7-secret|{SEED}".encode()).digest(), "big") % (R - 1)
     Q = E.mul(G, secret)
     assert Q is not None and E.mul(Q, R) is None
+    challenge_cost = meter.delta(before, meter.snapshot())
     rng = random.Random(SEED)
-    targets = []
+    targets, per_attempt = [], []
     for i in range(ATTEMPTS):
+        before = meter.snapshot()
         u, v = rng.randrange(R), rng.randrange(1, R)
         T = E.add(E.mul(G, u), E.mul(Q, v))
         targets.append((u, v, T))
-    return secret, Q, targets
+        per_attempt.append(meter.delta(before, meter.snapshot()))
+    return secret, Q, targets, challenge_cost, per_attempt
+
+
+def transport_stream(phi, G, Q, targets, meter):
+    before = meter.snapshot()
+    G1, Q1 = phi(G), phi(Q)
+    setup = meter.delta(before, meter.snapshot())
+    output, per_attempt = [], []
+    for u, v, T in targets:
+        before = meter.snapshot()
+        output.append((u, v, phi(T)))
+        per_attempt.append(meter.delta(before, meter.snapshot()))
+    return G1, Q1, output, setup, per_attempt
+
+
+def direct_codomain_targets(curve, G, Q, paired_targets, meter):
+    output, per_attempt = [], []
+    for u, v, _ in paired_targets:
+        before = meter.snapshot()
+        T = curve.add(curve.mul(G, u), curve.mul(Q, v))
+        output.append((u, v, T))
+        per_attempt.append(meter.delta(before, meter.snapshot()))
+    return output, per_attempt
+
+
+def add_costs(*costs):
+    total = Counter()
+    for cost in costs:
+        total.update(cost)
+    return dict(sorted(total.items()))
 
 
 def pair_table(E, base):
@@ -252,10 +285,13 @@ class RankTracker:
         return x
 
 
-def relation_run(E, G, Q, targets, base, *, expected_secret):
+def relation_run(E, G, Q, targets, base, *, expected_secret, meter):
+    before_pair = meter.snapshot()
     table = pair_table(E, base)
+    after_pair = meter.snapshot()
     tracker = RankTracker()
     cases, first_full_rank, hits, dependent = [], None, 0, 0
+    at_rank = None
     for i, (u, v, T) in enumerate(targets):
         witnesses = table.get(T, [])
         if witnesses:
@@ -272,16 +308,26 @@ def relation_run(E, G, Q, targets, base, *, expected_secret):
                 dependent += 1
             if len(tracker.pivots) == tracker.width:
                 first_full_rank = i + 1
+                at_rank = meter.snapshot()
         cases.append({"i": i, "u": u, "v": v, "target": encode_point(T),
                       "witness_count": len(witnesses),
                       "first_witness": list(witnesses[0]) if witnesses else None,
                       "independent_before_rank_stop": independent})
+    after_scan = meter.snapshot()
     solution = tracker.solve() if first_full_rank is not None else None
     verified = False
     if solution is not None:
         verified = solution[-1] == expected_secret and E.mul(G, solution[-1]) == Q
         verified &= all(E.mul(G, d) == P for d, P in zip(solution[:-1], base))
+    after_verify = meter.snapshot()
+    costs = {
+        "pair_table": meter.delta(before_pair, after_pair),
+        "scan_to_rank": meter.delta(after_pair, at_rank or after_scan),
+        "audit_tail": meter.delta(at_rank or after_scan, after_scan),
+        "recovery_verify": meter.delta(after_scan, after_verify),
+    }
     return {"attempts": ATTEMPTS, "hits": hits, "dependent_before_stop": dependent,
+            "costs": costs,
             "first_full_rank_attempt": first_full_rank, "rank": len(tracker.pivots),
             "mod_r_ops": dict(tracker.ops), "solution": solution,
             "verified": bool(verified), "cases": cases,
@@ -338,6 +384,7 @@ def main():
     meter, ledger = Meter(), {}
     start = meter.snapshot()
     F = CountedField(meter)
+    F.frobenius(1, N - 1)  # charge the shared sqrt table before either base scan
     ledger["field_setup"] = meter.delta(start, meter.snapshot())
     E0, Twist = CountedCurve(meter, F, 0, 1), CountedCurve(meter, F, 1, 1)
     assert ORDER % ELL and TWIST_ORDER % (ELL ** 3) == 0
@@ -354,21 +401,22 @@ def main():
     assert phi(None) is None
     G, g_trials = phase(meter, ledger, "subgroup_generator",
                         lambda: choose_generator(E0))
-    secret, Q, targets0 = phase(meter, ledger, "target_stream",
-                                lambda: target_stream(E0, G))
+    secret, Q, targets0, challenge_cost, target_attempt_costs = phase(
+        meter, ledger, "target_stream", lambda: target_stream(E0, G, meter))
     B0, B0_meta = phase(meter, ledger, "original_base",
                         lambda: candidate_base(E0))
     B1, B1_meta = phase(meter, ledger, "native_base",
                         lambda: candidate_base(E1))
-    G1, Q1, targets1 = phase(
+    G1, Q1, targets1, transport_setup_cost, transport_attempt_costs = phase(
         meter, ledger, "target_transport",
-        lambda: (phi(G), phi(Q),
-                 [(u, v, phi(T)) for u, v, T in targets0]))
+        lambda: transport_stream(phi, G, Q, targets0, meter))
     assert G1 is not None and E1.mul(G1, R) is None
     assert Q1 == E1.mul(G1, secret)
     assert all(T is None or E1.on_curve(T) for _, _, T in targets1)
-    assert all(T == E1.add(E1.mul(G1, u), E1.mul(Q1, v))
-               for u, v, T in targets1)
+    targets1_direct, codomain_attempt_costs = phase(
+        meter, ledger, "codomain_target_generation",
+        lambda: direct_codomain_targets(E1, G1, Q1, targets0, meter))
+    assert targets1_direct == targets1, "paired map/direct target disagreement"
     B_transport = phase(meter, ledger, "base_transport",
                         lambda: [phi(P) for P in B0])
     assert len(set(B_transport)) == BASE_SIZE
@@ -419,8 +467,8 @@ def main():
     variants = {}
     for name, curve, gen, challenge, targets, base in [
         ("original", E0, G, Q, targets0, B0),
-        ("transported", E1, G1, Q1, targets1, B_transport),
-        ("descendant_native", E1, G1, Q1, targets1, B1),
+        ("transported", E1, G1, Q1, targets1_direct, B_transport),
+        ("descendant_native", E1, G1, Q1, targets1_direct, B1),
         ("pullback", E0, G, Q, targets0, B_pullback),
     ]:
         variants[name] = phase(
@@ -428,7 +476,7 @@ def main():
             lambda curve=curve, gen=gen, challenge=challenge,
                    targets=targets, base=base: relation_run(
                        curve, gen, challenge, targets, base,
-                       expected_secret=secret))
+                       expected_secret=secret, meter=meter))
         assert variants[name]["verified"], f"{name} failed exact recovery"
     for left, right in [("original", "transported"),
                         ("descendant_native", "pullback")]:
@@ -437,6 +485,36 @@ def main():
             c["witness_count"] for c in b["cases"]], (left, right)
         assert a["first_full_rank_attempt"] == b["first_full_rank_attempt"]
         assert a["rank"] == b["rank"] == BASE_SIZE + 1
+
+    cold_to_rank = {}
+    for name, v in variants.items():
+        limit = v["first_full_rank_attempt"]
+        assert limit is not None
+        shared = [ledger["field_setup"], ledger["subgroup_generator"],
+                  challenge_cost]
+        shared.extend((codomain_attempt_costs if name in
+                       ("transported", "descendant_native") else
+                       target_attempt_costs)[:limit])
+        relation = v["costs"]
+        specific = [relation["pair_table"], relation["scan_to_rank"],
+                    relation["recovery_verify"]]
+        if name == "original":
+            specific.append(ledger["original_base"])
+        elif name == "transported":
+            specific.extend([ledger["kernel_line_search"],
+                             ledger["selected_map_construction"],
+                             ledger["original_base"], ledger["base_transport"],
+                             transport_setup_cost])
+        elif name == "descendant_native":
+            specific.extend([ledger["kernel_line_search"],
+                             ledger["selected_map_construction"],
+                             ledger["native_base"], transport_setup_cost])
+        else:
+            specific.extend([ledger["kernel_line_search"],
+                             ledger["selected_map_construction"],
+                             ledger["native_base"], ledger["toy_inverse_table"],
+                             ledger["base_pullback"]])
+        cold_to_rank[name] = add_costs(*shared, *specific)
 
     raw = {
         "schema": "ecc2k130-degree7-paired-factor-base-pilot-v1",
@@ -477,6 +555,12 @@ def main():
                   "original_scan": B0_meta, "native_scan": B1_meta},
         "independent_lifts": lift,
         "phase_costs": ledger,
+        "prefix_costs": {"challenge_setup": challenge_cost,
+                         "target_generation": target_attempt_costs,
+                         "transport_setup": transport_setup_cost,
+                         "target_transport_audit": transport_attempt_costs,
+                         "codomain_generation": codomain_attempt_costs},
+        "cold_cost_to_verified_rank": cold_to_rank,
         "variants": variants,
         "comparison_controls": {
             "original_transport_hit_digest":
@@ -492,6 +576,7 @@ def main():
             "finite subgroup inverse table is an audit device, not scalable",
             "native counters are exclusive by phase but not calibrated to curve additions",
             "single fixed target stream; no generalizable speed claim",
+            "per-target phi(T) is audit-only; codomain policies generate paired targets directly",
         ],
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
