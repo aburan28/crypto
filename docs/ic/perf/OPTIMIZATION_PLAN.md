@@ -219,7 +219,16 @@ search like this one enumerates about |F|^(m−2) partial decompositions
 before algebra finishes them. Exact meet in the middle does the same
 enumeration with a table lookup in place of each finish. That is why the
 Gröbner route trails it by orders of magnitude, and why neither faster
-elimination nor higher degree has closed the gap. A formulation that
-refutes *partial* decompositions early (the symmetrised S_{m+1}, whose
-unknowns are the summands alone) is the lever left; it is where the
-Gröbner track goes next.
+elimination nor higher degree has closed the gap.
+
+Nor does a change of formulation escape it. With the summands as the
+only unknowns (the symmetrised S_{m+1}), a first summand P₁ is
+consistent exactly when R − P₁ decomposes into m − 1 base points; in a
+balanced cell that holds for about m/|F| of the choices, so refuting the
+rest early *is* solving an (m − 1)-point decomposition problem. Any
+algebraic formulation enumerates about |F|^(m−2) partial decompositions
+unless that smaller problem is cheap at low degree, which is what a
+small degree of regularity would mean, and what the measurements here
+(and the repository's FFD and solving-degree ladders) do not show. What
+remains for the Gröbner route at m = 5, 6 is engineering: the constant
+per node and the use of every core.
