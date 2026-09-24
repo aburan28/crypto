@@ -146,6 +146,7 @@ regression on any gated layer is reverted, not explained away.
 | 2026-09-24 | *Tried, dropped:* two-stage prefetch in the scans (filter word at 2·lookahead, the admitted key's table run at the lookahead) | L3 | no change within noise (k0n53 precompute 0.648 → 0.632 s, paired 3×3). The hypothesis that false positives' table-run misses dominate the lookup loop is falsified | reverted |
 | 2026-09-24 | *Tried, dropped:* a larger pair-table filter (16 bits a key instead of 4–8) | L1 micro | scan 61.7 → 54.1 ns a summand, but +50 % table memory at the 4 GiB budget, and the filter layout is a persisted format (`examples/load_fold_table.rs`) | not landed |
 | 2026-09-24 | *Measured, open:* where a windowed scan's time goes at n = 53 (window 1024, one thread): subtraction 10.9 ns, bulk key 9.5 ns, filter test 3.1 ns, and **resolving the 12.3 % of keys the filter admits 13–15 ns** — about 75–110 ns an admitted key, almost all in `compact_contains`. A prefetch of the run and a branch-free AVX-512 tag compare each left it unchanged, so it is neither the run's cache miss nor the run scan's branches; not yet explained | L1 micro | — | nothing landed |
+| 2026-09-24 | C: `wide_groebner` — the chained system in `u128` monomials (≤ 128 unknowns), solved by branching on summand bits only with a linearisation step (`gf2_elim`) at every node and a group lift at the leaves | L1 | n = 31, m = 3: planted 0/2 → **2/2** (82 s a target); n = 31, m = 4 (86 vars): **1/1 planted, 241 s** — the first m = 4 Gröbner decomposition at this size; n = 39, m = 3 (78 vars) and n = 31, m = 5 (123 vars): no target decided in 400 s; n = 31, m = 6 (154 vars) exceeds 128. Meet in the middle on the same cells: 0.1–0.6 ms, 7 ms (m = 5), 0.21 s (m = 6) | engine agrees with enumerate on every reach cell |
 
 ## 6. What the L1 ladder says (pdp-reference-v1)
 
@@ -174,9 +175,12 @@ Reading it honestly:
    31-bit intermediate abscissa first. Guessing a summand instead and
    solving the m = 2 remainder is the obvious fix, and it would still cost
    about |F| × 5 ms ≈ 7 s a target, against 0.1 ms.
-3. m ≥ 4 at n ≥ 31 cannot even be written down until the monomials are
-   widened (C). Doing that measures the frontier; the numbers above give
-   no reason to expect it to cross meet in the middle.
+3. m ≥ 4 at n ≥ 31 could not even be written down until the monomials
+   were widened (C). With `wide_groebner` it can: m = 4 at n = 31 decides
+   a planted target in 241 s, m = 5 decides none in 400 s, and m = 6
+   needs more than 128 unknowns. Meet in the middle answers the same
+   cells in 0.2 ms, 7 ms and 0.21 s. Summand-first branching fixed the
+   completeness failure; it did not change the verdict.
 
 So the plan's order stands for the Gröbner track (C, then D.2 hybrid
 guessing with summand-first splitting), with its success criterion stated
