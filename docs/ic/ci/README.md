@@ -7,14 +7,57 @@ rungs, and gates the result against the reference in this directory. It is the
 CI form of the rule in `AGENTS.md` §2 that end-to-end speed is the measure of
 speed: nothing on this page is a stage number.
 
-| rung | base | `n` | log₂ r | targets | ρ/IC whole-process, v1 (dev) → v2 (runner) → v3 (dev) → v4 (dev) | crosses ρ e2e |
-|:--|:--|--:|--:|--:|:--|:--|
-| `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 0.03 → 0.04 → 0.03 → 0.04 | no |
-| `docs/ic/params/k0n41-subgroup.json` | subgroup, 5248 points | 41 | 39.0 | 32 | 2.70 → 2.23 → 1.79 → 3.39 | yes |
-| `docs/ic/params/k0n53-subgroup.json` | subgroup, 15264 points | 53 | 44.3 | 32 | 2.50 → 2.00 → 1.51 → 3.00 | yes |
+| rung (v5) | base | `n` | log₂ r | targets | relations | summands scanned | IC whole process, same host: v4 rung → v5 rung | ρ/IC whole-process, v4 → v5 (dev) | crosses ρ e2e |
+|:--|:--|--:|--:|--:|--:|--:|:--|:--|:--|
+| `docs/ic/params/k0n31.json` | pruned divisor, 35 columns | 31 | 20.5 | 32 | 78 → 78 | 277,760 → 277,760 | 0.074 s → 0.073 s | 0.04 → 0.08 | no |
+| `docs/ic/params/k0n41-subgroup-aimed.json` | subgroup, 5248 points, 64 columns | 41 | 39.0 | 32 | 124 → 67 | 15,072,256 → 2,770,944 | 0.421 s → 0.297 s | 3.39 → 7.75 | yes |
+| `docs/ic/params/k0n53-subgroup-aimed.json` | subgroup, 15264 points, 144 columns | 53 | 44.3 | 32 | 458 → 147 | 242,514,432 → 31,694,848 | 4.41 s → 1.65 s | 3.00 → 14.84 | yes |
 
-**`ic-e2e-reference-v4.json`** is what the workflow gates against. It
-supersedes v3 because the workflow now computes its own probing volume
+The v4 rungs were `docs/ic/params/k0n41-subgroup.json` and
+`docs/ic/params/k0n53-subgroup.json`; their files are unchanged, and the
+ledger records that cite them still mean what they meant. Earlier columns
+of the ρ/IC ratio, for the v4 rungs: v1 (dev) 2.70 / 2.50, v2 (runner)
+2.23 / 2.00, v3 (dev) 1.79 / 1.51, v4 (dev) 3.39 / 3.00.
+
+**`ic-e2e-reference-v5.json`** is what the workflow gates against. It
+supersedes v4 for two reasons, one of them a gate fix.
+
+*The rungs collect the way the measurements say to.* The degree-41 and
+degree-53 rungs keep their curve, base, targets, pair-table tier and
+descent, and collect with a window of about `|F|/32` summands aimed at the
+least-mentioned columns: one planned unit, then further units until every
+column is determined (`k0n41-subgroup-aimed.json`, window 164 and units of
+1024 probes; `k0n53-subgroup-aimed.json`, window 477 and units of 2048).
+The window and the aim were measured and classified in
+`docs/ic/runs/koblitz-collection-window-20260921.json` (a full `m = 3`
+scan meets each triple three times and keeps one; a window keeps all
+three chances) and `docs/ic/runs/koblitz-collection-aim-20260922.json`
+(aimed at the least-mentioned columns, relations fall to within 3 % of
+the counting floor). Both left the ledger rungs sweeping, as an open
+question; v5 answers it for the gate. At degree 53 the rung scans 7.65×
+fewer summands for 147 relations instead of 458, and the whole IC process
+on one host falls from 4.41 s to 1.65 s. Descent trials, ρ and the stored
+pairs are identical to v4's. By `AGENTS.md` §3 this is **engineering**:
+the counters and the total both fell, the generic-group floor did not
+move, and no decomposition is found that the sweep could not find.
+
+*The collection counters now see extension units.* They used to be read
+from the collect stage, which reports only the planned units; units
+collected inside the logs stage, because the planned ones left a column
+undetermined, were work the gate could not see. A v5 rung does almost all
+of its collecting there, so reading the old way would have pinned 2 of 67
+relations at degree 41. `scripts/ic_e2e_benchmark.py` now reads the logs
+stage's totals, which equal the collect stage's whenever nothing is
+extended: the v4 rungs check identically against v4 under the new read.
+A reused logs stage, or a logs total below the collect stage's, is
+refused.
+
+v5 is frozen on a dev host, as v3 and v4 were; `frozen_from` records the
+commit, the `ic` binary hash and the host. The IC whole-process figures
+in the table are both from that host and the same `ic` binary, v4 rung
+beside v5 rung.
+
+v4 superseded v3 because the workflow now computes its own probing volume
 and passes it to `PairSumTable::build_within_for`
 (`docs/ic/runs/koblitz-probe-volume-20260921.json`), so the tier is
 priced for the run being built rather than for the volume the cost model
@@ -116,8 +159,8 @@ stage number this gate was built not to be fooled by.
 ```bash
 cargo build --release --bin ic
 python3 scripts/ic_e2e_benchmark.py run --ic target/release/ic --output /tmp/ic-e2e \
-    --params docs/ic/params/k0n31.json docs/ic/params/k0n41-subgroup.json docs/ic/params/k0n53-subgroup.json
-python3 scripts/ic_e2e_benchmark.py check --output /tmp/ic-e2e --reference docs/ic/ci/ic-e2e-reference-v2.json
+    --params docs/ic/params/k0n31.json docs/ic/params/k0n41-subgroup-aimed.json docs/ic/params/k0n53-subgroup-aimed.json
+python3 scripts/ic_e2e_benchmark.py check --output /tmp/ic-e2e --reference docs/ic/ci/ic-e2e-reference-v5.json
 python3 -m unittest discover -s scripts -p 'test_ic_e2e_benchmark.py'
 ```
 

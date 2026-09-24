@@ -28,7 +28,7 @@ concurrency:
   group: ic-e2e-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 env:
-  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v4.json
+  IC_E2E_REFERENCE: docs/ic/ci/ic-e2e-reference-v5.json
   IC_E2E_OUTPUT: /tmp/ic-e2e
 jobs:
   e2e-benchmark:
@@ -53,8 +53,8 @@ jobs:
             --ic target/release/ic \
             --output "$IC_E2E_OUTPUT" \
             --params docs/ic/params/k0n31.json \
-                     docs/ic/params/k0n41-subgroup.json \
-                     docs/ic/params/k0n53-subgroup.json
+                     docs/ic/params/k0n41-subgroup-aimed.json \
+                     docs/ic/params/k0n53-subgroup-aimed.json
       - name: Gate against the frozen reference
         if: always()
         run: |

@@ -1,0 +1,26 @@
+name: Toy symmetry quotient
+on:
+  pull_request:
+    paths:
+      - "research/toy_symmetry_quotient_20260924/**"
+      - ".github/workflows/toy-symmetry-quotient.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Exact arithmetic, coverage, and negative controls
+        run: python3 -m unittest discover -s research/toy_symmetry_quotient_20260924 -p 'test_*.py' -v
+      - name: Reproduce the bounded pilot
+        run: python3 research/toy_symmetry_quotient_20260924/experiment.py --output "$RUNNER_TEMP/toy-symmetry-results" --repetitions 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: toy-symmetry-results
+          path: ${{ runner.temp }}/toy-symmetry-results
