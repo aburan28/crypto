@@ -1,6 +1,6 @@
 # Searching the isogeny class of ECC2K-130 for an easier Gröbner problem
 
-**Status:** closed with a negative result, 2026-09-12
+**Status:** scoped negative for the recorded fixed-presentation FFD sweep, 2026-09-12; interpretation corrected 2026-09-24. Explicit transport and useful-PDP cost remain open.
 **Module:** `src/cryptanalysis/isogeny_degree_search/`
 **Runner:** `cargo run --release --example isogeny_degree_search [max_n]`
 **Snapshot:** `experiments/isogeny_degree_search.json`
@@ -10,10 +10,13 @@ operational first-fall-degree definition), `research/notes/ecc2k130/RESEARCH_KOB
 (the decomposition oracle being attacked), `src/cryptanalysis/binary_isogeny.rs`
 (the isogeny walk).
 
-**One-line thesis:** an isogeny changes the point-decomposition system's
-**constant term and nothing else**, so it cannot change the degree of
-regularity; and the one lever that does change it — subfield structure —
-sits on ECC2K-130 itself, uniquely, because 131 is prime.
+**Scope of the algebraic result:** at fixed target x-coordinate, field basis,
+subspace, and explicit S3-chain encoding, changing the curve parameter b changes
+only the constant terms. This preserves the generators' positive-degree parts.
+It does not identify first-fall degree with solving degree, bound actual solver
+cost, or compare transported targets and redesigned factor bases. The recorded
+negative sweep is retained; a universal claim that descendants cannot help is
+not justified by that sweep.
 
 ---
 
@@ -25,14 +28,15 @@ solves a **point-decomposition problem** — "is `R = P_1 + … + P_m` with
 every `P_i` in the factor base?" — by writing the condition as a Semaev
 summation polynomial, Weil-restricting to `F_2`, and handing the Boolean
 system to a Gröbner engine.  The cost of that step is governed by the
-**solving degree** `D*`, measured operationally as the first fall degree
-`D_ff`.
+**solving degree**. This experiment instead measures the distinct
+**first-fall degree** `D_ff`; it does not measure or establish the solving degree.
 
 Isogenies are the obvious thing to try.  By Tate, two curves over `F_q`
 are isogenous iff they have the same number of points, so every curve in
-ECC2K-130's isogeny class carries the *same* discrete-logarithm problem,
-transportable along the isogeny.  If some member presented a system with
-a lower `D*`, the attack would move there and solve the cheaper instance.
+ECC2K-130's isogeny class has the same group order. A separable isogeny
+whose degree is coprime to the subgroup order transports the public DLP.
+A descendant would be useful only if lower charged relation and recovery
+costs outweighed construction and transport.
 
 The question the thread answers is therefore:
 
@@ -45,9 +49,9 @@ and the request that opened it asked for the search to be **exhaustive**.
 
 ## 2. The boundary, stated before measuring
 
-### 2.1 Floor — the class is larger than the attack it would improve
+### 2.1 Floor for exhaustive class enumeration
 
-The floor is exact, not estimated.  For an ordinary curve the isogeny
+The class count is exact under the stated isomorphism-class convention. For an ordinary curve the isogeny
 class holds `H(Δ)` isomorphism classes (Deuring; Waterhouse; Schoof 1987
 Thm 4.6), where `Δ = t² − 4q = f²·D_K` and
 
@@ -86,10 +90,11 @@ a flat `S = √(π/2) ≈ 1.253` at every size.
 | **rho, negation × Frobenius (reference)** | `2^60.81` | **`0.0774`** | **`1.00×`** |
 | **exhaustive isogeny-class search, 1 op/curve (floor)** | `2^65.06` | **`1.477`** | **`19.1×`** |
 
-**An exhaustive isogeny-class search is 19× worse than the attack it is
-trying to improve, before it tests a single curve** — and that is with a
-free screen, which no real screen is.  The floor is derived, and nothing
-inside the thread can move it.
+Enumerating every member and charging one abstract operation per member
+exceeds the idealized rho iteration count by 19.1× before a solver call.
+This lower bound applies only to exhaustive enumeration; a structured
+sample is a different strategy, and the two operation units are not a
+measured hardware-cost comparison.
 
 ### 2.4 Why the exact class number, and not a pigeonhole bound
 
@@ -135,9 +140,9 @@ machine-checked at every size where measurement is possible.
 | **E3** | the `ℓ`-isogeny neighbourhood of ECC2K-130 itself at `n = 131` | `walk_isogeny_ball`, `rational_isogeny_degrees` | structural screen only |
 | **E4** | the `≈ 2^65` members E1–E3 cannot touch | `certify_leading_form_invariance` | a proof, checked mechanically |
 
-E1 is a strict superset of E2, so a null result there settles the isogeny
-question a fortiori — for every isogeny class over the field at once, not
-just ECC2K-130's.
+E1 contains E2 at a common field size. Its null result covers the tested
+fixed-presentation FFD statistic for every class at those sizes, not
+transported-target solver costs or the degree-131 problem.
 
 ### 3.1 Enumerating a class exhaustively: Kloosterman sums by FWHT
 
@@ -189,9 +194,9 @@ class number. Neither was fitted to the other.)
 
 ---
 
-## 4. The structural results — where the search dies, and why
+## 4. Structural results and their scope
 
-### 4.1 The curve enters the ideal only as a constant
+### 4.1 The curve enters the fixed S3-chain generators only as a constant
 
 The binary summation polynomial is
 
@@ -201,8 +206,9 @@ The binary summation polynomial is
 
 and the curve enters it **only through `b`** — the `a`-dependence lives
 in the Artin–Schreier side condition, not in the polynomial.  Since
-`b = 1/j`, walking the isogeny graph *is* varying `b`, and nothing else
-about the presentation changes.
+`b = 1/j`, walking the isogeny graph *is* varying `b`, provided the target coordinates, factor-base subspace, and S3-chain
+presentation are held fixed. An actual isogeny transports the target; an
+eliminated higher Semaev polynomial need not retain this constant-only form.
 
 Weil-restrict.  Writing `x_i = Σ_t u_{i,t} z^t` makes each `x_i` linear
 in the Boolean unknowns, and squaring is `F_2`-linear in characteristic
@@ -228,9 +234,9 @@ Galbraith–Gebregiyorgis) is defined on the **homogeneous system built
 from the generators' top-degree components** — the index of the first
 non-positive coefficient of that system's Hilbert series.  Under that
 definition it is a function of the top-degree components alone, and
-those are `b`-free.  So *every one of the `2^65` curves in the class has
-the same degree of regularity as ECC2K-130*, and so does every binary
-curve over the field, isogenous or not.
+those are `b`-free.  Thus this invariant of the identical homogeneous input is unchanged in
+the stated fixed-presentation comparison. It is not an isogeny-invariance
+theorem for affine solving degree or for the cost of finding liftable relations.
 
 There is nothing left to measure about `d_reg` itself: identical inputs
 give an identical Hilbert series, so computing it per curve would
@@ -249,32 +255,35 @@ in every case.
 Two corollaries fall out:
 
 - **The quadratic twist presents a byte-identical system.**  `S₃` has no
-  `a`.  So half of every isogeny class is algebraically indistinguishable
-  from the other half before any measurement.
+  `a`.  At fixed x-target and subspace, the two twists have the same S3 equations,
+  but generally different rational-point lifting conditions and group orders.
+  A twist is not generally in the same rational isogeny class.
 - **What the constant *can* still do.**  A degree fall whose remainder is
   a nonzero constant certifies infeasibility, and which curves get that
   certificate is `b`-dependent.  So the theorem bounds where variation
   can live — the affine tail — without asserting it is zero.  §5 measures
   the tail exhaustively.
 
-### 4.2 The only lever that works is on the start point, uniquely
+### 4.2 The measured subfield lever is already on the start point
 
-`research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` §2 has exactly one lever that measurably
-lowers `D*`: **L1, subfield structure** (Subfield mean `D*` 2.04 vs
-Random 3.53 at `2n' = n`).  A curve over `F_{2^n}` has it iff it is
-`F_{2^n}`-isomorphic to one defined over a proper subfield, i.e. iff
-`j ∈ F_{2^d}` for some `d | n`, `d < n`.
+`research/notes/index-calculus/RESEARCH_DEGREE_REDUCTION.md` §2 reports one
+measured lever in its toy panel: **L1, subfield structure** (Subfield mean
+`D*` 2.04 vs Random 3.53 at `2n' = n`). A necessary condition for
+a model defined over a proper subfield is `j ∈ F_{2^d}` for some
+`d | n`, `d < n`; this j-condition alone does not certify a useful
+factor base or cheaper solver.
 
 **131 is prime.**  The only proper subfield of `F_{2^131}` is `F_2`, with
 two elements: `j = 0` is supersingular (a different isogeny class
 entirely), and `j = 1` is `b = 1` — **ECC2K-130 itself**.
 
-So the attacker already stands on the unique point of the class that
-carries the lever, and every isogeny step strictly loses structure.
-There is nowhere to walk *to*.  (`subfield_j_count(131) = 2`, and the
+The start point is the unique ordinary j-invariant in this class that
+lies in a proper subfield. Moving to a distinct j loses that particular
+coefficient-field property. This does not rule out other factor-base or
+target-conditioned advantages on a descendant.  (`subfield_j_count(131) = 2`, and the
 contrast is real: `subfield_j_count(12) > 2`.)
 
-### 4.3 Weil descent is empty over `F_{2^131}`, for every curve
+### 4.3 The specified GHS magic-number window is empty over `F_{2^131}`
 
 The GHS magic number of `E_{a,b}` over `F_{2^N}/F_2` is
 `dim_{F_2} ⟨√b, √b², √b⁴, …⟩` — the dimension of the smallest
@@ -290,63 +299,58 @@ degree 130, and the attainable magic numbers over `F_{2^131}` are
     {0, 1, 130, 131}.
 ```
 
-The tractable GHS window `2 ≤ m ≤ 6` is **empty** — not for ECC2K-130,
-for *any* curve over the field.  (The contrast: the window is non-empty
-over `F_{2^176}`, which is why GHS breaks `c2pnb176w1` and cannot touch
-this.)  That is a statement about all `2^131` curves, derived in one
-line, covering what no walk can enumerate.
+The specified low magic-number window `2 ≤ m ≤ 6` is empty for
+curves over this field. This excludes that standard GHS construction
+at degree 131, not every possible descent model. For comparison, the
+window is nonempty over `F_{2^176}`.
 
-#### The same divisor set closes the quasi-subfield route
+#### The same divisor set constrains invariant linear-subspace constructions
 
-`research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` (landed on `main` while this thread ran)
-attacks the same target from the other side: it builds a factor base
-from the roots of a **quasi-subfield polynomial** (Huang–Kosters–Petit–
-Yeo–Yun), which is the other known route to a lower first fall degree on
-a binary curve.  Its §3 establishes that such polynomials exist exactly
-where a Frobenius-stable `F_2`-subspace does — i.e. exactly at the
-divisor degrees of `t^n − 1`.
-
-That is the *same set* `achievable_magic_numbers` computes here, so one
-calculation settles both questions at `n = 131`:
+The related `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md`
+uses Frobenius-stable linear subspaces. For that specified construction the
+same divisor-degree restriction applies:
 
 ```
-    attainable dimensions over F_{2^131}  =  {0, 1, 130, 131}
-      → GHS window 2..=6            empty
-      → n0 = 1    the subfield F_2, a factor base of 2 elements
-      → n0 = 130  the trace hyperplane, a factor base of half the field
+    attainable dimensions over F_{2^131} = {0, 1, 130, 131}
+      → invariant-subspace dimensions 2..129 absent
+      → dimension 1 has only 2 field elements
+      → dimension 130 has half the field
 ```
 
-Neither surviving dimension is a usable factor base.  So **both** known
-routes to a lower solving degree on a binary curve are closed over
-`F_{2^131}` by one line of divisor arithmetic — and closed for every
-curve over the field, not just for ECC2K-130's isogeny class.  Pinned by
-`no_usable_quasi_subfield_dimension_over_f2_131`, which also cross-checks
-the coset computation against the sibling module's.
+The test `no_usable_quasi_subfield_dimension_over_f2_131` cross-checks this
+coset computation. This excludes the requested intermediate dimensions for
+Frobenius-stable linear subspaces. It does not exclude nonlinear invariant
+sets, orbit unions of non-invariant subspaces, or all constructions called
+quasi-subfields under other coefficient restrictions.
 
-### 4.4 The walk cannot even take its first step at small `ℓ`
+### 4.4 Small-degree edges stay at the crater j-invariant
 
 Two findings, both surprises worth recording:
 
-**`ℓ = 2` is degenerate in characteristic 2.**  The Kronecker congruence
+**`ℓ = 2` has inseparable Frobenius and separable Verschiebung in the ordinary case.**  The Kronecker congruence
 `Φ_ℓ(X,Y) ≡ (X − Y^ℓ)(X^ℓ − Y) (mod ℓ)` at `ℓ = 2` reads
 `Φ_2(X,Y) ≡ (X + Y²)(X² + Y) (mod 2)`, so the only 2-isogenous
-`j`-invariants are `j²` (Frobenius) and `√j` (Verschiebung) — both
-inseparable, both in the curve's own Galois orbit.  An ordinary binary
-curve has `E[2] ≅ Z/2`; there is no separable 2-isogeny to find.  For
+`j`-invariants are `j²` (Frobenius) and `√j` (Verschiebung), both
+in the curve's own Galois orbit. Frobenius is inseparable; its dual
+Verschiebung is separable for an ordinary curve. The geometric points of
+E[2] form Z/2, while the full group scheme also has a connected part.  For
 ECC2K-130, `j = 1 ∈ F_2` is Frobenius-fixed, so the 2-isogeny ball is a
 **self-loop**: one node at every radius.
 
 **`ℓ = 3` and `ℓ = 5` are inert.**  A rational `ℓ`-isogeny exists iff
 Frobenius has an eigenvalue on `E[ℓ]`, i.e. iff `(Δ/ℓ) ≠ −1`.  For
-ECC2K-130, `(Δ/3) = (Δ/5) = −1`.  The smallest degree at which the curve
-can move at all is **`ℓ = 7`**, and it moves there only because `7 | Δ`
-(a ramified prime, one rational isogeny).
+ECC2K-130, `(Δ/3) = (Δ/5) = −1`.  Degree 7 has one rational ramified horizontal isogeny, but h(-7)=1
+makes it a self-loop. It does not reach a new j-invariant. The first rational
+prime-degree descent from the maximal order is **263**, the smallest prime
+dividing the conductor f. At that prime there are two horizontal loops and
+262 descending edges.
 
 This is an exhaustive statement, not a sample: the Legendre-symbol screen
 decides every prime `ℓ ≤ 10^5` in milliseconds, where a `Φ_ℓ` table
 would stop near `ℓ = 100`.  About half of all primes split, as expected,
-so the class *is* reachable in principle — the point is not that walking
-is impossible, it is that arriving buys nothing.
+but split primes not dividing f only give horizontal loops at this
+class-number-one crater. Reaching a different endomorphism order requires a
+vertical edge at a conductor prime. Its useful-PDP cost must be measured.
 
 ### 4.5 Where ECC2K-130 sits in the volcano, and why the screen has to know
 
@@ -513,70 +517,52 @@ Reading the table:
 | exact class size replacing the pigeonhole mean | the floor became exact and rose from `2^64.5` to `2^65.06` | **accounting** — the ratio to rho worsened from `13×` to `19×`; the earlier number was a mean, not a bound |
 | FWHT census replacing the `Θ(4^n)` count | census reach `n = 13 → 17+`; no attack quantity moved | **engineering** |
 | Legendre screen replacing the `Φ_ℓ` walk | small-`ℓ` reach `ℓ ≤ 3 → 10^5`; no attack quantity moved | **engineering** |
-| leading-form certificate | covered the `2^65` curves no sweep can reach | **not an advance — a derivation of why there cannot be one** |
+| leading-form certificate | covered the `2^65` curves no sweep can reach | **fixed-input invariant, not a universal obstruction** |
 
-Nothing in this thread is an advance, and the leading-form argument says
-nothing in it could have been.
+No cryptanalytic advance was established by this sweep. The leading-form
+argument is confined to its fixed inputs and does not rule out a different
+representation, factor base, target distribution, or solver policy.
 
 ---
 
-## 7. Bottom line
+## 7. Scope of the retained negative result
 
-The answer is **no**, for three independent reasons, any one of which is
-sufficient:
+The recorded toy fixed-presentation FFD sweep found no curve beating its
+reference. Three reusable facts constrain a successor:
 
-1. **Cost.**  The class holds `2^65.06` curves.  Enumerating it at one
-   free operation each costs `S = 1.48` against rho's `0.077` — `19×`
-   worse than the attack it would improve, before the first test.
-2. **Algebra.**  The curve parameter enters the point-decomposition ideal
-   **only as a constant term**.  The leading forms — and hence the degree
-   of regularity — are identical for every curve in the class, and
-   indeed for every binary curve over the field.  Verified exhaustively
-   over 2 716 systems at `n ≤ 11`, and over 2 994 curve comparisons at
-   `n ≤ 17`: zero curves beat the reference.
-3. **Structure.**  The only lever known to lower `D*` is subfield
-   structure, and because 131 is prime, the isogeny class contains
-   **exactly one** curve that has it: ECC2K-130.  Isogenies can only lose
-   it.  Weil descent is separately dead for the entire field, since the
-   attainable GHS magic numbers over `F_{2^131}` are `{0, 1, 130, 131}`
-   and the tractable window is empty.
-A fourth observation is **not** a reason, and is recorded so it is not
-mistaken for one: at the degrees a `Φ_ℓ` table can express, the walk
-cannot even start — `ℓ = 2` is inseparable in characteristic 2, and
-`ℓ ∈ {3, 5}` are inert, so the first real step is `ℓ = 7`.  That is a
-curiosity about small `ℓ`, not an obstruction: roughly half of all primes
-split, and the class is perfectly reachable from `ℓ = 7` upward.  The
-point is not that walking is impossible; it is that arriving buys
-nothing.
+1. Enumerating all 2^65.06 class members costs about 19 times the idealized
+   automorphism-aware rho reference even at one operation per member. This
+   rules out that exhaustive strategy, not a small structured sample.
+2. The fixed S3-chain generators' positive-degree parts are b-independent.
+   This does not fix the affine ideal, rational lifting, solving degree,
+   target transport cost, or useful relation yield.
+3. Degree 131 admits no intermediate subfield and no invariant-subspace
+   dimensions between 1 and 130. These constrain the specified subfield and
+   invariant-subspace constructions, not every possible factor base.
 
-The thread is closed.  Its reusable parts are the exhaustive census
-(`IsogenyCensus`, `Θ(n·2^n)` for every ordinary binary curve over
-`F_{2^n}`), the validated exact class-number computation, the
-Legendre-symbol isogeny-degree screen, and the leading-form signature —
-all of which apply to any binary-curve thread, not just this one.
+The ordinary separable degree-2 Verschiebung and ramified degree-7 edge return
+to j=1. The first rational prime-degree descent is 263. Explicit morphisms,
+transported factor bases, and target-conditioned solver costs were not tested
+by the archived j-only walk. A successor must compare them against the
+original curve, matched pullback bases, and automorphism-aware rho, charging
+construction, unsuccessful attempts, lifting, rank, and scalar recovery.
 
-### 7.1 What would change the answer
+The original measured artifacts are unchanged. These corrections concern the
+interpretation of that evidence and characteristic-two isogeny statements.
 
-Stated so a later reader does not re-open this on a hunch:
+### 7.1 Concrete successor questions
 
-- **A composite extension degree.**  Every structural obstruction here is
-  a statement about 131 being prime.  Over `F_{2^{mn}}` with `m, n > 1`
-  the subfield lever is reachable by isogeny, and the GHS window can be
-  non-empty.  This thread says nothing about such curves — and Weil
-  descent already does.
-- **A presentation whose *positive-degree* part depends on the curve.**
-  Leading-form invariance is a property of `S₃`, whose curve-dependence
-  is the single additive `+ b`.  A different decomposition — higher
-  summation polynomials solved directly rather than chained, or a model
-  in which the curve coefficients multiply a variable — would not inherit
-  it, and would have to be measured rather than argued.
-- **A cheaper-than-free screen, which cannot exist.**  The floor charges
-  one operation per curve.  No screen beats that, so no refinement of the
-  search strategy can move the ratio in §2.3.
-- **Not: a quasi-subfield factor base.**  Asked and answered in §4.3 —
-  it needs a Frobenius-stable subspace, and `t^131 − 1` offers only
-  `F_2` and the trace hyperplane.  `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` reaches
-  the same negative conclusion independently, and by the same lemma.
+- Compare actual transported targets and factor bases on a small structured
+  set of descendants. The one-operation-per-curve lower bound applies to
+  exhaustive enumeration; it does not apply to that targeted strategy.
+- Measure affine solver work, group-valid yield and independent relation
+  rank. Equal input top forms alone do not force these quantities to agree.
+- Study other presentations, including direct higher summation polynomials,
+  while stating their curve-coefficient dependence explicitly.
+- Retain the invariant linear-subspace obstruction, but distinguish it from
+  nonlinear or rational-map factor bases and orbit unions.
+- Over composite extension degrees, test the separately available subfield
+  and GHS possibilities with an explicit mapping back to the target group.
 
 ---
 
