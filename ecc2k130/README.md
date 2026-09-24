@@ -18,6 +18,8 @@ the tree's previous best configuration rebuilt in the same session on the same
 card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
 22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
 serial inversion (§7 there). The campaign default below is unchanged.
+[CHEAPER-SELECTION.md](CHEAPER-SELECTION.md) prices the remaining forward-pass
+lever (phase via popc planes, `TABLE_PHASE_POPC`) against that 0.90 floor.
 [TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× that
 ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
 SM-clocks 30 B/s allows) and builds the kernel for the remaining tenth:
