@@ -42,6 +42,32 @@ passing PR.**
   another concrete gate prevents merging, report that blocker precisely rather
   than asking the user to repeat the authorization already given.
 
+## Research work belongs in pull requests
+
+Treat an experiment as repository work, including a negative or inconclusive
+result. Before running it, state the hypothesis, frozen inputs, reference,
+success and stop conditions, and cost accounting in a versioned protocol.
+Make each bounded experiment or compatible group of experiments a focused
+branch and PR. Commit the code, configuration, seeds, source and input hashes,
+commands, compact raw results, verification receipts, analysis, and decision
+in that PR. Link follow-on PRs to their dependencies; do not let a local note,
+untracked worktree, chat summary, or published page be the only record of a
+finding or a decision.
+
+Preserve failures, timeouts, and regressions. Do not overwrite an earlier
+run. If raw output is too large for Git, commit a manifest with its content
+hash, byte count, durable accessible location, extraction command, and the
+small derived data needed to audit the claim. A local absolute path alone is
+not a durable location. Label unmerged work and unreviewed replays as such;
+a downstream claim cannot silently treat them as accepted evidence.
+
+For performance changes, the existing frozen-suite, full-cost, matched-rho,
+and scoreboard requirements in sections 1–8 still apply. A PR that reports
+only a stage measurement must label it a stage diagnostic and leave
+end-to-end cost and speedup unset. Open or update the PR as part of the
+iteration, then follow the default finish-and-merge workflow above once
+its evidence, review, and CI gates are satisfied.
+
 ## The rule: boundary, table, ratio
 
 Any thread that claims to improve an attack must express its progress as
