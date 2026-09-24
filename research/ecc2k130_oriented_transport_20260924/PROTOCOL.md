@@ -66,3 +66,14 @@ must supply its own matched end-to-end protocol.
 
 The final PR includes code, replayable tests, compact validation receipt and
 the outcome. Older saved preflight evidence is not overwritten.
+
+## Additional generic-interface controls (registered before their execution)
+
+The initial fixed corpus passed. Before final validation, also cover an odd
+composite kernel on a non-unit b: enumerate b=2,...,31 on a=0 over F_2^5,
+select the first b whose rational group has an odd composite cyclic subgroup,
+and verify that subgroup's quotient against direct rational full Vélu sums
+on every point and against all source point-pair additions. This selection is
+solely a coverage rule, not a performance or curve-quality search. Add explicit
+incompatible-field, incompatible-b, wrong-order and composition-model rejection
+checks. The frozen exact-target corpus remains unchanged.
