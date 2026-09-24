@@ -890,3 +890,105 @@ reason given.
 
 **Class.**  **Accounting**: a ledger.  No measurement changed, and nothing
 here bears on ECC2K-130's security.
+
+## X6′ — X6 as it runs, and a priority check on X5′
+
+**Registered 2026-09-24, before the identification below was run and before the
+queries listed here.**  Two things had already happened, and they are
+disclosed here.
+
+- **The priority check was proposed in chat** before any reading: "check
+  whether 'the `x`-chain's fall at 3 is one hidden linear equation' is already
+  in the literature".
+- **Five papers were read before this text was written.**  They are
+  Huang–Kosters–Yeo (CRYPTO 2015, eprint 2015/573), Kosters–Yeo (arXiv
+  1503.08001), Kousidis–Wiemers (arXiv 1906.05594), Galbraith–Gebregiyorgis
+  (eprint 2014/806) and Galbraith–Gaudry (eprint 2015/1022).
+  - **Kosters–Yeo appear to state X5′'s mechanism outright** (Prop. 4.9,
+    Cor. 4.11, Rem. 4.12, §5).  That reading is what this registration
+    tests.
+  - **HKY and KY were already in
+    [`RESEARCH_ECC2K130_IC_LITERATURE.md`](RESEARCH_ECC2K130_IC_LITERATURE.md)'s
+    source list.**  That survey quotes HKY §5.2's chained-`S₃` reductio.  So
+    the paper was in hand when H1 and X5′ were written.
+
+**Question 1: the priority check.**  Is X5′'s diagnosis the same statement as
+Kosters–Yeo Prop. 4.9 on the systems this repository builds, or only an
+analogue?
+
+- **KY Prop. 4.9.**  Take `F = F_{2ⁿ}`, an ordinary `E` and
+  `T = S₃(X₁, X₂, x(P))`.  Then
+  `Tr(T/b²) = Tr((X₁ + X₂ + x(P) + a₂)/a₁²)` with `b = a₁(a₁x(P) + a₃)`.
+- **On `K₀` it says:** `a₁ = 1`, `a₂ = a₃ = 0`, `b = x_R`, so the functional
+  that kills the quadratic parts should be `c ↦ Tr(c·x_R⁻²)`.
+- **Identification.** A new diagnostic,
+  `examples/koblitz_x5_trace_identity.rs`, frozen as
+  `experiments/28_koblitz_x5_trace_identity.log`, checks two things.
+  - **(a)** The left null space of the quadratic parts of the `x`-chain's
+    degree-2 equations (the link where `x_R` is known) is one-dimensional,
+    and its vector is `c_j = Tr(z^j·x_R⁻²)` in the polynomial basis the
+    equations are written in.
+  - **(b)** `Σ_j c_j f_j` equals, as a reduced Boolean polynomial, the Weil
+    descent of `Tr(e + x_m) + Tr(a₆·x_R⁻²)`, where `e` and `x_m` are that
+    link's two unknown field elements.
+- **Coverage.**  Every draw of X5′'s quadratic-rank protocol (random `V`,
+  `n = 9 … 19`, 8 draws, seed `0x5EED0005`), and every row of H1's own
+  protocol that X5′ checked.
+- **Predicted outcome** (a theorem, so this checks the code against KY):
+  both hold on every draw.
+- **What would contradict it.**  A mismatch on any draw would mean the
+  repository's link is not KY's `T` (a different normalisation, or a
+  different equation set).  X5′'s diagnosis would then be an analogue and
+  would be reported as one.
+
+**Question 2: is anything in X5′ not in the literature?**  Two candidates.
+
+- **The definitional offset.**  H1 records rank loss of the Macaulay matrix,
+  and KY, HKY and Kousidis–Wiemers record degree falls (Hodges–Petit–Schlather's
+  definition).  If both are the same event, H1's "3" is KY's "2".
+- **The symmetrised side.**
+  - Symmetrising under `T` (`w = u² + u`, `u = 1/(x + 1)`) removes the
+    linear equation.
+  - The symmetrised chain has no rank loss below the degree where trivial
+    syzygies force one.
+- **Sources for this.**  The papers above, plus the two that symmetrise under
+  small torsion and could have noticed:
+  - Faugère–Gaudry–Huot–Renault, *Using symmetries in the index calculus for
+    elliptic curves discrete logarithm* (J. Cryptology 2014);
+  - Faugère–Huot–Joux–Renault–Vitse, *Symmetrized summation polynomials*
+    (EUROCRYPT 2014).
+- **Search terms:** `fall`, `trace`, `Kosters`, `linear`.  An empty result is
+  reported as "not in the sources read", with the list, never as "new".
+
+**Question 3: X6 itself.**  Items 4 and 5 of the survey.
+
+- **Queries,** recorded with their hits:
+  1. `summation polynomial splitting 2-torsion invariant variables binary
+     elliptic curve first fall degree trace morphism`
+  2. `Koblitz curve index calculus tau-adic decomposition Frobenius
+     endomorphism factor base point decomposition`
+  3. `index calculus prime extension degree elliptic curve without subfield
+     invariant subspace factor base 2020..2026`
+  4. `Koblitz curve endomorphism ring class group index calculus discrete
+     logarithm Z[tau]`
+- **Item 4's concrete test.**  Does any construction in the sources give a
+  factor base or decomposition at prime `n` with `ord_n(2) = n − 1` and
+  `q = 2`, with an operation count?
+- **Item 5's test.**  Is there Koblitz structure beyond `⟨−1⟩ × ⟨τ⟩` that an
+  index calculus could use?
+
+**Outcomes.**
+
+| outcome | what follows |
+|---|---|
+| (a) and (b) hold on every draw | X5′'s diagnosis **is** KY Prop. 4.9; X5′ is re-attributed, and the sentences that claimed novelty are struck, not deleted.  **Accounting** |
+| (a) or (b) fails on some draw | X5′'s diagnosis is an analogue of KY; say where it differs |
+| question 2 empty | the definitional offset and the symmetrised side are "not in the sources read (list)"; step 2 (the `D = 4` syzygy split) is registered separately |
+| X6 finds an operation count at prime `n` with `q = 2` | Route 5 reopens with that count as its target |
+| X6 finds none | items 4 and 5 are recorded as the registered outcome, with the queries |
+
+**Class.**  Accounting, whatever the outcome.  No cost moves.
+
+**Inadmissible.**  Calling the X5′ mechanism new, or "independently
+discovered", once (a) and (b) hold.  Deleting the claims it corrects.
+Reporting an empty search as evidence of absence.
