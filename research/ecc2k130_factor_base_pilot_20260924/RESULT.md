@@ -1,6 +1,6 @@
 # Degree-7 paired factor-base pilot: no native-base advantage on the frozen stream
 
-Status: **toy relation-and-rank diagnostic, negative for this fixed base and stream**. The protocol was committed as `7546c5c` before relation measurements. This experiment uses the degree-7 oriented full-point map from [PR #717](https://github.com/aburan28/crypto/pull/717); its exact source SHA-256 is pinned in each raw result. It is not an ECC2K-130 PDP solver or a claim against rho.
+Status: **toy relation-and-rank diagnostic, negative for this fixed base and stream**. The protocol was committed as `7546c5c` before relation measurements. This experiment uses the degree-7 oriented full-point map from merged [PR #717](https://github.com/aburan28/crypto/pull/717); its exact source SHA-256 is pinned in each raw result. It is not an ECC2K-130 PDP solver or a claim against rho.
 
 The field is `F_(2^21)` with modulus `z^21+z^2+1`. The source has `#E=2,099,948`, trace `-2795`, and an order-421 subgroup coprime to the isogeny degree. Its twist has order `2,094,358`. Deterministic sampling recovered all eight degree-7 twist-kernel lines after 522 abscissae; one returned the source `j` and seven had a different codomain `j`. The predeclared lexicographically first non-self line has kernel abscissae `(142423, 1187869, 1467199)` and codomain `b=0x11584f`. This is a **candidate descending** edge in a ramified degree-7 volcano proxy; it is not a measured degree-263 edge advantage.
 
@@ -19,7 +19,7 @@ The exact equality of original/transported hit and rank trajectories, and of nat
 
 The initial raw run is retained as `results_initial.json` under its own historical runner commit `a8e7465`; instrumentation then moved a shared square-root table cost into field setup and added per-target prefix accounting without changing any geometry, base, target, hit, rank, or recovered-scalar record. `results_final.json` is the final charged run. An intermediate local accounting draft double-charged per-target `phi(T)` after forming each source target; the final run corrects this by measuring direct `[u]phi(G)+[v]phi(Q)` generation and treats `phi(T)` as an audit-only equality check. CPU time is in both raw files as a shared-host practicality note; it is not a performance claim. The final raw file is 887,678 bytes with SHA-256 `288b94e14bd4e3b0459160d5c8174f24ee6bbd27928260bbf8d5f9db2d440a23`.
 
-From a fresh checkout after PR #717 lands:
+From a fresh checkout of current main:
 
 ```sh
 python3 research/ecc2k130_factor_base_pilot_20260924/run.py --out /tmp/degree7-new.json
