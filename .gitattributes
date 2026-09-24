@@ -18,3 +18,6 @@ research/sat_factor_base_review_20260908/autolab_groebner_linear_tail_20260921/r
 research/sat_factor_base_review_20260908/autolab_groebner_active_layout_20260921/runs/** -whitespace
 research/sat_factor_base_review_20260908/autolab_groebner_flat_matrix_20260921/runs/** -whitespace
 research/sat_factor_base_review_20260908/autolab_groebner_fused_hash_20260922/runs/** -whitespace
+
+# Preserve hash-bound compiler diagnostics in the projected-syndrome experiment.
+research/boolean_byte_sieve_20260923/**/worker-compile.txt whitespace=-blank-at-eof
