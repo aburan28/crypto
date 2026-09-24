@@ -622,6 +622,7 @@ pub fn matrix_f4_f2_blocked(
     blocks: &[usize],
     bounds: &[u32],
 ) -> Option<(Vec<F2BoolPoly>, u64)> {
+    let row_cap = max_f4_rows();
     if polys.is_empty() || blocks.len() != bounds.len() {
         return Some((Vec::new(), 0));
     }
@@ -666,7 +667,7 @@ pub fn matrix_f4_f2_blocked(
                 continue;
             }
             rows_monos.push(row);
-            if rows_monos.len() > max_f4_rows() {
+            if rows_monos.len() > row_cap {
                 return None;
             }
         }
@@ -1465,6 +1466,7 @@ fn visit_macaulay_rows(
     criterion: Option<&F5Criterion>,
     mut visit: impl FnMut(&[u64]),
 ) -> Option<usize> {
+    let row_cap = max_f4_rows();
     let mut count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut all: Vec<u64> = Vec::new();
@@ -1513,7 +1515,7 @@ fn visit_macaulay_rows(
                 visit(&row);
                 count += 1;
             }
-            if count > max_f4_rows() {
+            if count > row_cap {
                 return None;
             }
         }
@@ -1766,6 +1768,7 @@ fn pack_polynomials_flat_fused(
     multiplier_mask: u64,
     layout: &F4ColumnLayout,
 ) -> Option<FlatF2Matrix> {
+    let row_cap = max_f4_rows();
     let words = layout.columns.len().div_ceil(64);
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut gaps = Vec::with_capacity(polys.len());
@@ -1821,7 +1824,7 @@ fn pack_polynomials_flat_fused(
             if write == 0 {
                 continue;
             }
-            if rows == max_f4_rows() {
+            if rows == row_cap {
                 return None;
             }
             let start = data.len();
@@ -1848,6 +1851,7 @@ fn pack_polynomials_nested_fused(
     multiplier_mask: u64,
     layout: &F4ColumnLayout,
 ) -> Option<Vec<Vec<u64>>> {
+    let row_cap = max_f4_rows();
     let words = layout.columns.len().div_ceil(64);
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut gaps = Vec::with_capacity(polys.len());
@@ -1907,7 +1911,7 @@ fn pack_polynomials_nested_fused(
             if write == 0 {
                 continue;
             }
-            if matrix.len() == max_f4_rows() {
+            if matrix.len() == row_cap {
                 return None;
             }
             let mut row = vec![0u64; words];
