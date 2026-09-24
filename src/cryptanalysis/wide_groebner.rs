@@ -38,6 +38,7 @@ use std::collections::HashMap;
 use num_bigint::BigUint;
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
+use crate::cryptanalysis::fx_hash::FxMap;
 use crate::cryptanalysis::gf2_elim;
 use crate::cryptanalysis::koblitz_groebner::FieldStructure;
 use crate::cryptanalysis::koblitz_index_calculus::{
@@ -407,13 +408,34 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
         // Columns: every monomial, descending degree, then descending
         // integer (any fixed order within a degree serves), so a reduced
         // row whose leading column has degree ≤ 1 is linear.
-        let mut cols: Vec<Mono> = eqs.iter().flat_map(|p| p.terms.iter().copied()).collect();
-        cols.sort_unstable_by(|a, b| b.count_ones().cmp(&a.count_ones()).then(b.cmp(a)));
-        cols.dedup();
-        if cols.len() > MAX_LINEARISATION_COLS {
+        //
+        // Sorted as plain integers to deduplicate, then laid out by degree
+        // with a counting pass: a comparator that recounts bits on every
+        // compare was 40 % of a search.
+        let mut all: Vec<Mono> = eqs.iter().flat_map(|p| p.terms.iter().copied()).collect();
+        all.sort_unstable();
+        all.dedup();
+        if all.len() > MAX_LINEARISATION_COLS {
             return true;
         }
-        let index: HashMap<Mono, usize> = cols.iter().enumerate().map(|(i, &m)| (m, i)).collect();
+        let max_deg = all.iter().map(|m| m.count_ones()).max().unwrap_or(0) as usize;
+        let mut start = vec![0usize; max_deg + 2];
+        for m in &all {
+            // Descending degree: degree d goes after every higher one.
+            start[max_deg - m.count_ones() as usize + 1] += 1;
+        }
+        for d in 1..start.len() {
+            start[d] += start[d - 1];
+        }
+        let mut cols = vec![0 as Mono; all.len()];
+        let mut index: FxMap<Mono, usize> = FxMap::default();
+        index.reserve(all.len());
+        for &m in all.iter().rev() {
+            let slot = &mut start[max_deg - m.count_ones() as usize];
+            cols[*slot] = m;
+            index.insert(m, *slot);
+            *slot += 1;
+        }
         let words = cols.len().div_ceil(64);
         let mut matrix: Vec<Vec<u64>> = eqs
             .iter()
