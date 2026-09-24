@@ -441,11 +441,13 @@ fn run_cells(cells: &[Cell], tier: &str, engines: &[String], budget: f64, emit: 
                 }
             }
             let chained_vars = c.m as u32 * fb.ell + (c.m as u32 - 2) * c.n;
-            if engine == "wide" && chained_vars as usize > MAX_WIDE_VARS {
+            // Past MAX_WIDE_VARS the wide engine recurses on a chain
+            // suffix; it needs at least one link of ℓ + n unknowns to fit.
+            if engine == "wide" && (fb.ell + c.n) as usize > MAX_WIDE_VARS {
                 let row = serde_json::json!({
                     "tier": format!("{:?}", c.tier), "curve": curve, "n": c.n, "ell": fb.ell,
                     "m": c.m, "vars": chained_vars, "engine": engine,
-                    "status": format!("system not buildable: {chained_vars} variables > {MAX_WIDE_VARS}"),
+                    "status": format!("not buildable: one link needs {} variables > {MAX_WIDE_VARS}", fb.ell + c.n),
                 });
                 report(&row, emit, "FINAL ");
                 rows.push(row);

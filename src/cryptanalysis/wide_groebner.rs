@@ -324,16 +324,48 @@ impl WideSystem {
         })
     }
 
-    /// Summand `i`'s abscissa under an assignment of the summand bits.
-    fn summand_x(&self, basis: &[F2mElement], bits: u128, i: usize, n: u32) -> F2mElement {
-        let mut acc = 0u64;
-        for t in 0..self.ell {
-            if bits >> (i * self.ell + t) & 1 == 1 {
-                acc ^= basis[t].raw_bits().first().copied().unwrap_or(0);
-            }
+    /// The last `k` links of an `m`-point chain, `m > k`, starting from a
+    /// **free** abscissa: `w_0` stands for `x(P_1 + … + P_{m−k})`, and the
+    /// links are `S₃(w_0, y_1, w_1), …, S₃(w_{k−1}, y_k, x_R)`.  Summand
+    /// `y_i` owns variables `[(i−1)·ℓ, i·ℓ)`, then the `k` intermediates
+    /// `w_0 … w_{k−1}`: `k·(ℓ + n)` unknowns.  Every decomposition of the
+    /// target satisfies it, whatever the first `m − k` summands are, so
+    /// it prunes soundly; it cannot finish a decomposition on its own.
+    pub fn build_suffix(
+        basis: &[F2mElement],
+        x_r: &F2mElement,
+        b: &F2mElement,
+        k: usize,
+        st: &FieldStructure,
+    ) -> Option<Self> {
+        if k == 0 || st.n > 64 {
+            return None;
         }
-        let positions: Vec<u32> = (0..n).filter(|&k| acc >> k & 1 == 1).collect();
-        F2mElement::from_bit_positions(&positions, n)
+        let n = st.n;
+        let ell = basis.len();
+        let n_vars = k * (ell + n as usize);
+        if n_vars > MAX_WIDE_VARS {
+            return None;
+        }
+        let ys: Vec<WSym> = (0..k)
+            .map(|i| WSym::from_subspace_vars(basis, i * ell, n))
+            .collect();
+        let ws: Vec<WSym> = (0..k)
+            .map(|i| WSym::from_free_vars(k * ell + i * n as usize, n))
+            .collect();
+        let target = WSym::constant(x_r, n);
+        let mut equations = Vec::new();
+        for i in 0..k {
+            let next = if i + 1 < k { &ws[i + 1] } else { &target };
+            equations.extend(s3(&ws[i], &ys[i], next, b, st));
+        }
+        equations.retain(|p| !p.is_zero());
+        Some(Self {
+            equations,
+            n_vars,
+            ell,
+            m: k,
+        })
     }
 }
 
@@ -470,6 +502,13 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
 /// Decompose `target` into `m` factor-base points through the wide
 /// chained system; `None` with `stats.exhausted` unset is a complete
 /// search that found nothing, with it set says nothing.
+///
+/// When the whole chain needs more than [`MAX_WIDE_VARS`] unknowns, the
+/// search takes the largest `k` trailing summands whose chain suffix
+/// ([`WideSystem::build_suffix`]) fits, branches on those with the suffix
+/// as the pruning system, and at each of its leaves decomposes the
+/// remainder `target − ΣP_i` into the other `m − k` summands, by the
+/// same function.
 #[allow(clippy::too_many_arguments)]
 pub fn wide_groebner_decompose(
     kc: &KoblitzCurve,
@@ -481,23 +520,200 @@ pub fn wide_groebner_decompose(
     node_budget: usize,
 ) -> (Option<Vec<usize>>, WideStats) {
     let mut stats = WideStats::default();
+    let opts = SearchOptions::from_env();
+    let found = decompose_rec(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        node_budget,
+        &opts,
+        &mut stats,
+    );
+    (found, stats)
+}
+
+/// The search's switches, each a same-binary control read once per call.
+#[derive(Clone, Copy)]
+struct SearchOptions {
+    /// Only summands in non-decreasing order (`KIC_WIDE_ORDER=0` off).
+    order: bool,
+    /// Each summand from its highest coordinate (`KIC_WIDE_BRANCH=low` off).
+    high_first: bool,
+    /// Look the last summand up instead of branching (`KIC_WIDE_FINISH=0` off).
+    finish: bool,
+    /// Widest system built in one piece; above it the suffix recursion
+    /// takes over.  [`MAX_WIDE_VARS`] except in tests, which lower it to
+    /// reach the recursion on small curves.
+    max_vars: usize,
+}
+
+impl SearchOptions {
+    fn from_env() -> Self {
+        Self {
+            order: std::env::var("KIC_WIDE_ORDER").as_deref() != Ok("0"),
+            high_first: std::env::var("KIC_WIDE_BRANCH").as_deref() != Ok("low"),
+            finish: std::env::var("KIC_WIDE_FINISH").as_deref() != Ok("0"),
+            max_vars: MAX_WIDE_VARS,
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn decompose_rec(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    node_budget: usize,
+    opts: &SearchOptions,
+    stats: &mut WideStats,
+) -> Option<Vec<usize>> {
+    if m == 0 {
+        return (*target == BinaryPoint::Infinity).then(Vec::new);
+    }
+    if m == 1 {
+        return index_of.get(&point_key(target)).map(|&i| vec![i]);
+    }
     let x_r = match target {
         BinaryPoint::Affine { x, .. } => x.clone(),
-        BinaryPoint::Infinity => return (None, stats),
+        BinaryPoint::Infinity => return None,
     };
-    let Some(sys) = WideSystem::build(&fb.subspace_basis, &x_r, &kc.curve.b, m, st) else {
-        return (None, stats);
+    let ell = fb.subspace_basis.len();
+    let full_vars = m * ell + (m - 2) * st.n as usize;
+    let whole = if full_vars <= opts.max_vars {
+        WideSystem::build(&fb.subspace_basis, &x_r, &kc.curve.b, m, st)
+    } else {
+        None
     };
-    let summand_vars = m * sys.ell;
-    // Summands are unordered, so every decomposition is also a root with
-    // its abscissae in non-decreasing order (as coordinate vectors over
-    // the basis, highest coordinate first): searching only those skips up
-    // to m! copies of every subtree.  `KIC_WIDE_ORDER=0` searches them
-    // all, as a same-binary control.
-    let order = std::env::var("KIC_WIDE_ORDER").as_deref() != Ok("0");
-    let high_first = std::env::var("KIC_WIDE_BRANCH").as_deref() != Ok("low");
-    let finish = std::env::var("KIC_WIDE_FINISH").as_deref() != Ok("0");
-    // Depth-first over summand bits; each frame carries its own system.
+    if let Some(sys) = whole {
+        // The whole chain fits: its leaves finish the decomposition.
+        let ell = sys.ell;
+        let finish_head = opts.finish.then_some(m - 1);
+        return search(
+            &sys,
+            m,
+            finish_head,
+            node_budget,
+            opts,
+            stats,
+            &mut |values, is_head, _stats| {
+                let count = if is_head { m - 1 } else { m };
+                let xs: Vec<F2mElement> = (0..count)
+                    .map(|i| summand_x(&fb.subspace_basis, ell, values, i, kc.n))
+                    .collect();
+                if is_head {
+                    finish_last(kc, fb, index_of, &xs, target)
+                } else {
+                    lift_candidate(kc, fb, index_of, &xs, target)
+                }
+            },
+        );
+    }
+    // Too wide: prune with the longest chain suffix that fits.
+    let k = (1..m - 1)
+        .rev()
+        .find(|&k| k * (ell + st.n as usize) <= opts.max_vars)?;
+    let sys = WideSystem::build_suffix(&fb.subspace_basis, &x_r, &kc.curve.b, k, st)?;
+    search(
+        &sys,
+        k,
+        None,
+        node_budget,
+        opts,
+        stats,
+        &mut |values, _is_head, stats| {
+            // The k trailing summands are known up to sign: for each
+            // choice of base points, decompose what is left.
+            let choices: Vec<Vec<usize>> = (0..k)
+                .map(|i| {
+                    let x = summand_x(&fb.subspace_basis, ell, values, i, kc.n);
+                    points_with_x(&kc.curve, &x)
+                        .iter()
+                        .filter_map(|p| index_of.get(&point_key(p)).copied())
+                        .collect()
+                })
+                .collect();
+            if choices.iter().any(Vec::is_empty) {
+                return None;
+            }
+            let mut pick = vec![0usize; k];
+            loop {
+                let chosen: Vec<usize> = (0..k).map(|i| choices[i][pick[i]]).collect();
+                let rest = chosen.iter().fold(target.clone(), |acc, &i| {
+                    kc.add(&acc, &negate(&fb.points[i]))
+                });
+                if let Some(mut head) =
+                    decompose_rec(kc, fb, index_of, st, &rest, m - k, node_budget, opts, stats)
+                {
+                    head.extend(chosen);
+                    return Some(head);
+                }
+                if stats.exhausted {
+                    return None;
+                }
+                // Next sign pattern.
+                let mut i = 0;
+                loop {
+                    if i == k {
+                        return None;
+                    }
+                    pick[i] += 1;
+                    if pick[i] < choices[i].len() {
+                        break;
+                    }
+                    pick[i] = 0;
+                    i += 1;
+                }
+            }
+        },
+    )
+}
+
+/// `−P` on a binary curve: `(x, x + y)`.
+fn negate(p: &BinaryPoint) -> BinaryPoint {
+    match p {
+        BinaryPoint::Affine { x, y } => BinaryPoint::Affine {
+            x: x.clone(),
+            y: x.add(y),
+        },
+        BinaryPoint::Infinity => BinaryPoint::Infinity,
+    }
+}
+
+/// Summand `i`'s abscissa under an assignment of the summand bits.
+fn summand_x(basis: &[F2mElement], ell: usize, bits: u128, i: usize, n: u32) -> F2mElement {
+    let mut acc = 0u64;
+    for t in 0..ell {
+        if bits >> (i * ell + t) & 1 == 1 {
+            acc ^= basis[t].raw_bits().first().copied().unwrap_or(0);
+        }
+    }
+    let positions: Vec<u32> = (0..n).filter(|&k| acc >> k & 1 == 1).collect();
+    F2mElement::from_bit_positions(&positions, n)
+}
+
+/// Depth-first over the summand bits of `sys` (`count` summands), each
+/// node linearised.  A node whose first `head` summands are all fixed is
+/// handed to `leaf` with `is_head = true` (the last-summand shortcut); a
+/// node with every summand fixed, with `false`.  `leaf` returning `Some`
+/// ends the search.
+#[allow(clippy::type_complexity)]
+fn search(
+    sys: &WideSystem,
+    count: usize,
+    head: Option<usize>,
+    node_budget: usize,
+    opts: &SearchOptions,
+    stats: &mut WideStats,
+    leaf: &mut dyn FnMut(u128, bool, &mut WideStats) -> Option<Vec<usize>>,
+) -> Option<Vec<usize>> {
+    let ell = sys.ell;
+    let summand_vars = count * ell;
     struct Frame {
         eqs: Vec<WPoly>,
         subs: Vec<(usize, WPoly)>,
@@ -510,13 +726,21 @@ pub fn wide_groebner_decompose(
         fixed: 0,
         values: 0,
     }];
+    let head_mask = head.map(|h| {
+        let bits = h * ell;
+        if bits >= 128 {
+            u128::MAX
+        } else {
+            (1u128 << bits) - 1
+        }
+    });
     while let Some(mut f) = stack.pop() {
         if stats.nodes >= node_budget {
             stats.exhausted = true;
-            return (None, stats);
+            return None;
         }
         stats.nodes += 1;
-        if !linearise(&mut f.eqs, &mut stats, &mut f.subs) {
+        if !linearise(&mut f.eqs, stats, &mut f.subs) {
             stats.refuted += 1;
             continue;
         }
@@ -531,47 +755,38 @@ pub fn wide_groebner_decompose(
                 }
             }
         }
-        if order && !summands_ordered(fixed, values, m, sys.ell) {
+        if opts.order && !summands_ordered(fixed, values, count, ell) {
             stats.refuted += 1;
             continue;
         }
+        if let Some(mask) = head_mask {
+            if fixed & mask == mask {
+                stats.leaves += 1;
+                if let Some(found) = leaf(values, true, stats) {
+                    return Some(found);
+                }
+                if stats.exhausted {
+                    return None;
+                }
+                continue;
+            }
+        }
         // Each summand from its highest coordinate down, so the order
         // test above decides as early as it can.
-        // Last-summand shortcut: once the first m − 1 summands are fixed
-        // the last is determined up to the signs of the others, so it is
-        // looked up in the base directly (at most 2^(m−1) additions)
-        // instead of branching over its ℓ bits.  `KIC_WIDE_FINISH=0`
-        // branches to the leaves, as a same-binary control.
-        let head = (m - 1) * sys.ell;
-        let head_mask = if head == 128 {
-            u128::MAX
-        } else {
-            (1u128 << head) - 1
-        };
-        if finish && m >= 2 && fixed & head_mask == head_mask {
-            stats.leaves += 1;
-            let xs: Vec<F2mElement> = (0..m - 1)
-                .map(|i| sys.summand_x(&fb.subspace_basis, values, i, kc.n))
-                .collect();
-            if let Some(idxs) = finish_last(kc, fb, index_of, &xs, target) {
-                return (Some(idxs), stats);
-            }
-            continue;
-        }
-        let next = if high_first {
-            (0..m)
-                .flat_map(|i| (0..sys.ell).rev().map(move |t| i * sys.ell + t))
+        let next = if opts.high_first {
+            (0..count)
+                .flat_map(|i| (0..ell).rev().map(move |t| i * ell + t))
                 .find(|&v| fixed >> v & 1 == 0)
         } else {
             (0..summand_vars).find(|&v| fixed >> v & 1 == 0)
         };
         let Some(v) = next else {
             stats.leaves += 1;
-            let xs: Vec<F2mElement> = (0..m)
-                .map(|i| sys.summand_x(&fb.subspace_basis, values, i, kc.n))
-                .collect();
-            if let Some(idxs) = lift_candidate(kc, fb, index_of, &xs, target) {
-                return (Some(idxs), stats);
+            if let Some(found) = leaf(values, false, stats) {
+                return Some(found);
+            }
+            if stats.exhausted {
+                return None;
             }
             continue;
         };
@@ -592,7 +807,7 @@ pub fn wide_groebner_decompose(
             });
         }
     }
-    (None, stats)
+    None
 }
 
 /// With the abscissae of all but the last summand known, find the last:
@@ -635,14 +850,7 @@ fn finish_last(
             return false;
         }
         for &i in &choices[depth] {
-            let p = &fb.points[i];
-            let neg = match p {
-                BinaryPoint::Affine { x, y } => BinaryPoint::Affine {
-                    x: x.clone(),
-                    y: x.add(y),
-                },
-                BinaryPoint::Infinity => BinaryPoint::Infinity,
-            };
+            let neg = negate(&fb.points[i]);
             chosen.push(i);
             if walk(
                 kc,
@@ -787,6 +995,42 @@ mod tests {
         assert!(!summands_ordered(0b100_100, 0b000_100, 2, ell));
         // Top bit of the later summand unfixed: undecided, not refused.
         assert!(summands_ordered(0b000_111, 0b000_101, 2, ell));
+    }
+
+    #[test]
+    fn the_suffix_recursion_finds_planted_decompositions() {
+        // Force the recursion on a small curve by lowering the one-piece
+        // cap below the whole chain: at n = 9, m = 4 the chain has
+        // 4l + 18 unknowns, the suffix k(l + 9).
+        for (a, n, m) in [(0u8, 9u32, 4usize), (0, 9, 5), (1, 17, 3)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+            let index_of = fb.index_map();
+            let ell = fb.subspace_basis.len();
+            let opts = SearchOptions {
+                max_vars: m * ell + (m - 2) * n as usize - 1,
+                ..SearchOptions::from_env()
+            };
+            let mut rng = StdRng::seed_from_u64(91 + n as u64 + m as u64);
+            for _ in 0..4 {
+                let t = (0..m).fold(BinaryPoint::Infinity, |acc, _| {
+                    kc.add(&acc, &fb.points[rng.gen_range(0..fb.points.len())])
+                });
+                if t == BinaryPoint::Infinity {
+                    continue;
+                }
+                let mut stats = WideStats::default();
+                let idxs =
+                    decompose_rec(&kc, &fb, &index_of, &st, &t, m, 1 << 22, &opts, &mut stats)
+                        .unwrap_or_else(|| panic!("K_{a}/2^{n} m={m}: missed, {stats:?}"));
+                assert_eq!(idxs.len(), m);
+                let sum = idxs
+                    .iter()
+                    .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
+                assert_eq!(sum, t, "K_{a}/2^{n} m={m}");
+            }
+        }
     }
 
     #[test]
