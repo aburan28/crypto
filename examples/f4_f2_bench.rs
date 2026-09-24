@@ -12,7 +12,7 @@
 
 use crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2;
 use crypto_lib::cryptanalysis::pq_f4_f2::groebner_basis_f4;
-use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
+use crypto_lib::cryptanalysis::pq_groebner_f2::{groebner_basis_f2_stats, F2BoolMono, F2BoolPoly};
 use serde_json::json;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -99,6 +99,38 @@ fn main() {
                 "build_ms": st.build_ns as f64 / 1e6, "eliminate_ms": st.eliminate_ns as f64 / 1e6,
                 "word_xors": st.word_xors, "divisor_tests": st.divisor_tests,
                 "steps": st.steps, "basis_len": st.basis_len, "basis_fp": format!("{:016x}", h.finish()),
+            })
+        );
+    }
+    // Buchberger (the reference engine) on the smaller systems
+    for &(n, m) in &[(8usize, 8usize), (10, 10), (12, 12), (12, 16), (14, 14)] {
+        if n > max_n {
+            continue;
+        }
+        let sys = system(n, m, 0x2545_f491_4f6c_dd1d ^ ((n * 64 + m) as u64));
+        let mut walls = Vec::new();
+        let mut last = None;
+        for _ in 0..repeats {
+            let (gb, st) = groebner_basis_f2_stats(sys.clone(), n);
+            walls.push(st.wall_ns as f64 / 1e6);
+            last = Some((gb, st));
+        }
+        let (gb, st) = last.unwrap();
+        let mut h = DefaultHasher::new();
+        for p in &gb {
+            for t in &p.terms {
+                t.mask.hash(&mut h);
+            }
+            u64::MAX.hash(&mut h);
+        }
+        println!(
+            "{}",
+            json!({
+                "case": format!("bb_n{n}_m{m}"), "wall_ms": median(walls),
+                "mono_ops": st.mono_ops, "reduction_steps": st.reduction_steps,
+                "spolys": st.spolys, "pairs_chain_skipped": st.pairs_chain_skipped,
+                "field_pairs": st.field_pairs, "basis_len": st.basis_len,
+                "basis_fp": format!("{:016x}", h.finish()),
             })
         );
     }
