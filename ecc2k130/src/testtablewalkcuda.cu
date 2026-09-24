@@ -88,6 +88,11 @@ int main() {
         in[i].hist = ECC_HIST_EMPTY;
         if (i % 4 == 1) in[i].hist = eccHistPush(ECC_HIST_EMPTY, rawTags[i] ^ ECC_TAG_EPS);
         if (i % 8 == 2) in[i].hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, 0x0123u ^ ECC_TAG_EPS), rawTags[i] ^ ECC_TAG_EPS), 0x0123u);
+        // The rule of WALK-CONSTANT.md section 11: undoing the fourth-last step,
+        // and closing a tau-relation with the last three.
+        if (i % 8 == 3) in[i].hist = eccHistPush(eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, rawTags[i] ^ ECC_TAG_EPS), 0x0123u), 0x0456u), 0x0789u);
+        if (i % 8 == 5) in[i].hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, eccTagAdvanceK(rawTags[i], 2, 131)), eccTagAdvanceK(rawTags[i], 1, 131)), rawTags[i]);
+        if (i % 8 == 6) in[i].hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, eccTagAdvanceK(rawTags[i], 3, 131) ^ ECC_TAG_EPS), rawTags[i]), eccTagAdvanceK(rawTags[i], 1, 131) ^ ECC_TAG_EPS);
     }
     In *dIn; Out *dOut;
     checked(cudaMalloc(&dIn, N * sizeof(In)));
@@ -125,7 +130,7 @@ int main() {
     std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, addend words %d\n", badK, badPivot, badEps, badTag, badAdd);
     std::printf("  branches %d, shared bytes %zu, addend global %d\n",
                 TW_H, TW_SHARED_BYTES, ECC_TABLE_ADDEND_GLOBAL);
-    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= N / 4;
+    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= 5 * N / 8;   // i % 8 in {1, 2, 3, 5, 6} must all fire
     std::printf("%s\n", ok ? "PASS" : "FAIL");
     return ok ? 0 : 1;
 }

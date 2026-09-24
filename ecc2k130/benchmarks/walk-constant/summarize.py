@@ -175,3 +175,88 @@ for label, table_loss, sigma_loss in (
     vals = [q * (rs / rt) * lt / sigma_loss for _, rs, rt in PAIRED for q in (ratio_lo, ratio_hi) for lt in losses]
     print(f"  {label}: table loss x{losses[0]:.3f} (x{losses[1]:.3f} scaled), sigma loss x{sigma_loss:.3f}; "
           f"table / sigma = {min(vals):.2f} - {max(vals):.2f}")
+
+
+# ---------------------------------------------------------------------------
+# Round 2 (WALK-CONSTANT.md section 11): the table walk under the extended
+# cycle rule, v2.  matrix-v3 is the emulation under v2, device-v3 the device's
+# own walk (whose rule is v2 since that section), merge.jsonl the merge
+# parting under both rules.  Everything above is rule v1 and stays as it was.
+v3 = load("matrix-v3.jsonl")
+d3 = load("device-v3.jsonl")
+merges = load("merge.jsonl")
+
+print()
+print("Round 2: the table walk under the extended rule (v2), against the same rows under v1:")
+print("| n | branches | H | harness | W | trials | c (v2) | ± | c (v1) | ± | difference / SE | "
+      "pairwise returns (v1 count) | τ-relation returns (v1 count) | rule fired per step |")
+print("|---:|---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
+old_rows = [r for r in v2 + d2 if r["walk"] in ("table", "device-table") and not r.get("fixed_mapping")]
+for r in sorted(v3 + d3, key=lambda r: (r["n"], r["dist"], r["branches"], r["walk"])):
+    if r["walk"] not in ("table", "device-table") or r.get("fixed_mapping"):
+        continue
+    same = [o for o in old_rows if (o["n"], o["dist"], o["branches"], o["walk"], o["walks"]) ==
+            (r["n"], r["dist"], r["branches"], r["walk"], r["walks"])]
+    old = same[0] if same else None
+    where = "device" if r["walk"].startswith("device") else "emulation"
+    pair = sum(r["fruitless"].values())
+    rel = sum(r["relation"].values())
+    diff = (f"{(r['c'] - old['c']) / sqrt(r['c_se'] ** 2 + old['c_se'] ** 2):+.1f}" if old else "–")
+    oldc = f"{old['c']:.4f} | {old['c_se']:.4f}" if old else "– | –"
+    print(f"| {r['n']} | {r['dist']} | {r['branches']} | {where} | {r['walks']} | {r['trials']:,} | {r['c']:.4f} | "
+          f"{r['c_se']:.4f} | {oldc} | {diff} | {pair} ({r['fruitless_predicted'] * r['steps']:.1f}) | "
+          f"{rel} ({r['relation_predicted'] * r['steps']:.1f}) | {r['cycle_rule'] / r['steps']:.2e} |")
+seen_v3 = sum(sum(r["fruitless"].values()) + sum(r["relation"].values()) for r in v3 + d3
+              if r["walk"] in ("table", "device-table"))
+count_v3 = sum((r["fruitless_predicted"] + r["relation_predicted"]) * r["steps"] for r in v3 + d3
+               if r["walk"] in ("table", "device-table"))
+steps_v3 = sum(r["steps"] for r in v3 + d3 if r["walk"] in ("table", "device-table"))
+print(f"formal returns under v2: {seen_v3} in {steps_v3:,} table steps, where rule v1's count predicts "
+      f"{count_v3:.0f}")
+c_table_v2, se_table_v2, sel_v2 = 0.0, 0.0, []
+sel_v2 = [r for r in v3 + d3 if r["walk"] in ("table", "device-table") and r["dist"] == "ecc2k130"
+          and r["branches"] == 8 and not r.get("fixed_mapping")]
+if sel_v2:
+    w = [1 / r["c_se"] ** 2 for r in sel_v2]
+    c_table_v2 = sum(wi * r["c"] for wi, r in zip(w, sel_v2)) / sum(w)
+    se_table_v2 = sqrt(1 / sum(w))
+    print(f"table walk under v2, ECC2K-130 branches, H = 8, pooled: c = {c_table_v2:.4f} ± {se_table_v2:.4f} "
+          f"over {len(sel_v2)} rows (n = {sorted(set(r['n'] for r in sel_v2))})")
+
+print()
+print("Merge parting: two walks meet at one point with different pasts; parted within 16 steps:")
+print("| n | branches | rule | harness | merges | parted | rate | ± | predicted | by step (1, 2, 3, 4) |")
+print("|---:|---|---|---|---:|---:|---:|---:|---:|---|")
+for r in sorted(merges, key=lambda r: (r["n"], r["dist"], r["rule"], r["walk"])):
+    where = "device" if r["walk"].startswith("device") else "emulation"
+    steps4 = ", ".join(str(x) for x in r["parted_by_step"][:4])
+    print(f"| {r['n']} | {r['dist']} | {r['rule']} | {where} | {r['merges']:,} | {r['parted']:,} | "
+          f"{r['parted_rate']:.3e} | {r['parted_se']:.1e} | {r['predicted']:.3e} | {steps4} |")
+ratios = {}
+for r in merges:
+    ratios.setdefault(r["rule"], []).append(r["parted_rate"] / r["predicted"])
+for rule, xs in sorted(ratios.items()):
+    print(f"rule {rule}: measured / predicted over {len(xs)} rows: {min(xs):.3f} - {max(xs):.3f}")
+q131 = s2 / 262
+delta_v1, delta_v2 = 2 * q131, 20 * q131
+print(f"at n = 131, H = 8 (q = sum p^2 / 2n = {q131:.3e}): merges parted {delta_v1:.2%} under v1, {delta_v2:.2%} "
+      f"under v2; iteration factor 1 + delta / 2 = {1 + delta_v1 / 2:.4f} and {1 + delta_v2 / 2:.4f}")
+
+# Cost to solve with the extended rule, dpWeight 32, maxIters 2^32 (both walks
+# at the new guard).  The table walk's trap loss under v2 is bounded from the
+# enumeration: nothing survives at four determined tags or fewer, so the
+# residual starts at order (2n)^-5; even a thousand such patterns would trap
+# a fraction below 1e-5 of trails, a loss under x1.0002 at twelve trail
+# lengths.  The GPU rate of the v2 kernel is not measured here; the rows use
+# the v1 kernel's paired rates, so they are projections until it is.
+guard = 2 ** 32
+loss_sigma = trap_cost.overhead(0.0, th, guard)
+trap_bound = 1000 * q131 ** 5 / th
+loss_table_v2 = trap_cost.overhead(1000 * q131 ** 5, th, guard)
+if c_table_v2:
+    print()
+    print(f"cost to solve, table (v2) / sigma, dpWeight 32, maxIters 2^32: sigma loss x{loss_sigma:.5f}, table trap "
+          f"loss <= x{loss_table_v2:.5f} (bound; trapped fraction <= {trap_bound:.1e}), merge factor x{1 + delta_v2 / 2:.4f}")
+    vals = [c_table_v2 * (1 + delta_v2 / 2) / cs * (rs / rt) * loss_table_v2 / loss_sigma
+            for _, rs, rt in PAIRED for cs in (sigma_lo, sigma_hi)]
+    print(f"  table / sigma = {min(vals):.2f} - {max(vals):.2f} (projection: the v1 kernel's paired rates)")

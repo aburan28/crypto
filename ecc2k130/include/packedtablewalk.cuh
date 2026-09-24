@@ -213,7 +213,7 @@ TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
     int h = (hw >> 1) & (TW_H - 1);
     unsigned tag = eccTag(h, k, eps);
     const unsigned long long old = *hist;
-    while (eccTagFruitless(tag, old)) {
+    while (eccTagFruitless(tag, old, 131)) {
         h = (h + 1) & (TW_H - 1);
         tag = eccTag(h, k, eps);
     }

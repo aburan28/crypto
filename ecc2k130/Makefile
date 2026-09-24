@@ -480,6 +480,14 @@ test-shared-sigma-cuda:
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(DEFS) src/testsharedsigmacuda.cu -o build/test-shared-sigma-cuda
 	./build/test-shared-sigma-cuda
 
+# The table walk's cycle rule on its own: every tau-relation 4-cycle and every
+# pairwise cycle up to 8 steps refused, the rule a class function
+# (WALK-CONSTANT.md section 11).  No curve, a second.
+test-cycle-rule:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -Wall -Wno-unused-function src/testcyclerule.cpp -o build/test-cycle-rule
+	./build/test-cycle-rule
+
 # Device primitives of the table walk against the host reference; needs a GPU.
 # The same probe on the host, for both selection layouts, so a layout change
 # is held to the reference before any GPU sees it.
@@ -524,7 +532,7 @@ test-logic:
 	$(CXX) -O2 -std=c++17 $(ARCHFLAGS) -Wno-unknown-pragmas src/testlogic.cpp -o build/test-logic
 	./build/test-logic
 
-test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host check-verilog ecc2k130-cpu
+test: check-cli check-cycles test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-timing test-logic test-table-walk-host test-cycle-rule check-verilog ecc2k130-cpu
 	./ecc2k130-cpu --test
 
 # End-to-end: recover planted discrete logarithms on the small curves, through
@@ -855,6 +863,6 @@ clean:
 	rm -f build/test-packed-cuda build/test-packed-storage-cuda
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
-	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16
+	rm -f build/walk-constant-host-h8 build/walk-constant-host-h16 build/test-cycle-rule
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host walk-constant test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-cycle-rule walk-constant test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean

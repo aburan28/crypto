@@ -927,6 +927,20 @@ static void testOrbit(Rng &rng, const Solver<Cfg> &sol) {
         if (R::eq(fa, f)) okFrob = false;   // the rule did not fire
         if (!R::eq(sol.walk.step(pc, R::weight(pc.x), &g1, 0, 0, ell, sol.spow), R::frob(fa, c))) okFrob = false;
         if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &g2, 0, 0, ell, sol.spow), R::neg(fa))) okNeg = false;
+        // The same with a history that closes a tau-relation (WALK-CONSTANT.md
+        // section 11): the last three steps are the tag itself and the two
+        // phases after it on the same branch, so sigma^2 + sigma + 2 = 0 would
+        // return the walk.  The rule must refuse it for R, sigma^c(R) and -R.
+        auto tau = [&](u64 h) {
+            const unsigned t = unsigned(h & 0xFFFF);
+            return eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, eccTagAdvanceK(t, 2, Cfg::M)),
+                                           eccTagAdvanceK(t, 1, Cfg::M)), t);
+        };
+        u64 r0 = tau(h0), r1 = tau(h1), r2 = tau(h2);
+        const typename R::Point fr = sol.walk.step(p, hw, &r0, 0, 0, ell, sol.spow);
+        if (R::eq(fr, f)) okFrob = false;   // the tau test did not fire
+        if (!R::eq(sol.walk.step(pc, R::weight(pc.x), &r1, 0, 0, ell, sol.spow), R::frob(fr, c))) okFrob = false;
+        if (!R::eq(sol.walk.step(pn, R::weight(pn.x), &r2, 0, 0, ell, sol.spow), R::neg(fr))) okNeg = false;
         if (R::weight(pc.x) != hw) okWeight = false;
         if (R::trace(p.x) != 0) okTrace = false;
     }
