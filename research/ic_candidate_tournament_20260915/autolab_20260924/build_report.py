@@ -107,8 +107,8 @@ def main():
         '72 retained rejections and an earlier reporting failure are preserved. No promoted winner, '
         'operation-count result, ECC2K-130 gain or global-optimum claim. '
         'Native wall times have uncontrolled affinity, OS caches and host activity; A/A variation is recorded.</p>',
-        '<p>Source: <a href="../research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.json">'
-        'frozen measurements</a> and <a href="../research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.md">'
+        '<p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.json">'
+        'frozen measurements</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.md">'
         'report and limits</a>. S and ratios to an operation floor are unmeasured. '
         'Classification: accounting and integration engineering.</p>']
     def fmt(v):
