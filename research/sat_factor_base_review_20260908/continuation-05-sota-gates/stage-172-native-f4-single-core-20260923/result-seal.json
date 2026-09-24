@@ -1,0 +1,84 @@
+{
+  "inventory": [
+    {
+      "bytes": 1687,
+      "path": "RESULTS.md",
+      "sha256": "9d48e7384702105b3d10719ebd8a93fa0a5684234b41e1465121a75cee67a4c1"
+    },
+    {
+      "bytes": 12168,
+      "path": "compose_stage172.py",
+      "sha256": "94de34ed7ff1ce89a0852905476a05e28564f24c1b320f0d1610bf875d4baca3"
+    },
+    {
+      "bytes": 25451,
+      "path": "result.json",
+      "sha256": "9bd040e1e9ec3dca070f1fe3f0120c9fc539d3fef7323b9aa95dad5684f05524"
+    },
+    {
+      "bytes": 548,
+      "path": "runs/candidate/metrics.json",
+      "sha256": "bd89cb45621e89358b939e947360af74537c069ce0e877ee0a986b00f2c27405"
+    },
+    {
+      "bytes": 0,
+      "path": "runs/candidate/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6562,
+      "path": "runs/candidate/stdout.json",
+      "sha256": "2f8c76d04a430a96e938ce1972a1c19027787702ad7050a0b5405b23567ebcd4"
+    },
+    {
+      "bytes": 549,
+      "path": "runs/control/metrics.json",
+      "sha256": "269cc5d977292c555e2a182327fa1efae4a8a53088806242be7dcfb98680a688"
+    },
+    {
+      "bytes": 0,
+      "path": "runs/control/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6465,
+      "path": "runs/control/stdout.json",
+      "sha256": "4abe1db0aa357904b1f9d119d061732959fce3f41f56d7eac4d32ff4300300d6"
+    },
+    {
+      "bytes": 530,
+      "path": "runs/direct-mitm/metrics.json",
+      "sha256": "b28fecf9b08f70bfa488b38241188c699755054b7d86714022e1a9da6720ad18"
+    },
+    {
+      "bytes": 0,
+      "path": "runs/direct-mitm/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1261,
+      "path": "runs/direct-mitm/stdout.json",
+      "sha256": "521f7b622ce3bfe975225f280f9bcc754dbd35b14357030fe82a90e530a45ef8"
+    },
+    {
+      "bytes": 1374,
+      "path": "seal_stage172.py",
+      "sha256": "558b9077a3db5392217f1793f64abc6475b498abb6e02b039c003a67fa408e24"
+    },
+    {
+      "bytes": 650,
+      "path": "verification.json",
+      "sha256": "14aa0fb6973cc13cbd21dfa07cdc79a5dd81874546001ce072721f0e763a6456"
+    },
+    {
+      "bytes": 5450,
+      "path": "verify_stage172.py",
+      "sha256": "ced089a282bb762cd61f77735960ac57f9f2e1ca785c3a109af3ca35162ed932"
+    }
+  ],
+  "inventory_sha256": "09579257d5cfcac132fa3be8b4927d3cb8616e0f9ced852a884c86385a0da361",
+  "result_sha256": "9bd040e1e9ec3dca070f1fe3f0120c9fc539d3fef7323b9aa95dad5684f05524",
+  "schema": "koblitz_stage172_native_f4_single_core_seal.v1",
+  "seal_payload_sha256": "84b6ca6cf9de633d8c31145417f6c0311579e8d74a4b0397251ba10dcc357968",
+  "status": "stage172_native_f4_single_core_result_frozen"
+}

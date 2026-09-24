@@ -1,0 +1,22 @@
+{
+  "artifact_receipts_verified": 9,
+  "checks": {
+    "accounting": true,
+    "artifacts": true,
+    "claim_boundary": true,
+    "dense_mode_exercised": true,
+    "direct_terminal": true,
+    "exact_f4_terminals": true,
+    "measured_single_core_improvement": true,
+    "same_binary": true,
+    "same_scientific_report": true,
+    "schema": true,
+    "single_thread_contract": true,
+    "source_tree": true,
+    "status": true,
+    "valid_single_core_metrics": true
+  },
+  "result_sha256": "9bd040e1e9ec3dca070f1fe3f0120c9fc539d3fef7323b9aa95dad5684f05524",
+  "schema": "koblitz_stage172_native_f4_single_core_verification.v1",
+  "status": "pass"
+}
