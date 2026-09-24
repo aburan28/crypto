@@ -37,8 +37,8 @@ Record a machine-readable manifest and exact rerun command with each PR.
 | Priority | Decision and evidence | Next controlled experiment | Gate |
 | --- | --- | --- | --- |
 | 1 | Compact orbit extraction may buy feasible base size. PR #714 merged its producer and frozen replay into the feature branch: 12/12 fixed and 8/8 new natural targets had independent valid lifts per run, and repeated candidate witnesses were identical. It did not measure full rank, fresh RSS or rho; main still lacks the precursor source. | Promote the feature-branch producer to main through a reviewed dependency, then compare explicit table, rebuilt compact index, and reused compact index on one fixed base and target stream at cold batch sizes 1/8/32/full rank. Preserve exact small-field support/cancellation controls and charge construction. | Advance only if all lifts and rank/scalar controls pass and a memory-constrained useful base or measured cold batch break-even emerges. If reuse cannot amortize construction and the larger base gives no useful-rank gain, stop this branch. |
-| 2 | Selecting a base by relation trials ranked candidates badly: a tracked K1 comparison used 2,405,397 versus 53,895,954 elimination word XORs for degree-5 versus degree-8 bases across 12 verified runs each, a 22.41-fold solver-stage difference. This is not a full-cost ratio. | Pre-register a cost-per-new-rank base selector. Compare equal useful point cardinality, orbit count, and subgroup handling for ordinary orbit unions and any degree-263 native or pullback bases. Charge construction, unsuccessful targets, solver, lifting, rank and final recovery. | Continue only if held-out total cost to equal rank falls with valid answers; a trial-only or solver-only gain is diagnostic. |
-| 3 | PR #703 merged the exact-target degree-263 structural preflight and sampled oriented replay: 264 kernel lines, two horizontal loops, and 262 descending j-invariants. It did not measure PDP yield or implement exceptional-input transport. | Complete a generic normalized full-point Vélu map, including infinity, kernel and exceptional inputs; verify homomorphism, codomain, dual/composition and transported target order. Then blind-compare original, descendant-native and pullback bases at matched useful size. | Reject geometric selection if verified relation yield and total cost do not improve on held-out targets after map construction and cofactor costs. Do not extrapolate from the 262 descendant labels as independent trials. |
+| 2 | PR #716 froze and ran a degree-7 crater-edge proxy over F_(2^21) at 16 useful points per base and 512 paired targets. Original/transported had 131 hits and first full rank at attempt 135; descendant-native/pullback had 117 hits and rank at 202. Cold native field multiplications to verified rank were 360,907 versus 89,948 original (4.012×), including map construction and cofactor costs. All scalars/lifts verified. One toy stream gives no exact-target or rho claim. | Repeat with disjoint target streams and several equal-cardinality/equal-orbit bases before any selector, then test exact degree-263 native bases only after the same group/rank gates and dual-map checks. Charge field, construction, failed targets, solving, lifting, rank and final recovery. | Continue only if held-out total cost to equal verified rank falls; stop a selector if native benefit vanishes when geometry and base construction are charged. |
+| 3 | PR #703 established the exact-target degree-263 orientation structure (two horizontal loops, 262 descendant j-invariants); PR #717 merged a normalized full-point Vélu map with infinity, kernel and exceptional inputs, independent full-point replay and order checks. No descendant PDP yield or DLP advantage has been measured. | Verify the dual/composition on representative exact-target lines, then compare original, descendant-native and pullback bases on blind paired targets at matched useful size and orbit composition. Use PR #716's negative degree-7 result as a control, not an extrapolation. | Reject geometric selection if verified relation yield and total cost do not improve after map construction, cofactor and matrix-rank costs. Do not count Frobenius-equivalent kernels as independent trials. |
 | 4 | The new retrospective toy m=2 feature panel reran 716 cases from main: 640 natural and 76 planted. Affine row-span contradictions safely rejected 88/640 natural cases and retained all 111 hits; the double holdout by base and Frobenius target orbit rejected 4/55 and retained 13/13 hits. Charged confirmation field-multiplication ratio was 0.9415 and row-XOR ratio 0.9806. The rank priority t in W was inconsistent across fields and is rejected. This is a stage diagnostic, not an ECDLP gain. | Test the certified affine early exit on naturally sampled implicit-orbit and chained m=3 PDPs with cached per-base span, then measure first verified relation, failed work and independent row gain against the same producer without the screen. Only if complementary solvers show held-out headroom, test a charged portfolio. | Retain the safe screen only if matched total cost falls without losing useful relations. Do not train a rank selector on these toy cells; a selector needs a fresh orbit-held-out hindsight advantage over the best constant policy after feature cost and producer misses. |
 | 5 | Inherited F4 splitting has a strong stage-engineering signal, but native F4 terminal cases remain slower than matched direct MITM. F5 toy tests in PR #701 find no consistent certified-neighbor advantage. | Test adjacent-assignment and target-batch row-space reuse with exact inherited-ideal controls; benchmark first verified relation and exhaustive UNSAT separately. | Continue only if paired CPU/operation cost beats direct MITM on held-out systems, not merely a prior F4 version. |
 
@@ -50,14 +50,13 @@ Record a machine-readable manifest and exact rerun command with each PR.
    into that feature branch. Current main still lacks the producer file, so
    treat its stage comparison as feature-branch evidence until the precursor
    is reviewed and merged. Next measure fresh RSS and cold full-rank batches.
-2. PR #703 merged the degree-263 scope correction and replay with exact
-   source/seed hashes. Build the exceptional-case map before any claimed
-   descendant-base advantage.
-3. Run a paired, first-verified-relation pilot for equal-cardinality bases.
-   Keep n=7/9/13/17 morphology separate from subgroup difficulty: the
-   degree-17 sample has prime order 239 and cofactor 548, whereas degree-13
-   has prime order 2003 and cofactor 4. Use explicit cofactor clearing and
-   compare equal verified workloads.
+2. PR #717 merged the full-point oriented degree-263 map and exact-order
+   checks. Prove and replay the dual/composition on representative lines
+   before treating descendant transport as an attack primitive.
+3. PR #716's frozen degree-7 paired pilot reached verified rank but gave no
+   native-base advantage on its one toy stream. Repeat on disjoint target
+   streams and several bases matched in useful cardinality and orbit makeup;
+   retain all failed targets, cofactor work and matrix-rank costs.
 4. Only after the pilot passes correctness and shows headroom, run the
    pre-registered cold 1/8/32/full-rank cost panel and matched rho. The
    scoreboard and previous baseline move in the same PR as the measurement.
@@ -103,6 +102,11 @@ unowned speculative tasks.
   research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md.
 - Certified toy F5 neighbor comparison: PR #701.
 - Degree-263 structural preflight and representative replay: PR #703.
+- Full-point oriented Vélu transport with exceptional inputs and order checks:
+  merged PR #717.
+- Frozen degree-7 equal-useful-cardinality factor-base pilot: PR #716;
+  512 paired targets, all group lifts/scalars verified, native cold cost worse
+  on this one toy stream. This is a diagnostic, not exact-target evidence.
 - Toy PDP affine-screen grouped holdout: PR #706 contains the reproducible
   source, raw cases, charged native counters and decision.
 - Compact orbit producer and independent replay: PR #714 merged to
