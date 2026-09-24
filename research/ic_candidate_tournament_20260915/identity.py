@@ -100,6 +100,27 @@ def base_points(report, c):
     return points
 
 
+def subgroup_orbits(points, c):
+    """Partition by the actual group action, including partially supplied orbits.
+
+    On these F2-defined curves Frobenius and negation preserve r-torsion.
+    Check one point of each regenerated orbit instead of repeating a scalar
+    multiplication and orbit expansion for all 2*n images of the same point.
+    """
+    remaining = set(points)
+    representatives = set()
+    while remaining:
+        p = min(remaining)
+        require(c.mul(p, c.r) is None, 'non-subgroup factor-base point')
+        orbit = set()
+        for _ in range(c.n):
+            orbit.update((p, c.neg(p)))
+            p = c.frob(p)
+        representatives.add(min(orbit))
+        remaining.difference_update(orbit)
+    return representatives
+
+
 def factor_base_inventory(report, fixture):
     """Count distinct usable points BEFORE folding; keep raw geometry separately.
 
@@ -113,27 +134,14 @@ def factor_base_inventory(report, fixture):
     require(convention in ('representative', 'cofactor'), 'unknown column convention')
     projected = [c.mul(p, c.h) if convention == 'cofactor' else p for p in points]
     usable = set(projected) - {None}
-    require(usable and all(c.mul(p, c.r) is None for p in usable),
-            'base has no usable points or contains non-subgroup points')
-    representatives = set()
-    for p in usable:
-        orbit = []
-        for _ in range(c.n):
-            orbit.extend((p, c.neg(p)))
-            p = c.frob(p)
-        representatives.add(min(orbit))
+    require(usable, 'base has no usable points')
+    representatives = subgroup_orbits(usable, c)
     columns = natural(report['columns'], 'column count', positive=True)
     require(columns == len(representatives), 'claimed folded column count differs from actual orbits')
     if 'column_logs' in report:
-        column_reps = set()
-        for entry in report['column_logs']:
-            p = c.decode(entry['point'])
-            require(p is not None and c.mul(p, c.r) is None, 'invalid column representative')
-            orbit = []
-            for _ in range(c.n):
-                orbit.extend((p, c.neg(p)))
-                p = c.frob(p)
-            column_reps.add(min(orbit))
+        column_points = [c.decode(entry['point']) for entry in report['column_logs']]
+        require(None not in column_points, 'identity column representative')
+        column_reps = subgroup_orbits(column_points, c)
         require(len(report['column_logs']) == columns and column_reps == representatives,
                 'column representatives do not cover the usable base exactly')
     encode = lambda ps: [list(p) for p in ps]

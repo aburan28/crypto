@@ -36,6 +36,13 @@ algorithm-affecting flags. The stage field sets are executable in `STAGE_FIELDS`
 They require explicit encoding, kernel, collection, matrix and descent policies.
 Unknown stage wiring cannot enter the resolved-candidate constructor.
 
+The independent oracle proves that the binary defining polynomial is
+irreducible before accepting the curve, using the exact finite-field criterion
+in [HAC Algorithm 4.69](https://cacr.uwaterloo.ca/hac/about/chap4.pdf). The test is
+cross-checked against exhaustive polynomial trial division through degree nine.
+Valid point arithmetic on a producer-supplied polynomial alone does not establish
+that it defines the claimed field.
+
 The candidate record retains unknown endomorphism conductors as `null`; a claimed
 conductor or volcano level needs a proof digest. This adapter currently admits
 `isogeny: "none"` only. `ISO1` requires an independently checked ordered route,

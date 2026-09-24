@@ -2,6 +2,7 @@
 import math
 import hashlib
 import json
+from functools import lru_cache
 
 
 class InvalidEvidence(ValueError):
@@ -11,6 +12,37 @@ class InvalidEvidence(ValueError):
 def require(condition, message):
     if not condition:
         raise InvalidEvidence(message)
+
+
+def polynomial_remainder(a, b):
+    """GF(2)[x] division in the checker's integer coefficient encoding."""
+    require(b > 0, 'zero polynomial divisor')
+    while a.bit_length() >= b.bit_length():
+        a ^= b << (a.bit_length() - b.bit_length())
+    return a
+
+
+@lru_cache(maxsize=128)
+def irreducible_binary_polynomial(modulus):
+    """Exact bounded-degree test, HAC Algorithm 4.69 (p=2).
+
+    https://cacr.uwaterloo.ca/hac/about/chap4.pdf, section 4.5.1.
+    Eliminate every possible irreducible factor of degree <= floor(n/2)
+    using gcd(f, x^(2^i)-x). This does not trust the producer's field claim.
+    """
+    degree = modulus.bit_length()-1
+    if degree < 1:
+        return False
+    power = 2
+    for _ in range(degree//2):
+        square = sum(1 << (2*i) for i in range(power.bit_length()) if power & (1 << i))
+        power = polynomial_remainder(square, modulus)
+        a, b = modulus, power ^ 2
+        while b:
+            a, b = b, polynomial_remainder(a, b)
+        if a != 1:
+            return False
+    return True
 
 
 class Curve:
@@ -32,6 +64,7 @@ class Curve:
         require(fixture['irreducible']['degree'] == self.n, 'field degree mismatch')
         require(len(set(terms)) == len(terms) and all(0 <= x < self.n for x in terms), 'bad modulus')
         self.modulus = (1 << self.n) | sum(1 << t for t in terms)
+        require(irreducible_binary_polynomial(self.modulus), 'reducible field modulus')
         require(self.r > 2 and all(self.r % d for d in range(2, math.isqrt(self.r) + 1)), 'nonprime subgroup')
         t = -1 if self.a == 0 else 1
         s0, s1 = 2, t

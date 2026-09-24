@@ -45,6 +45,15 @@ sealed sources. Instrument derived copies and measure observer overhead and
 equivalence against originals on public development fixtures. Also inspect the
 current `icx` engine before claiming the strongest compatible incumbent.
 
+Source review found two qualification hazards in archived `scaled`: the tiny
+fast path dispatches before the configured `linear_algebra` selection and
+actually uses incremental Gaussian elimination, and `solve_target` can emit an
+empty direct-collision witness. The current independent oracle rejects such a
+witness as IC. Resolve/report the actual dispatched method and qualify against
+the stricter admission rule. A nominal LA configuration sweep is not evidence
+that multiple LA solvers ran. The current `icx` runner constructs planted target
+scalars; a public-target adapter is required before that path joins this panel.
+
 ## Next gates
 
 1. Canonical record and base census regression/CI: implemented in `identity.py`,

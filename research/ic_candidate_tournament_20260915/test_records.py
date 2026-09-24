@@ -13,7 +13,7 @@ from identity import (STAGE_FIELDS, candidate_manifest, canonical, curve_record,
                       write_immutable)
 from measurement import (PHASES, PDP_OUTCOMES, exclusive_ledger, legacy_ledger,
                          measured_run, query_diagnostics, report_sha256)
-from oracle import Curve, InvalidEvidence
+from oracle import Curve, InvalidEvidence, irreducible_binary_polynomial
 from test_certificate import FIXTURE, REPORT
 
 
@@ -37,6 +37,29 @@ def method_fixture():
 class IdentityTests(unittest.TestCase):
     def setUp(self):
         self.method = method_fixture()
+
+    def test_field_check_matches_exhaustive_polynomial_trial_division(self):
+        # Independent small-field reference: enumerate every possible monic
+        # factor; do not reuse the production Frobenius/GCD criterion.
+        def divides(f, g):
+            coefficients = [(f >> i) & 1 for i in range(f.bit_length())]
+            degree = g.bit_length()-1
+            for i in range(len(coefficients)-1, degree-1, -1):
+                if coefficients[i]:
+                    for j in range(degree+1):
+                        coefficients[i-degree+j] ^= (g >> j) & 1
+            return not any(coefficients)
+        for degree in range(1, 10):
+            for modulus in range(1 << degree, 1 << (degree+1)):
+                reducible = any(divides(modulus, factor)
+                    for d in range(1, degree//2+1) for factor in range(1 << d, 1 << (d+1)))
+                self.assertEqual(irreducible_binary_polynomial(modulus), not reducible, hex(modulus))
+
+    def test_reducible_field_is_rejected_before_point_checks(self):
+        fixture = copy.deepcopy(FIXTURE)
+        fixture['irreducible']['low_terms'] = [0]  # x^13 + 1 has the factor x + 1.
+        with self.assertRaisesRegex(InvalidEvidence, 'reducible field modulus'):
+            curve_record(fixture)
 
     def test_target_seeds_do_not_change_curve_or_candidate(self):
         other = copy.deepcopy(FIXTURE)
@@ -124,6 +147,19 @@ class IdentityTests(unittest.TestCase):
             report['factor_base'].append(point)
             with self.assertRaises(InvalidEvidence):
                 factor_base_inventory(report, FIXTURE)
+
+    def test_orbit_partition_rejects_an_extra_non_subgroup_orbit(self):
+        c = Curve(FIXTURE)
+        orbit = []
+        p = c.g
+        for _ in range(c.n):
+            orbit.extend((list(p), list(c.neg(p))))
+            p = c.frob(p)
+        report = {'factor_base': orbit, 'column_convention': 'representative', 'columns': 1}
+        self.assertEqual(factor_base_inventory(report, FIXTURE)['usable_point_count'], 26)
+        report['factor_base'].append([0, 1])
+        with self.assertRaises(InvalidEvidence):
+            factor_base_inventory(report, FIXTURE)
 
     def test_workload_changes_independently_of_method(self):
         kwargs = dict(input_law='public-hash', algorithm_seed=9, resource_envelope={'memory_bytes': 1024})
