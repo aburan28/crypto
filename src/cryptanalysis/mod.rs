@@ -232,6 +232,7 @@ pub mod visual_demos;
 pub mod visualize;
 pub mod wdsat_oracle;
 pub mod weil_charts;
+pub mod wide_groebner;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,

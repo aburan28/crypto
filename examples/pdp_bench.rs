@@ -5,7 +5,7 @@
 //!
 //! ```bash
 //! cargo run --release --example pdp_bench -- [--out FILE] [--tier reach|frontier|aspiration|all]
-//!                                           [--budget SECONDS] [--engines groebner,sat,mitm,enumerate]
+//!                                           [--budget SECONDS] [--engines groebner,wide,sat,mitm,enumerate]
 //! ```
 //!
 //! Every cell decides the same frozen targets with each engine:
@@ -40,6 +40,7 @@ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base_from_divisor, enumerate_decompose, groebner_decompose,
     invariant_factors, sat_decompose, FrobeniusFactorBase, KoblitzCurve, PairSumTable,
 };
+use crypto_lib::cryptanalysis::wide_groebner::{wide_groebner_decompose, MAX_WIDE_VARS};
 use num_bigint::BigUint;
 use rand::{rngs::StdRng, Rng, SeedableRng};
 use std::time::Instant;
@@ -214,7 +215,7 @@ fn main() {
         .unwrap_or(120.0);
     let tier = flag("--tier").unwrap_or_else(|| "all".into());
     let engines: Vec<String> = flag("--engines")
-        .unwrap_or_else(|| "groebner,sat,mitm,enumerate".into())
+        .unwrap_or_else(|| "groebner,wide,sat,mitm,enumerate".into())
         .split(',')
         .map(str::to_string)
         .collect();
@@ -439,7 +440,18 @@ fn run_cells(cells: &[Cell], tier: &str, engines: &[String], budget: f64, emit: 
                     table = Some((t, t0.elapsed().as_secs_f64()));
                 }
             }
-            if !matches!(engine.as_str(), "enumerate" | "mitm") && vars.is_none() {
+            let chained_vars = c.m as u32 * fb.ell + (c.m as u32 - 2) * c.n;
+            if engine == "wide" && chained_vars as usize > MAX_WIDE_VARS {
+                let row = serde_json::json!({
+                    "tier": format!("{:?}", c.tier), "curve": curve, "n": c.n, "ell": fb.ell,
+                    "m": c.m, "vars": chained_vars, "engine": engine,
+                    "status": format!("system not buildable: {chained_vars} variables > {MAX_WIDE_VARS}"),
+                });
+                report(&row, emit, "FINAL ");
+                rows.push(row);
+                continue;
+            }
+            if !matches!(engine.as_str(), "enumerate" | "mitm" | "wide") && vars.is_none() {
                 let chained = c.m as u32 * fb.ell + (c.m as u32 - 2) * c.n;
                 let row = serde_json::json!({
                     "tier": format!("{:?}", c.tier), "curve": curve, "n": c.n, "ell": fb.ell,
@@ -476,6 +488,9 @@ fn run_cells(cells: &[Cell], tier: &str, engines: &[String], budget: f64, emit: 
                     }
                     "sat" => sat_decompose(&kc, &fb, &index_of, &st, target, c.m, 64, Some(2)).0,
                     "enumerate" => enumerate_decompose(&kc, &fb, &index_of, target, c.m),
+                    "wide" => {
+                        wide_groebner_decompose(&kc, &fb, &index_of, &st, target, c.m, 1 << 22).0
+                    }
                     "mitm" => {
                         let (t, _) = table.as_ref().expect("built above");
                         mitm_decompose(&kc, &fb, t, target, c.m, 0)
@@ -527,7 +542,7 @@ fn run_cells(cells: &[Cell], tier: &str, engines: &[String], budget: f64, emit: 
             let row = serde_json::json!({
                 "tier": format!("{:?}", c.tier), "curve": curve, "a": a, "n": c.n,
                 "divisor": divisor, "ell": fb.ell, "factor_base_points": fb.points.len(),
-                "m": c.m, "vars": vars, "equations": eqs, "engine": engine,
+                "m": c.m, "vars": vars.or(Some(chained_vars as usize)), "equations": eqs, "engine": engine,
                 "planted": c.planted, "random": c.random,
                 "planted_done": r.planted_done, "planted_hits": r.planted_hits,
                 "random_done": r.random_done, "random_hits": r.random_hits,
