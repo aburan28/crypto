@@ -640,6 +640,12 @@ worse than none:
 - **No iterative matrix.** Two eliminations ship; Wiedemann and Lanczos
   are open, and the trait is written so that a matrix-vector product is
   a legitimate `work_unit`.
+- **No algebraic oracle on prime-field curves.** The prime regime has
+  only the table oracles (`subtract`, `mitm`), whose family law is
+  `Θ(r^{1/6})` above rho. The one published algebraic mechanism is
+  Petit–Kosters–Messeng's tower factor base; its design, and the test
+  on the solver axis that decides whether to build it end to end, are in
+  [`RESEARCH_PKM_TOWER_ORACLE.md`](../../research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md).
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.

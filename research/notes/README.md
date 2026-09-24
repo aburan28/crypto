@@ -44,6 +44,7 @@ its old name still identify it.
 | [`RESEARCH_HYPERELLIPTIC_IC_RHO.md`](index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md) | Index calculus vs rho on genus-2 and genus-3 Jacobians |
 | [`RESEARCH_EXOTIC_COORDINATES.md`](index-calculus/RESEARCH_EXOTIC_COORDINATES.md) | Exotic coordinates for point decomposition |
 | [`RESEARCH_AUTOLAB_LOG.md`](index-calculus/RESEARCH_AUTOLAB_LOG.md) | Research AutoLab log |
+| [`RESEARCH_PKM_TOWER_ORACLE.md`](index-calculus/RESEARCH_PKM_TOWER_ORACLE.md) | Design and pre-registration of the prime-field algebraic oracle (Petit–Kosters–Messeng towers): construction, framework integration, the one-generator bound, and the solver-axis falsification test |
 
 ## ecc2k130 — the ECC2K-130 campaign, Koblitz curves, binary Weil descent
 
