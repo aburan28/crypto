@@ -41,6 +41,9 @@ type_complexity = "allow"
 unusual_byte_groupings = "allow"
 # Authenticated decryption fails without detail on purpose: no error oracle.
 result_unit_err = "allow"
+# `chunks_exact(N)` is equivalent to `as_chunks::<N>().0`; rewriting 51 call
+# sites would change slice types throughout for no behavior gain.
+chunks_exact_to_as_chunks = "allow"
 
 [dependencies]
 redis = { version = "0.32", optional = true, default-features = false, features = ["tls-rustls"] }

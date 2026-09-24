@@ -1227,7 +1227,7 @@ fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2m
             kernel_basis.push(pre);
         } else {
             pivots.push((img, pre));
-            pivots.sort_by(|x, y| y.0.cmp(&x.0));
+            pivots.sort_by_key(|p| std::cmp::Reverse(p.0));
         }
     }
 

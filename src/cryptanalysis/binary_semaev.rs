@@ -241,7 +241,7 @@ pub fn solve_artin_schreier(c: &F2mElement, m: u32, irr: &IrreduciblePoly) -> Op
         }
         if img != 0 {
             pivots.push((img, pre));
-            pivots.sort_by(|x, y| y.0.cmp(&x.0));
+            pivots.sort_by_key(|p| std::cmp::Reverse(p.0));
         }
     }
     let mut target = c.raw_bits().first().copied().unwrap_or(0);

@@ -64,7 +64,7 @@ fn random_subspace_basis(n: u32, k: u32, rng: &mut StdRng) -> Option<Vec<F2mElem
             }
             let p = 63 - v.leading_zeros();
             pivots.push((p, v));
-            pivots.sort_by(|a, b| b.0.cmp(&a.0));
+            pivots.sort_by_key(|p| std::cmp::Reverse(p.0));
             basis.push(F2mElement::from_bit_positions(
                 &(0..n).filter(|i| (bits >> i) & 1 == 1).collect::<Vec<_>>(),
                 n,

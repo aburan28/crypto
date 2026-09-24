@@ -114,7 +114,7 @@ pub fn phi_l_mod2_in_x(l: u32, j_val: &F2mElement, m: u32, irr: &IrreduciblePoly
         cur = cur.mul(j_val, irr);
     }
 
-    for ((i, jdeg), _bit) in coeffs_bits.iter() {
+    for (i, jdeg) in coeffs_bits.keys() {
         let term = j_powers[*jdeg as usize].clone();
         let entry = by_x_deg.entry(*i).or_insert_with(|| F2mElement::zero(m));
         *entry = entry.add(&term);

@@ -1177,11 +1177,8 @@ impl SymmetrisedS4 {
         let e3 = KPoly::var(0).mul(f, &KPoly::var(1)).mul(f, &KPoly::var(2));
         let mut cache: HashMap<[u8; 3], KPoly> = HashMap::new();
         let mut terms = HashMap::new();
-        loop {
-            // Lex-largest monomial (x₁ first).
-            let Some((&lead, &coef)) = g.terms.iter().max_by_key(|(e, _)| **e) else {
-                break;
-            };
+        // Lex-largest monomial (x₁ first).
+        while let Some((&lead, &coef)) = g.terms.iter().max_by_key(|(e, _)| **e) {
             let (a, b, c, d) = (lead[0], lead[1], lead[2], lead[3]);
             assert!(
                 a >= b && b >= c,

@@ -1611,7 +1611,7 @@ mod tests {
                 p_order, // residual_bsgs_max — allow full BSGS
             );
             let m_u = modulus_to_u64(&result.modulus).unwrap_or(1);
-            let residual_range = if m_u > 0 { p_order / m_u } else { p_order };
+            let residual_range = p_order.checked_div(m_u).unwrap_or(p_order);
             let bsgs_ops = result
                 .residual_bsgs_cost
                 .unwrap_or(((residual_range as f64).sqrt().ceil()) as u64);

@@ -102,7 +102,7 @@ fn random_subspace_basis(n: u32, k: u32, rng: &mut StdRng) -> Option<Vec<F2mElem
             continue;
         }
         pivots.push((63 - v.leading_zeros(), v));
-        pivots.sort_by(|a, b| b.0.cmp(&a.0));
+        pivots.sort_by_key(|p| std::cmp::Reverse(p.0));
         basis.push(elem(bits, n));
     }
     None

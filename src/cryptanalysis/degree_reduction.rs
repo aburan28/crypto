@@ -2494,15 +2494,12 @@ mod tests {
                         v[i / 64] ^= 1u64 << (i % 64);
                     }
                 }
-                loop {
-                    let Some(l) = v
-                        .iter()
-                        .enumerate()
-                        .find(|(_, w)| **w != 0)
-                        .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
-                    else {
-                        break;
-                    };
+                while let Some(l) = v
+                    .iter()
+                    .enumerate()
+                    .find(|(_, w)| **w != 0)
+                    .map(|(i, w)| i * 64 + w.trailing_zeros() as usize)
+                {
                     match basis.iter().find(|(bl, _)| *bl == l) {
                         Some((_, bv)) => {
                             for w in 0..v.len() {

@@ -140,7 +140,7 @@ pub fn rho_on_curve(curve: &SmallCurve, max_iters: u64, seed: u64) -> (Option<Rh
     };
 
     // Pick a private scalar d in [1, n−1].
-    let d = ((seed.wrapping_mul(0x9E3779B97F4A7C15) % (n - 1)) + 1) as u64;
+    let d = (seed.wrapping_mul(0x9E3779B97F4A7C15) % (n - 1)) + 1;
     let h = g.scalar_mul(&BigUint::from(d), &a_fe);
     let _ = d;
 

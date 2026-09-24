@@ -527,13 +527,9 @@ pub fn format_report(r: &EdsReport) -> String {
         ca = sgn(r.chi_a),
         cb = sgn(r.chi_b),
         pw = r.period_w,
-        jw = if r.order > 0 { r.period_w / r.order } else { 0 },
+        jw = r.period_w.checked_div(r.order).unwrap_or(0),
         pc = r.period_chi,
-        jc = if r.order > 0 {
-            r.period_chi / r.order
-        } else {
-            0
-        },
+        jc = r.period_chi.checked_div(r.order).unwrap_or(0),
         qr = qr,
         nqr = nqr,
         zero = zero,

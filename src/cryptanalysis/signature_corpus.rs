@@ -296,7 +296,7 @@ impl<'c> CorpusAnalyzer<'c> {
 
         // Sort rows by severity (highest first), preserving order
         // within a severity.
-        rows.sort_by(|a, b| b.severity.cmp(&a.severity));
+        rows.sort_by_key(|r| std::cmp::Reverse(r.severity));
 
         CorpusReport {
             rows,

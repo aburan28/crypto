@@ -4278,7 +4278,7 @@ fn main() {
             let query_started = Instant::now();
             let mut witness: Option<(Vec<usize>, Vec<(usize, u64)>)> = None;
             let targeted_column =
-                if rank_aware_pair_scan && echelon.rank + rank_target_deficiency >= columns + 1 {
+                if rank_aware_pair_scan && echelon.rank + rank_target_deficiency > columns {
                     echelon.pivots[..columns].iter().position(Option::is_none)
                 } else {
                     None

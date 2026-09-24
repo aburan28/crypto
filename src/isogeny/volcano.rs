@@ -129,7 +129,7 @@ pub fn map_volcano(
     let cm = cm_discriminant(curve);
     // ν_ℓ(f): the start curve sits at level ν.  If ν = 0 then
     // we are already on the crater.
-    let f = cm.conductor.unsigned_abs() as u64;
+    let f = cm.conductor.unsigned_abs();
     let mut nu = 0u32;
     let mut ff = f;
     while ff.is_multiple_of(ell) && ff != 0 {
@@ -278,7 +278,7 @@ pub struct VolcanoPosition {
 
 pub fn position(curve: &SmallCurve, ell: u64) -> VolcanoPosition {
     let cm = cm_discriminant(curve);
-    let mut f = cm.conductor.unsigned_abs() as u64;
+    let mut f = cm.conductor.unsigned_abs();
     let mut depth = 0u32;
     while f != 0 && f.is_multiple_of(ell) {
         f /= ell;

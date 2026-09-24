@@ -664,9 +664,7 @@ pub struct SlhDsaSecretKey {
 
 impl Drop for SlhDsaSecretKey {
     fn drop(&mut self) {
-        for b in &mut self.bytes {
-            *b = 0;
-        }
+        self.bytes.fill(0);
     }
 }
 

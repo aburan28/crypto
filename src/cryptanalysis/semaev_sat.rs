@@ -217,7 +217,7 @@ pub fn encode_equations_with(
 
     // Assign auxiliary variable indices (after the bit-variables).
     let mut next = num_bit_vars + 1; // SAT variables are 1-indexed in DIMACS
-    for (_, v) in aux_quad_var.iter_mut() {
+    for v in aux_quad_var.values_mut() {
         *v = next;
         next += 1;
     }

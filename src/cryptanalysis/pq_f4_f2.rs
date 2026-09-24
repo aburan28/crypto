@@ -597,7 +597,7 @@ pub fn groebner_basis_f4(
         }
         let rows: Vec<Row> = reducers
             .iter()
-            .chain(s_rows.into_iter())
+            .chain(s_rows)
             .map(|p| cols.pack(p))
             .collect();
         st.build_ns += t.elapsed().as_nanos() as u64;
