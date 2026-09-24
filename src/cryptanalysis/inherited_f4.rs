@@ -730,19 +730,32 @@ impl ReducedBasis {
             if staging.len() < words {
                 staging.resize(words, 0);
             }
-            let (mut lo, mut hi) = (usize::MAX, 0usize);
+            let staging = &mut staging[..words];
+            let mut lo = usize::MAX;
+            let mut scatter = |c: u32| {
+                if c != DELETED {
+                    let w = c as usize / 64;
+                    staging[w] ^= 1u64 << (c % 64);
+                    lo = lo.min(w);
+                }
+            };
             for (i, &word) in live.iter().enumerate() {
                 let base = (lead + i) * 64;
                 let mut bits = word;
-                while bits != 0 {
-                    let b = bits.trailing_zeros() as usize;
-                    bits &= bits - 1;
-                    let c = map[base + b];
-                    if c != DELETED {
-                        let w = c as usize / 64;
-                        staging[w] ^= 1u64 << (c % 64);
-                        lo = lo.min(w);
-                        hi = hi.max(w);
+                // A whole word of the map at once, so the lookups below
+                // need no bounds check; only a layout's last word is short.
+                if let Some(chunk) = map.get(base..base + 64) {
+                    let chunk: &[u32; 64] = chunk.try_into().expect("64 entries");
+                    while bits != 0 {
+                        let b = bits.trailing_zeros() as usize & 63;
+                        bits &= bits - 1;
+                        scatter(chunk[b]);
+                    }
+                } else {
+                    while bits != 0 {
+                        let b = bits.trailing_zeros() as usize;
+                        bits &= bits - 1;
+                        scatter(map[base + b]);
                     }
                 }
             }
@@ -750,10 +763,11 @@ impl ReducedBasis {
                 return None;
             }
             cost.specialise_word_ops += (words - lo) as u64;
-            // staging is zero outside `lo..=hi`, so its tail is the image
-            let nonzero = staging[lo..=hi].iter().any(|&w| w != 0);
-            let out = nonzero.then(|| finish(&staging[lo..words], lo));
-            staging[lo..=hi].fill(0);
+            // staging is zero below `lo`, so its tail is the image
+            let image = &mut staging[lo..];
+            let nonzero = image.iter().any(|&w| w != 0);
+            let out = nonzero.then(|| finish(image, lo));
+            image.fill(0);
             out
         })
     }
