@@ -851,7 +851,7 @@ reason given.
 | X3 | 2, Crossbred on the symmetrised system | **not run** | — | open; bounded below |
 | X4 → X4′ | 3, symmetrised oracle end to end | X4 cannot run as registered; the X4′ gate ran | `3.1–14.7×` enumeration per relation at `d = 3`, `30–1,101×` at `d = 4`, priced from below | gate **closed**; the `350×` is **engineering** (weakly determined) |
 | X5 → X5′ | 4, `m = 4` | run | the symmetrised chain falls at 4 on every rung `n = 9 … 19` (96 draws), the `x`-chain at 3 | H1 falsified for the symmetrised chain by its letter; the `x`-chain's "fall at 3" is one hidden linear equation of its last link, which the symmetrisation removes; flat in `n` |
-| X6 → X6′ | 5, literature | ~~**not run**~~ run 2026-09-24 (X6′, below) | 4 queries and 13 sources; the trace identity checked on 96 draws | no operation count at prime `n` with `q = 2`; item 5 is empty by structure (`End(E) = Z[τ]`, class number 1); X5′'s mechanism is Kosters–Yeo's |
+| X6 → X6′ | 5, literature | ~~**not run**~~ run 2026-09-24 (X6′, below) | 4 queries and 13 sources; the trace identity checked on 96 draws | no operation count at prime `n` with `q = 2` outside the survey's exclusion set; item 5 is empty by structure (`End(E) = Z[τ]`, class number 1); X5′'s mechanism is Kosters–Yeo's |
 
 **What the thread established.**
 
@@ -1125,8 +1125,10 @@ Couveignes and Lercier conjecture that higher-dimensional groups might
 contribute.  Even if one did, GGMP's collapse is worth `1/n` on the relation
 search.  That would leave an oracle linear in `|F|` near
 `2^{27.78}/131 ≈ 2^{20.7}×` rho at `n = 131`: a bound on a hypothetical,
-from the frame's scale table.  **No source gives an operation count at prime
-`n` with `q = 2`.**
+from the frame's scale table.  **No source outside the survey's exclusion set
+gives an operation count at prime `n` with `q = 2`.**  The one inside it is
+Petit–Quisquater and Kousidis–Wiemers's conditional `2^{86}` at `n = 131`,
+already in the survey (§2), from the subspace bases the survey excludes.
 
 **Item 5** (Koblitz structure beyond Frobenius) is empty by structure,
 before any search.
@@ -1149,7 +1151,7 @@ way it was predicted.
 |---|---|
 | 1, priority | X5′'s mechanism **is** Kosters–Yeo Prop. 4.9 (96/96 draws, control 0/96).  Re-attributed, and the novelty claims struck in place |
 | 2, anything left | the symmetrised side is not in the 10 sources read; the `D = 4` syzygy split is registered separately |
-| 3, X6 | no operation count at prime `n` with `q = 2`; item 5 empty by structure.  **Route 5 stays closed** |
+| 3, X6 | no operation count at prime `n` with `q = 2` outside the survey's exclusion set; item 5 empty by structure.  **Route 5 stays closed** |
 
 **Class.**  **Accounting.**  The X5′ numbers stand.  What moves is where the
 diagnosis is attributed and the sentences that claimed novelty:
@@ -1288,8 +1290,11 @@ reported as measured.**
      `U` gives `w_R·U²·W`, and by `W` gives `w_R·U·W²`.  Both are still
      bilinear, because squaring is `F₂`-linear.  So each of the two
      multipliers' `n` coordinates falls from 3 to 2.
-   - **The `x`-link has no such fall.**  Its top part contains `a²b²`, and
-     `a·a²b² = a³b²` is cubic.
+   - **The mechanism does not carry over to the `x`-link as stated.**  Its
+     top part contains `a²b²`, and `a·a²b² = a³b²` is cubic.  The `x`-chain
+     still has 39–54 graded falls at 3.  At most one per unknown (34–46)
+     can be multiples of the trace fall at 2, so at least 5–8 are not.
+     Neither part is analysed here.
 2. **In H1's convention, the symmetrised chain's rank loss at 4 is not all
    trivial.**
    - `n + C(n, 2)` of it is the Koszul and field syzygies of its `n`

@@ -212,7 +212,9 @@ changed four things.  The survey text above is left as it was, except that
   - Couveignes–Lercier with an elliptic curve needs a multiple of `n` in the
     Hasse interval `N ≤ 5`.
 
-  No source read gives an operation count at prime `n` with `q = 2`.
+  No source read outside the exclusion set gives an operation count at prime
+  `n` with `q = 2`.  §2's conditional `2^{86}` comes from the excluded subspace
+  bases.
 - **Item 5 is empty by structure.**
   - `End(E) = Z[τ]` is the maximal order of `Q(√−7)`, and its class number
     is 1.
