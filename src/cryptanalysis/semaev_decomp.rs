@@ -131,8 +131,10 @@ pub struct Gf2 {
     /// The irreducible polynomial including its leading `z^n` bit.
     pub irr: u64,
     pub(crate) mask: u64,
-    /// `red[j][v] = (v · z^{n + 8j}) mod irr`, flattened.
-    red: Vec<u64>,
+    /// `red[j][v] = (v · z^{n + 8j}) mod irr`.  Fixed-size rows indexed
+    /// by a byte, so a lookup carries no bounds check; `n ≤ 63` means
+    /// at most eight rows are ever used.
+    red: Box<[[u64; 256]; 8]>,
     positions: usize,
     has_clmul: bool,
 }
@@ -184,11 +186,11 @@ impl Gf2 {
             }
         }
 
-        let mut red = vec![0u64; positions * 256];
+        debug_assert!(positions <= 8);
+        let mut red = Box::new([[0u64; 256]; 8]);
         for j in 0..positions {
             for v in 1usize..256 {
-                red[j * 256 + v] =
-                    red[j * 256 + (v & (v - 1))] ^ pow[j * 8 + v.trailing_zeros() as usize];
+                red[j][v] = red[j][v & (v - 1)] ^ pow[j * 8 + v.trailing_zeros() as usize];
             }
         }
 
@@ -217,8 +219,8 @@ impl Gf2 {
     fn reduce(&self, w: u128) -> u64 {
         let mut acc = (w as u64) & self.mask;
         let mut h = (w >> self.n) as u64;
-        for j in 0..self.positions {
-            acc ^= self.red[j * 256 + (h & 0xff) as usize];
+        for row in &self.red[..self.positions] {
+            acc ^= row[usize::from(h as u8)];
             h >>= 8;
         }
         debug_assert_eq!(h, 0, "product wider than the reduction table");
@@ -310,22 +312,51 @@ impl Gf2 {
     /// elements, so the inversion's cost per element goes to zero.
     ///
     /// Zeros are left as zero and skipped.
+    ///
+    /// The running product and the running inverse are each a serial
+    /// chain — every step waits for the previous multiplication — so on
+    /// one accumulator an element costs two multiplication *latencies*
+    /// however many multipliers the core has.  The slice is therefore
+    /// dealt round-robin to `LANES` independent accumulators whose chains
+    /// overlap; their `LANES` products are inverted together by the same
+    /// trick in miniature, still with one field inversion.  Same inverses,
+    /// same multiplication count, a quarter of the dependent chain.
+    ///
+    /// Both passes walk `xs` and `scratch` as zipped chunks, so the loops
+    /// carry no bounds checks and no `Vec` growth checks.
     pub fn batch_inv(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
+        const LANES: usize = 4;
         scratch.clear();
-        scratch.reserve(xs.len());
-        let mut acc = 1u64;
-        for &x in xs.iter() {
-            scratch.push(acc);
-            if x != 0 {
-                acc = self.mul(acc, x);
+        scratch.resize(xs.len(), 0);
+        let mut acc = [1u64; LANES];
+        for (xc, pc) in xs.chunks(LANES).zip(scratch.chunks_mut(LANES)) {
+            for ((&x, prefix), a) in xc.iter().zip(pc.iter_mut()).zip(acc.iter_mut()) {
+                *prefix = *a;
+                if x != 0 {
+                    *a = self.mul(*a, x);
+                }
             }
         }
-        let mut inv_acc = self.inv(acc);
-        for i in (0..xs.len()).rev() {
-            if xs[i] != 0 {
-                let xi = xs[i];
-                xs[i] = self.mul(inv_acc, scratch[i]);
-                inv_acc = self.mul(inv_acc, xi);
+        // Invert the four lane products with one inversion.  None is
+        // zero: each starts at 1 and only ever takes non-zero factors.
+        let p01 = self.mul(acc[0], acc[1]);
+        let p23 = self.mul(acc[2], acc[3]);
+        let inv_all = self.inv(self.mul(p01, p23));
+        let i01 = self.mul(inv_all, p23);
+        let i23 = self.mul(inv_all, p01);
+        let mut inv_acc = [
+            self.mul(i01, acc[1]),
+            self.mul(i01, acc[0]),
+            self.mul(i23, acc[3]),
+            self.mul(i23, acc[2]),
+        ];
+        for (xc, pc) in xs.chunks_mut(LANES).zip(scratch.chunks(LANES)).rev() {
+            for ((x, &prefix), ia) in xc.iter_mut().zip(pc.iter()).zip(inv_acc.iter_mut()) {
+                if *x != 0 {
+                    let xi = *x;
+                    *x = self.mul(*ia, prefix);
+                    *ia = self.mul(*ia, xi);
+                }
             }
         }
     }
@@ -921,6 +952,37 @@ mod tests {
         *state ^= *state << 25;
         *state ^= *state >> 27;
         state.wrapping_mul(0x2545_F491_4F6C_DD1D)
+    }
+
+    /// Batch inversion equals element-wise inversion on every length
+    /// around the lane count and a full block, with zeros scattered in
+    /// (left as zero) and a slice of nothing but zeros.
+    #[test]
+    fn batch_inversion_matches_elementwise() {
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        let mut s = 0xB47C_4111_7EE5_0001u64;
+        for n in [7u32, 24, 53, 62] {
+            let gf = Gf2::new(&find_irreducible_sparse(n).unwrap());
+            let mut scratch = Vec::new();
+            for len in (0..=17).chain([63, 64, 65, 1024, 1027]) {
+                let mut xs: Vec<u64> = (0..len)
+                    .map(|i| {
+                        let v = xorshift(&mut s) & gf.mask;
+                        if i % 7 == 3 {
+                            0
+                        } else {
+                            v
+                        }
+                    })
+                    .collect();
+                let want: Vec<u64> = xs.iter().map(|&x| gf.inv(x)).collect();
+                gf.batch_inv(&mut xs, &mut scratch);
+                assert_eq!(xs, want, "n = {n}, len = {len}");
+            }
+            let mut zeros = vec![0u64; 9];
+            gf.batch_inv(&mut zeros, &mut scratch);
+            assert!(zeros.iter().all(|&z| z == 0));
+        }
     }
 
     /// The Itoh–Tsujii inverse is a true inverse at every one-word
