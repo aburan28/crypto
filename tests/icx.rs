@@ -114,6 +114,28 @@ fn run_prime_analogue_recovers_a_logarithm() {
 }
 
 #[test]
+fn char3_curves_are_present_and_verify() {
+    // Characteristic-three coverage: the catalog carries verified F_3^m curves.
+    let list = run_json(&["list", "--family", "char3"]);
+    let curves = list["curves"].as_array().expect("curves");
+    assert!(
+        !curves.is_empty(),
+        "no characteristic-three curves in catalog"
+    );
+    let name = curves[0]["name"].as_str().unwrap();
+    let rep = run_json(&["inspect", name]);
+    assert_eq!(
+        rep["status"], "checks_passed",
+        "char3 curve {name} failed inspect"
+    );
+    assert_eq!(rep["verified"], true);
+    assert_eq!(rep["curve"]["family"], "char3");
+    // Estimate works; the runnable pipeline is not available for char-3 yet.
+    let est = run_json(&["estimate", name]);
+    assert_eq!(est["family"], "char3");
+}
+
+#[test]
 fn run_with_gray_code_fes_solver() {
     // The Gray-code FES solver plugs into the descent-algebraic oracle.
     let v = run_json(&[

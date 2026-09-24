@@ -35,6 +35,7 @@ use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
 use crate::binary_ecc::curve::{self as bcurve, BinaryCurve, BinaryPoint};
+use crate::cryptanalysis::gf3m::{Char3Curve, Char3Point, Gf3};
 use crate::ecc::curve::CurveParams;
 
 /// The finite-field / curve family an entry belongs to.
@@ -101,6 +102,23 @@ pub enum CurveObject {
     /// larger than a `CurveParams`, and an unboxed variant would bloat every
     /// `CurveObject` to the binary size.
     Binary(Box<BinaryCurve>),
+    /// Characteristic-three curve `y² = x³ + a4 x + a6` over `F_{3^m}`.
+    Char3(Box<Char3Entry>),
+}
+
+/// A characteristic-three catalog curve: the curve plus a generator and its
+/// subgroup order.  Unlike the prime/binary families, char-3 supersingular
+/// curves have no single authoritative fixed generator, so the generator and
+/// its order are computed once (at small `m`, by point enumeration) when the
+/// entry is built; `verify` still cross-checks `[n]G = O` and the Hasse bound.
+#[derive(Clone)]
+pub struct Char3Entry {
+    pub curve: Char3Curve,
+    pub m: u32,
+    pub generator: Char3Point,
+    pub order: BigUint,
+    pub cofactor: BigUint,
+    pub group_order: BigUint,
 }
 
 /// A single catalog entry, loaded (its constants materialized) but not yet
@@ -142,6 +160,12 @@ impl CatalogCurve {
                 label: format!("F_2^{}", c.m),
                 bits: c.m as u64,
             },
+            CurveObject::Char3(c) => FieldDesc {
+                kind: "char3",
+                // log2(3^m) = m*log2(3).
+                label: format!("F_3^{}", c.m),
+                bits: (c.m as f64 * 3.0_f64.log2()).ceil() as u64,
+            },
         }
     }
 
@@ -150,6 +174,7 @@ impl CatalogCurve {
         match &self.object {
             CurveObject::Prime(p) => p.n.clone(),
             CurveObject::Binary(c) => c.order.clone(),
+            CurveObject::Char3(c) => c.order.clone(),
         }
     }
 
@@ -158,6 +183,7 @@ impl CatalogCurve {
         match &self.object {
             CurveObject::Prime(p) => BigUint::from(p.h),
             CurveObject::Binary(c) => c.cofactor.clone(),
+            CurveObject::Char3(c) => c.cofactor.clone(),
         }
     }
 
@@ -199,8 +225,32 @@ impl CatalogCurve {
         match &self.object {
             CurveObject::Prime(p) => verify_prime(p),
             CurveObject::Binary(c) => verify_binary(c),
+            CurveObject::Char3(c) => verify_char3(c),
         }
     }
+}
+
+fn verify_char3(c: &Char3Entry) -> Vec<Check> {
+    let mut checks = Vec::new();
+    checks.push(Check {
+        name: "generator_on_curve",
+        passed: c.curve.is_on_curve(&c.generator),
+        detail: "generator satisfies y² = x³ + a4 x + a6 over F_3^m".to_string(),
+    });
+    let ng = c.curve.scalar_mul(&c.generator, &c.order);
+    checks.push(Check {
+        name: "generator_subgroup",
+        passed: matches!(ng, Char3Point::Infinity),
+        detail: "[n]G = O (point at infinity)".to_string(),
+    });
+    checks.push(Check {
+        name: "positive_cofactor",
+        passed: !c.cofactor.is_zero(),
+        detail: format!("cofactor h = {}", c.cofactor),
+    });
+    let q = BigUint::from(3u32).pow(c.m);
+    checks.push(hasse_check(&q, &c.group_order));
+    checks
 }
 
 fn verify_prime(p: &CurveParams) -> Vec<Check> {
@@ -284,6 +334,7 @@ pub fn all() -> Vec<CatalogCurve> {
     let mut v = Vec::new();
     prime_curves(&mut v);
     binary_curves(&mut v);
+    char3_curves(&mut v);
     v
 }
 
@@ -628,6 +679,201 @@ fn binary_curves(v: &mut Vec<CatalogCurve>) {
     }
 }
 
+/// A hardcoded characteristic-three catalog curve, as coefficient vectors over
+/// F_3 (index i is the z^i coefficient).  Computed once by
+/// `build_char3_supersingular` (cross-checked by a test) and stored so the CLI
+/// builds them instantly instead of re-enumerating the group on every run.
+struct Char3Const {
+    name: &'static str,
+    m: u32,
+    /// Reduction polynomial `[c0, …, cm]`, `cm = 1`.
+    irr: &'static [u8],
+    /// Generator x, y coefficient vectors (length m).
+    gx: &'static [u8],
+    gy: &'static [u8],
+    /// Subgroup order and full group order (cofactor = group_order / order).
+    order: u64,
+    group_order: u64,
+}
+
+/// Supersingular ηT-family study curves `y² = x³ - x + 1` over `F_{3^m}`,
+/// with generators and orders computed once (see the cross-check test).
+const CHAR3_CONSTS: &[Char3Const] = &[
+    Char3Const {
+        name: "ss-f3-5",
+        m: 5,
+        irr: &[1, 2, 0, 0, 0, 1],
+        gx: &[0, 1, 0, 0, 0],
+        gy: &[2, 0, 0, 1, 2],
+        order: 217,
+        group_order: 217,
+    },
+    Char3Const {
+        name: "ss-f3-7",
+        m: 7,
+        irr: &[2, 0, 1, 0, 0, 0, 0, 1],
+        gx: &[0, 0, 1, 0, 0, 0, 0],
+        gy: &[1, 1, 1, 1, 2, 1, 2],
+        order: 2107,
+        group_order: 2107,
+    },
+];
+
+/// Build a char-3 entry from its stored constants (fast — no enumeration).
+fn char3_from_const(c: &Char3Const) -> Option<Char3Entry> {
+    let field = Gf3::new(c.m, c.irr).ok()?;
+    let a4 = field.neg(&field.one()); // -1
+    let a6 = field.one(); // b = 1
+    let gx = field.element(c.gx).ok()?;
+    let gy = field.element(c.gy).ok()?;
+    let curve = Char3Curve::new(field, a4, a6).ok()?;
+    let order = BigUint::from(c.order);
+    let group_order = BigUint::from(c.group_order);
+    let cofactor = &group_order / &order;
+    Some(Char3Entry {
+        curve,
+        m: c.m,
+        generator: Char3Point::Affine { x: gx, y: gy },
+        order,
+        cofactor,
+        group_order,
+    })
+}
+
+/// Find a monic irreducible polynomial over F_3 of degree `m`, returned as
+/// coefficients `[c0, …, cm]` with `cm = 1`.  Tries trinomials then a small
+/// pentanomial sweep; `Gf3::new` performs the actual irreducibility test.
+/// Test-only: production builds char-3 curves from the hardcoded constants.
+#[cfg(test)]
+fn first_irreducible_f3(m: u32) -> Option<Vec<u8>> {
+    let md = m as usize;
+    // Trinomials x^m + c1*x^k + c0.
+    for k in 1..m {
+        for c1 in 1..=2u8 {
+            for c0 in 1..=2u8 {
+                let mut irr = vec![0u8; md + 1];
+                irr[0] = c0;
+                irr[k as usize] = c1;
+                irr[md] = 1;
+                if Gf3::new(m, &irr).is_ok() {
+                    return Some(irr);
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Build a supersingular char-3 curve `y² = x³ - x + b` over `F_{3^m}` and
+/// compute a generator of maximal order by enumerating points.  Small `m`
+/// only (the enumeration is `O(3^m)`); returns `None` if no irreducible is
+/// found.  Test-only: it is what produced (and re-verifies) `CHAR3_CONSTS`.
+#[cfg(test)]
+fn build_char3_supersingular(m: u32, b: u64) -> Option<Char3Entry> {
+    let irr = first_irreducible_f3(m)?;
+    let field = Gf3::new(m, &irr).ok()?;
+    let a4 = field.neg(&field.one()); // -1
+    let a6 = field.from_int(b);
+    let curve = Char3Curve::new(field, a4, a6).ok()?;
+    let f = curve.field();
+    let q: u64 = 3u64.pow(m);
+    // (3^m - 1)/2 and (3^m + 1)/4 as square-test / square-root exponents
+    // (m is odd for the ss curves used here, so 3^m ≡ 3 mod 4).
+    let qb = BigUint::from(3u32).pow(m);
+    let half = (&qb - BigUint::one()) / BigUint::from(2u32);
+    let quarter = (&qb + BigUint::one()) / BigUint::from(4u32);
+
+    // For each x, decide how many y exist and collect one representative point.
+    let mut points: Vec<Char3Point> = Vec::new();
+    let mut count: u64 = 1; // point at infinity
+    for xi in 0..q {
+        let x = f.from_int(xi);
+        // rhs = x^3 + a4*x + a6
+        let x3 = f.cube(&x);
+        let ax = f.mul(curve.a4(), &x);
+        let rhs = f.add(&f.add(&x3, &ax), curve.a6());
+        // Count every point, but only keep a bounded sample of candidate
+        // generators: scanning all points for the maximum order is O(#E^2)
+        // and needlessly slow at m=7. A few dozen points reliably include one
+        // of maximal (group-exponent) order for these small groups.
+        const GEN_SAMPLE: usize = 64;
+        if f.is_zero(&rhs) {
+            count += 1;
+            if points.len() < GEN_SAMPLE {
+                points.push(Char3Point::Affine {
+                    x: x.clone(),
+                    y: f.zero(),
+                });
+            }
+        } else {
+            // Nonzero: a square iff rhs^((q-1)/2) == 1.
+            let leg = f.pow(&rhs, &half);
+            if f.eq(&leg, &f.one()) {
+                count += 2;
+                if points.len() < GEN_SAMPLE {
+                    let y = f.pow(&rhs, &quarter); // sqrt, since q ≡ 3 mod 4
+                    points.push(Char3Point::Affine { x, y });
+                }
+            }
+        }
+    }
+    let group_order = BigUint::from(count);
+    // Generator of maximal order among the representatives.
+    let mut best_gen = Char3Point::Infinity;
+    let mut best_ord = BigUint::one();
+    for p in &points {
+        let ord = point_order(&curve, p, count);
+        if ord > best_ord {
+            best_ord = ord;
+            best_gen = p.clone();
+        }
+    }
+    if matches!(best_gen, Char3Point::Infinity) {
+        return None;
+    }
+    let cofactor = &group_order / &best_ord;
+    Some(Char3Entry {
+        curve,
+        m,
+        generator: best_gen,
+        order: best_ord,
+        cofactor,
+        group_order,
+    })
+}
+
+/// Order of a point by repeated addition, bounded by the group order.
+#[cfg(test)]
+fn point_order(curve: &Char3Curve, p: &Char3Point, bound: u64) -> BigUint {
+    if matches!(p, Char3Point::Infinity) {
+        return BigUint::from(1u32);
+    }
+    let mut q = p.clone();
+    let mut k: u64 = 1;
+    while !matches!(q, Char3Point::Infinity) {
+        q = curve.point_add(&q, p);
+        k += 1;
+        if k > bound + 1 {
+            break;
+        }
+    }
+    BigUint::from(k)
+}
+
+fn char3_curves(v: &mut Vec<CatalogCurve>) {
+    for c in CHAR3_CONSTS {
+        if let Some(entry) = char3_from_const(c) {
+            v.push(CatalogCurve {
+                name: c.name,
+                aliases: &[],
+                family: Family::Char3,
+                standard: "supersingular F_3^m (ηT pairing family); computed generator",
+                object: CurveObject::Char3(Box::new(entry)),
+            });
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -666,6 +912,11 @@ mod tests {
             "expected the NIST Koblitz suite (K-163..K-571), got {:?}",
             per_family.get("koblitz")
         );
+        assert!(
+            *per_family.get("char3").unwrap_or(&0) >= 1,
+            "expected at least one characteristic-three curve, got {:?}",
+            per_family.get("char3")
+        );
     }
 
     #[test]
@@ -685,6 +936,33 @@ mod tests {
                     c.name
                 );
             }
+        }
+    }
+
+    #[test]
+    fn hardcoded_char3_constants_match_computed() {
+        // The catalog ships char-3 curves as constants for a fast CLI; this
+        // test recomputes them from scratch (point enumeration) and checks the
+        // stored order/#E match, so any drift in the field or curve arithmetic
+        // is caught rather than silently shipping wrong parameters.
+        for c in CHAR3_CONSTS {
+            let computed = build_char3_supersingular(c.m, 1)
+                .unwrap_or_else(|| panic!("could not compute char3 m={}", c.m));
+            assert_eq!(
+                computed.group_order,
+                BigUint::from(c.group_order),
+                "char3 m={} #E drifted",
+                c.m
+            );
+            // The stored generator must be on the curve and have the stored order.
+            let entry = char3_from_const(c).expect("const builds");
+            assert!(entry.curve.is_on_curve(&entry.generator));
+            let ng = entry.curve.scalar_mul(&entry.generator, &entry.order);
+            assert!(
+                matches!(ng, Char3Point::Infinity),
+                "char3 m={} [n]G != O",
+                c.m
+            );
         }
     }
 
