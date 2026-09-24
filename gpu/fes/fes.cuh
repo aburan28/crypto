@@ -59,9 +59,12 @@ FES_HD uint64_t fes_eval(uint64_t cst, const uint64_t *lin,
 // Reflected binary Gray code of s.
 FES_HD uint64_t fes_gray(uint64_t s) { return s ^ (s >> 1); }
 
-// Trailing-zero count for a nonzero 64-bit word.
+// Trailing-zero count for a nonzero 64-bit word.  `__CUDA_ARCH__` is defined
+// only in the *device* pass, so the host pass of this __host__ __device__
+// function (and pure host builds) uses the compiler builtin; the device intrinsic
+// __ffsll is a device-only function and must not be referenced from host code.
 FES_HD int fes_ctz(uint64_t s) {
-#if defined(__CUDACC__)
+#if defined(__CUDA_ARCH__)
   return __ffsll((unsigned long long)s) - 1;
 #elif defined(__GNUC__)
   return __builtin_ctzll((unsigned long long)s);
