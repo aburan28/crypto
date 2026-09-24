@@ -4434,17 +4434,33 @@ impl PairSumTable {
                 // `docs/ic/runs/koblitz-probe-window-20260921.json`
                 // records both.  Do not unroll this back into a single
                 // loop.
+                //
+                // On a folded table the key reads only the abscissa, so
+                // the rests are formed without their ordinates and only
+                // the ones the filter admits are completed.
                 const BLOCK: usize = 1024;
                 const LOOKAHEAD: usize = 32;
                 let mut rests = Vec::with_capacity(BLOCK);
+                let mut lambdas: Vec<u64> = Vec::with_capacity(BLOCK);
                 let mut scratch = BatchScratch::default();
                 let mut keys = Vec::with_capacity(BLOCK);
                 let mut pairs = Vec::new();
                 for (b, addends) in self.negated.chunks(BLOCK).enumerate() {
                     // `add_many` appends, so the block starts empty.
                     rests.clear();
-                    self.curve
-                        .add_many(target, addends, &mut rests, &mut scratch);
+                    lambdas.clear();
+                    if self.fold {
+                        self.curve.add_many_lazy(
+                            target,
+                            addends,
+                            &mut rests,
+                            &mut lambdas,
+                            &mut scratch,
+                        );
+                    } else {
+                        self.curve
+                            .add_many(target, addends, &mut rests, &mut scratch);
+                    }
                     let block = &rests[..];
                     self.keys_of(block, &mut keys);
                     for &key in keys.iter().take(LOOKAHEAD) {
@@ -4458,7 +4474,11 @@ impl PairSumTable {
                             continue;
                         }
                         let k = b * BLOCK + offset;
-                        self.pairs_for_key(*rest, keys[offset], &mut pairs);
+                        let rest = match lambdas.get(offset) {
+                            Some(&lambda) => self.curve.finish_lazy(target, *rest, lambda),
+                            None => *rest,
+                        };
+                        self.pairs_for_key(rest, keys[offset], &mut pairs);
                         for &(i, j) in &pairs {
                             if (!sorted || j as usize <= k) && !sink(&[i as usize, j as usize, k]) {
                                 return;
@@ -8785,8 +8805,20 @@ impl<'a> IndividualLogSolver<'a> {
         let step = vec![*g; WALKS];
         let mut advanced = Vec::with_capacity(WALKS);
         let mut scratch = BatchScratch::default();
+        let mut keys: Vec<u64> = Vec::with_capacity(WALKS);
         while report.trials < self.opts.max_trials {
-            for (state, (a, b)) in states.iter().zip(coefficients.iter()) {
+            // Key every state of the round first and prefetch its filter
+            // word, so the 64 probes' cache misses overlap instead of
+            // each waiting on the last; then reject, on the key alone,
+            // every state the table cannot contain.  A key the table does
+            // not hold yields no witness, so the reject changes nothing
+            // but the time — the trials, their order and the first
+            // decomposition found are the same.
+            pair.keys_of(&states, &mut keys);
+            for &key in &keys {
+                pair.prefetch_key(key);
+            }
+            for ((state, (a, b)), &key) in states.iter().zip(coefficients.iter()).zip(&keys) {
                 report.trials += 1;
                 if state.infinity {
                     // [a]G + [b]Q = O already yields d.
@@ -8799,6 +8831,9 @@ impl<'a> IndividualLogSolver<'a> {
                             return Some(Some(d));
                         }
                     }
+                    continue;
+                }
+                if m == 2 && !pair.contains_key(key) {
                     continue;
                 }
                 let Some(idxs) = pair.decompose_fast(*state, m) else {
