@@ -646,6 +646,10 @@ worse than none:
   Petit–Kosters–Messeng's tower factor base; its design, and the test
   on the solver axis that decides whether to build it end to end, are in
   [`RESEARCH_PKM_TOWER_ORACLE.md`](../../research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md).
+  A pilot of that test (§10 there) found F4's solving degree flat, where
+  linear growth in `N` had been pre-registered: 4–5 for `m = 2` through
+  `N = 18`, and 5–6 for `m = 3` through `N = 12`. It reads inconclusive
+  until `N` is extended.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.

@@ -1,8 +1,18 @@
 # The PKM tower oracle: an algebraic decomposition oracle for prime-field curves
 
-**Status:** design and pre-registration. This revision measures nothing and claims
-nothing. The prediction, the decision rule and every control below are fixed
-here, before any run, per `AGENTS.md` §1 and §4.
+**Status:** design and pre-registration (§§0–9) followed by a design-validation
+pilot (§10, 2026-09-24).
+- §§0–9 were fixed before any run, per `AGENTS.md` §1 and §4, in commit
+  `c2157282`, and are unchanged since.
+- **The pilot contradicts the pre-registered expectation.** F4's solving degree
+  does not grow like `N`. In all three tower families it stays at 4–5 for `m = 2`
+  through `N = 18`, and at 5–6 for `m = 3` through `N = 12`. At `m = 4` it is 6
+  and 7 at the only two sizes run, `N = 8` and 12.
+- Under §5.2 this reads *inconclusive*, not H1. The shape-matched null behaves
+  the same way, and the plateau is too short to tell a bounded degree from a
+  slowly growing one.
+- §10 says what the pilot does and does not show.
+
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
 `RESEARCH_INDEX_CALCULUS_FACTOR_BASE.md` (structured `GF(p)` bases),
@@ -712,6 +722,381 @@ because this note exists.
   for F4. Stage A measures the heuristic.
 - Nothing here is a statement about a deployed curve. Every `N` in Stage A is
   toy-sized, and conclusions are scoped to the cells measured.
+
+---
+
+## 10. Pilot, 2026-09-24: the pre-registered expectation fails at toy sizes
+
+This section was written after §§0–9 were committed and after every run it
+reports. It is a pilot, not Stage A. It runs a small part of Stage A's cells
+with the repository's dense `f4_fp`, to test the prediction the staged plan
+rests on before anything else is built. It re-grades nothing:
+- §10.3 applies the rule of §5.2 as written;
+- §10.8 proposes an amendment for Stage A and marks it post hoc.
+
+The systems come from `examples/pkm_tower_pilot.rs`. The raw rows, their exact
+flags, and the two scripts that tabulate and cross-check them are in
+`research/pkm_tower_pilot_20260924/`.
+
+### 10.1 What was run
+
+| item | pilot | §5.2 asks for |
+|:--|:--|:--|
+| kinds | `kummer`, `dickson` (split case only), `isogeny` | the same, `dickson` in both cases |
+| `m`, mode | 2, `full`: `S₃` and the `2t` tower equations. 3, `chain`: `S₃(x₁,x₂,u)` and `S₃(u,x₃,x_R)`, with a free `u`. 4, `chain`: three `S₃` links with two free unknowns | 2–5; `full`, `chain`, `tree` |
+| presentation | `raw` only | `raw` and `reduced` |
+| `N` | `m = 2`: 2–18 (20 attempted); `m = 3`: 6–12 (15 attempted); `m = 4`: 8, 12 | at least four consecutive `t` per `m` |
+| prime | `p = 786433 = 3·2^18 + 1` in every cell, so `2^t \| p − 1` up to `t = 18`. Two checks at `p = 3221225473 = 3·2^30 + 1` | sized per `N`, so that `\|V\|^m ≈ m!·r` |
+| curve | a random curve over `F_p` per cell; the solver axis needs no prime order | an instance of prime order |
+| targets | 2 planted and 2 random per cell up to `t = 7`, random only above | 8 and 8 |
+| engine | `f4_fp::f4`: dense elimination, grevlex, normal strategy, degree bound `n + d + 6`. No finished row had a pair above the bound | `f4-fp`, then `f4-fp-tower` |
+| budget | 300 s per system (900–3600 s for the refutation-only cells at the largest `N`), and a 13 GB address-space cap | 600 s, 8 GiB |
+| controls | `null`: `S₃`'s monomial support, random coefficients, and a planted zero on planted targets. `naive`: `x^{2^t} = g^{2^t}` per unknown, Kummer only. Generator-count `ladder` at `N = 8, 12` | also `random set` and the binary twin |
+| not run | `macaulay-fp` and `δ_Z`, so Proposition 2 is untested here; the random-set control; the binary twin; `tree`; `m = 5` | — |
+
+**Seeds.** Every cell draws its tower, curve and targets from `0x504B4D54`
+combined with (kind, `m`, `t`, `g`). A cell is therefore the same system in every
+run that contains it. Overlapping runs, made with three builds of the example,
+repeated 215 measurements. Every repeat agreed on every deterministic field,
+including those re-measured with the committed source.
+
+**Planted targets stop early.** Once a planted system is solved, F4 keeps
+processing pairs that reduce to zero, to certify the basis, and it climbs to
+degree 7–11 doing so. At `N = 16` that tail, not the solve, reached about 10 GB.
+The larger cells are therefore refutations, on random targets: above `t = 7`
+at `m = 2`, and above `t = 3` or 4 at `m = 3`. `f4_fp` gained an opt-in stop
+(`F4Options::stopping_below`). It halts once the staircase is at most a given
+size, which bounds the number of solutions but leaves the basis uncertified.
+It was used only for the re-runs named below.
+
+**An accounting correction.** `f4_fp`'s `solving_degree` records the degree of
+the *last* productive step. On tower systems the normal strategy climbs to
+degree 5, learns low-degree elements, and descends again. The field therefore
+under-reports: the Kummer `N = 12` refutation has its last productive step at
+degree 3, after a step at degree 5. `F4Report` now also carries:
+- `solving_degree_max`, the highest productive step degree, which is the
+  framework's definition (`FRAMEWORK.md` §3);
+- `max_cols_to_solution`, the widest matrix up to that step;
+- `steps_to_solution`.
+
+Every figure below uses them. The one smoke run made before the change is kept
+with the data, and the analysis skips it.
+
+**Correctness.** `verify.py` recounts every finished tower row by exhaustive
+search over `V^m`, without F4.
+- For `m = 3` it counts triples with `S₄ = Res_u(S₃(x₁,x₂,u), S₃(x₃,x_R,u)) = 0`,
+  the chain system with `u` eliminated.
+- For `m = 4` it counts quadruples with `S₅ = 0`, both free unknowns eliminated.
+  `test_verify.py` checks that counter against the other order of elimination,
+  and against planted decompositions.
+
+All 176 rows agree: F4 refuted exactly the systems with no solution on the
+grid, and found at least one solution in every other. No planted solution was
+lost, across 310 distinct systems.
+
+### 10.2 Results
+
+**`m = 2`, `full`, `raw`.** At every `N`, every target gave the same `D`, so each
+`D` below is exact, not a median. The other columns are defined as follows:
+- *width* is the widest F4 matrix up to the solution;
+- *steps* is the number of F4 steps to the solution (median);
+- *time* is the median wall-clock F4 time on a shared 4-core container, a
+  practicality note only.
+
+| `N` | Kummer `D` | width | steps | time | isogeny `D` | width | steps | null `D` | naive `D` |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 2 | 4 | 9 | 2.5 | < 1 ms | 4 | 9 | 2.5 | 4 | 4 |
+| 4 | 4 | 37 | 4.5 | < 1 ms | 5 | 48 | 4.5 | 4 | 6 |
+| 6 | 4 | 137 | 6.5 | 1.5 ms | 5 | 146 | 8 | 4 | 10 |
+| 8 | 4 | 282 | 8.5 | 7.9 ms | 5 | 327 | 10 | 4 | 18 |
+| 10 | 4 | 615 | 11 | 91 ms | 5 | 632 | 13 | 4 | 34 |
+| 12 | 5 | 4,427 | 14 | 1.1 s | 5 | 3,172 | 17 | 5 | 66 |
+| 14 | 5 | 8,348 | 16 | 7.0 s | 5 | 7,225 | 20 | 5 | 130 |
+| 16 | 5 | 9,427 | 18 | 21 s | 5 | 14,138 | 23 | 5 | — |
+| 18 | 5 | 15,172 | 21 | 73 s | 5‡ | 17,754 | 25 | 5 | — |
+| 20† | out of memory | | | | | | | | |
+
+† At `p = 3221225473`. F4 ran 23 steps, none above degree 5, then exhausted
+the 13 GB cap before refuting. No `D` is recorded.
+‡ The second of the two systems is decomposable. Its first run spent 19
+minutes certifying the basis and exhausted the memory cap. Re-run with the
+staircase stop, F4 had pinned it at degree 5 to two points, the two orderings
+of one decomposition.
+
+- **`dickson` equals `kummer`** in `D`, width and steps at every `N` from 2 to 18.
+  Their towers have the same leading terms and supports, and so do their `S₃`
+  systems; only the coefficients differ. The two runs are therefore the same F4
+  computation on different numbers, and `dickson` is not an independent
+  replication. `isogeny` is: its step maps change from level to level, and it is
+  not degenerate at infinity (§3.4).
+- **`null` matches the tower** in `D`, width and steps. This holds for Kummer at
+  every `N` it ran, and for Dickson and isogeny up to `N = 10`. One null system at
+  `N = 16` timed out at 300 s, still certifying its basis at degree 7. Re-run with
+  the staircase stop, F4 had pinned it down to at most one point at degree 5.
+- **`naive` gives `D = 2^t + 2` exactly.**
+- **At `p = 3221225473`,** Kummer gives the same `D`, widths and step counts at
+  every `N` from 2 to 16. At that prime `|V|² ≪ p`, so the flat degree does not
+  come from `|V|²` approaching `p` at the smaller prime.
+
+**`m = 3`, `chain`, `raw`.**
+
+| `N` | Kummer `D` | width | Dickson `D` | isogeny `D` | width |
+|--:|--:|--:|--:|--:|--:|
+| 6 | 5 | 368 | 5 | 6 | 399 |
+| 9 | 6 | 4,407 | 6 | 6 | 3,543 |
+| 12 | 6 | 12,482 | 6 | 6 | 13,249 |
+| 15 | out of memory§ | | — | — | |
+
+§ Two attempts. The traced one ran 19 steps, none above degree 6, with
+matrices up to 27,379 columns, then exhausted the 13 GB cap before an answer.
+
+**`m = 4`, `chain`, `raw`.** Random and planted targets agree. The planted runs
+used the staircase stop at 64 points. It fired at 24–43, since every ordering
+of a decomposition (at least `4! = 24`) solves the chain.
+
+| `N` | Kummer `D` | width | isogeny `D` | width |
+|--:|--:|--:|--:|--:|
+| 8 | 6 | 1,916 | 6 | 1,897 |
+| 12 | 7 | 21,768 | 7 | 21,841 |
+
+At `N = 12` the solving degree rises by one per summand: 5, 6 and 7 for
+`m = 2, 3, 4`. At `m = 4` there are only two sizes, and one refutation at
+`N = 12` takes about two minutes.
+
+At `N = 12`, two of the four Kummer systems are planted ones that hit the 300 s
+budget in their certification tails. The two random ones finished at `D = 6`,
+as did every Dickson and isogeny system.
+
+**Generator-count ladder (instrument power).** On planted targets, `g − 1`
+random quadrics through the planted point are added to the system:
+
+| kind, `N` | `g = 1` | 2 | 4 | 8 | 12 |
+|:--|--:|--:|--:|--:|--:|
+| Kummer, 12 | 5 | 4 | 4 | 4 | 4 |
+| isogeny, 12 | 5 | 5 | 5 | 5 | 4 |
+
+At `N = 8`, Kummer and Dickson stay at 4 for `g = 1, 4`, and isogeny falls from 5
+to 4. `D` cannot fall below 4, the degree of the raw `S₃`. Wherever it started
+above 4, it fell as `g` grew, so the instrument registers a fall. It fell at
+`g = 2` for Kummer at `N = 12`, at `g = 4` for isogeny at `N = 8`, and only at
+`g = 12` for isogeny at `N = 12`.
+
+### 10.3 The rule of §5.2, as written
+
+| cell | β̂ (least squares) | pre-registered 95% interval | leave-one-`N`-out slopes | upper-half slope | §5.2 reading |
+|:--|:--|:--|:--|:--|:--|
+| Kummer, `m = 2` | 0.084 (`N` = 2…18) | [0.084, 0.084], degenerate | 0.079–0.095 | 0.100 (`N` = 10…18) | inconclusive |
+| Dickson, `m = 2` | 0.085 (2…18) | degenerate | 0.079–0.095 | 0.100 (10…18) | inconclusive |
+| isogeny, `m = 2` | 0.042 (2…18) | degenerate | 0.000–0.044 | 0.000 (10…18) | inconclusive |
+| Kummer and Dickson, `m = 3` | 0.190 (6…12) | degenerate | 0.000–0.333 | — (three values) | inconclusive |
+| isogeny, `m = 3` | 0.000 (6…12) | degenerate | 0.000–0.000 | — | inconclusive (no null at `m = 3`) |
+| Kummer and isogeny, `m = 4` | 0.250 (8, 12) | degenerate | — (two values) | — | inconclusive (no null at `m = 4`) |
+| naive (Kummer, `m = 2`) | 5.743 (2…12) | degenerate | 3.6–7.2 | 12.0 | H0 |
+
+- **The pre-registered interval is degenerate.** Every target at a given `N`
+  gave the same `D`. Resampling targets within `N` therefore returns β̂ every
+  time, and the "95% interval" is a single point. The rule cannot be read at face
+  value, so the jackknife and upper-half slopes are reported beside it.
+- **H0 needs the lower bound above 0.25.** No tower cell meets it. The naive
+  control does, as it should.
+- **H1 needs two things:** the upper bound below 0.10, and `D_F4` below the
+  shape-matched null at the largest `N`. The first holds only on the degenerate
+  interval. The second fails in every cell where both ran: the null gives the
+  same `D`, the same widths and the same step counts.
+- **The reading is inconclusive for every kind.** §5.2 prescribes what to do
+  next: extend `N` before deciding.
+- **The expectation itself fails.** It was H0 for all three kinds, with β near 1
+  for Kummer and Dickson. From `D = 4` at `N = 10`, β = 1 would give `D ≈ 12` at
+  `N = 18`; the measured `D` is 5. Proposition 2 is a theorem about XL, and §3.3's
+  estimate of about `N + d` is a statement about XL. Neither is tested here, and
+  neither says anything about F4 with falls. What is refuted over the measured
+  range is the prediction built on them (§0, §5.2): that F4 grows the same way.
+  §3.5 had named the way out, falls.
+
+### 10.4 What the controls say
+
+- **naive against tower.** On the same `V` and the same targets, the solving
+  degree drops from `2^t + 2` to 4 or 5: 66 against 5 at `N = 12`. That is the
+  effect §3.1 hoped the tower would have, and it is much larger than §3.3
+  predicted.
+- **null equals tower.** The low degree is a property of the tower algebra and
+  of `S₃`'s monomial support, not of the summation polynomial. That is exactly
+  what the null was built to detect. For the oracle it cuts both ways: it needs
+  nothing curve-specific, and it exploits nothing curve-specific either.
+- **isogeny is as flat as Kummer.** Its `D` is 5 from `N = 4` on; Kummer's is 4,
+  then 5 from `N = 12`. The effect therefore does not come from the Kummer group
+  algebra, nor from its carries `y_j·y_j = y_{j+1}` (§2.4, §3.5). What the three
+  families share is that every tower equation is a quadric with leading term
+  `y_j²`.
+- **ladder.** The instrument registers a fall once enough generators are
+  added. The power check was designed to validate a negative. The pilot's
+  result is not a negative, so the check carries less weight here.
+
+### 10.5 What F4 does: an observation, not a proof
+
+Two diagnostics were run on Kummer `m = 2` random targets.
+- **The step trace** (`F4_DEBUG=1`). The first twelve steps, at degrees 3 and 4,
+  have the same pairs, rows and pivots for `t = 6, 7, 8`. For `t = 5`, the first
+  eight match. After those steps, each further level of the tower adds two or
+  three steps, at degrees 4 and 5. The steps to the solution are 11, 14, 16, 18
+  and 21 for `t = 5 … 9`. The steps at degree 5 number 1, 2 and 4 for
+  `t = 6, 7, 8`.
+- **The degree-capped closure** (`--cap 4 --dump 3`: F4 run to completion with
+  every pair above degree 4 dropped). The result is the same for `t = 6, 7, 8`:
+  - two quadrics, on levels 0–1 and 0–2 of both blocks;
+  - two cubics on levels 0–2;
+  - 88 cubics on levels 0–5, and none on any higher level, whatever `t` is.
+
+  At degree 4, then, F4 knows a fixed window of the tower's lowest levels. What
+  it needs from the levels above that window, it learns in the steps that
+  follow, the first of which is at degree 5.
+
+These observations suggest a mechanism.
+
+> **Conjecture 3.** For `m = 2`, in all three families, F4 with the normal
+> strategy solves the `raw` tower system at degree at most 5, for every `t`.
+>
+> *Suggested mechanism (level-window propagation).* Every level of a tower
+> has the same shape. So the degree-5 closure of what F4 knows on levels
+> `j … j + k` contains the corresponding equations on levels
+> `j + 1 … j + k + 1`, and F4 climbs the tower one window at a time.
+
+The conjecture fits the data, and nothing here proves it. For the isogeny
+tower, whose maps change from level to level, only the shape repeats. A proof
+would bound the last fall degree (Huang–Kosters–Yeo) of `m = 2` tower systems.
+§10.9 ranks that as the third next step.
+
+### 10.6 What it costs (a stage diagnostic, `AGENTS.md` §2)
+
+- **Width.** While `D` stays fixed, the width is at most the number of
+  monomials of degree at most `D`, `C(n + D, D)`, so it grows at most
+  polynomially in `N`. At `N = 18` it is 15,172 of the possible 33,649. The
+  slopes of `log₂(width)` per unit `N` fall from 0.70 (Kummer) and 0.73
+  (isogeny) over `N = 2…18` to 0.52 and 0.59 over the upper half, `N = 10…18`,
+  as a polynomial of fixed degree predicts. A slope over so short a range is not
+  an exponent.
+- **Time.** F4 time grows much faster than the width, because the elimination is
+  dense: 1.1 s, 7.0 s, 21 s and 73 s at `N = 12, 14, 16, 18`.
+- **Against the reference.** On the same system, the cell reference
+  `tower-exhaustive` costs `2^t` square roots, which is 512 at `N = 18`. F4 has no
+  operation counter yet (a Stage 0 item, §4.4), so the two are not in a common
+  unit. For scale, F4's matrices at `N = 18` reach 15,172 columns and 25,791
+  rows. This is no speed claim; nothing here is priced end to end.
+- **§3.7 is unchanged.** At `m ≤ 3` no oracle, however fast, beats rho
+  asymptotically. The measured cells test the mechanism, not the verdict.
+- **No scoreboard row.** The pilot prices nothing, so it has no `S` to draw
+  (`AGENTS.md` §7).
+
+### 10.7 What the pilot shows, and what it does not
+
+At the measured sizes (`N ≤ 18` at `m = 2`, `N ≤ 12` at `m = 3, 4`, `raw`, dense
+`f4_fp`, two primes), the pilot shows four things:
+1. The tower presentation removes the degree of the Yokoyama regime:
+   `2^t + 2` becomes 4–7.
+2. F4's solving degree on tower systems does not follow `N + d`. At `m = 2` it
+   is 4–5 through `N = 18`, in all three families. At `m = 3` it is 5–6 through
+   `N = 12`.
+3. The effect depends neither on the summation polynomial (the null) nor on the
+   Kummer group algebra (isogeny).
+4. The degree grows with the number of summands. At `N = 12` it is 5, 6 and 7
+   for `m = 2, 3, 4`.
+
+It does not show the following:
+1. **That `D` is bounded.** For Kummer and Dickson at `m = 2`, `D` moved once,
+   from 4 to 5 at `N = 12`. For isogeny it has not moved since `N = 4`, but every
+   `N` measured is small. One increase every 10 in `N` (β = 0.1) fits the data as
+   well as a constant, and §3.6 says what β = 0.1 would mean: width
+   `p^{H(0.1)} ≈ p^{0.47}` per target, a negative for the oracle. Only `N` of
+   about 30–40 separates the two. In 13 GB the dense `f4_fp` reaches `N = 18`
+   at `m = 2` and `N = 12` at `m = 3`. At `N = 20` and `N = 15` it ran out of
+   memory before an answer, having stepped no higher than degree 5 and 6
+   respectively.
+2. **How `D` grows with `N` at `m ≥ 4`.** These are the only cells §3.7 allows
+   to matter. `m = 4` has two sizes, with `D = 6` and 7, which is no slope at
+   all. `m = 5` and `tree` were not run.
+3. Any speed, any `S`, or anything about a deployed curve.
+
+### 10.8 A proposed amendment to §5.2 (post hoc, for Stage A)
+
+This amendment was written after seeing the pilot's data, and it is not applied
+to it.
+- **A1(a): a plateau criterion replaces the bootstrap.** The solving degree is
+  an integer and is constant within each `N`, so a within-`N` resampling
+  interval collapses. Report instead:
+  - the per-`N` values;
+  - the leave-one-`N`-out slopes;
+  - the length `L` of the final plateau, the `N` range since `D` last rose.
+
+  A slope below 0.10 needs `L > 10`. H0 needs an increase at least every 4 in
+  `N` over the upper half.
+- **A1(b): H1 splits in two.**
+  - **H1a (viability):** `D` is bounded, judged by A1(a). This gates Stage B.
+  - **H1b (curve-specificity):** `D` is below the null. It is reported and gates
+    nothing.
+
+  §5.2 conflated the two. A low degree that the null shares means the mechanism
+  is generic in the polynomial, and that does not weaken the oracle.
+
+Under A1, Kummer and Dickson still read inconclusive: at `m = 2` their final
+plateau covers `N = 12…18`, so `L = 6`. Isogeny's plateau covers
+`N = 4…18`, `L = 14`, which would pass A1(a). A1 was written after these data,
+though, so that is a prediction for Stage A to test, not a result.
+
+### 10.9 Next steps, ranked
+
+1. **Extend `N` to 30–40 at `m = 2` and `m = 3`.** Nothing else separates a
+   bounded degree from one increase every 10 in `N` (A1(a)). This needs the
+   sparse, tower-aware engine of §4.4 (`f4-fp-tower`), or an external engine that
+   has passed the known-answer battery. §10.5 suggests a design: apply the tower
+   as a rewriting rule, and keep in the matrix only the window of levels F4 is
+   working on.
+2. **Run `m = 4` at four or more sizes, and `m = 5`, in `chain` and `tree`.**
+   These are the decisive cells. The pilot's two `m = 4` sizes already take two
+   minutes per refutation at `N = 12`, so they too need the sparse engine. The
+   growth of `D` with `m` (5, 6, 7 at `N = 12`) decides how the per-target cost
+   scales with `m` in §3.7's balance.
+3. **Prove or refute Conjecture 3.** It is concrete enough to attack directly:
+   show that the degree-5 closure of a window of levels contains the window one
+   level up.
+4. **Replicate independently** with another Gröbner engine (msolve after the
+   battery, or Magma), and compare against whatever degrees PKM report
+   (§10.10).
+5. **Then build Stage 0,** as planned. Nothing in the pilot changes §4.
+
+### 10.10 Relation to the literature, and what is at stake
+
+- **PKM's paper could not be retrieved in this container.** The authors' host
+  failed TLS, and the publisher's copy is paywalled. Whether PKM saw the same low
+  degrees is therefore unchecked. Amadori–Pintore–Sala (ePrint 2017/609, §3.3)
+  quote PKM's per-system times at `m = 3`, from 0.02 s at 11 bits to 5163 s at
+  22 bits, and report no degrees. The flat degree here may reproduce PKM's own
+  observation rather than add a new one; this note claims neither.
+- **The stake.** If `D` is bounded for some `m ≥ 4`, §3.7's floor `r^{2/(m+1)}`
+  becomes the method's exponent, up to factors polynomial in `log r`; at `m = 4`
+  that is `r^{2/5}`. This is the exponent-moving outcome §0 describes. It rests on
+  two things the pilot did not measure (§10.7), and is recorded as the stake, not
+  as a finding.
+- **Which primes the Kummer and Dickson families reach.** A Kummer tower of
+  length `t` needs `2^t | p − 1`. A Dickson torus tower needs `2^t | p + 1`.
+  Isogeny towers need neither. The values below, given for scale, are properties
+  of the primes, not measurements:
+
+  | prime of | `v₂(p − 1)` | `v₂(p + 1)` |
+  |:--|--:|--:|
+  | P-224 | 96 | 1 |
+  | P-256 | 1 | 96 |
+  | P-521 | 1 | 521 |
+  | Ed448 | 1 | 224 |
+  | P-192, SM2 | 1 | 64 |
+  | P-384 | 1 | 32 |
+  | secp256k1 | 1 | 4 |
+  | brainpoolP256r1, BN254 | 1 | 3 |
+  | Curve25519 | 2 | 1 |
+  | BLS12-381 | 1 | 2 |
+
+  Nothing in §10 runs at these sizes. The Dickson torus case is unmeasured,
+  because the pilot's prime is split. A long tower is a precondition for these
+  two families, not a weakness.
 
 ---
 
