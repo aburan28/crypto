@@ -307,7 +307,7 @@ mod tests {
     #[test]
     fn lucifer_sbox_basic_consistency() {
         // hi=0 nibble, lo=0 nibble, ICB=0 → expected v = 0x7C.
-        let expected_v: u8 = (S0[0] | (S1[0] << 4)) as u8;
+        let expected_v: u8 = S0[0] | (S1[0] << 4);
         assert_eq!(expected_v, 0x7C);
     }
 }

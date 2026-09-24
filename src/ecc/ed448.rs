@@ -174,6 +174,7 @@ impl EdPoint {
         (fe_mul(&self.x, &zi), fe_mul(&self.y, &zi))
     }
 
+    #[allow(dead_code)]
     fn is_identity(&self) -> bool {
         let (x, y) = self.to_affine();
         x.is_zero() && y.is_one()

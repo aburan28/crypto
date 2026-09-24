@@ -1,0 +1,74 @@
+{
+  "scope": "One-repetition discovery-only affine-substitution resource probe. n24 seed17, all three families and fifteen matched methods. No holdouts or promotion claim.",
+  "source_hashes": {
+    "worker.rs": "8990d820cf02f87471cb9fe74b90ccf2ef79e918e8c0a100d60a86f9f92414ec",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464",
+    "basis.rs": "716b439439daf82512904bf20b4afd7d0c54379be2043f7a8dfc37dfc879eabc",
+    "basis_tests.rs": "58331a341cfe02a2bfac5622727f3e9f58e5e293ce5270bfe0c8f85b02507046",
+    "affine.rs": "f6983c46d361ec5d3c1106b628b588aa6735717808e688f58d033f6d526f4203",
+    "affine_tests.rs": "cca4072882253ba96aed7bdab2ba835c927b6c8b74c7e1321e594f7dc639266f"
+  },
+  "worker_sha256": "8abb2319234c8d9700a1ecaa064348eb3b65e1ff04b50c3a75285cad89959789",
+  "compiler_command": [
+    "rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "research/boolean_affine_substitution_20260923/worker.rs",
+    "-o",
+    "/tmp/boolean-affine-probe"
+  ],
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "started_utc": "2026-09-23T16:14:43.382566+00:00",
+  "receipts": [
+    {
+      "command": [
+        "/tmp/boolean-affine-probe",
+        "24",
+        "17",
+        "planted",
+        "1",
+        "200000",
+        "with-affine"
+      ],
+      "exit_code": 0,
+      "process_ns": 3953175792,
+      "stdout_sha256": "8ad2471884bfba1925baa794f2fba68d4ce188f58adb4e4c581a8d1e89fdb9f0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-affine-probe",
+        "24",
+        "17",
+        "cross_planted",
+        "1",
+        "200000",
+        "with-affine"
+      ],
+      "exit_code": 0,
+      "process_ns": 1808739125,
+      "stdout_sha256": "0969344825449640e64361f32809b578b731fb03816c888102d27a25fda723e7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-affine-probe",
+        "24",
+        "17",
+        "unplanted",
+        "1",
+        "200000",
+        "with-affine"
+      ],
+      "exit_code": 0,
+      "process_ns": 3369491000,
+      "stdout_sha256": "69a8e1bcd999ad229a3ba3a182148c3e78d932f48d1eea5d8a805c940347e034",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "complete": true,
+  "ended_utc": "2026-09-23T16:14:52.516534+00:00"
+}

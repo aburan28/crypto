@@ -71,7 +71,7 @@ fn main() {
         2 * degree
     );
 
-    let full = widest(|p| PairSumTable::byte_size(p), budget);
+    let full = widest(PairSumTable::byte_size, budget);
     let compact = widest(|p| PairSumTable::compact_byte_size(p, degree), budget);
     let folded = widest(
         |p| {

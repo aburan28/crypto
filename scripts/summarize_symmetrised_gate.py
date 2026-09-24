@@ -19,8 +19,13 @@ relation, on the d = 3 diagonal, with the wall-clock ratio's slope beside it;
 a rung where either arm is budget-limited on more than half its targets is
 printed as a bound and left out of that fit.
 
+Several gate files may be given (the d = 3 run and the separately run,
+non-deciding d = 4 rungs); a JSON object with `instances` is read as the
+calibration instead of docs/ic/calibration.json.  The verdicts use d = 3
+only, as registered.
+
 Usage:
-    python3 scripts/summarize_symmetrised_gate.py GATE.json [CALIBRATION.json]
+    python3 scripts/summarize_symmetrised_gate.py GATE.json [GATE.json ...] [CALIBRATION.json]
 """
 
 from __future__ import annotations
@@ -65,8 +70,15 @@ def gate_verdict(ns, ratios):
 
 
 def main() -> None:
-    rows = json.load(open(sys.argv[1]))
-    calib = json.load(open(sys.argv[2] if len(sys.argv) > 2 else "docs/ic/calibration.json"))["instances"]
+    rows, calib = [], None
+    for path in sys.argv[1:]:
+        doc = json.load(open(path))
+        if isinstance(doc, dict) and "instances" in doc:
+            calib = doc["instances"]
+        else:
+            rows.extend(doc)
+    if calib is None:
+        calib = json.load(open("docs/ic/calibration.json"))["instances"]
     table = []
     for b in rows:
         k = b["targets"]
@@ -97,8 +109,9 @@ def main() -> None:
             table.append(row)
 
     print("| n | shape | l | d | arm | vars | top-degree only | found / refuted / budget | gate failures "
-          "| GAE per relation | reference (full, first-hit) | ratio to reference | per target vs full | splits | ms per relation |")
-    print("|---:|---|---:|---:|---|---:|---|---|---:|---:|---|---:|---:|---:|---:|")
+          "| GAE per relation | reference (full, first-hit) | ratio to reference | per target vs full | splits | ms per relation "
+          "| built degree | oversize targets |")
+    print("|---:|---|---:|---:|---|---:|---|---|---:|---:|---|---:|---:|---:|---:|---:|---:|")
     for r in table:
         for name, a, q, ref, full, first, pt, wall in [
             ("x-chained", r["x"], r["qx"], r["rx"], r["fx"], r["hx"], r["fx_pt"], r["wall_x"]),
@@ -108,7 +121,7 @@ def main() -> None:
             print(f"| {r['n']} | {shape} | {r['l']} | {r['d']} | {name} (cap {a['cap']}) | {a['n_vars']} "
                   f"| {'yes' if a['top_degree_only'] else 'no'} | {a['found']} / {a['refuted']} / {a['budget']} "
                   f"| {a['gate_failures']} | {q:,.0f} | {ref:,.0f} ({full:,.0f}, {first:,.0f}) | {q / ref:.2f} "
-                  f"| {pt:.2f} | {a['mean_splits']:.0f} | {wall:.1f} |")
+                  f"| {pt:.2f} | {a['mean_splits']:.0f} | {wall:.1f} | {a['built_degree']} | {a['oversize_targets']} |")
     print()
     for r in table:
         cal = f", frozen {r['cal']['ns_per_word_xor']:.4f}" if r["cal"] else ", no frozen K_0 entry"

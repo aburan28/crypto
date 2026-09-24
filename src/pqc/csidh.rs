@@ -300,8 +300,8 @@ pub fn velu_codomain(curve: &MontCurve, p: &MontPoint, ell: u64) -> u64 {
     // Production CSIDH uses the exact Costello-Hisil formula.
     let _ = prod_xi_inv;
     let _ = sum_xi_sq;
-    let approx = fp_sub(fp_mul(ell, curve.a), fp_mul(6, sum_xi));
-    approx
+
+    fp_sub(fp_mul(ell, curve.a), fp_mul(6, sum_xi))
 }
 
 // ── Class group action ────────────────────────────────────────────
@@ -372,7 +372,7 @@ mod tests {
     #[test]
     fn p_is_prime() {
         for d in 2..(P as f64).sqrt() as u64 + 1 {
-            assert!(P % d != 0, "P = {} divisible by {}", P, d);
+            assert!(!P.is_multiple_of(d), "P = {} divisible by {}", P, d);
         }
     }
 

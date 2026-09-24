@@ -23,7 +23,7 @@
 //! a signature.
 
 use crate::cryptopals::Report;
-use num_bigint::{BigInt, BigUint, ToBigInt};
+use num_bigint::{BigUint, ToBigInt};
 use num_integer::Integer;
 use num_traits::One;
 

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-09-24T01:40:54.858990+00:00",
+  "analysis_execution_utc": null,
+  "worker_grid_complete": true,
+  "workers_completed": 24,
+  "producer_exit_code": 1,
+  "analysis_complete": false,
+  "reason": "Frozen analyzer expected constructiondispatch_* instead of the executed construction_dispatch_* names.",
+  "provenance": "Producer exit code and assertion observed directly in task tool output. Exact analysis failure timestamp was not captured.",
+  "timed_measurements_modified": false
+}

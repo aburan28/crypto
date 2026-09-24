@@ -37,7 +37,7 @@
 //! group of forms, which is feasible up to `|D| ≈ 10⁶` on a
 //! workstation.
 
-use num_bigint::{BigInt, Sign};
+use num_bigint::BigInt;
 use num_integer::Integer;
 use num_traits::{One, Signed, Zero};
 use std::collections::HashMap;
@@ -181,7 +181,7 @@ impl BinaryQuadraticForm {
         assert_eq!(d_disc, other.discriminant());
 
         // Cohen's algorithm prefers a₁ ≤ a₂; swap if needed.
-        let (a1, b1, c1, a2, b2, c2) = if self.a <= other.a {
+        let (a1, b1, _c1, a2, b2, c2) = if self.a <= other.a {
             (
                 self.a.clone(),
                 self.b.clone(),

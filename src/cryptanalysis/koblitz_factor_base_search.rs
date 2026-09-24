@@ -484,7 +484,7 @@ pub fn greedy_prune(
                 continue;
             }
             let s = expected_trials(unknowns - 1, extra_relations, c, targets);
-            if s < score * (1.0 - 1e-12) && best.map_or(true, |(_, _, bs)| s < bs) {
+            if s < score * (1.0 - 1e-12) && best.is_none_or(|(_, _, bs)| s < bs) {
                 best = Some((o, c, s));
             }
         }

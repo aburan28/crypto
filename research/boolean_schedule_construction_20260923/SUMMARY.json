@@ -1,0 +1,527 @@
+{
+  "all_complete_verified": true,
+  "calibrated_operation_ratio": null,
+  "campaign_seconds": 201.58148933299526,
+  "cells": 24,
+  "classification": "accounting",
+  "constructor_optimization_implemented": false,
+  "decisions": {
+    "16": {
+      "INCONCLUSIVE": 3,
+      "RULED_OUT_UNDER_MEASURED_SCAN": 6
+    },
+    "64": {
+      "INCONCLUSIVE": 9
+    },
+    "dispatch": {
+      "INCONCLUSIVE": 6,
+      "RULED_OUT_UNDER_MEASURED_SCAN": 3
+    }
+  },
+  "full_ic_cost": null,
+  "n24_cost_table": [
+    {
+      "dispatcher_over_arm_planted": 0.007296537171405745,
+      "families": {
+        "cross_planted": 93909291.5,
+        "planted": 92869396.0,
+        "unplanted": 119293479.5
+      },
+      "variant": "search"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.0018839874751928791,
+      "families": {
+        "cross_planted": 121436750.0,
+        "planted": 359675958.0,
+        "unplanted": 464239875.0
+      },
+      "variant": "flat"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.00056825194914035,
+      "families": {
+        "cross_planted": 415240312.0,
+        "planted": 1192472812.5,
+        "unplanted": 1587468187.5
+      },
+      "variant": "bucket"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.0012064424598865827,
+      "families": {
+        "cross_planted": 189090562.5,
+        "planted": 561672042.0,
+        "unplanted": 799997146.0
+      },
+      "variant": "hybrid"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.006247711794283496,
+      "families": {
+        "cross_planted": 109787000.5,
+        "planted": 108459708.5,
+        "unplanted": 139168250.0
+      },
+      "variant": "small_flat"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.006944322891394592,
+      "families": {
+        "cross_planted": 99022750.0,
+        "planted": 97579708.0,
+        "unplanted": 125447687.0
+      },
+      "variant": "word_tail"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.008309223912968506,
+      "families": {
+        "cross_planted": 82529604.5,
+        "planted": 81550937.5,
+        "unplanted": 104025729.5
+      },
+      "variant": "merge_search"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.020369910051347053,
+      "families": {
+        "cross_planted": 33999875.0,
+        "planted": 33265979.0,
+        "unplanted": 43020625.0
+      },
+      "variant": "quadratic_state"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.03314359861198204,
+      "families": {
+        "cross_planted": 20981833.5,
+        "planted": 20445124.5,
+        "unplanted": 26395770.5
+      },
+      "variant": "packed_state"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.0025422047729296692,
+      "families": {
+        "cross_planted": 124032333.5,
+        "planted": 266550125.0,
+        "unplanted": 414505187.5
+      },
+      "variant": "basis_list"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.011515911118664231,
+      "families": {
+        "cross_planted": 27874146.5,
+        "planted": 58842500.0,
+        "unplanted": 90740146.0
+      },
+      "variant": "basis_wide"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.0037066164036810133,
+      "families": {
+        "cross_planted": 56310396.0,
+        "planted": 182814979.0,
+        "unplanted": 233922708.5
+      },
+      "variant": "tail_list"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.012587500426781513,
+      "families": {
+        "cross_planted": 17131604.5,
+        "planted": 53833166.0,
+        "unplanted": 67274229.5
+      },
+      "variant": "tail_wide"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.04659811897980841,
+      "families": {
+        "cross_planted": 14836000.0,
+        "planted": 14541896.0,
+        "unplanted": 18862250.0
+      },
+      "variant": "packed_untraced"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.003459739452989064,
+      "families": {
+        "cross_planted": 142035521.0,
+        "planted": 195860124.5,
+        "unplanted": 488362396.0
+      },
+      "variant": "affine_sl_basis_list"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.03187976502807772,
+      "families": {
+        "cross_planted": 13536500.0,
+        "planted": 21255646.0,
+        "unplanted": 51402083.0
+      },
+      "variant": "affine_sl_basis_fast"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.03969523781628596,
+      "families": {
+        "cross_planted": 17033062.5,
+        "planted": 17070687.5,
+        "unplanted": 20704833.5
+      },
+      "variant": "gray_scalar"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.2624525276100446,
+      "families": {
+        "cross_planted": 2660458.5,
+        "planted": 2581895.5,
+        "unplanted": 3165625.0
+      },
+      "variant": "gray_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.0362588478009681,
+      "families": {
+        "cross_planted": 19668749.5,
+        "planted": 18688542.0,
+        "unplanted": 25630000.0
+      },
+      "variant": "packed_gray12_scalar"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.08268992507539259,
+      "families": {
+        "cross_planted": 8753479.0,
+        "planted": 8194771.0,
+        "unplanted": 11484187.0
+      },
+      "variant": "packed_gray12_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.04633254132407993,
+      "families": {
+        "cross_planted": 16118833.0,
+        "planted": 14625250.0,
+        "unplanted": 21349541.0
+      },
+      "variant": "packed_gray16_scalar"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.26159127793588316,
+      "families": {
+        "cross_planted": 2906417.0,
+        "planted": 2590396.0,
+        "unplanted": 3843958.0
+      },
+      "variant": "packed_gray16_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.0403984947465711,
+      "families": {
+        "cross_planted": 16542021.0,
+        "planted": 16773521.0,
+        "unplanted": 20425603.5
+      },
+      "variant": "gray_delta_scalar"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.29118810332499107,
+      "families": {
+        "cross_planted": 2326604.0,
+        "planted": 2327104.0,
+        "unplanted": 2846458.5
+      },
+      "variant": "gray_delta_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.04072831636007107,
+      "families": {
+        "cross_planted": 8244187.5,
+        "planted": 16637687.5,
+        "unplanted": 20450083.5
+      },
+      "variant": "initial_list"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.2917548497179972,
+      "families": {
+        "cross_planted": 1188708.5,
+        "planted": 2322583.5,
+        "unplanted": 2813687.5
+      },
+      "variant": "initial_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.045819075692403066,
+      "families": {
+        "cross_planted": 16062771.0,
+        "planted": 14789146.0,
+        "unplanted": 21265729.0
+      },
+      "variant": "packed_gray16_delta_scalar"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.26797281457566474,
+      "families": {
+        "cross_planted": 2798479.5,
+        "planted": 2528708.0,
+        "unplanted": 3713583.0
+      },
+      "variant": "packed_gray16_delta_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.16022579275265134,
+      "families": {
+        "cross_planted": 3758208.5,
+        "planted": 4229188.0,
+        "unplanted": 8149166.5
+      },
+      "variant": "fiber_rows"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.1921420596522941,
+      "families": {
+        "cross_planted": 3272333.0,
+        "planted": 3526687.5,
+        "unplanted": 7715666.5
+      },
+      "variant": "fiber_columns"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.5098119761519719,
+      "families": {
+        "cross_planted": 1182208.5,
+        "planted": 1329166.5,
+        "unplanted": 3093291.5
+      },
+      "variant": "fiber_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.37895840615169524,
+      "families": {
+        "cross_planted": 1797125.5,
+        "planted": 1788125.0,
+        "unplanted": 4555395.5
+      },
+      "variant": "fiber_zero_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.30622793390764014,
+      "families": {
+        "cross_planted": 2296750.0,
+        "planted": 2212812.5,
+        "unplanted": 2633729.5
+      },
+      "variant": "gray_quiet"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.46835020465374744,
+      "families": {
+        "cross_planted": 1450520.5,
+        "planted": 1446834.0,
+        "unplanted": 1774125.5
+      },
+      "variant": "wide64_quiet"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.11619914213695132,
+      "families": {
+        "cross_planted": 6254875.0,
+        "planted": 5831583.5,
+        "unplanted": 7116666.5
+      },
+      "variant": "byte_scalar"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.4445811292901956,
+      "families": {
+        "cross_planted": 1431354.5,
+        "planted": 1524187.5,
+        "unplanted": 1916979.5
+      },
+      "variant": "byte_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.2966509795337638,
+      "families": {
+        "cross_planted": 2644229.0,
+        "planted": 2284250.0,
+        "unplanted": 3345354.0
+      },
+      "variant": "leaf16_quiet"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.12311266982667207,
+      "families": {
+        "cross_planted": 5863208.5,
+        "planted": 5504104.5,
+        "unplanted": 8037125.0
+      },
+      "variant": "leaf16_byte_scalar"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.38313661742879357,
+      "families": {
+        "cross_planted": 1666062.0,
+        "planted": 1768625.0,
+        "unplanted": 2664292.0
+      },
+      "variant": "leaf16_byte_simd"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.3725175119650893,
+      "families": {
+        "cross_planted": 1706916.5,
+        "planted": 1819042.0,
+        "unplanted": 2322625.0
+      },
+      "variant": "byte_single_quiet"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.33045141821629137,
+      "families": {
+        "cross_planted": 1940000.0,
+        "planted": 2050604.0,
+        "unplanted": 3063292.0
+      },
+      "variant": "leaf16_single_quiet"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.42211959634745466,
+      "families": {
+        "cross_planted": 1545000.5,
+        "planted": 1605291.5,
+        "unplanted": 2002666.5
+      },
+      "variant": "byte_planes"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.3698616454087759,
+      "families": {
+        "cross_planted": 1832229.5,
+        "planted": 1832104.0,
+        "unplanted": 2836500.0
+      },
+      "variant": "leaf16_byte_planes"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.5435222891261854,
+      "families": {
+        "cross_planted": 1149334.0,
+        "planted": 1246729.0,
+        "unplanted": 1514770.5
+      },
+      "variant": "byte_unrolled"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.9790790263609036,
+      "families": {
+        "cross_planted": 684729.0,
+        "planted": 692104.5,
+        "unplanted": 831124.5
+      },
+      "variant": "wide64_unrolled"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.45529110243100757,
+      "families": {
+        "cross_planted": 1439625.0,
+        "planted": 1488333.5,
+        "unplanted": 2257500.5
+      },
+      "variant": "leaf16_byte_unrolled"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.6310703120125241,
+      "families": {
+        "cross_planted": 1105145.5,
+        "planted": 1073771.0,
+        "unplanted": 1307125.0
+      },
+      "variant": "word16_unrolled"
+    },
+    {
+      "dispatcher_over_arm_planted": 1.0,
+      "families": {
+        "cross_planted": 680750.0,
+        "planted": 677625.0,
+        "unplanted": 843645.5
+      },
+      "variant": "word_dispatch"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.49042544067724847,
+      "families": {
+        "cross_planted": 1554812.5,
+        "planted": 1381708.5,
+        "unplanted": 2051083.5
+      },
+      "variant": "leaf16_word_unrolled"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.5370604396584212,
+      "families": {
+        "cross_planted": 1288312.5,
+        "planted": 1261729.5,
+        "unplanted": 1555959.0
+      },
+      "variant": "construction16_rebound"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.5298430351004151,
+      "families": {
+        "cross_planted": 1298083.0,
+        "planted": 1278916.5,
+        "unplanted": 1554916.5
+      },
+      "variant": "construction16_profile"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.78504552713758,
+      "families": {
+        "cross_planted": 850354.5,
+        "planted": 863166.5,
+        "unplanted": 1060958.0
+      },
+      "variant": "construction64_rebound"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.793065613342111,
+      "families": {
+        "cross_planted": 857854.5,
+        "planted": 854437.5,
+        "unplanted": 1044750.0
+      },
+      "variant": "construction64_profile"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.7808426359380627,
+      "families": {
+        "cross_planted": 866667.0,
+        "planted": 867812.5,
+        "unplanted": 1055270.5
+      },
+      "variant": "construction_dispatch_rebound"
+    },
+    {
+      "dispatcher_over_arm_planted": 0.7890448380078284,
+      "families": {
+        "cross_planted": 911833.0,
+        "planted": 858791.5,
+        "unplanted": 1045521.0
+      },
+      "variant": "construction_dispatch_profile"
+    }
+  ],
+  "observations": 10560,
+  "peak_worker_rss_bytes": 19873792,
+  "performance_promotion": null,
+  "production_solver_cost": null,
+  "protocol_classification": "engineering diagnostic",
+  "rho_ratio": null,
+  "schema_version": 1,
+  "scope": "Discovery-only cost partition of standalone generated public Boolean solves; no constructor optimization, holdouts, curve inputs, keys, production or rho campaign."
+}

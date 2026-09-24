@@ -72,8 +72,7 @@ use std::collections::HashSet;
 
 /// A monomial in `F_2[v_0, …, v_{n-1}] / (v_i² − v_i)` represented as a
 /// bitmask: bit `k` is set iff `v_k` divides the monomial.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, serde::Serialize, serde::Deserialize)]
 pub struct F2BoolMono {
     pub mask: u64,
 }
@@ -147,6 +146,7 @@ impl F2BoolMono {
 /// This gives a graded ordering compatible with the boolean ring; in
 /// the worst case the GB has up to `2^n` elements but in practice
 /// (and for the PQ systems here) it terminates in O(n) elements.
+#[inline]
 pub fn cmp_mono(a: F2BoolMono, b: F2BoolMono) -> Ordering {
     let da = a.degree();
     let db = b.degree();
@@ -181,8 +181,7 @@ pub fn mono_key(m: F2BoolMono) -> u128 {
 ///
 /// Stored as a `Vec<F2BoolMono>` sorted DESCENDING by [`cmp_mono`] with
 /// no duplicates.  `terms[0]` (if present) is the leading monomial.
-#[derive(Clone, PartialEq, Eq, Debug)]
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct F2BoolPoly {
     pub terms: Vec<F2BoolMono>,
     pub n_vars: usize,
@@ -226,6 +225,149 @@ impl F2BoolPoly {
             }
         }
         F2BoolPoly { terms: out, n_vars }
+    }
+
+    /// Specialise variable `var` to `value`: `v := 0` deletes every term
+    /// holding `v`, `v := 1` folds `m` into `m ∖ v` (with cancellation).
+    ///
+    /// Equal to rebuilding through [`F2BoolPoly::from_monos`], without its
+    /// sort.  Deleting terms keeps a sorted list sorted.  Folding lowers
+    /// the degree of every term holding `v` by one and clears the same bit
+    /// in each, so those terms keep their relative order, and the result
+    /// is a linear merge of two sorted lists.  A `terms` not in canonical
+    /// order (the field is public) takes the rebuilding path instead.
+    pub fn substitute(&self, var: u32, value: bool) -> Self {
+        self.substitute_dispatch(var, value, true)
+    }
+
+    /// Is `terms` in canonical order — strictly decreasing under
+    /// [`cmp_mono`], hence also free of repeats?
+    pub fn is_canonical(&self) -> bool {
+        self.terms
+            .windows(2)
+            .all(|w| cmp_mono(w[0], w[1]) == Ordering::Greater)
+    }
+
+    /// [`F2BoolPoly::substitute`] for a polynomial already known to be
+    /// canonical (see [`F2BoolPoly::is_canonical`]): the same result
+    /// without re-checking the order.  `substitute` returns canonical
+    /// polynomials, so a caller that checked its inputs once can use this
+    /// for everything derived from them.
+    pub(crate) fn substitute_canonical(&self, var: u32, value: bool) -> Self {
+        debug_assert!(self.is_canonical(), "substitute_canonical on {self:?}");
+        self.substitute_dispatch(var, value, false)
+    }
+
+    fn substitute_dispatch(&self, var: u32, value: bool, check: bool) -> Self {
+        // The keys below are popcounts, and the baseline x86-64 target has
+        // no `popcnt` instruction, so `count_ones` becomes a dozen-instruction
+        // bit trick.  Where the CPU has it, run the same body compiled with
+        // the instruction; the result is identical either way.
+        #[cfg(target_arch = "x86_64")]
+        {
+            if std::arch::is_x86_feature_detected!("popcnt") {
+                // SAFETY: the feature was just detected on this CPU.
+                return unsafe { self.substitute_popcnt(var, value, check) };
+            }
+        }
+        self.substitute_body(var, value, check)
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "popcnt")]
+    unsafe fn substitute_popcnt(&self, var: u32, value: bool, check: bool) -> Self {
+        self.substitute_body(var, value, check)
+    }
+
+    #[inline(always)]
+    fn substitute_body(&self, var: u32, value: bool, check: bool) -> Self {
+        let bit = 1u64 << var;
+        let terms = &self.terms;
+        let n = terms.len();
+        // Strictly decreasing `mono_key`s is canonical order; anything
+        // else (the field is public) is rebuilt through `from_monos`.
+        if check {
+            let mut previous = u128::MAX;
+            for t in terms {
+                let key = mono_key(*t);
+                if key >= previous {
+                    let monos = terms
+                        .iter()
+                        .filter(|t| value || t.mask & bit == 0)
+                        .map(|t| F2BoolMono::from_mask(t.mask & !bit))
+                        .collect();
+                    return Self::from_monos(monos, self.n_vars);
+                }
+                previous = key;
+            }
+        }
+        let mut out: Vec<F2BoolMono> = Vec::with_capacity(n);
+        if !value {
+            out.extend(terms.iter().filter(|t| t.mask & bit == 0).copied());
+            return F2BoolPoly {
+                terms: out,
+                n_vars: self.n_vars,
+            };
+        }
+        // Two cursors over the same list, the kept terms and the folded
+        // ones (`m ∖ v`), each already in order; merge them, cancelling
+        // equal pairs.  Each cursor keys its current term once.
+        let next_kept = |mut k: usize| {
+            while k < n && terms[k].mask & bit != 0 {
+                k += 1;
+            }
+            k
+        };
+        let next_folded = |mut k: usize| {
+            while k < n && terms[k].mask & bit == 0 {
+                k += 1;
+            }
+            k
+        };
+        let folded_at = |k: usize| F2BoolMono::from_mask(terms[k].mask & !bit);
+        let (mut i, mut j) = (next_kept(0), next_folded(0));
+        let mut ki = if i < n { mono_key(terms[i]) } else { 0 };
+        let mut kj = if j < n { mono_key(folded_at(j)) } else { 0 };
+        while i < n && j < n {
+            match ki.cmp(&kj) {
+                Ordering::Greater => {
+                    out.push(terms[i]);
+                    i = next_kept(i + 1);
+                    if i < n {
+                        ki = mono_key(terms[i]);
+                    }
+                }
+                Ordering::Less => {
+                    out.push(folded_at(j));
+                    j = next_folded(j + 1);
+                    if j < n {
+                        kj = mono_key(folded_at(j));
+                    }
+                }
+                Ordering::Equal => {
+                    i = next_kept(i + 1);
+                    j = next_folded(j + 1);
+                    if i < n {
+                        ki = mono_key(terms[i]);
+                    }
+                    if j < n {
+                        kj = mono_key(folded_at(j));
+                    }
+                }
+            }
+        }
+        while i < n {
+            out.push(terms[i]);
+            i = next_kept(i + 1);
+        }
+        while j < n {
+            out.push(folded_at(j));
+            j = next_folded(j + 1);
+        }
+        F2BoolPoly {
+            terms: out,
+            n_vars: self.n_vars,
+        }
     }
 
     /// `p + q` = XOR of monomial sets.  Merge two sorted lists.
@@ -528,6 +670,77 @@ fn basis_monomials(basis: &[F2BoolPoly]) -> u64 {
     basis.iter().map(|p| p.terms.len() as u64).sum()
 }
 
+/// The S-pair queue of [`groebner_basis_f2_within`].
+///
+/// The queue is a `Vec` popped by "first entry of smallest degree" and
+/// `swap_remove`, and that order decides which pairs the chain criterion
+/// later sees as treated, so it is part of the engine's trajectory and
+/// its counts.  This keeps the `Vec` exactly as it was and indexes it:
+/// per degree, the ordered set of positions holding that degree, so the
+/// pop finds the same entry as the linear `min_by_key` scan did; and the
+/// set of queued pairs, so the chain criterion's "is `(a, b)` still
+/// queued?" is a lookup instead of a scan of the whole queue.
+struct PairQueue {
+    pairs: Vec<(usize, usize, u32)>,
+    by_degree: Vec<std::collections::BTreeSet<usize>>,
+    queued: crate::cryptanalysis::fx_hash::FxSet<(usize, usize)>,
+}
+
+impl PairQueue {
+    fn new() -> Self {
+        PairQueue {
+            pairs: Vec::new(),
+            by_degree: Vec::new(),
+            queued: Default::default(),
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.pairs.len()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.pairs.is_empty()
+    }
+
+    /// Queue `(i, j)` with `i < j`.
+    fn push(&mut self, i: usize, j: usize, degree: u32) {
+        let d = degree as usize;
+        if self.by_degree.len() <= d {
+            self.by_degree.resize_with(d + 1, Default::default);
+        }
+        self.by_degree[d].insert(self.pairs.len());
+        self.queued.insert((i, j));
+        self.pairs.push((i, j, degree));
+    }
+
+    /// The first entry of smallest degree, removed by `swap_remove`.
+    fn pop_min(&mut self) -> (usize, usize, u32) {
+        let set = self
+            .by_degree
+            .iter_mut()
+            .find(|set| !set.is_empty())
+            .expect("pop from an empty pair queue");
+        let idx = set.pop_first().unwrap();
+        let last = self.pairs.len() - 1;
+        if idx != last {
+            // the last entry moves into the hole
+            let moved = self.pairs[last].2 as usize;
+            self.by_degree[moved].remove(&last);
+            self.by_degree[moved].insert(idx);
+        }
+        let p = self.pairs.swap_remove(idx);
+        self.queued.remove(&(p.0, p.1));
+        p
+    }
+
+    /// Is the pair `{a, b}` still queued?
+    fn contains(&self, a: usize, b: usize) -> bool {
+        let (a, b) = if a < b { (a, b) } else { (b, a) };
+        self.queued.contains(&(a, b))
+    }
+}
+
 /// [`groebner_basis_f2`], with the cost of the run beside the basis.
 pub fn groebner_basis_f2_stats(
     initial: Vec<F2BoolPoly>,
@@ -564,11 +777,11 @@ pub fn groebner_basis_f2_within(
     // Bayer–Stillman recommendation and prevents intermediate-polynomial
     // degree blowup that LIFO ordering causes — the classic source of
     // 10–100× speedups on dense boolean systems like Weil-descended PQ.
-    let mut pairs: Vec<(usize, usize, u32)> = Vec::new(); // (i, j, lcm_degree)
+    let mut pairs = PairQueue::new(); // (i, j, lcm_degree)
     for i in 0..basis.len() {
         for j in (i + 1)..basis.len() {
             let lcm_deg = basis[i].lt().unwrap().lcm(basis[j].lt().unwrap()).degree();
-            pairs.push((i, j, lcm_deg));
+            pairs.push(i, j, lcm_deg);
         }
     }
     // Field pairs, `(element, variable, degree)`: the degree is that of
@@ -638,7 +851,7 @@ pub fn groebner_basis_f2_within(
                 let r_lt = r.lt().unwrap();
                 for j in 0..new_idx {
                     let lcm_deg = basis[j].lt().unwrap().lcm(r_lt).degree();
-                    pairs.push((j, new_idx, lcm_deg));
+                    pairs.push(j, new_idx, lcm_deg);
                 }
                 pending.push(queue_field_pairs(new_idx, &r, &mut field));
                 basis.push(r);
@@ -648,13 +861,7 @@ pub fn groebner_basis_f2_within(
             continue;
         }
         // Pop the pair with the SMALLEST lcm degree.
-        let min_idx = pairs
-            .iter()
-            .enumerate()
-            .min_by_key(|(_, p)| p.2)
-            .map(|(idx, _)| idx)
-            .unwrap();
-        let (i, j, lcm_deg) = pairs.swap_remove(min_idx);
+        let (i, j, lcm_deg) = pairs.pop_min();
         st.pairs_considered += 1;
 
         // Criterion 1: coprime leading monomials → S-poly reduces to 0.
@@ -671,10 +878,7 @@ pub fn groebner_basis_f2_within(
         // reduced and cannot contribute.  Skipping it is exact, not an
         // approximation — the basis returned is the same one.
         let lcm_ij = li.lcm(lj);
-        let queued = |a: usize, b: usize| {
-            let (a, b) = if a < b { (a, b) } else { (b, a) };
-            pairs.iter().any(|p| p.0 == a && p.1 == b)
-        };
+        let queued = |a: usize, b: usize| pairs.contains(a, b);
         if (0..basis.len()).any(|k| {
             k != i
                 && k != j
@@ -699,7 +903,7 @@ pub fn groebner_basis_f2_within(
             let r_lt = r.lt().unwrap();
             for k in 0..new_idx {
                 let lcm_deg = basis[k].lt().unwrap().lcm(r_lt).degree();
-                pairs.push((k, new_idx, lcm_deg));
+                pairs.push(k, new_idx, lcm_deg);
             }
             pending.push(queue_field_pairs(new_idx, &r, &mut field));
             basis.push(r);
@@ -809,6 +1013,86 @@ pub fn solution_set(gb: &[F2BoolPoly], n_vars: usize) -> HashSet<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn substitute_matches_rebuilding_through_from_monos() {
+        let mut x = 0xdead_beef_0bad_f00du64;
+        let mut next = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for trial in 0..2_000 {
+            let n = 1 + (trial % 12);
+            let terms: Vec<F2BoolMono> = (0..(next() % 40))
+                .map(|_| F2BoolMono::from_mask(next() & ((1u64 << n) - 1)))
+                .collect();
+            let canonical = F2BoolPoly::from_monos(terms.clone(), n);
+            // the field is public: an unsorted, duplicated list too
+            let raw = F2BoolPoly { terms, n_vars: n };
+            for p in [&canonical, &raw] {
+                for var in 0..n as u32 {
+                    for value in [false, true] {
+                        let bit = 1u64 << var;
+                        let expected = F2BoolPoly::from_monos(
+                            p.terms
+                                .iter()
+                                .filter(|t| value || t.mask & bit == 0)
+                                .map(|t| F2BoolMono::from_mask(t.mask & !bit))
+                                .collect(),
+                            n,
+                        );
+                        assert_eq!(p.substitute(var, value), expected, "{p:?} x{var}={value}");
+                        if p.is_canonical() {
+                            assert_eq!(p.substitute_canonical(var, value), expected);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn pair_queue_pops_what_the_linear_scan_popped() {
+        // the old queue: a Vec, `min_by_key` (first minimum) and
+        // `swap_remove`, membership by scanning
+        let mut x = 0x0123_4567_89ab_cdefu64;
+        let mut next = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for _ in 0..50 {
+            let mut old: Vec<(usize, usize, u32)> = Vec::new();
+            let mut new = PairQueue::new();
+            let mut n = 0usize;
+            for _ in 0..400 {
+                if next() % 3 != 0 || old.is_empty() {
+                    // a new element pairs with every earlier one
+                    n += 1;
+                    for k in 0..n - 1 {
+                        let d = (next() % 7) as u32;
+                        old.push((k, n - 1, d));
+                        new.push(k, n - 1, d);
+                    }
+                } else {
+                    let idx = old
+                        .iter()
+                        .enumerate()
+                        .min_by_key(|(_, p)| p.2)
+                        .map(|(i, _)| i)
+                        .unwrap();
+                    assert_eq!(new.pop_min(), old.swap_remove(idx));
+                }
+                assert_eq!(new.len(), old.len());
+                let (a, b) = ((next() % 12) as usize, (next() % 12) as usize);
+                let scan = old.iter().any(|p| (p.0, p.1) == (a.min(b), a.max(b)));
+                assert_eq!(new.contains(a, b), scan);
+            }
+        }
+    }
 
     #[test]
     fn mono_key_orders_exactly_like_cmp_mono() {
@@ -1020,7 +1304,7 @@ mod tests {
         let v = F2BoolMono::var;
         let g = F2BoolPoly::from_monos(vec![v(0).mul(v(1)), v(2)], 3);
         assert!(
-            !is_boolean_groebner_basis(&[g.clone()]),
+            !is_boolean_groebner_basis(std::slice::from_ref(&g)),
             "the checker must reject the input"
         );
         let gb = groebner_basis_f2(vec![g], 3);

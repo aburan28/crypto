@@ -101,7 +101,7 @@ fn isqrt(n: &BigUint) -> BigUint {
         return BigUint::zero();
     }
     // Newton's method on BigUint.
-    let mut x = BigUint::one() << ((n.bits() + 1) / 2);
+    let mut x = BigUint::one() << n.bits().div_ceil(2);
     loop {
         let y = (&x + n / &x) >> 1u32;
         if y >= x {

@@ -566,7 +566,8 @@
           Semaev systems, the algebraic ones included although none finishes a logarithm at these
           sizes. Matrix-F4 is counted in 64-bit word XORs, exactly; SAT in conflicts; both converted
           at the host&rsquo;s measured factors. First fall degree 2 on every m = 2 system and 3 on
-          every m = 3 one.</p>
+          every m = 3 one (Macaulay rank loss; the m = 3 fall is Kosters&ndash;Yeo&rsquo;s trace
+          equation, see the ECC2K-130 Route 4 panel).</p>
       </div>
       <div class="ledger">
         <div class="lrow"><div class="name"><strong>n = 23, m = 2</strong> &middot; 22 unknowns, 23 equations, first fall degree 2, hit rate 0.5</div><div class="num">GAE / target</div></div>
@@ -1709,6 +1710,11 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         <tr><td class="n">15</td><td>fit only</td><td class="n">2,025 / 4,386</td><td class="n">8.97</td><td class="n"><b>3.10</b></td><td class="n">0.75</td><td><span class="chip">stage diagnostic</span></td></tr>
         <tr><td class="n">19</td><td>E1</td><td class="n">4,421 / 15,359</td><td class="n">14.60</td><td class="n"><b>14.71</b></td><td class="n">3.50</td><td><span class="chip">stage diagnostic</span></td></tr>
         <tr><td class="n">23</td><td>E1</td><td class="n">45,495 / 54,629</td><td class="n">15.57</td><td class="n"><b>3.60</b></td><td class="n">0.28, a bound (x budget-limited on 12/16)</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr class="group"><td colspan="7">The registered d = 4 pair (x at cap 4, symmetrised at 5) &mdash; <em>does not decide the gate (registered)</em>. Frozen: <code>experiments/26_koblitz_symmetrised_gate_d4.json</code></td></tr>
+        <tr><td class="n">13</td><td>E1</td><td class="n">395 / 875</td><td class="n">1,987</td><td class="n">74.5</td><td class="n">0.083</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">15</td><td>fit only</td><td class="n">2,069 / 3,012</td><td class="n">2,338</td><td class="n">29.6</td><td class="n">0.018</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">19</td><td>E1</td><td class="n">4,768 / 14,186</td><td class="n">7,524 (x matrix over the size caps on 16/16)</td><td class="n">1,101</td><td class="n">0.44</td><td><span class="chip">stage diagnostic</span></td></tr>
+        <tr><td class="n">23</td><td>E1</td><td class="n" colspan="4">timed out at the two-hour limit; reproducible with <code>--rungs 23 --x-caps 4</code></td><td><span class="chip">stage diagnostic</span></td></tr>
       </tbody>
     </table></div>
     <div class="panel-head">
@@ -1722,6 +1728,121 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         &plusmn; 0.32 over three unbounded rungs, which is weakly determined. At n = 23 the
         symmetrised system is the better algebraic oracle, but both lose to enumeration. Nothing
         here bears on ECC2K-130&rsquo;s security.</p>
+      <p>With Route 3 closed, the ECC2K-130 routes thread has met its own finishing condition. Its
+        ledger is the close-out at the end of
+        <code>research/notes/ecc2k130/RESEARCH_ECC2K130_ROUTE_TARGETS.md</code>. No oracle built
+        there beats enumeration per relation at any size measured. The m&thinsp;=&thinsp;4 fall
+        degree has since been measured (the panel below). The items still open (Crossbred&rsquo;s
+        &alpha; over four rungs and Crossbred on the symmetrised system<s>, and a second literature
+        pass</s>) are left open by choice, with the reasons given there. Class
+        <span class="chip">accounting</span>.</p>
+      <p><b>The second literature pass has since run (X6&prime;, 2026-09-24).</b>
+        <b>Nothing reopens Route 5.</b>
+        Outside the survey&rsquo;s exclusion set, no source gives an operation count at prime n
+        with q&thinsp;=&thinsp;2. GGMP&rsquo;s three
+        Frobenius-invariant constructions do not exist at q&thinsp;=&thinsp;2, n&thinsp;=&thinsp;131:
+        ord<sub>131</sub>(2)&thinsp;=&thinsp;130, Couveignes&ndash;Lercier with a torus needs n&thinsp;|&thinsp;3,
+        and with an elliptic curve it needs a multiple of n below 6. The &ldquo;Koblitz structure beyond
+        Frobenius&rdquo; item is empty by structure: End(E)&thinsp;=&thinsp;Z[&tau;] is the maximal
+        order of Q(&radic;&minus;7), with class number 1 and automorphisms &plusmn;1. The pass also found
+        that X5&prime;&rsquo;s explanation was Kosters&ndash;Yeo&rsquo;s, and that is recorded in the
+        panel below. Class <span class="chip">accounting</span>.</p>
+    </div>
+  </div>
+
+  <div class="panel" id="ecc2k130-x5-fall-20260923">
+    <div class="panel-head">
+      <h2>ECC2K-130 Route 4: the x-chain&rsquo;s &ldquo;fall at 3&rdquo; is one hidden linear equation, Kosters&ndash;Yeo&rsquo;s trace equation (2015), which the symmetrised chain does not have</h2>
+      <p>A structural measurement: no cost moves, so no <code>S</code> and none of the four
+        classes. H1 of the Koblitz scaling target says every chained decomposition system has its
+        first fall at exactly degree 3. X5&prime; tested it on the one chained family H1 had not
+        measured: the symmetrised S<sub>3</sub>, chained at m&thinsp;=&thinsp;4 through two
+        intermediate points. That system has Boolean degree 3, like the x-chained systems. It
+        was registered before any code for it existed. Frozen:
+        <code>experiments/27_koblitz_x5_fall.json</code>, with an unregistered supplement that
+        only raises the Macaulay size caps in
+        <code>experiments/27_koblitz_x5_fall_raised_caps.json</code>.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>First fall degree (the first Macaulay degree that loses rank, H1&rsquo;s definition)
+        over 16 draws per cell, one shared non-invariant V per rung. Under the degree-fall
+        definition that Kosters&ndash;Yeo and HKY use, the same event is recorded at 2, one degree
+        earlier. &ldquo;Censored&rdquo; means
+        the degree-4 matrix exceeded the registered default caps; the supplement removes that.</caption>
+      <thead>
+        <tr><th scope="col" class="n">n</th><th scope="col" class="n">Unknowns (sym / x)</th>
+          <th scope="col">Symmetrised chain, registered</th><th scope="col">Symmetrised chain, raised caps</th>
+          <th scope="col">x-chained</th><th scope="col">Class</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">9</td><td class="n">31 / 34</td><td>4 on 16/16</td><td>4 on 16/16</td><td>2&ndash;3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">11</td><td class="n">35 / 38</td><td>4 on 16/16</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">13</td><td class="n">43 / 46</td><td>censored at 3</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">15</td><td class="n">47 / 50</td><td>censored at 3</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">17</td><td class="n">55 / 58</td><td>censored at 3</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+        <tr><td class="n">19</td><td class="n">59 / 62</td><td>censored at 3</td><td>4 on 16/16</td><td>3</td><td><span class="chip">structural</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><b>By H1&rsquo;s letter, H1 is falsified for the symmetrised chain.</b> It falls at 4 on
+        every rung measured, 96 draws, where the x-chain falls at 3, and the offset is flat in n.
+        <b>A diagnostic then explains the one degree, and the explanation was already
+        published.</b> It is Kosters&ndash;Yeo&rsquo;s trace equation (arXiv 1503.08001,
+        Prop.&nbsp;4.9 and Cor.&nbsp;4.11; HKY, CRYPTO 2015, Prop.&nbsp;5). Both papers apply it to chained
+        S<sub>3</sub> systems of this kind (KY derive a fall at 2; HKY report &ldquo;usually 2&rdquo;), and the paper was already in this thread&rsquo;s literature
+        survey. X6&prime; checks the identification on 96 of 96 draws, and a wrong-functional
+        control matches on none (<code>experiments/28_koblitz_x5_trace_identity.log</code>).
+        That re-attribution is <span class="chip">accounting</span>. With x(R) known, the x-chain&rsquo;s last
+        link is t&sup2; + x<sub>R</sub>t + &hellip;, and t &#8614; t&sup2; + x<sub>R</sub>t has a
+        one-dimensional kernel, so one combination of its n quadratic equations is linear. The
+        measured quadratic-part rank is n&nbsp;&minus;&nbsp;1 on every draw. That linear equation&rsquo;s
+        Boolean identity is the single rank loss H1 records at 3. It also holds on every chained
+        row of H1&rsquo;s own table that was checked (all but n&nbsp;=&nbsp;7), and that table now
+        carries an <span class="chip">accounting</span> caveat.
+        The symmetrised last link has full rank n, so it has no such equation and shows no rank
+        loss below degree 4, where trivial syzygies force one. That part, and the removal of the
+        trace equation by symmetrising under T, is not in the ten sources X6&prime; read. It is
+        recorded as absent from those sources, not as new. So the symmetrised system is not
+        shown to be harder. What the diagnostic shows is that the x-chain gets one free linear
+        equation and the symmetrisation removes it (<code>experiments/27_koblitz_x5_syzygy.log</code>).
+        The one registered solve (K<sub>1</sub>/F<sub>2</sub><sup>11</sup>) agrees with 4-sum
+        enumeration on all 16 targets. Nothing here bears on ECC2K-130&rsquo;s cost.</p>
+    </div>
+    <div class="table-scroll"><table>
+      <caption>X5&Prime; (2026-09-24, registered before its code): the degree-4 kernel split, per arm, over
+        8, 8 and 2 draws at n&thinsp;=&thinsp;9, 11, 13. &ldquo;Literature&rdquo; is the degree-fall
+        definition (graded top parts, trivial syzygies removed). &ldquo;Trivial&rdquo; is the
+        degree-4 span of the Koszul and field syzygies, which is n&thinsp;+&thinsp;C(n,2) in every
+        row. &ldquo;Identities&rdquo; are the Boolean identities of linear falls below degree 4.
+        Frozen: <code>experiments/29_koblitz_x5_syzygy_split.json</code>.</caption>
+      <thead>
+        <tr><th scope="col" class="n">n</th><th scope="col">Arm</th><th scope="col" class="n">First fall (literature)</th>
+          <th scope="col" class="n">Falls at that degree</th><th scope="col" class="n">K<sub>4</sub> (H1)</th>
+          <th scope="col" class="n">Trivial + identities</th><th scope="col" class="n">Residual</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="n">9</td><td>symmetrised</td><td class="n">3</td><td class="n">18 (= 2n)</td><td class="n">87&ndash;89</td><td class="n">45</td><td class="n">42&ndash;44</td></tr>
+        <tr><td class="n">11</td><td>symmetrised</td><td class="n">3</td><td class="n">22 (= 2n)</td><td class="n">116&ndash;122</td><td class="n">66</td><td class="n">50&ndash;56</td></tr>
+        <tr><td class="n">13</td><td>symmetrised</td><td class="n">3</td><td class="n">26 (= 2n)</td><td class="n">117</td><td class="n">91</td><td class="n">26</td></tr>
+        <tr><td class="n">9</td><td>x-chain</td><td class="n">2</td><td class="n">1 (KY&rsquo;s trace)</td><td class="n">84</td><td class="n">78</td><td class="n">6</td></tr>
+        <tr><td class="n">11</td><td>x-chain</td><td class="n">2</td><td class="n">1</td><td class="n">111</td><td class="n">103</td><td class="n">8</td></tr>
+        <tr><td class="n">13</td><td>x-chain</td><td class="n">2</td><td class="n">1</td><td class="n">145</td><td class="n">136</td><td class="n">9</td></tr>
+      </tbody>
+    </table></div>
+    <div class="panel-head">
+      <p><b>X5&Prime;: the symmetrised chain falls genuinely at 3, one degree above the x-chain in
+        both conventions.</b> By the literature&rsquo;s definition its first fall is at 3 on every
+        draw, with exactly 2n falls, all to quadratics. The count is derived: its last link&rsquo;s
+        top part w<sub>R</sub>UW stays bilinear when multiplied by U or by W, because squaring is
+        F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
+        4-against-3 is the literature&rsquo;s 3-against-2, and the symmetrised system is not shown
+        to be harder. In H1&rsquo;s convention its rank loss at 4 is n&thinsp;+&thinsp;C(n,2)
+        trivial syzygies plus 26&ndash;56 that are not trivial and not identities of linear falls
+        (there are none). What those are is left open. An unregistered localisation puts all of
+        it, in both arms and both conventions, in the single link whose x(R) is known: the two
+        cubic links show no kernel and no fall through degree 4. A first run that under-counted
+        the x-chain&rsquo;s identities is kept and disclosed (<code>experiments/29_prefix/</code>);
+        the symmetrised rows are unchanged by the fix. A structural measurement: no cost moves.</p>
     </div>
   </div>
 
@@ -4334,6 +4455,86 @@ factor base, and this prices a decomposition oracle.</p>
   calibrated rows, fitted exponents and the page's end-to-end verdict are unchanged.</p>
 </section>
 <!-- END ic-crossover-20260922 -->
+<!-- BEGIN ic-triple-table-20260923 -->
+<section class="panel" id="ic-triple-table-20260923">
+<div class="panel-head"><h2>A triple-sum table moves the crossover <span class="chip">engineering</span></h2>
+<p>The collector above is a pair table: <code>&Theta;(r<sup>2/3</sup>)</code> at its own
+  optimum, a boundary its model scopes to &ldquo;this pair-table collector, not index
+  calculus&rdquo;. Tabulating <em>triple</em> sums <code>C<sub>o</sub> + P<sub>j</sub> + P<sub>l</sub></code>
+  under the same Frobenius orbit names and scanning one summand per probe gives four-term
+  relations and <code>&Theta;(r<sup>3/5</sup>)</code>, so the ratio to rho grows as
+  <code>r<sup>1/10</sup></code> rather than <code>r<sup>1/6</sup></code> &mdash; derived, not
+  fitted. A patch against the <code>scaled</code> tree, on two orbits where the pair table uses
+  8, 16 and 24; pre-registered before it existed. <strong>Not a tournament round</strong>: no
+  native-time gate, no confirmation or replay stage, nothing promoted.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/RESULTS.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/PREREGISTRATION.md">pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/triple-table.patch">the patch</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_table_20260923/check.py">the paired check</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Instruction unit Ir, complete DLP, 32 paired fixtures a cell (seed 20260924), every report
+  of both arms verified by <code>oracle.py</code> with the same logarithm. Geometric mean of the
+  paired ratios, 95% bootstrap interval. The rho columns are secondary and were not
+  pre-registered.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>triple / <code>scaled</code></th><th><code>scaled</code> / rho</th><th>triple / rho</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>1.493 [1.411, 1.575]</td><td>0.689 [0.621, 0.769]</td><td>1.029 [0.940, 1.130]</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td><strong>0.589</strong> [0.535, 0.643]</td><td>1.381 [1.152, 1.649]</td><td><strong>0.813</strong> [0.700, 0.941]</td></tr>
+<tr><td>n43a1</td><td>4,644,189,029</td><td><strong>0.409</strong> [0.337, 0.494]</td><td>2.281 [1.864, 2.754]</td><td><strong>0.933</strong> [0.753, 1.159]</td></tr>
+</tbody></table></div>
+<p><strong>The gain grows with <code>r</code>, with disjoint intervals</strong> &mdash; the signature
+  of a rate change, which no constant-factor lever produces &mdash; and the pre-registered rule reads
+  <em>supported</em>. In instructions, <code>n37a0</code> moves from 1.38&times; rho to 0.81&times;,
+  its whole interval below one, and <code>n43a1</code> from 2.28&times; to 0.93&times;, its interval
+  spanning one. <strong><code>n23a1</code> gets worse</strong>, 1.49&times; the pair table: the
+  checker needs two columns and at two orbits the triple table costs more than the whole pair-table
+  job there. The same harness reproduces the crossover panel above (0.69, 1.38, 2.28 against 0.83,
+  1.40, 2.21). A collector that switches by the model at run time would read 0.69, 0.81 and 0.93,
+  below rho at every cell measured &mdash; arithmetic on this table, not a run, and to be
+  pre-registered before it is one.</p>
+<p><strong>Correction (same PR):</strong> the rho columns are against the worker&rsquo;s rho, which
+  names each Frobenius class by squaring through the orbit &mdash; about 9,100 of its 9,930
+  instructions a step at <code>n43a1</code> &mdash; where the IC arm uses a normal-basis rotation.
+  Given that one piece of the IC arm&rsquo;s code, rho is below this pipeline at every cell measured
+  (panel below). &ldquo;Below rho&rdquo; in this panel does not mean below a matched rho.</p>
+</section>
+<!-- END ic-triple-table-20260923 -->
+<!-- BEGIN ic-triple-counted-20260923 -->
+<section class="panel" id="ic-triple-counted-20260923">
+<div class="panel-head"><h2>Counted sizing, and a matched rho <span class="chip">engineering</span> <span class="chip">accounting</span></h2>
+<p>Two pre-registered measurements on the same 256 fixtures. First, the triple collector sized
+  by counting the four-sums a target can be, in place of the pair model&rsquo;s units: the count
+  predicts the triple arm&rsquo;s trials unfitted (5.9, 37.1, 396.1 against 6.1, 36.3, 387.6) and
+  moves one cell, <code>n43a1</code>, from two orbits to three. Second, a control prompted by a
+  profile taken during the first: the worker&rsquo;s rho with the IC arm&rsquo;s own normal-basis
+  orbit naming in place of its squaring chain, and nothing else changed. <strong>Not a tournament
+  round</strong>; instructions only.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/RESULTS.md">full result</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/PREREGISTRATION.md">sizing pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/PREREGISTRATION-rho-control.md">control pre-registration</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/ic_triple_counted_20260923/rho-normal-basis.patch">the control patch</a>.</p></div>
+<div class="table-scroll"><table>
+<caption>Instruction unit Ir, complete DLP, 32 paired fixtures a cell (128 at <code>n43a1</code>),
+  every report of every arm verified by <code>oracle.py</code> with the same logarithm. Geometric
+  mean of paired ratios, 95% bootstrap interval. &ldquo;Worker rho&rdquo; is the tournament&rsquo;s
+  matched rho; &ldquo;control&rdquo; is that rho with the IC arm&rsquo;s orbit naming.</caption>
+<thead><tr><th>Cell</th><th>r</th><th>counted / triple</th><th>counted / worker rho</th><th>counted / control</th></tr></thead><tbody>
+<tr><td>n23a1</td><td>4,196,903</td><td>0.968 (identity)</td><td>1.210 [1.121, 1.303]</td><td>1.501 [1.433, 1.574]&dagger;</td></tr>
+<tr><td>n37a0</td><td>230,603,167</td><td>0.991 (identity)</td><td>0.795 [0.679, 0.935]</td><td><strong>1.723</strong> [1.569, 1.892]</td></tr>
+<tr><td>n43a1</td><td>4,644,189,029</td><td><strong>0.773</strong> [0.708, 0.843]</td><td>0.824 [0.752, 0.904]</td><td><strong>2.882</strong> [2.680, 3.095]</td></tr>
+<tr><td>n59a0</td><td>10,063,074,221</td><td>0.999 (identity)</td><td>0.823 [0.763, 0.889]</td><td><strong>1.192</strong> [1.148, 1.242]</td></tr>
+<tr><td>n61a1</td><td>11,514,943,771</td><td>0.997 (identity)</td><td>0.714 [0.580, 0.874]</td><td>2.736 [2.306, 3.258]&dagger;</td></tr>
+</tbody></table></div>
+<p><strong>The sizing is supported</strong>: 0.773&times; the triple arm at <code>n43a1</code>, below
+  its predicted 0.795&ndash;0.890, and an exact identity (same base, trials, relations, logarithm)
+  at the other four. <strong>Against the worker&rsquo;s rho the pipeline is below one at four
+  cells</strong>, as registered. <strong>Against the control it is above one at all five</strong>:
+  the worker&rsquo;s rho spends about 9,100 of its 9,930 instructions a step walking the Frobenius
+  orbit by squaring, a cost the IC arm engineered away in round 0007, and every cell where this
+  pipeline &ldquo;beat rho&rdquo; is one where it loses to a rho given that same code. By the
+  control rule&rsquo;s letter the verdict is <em>partial</em>: &dagger; marks two cells left unscored
+  because walk lengths fell outside a band that proved too tight for 32 fixtures &mdash; both
+  bootstrap intervals contain one, and a longer control walk only lowers these ratios. The control
+  still costs about 3,000 instructions a step against an IC probe&rsquo;s 1,100, so a lean rho would
+  widen every ratio. <strong>Class: accounting</strong> &mdash; what the ratios were counted against
+  changed; no algorithm got worse. It bears on every IC-below-rho result taken against the
+  worker&rsquo;s rho, including the tournament&rsquo;s <code>beats_rho_strict</code> rounds, and says
+  nothing new about ECC2K-130.</p>
+</section>
+<!-- END ic-triple-counted-20260923 -->
 <section class="panel" id="radical-pair-image-20260921">
   <div class="panel-head">
     <h2>Radical unordered-pair image <span class="chip">engineering diagnostic</span></h2>
@@ -4392,6 +4593,579 @@ factor base, and this prices a decomposition oracle.</p>
   <p>The prior binary <code>k=4</code> probe is censored after 90 seconds;
     no direct comparison or inferred degree is reported. Existing calibrated
     index-calculus rows, exponents and the page's end-to-end verdict are unchanged.</p>
+</section>
+<section class="panel" id="boolean-implicit-minors-20260923">
+  <div class="panel-head">
+    <h2>Exact minors verified; the fixed prepass does not justify a complete candidate <span class="chip">engineering</span></h2>
+    <p>All 5,280 observations on 12 discovery systems and 55 arms complete and verify.
+      All six measured preprocessing opportunity bounds miss two, even granting later recovery free.
+      No complete candidate or holdout promotion follows. Full-IC and rho costs remain null.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_implicit_minors_20260923/CONCLUSION.md">costs, overlaps and limitations</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_implicit_minors_20260923/run_01/results.json">frozen result</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_implicit_minors_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_implicit_minors_20260923/RUN_LEDGER.json">evidence hashes</a>.</p>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Variables</th><th>Family</th><th>Reference / prepass</th><th>95% interval</th><th>Conditional decision</th></tr></thead><tbody>
+<tr><td>12</td><td>cross_planted</td><td>0.011738</td><td>[0.009875, 0.013883]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>12</td><td>planted</td><td>0.010903</td><td>[0.008474, 0.015090]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>12</td><td>unplanted</td><td>0.012081</td><td>[0.009786, 0.013399]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>16</td><td>cross_planted</td><td>0.019185</td><td>[0.011461, 0.056777]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>16</td><td>planted</td><td>0.022413</td><td>[0.007921, 0.056610]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+<tr><td>16</td><td>unplanted</td><td>0.047025</td><td>[0.034008, 0.081790]</td><td>BLOCKS_MEASURED_FIXED_PREPROCESSING</td></tr>
+  </tbody></table></div>
+  <p>n16 discovery medians, milliseconds including validation. Kind distinguishes complete solves from necessary filters.
+    The dispatcher ratio uses pooled planted medians and is descriptive; a filter row does not establish a full-solver speedup.</p>
+  <div class="table-wrap"><table><thead><tr><th>Arm</th><th>Kind</th><th>Planted ms</th><th>Cross-planted ms</th><th>Unplanted ms</th><th>Dispatcher / arm, planted</th><th>Correctness</th></tr></thead><tbody>
+<tr><td>search</td><td>complete solve</td><td>3.161792</td><td>3.622229</td><td>3.848584</td><td>0.0015</td><td>PASS</td></tr>
+<tr><td>flat</td><td>complete solve</td><td>6.724417</td><td>3.217792</td><td>7.329375</td><td>0.0007</td><td>PASS</td></tr>
+<tr><td>bucket</td><td>complete solve</td><td>63.313041</td><td>28.751771</td><td>60.618333</td><td>0.0001</td><td>PASS</td></tr>
+<tr><td>hybrid</td><td>complete solve</td><td>14.092563</td><td>7.393916</td><td>15.796083</td><td>0.0003</td><td>PASS</td></tr>
+<tr><td>small_flat</td><td>complete solve</td><td>4.851021</td><td>2.852708</td><td>5.503917</td><td>0.0010</td><td>PASS</td></tr>
+<tr><td>word_tail</td><td>complete solve</td><td>4.267812</td><td>2.452062</td><td>4.680438</td><td>0.0011</td><td>PASS</td></tr>
+<tr><td>merge_search</td><td>complete solve</td><td>2.786104</td><td>3.276916</td><td>3.520771</td><td>0.0017</td><td>PASS</td></tr>
+<tr><td>quadratic_state</td><td>complete solve</td><td>1.140750</td><td>1.227062</td><td>1.284312</td><td>0.0042</td><td>PASS</td></tr>
+<tr><td>packed_state</td><td>complete solve</td><td>0.693875</td><td>0.695875</td><td>0.867395</td><td>0.0069</td><td>PASS</td></tr>
+<tr><td>basis_list</td><td>complete solve</td><td>2.276937</td><td>1.975521</td><td>9.229458</td><td>0.0021</td><td>PASS</td></tr>
+<tr><td>basis_wide</td><td>complete solve</td><td>0.459854</td><td>0.462166</td><td>1.790209</td><td>0.0105</td><td>PASS</td></tr>
+<tr><td>tail_list</td><td>complete solve</td><td>5.717791</td><td>3.070208</td><td>6.134750</td><td>0.0008</td><td>PASS</td></tr>
+<tr><td>tail_wide</td><td>complete solve</td><td>1.346812</td><td>0.748834</td><td>1.615541</td><td>0.0036</td><td>PASS</td></tr>
+<tr><td>packed_untraced</td><td>complete solve</td><td>0.481687</td><td>0.557000</td><td>0.594771</td><td>0.0100</td><td>PASS</td></tr>
+<tr><td>affine_sl_basis_list</td><td>complete solve</td><td>10.589729</td><td>6.691959</td><td>17.195958</td><td>0.0005</td><td>PASS</td></tr>
+<tr><td>affine_sl_basis_fast</td><td>complete solve</td><td>0.802208</td><td>0.546333</td><td>1.251105</td><td>0.0060</td><td>PASS</td></tr>
+<tr><td>gray_scalar</td><td>complete solve</td><td>0.031771</td><td>0.025229</td><td>0.083104</td><td>0.1515</td><td>PASS</td></tr>
+<tr><td>gray_simd</td><td>complete solve</td><td>0.005895</td><td>0.005834</td><td>0.015709</td><td>0.8163</td><td>PASS</td></tr>
+<tr><td>packed_gray12_scalar</td><td>complete solve</td><td>0.109917</td><td>0.114625</td><td>0.123458</td><td>0.0438</td><td>PASS</td></tr>
+<tr><td>packed_gray12_simd</td><td>complete solve</td><td>0.050188</td><td>0.044916</td><td>0.054937</td><td>0.0959</td><td>PASS</td></tr>
+<tr><td>packed_gray16_scalar</td><td>complete solve</td><td>0.034959</td><td>0.031355</td><td>0.086146</td><td>0.1377</td><td>PASS</td></tr>
+<tr><td>packed_gray16_simd</td><td>complete solve</td><td>0.010333</td><td>0.009458</td><td>0.019291</td><td>0.4657</td><td>PASS</td></tr>
+<tr><td>gray_delta_scalar</td><td>complete solve</td><td>0.025916</td><td>0.031626</td><td>0.083896</td><td>0.1857</td><td>PASS</td></tr>
+<tr><td>gray_delta_simd</td><td>complete solve</td><td>0.007104</td><td>0.005959</td><td>0.013999</td><td>0.6774</td><td>PASS</td></tr>
+<tr><td>initial_list</td><td>complete solve</td><td>0.027354</td><td>0.045437</td><td>0.085104</td><td>0.1759</td><td>PASS</td></tr>
+<tr><td>initial_simd</td><td>complete solve</td><td>0.007187</td><td>0.013750</td><td>0.015354</td><td>0.6696</td><td>PASS</td></tr>
+<tr><td>packed_gray16_delta_scalar</td><td>complete solve</td><td>0.034354</td><td>0.036333</td><td>0.088041</td><td>0.1401</td><td>PASS</td></tr>
+<tr><td>packed_gray16_delta_simd</td><td>complete solve</td><td>0.009876</td><td>0.009874</td><td>0.017229</td><td>0.4873</td><td>PASS</td></tr>
+<tr><td>fiber_rows</td><td>complete solve</td><td>0.034792</td><td>0.022396</td><td>0.075521</td><td>0.1383</td><td>PASS</td></tr>
+<tr><td>fiber_columns</td><td>complete solve</td><td>0.032771</td><td>0.023334</td><td>0.070708</td><td>0.1469</td><td>PASS</td></tr>
+<tr><td>fiber_simd</td><td>complete solve</td><td>0.014250</td><td>0.011938</td><td>0.037583</td><td>0.3377</td><td>PASS</td></tr>
+<tr><td>fiber_zero_simd</td><td>complete solve</td><td>0.014209</td><td>0.013833</td><td>0.055083</td><td>0.3387</td><td>PASS</td></tr>
+<tr><td>gray_quiet</td><td>complete solve</td><td>0.006021</td><td>0.006167</td><td>0.016063</td><td>0.7993</td><td>PASS</td></tr>
+<tr><td>wide64_quiet</td><td>complete solve</td><td>0.005916</td><td>0.004938</td><td>0.010021</td><td>0.8135</td><td>PASS</td></tr>
+<tr><td>byte_scalar</td><td>complete solve</td><td>0.015459</td><td>0.013104</td><td>0.034042</td><td>0.3113</td><td>PASS</td></tr>
+<tr><td>byte_simd</td><td>complete solve</td><td>0.006042</td><td>0.005521</td><td>0.013416</td><td>0.7965</td><td>PASS</td></tr>
+<tr><td>leaf16_quiet</td><td>complete solve</td><td>0.009000</td><td>0.010042</td><td>0.019166</td><td>0.5347</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_scalar</td><td>complete solve</td><td>0.018021</td><td>0.015583</td><td>0.036166</td><td>0.2670</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_simd</td><td>complete solve</td><td>0.009021</td><td>0.009437</td><td>0.017167</td><td>0.5335</td><td>PASS</td></tr>
+<tr><td>byte_single_quiet</td><td>complete solve</td><td>0.005396</td><td>0.006208</td><td>0.014020</td><td>0.8919</td><td>PASS</td></tr>
+<tr><td>leaf16_single_quiet</td><td>complete solve</td><td>0.009666</td><td>0.009187</td><td>0.017542</td><td>0.4979</td><td>PASS</td></tr>
+<tr><td>byte_planes</td><td>complete solve</td><td>0.007062</td><td>0.006625</td><td>0.012729</td><td>0.6815</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_planes</td><td>complete solve</td><td>0.009104</td><td>0.009270</td><td>0.016459</td><td>0.5286</td><td>PASS</td></tr>
+<tr><td>byte_unrolled</td><td>complete solve</td><td>0.009166</td><td>0.007625</td><td>0.012542</td><td>0.5250</td><td>PASS</td></tr>
+<tr><td>wide64_unrolled</td><td>complete solve</td><td>0.007374</td><td>0.007333</td><td>0.009521</td><td>0.6526</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_unrolled</td><td>complete solve</td><td>0.011730</td><td>0.011833</td><td>0.016958</td><td>0.4103</td><td>PASS</td></tr>
+<tr><td>word16_unrolled</td><td>complete solve</td><td>0.004063</td><td>0.003916</td><td>0.008292</td><td>1.1846</td><td>PASS</td></tr>
+<tr><td>word_dispatch</td><td>complete solve</td><td>0.004812</td><td>0.004916</td><td>0.008833</td><td>1.0000</td><td>PASS</td></tr>
+<tr><td>leaf16_word_unrolled</td><td>complete solve</td><td>0.008688</td><td>0.007812</td><td>0.011500</td><td>0.5540</td><td>PASS</td></tr>
+<tr><td>projected4</td><td>complete solve</td><td>0.015041</td><td>0.013771</td><td>0.032250</td><td>0.3199</td><td>PASS</td></tr>
+<tr><td>projected5</td><td>complete solve</td><td>0.014958</td><td>0.010500</td><td>0.033562</td><td>0.3217</td><td>PASS</td></tr>
+<tr><td>projected6</td><td>complete solve</td><td>0.022708</td><td>0.020688</td><td>0.112792</td><td>0.2119</td><td>PASS</td></tr>
+<tr><td>numeric_minor4</td><td>necessary filter</td><td>0.605666</td><td>0.608313</td><td>0.674958</td><td>0.0079</td><td>PASS</td></tr>
+<tr><td>symbolic_minor4</td><td>necessary filter</td><td>0.210646</td><td>0.183667</td><td>0.149229</td><td>0.0228</td><td>PASS</td></tr>
+<tr><td>affine_filter</td><td>necessary filter</td><td>0.043229</td><td>0.041521</td><td>0.042271</td><td>0.1113</td><td>PASS</td></tr>
+  </tbody></table></div>
+  <p>The four minors leave 1,410&ndash;1,920 outside assignments at n16; exact affine consistency leaves 5&ndash;15.
+    Every filter bit is checked and all 417,792 original assignments are covered. Product cancellations, degree drops,
+    zero/duplicate controls and rank-deficient insufficiency remain explicit. Whole-worker RSS: 6,881,280 bytes.
+    Campaign: 6.472 seconds. The prior complete projected-fiber comparison remains below.</p>
+</section>
+
+<section class="panel" id="boolean-projected-fibers-20260923">
+  <div class="panel-head">
+    <h2>Complete recovery is verified; the dramatic-gain gate is rejected <span class="chip">engineering</span></h2>
+    <p>Exact equation-space projection, affine kernel recovery and original-equation checks are implemented.
+      All 89,856 observations over 216 generated systems and 52 methods complete and verify.
+      The table reports complete generic solver time; full-IC and rho costs remain null.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_projected_fibers_20260923/CONCLUSION.md">results and paired gates</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_projected_fibers_20260923/run_01/results.json">frozen measurements</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_projected_fibers_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_projected_fibers_20260923/RUN_LEDGER.json">source and evidence hashes</a>.</p>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Candidate</th><th>Groups above 2.0</th><th>Groups above 1.0</th><th>Dramatic decision</th></tr></thead><tbody>
+<tr><td>projected4</td><td>0/18</td><td>0/18</td><td>REJECTED</td></tr>
+<tr><td>projected5</td><td>0/18</td><td>0/18</td><td>REJECTED</td></tr>
+<tr><td>projected6</td><td>0/18</td><td>0/18</td><td>REJECTED</td></tr>
+  </tbody></table></div>
+  <p>Fresh n24 holdouts; milliseconds per cold solve plus validation. The dispatcher ratio uses pooled planted medians
+    and is descriptive. Acceptance requires all 18 paired groups, shown in the linked note. No tuning followed holdout timing.</p>
+  <div class="table-wrap"><table><thead><tr><th>Method</th><th>Planted ms</th><th>Cross-planted ms</th><th>Unplanted ms</th><th>Dispatcher / arm, planted</th><th>Correctness</th></tr></thead><tbody>
+<tr><td>search</td><td>80.001708</td><td>47.048313</td><td>144.082667</td><td>0.006</td><td>PASS</td></tr>
+<tr><td>flat</td><td>293.787812</td><td>149.567542</td><td>551.156271</td><td>0.002</td><td>PASS</td></tr>
+<tr><td>bucket</td><td>1063.146729</td><td>522.085438</td><td>2073.274041</td><td>0.000</td><td>PASS</td></tr>
+<tr><td>hybrid</td><td>514.655333</td><td>217.043645</td><td>929.048666</td><td>0.001</td><td>PASS</td></tr>
+<tr><td>small_flat</td><td>95.769917</td><td>55.280020</td><td>168.129188</td><td>0.005</td><td>PASS</td></tr>
+<tr><td>word_tail</td><td>78.956625</td><td>48.750083</td><td>148.793167</td><td>0.006</td><td>PASS</td></tr>
+<tr><td>merge_search</td><td>67.071146</td><td>41.841020</td><td>125.967833</td><td>0.007</td><td>PASS</td></tr>
+<tr><td>quadratic_state</td><td>27.550375</td><td>16.624250</td><td>50.572479</td><td>0.018</td><td>PASS</td></tr>
+<tr><td>packed_state</td><td>16.797020</td><td>10.198187</td><td>31.142854</td><td>0.029</td><td>PASS</td></tr>
+<tr><td>basis_list</td><td>282.821000</td><td>145.705105</td><td>473.644334</td><td>0.002</td><td>PASS</td></tr>
+<tr><td>basis_wide</td><td>62.981354</td><td>33.804167</td><td>101.966166</td><td>0.008</td><td>PASS</td></tr>
+<tr><td>tail_list</td><td>132.341771</td><td>63.002187</td><td>261.885167</td><td>0.004</td><td>PASS</td></tr>
+<tr><td>tail_wide</td><td>40.335729</td><td>19.494583</td><td>74.902167</td><td>0.012</td><td>PASS</td></tr>
+<tr><td>packed_untraced</td><td>12.085312</td><td>7.211729</td><td>22.438917</td><td>0.040</td><td>PASS</td></tr>
+<tr><td>affine_sl_basis_list</td><td>261.098875</td><td>109.415937</td><td>570.792292</td><td>0.002</td><td>PASS</td></tr>
+<tr><td>affine_sl_basis_fast</td><td>22.341000</td><td>11.336166</td><td>59.270583</td><td>0.022</td><td>PASS</td></tr>
+<tr><td>gray_scalar</td><td>12.095083</td><td>12.198167</td><td>20.990667</td><td>0.040</td><td>PASS</td></tr>
+<tr><td>gray_simd</td><td>1.786687</td><td>1.735084</td><td>3.127355</td><td>0.271</td><td>PASS</td></tr>
+<tr><td>packed_gray12_scalar</td><td>14.836375</td><td>10.110437</td><td>27.358458</td><td>0.033</td><td>PASS</td></tr>
+<tr><td>packed_gray12_simd</td><td>6.599166</td><td>4.629062</td><td>12.401625</td><td>0.073</td><td>PASS</td></tr>
+<tr><td>packed_gray16_scalar</td><td>11.702291</td><td>9.840834</td><td>21.972292</td><td>0.041</td><td>PASS</td></tr>
+<tr><td>packed_gray16_simd</td><td>2.139625</td><td>1.859104</td><td>3.849729</td><td>0.226</td><td>PASS</td></tr>
+<tr><td>gray_delta_scalar</td><td>11.774125</td><td>11.606979</td><td>20.919500</td><td>0.041</td><td>PASS</td></tr>
+<tr><td>gray_delta_simd</td><td>1.632521</td><td>1.648708</td><td>2.863208</td><td>0.297</td><td>PASS</td></tr>
+<tr><td>initial_list</td><td>11.813999</td><td>5.895625</td><td>21.233896</td><td>0.041</td><td>PASS</td></tr>
+<tr><td>initial_simd</td><td>1.626167</td><td>0.865980</td><td>2.890875</td><td>0.298</td><td>PASS</td></tr>
+<tr><td>packed_gray16_delta_scalar</td><td>11.444187</td><td>9.950750</td><td>22.081146</td><td>0.042</td><td>PASS</td></tr>
+<tr><td>packed_gray16_delta_simd</td><td>2.035855</td><td>1.855229</td><td>3.784687</td><td>0.238</td><td>PASS</td></tr>
+<tr><td>fiber_rows</td><td>4.458437</td><td>4.303229</td><td>8.958771</td><td>0.109</td><td>PASS</td></tr>
+<tr><td>fiber_columns</td><td>4.115854</td><td>4.017104</td><td>8.536625</td><td>0.118</td><td>PASS</td></tr>
+<tr><td>fiber_simd</td><td>1.554646</td><td>1.470374</td><td>3.321729</td><td>0.312</td><td>PASS</td></tr>
+<tr><td>fiber_zero_simd</td><td>2.315125</td><td>2.065333</td><td>4.517771</td><td>0.209</td><td>PASS</td></tr>
+<tr><td>gray_quiet</td><td>1.618208</td><td>1.631375</td><td>2.724959</td><td>0.299</td><td>PASS</td></tr>
+<tr><td>wide64_quiet</td><td>1.013438</td><td>1.018417</td><td>1.798479</td><td>0.478</td><td>PASS</td></tr>
+<tr><td>byte_scalar</td><td>4.101854</td><td>4.145062</td><td>7.269125</td><td>0.118</td><td>PASS</td></tr>
+<tr><td>byte_simd</td><td>1.143271</td><td>1.085000</td><td>1.937355</td><td>0.424</td><td>PASS</td></tr>
+<tr><td>leaf16_quiet</td><td>1.929312</td><td>1.649083</td><td>3.457562</td><td>0.251</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_scalar</td><td>4.417916</td><td>3.702125</td><td>8.282917</td><td>0.110</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_simd</td><td>1.428667</td><td>1.224229</td><td>2.714583</td><td>0.339</td><td>PASS</td></tr>
+<tr><td>byte_single_quiet</td><td>1.304167</td><td>1.289146</td><td>2.367167</td><td>0.372</td><td>PASS</td></tr>
+<tr><td>leaf16_single_quiet</td><td>1.688063</td><td>1.388875</td><td>3.103000</td><td>0.287</td><td>PASS</td></tr>
+<tr><td>byte_planes</td><td>1.149563</td><td>1.148270</td><td>2.101666</td><td>0.422</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_planes</td><td>1.493667</td><td>1.286229</td><td>2.807771</td><td>0.324</td><td>PASS</td></tr>
+<tr><td>byte_unrolled</td><td>0.882062</td><td>0.897208</td><td>1.582542</td><td>0.549</td><td>PASS</td></tr>
+<tr><td>wide64_unrolled</td><td>0.481604</td><td>0.487708</td><td>0.847584</td><td>1.006</td><td>PASS</td></tr>
+<tr><td>leaf16_byte_unrolled</td><td>1.238458</td><td>1.030750</td><td>2.281375</td><td>0.391</td><td>PASS</td></tr>
+<tr><td>word16_unrolled</td><td>0.897208</td><td>0.873667</td><td>1.550771</td><td>0.540</td><td>PASS</td></tr>
+<tr><td>word_dispatch</td><td>0.484604</td><td>0.485542</td><td>0.848666</td><td>1.000</td><td>PASS</td></tr>
+<tr><td>leaf16_word_unrolled</td><td>1.228167</td><td>1.086000</td><td>2.281417</td><td>0.395</td><td>PASS</td></tr>
+<tr><td>projected4</td><td>1.575000</td><td>1.532229</td><td>3.701479</td><td>0.308</td><td>PASS</td></tr>
+<tr><td>projected5</td><td>1.586854</td><td>1.449938</td><td>2.955208</td><td>0.305</td><td>PASS</td></tr>
+<tr><td>projected6</td><td>1.518646</td><td>1.398583</td><td>2.735750</td><td>0.319</td><td>PASS</td></tr>
+  </tbody></table></div>
+  <p>Projection is necessary only: every free extension remains subject to the original equations.
+    Quotient dimensions do not establish independent conditional constraints or predicted yield.
+    Whole-worker peak RSS: 24,625,152 bytes; campaign: 1972.255 seconds.
+    These are finite mathematical solver diagnostics. Earlier negative and inconclusive construction results remain below.</p>
+</section>
+
+<section class="panel" id="boolean-schedule-construction-20260923">
+  <div class="panel-head">
+    <h2>Construction cost diagnostic: limited bounds, no optimized solver <span class="chip">accounting</span></h2>
+    <p>Even free construction misses 2&times; in six guarded 16-point groups and three
+      dispatcher groups under the measured unchanged-scan assumption. Every 64-point
+      group remains inconclusive because extraction exceeded the declared timing tolerance.
+      No constructor optimization or performance promotion is implemented.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/CONCLUSION.md">decisions, phases and limitations</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/analysis_01/results.json">corrected diagnostic results</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/ANALYSIS_CORRECTION.md">preserved analysis failure</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_schedule_construction_20260923/RUN_LEDGER.json">artifact ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold solve plus validation milliseconds on two n24 discovery seeds and
+      eight random/reverse repetitions. Profiled arms include observer work. Display
+      ratios use pooled planted costs relative to the retained dispatcher; no speedup
+      or holdout promotion is claimed. All 55 methods are included.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Dispatcher / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>search</td><td>92.869396</td><td>93.909291</td><td>119.293480</td><td>0.007</td><td>PASS</td></tr>
+      <tr><td>flat</td><td>359.675958</td><td>121.436750</td><td>464.239875</td><td>0.002</td><td>PASS</td></tr>
+      <tr><td>bucket</td><td>1192.472812</td><td>415.240312</td><td>1587.468188</td><td>0.001</td><td>PASS</td></tr>
+      <tr><td>hybrid</td><td>561.672042</td><td>189.090563</td><td>799.997146</td><td>0.001</td><td>PASS</td></tr>
+      <tr><td>small_flat</td><td>108.459709</td><td>109.787001</td><td>139.168250</td><td>0.006</td><td>PASS</td></tr>
+      <tr><td>word_tail</td><td>97.579708</td><td>99.022750</td><td>125.447687</td><td>0.007</td><td>PASS</td></tr>
+      <tr><td>merge_search</td><td>81.550938</td><td>82.529605</td><td>104.025729</td><td>0.008</td><td>PASS</td></tr>
+      <tr><td>quadratic_state</td><td>33.265979</td><td>33.999875</td><td>43.020625</td><td>0.020</td><td>PASS</td></tr>
+      <tr><td>packed_state</td><td>20.445124</td><td>20.981834</td><td>26.395771</td><td>0.033</td><td>PASS</td></tr>
+      <tr><td>basis_list</td><td>266.550125</td><td>124.032333</td><td>414.505187</td><td>0.003</td><td>PASS</td></tr>
+      <tr><td>basis_wide</td><td>58.842500</td><td>27.874146</td><td>90.740146</td><td>0.012</td><td>PASS</td></tr>
+      <tr><td>tail_list</td><td>182.814979</td><td>56.310396</td><td>233.922708</td><td>0.004</td><td>PASS</td></tr>
+      <tr><td>tail_wide</td><td>53.833166</td><td>17.131605</td><td>67.274230</td><td>0.013</td><td>PASS</td></tr>
+      <tr><td>packed_untraced</td><td>14.541896</td><td>14.836000</td><td>18.862250</td><td>0.047</td><td>PASS</td></tr>
+      <tr><td>affine_sl_basis_list</td><td>195.860125</td><td>142.035521</td><td>488.362396</td><td>0.003</td><td>PASS</td></tr>
+      <tr><td>affine_sl_basis_fast</td><td>21.255646</td><td>13.536500</td><td>51.402083</td><td>0.032</td><td>PASS</td></tr>
+      <tr><td>gray_scalar</td><td>17.070687</td><td>17.033062</td><td>20.704833</td><td>0.040</td><td>PASS</td></tr>
+      <tr><td>gray_simd</td><td>2.581895</td><td>2.660458</td><td>3.165625</td><td>0.262</td><td>PASS</td></tr>
+      <tr><td>packed_gray12_scalar</td><td>18.688542</td><td>19.668750</td><td>25.630000</td><td>0.036</td><td>PASS</td></tr>
+      <tr><td>packed_gray12_simd</td><td>8.194771</td><td>8.753479</td><td>11.484187</td><td>0.083</td><td>PASS</td></tr>
+      <tr><td>packed_gray16_scalar</td><td>14.625250</td><td>16.118833</td><td>21.349541</td><td>0.046</td><td>PASS</td></tr>
+      <tr><td>packed_gray16_simd</td><td>2.590396</td><td>2.906417</td><td>3.843958</td><td>0.262</td><td>PASS</td></tr>
+      <tr><td>gray_delta_scalar</td><td>16.773521</td><td>16.542021</td><td>20.425604</td><td>0.040</td><td>PASS</td></tr>
+      <tr><td>gray_delta_simd</td><td>2.327104</td><td>2.326604</td><td>2.846458</td><td>0.291</td><td>PASS</td></tr>
+      <tr><td>initial_list</td><td>16.637687</td><td>8.244188</td><td>20.450084</td><td>0.041</td><td>PASS</td></tr>
+      <tr><td>initial_simd</td><td>2.322583</td><td>1.188708</td><td>2.813687</td><td>0.292</td><td>PASS</td></tr>
+      <tr><td>packed_gray16_delta_scalar</td><td>14.789146</td><td>16.062771</td><td>21.265729</td><td>0.046</td><td>PASS</td></tr>
+      <tr><td>packed_gray16_delta_simd</td><td>2.528708</td><td>2.798480</td><td>3.713583</td><td>0.268</td><td>PASS</td></tr>
+      <tr><td>fiber_rows</td><td>4.229188</td><td>3.758208</td><td>8.149166</td><td>0.160</td><td>PASS</td></tr>
+      <tr><td>fiber_columns</td><td>3.526687</td><td>3.272333</td><td>7.715667</td><td>0.192</td><td>PASS</td></tr>
+      <tr><td>fiber_simd</td><td>1.329166</td><td>1.182208</td><td>3.093291</td><td>0.510</td><td>PASS</td></tr>
+      <tr><td>fiber_zero_simd</td><td>1.788125</td><td>1.797125</td><td>4.555396</td><td>0.379</td><td>PASS</td></tr>
+      <tr><td>gray_quiet</td><td>2.212813</td><td>2.296750</td><td>2.633729</td><td>0.306</td><td>PASS</td></tr>
+      <tr><td>wide64_quiet</td><td>1.446834</td><td>1.450521</td><td>1.774126</td><td>0.468</td><td>PASS</td></tr>
+      <tr><td>byte_scalar</td><td>5.831583</td><td>6.254875</td><td>7.116667</td><td>0.116</td><td>PASS</td></tr>
+      <tr><td>byte_simd</td><td>1.524188</td><td>1.431355</td><td>1.916980</td><td>0.445</td><td>PASS</td></tr>
+      <tr><td>leaf16_quiet</td><td>2.284250</td><td>2.644229</td><td>3.345354</td><td>0.297</td><td>PASS</td></tr>
+      <tr><td>leaf16_byte_scalar</td><td>5.504105</td><td>5.863208</td><td>8.037125</td><td>0.123</td><td>PASS</td></tr>
+      <tr><td>leaf16_byte_simd</td><td>1.768625</td><td>1.666062</td><td>2.664292</td><td>0.383</td><td>PASS</td></tr>
+      <tr><td>byte_single_quiet</td><td>1.819042</td><td>1.706916</td><td>2.322625</td><td>0.373</td><td>PASS</td></tr>
+      <tr><td>leaf16_single_quiet</td><td>2.050604</td><td>1.940000</td><td>3.063292</td><td>0.330</td><td>PASS</td></tr>
+      <tr><td>byte_planes</td><td>1.605292</td><td>1.545000</td><td>2.002667</td><td>0.422</td><td>PASS</td></tr>
+      <tr><td>leaf16_byte_planes</td><td>1.832104</td><td>1.832229</td><td>2.836500</td><td>0.370</td><td>PASS</td></tr>
+      <tr><td>byte_unrolled</td><td>1.246729</td><td>1.149334</td><td>1.514771</td><td>0.544</td><td>PASS</td></tr>
+      <tr><td>wide64_unrolled</td><td>0.692105</td><td>0.684729</td><td>0.831125</td><td>0.979</td><td>PASS</td></tr>
+      <tr><td>leaf16_byte_unrolled</td><td>1.488333</td><td>1.439625</td><td>2.257500</td><td>0.455</td><td>PASS</td></tr>
+      <tr><td>word16_unrolled</td><td>1.073771</td><td>1.105145</td><td>1.307125</td><td>0.631</td><td>PASS</td></tr>
+      <tr><td>word_dispatch</td><td>0.677625</td><td>0.680750</td><td>0.843646</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>leaf16_word_unrolled</td><td>1.381709</td><td>1.554812</td><td>2.051083</td><td>0.490</td><td>PASS</td></tr>
+      <tr><td>construction16_rebound</td><td>1.261729</td><td>1.288312</td><td>1.555959</td><td>0.537</td><td>PASS</td></tr>
+      <tr><td>construction16_profile</td><td>1.278917</td><td>1.298083</td><td>1.554917</td><td>0.530</td><td>PASS</td></tr>
+      <tr><td>construction64_rebound</td><td>0.863166</td><td>0.850355</td><td>1.060958</td><td>0.785</td><td>PASS</td></tr>
+      <tr><td>construction64_profile</td><td>0.854437</td><td>0.857854</td><td>1.044750</td><td>0.793</td><td>PASS</td></tr>
+      <tr><td>construction_dispatch_rebound</td><td>0.867812</td><td>0.866667</td><td>1.055271</td><td>0.781</td><td>PASS</td></tr>
+      <tr><td>construction_dispatch_profile</td><td>0.858792</td><td>0.911833</td><td>1.045521</td><td>0.789</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 10,560 observations across 24 systems complete with verified results. The
+    original analysis-only naming failure is preserved; an additive correction changes
+    neither measurements nor thresholds. Validation includes 63 Rust tests and 20 Python
+    evidence/census tests. Whole-worker peak RSS is 19,873,792 bytes.</p>
+  <p>Relevant guarded outcomes: 16-point scans 6/9 below the target and 3/9 inconclusive;
+    64-point scans 9/9 inconclusive; dispatcher 3/9 below the target and 6/9 inconclusive.
+    These conditional timing ceilings do not rule out changing the scan itself.</p>
+  <p>An exact discovery census annihilates low-block quadratic coefficient vectors in
+    equation space, leaving a necessary affine subsystem. At n24 the quotient dimensions
+    are 21&ndash;23 for four low variables, 18&ndash;20 for five, and 14&ndash;17 for six.
+    Original-equation checks remain mandatory. Its complete solver and speed are unmeasured;
+    production, full-IC, calibrated-operation and rho costs remain null.</p>
+</section>
+<section class="panel" id="boolean-byte-sieve-20260923">
+  <div class="panel-head">
+    <h2>Compiled Gray schedules: limited 2&times; groups, universal gain rejected <span class="chip">engineering</span></h2>
+    <p>The compiled 64-point kernel and fixed dispatcher each pass 3/18 dramatic
+      comparisons, including two fresh n24 holdout groups. Every universal dramatic
+      and incremental gate remains rejected. All 192 systems complete with verified
+      results; no treatment is eligible for confirmation.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_byte_sieve_20260923/CONCLUSION.md">decision and all subgroup claims</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_byte_sieve_20260923/CORRECTNESS.md">projection, recovery and schedule arguments</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_byte_sieve_20260923/run_01/results.json">frozen costs and intervals</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_byte_sieve_20260923/SUMMARY.json">case ratios and alias diagnostics</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_byte_sieve_20260923/RUN_LEDGER.json">immutable run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete standalone solve plus validation milliseconds on two fresh n24
+      holdout seeds and eight random/reverse repetitions. Display ratios use pooled planted
+      costs relative to retained direct SIMD; acceptance uses paired fastest-reference costs.
+      All 49 methods are shown. Calibrated IC-operation and rho comparisons are absent.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Direct SIMD / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>82.267875</td><td>59.109792</td><td>133.809917</td><td>0.025</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>389.806354</td><td>236.008417</td><td>544.432396</td><td>0.005</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>1434.410437</td><td>766.203542</td><td>1832.271167</td><td>0.001</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>676.465416</td><td>361.093209</td><td>753.735458</td><td>0.003</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>93.188875</td><td>67.080521</td><td>143.119875</td><td>0.022</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>86.461167</td><td>61.242230</td><td>135.998333</td><td>0.024</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>70.492688</td><td>50.582021</td><td>114.221813</td><td>0.029</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>29.291563</td><td>20.800375</td><td>47.691500</td><td>0.070</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>17.407000</td><td>12.600105</td><td>28.807396</td><td>0.117</td><td>PASS</td></tr>
+      <tr><td>Full RREF, list</td><td>204.686375</td><td>87.435541</td><td>435.574125</td><td>0.010</td><td>PASS</td></tr>
+      <tr><td>Full RREF, wide</td><td>42.473230</td><td>19.855313</td><td>95.332063</td><td>0.048</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, list</td><td>148.274250</td><td>75.484792</td><td>243.890874</td><td>0.014</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, wide</td><td>45.624187</td><td>24.110333</td><td>76.576750</td><td>0.045</td><td>PASS</td></tr>
+      <tr><td>Packed without diagnostic hashing</td><td>12.495354</td><td>8.820979</td><td>20.444416</td><td>0.163</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, list</td><td>516.991584</td><td>206.844083</td><td>623.828562</td><td>0.004</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, compact</td><td>43.627188</td><td>21.257562</td><td>64.053354</td><td>0.047</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, scalar</td><td>17.462333</td><td>13.337146</td><td>20.751812</td><td>0.117</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, SIMD</td><td>2.038874</td><td>2.003750</td><td>3.220125</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, scalar</td><td>18.364604</td><td>12.039438</td><td>28.516708</td><td>0.111</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, SIMD</td><td>9.562000</td><td>5.834291</td><td>12.479625</td><td>0.213</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, scalar</td><td>16.459479</td><td>14.677500</td><td>21.557334</td><td>0.124</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, SIMD</td><td>3.197521</td><td>2.606396</td><td>3.860292</td><td>0.638</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, scalar</td><td>15.147854</td><td>12.674250</td><td>20.539084</td><td>0.135</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, SIMD</td><td>2.149083</td><td>1.806938</td><td>2.875146</td><td>0.949</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, list/scalar</td><td>15.908042</td><td>6.974771</td><td>20.867188</td><td>0.128</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, packed/SIMD</td><td>2.117771</td><td>0.926500</td><td>2.877042</td><td>0.963</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, scalar</td><td>14.241354</td><td>14.636875</td><td>21.519687</td><td>0.143</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, SIMD</td><td>3.247459</td><td>2.570146</td><td>3.755355</td><td>0.628</td><td>PASS</td></tr>
+      <tr><td>Fibers with row elimination</td><td>5.986562</td><td>5.545438</td><td>9.374667</td><td>0.341</td><td>PASS</td></tr>
+      <tr><td>Fibers with scalar column membership</td><td>5.037688</td><td>4.532063</td><td>8.839833</td><td>0.405</td><td>PASS</td></tr>
+      <tr><td>Fibers with SIMD screening</td><td>1.966979</td><td>1.670146</td><td>3.652000</td><td>1.037</td><td>PASS</td></tr>
+      <tr><td>Fibers with zero-only SIMD screen</td><td>2.962292</td><td>2.578375</td><td>5.166291</td><td>0.688</td><td>PASS</td></tr>
+      <tr><td>Direct 16-point, quiet</td><td>1.937105</td><td>1.748355</td><td>2.667021</td><td>1.053</td><td>PASS</td></tr>
+      <tr><td>Full-word 64-point, quiet</td><td>1.461688</td><td>1.135646</td><td>1.789583</td><td>1.395</td><td>PASS</td></tr>
+      <tr><td>Projected bytes, scalar</td><td>5.921750</td><td>4.971187</td><td>7.801771</td><td>0.344</td><td>PASS</td></tr>
+      <tr><td>Projected bytes, SIMD</td><td>1.238875</td><td>1.104625</td><td>1.951437</td><td>1.646</td><td>PASS</td></tr>
+      <tr><td>Leaf16 full words, quiet</td><td>2.179438</td><td>2.294042</td><td>3.499896</td><td>0.936</td><td>PASS</td></tr>
+      <tr><td>Leaf16 projected bytes, scalar</td><td>5.501542</td><td>5.617355</td><td>8.762771</td><td>0.371</td><td>PASS</td></tr>
+      <tr><td>Leaf16 projected bytes, SIMD</td><td>1.786313</td><td>1.448959</td><td>2.682500</td><td>1.141</td><td>PASS</td></tr>
+      <tr><td>Single-stage bytes, quiet</td><td>1.779834</td><td>1.332938</td><td>2.341958</td><td>1.146</td><td>PASS</td></tr>
+      <tr><td>Leaf16 single-stage bytes, quiet</td><td>2.332917</td><td>1.737416</td><td>3.146209</td><td>0.874</td><td>PASS</td></tr>
+      <tr><td>Projected bit planes</td><td>1.536125</td><td>1.161938</td><td>2.018687</td><td>1.327</td><td>PASS</td></tr>
+      <tr><td>Leaf16 projected bit planes</td><td>2.117979</td><td>1.531125</td><td>2.864583</td><td>0.963</td><td>PASS</td></tr>
+      <tr><td>Compiled projected bytes</td><td>1.140313</td><td>0.900521</td><td>1.573042</td><td>1.788</td><td>PASS</td></tr>
+      <tr><td>Compiled full-word 64-point</td><td>0.698354</td><td>0.560230</td><td>0.839333</td><td>2.920</td><td>PASS</td></tr>
+      <tr><td>Leaf16 compiled projected bytes</td><td>1.467542</td><td>1.215521</td><td>2.348187</td><td>1.389</td><td>PASS</td></tr>
+      <tr><td>Compiled full-word 16-point</td><td>0.984708</td><td>0.969562</td><td>1.537875</td><td>2.071</td><td>PASS</td></tr>
+      <tr><td>Fixed compiled dispatcher</td><td>0.578354</td><td>0.565666</td><td>0.838083</td><td>3.525</td><td>PASS</td></tr>
+      <tr><td>Leaf16 compiled full words</td><td>1.792749</td><td>1.588083</td><td>2.321146</td><td>1.137</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>The run contains 75,264 observations: 147 SAT and 45 UNSAT fixtures per arm.
+    Two-stage SIMD filtering makes 9,516 complete checks across 606,446,080 partial
+    points in one solve per fixture; reduced checks do not remove its other costs.
+    The prior seed2097153 exception remains at dispatcher ratio 0.194210.</p>
+  <p>Equivalent component/dispatcher median ratios are 1.002699 at n16, 0.998049 at
+    n20 and 1.001462 at n24 under random/reverse orders. No mathematical gain is
+    attributed to alias timing. Validation includes 60 Rust and 32 Python evidence
+    tests. Whole-worker peak RSS is 29,851,648 bytes; calibrated operations, production,
+    full-IC and rho costs remain unmeasured.</p>
+  <p>The evidence-test scratch copies were moved to the checkout volume after system
+    temporary storage was exhausted; frozen measurements were unchanged. Direct schedule construction was prospective at that run's close. The
+    <a href="#boolean-schedule-construction-20260923">subsequent cost diagnostic above</a>
+    records guarded bounds and inconclusive cases without implementing the optimization.
+    Historical figures and verdicts remain below.</p>
+</section>
+<section class="panel" id="boolean-linear-fibers-20260923">
+  <div class="panel-head">
+    <h2>Exact linear fibers: query count falls, complete-cost gain rejected <span class="chip">engineering</span></h2>
+    <p>The SIMD fiber candidate passes 0/18 dramatic and 1/18 incremental comparisons
+      against the pointwise fastest fixed reference. The matched scalar-column gate
+      passes 17/18 and is also rejected universally. All 168 systems complete with
+      verified results; there is no confirmation eligibility.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/CONCLUSION.md">decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/CORRECTNESS.md">exact selection, screening and recovery</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/run_01/results.json">recorded costs and paired intervals</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/SUMMARY.json">individual cases and work counts</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_linear_fibers_20260923/RUN_LEDGER.json">immutable run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete standalone solve plus validation milliseconds on two fresh n24
+      holdout seeds and seven repetitions. Display ratios use pooled planted costs relative
+      to retained direct SIMD. Acceptance uses paired fastest-reference costs over 31 controls;
+      all 32 measured methods are shown. Calibrated IC-operation and rho comparisons are absent.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Direct SIMD / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>20.276459</td><td>26.065313</td><td>126.155937</td><td>0.128</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>68.772166</td><td>50.899687</td><td>513.035354</td><td>0.038</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>235.042229</td><td>170.269083</td><td>1760.644084</td><td>0.011</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>129.278416</td><td>89.139417</td><td>808.516667</td><td>0.020</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>23.387625</td><td>29.699292</td><td>148.162521</td><td>0.111</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>20.576042</td><td>26.291375</td><td>131.962458</td><td>0.126</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>17.889646</td><td>22.693646</td><td>111.392792</td><td>0.145</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>7.578250</td><td>9.555167</td><td>45.521791</td><td>0.343</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>4.477958</td><td>5.729937</td><td>27.890125</td><td>0.581</td><td>PASS</td></tr>
+      <tr><td>Full RREF, list</td><td>233.075979</td><td>69.649104</td><td>402.975000</td><td>0.011</td><td>PASS</td></tr>
+      <tr><td>Full RREF, wide</td><td>49.221750</td><td>15.239688</td><td>90.753042</td><td>0.053</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, list</td><td>34.739730</td><td>23.479625</td><td>210.481458</td><td>0.075</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, wide</td><td>10.178250</td><td>7.162834</td><td>65.169875</td><td>0.256</td><td>PASS</td></tr>
+      <tr><td>Packed without diagnostic hashing</td><td>3.074937</td><td>4.047271</td><td>19.832270</td><td>0.846</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, list</td><td>172.130958</td><td>159.895625</td><td>421.451542</td><td>0.015</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, compact</td><td>18.144458</td><td>15.882125</td><td>45.553271</td><td>0.143</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, scalar</td><td>17.895333</td><td>16.017187</td><td>20.737167</td><td>0.145</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, SIMD</td><td>2.601812</td><td>2.535916</td><td>3.105292</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, scalar</td><td>3.599833</td><td>5.628312</td><td>26.941083</td><td>0.723</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, SIMD</td><td>1.604062</td><td>2.678062</td><td>12.073583</td><td>1.622</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, scalar</td><td>2.904375</td><td>5.419834</td><td>21.291812</td><td>0.896</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, SIMD</td><td>0.529583</td><td>0.968480</td><td>3.802375</td><td>4.913</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, scalar</td><td>15.881062</td><td>15.826667</td><td>20.688625</td><td>0.164</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, SIMD</td><td>2.081021</td><td>2.191229</td><td>2.849396</td><td>1.250</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, list/scalar</td><td>15.594229</td><td>7.857625</td><td>20.597230</td><td>0.167</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, packed/SIMD</td><td>2.456291</td><td>1.116708</td><td>2.844771</td><td>1.059</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, scalar</td><td>2.921396</td><td>5.488542</td><td>21.114354</td><td>0.891</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, SIMD</td><td>0.509312</td><td>0.938187</td><td>3.716312</td><td>5.108</td><td>PASS</td></tr>
+      <tr><td>Fibers with row elimination</td><td>2.786709</td><td>2.241522</td><td>7.505500</td><td>0.934</td><td>PASS</td></tr>
+      <tr><td>Fibers with scalar column membership</td><td>2.525792</td><td>2.043166</td><td>7.146187</td><td>1.030</td><td>PASS</td></tr>
+      <tr><td>Fibers with SIMD screening</td><td>0.953291</td><td>0.743417</td><td>2.458729</td><td>2.729</td><td>PASS</td></tr>
+      <tr><td>Fibers with zero-only SIMD screen</td><td>1.453480</td><td>1.221750</td><td>3.667479</td><td>1.790</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>The run contains 37,632 observations: 128 SAT and 40 UNSAT fixtures per arm.
+    One solve per fixture totals 25,304,736 screened outside assignments and 105,861
+    complete linear queries (about 0.4183%). These counts do not remove screening,
+    setup or recovery cost. The prior seed2097153 exception remains at ratio 0.121522.</p>
+  <p>Three systems select six variables and use the documented scalar-screen fallback.
+    The matched n24 cross-planted holdout interval is [1.024697, 3.404951], missing
+    its 1.05 lower-bound threshold. Validation includes 49 Rust tests and 26 Python
+    evidence/census tests. Whole-worker peak RSS is 29,818,880 bytes; candidate-specific
+    memory, calibrated operations, production, full-IC and rho costs remain unmeasured.</p>
+  <p>A separate discovery census rules out the simple untouched-row shortcut for the
+    current n24 variable selections. Partial byte-syndrome filtering was the next documented
+    hypothesis at that run's close. Its <a href="#boolean-byte-sieve-20260923">subsequent
+    implementation and measurement above</a> retain the historical rejection.
+    Prior measurements and rejections remain below.</p>
+</section>
+<section class="panel" id="boolean-initial-restriction-20260923">
+  <div class="panel-head">
+    <h2>One initial affine restriction: fewer assignments, dramatic gate rejected <span class="chip">engineering</span></h2>
+    <p>All three new treatments pass 0/18 dramatic comparisons against the current
+      reference, which includes every predecessor SIMD method. Incremental comparisons
+      pass in 5/18 groups for direct block transport, 10/18 for initial restriction and
+      0/18 for transported leaves. No universal gain or confirmation eligibility is established.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/CONCLUSION.md">decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/CORRECTNESS.md">exact coefficient and rank arguments</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/run_01/results.json">recorded costs and paired intervals</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/SUMMARY.json">individual cases and rank counts</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_initial_restriction_20260923/RUN_LEDGER.json">immutable run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete standalone solve plus validation milliseconds on two fresh n24
+      holdout seeds and seven repetitions. Display ratios use pooled planted costs relative
+      to retained direct SIMD; acceptance uses paired fastest-reference costs. These are
+      solver diagnostics with no calibrated IC-operation or rho comparison.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Direct SIMD / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>58.977604</td><td>66.921708</td><td>131.455542</td><td>0.028</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>211.675750</td><td>154.656688</td><td>496.847625</td><td>0.008</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>834.953604</td><td>569.018396</td><td>2017.926459</td><td>0.002</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>425.680834</td><td>258.226729</td><td>1070.070500</td><td>0.004</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>69.096271</td><td>76.453354</td><td>152.386209</td><td>0.024</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>60.876854</td><td>67.377167</td><td>137.764104</td><td>0.027</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>51.737938</td><td>59.208897</td><td>115.901396</td><td>0.032</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>21.899041</td><td>24.354313</td><td>48.403396</td><td>0.075</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>13.286791</td><td>14.862875</td><td>29.163438</td><td>0.123</td><td>PASS</td></tr>
+      <tr><td>Full RREF, list</td><td>263.747000</td><td>189.058312</td><td>362.392271</td><td>0.006</td><td>PASS</td></tr>
+      <tr><td>Full RREF, wide</td><td>57.391458</td><td>42.091729</td><td>80.346542</td><td>0.029</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, list</td><td>103.822063</td><td>75.383938</td><td>230.920729</td><td>0.016</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, wide</td><td>31.455313</td><td>22.961083</td><td>64.298438</td><td>0.052</td><td>PASS</td></tr>
+      <tr><td>Packed without diagnostic hashing</td><td>9.358438</td><td>10.563563</td><td>20.912500</td><td>0.175</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, list</td><td>201.793584</td><td>194.776563</td><td>511.947521</td><td>0.008</td><td>PASS</td></tr>
+      <tr><td>Recursive affine/products, compact</td><td>21.520312</td><td>22.411625</td><td>51.417437</td><td>0.076</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, scalar</td><td>10.418708</td><td>10.400021</td><td>20.718916</td><td>0.157</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, SIMD</td><td>1.638146</td><td>1.641104</td><td>3.135958</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, scalar</td><td>11.177500</td><td>13.295917</td><td>27.136333</td><td>0.147</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, SIMD</td><td>5.024521</td><td>5.933875</td><td>12.128438</td><td>0.326</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, scalar</td><td>9.101875</td><td>10.794166</td><td>21.356188</td><td>0.180</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, SIMD</td><td>1.657396</td><td>1.985146</td><td>3.804146</td><td>0.988</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, scalar</td><td>10.239313</td><td>10.295500</td><td>20.634563</td><td>0.160</td><td>PASS</td></tr>
+      <tr><td>Transported blocks, SIMD</td><td>1.431812</td><td>1.428292</td><td>2.839542</td><td>1.144</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, list/scalar</td><td>10.395687</td><td>5.240375</td><td>20.388834</td><td>0.158</td><td>PASS</td></tr>
+      <tr><td>Initial restriction, packed/SIMD</td><td>1.423979</td><td>0.732729</td><td>2.839938</td><td>1.150</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, scalar</td><td>9.078062</td><td>11.037646</td><td>21.386854</td><td>0.180</td><td>PASS</td></tr>
+      <tr><td>Transported 16-variable leaves, SIMD</td><td>1.592000</td><td>1.878562</td><td>3.727667</td><td>1.029</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 28,224 observations over 144 distinct systems complete: 107 SAT and 37 UNSAT
+    fixtures per arm. Initial restriction finds affine rank one on 48 fixtures; a sound
+    projected-rank certificate proves an empty affine intersection on the other 96.
+    The fresh n24 cross-planted paired ratio is 1.991582, with interval [1.835488, 2.152253];
+    its lower bound misses 2.0. The prior seed2097153 failure remains, with initial-restriction
+    ratio 0.160432 against the expanded reference.</p>
+  <p>The evidence includes 42 Rust tests and 20 Python checks. Whole-worker peak RSS is
+    29,769,728 bytes. Candidate-specific memory, calibrated-operation ratios, production
+    index-calculus cost and rho ratio remain unmeasured. No confirmation run was launched.</p>
+  <p>A separate exact discovery census finds independent variable sets of size 2&ndash;3
+    at n16 and 4&ndash;5 at n24, so fixing the remaining variables leaves a small linear system.
+    At that run's close its solver and complete cost were unimplemented and unmeasured.
+    The <a href="#boolean-linear-fibers-20260923">subsequent implementation above</a> retains
+    that historical result and records the measured follow-up. Earlier figures remain below.</p>
+</section>
+<section class="panel" id="boolean-affine-substitution-20260923">
+  <div class="panel-head">
+    <h2>Affine substitution and SIMD evaluation: universal gain rejected <span class="chip">engineering</span></h2>
+    <p>Direct SIMD Gray evaluation passes 16/18 strongest-reference comparisons;
+      packed search with 16-variable SIMD leaves passes 15/18. Both fail the required
+      universal 2&times; gate. Affine substitution and the 12-variable hybrid pass 0/18.
+      All matched-backend gates pass, but confirmation was correctly stopped before launch.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/CONCLUSION.md">decision and failed intervals</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/README.md">algebra and accounting contract</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/SUMMARY.json">recorded figures and individual cases</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/RUN_LEDGER.json">immutable run ledger</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_affine_substitution_20260923/CONFIRMATION_GUARD.json">unstarted-confirmation receipt</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete standalone solve plus validation milliseconds at 24 variables,
+      pooling two fresh holdout seeds and 22 balanced repetitions. Descriptive ratios
+      use the untraced packed planted cost; acceptance uses paired fastest-reference
+      costs over the frozen 19-arm roster. No calibrated IC-operation comparison is available.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Untraced packed / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>79.291375</td><td>80.110521</td><td>143.931354</td><td>0.156</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>261.296500</td><td>156.635917</td><td>510.276729</td><td>0.047</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>932.561834</td><td>539.046000</td><td>1861.392605</td><td>0.013</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>323.089250</td><td>197.977687</td><td>826.881042</td><td>0.038</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>90.098479</td><td>90.386396</td><td>165.173479</td><td>0.138</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>78.273562</td><td>77.630188</td><td>145.692750</td><td>0.158</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>69.558688</td><td>70.610833</td><td>126.581771</td><td>0.178</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>28.146959</td><td>28.916208</td><td>51.876855</td><td>0.441</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>17.568792</td><td>17.828833</td><td>32.550312</td><td>0.706</td><td>PASS</td></tr>
+      <tr><td>Full RREF, list</td><td>237.259479</td><td>48.409396</td><td>357.864375</td><td>0.052</td><td>PASS</td></tr>
+      <tr><td>Full RREF, wide</td><td>53.390625</td><td>11.743813</td><td>82.236834</td><td>0.232</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, list</td><td>125.170687</td><td>85.458624</td><td>229.339000</td><td>0.099</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine tail, wide</td><td>40.682292</td><td>26.818541</td><td>70.524333</td><td>0.305</td><td>PASS</td></tr>
+      <tr><td>Packed, diagnostic hashing removed</td><td>12.401042</td><td>12.482542</td><td>22.925854</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Affine substitution and products, list</td><td>266.847854</td><td>60.621437</td><td>471.918396</td><td>0.046</td><td>PASS</td></tr>
+      <tr><td>Affine substitution and products, compact</td><td>30.022771</td><td>7.068459</td><td>42.978333</td><td>0.413</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, scalar</td><td>5.292791</td><td>13.534583</td><td>20.737104</td><td>2.343</td><td>PASS</td></tr>
+      <tr><td>Direct Gray, SIMD</td><td>0.802625</td><td>2.098875</td><td>3.210771</td><td>15.451</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, scalar</td><td>12.976146</td><td>12.147833</td><td>28.111251</td><td>0.956</td><td>PASS</td></tr>
+      <tr><td>12-variable leaves, SIMD</td><td>5.622458</td><td>5.275979</td><td>12.244438</td><td>2.206</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, scalar</td><td>9.533771</td><td>9.073272</td><td>21.378792</td><td>1.301</td><td>PASS</td></tr>
+      <tr><td>16-variable leaves, SIMD</td><td>1.691271</td><td>1.596583</td><td>3.761563</td><td>7.332</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 58,080 observations over 120 distinct systems complete: 89 SAT and 31 UNSAT
+    fixtures per arm. The recorded checks include 34 Rust tests and 30 Python evidence
+    checks. The direct-SIMD n24 cross-planted holdout ratios differ sharply by fixture:
+    6.839063 and 0.228740. Its grouped interval is [0.236, 5.913], so the pooled median
+    does not establish a uniform gain. The failures remain retained.</p>
+  <p>Whole-worker peak RSS is 29,966,336 bytes; candidate-specific memory and calibrated
+    operation ratios remain unmeasured. Production solver, full index-calculus and rho
+    costs remain null. A size-based dispatch is a new, unimplemented hypothesis;
+    it cannot replace the rejected primary result. Prior scoreboard figures remain below.</p>
+</section>
+<section class="panel" id="boolean-basis-transport-20260923">
+  <div class="panel-head">
+    <h2>Quadratic row-space transport: correct inference, rejected complete-solve gain <span class="chip">engineering</span></h2>
+    <p>Packed matrix backends beat their matched list implementations by 3.03&ndash;5.20&times;,
+      but both inference policies fail their strongest-reference improvement and dramatic-gain
+      gates. Full RREF passes only 3/18 incremental comparisons and 0/18 dramatic comparisons;
+      source-branching echelon/affine-tail transport passes 0/18 of either. The retained packed
+      solver remains best by pooled median on the fresh n24 families.</p>
+    <p>Sources: <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/CONCLUSION.md">decision and limits</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/README.md">row-space contract</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/run_01/RESULT.md">all paired comparisons</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/SUMMARY.json">recorded figures</a>,
+      <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/RUN_LEDGER.json">immutable run ledger</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold complete-solve plus validation milliseconds at 24 variables, pooling two fresh
+      holdout seeds and thirteen balanced repetitions. Displayed ratios compare pooled planted
+      costs with packed_state; gates use paired minima over all twelve competing arms.</caption>
+    <thead><tr><th>Method</th><th>Planted (ms)</th><th>Cross-planted (ms)</th><th>Unplanted (ms)</th><th>Packed / method</th><th>Correctness</th></tr></thead>
+    <tbody>
+      <tr><td>Search-only</td><td>66.217584</td><td>40.276479</td><td>77.027376</td><td>0.222</td><td>PASS</td></tr>
+      <tr><td>Degree-3 flat kernel</td><td>306.182646</td><td>181.077229</td><td>315.948980</td><td>0.048</td><td>PASS</td></tr>
+      <tr><td>Degree-3 sparse bucket</td><td>1209.731875</td><td>577.337396</td><td>1029.723521</td><td>0.012</td><td>PASS</td></tr>
+      <tr><td>Degree-3 hybrid kernel</td><td>564.794188</td><td>258.394334</td><td>402.785188</td><td>0.026</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 flat</td><td>77.067354</td><td>48.026376</td><td>89.620125</td><td>0.190</td><td>PASS</td></tr>
+      <tr><td>Selective degree-2 one-word</td><td>68.757750</td><td>42.481395</td><td>79.346271</td><td>0.213</td><td>PASS</td></tr>
+      <tr><td>Ordered-specialization search</td><td>58.147124</td><td>35.623875</td><td>67.757313</td><td>0.252</td><td>PASS</td></tr>
+      <tr><td>Fixed-quadratic state</td><td>24.245251</td><td>14.992396</td><td>27.964833</td><td>0.605</td><td>PASS</td></tr>
+      <tr><td>Retained packed state</td><td>14.673687</td><td>9.026291</td><td>16.798105</td><td>1.000</td><td>PASS</td></tr>
+      <tr><td>Full row-space RREF, list</td><td>125.438604</td><td>51.116333</td><td>268.847458</td><td>0.117</td><td>PASS</td></tr>
+      <tr><td>Full row-space RREF, wide</td><td>32.977396</td><td>12.047854</td><td>64.268354</td><td>0.445</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine-tail, list</td><td>115.883104</td><td>74.345251</td><td>135.799709</td><td>0.127</td><td>PASS</td></tr>
+      <tr><td>Echelon/affine-tail, wide</td><td>36.544917</td><td>23.088125</td><td>44.602750</td><td>0.402</td><td>PASS</td></tr>
+    </tbody>
+  </table></div>
+  <p>All 16,224 observations across 96 distinct systems finish with verified results. Each
+    list/packed pair matches models, counters and trace digests within its inference policy.
+    Earlier failures remain in the regression inputs. Regrouped legacy gates do not replace
+    earlier frozen verdicts. Whole-worker peak RSS is 29,360,128 bytes; candidate-specific
+    memory, calibrated-operation ratios, full index-calculus cost and rho ratios remain unmeasured.</p>
+  <p>A separate discovery-only diagnostic reproduces the exact search and finds unused nonunit
+    affine relations at 47,962 of 52,864 branching decisions (90.73%), with rank sum 189,283.
+    These repeat across search states and are not independent relations or a speedup.
+    <a href="https://github.com/aburan28/crypto/blob/main/research/boolean_basis_transport_20260923/AFFINE_SUBSTITUTION_NEXT.md">General affine substitution was the next documented contract at the close of this run</a>.
+    The <a href="#boolean-affine-substitution-20260923">subsequent implementation and comparison</a>
+    above retain its original negative verdict and separately report the measured follow-up.</p>
 </section>
 <section class="panel" id="boolean-quadratic-frontier-20260923">
   <div class="panel-head">
@@ -4994,5 +5768,114 @@ factor base, and this prices a decomposition oracle.</p>
 </tbody></table>
 </section>
 <!-- END ic-autolab-20260924 -->
+
+<section class="panel" id="toy-symmetry-quotient-20260924">
+<div class="panel-head"><h2>Fixed seven-bit symmetry quotient: exact coverage, solver costs unmeasured <span class="chip">accounting</span></h2></div>
+<p>All 90 complete-enumeration measurements agree with exhaustive point ground truth.
+The unit below is tuple sum checks; the floor counts point multisets for explicit enumeration,
+not a universal solver lower bound. These stage ratios are not ECDLP speedups.
+Gr&ouml;bner degree, F4 matrices, full-DLP S and rho ratios remain unmeasured.</p>
+<table><thead><tr><th>Support</th><th>Variant</th><th>Tuple checks</th><th>Enumeration floor</th><th>Checks / floor</th><th>Checks / ordered</th><th>Solvable targets</th><th>Correctness</th><th>Class</th></tr></thead><tbody>
+<tr><td>orbit-s101</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s101</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s101</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>invariant_lift</td><td>697</td><td>680</td><td>1.025000</td><td>0.206519</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>ordered</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>permutation</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>invariant_lift</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+</tbody></table>
+<p>Same-dimensional invariant coordinate subspaces yield 1 versus 15 factor-base points;
+matching dimension alone does not match the decomposition workload.
+Six invariant-support Frobenius audits pass and four non-invariant controls are rejected.
+The 20 target orbits do not imply 20 independent solver calls or independent relations.</p>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/results/pilot-001/results.json">raw runs</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/results/pilot-001/certificates.json">certificates</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/RESULTS.md">interpretation and limitations</a>.</p>
+</section>
+
+<section class="panel" id="toy-f5-neighbors-20260924">
+<div class="panel-head"><h2>Fixed eight-bit F5 criterion and descending neighbors: no consistent advantage <span class="chip">accounting</span></h2></div>
+<p>1,280 systems, 7,680 repeated solver executions; all exact row spaces, roots,
+point lifts and four isogeny certificates verified. Neighbor/source completion
+budget: 133 lower, 775 equal, 116 higher. The frozen success condition fails.
+This is a bounded Python reference of the Boolean matrix-F5 row criterion,
+not full signature-based F5 or intrinsic degree of regularity.</p>
+<p>Unit: one at-most-64-bit row XOR, including criterion overhead, summed over
+64 systems per row and all degree budgets, per repetition. Ratios compare the
+same solver, split and encoding on the source. Non-matrix costs and completion
+checks are separate. Full-DLP S, rho/floor ratios and speedup are null for every
+row. These stage costs do not establish an end-to-end improvement.</p>
+<table><thead><tr><th>Split</th><th>Encoding</th><th>Model</th><th>Matrix variant</th><th>Degree range</th><th>Matrix XORs</th><th>Criterion XORs (included)</th><th>Cost/source</th><th>Correctness</th><th>Class</th></tr></thead><tbody>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_224</td><td>f4</td><td>4–7</td><td>148915</td><td>0</td><td>0.996000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_224</td><td>f5</td><td>4–7</td><td>148718</td><td>112</td><td>0.995102</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_225</td><td>f4</td><td>4–7</td><td>127815</td><td>0</td><td>0.854875</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_225</td><td>f5</td><td>4–7</td><td>127359</td><td>567</td><td>0.852185</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_92</td><td>f4</td><td>4–7</td><td>150620</td><td>0</td><td>1.007404</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_92</td><td>f5</td><td>4–7</td><td>150154</td><td>286</td><td>1.004711</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_93</td><td>f4</td><td>4–7</td><td>138967</td><td>0</td><td>0.929464</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_93</td><td>f5</td><td>4–7</td><td>138842</td><td>382</td><td>0.929020</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>source</td><td>f4</td><td>4–7</td><td>149513</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>source</td><td>f5</td><td>4–7</td><td>149450</td><td>439</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_224</td><td>f4</td><td>4–8</td><td>168543</td><td>0</td><td>1.078654</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_224</td><td>f5</td><td>4–8</td><td>168302</td><td>205</td><td>1.079343</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_225</td><td>f4</td><td>4–8</td><td>153385</td><td>0</td><td>0.981645</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_225</td><td>f5</td><td>4–8</td><td>152576</td><td>789</td><td>0.978490</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_92</td><td>f4</td><td>4–8</td><td>177279</td><td>0</td><td>1.134564</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_92</td><td>f5</td><td>4–8</td><td>176675</td><td>317</td><td>1.133040</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_93</td><td>f4</td><td>4–8</td><td>160471</td><td>0</td><td>1.026995</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_93</td><td>f5</td><td>4–8</td><td>160170</td><td>726</td><td>1.027192</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>source</td><td>f4</td><td>4–8</td><td>156253</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>source</td><td>f5</td><td>4–8</td><td>155930</td><td>594</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_224</td><td>f4</td><td>4–7</td><td>159486</td><td>0</td><td>1.075653</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_224</td><td>f5</td><td>4–7</td><td>159072</td><td>436</td><td>1.080520</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_225</td><td>f4</td><td>4–7</td><td>143040</td><td>0</td><td>0.964733</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_225</td><td>f5</td><td>4–7</td><td>142426</td><td>1215</td><td>0.967450</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_92</td><td>f4</td><td>4–7</td><td>141676</td><td>0</td><td>0.955534</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_92</td><td>f5</td><td>4–7</td><td>141161</td><td>679</td><td>0.958857</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_93</td><td>f4</td><td>4–7</td><td>146447</td><td>0</td><td>0.987712</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_93</td><td>f5</td><td>4–7</td><td>145840</td><td>26</td><td>0.990640</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>source</td><td>f4</td><td>4–7</td><td>148269</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>source</td><td>f5</td><td>4–7</td><td>147218</td><td>482</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_224</td><td>f4</td><td>4–8</td><td>140862</td><td>0</td><td>0.832139</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_224</td><td>f5</td><td>4–8</td><td>140443</td><td>500</td><td>0.839222</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_225</td><td>f4</td><td>4–8</td><td>161450</td><td>0</td><td>0.953762</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_225</td><td>f5</td><td>4–8</td><td>160697</td><td>1139</td><td>0.960251</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_92</td><td>f4</td><td>4–8</td><td>178330</td><td>0</td><td>1.053480</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_92</td><td>f5</td><td>4–8</td><td>177693</td><td>1420</td><td>1.061811</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_93</td><td>f4</td><td>4–8</td><td>149907</td><td>0</td><td>0.885572</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_93</td><td>f5</td><td>4–8</td><td>149060</td><td>144</td><td>0.890713</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>source</td><td>f4</td><td>4–8</td><td>169277</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>source</td><td>f5</td><td>4–8</td><td>167349</td><td>1976</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+</tbody></table>
+<p>The neighbors are Frobenius-related; these are transported workloads, not
+independent curve samples. This eight-bit matrix experiment is separate from
+the seven-bit enumeration pilot above; its earlier figures remain unchanged.</p>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/results/raw.json.gz">raw traces and certificates</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/results/summary.json">summary</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/RESULTS.md">results and limitations</a>.</p>
+</section>
 </body>
 </html>

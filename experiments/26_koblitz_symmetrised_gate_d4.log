@@ -1,0 +1,20 @@
+== n = 13 (--rungs 13 --targets 16 --x-caps 4, timeout 7200 s)
+K_0/F_2^13 l=6 | 101.4 ns/add, 0.0056 GAE/word XOR (in rref 0.0206) | x: |F| 65 decomposable 16/16 (5.88 each) 2.15 GAE/step | GAE per relation: full 784, first-hit 395 | u: |F| 45 decomposable 11/16 (2.50 each) 2.11 GAE/step | GAE per relation: full 875, first-hit 1654
+   x-chained    cap 4 vars 31 deg 3 | found 16 refuted  0 budget  0 gate failures 0 | word XORs mean 1.404e8 (found 1.233e8, refuted NaN) | GAE per relation 784486 | splits 11.5 | 1109.6 ms | built 4 oversize 0
+   symmetrised  cap 5 vars 16 deg 4 | found 11 refuted  5 budget  0 gate failures 0 | word XORs mean 8.021e6 (found 5.552e6, refuted 1.295e7) | GAE per relation 65193 | splits 39.6 | 182.8 ms | built 5 oversize 0
+== n = 15 (--rungs 15 --targets 16 --x-caps 4, timeout 7200 s)
+K_0/F_2^15 l=6 | 112.6 ns/add, 0.0053 GAE/word XOR (in rref 0.0199) | x: |F| 67 decomposable 14/16 (1.62 each) 2.12 GAE/step | GAE per relation: full 2969, first-hit 2069 | u: |F| 73 decomposable 7/16 (1.88 each) 2.09 GAE/step | GAE per relation: full 3012, first-hit 10472
+   x-chained    cap 4 vars 33 deg 3 | found 14 refuted  2 budget  0 gate failures 0 | word XORs mean 8.020e8 (found 4.523e8, refuted 3.253e9) | GAE per relation 4837739 | splits 26.6 | 3542.4 ms | built 4 oversize 0
+   symmetrised  cap 5 vars 16 deg 4 | found  7 refuted  9 budget  0 gate failures 0 | word XORs mean 7.388e6 (found 3.075e6, refuted 1.020e7) | GAE per relation 89126 | splits 45.1 | 212.0 ms | built 5 oversize 0
+== n = 19 (--rungs 19 --targets 16 --x-caps 4, timeout 7200 s)
+K_0/F_2^19 l=8 | 158.1 ns/add, 0.0036 GAE/word XOR (in rref 0.0134) | x: |F| 269 decomposable 16/16 (7.00 each) 2.26 GAE/step | GAE per relation: full 11732, first-hit 4768 | u: |F| 261 decomposable 9/16 (4.75 each) 1.97 GAE/step | GAE per relation: full 14186, first-hit 64737
+   x-chained    cap 4 vars 43 deg 3 | found 16 refuted  0 budget  0 gate failures 0 | word XORs mean 9.855e9 (found 8.423e9, refuted NaN) | GAE per relation 35869770 | splits 57.1 | 76929.0 ms | built 4 oversize 16
+   symmetrised  cap 5 vars 22 deg 4 | found  9 refuted  7 budget  0 gate failures 0 | word XORs mean 2.413e9 (found 3.406e8, refuted 4.312e9) | GAE per relation 15613672 | splits 569.2 | 7993.0 ms | built 5 oversize 0
+== n = 23 (--rungs 23 --targets 16 --x-caps 4, timeout 7200 s)
+== status (exit 124 = timed out at the two-hour limit, no output)
+n=13 exit=0 seconds=21
+n=15 exit=0 seconds=62
+n=19 exit=0 seconds=1366
+n=23 exit=124 seconds=7200
+done
+source 378dd3fbba265e53ffe9c3a0d78d99fae287580b binary built at ff197bfa

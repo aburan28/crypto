@@ -56,6 +56,7 @@ const A: usize = 12;
 const K_FORS: usize = 14;
 /// Winternitz parameter w = 2^4 = 16.
 const W: usize = 16;
+#[allow(dead_code)]
 const LG_W: usize = 4;
 /// WOTS+ chain count: len1 = 2n (one nibble per byte), len2 = 3, len = 2n + 3 = 35.
 const LEN1: usize = 2 * N;
@@ -140,6 +141,7 @@ impl Adrs {
     fn set_tree_index(&mut self, i: u32) {
         self.bytes[24..28].copy_from_slice(&i.to_be_bytes());
     }
+    #[allow(dead_code)]
     fn get_tree_index(&self) -> u32 {
         u32::from_be_bytes(self.bytes[24..28].try_into().unwrap())
     }
@@ -272,16 +274,12 @@ fn wots_checksum(msg_digits: &[u32; LEN1]) -> [u32; LEN2] {
     }
     // Left-shift to fill the high nibble of a 12-bit value (lg(w)·LEN2 = 12).
     // For lg(w)=4, no shift needed beyond aligning to LEN2 nibbles.
-    let bytes = [
-        (csum >> 8) as u8 & 0x0f,
-        (csum >> 4) as u8 & 0xff,
-        csum as u8 & 0xff,
-    ];
+    let bytes = [(csum >> 8) as u8 & 0x0f, ((csum >> 4) as u8), (csum as u8)];
     // We want LEN2=3 nibbles from a 12-bit csum, MSB first.
     let mut out = [0u32; LEN2];
-    out[0] = (csum >> 8) as u32 & 0x0f;
-    out[1] = (csum >> 4) as u32 & 0x0f;
-    out[2] = csum as u32 & 0x0f;
+    out[0] = (csum >> 8) & 0x0f;
+    out[1] = (csum >> 4) & 0x0f;
+    out[2] = csum & 0x0f;
     let _ = bytes;
     out
 }
@@ -605,7 +603,7 @@ fn fors_sign(digest: &[u8], sk_seed: &[u8; N], pk_seed: &[u8; N], adrs: &mut Adr
             sibling_idx ^= 1;
             let node = fors_node(sk_seed, pk_seed, adrs, sibling_idx, j as u32);
             out.extend_from_slice(&node);
-            sibling_idx = (sibling_idx >> 1) << 1; // move to parent's left child slot
+            // Move to the parent's left-child slot.
             sibling_idx = (leaf_global >> (j + 1)) << 1;
         }
     }
@@ -666,9 +664,7 @@ pub struct SlhDsaSecretKey {
 
 impl Drop for SlhDsaSecretKey {
     fn drop(&mut self) {
-        for b in &mut self.bytes {
-            *b = 0;
-        }
+        self.bytes.fill(0);
     }
 }
 

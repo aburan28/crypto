@@ -369,7 +369,7 @@ fn f3(d: u32, km: u32, kr: u32) -> u32 {
 /// for the four subkeys produced from each half (K1..K4 vs K9..K12;
 /// K5..K8 vs K13..K16) differ.  Two iterations of (Phase A + Phase B
 /// + Phase A' + Phase B') generate 32 subkeys: K1..K16 (= Km) then
-/// K17..K32 (= Kr).
+///   K17..K32 (= Kr).
 fn key_schedule(key: &[u8; 16]) -> ([u32; 16], [u32; 16]) {
     let mut x = [0u32; 4];
     for i in 0..4 {
@@ -417,7 +417,7 @@ fn key_schedule(key: &[u8; 16]) -> ([u32; 16], [u32; 16]) {
             ^ S6[byte(&x, 11) as usize];
 
         // K1..K4 (outer iteration 0) or K17..K20 (outer iteration 1).
-        all[base + 0] = S5[byte(&z, 8) as usize]
+        all[base] = S5[byte(&z, 8) as usize]
             ^ S6[byte(&z, 9) as usize]
             ^ S7[byte(&z, 7) as usize]
             ^ S8[byte(&z, 6) as usize]

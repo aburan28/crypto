@@ -95,7 +95,7 @@ pub fn hkdf_expand_checked(
     if length > 255 * HASH_LEN {
         return Err("HKDF output too long");
     }
-    let n = (length + HASH_LEN - 1) / HASH_LEN;
+    let n = length.div_ceil(HASH_LEN);
     let mut okm = Vec::with_capacity(n * HASH_LEN);
     let mut t = Vec::new(); // T(0) = empty
 

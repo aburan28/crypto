@@ -66,11 +66,11 @@ use crate::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, first_fall_degree, solving_degree, system_degree, FieldStructure,
     MacaulayProfile, SolverEngine,
 };
-use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use crate::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base, enumerate_decompose, groebner_decompose, invariant_subspace_basis,
     order_of_2_mod_n, sat_decompose, KoblitzCurve,
 };
+use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 
 /// Unknowns in the chained `m`-point decomposition system: `m·ℓ`
 /// subspace coordinates plus `(m − 2)·n` for the intermediate points.
@@ -83,9 +83,7 @@ pub fn n_vars_for(n: u32, ell: u32, m: usize) -> usize {
 /// Largest `m` whose system still fits the 64-variable Boolean-monomial
 /// budget, or `None` if even `m = 2` does not.
 pub fn max_m_within_budget(n: u32, ell: u32, budget: usize) -> Option<usize> {
-    (2..=64)
-        .filter(|&m| n_vars_for(n, ell, m) <= budget)
-        .next_back()
+    (2..=64).rfind(|&m| n_vars_for(n, ell, m) <= budget)
 }
 
 // ── System structure ───────────────────────────────────────────────
@@ -379,7 +377,7 @@ fn median(mut xs: Vec<f64>) -> f64 {
     }
     xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let mid = xs.len() / 2;
-    if xs.len() % 2 == 0 {
+    if xs.len().is_multiple_of(2) {
         (xs[mid - 1] + xs[mid]) / 2.0
     } else {
         xs[mid]
@@ -847,8 +845,8 @@ pub fn dreg_summary(
             None => continue,
         };
         let deg = system_degree(&sys.equations);
-        let terms: usize = sys.equations.iter().map(|e| e.terms.len()).sum::<usize>()
-            / sys.equations.len().max(1);
+        let terms: usize =
+            sys.equations.iter().map(|e| e.terms.len()).sum::<usize>() / sys.equations.len().max(1);
         shape = Some((sys.n_vars, sys.equations.len(), deg, terms));
 
         let (fall, _) = first_fall_degree(&sys.equations, sys.n_vars, d_max);
@@ -1258,7 +1256,6 @@ mod tests {
         assert_eq!(parsed["systems"][0]["n_vars"], 12);
         assert_eq!(parsed["oracles"][0]["disagreements"], 0);
     }
-
 
     /// The control arms are tracked and reported **separately**.
     ///

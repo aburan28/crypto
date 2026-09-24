@@ -15,7 +15,7 @@
 //! the two paths.  Unit: 64-bit word operations, the specialisation's
 //! reads and writes included.  Stage diagnostic only (AGENTS.md §8).
 
-use crypto_lib::cryptanalysis::inherited_f4::{substitute, InheritCost, ReducedBasis};
+use crypto_lib::cryptanalysis::inherited_f4::{substitute, ReducedBasis};
 use crypto_lib::cryptanalysis::koblitz_groebner::{
     f4_profile, f4_profile_reset, split_rule_default, FieldStructure, SolveOptions, SolverEngine,
     SplitRule,
@@ -43,7 +43,10 @@ fn canonical(mut rows: Vec<F2BoolPoly>) -> Vec<String> {
 /// the assigned variable too, so once `1` is in its row space `x_v·1 = x_v`
 /// joins its tail; the solver never reads past the `1`.
 fn solver_view(rows: Vec<F2BoolPoly>) -> Vec<String> {
-    if rows.iter().any(|p| p.terms.len() == 1 && p.terms[0].mask == 0) {
+    if rows
+        .iter()
+        .any(|p| p.terms.len() == 1 && p.terms[0].mask == 0)
+    {
         vec!["refuted".into()]
     } else {
         canonical(rows)
@@ -58,7 +61,12 @@ fn main() {
     let degree: u32 = args.get(4).and_then(|s| s.parse().ok()).unwrap_or(3);
     let m: usize = args.get(5).and_then(|s| s.parse().ok()).unwrap_or(2);
 
-    let dump = format!("/tmp/inherited_f4_probe_{}_{}_{}.jsonl", a, n, std::process::id());
+    let dump = format!(
+        "/tmp/inherited_f4_probe_{}_{}_{}.jsonl",
+        a,
+        n,
+        std::process::id()
+    );
     let _ = std::fs::remove_file(&dump);
     std::env::set_var("KIC_F4_NODE_DUMP", &dump);
 
@@ -72,8 +80,16 @@ fn main() {
     let mut solve_stats = (0usize, 0usize, 0usize, 0usize);
     for i in 0..targets {
         let target = kc.mul(&g, &target_scalar(i));
-        let (_, stats) =
-            groebner_decompose(&kc, &fb, &index_of, &st, &target, m, SolverEngine::default(), 20_000);
+        let (_, stats) = groebner_decompose(
+            &kc,
+            &fb,
+            &index_of,
+            &st,
+            &target,
+            m,
+            SolverEngine::default(),
+            20_000,
+        );
         solve_stats.0 += stats.reductions;
         solve_stats.1 += stats.infeasible_branches;
         solve_stats.2 += stats.propagations;
@@ -141,7 +157,10 @@ fn main() {
     .split_rule;
     println!("split rule for the probe's children: {rule:?}");
     for (system, n_vars) in &systems {
-        let occurring = system.iter().flat_map(|p| p.terms.iter()).fold(0u64, |a, t| a | t.mask);
+        let occurring = system
+            .iter()
+            .flat_map(|p| p.terms.iter())
+            .fold(0u64, |a, t| a | t.mask);
         if occurring == 0 {
             continue;
         }
@@ -161,7 +180,10 @@ fn main() {
                 .map(|p| substitute(p, v, value))
                 .filter(|p| !p.is_zero())
                 .collect();
-            if child_system.iter().any(|p| p.terms.len() == 1 && p.terms[0].mask == 0) {
+            if child_system
+                .iter()
+                .any(|p| p.terms.len() == 1 && p.terms[0].mask == 0)
+            {
                 continue; // the solver refutes before reducing
             }
             let t0 = std::time::Instant::now();
@@ -196,19 +218,45 @@ fn main() {
 
     let per = |x: u64| x as f64 / nodes.max(1) as f64;
     println!();
-    println!("=== inherited F4 probe: K_{a}/2^{n}, m = {m}, {targets} targets, degree {degree} ===");
-    println!("node systems captured: {} (reduced: {nodes})", systems.len());
+    println!(
+        "=== inherited F4 probe: K_{a}/2^{n}, m = {m}, {targets} targets, degree {degree} ==="
+    );
+    println!(
+        "node systems captured: {} (reduced: {nodes})",
+        systems.len()
+    );
     println!("mean rank per node: {:.1}", per(ranks));
     println!();
     println!("| quantity | total word ops | per node |");
     println!("|:--|--:|--:|");
-    println!("| parent from scratch | {scratch_parent} | {:.0} |", per(scratch_parent));
-    println!("| children from scratch (both values) | {scratch_child} | {:.0} |", per(scratch_child));
-    println!("| children inherited (both values) | {inherited_child} | {:.0} |", per(inherited_child));
-    println!("|   of which re-reduction XORs | {inherited_reduce} | {:.0} |", per(inherited_reduce));
-    println!("|   of which specialisation reads+writes | {inherited_specialise} | {:.0} |", per(inherited_specialise));
-    println!("| displaced rows (both children) | {displaced} | {:.1} |", per(displaced));
-    println!("| completion rows (both children) | {completion} | {:.2} |", per(completion));
+    println!(
+        "| parent from scratch | {scratch_parent} | {:.0} |",
+        per(scratch_parent)
+    );
+    println!(
+        "| children from scratch (both values) | {scratch_child} | {:.0} |",
+        per(scratch_child)
+    );
+    println!(
+        "| children inherited (both values) | {inherited_child} | {:.0} |",
+        per(inherited_child)
+    );
+    println!(
+        "|   of which re-reduction XORs | {inherited_reduce} | {:.0} |",
+        per(inherited_reduce)
+    );
+    println!(
+        "|   of which specialisation reads+writes | {inherited_specialise} | {:.0} |",
+        per(inherited_specialise)
+    );
+    println!(
+        "| displaced rows (both children) | {displaced} | {:.1} |",
+        per(displaced)
+    );
+    println!(
+        "| completion rows (both children) | {completion} | {:.2} |",
+        per(completion)
+    );
     println!();
     println!(
         "ratio from-scratch / inherited (children): {:.2}×",

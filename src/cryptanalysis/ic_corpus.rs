@@ -466,7 +466,7 @@ fn build_entry(
                 .join(" ")
         );
     }
-    let _ = writeln!(info, "variables x_(i,j) = bit j of X_(i+1) -> DIMACS {} ; e-variables from {} ; CNF auxiliaries after {}", "1 + i*l + j", 3 * l + 1, 3 * l + sys.n_e_vars());
+    let _ = writeln!(info, "variables x_(i,j) = bit j of X_(i+1) -> DIMACS 1 + i*l + j ; e-variables from {} ; CNF auxiliaries after {}", 3 * l + 1, 3 * l + sys.n_e_vars());
     let _ = writeln!(
         info,
         "dimacs_xor variables {} clauses {} xor_rows {}",

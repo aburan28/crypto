@@ -6,7 +6,7 @@
 //! ```
 
 use crypto_lib::cryptanalysis::diem_descent::{
-    build_factor_base, find_2_decomposition, ECurveFpk, Fpk, Pt,
+    build_factor_base, find_2_decomposition, ECurveFpk, Fpk,
 };
 
 fn main() {

@@ -30,7 +30,6 @@
 //! residue lifts when CRT-combining `k` residues.  We resolve it by
 //! running the kangaroo against each lift.
 
-use crate::cryptanalysis::ec_index_calculus::sqrt_mod_p;
 use crate::cryptopals::challenge58::kangaroo;
 use crate::cryptopals::challenge59::cryptopals_curve;
 use crate::cryptopals::set8_util::{

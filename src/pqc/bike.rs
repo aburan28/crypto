@@ -52,7 +52,7 @@ pub const R: usize = 31;
 pub const W: usize = 6;
 pub const T: usize = 3;
 
-const BYTES: usize = (R + 7) / 8;
+const BYTES: usize = R.div_ceil(8);
 
 /// An element of `F_2[x] / (x^R − 1)` stored as a packed bit-vector.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -151,21 +151,14 @@ impl R2Poly {
             v[i / 8] = (v[i / 8] & !(1 << (i % 8))) | ((b & 1) << (i % 8));
         };
         let degree = |v: &[u8], max: usize| -> Option<usize> {
-            for i in (0..max).rev() {
-                if get_bit(v, i) == 1 {
-                    return Some(i);
-                }
-            }
-            None
+            (0..max).rev().find(|&i| get_bit(v, i) == 1)
         };
 
         // Iterative trial: try b /= a and update u, v.
         for _iter in 0..(R * R) {
             let deg_a = degree(&a, max_bits);
             let deg_b = degree(&b, max_bits);
-            if deg_a.is_none() {
-                return None;
-            }
+            deg_a?;
             if deg_a == Some(0) {
                 // gcd is x^0 = 1 (constant); u is the inverse.
                 let mut out = Self::zero();

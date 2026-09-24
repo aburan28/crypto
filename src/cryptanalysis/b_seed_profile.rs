@@ -41,7 +41,6 @@
 //! Our job: actually do it.
 
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
 
 /// P-256's `b` parameter.
 fn p256_b() -> BigUint {
@@ -95,7 +94,7 @@ pub fn compute_b_residue_ratios(b: &BigUint, primes: &[u64]) -> Vec<f64> {
 
 /// Kolmogorov-Smirnov D-statistic against `Uniform[0, 1)`.
 pub fn ks_statistic_uniform(samples: &[f64]) -> f64 {
-    let mut sorted: Vec<f64> = samples.iter().copied().collect();
+    let mut sorted: Vec<f64> = samples.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let n = sorted.len() as f64;
     let mut max_d: f64 = 0.0;
@@ -117,6 +116,8 @@ pub fn ks_statistic_uniform(samples: &[f64]) -> f64 {
 /// ```
 ///
 /// For large `n`, this converges fast.
+// Not `clamp`: `max` then `min` maps a NaN statistic to 0, `clamp` keeps NaN.
+#[allow(clippy::manual_clamp)]
 pub fn ks_pvalue(d: f64, n: usize) -> f64 {
     let t = (n as f64).sqrt() * d;
     if t == 0.0 {
@@ -124,7 +125,7 @@ pub fn ks_pvalue(d: f64, n: usize) -> f64 {
     }
     let mut sum = 0.0f64;
     for k in 1..200 {
-        let term = ((-1f64).powi((k - 1) as i32)) * (-2.0 * (k as f64).powi(2) * t * t).exp();
+        let term = ((-1f64).powi(k - 1)) * (-2.0 * (k as f64).powi(2) * t * t).exp();
         sum += term;
         if term.abs() < 1e-15 {
             break;

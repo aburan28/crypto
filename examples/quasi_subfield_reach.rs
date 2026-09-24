@@ -26,10 +26,7 @@ fn ord2(n: u32) -> u32 {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let hi: u32 = args
-        .get(1)
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(200);
+    let hi: u32 = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(200);
 
     println!("=== Quasi-subfield reach over F_2^n, via divisors of t^n - 1 ===");
     println!("A cell is a hit when some divisor g of t^n - 1 of degree n0 has");
@@ -71,10 +68,7 @@ fn main() {
             ));
         }
         if !row.is_empty() {
-            println!(
-                "n={n:<4} ord_n(2)={d:<4} {}",
-                row.join(" ")
-            );
+            println!("n={n:<4} ord_n(2)={d:<4} {}", row.join(" "));
         }
     }
 
@@ -109,7 +103,7 @@ fn is_prime(n: u32) -> bool {
     }
     let mut d = 2;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             return false;
         }
         d += 1;
