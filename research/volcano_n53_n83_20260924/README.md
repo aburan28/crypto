@@ -1,5 +1,19 @@
 # Characteristic-two Koblitz volcano audit at n=53 and n=83
 
+
+**Plain-English summary.** These calculations tell us where a curve could
+move to a different endomorphism stratum. They do not tell us that solving
+its equations becomes easier. For n=53, the relevant first descending
+degree is very large (68,476,319); n=83 has a smaller option (6,473), but
+its kernel still cannot be obtained by sampling rational points. No actual
+neighbor comparison at those sizes has been measured here.
+
+**How I will describe future results.** Technical names are retained, with
+a short translation: relation yield is how often the allowed factor-base
+points can express a target; polynomial regularity describes a particular
+encoding's degree behavior; solver work measures the actual computation.
+These are separate quantities and may move in different directions.
+
 Classification: **structural accounting**. This extends the bounded
 prime-field metadata validation in PR #614 to the standard binary Koblitz
 models; the previous Rust volcano backend does **not** support these fields.
@@ -91,3 +105,19 @@ solver regularity follows from conductor factorization alone.
 
 The general volcano kernel-count result appears in A. V. Sutherland,
 *Isogeny volcanoes*, §2.7–2.8, <https://arxiv.org/html/1208.5370v3>.
+
+## New small-field regularity control
+
+A separate measurement over F_103 compared a curve and its 2-isogenous
+neighbor using identical transported point problems. In 240 paired cases,
+`d_reg_top` was equal on the two curves for both tested encodings. All
+504 transported decomposition counts matched. Reducing equations by their
+factor-base constraints changed `d_reg_top` in 160 of 480 individual systems:
+for four-point bases, the value fell from 3 to 2 on both curves.
+
+Plain English: rewriting the equations changed the regularity number;
+moving to the neighboring curve did not change it in this control. This
+is not an n=53/n=83 result and no F4/F5 runtime was measured.
+
+Details and reproducible certificates are in
+`research/volcano_regularity_control_20260924/README.md`.
