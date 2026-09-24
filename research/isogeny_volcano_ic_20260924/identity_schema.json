@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "title": "ICV1 curve and ICCAN1 candidate identity",
+  "curve_id": {
+    "canonical": "ICV1:<field>:<trace>:<order>:<j>:<end>:<level>:<path>:<model>",
+    "field": [
+      "fp-<p>",
+      "f2m-<m>-<modhash8>"
+    ],
+    "rules": [
+      "trace and order are decimal integers",
+      "j uses canonical field-element encoding",
+      "end is certified End(E) order discriminant or unk",
+      "level is relative to the selected ell-volcano and is certified or unk",
+      "path records root-relative certified edges with direction+prime",
+      "model is sha256(canonical curve-model JSON)[0:12]",
+      "full canonical JSON is authoritative; slug is display-only",
+      "never identify a curve by j or order alone"
+    ]
+  },
+  "candidate_id": {
+    "canonical": "ICCAN1/<curve-slug>/<fb>/<relation>/<solver>/<symmetry>/<revision>",
+    "rules": [
+      "every segment is lowercase ASCII [a-z0-9._-]+",
+      "revision is rNN",
+      "candidate record embeds full curve_id and config hash",
+      "stage-only candidates leave full-DLP metrics null"
+    ]
+  }
+}
