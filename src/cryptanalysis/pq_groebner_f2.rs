@@ -226,6 +226,83 @@ impl F2BoolPoly {
         F2BoolPoly { terms: out, n_vars }
     }
 
+    /// Specialise variable `var` to `value`: `v := 0` deletes every term
+    /// holding `v`, `v := 1` folds `m` into `m ∖ v` (with cancellation).
+    ///
+    /// Equal to rebuilding through [`F2BoolPoly::from_monos`], without its
+    /// sort.  Deleting terms keeps a sorted list sorted.  Folding lowers
+    /// the degree of every term holding `v` by one and clears the same bit
+    /// in each, so those terms keep their relative order, and the result
+    /// is a linear merge of two sorted lists.  A `terms` not in canonical
+    /// order (the field is public) takes the rebuilding path instead.
+    pub fn substitute(&self, var: u32, value: bool) -> Self {
+        let bit = 1u64 << var;
+        let canonical = self
+            .terms
+            .windows(2)
+            .all(|w| cmp_mono(w[0], w[1]) == Ordering::Greater);
+        if !canonical {
+            let monos = self
+                .terms
+                .iter()
+                .filter(|t| value || t.mask & bit == 0)
+                .map(|t| F2BoolMono::from_mask(t.mask & !bit))
+                .collect();
+            return Self::from_monos(monos, self.n_vars);
+        }
+        let mut out: Vec<F2BoolMono> = Vec::with_capacity(self.terms.len());
+        let mut kept = self
+            .terms
+            .iter()
+            .filter(|t| t.mask & bit == 0)
+            .copied()
+            .peekable();
+        if !value {
+            out.extend(kept);
+            return F2BoolPoly {
+                terms: out,
+                n_vars: self.n_vars,
+            };
+        }
+        // merge the kept terms with the folded ones, cancelling equal pairs
+        let mut folded = self
+            .terms
+            .iter()
+            .filter(|t| t.mask & bit != 0)
+            .map(|t| F2BoolMono::from_mask(t.mask & !bit))
+            .peekable();
+        loop {
+            match (kept.peek(), folded.peek()) {
+                (Some(&k), Some(&f)) => match cmp_mono(k, f) {
+                    Ordering::Greater => {
+                        out.push(k);
+                        kept.next();
+                    }
+                    Ordering::Less => {
+                        out.push(f);
+                        folded.next();
+                    }
+                    Ordering::Equal => {
+                        kept.next();
+                        folded.next();
+                    }
+                },
+                (Some(_), None) => {
+                    out.extend(kept);
+                    break;
+                }
+                (None, _) => {
+                    out.extend(folded);
+                    break;
+                }
+            }
+        }
+        F2BoolPoly {
+            terms: out,
+            n_vars: self.n_vars,
+        }
+    }
+
     /// `p + q` = XOR of monomial sets.  Merge two sorted lists.
     pub fn add(&self, other: &Self) -> Self {
         debug_assert_eq!(self.n_vars, other.n_vars);
@@ -869,6 +946,42 @@ pub fn solution_set(gb: &[F2BoolPoly], n_vars: usize) -> HashSet<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn substitute_matches_rebuilding_through_from_monos() {
+        let mut x = 0xdead_beef_0bad_f00du64;
+        let mut next = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            x
+        };
+        for trial in 0..2_000 {
+            let n = 1 + (trial % 12);
+            let terms: Vec<F2BoolMono> = (0..(next() % 40))
+                .map(|_| F2BoolMono::from_mask(next() & ((1u64 << n) - 1)))
+                .collect();
+            let canonical = F2BoolPoly::from_monos(terms.clone(), n);
+            // the field is public: an unsorted, duplicated list too
+            let raw = F2BoolPoly { terms, n_vars: n };
+            for p in [&canonical, &raw] {
+                for var in 0..n as u32 {
+                    for value in [false, true] {
+                        let bit = 1u64 << var;
+                        let expected = F2BoolPoly::from_monos(
+                            p.terms
+                                .iter()
+                                .filter(|t| value || t.mask & bit == 0)
+                                .map(|t| F2BoolMono::from_mask(t.mask & !bit))
+                                .collect(),
+                            n,
+                        );
+                        assert_eq!(p.substitute(var, value), expected, "{p:?} x{var}={value}");
+                    }
+                }
+            }
+        }
+    }
 
     #[test]
     fn pair_queue_pops_what_the_linear_scan_popped() {
