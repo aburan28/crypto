@@ -136,3 +136,45 @@ regression on any gated layer is reverted, not explained away.
 | 2026-09-24 | #694 AVX-512 scan kernel | L3 | k0n53 collection 4.45 s → 3.55 s | v4 (counters identical) |
 | 2026-09-24 | #694 windowed, aimed collection rungs | L3 | k0n53 IC 4.41 s → 1.65 s | v5 |
 | 2026-09-24 | A.1 + A.2: `gf2_elim` Four Russians kernel (up to four adaptive-width Gray-code tables per pass, word-strip pivot search, BMI2 `pext` pattern gather, AVX-512 row update, rayon) replaces block-width-4 M4RI for the oracle's reduced row echelon form | L0; L1 dense solving | m = 3, degree 6 (20,240 × 20,686): elimination 4.12 s → 0.55 s (7.5×); dense `solving_profile` 3.84 s → 0.86 s, now ahead of the sparse path (1.98 s). Stage ladder unmoved: its matrices sit below the kernel's size gate, and the build dominates it (B) | `gf2-elim-reference-v1.json`; reduced form bit-identical on every cell |
+| 2026-09-24 | B (part): decomposition systems instantiated from a per-thread `DecompositionTemplate` memo; Macaulay row cap read once per matrix | L2 | system build was 29 % of an m = 2 decomposition at n = 23 (callgrind); stage-ladder wall within its noise (tens of ms) | equations identical (new test) |
+| 2026-09-24 | L1 frozen: `examples/pdp_bench.rs`, balanced ladder m = 2…6 | — | see §6 | `pdp-reference-v1.json` (a few frontier timings overlapped another job on the host; hits and statuses are unaffected) |
+| 2026-09-24 | E.1: descent walk steps all 64 walks with `add_many_lazy(G, walks)` (the AVX-512 kernel) instead of `add_pairwise` | L3 | k0n53 descent 0.729 s → 0.622 s (−15 %, paired, 3 runs each); k0n41 unchanged within noise | v5, every counter identical |
+
+## 6. What the L1 ladder says (pdp-reference-v1)
+
+Balanced cells (`m·ℓ ≈ n`), seconds per decided target, planted hits:
+
+| cell | vars | Gröbner | SAT | meet in the middle | enumerate |
+|:--|--:|:--|:--|:--|:--|
+| n = 23, m = 2, ℓ = 11 | 22 | 10 ms, 8/8 | 1.5 s, 8/8 | 0.1 ms, 8/8 | 1.3 ms |
+| n = 15, m = 3, ℓ = 5 | 30 | 35 ms, 8/8 | budget | < 0.1 ms | 0.9 ms |
+| **n = 31, m = 3, ℓ = 10** | 61 | **3.7 s, 0/2 planted** (node budget) | budget | 0.1 ms, 2/2 | 0.9 s |
+| n = 15, m = 4, ℓ = 4 | 46 | 69 ms, 4/4 | budget | < 0.1 ms | 2 ms |
+| n = 15, m = 5, ℓ = 3 | 60 | 1.8 s, 1/1 | budget | 0.3 ms | 1.6 ms |
+| n = 7, m = 6, ℓ = 1 | 34 | 14 ms, 4/4 | 2.3 ms | < 0.1 ms | < 0.1 ms |
+| n = 31, m = 4 / 5 / 6 | 86 / 123 / 154 | not buildable (64-bit monomials) | — | 0.2 ms / 7 ms / 0.21 s | 55 ms / 0.75 s / — |
+| n = 39, m = 3, ℓ = 13 | 78 | not buildable | — | 0.6 ms | — |
+
+Reading it honestly:
+
+1. On every cell the summation-polynomial + Gröbner oracle is **two to four
+   orders of magnitude slower** than the exact meet-in-the-middle oracle
+   the end-to-end pipeline already uses. The elimination kernel (A) moved
+   a constant; it did not touch that gap.
+2. At n = 31, m = 3 it is also **incomplete**: its splitting search
+   exhausts 20,000 nodes (and 200,000, at 38 s a target) without finding
+   decompositions that exist. The default split rule branches on the
+   31-bit intermediate abscissa first. Guessing a summand instead and
+   solving the m = 2 remainder is the obvious fix, and it would still cost
+   about |F| × 5 ms ≈ 7 s a target, against 0.1 ms.
+3. m ≥ 4 at n ≥ 31 cannot even be written down until the monomials are
+   widened (C). Doing that measures the frontier; the numbers above give
+   no reason to expect it to cross meet in the middle.
+
+So the plan's order stands for the Gröbner track (C, then D.2 hybrid
+guessing with summand-first splitting), with its success criterion stated
+in advance: **a Gröbner cell counts as progress when it decides planted
+targets that it previously missed, or when its seconds per target fall on
+an unchanged cell; it counts as a crossover only when it beats the
+meet-in-the-middle column on the same cell.** End-to-end work (E) proceeds
+alongside it.

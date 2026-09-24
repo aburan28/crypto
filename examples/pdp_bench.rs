@@ -87,33 +87,58 @@ const LADDER: &[Cell] = &[
     cell(Tier::Reach, 23, 11, 2, 8, 8),
     cell(Tier::Reach, 9, 3, 3, 16, 16),
     cell(Tier::Reach, 15, 5, 3, 8, 8),
-    cell(Tier::Frontier, 21, 7, 3, 4, 4),
     cell(Tier::Frontier, 31, 10, 3, 2, 2),
+    cell(Tier::Frontier, 39, 13, 3, 2, 2),
     cell(Tier::Frontier, 15, 4, 4, 4, 4),
-    cell(Tier::Frontier, 21, 5, 4, 2, 2),
+    cell(Tier::Frontier, 31, 6, 4, 2, 2),
     cell(Tier::Aspiration, 15, 3, 5, 2, 2),
-    cell(Tier::Aspiration, 25, 5, 5, 2, 2),
+    cell(Tier::Aspiration, 31, 6, 5, 2, 2),
     cell(Tier::Aspiration, 7, 1, 6, 4, 4),
     cell(Tier::Aspiration, 31, 5, 6, 2, 2),
 ];
 
-/// Factor indices of [`invariant_factors`] whose degrees sum to `ell`:
-/// the first such subset in index order, so the choice is frozen.
-fn divisor_for(kc: &KoblitzCurve, ell: u32) -> Option<Vec<usize>> {
-    let degs: Vec<usize> = invariant_factors(kc)
-        .iter()
-        .map(|f| f.degree().unwrap_or(0))
-        .collect();
-    let k = degs.len().min(20);
-    (1u32..1 << k)
-        .find(|&mask| {
-            (0..k)
-                .filter(|&i| mask >> i & 1 == 1)
-                .map(|i| degs[i])
-                .sum::<usize>()
-                == ell as usize
-        })
-        .map(|mask| (0..k).filter(|&i| mask >> i & 1 == 1).collect())
+/// The curve and divisor for a rung: over `K_0` and `K_1`, every subset
+/// of [`invariant_factors`] whose degrees sum to `ell` and whose base can
+/// reach every cofactor class with `m` summands, keeping the one with the
+/// **most points** (first in `(a, subset)` order on a tie, so the choice
+/// is frozen).  Taking merely the first subset of the right degree can
+/// pick a subspace with one curve point on it, whose "decompositions"
+/// are all the same point.
+fn choose_base(
+    n: u32,
+    ell: u32,
+    m: usize,
+) -> Option<(u8, KoblitzCurve, FrobeniusFactorBase, Vec<usize>)> {
+    let mut best: Option<(u8, KoblitzCurve, FrobeniusFactorBase, Vec<usize>)> = None;
+    for a in 0u8..=1 {
+        let Some(kc) = KoblitzCurve::new(a, n) else {
+            continue;
+        };
+        let degs: Vec<usize> = invariant_factors(&kc)
+            .iter()
+            .map(|f| f.degree().unwrap_or(0))
+            .collect();
+        let k = degs.len().min(16);
+        for mask in 1u32..1 << k {
+            let idx: Vec<usize> = (0..k).filter(|&i| mask >> i & 1 == 1).collect();
+            if idx.iter().map(|&i| degs[i]).sum::<usize>() != ell as usize {
+                continue;
+            }
+            let Some(fb) = build_frobenius_factor_base_from_divisor(&kc, &idx) else {
+                continue;
+            };
+            if !fb.m_can_decompose(&kc, m) {
+                continue;
+            }
+            if best
+                .as_ref()
+                .is_none_or(|b| fb.points.len() > b.2.points.len())
+            {
+                best = Some((a, kc.clone(), fb, idx));
+            }
+        }
+    }
+    best
 }
 
 #[derive(Default)]
@@ -353,14 +378,7 @@ fn run_cells(cells: &[Cell], tier: &str, engines: &[String], budget: f64, emit: 
         if !wanted {
             continue;
         }
-        // The first of K_0, K_1 with a curve, a divisor of the right
-        // degree, and a base that can reach every cofactor class.
-        let found = (0u8..=1).find_map(|a| {
-            let kc = KoblitzCurve::new(a, c.n)?;
-            let divisor = divisor_for(&kc, c.ell)?;
-            let fb = build_frobenius_factor_base_from_divisor(&kc, &divisor)?;
-            fb.m_can_decompose(&kc, c.m).then_some((a, kc, fb, divisor))
-        });
+        let found = choose_base(c.n, c.ell, c.m);
         let Some((a, kc, fb, divisor)) = found else {
             for engine in engines {
                 let row = serde_json::json!({
