@@ -1,0 +1,131 @@
+{
+  "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "claim_boundary": "A reproducible positive compact-orbit extractor and stage-only comparison. No useful-rank collection, final scalar, or matched-rho result; wall timings are exploratory.",
+  "complete_negative_coverage": null,
+  "deterministic_candidate_repeated_witnesses_equal": true,
+  "fixed_fixtures": {
+    "deterministic_direct_map": {
+      "executable_sha256": "41327941b6021318fb47fdcf36bde1b751b50e0d99a2adb9ae7837cbc71391bd",
+      "independently_verified_relations": 24,
+      "runs": [
+        {
+          "name": "direct_map_run_001",
+          "natural_median_extract_ms": 529.6068955,
+          "natural_median_trials": 59440.5,
+          "planted_median_extract_ms": 399.7318545,
+          "planted_median_trials": 25420.0
+        },
+        {
+          "name": "direct_map_run_002",
+          "natural_median_extract_ms": 608.7083534999999,
+          "natural_median_trials": 59440.5,
+          "planted_median_extract_ms": 332.9823955,
+          "planted_median_trials": 25420.0
+        }
+      ],
+      "source_sha256": "93c3159a0da27d4703727b21041cdf529b3f2206c3a6d3a7878913f951cd08fd"
+    },
+    "frozen_unsorted": {
+      "executable_sha256": "16ccbc6119763697c81cc604f20505f40025bcfc1bd0a32333fb26c81cc45e19",
+      "independently_verified_relations": 24,
+      "runs": [
+        {
+          "name": "frozen_unsorted_run_001",
+          "natural_median_extract_ms": 645.8804789999999,
+          "natural_median_trials": 53569.0,
+          "planted_median_extract_ms": 653.0504585,
+          "planted_median_trials": 49491.5
+        },
+        {
+          "name": "frozen_unsorted_run_002",
+          "natural_median_extract_ms": 636.8981875,
+          "natural_median_trials": 66150.0,
+          "planted_median_extract_ms": 568.089479,
+          "planted_median_trials": 33909.0
+        }
+      ],
+      "source_sha256": "96970319975031d1a86b0821049625d4ed8144b5bf76b6dd62826a75ead24c0b"
+    },
+    "scan_order_prototype": {
+      "executable_sha256": "54cf453048edaa5d273ad08b75786f52b98c93e49d937fa96652dd1e19ae61cf",
+      "independently_verified_relations": 12,
+      "runs": [
+        {
+          "name": "scan_order_run_001",
+          "natural_median_extract_ms": 1347.4142915000002,
+          "natural_median_trials": 59440.5,
+          "planted_median_extract_ms": 1089.7995210000001,
+          "planted_median_trials": 25420.0
+        }
+      ],
+      "source_sha256": "ba0a4244008d50163d625b11ef492bed8234e14c530db973383066fe9c3054a1"
+    },
+    "sorted_key_prototype": {
+      "executable_sha256": "f2f8505fdffe2465ba7b77aad2be6c9aadb546e5ef3a548554e66e242a08b96e",
+      "independently_verified_relations": 24,
+      "runs": [
+        {
+          "name": "deterministic_run_004",
+          "natural_median_extract_ms": 1452.414021,
+          "natural_median_trials": 59440.5,
+          "planted_median_extract_ms": 1359.493729,
+          "planted_median_trials": 25420.0
+        },
+        {
+          "name": "deterministic_run_005",
+          "natural_median_extract_ms": 1631.7853125000001,
+          "natural_median_trials": 59440.5,
+          "planted_median_extract_ms": 1264.5909375,
+          "planted_median_trials": 25420.0
+        }
+      ],
+      "source_sha256": "e938c37fb2e12b474c14948bd354933107f508f90b9c7d5b88f7170c66bdc669"
+    }
+  },
+  "full_dlp_total_operations": null,
+  "natural_holdout_seeds_9_to_16": {
+    "deterministic_direct_map": {
+      "executable_sha256": "41327941b6021318fb47fdcf36bde1b751b50e0d99a2adb9ae7837cbc71391bd",
+      "independently_verified_relations": 16,
+      "runs": [
+        {
+          "median_extract_ms": 678.166479,
+          "median_process_wall_seconds": 2.1502515420000003,
+          "median_trials": 109330.0,
+          "name": "holdout_deterministic_001"
+        },
+        {
+          "median_extract_ms": 731.974521,
+          "median_process_wall_seconds": 2.505397895999999,
+          "median_trials": 109330.0,
+          "name": "holdout_deterministic_002"
+        }
+      ],
+      "source_sha256": "93c3159a0da27d4703727b21041cdf529b3f2206c3a6d3a7878913f951cd08fd"
+    },
+    "frozen_unsorted": {
+      "executable_sha256": "16ccbc6119763697c81cc604f20505f40025bcfc1bd0a32333fb26c81cc45e19",
+      "independently_verified_relations": 16,
+      "runs": [
+        {
+          "median_extract_ms": 767.983021,
+          "median_process_wall_seconds": 3.118365354,
+          "median_trials": 71314.5,
+          "name": "holdout_unsorted_001"
+        },
+        {
+          "median_extract_ms": 437.288979,
+          "median_process_wall_seconds": 2.2985484589999996,
+          "median_trials": 47527.0,
+          "name": "holdout_unsorted_002"
+        }
+      ],
+      "source_sha256": "96970319975031d1a86b0821049625d4ed8144b5bf76b6dd62826a75ead24c0b"
+    }
+  },
+  "raw_archive_sha256": "e2e7aded124459a0ffc0417acbb6097a79aef13a00b0fad903bf9331f506db0b",
+  "rho_ratio": null,
+  "schema": "compact-orbit-stage-comparison-v1",
+  "status": "PASS",
+  "unsorted_repeated_witnesses_changed_count": 12
+}

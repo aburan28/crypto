@@ -1,0 +1,76 @@
+{
+  "n": 53,
+  "a": 0,
+  "fixture_hash": "b71df453f2752e550cc3d4cc5bb6869a3b92028d1ca231326229b35d8b39a25a",
+  "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "executable_or_source_hash": {
+    "source_sha256": "d74877ae0c7021983e4c8c989c85c970869b431a342ace2cd864229d8ea63dab",
+    "executable_sha256": "a20c993e6e295a348dac00528472c2ab7a1094f2b25b709eece8ab16f9de847f",
+    "git_head": "fb4491d4451b882514b2312c8f1eabff622dfe26",
+    "worktree": "dirty (uncommitted research WIP)"
+  },
+  "host_id": "Adams-MacBook-Pro.local / Apple M4 Pro / 48 GiB",
+  "resource_caps": {
+    "sat_conflicts_per_target": "2000 natural / 50000 planted",
+    "memory": "under 16 GiB",
+    "peak_rss_bytes": 601391104
+  },
+  "seeds": {
+    "planted": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "natural": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ]
+  },
+  "claim_boundary": "Public synthetic planted and natural (published scalar) targets on the retained rank-guided n=53 base. Relations are found by a streamed meet-in-the-middle over the Frobenius-quotiented regular-root index (no pair table, no edge selectors), then confirmed as a SAT model of the orbit-factorized S5 formula with orbit reps, Frobenius shifts, and both S3 intermediates pinned; the solver verifies (0 conflicts) and does not search. Per-relation extraction is ~100x slower than the explicit table's post-precompute lookup. Not a vs_rho win, not an asymptotic claim, pending independent replay.",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "evidence": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/results.json",
+  "pair_table_entries": 0,
+  "edge_selectors": 0,
+  "stage": "decomposition",
+  "m_summands": 4,
+  "dimension_l_or_dim": "not_applicable: point-defined 220-orbit base (11,660 x-values), not an F2-subspace",
+  "unknowns": {
+    "field_elements": 6,
+    "bits": 318,
+    "orbit_selector_vars": 880,
+    "frobenius_shift_bits": 24,
+    "formula_note": "m*l+(m-2)*n inapplicable (no subspace dimension l)"
+  },
+  "system_degree": {
+    "s3_total_degree": 4,
+    "per_variable_degree": 2,
+    "equations": 3,
+    "structure": "balanced S5 = S3(x0,x1,u), S3(x2,x3,v), S3(u,v,target_x)"
+  },
+  "eq_var_ratio": 0.5,
+  "ffd": {
+    "status": "inapplicable",
+    "reason": "oracle is streamed meet-in-the-middle over the Frobenius-quotiented S3 regular-root index; the SAT solver only verifies a fully pinned witness by unit propagation (0 conflicts), no Groebner/Macaulay elimination is performed"
+  },
+  "oracle_class": "pairs_and_solve (Frobenius-quotiented regular-root index, streamed) + SAT propagation certificate",
+  "median_ms_per_target": 625.3005,
+  "largest_solvable": {
+    "n": 53,
+    "targets": 12,
+    "sat_group_valid": 12
+  },
+  "sat_conflicts": 0,
+  "verdict_mix": {
+    "SAT": 12,
+    "UNSAT": 0,
+    "UNKNOWN": 0
+  },
+  "verdict": "N53_COMPACT_ORBIT_DECOMPOSITION_12_OF_12_SAT_CONFIRMED_NO_PAIR_TABLE"
+}
