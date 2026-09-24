@@ -111,18 +111,29 @@ binary knows only four names and treats them as **inspection-only**
 - CI: `cryptanalysis` already runs on `ubuntu-24.04-arm` and macOS; `crypto`
   runs IC on x86-64 only and only smoke-tests `--help` on macOS.
 
-### 2.5 Confirmed defects fixed as part of this work
+### 2.5 Confirmed defects
 
-Reproduced by the audits and corrected here with regression tests:
+Reproduced by the audits.  **Fixed here, each with a regression test:**
 
-1. `MPoly::mul` drops the constant term (`symmetrized_semaev.rs`).
-2. GOST `tc26-256-paramSetA` cofactor recorded as 1; must be 4.
-3. Oakley Group 3 records `#E` as the group order; the generator has order
-   `4·q` (documented as a subgroup curve).
-4. `fes-f2`/`fes-f2-wide` report 1 solution for the empty system (should be
-   `2^n`).
-5. `pack_point` key collision at `n = 63`.
-6. `Gf2` has no aarch64 carry-less path (perf cliff on Apple silicon).
+1. `MPoly::mul` dropped the constant term whenever any term cancelled
+   (`symmetrized_semaev.rs`) — e.g. `(1+x)(1-x)` came out `-x²`; fixed, the
+   final zero-cleanup already handled cancellation.
+2. GOST `tc26-256-paramSetA` cofactor recorded as 1; corrected to 4
+   (`curve_zoo.rs`) — the catalog Hasse check is the regression test.
+3. `Gf2` had no aarch64 carry-less path (perf cliff on Apple silicon /
+   Graviton); added the PMULL path (`semaev_decomp.rs`), verified against an
+   independent reference.
+
+**Documented, not yet fixed** (they touch heavily-CI'd core Koblitz paths and
+are out of scope for this engine PR; each has a proposed fix in the audit):
+
+4. Oakley Group 3 records `#E` as the group order (its generator has order
+   `4·q`); the catalog labels it a subgroup curve and verifies `[#E]G = O`.
+5. `fes-f2`/`fes-f2-wide` return 1 solution for the empty system (a caller
+   cannot know `n` from an empty equation slice; the practical IC path never
+   produces an empty system).
+6. `pack_point` key collision at `n = 63` (the pipeline runs `n ≤ 62`).
+7. `buchberger-f2` panics at `n = 25..26` (wrapper cap above the solver's).
 
 ## 3. Design of the `icx` engine
 
