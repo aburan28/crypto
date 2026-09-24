@@ -1,0 +1,33 @@
+{
+  "field": 103,
+  "curves": {
+    "source": [
+      0,
+      1
+    ],
+    "neighbor": [
+      88,
+      22
+    ]
+  },
+  "subgroup_order": 21,
+  "paired_records": 240,
+  "unique_supports": 24,
+  "transported_count_comparisons": 504,
+  "comparisons": {
+    "raw": {
+      "lower": 0,
+      "equal": 240,
+      "higher": 0
+    },
+    "reduced": {
+      "lower": 0,
+      "equal": 240,
+      "higher": 0
+    }
+  },
+  "within_curve_preprocessing_changes": 160,
+  "f4_f5_solving_degree": null,
+  "n53_n83_neighbor_measurements": null,
+  "ecdLP_speedup": null
+}
