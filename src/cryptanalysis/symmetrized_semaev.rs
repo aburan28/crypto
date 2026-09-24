@@ -458,7 +458,10 @@ mod tests {
         let one_minus_x = one.add(&x.scale(&fe(270))); // 270 = -1 mod 271
         let prod = one.add(&x).mul(&one_minus_x);
         assert_eq!(prod.num_terms(), 2, "expected 1 - x^2 (two terms)");
-        assert!(prod.terms.contains_key(&vec![0u32]), "constant term was dropped");
+        assert!(
+            prod.terms.contains_key(&vec![0u32]),
+            "constant term was dropped"
+        );
         assert!(prod.terms.contains_key(&vec![2u32]), "x^2 term missing");
         assert!(
             !prod.terms.contains_key(&vec![1u32]),
