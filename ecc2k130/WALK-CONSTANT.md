@@ -195,6 +195,7 @@ steps per trial, that ended about 14% of trials early and gave
 | 41 | sigma | 8 | ecc2k130 | emulation | 16 | 8,000 | 1.0910 | 0.0064 | 1.0700 | 1.0196 | matrix-v1.jsonl |
 | 59 | table | 8 | ecc2k130 | emulation | 16 | 20,000 | 0.9949 | 0.0037 | 1.0005 | 0.9943 | matrix-v2.jsonl |
 | 59 | sigma | 8 | ecc2k130 | emulation | 16 | 20,000 | 1.0817 | 0.0040 | 1.0700 | 1.0109 | matrix-v2.jsonl |
+| 59 | sigma | 8 | native | emulation | 16 | 20,000 | 1.1221 | 0.0042 | 1.0850 | 1.0342 | matrix-v2.jsonl |
 
 **Reading it.**
 
@@ -215,7 +216,7 @@ steps per trial, that ended about 14% of trials early and gave
   [output](benchmarks/walk-constant/sigma_classes.txt)) reproduces the
   `1.006`, and gives `1.087 ± 0.011` at `n = 23`: a third implementation,
   agreeing with the other two.
-- With the device's own weight branches, σ is at `1.154–1.217` at
+- With the device's own weight branches, σ is at `1.122–1.217` at
   `n = 23–59`.  Part of that is the narrower small-degree distribution (the
   model column).  Part of it is a further excess that varies with the
   degree without a trend (`c/model` 1.010–1.099).
