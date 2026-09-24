@@ -546,6 +546,9 @@ on ECC2K-130's security.
 
 ## X5 — `m = 4` via a chained symmetrised `S₃`
 
+> **Restated as X5′ below**: the count named here is a degree-4 system, and the
+> literal chain of symmetrised `S₃` links is the one comparable with H1's table.
+
 **Question.** The conditional theory wants `m ≈ n^{1/3} ≈ 5.1` at
 `n = 131`; the harness reaches `m = 3`. `research/notes/index-calculus/RESEARCH_EXOTIC_COORDINATES.md`
 §8.5 names the missing arm — chain the *symmetrised* `S₃`, giving
@@ -561,6 +564,207 @@ draws per instance at `m = 4`.
 **Falsifier.** FFD growing with `n`. That closes the route *and* is a
 result: it is H1 of the scaling target, and per the literature survey
 nobody has a rigorous answer in either direction.
+
+## X5′ — X5 as it can run: the symmetrised `S₃` chained at `m = 4`, against H1
+
+**Registered before any chained-symmetrised code exists.**  Nothing below
+has been measured.
+
+**Why X5 needs restating.**
+
+- **The topology.**  X5 names `4(ℓ − 1) + 1 + n` unknowns.  That count is one
+  intermediate point `Q`: the symmetrised `S₃` link `P₁ + P₂ + Q` and the
+  symmetrised `S₄` link `Q + P₃ + P₄ + R`.  The `S₄` link has Boolean degree 4
+  (its `w_Q·w₃·w₄·w_R·s` term, with `w_R` known), so its equations enter a
+  Macaulay matrix only at degree 4.  That system is not comparable with the
+  `x`-chained systems in H1's table, which are degree 3 throughout.
+- **What "chain the symmetrised `S₃`" means at `m = 4`.**  Taken literally, it
+  is three `S₃` links through two intermediate points: `P₁ + P₂ + Q₁`,
+  `Q₁ + P₃ + Q₂` and `Q₂ + P₄ + R`.
+  - `AS` is `F₂`-linear, so each `w_Q = AS(u_Q)` is linear in its `n` free bits,
+    and every link has Boolean degree 3, like the `x`-chained links.
+  - The parity bits fold, because `AS(u + 1) = AS(u)`.  `ε₁ + ε₂` goes into
+    `u_{Q₁}` and `ε₃` into `u_{Q₂}`, which leaves one parity bit, on the last
+    link.
+  - The system has **`4(ℓ − 1) + 1 + 2n` unknowns** and `3n` equations.
+- **The primary metric.**  X5's primary, a solve with a clean gate under 64
+  unknowns, is out of reach where the question is interesting.  X4′'s
+  `x`-chained arm at 50 unknowns hit its budget on 12 of 16 targets.  So the
+  deliverable is the first fall degree, as H1 registered it, and a solve is
+  attempted only on the smallest rung.
+
+**The protocol, fixed now.**
+
+1. **Two arms, one system each.**
+   - The symmetrised chain above.  Its layout puts the summand bits first, then
+     the parity bit, then `u_{Q₁}` and `u_{Q₂}`, so the existing four-summand
+     lift reads it unchanged.
+   - The `x`-chained `m = 4` system, `build_decomposition_system`, with
+     `4ℓ + 2n` unknowns.  This is the family H1's table measured.
+2. **Rungs.**
+
+   | `n` | `ℓ` | symmetrised chain | `x`-chained | equations |
+   |---:|---:|---:|---:|---:|
+   | 9 | 4 | 31 | 34 | 27 |
+   | 11 | 4 | 35 | 38 | 33 |
+   | 13 | 5 | 43 | 46 | 39 |
+   | 15 | 5 | 47 | 50 | 45 |
+   | 17 | 6 | 55 | 58 | 51 |
+   | 19 | 6 | 59 | 62 | 57 |
+
+   `ℓ = ⌈(n + log₂ 24)/4⌉`.  The fall degree is a property of the system, and
+   the system needs only the field and `b = 1`.  So no curve is needed, and
+   the rungs are not limited to degrees where one exists.
+3. **One `V` per rung, shared by both arms.**  A uniformly random
+   `ℓ`-dimensional `V ∋ 1`, redrawn if Frobenius-stable, from seed
+   `0x5EED0005 ⊕ (n ≪ 32)`.  That is the only kind of `V` that exists at
+   ECC2K-130's `n = 131` (X4′).  H1's table used invariant subspaces, so one
+   cross-check cell is added: at `n = 15`, the invariant
+   `V = ker (x + 1)(x⁴ + x + 1)`, of dimension `5 ∋ 1`, runs through both
+   arms.  It is a cross-check, not a rung.
+4. **Draws.**  H1's protocol: 16 draws of a uniform `x(R) ∈ F_{2^n}` with
+   `u(R)` finite and non-zero, the same 16 for both arms.
+5. **The fall degree.**  `first_fall_degree` with `d_max = 4`: the first
+   degree at which the Macaulay matrix loses rank, which is H1's definition.
+   The report gives the minimum, the maximum and the no-fall count over the 16
+   draws, never a single draw.  Where the degree-4 matrix exceeds the engine's
+   size caps, the cell is reported as censored at 3.
+6. **Correctness of the new system.**  A unit test plants
+   `R = P₁ + P₂ + P₃ + P₄` over `F_u` on a small curve.  The chained system
+   must vanish at the planted root, and the root must lift back to that
+   relation.  At `n = 11` (`K₁`, a curve exists) the solver's verdict is also
+   checked against exhaustive 4-sum enumeration on 16 subgroup targets.  That
+   is the one rung where a solve is attempted.
+
+**What each outcome means.**
+
+- **H1 not falsified for the symmetrised chain.**  Every rung has
+  `fall_min ≤ 3`.  The chained symmetrised system is as benign as the
+  `x`-chain.  X5 then closes, and with it the last open route that needs code.
+- **H1 falsified.**  Some rung has `fall_min ≥ 4`, or no fall at `d ≤ 4` on any
+  of its 16 draws.  The symmetrised chain then falls later than the `x`-chain.
+  That is a fact about the fall-degree question, and it is reported as one
+  whatever the `x` arm does.
+- **Either way, the paired arm is reported beside it.**  If the `x`-chained arm
+  also rises somewhere on this ladder, H1 is falsified for the family the
+  table measured too.
+
+**Class.**  A structural measurement.  No cost moves, so none of `AGENTS.md`
+§3's four classes applies.  Nothing here bears on ECC2K-130's cost: the
+close-out above already records that no oracle beats enumeration per relation.
+
+**Inadmissible.**  Changing `d_max`, `ℓ`, `V`, the seed or the draws after rows
+are seen; reporting single draws; dropping a censored rung.
+
+### X5′, run: **the symmetrised chain falls at 4 and the `x`-chain at 3, because the `x`-chain carries one hidden linear equation**
+
+**Runner:** `cargo run --release --example koblitz_x5_fall -- --json …`, built
+at `7bcc6460`, the code commit after the registration (`dc363f5f`).
+**Frozen:** `experiments/27_koblitz_x5_fall.json` (and `.log`), the registered
+run.  `experiments/27_koblitz_x5_fall_raised_caps.json` (and `.log`) is a
+supplement outside the registration, described below.  Each run takes
+seconds to minutes.
+
+First fall degree over 16 draws per cell.  The registered run used the
+engine's default Macaulay caps (20,000 rows, 40,000 columns), as frozen.  The
+supplement changes nothing but the caps (200,000 and 2,000,000) and reruns
+every cell.
+
+| `n` | `ℓ` | arm | unknowns | registered: FFD min–max, no fall, censored | supplement: FFD min–max | rank deficit at `D = 3` (mean) |
+|---:|---:|---|---:|---|---|---:|
+| 9 | 4 | symmetrised chain | 31 | **4–4**, 0, 0 | 4–4 | 0 |
+| 9 | 4 | `x`-chained | 34 | 2–3, 0, 0 | 2–3 | 3.56 |
+| 11 | 4 | symmetrised chain | 35 | **4–4**, 0, 0 | 4–4 | 0 |
+| 11 | 4 | `x`-chained | 38 | 3–3, 0, 0 | 3–3 | 1.00 |
+| 13 | 5 | symmetrised chain | 43 | —, 16, **16 (at 3)** | **4–4** | 0 |
+| 13 | 5 | `x`-chained | 46 | 3–3, 0, 0 | 3–3 | 1.00 |
+| 15 | 5 | symmetrised chain | 47 | —, 16, **16** | **4–4** | 0 |
+| 15 | 5 | `x`-chained | 50 | 3–3, 0, 0 | 3–3 | 1.00 |
+| 17 | 6 | symmetrised chain | 55 | —, 16, **16** | **4–4** | 0 |
+| 17 | 6 | `x`-chained | 58 | 3–3, 0, 0 | 3–3 | 1.00 |
+| 19 | 6 | symmetrised chain | 59 | —, 16, **16** | **4–4** | 0 |
+| 19 | 6 | `x`-chained | 62 | 3–3, 0, 0 | 3–3 | 1.00 |
+| 15, invariant `V` | 5 | symmetrised chain | 47 | —, 16, 16 | 4–4 | 0 |
+| 15, invariant `V` | 5 | `x`-chained | 50 | 3–3, 0, 0 | 3–3 | 1.00 |
+
+The one solve is `K₁/F₂¹¹`, `|F_u| = 21`, on 16 subgroup targets.  It found
+6 relations and refuted 10, which matches exhaustive 4-sum enumeration
+(6/16 decomposable) with zero gate failures.  It averaged 486 splits and
+`4.4·10⁶` word XORs per target.
+
+**1. The registered outcome: H1 falsified for the symmetrised chain.**  At
+`n = 9` and `11` every draw first loses rank at `D = 4`, where H1 says every
+chained system falls at 3.  From `n = 13` the registered run censors every
+draw at 3, as registered: the degree-4 matrix exceeds the default caps.
+Those cells show no rank loss at `D = 2` or `3` on any draw.
+
+**2. The supplement removes the censoring, and the fall does not grow.**
+With only the caps raised, every draw at `n = 13, 15, 17, 19` falls at
+exactly 4.  So the symmetrised chain falls at 4 on all six rungs, 96 draws.
+The `x`-chain falls at 3 on every rung (at 2 on some draws at `n = 9`).
+That reproduces H1's table on a non-invariant `V`.  The offset is one degree
+and flat in `n`.  X5's original falsifier, a fall degree that grows with `n`,
+does not fire.  H1's operational one, `fall_min ≥ 4`, does.  The
+invariant-`V` cross-check at `n = 15` reads the same as the random-`V` rung,
+so the kind of `V` is not what moves it.
+
+**3. What the one degree is: a single hidden linear equation in the `x`-chain.**
+**Diagnostic:** `cargo run --release --example koblitz_x5_syzygy`, frozen as
+`experiments/27_koblitz_x5_syzygy.log`.
+
+- **Where the dependency lives.**  The `x`-chain's one dependency at `D = 3`
+  lies entirely among its last link's `n` degree-2 equations (the link where
+  `R` is known) and their variable multiples: 21–42 rows on the four draws
+  checked at `n = 11`.  Its coefficients change with the target.  The
+  symmetrised chain has none.
+- **Why it is there.**  With `x_R` known, that link is
+  `S₃ = t² + x_R·t + x_R²(a + b) + 1` with `t = ab + x_R(a + b)`.  The map
+  `t ↦ t² + x_R·t` is `F₂`-linear with the one-dimensional kernel
+  `{0, x_R}`.  So one functional of the link's `n` equations kills every
+  quadratic term and leaves a **linear equation `λ`**.  That is a degree fall
+  from 2 to 1.  Its Boolean identity `λ(λ + 1) = 0` is the single rank loss
+  that H1's definition records at `D = 3`.
+- **The measurement agrees.**  The quadratic parts of the `x`-chain's
+  degree-2 equations have rank **`n − 1`** on every draw at every rung
+  (`n = 9 … 19`).  The symmetrised chain's last link has rank **`n`**: its
+  quadratic part is `w_R·w₁·w₂`, with no such kernel.
+- **It is H1's table too.**  The same holds on H1's own protocol (invariant
+  `V`, the same seeds): rank `n − 1` at `n = 9, 15, 21, 31` for `m = 3`, and at
+  `n = 9, 15` for `m = 4`.  So H1's "every chained system falls at exactly 3"
+  is this one linear equation, on every chained row of its table that was
+  checked (all but `n = 7`).
+- **What "4" means for the symmetrised chain.**  At `D = 4`, the trivial
+  syzygies of the `n` degree-2 equations appear: `f(f + 1) = 0` and
+  `f_i f_j = f_j f_i`, which number `n + C(n, 2) = 45` at `n = 9` if
+  independent.  So any system with degree-2 equations loses rank there.  The
+  measured kernels at `D = 4`, `n = 9`, are 89 (symmetrised) and 84 (`x`).
+  Whether any of the symmetrised chain's are non-trivial is not separated
+  here.
+
+**The corrected reading.**  The symmetrised chain is not shown to be harder
+than the `x`-chain.  What is shown is narrower:
+
+- The `x`-chain's last link hands the solver one free linear equation, and
+  that equation accounts for H1's "fall at 3" on every chained row checked.
+- The symmetrisation removes it.
+- The symmetrised chain has no rank loss below the degree where trivial
+  syzygies force one.
+
+H1 is falsified for the symmetrised chain by H1's letter.  In substance, its
+"fall at 3" was one linear equation all along, and the symmetrised system
+does not have it.  The **accounting** caveat this puts on H1's table is noted
+in [`RESEARCH_KOBLITZ_SCALING_TARGET.md`](RESEARCH_KOBLITZ_SCALING_TARGET.md).
+
+**Class.**  A structural measurement; no cost moves.  X5 is closed as run.
+
+**What this does not settle.**
+- **Whether any of the symmetrised chain's `D = 4` dependencies is
+  non-trivial.**  Separating them from the trivial syzygies needs the
+  syzygy module, not a rank.
+- **Whether the constant offset survives past `n = 19`.**  Both arms reach 64
+  unknowns there, and `MAX_VARS` is a `u64` mask.
+- **Anything about ECC2K-130's cost.**  The close-out already records that no
+  oracle here beats enumeration per relation.
 
 ## X6 — Second literature pass on the under-searched items
 
@@ -619,3 +823,70 @@ Any one of:
 None of these threatens a deployed curve, and none is claimed to. The
 `α ≤ 0.38` row of the scale table is what that would take, and nothing
 on the table is within `2^27` of it.
+
+## Close-out, 2026-09-23: what the routes established
+
+The finishing condition above is met.  X4 is classified: X4′ closed Route 3 at
+its gate, one phase before the end-to-end run.  The ledger below covers all
+six experiments, and the items left open are left open by choice, with the
+reason given.
+
+| experiment | route | status | what was measured | verdict |
+|---|---|---|---|---|
+| X1 | 1, Crossbred | run on two rungs per `m` ([`RESEARCH_ECC2K130_CROSSBRED.md`](RESEARCH_ECC2K130_CROSSBRED.md) §2–4) | oracle `xb/F4 = 0.023` in bit operations; wall-clock `0.696` at `n = 9, m = 3`, rising `17×` in one rung; end to end, enumeration beats every algebraic oracle by `3.4×` to `1,800×` | falsifier (`xb/F4 ≥ 1`) not fired; **`α` never fitted** (two rungs per `m`, not four) |
+| X2 | 1, 2 | the `(D, k)` frontier is in the frozen `crossbred_bench` output (CROSSBRED §2) | no filters at any `(D, k)`; at `D = 2` no space below `k = 5` | recorded there, not re-tabulated here |
+| X3 | 2, Crossbred on the symmetrised system | **not run** | — | open; bounded below |
+| X4 → X4′ | 3, symmetrised oracle end to end | X4 cannot run as registered; the X4′ gate ran | `3.1–14.7×` enumeration per relation at `d = 3`, `30–1,101×` at `d = 4`, priced from below | gate **closed**; the `350×` is **engineering** (weakly determined) |
+| X5 → X5′ | 4, `m = 4` | run | the symmetrised chain falls at 4 on every rung `n = 9 … 19` (96 draws), the `x`-chain at 3 | H1 falsified for the symmetrised chain by its letter; the `x`-chain's "fall at 3" is one hidden linear equation of its last link, which the symmetrisation removes; flat in `n` |
+| X6 | 5, literature | **not run** | — | open, no code |
+
+**What the thread established.**
+
+1. **The product law holds where it was measured.**  `Λ = 3.08` at the
+   relation budget on E1's rungs, against a predicted `3`
+   ([`RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md`](RESEARCH_ECC2K130_DECOMPOSITION_RUNS.md)
+   §0.5).
+2. **No oracle built here beats enumeration per relation, at any size
+   measured.**
+   - Crossbred, Gröbner and SAT lose end to end (CROSSBRED §4).
+   - The `x`-chained and symmetrised systems lose per relation on every X4′
+     rung that finished, at both Macaulay caps, even priced from below.
+   - The algebra buys smaller searches and loses on cost.
+3. **On ECC2K-130's structure the Frobenius collapse is unavailable to every
+   frame.**  At `n = 131` the only Frobenius-stable `V ∋ 1` are `F₂` and the
+   field (X4′), and the `x`-frame has the same obstruction (E1's definition).
+4. **Against rho nothing is close.**
+   - The frame's scale table puts enumeration at `2^{71.78}×` rho at
+     `n = 131`, and an oracle linear in `|F|` still at `2^{27.78}×`.
+   - On the Koblitz pipeline actually built, a matched rho with the pipeline's
+     own canonical form beats it at all five cells of that round, by `1.19–2.88×`
+     (`research/ic_triple_counted_20260923/RESULTS.md`, #668).
+
+**What is left, and why it is not next here.**
+
+- **X5 (H1, the first fall degree at `m = 4`)**, since run as X5′ (above).
+  The `x`-chain's "fall at 3" turns out to be one hidden linear equation in
+  its last link, on every chained row of H1's table that was checked.  The symmetrised chain lacks it
+  and falls at 4, flat in `n`.  It was the one open item of independent
+  interest.
+  - Nobody has a rigorous bound on these systems' fall degree in either
+    direction, so a measurement is new evidence on the fall-degree question.
+  - It does not bear on ECC2K-130's cost.  A fall degree that stays at 3
+    would still leave the `m = 4` oracle needing to beat enumeration per
+    relation, which no oracle here does at `m = 3`.
+  - It was registered and run as X5′: three symmetrised `S₃` links, the fall
+    degree over 16 draws per rung, and H1's own falsifier.
+- **X1's `α` over four rungs** needs Crossbred to finish at `m = 3` past
+  `n = 9`, where its edge over F4 was already nearly gone.  The question it
+  would answer, whether the oracle scales, matters only if the oracle first
+  beats enumeration per relation, and at the measured rungs it does not.
+- **X3** is bounded by what was measured.  X4′ put the symmetrised systems
+  under the default engine at `3.1–14.7×` enumeration per relation.  So
+  Crossbred would have to beat that engine by more than that factor, and keep
+  the lead as `n` grows, where on the `x`-systems its edge over F4 fell from
+  `0.04` to `0.70` in one rung.
+- **X6** costs one research run and no code.  It is the cheapest thing left,
+  and nothing measured here depends on it.
+
+**Class.**  **Accounting**: a ledger.  No measurement changed, and nothing
+here bears on ECC2K-130's security.
