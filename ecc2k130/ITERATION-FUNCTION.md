@@ -530,7 +530,7 @@ choosing it later is a configuration change and not a code change. *(Not so:
 lets through, four-step ones from Frobenius's relation and six-step pairwise
 ones, which at the live `dpWeight = 32` trap about half the walks; the walk
 needs a cycle check before it can be chosen, and priced end to end it costs
-about six times the σ walk per solve as built.)* The three
+five to six times the σ walk per solve as built.)* The three
 facts a reader needs to revisit that policy are on this page: the gain is
 real and reproducible (nine of nine paired repetitions across both
 geometries), it is worth +9% to +15% depending on worker count and never

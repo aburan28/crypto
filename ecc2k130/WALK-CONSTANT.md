@@ -24,13 +24,13 @@ Answer: **keep the σ walk, and raise `maxIters`.**
   a walk to where it started.  No two of those tags cancel, so the rule, which
   looks only for pairs, never fires.  Neither does it catch six-step pairwise
   cycles.  The rate of both is measured on the device's own walk and on an
-  emulation, and matches a count of the patterns: 1145 τ-relation
-  returns seen against 1297 predicted.
+  emulation, and tracks a count of the patterns: 1145 τ-relation returns
+  seen against 1312 predicted.  The count runs about 14% high.
 - **What the cycles cost.** At the live bucket's `dpWeight = 32` those
-  cycles trap **54%** of the table walk's trails (H = 8).  Each trapped trail
-  runs to the `maxIters = 2^30` guard and is discarded, so a completed trail
-  costs **8.6×** its steps.  Priced end to end, the table walk as built costs
-  **5.88–6.26× the σ walk per solve**.  With every fruitless cycle caught
+  cycles trap **about half** of the table walk's trails (50–54%, H = 8).
+  Each trapped trail runs to the `maxIters = 2^30` guard and is discarded,
+  so a completed trail costs **7.1–8.6×** its steps.  Priced end to end, the table walk as built costs
+  **4.85–6.26× the σ walk per solve**.  With every fruitless cycle caught
   and escaped (a check that does not exist yet), it would cost
   **0.81–0.86×**; that figure is a projection.
 - **The σ walk's own loss.** The same guard costs the σ walk **15.6% of its
@@ -138,8 +138,8 @@ collide, and the walk pays the full injective penalty
 `1/√(1 − Σp²) = 1.070`.  Because the multipliers commute it also pays a
 higher-order penalty: `(1 + λᵃ)(1 + λᵇ)` is the same step in either order,
 which forbids the two-step collisions a random mapping would have.  The
-emulation measures that excess at `c/model = 1.016–1.028` with hashed
-branches (§4).
+emulation measures that excess at `c/model = 1.011–1.028` with hashed
+branches, shrinking with the degree (§4).
 
 The table walk adds `ε σᵏ(T_h)` with `k, ε` read from the class.  Two
 classes on one branch land in the same class whenever their frames differ,
@@ -150,9 +150,10 @@ random mapping up to `Σp²/2n`.
 
 All rows are in unit `c`; the model column is §1's model for that walk.
 Sources are the frozen files in [benchmarks/walk-constant](benchmarks/walk-constant/),
-printed by `summarize.py`.  σ rows come from `matrix-v1.jsonl`, whose σ code
-is unchanged.  v1's table and adding rows used only a previous-class cycle
-rule and scored fruitless 4-cycles as collisions.  At `n = 41`, with 102k
+printed by `summarize.py`.  The σ rows at `n = 23, 37, 41` come from
+`matrix-v1.jsonl`, whose σ code is unchanged; everything else comes from
+`matrix-v2.jsonl` and the device files.  v1's table and adding rows used only
+a previous-class cycle rule and scored fruitless 4-cycles as collisions.  At `n = 41`, with 102k
 steps per trial, that ended about 14% of trials early and gave
 `c = 0.909 ± 0.006`, which is the prediction for that artefact
 (`1 − 0.64 λμ` with `λ = q²`).  Those rows are superseded, not deleted.
@@ -205,9 +206,10 @@ steps per trial, that ended about 14% of trials early and gave
 
 **Reading it.**
 
-- The table walk is at the floor: `c = 1.002–1.008`, with no dependence on
-  `H`, on the branch distribution (`Σp²` from 0.10 to 0.23) or on `W`.
-  The device and the emulation agree.
+- The table walk is at the floor: `c = 0.995–1.013` over every emulation
+  row (pooled `1.0035 ± 0.0006` with ECC2K-130's branches at H = 8).  It shows
+  no dependence on `H`, on the branch distribution (`Σp²` from 0.10 to
+  0.26), on `W`, or on the degree, and the device and the emulation agree.
 - The σ walk with ECC2K-130's distribution is at `c = 1.0995, 1.0964, 1.0919, 1.0910, 1.0817` at
   `n = 23, 31, 37, 41, 59`.  That is the first-order `1.070` times a
   higher-order excess (the commuting multipliers of §3) which shrinks with
@@ -223,16 +225,24 @@ steps per trial, that ended about 14% of trials early and gave
   `1.006`, and gives `1.087 ± 0.011` at `n = 23`: a third implementation,
   agreeing with the other two.
 - One mapping at a time, both walks' constants stray from the average over
-  mappings far more than their standard errors allow: σ 1.108 with a standard deviation of 0.034 over 6 mappings, each ± 0.003; table 0.995 with a standard deviation of 0.041 over 3 mappings, each ± 0.003.  A random
-  mapping on 3.1M classes would stray by about 0.1%.  The suspected cause is
-  accidental short relations mod `ℓ` among a mapping's steps, since
-  `(2Hn)³ ≈ ℓ` at `n = 37`; at ECC2K-130's `ℓ ≈ 2^129` no short relation
-  can be accidental.  At `n = 59` (`ℓ ≈ 2^33`) the spread is (running).
+  mappings far more than their standard errors allow: σ 1.108 with a standard deviation of 0.034 over 6 mappings, each ± 0.003; table 0.995 with a standard deviation of 0.041 over 3 mappings, each ± 0.003 at
+  `n = 37`, and σ 1.075 with a standard deviation of 0.043 over 4 mappings, each ± 0.005; table 1.021 with a standard deviation of 0.040 over 4 mappings, each ± 0.005 at `n = 59`.
+- That spread belongs to the statistic, not to either walk.  Uniformly
+  random functions on 45,562 points, under the same count, stray by a 6%
+  standard deviation at `W = 8` and 1.1% at `W = 64`
+  ([mapping_spread.py](benchmarks/walk-constant/mapping_spread.py),
+  [output](benchmarks/walk-constant/mapping_spread.txt)).  A few walks, each
+  a sizeable fraction of `√N` long, sample only a few neighbourhoods of one
+  mapping's trees.  More, shorter walks average them.
+- A campaign is at the far end of that: about `2^33` trails of `2^28`
+  steps against `√N ≈ 2^61`.  So the mapping average, the main table's
+  rows, is the constant a campaign pays, and every figure below uses it.
 - With the device's own weight branches, σ is at `1.122–1.217` at
-  `n = 23–59`, with `c/model` 1.010–1.099.  Each of those rows is a single
-  mapping, and the scatter, including `n = 37`'s 1.217, is within the
-  one-mapping spread just described.  So these rows establish no effect of
-  weight-based branches beyond the model column's `Σp²`.
+  `n = 23–59`, with `c/model` 1.010–1.099.  The device's branch function
+  is fixed, so each of those rows is a single mapping.  Their scatter,
+  including `n = 37`'s 1.217, is within the one-mapping spread at their
+  `W`, so they establish no effect of weight-based branches beyond the
+  model column's `Σp²`.
 - §6 uses the hashed σ bracket.  That is the conservative choice for
   switching, since any extra cost of the native branches would only make σ
   dearer.
@@ -241,6 +251,8 @@ steps per trial, that ended about 14% of trials early and gave
 |---:|---|---|---:|---:|---:|
 | 37 | sigma ecc2k130 H = 8 | 1: 1.0810, 2: 1.0752, 3: 1.1057, 4: 1.0960, 5: 1.1680, 6: 1.1239 | 1.1083 | 0.0341 | 0.0029 |
 | 37 | table ecc2k130 H = 8 | 1: 0.9810, 2: 1.0412, 3: 0.9630 | 0.9951 | 0.0409 | 0.0026 |
+| 59 | sigma ecc2k130 H = 8 | 1: 1.0226, 2: 1.0573, 3: 1.1161, 4: 1.1046 | 1.0752 | 0.0433 | 0.0055 |
+| 59 | table ecc2k130 H = 8 | 1: 1.0667, 2: 0.9886, 3: 1.0427, 4: 0.9850 | 1.0208 | 0.0405 | 0.0054 |
 
 ## 5. Fruitless cycles
 
@@ -297,16 +309,16 @@ Measured against that count:
 **Reading it.**
 
 - The τ-relation rate follows `24Σp⁴/(2n)³` on the device walk and in the
-  emulation, across a factor of 343 in predicted rate: 1145 seen against 1297 predicted, 0.88 ± 0.03 overall.
-- Where it falls short, as at `n = 19`, the walks are short.  A `W = 8`
-  trial there ends after about nine steps per walk, which cuts off windows
-  at both ends.  The ratio is 425 seen against 488 predicted, 0.87 ± 0.04 on the rows at `n ≥ 37`, where walks
-  run thousands of steps.
-- The pairwise count is small and noisy: 126 seen against 164 predicted, 0.77 ± 0.07 overall, 64 seen against 65 predicted, 0.99 ± 0.12 at
-  `n ≥ 37`.
-- The pairwise term is 14% of the `n = 131` rate, so the pricing below
-  rests mainly on the τ-relation law, which the device walk confirms
-  directly: 65 seen against 70 predicted at `n = 23`.
+  emulation, across a factor of 344 in predicted rate: 1145 seen against 1312 predicted, 0.87 ± 0.03 overall,
+  and 425 seen against 503 predicted, 0.85 ± 0.04 on the rows at `n ≥ 37`, where walks run thousands of steps.
+  The device walk confirms it directly: 65 seen against 70 predicted at
+  `n = 23`.
+- The pairwise term follows `4(Σp²/2n)³`: 126 seen against 166 predicted, 0.76 ± 0.07 overall, 64 seen against 67 predicted, 0.95 ± 0.12 at
+  `n ≥ 37`.  At `n = 19–23` short walks cut six-step windows off.
+- The measured total runs at 0.86 of the count.  The count is leading
+  order, and the rule's advancing of `h` breaks a few entries it does not
+  model.  §6 prices both the count and the count scaled to the
+  measurements; no conclusion depends on which.
 
 ## 6. Cost to solve
 
@@ -329,7 +341,10 @@ on the rates §5 measures; its outputs are marked as model rows.  At
 | 34 | table, rule also refusing τ-relations | 1.8% | ×1.493 | ×1.126 (`2^27.75`) |
 | 34 | σ | 0 | ×1.000 | ×1.000 |
 
-The σ row at `dpWeight = 32` is the campaign's own configuration today.
+These rows use the count.  Scaled to the measured rates (0.86 of the count,
+§5), the as-built losses at `dpWeight = 32` are ×7.1 at `2^30` and ×4.8 at
+the best guard, and the ranges below span both.  The σ row at
+`dpWeight = 32` is the campaign's own configuration today.
 `maxIters = 2^30` is `2^1.59` trail lengths, so a fraction
 `e^{−3.01} = 4.9%` of honest trails, the longest ones, are cut before their
 distinguished point.  That is 15.6% of all steps.
@@ -354,15 +369,15 @@ each range spans the bracket and the three paired sessions:
 
 | configuration (`dpWeight = 32`) | table / σ | kind |
 |---|---:|---|
-| as built, both at `maxIters = 2^30` | 5.88–6.26 | measured rates × model loss |
-| as built, each at its best guard | 4.30–4.58 | measured rates × model loss |
-| rule also refusing τ-relations, best guards | 1.43–1.52 | projection (rule not built) |
+| as built, both at `maxIters = 2^30` | 4.85–6.26 | measured rates × model loss |
+| as built, each at its best guard | 3.85–4.58 | measured rates × model loss |
+| rule also refusing τ-relations, best guards | 1.36–1.52 | projection (rule not built) |
 | every fruitless cycle caught and escaped, best guards | 0.81–0.86 | projection (check not built) |
 
 **Verdict.**
 
-- The table walk is not a campaign candidate as built.  It costs about six
-  times the σ walk per solve, which is a larger gap than any rate or
+- The table walk is not a campaign candidate as built.  It costs five to
+  six times the σ walk per solve, which is a larger gap than any rate or
   iteration difference in this tree.
 - Refusing the τ-relations in the rule is not enough, because the six-step
   cycles remain.
@@ -394,7 +409,9 @@ this tree, is the first-order `2^60.809 × 1.069`, and it stands.
 Declared before the v2 matrix ran (after the first `n = 23` and `n = 37`
 rows): recommend the table walk only if
 
-- `c_t/c_σ < 1` by more than three standard errors at every degree run;
+- `c_t/c_σ < 1` by more than three standard errors at every degree run
+  (every degree with eight distinct σ multipliers, `n ≥ 21`; §4 gives the
+  structural reason `n = 19` has seven);
 - the device rows agree with the emulation within two standard errors at
   `n = 23`;
 - the adding control is `1.00 ± 0.01`;
@@ -418,7 +435,7 @@ or leaving a phase unpriced.  Result:
 |---|---|---|
 | σ walk constant `1.069` (assumed) against `1.08–1.10` measured at `n = 23–59`, falling towards `1.070` | **accounting** | the planning figure `2^60.9` is confirmed within 1% (`2^60.91–60.92`, extrapolated); no walk changed |
 | table walk `c = 1.00` against σ's `[1.070, 1.082]` | **engineering** | 6–7% fewer iterations, at the floor, not across it; a random mapping already does this |
-| table walk as built, at campaign settings: rate +9–15%, cost per solve ×5.88–6.26 | **relabelling** | the headline B/s counts the updates of trapped lanes |
+| table walk as built, at campaign settings: rate +9–15%, cost per solve ×4.85–6.26 | **relabelling** | the headline B/s counts the updates of trapped lanes |
 | `maxIters = 2^30` at `dpWeight = 32` discards 15.6% of σ steps | **accounting** | a cost the campaign pays that no page priced; raising the guard is the engineering fix |
 | v1 table rows → v2 (fruitless 4-cycles no longer scored as collisions) | **accounting** | a correction to this note's own emulation |
 
@@ -452,6 +469,8 @@ python3 summarize.py                    # this note's tables, from the frozen fi
 python3 fruitless_patterns.py           # the 24 + 4 patterns of §5
 python3 trap_cost.py                    # §6's loss table
 python3 coset_index.py                  # index 1 at every degree
+python3 sigma_classes.py 19 130873 41811 8,2 15000   # σ on classes: why n = 19 is degenerate
+python3 mapping_spread.py 45562 8 6000 5              # one-mapping spread of random mappings
 ```
 
 Every row names its seed.  The full matrices took about an hour on four

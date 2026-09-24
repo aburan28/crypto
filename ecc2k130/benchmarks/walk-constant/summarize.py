@@ -154,14 +154,24 @@ p8 = trap_cost.branch_probabilities(131, 8)
 s2, s4 = sum(x * x for x in p8), sum(x ** 4 for x in p8)
 pair, rel = 4 * (s2 / 262) ** 3, 24 * s4 / 262 ** 3
 loss_sigma_2_30 = trap_cost.overhead(0.0, th, 2 ** 30)
-configs = (
-    ("as built, both at maxIters = 2^30", trap_cost.overhead(pair + rel, th, 2 ** 30), loss_sigma_2_30),
-    ("as built, each at its best guard", trap_cost.best_guard(pair + rel, th)[0], 1.0),
-    ("rule also refusing tau-relations, best guards", trap_cost.best_guard(pair, th)[0], 1.0),
-    ("every fruitless cycle caught and escaped, best guards", 1.0, 1.0),
-)
+# The measured fruitless rates run below the leading-order count; price
+# with the count and with the count scaled to the measurements.
+seen_all = sum(sum(r["fruitless"].values()) + sum(r["relation"].values())
+               for r in v2 + d2 if r["walk"] in ("table", "device-table"))
+pred_all = sum((r["fruitless_predicted"] + r["relation_predicted"]) * r["steps"]
+               for r in v2 + d2 if r["walk"] in ("table", "device-table"))
+scale = seen_all / pred_all
 print()
-print("cost to solve, table / sigma, dpWeight = 32, H = 8:")
-for label, lt, ls in configs:
-    vals = [q * (rs / rt) * lt / ls for _, rs, rt in PAIRED for q in (ratio_lo, ratio_hi)]
-    print(f"  {label}: table loss x{lt:.3f}, sigma loss x{ls:.3f}; table / sigma = {min(vals):.2f} - {max(vals):.2f}")
+print(f"fruitless returns on all table rows: {seen_all} seen, {pred_all:.0f} predicted, scale {scale:.3f}")
+print("cost to solve, table / sigma, dpWeight = 32, H = 8 (the count; the count x measured scale):")
+for label, table_loss, sigma_loss in (
+    ("as built, both at maxIters = 2^30",
+     lambda k: trap_cost.overhead(k * (pair + rel), th, 2 ** 30), loss_sigma_2_30),
+    ("as built, each at its best guard", lambda k: trap_cost.best_guard(k * (pair + rel), th)[0], 1.0),
+    ("rule also refusing tau-relations, best guards", lambda k: trap_cost.best_guard(k * pair, th)[0], 1.0),
+    ("every fruitless cycle caught and escaped, best guards", lambda k: 1.0, 1.0),
+):
+    losses = [table_loss(k) for k in (1.0, scale)]
+    vals = [q * (rs / rt) * lt / sigma_loss for _, rs, rt in PAIRED for q in (ratio_lo, ratio_hi) for lt in losses]
+    print(f"  {label}: table loss x{losses[0]:.3f} (x{losses[1]:.3f} scaled), sigma loss x{sigma_loss:.3f}; "
+          f"table / sigma = {min(vals):.2f} - {max(vals):.2f}")
