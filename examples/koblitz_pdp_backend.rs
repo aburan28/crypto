@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 //! Run one native backend against an exported binary-Koblitz PDP instance.
 //!
 //! The exporter writes the source system and a canonical identity into its
@@ -9,14 +11,20 @@
 //!
 //! ```text
 //! koblitz_pdp_backend native-sat /tmp/pdp/manifest.json 100000
+//! koblitz_pdp_backend native-f4 /tmp/pdp/manifest.json 115
 //! koblitz_pdp_backend direct-mitm /tmp/pdp/manifest.json
 //! ```
 
 use crypto_lib::binary_ecc::curve::{point_add, point_neg};
 use crypto_lib::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement, IrreduciblePoly};
 use crypto_lib::cryptanalysis::binary_semaev_s4::{weil_descend_s4, S4System};
+use crypto_lib::cryptanalysis::ic_framework::solvers::F4F2;
+use crypto_lib::cryptanalysis::ic_framework::stages::{
+    BooleanSystem, Params, SolverCost, SolverVerdict, SystemSolver,
+};
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    build_decomposition_system, DecompositionSystem, FieldStructure,
+    build_decomposition_system, sym_semaev_s4_fixed_x1, DecompositionSystem, FieldStructure,
+    SymElement,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     factor_x_n_minus_1, find_irreducible_sparse, invariant_subspace_basis, points_with_x,
@@ -27,11 +35,12 @@ use crypto_lib::cryptanalysis::semaev_sat::{
 };
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
+use rayon::prelude::*;
 use serde_json::{json, Value};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Row {
@@ -55,6 +64,7 @@ struct VerifiedInstance {
     target: BinaryPoint,
     rows: Vec<Row>,
     n_vars: u32,
+    source_representation: String,
     source: SourceSystem,
     artifact_receipts: Value,
     verification_ns: u128,
@@ -526,6 +536,7 @@ fn verify_instance(manifest_path: &Path) -> Result<VerifiedInstance, String> {
         target,
         rows,
         n_vars,
+        source_representation: representation.to_string(),
         source,
         artifact_receipts,
         verification_ns: started.elapsed().as_nanos(),
@@ -605,6 +616,491 @@ fn source_point_witness_valid(
                 .any(|p2| point_add(curve, &point_add(curve, p0, p1), p2) == *target)
         })
     })
+}
+
+fn point_json(point: &BinaryPoint) -> Value {
+    match point {
+        BinaryPoint::Infinity => Value::Null,
+        BinaryPoint::Affine { x, y } => json!({
+            "x":x.to_biguint().to_string(),
+            "y":y.to_biguint().to_string(),
+        }),
+    }
+}
+
+/// Return one exact lift of the three Boolean x-coordinate blocks whose
+/// group sum is the authenticated target.  The F4 engine decides the
+/// polynomial system; this separate curve check is what turns one Boolean
+/// root into a PDP relation.
+fn source_point_witness(
+    curve: &BinaryCurve,
+    basis: &[F2mElement],
+    target: &BinaryPoint,
+    root: u64,
+) -> Option<Vec<BinaryPoint>> {
+    let assignment: Vec<bool> = (0..3 * basis.len())
+        .map(|index| root & (1u64 << index) != 0)
+        .collect();
+    let xs: Vec<_> = (0..3)
+        .map(|summand| {
+            basis
+                .iter()
+                .enumerate()
+                .fold(F2mElement::zero(curve.m), |x, (index, element)| {
+                    if assignment[summand * basis.len() + index] {
+                        x.add(element)
+                    } else {
+                        x
+                    }
+                })
+        })
+        .collect();
+    let lifts: Vec<_> = xs.iter().map(|x| points_with_x(curve, x)).collect();
+    for p0 in &lifts[0] {
+        for p1 in &lifts[1] {
+            for p2 in &lifts[2] {
+                if point_add(curve, &point_add(curve, p0, p1), p2) == *target {
+                    return Some(vec![p0.clone(), p1.clone(), p2.clone()]);
+                }
+            }
+        }
+    }
+    None
+}
+
+#[derive(Default)]
+struct F4CostAggregate {
+    calls: u64,
+    ops: u64,
+    wall_ns: u64,
+    peak_bytes: u64,
+    degree_reached: Option<u32>,
+    solving_degree: Option<u32>,
+    timed_out: bool,
+    extra: BTreeMap<String, u64>,
+}
+
+impl F4CostAggregate {
+    fn add(&mut self, cost: SolverCost) {
+        self.calls += 1;
+        self.ops = self.ops.saturating_add(cost.ops);
+        self.wall_ns = self.wall_ns.saturating_add(cost.wall_ns);
+        self.peak_bytes = self.peak_bytes.max(cost.peak_bytes);
+        self.degree_reached = Some(
+            self.degree_reached
+                .unwrap_or(0)
+                .max(cost.degree_reached.unwrap_or(0)),
+        );
+        self.solving_degree = Some(
+            self.solving_degree
+                .unwrap_or(0)
+                .max(cost.solving_degree.unwrap_or(0)),
+        );
+        self.timed_out |= cost.timed_out;
+        for (key, value) in cost.extra {
+            let aggregate_by_max = key.ends_with("_max")
+                || matches!(
+                    key.as_str(),
+                    "basis_len" | "oversize" | "symbolic_bytes_estimate_max" | "symbolic_cap_hit"
+                );
+            let entry = self.extra.entry(key).or_default();
+            if aggregate_by_max {
+                *entry = (*entry).max(value);
+            } else {
+                *entry = entry.saturating_add(value);
+            }
+        }
+    }
+
+    fn json(&self) -> Value {
+        let mut extra = self.extra.clone();
+        extra.insert("f4_calls".to_string(), self.calls);
+        json!({
+            "ops":self.ops,
+            "op_unit":"word XORs (elimination, including M4RI tables)",
+            "wall_ns":self.wall_ns,
+            "peak_bytes":self.peak_bytes,
+            "degree_reached":self.degree_reached,
+            "solving_degree":self.solving_degree,
+            "timed_out":self.timed_out,
+            "extra":extra,
+        })
+    }
+}
+
+/// Run the repository's full Boolean Faugere F4 implementation on the same
+/// authenticated PDP instance, fixing one summand and solving the remaining
+/// direct symmetrised-S4 systems.
+///
+/// Expanding the direct S4 in all `3*ell` variables is already a multi-GB
+/// construction at the frozen `n=59, ell=9` cell, before F4 starts.  The
+/// fixed-X1 route enumerates the `2^ell` public subspace coefficients for the
+/// first summand and hands each lower-degree `2*ell`-variable system to the
+/// same full F4 engine.  The fixed summand and target powers are applied as
+/// exact linear field maps, and the shared symbolic `X2*X3` product is formed
+/// once; an exhaustive unit gate proves this constructor byte-identical to the
+/// generic S4 expansion.  Construction, every failed branch, extraction and
+/// the exact curve lift all live inside one charged budget.  This is a native
+/// F4 arm, but it is intentionally reported as a different formulation from
+/// Magma's frozen direct-F4 source.
+fn fixed_x1_masks(ell: usize, hamming_weight_order: bool) -> Vec<usize> {
+    let mut masks: Vec<usize> = (0..1usize << ell).collect();
+    if hamming_weight_order {
+        masks.sort_unstable_by_key(|mask| (mask.count_ones(), *mask));
+    }
+    masks
+}
+
+fn build_fixed_x1_batch(
+    candidates: &[(usize, F2mElement)],
+    x2: &SymElement,
+    x3: &SymElement,
+    target_x: &F2mElement,
+    st: &FieldStructure,
+    n_vars: usize,
+    parallel: bool,
+) -> Vec<(usize, BooleanSystem)> {
+    let build = |(x1_mask, x1_value): &(usize, F2mElement)| {
+        let equations = sym_semaev_s4_fixed_x1(x1_value, x2, x3, target_x, st);
+        (*x1_mask, BooleanSystem { equations, n_vars })
+    };
+    if parallel && candidates.len() > 1 {
+        candidates.par_iter().map(build).collect()
+    } else {
+        candidates.iter().map(build).collect()
+    }
+}
+
+fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
+    if budget_seconds == 0 {
+        return (
+            json!({
+                "schema":"koblitz_pdp_isolated_backend.v1",
+                "backend":"native-f4",
+                "status":"backend_contract_error",
+                "source_instance_id":instance.id,
+                "source_instance_verified":true,
+                "source_artifacts":instance.artifact_receipts,
+                "regenerated_source_exact":true,
+                "reason":"F4 budget must be positive",
+            }),
+            false,
+        );
+    }
+    let n_vars = 2usize.saturating_mul(instance.ell);
+    if n_vars > 64 || instance.ell >= usize::BITS as usize {
+        return (
+            json!({
+                "schema":"koblitz_pdp_isolated_backend.v1",
+                "backend":"native-f4",
+                "status":"not_run_resource_cap",
+                "source_instance_id":instance.id,
+                "source_instance_verified":true,
+                "source_artifacts":instance.artifact_receipts,
+                "regenerated_source_exact":true,
+                "source_representation":instance.source_representation,
+                "solver_representation":"fixed_x1_direct_symmetrised_s4_boolean",
+                "source_variables":instance.n_vars,
+                "solver_variables":n_vars,
+                "variable_cap":64,
+                "exhaustive":false,
+                "source_model_valid":Value::Null,
+                "source_witness_valid":Value::Null,
+                "conflicts":Value::Null,
+                "interpretation":"The native Boolean F4 monomial representation cannot encode this instance; this is censored, not UNSAT",
+            }),
+            true,
+        );
+    }
+
+    let whole_started = Instant::now();
+    let deadline = whole_started + Duration::from_secs(budget_seconds);
+    let st = FieldStructure::new(instance.n, &instance.curve.irreducible);
+    let target_x = match &instance.target {
+        BinaryPoint::Affine { x, .. } => x,
+        BinaryPoint::Infinity => unreachable!(),
+    };
+    let solver = F4F2;
+    let x2 = SymElement::from_subspace_vars(&instance.basis, 0, instance.n, n_vars);
+    let x3 = SymElement::from_subspace_vars(&instance.basis, instance.ell, instance.n, n_vars);
+    let parallel_construction =
+        std::env::var("PQ_F4_DISABLE_PARALLEL_CONSTRUCTION").as_deref() != Ok("1");
+    let mut equation_hasher = blake3::Hasher::new();
+    let mut costs = F4CostAggregate::default();
+    let mut construction_ns = 0u128;
+    let mut factor_base_membership_ns = 0u128;
+    let mut nonrational_x1_skipped = 0usize;
+    let mut systems_constructed = 0usize;
+    let mut systems_completed = 0usize;
+    let mut total_equations = 0usize;
+    let mut total_terms = 0usize;
+    let mut max_terms = 0usize;
+    let mut max_degree = 0u32;
+    let mut algebraic_roots = 0usize;
+    let mut source_model_valid = None;
+    let mut witness: Option<Vec<BinaryPoint>> = None;
+    let mut status = "unsat";
+    let mut exhaustive = true;
+    let x1_count = 1usize << instance.ell;
+    let weight_order = std::env::var("PQ_F4_X1_ORDER").as_deref() != Ok("ascending");
+    let x1_order = if weight_order {
+        "hamming_weight_then_mask"
+    } else {
+        "ascending_bitmask"
+    };
+    let x1_batch_size = std::env::var("PQ_F4_X1_BATCH")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(1)
+        .clamp(1, x1_count);
+    let rayon_threads_requested = std::env::var("RAYON_NUM_THREADS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok());
+    let mut x1_masks_visited = 0usize;
+    let mut x1_batches_completed = 0usize;
+    let mut speculative_systems_completed = 0usize;
+    let masks = fixed_x1_masks(instance.ell, weight_order);
+    let mut mask_cursor = 0usize;
+    'mask_batches: while mask_cursor < masks.len() {
+        let mut candidates: Vec<(usize, F2mElement)> = Vec::with_capacity(x1_batch_size);
+        while candidates.len() < x1_batch_size && mask_cursor < masks.len() {
+            let x1_mask = masks[mask_cursor];
+            mask_cursor += 1;
+            x1_masks_visited += 1;
+            if Instant::now() >= deadline {
+                status = "unknown_inconclusive";
+                exhaustive = false;
+                break 'mask_batches;
+            }
+            let x1_value = instance.basis.iter().enumerate().fold(
+                F2mElement::zero(instance.n),
+                |value, (index, basis_element)| {
+                    if x1_mask >> index & 1 == 1 {
+                        value.add(basis_element)
+                    } else {
+                        value
+                    }
+                },
+            );
+            let membership_started = Instant::now();
+            let x1_is_rational = !points_with_x(&instance.curve, &x1_value).is_empty();
+            factor_base_membership_ns =
+                factor_base_membership_ns.saturating_add(membership_started.elapsed().as_nanos());
+            if !x1_is_rational {
+                nonrational_x1_skipped += 1;
+                continue;
+            }
+            candidates.push((x1_mask, x1_value));
+        }
+        if candidates.is_empty() {
+            continue;
+        }
+        let built = Instant::now();
+        let batch = build_fixed_x1_batch(
+            &candidates,
+            &x2,
+            &x3,
+            target_x,
+            &st,
+            n_vars,
+            parallel_construction,
+        );
+        construction_ns = construction_ns.saturating_add(built.elapsed().as_nanos());
+        for (x1_mask, system) in &batch {
+            systems_constructed += 1;
+            total_equations = total_equations.saturating_add(system.equations.len());
+            let terms: usize = system.equations.iter().map(|p| p.terms.len()).sum();
+            total_terms = total_terms.saturating_add(terms);
+            max_terms = max_terms.max(terms);
+            max_degree = max_degree.max(
+                system
+                    .equations
+                    .iter()
+                    .flat_map(|p| p.terms.iter())
+                    .map(|term| term.mask.count_ones())
+                    .max()
+                    .unwrap_or(0),
+            );
+            equation_hasher.update(&(*x1_mask as u64).to_le_bytes());
+            equation_hasher.update(
+                &serde_json::to_vec(&system.equations).expect("serialize fixed-X1 S4 equations"),
+            );
+        }
+        let now = Instant::now();
+        if now >= deadline {
+            status = "unknown_inconclusive";
+            exhaustive = false;
+            break;
+        }
+        let remaining = deadline.saturating_duration_since(now);
+        let solve_one = |(_, system): &(usize, BooleanSystem)| {
+            solver.solve(system, &Params::default(), Some(remaining))
+        };
+        let solved: Vec<(SolverVerdict, SolverCost)> = if batch.len() == 1 {
+            batch.iter().map(solve_one).collect()
+        } else {
+            batch.par_iter().map(solve_one).collect()
+        };
+        x1_batches_completed += 1;
+        let mut batch_budget_exceeded = false;
+        let mut batch_invalid_model = false;
+        let mut batch_witness: Option<(usize, Vec<BinaryPoint>)> = None;
+        let mut batch_completed = vec![false; batch.len()];
+        for (batch_index, ((x1_mask, system), (verdict, cost))) in
+            batch.iter().zip(solved).enumerate()
+        {
+            costs.add(cost);
+            match verdict {
+                SolverVerdict::BudgetExceeded => {
+                    batch_budget_exceeded = true;
+                }
+                SolverVerdict::Unsatisfiable => {
+                    systems_completed += 1;
+                    batch_completed[batch_index] = true;
+                }
+                SolverVerdict::Solved(roots) => {
+                    systems_completed += 1;
+                    batch_completed[batch_index] = true;
+                    algebraic_roots = algebraic_roots.saturating_add(roots.len());
+                    let models_valid = roots
+                        .iter()
+                        .all(|root| system.equations.iter().all(|p| p.eval(*root) == 0));
+                    if !models_valid {
+                        source_model_valid = Some(false);
+                        batch_invalid_model = true;
+                        continue;
+                    }
+                    source_model_valid = Some(true);
+                    if batch_witness.is_none() {
+                        let found = roots.iter().find_map(|root| {
+                            let x2_mask = root & ((1u64 << instance.ell) - 1);
+                            let x3_mask = root >> instance.ell;
+                            let combined = (*x1_mask as u64)
+                                | (x2_mask << instance.ell)
+                                | (x3_mask << (2 * instance.ell));
+                            source_point_witness(
+                                &instance.curve,
+                                &instance.basis,
+                                &instance.target,
+                                combined,
+                            )
+                        });
+                        if let Some(found) = found {
+                            batch_witness = Some((batch_index, found));
+                        }
+                    }
+                }
+            }
+        }
+        if batch_invalid_model {
+            status = "sat_invalid_model";
+            exhaustive = false;
+            break;
+        }
+        if let Some((batch_index, found)) = batch_witness {
+            speculative_systems_completed = speculative_systems_completed.saturating_add(
+                batch_completed[batch_index + 1..]
+                    .iter()
+                    .filter(|&&completed| completed)
+                    .count(),
+            );
+            witness = Some(found);
+            status = "sat";
+            break;
+        }
+        if batch_budget_exceeded {
+            status = "unknown_inconclusive";
+            exhaustive = false;
+            break;
+        }
+    }
+    let witness_json = witness
+        .as_ref()
+        .map(|points| points.iter().map(point_json).collect::<Vec<_>>());
+    let source_witness_valid = witness.as_ref().map(|points| {
+        point_add(
+            &instance.curve,
+            &point_add(&instance.curve, &points[0], &points[1]),
+            &points[2],
+        ) == instance.target
+    });
+    let accepted = status != "sat_invalid_model";
+    let equation_fingerprint = equation_hasher.finalize().to_hex().to_string();
+
+    (
+        json!({
+            "schema":"koblitz_pdp_isolated_backend.v1",
+            "backend":"native-f4",
+            "status":status,
+            "source_instance_id":instance.id,
+            "source_instance_verified":true,
+            "source_artifacts":instance.artifact_receipts,
+            "regenerated_source_exact":true,
+            "same_instance_fields":["n","ell","m","curve","algebraic_factor_base","affine_target"],
+            "source_representation":instance.source_representation,
+            "solver_representation":"fixed_x1_direct_symmetrised_s4_boolean",
+            "solver_constructor":"fixed_x1_constant_linear_specialisation",
+            "solver_schedule":format!("enumerate x1 coefficients in {x1_order}; construct rational systems in deterministic batches of {x1_batch_size} with ordered parallel collection={parallel_construction}; solve each batch in parallel; inspect completed results in schedule order"),
+            "solver_parallel_construction":parallel_construction,
+            "solver_parallel_construction_control":"PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+            "solver_x1_order":x1_order,
+            "solver_x1_order_target_independent":true,
+            "solver_x1_order_control":"PQ_F4_X1_ORDER=ascending",
+            "solver_x1_batch_size":x1_batch_size,
+            "solver_x1_batch_cap":x1_count,
+            "solver_x1_batch_control":"PQ_F4_X1_BATCH=1",
+            "solver_x1_batches_completed":x1_batches_completed,
+            "solver_x1_speculative_systems_completed":speculative_systems_completed,
+            "solver_rayon_threads_requested":rayon_threads_requested,
+            "solver":"f4-f2",
+            "solver_description":solver.describe(),
+            "solver_internal_mask_hasher":"splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+            "solver_pair_selector":"epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+            "solver_pair_installer":"order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+            "solver_symbolic_reducer_selector":"exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+            "solver_symbolic_monomial_sets":if std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() == Ok("1") { "splitmix64_hash_sets" } else { "reused_bit_packed_complete_boolean_domain_to_20_variables_else_splitmix64_hash_sets" },
+            "solver_symbolic_monomial_set_control":"PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+            "solver_column_index":"dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+            "solver_monomial_multiply":if std::env::var("PQ_F4_DISABLE_DENSE_MUL").as_deref() == Ok("1") { "sort_all_mapped_terms_then_cancel" } else { "epoch_dense_parity_cancel_then_encoded_u32_order_sort" },
+            "solver_monomial_multiply_control":"PQ_F4_DISABLE_DENSE_MUL=1",
+            "solver_echelon_policy":if std::env::var("PQ_F4_FLAT_M4RI").as_deref() == Ok("1") { "shape_selected_contiguous_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming" } else { "shape_selected_segmented_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming" },
+            "solver_flat_m4ri_control":"PQ_F4_FLAT_M4RI=1 and optional PQ_F4_FLAT_M4RI_MIN_WORDS",
+            "solver_flat_m4ri_min_words":std::env::var("PQ_F4_FLAT_M4RI_MIN_WORDS").ok().and_then(|value| value.parse::<usize>().ok()),
+            "single_thread_requested":x1_batch_size == 1 && rayon_threads_requested.unwrap_or(1) == 1,
+            "budget_seconds":budget_seconds,
+            "source_variables":instance.n_vars,
+            "solver_variables":n_vars,
+            "fixed_x1_values":x1_count,
+            "fixed_x1_masks_visited":x1_masks_visited,
+            "fixed_x1_nonrational_skipped":nonrational_x1_skipped,
+            "fixed_x1_systems_constructed":systems_constructed,
+            "fixed_x1_systems_completed":systems_completed,
+            "solver_equations_total":total_equations,
+            "solver_terms_total":total_terms,
+            "solver_terms_max_per_system":max_terms,
+            "solver_max_degree":max_degree,
+            "solver_equations_blake3":equation_fingerprint,
+            "algebraic_roots":algebraic_roots,
+            "source_model_valid":source_model_valid,
+            "source_witness_valid":source_witness_valid,
+            "witness_points":witness_json,
+            "exhaustive":exhaustive,
+            "conflicts":Value::Null,
+            "cost":costs.json(),
+            "timing_ns":{
+                "source_verification":instance.verification_ns,
+                "factor_base_x1_membership":factor_base_membership_ns,
+                "fixed_x1_s4_construction":construction_ns,
+                "native_f4_whole":whole_started.elapsed().as_nanos(),
+            },
+            "factor_base_contract":{
+                "target_subgroup_enumerated":false,
+                "discrete_log_labels_used":false,
+            },
+            "interpretation":"Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+        }),
+        accepted,
+    )
 }
 
 fn validate_assignment(
@@ -868,7 +1364,7 @@ fn direct_mitm(instance: VerifiedInstance) -> (Value, bool) {
 }
 
 fn usage() -> &'static str {
-    "usage: koblitz_pdp_backend <verify-source|native-sat|direct-mitm|validate-model> <manifest.json> [conflict-budget|assignment.json]"
+    "usage: koblitz_pdp_backend <verify-source|native-sat|native-f4|direct-mitm|validate-model> <manifest.json> [conflict-budget|budget-seconds|assignment.json]"
 }
 
 fn run(args: &[String]) -> Result<(Value, bool), String> {
@@ -881,6 +1377,9 @@ fn run(args: &[String]) -> Result<(Value, bool), String> {
     }
     if backend == "native-sat" && args.len() != 4 {
         return Err("native-sat requires a conflict budget".to_string());
+    }
+    if backend == "native-f4" && args.len() != 4 {
+        return Err("native-f4 requires a positive wall budget in seconds".to_string());
     }
     if backend == "validate-model" && args.len() != 4 {
         return Err("validate-model requires an assignment JSON file".to_string());
@@ -916,6 +1415,12 @@ fn run(args: &[String]) -> Result<(Value, bool), String> {
             }
             Ok(native_sat(instance, budget))
         }
+        "native-f4" => {
+            let budget = args[3]
+                .parse::<u64>()
+                .map_err(|_| "F4 wall budget must be an unsigned integer".to_string())?;
+            Ok(native_f4(instance, budget))
+        }
         "direct-mitm" => Ok(direct_mitm(instance)),
         "validate-model" => validate_assignment(instance, Path::new(&args[3])),
         _ => Err(format!("unknown backend {backend}; {}", usage())),
@@ -942,5 +1447,112 @@ fn main() {
             eprintln!("koblitz_pdp_backend: {error}");
             std::process::exit(2);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn fixed_x1_weight_order_is_an_exact_target_independent_permutation() {
+        for ell in 0..=12usize {
+            let ascending = fixed_x1_masks(ell, false);
+            let weighted = fixed_x1_masks(ell, true);
+            assert_eq!(ascending, (0..1usize << ell).collect::<Vec<_>>());
+            let mut restored = weighted.clone();
+            restored.sort_unstable();
+            assert_eq!(restored, ascending);
+            assert!(weighted.windows(2).all(|pair| {
+                (pair[0].count_ones(), pair[0]) <= (pair[1].count_ones(), pair[1])
+            }));
+        }
+    }
+
+    #[test]
+    fn parallel_fixed_x1_batch_construction_preserves_order_and_equations() {
+        let n = 7u32;
+        let irreducible = find_irreducible_sparse(n).unwrap();
+        let st = FieldStructure::new(n, &irreducible);
+        let basis: Vec<_> = (0..3)
+            .map(|index| F2mElement::from_bit_positions(&[index], n))
+            .collect();
+        let n_vars = 2 * basis.len();
+        let x2 = SymElement::from_subspace_vars(&basis, 0, n, n_vars);
+        let x3 = SymElement::from_subspace_vars(&basis, basis.len(), n, n_vars);
+        let target = F2mElement::from_bit_positions(&[0, 2, 5], n);
+        let candidates: Vec<_> = fixed_x1_masks(basis.len(), true)
+            .into_iter()
+            .map(|mask| {
+                let value = basis.iter().enumerate().fold(
+                    F2mElement::zero(n),
+                    |value, (index, element)| {
+                        if mask >> index & 1 == 1 {
+                            value.add(element)
+                        } else {
+                            value
+                        }
+                    },
+                );
+                (mask, value)
+            })
+            .collect();
+        let serial = build_fixed_x1_batch(&candidates, &x2, &x3, &target, &st, n_vars, false);
+        let parallel = build_fixed_x1_batch(&candidates, &x2, &x3, &target, &st, n_vars, true);
+        assert_eq!(
+            serial.iter().map(|(mask, _)| *mask).collect::<Vec<_>>(),
+            parallel.iter().map(|(mask, _)| *mask).collect::<Vec<_>>()
+        );
+        for ((_, serial), (_, parallel)) in serial.iter().zip(&parallel) {
+            assert_eq!(serial.equations, parallel.equations);
+        }
+    }
+
+    #[test]
+    fn fixed_x1_native_f4_recovers_an_exact_small_relation() {
+        let n = 7u32;
+        let irreducible = find_irreducible_sparse(n).unwrap();
+        let curve = BinaryCurve {
+            m: n,
+            irreducible,
+            a: F2mElement::one(n),
+            b: F2mElement::one(n),
+            generator: BinaryPoint::Infinity,
+            order: BigUint::zero(),
+            cofactor: BigUint::one(),
+        };
+        let basis: Vec<_> = (0..2)
+            .map(|index| F2mElement::from_bit_positions(&[index], n))
+            .collect();
+        let points = materialise_factor_points(&curve, &basis);
+        let target = points
+            .iter()
+            .flat_map(|p0| points.iter().map(move |p1| (p0, p1)))
+            .flat_map(|(p0, p1)| points.iter().map(move |p2| (p0, p1, p2)))
+            .map(|(p0, p1, p2)| point_add(&curve, &point_add(&curve, p0, p1), p2))
+            .find(|sum| *sum != BinaryPoint::Infinity)
+            .unwrap();
+        let instance = VerifiedInstance {
+            id: "small-fixed-x1-fixture".to_string(),
+            n,
+            ell: basis.len(),
+            conflict_budget_from_manifest: 1,
+            curve,
+            basis,
+            target,
+            rows: Vec::new(),
+            n_vars: 0,
+            source_representation: "fixture".to_string(),
+            source: SourceSystem::SymmetrisedS4,
+            artifact_receipts: json!({}),
+            verification_ns: 0,
+        };
+        let (report, accepted) = native_f4(instance, 5);
+        assert!(accepted);
+        assert_eq!(report["status"], "sat");
+        assert_eq!(report["source_witness_valid"], true);
+        assert_eq!(report["conflicts"], Value::Null);
+        assert!(report["fixed_x1_systems_constructed"].as_u64().unwrap() <= 4);
+        assert!(report["cost"]["extra"]["f4_calls"].as_u64().unwrap() >= 1);
     }
 }

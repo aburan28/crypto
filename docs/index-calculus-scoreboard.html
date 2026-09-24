@@ -559,6 +559,63 @@
       </div>
     </div>
 
+    <div class="panel" id="phase-b-native-f4-parallel-construction">
+      <div class="panel-head">
+        <h2>Phase-B native F4, parallel fixed-X1 construction: 17.13 s <span class="chip">same target</span></h2>
+        <p>Stage 170 constructs each deterministic batch of rational fixed-X1 S4 systems through the same bounded Rayon pool used by the repository-native F4 solver. Indexed collection preserves the algebraic mask order. The clean serial-construction control uses the same binary, equations, batch size 39, twelve solver threads, and exhaustive true-negative target.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Exact Stage-169 <code>n=59, ell=9, m=3</code> holdout rerun after truth was opened. Parallel single-core time is null.</caption>
+          <thead><tr><th>Arm</th><th>Wall s</th><th>Total core s</th><th>Peak RSS</th><th>Construction s</th><th>Decision</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Parallel construction, batch 39 / 12 threads</strong></td><td class="n"><strong>17.131544</strong></td><td class="n">176.171665</td><td class="n">2,904.5 MB</td><td class="n"><strong>0.528026</strong></td><td><span class="chip">selected</span></td></tr>
+            <tr><td>Serial construction, same binary</td><td class="n">20.796178</td><td class="n"><strong>172.001422</strong></td><td class="n"><strong>2,839.7 MB</strong></td><td class="n">4.629543</td><td><span class="chip">control</span></td></tr>
+            <tr><td>Parallel construction, batch 64 / 14 threads</td><td class="n">14.661977</td><td class="n">173.038840</td><td class="n">3,535.7 MB</td><td class="n">0.476829</td><td><span class="chip">post-hoc ceiling</span></td></tr>
+            <tr><td>Direct MITM reference</td><td class="n"><strong>2.953129</strong></td><td class="n"><strong>2.948281</strong></td><td class="n"><strong>45.0 MB</strong></td><td class="n">n/a</td><td><span class="chip">reference</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">exact</span> every F4 arm retains 512 masks, 242 systems, 14,278 equations, 14,515,915 terms, the same equation fingerprint, 99.20 billion word XORs, zero roots and exhaustive UNSAT</span>
+        <span><span class="chip">speedup</span> clean same-binary wall improves 1.214&times;; three alternating development pairs improve 1.206&times; by median wall</span>
+        <span><span class="chip">cost</span> selected CPU rises 2.42% and RSS rises 2.28%; F4 remains 5.80&times; direct MITM by wall, 59.75&times; by CPU and 64.51&times; by RSS</span>
+        <span><span class="chip">boundary</span> developed after holdout truth was opened; the 14.66-second arm is target-tuned and can do extra work on positive targets</span>
+        <span>measured campaign lower bound through Stage 170: 8,808.374612 sequential wall-seconds, 12,423.234481 core-seconds, 6.31 GB maximum process RSS across 264 components; complete cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-20260923/result.json</code>; licensed Magma, a larger preregistered target distribution, full IC/rho cost and independent review remain open</span>
+      </div>
+    </div>
+
+    <div class="panel" id="phase-b-native-f4-fresh-holdout">
+      <div class="panel-head">
+        <h2>Phase-B native F4, preregistered fresh n = 59 holdout: exhaustive true negative <span class="chip">holdout</span></h2>
+        <p>Stage 169 selects blind-bundle ordinal 13 by a committed presentation-order rule before execution or truth scoring. The factor base, sparse fixed-X1 order, batch size 39, twelve-thread pool, 300-second F4 budget, and no-retry policy were frozen first. Native F4 exhausts all 512 masks and all 242 rational systems; post-run scoring then identifies the target as nondecomposable. This is one finite holdout, not an expected-time law.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Same authenticated <code>n=59, ell=9, m=3</code> target and exported source bytes. Local arms share the arm64 host.</caption>
+          <thead><tr><th>Backend</th><th>Terminal</th><th>Wall s</th><th>Core s</th><th>Peak RSS</th><th>Native work / conflicts</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Native F4, batch 39 / 12 threads</strong></td><td><strong>UNSAT, exhaustive true negative</strong></td><td class="n"><strong>20.539819</strong></td><td class="n">169.094100</td><td class="n">2,872.5 MB</td><td>99.20 billion word XORs; 242 F4 calls; conflicts null</td><td><span class="chip">holdout</span></td></tr>
+            <tr><td>Direct MITM</td><td>UNSAT, exhaustive true negative</td><td class="n"><strong>2.953129</strong></td><td class="n"><strong>2.948281</strong></td><td class="n"><strong>45.0 MB</strong></td><td>117,369 additions; 116,635 pair entries</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Native XOR SAT</td><td>inconclusive</td><td class="n">8.986403</td><td class="n">8.963603</td><td class="n">167.6 MB</td><td>100,000 conflicts</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>WDSat</td><td>timeout, inconclusive</td><td class="n">120.002468</td><td class="n">119.898830</td><td class="n">13.9 MB</td><td>conflicts unavailable before kill</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>CryptoMiniSat</td><td>timeout, inconclusive</td><td class="n">120.007540</td><td class="n">119.650196</td><td class="n">210.5 MB</td><td>conflicts unavailable before kill</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>Licensed Magma F4</td><td>not run</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td><span class="chip">missing gate</span></td></tr>
+            <tr><td>GGMP</td><td>not the same n = 59 construction</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td><span class="chip">not comparable</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">fresh target</span> selected by committed blind-bundle order; truth and witness were not consulted before the sealed run</span>
+        <span><span class="chip">exhaustive</span> 512 masks visited, 270 non-rational values skipped, 242 systems completed, 14,278 equations and zero roots</span>
+        <span><span class="chip">reference</span> F4 is 6.96&times; direct MITM by wall, 57.35&times; by CPU, and 63.80&times; by RSS on this nondecomposable target</span>
+        <span><span class="chip">selection check</span> the fresh negative costs 4.119&times; the wall and 6.205&times; the F4 systems of the post-hoc selected positive target; Stage 168 is not generic fresh-target timing</span>
+        <span>measured campaign lower bound through Stage 169: 8,261.489665 sequential wall-seconds, 8,801.978114 core-seconds, 6.31 GB maximum process RSS; complete campaign cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-20260923/result.json</code>; licensed Magma, the full native-F4 panel, full IC/rho cost and independent review remain open</span>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-head">
         <h2>What one target costs each decomposition oracle</h2>
@@ -589,6 +646,54 @@
         <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 4.1&times;10<sup>3</sup>, 22&times; the whole measured cost of the tabled fold (9.2&times;10<sup>3</sup> and 49&times; at the freeze) &mdash; an extrapolation</span>
         <span>matrix-F4 rows from the lift-checked re-run on the merged tree, <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>: same verdicts, fall degrees and SAT conflicts as the freeze, 1.4&ndash;2.7&times; fewer word XORs after main&rsquo;s sparse elimination (#405) &mdash; engineering, ratio to the probe unmoved</span>
         <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical found/refuted verdicts on all 13 cells, zero disagreements, no inconclusive target; 2.3&ndash;29.9&times; fewer word operations on every cell with a tree, the specialisation&rsquo;s reads and writes charged; the default splits on the smallest free variable, so its tree has the same size and a different shape from the reference&rsquo;s &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
+      </div>
+    </div>
+
+    <div class="panel" id="phase-b-native-f4-single-target">
+      <div class="panel-head">
+        <h2>Phase-B native F4, one frozen n = 59 target: a complete relation, parallel F4 still 1.66&times; direct MITM <span class="chip">engineering</span></h2>
+        <p>Stages 159&ndash;168, one authenticated <code>n=59, ell=9, m=3</code> public target. The factor base is
+          <code>span(1,z,...,z^8)</code>; no target-subgroup enumeration, factor-base log, truth class or
+          witness reaches the solver. Full <code>f4-f2</code> fixes one summand, solves the remaining
+          18-variable direct-S4 systems, then accepts only an exact three-point curve sum. Stage 160
+          forms the shared symbolic <code>X2*X3</code> product once and applies known field factors as
+          exact linear maps, with a 60-case byte-equality gate against the generic constructor. This is a
+          PDP-stage diagnostic. It is a different formulation from the unexecuted licensed Magma source,
+          and it prices neither relation collection nor a logarithm.</p>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <caption>Same mathematical target. Local rows share the arm64 host; frozen WDSat and CryptoMiniSat receipts are Linux x86_64 and are not used for wall-time ratios.</caption>
+          <thead><tr><th>Backend</th><th>Terminal</th><th>Wall s</th><th>Core s</th><th>Peak RSS</th><th>Native work</th><th>Class</th></tr></thead>
+          <tbody>
+            <tr><td>Direct MITM, same local binary</td><td>SAT, group verified</td><td class="n">2.999661</td><td class="n">2.991745</td><td class="n">45.8 MB</td><td>117,015 additions; 116,635 pair entries</td><td><span class="chip">reference</span></td></tr>
+            <tr><td>Native XOR SAT, same local binary</td><td>inconclusive at 100,000 conflicts</td><td class="n">8.906472</td><td class="n">8.890455</td><td class="n">168.4 MB</td><td>100,000 conflicts</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>Native F4, fixed-X1 baseline</td><td>SAT, group verified</td><td class="n">205.702959</td><td class="n">204.982191</td><td class="n">950.9 MB</td><td>182.73 billion word XORs; 138 calls</td><td><span class="chip">baseline</span></td></tr>
+            <tr><td>Native F4, skip non-rational X1</td><td>SAT, same witness</td><td class="n">100.179380</td><td class="n">99.920352</td><td class="n">921.7 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">Stage 159</span> 2.05&times; stage gain</td></tr>
+            <tr><td>Native F4, constant-linear fixed-X1 constructor</td><td>SAT, identical equations and witness</td><td class="n">73.757990</td><td class="n">73.585054</td><td class="n">910.9 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">Stage 160</span> 27.04&times; construction; 1.36&times; whole target</td></tr>
+            <tr><td>Native F4, fast trusted-mask hashing</td><td>SAT, identical F4 structure and witness</td><td class="n">60.645599</td><td class="n">60.498754</td><td class="n">964.3 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">Stage 161</span> 1.77&times; matrix build; 1.22&times; whole target</td></tr>
+            <tr><td>Native F4, grouped exact pair selection</td><td>SAT, identical F4 structure and witness</td><td class="n">57.862894</td><td class="n">57.736423</td><td class="n">968.1 MB</td><td>87.51 billion word XORs; 65 calls</td><td><span class="chip">Stage 162</span> 3,600-case UPDATE equivalence; 1.048&times; whole target</td></tr>
+            <tr><td>Native F4, shape-selected block-4 M4RI</td><td>SAT, same equations and witness</td><td class="n">54.773779</td><td class="n">54.662604</td><td class="n">915.7 MB</td><td>45.88 billion elimination-and-table word XORs; 196 M4RI matrices</td><td><span class="chip">Stage 163</span> 1.070&times; same-binary wall; 47.6% less counted work; still 18.26&times; direct MITM</td></tr>
+            <tr><td>Native F4, dense indices + batch UPDATE + trimmed block-8 M4RI</td><td>SAT, same equations and witness</td><td class="n">36.450481</td><td class="n">36.319425</td><td class="n">946.4 MB</td><td>27.26 billion elimination-and-table word XORs; 196 M4RI matrices</td><td><span class="chip">Stage 164</span> 1.503&times; over Stage 163; still 12.15&times; direct MITM</td></tr>
+            <tr><td>Native F4, sparse-coefficient fixed-X1 order</td><td>SAT, same exact witness</td><td class="n">21.512089</td><td class="n">21.484441</td><td class="n">948.5 MB</td><td>16.82 billion word XORs; 39 F4 calls after 85 masks</td><td><span class="chip">Stage 165</span> 1.601&times; same-binary ascending order; post-hoc selection; still 7.17&times; direct MITM</td></tr>
+            <tr><td>Native F4, dense-cancel monomial products</td><td>SAT, identical equations and witness</td><td class="n">19.887753</td><td class="n">19.858236</td><td class="n">900.2 MB</td><td>16.82 billion word XORs; 101.59 million product terms cancelled before sorting</td><td><span class="chip">Stage 166</span> 1.085&times; same-binary wall; still 6.63&times; direct MITM</td></tr>
+            <tr><td>Native F4, Stage 167 same-binary one-thread control</td><td>SAT, same equations and witness</td><td class="n">19.828459</td><td class="n">19.805719</td><td class="n">904.1 MB</td><td>16.82 billion word XORs; 39 systems; no speculative work</td><td><span class="chip">single core</span> current source control</td></tr>
+            <tr><td>Native F4, deterministic fixed-X1 batch 13</td><td>SAT, same equations and witness</td><td class="n">5.589951</td><td class="n">36.302718</td><td class="n">3,033.6 MB</td><td>16.82 billion word XORs; 39 systems in three batches; 13 threads</td><td><span class="chip">Stage 167</span> 3.547&times; same-binary wall; parallel F4 still 1.86&times; direct MITM</td></tr>
+            <tr><td><strong>Native F4, one batch of 39 systems</strong></td><td><strong>SAT, same equations and witness</strong></td><td class="n"><strong>4.987010</strong></td><td class="n"><strong>28.179809</strong></td><td class="n">2,764.0 MB</td><td>16.82 billion word XORs; one complete batch; 12 threads</td><td><span class="chip">engineering</span> 1.121&times; over Stage 167; batch equals the post-hoc known successful prefix</td></tr>
+            <tr><td>Native F4 + trace equation</td><td>SAT, same target</td><td class="n">118.368718</td><td class="n">117.960326</td><td class="n"><strong>637.3 MB</strong></td><td>138.96 billion word XORs</td><td><span class="chip">rejected</span> speed regression</td></tr>
+            <tr><td>WDSat, frozen Linux receipt</td><td>timeout, inconclusive</td><td class="n">120.003056</td><td class="n">88.060134</td><td class="n">19.6 MB</td><td>conflicts unavailable</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>CryptoMiniSat, frozen Linux receipt</td><td>timeout, inconclusive</td><td class="n">120.005939</td><td class="n">87.983526</td><td class="n">69.4 MB</td><td>conflicts unavailable before kill</td><td><span class="chip">censored</span></td></tr>
+            <tr><td>Licensed Magma F4</td><td>not run</td><td class="n">null</td><td class="n">null</td><td class="n">null</td><td>null</td><td><span class="chip">missing gate</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend" style="padding-top:0">
+        <span><span class="chip">engineering</span> Stage 168 places the same 39 rational systems in one complete Rayon batch; batch size 39 is the already known successful prefix and therefore a post-hoc target-specific choice, not a generic stopping rule</span>
+        <span><span class="chip">reference</span> selected parallel F4 remains 1.66&times; direct MITM by same-host wall, 9.42&times; by CPU, and 60.29&times; by RSS; the one-thread control remains 6.61&times; direct MITM by wall</span>
+        <span><span class="chip">full cost</span> clean build plus selected custody run is 172.15 wall seconds / 191.68 core-seconds / 2.76 GB peak RSS; the build was already charged in Stage 167 and is not counted twice</span>
+        <span><span class="chip">accounting</span> conflicts are <code>null</code> for F4 and MITM because neither exposes SAT conflicts; caps and watchdogs remain censored rather than UNSAT</span>
+        <span>measured campaign lower bound through Stage 168: 7,988.745489 sequential wall-seconds, 8,381.199829 core-seconds, 6.31 GB maximum process RSS; complete campaign cost remains <code>null</code></span>
+        <span>source: <code>research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-168-single-batch-39-20260923/result.json</code>; licensed Magma, the full 160-input native-F4 panel, end-to-end IC/rho cost, fresh-target validation and independent review remain open</span>
       </div>
     </div>
 

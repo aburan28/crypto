@@ -12,6 +12,8 @@ on:
       - "examples/koblitz_pdp_backend.rs"
       - "src/cryptanalysis/koblitz_index_calculus.rs"
       - "src/cryptanalysis/koblitz_pdp_phase_a.rs"
+      - "src/cryptanalysis/pq_f4_f2.rs"
+      - "src/cryptanalysis/ic_framework/solvers.rs"
       - "src/bin/koblitz_pdp_prepare.rs"
       - "scripts/process_meter.py"
       - "scripts/run_koblitz_pdp_matrix.py"
@@ -26,6 +28,22 @@ on:
       - "scripts/build_koblitz_phase_b_wdsat.py"
       - "scripts/test_koblitz_phase_b_wdsat_custody.py"
       - "scripts/build_koblitz_phase_b_tools.py"
+      - "scripts/build_koblitz_phase_b_native_f4.py"
+      - "scripts/run_koblitz_phase_b_native_f4.py"
+      - "scripts/compose_koblitz_stage164_dense_f4.py"
+      - "scripts/verify_koblitz_stage164_dense_f4.py"
+      - "scripts/compose_koblitz_stage165_x1_order.py"
+      - "scripts/verify_koblitz_stage165_x1_order.py"
+      - "scripts/compose_koblitz_stage166_dense_mul.py"
+      - "scripts/verify_koblitz_stage166_dense_mul.py"
+      - "scripts/compose_koblitz_stage167_parallel_x1.py"
+      - "scripts/verify_koblitz_stage167_parallel_x1.py"
+      - "scripts/compose_koblitz_stage168_single_batch.py"
+      - "scripts/verify_koblitz_stage168_single_batch.py"
+      - "scripts/compose_koblitz_stage169_fresh_holdout.py"
+      - "scripts/verify_koblitz_stage169_fresh_holdout.py"
+      - "scripts/compose_koblitz_stage170_parallel_construction.py"
+      - "scripts/verify_koblitz_stage170_parallel_construction.py"
       - "scripts/test_koblitz_phase_b_tool_builds.py"
       - "scripts/score_koblitz_blind_pdp_phase_b.py"
       - "scripts/test_koblitz_blind_pdp_phase_b.py"
@@ -100,6 +118,25 @@ on:
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE22_PHASE_B_MAGMA_REPLAY.md"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz"
       - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-22-phase-b-magma-replay-packet-successor-03-20260910.tar.gz.sha256"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-165-x1-weight-order-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-165-x1-weight-order-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-166-dense-product-cancellation-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-166-dense-product-cancellation-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-167-parallel-x1-batches-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-167-parallel-x1-batches-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-168-single-batch-39-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-168-single-batch-39-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-preregistration-20260923.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-verification.json"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-171-dense-symbolic-sets-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-172-native-f4-single-core-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-173-ggmp-same-cell-availability-20260923/**"
+      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-174-size-gated-flat-m4ri-20260923/**"
       - ".github/workflows/koblitz-sota-reproduction.yml"
 
 permissions:
@@ -127,6 +164,8 @@ jobs:
         run: |
           python3 scripts/test_koblitz_phase_b_tool_builds.py -v
           python3 scripts/test_koblitz_phase_b_wdsat_custody.py -v
+          python3 scripts/test_run_koblitz_pdp_matrix.py -v
+          python3 scripts/test_run_koblitz_phase_b_native_f4.py -v
           # Cargo normally hard-links example binaries on Linux. Make dedicated
           # byte copies for the single-link immutable-artifact custody checks.
           mkdir "$RUNNER_TEMP/phase-b-tools"
@@ -135,6 +174,90 @@ jobs:
           python3 scripts/test_koblitz_blind_pdp_phase_b.py --preparer target/release/koblitz_pdp_prepare --exporter "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_export" --backend "$RUNNER_TEMP/phase-b-tools/koblitz_pdp_backend" -v
       - name: Verify terminal Phase-B result evidence
         run: python3 scripts/verify_stage20_phase_b_terminal_evidence.py
+      - name: Verify native-F4 single-target supplement
+        run: |
+          python3 scripts/verify_koblitz_stage159_native_f4.py > /tmp/stage159-native-f4-verification.json
+          cmp /tmp/stage159-native-f4-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-verification.json
+      - name: Verify fixed-X1 constant-linear supplement
+        run: |
+          cargo test --release --lib fixed_x1_specialisation_matches_the_generic_s4_system -- --test-threads=1
+          python3 scripts/verify_koblitz_stage160_fixed_x1.py > /tmp/stage160-fixed-x1-verification.json
+          cmp /tmp/stage160-fixed-x1-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-160-fixed-x1-verification.json
+      - name: Verify trusted-mask hashing supplement
+        run: |
+          python3 scripts/verify_koblitz_stage161_fast_hash.py > /tmp/stage161-fast-hash-verification.json
+          cmp /tmp/stage161-fast-hash-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-161-fast-hash-verification.json
+      - name: Verify grouped critical-pair supplement
+        run: |
+          python3 scripts/verify_koblitz_stage162_pair_selection.py > /tmp/stage162-pair-selection-verification.json
+          cmp /tmp/stage162-pair-selection-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-162-pair-selection-verification.json
+      - name: Verify block-4 M4RI supplement
+        run: |
+          python3 scripts/verify_koblitz_stage163_m4ri.py > /tmp/stage163-m4ri-verification.json
+          cmp /tmp/stage163-m4ri-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-163-m4ri-verification.json
+      - name: Verify dense native-F4 supplement
+        run: |
+          cargo test --release --lib cryptanalysis::pq_f4_f2::tests:: -- --test-threads=1
+          python3 scripts/verify_koblitz_stage164_dense_f4.py > /tmp/stage164-dense-f4-verification.json
+          cmp /tmp/stage164-dense-f4-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-164-native-f4-dense-verification.json
+      - name: Verify sparse fixed-X1 order supplement
+        run: |
+          cargo test --release --example koblitz_pdp_backend -- --test-threads=1
+          python3 scripts/verify_koblitz_stage165_x1_order.py > /tmp/stage165-x1-order-verification.json
+          cmp /tmp/stage165-x1-order-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-165-x1-weight-order-verification.json
+      - name: Verify dense F4 monomial-product supplement
+        run: |
+          python3 scripts/verify_koblitz_stage166_dense_mul.py > /tmp/stage166-dense-product-verification.json
+          cmp /tmp/stage166-dense-product-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-166-dense-product-cancellation-verification.json
+      - name: Verify deterministic parallel fixed-X1 supplement
+        run: |
+          python3 scripts/verify_koblitz_stage167_parallel_x1.py > /tmp/stage167-parallel-x1-verification.json
+          cmp /tmp/stage167-parallel-x1-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-167-parallel-x1-batches-verification.json
+      - name: Verify one-batch fixed-X1 supplement
+        run: |
+          python3 scripts/verify_koblitz_stage168_single_batch.py > /tmp/stage168-single-batch-verification.json
+          cmp /tmp/stage168-single-batch-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-168-single-batch-39-verification.json
+      - name: Verify preregistered fresh-target holdout
+        run: |
+          python3 scripts/verify_koblitz_stage169_fresh_holdout.py > /tmp/stage169-fresh-holdout-verification.json
+          cmp /tmp/stage169-fresh-holdout-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-169-fresh-target-holdout-verification.json
+      - name: Verify parallel fixed-X1 construction
+        run: |
+          python3 scripts/verify_koblitz_stage170_parallel_construction.py > /tmp/stage170-parallel-construction-verification.json
+          cmp /tmp/stage170-parallel-construction-verification.json research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-170-parallel-fixed-x1-construction-verification.json
+      - name: Verify Stage 171-174 native-F4 supplements
+        env:
+          KIC_VERIFY_NO_WRITE: "1"
+        run: |
+          stage_root="research/sat_factor_base_review_20260908/continuation-05-sota-gates"
+          python3 "$stage_root/stage-171-dense-symbolic-sets-20260923/verify_stage171.py"
+          python3 "$stage_root/stage-172-native-f4-single-core-20260923/verify_stage172.py"
+          python3 "$stage_root/stage-173-ggmp-same-cell-availability-20260923/verify_stage173.py"
+          python3 "$stage_root/stage-174-size-gated-flat-m4ri-20260923/verify_stage174.py"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          stage_root = Path("research/sat_factor_base_review_20260908/continuation-05-sota-gates")
+          names = (
+              "stage-171-dense-symbolic-sets-20260923",
+              "stage-172-native-f4-single-core-20260923",
+              "stage-173-ggmp-same-cell-availability-20260923",
+              "stage-174-size-gated-flat-m4ri-20260923",
+          )
+          for name in names:
+              root = stage_root / name
+              seal = json.loads((root / "result-seal.json").read_text())
+              assert hashlib.sha256((root / "result.json").read_bytes()).hexdigest() == seal["result_sha256"]
+              inventory = seal["inventory"]
+              encoded = json.dumps(inventory, sort_keys=True, separators=(",", ":")).encode()
+              assert hashlib.sha256(encoded).hexdigest() == seal["inventory_sha256"]
+              for item in inventory:
+                  path = root / item["path"]
+                  assert path.is_file() and path.stat().st_size == item["bytes"]
+                  assert hashlib.sha256(path.read_bytes()).hexdigest() == item["sha256"]
+          PY
       - name: Validate licensed Magma Phase-B replay packet controls
         run: |
           python3 scripts/test_koblitz_phase_b_magma_replay.py -v

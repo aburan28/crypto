@@ -1,0 +1,53 @@
+{
+  "backend_terminal_report": null,
+  "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+  "cell_id": "n59-l9-m3-standard-a1-f0",
+  "claim_boundary": "Charged class-blind single-target native-F4 attempt; watchdog timeout is censored, not UNSAT, and is not licensed Magma F4 or an end-to-end index-calculus result.",
+  "classification": "inconclusive",
+  "clean_build_resources": {
+    "aggregate_process_tree_peak_rss_bytes": null,
+    "largest_child_peak_rss_bytes": 1684684800,
+    "single_core_elapsed_seconds": null,
+    "summed_process_wall_seconds": 172.200837335,
+    "total_core_seconds": 167.481573
+  },
+  "conflicts": null,
+  "full_cost_gate_passed": false,
+  "internal_budget_seconds": 110,
+  "known_witnesses_present": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "outer_driver_resource_note": "the runner failed after preserving child receipts, before it could write its outer resource summary",
+  "outer_driver_resources": null,
+  "outer_watchdog_seconds": 120,
+  "process_resources": {
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+    "peak_rss_bytes": 5251366912,
+    "single_core_seconds": 119.855702,
+    "system_seconds": 0.9215089999999999,
+    "total_core_seconds": 119.855702,
+    "user_seconds": 118.934193,
+    "wall_seconds": 120.10503841599711
+  },
+  "schema": "koblitz_phase_b_native_f4_failed_attempt.v1",
+  "solver": "f4-f2",
+  "source_artifacts_unchanged": true,
+  "source_revision": {
+    "commit": "f438115ddf274f72bca345c02f7c5b006dd2d41a",
+    "dirty": false,
+    "porcelain": []
+  },
+  "source_system_id": "x-4b8824db5204cff67a887d4166992386cf86804e7547c89717f385097a92d886",
+  "status": "watchdog_timeout_inconclusive",
+  "target": {
+    "x": "342002423881678665",
+    "y": "482559600513111561"
+  },
+  "terminal": {
+    "returncode": -15,
+    "stderr_bytes": 0,
+    "stdout_bytes": 0,
+    "timed_out": true
+  },
+  "truth_labels_present": false
+}

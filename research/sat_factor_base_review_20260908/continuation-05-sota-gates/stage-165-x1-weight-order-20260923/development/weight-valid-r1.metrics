@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/target/release/examples/koblitz_pdp_backend",
+    "native-f4",
+    "/Volumes/SSD990/koblitz-native-f4-run12-9845f2df/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 21.697178000002168,
+    "user_seconds": 21.291178,
+    "system_seconds": 0.161328,
+    "total_core_seconds": 21.452506,
+    "single_core_seconds": 21.452506,
+    "peak_rss_bytes": 1005977600,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/usr/bin/tar",
+    "-xf",
+    "/Volumes/SSD990/koblitz-native-f4-build11-04e49c93/source.tar",
+    "-C",
+    "/Volumes/SSD990/koblitz-native-f4-build11-04e49c93/source"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.07196791699971072,
+    "user_seconds": 0.004397,
+    "system_seconds": 0.050154,
+    "total_core_seconds": 0.054550999999999995,
+    "single_core_seconds": 0.054550999999999995,
+    "peak_rss_bytes": 3457024,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

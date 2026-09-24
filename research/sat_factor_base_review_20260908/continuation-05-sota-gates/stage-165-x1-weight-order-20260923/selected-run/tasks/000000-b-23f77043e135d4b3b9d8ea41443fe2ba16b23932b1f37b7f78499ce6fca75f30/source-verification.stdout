@@ -1,0 +1,34 @@
+{
+  "ell": 9,
+  "interpretation": "The algebraic factor base, explicit affine target, source identity, and all exported equations were independently reconstructed without running a solver",
+  "n": 59,
+  "regenerated_source_exact": true,
+  "schema": "koblitz_pdp_source_verification.v1",
+  "source_artifacts": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+      "bytes": 219207,
+      "path": "instance.xor.cnf",
+      "valid": true
+    },
+    "magma_boolean_f4": {
+      "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+      "bytes": 404158,
+      "path": "instance.magma",
+      "valid": true
+    },
+    "wdsat_anf": {
+      "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+      "bytes": 255940,
+      "path": "instance.anf",
+      "valid": true
+    }
+  },
+  "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+  "source_instance_verified": true,
+  "source_variables": 78,
+  "status": "verified",
+  "timing_ns": {
+    "source_verification": 39144833
+  }
+}

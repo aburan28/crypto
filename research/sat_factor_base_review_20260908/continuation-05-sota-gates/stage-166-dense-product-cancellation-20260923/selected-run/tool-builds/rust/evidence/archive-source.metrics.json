@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/usr/bin/git",
+    "archive",
+    "--format=tar",
+    "--output=/Volumes/SSD990/koblitz-native-f4-build17-ac3e385c/source.tar",
+    "ac3e385cec9c90b489017f6012ebe0b50ca06405",
+    "Cargo.toml",
+    "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock",
+    "src",
+    "examples/koblitz_pdp_export.rs",
+    "examples/koblitz_pdp_backend.rs",
+    "docs/ic/calibration.json"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.17944374999206048,
+    "user_seconds": 0.042863,
+    "system_seconds": 0.058407999999999995,
+    "total_core_seconds": 0.101271,
+    "single_core_seconds": 0.101271,
+    "peak_rss_bytes": 18415616,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

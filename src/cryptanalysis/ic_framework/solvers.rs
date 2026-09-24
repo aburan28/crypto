@@ -147,8 +147,20 @@ impl SystemSolver for F4F2 {
     }
 
     fn describe(&self) -> String {
-        "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, bit-packed elimination, reduced basis"
-            .into()
+        let products = if std::env::var("PQ_F4_DISABLE_DENSE_MUL").as_deref() == Ok("1") {
+            "sorted-input monomial products"
+        } else {
+            "dense duplicate-cancelling monomial products"
+        };
+        let symbolic_sets =
+            if std::env::var("PQ_F4_DISABLE_DENSE_SYMBOLIC_SET").as_deref() == Ok("1") {
+                "hash-backed symbolic monomial sets"
+            } else {
+                "bit-packed symbolic monomial sets on bounded Boolean domains"
+            };
+        format!(
+            "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, {products}, {symbolic_sets}, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis"
+        )
     }
 
     fn accepts(&self, shape: &SystemShape) -> bool {
@@ -171,23 +183,74 @@ impl SystemSolver for F4F2 {
             ("field_pairs_reduced", st.field_pairs_reduced),
             ("pairs_product_skipped", st.pairs_product_skipped),
             ("pairs_chain_skipped", st.pairs_chain_skipped),
+            ("pair_prune_tests", st.pair_prune_tests),
+            ("pair_prune_submask_lookups", st.pair_prune_submask_lookups),
+            ("pair_prune_linear_tests", st.pair_prune_linear_tests),
+            ("pair_prune_passes", st.pair_prune_passes),
+            ("batch_insert_groups", st.batch_insert_groups),
+            ("batch_insert_elements", st.batch_insert_elements),
+            ("active_candidate_visits", st.active_candidate_visits),
+            ("active_deactivation_tests", st.active_deactivation_tests),
+            ("pair_dense_select_calls", st.pair_dense_select_calls),
+            ("pair_sorted_select_calls", st.pair_sorted_select_calls),
+            ("pair_lcm_groups", st.pair_lcm_groups),
+            ("pair_cover_lookups", st.pair_cover_lookups),
+            (
+                "pair_dense_scratch_bytes_max",
+                st.pair_dense_scratch_bytes_max,
+            ),
+            ("dense_column_matrices", st.dense_column_matrices),
+            ("dense_column_bytes_max", st.dense_column_bytes_max),
             ("reducer_rows", st.reducer_rows),
             ("matrix_rows_max", st.matrix_rows_max),
             ("matrix_cols_max", st.matrix_cols_max),
             ("matrix_rows_sum", st.matrix_rows_sum),
+            ("m4ri_matrices", st.m4ri_matrices),
+            ("m4ri_block_width_max", st.m4ri_block_width_max),
+            ("m4ri_table_word_xors", st.m4ri_table_word_xors),
+            ("m4ri_blocks", st.m4ri_blocks),
+            ("m4ri_consecutive_blocks", st.m4ri_consecutive_blocks),
+            (
+                "m4ri_trimmed_word_xors_avoided",
+                st.m4ri_trimmed_word_xors_avoided,
+            ),
+            ("m4ri_scratch_bytes_max", st.m4ri_scratch_bytes_max),
+            ("flat_m4ri_matrices", st.flat_m4ri_matrices),
+            ("flat_m4ri_order_bytes_max", st.flat_m4ri_order_bytes_max),
             ("divisor_tests", st.divisor_tests),
+            ("divisor_submask_lookups", st.divisor_submask_lookups),
+            ("divisor_linear_tests", st.divisor_linear_tests),
+            ("dense_mul_calls", st.dense_mul_calls),
+            ("dense_mul_input_terms", st.dense_mul_input_terms),
+            ("dense_mul_output_terms", st.dense_mul_output_terms),
+            ("dense_mul_cancelled_terms", st.dense_mul_cancelled_terms),
+            (
+                "dense_mul_scratch_bytes_max",
+                st.dense_mul_scratch_bytes_max,
+            ),
+            ("dense_symbolic_set_steps", st.dense_symbolic_set_steps),
+            (
+                "dense_symbolic_set_bytes_max",
+                st.dense_symbolic_set_bytes_max,
+            ),
             ("new_elements", st.new_elements),
             ("basis_len", st.basis_len),
             ("build_ns", st.build_ns),
             ("eliminate_ns", st.eliminate_ns),
+            ("pair_update_ns", st.pair_update_ns),
             ("pairs_left", st.pairs_left),
             ("oversize", st.oversize as u64),
+            (
+                "symbolic_bytes_estimate_max",
+                st.symbolic_bytes_estimate_max,
+            ),
+            ("symbolic_cap_hit", st.symbolic_cap_hit as u64),
         ] {
             extra.insert(k.to_string(), v);
         }
         let mut cost = SolverCost {
             ops: st.word_xors,
-            op_unit: "word XORs (elimination only)".into(),
+            op_unit: "word XORs (elimination, including M4RI tables)".into(),
             wall_ns: 0,
             peak_bytes: st.peak_matrix_bytes,
             degree_reached: Some(st.degree_reached),
@@ -262,7 +325,9 @@ fn split_rule(name: &str) -> Result<SplitRule, String> {
         "highest" => Ok(SplitRule::HighestFree),
         "frequent" => Ok(SplitRule::MostFrequent),
         "mom" => Ok(SplitRule::MinTermWeight),
-        other => Err(format!("unknown split rule `{other}`; try auto, lowest, highest, frequent or mom")),
+        other => Err(format!(
+            "unknown split rule `{other}`; try auto, lowest, highest, frequent or mom"
+        )),
     }
 }
 
@@ -286,9 +351,18 @@ impl SystemSolver for HybridF4 {
 
     fn parameters(&self) -> &[(&str, &str)] {
         &[
-            ("max_degree", "highest Macaulay degree built before splitting (default 3)"),
-            ("split", "auto, lowest, highest, frequent or mom (default auto)"),
-            ("node_budget", "reductions before the run gives up (default 4096)"),
+            (
+                "max_degree",
+                "highest Macaulay degree built before splitting (default 3)",
+            ),
+            (
+                "split",
+                "auto, lowest, highest, frequent or mom (default auto)",
+            ),
+            (
+                "node_budget",
+                "reductions before the run gives up (default 4096)",
+            ),
         ]
     }
 
@@ -330,7 +404,10 @@ impl SystemSolver for HybridF4 {
             ("oversize", st.oversize as u64),
             ("max_degree", max_degree as u64),
             ("verification_tests", tests),
-            ("engine_overridden_by_environment", (format!("{:?}", resolved.engine) != format!("{:?}", opts.engine)) as u64),
+            (
+                "engine_overridden_by_environment",
+                (format!("{:?}", resolved.engine) != format!("{:?}", opts.engine)) as u64,
+            ),
             ("reduction_cache_on", enabled(Layer::ExactReduction) as u64),
         ] {
             extra.insert(k.to_string(), v);
@@ -377,15 +454,22 @@ impl SystemSolver for CrossbredF2 {
     }
 
     fn describe(&self) -> String {
-        "Joux–Vitse crossbred: Macaulay left kernel at degree D, then 2^k bit-sliced linear solves".into()
+        "Joux–Vitse crossbred: Macaulay left kernel at degree D, then 2^k bit-sliced linear solves"
+            .into()
     }
 
     fn parameters(&self) -> &[(&str, &str)] {
         &[
             ("D", "Macaulay degree of the preprocessing (default 3)"),
             ("k", "variables enumerated (default 8, capped at n − 1)"),
-            ("max_rows", "Macaulay rows the preprocessing may build (default 4000)"),
-            ("max_kernel_dim", "affine solution space enumerated per point (default 12)"),
+            (
+                "max_rows",
+                "Macaulay rows the preprocessing may build (default 4000)",
+            ),
+            (
+                "max_kernel_dim",
+                "affine solution space enumerated per point (default 12)",
+            ),
         ]
     }
 
@@ -399,7 +483,9 @@ impl SystemSolver for CrossbredF2 {
         params: &Params,
         _budget: Option<Duration>,
     ) -> (SolverVerdict, SolverCost) {
-        use crate::cryptanalysis::crossbred::{extract_crossbred, solve_crossbred, CrossbredParams, SearchOptions};
+        use crate::cryptanalysis::crossbred::{
+            extract_crossbred, solve_crossbred, CrossbredParams, SearchOptions,
+        };
         let started = Instant::now();
         let n = system.n_vars;
         let xp = CrossbredParams {
@@ -516,7 +602,9 @@ impl SystemSolver for FesF2 {
                     .sum()
             })
             .unwrap_or(0);
-        let found = forms.as_deref().and_then(|fs| gray_incremental_find_all(fs, usize::MAX));
+        let found = forms
+            .as_deref()
+            .and_then(|fs| gray_incremental_find_all(fs, usize::MAX));
         let mut tests = 0u64;
         let mut extra = BTreeMap::new();
         extra.insert("points".into(), 1u64 << n);
@@ -597,14 +685,19 @@ impl SystemSolver for FesWide {
             .equations
             .iter()
             .map(|p| {
-                QuadraticForm::from_anf_row(&crate::cryptanalysis::wdsat_oracle::AnfRow::from_poly(p), n)
+                QuadraticForm::from_anf_row(
+                    &crate::cryptanalysis::wdsat_oracle::AnfRow::from_poly(p),
+                    n,
+                )
             })
             .collect();
         // A lane holds 32 equations.  With more, the walk enumerates the
         // roots of the first 32 — a superset of the system's — and every
         // candidate is checked against all the equations below, as
         // libfes does: about `2^{n−32}` spurious candidates per call.
-        let found = forms.as_deref().and_then(|fs| gray_find_all_wide(&fs[..fs.len().min(32)], usize::MAX));
+        let found = forms
+            .as_deref()
+            .and_then(|fs| gray_find_all_wide(&fs[..fs.len().min(32)], usize::MAX));
         let Some((candidates, lanes)) = found else {
             // No lanes on this host, or a system the lanes do not fit:
             // the scalar walk, which reports its own unit.
@@ -891,9 +984,15 @@ pub fn solver_registry() -> Vec<Box<dyn SystemSolver>> {
     vec![
         Box::new(F4F2),
         Box::new(BuchbergerF2),
-        Box::new(HybridF4 { kind: HybridKind::MatrixF4 }),
-        Box::new(HybridF4 { kind: HybridKind::MatrixF5 }),
-        Box::new(HybridF4 { kind: HybridKind::InheritedF4 }),
+        Box::new(HybridF4 {
+            kind: HybridKind::MatrixF4,
+        }),
+        Box::new(HybridF4 {
+            kind: HybridKind::MatrixF5,
+        }),
+        Box::new(HybridF4 {
+            kind: HybridKind::InheritedF4,
+        }),
         Box::new(CrossbredF2),
         Box::new(XlF2),
         Box::new(SatCdcl),
@@ -950,7 +1049,11 @@ mod tests {
             let (verdict, cost) = solver.solve(&sys, &Params::default(), None);
             match verdict {
                 SolverVerdict::Solved(found) => {
-                    assert!(!found.is_empty(), "{}: solved with no solutions", solver.name());
+                    assert!(
+                        !found.is_empty(),
+                        "{}: solved with no solutions",
+                        solver.name()
+                    );
                     for f in &found {
                         assert!(
                             reference.contains(f),
@@ -1031,7 +1134,11 @@ mod tests {
             let (wide, scalar) = (sorted(wide), sorted(scalar));
             assert!(scalar.contains(&planted));
             assert_eq!(wide, scalar, "trial {trial} (n = {n}, m = {m})");
-            assert!(cost.op_unit.starts_with("vector XORs"), "the lanes ran: {}", cost.op_unit);
+            assert!(
+                cost.op_unit.starts_with("vector XORs"),
+                "the lanes ran: {}",
+                cost.op_unit
+            );
         }
     }
 
@@ -1064,7 +1171,10 @@ mod tests {
                 F2BoolPoly::from_monos(monos, n)
             })
             .collect();
-        BooleanSystem { equations, n_vars: n }
+        BooleanSystem {
+            equations,
+            n_vars: n,
+        }
     }
 
     /// Hold every engine that answers to the reference's answer on one
@@ -1072,30 +1182,49 @@ mod tests {
     /// a wrong answer — but a verdict it gives must be the right one,
     /// and every engine but CDCL (one model) must return every solution.
     fn agree_with_the_reference(sys: &BooleanSystem, label: &str) -> usize {
-        let reference: std::collections::BTreeSet<u64> = match Exhaustive.solve(sys, &Params::default(), None).0 {
-            SolverVerdict::Solved(v) => v.into_iter().collect(),
-            SolverVerdict::Unsatisfiable => Default::default(),
-            other => panic!("{label}: the reference must decide, got {other:?}"),
-        };
+        let reference: std::collections::BTreeSet<u64> =
+            match Exhaustive.solve(sys, &Params::default(), None).0 {
+                SolverVerdict::Solved(v) => v.into_iter().collect(),
+                SolverVerdict::Unsatisfiable => Default::default(),
+                other => panic!("{label}: the reference must decide, got {other:?}"),
+            };
         let mut answered = 0;
         for solver in solver_registry() {
             if !solver.accepts(&sys.shape()) {
                 continue;
             }
-            let (verdict, cost) = solver.solve(sys, &Params::default(), Some(Duration::from_secs(60)));
+            let (verdict, cost) =
+                solver.solve(sys, &Params::default(), Some(Duration::from_secs(60)));
             match verdict {
                 SolverVerdict::Solved(found) => {
                     answered += 1;
-                    assert!(!reference.is_empty(), "{label}: {} solved an inconsistent system", solver.name());
+                    assert!(
+                        !reference.is_empty(),
+                        "{label}: {} solved an inconsistent system",
+                        solver.name()
+                    );
                     let got: std::collections::BTreeSet<u64> = found.into_iter().collect();
-                    assert!(got.is_subset(&reference), "{label}: {} returned a non-solution", solver.name());
+                    assert!(
+                        got.is_subset(&reference),
+                        "{label}: {} returned a non-solution",
+                        solver.name()
+                    );
                     if solver.name() != "sat-cdcl" {
-                        assert_eq!(got, reference, "{label}: {} missed a solution", solver.name());
+                        assert_eq!(
+                            got,
+                            reference,
+                            "{label}: {} missed a solution",
+                            solver.name()
+                        );
                     }
                 }
                 SolverVerdict::Unsatisfiable => {
                     answered += 1;
-                    assert!(reference.is_empty(), "{label}: {} refuted a satisfiable system", solver.name());
+                    assert!(
+                        reference.is_empty(),
+                        "{label}: {} refuted a satisfiable system",
+                        solver.name()
+                    );
                 }
                 SolverVerdict::BudgetExceeded => {}
             }
@@ -1116,8 +1245,12 @@ mod tests {
             let n = 2 + trial % 10;
             let m = (n + trial % 3).saturating_sub(1).max(1);
             let sys = random_quadratic(n, m, &mut rng);
-            let answered = agree_with_the_reference(&sys, &format!("trial {trial} (n = {n}, m = {m})"));
-            assert!(answered >= 5, "trial {trial}: only {answered} engines answered");
+            let answered =
+                agree_with_the_reference(&sys, &format!("trial {trial} (n = {n}, m = {m})"));
+            assert!(
+                answered >= 5,
+                "trial {trial}: only {answered} engines answered"
+            );
         }
     }
 
@@ -1131,13 +1264,21 @@ mod tests {
         use crate::cryptanalysis::pq_descent_symbolic::descend;
         use rand::{Rng, SeedableRng};
         let mut rng = rand::rngs::StdRng::seed_from_u64(7);
-        for &(n, np, m, seed) in &[(7u32, 4u32, 2u32, 1u64), (9, 5, 2, 2), (11, 6, 2, 3), (7, 2, 3, 4)] {
+        for &(n, np, m, seed) in &[
+            (7u32, 4u32, 2u32, 1u64),
+            (9, 5, 2, 2),
+            (11, 6, 2, 3),
+            (7, 2, 3, 4),
+        ] {
             let inst = random_binary_instance(n, seed, 1 << 20).unwrap();
             let words: Vec<u64> = (0..np).map(|k| 1u64 << k).collect();
             for t in 0..3 {
                 let x_r = rng.gen::<u64>() & ((1u64 << n) - 1);
                 let d = descend(&inst.gf, inst.b, x_r, &words, m).unwrap();
-                let sys = BooleanSystem { equations: d.equations, n_vars: d.n_vars };
+                let sys = BooleanSystem {
+                    equations: d.equations,
+                    n_vars: d.n_vars,
+                };
                 agree_with_the_reference(&sys, &format!("n = {n}, n' = {np}, m = {m}, target {t}"));
             }
         }
@@ -1175,9 +1316,21 @@ mod tests {
         use rand::SeedableRng;
         let mut rng = rand::rngs::StdRng::seed_from_u64(5);
         let sys = random_quadratic(12, 12, &mut rng);
-        let model: u64 = sys.equations.iter().map(|p| p.terms.len() as u64).sum::<u64>() << 12;
+        let model: u64 = sys
+            .equations
+            .iter()
+            .map(|p| p.terms.len() as u64)
+            .sum::<u64>()
+            << 12;
         let (_, cost) = Exhaustive.solve(&sys, &Params::default(), None);
-        assert!(cost.ops < model, "{} tests against a model of {model}", cost.ops);
-        assert!(cost.ops >= sys.equations[0].terms.len() as u64 * (1 << 12), "every point tests the first equation");
+        assert!(
+            cost.ops < model,
+            "{} tests against a model of {model}",
+            cost.ops
+        );
+        assert!(
+            cost.ops >= sys.equations[0].terms.len() as u64 * (1 << 12),
+            "every point tests the first equation"
+        );
     }
 }

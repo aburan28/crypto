@@ -1,0 +1,20 @@
+{
+  "reason": "default offline Cargo cache lacked redis 0.32.7; no network fallback occurred",
+  "resource_summary": {
+    "peak_rss_bytes": 44253184,
+    "resource_components": 6,
+    "summed_wall_seconds": 0.428285792004,
+    "total_core_seconds": 0.215997
+  },
+  "roles": [
+    "archive-source",
+    "extract-source",
+    "install-lock",
+    "version-cargo",
+    "version-rustc",
+    "vendor"
+  ],
+  "schema": "koblitz_stage166_rejected_build.v1",
+  "source_commit": "ac3e385cec9c90b489017f6012ebe0b50ca06405",
+  "status": "rejected_missing_dependency_in_default_offline_cache"
+}

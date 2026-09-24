@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "vendor",
+    "--locked",
+    "--offline",
+    "--versioned-dirs",
+    "/Volumes/SSD990/koblitz-native-f4-build14-9845f2df/vendor"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 1.540616708000016,
+    "user_seconds": 0.45693,
+    "system_seconds": 0.7324999999999999,
+    "total_core_seconds": 1.18943,
+    "single_core_seconds": 1.18943,
+    "peak_rss_bytes": 50282496,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

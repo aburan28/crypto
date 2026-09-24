@@ -263,16 +263,19 @@ def build(output: Path) -> dict[str, Any]:
 
 
 def verify(output: Path) -> dict[str, Any]:
-    # Stage 128 is the current audit: recompose from the live documents and
-    # require the result to equal the sealed one.  When the documents it pins
-    # move again, the next stage re-seals and this verify becomes historical,
-    # exactly as Stage 109's, 124's, 125's, 126's and 127's did.
+    # Stage 128 is now an immutable historical snapshot. Stage 159 moved the
+    # gate status and canonical scoreboard when it added the native-F4
+    # single-target supplement, so recomposing here would compare two points
+    # in time. The Stage-159 audit recomposes the current evidence and chains
+    # to this seal; this verifier now checks only the frozen audit and seal, as
+    # the Stage 109, 124, 125, 126 and 127 verifiers do.
     seal = load(output / "result-seal.json", "Stage-128 seal")
     require(seal.get("schema") == SEAL_SCHEMA, "seal schema changed")
     require(sha256(output / "audit.json") == seal.get("audit_sha256"), "audit seal changed")
-    current = compose()
-    require(current == load(output / "audit.json", "Stage-128 audit"), "current audit changed")
-    return current
+    committed = load(output / "audit.json", "Stage-128 audit")
+    require(committed.get("schema") == SCHEMA, "committed audit schema changed")
+    require(committed.get("status") == "current_seven_gate_audit_verified", "committed audit status changed")
+    return committed
 
 
 def main() -> None:

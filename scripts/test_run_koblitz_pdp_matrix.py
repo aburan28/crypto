@@ -246,6 +246,63 @@ class IsolatedBackendTests(unittest.TestCase):
         )
         self.assertEqual(row["status"], "model_cap_inconclusive")
 
+    def native_f4_report(self, status: str) -> dict:
+        report = dict(
+            self.base,
+            backend="native-f4",
+            status=status,
+            conflicts=None,
+            cost={
+                "ops": 123,
+                "op_unit": "word XORs (elimination only)",
+                "wall_ns": 456,
+                "peak_bytes": 64,
+                "timed_out": status == "unknown_inconclusive",
+            },
+            exhaustive=status in {"sat", "unsat"},
+        )
+        if status == "unsat":
+            report["source_model_valid"] = None
+            report["source_witness_valid"] = None
+        elif status == "unknown_inconclusive":
+            report["source_model_valid"] = None
+            report["source_witness_valid"] = None
+        return report
+
+    def test_native_f4_accepts_only_charged_valid_terminals(self) -> None:
+        import json
+
+        for status in ("sat", "unsat", "unknown_inconclusive"):
+            row = matrix.isolated_backend_status(
+                run_record(json.dumps(self.native_f4_report(status))),
+                "native-f4",
+                self.manifest,
+            )
+            self.assertEqual(row["status"], status)
+            self.assertIsNone(row["conflicts"])
+
+        invented_conflicts = self.native_f4_report("sat")
+        invented_conflicts["conflicts"] = 1
+        self.assertEqual(
+            matrix.isolated_backend_status(
+                run_record(json.dumps(invented_conflicts)),
+                "native-f4",
+                self.manifest,
+            )["status"],
+            "backend_contract_error",
+        )
+
+        incomplete_unsat = self.native_f4_report("unsat")
+        incomplete_unsat["exhaustive"] = False
+        self.assertEqual(
+            matrix.isolated_backend_status(
+                run_record(json.dumps(incomplete_unsat)),
+                "native-f4",
+                self.manifest,
+            )["status"],
+            "backend_contract_error",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,47 @@
+{
+  "all_seven_gates_passed": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "c97bcd8b88a4ca607b176cd0639aa015ebbc27b2059b66d792f59fd35988bf47",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_one_native_f4_n59_target_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "next_targets": [
+    "execute the full frozen 160-input packet under licensed Magma F4",
+    "run a complete native-F4 panel rather than one selected n59 target",
+    "reduce selected native-F4 cost below same-target direct MITM or retain it only as a solver control",
+    "preserve complete outer metering for every future development command",
+    "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
+  ],
+  "predecessor": {
+    "stage159_audit_sha256": "3069f87aa7f77516913b5ed6cac9d6baa66b3783eebd16e508c0e46a083266cf",
+    "stage159_seal_sha256": "5aed3ce78dd25ba382fa975ebb056fcb07530ca20d2076706f74e0435864b528",
+    "stage159_status": "current_seven_gate_audit_verified"
+  },
+  "schema": "koblitz_stage160_current_gate_audit.v1",
+  "scoreboard_sha256": "05a9f848c25b491c34f2257c553df7f9d8b6deb399862fc0b298128af5608640",
+  "stage160": {
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "complete_campaign_cost": null,
+    "construction_speedup": 27.038527782839164,
+    "result_seal_sha256": "90cd35a7a3795bedf885ad2369e07024e2b050c471b37c079ebc50dd19d04a72",
+    "result_sha256": "23058f98cdcedfa74af77ae87d4ea24b14a720831583a8775422f311f95aa940",
+    "same_host_f4_over_mitm_wall": 24.588777330905284,
+    "selected_core_seconds": 73.585054,
+    "selected_peak_rss_bytes": 910934016,
+    "selected_wall_seconds": 73.75799025000015,
+    "source_commit": "3cb24b82e8a059a293f6371178bd0d3647272a63",
+    "verification_sha256": "c87f80f020e7ac241405d09e993de173acbfa9e494f2aa6c484983737deb9fde",
+    "whole_target_speedup": 1.3582173226445962
+  },
+  "status": "current_seven_gate_audit_verified"
+}

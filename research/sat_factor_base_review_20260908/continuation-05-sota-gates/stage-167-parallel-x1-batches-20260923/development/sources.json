@@ -1,0 +1,59 @@
+{
+  "arms": [
+    "pattern-tail-candidate-r1",
+    "pattern-tail-candidate-r2",
+    "pattern-tail-candidate-r3",
+    "pattern-tail-control-r1",
+    "pattern-tail-control-r2",
+    "pattern-tail-control-r3",
+    "pivot-tail-candidate-r1",
+    "pivot-tail-control-r1",
+    "table-copy-candidate-r1",
+    "table-copy-control-r1",
+    "x1-batch1-r1",
+    "x1-batch1-r2",
+    "x1-batch1-r3",
+    "x1-batch13-r1",
+    "x1-batch13-r2",
+    "x1-batch13-r3",
+    "x1-confounded-batch10-r1",
+    "x1-confounded-batch12-r1",
+    "x1-confounded-batch13-r1",
+    "x1-confounded-batch14-r1",
+    "x1-confounded-batch2-r1",
+    "x1-confounded-batch4-r1",
+    "x1-confounded-batch8-r1",
+    "x1-stale-batch2-r1"
+  ],
+  "binary_bindings": {
+    "clean-selected": {
+      "sha256": "58767973f4bc1fcf30d5bbca231d1d5647e6a79f6282c55f1c3874a962820931",
+      "source_commit": "509e43c79bcf36425f4329a09c34fd20c75949ed"
+    },
+    "pattern-tail": {
+      "decision": "rejected",
+      "sha256": "4b09792521390304c04c6cf8a4783bca06deeb3426274a23030ca891ed2d9f44"
+    },
+    "pivot-tail": {
+      "decision": "rejected",
+      "sha256": "d9ae138013b37e4f1b2db15ec3143aeaa69f84bf43bf92fa1a1f8de41b9ccbca"
+    },
+    "table-copy": {
+      "decision": "rejected",
+      "sha256": "58b7be5ad3adf88639b5d6cd4192ed375629b8414b643f721b26ec6eaccf78c7"
+    },
+    "x1-confounded-width-sweep": {
+      "decision": "exploratory_table_copy_confound",
+      "sha256": "c56b89c73a9ed322e84fd839d2c662aeca779cafb30c54a267937478a82dc777"
+    },
+    "x1-final-development": {
+      "decision": "implementation_equivalent_precursor_to_509e43c7_except_zero_speculation_accounting_fix",
+      "sha256": "c3fad75275606d17f9f7ac29e31c5842924170b4807509626da2e64bbf4813ba"
+    },
+    "x1-stale-batch2": {
+      "decision": "rejected_stale_binary",
+      "sha256": "58b7be5ad3adf88639b5d6cd4192ed375629b8414b643f721b26ec6eaccf78c7"
+    }
+  },
+  "schema": "koblitz_stage167_development_sources.v1"
+}

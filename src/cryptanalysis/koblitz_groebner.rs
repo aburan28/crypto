@@ -307,6 +307,41 @@ impl SymElement {
         Self { coords }
     }
 
+    /// Multiply by a known field element as one linear coordinate map.
+    ///
+    /// The generic symbolic product above is deliberately symmetric, but
+    /// applying it to a constant still allocates an `n x n` polynomial table
+    /// and repeatedly multiplies by the Boolean constant one.  Fixed-summand
+    /// Semaev systems use many such products, so apply the already-tabulated
+    /// field multiplication matrix directly instead.
+    pub fn mul_constant(&self, constant: &F2mElement, st: &FieldStructure) -> Self {
+        self.mul_constant_mask(constant.raw_bits().first().copied().unwrap_or(0), st)
+    }
+
+    fn mul_constant_mask(&self, constant: u64, st: &FieldStructure) -> Self {
+        let n = st.n as usize;
+        let n_vars = self.coords[0].n_vars;
+        let mut coords = vec![F2BoolPoly::zero(n_vars); n];
+        for (i, source) in self.coords.iter().enumerate() {
+            if source.is_zero() {
+                continue;
+            }
+            let mut image = 0u64;
+            let mut bits = constant;
+            while bits != 0 {
+                let j = bits.trailing_zeros() as usize;
+                bits &= bits - 1;
+                image ^= st.reduced[i][j];
+            }
+            while image != 0 {
+                let k = image.trailing_zeros() as usize;
+                image &= image - 1;
+                coords[k] = coords[k].add(source);
+            }
+        }
+        Self { coords }
+    }
+
     /// Field squaring — an `F_2`-linear map, so it never raises the
     /// degree of the Boolean system.
     ///
@@ -430,6 +465,85 @@ pub fn sym_semaev_s4(
     acc = acc.add(&e3_sq.mul(&xr4, st)); // e₃²x_R⁴
     acc = acc.add(&e3_sq); // e₃²
     acc = acc.add(&e2_sq.mul(&xr2, st)); // e₂²x_R²
+    acc.coords
+}
+
+fn constant_square_mask(value: u64, st: &FieldStructure) -> u64 {
+    let mut out = 0u64;
+    let mut bits = value;
+    while bits != 0 {
+        let i = bits.trailing_zeros() as usize;
+        bits &= bits - 1;
+        out ^= st.squares[i];
+    }
+    out
+}
+
+fn constant_mul_mask(left: u64, right: u64, st: &FieldStructure) -> u64 {
+    let mut out = 0u64;
+    let mut left_bits = left;
+    while left_bits != 0 {
+        let i = left_bits.trailing_zeros() as usize;
+        left_bits &= left_bits - 1;
+        let mut right_bits = right;
+        while right_bits != 0 {
+            let j = right_bits.trailing_zeros() as usize;
+            right_bits &= right_bits - 1;
+            out ^= st.reduced[i][j];
+        }
+    }
+    out
+}
+
+fn element_from_mask(value: u64, n: u32) -> F2mElement {
+    let positions: Vec<u32> = (0..n).filter(|k| value >> k & 1 == 1).collect();
+    F2mElement::from_bit_positions(&positions, n)
+}
+
+/// Fixed-`x1` specialisation of [`sym_semaev_s4`].
+///
+/// It constructs the identical Boolean coordinate system while computing the
+/// one symbolic `x2*x3` product once and applying every known-field-element
+/// factor through [`SymElement::mul_constant`].
+pub fn sym_semaev_s4_fixed_x1(
+    x1: &F2mElement,
+    x2: &SymElement,
+    x3: &SymElement,
+    x_r: &F2mElement,
+    st: &FieldStructure,
+) -> Vec<F2BoolPoly> {
+    let n_vars = x2.coords[0].n_vars;
+    let n = st.n;
+
+    let x23 = x2.mul(x3, st);
+    let e1 = SymElement::constant(x1, n, n_vars).add(x2).add(x3);
+    let e2 = x2
+        .mul_constant(x1, st)
+        .add(&x3.mul_constant(x1, st))
+        .add(&x23);
+    let e3 = x23.mul_constant(x1, st);
+
+    let e1_sq = e1.square(st);
+    let e2_sq = e2.square(st);
+    let e3_sq = e3.square(st);
+
+    let xr1 = x_r.raw_bits().first().copied().unwrap_or(0);
+    let xr2 = constant_square_mask(xr1, st);
+    let xr3 = constant_mul_mask(xr2, xr1, st);
+    let xr4 = constant_square_mask(xr2, st);
+
+    let mut acc = SymElement::constant(&element_from_mask(xr4, n), n, n_vars);
+    acc = acc.add(&e1_sq.square(st));
+    acc = acc.add(&e3_sq.square(st));
+    acc = acc.add(&e2_sq.square(st).mul_constant_mask(xr4, st));
+    acc = acc.add(&e3_sq.mul(&e3, st).mul_constant_mask(xr1, st));
+    acc = acc.add(&e3.mul(&e2_sq, st).mul_constant_mask(xr3, st));
+    acc = acc.add(&e3.mul(&e1_sq, st).mul_constant_mask(xr1, st));
+    acc = acc.add(&e3.mul_constant_mask(xr3, st));
+    acc = acc.add(&e1_sq.mul(&e3_sq, st).mul_constant_mask(xr2, st));
+    acc = acc.add(&e3_sq.mul_constant_mask(xr4, st));
+    acc = acc.add(&e3_sq);
+    acc = acc.add(&e2_sq.mul_constant_mask(xr2, st));
     acc.coords
 }
 
@@ -4075,6 +4189,31 @@ mod tests {
             .map(|t| t.mask)
             .fold(0, |a, b| a | b);
         assert_eq!(top >> two, 0, "fixed system used a variable beyond 2ℓ");
+    }
+
+    #[test]
+    fn fixed_x1_specialisation_matches_the_generic_s4_system() {
+        for (n, l) in [(6u32, 2u32), (9, 3), (12, 4)] {
+            let irr = find_irreducible(n).unwrap();
+            let st = FieldStructure::new(n, &irr);
+            let basis: Vec<F2mElement> = (0..l)
+                .map(|k| F2mElement::from_bit_positions(&[k], n))
+                .collect();
+            let n_vars = 2 * l as usize;
+            let x2 = SymElement::from_subspace_vars(&basis, 0, n, n_vars);
+            let x3 = SymElement::from_subspace_vars(&basis, l as usize, n, n_vars);
+
+            for x1_raw in [0u64, 1, 3, 13, 37] {
+                let x1 = fe(x1_raw % (1 << n), n);
+                for xr_raw in [1u64, 5, 19, 41] {
+                    let x_r = fe(xr_raw % (1 << n), n);
+                    let generic =
+                        sym_semaev_s4(&SymElement::constant(&x1, n, n_vars), &x2, &x3, &x_r, &st);
+                    let specialised = sym_semaev_s4_fixed_x1(&x1, &x2, &x3, &x_r, &st);
+                    assert_eq!(specialised, generic, "n={n} l={l} x1={x1_raw} x_r={xr_raw}");
+                }
+            }
+        }
     }
 
     /// The decomposition systems really are multilinear with respect to

@@ -1,0 +1,48 @@
+{
+  "all_seven_gates_passed": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "44daf3373a60002a3d78a15d64a9aea0abc8b18d72ed08496336c99446e84410",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_one_native_f4_n59_target_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "next_targets": [
+    "execute the full frozen 160-input packet under licensed Magma F4",
+    "run fresh-target native-F4 schedule and batch-width holdouts",
+    "reduce parallel F4 wall below same-target direct MITM without worsening full cost",
+    "preserve complete outer metering for every future development command",
+    "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
+  ],
+  "predecessor": {
+    "stage167_audit_sha256": "e329dfaa063fb02c4c8f4c983f8f447481b0a57cbab6db2cf3fd75fbcd761afd",
+    "stage167_seal_sha256": "7a86937dacdce23e1ff4846c95ff90eed676817c40737a30b2503e807930aad6",
+    "stage167_status": "current_seven_gate_audit_verified"
+  },
+  "schema": "koblitz_stage168_current_gate_audit.v1",
+  "scoreboard_sha256": "e472287bcfed81fe3af444cb48abfdc920a67ed35c40a57d3eabc6c9b0840bac",
+  "stage168": {
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "complete_campaign_cost": null,
+    "parallel_peak_rss_bytes": 2763997184,
+    "parallel_single_core_seconds": null,
+    "parallel_total_core_seconds": 28.179809,
+    "parallel_wall_seconds": 4.987009749995195,
+    "result_seal_sha256": "2bcbe619cb8e97dd86b5b70dafc06933bb6079cc4abd25b6deb1f78700d59065",
+    "result_sha256": "32565928b7f52edac9fbed32aacd6b07d68be0415e66bb08d4e3a63688ff13f5",
+    "same_host_parallel_f4_over_mitm_wall": 1.6625245871539354,
+    "selection_caveat": "batch size equals the already known successful 39-system prefix; selected post hoc and invalid as a generic stopping rule",
+    "source_commit": "509e43c79bcf36425f4329a09c34fd20c75949ed",
+    "stage167_wall_speedup": 1.1209023685987134,
+    "verification_sha256": "b4a7115211dfc94c0f9aca84c0387b82711215532d16366403c3c43b822cafc7"
+  },
+  "status": "current_seven_gate_audit_verified"
+}

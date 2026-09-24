@@ -1,0 +1,51 @@
+{
+  "all_seven_gates_passed": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "ea295de05cce99720175898f1402e95f84b6202a62b3cfe961724074a0d7bbcf",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_two_native_f4_n59_targets_one_preregistered_holdout_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "next_targets": [
+    "execute the full frozen 160-input packet under licensed Magma F4",
+    "expand preregistered native-F4 holdouts beyond one positive and one negative target",
+    "reduce the 99.2-billion-XOR F4 kernel and fresh-target cost relative to direct MITM",
+    "preserve complete outer metering for every future development command",
+    "obtain unaffiliated reproduction and a source-pinned novelty/correctness review"
+  ],
+  "predecessor": {
+    "stage169_audit_sha256": "c26df73def62e73befde985eb96129fc4c0baee25990ba2301fc88b029990b35",
+    "stage169_seal_sha256": "45bc7d9e5b507f98e51ee11d968ca5397d92d1d7114dab0ddc0cd0949ed8249a",
+    "stage169_status": "current_seven_gate_audit_verified"
+  },
+  "schema": "koblitz_stage170_current_gate_audit.v1",
+  "scoreboard_sha256": "21cb2de89205b8438022fb78511f804c42c78fc2afc8ade57b5a4fcd79db28f5",
+  "stage170": {
+    "blind_instance_id": "b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4",
+    "classification": "true_negative",
+    "clean_wall_speedup": 1.2139114898668546,
+    "complete_campaign_cost": null,
+    "direct_mitm_wall_ratio": 5.801149707808956,
+    "fresh_target_status": "same_stage169_holdout_after_truth_opened",
+    "posthoc_wall_seconds": 14.661977374998969,
+    "result_seal_sha256": "e0ea6ea20ffd248175e446179c6409b0bae603a50e6dd5ec2d08829a749f790c",
+    "result_sha256": "d72db3a24b97f4240c6184c74b90786283d19c13047489aae3eb121a918e2c07",
+    "selected_peak_rss_bytes": 2904489984,
+    "selected_single_core_seconds": null,
+    "selected_total_core_seconds": 176.171665,
+    "selected_wall_seconds": 17.131543916999362,
+    "serial_control_wall_seconds": 20.796178000004147,
+    "source_commit": "080d3c2bfe9fefaf86bd10c8279a7fb9ebe000a0",
+    "verification_sha256": "f3e2f97cd61e666606e099e4e2523fbb67c1f31a8f3e3d2c32af5b05a9b2bcce"
+  },
+  "status": "current_seven_gate_audit_verified"
+}

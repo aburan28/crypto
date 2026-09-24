@@ -1,0 +1,51 @@
+{
+  "close_fds": true,
+  "command": [
+    "/Volumes/SSD990/koblitz-native-f4-build18-509e43c7/bin/koblitz_pdp_backend",
+    "native-f4",
+    "/Volumes/SSD990/koblitz-native-f4-run18-509e43c7-holdout/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance/manifest.json",
+    "300"
+  ],
+  "cwd": "/Volumes/SSD990/koblitz-native-f4-run18-509e43c7-holdout/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance",
+  "environment": {
+    "LANG": "C",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "PQ_F4_X1_BATCH": "39",
+    "RAYON_NUM_THREADS": "12",
+    "TMPDIR": "/tmp",
+    "TZ": "UTC",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "executable_sha256": "58767973f4bc1fcf30d5bbca231d1d5647e6a79f6282c55f1c3874a962820931",
+  "inputs": [
+    {
+      "bytes": 4347,
+      "path": "/Volumes/SSD990/koblitz-native-f4-run18-509e43c7-holdout/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance/manifest.json",
+      "sha256": "57c691bd0380e5a9de4b350b416b6b17ef6a0f221282322c821d94d56daff893"
+    },
+    {
+      "bytes": 236183,
+      "path": "/Volumes/SSD990/koblitz-native-f4-run18-509e43c7-holdout/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance/instance.anf",
+      "sha256": "34c516d2568e327a3c5b403d6871845c80d523f0b7f012bd183be0bbc1469508"
+    },
+    {
+      "bytes": 208168,
+      "path": "/Volumes/SSD990/koblitz-native-f4-run18-509e43c7-holdout/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance/instance.xor.cnf",
+      "sha256": "a529c4d8bb1e1a4b5904134b1e5d099adfb80806215f1ff128088d7d518d4bb8"
+    },
+    {
+      "bytes": 373254,
+      "path": "/Volumes/SSD990/koblitz-native-f4-run18-509e43c7-holdout/tasks/000000-b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4/instance/instance.magma",
+      "sha256": "a685b3a96b378fb0b34a0a30f1fb1925d4b64c1e17c710d6357203a34b7d486b"
+    }
+  ],
+  "role": "native-f4",
+  "schema": "koblitz_pdp_phase_b_child_intent.v1",
+  "stdin": "devnull",
+  "watchdog_seconds": 360
+}

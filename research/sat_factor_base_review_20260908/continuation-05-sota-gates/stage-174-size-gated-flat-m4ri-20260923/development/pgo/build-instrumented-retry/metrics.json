@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "TMPDIR=/Volumes/SSD990/kic-stage174-f4-pgo-tmp",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage174-f4-pgo-instrumented-target",
+    "CARGO_INCREMENTAL=0",
+    "RUSTFLAGS=-C target-cpu=native -C profile-generate=/Volumes/SSD990/kic-stage174-f4-pgo-dev/profiles",
+    "CARGO_PROFILE_RELEASE_LTO=thin",
+    "CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1",
+    "/opt/homebrew/bin/cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_pdp_backend"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 165.5441799580003,
+    "user_seconds": 169.251992,
+    "system_seconds": 3.066573,
+    "total_core_seconds": 172.318565,
+    "single_core_seconds": 172.318565,
+    "peak_rss_bytes": 2919645184,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

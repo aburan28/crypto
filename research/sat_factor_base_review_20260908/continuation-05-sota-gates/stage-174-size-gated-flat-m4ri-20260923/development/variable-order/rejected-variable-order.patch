@@ -1,0 +1,212 @@
+diff --git a/examples/koblitz_pdp_backend.rs b/examples/koblitz_pdp_backend.rs
+index 5ef8c30f..cb8a7996 100644
+--- a/examples/koblitz_pdp_backend.rs
++++ b/examples/koblitz_pdp_backend.rs
+@@ -29,6 +29,7 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{
+ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
+     factor_x_n_minus_1, find_irreducible_sparse, invariant_subspace_basis, points_with_x,
+ };
++use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
+ use crypto_lib::cryptanalysis::sat::{SolveResult, SolverStats};
+ use crypto_lib::cryptanalysis::semaev_sat::{
+     encode_boolean_system_with, encode_semaev_s4_with, S4Options, XorEncoding,
+@@ -751,6 +752,95 @@ fn fixed_x1_masks(ell: usize, hamming_weight_order: bool) -> Vec<usize> {
+     masks
+ }
+ 
++/// Return the old-variable to new-variable map used by the native F4 arm.
++/// Relabelling variables leaves the Boolean variety and algebraic factor base
++/// unchanged, but DegRevLex is sensitive to the order.  The explicit form is
++/// an experimental hook for measured single-target searches; it is always
++/// reported with the result and the default remains the historical identity.
++fn native_f4_variable_order(ell: usize) -> Result<(String, Vec<usize>), String> {
++    let n_vars = 2 * ell;
++    let requested = std::env::var("PQ_F4_VARIABLE_ORDER").unwrap_or_else(|_| "identity".into());
++    let order = match requested.as_str() {
++        "identity" => (0..n_vars).collect(),
++        "reverse" => (0..n_vars).map(|old| n_vars - 1 - old).collect(),
++        "basis-reverse" => (0..n_vars)
++            .map(|old| {
++                let block = old / ell;
++                block * ell + ell - 1 - old % ell
++            })
++            .collect(),
++        "interleave" => (0..n_vars)
++            .map(|old| {
++                let block = old / ell;
++                2 * (old % ell) + block
++            })
++            .collect(),
++        "interleave-basis-reverse" => (0..n_vars)
++            .map(|old| {
++                let block = old / ell;
++                2 * (ell - 1 - old % ell) + block
++            })
++            .collect(),
++        _ => requested
++            .split(',')
++            .map(|value| {
++                value
++                    .parse::<usize>()
++                    .map_err(|_| format!("invalid F4 variable index `{value}`"))
++            })
++            .collect::<Result<Vec<_>, _>>()?,
++    };
++    if order.len() != n_vars {
++        return Err(format!(
++            "F4 variable order has {} entries; expected {n_vars}",
++            order.len()
++        ));
++    }
++    let mut seen = vec![false; n_vars];
++    for &new in &order {
++        if new >= n_vars || std::mem::replace(&mut seen[new], true) {
++            return Err(format!(
++                "F4 variable order must be a permutation of 0..{n_vars}"
++            ));
++        }
++    }
++    Ok((requested, order))
++}
++
++fn sym_element_from_subspace_variable_order(
++    basis: &[F2mElement],
++    old_offset: usize,
++    old_to_new: &[usize],
++    n: u32,
++    n_vars: usize,
++) -> SymElement {
++    let mut coords = vec![Vec::new(); n as usize];
++    for (basis_index, element) in basis.iter().enumerate() {
++        let variable = old_to_new[old_offset + basis_index];
++        let bits = element.raw_bits().first().copied().unwrap_or(0);
++        for (field_index, monomials) in coords.iter_mut().enumerate() {
++            if bits >> field_index & 1 == 1 {
++                monomials.push(F2BoolMono::var(variable as u32));
++            }
++        }
++    }
++    SymElement {
++        coords: coords
++            .into_iter()
++            .map(|monomials| F2BoolPoly::from_monos(monomials, n_vars))
++            .collect(),
++    }
++}
++
++fn solver_root_to_source_order(root: u64, old_to_new: &[usize]) -> u64 {
++    old_to_new
++        .iter()
++        .enumerate()
++        .fold(0u64, |source, (old, &new)| {
++            source | (((root >> new) & 1) << old)
++        })
++}
++
+ fn build_fixed_x1_batch(
+     candidates: &[(usize, F2mElement)],
+     x2: &SymElement,
+@@ -820,9 +910,39 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
+         BinaryPoint::Affine { x, .. } => x,
+         BinaryPoint::Infinity => unreachable!(),
+     };
++    let (variable_order_name, variable_order) = match native_f4_variable_order(instance.ell) {
++        Ok(order) => order,
++        Err(reason) => {
++            return (
++                json!({
++                    "schema":"koblitz_pdp_isolated_backend.v1",
++                    "backend":"native-f4",
++                    "status":"backend_contract_error",
++                    "source_instance_id":instance.id,
++                    "source_instance_verified":true,
++                    "source_artifacts":instance.artifact_receipts,
++                    "regenerated_source_exact":true,
++                    "reason":reason,
++                }),
++                false,
++            );
++        }
++    };
+     let solver = F4F2;
+-    let x2 = SymElement::from_subspace_vars(&instance.basis, 0, instance.n, n_vars);
+-    let x3 = SymElement::from_subspace_vars(&instance.basis, instance.ell, instance.n, n_vars);
++    let x2 = sym_element_from_subspace_variable_order(
++        &instance.basis,
++        0,
++        &variable_order,
++        instance.n,
++        n_vars,
++    );
++    let x3 = sym_element_from_subspace_variable_order(
++        &instance.basis,
++        instance.ell,
++        &variable_order,
++        instance.n,
++        n_vars,
++    );
+     let parallel_construction =
+         std::env::var("PQ_F4_DISABLE_PARALLEL_CONSTRUCTION").as_deref() != Ok("1");
+     let mut equation_hasher = blake3::Hasher::new();
+@@ -973,8 +1093,9 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
+                     source_model_valid = Some(true);
+                     if batch_witness.is_none() {
+                         let found = roots.iter().find_map(|root| {
+-                            let x2_mask = root & ((1u64 << instance.ell) - 1);
+-                            let x3_mask = root >> instance.ell;
++                            let source_root = solver_root_to_source_order(*root, &variable_order);
++                            let x2_mask = source_root & ((1u64 << instance.ell) - 1);
++                            let x3_mask = source_root >> instance.ell;
+                             let combined = (*x1_mask as u64)
+                                 | (x2_mask << instance.ell)
+                                 | (x3_mask << (2 * instance.ell));
+@@ -1043,6 +1164,9 @@ fn native_f4(instance: VerifiedInstance, budget_seconds: u64) -> (Value, bool) {
+             "solver_schedule":format!("enumerate x1 coefficients in {x1_order}; construct rational systems in deterministic batches of {x1_batch_size} with ordered parallel collection={parallel_construction}; solve each batch in parallel; inspect completed results in schedule order"),
+             "solver_parallel_construction":parallel_construction,
+             "solver_parallel_construction_control":"PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
++            "solver_variable_order":variable_order_name,
++            "solver_variable_old_to_new":variable_order,
++            "solver_variable_order_control":"PQ_F4_VARIABLE_ORDER=identity",
+             "solver_x1_order":x1_order,
+             "solver_x1_order_target_independent":true,
+             "solver_x1_order_control":"PQ_F4_X1_ORDER=ascending",
+@@ -1452,6 +1576,39 @@ fn main() {
+ mod tests {
+     use super::*;
+ 
++    #[test]
++    fn native_f4_variable_relabelling_round_trips_roots_and_symbolic_coordinates() {
++        let n = 7u32;
++        let ell = 3usize;
++        let n_vars = 2 * ell;
++        let basis: Vec<_> = (0..ell)
++            .map(|index| F2mElement::from_bit_positions(&[index as u32], n))
++            .collect();
++        let old_to_new = vec![0, 2, 4, 1, 3, 5];
++        let x2 = sym_element_from_subspace_variable_order(&basis, 0, &old_to_new, n, n_vars);
++        let x3 = sym_element_from_subspace_variable_order(&basis, ell, &old_to_new, n, n_vars);
++        let reference_x2 = SymElement::from_subspace_vars(&basis, 0, n, n_vars);
++        let reference_x3 = SymElement::from_subspace_vars(&basis, ell, n, n_vars);
++        for source_root in 0..1u64 << n_vars {
++            let solver_root = old_to_new
++                .iter()
++                .enumerate()
++                .fold(0u64, |solver, (old, &new)| {
++                    solver | (((source_root >> old) & 1) << new)
++                });
++            assert_eq!(
++                solver_root_to_source_order(solver_root, &old_to_new),
++                source_root
++            );
++            for (coordinate, reference) in x2.coords.iter().zip(&reference_x2.coords) {
++                assert_eq!(coordinate.eval(solver_root), reference.eval(source_root));
++            }
++            for (coordinate, reference) in x3.coords.iter().zip(&reference_x3.coords) {
++                assert_eq!(coordinate.eval(solver_root), reference.eval(source_root));
++            }
++        }
++    }
++
+     #[test]
+     fn fixed_x1_weight_order_is_an_exact_target_independent_permutation() {
+         for ell in 0..=12usize {
