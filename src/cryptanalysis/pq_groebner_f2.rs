@@ -146,6 +146,7 @@ impl F2BoolMono {
 /// This gives a graded ordering compatible with the boolean ring; in
 /// the worst case the GB has up to `2^n` elements but in practice
 /// (and for the PQ systems here) it terminates in O(n) elements.
+#[inline]
 pub fn cmp_mono(a: F2BoolMono, b: F2BoolMono) -> Ordering {
     let da = a.degree();
     let db = b.degree();
@@ -236,66 +237,132 @@ impl F2BoolPoly {
     /// is a linear merge of two sorted lists.  A `terms` not in canonical
     /// order (the field is public) takes the rebuilding path instead.
     pub fn substitute(&self, var: u32, value: bool) -> Self {
-        let bit = 1u64 << var;
-        let canonical = self
-            .terms
+        self.substitute_dispatch(var, value, true)
+    }
+
+    /// Is `terms` in canonical order — strictly decreasing under
+    /// [`cmp_mono`], hence also free of repeats?
+    pub fn is_canonical(&self) -> bool {
+        self.terms
             .windows(2)
-            .all(|w| cmp_mono(w[0], w[1]) == Ordering::Greater);
-        if !canonical {
-            let monos = self
-                .terms
-                .iter()
-                .filter(|t| value || t.mask & bit == 0)
-                .map(|t| F2BoolMono::from_mask(t.mask & !bit))
-                .collect();
-            return Self::from_monos(monos, self.n_vars);
+            .all(|w| cmp_mono(w[0], w[1]) == Ordering::Greater)
+    }
+
+    /// [`F2BoolPoly::substitute`] for a polynomial already known to be
+    /// canonical (see [`F2BoolPoly::is_canonical`]): the same result
+    /// without re-checking the order.  `substitute` returns canonical
+    /// polynomials, so a caller that checked its inputs once can use this
+    /// for everything derived from them.
+    pub(crate) fn substitute_canonical(&self, var: u32, value: bool) -> Self {
+        debug_assert!(self.is_canonical(), "substitute_canonical on {self:?}");
+        self.substitute_dispatch(var, value, false)
+    }
+
+    fn substitute_dispatch(&self, var: u32, value: bool, check: bool) -> Self {
+        // The keys below are popcounts, and the baseline x86-64 target has
+        // no `popcnt` instruction, so `count_ones` becomes a dozen-instruction
+        // bit trick.  Where the CPU has it, run the same body compiled with
+        // the instruction; the result is identical either way.
+        #[cfg(target_arch = "x86_64")]
+        {
+            if std::arch::is_x86_feature_detected!("popcnt") {
+                // SAFETY: the feature was just detected on this CPU.
+                return unsafe { self.substitute_popcnt(var, value, check) };
+            }
         }
-        let mut out: Vec<F2BoolMono> = Vec::with_capacity(self.terms.len());
-        let mut kept = self
-            .terms
-            .iter()
-            .filter(|t| t.mask & bit == 0)
-            .copied()
-            .peekable();
+        self.substitute_body(var, value, check)
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "popcnt")]
+    unsafe fn substitute_popcnt(&self, var: u32, value: bool, check: bool) -> Self {
+        self.substitute_body(var, value, check)
+    }
+
+    #[inline(always)]
+    fn substitute_body(&self, var: u32, value: bool, check: bool) -> Self {
+        let bit = 1u64 << var;
+        let terms = &self.terms;
+        let n = terms.len();
+        // Strictly decreasing `mono_key`s is canonical order; anything
+        // else (the field is public) is rebuilt through `from_monos`.
+        if check {
+            let mut previous = u128::MAX;
+            for t in terms {
+                let key = mono_key(*t);
+                if key >= previous {
+                    let monos = terms
+                        .iter()
+                        .filter(|t| value || t.mask & bit == 0)
+                        .map(|t| F2BoolMono::from_mask(t.mask & !bit))
+                        .collect();
+                    return Self::from_monos(monos, self.n_vars);
+                }
+                previous = key;
+            }
+        }
+        let mut out: Vec<F2BoolMono> = Vec::with_capacity(n);
         if !value {
-            out.extend(kept);
+            out.extend(terms.iter().filter(|t| t.mask & bit == 0).copied());
             return F2BoolPoly {
                 terms: out,
                 n_vars: self.n_vars,
             };
         }
-        // merge the kept terms with the folded ones, cancelling equal pairs
-        let mut folded = self
-            .terms
-            .iter()
-            .filter(|t| t.mask & bit != 0)
-            .map(|t| F2BoolMono::from_mask(t.mask & !bit))
-            .peekable();
-        loop {
-            match (kept.peek(), folded.peek()) {
-                (Some(&k), Some(&f)) => match cmp_mono(k, f) {
-                    Ordering::Greater => {
-                        out.push(k);
-                        kept.next();
+        // Two cursors over the same list, the kept terms and the folded
+        // ones (`m ∖ v`), each already in order; merge them, cancelling
+        // equal pairs.  Each cursor keys its current term once.
+        let next_kept = |mut k: usize| {
+            while k < n && terms[k].mask & bit != 0 {
+                k += 1;
+            }
+            k
+        };
+        let next_folded = |mut k: usize| {
+            while k < n && terms[k].mask & bit == 0 {
+                k += 1;
+            }
+            k
+        };
+        let folded_at = |k: usize| F2BoolMono::from_mask(terms[k].mask & !bit);
+        let (mut i, mut j) = (next_kept(0), next_folded(0));
+        let mut ki = if i < n { mono_key(terms[i]) } else { 0 };
+        let mut kj = if j < n { mono_key(folded_at(j)) } else { 0 };
+        while i < n && j < n {
+            match ki.cmp(&kj) {
+                Ordering::Greater => {
+                    out.push(terms[i]);
+                    i = next_kept(i + 1);
+                    if i < n {
+                        ki = mono_key(terms[i]);
                     }
-                    Ordering::Less => {
-                        out.push(f);
-                        folded.next();
-                    }
-                    Ordering::Equal => {
-                        kept.next();
-                        folded.next();
-                    }
-                },
-                (Some(_), None) => {
-                    out.extend(kept);
-                    break;
                 }
-                (None, _) => {
-                    out.extend(folded);
-                    break;
+                Ordering::Less => {
+                    out.push(folded_at(j));
+                    j = next_folded(j + 1);
+                    if j < n {
+                        kj = mono_key(folded_at(j));
+                    }
+                }
+                Ordering::Equal => {
+                    i = next_kept(i + 1);
+                    j = next_folded(j + 1);
+                    if i < n {
+                        ki = mono_key(terms[i]);
+                    }
+                    if j < n {
+                        kj = mono_key(folded_at(j));
+                    }
                 }
             }
+        }
+        while i < n {
+            out.push(terms[i]);
+            i = next_kept(i + 1);
+        }
+        while j < n {
+            out.push(folded_at(j));
+            j = next_folded(j + 1);
         }
         F2BoolPoly {
             terms: out,
@@ -977,6 +1044,9 @@ mod tests {
                             n,
                         );
                         assert_eq!(p.substitute(var, value), expected, "{p:?} x{var}={value}");
+                        if p.is_canonical() {
+                            assert_eq!(p.substitute_canonical(var, value), expected);
+                        }
                     }
                 }
             }
