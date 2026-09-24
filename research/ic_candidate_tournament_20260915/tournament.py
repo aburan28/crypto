@@ -22,6 +22,7 @@ import time
 import threading
 
 from oracle import Curve, InvalidEvidence, require, verify
+from portfolio import retain
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -232,8 +233,8 @@ def frozen_inputs(round_dir):
     require(objhash(c)==read(round_dir/'seal.json')['contract_sha256'],'changed contract')
     for relative, expected in c['pinned_files'].items():
         require(digest(round_dir/relative)==expected,'changed pinned artifact '+relative)
-    require(digest(Path(__file__))==c['evaluator_sha256']['tournament.py'],'run the frozen evaluator copy')
-    require(digest(HERE/'oracle.py')==c['evaluator_sha256']['oracle.py'],'changed checker')
+    for name, expected in c['evaluator_sha256'].items():
+        require(digest(HERE/name)==expected,'changed evaluator or checker: '+name)
     return c, read(round_dir/'fixtures.json'), read(round_dir/'candidates.json')
 
 
@@ -281,14 +282,14 @@ def snapshot_build(source,destination):
 
 def prepare(args):
     out = args.out.resolve()
-    out.mkdir(parents=True,exist_ok=False)
     require(platform.machine()=='x86_64','instruction protocol currently supports amd64 only')
     require(shutil.which('valgrind') is not None,'Valgrind required')
     version = subprocess.check_output(['valgrind','--version'],text=True).strip()
     require(version=='valgrind-3.22.0','version requires a new calibrated protocol')
+    out.mkdir(parents=True,exist_ok=False)
     evaluator = out/'evaluator'
     evaluator.mkdir()
-    for name in ('tournament.py','oracle.py'):
+    for name in ('tournament.py','oracle.py','portfolio.py'):
         shutil.copy2(HERE/name,evaluator/name)
     source = args.source_root.resolve()
     binary, manifest = snapshot_build(source,out)
@@ -327,6 +328,22 @@ def prepare(args):
         arm['configuration_sha256'] = h
         arm['source_manifest_sha256'] = objhash(arm_manifest)
     write(out/'candidates.json',arms,exclusive=True)
+    # A stronger reference may live outside the IC incumbent's source tree.
+    # Freeze it explicitly rather than silently weakening rho when changing IC.
+    rho_reference = synthetic_arm('rho',arms[0])
+    if args.rho_source_root:
+        destination=out/'rho_reference'
+        destination.mkdir()
+        rho_binary,rho_manifest=snapshot_build(args.rho_source_root.resolve(),destination)
+        rho_reference.update(binary_relative=str(rho_binary.relative_to(out)),
+            source_directory=str((destination/'source').relative_to(out)),
+            source_manifest_relative=str((destination/'source-manifest.json').relative_to(out)),
+            source_manifest_sha256=objhash(rho_manifest))
+    if args.rho_config:
+        rho_reference['config']=read(args.rho_config)
+        require(isinstance(rho_reference['config'],dict) and 'summands' in rho_reference['config'],
+                'rho config must be a complete worker configuration')
+    rho_reference['configuration_sha256']=objhash(rho_reference['config'])
     cpus = sorted(os.sched_getaffinity(0))
     cpu = args.cpu if args.cpu is not None else cpus[-1]
     require(cpu in cpus,'CPU outside permitted affinity')
@@ -368,6 +385,7 @@ def prepare(args):
     limits = {'timeout_seconds':args.timeout,'memory_bytes':8*1024**3,'cpu':cpu,
               'worker_threads':1,'max_profiled_jobs':args.max_processes}
     fixtures = {}
+    used_targets = {}
     rng = random.Random(args.seed)
     for stage in STAGES:
         stage_cells = cells+holdout if stage in ('confirmation','replay') else cells
@@ -379,16 +397,24 @@ def prepare(args):
         for degree,a in stage_cells:
             n_cases = extra.get(f'n{degree}a{a}',count) if stage=='confirmation' else count
             for index in range(n_cases):
-                public_seed = rng.getrandbits(64)
                 case = {'id':f'n{degree}a{a}-{index:03d}', 'cell':f'n{degree}a{a}',
                     'job':{'mode':'fixture','degree':degree,'curve_a':a,
-                           'target_seeds':[public_seed]+[rng.getrandbits(64) for _ in range(args.targets-1)],'algorithm_seed':rng.getrandbits(64),
+                           'target_seeds':[],'algorithm_seed':rng.getrandbits(64),
                            'factor_base':{'kind':'subgroup_orbits','seed':43,'points':6*degree},
                            'config':BASE_CONFIG}}
-                raw = subprocess.run([str(binary)],input=json.dumps(case['job']),text=True,
-                    capture_output=True,env=child_env(),timeout=args.timeout,check=True)
-                case['fixture'] = json.loads(raw.stdout)['fixture']
-                Curve(case['fixture'])
+                used = used_targets.setdefault((degree,a),set())
+                for attempt in range(1000):
+                    case['job']['target_seeds']=[rng.getrandbits(64) for _ in range(args.targets)]
+                    raw = subprocess.run([str(binary)],input=json.dumps(case['job']),text=True,
+                        capture_output=True,env=child_env(),timeout=args.timeout,check=True)
+                    fixture = json.loads(raw.stdout)['fixture']
+                    curve = Curve(fixture)
+                    require(curve.r-1-len(used)>=args.targets,'too few unused public targets for independent confirmation')
+                    if reserve_targets(fixture,used):
+                        case['fixture']=fixture
+                        break
+                else:
+                    raise InvalidEvidence('could not sample distinct public targets within preparation budget')
                 case['fixture_sha256'] = objhash(case['fixture'])
                 cases.append(case)
         fixtures[stage] = cases
@@ -415,6 +441,8 @@ def prepare(args):
         'equivalent_suite_reason':'Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; the final suite has '+str(confirmation_cases)+' inputs.',
         'curve_diversity_limit':'One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.',
         'limits':limits,'repetitions':3,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
+        'selection_width':args.selection_width,'exploration_slots':args.exploration_slots,
+        'rho_reference':rho_reference,
         'require_native_progress':args.require_native_progress,'parity_margin':1.10,
         'objective':args.objective,'no_regression_ratio':0.98,
         'comparison_kind':args.comparison_kind,
@@ -423,13 +451,23 @@ def prepare(args):
         'native_timing_protocol':'blocking process reap with independent watchdog; complete cold process wall; '+SPAWN,
         'ci_level':0.95,'bootstrap_draws':2000,'host':platform.uname()._asdict(),
         'profiler_version':version,'compiler':subprocess.check_output(['rustc','--version'],text=True).strip(),
-        'evaluator_sha256':{n:digest(evaluator/n) for n in ('tournament.py','oracle.py')},
+        'evaluator_sha256':{n:digest(evaluator/n) for n in ('tournament.py','oracle.py','portfolio.py')},
         'source_manifest_sha256':objhash(manifest),
         'target_count':args.targets,'workload':'complete cold batch with all setup charged once and every target verified','native_timings':'paired native reruns retained; no runtime claim from profiled elapsed time',
-        'pinned_files':{n:digest(out/n) for n in set(['worker','source-manifest.json','candidates.json','fixtures.json','calibration.json']+[a['binary_relative'] for a in arms]+[a['source_manifest_relative'] for a in arms])}}
+        'target_uniqueness':'Distinct public points within each curve across A/A, smoke, development, selection and confirmation; replay intentionally repeats confirmation.',
+        'pinned_files':{n:digest(out/n) for n in set(['worker','source-manifest.json','candidates.json','fixtures.json','calibration.json']+[a['binary_relative'] for a in arms+[rho_reference]]+[a['source_manifest_relative'] for a in arms+[rho_reference]])}}
     write(out/'contract.json',c,exclusive=True)
     write(out/'seal.json',{'contract_sha256':objhash(c)},exclusive=True)
     print(json.dumps({'status':'prepared','round':str(out),'command':f'python3 {evaluator / "tournament.py"} run --round {out}'}))
+
+
+def reserve_targets(fixture,used):
+    """New random seeds alone do not guarantee new points in a small group."""
+    points=[tuple(map(int,p)) for p in fixture['targets']]
+    if len(set(points))!=len(points) or any(p in used for p in points):
+        return False
+    used.update(points)
+    return True
 
 
 def parse_confirmation_allocation(text,floor,declared):
@@ -582,6 +620,10 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_su
             return {'candidate':candidate_id,'eligible':False,'reason':'missing paired trials'}
         if any(x['status']!='VERIFIED' or x['total_operations'] is None for x in a+b):
             return {'candidate':candidate_id,'eligible':False,'reason':'unverified or unpriced workload'}
+        values=[v for x in a+b for v in (x['total_operations'],
+                    x.get('native_process',{}).get('process_wall_seconds'))]
+        if any(type(v) not in (int,float) or not math.isfinite(v) or v<=0 for v in values):
+            return {'candidate':candidate_id,'eligible':False,'reason':'invalid or missing full cost'}
         require(len({x['case_sha256'] for x in a+b})==1,'changed paired fixtures')
         if candidate_id!='rho' and baseline!='rho':
             if match_support:
@@ -661,22 +703,26 @@ def rho_gate(paired):
 
 def stage_arms(root, stage, arms):
     base=arms[0]
+    contract=read(root/'contract.json') if (root/'contract.json').exists() else {}
+    rho=contract.get('rho_reference',synthetic_arm('rho',base))
     if stage=='aa':
         return [base,synthetic_arm('aa_control',base)]
     if stage=='smoke':
-        return arms+[synthetic_arm('rho',base)]
+        return arms+[rho]
     if stage=='development':
         smoke=read(root/'summaries/smoke.json')
         failed={r['arm'] for r in smoke['failures']}
         require('incumbent' not in failed,'incumbent failed smoke')
-        return [a for a in arms if a['id'] not in failed]+[synthetic_arm('rho',base)]
+        return [a for a in arms if a['id'] not in failed]+[rho]
     if stage=='selection':
         d=read(root/'summaries/development.json')
-        eligible=sorted([r for r in d['comparisons'] if r.get('eligible')],key=lambda r:r['candidate_over_baseline'])[:2]
-        return [base]+[next(a for a in arms if a['id']==r['candidate']) for r in eligible]+[synthetic_arm('rho',base)]
+        eligible=d.get('retained_portfolio')
+        if eligible is None:
+            eligible=sorted([r for r in d['comparisons'] if r.get('eligible')],key=lambda r:r['candidate_over_baseline'])[:2]
+        return [base]+[next(a for a in arms if a['id']==r['candidate']) for r in eligible]+[rho]
     d=read(root/'summaries/selection.json')
     provisional=d.get('provisional_challenger')
-    return [base]+([next(a for a in arms if a['id']==provisional)] if provisional else [])+[synthetic_arm('rho',base)]
+    return [base]+([next(a for a in arms if a['id']==provisional)] if provisional else [])+[rho]
 
 
 def summarize(root,c,stage,fixtures,arms,*,save=True):
@@ -691,6 +737,9 @@ def summarize(root,c,stage,fixtures,arms,*,save=True):
     if stage=='aa':
         aa=comps[0]
         result['passed']=bool(aa.get('eligible') and all(.95<=r<=1.05 for r in aa['per_cell'].values()) and not gate(aa,c))
+    if stage=='development' and 'selection_width' in c:
+        result['retained_portfolio']=retain(comps,arms,width=c['selection_width'],
+            exploration=c['exploration_slots'],seed=c['seed'])
     if stage=='selection':
         eligible=sorted([r for r in comps if r.get('eligible')],key=lambda r:r['candidate_over_baseline'])
         result['provisional_challenger']=eligible[0]['candidate'] if eligible else None
@@ -807,9 +856,13 @@ def audit(args):
     root=args.round.resolve()
     c,fixtures,arms=frozen_inputs(root)
     manifest=read(root/'source-manifest.json')
-    source_pairs={(a.get('source_manifest_relative','source-manifest.json'),a.get('source_directory','source')) for a in arms}
+    sources=arms+([c['rho_reference']] if 'rho_reference' in c else [])
+    source_pairs={(a.get('source_manifest_relative','source-manifest.json'),a.get('source_directory','source')) for a in sources}
+    source_files=0
     for manifest_path,source_path in source_pairs:
-        for name,h in read(root/manifest_path).items():
+        source_manifest=read(root/manifest_path)
+        source_files+=len(source_manifest)
+        for name,h in source_manifest.items():
             require(digest(root/source_path/name)==h,'changed source snapshot '+name)
     count=0
     for stage in STAGES:
@@ -827,7 +880,7 @@ def audit(args):
                 'changed stage summary or provisional selection')
     if (root/'decision.json').exists():
         require(read(root/'decision.json')==decision(root,c,fixtures,arms,save=False),'changed decision')
-    print(json.dumps({'status':'VERIFIED','trial_receipts':count,'source_files':len(manifest)}))
+    print(json.dumps({'status':'VERIFIED','trial_receipts':count,'source_files':source_files}))
 
 
 def main():
@@ -836,6 +889,8 @@ def main():
     p=commands.add_parser('prepare')
     p.add_argument('--out',type=Path,required=True)
     p.add_argument('--source-root',type=Path,default=ROOT)
+    p.add_argument('--rho-source-root',type=Path,help='Freeze a separately qualified rho worker source.')
+    p.add_argument('--rho-config',type=Path,help='Freeze the rho configuration selected on development data.')
     p.add_argument('--comparison-kind',choices=['fixed-support','factor-base-policy'],default='fixed-support')
     p.add_argument('--candidates',type=Path)
     p.add_argument('--profile',choices=['pilot','standard'],default='pilot')
@@ -850,6 +905,8 @@ def main():
     p.add_argument('--timeout',type=float,default=60)
     p.add_argument('--max-processes',type=int,default=1800)
     p.add_argument('--require-native-progress',action='store_true')
+    p.add_argument('--selection-width',type=int,default=6)
+    p.add_argument('--exploration-slots',type=int,default=1)
     p.add_argument('--targets',type=int,default=1)
     p.add_argument('--objective',choices=['incumbent','rho'],default='incumbent',
                    help='rho: promote only a challenger that is measurably cheaper than the incumbent AND strictly below matched rho in both metrics (see gate/rho_gate)')
@@ -862,6 +919,8 @@ def main():
     args=parser.parse_args()
     try:
         if args.command=='prepare':
+            require(2<=args.selection_width<=15 and 0<=args.exploration_slots<args.selection_width,
+                    'invalid selection/exploration budget')
             require(args.timeout>0 and args.max_processes>0,'positive limits required')
             require(1<=args.targets<=100,'target count must be 1..100')
             prepare(args)
@@ -870,7 +929,10 @@ def main():
                 proposed,source=proposals_from_previous(args.from_round.resolve())
                 write(args.out,proposed,exclusive=True)
                 parent_contract=read(args.from_round.resolve()/'contract.json')
+                rho_reference=parent_contract.get('rho_reference',{})
                 print(json.dumps({'candidates':str(args.out),'baseline_source_root':str(source),
+                      'rho_source_root':str(args.from_round.resolve()/rho_reference.get('source_directory','source')),
+                      'rho_config':rho_reference.get('config'),
                       'target_count':parent_contract.get('target_count',1),
                       'comparison_kind':parent_contract.get('comparison_kind','fixed-support'),
                       'require_native_progress':parent_contract.get('require_native_progress',False),

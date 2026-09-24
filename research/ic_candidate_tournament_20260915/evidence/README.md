@@ -1,5 +1,14 @@
 # Frozen tournament evidence
 
+`autolab-20260924.tar.zst` preserves the portable development sequence: six
+audited panels (960 receipts, 888 verified jobs and 72 retained rejections), plus
+the original 192-job reporting failure, all frozen source/evaluators/executables,
+and validation output. These are native development diagnostics, not instruction
+tournament promotions. Restore with `--archive autolab-20260924`, then audit each
+completed panel with `autolab_20260924/PANEL/evaluator/autolab.py verify --round PATH`.
+See [the report](../autolab_20260924/RESULTS.md) and
+[fresh-directory restoration audit](../autolab_20260924/archive-validation.json).
+
 The archives preserve every raw profile, receipt, correctness certificate,
 native process output, source snapshot, frozen evaluator and measured executable.
 Readable contracts, fixtures, decisions, phase summaries and reports also live
