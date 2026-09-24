@@ -412,17 +412,16 @@ mod tests {
         for s in [ml_dsa_44_set(), ml_dsa_65_set(), ml_dsa_87_set()] {
             let key = primal_usvp_2016(&s.lwe(), &core_svp()).unwrap();
             let forge = sis_estimate(&s.sis(), &core_svp());
-            match forge {
-                Some(f) => assert!(
+            // `None`: the bound is so loose that even β = 50 suffices, which
+            // is the same conclusion stated differently.
+            if let Some(f) = forge {
+                assert!(
                     f.log2_cost <= key.log2_cost,
                     "{}: SIS {} > MLWE {}",
                     s.name,
                     f.log2_cost,
                     key.log2_cost
-                ),
-                // Or the bound is so loose that even β = 50 suffices, which is
-                // the same conclusion stated differently.
-                None => {}
+                );
             }
         }
     }

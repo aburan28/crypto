@@ -233,7 +233,7 @@ fn cz_split(poly: &F2mPoly, m: u32, irr: &IrreduciblePoly, roots: &mut Vec<F2mEl
         let mut bits = Vec::new();
         let bound = m.min(20);
         for k in 0..bound {
-            if (attempt.wrapping_mul(0x9E3779B1).rotate_left(k as u32) >> 1) & 1 == 1 {
+            if (attempt.wrapping_mul(0x9E3779B1).rotate_left(k) >> 1) & 1 == 1 {
                 bits.push(k);
             }
         }

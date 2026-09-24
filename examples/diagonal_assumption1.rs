@@ -30,10 +30,10 @@
 //! ```
 
 use crypto_lib::binary_ecc::{F2mElement, IrreduciblePoly};
+use crypto_lib::cryptanalysis::koblitz_bench::random_control_system;
 use crypto_lib::cryptanalysis::koblitz_groebner::{
     build_decomposition_system, first_fall_degree, solving_degree, system_degree, FieldStructure,
 };
-use crypto_lib::cryptanalysis::koblitz_bench::random_control_system;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -107,12 +107,16 @@ fn main() {
     println!("Assumption 1 (Semaev 2015) asserts d_F4 <= 4 here. FFD and D_solve are");
     println!("NOT d_F4 (KN-OPEN-d218ec); this fixes the SUBSPACE, not the definition.");
     println!();
-    println!("| n | k=ceil(n/m) | vars | eqs | deg | FFD | D_solve | gap | null FFD | null D_solve |");
-    println!("|--:|------------:|-----:|----:|----:|----:|--------:|----:|---------:|-------------:|");
+    println!(
+        "| n | k=ceil(n/m) | vars | eqs | deg | FFD | D_solve | gap | null FFD | null D_solve |"
+    );
+    println!(
+        "|--:|------------:|-----:|----:|----:|----:|--------:|----:|---------:|-------------:|"
+    );
 
     let mut rng = StdRng::seed_from_u64(seed);
     for n in (5..=n_max).step_by(2) {
-        let k = (n + m as u32 - 1) / m as u32; // ceil(n/m)
+        let k = n.div_ceil(m as u32); // ceil(n/m)
         let irr: IrreduciblePoly = match find_irreducible_sparse(n) {
             Some(i) => i,
             None => continue,
@@ -152,7 +156,7 @@ fn main() {
             // structure is buying nothing and we measured the shape alone.
             let terms: usize = (sys.equations.iter().map(|e| e.terms.len()).sum::<usize>()
                 / sys.equations.len().max(1))
-                .max(1);
+            .max(1);
             let ctrl = random_control_system(
                 sys.n_vars,
                 sys.equations.len(),

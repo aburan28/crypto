@@ -51,7 +51,7 @@ use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
 use crate::hash::sha256::sha256;
-use crate::zk::pedersen::{pedersen_second_generator, PedersenParams};
+use crate::zk::pedersen::PedersenParams;
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::{One, Zero};
 use rand::rngs::OsRng;
@@ -117,7 +117,7 @@ fn encode_point(p: &Point) -> Vec<u8> {
 fn push_be32(out: &mut Vec<u8>, v: &BigUint) {
     let bytes = v.to_bytes_be();
     if bytes.len() < 32 {
-        out.extend(std::iter::repeat(0).take(32 - bytes.len()));
+        out.extend(std::iter::repeat_n(0, 32 - bytes.len()));
     }
     out.extend_from_slice(&bytes);
 }
@@ -146,6 +146,7 @@ fn sc_inv_checked(a: &BigUint, n: &BigUint) -> Option<BigUint> {
         crate::utils::mod_inverse(a, n)
     }
 }
+#[allow(dead_code)]
 fn sc_pow(base: &BigUint, exp: u64, n: &BigUint) -> BigUint {
     base.modpow(&BigUint::from(exp), n)
 }
@@ -413,9 +414,7 @@ pub struct RangeProof {
 
 /// Compute the bit decomposition of `v` into `N` bits as scalars 0/1.
 fn bit_decompose(v: u64) -> Vec<BigUint> {
-    (0..N)
-        .map(|i| BigUint::from(((v >> i) & 1) as u64))
-        .collect()
+    (0..N).map(|i| BigUint::from((v >> i) & 1)).collect()
 }
 
 /// `(1, y, y², …, y^{N-1})`.
@@ -511,7 +510,7 @@ pub fn range_prove_checked(
     let r_x: Vec<BigUint> = vec_hadamard(&y_pow, &s_r, n);
 
     // t(X) = <l(X), r(X)> = t0 + t1·X + t2·X²
-    let t0 = vec_inner(&l_const, &r_const, n);
+    let _t0 = vec_inner(&l_const, &r_const, n);
     let t1 = sc_add(
         &vec_inner(&l_const, &r_x, n),
         &vec_inner(&l_x, &r_const, n),
@@ -722,6 +721,7 @@ fn v_commitment(v: u64, gamma: &BigUint, params: &PedersenParams) -> Point {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::zk::pedersen::pedersen_second_generator;
 
     /// Inner-product argument: tiny n=2 sanity.
     #[test]
@@ -794,8 +794,8 @@ mod tests {
         let g_vec = nums_generators(&curve, "test/G", n);
         let h_vec = nums_generators(&curve, "test/H", n);
         let u = pedersen_second_generator(&curve);
-        let a: Vec<BigUint> = (0..n as u64).map(|i| BigUint::from(i)).collect();
-        let b: Vec<BigUint> = (0..n as u64).map(|i| BigUint::from(i)).collect();
+        let a: Vec<BigUint> = (0..n as u64).map(BigUint::from).collect();
+        let b: Vec<BigUint> = (0..n as u64).map(BigUint::from).collect();
         let mut t_prove = Transcript::new(&curve);
         let proof = ipa_prove(&curve, g_vec, h_vec, &u, a, b, &mut t_prove);
         assert_eq!(proof.l_vec.len(), 5, "log2(32) = 5 halving rounds");

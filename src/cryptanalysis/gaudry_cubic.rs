@@ -215,7 +215,7 @@ impl Fp3 {
         };
         let cof = |r: usize, cidx: usize| {
             let v = minor(r, cidx);
-            if (r + cidx) % 2 == 0 {
+            if (r + cidx).is_multiple_of(2) {
                 v
             } else {
                 (p - v) % p
@@ -259,7 +259,7 @@ impl Fp3 {
         }
         let mut s = 0u32;
         let mut m = q;
-        while m % 2 == 0 {
+        while m.is_multiple_of(2) {
             m /= 2;
             s += 1;
         }
@@ -275,7 +275,7 @@ impl Fp3 {
         };
         let mut c = self.pow(&z, m);
         let mut t = self.pow(a, m);
-        let mut r = self.pow(a, (m + 1) / 2);
+        let mut r = self.pow(a, m.div_ceil(2));
         let mut mm_ = s;
         loop {
             if t == Fp3::ONE {
@@ -616,6 +616,7 @@ impl PolyRing {
     fn deg(f: &UPoly) -> isize {
         f.0.len() as isize - 1
     }
+    #[allow(dead_code)]
     fn add(&self, f: &UPoly, g: &UPoly) -> UPoly {
         let n = f.0.len().max(g.0.len());
         let mut out = vec![0u64; n];
@@ -659,7 +660,7 @@ impl PolyRing {
         assert!(dg >= 0);
         let mut r = f.0.clone();
         let lead_inv = inv_mod(*g.0.last().unwrap(), self.p);
-        while r.len() as isize - 1 >= dg {
+        while r.len() as isize > dg {
             let coef = mm(*r.last().unwrap(), lead_inv, self.p);
             let shift = r.len() - g.0.len();
             self.count(g.0.len() as u64 + 1);
@@ -754,7 +755,7 @@ impl PolyRing {
         let mut r = f.0.clone();
         let mut q = vec![0u64; f.0.len().saturating_sub(g.0.len()) + 1];
         let lead_inv = inv_mod(*g.0.last().unwrap(), self.p);
-        while r.len() as isize - 1 >= dg && !r.is_empty() {
+        while r.len() as isize > dg && !r.is_empty() {
             let coef = mm(*r.last().unwrap(), lead_inv, self.p);
             let shift = r.len() - g.0.len();
             q[shift] = coef;
@@ -1074,6 +1075,7 @@ impl KPoly {
         out
     }
     /// Evaluate at a point of `F_{p³}⁴`.
+    #[allow(dead_code)]
     fn eval(&self, f: &Fp3, x: &[E3; 4]) -> E3 {
         let mut acc = Fp3::ZERO;
         for (&e, &c) in &self.terms {
@@ -1368,7 +1370,12 @@ pub(crate) fn charpoly_mod_p(a: &[Vec<u64>], p: u64, muls: &mut u64) -> UPoly {
 }
 
 /// Kernel basis of `(m − λI)` for a square matrix `m` over `F_p`.
-pub(crate) fn eigenvectors_mod_p(m: &[Vec<u64>], lambda: u64, p: u64, muls: &mut u64) -> Vec<Vec<u64>> {
+pub(crate) fn eigenvectors_mod_p(
+    m: &[Vec<u64>],
+    lambda: u64,
+    p: u64,
+    muls: &mut u64,
+) -> Vec<Vec<u64>> {
     let n = m.len();
     let mut a: Vec<Vec<u64>> = m.to_vec();
     for i in 0..n {
@@ -1712,9 +1719,7 @@ fn solve_at_degree(
         let is_box = {
             let (a, b, c) = (mx(0) + 1, mx(1) + 1, mx(2) + 1);
             std_mono.len() == (a as usize) * (b as usize) * (c as usize)
-                && std_mono
-                    .iter()
-                    .all(|m| m[0] < a && m[1] < b && m[2] < c)
+                && std_mono.iter().all(|m| m[0] < a && m[1] < b && m[2] < c)
         };
         eprintln!(
             "  degree {degree}: rows {} cols {} pivots {} standard(dim) {dim}              maxima [{},{},{}] box={is_box} staircase={std_mono:?}",
@@ -1781,10 +1786,7 @@ fn solve_at_degree(
         // only a fraction of the pivots, a lazier elimination has something
         // to skip, and if it reaches nearly all of them it has nothing.
         let reached = nfs.memo.iter().filter(|m| m.is_some()).count();
-        let reached_pivots = pivots
-            .iter()
-            .filter(|&&c| nfs.memo[c].is_some())
-            .count();
+        let reached_pivots = pivots.iter().filter(|&&c| nfs.memo[c].is_some()).count();
         eprintln!(
             "  degree {degree}: nf resolved {reached} columns of {}, of which              {reached_pivots} of {} pivots ({:.0}%)",
             cols.len(),
@@ -1822,8 +1824,8 @@ fn solve_at_degree(
         return None;
     };
     let read = read_solutions(
-        &m_e1, &cols, &col_index, &standard, &std_index, &pivots, &mut nfs, &comps, p, rng,
-        stats, muls, debug, degree, false,
+        &m_e1, &cols, &col_index, &standard, &std_index, &pivots, &mut nfs, &comps, p, rng, stats,
+        muls, debug, degree, false,
     );
     let Read::Solved(res) = read else {
         return None;
@@ -2047,8 +2049,8 @@ fn solve_lazy(
         standard.iter().enumerate().map(|(i, &c)| (c, i)).collect();
     let mut rows = mat.to_vec();
     let mut nfs = NormalForms::lazy(&mut rows, plan, &std_index, dim, p);
-    let m_e1 = mult_matrix(cols, col_index, standard, [1, 0, 0], &mut nfs, muls)
-        .filter(|_| !nfs.broken());
+    let m_e1 =
+        mult_matrix(cols, col_index, standard, [1, 0, 0], &mut nfs, muls).filter(|_| !nfs.broken());
     stats.macaulay_muls += *muls - before;
     let Some(m_e1) = m_e1 else {
         if debug {
@@ -2078,7 +2080,15 @@ fn solve_lazy(
             .collect();
         let same = standard_f == *standard && {
             let mut nfs_f = NormalForms::new(&mut full, &pivots_f, &std_index, dim, p);
-            mult_matrix(cols, col_index, standard, [1, 0, 0], &mut nfs_f, &mut scratch).as_ref()
+            mult_matrix(
+                cols,
+                col_index,
+                standard,
+                [1, 0, 0],
+                &mut nfs_f,
+                &mut scratch,
+            )
+            .as_ref()
                 == Some(&m_e1)
         };
         stats.lazy_verified += 1;
@@ -2098,7 +2108,11 @@ fn solve_lazy(
         &m_e1, cols, col_index, standard, &std_index, &planned, &mut nfs, comps, p, rng, stats,
         muls, debug, degree, true,
     );
-    let read = if nfs.broken() { Read::SplitUnavailable } else { read };
+    let read = if nfs.broken() {
+        Read::SplitUnavailable
+    } else {
+        read
+    };
     stats.echelon_muls += nfs.elim_muls;
     stats.lazy_pivots_reduced += nfs.reduced;
     stats.lazy_pivots_planned += plan.pivot_row.len() as u64;
@@ -2158,7 +2172,12 @@ impl EchelonTrace {
     /// normalisation and every reduction it performed, on any row.
     fn done_by(&self, c: usize) -> u64 {
         self.norm.get(&c).copied().unwrap_or(0)
-            + self.mods.iter().filter(|m| m.0 == c).map(|m| m.2).sum::<u64>()
+            + self
+                .mods
+                .iter()
+                .filter(|m| m.0 == c)
+                .map(|m| m.2)
+                .sum::<u64>()
     }
 
     /// The rows a set of normal forms depends on — the pivot rows of the
@@ -4046,19 +4065,27 @@ mod tests {
                 (k * 104_729 + 13) % p,
                 (k * 15_485_863 + 7) % p,
             ]);
-            let a = solve_s4_subspace_with(&inst, &pre_full, &x_r, &mut rng_full, &mut st_full, full);
-            let b = solve_s4_subspace_with(&inst, &pre_lazy, &x_r, &mut rng_lazy, &mut st_lazy, lazy);
+            let a =
+                solve_s4_subspace_with(&inst, &pre_full, &x_r, &mut rng_full, &mut st_full, full);
+            let b =
+                solve_s4_subspace_with(&inst, &pre_lazy, &x_r, &mut rng_lazy, &mut st_lazy, lazy);
             assert_eq!(a, b, "residual {k}: full {a:?} vs lazy {b:?}");
         }
         assert!(pre_lazy.plan.get().is_some(), "no plan was learned");
-        assert!(pre_full.plan.get().is_none(), "the full mode learned a plan");
+        assert!(
+            pre_full.plan.get().is_none(),
+            "the full mode learned a plan"
+        );
         assert_eq!(st_lazy.lazy_verify_mismatches, 0, "{st_lazy:?}");
         assert_eq!(st_lazy.lazy_verified, st_lazy.lazy_solves, "{st_lazy:?}");
         // Every residual after the one that taught the plan is tried
         // lazily, and every one that falls back has a staircase no plan
         // could serve — an accidental cancellation (probability ~`1/p`
         // per entry) is absorbed by trying another row, never a fallback.
-        assert!(st_lazy.lazy_solves + st_lazy.lazy_fallbacks + 1 >= st_lazy.solves, "{st_lazy:?}");
+        assert!(
+            st_lazy.lazy_solves + st_lazy.lazy_fallbacks + 1 >= st_lazy.solves,
+            "{st_lazy:?}"
+        );
         assert_eq!(st_lazy.lazy_needless_fallbacks, 0, "{st_lazy:?}");
         assert!(st_lazy.lazy_fallbacks * 20 <= st_lazy.solves, "{st_lazy:?}");
         // It skips rows, though not many: whether that pays is the
@@ -4245,7 +4272,7 @@ mod tests {
 
         // The cap binds: nothing survives past depth 1, and the uncapped run
         // went deeper than that.
-        assert_eq!(capped.abandoned > 0, true, "a depth-1 cap must discard something");
+        assert!(capped.abandoned > 0, "a depth-1 cap must discard something");
         assert_eq!(uncapped.abandoned, 0, "no cap means nothing is discarded");
         assert!(capped.mean_merge_depth() <= 1.0);
         assert!(

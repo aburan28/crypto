@@ -58,7 +58,7 @@
 
 use crate::cryptanalysis::canonical_lift::{ZpCurve, ZpInt};
 use num_bigint::BigInt;
-use num_traits::{One, Zero};
+use num_traits::Zero;
 
 /// A power series `a_0 + a_1·z + a_2·z² + …` over `Z_p / p^prec`,
 /// truncated to `n` terms.  Used to represent `ω(z)` and integrals
@@ -283,9 +283,9 @@ pub fn iterated_coleman_integral(
 /// Verify additivity of single Coleman integrals (sanity check).
 /// For `ω` holomorphic, `I_1(P + Q) ≡ I_1(P) + I_1(Q) (mod p^k)`.
 pub fn verify_abelian_additivity(omega: &PSeries, z_p: &ZpInt, z_q: &ZpInt, z_pq: &ZpInt) -> bool {
-    let i_p = omega.integrate().and_then(|f| Some(f.evaluate(z_p)));
-    let i_q = omega.integrate().and_then(|f| Some(f.evaluate(z_q)));
-    let i_pq = omega.integrate().and_then(|f| Some(f.evaluate(z_pq)));
+    let i_p = omega.integrate().map(|f| f.evaluate(z_p));
+    let i_q = omega.integrate().map(|f| f.evaluate(z_q));
+    let i_pq = omega.integrate().map(|f| f.evaluate(z_pq));
     match (i_p, i_q, i_pq) {
         (Some(a), Some(b), Some(c)) => a.add(&b) == c,
         _ => false,
@@ -358,10 +358,9 @@ pub fn formal_group_scalar_mul(a: &ZpInt, b: &ZpInt, t: &ZpInt, d: u64) -> ZpInt
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cryptanalysis::nonanom_formal_log::{
-        proj_hensel_lift, proj_scalar_mul, ZpProjPoint,
-    };
+    use crate::cryptanalysis::nonanom_formal_log::{proj_hensel_lift, proj_scalar_mul};
     use num_bigint::BigUint;
+    use num_traits::One;
 
     /// Sanity: power series operations.
     #[test]
@@ -420,7 +419,7 @@ mod tests {
         // Coefficient of z⁴ is -4a/5.  For a=1, p=11: -4·1/5 ≡ -4·9
         // (mod 11) (since 5⁻¹ = 9 mod 11) = -36 ≡ 8 (mod 11).
         let z4 = &omega.coefs[4];
-        let expected = ((-4i32 * 9) % 11 + 11) % 11;
+        let expected = (-4i32 * 9) % 11 + 11;
         assert_eq!(z4.value.clone() % BigInt::from(11), BigInt::from(expected));
     }
 

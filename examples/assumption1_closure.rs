@@ -150,7 +150,10 @@ fn degree_closure(
             Some(r) => r,
             None => return (gens, round - 1, Closure::SizeCap),
         };
-        let mut next: Vec<_> = reduced.into_iter().filter(|p| !p.terms.is_empty()).collect();
+        let mut next: Vec<_> = reduced
+            .into_iter()
+            .filter(|p| !p.terms.is_empty())
+            .collect();
         next.sort_by_key(|p| system_degree(std::slice::from_ref(p)));
         let sig = signature(&next);
         if sig == prev {
@@ -193,7 +196,7 @@ fn main() {
 
     let mut rng = StdRng::seed_from_u64(seed);
     for n in (n_min..=n_max).step_by(2) {
-        let k = (n + m as u32 - 1) / m as u32;
+        let k = n.div_ceil(m as u32);
         let irr: IrreduciblePoly = match find_irreducible_sparse(n) {
             Some(i) => i,
             None => continue,
@@ -220,13 +223,17 @@ fn main() {
                 match solving_profile(&closure, sys.n_vars, d) {
                     Some(p) => {
                         let done = p.refuted || (p.vars_determined == p.vars_occurring);
-                        eprintln!("   DIAG n={} refuted={} pinned={}/{}", n, p.refuted, p.vars_determined, p.vars_occurring);
+                        eprintln!(
+                            "   DIAG n={} refuted={} pinned={}/{}",
+                            n, p.refuted, p.vars_determined, p.vars_occurring
+                        );
                         (
                             if done { "yes" } else { "no" }.to_string(),
                             if done {
                                 format!("REFUTED-at-degree-{d}")
                             } else {
-                                "not-refuted (target likely decomposable; NOT a degree verdict)".to_string()
+                                "not-refuted (target likely decomposable; NOT a degree verdict)"
+                                    .to_string()
                             },
                         )
                     }

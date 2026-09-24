@@ -1728,6 +1728,7 @@ fn raw_affine(point: &BinaryPoint) -> Option<(u64, u64)> {
     }
 }
 
+#[allow(dead_code)]
 fn canonical_signed_point(
     curve: &KoblitzCurve,
     point: &BinaryPoint,
@@ -1825,6 +1826,7 @@ fn balanced_orbits(
     unreachable!()
 }
 
+#[allow(dead_code)]
 fn signed_point_orbit(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPoint> {
     let mut by_key = BTreeMap::new();
     let mut current = point.clone();
@@ -1839,6 +1841,7 @@ fn signed_point_orbit(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPo
     by_key.into_values().collect()
 }
 
+#[allow(dead_code)]
 fn absolute_trace_bit(curve: &KoblitzCurve, x: &F2mElement) -> bool {
     let mut trace = F2mElement::zero(curve.n);
     let mut power = x.clone();
@@ -1850,6 +1853,7 @@ fn absolute_trace_bit(curve: &KoblitzCurve, x: &F2mElement) -> bool {
     !trace.is_zero()
 }
 
+#[allow(dead_code)]
 fn batch_target_minus_base(
     curve: &KoblitzCurve,
     target: &BinaryPoint,
@@ -1917,6 +1921,7 @@ fn batch_target_minus_base(
         .collect()
 }
 
+#[allow(dead_code)]
 fn batch_target_minus_keys(
     curve: &KoblitzCurve,
     target: &BinaryPoint,
@@ -2760,6 +2765,7 @@ fn batch_raw_target_minus_fibers_x_filtered(
     attempted
 }
 
+#[allow(dead_code)]
 fn frobenius_key_images(
     curve: &KoblitzCurve,
     key: (u64, u64),
@@ -3292,6 +3298,7 @@ fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
     }
 }
 
+#[allow(dead_code)]
 fn reference_point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
     let modulus = curve.subgroup_order.to_u64().unwrap();
     let lambda = curve.lambda.to_u64().unwrap();
@@ -4239,7 +4246,7 @@ fn main() {
                     (coefficient_a, coefficient_b, target)
                 }
                 TargetMode::CoefficientWalk => {
-                    let result = (walk_a, walk_b, walk_target.clone());
+                    let result = (walk_a, walk_b, walk_target);
                     walk_a = (walk_a + delta_a) % modulus;
                     walk_b = (walk_b + delta_b) % modulus;
                     walk_target = raw_add_point(&curve, walk_target, walk_jump);

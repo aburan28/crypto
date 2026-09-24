@@ -30,7 +30,7 @@
 
 use super::cm::{cm_discriminant, CmData};
 use super::SmallCurve;
-use crate::cryptanalysis::pollard_rho::{pollard_rho_dlp, RhoOptions, RhoSolution};
+use crate::cryptanalysis::pollard_rho::RhoSolution;
 use crate::ecc::point::Point;
 use num_bigint::BigUint;
 use num_traits::Zero;
@@ -244,8 +244,8 @@ fn r_adding_rho_on_curve(
     let mut m_a: Vec<BigUint> = Vec::with_capacity(R);
     let mut m_b: Vec<BigUint> = Vec::with_capacity(R);
     for _ in 0..R {
-        let a_i = (&mut rng).gen_biguint_below(n);
-        let b_i = (&mut rng).gen_biguint_below(n);
+        let a_i = rng.gen_biguint_below(n);
+        let b_i = rng.gen_biguint_below(n);
         let pt = g
             .scalar_mul(&a_i, a_fe)
             .add(&h.scalar_mul(&b_i, a_fe), a_fe);
@@ -295,10 +295,7 @@ fn r_adding_rho_on_curve(
         let (a0, b0) = if restart == 0 {
             (BigUint::from(1u32), BigUint::zero())
         } else {
-            (
-                (&mut rng).gen_biguint_below(n),
-                (&mut rng).gen_biguint_below(n),
-            )
+            (rng.gen_biguint_below(n), rng.gen_biguint_below(n))
         };
         let start = g.scalar_mul(&a0, a_fe).add(&h.scalar_mul(&b0, a_fe), a_fe);
 
@@ -433,8 +430,8 @@ fn dp_parallel_rho_on_curve(
     let mut prng = StdRng::seed_from_u64(seed ^ 0xA5A5A5A5_5A5A5A5A);
     let mut adders: Vec<(Point, BigUint, BigUint)> = Vec::with_capacity(R);
     for _ in 0..R {
-        let ai = (&mut prng).gen_biguint_below(n);
-        let bi = (&mut prng).gen_biguint_below(n);
+        let ai = prng.gen_biguint_below(n);
+        let bi = prng.gen_biguint_below(n);
         let pt = g.scalar_mul(&ai, a_fe).add(&h.scalar_mul(&bi, a_fe), a_fe);
         adders.push((pt, ai, bi));
     }
@@ -443,7 +440,7 @@ fn dp_parallel_rho_on_curve(
     // DP threshold.  Heuristic: dp_bits ≈ bits(n)/4 — DP density
     // ≈ 2^{-bits/4}, so each walker emits ~2^{bits/4} DPs in its
     // √n budget.  At 50-bit that's ~32k DPs; table fits in memory.
-    let dp_bits = (((n.bits() as u32) / 4).max(4)).min(28) as u64;
+    let dp_bits = ((n.bits() as u32) / 4).clamp(4, 28) as u64;
     let dp_mask = (1u64 << dp_bits) - 1;
 
     let dp_table: Arc<Mutex<HashMap<u64, (BigUint, BigUint)>>> =
@@ -513,8 +510,8 @@ fn dp_parallel_rho_on_curve(
             };
 
             // Random initial (a, b).
-            let a0 = (&mut wrng).gen_biguint_below(n);
-            let b0 = (&mut wrng).gen_biguint_below(n);
+            let a0 = wrng.gen_biguint_below(n);
+            let b0 = wrng.gen_biguint_below(n);
             let mut pt = g_pt
                 .scalar_mul(&a0, a_fe)
                 .add(&h_pt.scalar_mul(&b0, a_fe), a_fe);
@@ -636,9 +633,8 @@ pub fn multi_target_dp_rho(
     max_iters: u64,
     seed: u64,
 ) -> (Option<Vec<BigUint>>, u64) {
-    use crate::utils::mod_inverse;
     use num_bigint::RandBigInt;
-    use num_integer::Integer;
+
     use rand::rngs::StdRng;
     use rand::SeedableRng;
     use std::collections::HashMap;
@@ -656,8 +652,8 @@ pub fn multi_target_dp_rho(
     let mut prng = StdRng::seed_from_u64(seed ^ 0xCAFEFACE_FEEDF00D);
     let mut adders: Vec<(Point, BigUint, Vec<BigUint>)> = Vec::with_capacity(R);
     for _ in 0..R {
-        let aj = (&mut prng).gen_biguint_below(n);
-        let bj: Vec<BigUint> = (0..m).map(|_| (&mut prng).gen_biguint_below(n)).collect();
+        let aj = prng.gen_biguint_below(n);
+        let bj: Vec<BigUint> = (0..m).map(|_| prng.gen_biguint_below(n)).collect();
         let mut pt = g.scalar_mul(&aj, a_fe);
         for i in 0..m {
             pt = pt.add(&targets[i].scalar_mul(&bj[i], a_fe), a_fe);
@@ -668,7 +664,7 @@ pub fn multi_target_dp_rho(
 
     // DP density: roughly bits(n)/4 for medium scales, but with a
     // small minimum so 16-bit toy tests actually emit a few DPs.
-    let dp_bits = (((n.bits() as u32) / 4).max(4)).min(28) as u64;
+    let dp_bits = ((n.bits() as u32) / 4).clamp(4, 28) as u64;
     let dp_mask = (1u64 << dp_bits) - 1;
 
     // Shared state.  DP table maps point-key → (a, b_0, …, b_{m-1}).
@@ -738,8 +734,8 @@ pub fn multi_target_dp_rho(
             };
 
             // Random initial state.
-            let a0 = (&mut wrng).gen_biguint_below(n);
-            let bs0: Vec<BigUint> = (0..m).map(|_| (&mut wrng).gen_biguint_below(n)).collect();
+            let a0 = wrng.gen_biguint_below(n);
+            let bs0: Vec<BigUint> = (0..m).map(|_| wrng.gen_biguint_below(n)).collect();
             let mut pt = g_pt.scalar_mul(&a0, a_fe);
             for i in 0..m {
                 pt = pt.add(&targets[i].scalar_mul(&bs0[i], a_fe), a_fe);
@@ -845,9 +841,9 @@ fn factor_smooth(n: u64, bound: u64) -> (Vec<(u64, u32)>, u64) {
     let mut rem = n;
     let mut q = 2u64;
     while q <= bound && q * q <= rem {
-        if rem % q == 0 {
+        if rem.is_multiple_of(q) {
             let mut e = 0u32;
-            while rem % q == 0 {
+            while rem.is_multiple_of(q) {
                 rem /= q;
                 e += 1;
             }
@@ -1179,14 +1175,12 @@ fn solve_mod_n(
         // Find a not-yet-used row with mat[r][col] invertible mod n.
         let mut chosen: Option<usize> = None;
         for r in 0..mat.len() {
-            if pivot_row_for_col.iter().any(|&pr| pr == Some(r)) {
+            if pivot_row_for_col.contains(&Some(r)) {
                 continue;
             }
-            if !mat[r][col].is_zero() {
-                if mod_inverse(&mat[r][col], n).is_some() {
-                    chosen = Some(r);
-                    break;
-                }
+            if !mat[r][col].is_zero() && mod_inverse(&mat[r][col], n).is_some() {
+                chosen = Some(r);
+                break;
             }
         }
         let r = chosen?;

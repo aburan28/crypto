@@ -118,7 +118,7 @@ pub struct F2mElement {
 impl F2mElement {
     /// Zero element.
     pub fn zero(m: u32) -> Self {
-        let n_words = ((m + 63) / 64) as usize;
+        let n_words = m.div_ceil(64) as usize;
         Self {
             bits: vec![0u64; n_words.max(1)],
             m,
@@ -253,12 +253,12 @@ impl F2mElement {
     pub fn schoolbook_mul(&self, other: &Self, irreducible: &IrreduciblePoly) -> Self {
         let m = self.m;
         // Unreduced product has up to 2m bits.
-        let n_words = ((2 * m + 63) / 64) as usize;
+        let n_words = (2 * m).div_ceil(64) as usize;
         let mut prod = vec![0u64; n_words.max(2)];
         // For each set bit of self, XOR a shifted copy of `other`.
         for i in 0..self.m {
             let w_i = (i / 64) as usize;
-            let b_i = (i % 64) as u32;
+            let b_i = i % 64;
             if w_i >= self.bits.len() {
                 break;
             }
@@ -312,7 +312,7 @@ impl F2mElement {
         let mid = xor_bits(&xor_bits(&p_mid_bits, &p_lo_bits), &p_hi_bits);
 
         // Combined product: p_lo ⊕ (mid << k) ⊕ (p_hi << 2k).
-        let mut combined = vec![0u64; ((2 * m + 63) / 64) as usize + 2];
+        let mut combined = vec![0u64; (2 * m).div_ceil(64) as usize + 2];
         for (i, w) in p_lo_bits.iter().enumerate() {
             if i < combined.len() {
                 combined[i] ^= *w;
@@ -340,7 +340,7 @@ impl F2mElement {
     /// reduce mod `m(z)`.
     pub fn square(&self, irreducible: &IrreduciblePoly) -> Self {
         let m = self.m;
-        let n_words = ((2 * m + 63) / 64) as usize + 1;
+        let n_words = (2 * m).div_ceil(64) as usize + 1;
         let mut sq = vec![0u64; n_words];
         for i in 0..m {
             let w_i = (i / 64) as usize;
@@ -428,7 +428,7 @@ impl F2mElement {
 
     /// Internal: construct from a `&[u64]` raw word slice.
     fn from_words(words: &[u64], m: u32) -> Self {
-        let n_words = ((m + 63) / 64) as usize;
+        let n_words = m.div_ceil(64) as usize;
         let mut bits = vec![0u64; n_words.max(1)];
         for (i, w) in words.iter().enumerate().take(bits.len()) {
             bits[i] = *w;
@@ -554,7 +554,7 @@ fn split_at(bits: &[u64], at: u32) -> (Vec<u64>, Vec<u64>) {
 /// Reduce a polynomial (bit-vector) modulo the irreducible
 /// polynomial `m(z)`.  In place: high bits get folded down into
 /// positions `< m`.
-fn reduce(value: &mut Vec<u64>, irreducible: &IrreduciblePoly) {
+fn reduce(value: &mut [u64], irreducible: &IrreduciblePoly) {
     let m = irreducible.degree;
     // Total bit length of `value`.
     let total_bits = (value.len() as u32) * 64;

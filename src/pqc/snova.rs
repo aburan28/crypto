@@ -283,7 +283,7 @@ pub fn snova_sign(sk: &SnovaSecretKey, msg: &[u8]) -> Vec<R> {
     let unknowns = O * 4; // each oil ring-variable has ℓ² field entries
     loop {
         let mut x: Vec<R> = (0..V).map(|_| random_r()).collect();
-        x.extend(std::iter::repeat(R_ZERO).take(O));
+        x.extend(std::iter::repeat_n(R_ZERO, O));
 
         // Constants: F_k(vinegars, oils = 0).
         let consts: Vec<R> = sk.central.iter().map(|q| eval_ring_form(q, &x)).collect();

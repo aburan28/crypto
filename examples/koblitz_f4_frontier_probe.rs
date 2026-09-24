@@ -67,7 +67,6 @@ fn main() {
                 max_solutions: if kind == "x" { 1 } else { usize::MAX },
                 node_budget: 50_000,
                 split_rule: split_rule_default(),
-                ..Default::default()
             },
         );
         let profile = f4_profile();

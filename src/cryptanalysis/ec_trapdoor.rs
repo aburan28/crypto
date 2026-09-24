@@ -155,7 +155,7 @@ impl FieldTower {
     /// `true` iff `x ∈ F_{2^{sub_l}}`, where `sub_l` must divide
     /// `big_n`.  Equivalent to `x^{2^{sub_l}} = x`.
     pub fn is_in_subfield(&self, x: &F2mElement, sub_l: u32) -> bool {
-        assert!(self.big_n % sub_l == 0, "sub_l must divide N");
+        assert!(self.big_n.is_multiple_of(sub_l), "sub_l must divide N");
         x.square_k_times(sub_l, &self.irr) == *x
     }
 
@@ -164,7 +164,7 @@ impl FieldTower {
     /// that `x ∈ F_{2^{i·l}}`.  Always divides `n`.
     pub fn frobenius_orbit_length(&self, x: &F2mElement) -> u32 {
         // Generate divisors of n in ascending order and test.
-        let mut divisors: Vec<u32> = (1..=self.n).filter(|d| self.n % d == 0).collect();
+        let mut divisors: Vec<u32> = (1..=self.n).filter(|d| self.n.is_multiple_of(*d)).collect();
         divisors.sort_unstable();
         for d in divisors {
             // σ^d(x) = x  ⇔  x ∈ F_{2^{d·l}}.
@@ -185,7 +185,7 @@ pub fn f2_dim(elements: &[F2mElement], m: u32) -> u32 {
     if elements.is_empty() {
         return 0;
     }
-    let n_words = ((m + 63) / 64) as usize;
+    let n_words = m.div_ceil(64) as usize;
     // Copy bit-vectors into a mutable matrix.
     let mut rows: Vec<Vec<u64>> = elements
         .iter()
@@ -319,7 +319,7 @@ pub fn audit_curve(
 ) -> Vec<DescentRow> {
     let mut rows = Vec::new();
     for l in 1..big_n {
-        if big_n % l != 0 {
+        if !big_n.is_multiple_of(l) {
             continue;
         }
         let n = big_n / l;
@@ -344,7 +344,7 @@ pub fn audit_curve(
 }
 
 /// One row of an [`audit_curve`] report.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescentRow {
     /// `[K : k]` for this factorisation.
     pub n: u32,
@@ -393,7 +393,7 @@ pub fn construct_trapdoor_curve(
     // over small bit-patterns suffices for the toy parameters this
     // module targets.
     let sub_l = m_target * l;
-    let strictly_below_l = (m_target - 1) * l;
+    let _strictly_below_l = (m_target - 1) * l;
 
     let mut tried = 0u32;
     let mut candidate_bits = 1u64;
@@ -430,7 +430,7 @@ pub fn construct_trapdoor_curve(
             continue;
         }
         // Recover b = (√b)².
-        let b = sqrt_b.square(&big_irr);
+        let b = sqrt_b.square(big_irr);
         if b.is_zero() {
             continue;
         }

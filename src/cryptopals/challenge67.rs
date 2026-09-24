@@ -78,10 +78,11 @@ fn find_integer_roots(coeffs: &[BigInt], x_bound: &BigInt) -> Vec<BigInt> {
                 // Test the neighbourhood for an exact root.
                 for d in -5i64..=5 {
                     let cand = &x + BigInt::from(d);
-                    if cand.abs() <= *x_bound && eval_poly(coeffs, &cand).is_zero() {
-                        if !out.contains(&cand) {
-                            out.push(cand);
-                        }
+                    if cand.abs() <= *x_bound
+                        && eval_poly(coeffs, &cand).is_zero()
+                        && !out.contains(&cand)
+                    {
+                        out.push(cand);
                     }
                 }
                 break;

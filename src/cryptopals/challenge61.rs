@@ -26,7 +26,6 @@
 use crate::cryptopals::set8_util::{crt_combine, crt_pair, parse_big};
 use crate::cryptopals::Report;
 use crate::ecc::curve::CurveParams;
-use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
 use crate::hash::sha256::sha256;
 use num_bigint::{BigInt, BigUint, RandBigInt, ToBigInt};
@@ -98,7 +97,7 @@ pub fn forge_ecdsa(
     // Concretely: we have x(R) = r.  R is fixed by Alice.  We
     // reconstruct R by lifting r to a point on the curve and using
     // it.  Then everything below works.
-    let r_point = lift_x_to_point(&curve, r);
+    let r_point = lift_x_to_point(curve, r);
     let t = (&u1 + (&u2 * &d_prime) % n) % n;
     let t_inv = mod_inv(&t, n).expect("t must be coprime to n");
     let g_prime = r_point.scalar_mul(&t_inv, &curve.a_fe());
@@ -194,7 +193,7 @@ pub fn rsa_pkcs1_pad(msg: &[u8], modulus_bytes: usize) -> BigUint {
     let mut out = Vec::with_capacity(modulus_bytes);
     out.push(0x00);
     out.push(0x01);
-    out.extend(std::iter::repeat(0xff).take(pad_len));
+    out.extend(std::iter::repeat_n(0xff, pad_len));
     out.push(0x00);
     out.extend_from_slice(&digest_info);
     out.extend_from_slice(&h);
@@ -213,7 +212,7 @@ pub fn pohlig_hellman_dlog(g: &BigUint, y: &BigUint, p: &BigUint) -> Option<BigU
     let mut factors: Vec<(BigUint, u32)> = Vec::new();
     let mut n = order.clone();
     let mut pf: u64 = 2;
-    while pf < 1u64 << 24 && &n > &BigUint::one() {
+    while pf < 1u64 << 24 && n > BigUint::one() {
         let pf_b = BigUint::from(pf);
         let mut e: u32 = 0;
         while (&n % &pf_b).is_zero() {
@@ -248,7 +247,7 @@ pub fn pohlig_hellman_dlog(g: &BigUint, y: &BigUint, p: &BigUint) -> Option<BigU
 pub fn bsgs(g: &BigUint, y: &BigUint, p: &BigUint, n: &BigUint) -> Option<BigUint> {
     use std::collections::HashMap;
     let m = n.sqrt() + BigUint::one();
-    let m_u = m.to_u64_digits().get(0).copied().unwrap_or(0) as usize;
+    let m_u = m.to_u64_digits().first().copied().unwrap_or(0) as usize;
     let mut table: HashMap<Vec<u8>, u64> = HashMap::with_capacity(m_u);
     let mut step = BigUint::one();
     for j in 0..m_u as u64 {
@@ -308,12 +307,12 @@ fn is_small_prime(n: u64) -> bool {
     if n < 4 {
         return true;
     }
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         return false;
     }
     let mut i = 3u64;
     while i * i <= n {
-        if n % i == 0 {
+        if n.is_multiple_of(i) {
             return false;
         }
         i += 2;
@@ -332,7 +331,7 @@ pub fn forge_rsa(m: &[u8], s: &BigUint, bits_target: u32, seed: u64) -> Option<(
         return None;
     }
     let n_prime = &p_prime * &q_prime;
-    let modulus_bytes = (n_prime.bits() as usize + 7) / 8;
+    let modulus_bytes = (n_prime.bits() as usize).div_ceil(8);
     let pad = rsa_pkcs1_pad(m, modulus_bytes);
     let s_mod_p = s % &p_prime;
     let pad_mod_p = &pad % &p_prime;
@@ -388,7 +387,7 @@ pub fn run() -> Report {
     let _ = parse_big;
     match forge_rsa(msg2, &s, 256, 99) {
         Some((e_prime, n_prime)) => {
-            let modulus_bytes = (n_prime.bits() as usize + 7) / 8;
+            let modulus_bytes = (n_prime.bits() as usize).div_ceil(8);
             let pad = rsa_pkcs1_pad(msg2, modulus_bytes);
             let lhs = s.modpow(&e_prime, &n_prime);
             let ok = lhs == pad;
@@ -432,7 +431,7 @@ mod tests {
         let msg = b"hello";
         let s = crate::asymmetric::rsa::rsa_sign(msg, &kp.private);
         let (e_prime, n_prime) = forge_rsa(msg, &s, 256, 1).expect("forgery must succeed");
-        let modulus_bytes = (n_prime.bits() as usize + 7) / 8;
+        let modulus_bytes = (n_prime.bits() as usize).div_ceil(8);
         let pad = rsa_pkcs1_pad(msg, modulus_bytes);
         assert_eq!(s.modpow(&e_prime, &n_prime), pad);
     }

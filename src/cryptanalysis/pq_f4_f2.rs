@@ -362,7 +362,11 @@ impl State {
         while bits != 0 {
             let v = bits.trailing_zeros();
             bits &= bits - 1;
-            self.pairs.push(Pair { kind: PairKind::Field(h, v), lcm: lh, deg: dh + 1 });
+            self.pairs.push(Pair {
+                kind: PairKind::Field(h, v),
+                lcm: lh,
+                deg: dh + 1,
+            });
         }
 
         // New pairs (h, g): keep one per minimal lcm (chain criterion).
@@ -399,7 +403,11 @@ impl State {
             if lh & self.lm[g] == 0 {
                 st.pairs_product_skipped += 1;
             } else {
-                self.pairs.push(Pair { kind: PairKind::Critical(g, h), lcm: l, deg: l.count_ones() });
+                self.pairs.push(Pair {
+                    kind: PairKind::Critical(g, h),
+                    lcm: l,
+                    deg: l.count_ones(),
+                });
             }
         }
         for g in 0..h {
@@ -547,7 +555,11 @@ pub fn groebner_basis_f4(
             match s.reducer_for(m, &active, &mut st) {
                 Some(g) => {
                     let r = s.polys[g].mul_mono(F2BoolMono::from_mask(m & !s.lm[g]));
-                    debug_assert_eq!(r.lt().map(|t| t.mask), Some(m), "a reducer must lead with its monomial");
+                    debug_assert_eq!(
+                        r.lt().map(|t| t.mask),
+                        Some(m),
+                        "a reducer must lead with its monomial"
+                    );
                     for t in &r.terms {
                         if examined.insert(t.mask) {
                             queue.push(t.mask);
@@ -583,7 +595,11 @@ pub fn groebner_basis_f4(
         for p in reducers.iter().chain(s_rows.iter().copied()) {
             st.max_poly_degree = st.max_poly_degree.max(degree(p));
         }
-        let rows: Vec<Row> = reducers.iter().chain(s_rows.into_iter()).map(|p| cols.pack(p)).collect();
+        let rows: Vec<Row> = reducers
+            .iter()
+            .chain(s_rows.into_iter())
+            .map(|p| cols.pack(p))
+            .collect();
         st.build_ns += t.elapsed().as_nanos() as u64;
 
         let t = Instant::now();
@@ -752,8 +768,9 @@ pub fn solutions_from_reduced_basis(
     if free.len() > max_free {
         return None;
     }
-    let pivots: Vec<(usize, usize)> =
-        (0..n_vars).filter_map(|v| linear_of[v].map(|k| (v, k))).collect();
+    let pivots: Vec<(usize, usize)> = (0..n_vars)
+        .filter_map(|v| linear_of[v].map(|k| (v, k)))
+        .collect();
     let mut out = Vec::new();
     for a in 0u64..(1u64 << free.len()) {
         let mut point = 0u64;
@@ -796,12 +813,16 @@ mod tests {
     }
 
     fn brute_force(eqs: &[F2BoolPoly], n: usize) -> Vec<u64> {
-        (0u64..1 << n).filter(|v| eqs.iter().all(|e| e.eval(*v) == 0)).collect()
+        (0u64..1 << n)
+            .filter(|v| eqs.iter().all(|e| e.eval(*v) == 0))
+            .collect()
     }
 
     fn standard_monomials(gb: &[F2BoolPoly], n: usize) -> u64 {
         let lms: Vec<u64> = gb.iter().filter_map(|p| p.lt()).map(|m| m.mask).collect();
-        (0u64..1 << n).filter(|&m| !lms.iter().any(|&l| l & !m == 0)).count() as u64
+        (0u64..1 << n)
+            .filter(|&m| !lms.iter().any(|&l| l & !m == 0))
+            .count() as u64
     }
 
     /// The Gröbner-basis certificate, checked directly: every
@@ -867,7 +888,11 @@ mod tests {
         assert_eq!(standard_monomials(&gb, 2), 1);
         assert!(st.field_pairs_reduced > 0);
         let buchberger = groebner_basis_f2(vec![g], 2);
-        assert_eq!(standard_monomials(&buchberger, 2), 1, "Buchberger closes under the field equations too");
+        assert_eq!(
+            standard_monomials(&buchberger, 2),
+            1,
+            "Buchberger closes under the field equations too"
+        );
     }
 
     /// **Certified on random systems**: the output is a Gröbner basis of
@@ -887,7 +912,11 @@ mod tests {
             assert!(!st.timed_out && !st.oversize);
             let sols = brute_force(&eqs, n);
             assert!(is_boolean_groebner_basis(&gb), "trial {trial}: not closed");
-            assert_eq!(standard_monomials(&gb, n), sols.len() as u64, "trial {trial}");
+            assert_eq!(
+                standard_monomials(&gb, n),
+                sols.len() as u64,
+                "trial {trial}"
+            );
             if sols.is_empty() {
                 inconsistent += 1;
                 assert_eq!(gb.len(), 1);
@@ -901,10 +930,16 @@ mod tests {
             assert_eq!(got, sols, "trial {trial}: extraction");
             // Every generator lies in the ideal the basis generates.
             for e in &eqs {
-                assert!(reduce(e, &gb).is_zero(), "trial {trial}: a generator escaped");
+                assert!(
+                    reduce(e, &gb).is_zero(),
+                    "trial {trial}: a generator escaped"
+                );
             }
         }
-        assert!(consistent > 5 && inconsistent > 5, "{consistent} / {inconsistent}");
+        assert!(
+            consistent > 5 && inconsistent > 5,
+            "{consistent} / {inconsistent}"
+        );
     }
 
     /// **Batched Buchberger is Buchberger.**  Wherever the Buchberger
@@ -955,7 +990,7 @@ mod tests {
                 let free = (0..9)
                     .filter(|&v| !gb.iter().any(|g| g.lt().unwrap().mask == 1u64 << v))
                     .count() as u64;
-                assert!(1 + free <= sols, "{free} free variables for {sols} solutions");
+                assert!(free < sols, "{free} free variables for {sols} solutions");
             }
         }
         assert!(consistent > 3);

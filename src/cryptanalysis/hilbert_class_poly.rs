@@ -65,7 +65,7 @@
 //! 4. Documents the scaling barrier with a quantitative table.
 
 use num_bigint::BigInt;
-use num_traits::{One, Zero};
+use num_traits::One;
 
 /// Class-number-1 discriminants and their `H_D(X) = X - j_0`.
 ///
@@ -109,7 +109,7 @@ impl HilbertClassPoly {
 
     /// Storage in bits (sum of bit-lengths of all coefficients).
     pub fn storage_bits(&self) -> u64 {
-        self.coeffs.iter().map(|c| c.bits() as u64).sum()
+        self.coeffs.iter().map(|c| c.bits()).sum()
     }
 }
 
@@ -144,7 +144,7 @@ pub fn class_number_brute_force(d: i64) -> Option<u32> {
     if d >= 0 {
         return None;
     }
-    if (d % 4) != 0 && (d % 4 + 4) % 4 != 1 {
+    if (d % 4) != 0 && d.rem_euclid(4) != 1 {
         return None; // not a valid discriminant
     }
     let abs_d = (-d) as u64;

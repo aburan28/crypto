@@ -77,8 +77,6 @@
 //!   cryptographic problems*, SAT 2009 — XOR-native reasoning.
 //! - **A. Urquhart**, *Hard examples for resolution*, JACM 1987.
 
-use std::collections::HashSet;
-
 /// Standard SAT literal encoding: positive integer = positive
 /// literal, negative integer = negated literal, `|lit| - 1` = variable
 /// index (0-based internally; 1-based in DIMACS).
@@ -86,7 +84,7 @@ pub type Lit = i32;
 
 #[inline]
 fn var_of(lit: Lit) -> u32 {
-    (lit.unsigned_abs() - 1) as u32
+    lit.unsigned_abs() - 1
 }
 
 #[inline]
@@ -453,7 +451,7 @@ enum XorStep {
 
 #[inline]
 fn bs_words(n_vars: u32) -> usize {
-    (n_vars as usize + 63) / 64
+    (n_vars as usize).div_ceil(64)
 }
 
 #[inline]
@@ -473,6 +471,7 @@ fn watch_index(lit: Lit) -> usize {
 }
 
 #[inline]
+#[allow(dead_code)]
 fn negated(lit: Lit) -> Lit {
     -lit
 }
@@ -1781,6 +1780,7 @@ pub fn check_model(clauses: &[Vec<Lit>], model: &[bool]) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashSet;
 
     // ── native XOR reasoning ────────────────────────────────────────
 

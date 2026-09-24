@@ -19,6 +19,28 @@ path = "src/lib.rs"
 
 [features]
 redis-cache = ["dep:redis"]
+# Verbose tracing in the isogeny rho attack's linear-algebra step.
+rho_debug = []
+
+[lints.rust]
+# `hashclash_linked` is set by a downstream build script that links the
+# HashClash C library (see src/cryptanalysis/md5_hashclash_ffi.rs).
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(hashclash_linked)"] }
+
+[lints.clippy]
+# The whole allow list; CI runs clippy with -D warnings for everything else.
+# Index loops mirror the specs and papers the algorithms come from (state
+# matrices, round tables, polynomial coefficients); iterator rewrites of
+# them obscure the correspondence without making them safer.
+needless_range_loop = "allow"
+manual_memcpy = "allow"
+# Attack and protocol entry points take their parameters explicitly.
+too_many_arguments = "allow"
+type_complexity = "allow"
+# Constants are grouped as they appear in their standards, not by nibble.
+unusual_byte_groupings = "allow"
+# Authenticated decryption fails without detail on purpose: no error oracle.
+result_unit_err = "allow"
 
 [dependencies]
 redis = { version = "0.32", optional = true, default-features = false, features = ["tls-rustls"] }

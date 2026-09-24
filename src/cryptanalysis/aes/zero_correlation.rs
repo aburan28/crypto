@@ -45,7 +45,7 @@
 //!   with reduced data complexity*, FSE 2012.
 
 use super::reduced::SBOX;
-use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_RED, FG_BRIGHT_YELLOW};
+use crate::visualize::color::{paint, FG_BRIGHT_GREEN, FG_BRIGHT_RED};
 use rand::rngs::StdRng;
 use rand::{RngCore, SeedableRng};
 

@@ -70,7 +70,7 @@
 
 use std::collections::HashMap;
 
-use num_bigint::{BigUint, ToBigInt};
+use num_bigint::BigUint;
 use num_traits::Zero;
 
 use crate::cryptanalysis::bleichenbacher::{bleichenbacher_direct, BleichenbacherSample};
@@ -597,7 +597,7 @@ mod tests {
 
     fn biased_nonce<R: RngCore>(rng: &mut R, k_bits: u32) -> BigUint {
         loop {
-            let bytes = ((k_bits + 7) / 8) as usize;
+            let bytes = k_bits.div_ceil(8) as usize;
             let mut buf = vec![0u8; bytes];
             rng.fill_bytes(&mut buf);
             let extra = (bytes as u32) * 8 - k_bits;

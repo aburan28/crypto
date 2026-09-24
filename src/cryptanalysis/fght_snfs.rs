@@ -105,7 +105,6 @@
 
 use crate::utils::mod_inverse;
 use num_bigint::{BigInt, BigUint, Sign};
-use num_integer::Integer;
 use num_traits::{One, Signed, Zero};
 
 // ── Miller–Rabin primality test (for the trapdoor search) ──────────────
@@ -393,7 +392,7 @@ fn factor_algebraic(a: i64, b: i64, c: i64, alg_fb: &[(u64, u64)]) -> Option<Vec
         }
         let mut e: u32 = 0;
         let ell_u128 = ell as u128;
-        while remaining % ell_u128 == 0 {
+        while remaining.is_multiple_of(ell_u128) {
             remaining /= ell_u128;
             e += 1;
         }
@@ -529,7 +528,7 @@ pub fn solve_relations(
 /// every nonzero entry is invertible).  Returns the reduced row-echelon
 /// matrix and the pivot column for each pivot row.
 pub fn gaussian_eliminate_homogeneous(
-    matrix: &mut Vec<Vec<BigUint>>,
+    matrix: &mut [Vec<BigUint>],
     q: &BigUint,
 ) -> Vec<Option<usize>> {
     let rows = matrix.len();
@@ -850,7 +849,11 @@ impl MonicPoly {
             } else {
                 BigInt::one()
             };
-            let sign = if (d + i) % 2 == 0 { 1i64 } else { -1i64 };
+            let sign = if (d + i).is_multiple_of(2) {
+                1i64
+            } else {
+                -1i64
+            };
             sum += BigInt::from(sign) * &c_i * &a_pow[i] * &b_pow[d - i];
         }
         sum
@@ -1311,6 +1314,7 @@ pub mod detector {
 ///
 /// We don't *implement* anything here — there's nothing to implement.
 /// This module is documentation.
+#[allow(clippy::mixed_attributes_style)]
 pub mod ecc_implications {
     //! ## Why FGHT does not extend to ECDLP
     //!
@@ -1712,7 +1716,7 @@ mod tests {
         let (g, rat_logs, fb) = snfs_dlp_recover(&trap, 30, 30, 30, 20).unwrap();
         for x_u32 in [3u32, 7, 11, 19, 25, 31] {
             let x = BigUint::from(x_u32);
-            if &x >= &trap.q {
+            if x >= trap.q {
                 continue;
             }
             let h = g.modpow(&x, &trap.p);

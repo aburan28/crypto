@@ -1649,7 +1649,10 @@ mod tests {
                 assert!(!seen[j], "a={a} n={n}: index map is not injective");
                 seen[j] = true;
             }
-            assert!(seen.iter().all(|&b| b), "a={a} n={n}: index map misses a point");
+            assert!(
+                seen.iter().all(|&b| b),
+                "a={a} n={n}: index map misses a point"
+            );
 
             // Every abscissa really is in V, read back through u.
             let v_span: std::collections::HashSet<u64> =
@@ -1666,7 +1669,7 @@ mod tests {
             let mut covered = vec![false; view.points.len()];
             for orbit in &view.orbits {
                 assert!(
-                    n as usize % orbit.len() == 0,
+                    (n as usize).is_multiple_of(orbit.len()),
                     "a={a} n={n}: orbit of length {} does not divide n",
                     orbit.len()
                 );
@@ -1685,7 +1688,10 @@ mod tests {
                     assert_eq!(img, next, "a={a} n={n}: orbit is not a π-cycle");
                 }
             }
-            assert!(covered.iter().all(|&b| b), "a={a} n={n}: orbits miss a point");
+            assert!(
+                covered.iter().all(|&b| b),
+                "a={a} n={n}: orbits miss a point"
+            );
         }
     }
 
@@ -2565,7 +2571,13 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
     let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
 
     let g = kc.generator().clone();
-    let r_u64 = kc.subgroup_order.to_u64_digits().first().copied().unwrap_or(2).max(2);
+    let r_u64 = kc
+        .subgroup_order
+        .to_u64_digits()
+        .first()
+        .copied()
+        .unwrap_or(2)
+        .max(2);
     let mut targets: Vec<BinaryPoint> = Vec::new();
     while targets.len() < opts.targets {
         let p = kc.mul(&g, &BigUint::from(rng.gen_range(1..r_u64)));
@@ -2627,15 +2639,23 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
     }
     // Cross-check the pair enumeration against the library's.
     for (ti, t) in targets.iter().enumerate() {
-        assert_eq!(truth[ti].0, enumerate_decompose(&kc, &fb_x, &index_x, t, m).is_some());
-        assert_eq!(truth[ti].1, enumerate_symmetrised(&kc, &fb_u, t, m).is_some());
+        assert_eq!(
+            truth[ti].0,
+            enumerate_decompose(&kc, &fb_x, &index_x, t, m).is_some()
+        );
+        assert_eq!(
+            truth[ti].1,
+            enumerate_symmetrised(&kc, &fb_u, t, m).is_some()
+        );
     }
 
     let mut arms = Vec::new();
     for &cap in &opts.x_caps {
         for (arm, sym) in [("x-chained", false), ("symmetrised", true)] {
             let arm_cap = if sym { cap + 1 } else { cap };
-            let engine = SolverEngine::InheritedF4 { max_degree: arm_cap };
+            let engine = SolverEngine::InheritedF4 {
+                max_degree: arm_cap,
+            };
             let mut rows = Vec::new();
             let (mut n_vars, mut degree, mut built, mut oversize) = (0, 0, 0, 0);
             for (ti, target) in targets.iter().enumerate() {
@@ -2643,7 +2663,13 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
                 let t0 = Instant::now();
                 let (relation_ok, found, complete, splits) = if sym {
                     let o = symmetrised_groebner_decompose(
-                        &kc, &fb_u, &st, target, m, engine, opts.node_budget,
+                        &kc,
+                        &fb_u,
+                        &st,
+                        target,
+                        m,
+                        engine,
+                        opts.node_budget,
                     )?;
                     n_vars = o.n_vars;
                     degree = o.degree;
@@ -2656,20 +2682,34 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
                     (ok, o.relation.is_some(), o.complete, o.effort as usize)
                 } else {
                     let (rel, stats) = groebner_decompose(
-                        &kc, &fb_x, &index_x, &st, target, m, engine, opts.node_budget,
+                        &kc,
+                        &fb_x,
+                        &index_x,
+                        &st,
+                        target,
+                        m,
+                        engine,
+                        opts.node_budget,
                     );
                     let x_r = match target {
                         BinaryPoint::Affine { x, .. } => x.clone(),
                         BinaryPoint::Infinity => unreachable!(),
                     };
-                    let sys = build_decomposition_system(&fb_x.subspace_basis, &x_r, &kc.curve.b, m, &st)?;
+                    let sys = build_decomposition_system(
+                        &fb_x.subspace_basis,
+                        &x_r,
+                        &kc.curve.b,
+                        m,
+                        &st,
+                    )?;
                     n_vars = sys.n_vars;
                     degree = system_degree(&sys.equations);
                     built = built.max(stats.max_degree_built);
                     oversize += usize::from(stats.oversize > 0);
                     let ok = rel.as_ref().map(|idx| {
-                        idx.iter().fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb_x.points[i]))
-                            == *target
+                        idx.iter().fold(BinaryPoint::Infinity, |acc, &i| {
+                            kc.add(&acc, &fb_x.points[i])
+                        }) == *target
                     });
                     (ok, rel.is_some(), !stats.exhausted, stats.splits)
                 };
@@ -2681,10 +2721,19 @@ pub fn subspace_gate_bench(a: u8, n: u32, l: usize, opts: &GateOptions) -> Optio
                     (false, true) => ("refuted", !exists),
                     (false, false) => ("budget", true),
                 };
-                rows.push(GateTarget { verdict, word_xors, splits, ms, gate_ok });
+                rows.push(GateTarget {
+                    verdict,
+                    word_xors,
+                    splits,
+                    ms,
+                    gate_ok,
+                });
             }
             let by = |v: &str| -> Vec<f64> {
-                rows.iter().filter(|r| r.verdict == v).map(|r| r.word_xors as f64).collect()
+                rows.iter()
+                    .filter(|r| r.verdict == v)
+                    .map(|r| r.word_xors as f64)
+                    .collect()
             };
             let k = rows.len() as f64;
             arms.push(GateArm {
@@ -2795,13 +2844,21 @@ mod gate_tests {
                 decomposable += usize::from(over_r);
                 checked += 1;
             }
-            assert!(decomposable > count / 10 && decomposable < count, "n = {n}: {decomposable}/{count}");
+            assert!(
+                decomposable > count / 10 && decomposable < count,
+                "n = {n}: {decomposable}/{count}"
+            );
         }
     }
 
     #[test]
     fn gate_bench_agrees_with_enumeration_and_counts_its_work() {
-        let opts = GateOptions { targets: 4, seed: 11, node_budget: 20_000, x_caps: vec![3] };
+        let opts = GateOptions {
+            targets: 4,
+            seed: 11,
+            node_budget: 20_000,
+            x_caps: vec![3],
+        };
         let b = subspace_gate_bench(0, 13, 6, &opts).unwrap();
         assert_eq!(b.arms.len(), 2);
         for arm in &b.arms {

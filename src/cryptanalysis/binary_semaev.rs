@@ -266,11 +266,11 @@ pub fn solve_artin_schreier(c: &F2mElement, m: u32, irr: &IrreduciblePoly) -> Op
 ///
 /// - `A = 0, B ≠ 0`: linear, single root `X = C / B`.
 /// - `A = 0, B = 0`: degenerate (the polynomial is the constant `C`);
-///    no usable roots reported.
+///   no usable roots reported.
 /// - `A ≠ 0, B = 0`: pure square, `X = √(C/A)`.  In char 2 the square
-///    root is the absolute Frobenius `m-1` times.
+///   root is the absolute Frobenius `m-1` times.
 /// - `A ≠ 0, B ≠ 0`: substitute `X = (B/A) · z` to get
-///    `z² + z = A · C / B²`, an Artin-Schreier equation in `z`.
+///   `z² + z = A · C / B²`, an Artin-Schreier equation in `z`.
 ///
 /// Returns up to two solutions (no guaranteed order).
 pub fn solve_quadratic_f2m(

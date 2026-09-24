@@ -361,7 +361,7 @@ pub fn hcdlp_bsgs(
     let mut table: HashMap<(Vec<u8>, Vec<u8>), BigUint> = HashMap::new();
     let mut acc = MumfordDivisor::identity(curve.m);
     let mut i = BigUint::zero();
-    while &i < &m {
+    while i < m {
         let key = divisor_key(&acc);
         table.entry(key).or_insert_with(|| i.clone());
         acc = acc.add(p, curve);
@@ -372,7 +372,7 @@ pub fn hcdlp_bsgs(
     let neg_gamma = gamma.neg(curve);
     let mut gq = q.clone();
     let mut j = BigUint::zero();
-    while &j < &m {
+    while j < m {
         let key = divisor_key(&gq);
         if let Some(i_val) = table.get(&key) {
             // k = j·m + i  (mod #Jac); we don't know #Jac here, so

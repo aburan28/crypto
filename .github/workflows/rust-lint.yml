@@ -4,12 +4,12 @@ name: Rust lint
 # (src/, tests/, examples/, benches/) and cd_attack/. The crates under
 # research/ are archived snapshots and are not linted.
 #
-# Both checks are ratchets, because the tree predates them:
-# - Format is PR-scoped: a changed .rs file must be rustfmt-clean, the
-#   rest of the tree is left alone until someone touches it.
-# - Clippy denies the `correctness` and `suspicious` groups (likely bugs)
-#   and the compiler's own warnings stay warnings. Tighten by adding
-#   groups here once the tree is clean for them.
+# - Format is PR-scoped, because the tree predates the check: a changed
+#   .rs file must be rustfmt-clean, the rest of the tree is left alone
+#   until someone touches it.
+# - Clippy runs with -D warnings: every compiler and clippy warning fails
+#   the build. The allow list lives in Cargo.toml `[lints]`, and each
+#   remaining exception is an item-level #[allow] next to the code.
 
 on:
   pull_request:
@@ -102,4 +102,4 @@ jobs:
         with:
           workspaces: ${{ matrix.dir }}
       - name: Clippy
-        run: cargo clippy --all-targets -- -D clippy::correctness -D clippy::suspicious
+        run: cargo clippy --all-targets -- -D warnings

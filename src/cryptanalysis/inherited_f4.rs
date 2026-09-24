@@ -85,7 +85,11 @@ use std::rc::Rc;
 
 /// Degree of a Boolean polynomial (`0` for a constant or zero).
 fn poly_degree(p: &F2BoolPoly) -> u32 {
-    p.terms.iter().map(|t| t.mask.count_ones()).max().unwrap_or(0)
+    p.terms
+        .iter()
+        .map(|t| t.mask.count_ones())
+        .max()
+        .unwrap_or(0)
 }
 
 /// Leading (lowest-index) set column of a packed row.
@@ -221,6 +225,7 @@ impl LazyRow {
     }
 
     /// The words from `w` (at least `lead`) to the end of the layout.
+    #[allow(clippy::wrong_self_convention)]
     fn from_word(&self, w: usize) -> &[u64] {
         debug_assert!(w >= self.lead as usize);
         &self.data[w - self.start as usize..]
@@ -336,14 +341,13 @@ impl ReducedBasis {
             .flat_map(|p| p.terms.iter())
             .fold(0u64, |acc, t| acc | t.mask)
             & all_variable_mask(n_vars);
-        let (columns, mut matrix) =
-            build_inherited_macaulay(
-                system.as_slice(),
-                n_vars,
-                degree,
-                occurring,
-                quadratic_generators,
-            )?;
+        let (columns, mut matrix) = build_inherited_macaulay(
+            system.as_slice(),
+            n_vars,
+            degree,
+            occurring,
+            quadratic_generators,
+        )?;
         let mut cost = InheritCost::default();
         let empty = |columns: Vec<u64>| Self {
             degree,
@@ -432,8 +436,13 @@ impl ReducedBasis {
     /// Monomial → current column, built on first use after a layout change.
     fn column_index(&mut self) -> &HashMap<u64, usize> {
         if self.column_index.is_none() {
-            self.column_index =
-                Some(self.columns.iter().enumerate().map(|(i, &m)| (m, i)).collect());
+            self.column_index = Some(
+                self.columns
+                    .iter()
+                    .enumerate()
+                    .map(|(i, &m)| (m, i))
+                    .collect(),
+            );
         }
         self.column_index.as_ref().expect("just built")
     }
@@ -541,7 +550,13 @@ impl ReducedBasis {
         let prev = self.composite_to(to - 1, from);
         let composed: Rc<[u32]> = prev
             .iter()
-            .map(|&c| if c == DELETED { DELETED } else { step.map[c as usize] })
+            .map(|&c| {
+                if c == DELETED {
+                    DELETED
+                } else {
+                    step.map[c as usize]
+                }
+            })
             .collect();
         step.to_here.borrow_mut().insert(from, composed.clone());
         composed
@@ -593,7 +608,9 @@ impl ReducedBasis {
             let mut data = vec![0u64; words - lo];
             data[..=hi - lo].copy_from_slice(&staging[lo..=hi]);
             staging[lo..=hi].fill(0);
-            data.iter().any(|&w| w != 0).then_some(Draft { start: lo, data })
+            data.iter()
+                .any(|&w| w != 0)
+                .then_some(Draft { start: lo, data })
         })
     }
 
@@ -602,7 +619,9 @@ impl ReducedBasis {
     /// nonzero.
     fn ensure_current(&mut self, r: usize, cost: &mut InheritCost) {
         if self.rows[r].version != self.epoch() {
-            let draft = self.rewrite(&self.rows[r], cost).expect("a kept pivot survives");
+            let draft = self
+                .rewrite(&self.rows[r], cost)
+                .expect("a kept pivot survives");
             let lead = draft.start + draft.data.iter().position(|&w| w != 0).expect("nonzero");
             self.rows[r] = LazyRow {
                 version: self.epoch(),
@@ -783,8 +802,11 @@ impl ReducedBasis {
     /// and `g = 1` is already a refutation.  The solver reads nothing but
     /// the tail, so it behaves identically.
     pub fn specialise(&self, var: u32, value: bool) -> (Self, InheritCost) {
-        let substituted: Vec<F2BoolPoly> =
-            self.system.iter().map(|p| substitute(p, var, value)).collect();
+        let substituted: Vec<F2BoolPoly> = self
+            .system
+            .iter()
+            .map(|p| substitute(p, var, value))
+            .collect();
         let child = ChildSystem::new(&self.generator_degrees, &substituted);
         self.specialise_shared(var, value, &child)
     }
@@ -809,7 +831,12 @@ impl ReducedBasis {
     /// anything else, and a specialisation of `1` is `1`, so a refuted
     /// basis stays refuted, at no cost, through whatever the solver still
     /// assigns before it reads this degree.
-    pub fn specialise_shared(&self, var: u32, value: bool, child: &ChildSystem) -> (Self, InheritCost) {
+    pub fn specialise_shared(
+        &self,
+        var: u32,
+        value: bool,
+        child: &ChildSystem,
+    ) -> (Self, InheritCost) {
         let mut cost = InheritCost::default();
         let bit = 1u64 << var;
         if self.refuted {
@@ -1028,7 +1055,7 @@ impl ReducedBasis {
             out.pending.clear();
         }
         let every = Self::rref_every();
-        if every > 0 && out.depth() % every == 0 {
+        if every > 0 && out.depth().is_multiple_of(every) {
             out.reduce_fully(&mut cost);
         }
         (out, cost)
@@ -1231,7 +1258,9 @@ impl ReducedBasis {
         missing.dedup();
         let mut columns = self.columns.clone();
         columns.extend(missing);
-        columns.sort_by(|a, b| cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse());
+        columns.sort_by(|a, b| {
+            cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse()
+        });
         let index: HashMap<u64, usize> = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
         let map: Vec<u32> = self.columns.iter().map(|m| index[m] as u32).collect();
         self.adopt_layout(columns, map);
@@ -1387,13 +1416,21 @@ mod tests {
     }
 
     /// From-scratch Macaulay row space with multipliers over `mask`.
-    fn masked_space(system: &[F2BoolPoly], n_vars: usize, degree: u32, mask: u64) -> Vec<F2BoolPoly> {
+    fn masked_space(
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        degree: u32,
+        mask: u64,
+    ) -> Vec<F2BoolPoly> {
         use crate::cryptanalysis::koblitz_groebner::macaulay_rows_monos_with_mask;
         let rows = macaulay_rows_monos_with_mask(system, n_vars, degree, mask, None).unwrap();
         let polys: Vec<F2BoolPoly> = rows
             .iter()
             .map(|monos| {
-                F2BoolPoly::from_monos(monos.iter().map(|&m| F2BoolMono::from_mask(m)).collect(), n_vars)
+                F2BoolPoly::from_monos(
+                    monos.iter().map(|&m| F2BoolMono::from_mask(m)).collect(),
+                    n_vars,
+                )
             })
             .collect();
         rref_polys(&polys, n_vars)
@@ -1413,7 +1450,10 @@ mod tests {
     /// `x·1 = x` into its tail; the solver never reads past the `1`.
     fn solver_view(tail: &[F2BoolPoly], n_vars: usize) -> Vec<F2BoolPoly> {
         let tail = rref_polys(tail, n_vars);
-        if tail.iter().any(|p| p.terms.len() == 1 && p.terms[0].mask == 0) {
+        if tail
+            .iter()
+            .any(|p| p.terms.len() == 1 && p.terms[0].mask == 0)
+        {
             vec![F2BoolPoly::one(n_vars)]
         } else {
             tail
@@ -1424,11 +1464,16 @@ mod tests {
     /// reduction, so the exact row-space invariant is only claimed for
     /// systems it would actually reduce.
     fn has_constant(system: &[F2BoolPoly]) -> bool {
-        system.iter().any(|p| p.terms.len() == 1 && p.terms[0].mask == 0)
+        system
+            .iter()
+            .any(|p| p.terms.len() == 1 && p.terms[0].mask == 0)
     }
 
     fn occurring(system: &[F2BoolPoly]) -> u64 {
-        system.iter().flat_map(|p| p.terms.iter()).fold(0, |a, t| a | t.mask)
+        system
+            .iter()
+            .flat_map(|p| p.terms.iter())
+            .fold(0, |a, t| a | t.mask)
     }
 
     /// Does every polynomial of `inner` reduce to zero against the RREF
@@ -1442,17 +1487,41 @@ mod tests {
     /// documents, for a node reached by assigning `assigned`.
     /// A refuted basis is collapsed to `1`, so for it the claim is only the
     /// solver's view: the smallest space of the sandwich refutes as well.
-    fn assert_sandwich(basis: &ReducedBasis, system: &[F2BoolPoly], n_vars: usize, assigned: u64, what: &str) {
+    fn assert_sandwich(
+        basis: &ReducedBasis,
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        assigned: u64,
+        what: &str,
+    ) {
         let rows = rref_polys(&basis_polys(basis), n_vars);
         let lower = masked_space(system, n_vars, basis.degree, occurring(system) & !assigned);
         if basis.refuted {
-            assert_eq!(rows, vec![F2BoolPoly::one(n_vars)], "{what}: a refuted basis is exactly 1");
-            assert!(has_constant(&lower), "{what}: refuted, but V_occurring does not contain 1");
+            assert_eq!(
+                rows,
+                vec![F2BoolPoly::one(n_vars)],
+                "{what}: a refuted basis is exactly 1"
+            );
+            assert!(
+                has_constant(&lower),
+                "{what}: refuted, but V_occurring does not contain 1"
+            );
             return;
         }
-        let upper = masked_space(system, n_vars, basis.degree, all_variable_mask(n_vars) & !assigned);
-        assert!(contained(&lower, &rows, n_vars), "{what}: V_occurring not contained in the basis");
-        assert!(contained(&rows, &upper, n_vars), "{what}: basis not contained in V_unassigned");
+        let upper = masked_space(
+            system,
+            n_vars,
+            basis.degree,
+            all_variable_mask(n_vars) & !assigned,
+        );
+        assert!(
+            contained(&lower, &rows, n_vars),
+            "{what}: V_occurring not contained in the basis"
+        );
+        assert!(
+            contained(&rows, &upper, n_vars),
+            "{what}: basis not contained in V_unassigned"
+        );
     }
 
     /// Every row, materialised into the current layout, as polynomials.
@@ -1490,7 +1559,13 @@ mod tests {
             for degree in 2..=3u32 {
                 let (mut root, _) = ReducedBasis::from_system(&system, n_vars, degree).unwrap();
                 // Root: the sandwich with nothing assigned, and the legacy tail.
-                assert_sandwich(&root, &system, n_vars, 0, &format!("trial {trial} degree {degree} root"));
+                assert_sandwich(
+                    &root,
+                    &system,
+                    n_vars,
+                    0,
+                    &format!("trial {trial} degree {degree} root"),
+                );
                 let f4 = matrix_f4_f2(&system, n_vars, degree).unwrap();
                 let mut root_cost = InheritCost::default();
                 assert_eq!(
@@ -1499,8 +1574,11 @@ mod tests {
                     "trial {trial} degree {degree}: root tail differs"
                 );
                 // Every one-variable specialisation, both values, then a second one.
-                let occurring = system.iter().flat_map(|p| p.terms.iter()).fold(0, |a, t| a | t.mask);
-                let all = all_variable_mask(n_vars);
+                let occurring = system
+                    .iter()
+                    .flat_map(|p| p.terms.iter())
+                    .fold(0, |a, t| a | t.mask);
+                let _all = all_variable_mask(n_vars);
                 for v in 0..n_vars as u32 {
                     if occurring & (1 << v) == 0 {
                         continue;
@@ -1523,7 +1601,8 @@ mod tests {
                             );
                         }
                         // Tail agreement with the legacy all-variable step's readback.
-                        let legacy = matrix_f4_f2(&child_system, n_vars, degree).unwrap_or_default();
+                        let legacy =
+                            matrix_f4_f2(&child_system, n_vars, degree).unwrap_or_default();
                         let mut cost = InheritCost::default();
                         let tail = child.linear_tail(&mut cost);
                         assert_eq!(
@@ -1545,7 +1624,9 @@ mod tests {
                                 &gc_system,
                                 n_vars,
                                 (1 << v) | (1 << w),
-                                &format!("trial {trial} degree {degree} v{v}={value} w{w}: grandchild"),
+                                &format!(
+                                    "trial {trial} degree {degree} v{v}={value} w{w}: grandchild"
+                                ),
                             );
                         }
                         let legacy = matrix_f4_f2(&gc_system, n_vars, degree).unwrap_or_default();
@@ -1571,12 +1652,19 @@ mod tests {
             n_vars,
         );
         let g = F2BoolPoly::from_monos(
-            vec![F2BoolMono::from_mask(0b1100), F2BoolMono::from_mask(0b0010), F2BoolMono::one()],
+            vec![
+                F2BoolMono::from_mask(0b1100),
+                F2BoolMono::from_mask(0b0010),
+                F2BoolMono::one(),
+            ],
             n_vars,
         );
         let (root, _) = ReducedBasis::from_system(&[f, g], n_vars, 3).unwrap();
         let (child, cost) = root.specialise(0, false);
-        assert!(cost.completion_rows > 0, "f dropped to degree 1; completion expected");
+        assert!(
+            cost.completion_rows > 0,
+            "f dropped to degree 1; completion expected"
+        );
         let system = child.system.clone();
         assert_sandwich(&child, &system, n_vars, 1, "degree drop");
         // With every unassigned variable occurring, the sandwich is an equality.
@@ -1589,17 +1677,28 @@ mod tests {
 
     /// Every point of `F_2^n_vars` on which the whole system vanishes.
     fn variety(system: &[F2BoolPoly], n_vars: usize) -> Vec<u64> {
-        (0..1u64 << n_vars).filter(|&x| system.iter().all(|p| p.eval(x) == 0)).collect()
+        (0..1u64 << n_vars)
+            .filter(|&x| system.iter().all(|p| p.eval(x) == 0))
+            .collect()
     }
 
     /// A closed basis may leave the Macaulay space — that is its point —
     /// but must stay inside the ideal and keep everything the plain basis
     /// has, so its tail refutes or pins at least what the plain one does.
-    fn assert_closed_sound(basis: &ReducedBasis, system: &[F2BoolPoly], n_vars: usize, assigned: u64, what: &str) {
+    fn assert_closed_sound(
+        basis: &ReducedBasis,
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        assigned: u64,
+        what: &str,
+    ) {
         let rows = basis_polys(basis);
         let roots = variety(system, n_vars);
         for p in &rows {
-            assert!(roots.iter().all(|&x| p.eval(x) == 0), "{what}: a closed row does not vanish on the variety");
+            assert!(
+                roots.iter().all(|&x| p.eval(x) == 0),
+                "{what}: a closed row does not vanish on the variety"
+            );
         }
         if !has_constant(system) && !basis.refuted {
             let lower = masked_space(system, n_vars, basis.degree, occurring(system) & !assigned);
@@ -1625,7 +1724,8 @@ mod tests {
                 continue;
             }
             let rounds = 1 + trial as u32 % 2;
-            let (root, cost) = ReducedBasis::from_system_closed(&system, n_vars, 3, rounds).unwrap();
+            let (root, cost) =
+                ReducedBasis::from_system_closed(&system, n_vars, 3, rounds).unwrap();
             products += cost.closure_products;
             assert_closed_sound(&root, &system, n_vars, 0, &format!("trial {trial} root"));
             for v in 0..n_vars as u32 {
@@ -1640,11 +1740,20 @@ mod tests {
                         .map(|p| substitute(p, v, value))
                         .filter(|p| !p.is_zero())
                         .collect();
-                    assert_closed_sound(&child, &child_system, n_vars, 1 << v, &format!("trial {trial} v{v}={value}"));
+                    assert_closed_sound(
+                        &child,
+                        &child_system,
+                        n_vars,
+                        1 << v,
+                        &format!("trial {trial} v{v}={value}"),
+                    );
                 }
             }
         }
-        assert!(products > 0, "no degree fall was closed; the test exercised nothing");
+        assert!(
+            products > 0,
+            "no degree fall was closed; the test exercised nothing"
+        );
     }
 
     #[test]
@@ -1677,21 +1786,38 @@ mod tests {
                         .filter(|p| !p.is_zero())
                         .collect();
                     let legacy = matrix_f4_f2(&child_system, n_vars, 3).unwrap_or_default();
-                    assert!(has_constant(&legacy), "trial {trial} v{v}={value}: refuted, but not from scratch");
+                    assert!(
+                        has_constant(&legacy),
+                        "trial {trial} v{v}={value}: refuted, but not from scratch"
+                    );
                     assert_eq!(basis_polys(&child), vec![F2BoolPoly::one(n_vars)]);
-                    let Some(w) = (0..n_vars as u32).find(|&w| w != v && occurring & (1 << w) != 0) else {
+                    let Some(w) = (0..n_vars as u32).find(|&w| w != v && occurring & (1 << w) != 0)
+                    else {
                         continue;
                     };
                     let (mut grandchild, cost) = child.specialise(w, !value);
-                    assert!(grandchild.refuted, "trial {trial}: refutation lost below v{v}={value}");
-                    assert_eq!(cost.word_ops(), 0, "trial {trial}: a refuted basis cost something to specialise");
+                    assert!(
+                        grandchild.refuted,
+                        "trial {trial}: refutation lost below v{v}={value}"
+                    );
+                    assert_eq!(
+                        cost.word_ops(),
+                        0,
+                        "trial {trial}: a refuted basis cost something to specialise"
+                    );
                     let mut read = InheritCost::default();
-                    assert_eq!(grandchild.decisive_rows(&mut read), vec![F2BoolPoly::one(n_vars)]);
+                    assert_eq!(
+                        grandchild.decisive_rows(&mut read),
+                        vec![F2BoolPoly::one(n_vars)]
+                    );
                     assert_eq!(read.word_ops(), 0);
                 }
             }
         }
-        assert!(refuted_children > 0, "no specialisation refuted; the test exercised nothing");
+        assert!(
+            refuted_children > 0,
+            "no specialisation refuted; the test exercised nothing"
+        );
     }
 
     #[test]
@@ -1699,9 +1825,12 @@ mod tests {
         let mut seed = 0x5555_aaaa_1234_4321u64;
         for trial in 0..20 {
             let n_vars = 5 + trial % 4;
-            let system: Vec<F2BoolPoly> = (0..4).map(|k| random_poly(n_vars, 2, 5 + k, &mut seed)).collect();
+            let system: Vec<F2BoolPoly> = (0..4)
+                .map(|k| random_poly(n_vars, 2, 5 + k, &mut seed))
+                .collect();
             let (plain, plain_cost) = ReducedBasis::from_system(&system, n_vars, 3).unwrap();
-            let (closed, closed_cost) = ReducedBasis::from_system_closed(&system, n_vars, 3, 0).unwrap();
+            let (closed, closed_cost) =
+                ReducedBasis::from_system_closed(&system, n_vars, 3, 0).unwrap();
             assert_eq!(basis_polys(&plain), basis_polys(&closed), "trial {trial}");
             assert_eq!(plain_cost, closed_cost, "trial {trial}");
         }

@@ -278,7 +278,7 @@ pub fn semaev_s4_in_x4(
     let s4 = sub_polys(&a_sq, &bc);
 
     [
-        s4.get(0).cloned().unwrap_or(zero.clone()),
+        s4.first().cloned().unwrap_or(zero.clone()),
         s4.get(1).cloned().unwrap_or(zero.clone()),
         s4.get(2).cloned().unwrap_or(zero.clone()),
         s4.get(3).cloned().unwrap_or(zero.clone()),
@@ -332,7 +332,7 @@ pub fn find_roots_fp(coeffs: &[FieldElement], p: &BigUint) -> Vec<FieldElement> 
         // gets empty.  See doc comment.
         return roots;
     }
-    let p_u64 = p.to_u64_digits().get(0).copied().unwrap_or(0);
+    let p_u64 = p.to_u64_digits().first().copied().unwrap_or(0);
     let coeffs_slice = &coeffs[..=deg];
     for v in 0..p_u64 {
         let elt = FieldElement::new(BigUint::from(v), p.clone());
@@ -437,7 +437,7 @@ pub struct FactorBaseEntry {
 pub fn build_factor_base(curve: &CurveParams, target_size: usize) -> Vec<FactorBaseEntry> {
     let mut out = Vec::with_capacity(target_size);
     let mut x = BigUint::one();
-    while out.len() < target_size && &x < &curve.p {
+    while out.len() < target_size && x < curve.p {
         // rhs = x³ + ax + b mod p
         let xf = curve.fe(x.clone());
         let rhs_value = xf
@@ -616,10 +616,7 @@ fn try_finalise(
             let p_j = if s_j > 0 { f_j.clone() } else { f_j.neg() };
             let lhs = p_i.add(&p_j, &a_fe);
             if &lhs == r {
-                let i_idx = match factor_base.iter().position(|fb| &fb.point == f_i) {
-                    Some(k) => k,
-                    None => return None,
-                };
+                let i_idx = factor_base.iter().position(|fb| &fb.point == f_i)?;
                 let mut entries = Vec::new();
                 if i_idx == j {
                     // Special case: same factor base index, combine.
@@ -651,8 +648,8 @@ fn try_finalise(
 /// Used by the index-calculus driver to recover `log_G Q` from the
 /// matrix of relations.
 pub fn gaussian_eliminate_mod_n(
-    matrix: &mut Vec<Vec<BigUint>>,
-    rhs: &mut Vec<BigUint>,
+    matrix: &mut [Vec<BigUint>],
+    rhs: &mut [BigUint],
     n: &BigUint,
 ) -> Option<Vec<BigUint>> {
     let rows = matrix.len();
@@ -826,7 +823,7 @@ pub fn pollard_rho_ecdlp(
         let branch = match r {
             Point::Affine { x, .. } => (&x.value % BigUint::from(3u32))
                 .to_u32_digits()
-                .get(0)
+                .first()
                 .copied()
                 .unwrap_or(0),
             Point::Infinity => 0,

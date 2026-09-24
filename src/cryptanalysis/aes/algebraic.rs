@@ -147,7 +147,7 @@ pub fn sbox4_quadratic_equations() -> Vec<Polynomial> {
             }
         }
     }
-    let rank = row;
+    let _rank = row;
 
     // The null space has dimension `n_mono - rank`. For AES-like S-boxes
     // this is 21–23.
@@ -160,7 +160,7 @@ pub fn sbox4_quadratic_equations() -> Vec<Polynomial> {
     }
 
     // Generate one basis polynomial per free column.
-    let mut polynomials: Vec<Polynomial> = Vec::new();
+    let polynomials: Vec<Polynomial> = Vec::new();
     for &fc in &free_cols {
         let mut coeffs = vec![false; n_mono];
         coeffs[fc] = true;

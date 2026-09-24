@@ -72,8 +72,7 @@ use std::collections::HashSet;
 
 /// A monomial in `F_2[v_0, …, v_{n-1}] / (v_i² − v_i)` represented as a
 /// bitmask: bit `k` is set iff `v_k` divides the monomial.
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, serde::Serialize, serde::Deserialize)]
 pub struct F2BoolMono {
     pub mask: u64,
 }
@@ -181,8 +180,7 @@ pub fn mono_key(m: F2BoolMono) -> u128 {
 ///
 /// Stored as a `Vec<F2BoolMono>` sorted DESCENDING by [`cmp_mono`] with
 /// no duplicates.  `terms[0]` (if present) is the leading monomial.
-#[derive(Clone, PartialEq, Eq, Debug)]
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct F2BoolPoly {
     pub terms: Vec<F2BoolMono>,
     pub n_vars: usize,
@@ -1020,7 +1018,7 @@ mod tests {
         let v = F2BoolMono::var;
         let g = F2BoolPoly::from_monos(vec![v(0).mul(v(1)), v(2)], 3);
         assert!(
-            !is_boolean_groebner_basis(&[g.clone()]),
+            !is_boolean_groebner_basis(std::slice::from_ref(&g)),
             "the checker must reject the input"
         );
         let gb = groebner_basis_f2(vec![g], 3);

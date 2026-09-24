@@ -314,9 +314,9 @@ impl BinaryCurve {
         let a = F2mElement::one(m);
         let b = F2mElement::one(m);
         // Pick a generator by trial (we'll find one valid point).
-        let gx = F2mElement::from_bit_positions(&[1], m); // x = z
-                                                          // Find y satisfying y² + zy = z³ + z² + 1 ...
-                                                          // Just brute-force search for a valid point.
+        let _gx = F2mElement::from_bit_positions(&[1], m); // x = z
+                                                           // Find y satisfying y² + zy = z³ + z² + 1 ...
+                                                           // Just brute-force search for a valid point.
         let (gen, ord) = find_any_generator(m, &irr, &a, &b);
         Self {
             m,
