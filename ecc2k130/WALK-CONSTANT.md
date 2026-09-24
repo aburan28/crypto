@@ -492,3 +492,61 @@ python3 mapping_spread.py 45562 16 6000 5             # one-mapping spread of ra
 
 Every row names its seed.  The full matrices took about an hour on four
 cores: `matrix-v2` in the emulation, and `device-v2` on the reference walks.
+
+## 11. Round 2: the cycle rule extended
+
+Declared before any code changed (`AGENTS.md` §4), for the change §6's
+verdict asks for.
+
+**The change.** The history word already holds the last four step tags in
+16-bit slots; the rule reads three.  It will read all four, and refuse a step
+`t` when either
+
+- `t` undoes any of the last four steps: `t = −tᵢ`, `i = 1..4`.  This
+  replaces both current checks.  Every pairwise cycle of at most 8 steps has
+  a pair at most 4 steps apart along the walk, so none can close.  The first
+  pairwise survivor has 10 steps (`a, b, c, d, e, −a, …, −e`), at order
+  `(2n)⁻⁵`.  The check also refuses some harmless steps (`a, b, −a`), at
+  about `4Σp²/2n` per step, by advancing `h` as the rule already does.
+- `t, t₁, t₂, t₃` share `h` and form one of the 24 τ-relation patterns of §5.
+  That means one repeated `(k, ε)`, with the other two at `(k+1, ε), (k+2, ε)`
+  or at `(k+1, −ε), (k+3, −ε)`, offsets mod `n`.
+
+Both tests read only differences of `k` and the parity of `ε`, so the rule
+stays a function on classes: `σ` shifts every `k` and negation flips every
+`ε`.  The history layout is unchanged, so the device's `& 0xFFFF` readers are
+untouched.  `aws/protocol.py` names the rule inside the walk's definition, so
+the rule change is a new walk identity.  No table-walk point has been
+collected, so nothing forks.
+
+The sketch in §6's verdict, a five-tag history in 12-bit slots, was wrong
+about what is needed.  Four full tags are already stored, and cycles longer
+than six steps are caught by reading all four.  This is an accounting
+correction to §6's sketch, and §6's projection is unaffected by it.
+
+**Target.**  The rule is a success only if all of the following hold.
+
+1. `fruitless_patterns.py` under the new rule finds no pattern with at most
+   three determined tags at `L ≤ 8`, and its count at four determined tags
+   gives under 0.1% of DP-32 trails trapped at `n = 131`.  That is a count,
+   not a measurement: the residual rate at the degrees that run is below
+   what `10⁹` steps can see.
+2. No τ-relation 4-step return and no pairwise return of 8 steps or fewer
+   in either harness, where the old rule showed 1,145 and 126.
+3. The table walk's `c` stays within two standard errors of the old rule's
+   rows at `n = 23, 37, 41`.
+4. Two walks that meet at one point, carrying different histories, part
+   within 16 steps no more often than would cost 1% of collisions.  This is
+   measured, since a parted merge is a lost collision under distinguished
+   points.
+5. The device and the reference pick the same tag on every one of 4,096
+   points, with histories that trip every new check.  `test-production` and
+   the planted small-curve logs pass with `WALK_TABLE=1`, and the CUDA
+   sources compile.
+6. The switch stays the campaign owner's.  This round prices the table walk
+   with the new rule end to end.  The GPU-paired rate of the new kernel is
+   the one input it cannot measure here.
+
+Inadmissible: changing `H`, `dpWeight` or the history layout's meaning
+without saying so; scoring a formal return as a collision; dropping the
+16-point return detector the harnesses use as the independent check.
