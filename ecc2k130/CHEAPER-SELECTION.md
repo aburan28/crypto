@@ -77,7 +77,13 @@ point. The candidate stays **off by default**.
 ## 5. Status
 
 * Boundaries and target: this file.
-* Implementation: `TABLE_PHASE_POPC` knob + host-equivalent phase, in progress.
-* GPU measurement: blocked in environments without `nvcc` / an RTX PRO 6000;
-  run `make gpu-rtx-pro6000-20b` paired with `TABLE_PHASE_POPC=1` when a card
-  is available and file the receipt under `benchmarks/cheaper-selection/`.
+* Implementation: `TABLE_PHASE_POPC` knob in `include/packedtablewalk.cuh`,
+  host fill of the eight L-bit planes, `twPhase` popc path, Makefile flag,
+  and `make test-table-walk-host` covering nibble/bytes × table/popc (4
+  binaries). Host gate: **PASS**, 4096 points, zero mismatches on every arm.
+  Shared bytes with `PIVOT_BYTES=1`: 48,732 → **44,540** (−4,192).
+* GPU measurement: blocked here (no `nvcc`). When a card is available, run
+  the 20 B/s reference paired with `TABLE_PHASE_POPC=1` and file the receipt
+  under `benchmarks/cheaper-selection/`. Default stays off until that clears
+  §2.
+
