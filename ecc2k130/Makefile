@@ -501,6 +501,20 @@ test-table-walk-host:
 	./build/test-table-walk-host-nibble-popc
 	./build/test-table-walk-host-bytes-popc
 
+# Host static price of twPhase byte-table vs popc planes (CHEAPER-SELECTION.md).
+test-phase-cost:
+	mkdir -p build
+	$(CXX) -O3 -std=c++17 -DPHASE_POPC=0 -Wno-unknown-pragmas -Wno-unused-function src/testphasecost.cpp -o build/test-phase-cost-table
+	$(CXX) -O3 -std=c++17 -DPHASE_POPC=1 -Wno-unknown-pragmas -Wno-unused-function src/testphasecost.cpp -o build/test-phase-cost-popc
+	./build/test-phase-cost-table
+	./build/test-phase-cost-popc
+
+# GPU paired measurement of TABLE_PHASE_POPC (needs Modal/RunPod/AWS + a 6000).
+#   make bench-cheaper-selection OUT=/tmp/cheaper-selection
+bench-cheaper-selection:
+	@test -n "$(OUT)" || (echo "usage: make bench-cheaper-selection OUT=DIR"; exit 1)
+	modal run --detach modal_job.py --job benchmarks/cheaper-selection/gpujob.sh --out "$(OUT)" --gpu "RTX PRO 6000"
+
 test-table-walk-cuda:
 	mkdir -p build
 	$(NVCC) -O3 -std=c++17 $(ARCH) $(filter-out -DECC_WALK_TABLE=% -DECC_WITNESS=%,$(DEFS)) -DECC_WALK_TABLE=1 -DECC_WITNESS=0 \
@@ -856,4 +870,4 @@ clean:
 	rm -f build/test-shared-sigma-cuda
 	rm -f build/test-timing build/test-logic build/test-table-walk-host-nibble build/test-table-walk-host-bytes
 
-.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean
+.PHONY: path-cost all generate check-cli check-cycles perfmodel test-decomp test-schedule test-packed test-packed-network test-generated-product test-clmad test-clmad-square test-karat3 test-packed-cuda test-packed-storage-cuda test-shared-sigma-cuda test-timing test-logic test-table-walk-host test-table-walk-cuda test-phase-cost test-production certify-local rehearse autolab cpu gpu test break-small bench bench95 ptx check-cuda modal bench-rtx-pro6000 bench-rtx-pro4500 bench-ada bench-ada-modal bench-g6-modal bench-g6e-modal bench-g4dn-modal bench-g4dn bench-b200-modal validate-b200-modal bench-waves-modal bench-modal-gpu bench-cheaper-selection gpu-g6 gpu-g6e gpu-g4dn audit-rtx-pro6000 clean

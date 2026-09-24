@@ -45,7 +45,7 @@ Inadmissible: changing the walk, the CLMAD count, the batch, or the DP rule;
 quoting a phase-only cycle cut as a method speedup; measuring on a different
 SKU without a matched reference rebuild.
 
-## 3. Candidate under build: `TABLE_PHASE_POPC`
+## 3. Candidate: `TABLE_PHASE_POPC`
 
 Replace the 17 byte-table lookups in `twPhase` with eight bit-plane popcounts
 against precomputed masks of coordinates whose `L` bit is set — the form
@@ -54,17 +54,41 @@ ALU, but which may win for *phase alone* now that the pivot is already on the
 byte table (`TABLE_PIVOT_BYTES=1`) and the forward pass is MIO-bound rather
 than ALU-bound (ONE-BLOCK §6).
 
-Static price to fill before any GPU run (host-equivalent `TW_FN` path):
+### Static price (filled)
 
-| piece | reference (byte table) | candidate (popc planes) |
+Slot weights from `benchmarks/clmad-price` on sm_120: LOP3/PRMT = 1,
+POPC = 3.97. Host gate `make test-phase-cost` (same points, both arms):
+
+| piece | byte table (`PHASE_POPC=0`) | popc planes (`PHASE_POPC=1`) |
 |---|---|---|
-| phase `LDS.U8` | 17 | 0 |
-| phase ALU (priced in LOP3 slots) | ~72 (THROUGHPUT-20B §3) | 8×`POPC` + masks + reduce; measure with `kernel_cost.py` / host objdump |
-| shared bytes for phase | 17×256 | 131×5 mask words (same as `maskLt` family) or less if folded into existing masks |
+| random `LDS.U8` | **17** | 0 |
+| broadcast `LDS.U32` (plane masks) | 0 | 40 |
+| ALU slots (static) | ≈ 33 source / ~72 with address math (THROUGHPUT-20B) | **AND 40 + POPC 40×3.97 + shift/add ≈ 245.8** |
+| shared bytes (`PIVOT_BYTES=1`) | 48,732 | **44,540** (−4,192) |
+| host ns/call (practicality) | 4.4 | 85.1 |
 
-Host gate: `make test-table-walk-host` must pass with both
-`TABLE_PHASE_POPC=0` and `1` against the scalar reference for every tested
-point. The candidate stays **off by default**.
+Reading the ALU column: the candidate is **~3–7× dearer** on the logic pipe
+than the byte table, in exchange for deleting 17 random byte loads. It only
+pays if those loads are what starve the carry-less unit in the forward pass
+(ONE-BLOCK §6). That is a GPU question; the static table alone would abandon
+the knob. The falsification target in §2 still stands — a card either clears
+20.50 B/s or the candidate is abandoned below 20.20.
+
+Host gate: `make test-table-walk-host` and `make test-phase-cost` both PASS.
+Off by default.
+
+### GPU job
+
+```sh
+make bench-cheaper-selection OUT=/tmp/cheaper-selection
+# or: modal run --detach modal_job.py \
+#        --job benchmarks/cheaper-selection/gpujob.sh \
+#        --out DIR --gpu "RTX PRO 6000"
+```
+
+Paired `gpu-rtx-pro6000-20b` ± `TABLE_PHASE_POPC`, 300/300 re-walks, DP-set
+identity, five alternating benches, profile dumps. Receipts under
+`benchmarks/cheaper-selection/`.
 
 ## 4. What was checked and rejected on the way here
 
@@ -77,13 +101,20 @@ point. The candidate stays **off by default**.
 ## 5. Status
 
 * Boundaries and target: this file.
-* Implementation: `TABLE_PHASE_POPC` knob in `include/packedtablewalk.cuh`,
-  host fill of the eight L-bit planes, `twPhase` popc path, Makefile flag,
-  and `make test-table-walk-host` covering nibble/bytes × table/popc (4
-  binaries). Host gate: **PASS**, 4096 points, zero mismatches on every arm.
-  Shared bytes with `PIVOT_BYTES=1`: 48,732 → **44,540** (−4,192).
-* GPU measurement: blocked here (no `nvcc`). When a card is available, run
-  the 20 B/s reference paired with `TABLE_PHASE_POPC=1` and file the receipt
-  under `benchmarks/cheaper-selection/`. Default stays off until that clears
-  §2.
+* Implementation: `TABLE_PHASE_POPC` in `include/packedtablewalk.cuh`, identity
+  line `packed table phase popc:`, `make test-table-walk-host`,
+  `make test-phase-cost`, GPU job `benchmarks/cheaper-selection/gpujob.sh`.
+* Host gate: **PASS** (4096 points, zero mismatches; shared 48,732 → 44,540).
+* Static price: **filled** — candidate is much heavier on ALU (~246 slots vs
+  ~33–72); only a MIO-starvation win on the 6000 can save it. Default stays off.
+* GPU measurement: blocked here (no `nvcc` / Modal token). Run
+  `make bench-cheaper-selection OUT=…` on an RTX PRO 6000 to clear or abandon
+  §2; file the receipt under `benchmarks/cheaper-selection/`.
+
+## 6. If the card abandons popc
+
+The next cheaper-selection lever to price (not built here) is cutting the
+remaining **pivot** byte lookups or the selection's address math without
+touching POPC — the byte phase table is already cheap on the ALU column, so
+the leftover MIO is the 17 pivot `LDS.U8` plus sign/history, not the phase.
 
