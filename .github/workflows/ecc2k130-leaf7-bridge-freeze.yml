@@ -25,7 +25,7 @@ jobs:
           python-version: '3.12'
       - name: Pin exact freeze file
         run: |
-          echo '4e6894e07e6c42b7249e4bea2d85d6f3b3e8e64817de74faf2057436cad42d2c  research/ecc2k130_leaf7_bridge_20260925/FROZEN.json' | sha256sum -c -
+          echo 'b48e9540de68f5c5df7d8f32c4183b39fda2b580efc8fd93cbd99bbb042b0fe3  research/ecc2k130_leaf7_bridge_20260925/FROZEN.json' | sha256sum -c -
       - name: Check source and implementation hashes only
         run: python3 research/ecc2k130_leaf7_bridge_20260925/ci_replay.py
       - name: Check Python syntax only
@@ -34,4 +34,5 @@ jobs:
             research/ecc2k130_leaf7_bridge_20260925/cubic_velu.py \
             research/ecc2k130_leaf7_bridge_20260925/run.py \
             research/ecc2k130_leaf7_bridge_20260925/verify.py \
+            research/ecc2k130_leaf7_bridge_20260925/verify_extension.py \
             research/ecc2k130_leaf7_bridge_20260925/ci_replay.py

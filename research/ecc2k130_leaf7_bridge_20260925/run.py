@@ -172,12 +172,32 @@ def choose_sage_iso(psi, target_curve, witness, expected):
     return match[0], len(choices)
 
 
+def encode_cubic(value):
+    """Canonical 3 Fq coefficients of a class in Fq[U]/h(U)."""
+    coeffs = value.lift().list()
+    assert len(coeffs) <= 3
+    return [hex(bit_integer(coeffs[i])) if i < len(coeffs) else "0x0"
+            for i in range(3)]
+
+
+def encode_sextic(value):
+    """Canonical 2 by 3 Fq coefficients for Fq[U,V]/(h,V²+V+1)."""
+    coeffs = value.lift().list()
+    assert len(coeffs) <= 2
+    zero = value.parent().base_ring().zero()
+    return [encode_cubic(coeffs[i] if i < len(coeffs) else zero)
+            for i in range(2)]
+
+
 def exact_kernel_points(curve, isogeny, kernel_poly, q, expected_count):
     roots = kernel_poly.roots()
     assert len(roots) == 3 and all(int(multiplicity) == 1 for _, multiplicity in roots)
+    root_records = []
+    point_records = []
     seen = set()
     eigen_ok = 0
     for x, _ in roots:
+        root_records.append(encode_sextic(x))
         lifts = curve.lift_x(x, all=True)
         assert len(lifts) == 2
         for point in lifts:
@@ -185,10 +205,19 @@ def exact_kernel_points(curve, isogeny, kernel_poly, q, expected_count):
             image5 = 5 * point
             assert (point[0] ** q, point[1] ** q) == (image5[0], image5[1])
             assert isogeny(point).is_zero()
-            seen.add(tuple(point))
+            record = {"x": encode_sextic(point[0]), "y": encode_sextic(point[1])}
+            key = json.dumps(record, sort_keys=True)
+            assert key not in seen
+            seen.add(key)
+            point_records.append(record)
             eigen_ok += 1
     assert len(seen) == expected_count == 6
+    assert int(kernel_poly.degree()) == 3
     return {"root_count": len(roots), "point_count": len(seen),
+            "roots": sorted(root_records, key=lambda row: json.dumps(row)),
+            "points": sorted(point_records, key=lambda row: json.dumps(row, sort_keys=True)),
+            "kernel_polynomial_low_to_high":
+                [encode_sextic(kernel_poly[i]) for i in range(4)],
             "exact_order_seven": True, "q_frobenius_eigenvalue": 5,
             "eigenvalue_checks": eigen_ok, "all_mapped_to_infinity": True}
 
@@ -217,7 +246,8 @@ def main():
     started = clock()
     phase = "initialization"
     receipt = {"schema": "ecc2k130-leaf7-bridge-certificate-v1",
-               "status": "STOP", "freeze_sha256": digest(HERE / "FROZEN.json"),
+               "status": "STOP", "structural_gate_status": "UNRESOLVED",
+               "freeze_sha256": digest(HERE / "FROZEN.json"),
                "source_main_commit": spec["source_main_commit"],
                "parent_note_commit": spec["parent_note_commit"],
                "release_main_head": spec["release_main_head"],
@@ -375,7 +405,8 @@ def main():
         receipt["infinity_mapped_to_infinity"] = True
 
         phase = "complete"
-        receipt["status"] = "PASS"
+        receipt["status"] = "PRODUCER_PASS"
+        receipt["structural_gate_status"] = "UNRESOLVED_PENDING_REPLAY"
         receipt["cost"] = {
             "shared_263_torsion_reused_for_direct_second_leaf": True,
             "direct_second_leaf_rederived_from_saved_basis": True,
@@ -395,13 +426,16 @@ def main():
             "wall_seconds": end["wall_seconds"] - started["wall_seconds"],
             "cpu_seconds": end["cpu_seconds"] - started["cpu_seconds"],
             "peak_rss_bytes": end["peak_rss_bytes"]}
+        if receipt["resources"]["wall_seconds"] > spec["caps"]["child_wall_seconds"]:
+            receipt["status"] = "STOP"
+            receipt.setdefault("error", "wall time exceeded frozen cap")
         if end["peak_rss_bytes"] > spec["caps"]["child_peak_rss_bytes"]:
             receipt["status"] = "STOP"
-            receipt["error"] = "peak RSS exceeded frozen cap"
+            receipt.setdefault("error", "peak RSS exceeded frozen cap")
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
         signal.setitimer(signal.ITIMER_REAL, 0)
-    return 0 if receipt["status"] == "PASS" else 1
+    return 0 if receipt["status"] == "PRODUCER_PASS" else 1
 
 
 if __name__ == "__main__":

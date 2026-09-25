@@ -95,14 +95,18 @@
         1
       ]
     ],
-    "predicted_dual_composition_controls": 12
+    "predicted_dual_composition_controls": 12,
+    "producer_status": "PRODUCER_PASS",
+    "fq_replay_status": "FQ_REPLAY_PASS",
+    "exceptional_point_encoding": "[V^0,V^1] by [U^0,U^1,U^2] canonical Fq bit-polynomial hex"
   },
   "implementation_sha256": {
-    "PROTOCOL.md": "e0f40d8e703ca0f9da01123757f81c386f1a0a6006e11932c25e7e5584b729a3",
+    "PROTOCOL.md": "4822314b160911854dc08591e4e9d08e9579fbec0a5fdf611a631085dcf009f0",
     "cubic_velu.py": "aa774740505396c6921691f5ead6ac49e254e17eefce2baf0766fef3faec5839",
-    "run.py": "8468ebd04c917d447391910bbcf7d8d8b12108a27175e7410068959161c6dbd4",
-    "verify.py": "584569d1a3a5111e16e660e0098278ae424d36a82710724dd20f6ab910b00627",
-    "ci_replay.py": "015d64a5757a26071fb4e42be72f0b4cd220b5f07de4cd7af95d4b1941e77489"
+    "run.py": "e90e791b181c04ebff81552007fdd75a1442f4ecb4987669413a3ebb1abba814",
+    "verify.py": "9805862a2f6cc9d44a2f769131f71d683d359be73109ce696eda858b31cc8eba",
+    "verify_extension.py": "5aa49510f4117422288cf6ff34a120143b9a57a25b2a9e7373fee7232fa711a8",
+    "ci_replay.py": "65b956e904dac772bf75c8b28e58c9f9fa5541499e89876068720cb43d9da4a8"
   },
   "release_main_head": null,
   "release_gate": "hold_parent_unmerged"

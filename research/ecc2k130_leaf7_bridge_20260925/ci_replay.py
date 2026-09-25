@@ -22,6 +22,8 @@ def main() -> None:
     assert spec["release_main_head"] is None
     assert spec["release_gate"] == "hold_parent_unmerged"
     assert spec["gate"]["no_pdp_or_dlp_claim"] is True
+    assert spec["gate"]["producer_status"] == "PRODUCER_PASS"
+    assert spec["gate"]["fq_replay_status"] == "FQ_REPLAY_PASS"
     for relative, expected in spec["input_sha256"].items():
         actual = sha(REPO / relative)
         assert actual == expected, f"{relative}: expected {expected}, got {actual}"

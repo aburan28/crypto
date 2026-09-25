@@ -53,7 +53,10 @@ def main():
         raise SystemExit("refusing to overwrite replay receipt")
     spec = json.loads((HERE / "FROZEN.json").read_text())
     source = json.loads(args.input.read_text())
-    assert source["status"] == "PASS" and source["phase"] == "complete"
+    assert source["status"] == "PRODUCER_PASS" and source["phase"] == "complete"
+    assert source["structural_gate_status"] == "UNRESOLVED_PENDING_REPLAY"
+    assert spec["release_main_head"] is not None
+    assert source["release_main_head"] == spec["release_main_head"]
     assert source["freeze_sha256"] == sha(HERE / "FROZEN.json")
     assert source["input_sha256"] == spec["input_sha256"]
     assert source["implementation_sha256"] == spec["implementation_sha256"]
@@ -160,11 +163,12 @@ def main():
     assert cost["incremental_mul_equivalent_ratio"] is None
     assert cost["cold_mul_equivalent_ratio"] is None
     assert cost["promotion"] is False
-    replay = {"schema": "ecc2k130-leaf7-bridge-replay-v1", "status": "PASS",
+    replay = {"schema": "ecc2k130-leaf7-bridge-replay-v1", "status": "FQ_REPLAY_PASS",
+              "structural_gate_status": "UNRESOLVED_PENDING_EXTENSION_REPLAY",
               "source_receipt_sha256": sha(args.input),
               "freeze_sha256": source["freeze_sha256"],
               "independent_Fq_case_labels": checked,
-              "exceptional_extension_scope": "producer assertions recorded; no independent extension replay",
+              "exceptional_extension_scope": "not checked here; verify_extension.py is required for structural PASS",
               "cost_promotion": False}
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(replay, indent=2, sort_keys=True) + "\n")
