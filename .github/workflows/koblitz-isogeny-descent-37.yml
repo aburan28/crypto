@@ -1,0 +1,38 @@
+name: Koblitz degree-73 descent at 2^37
+
+on:
+  pull_request:
+    paths:
+      - "research/koblitz_isogeny_descent_37_20260925/**"
+      - "research/toy_f5_neighbors_20260924/matrix.py"
+      - ".github/workflows/koblitz-isogeny-descent-37.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-isogeny-and-matched-stage:
+    runs-on: ubuntu-latest
+    container:
+      image: sagemath/sagemath:10.6
+      options: --user root
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construct map and run frozen comparison
+        run: |
+          mkdir -p "$RUNNER_TEMP/koblitz-37-run"
+          chown sage:sage "$RUNNER_TEMP/koblitz-37-run"
+          su - sage -c "sage -python '$GITHUB_WORKSPACE/research/koblitz_isogeny_descent_37_20260925/experiment.py' --output '$RUNNER_TEMP/koblitz-37-run'"
+      - name: Verify saved evidence
+        run: |
+          su - sage -c "sage -python '$GITHUB_WORKSPACE/research/koblitz_isogeny_descent_37_20260925/verify.py' '$RUNNER_TEMP/koblitz-37-run'"
+      - name: Retain raw run and summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: koblitz-isogeny-descent-37
+          path: |
+            ${{ runner.temp }}/koblitz-37-run/raw.json.gz
+            ${{ runner.temp }}/koblitz-37-run/summary.json
+          retention-days: 90
