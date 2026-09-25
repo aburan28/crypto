@@ -95,6 +95,8 @@ def prepare(name, output, restored=None, *, instrument=True):
     if name == 'pairinv':
         patches.append(HERE.parent/'campaign_20260916/round24-pairinv.patch')
     if instrument:
+        if name == 'both':
+            patches.append(HERE/'both-test-convention.patch')
         patches.append(HERE/'exclusive-phases.patch')
     for patch in patches:
         # Check every hunk before writing. Some system patch implementations

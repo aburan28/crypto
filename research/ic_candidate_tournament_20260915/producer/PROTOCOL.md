@@ -26,6 +26,14 @@ It must preserve independently correct arithmetic, ordinary-query relations,
 factor logs and recovered DLPs. Requiring IC witnesses and removing modulo bias
 can change a trace; never claim byte equivalence to all historical traces.
 
+The first Linux run exposed a stale assertion in the archived `both` test:
+it multiplied the descent scalar by the cofactor even though that source already
+uses representative columns. `both-test-convention.patch` corrects only that
+assertion and removes its unused cofactor variable. The group witness and final
+scalar checks remain mandatory; the later archived `scaled` test already contains
+this correction. Preserve the failed original control and do not change its
+algorithm to match an obsolete assertion.
+
 ## Fixed integration vectors and limits
 
 - `scaled` and `pairinv`: `13a0,23a1,37a0,43a1,61a1`.
