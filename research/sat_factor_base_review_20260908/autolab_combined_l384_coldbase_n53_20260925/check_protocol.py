@@ -103,7 +103,9 @@ def preflight(*, require_release: bool = False) -> dict:
     if release is not None:
         if not HEX40.fullmatch(release):
             raise AssertionError("invalid release main SHA")
-        subprocess.run(["git", "merge-base", "--is-ancestor", release, "HEAD"],
+        # Main may advance after this PR branches. The base must precede the
+        # frozen current main, while the PR's own exact HEAD is checked below.
+        subprocess.run(["git", "merge-base", "--is-ancestor", base_head, release],
                        cwd=REPO, check=True)
     if require_release:
         expected_head = os.environ.get("KIC_L384_EXPECTED_HEAD", "")

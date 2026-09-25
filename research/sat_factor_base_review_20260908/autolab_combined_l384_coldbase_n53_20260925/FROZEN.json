@@ -33,9 +33,9 @@
   "one_shot_pr_label": "run-n53-coldbase-once",
   "prior_760_fixed_stream_classification": "COMPLETE_FIXED_STREAM_NO_CROSSOVER",
   "process_group_rss_cap_bytes": 2147483648,
-  "protocol_sha256": "435589fbe30c070739808d54c755ca2298371b11517a252f074231f39b401ab1",
+  "protocol_sha256": "30b8f8c19505ed8d601ac41ccd9f67bc6b863d248dfb53c410d0f9e703dc95a3",
   "python_version": "3.12",
-  "release_main_head": null,
+  "release_main_head": "c765b0531f7c34626efc562664bf7282da650175",
   "rust_toolchain_version": "1.93.1",
   "schema": "n53_l384_coldbase_repeat_freeze_v1",
   "source_sha256": {
@@ -49,7 +49,7 @@
     "independent_group_reference": "54767452cfbb3a4ec931c1c5e19b1500c12bc61605a43cebfdade2732770499d",
     "operational": "29b6f7e92c80784cb9ef56688625b7003b41f800b7d88febdd06427581475923",
     "point_generation_math": "253842968ae6616bf6c96b79b89808e19e982c276af9e4e2fcb3f7a027a1a8b1",
-    "preflight": "c6c84538135822f3a3d0e35fa8a83bd5b19c8fb742dc0009aeb99c605eb848a9",
+    "preflight": "a965bb136087058e2c42c289e7c0bf86e5605e7c425315ea497a635c95d092ad",
     "prior_runner": "edbeb4f9d5e608edd7ab2ef90d306288ee573911ef8bdc2c67567b1273888034",
     "rho": "fedacb54e441979c8c32860e7b5639e43799234741d49677010164564536d2c8",
     "rho_audit_math": "386a864faa4b2232edb3397fead4d924e6edb4ec4eade754b64df9fbc639fc94",
@@ -57,5 +57,5 @@
     "training_schedule_reference": "51fb3a27ca76d05c0723755f48d230c42b5ad0d898f63ec292323bdb3061ca5f",
     "workflow": "22af01b8b89facf10601c8c55b4bfdf329173d19a29491396f5d2673141266f1"
   },
-  "status": "held_no_outcome"
+  "status": "released_for_one_outcome"
 }
