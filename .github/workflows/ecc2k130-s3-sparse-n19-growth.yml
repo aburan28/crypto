@@ -1,0 +1,27 @@
+name: ECC2K-130 n19 sparse S3 growth gate
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/**'
+      - '.github/workflows/ecc2k130-s3-sparse-n19-growth.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-and-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile frozen sources without executing n19 growth
+        run: python -m py_compile research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/{export,verify,run,ci_replay}.py
+      - name: Check source and input hashes; replay archive only when committed
+        run: |
+          python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/ci_replay.py
+          if test -f research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/evidence/final/receipt.json; then
+            python research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/ci_replay.py \
+              --evidence research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/evidence/final
+          fi
