@@ -1,0 +1,81 @@
+name: Optimized IC producer admission
+on:
+  pull_request:
+    paths:
+      - 'research/ic_candidate_tournament_20260915/producer/**'
+      - 'research/ic_candidate_tournament_20260915/identity.py'
+      - 'research/ic_candidate_tournament_20260915/measurement.py'
+      - 'research/ic_candidate_tournament_20260915/oracle.py'
+      - 'research/ic_candidate_tournament_20260915/tournament.py'
+      - 'research/ic_candidate_tournament_20260915/test_producer.py'
+      - '.github/workflows/ic-producer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ic-producer-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  archived-producer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        reference: [both, scaled, pairinv]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install pinned profiler and static toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind musl-tools zstd
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Restore and verify exact source before applying reviewed patches
+        run: |
+          python research/ic_candidate_tournament_20260915/producer/prepare.py \
+            --reference '${{ matrix.reference }}' --out "$RUNNER_TEMP/ic-producer"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          receipt = json.loads((Path(os.environ['RUNNER_TEMP'])/'ic-producer/preparation.json').read_text())
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write('IC_SOURCE_MANIFEST_SHA256='+receipt['source_manifest_sha256']+'\n')
+          PY
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: '${{ runner.temp }}/ic-producer/source -> ../build'
+          shared-key: ic-producer-${{ matrix.reference }}
+      - name: Harness regression tests
+        run: python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py'
+      - name: Optimized release arithmetic and strict descent controls
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/ic-producer/build
+        run: |
+          cd "$RUNNER_TEMP/ic-producer/source"
+          cargo test --locked --release --lib koblitz_tiny_ic --jobs 2
+          cargo test --locked --release --example ic_tournament_worker --jobs 2
+          cargo build --locked --release --example ic_tournament_worker --jobs 2
+      - name: Fixed public vectors, complete phase closure and canonical records
+        run: |
+          python research/ic_candidate_tournament_20260915/producer/integration.py \
+            --prepared "$RUNNER_TEMP/ic-producer" \
+            --worker "$RUNNER_TEMP/ic-producer/build/x86_64-unknown-linux-musl/release/examples/ic_tournament_worker" \
+            --out "$RUNNER_TEMP/ic-producer-evidence"
+      - name: Preserve evidence and exact derived source, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-producer-${{ matrix.reference }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-producer-evidence
+            ${{ runner.temp }}/ic-producer/preparation.json
+            ${{ runner.temp }}/ic-producer/source-manifest.json
+            ${{ runner.temp }}/ic-producer/source
+          retention-days: 30
+          if-no-files-found: warn

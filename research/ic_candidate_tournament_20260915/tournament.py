@@ -164,7 +164,7 @@ def execute(command, job, directory, timeout, memory, cpu):
         timer.start()
         inherited = os.sched_getaffinity(0)
         os.sched_setaffinity(0,{cpu})
-        start = time.monotonic()
+        start_ns = time.monotonic_ns()
         try:
             process = subprocess.Popen(command,stdin=subprocess.PIPE,stdout=stdout,stderr=stderr,
                 env=child_env(),start_new_session=True)
@@ -180,17 +180,32 @@ def execute(command, job, directory, timeout, memory, cpu):
         try:
             # Blocking reap avoids communicate(timeout)'s exponential wait polling,
             # which quantized previous short native timings. Charge full process wall.
-            process.communicate(payload)
+            # stdout/stderr already go to files, so no pipe-draining loop is
+            # needed. Reap this exact child with wait4 to retain its RSS peak;
+            # RUSAGE_CHILDREN would mix peaks from earlier jobs.
+            try:
+                process.stdin.write(payload)
+            except BrokenPipeError:
+                pass
+            finally:
+                try:
+                    process.stdin.close()
+                except BrokenPipeError:
+                    pass
+            _, wait_status, usage = os.wait4(process.pid, 0)
+            process.returncode = os.waitstatus_to_exitcode(wait_status)
         finally:
-            wall = time.monotonic()-start
+            wall_ns = time.monotonic_ns()-start_ns
             timer.cancel()
             timer.join()
         if expired.is_set(): status = 'TIMEOUT'
-    return {'exit_code':process.returncode,'process_wall_seconds':wall,
+    return {'exit_code':process.returncode,'process_wall_seconds':wall_ns/1_000_000_000,
+            'process_wall_ns':wall_ns, 'peak_rss_bytes':usage.ru_maxrss*1024,
             'process_status':status,'command':command,'memory_cap_bytes':memory,'cpu':cpu,'spawn':SPAWN}
 
 
-def parse_profiles(directory, *, compressed=False):
+def parse_profiles(directory, *, compressed=False, phase_schema=1):
+    require(phase_schema in (1, 2), 'unknown phase schema')
     pattern = 'callgrind.out*.gz' if compressed else 'callgrind.out*'
     paths = sorted(Path(directory).glob(pattern))
     require(bool(paths),'missing instruction profiles')
@@ -213,12 +228,21 @@ def parse_profiles(directory, *, compressed=False):
         require(total >= 0 and int(one('totals:'))==total,'invalid profile total')
         trigger = one('desc: Trigger:')
         if trigger == 'Program termination':
-            phase = 'reporting_and_cleanup'
+            phase = 'reporting_and_cleanup' if phase_schema == 1 else 'setup'
             terminated += 1
         else:
             require(trigger.startswith('Client Request: '),'unknown profiling boundary')
             phase = trigger.removeprefix('Client Request: ')
-        require(phase in PHASES,'unknown cost phase')
+            if phase_schema == 2:
+                require(phase.startswith('ic_') or phase == 'reference_solve',
+                        'legacy interval in scientific profile')
+                phase = phase.removeprefix('ic_')
+        if phase_schema == 1:
+            require(phase in PHASES,'unknown cost phase')
+        else:
+            require(phase in {'setup', 'factor_base', 'precompute', 'queries', 'pdp',
+                'relation_check', 'matrix_build', 'relation_la', 'target_descent',
+                'recovery_check', 'reference_solve'}, 'unknown scientific cost phase')
         phases[phase] = phases.get(phase,0)+total
     require(terminated==1,'missing or duplicate final interval')
     stderr = (Path(directory)/'stderr.txt').read_text()

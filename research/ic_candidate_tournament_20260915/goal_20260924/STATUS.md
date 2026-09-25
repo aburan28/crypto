@@ -1,8 +1,10 @@
 # September 24 bounded IC goal
 
-Status: implementation/admission work; no new performance tournament launched.
+Status: optimized producer instrumentation; no new performance tournament launched.
 Foundation: [PR 704](https://github.com/aburan28/crypto/pull/704), merged at
 `c04879dbb305423d4e7bad9b9e9dd2188f000a35`.
+Canonical record/field/accounting work: [PR 718](https://github.com/aburan28/crypto/pull/718),
+merged at `e3b0a1b6bc823ed2205c8333bc43474fe5f1a0b4`.
 
 ## Objective and stopping rule
 
@@ -30,7 +32,7 @@ this status note does not substitute for that protocol.
 
 | Source | Durable identity | Why retained |
 |---|---|---|
-| Round 0020 `both` | Source manifest `69de47e30a267e93ab6da91903217062f2e2d3fbe9d6963e17700f77f33c3bd6` | Last formally promoted single-target winner |
+| Round 0020 `both` | Source manifest `563eb460f29d9ef09a2adbde4770a466d3dc16566f5f08f1e6d8238325b104d4` | Last formally promoted single-target winner |
 | Round 0023 `scaled` | Source manifest `55154f73c35b1f55240b35fd1a5e8e2488c6df41444b5114949e41741c0c3db1` | Improved the archived incumbent; nonpromotion under the old rho objective does not disqualify it as a stronger IC reference |
 | Round 0024 `pairinv` proposal | `campaign_20260916/round24-pairinv.patch` over `scaled` | Retained source change and public equivalence check; inspect and qualify before choosing a baseline |
 
@@ -45,6 +47,13 @@ sealed sources. Instrument derived copies and measure observer overhead and
 equivalence against originals on public development fixtures. Also inspect the
 current `icx` engine before claiming the strongest compatible incumbent.
 
+Correction from the materializer's source-hash check: the historical winner
+summary's `source_root` names round 0020 `both`, but its top-level source hash
+`69de47e3...` belongs to that round's incumbent. The archived candidate registry
+and independently hashed `both/source-manifest.json` identify `both` as
+`563eb460...`. Use the verified candidate source, not the inherited summary hash;
+the historical summary remains unchanged as evidence of the discrepancy.
+
 Source review found two qualification hazards in archived `scaled`: the tiny
 fast path dispatches before the configured `linear_algebra` selection and
 actually uses incremental Gaussian elimination, and `solve_target` can emit an
@@ -57,7 +66,7 @@ scalars; a public-target adapter is required before that path joins this panel.
 ## Next gates
 
 1. Canonical record and base census regression/CI: implemented in `identity.py`,
-   `measurement.py`, `test_records.py` and `ci_smoke.py`; review and merge.
+   `measurement.py`, `test_records.py` and `ci_smoke.py`; merged in PR 718.
 2. Instrument the actual optimized producer into eleven exclusive phases,
    retaining ordinary-query outcomes/rank and matrix diagnostics. Combined old
    labels remain unknown under the new schema. Integrate admission into both

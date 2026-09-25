@@ -7,6 +7,7 @@ research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wds
 # Preserve frozen patch context and verbatim benchmark source/log bytes.
 research/summation_polynomials_20260914/*.patch -whitespace
 research/gaudry_allocation_20260914/*.patch -whitespace
+research/ic_candidate_tournament_20260915/producer/*.patch -whitespace
 research/summation_polynomials_20260914/gaudry-tests.log whitespace=-blank-at-eof
 research/gaudry_allocation_20260914/gaudry-tests.log whitespace=-blank-at-eof
 gpu/macaulay/benchmarks/pipeline-20260914/sources/kernels.cuh whitespace=-blank-at-eof
