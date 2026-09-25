@@ -69,14 +69,16 @@ Beyond the verdict, and not registered:
   - The grid cannot say whether the exception is the small field or the
     extreme surplus. **`(10, 5)` shares that surplus**, so this caveat
     applies to Q2 too.
+  - It cuts the other way there. At `(4, 3)` the exception went down, so if
+    the surplus is the cause, it would push `(10, 5)` down, not up.
 - **The first fall degree is 3 on all 20 new Q1 draws.** The gap to the
-  solving degree is 2 at every cell that resolves at 5, and 3 at every cell
+  solving degree is 2 at every new cell that resolves at 5, and 3 at every cell
   that resolves at 6.
 - **Satisfiable fractions:**
   - 251/255 at `(4,3)`, about 1.6% unsatisfiable, against the pre-registered
     `e^{−5.3} ≈ 0.5%`;
   - 28/32 at `(5,3)`, S = −4;
-  - 0/4 at every `ℓ = 2` cell, S ≥ +2.
+  - 0/4 at every new `ℓ = 2` cell, S ≥ +2.
 
 ## Q2, scored
 
