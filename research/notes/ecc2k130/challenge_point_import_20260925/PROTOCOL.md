@@ -2,9 +2,9 @@
 
 The n=131 support gate in [PR #762](https://github.com/aburan28/crypto/pull/762)
 uses the bit-polynomial `z^131+z^13+z^2+z+1`. The established ECC2K-130
-challenge implementation, [`relations.py`](https://github.com/aburan28/crypto/blob/a1df88fbf76fd14e565a5ec6b7d0ea4402f954ed/research/ecc2k130_relations/relations.py)
+challenge implementation, [`relations.py`](https://github.com/aburan28/crypto/blob/e762852591ec6cb147707daac9127b22e5150143/research/ecc2k130_relations/relations.py)
 (Git blob `a1df88fbf76fd14e565a5ec6b7d0ea4402f954ed`), and its
-[`fastfield.py`](https://github.com/aburan28/crypto/blob/bb57818dd85db7bff049e6f590d818616c5164e6/research/ecc2k130_relations/fastfield.py)
+[`fastfield.py`](https://github.com/aburan28/crypto/blob/e762852591ec6cb147707daac9127b22e5150143/research/ecc2k130_relations/fastfield.py)
 (Git blob `bb57818dd85db7bff049e6f590d818616c5164e6`) use **the same
 polynomial and bit-i-is-z^i encoding**. Consequently the public P and Q
 integers can be copied directly; a field-isomorphism computation is not

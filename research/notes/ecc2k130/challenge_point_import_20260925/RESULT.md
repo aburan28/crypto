@@ -22,9 +22,14 @@ correct translated identity is `tau(Q+T)=tau(Q)+T`; the checked
 `tau(Q)=[lambda]Q` identity alone must not be substituted for the
 translated point.
 
-The source/input manifest was committed at `45ad005` before fixture
-generation; its SHA-256 is
-`784a0155fe0ebd3401ee195d3f850520db28a47a2148ce082b20811d63cb7488`.
+The literal inputs and all executable source were committed at `45ad005`
+before fixture generation. A later documentation-link correction changed
+only `PROTOCOL.md` and its manifest hash; the generator, independent verifier
+and CI script remain byte-identical to their original hashes. The current
+`SOURCE.json` SHA-256 is
+`8abab266fbd409a15e115412b35e13455e2de0ffeb6b95b632478892592d98da`
+(the initial manifest was
+`784a0155fe0ebd3401ee195d3f850520db28a47a2148ce082b20811d63cb7488`).
 The fixture SHA-256 is
 `939fac55c31b7145be425ce09f543feba29aa47846a8355d1f0841f6e594113a`
 and the independent [validation](validation.json) SHA-256 is
