@@ -6705,7 +6705,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-row-certificate-20260925 -->
-
+<!-- BEGIN ecc2k130-rotated-rank-holdout-20260925 -->
+<section class="panel" id="ecc2k130-rotated-rank-holdout-20260925">
+  <div class="panel-head">
+    <h2>Rotated toy rows: exact rank saturates in 2/3 equations; 64 point-only holdouts replay <span class="chip">rank diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/768">PR #768</a> froze SHA-selected 16 projected-positive nonzero Q points per n = 13 arm, retained 4/0/2/0 preceding selection misses, and removed all Q+T rows for those Q before modulo-2,003 elimination. An independent bit-serial/Fermat replay checked the exact rank, every remaining row equation, each solved column log by group law, and every held-out scalar. Recovery was passed only Q coordinates, column logs and a stripped saved-row response; the full old-row archive scan is charged as an <em>oracle lookup</em>, not a new PDP solver.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>The rank denominator is the complete canonical term-column set in each frozen toy arm. Dependent counts include one zero row. The 16 point-only cases per arm were selected for positive archived support, so oracle hits do not estimate a natural-target hit rate.</caption>
+    <thead><tr><th>Rotated arm</th><th class="n">Retained / archived rows</th><th class="n">Rank / columns</th><th class="n">Dependent incl. zero</th><th class="n">First full-rank row</th><th class="n">Point-only logs</th></tr></thead>
+    <tbody>
+      <tr><td>beta 3, m = 5</td><td class="n">1,780 / 1,799</td><td class="n">2 / 2</td><td class="n">1,778</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 3, m = 6</td><td class="n">6,261 / 6,307</td><td class="n">2 / 2</td><td class="n">6,259</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 7, m = 5</td><td class="n">1,781 / 1,799</td><td class="n">2 / 2</td><td class="n">1,779</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 7, m = 6</td><td class="n">7,948 / 8,012</td><td class="n">3 / 3</td><td class="n">7,945</td><td class="n">5</td><td class="n">16 / 16</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The charged toy producer used 0.681 s wall for training, scanning all 17,917 archived rows and point-only recovery; independent replay took 0.441 s. Input construction took 0.051 s. The rank trainer/verifier peaked at 176,963,584/181,403,648 bytes RSS. Thus #766's 17,917 correct identities yield only 2/2/2/3 independent rows in these separate tiny column spaces. The 64/64 recovered scalars depend on precomputed archived witness rows, not an implicit n = 131 PDP search. Full n = 131 factor-base cardinality/rank cost, natural-target relation yield, rho comparison and a Certicom log remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/PROTOCOL.md">pre-outcome protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/evidence/README.md">archive receipt</a>. Raw SHA-256 <code>3b483e486eb1dec9d34a81653cb6b568b74ada33e8c05305304810ec87ba3c6a</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-rank-holdout-20260925 -->
 <!-- BEGIN ecc2k130-rotated-beta-sweep-20260925 -->
 <section class="panel" id="ecc2k130-rotated-beta-sweep-20260925">
   <div class="panel-head">
