@@ -6710,10 +6710,31 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     </tbody>
   </table></div>
   <div class="panel-head">
-    <p>The exact m6,d21 F from <a href="https://github.com/aburan28/crypto/pull/773">#773</a> gives a one-base counting ceiling of 12.4685%; even four equal-size bases cannot exceed 49.8738% by the union bound. Balanced m10 reduces C but has 1,178 raw affine-chain variables before branches/auxiliaries. A separate full-dimensional unequal-slot census, starting with five 15-bit and four 14-bit m9 slots, is the next parameter experiment; no larger-rung solver has been admitted. Producer/independent replay wall was at most 10.506/124.310 s per arm, below frozen 600/1,200 s and 256 MiB caps. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/RESULT.md">Exact result and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/EVIDENCE.md">raw receipt and replay</a>. Freeze SHA-256 <code>3e930522ef1102770b7a748477959a108f8656fa2aaaa0b22a17598b2856eedb</code>.</p>
+    <p>The exact m6,d21 F from <a href="https://github.com/aburan28/crypto/pull/773">#773</a> gives a one-base counting ceiling of 12.4685%; even four equal-size bases cannot exceed 49.8738% by the union bound. Balanced m10 reduces C but has 1,178 raw affine-chain variables before branches/auxiliaries. The subsequent full-dimensional unequal-slot census is reported immediately below; no larger-rung solver has been admitted. Producer/independent replay wall was at most 10.506/124.310 s per arm, below frozen 600/1,200 s and 256 MiB caps. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/RESULT.md">Exact result and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/EVIDENCE.md">raw receipt and replay</a>. Freeze SHA-256 <code>3e930522ef1102770b7a748477959a108f8656fa2aaaa0b22a17598b2856eedb</code>.</p>
   </div>
 </section>
 <!-- END ecc2k130-rotated-arity-screen-20260925 -->
+<!-- BEGIN ecc2k130-rotated-unequal-arity-20260925 -->
+<section class="panel" id="ecc2k130-rotated-unequal-arity-20260925">
+  <div class="panel-head">
+    <h2>Full-dimensional unequal n = 131 slots: m9 narrowly misses the frozen column cap; m10 passes <span class="chip">necessary count</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/784">PR #784</a> froze four beta-3 allocations, parent hashes and an independent verifier before outcomes. Each arm partitions all 131 normal-basis conjugate indices across high slots i=0..r−1 and low slots i=r..m−1, giving combined GF(2) rank 131. After inverse Frobenius the normalized low space is nested in the high space, so its nonzero signed ±[4] columns are a subset of the high set. The complete natural-mask replay checked all 1,056,768 low/high masks, all row/chunk digests, exact column sets and 512 fixed sample ordinals; 269 rational-lift samples passed full group-law checks. Every space had zero x=1 masks.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>F is exact physical F0 size in each normalized space, C is the number of distinct nonzero signed columns. N=F<sub>high</sub><sup>r</sup>F<sub>low</sub><sup>m−r</sup>. The frozen gate requires N≥q and C<sub>high</sub>≤16,384; N/q is a necessary tuple-count ceiling, not a measured PDP hit rate. Full S and matched rho remain unset.</caption>
+    <thead><tr><th>Slots high / low</th><th>F low / high</th><th>C low / high</th><th>Exact N/q</th><th>Raw chain variables</th><th>Gate</th></tr></thead>
+    <tbody>
+      <tr><td>m7: 19×5 / 18×2</td><td>261,709 / 523,721</td><td>130,854 / 261,860</td><td>3.9652248352</td><td>786</td><td>fail C</td></tr>
+      <tr><td>m8: 17×3 / 16×5</td><td>65,747 / 131,331</td><td>32,873 / 65,665</td><td>4.0889520501</td><td>917</td><td>fail C</td></tr>
+      <tr><td>m9: 15×5 / 14×4</td><td>16,743 / 33,247</td><td>8,371 / 16,623</td><td>4.6905739288</td><td>1,048</td><td>fail C by 239</td></tr>
+      <tr><td>m10: 14×1 / 13×9</td><td>7,977 / 16,125</td><td>3,988 / 8,062</td><td>3.0987505090</td><td>1,179</td><td>pass necessary screen</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>All four N≥q. The m9 miss is only 239 columns above the preregistered cap, not a proof that m9 is impossible. Unequal m10 has 2.02144× the ordered tuple count and 2.02156× the signed columns of #778's balanced m10, with one more raw chain variable. The threshold admits unequal m10 as a next implicit-PDP feasibility arm but establishes no support, relation rank, solver or attack-cost dominance. The first run and all eight children passed frozen time/RSS caps; largest child RSS upper bound was 79,659,008 bytes. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_unequal_arity_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_unequal_arity_20260925/EVIDENCE.md">receipt and replay</a>. Freeze SHA-256 <code>ba93ce394df2c57f498f62bd59b74ed1faac8b748119d3e15594659d197f09cf</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-unequal-arity-20260925 -->
 <!-- BEGIN ecc2k130-rotated-pdp-corpus-20260925 -->
 <section class="panel" id="ecc2k130-rotated-pdp-corpus-20260925">
   <div class="panel-head">
