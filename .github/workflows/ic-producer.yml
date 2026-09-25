@@ -12,8 +12,17 @@ on:
       - 'research/ic_candidate_tournament_20260915/driver_admission.py'
       - 'research/ic_candidate_tournament_20260915/driver_smoke.py'
       - 'research/ic_candidate_tournament_20260915/test_driver_admission.py'
+      - 'research/ic_candidate_tournament_20260915/qualification.py'
+      - 'research/ic_candidate_tournament_20260915/qualify_references.py'
+      - 'research/ic_candidate_tournament_20260915/test_qualification.py'
+      - 'research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/**'
       - '.github/workflows/ic-producer.yml'
   workflow_dispatch:
+    inputs:
+      qualify_references:
+        description: Run the frozen five-cell development qualification after all producer controls pass
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -100,6 +109,48 @@ jobs:
           path: |
             ${{ runner.temp }}/ic-driver-evidence
             !${{ runner.temp }}/ic-driver-evidence/**/build/**
+          retention-days: 30
+          if-no-files-found: warn
+          include-hidden-files: true
+
+  reference-qualification:
+    if: github.event_name == 'workflow_dispatch' && inputs.qualify_references
+    needs: archived-producer
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: x86_64-unknown-linux-musl
+      - name: Install calibrated profiler and static toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind musl-tools zstd
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ic-producer-*-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/qualified-producer-inputs
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ic-reference-qualification
+      - name: Qualify all archived sources and matched rho widths on one host
+        run: |
+          python research/ic_candidate_tournament_20260915/qualify_references.py \
+            --artifacts "$RUNNER_TEMP/qualified-producer-inputs" \
+            --out "$RUNNER_TEMP/ic-reference-qualification"
+      - name: Preserve the declared panel and every outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-reference-qualification-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-reference-qualification
+            !${{ runner.temp }}/ic-reference-qualification/**/build/**
           retention-days: 30
           if-no-files-found: warn
           include-hidden-files: true

@@ -1,0 +1,960 @@
+{
+  "R": 12,
+  "all_pair_sums_independently_rebuilt": true,
+  "all_positive_witnesses_replayed": true,
+  "both_negative": 125,
+  "crosschecked_128_euclid_inverses_and_136_group_adds": true,
+  "distinct_root_x_collision_proxy_count": 984,
+  "extractor_hits": 3,
+  "finite_balanced_missed_targets": 0,
+  "forbidden_extractor_positive_oracle_negative": 0,
+  "full_independent_miss_indices": [
+    82,
+    83,
+    27,
+    114,
+    77,
+    16,
+    124,
+    8,
+    112,
+    118,
+    4,
+    2,
+    116,
+    43,
+    61,
+    80
+  ],
+  "infinity_pair_entries": 492,
+  "n": 41,
+  "oracle_members": 3,
+  "oracle_positive_extractor_negative": 0,
+  "pair_collisions": 3443,
+  "pair_entries": 484620,
+  "root_x_collision_proxy_missed_targets": 0,
+  "schema_version": "1.0",
+  "target_count": 128,
+  "target_detail": [
+    {
+      "extractor_hit": false,
+      "index": 0,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 1,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 2,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 3,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 4,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 5,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 6,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 7,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 8,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 9,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 10,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 11,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 12,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 13,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 14,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 15,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 16,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 17,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 18,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 19,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 20,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 21,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 22,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 23,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 24,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 25,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 26,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 27,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 28,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 29,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 30,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 31,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 32,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 33,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 34,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 35,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 36,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 37,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 38,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 39,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 40,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 41,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 42,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 43,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 44,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 45,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 46,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 47,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 48,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 49,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 50,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 51,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 52,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 53,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 54,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 55,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 56,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 57,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 58,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 59,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 60,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 61,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 62,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 63,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 64,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 65,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 66,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 67,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 68,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 69,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 70,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 71,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 72,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 73,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 74,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 75,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 76,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 77,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 78,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 79,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 80,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 81,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 82,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 83,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 84,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 85,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 86,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 87,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 88,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 89,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 90,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 91,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 92,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": true,
+      "index": 93,
+      "oracle_hit": true,
+      "witness_classes": [
+        {
+          "finite_balanced_partitions": 3,
+          "opposite_point_pairs": 0,
+          "repeated_indices": false,
+          "root_x_endpoint_collision_proxy": false
+        }
+      ],
+      "witness_count": 1
+    },
+    {
+      "extractor_hit": false,
+      "index": 94,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 95,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 96,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 97,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 98,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 99,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 100,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 101,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 102,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 103,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 104,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 105,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 106,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": true,
+      "index": 107,
+      "oracle_hit": true,
+      "witness_classes": [
+        {
+          "finite_balanced_partitions": 3,
+          "opposite_point_pairs": 0,
+          "repeated_indices": false,
+          "root_x_endpoint_collision_proxy": false
+        }
+      ],
+      "witness_count": 1
+    },
+    {
+      "extractor_hit": false,
+      "index": 108,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 109,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 110,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 111,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 112,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 113,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 114,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": true,
+      "index": 115,
+      "oracle_hit": true,
+      "witness_classes": [
+        {
+          "finite_balanced_partitions": 3,
+          "opposite_point_pairs": 0,
+          "repeated_indices": false,
+          "root_x_endpoint_collision_proxy": false
+        }
+      ],
+      "witness_count": 1
+    },
+    {
+      "extractor_hit": false,
+      "index": 116,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 117,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 118,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 119,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 120,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 121,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 122,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 123,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 124,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 125,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 126,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    },
+    {
+      "extractor_hit": false,
+      "index": 127,
+      "oracle_hit": false,
+      "witness_classes": [],
+      "witness_count": 0
+    }
+  ],
+  "total_distinct_four_multiset_witnesses": 3,
+  "unique_pair_sums": 481177,
+  "zero_finite_balanced_missed_targets": 0
+}

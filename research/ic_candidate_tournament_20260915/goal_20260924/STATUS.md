@@ -133,3 +133,12 @@ before enabling promotion. The existing admission gate intentionally leaves
 reference qualification unset. The next deliverable is a qualified comparison
 panel and executed development evidence, followed by the bounded rounds; more
 integration controls alone will not complete this goal.
+
+
+Reference-qualification implementation is in progress under the
+[predeclared protocol](reference-qualification/PROTOCOL.md). The prepared-source
+patch adds the allocator alignment fallback and independent scalar-row rank/
+solution controls. Local release checks pass for both changes; comparative Linux
+measurements have not run yet. The existing tournament now has a bounded
+qualification mode with interleaved references and separate online/cold leaders.
+This remains a prerequisite, not an improvement-round result.

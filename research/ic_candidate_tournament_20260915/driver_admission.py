@@ -16,7 +16,7 @@ from producer.evidence import audit_stages, check_build_identity, method_record,
 from producer.timing import native_intervals
 
 EVALUATOR = ('autolab.py', 'tournament.py', 'portfolio.py', 'oracle.py', 'identity.py',
-             'measurement.py', 'driver_admission.py', 'producer/evidence.py', 'producer/timing.py')
+             'measurement.py', 'driver_admission.py', 'qualification.py', 'producer/evidence.py', 'producer/timing.py')
 INPUT_LAW = ('public-hash-to-curve-cofactor-v1; independently generated fixture, '
              'one supplied public point, no planted scalar')
 

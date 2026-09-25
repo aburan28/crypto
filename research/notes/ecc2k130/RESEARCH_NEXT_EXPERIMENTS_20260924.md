@@ -17,7 +17,12 @@ dual on all eight saved maps, including a preserved checker failure and
 fully charged map construction from supplied torsion generators. PR #753
 adds independently replayed disjoint-orbit toy factor-base cells and a bounded
 actual-challenge-point degree-263 smoke with no n=131 m=2 relation or rank.
-None is an ECC2K-130 challenge-log or whole-attack speed claim. The canonical wall table is in
+PR #747 measures sparse n37/41 compact bases, and PR #757 independently
+certifies complete group-law four-sum support on held-out toy target
+streams: 164/512, 10/512 and 3/128 oracle members exactly match extractor
+hits. These finite samples favor a support/representation gate over root-index
+repair. None is an ECC2K-130 challenge-log or whole-attack speed claim. The
+canonical wall table is in
 `docs/index-calculus-scoreboard.html`.
 
 ## Decision rule and common controls
@@ -51,7 +56,7 @@ Record a machine-readable manifest and exact rerun command with each PR.
 
 | Priority | Decision and evidence | Next controlled experiment | Gate |
 | --- | --- | --- | --- |
-| 1 | PR #735 independently replayed 512/512 n=53 training relations on 220 orbit columns, first full rank at relation 461, 51 post-rank labels, and 8/8 point-only logs; its old producer's SAT accounting defect is isolated. PR #738 independently checked 27 matched signed-Frobenius rho outputs on the same one/eight-point Q prefixes. Charged IC wall was 159.916/170.521 s versus rho ranges 1.081–3.435/4.468–19.256 s. All measured blocks lost, with host-load and post-panel L1 caveats; no general interval or n=131 timing is inferred. PR #739 shows the direct n=131 root-index port has at most 2.12e-13 coverage under an optimistic 1 TiB packed-root cap. | PR #737 completed six clean same-Q n=37/41 full-rank controls: median rho/IC whole-process wall was 0.670 and 0.0634, respectively; n=41 IC peaked at 1,711,898,624 bytes RSS. Freeze at least three nonsaturated base sizes per rung and measure unique-root occupancy, failed-query S3 work, useful rank, cold memory and same-Q batched rho. PR #754 completed three L32 and three L128 true shared-log n=53 point-only batches after one rank-220 solve: all 480 IC/rho scalar checks passed; IC child-only lower/rho was 2.688–3.034 and 1.541–1.730 per block. The L128 training-once three-block portfolio bounds straddle rho (0.757 lower, 1.305 verified upper). Next preregister combined L384 on the same 384 Q values with one IC point process and one shared rho table, splitting mandatory rank/recovery from audit replay. | Stop the current materialized-root path if its coverage/memory and fully charged cost remain behind rho; reopen only for a reviewed low-memory, low-miss-work search that survives independent rank and point-log replay. Solver-stage savings alone cannot pass. |
+| 1 | PR #735 independently replayed 512/512 n=53 training relations on 220 orbit columns, first full rank at relation 461, 51 post-rank labels, and 8/8 point-only logs; its old producer's SAT accounting defect is isolated. PR #738 independently checked 27 matched signed-Frobenius rho outputs on the same one/eight-point Q prefixes. Charged IC wall was 159.916/170.521 s versus rho ranges 1.081–3.435/4.468–19.256 s. All measured blocks lost, with host-load and post-panel L1 caveats; no general interval or n=131 timing is inferred. PR #739 shows the direct n=131 root-index port has at most 2.12e-13 coverage under an optimistic 1 TiB packed-root cap; PR #747 tightens the exact unordered four-sum ceiling to 8.82e-15 at that cap. PR #757 finds no oracle-positive extractor gap in 1,152 base-target evaluations over 1,024 fresh target points (R12 reuses an R8 prefix): the exact oracle and extractor agree at 164/512, 10/512 and 3/128. | PR #737 completed six clean same-Q n=37/41 full-rank controls: median rho/IC whole-process wall was 0.670 and 0.0634, respectively; n=41 IC peaked at 1,711,898,624 bytes RSS. PR #747 completed the nonsaturated base sweep; PR #757 completed its exact fresh-stream four-sum membership gate. Test a new support representation or larger summand count only after a preregistered exact small-rung support/control and an n=131 memory admission bound; do not spend on compact root-index repair solely from these matched finite streams. PR #754 completed three L32 and three L128 true shared-log n=53 point-only batches after one rank-220 solve: all 480 IC/rho scalar checks passed; IC child-only lower/rho was 2.688–3.034 and 1.541–1.730 per block. The L128 training-once three-block portfolio bounds straddle rho (0.757 lower, 1.305 verified upper). PR #760 then ran the exact combined L384 union with one IC index and one rho table: 384/384 same-Q scalar replays passed; operational IC/rho wall was 353.649/154.799 s (2.285x), and even the incomplete IC two-child lower was 1.787x rho. Gate further batch-size work on a pre-frozen full-cost model and common-unit calibration; prioritize n=131 low-memory supported-target admission. | Stop the current materialized-root path if its coverage/memory and fully charged cost remain behind rho; reopen only for a reviewed low-memory, low-miss-work search that survives independent rank and point-log replay. Solver-stage savings alone cannot pass. |
 | 2 | Earlier K1 degree-5/8 comparison was a solver-stage signal only. PR #716's one-stream degree-7 F_(2^21) 16-point toy native base lost to original at first verified rank. Preregistered PR #753 tested two independent equal-useful-size, same-source-orbit bases on disjoint 512-target signed-τ holdouts. All 16 policies reached rank 17 and recovered scalar 339; independent replay checked 8,192 outcomes, 2,137 target draws, four bases, rank and cold ledgers. Native first-rank attempts were 97/121 versus original 159/148 in seed 2511, but 126/289 versus 115/138 in seed 2512. Its cold field-multiplication component was 2.087–3.700x original in all four cells and beat transported in only two. Degree 7 is ramified, not an n=131 yield model. | Stop the 16-point m=2 native selector. Preregister an implicit m≥3 original/leaf producer only after a supported-target-mass and memory admission bound predicts observable independent rank. Use held-out natural targets, cofactor-correct lifts, actual or tagged-conjugate leaf action, all misses, dual/map setup and same-Q rho. | Reopen native selection only if equal-useful-size held-out rank and fully charged cost beat original after action, construction, solver, projection and recovery. The toy field-multiplication component fails; modular-r work has no calibrated conversion and no whole-ECDLP speed ratio is asserted. |
 | 3 | PR #703 established the degree-263 structure and PR #717 the full-point oriented map. PR #743 independently certified the first saved kernel line descends, with two horizontal and 262 descending lines; source discriminant is -7 and leaf discriminant -484183. The least degree of a non-scalar leaf endomorphism is 121046. In the measured Python code, source Frobenius takes two squarings, one map takes 1053 multiplications/400 squarings/one inversion, and generic leaf scalar action takes 25476 multiplications/25604 squarings/193 inversions. These are stage costs, not an attack speed ratio. PR #750 independently verifies 64 forward/reverse full coordinates on all eight saved maps, 4,192 twist-kernel exceptions, and the sign-corrected dual identity; per-representative four-map setup from saved generators costs 82,638 multiplications/80,750 squarings/605 inversions, and a positive dual composition costs 2,106 multiplications/800 squarings/two inversions. PR #753's bounded exact smoke checked 32 public Certicom P,Q combinations on each of two nonconjugate descending degree-263 lines with source, native, transported and pullback 16-point bases. It charged dual/map construction, cofactor projection, full map covariance and one native leaf-orbit neighbor per selected point; independent replay checked 64 targets and 256 policy-target cases. All four m=2 arms had 0/32 hits and rank 0 on both lines, as the 32×136/r expectation is at most 6.40e-36. Prior torsion discovery is a separate 3.267-second receipt without compatible field-operation metering. This is representation feasibility, not PDP yield. | Gate larger exact-leaf work on an implicit m≥3 producer whose supported-target-mass and memory bound make useful rank plausible. Charge torsion discovery, both maps, actual or tagged-conjugate leaf action, cofactor, misses, solver, rank, recovery and same-Q rho. | Reject geometric selection if verified relation yield and total cost do not improve after map construction, orbit action, cofactor and matrix-rank costs. Do not count Frobenius-equivalent kernels as independent trials. |
 | 4 | PR #706's retrospective m=2 affine S3 contradiction retained every toy hit, but PR #751's preregistered chained m=3 implicit-orbit pilot is negative after full charging. Its 2,048 cofactor-masked full-group targets gave 7/2,048 training-base and 4/2,048 held-base group hits; the double-held-out cell had 2/649 independent hits and verified the toy scalar. The screen safely skipped 18,753 held-out source residuals, yet confirmation field multiplications rose 601,634 to 1,382,384 (2.30x), and transported-base work rose to 10,491,134 (17.44x). Both bases reached verified global rank; every source/transported relation trajectory matched. | Stop placing this affine screen ahead of a complete finite-base pair lookup. Test it again only where the complete alternative is a materially costlier algebraic solver, with disjoint orbits, failed work, feature setup, useful rank and scalar replay charged. Retain the preserved saturation and zero-hit controls as base/target-distribution warnings. | Reopen only on a held-out reduction in complete charged solve cost with zero lost S3 roots/group hits and at least equal verified rank. Skip count or lookup count alone fails. No n=131 or rho inference. |
@@ -66,9 +71,12 @@ Record a machine-readable manifest and exact rerun command with each PR.
    pending-validation input; the accepted rank/point receipts are separate.
 2. PR #737 merged six clean same-Q n=37/n=41 full-rank pairs with durable
    raw evidence and independent replay; the point-defined method lost on the
-   panel. Run the preregistered three-base-size sweep per rung at nonsaturated
-   hit rates, charging failed queries, root occupancy, RSS, rank and matched
-   rho. PR #754 now supplies the one-training, point-only L32/L128 n=53 controls:
+   panel. PR #747 completed the nonsaturated base sweep and PR #757 matched a
+   complete group-law four-sum oracle to its compact extractor on fresh
+   disjoint targets in all three tested bases. Prioritize supported target
+   mass and representation or summand count; retain the n=131 materialized
+   four-sum no-go. PR #754 now supplies the one-training, point-only
+   L32/L128 n=53 controls:
    all six pairs replay, but the verified L128 three-block portfolio bounds
    straddle three fresh rho tables. The next same-Q L384 control must use
    one IC point process and one rho table and split solve/recovery from audit.
@@ -83,7 +91,7 @@ Record a machine-readable manifest and exact rerun command with each PR.
    native cold field-multiplication component lost to original in every
    cell. PR #751's held-out chained affine screen also lost after full
    charging. Stop these selectors in their tested placement; prioritize the
-   nonsaturated n=37/41 base-size sweep and a supported-target-mass gate.
+   supported-target-mass and memory admission gates.
 
 ## Alternative ideas kept testable
 
@@ -190,7 +198,32 @@ unowned speculative tasks.
   The first failed checker attempt remains in Git separately. All six
   per-block IC lower/rho ratios exceed one; the L128 three-block portfolio
   interval spans rho, so no general many-target, common-unit S, n=131 or
-  ECC2K-130 crossover is claimed. The next registered gate is a combined
-  L384 one-table same-Q run with mandatory recovery and audit split.
+  ECC2K-130 crossover is claimed. That combined one-table question is now
+  measured in PR #760 below.
+- Complete four-sum support versus compact S3 extraction: PR #757 froze the
+  #747 point sets and disjoint target files before outcomes, archived six
+  matched process receipts plus three invalid/contended attempts, and
+  independently rebuilt all 24,753 / 215,496 / 484,620 unordered pair sums.
+  The complete oracle found 164/512, 10/512 and 3/128 members, exactly the
+  unchanged extractor hit counts, with zero oracle-positive misses. All 237
+  distinct positive four-multiset witnesses and 16 exhaustive negative
+  samples per arm replayed. The SHA256SUMS ledger is
+  `eee6dec54fccb590091abffff954d42e349becae94e68288a73729c5548bd840`.
+  This is a finite toy Gate 1 result, not global S3 completeness or n=131 yield.
+- n=53 combined L384 one-table control: preregistered PR #760 used the exact
+  384 distinct Q values from PR #754's three L128 blocks, one fresh 512-target
+  rank-220 training solve, one compact point index and one same-Q rho table.
+  Independent audit checked 512 training relations, 23,320 orbit labels,
+  220 base logs and all 384 IC/rho scalars. Fully charged operational IC was
+  353.649 s (358.745 s CPU, 396.6 MiB peak) versus rho 154.799 s
+  (154.773 s CPU, 76.8 MiB peak); even IC's incomplete two-child lower
+  cost 276.592 s exceeded rho. The 30-file raw archive SHA-256 is
+  `bef32e5d3993fe0a6cb5cc6be7c92b8b094cbaa24ff01031400d3f7e3df583b6`.
+  A post-outcome archive checker used a 64-hex file-digest predicate on a
+  40-hex Git SHA; the failed CI run, exact old checker and correction are
+  preserved, and the corrected archive-only CI independently replayed all logs. Total panel elapsed 659.421 s, below the 2,700 s ceiling.
+  This is a fixed-stream no-crossover with pre-certified base construction
+  uncharged; no common-unit S, general batch limit, n=131 or ECC2K-130
+  speedup is inferred.
 - The normal-x degree-53 local artifacts still need main-based review before
   promotion from provisional evidence.
