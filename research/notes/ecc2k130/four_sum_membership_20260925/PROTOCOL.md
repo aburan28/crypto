@@ -58,8 +58,9 @@ inverse (instead of its much slower exponentiation inverse). Test Euclid
 against the original inverse on 128 deterministic field elements per curve,
 and compare group-add outputs on random pairs plus infinity, opposite,
 doubling and x=0 exceptions. Replay every positive witness and a fixed sample
-of 16 oracle misses per arm (indices selected by SHA-256 order), recomputing
-the complete pair scan for those misses. CI checks source/input
+of 16 oracle misses per arm (indices sorted by SHA-256 of
+`ECC2K-FOUR-SUM-MISS-SAMPLE-v1/{n}/{R}/{index}`), recomputing the complete
+pair scan for those misses. CI checks source/input
 hashes, point/group membership, all witnesses and sample misses. If batch
 arithmetic mismatches independent replay, classify the arm invalid.
 
