@@ -21,7 +21,7 @@ def main() -> None:
     evidence = HERE / "evidence"
     receipt_path = evidence / "receipt.json"
     if not receipt_path.exists():
-        assert not any(evidence.iterdir()), "partial outcome without receipt"
+        assert not evidence.exists() or not any(evidence.iterdir()), "partial outcome without receipt"
         print("FROZEN_HASHES_PASS; OUTCOME_HELD")
         return
     raw = receipt_path.read_bytes()
