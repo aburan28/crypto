@@ -26,3 +26,6 @@ research/boolean_byte_sieve_20260923/**/worker-compile.txt whitespace=-blank-at-
 # Preserve the exact executed runner and its matching replay source.
 research/boolean_implicit_minors_20260923/run.py whitespace=-blank-at-eof
 research/boolean_implicit_minors_20260923/run_01/run.py whitespace=-blank-at-eof
+
+# Keep the raw million-clause toy DIMACS downloadable without rendering its full diff.
+research/notes/ecc2k130/rotated_s3_o_branch_20260925/evidence/producer/n13-m5/base.cnf -diff

@@ -6813,6 +6813,46 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-s3-fibre-theorem-20260925 -->
+<!-- BEGIN ecc2k130-rotated-solver-admission-20260925 -->
+<section class="panel" id="ecc2k130-rotated-solver-admission-20260925">
+  <div class="panel-head">
+    <h2>Rotated m = 5/6 solver admission: complete-instance export remains blocked <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/780">PR #780</a> checks the pinned #767 16-Q corpus, all 64 Q+T point branches, #774 affine candidates, #777 finite-fibre theorem and the currently identified S3/resultant/SAT interfaces. The four planted and four certified-negative Q labels per rung are valid reference labels, but no audited path emits a branch-complete rotated solver input. No solver was run, and no solver SAT/UNSAT verdict or speed ratio is claimed.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Static interface gate after a hash-only preregistration. Raw chain bits omit lift, exception and solver auxiliaries. Certified negatives come from the complete point oracle, not an algebraic solver. Full-DLP S and matched-rho ratios are unset.</caption>
+    <thead><tr><th>Arm</th><th>Frozen Q targets / Q+T branches</th><th>Raw S3-chain bits / generic limit</th><th>Affine paths on planted Q / negative Q</th><th>Admission blocker</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>8 / 32</td><td>49 / 64</td><td>2,2,2,2 / 0,0,0,0</td><td>No rotated-slot, rational-lift and O/inverse-complete exporter</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>8 / 32</td><td>88 / 64</td><td>3,1,4,2 / 0,0,0,0</td><td>Same semantics gap plus multiword capacity</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The #774 n = 13 Q+O control has three true x-mask witnesses, including one with an O prefix that affine S3 omits; the same Q also has two affine witnesses, so this is a model-set gap rather than a wrong target-level answer on the fixed corpus. #777 proves finite affine roots sound for complete rational sign fibres but does not encode the missing branch. CryptoMiniSat, msolve, Kissat, CaDiCaL and the earlier #764 WDSat fixture were inventoried; installed binaries cannot supply absent inputs. The corrected static audit took 0.186 s wall and 25,935,872-byte child high-water RSS under its 30 s/256 MiB caps; the original PATH-only inventory is retained. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_solver_admission_20260925/RESULT.md">Bounded decision and next gate</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/README.md">raw receipt and replay</a>. This is not a repository-wide impossibility result or an n = 131 solver-cost estimate.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-solver-admission-20260925 -->
+<!-- BEGIN ecc2k130-s3-o-branch-20260925 -->
+<section class="panel" id="ecc2k130-s3-o-branch-20260925">
+  <div class="panel-head">
+    <h2>O-aware recursive S3 CNF: complete toy semantics pass, dense table stops here <span class="chip">exporter gate</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/781">PR #781</a> turns #777's finite-fibre theorem into an explicit one-hot DIMACS exporter with O as a prefix/terminal state. Its independent verifier parsed every clause, rebuilt the allowed transition table from signed rational point sums, and compared every CNF state path with the complete full-point oracle. All 61 exact target assumptions, including O, and all four nonlift/sign/corruption controls passed. This is a semantic exporter gate; no SAT solver was run.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Frozen complete domains and raw DIMACS size. O-prefix and O-terminal paths can overlap. The n = 13 arm uses the same #767 five rotated factor slots and #774 32 Q+T labels, plus an O target. Full S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Panel</th><th>Factor-x / signed-point tuples</th><th>Exact CNF paths</th><th>O-prefix / O-terminal paths</th><th>Target labels</th><th>CNF variables / clauses</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 2, m = 4</td><td>256 / 2,401</td><td>949</td><td>184 / 133</td><td>8 incl. O</td><td>31 / 258</td><td>unset / unset</td></tr>
+      <tr><td>n = 3, m = 5</td><td>32 / 243</td><td>70</td><td>49 / 20</td><td>4 incl. O</td><td>22 / 66</td><td>unset / unset</td></tr>
+      <tr><td>n = 4, m = 4</td><td>4,096 / 50,625</td><td>22,373</td><td>1,744 / 1,485</td><td>16 incl. O</td><td>59 / 1,744</td><td>unset / unset</td></tr>
+      <tr><td>n = 13, m = 5</td><td>243 / 3,125</td><td>1,563</td><td>63 / 0</td><td>32 Q+T + O</td><td>1,263 / 1,195,344</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The concrete n = 13 target <code>Q3T0=(7256,3272)</code> has three paths, including the recovered exceptional-only mask <code>[0,0,0,2,1]</code> with an O prefix; the n = 13 O target has zero models and zero full-point witnesses. The n = 13 DIMACS is 17,630,779 bytes: 462,381 one-hot clauses and 732,963 forbidden triples. Independent verifier peak RSS was 495,173,632 bytes, 41,697,280 bytes below the 512-MiB cap. This measured toy cost rejects the dense table as the next representation to scale; test a sparse allowed-transition encoding against the same exact oracle before solver admission. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_o_branch_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_o_branch_20260925/evidence/README.md">raw DIMACS, paths and replay</a>. Frozen SHA-256 <code>684553d2a05f7355e29acc6b3f76dc3998a8cd5f970b6aafcd508c3fe2d02cf2</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-o-branch-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
