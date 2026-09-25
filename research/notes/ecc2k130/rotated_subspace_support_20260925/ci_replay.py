@@ -26,7 +26,8 @@ def tree_hashes(root: Path) -> dict[str, str]:
 def substantive(obj):
     if isinstance(obj, dict):
         return {key: substantive(value) for key, value in obj.items()
-                if not key.endswith("wall_seconds") and not key.endswith("cpu_seconds")}
+                if not key.endswith("wall_seconds") and not key.endswith("cpu_seconds")
+                and not key.endswith("peak_rss_bytes")}
     if isinstance(obj, list):
         return [substantive(value) for value in obj]
     return obj

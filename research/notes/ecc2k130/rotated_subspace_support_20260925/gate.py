@@ -17,6 +17,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DOMAIN = "ECC2K130-ROTATED-SUBSPACE-20260925-v1"
 Q131 = 680564733841876926932320129493409985129
+LAMBDA131 = 196511074115861092422032515080945363956
 MODELS = {
     13: {"low": [0, 1, 3, 4], "order": 2003},
     131: {"low": [0, 1, 2, 13], "order": Q131},
@@ -143,6 +144,16 @@ class Curve:
         return acc
 
 
+def source_group_order(n: int) -> int:
+    # E(F_2)={O,(0,1),(1,0),(1,1)}, hence t_1=2+1-4=-1.
+    previous, current = 2, -1
+    if n == 1:
+        return 4
+    for _ in range(2, n + 1):
+        previous, current = current, -current - 2 * previous
+    return (1 << n) + 1 - current
+
+
 def is_prime_by_trial(n: int) -> bool:
     return n > 1 and all(n % d for d in range(2, math.isqrt(n) + 1))
 
@@ -236,7 +247,7 @@ def whole_curve(curve: Curve) -> tuple[list[tuple[int, int]], dict[int, list[tup
         assert all(curve.on_curve(p) for p in points)
         by_x[x] = points
         all_points.extend(points)
-    assert len(all_points) + 1 == 8012
+    assert len(all_points) + 1 == source_group_order(13) == 8012
     return all_points, by_x
 
 
@@ -461,7 +472,6 @@ def run_toy(out: Path) -> None:
     assert global_setup["peak_rss_bytes"] <= 512 * 1024 * 1024
     summary_rows = []
     for beta in (3, 7):
-        normal_conjugates(f, beta)
         for m in (5, 6):
             for repeated in (False, True):
                 hard_deadline(180, f"n13 beta={beta} m={m} repeated={repeated}", f, c)
@@ -479,6 +489,43 @@ def run_toy(out: Path) -> None:
     save_json(out / "toy_summary.json", {"generator": pjson(h), "torsion": list(map(pjson, torsion)),
                                           "curve_order": 8012, "global_setup": global_setup,
                                           "rows": summary_rows})
+
+
+def half_trace(f: Field, a: int) -> int:
+    assert f.n & 1 and f.trace(a) == 0
+    z, term = 0, a
+    for _ in range((f.n + 1) // 2):
+        z ^= term
+        term = f.square(f.square(term))
+    assert f.square(z) ^ z == a
+    return z
+
+
+def n131_projected_lambda_point(curve: Curve, tmask: int) -> dict:
+    f = curve.f
+    assert f.n == 131
+    lam = LAMBDA131
+    assert (lam * lam + lam + 2) % Q131 == 0
+    assert pow(lam, 131, Q131) == 1
+    for x in range(2, 1 << 12):
+        rhs = x ^ f.square(f.inverse(x))
+        if trace_fast(tmask, rhs) != 0:
+            continue
+        z = half_trace(f, rhs)
+        p = (x, f.mul(x, z))
+        assert curve.on_curve(p)
+        h = curve.scalar(p, 4)
+        if h is None:
+            continue
+        assert curve.scalar(h, Q131) is None
+        assert curve.tau(h) == curve.scalar(h, lam)
+        assert curve.scalar(curve.tau(p), 4) == curve.tau(h)
+        return {"x": x, "point": pjson(p), "projected_H": pjson(h),
+                "lambda": lam, "group_order": 4 * Q131,
+                "checks": ["point_on_curve", "nonzero_[4]projection",
+                           "[q]H=O", "tau(H)=[lambda]H",
+                           "[4]tau(P)=tau([4]P)"]}
+    raise AssertionError("no deterministic projected n131 point")
 
 
 def trace_mask(f: Field) -> int:
@@ -563,12 +610,16 @@ def run_density(out: Path, inputs: Path) -> None:
     f = Field(131, MODELS[131]["low"])
     f.rabin_prime_degree()
     assert manifest["polynomial"] == f.poly and manifest["beta"] == 3
+    assert source_group_order(131) == 4 * Q131
     conjugates = normal_conjugates(f, 3)
     tmask = trace_mask(f)
     assert trace_fast(tmask, 3) == 1
+    c = Curve(f)
+    lambda_point = n131_projected_lambda_point(c, tmask)
     global_setup = {"wall_seconds": time.perf_counter() - global_wall_start,
                     "cpu_seconds": time.process_time() - global_cpu_start,
                     "field_operations": dict(f.operations),
+                    "curve_operations": dict(c.operations),
                     "peak_rss_bytes": peak_rss_bytes()}
     assert global_setup["peak_rss_bytes"] <= 512 * 1024 * 1024
     summaries = []
@@ -628,7 +679,8 @@ def run_density(out: Path, inputs: Path) -> None:
                    "conditional_sampled_projected_ratio": min(1, estimate_points**m / Q131),
                    "conditional_wilson_upper_projected_ratio": min(1, upper_points**m / Q131),
                    "physical_ideal_point_choices": m * ideal_points,
-                   "compressed_ideal_point_choices_upper": ideal_points,
+                   "compressed_ideal_point_choices_proxy": ideal_points,
+                   "compressed_rigorous_point_choices_upper": 2 * ideal_points - 1,
                    "wall_seconds": time.perf_counter() - wall_start,
                    "cpu_seconds": time.process_time() - cpu_start,
                    "field_operations": {k: f.operations[k] - bf[k] for k in sorted(f.operations)},
@@ -647,6 +699,7 @@ def run_density(out: Path, inputs: Path) -> None:
         clear_deadline()
     save_json(out / "density_summary.json", {"n": 131, "rows": summaries,
                                             "trace_mask": tmask,
+                                            "projected_lambda_point": lambda_point,
                                             "global_setup": global_setup})
 
 

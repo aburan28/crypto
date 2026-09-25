@@ -35,16 +35,17 @@ def main() -> int:
     raw = args.out / "raw"
     raw.mkdir()
     inputs = HERE / "inputs"
-    frozen = json.loads((HERE / "FROZEN.json").read_text())
-    current_sources = {name: sha(HERE / name) for name in SOURCE_FILES}
-    current_inputs = tree_hashes(inputs)
-    assert current_sources == frozen["source_sha256"]
-    assert current_inputs == frozen["input_sha256"]
     receipt = {"status": "started", "started_utc": utc(),
                "python": sys.version, "platform": platform.platform(),
-               "source_sha256": current_sources,
-               "input_sha256": current_inputs, "commands": []}
+               "source_sha256": None, "input_sha256": None, "commands": []}
     try:
+        frozen = json.loads((HERE / "FROZEN.json").read_text())
+        current_sources = {name: sha(HERE / name) for name in SOURCE_FILES}
+        current_inputs = tree_hashes(inputs)
+        receipt["source_sha256"] = current_sources
+        receipt["input_sha256"] = current_inputs
+        assert current_sources == frozen["source_sha256"], "source freeze mismatch"
+        assert current_inputs == frozen["input_sha256"], "input freeze mismatch"
         commands = [
             ("toy", [sys.executable, str(HERE / "gate.py"), "toy", "--out", str(raw / "toy")], 1800),
             ("density", [sys.executable, str(HERE / "gate.py"), "density", "--out", str(raw / "density"), "--inputs", str(inputs)], 900),

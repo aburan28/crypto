@@ -24,7 +24,12 @@ no Certicom target coordinate conversion or challenge log is attempted.
 The exact small model uses n=13, polynomial x^13+x^4+x^3+x+1
 (0x201b), and must independently count #E=8012=4*2003 with 2003 prime.
 Before any support outcome, the implementation must verify both field
-polynomials by the prime-degree Rabin irreducibility test.
+polynomials by the prime-degree Rabin irreducibility test. Both producer
+and independent replay derive the group orders from #E(F_2)=4 and the
+Weil-trace recurrence t_0=2, t_1=-1,
+t_n=-t_(n-1)-2t_(n-2), #E(F_(2^n))=2^n+1-t_n; it returns
+8012 for n=13 and 2722258935367507707729280517973639940516=4q
+for n=131.
 
 For each n, beta_A=3=1+x is accepted only if its n Frobenius conjugates
 have exact F2 rank n and tau^n(beta_A)=beta_A. At n=13, beta_B is the
@@ -38,6 +43,21 @@ For each, verify rank(V_i)=d, V_i∩V_j={0} for i!=j, rank(sum V_i)=m*d,
 and tau(V_i)=V_(i+1) for 0<=i<m-1 by exact F2 elimination.
 The normal-basis trace must satisfy Tr(beta)=1 and
 Tr(sum_j c_j beta^(2^(m*j+i))) = parity(c) for every tested mask.
+For the n=131 compressed-column structural check, deterministically select
+the first x>=2 with a rational lift whose [4]-projection H is nonzero;
+construct the lift by half-trace. Assert [q]H=O, lambda^2+lambda+2=0
+mod q, lambda^131=1 mod q and tau(H)=[lambda]H by actual group law for
+lambda=196511074115861092422032515080945363956. Replay the selected
+point, [4]tau(P)=tau[4](P), and scalar identity through separate field
+and inverse arithmetic. The deterministic structural preflight selects
+x=3, P=(3,780119811075450012506287188407015201238) and
+H=[4]P=(302709522240084841455960327861177137188,
+1704224067622899467506648521202877826049). This certifies the
+action on the cyclic prime subgroup under the checked #E=4q model; no
+target log is calculated. The lambda constant is consistent with the
+direct public challenge-point identity in
+`RESEARCH_ECC2K130_RELATION_SWEEPS.md` §4.3; this gate separately
+checks it in the chosen polynomial basis.
 The n=13 exact cells are m=5 or 6 with d=2 and the same construction.
 Each F_i contains *all* rational point lifts of x in V_i, including
 both signs when x!=0, the one point (0,1), and no infinity. The
@@ -106,7 +126,7 @@ conditional estimate from a bound using measured |F_i| or
 |[4]F_i|. The 1% projected necessary threshold first clears at
 m=5,d=25 and m=6,d=21; it promises no actual coverage.
 
-| m | d | md | Idealized raw ceiling / (4q) | Idealized projected ceiling / q | Physical choices m·2^d | Compressed F0 upper count |
+| m | d | md | Idealized raw ceiling / (4q) | Idealized projected ceiling / q | Physical choices m·2^d | Compressed F0 proxy |
 |---:|---:|---:|---:|---:|---:|---:|
 | 5 | 24 | 120 | 0.00048828125 | 0.001953125 | 83,886,080 | 16,777,216 |
 | 5 | 25 | 125 | 0.015625 | 0.0625 | 167,772,160 | 33,554,432 |
@@ -116,14 +136,17 @@ m=5,d=25 and m=6,d=21; it promises no actual coverage.
 
 The decimals display the exact-q formulas rounded to the shown precision.
 The physical and compressed counts are idealized point-size proxies, not
-measured matrix columns; rational lift density, [4] duplicates and signs
+measured matrix columns or upper bounds; rational lift density, [4] duplicates and signs
 will be reported separately. The d=25/m=5 and d=21/m=6 materialized
 three-summand projections at 24 bytes/tuple are approximately 906.7 ZB
 and 221.4 EB respectively, conditional on no deduplication.
 
 Physical point choices are roughly m*2^d, while Frobenius/known-lambda
-compression can represent log columns through F_0 (at most its
-unique projected points, with sign policy explicit). A materialized
+compression can represent log columns through F_0. The displayed 2^d
+compressed count is an idealized proxy, not an upper bound: with both
+rational signs, |[4]F_0| <= |F_0| <= 2^(d+1)-1. Exact n=13 projected
+duplicates and the n=131 point check must be reported before interpreting
+this proxy as useful columns. A materialized
 three-summand MITM half at d=25 or 21 conditionally holds 2^75 or
 2^63 tuples before collisions, respectively; price 24 bytes/record
 as a conditional storage projection, never a lower bound for a
@@ -167,17 +190,17 @@ n=13 polynomial `0x201b`, n=131 polynomial
 `0x800000000000000000000000000002007`, beta_A=3 and first alternate
 n=13 beta_B=7; it examined no support or density outcomes. The complete
 machine-readable hash map is `FROZEN.json` (SHA-256
-`15a2a922e8a4bdb87351584d6b92697bc8862c652a7104dc77e5ebc29e2db06b`).
+`f573dd5a43dd7e5014d28ca163bed1d69c8fd793201379d694942c4df9d85069`).
 The input manifest SHA-256 is
 `b1bfffd8ac22d47cd10f73e3745e0b295d6466b0c300df6674e7dd8d46381da4`.
 The source SHA-256 values are:
 
 | File | SHA-256 |
 | --- | --- |
-| `gate.py` | `631427072ac48ef14ba8d2a9b34caa8ee6504b7175ea7c6bd9126f1a01c9535a` |
-| `verify.py` | `c387fb38f397efbcc0d0a16bb82f857e5a449e311604714eeb026d325f21c1ca` |
-| `run.py` | `9bf93db61c93a5fc29effdd4f0bd25efbc118f5559f8a3b6baf9762226eaaffa` |
-| `ci_replay.py` | `ed380967f1ebc39b1a87fa22ca1e7ba750d9e655287afb60d055bd3c49437329` |
+| `gate.py` | `d3f0f6e1515282a25efb4eb6a5f68ad754f1d9be68e4a741f17a748d9a58d782` |
+| `verify.py` | `8b665a8d5a1d92cf17f64106dab4bf7134ecaffd06e669404a7508246282c1c8` |
+| `run.py` | `052553f2dedacdaf23da6230bdfd1625c02bb3375718b6c67c087d086fa62618` |
+| `ci_replay.py` | `0a370ac9b0e0792c38249bcd5871e7c40c167203e517fd6f1f8544b273507b21` |
 
 Use Python >=3.12 and run from the repository root:
 
