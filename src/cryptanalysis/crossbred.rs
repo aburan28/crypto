@@ -530,9 +530,12 @@ pub struct SearchStats {
     pub filter_word_ops: u64,
     /// Row operations in the per-point linear solves.
     pub solve_row_ops: u64,
-    /// Set if a rank-deficient system exceeded `max_kernel_dim`, so the
-    /// solution list may be incomplete.
+    /// Set if a search limit or unsupported input left the solution list
+    /// incomplete. Check `unsupported` to distinguish encoding rejection.
     pub exhausted: bool,
+    /// A decomposition frontend could not encode its input. No search
+    /// occurred; also sets `exhausted` for older completion checks.
+    pub unsupported: bool,
 }
 
 /// **Solve** the original system by crossbred search.
