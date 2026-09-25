@@ -305,7 +305,7 @@ def replay(arm: str, producer: dict):
         "factor_sizes": list(map(len, factors)),
         "rational_point_tuple_count": point_count,
         "rational_x_mask_tuple_count": sum(mask_parity.values()),
-        "mask_parity_counts": dict(sorted(mask_parity.items())),
+        "mask_parity_counts": {str(k): v for k, v in sorted(mask_parity.items())},
         "all_point_addition_branches": dict(sorted(global_branches.items())),
         "root_equation_cases": dict(sorted(cases.items())),
         "root_calls": sum(cases.values()), "path_expansions": path_expansions,
