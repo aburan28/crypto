@@ -1,0 +1,85 @@
+{
+  "base_gzip_sha256": "23397af2ef668aed0775bcb409e1ae19555357ded635452818c9a3812f679d08",
+  "base_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "binary_sha256": {
+    "ic": "33596f6fcd877f3cb3f88e607cd4e89d4c2ff1265ad7218a8a1da65d1970d0c0",
+    "rho": "b1ced2d91a9faf19f81778d415bb487af2b6d02f37fb9e621d0d3995abbdc402"
+  },
+  "checkout_head": "b3d7cf1c90473989170f8b27cb027229b99a54fd",
+  "classification": "CENSORED_OR_INVALID_FRESH_BASE",
+  "elapsed_wall_s": 115.377928212,
+  "github_run_attempt": "1",
+  "github_run_id": "36182222980",
+  "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "points_sha256": "d5185187014a12516aeef29306b65d4d20864293bb2c60667a9684fa8e51ac97",
+  "protocol_sha256": "30b8f8c19505ed8d601ac41ccd9f67bc6b863d248dfb53c410d0f9e703dc95a3",
+  "source_sha256": {
+    "archive_sealer": "cc8cd03f4478dc82b240b35efc9915d6697cc095f32e58dae5ec1346f788c9d4",
+    "archive_verifier": "bb192e0e8db0c1f8b05450b878766ff1662c29a79ddacd806c2749d052f8d951",
+    "audit": "65afe3467521c009cb1a032298d1e65876ed5350fb1ae9cbc9ee5f1b2c88c30f",
+    "cargo_lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "cargo_toml": "1435eec1bdf7ef0357ae6c8d86083b3352e9c40f850e2ef0e4d27648b0b6b6b8",
+    "cold_base": "242baab2a9a1f9ea11aa6f2dc467d40a5a09675f79a25fe3b09814919382c3b7",
+    "ic": "c2bc8b05087df69bef9593363e9d7c112e843ef16da122da50eb29ab22115f09",
+    "independent_group_reference": "54767452cfbb3a4ec931c1c5e19b1500c12bc61605a43cebfdade2732770499d",
+    "operational": "29b6f7e92c80784cb9ef56688625b7003b41f800b7d88febdd06427581475923",
+    "point_generation_math": "253842968ae6616bf6c96b79b89808e19e982c276af9e4e2fcb3f7a027a1a8b1",
+    "preflight": "a965bb136087058e2c42c289e7c0bf86e5605e7c425315ea497a635c95d092ad",
+    "prior_runner": "edbeb4f9d5e608edd7ab2ef90d306288ee573911ef8bdc2c67567b1273888034",
+    "rho": "fedacb54e441979c8c32860e7b5639e43799234741d49677010164564536d2c8",
+    "rho_audit_math": "386a864faa4b2232edb3397fead4d924e6edb4ec4eade754b64df9fbc639fc94",
+    "runner": "ff1cdb84517735b326a70146e8e841f90496f5cbe8da6133fef4708ebc5a10b9",
+    "training_schedule_reference": "51fb3a27ca76d05c0723755f48d230c42b5ad0d898f63ec292323bdb3061ca5f",
+    "workflow": "22af01b8b89facf10601c8c55b4bfdf329173d19a29491396f5d2673141266f1"
+  },
+  "steps": {
+    "base_materialization": {
+      "load_average_after": [
+        1.6630859375,
+        1.62109375,
+        0.76025390625
+      ],
+      "load_average_before": [
+        1.6630859375,
+        1.62109375,
+        0.76025390625
+      ],
+      "manifest_sha256": "8a7df1b4b967520cad2cbc3ece42c31657eeba48e7d749347edda9d4eab684bd",
+      "observed_group_peak_rss_bytes": 34361344,
+      "peak_rss_bytes": 43315200,
+      "returncode": 1,
+      "rss_gate": false,
+      "stderr_sha256": "9d5341ef34c73dacc4029cd43754f60fb8933e535f04e4afa3b55e719488345c",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "system_cpu_s": 0.019053999999999998,
+      "timed_out": false,
+      "user_cpu_s": 0.073209,
+      "wall_ms": 115.994548
+    },
+    "training_producer": {
+      "load_average_after": [
+        1.6630859375,
+        1.62109375,
+        0.76025390625
+      ],
+      "load_average_before": [
+        4.02294921875,
+        1.7919921875,
+        0.6884765625
+      ],
+      "manifest_sha256": "0177fa58645656e748f88018a221cc36f73304414bf257af6dbfbb74972a218e",
+      "observed_group_peak_rss_bytes": 416727040,
+      "peak_rss_bytes": 416464896,
+      "returncode": 0,
+      "rss_gate": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5cfcc6b51d378cd7934f1ad979958832dbb0a9ba898956d1fd7faf5a30aaa1dc",
+      "system_cpu_s": 0.090983,
+      "timed_out": false,
+      "user_cpu_s": 117.777112,
+      "wall_ms": 115236.286076
+    }
+  },
+  "validator_manifest_sha256": "f1843670a169d65645bf83886aeffee2e60e25627faa0002763eb1e7c13d8362"
+}
