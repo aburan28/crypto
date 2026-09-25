@@ -147,6 +147,10 @@ reported as a proved absence of decompositions. These controls are separate
 from solver performance qualification. Generic `RelationCollector` still drops
 per-attempt solver statistics; its scientific adapter must retain them before
 ordinary-query status mixes can enter a comparative table.
+The [relation-LA accounting controls](goal_20260924/la-accounting/RESULTS.md)
+also preserve failed solve attempts and their diagnostics in the generic
+factor-base-log report. This repairs bookkeeping; complete scientific phase
+instrumentation is still required before comparing its cost.
 
 Native screens always report `promotion_eligible=false`; operation counts, S,
 floor ratios, memory caps and affinity remain null when unavailable. A/A results,

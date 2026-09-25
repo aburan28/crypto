@@ -8606,11 +8606,12 @@ impl<'a> FactorBaseLogSolver<'a> {
         if self.system.rows() < self.system.n_cols {
             return None;
         }
-        let mut report = self.report.clone();
-        let table = self.system.attempt(&mut report)?;
-        report.verified = true;
-        self.report.solve_attempts = report.solve_attempts;
-        Some((table, report))
+        // A failed solve still consumed work. Update the persistent report
+        // before propagating None so its attempts, time and sparse diagnostics
+        // survive the next collection batch and a terminal incomplete result.
+        let table = self.system.attempt(&mut self.report);
+        self.report.verified = table.is_some();
+        Some((table?, self.report.clone()))
     }
 
     /// The report as it stands, for a solve that has not succeeded.
@@ -12230,6 +12231,96 @@ mod tests {
         bad.a = 0;
         assert!(!verify_collected_relation(&kc, &fb, 2, &bad));
         assert!(!verify_collected_relation(&kc, &fb, 3, &good));
+    }
+
+    #[test]
+    fn la_accounting_retains_failed_attempts() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 36).unwrap();
+        for la in [
+            LinearAlgebra::Dense,
+            LinearAlgebra::Sparse(SparseSolveOptions::default()),
+        ] {
+            let opts = KoblitzIcOptions {
+                linear_algebra: la,
+                ..collector_options()
+            };
+            let mut solver = FactorBaseLogSolver::new(&kc, &fb, &opts).unwrap();
+            assert!(solver.try_solve().is_none());
+            assert_eq!(
+                solver.report().solve_attempts,
+                0,
+                "no matrix solve was attempted"
+            );
+
+            // An explicit singular, homogeneous matrix isolates LA reporting.
+            // This is a matrix control, not fabricated collected IC evidence.
+            let cols = solver.columns();
+            assert!(cols > 1);
+            let zero = vec![BigUint::zero(); cols];
+            if solver.system.sparse_opts.is_some() {
+                solver.system.sparse_rows = (0..cols)
+                    .map(|_| SparseRow::from_dense(&zero, &BigUint::zero(), solver.system.r_u64))
+                    .collect();
+            } else {
+                solver.system.dense_matrix = vec![zero; cols];
+                solver.system.dense_rhs = vec![BigUint::zero(); cols];
+            }
+            // A nonzero prior value catches replacement as well as omission.
+            solver.report.linear_algebra_seconds = 7.0;
+            for expected in 1..=2 {
+                assert!(solver.try_solve().is_none());
+                let report = solver.report();
+                assert_eq!(report.solve_attempts, expected);
+                assert!(report.linear_algebra_seconds > 7.0);
+                assert!(!report.verified);
+                assert_eq!(
+                    report.sparse_report.is_some(),
+                    solver.system.sparse_opts.is_some()
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn la_accounting_persists_success_report() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        for la in [
+            LinearAlgebra::Dense,
+            LinearAlgebra::Sparse(SparseSolveOptions::default()),
+        ] {
+            let opts = KoblitzIcOptions {
+                linear_algebra: la,
+                ..collector_options()
+            };
+            let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+            let (relations, _) = collector.collect(RelationWorkUnit {
+                seed: opts.seed,
+                start: 0,
+                count: 600,
+            });
+            let mut solver = FactorBaseLogSolver::new(&kc, &fb, &opts).unwrap();
+            solver.push(&relations);
+            for expected in 1..=2 {
+                let (table, report) = solver
+                    .try_solve()
+                    .expect("toy relations span the log table");
+                assert!(table.verify(&kc));
+                assert!(report.verified && solver.report().verified);
+                assert_eq!(report.solve_attempts, expected);
+                assert_eq!(solver.report().solve_attempts, expected);
+                assert_eq!(
+                    solver.report().linear_algebra_seconds,
+                    report.linear_algebra_seconds
+                );
+                assert!(report.linear_algebra_seconds > 0.0);
+                assert_eq!(
+                    solver.report().sparse_report.is_some(),
+                    report.sparse_report.is_some()
+                );
+            }
+        }
     }
 
     #[test]
