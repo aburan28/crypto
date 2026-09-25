@@ -48,12 +48,18 @@ No SAT, relation, or target enumeration is run here.
 `audit.py --preflight` only validates frozen file hashes and input schema.
 The draft PR and hash-only CI must exist and pass before `--run` reads any
 toy point-set or admission outcome. Then run exactly one cold
-`audit.py --run --output evidence/receipt.json` with external 60-second
-wall cap and 256 MiB RSS cap. Retain stdout/stderr, exact command, UTC,
-exit, wall, CPU, RSS, and receipt SHA/bytes. If the first attempt fails,
-retain it under `evidence/failure_0/`; never silently overwrite it.
-`ci_replay.py` must independently replay the committed receipt and hashes
-without rerunning the toy enumeration. Any hash drift, point mismatch,
+`python3 run.py --output-dir evidence` from this directory. The wrapper
+runs `audit.py` and a separate `verify.py` sequentially under a total
+60-second child wall cap and 256 MiB child-RSS acceptance cap. It archives
+both exact child commands, UTC start/end, exit, stdout/stderr, wall, CPU,
+RSS upper samples, all file hashes/bytes, and the run receipt SHA/bytes.
+The independent verifier uses polynomial-product/reduction arithmetic,
+Euclid inverses, and a complete Artin-Schreier-root table; it does not call
+the producer's field arithmetic, trace, half-trace, or point enumeration.
+If the first attempt fails, retain all files and its failed receipt under
+`evidence/failure_0/`; never silently overwrite it. `ci_replay.py` checks
+the committed transcripts/hashes and recomputes the independent toy
+verifier from the archived producer receipt. Any hash drift, point mismatch,
 failed control, timeout, or missing receipt fails the gate.
 
 The n131 admission checker is deliberately fail-closed. It computes the

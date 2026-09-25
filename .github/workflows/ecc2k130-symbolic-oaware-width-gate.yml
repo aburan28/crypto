@@ -18,7 +18,7 @@ jobs:
           python-version: '3.12'
       - name: Compile and verify frozen source hashes
         run: |
-          python3 -m py_compile research/notes/ecc2k130/symbolic_oaware_width_gate_20260925/{audit,ci_replay}.py
+          python3 -m py_compile research/notes/ecc2k130/symbolic_oaware_width_gate_20260925/{audit,verify,run,ci_replay}.py
           python3 research/notes/ecc2k130/symbolic_oaware_width_gate_20260925/audit.py --preflight
       - name: Archive-structure replay when committed
         run: python3 research/notes/ecc2k130/symbolic_oaware_width_gate_20260925/ci_replay.py
