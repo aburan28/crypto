@@ -9,6 +9,7 @@ from pathlib import Path
 
 from generic_queries import verify_queries
 from generic_query_law import verify_query_law
+from generic_phases import verify_native as verify_native_phases, parse_profiles as parse_generic_profiles
 from identity import curve_record, factor_base_inventory, write_immutable
 from measurement import legacy_ledger
 from oracle import require, verify
@@ -81,7 +82,7 @@ def main():
         'evaluator_sha256': {name: digest(Path(__file__).with_name(name))
                              for name in ('ci_smoke.py', 'tournament.py', 'oracle.py', 'portfolio.py',
                                           'identity.py', 'measurement.py', 'generic_queries.py',
-                                          'generic_query_law.py')},
+                                          'generic_query_law.py', 'generic_phases.py')},
     }, exclusive=True)
     outcomes = []
     fixtures = {}
@@ -175,6 +176,51 @@ def main():
                                            process_operations=sum(intervals.values()))
                     require(ledger['cold_operations'] is None, 'legacy stages became a scientific total')
                     write(directory / 'scientific-phase-ledger.json', ledger, exclusive=True)
+            # The opt-in generic tracer has its own namespace and schema. Its
+            # intervals must close independently and preserve the untraced job.
+            traced_job = dict(job, exclusive_phases=True)
+            write(directory / 'exclusive-job.json', traced_job, exclusive=True)
+            traced_dir = directory / 'exclusive-native'
+            traced_process = execute([str(worker)], traced_job, traced_dir, 60, 8 * 1024**3, cpu)
+            receipt['exclusive_native_process'] = traced_process
+            require(traced_process['exit_code'] == (2 if expected_failure else 0)
+                    and traced_process['process_status'] == 'EXITED', 'exclusive native exit changed')
+            traced_report = read(traced_dir / 'stdout.json')
+            receipt['exclusive_native_phases'] = verify_native_phases(
+                traced_report, traced_job,
+                process_wall_ns=round(traced_process['process_wall_seconds'] * 1e9))
+            traced_proof = None if expected_failure else verify(
+                traced_report, fixture, expected_mode=job['mode'], summands=job['config']['summands'])
+            require(traced_proof == proof, 'tracing changed certificates')
+            if job['mode'] == 'ic':
+                require(verify_queries(traced_report, fixture, job['config']['summands'])
+                        == receipt['query_accounting'], 'tracing changed queries/counters')
+                receipt['exclusive_query_law'] = verify_query_law(traced_report, fixture, traced_job)
+            # Cover each backend, sparse LA, both rho curves, a collection walk,
+            # and an unstarted target under Callgrind without profiling every
+            # duplicate LA/curve combination in this integration panel.
+            profile_exclusive = (profile or name == 'incomplete-pair_table' or
+                                 (name.startswith('algebra-a0-') and job['config']['linear_algebra'] == 'dense'))
+            if profile_exclusive:
+                traced_profile = directory / 'exclusive-profile'
+                command = ['valgrind', '--tool=callgrind', '--cache-sim=no', '--branch-sim=no',
+                           '--separate-threads=no', '--collect-atstart=yes', '--instr-atstart=yes',
+                           '--callgrind-out-file=' + str(traced_profile / 'callgrind.out'), str(worker)]
+                profile_process = execute(command, traced_job, traced_profile, 60, 8 * 1024**3, cpu)
+                receipt['exclusive_profile_process'] = profile_process
+                require(profile_process['exit_code'] == (2 if expected_failure else 0)
+                        and profile_process['process_status'] == 'EXITED', 'exclusive profiler exit changed')
+                profiled = read(traced_profile / 'stdout.json')
+                receipt['exclusive_instructions'] = parse_generic_profiles(traced_profile, profiled, traced_job)
+                profile_proof = None if expected_failure else verify(
+                    profiled, fixture, expected_mode=job['mode'], summands=job['config']['summands'])
+                require(profile_proof == traced_proof, 'exclusive native/profile certificate mismatch')
+                if job['mode'] == 'ic':
+                    require(verify_query_law(profiled, fixture, traced_job) == receipt['exclusive_query_law'],
+                            'exclusive native/profile query law mismatch')
+                else:
+                    require(profiled['field_kernel'] == traced_report['field_kernel'],
+                            'exclusive native/profile rho dispatch mismatch')
             receipt['status'] = 'VERIFIED'
         except Exception as exc:
             receipt['reason'] = f'{type(exc).__name__}: {exc}'

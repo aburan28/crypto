@@ -192,3 +192,15 @@ The [independent query-law controls](generic-query-law/RESULTS.md) now replay
 controls (40 complete, seven intentionally incomplete). Wrong seeds, batch
 partitions and collection/descent rules are rejected even when group equations
 remain valid. This is accounting admission, not a new measured improvement round.
+
+PR 805 merged the query-law checks at
+`c7c2922c116b2ec3ca84a2066a8b9c63a782a39d`, with all applicable checks passing.
+The [exclusive generic phase follow-on](generic-exclusive-phases/RESULTS.md)
+now passes two retained local 147-pair panels (126 complete and 21 deliberately
+incomplete pairs per panel). It separates query/PDP/checking/matrix/LA/descent
+work and independently checks native clock closure. Strict sessions reject
+phase changes on another thread. Linux instruction closure is exercised by
+the PR integration checks. Shared-host mode ratios remain too unstable to
+qualify overhead or comparative performance. This accounting work consumes no
+round; exact generic admission and optimized-reference qualification precede
+the remaining two rounds.

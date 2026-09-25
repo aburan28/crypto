@@ -164,6 +164,15 @@ also preserve failed solve attempts and their diagnostics in the generic
 factor-base-log report. This repairs bookkeeping; complete scientific phase
 instrumentation is still required before comparing its cost.
 
+The [exclusive generic phase controls](goal_20260924/generic-exclusive-phases/RESULTS.md)
+add opt-in native and instruction partitions for the generic worker. Both local
+147-pair passes preserve query histories, base census and certificates; missing
+phases stay null and failed work remains charged. The checker requires exact
+online closure and whole-process instruction closure. This is clock-accounting
+admission only: tracing changes collection scheduling, and the uncalibrated
+enabled/disabled timings do not establish low overhead. Exact source/dispatch,
+base/matrix admission and optimized-reference qualification are still required.
+
 Native screens always report `promotion_eligible=false`; operation counts, S,
 floor ratios, memory caps and affinity remain null when unavailable. A/A results,
 failures and every reference remain visible. These screens validate integration
