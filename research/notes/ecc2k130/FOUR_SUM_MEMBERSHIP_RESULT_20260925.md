@@ -5,7 +5,7 @@ preregistered, disjoint toy-point streams, the complete elliptic-curve
 four-sum oracle and the unchanged compact S3 extractor agree on every target.
 There is no observed root-index/extractor miss on these streams. At n=37 R3,
 164/512 targets have a four-point sum in the frozen base, compared with the
-exact **whole-group necessary counting ceiling** 0.450829; the older training
+exact **uniform prime-subgroup target counting ceiling** 0.450829; the older training
 stream's extractor yield was 175/512. The ceiling counts potential unordered
 multisets before collisions and is not the measured support probability. The
 fresh 164/512 result is 0.3203125. Replacing a root index cannot recover the
@@ -24,7 +24,7 @@ scalars are *modeled* as independent uniform subgroup draws, descriptive 95%
 Wilson intervals for the oracle membership fractions are 0.2814–0.3619,
 0.0106–0.0356 and 0.0080–0.0666 respectively. These are model-based
 sampling descriptions, not coverage proofs; in particular 10/512 at n41 R8
-may exceed its 0.014164 whole-group ceiling by finite-sample fluctuation.
+may exceed its 0.014164 uniform prime-subgroup target ceiling by finite-sample fluctuation.
 The n41 R12 targets are literally the first 128 of the n41 stream used at R8,
 so the two n41 rows are not statistically independent samples.
 
@@ -51,7 +51,7 @@ multiplicity proxy; no missed positive case was available to classify causally.
 The negative-symmetry closure contributes one infinity pair per `F/2` at
 minimum. All 237 positive witnesses admit all three finite balanced pair
 partitions; 12 n37 witnesses repeat an index. The 60/2/0 witness root-x
-collision-proxy flags at n37/R8/R12 did not cause a missed target. These
+collision-proxy flags at n37 R3 / n41 R8 / n41 R12 did not cause a missed target. These
 figures explain why a counting ceiling can substantially overstate actual
 support and why tuple-partition multiplicity must not be mistaken for distinct
 target yield.
