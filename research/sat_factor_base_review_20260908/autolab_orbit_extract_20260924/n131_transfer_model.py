@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Exact-count transfer checks for the current compact S5 orbit extractor.
 
-All counts are architecture-specific projections, not measured n=131 costs.
-The counting bound on random-target coverage is universal for a four-sum
-factor base: at most F**4 subgroup elements are represented by ordered tuples.
+Integer counts and rational coverage/work bounds are exact architecture-specific
+projections, not measured n=131 costs. Probability and log2 display fields
+are floating-point approximations. The four-sum counting bound is universal:
+at most F**4 subgroup elements are represented by ordered tuples.
 """
 
 import json
@@ -46,13 +47,13 @@ def orbit_scenario(name: str, columns: int) -> dict:
     points = 2 * n * columns
     slots = n * columns**2  # Every (left, right, relative shift) scan slot.
     root_candidates = 2 * slots  # Conditional: two regular S3 roots per slot.
-    probability_cap = min(1.0, points**4 / Q131)
+    coverage_cap_numerator = min(points**4, Q131)
+    probability_cap_approx = coverage_cap_numerator / Q131
     s3_calls_per_failed_query = 2 * n * slots
-    expected_failed_query_calls_for_rank = (
-        columns * (1 / probability_cap - 1) * s3_calls_per_failed_query
-        if probability_cap < 1
-        else 0
+    failed_call_numerator = (
+        columns * (Q131 - coverage_cap_numerator) * s3_calls_per_failed_query
     )
+    failed_call_denominator = coverage_cap_numerator
     return {
         "scenario": name,
         "columns": columns,
@@ -60,12 +61,18 @@ def orbit_scenario(name: str, columns: int) -> dict:
         "regular_scan_slots": slots,
         "root_candidates_if_two_per_slot": root_candidates,
         "packed_root_bytes_if_distinct": root_candidates * PACKED_ROOT_BYTES,
-        "random_target_coverage_upper_bound": probability_cap,
-        "log2_random_target_coverage_upper_bound": math.log2(probability_cap),
+        "random_target_coverage_upper_bound_numerator": coverage_cap_numerator,
+        "random_target_coverage_upper_bound_denominator": Q131,
+        "random_target_coverage_upper_bound_approx": probability_cap_approx,
+        "log2_random_target_coverage_upper_bound_approx": (
+            math.log2(coverage_cap_numerator) - math.log2(Q131)
+        ),
         "s3_calls_per_failed_query_if_all_regular": s3_calls_per_failed_query,
-        "log2_expected_failed_query_s3_calls_for_full_rank_if_all_regular": (
-            math.log2(expected_failed_query_calls_for_rank)
-            if expected_failed_query_calls_for_rank
+        "expected_failed_query_s3_calls_for_full_rank_numerator": failed_call_numerator,
+        "expected_failed_query_s3_calls_for_full_rank_denominator": failed_call_denominator,
+        "log2_expected_failed_query_s3_calls_for_full_rank_approx": (
+            math.log2(failed_call_numerator) - math.log2(failed_call_denominator)
+            if failed_call_numerator
             else None
         ),
     }
