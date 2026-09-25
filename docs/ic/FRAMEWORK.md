@@ -658,8 +658,8 @@ worse than none:
   - at `m = 3`, to 7 at `N = 15`.
 
   Whether the growth is linear or slower is open. So is `m = 4` past
-  `N = 12`, the regime that decides the oracle, which ran out of memory at
-  `N = 16`. No oracle is built.
+  `N = 12`, the regime that decides the oracle. It ran out of memory at
+  `N = 16`, where a diagnostic gives only `D ≥ 7`. No oracle is built.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.

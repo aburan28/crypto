@@ -90,7 +90,7 @@ CONFIRM_README_PLACEHOLDER
 | file | flags (all with `--engine tower --p 2013265921 --kinds kummer --controls tower --planted 0 --random 1 --ladder-t none --trace`) | what it is |
 |:--|:--|:--|
 | `D1-kummer-m4-p1-N12-trace` | `--m 4 --t-min 3 --max-t-m4 3 --budget 600` | The step trace of M4's `N = 12` target 0, which it repeats exactly. It shows where `m = 4` spends its memory (note §11.7) |
-D2_README_PLACEHOLDER
+| `D2-kummer-m4-p1-N16-trace` | `--m 4 --t-min 4 --max-t-m4 4 --budget 1500 --max-nnz 2000000000` | M4's first `N = 16` system, which ran out of memory after 29 minutes, re-run with a 25-minute budget so that the engine stops itself and prints its trace. It stopped at the budget after 48 steps, all at degree 7 or below and every one from step 12 on at 7, without refuting: `D ≥ 7`. Its row says `timed_out` |
 
 ## Builds
 

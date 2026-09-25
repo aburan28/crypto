@@ -23,8 +23,8 @@ pilot (§10, 2026-09-24).
     Kummer and the isogeny family, at every prime and in the null. This refutes
     the pilot's Conjecture 3.
   - At `m = 3` it reaches 7 at `N = 15`.
-  - Whether it grows linearly in `N` is not decided, and `m = 4` ran out of
-    memory at `N = 16`.
+  - Whether it grows linearly in `N` is not decided. `m = 4` ran out of
+    memory at `N = 16`, where a diagnostic gives only `D ≥ 7`.
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -1378,6 +1378,15 @@ staircase stop never fired.
 - **`N = 16` ran out of memory.** Its first system hit the 14 GB cap after 29
   minutes ("memory allocation of 131072 bytes failed"). The process ended
   there, so the second target never ran, and there is no row and no `D`.
+- **A diagnostic re-run of that system (D2) gives a lower bound.** It is labelled
+  as such, runs on the same build with a 25-minute budget so that the engine
+  stops itself before memory runs out, and records its trace.
+  - In 48 steps it reached degree 7 (at step 12) and no higher, over up to
+    76,837 columns. It had not refuted when the budget ran out, so
+    `D ≥ 7` at `N = 16`, against 7 at `N = 12`.
+  - Every step from step 12 on is at degree 7. The last steps grow fast: step
+    48 had 4,117 critical pairs and 229 million nonzeros, with a basis of 6,036
+    elements and 123,032 pending pairs. That tail is what filled the memory.
 - A trace of the `N = 12` system (D1 in the README) shows where the memory goes.
   One early step reaches degree 7 (step 16). The refutation then comes through a
   tail of degree-6 steps, in which the basis grows to 1,886 elements and the
@@ -1409,7 +1418,7 @@ committed scripts wrote them with `$(date …)` in the same line, which resets
 | 3 | K0: `D = 6`; target 0 reproduces §11.3 | held |
 | 4 | K1n: the null's `D` is the tower's | held at every `N` |
 | 5 | I0: `D ≥ 5` | held: `D = 6` |
-| 6 | M4: 6 and 7 at `N = 8, 12`; M3: 6 at `N = 9, 12`; `D` not falling at new sizes | held where measured. M3 gives 7 at `N = 15`, and both `N = 18` systems stopped for size at `D ≥ 7`. M4 gave no `D` at `N = 16` |
+| 6 | M4: 6 and 7 at `N = 8, 12`; M3: 6 at `N = 9, 12`; `D` not falling at new sizes | held where measured. M3 gives 7 at `N = 15`, and both `N = 18` systems stopped for size at `D ≥ 7`. M4 gave only `D ≥ 7` at `N = 16` (D2) |
 
 **`N`, not `|V|²/p`.** Both K1 systems at `N = 20` have `D = 6`, so "`N`"
 holds. At `p₁` the grid is `2^20/p₁ ≈ 5·10⁻⁴` of the field, three orders of
@@ -1427,7 +1436,7 @@ range starts, so each reading comes with its range.
 | Kummer, 2, `p₀` (XV1, K0) | 2–20 | 3 4 4 4 4 5 5 5 5 6 | 0 | 0.10 (12–20) | inconclusive |
 | isogeny, 2, `p₀` (XV1, I0) | 2–20 | 3 5 5 5 5 5 5 5 5 6 | 0 | 0.10 (12–20) | inconclusive |
 | Kummer, 3, `p₁` (M3) | 9–15; 18 stopped at `≥ 7` | 6 6 7 | 0 | — | inconclusive (three sizes) |
-| Kummer, 4, `p₁` (M4) | 8–12 | 6 7 | 0 | — | inconclusive (two sizes) |
+| Kummer, 4, `p₁` (M4) | 8–12; 16 only `≥ 7` (D2) | 6 7 | 0 | — | inconclusive (two sizes) |
 
 - **Both H0 readings are at the threshold, and both come from where the range
   begins.**
@@ -1477,7 +1486,8 @@ It does not show three things.
      (12, 20, then about 33) would make `D` logarithmic in `N`, which §3.6
      counts as viable.
    - Telling the two apart needs `N ≈ 28–33` at `m = 2`.
-2. **Anything at `m = 4` beyond `N = 12`**, the regime that decides the oracle.
+2. **Anything at `m = 4` beyond `N = 12`, the regime that decides the oracle,**
+   except the lower bound `D ≥ 7` at `N = 16`.
 3. **Any speed, `S` or scoreboard row.** Nothing is priced end to end, so there
    is no row to draw (`AGENTS.md` §7), as in §10.6.
 
