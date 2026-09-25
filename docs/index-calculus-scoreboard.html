@@ -5870,8 +5870,9 @@ factor base, and this prices a decomposition oracle.</p>
     over-weights elimination: 51 instructions per counted operation where m4ri kernels dominate, 586 where system construction and root
     builds do. The oracle ledger&rsquo;s matrix-F4 figures are word XORs converted to GAE, so they undercount the oracle by roughly
     that factor. Next levers, measured here and not claimed: specialisation on the large cells (51% of instructions, <code>insert</code>
-    29%); system construction on the small and quadratic ones (31&ndash;33%), where the decoded template can be kept in memory; and a layout
-    cache for support-local roots, which would remove round 2&rsquo;s one per-rung regression.</p>
+    29%); system construction on the small and quadratic ones (31&ndash;33%), which #697 &mdash; merged after these runs &mdash; now amortises
+    with an in-process template memo, not yet re-priced; and a layout cache for support-local roots, which would remove round 2&rsquo;s one
+    per-rung regression. Every figure here is for the code before #697 (<code>31bedbdf</code>).</p>
 </section>
 <!-- END groebner-instructions-20260925 -->
 <!-- BEGIN ic-tournament-round-0023 -->

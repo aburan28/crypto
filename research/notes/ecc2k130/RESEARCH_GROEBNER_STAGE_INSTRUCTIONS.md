@@ -386,11 +386,23 @@ on the same instance and seeds (`rho/`).
 
 ### 5.6 The next levers, measured here, none claimed
 
+*Dated: every number in this note is for the code at `31bedbdf` (main at
+`48229a70`).  #697, merged into main after these runs, changes two things
+this round priced:*
+- *It keeps decoded `DecompositionTemplate`s in process by default
+  (`IC_TEMPLATE_MEMO=0` restores the old path).  That is the
+  system-construction lever below.*
+- *It moves large reduced-row-echelon forms to a new Four Russians kernel
+  (`gf2_elim`).*
+
+*This round does not measure either change.  The next Gröbner round's
+reference is main after #697, re-priced under this round's convention.*
+
 1. **Specialisation on large cells:** 51% of the default's instructions,
    `insert` 29%.
-2. **System construction on small and quadratic cells** (31–33%): keep the
-   decoded `DecompositionTemplate` in memory, bypassing the serialising cache
-   whose overhead sank it on 2026-09-14.
+2. **System construction on small and quadratic cells** (31–33%): taken up
+   by #697's in-process template memo, whose instruction effect is still to
+   be measured.
 3. **The `K_1/2^15 m=2` regression:** give support-local roots a layout
    cache.
 
