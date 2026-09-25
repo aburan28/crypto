@@ -848,8 +848,10 @@ fn cached_monomials_up_to_mask(variable_mask: u64, degree: u32) -> std::rc::Rc<[
     thread_local! {
         static CACHE: RefCell<HashMap<(u64, u32), Rc<[u64]>>> = RefCell::new(HashMap::new());
     }
-    let cacheable =
-        degree <= 2 && std::env::var("KIC_F4_DISABLE_SCHEDULE_CACHE").as_deref() != Ok("1");
+    static DISABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let disabled = *DISABLED
+        .get_or_init(|| std::env::var("KIC_F4_DISABLE_SCHEDULE_CACHE").as_deref() == Ok("1"));
+    let cacheable = degree <= 2 && !disabled;
     if !cacheable {
         return monomials_up_to_mask(variable_mask, degree).into();
     }
@@ -1542,6 +1544,9 @@ fn visit_macaulay_rows(
     criterion: Option<&F5Criterion>,
     mut visit: impl FnMut(&[u64]),
 ) -> Option<usize> {
+    // Read once per build, not once per row: the cap is an environment
+    // lookup, and the loop below runs once per Macaulay row.
+    let row_cap = max_f4_rows();
     let mut count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut all: Vec<u64> = Vec::new();
@@ -1590,7 +1595,7 @@ fn visit_macaulay_rows(
                 visit(&row);
                 count += 1;
             }
-            if count > max_f4_rows() {
+            if count > row_cap {
                 return None;
             }
         }
@@ -1916,7 +1921,8 @@ fn pack_polynomials_flat_fused(
         gaps.push(Some(gap));
     }
     let mut seen = vec![false; layout.columns.len()];
-    let mut data = Vec::with_capacity(estimated_rows.min(max_f4_rows()) * words);
+    let row_cap = max_f4_rows();
+    let mut data = Vec::with_capacity(estimated_rows.min(row_cap) * words);
     let mut rows = 0usize;
     for (polynomial, gap) in polys.iter().zip(gaps) {
         let Some(gap) = gap else {
@@ -1944,7 +1950,7 @@ fn pack_polynomials_flat_fused(
             if write == 0 {
                 continue;
             }
-            if rows == max_f4_rows() {
+            if rows == row_cap {
                 return None;
             }
             let start = data.len();
@@ -1998,7 +2004,8 @@ fn pack_polynomials_nested_fused(
         gaps.push(Some(gap));
     }
     let mut seen = vec![false; layout.columns.len()];
-    let mut matrix = Vec::with_capacity(estimated_rows.min(max_f4_rows()));
+    let row_cap = max_f4_rows();
+    let mut matrix = Vec::with_capacity(estimated_rows.min(row_cap));
     let max_terms = polys
         .iter()
         .map(|polynomial| polynomial.terms.len())
@@ -2030,7 +2037,7 @@ fn pack_polynomials_nested_fused(
             if write == 0 {
                 continue;
             }
-            if matrix.len() == max_f4_rows() {
+            if matrix.len() == row_cap {
                 return None;
             }
             let mut row = vec![0u64; words];
@@ -3373,11 +3380,15 @@ impl SolverEngine {
         let top = max_degree.max(base);
         // A higher-degree Macaulay matrix includes the lower-degree rows,
         // so this changes work scheduling rather than the ideal or roots.
-        let highest_only = match std::env::var("KIC_F4_MAX_DEGREE_ONLY").as_deref() {
-            Ok("1") => true,
-            Ok("0") => false,
-            _ => n_vars >= 24,
-        };
+        static HIGHEST_ONLY: std::sync::OnceLock<Option<bool>> = std::sync::OnceLock::new();
+        let forced = *HIGHEST_ONLY.get_or_init(|| {
+            match std::env::var("KIC_F4_MAX_DEGREE_ONLY").as_deref() {
+                Ok("1") => Some(true),
+                Ok("0") => Some(false),
+                _ => None,
+            }
+        });
+        let highest_only = forced.unwrap_or(n_vars >= 24);
         let first = if highest_only { top } else { base };
         Some(first..=top)
     }
