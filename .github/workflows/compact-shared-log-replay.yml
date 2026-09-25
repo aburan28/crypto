@@ -1,0 +1,34 @@
+name: Compact shared-log archive replay
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/compact_shared_log_20260925/**'
+      - '.github/workflows/compact-shared-log-replay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check frozen source and inputs
+        run: |
+          python3 -B -m py_compile research/notes/ecc2k130/compact_shared_log_20260925/{make_inputs,build,run,run_panel,verify,archive,verify_archive,summarize,rss_smoke}.py
+          python3 -B research/notes/ecc2k130/compact_shared_log_20260925/make_inputs.py --check
+      - name: Replay committed archive and decision without rerunning producers
+        run: |
+          if test -f research/notes/ecc2k130/compact_shared_log_20260925/evidence/SHA256SUMS; then
+            python3 -B research/notes/ecc2k130/compact_shared_log_20260925/verify_archive.py
+            python3 -B research/notes/ecc2k130/compact_shared_log_20260925/summarize.py --out /tmp/compact-shared-log-analysis.json
+            cmp /tmp/compact-shared-log-analysis.json research/notes/ecc2k130/compact_shared_log_20260925/analysis.json
+          else
+            test ! -e research/notes/ecc2k130/compact_shared_log_20260925/analysis.json
+            echo 'Pre-outcome draft: frozen input replay passed; no producer archive exists yet.'
+          fi
