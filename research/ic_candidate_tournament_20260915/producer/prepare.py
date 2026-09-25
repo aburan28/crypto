@@ -100,6 +100,7 @@ def prepare(name, output, restored=None, *, instrument=True):
         patches.append(HERE/'exclusive-phases.patch')
         patches.append(HERE/'public-point-timing.patch')
         patches.append(HERE/'rho-preparation.patch')
+        patches.append(HERE/'reference-quality.patch')
     for patch in patches:
         # Check every hunk before writing. Some system patch implementations
         # return success after printing that an out-of-range hunk was ignored.
