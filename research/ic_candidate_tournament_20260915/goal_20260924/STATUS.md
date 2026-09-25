@@ -1,10 +1,15 @@
 # September 24 bounded IC goal
 
-Status: optimized producer instrumentation; no new performance tournament launched.
+Status: optimized producer admission passed; no new performance tournament launched.
 Foundation: [PR 704](https://github.com/aburan28/crypto/pull/704), merged at
 `c04879dbb305423d4e7bad9b9e9dd2188f000a35`.
 Canonical record/field/accounting work: [PR 718](https://github.com/aburan28/crypto/pull/718),
 merged at `e3b0a1b6bc823ed2205c8333bc43474fe5f1a0b4`.
+Optimized producer work: [PR 733](https://github.com/aburan28/crypto/pull/733).
+The tested implementation head `6b5a402558c2c883baa52c2ef585f99886108167` passed
+all 39 Linux native/profile pairs. The [admission report and durable evidence](producer-admission/README.md)
+retain independent transport replay and the earlier failed controls. This
+qualifies the instrumentation on fixed vectors; it does not select an incumbent.
 
 ## Objective and stopping rule
 
@@ -67,10 +72,12 @@ scalars; a public-target adapter is required before that path joins this panel.
 
 1. Canonical record and base census regression/CI: implemented in `identity.py`,
    `measurement.py`, `test_records.py` and `ci_smoke.py`; merged in PR 718.
-2. Instrument the actual optimized producer into eleven exclusive phases,
-   retaining ordinary-query outcomes/rank and matrix diagnostics. Combined old
-   labels remain unknown under the new schema. Integrate admission into both
-   development and promotion drivers before any new comparison.
+2. Optimized archived producers now export eleven exclusive phases, ordinary-query
+   outcomes/rank and matrix diagnostics; 39/39 pairs independently replay. Combined
+   old labels remain unknown under the new schema. Integrate admission into both
+   development and promotion drivers before any new comparison. Native phase-wall
+   and single-target online intervals still need instrumentation, with public-point
+   input so fixture construction stays outside the algorithm timing boundary.
 3. Restore/qualify candidate IC sources and a strong matched rho reference;
    freeze rho width and source before held-out data.
 4. Seal the panel and familywise protocol, then run bounded rounds. Keep all

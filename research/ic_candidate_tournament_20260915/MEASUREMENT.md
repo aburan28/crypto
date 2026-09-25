@@ -9,8 +9,11 @@ profile are insufficient for admission under this contract**.
 `identity.py` implements the binary Koblitz fixture adapter and immutable record
 writer. `measurement.py` verifies run bindings, certificates and cost closure.
 CI exercises the real worker's base inventories and exports the explicit unknown
-phase ledger. The producer instrumentation and tournament admission migration
-remain prerequisites; these helpers alone do not make a campaign ready.
+phase ledger. The restored optimized producers now have a separately tested
+[scientific adapter](producer/PROTOCOL.md), with [retained admission evidence](goal_20260924/producer-admission/README.md).
+The ordinary checkout's legacy worker remains unpriced under this schema. Driver
+admission migration, reference qualification and online timing remain prerequisites;
+passing producer controls alone does not make a comparative campaign ready.
 
 ## Identity
 
