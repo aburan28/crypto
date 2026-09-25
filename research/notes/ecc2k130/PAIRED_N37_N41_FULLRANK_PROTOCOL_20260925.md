@@ -1,6 +1,6 @@
 # Paired cold full-rank control for n=37 and n=41
 
-Status: preregistered protocol; measurements will be added on this branch. This does not alter the canonical boundary or scoreboard until a complete replayed panel exists.
+Status: six clean main-derived same-Q pairs independently replayed and archived; final current-main source-hash revalidation is pending. This is a negative control, not a crossover or shared-log batch claim.
 
 ## Question and fixed arms
 
@@ -29,3 +29,6 @@ This fixture does not amortize factor-log linear algebra across targets: its bat
 ## Historical boundary
 
 The committed [2026-09-12 n37 sweep](../../sat_factor_base_review_20260908/autolab/evidence/20260912-koblitz-vs-rho-no-crossover/README.md) reported 14.778 ms/target for its best direct mode versus 12.822 ms/target for rho over 1024 independently generated targets, a 0.868 rho/IC ratio. Its aggregate receipts did not preserve per-relation replay in Git. That figure is a cross-cohort historical control, not this paired result.
+## Measured panel and promotion gate
+
+The six clean-source pairs and all raw/replay receipts are committed under [paired_fullrank_clean_evidence_20260925](paired_fullrank_clean_evidence_20260925/clean_archive_manifest.json). On the measured PR merge ref `a045a0a80d3a8af00fedc85c0342f4e7d026aacd`, median rho/IC cold wall ratios were 0.670 at n37 and 0.0634 at n41; all 820 relations were independently replayed. This is a negative point-defined control. The local source-overlay panel remains labeled provisional. A subsequent CI run must revalidate source hashes and replay against the current main-derived merge ref after main's later research merges.
