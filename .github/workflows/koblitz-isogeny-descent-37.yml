@@ -14,14 +14,17 @@ permissions:
 jobs:
   exact-isogeny-and-matched-stage:
     runs-on: ubuntu-latest
-    container: sagemath/sagemath:10.6
+    container:
+      image: sagemath/sagemath:10.6
+      options: --user root
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - name: Construct map and run frozen comparison
         run: |
-          sage -python research/koblitz_isogeny_descent_37_20260925/experiment.py \
-            --output "$RUNNER_TEMP/koblitz-37-run"
+          mkdir -p "$RUNNER_TEMP/koblitz-37-run"
+          chown sage:sage "$RUNNER_TEMP/koblitz-37-run"
+          su - sage -c "sage -python '$GITHUB_WORKSPACE/research/koblitz_isogeny_descent_37_20260925/experiment.py' --output '$RUNNER_TEMP/koblitz-37-run'"
       - name: Verify saved evidence
         run: |
           python3 research/koblitz_isogeny_descent_37_20260925/verify.py \
