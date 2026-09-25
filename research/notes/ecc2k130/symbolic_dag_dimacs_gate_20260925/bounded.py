@@ -34,9 +34,23 @@ def run_child(command: list[str], *, cwd: Path, stdout: Path, stderr: Path,
     peak = 0
     stop_reason = None
     with stdout.open('wb') as out_stream, stderr.open('wb') as err_stream:
-        child = subprocess.Popen(command, cwd=cwd, stdout=out_stream, stderr=err_stream,
-                                 start_new_session=True,
-                                 preexec_fn=_limits(rss_cap, file_cap))
+        try:
+            child = subprocess.Popen(command, cwd=cwd, stdout=out_stream, stderr=err_stream,
+                                     start_new_session=True,
+                                     preexec_fn=_limits(rss_cap, file_cap))
+        except Exception as exc:
+            err_stream.write(f'LAUNCH_ERROR {type(exc).__name__}: {exc}\n'.encode())
+            err_stream.flush()
+            return {'argv': command, 'cwd': str(cwd), 'utc_start': utc,
+                    'exit_code': None, 'stop_reason': 'LAUNCH_ERROR',
+                    'wall_seconds': time.monotonic() - started,
+                    'sampled_peak_rss_bytes': 0,
+                    'rss_address_space_cap_bytes': rss_cap,
+                    'file_size_cap_bytes': file_cap,
+                    'stdout_sha256': sha(stdout), 'stderr_sha256': sha(stderr),
+                    'watched_file_sha256': sha(watched_file) if watched_file else None,
+                    'watched_file_bytes': watched_file.stat().st_size
+                    if watched_file and watched_file.is_file() else None}
         while child.poll() is None:
             # POSIX process-group sample; RLIMIT_AS remains the hard per-process
             # address-space cap even if a short process escapes a sample.

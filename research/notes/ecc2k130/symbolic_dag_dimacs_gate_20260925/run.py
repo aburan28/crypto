@@ -88,14 +88,28 @@ def main() -> int:
         raw['reported_peak_rss_bytes'] = result.get('peak_rss_bytes') if result else None
         attempts.append(raw)
         if (raw['exit_code'] != 0 or raw['stop_reason'] is not None or
+                raw['wall_seconds'] > wall_cap or
+                raw['sampled_peak_rss_bytes'] > rss_cap or
                 result is None or result.get('decision') != 'PASS' or
                 result.get('peak_rss_bytes', rss_cap + 1) > rss_cap):
             break
+    manifest = []
+    for artifact in sorted(path for path in out.rglob('*') if path.is_file()):
+        manifest.append({'path': artifact.relative_to(out).as_posix(),
+                         'bytes': artifact.stat().st_size, 'sha256': sha(artifact)})
+    (out / 'MANIFEST.json').write_text(json.dumps(manifest, sort_keys=True, indent=2) + '\n')
+    caps = {phase: (wall, rss) for phase, wall, rss in specs}
     receipt = {'domain': DOMAIN, 'freeze_sha256': sha(HERE / 'FROZEN.json'),
                'release_gate': gate, 'attempts': attempts,
+               'manifest_sha256': sha(out / 'MANIFEST.json'),
                'decision': 'PASS' if len(attempts) == 3 and all(
                    item['exit_code'] == 0 and item['stop_reason'] is None and
-                   item['reported_decision'] == 'PASS' for item in attempts) else 'FAIL_OR_CENSORED'}
+                   item['reported_decision'] == 'PASS' and
+                   item['reported_peak_rss_bytes'] is not None and
+                   item['reported_peak_rss_bytes'] <= caps[item['phase']][1] and
+                   item['sampled_peak_rss_bytes'] <= caps[item['phase']][1] and
+                   item['wall_seconds'] <= caps[item['phase']][0]
+                   for item in attempts) else 'FAIL_OR_CENSORED'}
     (out / 'receipt.json').write_text(json.dumps(receipt, sort_keys=True, indent=2) + '\n')
     print(json.dumps({'decision': receipt['decision'],
                       'phases': [item['phase'] for item in attempts]}, sort_keys=True))

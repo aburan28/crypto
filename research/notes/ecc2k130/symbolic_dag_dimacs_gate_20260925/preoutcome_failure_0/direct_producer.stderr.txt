@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/private/tmp/ecc2k130-dimacs-preoutcome-5f57144/research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/produce.py", line 17, in <module>
+    from verify import ReferenceField, evaluate_cnf, lift_solver_model, parse_cnf, parse_solver_output
+ImportError: cannot import name 'ReferenceField' from 'verify' (/private/tmp/ecc2k130-dimacs-preoutcome-5f57144/research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/verify.py)

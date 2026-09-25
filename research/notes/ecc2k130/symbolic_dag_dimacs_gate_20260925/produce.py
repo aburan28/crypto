@@ -27,6 +27,16 @@ def _rss_bytes() -> int:
     return value if sys.platform == 'darwin' else value * 1024
 
 
+def _text_proof_valid(path: Path) -> bool:
+    if not path.is_file() or path.stat().st_size == 0:
+        return False
+    with path.open('rb') as stream:
+        while chunk := stream.read(1 << 20):
+            if b'\x00' in chunk or any(byte > 127 for byte in chunk):
+                return False
+    return True
+
+
 def _gzip_copy(source: Path, dest: Path) -> None:
     with source.open('rb') as src, dest.open('wb') as dst:
         with gzip.GzipFile(filename='', mode='wb', fileobj=dst, mtime=0) as zipped:
@@ -89,7 +99,7 @@ def panel(out: Path, frozen: dict) -> dict:
         variables, _, clauses = parse_cnf(query)
         proof = out / 'proof.drat'
         proof.unlink(missing_ok=True)
-        command = [frozen['cadical_path'], '--no-binary', '--quiet', str(query)]
+        command = [frozen['cadical_path'], '--no-binary', str(query)]
         if case['expected'] == 'UNSAT':
             command.append(str(proof))
         solver = run_child(command, cwd=HERE,
@@ -116,8 +126,9 @@ def panel(out: Path, frozen: dict) -> dict:
                 error = f'{type(exc).__name__}: {exc}'
         else:
             error = 'solver cap, error, or unexpected exit'
+        proof_valid = _text_proof_valid(proof) and proof.stat().st_size <= frozen['proof_byte_cap']
         checker_receipt = None
-        if parsed == 'UNSAT' and proof.is_file() and proof.stat().st_size <= frozen['proof_byte_cap']:
+        if parsed == 'UNSAT' and proof_valid:
             checker_receipt = run_child([str(checker), str(query), str(proof)],
                                         cwd=HERE,
                                         stdout=out / 'logs' / f'{name}.checker.stdout.txt',
@@ -132,15 +143,18 @@ def panel(out: Path, frozen: dict) -> dict:
             _gzip_copy(proof, archived_proof)
         query.unlink()
         proof.unlink(missing_ok=True)
+        if parsed == 'UNSAT' and not proof_valid:
+            error = 'missing, empty, non-ASCII, or oversized DRAT proof'
         verified_unsat = bool(checker_receipt and checker_receipt['exit_code'] == 0
                               and checker_receipt['stop_reason'] is None)
         status = ('SAT_LIFTED' if parsed == 'SAT' and lifted is not None and error is None else
-                  'PROVED_UNSAT' if parsed == 'UNSAT' and verified_unsat else
+                  'PROVED_UNSAT' if parsed == 'UNSAT' and verified_unsat and proof_valid and error is None else
                   'UNPROVEN_UNSAT' if parsed == 'UNSAT' else 'FAIL')
         query_row = {'id': name, 'expected': case['expected'], 'observed': parsed,
                      'status': status, 'points': {k: case[k] for k in ('p', 'q', 'r')},
                      'units': units, 'cnf': meta, 'cnf_gzip_sha256': sha(archived_query),
                      'proof_gzip_sha256': sha(archived_proof) if archived_proof else None,
+                     'proof_text_valid': proof_valid,
                      'solver': solver, 'checker': checker_receipt,
                      'lifted': lifted, 'error': error}
         queries.append(query_row)
