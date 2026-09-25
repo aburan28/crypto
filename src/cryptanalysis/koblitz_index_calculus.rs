@@ -12517,13 +12517,20 @@ mod tests {
         assert!(build_decomposition_system(&basis, x, &kc.curve.b, m, &st).is_none());
         assert!(
             crate::cryptanalysis::polynomial_reuse::DecompositionTemplate::build(
-                &basis, &kc.curve.b, m, &st
+                &basis,
+                &kc.curve.b,
+                m,
+                &st
             )
             .is_none()
         );
         assert!(
             crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
-                &basis, x, &kc.curve.b, m, &st
+                &basis,
+                x,
+                &kc.curve.b,
+                m,
+                &st
             )
             .is_none()
         );
