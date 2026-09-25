@@ -73,6 +73,23 @@ identical** on every field round 2 printed, the times aside:
 - the replayed M4 system at `N = 12`, target 0, against D1 (29);
 - K0's target 0 against both of round 2's profiling traces of it (P0, 2 × 24).
 
+**Paired runs.** `pair_memory.py` ran four systems that round 2 finished, each
+with round 2's build (the baseline) and then this round's (the candidate), one
+after the other, from 14:15 to 14:48 UTC. It recorded each process's peak
+resident memory (`ru_maxrss` through `wait4`) and its wall time. The rows,
+logs and summary are in `pairs/`, and the two rows of every pair agree on every
+field but the wall clock.
+
+| system (target 0) | peak, baseline | peak, candidate | candidate / baseline | wall, baseline | wall, candidate |
+|:--|--:|--:|--:|--:|--:|
+| K0: Kummer, `m = 2`, `p₀`, `N = 20` | 668 MB | 463 MB | 0.69 | 62 s | 59 s |
+| D1: Kummer, `m = 4`, `p₁`, `N = 12` | 338 MB | 171 MB | 0.51 | 11 s | 10 s |
+| M3: Kummer, `m = 3`, `p₁`, `N = 15` | 1,738 MB | 1,084 MB | 0.62 | 380 s | 374 s |
+| K1: Kummer, `m = 2`, `p₁`, `N = 22` | 2,213 MB | 1,523 MB | 0.69 | 585 s | 572 s |
+
+One run per build is not a timing claim, and wall time is a practicality note
+(`AGENTS.md` §2). Every multiply-add is the same in both builds.
+
 ## Builds
 
 The replay and the paired runs use the example built (`cargo build --release
