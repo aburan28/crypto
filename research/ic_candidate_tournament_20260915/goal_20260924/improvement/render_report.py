@@ -60,14 +60,14 @@ def render(data):
     opening=(f"Round {n}: {status}. Selected challenger: {challenger}; retained/promoted winner: {d['winner']}. "
         f"{data['verified_runs']}/{data['total_runs']} native/profile pairs independently verified by the measured round's frozen checker. "
         'Fresh Linux transport replay is the evidence-PR merge gate. All results are limited to the registered synthetic toy panel.')
-    md=[f'# Bounded IC round {n}', '', opening, '',
+    md=[f'# Bounded IC round {n}', '', opening, '', '[Provenance, interpretation and reproduction commands](EVIDENCE.md).', '',
         'Primary metric: one supplied target, after reusable preparation through scalar replay; fixture generation is outside both timed algorithms. Cold instruction and native process costs are supplementary promotion gates. Each table uses one cost unit. Values are equal-cell geometric means of three-process per-point medians, with no target amortization.', '',
         'The IC reference is the qualified `pairinv` source. `rho` is the separately qualified cold-instruction reference; `rho_online` is the separately qualified online-time reference. Ratios to rho are descriptive. The K-instruction floor applies only to this full-rank collector; it is not a generic IC lower bound.', '',
         'The class column labels engineering experiments and accounting controls. No asymptotic advance is claimed. Variant names are readable aliases; the machine-readable export retains every canonical candidate, workload and run ID. `stop3` uses the legacy adaptive orbit bound, which is not a universal three-column guarantee. Actual admitted bases and columns below are authoritative.', '']
     markup=[f'<!-- BEGIN ic-bounded-round-{n}-20260925 -->',f'<section class="panel" id="ic-bounded-round-{n}-20260925">',
         f'<h2>Bounded IC round {n}: {html.escape(status)}</h2>',f'<p>{html.escape(opening)}</p>',
         '<p>Primary metric: single-target online native time, reusable preparation excluded and scalar replay included. Cold cost remains an additional acceptance gate. Engineering/accounting only; no global-optimum or asymptotic claim. '+
-        f'<a href="{url}/README.md">Full report</a> · <a href="{url}/RESULTS.json">Frozen tables and stage diagnostics</a> · <a href="{url}/RUNS.csv">Every run, including failures</a>.</p>']
+        f'<a href="{url}/README.md">Full report</a> · <a href="{url}/EVIDENCE.md">Provenance and reproduction</a> · <a href="{url}/RESULTS.json">Frozen tables and stage diagnostics</a> · <a href="{url}/RUNS.csv">Every run, including failures</a>.</p>']
     for stage in ('confirmation','replay','development','smoke','selection','aa'):
         block=data['stages'][stage]
         md += ['## '+stage.title(),'',f"Verified {block['verified_runs']}/{block['runs']} pairs.",'']

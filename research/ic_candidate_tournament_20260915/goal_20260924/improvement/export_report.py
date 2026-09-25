@@ -209,7 +209,7 @@ def main():
             raise ValueError('exported table differs from audited receipts')
         import io
         expected = io.StringIO(newline='')
-        writer = csv.DictWriter(expected, fieldnames=list(runs[0]))
+        writer = csv.DictWriter(expected, fieldnames=list(runs[0]), lineterminator='\n')
         writer.writeheader(); writer.writerows(runs)
         if (a.out/'RUNS.csv').read_bytes() != expected.getvalue().encode():
             raise ValueError('exported run rows differ from audited receipts')
@@ -217,7 +217,7 @@ def main():
         a.out.mkdir(parents=True, exist_ok=False)
         (a.out/'RESULTS.json').write_text(json.dumps(report, indent=2, sort_keys=True, allow_nan=False)+'\n')
         with (a.out/'RUNS.csv').open('x', newline='') as stream:
-            writer = csv.DictWriter(stream, fieldnames=list(runs[0]))
+            writer = csv.DictWriter(stream, fieldnames=list(runs[0]), lineterminator='\n')
             writer.writeheader(); writer.writerows(runs)
     print(json.dumps(dict(status='VERIFIED' if a.verify else 'EXPORTED',
                           rows=len(runs), verified=report['verified_runs'])))
