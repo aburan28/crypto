@@ -1,6 +1,6 @@
 # Frozen protocol: Frobenius-rotated normal-basis support gate
 
-Status: preregistration; no support or lift-density outcomes have been run.
+Status: source/input freeze after preregistration; no support or lift-density outcomes have been run.
 This gate follows the complete toy four-sum oracle in
 [PR #757](https://github.com/aburan28/crypto/pull/757). It is a bounded
 representation and exact group-law support experiment, not
@@ -158,3 +158,55 @@ receipt and stop the affected cell; no result substitution or silent
 target reduction. Archive source/input hashes, raw per-target counts,
 all failed attempts, independent replay and the resulting decision in
 one focused PR with CI and the canonical scoreboard/ledger update.
+
+## Source/input freeze and exact runner
+
+This section fixes the implementation and inputs before the first support or
+lift-density measurement. The field-only Rabin/rank/trace preflight checked
+n=13 polynomial `0x201b`, n=131 polynomial
+`0x800000000000000000000000000002007`, beta_A=3 and first alternate
+n=13 beta_B=7; it examined no support or density outcomes. The complete
+machine-readable hash map is `FROZEN.json` (SHA-256
+`15a2a922e8a4bdb87351584d6b92697bc8862c652a7104dc77e5ebc29e2db06b`).
+The input manifest SHA-256 is
+`b1bfffd8ac22d47cd10f73e3745e0b295d6466b0c300df6674e7dd8d46381da4`.
+The source SHA-256 values are:
+
+| File | SHA-256 |
+| --- | --- |
+| `gate.py` | `631427072ac48ef14ba8d2a9b34caa8ee6504b7175ea7c6bd9126f1a01c9535a` |
+| `verify.py` | `c387fb38f397efbcc0d0a16bb82f857e5a449e311604714eeb026d325f21c1ca` |
+| `run.py` | `9bf93db61c93a5fc29effdd4f0bd25efbc118f5559f8a3b6baf9762226eaaffa` |
+| `ci_replay.py` | `ed380967f1ebc39b1a87fa22ca1e7ba750d9e655287afb60d055bd3c49437329` |
+
+Use Python >=3.12 and run from the repository root:
+
+```sh
+python3 research/notes/ecc2k130/rotated_subspace_support_20260925/ci_replay.py
+python3 research/notes/ecc2k130/rotated_subspace_support_20260925/run.py --out /private/tmp/rotated-subspace-run-20260925
+```
+
+`run.py` verifies the hash freeze before invoking the n13 toy producer,
+n131 density producer and separate verifier, preserving stdout, stderr,
+UTC timestamps, source/input hashes, command status and every raw file's
+hash even on a run failure. The n13 producer charges one shared cold
+curve/field/group/target setup plus stage-separated per-variant normal/factor
+construction, exact histogram, `[4]` projection/witness self-check and all
+four Q+T right-hand sides. The independent verifier has a separate charged
+receipt. A counterfactual cold single-variant cost adds the shared setup to
+that variant's stage total; the full eight-arm campaign charges it once.
+The n131 density producer likewise separates shared field/normal/trace-mask
+setup from each cell. `ru_maxrss` is reported as process high-water RSS,
+converted to bytes; per-arm values can include a prior arm's high-water mark.
+A POSIX SIGALRM wall deadline of 180 seconds for each toy arm and 120
+seconds for each density cell covers its construction, enumeration and file
+emission; an arm that expires is rejected and leaves a quantitative producer
+failure file alongside already completed cells. The 512-MiB RSS cap is a
+retrospective admission check after each cell, because portable Python
+does not enforce a hard per-cell memory limit. An over-cap cell is rejected
+and retained as a failed attempt. The aggregate runner timeouts are backup
+process guards and do not replace these per-cell deadlines. Python 3.12 and 3.13 use the same integer arithmetic;
+wall and CPU are host-specific diagnostics, while operation counts and exact
+support are primary. The focused CI checks this freeze even before evidence
+exists; after evidence is added it replays the entire archived census and
+density sample with independent arithmetic.
