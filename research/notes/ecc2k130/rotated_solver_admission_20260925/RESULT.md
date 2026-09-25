@@ -70,7 +70,9 @@ translates, and independently decoded point witnesses. Then handle n19's
 88-bit pre-auxiliary chain through a multiword or direct circuit/export path.
 Freeze each engine's CNF/XOR/ANF bytes and model/exit parser, verify its full
 projected model set against the point oracle including the #774 exceptional
-mask, and only then apply the 15-second/2-GiB cold pilot caps from
+mask. Do not enable WDSat's common-base `m!` ordering for the distinct rotated
+slots: #770 has a target-level counterexample to that cross-slot ordering.
+Only then apply the 15-second/2-GiB cold pilot caps from
 [#763](../ROTATED_M5_M6_SOLVER_ADMISSION_20260925.md). Compare positive
 first-valid-witness and negative complete-refutation workloads separately,
 with failed/censored runs retained. This gate neither prices n131 solver cost
