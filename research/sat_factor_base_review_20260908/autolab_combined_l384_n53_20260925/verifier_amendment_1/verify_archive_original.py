@@ -19,7 +19,6 @@ ORBIT = HERE.parent / "autolab_orbit_extract_20260924"
 SHARED = HERE.parent / "autolab_shared_log_n53_20260925"
 RHO_STUDY = HERE.parent / "autolab_matched_point_rho_n53_20260925"
 HEX = re.compile(r"^[0-9a-f]{64}$")
-GIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 
 
 def sha(path: Path) -> str:
@@ -34,7 +33,7 @@ def sources():
         "audit": HERE / "audit.py",
         "runner": HERE / "run_panel.py",
         "archive_sealer": HERE / "archive.py",
-        "archive_verifier": HERE / "verifier_amendment_1/verify_archive_original.py",
+        "archive_verifier": HERE / "verify_archive.py",
         "training_schedule_reference": ORBIT / "cold_batch_rank.py",
         "independent_group_reference": ORBIT / "independent_replay_20260924_codex/replay.py",
         "rho_audit_math": RHO_STUDY / "analyze.py",
@@ -90,7 +89,7 @@ def check_receipts(panel: Path, summary: dict):
         assert receipt["stdout_sha256"] == sha(root / f"{basename}.stdout.jsonl"), key
         assert receipt["stderr_sha256"] == sha(root / f"{basename}.stderr.txt"), key
         manifest = json.loads((root / "manifest.json").read_text())
-        assert GIT_SHA.fullmatch(manifest["checkout_head"])
+        assert HEX.fullmatch(manifest["checkout_head"])
         assert all(HEX.fullmatch(value) for value in manifest["input_sha256"].values())
         assert receipt["wall_ms"] >= 0
         assert receipt["user_cpu_s"] >= 0 and receipt["system_cpu_s"] >= 0
@@ -150,11 +149,6 @@ def main():
     assert sha(archive) == manifest["archive_sha256"]
     assert archive.stat().st_size == manifest["archive_bytes"]
     freeze = json.loads((HERE / "SOURCE_FREEZE.json").read_text())
-    amendment = json.loads((HERE / "verifier_amendment_1/VALIDATION_AMENDMENT.json").read_text())
-    assert amendment["accepted_archive_sha256"] == manifest["archive_sha256"]
-    assert amendment["frozen_checker_sha256"] == freeze["source_sha256"]["archive_verifier"]
-    assert sha(HERE / "verifier_amendment_1/verify_archive_original.py") == amendment["frozen_checker_sha256"]
-    assert sha(HERE / "verify_archive.py") == amendment["corrected_checker_sha256"]
     assert freeze["target_sha256"] == sha(HERE / "points_L384.jsonl")
     assert freeze["protocol_sha256"] == sha(HERE / "PROTOCOL.md")
     assert all(sha(path) == freeze["source_sha256"][key] for key, path in sources().items())
@@ -173,7 +167,7 @@ def main():
         assert summary["source_sha256"] == freeze["source_sha256"]
         assert summary["base_gzip_sha256"] == freeze["base_gzip_sha256"]
         assert summary["validator_manifest_sha256"] == freeze["validator_manifest_sha256"]
-        assert GIT_SHA.fullmatch(summary["checkout_head"])
+        assert HEX.fullmatch(summary["checkout_head"])
         assert all(HEX.fullmatch(value) for value in summary["binary_sha256"].values())
         check_receipts(panel, summary)
         if summary["classification"].startswith("COMPLETE"):
