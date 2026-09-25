@@ -4250,7 +4250,8 @@ A stored pair of the folded table, in the same unit:
 
 - **A canonical step costs `2.74–2.92` units, not one.**  The table-driven
   canonicalisation costs more than the addition it follows (`1.74–1.92`
-  units), because the least rotation is a serial scan over `n` rotations.
+  units), because the least rotation was, at `3e8dd352`, a serial scan
+  over `n` rotations (see §19.8 for what main has changed since).
 - **Bailey et al.'s step costs `1.38–1.41` units**, because that walk
   never canonicalises.  Its step *count* was not measured here, so any
   figure priced at its step is a model, and is marked as one.
@@ -4393,6 +4394,27 @@ nothing measured end to end on an elliptic curve is below rho.
   `8–11%` lower.  They are not re-read here.
 - **The build's two passes** are the thread's largest phase once priced,
   and the obvious next lever for it.
+
+### 19.8 After the merge with main (2026-09-25)
+
+Both prices in §19.4 were measured at `3e8dd352`.  Since then main has
+made the Koblitz primitives faster (#689 and the AVX-512 kernels that
+followed it), with bit-identical outputs:
+
+- the least rotation searches the longest zero runs, about `log₂ n`
+  steps instead of `n`;
+- the folded build keys its pairs in bulk;
+- the scan forms its rests without their ordinates.
+
+Every frozen count therefore stands.  On the merged code, the walk
+replays the frozen runs it was checked against exactly: the eight
+instances of §18's ladder and the first batches of §19's `n = 41` run.
+But on current main a canonical rho step, a stored pair and the
+index-calculus scan all cost less than §19.4 measured.  The re-read is
+internally consistent, because the frozen figures, their build price and
+the reference's step all date from that commit.  It is not a price of
+current main.  Re-pricing there means re-running both sides, which is
+not done here.
 
 ## Appendix A. The conversion factors, as measured
 
