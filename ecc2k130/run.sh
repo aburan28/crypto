@@ -90,6 +90,11 @@ if [ "$CURVE" = 131 ]; then
     export ECC_PACKED_KARAT3="${ECC_PACKED_KARAT3:-0}"
     export ECC_WALK_TABLE="${ECC_WALK_TABLE:-0}"
     export ECC_TABLE_PIVOT_BYTES="${ECC_TABLE_PIVOT_BYTES:-0}"
+    # Campaign collection: WITNESS=0. Cairn counters cost ~35% on the 6000
+    # (14.0 -> 9.2 B/s) and emit 72-byte v2 DP records modal_sync still frames
+    # as 32-byte v1, which falsely trips the weight-32 admission check.
+    export ECC_WITNESS="${ECC_WITNESS:-0}"
+    export WITNESS="$ECC_WITNESS"
 else
     PACKED=${PACKED:-0}
     BATCH=${BATCH:-8}
