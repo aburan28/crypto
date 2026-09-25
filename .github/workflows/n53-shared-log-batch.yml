@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Check study scripts
-        run: python3 -m py_compile research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/{generate_targets,run_panel,verify_pair,archive,verify_archive}.py
+        run: python3 -m py_compile research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/{generate_targets,run_panel,verify_pair,archive,verify_archive,verify_failed_attempt}.py
       - name: Replay committed evidence if present
         run: |
           bundle=research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/evidence
@@ -31,6 +31,9 @@ jobs:
             python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/verify_archive.py --bundle "$bundle"
             echo 'PANEL_ARCHIVED=1' >> "$GITHUB_ENV"
           fi
+      - name: Replay retained first-run verifier failure
+        if: env.PANEL_ARCHIVED == '1'
+        run: python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/verify_failed_attempt.py --bundle research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/failed_attempt_1
       - name: Build exact checked-out producers
         if: env.PANEL_ARCHIVED != '1'
         run: cargo build --release --example koblitz_s5_sat_instance --example koblitz_rho_batch_ks

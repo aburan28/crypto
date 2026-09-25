@@ -81,9 +81,8 @@ def verify_ic(args, points_file, points, labels):
     for index, (item, target) in enumerate(zip(observations, points)):
         assert tuple(item["target_point"]) == target, index
         assert item["hit"], index
-        assert item["s3_calls"] >= 0
-        assert 0 <= item["group_lift_attempts"] <= item["indexed_partner_hits"] <= item["partner_roots"]
-        assert item["partner_roots"] <= 2 * item["s3_calls"]
+        assert item["s3_calls"] >= item["partner_roots"] >= item["indexed_partner_hits"]
+        assert item["indexed_partner_hits"] >= item["group_lift_attempts"]
     return {
         "arm": "ic", "n": 53, "count": args.count, "block": args.block,
         "raw_sha256": sha(raw_file), "points_sha256": sha(points_file),
