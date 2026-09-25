@@ -109,8 +109,14 @@ def verify_rho(args, points_file, points, labels):
     summary = summaries[0]
     assert summary["all_verified"] and summary["target_source"] == "explicit_public_points"
     assert summary["n"] == 53 and summary["a"] == 0
+    assert summary["quotient_mode"] == "signed_frobenius"
+    assert summary["batch_seed"] == 531320 + args.block
+    assert summary["corpus"] == f"n53-shared-log-20260925-b{args.block}-L{args.count}"
+    assert summary["fixtures"] == args.count
     assert summary["automorphism_size"] == 106
     assert summary["dp_bits"] == 4 and summary["precompute_walks"] == 0
+    assert summary["precompute_steps"] == 0 and summary["precompute_table_entries"] == 0
+    assert all(isinstance(value, int) and value >= 0 for value in summary["charges"].values())
     assert math.on_curve(math.GENERATOR) and math.scalar(math.GENERATOR, math.ORDER) is None
     recovered = []
     for index, (row, target, expected) in enumerate(zip(fixtures, points, labels)):
