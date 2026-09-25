@@ -150,6 +150,22 @@ impl WPoly {
         if self.terms.iter().all(|m| m & bit == 0) {
             return self.clone();
         }
+        // The branching step substitutes constants, and those need no
+        // multiplication: v := 0 drops the terms v divides, v := 1 strips
+        // v from them (terms that then coincide cancel in pairs).
+        if form.is_zero() {
+            return Self {
+                terms: self
+                    .terms
+                    .iter()
+                    .copied()
+                    .filter(|m| m & bit == 0)
+                    .collect(),
+            };
+        }
+        if form.is_one() {
+            return Self::from_monos(self.terms.iter().map(|m| m & !bit).collect());
+        }
         let (with, without): (Vec<Mono>, Vec<Mono>) =
             self.terms.iter().partition(|&&m| m & bit != 0);
         let cofactor = Self::from_monos(with.into_iter().map(|m| m & !bit).collect());
@@ -1260,6 +1276,15 @@ mod tests {
                     bits & !(1u128 << v)
                 };
                 assert_eq!(p.substitute(v, &form).eval(bits), p.eval(with));
+                // The constant fast paths.
+                for (c, set) in [(WPoly::zero(), false), (WPoly::one(), true)] {
+                    let with = if set {
+                        bits | 1u128 << v
+                    } else {
+                        bits & !(1u128 << v)
+                    };
+                    assert_eq!(p.substitute(v, &c).eval(bits), p.eval(with));
+                }
             }
         }
     }
