@@ -16,7 +16,7 @@ assert result["contract"]["field_exponent"] == 37
 assert cert["degree"] == 73 and cert["separable"]
 assert cert["inventory_count"] == 74
 assert cert["kernel_polynomial_degree"] == 36
-assert cert["rational_kernel_points"] == 73
+assert cert["kernel_division_polynomial_quotient_degree"] == 2628
 assert cert["source_group_order"] == cert["target_group_order"] == 137439487532
 assert cert["trace_over_gf_2_37"] == -534059
 assert cert["frobenius_order_discriminant"] == -7 * 194399**2

@@ -15,8 +15,11 @@ The exact structural certificate in
 order of discriminant `-7`. Since `(-7/73) = -1`, 73 is inert in
 `Q(sqrt(-7))`. The rational 73-isogenies at this top vertex are descending;
 the target order has discriminant `-7 * 73^2`. Sage's finite-field isogeny
-enumerator must return all 74 rational cyclic kernels, and the run records one
-map, its kernel polynomial, rational functions, target model, and checks.
+enumerator must return all 74 base-field-defined cyclic kernels, and the run
+records one map, its kernel polynomial, rational functions, target model, and
+checks. The kernel subgroup is Galois-stable; its points are not assumed to be
+individually rational over the base field. The squarefree degree-36 kernel
+polynomial is checked to divide the degree-2664 73-division polynomial.
 
 ## Frozen protocol
 
@@ -27,7 +30,8 @@ two and three summands, and ordered/canonical encodings. All support points and
 targets on the codomain are the exact images under the same isogeny. Source and
 codomain ground truth is checked by signed point addition. The executable also
 checks the codomain equation after binary Weierstrass normalization, source and
-target cardinality, rational kernel points, and sampled homomorphism pairs.
+target cardinality, the division-polynomial kernel certificate, and sampled
+homomorphism pairs.
 
 The Boolean systems use binary Semaev `S3` and `S4` summation equations in the
 standardized model `y^2 + x*y = x^3 + A*x^2 + b`. Every solver root is enumerated and

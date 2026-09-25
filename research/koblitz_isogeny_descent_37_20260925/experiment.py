@@ -96,14 +96,12 @@ def build_isogeny(source):
         raise AssertionError("degree/separability/kernel polynomial certificate failed")
     if kernel_poly.gcd(kernel_poly.derivative()).degree() != 0:
         raise AssertionError("kernel polynomial is not squarefree")
-    points = [source(0)]
-    for x in kernel_poly.roots(multiplicities=False):
-        lifts = source.lift_x(x, all=True)
-        if len(lifts) != 2:
-            raise AssertionError("a kernel x-coordinate did not have two rational lifts")
-        points.extend(lifts)
-    if len(points) != 73 or any(phi(p) != target(0) for p in points):
-        raise AssertionError("enumerated rational kernel is not exactly order 73")
+    division_polynomial = source.division_polynomial(73)
+    if division_polynomial % kernel_poly != 0:
+        raise AssertionError("kernel polynomial does not divide the 73-division polynomial")
+    quotient_degree = (division_polynomial // kernel_poly).degree()
+    if quotient_degree != 2628:
+        raise AssertionError("unexpected 73-division polynomial quotient degree")
     if source.cardinality() != 137439487532 or target.cardinality() != source.cardinality():
         raise AssertionError("source/target point-count certificate failed")
     set_random_seed(730037)
@@ -127,7 +125,7 @@ def build_isogeny(source):
         "kernel_polynomial": str(kernel_poly),
         "kernel_polynomial_sha256": digest_bytes(str(kernel_poly).encode()),
         "kernel_polynomial_degree": int(kernel_poly.degree()),
-        "rational_kernel_points": len(points),
+        "kernel_division_polynomial_quotient_degree": quotient_degree,
         "homomorphism_checked_pairs": homomorphism_pairs,
         "source_group_order": int(source.cardinality()),
         "target_group_order": int(target.cardinality()),
@@ -143,6 +141,7 @@ def build_isogeny(source):
         "target_endomorphism_order_discriminant": -7 * 73**2,
         "legendre_symbol_minus7_mod_73": splitting,
         "direction": "descending; 73 is inert in Q(sqrt(-7)) and divides the Frobenius-order conductor",
+        "kernel_rationality": "kernel subgroup is defined over the base field; individual kernel points need not be",
     }
     return phi, certificate
 
