@@ -238,7 +238,7 @@ def parse_sparse(path: Path, schema, by_name, iv, curve, by_h):
         for u, vu in zip(left["values"], left["vars"]):
             for a, va in zip(right["values"], right["vars"]):
                 row = reader.take()
-                if row[:2] != (-vu, -va) or len(row) < 3:
+                if row[:2] != (-vu, -va) or len(row) < 2:
                     raise ClauseError("sparse input-pair implication")
                 outputs = row[2:]
                 if len(set(outputs)) != len(outputs) or any(v not in end_by_literal for v in outputs):

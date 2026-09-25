@@ -22,7 +22,7 @@ jobs:
           python3 research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/ci_replay.py
       - name: Audit committed evidence when present
         run: |
-          receipt=research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/receipt.json
+          receipt=research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/final/receipt.json
           if test -f "$receipt"; then
             python3 research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/ci_replay.py --evidence "$receipt"
           fi

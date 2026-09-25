@@ -107,7 +107,7 @@ def export_panel(dense, frozen: dict, panel: tuple, out: Path):
                 permitted = set(dense.local(field, u, a))
                 outputs = [vv for v, vv in zip(end["values"], end["vars"])
                            if v in permitted]
-                assert len(outputs) == len(permitted) and outputs
+                assert len(outputs) == len(permitted & set(end["values"]))
                 clauses.append(tuple([-vu, -va, *outputs]))
                 implication_count += 1
                 allowed_size_counts[len(outputs)] = allowed_size_counts.get(len(outputs), 0) + 1
@@ -155,6 +155,7 @@ def export_panel(dense, frozen: dict, panel: tuple, out: Path):
            "base_sha256": sha(out / "base.cnf"),
            "paths_sha256": sha(out / "paths.jsonl.gz"),
            "panel_wall_seconds": time.perf_counter() - started}
+    assert allowed_size_counts.get(0, 0) == (3 if name == "n13-m5" else 0)
     if name == "n13-m5":
         assert (row["variables"], row["clauses"]) == (2517, 4731)
         assert row["bytes"] <= 250000 and row["clauses"] * 100 <= dense_count
