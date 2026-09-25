@@ -24,6 +24,8 @@ def contract():
         bindings[name] = dict(selected_alias=selected, source_manifest_sha256=source,
                              configuration=config if name == 'incumbent' else dict(config, rho_parallel_walks=4))
     return dict(purpose=rules.PURPOSE, familywise_rule=copy.deepcopy(rules.RULE),
+        compiler='rustc 1.94.1 (test build)', profiler_version='valgrind-3.22.0',
+        host=dict(system='Linux', machine='x86_64'),
         attempt_number=1, seed=2026092551, confirmation_cases=72, repetitions=3,
         cells=rules.CELLS, holdout_cells=rules.HOLDOUT_CELLS,
         confirmation_cases_per_cell={cell:12 for cell in rules.CELLS + rules.HOLDOUT_CELLS},
@@ -95,6 +97,8 @@ class CampaignRulesTests(unittest.TestCase):
 
     def test_round_budget_and_reference_flags_cannot_relax_confirmation(self):
         for key, value in (('attempt_number',4), ('confirmation_cases',59), ('repetitions',1),
+                           ('compiler','rustc 1.93.1 (different build)'), ('profiler_version','valgrind-3.23.0'),
+                           ('host',dict(system='Darwin',machine='arm64')),
                            ('familywise_rule',dict(rules.RULE, comparisons=1)),
                            ('reference_qualification',{'complete':True})):
             c = contract(); c[key] = value

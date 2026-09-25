@@ -65,6 +65,8 @@ def validate_contract(contract):
     require(type(contract.get('attempt_number')) is int and 1 <= contract['attempt_number'] <= 3,
             'attempt is outside the three-round budget')
     require(contract['seed'] == 2026092550 + contract['attempt_number'], 'changed predeclared round seed')
+    validate_environment(system=contract['host']['system'], machine=contract['host']['machine'],
+                         compiler=contract['compiler'], profiler=contract['profiler_version'])
     require(contract['confirmation_cases'] == 72 and contract['repetitions'] == 3,
             'incomplete confirmation sample/repetitions')
     require(contract['cells'] == CELLS and contract['holdout_cells'] == HOLDOUT_CELLS and
@@ -91,6 +93,12 @@ def validate_contract(contract):
             ('rho_online', 'rho_pairinv_4', IC_SOURCE, dict(CONFIG, rho_parallel_walks=4))):
         require(binding['bindings'][name] == dict(selected_alias=alias,
             source_manifest_sha256=source, configuration=config), 'changed bound reference '+name)
+
+
+def validate_environment(*, system, machine, compiler, profiler):
+    require(system == 'Linux' and machine == 'x86_64' and
+            compiler.startswith('rustc 1.94.1 ') and profiler == 'valgrind-3.22.0',
+            'bounded campaign requires its registered Linux amd64/compiler/profiler environment')
 
 
 def validate_preparation(args):

@@ -333,6 +333,9 @@ def prepare(args):
     require(shutil.which('valgrind') is not None,'Valgrind required')
     version = subprocess.check_output(['valgrind','--version'],text=True).strip()
     require(version=='valgrind-3.22.0','version requires a new calibrated protocol')
+    if getattr(args, 'attempt_number', 0):
+        bounded.validate_environment(system=platform.system(), machine=platform.machine(),
+            compiler=subprocess.check_output(['rustc','--version'],text=True).strip(), profiler=version)
     out.mkdir(parents=True,exist_ok=False)
     evaluator = out/'evaluator'
     evaluator.mkdir()
