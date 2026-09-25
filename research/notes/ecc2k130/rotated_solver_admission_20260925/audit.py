@@ -28,7 +28,7 @@ def rss_bytes() -> int:
     return value if sys.platform == "darwin" else value * 1024
 
 
-def binary_inventory(names: list[str]) -> dict:
+def binary_inventory(names: list[str], supplements: list[dict]) -> dict:
     found = {}
     for name in names:
         executable = shutil.which(name)
@@ -47,6 +47,14 @@ def binary_inventory(names: list[str]) -> dict:
         found[name] = {"available_on_PATH": True, "path": str(path),
                        "bytes": path.stat().st_size, "sha256": sha(path),
                        "version_first_lines": version, "version_exit": version_status}
+    for item in supplements:
+        path = Path(item["path"])
+        extra = {"on_PATH": False, "path": str(path), "exists_on_host": path.is_file(),
+                 "expected_sha256": item["expected_sha256"]}
+        if path.is_file():
+            extra.update({"bytes": path.stat().st_size, "sha256": sha(path)})
+            assert extra["sha256"] == item["expected_sha256"], item["name"]
+        found[item["name"]] = extra
     return found
 
 
@@ -135,7 +143,7 @@ def audit(data: dict, include_binaries: bool) -> dict:
               "admitted_solver_arms": [], "missing_prerequisites": missing,
               "decision": "BLOCKED_BEFORE_SOLVER_TIMING"}
     if include_binaries:
-        result["binary_inventory"] = binary_inventory(data["binary_names"])
+        result["binary_inventory"] = binary_inventory(data["binary_names"], data["supplementary_binaries"])
     return result
 
 

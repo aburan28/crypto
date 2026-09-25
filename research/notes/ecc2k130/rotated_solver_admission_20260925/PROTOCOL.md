@@ -41,7 +41,9 @@ receipts, not infer absence from a repository-wide string search. Inspect the
 current generic `build_decomposition_system`, binary Semaev functions, S5
 SAT example, framework solver adapters and WDSat adapter. Enumerate local
 binary availability, hashes and version output for CryptoMiniSat, MiniSat,
-msolve, WDSat, Kissat and CaDiCaL. Installed binaries alone are **not**
+msolve, WDSat, Kissat and CaDiCaL on PATH, plus the prior #764 pinned
+WDSat fixture path if present on this host. A missing local fixture on another
+host is an inventory fact, not a source/corpus failure. Installed binaries alone are **not**
 admitted arms: each needs a complete frozen encoding and a parser/verifier.
 The existing S5 example has four factor points, and its fixture is not
 silently retargeted to five or six distinct rotated slots. The source audit
