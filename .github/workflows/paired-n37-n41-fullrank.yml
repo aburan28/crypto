@@ -1,0 +1,53 @@
+name: Paired n37 n41 full-rank controls
+
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/paired_fullrank_20260925/**'
+      - 'research/notes/ecc2k130/PAIRED_N37_N41_FULLRANK_PROTOCOL_20260925.md'
+      - '.github/workflows/paired-n37-n41-fullrank.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-source-paired-panel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build exact branch source
+        run: cargo build --release --example koblitz_rank_fixture --example koblitz_rho_fixture
+      - name: Run n37 pilot and holdouts
+        run: |
+          python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n37_seed0 --n 37 --seed-index 0
+          python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n37_seed1 --n 37 --seed-index 1
+          python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n37_seed2 --n 37 --seed-index 2
+      - name: Run n41 pilot
+        run: python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n41_seed0 --n 41 --seed-index 0
+      - name: Enforce n41 pilot resource gate
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('/tmp/paired-panel/n41_seed0/manifest.json').read_text())
+          assert report['replay_verdict'] == 'PASS'
+          assert all(not arm['timed_out'] and arm['peak_rss_bytes'] < 2 * 1024**3 for arm in report['arms'])
+          PY
+      - name: Run n41 holdouts
+        run: |
+          python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n41_seed1 --n 41 --seed-index 1
+          python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n41_seed2 --n 41 --seed-index 2
+      - name: Archive raw outputs including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paired-n37-n41-fullrank-${{ github.sha }}
+          path: /tmp/paired-panel/
+          if-no-files-found: warn
+          retention-days: 30
