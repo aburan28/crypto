@@ -67,7 +67,9 @@ fn parse_engine(spec: &str) -> Result<(String, Params), String> {
     let (name, rest) = spec.split_once(':').unwrap_or((spec, ""));
     let mut params = Params::default();
     for kv in rest.split(',').filter(|s| !s.is_empty()) {
-        let (k, v) = kv.split_once('=').ok_or_else(|| format!("parameter `{kv}` is not key=value"))?;
+        let (k, v) = kv
+            .split_once('=')
+            .ok_or_else(|| format!("parameter `{kv}` is not key=value"))?;
         params.set(k.trim(), v.trim());
     }
     Ok((name.to_string(), params))
@@ -151,7 +153,15 @@ pub fn run(args: DescentArgs, json_only: bool) -> Result<Value, String> {
             }
             let budget = (args.budget_seconds > 0)
                 .then(|| std::time::Duration::from_secs(args.budget_seconds));
-            match price_descent_cell(family, *n, *n_prime, *m, args.targets.max(1), args.seed, budget) {
+            match price_descent_cell(
+                family,
+                *n,
+                *n_prime,
+                *m,
+                args.targets.max(1),
+                args.seed,
+                budget,
+            ) {
                 Some(cell) => measured.push(cell),
                 None => skipped.push(json!({
                     "family": family, "n": n, "n_prime": n_prime, "m": m,
@@ -210,7 +220,11 @@ pub fn run(args: DescentArgs, json_only: bool) -> Result<Value, String> {
 }
 
 /// `--solver`: every named engine on every target of every cell, paired.
-fn run_engines(args: &DescentArgs, cells: &[(u32, u32, u32)], json_only: bool) -> Result<Value, String> {
+fn run_engines(
+    args: &DescentArgs,
+    cells: &[(u32, u32, u32)],
+    json_only: bool,
+) -> Result<Value, String> {
     let mut engines = Vec::new();
     let mut described = Vec::new();
     for spec in &args.solvers {
@@ -228,14 +242,19 @@ fn run_engines(args: &DescentArgs, cells: &[(u32, u32, u32)], json_only: bool) -
         }));
         engines.push((name, solver, params));
     }
-    let budget = (args.budget_seconds > 0).then(|| std::time::Duration::from_secs(args.budget_seconds));
+    let budget =
+        (args.budget_seconds > 0).then(|| std::time::Duration::from_secs(args.budget_seconds));
     let started = std::time::Instant::now();
     let mut measured: Vec<EngineCell> = Vec::new();
     let mut skipped: Vec<Value> = Vec::new();
     for family in &args.families {
         for (n, n_prime, m) in cells {
             if !json_only {
-                eprintln!("  {family} n={n} n'={n_prime} m={m} × {} engines × {} repeats …", engines.len(), args.repeats.max(1));
+                eprintln!(
+                    "  {family} n={n} n'={n_prime} m={m} × {} engines × {} repeats …",
+                    engines.len(),
+                    args.repeats.max(1)
+                );
             }
             match price_engine_cell(
                 &engines,
