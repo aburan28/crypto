@@ -1,0 +1,398 @@
+{
+  "reference": "scaled",
+  "rho_rows": [
+    {
+      "cell": "n13a0",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "598"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 91418,
+        "reference_solve": 547652,
+        "setup": 281157
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 591929,
+          "phase_wall_ns": {
+            "recovery_check": 14406,
+            "reference_solve": 123151,
+            "setup": 664950
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 802507,
+          "worker_snapshot_wall_ns": 210578
+        },
+        "native_report_sha256": "12e5fec0e2eb823111bebd410a0d3ee94d81a574efb07163f0d1939e955b2739",
+        "online": {
+          "boundary": "after reusable rho arithmetic/Frobenius preparation; target-dependent setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 14406,
+            "reference_solve": 123151
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 137557
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "05e22882426f"
+    },
+    {
+      "cell": "n23a1",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "2527940"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 173343,
+        "reference_solve": 2192905,
+        "setup": 416844
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 608647,
+          "phase_wall_ns": {
+            "recovery_check": 29941,
+            "reference_solve": 326093,
+            "setup": 707025
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 1063059,
+          "worker_snapshot_wall_ns": 454412
+        },
+        "native_report_sha256": "fa1a8d8fbd7af5208431b76eea934cd6d7cb4b4082b05016168ed5b5c31f126e",
+        "online": {
+          "boundary": "after reusable rho arithmetic/Frobenius preparation; target-dependent setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 29941,
+            "reference_solve": 326093
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 356034
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "8e322fa2720e"
+    },
+    {
+      "cell": "n37a0",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "134101706"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 315824,
+        "reference_solve": 23211167,
+        "setup": 932058
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 659212,
+          "phase_wall_ns": {
+            "recovery_check": 48133,
+            "reference_solve": 2305252,
+            "setup": 825086
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 3178471,
+          "worker_snapshot_wall_ns": 2519259
+        },
+        "native_report_sha256": "893c585fd16ebd7f3e503c9c263e7a1633cb2b2bb2e3e85d20e8f23a543770f6",
+        "online": {
+          "boundary": "after reusable rho arithmetic/Frobenius preparation; target-dependent setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 48133,
+            "reference_solve": 2305252
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 2353385
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "d51786ead015"
+    },
+    {
+      "cell": "n43a1",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "2200367456"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 306977,
+        "reference_solve": 34404526,
+        "setup": 1962958
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 743976,
+          "phase_wall_ns": {
+            "recovery_check": 51484,
+            "reference_solve": 3674006,
+            "setup": 1153872
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 4879362,
+          "worker_snapshot_wall_ns": 4135386
+        },
+        "native_report_sha256": "60decad0b7525b104f374a1ae041af489ff68139aee89a4f46c9eab7929fde3f",
+        "online": {
+          "boundary": "after reusable rho arithmetic/Frobenius preparation; target-dependent setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 51484,
+            "reference_solve": 3674006
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 3725490
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "c117844a3d0f"
+    },
+    {
+      "cell": "n61a1",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "10484033407"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 413794,
+        "reference_solve": 129977310,
+        "setup": 2965843
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 725686,
+          "phase_wall_ns": {
+            "recovery_check": 63926,
+            "reference_solve": 13547445,
+            "setup": 1357658
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 14969029,
+          "worker_snapshot_wall_ns": 14243343
+        },
+        "native_report_sha256": "a9498ea2d29eaae50c934010fb58d65ee5e780fc79614de794be3ba4fe61f2d2",
+        "online": {
+          "boundary": "after reusable rho arithmetic/Frobenius preparation; target-dependent setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 63926,
+            "reference_solve": 13547445
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 13611371
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "68cad1ae5301"
+    }
+  ],
+  "rho_verified_pairs": 5,
+  "rows": [
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h397cd1a1bf36",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 609619,
+      "rank": 7,
+      "repetition": 0,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h397cd1a1bf36W05e22882426fR0",
+      "total_operations": 719451
+    },
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h397cd1a1bf36",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 737584,
+      "rank": 7,
+      "repetition": 1,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h397cd1a1bf36W05e22882426fR1",
+      "total_operations": 719460
+    },
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h397cd1a1bf36",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 745477,
+      "rank": 7,
+      "repetition": 2,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0h397cd1a1bf36W05e22882426fR2",
+      "total_operations": 719464
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hf3218d04a071",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 1032010,
+      "rank": 8,
+      "repetition": 0,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hf3218d04a071W8e322fa2720eR0",
+      "total_operations": 2313823
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hf3218d04a071",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 1105408,
+      "rank": 8,
+      "repetition": 1,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hf3218d04a071W8e322fa2720eR1",
+      "total_operations": 2313823
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hf3218d04a071",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 1167287,
+      "rank": 8,
+      "repetition": 2,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0hf3218d04a071W8e322fa2720eR2",
+      "total_operations": 2313823
+    },
+    {
+      "candidate_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h34e43bebadd3",
+      "cell": "n37a0",
+      "matrix_sha256": "7a3181adf961a029fa1e44183d236d1a999a8f6fc137902c17dfd23a39da563b",
+      "native_wall_ns": 3581756,
+      "rank": 16,
+      "repetition": 0,
+      "run_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h34e43bebadd3Wd51786ead015R0",
+      "total_operations": 24365729
+    },
+    {
+      "candidate_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h34e43bebadd3",
+      "cell": "n37a0",
+      "matrix_sha256": "7a3181adf961a029fa1e44183d236d1a999a8f6fc137902c17dfd23a39da563b",
+      "native_wall_ns": 3603312,
+      "rank": 16,
+      "repetition": 1,
+      "run_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h34e43bebadd3Wd51786ead015R1",
+      "total_operations": 24365729
+    },
+    {
+      "candidate_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h34e43bebadd3",
+      "cell": "n37a0",
+      "matrix_sha256": "7a3181adf961a029fa1e44183d236d1a999a8f6fc137902c17dfd23a39da563b",
+      "native_wall_ns": 3573526,
+      "rank": 16,
+      "repetition": 2,
+      "run_id": "IC1N37Ckb0fb1184PDP3pairRCwalkLAgaussTDpdpISO0h34e43bebadd3Wd51786ead015R2",
+      "total_operations": 24365733
+    },
+    {
+      "candidate_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h5fa25e2f1ec6",
+      "cell": "n43a1",
+      "matrix_sha256": "55aedc344e3d1794c95ac61ce50c0596d73e791a4fe62ff61278404184c0fe84",
+      "native_wall_ns": 27801526,
+      "rank": 24,
+      "repetition": 0,
+      "run_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h5fa25e2f1ec6Wc117844a3d0fR0",
+      "total_operations": 241188932
+    },
+    {
+      "candidate_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h5fa25e2f1ec6",
+      "cell": "n43a1",
+      "matrix_sha256": "55aedc344e3d1794c95ac61ce50c0596d73e791a4fe62ff61278404184c0fe84",
+      "native_wall_ns": 28089613,
+      "rank": 24,
+      "repetition": 1,
+      "run_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h5fa25e2f1ec6Wc117844a3d0fR1",
+      "total_operations": 241188928
+    },
+    {
+      "candidate_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h5fa25e2f1ec6",
+      "cell": "n43a1",
+      "matrix_sha256": "55aedc344e3d1794c95ac61ce50c0596d73e791a4fe62ff61278404184c0fe84",
+      "native_wall_ns": 27236319,
+      "rank": 24,
+      "repetition": 2,
+      "run_id": "IC1N43Ckb1fb2064PDP3pairRCwalkLAgaussTDpdpISO0h5fa25e2f1ec6Wc117844a3d0fR2",
+      "total_operations": 241188955
+    },
+    {
+      "candidate_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h914c05d4b5e2",
+      "cell": "n61a1",
+      "matrix_sha256": "a10a2a1b0b297e405e7f699591b9a66cc11fdee1d3dfa8471e444e6117e0505d",
+      "native_wall_ns": 28394710,
+      "rank": 24,
+      "repetition": 0,
+      "run_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h914c05d4b5e2W68cad1ae5301R0",
+      "total_operations": 253046407
+    },
+    {
+      "candidate_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h914c05d4b5e2",
+      "cell": "n61a1",
+      "matrix_sha256": "a10a2a1b0b297e405e7f699591b9a66cc11fdee1d3dfa8471e444e6117e0505d",
+      "native_wall_ns": 27471285,
+      "rank": 24,
+      "repetition": 1,
+      "run_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h914c05d4b5e2W68cad1ae5301R1",
+      "total_operations": 253046403
+    },
+    {
+      "candidate_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h914c05d4b5e2",
+      "cell": "n61a1",
+      "matrix_sha256": "a10a2a1b0b297e405e7f699591b9a66cc11fdee1d3dfa8471e444e6117e0505d",
+      "native_wall_ns": 28977613,
+      "rank": 24,
+      "repetition": 2,
+      "run_id": "IC1N61Ckb1fb2928PDP3pairRCwalkLAgaussTDpdpISO0h914c05d4b5e2W68cad1ae5301R2",
+      "total_operations": 253046407
+    }
+  ],
+  "scope": "transported producer integration evidence; no comparison",
+  "source_manifest_sha256": "9c3d4a51ec4e52bfd4f9dbb83675cadb95889aea7370d6ffc91abe380ed48ba0",
+  "status": "VERIFIED",
+  "verified_pairs": 15,
+  "worker_sha256": "823b4e0283d59a79a83faf6b659021171f217be0a20844dfcbeab29a458abfaf"
+}

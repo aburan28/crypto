@@ -1,8 +1,9 @@
 # Public input and single-target intervals
 
-This follow-up to [PR 733](https://github.com/aburan28/crypto/pull/733) adds
-supplied-point admission and native online intervals to the restored optimized
-producers. Linux admission is pending. This is accounting and correctness work;
+Merged [PR 748](https://github.com/aburan28/crypto/pull/748), following
+[PR 733](https://github.com/aburan28/crypto/pull/733), adds supplied-point admission
+and native online intervals to the restored optimized producers. The final Linux
+admission and independent transport replay passed. This is accounting and correctness work;
 no candidate has been promoted and no improvement round has been consumed.
 
 Measured jobs now require exactly one public point. Fixture construction runs
@@ -72,8 +73,31 @@ auditor and archive remain unchanged.
 
 ## Remaining admission gates
 
-Linux integration and fresh artifact replay must pass before these producers
-are admitted. The development/promotion drivers still need canonical admission
+The final implementation `159ec5ff086702a7fd5603d32eeacb48b6ef7361` merged as
+`4a898fcd3464b71439bd9451bd466a6ec217ddc9`; all 20 reviewed files match the merge.
+Every applicable check passed at that head. The
+[final Linux run](https://github.com/aburan28/crypto/actions/runs/36113511435)
+passed the following fixed controls, all reconstructed from downloaded artifacts:
+
+| Source policy | IC native/profile pairs | Rho native/profile pairs |
+|---|---:|---:|
+| `both` | 9/9 | 3/3 |
+| `scaled` | 15/15 | 5/5 |
+| `pairinv` | 15/15 | 5/5 |
+
+[History and exact source/binary identities](history.json) and [replay receipts](audits/)
+bind each row. The separately registered
+`evidence/ic-public-linux-controls-20260925.tar.zst` preserves both the initial
+superseded run and the final run, including executables, all source files
+(including `.cargo/config.toml`), frozen evaluators, protocols, process reports,
+profiles and certificates. Extract it into a fresh directory using the command
+above. Run each extracted artifact's `ic-producer-evidence/evaluator/producer/audit.py`
+with its artifact directory as the argument. The initial evaluator replays its
+historical boundary; that pass does not rehabilitate the superseded rho interval.
+The archive manifest supplies its digest/size and `archive-validation.json`
+records the fresh extraction and replay.
+
+The development/promotion drivers still need canonical admission
 migration; the current `icx` source, instrumentation overhead and a strong rho
 reference still need qualification. Only then can a frozen comparison panel
 launch. This checkpoint does not satisfy the three-round improvement objective.
