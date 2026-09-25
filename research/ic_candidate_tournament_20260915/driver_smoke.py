@@ -67,7 +67,20 @@ def main():
         require(result['runs'] == result['verified_runs'], 'profiled driver retained failures')
     run([sys.executable, campaign/'evaluator/tournament.py', 'verify', '--round', campaign])
     require(not (campaign/'decision.json').exists(), 'integration control must not select a winner')
-    summary = dict(scope='driver wiring controls; not a reference qualification or improvement round',
+    qualification = out/'qualification-control'
+    run([sys.executable, HERE/'tournament.py', 'prepare', '--source-root', prepared/'source',
+         '--out', qualification, '--candidates', out/'candidates.json', '--cells', '13a0',
+         '--holdout-cells', '17a1', '--profile', 'pilot', '--qualification', '--seed', '2026092540',
+         '--timeout', '180', '--max-processes', '100', '--selection-width', '2', '--exploration-slots', '1'])
+    run([sys.executable, qualification/'evaluator/tournament.py', 'run', '--round', qualification])
+    run([sys.executable, qualification/'evaluator/tournament.py', 'verify', '--round', qualification])
+    selected=read(qualification/'qualification.json')
+    require(selected['status']=='DEVELOPMENT_REFERENCES_SELECTED' and len(selected['table'])==5,
+            'qualification control did not retain both IC arms and three rho widths')
+    require(set(read(qualification/'fixtures.json'))=={'aa','smoke','development'}
+            and not (qualification/'decision.json').exists(), 'qualification accessed confirmation or promotion')
+    summary = dict(qualification_control_pairs=66,
+        scope='driver wiring controls; not a reference qualification or improvement round',
         native_verified=17, native_expected_failures=1, profile_native_pairs_verified=15, promotion_eligible=False,
         executed_stages=['aa', 'smoke'], prepared_but_unexecuted=['development', 'selection', 'confirmation', 'replay'])
     write(out/'summary.json', summary, exclusive=True)
