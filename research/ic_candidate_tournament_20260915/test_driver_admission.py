@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 import unittest
 import tempfile
+import shutil
+import subprocess
+import sys
 
 from driver_admission import (make_admission, run_record, check_admission, online_table,
                              freeze_admission, distinct_candidates)
@@ -15,6 +18,19 @@ DATA = Path(__file__).parent/'producer/testdata'
 
 
 class DriverAdmissionTests(unittest.TestCase):
+    def test_frozen_producer_includes_transitive_driver_dependencies(self):
+        from producer.integration import FROZEN_EVALUATOR
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for name in FROZEN_EVALUATOR:
+                (root/name).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(Path(__file__).parent/name, root/name)
+            # An isolated interpreter cannot silently borrow a missing module
+            # from the live checkout instead of the transported evaluator.
+            code = f'import sys; sys.path.insert(0, {str(root)!r}); import autolab, tournament, producer.integration'
+            subprocess.run([sys.executable, '-I', '-c', code], cwd=root, check=True,
+                           capture_output=True, text=True)
+
     def setUp(self):
         vector = json.loads((DATA/'n13-public.json').read_text())['ic']
         self.job, self.report = vector['job'], vector['report']

@@ -17,6 +17,9 @@ from oracle import require, verify
 from tournament import digest, execute, parse_profiles, read, write
 from producer.evidence import audit_stages, check_build_identity, method_record, scientific_ledger
 from producer.timing import native_intervals
+from driver_admission import EVALUATOR
+
+FROZEN_EVALUATOR = (*EVALUATOR, 'producer/integration.py', 'producer/audit.py', 'producer/PROTOCOL.md')
 
 
 def process_ok(process):
@@ -71,18 +74,15 @@ def main():
         jobs=jobs, repetitions=3, rho_controls_per_cell=1,
         resources=resources, build=build, host=host,
         worker_sha256=digest(worker), source_manifest_sha256=sha256(manifest),
-        preparation=preparation, evaluator_sha256={str(p.relative_to(HERE.parent)): digest(p)
-            for p in [HERE/'integration.py', HERE/'evidence.py', HERE/'timing.py', HERE/'audit.py', HERE.parent/'oracle.py',
-                      HERE.parent/'identity.py', HERE.parent/'measurement.py', HERE.parent/'tournament.py']},
+        preparation=preparation, evaluator_sha256={relative: digest(HERE.parent/relative)
+            for relative in FROZEN_EVALUATOR},
         protocol_sha256=digest(HERE/'PROTOCOL.md')), exclusive=True)
     (out/'cpuinfo.txt').write_text(Path('/proc/cpuinfo').read_text())
     # Retain the actual executable and the evaluator with the reports. A source
     # digest alone cannot reproduce the bytes that were measured after the CI
     # runner and its build directory disappear.
     shutil.copy2(worker, out/'worker')
-    for relative in ('identity.py', 'measurement.py', 'oracle.py', 'tournament.py',
-                     'portfolio.py', 'producer/evidence.py', 'producer/integration.py', 'producer/timing.py', 'producer/audit.py',
-                     'producer/PROTOCOL.md'):
+    for relative in FROZEN_EVALUATOR:
         target = out/'evaluator'/relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(HERE.parent/relative, target)

@@ -73,6 +73,7 @@ jobs:
             --prepared "$RUNNER_TEMP/ic-producer" \
             --worker "$RUNNER_TEMP/ic-producer/build/x86_64-unknown-linux-musl/release/examples/ic_tournament_worker" \
             --out "$RUNNER_TEMP/ic-producer-evidence"
+          python "$RUNNER_TEMP/ic-producer-evidence/evaluator/producer/audit.py" "$RUNNER_TEMP"
       - name: Preserve evidence and exact derived source, including failures
         if: always()
         uses: actions/upload-artifact@v4
