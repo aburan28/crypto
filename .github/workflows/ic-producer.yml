@@ -8,6 +8,10 @@ on:
       - 'research/ic_candidate_tournament_20260915/oracle.py'
       - 'research/ic_candidate_tournament_20260915/tournament.py'
       - 'research/ic_candidate_tournament_20260915/test_producer.py'
+      - 'research/ic_candidate_tournament_20260915/autolab.py'
+      - 'research/ic_candidate_tournament_20260915/driver_admission.py'
+      - 'research/ic_candidate_tournament_20260915/driver_smoke.py'
+      - 'research/ic_candidate_tournament_20260915/test_driver_admission.py'
       - '.github/workflows/ic-producer.yml'
   workflow_dispatch:
 permissions:
@@ -79,6 +83,22 @@ jobs:
             ${{ runner.temp }}/ic-producer/preparation.json
             ${{ runner.temp }}/ic-producer/source-manifest.json
             ${{ runner.temp }}/ic-producer/source
+          retention-days: 30
+          if-no-files-found: warn
+          include-hidden-files: true
+      - name: Existing native and instruction driver admission controls
+        if: matrix.reference == 'scaled'
+        run: |
+          python research/ic_candidate_tournament_20260915/driver_smoke.py \
+            --prepared "$RUNNER_TEMP/ic-producer" --out "$RUNNER_TEMP/ic-driver-evidence"
+      - name: Preserve driver controls including failed preparation and raw runs
+        if: always() && matrix.reference == 'scaled'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-driver-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-driver-evidence
+            !${{ runner.temp }}/ic-driver-evidence/**/build/**
           retention-days: 30
           if-no-files-found: warn
           include-hidden-files: true

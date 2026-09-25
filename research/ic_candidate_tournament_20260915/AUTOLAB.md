@@ -10,10 +10,14 @@ New research admission is governed by [MEASUREMENT.md](MEASUREMENT.md).
 Canonical identity and cost validators now exist, and CI checks the real base
 census and explicit unknown phase ledger. The archived optimized producers now
 pass [scientific admission controls](goal_20260924/producer-admission/README.md).
-Driver migration and comparative reference qualification are still pending;
-the legacy commands below must not be
-used to claim compliance with the new measurement contract. Follow the active
-[goal checkpoint](goal_20260924/STATUS.md) before starting a new comparison.
+Both drivers now require schema-3 public-point admission and reconstruct canonical
+records from the frozen source, base census and workload. They report one-target
+online native time first and retain supplementary complete cold costs. Only the
+prepared optimized `pair_table` / `tiny_gauss` / `subgroup_orbits` producer is
+currently admitted. Other implemented engines remain proposals until their stage
+adapters are qualified. Comparative IC/rho reference qualification and the
+familywise confirmation protocol remain gates; new contracts cannot promote on
+admission evidence alone. Follow the [goal checkpoint](goal_20260924/STATUS.md).
 
 ## What was reviewed and corrected
 
@@ -87,21 +91,21 @@ implementations; their presence is not a certification of state-of-the-art speed
 
 ## Portable bounded development
 
-From the repository root:
+From the repository root, materialize a reviewed optimized producer and run the
+bounded wiring control (Python 3.11 or newer). The two configurations change a
+stopping limit; this example makes no optimization claim.
 
 ```sh
-python3 research/ic_candidate_tournament_20260915/autolab.py doctor
-cargo generate-lockfile --offline  # once if this checkout lacks Cargo.lock
-python3 -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py'
-cargo test --release --offline --lib descent_
-cargo test --release --offline --lib rho_
-
-python3 research/ic_candidate_tournament_20260915/autolab.py propose \
-  --panel implementation --out /tmp/ic-implementation.json
-python3 research/ic_candidate_tournament_20260915/autolab.py screen \
-  --candidates /tmp/ic-implementation.json --out /tmp/ic-development-01 \
-  --cells 9a0,13a0 --cases 2 --repetitions 3 --seed 2026092501 --timeout 5
-python3 /tmp/ic-development-01/evaluator/autolab.py verify --round /tmp/ic-development-01
+python3.11 research/ic_candidate_tournament_20260915/producer/prepare.py \
+  --reference scaled --out /tmp/ic-prepared
+python3.11 research/ic_candidate_tournament_20260915/autolab.py doctor \
+  --source-root /tmp/ic-prepared/source
+python3.11 research/ic_candidate_tournament_20260915/autolab.py screen \
+  --source-root /tmp/ic-prepared/source \
+  --candidates research/ic_candidate_tournament_20260915/goal_20260924/driver-admission/candidates.json \
+  --out /tmp/ic-development-01 --cells 13a0,17a1 --cases 1 \
+  --repetitions 1 --seed 2026092530 --timeout 180
+python3.11 /tmp/ic-development-01/evaluator/autolab.py verify --round /tmp/ic-development-01
 ```
 
 Preparation copies and hashes the source and compile-time dependencies before
@@ -114,8 +118,10 @@ outside the measured child, as it is in the historical instruction protocol.
 Reissue `run --round PATH` using the **frozen** evaluator to resume. Existing
 receipts are reverified. An interrupted directory without its receipt is retained
 and rejected; use a new round. No automatic retry of failures occurs.
-The latest native summary pairs each case's repetition medians and weights curve
-cells equally; pooled wall-time medians are shown separately as practical costs.
+The native summary pairs each target's online repetition medians and weights
+curve cells equally. `single_target_online` retains the actual point, canonical
+identities, IC and rho milliseconds and their ratio; incomplete pairs have no
+speedup. Whole-process cold timing is separate.
 The A/A paired ratio is a noise diagnostic, never a promotion test on this path.
 
 Use `--source-screen PATH` for a new seed/panel on an already frozen source and
@@ -124,12 +130,13 @@ log and compiler identity; **current source changes are not used**. Omit that
 argument to compile an implementation change. The native screen admits one
 source tree; the instruction tournament supports separately built source arms.
 
-For an algebra screen, use the committed
-[`autolab_20260924/algebra-base.json`](autolab_20260924/algebra-base.json):
-two summands on the degree-9 linear factor base. Generate `--panel algebra
---base-config FILE`, then screen `--cells 9a0,9a1`. Begin small; a large orbit set
-does not imply a small algebraic encoding. For factor-base recipes use
-`--panel factor-base` and `screen --comparison-kind factor-base-policy`.
+For algebra proposals, the committed
+[`autolab_20260924/algebra-base.json`](autolab_20260924/algebra-base.json)
+describes two summands on a degree-9 linear factor base. Generate proposals with
+`propose --panel algebra --base-config FILE`; factor-base proposals use
+`--panel factor-base`. These generic engines need public-input scientific
+instrumentation and independent stage adapters before the current drivers can
+admit them. Historical screens remain replayable with their own frozen evaluator.
 
 Native screens always report `promotion_eligible=false`; operation counts, S,
 floor ratios, memory caps and affinity remain null when unavailable. A/A results,
