@@ -8,7 +8,7 @@
         0
       ],
       "returncode": 101,
-      "stderr_sha256": "ac4115f60c093d857ea26cc0b0efbfb170897a4a0b46a21aebb1865dec21ac94"
+      "stderr_sha256": "8ba9835d6719ce4e4e9eff25a45319a4f5aacba91a4797bb16b4a8e1fd653b97"
     },
     {
       "case": "wrong_subgroup",
@@ -18,13 +18,23 @@
         1
       ],
       "returncode": 101,
-      "stderr_sha256": "417e6d40852d08359e99e7769a3d84e089a369b1ed9860b60a9fa88941062083"
+      "stderr_sha256": "bf7d1f361c4ae902db9650795a83113606eef512932bdf72eaa64b8554c7047a"
+    },
+    {
+      "case": "missing_compact_mode",
+      "expected_rejection": "compact batch target files require KIC_ORBIT_LAZY_RELATIVE_SUPPORT=1",
+      "point": [
+        1982694855789544,
+        1466753660120656
+      ],
+      "returncode": 101,
+      "stderr_sha256": "e984cdcfa32f5d19d281db0eb671cf337197e454eb58913e382c3e8372ba48e7"
     }
   ],
-  "positive_process_peak_rss_raw": 646447104,
-  "positive_process_wall_ms": 10750.116707989946,
+  "positive_process_peak_rss_raw": 647774208,
+  "positive_process_wall_ms": 6308.700417022919,
   "producer_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "producer_stdout_sha256": "fc114be294d5cab08c73c112426ed11b7b51e748af8b4935a936656dc8616229",
+  "producer_stdout_sha256": "62e6dce32ab438cc18c8c3e279a5436291488b25bfe354052b93f02d9ed18186",
   "schema_version": "1.0",
   "targets_extracted": 8,
   "targets_requested": 8
