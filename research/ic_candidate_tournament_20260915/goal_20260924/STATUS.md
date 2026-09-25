@@ -1,13 +1,18 @@
 # September 24 bounded IC goal
 
-Status: canonical admission is merged in both existing campaign drivers; no new
-performance tournament launched. [PR 755](https://github.com/aburan28/crypto/pull/755)
-merged at `0de6d004d81fb8c2d3e86ecef24c738d86fec853`. The
-[durable driver controls](driver-admission/README.md) retain 17 successful native
-jobs, one intentional failure and 15 tournament native/profile pairs in the final
-Linux run; 28 audits passed after fresh extraction of the full history. These are
-fixed integration controls, not comparative reference qualification. Zero of the
-three improvement rounds have run.
+Status: the archived reference panel has completed under the frozen protocol:
+1,290/1,290 native/profile pairs, three IC sources and eighteen rho configurations.
+[PR 761](https://github.com/aburan28/crypto/pull/761) merged the implementation at
+`e9b540eef8775f8d0d65e24c319174d8fefa7460`. The
+[qualification report and durable evidence](reference-qualification/README.md)
+select `pairinv` for IC cold instructions and online time, `rho_incumbent_4` for
+rho cold instructions and `rho_pairinv_4` for rho online time. Exact frozen Linux
+replay is an evidence-PR merge gate; independent macOS receipt replay passed all
+1,290 jobs, with two one-ULP derived-summary differences documented in the report.
+No reference selection is a promotion. Zero of the three improvement rounds have
+run. The familywise protocol and cross-campaign target exclusions remain pending.
+Canonical admission is merged in both drivers; the earlier
+[driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the
 [follow-up controls](public-inputs/README.md); PR 748 merged at
 `4a898fcd3464b71439bd9451bd466a6ec217ddc9`, with 39/39 IC and 13/13 rho
@@ -50,7 +55,7 @@ complete cold instruction/time goals above are additional acceptance gates.
 Report both boundaries explicitly; neither batch amortization nor a cheap solver
 stage substitutes for the one-target result.
 
-## Baseline inventory, not yet fresh qualification
+## Baseline inventory and archived provenance
 
 | Source | Durable identity | Why retained |
 |---|---|---|
@@ -97,22 +102,22 @@ scalars; a public-target adapter is required before that path joins this panel.
    and single-target native timing follow-up passes local controls, Linux
    integration and transported evidence replay. Rho reusable arithmetic/Frobenius
    preparation is excluded from its online interval and retained in cold cost.
-3. Complete the bounded reference-quality checks below, then qualify candidate
-   IC sources and a strong matched rho reference;
-   freeze rho width and source before held-out data.
+3. The bounded reference-quality checks and five-cell development qualification
+   have executed; see the report above. Bind its selected complete sources and
+   rho settings to the new protocol before any held-out data.
 4. Seal the panel and familywise protocol, then run bounded rounds. Keep all
    failures and source/fixture/profiler artifacts; archive them durably, update
    the existing scoreboard, and merge implementation/evidence PRs.
 
 The local development machine is macOS arm64. Calibrated measurements require
 the existing Linux amd64 / Valgrind 3.22.0 workflow; native local timings cannot
-substitute for that accounting model. No new performance result is claimed here.
+substitute for that accounting model. The new measurements are development reference selection, not an improvement-round claim.
 
 ## Reference-quality checks before comparison
 
-Review of the prepared `scaled` source identified two concrete checks to finish
-while qualifying the references. These are code-review findings, not measured
-performance improvements:
+Review of the prepared `scaled` source identified two concrete issues. PR 761
+completed the allocator correction and independent row-arithmetic controls; it
+did not optimize the row kernel:
 
 - In `examples/ic_tournament_worker.rs`, the arena region guarantees 4096-byte
   alignment but allocation rounds only the offset for arbitrary requested
@@ -130,15 +135,15 @@ performance improvements:
 Inspect the current compatible `icx`/rho paths as well as restored sources.
 Freeze a cross-campaign target exclusion set and the familywise confirmation rule
 before enabling promotion. The existing admission gate intentionally leaves
-reference qualification unset. The next deliverable is a qualified comparison
-panel and executed development evidence, followed by the bounded rounds; more
-integration controls alone will not complete this goal.
+reference qualification unset. The next deliverable is the frozen familywise improvement protocol and its
+executed bounded rounds; more integration controls alone will not complete this goal.
 
 
-Reference-qualification implementation is in progress under the
-[predeclared protocol](reference-qualification/PROTOCOL.md). The prepared-source
-patch adds the allocator alignment fallback and independent scalar-row rank/
-solution controls. Local release checks pass for both changes; comparative Linux
-measurements have not run yet. The existing tournament now has a bounded
-qualification mode with interleaved references and separate online/cold leaders.
-This remains a prerequisite, not an improvement-round result.
+Reference qualification now has measured development evidence. `pairinv`'s online
+ratio to the old incumbent is 0.9781 [0.9249, 1.0302], its cold instruction ratio
+is 0.9845 and its cold native ratio is 1.0064. This is not a 20% gain. Larger
+requested rho widths clip to the same effective width on several cells; the
+report preserves those counts. The existing exact evaluator remains unchanged,
+and Linux archive replay checks both raw receipts and derived selection. Before
+a new round, finish source/reference binding, target-exclusion sealing and the
+familywise rule, then execute the actual diversified pipeline budget.
