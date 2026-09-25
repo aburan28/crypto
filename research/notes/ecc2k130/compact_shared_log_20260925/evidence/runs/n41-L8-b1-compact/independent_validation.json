@@ -1,0 +1,95 @@
+{
+  "R": 40,
+  "block": 1,
+  "classification": "COMPLETE",
+  "exceptional_states": 0,
+  "failed_query_s3_calls": 5379200,
+  "length": 8,
+  "n": 41,
+  "peak_rss_bytes": 33832960,
+  "point_set_sha256": "d8a7339a2812c1373953474b1fb56a8ecad71b04f33cba8cb4b3382d639510b7",
+  "process_cpu_s": 1.447108,
+  "process_wall_ms": 1478.555292,
+  "producer_base_ms": 10.726291,
+  "producer_index_ms": 1.484916,
+  "producer_query_ms": 1400.7299170000001,
+  "producer_scan_ms": 44.586292,
+  "producer_stdout_sha256": "0e03015a8eb6ebd966f0807236cdd5ea846d95643f32a50ba485df5cbb9634ee",
+  "recovered": [
+    {
+      "index": 0,
+      "scalar": 258796166379,
+      "target_point": [
+        297260133076,
+        1500218237450
+      ]
+    },
+    {
+      "index": 1,
+      "scalar": 104466563120,
+      "target_point": [
+        686968252796,
+        296193334500
+      ]
+    },
+    {
+      "index": 2,
+      "scalar": 267925107391,
+      "target_point": [
+        1466478648350,
+        1128124297696
+      ]
+    },
+    {
+      "index": 3,
+      "scalar": 308126858268,
+      "target_point": [
+        79701253508,
+        1874715957675
+      ]
+    },
+    {
+      "index": 4,
+      "scalar": 277105638149,
+      "target_point": [
+        1269940311276,
+        65128824713
+      ]
+    },
+    {
+      "index": 5,
+      "scalar": 352088307243,
+      "target_point": [
+        516307855484,
+        701430521871
+      ]
+    },
+    {
+      "index": 6,
+      "scalar": 320588433819,
+      "target_point": [
+        238761590040,
+        2179182775925
+      ]
+    },
+    {
+      "index": 7,
+      "scalar": 546392127182,
+      "target_point": [
+        616304726604,
+        401863109699
+      ]
+    }
+  ],
+  "regular_states": 65600,
+  "relations": 8,
+  "root_candidates": 131200,
+  "root_occupancy": 0.9871951219512195,
+  "run_manifest_sha256": "42aff114aab33106820b5944a0115eba8b5e8faf4b7fe33ba4e83a428b578308",
+  "schema_version": "1.0",
+  "total_group_lift_attempts": 8,
+  "total_indexed_partner_hits": 8,
+  "total_partner_roots": 1479498,
+  "total_s3_calls": 739752,
+  "unique_indexed_roots": 129520
+}

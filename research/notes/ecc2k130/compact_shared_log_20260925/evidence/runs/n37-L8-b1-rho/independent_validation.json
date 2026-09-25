@@ -1,0 +1,38 @@
+{
+  "block": 1,
+  "charges": {
+    "canonicalizations": 6613,
+    "failed_collisions": 0,
+    "frobenius_maps": 238068,
+    "group_additions": 6621,
+    "negations_examined": 244681,
+    "partition_hashes": 6194,
+    "scalar_multiplications": 56,
+    "table_inserts": 410,
+    "table_queries": 418
+  },
+  "classification": "COMPLETE",
+  "cross_target_solves": 6,
+  "length": 8,
+  "n": 37,
+  "peak_rss_bytes": 2244608,
+  "process_cpu_s": 0.012337999999999998,
+  "process_wall_ms": 62.047625,
+  "producer_in_process_ms": 10.757917,
+  "producer_setup_ms": 0.9586669999999999,
+  "producer_stdout_sha256": "d3317f90669befe6b065e0af056659af157621c0f2a8655ac47544ea93b1e55e",
+  "recovered_scalars": [
+    120110186,
+    161180266,
+    171152725,
+    201064155,
+    60907628,
+    124344689,
+    168201054,
+    223319913
+  ],
+  "run_manifest_sha256": "558981cb0d4b6a31e960e0ccd1840b8d5e6a0d23fd1b84ff2969b1675cff539a",
+  "schema_version": "1.0",
+  "table_entries": 410,
+  "total_walk_steps": 6194
+}
