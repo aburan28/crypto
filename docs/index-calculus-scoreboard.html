@@ -6665,6 +6665,25 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-subspace-support-20260925 -->
+<!-- BEGIN ecc2k130-rotated-pdp-corpus-20260925 -->
+<section class="panel" id="ecc2k130-rotated-pdp-corpus-20260925">
+  <div class="panel-head">
+    <h2>Rotated projected PDP corpus: fixed positives and exact negatives at m = 5 and m = 6 <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/767">PR #767</a> preregistered the n = 13,m = 5 and n = 19,m = 6 point-target arms after <a href="https://github.com/aburan28/crypto/pull/762">PR #762</a> found n = 13,m = 6 projected support saturated. Every labelled tuple was enumerated by exact group law and an independent field/group-law implementation rebuilt both full-point and cofactor-projected histograms. The selection stream fixed four planted and four certified projected-negative subgroup targets per arm before any solver query. Both arms passed the frozen 300/600 s producer/verifier and 512 MiB per-child caps. These are corpus-admission measurements, not solver timings or an ECDLP performance comparison.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Complete point-sum census for rotated d = 2, beta = 3 factors. Projected support includes the identity in the prime-order subgroup. The n = 19 minimum-miss count is the preregistered necessary bound q - 7<sup>6</sup>, not a predicted hit rate. S and matched-rho ratios are unset.</caption>
+    <thead><tr><th>Exact arm</th><th>Factor points</th><th>Labelled tuples</th><th>Distinct full sums</th><th>Projected support / q</th><th>Necessary misses</th><th>Exact misses</th><th>Frozen targets</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>5 &times; 5</td><td>3,125</td><td>1,799</td><td>1,591 / 2,003</td><td>0</td><td>412</td><td>4 planted + 4 negative; independently replayed</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>7 &times; 6</td><td>117,649</td><td>81,175</td><td>62,389 / 130,873</td><td>13,224</td><td>68,484</td><td>4 planted + 4 negative; independently replayed</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The archive preserves every selection attempt, all four torsion-shift multiplicities for each selected target, full and projected histograms, factor lists, operation counts and process receipts. n = 13 support matches all 2,003 subgroup labels in the independently archived parent #762 census. No SAT/FES/crossbred/F4/F5 solver was run, so no relative solver difficulty, n = 131 yield, ECC2K-130 speedup, or rho crossover follows. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_pdp_corpus_20260925/RESULT.md">decision and cost table</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_pdp_corpus_20260925/PROTOCOL.md">pre-outcome protocol</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/README.md">raw archive and replay</a>. Raw SHA-256 <code>39f16990213e2c7525c6dae92c131127b12f914bbfd6182264249da72bc9546c</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-pdp-corpus-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">
