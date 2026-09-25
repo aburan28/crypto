@@ -8,7 +8,6 @@ import json
 import os
 import platform
 import signal
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -36,6 +35,28 @@ def clean_env() -> dict[str, str]:
     return {key: value for key, value in os.environ.items() if not key.startswith("KIC_")}
 
 
+def linux_process_group_rss(pgid: int) -> int:
+    """Current summed RSS for the fresh measured process group on Linux."""
+    if not Path("/proc").is_dir():
+        return 0
+    total = 0
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdecimal():
+            continue
+        try:
+            stat = (entry / "stat").read_text()
+            fields = stat[stat.rfind(")") + 2:].split()
+            if int(fields[2]) != pgid:
+                continue
+            for line in (entry / "status").read_text().splitlines():
+                if line.startswith("VmRSS:"):
+                    total += int(line.split()[1]) * 1024
+                    break
+        except (FileNotFoundError, PermissionError, ProcessLookupError, ValueError):
+            continue
+    return total
+
+
 def measure(command: list[str], env: dict[str, str], directory: Path,
             basename: str, timeout: float, input_files: dict[str, Path]) -> dict:
     directory.mkdir(parents=True, exist_ok=False)
@@ -55,7 +76,18 @@ def measure(command: list[str], env: dict[str, str], directory: Path,
         child = subprocess.Popen(command, cwd=REPO, env=env, stdout=out_stream, stderr=err_stream, start_new_session=True)
         timed_out = False
         rss_gate = False
+        observed_group_peak_rss = 0
         while True:
+            group_rss = linux_process_group_rss(child.pid)
+            observed_group_peak_rss = max(observed_group_peak_rss, group_rss)
+            if group_rss >= MAX_RSS:
+                rss_gate = True
+                try:
+                    os.killpg(child.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                _, status, usage = os.wait4(child.pid, 0)
+                break
             pid, status, usage = os.wait4(child.pid, os.WNOHANG)
             if pid:
                 break
@@ -68,25 +100,6 @@ def measure(command: list[str], env: dict[str, str], directory: Path,
                     pass
                 _, status, usage = os.wait4(child.pid, 0)
                 break
-            # The direct point/rho child is monitored live on Linux. Training
-            # also records its internally spawned producer's peak in validation.
-            status_path = Path(f"/proc/{child.pid}/status")
-            if status_path.exists():
-                try:
-                    status_lines = status_path.read_text().splitlines()
-                except FileNotFoundError:
-                    status_lines = []
-                for line in status_lines:
-                    if line.startswith("VmRSS:") and int(line.split()[1]) * 1024 >= MAX_RSS:
-                        rss_gate = True
-                        try:
-                            os.killpg(child.pid, signal.SIGKILL)
-                        except ProcessLookupError:
-                            pass
-                        _, status, usage = os.wait4(child.pid, 0)
-                        break
-                if rss_gate:
-                    break
             time.sleep(0.02)
         wall_ms = (time.monotonic_ns() - started) / 1e6
         child.returncode = os.waitstatus_to_exitcode(status)
@@ -95,6 +108,7 @@ def measure(command: list[str], env: dict[str, str], directory: Path,
         "returncode": child.returncode, "timed_out": timed_out, "rss_gate": rss_gate,
         "wall_ms": wall_ms, "user_cpu_s": usage.ru_utime,
         "system_cpu_s": usage.ru_stime, "peak_rss_bytes": peak_rss,
+        "observed_group_peak_rss_bytes": observed_group_peak_rss,
         "load_average_before": before_load, "load_average_after": os.getloadavg(),
         "stdout_sha256": sha(stdout), "stderr_sha256": sha(stderr),
         "manifest_sha256": sha(directory / "manifest.json"),
@@ -106,7 +120,8 @@ def measure(command: list[str], env: dict[str, str], directory: Path,
 
 def complete(receipt: dict) -> bool:
     return (receipt["returncode"] == 0 and not receipt["timed_out"]
-            and not receipt["rss_gate"] and receipt["peak_rss_bytes"] < MAX_RSS)
+            and not receipt["rss_gate"] and receipt["peak_rss_bytes"] < MAX_RSS
+            and receipt["observed_group_peak_rss_bytes"] < MAX_RSS)
 
 
 def checked_targets():
@@ -147,6 +162,8 @@ def run(args):
             "training_driver": sha(ORBIT / "cold_batch_rank.py"),
             "independent_replay": sha(ORBIT / "independent_replay_20260924_codex/replay.py"),
             "pair_verifier": sha(HERE / "verify_pair.py"),
+            "panel_runner": sha(HERE / "run_panel.py"),
+            "archive_sealer": sha(HERE / "archive.py"),
         },
         "binary_sha256": {"ic": sha(IC_EXE), "rho": sha(RHO_EXE)},
         "base_gzip_sha256": sha(BASE_GZ), "base_hash": BASE_HASH,
@@ -269,6 +286,21 @@ def run(args):
         rho = json.loads((pair_dir / "rho/validation.json").read_text())
         assert ic["recovered_scalars"] == rho["recovered_scalars"]
         record["classification"] = "PASS"
+        record["ic_operations"] = {
+            "regular_states": ic["regular_states"],
+            "index_entries": ic["index_entries"],
+            "partner_trials_sum": ic["partner_trials_sum"],
+            "query_ms_sum": ic["query_ms_sum"],
+            "batch_loop_wall_ms": ic["batch_loop_wall_ms"],
+            "s3_calls_sum": sum(row["s3_calls"] for row in ic["query_observations"]),
+            "partner_roots_sum": sum(row["partner_roots"] for row in ic["query_observations"]),
+            "indexed_partner_hits_sum": sum(row["indexed_partner_hits"] for row in ic["query_observations"]),
+            "group_lift_attempts_sum": sum(row["group_lift_attempts"] for row in ic["query_observations"]),
+        }
+        record["rho_operations"] = {
+            "walk_steps": rho["walk_steps"], "table_entries": rho["table_entries"],
+            "cross_target_solves": rho["cross_target_solves"], "charges": rho["charges"],
+        }
         record["ic_lower_wall_ms"] = root["training_child_wall_ms"] + record["arms"]["ic"]["wall_ms"]
         record["ic_conservative_upper_wall_ms"] = (driver["wall_ms"] + record["arms"]["ic"]["wall_ms"]
                                                     + record["verify_ic"]["wall_ms"])
@@ -283,15 +315,24 @@ def run(args):
                                + record["arms"]["rho"]["system_cpu_s"])
         record["ic_peak_rss_bytes"] = max(
             root["training_child_peak_rss_bytes"], driver["peak_rss_bytes"],
-            record["arms"]["ic"]["peak_rss_bytes"], record["verify_ic"]["peak_rss_bytes"],
+            driver["observed_group_peak_rss_bytes"],
+            record["arms"]["ic"]["peak_rss_bytes"],
+            record["arms"]["ic"]["observed_group_peak_rss_bytes"],
+            record["verify_ic"]["peak_rss_bytes"],
         )
-        record["rho_peak_rss_bytes"] = record["arms"]["rho"]["peak_rss_bytes"]
+        record["rho_peak_rss_bytes"] = max(
+            record["arms"]["rho"]["peak_rss_bytes"],
+            record["arms"]["rho"]["observed_group_peak_rss_bytes"],
+        )
         save()
         return True
 
     for block in range(3):
         if not pair(block, 32):
-            root["classification"] = "CENSORED_OR_INVALID_L32"
+            root["classification"] = (
+                "INVALID_L32_REPLAY" if root["steps"][-1]["classification"].startswith("INVALID")
+                else "CENSORED_L32_CHILD_OR_CAP"
+            )
             save()
             return
     l32 = [x for x in root["steps"] if x["count"] == 32]
@@ -308,7 +349,10 @@ def run(args):
         return
     for block in range(3):
         if not pair(block, 128):
-            root["classification"] = "CENSORED_OR_INVALID_L128"
+            root["classification"] = (
+                "INVALID_L128_REPLAY" if root["steps"][-1]["classification"].startswith("INVALID")
+                else "CENSORED_L128_CHILD_OR_CAP"
+            )
             save()
             return
     root["classification"] = "COMPLETE_ALL_SIX_PAIRS"
