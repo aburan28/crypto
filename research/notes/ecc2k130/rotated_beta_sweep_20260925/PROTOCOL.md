@@ -29,6 +29,18 @@ discriminator is any exact membership flip among #767's eight n19 Q targets.
 Both can fail; all zero/negative outcomes and failed arms stay in the PR.
 Neither threshold is a speed boundary or an attack improvement.
 
+The **follow-up priority gate**, distinct from the 1%-of-q descriptive
+threshold, requires one admitted candidate at identical seven physical F0
+points and three nonzero negation-paired projected columns (seven signed
+projected points including O) to have at least 10% more projected support
+than beta 3: `S_candidate >= ceil(1.10 * 62389) = 68628`. It must also have
+no worse projected tuple energy *per supported target*:
+`E_candidate / S_candidate <= E_beta3 / 62389`, checked by exact integer
+cross multiplication, where `E = sum_R multiplicity(R)^2`. If no candidate
+passes both conjuncts, prioritize other factor-base/solver work over further
+beta tuning. This is a toy-rung decision rule, not evidence of transfer to
+n131 or ECC2K-130.
+
 The admission gate is at least three and at most four *preselected* additional
 normal generators with complete producer and independent-verifier success
 under the caps below. If the frozen selection rule yields fewer than three,
@@ -55,6 +67,10 @@ admitted candidate. A candidate first passes these **pre-outcome** checks:
 3. The *single-factor* cofactor-projected column `[4]F_0` has the same number
    of distinct points as beta 3's `[4]F_0` in #767. This is computed only
    from the seven factor points, never a tuple sum or target-support oracle.
+   Record both this **signed** point count and the quotient count under
+   `P ~ -P` (including O); the signed count, not the quotient, is the
+   primary matching condition. This avoids hiding a changed physical column
+   behind a sign-paired count.
 
 Primary selection takes the first four candidates passing all three checks.
 Stop scanning after the fourth. If fewer than three primary candidates occur
@@ -85,7 +101,10 @@ For each, report projected `R=[4]Q` multiplicity, all four full-point
 for beta 3 may be negative for another beta; the historical class label
 remains unchanged. Do not replace any target. Compare each candidate to the
 reference's all-q projected support: exact support and miss counts, labelled
-and full/projected collisions, factor and projected-column sizes, intersection,
+and full/projected duplicate counts, exact projected energy
+`E = sum_R multiplicity(R)^2`, unordered colliding tuple-pair count
+`(E-7^6)/2`, and Cauchy–Schwarz effective-support floor `(7^6)^2/E`
+(as an exact fraction), factor and signed projected-column sizes, intersection,
 union, candidate-only and beta3-only targets, common misses, and the fixed
 target verdicts. Ratios of support counts are support ratios, never speedups.
 
@@ -116,3 +135,34 @@ result, decision and the canonical
 preflight before evidence exists and archive-only independent replay once it
 does; it must never run fresh support outcomes. Review the final diff and
 exact-head CI, then merge under `AGENTS.md`'s standing workflow.
+
+## Exact pre-outcome source and input freeze
+
+The 25 examined hash counters admitted beta `338435` (counter 1), `303097`
+(counter 12), `464276` (counter 13) and `42605` (counter 24). All four pass
+normal rank 19, seven physical F0 points, seven signed projected F0 points
+and four projected sign-orbits including O. The fallback was not used. The
+independent bit-serial preflight replay agrees on every counter, rejection
+reason and admitted beta. This selection precedes every candidate six-sum
+support outcome. `selection.json` SHA-256 is
+`b88d2ca8c33b90650ac466937a01e82d428aa6bd1ef53f6da7f5958c843a5d6d`.
+
+The sweep `FROZEN.json` SHA-256 `44ac5784e3544c3bc32ed5b63f0c93ff27029c6a12b4598a26160cf492516543`.
+The runner and CI check that independent literal anchor and then every frozen
+source, input, selection, parent-source and #767 archive hash. From the
+repository root, the **pre-outcome** check is:
+
+```sh
+python3 research/notes/ecc2k130/rotated_beta_sweep_20260925/ci_replay.py
+```
+
+After exact-head pre-outcome CI is green, the single frozen support run is:
+
+```sh
+python3 research/notes/ecc2k130/rotated_beta_sweep_20260925/run.py --out /private/tmp/rotated-beta-sweep-run-20260925
+```
+
+The first command reads only source, selection and pinned reference bytes; it
+never computes a new candidate six-sum support outcome. The later archive CI
+invocation uses `--evidence research/notes/ecc2k130/rotated_beta_sweep_20260925/evidence`
+and independently re-enumerates only the committed outcomes.
