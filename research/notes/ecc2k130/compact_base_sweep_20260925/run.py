@@ -65,6 +65,7 @@ def run(args: argparse.Namespace) -> None:
                     "KIC_ORBIT_BRANCH_ORDER": "pair_then_pair",
                     "KIC_ORBIT_REP_ENCODING": "one_hot",
                     "KIC_ORBIT_BATCH_ONLY": "1",
+                    "KIC_ORBIT_INCLUDE_BASE_HEADER": "1",
                     "KIC_TASK_ID": "TASK-IC-COMPACT-BASE-SWEEP-20260925"})
         if args.mode == "train":
             source_lines = (HERE / f"training_scalars_n{n}.txt").read_bytes().splitlines()
@@ -129,13 +130,16 @@ def run(args: argparse.Namespace) -> None:
         assert len(rows) == 1, len(rows)
         observed = rows[0]
         assert observed["n"] == n and observed["a"] == 0
-        assert int(observed["subgroup_order"]) == int(spec["arms"][str(n)][0]["subgroup_order"])
         if args.mode == "rho":
+            assert int(observed["subgroup_order"]) == int(spec["arms"][str(n)][0]["subgroup_order"])
             expected = spec["holdouts"][str(n)][args.seed_index]
             assert observed["published_q"] == expected["q"]
             assert observed["recovered_fixture_scalar"] == expected["scalar_validator_only"]
         else:
             assert observed["orbit_columns"] == args.r
+            header = observed["compact_orbit_base_header"]
+            assert int(header["subgroup_order"]) == int(spec["arms"][str(n)][0]["subgroup_order"])
+            assert header["orbit_columns"] == args.r
             batch = observed["compact_orbit_batch" if args.mode == "train"
                              else "compact_orbit_point_batch"]
             assert batch["targets_requested"] == (args.count if args.mode == "train" else 3)

@@ -6675,6 +6675,25 @@ fn main() {
             "factor_base_points":base.points.len(),
             "factor_base_x_coordinates":base.x_codes.len(),
             "orbit_columns":base.orbit_columns,
+            "compact_orbit_base_header":if lazy_relative_support
+                && std::env::var("KIC_ORBIT_INCLUDE_BASE_HEADER").as_deref() == Ok("1") {
+                Some(json!({
+                    "kind":"point_defined_factor_base",
+                    "n":n,
+                    "a":a,
+                    "subgroup_order":modulus,
+                    "cofactor":curve.cofactor.to_u64().unwrap(),
+                    "field_modulus_low_terms":curve.curve.irreducible.low_terms,
+                    "generator":affine_coordinates(curve.generator()),
+                    "orbit_columns":base.orbit_columns,
+                    "signed_automorphism_size":base.signed_size,
+                    "factor_base_points":base.points.len(),
+                    "factor_base_point_coordinates":base.points.iter().map(affine_coordinates).collect::<Vec<_>>(),
+                    "factor_base_point_labels":base.point_labels,
+                    "factor_base_representatives":base.representatives.iter().map(affine_coordinates).collect::<Vec<_>>(),
+                    "scanned_x":base.scanned_x
+                }))
+            } else { None },
             "models_examined":models,
             "valid_x_tuples":valid_x_tuples.len(),
             "invalid_group_lifts":invalid_lifts,
