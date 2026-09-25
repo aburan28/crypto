@@ -3005,9 +3005,18 @@ fn extract_orbit_relation(
     let started = Instant::now();
     let index =
         CompactOrbitExtractionIndex::new(curve, regular, regular_keys, representative_x_codes, gf);
-    let result = extract_orbit_relation_with_index(curve, base, target, regular, &index, gf, b);
+    let (result, _) =
+        extract_orbit_relation_with_index(curve, base, target, regular, &index, gf, b);
     let elapsed = started.elapsed().as_secs_f64() * 1000.0;
     (result, index.index_entries, elapsed)
+}
+
+#[derive(Clone, Copy, Default)]
+struct CompactOrbitQueryStats {
+    s3_calls: u64,
+    partner_roots: u64,
+    indexed_partner_hits: u64,
+    group_lift_attempts: u64,
 }
 
 fn extract_orbit_relation_with_index(
@@ -3018,12 +3027,13 @@ fn extract_orbit_relation_with_index(
     index: &CompactOrbitExtractionIndex,
     gf: &Gf2,
     b: u64,
-) -> Option<ExtractedOrbitRelation> {
+) -> (Option<ExtractedOrbitRelation>, CompactOrbitQueryStats) {
     let started = Instant::now();
+    let mut stats = CompactOrbitQueryStats::default();
     let width = curve.n as usize;
     let target_x = match target {
         BinaryPoint::Affine { x, .. } => x.raw_bits().first().copied().unwrap_or(0),
-        BinaryPoint::Infinity => return None,
+        BinaryPoint::Infinity => return (None, stats),
     };
     let mut trials = 0u64;
     for &(left, right, relative) in &index.regular_keys {
@@ -3037,42 +3047,49 @@ fn extract_orbit_relation_with_index(
                 for _ in 0..left_shift {
                     absolute = gf.sqr(absolute);
                 }
+                stats.s3_calls += 1;
                 let Some(partners) = s3_x_roots(gf, b, absolute, target_x) else {
                     continue;
                 };
                 for partner in partners {
                     trials += 1;
+                    stats.partner_roots += 1;
                     let Some((second_left, second_right, second_left_shift, second_right_shift)) =
                         witness_for_absolute_root(&index.by_canonical, gf, partner, width)
                     else {
                         continue;
                     };
+                    stats.indexed_partner_hits += 1;
                     let codes = [
                         x_left,
                         x_right,
                         index.shifted[second_left][second_left_shift],
                         index.shifted[second_right][second_right_shift],
                     ];
+                    stats.group_lift_attempts += 1;
                     if lift_x_tuple(curve, base, &codes, target).is_some() {
-                        return Some(ExtractedOrbitRelation {
-                            codes,
-                            first: (left, right, left_shift, right_shift),
-                            second: (
-                                second_left,
-                                second_right,
-                                second_left_shift,
-                                second_right_shift,
-                            ),
-                            intermediates: [absolute, partner],
-                            trials,
-                            extract_ms: started.elapsed().as_secs_f64() * 1000.0,
-                        });
+                        return (
+                            Some(ExtractedOrbitRelation {
+                                codes,
+                                first: (left, right, left_shift, right_shift),
+                                second: (
+                                    second_left,
+                                    second_right,
+                                    second_left_shift,
+                                    second_right_shift,
+                                ),
+                                intermediates: [absolute, partner],
+                                trials,
+                                extract_ms: started.elapsed().as_secs_f64() * 1000.0,
+                            }),
+                            stats,
+                        );
                     }
                 }
             }
         }
     }
-    None
+    (None, stats)
 }
 
 fn force_one_hot(solver: &mut Solver, offset: usize, index: usize) {
@@ -5765,9 +5782,11 @@ fn main() {
     let mut compact_relation: Option<ExtractedOrbitRelation> = None;
     let mut compact_batch_relations: Vec<(u64, ExtractedOrbitRelation)> = Vec::new();
     let mut compact_batch_failures: Vec<u64> = Vec::new();
+    let mut compact_batch_query_observations = Vec::new();
     let mut compact_batch_targets_requested = 0usize;
     let mut compact_point_batch_relations: Vec<([u64; 2], ExtractedOrbitRelation)> = Vec::new();
     let mut compact_point_batch_failures: Vec<[u64; 2]> = Vec::new();
+    let mut compact_point_batch_query_observations = Vec::new();
     let mut compact_point_batch_targets_requested = 0usize;
     let mut compact_batch_loop_ms = 0.0f64;
     let mut compact_batch_index_build_ms = 0.0f64;
@@ -5828,7 +5847,7 @@ fn main() {
             for scalar in scalars {
                 let target = curve.mul(curve.generator(), &BigUint::from(scalar));
                 let query_started = Instant::now();
-                let relation = extract_orbit_relation_with_index(
+                let (relation, stats) = extract_orbit_relation_with_index(
                     &curve,
                     &base,
                     &target,
@@ -5839,6 +5858,15 @@ fn main() {
                 );
                 let query_ms = query_started.elapsed().as_secs_f64() * 1000.0;
                 compact_batch_query_ms += query_ms;
+                compact_batch_query_observations.push(json!({
+                    "scalar":scalar,
+                    "hit":relation.is_some(),
+                    "query_ms":query_ms,
+                    "s3_calls":stats.s3_calls,
+                    "partner_roots":stats.partner_roots,
+                    "indexed_partner_hits":stats.indexed_partner_hits,
+                    "group_lift_attempts":stats.group_lift_attempts
+                }));
                 if let Some(relation) = relation {
                     let lifted = lift_x_tuple(&curve, &base, &relation.codes, &target);
                     assert!(lifted.is_some(), "batch relation failed group lift");
@@ -5892,7 +5920,7 @@ fn main() {
                     "point target must belong to the prime-order subgroup"
                 );
                 let query_started = Instant::now();
-                let relation = extract_orbit_relation_with_index(
+                let (relation, stats) = extract_orbit_relation_with_index(
                     &curve,
                     &base,
                     &target,
@@ -5901,7 +5929,17 @@ fn main() {
                     &lazy_relative_field.gf,
                     b,
                 );
-                compact_batch_query_ms += query_started.elapsed().as_secs_f64() * 1000.0;
+                let query_ms = query_started.elapsed().as_secs_f64() * 1000.0;
+                compact_batch_query_ms += query_ms;
+                compact_point_batch_query_observations.push(json!({
+                    "target_point":coordinates,
+                    "hit":relation.is_some(),
+                    "query_ms":query_ms,
+                    "s3_calls":stats.s3_calls,
+                    "partner_roots":stats.partner_roots,
+                    "indexed_partner_hits":stats.indexed_partner_hits,
+                    "group_lift_attempts":stats.group_lift_attempts
+                }));
                 if let Some(relation) = relation {
                     assert!(
                         lift_x_tuple(&curve, &base, &relation.codes, &target).is_some(),
@@ -6576,6 +6614,7 @@ fn main() {
                     "targets_requested":compact_batch_targets_requested,
                     "targets_extracted":compact_batch_relations.len(),
                     "failed_target_scalars":compact_batch_failures,
+                    "query_observations":compact_batch_query_observations,
                     "target_scalars":compact_batch_relations.iter().map(|(scalar, _)| scalar).collect::<Vec<_>>(),
                     "relations":compact_batch_relations.iter().map(|(scalar, relation)| json!({
                         "scalar":scalar,
@@ -6602,6 +6641,7 @@ fn main() {
                     "targets_requested":compact_point_batch_targets_requested,
                     "targets_extracted":compact_point_batch_relations.len(),
                     "failed_target_points":compact_point_batch_failures,
+                    "query_observations":compact_point_batch_query_observations,
                     "relations":compact_point_batch_relations.iter().map(|(point, relation)| json!({
                         "target_point":point,
                         "x_codes":relation.codes,
@@ -6635,6 +6675,25 @@ fn main() {
             "factor_base_points":base.points.len(),
             "factor_base_x_coordinates":base.x_codes.len(),
             "orbit_columns":base.orbit_columns,
+            "compact_orbit_base_header":if lazy_relative_support
+                && std::env::var("KIC_ORBIT_INCLUDE_BASE_HEADER").as_deref() == Ok("1") {
+                Some(json!({
+                    "kind":"point_defined_factor_base",
+                    "n":n,
+                    "a":a,
+                    "subgroup_order":modulus,
+                    "cofactor":curve.cofactor.to_u64().unwrap(),
+                    "field_modulus_low_terms":curve.curve.irreducible.low_terms,
+                    "generator":affine_coordinates(curve.generator()),
+                    "orbit_columns":base.orbit_columns,
+                    "signed_automorphism_size":base.signed_size,
+                    "factor_base_points":base.points.len(),
+                    "factor_base_point_coordinates":base.points.iter().map(affine_coordinates).collect::<Vec<_>>(),
+                    "factor_base_point_labels":base.point_labels,
+                    "factor_base_representatives":base.representatives.iter().map(affine_coordinates).collect::<Vec<_>>(),
+                    "scanned_x":base.scanned_x
+                }))
+            } else { None },
             "models_examined":models,
             "valid_x_tuples":valid_x_tuples.len(),
             "invalid_group_lifts":invalid_lifts,

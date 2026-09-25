@@ -19,6 +19,8 @@ jobs:
           python-version: '3.12'
       - name: Recheck frozen source and evidence scripts
         run: python3 -m py_compile research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/{cold_batch_rank,run_point_batch,recover_point_batch}.py
+      - name: Fetch immutable source of archived point run
+        run: git fetch --depth=1 origin d92439080c2d5c3a858f71abfc8e749e273125bb
       - name: Independently replay all 512 relations and 8 recovered point logs
         run: |
           evidence=research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924
