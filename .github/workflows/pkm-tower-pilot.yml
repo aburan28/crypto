@@ -4,6 +4,7 @@ on:
     paths:
       - 'research/pkm_tower_pilot_20260924/**'
       - 'research/pkm_tower_round2_20260925/**'
+      - 'research/pkm_tower_round3_20260925/**'
       - 'src/cryptanalysis/f4_fp_tower.rs'
       - 'examples/pkm_tower_pilot.rs'
       - '.github/workflows/pkm-tower-pilot.yml'
@@ -27,6 +28,8 @@ jobs:
           python3 research/pkm_tower_pilot_20260924/analyze.py
           research/pkm_tower_pilot_20260924/runs/*.jsonl
           research/pkm_tower_round2_20260925/runs/*.jsonl
+      - name: The compact-basis build reproduces every round-2 row and trace (round 3, note section 12.2)
+        run: python3 research/pkm_tower_round3_20260925/compare_builds.py
   engine-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 45
