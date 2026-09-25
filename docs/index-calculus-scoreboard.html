@@ -6684,6 +6684,28 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-pdp-corpus-20260925 -->
+<!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
+<section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
+  <div class="panel-head">
+    <h2>Rotated Frobenius-compressed rows: exact witness identities pass <span class="chip">row semantics</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/766">PR #766</a> froze the source and synthetic inputs before running. For every one of the 17,917 positive full-point Q+T witnesses saved by PR #762's four rotated n = 13 arms, it reconstructed each factor point, transported it back by Frobenius, projected by [4], assigned its signed &lambda;<sup>i</sup> coefficient, and verified the aggregate row equals [4]Q. A separate bit-serial/Fermat group implementation checked the complete 2,003-target &times; four-coset roster, every positive row and all misses. All-torsion and repeated-column controls passed. Eight SHA-fixed n = 131 public synthetic planted tuples passed the same row algebra without a PDP search.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact n = 13 saved witnesses. Columns are canonical projected F0 point choices seen in nonzero rows; weight counts are nonzero coefficients after sign-aware aggregation. The tiny 2/3-column bases are structural toy controls, not measured rank or a predicted n = 131 matrix size.</caption>
+    <thead><tr><th>Rotated arm</th><th class="n">Positive Q+T rows</th><th class="n">Distinct columns</th><th>Row weights 0 / 1 / 2 / 3</th><th class="n">Producer wall s</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, beta 3, m = 5</td><td class="n">1,799</td><td class="n">2</td><td>1 / 226 / 1,572 / 0</td><td class="n">1.759</td></tr>
+      <tr><td>n = 13, beta 3, m = 6</td><td class="n">6,307</td><td class="n">2</td><td>1 / 470 / 5,836 / 0</td><td class="n">7.026</td></tr>
+      <tr><td>n = 13, beta 7, m = 5</td><td class="n">1,799</td><td class="n">2</td><td>1 / 226 / 1,572 / 0</td><td class="n">1.812</td></tr>
+      <tr><td>n = 13, beta 7, m = 6</td><td class="n">8,012</td><td class="n">3</td><td>1 / 261 / 3,464 / 4,286</td><td class="n">9.523</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Producer/independent verifier wall was 21.238/52.914 s on the recorded macOS host, with a 177,078,272-byte high-water child RSS. The two n = 131 planted cells took 0.490/0.585 s in the producer and had 15/18 distinct term columns across four tuples each. All source and output hashes, stage operation counts, complete row files, sign/torsion controls and an archive-only replay are retained. Passing this semantic gate does not establish independent rank, solver feasibility, relation yield, an ECC2K-130 log or an IC/rho speed ratio. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/PROTOCOL.md">protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/evidence/README.md">archive receipt</a>. Raw SHA-256 <code>863f50ea872ce01b1999d0ef67bc0341fa0c764f2ad4187d16736768b0ab9b3d</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-row-certificate-20260925 -->
+
 <!-- BEGIN ecc2k130-rotated-beta-sweep-20260925 -->
 <section class="panel" id="ecc2k130-rotated-beta-sweep-20260925">
   <div class="panel-head">
@@ -6705,8 +6727,7 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     <p>The largest gain is 6.11% over beta 3, below the preregistered 10% support threshold. Exact projected-energy-per-supported-target improves on three candidates, yet no candidate passes both conditions. Supported point sets have only 28,253&ndash;31,579 shared targets with beta 3, so a frozen beta-3 planted or negative label can change status under another base. Prioritize other factor-base and solver directions over more toy normal-beta tuning. There is no n = 131 transfer, ECC2K-130 speedup, rho ratio or full-cost S. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/RESULT.md">exact decision and operations</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/PROTOCOL.md">pre-outcome protocol</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/evidence/README.md">raw archive and replay</a>. Archive SHA-256 <code>fe84aef6a2cf7f6f4c950245c9c8e870354fb750666f5482b81f9a997d107140</code>.</p>
   </div>
 </section>
-<!-- END ecc2k130-rotated-beta-sweep-20260925 -->
-<!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
+<!-- END ecc2k130-rotated-beta-sweep-20260925 --><!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">
     <h2>Near-saturated compact n = 37/41 true shared-log batches: complete logs, negative charged wall <span class="chip">accounting</span></h2>
