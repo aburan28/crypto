@@ -141,6 +141,7 @@ pub mod fght_snfs;
 pub(crate) mod fx_hash;
 pub mod gaudry_cubic;
 pub mod gaudry_quartic;
+pub mod gf2_elim;
 pub mod gf3m;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
@@ -166,6 +167,7 @@ pub mod j0_twists;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
 pub mod koblitz_fast;
+pub mod koblitz_fast_arith;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod koblitz_isogeny_cost;
@@ -236,6 +238,7 @@ pub mod visual_demos;
 pub mod visualize;
 pub mod wdsat_oracle;
 pub mod weil_charts;
+pub mod wide_groebner;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,
