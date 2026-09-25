@@ -180,7 +180,7 @@ def verify_training(run: Path) -> dict:
             solved_rank, frozen_solution = math.rank_and_solve(rows, rhs, order, r)
             assert solved_rank == r and frozen_solution is not None
     rank, solution = math.rank_and_solve(rows, rhs, order, r)
-    assert rank == incremental.pivots.__len__()
+    assert rank == len(incremental.pivots)
     assert solution == frozen_solution
     if solution is not None:
         for rep, log in zip(reps, solution):
