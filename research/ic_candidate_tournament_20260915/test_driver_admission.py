@@ -12,12 +12,22 @@ from driver_admission import (make_admission, run_record, check_admission, onlin
                              freeze_admission, distinct_candidates)
 from identity import sha256
 from oracle import InvalidEvidence
-from tournament import comparison, gate
+from tournament import comparison, gate, process_seconds
 
 DATA = Path(__file__).parent/'producer/testdata'
 
 
 class DriverAdmissionTests(unittest.TestCase):
+    def test_transported_process_sum_uses_integer_clocks(self):
+        # Actual first Linux A/A control: summing its converted floats changed
+        # the summary by one ULP between Python 3.11 and Python 3.12.
+        pairs = [(214773183, 702002), (214152698, 855224), (215132332, 712646),
+                 (216879915, 754261), (214588807, 721192), (215620274, 747245)]
+        rows = [dict(profile_process=dict(process_wall_ns=a),
+                     native_process=dict(process_wall_ns=b)) for a,b in pairs]
+        self.assertEqual(process_seconds(rows), 1.295639779)
+        self.assertEqual(process_seconds(list(reversed(rows))), 1.295639779)
+
     def test_frozen_producer_includes_transitive_driver_dependencies(self):
         from producer.integration import FROZEN_EVALUATOR
         with tempfile.TemporaryDirectory() as temp:

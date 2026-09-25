@@ -873,6 +873,13 @@ def stage_arms(root, stage, arms):
     return [base]+([next(a for a in arms if a['id']==provisional)] if provisional else [])+[rho]
 
 
+def process_seconds(rows):
+    # Python 3.12 changed floating-point sum. Add the measured integer clocks
+    # first so transported summaries replay identically on Python 3.11/3.12.
+    return sum(r['profile_process']['process_wall_ns']+
+               r.get('native_process',{}).get('process_wall_ns',0) for r in rows)/1e9
+
+
 def summarize(root,c,stage,fixtures,arms,*,save=True):
     rows=load_stage(root,stage,fixtures,arms,c['repetitions'])
     comps=[comparison(rows,a['id'],draws=c['bootstrap_draws'],
@@ -880,7 +887,8 @@ def summarize(root,c,stage,fixtures,arms,*,save=True):
     rho = comparison(rows,'rho',draws=c['bootstrap_draws']) if any(a['id']=='rho' for a in arms) else None
     result={'stage':stage,'runs':len(rows),'verified_runs':sum(r['status']=='VERIFIED' for r in rows),
             'comparisons':comps,'rho_over_incumbent':rho,
-            'process_wall_seconds_including_profiling':sum(r['profile_process']['process_wall_seconds']+r.get('native_process',{}).get('process_wall_seconds',0) for r in rows),
+            'process_wall_seconds_including_profiling':process_seconds(rows) if c.get('scientific_admission') else
+                sum(r['profile_process']['process_wall_seconds']+r.get('native_process',{}).get('process_wall_seconds',0) for r in rows),
             'failures':[{k:r.get(k) for k in ('case','arm','repetition','status','reason')} for r in rows if r['status']!='VERIFIED']}
     if c.get('scientific_admission'):
         result['single_target_online']=online_table(rows,fixtures,arms,c['repetitions'],
