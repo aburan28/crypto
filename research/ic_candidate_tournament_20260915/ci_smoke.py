@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 
 from generic_queries import verify_queries
+from generic_query_law import verify_query_law
 from identity import curve_record, factor_base_inventory, write_immutable
 from measurement import legacy_ledger
 from oracle import require, verify
@@ -57,6 +58,13 @@ def main():
                    config=dict(solver='pair_table', linear_algebra='sparse',
                                batch_trials=1, max_trials=4096, summands=3))
         jobs.append((f'factor-base-{name}', job, False))
+    for window in (0, 1, 1000):
+        job = dict(mode='ic', degree=9, curve_a=0, target_seeds=[2026092425],
+                   algorithm_seed=2026092425,
+                   factor_base=dict(kind='subgroup_orbits', seed=43, points=36),
+                   config=dict(solver='pair_table', linear_algebra='dense', summands=3,
+                               batch_trials=128, max_trials=256, collection_window=window))
+        jobs.append((f'query-law-window{window}', job, window == 1))
     for solver in SOLVERS:
         job = copy.deepcopy(jobs[0][1])
         job['config'].update(solver=solver, batch_trials=1, max_trials=1)
@@ -72,7 +80,8 @@ def main():
         'input_sha256': digest(out / 'inputs.json'),
         'evaluator_sha256': {name: digest(Path(__file__).with_name(name))
                              for name in ('ci_smoke.py', 'tournament.py', 'oracle.py', 'portfolio.py',
-                                          'identity.py', 'measurement.py', 'generic_queries.py')},
+                                          'identity.py', 'measurement.py', 'generic_queries.py',
+                                          'generic_query_law.py')},
     }, exclusive=True)
     outcomes = []
     fixtures = {}
@@ -124,6 +133,7 @@ def main():
             receipt['certificate'] = proof
             if job['mode'] == 'ic':
                 receipt['query_accounting'] = verify_queries(report, fixture, job['config']['summands'])
+                receipt['query_law'] = verify_query_law(report, fixture, job)
                 inventory = factor_base_inventory(report, fixture)
                 write_immutable(directory / 'factor-base-inventory.json', inventory)
                 receipt['factor_base_inventory'] = inventory
@@ -147,6 +157,8 @@ def main():
                                                      job['config']['summands'])
                     require(profile_queries == receipt['query_accounting'],
                             'native/profile query accounting differs')
+                    require(verify_query_law(profile_report, fixture, job) == receipt['query_law'],
+                            'native/profile query law differs')
                 require(profile_proof == proof, 'native/profile certificates differ')
                 intervals = parse_profiles(profile_dir)
                 expected = {'startup_and_input', 'curve_and_targets', 'final_verification',

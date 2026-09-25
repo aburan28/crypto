@@ -1,0 +1,942 @@
+[
+  {
+    "name": "a0-pair_table-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "eb41e001c99c64329bd105c17ad79c322b7ba2ef72a57b8d3fecdad30ed040b7",
+      "promotion_eligible": false,
+      "query_sha256": "4f98bb2537e99bc2c2342c0cbf3407038e2ea536d252f6bb7f25f86190412bf2",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-pair_table-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "8c86781fc9124fdd74b83c0b4b057fc730ff07395417823a665c738bb240829b",
+      "promotion_eligible": false,
+      "query_sha256": "4f98bb2537e99bc2c2342c0cbf3407038e2ea536d252f6bb7f25f86190412bf2",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-enumerate-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "72241b04a7b170172034de3fa6d2fe82b8d211c5b2e768263256c3ba0594495b",
+      "promotion_eligible": false,
+      "query_sha256": "a6da2181237870d44d31e90fdb78c29f8cac8b1b4300b767c222b421b7e1f0a9",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-enumerate-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "feb946afcad3171e16ab7621ba73788933377df15b7a14bf495bba03f2b30724",
+      "promotion_eligible": false,
+      "query_sha256": "a6da2181237870d44d31e90fdb78c29f8cac8b1b4300b767c222b421b7e1f0a9",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-f4-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "c30ff31297475298db20fe521d2b7f29416894939b4a337255296ca810d3e09c",
+      "promotion_eligible": false,
+      "query_sha256": "a1fb71eb0318fe70365f42380c137cf38c765ae4947421c741511ec2cbb6c630",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-f4-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "1b5d542d95bdfb1971e1a9091703685c570a1dd61d6eae929e61545398bca27e",
+      "promotion_eligible": false,
+      "query_sha256": "a1fb71eb0318fe70365f42380c137cf38c765ae4947421c741511ec2cbb6c630",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-f5-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "012f387671f1ac193decdb532123743a018ed89d4f0f28ed4b7a7886b6db725e",
+      "promotion_eligible": false,
+      "query_sha256": "9bff6ea793ab7a07f494e7008bf15ae1671394fbcbd193cf1da8d402c71a8e6d",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-f5-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "f935e4d50249a4c6dfc9d526f808190499b1d108fe5afe4dc82a4ac67f5da576",
+      "promotion_eligible": false,
+      "query_sha256": "9bff6ea793ab7a07f494e7008bf15ae1671394fbcbd193cf1da8d402c71a8e6d",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-inherited_f4-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "48b87cf462f8de86877d3435d6646a2a35d7b950ff7e4648b1d365037c836183",
+      "promotion_eligible": false,
+      "query_sha256": "5aa7efec9ce63a5c8a05ce4da02a6e592ef444cbbb050cd351ff15d8fd029b59",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-inherited_f4-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "ae965bdb2352fae17cbc8859ac4bf7be67908fda926cca46097ef10d031c9e83",
+      "promotion_eligible": false,
+      "query_sha256": "5aa7efec9ce63a5c8a05ce4da02a6e592ef444cbbb050cd351ff15d8fd029b59",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-sat_xor-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 24,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "fe388cd4f7ca6810afb3ef2c7e027bc1dfcd2f34b1ee50a53ab7b3c267bd0048",
+      "promotion_eligible": false,
+      "query_sha256": "538c6d7d8b558ec81350690ddb2e10d07403414385d27136e3c9653c652a841f",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-sat_xor-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 24,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "88f973288a655aa58d34a49a797e0e857da95ec9823b293c55d06bb8a7d48fa0",
+      "promotion_eligible": false,
+      "query_sha256": "538c6d7d8b558ec81350690ddb2e10d07403414385d27136e3c9653c652a841f",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-sat_cnf-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "2b16b9f3d55bd7a93e9bce96d9f48e3816d3ac565b8e5c18fe8d2422b34a0291",
+      "promotion_eligible": false,
+      "query_sha256": "93b2b6be9e602bd327160efefb4d004d0d74cf1989efb6768bc517fd1c65b499",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a0-sat_cnf-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "ca482ff9a07d487c42886102c6f4019e27c59abbaeae762e5eae217d182c4a33",
+      "promotion_eligible": false,
+      "query_sha256": "93b2b6be9e602bd327160efefb4d004d0d74cf1989efb6768bc517fd1c65b499",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-pair_table-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "31f95fadd024a9d989b40fcc28152b253cf6530b60fb2cafb7b5d237cd1d8af6",
+      "promotion_eligible": false,
+      "query_sha256": "b7e4df44341b95fec45a58fd7856d188ef2337e9e056815e7f9bc74b4c2802f4",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-pair_table-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "975ccceb239ed727265efe10a4e56bb0bbe9e3703cdf9e568ea2165984881841",
+      "promotion_eligible": false,
+      "query_sha256": "b7e4df44341b95fec45a58fd7856d188ef2337e9e056815e7f9bc74b4c2802f4",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-enumerate-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "a3e320cfc11e4f1ae4ab9ea1a8fe69328a248f7b949408a2c9507375a07847e3",
+      "promotion_eligible": false,
+      "query_sha256": "d33e5fae1191191ae76fce892c8d1c9f62fe65388788714e9e21d992d1be9bf8",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-enumerate-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "86a1949841708f001c8776e9ad2d7f425f632a68c409ada74791f90909a9db07",
+      "promotion_eligible": false,
+      "query_sha256": "d33e5fae1191191ae76fce892c8d1c9f62fe65388788714e9e21d992d1be9bf8",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-f4-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "d3ad68faa2d8d01c28f1f5b0d346430cca1e70c858e1fb0899a90113c804869b",
+      "promotion_eligible": false,
+      "query_sha256": "8cd2fc8512848ab0409711f9bbfa2dfda545ae05ceda0dca6e99dc5ee4cf4848",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-f4-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "1288b4f9c97ec54e505cd87d443f74180e826c2539931739c848a440ddb175d5",
+      "promotion_eligible": false,
+      "query_sha256": "8cd2fc8512848ab0409711f9bbfa2dfda545ae05ceda0dca6e99dc5ee4cf4848",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-f5-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "e455b87b41fb63f0ca9179915ba0bd7c13d873c8148cc64e89c95acafc2e92b3",
+      "promotion_eligible": false,
+      "query_sha256": "4d8a4ba9ad51b7f80536b882d316647218531f27bde2bbea8bd9a6969f846693",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-f5-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "3d441c92801e1d669ba24647d3b509b6f495c8b51e2f842260cd9d6c69e8f7e8",
+      "promotion_eligible": false,
+      "query_sha256": "4d8a4ba9ad51b7f80536b882d316647218531f27bde2bbea8bd9a6969f846693",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-inherited_f4-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "7ae087923144e159aab7eac2fb13a843b84669bbff449a01a844be8d2a5a7257",
+      "promotion_eligible": false,
+      "query_sha256": "6b73729fa55b2047467fdac374cac2d8db742fb35286509b74aacde7f31fd82f",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-inherited_f4-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "892d8da797c2f9fd48baaebcd2ddd51d02f2acea8276ff48a3871b5313396b2d",
+      "promotion_eligible": false,
+      "query_sha256": "6b73729fa55b2047467fdac374cac2d8db742fb35286509b74aacde7f31fd82f",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-sat_xor-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "53057a60ad2ff983ea018c3e38b6852c75eb699a5f9957315c7168e0fa661175",
+      "promotion_eligible": false,
+      "query_sha256": "660920d81b0fe694a3575c25d3eaf2bc900622907a9c251ac523ab1b3b311a01",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-sat_xor-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "8d3acbaad2d1ac83df507f2d17fdbaf5c55bb9022b3878ba8d0db202ff9102f1",
+      "promotion_eligible": false,
+      "query_sha256": "660920d81b0fe694a3575c25d3eaf2bc900622907a9c251ac523ab1b3b311a01",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-sat_cnf-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "03c5e53c25e49cdd34a1cca346a91ec00a0409611a94dc46227cbe68cf71b7ba",
+      "promotion_eligible": false,
+      "query_sha256": "6febd7adf8230ccbedb16acc38a08dd5489bc92cb68e742478748796b5346422",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "a1-sat_cnf-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 8,
+      "descent_law": "sampled",
+      "descent_queries": 1,
+      "job_sha256": "1ec8d1973c83118eb278463802fbf495e0b4ba7a1c3d99aa8a9b38b4735ddb23",
+      "promotion_eligible": false,
+      "query_sha256": "6febd7adf8230ccbedb16acc38a08dd5489bc92cb68e742478748796b5346422",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "incomplete-pair_table",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 1,
+      "descent_law": "walked-64",
+      "descent_queries": 0,
+      "job_sha256": "b6b1c63e397025bf2d5f0b5c890f12714df403b4ed8ca05709e911030bb83d75",
+      "promotion_eligible": false,
+      "query_sha256": "b183e8c0a1c3e3ea0278f8e15484706919d3f40806402fb1b1ee5f69c5381811",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "incomplete-enumerate",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 1,
+      "descent_law": "sampled",
+      "descent_queries": 0,
+      "job_sha256": "829cce646704902b0e3337622238b6c759545a618a7b64cb04a09f6ba50426eb",
+      "promotion_eligible": false,
+      "query_sha256": "b183e8c0a1c3e3ea0278f8e15484706919d3f40806402fb1b1ee5f69c5381811",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "incomplete-f4",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 1,
+      "descent_law": "sampled",
+      "descent_queries": 0,
+      "job_sha256": "822db322df5e8933cf994e1d0fed7c1f97cbb81e90c9e47b6bb541eed4178db1",
+      "promotion_eligible": false,
+      "query_sha256": "c9c002647122fea6b1c3c907c8d300e99488e537039837911fec039ffce21dcd",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "incomplete-f5",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 1,
+      "descent_law": "sampled",
+      "descent_queries": 0,
+      "job_sha256": "168d5c6f9e615aa0722dcee124510292e779684fdef027ddf499dc5027425778",
+      "promotion_eligible": false,
+      "query_sha256": "3bcd3bd47140307b878efa38b7fa7a13806d80e854437d945586ef338ecf1a7e",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "incomplete-inherited_f4",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 1,
+      "descent_law": "sampled",
+      "descent_queries": 0,
+      "job_sha256": "3c97129245f4d86ddb0eef41848a7c39525cdcc0da0813c84802df4944bf08ad",
+      "promotion_eligible": false,
+      "query_sha256": "36c29439ad4b3fb608f88374ad92ad499d9bd57eee10f00a517079d8e5b3c2fe",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "incomplete-sat_xor",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 1,
+      "descent_law": "sampled",
+      "descent_queries": 0,
+      "job_sha256": "16b0746a08792d699c90c20b368a5a1f5a1905dcfda89ca8f2038b7bba2b7f47",
+      "promotion_eligible": false,
+      "query_sha256": "77b943c36db748878b6f7f6f97f3e3e8c3f1e51f7b28fbc509368ff135e9c8a0",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "incomplete-sat_cnf",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 1,
+      "descent_law": "sampled",
+      "descent_queries": 0,
+      "job_sha256": "173fc5e80c25e5ea7d51212dcba6b594f3f694c8753ea8f7699677dd7aa8ca1c",
+      "promotion_eligible": false,
+      "query_sha256": "7c983cf1ee5c42575a9a0b725f9dab09f2c2b51e4d73ef2da9171a788ac09533",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n9-window0-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "357659158d8184a9f63b39762998175c446c522be6b6828aef642c90dee3dc4d",
+      "promotion_eligible": false,
+      "query_sha256": "837852d6f0d7ea809b147209b5712ced815865975e02f7f70797d70c63878ead",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n9-window0-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "4d3d79ce2c752b638a80cd5c6dfa7a0e7e0e7ab02cb5b0af5ade604785121320",
+      "promotion_eligible": false,
+      "query_sha256": "837852d6f0d7ea809b147209b5712ced815865975e02f7f70797d70c63878ead",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n9-window1-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "windowed-64",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "fb6943b289c5e75e97302398e40b3df4880090a467b37e3e2ae8835631b2bb8c",
+      "promotion_eligible": false,
+      "query_sha256": "44673a54d3131b01404f4f1286d3ce8809bd5bb060d8e9236f935f7da6ca1d02",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n9-window1-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "windowed-64",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "a2a0598101052fc758d94bb39799497a81d0793cb1c80f2d0799b8b2b77f27ff",
+      "promotion_eligible": false,
+      "query_sha256": "44673a54d3131b01404f4f1286d3ce8809bd5bb060d8e9236f935f7da6ca1d02",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n9-window1000-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "0355f80760ab8ac4b9d8d3f44b502cb7b6deef2b047d907f9c744bffae66aba3",
+      "promotion_eligible": false,
+      "query_sha256": "837852d6f0d7ea809b147209b5712ced815865975e02f7f70797d70c63878ead",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n9-window1000-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "ac94ae0615b70f28c48461b36f880a8952156d68c3a09a00ac64bd0be6428061",
+      "promotion_eligible": false,
+      "query_sha256": "837852d6f0d7ea809b147209b5712ced815865975e02f7f70797d70c63878ead",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n13-window0-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "7affba4ad001bdeaca93b12a0e15c33f1616caca89657a44dd39680efe1906b7",
+      "promotion_eligible": false,
+      "query_sha256": "25631118bc63750c34182eff17159aee9b40463e045aca546eb2a6d9178339db",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n13-window0-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "d297ec435443400bd05d348d5024b4b7e6c972f605c592a15aa84ec04d9cc0f6",
+      "promotion_eligible": false,
+      "query_sha256": "25631118bc63750c34182eff17159aee9b40463e045aca546eb2a6d9178339db",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n13-window1-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "windowed-64",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "9d3bc0e9403f65abcefbf0784de685b38c0f83510b7d0702e249d3b8b39ad811",
+      "promotion_eligible": false,
+      "query_sha256": "41b1cb1f4aae80a89e74dc9a3bdb59dbe19b4c2bb2e04c7793cd8d8d10afb580",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n13-window1-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "windowed-64",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "ce9b9b46de61988bcb670ed8983fd2415abdfba1307659ad8cc36796b28d8ab8",
+      "promotion_eligible": false,
+      "query_sha256": "41b1cb1f4aae80a89e74dc9a3bdb59dbe19b4c2bb2e04c7793cd8d8d10afb580",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n13-window1000-dense",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "46688614fe41023b2739fea2211399eb3c83e235e8a6e7c1724f7ad13e960e45",
+      "promotion_eligible": false,
+      "query_sha256": "25631118bc63750c34182eff17159aee9b40463e045aca546eb2a6d9178339db",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  },
+  {
+    "name": "n13-window1000-sparse",
+    "receipt": {
+      "checker_sha256": {
+        "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+        "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+        "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+      },
+      "collection_law": "sampled",
+      "collection_queries": 128,
+      "descent_law": "walked-64",
+      "descent_queries": 1,
+      "job_sha256": "5c2fb527158a47fc11b26b58a9761576a6acf8a1d4b2c55a7d3f6eea7bf6a11c",
+      "promotion_eligible": false,
+      "query_sha256": "25631118bc63750c34182eff17159aee9b40463e045aca546eb2a6d9178339db",
+      "schema_version": 1,
+      "scope": "query law and group replay only",
+      "stream_version": "rand-0.8.8/rand_core-0.6.4/rand_chacha-0.3.1/StdRng-u64-v1"
+    }
+  }
+]
