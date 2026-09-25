@@ -21,7 +21,7 @@ use crypto_lib::cryptanalysis::ic_descent_degrees::{
     format_engine_markdown, format_markdown, max_n_prime, price_descent_cell, price_engine_cell,
     semi_regular_degree, DescentCell, EngineCell,
 };
-use crypto_lib::cryptanalysis::ic_framework::solvers::solver_by_name;
+use crypto_lib::cryptanalysis::ic_framework::solvers::{solver_by_name, validate_solver_params};
 use crypto_lib::cryptanalysis::ic_framework::stages::Params;
 
 #[derive(Args, Clone)]
@@ -219,6 +219,7 @@ fn run_engines(args: &DescentArgs, cells: &[(u32, u32, u32)], json_only: bool) -
             return Err(format!("engine `{name}` listed twice"));
         }
         let solver = solver_by_name(&name)?;
+        validate_solver_params(&name, &params)?;
         described.push(json!({
             "engine": name,
             "spec": spec,
