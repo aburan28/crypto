@@ -31,6 +31,6 @@ jobs:
         run: python3 research/notes/ecc2k130/rotated_solver_admission_20260925/ci_replay.py
       - name: Replay committed static preflight if present
         run: |
-          if test -f research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/receipt.json; then
-            python3 research/notes/ecc2k130/rotated_solver_admission_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_solver_admission_20260925/evidence
+          if test -f research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/final/receipt.json; then
+            python3 research/notes/ecc2k130/rotated_solver_admission_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/final
           fi
