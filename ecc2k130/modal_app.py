@@ -145,11 +145,12 @@ if TABLE_PIVOT_BYTES not in ("0", "1"):
     raise ValueError("ECC_TABLE_PIVOT_BYTES must be 0 or 1")
 if TABLE_PIVOT_BYTES == "1" and WALK_TABLE != "1":
     raise ValueError("ECC_TABLE_PIVOT_BYTES=1 requires ECC_WALK_TABLE=1")
-# Cairn witness counters. Default follows the Makefile (on for sigma walks).
-# Campaign collection wants WITNESS=0: on an RTX PRO 6000 the counters cost
-# ~35% throughput (14.0 -> 9.2 B/s, measured 2026-09-25) and emit 72-byte v2
-# DP records that modal_sync still frames as 32-byte v1.
-WITNESS = os.environ.get("ECC_WITNESS", os.environ.get("WITNESS", "1" if WALK_TABLE == "0" else "0"))
+# Cairn witness counters. Campaign default is WITNESS=0: on an RTX PRO 6000
+# the counters cost ~35% throughput (14.0 -> 9.2 B/s, measured 2026-09-25)
+# and emit 72-byte v2 DP records that modal_sync still frames as 32-byte v1.
+# The Makefile still defaults WITNESS=1 for local cairn measurement; Modal
+# collection is the other way round. Override with ECC_WITNESS=1 when needed.
+WITNESS = os.environ.get("ECC_WITNESS", os.environ.get("WITNESS", "0"))
 if WITNESS not in ("0", "1"):
     raise ValueError("ECC_WITNESS must be 0 or 1")
 if WITNESS == "1" and WALK_TABLE == "1":

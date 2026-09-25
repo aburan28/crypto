@@ -191,6 +191,7 @@ next-run-id)
 deploy)
     # The image is baked from this shell's environment (GPU, CPU threads,
     # packed knobs), exactly as `modal run` would bake it.
+    echo "deploy: ECC_GPU=$ECC_GPU ECC_WITNESS=${ECC_WITNESS:-} WITNESS=${WITNESS:-} ECC_WALK_TABLE=${ECC_WALK_TABLE:-} ECC_PACKED_CLMAD=${ECC_PACKED_CLMAD:-}"
     modal deploy modal_app.py
     ;;
 
