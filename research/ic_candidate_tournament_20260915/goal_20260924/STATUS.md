@@ -10,10 +10,25 @@ rho cold instructions and `rho_pairinv_4` for rho online time. PR 765 merged the
 including exact Linux replay of 22 retained evidence sets and every exported table.
 Independent macOS receipt replay passed all 1,290 jobs, with two one-ULP
 derived-summary differences documented in the report.
-No reference selection is a promotion. Zero of the three improvement rounds have
-run. The [bounded protocol](improvement/PROTOCOL.md) now fixes the nominal
-familywise rule, 5,133-point historical exclusions and the first 16-pipeline
-registry. The implementation PR must pass candidate controls before dispatch.
+No reference selection is a promotion. One of the three improvement rounds has
+completed: [round one](improvement/round1/README.md), from
+[workflow 36140265516](https://github.com/aburan28/crypto/actions/runs/36140265516),
+retained the incumbent. Its frozen checker verified 3,243/3,243 native/profile
+pairs across all six stages, plus 30/30 policy controls. The selected `stop6`
+challenger had confirmation ratios of 1.064757 online time, 0.956822 cold Ir and
+0.964563 cold native time; replay also failed promotion. Neither complete cold
+metric reached the required 0.8 ratio, the instruction familywise upper bound
+exceeded one, and online regression also failed its aggregate and cell gates.
+The full run export and scoreboard retain every measured variant. Exact Linux
+transport replay and byte-exact JSON/CSV/table reproduction passed on the merged
+evidence head. [PR 782](https://github.com/aburan28/crypto/pull/782) merged at
+`b338522537f316f2379ed8cc11bb317212e573ec` with all applicable CI passing.
+The [bounded protocol](improvement/PROTOCOL.md) fixes the nominal familywise rule,
+5,133-point historical exclusions and the first 16-pipeline registry. PR 772
+merged that implementation at `5915da9d56758f81ceabbf978e796cd6be9740c3`.
+Do not dispatch round one again. A second round must be registered from
+development evidence only, with a new source identity and all prior generated
+targets excluded. No qualifying winner has been found; the full goal remains active.
 Canonical admission is merged in both drivers; the earlier
 [driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the

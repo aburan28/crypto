@@ -141,6 +141,16 @@ describes two summands on a degree-9 linear factor base. Generate proposals with
 `--panel factor-base`. These generic engines need public-input scientific
 instrumentation and independent stage adapters before the current drivers can
 admit them. Historical screens remain replayable with their own frozen evaluator.
+The [PDP outcome controls](goal_20260924/pdp-admission/PROTOCOL.md) address one
+admission defect: an encoding rejection must be retained as unsupported, never
+reported as a proved absence of decompositions. These controls are separate
+from solver performance qualification. Generic `RelationCollector` still drops
+per-attempt solver statistics; its scientific adapter must retain them before
+ordinary-query status mixes can enter a comparative table.
+The [relation-LA accounting controls](goal_20260924/la-accounting/RESULTS.md)
+also preserve failed solve attempts and their diagnostics in the generic
+factor-base-log report. This repairs bookkeeping; complete scientific phase
+instrumentation is still required before comparing its cost.
 
 Native screens always report `promotion_eligible=false`; operation counts, S,
 floor ratios, memory caps and affinity remain null when unavailable. A/A results,
@@ -269,5 +279,7 @@ native time remain additional promotion gates. Confirmation uses 72 fresh target
 and three process repetitions, with exact historical point exclusion and a nominal
 familywise bootstrap rule across three attempts. A confirmation or replay result
 cannot tune the same challenger. Preserve both cold and online rho references and
-retain all failed or incomplete runs. Zero improvement rounds have executed at
-this implementation checkpoint.
+retain all failed or incomplete runs. [Round one](goal_20260924/improvement/round1/README.md)
+completed all 3,243 measured pairs and retained the incumbent. Its evidence merged
+in [PR 782](https://github.com/aburan28/crypto/pull/782). Two attempts remain; do not
+redispatch round one or use its confirmation/replay results to tune candidates.

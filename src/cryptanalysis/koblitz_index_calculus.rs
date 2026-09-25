@@ -4653,7 +4653,8 @@ pub(crate) fn lift_candidate(
 /// statistics, or `None` when the system has no root that lifts.  A
 /// `None` from a completed solve is a *proof* that no decomposition
 /// exists over this factor base; a `None` with `stats.exhausted` set
-/// only means the node budget ran out.
+/// is inconclusive. `stats.unsupported` distinguishes an input the
+/// encoder cannot represent (including infinity) from a spent budget.
 pub fn groebner_decompose(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -4664,9 +4665,14 @@ pub fn groebner_decompose(
     engine: SolverEngine,
     node_budget: usize,
 ) -> (Option<Vec<usize>>, SolveStats) {
+    let unsupported = || SolveStats {
+        exhausted: true,
+        unsupported: true,
+        ..Default::default()
+    };
     let x_r = match target {
         BinaryPoint::Affine { x, .. } => x.clone(),
-        BinaryPoint::Infinity => return (None, SolveStats::default()),
+        BinaryPoint::Infinity => return (None, unsupported()),
     };
     let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
         &fb.subspace_basis,
@@ -4676,7 +4682,7 @@ pub fn groebner_decompose(
         st,
     ) {
         Some(sys) => sys,
-        None => return (None, SolveStats::default()),
+        None => return (None, unsupported()),
     };
     // A root of S₃ fixes the summands only up to sign, so some roots do
     // not lift.  Lift each as it is found and stop at the first that
@@ -4755,9 +4761,13 @@ pub fn crossbred_decompose(
         exhausted: true,
         ..Default::default()
     };
+    let unsupported = || CrossbredSearchStats {
+        unsupported: true,
+        ..unknown()
+    };
     let x_r = match target {
         BinaryPoint::Affine { x, .. } => x.clone(),
-        BinaryPoint::Infinity => return (None, CrossbredSearchStats::default()),
+        BinaryPoint::Infinity => return (None, unsupported()),
     };
     let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
         &fb.subspace_basis,
@@ -4767,7 +4777,7 @@ pub fn crossbred_decompose(
         st,
     ) {
         Some(sys) => sys,
-        None => return (None, CrossbredSearchStats::default()),
+        None => return (None, unsupported()),
     };
     let params = params.unwrap_or_else(|| crossbred_params_for(&sys.equations, sys.n_vars));
     let xb = match extract_crossbred(&sys.equations, sys.n_vars, &params) {
@@ -4821,9 +4831,12 @@ pub struct SatDecompositionStats {
     /// The search ended in UNSAT, so "no decomposition" is *proven* —
     /// the SAT analogue of the Gröbner infeasibility certificate.
     pub refuted: bool,
-    /// The model cap or the solver's conflict budget was hit, so a
-    /// `None` result is inconclusive rather than a refutation.
+    /// A budget, invalid model or unsupported input left the attempt
+    /// incomplete. A `None` result is inconclusive, not a refutation.
     pub exhausted: bool,
+    /// The input could not be encoded. No solve occurred; also sets
+    /// `exhausted` for callers using the older completion flag.
+    pub unsupported: bool,
     /// Models that did not satisfy the original system — always zero
     /// unless the CNF encoding is wrong.
     pub spurious: usize,
@@ -5024,10 +5037,14 @@ pub fn sat_decompose_with(
     if m == 3 && fb.uses_ambient_basis() {
         return sat_decompose_union_s4(kc, fb, index_of, target, max_models, options);
     }
-    let mut stats = SatDecompositionStats::default();
+    let unsupported = || SatDecompositionStats {
+        exhausted: true,
+        unsupported: true,
+        ..Default::default()
+    };
     let x_r = match target {
         BinaryPoint::Affine { x, .. } => x.clone(),
-        BinaryPoint::Infinity => return (None, stats),
+        BinaryPoint::Infinity => return (None, unsupported()),
     };
     let sys = match crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
         &fb.subspace_basis,
@@ -5037,8 +5054,9 @@ pub fn sat_decompose_with(
         st,
     ) {
         Some(sys) => sys,
-        None => return (None, stats),
+        None => return (None, unsupported()),
     };
+    let mut stats = SatDecompositionStats::default();
 
     // Algebraic preprocessing: hand the solver the degree-`D` Macaulay
     // consequences of the system alongside the system itself.  Each row
@@ -5207,6 +5225,7 @@ fn sat_decompose_union_s4(
     let mut stats = SatDecompositionStats::default();
     let BinaryPoint::Affine { x: x_r, .. } = target else {
         stats.exhausted = true;
+        stats.unsupported = true;
         return (None, stats);
     };
     let mut enc = encode_semaev_s4(
@@ -5743,7 +5762,8 @@ pub struct KoblitzIcReport {
     pub sat_calls: usize,
     /// Targets the SAT oracle refuted outright (UNSAT).
     pub sat_refutations: usize,
-    /// Inconclusive attempts (model/conflict caps or invalid models).
+    /// Inconclusive attempts, including unsupported inputs, model/conflict
+    /// caps and invalid models. The attempt ledger distinguishes these.
     pub sat_unknowns: usize,
     /// Encoding/model verification failures; any nonzero value invalidates a run.
     pub sat_invalid_models: usize,
@@ -5805,6 +5825,8 @@ pub struct KoblitzIcReport {
 pub enum KoblitzRelationAttemptDisposition {
     RelationFound,
     Refuted,
+    /// The requested decomposition could not be encoded; no refutation.
+    Unsupported,
     Unknown,
     InvalidModel,
     DirectSkipped,
@@ -6386,6 +6408,8 @@ fn koblitz_index_calculus_dlp_observed(
                     report.infeasible_branches += stats.infeasible_branches;
                     let disposition = if idxs.is_some() {
                         KoblitzRelationAttemptDisposition::RelationFound
+                    } else if stats.unsupported {
+                        KoblitzRelationAttemptDisposition::Unsupported
                     } else if stats.exhausted {
                         KoblitzRelationAttemptDisposition::Unknown
                     } else {
@@ -6396,6 +6420,8 @@ fn koblitz_index_calculus_dlp_observed(
                 RelationAttemptOutcome::Crossbred(idxs, stats) => {
                     let disposition = if idxs.is_some() {
                         KoblitzRelationAttemptDisposition::RelationFound
+                    } else if stats.unsupported {
+                        KoblitzRelationAttemptDisposition::Unsupported
                     } else if stats.exhausted {
                         KoblitzRelationAttemptDisposition::Unknown
                     } else {
@@ -6418,6 +6444,8 @@ fn koblitz_index_calculus_dlp_observed(
                         KoblitzRelationAttemptDisposition::InvalidModel
                     } else if idxs.is_some() {
                         KoblitzRelationAttemptDisposition::RelationFound
+                    } else if stats.unsupported {
+                        KoblitzRelationAttemptDisposition::Unsupported
                     } else if stats.refuted {
                         KoblitzRelationAttemptDisposition::Refuted
                     } else {
@@ -8578,11 +8606,12 @@ impl<'a> FactorBaseLogSolver<'a> {
         if self.system.rows() < self.system.n_cols {
             return None;
         }
-        let mut report = self.report.clone();
-        let table = self.system.attempt(&mut report)?;
-        report.verified = true;
-        self.report.solve_attempts = report.solve_attempts;
-        Some((table, report))
+        // A failed solve still consumed work. Update the persistent report
+        // before propagating None so its attempts, time and sparse diagnostics
+        // survive the next collection batch and a terminal incomplete result.
+        let table = self.system.attempt(&mut self.report);
+        self.report.verified = table.is_some();
+        Some((table?, self.report.clone()))
     }
 
     /// The report as it stands, for a solve that has not succeeded.
@@ -12205,6 +12234,96 @@ mod tests {
     }
 
     #[test]
+    fn la_accounting_retains_failed_attempts() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_subgroup_orbit_factor_base(&kc, 3, 36).unwrap();
+        for la in [
+            LinearAlgebra::Dense,
+            LinearAlgebra::Sparse(SparseSolveOptions::default()),
+        ] {
+            let opts = KoblitzIcOptions {
+                linear_algebra: la,
+                ..collector_options()
+            };
+            let mut solver = FactorBaseLogSolver::new(&kc, &fb, &opts).unwrap();
+            assert!(solver.try_solve().is_none());
+            assert_eq!(
+                solver.report().solve_attempts,
+                0,
+                "no matrix solve was attempted"
+            );
+
+            // An explicit singular, homogeneous matrix isolates LA reporting.
+            // This is a matrix control, not fabricated collected IC evidence.
+            let cols = solver.columns();
+            assert!(cols > 1);
+            let zero = vec![BigUint::zero(); cols];
+            if solver.system.sparse_opts.is_some() {
+                solver.system.sparse_rows = (0..cols)
+                    .map(|_| SparseRow::from_dense(&zero, &BigUint::zero(), solver.system.r_u64))
+                    .collect();
+            } else {
+                solver.system.dense_matrix = vec![zero; cols];
+                solver.system.dense_rhs = vec![BigUint::zero(); cols];
+            }
+            // A nonzero prior value catches replacement as well as omission.
+            solver.report.linear_algebra_seconds = 7.0;
+            for expected in 1..=2 {
+                assert!(solver.try_solve().is_none());
+                let report = solver.report();
+                assert_eq!(report.solve_attempts, expected);
+                assert!(report.linear_algebra_seconds > 7.0);
+                assert!(!report.verified);
+                assert_eq!(
+                    report.sparse_report.is_some(),
+                    solver.system.sparse_opts.is_some()
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn la_accounting_persists_success_report() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        for la in [
+            LinearAlgebra::Dense,
+            LinearAlgebra::Sparse(SparseSolveOptions::default()),
+        ] {
+            let opts = KoblitzIcOptions {
+                linear_algebra: la,
+                ..collector_options()
+            };
+            let collector = RelationCollector::new(&kc, &fb, &opts).unwrap();
+            let (relations, _) = collector.collect(RelationWorkUnit {
+                seed: opts.seed,
+                start: 0,
+                count: 600,
+            });
+            let mut solver = FactorBaseLogSolver::new(&kc, &fb, &opts).unwrap();
+            solver.push(&relations);
+            for expected in 1..=2 {
+                let (table, report) = solver
+                    .try_solve()
+                    .expect("toy relations span the log table");
+                assert!(table.verify(&kc));
+                assert!(report.verified && solver.report().verified);
+                assert_eq!(report.solve_attempts, expected);
+                assert_eq!(solver.report().solve_attempts, expected);
+                assert_eq!(
+                    solver.report().linear_algebra_seconds,
+                    report.linear_algebra_seconds
+                );
+                assert!(report.linear_algebra_seconds > 0.0);
+                assert_eq!(
+                    solver.report().sparse_report.is_some(),
+                    report.sparse_report.is_some()
+                );
+            }
+        }
+    }
+
+    #[test]
     fn logs_from_collected_relations_match_the_single_process_precompute() {
         for (a, n, la) in [
             (0u8, 9u32, LinearAlgebra::Dense),
@@ -12297,6 +12416,155 @@ mod tests {
     }
 
     #[test]
+    fn pdp_admission_unsupported_is_not_a_refutation() {
+        let kc = KoblitzCurve::new(1, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let p = fb
+            .points
+            .iter()
+            .find(|p| kc.add(p, p) != BinaryPoint::Infinity)
+            .unwrap();
+        // All three targets have known decompositions. The narrow Semaev
+        // encoder lacks infinity, m=1, and this >64-variable layout.
+        let cases = [
+            (BinaryPoint::Infinity, 2), // P + (-P)
+            (p.clone(), 1),
+            (kc.mul(p, &BigUint::from(16u32)), 16),
+        ];
+        assert!(index_of.contains_key(&point_key(&point_neg(p))));
+        assert_ne!(cases[2].0, BinaryPoint::Infinity);
+        assert!(fb.n_vars_for_summands(kc.n, 16) > 64);
+        for (target, m) in cases {
+            for engine in [
+                SolverEngine::MatrixF4 { max_degree: 3 },
+                SolverEngine::MatrixF5 { max_degree: 3 },
+                SolverEngine::InheritedF4 { max_degree: 3 },
+            ] {
+                let (found, stats) =
+                    groebner_decompose(&kc, &fb, &index_of, &st, &target, m, engine, 20_000);
+                assert!(found.is_none());
+                assert!(
+                    stats.unsupported && stats.exhausted,
+                    "{engine:?}: {stats:?}"
+                );
+                assert_eq!(stats.reductions, 0);
+                assert_eq!(stats.infeasible_branches, 0);
+            }
+            let (found, stats) = crossbred_decompose(&kc, &fb, &index_of, &st, &target, m, None);
+            assert!(found.is_none());
+            assert!(stats.unsupported && stats.exhausted);
+            assert_eq!(stats.points, 0);
+            for encoding in [XorEncoding::Native, XorEncoding::Cnf] {
+                let (found, stats) = sat_decompose_with(
+                    &kc,
+                    &fb,
+                    &index_of,
+                    &st,
+                    &target,
+                    m,
+                    64,
+                    None,
+                    SatDecompositionOptions {
+                        encoding,
+                        ..Default::default()
+                    },
+                );
+                assert!(found.is_none());
+                assert!(stats.unsupported && stats.exhausted);
+                assert!(!stats.refuted);
+                assert_eq!(stats.solver_calls, 0);
+            }
+        }
+        // The uncached builder and the template fallback must reject a
+        // layout overflow as well, rather than wrap or panic in release.
+        let BinaryPoint::Affine { x, .. } = p else {
+            unreachable!()
+        };
+        assert!(
+            build_decomposition_system(&fb.subspace_basis, x, &kc.curve.b, usize::MAX, &st)
+                .is_none()
+        );
+        assert!(
+            crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+                &fb.subspace_basis,
+                x,
+                &kc.curve.b,
+                usize::MAX,
+                &st,
+            )
+            .is_none()
+        );
+    }
+
+    #[test]
+    fn pdp_admission_budget_exhaustion_is_not_unsupported() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let target = kc.generator().clone();
+        for engine in [
+            SolverEngine::MatrixF4 { max_degree: 3 },
+            SolverEngine::MatrixF5 { max_degree: 3 },
+            SolverEngine::InheritedF4 { max_degree: 3 },
+        ] {
+            let (found, stats) =
+                groebner_decompose(&kc, &fb, &index_of, &st, &target, 2, engine, 0);
+            assert!(found.is_none());
+            assert!(stats.exhausted && !stats.unsupported);
+            assert_eq!(stats.infeasible_branches, 0);
+        }
+    }
+
+    #[test]
+    fn pdp_admission_attempt_ledger_retains_unsupported() {
+        let kc = KoblitzCurve::new(1, 9).unwrap();
+        let target = kc.mul(kc.generator(), &BigUint::from(5u32));
+        for (strategy, engine) in [
+            (
+                DecompositionStrategy::Groebner,
+                SolverEngine::MatrixF4 { max_degree: 3 },
+            ),
+            (
+                DecompositionStrategy::Groebner,
+                SolverEngine::MatrixF5 { max_degree: 3 },
+            ),
+            (DecompositionStrategy::Crossbred, SolverEngine::default()),
+            (DecompositionStrategy::Sat, SolverEngine::default()),
+        ] {
+            let opts = KoblitzIcOptions {
+                m: 16,
+                strategy,
+                engine,
+                max_trials: 8,
+                allow_direct_relation: false,
+                ..Default::default()
+            };
+            let report = koblitz_index_calculus_dlp(&kc, &target, &opts).unwrap();
+            assert_eq!(report.attempt_records.len(), 8);
+            assert!(report.log.is_none());
+            assert_eq!(report.relations, 0);
+            let unsupported = report
+                .attempt_records
+                .iter()
+                .filter(|r| r.disposition == KoblitzRelationAttemptDisposition::Unsupported)
+                .count();
+            assert!(unsupported > 0);
+            assert!(report.attempt_records.iter().all(|r| matches!(
+                r.disposition,
+                KoblitzRelationAttemptDisposition::Unsupported
+                    | KoblitzRelationAttemptDisposition::DirectSkipped
+            )));
+            assert_eq!(report.sat_refutations, 0);
+            if strategy == DecompositionStrategy::Sat {
+                assert_eq!(report.sat_unknowns, unsupported);
+            }
+        }
+    }
+
+    #[test]
     fn all_three_oracles_answer_every_target_identically() {
         // Exhaustive search, Gröbner and SAT must agree on *both*
         // answers: the same decomposability verdict, and whatever they
@@ -12327,6 +12595,28 @@ mod tests {
                 sat_decompose(&kc, &fb, &index_of, &st, &target, 2, 64, Some(2));
             assert!(!sat_stats.exhausted, "model cap should suffice at n = 9");
             assert_eq!(sat_stats.spurious, 0, "the CNF encoding must be exact");
+            let (by_f5, f5_stats) = groebner_decompose(
+                &kc,
+                &fb,
+                &index_of,
+                &st,
+                &target,
+                2,
+                SolverEngine::MatrixF5 { max_degree: 3 },
+                20_000,
+            );
+            assert!(!f5_stats.exhausted, "F5 budget should suffice at n = 9");
+            assert_eq!(
+                by_search.is_some(),
+                by_f5.is_some(),
+                "F5 disagrees on [{k}]G"
+            );
+            if let Some(idxs) = by_f5 {
+                let sum = idxs
+                    .iter()
+                    .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                assert_eq!(sum, target, "F5 decomposition of [{k}]G is wrong");
+            }
             assert_eq!(
                 by_search.is_some(),
                 by_algebra.is_some(),

@@ -81,7 +81,7 @@ configuration and count a new family/size/resource regime as a separate panel.
 
 Use `tournament.py prepare` for the calibrated instruction tournament and
 `--selection-width` / `--exploration-slots` to freeze its portfolio budget.
-For the bounded goal, inspect workflow history before dispatching `ic-improvement.yml` with `run_round_one=true`. The registered wrapper uses Python 3.12 and invokes the existing prepare/run/verify sequence. A duplicate dispatch or a retry of a measured failure is not a new round; retain partial evidence and investigate it.
+The first bounded round has completed in workflow `36140265516`: 3,243/3,243 verified pairs, incumbent retained, no promotion. Read [its full report](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md) and the development-stage evidence before proposing round two. Do not dispatch `run_round_one=true` again. A follow-on needs a new registered source/configuration panel, the next predeclared round seed, and exclusions for every prior generated point; never retune on confirmation or replay. The registered wrapper uses Python 3.12 and the existing prepare/run/verify sequence. A duplicate dispatch or a retry of a measured failure is not a new round; retain partial evidence and investigate it.
 
 Selection locks one challenger; confirmation and replay cannot be used to
 retune it. Preserve final failures. Subsequent tuning requires new held-out

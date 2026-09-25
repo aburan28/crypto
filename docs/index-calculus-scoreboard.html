@@ -428,7 +428,8 @@
   <aside class="gain-overview" aria-labelledby="gain-title">
     <div><span class="chip">engineering</span><h2 id="gain-title">Latest measured improvements</h2>
     <p><b>10.7% fewer field products</b> per specialization (1,342 → 1,199; p = 67, seed = 11).</p>
-    <p>Timing diagnostics: <b>55.4% less specialization time</b> and <b>1.2% less setup time</b>. Full-DLP confirmation remains inconclusive.</p></div>
+    <p>Timing diagnostics: <b>55.4% less specialization time</b> and <b>1.2% less setup time</b>. Full-DLP confirmation remains inconclusive.</p>
+    <p><span class="chip">accounting</span> <a href="#ic-bounded-round-1-20260925">Bounded IC autolab, round one</a>: incumbent retained after 3,243 verified toy-panel pairs. The selected challenger&rsquo;s single-target online time was 6.5% higher on confirmation; neither complete cold metric met the 20% improvement gate.</p></div>
     <nav aria-label="Performance evidence"><a href="algorithm-lab.html">Factor bases, linear algebra &amp; SAT demos →</a><a href="performance-gains.html">Explore performance charts →</a><a href="#summation-polynomials-20260914">Summation-polynomial evidence</a><a href="#gaudry-allocation-20260914">Earlier Gaudry gains</a><a href="#macaulay-cpu-gpu-pipeline">CPU/GPU pipeline</a></nav>
   </aside>
 
@@ -6151,6 +6152,283 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Aliases aggregate complete policies across curves; canonical per-run keys are in the result file. The K-instruction floor is a weak full-rank-collector bound, inapplicable to rho; Ir is not a curve-operation unit. No new exponent fit is justified. Archived implementation panels below retain their original measurements and scope.</p>
 </section>
 <!-- END ic-reference-qualification-20260925 -->
+<!-- BEGIN ic-bounded-round-1-20260925 -->
+<section class="panel" id="ic-bounded-round-1-20260925">
+<h2>Bounded IC round 1: retained</h2>
+<p>Round 1: retained. Selected challenger: stop6; retained/promoted winner: incumbent. 3243/3243 native/profile pairs independently verified by the measured round&#x27;s frozen checker. Fresh Linux transport replay is the evidence-PR merge gate. All results are limited to the registered synthetic toy panel.</p>
+<p>Primary metric: single-target online native time, reusable preparation excluded and scalar replay included. Cold cost remains an additional acceptance gate. Engineering/accounting only; no global-optimum or asymptotic claim. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/README.md">Full report</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/EVIDENCE.md">Provenance and reproduction</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RESULTS.json">Frozen tables and stage diagnostics</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/improvement/round1/RUNS.csv">Every run, including failures</a>.</p>
+<h3>Confirmation</h3>
+<div class="table-scroll"><table><caption>Confirmation: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0347468</td><td>1</td><td>reference</td><td>8.41491</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.290317</td><td>8.35522</td><td>[7.33193, 9.376]</td><td>1.00714</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.292392</td><td>8.41491</td><td>[7.39792, 9.45168]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop6</td><td>0.036997</td><td>1.06476</td><td>[1.01009, 1.11961]</td><td>7.90313</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Confirmation: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.78276e+06</td><td>2790.95</td><td>1</td><td>reference</td><td>0.717195</td><td>222845</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>2.48574e+06</td><td>3891.48</td><td>1.39432</td><td>[1.24631, 1.55199]</td><td>1</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>2.48564e+06</td><td>3891.33</td><td>1.39427</td><td>[1.24627, 1.55192]</td><td>0.999961</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop6</td><td>1.70579e+06</td><td>2670.45</td><td>0.956822</td><td>[0.921452, 0.992762]</td><td>0.686228</td><td>284298</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Confirmation: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.97376</td><td>1</td><td>reference</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.939833</td><td>0.965159</td><td>[0.92131, 1.01048]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.93906</td><td>0.964365</td><td>[0.919519, 1.0106]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop6</td><td>0.939253</td><td>0.964563</td><td>[0.942415, 0.98683]</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Replay</h3>
+<div class="table-scroll"><table><caption>Replay: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0348236</td><td>1</td><td>reference</td><td>8.37185</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.29019</td><td>8.33315</td><td>[7.38617, 9.34136]</td><td>1.00464</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.291538</td><td>8.37185</td><td>[7.47242, 9.31891]</td><td>1</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop6</td><td>0.0373129</td><td>1.07148</td><td>[1.00765, 1.13515]</td><td>7.81333</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Replay: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.78276e+06</td><td>2790.95</td><td>1</td><td>reference</td><td>0.717195</td><td>222845</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>2.48574e+06</td><td>3891.49</td><td>1.39432</td><td>[1.24632, 1.55199]</td><td>1</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>2.48565e+06</td><td>3891.35</td><td>1.39427</td><td>[1.24628, 1.55194]</td><td>0.999965</td><td>not applicable</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop6</td><td>1.70578e+06</td><td>2670.44</td><td>0.956821</td><td>[0.92145, 0.99276]</td><td>0.686227</td><td>284297</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Replay: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.971718</td><td>1</td><td>reference</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.943677</td><td>0.971143</td><td>[0.927014, 1.01771]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.943521</td><td>0.970983</td><td>[0.926287, 1.01869]</td><td>216/216</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>stop6</td><td>0.939902</td><td>0.967258</td><td>[0.948695, 0.987191]</td><td>216/216</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Development</h3>
+<div class="table-scroll"><table><caption>Development: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0352563</td><td>1</td><td>reference</td><td>8.62949</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>compatibility</td><td>0.0352661</td><td>1.00028</td><td>[0.915036, 1.09709]</td><td>8.62712</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.302369</td><td>8.5763</td><td>[7.34981, 10.0703]</td><td>1.0062</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.304244</td><td>8.62949</td><td>[7.24042, 10.2083]</td><td>1</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>row_bounded</td><td>0.0358234</td><td>1.01608</td><td>[0.928955, 1.10844]</td><td>8.4929</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_suffix</td><td>0.0346403</td><td>0.982528</td><td>[0.892417, 1.08623]</td><td>8.78295</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_word</td><td>0.0345295</td><td>0.979383</td><td>[0.896681, 1.06213]</td><td>8.81115</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2</td><td>0.0679139</td><td>1.92629</td><td>[1.18149, 3.38307]</td><td>4.47986</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2_word</td><td>0.0647879</td><td>1.83762</td><td>[1.11767, 3.26681]</td><td>4.69601</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3</td><td>0.0691609</td><td>1.96166</td><td>[1.09311, 3.81667]</td><td>4.39908</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_full</td><td>0.0648977</td><td>1.84074</td><td>[0.998979, 3.64114]</td><td>4.68806</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word</td><td>0.0668481</td><td>1.89606</td><td>[1.07219, 3.5761]</td><td>4.55128</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word_full</td><td>0.063838</td><td>1.81068</td><td>[0.976064, 3.58731]</td><td>4.76588</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4</td><td>0.0486596</td><td>1.38017</td><td>[0.897831, 2.25716]</td><td>6.25251</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word</td><td>0.0499396</td><td>1.41647</td><td>[0.910688, 2.37107]</td><td>6.09225</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word_full</td><td>0.0508188</td><td>1.44141</td><td>[0.896384, 2.48901]</td><td>5.98684</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6</td><td>0.0387835</td><td>1.10004</td><td>[0.924287, 1.31229]</td><td>7.84469</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_full</td><td>0.0339077</td><td>0.961748</td><td>[0.854766, 1.13779]</td><td>8.97271</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Development: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.72112e+06</td><td>2148.81</td><td>1</td><td>reference</td><td>0.672651</td><td>215140</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>compatibility</td><td>1.72684e+06</td><td>2155.95</td><td>1.00332</td><td>[1.00211, 1.00471]</td><td>0.674886</td><td>215855</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>2.55872e+06</td><td>3194.54</td><td>1.48666</td><td>[1.1913, 1.73263]</td><td>1</td><td>not applicable</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>2.55868e+06</td><td>3194.5</td><td>1.48664</td><td>[1.19127, 1.73263]</td><td>0.999986</td><td>not applicable</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>row_bounded</td><td>1.72106e+06</td><td>2148.73</td><td>0.999963</td><td>[0.999128, 1.00084]</td><td>0.672626</td><td>215133</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_suffix</td><td>1.72443e+06</td><td>2152.94</td><td>1.00192</td><td>[1.00078, 1.00307]</td><td>0.673943</td><td>215554</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_word</td><td>1.71926e+06</td><td>2146.49</td><td>0.998918</td><td>[0.998177, 0.999686]</td><td>0.671923</td><td>214908</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2</td><td>2.33929e+06</td><td>2920.58</td><td>1.35916</td><td>[0.909484, 2.1533]</td><td>0.914241</td><td>1.16964e+06</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2_word</td><td>2.33893e+06</td><td>2920.14</td><td>1.35896</td><td>[0.909258, 2.1532]</td><td>0.914103</td><td>1.16947e+06</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3</td><td>2.03632e+06</td><td>2542.33</td><td>1.18313</td><td>[0.862259, 1.65424]</td><td>0.795836</td><td>678773</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_full</td><td>2.10341e+06</td><td>2626.09</td><td>1.22211</td><td>[0.913466, 1.65705]</td><td>0.822055</td><td>701136</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word</td><td>2.03549e+06</td><td>2541.29</td><td>1.18265</td><td>[0.861813, 1.65388]</td><td>0.795511</td><td>678496</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word_full</td><td>2.10264e+06</td><td>2625.13</td><td>1.22166</td><td>[0.912881, 1.65675]</td><td>0.821754</td><td>700879</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4</td><td>1.80551e+06</td><td>2254.16</td><td>1.04903</td><td>[0.832364, 1.36359]</td><td>0.705629</td><td>451377</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word</td><td>1.80389e+06</td><td>2252.14</td><td>1.04809</td><td>[0.831268, 1.36309]</td><td>0.704997</td><td>450972</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word_full</td><td>2.04443e+06</td><td>2552.46</td><td>1.18785</td><td>[1.00918, 1.44019]</td><td>0.799005</td><td>511107</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6</td><td>1.80162e+06</td><td>2249.31</td><td>1.04677</td><td>[0.950769, 1.17067]</td><td>0.704111</td><td>300270</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_full</td><td>2.41789e+06</td><td>3018.72</td><td>1.40483</td><td>[1.29982, 1.48749]</td><td>0.944962</td><td>402982</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Development: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.981844</td><td>1</td><td>reference</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>compatibility</td><td>0.984506</td><td>1.00271</td><td>[0.958741, 1.05815]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.946136</td><td>0.963631</td><td>[0.898189, 1.02345]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.945346</td><td>0.962827</td><td>[0.898169, 1.026]</td><td>45/45</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>row_bounded</td><td>0.984798</td><td>1.00301</td><td>[0.94677, 1.0598]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_suffix</td><td>0.988162</td><td>1.00643</td><td>[0.960356, 1.07065]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_word</td><td>0.956282</td><td>0.973965</td><td>[0.944071, 1.00736]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2</td><td>1.0355</td><td>1.05465</td><td>[0.886556, 1.30183]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2_word</td><td>1.03288</td><td>1.05198</td><td>[0.899399, 1.28675]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3</td><td>0.97891</td><td>0.997011</td><td>[0.88293, 1.14783]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_full</td><td>0.988985</td><td>1.00727</td><td>[0.911653, 1.13801]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word</td><td>0.956279</td><td>0.973962</td><td>[0.865902, 1.11229]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word_full</td><td>0.956479</td><td>0.974165</td><td>[0.886563, 1.09026]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4</td><td>0.918897</td><td>0.935889</td><td>[0.859965, 1.02221]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word</td><td>0.923877</td><td>0.940961</td><td>[0.85349, 1.02574]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word_full</td><td>0.948846</td><td>0.966392</td><td>[0.882228, 1.05218]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6</td><td>0.967292</td><td>0.985179</td><td>[0.933241, 1.04515]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_full</td><td>1.00556</td><td>1.02416</td><td>[0.988143, 1.07122]</td><td>45/45</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<h3>Smoke</h3>
+<div class="table-scroll"><table><caption>Smoke: Single-target online time</caption><thead><tr>
+<th>Variant</th>
+<th>Online ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Online rho / variant</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>0.0414595</td><td>1</td><td>reference</td><td>8.24864</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>compatibility</td><td>0.0466808</td><td>1.12594</td><td>[0.998912, 1.42512]</td><td>7.32603</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.331739</td><td>8.00152</td><td>[6.91821, 9.25446]</td><td>1.03088</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.341985</td><td>8.24864</td><td>[6.93628, 9.8093]</td><td>1</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>row_bounded</td><td>0.0418418</td><td>1.00922</td><td>[0.988594, 1.03028]</td><td>8.17327</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_suffix</td><td>0.0442462</td><td>1.06722</td><td>[1.00365, 1.14663]</td><td>7.72913</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_word</td><td>0.0434484</td><td>1.04797</td><td>[0.959907, 1.1652]</td><td>7.87105</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2</td><td>0.0384477</td><td>0.927355</td><td>[0.682692, 1.29242]</td><td>8.8948</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2_word</td><td>0.0385728</td><td>0.930373</td><td>[0.681697, 1.27986]</td><td>8.86595</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3</td><td>0.0389066</td><td>0.938423</td><td>[0.781481, 1.07914]</td><td>8.7899</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_full</td><td>0.0388243</td><td>0.936439</td><td>[0.784051, 1.08684]</td><td>8.80852</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word</td><td>0.0400013</td><td>0.964829</td><td>[0.799571, 1.12555]</td><td>8.54933</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word_full</td><td>0.0382545</td><td>0.922696</td><td>[0.789234, 1.05734]</td><td>8.93972</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4</td><td>0.0393433</td><td>0.948958</td><td>[0.793684, 1.12729]</td><td>8.69232</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word</td><td>0.0416154</td><td>1.00376</td><td>[0.80422, 1.30243]</td><td>8.21774</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word_full</td><td>0.0400582</td><td>0.966199</td><td>[0.771701, 1.17757]</td><td>8.53721</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6</td><td>0.0414627</td><td>1.00008</td><td>[0.705577, 1.46555]</td><td>8.248</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_full</td><td>0.0400991</td><td>0.967185</td><td>[0.6931, 1.36308]</td><td>8.5285</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Smoke: Complete cold instructions</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold Ir</th>
+<th>S = Ir / sqrt(r)</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>/ cold rho</th>
+<th>/ K floor</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.94699e+06</td><td>2430.81</td><td>1</td><td>reference</td><td>0.689415</td><td>243374</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>compatibility</td><td>1.95332e+06</td><td>2438.71</td><td>1.00325</td><td>[1.00209, 1.00445]</td><td>0.691656</td><td>244165</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>2.82412e+06</td><td>3525.9</td><td>1.45051</td><td>[1.2103, 1.70404]</td><td>1</td><td>not applicable</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>2.82409e+06</td><td>3525.86</td><td>1.45049</td><td>[1.21028, 1.70403]</td><td>0.99999</td><td>not applicable</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>row_bounded</td><td>1.9457e+06</td><td>2429.19</td><td>0.999336</td><td>[0.998698, 0.999974]</td><td>0.688956</td><td>243212</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_suffix</td><td>1.95045e+06</td><td>2435.13</td><td>1.00178</td><td>[1.00064, 1.00299]</td><td>0.69064</td><td>243806</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_word</td><td>1.9436e+06</td><td>2426.57</td><td>0.998257</td><td>[0.997788, 0.998726]</td><td>0.688213</td><td>242950</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2</td><td>1.68904e+06</td><td>2108.76</td><td>0.867514</td><td>[0.764624, 0.984249]</td><td>0.598077</td><td>844521</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2_word</td><td>1.68874e+06</td><td>2108.38</td><td>0.867357</td><td>[0.76442, 0.984155]</td><td>0.597968</td><td>844368</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3</td><td>1.60918e+06</td><td>2009.05</td><td>0.826497</td><td>[0.701536, 1.0244]</td><td>0.569799</td><td>536394</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_full</td><td>1.71499e+06</td><td>2141.15</td><td>0.880841</td><td>[0.74517, 1.07333]</td><td>0.607265</td><td>571663</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word</td><td>1.60846e+06</td><td>2008.15</td><td>0.826127</td><td>[0.701291, 1.02407]</td><td>0.569544</td><td>536154</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word_full</td><td>1.71429e+06</td><td>2140.28</td><td>0.880483</td><td>[0.744926, 1.07293]</td><td>0.607018</td><td>571431</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4</td><td>1.60745e+06</td><td>2006.89</td><td>0.825608</td><td>[0.675293, 1.04043]</td><td>0.569186</td><td>401863</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word</td><td>1.6059e+06</td><td>2004.96</td><td>0.824813</td><td>[0.674708, 1.03982]</td><td>0.568638</td><td>401476</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word_full</td><td>1.84741e+06</td><td>2306.48</td><td>0.948854</td><td>[0.75375, 1.14322]</td><td>0.654154</td><td>461852</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6</td><td>1.58274e+06</td><td>1976.04</td><td>0.812916</td><td>[0.745035, 0.882935]</td><td>0.560436</td><td>263790</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_full</td><td>2.28429e+06</td><td>2851.92</td><td>1.17324</td><td>[0.939703, 1.42684]</td><td>0.808848</td><td>380715</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table><caption>Smoke: Complete cold native time</caption><thead><tr>
+<th>Variant</th>
+<th>Complete cold ms</th>
+<th>/ IC reference</th>
+<th>Descriptive 95% interval</th>
+<th>Verified / scheduled</th>
+<th>Class</th>
+</tr></thead><tbody>
+<tr><td>incumbent</td><td>1.00367</td><td>1</td><td>reference</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>compatibility</td><td>1.01525</td><td>1.01154</td><td>[0.96277, 1.06977]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho</td><td>0.987279</td><td>0.983669</td><td>[0.934957, 1.03761]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>rho_online</td><td>0.996115</td><td>0.992472</td><td>[0.95043, 1.04289]</td><td>15/15</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>row_bounded</td><td>1.01107</td><td>1.00738</td><td>[0.961045, 1.0607]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_suffix</td><td>1.03722</td><td>1.03343</td><td>[0.982347, 1.09666]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>row_word</td><td>1.02724</td><td>1.02348</td><td>[0.980733, 1.0566]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2</td><td>0.868114</td><td>0.864939</td><td>[0.826586, 0.901316]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop2_word</td><td>0.927407</td><td>0.924015</td><td>[0.870228, 0.981128]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3</td><td>0.882391</td><td>0.879163</td><td>[0.848425, 0.916289]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_full</td><td>0.899878</td><td>0.896587</td><td>[0.856064, 0.947817]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word</td><td>0.882449</td><td>0.879222</td><td>[0.806756, 0.958197]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop3_word_full</td><td>0.877445</td><td>0.874236</td><td>[0.821711, 0.943928]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4</td><td>0.895041</td><td>0.891768</td><td>[0.859841, 0.935816]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word</td><td>0.909145</td><td>0.90582</td><td>[0.863603, 0.950101]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop4_word_full</td><td>0.922189</td><td>0.918817</td><td>[0.867159, 0.988972]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6</td><td>0.904897</td><td>0.901587</td><td>[0.876533, 0.926856]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+<tr><td>stop6_full</td><td>0.985016</td><td>0.981413</td><td>[0.931481, 1.04672]</td><td>15/15</td><td><span class="chip">engineering</span></td></tr>
+</tbody></table></div>
+<p>Complete cold Ir is user-space guest instructions, not curve additions. The K-instruction collector floor is implementation-specific and inapplicable to rho. Engineering rows test implementation changes; accounting rows are references or compatibility controls. Per-target identities, exact admitted bases, phase ledgers, uncertainty, retained failures and the final gate are available in the linked frozen report.</p>
+</section>
+<!-- END ic-bounded-round-1-20260925 -->
+<section class="panel" id="ic-pdp-outcome-controls-20260925">
+  <h2>PDP admission: unsupported inputs are not refutations</h2>
+  <p><span class="chip">accounting</span> Toy correctness controls now distinguish an unsupported encoding from budget exhaustion and a completed algebraic refutation. Twenty-two local release tests passed, including a 39-target F5 comparison with exhaustive enumeration and independent witness checks. These controls do not qualify a new performance winner: online time, cold cost, S and speedup remain unknown. Generic solver timing and per-query statistics still need scientific admission. See the <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/pdp-admission/PROTOCOL.md">protocol</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/pdp-admission/RESULTS.md">retained results</a>. One of three improvement rounds is complete; the incumbent is retained.</p>
+</section>
+<section class="panel" id="ic-la-accounting-controls-20260925">
+  <h2>Relation-LA admission: retain failed solve work</h2>
+  <p><span class="chip">accounting</span> The generic factor-base solver now retains failed linear-algebra attempts, their measured LA time and sparse diagnostics, and keeps successful reports consistent. Dense and sparse correctness controls and the collected-relation equivalence test pass locally. This is a bookkeeping correction with no speedup claim; full online/cold cost remains unknown. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/la-accounting/RESULTS.md">control record</a> preserves its protocol, source hashes and raw test output. The optimized round-one result is unchanged.</p>
+</section>
+
 <!-- BEGIN ic-autolab-20260924 -->
 <section id="ic-autolab-20260924">
 <h2>IC autolab — native development checkpoint, 2026-09-24</h2>
@@ -6674,6 +6952,46 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-direct-challenge-import-20260925 -->
+<!-- BEGIN ecc2k130-n131-beta3-f0-census-20260925 -->
+<section class="panel" id="ecc2k130-n131-beta3-f0-census-20260925">
+  <div class="panel-head">
+    <h2>Exact n = 131 beta-3 F0: 1,048,134 nonzero signed columns <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/773">PR #773</a> preregistered the m = 6,d = 21 beta-3 F0 before enumerating all 2,097,152 Gray-code masks. Independent natural-mask and polynomial-division arithmetic replay matched every row digest, lift decision and canonical ±[4] projected x key. The 64 frozen n = 131 full-group-law samples and complete n = 13/19 F0 and four-torsion controls passed. The zero mask gives the identity column; x = 1 is excluded by the normal-basis coordinates.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>C counts distinct nonzero canonical ±[4] projected point pairs, keyed by x. O is one separate zero column. The prior 2<sup>21</sup> F0-column figure was a nominal proxy; no row rank, target-support probability or S/rho cost is inferred.</caption>
+    <thead><tr><th>Exact stage</th><th>F0 masks</th><th>Liftable nonzero x, L</th><th>Physical F0 points</th><th>Nonzero ± columns, C</th><th>Repeated-column x preimages</th><th>Independent replay</th><th>Rank / S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>Gray-prefix pilot</td><td>32,768</td><td>16,707</td><td>33,415</td><td>16,707</td><td>0</td><td>all rows</td><td>unset / unset / unset</td></tr>
+      <tr><td>Full n = 131 F0</td><td>2,097,152</td><td>1,048,134</td><td>2,096,269</td><td>1,048,134</td><td>0</td><td>all 2,097,152 rows</td><td>unset / unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>All 1,048,134 nonzero columns have exactly one rational x preimage; adding O gives 1,048,135 signed columns. The nominal 2<sup>21</sup> proxy is 2.00084 times the exact nonzero signed-column count, but the physical F0 size is only 883 below 2<sup>21</sup>. This corrects cardinality accounting, not an algorithmic crossover. The full producer used 74.262 s wall, 3,145,285 field inversions in enumeration and 138,067,968 B peak RSS; independent all-mask replay used 902.264 s and 157,351,936 B. Both passed frozen caps. The next exporter/solver gate may use these exact sizes, while natural-target relations, matrix rank, actual challenge decomposition and matched rho remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/PROTOCOL.md">frozen protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/EVIDENCE.md">raw receipts and replay</a>. Full row SHA-256 <code>b8b03e28e783ebec12be04c82542d74448896e3a128c0a5784a77a0a688da30d</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n131-beta3-f0-census-20260925 -->
+<!-- BEGIN ecc2k130-rotated-arity-screen-20260925 -->
+<section class="panel" id="ecc2k130-rotated-arity-screen-20260925">
+  <div class="panel-head">
+    <h2>Exact n = 131 balanced rotated-arity screen selects m10,d13 for an implicit-PDP gate <span class="chip">necessary count</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/778">PR #778</a> froze four beta-3 arms and independent full-mask replay before counting. Each of the 352,256 masks across m7/d18, m8/d16, m9/d14 and m10/d13 was independently reconstructed and checked for a rational lift and signed ±[4] projected column; 64 fixed full-group-law samples per arm passed. The tuple product over the subgroup order q is a necessary uniform-target support ceiling, not an observed PDP hit rate.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>F is the exact physical F0 point count; C is the number of distinct nonzero signed ±[4] columns. The frozen gate requires F<sup>m</sup>≥q and C≤16,384. No relation rank, solver time, full S, or rho ratio was measured.</caption>
+    <thead><tr><th>Arm</th><th>Masks</th><th>F</th><th>C</th><th>Exact F<sup>m</sup>/q</th><th>Gate</th></tr></thead>
+    <tbody>
+      <tr><td>m7,d18</td><td>262,144</td><td>261,709</td><td>130,854</td><td>0.1235552391</td><td>fail both</td></tr>
+      <tr><td>m8,d16</td><td>65,536</td><td>65,747</td><td>32,873</td><td>0.5130244782</td><td>fail both</td></tr>
+      <tr><td>m9,d14</td><td>16,384</td><td>16,743</td><td>8,371</td><td>0.1519252832</td><td>fail tuple count</td></tr>
+      <tr><td>m10,d13</td><td>8,192</td><td>7,977</td><td>3,988</td><td>1.5329446704</td><td>pass necessary screen</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The exact m6,d21 F from <a href="https://github.com/aburan28/crypto/pull/773">#773</a> gives a one-base counting ceiling of 12.4685%; even four equal-size bases cannot exceed 49.8738% by the union bound. Balanced m10 reduces C but has 1,178 raw affine-chain variables before branches/auxiliaries. A separate full-dimensional unequal-slot census, starting with five 15-bit and four 14-bit m9 slots, is the next parameter experiment; no larger-rung solver has been admitted. Producer/independent replay wall was at most 10.506/124.310 s per arm, below frozen 600/1,200 s and 256 MiB caps. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/RESULT.md">Exact result and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/EVIDENCE.md">raw receipt and replay</a>. Freeze SHA-256 <code>3e930522ef1102770b7a748477959a108f8656fa2aaaa0b22a17598b2856eedb</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-arity-screen-20260925 -->
 <!-- BEGIN ecc2k130-rotated-pdp-corpus-20260925 -->
 <section class="panel" id="ecc2k130-rotated-pdp-corpus-20260925">
   <div class="panel-head">
@@ -6731,6 +7049,87 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-s3-candidate-20260925 -->
+<!-- BEGIN ecc2k130-s3-fibre-theorem-20260925 -->
+<section class="panel" id="ecc2k130-s3-fibre-theorem-20260925">
+  <div class="panel-head">
+    <h2>Recursive S3 on complete rational x fibres: affine paths are exact <span class="chip">semantic theorem</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/777">PR #777</a> proves the finite-fibre S3 root theorem for <code>y²+xy=x³+1</code>: every finite root for two rational, sign-complete factor fibres is the x-coordinate of a rational signed sum, including x=0, doubling and inverse cases. Negating all earlier factors reconciles each recursive prefix sign without changing its x path; global negation gives either affine target sign. The proof is universal in finite characteristic-two extensions; the independently replayed small-field controls below check its implementation and edge cases.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Frozen exhaustive controls after pre-outcome source hash and draft PR. Pair rows span n=1..7; chain panels enumerate every rational x tuple and signed point tuple. O-prefix and O-terminal counts may overlap. Full S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Control</th><th>Rational x tuples / ordered pairs</th><th>Signed point tuples / S3 evaluations</th><th>Distinct affine paths / root occurrences</th><th>O-prefix / O-terminal signed tuples</th><th>Candidate-only paths / missing target signs</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n=1..7 pairs</td><td>4,720 pairs</td><td>497,384 evaluations</td><td>9,075 roots</td><td>—</td><td>0 pair mismatches</td><td>unset / unset</td></tr>
+      <tr><td>n=3, m=4 chain</td><td>16 tuples</td><td>81 point tuples</td><td>8 paths</td><td>45 / 21</td><td>0 / 0</td><td>unset / unset</td></tr>
+      <tr><td>n=4, m=4 chain</td><td>4,096 tuples</td><td>50,625 point tuples</td><td>19,208 paths</td><td>6,525 / 3,165</td><td>0 / 0</td><td>unset / unset</td></tr>
+      <tr><td>n=5, m=3 chain</td><td>10,648 tuples</td><td>79,507 point tuples</td><td>37,485 paths</td><td>1,849 / 1,806</td><td>0 / 0</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The independent verifier compared all 4,720 pair rows and 56,701 complete affine-chain rows, including both terminal signs. A nonliftable formal n=3 S3 root and a first single-sign loss at n=2 demonstrate why rational lifts and sign completeness are required. Producer/verifier wall was 2.878/3.222 s under the frozen 180 s and 512 MiB per-child caps. The remaining semantic work is explicit O-prefix, inverse and O-target branches and validation of a concrete exporter against the full point oracle; this proof alone does not admit solver UNSAT, direct higher-S<sub>m</sub> equations or n=131 performance claims. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/RESULT.md">Decision and proof boundary</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/evidence/README.md">raw evidence and replay</a>. Freeze SHA-256 <code>d87bfa84b6d6ccffe859cf044b22cbf0fc901ac71e3d0d01b35469a7760855e3</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-fibre-theorem-20260925 -->
+<!-- BEGIN ecc2k130-rotated-solver-admission-20260925 -->
+<section class="panel" id="ecc2k130-rotated-solver-admission-20260925">
+  <div class="panel-head">
+    <h2>Rotated m = 5/6 solver admission: complete-instance export remains blocked <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/780">PR #780</a> checks the pinned #767 16-Q corpus, all 64 Q+T point branches, #774 affine candidates, #777 finite-fibre theorem and the currently identified S3/resultant/SAT interfaces. The four planted and four certified-negative Q labels per rung are valid reference labels, but no audited path emits a branch-complete rotated solver input. No solver was run, and no solver SAT/UNSAT verdict or speed ratio is claimed.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Static interface gate after a hash-only preregistration. Raw chain bits omit lift, exception and solver auxiliaries. Certified negatives come from the complete point oracle, not an algebraic solver. Full-DLP S and matched-rho ratios are unset.</caption>
+    <thead><tr><th>Arm</th><th>Frozen Q targets / Q+T branches</th><th>Raw S3-chain bits / generic limit</th><th>Affine paths on planted Q / negative Q</th><th>Admission blocker</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>8 / 32</td><td>49 / 64</td><td>2,2,2,2 / 0,0,0,0</td><td>No rotated-slot, rational-lift and O/inverse-complete exporter</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>8 / 32</td><td>88 / 64</td><td>3,1,4,2 / 0,0,0,0</td><td>Same semantics gap plus multiword capacity</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The #774 n = 13 Q+O control has three true x-mask witnesses, including one with an O prefix that affine S3 omits; the same Q also has two affine witnesses, so this is a model-set gap rather than a wrong target-level answer on the fixed corpus. #777 proves finite affine roots sound for complete rational sign fibres but does not encode the missing branch. CryptoMiniSat, msolve, Kissat, CaDiCaL and the earlier #764 WDSat fixture were inventoried; installed binaries cannot supply absent inputs. The corrected static audit took 0.186 s wall and 25,935,872-byte child high-water RSS under its 30 s/256 MiB caps; the original PATH-only inventory is retained. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_solver_admission_20260925/RESULT.md">Bounded decision and next gate</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/README.md">raw receipt and replay</a>. This is not a repository-wide impossibility result or an n = 131 solver-cost estimate.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-solver-admission-20260925 -->
+<!-- BEGIN ecc2k130-s3-o-branch-20260925 -->
+<section class="panel" id="ecc2k130-s3-o-branch-20260925">
+  <div class="panel-head">
+    <h2>O-aware recursive S3 CNF: complete toy semantics pass, dense table stops here <span class="chip">exporter gate</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/781">PR #781</a> turns #777's finite-fibre theorem into an explicit one-hot DIMACS exporter with O as a prefix/terminal state. Its independent verifier parsed every clause, rebuilt the allowed transition table from signed rational point sums, and compared every CNF state path with the complete full-point oracle. All 61 exact target assumptions, including O, and all four nonlift/sign/corruption controls passed. This is a semantic exporter gate; no SAT solver was run.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Frozen complete domains and raw DIMACS size. O-prefix and O-terminal paths can overlap. The n = 13 arm uses the same #767 five rotated factor slots and #774 32 Q+T labels, plus an O target. Full S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Panel</th><th>Factor-x / signed-point tuples</th><th>Exact CNF paths</th><th>O-prefix / O-terminal paths</th><th>Target labels</th><th>CNF variables / clauses</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 2, m = 4</td><td>256 / 2,401</td><td>949</td><td>184 / 133</td><td>8 incl. O</td><td>31 / 258</td><td>unset / unset</td></tr>
+      <tr><td>n = 3, m = 5</td><td>32 / 243</td><td>70</td><td>49 / 20</td><td>4 incl. O</td><td>22 / 66</td><td>unset / unset</td></tr>
+      <tr><td>n = 4, m = 4</td><td>4,096 / 50,625</td><td>22,373</td><td>1,744 / 1,485</td><td>16 incl. O</td><td>59 / 1,744</td><td>unset / unset</td></tr>
+      <tr><td>n = 13, m = 5</td><td>243 / 3,125</td><td>1,563</td><td>63 / 0</td><td>32 Q+T + O</td><td>1,263 / 1,195,344</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The concrete n = 13 target <code>Q3T0=(7256,3272)</code> has three paths, including the recovered exceptional-only mask <code>[0,0,0,2,1]</code> with an O prefix; the n = 13 O target has zero models and zero full-point witnesses. The n = 13 DIMACS is 17,630,779 bytes: 462,381 one-hot clauses and 732,963 forbidden triples. Independent verifier peak RSS was 495,173,632 bytes, 41,697,280 bytes below the 512-MiB cap. This measured toy cost rejects the dense table as the next representation to scale; test a sparse allowed-transition encoding against the same exact oracle before solver admission. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_o_branch_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_o_branch_20260925/evidence/README.md">raw DIMACS, paths and replay</a>. Frozen SHA-256 <code>684553d2a05f7355e29acc6b3f76dc3998a8cd5f970b6aafcd508c3fe2d02cf2</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-o-branch-20260925 -->
+<!-- BEGIN ecc2k130-n13-oaware-sat-benchmark-20260925 -->
+<section class="panel" id="ecc2k130-n13-oaware-sat-benchmark-20260925">
+  <div class="panel-head">
+    <h2>O-aware n = 13 SAT stage: all 96 cold toy queries complete; n = 131 remains unpriced <span class="chip">solver stage</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/785">PR #785</a> ran the exact #781 17.6 MB dense CNF with each of the 32 frozen #767 Q+T unit assumptions in three cold engines: CryptoMiniSat, Kissat and CaDiCaL. Each returned five SAT and 27 UNSAT branch statuses. All 15 SAT models were independently converted from chosen x values to complete rational point fibres and a signed tuple summing to the exact full point. The 81 UNSAT outputs agree with #767's complete point oracle, but no separate UNSAT proof certificate was checked. All six tiny interface smokes and 96 target children finished within the frozen 15 s/2 GiB caps with zero invalid models or timeouts.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed macOS panel. Charged portfolio wall includes source/schema/oracle preflight, one base read, 32 derived query files, cold child wall and point verification for each engine. The per-child maximum is not a portfolio cost. These are solver-stage diagnostics, not full IC operations S or matched rho.</caption>
+    <thead><tr><th>CNF engine</th><th>SAT / oracle-consistent UNSAT</th><th>32 child wall sum</th><th>Charged 32-query wall</th><th>Max child wall</th><th>Max sampled RSS</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>CryptoMiniSat 5.14.7</td><td>5 / 27</td><td>9.508 s</td><td>10.326 s</td><td>0.535 s</td><td>102.8 MB</td><td>unset / unset</td></tr>
+      <tr><td>Kissat 4.0.4</td><td>5 / 27</td><td>6.650 s</td><td>7.468 s</td><td>0.274 s</td><td>130.3 MB</td><td>unset / unset</td></tr>
+      <tr><td>CaDiCaL 3.0.1</td><td>5 / 27</td><td>10.158 s</td><td>10.977 s</td><td>0.593 s</td><td>136.4 MB</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The actual 96-child Python main wall was 27.316 s. Fixed-order first verified positive branches were T3,T0,T2,T0 for Q0&ndash;Q3; each of Q4&ndash;Q7 required all four negative branches, with charged full-Q costs retained in the analysis. Query files were reconstructed from one hash-pinned #781 base, not archived 96 times; exact commands, raw output, model witnesses, child CPU/RSS and two pre-corpus setup failures are preserved. This admits the dense n = 13 toy solver interface and supersedes #780's n = 13 input blocker, while #780's n = 19 multiword/complete-export blocker remains. One toy wall panel does not establish statistically robust engine superiority, n = 131 tractability, relation yield/rank, a Certicom log or an end-to-end rho crossover. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/analysis.json">charged Q and portfolio costs</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/README.md">raw evidence and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n13-oaware-sat-benchmark-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
@@ -6817,6 +7216,25 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-beta-portfolio-20260925 -->
+<!-- BEGIN ecc2k130-rotated-four-base-joint-rank-20260925 -->
+<section class="panel" id="ecc2k130-rotated-four-base-joint-rank-20260925">
+  <div class="panel-head">
+    <h2>Rotated n = 19 four-base joint rank: 12/12 columns and 58/64 archive-oracle logs <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/779">PR #779</a> froze one unconditional SHA-selected 256-training/64-point-only-holdout stream for beta 3 and #775's selected four-base portfolio. All 12 canonical signed [4]F0 columns are distinct across bases. The independent bit-serial/Fermat replay checks every selected archived first witness, exact modular rank, each solved column log and every recovered scalar by [k]H = Q before sealed labels. The preregistered semantic gate required full joint rank and at least 12 additional verified holdouts; both conditions passed.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Same-Q first-archived-witness diagnostic on the n = 19 subgroup q = 130,873. Counts include misses and dependent rows. Lookup uses a complete prior archive; no implicit PDP solving or matched-rho S is measured.</caption>
+    <thead><tr><th>Fixed arm</th><th class="n">Training rows / base-Q probes</th><th class="n">Training misses</th><th class="n">Exact rank / columns</th><th class="n">Zero / dependent rows</th><th class="n">First full rank row</th><th class="n">Group-verified holdouts / 64</th><th class="n">Archive misses</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>beta 3</td><td class="n">113 / 256</td><td class="n">143</td><td class="n">3 / 3</td><td class="n">0 / 110</td><td class="n">3</td><td class="n">29</td><td class="n">35</td><td>unset / unset</td></tr>
+      <tr><td>3, 338435, 303097, 464276</td><td class="n">516 / 1,024</td><td class="n">508</td><td class="n">12 / 12</td><td class="n">0 / 504</td><td class="n">16</td><td class="n">58</td><td class="n">6</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The four-base archive oracle used 129 fixed-order base probes for 64 holdouts; beta 3 used 64. Training and oracle each scanned 23,927,716 uncompressed archive bytes and took 3.307/2.929 s wall; point recovery and independent replay took 0.061/2.099 s. All children exited zero under frozen 120/300 s caps; peak training RSS was 313,278,464 bytes. This passes an n = 19 semantic admission gate only. It does not price implicit S6 witness search, negative proofs, relation acquisition, n = 131 support, an ECC2K-130 challenge log, or end-to-end IC/rho cost. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/EVIDENCE.md">frozen hashes and replay receipt</a>. Raw SHA-256 <code>00ceb79d014bd92b4ce54baa9c1923f1594532b719881af17ae44a9e1aa1fe98</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-four-base-joint-rank-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">

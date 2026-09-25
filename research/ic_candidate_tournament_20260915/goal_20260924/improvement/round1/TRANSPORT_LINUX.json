@@ -1,0 +1,20 @@
+{
+  "status": "VERIFIED",
+  "round": 1,
+  "contract_sha256": "3008ed46d8ce8a4a110ba78849756933018dfce54a361f4f837cf7251ec2ea10",
+  "decision_sha256": "5068c53ab3432274e687f375770ae2d58e4e10732b2c60b0279a617ea4f80b23",
+  "tournament": {
+    "status": "VERIFIED",
+    "trial_receipts": 3243,
+    "source_files": 1362
+  },
+  "controls": {
+    "status": "VERIFIED",
+    "pairs": 30,
+    "scope": "fixed-vector mathematical certificates, policy admission and phase closure; no performance selection"
+  },
+  "decision_status": "retained",
+  "promotion_eligible": false,
+  "python": "3.12.14 (main, Aug 13 2026, 02:47:42) [GCC 13.3.0]",
+  "platform": "linux"
+}

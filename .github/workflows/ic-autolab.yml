@@ -40,6 +40,12 @@ jobs:
           python -m unittest discover -s research/sat_factor_base_review_20260908/autolab -p 'test_boundary_autolab.py' -v
       - name: Release arithmetic and descent regressions
         run: |
+          cargo test --locked --release --lib pdp_admission_ -- --test-threads=1
+          cargo test --locked --release --lib la_accounting_ -- --test-threads=1
+          cargo test --locked --release --lib all_three_oracles_answer_every_target_identically -- --test-threads=1
+          cargo test --locked --release --lib undecomposable_targets -- --test-threads=1
+          cargo test --locked --release --lib cryptanalysis::crossbred::tests -- --test-threads=1
+          cargo test --locked --release --lib cryptanalysis::polynomial_reuse::tests -- --test-threads=1
           cargo test --locked --release --lib descent_
           cargo test --locked --release --lib rho_
           cargo build --locked --release --example ic_tournament_worker
