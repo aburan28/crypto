@@ -2,9 +2,9 @@
   "classification": "PUBLIC_SYNTHETIC_POINT_INPUT_LOG_RECOVERY",
   "frobenius_eigenvalue": 10244141222326,
   "independent_orbit_labels_verified": 23320,
-  "point_batch_query_ms_sum": 8386.746542,
-  "point_batch_reported_stage_ms": 9940.275207,
-  "point_batch_stdout_sha256": "fc114be294d5cab08c73c112426ed11b7b51e748af8b4935a936656dc8616229",
+  "point_batch_query_ms_sum": 3997.515751000001,
+  "point_batch_reported_stage_ms": 5556.989458,
+  "point_batch_stdout_sha256": "62e6dce32ab438cc18c8c3e279a5436291488b25bfe354052b93f02d9ed18186",
   "point_input_sha256": "41d23eda5bcceba8270bdf0fcc742a570006ff647ddaf8b4735140dcf43fffe8",
   "rows": [
     {
@@ -26,7 +26,7 @@
           1598375052617595
         ]
       ],
-      "query_ms": 331.501459,
+      "query_ms": 149.541041,
       "recovered_scalar": 11581252941738,
       "target_point": [
         1982694855789544,
@@ -53,7 +53,7 @@
           7472789308578171
         ]
       ],
-      "query_ms": 422.66337500000003,
+      "query_ms": 134.420833,
       "recovered_scalar": 2215619539842,
       "target_point": [
         3814408427910942,
@@ -80,7 +80,7 @@
           2708676946025653
         ]
       ],
-      "query_ms": 955.345959,
+      "query_ms": 537.0291659999999,
       "recovered_scalar": 10887195971549,
       "target_point": [
         8656445247397418,
@@ -107,7 +107,7 @@
           4610192838155011
         ]
       ],
-      "query_ms": 1752.567666,
+      "query_ms": 781.7267919999999,
       "recovered_scalar": 10471086462577,
       "target_point": [
         385816697747772,
@@ -134,7 +134,7 @@
           3391583356228363
         ]
       ],
-      "query_ms": 896.051,
+      "query_ms": 481.7345,
       "recovered_scalar": 16974525669279,
       "target_point": [
         1719622913306404,
@@ -161,7 +161,7 @@
           3691260247127963
         ]
       ],
-      "query_ms": 114.141125,
+      "query_ms": 75.73108400000001,
       "recovered_scalar": 5992595980692,
       "target_point": [
         3734049626420067,
@@ -188,7 +188,7 @@
           7590323606048348
         ]
       ],
-      "query_ms": 370.97466699999995,
+      "query_ms": 202.139667,
       "recovered_scalar": 12415941691194,
       "target_point": [
         7696494385511067,
@@ -215,7 +215,7 @@
           5121764167122126
         ]
       ],
-      "query_ms": 3543.4985,
+      "query_ms": 1635.191084,
       "recovered_scalar": 15916188630759,
       "target_point": [
         6578204329097284,
