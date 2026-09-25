@@ -8,7 +8,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PARENT = HERE.parent / 'symbolic_dag_fullpoint_20260925'
-sys.path.insert(0, str(PARENT))
+sys.path.append(str(PARENT))
 from dag import Dag, PackedModel, Relation, build_relation  # noqa: E402
 
 DIMACS_MAX_VAR = (1 << 31) - 1

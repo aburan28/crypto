@@ -10,7 +10,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 PARENT = HERE.parent / 'symbolic_dag_fullpoint_20260925'
-sys.path.insert(0, str(PARENT))
+sys.path.append(str(PARENT))
 from dag import PackedModel, build_relation  # noqa: E402
 
 O = (1, 0, 0)
@@ -125,25 +125,33 @@ def check_relation_cnf(relation, clauses: list[tuple[int, ...]],
 def parse_solver_output(output: str, variables: int, exit_code: int) -> tuple[str, list[int] | None]:
     states = []
     model_literals = []
+    terminated = False
     for line in output.splitlines():
         if line.startswith('s '):
             states.append(line[2:].strip())
         elif line.startswith('v '):
             tokens = line[2:].split()
-            if not tokens or tokens[-1] != '0':
-                raise ValueError('unterminated SAT model line')
-            model_literals.extend(int(token) for token in tokens[:-1])
+            if not tokens or terminated:
+                raise ValueError('empty or post-terminator SAT model line')
+            for token in tokens:
+                if terminated:
+                    raise ValueError('token after model terminator')
+                lit = int(token)
+                if lit == 0:
+                    terminated = True
+                else:
+                    model_literals.append(lit)
         elif line.startswith('c ') or line == 'c' or not line.strip():
             continue
         else:
             raise ValueError('unexpected solver output line')
-    if states == ['UNSATISFIABLE'] and exit_code == 20 and not model_literals:
+    if states == ['UNSATISFIABLE'] and exit_code == 20 and not model_literals and not terminated:
         return 'UNSAT', None
-    if states != ['SATISFIABLE'] or exit_code != 10:
-        raise ValueError('solver status/exit mismatch')
+    if states != ['SATISFIABLE'] or exit_code != 10 or not terminated:
+        raise ValueError('solver status/exit/model-terminator mismatch')
     assigned = [None] * variables
     for lit in model_literals:
-        if lit == 0 or abs(lit) > variables:
+        if abs(lit) > variables:
             raise ValueError('SAT model literal out of range')
         i = abs(lit) - 1
         if assigned[i] is not None:

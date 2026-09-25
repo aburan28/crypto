@@ -14,6 +14,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[3]
 PARENT = HERE.parent / 'symbolic_dag_fullpoint_20260925'
+ARCHIVED_CADICAL = ROOT / 'research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/panel/Q0T3-cadical.stdout'
 DOMAIN = 'k0-symbolic-dag-dimacs-gate-v1'
 SOURCES = ('PROTOCOL.md', 'INPUT.json', 'export.py', 'verify.py', 'bounded.py',
            'produce.py', 'run.py', 'ci_replay.py', 'third_party/drat-trim.c',
@@ -36,6 +37,9 @@ def check_freeze() -> dict:
     assert sha(PARENT / 'FROZEN.json') == frozen['parent_freeze_sha256']
     assert sha(PARENT / 'evidence/producer/rows.jsonl.gz') == frozen['parent_rows_sha256']
     assert inputs['parent_rows_sha256'] == frozen['parent_rows_sha256']
+    assert sha(ARCHIVED_CADICAL) == frozen['archived_cadical_sat_output_sha256']
+    for name, digest in frozen['preoutcome_failure_sha256'].items():
+        assert sha(HERE / 'preoutcome_failure_0' / name) == digest
     assert set(frozen['source_sha256']) == set(SOURCES)
     for name in SOURCES:
         assert sha(HERE / name) == frozen['source_sha256'][name], name
@@ -49,6 +53,26 @@ def check_freeze() -> dict:
     assert frozen['proof_byte_cap'] == 128 << 20
     if frozen['release_main_head'] is not None:
         assert len(frozen['release_main_head']) == 40
+    # Import the actual producer in hash-only CI; this catches parent/local
+    # module shadowing before the protected outcome run.
+    sys.path.insert(0, str(HERE))
+    import produce  # noqa: F401
+    from verify import parse_solver_output
+    assert parse_solver_output('s SATISFIABLE\nv 1 -2\nv 3 0\n', 3, 10) == ('SAT', [1, 0, 1])
+    assert parse_solver_output('s UNSATISFIABLE\n', 3, 20) == ('UNSAT', None)
+    archived_status, archived_model = parse_solver_output(ARCHIVED_CADICAL.read_text(), 1263, 10)
+    assert archived_status == 'SAT' and archived_model is not None and len(archived_model) == 1263
+    for bad in ('s SATISFIABLE\nv 1 -2 3\n',
+                's SATISFIABLE\nv 1 -2 3 0 0\n',
+                's SATISFIABLE\nv 1 -2 3 0 1\n',
+                's SATISFIABLE\nv 1 -2 1 0\n',
+                's SATISFIABLE\nv 1 -2 0\n'):
+        try:
+            parse_solver_output(bad, 3, 10)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('malformed SAT-model control accepted')
     return frozen
 
 
@@ -75,6 +99,15 @@ def check_evidence(receipt_path: Path, frozen: dict) -> dict:
     assert receipt['domain'] == DOMAIN
     assert receipt['freeze_sha256'] == sha(HERE / 'FROZEN.json')
     assert receipt['decision'] in ('PASS', 'FAIL_OR_CENSORED')
+    manifest_path = archive / 'MANIFEST.json'
+    assert sha(manifest_path) == receipt['manifest_sha256']
+    manifest = json.loads(manifest_path.read_text())
+    actual = {path.relative_to(archive).as_posix(): path for path in archive.rglob('*')
+              if path.is_file() and path.relative_to(archive).as_posix() not in ('receipt.json', 'MANIFEST.json')}
+    assert [row['path'] for row in manifest] == sorted(actual)
+    for row in manifest:
+        artifact = actual[row['path']]
+        assert artifact.stat().st_size == row['bytes'] and sha(artifact) == row['sha256']
     attempts = receipt['attempts']
     assert [item['phase'] for item in attempts] == ['toy', 'panel', 'n131'][:len(attempts)]
     for item in attempts:
@@ -84,11 +117,22 @@ def check_evidence(receipt_path: Path, frozen: dict) -> dict:
         result = archive / phase / 'result.json'
         if result.is_file():
             assert sha(result) == item['result_sha256']
+            parsed_result = json.loads(result.read_text())
+            assert item['reported_decision'] == parsed_result['decision']
+            assert item['reported_peak_rss_bytes'] == parsed_result['peak_rss_bytes']
+            assert item['reported_cpu_seconds'] == parsed_result['cpu_seconds']
     if receipt['decision'] != 'PASS':
         return {'decision': 'ARCHIVED_FAILURE_ONLY', 'phases': len(attempts)}
+    caps = {'toy': (frozen['toy_external_wall_cap_seconds'], frozen['toy_rss_cap_bytes']),
+            'panel': (frozen['panel_external_wall_cap_seconds'], frozen['panel_rss_cap_bytes']),
+            'n131': (frozen['n131_external_wall_cap_seconds'], frozen['n131_rss_cap_bytes'])}
     assert len(attempts) == 3 and all(item['exit_code'] == 0 and
                                      item['stop_reason'] is None and
-                                     item['reported_decision'] == 'PASS'
+                                     item['reported_decision'] == 'PASS' and
+                                     item['reported_peak_rss_bytes'] is not None and
+                                     item['reported_peak_rss_bytes'] <= caps[item['phase']][1] and
+                                     item['sampled_peak_rss_bytes'] <= caps[item['phase']][1] and
+                                     item['wall_seconds'] <= caps[item['phase']][0]
                                      for item in attempts)
     sys.path.insert(0, str(HERE))
     from verify import (ReferenceField, check_relation_cnf, evaluate_cnf,
@@ -141,12 +185,14 @@ def check_evidence(receipt_path: Path, frozen: dict) -> dict:
                 assert tuple(row['lifted']['r']) == lifted['r']
                 assert row['lifted']['lambda'] == lifted['lambda']
             else:
-                assert row['status'] == 'PROVED_UNSAT'
+                assert row['status'] == 'PROVED_UNSAT' and row['proof_text_valid'] is True
+                assert row['error'] is None
                 packed = archive / 'panel/proofs' / f'{name}.drat.gz'
                 assert sha(packed) == row['proof_gzip_sha256']
                 proof = temporary / 'proof.drat'
                 proof_bytes = gzip.decompress(packed.read_bytes())
-                assert len(proof_bytes) <= frozen['proof_byte_cap']
+                assert 0 < len(proof_bytes) <= frozen['proof_byte_cap']
+                assert b'\x00' not in proof_bytes and all(byte < 128 for byte in proof_bytes)
                 proof.write_bytes(proof_bytes)
                 checked = subprocess.run([str(checker), str(query), str(proof)],
                                          capture_output=True, timeout=180)
