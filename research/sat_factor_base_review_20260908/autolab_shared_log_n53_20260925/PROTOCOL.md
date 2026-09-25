@@ -23,3 +23,13 @@ Record fresh-process monotonic wall, user+system CPU, peak RSS, exit/timeout, ho
 Independently reconstruct every training relation/group witness, orbit label, rank transition and solved factor-base log, then each point relation and scalar `[d]G=Q`; separately compare with withheld validator labels. Independently replay every rho scalar on the same Q. Missing completions, wrong Q order, source drift, or any replay failure make that block invalid. A fixed-stream favorable observation needs all three paired blocks complete, conservative IC upper wall below each rho wall, and no operation/resource regression hidden by staging. A negative fixed-stream observation requires the IC **lower** wall above every rho wall. Anything between is inconclusive. Three blocks cannot establish a distributional or asymptotic crossover; report ratios and dispersion without generalizing to ECC2K-130.
 
 The first implementation commit and draft PR will precede all new target outcomes. Raw archives and failures must be durable in Git, with focused CI rechecking hashes and independent replay. Update the canonical scoreboard/ledger after measuring, coordinating with #747 and #753, and merge only after CI/review.
+
+## Frozen point-file digests
+
+All files below were committed before any new measured child run. The L32 file is byte-exactly the first 32 lines of its L128 file. `TARGET_MANIFEST.json` contains the withheld validator scalar schedule and its hash.
+
+| Block | Rho seed | L32 SHA-256 | L128 SHA-256 |
+| ---: | ---: | --- | --- |
+| 0 | 531320 | `680f9f7725e54ac857c2dac32aa215223abc32de51d60f19fbfad69c93574049` | `1ec6ca63fb81d6e4e07ec9d2a8e5389d02f25fb73f0fc56e3d5ccab85a59dd6f` |
+| 1 | 531321 | `f3a7de1bbcbf4f7a0f0dd5fa3908c1a7ef871802772b0405688ed1f135c6d020` | `d4cd94396d04d755e4eb6a3f4f550da329769ee6b42a1020fc95615c80c9df55` |
+| 2 | 531322 | `c4f92e7391276f1d6ded2fa711f82fef445b4a8eee0ae5449d5084ab6f1fdbdc` | `1b3d3a0d9ed59f6f5f96ec0eff80776ee00f75a47ce07e4abfeb95cbf9d61a22` |
