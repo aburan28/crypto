@@ -304,6 +304,52 @@ existing EC2 key-pair name **`meow34`** when launching the instance.
   accessible, report that access blocker and continue with non-SSH work where
   possible.
 
+### 10. Performance work starts from a clean, recorded baseline
+
+A speedup is a comparison, so it is only as good as the baseline and the
+conditions both sides ran under.  Before changing code for speed:
+
+- **Record the baseline and the host.** Build the unmodified revision and
+  keep the binary.  Record the commit, `rustc --version`, the CPU model and
+  its relevant features (for example `popcnt`, `avx2`, `avx512*`,
+  `pclmulqdq`, NEON/`aes`), the logical core count, memory, OS and
+  architecture, and the exact benchmark command and inputs.  A number
+  without its host is not a baseline.
+- **Pin the output, not just the time.** Every run must show identical
+  results and counted units (fingerprints, digests, counters) between
+  baseline and candidate.  A faster run that decides anything differently
+  is a different algorithm, not a speedup.
+- **Account for contention.** Check the load average and running processes
+  before and after (`uptime`, `top`).  Do not benchmark while builds, test
+  suites, other agents' jobs or other workers share the machine; if the
+  host is shared or virtualised (cloud containers, CI runners), expect
+  ±5–10% wall noise and say so.  Fix the thread count explicitly
+  (`RAYON_NUM_THREADS`, `taskset`) when comparing, and report it.
+- **Measure the noise floor, then interleave.** Run the baseline against a
+  copy of itself (A/A) to see the spread, then alternate baseline and
+  candidate (ABAB…, at least five rounds) and report median and minimum.
+  A difference inside the A/A spread is not a result.  Where wall time is
+  noisy, add a deterministic measure beside it: instruction counts
+  (`valgrind --tool=callgrind`) or the repository's counted units.
+- **Watch for one-time costs.** Thread-pool start-up, page faults, lazy
+  statics and cold caches land on whichever case runs first; do not charge
+  them to that case's algorithm.
+- **Measure parallel changes at one thread and at many.** A multi-core gain
+  must not regress `RAYON_NUM_THREADS=1`, and the core count of the host
+  bounds what the result says about any other host.
+- **Say which hardware class a result covers.** This code is meant to run
+  well on a diverse set of targets: Linux x86-64 (whose baseline target has
+  no `popcnt` or AVX2 unless dispatched at runtime), Arm64 (Apple silicon,
+  Graviton), GPUs (CUDA; Metal on Apple silicon; see §9 for the AWS hosts)
+  and, prospectively, FPGAs.  A result holds for the class it was measured
+  on; name it, and name the classes it was not measured on rather than
+  implying them.  Use runtime feature detection with a portable fallback
+  instead of global `target-cpu` flags, and report a gain on one class that
+  costs another per class.
+- **Keep the evidence.** The PR states the host manifest, the A/A spread,
+  the A/B table with identical-output checks, and the changes that were
+  tried and rejected with their numbers.
+
 ## Worked example
 
 `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
