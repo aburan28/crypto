@@ -1,0 +1,16 @@
+{
+  "accepted_archive_sha256": "bef32e5d3993fe0a6cb5cc6be7c92b8b094cbaa24ff01031400d3f7e3df583b6",
+  "accepted_panel_sha256": "0ed1b0a86e28070c58a892e918aae73be33e088220f684b254751ea5c298c6ce",
+  "classification": "POST_OUTCOME_ARCHIVE_VERIFIER_ONLY_CORRECTION",
+  "corrected_checker_path": "verify_archive.py",
+  "corrected_checker_sha256": "6688cbe47bfd8db4f48b0c2a2734901778c1a97c20c8e2a100279b47c5e0d518",
+  "correction": "Use a separate exact 40-hex Git commit regex for checkout_head; keep 64-hex SHA-256 validation for file digests.",
+  "failed_predicate": "A SHA-256 64-hex validator was incorrectly applied to 40-hex Git checkout_head in archived panel and per-stage manifests.",
+  "failed_run_head": "57e6d323b39165079323b496be2d3421dc017996",
+  "failed_run_url": "https://github.com/aburan28/crypto/actions/runs/36128714271",
+  "frozen_checker_path": "verifier_amendment_1/verify_archive_original.py",
+  "frozen_checker_sha256": "e9dff53970c09e007e42f86cdcfbd4d999641d51e0bd250064537aa61fb6343b",
+  "measured_children_rerun": false,
+  "measured_producer_source_and_inputs_unchanged": true,
+  "schema_version": "1"
+}
