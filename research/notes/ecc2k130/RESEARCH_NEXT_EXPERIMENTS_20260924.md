@@ -81,7 +81,7 @@ Record a machine-readable manifest and exact rerun command with each PR.
    complete group-law four-sum oracle to its compact extractor on fresh
    disjoint targets in all three tested bases. PR #762 then passes the exact
    n=13 rotated m=5/6 support gate and samples n=131 lift density; it does
-   not solve an n=131 PDP. PR #763 audits the direct S5/S6 solver interfaces
+   not solve an n=131 PDP. PR #763 audits the direct S6/S7 solver interfaces
    and requires a multiword/streaming exporter with group-law validation.
    Prioritize that corpus and bounded implicit memory/work gate; retain the
    n=131 materialized four-sum no-go. PR #754 completed L32/L128 true shared

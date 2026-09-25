@@ -53,7 +53,7 @@ Equal aggregate counts therefore do not mean that the same targets were
 chosen twice. The exact m=5 rotated miss sets contain 412 targets each,
 with only 66 common misses. Both m=6 rotated rows have *zero* projected
 negative H targets, so this n=13 panel cannot supply a negative-instance
-S6 refutation benchmark. For beta=7/m=6, all 8,012 full-curve points occur
+S7 refutation benchmark. For beta=7/m=6, all 8,012 full-curve points occur
 as sums; for beta=3/m=6, 6,307 full points occur, yet projection still
 covers all H targets. The four torsion shifts are essential: for
 beta=3/m=5, raw H support is 404 but `[4]`-projected H support is 1,591.
