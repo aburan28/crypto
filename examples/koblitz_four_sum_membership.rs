@@ -54,19 +54,29 @@ fn emit_pairs(
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    assert_eq!(args.len(), 4, "usage: koblitz_four_sum_membership BASE_JSON TARGET_JSONL COUNT");
-    let base: Value = serde_json::from_slice(&fs::read(&args[1]).expect("base file"))
-        .expect("base header JSON");
+    assert_eq!(
+        args.len(),
+        4,
+        "usage: koblitz_four_sum_membership BASE_JSON TARGET_JSONL COUNT"
+    );
+    let base: Value =
+        serde_json::from_slice(&fs::read(&args[1]).expect("base file")).expect("base header JSON");
     let n = base["n"].as_u64().expect("n") as u32;
     let r = base["orbit_columns"].as_u64().expect("R") as usize;
     assert!(matches!((n, r), (37, 3) | (41, 8) | (41, 12)));
     assert_eq!(base["a"].as_u64(), Some(0));
     let source = KoblitzCurve::new(0, n).expect("Koblitz toy curve");
     let field = FastBinaryCurve::new(&source.curve.irreducible, 0).expect("single-word curve");
-    assert_eq!(source.subgroup_order.to_string(), base["subgroup_order"].to_string().trim_matches('"'));
-    let points_raw: Vec<[u64; 2]> = serde_json::from_value(base["factor_base_point_coordinates"].clone())
-        .expect("base points");
-    assert_eq!(points_raw.len(), base["factor_base_points"].as_u64().unwrap() as usize);
+    assert_eq!(
+        source.subgroup_order.to_string(),
+        base["subgroup_order"].to_string().trim_matches('"')
+    );
+    let points_raw: Vec<[u64; 2]> =
+        serde_json::from_value(base["factor_base_point_coordinates"].clone()).expect("base points");
+    assert_eq!(
+        points_raw.len(),
+        base["factor_base_points"].as_u64().unwrap() as usize
+    );
     assert!(points_raw.len() <= u16::MAX as usize);
     let points: Vec<FastPoint> = points_raw.into_iter().map(|[x, y]| Some((x, y))).collect();
     let mut unique_points = BTreeSet::new();
@@ -80,8 +90,10 @@ fn main() {
     }
     let requested: usize = args[3].parse().expect("target count");
     assert!(requested > 0 && requested <= 512);
-    let targets: Vec<[u64; 2]> = fs::read_to_string(&args[2]).expect("target file")
-        .lines().filter(|line| !line.is_empty())
+    let targets: Vec<[u64; 2]> = fs::read_to_string(&args[2])
+        .expect("target file")
+        .lines()
+        .filter(|line| !line.is_empty())
         .take(requested)
         .map(|line| serde_json::from_str(line).expect("target [x,y]"))
         .collect();
@@ -111,22 +123,28 @@ fn main() {
         histogram
     };
     assert_eq!(buckets.values().map(Vec::len).sum::<usize>(), pair_entries);
-    println!("{}", json!({
-        "kind":"complete_four_sum_header", "schema_version":"1.0", "n":n, "R":r,
-        "factor_base_points":points.len(), "target_count":targets.len(),
-        "pair_entries":pair_entries, "unique_pair_sums":sums.len(),
-        "pair_collisions":pair_entries-sums.len(),
-        "infinity_pair_entries":buckets.get(&None).map_or(0, Vec::len),
-        "bucket_histogram":bucket_histogram,
-        "pair_build_ms":pair_build_ms,
-        "algorithm":"all i<=j pairs; all distinct sum complements; exact group law; repeated indices and infinity retained"
-    }));
+    println!(
+        "{}",
+        json!({
+            "kind":"complete_four_sum_header", "schema_version":"1.0", "n":n, "R":r,
+            "factor_base_points":points.len(), "target_count":targets.len(),
+            "pair_entries":pair_entries, "unique_pair_sums":sums.len(),
+            "pair_collisions":pair_entries-sums.len(),
+            "infinity_pair_entries":buckets.get(&None).map_or(0, Vec::len),
+            "bucket_histogram":bucket_histogram,
+            "pair_build_ms":pair_build_ms,
+            "algorithm":"all i<=j pairs; all distinct sum complements; exact group law; repeated indices and infinity retained"
+        })
+    );
 
     let mut query_pairs: Vec<(FastPoint, FastPoint)> = Vec::with_capacity(CHUNK);
     for (index, &[x, y]) in targets.iter().enumerate() {
         assert!(x < (1 << n) && y < (1 << n));
-        assert_eq!(field.gf.sqr(y) ^ field.gf.mul(x, y),
-                   field.gf.mul(field.gf.sqr(x), x) ^ 1, "off-curve target");
+        assert_eq!(
+            field.gf.sqr(y) ^ field.gf.mul(x, y),
+            field.gf.mul(field.gf.sqr(x), x) ^ 1,
+            "off-curve target"
+        );
         let target = Some((x, y));
         let query_start = Instant::now();
         let mut tuples: BTreeSet<[u16; 4]> = BTreeSet::new();
@@ -137,7 +155,9 @@ fn main() {
             query_pairs.extend(chunk.iter().map(|&sum| (target, FastBinaryCurve::neg(sum))));
             let complements = add_many(&field, &query_pairs);
             for (&sum, remainder) in chunk.iter().zip(complements) {
-                let Some(right_pairs) = buckets.get(&remainder) else { continue };
+                let Some(right_pairs) = buckets.get(&remainder) else {
+                    continue;
+                };
                 let left_pairs = &buckets[&sum];
                 matched_sum_complements += 1;
                 matched_pair_partition_products += (left_pairs.len() * right_pairs.len()) as u64;
@@ -151,19 +171,24 @@ fn main() {
             }
         }
         for tuple in &tuples {
-            let actual = tuple.iter().fold(None, |acc, &i| field.add(acc, points[i as usize]));
+            let actual = tuple
+                .iter()
+                .fold(None, |acc, &i| field.add(acc, points[i as usize]));
             assert_eq!(actual, target, "witness group law mismatch");
         }
         let witnesses: Vec<_> = tuples.into_iter().collect();
-        println!("{}", json!({
-            "kind":"complete_four_sum_target", "index":index, "target":encoded(target),
-            "member":!witnesses.is_empty(), "distinct_four_multisets":witnesses.len(),
-            "matched_sum_complements":matched_sum_complements,
-            "matched_pair_partition_products":matched_pair_partition_products,
-            "duplicate_partition_products":matched_pair_partition_products - witnesses.len() as u64,
-            "unique_sum_probes":sums.len(), "lookup_count":sums.len(),
-            "witnesses":witnesses,
-            "query_ms":query_start.elapsed().as_secs_f64() * 1000.0
-        }));
+        println!(
+            "{}",
+            json!({
+                "kind":"complete_four_sum_target", "index":index, "target":encoded(target),
+                "member":!witnesses.is_empty(), "distinct_four_multisets":witnesses.len(),
+                "matched_sum_complements":matched_sum_complements,
+                "matched_pair_partition_products":matched_pair_partition_products,
+                "duplicate_partition_products":matched_pair_partition_products - witnesses.len() as u64,
+                "unique_sum_probes":sums.len(), "lookup_count":sums.len(),
+                "witnesses":witnesses,
+                "query_ms":query_start.elapsed().as_secs_f64() * 1000.0
+            })
+        );
     }
 }

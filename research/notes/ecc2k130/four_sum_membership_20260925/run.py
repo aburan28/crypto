@@ -18,7 +18,7 @@ REPO = HERE.parents[3]
 SWEEP = HERE.parent / "compact_base_sweep_20260925"
 COMPACT = REPO / "target/release/examples/koblitz_s5_sat_instance"
 ORACLE = REPO / "target/release/examples/koblitz_four_sum_membership"
-ORACLE_SOURCE_SHA = "1cf5e4d55d928ccb0609e9763727fb5a942b7674a91f87cae96263316e504687"
+ORACLE_SOURCE_SHA = "6185018d17e9541245456ffbfec2df36630fe5a4d7e47e8f638ff59f072bdd8a"
 COMPACT_SOURCE_SHA = "c2bc8b05087df69bef9593363e9d7c112e843ef16da122da50eb29ab22115f09"
 BASE_HASHES = {
     (37, 3): "2722f3c7271ea410e47ff9d20b67496a9a28120804f8b790e0729d8c86ea6ddb",
@@ -75,6 +75,9 @@ def run(args: argparse.Namespace) -> None:
     manifest = {"schema_version": "1.0", "mode": args.mode,
                 "n": n, "R": r, "count": count,
                 "source_pr747_commit": "fc27150df3238b6863ed5618c721e7fd8b6ce403",
+                "source_input_freeze_commit": "12d2e489de77dc633f02df47de2debf865a3f301",
+                "budget_amendment_commit": "4d1b48634d559e38369e85936f5c7a2190e24323",
+                "runner_sha256": sha(Path(__file__).read_bytes()),
                 "checkout_commit": subprocess.check_output(["git", "rev-parse", "HEAD"],
                                                            cwd=REPO, text=True).strip(),
                 "protocol_sha256": sha((HERE / "PROTOCOL.md").read_bytes()),

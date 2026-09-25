@@ -51,6 +51,12 @@ pair-partition counts, exact witness tuples, probe count and hash-table lookup
 count. Canonical sorted four-tuples count distinct multiset decompositions,
 while pair matches may count partitions more than once.
 
+The frozen oracle source is `examples/koblitz_four_sum_membership.rs`,
+SHA-256 `6185018d17e9541245456ffbfec2df36630fe5a4d7e47e8f638ff59f072bdd8a`
+after a formatting-only pre-outcome amendment. The previous commit retained
+source SHA-256 `1cf5e4d55d928ccb0609e9763727fb5a942b7674a91f87cae96263316e504687`;
+no frozen-stream outcome had been run when rustfmt and the runner pin changed.
+
 Use the repository's single-word `FastBinaryCurve::batch_add` for pair
 construction and complement probes; independent replay uses the separate
 Python `Curve` group formulas from #737 with a cross-checked polynomial-Euclid
