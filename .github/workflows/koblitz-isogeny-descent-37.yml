@@ -27,8 +27,7 @@ jobs:
           su - sage -c "sage -python '$GITHUB_WORKSPACE/research/koblitz_isogeny_descent_37_20260925/experiment.py' --output '$RUNNER_TEMP/koblitz-37-run'"
       - name: Verify saved evidence
         run: |
-          python3 research/koblitz_isogeny_descent_37_20260925/verify.py \
-            "$RUNNER_TEMP/koblitz-37-run"
+          su - sage -c "sage -python '$GITHUB_WORKSPACE/research/koblitz_isogeny_descent_37_20260925/verify.py' '$RUNNER_TEMP/koblitz-37-run'"
       - name: Retain raw run and summary
         uses: actions/upload-artifact@v4
         with:
