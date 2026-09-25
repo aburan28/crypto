@@ -15,9 +15,10 @@ records from the frozen source, base census and workload. They report one-target
 online native time first and retain supplementary complete cold costs. Only the
 prepared optimized `pair_table` / `tiny_gauss` / `subgroup_orbits` producer is
 currently admitted. Other implemented engines remain proposals until their stage
-adapters are qualified. Comparative IC/rho reference qualification and the
-familywise confirmation protocol remain gates; new contracts cannot promote on
-admission evidence alone. Follow the [goal checkpoint](goal_20260924/STATUS.md).
+adapters are qualified. The [archived IC/rho reference panel](goal_20260924/reference-qualification/README.md)
+has executed; bind its audited sources/settings and the familywise confirmation
+protocol before an improvement round. New contracts cannot promote on admission
+evidence alone. Follow the [goal checkpoint](goal_20260924/STATUS.md).
 
 ## What was reviewed and corrected
 
@@ -185,6 +186,12 @@ before their sealed source artifacts enter the single-host qualification job.
 `qualify_references.py` only orchestrates the existing tournament CLI. Audit the
 result with its frozen `evaluator/tournament.py verify --round ...`; the verifier
 recomputes the reference selection as well as the individual certificates.
+
+The retained [five-cell results](goal_20260924/reference-qualification/README.md)
+select `pairinv` for IC, `rho_incumbent_4` for rho cold instructions and
+`rho_pairinv_4` for rho online time. Keep both rho settings. Strict replay of the
+frozen floating summaries uses Linux/Python 3.12; the report documents the two
+one-ULP macOS differences without relaxing exact comparisons.
 
 Reference selection uses development data. It does not substitute for the fresh
 60-target confirmation panel or the familywise rule required by the active goal.
