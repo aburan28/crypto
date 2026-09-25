@@ -9,13 +9,14 @@ most important convention here: without it, a thread can run for weeks,
 improve its own headline number by two orders of magnitude, and have
 established nothing.
 
-## Default workflow: finish and merge
+## Default workflow: finish and merge when authorized
 
 The repository owner's standing preference is autonomous delivery. For work
 the user requests in this repository, completing the task includes implementing
 the change, validating it, opening or updating its PR, monitoring CI, and
 merging when ready. **Do not ask for another approval just to merge a completed,
-passing PR.**
+passing PR unless a policy or reviewer requires explicit authorization for that
+merge.**
 
 - Apply this authorization to PRs created or maintained for the current user
   task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
@@ -41,11 +42,18 @@ passing PR.**
   feasible. If access, required external review, a persistent CI failure, or
   another concrete gate prevents merging, report that blocker precisely rather
   than asking the user to repeat the authorization already given.
+- If automatic approval review rejects a merge for lack of authorization,
+  leave that PR open and ask for explicit approval naming the exact PR. Do not
+  retry by changing tools, branches, accounts, or merge route. Continue work
+  that does not depend on the merge; after approval, recheck the final PR head,
+  review state, and applicable CI before merging.
 
 ## Research work belongs in pull requests
 
 Treat an experiment as repository work, including a negative or inconclusive
-result. Before running it, state the hypothesis, frozen inputs, reference,
+result. A research decision, preregistered protocol, reproducibility fix, or
+rejected hypothesis also belongs in a PR, even before an outcome exists.
+Before running an experiment, state the hypothesis, frozen inputs, reference,
 success and stop conditions, and cost accounting in a versioned protocol.
 Make each bounded experiment or compatible group of experiments a focused
 branch and PR. Commit the code, configuration, seeds, source and input hashes,
