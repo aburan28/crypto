@@ -17,10 +17,34 @@ row prices a decomposition end to end, so there is no `S` and no scoreboard row.
 ```sh
 # the compact-basis build against round 2: every row and every trace step
 python3 research/pkm_tower_round3_20260925/compare_builds.py
+# every finished round-3 row against exhaustive search over V^m
+python3 research/pkm_tower_pilot_20260924/verify.py research/pkm_tower_round3_20260925/runs/*.jsonl
+# tables, repeats, planted solutions and confirmation runs, with the pilot and round 2
+python3 research/pkm_tower_pilot_20260924/analyze.py \
+    research/pkm_tower_pilot_20260924/runs/*.jsonl \
+    research/pkm_tower_round2_20260925/runs/*.jsonl \
+    research/pkm_tower_round3_20260925/runs/*.jsonl
 ```
 
-The CI workflow `.github/workflows/pkm-tower-pilot.yml` runs it, with the
-pilot's and round 2's checks and the engine's unit tests.
+The CI workflow `.github/workflows/pkm-tower-pilot.yml` runs all three, with
+the pilot's and round 2's checks and the engine's unit tests.
+
+## Round 3 (note §12.4)
+
+`run_round3.sh` ran the cell from 14:49 to 16:40 UTC on 2026-09-25. That was
+after the identity check below had passed, with the example built from the
+pre-registration commit (hashes under "Builds"). `progress.txt` records the
+start, end and exit status of each run. Unlike round 2's, these exit codes are
+read before anything else runs.
+
+| file | cell | what happened |
+|:--|:--|:--|
+| `runs/M4b-kummer-m4-p1-N16` | Kummer, `m = 4`, `p₁`, `N = 16`: round 2's two M4 targets, 14,400 s budget, 14 GB address-space cap, `--max-nnz 2000000000`, `--trace` | Both systems refuted at `D = 7`, in 53 steps each (55.5 and 55.6 minutes). The widest step had 76,837 columns, and the process peaked at 8.06 GB. Target 0's first 48 steps repeat D2's trace. The two targets' traces agree on every count they print |
+| `runs/C-M4b-kummer-m4-p1-N16` | the same cell with the degree bound at 6 (`--cap 6`) | Both systems end after 11 steps with 1,205 pairs above the bound, without refuting and without a staircase stop: confirmed |
+
+Each `.log` holds one trace line per step, printed as the step ended. The line
+gives the step's shape, times, `B'`'s entries, the kept basis elements and their
+entries, and the process's resident memory and its peak so far.
 
 ## The change (note §12.1)
 

@@ -40,3 +40,7 @@
 2026-09-25T14:14:14Z start pair_memory.py (note §12.2): baseline sha256 623655a3…, candidate sha256 ae387b05…
 2026-09-25T14:48:38Z end pair_memory.py: pairs agree
 2026-09-25T14:49:00Z start M4b-kummer-m4-p1-N16: --engine tower --p 2013265921 --kinds kummer --m 4 --controls tower --t-min 4 --max-t-m4 4 --planted 0 --random 2 --ladder-t none --budget 14400 --max-nnz 2000000000 --trace
+2026-09-25T16:40:09Z end M4b-kummer-m4-p1-N16 exit 0
+2026-09-25T16:40:09Z start C-M4b-kummer-m4-p1-N16: --engine tower --p 2013265921 --kinds kummer --m 4 --controls tower --t-min 4 --max-t-m4 4 --planted 0 --random 2 --ladder-t none --budget 14400 --max-nnz 2000000000 --trace --cap 6
+2026-09-25T16:40:10Z end C-M4b-kummer-m4-p1-N16 exit 0
+2026-09-25T16:40:10Z round 3 done

@@ -25,10 +25,16 @@ pilot (§10, 2026-09-24).
   - At `m = 3` it reaches 7 at `N = 15`.
   - Whether it grows linearly in `N` is not decided. `m = 4` ran out of
     memory at `N = 16`, where a diagnostic gives only `D ≥ 7`.
-- **Round 3 (§12, 2026-09-25) is pre-registered.** It makes a memory-only change
-  to the engine: the basis keeps the echelon's rows. It checks that the change
-  reproduces round 2 exactly, then runs `m = 4` at `N = 16`. §12.3 discloses a
-  profiling run of that system.
+- **Round 3 (§12, 2026-09-25) changes the engine's memory, and nothing else.**
+  - The basis keeps the echelon's rows. The new build reproduces round 2 exactly
+    (355 rows, every trace step) at 0.51–0.69 of its peak memory.
+  - With it, `m = 4` at `N = 16` finishes: **`D = 7` on both targets**, the same
+    as at `N = 12`, and capped re-runs confirm it. That is one level without a
+    rise: it fits slow growth and closes nothing (A1: inconclusive).
+  - Each system took 55 minutes and at most 8.1 GB. From `N = 12` the width grew
+    8 times and the multiply-adds 316 times.
+  - §§12.1–12.6 were pre-registered before the runs, and §12.3 discloses a
+    profiling run made before them.
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -1698,6 +1704,174 @@ today. Its log is `profile/profile-kummer-m4-p1-N16.log`.
 
   A run that the machine ends, not the engine, may be re-run once, and is
   reported as such.
+
+### 12.7 Results
+
+**The identity check passed** (§12.2).
+- **Replay.** The new build reproduced every row of round 2 and its cross-check
+  that it re-ran: 355 of 355, identical on every field but the wall clock, with
+  none missing. That covers the multiply-add counts, the nonzeros and the
+  residue sizes. 106 of 106 trace steps are identical on every field round 2
+  printed: D1, the replayed M4 system at `N = 12` against D1, and K0's target 0
+  against both of round 2's profiling traces.
+- **A restart.** The machine restarted during one confirmation run of the
+  replay (`C-K1`, `N = 22`), which had written no row. The script was started
+  again, skipping the runs that had ended, and that run was repeated whole.
+  `progress.txt` records it, and the README gives the details.
+- **Paired runs.** The round-2 build and the new one agree on all four paired
+  systems. The new build's peak resident memory is 0.51–0.69 times the old one's:
+
+  | system (target 0) | round-2 build | new build | ratio |
+  |:--|--:|--:|--:|
+  | K0: Kummer, `m = 2`, `p₀`, `N = 20` | 668 MB | 463 MB | 0.69 |
+  | D1: Kummer, `m = 4`, `p₁`, `N = 12` | 338 MB | 171 MB | 0.51 |
+  | M3: Kummer, `m = 3`, `p₁`, `N = 15` | 1,738 MB | 1,084 MB | 0.62 |
+  | K1: Kummer, `m = 2`, `p₁`, `N = 22` | 2,213 MB | 1,523 MB | 0.69 |
+
+- **D2's steps.** M4b's target 0 repeated D2's 48 steps exactly (§12.4).
+
+**M4b: Kummer, `m = 4`, `p₁`, `N = 16`.** Both systems refuted, at `D = 7`, and their
+traces agree step for step on every count they print. Their multiply-adds
+differ by 36,212 of 2.7·10¹³, from coefficients that cancel in one system and
+not in the other.
+
+| target | `D` | verdict | steps | width | largest step, rows | F4 time | peak memory | `verify.py` |
+|--:|--:|:--|--:|--:|--:|--:|--:|:--|
+| 0 | **7** | refuted | 53 | 76,837 | 111,137 | 55.5 min | 8.06 GB | agrees |
+| 1 | **7** | refuted | 53 | 76,837 | 111,137 | 55.6 min | at most 8.06 GB | agrees |
+
+How target 0 refutes (its trace, one line per step, in the round's `runs/`):
+- **Degree 7 early, then a long run at 7.** Steps 1–11 climb from degree 4 to 6.
+  Step 12 reaches degree 7, and steps 12–49 all stay at 7. These are the 48
+  steps D2 showed, plus step 49.
+- **Step 49 is the step round 2 could not finish.** It has 31,902 S-rows, 18,903
+  reducers and 10,551 promoted rows over 76,463 columns, 47,009 of them without
+  a divisor. Its `B'` has 1.1·10⁹ entries.
+  - It took 23.7 minutes and gave 16,552 new elements, the lowest of degree 5.
+  - That leaves 259,875 pending pairs, and F4 goes back to degree 6.
+- **Four steps at degree 6 close the system.**
+  - Steps 50–52 have 2,064, 2,250 and 7,015 S-rows over about 39,000 columns,
+    and every residue is a new element.
+  - Step 53 has 82,738 S-rows (63,701 critical and 19,037 tower pairs) over
+    38,060 columns. Their residues have full rank on the 9,661 columns without
+    a divisor: 9,661 new elements, one of them `1`.
+  - 73,077 of step 53's S-rows reduce to zero, 88%.
+- **This is the shape of `N = 12`, stretched** (D1). There, one step reaches
+  degree 7 (step 16) and 13 steps at degree 6 follow. The last of them has 7,440
+  S-rows over 9,452 columns, and its residues have full rank on the 3,130
+  columns without a divisor, `1` among them.
+- **Memory.** Target 0 peaked at 8.06 GB, against the 14 GB cap that round 2's
+  build could not stay under. At the end, the basis kept 39,185 elements with
+  1.04·10⁹ entries, 4.2 GB.
+
+**From `N = 12` to `N = 16` at `m = 4`** (target 0 at both sizes):
+
+| | `N = 12` | `N = 16` | ratio |
+|:--|--:|--:|--:|
+| `D` | 7 | 7 | 1 |
+| steps | 29 | 53 | 1.8 |
+| width (columns) | 9,452 | 76,837 | 8.1 |
+| rows, largest step | 13,762 | 111,137 | 8.1 |
+| nonzeros, largest step | 3.0·10⁷ | 1.09·10⁹ | 36 |
+| multiply-adds | 8.5·10¹⁰ | 2.7·10¹³ | 316 |
+| F4 time (practicality note) | 9.4 s | 55.5 min | 355 |
+
+**Confirmation.** The cell was re-run whole with the degree bound at 6
+(`C-M4b`). Both systems ended after 11 steps with 1,205 pairs above the bound,
+without refuting and without a staircase stop. Degree 6 does not suffice, and
+`analyze.py`'s confirmation table marks both as confirmed.
+
+**Exhaustive check.** `verify.py` confirms the verdict of every finished M4b row
+against a search of all `16⁴ = 65,536` tuples of `V⁴`.
+
+**One change to `analyze.py` (accounting).** Before this round, a system measured
+twice counted as the copy read first, even when that copy had timed out and
+another had finished. Now a finished copy stands for the system, and its `D` must
+not fall below the bound of the copy that stopped. Two systems are affected.
+- M4b's target 0 replaces D2's timed-out row, and its `D = 7` is not below D2's
+  bound of 7.
+- The pilot's Kummer null at `N = 16` under `f4_fp` timed out, then finished in
+  its staircase-stop re-run (R2 of the pilot). §11.2 counted it separately. It
+  now counts, so the two engines are compared on 270 systems, not 269. The
+  verdict agrees on all 270 and `D` on 242, not 241.
+- No other output of the pilot's or round 2's data changes.
+
+### 12.8 The rule of §12.6, applied
+
+**The predictions of §12.5.**
+
+| | prediction | outcome |
+|:--|:--|:--|
+| 1 | the replay and the paired runs reproduce round 2 | held: 355/355 rows, 106/106 trace steps, 4/4 pairs, and D2's 48 steps |
+| 2 | the new build's peak is lower on every pair; both M4b systems get through step 49 under 14 GB | held: 0.51–0.69 on all four pairs; both systems ran in at most 8.06 GB |
+| 3 | `D = 7` on both targets, both refuting at degree 7 | held, read as below: `D = 7` on both, and both refuted |
+| 4 | both targets give the same `D`, width and step count | held: the same `D`, width (76,837) and step count (53), and the same trace, count for count |
+
+On prediction 3, read strictly:
+- No step went above degree 7, and both systems refuted, so `D = 7` held.
+- The step that found `1` was at degree 6, after the run had reached 7, as at
+  `N = 12`.
+- The prediction's words "refute at degree 7" also allow the reading that `1`
+  comes from a degree-7 step. Under that reading it did not hold.
+
+**A1 for the Kummer `m = 4` line at `p₁`.**
+- The line has `N = 8, 12, 16` and `D` = 6, 7, 7.
+- The final plateau is `L = 4`, and the upper half (`N = 12`–16) has no rise:
+  **inconclusive**, the reading §12.6 fixed for this outcome.
+- `analyze.py` prints the same verdict: "inconclusive (only 3 values of `N`)".
+  Its leave-one-`N`-out slopes run from 0 to 0.25.
+- As §12.6 said in advance, no round-3 outcome could give H1a.
+
+**For §3.7**, as §12.6 stated before the runs: `D = 7` at `N = 16` is one level
+without a rise at `m = 4`. That fits slow growth and closes nothing.
+
+### 12.9 What round 3 shows, and what it does not
+
+It shows three things.
+1. **The compact basis changes memory and nothing else.** Every row and trace of
+   round 2 comes out the same, peaks fall to 0.51–0.69 of the old ones, and the
+   `m = 4`, `N = 16` system that ran out of 14 GB now runs in 8.1 GB.
+2. **At `m = 4` the solving degree does not rise from `N = 12` to `N = 16`**:
+   `D = 7` on both targets, and the capped re-runs confirm the degree-7 steps.
+3. **The refutation keeps its shape.** It reaches the top degree, falls back to
+   degree 6, and closes in one step. In that step the S-rows jump by an order
+   of magnitude, and their residues have full rank on the columns without a
+   divisor.
+
+It does not show three things.
+1. **Whether `D` stays at 7 for larger `N` at `m = 4`.**
+   - One level without a rise fits a bounded `D`. It equally fits slow growth,
+     such as the one rise per 8 in `N` seen at `m = 2`.
+   - The next point is `N = 20`. From `N = 12` to 16 the width grew 8 times and
+     the multiply-adds 316 times. If that repeated (an extrapolation from two
+     sizes), `N = 20` would be far beyond this machine.
+2. **That a bounded `D` makes the oracle cheap.**
+   - At a constant `D = 7`, adding 4 levels still multiplied the work by 316 at
+     these sizes.
+   - §3.6 counts a bounded `D` as polynomial in `N`. The number of monomials of
+     degree 7 grows like `N⁷`, and elimination costs a power of the width, so
+     that polynomial's degree is large. That is an argument, not a
+     measurement: this round measures no exponent for it.
+3. **Any speed, `S` or scoreboard row.** Nothing is priced end to end
+   (`AGENTS.md` §2).
+
+### 12.10 Next steps, ranked
+
+1. **Skip the zero reductions before growing `N`.**
+   - In step 53, 88% of the S-rows reduced to zero, and in step 49, 48%.
+   - Signature-based criteria (F5 or GVW) are the lever §11.10 named. Their
+     solving degree must be checked against this engine's before they measure
+     anything new.
+   - `m = 4` at `N = 20` probably needs that lever, or a machine with several
+     times this one's memory.
+2. **`m = 3` at `N = 18`.** Round 2 stopped both systems at the `--max-nnz` cap
+   of `2·10⁹`, which bounds a step's nonzeros and its `B'`, before memory ran
+   out. With the compact basis a raised cap may fit. That would give the
+   `m = 3` line a fourth size, the first line at `m ≥ 3` that A1 can read.
+3. **`m = 2` at `N = 28`**, the next rise the "every four levels" pattern
+   predicts (§11.9–11.10).
+4. **Replicate** `D = 6` at `m = 2`, `N = 20`, and `D = 7` at `m = 4`, `N = 16`,
+   with an independent Gröbner engine.
 
 ---
 
