@@ -30,6 +30,7 @@ def check_freeze() -> dict:
     for name, expected in frozen["parent_sha256"].items():
         assert sha((PDP if name.startswith("pdp/") else SUBSPACE) / name.split("/", 1)[1]) == expected, name
     assert sha(PDP / "evidence" / "raw.tar.gz") == frozen["parent_archive_sha256"]
+    assert sha(HERE.parents[3] / ".github/workflows/ecc2k130-rotated-slot-placement.yml") == frozen["workflow_sha256"]
     return frozen
 
 
