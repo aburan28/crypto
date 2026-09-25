@@ -1375,6 +1375,10 @@ staircase stop never fired.
 **M4: Kummer, `m = 4`, `p₁`.**
 - `N = 8` and 12 give `D = 6` and 7 on both targets, as in the pilot at `p₀`:
   1,049 and 9,452 columns, in 21 and 29 steps.
+- A trace of the `N = 12` system (D1 in the README) shows how `m = 4` refutes.
+  One early step reaches degree 7 (step 16). The refutation then comes through a
+  long tail of degree-6 steps, in which the basis grows to 1,886 elements and
+  the pending pairs to 25,873.
 - **`N = 16` ran out of memory.** Its first system hit the 14 GB cap after 29
   minutes ("memory allocation of 131072 bytes failed"). The process ended
   there, so the second target never ran, and there is no row and no `D`.
@@ -1387,10 +1391,6 @@ staircase stop never fired.
   - Every step from step 12 on is at degree 7. The last steps grow fast: step
     48 had 4,117 critical pairs and 229 million nonzeros, with a basis of 6,036
     elements and 123,032 pending pairs. That tail is what filled the memory.
-- A trace of the `N = 12` system (D1 in the README) shows where the memory goes.
-  One early step reaches degree 7 (step 16). The refutation then comes through a
-  tail of degree-6 steps, in which the basis grows to 1,886 elements and the
-  pending pairs to 25,873.
 
 **M3: Kummer, `m = 3`, `p₁`.**
 - `N = 9` and 12 give `D = 6` on both targets, as in the pilot.
@@ -1400,7 +1400,24 @@ staircase stop never fired.
   23 steps, reaching degree 7 at 104,600 columns. The `--max-nnz` cap of
   `2·10⁹` then stopped step 24. `D ≥ 7` is a lower bound, not a value.
 
-CONFIRM_VERIFY_PLACEHOLDER
+**Confirmation runs.**
+- Every `m = 2` cell with a system at `D ≥ 6` was re-run whole, with the degree
+  bound at 5 (`confirm_round2.sh`: five cells, ten systems).
+- Every system ended with pairs above the bound, without refuting and without a
+  staircase stop. That is 30,335 pairs for each Kummer system and the null, and
+  14,828 for isogeny. Degree 5 does not suffice under this engine's strategy.
+- **At degree 5, the level window of §10.5 has stopped growing.** The capped
+  Kummer runs at `N = 20` and `N = 22` end with the same 22 steps, the same
+  2,922 basis elements and the same 30,335 pending pairs. Only their column
+  counts differ (15,740 and 16,572). What F4 learns at degree 5 no longer
+  depends on `t`.
+
+**Exhaustive check.**
+- `verify.py` confirms the verdict of all 198 finished tower rows, 26 of them
+  new in round 2. It skips the 8 capped tower rows, which claim none.
+- No planted solution was lost.
+- The 218 repeated measurements agree on every deterministic field. They include
+  K0 against §11.3's profiling rows, and D1 against M4.
 
 **The exit codes in `progress.txt` are all 0 and carry no information.** The
 committed scripts wrote them with `$(date …)` in the same line, which resets
@@ -1424,7 +1441,14 @@ committed scripts wrote them with `$(date …)` in the same line, which resets
 holds. At `p₁` the grid is `2^20/p₁ ≈ 5·10⁻⁴` of the field, three orders of
 magnitude below §11.3's system, and the run has the same shape step for step.
 
-CONJ3_PLACEHOLDER
+**Conjecture 3 is refuted**, in the sense §11.6 fixed.
+- Eight finished `m = 2` tower systems have `D = 6`: K1 at `N = 20` and 22, K0
+  and I0.
+- `verify.py` confirms each of their verdicts.
+- Their confirmation runs confirm each degree-6 step.
+- The refutation concerns the reduced presentation that the engine measures.
+  The raw presentation agrees with it on every pilot system from `N = 4` up
+  (§11.2), but no raw system at `N = 20` has finished.
 
 **A1, per cell.** The same `D(N)` reads differently depending on where a cell's
 range starts, so each reading comes with its range.
@@ -1446,9 +1470,9 @@ range starts, so each reading comes with its range.
     0.10 and reads inconclusive.
   - The rule's reading is recorded as it stands, and it closes nothing. §3.7
     already rules `m = 2` out: no oracle beats rho there.
-- **H1a holds in no round-2 cell.** No final plateau is longer than
-  2 (K1's). The isogeny plateau of `N = 4–18`, which §10.8 noted would
-  pass A1, ends at `N = 20`.
+- **H1a holds in no round-2 cell.** No final plateau is longer than 2 (K1's).
+  The isogeny plateau of `N = 4–18`, which §10.8 noted would pass A1, ends at
+  `N = 20`.
 - **One line still reads H1a: the isogeny null at `p₀`.** The cross-check ran it
   only to `N = 18`, so it keeps that plateau. The null gates nothing, and at
   `N = 20` round 2 ran the isogeny tower, not its null.
@@ -1463,12 +1487,13 @@ It shows five things.
    up. It reaches `N = 22` at `m = 2` in 2.3 GB, where the dense `f4_fp` ran
    out of 13 GB at `N = 20`.
 2. **At `m = 2` the solving degree is not bounded by 5.** It rises to 6 at
-   `N = 20`, in both families, at both primes and in the null. CONJ3_SHORT_PLACEHOLDER
+   `N = 20`, in both families, at both primes and in the null. That refutes
+   Conjecture 3 (§11.8).
 3. **The rise depends on `N` alone** among the things varied here. It does not
    depend on `|V|²/p`, the target, the curve or the summation polynomial: within
    a family, the whole run has the same shape.
-4. **At `m = 3` the degree rises too**, to 7 at `N = 15`. At `N = 18` both systems
-   stopped for size at degree 7, a lower bound.
+4. **At `m = 3` the degree rises too**, to 7 at `N = 15`. At `N = 18` both
+   systems stopped for size at degree 7, a lower bound.
 5. **The rises fall at regular levels.** This pattern was noticed after the
    data, and is stated as a pattern, not a law.
    - At `m = 2`, the Kummer degree rises at `t = 6` and at `t = 10`, which is
@@ -1493,9 +1518,11 @@ It does not show three things.
 
 ### 11.10 Next steps, ranked
 
-1. **Reach `m = 4` at `N ≥ 16`.** §11.7's trace shows the memory going into the
-   tail of degree-6 steps. There the basis, whose every element is kept
-   (retired ones included), and the pending pairs swell past 14 GB. Two levers:
+1. **Reach `m = 4` at `N ≥ 16`.** The traces of §11.7 show where the memory
+   goes: into a long tail of steps at the top degree. That is degree 6 at
+   `N = 12` and degree 7 at `N = 16`, where in 25 minutes the basis (every
+   element of which is kept, retired ones included) passes 6,000 elements and
+   the pending pairs 123,000. Two levers:
    - **Memory only, the same algorithm:** retire basis elements that no pending
      pair references, and store elements over a shared monomial table rather
      than as `u128` keys.

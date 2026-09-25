@@ -21,7 +21,10 @@ run() {
   shift
   echo "$(date -u +%FT%TZ) start $name: $*" >> ../progress.txt
   "$bin" "${common[@]}" "$@" --out "$name.jsonl" 2> "$name.log"
-  echo "$(date -u +%FT%TZ) end $name exit $?" >> ../progress.txt
+  # Read the status before anything else runs: `$(date)` would reset it.
+  # (Fixed after round 2 ran; its progress.txt logs every exit as 0.)
+  rc=$?
+  echo "$(date -u +%FT%TZ) end $name exit $rc" >> ../progress.txt
 }
 run K1-kummer-m2-p1 --p $P1 --kinds kummer --m 2 --controls tower --t-min 6 --max-t 11
 run K1n-kummer-m2-p1-null --p $P1 --kinds kummer --m 2 --controls null --t-min 6 --max-t 10

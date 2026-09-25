@@ -32,13 +32,15 @@ the engine's unit tests.
 ## Runs
 
 `p₀ = 786433 = 3·2^18 + 1` (the pilot's prime) and
-`p₁ = 2013265921 = 15·2^27 + 1`. Every run used a 14 GB address-space cap
-(`ulimit -v 14000000`). A run's `.log` holds the example's stderr: one line per
+`p₁ = 2013265921 = 15·2^27 + 1`. Every run except the `P0` profiling runs used a
+14 GB address-space cap (`ulimit -v 14000000`). A run's `.log` holds the example's stderr: one line per
 system, and the step trace where `--trace` was given.
 
-**Cross-check (engine validation, note §11.2).** The pilot's cells, re-run with
-`--engine tower` and the pilot's flags, so every system here is one the pilot
-measured with `f4_fp`.
+**Cross-check (engine validation, note §11.2).** The pilot's cells are re-run
+with `--engine tower` and the pilot's flags, some widened to every kind and
+control, with no size above the pilot's largest for its `m`. 38 systems have no
+`f4_fp` counterpart, from the widened cells and from one cell whose targets were
+drawn differently (note §11.2).
 
 | file | flags (all with `--engine tower`) |
 |:--|:--|
@@ -74,8 +76,9 @@ the example built from the commit that pre-registered them.
 
 The exit codes in `progress.txt` are all 0 and carry no information:
 `run_round2.sh` wrote them with `$(date …)` in the same line, which resets `$?`
-first. The logs show how each run ended, and `confirm_round2.sh` reads the
-status before anything else runs.
+first. The logs show how each run ended. `confirm_round2.sh` reads the status
+before anything else runs, and so does `run_round2.sh` since the round (a
+logging fix, made after its cells ran).
 
 **Confirmations (note §11.4).** `confirm_round2.sh` re-runs, once and whole,
 every `m = 2` cell with a finished system at `D ≥ 6`, with the degree bound at 5
@@ -83,13 +86,23 @@ every `m = 2` cell with a finished system at `D ≥ 6`, with the degree bound at
 rows out of the tables (their degree bound is below the default) and reports
 them in their own section.
 
-CONFIRM_README_PLACEHOLDER
+They ran after the D2 diagnostic, from 04:57 to 05:01 UTC. The chain meant to
+start them straight after the cells got "Permission denied", because the script
+had been committed without its executable bit.
+
+| file | cell re-run with `--cap 5` | what happened |
+|:--|:--|:--|
+| `C-K1-kummer-m2-p1-t10` | K1, `N = 20` | Both systems ended with 30,335 pairs above the bound, not refuted: confirmed |
+| `C-K1-kummer-m2-p1-t11` | K1, `N = 22` | The same: 30,335 pairs above the bound, confirmed |
+| `C-K1n-kummer-m2-p1-null-t10` | K1n, `N = 20` | The same: confirmed |
+| `C-K0-kummer-m2-p0-N20-t10` | K0 (`--stop-below 8` as in the cell) | The same, with no stop: confirmed |
+| `C-I0-isogeny-m2-p0-N20-t10` | I0 (`--stop-below 8`) | 14,828 pairs above the bound, not refuted, no stop: confirmed |
 
 **Diagnostics (after the cells, labelled as such).**
 
 | file | flags (all with `--engine tower --p 2013265921 --kinds kummer --controls tower --planted 0 --random 1 --ladder-t none --trace`) | what it is |
 |:--|:--|:--|
-| `D1-kummer-m4-p1-N12-trace` | `--m 4 --t-min 3 --max-t-m4 3 --budget 600` | The step trace of M4's `N = 12` target 0, which it repeats exactly. It shows where `m = 4` spends its memory (note §11.7) |
+| `D1-kummer-m4-p1-N12-trace` | `--m 4 --t-min 3 --max-t-m4 3 --budget 600` | The step trace of M4's `N = 12` target 0, which it repeats exactly. It shows how `m = 4` refutes, through a long tail of degree-6 steps (note §11.7) |
 | `D2-kummer-m4-p1-N16-trace` | `--m 4 --t-min 4 --max-t-m4 4 --budget 1500 --max-nnz 2000000000` | M4's first `N = 16` system, which ran out of memory after 29 minutes, re-run with a 25-minute budget so that the engine stops itself and prints its trace. It stopped at the budget after 48 steps, all at degree 7 or below and every one from step 12 on at 7, without refuting: `D ≥ 7`. Its row says `timed_out` |
 
 ## Builds
