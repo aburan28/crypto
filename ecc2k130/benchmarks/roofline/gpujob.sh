@@ -4,8 +4,12 @@
 # nvidia/cuda:13.3.1-devel-ubuntu24.04 with the ecc2k130 tree at /work and an
 # output directory at /results (or $RESULTS), on one RTX PRO 6000:
 #   modal run modal_job.py --job benchmarks/roofline/gpujob.sh --out DIR
-#   python3 runpod_job.py --job benchmarks/roofline/gpujob.sh --out DIR
-#   python3 aws/bench_job.py --job benchmarks/roofline/gpujob.sh --out DIR
+#   python3 runpod_job.py --job benchmarks/roofline/gpujob.sh --out DIR \
+#       --extra benchmarks/roofline --extra roofline.py
+#   python3 aws/bench_job.py --job benchmarks/roofline/gpujob.sh --out DIR \
+#       --extra benchmarks/roofline --extra roofline.py
+# (Modal ships the whole tree; the other two ship Makefile, src, include,
+# codegen and generated only, so the probe and roofline.py go in --extra.)
 #
 #  1. pipes.cu: LOP3/SHF/IMAD/FFMA alone and mixed (does the walk's ALU work
 #     share the FMA pipe's issue?) and CLMAD in the walk's patterns (what does

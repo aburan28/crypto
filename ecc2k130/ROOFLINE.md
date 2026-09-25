@@ -248,6 +248,9 @@ one.
 
 ```
 modal run modal_job.py --job benchmarks/roofline/gpujob.sh --out /tmp/roofline-run1
+# or, on EC2 or RunPod, which ship only the build tree plus --extra:
+python3 aws/bench_job.py --job benchmarks/roofline/gpujob.sh --out /tmp/roofline-run1 \
+    --extra benchmarks/roofline --extra roofline.py
 python3 benchmarks/roofline/summarize.py /tmp/roofline-run1 benchmarks/roofline
 ```
 
