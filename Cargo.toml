@@ -13,6 +13,11 @@ path = "src/main.rs"
 name = "ic"
 path = "src/bin/ic.rs"
 
+# `icx` — index calculus across every standardized curve (catalog + engine).
+[[bin]]
+name = "icx"
+path = "src/bin/icx.rs"
+
 [lib]
 name = "crypto_lib"
 path = "src/lib.rs"

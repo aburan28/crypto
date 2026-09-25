@@ -1,0 +1,21 @@
+name: PKM tower pilot
+on:
+  pull_request:
+    paths:
+      - 'research/pkm_tower_pilot_20260924/**'
+      - '.github/workflows/pkm-tower-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cross-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exhaustive counters against planted decompositions
+        run: python3 -m unittest discover -s research/pkm_tower_pilot_20260924 -p 'test_*.py' -v
+      - name: Every committed tower row against exhaustive search
+        run: python3 research/pkm_tower_pilot_20260924/verify.py research/pkm_tower_pilot_20260924/runs/*.jsonl
+      - name: Repeats agree and no planted solution is lost
+        run: python3 research/pkm_tower_pilot_20260924/analyze.py research/pkm_tower_pilot_20260924/runs/*.jsonl

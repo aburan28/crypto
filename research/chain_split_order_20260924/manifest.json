@@ -1,0 +1,52 @@
+{
+  "round": "chain-split-order-20260924",
+  "note": "research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md",
+  "scope": "decomposition-oracle Groebner stage (stage diagnostic) plus whole-logarithm runs; see the note",
+  "git_head": "0fdb05d07d8faac401e221b90e86a95ce794313f",
+  "built_from": {
+    "run.sh (frozen, chain, chain-holdout)": "2809b498",
+    "run_t1prime.sh, oracle_ladder.sh, e2e.sh": "0fdb05d0"
+  },
+  "src_identical_between_builds": true,
+  "working_tree_clean_for_sources": true,
+  "measured_sources_unchanged_since_build": true,
+  "sources_sha256_at_head": {
+    "src/cryptanalysis/koblitz_groebner.rs": "6c4c75d95cc290c0878017374340b77565edf3d642c61565d403bdbee9d95ced",
+    "src/cryptanalysis/inherited_f4.rs": "4e38e952907c93957baa609d2f417206d86a30f82df44ab6db3135d5cd9fa081",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "ad7e32437460027595d884e3252a769e1dd6c05a0d0c3397b00a3bed26656e3f",
+    "src/cryptanalysis/pq_groebner_f2.rs": "8fdd260742e30a9dff1561870555f6e5d0ed42a7f5b64b504c278adc67db9a35",
+    "examples/groebner_stage_bench.rs": "59f2df0f389b05b90813122c3deb02175bccb173da7e8cb057348937a65c3165"
+  },
+  "binaries_sha256": {
+    "target/release/examples/groebner_stage_bench": "17d8dc08dca2751e503149e5fef0cba9a2e103a4545b0dccf5470109e0fbd3ad",
+    "target/release/ic": "836d6a5e3d04f700a6f36a1c24f4ac0424ac4878c447840af9a2241aec495784"
+  },
+  "host": {
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+    "logical_cores": 4,
+    "os": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "note": "shared cloud host, no CPU pinning; wall time is a practicality note, not the metric"
+  },
+  "arms": {
+    "reference": {
+      "KIC_CHAIN_ORDER": "layout",
+      "KIC_LINEAR_ELIM": "0",
+      "KIC_F4_DROP": "complete"
+    },
+    "candidate": {
+      "KIC_CHAIN_ORDER": "interleaved",
+      "KIC_LINEAR_ELIM": "1",
+      "KIC_F4_DROP": "complete"
+    },
+    "factorial": "run.sh: O (order) x L (linear elimination) x D (degree-drop rule), every variable explicit"
+  },
+  "commands": [
+    "cargo build --release --example groebner_stage_bench --bin ic",
+    "research/chain_split_order_20260924/run.sh",
+    "research/chain_split_order_20260924/run_t1prime.sh",
+    "research/chain_split_order_20260924/compare_all.sh",
+    "research/chain_split_order_20260924/oracle_ladder.sh",
+    "research/chain_split_order_20260924/e2e.sh",
+    "python3 research/chain_split_order_20260924/table.py > research/chain_split_order_20260924/tables.md"
+  ]
+}

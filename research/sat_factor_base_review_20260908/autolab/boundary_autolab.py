@@ -14,6 +14,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import math
 import os
 import platform
 import resource
@@ -547,25 +548,23 @@ def seed_for(beat_id: str, arm: str, repetition: int) -> int:
     return int.from_bytes(hashlib.sha256(material).digest()[:8], "big")
 
 
+def positive_cost(value):
+    return float(value) if type(value) in (int, float) and math.isfinite(value) and value > 0 else None
+
+
 def extract_ic_cost(rows: list[dict[str, Any]], timing_class: str) -> float | None:
     if not rows:
         return None
     row = rows[-1]
     if timing_class == "whole_process_wall":
         return None  # filled from outer wait4
-    for key in (
-        "full_algorithm_charged_total_ms",
-        "charged_total_ms",
-        "projection_matched_charged_total_ms",
-        "online_charged_ms",
-    ):
+    # Online-only and projection-matched slices cannot stand in for a full job.
+    for key in ("full_algorithm_charged_total_ms",):
         if key in row:
-            return float(row[key])
+            return positive_cost(row[key])
         timing = row.get("timing_breakdown_ms")
         if isinstance(timing, dict) and key in timing:
-            return float(timing[key])
-    if "charged_total_ms" in row:
-        return float(row["charged_total_ms"])
+                return positive_cost(timing[key])
     return None
 
 
@@ -574,15 +573,59 @@ def extract_rho_cost(rows: list[dict[str, Any]]) -> float | None:
         return None
     totals = []
     for row in rows:
+        value = None
         if "total_ms" in row:
-            totals.append(float(row["total_ms"]))
+            value = positive_cost(row['total_ms'])
         elif isinstance(row.get("timing_breakdown_ms"), dict):
             timing = row["timing_breakdown_ms"]
             if "total_ms" in timing:
-                totals.append(float(timing["total_ms"]))
+                value = positive_cost(timing['total_ms'])
+        if value is None:
+            return None
+        totals.append(value)
     if not totals:
         return None
-    return sum(totals) / len(totals)
+    # IC's full_algorithm field is a batch total. Compare equal workloads.
+    return math.fsum(totals)
+
+
+def comparison_integrity(direct_rows, rho_rows, expected_count=None):
+    """Bind a comparison to actual complete public targets, never source bytes.
+
+    This checks producer consistency only. Independent group/rank replay is
+    still required for a scientific result.
+    """
+    def corpus(rows, kind, verified_key):
+        selected = [r for r in rows if r.get('kind') == kind]
+        require(bool(selected), 'no complete fixture records')
+        headers = [r for r in rows if r.get('kind') == 'point_defined_factor_base']
+        if kind == 'relation_rank_summary':
+            require(len(headers) == 1, 'missing or ambiguous curve header')
+        entries = []
+        for row in selected:
+            metadata = headers[0] if kind == 'relation_rank_summary' else row
+            require(row.get(verified_key) is True, 'unverified fixture')
+            require(row.get('recovered_fixture_scalar') is not None, 'missing recovered scalar')
+            require(int(row['recovered_fixture_scalar']) == int(row['published_fixture_scalar']), 'wrong scalar')
+            entries.append({'index': int(row['fixture_index']), 'n': int(row['n']), 'a': int(row['a']),
+                'subgroup_order': int(metadata['subgroup_order']),
+                'field_modulus_low_terms': sorted(int(t) for t in metadata['field_modulus_low_terms']),
+                'generator': [int(x) for x in row['generator_point_key']],
+                'target': [int(x) for x in row['published_q_point_key']]})
+        entries.sort(key=lambda r: r['index'])
+        count = len(entries) if expected_count is None else expected_count
+        require([r['index'] for r in entries] == list(range(count)), 'missing or duplicate fixture')
+        return entries
+    try:
+        direct = corpus(direct_rows, 'relation_rank_summary', 'linear_solution_verified')
+        rho = corpus(rho_rows, 'rho_public_fixture', 'verified')
+        require(direct == rho, 'IC and rho solved different public targets')
+        fingerprint = hashlib.sha256(json.dumps(direct, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        return {'status': 'MATCHED', 'fixture_hash': fingerprint, 'fixtures': len(direct),
+                'independent_validation': False}
+    except (AutolabError, KeyError, TypeError, ValueError) as exc:
+        return {'status': 'INVALID_COMPARISON', 'reason': str(exc), 'fixture_hash': None,
+                'independent_validation': False}
 
 
 def automorphism_discount(n: int) -> dict[str, Any]:
@@ -607,6 +650,7 @@ def draft_vs_rho_claim(
     direct_rows = parse_json_lines(direct_obs["stdout"])
     rho_rows = parse_json_lines(rho_obs["stdout"])
     producers_ok = direct_obs["exit_code"] == 0 and rho_obs["exit_code"] == 0
+    integrity = comparison_integrity(direct_rows, rho_rows, direct_obs.get('fixtures'))
     ic_cost = (
         float(direct_obs["whole_process_wall_ms"])
         if timing_class == "whole_process_wall"
@@ -629,9 +673,12 @@ def draft_vs_rho_claim(
         "ic_cost": ic_cost,
         "rho_cost": rho_cost,
         "automorphism_discount": automorphism_discount(int(beat["n"])),
-        "all_stages_charged_same_series": True,
+        "all_stages_charged_same_series": bool(producers_ok and integrity['status'] == 'MATCHED'
+            and timing_class == 'whole_process_wall'
+            and all(isinstance(x, (int, float)) and math.isfinite(x) and x > 0 for x in (ic_cost, rho_cost))),
+        "comparison_integrity": integrity,
         "verdict": (
-            "DRAFT_PENDING_INDEPENDENT_VALIDATION"
+            ("DRAFT_PENDING_INDEPENDENT_VALIDATION" if integrity['status'] == 'MATCHED' else 'INVALID_COMPARISON')
             if producers_ok
             else "PRODUCER_FAILURE"
         ),
@@ -649,7 +696,7 @@ def draft_vs_rho_claim(
         "independent_replay_pointer": str(
             (run / "artifacts/claim_draft.json").relative_to(REPO)
         ),
-        "fixture_hash": sha256(REPO / "examples/koblitz_rank_fixture.rs"),
+        "fixture_hash": integrity['fixture_hash'],
         "executable_or_source_hash": {
             "direct": sha256(binaries["direct"]),
             "rho": sha256(binaries["rho"]),
@@ -796,6 +843,7 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
 
         direct_obs = run_timed(direct_cmd, env=env, cwd=REPO, repeats=repeats)
         direct_obs["seed"] = direct_seed
+        direct_obs["fixtures"] = fixtures
         (run / "logs/direct.stdout.jsonl").write_text(direct_obs["stdout"])
         (run / "logs/direct.stderr.txt").write_text(direct_obs["stderr"])
         write_json(
@@ -828,6 +876,10 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
         status = "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
         if validation["status"] != "PASS":
             status = "SCHEMA_INCOMPLETE"
+        if producers_ok and claim['comparison_integrity']['status'] != 'MATCHED':
+            status = 'INVALID_COMPARISON'
+        elif producers_ok and not claim['all_stages_charged_same_series']:
+            status = 'ACCOUNTING_INCOMPLETE'
         state.update(
             status=status,
             phase="analysis",

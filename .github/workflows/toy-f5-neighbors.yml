@@ -1,0 +1,28 @@
+name: Toy F5 neighbor measurements
+on:
+  pull_request:
+    paths:
+      - "research/toy_f5_neighbors_20260924/**"
+      - ".github/workflows/toy-f5-neighbors.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Boolean criterion and exact curve certificates
+        run: python3 -m unittest discover -s research/toy_f5_neighbors_20260924 -p 'test_*.py' -v
+      - name: Reproduce all frozen and holdout pairs
+        run: python3 research/toy_f5_neighbors_20260924/experiment.py --output "$RUNNER_TEMP/toy-f5-neighbors"
+      - name: Compare exact evidence
+        run: python3 research/toy_f5_neighbors_20260924/verify_replay.py "$RUNNER_TEMP/toy-f5-neighbors"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: toy-f5-neighbor-results
+          path: ${{ runner.temp }}/toy-f5-neighbors

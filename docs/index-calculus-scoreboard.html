@@ -582,6 +582,8 @@
         <div class="lrow"><div class="name">S&#8324; pairs-and-solve</div><div class="num">1,118</div><div class="lbar"><i style="width:47.6%"></i></div></div>
         <div class="lrow"><div class="name">Matrix-F4 with splitting &middot; 6.5&times;10<sup>7</sup> word XORs found, 6.3&times;10<sup>8</sup> refuted &middot; was 1.7&times;10<sup>8</sup> / 1.7&times;10<sup>9</sup> at the freeze</div><div class="num">8.7&times;10<sup>5</sup></div><div class="lbar"><i style="width:81.7%"></i></div></div>
         <div class="lrow"><div class="name">Inherited matrix-F4, splitting on the smallest free variable, rows materialised lazily &middot; 2.8&times;10<sup>6</sup> word ops found, 9.6&times;10<sup>6</sup> refuted (5.5&times;10<sup>7</sup> total against the from-scratch engine&rsquo;s 1.7&times;10<sup>9</sup>; was 1.5&times;10<sup>8</sup> with eager rows) &middot; on the historical tree, inheriting cost <strong>1.6&times; more</strong> here (2.7&times;10<sup>9</sup>): the loss that the split variable reversed &middot; identical found/refuted verdicts</div><div class="num">1.4&times;10<sup>4</sup></div><div class="lbar"><i style="width:60.9%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4 in the chain&rsquo;s interleaved order, linear generators eliminated (default 2026-09-24, until support-local multipliers below) &middot; <strong>7.2&times;10<sup>6</sup> word ops</strong> over the 8 targets against <strong>2.6&times;10<sup>7</sup></strong> for the same engine on today&rsquo;s main (3.57&times;; the 5.5&times;10<sup>7</sup> above is its 2026-09-22 freeze) &middot; identical found/refuted verdicts, zero disagreements &middot; still 5&times; enumeration and 100&times; meet in the middle per target</div><div class="num">2.4&times;10<sup>3</sup></div><div class="lbar"><i style="width:51.7%"></i></div></div>
+        <div class="lrow"><div class="name">Inherited matrix-F4 as above, each generator multiplied only by monomials in its own variables (support-local multipliers, default since 2026-09-24, second round) &middot; <strong>4.7&times;10<sup>6</sup> word ops</strong> over the 8 targets, was 7.2&times;10<sup>6</sup> (1.52&times;) &middot; identical found/refuted verdicts, zero disagreements &middot; the same run prices the previous default at 2.3&times;10<sup>3</sup> GAE per target &middot; still 3&times; enumeration and 60&times; meet in the middle per target</div><div class="num">1.5&times;10<sup>3</sup></div><div class="lbar"><i style="width:49.2%"></i></div></div>
         <div class="lrow"><div class="name">CDCL &middot; no answer on 8 of 8 targets at 200,000 conflicts</div><div class="num">&ge; 4.0&times;10<sup>7</sup></div><div class="lbar"><i style="width:100%"></i></div></div>
       </div>
       <div class="legend" style="padding-top:0">
@@ -589,6 +591,8 @@
         <span>zero disagreements between oracles on every target of every cell, S&#8324; witnesses lifted in the group and compared both ways</span>
         <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 4.1&times;10<sup>3</sup>, 22&times; the whole measured cost of the tabled fold (9.2&times;10<sup>3</sup> and 49&times; at the freeze) &mdash; an extrapolation</span>
         <span>matrix-F4 rows from the lift-checked re-run on the merged tree, <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>: same verdicts, fall degrees and SAT conflicts as the freeze, 1.4&ndash;2.7&times; fewer word XORs after main&rsquo;s sparse elimination (#405) &mdash; engineering, ratio to the probe unmoved</span>
+        <span>support-local row from the paired second 2026-09-24 re-run, <code>research/support_local_multipliers_20260924/oracle_ladder/{reference,candidate}.json</code>, both arms on one binary: identical found/refuted verdicts on every cell, zero disagreements; matrix-F4 1.52&times; fewer word XORs at n = 15, m = 3 and 2.06&times; at n = 9, m = 3, the m = 2 cells 1.00&ndash;1.03&times;, none rising; GAE at that run&rsquo;s own host-measured factor; projected relation phase at n = 15, m = 3: S &asymp; 579 against 878 &mdash; an extrapolation &mdash; engineering (<a href="#support-local-multipliers-20260924">the round</a>)</span>
+        <span>interleaved-order row from the paired 2026-09-24 re-run, <code>research/chain_split_order_20260924/oracle_ladder/{reference,candidate}.json</code>, both arms on one binary: identical found/refuted verdicts on every cell, zero disagreements; matrix-F4 3.57&times; fewer word XORs at n = 15, m = 3 and 1.58&times; at n = 9, m = 3, the m = 2 cells 1.00&ndash;1.03&times;; GAE converted at each run&rsquo;s own host-measured factor (the two differ by up to 14%), so the word-XOR ratio is the comparison; projected relation phase at n = 15, m = 3: S &asymp; 948 against 3,864 &mdash; an extrapolation &mdash; engineering (<a href="#chain-split-order-20260924">the round</a>)</span>
         <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical found/refuted verdicts on all 13 cells, zero disagreements, no inconclusive target; 2.3&ndash;29.9&times; fewer word operations on every cell with a tree, the specialisation&rsquo;s reads and writes charged; the default splits on the smallest free variable, so its tree has the same size and a different shape from the reference&rsquo;s &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
       </div>
     </div>
@@ -1833,8 +1837,9 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
       <p><b>X5&Prime;: the symmetrised chain falls genuinely at 3, one degree above the x-chain in
         both conventions.</b> By the literature&rsquo;s definition its first fall is at 3 on every
         draw, with exactly 2n falls, all to quadratics. The count is derived: its last link&rsquo;s
-        top part w<sub>R</sub>UW stays bilinear when multiplied by U or by W, because squaring is
-        F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
+        top part w<sub>R</sub>&middot;w<sub>Q2</sub>&middot;w<sub>4</sub> stays bilinear when multiplied by
+        either symmetric coordinate w<sub>Q2</sub>&thinsp;=&thinsp;AS(U<sub>2</sub>) or w<sub>4</sub>
+        (<s>by U or by W</s>, corrected in X5&tprime;), because squaring is F<sub>2</sub>-linear. The x-chain falls at 2 by the same definition. So X5&prime;&rsquo;s
         4-against-3 is the literature&rsquo;s 3-against-2, and the symmetrised system is not shown
         to be harder. In H1&rsquo;s convention its rank loss at 4 is n&thinsp;+&thinsp;C(n,2)
         trivial syzygies plus 26&ndash;56 that are not trivial and not identities of linear falls
@@ -1843,6 +1848,28 @@ Increasing factor-base dimension remains the next scaling test.</p></div></div>
         cubic links show no kernel and no fall through degree 4. A first run that under-counted
         the x-chain&rsquo;s identities is kept and disclosed (<code>experiments/29_prefix/</code>);
         the symmetrised rows are unchanged by the fix. A structural measurement: no cost moves.</p>
+      <p><b>X5&tprime; (2026-09-24, registered before its code): the residual is not the pointwise
+        trace, and it stays open.</b> For each value &sigma; of its small block, the symmetrised last
+        link is an F<sub>2</sub>-linear system in the chain unknown, a(U<sup>2</sup>&thinsp;+&thinsp;U)&thinsp;+&thinsp;U<sup>2</sup>&thinsp;+&thinsp;d.
+        Its cokernel is killed by &psi;<sub>&sigma;</sub>(z)&thinsp;=&thinsp;Tr(z(1&thinsp;+&thinsp;a)/a<sup>2</sup>):
+        Kosters&ndash;Yeo&rsquo;s trace, but with coefficients that depend on &sigma;. That structure is
+        confirmed on every draw. The registered hypothesis, that the residual syzygies are pointwise
+        multiples of &psi;<sub>&sigma;</sub>, is falsified: <b>no such syzygy exists at degree 4 on any
+        of 18 draws</b>, in either arm. The residual needs multipliers that mix the chain unknown with
+        the small block (either alone gives 0). An unregistered regularity at &ell;&thinsp;=&thinsp;4
+        (residual = a per-rung constant + the number of small-block points where the local system is
+        consistent, on all 16 draws) breaks at &ell;&thinsp;=&thinsp;5, and is recorded only as an
+        observation. At &ell;&thinsp;=&thinsp;5 a different regularity holds, and it survived an
+        unregistered supplement whose prediction was stated before it ran (n&thinsp;=&thinsp;15, 8 of 8
+        draws): the residual is exactly 2n. It splits as n syzygies realisable with multipliers of
+        U-degree &le;&thinsp;1, plus n with small-block degree &le;&thinsp;1, and none with only
+        bidegree-(1,1) multipliers. The link is an affine bilinear system in (U, &sigma;). The theory
+        it now has to be checked against is Faug&egrave;re&ndash;Safey El Din&ndash;Spaenlehauer&rsquo;s
+        Jacobian-kernel description of bilinear syzygies (JSC 2011), which is not claimed to explain
+        it here. The x-arm failed one registered gate, and the cause is identified and checked:
+        X5&Prime;&rsquo;s last-link matrix used the whole chain&rsquo;s variables as multipliers.
+        Frozen: <code>experiments/30_koblitz_x5_residual.json</code>. No cost moves, and no further
+        run is proposed.</p>
     </div>
   </div>
 
@@ -5596,7 +5623,7 @@ factor base, and this prices a decomposition oracle.</p>
       <tr><td>same-tree: F4, H &rarr; default</td><td></td><td>7,917</td><td class="n">973,838,382</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">37,302,399</td><td class="n">26.11&times;</td><td>flat</td><td class="n">8.85&times;</td><td>identical</td><td><span class="chip">engineering</span> (compare.py accepts every rung; every rung with a tree improves)</td></tr>
       <tr><td>holdout <code>K_0/2^19</code>, 36 unknowns</td><td>2</td><td>228 &rarr; 228</td><td class="n">116,912,104</td><td class="n">&mdash;</td><td class="n">74,984,242 (1.56&times;)</td><td class="n">163,178,360</td><td class="n">31,800,117</td><td class="n">22,640,333</td><td class="n">5.16&times;</td><td>flat</td><td class="n">3.01&times;</td><td>identical tree</td><td><span class="chip">engineering</span></td></tr>
       <tr><td>holdout <code>K_1/2^17</code>, divisor 1</td><td>2</td><td>1,062 &rarr; 1,198</td><td class="n">33,578,834</td><td class="n">&mdash;</td><td class="n">6,475,463 (5.19&times;)</td><td class="n">42,029,541</td><td class="n">4,607,771</td><td class="n">3,011,390</td><td class="n">11.15&times;</td><td>flat</td><td class="n">5.94&times;</td><td>verified</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,670,183,123 (<strong>0.62&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n">55,202,947</td><td class="n"><strong>29.94&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.62&times; is the superseded loss</td></tr>
+      <tr><td>oracle ladder <code>K_0/2^15</code>, 30 unknowns</td><td>3</td><td>8,920 &rarr; 12,069</td><td class="n">1,653,034,947</td><td class="n">&mdash;</td><td class="n">2,670,183,123 (<strong>0.62&times;</strong>)</td><td class="n">305,067,403</td><td class="n">148,488,873</td><td class="n">55,202,947 (default until 2026-09-24; <a href="#chain-split-order-20260924">7,187,062 after</a>, <a href="#support-local-multipliers-20260924">4,736,391 after the second round</a>, against 25,639,588 for the same engine on that day&rsquo;s main)</td><td class="n"><strong>29.94&times;</strong></td><td>flat</td><td class="n">&mdash;</td><td>verified</td><td><span class="chip">engineering</span>; the 0.62&times; is the superseded loss</td></tr>
     </tbody>
   </table></div>
   <div class="table-scroll"><table>
@@ -5626,6 +5653,152 @@ factor base, and this prices a decomposition oracle.</p>
     off it is <code>2<sup>4.4</sup></code> off <code>2<sup>131</sup></code>.</p>
 </section>
 <!-- END inherited-f4-20260922 -->
+<!-- BEGIN chain-split-order-20260924 -->
+<section class="panel" id="chain-split-order-20260924">
+  <div class="panel-head">
+    <h2>The chained Koblitz system: fix the last summand first, eliminate the intermediate point &mdash; 4.91&times; on a registered holdout, only together <span class="chip">engineering</span></h2>
+    <p>For <code>m &ge; 3</code> the decomposition oracle solves the chain <code>S&#8323;(x&#8321;,x&#8322;,e&#8321;), &hellip;, S&#8323;(e<sub>m&minus;2</sub>,x<sub>m</sub>,x<sub>R</sub>)</code>,
+      and the inherited engine&rsquo;s split rule, handed the layout order, branches first on the <code>n</code> coordinates of the
+      intermediate point &mdash; the least constrained unknowns in the system. The system is multilinear in its blocks, so once the
+      <code>&ell;</code> coordinates of <code>x<sub>m</sub></code> are fixed the last link is <em>linear</em> in <code>e<sub>m&minus;2</sub></code>.
+      Two changes act on that: <strong>the order</strong> (<code>groebner_decompose</code> renames the chain
+      <code>x&#8321;, x&#8322;, e&#8321;, x&#8323;, &hellip;, x<sub>m</sub></code> so the same rule fixes <code>x<sub>m</sub></code> first, and renames each
+      root back before lifting it), and <strong>linear elimination</strong> (a node&rsquo;s degree-one generators are Gauss&ndash;Jordaned
+      and substituted away &mdash; an affine substitution is a Boolean-ring endomorphism, so every root is kept &mdash; and the node
+      rebuilds a small basis over what is left). They only work together: the order alone is <code>0.21&times;</code> on the holdout,
+      because the last link&rsquo;s generators drop to degree one and the engine multiplies each by every monomial of degree
+      <code>&le; 2</code>; elimination alone is <code>2.42&times;</code>; both are <code>7.25&times;</code>. A third, same-tree change &mdash;
+      rebuilding a child&rsquo;s basis on any degree drop instead of completing it &mdash; failed its own registered gate
+      (<code>0.88&times;</code> on one holdout rung) and stays a retained control.</p>
+    <p>Boundary: the <code>m&middot;2<sup>131</sup></code> candidate-tuple count of the ECC2K-130 decomposition note, no term for the
+      split order or for how a node is reduced &mdash; the ratio to it is <strong>flat by construction</strong>. Reference: the shipped
+      default on <code>main</code> (<code>KIC_CHAIN_ORDER=layout KIC_LINEAR_ELIM=0</code>), which reproduces main&rsquo;s frozen ladder to
+      the digit; unit: 64-bit word operations, with the elimination&rsquo;s row operations and every monomial its substitution writes
+      charged to the candidate. <strong>Registered, and the registration bit:</strong> the first holdout was written without an
+      admissibility check, seven of its eleven cells never enter the Gr&ouml;bner stage, and T1 needed six comparable rungs &mdash;
+      <strong>T1 is not met as registered</strong>. The supplementary holdout T1&prime;, every admissible cell of a screen that no arm had
+      touched (nine), was registered before any run on it and met the same thresholds; so did the frozen-ladder no-regression target
+      and the correctness target. Two of the exploration&rsquo;s cells, including its largest ratio, turned out to be inadmissible and
+      are not evidence.
+      Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/tables.md">all eight arms</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/comparisons/chain-holdout-2.cross_tree.candidate-vs-reference.json">T1&prime;</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/comparisons/chain-holdout.cross_tree.candidate-vs-reference.json">holdout</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/comparisons/frozen.cross_tree.candidate-vs-reference.json">frozen ladder</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/screen.json">admissibility screen</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/chain_split_order_20260924/manifest.json">manifest</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md">note</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Word operations, medians of 3 (identical across repetitions); ratios are reference / arm. &ldquo;O&rdquo; is the order,
+      &ldquo;L&rdquo; linear elimination, &ldquo;D&rdquo; rebuild-on-drop (same tree as the reference, <code>compare.py</code>). Every pair
+      accepted: the same targets decomposed, none exhausted, every decomposition lifted and verified in the group. Stage diagnostic
+      (AGENTS.md &sect;8).</caption>
+    <thead><tr><th>Suite</th><th>Rungs</th><th>Nodes ref &rarr; cand</th><th>Reference</th><th>L alone</th><th>O alone</th><th>O + L (default)</th><th>D (control)</th><th>Floor ratio</th><th>Wall</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>frozen ladder (5 quadratic rungs, 1 cubic)</td><td class="n">6</td><td>7,917 &rarr; 7,701</td><td class="n">16,696,846</td><td class="n">1.02&times;</td><td class="n">0.97&times;</td><td class="n"><strong>1.04&times;</strong> (cubic rung 1.84&times;; no rung rises)</td><td class="n">1.01&times;</td><td>flat</td><td class="n">0.6 &rarr; 0.6 s</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>chain ladder (tuning set)</td><td class="n">3</td><td>1,340 &rarr; 571</td><td class="n">13,754,966</td><td class="n">1.28&times;</td><td class="n">0.85&times;</td><td class="n"><strong>1.82&times;</strong></td><td class="n">1.14&times;</td><td>flat</td><td class="n">0.25 &rarr; 0.18 s</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>holdout as registered (4 of 11 cells run; T1 needed 6)</td><td class="n">4</td><td>66,615 &rarr; 8,496</td><td class="n">379,266,727</td><td class="n">2.42&times;</td><td class="n"><strong>0.21&times;</strong></td><td class="n"><strong>7.25&times;</strong> (1.53&ndash;8.74&times;)</td><td class="n"><strong>2.07&times;, one rung 0.88&times;</strong></td><td>flat</td><td class="n">8.5 &rarr; 1.3 s</td><td><span class="chip">engineering</span>; T1 not met as registered</td></tr>
+      <tr><td>supplementary holdout T1&prime; (every untouched admissible cell)</td><td class="n">9</td><td>256,531 &rarr; 24,181</td><td class="n">1,104,534,384</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n"><strong>4.91&times;</strong> (1.68&ndash;33.3&times;)</td><td class="n">&mdash;</td><td>flat</td><td class="n">24.8 &rarr; 4.4 s</td><td><span class="chip">engineering</span>; T1&prime; met</td></tr>
+      <tr><td>oracle-pricing ladder, <code>n = 15</code>, m = 3</td><td class="n">1</td><td></td><td class="n">25,639,588</td><td class="n"></td><td class="n"></td><td class="n"><strong>3.57&times;</strong> (7,187,062)</td><td class="n"></td><td>flat</td><td class="n"></td><td><span class="chip">engineering</span>; zero oracle disagreements</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Whole logarithms, <code>ic run --solver groebner --summands 3</code>, both arms on one binary and the same seeds; every run
+      recovered the planted <code>k</code> and verified <code>[k]G = Q</code>. The pipeline counts its oracle in word operations and the
+      rest only in wall time, with no measured conversion, so <code>S</code> is <strong>null</strong>; the only whole-pipeline number is the
+      wall ratio, a practicality note (the arms ran back to back, not interleaved, on a shared host). Reading: on every
+      <code>K_0/2^13</code> seed the candidate does the same work in every other counted phase, so the total falls by an amount the
+      unit cannot state; on one <code>K_0/2^9</code> seed a different first decomposition closed the matrix a trial earlier, less work
+      in every phase.</caption>
+    <thead><tr><th>Cell</th><th>Runs verified</th><th>Trials ref / cand</th><th>Relations ref / cand</th><th>Oracle word ops, ref &rarr; cand</th><th>Wall ratio [95% paired bootstrap]</th><th>S</th></tr></thead>
+    <tbody>
+      <tr><td><code>K_0/2^13</code>, 10 seeds + 5 holdout</td><td class="n">30 / 30</td><td class="n">207 / 207</td><td class="n">206 / 206</td><td class="n">234,370,439 &rarr; 151,807,846 (1.54&times;)</td><td class="n">1.062&times; [1.025, 1.097]</td><td>null</td></tr>
+      <tr><td><code>K_0/2^9</code>, 5 seeds</td><td class="n">10 / 10</td><td class="n">20 / 19</td><td class="n">20 / 19</td><td class="n">1,501,482 &rarr; 803,023 (1.87&times;)</td><td class="n">1.32&times; [1.14, 1.49]</td><td>null</td></tr>
+    </tbody>
+  </table></div>
+  <p>Retained controls: <code>KIC_CHAIN_ORDER=layout</code>, <code>KIC_LINEAR_ELIM=0|1</code>, <code>KIC_F4_DROP=rebuild</code>. Tests pin that
+    linear elimination returns exactly the variety (brute force, both engines, both split rules, both drop rules) and that the
+    interleaved chain solve has the pre-round default&rsquo;s roots at m = 3 and 4. Only <code>groebner_decompose</code> renames a chain;
+    the <code>m = 2</code> rungs are flat because the order is the identity there. Nothing here changes a first fall degree, a solving
+    degree, a fitted exponent or the page&rsquo;s verdict: the Gr&ouml;bner oracle is still 5&times; enumeration and 100&times; meet in the
+    middle per target at <code>n = 15</code>, m = 3.</p>
+</section>
+<!-- END chain-split-order-20260924 -->
+<!-- BEGIN support-local-multipliers-20260924 -->
+<section class="panel" id="support-local-multipliers-20260924">
+  <div class="panel-head">
+    <h2>Support-local multipliers: build each root row from the generator&rsquo;s own variables &mdash; 1.50&times; on a registered holdout, and a hidden cost the unit did not see <span class="chip">engineering</span></h2>
+    <p>The inherited engine built a root&rsquo;s Macaulay matrix, and every completion after a degree drop, by multiplying <em>every</em>
+      generator by every monomial of the allowed degree over <em>every variable occurring in the system</em>. For the chained systems of
+      the <a href="#chain-split-order-20260924">previous round</a> that is mostly wasted: the links are block-multilinear, and a product of the
+      last link with a variable of the first summand makes monomials that nothing the tail reads can use. <strong>Support-local
+      multipliers</strong> multiply each generator only by monomials in its own variables. That is a subset of the old rows, so every
+      consequence is still in the ideal and no root is lost; the tail can only be weaker, so the tree can only grow (it grows by at most
+      ten nodes on any rung). Quadratic <code>m = 2</code> roots already span every variable and are built identically.</p>
+    <p>Boundary: the <code>m&middot;2<sup>131</sup></code> candidate-tuple count, with no term for which rows a root is built from &mdash;
+      <strong>flat by construction</strong>. Reference: the previous round&rsquo;s default on <code>main</code>, selected on the same binary with
+      <code>KIC_F4_MULTIPLIERS=occurring</code>, which reproduces that round&rsquo;s frozen runs to the digit. Unit: 64-bit word
+      operations; building a row is uncharged in both arms, as it always was. <strong>Registered</strong> before any run: a new holdout of
+      19 rungs (four cells no ladder had used, including <code>K_0/2^31</code> at 46 unknowns, and fresh targets on the fifteen known
+      admissible cells), a <code>1.3&times;</code> threshold with no rung allowed to rise more than 2%, the frozen ladder, and identical oracle
+      verdicts. <strong>All three targets are met.</strong></p>
+    <p><strong>What the unit missed.</strong> On the registered code the whole logarithms did <code>2.19&times;</code> less oracle work and ran
+      <strong>18% slower</strong> (<code>0.82&times;</code>, interleaved, 95% interval <code>[0.80, 0.84]</code>). A profile found that the new root
+      builder packed rows through an <code>FxHash</code> index. On one word that hash is <code>x&middot;K</code>, which keeps <code>x</code>&rsquo;s
+      trailing zeros, so the tail links&rsquo; monomials (the low-index variables absent) fell into a few buckets. Packing cost
+      151&thinsp;M instructions against 39&thinsp;M for the elimination it served. That is the relabelling pattern of AGENTS.md &sect;3, seen
+      in wall time because <code>S</code> is null here. A post-registration amendment gives <code>pack_rows</code> and the engine&rsquo;s column
+      index the splitmix hasher the cached layouts already used. Every counter of all 60 amendment ladder runs and every whole-log run is
+      identical to the registered runs. After the fix the whole logarithms run <strong>1.41&times;</strong> faster than the reference.
+      Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/tables.md">stage tables</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/comparisons/r2-holdout.cross_tree.candidate-vs-reference.json">R2 holdout</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/comparisons/frozen.cross_tree.candidate-vs-reference.json">frozen ladder</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/screen_wide.json">admissibility screen</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/postfix_identity.md">amendment identity check</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/e2e_tables.md">whole logarithms</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/profile/">profiles</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/support_local_multipliers_20260924/manifest.json">manifest</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md">note</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Word operations, medians of 3 (identical across repetitions, and identical again on the amended binary); ratios are
+      reference / candidate. Every pair accepted by <code>compare_cross_tree.py</code>: the same targets decomposed, none exhausted, every
+      decomposition lifted and verified in the group. Wall is the interleaved rerun on the fixed binary, a practicality note. Stage
+      diagnostic (AGENTS.md &sect;8).</caption>
+    <thead><tr><th>Suite</th><th>Rungs</th><th>Nodes ref &rarr; cand</th><th>Reference</th><th>Support-local (default)</th><th>Per rung</th><th>Floor ratio</th><th>Wall ref/cand</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>frozen ladder (5 quadratic rungs, 1 cubic)</td><td class="n">6</td><td>7,701 &rarr; 7,704</td><td class="n">16,125,634 <span class="was">was 16,696,846 before #690</span></td><td class="n"><strong>15,816,123 (1.02&times;)</strong></td><td class="n">0.9988&ndash;2.01&times; (two rungs +0.12%, +0.05%)</td><td>flat</td><td class="n">1.00&times;</td><td><span class="chip">engineering</span>; T2 met</td></tr>
+      <tr><td>chain ladder (tuning)</td><td class="n">3</td><td>571 &rarr; 573</td><td class="n">7,547,415</td><td class="n"><strong>3,351,378 (2.25&times;)</strong></td><td class="n">2.01&ndash;3.12&times;</td><td>flat</td><td class="n">1.49&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>chain holdout (tuning)</td><td class="n">4</td><td>8,496 &rarr; 8,496</td><td class="n">52,305,605</td><td class="n"><strong>32,779,266 (1.60&times;)</strong></td><td class="n">1.43&ndash;3.30&times;</td><td>flat</td><td class="n">1.29&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>previous round&rsquo;s T1&prime; (tuning)</td><td class="n">9</td><td>24,181 &rarr; 24,189</td><td class="n">225,078,474 <span class="was">was 1,104,534,384 before #690</span></td><td class="n"><strong>136,355,549 (1.65&times;)</strong></td><td class="n">1.46&ndash;3.55&times;</td><td>flat</td><td class="n">1.21&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><strong>R2 holdout</strong> (registered here)</td><td class="n">19</td><td>39,156 &rarr; 39,168</td><td class="n">888,630,176</td><td class="n"><strong>591,938,031 (1.50&times;)</strong></td><td class="n">1.40&ndash;3.57&times;, none rising</td><td>flat</td><td class="n">1.08&times;</td><td><span class="chip">engineering</span>; T1 met</td></tr>
+      <tr><td>oracle-pricing ladder, <code>n = 15</code>, m = 3</td><td class="n">1</td><td></td><td class="n">7,187,062</td><td class="n"><strong>4,736,391 (1.52&times;)</strong></td><td class="n">n = 9, m = 3: 2.06&times;</td><td>flat</td><td class="n"></td><td><span class="chip">engineering</span>; T3 met, zero disagreements</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Whole logarithms, <code>ic run --solver groebner --summands 3</code>; every run recovered the planted <code>k</code> and verified
+      <code>[k]G = Q</code>; trials, relations and oracle word operations identical, seed by seed, on both binaries. <code>S</code> is
+      <strong>null</strong> (the pipeline counts only its oracle in operations), so the wall ratio &mdash; paired, interleaved, geometric mean
+      over seeds with a 95% bootstrap interval &mdash; is a practicality note. The first row is the registered code; the fix changes no
+      counter.</caption>
+    <thead><tr><th>Cell</th><th>Trials = relations</th><th>Oracle word ops, ref &rarr; cand</th><th>Wall ref/cand, registered code</th><th>Wall ref/cand, after the hash fix</th><th>Hash fix alone, reference arm</th><th>S</th></tr></thead>
+    <tbody>
+      <tr><td><code>K_0/2^13</code>, 10 seeds + 5 holdout</td><td class="n">141</td><td class="n">104,865,593 &rarr; 47,966,249 (2.19&times;)</td><td class="n"><strong>0.82&times;</strong> [0.80, 0.84]</td><td class="n"><strong>1.41&times;</strong> [1.37, 1.44]</td><td class="n">1.01&times; [0.99, 1.03]</td><td>null</td></tr>
+      <tr><td><code>K_0/2^9</code>, 5 seeds</td><td class="n">17</td><td class="n">750,778 &rarr; 361,523 (2.08&times;)</td><td class="n">1.05&times; [1.00, 1.10]</td><td class="n"><strong>1.24&times;</strong> [1.18, 1.30]</td><td class="n">1.03&times; [0.96, 1.11]</td><td>null</td></tr>
+    </tbody>
+  </table></div>
+  <p>Retained control: <code>KIC_F4_MULTIPLIERS=occurring</code>. Tests pin that support-local rows are a subset of the occurring-variable
+    rows (equal at <code>m = 2</code>) and that every policy keeps every root with either multiplier choice. Nothing here moves a first fall
+    degree, a solving degree, a fitted exponent or the page&rsquo;s verdict: at <code>n = 15</code>, m = 3 the Gr&ouml;bner oracle is still
+    3&times; enumeration and 60&times; meet in the middle per target. The lesson is for accounting: row building has never been
+    charged, and this round shows an uncharged phase can grow and hide a regression. Pricing it is the next round&rsquo;s first,
+    registered, change.</p>
+  <p>Follow-up, same day: environment lookups moved out of the per-row and per-node loops (a profile found 1.4% of a chained cell&rsquo;s
+    instructions in <code>getenv</code>). Every counter of 30 ladder runs and 120 whole logarithms is identical; the ladders run
+    1.03&ndash;1.07&times; faster in wall time and the whole logarithms are flat &mdash; <span class="chip">engineering</span> on uncounted work, no
+    claim in the unit (<a href="https://github.com/aburan28/crypto/blob/main/research/env_reads_20260924/README.md">evidence</a>).</p>
+</section>
+<!-- END support-local-multipliers-20260924 -->
 <!-- BEGIN ic-tournament-round-0023 -->
 <section class="panel" id="ic-tournament-round-0023">
 <p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>
@@ -5663,5 +5836,326 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0023 -->
+<!-- BEGIN ic-autolab-20260924 -->
+<section id="ic-autolab-20260924">
+<h2>IC autolab — native development checkpoint, 2026-09-24</h2>
+<p>888/960 verified jobs across six audited development screens; 72 retained rejections and an earlier reporting failure are preserved. No promoted winner, operation-count result, ECC2K-130 gain or global-optimum claim. Native wall times have uncontrolled affinity, OS caches and host activity; A/A variation is recorded.</p>
+<p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.json">frozen measurements</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.md">report and limits</a>. S and ratios to an operation floor are unmeasured. Classification: accounting and integration engineering.</p>
+<h3>implementation_v2</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>21.8719</td><td>1.0000</td><td>3.0034</td><td>2.8149</td><td>2.9752</td><td>12/12</td></tr>
+<tr><td>implementation_01</td><td>14.0861</td><td>0.5871</td><td>1.7632</td><td>1.6526</td><td>1.7467</td><td>12/12</td></tr>
+<tr><td>implementation_02</td><td>11.3661</td><td>0.4663</td><td>1.4006</td><td>1.3127</td><td>1.3874</td><td>12/12</td></tr>
+<tr><td>implementation_03</td><td>17.1487</td><td>0.5512</td><td>1.6556</td><td>1.5517</td><td>1.6401</td><td>12/12</td></tr>
+<tr><td>implementation_04</td><td>14.0995</td><td>0.6559</td><td>1.9698</td><td>1.8462</td><td>1.9513</td><td>12/12</td></tr>
+<tr><td>implementation_05</td><td>19.3113</td><td>0.7642</td><td>2.2953</td><td>2.1513</td><td>2.2738</td><td>12/12</td></tr>
+<tr><td>implementation_06</td><td>14.7324</td><td>0.6011</td><td>1.8053</td><td>1.6920</td><td>1.7884</td><td>12/12</td></tr>
+<tr><td>implementation_07</td><td>25.8580</td><td>1.0254</td><td>3.0798</td><td>2.8865</td><td>3.0509</td><td>12/12</td></tr>
+<tr><td>implementation_08</td><td>12.4010</td><td>0.5899</td><td>1.7718</td><td>1.6606</td><td>1.7551</td><td>12/12</td></tr>
+<tr><td>implementation_09</td><td>15.7062</td><td>0.6501</td><td>1.9525</td><td>1.8299</td><td>1.9341</td><td>12/12</td></tr>
+<tr><td>implementation_10</td><td>35.1935</td><td>1.1015</td><td>3.3083</td><td>3.1006</td><td>3.2772</td><td>12/12</td></tr>
+<tr><td>implementation_11</td><td>18.5262</td><td>0.8513</td><td>2.5567</td><td>2.3962</td><td>2.5327</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>19.7760</td><td>0.8546</td><td>2.5668</td><td>2.4057</td><td>2.5427</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>8.0088</td><td>0.3330</td><td>1.0000</td><td>0.9372</td><td>0.9906</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>8.4347</td><td>0.3553</td><td>1.0670</td><td>1.0000</td><td>1.0569</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>7.9121</td><td>0.3361</td><td>1.0095</td><td>0.9461</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>algebra</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>17.5033</td><td>1.0000</td><td>2.4006</td><td>2.8468</td><td>2.0742</td><td>12/12</td></tr>
+<tr><td>algebra_01</td><td>14.9381</td><td>0.8749</td><td>2.1003</td><td>2.4905</td><td>1.8147</td><td>12/12</td></tr>
+<tr><td>algebra_02</td><td>14.6655</td><td>0.8676</td><td>2.0828</td><td>2.4699</td><td>1.7996</td><td>12/12</td></tr>
+<tr><td>algebra_03</td><td>14.4003</td><td>0.9063</td><td>2.1758</td><td>2.5801</td><td>1.8799</td><td>12/12</td></tr>
+<tr><td>algebra_04</td><td>26.4680</td><td>1.5454</td><td>3.7100</td><td>4.3994</td><td>3.2055</td><td>12/12</td></tr>
+<tr><td>algebra_05</td><td>25.9082</td><td>1.8775</td><td>4.5072</td><td>5.3447</td><td>3.8943</td><td>12/12</td></tr>
+<tr><td>algebra_06</td><td>25.2754</td><td>1.1423</td><td>2.7424</td><td>3.2520</td><td>2.3694</td><td>12/12</td></tr>
+<tr><td>algebra_07</td><td>26.2983</td><td>1.5179</td><td>3.6440</td><td>4.3212</td><td>3.1485</td><td>12/12</td></tr>
+<tr><td>algebra_08</td><td>20.8496</td><td>1.1332</td><td>2.7205</td><td>3.2260</td><td>2.3505</td><td>12/12</td></tr>
+<tr><td>algebra_09</td><td>21.6427</td><td>1.2295</td><td>2.9515</td><td>3.5000</td><td>2.5502</td><td>12/12</td></tr>
+<tr><td>algebra_10</td><td>18.0390</td><td>1.1084</td><td>2.6608</td><td>3.1552</td><td>2.2989</td><td>12/12</td></tr>
+<tr><td>algebra_11</td><td>16.4471</td><td>0.9716</td><td>2.3326</td><td>2.7660</td><td>2.0154</td><td>12/12</td></tr>
+<tr><td>algebra_12</td><td>33.6458</td><td>2.0596</td><td>4.9444</td><td>5.8632</td><td>4.2720</td><td>12/12</td></tr>
+<tr><td>algebra_13</td><td>27.8681</td><td>1.5900</td><td>3.8170</td><td>4.5263</td><td>3.2979</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>12.9528</td><td>0.8363</td><td>2.0078</td><td>2.3809</td><td>1.7347</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>7.4675</td><td>0.4166</td><td>1.0000</td><td>1.1858</td><td>0.8640</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>6.1080</td><td>0.3513</td><td>0.8433</td><td>1.0000</td><td>0.7286</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>7.3074</td><td>0.4821</td><td>1.1574</td><td>1.3725</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>factor_base</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>23.3162</td><td>1.0000</td><td>3.0396</td><td>2.7568</td><td>2.9965</td><td>12/12</td></tr>
+<tr><td>factor_base_01</td><td>29.1259</td><td>1.2987</td><td>3.9474</td><td>3.5801</td><td>3.8915</td><td>12/12</td></tr>
+<tr><td>factor_base_02</td><td>28.2757</td><td>1.2220</td><td>3.7142</td><td>3.3687</td><td>3.6616</td><td>12/12</td></tr>
+<tr><td>factor_base_03</td><td>26.6037</td><td>1.0804</td><td>3.2841</td><td>2.9786</td><td>3.2376</td><td>12/12</td></tr>
+<tr><td>factor_base_04</td><td>27.0244</td><td>1.1541</td><td>3.5080</td><td>3.1816</td><td>3.4583</td><td>12/12</td></tr>
+<tr><td>factor_base_05</td><td>29.1676</td><td>1.1071</td><td>3.3651</td><td>3.0520</td><td>3.3174</td><td>12/12</td></tr>
+<tr><td>factor_base_06</td><td>28.1824</td><td>1.2344</td><td>3.7521</td><td>3.4031</td><td>3.6990</td><td>12/12</td></tr>
+<tr><td>factor_base_07</td><td>642.5599</td><td>8.9549</td><td>27.2189</td><td>24.6867</td><td>26.8337</td><td>12/12</td></tr>
+<tr><td>factor_base_08</td><td>599.7235</td><td>6.7610</td><td>20.5505</td><td>18.6387</td><td>20.2597</td><td>12/12</td></tr>
+<tr><td>factor_base_09</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>factor_base_10</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>factor_base_11</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>factor_base_12</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>aa_control</td><td>24.2085</td><td>0.9175</td><td>2.7886</td><td>2.5292</td><td>2.7492</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>7.2721</td><td>0.3290</td><td>1.0000</td><td>0.9070</td><td>0.9858</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>8.1195</td><td>0.3627</td><td>1.1026</td><td>1.0000</td><td>1.0870</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>8.7662</td><td>0.3337</td><td>1.0144</td><td>0.9200</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>union_followup</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>22.8911</td><td>1.0000</td><td>2.6607</td><td>2.8439</td><td>2.5425</td><td>12/12</td></tr>
+<tr><td>union_1</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>6/12</td></tr>
+<tr><td>union_2</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>0/12</td></tr>
+<tr><td>union_3</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>6/12</td></tr>
+<tr><td>union_4</td><td>16.6916</td><td>0.8995</td><td>2.3933</td><td>2.5581</td><td>2.2870</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>19.3925</td><td>0.9468</td><td>2.5192</td><td>2.6926</td><td>2.4073</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>8.0198</td><td>0.3758</td><td>1.0000</td><td>1.0689</td><td>0.9556</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>6.9927</td><td>0.3516</td><td>0.9356</td><td>1.0000</td><td>0.8940</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>9.1493</td><td>0.3933</td><td>1.0465</td><td>1.1185</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>interactions</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>36.2327</td><td>1.0000</td><td>3.8099</td><td>4.0160</td><td>3.8757</td><td>12/12</td></tr>
+<tr><td>combination_01</td><td>23.7385</td><td>0.6503</td><td>2.4777</td><td>2.6117</td><td>2.5204</td><td>12/12</td></tr>
+<tr><td>combination_02</td><td>26.7312</td><td>0.7665</td><td>2.9205</td><td>3.0784</td><td>2.9708</td><td>12/12</td></tr>
+<tr><td>union_4</td><td>38.6873</td><td>0.8036</td><td>3.0618</td><td>3.2274</td><td>3.1146</td><td>12/12</td></tr>
+<tr><td>implementation_01</td><td>28.2180</td><td>0.7802</td><td>2.9727</td><td>3.1334</td><td>3.0239</td><td>12/12</td></tr>
+<tr><td>implementation_10</td><td>35.7428</td><td>0.9813</td><td>3.7386</td><td>3.9408</td><td>3.8031</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>27.4043</td><td>0.9142</td><td>3.4829</td><td>3.6713</td><td>3.5430</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>10.1807</td><td>0.2625</td><td>1.0000</td><td>1.0541</td><td>1.0172</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>9.4395</td><td>0.2490</td><td>0.9487</td><td>1.0000</td><td>0.9651</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>8.1268</td><td>0.2580</td><td>0.9830</td><td>1.0362</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+<h3>interaction_replication</h3>
+<table><thead><tr><th>Variant</th><th>Cold ms</th><th>Paired / incumbent</th><th>/ rho 1</th><th>/ rho 8</th><th>/ rho 32</th><th>Verified</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>38.4235</td><td>1.0000</td><td>4.4269</td><td>3.8557</td><td>4.7951</td><td>12/12</td></tr>
+<tr><td>combination_01</td><td>27.1512</td><td>0.8077</td><td>3.5757</td><td>3.1143</td><td>3.8731</td><td>12/12</td></tr>
+<tr><td>combination_02</td><td>33.2033</td><td>0.8791</td><td>3.8916</td><td>3.3894</td><td>4.2152</td><td>12/12</td></tr>
+<tr><td>union_4</td><td>38.6317</td><td>0.9238</td><td>4.0894</td><td>3.5618</td><td>4.4296</td><td>12/12</td></tr>
+<tr><td>implementation_01</td><td>28.0912</td><td>0.7138</td><td>3.1600</td><td>2.7522</td><td>3.4228</td><td>12/12</td></tr>
+<tr><td>implementation_10</td><td>44.8494</td><td>1.1014</td><td>4.8759</td><td>4.2467</td><td>5.2814</td><td>12/12</td></tr>
+<tr><td>aa_control</td><td>37.3434</td><td>0.8617</td><td>3.8149</td><td>3.3226</td><td>4.1322</td><td>12/12</td></tr>
+<tr><td>rho_w1</td><td>10.3586</td><td>0.2259</td><td>1.0000</td><td>0.8710</td><td>1.0832</td><td>12/12</td></tr>
+<tr><td>rho_w8</td><td>10.6090</td><td>0.2594</td><td>1.1482</td><td>1.0000</td><td>1.2436</td><td>12/12</td></tr>
+<tr><td>rho_w32</td><td>8.5442</td><td>0.2085</td><td>0.9232</td><td>0.8041</td><td>1.0000</td><td>12/12</td></tr>
+</tbody></table>
+</section>
+<!-- END ic-autolab-20260924 -->
+
+<section class="panel" id="toy-symmetry-quotient-20260924">
+<div class="panel-head"><h2>Fixed seven-bit symmetry quotient: exact coverage, solver costs unmeasured <span class="chip">accounting</span></h2></div>
+<p>All 90 complete-enumeration measurements agree with exhaustive point ground truth.
+The unit below is tuple sum checks; the floor counts point multisets for explicit enumeration,
+not a universal solver lower bound. These stage ratios are not ECDLP speedups.
+Gr&ouml;bner degree, F4 matrices, full-DLP S and rho ratios remain unmeasured.</p>
+<table><thead><tr><th>Support</th><th>Variant</th><th>Tuple checks</th><th>Enumeration floor</th><th>Checks / floor</th><th>Checks / ordered</th><th>Solvable targets</th><th>Correctness</th><th>Class</th></tr></thead><tbody>
+<tr><td>orbit-s101</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s101</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s101</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s101</td><td>invariant_lift</td><td>697</td><td>680</td><td>1.025000</td><td>0.206519</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s202</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s202</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s503</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s503</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>orbit-s607</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>115/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>ordinary-s607</td><td>invariant_lift</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>116/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>ordered</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>permutation</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x2</td><td>invariant_lift</td><td>1</td><td>1</td><td>1.000000</td><td>1.000000</td><td>1/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>ordered</td><td>3375</td><td>680</td><td>4.963235</td><td>1.000000</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>permutation</td><td>680</td><td>680</td><td>1.000000</td><td>0.201481</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+<tr><td>linear-d3-x4</td><td>invariant_lift</td><td>799</td><td>680</td><td>1.175000</td><td>0.236741</td><td>58/116</td><td>verified</td><td>accounting</td></tr>
+</tbody></table>
+<p>Same-dimensional invariant coordinate subspaces yield 1 versus 15 factor-base points;
+matching dimension alone does not match the decomposition workload.
+Six invariant-support Frobenius audits pass and four non-invariant controls are rejected.
+The 20 target orbits do not imply 20 independent solver calls or independent relations.</p>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/results/pilot-001/results.json">raw runs</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/results/pilot-001/certificates.json">certificates</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_symmetry_quotient_20260924/RESULTS.md">interpretation and limitations</a>.</p>
+</section>
+
+<section class="panel" id="toy-f5-neighbors-20260924">
+<div class="panel-head"><h2>Fixed eight-bit F5 criterion and descending neighbors: no consistent advantage <span class="chip">accounting</span></h2></div>
+<p>1,280 systems, 7,680 repeated solver executions; all exact row spaces, roots,
+point lifts and four isogeny certificates verified. Neighbor/source completion
+budget: 133 lower, 775 equal, 116 higher. The frozen success condition fails.
+This is a bounded Python reference of the Boolean matrix-F5 row criterion,
+not full signature-based F5 or intrinsic degree of regularity.</p>
+<p>Unit: one at-most-64-bit row XOR, including criterion overhead, summed over
+64 systems per row and all degree budgets, per repetition. Ratios compare the
+same solver, split and encoding on the source. Non-matrix costs and completion
+checks are separate. Full-DLP S, rho/floor ratios and speedup are null for every
+row. These stage costs do not establish an end-to-end improvement.</p>
+<table><thead><tr><th>Split</th><th>Encoding</th><th>Model</th><th>Matrix variant</th><th>Degree range</th><th>Matrix XORs</th><th>Criterion XORs (included)</th><th>Cost/source</th><th>Correctness</th><th>Class</th></tr></thead><tbody>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_224</td><td>f4</td><td>4–7</td><td>148915</td><td>0</td><td>0.996000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_224</td><td>f5</td><td>4–7</td><td>148718</td><td>112</td><td>0.995102</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_225</td><td>f4</td><td>4–7</td><td>127815</td><td>0</td><td>0.854875</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_225</td><td>f5</td><td>4–7</td><td>127359</td><td>567</td><td>0.852185</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_92</td><td>f4</td><td>4–7</td><td>150620</td><td>0</td><td>1.007404</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_92</td><td>f5</td><td>4–7</td><td>150154</td><td>286</td><td>1.004711</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_93</td><td>f4</td><td>4–7</td><td>138967</td><td>0</td><td>0.929464</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>neighbor_93</td><td>f5</td><td>4–7</td><td>138842</td><td>382</td><td>0.929020</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>source</td><td>f4</td><td>4–7</td><td>149513</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>canonical</td><td>source</td><td>f5</td><td>4–7</td><td>149450</td><td>439</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_224</td><td>f4</td><td>4–8</td><td>168543</td><td>0</td><td>1.078654</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_224</td><td>f5</td><td>4–8</td><td>168302</td><td>205</td><td>1.079343</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_225</td><td>f4</td><td>4–8</td><td>153385</td><td>0</td><td>0.981645</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_225</td><td>f5</td><td>4–8</td><td>152576</td><td>789</td><td>0.978490</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_92</td><td>f4</td><td>4–8</td><td>177279</td><td>0</td><td>1.134564</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_92</td><td>f5</td><td>4–8</td><td>176675</td><td>317</td><td>1.133040</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_93</td><td>f4</td><td>4–8</td><td>160471</td><td>0</td><td>1.026995</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>neighbor_93</td><td>f5</td><td>4–8</td><td>160170</td><td>726</td><td>1.027192</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>source</td><td>f4</td><td>4–8</td><td>156253</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>ordered</td><td>source</td><td>f5</td><td>4–8</td><td>155930</td><td>594</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_224</td><td>f4</td><td>4–7</td><td>159486</td><td>0</td><td>1.075653</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_224</td><td>f5</td><td>4–7</td><td>159072</td><td>436</td><td>1.080520</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_225</td><td>f4</td><td>4–7</td><td>143040</td><td>0</td><td>0.964733</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_225</td><td>f5</td><td>4–7</td><td>142426</td><td>1215</td><td>0.967450</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_92</td><td>f4</td><td>4–7</td><td>141676</td><td>0</td><td>0.955534</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_92</td><td>f5</td><td>4–7</td><td>141161</td><td>679</td><td>0.958857</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_93</td><td>f4</td><td>4–7</td><td>146447</td><td>0</td><td>0.987712</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>neighbor_93</td><td>f5</td><td>4–7</td><td>145840</td><td>26</td><td>0.990640</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>source</td><td>f4</td><td>4–7</td><td>148269</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>canonical</td><td>source</td><td>f5</td><td>4–7</td><td>147218</td><td>482</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_224</td><td>f4</td><td>4–8</td><td>140862</td><td>0</td><td>0.832139</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_224</td><td>f5</td><td>4–8</td><td>140443</td><td>500</td><td>0.839222</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_225</td><td>f4</td><td>4–8</td><td>161450</td><td>0</td><td>0.953762</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_225</td><td>f5</td><td>4–8</td><td>160697</td><td>1139</td><td>0.960251</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_92</td><td>f4</td><td>4–8</td><td>178330</td><td>0</td><td>1.053480</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_92</td><td>f5</td><td>4–8</td><td>177693</td><td>1420</td><td>1.061811</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_93</td><td>f4</td><td>4–8</td><td>149907</td><td>0</td><td>0.885572</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>neighbor_93</td><td>f5</td><td>4–8</td><td>149060</td><td>144</td><td>0.890713</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>source</td><td>f4</td><td>4–8</td><td>169277</td><td>0</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+<tr><td>holdout</td><td>ordered</td><td>source</td><td>f5</td><td>4–8</td><td>167349</td><td>1976</td><td>1.000000</td><td>64/64 verified</td><td>accounting</td></tr>
+</tbody></table>
+<p>The neighbors are Frobenius-related; these are transported workloads, not
+independent curve samples. This eight-bit matrix experiment is separate from
+the seven-bit enumeration pilot above; its earlier figures remain unchanged.</p>
+<p>Frozen evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/results/raw.json.gz">raw traces and certificates</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/results/summary.json">summary</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_f5_neighbors_20260924/RESULTS.md">results and limitations</a>.</p>
+</section>
+<section id="toy-binary-formula-audit-20260924">
+<h2>Binary formula coefficient audit — stage diagnostic</h2>
+<p>Accounting control over GF(8), GF(16), and GF(32): 798 systems across 34
+coordinate subspaces. All 798 constant-only ANF comparisons and 219,968
+pointwise Frobenius covariance checks passed. Nonconstant terms were unchanged;
+polynomial-zero counts varied in all 34 subspaces. These are not verified
+rational-point relations, isogeny comparisons, or degree-of-regularity measurements.</p>
+<p>End-to-end operations, S, rho ratio, and speedup: unset.
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_formula_audit_20260924/README.md">Analysis</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_formula_audit_20260924/results.json">raw results</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_formula_audit_20260924/receipt.json">verification receipt</a>.</p>
+</section>
+<!-- BEGIN toy-quotient-controls-20260924 -->
+<section class="panel" id="toy-quotient-controls-20260924">
+<div class="panel-head"><h2>Finite symmetry quotient: three-summand proxy benefit, two-summand regression <span class="chip">accounting</span></h2></div>
+<p>1920/1920 systems preserve exact signed-point multiset coverage. Fresh invariant/ordered Python opcode ratios: 0.257–0.307 for three summands; 1.060–1.316 for two. The frozen uniform-improvement criterion is false.</p>
+<p>Coordinate rescaling alone changes completion degree: 64 lower, 178 equal, 78 higher. In invariant coordinates, all 256 neighbor/source degree comparisons are equal. These are representation-dependent completion budgets, not intrinsic regularity.</p>
+<p>Unit: complete decomposition-call CPython opcode dispatches, including setup,
+encoding, solving, reconstruction and verification; 40 inputs per row. This is
+a Python proxy, not calibrated machine operations. C-internal work, arithmetic-table
+and fixture generation, and independent audit costs are outside this metric.
+Full-DLP S, rho/floor ratios and speedup are null for every row.</p>
+<table><thead><tr><th>Split</th><th>Summands</th><th>Variant</th><th>Python opcodes</th><th>Cost/ordered</th><th>Verified</th><th>Class</th></tr></thead><tbody>
+<tr><td>fresh_a</td><td>2</td><td>canonical</td><td>5246020</td><td>0.956401</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>2</td><td>invariant</td><td>6260311</td><td>1.141316</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>2</td><td>ordered</td><td>5485169</td><td>1.000000</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>2</td><td>relabel</td><td>5493151</td><td>1.001455</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>2</td><td>reverse_equations</td><td>5479988</td><td>0.999055</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>2</td><td>scale</td><td>5362363</td><td>0.977611</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>3</td><td>canonical</td><td>54923758</td><td>0.778149</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>3</td><td>invariant</td><td>19093504</td><td>0.270513</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>3</td><td>ordered</td><td>70582572</td><td>1.000000</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>3</td><td>relabel</td><td>70222527</td><td>0.994899</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>3</td><td>reverse_equations</td><td>70463470</td><td>0.998313</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_a</td><td>3</td><td>scale</td><td>70475959</td><td>0.998490</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>2</td><td>canonical</td><td>5325716</td><td>0.983704</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>2</td><td>invariant</td><td>6378400</td><td>1.178144</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>2</td><td>ordered</td><td>5413940</td><td>1.000000</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>2</td><td>relabel</td><td>5428569</td><td>1.002702</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>2</td><td>reverse_equations</td><td>5419652</td><td>1.001055</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>2</td><td>scale</td><td>5732985</td><td>1.058930</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>3</td><td>canonical</td><td>62268227</td><td>0.900789</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>3</td><td>invariant</td><td>19174073</td><td>0.277377</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>3</td><td>ordered</td><td>69126293</td><td>1.000000</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>3</td><td>relabel</td><td>69799697</td><td>1.009742</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>3</td><td>reverse_equations</td><td>69067074</td><td>0.999143</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>fresh_b</td><td>3</td><td>scale</td><td>68683671</td><td>0.993597</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>2</td><td>canonical</td><td>5222417</td><td>0.927072</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>2</td><td>invariant</td><td>6435392</td><td>1.142396</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>2</td><td>ordered</td><td>5633240</td><td>1.000000</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>2</td><td>relabel</td><td>5665736</td><td>1.005769</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>2</td><td>reverse_equations</td><td>5629381</td><td>0.999315</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>2</td><td>scale</td><td>5721240</td><td>1.015622</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>3</td><td>canonical</td><td>52933993</td><td>0.781225</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>3</td><td>invariant</td><td>18804886</td><td>0.277531</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>3</td><td>ordered</td><td>67757690</td><td>1.000000</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>3</td><td>relabel</td><td>66631636</td><td>0.983381</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>3</td><td>reverse_equations</td><td>67732189</td><td>0.999624</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>frozen</td><td>3</td><td>scale</td><td>73160461</td><td>1.079737</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>2</td><td>canonical</td><td>5271525</td><td>0.950255</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>2</td><td>invariant</td><td>6253184</td><td>1.127210</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>2</td><td>ordered</td><td>5547487</td><td>1.000000</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>2</td><td>relabel</td><td>5525486</td><td>0.996034</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>2</td><td>reverse_equations</td><td>5528986</td><td>0.996665</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>2</td><td>scale</td><td>5812556</td><td>1.047782</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>3</td><td>canonical</td><td>56362851</td><td>0.795766</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>3</td><td>invariant</td><td>19468944</td><td>0.274875</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>3</td><td>ordered</td><td>70828380</td><td>1.000000</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>3</td><td>relabel</td><td>69603641</td><td>0.982708</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>3</td><td>reverse_equations</td><td>70845466</td><td>1.000241</td><td>40/40</td><td>accounting</td></tr>
+<tr><td>previous_holdout</td><td>3</td><td>scale</td><td>75358926</td><td>1.063965</td><td>40/40</td><td>accounting</td></tr></tbody></table>
+<p>Independent Buchberger audits: 240/240 verified. Signature-based F5B: 101 completed, 139 budget-exceeded and retained as incomplete.</p>
+<p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/toy_quotient_controls_20260924/results/run-002/raw.json.gz">raw run</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/toy_quotient_controls_20260924/results/run-002/summary.json">per-model summary</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/toy_quotient_controls_20260924/RESULTS.md">results and limitations</a>. Earlier pilot and neighbor figures above remain unchanged.</p>
+</section>
+<!-- END toy-quotient-controls-20260924 -->
+<section id="toy-binary-elimination-20260924">
+<h2>Tiny binary isogeny-class elimination audit — accounting</h2>
+<p>53 curves, 106 systems, 40,064 point-pair checks, and 53 Frobenius controls.
+All checks passed. Full Boolean-ideal saturation at degree six reflects an
+ambient-dimension floor; it is not degree of regularity.</p>
+<table><thead><tr><th>Field</th><th>Systems</th><th>Unsatisfiable</th><th>Linear completion degree</th></tr></thead>
+<tbody><tr><td>GF(8)</td><td>14</td><td>0</td><td>5</td></tr>
+<tr><td>GF(16)</td><td>30</td><td>10</td><td>4–5</td></tr>
+<tr><td>GF(32)</td><td>62</td><td>36</td><td>4–5</td></tr></tbody></table>
+<p>306 polynomial-zero triples versus 206 rational-lifted triples, including
+transported controls. No matched positive rational-lift comparison between
+nonconjugate curves was found under the frozen matching criteria. No explicit
+isogeny neighbors or F4/F5 traces were constructed. End-to-end costs and speedup remain unset.</p>
+<p>Evidence:
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_elimination_20260924/README.md">analysis and limits</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_elimination_20260924/refined.json">refined raw results</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/toy_binary_elimination_20260924/receipt.json">verification receipt</a>.</p>
+</section>
+<section id="koblitz-structural-fields-20260924">
+<h2>Koblitz fields 2^37, 2^53, 2^83 — structural survey</h2>
+<p>Exact conductor arithmetic for both a=0 and a=1. The original endomorphism
+orders are maximal; the listed conductors belong to the full-field Frobenius orders.</p>
+<table><thead><tr><th>n</th><th>Frobenius-order conductor</th><th>Rational prime descent degrees</th><th>Depth per prime</th></tr></thead>
+<tbody><tr><td>37</td><td>194399</td><td>73, 2663</td><td>1</td></tr>
+<tr><td>53</td><td>68476319</td><td>68476319</td><td>1</td></tr>
+<tr><td>83</td><td>347450761417</td><td>6473, 53676929</td><td>1</td></tr></tbody></table>
+<p>Structural arithmetic only: no neighbor maps or solver runs.
+Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are retained.</p>
+<p><a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_structural_fields_20260924/README.md">Analysis and scope</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_structural_fields_20260924/results.json">exact results</a>,
+<a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_structural_fields_20260924/receipt.json">verification receipt</a>.</p>
+</section>
 </body>
 </html>

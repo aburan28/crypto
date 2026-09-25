@@ -446,6 +446,37 @@ anything in the table above.
 The single-cell caveat on Result 2 is unchanged.  What has changed is
 that the experiment which would lift it is now schedulable.
 
+## Result 4: the ladder at fixed surplus, inconclusive as far as it ran
+
+`research/dreg_fixed_surplus_20260923/` holds everything: a pre-registered
+`m = 3` ladder in four pairs, each pair at one surplus `S = n − 3ℓ`.
+
+- **Random subspaces**, so that `ℓ` is free and `S` can be held fixed.
+- **Each draw's solutions counted exactly** before it is measured, so only
+  unsatisfiable draws are measured, and a non-resolving degree would be a
+  real lower bound.
+
+| pair | `S` | small cell | large cell | registered verdict |
+|---|--:|---|---|---|
+| primary | `−2` | `(7, 3)`: 6 6 6 6 | `(13, 5)`: no finished draw | not testable |
+| | `−1` | `(5, 2)`: 5 5 5 5 | `(11, 4)`: 6 6 6 6 | grows |
+| | `0` | `(9, 3)`: 6 6 6 6 | `(15, 5)`: not started | not testable |
+| | `+1` | `(7, 2)`: 5 5 5 5 | `(13, 4)`: 6 6 6 6 | grows |
+
+**Inconclusive, by the rule registered before the run.** The primary pair's
+large cell needs more than 4.5 uninterrupted hours a draw, and the container
+restarted four times on 2026-09-24. That is a resource limit, not evidence.
+
+**Read the two "grows" with their confound.** Both start from `ℓ = 2`, the
+only cells at 5. Every `ℓ ≥ 3` cell resolves at 6: `(7, 3)`, `(9, 3)`,
+`(11, 4)` and `(13, 4)`, from 16 to 25 unknowns. So the growth may be an
+`ℓ = 2` floor rather than field size. The primary pair, `ℓ ≥ 3` at both
+ends, is the one that separates the two readings.
+
+FFD is 3 on 22 of 24 draws. Random subspaces reproduce Result 3's 6 at
+`(7, 3)`. Wherever a control finished, it resolved at least one degree above
+the Semaev draws.
+
 ## Reproducing
 
 ```sh
@@ -491,7 +522,13 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
   above already answers the control question one degree shallower.
 - Give `dreg_sweep` an `--n-min`.  Every attempt at `n = 7` with controls
   re-paid `n = 5` first and died there; one flag would have made the cell
-  reachable at this scale.
+  reachable at this scale.  **Done differently:** `examples/dreg_ladder.rs`
+  takes explicit cells, each from its own seed, and `--unsat-index` measures
+  a single draw (Result 4).
+- **Run the primary pair `(7, 3) → (13, 5)` to completion** on a machine
+  that stays up: `research/dreg_fixed_surplus_20260923/run_queue.py` resumes
+  after interruptions.  It is the pair that separates field-size growth from
+  the `ℓ = 2` floor (Result 4).
 - **Match the surplus, not the unknown count, when pairing cells.**  The
   `n = 9` versus `n = 15` comparison proposed above is confounded a third
   way: those cells carry surplus `n − mℓ` of `−9` and `+3`, opposite signs
@@ -503,3 +540,6 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 - Sparse elimination (Wiedemann/Lanczos) in place of dense `rref_f2` is
   what would move the frontier; the dense pass is the binding cost, and
   `research/notes/index-calculus/RESEARCH_GROEBNER_F4.md` already lists it as missing.
+  **Superseded:** structured sparse elimination landed ("Sparse
+  elimination" above). The frontier is now wall time. A degree-6 matrix at
+  28 unknowns takes more than 4.5 hours on a four-core container (Result 4).

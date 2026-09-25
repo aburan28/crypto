@@ -1,0 +1,15 @@
+{
+  "status": "EXACT_MATCH",
+  "systems": 1280,
+  "repetitions": 3,
+  "dependency": "research/toy_f5_neighbors_20260924/results/raw.json.gz",
+  "dependency_compressed_sha256": "6f9780c3ff52414ac20e9e726e60b04166f97844c4a8c6a17b18ba8b22c0e791",
+  "normalized_raw_sha256": "bd98437f910a1feca6f55eaee4ba359f5e3372862aba5b672c6c8db355e4236c",
+  "excluded_fields": [
+    "elapsed_seconds"
+  ],
+  "reproduce": [
+    "python3 research/toy_f5_neighbors_20260924/experiment.py --output /tmp/previous-f5-replay",
+    "python3 research/toy_f5_neighbors_20260924/verify_replay.py /tmp/previous-f5-replay"
+  ]
+}

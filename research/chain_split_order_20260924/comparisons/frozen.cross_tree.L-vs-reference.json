@@ -1,0 +1,168 @@
+{
+  "kind": "cross-tree comparison: same instances, same verified answers, splitting tree may differ",
+  "unit": "64-bit word operations",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "curve",
+    "m",
+    "ell",
+    "factor_base_points",
+    "targets",
+    "decomposed",
+    "oversize",
+    "exhausted"
+  ],
+  "repetitions": {
+    "reference": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_0/2^9",
+      "m": 2,
+      "ell": 6,
+      "targets": 40,
+      "decomposed": 39,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 219979,
+        "reductions": 338,
+        "splits": 185,
+        "infeasible_branches": 22,
+        "wall_ns": 20096165
+      },
+      "candidate": {
+        "word_ops": 203411,
+        "reductions": 289,
+        "splits": 185,
+        "infeasible_branches": 21,
+        "wall_ns": 18876368
+      },
+      "word_op_ratio": 1.0814508556567737,
+      "wall_ratio": 1.0646203231469105
+    },
+    {
+      "curve": "K_0/2^9",
+      "m": 3,
+      "ell": 6,
+      "targets": 16,
+      "decomposed": 15,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 1142867,
+        "reductions": 382,
+        "splits": 196,
+        "infeasible_branches": 67,
+        "wall_ns": 46460488
+      },
+      "candidate": {
+        "word_ops": 889201,
+        "reductions": 356,
+        "splits": 196,
+        "infeasible_branches": 67,
+        "wall_ns": 37071113
+      },
+      "word_op_ratio": 1.2852740831375584,
+      "wall_ratio": 1.253280094395871
+    },
+    {
+      "curve": "K_0/2^13",
+      "m": 2,
+      "ell": 12,
+      "targets": 40,
+      "decomposed": 40,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 5295231,
+        "reductions": 520,
+        "splits": 440,
+        "infeasible_branches": 0,
+        "wall_ns": 98643446
+      },
+      "candidate": {
+        "word_ops": 5273806,
+        "reductions": 520,
+        "splits": 440,
+        "infeasible_branches": 0,
+        "wall_ns": 105357997
+      },
+      "word_op_ratio": 1.004062530931172,
+      "wall_ratio": 0.9362691851478535
+    },
+    {
+      "curve": "K_1/2^15",
+      "m": 2,
+      "ell": 4,
+      "targets": 32,
+      "decomposed": 0,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 70779,
+        "reductions": 32,
+        "splits": 0,
+        "infeasible_branches": 32,
+        "wall_ns": 5387494
+      },
+      "candidate": {
+        "word_ops": 70779,
+        "reductions": 32,
+        "splits": 0,
+        "infeasible_branches": 32,
+        "wall_ns": 5509470
+      },
+      "word_op_ratio": 1.0,
+      "wall_ratio": 0.9778606653634561
+    },
+    {
+      "curve": "K_1/2^17",
+      "m": 2,
+      "ell": 8,
+      "targets": 32,
+      "decomposed": 7,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 1985821,
+        "reductions": 1769,
+        "splits": 876,
+        "infeasible_branches": 879,
+        "wall_ns": 108252678
+      },
+      "candidate": {
+        "word_ops": 1982352,
+        "reductions": 1769,
+        "splits": 876,
+        "infeasible_branches": 879,
+        "wall_ns": 113552448
+      },
+      "word_op_ratio": 1.0017499414836517,
+      "wall_ratio": 0.9533275583807758
+    },
+    {
+      "curve": "K_1/2^23",
+      "m": 2,
+      "ell": 11,
+      "targets": 16,
+      "decomposed": 9,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 7982169,
+        "reductions": 4876,
+        "splits": 2447,
+        "infeasible_branches": 2410,
+        "wall_ns": 316083663
+      },
+      "candidate": {
+        "word_ops": 7974980,
+        "reductions": 4876,
+        "splits": 2447,
+        "infeasible_branches": 2410,
+        "wall_ns": 307206704
+      },
+      "word_op_ratio": 1.0009014442669448,
+      "wall_ratio": 1.0288957203225617
+    }
+  ],
+  "total_word_op_ratio": 1.0184401149920197,
+  "total_wall_ratio": 1.0125087780417823,
+  "min_word_op_ratio": 1.0
+}

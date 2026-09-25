@@ -144,8 +144,9 @@ use crate::cryptanalysis::crossbred::{
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
-    matrix_f4_f2, solve_boolean_system_filtered, split_rule_default, FieldStructure, SolveOptions,
-    SolveStats, SolverEngine,
+    chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
+    solve_boolean_system_filtered, split_rule_default, FieldStructure, SolveOptions, SolveStats,
+    SolverEngine,
 };
 use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
@@ -2634,8 +2635,8 @@ pub struct ScanScratch {
     gather: Vec<FastPoint>,
     /// `target − P_k` for each scanned summand.
     rests: Vec<FastPoint>,
-    /// On a folded table, the slope of each rest, so its ordinate can be
-    /// completed only if the filter admits its key.
+    /// On a folded table, each rest's slope, so the few rests the filter
+    /// admits can be completed; empty otherwise.
     lambdas: Vec<u64>,
     /// Workspace for the shared-inversion batch addition.
     batch: BatchScratch,
@@ -4287,12 +4288,10 @@ impl PairSumTable {
         rests.clear();
         lambdas.clear();
         // On a folded table the key reads only the abscissa, so the rests
-        // are formed without their ordinates — by the batched kernel, eight
-        // lanes wide on AVX-512 — and only those the filter admits are
-        // completed, exactly as the full scan does.
-        let fold = self.fold;
+        // are formed without their ordinates and only the ones the filter
+        // admits are completed, as the full scan does.
         let mut add = |summands: &[FastPoint], rests: &mut Vec<FastPoint>| {
-            if fold {
+            if self.fold {
                 self.curve
                     .add_many_lazy(target, summands, rests, lambdas, batch);
             } else {
@@ -4689,7 +4688,29 @@ pub fn groebner_decompose(
         split_rule: split_rule_default(),
     };
     let mut found: Option<Vec<usize>> = None;
-    let (_, stats) = solve_boolean_system_filtered(&sys.equations, sys.n_vars, &opts, |root| {
+    // A chain is solved in its interleaved order, so the splitter fixes
+    // the last summand first and the intermediate points are eliminated
+    // rather than split on; the roots are renamed back to the layout the
+    // lift reads.  The system's own layout is untouched.
+    let order = (m >= 3 && chain_order_interleaved(opts.resolve().split_rule))
+        .then(|| sys.interleaved_order(kc.n));
+    let reordered: Vec<F2BoolPoly>;
+    let equations = match &order {
+        Some(perm) => {
+            reordered = sys
+                .equations
+                .iter()
+                .map(|e| permute_poly(e, perm))
+                .collect();
+            &reordered
+        }
+        None => &sys.equations,
+    };
+    let back = order.as_deref().map(invert_permutation);
+    let (_, stats) = solve_boolean_system_filtered(equations, sys.n_vars, &opts, |root| {
+        let root = back
+            .as_deref()
+            .map_or(root, |inverse| permute_mask(root, inverse));
         let xs: Vec<F2mElement> = (0..m)
             .map(|i| sys.summand_x(&fb.subspace_basis, root, i, kc.n))
             .collect();
@@ -8590,12 +8611,23 @@ pub fn solve_factor_base_logs_from_relations(
 }
 
 /// What an individual-logarithm descent did.
+#[derive(Clone, Debug, Serialize)]
+pub struct DescentRelation {
+    /// The actual probe `[a]G + [b]Q`, before scalar recovery.
+    pub a: u64,
+    pub b: u64,
+    /// Indices in the materialized factor base, summing to the probe.
+    pub points: Vec<usize>,
+}
+
+/// A descent result and the relation from which it was derived.
 #[derive(Clone, Debug, Default)]
 pub struct IndividualLogReport {
     /// `[a]G + [b]Q` probes drawn before one descended.
     pub trials: usize,
     /// The recovered logarithm, if the descent succeeded and verified.
     pub log: Option<BigUint>,
+    pub relation: Option<DescentRelation>,
 }
 
 /// **Recover `log_G Q` with one relation, reusing a solved table.**
@@ -8843,8 +8875,14 @@ impl<'a> IndividualLogSolver<'a> {
                 pair.prefetch_key(key);
             }
             for ((state, (a, b)), &key) in states.iter().zip(coefficients.iter()).zip(&keys) {
+                if report.trials >= self.opts.max_trials {
+                    break;
+                }
                 report.trials += 1;
                 if state.infinity {
+                    if !self.opts.allow_direct_relation {
+                        continue;
+                    }
                     // [a]G + [b]Q = O already yields d.
                     if let Some(d) = solve_for_d(
                         &BigUint::from(*a),
@@ -8852,6 +8890,11 @@ impl<'a> IndividualLogSolver<'a> {
                         &self.kc.subgroup_order,
                     ) {
                         if self.kc.mul(self.kc.generator(), &d) == *q {
+                            report.relation = Some(DescentRelation {
+                                a: *a,
+                                b: *b,
+                                points: Vec::new(),
+                            });
                             return Some(Some(d));
                         }
                     }
@@ -8864,6 +8907,11 @@ impl<'a> IndividualLogSolver<'a> {
                     continue;
                 };
                 if let Some(d) = self.logarithm_from(q, &idxs, *a, *b) {
+                    report.relation = Some(DescentRelation {
+                        a: *a,
+                        b: *b,
+                        points: idxs,
+                    });
                     return Some(Some(d));
                 }
             }
@@ -8918,10 +8966,18 @@ impl<'a> IndividualLogSolver<'a> {
                 Probe::Decomposed(idxs) => idxs,
                 Probe::Miss => continue,
                 Probe::Degenerate => {
+                    if !self.opts.allow_direct_relation {
+                        continue;
+                    }
                     // Degenerate relation [a]G + [b]Q = O already yields d.
                     if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
                         if kc.mul(g, &d) == *q {
                             report.log = Some(d.clone());
+                            report.relation = Some(DescentRelation {
+                                a,
+                                b,
+                                points: Vec::new(),
+                            });
                             return Some((d, report));
                         }
                     }
@@ -8955,6 +9011,11 @@ impl<'a> IndividualLogSolver<'a> {
             let d = (numerator * hb_inv) % r;
             if kc.mul(g, &d) == *q {
                 report.log = Some(d.clone());
+                report.relation = Some(DescentRelation {
+                    a: a.to_u64_digits()[0],
+                    b: b.to_u64_digits()[0],
+                    points: idxs,
+                });
                 return Some((d, report));
             }
             // A non-matching d means this factor base cannot place Q in the
@@ -9730,6 +9791,65 @@ mod tests {
             solver.solve(&BinaryPoint::Infinity).unwrap().0,
             BigUint::zero()
         );
+    }
+
+    #[test]
+    fn descent_certificates_bind_actual_probes_and_trial_caps() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let opts = KoblitzIcOptions {
+            m: 2,
+            strategy: DecompositionStrategy::PairTable,
+            allow_direct_relation: false,
+            ..KoblitzIcOptions::default()
+        };
+        let (table, _) = solve_factor_base_logs(&kc, &fb, &opts).unwrap();
+        let pair = PairSumTable::build(&kc, &fb).unwrap();
+        for strategy in [
+            DecompositionStrategy::PairTable,
+            DecompositionStrategy::Enumerate,
+        ] {
+            let options = KoblitzIcOptions {
+                strategy,
+                ..opts.clone()
+            };
+            let solver = IndividualLogSolver::new(&kc, &fb, &table, &options, Some(&pair)).unwrap();
+            for d in [1u64, 2, 17, 31, 58] {
+                let q = kc.mul(kc.generator(), &BigUint::from(d));
+                let (found, report) = solver.solve(&q).expect("certified descent");
+                assert_eq!(found, BigUint::from(d));
+                let relation = report.relation.expect("actual relation retained");
+                assert_eq!(relation.points.len(), options.m);
+                let sum = relation
+                    .points
+                    .iter()
+                    .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                assert_eq!(
+                    sum,
+                    kc.add(
+                        &kc.mul(kc.generator(), &BigUint::from(relation.a)),
+                        &kc.mul(&q, &BigUint::from(relation.b))
+                    )
+                );
+            }
+        }
+        // Inspect exhausted walk reports too: a 64-way batch must not silently
+        // spend 64 probes when the declared budget is only one.
+        let options = KoblitzIcOptions {
+            max_trials: 1,
+            ..opts
+        };
+        let solver = IndividualLogSolver::new(&kc, &fb, &table, &options, Some(&pair)).unwrap();
+        for d in 1..100u64 {
+            let q = kc.mul(kc.generator(), &BigUint::from(d));
+            let mut report = IndividualLogReport::default();
+            solver.solve_by_walking(&q, &mut report);
+            assert!(report.trials <= 1);
+            assert!(report
+                .relation
+                .as_ref()
+                .is_none_or(|rel| !rel.points.is_empty()));
+        }
     }
 
     #[test]
@@ -11687,6 +11807,66 @@ mod tests {
             }
         }
         assert!(compared >= 1500, "the sweep shrank: {compared} comparisons");
+    }
+
+    /// On a folded table a scan forms its rests without ordinates and
+    /// completes only the ones the filter admits.  It must find exactly
+    /// what the same scan finds on the full table, which forms them whole:
+    /// for a wrapping window and for a scattered index list alike.
+    #[test]
+    fn a_folded_table_s_scan_finds_what_the_full_table_s_scan_finds() {
+        for (degree, points) in [(19u32, 300usize), (31, 400)] {
+            let kc = KoblitzCurve::new(0, degree).unwrap();
+            let fb = build_subgroup_orbit_factor_base(&kc, 3, points).unwrap();
+            let full = PairSumTable::build_full(&kc, &fb).unwrap();
+            let folded = PairSumTable::build_within(
+                &kc,
+                &fb,
+                PairSumTable::folded_byte_size(fb.signed_orbits.len(), fb.points.len(), kc.n),
+            )
+            .unwrap();
+            assert!(
+                folded.is_folded(),
+                "degree {degree}: expected the fold tier"
+            );
+            let fc = FastCurve::new(&kc.curve).unwrap();
+            let g = fc.lift(kc.generator());
+            let base = fb.points.len();
+            let len = base / 4;
+            let idxs: Vec<u32> = (0..base as u32).filter(|i| i % 5 == 2).collect();
+            let (mut scratch_full, mut scratch_folded) =
+                (ScanScratch::default(), ScanScratch::default());
+            let mut found = 0usize;
+            for t in 1u64..300 {
+                let target = fc.mul_u64(g, t);
+                for scan in [
+                    Scan::Cyclic {
+                        start: base - len / 2,
+                        len,
+                    },
+                    Scan::Indices(&idxs),
+                ] {
+                    let mut a = Vec::new();
+                    full.witnesses_fast_scan(target, 3, scan, &mut scratch_full, &mut |w| {
+                        a.push(w.to_vec());
+                        true
+                    });
+                    let mut b = Vec::new();
+                    folded.witnesses_fast_scan(target, 3, scan, &mut scratch_folded, &mut |w| {
+                        b.push(w.to_vec());
+                        true
+                    });
+                    a.sort();
+                    b.sort();
+                    assert_eq!(a, b, "degree {degree}, t = {t}: the scans disagree");
+                    found += a.len();
+                }
+            }
+            assert!(
+                found > 0,
+                "degree {degree}: the scans found nothing to compare"
+            );
+        }
     }
 
     /// The whole point of an index scan: every witness it returns has

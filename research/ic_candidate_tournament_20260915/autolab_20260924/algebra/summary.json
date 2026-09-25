@@ -1,0 +1,387 @@
+{
+  "all_jobs_verified": true,
+  "global_optimum_claim": false,
+  "next_action": "Retain distinct mechanisms; run actual combinations on fresh development cases. Freeze one challenger before confirmation.",
+  "promotion_eligible": false,
+  "reason": "No instruction accounting, held-out confirmation, or baseline quality certification.",
+  "retained_candidates": [
+    "incumbent",
+    "algebra_01",
+    "algebra_02",
+    "algebra_03",
+    "algebra_04",
+    "algebra_05",
+    "algebra_06",
+    "algebra_07",
+    "algebra_08",
+    "algebra_09",
+    "algebra_10",
+    "algebra_11",
+    "algebra_12",
+    "algebra_13"
+  ],
+  "status": "DEVELOPMENT_DIAGNOSTIC",
+  "table": [
+    {
+      "S": null,
+      "arm": "incumbent",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.0,
+      "failures": [],
+      "median_cold_wall_seconds": 0.017503312512417324,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_01",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.8534456259437724,
+      "failures": [],
+      "median_cold_wall_seconds": 0.014938125503249466,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_02",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.8378723458868182,
+      "failures": [],
+      "median_cold_wall_seconds": 0.014665541515569203,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_03",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.8227169002825353,
+      "failures": [],
+      "median_cold_wall_seconds": 0.014400271014892496,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_04",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.5121709383252182,
+      "failures": [],
+      "median_cold_wall_seconds": 0.02646800050570164,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_05",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.4801888780762387,
+      "failures": [],
+      "median_cold_wall_seconds": 0.025908208510372788,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_06",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.4440362059719174,
+      "failures": [],
+      "median_cold_wall_seconds": 0.025275416992371902,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_07",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.5024739447862672,
+      "failures": [],
+      "median_cold_wall_seconds": 0.026298270997358486,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_08",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.1911804968057538,
+      "failures": [],
+      "median_cold_wall_seconds": 0.020849604494287632,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_09",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.2364921494301255,
+      "failures": [],
+      "median_cold_wall_seconds": 0.021642708510626107,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_10",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.0306025503464227,
+      "failures": [],
+      "median_cold_wall_seconds": 0.018038958514807746,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_11",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.9396590496505983,
+      "failures": [],
+      "median_cold_wall_seconds": 0.016447146001155488,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_12",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.9222528014092022,
+      "failures": [],
+      "median_cold_wall_seconds": 0.03364579151093494,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "algebra_13",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.5921605118475413,
+      "failures": [],
+      "median_cold_wall_seconds": 0.02786808300879784,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "aa_control",
+      "base_sizes": [
+        55,
+        73
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.740021837892003,
+      "failures": [],
+      "median_cold_wall_seconds": 0.012952833494637161,
+      "mode": "ic",
+      "rank_range": [
+        2,
+        3
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w1",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.4266347290240371,
+      "failures": [],
+      "median_cold_wall_seconds": 0.007467520990758203,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w8",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.34896134622647634,
+      "failures": [],
+      "median_cold_wall_seconds": 0.006107979497755878,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w32",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.41748643257664225,
+      "failures": [],
+      "median_cold_wall_seconds": 0.0073073954990832135,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    }
+  ],
+  "unit": "complete cold child wall seconds"
+}

@@ -1,0 +1,168 @@
+{
+  "kind": "cross-tree comparison: same instances, same verified answers, splitting tree may differ",
+  "unit": "64-bit word operations",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "curve",
+    "m",
+    "ell",
+    "factor_base_points",
+    "targets",
+    "decomposed",
+    "oversize",
+    "exhausted"
+  ],
+  "repetitions": {
+    "reference": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_0/2^9",
+      "m": 2,
+      "ell": 6,
+      "targets": 40,
+      "decomposed": 39,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 203411,
+        "reductions": 289,
+        "splits": 185,
+        "infeasible_branches": 21,
+        "wall_ns": 16878228
+      },
+      "candidate": {
+        "word_ops": 201881,
+        "reductions": 290,
+        "splits": 186,
+        "infeasible_branches": 21,
+        "wall_ns": 17567819
+      },
+      "word_op_ratio": 1.0075787221184758,
+      "wall_ratio": 0.9607469202636936
+    },
+    {
+      "curve": "K_0/2^9",
+      "m": 3,
+      "ell": 6,
+      "targets": 16,
+      "decomposed": 15,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 620306,
+        "reductions": 215,
+        "splits": 152,
+        "infeasible_branches": 3,
+        "wall_ns": 28845206
+      },
+      "candidate": {
+        "word_ops": 308276,
+        "reductions": 217,
+        "splits": 152,
+        "infeasible_branches": 2,
+        "wall_ns": 26618848
+      },
+      "word_op_ratio": 2.0121773994731993,
+      "wall_ratio": 1.0836384053885428
+    },
+    {
+      "curve": "K_0/2^13",
+      "m": 2,
+      "ell": 12,
+      "targets": 40,
+      "decomposed": 40,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 5273806,
+        "reductions": 520,
+        "splits": 440,
+        "infeasible_branches": 0,
+        "wall_ns": 79045171
+      },
+      "candidate": {
+        "word_ops": 5273806,
+        "reductions": 520,
+        "splits": 440,
+        "infeasible_branches": 0,
+        "wall_ns": 85130810
+      },
+      "word_op_ratio": 1.0,
+      "wall_ratio": 0.9285142594085503
+    },
+    {
+      "curve": "K_1/2^15",
+      "m": 2,
+      "ell": 4,
+      "targets": 32,
+      "decomposed": 0,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 70779,
+        "reductions": 32,
+        "splits": 0,
+        "infeasible_branches": 32,
+        "wall_ns": 4921017
+      },
+      "candidate": {
+        "word_ops": 68049,
+        "reductions": 32,
+        "splits": 0,
+        "infeasible_branches": 32,
+        "wall_ns": 6138614
+      },
+      "word_op_ratio": 1.0401181501565049,
+      "wall_ratio": 0.8016495254466236
+    },
+    {
+      "curve": "K_1/2^17",
+      "m": 2,
+      "ell": 8,
+      "targets": 32,
+      "decomposed": 7,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 1982352,
+        "reductions": 1769,
+        "splits": 876,
+        "infeasible_branches": 879,
+        "wall_ns": 90299941
+      },
+      "candidate": {
+        "word_ops": 1984783,
+        "reductions": 1769,
+        "splits": 876,
+        "infeasible_branches": 879,
+        "wall_ns": 96029173
+      },
+      "word_op_ratio": 0.9987751809643673,
+      "wall_ratio": 0.9403386302202145
+    },
+    {
+      "curve": "K_1/2^23",
+      "m": 2,
+      "ell": 11,
+      "targets": 16,
+      "decomposed": 9,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 7974980,
+        "reductions": 4876,
+        "splits": 2447,
+        "infeasible_branches": 2410,
+        "wall_ns": 262517243
+      },
+      "candidate": {
+        "word_ops": 7979328,
+        "reductions": 4876,
+        "splits": 2447,
+        "infeasible_branches": 2410,
+        "wall_ns": 262817199
+      },
+      "word_op_ratio": 0.9994550919576185,
+      "wall_ratio": 0.9988586896095791
+    }
+  ],
+  "total_word_op_ratio": 1.0195693344064156,
+  "total_wall_ratio": 0.976136762644454,
+  "min_word_op_ratio": 0.9987751809643673
+}

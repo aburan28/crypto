@@ -334,7 +334,7 @@ What ships behind it (`ic bench --list` prints each one's parameters):
 | `f4-f2` | Faugère's F4 over `F_2[v]/(v² − v)`: normal strategy, Gebauer–Möller criteria, the field products `v·g` as pairs, symbolic preprocessing, bit-packed elimination; a full reduced basis, solutions read off its linear elements ([`pq_f4_f2.rs`](../../src/cryptanalysis/pq_f4_f2.rs)) | word XORs (elimination only) | matrix size; the budget |
 | `matrix-f4` | the Koblitz oracle's hybrid: Macaulay matrices to a fixed degree (`max_degree`, default 3), propagation, splitting (`split`) | word XORs (elimination only) | `node_budget` |
 | `matrix-f5` | the same, leaving out the rows the Boolean F5 criterion predicts to reduce to zero | word XORs (elimination only) | `node_budget` |
-| `inherited-f4` | the same, children specialising their parent's reduced basis | word XORs (elimination and specialisation only) | `node_budget` |
+| `inherited-f4` | the same, children specialising their parent's reduced basis | word XORs (elimination, specialisation and linear elimination only) | `node_budget` |
 | `crossbred-f2` | Joux–Vitse: a Macaulay left kernel at degree `D`, then `2^k` bit-sliced linear solves | word operations (partial) | parameters that do not fit the system are a budget verdict |
 | `buchberger-f2` | Buchberger over the boolean ring, one pair at a time, coprime and chain criteria, closed under the field equations since 34154ed9 — the frozen rows of ledger §14–§17 were measured on the earlier pair-only engine, whose degree is an upper bound (§17.1, §17.7) | monomial operations | the budget; enumerates for solutions up to 26 unknowns |
 | `xl-f2` | XL: multiply out to degree `n_vars`, linearise | monomial operations (modelled) | declines above 10 unknowns |
@@ -640,6 +640,16 @@ worse than none:
 - **No iterative matrix.** Two eliminations ship; Wiedemann and Lanczos
   are open, and the trait is written so that a matrix-vector product is
   a legitimate `work_unit`.
+- **No algebraic oracle on prime-field curves.** The prime regime has
+  only the table oracles (`subtract`, `mitm`), whose family law is
+  `Θ(r^{1/6})` above rho. The one published algebraic mechanism is
+  Petit–Kosters–Messeng's tower factor base; its design, and the test
+  on the solver axis that decides whether to build it end to end, are in
+  [`RESEARCH_PKM_TOWER_ORACLE.md`](../../research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md).
+  A pilot of that test (§10 there) found F4's solving degree flat, where
+  linear growth in `N` had been pre-registered: 4–5 for `m = 2` through
+  `N = 18`, and 5–6 for `m = 3` through `N = 12`. It reads inconclusive
+  until `N` is extended.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
