@@ -26,4 +26,5 @@ jobs:
           receipt=research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/receipt.json
           if test -f "$receipt"; then
             python3 research/notes/ecc2k130/rotated_s3_candidate_20260925/ci_replay.py --evidence "$receipt"
+            python3 research/notes/ecc2k130/rotated_s3_candidate_20260925/archive_check.py
           fi

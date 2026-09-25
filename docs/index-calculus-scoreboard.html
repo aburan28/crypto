@@ -6712,6 +6712,25 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-m56-export-gate-20260925 -->
+<!-- BEGIN ecc2k130-rotated-s3-candidate-20260925 -->
+<section class="panel" id="ecc2k130-rotated-s3-candidate-20260925">
+  <div class="panel-head">
+    <h2>Recursive S3 affine candidates: exact toy lifts pass, one O-prefix witness is missed <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/774">PR #774</a> freezes the same 16 subgroup Q targets and 64 exact Q+T branches as #770, solves every affine recursive-S3 root for every rational rotated x-mask tuple, and independently rebuilds the complete signed-point oracle with separate field arithmetic. The 18 affine candidate paths all lift to their specific full target; no all-affine witness is missed. One additional n = 13 exact witness has its first two factors summing to O, so an affine-only chain cannot express it. An absent affine-chain model is therefore not full PDP UNSAT.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exhaustive toy semantic counts. The correctness boundary is zero candidate-only masks and complete recovery of all-affine witnesses; both arms meet it. Trace acceptance is an input-mask filter count, not measured solver savings. Full-DLP S and rho ratios remain unset.</caption>
+    <thead><tr><th>Toy arm</th><th>Rational x masks / point tuples</th><th>Trace-accepted masks per target parity</th><th>Affine S3 paths / true all-affine tuples</th><th>Exact O-prefix tuples / exceptional-only masks</th><th>Candidate-only masks / unliftable paths</th><th>Producer / independent verifier wall s</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>243 / 3,125</td><td>121 or 122 / 243</td><td>8 / 8</td><td>1 / 1</td><td>0 / 0</td><td>0.212 / 0.160</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>4,096 / 117,649</td><td>2,048 / 4,096</td><td>10 / 10</td><td>0 / 0</td><td>0 / 0</td><td>14.024 / 9.934</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The n = 13 exceptional-only mask <code>[0,0,0,2,1]</code> has an exact Q+O witness whose first two points are both (0,1) and sum to O. The first independent replay stopped on a string-versus-integer JSON key mismatch; its raw failure and old freeze were retained before a corrected replay passed. The next gate must encode infinity/inverse branches and prove direct-versus-chain model equivalence before SAT, FES, WDSat, F4 or F5 timing. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_candidate_20260925/RESULT.md">Decision and full cost ledger</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/README.md">raw replay receipts</a>. This is semantic accounting, not a measured ECC2K-130 attack improvement.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-s3-candidate-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
