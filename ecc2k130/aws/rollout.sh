@@ -12,6 +12,7 @@
 #   ./rollout.sh activate <prefix>           next kernelVersion, then point
 #   ./rollout.sh activate --from-version N   re-activate that record as a new version
 #   ./rollout.sh wait [prefix]               until walking slots heartbeat the new key
+#   ./rollout.sh max-iters N                 raise campaign.json maxIters only (no rollout)
 #
 # Prefix is bin/<16-hex> (no trailing /ecc2k130).
 # kernelProtocol ecc2k-kernel-v1 is the client pointer. It does not
@@ -284,11 +285,39 @@ EOF
     done
 }
 
+# Raise campaign.json maxIters and change nothing else (rollout.py
+# maxItersReasons says what it refuses: a lower value, a strict campaign).
+# The write is conditional on the ETag read, so a campaign.json that moved
+# meanwhile is never overwritten.  Workers keep walking; each takes the new
+# guard when its client next restarts (restartHours, or an activate) and
+# resumes its checkpoint -- no point or checkpoint is invalidated.
+cmd_max_iters() {
+    local value=${1:?usage: $0 max-iters N   (4294967296 is 2^32)}
+    local work etag
+    work=$(mktemp -d)
+    etag=$(aws s3api get-object --bucket "$BUCKET" --key campaign.json "$work/campaign.json" \
+               --query ETag --output text)
+    cp "$work/campaign.json" "$work/campaign.before.json"
+    python3 "$HERE/rollout.py" max-iters --campaign "$work/campaign.json" --value "$value" \
+        || { echo "max-iters refused; campaign.json not rewritten" >&2; rm -rf "$work"; exit 2; }
+    if ! aws s3api put-object --bucket "$BUCKET" --key campaign.json --body "$work/campaign.json" \
+            --content-type application/json --if-match "$etag" >/dev/null; then
+        echo "put refused (campaign.json changed since it was read, or this aws CLI lacks" \
+             "--if-match); nothing written" >&2
+        rm -rf "$work"
+        exit 1
+    fi
+    echo "campaign.json maxIters is now $value; the previous file is $work/campaign.before.json"
+    echo "workers adopt it at their next client restart (restartHours), resuming their checkpoints;"
+    echo "to adopt it now, re-activate the live kernel: $0 versions, then $0 activate --from-version N"
+}
+
 case "$cmd" in
     stage) cmd_stage "${1:-}" ;;
     status) cmd_status ;;
     versions) cmd_versions ;;
     activate) cmd_activate "$@" ;;
     wait) cmd_wait "${1:-}" ;;
-    *) echo "usage: $0 {stage|status|versions|activate|wait} [bin/<sha>|--from-version N]" >&2; exit 2 ;;
+    max-iters) cmd_max_iters "${1:-}" ;;
+    *) echo "usage: $0 {stage|status|versions|activate|wait|max-iters} [bin/<sha>|--from-version N|N]" >&2; exit 2 ;;
 esac
