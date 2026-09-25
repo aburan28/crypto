@@ -1,6 +1,10 @@
 # September 24 bounded IC goal
 
 Status: optimized producer admission passed; no new performance tournament launched.
+Public-point input and single-target native intervals are implemented in the
+[follow-up controls](public-inputs/README.md); PR 748 merged at
+`4a898fcd3464b71439bd9451bd466a6ec217ddc9`, with 39/39 IC and 13/13 rho
+native/profile pairs passing final Linux validation and independent replay.
 Foundation: [PR 704](https://github.com/aburan28/crypto/pull/704), merged at
 `c04879dbb305423d4e7bad9b9e9dd2188f000a35`.
 Canonical record/field/accounting work: [PR 718](https://github.com/aburan28/crypto/pull/718),
@@ -75,9 +79,10 @@ scalars; a public-target adapter is required before that path joins this panel.
 2. Optimized archived producers now export eleven exclusive phases, ordinary-query
    outcomes/rank and matrix diagnostics; 39/39 pairs independently replay. Combined
    old labels remain unknown under the new schema. Integrate admission into both
-   development and promotion drivers before any new comparison. Native phase-wall
-   and single-target online intervals still need instrumentation, with public-point
-   input so fixture construction stays outside the algorithm timing boundary.
+   development and promotion drivers before any new comparison. The public-point
+   and single-target native timing follow-up passes local controls, Linux
+   integration and transported evidence replay. Rho reusable arithmetic/Frobenius
+   preparation is excluded from its online interval and retained in cold cost.
 3. Restore/qualify candidate IC sources and a strong matched rho reference;
    freeze rho width and source before held-out data.
 4. Seal the panel and familywise protocol, then run bounded rounds. Keep all

@@ -7,9 +7,10 @@ import tempfile
 import unittest
 
 from identity import sha256
-from oracle import InvalidEvidence
+from oracle import InvalidEvidence, verify
 from producer.evidence import audit_stages, check_build_identity, scientific_ledger
 from producer.prepare import verify_source
+from producer.timing import native_intervals, RAW_PHASES
 from tournament import parse_profiles
 
 VECTOR = json.loads((Path(__file__).parent/'producer/testdata/n13.json').read_text())
@@ -116,6 +117,26 @@ class ScientificProfilesTests(unittest.TestCase):
             with self.assertRaises(InvalidEvidence):
                 parse_profiles(root, phase_schema=2)
 
+    def test_target_subphases_fold_into_cold_descent_once(self):
+        report = copy.deepcopy(VECTOR['report'])
+        report['phase_schema'] = 3
+        from measurement import PHASES
+        phases = sorted((set(PHASES)-{'isogeny'}) |
+                        {'target_query', 'target_pdp', 'target_relation_check'})
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            self.profile(root, ['ic_'+p for p in phases] + [None])
+            costs = parse_profiles(root, phase_schema=3)
+            with self.assertRaises(InvalidEvidence):
+                parse_profiles(root, phase_schema=2)
+        ledger = scientific_ledger(report, costs)
+        self.assertEqual(ledger['cold_operations'], 140)
+        self.assertEqual(ledger['operations']['target_descent'], 40)
+        self.assertEqual(ledger['operations']['setup'], 20)
+        del costs['target_pdp']
+        with self.assertRaises(InvalidEvidence):
+            scientific_ledger(report, costs)
+
     def test_source_manifest_and_contents_both_must_match(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
@@ -130,6 +151,93 @@ class ScientificProfilesTests(unittest.TestCase):
             code.write_bytes(b'changed')
             with self.assertRaises(InvalidEvidence):
                 verify_source(root, sha256(manifest))
+
+
+class NativeIntervalTests(unittest.TestCase):
+    def test_real_public_point_ic_and_rho_vectors_replay_and_close(self):
+        vector = json.loads((Path(__file__).parent/'producer/testdata/n13-public.json').read_text())
+        with self.assertRaises(InvalidEvidence):
+            native_intervals(vector['rho']['report'], vector['rho']['process']['process_wall_ns'])
+        # Preserve the earlier control but refuse its setup-inclusive rho
+        # interval as the corrected one-target measurement.
+        vector['rho'] = json.loads((Path(__file__).parent/'producer/testdata/n13-rho-prepared.json').read_text())
+        fixture = vector['ic']['report']['fixture']
+        for mode in ('ic', 'rho'):
+            item = vector[mode]
+            self.assertEqual(item['job']['public_targets'], fixture['targets'])
+            verify(item['report'], fixture, expected_mode=mode)
+            result = native_intervals(item['report'], item['process']['process_wall_ns'])
+            self.assertEqual(result['online']['wall_ns'], sum(result['online']['phase_wall_ns'].values()))
+            self.assertEqual(result['cold']['wall_ns'], sum(result['cold']['phase_wall_ns'].values()))
+        audit_stages(vector['ic']['report'], fixture, vector['ic']['job']['algorithm_seed'])
+
+    def report(self, mode='ic'):
+        phases = dict.fromkeys(RAW_PHASES, 0)
+        phases.update(setup=100, recovery_check=5)
+        if mode == 'ic':
+            phases.update(factor_base=30, precompute=40, queries=7, pdp=20,
+                          relation_check=3, matrix_build=5, relation_la=15,
+                          target_query=2, target_pdp=8, target_relation_check=3,
+                          target_descent=7)
+        else:
+            phases['reference_solve'] = 20
+        report = {'phase_schema': 3, 'status': 'complete', 'mode': mode,
+                  'fixture': {'targets': [['1', '2']]}}
+        intervals = {'target_input': 'supplied_public_point',
+                     'phase_wall_ns': phases, 'online_wall_ns': 25}
+        if mode == 'ic':
+            report['diagnostics'] = intervals
+        else:
+            report.update(intervals)
+            report.update(rho_reusable_setup_excluded=True, field_kernel='portable')
+        return report
+
+    def test_online_excludes_setup_and_cold_accounts_for_external_tail(self):
+        for mode in ('ic', 'rho'):
+            with self.subTest(mode=mode):
+                report = self.report(mode)
+                result = native_intervals(report, 400)
+                self.assertEqual(result['online']['wall_ns'], 25)
+                self.assertEqual(sum(result['cold']['phase_wall_ns'].values()), 400)
+                self.assertGreater(result['cold']['external_setup_remainder_ns'], 0)
+                self.assertTrue(result['online']['scalar_replay_included'])
+                self.assertFalse(result['online']['target_generation_included'])
+                self.assertEqual(result['unit'], 'native_monotonic_ns')
+                if mode == 'ic':
+                    self.assertEqual(result['cold']['phase_wall_ns']['target_descent'], 20)
+
+    def test_incomplete_multiple_generated_and_unknown_intervals_fail_closed(self):
+        mutations = [
+            lambda r: r.update(phase_schema=2),
+            lambda r: r.update(status='incomplete'),
+            lambda r: r['fixture']['targets'].append(['3', '4']),
+            lambda r: r['diagnostics'].update(target_input='generated'),
+            lambda r: r['diagnostics'].update(online_wall_ns=24),
+            lambda r: r['diagnostics']['phase_wall_ns'].pop('target_query'),
+            lambda r: r['diagnostics']['phase_wall_ns'].update(reference_solve=1),
+            lambda r: r['diagnostics']['phase_wall_ns'].update(setup=401),
+        ]
+        for index, mutate in enumerate(mutations):
+            report = self.report()
+            mutate(report)
+            with self.subTest(index=index), self.assertRaises(InvalidEvidence):
+                native_intervals(report, 400)
+
+    def test_interval_units_require_nonnegative_integer_nanoseconds(self):
+        for value in (None, -1, True, 1.5, '10'):
+            report = self.report()
+            report['diagnostics']['phase_wall_ns']['target_query'] = value
+            with self.subTest(value=value), self.assertRaises(InvalidEvidence):
+                native_intervals(report, 400)
+        report = self.report('rho')
+        report['phase_wall_ns']['target_pdp'] = 1
+        with self.assertRaises(InvalidEvidence):
+            native_intervals(report, 400)
+        for field, value in (('rho_reusable_setup_excluded', False), ('field_kernel', 'guessed')):
+            report = self.report('rho')
+            report[field] = value
+            with self.subTest(field=field), self.assertRaises(InvalidEvidence):
+                native_intervals(report, 400)
 
 
 if __name__ == '__main__':
