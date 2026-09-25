@@ -8,6 +8,14 @@ normal-basis construction and independently replayed n13 support in
 solver-interface admission in [PR #763](https://github.com/aburan28/crypto/pull/763).
 No solver is timed here.
 
+The solver-admission #763 prerequisite is merged at
+`ec990d85b61eacccefa9dee97f2a835e7a20b785`. The parent #762 evidence is merged on main at
+`2de218f583d2dddeafdd0180dd02329dc57d53e4`; its immutable
+`evidence/raw.tar.gz` has SHA-256
+`fad4b4cc48f980349d1ef472d18327368dd0f93f3d1284fc8bbdc20f0d3086d7`.
+The n13 model and beta are inherited from its frozen source ancestor
+`a6be357281fd03dab15ce690d46e4e571209febf`.
+
 ## Frozen arms and reason for the second rung
 
 Use `E: y^2+xy=x^3+1`, all rational lifts of each x, and no point at
@@ -101,3 +109,19 @@ four exact projected-negative targets, all source/input hashes and
 independent checks pass, and each arm meets its caps. Otherwise report
 the failed gate and its preserved evidence. No wall-time speedup or
 ECC2K-130 extrapolation follows from a successful corpus admission.
+
+## Exact source and input freeze
+
+Before any corpus support outcome, the source, input manifest, merged parent
+source and archive were pinned in `FROZEN.json`. The corpus `FROZEN.json` SHA-256 `7e0ed24783547ac8a80a83cd62a27976f72798730483121db0c2e55341e45e6b`.
+`run.py` and CI check this independent protocol anchor before any target is
+measured or replayed. Use Python >=3.12 from the repository root:
+
+```sh
+python3 research/notes/ecc2k130/rotated_pdp_corpus_20260925/ci_replay.py
+python3 research/notes/ecc2k130/rotated_pdp_corpus_20260925/run.py --out /private/tmp/rotated-pdp-corpus-run-20260925
+```
+
+The hash-only `ci_replay.py` invocation reads no new corpus support outcome.
+When `evidence/raw.tar.gz` is committed, the same command with `--evidence
+evidence-path` independently re-enumerates both complete point histograms.
