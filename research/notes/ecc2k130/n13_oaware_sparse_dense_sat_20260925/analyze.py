@@ -41,12 +41,19 @@ def summarize(smoke, receipt, panel, archived_audit):
                            all(row["verdict"] == "UNSAT" for row in block[:first]) else
                            "NEGATIVE" if all(row["verdict"] == "UNSAT" for row in block) else
                            "CENSORED")
+                first_stage = stage(block[:first+1]) if verdict == "POSITIVE" else None
+                full_stage = stage(block)
                 q_rows.append({"q": q, "status": verdict,
                                "branch_statuses": [row["verdict"] for row in block],
                                "first_witness_t": first if verdict == "POSITIVE" else None,
-                               "first_witness_stage_wall_seconds":
-                                   stage(block[:first+1]) if verdict == "POSITIVE" else None,
-                               "all_four_stage_wall_seconds": stage(block)})
+                               "first_witness_stage_wall_seconds": first_stage,
+                               "first_witness_full_wall_seconds_by_export_pair":
+                                   [common + export_wall[(rep, pair)] + first_stage
+                                    for pair in (0, 1)] if first_stage is not None else None,
+                               "all_four_stage_wall_seconds": full_stage,
+                               "all_four_full_wall_seconds_by_export_pair":
+                                   [common + export_wall[(rep, pair)] + full_stage
+                                    for pair in (0, 1)]})
             complete = all(row["verdict"] in ("SAT", "UNSAT") for row in rows)
             correct = all(q["status"] == ("POSITIVE" if q["q"] < 4 else "NEGATIVE")
                           for q in q_rows)

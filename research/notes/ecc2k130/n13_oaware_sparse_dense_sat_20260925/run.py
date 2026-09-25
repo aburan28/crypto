@@ -113,6 +113,7 @@ def preflight():
     assert frozen["solver_wall_cap_seconds"] == SOLVER_WALL
     assert frozen["solver_rss_cap_bytes"] == SOLVER_RSS
     assert platform.python_version() == frozen["python_version"]
+    assert str(Path(sys.executable).resolve()) == frozen["python_executable"]
     assert psutil.__version__ == frozen["psutil_version"]
     pinned = {
         "protocol_sha256": HERE / "PROTOCOL.md",

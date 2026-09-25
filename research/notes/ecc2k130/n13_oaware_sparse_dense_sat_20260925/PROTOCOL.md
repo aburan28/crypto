@@ -21,7 +21,7 @@ drift. Both files encode *the same* signed-rational-factor point-target
 question, including O-prefix branches; no WDSat same-base m! ordering is
 permitted for the distinct rotated slots.
 
-The three engines are the exact #785 SHA-pinned installed CryptoMiniSat 5.14.7,
+The cold exporter and runner use an exact pinned Python 3.12.8 executable and psutil 7.2.2. The three engines are the exact #785 SHA-pinned installed CryptoMiniSat 5.14.7,
 Kissat 4.0.4 and CaDiCaL 3.0.1 binaries with identical CLI flags, single
 thread and exit/model parser. Run two tiny SAT/UNSAT interface smokes per
 engine before this panel; archive failures. For SAT, decode the five chosen

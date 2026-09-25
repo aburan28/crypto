@@ -99,6 +99,7 @@ def replay_panel(root, f, schemas, truth, curve, point, old):
         raw(row, root, stem)
         assert row["representation"] == rep and row["pair"] == (0 if index < 2 else 1)
         assert row["exit_code"] == 0 and row["stop_reason"] is None
+        assert row["command"][0] == f["python_executable"]
         assert row["sampled_peak_tree_rss_bytes"] <= f["export_rss_cap_bytes"]
         assert row["expected_base_sha256"] == f[f"{rep}_base_sha256"]
         assert row["expected_schema_sha256"] == f[f"{rep}_schema_sha256"]
