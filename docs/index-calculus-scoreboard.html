@@ -6750,6 +6750,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-s3-candidate-20260925 -->
+<!-- BEGIN ecc2k130-s3-fibre-theorem-20260925 -->
+<section class="panel" id="ecc2k130-s3-fibre-theorem-20260925">
+  <div class="panel-head">
+    <h2>Recursive S3 on complete rational x fibres: affine paths are exact <span class="chip">semantic theorem</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/777">PR #777</a> proves the finite-fibre S3 root theorem for <code>y²+xy=x³+1</code>: every finite root for two rational, sign-complete factor fibres is the x-coordinate of a rational signed sum, including x=0, doubling and inverse cases. Negating all earlier factors reconciles each recursive prefix sign without changing its x path; global negation gives either affine target sign. The proof is universal in finite characteristic-two extensions; the independently replayed small-field controls below check its implementation and edge cases.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Frozen exhaustive controls after pre-outcome source hash and draft PR. Pair rows span n=1..7; chain panels enumerate every rational x tuple and signed point tuple. O-prefix and O-terminal counts may overlap. Full S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Control</th><th>Rational x tuples / ordered pairs</th><th>Signed point tuples / S3 evaluations</th><th>Distinct affine paths / root occurrences</th><th>O-prefix / O-terminal signed tuples</th><th>Candidate-only paths / missing target signs</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n=1..7 pairs</td><td>4,720 pairs</td><td>497,384 evaluations</td><td>9,075 roots</td><td>—</td><td>0 pair mismatches</td><td>unset / unset</td></tr>
+      <tr><td>n=3, m=4 chain</td><td>16 tuples</td><td>81 point tuples</td><td>8 paths</td><td>45 / 21</td><td>0 / 0</td><td>unset / unset</td></tr>
+      <tr><td>n=4, m=4 chain</td><td>4,096 tuples</td><td>50,625 point tuples</td><td>19,208 paths</td><td>6,525 / 3,165</td><td>0 / 0</td><td>unset / unset</td></tr>
+      <tr><td>n=5, m=3 chain</td><td>10,648 tuples</td><td>79,507 point tuples</td><td>37,485 paths</td><td>1,849 / 1,806</td><td>0 / 0</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The independent verifier compared all 4,720 pair rows and 56,701 complete affine-chain rows, including both terminal signs. A nonliftable formal n=3 S3 root and a first single-sign loss at n=2 demonstrate why rational lifts and sign completeness are required. Producer/verifier wall was 2.878/3.222 s under the frozen 180 s and 512 MiB per-child caps. The remaining semantic work is explicit O-prefix, inverse and O-target branches and validation of a concrete exporter against the full point oracle; this proof alone does not admit solver UNSAT, direct higher-S<sub>m</sub> equations or n=131 performance claims. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/RESULT.md">Decision and proof boundary</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/evidence/README.md">raw evidence and replay</a>. Freeze SHA-256 <code>d87bfa84b6d6ccffe859cf044b22cbf0fc901ac71e3d0d01b35469a7760855e3</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-fibre-theorem-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
