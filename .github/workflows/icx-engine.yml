@@ -16,6 +16,7 @@ on:
       - "src/cryptanalysis/ic_run.rs"
       - "src/cryptanalysis/semaev_decomp.rs"
       - "src/cryptanalysis/field_dispatch.rs"
+      - "src/cryptanalysis/fes_gpu.rs"
       - "src/cryptanalysis/gf3m.rs"
       - "tests/icx.rs"
       - "Cargo.toml"
@@ -47,9 +48,13 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Build icx
         run: cargo build --release --bin icx
-      - name: Unit tests (catalog, engine, progress, run, field backend)
-        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress cryptanalysis::ic_run cryptanalysis::semaev_decomp::tests::clmul_path_matches_independent_reference
-      - name: Integration tests (run binary over the whole catalog)
+      - name: Unit tests (catalog, engine, progress, run, field backend, fes-gpu)
+        run: cargo test --release --lib -- cryptanalysis::curve_catalog cryptanalysis::ic_engine cryptanalysis::ic_progress cryptanalysis::ic_run cryptanalysis::fes_gpu cryptanalysis::semaev_decomp::tests::clmul_path_matches_independent_reference
+      - name: Build the host-emulation FES worker (drives the GPU offload path)
+        run: make -C gpu/fes host-worker
+      - name: Integration tests (catalog + FES worker subprocess path)
+        env:
+          ICX_FES_WORKER: ${{ github.workspace }}/gpu/fes/fes_solve
         run: cargo test --release --test icx
       - name: List the catalog (log which curves ran on ${{ matrix.arch }})
         run: ./target/release/icx list
@@ -73,9 +78,12 @@ jobs:
           ./target/release/icx run sect233k1 --degree 11 --oracle descent-algebraic --solver fes-f2 --rho-runs 0
       - name: GPU FES kernel — host verification (no GPU needed)
         run: make -C gpu/fes test
-      - name: GPU FES kernel — Metal shader compile-check (Apple silicon)
+      - name: GPU FES — drive the worker from icx (subprocess offload path)
+        run: |
+          ./target/release/icx fes --n 18 --m 20 --seed 1 --worker gpu/fes/fes_solve
+      - name: GPU FES kernel — Metal worker compile-check (Apple silicon)
         if: matrix.arch == 'macos-arm64'
-        run: make -C gpu/fes metal
+        run: make -C gpu/fes metal-worker
 
   gpu-fes-cuda:
     name: GPU FES CUDA compile-check
