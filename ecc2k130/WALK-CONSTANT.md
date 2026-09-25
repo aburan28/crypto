@@ -28,8 +28,9 @@ rate on the card.**
   its rate.  `aws/campaign.json` still names σ, and the switch is the campaign
   owner's.
 - **`maxIters`** is `2^32` in `aws/campaign.json` and in the witness
-  generator's default, up from `2^30`.  The bucket copy, which is what
-  workers read, is the owner's to republish.
+  generator's default, up from `2^30`.  Workers read the bucket copy, and
+  `./rollout.sh max-iters 4294967296` raises that one field there.  A raise
+  keeps every collected point and checkpoint (§11.4).
 
 Round 1's answer was **keep the σ walk, and raise `maxIters`**, on these
 findings (the fruitless-cycle ones are about the rule as it was then):
@@ -59,9 +60,11 @@ findings (the fruitless-cycle ones are about the rule as it was then):
   steps** today.  At `dpWeight = 32` a trail averages `2^28.41` steps, so
   `2^30` is only three trail lengths.  About 5% of honest trails reach the
   guard first, and they are the longest.  `maxIters = 2^32` brings that loss
-  to 0.01%.  No distinguished point has been collected
-  (`docs/ecc2k130-status/history.json` is empty), so the change costs
-  nothing now.
+  to 0.01%, and it can be raised at any time without losing collected work
+  (§11.4).  *(This line first said that no distinguished point had been
+  collected, citing `docs/ecc2k130-status/history.json`.  That file is a
+  committed placeholder and says nothing about the live bucket.  This is an
+  accounting correction.)*
 
 Everything below follows `AGENTS.md`: §1 gives the boundary and unit, §2 the
 method, §3 why the walks differ, §4 the single table, §5 the fruitless
@@ -482,10 +485,11 @@ None is an advance: no row moves the ratio to the floor below one.
   `maxIters` change below in the repository, §11.)*  Round 1 left the
   `maxIters` change to the campaign owner, for two reasons: the
   bucket copy is what workers read, and `maxIters` is part of the campaign
-  contract (`campaignContract` in `aws/protocol.py`), so changing it starts a
-  new corpus.  That costs nothing now and costs the corpus later, so the
-  change has the same deadline as the walk choice.  Recommended before
-  collection: `maxIters ≥ 2^32` at `dpWeight = 32`.  The witness generator
+  contract (`campaignContract` in `aws/protocol.py`), which binds it into a
+  strict (`storageProtocol`) corpus's id.  *(For the live corpus that was
+  wrong.  The live corpus is unversioned, so `maxIters` binds nothing there,
+  and a raise keeps every point and checkpoint; §11.4.)*  Recommended:
+  `maxIters ≥ 2^32` at `dpWeight = 32`.  The witness generator
   `src/witness.cpp` has to move with it.  It refuses a trail longer than its
   own `--max-iters`, which defaulted to `2^30`, and a cairn job's
   `max_steps_per_walker` can lower that.  Unless both are raised, the
@@ -821,6 +825,7 @@ independent, which overstates the uncertainty of the correlated ones.
 | §6's five-tag sketch → four 16-bit tags | **accounting** | a correction to this note's own sketch; nothing measured changes |
 | the residual six-step relations | **accounting** | §6's 0.81–0.86 assumed every cycle caught; what is built leaves `2.0 × 10⁻⁵` of trails trapped, a ×1.0002 difference, so the projection is unchanged to two digits |
 | `README.md`'s `2^60.94` → `2^60.91–60.92` | **accounting** | a figure from a draft of §6 left in the README |
+| "`maxIters` is free only before the first point" → free at any time (§11.4) | **accounting** | the claim rested on a placeholder status file and on the strict contract, which the live corpus does not use |
 
 None is an advance: no row moves the ratio to the floor below one.
 
@@ -829,10 +834,13 @@ None is an advance: no row moves the ratio to the floor below one.
 - `aws/campaign.json`:
   - `maxIters` is `2^32`, and `src/witness.cpp`'s default `--max-iters` is
     `2^32` with it.  The bucket copy is still what workers read, and
-    republishing it is the campaign owner's.
-  - `maxIters` is in the campaign contract, so the change is free only
-    before the first distinguished point.  `docs/ecc2k130-status/history.json`
-    is still empty.
+    `./rollout.sh max-iters 4294967296` raises it there (§11.4).
+  - The live corpus is unversioned: `bootstrap.sh` runs it with
+    `ECC_ALLOW_LEGACY_STORAGE=1`.  So `maxIters` is in no campaign id there,
+    and a raise costs no collected work (§11.4).
+  - This bullet first said the change was free only before the first
+    distinguished point, citing an empty `docs/ecc2k130-status/history.json`.
+    That file is a committed placeholder, not the live bucket (accounting).
   - Every counter the guard compares, and every record field, is 64-bit.
     The witness's per-branch step counts are 32-bit.  A trail of at most
     `2^32` steps plus one guard period overflows one only by taking nearly
@@ -845,7 +853,67 @@ None is an advance: no row moves the ratio to the floor below one.
 - Switching needs three things, in order:
   1. the paired rate above;
   2. the owner's decision;
-  3. both before the first distinguished point, since the walk and
-     `maxIters` are both in the contract.
+  3. the switch made early, since the walk is part of a corpus's collision
+     identity: points from the σ walk never collide with the table walk's.
+     `maxIters` is not part of that identity (§11.4).
 - [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) and the [README](README.md)
   now point here, not at round 1's verdict.
+
+### 11.4 Raising `maxIters` on a live corpus
+
+`maxIters` restarts a walk that has gone that many steps without a report.
+It is a guard, not part of the walk, so raising it on a corpus that is
+already collecting loses nothing.
+
+- **Points.**
+  - A distinguished point is fixed by its seed, the walk and `dpWeight`.
+    `maxIters` only decides which trails are abandoned before they reach
+    one.
+  - A trail that ends under `2^30` ends at the same point under `2^32`.
+  - A point collected under the old guard collides with one collected under
+    the new guard exactly as two old ones would.
+  - Re-walking an old point to verify it needs fewer than `2^30` steps.
+  - Ingest does not filter records by trail length.
+- **Checkpoints.**
+  - The checkpoint header holds the magic, version, degree, threads,
+    batch, lanes, run id and iteration base.  It holds no guard.
+  - `test-production` checks this.  A host-engine checkpoint written under
+    a guard of two periods restores under four, and walks exactly as the
+    original did.  Past the old bound the old guard cuts every trail and
+    the raised one cuts none.
+- **Storage.**
+  - The live corpus is unversioned (`ECC_ALLOW_LEGACY_STORAGE=1`, from
+    `bootstrap.sh`), so no campaign id holds `maxIters`.
+  - Under `storageProtocol`, `campaignContract` hashes it into the id
+    together with the binary hashes.  There a raise, like any rebuild, is a
+    new namespace, and `rollout.py` refuses it.
+- **How.**
+  - `./rollout.sh max-iters 4294967296` reads `campaign.json` together with
+    its ETag and changes `maxIters` and nothing else.
+  - It refuses a lower value, a live value of 0 and a strict campaign.
+  - It writes the file back only if the file did not change in the
+    meantime.
+  - Workers do not restart for this: it is neither a client-pointer move
+    nor a frozen field.
+  - Each worker takes the new guard when its client next restarts through
+    `reloadClient`: the scheduled restart every `restartHours` (48 in the
+    repository copy), or the next `rollout.sh activate`.  It checkpoints
+    first and resumes the same slot.
+  - A fleet running both guards during the change is harmless.
+- **Not this way.**
+  - Uploading the repository's `campaign.json` over the bucket's would carry
+    `storageProtocol` with it.  A worker started on that file refuses the
+    live slots' checkpoints ("legacy slot checkpoint requires audited
+    migration").  That is the one path that would lose work.
+  - Lowering the guard cuts trails that are already under way.
+- **Tools that re-walk trails** must accept the longer ones:
+  - `merge.py`'s solve step: leave out `--client-arg --max-iters`, since the
+    client's default cap is `2^34`.  A merge work directory bound to the
+    `2^30` argument refuses a changed one.  It is a derived cache, rebuilt
+    from `dp/` without losing a point.
+  - the witness generator, whose default is `2^32` since round 2;
+  - cairn jobs, whose `max_steps_per_walker` must be at least `2^32`.
+- **What is not recovered.** The steps the `2^30` guard has already
+  discarded, 15.6% of the steps so far.  Those trails were restarted, and
+  re-walking their seeds costs what new steps cost.  The raise stops the
+  loss from here on.
