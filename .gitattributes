@@ -29,3 +29,7 @@ research/boolean_implicit_minors_20260923/run_01/run.py whitespace=-blank-at-eof
 
 # Keep the raw million-clause toy DIMACS downloadable without rendering its full diff.
 research/notes/ecc2k130/rotated_s3_o_branch_20260925/evidence/producer/n13-m5/base.cnf -diff
+
+# Keep pinned SAT solver stdout/stderr bytes verbatim, including padded comment lines.
+research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/**/*.stdout -whitespace
+research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/**/*.stderr -whitespace
