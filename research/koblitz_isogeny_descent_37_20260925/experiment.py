@@ -33,7 +33,7 @@ def digest(value):
 
 
 def integer_representation(value):
-    return int(value.integer_representation())
+    return int(value.to_integer())
 
 
 def s3(x, y, z, b):
