@@ -528,7 +528,16 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 - **Run the primary pair `(7, 3) → (13, 5)` to completion** on a machine
   that stays up: `research/dreg_fixed_surplus_20260923/run_queue.py` resumes
   after interruptions.  It is the pair that separates field-size growth from
-  the `ℓ = 2` floor (Result 4).
+  the `ℓ = 2` floor (Result 4).  **It is far more expensive than recorded:**
+  about 11–24 h a `(13, 5)` draw and 1.7–5.6 days a `(15, 5)` draw on the
+  four-core container.  That is an extrapolation
+  (`research/dreg_ell_grid_20260925/cost_model.py`), so it needs a large
+  machine for days.
+- **Separate `ℓ` from the unknown count directly** (pre-registered 2026-09-25,
+  `research/dreg_ell_grid_20260925/`).  The design compares `ℓ = 2` with
+  `ℓ = 3` at matched `N = 13, 14, 16, 18`, which takes minutes, and measures
+  `(10, 5)` against `(13, 4)` at `N = 25`, about 1.2 h a draw.  It answers
+  the Result 4 confound without the primary pair's cost.
 - **Match the surplus, not the unknown count, when pairing cells.**  The
   `n = 9` versus `n = 15` comparison proposed above is confounded a third
   way: those cells carry surplus `n − mℓ` of `−9` and `+3`, opposite signs
