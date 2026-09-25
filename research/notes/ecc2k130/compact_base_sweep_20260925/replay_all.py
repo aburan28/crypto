@@ -7,9 +7,11 @@ import gzip
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 
 HERE = Path(__file__).resolve().parent
 EVIDENCE = HERE / "evidence"
+REPO = HERE.parents[3]
 
 
 def digest(data: bytes) -> str:
@@ -38,6 +40,28 @@ def main() -> None:
     runs = {name: EVIDENCE / "runs" / name for name in names}
     assert sorted(runs.values()) == sorted(path for path in (EVIDENCE / "runs").iterdir() if path.is_dir())
     metadata = {name: json.loads((run / "manifest.json").read_bytes()) for name,run in runs.items()}
+    # A source snapshot proves the bytes used by replay; the historical Git
+    # object proves that each receipt names a real, reachable source commit.
+    for name, meta in metadata.items():
+        revision = f"{meta['source_commit']}:{meta['source_path']}"
+        historical = subprocess.check_output(["git", "show", revision], cwd=REPO)
+        assert digest(historical) == meta["source_sha256"], name
+    failures = manifest["runner_failures"]
+    assert len(failures) == len(set(failures))
+    assert sorted(failures) == sorted(path.name for path in (EVIDENCE / "runner_failures").iterdir() if path.is_dir())
+    for name in failures:
+        failed = EVIDENCE / "runner_failures" / name
+        if not (failed / "manifest.json").exists():
+            continue  # Setup failure happened before source/producer receipt.
+        meta = json.loads((failed / "manifest.json").read_bytes())
+        revision = f"{meta['source_commit']}:{meta['source_path']}"
+        historical = subprocess.check_output(["git", "show", revision], cwd=REPO)
+        with gzip.open(failed / "producer_source.rs.gz", "rb") as stream:
+            assert stream.read() == historical
+        assert digest(historical) == meta["source_sha256"]
+        receipt = json.loads((failed / "receipt.json").read_bytes())
+        with gzip.open(failed / "producer.stdout.jsonl.gz", "rb") as stream:
+            assert digest(stream.read()) == receipt["stdout_sha256"]
     final_training = {}
     for name, meta in metadata.items():
         if meta["mode"] == "train":

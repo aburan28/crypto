@@ -7,7 +7,7 @@ import argparse
 from collections import defaultdict
 import gzip
 import hashlib
-import importlib.util
+import types
 import itertools
 import json
 from pathlib import Path
@@ -25,9 +25,11 @@ def digest(data: bytes) -> str:
 
 
 def load_reference_math():
-    spec = importlib.util.spec_from_file_location("paired_fullrank_verify", PR737_VERIFY)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # Execute the hashed source snapshot directly: importlib would create a
+    # __pycache__ inside the immutable evidence archive on first replay.
+    module = types.ModuleType("paired_fullrank_verify")
+    module.__file__ = str(PR737_VERIFY)
+    exec(compile(PR737_VERIFY.read_bytes(), str(PR737_VERIFY), "exec"), module.__dict__)
     return module
 
 
