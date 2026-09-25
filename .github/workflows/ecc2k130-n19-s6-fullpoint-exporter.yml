@@ -1,0 +1,24 @@
+name: ECC2K-130 n19 S6 full-point exporter preflight
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/n19_s6_fullpoint_exporter_20260925/**'
+      - '.github/workflows/ecc2k130-n19-s6-fullpoint-exporter.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-preflight-and-toy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen hashes and syntax without n19 outcomes
+        run: python3 research/notes/ecc2k130/n19_s6_fullpoint_exporter_20260925/ci_replay.py
+      - name: Replay only the n2 toy full-point CNF control
+        run: |
+          python3 research/notes/ecc2k130/n19_s6_fullpoint_exporter_20260925/selftest.py > /tmp/s6-toy-selftest.json
+          cmp /tmp/s6-toy-selftest.json research/notes/ecc2k130/n19_s6_fullpoint_exporter_20260925/evidence/toy_selftest.json
