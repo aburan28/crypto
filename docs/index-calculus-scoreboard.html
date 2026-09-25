@@ -6545,6 +6545,43 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-compact-sparse-base-sweep-20260925 -->
+<!-- BEGIN ecc2k130-rotated-subspace-support-20260925 -->
+<section class="panel" id="ecc2k130-rotated-subspace-support-20260925">
+  <div class="panel-head">
+    <h2>Rotated five/six-summand spaces: exact toy support passes; n = 131 count gate remains conditional <span class="chip">support</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/762">PR #762</a> froze two normal-basis generators, exact cofactor-four targets and a repeated-F0 control before outcomes. A full n = 13 group-law census and independent second-arithmetic replay show a large support gain from distinct Frobenius-rotated summand spaces. The n = 131 arm checks field structure, a projected Frobenius scalar identity and 81,920 fixed x-lift samples; it measures no target decomposition, solver, relation rank, log, or whole-attack cost. <a href="https://github.com/aburan28/crypto/pull/763">PR #763</a> audits the separate multiword/streaming solver-corpus prerequisite.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact E(F<sub>2<sup>13</sup></sub>), order 8,012 = 4·2,003. Every Q=[k]H including O is checked against all four Q+T torsion shifts; each [4]-projected support count is independently reconstructed from the complete full-point sum histogram. Rotated/repeated ratio is a support ratio, not a time or DLP speed ratio.</caption>
+    <thead><tr><th>Beta</th><th>Summands</th><th>Policy</th><th>Points / factor</th><th>Labelled tuples</th><th>Distinct full sums</th><th>Raw H support</th><th>Projected H support</th><th>Rotated / repeated</th></tr></thead>
+    <tbody>
+      <tr><td>3</td><td>5</td><td>Rotated</td><td>5</td><td>3,125</td><td>1,799</td><td>404 / 2,003</td><td>1,591 / 2,003</td><td>26.082</td></tr>
+      <tr><td>3</td><td>5</td><td>Repeated</td><td>5</td><td>3,125</td><td>61</td><td>10 / 2,003</td><td>61 / 2,003</td><td>1.000</td></tr>
+      <tr><td>3</td><td>6</td><td>Rotated</td><td>5</td><td>15,625</td><td>6,307</td><td>1,659 / 2,003</td><td>2,003 / 2,003</td><td>23.565</td></tr>
+      <tr><td>3</td><td>6</td><td>Repeated</td><td>5</td><td>15,625</td><td>85</td><td>21 / 2,003</td><td>85 / 2,003</td><td>1.000</td></tr>
+      <tr><td>7</td><td>5</td><td>Rotated</td><td>5</td><td>3,125</td><td>1,799</td><td>404 / 2,003</td><td>1,591 / 2,003</td><td>26.082</td></tr>
+      <tr><td>7</td><td>5</td><td>Repeated</td><td>5</td><td>3,125</td><td>61</td><td>10 / 2,003</td><td>61 / 2,003</td><td>1.000</td></tr>
+      <tr><td>7</td><td>6</td><td>Rotated</td><td>7</td><td>117,649</td><td>8,012</td><td>2,003 / 2,003</td><td>2,003 / 2,003</td><td>5.428</td></tr>
+      <tr><td>7</td><td>6</td><td>Repeated</td><td>7</td><td>117,649</td><td>377</td><td>97 / 2,003</td><td>369 / 2,003</td><td>1.000</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>n = 131 fixed 16,384-mask sample per cell; projected columns use the nominal F0 size 2^d, not a proved upper bound. Idealized necessary ceiling uses |Fi|≈2^d and exact prime order q; sample-calibrated values depend on the SHA-mask lift-density model. Neither column predicts actual target hit probability.</caption>
+    <thead><tr><th>m,d</th><th>Solvable x / 16,384</th><th>Ideal projected tuple ceiling</th><th>Sample-calibrated ratio</th><th>Descriptive 95% upper ratio</th><th>Ideal physical choices</th><th>F0 column proxy</th></tr></thead>
+    <tbody>
+      <tr><td>5,24</td><td>8,070</td><td>0.001953</td><td>0.001812</td><td>0.001957</td><td>83,886,080</td><td>16,777,216</td></tr>
+      <tr><td>5,25</td><td>8,143</td><td>0.062500</td><td>0.060653</td><td>0.065471</td><td>167,772,160</td><td>33,554,432</td></tr>
+      <tr><td>5,26</td><td>8,228</td><td>1.000000</td><td>1.000000</td><td>1.000000</td><td>335,544,320</td><td>67,108,864</td></tr>
+      <tr><td>6,20</td><td>8,117</td><td>0.001953</td><td>0.001848</td><td>0.002026</td><td>6,291,456</td><td>1,048,576</td></tr>
+      <tr><td>6,21</td><td>8,198</td><td>0.125000</td><td>0.125550</td><td>0.137525</td><td>12,582,912</td><td>2,097,152</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The preregistered toy support-improvement gate passes. The m = 6 rotated n = 13 arms have zero projected-negative H targets, so an UNSAT corpus must use the m = 5 negatives or a larger predeclared rung. All 18,501 full-point witnesses and 45,595 negative full-point support decisions were independently replayed; 256 covariance masks per n = 131 cell and every density row also replayed. On nonzero n = 13 H targets, trace of x, exact cofactor class and Frobenius-orbit size are constant, so they do not stratify PDP difficulty. The m = 6,d = 21 n = 131 count cell is a conditional smaller-base candidate; an implicit solver and memory gate are still absent. A materialized three-summand half at 24 bytes per tuple would project about 221 EB there. Full-ECDLP S and rho ratio remain unset.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_subspace_support_20260925/RESULT.md">exact decision and limits</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_subspace_support_20260925/PROTOCOL.md">pre-outcome protocol</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_subspace_support_20260925/evidence/README.md">raw archive and independent replay receipt</a>. Raw archive SHA-256 <code>fad4b4cc48f980349d1ef472d18327368dd0f93f3d1284fc8bbdc20f0d3086d7</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-subspace-support-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">
