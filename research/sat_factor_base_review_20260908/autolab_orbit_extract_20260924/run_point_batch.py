@@ -101,11 +101,16 @@ def run(args):
     for name, point, expected in (
         ("off_curve", [0, 0], "point target must be on the curve"),
         ("wrong_subgroup", [0, 1], "point target must belong to the prime-order subgroup"),
+        ("missing_compact_mode", list(points[0]),
+         "compact batch target files require KIC_ORBIT_LAZY_RELATIVE_SUPPORT=1"),
     ):
         path = out / f"{name}.jsonl"
         path.write_text(json.dumps(point) + "\n")
-        env["KIC_ORBIT_TARGET_POINTS_JSONL"] = str(path)
-        result = subprocess.run(command, cwd=REPO, env=env, capture_output=True,
+        negative_env = env.copy()
+        negative_env["KIC_ORBIT_TARGET_POINTS_JSONL"] = str(path)
+        if name == "missing_compact_mode":
+            negative_env.pop("KIC_ORBIT_LAZY_RELATIVE_SUPPORT")
+        result = subprocess.run(command, cwd=REPO, env=negative_env, capture_output=True,
                                 text=True, timeout=args.timeout)
         (out / f"{name}.stderr.txt").write_text(result.stderr)
         assert result.returncode != 0 and expected in result.stderr
