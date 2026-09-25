@@ -48,11 +48,23 @@ def verify(training, point_batch):
         assert curve.scalar(curve.generator, log) == rep
     manifest = json.loads((point_batch / "manifest.json").read_text())
     assert manifest["base_hash"] == header["base_hash"]
+    assert manifest["source_sha256"] == sha(rank.SOURCE)
     assert manifest["point_file_sha256"] == sha(point_batch / "target_points.jsonl")
     assert manifest["training_manifest_sha256"] == sha(training / "manifest.json")
     assert manifest["training_validation_sha256"] == sha(training / "validation.json")
     points = [tuple(json.loads(line)) for line in (point_batch / "target_points.jsonl").read_text().splitlines()]
     assert len(points) == len(set(points)) == len(manifest["validation_scalars"])
+    receipt = json.loads((point_batch / "resource_receipt.json").read_text())
+    assert receipt["producer_stdout_sha256"] == sha(point_batch / "producer.stdout.jsonl")
+    assert receipt["producer_stderr_sha256"] == sha(point_batch / "producer.stderr.txt")
+    assert receipt["targets_requested"] == len(points)
+    assert len(receipt["negative_controls"]) == 2
+    for control in receipt["negative_controls"]:
+        assert control["returncode"] != 0
+        stderr = point_batch / (control["case"] + ".stderr.txt")
+        assert control["stderr_sha256"] == sha(stderr)
+        assert control["expected_rejection"] in stderr.read_text()
+        assert json.loads((point_batch / (control["case"] + ".jsonl")).read_text()) == control["point"]
     observation = json.loads((point_batch / "producer.stdout.jsonl").read_text())
     batch = observation["compact_orbit_point_batch"]
     assert observation["factor_base_input_hash"] == header["base_hash"]
