@@ -1,0 +1,1628 @@
+{
+ "models": {
+  "rtx-pro-6000": [
+   [
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)",
+    {
+     "clmad": 1.62
+    }
+   ],
+   [
+    "clmad 2.00 only",
+    {
+     "clmad": 2.0
+    }
+   ],
+   [
+    "alu 64, clmad 1.62",
+    {
+     "alu": 64.0,
+     "clmad": 1.62,
+     "issue": 128.0
+    }
+   ],
+   [
+    "alu 64, clmad 2.00",
+    {
+     "alu": 64.0,
+     "clmad": 2.0,
+     "issue": 128.0
+    }
+   ],
+   [
+    "int 69 (alu+fma), clmad 2.00",
+    {
+     "int": 69.0,
+     "clmad": 2.0,
+     "issue": 128.0
+    }
+   ],
+   [
+    "alu 128 (Nsight's peak), clmad 2.00",
+    {
+     "alu": 128.0,
+     "clmad": 2.0,
+     "issue": 128.0
+    }
+   ]
+  ],
+  "b200": [
+   [
+    "alu 63.7, clmad 29.1",
+    {
+     "alu": 63.7,
+     "clmad": 29.1,
+     "issue": 128.0
+    }
+   ],
+   [
+    "int 69 (alu+fma), clmad 29.1",
+    {
+     "int": 69.0,
+     "clmad": 29.1,
+     "issue": 128.0
+    }
+   ],
+   [
+    "alu 128 (Nsight's peak), clmad 29.1",
+    {
+     "alu": 128.0,
+     "clmad": 29.1,
+     "issue": 128.0
+    }
+   ]
+  ]
+ },
+ "rows": [
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "base (20 B/s knob set)",
+   "knobs": "",
+   "bps": 19.9605,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.745923198316675,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1319.5677956669365,
+   "fma": 188.64492797858293,
+   "issue": 1698.8611379842303,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8989536580215723,
+    "clmad 2.00 only": 0.7281524629974736,
+    "alu 64, clmad 1.62": 0.9064590004780174,
+    "alu 64, clmad 2.00": 0.9064590004780174,
+    "int 69 (alu+fma), clmad 2.00": 0.9609702461656989,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.7281524629974736
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "geo-640x1",
+   "knobs": "THREADS=640 MINBLOCKS=1",
+   "bps": 20.0649,
+   "regs": 96,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "640x1 b16",
+   "regsBuilt": 96,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.627573523914897,
+   "clmad": 33.12500000001129,
+   "expectedClmad": 33.125,
+   "alu": 1315.878342541866,
+   "fma": 190.7663879395153,
+   "issue": 1708.1669851521103,
+   "lsu": 80.010986328152,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.9036554822192344,
+    "clmad 2.00 only": 0.73196094059758,
+    "alu 64, clmad 1.62": 0.9086524050175476,
+    "alu 64, clmad 2.00": 0.9086524050175476,
+    "int 69 (alu+fma), clmad 2.00": 0.9649921523164678,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.73196094059758
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "fused",
+   "knobs": "TABLE_FUSED=1 TABLE_PIPE_SELECT=0",
+   "bps": 19.9918,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.710311227603317,
+   "clmad": 33.12500000000002,
+   "expectedClmad": 33.125,
+   "alu": 1305.8272561157526,
+   "fma": 171.9679870605469,
+   "issue": 1685.3242727493619,
+   "lsu": 75.01806640625003,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.9003633045479592,
+    "clmad 2.00 only": 0.729294276683847,
+    "alu 64, clmad 1.62": 0.9003633045479592,
+    "alu 64, clmad 2.00": 0.8984267398330092,
+    "int 69 (alu+fma), clmad 2.00": 0.9430659998548216,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.729294276683847
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "clmad",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "no-pair-ilp",
+   "knobs": "PACKED_PAIR_ILP=0",
+   "bps": 19.9727,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.732029219885142,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1323.3177956669383,
+   "fma": 188.64492797858293,
+   "issue": 1699.7361379842303,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8995031049105713,
+    "clmad 2.00 only": 0.7285975149775628,
+    "alu 64, clmad 1.62": 0.9095906202341396,
+    "alu 64, clmad 2.00": 0.9095906202341396,
+    "int 69 (alu+fma), clmad 2.00": 0.9639484020226047,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.7285975149775628
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "clmul-flat",
+   "knobs": "PACKED_CLMUL_FLAT=1",
+   "bps": 19.9657,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.739999098453847,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1320.4427956669367,
+   "fma": 188.64492797858293,
+   "issue": 1697.7361379842298,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8991878484988506,
+    "clmad 2.00 only": 0.728342157284069,
+    "alu 64, clmad 1.62": 0.9072963720433351,
+    "alu 64, clmad 2.00": 0.9072963720433351,
+    "int 69 (alu+fma), clmad 2.00": 0.9617782516121474,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.728342157284069
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "no-pipe-select",
+   "knobs": "TABLE_PIPE_SELECT=0",
+   "bps": 19.9309,
+   "regs": 92,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 92,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.779703876894672,
+   "clmad": 33.12500000000002,
+   "expectedClmad": 33.125,
+   "alu": 1316.2549904907519,
+   "fma": 182.45645141601565,
+   "issue": 1689.4851003860801,
+   "lsu": 80.01318359375003,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.89762057376599,
+    "clmad 2.00 only": 0.727072664750452,
+    "alu 64, clmad 1.62": 0.9028424749313124,
+    "alu 64, clmad 2.00": 0.9028424749313124,
+    "int 69 (alu+fma), clmad 2.00": 0.9535003526467771,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.727072664750452
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "no-chain-first",
+   "knobs": "PACKED_CHAIN_FIRST=0",
+   "bps": 19.9265,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.78473389707174,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1319.5677956669365,
+   "fma": 188.64492797858293,
+   "issue": 1699.7986379842305,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8974224125932146,
+    "clmad 2.00 only": 0.7269121542005039,
+    "alu 64, clmad 1.62": 0.9049149707184296,
+    "alu 64, clmad 2.00": 0.9049149707184296,
+    "int 69 (alu+fma), clmad 2.00": 0.9593333639047518,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.7269121542005039
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "alu-sqr",
+   "knobs": "PACKED_ALU_SQR=1",
+   "bps": 19.8764,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.842164577086393,
+   "clmad": 31.875000000010893,
+   "expectedClmad": 31.875,
+   "alu": 1345.1302956669394,
+   "fma": 195.39492797858568,
+   "issue": 1725.798637984227,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8613862254398654,
+    "clmad 2.00 only": 0.697722842606291,
+    "alu 64, clmad 1.62": 0.92012562114535,
+    "alu 64, clmad 2.00": 0.92012562114535,
+    "int 69 (alu+fma), clmad 2.00": 0.9774228025218806,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.697722842606291
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "no-from-reduced",
+   "knobs": "PACKED_FROM_REDUCED=0",
+   "bps": 19.8646,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.85573331453943,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1324.5677956669385,
+   "fma": 189.64492797858335,
+   "issue": 1704.923637984232,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8946346451809988,
+    "clmad 2.00 only": 0.724654062596609,
+    "alu 64, clmad 1.62": 0.9055221078437303,
+    "alu 64, clmad 2.00": 0.9055221078437303,
+    "int 69 (alu+fma), clmad 2.00": 0.9601578577630442,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.724654062596609
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "unroll2",
+   "knobs": "UNROLL_SLOTS=2",
+   "bps": 19.7955,
+   "regs": 118,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 118,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 22.93551564749564,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1320.1302956669717,
+   "fma": 184.5194396973312,
+   "issue": 1705.5483938436846,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.891522614031013,
+    "clmad 2.00 only": 0.7221333173651205,
+    "alu 64, clmad 1.62": 0.8993491224187378,
+    "alu 64, clmad 2.00": 0.8993491224187378,
+    "int 69 (alu+fma), clmad 2.00": 0.9507751314155239,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.7221333173651205
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "fused-pipe",
+   "knobs": "TABLE_FUSED=1 TABLE_FUSED_PIPE=1 TABLE_PIPE_SELECT=0",
+   "bps": 19.5508,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 23.22257912719684,
+   "clmad": 33.12500000000002,
+   "expectedClmad": 33.125,
+   "alu": 1346.3887795532519,
+   "fma": 184.0256042480469,
+   "issue": 1744.696159956393,
+   "lsu": 75.01806640625003,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8805021506095619,
+    "clmad 2.00 only": 0.7132067419937452,
+    "alu 64, clmad 1.62": 0.9058995801151972,
+    "alu 64, clmad 2.00": 0.9058995801151972,
+    "int 69 (alu+fma), clmad 2.00": 0.95510143314961,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.7132067419937452
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "pivot-nibble",
+   "knobs": "TABLE_PIVOT_BYTES=0",
+   "bps": 19.5402,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 23.235176712623208,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1365.9927956669537,
+   "fma": 185.64492797858182,
+   "issue": 1751.486137984249,
+   "lsu": 104.01318359378632,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8800247623292566,
+    "clmad 2.00 only": 0.712820057486698,
+    "alu 64, clmad 1.62": 0.918591568993774,
+    "alu 64, clmad 2.00": 0.918591568993774,
+    "int 69 (alu+fma), clmad 2.00": 0.9678214854730428,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.712820057486698
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "inline-poly-1",
+   "knobs": "PACKED_INLINE_POLY=1",
+   "bps": 19.3137,
+   "regs": 124,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 124,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 23.507665543111884,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1325.0052956669392,
+   "fma": 190.58242797858358,
+   "issue": 1725.8611379842364,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8698239655785798,
+    "clmad 2.00 only": 0.7045574121186496,
+    "alu 64, clmad 1.62": 0.8807002850549868,
+    "alu 64, clmad 2.00": 0.8807002850549868,
+    "int 69 (alu+fma), clmad 2.00": 0.9343777429894403,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.7045574121186496
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "inline-poly-0",
+   "knobs": "PACKED_INLINE_POLY=0",
+   "bps": 19.164,
+   "regs": 124,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 124,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 23.691296180338135,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1329.755295666941,
+   "fma": 191.64492797858395,
+   "issue": 1743.1111379842432,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8630819820307813,
+    "clmad 2.00 only": 0.6990964054449329,
+    "alu 64, clmad 1.62": 0.8770067427564197,
+    "alu 64, clmad 2.00": 0.8770067427564197,
+    "int 69 (alu+fma), clmad 2.00": 0.9306911042654329,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.6990964054449329
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "no-l2-persist",
+   "knobs": "PACKED_L2_PERSIST=0",
+   "bps": 18.7407,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 24.226416302486033,
+   "clmad": 33.12500000001132,
+   "expectedClmad": 33.125,
+   "alu": 1319.5677956669365,
+   "fma": 188.64492797858293,
+   "issue": 1698.8611379842303,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8440179764477282,
+    "clmad 2.00 only": 0.68365456092266,
+    "alu 64, clmad 1.62": 0.8510646622208051,
+    "alu 64, clmad 2.00": 0.8510646622208051,
+    "int 69 (alu+fma), clmad 2.00": 0.9022446878744277,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.68365456092266
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "geo-768x1",
+   "knobs": "THREADS=768 MINBLOCKS=1",
+   "bps": 18.5917,
+   "regs": 80,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "768x1 b16",
+   "regsBuilt": 80,
+   "spills": [
+    20,
+    40
+   ],
+   "smClocksPerUpdate": 24.420574772613584,
+   "clmad": 33.125000000011305,
+   "expectedClmad": 33.125,
+   "alu": 1337.0640983186952,
+   "fma": 190.1383361817081,
+   "issue": 1760.0360525608953,
+   "lsu": 89.69628906253146,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8373075185411017,
+    "clmad 2.00 only": 0.6782190900182924,
+    "alu 64, clmad 1.62": 0.8554928264693629,
+    "alu 64, clmad 2.00": 0.8554928264693629,
+    "int 69 (alu+fma), clmad 2.00": 0.9063410186712437,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.6782190900182924
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "geo-384x1",
+   "knobs": "THREADS=384 MINBLOCKS=1",
+   "bps": 18.4348,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "384x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 24.628420161867773,
+   "clmad": 33.125000000011305,
+   "expectedClmad": 33.125,
+   "alu": 1319.5717019169365,
+   "fma": 188.6510314942079,
+   "issue": 1698.8740774373553,
+   "lsu": 80.01757812502754,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8302412712555334,
+    "clmad 2.00 only": 0.6724954297169821,
+    "alu 64, clmad 1.62": 0.8371754138893365,
+    "alu 64, clmad 2.00": 0.8371754138893365,
+    "int 69 (alu+fma), clmad 2.00": 0.8875234521970162,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.6724954297169821
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "geo-256x2",
+   "knobs": "THREADS=256 MINBLOCKS=2",
+   "bps": 18.129,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "256x2 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 25.043852391196424,
+   "clmad": 33.12500000001121,
+   "expectedClmad": 33.125,
+   "alu": 1319.5795144168674,
+   "fma": 188.663238525452,
+   "issue": 1698.8999563435157,
+   "lsu": 80.02636718752693,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.8164690697263612,
+    "clmad 2.00 only": 0.6613399464783526,
+    "alu 64, clmad 1.62": 0.8232930617340436,
+    "alu 64, clmad 2.00": 0.8232930617340436,
+    "int 69 (alu+fma), clmad 2.00": 0.8728126280618204,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.6613399464783526
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "alu",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "batch32-256x1",
+   "knobs": "BATCH=32 THREADS=256 MINBLOCKS=1",
+   "bps": 17.1895,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "256x1 b32",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 26.412635620582332,
+   "clmad": 31.562500000251305,
+   "expectedClmad": 31.5625,
+   "alu": 1212.691666525713,
+   "fma": 178.33161926411807,
+   "issue": 1570.452126155318,
+   "lsu": 76.51318359435916,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.7376403086532869,
+    "clmad 2.00 only": 0.5974886500091624,
+    "alu 64, clmad 1.62": 0.7376403086532869,
+    "alu 64, clmad 2.00": 0.7173955511921192,
+    "int 69 (alu+fma), clmad 2.00": 0.7632618741523963,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.5974886500091624
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "clmad",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "batch32-512x1",
+   "knobs": "BATCH=32 THREADS=512 MINBLOCKS=1",
+   "bps": 16.9935,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b32",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 26.71727425191985,
+   "clmad": 31.562500000251436,
+   "expectedClmad": 31.5625,
+   "alu": 1212.6858071507168,
+   "fma": 178.32246399068094,
+   "issue": 1570.4327169756348,
+   "lsu": 76.50659179748443,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 0.7292295055178849,
+    "clmad 2.00 only": 0.5906758994694868,
+    "alu 64, clmad 1.62": 0.7292295055178849,
+    "alu 64, clmad 2.00": 0.7092121583236871,
+    "int 69 (alu+fma), clmad 2.00": 0.754550781317855,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.5906758994694868
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "clmad",
+    "alu 64, clmad 2.00": "alu",
+    "int 69 (alu+fma), clmad 2.00": "int",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "rtx-pro-6000",
+   "arm": "karat3-not-topclmad",
+   "knobs": "PACKED_KARAT3=1 PACKED_TOP_CLMAD=0",
+   "bps": 13.8936,
+   "regs": 116,
+   "source": "benchmarks/autosweep/rtx-pro-6000/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 32.67835550181378,
+   "clmad": 54.375000000018574,
+   "expectedClmad": 54.375,
+   "alu": 1145.7553567020207,
+   "fma": 138.01986694340675,
+   "issue": 1583.9236379842018,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": 1.0271268030290965,
+    "clmad 2.00 only": 0.8319727104535682,
+    "alu 64, clmad 1.62": 1.0271268030290965,
+    "alu 64, clmad 2.00": 0.8319727104535682,
+    "int 69 (alu+fma), clmad 2.00": 0.8319727104535682,
+    "alu 128 (Nsight's peak), clmad 2.00": 0.8319727104535682
+   },
+   "binding": {
+    "clmad 1.62 only (ONE-BLOCK-GEOMETRY)": "clmad",
+    "clmad 2.00 only": "clmad",
+    "alu 64, clmad 1.62": "clmad",
+    "alu 64, clmad 2.00": "clmad",
+    "int 69 (alu+fma), clmad 2.00": "clmad",
+    "alu 128 (Nsight's peak), clmad 2.00": "clmad"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "base (PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1)",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1",
+   "bps": 15.3716,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.91930573264982,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 943.8482265429691,
+   "fma": 187.33980227820834,
+   "issue": 1296.1114431599194,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7831726929402297,
+    "int 69 (alu+fma), clmad 29.1": 0.866523837336886,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5352136485754992
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "fused",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0",
+   "bps": 17.4559,
+   "regs": 102,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 102,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 16.66026959366174,
+   "clmad": 64.37500000000001,
+   "expectedClmad": 64.375,
+   "alu": 946.4853725387833,
+   "fma": 167.54091311798462,
+   "issue": 1288.1447073196744,
+   "lsu": 75.01806640625003,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.8918512993951788,
+    "int 69 (alu+fma), clmad 29.1": 0.9690904698157818,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.6040496805504023
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "fused-pipe",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 TABLE_FUSED=1 TABLE_FUSED_PIPE=1 TABLE_PIPE_SELECT=0",
+   "bps": 17.1444,
+   "regs": 106,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 106,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 16.962973332400082,
+   "clmad": 64.37500000000001,
+   "expectedClmad": 64.375,
+   "alu": 961.6679897262833,
+   "fma": 208.53328372345337,
+   "issue": 1344.444695112643,
+   "lsu": 75.01806640625003,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.8899871754960446,
+    "int 69 (alu+fma), clmad 29.1": 0.999791629292668,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.6192000644430297
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "batch32-256x1",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 BATCH=32 THREADS=256 MINBLOCKS=1",
+   "bps": 16.1534,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "256x1 b32",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.003640100536106,
+   "clmad": 59.68750000047532,
+   "expectedClmad": 59.6875,
+   "alu": 888.6283473993284,
+   "fma": 174.68259097582398,
+   "issue": 1214.0772787404026,
+   "lsu": 76.51318359435916,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7748549436341972,
+    "int 69 (alu+fma), clmad 29.1": 0.8559548718291402,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5268367223068936
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "karat3-not-topclmad",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0",
+   "bps": 16.0616,
+   "regs": 113,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 113,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.10653982168651,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 890.7232265429551,
+   "fma": 171.27730227820294,
+   "issue": 1226.9239431598985,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7722677173979192,
+    "int 69 (alu+fma), clmad 29.1": 0.850041596211906,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5293857026429853
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "batch32-512x1",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 BATCH=32 THREADS=512 MINBLOCKS=1",
+   "bps": 15.9094,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b32",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.27975913610821,
+   "clmad": 59.68750000047542,
+   "expectedClmad": 59.6875,
+   "alu": 888.6257839227676,
+   "fma": 174.67013980394987,
+   "issue": 1214.0578695607185,
+   "lsu": 76.50659179748443,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7631484194337778,
+    "int 69 (alu+fma), clmad 29.1": 0.8430136161188324,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.518870464064684
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "no-pipe-select",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 TABLE_PIPE_SELECT=0",
+   "bps": 15.786,
+   "regs": 96,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 96,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.422652983656405,
+   "clmad": 64.37500000000003,
+   "expectedClmad": 64.375,
+   "alu": 956.5351772262829,
+   "fma": 182.7763257156409,
+   "issue": 1312.9226614212364,
+   "lsu": 80.01318359375003,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.8150970890674903,
+    "int 69 (alu+fma), clmad 29.1": 0.8962748702290678,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5567715085038543
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "no-chain-first",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_CHAIN_FIRST=0",
+   "bps": 15.3976,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.88735906894581,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 943.8482265429691,
+   "fma": 187.33980227820834,
+   "issue": 1296.1114431599194,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7844973754727212,
+    "int 69 (alu+fma), clmad 29.1": 0.8679895025747766,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.536118925505875
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "no-pair-ilp",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_PAIR_ILP=0",
+   "bps": 15.356,
+   "regs": 117,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 117,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.938525657723364,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 943.8482265429691,
+   "fma": 189.15230227820894,
+   "issue": 1297.9239431599199,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7823778834207349,
+    "int 69 (alu+fma), clmad 29.1": 0.8670314583042058,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5354181729453499
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "unroll2",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 UNROLL_SLOTS=2",
+   "bps": 15.3411,
+   "regs": 118,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 118,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.95691964722217,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 944.0357265429936,
+   "fma": 179.77681399695572,
+   "issue": 1290.5486990193285,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7817740107611445,
+    "int 69 (alu+fma), clmad 29.1": 0.85916586511889,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.531859178533044
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "clmul-flat",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_CLMUL_FLAT=1",
+   "bps": 15.3071,
+   "regs": 114,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 114,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 18.999026595501434,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 943.8482265429691,
+   "fma": 187.2773022782083,
+   "issue": 1296.048943159919,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7798864612730874,
+    "int 69 (alu+fma), clmad 29.1": 0.8628401841379371,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5329421650914654
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "inline-poly-0",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_INLINE_POLY=0",
+   "bps": 15.3033,
+   "regs": 118,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 118,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.00374429044716,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 951.6607265429718,
+   "fma": 202.58980227821368,
+   "issue": 1324.1114431599271,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7861465931553178,
+    "int 69 (alu+fma), clmad 29.1": 0.8802617146374344,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5443464451838045
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "geo-640x1",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 THREADS=640 MINBLOCKS=1",
+   "bps": 15.2955,
+   "regs": 96,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "640x1 b16",
+   "regsBuilt": 96,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.013435324114937,
+   "clmad": 64.37500000002194,
+   "expectedClmad": 64.375,
+   "alu": 944.2848110156219,
+   "fma": 189.39772464148322,
+   "issue": 1295.6672903278306,
+   "lsu": 80.010986328152,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7796559183484238,
+    "int 69 (alu+fma), clmad 29.1": 0.8641353546116602,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5323814730548893
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "geo-768x1",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 THREADS=768 MINBLOCKS=1",
+   "bps": 15.2368,
+   "regs": 80,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "768x1 b16",
+   "regsBuilt": 80,
+   "spills": [
+    52,
+    132
+   ],
+   "smClocksPerUpdate": 19.086684868213798,
+   "clmad": 64.37500000002197,
+   "expectedClmad": 64.375,
+   "alu": 953.2841966131716,
+   "fma": 202.51860409804527,
+   "issue": 1340.1616018772065,
+   "lsu": 101.44647216800426,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7840657044847894,
+    "int 69 (alu+fma), clmad 29.1": 0.8776152246111032,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5485506040968915
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "no-l2-persist",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_L2_PERSIST=0",
+   "bps": 15.2263,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.099846975299318,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 943.8482265429691,
+   "fma": 187.33980227820834,
+   "issue": 1296.1114431599194,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7757697555567292,
+    "int 69 (alu+fma), clmad 29.1": 0.8583330235266743,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5301545432684381
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "no-from-reduced",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_FROM_REDUCED=0",
+   "bps": 15.2165,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.112147997239838,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 949.848226542971,
+   "fma": 188.33980227820868,
+   "issue": 1304.111443159921,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7801988109403163,
+    "int 69 (alu+fma), clmad 29.1": 0.8630886847961875,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5330834949142441
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "geo-256x2",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 THREADS=256 MINBLOCKS=2",
+   "bps": 15.026,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "256x2 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.354452282709968,
+   "clmad": 64.3750000000219,
+   "expectedClmad": 64.375,
+   "alu": 943.8533534960903,
+   "fma": 187.36470462195086,
+   "issue": 1296.1502615192371,
+   "lsu": 80.02636718752693,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7655687636459682,
+    "int 69 (alu+fma), clmad 29.1": 0.8470642501752511,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5231960982520346
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "geo-384x1",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 THREADS=384 MINBLOCKS=1",
+   "bps": 14.948,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "384x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.455445544554454,
+   "clmad": 64.37500000002197,
+   "expectedClmad": 64.375,
+   "alu": 943.8499355273441,
+   "fma": 187.3481030594583,
+   "issue": 1296.1243826130444,
+   "lsu": 80.01757812502754,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7615919365047016,
+    "int 69 (alu+fma), clmad 29.1": 0.8426522247834719,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5204697942267712
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "inline-poly-1",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_INLINE_POLY=1",
+   "bps": 14.8501,
+   "regs": 114,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 114,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.58370650702689,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 949.5982265429711,
+   "fma": 191.58980227820996,
+   "issue": 1308.9239431599217,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7612119028556279,
+    "int 69 (alu+fma), clmad 29.1": 0.8445263889909201,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5221671547348647
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "pivot-nibble",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 TABLE_PIVOT_BYTES=0",
+   "bps": 14.8223,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.620436774319774,
+   "clmad": 64.37500000002198,
+   "expectedClmad": 64.375,
+   "alu": 973.3107265429788,
+   "fma": 177.96480227820513,
+   "issue": 1333.7989431599274,
+   "lsu": 104.01318359378632,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7787595871683993,
+    "int 69 (alu+fma), clmad 29.1": 0.8503965932832719,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.53109440749431
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "alu-sqr",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 PACKED_ALU_SQR=1",
+   "bps": 14.6209,
+   "regs": 116,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 116,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 19.890704402601756,
+   "clmad": 63.12500000002156,
+   "expectedClmad": 63.125,
+   "alu": 970.2232265429691,
+   "fma": 193.02730227821078,
+   "issue": 1325.7989431599153,
+   "lsu": 80.01318359377757,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.7657413003777495,
+    "int 69 (alu+fma), clmad 29.1": 0.8475669325237081,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5207359193413991
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "greedy combo1",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0",
+   "bps": 17.4816,
+   "regs": 102,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b16",
+   "regsBuilt": 102,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 16.635777045579353,
+   "clmad": 64.37500000000001,
+   "expectedClmad": 64.375,
+   "alu": 946.4853725387833,
+   "fma": 167.54091311798462,
+   "issue": 1288.1447073196744,
+   "lsu": 75.01806640625003,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.893164355633726,
+    "int 69 (alu+fma), clmad 29.1": 0.9705172438620507,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.604939011767363
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "greedy combo3",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1",
+   "bps": 17.7529,
+   "regs": 102,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "256x1 b32",
+   "regsBuilt": 102,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 16.381548930033965,
+   "clmad": 59.68749999999992,
+   "expectedClmad": 59.6875,
+   "alu": 890.4532680465957,
+   "fma": 152.7904706131017,
+   "issue": 1203.611000654635,
+   "lsu": 71.5180664062499,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.8533294544244034,
+    "int 69 (alu+fma), clmad 29.1": 0.9229575626764372,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5740123222032119
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "greedy combo4",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0",
+   "bps": 18.64145,
+   "regs": 106,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "256x1 b32",
+   "regsBuilt": 106,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 15.600717755324828,
+   "clmad": 59.68749999999992,
+   "expectedClmad": 59.6875,
+   "alu": 842.3595180465957,
+   "fma": 134.3842206131017,
+   "issue": 1137.111000654635,
+   "lsu": 71.5180664062499,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.8476439670176209,
+    "int 69 (alu+fma), clmad 29.1": 0.9073753258919963,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.569440447032135
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  },
+  {
+   "gpu": "b200",
+   "arm": "greedy combo5",
+   "knobs": "PACKED_TOP_CLMAD=1 PACKED_ALU_SQUARE=0 PACKED_ONB_INV=1 TABLE_FUSED=1 TABLE_PIPE_SELECT=0 BATCH=32 THREADS=256 MINBLOCKS=1 PACKED_KARAT3=1 PACKED_TOP_CLMAD=0 BATCH=32 THREADS=512 MINBLOCKS=1",
+   "bps": 19.4024,
+   "regs": 106,
+   "source": "benchmarks/autosweep/b200/summary.json",
+   "geometry": "512x1 b32",
+   "regsBuilt": 106,
+   "spills": [
+    0,
+    0
+   ],
+   "smClocksPerUpdate": 14.988867356615676,
+   "clmad": 59.68750000000002,
+   "expectedClmad": 59.6875,
+   "alu": 842.3569545700333,
+   "fma": 134.3717694412268,
+   "issue": 1137.0915914749478,
+   "lsu": 71.51147460937503,
+   "eta": {
+    "alu 63.7, clmad 29.1": 0.8822423822203603,
+    "int 69 (alu+fma), clmad 29.1": 0.9444001615998378,
+    "alu 128 (Nsight's peak), clmad 29.1": 0.5926750732420808
+   },
+   "binding": {
+    "alu 63.7, clmad 29.1": "alu",
+    "int 69 (alu+fma), clmad 29.1": "int",
+    "alu 128 (Nsight's peak), clmad 29.1": "issue"
+   }
+  }
+ ]
+}

@@ -15,17 +15,22 @@ the step tag instead of stored, products inlined and the forward pass
 software-pipelined. 300/300 device reports re-walked, the same distinguished
 points as the two-pass kernel, 19.04 B/s in DP-34 collection. Measured against
 the tree's previous best configuration rebuilt in the same session on the same
-card, 17.41 B/s: +15.3%. The kernel sits at 0.90 of the carry-less unit's
-22.3 B/s ceiling for its 33 CLMADs per update; the remaining tenth is the
-serial inversion (§7 there). The campaign default below is unchanged, and
+card, 17.41 B/s: +15.3%. [ROOFLINE.md](ROOFLINE.md) prices it per pipe from
+dynamic SASS counts: the ALU pipe is 91% busy (1,320 logic lane-instructions
+per update at 64 per SM-clock), the carry-less unit 73%, and the speed of
+light for its 33.1 CLMADs per update is 27.4 B/s. The same note corrects the
+22.3 B/s "carry-less ceiling" quoted here before: it assumed 1.62 CLMADs per
+SM-clock, and a measured sweep build ran the unit at least 1.654 (accounting;
+no rate changes). The campaign default below is unchanged, and
 the table walk is not a candidate for it as built: its cycle rule lets
 fruitless cycles through (four steps that sum to `O` through Frobenius's own
 `σ² + σ + 2 = 0`, and six-step pairwise ones), which at the campaign's
 distinguished-point weight trap about half its walks, several times its rate
 gain ([WALK-CONSTANT.md](WALK-CONSTANT.md)).
-[TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× that
+[TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× the 22.3
 ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
-SM-clocks 30 B/s allows) and builds the kernel for the remaining tenth:
+SM-clocks 30 B/s allows; at the unit's 2.0 they fill 15.0, so the verdict
+stands, ROOFLINE.md §5) and builds the kernel for the remaining tenth:
 `PACKED_CHAINS=2` (`make gpu-rtx-pro6000-chains2`), two interleaved
 Montgomery chains per thread so the inversion and the forward pass overlap
 inside the warp — same walk, same distinguished points, and **0.696× the
