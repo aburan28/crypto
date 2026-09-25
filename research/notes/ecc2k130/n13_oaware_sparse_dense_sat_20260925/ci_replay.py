@@ -75,7 +75,10 @@ def replay_smoke(root, f, old):
         raw(row, root, stem)
         assert row["solver"] == name and row["case"] == case
         assert verify.sha(root / f"{stem}.cnf") == row["input_sha256"]
-        assert row["command"][0] == f["binaries"][name]["path"]
+        expected_command = ([f["binaries"][name]["path"], "--verb=0", "--threads=1",
+                             str(root / f"{stem}.cnf")] if name == "cryptominisat5"
+                            else [f["binaries"][name]["path"], str(root / f"{stem}.cnf")])
+        assert row["command"] == expected_command
         try:
             status, assignment = old.parse_solver_output(
                 (root / f"{stem}.stdout").read_bytes(), row["exit_code"], 1)
@@ -99,7 +102,9 @@ def replay_panel(root, f, schemas, truth, curve, point, old):
         raw(row, root, stem)
         assert row["representation"] == rep and row["pair"] == (0 if index < 2 else 1)
         assert row["exit_code"] == 0 and row["stop_reason"] is None
-        assert row["command"][0] == f["python_executable"]
+        assert row["command"] == [f["python_executable"],
+                                  str((verify.DENSE if rep == "dense" else verify.SPARSE) / "export.py"),
+                                  "--out", str(root / "work" / stem)]
         assert row["sampled_peak_tree_rss_bytes"] <= f["export_rss_cap_bytes"]
         assert row["expected_base_sha256"] == f[f"{rep}_base_sha256"]
         assert row["expected_schema_sha256"] == f[f"{rep}_schema_sha256"]
@@ -131,8 +136,10 @@ def replay_panel(root, f, schemas, truth, curve, point, old):
                 assert row["point_oracle_positive"] == truth[target["id"]]
                 assert row["input_sha256"] == query_hash[rep]
                 assert row["input_bytes"] == query_bytes[rep]
-                assert row["command"][0] == f["binaries"][name]["path"]
-                assert row["command"][-1] == str(root / f"query-{rep}.cnf")
+                expected_command = ([f["binaries"][name]["path"], "--verb=0", "--threads=1",
+                                     str(root / f"query-{rep}.cnf")] if name == "cryptominisat5"
+                                    else [f["binaries"][name]["path"], str(root / f"query-{rep}.cnf")])
+                assert row["command"] == expected_command
                 if row["stop_reason"]:
                     verdict, certificate = "CENSORED", None
                 else:
