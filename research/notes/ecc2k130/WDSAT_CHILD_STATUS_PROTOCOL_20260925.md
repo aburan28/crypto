@@ -1,6 +1,6 @@
 # WDSat child-status and empty-output correctness gate
 
-Status: pre-change protocol, 2026-09-25, based on `main` ec990d85b61eacccefa9dee97f2a835e7a20b785. This is a triage repair, not a new solver-performance experiment. It does not revise the frozen Riemann–Roch WDSat results or claim a new index-calculus boundary.
+Status: pre-change protocol, 2026-09-25, based on `main` ec990d85b61eacccefa9dee97f2a835e7a20b785. This is a triage repair, not a new solver-performance experiment. The frozen `research/wdsat_rr_20260920/` Riemann–Roch panel uses the separate Python `ecc2k130/codegen/wdsat.py` exporter/runner, not this Rust Semaev adapter. Its published outcomes and prior limitations are unaffected by this code change; no historical result without stored child status is retrospectively reclassified. No new index-calculus boundary is claimed.
 
 ## Defect and upstream contract
 
@@ -22,5 +22,5 @@ A model that fails any independent check remains spurious/exhausted. The adapter
 
 1. Add a mock-child regression for zero and nonzero empty stdout, explicit successful UNSAT, nonzero exit with misleading UNSAT text, and successful model output. Check both the process boundary and oracle verdict; use a tiny frozen Koblitz fixture if the full oracle is needed.
 2. Re-run the existing WDSat ANF/parse/validation unit tests and the pinned planted n=7 WDSat/native-SAT witness comparison where the existing WDSat binary is available. If the binary is unavailable, report that test as unavailable rather than substitute a mock for actual solver agreement.
-3. Replay the prior small-rung corpus or its archived parser/ANF fixtures without changing files, check hashes when stored, and document which historical labels the new rule would leave unchanged or classify as unknown. Do not rewrite historical timing rows or the canonical scoreboard from a parser fix alone.
+3. Replay the existing Rust ANF/parser fixtures and inspect archived WDSat corpus receipts without changing them; check hashes when stored. Distinguish the separate Riemann–Roch Python panel from this Rust Semaev path. Do not infer a changed historical verdict where child status was not stored, and do not rewrite timing rows or the canonical scoreboard from a parser fix alone.
 4. Keep the change to child status and verdict triage plus focused tests/docs. Any subsequent WDSat comparison needs a new frozen corpus, raw stdout/stderr/exit receipts, and independent witness checks.
