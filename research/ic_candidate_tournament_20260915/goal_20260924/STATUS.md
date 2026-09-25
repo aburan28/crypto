@@ -174,7 +174,7 @@ preserves every attempted collection/descent query, typed frontend outcomes and
 solver counters, plus terminal failed descents. The worker exports these records
 and retains actual attempted matrix solves. Independent group and bounded
 negative-answer replay checks accounting only; complete generic scientific
-admission still needs query-law replay, exact source/base/matrix binding and
+admission still needs exact source/base/matrix binding and
 exclusive public-target timing. This is not an improvement round. The incumbent
 remains selected and two rounds remain under the frozen goal protocol.
 
@@ -184,3 +184,11 @@ reusable IC/rho preparation through independent scalar replay. Its 37 final loca
 worker controls pass, including seven intended preparation failures with null
 online intervals. Combined legacy phase dumps remain unqualified for scientific
 cost comparison; full generic admission and the remaining two rounds are open.
+
+PR 803 merged at `62ef21ec1e083f197593edbe1309c5ddf60b7789` after all applicable
+checks passed, including Linux integration and strict archived-round replay.
+The [independent query-law controls](generic-query-law/RESULTS.md) now replay
+7,436 pinned Rust RNG/probe values, all 35 archived IC reports, and 47 fresh
+controls (40 complete, seven intentionally incomplete). Wrong seeds, batch
+partitions and collection/descent rules are rejected even when group equations
+remain valid. This is accounting admission, not a new measured improvement round.
