@@ -29,7 +29,8 @@ Compare all 64 exact `Q+T` multiplicities (16 points × four torsion branches)
 with #767's archived complete group-law counts. Every point and factor list
 must independently match the hash-pinned #767 verifier source and archive.
 For every mask tuple in the direct reference, retain the exact rational lift
-count and check the curve equation and full point sum. Every future solver
+count and one full rational point-tuple witness; re-add that witness and check
+its factor membership, mask decoding, curve equation and full point sum. Every future solver
 model must map back to a mask tuple and then to a rational point-sign witness;
 a raw algebraic root with no such lift is spurious. A claimed UNSAT must agree
 with the complete direct reference, and timeouts/caps remain unknown.
@@ -139,8 +140,8 @@ per-engine variable/degree/memory preflight, 15-second/2-GiB pilot caps from
 [#763](../ROTATED_M5_M6_SOLVER_ADMISSION_20260925.md), and all 16 point
 labels before outcomes. A solver ranking follows only if both encodings are
 semantically exact on the toy corpus. Before any actual ECC2K-130 target
-experiment, add a separately verified field isomorphism from the public
-challenge's representation into #762's n131 polynomial basis, map its exact
+experiment, verify the public challenge field/model against #762's n131
+basis (and construct an isomorphism only if they differ), import its literal
 source `P,Q`, verify curve and subgroup order, and archive coordinates,
 source-model hashes and import receipts. This toy gate uses no challenge
 coordinates.

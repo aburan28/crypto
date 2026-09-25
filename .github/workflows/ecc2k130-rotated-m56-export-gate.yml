@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Check independently pinned freeze anchor
-        run: echo "b620658201df4ae38f03bc1430d9225891fcfeba077b5a4767cdf33fcde908bd  research/notes/ecc2k130/rotated_m56_export_gate_20260925/FROZEN.json" | sha256sum --check
+        run: echo "616ba20c58f40db62670783301256e344c459f866dbcb2bee24503125bb36fff  research/notes/ecc2k130/rotated_m56_export_gate_20260925/FROZEN.json" | sha256sum --check
       - name: Check frozen source, targets, and pre-outcome self-test
         run: python3 research/notes/ecc2k130/rotated_m56_export_gate_20260925/ci_replay.py
       - name: Re-enumerate committed exact semantic outcomes

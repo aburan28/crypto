@@ -194,6 +194,7 @@ def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
     full = Counter()
     matching = [Counter() for _ in target_points]
     x_masks = [set() for _ in target_points]
+    mask_witnesses = [{} for _ in target_points]
     point_targets = {}
     for index, target in enumerate(target_points):
         point_targets.setdefault(target, []).append(index)
@@ -232,6 +233,7 @@ def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
         for index in point_targets.get(acc, ()):
             matching[index][mask_tuple] += 1
             x_masks[index].add(mask_tuple)
+            mask_witnesses[index].setdefault(mask_tuple, choice)
             if chain:
                 prior = None
                 for p in choice[:-1]:
@@ -249,6 +251,15 @@ def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
                 if chain else {})
     assert sum(full.values()) == total == math.prod(map(len, factors))
     assert len(seen_masks) == 4 ** len(factors)
+    for index, models in enumerate(mask_witnesses):
+        assert set(models) == x_masks[index] == set(matching[index])
+        for masks, choice in models.items():
+            assert all(p in factors[i] and coordinate_maps[i][p[0]] == masks[i]
+                       for i, p in enumerate(choice))
+            acc = None
+            for p in choice:
+                acc = curve.add(acc, p)
+            assert acc == target_points[index]
     if chain:
         assert sum(branches.values()) == (len(factors) - 1) * total
         assert sum(terminal.values()) == sum(sum(c.values()) for c in matching)
@@ -265,6 +276,12 @@ def enumerate_policy(curve, factors, coordinate_maps, target_points, trace_mask,
         "symmetry_negative_controls": controls,
         "target_full_counts": [sum(c.values()) for c in matching],
         "target_x_mask_sets": [sorted([list(t) for t in masks]) for masks in x_masks],
+        "target_x_mask_models": [
+            [{"masks": list(masks), "rational_lift_multiplicity": count,
+              "point_witness": [pjson(p) for p in mask_witnesses[index][masks]]}
+             for masks, count in sorted(counter.items())]
+            for index, counter in enumerate(matching)
+        ],
     }
 
 
