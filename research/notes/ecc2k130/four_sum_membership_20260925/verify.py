@@ -134,7 +134,15 @@ def verify_arm(n: int, r: int, oracle_path: Path, extractor_path: Path) -> dict:
     for point in points:
         assert curve.is_on_curve(point) and curve.scalar(point, order) is None
     target_count = 128 if (n, r) == (41, 12) else 512
-    target_rows = read_lines(HERE / f"target_points_n{n}.jsonl")[:target_count]
+    full_target_data = (HERE / f"target_points_n{n}.jsonl").read_bytes()
+    if (n, r) == (41, 12):
+        prefix_data = (HERE / "target_points_n41_R12.jsonl").read_bytes()
+        assert prefix_data == b"".join(full_target_data.splitlines(keepends=True)[:128])
+        assert sha(prefix_data) == "1b154bdd8aa9dabdb37d2dd5a7bfee69a1fa8284ac5db678ef73eaf2c2f297a5"
+        effective_target_file = HERE / "target_points_n41_R12.jsonl"
+    else:
+        effective_target_file = HERE / f"target_points_n{n}.jsonl"
+    target_rows = read_lines(effective_target_file)
     scalar_rows = list(map(int, (HERE / f"target_scalars_n{n}.txt").read_text().split()))[:target_count]
     targets = [tuple(row) for row in target_rows]
     assert len(targets) == len(scalar_rows) == target_count

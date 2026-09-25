@@ -102,6 +102,11 @@ def main() -> None:
             "target_scalars_sha256": sha(scalar_data),
             "target_points_sha256": sha(point_data),
         }
+    # The R12 extractor consumes its whole point file; freeze precisely the
+    # preregistered first 128 lines as a separate, byte-identical prefix.
+    n41_lines = (HERE / "target_points_n41.jsonl").read_bytes().splitlines(keepends=True)
+    assert len(n41_lines) == 512
+    once(HERE / "target_points_n41_R12.jsonl", b"".join(n41_lines[:128]))
     manifest_data = json.dumps(manifest, sort_keys=True, indent=2).encode() + b"\n"
     once(HERE / "input_manifest.json", manifest_data)
     print(json.dumps({"input_manifest_sha256": sha(manifest_data),

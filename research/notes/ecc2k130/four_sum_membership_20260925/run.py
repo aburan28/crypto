@@ -42,11 +42,18 @@ def run(args: argparse.Namespace) -> None:
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     base_file = HERE / f"base_n{n}_R{r}.json"
-    targets_file = HERE / f"target_points_n{n}.jsonl"
+    full_targets_file = HERE / f"target_points_n{n}.jsonl"
+    targets_file = (HERE / "target_points_n41_R12.jsonl"
+                    if (n, r) == (41, 12) else full_targets_file)
     header = json.loads(base_file.read_bytes())
     assert sha(json.dumps(header["factor_base_point_coordinates"],
                           separators=(",", ":")).encode()) == BASE_HASHES[(n, r)]
-    assert len(targets_file.read_bytes().splitlines()) == 512
+    full_target_lines = full_targets_file.read_bytes().splitlines(keepends=True)
+    assert len(full_target_lines) == 512
+    assert len(targets_file.read_bytes().splitlines()) == count
+    if (n, r) == (41, 12):
+        assert targets_file.read_bytes() == b"".join(full_target_lines[:128])
+        assert sha(targets_file.read_bytes()) == "1b154bdd8aa9dabdb37d2dd5a7bfee69a1fa8284ac5db678ef73eaf2c2f297a5"
     if args.mode == "oracle":
         exe = ORACLE
         source = REPO / "examples/koblitz_four_sum_membership.rs"
@@ -86,6 +93,9 @@ def run(args: argparse.Namespace) -> None:
                 "point_set_sha256": BASE_HASHES[(n, r)],
                 "targets_file": str(targets_file.relative_to(REPO)),
                 "targets_sha256": sha(targets_file.read_bytes()),
+                "full_target_stream_sha256": sha(full_targets_file.read_bytes()),
+                "input_amendment_sha256": (sha((HERE / "input_amendment.json").read_bytes())
+                                           if (n, r) == (41, 12) else None),
                 "source_path": str(source.relative_to(REPO)),
                 "source_sha256": expected_source_sha,
                 "executable_sha256": sha(exe.read_bytes()),
