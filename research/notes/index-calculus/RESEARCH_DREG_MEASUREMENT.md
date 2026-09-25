@@ -477,6 +477,54 @@ FFD is 3 on 22 of 24 draws. Random subspaces reproduce Result 3's 6 at
 `(7, 3)`. Wherever a control finished, it resolved at least one degree above
 the Semaev draws.
 
+## Result 5: the `(n, ℓ)` grid — size does not move `ℓ = 2`, and `ℓ = 5` refutes above 6
+
+`research/dreg_ell_grid_20260925/` holds everything. It was pre-registered
+before any cell ran, with the same system, sampling and frozen binary as
+Result 4. It separates `ℓ` from the unknown count `N`, the confound Result 4
+could not.
+
+| `ℓ` \ `N` | 11 | 13 | 14 | 16 | 18 | 23 | 25 |
+|---|---|---|---|---|---|---|---|
+| 2 | 5555 | 5555 | **5555** | **5555** | **5555** | | |
+| 3 | | **5555** | **6666** | 6666 | 6666 | | |
+| 4 | | | | | | 6666 | 6666 |
+| 5 | | | | | | | **≥7 ≥7 ≥7 ≥7** |
+
+Bold cells are new. The others are Result 4's.
+
+- **Q1: mixed, by the registered rule.** At matched `N`, `ℓ = 3` resolves
+  above `ℓ = 2` at 14, 16 and 18 unknowns, but not at 13.
+  - Size alone does not move `ℓ = 2`. It reads 5 from 11 to 18 unknowns,
+    across surpluses −1 to +6.
+  - So Result 4's two "grows" pairs coincide with crossing from `ℓ = 2` to
+    `ℓ ≥ 3`, not with field size.
+  - The exception is `(4, 3)` at 5. It is the smallest field in the grid, and
+    it sits at surplus −5.
+- **Q2: rises at `ℓ = 5`.** At 25 unknowns `(13, 4)` is refuted at 6 on all
+  four draws.
+  - `(10, 5)` is refuted by none of its four at degree 6. That is a
+    mathematical lower bound, ≥7.
+  - The FFD is still 3, so the gap is at least 4.
+- **The confound Q2 carries.** At fixed `N`, one more `ℓ` means six fewer
+  equations, since the surplus `S = N − 6ℓ`.
+  - Lowering the surplus at fixed `ℓ` never raised the degree anywhere in the
+    grid. That argues against the equation count as the cause, without ruling
+    it out at `ℓ = 5`.
+  - `(7, 4)`, which is `ℓ = 4` at `S = −5`, separates the two readings in
+    seconds. It is not yet run.
+
+**What it means, if the rise belongs to `ℓ`:**
+
+- The refutation degree runs 5, 6, 6, ≥7 over `ℓ = 2`–`5`.
+- Result 4's flat stretch at `ℓ = 3, 4` does not continue.
+- At fixed surplus `ℓ` grows with `n`, so the degree grows with the field.
+
+That is scoped to `m = 3` and `n ≤ 13`, and it says nothing about `n = 131`.
+
+My predictions were "tracks ℓ" for Q1 and 6 for Q2. Both failed, and
+`RESULTS.md` records both.
+
 ## Reproducing
 
 ```sh
@@ -528,7 +576,21 @@ F4_F2_MAX_ROWS=2000000 F4_F2_MAX_COLS=200000 \
 - **Run the primary pair `(7, 3) → (13, 5)` to completion** on a machine
   that stays up: `research/dreg_fixed_surplus_20260923/run_queue.py` resumes
   after interruptions.  It is the pair that separates field-size growth from
-  the `ℓ = 2` floor (Result 4).
+  the `ℓ = 2` floor (Result 4).  **It is far more expensive than recorded:**
+  about 11–24 h a `(13, 5)` draw and 1.7–5.6 days a `(15, 5)` draw on the
+  four-core container.  That is an extrapolation
+  (`research/dreg_ell_grid_20260925/cost_model.py`), so it needs a large
+  machine for days.
+- **Separate `ℓ` from the unknown count directly** (pre-registered 2026-09-25,
+  `research/dreg_ell_grid_20260925/`).  The design compares `ℓ = 2` with
+  `ℓ = 3` at matched `N = 13, 14, 16, 18`, which takes minutes, and measures
+  `(10, 5)` against `(13, 4)` at `N = 25`, about 1.2 h a draw.  It answers
+  the Result 4 confound without the primary pair's cost.  **Done:**
+  Result 5.  A `(10, 5)` draw took 26–29 min, and the cost model overstated
+  it by 2.5–2.9×.
+- **Run the `(7, 4)` surplus control** for Result 5's Q2: `ℓ = 4` at
+  `S = −5`, which takes seconds.  It decides whether `(10, 5)`'s ≥7 belongs
+  to `ℓ` or to the six equations it lacks.  Pre-register it first.
 - **Match the surplus, not the unknown count, when pairing cells.**  The
   `n = 9` versus `n = 15` comparison proposed above is confounded a third
   way: those cells carry surplus `n − mℓ` of `−9` and `+3`, opposite signs

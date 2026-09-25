@@ -1,0 +1,31 @@
+## Q1: at matched unknown count N, does ℓ = 3 resolve above ℓ = 2?
+
+| N | ℓ = 2 cell | values | median | ℓ = 3 cell | values | median | pair |
+|--:|---|---|--:|---|---|--:|---|
+| 13 | n7l2 | 5 5 5 5 | 5 | n4l3 | 5 5 5 5 | 5 | no ℓ-step |
+| 14 | n8l2 | 5 5 5 5 | 5 | n5l3 | 6 6 6 6 | 6 | ℓ-step |
+| 16 | n10l2 | 5 5 5 5 | 5 | n7l3 | 6 6 6 6 | 6 | ℓ-step |
+| 18 | n12l2 | 5 5 5 5 | 5 | n9l3 | 6 6 6 6 | 6 | ℓ-step |
+
+Q1, by the registered rule: mixed
+
+## Q2: at N = 25, does ℓ = 5 resolve above ℓ = 4?
+
+n13l4: 6 6 6 6; n10l5: ≥7 ≥7 ≥7 ≥7
+
+Q2, by the registered rule: rises at ℓ = 5
+
+## Secondary (not decided on)
+
+- n5l2: ℓ=2 N=11 S=-1 FFD [3, 2, 3, 3] satisfiable 3/7 secs 0.0–0.0
+- n7l2: ℓ=2 N=13 S=+1 FFD [3, 3, 3, 3] satisfiable 1/5 secs 0.1–0.1
+- n8l2: ℓ=2 N=14 S=+2 FFD [3, 3, 3, 3] satisfiable 0/4 secs 0.1–0.2
+- n10l2: ℓ=2 N=16 S=+4 FFD [3, 3, 3, 3] satisfiable 0/4 secs 0.7–0.8
+- n12l2: ℓ=2 N=18 S=+6 FFD [3, 3, 3, 3] satisfiable 0/4 secs 3.3–4.2
+- n4l3: ℓ=3 N=13 S=-5 FFD [3, 3, 3, 3] satisfiable 251/255 secs 0.0–0.0
+- n5l3: ℓ=3 N=14 S=-4 FFD [3, 3, 3, 3] satisfiable 28/32 secs 0.5–0.7
+- n7l3: ℓ=3 N=16 S=-2 FFD [2, 3, 3, 3] satisfiable 8/12 secs 2.6–8.1
+- n9l3: ℓ=3 N=18 S=+0 FFD [3, 3, 3, 3] satisfiable 0/4 secs 67.3–80.1
+- n11l4: ℓ=4 N=23 S=-1 FFD [3, 3, 3, 3] satisfiable 2/6 secs 1280.6–1629.5
+- n13l4: ℓ=4 N=25 S=+1 FFD [3, 3, 3, 3] satisfiable 1/5 secs 5959.9–7173.9
+- n10l5: ℓ=5 N=25 S=-5 FFD [3, 3, 3, 3] one process a draw secs 1550.9–1731.6

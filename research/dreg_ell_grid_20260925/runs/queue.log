@@ -1,0 +1,20 @@
+2026-09-25T00:33:01Z start, pending [('4:3:7', 'all'), ('5:3:7', 'all'), ('8:2:7', 'all'), ('10:2:7', 'all'), ('12:2:7', 'all'), ('10:5:6', 'u0'), ('10:5:6', 'u1'), ('10:5:6', 'u2'), ('10:5:6', 'u3')]
+2026-09-25T00:33:01Z launch 4:3:7 all pid 662
+2026-09-25T00:33:01Z launch 5:3:7 all pid 663
+2026-09-25T00:33:11Z done 4:3:7 all exit 0 wall 10s
+2026-09-25T00:33:11Z done 5:3:7 all exit 0 wall 10s
+2026-09-25T00:33:11Z launch 8:2:7 all pid 675
+2026-09-25T00:33:11Z launch 10:2:7 all pid 676
+2026-09-25T00:33:21Z done 8:2:7 all exit 0 wall 10s
+2026-09-25T00:33:21Z done 10:2:7 all exit 0 wall 10s
+2026-09-25T00:33:21Z launch 12:2:7 all pid 686
+2026-09-25T00:33:21Z launch 10:5:6 u0 pid 687
+2026-09-25T00:33:41Z done 12:2:7 all exit 0 wall 20s
+2026-09-25T00:33:41Z launch 10:5:6 u1 pid 701
+2026-09-25T01:00:51Z done 10:5:6 u0 exit 0 wall 1650s
+2026-09-25T01:00:51Z launch 10:5:6 u2 pid 1171
+2026-09-25T01:02:01Z done 10:5:6 u1 exit 0 wall 1700s
+2026-09-25T01:02:01Z launch 10:5:6 u3 pid 1207
+2026-09-25T01:28:01Z done 10:5:6 u3 exit 0 wall 1560s
+2026-09-25T01:29:51Z done 10:5:6 u2 exit 0 wall 1740s
+2026-09-25T01:29:51Z queue empty
