@@ -48,7 +48,18 @@ It retains the original sources, worker binaries, fixtures, admissions, native/p
 
 [Fresh archive extraction](ARCHIVE_RESTORE.json) passed the archive hash, reconstructed-profile hashes, file count and byte count. The measured Linux checker verified all 3,243 records and 1,362 files across the three source snapshots. [Independent macOS transport replay](TRANSPORT_MACOS.json) reproduced the full frozen audit, including every summary and the decision, and rechecked all 30 controls without executing benchmark workers. A fresh Linux/Python 3.12 restore, full audit, byte-exact table export and scoreboard check are required by the evidence PR's CI. Successful verification does not turn the rejected challenger into a winner.
 
-From the repository root, with Python 3.12 and zstd available, choose a new output directory and run:
+[Linux transport replay](TRANSPORT_LINUX.json) also passed every raw audit in
+[CI run 36148143827](https://github.com/aburan28/crypto/actions/runs/36148143827).
+That job then correctly rejected one last-bit difference in the local report
+export: the development `stop3_word` online mean was `0.06684807584648403` ms
+on macOS and `0.06684807584648401` ms on Linux. Every CSV row and the frozen
+decision matched. [The discrepancy record](PLATFORM_DIFFERENCES.json) retains
+both values and export hashes. The committed JSON uses the independently
+regenerated Linux value; no measurements, thresholds, decisions, displayed
+six-significant-digit tables or checker tolerances changed. The corrected PR
+head must pass the complete byte-exact gate again.
+
+From the repository root on Linux, with Python 3.12 and zstd available, choose a new output directory and run:
 
 ```sh
 python3.12 research/ic_candidate_tournament_20260915/evidence/restore.py \
