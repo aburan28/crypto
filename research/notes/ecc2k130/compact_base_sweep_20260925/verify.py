@@ -13,7 +13,10 @@ import json
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PR737_VERIFY = HERE.parent / "paired_fullrank_20260925/verify.py"
+REPO = HERE.parents[3]
+PR737_VERIFY = (HERE / "evidence/source/pr737_independent_math.py"
+                if (HERE / "evidence/source/pr737_independent_math.py").exists()
+                else HERE.parent / "paired_fullrank_20260925/verify.py")
 SPEC = HERE / "input_spec.json"
 
 
@@ -45,6 +48,13 @@ def read_run(run: Path) -> tuple[dict, dict, dict]:
     assert digest((run / "producer.stderr.txt").read_bytes()) == receipt["stderr_sha256"]
     assert digest((run / "manifest.json").read_bytes()) == receipt["manifest_sha256"]
     assert manifest["input_spec_sha256"] == digest(SPEC.read_bytes())
+    source_snapshot = HERE / "evidence/source" / (Path(manifest["source_path"]).name + ".gz")
+    if source_snapshot.exists():
+        with gzip.open(source_snapshot, "rb") as stream:
+            source_bytes = stream.read()
+    else:
+        source_bytes = (REPO / manifest["source_path"]).read_bytes()
+    assert digest(source_bytes) == manifest["source_sha256"]
     assert len(stdout.splitlines()) == 1
     return manifest, receipt, json.loads(stdout)
 
