@@ -6,6 +6,10 @@ actual source/build/kernel, independent usable-base census, complete method,
 canonical candidate and one-target workload. Successful runs reconstruct those
 identities and independently verify the relations, rank, target descent, scalar
 replay, native online interval and (when profiled) exclusive instruction ledger.
+A frozen random run-number namespace prevents identifier collisions when the same
+workload is executed again in another campaign. Early local controls retain their
+original identifiers under their sealed contracts. Ignored configuration flags
+cannot create a second IC competitor with the same canonical method.
 Failed executions keep the same candidate/workload key and null verified online
 timing and complete costs. Rho uses a distinct reference identity.
 

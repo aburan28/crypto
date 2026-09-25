@@ -15,6 +15,11 @@ generated in separate processes. The bounded control seed is 2026092530,
 with one target in each of n13a0 and n17a1 and one process repetition in the
 portable screen. Rho widths 1, 8 and 32 and an A/A copy are retained.
 
+Also run an n13a0 control with a one-trial IC arm, reusing the sealed native
+executable. Expect collection exhaustion and a retained canonical failure with
+null verified timing/costs. Its repeated incumbent workload must have a distinct
+run ID. The final Linux control executes this six-job failure screen as well.
+
 The Linux driver control additionally freezes the existing pilot tournament
 with n13a0 development and n17a1 holdout cells, three repetitions, and the same
 two IC configurations. Exercise A/A and smoke only, then independently audit

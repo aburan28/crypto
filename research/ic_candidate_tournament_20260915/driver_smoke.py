@@ -40,6 +40,21 @@ def main():
     run([sys.executable, native/'evaluator/autolab.py', 'verify', '--round', native])
     require(read(native/'summary.json')['all_jobs_verified'], 'native driver retained failures')
 
+    failure_registry = [registry[0], dict(id='budget', config=dict(config, max_trials=1))]
+    write(out/'failure-candidates.json', failure_registry, exclusive=True)
+    failure = out/'native-failure'
+    run([sys.executable, HERE/'autolab.py', 'screen', '--source-screen', native,
+         '--out', failure, '--candidates', out/'failure-candidates.json', '--cells', '13a0',
+         '--cases', '1', '--repetitions', '1', '--seed', '2026092530', '--timeout', '180'])
+    run([sys.executable, failure/'evaluator/autolab.py', 'verify', '--round', failure])
+    failed = read(failure/'trials/n13a0-000/budget/rep-0/run.json')
+    require(failed['status'] == 'error' and failed['total_operations'] is None
+            and failed['native_timing'] is None and failed['certificate'] is None,
+            'expected collection exhaustion acquired a verified measurement')
+    ids = [{read(p)['run_id'] for p in root.glob('trials/**/run.json')} for root in (native, failure)]
+    require(len(ids[0]) == 12 and len(ids[1]) == 6 and not ids[0] & ids[1],
+            'repeated workload has colliding run identities')
+
     campaign = out/'tournament'
     run([sys.executable, HERE/'tournament.py', 'prepare', '--source-root', prepared/'source',
          '--out', campaign, '--candidates', out/'candidates.json', '--cells', '13a0',
@@ -53,7 +68,7 @@ def main():
     run([sys.executable, campaign/'evaluator/tournament.py', 'verify', '--round', campaign])
     require(not (campaign/'decision.json').exists(), 'integration control must not select a winner')
     summary = dict(scope='driver wiring controls; not a reference qualification or improvement round',
-        native_verified=12, profile_native_pairs_verified=15, promotion_eligible=False,
+        native_verified=17, native_expected_failures=1, profile_native_pairs_verified=15, promotion_eligible=False,
         executed_stages=['aa', 'smoke'], prepared_but_unexecuted=['development', 'selection', 'confirmation', 'replay'])
     write(out/'summary.json', summary, exclusive=True)
     print(json.dumps(summary))

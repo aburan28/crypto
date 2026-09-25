@@ -234,7 +234,7 @@ def admitted_trial(root, contract, case, arm):
 
 def native_record(admitted, row, directory, contract):
     complete = row['status'] == 'VERIFIED'
-    return run_record(admitted, number=row['repetition']+contract['repetitions']*
+    return run_record(admitted, number=contract['run_number_base']+row['repetition']+contract['repetitions']*
         next(i for i,a in enumerate(contract['arms']) if a['id']==row['arm']),
         host_id=objhash(contract['host']), status='complete' if complete else
             ('timeout' if row['status']=='TIMEOUT' else 'error'),
@@ -370,6 +370,7 @@ def prepare(args):
     pinned.update({str(p.relative_to(root)):digest(p) for p in (root/'fixture_generation').rglob('*') if p.is_file()})
     pinned.update({str(p.relative_to(root)):digest(p) for p in (root/'admissions').rglob('*') if p.is_file()})
     contract = {'schema_version': 2, 'scientific_admission': True, 'producer': metadata, 'resources': resources, 'purpose': 'native development screen only',
+        'run_number_base': int.from_bytes(os.urandom(16),'big') << 16,
         'seed': args.seed, 'arms': arms, 'cases': cases, 'repetitions': args.repetitions,
         'timeout_seconds': args.timeout, 'max_processes': args.max_processes,
         'comparison_kind': args.comparison_kind, 'pinned': pinned, 'source_manifest': manifest,

@@ -493,6 +493,7 @@ def prepare(args):
                 admitted_arms.append((arm['id'],admitted))
             distinct_candidates(admitted_arms)
     c = {'schema_version':2, 'scientific_admission':True, 'reference_qualification':None, 'admissions':admissions, 'resources':resources,
+        'run_number_base':int.from_bytes(os.urandom(16),'big') << 16,
         'run_aliases':[a['id'] for a in all_admission_arms],'profile':args.profile,'seed':args.seed,'created_unix':time.time(),
         'cells':[f'n{n}a{a}' for n,a in cells],'holdout_cells':[f'n{n}a{a}' for n,a in holdout],
         'confirmation_cases':confirmation_cases,
@@ -603,6 +604,16 @@ def verify_receipt(directory, c, case, arm):
         native_proof = verify(native,case['fixture'],expected_mode=r['mode'],summands=arm['config']['summands'])
         require(native_proof['solutions']==proof['solutions'],'native/profile mismatch')
     if c.get('scientific_admission'):
+        require(r['status'] in ('VERIFIED','TIMEOUT','OOM','INVALID_OR_INCOMPLETE'), 'unknown trial outcome')
+        if r['status']=='VERIFIED':
+            for key in ('profile_process','native_process'):
+                process=r[key]
+                require(process['process_status']=='EXITED' and process['exit_code']==0, 'failed process marked verified')
+                require(process['memory_cap_bytes']==c['limits']['memory_bytes'] and process['cpu']==c['limits']['cpu'], 'changed measured resources')
+                require(type(process['process_wall_ns']) is int and process['process_wall_ns']>0 and
+                    process['process_wall_seconds']==process['process_wall_ns']/1e9, 'changed process clock units')
+        else:
+            require(all(r[k] is None for k in ('certificate','phase_costs','total_operations')), 'failed trial has verified costs')
         root = directory.parents[4]
         require(read(directory/'profile/process.json') == r['profile_process'], 'changed profile process record')
         if 'native_process' in r:
@@ -626,7 +637,7 @@ def scientific_trial(root, c, row, case, arm, directory):
         metadata=read(manifest_path.parent/'producer.json'), resources=c['resources'],
         worker_sha256=digest(root/arm['binary_relative']))
     complete=row['status']=='VERIFIED'
-    return run_record(admitted, number=(STAGES.index(stage)*len(c['run_aliases'])+
+    return run_record(admitted, number=c['run_number_base']+(STAGES.index(stage)*len(c['run_aliases'])+
         c['run_aliases'].index(arm['id']))*c['repetitions']+row['repetition'],
         host_id=objhash(c['host']), status='complete' if complete else
             {'TIMEOUT':'timeout','OOM':'oom'}.get(row['status'],'error'),
