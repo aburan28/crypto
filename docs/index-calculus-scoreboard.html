@@ -6460,6 +6460,36 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-compact-rank-rho-20260925 -->
+<!-- BEGIN ecc2k130-n53-shared-log-batch-20260925 -->
+<section class="panel" id="ecc2k130-n53-shared-log-batch-20260925">
+  <div class="panel-head">
+    <h2>Compact n = 53 true shared-log batches: six verified fixed-stream pairs <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/754">PR #754</a> trained the same certified 220-orbit base once on 512/512 independently replayed relations (rank 220, first at 461), then recovered 480/480 point-only logs across three disjoint L = 32 streams and their L = 128 prefix extensions. A fresh signed-Frobenius Kuhn–Struik rho table solved the identical Q file in every paired process; all 480 rho scalars were independently replayed. The initial verifier-only S3-root inequality failure remains in a separate immutable archive; the corrected six-pair run, source/input hashes, and complete raw receipts are <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/RESULT.md">documented here</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold wall seconds on one CI host. IC lower = Rust training child + point child, omitting required Python rank/recovery; verified upper = complete training driver + point child + recovery/replay. Each block charges the training solve once. Rho includes one fresh shared table for the identical Q file. No common-operation-unit S or statistical interval is inferred.</caption>
+    <thead><tr><th class="n">Q count</th><th class="n">Block</th><th>Arm</th><th class="n">Cold wall s</th><th class="n">IC child-only lower s</th><th class="n">Cold / rho</th><th class="n">Lower / rho</th><th>Outcome</th></tr></thead>
+    <tbody>
+      <tr><td class="n">32</td><td class="n">0</td><td>Compact IC, verified upper</td><td class="n">215.025</td><td class="n">134.056</td><td class="n">4.867</td><td class="n">3.034</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">0</td><td>Signed-Frobenius rho</td><td class="n">44.181</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">1</td><td>Compact IC, verified upper</td><td class="n">218.080</td><td class="n">136.465</td><td class="n">4.841</td><td class="n">3.029</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">1</td><td>Signed-Frobenius rho</td><td class="n">45.053</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">2</td><td>Compact IC, verified upper</td><td class="n">214.618</td><td class="n">133.482</td><td class="n">4.321</td><td class="n">2.688</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">2</td><td>Signed-Frobenius rho</td><td class="n">49.666</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>32/32 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">0</td><td>Compact IC, verified upper</td><td class="n">248.083</td><td class="n">154.646</td><td class="n">2.472</td><td class="n">1.541</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">0</td><td>Signed-Frobenius rho</td><td class="n">100.342</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">1</td><td>Compact IC, verified upper</td><td class="n">247.505</td><td class="n">153.574</td><td class="n">2.788</td><td class="n">1.730</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">1</td><td>Signed-Frobenius rho</td><td class="n">88.760</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">2</td><td>Compact IC, verified upper</td><td class="n">246.561</td><td class="n">152.730</td><td class="n">2.714</td><td class="n">1.681</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">2</td><td>Signed-Frobenius rho</td><td class="n">90.851</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>128/128 logs</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Native work: training made 23,689,479 exact S3 calls and built 5,081,560 index entries; the three L32/L128 query processes made 4,570,099/14,931,236 more S3 calls, while rho used 9,995,226/20,151,058 walk steps. These are different units and cannot define an attack-speed S without a pinned conversion. The maximum sequential IC RSS was 427.6 MiB; rho reached at most 76.4 MiB. The pre-existing factor-base construction is excluded from IC cost and could only increase it. The preregistered L128 gate passed and no final-run query failed.</p>
+    <p>With training paid only once across three disjoint blocks, L32 IC child-only lower/verified upper were 154.978/270.825 s versus three fresh rho tables at 138.899 s; L128 was 211.925/365.250 s versus 279.952 s. The L128 portfolio bounds straddle rho (0.757&times; lower, 1.305&times; upper), so it is inconclusive about a many-target break-even. A preregistered combined L = 384 same-Q run with one IC query process and one rho table, plus separate mandatory solve/recovery and audit timings, is the next measurement. This fixed n = 53 result does not transfer to n = 131 or ECC2K-130.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-shared-log-batch-20260925 -->
 <!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
 <section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
   <div class="panel-head">
