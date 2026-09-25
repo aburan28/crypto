@@ -1541,7 +1541,8 @@ def runSearch(hours=1.0, curve=97, batch=8, threads=128, leaf=0, dpWeight=-1,
         runId = checkCampaignRunId(runId, withCpu=cpuThreads > 0)
         dpWeight = campaignDpWeightFor(dpWeight)
         print("campaign run: curve %d, run id %d (campaign slot %d), dp weight %d from "
-              "aws/campaign.json" % (curve, runId, 90000 + runId, dpWeight), flush=True)
+              "aws/campaign.json, WITNESS=%s" % (curve, runId, 90000 + runId, dpWeight, WITNESS),
+              flush=True)
         if cpuThreads > 0:
             print("campaign run: CPU walker run id %d (campaign slot %d) on %d threads"
                   % (cpuRunId(runId), 90000 + cpuRunId(runId), cpuThreads), flush=True)
