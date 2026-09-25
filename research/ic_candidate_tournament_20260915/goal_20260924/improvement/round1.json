@@ -1,0 +1,261 @@
+{
+  "candidate_panel": "round1-v1",
+  "candidate_source_sha256": "0d83baf9500a22bcddf3bceb11a6892f91d1429bd83da0423c5e1bdb33487259",
+  "candidates": [
+    {
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Unmodified qualified IC reference.",
+      "id": "incumbent",
+      "source": "qualified-pairinv"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "full",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Recompiled default policy measures policy-dispatch overhead.",
+      "id": "compatibility",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "suffix",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Skip already-zero row prefixes.",
+      "id": "row_suffix",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "bounded",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Use bounded subtraction and explicit normalized pivots.",
+      "id": "row_bounded",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "word",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Use word multiplication only when its modulus bound proves no overflow.",
+      "id": "row_word",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": null,
+        "row_kernel": "full",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Check the legacy three-orbit target after each sampled representative.",
+      "id": "stop3",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": 2,
+        "row_kernel": "full",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Trade fewer columns and setup for lower natural relation yield.",
+      "id": "stop2",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": 4,
+        "row_kernel": "full",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Trade four orbit columns against target query work.",
+      "id": "stop4",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": 6,
+        "row_kernel": "full",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Retain a larger base alternative without eight-sample overshoot.",
+      "id": "stop6",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": null,
+        "row_kernel": "word",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Combine exact stopping and word rows.",
+      "id": "stop3_word",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": 2,
+        "row_kernel": "word",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Combine the smallest base and word rows.",
+      "id": "stop2_word",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": false,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": 4,
+        "row_kernel": "word",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Combine four orbit columns and word rows.",
+      "id": "stop4_word",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": true,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": null,
+        "row_kernel": "full",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Pay for every pair row to reduce online retries.",
+      "id": "stop3_full",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": true,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": null,
+        "row_kernel": "word",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Measure all three mechanisms as one pipeline.",
+      "id": "stop3_word_full",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": true,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": 4,
+        "row_kernel": "word",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Measure larger support with word rows and a full table.",
+      "id": "stop4_word_full",
+      "source": "round1-v1"
+    },
+    {
+      "config": {
+        "batch_trials": 1,
+        "full_pair_table": true,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "orbit_batch": 1,
+        "orbit_target": 6,
+        "row_kernel": "full",
+        "solver": "pair_table",
+        "summands": 3
+      },
+      "hypothesis": "Explore higher reusable cost for potentially cheaper online work.",
+      "id": "stop6_full",
+      "source": "round1-v1"
+    }
+  ],
+  "round": 1,
+  "schema_version": 1,
+  "scope": "synthetic toy mathematical benchmarks only"
+}
