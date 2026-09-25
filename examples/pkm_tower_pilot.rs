@@ -25,8 +25,17 @@
 //! no pipeline, reports no `S`, and decides nothing on its own. Stage A of
 //! the note decides, on its full ladder.
 //!
+//! `--engine tower` runs the same systems on the sparse tower engine
+//! `f4_fp_tower` instead (note §11): the tower equations become its
+//! rewriting rules, the other equations its input in normal form (the
+//! `reduced` presentation), and the naive control, which has no tower, is
+//! skipped. `--max-nnz` stops a system whose matrices grow past a size, and
+//! `--trace` prints its step trace.
+//!
 //! The committed runs, their exact flags and the scripts that tabulate and
-//! cross-check them are in `research/pkm_tower_pilot_20260924/`.
+//! cross-check them are in `research/pkm_tower_pilot_20260924/` (the pilot,
+//! `f4_fp`) and `research/pkm_tower_round2_20260925/` (round 2,
+//! `f4_fp_tower`).
 //!
 //! ```bash
 //! cargo run --release --example pkm_tower_pilot -- --out pilot.jsonl
@@ -35,6 +44,9 @@
 //! # degree at most 3 (`--cap` bounds the degree, `--dump` prints the basis).
 //! cargo run --release --example pkm_tower_pilot -- --kinds kummer --m 2 --controls tower \
 //!     --t-min 8 --max-t 8 --planted 0 --random 1 --cap 4 --dump 3 --ladder-t none
+//! # The same system on the tower engine, with its step trace.
+//! cargo run --release --example pkm_tower_pilot -- --engine tower --kinds kummer --m 2 \
+//!     --controls tower --t-min 8 --max-t 8 --planted 0 --random 1 --ladder-t none --trace
 //! ```
 
 use std::collections::BTreeMap;
@@ -43,6 +55,7 @@ use std::io::Write;
 use std::time::{Duration, Instant};
 
 use crypto_lib::cryptanalysis::f4_fp::{self, F4Options, F4Report, Ordering, Poly};
+use crypto_lib::cryptanalysis::f4_fp_tower::{self, RPoly, SquareRule, TowerF4Options, TowerRing};
 use crypto_lib::cryptanalysis::ic_boundary::{CountedGroup, GroupOps, PrimeCurve, PrimePoint};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -283,6 +296,67 @@ impl Tower {
                             .add(&Pol::constant(n, tau, p), p);
                         lhs.sub(&rhs, p)
                     }
+                }
+            })
+            .collect()
+    }
+
+    /// The tower equations of one block (variables from `base`) as the
+    /// square rules of [`f4_fp_tower`]: each equation solved for `y_j²`.
+    fn square_rules(&self, base: usize, p: u64) -> Vec<SquareRule> {
+        (0..self.t)
+            .map(|j| {
+                let top = j + 1 == self.t;
+                let next = (!top).then_some((base + j + 1) as u8);
+                match (self.steps[j], top) {
+                    // y_{j+1} = y_j²; on top, y_j² = c
+                    (Step::Square, false) => SquareRule {
+                        next,
+                        a: 0,
+                        b: 1,
+                        c: 0,
+                        d: 0,
+                    },
+                    (Step::Square, true) => SquareRule {
+                        next,
+                        a: 0,
+                        b: 0,
+                        c: 0,
+                        d: self.c % p,
+                    },
+                    // y_{j+1} = y_j² − 2; on top, y_j² = c + 2
+                    (Step::Dickson, false) => SquareRule {
+                        next,
+                        a: 0,
+                        b: 1,
+                        c: 0,
+                        d: 2 % p,
+                    },
+                    (Step::Dickson, true) => SquareRule {
+                        next,
+                        a: 0,
+                        b: 0,
+                        c: 0,
+                        d: addm(self.c, 2, p),
+                    },
+                    // y_{j+1}(y_j − ξ) = y_j² − ξ·y_j + τ, so
+                    // y_j² = y_j·y_{j+1} − ξ·y_{j+1} + ξ·y_j − τ
+                    (Step::Velu { xi, tau }, false) => SquareRule {
+                        next,
+                        a: 1,
+                        b: subm(0, xi, p),
+                        c: xi,
+                        d: subm(0, tau, p),
+                    },
+                    // c·(y_j − ξ) = y_j² − ξ·y_j + τ, so
+                    // y_j² = (c + ξ)·y_j − (c·ξ + τ)
+                    (Step::Velu { xi, tau }, true) => SquareRule {
+                        next,
+                        a: 0,
+                        b: 0,
+                        c: addm(self.c, xi, p),
+                        d: subm(0, addm(mulm(self.c, xi, p), tau, p), p),
+                    },
                 }
             })
             .collect()
@@ -659,7 +733,7 @@ fn system(
     target: &Target,
     g: usize,
     rng: &mut StdRng,
-) -> (Vec<Pol>, usize, Option<Vec<u64>>) {
+) -> (Vec<Pol>, usize, Option<Vec<u64>>, std::ops::Range<usize>) {
     let p = curve.p;
     let t = tower.t;
     if control == Control::Naive {
@@ -684,7 +758,7 @@ fn system(
             p,
         );
         let sol = target.planted.then(|| target.xs.clone());
-        return (vec![s, member(0), member(1)], n, sol);
+        return (vec![s, member(0), member(1)], n, sol, 0..0);
     }
     let n = m * t + (m - 2);
     let mut eqs = summation(tower, curve, m, n, target.x_r);
@@ -701,9 +775,11 @@ fn system(
         }
         eqs[0] = f;
     }
+    let towers_from = eqs.len();
     for i in 0..m {
         eqs.extend(tower.equations(n, i * t, p));
     }
+    let towers = towers_from..eqs.len();
     if control == Control::Ladder {
         let sol = target
             .solution
@@ -713,7 +789,7 @@ fn system(
             eqs.push(random_quadric(n, sol, p, rng));
         }
     }
-    (eqs, n, target.solution.clone())
+    (eqs, n, target.solution.clone(), towers)
 }
 
 // ── Measuring ──────────────────────────────────────────────────────
@@ -783,6 +859,196 @@ fn measure(
     }
 }
 
+/// What one run reports, in the fields every row carries; `extra` holds
+/// the engine's own fields and is merged into the row.
+struct Outcome {
+    solving_degree_max: u32,
+    last_productive_degree: u32,
+    degree_reached: u32,
+    max_cols_to_solution: usize,
+    steps_to_solution: usize,
+    inconsistent: bool,
+    zero_dim: bool,
+    linear: usize,
+    basis_len: usize,
+    steps: usize,
+    max_rows: usize,
+    max_cols: usize,
+    ms: f64,
+    timed_out: bool,
+    pairs_above_bound: usize,
+    staircase_at_stop: Option<usize>,
+    planted_ok: Option<bool>,
+    extra: Value,
+}
+
+impl Outcome {
+    fn from_f4(r: &Measured) -> Self {
+        Outcome {
+            solving_degree_max: r.report.solving_degree_max,
+            last_productive_degree: r.report.solving_degree,
+            degree_reached: r.report.degree_reached,
+            max_cols_to_solution: r.report.max_cols_to_solution,
+            steps_to_solution: r.report.steps_to_solution,
+            inconsistent: r.report.inconsistent,
+            zero_dim: r.zero_dim,
+            linear: r.linear,
+            basis_len: r.report.basis.len(),
+            steps: r.report.steps,
+            max_rows: r.report.max_rows,
+            max_cols: r.report.max_cols,
+            ms: r.report.ms,
+            timed_out: r.report.timed_out,
+            pairs_above_bound: r.report.pairs_above_bound,
+            staircase_at_stop: r.report.staircase_at_stop,
+            planted_ok: r.planted_ok,
+            extra: json!({"engine": "f4_fp"}),
+        }
+    }
+}
+
+/// The tower quotient ring of an `m`-summand system: `m` blocks of the
+/// tower's rules, then the chain's `m − 2` free unknowns.
+fn tower_ring(tower: &Tower, m: usize, p: u64) -> TowerRing {
+    let mut rules = Vec::with_capacity(m * tower.t);
+    for i in 0..m {
+        rules.extend(tower.square_rules(i * tower.t, p));
+    }
+    TowerRing {
+        p,
+        rules,
+        n_free: m - 2,
+    }
+}
+
+fn raw_terms(e: &Pol) -> Vec<(Vec<u32>, u64)> {
+    e.terms.iter().map(|(k, v)| (k.clone(), *v)).collect()
+}
+
+/// Run `f4_fp_tower` on a system: the tower equations become the ring's
+/// rewriting, and the other equations its input in normal form.
+#[allow(clippy::too_many_arguments)]
+fn measure_tower(
+    eqs: &[Pol],
+    towers: std::ops::Range<usize>,
+    ring: &TowerRing,
+    sol: Option<&[u64]>,
+    max_degree: u32,
+    budget: Duration,
+    stop_below: Option<usize>,
+    max_nnz: Option<u64>,
+    trace: bool,
+) -> (Outcome, Vec<RPoly>) {
+    let p = ring.p;
+    if let Some(s) = sol {
+        for (k, e) in eqs.iter().enumerate() {
+            assert_eq!(
+                e.eval(s, p),
+                0,
+                "equation {k} does not vanish at the planted solution"
+            );
+        }
+    }
+    for k in towers.clone() {
+        assert!(
+            ring.from_raw(&raw_terms(&eqs[k])).is_empty(),
+            "tower equation {k} is not zero in the ring: the square rules are wrong"
+        );
+    }
+    let input: Vec<RPoly> = eqs
+        .iter()
+        .enumerate()
+        .filter(|(k, _)| !towers.contains(k))
+        .map(|(_, e)| ring.from_raw(&raw_terms(e)))
+        .filter(|f| !f.is_empty())
+        .collect();
+    let ring_degrees: Vec<u32> = input.iter().map(RPoly::degree).collect();
+    let mut opts = TowerF4Options::new(max_degree).with_budget(budget);
+    if let Some(b) = stop_below {
+        opts = opts.stopping_below(b);
+    }
+    if let Some(c) = max_nnz {
+        opts = opts.with_max_nnz(c);
+    }
+    let r = f4_fp_tower::f4_tower(&input, ring, &opts);
+    if trace {
+        for (k, st) in r.trace.iter().enumerate() {
+            eprintln!(
+                "tower step {}: degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0})",
+                k + 1,
+                st.degree,
+                st.critical_pairs,
+                st.tower_pairs,
+                st.s_rows,
+                st.reducer_rows,
+                st.promoted_rows,
+                st.cols,
+                st.nnz,
+                st.residual_rows,
+                st.residual_cols,
+                st.fresh,
+                st.fresh_min_degree,
+                st.basis_active,
+                st.pairs_left,
+                st.ms,
+                st.ms_rows,
+                st.ms_reduce,
+                st.ms_echelon,
+                st.ms_update
+            );
+        }
+    }
+    let planted_ok = sol.map(|s| !r.inconsistent && r.basis.iter().all(|f| ring.eval(f, s) == 0));
+    let lms: Vec<u128> = r.basis.iter().filter_map(RPoly::lm).collect();
+    let pure = |k: usize| {
+        lms.iter().any(|&m| {
+            let f = f4_fp_tower::free_of(m);
+            f4_fp_tower::mask_of(m) == 0
+                && (0..f4_fp_tower::MAX_FREE).all(|i| (i == k) == (f[i] > 0))
+        })
+    };
+    let zero_dim = r.inconsistent || (0..ring.n_free).all(pure);
+    let linear = lms
+        .iter()
+        .filter(|&&m| f4_fp_tower::degree_of(m) == 1)
+        .count();
+    let out = Outcome {
+        solving_degree_max: r.solving_degree_max,
+        last_productive_degree: r.last_productive_degree,
+        degree_reached: r.degree_reached,
+        max_cols_to_solution: r.max_cols_to_solution,
+        steps_to_solution: r.steps_to_solution,
+        inconsistent: r.inconsistent,
+        zero_dim,
+        linear,
+        basis_len: r.basis.len(),
+        steps: r.steps,
+        max_rows: r.max_rows,
+        max_cols: r.max_cols,
+        ms: r.ms,
+        // A run stopped for size did not finish either: its degree is a
+        // lower bound, like a timeout's.
+        timed_out: r.timed_out || r.oversize,
+        pairs_above_bound: r.pairs_above_bound,
+        staircase_at_stop: r.staircase_at_stop,
+        planted_ok,
+        extra: json!({
+            "engine": "f4_fp_tower",
+            "input_ring_degrees": ring_degrees,
+            "muladds": r.muladds,
+            "max_nnz": r.max_nnz,
+            "max_residual_rows": r.max_residual_rows,
+            "oversize": r.oversize,
+            "critical_pairs_reduced": r.critical_pairs_reduced,
+            "tower_pairs_reduced": r.tower_pairs_reduced,
+            "pairs_product_skipped": r.pairs_product_skipped,
+            "pairs_chain_skipped": r.pairs_chain_skipped,
+            "reducer_rows": r.reducer_rows,
+        }),
+    };
+    (out, r.basis)
+}
+
 // ── Driver ─────────────────────────────────────────────────────────
 
 struct Args {
@@ -814,6 +1080,19 @@ struct Args {
     /// Diagnostic: print every basis element of degree at most this, with
     /// tower variables named `y<summand>_<level>`.
     dump: Option<u32>,
+    /// The engine: `f4_fp` on the raw system (the default, and every
+    /// committed pilot row), or `f4_fp_tower` on the tower quotient ring.
+    engine: Engine,
+    /// `f4_fp_tower` only: stop before a matrix with more non-zeros.
+    max_nnz: Option<u64>,
+    /// `f4_fp_tower` only: print one line per F4 step.
+    trace: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Engine {
+    F4,
+    Tower,
 }
 
 /// Rows as they are measured: every row reaches `--out` and is flushed
@@ -855,6 +1134,9 @@ fn parse_args() -> Args {
         stop_below: None,
         cap: None,
         dump: None,
+        engine: Engine::F4,
+        max_nnz: None,
+        trace: false,
     };
     let args: Vec<String> = std::env::args().skip(1).collect();
     let list = |s: &str| -> Vec<usize> {
@@ -865,6 +1147,11 @@ fn parse_args() -> Args {
     };
     let mut i = 0;
     while i < args.len() {
+        if args[i] == "--trace" {
+            a.trace = true;
+            i += 1;
+            continue;
+        }
         let v = args.get(i + 1).cloned().unwrap_or_default();
         match args[i].as_str() {
             "--p" => a.p = v.parse().expect("--p"),
@@ -905,6 +1192,14 @@ fn parse_args() -> Args {
             "--out" => a.out = Some(v),
             "--stop-below" => a.stop_below = Some(v.parse().expect("--stop-below")),
             "--cap" => a.cap = Some(v.parse().expect("--cap")),
+            "--engine" => {
+                a.engine = match v.as_str() {
+                    "f4" | "f4_fp" => Engine::F4,
+                    "tower" | "f4_fp_tower" => Engine::Tower,
+                    other => panic!("unknown engine `{other}`"),
+                }
+            }
+            "--max-nnz" => a.max_nnz = Some(v.parse().expect("--max-nnz")),
             "--dump" => a.dump = Some(v.parse().expect("--dump")),
             other => panic!("unknown flag `{other}`"),
         }
@@ -971,7 +1266,7 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
     }
     let mut any_finished = false;
     for (k, target) in targets.iter().enumerate() {
-        let (eqs, n, sol) = system(
+        let (eqs, n, sol, towers) = system(
             cell.control,
             &tower,
             &curve,
@@ -980,6 +1275,10 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
             cell.g,
             &mut rng,
         );
+        if a.engine == Engine::Tower && cell.control == Control::Naive {
+            // The naive control has no tower to rewrite by.
+            continue;
+        }
         let d_in: Vec<u32> = eqs.iter().map(Pol::degree).collect();
         let d_max = d_in.iter().copied().max().unwrap_or(1);
         let max_degree = match (a.cap, cell.control) {
@@ -988,20 +1287,41 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
             (None, _) => n as u32 + d_max + 6,
         };
         let started = Instant::now();
-        let r = measure(
-            &eqs,
-            n,
-            p,
-            sol.as_deref(),
-            max_degree,
-            Duration::from_secs(a.budget),
-            a.stop_below,
-        );
+        let (r, basis) = match a.engine {
+            Engine::F4 => {
+                let m = measure(
+                    &eqs,
+                    n,
+                    p,
+                    sol.as_deref(),
+                    max_degree,
+                    Duration::from_secs(a.budget),
+                    a.stop_below,
+                );
+                let out = Outcome::from_f4(&m);
+                (out, Dumpable::Raw(m.report.basis))
+            }
+            Engine::Tower => {
+                let ring = tower_ring(&tower, cell.m, p);
+                let (out, basis) = measure_tower(
+                    &eqs,
+                    towers,
+                    &ring,
+                    sol.as_deref(),
+                    max_degree,
+                    Duration::from_secs(a.budget),
+                    a.stop_below,
+                    a.max_nnz,
+                    a.trace,
+                );
+                (out, Dumpable::Ring(basis))
+            }
+        };
         let wall = started.elapsed().as_secs_f64();
-        if !r.report.timed_out {
+        if !r.timed_out {
             any_finished = true;
         }
-        let row = json!({
+        let mut row = json!({
             "kind": cell.kind.name(),
             "m": cell.m,
             "control": cell.control.name(),
@@ -1018,25 +1338,30 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
             "curve": {"a": curve.a, "b": curve.b},
             "tower": tower.info,
             "max_degree_bound": max_degree,
-            "solving_degree_max": r.report.solving_degree_max,
-            "last_productive_degree": r.report.solving_degree,
-            "degree_reached": r.report.degree_reached,
-            "max_cols_to_solution": r.report.max_cols_to_solution,
-            "steps_to_solution": r.report.steps_to_solution,
-            "inconsistent": r.report.inconsistent,
+            "solving_degree_max": r.solving_degree_max,
+            "last_productive_degree": r.last_productive_degree,
+            "degree_reached": r.degree_reached,
+            "max_cols_to_solution": r.max_cols_to_solution,
+            "steps_to_solution": r.steps_to_solution,
+            "inconsistent": r.inconsistent,
             "zero_dim": r.zero_dim,
             "linear_basis_elements": r.linear,
-            "basis_len": r.report.basis.len(),
-            "steps": r.report.steps,
-            "max_rows": r.report.max_rows,
-            "max_cols": r.report.max_cols,
-            "ms": r.report.ms,
+            "basis_len": r.basis_len,
+            "steps": r.steps,
+            "max_rows": r.max_rows,
+            "max_cols": r.max_cols,
+            "ms": r.ms,
             "wall_s": wall,
-            "timed_out": r.report.timed_out,
-            "pairs_above_bound": r.report.pairs_above_bound,
-            "staircase_at_stop": r.report.staircase_at_stop,
+            "timed_out": r.timed_out,
+            "pairs_above_bound": r.pairs_above_bound,
+            "staircase_at_stop": r.staircase_at_stop,
             "planted_ok": r.planted_ok,
         });
+        if let (Some(obj), Some(extra)) = (row.as_object_mut(), r.extra.as_object()) {
+            for (k, v) in extra {
+                obj.insert(k.clone(), v.clone());
+            }
+        }
         eprintln!(
             "{:8} m={} {:6} t={:2} N={:2} g={:2} {:7} Dmax={:3} reached={:3} cols_to_sol={:7} cols={:7} {:8.1} ms{}{}",
             cell.kind.name(),
@@ -1046,12 +1371,12 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
             cell.m * cell.t,
             cell.g,
             if target.planted { "planted" } else { "random" },
-            r.report.solving_degree_max,
-            r.report.degree_reached,
-            r.report.max_cols_to_solution,
-            r.report.max_cols,
-            r.report.ms,
-            if r.report.timed_out { "  TIMEOUT" } else { "" },
+            r.solving_degree_max,
+            r.degree_reached,
+            r.max_cols_to_solution,
+            r.max_cols,
+            r.ms,
+            if r.timed_out { "  TIMEOUT" } else { "" },
             if r.planted_ok == Some(false) {
                 "  PLANTED-VIOLATION"
             } else {
@@ -1059,21 +1384,59 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
             },
         );
         if let Some(k) = a.dump {
-            dump_basis(&r.report.basis, cell, k);
+            match &basis {
+                Dumpable::Raw(b) => dump_basis(b, cell, k),
+                Dumpable::Ring(b) => dump_ring_basis(b, cell, k),
+            }
         }
         sink.push(row);
     }
     any_finished
 }
 
+/// A basis to print with `--dump`, from either engine.
+enum Dumpable {
+    Raw(Vec<Poly>),
+    Ring(Vec<RPoly>),
+}
+
+/// `dump_basis` for a basis in the tower ring: the monomials are masks of
+/// tower variables and free exponents.
+fn dump_ring_basis(basis: &[RPoly], cell: &Cell, k: u32) {
+    let as_raw: Vec<Poly> = basis
+        .iter()
+        .map(|f| {
+            f.monos
+                .iter()
+                .zip(&f.coefs)
+                .map(|(&m, &c)| {
+                    let n_t = cell.m * cell.t;
+                    let mut e = vec![0u32; n_t + cell.m.saturating_sub(2)];
+                    let mask = f4_fp_tower::mask_of(m);
+                    for (j, x) in e.iter_mut().enumerate().take(n_t) {
+                        *x = ((mask >> j) & 1) as u32;
+                    }
+                    let fr = f4_fp_tower::free_of(m);
+                    for k2 in 0..cell.m.saturating_sub(2) {
+                        e[n_t + k2] = u32::from(fr[k2]);
+                    }
+                    (e, u64::from(c))
+                })
+                .collect()
+        })
+        .collect();
+    dump_basis(&as_raw, cell, k);
+}
+
 /// Print the basis elements of degree at most `k`, low degree first, with
-/// tower variables named `y<summand>_<level>` and the chain unknown `u`.
+/// tower variables named `y<summand>_<level>` and the chain unknowns
+/// `u<k>`.
 fn dump_basis(basis: &[Poly], cell: &Cell, k: u32) {
     let name = |v: usize| -> String {
         if cell.control == Control::Naive {
             format!("x{v}")
         } else if v >= cell.m * cell.t {
-            "u".to_string()
+            format!("u{}", v - cell.m * cell.t)
         } else {
             format!("y{}_{}", v / cell.t, v % cell.t)
         }

@@ -694,10 +694,20 @@ worse than none:
   Petit–Kosters–Messeng's tower factor base; its design, and the test
   on the solver axis that decides whether to build it end to end, are in
   [`RESEARCH_PKM_TOWER_ORACLE.md`](../../research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md).
-  A pilot of that test (§10 there) found F4's solving degree flat, where
-  linear growth in `N` had been pre-registered: 4–5 for `m = 2` through
-  `N = 18`, and 5–6 for `m = 3` through `N = 12`. It reads inconclusive
-  until `N` is extended.
+  A pilot of that test (§10 there) found F4's solving degree nearly flat,
+  where linear growth in `N` had been pre-registered: 4–5 for `m = 2`
+  through `N = 18`, and 5–6 for `m = 3` through `N = 12`. Round 2 (§11)
+  built the sparse tower-aware F4 that extending `N` needed
+  (`src/cryptanalysis/f4_fp_tower.rs`, cross-checked against `f4_fp`). It
+  finds the degree rising again, slowly:
+  - at `m = 2`, to 6 at `N = 20` and still 6 at `N = 22`, in the Kummer and
+    isogeny families alike and at every prime tried, which refutes the
+    pilot's bounded-degree conjecture;
+  - at `m = 3`, to 7 at `N = 15`.
+
+  Whether the growth is linear or slower is open. So is `m = 4` past
+  `N = 12`, the regime that decides the oracle. It ran out of memory at
+  `N = 16`, where a diagnostic gives only `D ≥ 7`. No oracle is built.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.

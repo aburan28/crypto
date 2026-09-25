@@ -174,7 +174,7 @@ def count(row, v):
 
 
 def main(paths):
-    checked = agreed = skipped = 0
+    checked = agreed = skipped = bounded = 0
     bad = []
     seen = set()
     for path in paths:
@@ -183,10 +183,16 @@ def main(paths):
                 row = json.loads(line)
                 if "summary" in row or row["control"] != "tower" or row["timed_out"]:
                     continue
+                # A run that stopped at its degree bound with pairs left (a
+                # confirmation run, note section 11.4) claims nothing about
+                # solutions: it neither refuted nor finished.
+                if row.get("pairs_above_bound", 0) > 0 and not row["inconsistent"]:
+                    bounded += 1
+                    continue
                 # A system measured by two runs is checked once (see analyze.py).
                 key = (row["p"], row["kind"], row["m"], row["t"], row["target"],
                        row["target_index"], row["x_r"], row["curve"]["a"], row["curve"]["b"],
-                       json.dumps(row["tower"], sort_keys=True))
+                       json.dumps(row["tower"], sort_keys=True), row.get("engine", "f4_fp"))
                 if key in seen:
                     continue
                 seen.add(key)
@@ -202,8 +208,10 @@ def main(paths):
                 if ok:
                     agreed += 1
                 else:
-                    bad.append((path, row["kind"], row["m"], row["N"], row["target"], n, row["inconsistent"]))
-    print(f"checked {checked} tower rows against exhaustive search; {agreed} agree; {skipped} skipped (no V).")
+                    bad.append((path, row.get("engine", "f4_fp"), row["kind"], row["m"], row["N"],
+                                row["target"], n, row["inconsistent"]))
+    print(f"checked {checked} tower rows against exhaustive search; {agreed} agree; {skipped} skipped (no V); "
+          f"{bounded} stopped at their degree bound, with no verdict to check.")
     for b in bad:
         print("DISAGREE", b)
     return 1 if bad else 0
