@@ -1,0 +1,35 @@
+name: Oriented binary Velu
+on:
+  pull_request:
+    paths:
+      - 'research/ecc2k130_oriented_transport_20260924/**'
+      - 'research/ecc2k130_relations/fastfield.py'
+      - 'research/ecc2k130_relations/relations.py'
+      - 'research/ecc2k130_direction_review_20260924/redteam_velu_replay.py'
+      - 'research/ecc2k130_direction_review_20260924/twist_torsion_results.json'
+      - '.github/workflows/oriented-binary-velu.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate oriented maps and exceptional inputs
+        run: python3 research/ecc2k130_oriented_transport_20260924/validate.py --out /tmp/oriented-velu-validation.json
+      - name: Match deterministic evidence and source hashes
+        run: |
+          python3 - <<'PYCODE'
+          import json
+          from pathlib import Path
+          frozen = json.loads(Path('research/ecc2k130_oriented_transport_20260924/validation.json').read_text())
+          fresh = json.loads(Path('/tmp/oriented-velu-validation.json').read_text())
+          for key in ('status', 'sha256', 'toy_rows', 'generic_interface_control', 'exact_rows'):
+              assert fresh[key] == frozen[key], key
+          assert fresh['status'] == 'PASS'
+          PYCODE

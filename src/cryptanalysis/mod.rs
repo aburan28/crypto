@@ -167,6 +167,7 @@ pub mod j0_twists;
 pub mod koblitz_bench;
 pub mod koblitz_factor_base_search;
 pub mod koblitz_fast;
+pub mod koblitz_fast_arith;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod koblitz_isogeny_cost;
