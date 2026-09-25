@@ -17,7 +17,10 @@
 //! whether signs exist that make the summands add to the target.  So the
 //! search branches on summand bits only, lowest first — which fixes one
 //! summand at a time — and never on the `(m − 2)·n` intermediate
-//! unknowns.  At every node the equations, with the branch's assignment
+//! unknowns.  By default a node fixes a whole summand at once, branching
+//! over the coordinate vectors whose abscissa is a factor-base point's
+//! ([`valid_coordinates`]): a twist abscissa, or a point outside the
+//! base, is never a child.  At every node the equations, with the branch's assignment
 //! substituted, are **linearised**: their Macaulay matrix at their own
 //! degree, columns in descending degree, reduced to row echelon form by
 //! [`crate::cryptanalysis::gf2_elim`].  A reduced row equal to `1`
@@ -699,6 +702,11 @@ pub fn wide_groebner_decompose(
 ) -> (Option<Vec<usize>>, WideStats) {
     let mut stats = WideStats::default();
     let opts = SearchOptions::from_env();
+    let valid = if opts.points {
+        valid_coordinates(kc, fb, index_of)
+    } else {
+        Vec::new()
+    };
     let found = decompose_rec(
         kc,
         fb,
@@ -708,9 +716,36 @@ pub fn wide_groebner_decompose(
         m,
         node_budget,
         &opts,
+        &valid,
         &mut stats,
     );
     (found, stats)
+}
+
+/// Widest subspace whose coordinate vectors are listed for whole-summand
+/// branching; past it the search branches bit by bit.
+const MAX_POINT_BRANCH_ELL: usize = 20;
+
+/// Every coordinate vector `c` of the factor-base subspace, ascending,
+/// whose abscissa `Σ c_t·v_t` is a factor-base point's.  The rest — a
+/// twist abscissa, or a point outside the base — can never be a summand.
+fn valid_coordinates(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+) -> Vec<u32> {
+    let ell = fb.subspace_basis.len();
+    if ell > MAX_POINT_BRANCH_ELL {
+        return Vec::new();
+    }
+    (0..1u32 << ell)
+        .filter(|&c| {
+            let x = summand_x(&fb.subspace_basis, ell, c as u128, 0, kc.n);
+            points_with_x(&kc.curve, &x)
+                .iter()
+                .any(|p| index_of.contains_key(&point_key(p)))
+        })
+        .collect()
 }
 
 /// The search's switches, each a same-binary control read once per call.
@@ -722,6 +757,10 @@ struct SearchOptions {
     high_first: bool,
     /// Look the last summand up instead of branching (`KIC_WIDE_FINISH=0` off).
     finish: bool,
+    /// Branch on a whole summand at a time, over the coordinate vectors
+    /// whose abscissa is a factor-base point's (`KIC_WIDE_POINTS=0` off:
+    /// one summand bit at a time).
+    points: bool,
     /// Widest system built in one piece; above it the suffix recursion
     /// takes over.  [`MAX_WIDE_VARS`] except in tests, which lower it to
     /// reach the recursion on small curves.
@@ -734,6 +773,7 @@ impl SearchOptions {
             order: std::env::var("KIC_WIDE_ORDER").as_deref() != Ok("0"),
             high_first: std::env::var("KIC_WIDE_BRANCH").as_deref() != Ok("low"),
             finish: std::env::var("KIC_WIDE_FINISH").as_deref() != Ok("0"),
+            points: std::env::var("KIC_WIDE_POINTS").as_deref() != Ok("0"),
             max_vars: MAX_WIDE_VARS,
         }
     }
@@ -749,6 +789,7 @@ fn decompose_rec(
     m: usize,
     node_budget: usize,
     opts: &SearchOptions,
+    valid: &[u32],
     stats: &mut WideStats,
 ) -> Option<Vec<usize>> {
     if m == 0 {
@@ -778,6 +819,7 @@ fn decompose_rec(
             finish_head,
             node_budget,
             opts,
+            valid,
             stats,
             &|values, is_head, _stats| {
                 let count = if is_head { m - 1 } else { m };
@@ -803,10 +845,22 @@ fn decompose_rec(
         None,
         node_budget,
         opts,
+        valid,
         stats,
         &|values, _is_head, stats| {
             // The k trailing summands are known up to sign: for each
-            // choice of base points, decompose what is left.
+            // choice of base points, decompose what is left.  In order,
+            // they are the k largest, so the rest are at most the least
+            // of them (summand 0, when the order test is on).
+            let head_valid = if opts.order && !valid.is_empty() {
+                let least = (values & ((1u128 << ell) - 1)) as u32;
+                &valid[..valid.partition_point(|&c| c <= least)]
+            } else {
+                valid
+            };
+            if !valid.is_empty() && head_valid.is_empty() {
+                return None;
+            }
             let choices: Vec<Vec<usize>> = (0..k)
                 .map(|i| {
                     let x = summand_x(&fb.subspace_basis, ell, values, i, kc.n);
@@ -825,9 +879,18 @@ fn decompose_rec(
                 let rest = chosen.iter().fold(target.clone(), |acc, &i| {
                     kc.add(&acc, &negate(&fb.points[i]))
                 });
-                if let Some(mut head) =
-                    decompose_rec(kc, fb, index_of, st, &rest, m - k, node_budget, opts, stats)
-                {
+                if let Some(mut head) = decompose_rec(
+                    kc,
+                    fb,
+                    index_of,
+                    st,
+                    &rest,
+                    m - k,
+                    node_budget,
+                    opts,
+                    head_valid,
+                    stats,
+                ) {
                     head.extend(chosen);
                     return Some(head);
                 }
@@ -890,8 +953,8 @@ enum Step {
     Closed,
     /// A leaf: `is_head` for the last-summand shortcut.
     Leaf { values: u128, is_head: bool },
-    /// Two children, pushed in this order (the second is explored first).
-    Split([Frame; 2]),
+    /// Children, pushed in this order (the last is explored first).
+    Split(Vec<Frame>),
 }
 
 /// The search's fixed shape, shared by every thread.
@@ -900,6 +963,8 @@ struct Shape<'a> {
     ell: usize,
     head_mask: Option<u128>,
     opts: &'a SearchOptions,
+    /// [`valid_coordinates`]; empty for bit-by-bit branching.
+    valid: &'a [u32],
 }
 
 impl Shape<'_> {
@@ -925,6 +990,23 @@ impl Shape<'_> {
             stats.refuted += 1;
             return Step::Closed;
         }
+        let summand_mask = (1u128 << ell) - 1;
+        let valid = !self.valid.is_empty();
+        if valid {
+            // A summand the linearisation fixed outright must be a base
+            // point's abscissa.
+            let bad = (0..count).any(|i| {
+                fixed >> (i * ell) & summand_mask == summand_mask
+                    && self
+                        .valid
+                        .binary_search(&((values >> (i * ell) & summand_mask) as u32))
+                        .is_err()
+            });
+            if bad {
+                stats.refuted += 1;
+                return Step::Closed;
+            }
+        }
         if let Some(mask) = self.head_mask {
             if fixed & mask == mask {
                 return Step::Leaf {
@@ -935,6 +1017,42 @@ impl Shape<'_> {
         }
         // Each summand from its highest coordinate down, so the order
         // test above decides as early as it can.
+        if valid {
+            let Some(i) = (0..count).find(|&i| fixed >> (i * ell) & summand_mask != summand_mask)
+            else {
+                return Step::Leaf {
+                    values,
+                    is_head: false,
+                };
+            };
+            let fixed_i = (fixed >> (i * ell) & summand_mask) as u32;
+            let values_i = (values >> (i * ell) & summand_mask) as u32;
+            // Summands are in non-decreasing order: at least the previous.
+            let low = if self.opts.order && i > 0 {
+                (values >> ((i - 1) * ell) & summand_mask) as u32
+            } else {
+                0
+            };
+            let start = self.valid.partition_point(|&c| c < low);
+            let children: Vec<Frame> = self.valid[start..]
+                .iter()
+                .rev()
+                .filter(|&&c| c & fixed_i == values_i & fixed_i)
+                .map(|&c| {
+                    let free = !fixed_i & summand_mask as u32;
+                    let assignment: Vec<(usize, bool)> = (0..ell)
+                        .filter(|&t| free >> t & 1 == 1)
+                        .map(|t| (i * ell + t, c >> t & 1 == 1))
+                        .collect();
+                    assign(&f, fixed, values, &assignment)
+                })
+                .collect();
+            if children.is_empty() {
+                stats.refuted += 1;
+                return Step::Closed;
+            }
+            return Step::Split(children);
+        }
         let next = if self.opts.high_first {
             (0..count)
                 .flat_map(|i| (0..ell).rev().map(move |t| i * ell + t))
@@ -948,23 +1066,42 @@ impl Shape<'_> {
                 is_head: false,
             };
         };
-        let child = |value: bool| {
-            let form = if value { WPoly::one() } else { WPoly::zero() };
-            let mut eqs: Vec<WPoly> = f.eqs.iter().map(|p| p.substitute(v, &form)).collect();
-            eqs.retain(|p| !p.is_zero());
-            let mut subs = f.subs.clone();
-            for (_, g) in subs.iter_mut() {
-                *g = g.substitute(v, &form);
-            }
-            subs.push((v, form));
-            Frame {
-                eqs,
-                subs,
-                fixed: fixed | 1u128 << v,
-                values: if value { values | 1u128 << v } else { values },
-            }
-        };
-        Step::Split([child(true), child(false)])
+        Step::Split(vec![
+            assign(&f, fixed, values, &[(v, true)]),
+            assign(&f, fixed, values, &[(v, false)]),
+        ])
+    }
+}
+
+/// `f` with each summand bit `(v, value)` set to a constant.  A bit the
+/// linearisation already eliminated as `v = g` keeps that constraint as
+/// the equation `g + value`, rather than dropping it.
+fn assign(f: &Frame, mut fixed: u128, mut values: u128, assignment: &[(usize, bool)]) -> Frame {
+    let mut eqs = f.eqs.clone();
+    let mut subs = f.subs.clone();
+    for &(v, value) in assignment {
+        let form = if value { WPoly::one() } else { WPoly::zero() };
+        for p in eqs.iter_mut() {
+            *p = p.substitute(v, &form);
+        }
+        for (_, g) in subs.iter_mut() {
+            *g = g.substitute(v, &form);
+        }
+        if let Some((_, g)) = subs.iter().find(|(u, _)| *u == v) {
+            eqs.push(g.add(&form));
+        }
+        subs.push((v, form));
+        fixed |= 1u128 << v;
+        if value {
+            values |= 1u128 << v;
+        }
+    }
+    eqs.retain(|p| !p.is_zero());
+    Frame {
+        eqs,
+        subs,
+        fixed,
+        values,
     }
 }
 
@@ -991,6 +1128,7 @@ fn search(
     head: Option<usize>,
     node_budget: usize,
     opts: &SearchOptions,
+    valid: &[u32],
     stats: &mut WideStats,
     leaf: &Leaf<'_>,
 ) -> Option<Vec<usize>> {
@@ -1010,6 +1148,11 @@ fn search(
             }
         }),
         opts,
+        valid: if ell <= MAX_POINT_BRANCH_ELL {
+            valid
+        } else {
+            &[]
+        },
     };
     let nodes = AtomicUsize::new(stats.nodes);
     let stop = AtomicBool::new(false);
@@ -1041,10 +1184,7 @@ fn search(
                         return None;
                     }
                 }
-                Step::Split([a, b]) => {
-                    next.push(b);
-                    next.push(a);
-                }
+                Step::Split(children) => next.extend(children.into_iter().rev()),
             }
         }
         frontier = next;
@@ -1078,10 +1218,7 @@ fn search(
                             break;
                         }
                     }
-                    Step::Split([a, b]) => {
-                        stack.push(a);
-                        stack.push(b);
-                    }
+                    Step::Split(children) => stack.extend(children),
                 }
             }
             (None, local)
@@ -1328,9 +1465,20 @@ mod tests {
                     continue;
                 }
                 let mut stats = WideStats::default();
-                let idxs =
-                    decompose_rec(&kc, &fb, &index_of, &st, &t, m, 1 << 22, &opts, &mut stats)
-                        .unwrap_or_else(|| panic!("K_{a}/2^{n} m={m}: missed, {stats:?}"));
+                let valid = valid_coordinates(&kc, &fb, &index_of);
+                let idxs = decompose_rec(
+                    &kc,
+                    &fb,
+                    &index_of,
+                    &st,
+                    &t,
+                    m,
+                    1 << 22,
+                    &opts,
+                    &valid,
+                    &mut stats,
+                )
+                .unwrap_or_else(|| panic!("K_{a}/2^{n} m={m}: missed, {stats:?}"));
                 assert_eq!(idxs.len(), m);
                 let sum = idxs
                     .iter()
