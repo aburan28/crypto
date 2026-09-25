@@ -60,7 +60,7 @@ does. Their traces agree line for line. Cell K0 re-measures the same system with
 the committed build, and `analyze.py` compares the copies.
 
 **Round 2 (note §11.4).** `run_round2.sh` ran the cells in the note's order,
-one system at a time, from 01:54 to M3_END_PLACEHOLDER UTC on 2026-09-25, with
+one system at a time, from 01:54 to 04:32 UTC on 2026-09-25, with
 the example built from the commit that pre-registered them.
 
 | file | cell | what happened |
@@ -70,7 +70,7 @@ the example built from the commit that pre-registered them.
 | `K0-kummer-m2-p0-N20` | Kummer, `m = 2`, `p₀`, `N = 20`, staircase stop at 8 | Complete: both systems refuted at `D = 6`, so the stop never fired. Target 0 repeats `P0` exactly |
 | `I0-isogeny-m2-p0-N20` | isogeny, `m = 2`, `p₀`, `N = 20`, staircase stop at 8 | Complete: both refuted at `D = 6` |
 | `M4-kummer-m4-p1` | Kummer, `m = 4`, `p₁`, `N = 8, 12, 16` | `N = 8, 12` complete (`D = 6, 7`). The first `N = 16` system ran out of memory after 29 minutes ("memory allocation of 131072 bytes failed" in the log). The process ended there: no row, and the second `N = 16` target never ran |
-| `M3-kummer-m3-p1` | Kummer, `m = 3`, `p₁`, `N = 9–18` | `N = 9, 12, 15` complete (`D = 6, 6, 7`). M3_N18_README_PLACEHOLDER |
+| `M3-kummer-m3-p1` | Kummer, `m = 3`, `p₁`, `N = 9–18` | `N = 9, 12, 15` complete (`D = 6, 6, 7`). Both `N = 18` systems stopped for size, the `--max-nnz` cap of `2·10⁹`, after about 44 minutes each. They had reached degree 7 at 104,600 columns (`D ≥ 7`; rows with `"oversize": true`), and with every system at that `t` stopped, the example ended the cell |
 
 The exit codes in `progress.txt` are all 0 and carry no information:
 `run_round2.sh` wrote them with `$(date …)` in the same line, which resets `$?`

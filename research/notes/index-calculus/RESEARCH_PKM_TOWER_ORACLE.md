@@ -1387,7 +1387,9 @@ staircase stop never fired.
 - `N = 9` and 12 give `D = 6` on both targets, as in the pilot.
 - **`N = 15` gives `D = 7` on both targets**, at 31,397 columns in 24 steps,
   taking about 6 minutes each.
-- M3_N18_PLACEHOLDER
+- **`N = 18` stopped for size on both systems.** Each ran about 44 minutes and
+  23 steps, reaching degree 7 at 104,600 columns. The `--max-nnz` cap of
+  `2·10⁹` then stopped step 24. `D ≥ 7` is a lower bound, not a value.
 
 CONFIRM_VERIFY_PLACEHOLDER
 
@@ -1407,7 +1409,7 @@ committed scripts wrote them with `$(date …)` in the same line, which resets
 | 3 | K0: `D = 6`; target 0 reproduces §11.3 | held |
 | 4 | K1n: the null's `D` is the tower's | held at every `N` |
 | 5 | I0: `D ≥ 5` | held: `D = 6` |
-| 6 | M4: 6 and 7 at `N = 8, 12`; M3: 6 at `N = 9, 12`; `D` not falling at new sizes | held where measured. M3 gives 7 at `N = 15`, and M3_PRED_PLACEHOLDER. M4 gave no `D` at `N = 16` |
+| 6 | M4: 6 and 7 at `N = 8, 12`; M3: 6 at `N = 9, 12`; `D` not falling at new sizes | held where measured. M3 gives 7 at `N = 15`, and both `N = 18` systems stopped for size at `D ≥ 7`. M4 gave no `D` at `N = 16` |
 
 **`N`, not `|V|²/p`.** Both K1 systems at `N = 20` have `D = 6`, so "`N`"
 holds. At `p₁` the grid is `2^20/p₁ ≈ 5·10⁻⁴` of the field, three orders of
@@ -1424,7 +1426,7 @@ range starts, so each reading comes with its range.
 | null, Kummer, 2, `p₁` (K1n) | 12–20 | 5 5 5 5 6 | 0 | 0.25 (16–20) | H0, at the threshold |
 | Kummer, 2, `p₀` (XV1, K0) | 2–20 | 3 4 4 4 4 5 5 5 5 6 | 0 | 0.10 (12–20) | inconclusive |
 | isogeny, 2, `p₀` (XV1, I0) | 2–20 | 3 5 5 5 5 5 5 5 5 6 | 0 | 0.10 (12–20) | inconclusive |
-M3_A1_ROW_PLACEHOLDER
+| Kummer, 3, `p₁` (M3) | 9–15; 18 stopped at `≥ 7` | 6 6 7 | 0 | — | inconclusive (three sizes) |
 | Kummer, 4, `p₁` (M4) | 8–12 | 6 7 | 0 | — | inconclusive (two sizes) |
 
 - **Both H0 readings are at the threshold, and both come from where the range
@@ -1436,7 +1438,7 @@ M3_A1_ROW_PLACEHOLDER
   - The rule's reading is recorded as it stands, and it closes nothing. §3.7
     already rules `m = 2` out: no oracle beats rho there.
 - **H1a holds in no round-2 cell.** No final plateau is longer than
-  M3_L_PLACEHOLDER. The isogeny plateau of `N = 4–18`, which §10.8 noted would
+  2 (K1's). The isogeny plateau of `N = 4–18`, which §10.8 noted would
   pass A1, ends at `N = 20`.
 - **One line still reads H1a: the isogeny null at `p₀`.** The cross-check ran it
   only to `N = 18`, so it keeps that plateau. The null gates nothing, and at
@@ -1456,7 +1458,8 @@ It shows five things.
 3. **The rise depends on `N` alone** among the things varied here. It does not
    depend on `|V|²/p`, the target, the curve or the summation polynomial: within
    a family, the whole run has the same shape.
-4. **At `m = 3` the degree rises too**, to 7 at `N = 15`. M3_SHOWS_PLACEHOLDER
+4. **At `m = 3` the degree rises too**, to 7 at `N = 15`. At `N = 18` both systems
+   stopped for size at degree 7, a lower bound.
 5. **The rises fall at regular levels.** This pattern was noticed after the
    data, and is stated as a pattern, not a law.
    - At `m = 2`, the Kummer degree rises at `t = 6` and at `t = 10`, which is
