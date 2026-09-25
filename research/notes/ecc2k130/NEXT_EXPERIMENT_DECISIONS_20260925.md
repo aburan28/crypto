@@ -37,9 +37,9 @@ The source has cheap Frobenius action; the measured descending leaf has conducto
 
 ## Exact n=131 Frobenius-linear-subspace exclusion
 
-A separate mathematical gate removes a tempting but poorly sized family of factor bases. The multiplicative order of 2 modulo 131 is 130: the proper-divisor tests give 2^65 ≡ 130, 2^26 ≡ 53 and 2^10 ≡ 107 (mod 131), while 2^130 ≡ 1. Hence (X^131−1)/(X−1) is irreducible of degree 130 over F₂. Under the Frobenius action on F₂¹³¹, invariant **linear** subspaces have dimensions only 0, 1, 130 or 131. The exact check is [frobenius_subspace_gate_20260925.py](frobenius_subspace_gate_20260925.py). The paper [Index calculus for Koblitz curves](https://sacworkshop.org/SAC20/files/preproceedings/18-IndexCalculus.pdf), Lemma 4.1 and §4.1, gives the factorization criterion and explains the resulting factor-base size restriction.
+A separate mathematical gate removes a tempting but poorly sized family of factor bases. The multiplicative order of 2 modulo 131 is 130: the proper-divisor tests give 2^65 ≡ 130, 2^26 ≡ 53 and 2^10 ≡ 107 (mod 131), while 2^130 ≡ 1. Hence (X^131−1)/(X−1) is irreducible of degree 130 over F₂. Under the Frobenius action on F₂¹³¹, invariant **linear** subspaces have dimensions only 0, 1, 130 or 131. The exact check is [frobenius_subspace_gate_20260925.py](frobenius_subspace_gate_20260925.py). The paper [On Index Calculus Algorithms for Subfield Curves](https://sacworkshop.org/SAC20/files/preproceedings/18-IndexCalculus.pdf), Lemma 4.1 and §4.1, gives the factorization criterion and explains the resulting factor-base size restriction.
 
-Decision: do not spend a solver campaign on an intermediate-dimensional Frobenius-invariant *linearized-polynomial* x-space for n=131; none exists. This does **not** exclude non-linear Galois-invariant sets, unions of full Frobenius orbits, or different extension representations. The compact point-defined orbit bases are in that remaining class.
+Decision: do not spend a solver campaign on an intermediate-dimensional Frobenius-invariant *linearized-polynomial* x-space for n=131; none exists. This does **not** exclude nonlinear Galois-invariant sets or unions of full Frobenius orbits. A change of field basis does not change the four allowed invariant linear dimensions. The compact point-defined orbit bases are in the remaining class.
 
 ## Goal completion rule
 
