@@ -19,6 +19,8 @@ logarithms then run `1.41×` faster.  §0–§4 were committed before any
 registered run (`1f0d9751`); §1 lists every run made before registration.
 Results are appended below §4 and do not edit it.
 
+*Re-priced in instructions on 2026-09-25 ([`RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md`](RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md) §5): T1 reads `1.12×` in instructions, below its registered `1.3×`, and `1.01×` on the three `K_0/2^31` cells; the frozen `K_1/2^15 m=2` rung is `0.79×`. The status above, registered in word operations, stands.*
+
 ## The question
 
 The inherited engine builds a node's Macaulay matrix from scratch at a root

@@ -591,6 +591,7 @@
         <span>zero disagreements between oracles on every target of every cell, S&#8324; witnesses lifted in the group and compared both ways</span>
         <span>projected relation phase with matrix-F4 at n = 23: S &asymp; 4.1&times;10<sup>3</sup>, 22&times; the whole measured cost of the tabled fold (9.2&times;10<sup>3</sup> and 49&times; at the freeze) &mdash; an extrapolation</span>
         <span>matrix-F4 rows from the lift-checked re-run on the merged tree, <code>docs/ic/runs/ic-oracle-pricing-lifted-2026-09-21.json</code>: same verdicts, fall degrees and SAT conflicts as the freeze, 1.4&ndash;2.7&times; fewer word XORs after main&rsquo;s sparse elimination (#405) &mdash; engineering, ratio to the probe unmoved</span>
+        <span>every matrix-F4 figure in this ledger is word XORs converted to GAE; re-priced in instructions, the Gr&ouml;bner stage executes 51&ndash;586 instructions per counted operation, so these rows undercount the oracle by roughly that factor (<a href="#groebner-instructions-20260925">the accounting round</a>) &mdash; the verdict, that it is the slowest route that finishes, only strengthens</span>
         <span>support-local row from the paired second 2026-09-24 re-run, <code>research/support_local_multipliers_20260924/oracle_ladder/{reference,candidate}.json</code>, both arms on one binary: identical found/refuted verdicts on every cell, zero disagreements; matrix-F4 1.52&times; fewer word XORs at n = 15, m = 3 and 2.06&times; at n = 9, m = 3, the m = 2 cells 1.00&ndash;1.03&times;, none rising; GAE at that run&rsquo;s own host-measured factor; projected relation phase at n = 15, m = 3: S &asymp; 579 against 878 &mdash; an extrapolation &mdash; engineering (<a href="#support-local-multipliers-20260924">the round</a>)</span>
         <span>interleaved-order row from the paired 2026-09-24 re-run, <code>research/chain_split_order_20260924/oracle_ladder/{reference,candidate}.json</code>, both arms on one binary: identical found/refuted verdicts on every cell, zero disagreements; matrix-F4 3.57&times; fewer word XORs at n = 15, m = 3 and 1.58&times; at n = 9, m = 3, the m = 2 cells 1.00&ndash;1.03&times;; GAE converted at each run&rsquo;s own host-measured factor (the two differ by up to 14%), so the word-XOR ratio is the comparison; projected relation phase at n = 15, m = 3: S &asymp; 948 against 3,864 &mdash; an extrapolation &mdash; engineering (<a href="#chain-split-order-20260924">the round</a>)</span>
         <span>inherited-F4 rows from the paired 2026-09-22 re-run, <code>docs/ic/runs/ic-oracle-pricing-{matrix-f4-reference,inherited-f4}-2026-09-22.json</code>, both engines on one binary: identical found/refuted verdicts on all 13 cells, zero disagreements, no inconclusive target; 2.3&ndash;29.9&times; fewer word operations on every cell with a tree, the specialisation&rsquo;s reads and writes charged; the default splits on the smallest free variable, so its tree has the same size and a different shape from the reference&rsquo;s &mdash; engineering (<a href="#inherited-f4-20260922">the round</a>)</span>
@@ -5693,13 +5694,13 @@ factor base, and this prices a decomposition oracle.</p>
       &ldquo;L&rdquo; linear elimination, &ldquo;D&rdquo; rebuild-on-drop (same tree as the reference, <code>compare.py</code>). Every pair
       accepted: the same targets decomposed, none exhausted, every decomposition lifted and verified in the group. Stage diagnostic
       (AGENTS.md &sect;8).</caption>
-    <thead><tr><th>Suite</th><th>Rungs</th><th>Nodes ref &rarr; cand</th><th>Reference</th><th>L alone</th><th>O alone</th><th>O + L (default)</th><th>D (control)</th><th>Floor ratio</th><th>Wall</th><th>Class</th></tr></thead>
+    <thead><tr><th>Suite</th><th>Rungs</th><th>Nodes ref &rarr; cand</th><th>Reference</th><th>L alone</th><th>O alone</th><th>O + L (default)</th><th>D (control)</th><th>Instructions, O + L <a href="#groebner-instructions-20260925">(re-priced)</a></th><th>Floor ratio</th><th>Wall</th><th>Class</th></tr></thead>
     <tbody>
-      <tr><td>frozen ladder (5 quadratic rungs, 1 cubic)</td><td class="n">6</td><td>7,917 &rarr; 7,701</td><td class="n">16,696,846</td><td class="n">1.02&times;</td><td class="n">0.97&times;</td><td class="n"><strong>1.04&times;</strong> (cubic rung 1.84&times;; no rung rises)</td><td class="n">1.01&times;</td><td>flat</td><td class="n">0.6 &rarr; 0.6 s</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>chain ladder (tuning set)</td><td class="n">3</td><td>1,340 &rarr; 571</td><td class="n">13,754,966</td><td class="n">1.28&times;</td><td class="n">0.85&times;</td><td class="n"><strong>1.82&times;</strong></td><td class="n">1.14&times;</td><td>flat</td><td class="n">0.25 &rarr; 0.18 s</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>holdout as registered (4 of 11 cells run; T1 needed 6)</td><td class="n">4</td><td>66,615 &rarr; 8,496</td><td class="n">379,266,727</td><td class="n">2.42&times;</td><td class="n"><strong>0.21&times;</strong></td><td class="n"><strong>7.25&times;</strong> (1.53&ndash;8.74&times;)</td><td class="n"><strong>2.07&times;, one rung 0.88&times;</strong></td><td>flat</td><td class="n">8.5 &rarr; 1.3 s</td><td><span class="chip">engineering</span>; T1 not met as registered</td></tr>
-      <tr><td>supplementary holdout T1&prime; (every untouched admissible cell)</td><td class="n">9</td><td>256,531 &rarr; 24,181</td><td class="n">1,104,534,384</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n"><strong>4.91&times;</strong> (1.68&ndash;33.3&times;)</td><td class="n">&mdash;</td><td>flat</td><td class="n">24.8 &rarr; 4.4 s</td><td><span class="chip">engineering</span>; T1&prime; met</td></tr>
-      <tr><td>oracle-pricing ladder, <code>n = 15</code>, m = 3</td><td class="n">1</td><td></td><td class="n">25,639,588</td><td class="n"></td><td class="n"></td><td class="n"><strong>3.57&times;</strong> (7,187,062)</td><td class="n"></td><td>flat</td><td class="n"></td><td><span class="chip">engineering</span>; zero oracle disagreements</td></tr>
+      <tr><td>frozen ladder (5 quadratic rungs, 1 cubic)</td><td class="n">6</td><td>7,917 &rarr; 7,701</td><td class="n">16,696,846</td><td class="n">1.02&times;</td><td class="n">0.97&times;</td><td class="n"><strong>1.04&times;</strong> (cubic rung 1.84&times;; no rung rises)</td><td class="n">1.01&times;</td><td class="n">1.02&times;</td><td>flat</td><td class="n">0.6 &rarr; 0.6 s</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>chain ladder (tuning set)</td><td class="n">3</td><td>1,340 &rarr; 571</td><td class="n">13,754,966</td><td class="n">1.28&times;</td><td class="n">0.85&times;</td><td class="n"><strong>1.82&times;</strong></td><td class="n">1.14&times;</td><td class="n">1.21&times;</td><td>flat</td><td class="n">0.25 &rarr; 0.18 s</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>holdout as registered (4 of 11 cells run; T1 needed 6)</td><td class="n">4</td><td>66,615 &rarr; 8,496</td><td class="n">379,266,727</td><td class="n">2.42&times;</td><td class="n"><strong>0.21&times;</strong></td><td class="n"><strong>7.25&times;</strong> (1.53&ndash;8.74&times;)</td><td class="n"><strong>2.07&times;, one rung 0.88&times;</strong></td><td class="n"><strong>6.24&times;</strong></td><td>flat</td><td class="n">8.5 &rarr; 1.3 s</td><td><span class="chip">engineering</span>; T1 not met as registered</td></tr>
+      <tr><td>supplementary holdout T1&prime; (every untouched admissible cell)</td><td class="n">9</td><td>256,531 &rarr; 24,181</td><td class="n">1,104,534,384</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n"><strong>4.91&times;</strong> (1.68&ndash;33.3&times;)</td><td class="n">&mdash;</td><td class="n"><strong>5.23&times;</strong></td><td>flat</td><td class="n">24.8 &rarr; 4.4 s</td><td><span class="chip">engineering</span>; T1&prime; met</td></tr>
+      <tr><td>oracle-pricing ladder, <code>n = 15</code>, m = 3</td><td class="n">1</td><td></td><td class="n">25,639,588</td><td class="n"></td><td class="n"></td><td class="n"><strong>3.57&times;</strong> (7,187,062)</td><td class="n"></td><td class="n">&mdash;</td><td>flat</td><td class="n"></td><td><span class="chip">engineering</span>; zero oracle disagreements</td></tr>
     </tbody>
   </table></div>
   <div class="table-scroll"><table>
@@ -5716,6 +5717,10 @@ factor base, and this prices a decomposition oracle.</p>
       <tr><td><code>K_0/2^9</code>, 5 seeds</td><td class="n">10 / 10</td><td class="n">20 / 19</td><td class="n">20 / 19</td><td class="n">1,501,482 &rarr; 803,023 (1.87&times;)</td><td class="n">1.32&times; [1.14, 1.49]</td><td>null</td></tr>
     </tbody>
   </table></div>
+  <p>Re-priced in instructions (<a href="#groebner-instructions-20260925">the accounting round</a>, round 2&rsquo;s seeds): the stage gains
+    hold &mdash; 5.23&times; on T1&prime;, 6.24&times; on the holdout, 10.6&times; on the later R2 holdout &mdash; but the whole
+    <code>K_0/2^13</code> logarithm moves only 1.01&times; (1.18&times; at <code>K_0/2^9</code>): its 1.54&times; in oracle word operations
+    was almost all elimination, which the unit over-weights.</p>
   <p>Retained controls: <code>KIC_CHAIN_ORDER=layout</code>, <code>KIC_LINEAR_ELIM=0|1</code>, <code>KIC_F4_DROP=rebuild</code>. Tests pin that
     linear elimination returns exactly the variety (brute force, both engines, both split rules, both drop rules) and that the
     interleaved chain solve has the pre-round default&rsquo;s roots at m = 3 and 4. Only <code>groebner_decompose</code> renames a chain;
@@ -5727,7 +5732,7 @@ factor base, and this prices a decomposition oracle.</p>
 <!-- BEGIN support-local-multipliers-20260924 -->
 <section class="panel" id="support-local-multipliers-20260924">
   <div class="panel-head">
-    <h2>Support-local multipliers: build each root row from the generator&rsquo;s own variables &mdash; 1.50&times; on a registered holdout, and a hidden cost the unit did not see <span class="chip">engineering</span></h2>
+    <h2>Support-local multipliers: build each root row from the generator&rsquo;s own variables &mdash; 1.50&times; on a registered holdout in word operations, 1.12&times; in instructions <span class="chip">engineering</span></h2>
     <p>The inherited engine built a root&rsquo;s Macaulay matrix, and every completion after a degree drop, by multiplying <em>every</em>
       generator by every monomial of the allowed degree over <em>every variable occurring in the system</em>. For the chained systems of
       the <a href="#chain-split-order-20260924">previous round</a> that is mostly wasted: the links are block-multilinear, and a product of the
@@ -5741,7 +5746,10 @@ factor base, and this prices a decomposition oracle.</p>
       operations; building a row is uncharged in both arms, as it always was. <strong>Registered</strong> before any run: a new holdout of
       19 rungs (four cells no ladder had used, including <code>K_0/2^31</code> at 46 unknowns, and fresh targets on the fifteen known
       admissible cells), a <code>1.3&times;</code> threshold with no rung allowed to rise more than 2%, the frozen ladder, and identical oracle
-      verdicts. <strong>All three targets are met.</strong></p>
+      verdicts. <strong>All three targets are met</strong> in word operations, the unit they were registered in. Re-priced in
+      instructions (<a href="#groebner-instructions-20260925">the accounting round</a>), T1 reads <strong>1.12&times;</strong>, below its 1.3&times;
+      threshold, and 1.01&times; on the three <code>K_0/2^31</code> cells: most of the gain was in elimination, which the unit
+      over-weights.</p>
     <p><strong>What the unit missed.</strong> On the registered code the whole logarithms did <code>2.19&times;</code> less oracle work and ran
       <strong>18% slower</strong> (<code>0.82&times;</code>, interleaved, 95% interval <code>[0.80, 0.84]</code>). A profile found that the new root
       builder packed rows through an <code>FxHash</code> index. On one word that hash is <code>x&middot;K</code>, which keeps <code>x</code>&rsquo;s
@@ -5765,14 +5773,14 @@ factor base, and this prices a decomposition oracle.</p>
       reference / candidate. Every pair accepted by <code>compare_cross_tree.py</code>: the same targets decomposed, none exhausted, every
       decomposition lifted and verified in the group. Wall is the interleaved rerun on the fixed binary, a practicality note. Stage
       diagnostic (AGENTS.md &sect;8).</caption>
-    <thead><tr><th>Suite</th><th>Rungs</th><th>Nodes ref &rarr; cand</th><th>Reference</th><th>Support-local (default)</th><th>Per rung</th><th>Floor ratio</th><th>Wall ref/cand</th><th>Class</th></tr></thead>
+    <thead><tr><th>Suite</th><th>Rungs</th><th>Nodes ref &rarr; cand</th><th>Reference</th><th>Support-local (default)</th><th>Per rung</th><th>Instructions <a href="#groebner-instructions-20260925">(re-priced)</a></th><th>Floor ratio</th><th>Wall ref/cand</th><th>Class</th></tr></thead>
     <tbody>
-      <tr><td>frozen ladder (5 quadratic rungs, 1 cubic)</td><td class="n">6</td><td>7,701 &rarr; 7,704</td><td class="n">16,125,634 <span class="was">was 16,696,846 before #690</span></td><td class="n"><strong>15,816,123 (1.02&times;)</strong></td><td class="n">0.9988&ndash;2.01&times; (two rungs +0.12%, +0.05%)</td><td>flat</td><td class="n">1.00&times;</td><td><span class="chip">engineering</span>; T2 met</td></tr>
-      <tr><td>chain ladder (tuning)</td><td class="n">3</td><td>571 &rarr; 573</td><td class="n">7,547,415</td><td class="n"><strong>3,351,378 (2.25&times;)</strong></td><td class="n">2.01&ndash;3.12&times;</td><td>flat</td><td class="n">1.49&times;</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>chain holdout (tuning)</td><td class="n">4</td><td>8,496 &rarr; 8,496</td><td class="n">52,305,605</td><td class="n"><strong>32,779,266 (1.60&times;)</strong></td><td class="n">1.43&ndash;3.30&times;</td><td>flat</td><td class="n">1.29&times;</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td>previous round&rsquo;s T1&prime; (tuning)</td><td class="n">9</td><td>24,181 &rarr; 24,189</td><td class="n">225,078,474 <span class="was">was 1,104,534,384 before #690</span></td><td class="n"><strong>136,355,549 (1.65&times;)</strong></td><td class="n">1.46&ndash;3.55&times;</td><td>flat</td><td class="n">1.21&times;</td><td><span class="chip">engineering</span></td></tr>
-      <tr><td><strong>R2 holdout</strong> (registered here)</td><td class="n">19</td><td>39,156 &rarr; 39,168</td><td class="n">888,630,176</td><td class="n"><strong>591,938,031 (1.50&times;)</strong></td><td class="n">1.40&ndash;3.57&times;, none rising</td><td>flat</td><td class="n">1.08&times;</td><td><span class="chip">engineering</span>; T1 met</td></tr>
-      <tr><td>oracle-pricing ladder, <code>n = 15</code>, m = 3</td><td class="n">1</td><td></td><td class="n">7,187,062</td><td class="n"><strong>4,736,391 (1.52&times;)</strong></td><td class="n">n = 9, m = 3: 2.06&times;</td><td>flat</td><td class="n"></td><td><span class="chip">engineering</span>; T3 met, zero disagreements</td></tr>
+      <tr><td>frozen ladder (5 quadratic rungs, 1 cubic)</td><td class="n">6</td><td>7,701 &rarr; 7,704</td><td class="n">16,125,634 <span class="was">was 16,696,846 before #690</span></td><td class="n"><strong>15,816,123 (1.02&times;)</strong></td><td class="n">0.9988&ndash;2.01&times; (two rungs +0.12%, +0.05%)</td><td class="n">1.00&times; (one rung 0.79&times;)</td><td>flat</td><td class="n">1.00&times;</td><td><span class="chip">engineering</span>; T2 met</td></tr>
+      <tr><td>chain ladder (tuning)</td><td class="n">3</td><td>571 &rarr; 573</td><td class="n">7,547,415</td><td class="n"><strong>3,351,378 (2.25&times;)</strong></td><td class="n">2.01&ndash;3.12&times;</td><td class="n">1.45&times;</td><td>flat</td><td class="n">1.49&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>chain holdout (tuning)</td><td class="n">4</td><td>8,496 &rarr; 8,496</td><td class="n">52,305,605</td><td class="n"><strong>32,779,266 (1.60&times;)</strong></td><td class="n">1.43&ndash;3.30&times;</td><td class="n">1.23&times;</td><td>flat</td><td class="n">1.29&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td>previous round&rsquo;s T1&prime; (tuning)</td><td class="n">9</td><td>24,181 &rarr; 24,189</td><td class="n">225,078,474 <span class="was">was 1,104,534,384 before #690</span></td><td class="n"><strong>136,355,549 (1.65&times;)</strong></td><td class="n">1.46&ndash;3.55&times;</td><td class="n">1.17&times;</td><td>flat</td><td class="n">1.21&times;</td><td><span class="chip">engineering</span></td></tr>
+      <tr><td><strong>R2 holdout</strong> (registered here)</td><td class="n">19</td><td>39,156 &rarr; 39,168</td><td class="n">888,630,176</td><td class="n"><strong>591,938,031 (1.50&times;)</strong></td><td class="n">1.40&ndash;3.57&times;, none rising</td><td class="n"><strong>1.12&times;</strong> (<code>K_0/2^31</code> cells 1.01&times;)</td><td>flat</td><td class="n">1.08&times;</td><td><span class="chip">engineering</span>; T1 met</td></tr>
+      <tr><td>oracle-pricing ladder, <code>n = 15</code>, m = 3</td><td class="n">1</td><td></td><td class="n">7,187,062</td><td class="n"><strong>4,736,391 (1.52&times;)</strong></td><td class="n">n = 9, m = 3: 2.06&times;</td><td class="n">&mdash;</td><td>flat</td><td class="n"></td><td><span class="chip">engineering</span>; T3 met, zero disagreements</td></tr>
     </tbody>
   </table></div>
   <div class="table-scroll"><table>
@@ -5799,6 +5807,74 @@ factor base, and this prices a decomposition oracle.</p>
     claim in the unit (<a href="https://github.com/aburan28/crypto/blob/main/research/env_reads_20260924/README.md">evidence</a>).</p>
 </section>
 <!-- END support-local-multipliers-20260924 -->
+<!-- BEGIN groebner-instructions-20260925 -->
+<section class="panel" id="groebner-instructions-20260925">
+  <div class="panel-head">
+    <h2>The Gr&ouml;bner stage priced in instructions: the word-operation unit sees 0.2&ndash;2% of it, and the whole logarithm is 964&times; rho <span class="chip">accounting</span></h2>
+    <p>The Gr&ouml;bner-stage rounds priced the decomposition oracle in 64-bit word operations: elimination XORs, specialisation reads
+      and writes, linear-elimination row operations. Everything else was uncharged in both arms &mdash; building the system, building
+      rows, sorting, hashing, allocating, scanning for leading terms &mdash; and the round before showed an uncharged phase can grow and hide a
+      regression. This round prices the stage in <strong>instructions retired</strong> (callgrind), inside
+      <code>groebner_decompose</code> for the stage and over the whole <code>ic run</code> process for a logarithm. A measured
+      instructions-per-addition on the rho reference&rsquo;s own arithmetic (924 at <code>n = 13</code>, 680 at <code>n = 9</code>) converts them
+      to GAE, and rho is run on the same seeds in the same unit. Its instruction-derived <code>S</code> agrees with its counted one
+      within 3%, which checks the conversion.</p>
+    <p>Three arms on one binary: before #690 (A0), after #690 (A1), after #712 (A2, the default). <strong>Registered</strong> with
+      gates, not a speed target. <strong>G1 met</strong>: every counter of every rung equals its registered run, and so do the whole
+      logarithms&rsquo; trials, relations and oracle word operations. <strong>G2 not met as registered</strong>: one rung&rsquo;s instructions
+      vary by up to 2.5&times;10<sup>&minus;5</sup> between runs against a 10<sup>&minus;6</sup> gate; the cause, found afterwards, is rayon&rsquo;s
+      scheduling (single-threaded, the rung repeats exactly), and no ratio on the page moves by it. <strong>G3 met</strong>: every
+      logarithm and every rho run verified. Adopted for later rounds: stage instructions beside word operations, a stage gain must lower
+      the instruction total on the registered holdout, no-regression clauses apply in both units, and whole-log claims are stated in
+      <code>S</code> from process instructions.
+      Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/groebner_instructions_20260925/tables.md">every rung and every run</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/groebner_instructions_20260925/presweep/table.md">pre-registration sweep</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/groebner_instructions_20260925/determinism_single_thread/README.md">G2 diagnostic</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/groebner_instructions_20260925/manifest.json">manifest</a> &middot;
+      <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md">note</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Totals per ladder; ratios old / new. &ldquo;Instructions per word op&rdquo; is the default&rsquo;s. Round 1 is A0 &rarr; A1
+      (interleaved order + linear elimination), round 2 is A1 &rarr; A2 (support-local multipliers). Stage diagnostic (AGENTS.md &sect;8).</caption>
+    <thead><tr><th>Ladder</th><th>Rungs</th><th>Instructions, A0 &rarr; A1 &rarr; A2</th><th>Instructions per word op</th><th>Round 1: words</th><th>Round 1: instructions</th><th>Round 2: words</th><th>Round 2: instructions</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>frozen</td><td class="n">6</td><td class="n">4.19 G &rarr; 4.10 G &rarr; 4.08 G</td><td class="n">258</td><td class="n">1.04&times;</td><td class="n"><strong>1.02&times;</strong></td><td class="n">1.02&times;</td><td class="n"><strong>1.00&times;</strong> (one rung 0.79&times;)</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>chain (tuning)</td><td class="n">3</td><td class="n">1.66 G &rarr; 1.37 G &rarr; 0.94 G</td><td class="n">280</td><td class="n">1.82&times;</td><td class="n"><strong>1.21&times;</strong></td><td class="n">2.25&times;</td><td class="n"><strong>1.45&times;</strong></td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>round 1&rsquo;s holdout</td><td class="n">4</td><td class="n">48.3 G &rarr; 7.74 G &rarr; 6.30 G</td><td class="n">192</td><td class="n">7.25&times;</td><td class="n"><strong>6.24&times;</strong></td><td class="n">1.60&times;</td><td class="n"><strong>1.23&times;</strong></td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>round 1&rsquo;s T1&prime;</td><td class="n">9</td><td class="n">143.5 G &rarr; 27.4 G &rarr; 23.4 G</td><td class="n">172</td><td class="n">4.91&times;</td><td class="n"><strong>5.23&times;</strong></td><td class="n">1.65&times;</td><td class="n"><strong>1.17&times;</strong></td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>round 2&rsquo;s R2 holdout</td><td class="n">19</td><td class="n">686.5 G &rarr; 65.0 G &rarr; 58.0 G</td><td class="n">98</td><td class="n">17.3&times;</td><td class="n"><strong>10.6&times;</strong></td><td class="n">1.50&times;</td><td class="n"><strong>1.12&times;</strong> (<code>K_0/2^31</code>: 1.01&times;)</td><td><span class="chip">accounting</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Where the default&rsquo;s stage instructions go, summed over every rung (inclusive, so the rows overlap: specialisation contains
+      <code>insert</code>). The phases the unit counts are the last column.</caption>
+    <thead><tr><th>Ladder</th><th>System construction</th><th>Root builds</th><th>Specialisation</th><th>of which <code>insert</code></th><th>Linear elimination</th><th>Counted elimination kernels</th></tr></thead>
+    <tbody>
+      <tr><td>frozen</td><td class="n">33%</td><td class="n">23%</td><td class="n">35%</td><td class="n">15%</td><td class="n">0%</td><td class="n">10%</td></tr>
+      <tr><td>R2 holdout</td><td class="n">7%</td><td class="n">18%</td><td class="n">54%</td><td class="n">33%</td><td class="n">12%</td><td class="n">9%</td></tr>
+      <tr><td><strong>all five ladders</strong></td><td class="n">9%</td><td class="n">19%</td><td class="n"><strong>51%</strong></td><td class="n">29%</td><td class="n">12%</td><td class="n"><strong>8%</strong></td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>Whole logarithms, <code>ic run --solver groebner --summands 3</code>, round 2&rsquo;s seeds; <code>S</code> = process instructions /
+      instructions per addition / &radic;r, rho the same way. Every run verified <code>[k]G = Q</code>. Two sizes, no fitted exponent: a
+      measurement at <code>n = 9</code> and <code>13</code>, not a trend.</caption>
+    <thead><tr><th>Cell</th><th>Runs</th><th>Rho S (instructions; counted)</th><th>A0 S</th><th>A1 S</th><th>A2 S (default)</th><th>A2 / rho</th><th>Oracle&rsquo;s share</th></tr></thead>
+    <tbody>
+      <tr><td><code>K_0/2^13</code>, 15 seeds</td><td class="n">15 per arm</td><td class="n">19.8; 19.5</td><td class="n">27,185</td><td class="n">26,999</td><td class="n"><strong>19,128</strong></td><td class="n"><strong>964&times;</strong></td><td class="n">89%</td></tr>
+      <tr><td><code>K_0/2^9</code>, 5 seeds</td><td class="n">5 per arm</td><td class="n">45.2; 43.9</td><td class="n">12,395</td><td class="n">10,464</td><td class="n"><strong>8,674</strong></td><td class="n"><strong>192&times;</strong></td><td class="n">64%</td></tr>
+    </tbody>
+  </table></div>
+  <p>Reading: round 1&rsquo;s stage gains survive the re-pricing, round 2&rsquo;s mostly do not on the large cells, and in the whole
+    logarithm it is round 2 that moves the total (1.41&times; at <code>n = 13</code>, against round 1&rsquo;s 1.01&times;). The unit
+    over-weights elimination: 51 instructions per counted operation where m4ri kernels dominate, 586 where system construction and root
+    builds do. The oracle ledger&rsquo;s matrix-F4 figures are word XORs converted to GAE, so they undercount the oracle by roughly
+    that factor. Next levers, measured here and not claimed: specialisation on the large cells (51% of instructions, <code>insert</code>
+    29%); system construction on the small and quadratic ones (31&ndash;33%), which #697 &mdash; merged after these runs &mdash; now amortises
+    with an in-process template memo, not yet re-priced; and a layout cache for support-local roots, which would remove round 2&rsquo;s one
+    per-rung regression. Every figure here is for the code before #697 (<code>31bedbdf</code>).</p>
+</section>
+<!-- END groebner-instructions-20260925 -->
 <!-- BEGIN ic-tournament-round-0023 -->
 <section class="panel" id="ic-tournament-round-0023">
 <p><strong>Factor-base policy panel:</strong> base support and rank floors differ across arms; public ECDLP targets and matched rho are identical. See the report for per-arm base sizes. Engineering comparison only.</p>

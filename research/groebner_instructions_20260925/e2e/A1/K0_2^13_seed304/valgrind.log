@@ -1,0 +1,11 @@
+==912== Callgrind, a call-graph generating cache profiler
+==912== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==912== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==912== Command: /home/user/crypto/target/release/ic run --degree 13 --curve-a 0 --summands 3 --solver groebner --random-target --seed 304 --batch 1 --json
+==912== 
+==912== For interactive control, run 'callgrind_control -h'.
+==912== 
+==912== Events    : Ir
+==912== Collected : 1076821658
+==912== 
+==912== I   refs:      1,076,821,658
