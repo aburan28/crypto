@@ -199,10 +199,19 @@ def run(args):
     root["training_child_wall_ms"] = validation["process_wall_ms"]
     training_observation = json.loads((training / "producer.stdout.jsonl").read_text())
     training_batch = training_observation["compact_orbit_batch"]
+    training_queries = training_batch["query_observations"]
+    training_scalars = [int(line) for line in (training / "target_scalars.txt").read_text().splitlines()]
+    assert len(training_queries) == len(training_scalars) == 512
+    assert all(row["scalar"] == scalar and row["hit"]
+               for row, scalar in zip(training_queries, training_scalars))
     root["training_operations"] = {
         "regular_states": training_batch["regular_states"],
         "index_entries": training_batch["index_entries"],
-        "query_observations": training_batch.get("query_observations"),
+        "query_observations": training_queries,
+        "s3_calls_sum": sum(row["s3_calls"] for row in training_queries),
+        "partner_roots_sum": sum(row["partner_roots"] for row in training_queries),
+        "indexed_partner_hits_sum": sum(row["indexed_partner_hits"] for row in training_queries),
+        "group_lift_attempts_sum": sum(row["group_lift_attempts"] for row in training_queries),
         "query_ms_sum": training_batch["query_ms_sum"],
         "rank": validation["rank"],
         "first_full_rank_at_extracted": validation["full_rank_at_extracted"],
