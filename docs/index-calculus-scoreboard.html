@@ -6693,6 +6693,25 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-pdp-corpus-20260925 -->
+<!-- BEGIN ecc2k130-rotated-m56-export-gate-20260925 -->
+<section class="panel" id="ecc2k130-rotated-m56-export-gate-20260925">
+  <div class="panel-head">
+    <h2>Rotated m = 5/6 exporter semantics: rational reference passes; polynomial export still gated <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/770">PR #770</a> pins the 16 point targets from <a href="https://github.com/aburan28/crypto/pull/767">#767</a>, then re-enumerates every rational rotated tuple and an equal-count repeated-F0 control. All 64 fixed Q+T counts match the complete parent corpus, every rational tuple passes the trace parity law, and all affine S3-chain prefixes vanish while infinity branches are kept explicit. This is an exact model-checking reference and capacity gate; no S6/S7 ANF, solver timing, relation rank, or ECDLP cost was produced.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Direct x-mask reference and raw recursive-chain layout before exception/sign/SAT auxiliaries. Support counts include O. The repeated-F0 control has no witness on any of the 16 frozen Q targets, so it cannot be a same-Q positive solver-time comparator here. Full S and rho ratios remain unset.</caption>
+    <thead><tr><th>Toy arm</th><th>Rational point tuples</th><th>Rational x masks / formal masks</th><th>Rotated / repeated projected support</th><th>Exact Q+T replay</th><th>Raw chain bits / rows</th><th>Infinity/inverse prefix steps</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>3,125</td><td>243 / 1,024</td><td>1,591 / 61</td><td>32/32</td><td>49 / 52</td><td>130 / 130</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>117,649</td><td>4,096 / 4,096</td><td>62,389 / 377</td><td>32/32</td><td>88 / 95; exceeds u64 mask</td><td>2,450 / 2,451</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>For each fixed torsion translate, x-mask parity must match Tr(x(Q+T)); both parity classes remain necessary when all four T are allowed. Naive cross-slot sorting discards verified projected labels because nonzero rotated factor spaces are distinct: the first structural n = 13 and n = 19 counterexamples retain full Q+T witnesses, and swapping their first two points breaks both slot memberships. The initial lift-domain preflight failure is preserved; a corrected source freeze and fresh replay passed. The next gate must export and validate direct/chain equations against these exact mask sets before SAT, Gröbner, FES or WDSat arms can be ranked. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/RESULT.md">decision and limits</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/PROTOCOL.md">frozen protocol</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/evidence/README.md">raw receipts and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-m56-export-gate-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
@@ -6714,6 +6733,49 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-row-certificate-20260925 -->
+<!-- BEGIN ecc2k130-rotated-rank-holdout-20260925 -->
+<section class="panel" id="ecc2k130-rotated-rank-holdout-20260925">
+  <div class="panel-head">
+    <h2>Rotated toy rows: exact rank saturates in 2/3 equations; 64 point-only holdouts replay <span class="chip">rank diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/768">PR #768</a> froze SHA-selected 16 projected-positive nonzero Q points per n = 13 arm, retained 4/0/2/0 preceding selection misses, and removed all Q+T rows for those Q before modulo-2,003 elimination. An independent bit-serial/Fermat replay checked the exact rank, every remaining row equation, each solved column log by group law, and every held-out scalar. Recovery was passed only Q coordinates, column logs and a stripped saved-row response; the full old-row archive scan is charged as an <em>oracle lookup</em>, not a new PDP solver.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>The rank denominator is the complete canonical term-column set in each frozen toy arm. Dependent counts include one zero row. The 16 point-only cases per arm were selected for positive archived support, so oracle hits do not estimate a natural-target hit rate.</caption>
+    <thead><tr><th>Rotated arm</th><th class="n">Retained / archived rows</th><th class="n">Rank / columns</th><th class="n">Dependent incl. zero</th><th class="n">First full-rank row</th><th class="n">Point-only logs</th></tr></thead>
+    <tbody>
+      <tr><td>beta 3, m = 5</td><td class="n">1,780 / 1,799</td><td class="n">2 / 2</td><td class="n">1,778</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 3, m = 6</td><td class="n">6,261 / 6,307</td><td class="n">2 / 2</td><td class="n">6,259</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 7, m = 5</td><td class="n">1,781 / 1,799</td><td class="n">2 / 2</td><td class="n">1,779</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 7, m = 6</td><td class="n">7,948 / 8,012</td><td class="n">3 / 3</td><td class="n">7,945</td><td class="n">5</td><td class="n">16 / 16</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The charged toy producer used 0.681 s wall for training, scanning all 17,917 archived rows and point-only recovery; independent replay took 0.441 s. Input construction took 0.051 s. The rank trainer/verifier peaked at 176,963,584/181,403,648 bytes RSS. Thus #766's 17,917 correct identities yield only 2/2/2/3 independent rows in these separate tiny column spaces. The 64/64 recovered scalars depend on precomputed archived witness rows, not an implicit n = 131 PDP search. Full n = 131 factor-base cardinality/rank cost, natural-target relation yield, rho comparison and a Certicom log remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/PROTOCOL.md">pre-outcome protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/evidence/README.md">archive receipt</a>. Raw SHA-256 <code>3b483e486eb1dec9d34a81653cb6b568b74ada33e8c05305304810ec87ba3c6a</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-rank-holdout-20260925 -->
+<!-- BEGIN ecc2k130-rotated-beta-sweep-20260925 -->
+<section class="panel" id="ecc2k130-rotated-beta-sweep-20260925">
+  <div class="panel-head">
+    <h2>Rotated normal-beta sweep: exact n = 19 support moves at fixed base size; no beta meets the follow-up gate <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/769">PR #769</a> froze a SHA-selected four-beta sweep against merged <a href="https://github.com/aburan28/crypto/pull/767">#767</a> beta 3. Each arm has six seven-point rotated factors, seven signed projected F0 points (three nonzero sign-pair columns plus O), 117,649 labelled tuples, and the same 130,873-point subgroup. Every tuple and subgroup target was independently replayed with separate bit-serial field/group arithmetic, as were the eight unchanged #767 point labels. This is a factor-base support diagnostic, with no solver or log timing.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact projected point support including O, q = 130,873. Energy E = sum of squared tuple multiplicities; N<sup>2</sup>/E is a Cauchy&ndash;Schwarz lower bound on support, not a measured attack yield. All rows have at least 13,224 necessary misses from q &minus; 7<sup>6</sup>. Follow-up requires support at least 68,628 and E/support no worse than beta 3.</caption>
+    <thead><tr><th>Normal beta</th><th>Projected support / q</th><th>Exact misses</th><th>&Delta; vs beta 3</th><th>Tuple energy E</th><th>Effective floor N<sup>2</sup>/E</th><th>Overlap with beta 3</th><th>Fixed #767 label flips</th><th>Follow-up gate</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>3, #767 reference</td><td>62,389 / 130,873</td><td>68,484</td><td>reference</td><td>327,325</td><td>42,286.1</td><td>62,389</td><td>0 / 8</td><td>reference</td><td>unset / unset</td></tr>
+      <tr><td>338435</td><td>66,179 / 130,873</td><td>64,694</td><td>+3,790</td><td>297,425</td><td>46,537.1</td><td>31,457</td><td>5 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+      <tr><td>303097</td><td>66,203 / 130,873</td><td>64,670</td><td>+3,814</td><td>298,357</td><td>46,391.7</td><td>31,579</td><td>5 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+      <tr><td>464276</td><td>59,323 / 130,873</td><td>71,550</td><td>&minus;3,066</td><td>353,429</td><td>39,162.9</td><td>28,253</td><td>4 / 8</td><td>FAIL: support and energy</td><td>unset / unset</td></tr>
+      <tr><td>42605</td><td>64,657 / 130,873</td><td>66,216</td><td>+2,268</td><td>309,229</td><td>44,760.6</td><td>30,981</td><td>4 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The largest gain is 6.11% over beta 3, below the preregistered 10% support threshold. Exact projected-energy-per-supported-target improves on three candidates, yet no candidate passes both conditions. Supported point sets have only 28,253&ndash;31,579 shared targets with beta 3, so a frozen beta-3 planted or negative label can change status under another base. Prioritize other factor-base and solver directions over more toy normal-beta tuning. There is no n = 131 transfer, ECC2K-130 speedup, rho ratio or full-cost S. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/RESULT.md">exact decision and operations</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/PROTOCOL.md">pre-outcome protocol</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/evidence/README.md">raw archive and replay</a>. Archive SHA-256 <code>fe84aef6a2cf7f6f4c950245c9c8e870354fb750666f5482b81f9a997d107140</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-beta-sweep-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">
