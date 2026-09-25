@@ -118,6 +118,9 @@ outside the measured child, as it is in the historical instruction protocol.
 Reissue `run --round PATH` using the **frozen** evaluator to resume. Existing
 receipts are reverified. An interrupted directory without its receipt is retained
 and rejected; use a new round. No automatic retry of failures occurs.
+Measured resumption requires the frozen host identity. Moving an artifact to
+another host permits read-only audit; start a new campaign for measurements there
+so its times cannot be attributed to the previous host.
 The native summary pairs each target's online repetition medians and weights
 curve cells equally. `single_target_online` retains the actual point, canonical
 identities, IC and rho milliseconds and their ratio; incomplete pairs have no

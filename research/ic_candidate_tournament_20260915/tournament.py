@@ -980,6 +980,8 @@ def run_campaign(args):
     with (root/'operation.lock').open('a+') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         c,fixtures,arms=frozen_inputs(root)
+        require(not c.get('scientific_admission') or platform.uname()._asdict() == c['host'],
+                'execution host changed; prepare a new campaign instead of mixing measured environments')
         completed=sum(1 for _ in (root/'runs').glob('**/receipt.json'))
         for stage in STAGES:
             if args.stage!='all' and stage!=args.stage:

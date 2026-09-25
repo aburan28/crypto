@@ -389,6 +389,8 @@ def run(root):
     with (root/'operation.lock').open('a+') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         contract, rows = audit(root, complete=False)
+        require(not contract.get('scientific_admission') or platform.uname()._asdict() == contract['host'],
+                'execution host changed; prepare a new campaign instead of mixing measured environments')
         blocks = [(c, r) for c in contract['cases'] for r in range(contract['repetitions'])]
         rng = random.Random(contract['seed'])
         rng.shuffle(blocks)

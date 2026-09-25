@@ -7,6 +7,8 @@ import tempfile
 import shutil
 import subprocess
 import sys
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from driver_admission import (make_admission, run_record, check_admission, online_table,
                              freeze_admission, distinct_candidates)
@@ -18,6 +20,17 @@ DATA = Path(__file__).parent/'producer/testdata'
 
 
 class DriverAdmissionTests(unittest.TestCase):
+    def test_resumption_cannot_stamp_another_hosts_times_with_frozen_provenance(self):
+        import autolab
+        import tournament
+        contract = dict(scientific_admission=True, host={'node': 'a different measured host'})
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            with patch('autolab.audit', return_value=(contract, [])), self.assertRaises(InvalidEvidence):
+                autolab.run(root)
+            with patch('tournament.frozen_inputs', return_value=(contract, {}, [])), self.assertRaises(InvalidEvidence):
+                tournament.run_campaign(SimpleNamespace(round=root, stage='all'))
+
     def test_transported_process_sum_uses_integer_clocks(self):
         # Actual first Linux A/A control: summing its converted floats changed
         # the summary by one ULP between Python 3.11 and Python 3.12.
