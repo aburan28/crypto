@@ -139,3 +139,18 @@ trails (WALK-CONSTANT.md §6) becomes `2^61.15–61.17` at `2^30`.
 
 Expected class under AGENTS.md §3: **engineering**. The walk, its constant
 and the floor do not move; a self-imposed loss is removed.
+
+## Amendment 1, before any run
+
+Made after checking the rule above against the rare arm and before the first
+measurement. `c32` cuts a trail only if it exceeds `12.05 μ` and starts in
+the first `4 μ` of the horizon: about 0.45 cuts per run, a Poisson count, for
+which a 3-SD z-score flags 1.1% of honest runs. For `c32` the model
+comparison is therefore the exact one-sided tail: a run fails if
+`P(X ≥ cuts)` for `X ~ Poisson(λ)`, `λ` the Monte Carlo mean cut count, is
+below 0.00135, the normal 3-SD tail. The `c30` and `c31` rule, the 0.1%
+bound and everything else stand.
+
+The sizing runs that chose weight 44 and 1024-step launches measured
+throughput and report counts only, on run id 9 with no cap; they are not
+measurements of the cap and are not used.
