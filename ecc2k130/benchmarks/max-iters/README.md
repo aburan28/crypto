@@ -48,7 +48,7 @@ The trail-length law is the one the fleet's interval implies. The even-weight
 tail `θ = Σ_{even k ≤ w} C(131, k) / 2^130` gives `2^-28.409` at the
 campaign's weight 32, where the fleet measured `2^-28.41`
 (`../dp-interval/`), and `1.447744e-4` at weight 44, where the reference arms
-measured `1.446494e-4 ± 0.000017e-4`, 0.09% low and `−0.7` standard errors.
+measured `1.446494e-4 ± 0.0017e-4`, 0.09% low and `−0.7` standard errors.
 
 ## Checks
 
@@ -60,8 +60,9 @@ Every one holds on all twelve runs (`results.json`, `failures: []`):
    2.17 × 10^10 steps of the twelve runs are each assigned to exactly one
    reported trail, cut trail, idle stretch or trail in flight.
 2. No capped arm reports a trail longer than its cap.
-3. **Per seed**, against the reference on the same run id: 700,000-odd seeds
-   reported by both arms have identical length and orbit; of the reference
+3. **Per seed**, against the reference on the same run id: every seed
+   reported by both arms (701,581 under `c30`, 729,784 under `c31`, 730,878
+   under `c32`) has identical length and orbit; of the reference
    trails longer than the cap that the capped arm finished (9,750, 9,692 and
    9,856 under `c30`; 366, 360 and 369 under `c31`; one under `c32`) none was
    reported, and no trail within the cap was cut.
