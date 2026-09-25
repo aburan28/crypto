@@ -54,11 +54,11 @@ per-row witnesses are in the raw archive. Source/archive setup and
 constructor costs are charged in the wrapper and frozen construction receipt.
 Wall times are local-host diagnostics, not matched attack timings.
 
-The next falsifiable gate is to form a **new, independently sampled relation
-corpus** with exact target/factor provenance and charged generation cost,
-then measure modular row rank and target-log recovery using these column
-semantics. Because these n=13 rows occupy at most three columns per arm, their
-success cannot imply a useful n=131 relation matrix. Any n=131 admission
-needs a separately budgeted PDP solver, relation yield, memory bound and rho
-comparison. The separate projected-PDP corpus and solver prerequisites are
-tracked outside this certificate.
+The next falsifiable gate is to compute exact modular-q rank on these frozen
+rows, then test point-only target-log recovery on a separately frozen holdout
+whose labels are hidden until validation. The 17,917 correct row identities
+are **not** 17,917 independent relations; each n=13 arm has only two or three
+canonical columns. Any n=131 admission then needs a compressed-base
+cardinality/rank-cost model, a separately budgeted PDP solver, relation yield,
+memory bound and same-workload rho comparison. The separate projected-PDP
+corpus and solver prerequisites are tracked outside this certificate.
