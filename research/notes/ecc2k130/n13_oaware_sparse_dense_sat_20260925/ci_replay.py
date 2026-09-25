@@ -28,6 +28,7 @@ def freeze():
         "verify_sha256": HERE / "verify.py",
         "ci_replay_sha256": HERE / "ci_replay.py",
         "analyze_sha256": HERE / "analyze.py",
+        "selftest_sha256": HERE / "selftest.py",
         "workflow_sha256": Path(".github/workflows/ecc2k130-oaware-sparse-dense-sat.yml"),
         "dense_export_sha256": verify.DENSE / "export.py",
         "sparse_export_sha256": verify.SPARSE / "export.py",

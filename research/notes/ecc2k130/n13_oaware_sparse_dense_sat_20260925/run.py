@@ -121,6 +121,7 @@ def preflight():
         "verify_sha256": HERE / "verify.py",
         "ci_replay_sha256": HERE / "ci_replay.py",
         "analyze_sha256": HERE / "analyze.py",
+        "selftest_sha256": HERE / "selftest.py",
         "dense_export_sha256": verify.DENSE / "export.py",
         "sparse_export_sha256": verify.SPARSE / "export.py",
         "dense_base_sha256": verify.DENSE_DIR / "base.cnf",
