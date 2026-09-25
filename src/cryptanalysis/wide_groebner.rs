@@ -175,6 +175,57 @@ impl WPoly {
         Self { terms: without }.add(&cofactor.mul(form))
     }
 
+    /// Substitute `forms[v]` (a term list) for every variable `v` of
+    /// `mask` at once.  No form may mention a variable of `mask`.
+    pub fn substitute_all(&self, mask: u128, forms: &[&[Mono]]) -> Self {
+        if self.terms.iter().all(|m| m & mask == 0) {
+            return self.clone();
+        }
+        let mut out: Vec<Mono> = Vec::with_capacity(self.terms.len() * 2);
+        let mut expand: Vec<Mono> = Vec::new();
+        let mut next: Vec<Mono> = Vec::new();
+        for &m in &self.terms {
+            let mut hit = m & mask;
+            if hit == 0 {
+                out.push(m);
+                continue;
+            }
+            expand.clear();
+            expand.push(m & !mask);
+            while hit != 0 {
+                let v = hit.trailing_zeros() as usize;
+                hit &= hit - 1;
+                next.clear();
+                for &a in &expand {
+                    for &b in forms[v] {
+                        next.push(a | b);
+                    }
+                }
+                std::mem::swap(&mut expand, &mut next);
+            }
+            out.extend_from_slice(&expand);
+        }
+        Self::from_monos(out)
+    }
+
+    /// Set the variables of `zeros` to 0 and those of `ones` to 1, in one
+    /// pass: the terms a zero divides drop, the ones are stripped, and
+    /// only then is the result sorted (and coinciding terms cancelled).
+    pub fn assign_constants(&self, zeros: u128, ones: u128) -> Self {
+        let touched = zeros | ones;
+        if self.terms.iter().all(|m| m & touched == 0) {
+            return self.clone();
+        }
+        let kept = self.terms.iter().copied().filter(|m| m & zeros == 0);
+        if self.terms.iter().all(|m| m & ones == 0) {
+            // Filtering keeps the order and adds no repeats.
+            return Self {
+                terms: kept.collect(),
+            };
+        }
+        Self::from_monos(kept.map(|m| m & !ones).collect())
+    }
+
     /// Evaluate at a full assignment (`bits` bit `v` = value of variable `v`).
     pub fn eval(&self, bits: u128) -> bool {
         self.terms.iter().filter(|&&m| m & !bits == 0).count() % 2 == 1
@@ -424,19 +475,31 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
         if eqs.is_empty() {
             return true;
         }
-        // Columns: every monomial, descending degree, then descending
-        // integer (any fixed order within a degree serves), so a reduced
-        // row whose leading column has degree ≤ 1 is linear.
+        // Columns: every monomial, by descending degree (any fixed order
+        // within a degree serves), so a reduced row whose pivot column
+        // has degree ≤ 1 is linear.
         //
-        // Sorted as plain integers to deduplicate, then laid out by degree
-        // with a counting pass: a comparator that recounts bits on every
-        // compare was 40 % of a search.
-        let mut all: Vec<Mono> = eqs.iter().flat_map(|p| p.terms.iter().copied()).collect();
-        all.sort_unstable();
-        all.dedup();
+        // Deduplicated through the index map, then laid out by degree
+        // with a counting pass: no sort of every term of every equation
+        // (sorting was most of a search).
+        let mut index: FxMap<Mono, usize> = FxMap::default();
+        index.reserve(eqs.iter().map(|p| p.terms.len()).max().unwrap_or(0) * 2);
+        let mut all: Vec<Mono> = Vec::new();
+        for p in eqs.iter() {
+            for &m in &p.terms {
+                index.entry(m).or_insert_with(|| {
+                    all.push(m);
+                    0
+                });
+            }
+        }
         if all.len() > MAX_LINEARISATION_COLS {
             return true;
         }
+        // Ascending within a degree, so that a reduced row read in column
+        // order is one ascending run a degree (see `to_poly`): one sort of
+        // the distinct monomials here instead of one of every row there.
+        all.sort_unstable();
         let max_deg = all.iter().map(|m| m.count_ones()).max().unwrap_or(0) as usize;
         let mut start = vec![0usize; max_deg + 2];
         for m in &all {
@@ -446,13 +509,14 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
         for d in 1..start.len() {
             start[d] += start[d - 1];
         }
+        // Where each degree's columns end: a row read in column order is
+        // one ascending run between consecutive ends.
+        let degree_ends: Vec<usize> = start[1..].to_vec();
         let mut cols = vec![0 as Mono; all.len()];
-        let mut index: FxMap<Mono, usize> = FxMap::default();
-        index.reserve(all.len());
-        for &m in all.iter().rev() {
+        for &m in &all {
             let slot = &mut start[max_deg - m.count_ones() as usize];
             cols[*slot] = m;
-            index.insert(m, *slot);
+            *index.get_mut(&m).expect("indexed") = *slot;
             *slot += 1;
         }
         let words = cols.len().div_ceil(64);
@@ -479,35 +543,46 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
             &mut ops,
         );
         let to_poly = |row: &Vec<u64>| {
-            let mut terms: Vec<Mono> = Vec::new();
+            let weight: u32 = row.iter().map(|w| w.count_ones()).sum();
+            let mut terms: Vec<Mono> = Vec::with_capacity(weight as usize);
+            let mut runs: Vec<usize> = Vec::with_capacity(degree_ends.len());
+            let mut d = 0;
             for (w, &word) in row.iter().enumerate() {
                 let mut bits = word;
                 while bits != 0 {
-                    let b = bits.trailing_zeros() as usize;
+                    let c = w * 64 + bits.trailing_zeros() as usize;
                     bits &= bits - 1;
-                    terms.push(cols[w * 64 + b]);
+                    while c >= degree_ends[d] {
+                        runs.push(terms.len());
+                        d += 1;
+                    }
+                    terms.push(cols[c]);
                 }
             }
-            WPoly::from_monos(terms)
+            runs.push(terms.len());
+            WPoly {
+                terms: merge_degree_runs(terms, &runs),
+            }
         };
         let reduced: Vec<WPoly> = matrix[..rank].iter().map(to_poly).collect();
         if reduced.iter().any(WPoly::is_one) {
             return false;
         }
-        // Linear rows: leading (highest) monomial of degree 1.  In the
-        // reduced form each has a distinct leading variable, so they
-        // can be eliminated one after another.
+        // Linear rows: pivot (first, highest-degree) column of degree 1.
+        // The reduced form clears each pivot column from every other
+        // row, so each has a distinct leading variable that no other
+        // row's form mentions.
         let mut linear: Vec<(usize, WPoly)> = Vec::new();
-        for p in &reduced {
-            if p.degree() == 1 {
-                let lead = p
-                    .terms
-                    .iter()
-                    .filter(|m| m.count_ones() == 1)
-                    .max()
-                    .copied()
-                    .expect("degree one");
-                let v = lead.trailing_zeros() as usize;
+        for (row, p) in matrix[..rank].iter().zip(&reduced) {
+            let first = row
+                .iter()
+                .enumerate()
+                .find(|(_, &w)| w != 0)
+                .map(|(w, &word)| w * 64 + word.trailing_zeros() as usize)
+                .expect("nonzero row");
+            let pivot = cols[first];
+            if pivot.count_ones() == 1 {
+                let v = pivot.trailing_zeros() as usize;
                 let form = p.add(&WPoly::var(v)); // v = rest
                 linear.push((v, form));
             }
@@ -532,6 +607,12 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
             }
         }
         *eqs = reduced;
+        // The reduced form clears every pivot column from every other
+        // row, so no linear row's form mentions another's leading
+        // variable: the whole batch substitutes at once, one pass (and
+        // one sort) a polynomial instead of one a variable.
+        let mut batch: Vec<(usize, WPoly)> = Vec::with_capacity(linear.len());
+        let mut mask = 0u128;
         for (v, form) in linear {
             // Earlier substitutions may already mention `v` in `form`'s
             // variables' place; apply them to the form first.
@@ -539,20 +620,82 @@ fn linearise(eqs: &mut Vec<WPoly>, stats: &mut WideStats, subs: &mut Vec<(usize,
             for (u, g) in subs.iter() {
                 f = f.substitute(*u, g);
             }
-            if f.terms.iter().any(|m| m >> v & 1 == 1) {
-                // `v = … + v …` cannot happen for a linear form with `v`
-                // removed; guard anyway.
+            if f.terms.iter().any(|m| m >> v & 1 == 1 || m & mask != 0) {
+                // `v = … + v …`, or a form naming another leading
+                // variable, cannot happen in reduced form; guard anyway
+                // and leave it for the next pass.
                 continue;
             }
-            for p in eqs.iter_mut() {
-                *p = p.substitute(v, &f);
+            if batch
+                .iter()
+                .any(|(_, g)| g.terms.iter().any(|m| m >> v & 1 == 1))
+            {
+                continue;
             }
-            for (_, g) in subs.iter_mut() {
-                *g = g.substitute(v, &f);
-            }
-            subs.push((v, f));
+            mask |= 1u128 << v;
+            batch.push((v, f));
         }
+        let mut forms: Vec<&[Mono]> = vec![&[]; MAX_WIDE_VARS];
+        for (v, f) in &batch {
+            forms[*v] = &f.terms;
+        }
+        for p in eqs.iter_mut() {
+            *p = p.substitute_all(mask, &forms);
+        }
+        for (_, g) in subs.iter_mut() {
+            *g = g.substitute_all(mask, &forms);
+        }
+        subs.extend(batch);
     }
+}
+
+/// Monomials in column order — descending degree, ascending within a
+/// degree, no repeats — as the ascending list a [`WPoly`] keeps.  `runs`
+/// are the per-degree segments' ends in `terms`; they are merged two at
+/// a time (a plain merge each), not sorted.
+fn merge_degree_runs(terms: Vec<Mono>, runs: &[usize]) -> Vec<Mono> {
+    let mut bounds: Vec<(usize, usize)> = Vec::with_capacity(runs.len());
+    let mut lo = 0;
+    for &hi in runs {
+        if hi > lo {
+            bounds.push((lo, hi));
+        }
+        lo = hi;
+    }
+    if bounds.len() <= 1 {
+        return terms;
+    }
+    let mut cur = terms;
+    let mut next: Vec<Mono> = Vec::with_capacity(cur.len());
+    while bounds.len() > 1 {
+        next.clear();
+        let mut merged = Vec::with_capacity(bounds.len().div_ceil(2));
+        for pair in bounds.chunks(2) {
+            let start = next.len();
+            if let [(a0, a1), (b0, b1)] = *pair {
+                let (a, b) = (&cur[a0..a1], &cur[b0..b1]);
+                let (mut i, mut j) = (0, 0);
+                while i < a.len() && j < b.len() {
+                    if a[i] < b[j] {
+                        next.push(a[i]);
+                        i += 1;
+                    } else {
+                        next.push(b[j]);
+                        j += 1;
+                    }
+                }
+                next.extend_from_slice(&a[i..]);
+                next.extend_from_slice(&b[j..]);
+            } else {
+                let (a0, a1) = pair[0];
+                next.extend_from_slice(&cur[a0..a1]);
+            }
+            merged.push((start, next.len()));
+        }
+        std::mem::swap(&mut cur, &mut next);
+        bounds = merged;
+    }
+    cur
 }
 
 fn prolong_degree() -> u32 {
@@ -1077,20 +1220,32 @@ impl Shape<'_> {
 /// linearisation already eliminated as `v = g` keeps that constraint as
 /// the equation `g + value`, rather than dropping it.
 fn assign(f: &Frame, mut fixed: u128, mut values: u128, assignment: &[(usize, bool)]) -> Frame {
-    let mut eqs = f.eqs.clone();
-    let mut subs = f.subs.clone();
+    let (mut zeros, mut ones) = (0u128, 0u128);
+    for &(v, value) in assignment {
+        if value {
+            ones |= 1u128 << v;
+        } else {
+            zeros |= 1u128 << v;
+        }
+    }
+    let mut eqs: Vec<WPoly> = f
+        .eqs
+        .iter()
+        .map(|p| p.assign_constants(zeros, ones))
+        .collect();
+    let mut subs: Vec<(usize, WPoly)> = f
+        .subs
+        .iter()
+        .map(|(u, g)| (*u, g.assign_constants(zeros, ones)))
+        .collect();
     for &(v, value) in assignment {
         let form = if value { WPoly::one() } else { WPoly::zero() };
-        for p in eqs.iter_mut() {
-            *p = p.substitute(v, &form);
-        }
-        for (_, g) in subs.iter_mut() {
-            *g = g.substitute(v, &form);
-        }
         if let Some((_, g)) = subs.iter().find(|(u, _)| *u == v) {
             eqs.push(g.add(&form));
         }
-        subs.push((v, form));
+    }
+    for &(v, value) in assignment {
+        subs.push((v, if value { WPoly::one() } else { WPoly::zero() }));
         fixed |= 1u128 << v;
         if value {
             values |= 1u128 << v;
@@ -1422,7 +1577,59 @@ mod tests {
                     };
                     assert_eq!(p.substitute(v, &c).eval(bits), p.eval(with));
                 }
+                // Several affine forms at once, none naming a substituted
+                // variable.
+                {
+                    let (u, w) = (rng.gen_range(100..110), rng.gen_range(110..120));
+                    let fu = WPoly::from_monos(vec![0, 1u128 << rng.gen_range(0..100)]);
+                    let fw = WPoly::from_monos(vec![1u128 << rng.gen_range(0..100)]);
+                    let mut forms: Vec<&[Mono]> = vec![&[]; MAX_WIDE_VARS];
+                    forms[u] = &fu.terms;
+                    forms[w] = &fw.terms;
+                    let r = WPoly::from_monos(
+                        p.terms
+                            .iter()
+                            .map(|&m| {
+                                m | if m & 1 == 1 { 1u128 << u } else { 0 }
+                                    | if m & 2 == 2 { 1u128 << w } else { 0 }
+                            })
+                            .collect(),
+                    );
+                    let expect = r.substitute(u, &fu).substitute(w, &fw);
+                    assert_eq!(r.substitute_all(1u128 << u | 1u128 << w, &forms), expect);
+                }
+                // Several constants at once.
+                let (zeros, ones) = {
+                    let a: u128 = rng.gen::<u128>() & rng.gen::<u128>();
+                    let z: u128 = rng.gen::<u128>() & rng.gen::<u128>() & !a;
+                    (z, a)
+                };
+                assert_eq!(
+                    p.assign_constants(zeros, ones).eval(bits),
+                    p.eval((bits | ones) & !zeros)
+                );
             }
+        }
+    }
+
+    #[test]
+    fn degree_runs_merge_to_ascending_order() {
+        let mut rng = StdRng::seed_from_u64(9);
+        for _ in 0..200 {
+            let mut monos: Vec<Mono> = (0..rng.gen_range(0..40))
+                .map(|_| {
+                    (0..rng.gen_range(0..4)).fold(0u128, |m, _| m | 1u128 << rng.gen_range(0..128))
+                })
+                .collect();
+            monos.sort_unstable();
+            monos.dedup();
+            let mut column_order = monos.clone();
+            column_order.sort_by_key(|m| (std::cmp::Reverse(m.count_ones()), *m));
+            let mut runs: Vec<usize> = (1..column_order.len())
+                .filter(|&i| column_order[i].count_ones() != column_order[i - 1].count_ones())
+                .collect();
+            runs.push(column_order.len());
+            assert_eq!(merge_degree_runs(column_order, &runs), monos);
         }
     }
 

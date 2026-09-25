@@ -14,7 +14,7 @@ do not create a parallel scoreboard or redefine historical protocols.
 
 ## Begin or resume
 
-Run `python3 research/ic_candidate_tournament_20260915/autolab.py doctor`.
+Run `python3.12 research/ic_candidate_tournament_20260915/autolab.py doctor`.
 Inspect the latest local round's contract, source identity, summary and failures.
 Archived winners must be restored and identified by their candidate's
 `source_directory` and configuration, not assumed to be `round/source`.
@@ -28,7 +28,7 @@ not required by this repository-local runner.
 
 ## Quality and accounting first
 
-Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The optimized producer instrumentation and driver admission migration remain pending in the [goal checkpoint](../../../research/ic_candidate_tournament_20260915/goal_20260924/STATUS.md). Complete those gates before launching a new comparative campaign. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay.
+Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission, public-point input and single-target native interval controls, including independent transport replay. Reusable IC and rho preparation stays outside the online interval; cold costs remain separate. Both existing drivers now require canonical admission and retain success/failure records plus single-target online tables. The [archived reference panel](../../../research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md) has executed; use its audited source/settings selection and preserve the separate cold/online rho references. The [bounded improvement protocol](../../../research/ic_candidate_tournament_20260915/goal_20260924/improvement/PROTOCOL.md) now fixes exact historical point exclusions, qualified reference bindings, 72 fresh confirmation targets and a nominal familywise bootstrap rule. Use its registered runner for this goal, not generic pilot defaults. Exact replay of that historical floating-summary bundle uses Linux/Python 3.12; its documented one-ULP macOS differences do not justify rewriting sealed evidence. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay.
 
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,
@@ -81,6 +81,8 @@ configuration and count a new family/size/resource regime as a separate panel.
 
 Use `tournament.py prepare` for the calibrated instruction tournament and
 `--selection-width` / `--exploration-slots` to freeze its portfolio budget.
+For the bounded goal, inspect workflow history before dispatching `ic-improvement.yml` with `run_round_one=true`. The registered wrapper uses Python 3.12 and invokes the existing prepare/run/verify sequence. A duplicate dispatch or a retry of a measured failure is not a new round; retain partial evidence and investigate it.
+
 Selection locks one challenger; confirmation and replay cannot be used to
 retune it. Preserve final failures. Subsequent tuning requires new held-out
 targets and a new frozen protocol, never a retry until success.

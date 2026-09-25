@@ -71,7 +71,14 @@
 //! Usage:
 //! `cargo run --release --example ecc2k130_walk_constant -- --n 41 --walk sigma --dist ecc2k130 --trials 10000`
 //! (`--walks W`, default 16; `--branches H`, `--seed S`, `--threads K`; one
-//! JSON line on stdout).  `--fixed-mapping` draws the mapping once, from the
+//! JSON line on stdout).  `--rule v2` (the default) is the device's cycle rule
+//! as extended in `WALK-CONSTANT.md` §11; `--rule v1` is the one before it,
+//! which `matrix-v2` ran under.  The `*_predicted` fields are always rule
+//! v1's leading-order counts, so a `v2` row reads as what the extension
+//! removed.  `--merge N` instead runs N merge trials: two walks meet at one
+//! point carrying different pasts, and the tool counts how often the rule
+//! parts them within 16 steps (a lost collision under distinguished
+//! points).  `--fixed-mapping` draws the mapping once, from the
 //! seed, and runs every trial on it: the constant of *one* mapping, which is
 //! what a campaign pays, where the default averages over mappings.  The
 //! `native` σ walk has only one mapping per degree whatever the flag says.
@@ -112,10 +119,71 @@ fn tag(h: usize, k: u32, eps: bool) -> u32 {
     h as u32 | (k << 16) | (u32::from(eps) << 24)
 }
 
-/// `eccTagFruitless`: `t` undoes the last step, or `t` and the last step
-/// undo the two before.  `hist = [t1, t2, t3]`, most recent first.
-fn fruitless(t: u32, hist: &[u32; 3]) -> bool {
-    (t ^ hist[0]) == TAG_EPS || ((t ^ hist[1]) == TAG_EPS && (hist[0] ^ hist[2]) == TAG_EPS)
+/// Which cycle rule the table walk applies (`--rule`): the device's, as
+/// extended in `WALK-CONSTANT.md` §11, or the one before it.
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum Rule {
+    /// Refuse a step that undoes the last one, or that with the last one
+    /// undoes the two before: the rule `matrix-v2` ran under.
+    V1,
+    /// Refuse a step that undoes any of the last four, or that closes a
+    /// τ-relation with the last three: `eccTagFruitless` today.
+    V2,
+}
+
+/// The tag `d` phases on from `t`, same branch and sign, `k` mod `n`.
+fn advance_k(t: u32, d: u32, n: u32) -> u32 {
+    let k = ((t >> 16) & 0xff) + d;
+    let k = if k >= n { k - n } else { k };
+    (t & !(0xff << 16)) | (k << 16)
+}
+
+/// `eccTauPartners`: with `r` the repeated tag, whether `{u, v}` sit at
+/// `(k+1, ε), (k+2, ε)` or at `(k+1, −ε), (k+3, −ε)`.
+fn tau_partners(r: u32, u: u32, v: u32, n: u32) -> bool {
+    let (a1, a2) = (advance_k(r, 1, n), advance_k(r, 2, n));
+    let (b1, b3) = (a1 ^ TAG_EPS, advance_k(r, 3, n) ^ TAG_EPS);
+    (u == a1 && v == a2) || (u == a2 && v == a1) || (u == b1 && v == b3) || (u == b3 && v == b1)
+}
+
+/// `eccTauRelation`: four steps on one branch summing to `O` through
+/// `τ² + τ + 2 = 0` or `τ³ + τ − 2 = 0`.
+fn tau_relation(t: u32, t1: u32, t2: u32, t3: u32, n: u32) -> bool {
+    if ((t ^ t1) | (t ^ t2) | (t ^ t3)) & 0xffff != 0 {
+        return false;
+    }
+    if [t1, t2, t3].iter().any(|&u| (u >> 16) & 0xff >= n) {
+        return false;
+    }
+    if t == t1 {
+        tau_partners(t, t2, t3, n)
+    } else if t == t2 {
+        tau_partners(t, t1, t3, n)
+    } else if t == t3 {
+        tau_partners(t, t1, t2, n)
+    } else if t1 == t2 {
+        tau_partners(t1, t, t3, n)
+    } else if t1 == t3 {
+        tau_partners(t1, t, t2, n)
+    } else if t2 == t3 {
+        tau_partners(t2, t, t1, n)
+    } else {
+        false
+    }
+}
+
+/// `eccTagFruitless` under `rule`.  `hist = [t1, t2, t3, t4]`, most recent
+/// first.
+fn fruitless(rule: Rule, t: u32, hist: &[u32; 4], n: u32) -> bool {
+    match rule {
+        Rule::V1 => {
+            (t ^ hist[0]) == TAG_EPS || ((t ^ hist[1]) == TAG_EPS && (hist[0] ^ hist[2]) == TAG_EPS)
+        }
+        Rule::V2 => {
+            hist.iter().any(|&u| (t ^ u) == TAG_EPS)
+                || tau_relation(t, hist[0], hist[1], hist[2], n)
+        }
+    }
 }
 
 /// Whether steps with these tags return a walk to where it started, for
@@ -219,6 +287,8 @@ struct Setup {
     squaring_rotates_left: bool,
     /// The one mapping every trial uses, under `--fixed-mapping`.
     fixed: Option<Mapping>,
+    /// The table walk's cycle rule.
+    rule: Rule,
 }
 
 /// The part of a mapping a trial draws for itself.
@@ -230,7 +300,7 @@ struct Mapping {
 /// One walk: where it is, its last three tags, and its recent trail.
 struct WalkState {
     p: FastPoint,
-    hist: [u32; 3],
+    hist: [u32; 4],
     recent: [(FastPoint, u32); RECENT],
     len: usize,
 }
@@ -344,6 +414,25 @@ impl Setup {
         }
     }
 
+    /// One table step from `w` on branch `b`: the tag after the cycle rule,
+    /// pushed into the walk's history, and the point it leads to (the walk's
+    /// own point is left for the caller to move).  Also whether the rule
+    /// fired.
+    fn table_step(&self, m: &Mapping, w: &mut WalkState, b: usize) -> (FastPoint, u32, bool) {
+        let (k, eps) = self.frame(&w.p);
+        let raw = tag(b, k, eps);
+        let mut tg = raw;
+        // The device's cycle rule: advance h past a fruitless step.
+        for _ in 0..self.branches {
+            if !fruitless(self.rule, tg, &w.hist, self.n) {
+                break;
+            }
+            tg = tag(((tg & 0xffff) as usize + 1) % self.branches, k, eps);
+        }
+        w.hist = [tg, w.hist[0], w.hist[1], w.hist[2]];
+        (self.curve.add(w.p, self.addend(m, tg)), tg, tg != raw)
+    }
+
     fn mapping(&self, rng: &mut StdRng) -> Mapping {
         let table = match self.walk {
             Walk::Sigma => Vec::new(),
@@ -366,7 +455,7 @@ impl Setup {
             .mul_u64(self.generator, rng.gen_range(1..self.ell));
         WalkState {
             p,
-            hist: [TAG_NONE; 3],
+            hist: [TAG_NONE; 4],
             recent: [(p, TAG_NONE); RECENT],
             len: 0,
         }
@@ -411,19 +500,8 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
             let next = if s.walk == Walk::Sigma {
                 s.curve.add(w.p, s.curve.frobenius_k(w.p, 3 + b as u32))
             } else {
-                let (k, eps) = s.frame(&w.p);
-                let raw = tag(b, k, eps);
-                let mut tg = raw;
-                // The device's cycle rule: advance h past a fruitless step.
-                for _ in 0..s.branches {
-                    if !fruitless(tg, &w.hist) {
-                        break;
-                    }
-                    tg = tag(((tg & 0xffff) as usize + 1) % s.branches, k, eps);
-                }
-                t.cycle_rule += u64::from(tg != raw);
-                w.hist = [tg, w.hist[0], w.hist[1]];
-                let next = s.curve.add(w.p, s.addend(m, tg));
+                let (next, tg, fired) = s.table_step(m, w, b);
+                t.cycle_rule += u64::from(fired);
                 // A return to one of the walk's own recent points whose tags
                 // cancel is a fruitless cycle, not a collision.
                 let slot = w.len % RECENT;
@@ -471,6 +549,66 @@ fn trial(s: &Setup, rng: &mut StdRng, t: &mut Tally) {
     t.trials += 1;
     t.visited += v;
     t.visited_sq += v * v;
+}
+
+/// How often two walks that meet at one point part again.
+#[derive(Default, Clone)]
+struct MergeTally {
+    trials: u64,
+    /// `parted[i]`: pairs whose points first differ after step `i + 1`.
+    parted: [u64; MERGE_STEPS],
+    branch_counts: Vec<u64>,
+}
+
+/// Steps after a merge in which a parting is looked for: the rule reads four
+/// tags back, so after four steps both walks carry the same history.
+const MERGE_STEPS: usize = 16;
+
+/// One merge: two walks, each eight steps into its own trail, are put on the
+/// same point with their own histories -- as when one trail lands on
+/// another -- and stepped together.  If the rule decides differently for
+/// their different pasts they part, and the collision is lost to
+/// distinguished points.
+fn merge_trial(s: &Setup, rng: &mut StdRng, t: &mut MergeTally) {
+    let drawn;
+    let m = match &s.fixed {
+        Some(m) => m,
+        None => {
+            drawn = s.mapping(rng);
+            &drawn
+        }
+    };
+    let (mut a, mut b) = (s.start(rng), s.start(rng));
+    for w in [&mut a, &mut b] {
+        for _ in 0..8 {
+            let key = s.key(&w.p);
+            let br = s.branch(m, &w.p, key);
+            let (next, _, _) = s.table_step(m, w, br);
+            if next.infinity {
+                return;
+            }
+            w.p = next;
+        }
+    }
+    b.p = a.p;
+    for i in 0..MERGE_STEPS {
+        let key = s.key(&a.p);
+        let br = s.branch(m, &a.p, key);
+        t.branch_counts[br] += 1;
+        let (na, _, _) = s.table_step(m, &mut a, br);
+        let (nb, _, _) = s.table_step(m, &mut b, br);
+        if na != nb {
+            t.parted[i] += 1;
+            t.trials += 1;
+            return;
+        }
+        if na.infinity {
+            return;
+        }
+        a.p = na;
+        b.p = nb;
+    }
+    t.trials += 1;
 }
 
 fn main() {
@@ -542,6 +680,11 @@ fn main() {
         });
     }
     let fixed_mapping = args.iter().any(|a| a == "--fixed-mapping");
+    let rule = match get("--rule").as_deref().unwrap_or("v2") {
+        "v1" => Rule::V1,
+        "v2" => Rule::V2,
+        r => panic!("unknown rule {r}"),
+    };
     let mut setup = Setup {
         walk,
         dist,
@@ -555,10 +698,88 @@ fn main() {
         cdf,
         squaring_rotates_left,
         fixed: None,
+        rule,
     };
     if fixed_mapping {
         let mut rng = StdRng::seed_from_u64(splitmix(seed ^ 0x6d61_7070_696e_6721));
         setup.fixed = Some(setup.mapping(&mut rng));
+    }
+
+    let merge: u64 = get("--merge").map_or(0, |v| v.parse().expect("--merge"));
+    if merge > 0 {
+        assert!(
+            walk != Walk::Sigma,
+            "the sigma walk has no history to part on"
+        );
+        let next = AtomicU64::new(0);
+        let total = Mutex::new(MergeTally {
+            branch_counts: vec![0; branches],
+            ..MergeTally::default()
+        });
+        std::thread::scope(|scope| {
+            for tid in 0..threads {
+                let (setup, next, total) = (&setup, &next, &total);
+                scope.spawn(move || {
+                    let mut t = MergeTally {
+                        branch_counts: vec![0; setup.branches],
+                        ..MergeTally::default()
+                    };
+                    let mut rng =
+                        StdRng::seed_from_u64(splitmix(seed.wrapping_mul(1_000_003) + tid as u64));
+                    while next.fetch_add(1, Ordering::Relaxed) < merge {
+                        merge_trial(setup, &mut rng, &mut t);
+                    }
+                    let mut g = total.lock().unwrap();
+                    g.trials += t.trials;
+                    for (x, y) in g.parted.iter_mut().zip(&t.parted) {
+                        *x += y;
+                    }
+                    for (x, y) in g.branch_counts.iter_mut().zip(&t.branch_counts) {
+                        *x += y;
+                    }
+                });
+            }
+        });
+        let t = total.into_inner().unwrap();
+        let steps: u64 = t.branch_counts.iter().sum();
+        let s2: f64 = t
+            .branch_counts
+            .iter()
+            .map(|&c| (c as f64 / steps as f64).powi(2))
+            .sum();
+        let q = s2 / (2.0 * n as f64);
+        let parted: u64 = t.parted.iter().sum();
+        let rate = parted as f64 / t.trials as f64;
+        let se = (rate * (1.0 - rate) / t.trials as f64).sqrt();
+        // Leading order: a parting needs the tag at the meeting point, or one
+        // of the next three, to negate a tag from one walk's past and not the
+        // other's: 2 * (4 + 3 + 2 + 1) q under rule v2, 2 q under v1.
+        let predicted = match rule {
+            Rule::V1 => 2.0 * q,
+            Rule::V2 => 20.0 * q,
+        };
+        let rule_name = format!("{rule:?}").to_lowercase();
+        let dist_name = format!("{dist:?}").to_lowercase();
+        let by_step = t
+            .parted
+            .iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<_>>()
+            .join(",");
+        eprintln!(
+            "n = {n}, table walk (rule {rule_name}), H = {branches}, {dist_name} branches: {} merges, \
+             {parted} parted ({rate:.3e} ± {se:.1e}; predicted {predicted:.3e} from q = Σp²/2n = {q:.3e}); \
+             by step [{by_step}]",
+            t.trials
+        );
+        println!(
+            "{{\"n\":{n},\"walk\":\"table\",\"branches\":{branches},\"dist\":\"{dist_name}\",\"rule\":\"{rule_name}\",\
+             \"seed\":{seed},\"merges\":{},\"parted\":{parted},\"parted_rate\":{rate:.6e},\"parted_se\":{se:.6e},\
+             \"parted_by_step\":[{by_step}],\"sum_p2\":{s2:.6},\"predicted\":{predicted:.6e},\
+             \"emulation\":\"device-rule\"}}",
+            t.trials
+        );
+        return;
     }
 
     let next_trial = AtomicU64::new(0);
@@ -632,9 +853,10 @@ fn main() {
     let (fruitless_rate, relation_rate) = (per_step(&t.fruitless), per_step(&t.relation));
     let (fruitless_json, relation_json) = (by_length(&t.fruitless), by_length(&t.relation));
     let walk_name = format!("{walk:?}").to_lowercase();
+    let rule_name = format!("{rule:?}").to_lowercase();
     let dist_name = format!("{dist:?}").to_lowercase();
     eprintln!(
-        "n = {n}, {walk_name} walk, H = {branches}, {dist_name} branches{}, W = {walks}: {} trials, \
+        "n = {n}, {walk_name} walk (rule {rule_name}), H = {branches}, {dist_name} branches{}, W = {walks}: {} trials, \
          mean {mean:.1} classes visited (random mapping {expected:.1}), \
          c = {c:.4} ± {c_se:.4}; Σp² = {s2:.5}, model {model:.4}, c / model = {:.4}; \
          cycle rule {} times in {steps} steps; fruitless: pairwise {fruitless_rate:.3e}/step \
@@ -658,7 +880,7 @@ fn main() {
          \"fruitless_predicted\":{pairwise_predicted:.6e},\"relation\":{{{relation_json}}},\
          \"relation_per_step\":{relation_rate:.6e},\"relation_predicted\":{relation_predicted:.6e},\
          \"short_returns\":{},\"fixed_mapping\":{fixed_mapping},\
-         \"emulation\":\"device-rule\"}}",
+         \"emulation\":\"device-rule\",\"rule\":\"{rule_name}\"}}",
         t.trials,
         t.even as f64 / t.weighed.max(1) as f64,
         t.cycle_rule,

@@ -23,11 +23,15 @@ import threading
 
 from oracle import Curve, InvalidEvidence, require, verify
 from portfolio import retain
+import campaign_rules as bounded
+import target_history as history
+from driver_admission import (EVALUATOR, check_admission, freeze_admission, producer_metadata, run_record, online_table, distinct_candidates)
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 UNIT = 'valgrind-3.22-amd64-Ir'
 STAGES = ['aa', 'smoke', 'development', 'selection', 'confirmation', 'replay']
+QUALIFICATION_STAGES = STAGES[:3]
 BASE_CONFIG = {'solver':'pair_table','linear_algebra':'sparse','batch_trials':64,
                'max_trials':4096,'summands':3}
 PHASES = {'startup_and_input','curve_and_targets','factor_base_and_tables',
@@ -164,7 +168,7 @@ def execute(command, job, directory, timeout, memory, cpu):
         timer.start()
         inherited = os.sched_getaffinity(0)
         os.sched_setaffinity(0,{cpu})
-        start = time.monotonic()
+        start_ns = time.monotonic_ns()
         try:
             process = subprocess.Popen(command,stdin=subprocess.PIPE,stdout=stdout,stderr=stderr,
                 env=child_env(),start_new_session=True)
@@ -180,17 +184,32 @@ def execute(command, job, directory, timeout, memory, cpu):
         try:
             # Blocking reap avoids communicate(timeout)'s exponential wait polling,
             # which quantized previous short native timings. Charge full process wall.
-            process.communicate(payload)
+            # stdout/stderr already go to files, so no pipe-draining loop is
+            # needed. Reap this exact child with wait4 to retain its RSS peak;
+            # RUSAGE_CHILDREN would mix peaks from earlier jobs.
+            try:
+                process.stdin.write(payload)
+            except BrokenPipeError:
+                pass
+            finally:
+                try:
+                    process.stdin.close()
+                except BrokenPipeError:
+                    pass
+            _, wait_status, usage = os.wait4(process.pid, 0)
+            process.returncode = os.waitstatus_to_exitcode(wait_status)
         finally:
-            wall = time.monotonic()-start
+            wall_ns = time.monotonic_ns()-start_ns
             timer.cancel()
             timer.join()
         if expired.is_set(): status = 'TIMEOUT'
-    return {'exit_code':process.returncode,'process_wall_seconds':wall,
+    return {'exit_code':process.returncode,'process_wall_seconds':wall_ns/1_000_000_000,
+            'process_wall_ns':wall_ns, 'peak_rss_bytes':usage.ru_maxrss*1024,
             'process_status':status,'command':command,'memory_cap_bytes':memory,'cpu':cpu,'spawn':SPAWN}
 
 
-def parse_profiles(directory, *, compressed=False):
+def parse_profiles(directory, *, compressed=False, phase_schema=1):
+    require(phase_schema in (1, 2, 3), 'unknown phase schema')
     pattern = 'callgrind.out*.gz' if compressed else 'callgrind.out*'
     paths = sorted(Path(directory).glob(pattern))
     require(bool(paths),'missing instruction profiles')
@@ -213,12 +232,24 @@ def parse_profiles(directory, *, compressed=False):
         require(total >= 0 and int(one('totals:'))==total,'invalid profile total')
         trigger = one('desc: Trigger:')
         if trigger == 'Program termination':
-            phase = 'reporting_and_cleanup'
+            phase = 'reporting_and_cleanup' if phase_schema == 1 else 'setup'
             terminated += 1
         else:
             require(trigger.startswith('Client Request: '),'unknown profiling boundary')
             phase = trigger.removeprefix('Client Request: ')
-        require(phase in PHASES,'unknown cost phase')
+            if phase_schema in (2, 3):
+                require(phase.startswith('ic_') or phase == 'reference_solve',
+                        'legacy interval in scientific profile')
+                phase = phase.removeprefix('ic_')
+        if phase_schema == 1:
+            require(phase in PHASES,'unknown cost phase')
+        else:
+            allowed = {'setup', 'factor_base', 'precompute', 'queries', 'pdp',
+                'relation_check', 'matrix_build', 'relation_la', 'target_descent',
+                'recovery_check', 'reference_solve'}
+            if phase_schema == 3:
+                allowed |= {'target_query', 'target_pdp', 'target_relation_check'}
+            require(phase in allowed, 'unknown scientific cost phase')
         phases[phase] = phases.get(phase,0)+total
     require(terminated==1,'missing or duplicate final interval')
     stderr = (Path(directory)/'stderr.txt').read_text()
@@ -235,7 +266,15 @@ def frozen_inputs(round_dir):
         require(digest(round_dir/relative)==expected,'changed pinned artifact '+relative)
     for name, expected in c['evaluator_sha256'].items():
         require(digest(HERE/name)==expected,'changed evaluator or checker: '+name)
-    return c, read(round_dir/'fixtures.json'), read(round_dir/'candidates.json')
+    fixtures, arms = read(round_dir/'fixtures.json'), read(round_dir/'candidates.json')
+    if c.get('purpose') == bounded.PURPOSE:
+        bounded.validate_contract(c)
+        require(c['reference_qualification'] == bounded.qualified_binding(
+            read(round_dir/'qualified-references.json'), arms[0], c['reference_arms']),
+            'changed accepted reference binding')
+        require(history.validate_fresh(fixtures, read(round_dir/'target-history.json')) == c['fresh_target_count'],
+                'changed fresh target census')
+    return c, fixtures, arms
 
 
 def built_worker(build_dir):
@@ -247,7 +286,7 @@ def built_worker(build_dir):
     return found[0]
 
 
-def snapshot_build(source,destination):
+def snapshot_build(source,destination, *, scientific=False):
     snap = destination/'source'
     snap.mkdir()
     # A cargo config inside the source root is part of the snapshot and its seal:
@@ -271,10 +310,14 @@ def snapshot_build(source,destination):
     shutil.copy2(source/'examples/ic_tournament_worker.rs',snap/'examples/ic_tournament_worker.rs')
     manifest = {str(p.relative_to(snap)):digest(p) for p in sorted(snap.rglob('*')) if p.is_file()}
     write(destination/'source-manifest.json',manifest,exclusive=True)
+    if scientific:
+        metadata = producer_metadata(source, manifest, subprocess.check_output(['rustc', '--version'], text=True).strip())
+        write(destination/'producer.json', metadata, exclusive=True)
+        write(destination/'preparation.json', metadata['preparation'], exclusive=True)
     with (destination/'build.log').open('w') as log:
         subprocess.run(['cargo','build','--release','--offline','--locked','--jobs','2',
             '--example','ic_tournament_worker','--target-dir',str(destination/'build')],
-            cwd=snap,env=child_env(),stdout=log,stderr=subprocess.STDOUT,check=True)
+            cwd=snap,env=dict(child_env(), IC_SOURCE_MANIFEST_SHA256=objhash(manifest)),stdout=log,stderr=subprocess.STDOUT,check=True)
     binary = destination/'worker'
     shutil.copy2(built_worker(destination/'build'),binary)
     return binary, manifest
@@ -282,26 +325,64 @@ def snapshot_build(source,destination):
 
 def prepare(args):
     out = args.out.resolve()
+    require(args.targets == 1, 'scientific admission requires a single public target')
+    require(args.candidates is not None, 'supply an explicit registry of admitted optimized candidates')
+    if getattr(args, 'attempt_number', 0):
+        bounded.validate_preparation(args)
     require(platform.machine()=='x86_64','instruction protocol currently supports amd64 only')
     require(shutil.which('valgrind') is not None,'Valgrind required')
     version = subprocess.check_output(['valgrind','--version'],text=True).strip()
     require(version=='valgrind-3.22.0','version requires a new calibrated protocol')
+    if getattr(args, 'attempt_number', 0):
+        bounded.validate_environment(system=platform.system(), machine=platform.machine(),
+            compiler=subprocess.check_output(['rustc','--version'],text=True).strip(), profiler=version)
     out.mkdir(parents=True,exist_ok=False)
     evaluator = out/'evaluator'
     evaluator.mkdir()
-    for name in ('tournament.py','oracle.py','portfolio.py'):
+    for name in EVALUATOR:
+        (evaluator/name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(HERE/name,evaluator/name)
+    qualification = getattr(args, 'qualification', False)
+    attempt = getattr(args, 'attempt_number', 0)
+    bounded_run = attempt != 0
+    require(not (qualification and bounded_run), 'qualification is not an improvement round')
+    prior_rounds = []
+    excluded = None
+    if bounded_run:
+        require(1 <= attempt <= 3 and args.seed == 2026092550 + attempt, 'invalid bounded round/seed')
+        require(args.qualified_report and args.target_history and args.rho_source_root and args.rho_config,
+                'bounded round needs qualified evidence, target history and the cold rho reference')
+        require(len(args.prior_round) == attempt - 1, 'every preceding round must be retained')
+        require(digest(args.target_history) == bounded.HISTORY_SHA256, 'changed initial target exclusions')
+        parent_history = read(args.target_history)
+        for number, previous in enumerate(args.prior_round, 1):
+            previous = previous.resolve()
+            # Run the retained evaluator, not this round's possibly newer one.
+            subprocess.run([sys.executable, str(previous/'evaluator/tournament.py'),
+                            'verify', '--round', str(previous)], check=True)
+            previous_contract, previous_decision = read(previous/'contract.json'), read(previous/'decision.json')
+            bounded.validate_contract(previous_contract)
+            require(previous_contract['attempt_number'] == number, 'missing or reordered prior attempt')
+            require(previous_contract['prior_rounds'] == prior_rounds, 'prior campaign chain differs')
+            require(previous_decision['status'] != 'promoted', 'campaign already has a qualifying winner')
+            prior_rounds.append(dict(attempt_number=number, contract_sha256=digest(previous/'contract.json'),
+                                     decision_sha256=digest(previous/'decision.json')))
+        excluded = history.extend(parent_history, [p.resolve() for p in args.prior_round])
+        write(out/'target-history.json', excluded, exclusive=True)
+        write(out/'qualified-references.json', read(args.qualified_report), exclusive=True)
+    require(not qualification or not (args.rho_source_root or args.rho_config),
+            'qualification measures rho from every IC source; separate rho overrides are not used')
     source = args.source_root.resolve()
-    binary, manifest = snapshot_build(source,out)
+    binary, manifest = snapshot_build(source,out,scientific=True)
     arms = read(args.candidates) if args.candidates else candidates()
     require(isinstance(arms,list) and 2 <= len(arms) <= 16,'candidate count must be 2..16')
     require(arms[0]['id']=='incumbent','first candidate must be incumbent')
     ids, hashes = set(),set()
-    built_sources = {}
+    built_sources = {source:(out,binary,manifest)}
     for arm in arms:
         name = arm['id']
         require(re.fullmatch(r'[a-z][a-z0-9_-]{0,31}',name) is not None and name not in ids,'invalid candidate id')
-        require(name not in {'rho','aa_control'},'reserved candidate id')
+        require(name not in {'rho','aa_control'} and not name.startswith('rho_'),'reserved candidate id')
         if arm.get('source_root'):
             require(name!='incumbent','use --source-root for the incumbent')
             candidate_source=Path(arm['source_root']).resolve()
@@ -310,7 +391,7 @@ def prepare(args):
             else:
                 destination=out/'source_candidates'/name
                 destination.mkdir(parents=True)
-                arm_binary,arm_manifest=snapshot_build(candidate_source,destination)
+                arm_binary,arm_manifest=snapshot_build(candidate_source,destination,scientific=True)
                 built_sources[candidate_source]=(destination,arm_binary,arm_manifest)
             arm['binary_relative']=str(arm_binary.relative_to(out))
             arm['source_directory']=str((destination/'source').relative_to(out))
@@ -334,7 +415,7 @@ def prepare(args):
     if args.rho_source_root:
         destination=out/'rho_reference'
         destination.mkdir()
-        rho_binary,rho_manifest=snapshot_build(args.rho_source_root.resolve(),destination)
+        rho_binary,rho_manifest=snapshot_build(args.rho_source_root.resolve(),destination,scientific=True)
         rho_reference.update(binary_relative=str(rho_binary.relative_to(out)),
             source_directory=str((destination/'source').relative_to(out)),
             source_manifest_relative=str((destination/'source-manifest.json').relative_to(out)),
@@ -344,6 +425,16 @@ def prepare(args):
         require(isinstance(rho_reference['config'],dict) and 'summands' in rho_reference['config'],
                 'rho config must be a complete worker configuration')
     rho_reference['configuration_sha256']=objhash(rho_reference['config'])
+    references = qualification_references(arms, args.qualification_widths) if qualification else [rho_reference]
+    reference_binding = None
+    if bounded_run:
+        online_reference = synthetic_arm('rho_online', arms[0])
+        online_reference['kind'] = 'rho-reference'
+        online_reference['config'] = dict(arms[0]['config'], rho_parallel_walks=4)
+        online_reference['configuration_sha256'] = objhash(online_reference['config'])
+        references.append(online_reference)
+        reference_binding = bounded.qualified_binding(read(out/'qualified-references.json'), arms[0], references)
+    stages = QUALIFICATION_STAGES if qualification else STAGES
     cpus = sorted(os.sched_getaffinity(0))
     cpu = args.cpu if args.cpu is not None else cpus[-1]
     require(cpu in cpus,'CPU outside permitted affinity')
@@ -385,9 +476,9 @@ def prepare(args):
     limits = {'timeout_seconds':args.timeout,'memory_bytes':8*1024**3,'cpu':cpu,
               'worker_threads':1,'max_profiled_jobs':args.max_processes}
     fixtures = {}
-    used_targets = {}
+    used_targets = history.history_sets(excluded) if bounded_run else {}
     rng = random.Random(args.seed)
-    for stage in STAGES:
+    for stage in stages:
         stage_cells = cells+holdout if stage in ('confirmation','replay') else cells
         count = profile.get(stage,1)
         if stage=='replay':
@@ -401,20 +492,27 @@ def prepare(args):
                     'job':{'mode':'fixture','degree':degree,'curve_a':a,
                            'target_seeds':[],'algorithm_seed':rng.getrandbits(64),
                            'factor_base':{'kind':'subgroup_orbits','seed':43,'points':6*degree},
-                           'config':BASE_CONFIG}}
-                used = used_targets.setdefault((degree,a),set())
-                for attempt in range(1000):
+                           'config':arms[0]['config']}}
+                used = None if bounded_run else used_targets.setdefault((degree,a),set())
+                for fixture_attempt in range(1000):
                     case['job']['target_seeds']=[rng.getrandbits(64) for _ in range(args.targets)]
-                    raw = subprocess.run([str(binary)],input=json.dumps(case['job']),text=True,
-                        capture_output=True,env=child_env(),timeout=args.timeout,check=True)
-                    fixture = json.loads(raw.stdout)['fixture']
+                    directory=out/'fixture_generation'/stage/case['id']/f'attempt-{fixture_attempt}'
+                    process=execute([str(binary)],case['job'],directory,args.timeout,limits['memory_bytes'],cpu)
+                    write(directory/'job.json',case['job'],exclusive=True)
+                    write(directory/'process.json',process,exclusive=True)
+                    require(process['exit_code']==0 and process['process_status']=='EXITED',
+                            'fixture generation failed; raw preparation evidence retained')
+                    fixture = read(directory/'stdout.json')['fixture']
                     curve = Curve(fixture)
+                    if bounded_run:
+                        used = used_targets.setdefault(history.key_for(fixture), set())
                     require(curve.r-1-len(used)>=args.targets,'too few unused public targets for independent confirmation')
                     if reserve_targets(fixture,used):
                         case['fixture']=fixture
                         break
                 else:
                     raise InvalidEvidence('could not sample distinct public targets within preparation budget')
+                case['job']['public_targets'] = case['fixture']['targets']
                 case['fixture_sha256'] = objhash(case['fixture'])
                 cases.append(case)
         fixtures[stage] = cases
@@ -429,17 +527,46 @@ def prepare(args):
         'paired_aa_gate':'same executable/config; both complete, no >=20% promotion, each cell within 5%'},exclusive=True)
     allocation = {f'n{n}a{a}':extra.get(f'n{n}a{a}',profile['confirmation']) for n,a in cells+holdout}
     confirmation_cases = sum(allocation.values())
-    c = {'schema_version':1,'profile':args.profile,'seed':args.seed,'created_unix':time.time(),
+    resources = {k: (str(v) if k=='timeout_seconds' else v) for k,v in limits.items() if k!='max_profiled_jobs'}
+    all_admission_arms = arms+[synthetic_arm('aa_control', arms[0])]+references
+    admissions = {}
+    for stage, stage_cases in fixtures.items():
+        for case in stage_cases:
+            admitted_arms=[]
+            # Admission is independent of selection; predeclare every possible arm.
+            for arm in all_admission_arms:
+                if stage=='aa' and arm['id'] not in ('incumbent', 'aa_control'):
+                    continue
+                if stage!='aa' and arm['id']=='aa_control':
+                    continue
+                relative = str(Path('admissions')/stage/case['id']/arm['id'])
+                job = dict(copy.deepcopy(case['job']), mode='rho' if is_rho(arm) else 'ic', config=arm['config'])
+                destination = (out/arm['source_manifest_relative']).parent
+                admitted = freeze_admission(out/relative, binary=out/arm['binary_relative'], job=job,
+                    fixture=case['fixture'], manifest=read(out/arm['source_manifest_relative']),
+                    metadata=read(destination/'producer.json'), resources=resources,
+                    worker_sha256=digest(out/arm['binary_relative']), execute=lambda binary, job, directory:
+                        execute([str(binary)],job,directory,limits['timeout_seconds'],limits['memory_bytes'],limits['cpu']))
+                admissions[relative] = objhash(admitted)
+                admitted_arms.append((arm['id'],admitted))
+            distinct_candidates(admitted_arms)
+    c = {'purpose':bounded.PURPOSE if bounded_run else 'reference-qualification' if qualification else 'improvement',
+        'stages':list(stages), 'reference_arms':references,
+        'schema_version':2, 'scientific_admission':True, 'reference_qualification':reference_binding, 'admissions':admissions, 'resources':resources,
+        'run_number_base':int.from_bytes(os.urandom(16),'big') << 16,
+        'run_aliases':[a['id'] for a in all_admission_arms],'profile':args.profile,'seed':args.seed,'created_unix':time.time(),
         'cells':[f'n{n}a{a}' for n,a in cells],'holdout_cells':[f'n{n}a{a}' for n,a in holdout],
-        'confirmation_cases':confirmation_cases,
-        'confirmation_cases_per_cell':allocation,
-        'confirmation_allocation':('flat' if not extra else
+        'confirmation_cases':0 if qualification else confirmation_cases,
+        'confirmation_cases_per_cell':{} if qualification else allocation,
+        'confirmation_allocation':('not_applicable' if qualification else 'flat' if not extra else
             'per-cell; raised at the cells whose measured spread a flat count cannot resolve, '
             'never lowered, from frozen prior rounds only; estimator and gate unchanged'),
         'unit':UNIT,'evidence_scope':'bounded public-hash ECDLP configuration tournament',
         'metric_class':'implementation_instruction_cost','family_wide_or_scaling_claim':False,
-        'equivalent_suite_reason':'Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; the final suite has '+str(confirmation_cases)+' inputs.',
-        'curve_diversity_limit':'One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.',
+        'equivalent_suite_reason':('Point-base collector/rank/descent API, not WDSat ANF/conflict protocol; independent point and scalar-field certificates. '+
+            ('Development reference qualification only; no final suite generated.' if qualification else
+             'The final suite has '+str(confirmation_cases)+' inputs.')),
+        'curve_diversity_limit':'Only the declared Koblitz curve/subgroup cells; no broad family or scaling claim.',
         'limits':limits,'repetitions':3,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
         'selection_width':args.selection_width,'exploration_slots':args.exploration_slots,
         'rho_reference':rho_reference,
@@ -451,11 +578,31 @@ def prepare(args):
         'native_timing_protocol':'blocking process reap with independent watchdog; complete cold process wall; '+SPAWN,
         'ci_level':0.95,'bootstrap_draws':2000,'host':platform.uname()._asdict(),
         'profiler_version':version,'compiler':subprocess.check_output(['rustc','--version'],text=True).strip(),
-        'evaluator_sha256':{n:digest(evaluator/n) for n in ('tournament.py','oracle.py','portfolio.py')},
+        'evaluator_sha256':{n:digest(evaluator/n) for n in EVALUATOR},
         'source_manifest_sha256':objhash(manifest),
-        'target_count':args.targets,'workload':'complete cold batch with all setup charged once and every target verified','native_timings':'paired native reruns retained; no runtime claim from profiled elapsed time',
-        'target_uniqueness':'Distinct public points within each curve across A/A, smoke, development, selection and confirmation; replay intentionally repeats confirmation.',
-        'pinned_files':{n:digest(out/n) for n in set(['worker','source-manifest.json','candidates.json','fixtures.json','calibration.json']+[a['binary_relative'] for a in arms+[rho_reference]]+[a['source_manifest_relative'] for a in arms+[rho_reference]])}}
+        'target_count':args.targets,'workload':'one supplied public target; primary native online interval after reusable preparation through scalar replay; supplementary complete cold process','native_timings':'paired native reruns retained; no runtime claim from profiled elapsed time',
+        'target_uniqueness':'Distinct public points within each curve across generated stages; replay, when present, intentionally repeats confirmation.',
+        'pinned_files':{n:digest(out/n) for n in set(['worker','source-manifest.json','candidates.json','fixtures.json','calibration.json']+[a['binary_relative'] for a in arms+references]+[a['source_manifest_relative'] for a in arms+references])}}
+    c['pinned_files'].update({str(p.relative_to(out)):digest(p) for name in ('admissions','fixture_generation')
+        for p in (out/name).rglob('*') if p.is_file()})
+    for arm in all_admission_arms:
+        directory=(out/arm['source_manifest_relative']).parent
+        for name in ('producer.json','preparation.json','build.log'):
+            path=directory/name
+            c['pinned_files'][str(path.relative_to(out))]=digest(path)
+    if qualification:
+        protocol=HERE/'goal_20260924/reference-qualification/PROTOCOL.md'
+        shutil.copy2(protocol,out/'qualification-protocol.md')
+        c['pinned_files']['qualification-protocol.md']=digest(out/'qualification-protocol.md')
+    if bounded_run:
+        protocol = HERE/'goal_20260924/improvement/PROTOCOL.md'
+        shutil.copy2(protocol, out/'improvement-protocol.md')
+        c.update(attempt_number=attempt, familywise_rule=bounded.RULE, prior_rounds=prior_rounds,
+                 fresh_target_count=history.validate_fresh(fixtures, excluded),
+                 target_uniqueness='Exact canonical curve ID plus public point; all retained prior campaign points excluded. Replay repeats confirmation.')
+        for name in ('target-history.json', 'qualified-references.json', 'improvement-protocol.md'):
+            c['pinned_files'][name] = digest(out/name)
+        bounded.validate_contract(c)
     write(out/'contract.json',c,exclusive=True)
     write(out/'seal.json',{'contract_sha256':objhash(c)},exclusive=True)
     print(json.dumps({'status':'prepared','round':str(out),'command':f'python3 {evaluator / "tournament.py"} run --round {out}'}))
@@ -526,12 +673,53 @@ def verify_receipt(directory, c, case, arm):
         report = read(directory/'profile/stdout.json')
         proof = verify(report,case['fixture'],expected_mode=r['mode'],summands=arm['config']['summands'])
         require(proof==r['certificate'],'certificate summary changed')
-        costs = parse_profiles(directory/'profile',compressed=True)
+        costs = parse_profiles(directory/'profile',compressed=True,phase_schema=3 if c.get('scientific_admission') else 1)
         require(costs==r['phase_costs'] and sum(costs.values())==r['total_operations'],'changed cost summary')
         native = read(directory/'native/stdout.json')
         native_proof = verify(native,case['fixture'],expected_mode=r['mode'],summands=arm['config']['summands'])
         require(native_proof['solutions']==proof['solutions'],'native/profile mismatch')
+    if c.get('scientific_admission'):
+        require(r['status'] in ('VERIFIED','TIMEOUT','OOM','INVALID_OR_INCOMPLETE'), 'unknown trial outcome')
+        if r['status']=='VERIFIED':
+            for key in ('profile_process','native_process'):
+                process=r[key]
+                require(process['process_status']=='EXITED' and process['exit_code']==0, 'failed process marked verified')
+                require(process['memory_cap_bytes']==c['limits']['memory_bytes'] and process['cpu']==c['limits']['cpu'], 'changed measured resources')
+                require(type(process['process_wall_ns']) is int and process['process_wall_ns']>0 and
+                    process['process_wall_seconds']==process['process_wall_ns']/1e9, 'changed process clock units')
+        else:
+            require(all(r[k] is None for k in ('certificate','phase_costs','total_operations')), 'failed trial has verified costs')
+        root = directory.parents[4]
+        require(read(directory/'profile/process.json') == r['profile_process'], 'changed profile process record')
+        if 'native_process' in r:
+            require(read(directory/'native/process.json') == r['native_process'], 'changed native process record')
+        require(set(r['artifacts']) == {str(p.relative_to(directory)) for p in directory.rglob('*')
+                    if p.is_file() and p.name!='receipt.json'}, 'missing trial artifacts')
+        record = scientific_trial(root, c, r, case, arm, directory)
+        require(record == read(directory/'run.json') == r['measurement'], 'changed scientific run record')
     return r
+
+
+def scientific_trial(root, c, row, case, arm, directory):
+    stage = row['stage']
+    relative = str(Path('admissions')/stage/case['id']/arm['id'])
+    admitted = read(root/relative/'admission.json')
+    require(objhash(admitted) == c['admissions'][relative], 'changed admission receipt')
+    job = dict(copy.deepcopy(case['job']), mode='rho' if is_rho(arm) else 'ic', config=arm['config'])
+    require(read(directory/'job.json') == job, 'changed executed job')
+    manifest_path=root/arm['source_manifest_relative']
+    check_admission(admitted, job=job, fixture=case['fixture'], manifest=read(manifest_path),
+        metadata=read(manifest_path.parent/'producer.json'), resources=c['resources'],
+        worker_sha256=digest(root/arm['binary_relative']))
+    complete=row['status']=='VERIFIED'
+    return run_record(admitted, number=c['run_number_base']+(STAGES.index(stage)*len(c['run_aliases'])+
+        c['run_aliases'].index(arm['id']))*c['repetitions']+row['repetition'],
+        host_id=objhash(c['host']), status='complete' if complete else
+            {'TIMEOUT':'timeout','OOM':'oom'}.get(row['status'],'error'),
+        native=read(directory/'native/stdout.json') if complete else None,
+        profile=read(directory/'profile/stdout.json') if complete else None,
+        costs=row['phase_costs'] if complete else None,
+        process_wall_ns=row.get('native_process',{}).get('process_wall_ns'))
 
 
 def run_trial(root, c, stage, case, arm, repetition):
@@ -541,7 +729,7 @@ def run_trial(root, c, stage, case, arm, repetition):
     require(not directory.exists(),'interrupted trial retained; start a new campaign rather than overwrite it')
     directory.mkdir(parents=True)
     job = copy.deepcopy(case['job'])
-    job.update(mode='rho' if arm['id']=='rho' else 'ic',config=arm['config'])
+    job.update(mode='rho' if is_rho(arm) else 'ic',config=arm['config'])
     write(directory/'job.json',job,exclusive=True)
     binary=root/arm.get('binary_relative','worker')
     command = ['valgrind','--tool=callgrind','--cache-sim=no','--branch-sim=no',
@@ -549,7 +737,9 @@ def run_trial(root, c, stage, case, arm, repetition):
         '--callgrind-out-file='+str(directory/'profile/callgrind.out'),str(binary)]
     lim = c['limits']
     run = execute(command,job,directory/'profile',lim['timeout_seconds'],lim['memory_bytes'],lim['cpu'])
-    r = {'schema_version':1,'stage':stage,'arm':arm['id'],'case':case['id'],'cell':case['cell'],
+    if c.get('scientific_admission'):
+        write(directory/'profile/process.json',run,exclusive=True)
+    r = {'schema_version':2 if c.get('scientific_admission') else 1,'stage':stage,'arm':arm['id'],'case':case['id'],'cell':case['cell'],
          'case_sha256':objhash(case),'arm_sha256':objhash(arm),'repetition':repetition,
          'unit':c['unit'],'mode':job['mode'],'status':'ERROR','profile_process':run,
          'total_operations':None,'phase_costs':None,'certificate':None}
@@ -558,12 +748,15 @@ def run_trial(root, c, stage, case, arm, repetition):
         require(run['exit_code']==0,'worker failed or incomplete')
         report = read(directory/'profile/stdout.json')
         proof = verify(report,case['fixture'],expected_mode=job['mode'],summands=job['config']['summands'])
-        costs = parse_profiles(directory/'profile')
+        costs = parse_profiles(directory/'profile',phase_schema=3 if c.get('scientific_admission') else 1)
         expected = {'startup_and_input','curve_and_targets','final_verification','reporting_and_cleanup'}
         expected |= {'rho_solve'} if job['mode']=='rho' else PHASES-{'rho_solve'}
-        require(set(costs)==expected,'missing exclusive phases')
+        if not c.get('scientific_admission'):
+            require(set(costs)==expected,'missing exclusive phases')
         native = execute([str(binary)],job,directory/'native',lim['timeout_seconds'],lim['memory_bytes'],lim['cpu'])
         r['native_process'] = native
+        if c.get('scientific_admission'):
+            write(directory/'native/process.json',native,exclusive=True)
         require(native['exit_code']==0 and native['process_status']=='EXITED','native worker failed')
         nproof = verify(read(directory/'native/stdout.json'),case['fixture'],expected_mode=job['mode'],summands=job['config']['summands'])
         require(nproof['solutions']==proof['solutions'],'native/profile answers differ')
@@ -572,14 +765,23 @@ def run_trial(root, c, stage, case, arm, repetition):
                  normalized_S=total/math.sqrt(int(case['fixture']['subgroup_order'])),
                  floor_operations=proof['rank'],
                  ratio_to_floor=total/proof['rank'] if proof['rank'] else None)
+        if c.get('scientific_admission'):
+            r['measurement']=scientific_trial(root,c,r,case,arm,directory)
+            require(r['measurement']['total_operations']==total, 'scientific whole-cost mismatch')
     except (InvalidEvidence,ValueError,KeyError,TypeError) as exc:
-        r['reason'] = str(exc)
-        if run['process_status']=='TIMEOUT':
+        r.update(reason=str(exc), total_operations=None, phase_costs=None, certificate=None)
+        for key in ('normalized_S','floor_operations','ratio_to_floor','measurement'):
+            r.pop(key,None)
+        if any(p.get('process_status')=='TIMEOUT' for p in (run,r.get('native_process',{}))):
             r['status']='TIMEOUT'
-        elif 'memory allocation' in (directory/'profile/stderr.txt').read_text():
+        elif any('memory allocation' in p.read_text() for p in directory.glob('*/stderr.txt')):
             r['status']='OOM'
         else:
             r['status']='INVALID_OR_INCOMPLETE'
+    if c.get('scientific_admission'):
+        if r['status']!='VERIFIED':
+            r['measurement']=scientific_trial(root,c,r,case,arm,directory)
+        write(directory/'run.json',r['measurement'],exclusive=True)
     for path in sorted((directory/'profile').glob('callgrind.out*')):
         zipped = path.with_name(path.name+'.gz')
         zipped.write_bytes(gzip.compress(path.read_bytes(),mtime=0))
@@ -587,6 +789,31 @@ def run_trial(root, c, stage, case, arm, repetition):
     r['artifacts'] = {str(p.relative_to(directory)):digest(p) for p in sorted(directory.rglob('*')) if p.is_file()}
     write(directory/'receipt.json',r,exclusive=True)
     return r
+
+
+def is_rho(arm):
+    return arm['id']=='rho' or arm.get('kind')=='rho-reference'
+
+
+def qualification_references(arms, widths=(1,8,32)):
+    require(bool(widths) and len(set(widths))==len(widths) and
+            all(type(width) is int and 1<=width<=256 for width in widths), 'invalid qualification rho widths')
+    references=[]
+    seen=set()
+    for arm in arms:
+        for width in widths:
+            source_width=(arm['source_manifest_sha256'],width)
+            if source_width in seen:
+                continue
+            seen.add(source_width)
+            reference=copy.deepcopy(arm)
+            reference['id']=f"rho_{arm['id']}_{width}"
+            reference['kind']='rho-reference'
+            reference['ic_source_alias']=arm['id']
+            reference['config']['rho_parallel_walks']=width
+            reference['configuration_sha256']=objhash(reference['config'])
+            references.append(reference)
+    return references
 
 
 def synthetic_arm(name, base):
@@ -614,6 +841,8 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_su
         grouped.setdefault((r['case'],r['arm']),[]).append(r)
     logs={}
     native_logs={}
+    online_logs={}
+    scientific=any('measurement' in r for r in selected)
     for case in sorted(cases):
         a=grouped.get((case,baseline),[]); b=grouped.get((case,candidate_id),[])
         if not a or not b or len(a)!=len(b) or len({x['repetition'] for x in a})!=len(a) or len({x['repetition'] for x in b})!=len(b) or {x['repetition'] for x in a}!={x['repetition'] for x in b}:
@@ -625,7 +854,7 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_su
         if any(type(v) not in (int,float) or not math.isfinite(v) or v<=0 for v in values):
             return {'candidate':candidate_id,'eligible':False,'reason':'invalid or missing full cost'}
         require(len({x['case_sha256'] for x in a+b})==1,'changed paired fixtures')
-        if candidate_id!='rho' and baseline!='rho':
+        if candidate_id!='rho' and baseline!='rho' and not any(x.get('mode')=='rho' for x in a+b):
             if match_support:
                 require(len({x['certificate']['factor_base_sha256'] for x in a+b})==1,'changed paired factor-base support')
             else:
@@ -636,6 +865,12 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_su
         logs.setdefault(cell,[]).append(math.log(ratio))
         wall_ratio=statistics.median(x['native_process']['process_wall_seconds'] for x in b)/statistics.median(x['native_process']['process_wall_seconds'] for x in a)
         native_logs.setdefault(cell,[]).append(math.log(wall_ratio))
+        if scientific:
+            values=[x.get('measurement',{}).get('native_timing') for x in a+b]
+            if any(v is None or type(v['online']['wall_ns']) is not int or v['online']['wall_ns']<=0 for v in values):
+                return {'candidate':candidate_id,'eligible':False,'reason':'missing verified online interval'}
+            ratio=statistics.median(x['measurement']['native_timing']['online']['wall_ns'] for x in b)/statistics.median(x['measurement']['native_timing']['online']['wall_ns'] for x in a)
+            online_logs.setdefault(cell,[]).append(math.log(ratio))
     require(bool(logs),'empty comparison')
     cell_values={cell:statistics.mean(xs) for cell,xs in logs.items()}
     estimate=math.exp(statistics.mean(cell_values.values()))
@@ -643,18 +878,25 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_su
     cells=sorted(logs)
     boot=[]
     native_boot=[]
+    online_boot=[]
     for _ in range(draws):
         means=[]
         wall_means=[]
+        online_means=[]
         for _ in cells:
             cell=rng.choice(cells)
             indices=rng.choices(range(len(logs[cell])),k=len(logs[cell]))
             means.append(statistics.mean(logs[cell][i] for i in indices))
             wall_means.append(statistics.mean(native_logs[cell][i] for i in indices))
+            if scientific:
+                online_means.append(statistics.mean(online_logs[cell][i] for i in indices))
         boot.append(math.exp(statistics.mean(means)))
         native_boot.append(math.exp(statistics.mean(wall_means)))
+        if scientific:
+            online_boot.append(math.exp(statistics.mean(online_means)))
     boot.sort()
     native_boot.sort()
+    online_boot.sort()
     return {'candidate':candidate_id,'eligible':True,'candidate_over_baseline':estimate,
         'speedup':1/estimate,'ci95':[boot[int(.025*draws)],boot[min(draws-1,int(.975*draws))]],
         'per_cell':{cell:math.exp(v) for cell,v in cell_values.items()},
@@ -662,7 +904,11 @@ def comparison(rows, candidate_id, *, baseline='incumbent', draws=2000, match_su
         'native_wall_ci95':[native_boot[int(.025*draws)],native_boot[min(draws-1,int(.975*draws))]],
         'native_wall_per_cell':{cell:math.exp(statistics.mean(v)) for cell,v in native_logs.items()},
         'native_wall_status':'paired cold-process timing; nested curve/target bootstrap',
-        'paired_cases':len(cases),'independent_curve_blocks':len(cells)}
+        'paired_cases':len(cases),'independent_curve_blocks':len(cells),
+        'online':dict(candidate_over_baseline=math.exp(statistics.mean(statistics.mean(v) for v in online_logs.values())),
+            ci95=[online_boot[int(.025*draws)],online_boot[min(draws-1,int(.975*draws))]],
+            per_cell={cell:math.exp(statistics.mean(v)) for cell,v in online_logs.items()},
+            boundary='one supplied public point after reusable preparation through scalar replay') if scientific else None}
 
 
 def gate(result,c):
@@ -679,6 +925,12 @@ def gate(result,c):
     metric) — and the decision additionally requires `rho_gate` on both final
     stages.  The margin keeps an A/A control from passing on noise.
     """
+    if c.get('purpose') == 'reference-qualification':
+        return False
+    if c.get('purpose') == bounded.PURPOSE:
+        return bounded.promotion_passes(result, c)
+    if c.get('scientific_admission') and not c.get('reference_qualification'):
+        return False  # Admission controls alone do not qualify a comparative reference.
     if not result.get('eligible'):
         return False
     cells_ok = max(result['per_cell'].values())<=c['max_cell_ratio']
@@ -704,36 +956,63 @@ def rho_gate(paired):
 def stage_arms(root, stage, arms):
     base=arms[0]
     contract=read(root/'contract.json') if (root/'contract.json').exists() else {}
-    rho=contract.get('rho_reference',synthetic_arm('rho',base))
+    references=contract.get('reference_arms', [contract.get('rho_reference',synthetic_arm('rho',base))])
     if stage=='aa':
         return [base,synthetic_arm('aa_control',base)]
     if stage=='smoke':
-        return arms+[rho]
+        return arms+references
     if stage=='development':
         smoke=read(root/'summaries/smoke.json')
         failed={r['arm'] for r in smoke['failures']}
         require('incumbent' not in failed,'incumbent failed smoke')
-        return [a for a in arms if a['id'] not in failed]+[rho]
+        if contract.get('purpose') == 'reference-qualification':
+            return arms+references  # Retain failed references in the declared development workload.
+        return [a for a in arms if a['id'] not in failed]+references
     if stage=='selection':
         d=read(root/'summaries/development.json')
         eligible=d.get('retained_portfolio')
         if eligible is None:
             eligible=sorted([r for r in d['comparisons'] if r.get('eligible')],key=lambda r:r['candidate_over_baseline'])[:2]
-        return [base]+[next(a for a in arms if a['id']==r['candidate']) for r in eligible]+[rho]
+        return [base]+[next(a for a in arms if a['id']==r['candidate']) for r in eligible]+references
     d=read(root/'summaries/selection.json')
     provisional=d.get('provisional_challenger')
-    return [base]+([next(a for a in arms if a['id']==provisional)] if provisional else [])+[rho]
+    return [base]+([next(a for a in arms if a['id']==provisional)] if provisional else [])+references
+
+
+def process_seconds(rows):
+    # Python 3.12 changed floating-point sum. Add the measured integer clocks
+    # first so transported summaries replay identically on Python 3.11/3.12.
+    return sum(r['profile_process']['process_wall_ns']+
+               r.get('native_process',{}).get('process_wall_ns',0) for r in rows)/1e9
 
 
 def summarize(root,c,stage,fixtures,arms,*,save=True):
     rows=load_stage(root,stage,fixtures,arms,c['repetitions'])
     comps=[comparison(rows,a['id'],draws=c['bootstrap_draws'],
-                      match_support=c.get('comparison_kind','fixed-support')!='factor-base-policy') for a in arms if a['id'] not in ('incumbent','rho')]
-    rho = comparison(rows,'rho',draws=c['bootstrap_draws']) if any(a['id']=='rho' for a in arms) else None
+                      match_support=c.get('comparison_kind','fixed-support')!='factor-base-policy') for a in arms if a['id']!='incumbent' and not is_rho(a)]
+    reference_ids = [a['id'] for a in arms if is_rho(a)]
+    reference_comparisons = {name:comparison(rows,name,draws=c['bootstrap_draws']) for name in reference_ids}
+    if c.get('purpose') == bounded.PURPOSE and stage in ('confirmation', 'replay'):
+        comps = [bounded.final_comparison(rows, a['id'], c) for a in arms
+                 if a['id'] != 'incumbent' and not is_rho(a)]
+        # Rho intervals remain descriptive; the familywise budget is for the
+        # preselected challenger versus the qualified IC incumbent.
+    rho = reference_comparisons.get('rho')
     result={'stage':stage,'runs':len(rows),'verified_runs':sum(r['status']=='VERIFIED' for r in rows),
             'comparisons':comps,'rho_over_incumbent':rho,
-            'process_wall_seconds_including_profiling':sum(r['profile_process']['process_wall_seconds']+r.get('native_process',{}).get('process_wall_seconds',0) for r in rows),
+            'process_wall_seconds_including_profiling':process_seconds(rows) if c.get('scientific_admission') else
+                sum(r['profile_process']['process_wall_seconds']+r.get('native_process',{}).get('process_wall_seconds',0) for r in rows),
             'failures':[{k:r.get(k) for k in ('case','arm','repetition','status','reason')} for r in rows if r['status']!='VERIFIED']}
+    if c.get('scientific_admission'):
+        result['single_target_online']=online_table(rows,fixtures,arms,c['repetitions'],
+            reference_ids)
+        result['primary_metric']='single-target native online wall time'
+        result['promotion_prerequisite']='Qualified IC and rho references plus the frozen familywise confirmation protocol; admission alone cannot promote.'
+    if c.get('purpose') in ('reference-qualification', bounded.PURPOSE):
+        result['rho_comparisons'] = reference_comparisons
+        result['promotion_eligible'] = False  # Only the final decision can promote.
+        if c.get('purpose') == bounded.PURPOSE:
+            result['promotion_prerequisite'] = 'Both final stages must pass the frozen familywise and complete-cost gates.'
     if stage=='aa':
         aa=comps[0]
         result['passed']=bool(aa.get('eligible') and all(.95<=r<=1.05 for r in aa['per_cell'].values()) and not gate(aa,c))
@@ -741,7 +1020,8 @@ def summarize(root,c,stage,fixtures,arms,*,save=True):
         result['retained_portfolio']=retain(comps,arms,width=c['selection_width'],
             exploration=c['exploration_slots'],seed=c['seed'])
     if stage=='selection':
-        eligible=sorted([r for r in comps if r.get('eligible')],key=lambda r:r['candidate_over_baseline'])
+        eligible=sorted([r for r in comps if r.get('eligible')],key=
+            bounded.selection_key if c.get('purpose') == bounded.PURPOSE else lambda r:r['candidate_over_baseline'])
         result['provisional_challenger']=eligible[0]['candidate'] if eligible else None
     if save:
         write(root/'summaries'/f'{stage}.json',result,exclusive=True)
@@ -756,6 +1036,13 @@ def decision(root,c,fixtures,all_arms,*,save=True):
     conf=next((r for r in confirm['comparisons'] if r['candidate']==challenger),{})
     rep=next((r for r in replay['comparisons'] if r['candidate']==challenger),{})
     passed=gate(conf,c) and gate(rep,c)
+    final_references_complete = True
+    if c.get('purpose') == bounded.PURPOSE:
+        final_references_complete = all(
+            set(summary.get('rho_comparisons', {})) == {'rho', 'rho_online'} and
+            all(row.get('eligible') for row in summary['rho_comparisons'].values())
+            for summary in (confirm, replay))
+        passed = passed and final_references_complete
     challenger_over_rho={}
     if challenger and c.get('objective','incumbent')=='rho':
         for stage in ('confirmation','replay'):
@@ -771,9 +1058,13 @@ def decision(root,c,fixtures,all_arms,*,save=True):
                 receipt=read(trial_path(root,stage,case,'incumbent',repetition)/'receipt.json')
                 base_complete &= receipt['status']=='VERIFIED' and receipt['total_operations'] is not None
     choice=challenger if passed else ('incumbent' if base_complete and (qualified or not challenger) else None)
+    if not final_references_complete:
+        choice = None
     reasons=[]
     if not passed:
         reasons.append('No challenger passed every confirmation and replay threshold.')
+        if not final_references_complete:
+            reasons.append('A qualified rho reference did not complete both final stages; comparison remains inconclusive.')
         if challenger_over_rho and not all(rho_gate(p) for p in challenger_over_rho.values()):
             reasons.append('The provisional challenger did not beat matched rho on both metrics with every upper 95% limit and every cell below one.')
     result={'status':'promoted' if passed else ('retained' if choice else 'inconclusive'),
@@ -809,6 +1100,18 @@ def decision(root,c,fixtures,all_arms,*,save=True):
     if challenger_over_rho:
         result['challenger_over_rho']=challenger_over_rho
     result['objective']=c.get('objective','incumbent')
+    if c.get('purpose') == bounded.PURPOSE:
+        result.update(attempt_number=c['attempt_number'], familywise_rule=c['familywise_rule'],
+            primary_metric='single-target native online wall time',
+            qualified_references=c['reference_qualification'], promotion_eligible=passed,
+            reference_comparison_scope='Paired descriptive comparisons; not additional familywise claims.')
+        result['winner_over_online_rho'] = {}
+        if choice:
+            for stage in ('confirmation', 'replay'):
+                active = stage_arms(root, stage, all_arms)
+                rows = load_stage(root, stage, fixtures[stage], active, c['repetitions'])
+                paired = comparison(rows, choice, baseline='rho_online', draws=c['bootstrap_draws'])
+                result['winner_over_online_rho'][stage] = paired
     if save:
         write(root/'decision.json',result,exclusive=True)
     return result
@@ -819,12 +1122,16 @@ def run_campaign(args):
     with (root/'operation.lock').open('a+') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         c,fixtures,arms=frozen_inputs(root)
+        require(not c.get('scientific_admission') or platform.uname()._asdict() == c['host'],
+                'execution host changed; prepare a new campaign instead of mixing measured environments')
         completed=sum(1 for _ in (root/'runs').glob('**/receipt.json'))
-        for stage in STAGES:
+        stages=c.get('stages', STAGES)
+        require(args.stage=='all' or args.stage in stages, 'stage is not in this frozen campaign')
+        for stage in stages:
             if args.stage!='all' and stage!=args.stage:
                 continue
             index=STAGES.index(stage)
-            for prior in STAGES[:index]:
+            for prior in stages[:stages.index(stage)]:
                 require((root/'summaries'/f'{prior}.json').exists(),'complete earlier stage '+prior)
             if (root/'summaries'/f'{stage}.json').exists():
                 if stage=='aa':
@@ -848,6 +1155,14 @@ def run_campaign(args):
             summary=summarize(root,c,stage,fixtures[stage],active)
             if stage=='aa':
                 require(summary['passed'],'A/A gate failed; preserve evidence and investigate')
+        if c.get('purpose')=='reference-qualification' and (root/'summaries/development.json').exists():
+            from qualification import reference_report
+            report=reference_report(root,c,fixtures,arms)
+            if (root/'qualification.json').exists():
+                require(read(root/'qualification.json')==report,'changed qualification report')
+            else:
+                write(root/'qualification.json',report,exclusive=True)
+            print(json.dumps(report),flush=True)
         if (root/'summaries/replay.json').exists() and not (root/'decision.json').exists():
             print(json.dumps(decision(root,c,fixtures,arms)),flush=True)
 
@@ -856,7 +1171,7 @@ def audit(args):
     root=args.round.resolve()
     c,fixtures,arms=frozen_inputs(root)
     manifest=read(root/'source-manifest.json')
-    sources=arms+([c['rho_reference']] if 'rho_reference' in c else [])
+    sources=arms+c.get('reference_arms', [c['rho_reference']] if 'rho_reference' in c else [])
     source_pairs={(a.get('source_manifest_relative','source-manifest.json'),a.get('source_directory','source')) for a in sources}
     source_files=0
     for manifest_path,source_path in source_pairs:
@@ -878,6 +1193,9 @@ def audit(args):
         saved=read(root/'summaries'/f'{stage}.json')
         require(saved==summarize(root,c,stage,fixtures[stage],active,save=False),
                 'changed stage summary or provisional selection')
+    if c.get('purpose')=='reference-qualification' and (root/'summaries/development.json').exists():
+        from qualification import reference_report
+        require(read(root/'qualification.json')==reference_report(root,c,fixtures,arms),'changed qualification report')
     if (root/'decision.json').exists():
         require(read(root/'decision.json')==decision(root,c,fixtures,arms,save=False),'changed decision')
     print(json.dumps({'status':'VERIFIED','trial_receipts':count,'source_files':source_files}))
@@ -894,6 +1212,14 @@ def main():
     p.add_argument('--comparison-kind',choices=['fixed-support','factor-base-policy'],default='fixed-support')
     p.add_argument('--candidates',type=Path)
     p.add_argument('--profile',choices=['pilot','standard'],default='pilot')
+    p.add_argument('--qualification',action='store_true',
+        help='Run only A/A, smoke and development with matched rho references; never promote.')
+    p.add_argument('--attempt-number', type=int, default=0, help='Bounded goal round 1..3; zero keeps promotion disabled.')
+    p.add_argument('--qualified-report', type=Path, help='Accepted qualification.json from the retained reference archive')
+    p.add_argument('--target-history', type=Path, help='Pinned initial cross-campaign point exclusions')
+    p.add_argument('--prior-round', type=Path, action='append', default=[], help='Every preceding completed bounded round, in order')
+    p.add_argument('--qualification-widths',type=int,nargs='+',default=[1,8,32],
+        help='Requested rho widths in qualification mode; the full protocol uses 1 2 4 8 16 32.')
     p.add_argument('--confirmation-cases',default='',
         help='cell=count,... raising named cells above the profile floor. Lowering is refused.')
     p.add_argument('--cells',default='13a0,17a1,19a0,23a0',

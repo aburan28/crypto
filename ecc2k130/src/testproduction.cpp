@@ -3,7 +3,9 @@
 #include <cstdio>
 #include <cerrno>
 #include <unistd.h>
+#include <map>
 #include <string>
+#include <vector>
 static bool failWrite = false, failSync = false;
 static size_t checkedFwrite(const void *p, size_t s, size_t n, FILE *f) {
     if (failWrite) { errno = ENOSPC; return 0; }
@@ -50,13 +52,51 @@ struct FaultEngine {
     u64 walksPerLaunch() const { return 1; }
 };
 
+// The fixture needs a cross-run collision on the fixture instance: a walk of
+// run 2 and a walk of run 1 that end on the same distinguished point.  Its
+// seeds depend on the iteration function, so a change to it (WALK-CONSTANT.md
+// section 11 changed the table walk's cycle rule) needs a new pair; any pair
+// serves.  `test-production --find-fixture` prints the first it meets,
+// walking i = 0, 1, 2, ... of runs 2 and 1 in turn with the host reference.
+// The table walk's pair below came from it; the sigma walk's predates it.
+static int findFixture() {
+    using R = Ref<CfgF41>;
+    auto sol = fixtureSolver();
+    std::map<std::vector<u64>, u64> seen[3];
+    for (u64 i = 0; i < (1ull << 20); ++i) {
+        for (unsigned run : {2u, 1u}) {
+            const u64 seed = eccSeedFor(run, i);
+            const auto W = sol.rewalk(seed);
+            if (!W.ok) continue;
+            const auto c = R::canonical(W.endPoint.x);
+            const std::vector<u64> key(c.v, c.v + 3);
+            const unsigned other = run == 2 ? 1 : 2;
+            auto hit = seen[other].find(key);
+            if (hit != seen[other].end()) {
+                const u64 a = run == 2 ? seed : hit->second, b = run == 2 ? hit->second : seed;
+                const auto A = sol.rewalk(a), B = sol.rewalk(b);
+                U192 k; std::string why;
+                if (!sol.solve(A, B, &k, &why)) continue;   // a same-scalar merge; keep walking
+                printf("const u64 a = 0x%016llxull, b = 0x%016llxull;   // walks %llu and %llu, k = %s\n",
+                       (unsigned long long)a, (unsigned long long)b, (unsigned long long)((a >> 16) & 0xFFFFFFFFull),
+                       (unsigned long long)((b >> 16) & 0xFFFFFFFFull), u192_to_dec(k).c_str());
+                return 0;
+            }
+            seen[run].emplace(key, seed);
+        }
+    }
+    fprintf(stderr, "no cross-run collision found\n");
+    return 1;
+}
+
 int main(int argc, char **argv) {
     using R = Ref<CfgF41>;
+    if (argc == 2 && std::string(argv[1]) == "--find-fixture") return findFixture();
     auto sol = fixtureSolver();
     // A known cross-run collision on the fixture instance.  The seeds depend
     // on the iteration function, the discrete log they resolve to does not.
 #if ECC_WALK_TABLE
-    const u64 a = 0x0002000001c30000ull, b = 0x0001000002740000ull;
+    const u64 a = 0x0002000000860000ull, b = 0x0001000001ba0000ull;   // walks 134 and 442
 #else
     const u64 a = 0x0002000048880000ull, b = 0x000100004cf60000ull;
 #endif

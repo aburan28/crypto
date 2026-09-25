@@ -24,8 +24,9 @@
 // returns formally maps to zero, and a run that does not maps to zero with
 // probability 2^-16.  A step is refused when it would close such a run of 2, 4
 // or 6 steps (5 tags of history at H = 8, 4 at H = 16, where 6-step runs
-// remain); a run of odd length cannot close, since every phi is odd.  A
-// refused step advances h.  The decision depends only on the last few steps,
+// remain; a run of odd length cannot close, since every phi is odd), or when
+// it undoes any step in the history, which leaves no pairwise cycle shorter
+// than 12 steps (WALK-CONSTANT.md section 11).  A refused step advances h.  The decision depends only on the last few steps,
 // so two trails that merge re-synchronise within a few steps: merging, and
 // with it the rho collision structure, survives.  A spurious refusal is just
 // another deterministic step, so the 2^-16 costs nothing but that.
@@ -105,11 +106,13 @@ ECC_HD uint32_t eccCyclePhi(unsigned t, int b, const uint16_t *rpow, int m, uint
 // summed over the last 1, 3 (and 5) steps.  Retries change only h, so this is
 // computed once per step.
 struct EccCycleWindow {
+    unsigned long long hist;
     int b;
     uint32_t s[ECC_CYCLE_WINDOWS];
 };
 ECC_HD EccCycleWindow eccCycleWindow(int k, unsigned long long hist, const uint16_t *rpow, int m, uint32_t rm) {
     EccCycleWindow w;
+    w.hist = hist;
     w.b = k + (m + 1) / 2;
     if (w.b >= m) w.b -= m;
     uint32_t acc = 0;
@@ -120,10 +123,22 @@ ECC_HD EccCycleWindow eccCycleWindow(int k, unsigned long long hist, const uint1
     }
     return w;
 }
-// A step with tag t is fruitless when it closes a run of 2, 4 (or 6) steps.
+// Two tags name opposite addends exactly when they differ in the sign bit.
+ECC_HD bool eccTagNegates(unsigned a, unsigned b) { return (a ^ b) == ECC_TAG_EPS; }
+// The tag d phases on from t (d >= 0), same branch and sign; k is mod m.
+ECC_HD unsigned eccTagAdvanceK(unsigned t, int d, int m) {
+    return eccTag(eccTagH(t), (eccTagK(t) + d) % m, eccTagEps(t));
+}
+// A step with tag t is fruitless when it undoes any step in the history (so
+// no pairwise cycle shorter than 2 * ECC_HIST_DEPTH + 2 steps can close;
+// WALK-CONSTANT.md section 11), or closes a run of 2, 4 (or 6) steps that
+// sums to O through Frobenius.
 ECC_HD bool eccTagFruitless(unsigned t, const EccCycleWindow &w, const uint16_t *rpow, int m, uint32_t rm) {
-    const uint32_t v = eccCyclePhi(t, w.b, rpow, m, rm);
     bool closes = false;
+#pragma unroll
+    for (int i = 0; i < ECC_HIST_DEPTH; ++i)
+        closes |= eccTagNegates(t, unsigned(w.hist >> (ECC_HIST_SLOT * i)) & ECC_TAG_MASK);
+    const uint32_t v = eccCyclePhi(t, w.b, rpow, m, rm);
 #pragma unroll
     for (int i = 0; i < ECC_CYCLE_WINDOWS; ++i) closes |= ((v + w.s[i]) & 0xFFFFu) == 0;
     return closes;

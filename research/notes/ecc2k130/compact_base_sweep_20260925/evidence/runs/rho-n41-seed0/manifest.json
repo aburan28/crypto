@@ -1,0 +1,31 @@
+{
+  "R": null,
+  "command": [
+    "/private/tmp/kic-base-sweep-20260925/target/release/examples/koblitz_rho_fixture",
+    "41",
+    "0",
+    "signed_frobenius",
+    "1",
+    "packed",
+    "13737",
+    "hash:202609250041"
+  ],
+  "count": null,
+  "environment": {
+    "RAYON_NUM_THREADS": "1"
+  },
+  "executable_sha256": "826d6b6caed645b15db5462d4ff17ad2d863605c38eb05e7c8f4cb160e0eccc9",
+  "host": "Adams-MacBook-Pro.local",
+  "input_file": null,
+  "input_sha256": null,
+  "input_spec_sha256": "700ab214498bdd18cc49530e0233ed2f135628124fdb3eea48cbda9e1ef6666b",
+  "mode": "rho",
+  "n": 41,
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "schema_version": "1.0",
+  "seed_index": 0,
+  "source_commit": "eee56e30965779e833f59fe5410cab6f61491c6e",
+  "source_path": "examples/koblitz_rho_fixture.rs",
+  "source_sha256": "98d6ba2d764b246dc451f78c809fe84669f4aafdcbcfe7ea31d6dcc10e9faaf8",
+  "timeout_seconds": 1800
+}

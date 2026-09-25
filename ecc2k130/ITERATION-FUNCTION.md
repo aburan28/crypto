@@ -529,8 +529,10 @@ choosing it later is a configuration change and not a code change. *(Not so:
 [WALK-CONSTANT.md](WALK-CONSTANT.md) §5 finds fruitless cycles the §4.1 rule
 lets through, four-step ones from Frobenius's relation and six-step pairwise
 ones, which at the live `dpWeight = 32` trap about half the walks; the walk
-needs a cycle check before it can be chosen, and priced end to end it costs
-five to six times the σ walk per solve as built.)* The three
+needed a cycle check before it could be chosen, and priced end to end it
+cost five to six times the σ walk per solve as first built.  §11 there
+extends the rule to refuse those cycles; the walk is then projected at
+0.81–0.86× σ's cost per solve, pending the new kernel's paired rate.)* The three
 facts a reader needs to revisit that policy are on this page: the gain is
 real and reproducible (nine of nine paired repetitions across both
 geometries), it is worth +9% to +15% depending on worker count and never

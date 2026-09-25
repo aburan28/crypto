@@ -74,6 +74,8 @@ class NativeMetricsTests(unittest.TestCase):
         self.assertEqual(result['process_status'], 'EXITED')
         self.assertEqual(result['exit_code'], 0)
         self.assertEqual(result['spawn'], SPAWN)
+        self.assertGreater(result['peak_rss_bytes'], 0)
+        self.assertEqual(result['process_wall_seconds'], result['process_wall_ns']/1_000_000_000)
         self.assertEqual(seen, {'as': 4 * 1024**3, 'core': 0, 'cpus': [cpu], 'sid': True})
         self.assertEqual(os.sched_getaffinity(0), before)
 

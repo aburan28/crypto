@@ -22,7 +22,7 @@ WALKS = {
     "sigma": "sigma^(3+((normal-weight(x)>>1)&7))(R)+R",
     "table": "R+(-1)^eps(R)*sigma^k(R)(T[(normal-weight(x)>>1)&7]);"
              "k=frobenius-phase(x);eps=pivot-coordinate(y);"
-             "cycle-rule=advance-h-on-2-4-or-6-step-return-in-Z[tau]-from-last-five-tags",
+             "cycle-rule=advance-h-on-negating-any-of-last-five-tags-or-2-4-or-6-step-return-in-Z[tau]",
 }
 
 

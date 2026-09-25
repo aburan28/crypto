@@ -21,12 +21,14 @@ per update at 64 per SM-clock), the carry-less unit 73%, and the speed of
 light for its 33.1 CLMADs per update is 27.4 B/s. The same note corrects the
 22.3 B/s "carry-less ceiling" quoted here before: it assumed 1.62 CLMADs per
 SM-clock, and a measured sweep build ran the unit at least 1.654 (accounting;
-no rate changes). The campaign default below is unchanged, and
-the table walk is not a candidate for it as built: its cycle rule lets
-fruitless cycles through (four steps that sum to `O` through Frobenius's own
-`σ² + σ + 2 = 0`, and six-step pairwise ones), which at the campaign's
-distinguished-point weight trap about half its walks, several times its rate
-gain ([WALK-CONSTANT.md](WALK-CONSTANT.md)).
+no rate changes). The campaign default below is unchanged.  The table walk's
+first cycle rule let fruitless cycles through (four steps that sum to `O`
+through Frobenius's own `σ² + σ + 2 = 0`, and six-step pairwise ones), which
+at the campaign's distinguished-point weight trapped about half its walks.
+The rule now refuses them, and the table walk is projected at 0.81–0.86× the
+σ walk's cost per solve on these rates; the new kernel's own paired rate is
+the measurement the switch waits on ([WALK-CONSTANT.md](WALK-CONSTANT.md)
+§11).
 [TWO-CHAINS.md](TWO-CHAINS.md) prices 30 B/s on this part as 1.35× the 22.3
 ceiling (five products alone fill the carry-less unit for 18.5 of the 15.2
 SM-clocks 30 B/s allows; at the unit's 2.0 they fill 15.0, so the verdict
@@ -136,7 +138,7 @@ GPUs.
 Two targets are configured:
 
 * **ECC2K-130**, still open, `GF(2^131)`, about `2^60.9` iterations (Bailey et
-  al.'s budget; measured for this walk, `2^60.94` on completed trails,
+  al.'s budget; measured for this walk, `2^60.91–60.92` on completed trails,
   [WALK-CONSTANT.md](WALK-CONSTANT.md)). Uses the permuted type-II optimal
   normal basis of Bailey et al.
 * **ECC2K-95**, solved by Harley's group in 1998, `GF(2^97)`, about `2^44`

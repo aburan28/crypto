@@ -1,0 +1,1 @@
+runner setup failure before producer launch: REPO=HERE.parents[4] pointed outside the checkout; git rev-parse HEAD returned 128 (fatal: not a git repository). Command: python3 research/notes/ecc2k130/compact_base_sweep_20260925/run.py --mode train --n 37 --r 1 --count 64 --out /private/tmp/kic-sweep-r37-1-64. No producer measurements were made. Fixed in commit 3700070.

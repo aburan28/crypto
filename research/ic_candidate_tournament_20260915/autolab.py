@@ -23,12 +23,12 @@ import threading
 import time
 
 from oracle import Curve, InvalidEvidence, require, verify
+from driver_admission import (EVALUATOR, check_admission, freeze_admission, producer_metadata, run_record, online_table, distinct_candidates)
 from portfolio import factorial_candidates, recombine
 from tournament import BASE_CONFIG, child_env, digest, objhash, parse_cells, read, write
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-EVALUATOR = ('autolab.py', 'portfolio.py', 'tournament.py', 'oracle.py')
 
 
 def doctor(source):
@@ -41,6 +41,7 @@ def doctor(source):
             'native_build_ready': all(checks.values()) and bool(shutil.which('cargo')),
             'instruction_protocol_ready': platform.system() == 'Linux' and platform.machine() == 'x86_64'
                 and version == 'valgrind-3.22.0', 'valgrind': version,
+            'scientific_admission': 'Prepared optimized schema-3 sources only: pair_table/tiny_gauss/subgroup_orbits; other implemented adapters remain proposals pending stage admission.',
             'baseline_quality': 'Requires fresh rho sensitivity screen and arithmetic equivalence tests; no global-best certification.',
             'native_scope': 'Development diagnostic; no operation-count or hardware-independent speedup claim.',
             'stages': {
@@ -63,7 +64,7 @@ def run_native(binary, job, directory, timeout):
     write(directory/'job.json', job, exclusive=True)
     expired = threading.Event()
     with (directory/'stdout.json').open('wb') as stdout, (directory/'stderr.txt').open('wb') as stderr:
-        start = time.monotonic()
+        start = time.monotonic_ns()
         process = subprocess.Popen([str(binary)], stdin=subprocess.PIPE, stdout=stdout,
             stderr=stderr, env=child_env(), start_new_session=True)
         def kill():
@@ -83,9 +84,9 @@ def run_native(binary, job, directory, timeout):
             if process.poll() is None:
                 kill()
                 process.wait()
-        elapsed = time.monotonic()-start
+        elapsed_ns = time.monotonic_ns()-start
     return {'exit_code': process.returncode, 'status': 'TIMEOUT' if expired.is_set() else 'EXITED',
-            'whole_process_wall_seconds': elapsed, 'timeout_seconds': timeout,
+            'process_wall_ns': elapsed_ns, 'whole_process_wall_seconds': elapsed_ns/1e9, 'timeout_seconds': timeout,
             'memory_cap_bytes': None, 'cpu_affinity': None, 'peak_rss_bytes': None}
 
 
@@ -126,7 +127,9 @@ def paired_wall_ratio(contract, rows, candidate, baseline='incumbent'):
                 {r['repetition'] for r in group}!=set(range(contract['repetitions'])) or
                 any(r['status']!='VERIFIED' for r in group)):
                 return None
-        values = [statistics.median(r['process']['whole_process_wall_seconds'] for r in g) for g in pair]
+        values = [statistics.median(r['measurement']['native_timing']['online']['wall_ns']
+                    if contract.get('scientific_admission') else r['process']['whole_process_wall_seconds']
+                    for r in g) for g in pair]
         require(all(math.isfinite(v) and v>0 for v in values), 'invalid paired time')
         job = case.get('job',{})
         cell = (job.get('degree'),job.get('curve_a'))
@@ -154,6 +157,10 @@ def summarize(contract, rows):
         table.append({'arm': arm['id'], 'mode': arm['mode'], 'scheduled': expected,
             'verified': sum(r['status'] == 'VERIFIED' for r in records),
             'complete': complete,
+            'median_online_wall_ns': statistics.median(r['measurement']['native_timing']['online']['wall_ns']
+                for r in records) if complete and contract.get('scientific_admission') else None,
+            'candidate_ids': sorted({r['measurement'].get('candidate_id', r['measurement'].get('reference_id'))
+                for r in records}) if contract.get('scientific_admission') else [],
             'median_cold_wall_seconds': statistics.median(r['process']['whole_process_wall_seconds']
                 for r in records) if complete else None,
             'total_operations': None, 'S': None, 'ratio_to_floor': None,
@@ -168,7 +175,9 @@ def summarize(contract, rows):
     # This preserves every candidate; development results never lock a winner.
     return {'status': 'DEVELOPMENT_DIAGNOSTIC', 'promotion_eligible': False,
             'reason': 'No instruction accounting, held-out confirmation, or baseline quality certification.',
-            'unit': 'complete cold child wall seconds', 'table': table,
+            'single_target_online': online_table(rows, contract['cases'], contract['arms'], contract['repetitions'],
+                [a['id'] for a in contract['arms'] if a['mode']=='rho']) if contract.get('scientific_admission') else [],
+            'unit': 'single-target online native nanoseconds' if contract.get('scientific_admission') else 'complete cold child wall seconds', 'table': table,
             'ratio_definition': 'Equal-cell geometric mean of paired case median time ratios; diagnostic only.',
             'aa_diagnostic': {'paired_ratio':aa, 'within_five_percent':aa is not None and .95<=aa<=1.05,
                               'runtime_claim_eligible':False},
@@ -184,7 +193,10 @@ def verify_trial(root, contract, case, arm, repetition):
     require(receipt['case'] == case['id'] and receipt['arm'] == arm['id']
         and receipt['repetition'] == repetition, 'changed trial identity')
     require(receipt['case_sha256'] == objhash(case) and receipt['arm_sha256'] == objhash(arm), 'changed trial binding')
-    require(set(receipt['artifacts']) == {'job.json', 'stdout.json', 'stderr.txt', 'process.json'}, 'missing raw evidence')
+    expected_files = {'job.json', 'stdout.json', 'stderr.txt', 'process.json'}
+    if contract.get('scientific_admission'):
+        expected_files.add('run.json')
+    require(set(receipt['artifacts']) == expected_files, 'missing raw evidence')
     for name, expected in receipt['artifacts'].items():
         require(digest(directory/name) == expected, 'changed trial artifact: '+name)
     job = dict(copy.deepcopy(case['job']), config=arm['config'], mode=arm['mode'])
@@ -192,6 +204,10 @@ def verify_trial(root, contract, case, arm, repetition):
     require(read(directory/'process.json') == receipt['process'], 'changed process accounting')
     p = receipt['process']
     require(math.isfinite(p['whole_process_wall_seconds']) and p['whole_process_wall_seconds'] > 0, 'invalid wall measurement')
+    if contract.get('scientific_admission'):
+        require(type(p['process_wall_ns']) is int and p['process_wall_ns']>0 and
+                p['whole_process_wall_seconds']==p['process_wall_ns']/1e9, 'changed native clock units')
+        require(p['timeout_seconds']==contract['timeout_seconds'], 'changed native resource limit')
     if receipt['status'] == 'VERIFIED':
         require(p['status'] == 'EXITED' and p['exit_code'] == 0, 'failed process marked verified')
         proof = verify(read(directory/'stdout.json'), case['fixture'], expected_mode=arm['mode'], summands=arm['config']['summands'])
@@ -200,7 +216,30 @@ def verify_trial(root, contract, case, arm, repetition):
     else:
         require(receipt['status'] in ('TIMEOUT', 'INVALID_OR_INCOMPLETE') and receipt['certificate'] is None,
                 'invalid failure receipt')
+    if contract.get('scientific_admission'):
+        admitted = admitted_trial(root, contract, case, arm)
+        record = native_record(admitted, receipt, directory, contract)
+        require(record == read(directory/'run.json') == receipt['measurement'], 'changed scientific run record')
     return receipt
+
+
+def admitted_trial(root, contract, case, arm):
+    directory = root/'admissions'/case['id']/arm['id']
+    admitted = read(directory/'admission.json')
+    job = dict(copy.deepcopy(case['job']), config=arm['config'], mode=arm['mode'])
+    check_admission(admitted, job=job, fixture=case['fixture'], manifest=contract['source_manifest'],
+        metadata=contract['producer'], resources=contract['resources'], worker_sha256=contract['pinned']['worker'])
+    return admitted
+
+
+def native_record(admitted, row, directory, contract):
+    complete = row['status'] == 'VERIFIED'
+    return run_record(admitted, number=contract['run_number_base']+row['repetition']+contract['repetitions']*
+        next(i for i,a in enumerate(contract['arms']) if a['id']==row['arm']),
+        host_id=objhash(contract['host']), status='complete' if complete else
+            ('timeout' if row['status']=='TIMEOUT' else 'error'),
+        native=read(directory/'stdout.json') if complete else None,
+        process_wall_ns=row['process']['process_wall_ns'])
 
 
 def audit(root, *, complete=True):
@@ -248,7 +287,14 @@ def prepare(args):
             require(digest(source/name) == h, 'changed source-screen source')
     else:
         manifest = source_manifest(source)
+    compiler = prior['compiler'] if prior else subprocess.check_output(['rustc', '--version'], text=True).strip()
+    metadata = prior['producer'] if prior else producer_metadata(source, manifest, compiler)
+    if prior is None and platform.system() == 'Darwin':
+        host = subprocess.check_output(['rustc', '-vV'], text=True).split('host: ')[1].splitlines()[0]
+        metadata['build'].update(target=host, rustflags=[], rustflags_override='CARGO_ENCODED_RUSTFLAGS')
     root.mkdir(parents=True)
+    write(root/'preparation.json', metadata['preparation'], exclusive=True)
+    write(root/'source-manifest.json', manifest, exclusive=True)
     for name in manifest:
         dest = root/'source'/name
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -261,49 +307,78 @@ def prepare(args):
         shutil.copy2(previous/'worker', root/'worker')
         shutil.copy2(previous/'build.log', root/'build.log')
     else:
+        build_env = dict(child_env(), IC_SOURCE_MANIFEST_SHA256=objhash(manifest))
+        if metadata['build'].get('rustflags_override') == 'CARGO_ENCODED_RUSTFLAGS':
+            build_env['CARGO_ENCODED_RUSTFLAGS'] = '\x1f'.join(metadata['build']['rustflags'])
         with (root/'build.log').open('w') as log:
             subprocess.run(['cargo', 'build', '--release', '--offline', '--locked', '--jobs', '2',
-                '--example', 'ic_tournament_worker', '--target-dir', str(root/'build')],
-                cwd=root/'source', env=child_env(), stdout=log, stderr=subprocess.STDOUT, check=True)
+                '--example', 'ic_tournament_worker', '--target-dir', str(root/'build'),
+                '--target', metadata['build']['target']],
+                cwd=root/'source', env=build_env, stdout=log, stderr=subprocess.STDOUT, check=True)
         from tournament import built_worker
         shutil.copy2(built_worker(root/'build'), root/'worker')
     for name in EVALUATOR:
-        (root/'evaluator').mkdir(exist_ok=True)
+        (root/'evaluator'/name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(HERE/name, root/'evaluator'/name)
+    resources = dict(timeout_seconds=str(args.timeout), worker_threads=1, memory_bytes=None, cpu=None)
     cases = []
+    used_targets = {}
     rng = random.Random(args.seed)
+    from tournament import reserve_targets
     for n, a in cells:
+        used = used_targets.setdefault((n, a), set())
         for i in range(args.cases):
             job = {'mode': 'fixture', 'degree': n, 'curve_a': a, 'target_seeds': [rng.getrandbits(64)],
                 'algorithm_seed': rng.getrandbits(64), 'factor_base': {'kind':'subgroup_orbits','seed':43,'points':6*n},
-                'config': BASE_CONFIG}
+                'config': arms[0]['config']}
             case_id = f'n{n}a{a}-{i:03d}'
-            proc = run_native(root/'worker', job, root/'fixture_generation'/case_id, args.timeout)
-            write(root/'fixture_generation'/case_id/'process.json', proc, exclusive=True)
-            require(proc['exit_code'] == 0, 'fixture generation failed')
-            fixture = read(root/'fixture_generation'/case_id/'stdout.json')['fixture']
-            c = Curve(fixture)
-            require(fixture['target_scalar_constructed'] is False, 'fixture includes planted scalar')
-            require(all(c.decode(p) is not None for p in fixture['targets']), 'invalid public targets')
+            for attempt in range(1000):
+                job['target_seeds'] = [rng.getrandbits(64)]
+                fixture_dir = root/'fixture_generation'/case_id/f'attempt-{attempt}'
+                proc = run_native(root/'worker', job, fixture_dir, args.timeout)
+                write(fixture_dir/'process.json', proc, exclusive=True)
+                require(proc['exit_code'] == 0 and proc['status'] == 'EXITED', 'fixture generation failed')
+                fixture = read(fixture_dir/'stdout.json')['fixture']
+                c = Curve(fixture)
+                require(fixture['target_scalar_constructed'] is False, 'fixture includes planted scalar')
+                require(all(c.decode(p) is not None for p in fixture['targets']), 'invalid public targets')
+                require(c.r-1-len(used) >= 1, 'too few unused public targets')
+                if reserve_targets(fixture, used):
+                    break
+            else:
+                raise InvalidEvidence('could not sample distinct public points within preparation budget')
+            job['public_targets'] = fixture['targets']
             cases.append({'id': case_id, 'job': job, 'fixture': fixture})
     for arm in arms:
         arm['mode'] = 'ic'
     arms.append(dict(copy.deepcopy(arms[0]), id='aa_control'))
     for walks in (1, 8, 32):
-        arms.append({'id': f'rho_w{walks}', 'mode': 'rho', 'config': dict(BASE_CONFIG, rho_parallel_walks=walks),
+        arms.append({'id': f'rho_w{walks}', 'mode': 'rho', 'config': dict(arms[0]['config'], rho_parallel_walks=walks),
                      'hypothesis': 'Same-target reference sensitivity; packed signed-Frobenius walk.'})
-    pinned = {'worker': digest(root/'worker'), 'build.log': digest(root/'build.log')}
+    for case in cases:
+        admitted_arms=[]
+        for arm in arms:
+            job = dict(copy.deepcopy(case['job']), mode=arm['mode'], config=arm['config'])
+            admitted=freeze_admission(root/'admissions'/case['id']/arm['id'], binary=root/'worker',
+                job=job, fixture=case['fixture'], manifest=manifest, metadata=metadata, resources=resources,
+                worker_sha256=digest(root/'worker'), execute=lambda binary, job, directory:
+                    run_native(binary, job, directory, args.timeout))
+            admitted_arms.append((arm['id'],admitted))
+        distinct_candidates(admitted_arms)
+    pinned = {name:digest(root/name) for name in ('worker','build.log','preparation.json','source-manifest.json')}
     pinned.update({'evaluator/'+n: digest(root/'evaluator'/n) for n in EVALUATOR})
     pinned.update({str(p.relative_to(root)):digest(p) for p in (root/'fixture_generation').rglob('*') if p.is_file()})
-    contract = {'schema_version': 1, 'purpose': 'native development screen only',
+    pinned.update({str(p.relative_to(root)):digest(p) for p in (root/'admissions').rglob('*') if p.is_file()})
+    contract = {'schema_version': 2, 'scientific_admission': True, 'producer': metadata, 'resources': resources, 'purpose': 'native development screen only',
+        'run_number_base': int.from_bytes(os.urandom(16),'big') << 16,
         'seed': args.seed, 'arms': arms, 'cases': cases, 'repetitions': args.repetitions,
         'timeout_seconds': args.timeout, 'max_processes': args.max_processes,
         'comparison_kind': args.comparison_kind, 'pinned': pinned, 'source_manifest': manifest,
-        'compiler': prior['compiler'] if prior else subprocess.check_output(['rustc', '--version'], text=True).strip(),
+        'compiler': compiler,
         'build_reused_from': {'path':str(previous), 'contract_sha256':objhash(prior)} if prior else None,
         'host': platform.uname()._asdict(), 'promotion_eligible': False,
         'operation_counts': None, 'memory_cap_bytes': None, 'cpu_affinity': None,
-        'boundary': 'Complete child, input/targets/base/failed attempts/solve/descent/verification/reporting/exit; independent Python audit outside.',
+        'boundary': 'Primary: one supplied point after reusable preparation through scalar replay. Supplementary cold: complete child including input/base/failed attempts/reporting/exit; fixture construction and external Python audit outside.',
         'base_floor': 'Coverage ceiling min(1, binomial(B+m-1,m)/(r-1)); log rank requires K independent scalar-field rows. No wall-time conversion.'}
     write(root/'contract.json', contract, exclusive=True)
     write(root/'seal.json', {'sha256': objhash(contract)}, exclusive=True)
@@ -314,6 +389,8 @@ def run(root):
     with (root/'operation.lock').open('a+') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         contract, rows = audit(root, complete=False)
+        require(not contract.get('scientific_admission') or platform.uname()._asdict() == contract['host'],
+                'execution host changed; prepare a new campaign instead of mixing measured environments')
         blocks = [(c, r) for c in contract['cases'] for r in range(contract['repetitions'])]
         rng = random.Random(contract['seed'])
         rng.shuffle(blocks)
@@ -339,8 +416,14 @@ def run(root):
                                summands=arm['config']['summands'])
                 require(not proof.get('degenerate_descents', 0), 'generic direct relation admitted as IC')
                 row.update(status='VERIFIED', certificate=proof)
+                if contract.get('scientific_admission'):
+                    row['measurement'] = native_record(admitted_trial(root, contract, case, arm), row, directory, contract)
             except (ValueError, KeyError, TypeError) as exc:
-                row.update(reason=str(exc), status='TIMEOUT' if p['status'] == 'TIMEOUT' else 'INVALID_OR_INCOMPLETE')
+                row.update(certificate=None, reason=str(exc), status='TIMEOUT' if p['status'] == 'TIMEOUT' else 'INVALID_OR_INCOMPLETE')
+            if contract.get('scientific_admission'):
+                if row['status'] != 'VERIFIED':
+                    row['measurement'] = native_record(admitted_trial(root, contract, case, arm), row, directory, contract)
+                write(directory/'run.json', row['measurement'], exclusive=True)
             row['artifacts'] = {p.name: digest(p) for p in directory.iterdir() if p.is_file()}
             write(directory/'receipt.json', row, exclusive=True)
             rows.append(row)

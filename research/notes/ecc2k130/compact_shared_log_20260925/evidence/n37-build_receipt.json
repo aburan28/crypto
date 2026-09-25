@@ -1,0 +1,35 @@
+{
+  "cargo": "cargo 1.93.1 (Homebrew)",
+  "cargo_lock_sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+  "cargo_net_offline": true,
+  "cargo_toml_sha256": "1435eec1bdf7ef0357ae6c8d86083b3352e9c40f850e2ef0e4d27648b0b6b6b8",
+  "checkout_head": "8c9eff1c4b876d7d6d69a6c46f6ac7a16248cafa",
+  "command": [
+    "cargo",
+    "build",
+    "--release",
+    "--offline",
+    "--locked",
+    "--example",
+    "koblitz_s5_sat_instance",
+    "--example",
+    "koblitz_rho_batch_ks"
+  ],
+  "executable_sha256": {
+    "compact": "c0671955da6131f24881701e20460fa9f1b5ce2468a98510ce6e6caf09f25d16",
+    "rho": "b2890cbf2ff9c5a80062bd811a3e9a1ef3ee02dda0c6abbd5631cdba8d4e30a3"
+  },
+  "host": "Adams-MacBook-Pro.local",
+  "input_spec_sha256": "ef2e8df8f90a6dcedbbd3d6595bfa71454d49041775980fd2ca51d0d4a67b783",
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "returncode": 0,
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "schema_version": "1.0",
+  "source_sha256": {
+    "examples/koblitz_rho_batch_ks.rs": "fedacb54e441979c8c32860e7b5639e43799234741d49677010164564536d2c8",
+    "examples/koblitz_s5_sat_instance.rs": "c2bc8b05087df69bef9593363e9d7c112e843ef16da122da50eb29ab22115f09"
+  },
+  "stderr_sha256": "31f205742aa2a9e0079aa410be25e35ad63058a1a212d33e1047fe65dcf0c318",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "wall_ms": 72047.19525
+}

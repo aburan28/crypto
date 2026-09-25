@@ -202,6 +202,57 @@
       "bytes": 3424127,
       "uncompressed_file_bytes": 101409099,
       "files": 9436
+    },
+    {
+      "file": "ic-producer-admission-20260925.tar.zst",
+      "sha256": "7e3581b0f068f24635dd6fcd95441c27d58b5d0061827fe0c6549957227e0047",
+      "bytes": 4220264,
+      "uncompressed_file_bytes": 121341621,
+      "files": 32400
+    },
+    {
+      "file": "ic-public-native-controls-20260925.tar.zst",
+      "sha256": "af5154ad4443a157c9a36ea552cb52def611c6b27669e3cc0740c83ecee78bd8",
+      "bytes": 1172054,
+      "uncompressed_file_bytes": 4948881,
+      "files": 178
+    },
+    {
+      "file": "ic-rho-prepared-controls-20260925.tar.zst",
+      "sha256": "4312b53b4bc33f46402dee9788511958fd4541a28b800e96972448c1fccc3734",
+      "bytes": 471726,
+      "uncompressed_file_bytes": 1192226,
+      "files": 59
+    },
+    {
+      "file": "ic-public-linux-controls-20260925.tar.zst",
+      "sha256": "b0d6ea6d1ef6035702f366624e4161a7a7fcb9abca2ffa4009715cc5deed6ac2",
+      "bytes": 18774023,
+      "uncompressed_file_bytes": 113582270,
+      "files": 32311
+    },
+    {
+      "file": "ic-driver-native-controls-20260925.tar.zst",
+      "sha256": "93808969fe84a1a3eaf169908f8295b1f763d09b32abb4bc3389d544845621be",
+      "bytes": 10570117,
+      "uncompressed_file_bytes": 48193193,
+      "files": 2698
+    },
+    {
+      "file": "ic-driver-linux-controls-20260925.tar.zst",
+      "sha256": "972f1b6e16cc9a09960fccc80ba5f64331c3d12a5a312581521c53cea53d334c",
+      "bytes": 9324450,
+      "uncompressed_file_bytes": 372870950,
+      "files": 83113,
+      "profile_storage": "Original gzip streams preserved without re-encoding"
+    },
+    {
+      "file": "ic-reference-qualification-20260925.tar.zst",
+      "sha256": "a61e6b7c8154dfc594365a044dc74346880018a9c57e14d699ab4c55444950ac",
+      "bytes": 40999253,
+      "uncompressed_file_bytes": 405702110,
+      "files": 122855,
+      "profile_storage": "Original gzip streams preserved without re-encoding"
     }
   ],
   "profile_encoder": {

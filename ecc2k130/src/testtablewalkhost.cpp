@@ -28,17 +28,21 @@ using eccPacked131::P131;
 using namespace eccPacked131;
 
 // Histories the raw tag would close into a fruitless run, oldest tag first:
-// a step back, a 4-cycle of pairs, the tau-relation s^2 + s + 2 = 0 (tags k,
-// k + 1, k + 2 before a second k in one branch), and a 6-step run of pairs
-// no shorter window sees.  Every other point sees an empty history.
+// a step back, a 4-cycle of pairs, undoing the fourth-last and the fifth-last
+// step, the tau-relations s^2 + s + 2 = 0 and s^3 + s - 2 = 0 with the last
+// three, and a 6-step run of pairs that no pair within five steps shows.
+// Point i % 8 == 0 sees an empty history.
 static unsigned long long probeHistory(int i, unsigned raw) {
     const unsigned A = 0x0123u, C = 0x0245u, E = ECC_TAG_EPS;
-    const int h = eccTagH(raw), k = eccTagK(raw), eps = eccTagEps(raw);
+    auto adv = [&](int d) { return eccTagAdvanceK(raw, d, 131); };
     std::vector<unsigned> tags;
     if (i % 4 == 1) tags = {raw ^ E};
     if (i % 8 == 2) tags = {A ^ E, raw ^ E, A};
-    if (i % 8 == 3) tags = {eccTag(h, k, eps), eccTag(h, (k + 1) % 131, eps), eccTag(h, (k + 2) % 131, eps)};
+    if (i % 8 == 3) tags = {raw ^ E, 0x0123u, 0x0456u, 0x0789u};
     if (i % 8 == 4) tags = {A, raw ^ E, C, A ^ E, C ^ E};
+    if (i % 8 == 5) tags = {adv(2), adv(1), raw};
+    if (i % 8 == 6) tags = {adv(3) ^ E, raw, adv(1) ^ E};
+    if (i % 8 == 7) tags = {raw ^ E, 0x0123u, 0x0456u, 0x0789u, 0x0245u};
     unsigned long long hist = ECC_HIST_EMPTY;
     for (unsigned t : tags) hist = eccHistPush(hist, t);
     return hist;
@@ -101,7 +105,7 @@ int main() {
     std::printf("table walk host probe: %d points, cycle rule fired on %d\n", N, ruleFired);
     std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, addend words %d\n", badK, badPivot, badEps, badTag, badAdd);
     std::printf("  branches %d, pivot bytes %d, shared bytes %zu\n", TW_H, ECC_TABLE_PIVOT_BYTES, TW_SHARED_BYTES);
-    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= 5 * N / 8;
+    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= 7 * N / 8;   // every i % 8 but 0 must fire
     std::printf("%s\n", ok ? "PASS" : "FAIL");
     return ok ? 0 : 1;
 }

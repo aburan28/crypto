@@ -1,10 +1,11 @@
 //! Native-XOR balanced-S5 SAT control over point-defined Koblitz bases.
 //!
-//! Four factor-base points are constrained to sum to one published synthetic
-//! target through three balanced S3 links.  All SAT models are lifted through
-//! the original curve group; no unknown, external, or production point is used.
+//! Four factor-base points are constrained through three balanced S3 links.
+//! SAT controls use published synthetic targets; the optional compact batch
+//! accepts public subgroup points without their scalar labels. All extracted
+//! witnesses are lifted through the curve group before admission.
 
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -3004,9 +3005,18 @@ fn extract_orbit_relation(
     let started = Instant::now();
     let index =
         CompactOrbitExtractionIndex::new(curve, regular, regular_keys, representative_x_codes, gf);
-    let result = extract_orbit_relation_with_index(curve, base, target, regular, &index, gf, b);
+    let (result, _) =
+        extract_orbit_relation_with_index(curve, base, target, regular, &index, gf, b);
     let elapsed = started.elapsed().as_secs_f64() * 1000.0;
     (result, index.index_entries, elapsed)
+}
+
+#[derive(Clone, Copy, Default)]
+struct CompactOrbitQueryStats {
+    s3_calls: u64,
+    partner_roots: u64,
+    indexed_partner_hits: u64,
+    group_lift_attempts: u64,
 }
 
 fn extract_orbit_relation_with_index(
@@ -3017,12 +3027,13 @@ fn extract_orbit_relation_with_index(
     index: &CompactOrbitExtractionIndex,
     gf: &Gf2,
     b: u64,
-) -> Option<ExtractedOrbitRelation> {
+) -> (Option<ExtractedOrbitRelation>, CompactOrbitQueryStats) {
     let started = Instant::now();
+    let mut stats = CompactOrbitQueryStats::default();
     let width = curve.n as usize;
     let target_x = match target {
         BinaryPoint::Affine { x, .. } => x.raw_bits().first().copied().unwrap_or(0),
-        BinaryPoint::Infinity => return None,
+        BinaryPoint::Infinity => return (None, stats),
     };
     let mut trials = 0u64;
     for &(left, right, relative) in &index.regular_keys {
@@ -3036,42 +3047,49 @@ fn extract_orbit_relation_with_index(
                 for _ in 0..left_shift {
                     absolute = gf.sqr(absolute);
                 }
+                stats.s3_calls += 1;
                 let Some(partners) = s3_x_roots(gf, b, absolute, target_x) else {
                     continue;
                 };
                 for partner in partners {
                     trials += 1;
+                    stats.partner_roots += 1;
                     let Some((second_left, second_right, second_left_shift, second_right_shift)) =
                         witness_for_absolute_root(&index.by_canonical, gf, partner, width)
                     else {
                         continue;
                     };
+                    stats.indexed_partner_hits += 1;
                     let codes = [
                         x_left,
                         x_right,
                         index.shifted[second_left][second_left_shift],
                         index.shifted[second_right][second_right_shift],
                     ];
+                    stats.group_lift_attempts += 1;
                     if lift_x_tuple(curve, base, &codes, target).is_some() {
-                        return Some(ExtractedOrbitRelation {
-                            codes,
-                            first: (left, right, left_shift, right_shift),
-                            second: (
-                                second_left,
-                                second_right,
-                                second_left_shift,
-                                second_right_shift,
-                            ),
-                            intermediates: [absolute, partner],
-                            trials,
-                            extract_ms: started.elapsed().as_secs_f64() * 1000.0,
-                        });
+                        return (
+                            Some(ExtractedOrbitRelation {
+                                codes,
+                                first: (left, right, left_shift, right_shift),
+                                second: (
+                                    second_left,
+                                    second_right,
+                                    second_left_shift,
+                                    second_right_shift,
+                                ),
+                                intermediates: [absolute, partner],
+                                trials,
+                                extract_ms: started.elapsed().as_secs_f64() * 1000.0,
+                            }),
+                            stats,
+                        );
                     }
                 }
             }
         }
     }
-    None
+    (None, stats)
 }
 
 fn force_one_hot(solver: &mut Solver, offset: usize, index: usize) {
@@ -5741,6 +5759,12 @@ fn main() {
         && std::env::var("KIC_ORBIT_LAZY_RELATIVE_SUPPORT").as_deref() == Ok("1");
     let compact_batch_only = std::env::var("KIC_ORBIT_BATCH_ONLY").as_deref() == Ok("1");
     assert!(
+        lazy_relative_support
+            || (std::env::var_os("KIC_ORBIT_TARGET_SCALARS").is_none()
+                && std::env::var_os("KIC_ORBIT_TARGET_POINTS_JSONL").is_none()),
+        "compact batch target files require KIC_ORBIT_LAZY_RELATIVE_SUPPORT=1"
+    );
+    assert!(
         !lazy_relative_support || backend == "internal",
         "KIC_ORBIT_LAZY_RELATIVE_SUPPORT requires the internal solver"
     );
@@ -5758,7 +5782,13 @@ fn main() {
     let mut compact_relation: Option<ExtractedOrbitRelation> = None;
     let mut compact_batch_relations: Vec<(u64, ExtractedOrbitRelation)> = Vec::new();
     let mut compact_batch_failures: Vec<u64> = Vec::new();
+    let mut compact_batch_query_observations = Vec::new();
     let mut compact_batch_targets_requested = 0usize;
+    let mut compact_point_batch_relations: Vec<([u64; 2], ExtractedOrbitRelation)> = Vec::new();
+    let mut compact_point_batch_failures: Vec<[u64; 2]> = Vec::new();
+    let mut compact_point_batch_query_observations = Vec::new();
+    let mut compact_point_batch_targets_requested = 0usize;
+    let mut compact_batch_loop_ms = 0.0f64;
     let mut compact_batch_index_build_ms = 0.0f64;
     let mut compact_batch_query_ms = 0.0f64;
     let mut compact_index_entries = 0usize;
@@ -5786,6 +5816,11 @@ fn main() {
             .into_iter()
             .map(|(left, right, relative, roots)| ((left, right, relative), roots))
             .collect::<HashMap<_, _>>();
+        assert!(
+            std::env::var("KIC_ORBIT_TARGET_SCALARS").is_err()
+                || std::env::var("KIC_ORBIT_TARGET_POINTS_JSONL").is_err(),
+            "choose scalar or point batch inputs, not both"
+        );
         if let Ok(list_path) = std::env::var("KIC_ORBIT_TARGET_SCALARS") {
             let scalars: Vec<u64> = std::fs::read_to_string(&list_path)
                 .expect("read KIC_ORBIT_TARGET_SCALARS")
@@ -5808,10 +5843,11 @@ fn main() {
             compact_batch_index_build_ms = index_started.elapsed().as_secs_f64() * 1000.0;
             compact_index_entries = index.index_entries;
             let b = curve.curve.b.raw_bits().first().copied().unwrap_or(0);
+            let loop_started = Instant::now();
             for scalar in scalars {
                 let target = curve.mul(curve.generator(), &BigUint::from(scalar));
                 let query_started = Instant::now();
-                let relation = extract_orbit_relation_with_index(
+                let (relation, stats) = extract_orbit_relation_with_index(
                     &curve,
                     &base,
                     &target,
@@ -5822,6 +5858,15 @@ fn main() {
                 );
                 let query_ms = query_started.elapsed().as_secs_f64() * 1000.0;
                 compact_batch_query_ms += query_ms;
+                compact_batch_query_observations.push(json!({
+                    "scalar":scalar,
+                    "hit":relation.is_some(),
+                    "query_ms":query_ms,
+                    "s3_calls":stats.s3_calls,
+                    "partner_roots":stats.partner_roots,
+                    "indexed_partner_hits":stats.indexed_partner_hits,
+                    "group_lift_attempts":stats.group_lift_attempts
+                }));
                 if let Some(relation) = relation {
                     let lifted = lift_x_tuple(&curve, &base, &relation.codes, &target);
                     assert!(lifted.is_some(), "batch relation failed group lift");
@@ -5830,6 +5875,82 @@ fn main() {
                     compact_batch_failures.push(scalar);
                 }
             }
+            compact_batch_loop_ms = loop_started.elapsed().as_secs_f64() * 1000.0;
+        } else if let Ok(list_path) = std::env::var("KIC_ORBIT_TARGET_POINTS_JSONL") {
+            let targets: Vec<[u64; 2]> = std::fs::read_to_string(&list_path)
+                .expect("read KIC_ORBIT_TARGET_POINTS_JSONL")
+                .lines()
+                .filter(|line| !line.trim().is_empty())
+                .map(|line| serde_json::from_str(line).expect("point target must be [x,y]"))
+                .collect();
+            assert!(!targets.is_empty(), "point target list must not be empty");
+            compact_point_batch_targets_requested = targets.len();
+            let index_started = Instant::now();
+            let index = CompactOrbitExtractionIndex::new(
+                &curve,
+                &map,
+                regular_keys,
+                &codes,
+                &lazy_relative_field.gf,
+            );
+            compact_batch_index_build_ms = index_started.elapsed().as_secs_f64() * 1000.0;
+            compact_index_entries = index.index_entries;
+            let b = curve.curve.b.raw_bits().first().copied().unwrap_or(0);
+            let loop_started = Instant::now();
+            for coordinates in targets {
+                assert!(coordinates.iter().all(|value| *value < (1u64 << n)));
+                let target = BinaryPoint::Affine {
+                    x: F2mElement::from_biguint(&BigUint::from(coordinates[0]), n),
+                    y: F2mElement::from_biguint(&BigUint::from(coordinates[1]), n),
+                };
+                assert!(
+                    points_with_x(
+                        &curve.curve,
+                        match &target {
+                            BinaryPoint::Affine { x, .. } => x,
+                            BinaryPoint::Infinity => unreachable!(),
+                        }
+                    )
+                    .contains(&target),
+                    "point target must be on the curve"
+                );
+                assert_eq!(
+                    curve.mul(&target, &curve.subgroup_order),
+                    BinaryPoint::Infinity,
+                    "point target must belong to the prime-order subgroup"
+                );
+                let query_started = Instant::now();
+                let (relation, stats) = extract_orbit_relation_with_index(
+                    &curve,
+                    &base,
+                    &target,
+                    &map,
+                    &index,
+                    &lazy_relative_field.gf,
+                    b,
+                );
+                let query_ms = query_started.elapsed().as_secs_f64() * 1000.0;
+                compact_batch_query_ms += query_ms;
+                compact_point_batch_query_observations.push(json!({
+                    "target_point":coordinates,
+                    "hit":relation.is_some(),
+                    "query_ms":query_ms,
+                    "s3_calls":stats.s3_calls,
+                    "partner_roots":stats.partner_roots,
+                    "indexed_partner_hits":stats.indexed_partner_hits,
+                    "group_lift_attempts":stats.group_lift_attempts
+                }));
+                if let Some(relation) = relation {
+                    assert!(
+                        lift_x_tuple(&curve, &base, &relation.codes, &target).is_some(),
+                        "point-batch relation failed group lift"
+                    );
+                    compact_point_batch_relations.push((coordinates, relation));
+                } else {
+                    compact_point_batch_failures.push(coordinates);
+                }
+            }
+            compact_batch_loop_ms = loop_started.elapsed().as_secs_f64() * 1000.0;
         } else {
             let (extracted, entries, extract_ms) = extract_orbit_relation(
                 &curve,
@@ -6250,17 +6371,25 @@ fn main() {
             force_binary(&mut encoding.solver, offset, lazy_width, value as usize);
         }
     }
+    let mut sat_solver_invocations = 0usize;
+    let mut sat_solver_ms = 0.0f64;
     let outcome = loop {
         let solve_result = if compact_batch_only {
             SolveResult::Unknown
-        } else if compact_relation.is_some() {
-            encoding.solver.solve()
-        } else if s3_root_theory || lazy_relative_support {
-            encoding
-                .solver
-                .solve_with_lazy_clauses(&trigger_variables, &mut theory)
         } else {
-            encoding.solver.solve()
+            sat_solver_invocations += 1;
+            let solver_call_started = Instant::now();
+            let result = if compact_relation.is_some() {
+                encoding.solver.solve()
+            } else if s3_root_theory || lazy_relative_support {
+                encoding
+                    .solver
+                    .solve_with_lazy_clauses(&trigger_variables, &mut theory)
+            } else {
+                encoding.solver.solve()
+            };
+            sat_solver_ms += solver_call_started.elapsed().as_secs_f64() * 1000.0;
+            result
         };
         match solve_result {
             SolveResult::Sat => {
@@ -6353,8 +6482,9 @@ fn main() {
             result => break result,
         }
     };
-    phase_restart_shots_used += 1;
-    let _ = theory;
+    if !compact_batch_only {
+        phase_restart_shots_used += 1;
+    }
     let solve_ms = solve_started.elapsed().as_secs_f64() * 1000.0;
     let exhaustive_match = direct_set
         .as_ref()
@@ -6419,7 +6549,13 @@ fn main() {
             "schema_version":"1.0",
             "task_id":task_id,
             "kind":"balanced_s5_native_xor_observation",
-            "evidence_class":if outcome==SolveResult::Unknown {"censored_operational_observation"} else {"measured_solver_observation"},
+            "evidence_class":if compact_batch_targets_requested > 0 || compact_point_batch_targets_requested > 0 {
+                "measured_compact_batch_extraction"
+            } else if outcome==SolveResult::Unknown {
+                "censored_operational_observation"
+            } else {
+                "measured_solver_observation"
+            },
             "n":n,
             "a":a,
             "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
@@ -6478,6 +6614,7 @@ fn main() {
                     "targets_requested":compact_batch_targets_requested,
                     "targets_extracted":compact_batch_relations.len(),
                     "failed_target_scalars":compact_batch_failures,
+                    "query_observations":compact_batch_query_observations,
                     "target_scalars":compact_batch_relations.iter().map(|(scalar, _)| scalar).collect::<Vec<_>>(),
                     "relations":compact_batch_relations.iter().map(|(scalar, relation)| json!({
                         "scalar":scalar,
@@ -6491,11 +6628,38 @@ fn main() {
                     "regular_state_scan_ms":lazy_relative_scan_ms,
                     "root_index_build_ms":compact_batch_index_build_ms,
                     "query_ms_sum":compact_batch_query_ms,
-                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms,
-                    "sat_verification_included":true,
-                    "sat_verification_wall_ms":solve_ms,
-                    "charged_total_with_sat_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms + solve_ms
+                    "batch_loop_wall_ms":compact_batch_loop_ms,
+                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_loop_ms,
+                    "charged_total_scope":"base, regular scan, root index, and full target loop; process start/curve setup/encoding excluded",
+                    "sat_verification_included":false,
+                    "sat_verification_wall_ms":null,
+                    "charged_total_with_sat_ms":null
             }))
+            } else { None },
+            "compact_orbit_point_batch":if compact_point_batch_targets_requested > 0 {
+                Some(json!({
+                    "targets_requested":compact_point_batch_targets_requested,
+                    "targets_extracted":compact_point_batch_relations.len(),
+                    "failed_target_points":compact_point_batch_failures,
+                    "query_observations":compact_point_batch_query_observations,
+                    "relations":compact_point_batch_relations.iter().map(|(point, relation)| json!({
+                        "target_point":point,
+                        "x_codes":relation.codes,
+                        "pinned_intermediates":relation.intermediates,
+                        "trials":relation.trials,
+                        "query_ms":relation.extract_ms
+                    })).collect::<Vec<_>>(),
+                    "index_entries":compact_index_entries,
+                    "regular_states":lazy_regular_states.len(),
+                    "regular_state_scan_ms":lazy_relative_scan_ms,
+                    "root_index_build_ms":compact_batch_index_build_ms,
+                    "query_ms_sum":compact_batch_query_ms,
+                    "batch_loop_wall_ms":compact_batch_loop_ms,
+                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_loop_ms,
+                    "charged_total_scope":"base, regular scan, root index, and full target loop; process start/curve setup/encoding excluded",
+                    "sat_verification_included":false,
+                    "sat_verification_wall_ms":null
+                }))
             } else { None },
             "final_support_clauses":encoding.final_support_clauses,
             "final_compatible_selector_pairs":encoding.final_compatible_selector_pairs,
@@ -6511,6 +6675,25 @@ fn main() {
             "factor_base_points":base.points.len(),
             "factor_base_x_coordinates":base.x_codes.len(),
             "orbit_columns":base.orbit_columns,
+            "compact_orbit_base_header":if lazy_relative_support
+                && std::env::var("KIC_ORBIT_INCLUDE_BASE_HEADER").as_deref() == Ok("1") {
+                Some(json!({
+                    "kind":"point_defined_factor_base",
+                    "n":n,
+                    "a":a,
+                    "subgroup_order":modulus,
+                    "cofactor":curve.cofactor.to_u64().unwrap(),
+                    "field_modulus_low_terms":curve.curve.irreducible.low_terms,
+                    "generator":affine_coordinates(curve.generator()),
+                    "orbit_columns":base.orbit_columns,
+                    "signed_automorphism_size":base.signed_size,
+                    "factor_base_points":base.points.len(),
+                    "factor_base_point_coordinates":base.points.iter().map(affine_coordinates).collect::<Vec<_>>(),
+                    "factor_base_point_labels":base.point_labels,
+                    "factor_base_representatives":base.representatives.iter().map(affine_coordinates).collect::<Vec<_>>(),
+                    "scanned_x":base.scanned_x
+                }))
+            } else { None },
             "models_examined":models,
             "valid_x_tuples":valid_x_tuples.len(),
             "invalid_group_lifts":invalid_lifts,
@@ -6538,7 +6721,16 @@ fn main() {
             "factor_base_input_blake3":&factor_base_input_blake3,
             "encoding_ms":encoding_ms,
             "solve_ms":solve_ms,
-            "scope":"public synthetic balanced-S5 correctness control; no external point or key recovery"
+            "solve_ms_scope":"legacy whole solve phase including compact scan and extraction; not isolated SAT time",
+            "sat_solver_invocations":sat_solver_invocations,
+            "sat_solver_ms":sat_solver_ms,
+            "scope":if compact_point_batch_targets_requested > 0 {
+                "public subgroup point-only compact relation extraction; no target scalar supplied to the producer"
+            } else if compact_batch_targets_requested > 0 {
+                "public synthetic known-scalar compact relation batch; no unknown-target recovery"
+            } else {
+                "public synthetic balanced-S5 correctness control; no external point or key recovery"
+            }
         })
     );
 }

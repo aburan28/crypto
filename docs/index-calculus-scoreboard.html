@@ -6068,9 +6068,93 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0023 -->
+<!-- BEGIN ic-reference-qualification-20260925 -->
+<section id="ic-reference-qualification-20260925">
+<h2>Archived reference qualification — 2026-09-25</h2>
+<p><strong>Accounting/reference qualification, no promotion:</strong> 1,290/1,290 native/profile pairs; 21 configurations on five exact curve/subgroup cells, 15 development points and three repetitions. Zero improvement rounds used. The selected IC reference is pairinv; cold-instruction rho is rho_incumbent_4 and online rho is rho_pairinv_4. Online intervals exclude reusable preparation and include scalar replay. Every displayed value comes from the <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json">frozen results</a>; full identifiers, per-target pairs, phases, intervals, source hashes and replay details are in the <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md">evidence report</a>.</p>
+<p>pairinv's online / old-incumbent ratio is 0.9781 [0.9249, 1.0302]; cold instructions are 0.9845 and cold native time 1.0064. This does not meet the 20% goal. The 8.5202 selected-rho / pairinv online ratio is a development observation with reusable preparation excluded, not a cold-start or confirmed gain. No global-optimum or ECC2K-130 claim. All configurations verified 45/45 development jobs. Bootstrap intervals are descriptive; requested rho widths can clip to the same executed width.</p>
+<div class="table-scroll"><table>
+<caption>Primary online time: equal-cell geometric means of three-repetition per-point medians; milliseconds.</caption>
+<thead><tr><th>Alias</th><th>Online ms</th><th>/ old IC</th><th>Descriptive 95% CI</th><th>Selected rho / online</th><th>Verified / 45</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>0.03527943</td><td>1</td><td>[&#x27;1&#x27;, &#x27;1&#x27;]</td><td>8.333291</td><td>45</td></tr>
+<tr><td>scaled</td><td>0.03658234</td><td>1.036931</td><td>[&#x27;0.9816509&#x27;, &#x27;1.107543&#x27;]</td><td>8.036496</td><td>45</td></tr>
+<tr><td>pairinv</td><td>0.0345057</td><td>0.9780685</td><td>[&#x27;0.924907&#x27;, &#x27;1.030152&#x27;]</td><td>8.520151</td><td>45</td></tr>
+<tr><td>rho_incumbent_1</td><td>0.344969</td><td>9.778191</td><td>[&#x27;7.725357&#x27;, &#x27;12.07888&#x27;]</td><td>0.8522324</td><td>45</td></tr>
+<tr><td>rho_incumbent_2</td><td>0.3160875</td><td>8.959541</td><td>[&#x27;7.392714&#x27;, &#x27;10.75512&#x27;]</td><td>0.9301025</td><td>45</td></tr>
+<tr><td>rho_incumbent_4</td><td>0.2966635</td><td>8.408965</td><td>[&#x27;7.10053&#x27;, &#x27;9.967899&#x27;]</td><td>0.9910008</td><td>45</td></tr>
+<tr><td>rho_incumbent_8</td><td>0.3011474</td><td>8.536061</td><td>[&#x27;7.073196&#x27;, &#x27;10.23016&#x27;]</td><td>0.9762455</td><td>45</td></tr>
+<tr><td>rho_incumbent_16</td><td>0.3032368</td><td>8.595285</td><td>[&#x27;7.11568&#x27;, &#x27;10.25388&#x27;]</td><td>0.9695189</td><td>45</td></tr>
+<tr><td>rho_incumbent_32</td><td>0.3034023</td><td>8.599977</td><td>[&#x27;7.231951&#x27;, &#x27;10.20722&#x27;]</td><td>0.9689899</td><td>45</td></tr>
+<tr><td>rho_scaled_1</td><td>0.3460468</td><td>9.808741</td><td>[&#x27;7.717053&#x27;, &#x27;12.19424&#x27;]</td><td>0.8495781</td><td>45</td></tr>
+<tr><td>rho_scaled_2</td><td>0.3201308</td><td>9.074149</td><td>[&#x27;7.427558&#x27;, &#x27;11.00426&#x27;]</td><td>0.9183551</td><td>45</td></tr>
+<tr><td>rho_scaled_4</td><td>0.3022875</td><td>8.568378</td><td>[&#x27;7.282983&#x27;, &#x27;9.996674&#x27;]</td><td>0.9725635</td><td>45</td></tr>
+<tr><td>rho_scaled_8</td><td>0.2988046</td><td>8.469655</td><td>[&#x27;7.118939&#x27;, &#x27;10.09077&#x27;]</td><td>0.9838997</td><td>45</td></tr>
+<tr><td>rho_scaled_16</td><td>0.306974</td><td>8.701216</td><td>[&#x27;7.395277&#x27;, &#x27;10.30697&#x27;]</td><td>0.9577157</td><td>45</td></tr>
+<tr><td>rho_scaled_32</td><td>0.3058821</td><td>8.670267</td><td>[&#x27;7.259575&#x27;, &#x27;10.32453&#x27;]</td><td>0.9611344</td><td>45</td></tr>
+<tr><td>rho_pairinv_1</td><td>0.3419798</td><td>9.693462</td><td>[&#x27;7.649502&#x27;, &#x27;12.07019&#x27;]</td><td>0.8596817</td><td>45</td></tr>
+<tr><td>rho_pairinv_2</td><td>0.3222622</td><td>9.134563</td><td>[&#x27;7.601432&#x27;, &#x27;10.8611&#x27;]</td><td>0.9122814</td><td>45</td></tr>
+<tr><td>rho_pairinv_4</td><td>0.2939938</td><td>8.333291</td><td>[&#x27;7.066303&#x27;, &#x27;9.854115&#x27;]</td><td>1</td><td>45</td></tr>
+<tr><td>rho_pairinv_8</td><td>0.3024054</td><td>8.571718</td><td>[&#x27;7.197861&#x27;, &#x27;10.14227&#x27;]</td><td>0.9721844</td><td>45</td></tr>
+<tr><td>rho_pairinv_16</td><td>0.3044545</td><td>8.629802</td><td>[&#x27;7.275892&#x27;, &#x27;10.21295&#x27;]</td><td>0.965641</td><td>45</td></tr>
+<tr><td>rho_pairinv_32</td><td>0.2981093</td><td>8.449944</td><td>[&#x27;7.124324&#x27;, &#x27;9.997048&#x27;]</td><td>0.9861948</td><td>45</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Supplementary cold native time: complete worker process, milliseconds.</caption>
+<thead><tr><th>Alias</th><th>Cold ms</th><th>/ old IC</th><th>Descriptive 95% CI</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>0.9548849</td><td>1</td><td>[&#x27;1&#x27;, &#x27;1&#x27;]</td></tr>
+<tr><td>scaled</td><td>0.974083</td><td>1.020105</td><td>[&#x27;0.9906293&#x27;, &#x27;1.052218&#x27;]</td></tr>
+<tr><td>pairinv</td><td>0.9610005</td><td>1.006405</td><td>[&#x27;0.9651924&#x27;, &#x27;1.049098&#x27;]</td></tr>
+<tr><td>rho_incumbent_1</td><td>1.004023</td><td>1.05146</td><td>[&#x27;1.006284&#x27;, &#x27;1.104561&#x27;]</td></tr>
+<tr><td>rho_incumbent_2</td><td>0.9697427</td><td>1.01556</td><td>[&#x27;0.9749967&#x27;, &#x27;1.058701&#x27;]</td></tr>
+<tr><td>rho_incumbent_4</td><td>0.9405923</td><td>0.9850321</td><td>[&#x27;0.9303436&#x27;, &#x27;1.036712&#x27;]</td></tr>
+<tr><td>rho_incumbent_8</td><td>0.9478406</td><td>0.9926229</td><td>[&#x27;0.9463485&#x27;, &#x27;1.039489&#x27;]</td></tr>
+<tr><td>rho_incumbent_16</td><td>0.9503984</td><td>0.9953015</td><td>[&#x27;0.9505123&#x27;, &#x27;1.040278&#x27;]</td></tr>
+<tr><td>rho_incumbent_32</td><td>0.9475625</td><td>0.9923317</td><td>[&#x27;0.9479119&#x27;, &#x27;1.036316&#x27;]</td></tr>
+<tr><td>rho_scaled_1</td><td>1.01234</td><td>1.06017</td><td>[&#x27;1.024653&#x27;, &#x27;1.105298&#x27;]</td></tr>
+<tr><td>rho_scaled_2</td><td>0.9826127</td><td>1.029038</td><td>[&#x27;0.9887804&#x27;, &#x27;1.069209&#x27;]</td></tr>
+<tr><td>rho_scaled_4</td><td>0.9492754</td><td>0.9941255</td><td>[&#x27;0.9456095&#x27;, &#x27;1.042069&#x27;]</td></tr>
+<tr><td>rho_scaled_8</td><td>0.9506862</td><td>0.9956029</td><td>[&#x27;0.9444905&#x27;, &#x27;1.044679&#x27;]</td></tr>
+<tr><td>rho_scaled_16</td><td>0.9611215</td><td>1.006531</td><td>[&#x27;0.9565629&#x27;, &#x27;1.058752&#x27;]</td></tr>
+<tr><td>rho_scaled_32</td><td>0.9497731</td><td>0.9946467</td><td>[&#x27;0.9465444&#x27;, &#x27;1.044426&#x27;]</td></tr>
+<tr><td>rho_pairinv_1</td><td>1.007289</td><td>1.05488</td><td>[&#x27;1.011843&#x27;, &#x27;1.107358&#x27;]</td></tr>
+<tr><td>rho_pairinv_2</td><td>0.9787077</td><td>1.024948</td><td>[&#x27;0.9908894&#x27;, &#x27;1.059673&#x27;]</td></tr>
+<tr><td>rho_pairinv_4</td><td>0.9536487</td><td>0.9987054</td><td>[&#x27;0.9408598&#x27;, &#x27;1.052529&#x27;]</td></tr>
+<tr><td>rho_pairinv_8</td><td>0.9553195</td><td>1.000455</td><td>[&#x27;0.9534799&#x27;, &#x27;1.046117&#x27;]</td></tr>
+<tr><td>rho_pairinv_16</td><td>0.9510661</td><td>0.9960008</td><td>[&#x27;0.9515908&#x27;, &#x27;1.039741&#x27;]</td></tr>
+<tr><td>rho_pairinv_32</td><td>0.9488646</td><td>0.9936953</td><td>[&#x27;0.9536563&#x27;, &#x27;1.035123&#x27;]</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Supplementary cold guest instructions: Ir, including every phase.</caption>
+<thead><tr><th>Alias</th><th>Cold Ir</th><th>S = Ir / sqrt(r)</th><th>/ old IC</th><th>/ selected rho</th><th>/ K floor</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1780785</td><td>2223.299</td><td>1</td><td>0.7138638</td><td>222598.2</td></tr>
+<tr><td>scaled</td><td>1780670</td><td>2223.155</td><td>0.9999353</td><td>0.7138176</td><td>222583.8</td></tr>
+<tr><td>pairinv</td><td>1753224</td><td>2188.889</td><td>0.9845231</td><td>0.7028154</td><td>219153</td></tr>
+<tr><td>rho_incumbent_1</td><td>2967440</td><td>3704.83</td><td>1.666366</td><td>1.189558</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_2</td><td>2728287</td><td>3406.248</td><td>1.532069</td><td>1.093689</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_4</td><td>2494573</td><td>3114.458</td><td>1.400827</td><td>1</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_8</td><td>2540371</td><td>3171.636</td><td>1.426545</td><td>1.018359</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_16</td><td>2540393</td><td>3171.664</td><td>1.426558</td><td>1.018368</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_32</td><td>2540341</td><td>3171.599</td><td>1.426528</td><td>1.018347</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_1</td><td>2967677</td><td>3705.126</td><td>1.666499</td><td>1.189653</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_2</td><td>2728437</td><td>3406.436</td><td>1.532154</td><td>1.093749</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_4</td><td>2494754</td><td>3114.685</td><td>1.400929</td><td>1.000073</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_8</td><td>2540487</td><td>3171.781</td><td>1.42661</td><td>1.018405</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_16</td><td>2540537</td><td>3171.845</td><td>1.426639</td><td>1.018426</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_32</td><td>2540539</td><td>3171.846</td><td>1.42664</td><td>1.018426</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_1</td><td>2967663</td><td>3705.108</td><td>1.666491</td><td>1.189648</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_2</td><td>2728457</td><td>3406.461</td><td>1.532165</td><td>1.093757</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_4</td><td>2494724</td><td>3114.647</td><td>1.400912</td><td>1.000061</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_8</td><td>2540535</td><td>3171.842</td><td>1.426638</td><td>1.018425</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_16</td><td>2540583</td><td>3171.901</td><td>1.426664</td><td>1.018444</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_32</td><td>2540537</td><td>3171.844</td><td>1.426638</td><td>1.018425</td><td>not applicable</td></tr>
+</tbody></table></div>
+<p>Aliases aggregate complete policies across curves; canonical per-run keys are in the result file. The K-instruction floor is a weak full-rank-collector bound, inapplicable to rho; Ir is not a curve-operation unit. No new exponent fit is justified. Archived implementation panels below retain their original measurements and scope.</p>
+</section>
+<!-- END ic-reference-qualification-20260925 -->
 <!-- BEGIN ic-autolab-20260924 -->
 <section id="ic-autolab-20260924">
 <h2>IC autolab — native development checkpoint, 2026-09-24</h2>
+<p><strong>2026-09-25 accounting update:</strong> the restored optimized producers passed 39/39 IC and 13/13 matched rho native/profile admission pairs, with independent artifact replay. Measured jobs accept one supplied public point; native online intervals exclude reusable preparation and include scalar replay. Complete cold instruction and native costs remain separately recorded. These are fixed correctness/accounting controls, with no new tournament winner or speedup claim; canonical admission is now wired into both existing drivers, and the separate five-cell reference qualification above is now measured; the familywise improvement protocol remains pending. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/driver-admission/README.md">driver controls</a> retain canonical failure rows and per-target online tables: final Linux driver controls verified 17 native jobs and 15 native/profile pairs, retaining one intentional native failure. The durable history passed 28 audits after fresh extraction; no improvement round has run. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/README.md">Protocol, superseded controls and durable evidence</a>.</p>
 <p>888/960 verified jobs across six audited development screens; 72 retained rejections and an earlier reporting failure are preserved. No promoted winner, operation-count result, ECC2K-130 gain or global-optimum claim. Native wall times have uncontrolled affinity, OS caches and host activity; A/A variation is recorded.</p>
 <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.json">frozen measurements</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.md">report and limits</a>. S and ratios to an operation floor are unmeasured. Classification: accounting and integration engineering.</p>
 <h3>implementation_v2</h3>
@@ -6389,5 +6473,411 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
 <a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_structural_fields_20260924/results.json">exact results</a>,
 <a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_structural_fields_20260924/receipt.json">verification receipt</a>.</p>
 </section>
+<!-- BEGIN ecc2k130-directed-gates-20260925 -->
+<section class="panel" id="ecc2k130-directed-gates-20260925">
+  <div class="panel-head">
+    <h2>ECC2K-130 directed gates: oriented transport works, while charged native-base replication remains negative <span class="chip">accounting</span></h2>
+    <p>The exact degree-263 full-point map and the compact n = 53 relation producer are correctness prerequisites. The degree-7 comparisons below are separate F<sub>2<sup>21</sup></sub>, order-421 toy diagnostics: the original one-stream pilot and a preregistered two-base, two-disjoint-target-orbit replication. A bounded degree-263 smoke on two descending maps tested public Certicom P,Q but found no two-summand relation or rank. No ECC2K-130 PDP yield, full-DLP S, matched rho ratio, floor ratio, or challenge-log speedup is established.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Degree-7 paired base pilot: equal 16-point useful subgroup bases; cold field multiplications to first verified rank 17. One field-multiplication unit throughout this table.</caption>
+    <thead><tr><th>Base policy</th><th class="n">Useful points</th><th class="n">Hits / 512</th><th class="n">First rank 17</th><th class="n">Cold field mul</th><th class="n">/ original</th><th>Verified</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Original</td><td class="n">16</td><td class="n">131</td><td class="n">135</td><td class="n">89,948</td><td class="n">1.000</td><td>rank 17; [356]G = Q</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>Transported original</td><td class="n">16</td><td class="n">131</td><td class="n">135</td><td class="n">327,008</td><td class="n">3.636</td><td>rank 17; [356]G = Q</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>Descendant native</td><td class="n">16</td><td class="n">117</td><td class="n">202</td><td class="n">360,907</td><td class="n">4.012</td><td>rank 17; [356]G = Q</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>Subgroup pullback</td><td class="n">16</td><td class="n">117</td><td class="n">202</td><td class="n">389,771</td><td class="n">4.333</td><td>rank 17; [356]G = Q</td><td><span class="chip">accounting</span></td></tr>
+    </tbody>
+  </table></div>
+<div class="table-scroll"><table><caption>Preregistered disjoint-orbit degree-7 replication: two independent 16-useful-point bases, two disjoint 512-target holdouts; cold field multiplications to verified rank 17. Ratios are field-arithmetic components relative to original in the same cell, not whole-ECDLP speedups.</caption><thead><tr><th>Seed</th><th>Holdout</th><th>Policy</th><th class="n">Hits / 512</th><th class="n">First rank</th><th class="n">Cold field mul</th><th class="n">/ original</th><th>Verified</th><th>Class</th></tr></thead><tbody><tr><td>2026092511</td><td>A</td><td>Original</td><td class="n">153</td><td class="n">159</td><td class="n">211,867</td><td class="n">1.000</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092511</td><td>A</td><td>Transported</td><td class="n">153</td><td class="n">159</td><td class="n">528,853</td><td class="n">2.496</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092511</td><td>A</td><td>Descendant native</td><td class="n">148</td><td class="n">97</td><td class="n">442,132</td><td class="n">2.087</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092511</td><td>A</td><td>Pullback</td><td class="n">148</td><td class="n">97</td><td class="n">393,198</td><td class="n">1.856</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092511</td><td>B</td><td>Original</td><td class="n">124</td><td class="n">148</td><td class="n">203,749</td><td class="n">1.000</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092511</td><td>B</td><td>Transported</td><td class="n">124</td><td class="n">148</td><td class="n">515,565</td><td class="n">2.530</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092511</td><td>B</td><td>Descendant native</td><td class="n">104</td><td class="n">121</td><td class="n">490,796</td><td class="n">2.409</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092511</td><td>B</td><td>Pullback</td><td class="n">104</td><td class="n">121</td><td class="n">429,542</td><td class="n">2.108</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092512</td><td>A</td><td>Original</td><td class="n">118</td><td class="n">115</td><td class="n">167,569</td><td class="n">1.000</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092512</td><td>A</td><td>Transported</td><td class="n">118</td><td class="n">115</td><td class="n">462,445</td><td class="n">2.760</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092512</td><td>A</td><td>Descendant native</td><td class="n">132</td><td class="n">126</td><td class="n">469,843</td><td class="n">2.804</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092512</td><td>A</td><td>Pullback</td><td class="n">132</td><td class="n">126</td><td class="n">406,499</td><td class="n">2.426</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092512</td><td>B</td><td>Original</td><td class="n">198</td><td class="n">138</td><td class="n">197,577</td><td class="n">1.000</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092512</td><td>B</td><td>Transported</td><td class="n">198</td><td class="n">138</td><td class="n">504,487</td><td class="n">2.553</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092512</td><td>B</td><td>Descendant native</td><td class="n">146</td><td class="n">289</td><td class="n">731,005</td><td class="n">3.700</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+<tr><td>2026092512</td><td>B</td><td>Pullback</td><td class="n">146</td><td class="n">289</td><td class="n">585,293</td><td class="n">2.962</td><td>rank 17; [339]G = Q</td><td><span class="chip">accounting</span></td></tr>
+</tbody></table></div>
+  <div class="panel-head">
+    <p>The table includes field setup, kernel/map and base construction, cofactor projection, the target prefix to rank, pair-table work, matrix recovery, and scalar verification. Inversion's internal multiplications are counted once; separate audit replay is not a candidate cost. Original/transported and native/pullback have identical hit and rank trajectories as required by subgroup transport. Native selection fails the predeclared lower-total-cost gate on this one toy stream. The 421-point pullback inverse table is an audit control, not a scalable candidate.</p>
+<p><a href="https://github.com/aburan28/crypto/pull/753">PR #753</a> replayed all 8,192 toy policy-target outcomes, 2,137 target draws, four base constructions and all recovered scalars. Native-to-original cold field-multiplication components are 2.087–3.700 in the four held-out cells; native is cheaper than transported in two and dearer in two. Dual pullback and tagged source-orbit classification are charged. The conditional exact degree-263 smoke tested 32 public Certicom P,Q targets on each nonconjugate descending line [1,0] and [1,4] with 16 useful source/leaf points and one charged native leaf-orbit neighbor per selected point. All four 136-pair policies had 0/32 hits and rank 0 on both lines; 64 exact targets and 256 policy-target cases were independently replayed. Under uniform subgroup targets, the m=2 32-target union-bound expectation is at most 6.40e-36 hits per arm. Prior torsion discovery has a separate 3.267-second receipt without compatible field-operation metering, so no complete exact-target cost ratio is asserted. <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/README.md">Scope and decision</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/results.json">toy cases</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/replay.json">toy replay</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/exact_smoke.json">exact smoke</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_replication_20260925/exact_replay.json">exact replay</a> preserve the evidence.</p>
+    <p>Exact-target transport: <a href="https://github.com/aburan28/crypto/pull/717">PR #717</a> passed eight saved degree-263 representatives, 40 independent full-coordinate checks, 2,096 actual-degree kernel inputs, and 122 invalid-input controls. Its original validation did not include a reverse map. PR #750 now verifies a normalized dual for all eight saved degree-263 maps; a general arbitrary-kernel dual interface and exact-target PDP yield remain open. Compact producer: <a href="https://github.com/aburan28/crypto/pull/720">PR #720</a> promoted the n = 53 source and frozen 23,320-point base to main; its 12 archived witnesses were replayed in PR validation. The archived claim JSON still has its historical pending-validation label and does not by itself certify a main-based full-rank recovery. These are not cost rows in the toy table.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/results_final.json">frozen degree-7 raw stream</a> (SHA-256 <code>50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07</code>), <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/RESULT.md">scope and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_oriented_transport_20260924/validation.json">oriented-map validation</a>, and <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/COMPACT_ORBIT_PRODUCER.md">producer provenance and replay</a>. Next gates: preregister an implicit m ≥ 3 exact-target producer with supported target mass for useful rank, charged native leaf action, and a counting/memory admission bound; separately, use a fresh-stream exact group-law oracle to classify compact four-sum support versus extractor misses. The verified n = 53 full-rank and rho controls, and the completed n = 37/41 sparse-base sweep, appear below.</p>
+  </div>
+</section>
+<!-- END ecc2k130-directed-gates-20260925 -->
+<!-- BEGIN ecc2k130-compact-rank-rho-20260925 -->
+<section class="panel" id="ecc2k130-compact-rank-rho-20260925">
+  <div class="panel-head">
+    <h2>Compact n = 53: verified full rank and point-only logs, without a matched-rho crossover <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/735">PR #735</a> froze a 220-column, 23,320-point signed-Frobenius base and independently replayed 512/512 public synthetic training relations. Full rank first appeared at relation 461; the next 51 labels were predicted from the frozen solution. A separate point-only process recovered 8/8 held-out public Q logs and checked each [d]G = Q without passing d to the producer. <a href="https://github.com/aburan28/crypto/pull/738">PR #738</a> ran signed-Frobenius batched rho on those exact Q prefixes with three fixed seeds; all 27 rho output scalars and the one-point IC addendum were independently replayed.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One or eight exact public n = 53 Q points; cold wall seconds, with full-rank IC training and target setup charged. IC/rho is a fixed-stream wall ratio, not an operation-calibrated S or a paired-confidence speed claim.</caption>
+    <thead><tr><th class="n">Q count</th><th>Arm</th><th class="n">Cold wall s</th><th class="n">IC / rho</th><th>Verified outcome</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td>Compact IC, training + cold Q</td><td class="n">159.916</td><td class="n">1.00</td><td>rank 220; 1/1 point log</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td class="n">1</td><td>Signed-Frobenius rho, seed 531310</td><td class="n">1.604</td><td class="n">99.71</td><td>1/1 scalar</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td class="n">1</td><td>Signed-Frobenius rho, seed 531311</td><td class="n">3.435</td><td class="n">46.56</td><td>1/1 scalar</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td class="n">1</td><td>Signed-Frobenius rho, seed 531312</td><td class="n">1.081</td><td class="n">147.87</td><td>1/1 scalar</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td class="n">8</td><td>Compact IC, training + cold Q batch</td><td class="n">170.521</td><td class="n">1.00</td><td>rank 220; 8/8 point logs</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td class="n">8</td><td>Signed-Frobenius rho, seed 531310</td><td class="n">19.256</td><td class="n">8.86</td><td>8/8 scalars</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td class="n">8</td><td>Signed-Frobenius rho, seed 531311</td><td class="n">12.397</td><td class="n">13.76</td><td>8/8 scalars</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td class="n">8</td><td>Signed-Frobenius rho, seed 531312</td><td class="n">4.468</td><td class="n">38.17</td><td>8/8 scalars</td><td><span class="chip">accounting</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The IC training process took 158.127 s and peaked at 646,742,016 bytes RSS; separate cold point processes took 1.789 s and 12.394 s. The eight-point process peaked at 646,250,496 bytes, while rho peaked at 18.0–19.9 MB. The training run preserved 51 post-rank relations under its fixed stopping rule. Shared-host load varied and the arms were not run in contemporaneous paired blocks; this is a verified no-crossover on the frozen stream, not a general n = 53 performance interval. ECC2K-130 full-DLP cost, S and speedup remain unset.</p>
+    <p><a href="https://github.com/aburan28/crypto/pull/743">PR #743</a> independently classified all 264 degree-263 kernel lines in each of two saved torsion bases. The first full-point map in PR #717 descends. The source endomorphism discriminant is -7, while the descending leaf has conductor 263 and discriminant -484183; its least-degree non-scalar endomorphism has degree 121046. In the measured Python implementation, source Frobenius costs two squarings, one point transport 1053 multiplications/400 squarings/one inversion, and the existing generic leaf subgroup scalar action 25476 multiplications/25604 squarings/193 inversions. These stage counts do not establish a PDP or full-DLP gain. Native-leaf tests must charge their orbit action and map setup.</p>
+    <p><a href="https://github.com/aburan28/crypto/pull/750">PR #750</a> constructs the reverse kernel from a complementary twist-torsion line and verifies all eight exact degree-263 normalized reverse maps. Independent direct Vélu replay matches 64 forward/reverse full coordinates; each raw composition is [-263], so a negation correction gives the positive dual identity. All 2,096 forward-twist and 2,096 reverse-twist finite kernel inputs map to infinity. Starting from supplied torsion generators, the four-map setup and reverse-kernel transport use 82,638 field multiplications, 80,750 squarings and 605 inversions per representative (median 0.428 s on the recorded Python host); one positive dual composition uses 2,106 multiplications, 800 squarings and two inversions (median 9.09 ms). These are transport-stage costs, not PDP yield or full-DLP cost; a cold attack must also charge torsion discovery, factor-base construction, leaf orbit action, failed targets, rank and scalar recovery. The preserved initial FAIL receipt was an independent checker that used the wrong reverse-curve b coefficient; the corrected PASS receipt and focused CI are separate.</p>
+    <p><a href="https://github.com/aburan28/crypto/pull/739">PR #739</a> modeled the current n = 131 four-sum, materialized-root, exhaustive-miss design. Its valid but loose ordered-tuple ceiling at a 1 TiB packed-root cap was <code>2.12e-13</code>, with 239 PB of conditional packed roots at the first 1%-ceiling base. The <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/COMPACT_ORBIT_N131_UNORDERED_ADDENDUM_20260925.md">exact unordered-multiset addendum in PR #747</a> supersedes these as <code>8.82e-15</code> and 1.171 EB for the same index design. These are necessary coverage ceilings and conditional materialized-memory projections, not n = 131 measurements. <a href="https://github.com/aburan28/crypto/pull/737">PR #737</a> completed six clean n = 37/41 same-Q full-rank pairs and independently replayed 820 relations, 38,334 orbit labels and all six scalar checks. Median rho/IC whole-process wall was 0.670 at n = 37 and 0.0634 at n = 41; point-defined IC did not win and its n = 41 process peaked at 1,711,898,624 bytes RSS. It repeats full rank for each Q; the true shared-log controls below address that omission. The preregistered nonsaturated compact-base sweep now appears below; descendant-native and chained-PDP pilots remain separate controls.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/COLD_BATCH_AND_POINT_RECOVERY_20260924.md">rank and point recovery</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/RESULT.md">matched rho and caveats</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/COMPACT_ORBIT_N131_TRANSFER.md">n = 131 transfer model</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-compact-rank-rho-20260925 -->
+<!-- BEGIN ecc2k130-n53-shared-log-batch-20260925 -->
+<section class="panel" id="ecc2k130-n53-shared-log-batch-20260925">
+  <div class="panel-head">
+    <h2>Compact n = 53 true shared-log batches: six verified fixed-stream pairs <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/754">PR #754</a> trained the same certified 220-orbit base once on 512/512 independently replayed relations (rank 220, first at 461), then recovered 480/480 point-only logs across three disjoint L = 32 streams and their L = 128 prefix extensions. A fresh signed-Frobenius Kuhn–Struik rho table solved the identical Q file in every paired process; all 480 rho scalars were independently replayed. The initial verifier-only S3-root inequality failure remains in a separate immutable archive; the corrected six-pair run, source/input hashes, and complete raw receipts are <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/RESULT.md">documented here</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Cold wall seconds on one CI host. IC lower = Rust training child + point child, omitting required Python rank/recovery; verified upper = complete training driver + point child + recovery/replay. Each block charges the training solve once. Rho includes one fresh shared table for the identical Q file. No common-operation-unit S or statistical interval is inferred.</caption>
+    <thead><tr><th class="n">Q count</th><th class="n">Block</th><th>Arm</th><th class="n">Cold wall s</th><th class="n">IC child-only lower s</th><th class="n">Cold / rho</th><th class="n">Lower / rho</th><th>Outcome</th></tr></thead>
+    <tbody>
+      <tr><td class="n">32</td><td class="n">0</td><td>Compact IC, verified upper</td><td class="n">215.025</td><td class="n">134.056</td><td class="n">4.867</td><td class="n">3.034</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">0</td><td>Signed-Frobenius rho</td><td class="n">44.181</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">1</td><td>Compact IC, verified upper</td><td class="n">218.080</td><td class="n">136.465</td><td class="n">4.841</td><td class="n">3.029</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">1</td><td>Signed-Frobenius rho</td><td class="n">45.053</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">2</td><td>Compact IC, verified upper</td><td class="n">214.618</td><td class="n">133.482</td><td class="n">4.321</td><td class="n">2.688</td><td>32/32 logs</td></tr>
+      <tr><td class="n">32</td><td class="n">2</td><td>Signed-Frobenius rho</td><td class="n">49.666</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>32/32 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">0</td><td>Compact IC, verified upper</td><td class="n">248.083</td><td class="n">154.646</td><td class="n">2.472</td><td class="n">1.541</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">0</td><td>Signed-Frobenius rho</td><td class="n">100.342</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">1</td><td>Compact IC, verified upper</td><td class="n">247.505</td><td class="n">153.574</td><td class="n">2.788</td><td class="n">1.730</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">1</td><td>Signed-Frobenius rho</td><td class="n">88.760</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">2</td><td>Compact IC, verified upper</td><td class="n">246.561</td><td class="n">152.730</td><td class="n">2.714</td><td class="n">1.681</td><td>128/128 logs</td></tr>
+      <tr><td class="n">128</td><td class="n">2</td><td>Signed-Frobenius rho</td><td class="n">90.851</td><td class="n">&mdash;</td><td class="n">1.000</td><td class="n">&mdash;</td><td>128/128 logs</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Native work: training made 23,689,479 exact S3 calls and built 5,081,560 index entries; the three L32/L128 query processes made 4,570,099/14,931,236 more S3 calls, while rho used 9,995,226/20,151,058 walk steps. These are different units and cannot define an attack-speed S without a pinned conversion. The maximum sequential IC RSS was 427.6 MiB; rho reached at most 76.4 MiB. The pre-existing factor-base construction is excluded from IC cost and could only increase it. The preregistered L128 gate passed and no final-run query failed.</p>
+    <p>With training paid only once across three disjoint blocks, L32 IC child-only lower/verified upper were 154.978/270.825 s versus three fresh rho tables at 138.899 s; L128 was 211.925/365.250 s versus 279.952 s. The L128 portfolio bounds straddle rho (0.757&times; lower, 1.305&times; upper), so it is inconclusive about a many-target break-even. PR #760 tests that combined L = 384 same-Q question with one IC query process, one rho table, and separately timed mandatory rank/recovery; its fixed-stream decision appears below. This fixed n = 53 result does not transfer to n = 131 or ECC2K-130.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-shared-log-batch-20260925 -->
+<!-- BEGIN ecc2k130-n53-combined-l384-20260925 -->
+<section class="panel" id="ecc2k130-n53-combined-l384-20260925">
+  <div class="panel-head">
+    <h2>Compact n = 53 combined L = 384: one index versus one rho table <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/760">PR #760</a> preregistered the byte-exact union of the three disjoint L128 public-Q blocks from PR #754. One fresh 512-target/220-column training solve reached rank 220 at relation 461; an operational rank stage solved 220 base logs, then one compact point-index process produced 384 relations and operational recovery returned all Q logs. One fresh signed-Frobenius rho table solved the identical 384 Q values. Independent full group-law replay checked 512 training relations, 23,320 orbit labels, and every IC/rho scalar. Raw receipts, source and input hashes, and the retained archive-checker-only failure are in <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_combined_l384_n53_20260925/RESULT.md">the result</a>.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One GitHub-hosted Ubuntu fixed stream; wall seconds include fresh processes. Complete operational IC = training producer + mandatory rank/linear solve + one-index point producer + mandatory scalar recovery. Audit is separate from both operational costs; the child-only lower omits necessary recovery. The certified factor-base construction is excluded. Ratios use the same-Q one-table rho wall.</caption>
+    <thead><tr><th>Arm / accounting bound</th><th class="n">Cold wall s</th><th class="n">IC / rho</th><th>Correctness / scope</th></tr></thead>
+    <tbody>
+      <tr><td>Compact IC, two-child lower</td><td class="n">276.592</td><td class="n">1.787</td><td>Incomplete: rank and scalar recovery omitted</td></tr>
+      <tr><td><strong>Compact IC, complete operational</strong></td><td class="n"><strong>353.649</strong></td><td class="n"><strong>2.285</strong></td><td>384/384 logs; pre-certified base</td></tr>
+      <tr><td>Compact IC, audit-inclusive diagnostic</td><td class="n">504.545</td><td class="n">3.259</td><td>Independent replay added</td></tr>
+      <tr><td><strong>Signed-Frobenius rho, one table</strong></td><td class="n"><strong>154.799</strong></td><td class="n"><strong>1.000</strong></td><td>384/384 same-Q logs</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Exact native work: IC training/query made 23,689,479/14,931,236 S3 calls and built 5,081,560 index entries in each fresh process. Rho took 11,485,626 walk steps, 12,255,749 group additions and 765,929 table entries. Operational CPU was 358.745 s IC versus 154.773 s rho; sequential peak RSS was 396.6 MiB versus 76.8 MiB. The panel finished at 659.421 s below the frozen 2,700 s global ceiling. The fixed-stream no-crossover is favorable to IC because prior base construction is uncharged. S3 and rho additions lack a pinned common-unit conversion, so attack-speed S and a general n = 131/ECC2K-130 crossover remain unset.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n53-combined-l384-20260925 -->
+<!-- BEGIN ecc2k130-compact-sparse-base-sweep-20260925 -->
+<section class="panel" id="ecc2k130-compact-sparse-base-sweep-20260925">
+  <div class="panel-head">
+    <h2>Sparse compact four-sum bases: roots remain occupied, held-out logs do not complete <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/747">PR #747</a> preregistered three smaller signed-Frobenius bases each at n = 37 and n = 41. Its 27-run archive includes 64/512/4096 nested target stages, three frozen point-only Q holdouts per base, identical-Q signed-Frobenius rho L = 1 controls, failed wrapper attempts, raw source/input/output hashes, and independent full-rank/group-law replay. This is a sparse-support and failed-query cost diagnostic; no completed IC holdout DLP or matched batch-rho crossover was observed.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Final preregistered training stage per base. Wall seconds are cold process measurements for the displayed query count; S3 is an exact per-failed-query operation count, not a field-multiplication or rho-equivalent unit. Point-only compact logs are on the same three Q values as the separate L = 1 rho controls.</caption>
+    <thead><tr><th>Curve/base</th><th class="n">F points</th><th class="n">Training hits</th><th class="n">Rank</th><th class="n">Indexed roots</th><th class="n">S3 / miss</th><th class="n">Wall s</th><th class="n">Peak RSS MB</th><th class="n">IC / rho logs</th></tr></thead>
+    <tbody>
+      <tr><td>n = 37, R = 1</td><td class="n">74</td><td class="n">14 / 4,096</td><td class="n">1 / 1</td><td class="n">71 / 74</td><td class="n">2,738</td><td class="n">17.072</td><td class="n">24.05</td><td class="n">0 / 3</td></tr>
+      <tr><td>n = 37, R = 2</td><td class="n">148</td><td class="n">45 / 512</td><td class="n">2 / 2</td><td class="n">288 / 296</td><td class="n">10,952</td><td class="n">8.208</td><td class="n">15.20</td><td class="n">0 / 3</td></tr>
+      <tr><td>n = 37, R = 3</td><td class="n">222</td><td class="n">175 / 512</td><td class="n">3 / 3</td><td class="n">651 / 666</td><td class="n">24,642</td><td class="n">15.532</td><td class="n">15.60</td><td class="n">0 / 3</td></tr>
+      <tr><td>n = 41, R = 4</td><td class="n">328</td><td class="n">2 / 4,096</td><td class="n">2 / 4</td><td class="n">1,288 / 1,312</td><td class="n">53,792</td><td class="n">404.120</td><td class="n">26.74</td><td class="n">0 / 3</td></tr>
+      <tr><td>n = 41, R = 8</td><td class="n">656</td><td class="n">56 / 4,096</td><td class="n">8 / 8</td><td class="n">5,168 / 5,248</td><td class="n">215,168</td><td class="n">1,630.414</td><td class="n">26.38</td><td class="n">0 / 3</td></tr>
+      <tr><td>n = 41, R = 12</td><td class="n">984</td><td class="n">40 / 512</td><td class="n">12 / 12</td><td class="n">11,640 / 11,808</td><td class="n">484,128</td><td class="n">496.248</td><td class="n">19.51</td><td class="n">0 / 3</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>PR #757: fresh targets disjoint from training, exact full-coordinate group-law four-sum oracle versus unchanged compact S3 extractor; n41 R12 reuses the first 128 n41 R8 targets. The displayed necessary ceiling is C(F+3,4)/(q−1) for the sampled nonzero scalars, where q is the selected prime subgroup order; tuple collisions can only lower support. Both arms used the same frozen target file for each row.</caption>
+    <thead><tr><th>Curve/base</th><th class="n">F points</th><th class="n">Fresh targets</th><th class="n">Nonzero-target tuple ceiling</th><th class="n">Oracle members</th><th class="n">Extractor hits</th><th class="n">Oracle-only</th></tr></thead>
+    <tbody>
+      <tr><td>n = 37, R = 3</td><td class="n">222</td><td class="n">512</td><td class="n">0.450829</td><td class="n">164</td><td class="n">164</td><td class="n">0</td></tr>
+      <tr><td>n = 41, R = 8</td><td class="n">656</td><td class="n">512</td><td class="n">0.014164</td><td class="n">10</td><td class="n">10</td><td class="n">0</td></tr>
+      <tr><td>n = 41, R = 12</td><td class="n">984</td><td class="n">128</td><td class="n">0.071490</td><td class="n">3</td><td class="n">3</td><td class="n">0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>All six Q scalars were independently recovered by the separate L = 1 rho controls; their three-process sum is not a shared-work L = 3 comparator. Compact recovered zero logs at every base, including five full-rank bases. The IC/rho completed-workload cost ratio and S remain unset. The 512-query variants and confidence intervals, plus 4,096-query extensions, remain in the <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/COMPACT_BASE_SWEEP_RESULT_20260925.md">frozen result</a>. Observed indexed partner hits always lifted, while each miss scanned <code>F²/2</code> S3 candidates. High root occupancy therefore does not establish high target coverage. The <a href="https://github.com/aburan28/crypto/pull/757">fresh-stream complete four-sum oracle in PR #757</a> agrees with the compact extractor on every frozen target: 164/512, 10/512 and 3/128 members in the three rows above, with no oracle-positive extractor miss. Independent replay rebuilt all unordered pair sums, checked 237 distinct positive four-multiset witnesses and exhaustively certified 16 misses per arm. This resolves the sampled Gate 1 toward support, representation and summand count rather than a root-index repair; finite streams do not prove global extractor completeness.</p>
+    <p>The <a href="https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/COMPACT_ORBIT_N131_UNORDERED_ADDENDUM_20260925.md">exact n = 131 count</a> uses at most <code>C(F+3,4)</code> distinct unordered four-point choices. At a modeled 1 TiB packed-root cap, uniform-target coverage is at most <code>8.82e-15</code>; a base whose ceiling merely reaches 1% conditionally projects 1.171 EB of 24-byte materialized root records. These are model-only necessary bounds, stronger than the historical ordered-tuple figures, with no n = 131 solver or memory measurement. Five- and six-summand ideas require a new solver/index architecture gate; their easier combinatorial thresholds alone confer no speed or memory claim.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_base_sweep_20260925/evidence/SHA256SUMS">27 raw receipts and SHA-256 ledger</a> (<code>SHA256SUMS</code> SHA-256 <code>d20e66aad75e2f68ed7143ce7df7989666db5d370ef8592f7c6646271cebf1c4</code>), <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_base_sweep_20260925/replay_all.py">fail-closed replay</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/FOUR_SUM_MEMBERSHIP_RESULT_20260925.md">four-sum oracle decision and receipts</a>, and the <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/COMPACT_BASE_SWEEP_PROTOCOL_20260925.md">frozen protocol</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-compact-sparse-base-sweep-20260925 -->
+<!-- BEGIN ecc2k130-rotated-subspace-support-20260925 -->
+<section class="panel" id="ecc2k130-rotated-subspace-support-20260925">
+  <div class="panel-head">
+    <h2>Rotated five/six-summand spaces: exact toy support passes; n = 131 count gate remains conditional <span class="chip">support</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/762">PR #762</a> froze two normal-basis generators, exact cofactor-four targets and a repeated-F0 control before outcomes. A full n = 13 group-law census and independent second-arithmetic replay show a large support gain from distinct Frobenius-rotated summand spaces. The n = 131 arm checks field structure, a projected Frobenius scalar identity and 81,920 fixed x-lift samples; it measures no target decomposition, solver, relation rank, log, or whole-attack cost. <a href="https://github.com/aburan28/crypto/pull/763">PR #763</a> audits the separate multiword/streaming solver-corpus prerequisite.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact E(F<sub>2<sup>13</sup></sub>), order 8,012 = 4·2,003. Every Q=[k]H including O is checked against all four Q+T torsion shifts; each [4]-projected support count is independently reconstructed from the complete full-point sum histogram. Rotated/repeated ratio is a support ratio, not a time or DLP speed ratio.</caption>
+    <thead><tr><th>Beta</th><th>Summands</th><th>Policy</th><th>Points / factor</th><th>Labelled tuples</th><th>Distinct full sums</th><th>Raw H support</th><th>Projected H support</th><th>Rotated / repeated</th></tr></thead>
+    <tbody>
+      <tr><td>3</td><td>5</td><td>Rotated</td><td>5</td><td>3,125</td><td>1,799</td><td>404 / 2,003</td><td>1,591 / 2,003</td><td>26.082</td></tr>
+      <tr><td>3</td><td>5</td><td>Repeated</td><td>5</td><td>3,125</td><td>61</td><td>10 / 2,003</td><td>61 / 2,003</td><td>1.000</td></tr>
+      <tr><td>3</td><td>6</td><td>Rotated</td><td>5</td><td>15,625</td><td>6,307</td><td>1,659 / 2,003</td><td>2,003 / 2,003</td><td>23.565</td></tr>
+      <tr><td>3</td><td>6</td><td>Repeated</td><td>5</td><td>15,625</td><td>85</td><td>21 / 2,003</td><td>85 / 2,003</td><td>1.000</td></tr>
+      <tr><td>7</td><td>5</td><td>Rotated</td><td>5</td><td>3,125</td><td>1,799</td><td>404 / 2,003</td><td>1,591 / 2,003</td><td>26.082</td></tr>
+      <tr><td>7</td><td>5</td><td>Repeated</td><td>5</td><td>3,125</td><td>61</td><td>10 / 2,003</td><td>61 / 2,003</td><td>1.000</td></tr>
+      <tr><td>7</td><td>6</td><td>Rotated</td><td>7</td><td>117,649</td><td>8,012</td><td>2,003 / 2,003</td><td>2,003 / 2,003</td><td>5.428</td></tr>
+      <tr><td>7</td><td>6</td><td>Repeated</td><td>7</td><td>117,649</td><td>377</td><td>97 / 2,003</td><td>369 / 2,003</td><td>1.000</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-scroll"><table>
+    <caption>n = 131 fixed 16,384-mask sample per cell; projected columns use the nominal F0 size 2^d, not a proved upper bound. Idealized necessary ceiling uses |Fi|≈2^d and exact prime order q; sample-calibrated values depend on the SHA-mask lift-density model. Neither column predicts actual target hit probability.</caption>
+    <thead><tr><th>m,d</th><th>Solvable x / 16,384</th><th>Ideal projected tuple ceiling</th><th>Sample-calibrated ratio</th><th>Descriptive 95% upper ratio</th><th>Ideal physical choices</th><th>F0 column proxy</th></tr></thead>
+    <tbody>
+      <tr><td>5,24</td><td>8,070</td><td>0.001953</td><td>0.001812</td><td>0.001957</td><td>83,886,080</td><td>16,777,216</td></tr>
+      <tr><td>5,25</td><td>8,143</td><td>0.062500</td><td>0.060653</td><td>0.065471</td><td>167,772,160</td><td>33,554,432</td></tr>
+      <tr><td>5,26</td><td>8,228</td><td>1.000000</td><td>1.000000</td><td>1.000000</td><td>335,544,320</td><td>67,108,864</td></tr>
+      <tr><td>6,20</td><td>8,117</td><td>0.001953</td><td>0.001848</td><td>0.002026</td><td>6,291,456</td><td>1,048,576</td></tr>
+      <tr><td>6,21</td><td>8,198</td><td>0.125000</td><td>0.125550</td><td>0.137525</td><td>12,582,912</td><td>2,097,152</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The preregistered toy support-improvement gate passes. The m = 6 rotated n = 13 arms have zero projected-negative H targets, so an UNSAT corpus must use the m = 5 negatives or a larger predeclared rung. All 18,501 full-point witnesses and 45,595 negative full-point support decisions were independently replayed; 256 covariance masks per n = 131 cell and every density row also replayed. On nonzero n = 13 H targets, trace of x, exact cofactor class and Frobenius-orbit size are constant, so they do not stratify PDP difficulty. The m = 6,d = 21 n = 131 count cell is a conditional smaller-base candidate; an implicit solver and memory gate are still absent. A materialized three-summand half at 24 bytes per tuple would project about 221 EB there. Full-ECDLP S and rho ratio remain unset.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_subspace_support_20260925/RESULT.md">exact decision and limits</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_subspace_support_20260925/PROTOCOL.md">pre-outcome protocol</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_subspace_support_20260925/evidence/README.md">raw archive and independent replay receipt</a>. Raw archive SHA-256 <code>fad4b4cc48f980349d1ef472d18327368dd0f93f3d1284fc8bbdc20f0d3086d7</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-subspace-support-20260925 -->
+<!-- BEGIN ecc2k130-direct-challenge-import-20260925 -->
+<section class="panel" id="ecc2k130-direct-challenge-import-20260925">
+  <div class="panel-head">
+    <h2>Public ECC2K-130 P and Q import directly into the rotated n = 131 model <span class="chip">representation</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/771">PR #771</a> checks that the #762 polynomial <code>z<sup>131</sup>+z<sup>13</sup>+z²+z+1</code> and bit-i coefficient encoding exactly match the repository's public challenge-point source. The literal P and Q each pass on-curve, subgroup-order and Frobenius-scalar identities in both the producer and an independent bit-serial/Fermat implementation; beta 3 has normal rank 131. The committed fixture gives their polynomial and normal coordinates plus every exact Q+T torsion translate. Each translate maps to the same [4]Q, while their <code>Tr(x)</code> values in torsion order O,(0,1),(1,0),(1,1) are 0,0,1,1.</p>
+    <p>This closes a point-representation prerequisite for a future actual-target S6/S7 exporter, not a decomposition, challenge log, rank, natural-target support estimate or speed claim. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/challenge_point_import_20260925/RESULT.md">Scope and replay</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/challenge_point_import_20260925/challenge_points.json">literal target fixture</a> (SHA-256 <code>939fac55c31b7145be425ce09f543feba29aa47846a8355d1f0841f6e594113a</code>).</p>
+  </div>
+</section>
+<!-- END ecc2k130-direct-challenge-import-20260925 -->
+<!-- BEGIN ecc2k130-n131-beta3-f0-census-20260925 -->
+<section class="panel" id="ecc2k130-n131-beta3-f0-census-20260925">
+  <div class="panel-head">
+    <h2>Exact n = 131 beta-3 F0: 1,048,134 nonzero signed columns <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/773">PR #773</a> preregistered the m = 6,d = 21 beta-3 F0 before enumerating all 2,097,152 Gray-code masks. Independent natural-mask and polynomial-division arithmetic replay matched every row digest, lift decision and canonical ±[4] projected x key. The 64 frozen n = 131 full-group-law samples and complete n = 13/19 F0 and four-torsion controls passed. The zero mask gives the identity column; x = 1 is excluded by the normal-basis coordinates.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>C counts distinct nonzero canonical ±[4] projected point pairs, keyed by x. O is one separate zero column. The prior 2<sup>21</sup> F0-column figure was a nominal proxy; no row rank, target-support probability or S/rho cost is inferred.</caption>
+    <thead><tr><th>Exact stage</th><th>F0 masks</th><th>Liftable nonzero x, L</th><th>Physical F0 points</th><th>Nonzero ± columns, C</th><th>Repeated-column x preimages</th><th>Independent replay</th><th>Rank / S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>Gray-prefix pilot</td><td>32,768</td><td>16,707</td><td>33,415</td><td>16,707</td><td>0</td><td>all rows</td><td>unset / unset / unset</td></tr>
+      <tr><td>Full n = 131 F0</td><td>2,097,152</td><td>1,048,134</td><td>2,096,269</td><td>1,048,134</td><td>0</td><td>all 2,097,152 rows</td><td>unset / unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>All 1,048,134 nonzero columns have exactly one rational x preimage; adding O gives 1,048,135 signed columns. The nominal 2<sup>21</sup> proxy is 2.00084 times the exact nonzero signed-column count, but the physical F0 size is only 883 below 2<sup>21</sup>. This corrects cardinality accounting, not an algorithmic crossover. The full producer used 74.262 s wall, 3,145,285 field inversions in enumeration and 138,067,968 B peak RSS; independent all-mask replay used 902.264 s and 157,351,936 B. Both passed frozen caps. The next exporter/solver gate may use these exact sizes, while natural-target relations, matrix rank, actual challenge decomposition and matched rho remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/PROTOCOL.md">frozen protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/EVIDENCE.md">raw receipts and replay</a>. Full row SHA-256 <code>b8b03e28e783ebec12be04c82542d74448896e3a128c0a5784a77a0a688da30d</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n131-beta3-f0-census-20260925 -->
+<!-- BEGIN ecc2k130-rotated-pdp-corpus-20260925 -->
+<section class="panel" id="ecc2k130-rotated-pdp-corpus-20260925">
+  <div class="panel-head">
+    <h2>Rotated projected PDP corpus: fixed positives and exact negatives at m = 5 and m = 6 <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/767">PR #767</a> preregistered the n = 13,m = 5 and n = 19,m = 6 point-target arms after <a href="https://github.com/aburan28/crypto/pull/762">PR #762</a> found n = 13,m = 6 projected support saturated. Every labelled tuple was enumerated by exact group law and an independent field/group-law implementation rebuilt both full-point and cofactor-projected histograms. The selection stream fixed four planted and four certified projected-negative subgroup targets per arm before any solver query. Both arms passed the frozen 300/600 s producer/verifier and 512 MiB per-child caps. These are corpus-admission measurements, not solver timings or an ECDLP performance comparison.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Complete point-sum census for rotated d = 2, beta = 3 factors. Projected support includes the identity in the prime-order subgroup. The n = 19 minimum-miss count is the preregistered necessary bound q - 7<sup>6</sup>, not a predicted hit rate. S and matched-rho ratios are unset.</caption>
+    <thead><tr><th>Exact arm</th><th>Factor points</th><th>Labelled tuples</th><th>Distinct full sums</th><th>Projected support / q</th><th>Necessary misses</th><th>Exact misses</th><th>Frozen targets</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>5 &times; 5</td><td>3,125</td><td>1,799</td><td>1,591 / 2,003</td><td>0</td><td>412</td><td>4 planted + 4 negative; independently replayed</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>7 &times; 6</td><td>117,649</td><td>81,175</td><td>62,389 / 130,873</td><td>13,224</td><td>68,484</td><td>4 planted + 4 negative; independently replayed</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The archive preserves every selection attempt, all four torsion-shift multiplicities for each selected target, full and projected histograms, factor lists, operation counts and process receipts. n = 13 support matches all 2,003 subgroup labels in the independently archived parent #762 census. No SAT/FES/crossbred/F4/F5 solver was run, so no relative solver difficulty, n = 131 yield, ECC2K-130 speedup, or rho crossover follows. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_pdp_corpus_20260925/RESULT.md">decision and cost table</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_pdp_corpus_20260925/PROTOCOL.md">pre-outcome protocol</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/README.md">raw archive and replay</a>. Raw SHA-256 <code>39f16990213e2c7525c6dae92c131127b12f914bbfd6182264249da72bc9546c</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-pdp-corpus-20260925 -->
+<!-- BEGIN ecc2k130-rotated-m56-export-gate-20260925 -->
+<section class="panel" id="ecc2k130-rotated-m56-export-gate-20260925">
+  <div class="panel-head">
+    <h2>Rotated m = 5/6 exporter semantics: rational reference passes; polynomial export still gated <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/770">PR #770</a> pins the 16 point targets from <a href="https://github.com/aburan28/crypto/pull/767">#767</a>, then re-enumerates every rational rotated tuple and an equal-count repeated-F0 control. All 64 fixed Q+T counts match the complete parent corpus, every rational tuple passes the trace parity law, and all affine S3-chain prefixes vanish while infinity branches are kept explicit. This is an exact model-checking reference and capacity gate; no S6/S7 ANF, solver timing, relation rank, or ECDLP cost was produced.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Direct x-mask reference and raw recursive-chain layout before exception/sign/SAT auxiliaries. Support counts include O. The repeated-F0 control has no witness on any of the 16 frozen Q targets, so it cannot be a same-Q positive solver-time comparator here. Full S and rho ratios remain unset.</caption>
+    <thead><tr><th>Toy arm</th><th>Rational point tuples</th><th>Rational x masks / formal masks</th><th>Rotated / repeated projected support</th><th>Exact Q+T replay</th><th>Raw chain bits / rows</th><th>Infinity/inverse prefix steps</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>3,125</td><td>243 / 1,024</td><td>1,591 / 61</td><td>32/32</td><td>49 / 52</td><td>130 / 130</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>117,649</td><td>4,096 / 4,096</td><td>62,389 / 377</td><td>32/32</td><td>88 / 95; exceeds u64 mask</td><td>2,450 / 2,451</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>For each fixed torsion translate, x-mask parity must match Tr(x(Q+T)); both parity classes remain necessary when all four T are allowed. Naive cross-slot sorting discards verified projected labels because nonzero rotated factor spaces are distinct: the first structural n = 13 and n = 19 counterexamples retain full Q+T witnesses, and swapping their first two points breaks both slot memberships. The initial lift-domain preflight failure is preserved; a corrected source freeze and fresh replay passed. The next gate must export and validate direct/chain equations against these exact mask sets before SAT, Gröbner, FES or WDSat arms can be ranked. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/RESULT.md">decision and limits</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/PROTOCOL.md">frozen protocol</a>, and <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_m56_export_gate_20260925/evidence/README.md">raw receipts and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-m56-export-gate-20260925 -->
+<!-- BEGIN ecc2k130-rotated-s3-candidate-20260925 -->
+<section class="panel" id="ecc2k130-rotated-s3-candidate-20260925">
+  <div class="panel-head">
+    <h2>Recursive S3 affine candidates: exact toy lifts pass, one O-prefix witness is missed <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/774">PR #774</a> freezes the same 16 subgroup Q targets and 64 exact Q+T branches as #770, solves every affine recursive-S3 root for every rational rotated x-mask tuple, and independently rebuilds the complete signed-point oracle with separate field arithmetic. The 18 affine candidate paths all lift to their specific full target; no all-affine witness is missed. One additional n = 13 exact witness has its first two factors summing to O, so an affine-only chain cannot express it. An absent affine-chain model is therefore not full PDP UNSAT.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exhaustive toy semantic counts. The correctness boundary is zero candidate-only masks and complete recovery of all-affine witnesses; both arms meet it. Trace acceptance is an input-mask filter count, not measured solver savings. Full-DLP S and rho ratios remain unset.</caption>
+    <thead><tr><th>Toy arm</th><th>Rational x masks / point tuples</th><th>Trace-accepted masks per target parity</th><th>Affine S3 paths / true all-affine tuples</th><th>Exact O-prefix tuples / exceptional-only masks</th><th>Candidate-only masks / unliftable paths</th><th>Producer / independent verifier wall s</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>243 / 3,125</td><td>121 or 122 / 243</td><td>8 / 8</td><td>1 / 1</td><td>0 / 0</td><td>0.212 / 0.160</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>4,096 / 117,649</td><td>2,048 / 4,096</td><td>10 / 10</td><td>0 / 0</td><td>0 / 0</td><td>14.024 / 9.934</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The n = 13 exceptional-only mask <code>[0,0,0,2,1]</code> has an exact Q+O witness whose first two points are both (0,1) and sum to O. The first independent replay stopped on a string-versus-integer JSON key mismatch; its raw failure and old freeze were retained before a corrected replay passed. The next gate must encode infinity/inverse branches and prove direct-versus-chain model equivalence before SAT, FES, WDSat, F4 or F5 timing. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_candidate_20260925/RESULT.md">Decision and full cost ledger</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/README.md">raw replay receipts</a>. This is semantic accounting, not a measured ECC2K-130 attack improvement.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-s3-candidate-20260925 -->
+<!-- BEGIN ecc2k130-s3-fibre-theorem-20260925 -->
+<section class="panel" id="ecc2k130-s3-fibre-theorem-20260925">
+  <div class="panel-head">
+    <h2>Recursive S3 on complete rational x fibres: affine paths are exact <span class="chip">semantic theorem</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/777">PR #777</a> proves the finite-fibre S3 root theorem for <code>y²+xy=x³+1</code>: every finite root for two rational, sign-complete factor fibres is the x-coordinate of a rational signed sum, including x=0, doubling and inverse cases. Negating all earlier factors reconciles each recursive prefix sign without changing its x path; global negation gives either affine target sign. The proof is universal in finite characteristic-two extensions; the independently replayed small-field controls below check its implementation and edge cases.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Frozen exhaustive controls after pre-outcome source hash and draft PR. Pair rows span n=1..7; chain panels enumerate every rational x tuple and signed point tuple. O-prefix and O-terminal counts may overlap. Full S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Control</th><th>Rational x tuples / ordered pairs</th><th>Signed point tuples / S3 evaluations</th><th>Distinct affine paths / root occurrences</th><th>O-prefix / O-terminal signed tuples</th><th>Candidate-only paths / missing target signs</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n=1..7 pairs</td><td>4,720 pairs</td><td>497,384 evaluations</td><td>9,075 roots</td><td>—</td><td>0 pair mismatches</td><td>unset / unset</td></tr>
+      <tr><td>n=3, m=4 chain</td><td>16 tuples</td><td>81 point tuples</td><td>8 paths</td><td>45 / 21</td><td>0 / 0</td><td>unset / unset</td></tr>
+      <tr><td>n=4, m=4 chain</td><td>4,096 tuples</td><td>50,625 point tuples</td><td>19,208 paths</td><td>6,525 / 3,165</td><td>0 / 0</td><td>unset / unset</td></tr>
+      <tr><td>n=5, m=3 chain</td><td>10,648 tuples</td><td>79,507 point tuples</td><td>37,485 paths</td><td>1,849 / 1,806</td><td>0 / 0</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The independent verifier compared all 4,720 pair rows and 56,701 complete affine-chain rows, including both terminal signs. A nonliftable formal n=3 S3 root and a first single-sign loss at n=2 demonstrate why rational lifts and sign completeness are required. Producer/verifier wall was 2.878/3.222 s under the frozen 180 s and 512 MiB per-child caps. The remaining semantic work is explicit O-prefix, inverse and O-target branches and validation of a concrete exporter against the full point oracle; this proof alone does not admit solver UNSAT, direct higher-S<sub>m</sub> equations or n=131 performance claims. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/RESULT.md">Decision and proof boundary</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/evidence/README.md">raw evidence and replay</a>. Freeze SHA-256 <code>d87bfa84b6d6ccffe859cf044b22cbf0fc901ac71e3d0d01b35469a7760855e3</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-fibre-theorem-20260925 -->
+<!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
+<section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
+  <div class="panel-head">
+    <h2>Rotated Frobenius-compressed rows: exact witness identities pass <span class="chip">row semantics</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/766">PR #766</a> froze the source and synthetic inputs before running. For every one of the 17,917 positive full-point Q+T witnesses saved by PR #762's four rotated n = 13 arms, it reconstructed each factor point, transported it back by Frobenius, projected by [4], assigned its signed &lambda;<sup>i</sup> coefficient, and verified the aggregate row equals [4]Q. A separate bit-serial/Fermat group implementation checked the complete 2,003-target &times; four-coset roster, every positive row and all misses. All-torsion and repeated-column controls passed. Eight SHA-fixed n = 131 public synthetic planted tuples passed the same row algebra without a PDP search.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact n = 13 saved witnesses. Columns are canonical projected F0 point choices seen in nonzero rows; weight counts are nonzero coefficients after sign-aware aggregation. The tiny 2/3-column bases are structural toy controls, not measured rank or a predicted n = 131 matrix size.</caption>
+    <thead><tr><th>Rotated arm</th><th class="n">Positive Q+T rows</th><th class="n">Distinct columns</th><th>Row weights 0 / 1 / 2 / 3</th><th class="n">Producer wall s</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, beta 3, m = 5</td><td class="n">1,799</td><td class="n">2</td><td>1 / 226 / 1,572 / 0</td><td class="n">1.759</td></tr>
+      <tr><td>n = 13, beta 3, m = 6</td><td class="n">6,307</td><td class="n">2</td><td>1 / 470 / 5,836 / 0</td><td class="n">7.026</td></tr>
+      <tr><td>n = 13, beta 7, m = 5</td><td class="n">1,799</td><td class="n">2</td><td>1 / 226 / 1,572 / 0</td><td class="n">1.812</td></tr>
+      <tr><td>n = 13, beta 7, m = 6</td><td class="n">8,012</td><td class="n">3</td><td>1 / 261 / 3,464 / 4,286</td><td class="n">9.523</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Producer/independent verifier wall was 21.238/52.914 s on the recorded macOS host, with a 177,078,272-byte high-water child RSS. The two n = 131 planted cells took 0.490/0.585 s in the producer and had 15/18 distinct term columns across four tuples each. All source and output hashes, stage operation counts, complete row files, sign/torsion controls and an archive-only replay are retained. Passing this semantic gate does not establish independent rank, solver feasibility, relation yield, an ECC2K-130 log or an IC/rho speed ratio. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/PROTOCOL.md">protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/evidence/README.md">archive receipt</a>. Raw SHA-256 <code>863f50ea872ce01b1999d0ef67bc0341fa0c764f2ad4187d16736768b0ab9b3d</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-row-certificate-20260925 -->
+<!-- BEGIN ecc2k130-rotated-rank-holdout-20260925 -->
+<section class="panel" id="ecc2k130-rotated-rank-holdout-20260925">
+  <div class="panel-head">
+    <h2>Rotated toy rows: exact rank saturates in 2/3 equations; 64 point-only holdouts replay <span class="chip">rank diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/768">PR #768</a> froze SHA-selected 16 projected-positive nonzero Q points per n = 13 arm, retained 4/0/2/0 preceding selection misses, and removed all Q+T rows for those Q before modulo-2,003 elimination. An independent bit-serial/Fermat replay checked the exact rank, every remaining row equation, each solved column log by group law, and every held-out scalar. Recovery was passed only Q coordinates, column logs and a stripped saved-row response; the full old-row archive scan is charged as an <em>oracle lookup</em>, not a new PDP solver.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>The rank denominator is the complete canonical term-column set in each frozen toy arm. Dependent counts include one zero row. The 16 point-only cases per arm were selected for positive archived support, so oracle hits do not estimate a natural-target hit rate.</caption>
+    <thead><tr><th>Rotated arm</th><th class="n">Retained / archived rows</th><th class="n">Rank / columns</th><th class="n">Dependent incl. zero</th><th class="n">First full-rank row</th><th class="n">Point-only logs</th></tr></thead>
+    <tbody>
+      <tr><td>beta 3, m = 5</td><td class="n">1,780 / 1,799</td><td class="n">2 / 2</td><td class="n">1,778</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 3, m = 6</td><td class="n">6,261 / 6,307</td><td class="n">2 / 2</td><td class="n">6,259</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 7, m = 5</td><td class="n">1,781 / 1,799</td><td class="n">2 / 2</td><td class="n">1,779</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 7, m = 6</td><td class="n">7,948 / 8,012</td><td class="n">3 / 3</td><td class="n">7,945</td><td class="n">5</td><td class="n">16 / 16</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The charged toy producer used 0.681 s wall for training, scanning all 17,917 archived rows and point-only recovery; independent replay took 0.441 s. Input construction took 0.051 s. The rank trainer/verifier peaked at 176,963,584/181,403,648 bytes RSS. Thus #766's 17,917 correct identities yield only 2/2/2/3 independent rows in these separate tiny column spaces. The 64/64 recovered scalars depend on precomputed archived witness rows, not an implicit n = 131 PDP search. Full n = 131 factor-base cardinality/rank cost, natural-target relation yield, rho comparison and a Certicom log remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/PROTOCOL.md">pre-outcome protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/evidence/README.md">archive receipt</a>. Raw SHA-256 <code>3b483e486eb1dec9d34a81653cb6b568b74ada33e8c05305304810ec87ba3c6a</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-rank-holdout-20260925 -->
+<!-- BEGIN ecc2k130-rotated-beta-sweep-20260925 -->
+<section class="panel" id="ecc2k130-rotated-beta-sweep-20260925">
+  <div class="panel-head">
+    <h2>Rotated normal-beta sweep: exact n = 19 support moves at fixed base size; no beta meets the follow-up gate <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/769">PR #769</a> froze a SHA-selected four-beta sweep against merged <a href="https://github.com/aburan28/crypto/pull/767">#767</a> beta 3. Each arm has six seven-point rotated factors, seven signed projected F0 points (three nonzero sign-pair columns plus O), 117,649 labelled tuples, and the same 130,873-point subgroup. Every tuple and subgroup target was independently replayed with separate bit-serial field/group arithmetic, as were the eight unchanged #767 point labels. This is a factor-base support diagnostic, with no solver or log timing.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact projected point support including O, q = 130,873. Energy E = sum of squared tuple multiplicities; N<sup>2</sup>/E is a Cauchy&ndash;Schwarz lower bound on support, not a measured attack yield. All rows have at least 13,224 necessary misses from q &minus; 7<sup>6</sup>. Follow-up requires support at least 68,628 and E/support no worse than beta 3.</caption>
+    <thead><tr><th>Normal beta</th><th>Projected support / q</th><th>Exact misses</th><th>&Delta; vs beta 3</th><th>Tuple energy E</th><th>Effective floor N<sup>2</sup>/E</th><th>Overlap with beta 3</th><th>Fixed #767 label flips</th><th>Follow-up gate</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>3, #767 reference</td><td>62,389 / 130,873</td><td>68,484</td><td>reference</td><td>327,325</td><td>42,286.1</td><td>62,389</td><td>0 / 8</td><td>reference</td><td>unset / unset</td></tr>
+      <tr><td>338435</td><td>66,179 / 130,873</td><td>64,694</td><td>+3,790</td><td>297,425</td><td>46,537.1</td><td>31,457</td><td>5 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+      <tr><td>303097</td><td>66,203 / 130,873</td><td>64,670</td><td>+3,814</td><td>298,357</td><td>46,391.7</td><td>31,579</td><td>5 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+      <tr><td>464276</td><td>59,323 / 130,873</td><td>71,550</td><td>&minus;3,066</td><td>353,429</td><td>39,162.9</td><td>28,253</td><td>4 / 8</td><td>FAIL: support and energy</td><td>unset / unset</td></tr>
+      <tr><td>42605</td><td>64,657 / 130,873</td><td>66,216</td><td>+2,268</td><td>309,229</td><td>44,760.6</td><td>30,981</td><td>4 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The largest gain is 6.11% over beta 3, below the preregistered 10% support threshold. Exact projected-energy-per-supported-target improves on three candidates, yet no candidate passes both conditions. Supported point sets have only 28,253&ndash;31,579 shared targets with beta 3, so a frozen beta-3 planted or negative label can change status under another base. Prioritize other factor-base and solver directions over more toy normal-beta tuning. There is no n = 131 transfer, ECC2K-130 speedup, rho ratio or full-cost S. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/RESULT.md">exact decision and operations</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/PROTOCOL.md">pre-outcome protocol</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/evidence/README.md">raw archive and replay</a>. Archive SHA-256 <code>fe84aef6a2cf7f6f4c950245c9c8e870354fb750666f5482b81f9a997d107140</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-beta-sweep-20260925 -->
+<!-- BEGIN ecc2k130-rotated-beta-portfolio-20260925 -->
+<section class="panel" id="ecc2k130-rotated-beta-portfolio-20260925">
+  <div class="panel-head">
+    <h2>Rotated beta portfolio: five fixed bases cover 96.4790% of n = 19 targets <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/775">PR #775</a> combined the complete, independently checked #767/#769 n = 19, m = 6 projected target sets at equal seven-point factors and three nonzero signed F0 columns per base. All 130,873 subgroup points, 32 membership patterns and 31 subset unions were replayed through an independent bit-serial group-index enumeration and four archived target-count arrays. The fixed order is beta 3, 338435, 303097, 464276, 42605.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact union support including O. The frozen support-only gate was 117,786 targets (90% of q); it first passes with four bases. Each additional base may incur separate logarithm, relation and solver costs. Full-cost S and matched rho remain unset.</caption>
+    <thead><tr><th>Fixed-order prefix</th><th class="n">Projected support / q</th><th class="n">Coverage</th><th class="n">Marginal support</th><th class="n">Exact misses</th><th>Support gate</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>3</td><td class="n">62,389 / 130,873</td><td class="n">47.6714%</td><td class="n">62,389</td><td class="n">68,484</td><td>below 90%</td><td>unset / unset</td></tr>
+      <tr><td>+ 338435</td><td class="n">97,111 / 130,873</td><td class="n">74.2025%</td><td class="n">34,722</td><td class="n">33,762</td><td>below 90%</td><td>unset / unset</td></tr>
+      <tr><td>+ 303097</td><td class="n">114,165 / 130,873</td><td class="n">87.2334%</td><td class="n">17,054</td><td class="n">16,708</td><td>below 90%</td><td>unset / unset</td></tr>
+      <tr><td>+ 464276</td><td class="n">121,851 / 130,873</td><td class="n">93.1063%</td><td class="n">7,686</td><td class="n">9,022</td><td>PASS for charged follow-up</td><td>unset / unset</td></tr>
+      <tr><td>+ 42605</td><td class="n">126,265 / 130,873</td><td class="n">96.4790%</td><td class="n">4,414</td><td class="n">4,608</td><td>PASS for charged follow-up</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>No three-base subset reaches 90%; the fixed-order four-base choice is the protocol-selected next candidate. The ideal free-membership-oracle probe count is exactly 258,849 / 130,873 = 1.977864 per target in the five-base order, not a measured solver cost. The analysis and independent replay took 1.256 / 6.274 s wall and stayed below 184 MiB high-water RSS. A charged same-Q rank, negative-PDP and point-log study on new fixed targets is required before scaling. No n = 131 support transfer, ECC2K-130 log, end-to-end S or rho speedup is claimed. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_portfolio_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_portfolio_20260925/EVIDENCE.md">complete counts and replay receipt</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-beta-portfolio-20260925 -->
+<!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
+<section class="panel" id="ecc2k130-compact-shared-log-20260925">
+  <div class="panel-head">
+    <h2>Near-saturated compact n = 37/41 true shared-log batches: complete logs, negative charged wall <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/758">PR #758</a> preregistered n = 37 R = 8 (592 signed points) and n = 41 R = 40 (3,280 signed points), then trained each base once on 128/128 independently replayed relations. Rank 8 first appeared at relation 11; rank 40 at relation 96. Three disjoint point-only Q blocks per curve were fully recovered by compact and by fresh signed-Frobenius Kuhn&ndash;Struik batched rho, both at L = 8 and at the conditionally admitted L = 32. All 26 child processes and scalar replays completed under fixed wall/RSS caps with no replacement. The exact unordered four-sum ratios 22.4183 and 8.78836 are vacuous coverage ceilings above one, not empirical hit predictions. Unique-root occupancy was 4,656/4,736 and 129,520/131,200, respectively.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Same-Q Mac wall ratios across all three fixed paired blocks, min&ndash;median&ndash;max. IC lower = cold 128-query training child + cold point child; it omits required log solving and therefore favors IC. Audit-inclusive upper adds independently timed full rank/base and point-recovery checks, including proof overhead. The portfolio pays training once for three point blocks. These are wall diagnostics, not a calibrated common-operation S or an asymptotic crossover.</caption>
+    <thead><tr><th>Curve/base</th><th class="n">Q/block</th><th class="n">IC lower / rho</th><th class="n">IC audit upper / rho</th><th>Three-block wall: IC lower / upper / rho</th><th>Verified outcome</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>n = 37, R = 8</td><td class="n">8</td><td class="n">2.63&ndash;12.02&ndash;13.85&times;</td><td class="n">19.14&ndash;87.60&ndash;101.35&times;</td><td>0.864 / 6.839 / 0.398 s</td><td>3/3 pairs; 24/24 logs each arm; negative wall</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>n = 37, R = 8</td><td class="n">32</td><td class="n">12.77&ndash;12.78&ndash;12.95&times;</td><td class="n">106.86&ndash;107.42&ndash;107.50&times;</td><td>1.021 / 10.519 / 0.186 s</td><td>3/3 pairs; 96/96 logs each arm; negative wall</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>n = 41, R = 40</td><td class="n">8</td><td class="n">62.85&ndash;71.77&ndash;77.71&times;</td><td class="n">78.86&ndash;91.88&ndash;99.80&times;</td><td>41.739 / 55.636 / 1.574 s</td><td>3/3 pairs; 24/24 logs each arm; negative wall</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>n = 41, R = 40</td><td class="n">32</td><td class="n">42.14&ndash;46.55&ndash;48.81&times;</td><td class="n">52.83&ndash;58.28&ndash;61.50&times;</td><td>68.058 / 86.754 / 2.989 s</td><td>3/3 pairs; 96/96 logs each arm; negative wall</td><td><span class="chip">accounting</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The lower wall exceeds rho in every paired block, so audit overhead cannot reverse these four frozen-stream negative gates. Training alone made 146,197 S3 calls at n = 37 and 18,182,518 at n = 41; an n = 41 L = 32 compact point block made 5,499,904&ndash;6,317,838 S3 calls versus 561,441&ndash;667,413 rho walk steps. Native counters have different unit costs. No 95% paired interval can exclude parity from only three blocks. The Mac panels ran at 10:51:30&ndash;10:51:49 and 10:52:00&ndash;10:53:53 UTC; the separate #760 local CPU checks began after 10:56 UTC, so they did not overlap. Maximum compact RSS stayed below 35 MB; the first offline-build plumbing failure and both passing RSS-cap smokes are preserved.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_shared_log_20260925/RESULT.md">frozen result and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_shared_log_20260925/analysis.json">all paired ratios and native counters</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_shared_log_20260925/evidence/SHA256SUMS">26-run archive ledger</a> (SHA-256 <code>84ad0e494880e51360491276e130aea93ec16ab095ca22fe6ee53f491612f207</code>). This toy-rung wall result does not relax the n = 131 unordered four-sum/root-memory bound above. A longer-sum or implicit-index method requires a separate solver and cost gate.</p>
+  </div>
+</section>
+<!-- END ecc2k130-compact-shared-log-20260925 -->
 </body>
 </html>
