@@ -1,0 +1,36 @@
+{
+  "archive": "paired_fullrank_overlay_evidence_20260925.tar.gz",
+  "archive_bytes": 1177407,
+  "archive_sha256": "1d52dc9e340f8257bd127333a71dd6b944ef4ab01c54b5003502f616000025b4",
+  "classification": "provisional source overlay",
+  "extract": "tar -xzf paired_fullrank_overlay_evidence_20260925.tar.gz",
+  "parts": [
+    {
+      "bytes": 262144,
+      "name": "paired_fullrank_overlay_evidence_20260925.tar.gz.part00",
+      "sha256": "b772e0413e68d2c6a4da8e77b8046b4450d2a3222e4e31dc6bd96de2c94c5f5c"
+    },
+    {
+      "bytes": 262144,
+      "name": "paired_fullrank_overlay_evidence_20260925.tar.gz.part01",
+      "sha256": "3f362d14b00d4035b2932dbb82587cf1d74f6d8944a4967e211041bd39fa771c"
+    },
+    {
+      "bytes": 262144,
+      "name": "paired_fullrank_overlay_evidence_20260925.tar.gz.part02",
+      "sha256": "89ace2ef0e69117d548768b23d8004aff55089fd8d9c34dffba6439589e8fa45"
+    },
+    {
+      "bytes": 262144,
+      "name": "paired_fullrank_overlay_evidence_20260925.tar.gz.part03",
+      "sha256": "2056f0951f16842e29311a15f049c55900a1e4b09973b214f43232f314e4d12a"
+    },
+    {
+      "bytes": 128831,
+      "name": "paired_fullrank_overlay_evidence_20260925.tar.gz.part04",
+      "sha256": "05fa4e6175fce981ae0ec51c595c5984d58c9db989f65b7a7f3561c29fb58f55"
+    }
+  ],
+  "reassembly": "cat paired_fullrank_overlay_evidence_20260925.tar.gz.part* > paired_fullrank_overlay_evidence_20260925.tar.gz",
+  "verify": "shasum -a 256 -c SHA256SUMS"
+}
