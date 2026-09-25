@@ -1,0 +1,63 @@
+c ---- [ banner ] ------------------------------------------------------------
+c
+c Kissat SAT Solver
+c 
+c Copyright (c) 2021-2024 Armin Biere University of Freiburg
+c Copyright (c) 2019-2021 Armin Biere Johannes Kepler University Linz
+c 
+c Version 4.0.4 unknown
+c Apple clang version 17.0.0 (clang-1700.3.19.1) -W -Wall -O3 -DNDEBUG
+c Thu Oct 16 20:09:41 UTC 2025 Darwin Tahoe-arm64.local 25.0.0 arm64
+c
+c ---- [ parsing ] -----------------------------------------------------------
+c
+c opened and reading DIMACS file:
+c
+c   research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/panel/query.cnf
+c
+c parsed 'p cnf 1263 1195345' header
+c closing input after reading 17630785 bytes (17 MB)
+c finished parsing after 0.09 seconds
+c
+c ---- [ solving ] -----------------------------------------------------------
+c
+c seconds switched rate     size/glue tier1   binary         remaining
+c        MB reductions conflicts size  tier2      irredundant
+c         level restarts redundant glue  trail           variables
+c
+c *  0.09 74 0 0 0  0 0   0   0 0.0 0 0 0 0 0% 462372 732972 335 27%
+c l  0.11 122 0 0 0  0 0   0   0 0.0 0 0 0 0 0% 462372 732972 85 7%
+c 0  0.11 122 0 0 0  0 0   0   0 0.0 0 0 0 0 0% 462372 732972 85 7%
+c
+c ---- [ result ] ------------------------------------------------------------
+c
+s UNSATISFIABLE
+c
+c ---- [ profiling ] ---------------------------------------------------------
+c
+c           0.09   88.84 %  parse
+c           0.01   10.95 %  lucky
+c           0.00    0.00 %  search
+c           0.00    0.00 %  simplify
+c =============================================
+c           0.11  100.00 %  total
+c
+c ---- [ statistics ] --------------------------------------------------------
+c
+c conflicts:                                0                0.00 per second
+c decisions:                                0                0.00 per conflict
+c propagations:                         33416           310235    per second
+c switched:                                 0                0    interval
+c
+c ---- [ glue usage ] --------------------------------------------------------
+c
+c no clauses used at all
+c
+c ---- [ resources ] ---------------------------------------------------------
+c
+c maximum-resident-set-size:     130644180992 bytes     124592 MB
+c process-time:                                              0.11 seconds
+c
+c ---- [ shutting down ] -----------------------------------------------------
+c
+c exit 20
