@@ -6389,5 +6389,28 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
 <a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_structural_fields_20260924/results.json">exact results</a>,
 <a href="https://github.com/aburan28/crypto/blob/main/research/koblitz_structural_fields_20260924/receipt.json">verification receipt</a>.</p>
 </section>
+<!-- BEGIN ecc2k130-directed-gates-20260925 -->
+<section class="panel" id="ecc2k130-directed-gates-20260925">
+  <div class="panel-head">
+    <h2>ECC2K-130 directed gates: oriented transport and compact relations are available; the first paired native-base test is negative <span class="chip">accounting</span></h2>
+    <p>The exact degree-263 full-point map and the compact n = 53 relation producer are correctness prerequisites. The measured base comparison below is a separate F<sub>2<sup>21</sup></sub>, order-421 toy diagnostic on one frozen 512-target stream. No ECC2K-130 relation yield, full-DLP S, matched-rho ratio, floor ratio, or challenge-log speedup is established by these three PRs.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Degree-7 paired base pilot: equal 16-point useful subgroup bases; cold field multiplications to first verified rank 17. One field-multiplication unit throughout this table.</caption>
+    <thead><tr><th>Base policy</th><th class="n">Useful points</th><th class="n">Hits / 512</th><th class="n">First rank 17</th><th class="n">Cold field mul</th><th class="n">/ original</th><th>Verified</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>Original</td><td class="n">16</td><td class="n">131</td><td class="n">135</td><td class="n">89,948</td><td class="n">1.000</td><td>rank 17; [356]G = Q</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>Transported original</td><td class="n">16</td><td class="n">131</td><td class="n">135</td><td class="n">327,008</td><td class="n">3.636</td><td>rank 17; [356]G = Q</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>Descendant native</td><td class="n">16</td><td class="n">117</td><td class="n">202</td><td class="n">360,907</td><td class="n">4.012</td><td>rank 17; [356]G = Q</td><td><span class="chip">accounting</span></td></tr>
+      <tr><td>Subgroup pullback</td><td class="n">16</td><td class="n">117</td><td class="n">202</td><td class="n">389,771</td><td class="n">4.333</td><td>rank 17; [356]G = Q</td><td><span class="chip">accounting</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The table includes field setup, kernel/map and base construction, cofactor projection, the target prefix to rank, pair-table work, matrix recovery, and scalar verification. Inversion's internal multiplications are counted once; separate audit replay is not a candidate cost. Original/transported and native/pullback have identical hit and rank trajectories as required by subgroup transport. Native selection fails the predeclared lower-total-cost gate on this one toy stream. The 421-point pullback inverse table is an audit control, not a scalable candidate.</p>
+    <p>Exact-target transport: <a href="https://github.com/aburan28/crypto/pull/717">PR #717</a> passed eight saved degree-263 representatives, 40 independent full-coordinate checks, 2,096 actual-degree kernel inputs, and 122 invalid-input controls. Its general dual isogeny and exact-target PDP yield remain open. Compact producer: <a href="https://github.com/aburan28/crypto/pull/720">PR #720</a> promoted the n = 53 source and frozen 23,320-point base to main; its 12 archived witnesses were replayed in PR validation. The archived claim JSON still has its historical pending-validation label and does not by itself certify a main-based full-rank recovery. These are not cost rows in the toy table.</p>
+    <p>Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/results_final.json">frozen degree-7 raw stream</a> (SHA-256 <code>50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07</code>), <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_factor_base_pilot_20260924/RESULT.md">scope and accounting</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/ecc2k130_oriented_transport_20260924/validation.json">oriented-map validation</a>, and <a href="https://github.com/aburan28/crypto/blob/main/docs/ic/COMPACT_ORBIT_PRODUCER.md">producer provenance and replay</a>. Next gates: disjoint-stream/base-composition replication for native bases; independently checked n = 37/41/53 full-rank and point-only log recoveries with cold batch sizes and matched signed-Frobenius batched rho; then explicit n = 131 transfer assumptions.</p>
+  </div>
+</section>
+<!-- END ecc2k130-directed-gates-20260925 -->
 </body>
 </html>
