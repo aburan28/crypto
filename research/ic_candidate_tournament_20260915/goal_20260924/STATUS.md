@@ -20,7 +20,9 @@ challenger had confirmation ratios of 1.064757 online time, 0.956822 cold Ir and
 metric reached the required 0.8 ratio, the instruction familywise upper bound
 exceeded one, and online regression also failed its aggregate and cell gates.
 The full run export and scoreboard retain every measured variant. Exact Linux
-transport replay and table reproduction are evidence-PR acceptance gates.
+transport replay and byte-exact JSON/CSV/table reproduction passed on the merged
+evidence head. [PR 782](https://github.com/aburan28/crypto/pull/782) merged at
+`b338522537f316f2379ed8cc11bb317212e573ec` with all applicable CI passing.
 The [bounded protocol](improvement/PROTOCOL.md) fixes the nominal familywise rule,
 5,133-point historical exclusions and the first 16-pipeline registry. PR 772
 merged that implementation at `5915da9d56758f81ceabbf978e796cd6be9740c3`.

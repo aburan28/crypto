@@ -492,7 +492,9 @@ pub fn build_decomposition_system(
     }
     let ell = basis.len();
     let n = st.n;
-    let n_vars = m * ell + m.saturating_sub(2) * n as usize;
+    let n_vars = m
+        .checked_mul(ell)?
+        .checked_add((m - 2).checked_mul(n as usize)?)?;
     if n_vars > MAX_VARS {
         return None;
     }
@@ -3603,8 +3605,13 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
-    /// True if the node budget ran out, so results may be incomplete.
+    /// True if the node budget ran out or the input was unsupported, so
+    /// results may be incomplete. Check `unsupported` to distinguish them.
     pub exhausted: bool,
+    /// The decomposition frontend could not encode this input. No solve
+    /// occurred and an empty result is not an infeasibility certificate.
+    /// Also sets `exhausted` for callers using the older completion flag.
+    pub unsupported: bool,
     /// Highest Macaulay degree whose matrix was actually built.
     pub max_degree_built: u32,
     /// Reductions at which the next Macaulay matrix exceeded the size
