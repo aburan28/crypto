@@ -6703,6 +6703,48 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-m56-export-gate-20260925 -->
+<!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
+<section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
+  <div class="panel-head">
+    <h2>Rotated Frobenius-compressed rows: exact witness identities pass <span class="chip">row semantics</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/766">PR #766</a> froze the source and synthetic inputs before running. For every one of the 17,917 positive full-point Q+T witnesses saved by PR #762's four rotated n = 13 arms, it reconstructed each factor point, transported it back by Frobenius, projected by [4], assigned its signed &lambda;<sup>i</sup> coefficient, and verified the aggregate row equals [4]Q. A separate bit-serial/Fermat group implementation checked the complete 2,003-target &times; four-coset roster, every positive row and all misses. All-torsion and repeated-column controls passed. Eight SHA-fixed n = 131 public synthetic planted tuples passed the same row algebra without a PDP search.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact n = 13 saved witnesses. Columns are canonical projected F0 point choices seen in nonzero rows; weight counts are nonzero coefficients after sign-aware aggregation. The tiny 2/3-column bases are structural toy controls, not measured rank or a predicted n = 131 matrix size.</caption>
+    <thead><tr><th>Rotated arm</th><th class="n">Positive Q+T rows</th><th class="n">Distinct columns</th><th>Row weights 0 / 1 / 2 / 3</th><th class="n">Producer wall s</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, beta 3, m = 5</td><td class="n">1,799</td><td class="n">2</td><td>1 / 226 / 1,572 / 0</td><td class="n">1.759</td></tr>
+      <tr><td>n = 13, beta 3, m = 6</td><td class="n">6,307</td><td class="n">2</td><td>1 / 470 / 5,836 / 0</td><td class="n">7.026</td></tr>
+      <tr><td>n = 13, beta 7, m = 5</td><td class="n">1,799</td><td class="n">2</td><td>1 / 226 / 1,572 / 0</td><td class="n">1.812</td></tr>
+      <tr><td>n = 13, beta 7, m = 6</td><td class="n">8,012</td><td class="n">3</td><td>1 / 261 / 3,464 / 4,286</td><td class="n">9.523</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Producer/independent verifier wall was 21.238/52.914 s on the recorded macOS host, with a 177,078,272-byte high-water child RSS. The two n = 131 planted cells took 0.490/0.585 s in the producer and had 15/18 distinct term columns across four tuples each. All source and output hashes, stage operation counts, complete row files, sign/torsion controls and an archive-only replay are retained. Passing this semantic gate does not establish independent rank, solver feasibility, relation yield, an ECC2K-130 log or an IC/rho speed ratio. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/PROTOCOL.md">protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_row_certificate_20260925/evidence/README.md">archive receipt</a>. Raw SHA-256 <code>863f50ea872ce01b1999d0ef67bc0341fa0c764f2ad4187d16736768b0ab9b3d</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-row-certificate-20260925 -->
+<!-- BEGIN ecc2k130-rotated-rank-holdout-20260925 -->
+<section class="panel" id="ecc2k130-rotated-rank-holdout-20260925">
+  <div class="panel-head">
+    <h2>Rotated toy rows: exact rank saturates in 2/3 equations; 64 point-only holdouts replay <span class="chip">rank diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/768">PR #768</a> froze SHA-selected 16 projected-positive nonzero Q points per n = 13 arm, retained 4/0/2/0 preceding selection misses, and removed all Q+T rows for those Q before modulo-2,003 elimination. An independent bit-serial/Fermat replay checked the exact rank, every remaining row equation, each solved column log by group law, and every held-out scalar. Recovery was passed only Q coordinates, column logs and a stripped saved-row response; the full old-row archive scan is charged as an <em>oracle lookup</em>, not a new PDP solver.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>The rank denominator is the complete canonical term-column set in each frozen toy arm. Dependent counts include one zero row. The 16 point-only cases per arm were selected for positive archived support, so oracle hits do not estimate a natural-target hit rate.</caption>
+    <thead><tr><th>Rotated arm</th><th class="n">Retained / archived rows</th><th class="n">Rank / columns</th><th class="n">Dependent incl. zero</th><th class="n">First full-rank row</th><th class="n">Point-only logs</th></tr></thead>
+    <tbody>
+      <tr><td>beta 3, m = 5</td><td class="n">1,780 / 1,799</td><td class="n">2 / 2</td><td class="n">1,778</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 3, m = 6</td><td class="n">6,261 / 6,307</td><td class="n">2 / 2</td><td class="n">6,259</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 7, m = 5</td><td class="n">1,781 / 1,799</td><td class="n">2 / 2</td><td class="n">1,779</td><td class="n">3</td><td class="n">16 / 16</td></tr>
+      <tr><td>beta 7, m = 6</td><td class="n">7,948 / 8,012</td><td class="n">3 / 3</td><td class="n">7,945</td><td class="n">5</td><td class="n">16 / 16</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The charged toy producer used 0.681 s wall for training, scanning all 17,917 archived rows and point-only recovery; independent replay took 0.441 s. Input construction took 0.051 s. The rank trainer/verifier peaked at 176,963,584/181,403,648 bytes RSS. Thus #766's 17,917 correct identities yield only 2/2/2/3 independent rows in these separate tiny column spaces. The 64/64 recovered scalars depend on precomputed archived witness rows, not an implicit n = 131 PDP search. Full n = 131 factor-base cardinality/rank cost, natural-target relation yield, rho comparison and a Certicom log remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/PROTOCOL.md">pre-outcome protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_rank_holdout_20260925/evidence/README.md">archive receipt</a>. Raw SHA-256 <code>3b483e486eb1dec9d34a81653cb6b568b74ada33e8c05305304810ec87ba3c6a</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-rank-holdout-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">
