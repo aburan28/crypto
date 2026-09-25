@@ -114,7 +114,9 @@ WORK=/path ./run.sh analyze             # re-analyze kept raw files
 The 24 raw files (12 corpora and 12 final checkpoints, 226 MB) are not in
 the repository. A single-thread run is a function of its run id, so `run.sh`
 regenerates them byte for byte; [manifest.json](manifest.json) holds their
-SHA-256, the binary's and the exact compile command, and rerunning holdout
-30002 from a fresh build reproduced all eight of its files' hashes. Client
+SHA-256, the binary's and the exact compile command. Rerunning holdout 30002
+from a fresh build reproduced all eight of its files' hashes twice: on the
+measuring commit, and after merging `main` with PR #695, whose tree builds a
+byte-identical scale-model binary. Client
 logs are in [raw/](raw/). Wall time, as a practicality note: 150–154 s per
 run at 11.8–12.1 M steps/s, four runs at a time.
