@@ -317,12 +317,30 @@ pub fn run_wdsat(
     ))
 }
 
-/// Upstream WDSat 61c6ff3 prints one of these lines on a completed
-/// refutation; successful empty output has no documented UNSAT meaning.
-fn has_wdsat_unsat_marker(stdout: &str) -> bool {
-    stdout
-        .lines()
-        .any(|line| matches!(line.trim(), "UNSAT" | "UNSAT on XORGAUSS init"))
+/// The first recognized line is decisive. Upstream WDSat 61c6ff3 prints
+/// `UNSAT` before its decimal conflict counter, which may itself contain
+/// only 0/1 digits; find-all mode can instead print a model before a terminal
+/// `UNSAT`. Successful empty output has no documented UNSAT meaning.
+#[derive(Debug, PartialEq, Eq)]
+enum WdsatStdoutVerdict {
+    Model(Vec<bool>),
+    Unsat,
+    Unknown,
+}
+
+fn parse_wdsat_stdout(stdout: &str, n_vars: usize) -> WdsatStdoutVerdict {
+    for line in stdout.lines() {
+        let value = line.trim();
+        if matches!(value, "UNSAT" | "UNSAT on XORGAUSS init") {
+            return WdsatStdoutVerdict::Unsat;
+        }
+        if !value.is_empty() {
+            if let Some(model) = parse_wdsat_model(value, n_vars) {
+                return WdsatStdoutVerdict::Model(model);
+            }
+        }
+    }
+    WdsatStdoutVerdict::Unknown
 }
 
 /// Solve one Semaev decomposition instance with an external WDSat binary.
@@ -381,14 +399,14 @@ pub fn wdsat_decompose(
         return (None, stats);
     }
 
-    let model = match parse_wdsat_model(&stdout, sys.n_vars) {
-        Some(model) => model,
-        None => {
-            if has_wdsat_unsat_marker(&stdout) {
-                stats.refuted = true;
-            } else {
-                stats.exhausted = true;
-            }
+    let model = match parse_wdsat_stdout(&stdout, sys.n_vars) {
+        WdsatStdoutVerdict::Model(model) => model,
+        WdsatStdoutVerdict::Unsat => {
+            stats.refuted = true;
+            return (None, stats);
+        }
+        WdsatStdoutVerdict::Unknown => {
+            stats.exhausted = true;
             return (None, stats);
         }
     };
@@ -534,7 +552,7 @@ mod tests {
         );
         let explicit_unsat = make_child(
             "explicit-unsat.sh",
-            "#!/bin/sh\nprintf 'UNSAT\\n'\nexit 0\n",
+            "#!/bin/sh\nprintf 'UNSAT\\n101\\n'\nexit 0\n",
         );
         let model = make_child("model.sh", "#!/bin/sh\nprintf '01011\\n'\nexit 0\n");
         let options = |binary: PathBuf| WdsatSolveOptions {
@@ -547,7 +565,7 @@ mod tests {
         let (stdout, _, _) =
             run_wdsat(anf, 5, &[], &options(empty_ok.clone())).expect("successful empty child");
         assert!(stdout.is_empty());
-        assert!(!has_wdsat_unsat_marker(&stdout));
+        assert_eq!(parse_wdsat_stdout(&stdout, 5), WdsatStdoutVerdict::Unknown);
         for binary in [&empty_failure, &false_unsat] {
             assert!(run_wdsat(anf, 5, &[], &options(binary.clone()))
                 .expect_err("nonzero child must fail")
@@ -555,14 +573,24 @@ mod tests {
         }
         let (stdout, _, _) =
             run_wdsat(anf, 5, &[], &options(explicit_unsat.clone())).expect("explicit UNSAT child");
-        assert!(has_wdsat_unsat_marker(&stdout));
-        assert!(has_wdsat_unsat_marker("UNSAT on XORGAUSS init\n"));
-        assert!(!has_wdsat_unsat_marker("not UNSAT\n"));
+        assert_eq!(parse_wdsat_stdout(&stdout, 2), WdsatStdoutVerdict::Unsat);
+        assert_eq!(
+            parse_wdsat_stdout("UNSAT on XORGAUSS init\n", 2),
+            WdsatStdoutVerdict::Unsat
+        );
+        assert_eq!(
+            parse_wdsat_stdout("not UNSAT\n", 2),
+            WdsatStdoutVerdict::Unknown
+        );
+        assert_eq!(
+            parse_wdsat_stdout("01011\nUNSAT\n", 5),
+            WdsatStdoutVerdict::Model(vec![false, true, false, true, true])
+        );
         let (stdout, _, _) =
             run_wdsat(anf, 5, &[], &options(model)).expect("successful model child");
         assert_eq!(
-            parse_wdsat_model(&stdout, 5),
-            Some(vec![false, true, false, true, true])
+            parse_wdsat_stdout(&stdout, 5),
+            WdsatStdoutVerdict::Model(vec![false, true, false, true, true])
         );
 
         let kc = KoblitzCurve::new(1, 7).expect("K_1/F_2^7");
@@ -646,7 +674,10 @@ mod tests {
         };
         let valid_model = make_child(
             "valid-model.sh",
-            &format!("#!/bin/sh\nprintf '{}\\n'\nexit 0\n", bits(good_root)),
+            &format!(
+                "#!/bin/sh\nprintf '{}\\nUNSAT\\n'\nexit 0\n",
+                bits(good_root)
+            ),
         );
         let invalid_model = make_child(
             "invalid-model.sh",

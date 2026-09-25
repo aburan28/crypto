@@ -24,5 +24,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Freeze dependency resolution
         run: cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+      - name: Verify pinned upstream contradiction receipt
+        run: python3 research/notes/ecc2k130/wdsat_child_status_20260925/verify_fixture.py
       - name: Exercise WDSat child-status and ANF fixtures
         run: cargo test --locked --release --lib cryptanalysis::wdsat_oracle::tests
