@@ -8,6 +8,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 
 HERE = Path(__file__).resolve().parent
 BASE = HERE / "independent_replay_20260924_codex/base_header.jsonl.gz"
@@ -48,7 +49,14 @@ def verify(training, point_batch):
         assert curve.scalar(curve.generator, log) == rep
     manifest = json.loads((point_batch / "manifest.json").read_text())
     assert manifest["base_hash"] == header["base_hash"]
-    assert manifest["source_sha256"] == sha(rank.SOURCE)
+    # This archived point run used the exact source merged by PR #735. Later
+    # telemetry-only edits must not rewrite its source identity. CI fetches the
+    # immutable merge commit, and this check binds that blob to the manifest.
+    archived_source = subprocess.check_output(
+        ["git", "show", "d92439080c2d5c3a858f71abfc8e749e273125bb:examples/koblitz_s5_sat_instance.rs"],
+        cwd=rank.REPO,
+    )
+    assert manifest["source_sha256"] == hashlib.sha256(archived_source).hexdigest()
     assert manifest["point_file_sha256"] == sha(point_batch / "target_points.jsonl")
     assert manifest["training_manifest_sha256"] == sha(training / "manifest.json")
     assert manifest["training_validation_sha256"] == sha(training / "validation.json")
