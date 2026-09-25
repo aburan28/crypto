@@ -224,7 +224,55 @@ stopwatch, and the table should say which is which.
 | `work`, `work_unit` | the method's own count (`row_ops` for an elimination) |
 | `recovered`, `verified` | the logarithm found, and whether it is the planted one |
 | `total_gae`, `s` | the whole pipeline, and it over `√r` |
-| `s_over_rho` | against a counted Pollard rho on the same instance, when supplied |
+| `s_over_rho` | against the matched counted Pollard rho on the same instance, when supplied |
+
+### The rho reference
+
+`ic bench` runs the reference before any configuration, on the same
+subgroup and the same planted logarithms (`--rho-runs`, default 16),
+and every row's `s_over_rho` divides by its mean `S`.  It is the
+**matched** walk the accounting contract asks for: it uses the
+automorphisms the curve actually has, because a generic algorithm may
+use them too.
+
+| curve | `rho_reference` (prices the column) | also in the report |
+|:--|:--|:--|
+| generic prime, random binary | the negation-map walk, `A = 2` (`ic_boundary::rho_reference_negation`) | `rho_reference_plain`: the plain walk on points, `A = 1`, on the same seeds |
+| Koblitz | the cheaper, by mean `S`, of the signed-Frobenius walk (`A = 2n`) and the negation walk | the other in `rho_reference_candidates`; the plain walk |
+
+The negation walk is tuned so that its `S` is rho's and not its set-up's.
+Walk starts cost one addition each, and distinguished points come about
+every `r^{1/4}` steps. The jump table is sized to the subgroup
+(`rho_jumps_for`, calibrated in ledger §18.3). Fruitless cycles are
+handled by the Wiener–Zuccherato look-ahead and a deterministic doubling
+escape. Every operation it performs is charged, and its `counters` say
+where each one went.
+
+Through ledger §17 the column divided by the plain walk. That walk's
+`S` is mostly set-up at toy sizes: `14.8` at `r ≈ 2^{12}`, where the
+negation walk measures `2.6`. So a frozen report's `vs rho` from before
+§18 is generous to index calculus. `ic rho --reprice FILE` re-prices
+one against the matched walk. It first replays the frozen walk on the
+recorded seeds and refuses to re-price if any run differs.
+
+**A figure that solves `k` targets at once needs rho at the same `k`.**
+`ic bench` and `ic boundary` solve one target, so the single-target walk
+is their reference.  A pipeline that amortises one build over `k`
+targets and quotes its total over `k·√r` must divide by batch rho
+(Kuhn–Struik): `k` targets in sequence, jumps in `G` only, and one table
+of distinguished points, so a later target can finish on an earlier
+one's trail (`ic_boundary::rho_batch_with`).  At `k = 32` that costs
+about a fifth of one target alone (ledger §19).
+
+    ./target/release/ic rho --batch-koblitz 0/41,0/53 --batch-sizes 1,4,16,32 --batches 16
+
+The walk is generic over the classes it moves between
+(`ic_boundary::RhoClasses`): points, `{P, −P}`, and on a Koblitz curve
+the signed Frobenius classes (`SignedFrobeniusClasses`).  Those are
+canonicalised by the least normal-basis rotation, and `x` and `y` are
+carried there by table.  The count charges group operations only.  What
+a step's canonicalisation costs on top, in a batched unit, is measured
+by `examples/koblitz_reference_prices.rs`.
 
 ---
 

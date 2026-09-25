@@ -1,0 +1,50 @@
+  prime generated-22bit-2987209: rebuilding
+  prime generated-24bit-12832957: rebuilding
+  char2 random-binary-n24-bf19f6f: rebuilding
+  char2 random-binary-n27-b7ade7fe: rebuilding
+
+| instance | log₂ r | row | S | vs rho (frozen, A = 1) | vs rho (matched) | vs floor (A = 2) |
+|:--|--:|:--|--:|--:|--:|--:|
+| generated-22bit-2987209 | 21.5 | **rho** (frozen 2.956 → matched 1.121) | | | | |
+| generated-22bit-2987209 | 21.5 | semaev_s3_roots_m2 | 7133 | 2413× | 6366× | 8049× |
+| generated-22bit-2987209 | 21.5 | direct_subtraction_m2 | 847 | 287× | 756× | 956× |
+| generated-22bit-2987209 | 21.5 | mitm_m2 | 168 | 56.9× | 150× | 190× |
+| generated-22bit-2987209 | 21.5 | mitm_m3 | 89.3 | 30.2× | 79.7× | 101× |
+| generated-22bit-2987209 | 21.5 | mitm_m2_negfold | 130 | 44.0× | 116× | 147× |
+| generated-22bit-2987209 | 21.5 | mitm_m2_negfold_walk | 43.6 | 14.7× | 38.9× | 49.2× |
+| generated-22bit-2987209 | 21.5 | mitm_m3_negfold | 51.4 | 17.4× | 45.8× | 58.0× |
+| generated-22bit-2987209 | 21.5 | mitm_m3_negfold_walk | 45.8 | 15.5× | 40.9× | 51.7× |
+| generated-22bit-2987209 | 21.5 | mitm_m2_negfold_walk_balanced | 14.2 | 4.803× | 12.7× | 16.0× |
+| generated-24bit-12832957 | 23.6 | **rho** (frozen 2.660 → matched 0.878) | | | | |
+| generated-24bit-12832957 | 23.6 | semaev_s3_roots_m2 | 6317 | 2375× | 7196× | 7128× |
+| generated-24bit-12832957 | 23.6 | direct_subtraction_m2 | 2424 | 911× | 2761× | 2735× |
+| generated-24bit-12832957 | 23.6 | mitm_m2 | 312 | 117× | 355× | 352× |
+| generated-24bit-12832957 | 23.6 | mitm_m3 | 56.0 | 21.1× | 63.8× | 63.2× |
+| generated-24bit-12832957 | 23.6 | mitm_m2_negfold | 294 | 110× | 334× | 331× |
+| generated-24bit-12832957 | 23.6 | mitm_m2_negfold_walk | 22.8 | 8.554× | 25.9× | 25.7× |
+| generated-24bit-12832957 | 23.6 | mitm_m3_negfold | 37.7 | 14.2× | 43.0× | 42.6× |
+| generated-24bit-12832957 | 23.6 | mitm_m3_negfold_walk | 31.7 | 11.9× | 36.1× | 35.8× |
+| generated-24bit-12832957 | 23.6 | mitm_m2_negfold_walk_balanced | 12.6 | 4.744× | 14.4× | 14.2× |
+| random-binary-n24-bf19f6f | 21.0 | **rho** (frozen 2.432 → matched 0.963) | | | | |
+| random-binary-n24-bf19f6f | 21.0 | mitm_m3 | 106 | 43.7× | 110× | 120× |
+| random-binary-n24-bf19f6f | 21.0 | semaev_s4_pairs_and_solve_m3 | 25098 | 10319× | 26062× | 28319× |
+| random-binary-n24-bf19f6f | 21.0 | mitm_m3_negfold | 96.0 | 39.5× | 99.7× | 108× |
+| random-binary-n24-bf19f6f | 21.0 | mitm_m3_negfold_walk | 82.4 | 33.9× | 85.6× | 93.0× |
+| random-binary-n24-bf19f6f | 21.0 | mitm_m2_negfold | 777 | 319× | 807× | 876× |
+| random-binary-n24-bf19f6f | 21.0 | mitm_m2_negfold_walk | 28.7 | 11.8× | 29.8× | 32.4× |
+| random-binary-n24-bf19f6f | 21.0 | mitm_m2_negfold_walk_balanced | 37.7 | 15.5× | 39.1× | 42.5× |
+| random-binary-n27-b7ade7fe | 26.0 | **rho** (frozen 1.993 → matched 0.903) | | | | |
+| random-binary-n27-b7ade7fe | 26.0 | mitm_m3 | 122 | 61.3× | 135× | 138× |
+| random-binary-n27-b7ade7fe | 26.0 | semaev_s4_pairs_and_solve_m3 | 98072 | 49209× | 108662× | 110662× |
+| random-binary-n27-b7ade7fe | 26.0 | mitm_m3_negfold | 115 | 57.7× | 127× | 130× |
+| random-binary-n27-b7ade7fe | 26.0 | mitm_m3_negfold_walk | 108 | 54.2× | 120× | 122× |
+| random-binary-n27-b7ade7fe | 26.0 | mitm_m2_negfold | 1044 | 524× | 1157× | 1178× |
+| random-binary-n27-b7ade7fe | 26.0 | mitm_m2_negfold_walk | 33.5 | 16.8× | 37.1× | 37.8× |
+| random-binary-n27-b7ade7fe | 26.0 | mitm_m2_negfold_walk_balanced | 34.2 | 17.2× | 37.9× | 38.6× |
+
+Re-priced docs/ic/runs/ic-boundary-ledger-round5-holdout-2026-09-22.json: "complete"; the frozen walk reproduced on every recorded seed: true
+Report saved: research/ic_rho_reference_20260923/reprice/ic-boundary-ledger-round5-holdout-2026-09-22.json
+
+real	2m39.634s
+user	2m38.475s
+sys	0m0.012s
