@@ -79,8 +79,9 @@ in #762's polynomial model `0x800000000000000000000000000002007`.
 The schedule domain is
 `ECC2K130-ROTATED-ROW-20260925-v1/m/d/tuple/slot/counter`; read digest
 big-endian modulo 2^d, take the first nonzero x-mask with
-`Tr(x+1/x²)=0`, and lift via the odd-degree half-trace. Use the sign bit
-from SHA-256 of the same string suffixed `/sign`. Tuple 0 reuses one
+`Tr(x+1/x²)=0`, and lift via the odd-degree half-trace. Use the low bit
+of the **final SHA-256 digest byte** of the same string suffixed `/sign`.
+Tuple 0 reuses one
 accepted mask across every slot (a repeated compressed column); tuple 1
 sets slot 0 to x=0, `(0,1)` and derives all other slots. Tuples 2 and 3
 use independent accepted masks. Transport each accepted signed F0 point
@@ -127,3 +128,24 @@ not rank, a solver, relation yield on n=131, a Certicom logarithm, or
 an end-to-end speed advantage. The next matrix/rank or solver experiment
 needs its own preregistered targets and matched costs. Update the
 canonical scoreboard and decision ledger with this bounded result.
+
+## Frozen-source anchor and prefreeze construction note
+
+The immutable old archive is loaded directly by tar member name, never
+regenerated. `make_inputs.py` constructs only public synthetic input tuples,
+not relation-row outcomes. An initial uncapped prefreeze invocation generated
+`planted_inputs.json`; a corrected constructor then enforced a hard 30-second
+wall deadline and 512-MiB RSS cap per cell, wrote
+`input_construction_receipt.json`, and reproduced that input byte for byte
+(SHA-256 `036a9a539d5419ab77361d549e1a041126e5de4afdcbb1968d3af432e8bb61fc`).
+No relation-row producer or replay was executed before the source/input freeze.
+The constructor receipt is frozen input provenance. The later archive-only CI
+checks source/input hashes and independently reconstructs every accepted row.
+The preregistered execution command is
+`python3 run.py --evidence evidence`, from this protocol directory; the
+verification command is `python3 ci_replay.py`. The latter regenerates the
+planted inputs under the frozen constructor and checks their SHA-256 without
+running a row producer. Once `RESULT.md` exists, it requires the raw archive
+and receipt instead of accepting a hash-only pass.
+
+Frozen row manifest SHA-256: `e08fd485952cc8a3674964ed9b9d95f0f8fa1ba6978b9c0c8cc2713974eb5ae4`
