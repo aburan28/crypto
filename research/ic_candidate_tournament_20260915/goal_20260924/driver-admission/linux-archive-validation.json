@@ -1,0 +1,299 @@
+{
+  "archive_sha256": "972f1b6e16cc9a09960fccc80ba5f64331c3d12a5a312581521c53cea53d334c",
+  "files": 83113,
+  "expanded_file_bytes": 372870950,
+  "audits": [
+    {
+      "status": "VERIFIED",
+      "reference": "both",
+      "source_manifest_sha256": "a496494d7685b1e5a2adbeba4b7ee43236ec39e7f30259bbe8550f4ada5083ea",
+      "worker_sha256": "2bf1ebf277fd39ee7622bf6e830c664e7f7d0df7236b0fff5ea562db67070608",
+      "verified_pairs": 9,
+      "rho_verified_pairs": 3,
+      "phase": "initial",
+      "kind": "producer",
+      "supplemented_dependency": true
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "scaled",
+      "source_manifest_sha256": "9c3d4a51ec4e52bfd4f9dbb83675cadb95889aea7370d6ffc91abe380ed48ba0",
+      "worker_sha256": "823b4e0283d59a79a83faf6b659021171f217be0a20844dfcbeab29a458abfaf",
+      "verified_pairs": 15,
+      "rho_verified_pairs": 5,
+      "phase": "initial",
+      "kind": "producer",
+      "supplemented_dependency": true
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "pairinv",
+      "source_manifest_sha256": "d5fb1b0299fc8c555ea3dec3594f8be7ea26de918bd4f9ea038994f467289d92",
+      "worker_sha256": "9ebdb0976ae808419f48b61aa586045f9acdf8859d2ac6168d26de9b038aad1c",
+      "verified_pairs": 15,
+      "rho_verified_pairs": 5,
+      "phase": "initial",
+      "kind": "producer",
+      "supplemented_dependency": true
+    },
+    {
+      "phase": "initial",
+      "kind": "native",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 12,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "initial",
+      "kind": "tournament",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 15,
+        "source_files": 454
+      }
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "both",
+      "source_manifest_sha256": "a496494d7685b1e5a2adbeba4b7ee43236ec39e7f30259bbe8550f4ada5083ea",
+      "worker_sha256": "2bf1ebf277fd39ee7622bf6e830c664e7f7d0df7236b0fff5ea562db67070608",
+      "verified_pairs": 9,
+      "rho_verified_pairs": 3,
+      "phase": "intermediate",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "scaled",
+      "source_manifest_sha256": "9c3d4a51ec4e52bfd4f9dbb83675cadb95889aea7370d6ffc91abe380ed48ba0",
+      "worker_sha256": "823b4e0283d59a79a83faf6b659021171f217be0a20844dfcbeab29a458abfaf",
+      "verified_pairs": 15,
+      "rho_verified_pairs": 5,
+      "phase": "intermediate",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "pairinv",
+      "source_manifest_sha256": "d5fb1b0299fc8c555ea3dec3594f8be7ea26de918bd4f9ea038994f467289d92",
+      "worker_sha256": "9ebdb0976ae808419f48b61aa586045f9acdf8859d2ac6168d26de9b038aad1c",
+      "verified_pairs": 15,
+      "rho_verified_pairs": 5,
+      "phase": "intermediate",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "phase": "intermediate",
+      "kind": "native",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 12,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "intermediate",
+      "kind": "native-failure",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 6,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "intermediate",
+      "kind": "tournament",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 15,
+        "source_files": 454
+      }
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "both",
+      "source_manifest_sha256": "a496494d7685b1e5a2adbeba4b7ee43236ec39e7f30259bbe8550f4ada5083ea",
+      "worker_sha256": "2bf1ebf277fd39ee7622bf6e830c664e7f7d0df7236b0fff5ea562db67070608",
+      "verified_pairs": 9,
+      "rho_verified_pairs": 3,
+      "phase": "clockfix",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "scaled",
+      "source_manifest_sha256": "9c3d4a51ec4e52bfd4f9dbb83675cadb95889aea7370d6ffc91abe380ed48ba0",
+      "worker_sha256": "823b4e0283d59a79a83faf6b659021171f217be0a20844dfcbeab29a458abfaf",
+      "verified_pairs": 15,
+      "rho_verified_pairs": 5,
+      "phase": "clockfix",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "pairinv",
+      "source_manifest_sha256": "d5fb1b0299fc8c555ea3dec3594f8be7ea26de918bd4f9ea038994f467289d92",
+      "worker_sha256": "9ebdb0976ae808419f48b61aa586045f9acdf8859d2ac6168d26de9b038aad1c",
+      "verified_pairs": 15,
+      "rho_verified_pairs": 5,
+      "phase": "clockfix",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "phase": "clockfix",
+      "kind": "native",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 12,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "clockfix",
+      "kind": "native-failure",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 6,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "clockfix",
+      "kind": "tournament",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 15,
+        "source_files": 454
+      }
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "both",
+      "source_manifest_sha256": "a496494d7685b1e5a2adbeba4b7ee43236ec39e7f30259bbe8550f4ada5083ea",
+      "worker_sha256": "2bf1ebf277fd39ee7622bf6e830c664e7f7d0df7236b0fff5ea562db67070608",
+      "verified_pairs": 9,
+      "rho_verified_pairs": 3,
+      "phase": "final",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "scaled",
+      "source_manifest_sha256": "9c3d4a51ec4e52bfd4f9dbb83675cadb95889aea7370d6ffc91abe380ed48ba0",
+      "worker_sha256": "823b4e0283d59a79a83faf6b659021171f217be0a20844dfcbeab29a458abfaf",
+      "verified_pairs": 15,
+      "rho_verified_pairs": 5,
+      "phase": "final",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "status": "VERIFIED",
+      "reference": "pairinv",
+      "source_manifest_sha256": "d5fb1b0299fc8c555ea3dec3594f8be7ea26de918bd4f9ea038994f467289d92",
+      "worker_sha256": "9ebdb0976ae808419f48b61aa586045f9acdf8859d2ac6168d26de9b038aad1c",
+      "verified_pairs": 15,
+      "rho_verified_pairs": 5,
+      "phase": "final",
+      "kind": "producer",
+      "supplemented_dependency": false
+    },
+    {
+      "phase": "final",
+      "kind": "native",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 12,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "final",
+      "kind": "native",
+      "python": "3.11",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 12,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "final",
+      "kind": "native-failure",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 6,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "final",
+      "kind": "native-failure",
+      "python": "3.11",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 6,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "final",
+      "kind": "tournament",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 15,
+        "source_files": 454
+      }
+    },
+    {
+      "phase": "final",
+      "kind": "tournament",
+      "python": "3.11",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 15,
+        "source_files": 454
+      }
+    },
+    {
+      "phase": "final-native",
+      "kind": "native",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 12,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "phase": "final-native",
+      "kind": "failure",
+      "python": "3.12",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 6,
+        "promotion_eligible": false
+      }
+    }
+  ]
+}
