@@ -6068,10 +6068,93 @@ factor base, and this prices a decomposition oracle.</p>
 <p>Kernel/device work and external audit are outside Ir. Native timings follow their separate protocol. The K-instruction floor applies only to this full-rank collector and cannot establish an algorithmic advance.</p>
 </section>
 <!-- END ic-tournament-round-0023 -->
+<!-- BEGIN ic-reference-qualification-20260925 -->
+<section id="ic-reference-qualification-20260925">
+<h2>Archived reference qualification — 2026-09-25</h2>
+<p><strong>Accounting/reference qualification, no promotion:</strong> 1,290/1,290 native/profile pairs; 21 configurations on five exact curve/subgroup cells, 15 development points and three repetitions. Zero improvement rounds used. The selected IC reference is pairinv; cold-instruction rho is rho_incumbent_4 and online rho is rho_pairinv_4. Online intervals exclude reusable preparation and include scalar replay. Every displayed value comes from the <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/RESULTS.json">frozen results</a>; full identifiers, per-target pairs, phases, intervals, source hashes and replay details are in the <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/reference-qualification/README.md">evidence report</a>.</p>
+<p>pairinv's online / old-incumbent ratio is 0.9781 [0.9249, 1.0302]; cold instructions are 0.9845 and cold native time 1.0064. This does not meet the 20% goal. The 8.5202 selected-rho / pairinv online ratio is a development observation with reusable preparation excluded, not a cold-start or confirmed gain. No global-optimum or ECC2K-130 claim. All configurations verified 45/45 development jobs. Bootstrap intervals are descriptive; requested rho widths can clip to the same executed width.</p>
+<div class="table-scroll"><table>
+<caption>Primary online time: equal-cell geometric means of three-repetition per-point medians; milliseconds.</caption>
+<thead><tr><th>Alias</th><th>Online ms</th><th>/ old IC</th><th>Descriptive 95% CI</th><th>Selected rho / online</th><th>Verified / 45</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>0.03527943</td><td>1</td><td>[&#x27;1&#x27;, &#x27;1&#x27;]</td><td>8.333291</td><td>45</td></tr>
+<tr><td>scaled</td><td>0.03658234</td><td>1.036931</td><td>[&#x27;0.9816509&#x27;, &#x27;1.107543&#x27;]</td><td>8.036496</td><td>45</td></tr>
+<tr><td>pairinv</td><td>0.0345057</td><td>0.9780685</td><td>[&#x27;0.924907&#x27;, &#x27;1.030152&#x27;]</td><td>8.520151</td><td>45</td></tr>
+<tr><td>rho_incumbent_1</td><td>0.344969</td><td>9.778191</td><td>[&#x27;7.725357&#x27;, &#x27;12.07888&#x27;]</td><td>0.8522324</td><td>45</td></tr>
+<tr><td>rho_incumbent_2</td><td>0.3160875</td><td>8.959541</td><td>[&#x27;7.392714&#x27;, &#x27;10.75512&#x27;]</td><td>0.9301025</td><td>45</td></tr>
+<tr><td>rho_incumbent_4</td><td>0.2966635</td><td>8.408965</td><td>[&#x27;7.10053&#x27;, &#x27;9.967899&#x27;]</td><td>0.9910008</td><td>45</td></tr>
+<tr><td>rho_incumbent_8</td><td>0.3011474</td><td>8.536061</td><td>[&#x27;7.073196&#x27;, &#x27;10.23016&#x27;]</td><td>0.9762455</td><td>45</td></tr>
+<tr><td>rho_incumbent_16</td><td>0.3032368</td><td>8.595285</td><td>[&#x27;7.11568&#x27;, &#x27;10.25388&#x27;]</td><td>0.9695189</td><td>45</td></tr>
+<tr><td>rho_incumbent_32</td><td>0.3034023</td><td>8.599977</td><td>[&#x27;7.231951&#x27;, &#x27;10.20722&#x27;]</td><td>0.9689899</td><td>45</td></tr>
+<tr><td>rho_scaled_1</td><td>0.3460468</td><td>9.808741</td><td>[&#x27;7.717053&#x27;, &#x27;12.19424&#x27;]</td><td>0.8495781</td><td>45</td></tr>
+<tr><td>rho_scaled_2</td><td>0.3201308</td><td>9.074149</td><td>[&#x27;7.427558&#x27;, &#x27;11.00426&#x27;]</td><td>0.9183551</td><td>45</td></tr>
+<tr><td>rho_scaled_4</td><td>0.3022875</td><td>8.568378</td><td>[&#x27;7.282983&#x27;, &#x27;9.996674&#x27;]</td><td>0.9725635</td><td>45</td></tr>
+<tr><td>rho_scaled_8</td><td>0.2988046</td><td>8.469655</td><td>[&#x27;7.118939&#x27;, &#x27;10.09077&#x27;]</td><td>0.9838997</td><td>45</td></tr>
+<tr><td>rho_scaled_16</td><td>0.306974</td><td>8.701216</td><td>[&#x27;7.395277&#x27;, &#x27;10.30697&#x27;]</td><td>0.9577157</td><td>45</td></tr>
+<tr><td>rho_scaled_32</td><td>0.3058821</td><td>8.670267</td><td>[&#x27;7.259575&#x27;, &#x27;10.32453&#x27;]</td><td>0.9611344</td><td>45</td></tr>
+<tr><td>rho_pairinv_1</td><td>0.3419798</td><td>9.693462</td><td>[&#x27;7.649502&#x27;, &#x27;12.07019&#x27;]</td><td>0.8596817</td><td>45</td></tr>
+<tr><td>rho_pairinv_2</td><td>0.3222622</td><td>9.134563</td><td>[&#x27;7.601432&#x27;, &#x27;10.8611&#x27;]</td><td>0.9122814</td><td>45</td></tr>
+<tr><td>rho_pairinv_4</td><td>0.2939938</td><td>8.333291</td><td>[&#x27;7.066303&#x27;, &#x27;9.854115&#x27;]</td><td>1</td><td>45</td></tr>
+<tr><td>rho_pairinv_8</td><td>0.3024054</td><td>8.571718</td><td>[&#x27;7.197861&#x27;, &#x27;10.14227&#x27;]</td><td>0.9721844</td><td>45</td></tr>
+<tr><td>rho_pairinv_16</td><td>0.3044545</td><td>8.629802</td><td>[&#x27;7.275892&#x27;, &#x27;10.21295&#x27;]</td><td>0.965641</td><td>45</td></tr>
+<tr><td>rho_pairinv_32</td><td>0.2981093</td><td>8.449944</td><td>[&#x27;7.124324&#x27;, &#x27;9.997048&#x27;]</td><td>0.9861948</td><td>45</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Supplementary cold native time: complete worker process, milliseconds.</caption>
+<thead><tr><th>Alias</th><th>Cold ms</th><th>/ old IC</th><th>Descriptive 95% CI</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>0.9548849</td><td>1</td><td>[&#x27;1&#x27;, &#x27;1&#x27;]</td></tr>
+<tr><td>scaled</td><td>0.974083</td><td>1.020105</td><td>[&#x27;0.9906293&#x27;, &#x27;1.052218&#x27;]</td></tr>
+<tr><td>pairinv</td><td>0.9610005</td><td>1.006405</td><td>[&#x27;0.9651924&#x27;, &#x27;1.049098&#x27;]</td></tr>
+<tr><td>rho_incumbent_1</td><td>1.004023</td><td>1.05146</td><td>[&#x27;1.006284&#x27;, &#x27;1.104561&#x27;]</td></tr>
+<tr><td>rho_incumbent_2</td><td>0.9697427</td><td>1.01556</td><td>[&#x27;0.9749967&#x27;, &#x27;1.058701&#x27;]</td></tr>
+<tr><td>rho_incumbent_4</td><td>0.9405923</td><td>0.9850321</td><td>[&#x27;0.9303436&#x27;, &#x27;1.036712&#x27;]</td></tr>
+<tr><td>rho_incumbent_8</td><td>0.9478406</td><td>0.9926229</td><td>[&#x27;0.9463485&#x27;, &#x27;1.039489&#x27;]</td></tr>
+<tr><td>rho_incumbent_16</td><td>0.9503984</td><td>0.9953015</td><td>[&#x27;0.9505123&#x27;, &#x27;1.040278&#x27;]</td></tr>
+<tr><td>rho_incumbent_32</td><td>0.9475625</td><td>0.9923317</td><td>[&#x27;0.9479119&#x27;, &#x27;1.036316&#x27;]</td></tr>
+<tr><td>rho_scaled_1</td><td>1.01234</td><td>1.06017</td><td>[&#x27;1.024653&#x27;, &#x27;1.105298&#x27;]</td></tr>
+<tr><td>rho_scaled_2</td><td>0.9826127</td><td>1.029038</td><td>[&#x27;0.9887804&#x27;, &#x27;1.069209&#x27;]</td></tr>
+<tr><td>rho_scaled_4</td><td>0.9492754</td><td>0.9941255</td><td>[&#x27;0.9456095&#x27;, &#x27;1.042069&#x27;]</td></tr>
+<tr><td>rho_scaled_8</td><td>0.9506862</td><td>0.9956029</td><td>[&#x27;0.9444905&#x27;, &#x27;1.044679&#x27;]</td></tr>
+<tr><td>rho_scaled_16</td><td>0.9611215</td><td>1.006531</td><td>[&#x27;0.9565629&#x27;, &#x27;1.058752&#x27;]</td></tr>
+<tr><td>rho_scaled_32</td><td>0.9497731</td><td>0.9946467</td><td>[&#x27;0.9465444&#x27;, &#x27;1.044426&#x27;]</td></tr>
+<tr><td>rho_pairinv_1</td><td>1.007289</td><td>1.05488</td><td>[&#x27;1.011843&#x27;, &#x27;1.107358&#x27;]</td></tr>
+<tr><td>rho_pairinv_2</td><td>0.9787077</td><td>1.024948</td><td>[&#x27;0.9908894&#x27;, &#x27;1.059673&#x27;]</td></tr>
+<tr><td>rho_pairinv_4</td><td>0.9536487</td><td>0.9987054</td><td>[&#x27;0.9408598&#x27;, &#x27;1.052529&#x27;]</td></tr>
+<tr><td>rho_pairinv_8</td><td>0.9553195</td><td>1.000455</td><td>[&#x27;0.9534799&#x27;, &#x27;1.046117&#x27;]</td></tr>
+<tr><td>rho_pairinv_16</td><td>0.9510661</td><td>0.9960008</td><td>[&#x27;0.9515908&#x27;, &#x27;1.039741&#x27;]</td></tr>
+<tr><td>rho_pairinv_32</td><td>0.9488646</td><td>0.9936953</td><td>[&#x27;0.9536563&#x27;, &#x27;1.035123&#x27;]</td></tr>
+</tbody></table></div>
+<div class="table-scroll"><table>
+<caption>Supplementary cold guest instructions: Ir, including every phase.</caption>
+<thead><tr><th>Alias</th><th>Cold Ir</th><th>S = Ir / sqrt(r)</th><th>/ old IC</th><th>/ selected rho</th><th>/ K floor</th></tr></thead><tbody>
+<tr><td>incumbent</td><td>1780785</td><td>2223.299</td><td>1</td><td>0.7138638</td><td>222598.2</td></tr>
+<tr><td>scaled</td><td>1780670</td><td>2223.155</td><td>0.9999353</td><td>0.7138176</td><td>222583.8</td></tr>
+<tr><td>pairinv</td><td>1753224</td><td>2188.889</td><td>0.9845231</td><td>0.7028154</td><td>219153</td></tr>
+<tr><td>rho_incumbent_1</td><td>2967440</td><td>3704.83</td><td>1.666366</td><td>1.189558</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_2</td><td>2728287</td><td>3406.248</td><td>1.532069</td><td>1.093689</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_4</td><td>2494573</td><td>3114.458</td><td>1.400827</td><td>1</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_8</td><td>2540371</td><td>3171.636</td><td>1.426545</td><td>1.018359</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_16</td><td>2540393</td><td>3171.664</td><td>1.426558</td><td>1.018368</td><td>not applicable</td></tr>
+<tr><td>rho_incumbent_32</td><td>2540341</td><td>3171.599</td><td>1.426528</td><td>1.018347</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_1</td><td>2967677</td><td>3705.126</td><td>1.666499</td><td>1.189653</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_2</td><td>2728437</td><td>3406.436</td><td>1.532154</td><td>1.093749</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_4</td><td>2494754</td><td>3114.685</td><td>1.400929</td><td>1.000073</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_8</td><td>2540487</td><td>3171.781</td><td>1.42661</td><td>1.018405</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_16</td><td>2540537</td><td>3171.845</td><td>1.426639</td><td>1.018426</td><td>not applicable</td></tr>
+<tr><td>rho_scaled_32</td><td>2540539</td><td>3171.846</td><td>1.42664</td><td>1.018426</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_1</td><td>2967663</td><td>3705.108</td><td>1.666491</td><td>1.189648</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_2</td><td>2728457</td><td>3406.461</td><td>1.532165</td><td>1.093757</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_4</td><td>2494724</td><td>3114.647</td><td>1.400912</td><td>1.000061</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_8</td><td>2540535</td><td>3171.842</td><td>1.426638</td><td>1.018425</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_16</td><td>2540583</td><td>3171.901</td><td>1.426664</td><td>1.018444</td><td>not applicable</td></tr>
+<tr><td>rho_pairinv_32</td><td>2540537</td><td>3171.844</td><td>1.426638</td><td>1.018425</td><td>not applicable</td></tr>
+</tbody></table></div>
+<p>Aliases aggregate complete policies across curves; canonical per-run keys are in the result file. The K-instruction floor is a weak full-rank-collector bound, inapplicable to rho; Ir is not a curve-operation unit. No new exponent fit is justified. Archived implementation panels below retain their original measurements and scope.</p>
+</section>
+<!-- END ic-reference-qualification-20260925 -->
 <!-- BEGIN ic-autolab-20260924 -->
 <section id="ic-autolab-20260924">
 <h2>IC autolab — native development checkpoint, 2026-09-24</h2>
-<p><strong>2026-09-25 accounting update:</strong> the restored optimized producers passed 39/39 IC and 13/13 matched rho native/profile admission pairs, with independent artifact replay. Measured jobs accept one supplied public point; native online intervals exclude reusable preparation and include scalar replay. Complete cold instruction and native costs remain separately recorded. These are fixed correctness/accounting controls, with no new tournament winner or speedup claim; canonical admission is now wired into both existing drivers, while comparative reference qualification remains pending. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/driver-admission/README.md">driver controls</a> retain canonical failure rows and per-target online tables: final Linux driver controls verified 17 native jobs and 15 native/profile pairs, retaining one intentional native failure. The durable history passed 28 audits after fresh extraction; no improvement round has run. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/README.md">Protocol, superseded controls and durable evidence</a>.</p>
+<p><strong>2026-09-25 accounting update:</strong> the restored optimized producers passed 39/39 IC and 13/13 matched rho native/profile admission pairs, with independent artifact replay. Measured jobs accept one supplied public point; native online intervals exclude reusable preparation and include scalar replay. Complete cold instruction and native costs remain separately recorded. These are fixed correctness/accounting controls, with no new tournament winner or speedup claim; canonical admission is now wired into both existing drivers, and the separate five-cell reference qualification above is now measured; the familywise improvement protocol remains pending. The <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/driver-admission/README.md">driver controls</a> retain canonical failure rows and per-target online tables: final Linux driver controls verified 17 native jobs and 15 native/profile pairs, retaining one intentional native failure. The durable history passed 28 audits after fresh extraction; no improvement round has run. <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/goal_20260924/public-inputs/README.md">Protocol, superseded controls and durable evidence</a>.</p>
 <p>888/960 verified jobs across six audited development screens; 72 retained rejections and an earlier reporting failure are preserved. No promoted winner, operation-count result, ECC2K-130 gain or global-optimum claim. Native wall times have uncontrolled affinity, OS caches and host activity; A/A variation is recorded.</p>
 <p>Source: <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.json">frozen measurements</a> and <a href="https://github.com/aburan28/crypto/blob/main/research/ic_candidate_tournament_20260915/autolab_20260924/RESULTS.md">report and limits</a>. S and ratios to an operation floor are unmeasured. Classification: accounting and integration engineering.</p>
 <h3>implementation_v2</h3>
