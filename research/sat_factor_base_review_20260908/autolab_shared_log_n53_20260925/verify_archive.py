@@ -52,18 +52,21 @@ def main():
         panel_path = out / "panel/panel.json"
         if not panel_path.exists():
             assert manifest["classification"] == "NO_PANEL_SUMMARY"
-            print("Archive hashes PASS; no panel summary (producer infrastructure failure)")
-            return
+            raise AssertionError("archived producer infrastructure failure: no panel summary")
         assert sha(panel_path) == manifest["panel_sha256"]
         assert (bundle / "panel.json").read_bytes() == panel_path.read_bytes()
         panel = json.loads(panel_path.read_text())
         assert panel["classification"] == manifest["classification"]
+        assert (panel["classification"] == "COMPLETE_ALL_SIX_PAIRS"
+                or panel["classification"].startswith("CENSORED_")), panel["classification"]
         expected_sources = {
             "ic": REPO / "examples/koblitz_s5_sat_instance.rs",
             "rho": REPO / "examples/koblitz_rho_batch_ks.rs",
             "training_driver": ORBIT / "cold_batch_rank.py",
             "independent_replay": ORBIT / "independent_replay_20260924_codex/replay.py",
             "pair_verifier": HERE / "verify_pair.py",
+            "panel_runner": HERE / "run_panel.py",
+            "archive_sealer": HERE / "archive.py",
         }
         for key, path in expected_sources.items():
             assert sha(path) == panel["source_sha256"][key], key
@@ -97,7 +100,7 @@ def main():
                 assert sha(raw) == receipt["stdout_sha256"]
                 assert sha(stderr) == receipt["stderr_sha256"]
             if step.get("classification") != "PASS":
-                assert panel["classification"].startswith("CENSORED") or "INVALID" in panel["classification"]
+                assert panel["classification"].startswith("CENSORED")
                 print(f"{name}: {step.get('classification')}, raw retained", flush=True)
                 continue
             for arm in ("ic", "rho"):
