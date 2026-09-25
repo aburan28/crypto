@@ -41,7 +41,7 @@ def audit_stages(report, fixture, algorithm_seed):
     Hash the exact matrix in the external certificate audit. Instrumentation
     need not run another cryptographic hash in the measured solver hot path.
     """
-    require(report.get('phase_schema') == 2, 'missing scientific producer schema')
+    require(report.get('phase_schema') in (2, 3), 'missing scientific producer schema')
     require(report.get('executed_method') == {
         'pdp': 'partial_folded_pair_table', 'collection': 'additive_walk',
         'relation_la': 'incremental_gauss', 'descent': 'walked_pdp', 'direct_collision': False},
@@ -124,9 +124,14 @@ def audit_stages(report, fixture, algorithm_seed):
 
 
 def scientific_ledger(report, costs):
-    require(report.get('phase_schema') == 2 and report['mode'] == 'ic', 'not an instrumented IC report')
-    require(set(costs) == set(PHASES)-{'isogeny'}, 'missing or extra scientific phase intervals')
-    return exclusive_ledger(dict(costs, isogeny=0), unit='valgrind-3.22-amd64-Ir',
+    schema = report.get('phase_schema')
+    require(schema in (2, 3) and report['mode'] == 'ic', 'not an instrumented IC report')
+    target_children = {'target_query', 'target_pdp', 'target_relation_check'} if schema == 3 else set()
+    require(set(costs) == (set(PHASES)-{'isogeny'}) | target_children,
+            'missing or extra scientific phase intervals')
+    cold = {k: v for k, v in costs.items() if k not in target_children}
+    cold['target_descent'] += sum(costs[p] for p in target_children)
+    return exclusive_ledger(dict(cold, isogeny=0), unit='valgrind-3.22-amd64-Ir',
         process_operations=sum(costs.values()), zero_reasons={'isogeny': 'isogeny:none; no transport executed'})
 
 
@@ -175,6 +180,6 @@ def method_record(job, fixture, source_manifest, source_manifest_sha256, referen
                 ('optimized-ic', 'src/cryptanalysis/koblitz_tiny_ic.rs'),
                 ('phase-markers', 'src/cryptanalysis/ic_phase.rs'))],
             'flags': {'build': build, 'reference_policy': reference,
-                      'observer_cost': 'fully-charged-markers-and-diagnostics'}},
+                      'observer_cost': 'fully-charged-markers-native-clocks-and-diagnostics'}},
     }
     return method

@@ -11,8 +11,10 @@ writer. `measurement.py` verifies run bindings, certificates and cost closure.
 CI exercises the real worker's base inventories and exports the explicit unknown
 phase ledger. The restored optimized producers now have a separately tested
 [scientific adapter](producer/PROTOCOL.md), with [retained admission evidence](goal_20260924/producer-admission/README.md).
-The ordinary checkout's legacy worker remains unpriced under this schema. Driver
-admission migration, reference qualification and online timing remain prerequisites;
+The ordinary checkout's legacy worker remains unpriced under this schema. The
+schema-3 producer adds supplied public inputs and native online intervals, with
+[local controls retained](goal_20260924/public-inputs/README.md). Driver
+admission migration, reference qualification and Linux interval validation remain prerequisites;
 passing producer controls alone does not make a comparative campaign ready.
 
 ## Identity
@@ -96,6 +98,17 @@ cost unknown even when the final DLP certificate verifies.
 diagnostics, with all eleven scientific phases unknown. It cannot manufacture a
 split. Native cold process nanoseconds are a separate run field, never substituted
 for instruction counts. Warm workloads cannot acquire a cold total.
+
+The default empirical question is one previously unseen public target. Its
+headline wall time starts when target-dependent IC work begins, after reusable
+preparation, and ends after independent scalar replay. `producer/timing.py`
+checks the schema-3 native interval and its exclusive target phases. Rho includes
+its target-dependent setup and solve on that exact point. Fixture generation,
+process launch, input, reusable preparation and report serialization remain
+outside the online interval. Retain the supplementary whole-process cold cost;
+the goal's cold improvement gates are additional requirements. Profiled wall
+time cannot stand in for native time, and repetition cannot stand in for fresh
+target sampling. An incomplete result has no verified online speedup.
 
 Ordinary-query diagnostics retain attempts, verified/proved-unsat/timeout/budget/
 error/lift-rejected/unresolved outcomes, verified relation yield, distinct rows,
