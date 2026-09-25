@@ -22,7 +22,11 @@ Frozen (activate refuses):
 Allowed to move: PACKED_CLMAD and the other ALU / product-pipe knobs,
 plus the pointer fields including kernelProtocol / kernelVersion.
 
-No AWS imports. rollout.sh fetches objects and calls check / apply / adoption.
+max-iters is separate from a rollout: it raises campaign.json maxIters and
+touches nothing else (maxItersReasons says when it refuses).
+
+No AWS imports. rollout.sh fetches objects and calls check / apply / adoption
+/ max-iters.
 """
 from __future__ import annotations
 
@@ -251,6 +255,45 @@ def campaignPointerMoved(current, nxt):
     return False
 
 
+# maxIters restarts a walk that has gone that many steps without a report.
+# It is a guard, not part of the walk: a distinguished point is fixed by its
+# seed, the walk and dpWeight, and a checkpoint does not record the guard, so
+# raising it keeps every point and every checkpoint.  Workers take the new
+# value when their client next restarts (restartHours, or a rollout) and
+# re-read campaign.json.  Lowering it would cut trails already under way, and
+# under storageProtocol the value is hashed into the campaign id, so there a
+# raise is a new namespace rather than an edit (WALK-CONSTANT.md section 11.4).
+GUARD_PERIOD = 4096           # include/kernel.h ECC_GUARD_PERIOD
+MAX_ITERS_LIMIT = (1 << 64) - GUARD_PERIOD   # src/main.cu refuses anything above
+
+
+def maxItersReasons(campaign, value):
+    """Why raising the live campaign's maxIters to `value` is refused, if it is."""
+    reasons = []
+    current = campaign.get("maxIters")
+    if type(value) is not int or not 0 < value <= MAX_ITERS_LIMIT:
+        reasons.append("maxIters %r is not a positive step count the client accepts" % (value,))
+    if type(current) is not int or current < 0:
+        reasons.append("live maxIters %r is unreadable" % (current,))
+    elif current == 0:
+        reasons.append("live maxIters is 0 (no guard); a positive value would restart walks "
+                       "the live store lets run")
+    elif type(value) is int and value <= current:
+        reasons.append("maxIters %d -> %d is not a raise; only a raise keeps trails already "
+                       "under way" % (current, value))
+    if campaign.get("storageProtocol"):
+        reasons.append("storageProtocol=%s hashes maxIters into the campaign id; a raise there "
+                       "is a new campaign namespace, not an edit" % campaign["storageProtocol"])
+    return reasons
+
+
+def setMaxIters(campaign, value):
+    """The campaign with maxIters replaced and every other field as it was."""
+    out = dict(campaign)
+    out["maxIters"] = value
+    return out
+
+
 def _allowStrict(args):
     return bool(getattr(args, "allow_strict", False))
 
@@ -308,6 +351,25 @@ def _cmdAdoption(args):
     return 0 if out["done"] else 3
 
 
+def _cmdMaxIters(args):
+    live = _load(args.campaign)
+    reasons = maxItersReasons(live, args.value)
+    report = {"ok": not reasons, "reasons": reasons, "from": live.get("maxIters"), "to": args.value}
+    if not reasons:
+        out = setMaxIters(live, args.value)
+        if {k: v for k, v in out.items() if k != "maxIters"} != \
+                {k: v for k, v in live.items() if k != "maxIters"}:
+            print("setMaxIters touched another field", file=sys.stderr)
+            return 1
+        with open(args.campaign, "w") as fh:
+            json.dump(out, fh, indent=1, sort_keys=True)
+            fh.write("\n")
+        report["restartHours"] = live.get("restartHours")
+    json.dump(report, sys.stdout, indent=1)
+    sys.stdout.write("\n")
+    return 0 if not reasons else 2
+
+
 def _cmdNext(args):
     live = _load(args.campaign)
     json.dump({"kernelProtocol": KERNEL_PROTOCOL,
@@ -347,6 +409,11 @@ def main(argv=None):
     n = sub.add_parser("next-version", help="print the next kernelVersion for a campaign")
     n.add_argument("--campaign", required=True)
     n.set_defaults(fn=_cmdNext)
+
+    m = sub.add_parser("max-iters", help="raise campaign.json maxIters in place, nothing else")
+    m.add_argument("--campaign", required=True)
+    m.add_argument("--value", required=True, type=int)
+    m.set_defaults(fn=_cmdMaxIters)
 
     args = p.parse_args(argv)
     return args.fn(args)
