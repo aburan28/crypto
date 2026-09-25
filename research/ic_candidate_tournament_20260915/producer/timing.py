@@ -29,6 +29,10 @@ def native_intervals(report, process_wall_ns):
         cold['isogeny'] = 0
         cold['setup'] += process_wall_ns-snapshot
     else:
+        require(source.get('rho_reusable_setup_excluded') is True,
+                'rho reusable preparation has not been excluded')
+        require(source.get('field_kernel') in ('portable', 'pclmulqdq'),
+                'unknown executed rho arithmetic backend')
         require(all(wall[p] == 0 for p in RAW_PHASES-{'setup', 'reference_solve', 'recovery_check'}),
                 'IC work in a rho interval')
         online_names = ('reference_solve', 'recovery_check')
@@ -43,7 +47,7 @@ def native_intervals(report, process_wall_ns):
             'online': {'phase_wall_ns': online, 'wall_ns': source['online_wall_ns'],
                 'boundary': ('after certified reusable factor logs; target query through final scalar replay'
                              if report['mode'] == 'ic' else
-                             'supplied public point; target-dependent rho setup, solve and final scalar replay'),
+                             'after reusable rho arithmetic/Frobenius preparation; target-dependent setup, solve and final scalar replay'),
                 'target_generation_included': False, 'scalar_replay_included': True},
             'cold': {'phase_wall_ns': cold, 'wall_ns': process_wall_ns,
                 'worker_snapshot_wall_ns': snapshot, 'external_setup_remainder_ns': process_wall_ns-snapshot,

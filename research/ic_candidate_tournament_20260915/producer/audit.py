@@ -99,7 +99,8 @@ for job in p['jobs']:
         require(process['cpu'] == p['resources']['cpu'] and process['memory_cap_bytes'] == p['resources']['memory_bytes'], 'rho resources changed')
     nr, pr = [read(trial/mode/'stdout.json') for mode in ('native', 'profile')]
     for report in (nr, pr):
-        check_build_identity(report, source)
+        check_build_identity(report, source, admission['field_kernel'])
+        require(report.get('rho_reusable_setup_excluded') is True, 'rho preparation boundary differs')
     proof = verify(nr, fixture, expected_mode='rho')
     require(verify(pr, fixture, expected_mode='rho') == proof, 'rho proofs differ')
     timing = native_intervals(nr, native['process_wall_ns'])

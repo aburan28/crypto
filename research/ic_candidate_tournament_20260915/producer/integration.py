@@ -190,7 +190,7 @@ def main():
             write(directory/'native/process.json', native, exclusive=True)
             process_ok(native)
             native_report = read(directory/'native/stdout.json')
-            check_build_identity(native_report, sha256(manifest))
+            check_build_identity(native_report, sha256(manifest), admission['field_kernel'])
             proof = verify(native_report, fixture, expected_mode='rho')
             timing = native_intervals(native_report, native['process_wall_ns'])
             command = ['valgrind', '--tool=callgrind', '--cache-sim=no', '--branch-sim=no',
@@ -200,7 +200,8 @@ def main():
             write(directory/'profile/process.json', profile, exclusive=True)
             process_ok(profile)
             report = read(directory/'profile/stdout.json')
-            check_build_identity(report, sha256(manifest))
+            check_build_identity(report, sha256(manifest), native_report['field_kernel'])
+            require(report.get('rho_reusable_setup_excluded') is True, 'profile rho preparation boundary differs')
             require(verify(report, fixture, expected_mode='rho') == proof, 'rho native/profile proof differs')
             costs = parse_profiles(directory/'profile', phase_schema=3)
             require(set(costs) == {'setup', 'reference_solve', 'recovery_check'}, 'rho phase closure failed')

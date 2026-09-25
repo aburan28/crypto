@@ -22,6 +22,24 @@ checks, all online/cold native sums closed. Their public points were generated
 in separate processes. These five fixed vectors are neither new confirmation
 targets nor estimates of natural relation yield.
 
+Subsequent source review found that this first rho control included reusable
+field/Frobenius preparation inside its online clock. The archive is preserved,
+but the corrected interval validator explicitly rejects those rho intervals.
+`rho-preparation.patch` adds a hook after reusable preparation and before the
+target is read, reports the actual arithmetic kernel, and preserves the old
+entry for walk/counter equivalence checks. Linux validation must use that final
+boundary; an earlier green run is insufficient.
+
+The corrected local source
+`9c3d4a51ec4e52bfd4f9dbb83675cadb95889aea7370d6ffc91abe380ed48ba0`
+passes the same ten IC/rho public-point controls, eight worker release tests,
+and 33 rho release tests (three pre-existing large tests ignored), including
+the new prepared-entry counter/walk equivalence test. Its complete control
+reports, executable, manifests and build logs are in the separately registered
+`evidence/ic-rho-prepared-controls-20260925.tar.zst`. Its `files.json` checks all
+retained file contents; use the archive manifest for the archive hash and size.
+These local results remain correctness controls only.
+
 The new concurrent worker tests exposed corruption in the archived arena's
 relaxed publication of reused memory. The initial worker tests failed 9/20
 repetitions, including an abort. A paired control compiled the same eight tests

@@ -60,6 +60,7 @@ jobs:
           cd "$RUNNER_TEMP/ic-producer/source"
           cargo test --locked --release --lib koblitz_tiny_ic --jobs 2
           cargo test --locked --release --lib ic_phase --jobs 2
+          cargo test --locked --release --lib rho_ --jobs 2
           cargo test --locked --release --example ic_tournament_worker --jobs 2
           cargo build --locked --release --example ic_tournament_worker --jobs 2
       - name: Fixed public vectors, complete phase closure and canonical records

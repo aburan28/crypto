@@ -156,6 +156,11 @@ class ScientificProfilesTests(unittest.TestCase):
 class NativeIntervalTests(unittest.TestCase):
     def test_real_public_point_ic_and_rho_vectors_replay_and_close(self):
         vector = json.loads((Path(__file__).parent/'producer/testdata/n13-public.json').read_text())
+        with self.assertRaises(InvalidEvidence):
+            native_intervals(vector['rho']['report'], vector['rho']['process']['process_wall_ns'])
+        # Preserve the earlier control but refuse its setup-inclusive rho
+        # interval as the corrected one-target measurement.
+        vector['rho'] = json.loads((Path(__file__).parent/'producer/testdata/n13-rho-prepared.json').read_text())
         fixture = vector['ic']['report']['fixture']
         for mode in ('ic', 'rho'):
             item = vector[mode]
@@ -184,6 +189,7 @@ class NativeIntervalTests(unittest.TestCase):
             report['diagnostics'] = intervals
         else:
             report.update(intervals)
+            report.update(rho_reusable_setup_excluded=True, field_kernel='portable')
         return report
 
     def test_online_excludes_setup_and_cold_accounts_for_external_tail(self):
@@ -227,6 +233,11 @@ class NativeIntervalTests(unittest.TestCase):
         report['phase_wall_ns']['target_pdp'] = 1
         with self.assertRaises(InvalidEvidence):
             native_intervals(report, 400)
+        for field, value in (('rho_reusable_setup_excluded', False), ('field_kernel', 'guessed')):
+            report = self.report('rho')
+            report[field] = value
+            with self.subTest(field=field), self.assertRaises(InvalidEvidence):
+                native_intervals(report, 400)
 
 
 if __name__ == '__main__':

@@ -96,7 +96,11 @@ counts. The primary interval starts after reusable factor logs are ready and
 certified, immediately before target-dependent descent. It ends after the
 recovered scalar has been replayed. Its exclusive sum is
 `target_query + target_pdp + target_relation_check + target_descent + recovery_check`.
-Rho starts before its target-dependent setup and ends after final replay; its
+Rho's prepared entry builds field arithmetic and Frobenius powers before invoking
+the timing hook, then reads the target and starts its target-dependent setup.
+The hook reports the actual field kernel. Unsupported packed widths are rejected
+explicitly, and the original entry remains available for equivalence tests.
+The rho interval ends after final replay; its
 sum is `reference_solve + recovery_check`. Both consume the same public point.
 Serialization is outside these online intervals, and all target-dependent failed
 attempts are charged. Online time is never a batch average.
