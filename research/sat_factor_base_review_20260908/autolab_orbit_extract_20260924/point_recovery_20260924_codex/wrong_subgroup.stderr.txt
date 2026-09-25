@@ -1,5 +1,5 @@
 
-thread 'main' (16750821) panicked at examples/koblitz_s5_sat_instance.rs:5892:17:
+thread 'main' (16837408) panicked at examples/koblitz_s5_sat_instance.rs:5889:17:
 assertion `left == right` failed: point target must belong to the prime-order subgroup
   left: Affine { x: F2mElement { bits: [0], m: 53 }, y: F2mElement { bits: [1], m: 53 } }
  right: Infinity

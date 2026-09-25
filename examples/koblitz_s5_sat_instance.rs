@@ -2877,14 +2877,11 @@ fn lazy_relative_support_update(
 fn assigned_one_hot(assignment: &[Option<bool>], offset: usize, count: usize) -> Option<usize> {
     let mut found = None;
     for index in 0..count {
-        match assignment.get(offset + index).copied().flatten() {
-            Some(true) => {
-                if found.is_some() {
-                    return None;
-                }
-                found = Some(index);
+        if let Some(true) = assignment.get(offset + index).copied().flatten() {
+            if found.is_some() {
+                return None;
             }
-            Some(false) | None => {}
+            found = Some(index);
         }
     }
     found
@@ -6450,7 +6447,6 @@ fn main() {
     if !compact_batch_only {
         phase_restart_shots_used += 1;
     }
-    drop(theory);
     let solve_ms = solve_started.elapsed().as_secs_f64() * 1000.0;
     let exhaustive_match = direct_set
         .as_ref()
