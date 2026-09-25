@@ -1,0 +1,102 @@
+{
+  "a": 0,
+  "b_bailey_overhead_units": {
+    "max": 0.4133525672401106,
+    "median": 0.39956929975521954,
+    "min": 0.32560509313420316,
+    "rounds": [
+      0.32560509313420316,
+      0.38430678702813853,
+      0.3948200185194445,
+      0.39956929975521954,
+      0.40402342610099257,
+      0.4043867460443434,
+      0.4133525672401106
+    ]
+  },
+  "b_bailey_step_units": 1.3995692997552196,
+  "b_canonical_canonicalisation_units": {
+    "max": 2.104717405723623,
+    "median": 1.874570382722555,
+    "min": 1.564008840057574,
+    "rounds": [
+      1.564008840057574,
+      1.8244595226038247,
+      1.8598577710749797,
+      1.874570382722555,
+      1.9469474220430962,
+      2.1042759952366272,
+      2.104717405723623
+    ]
+  },
+  "b_canonical_step_units": 2.8745703827225553,
+  "c_build": {
+    "base_points": 18544,
+    "signed_orbits": 152,
+    "stored_pairs": 1418616,
+    "units_per_stored_pair": {
+      "max": 7.811105058079939,
+      "median": 5.863589334965705,
+      "min": 5.1174442815159935,
+      "rounds": [
+        5.1174442815159935,
+        5.715786382952493,
+        5.817920768076389,
+        5.863589334965705,
+        6.233047368911466,
+        6.252445773964094,
+        7.811105058079939
+      ]
+    },
+    "what": "build_folded_within, whole call, single-threaded, over the stored pairs: two passes over every row (count, then fill), each a batched addition and a normal-basis canonical key per pair, plus the per-point work around them"
+  },
+  "curve": "K_0 / GF(2^61)",
+  "diagnostic_add_pairwise_units": {
+    "max": 1.0272381122889624,
+    "median": 0.9898280557849854,
+    "min": 0.8667124775156311,
+    "rounds": [
+      0.8667124775156311,
+      0.9092564498041186,
+      0.9484271612976706,
+      0.9898280557849854,
+      1.0107387363539033,
+      1.0116655907133907,
+      1.0272381122889624
+    ]
+  },
+  "diagnostic_affine_add_units": {
+    "max": 20.886082026534453,
+    "median": 20.350420120637708,
+    "min": 16.93919311984794,
+    "rounds": [
+      16.93919311984794,
+      18.44558273631978,
+      19.153188160533926,
+      20.350420120637708,
+      20.585816648817534,
+      20.723470416622728,
+      20.886082026534453
+    ]
+  },
+  "log2_r": 47.21087395347554,
+  "n": 61,
+  "r": 162888033982417,
+  "rounds": 7,
+  "setup_group_operations_for_the_sample_points": 277235.0,
+  "unit_ns": {
+    "max": 62.32256014384921,
+    "median": 56.179361979166664,
+    "min": 52.23361445132488,
+    "rounds": [
+      52.23361445132488,
+      54.25056353606631,
+      54.52214791746672,
+      56.179361979166664,
+      56.82261714749744,
+      58.68555737567204,
+      62.32256014384921
+    ]
+  },
+  "what_this_is": "Ledger section 19.1 (b) and (c): the price of a rho step and of a folded-table stored pair, in the Koblitz collection thread's unit (one batched affine addition, add_many over 1,024 points), measured in one process on one thread in interleaved rounds; each quantity is divided by the unit of its own round."
+}

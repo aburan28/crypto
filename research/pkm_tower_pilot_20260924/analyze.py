@@ -17,8 +17,10 @@ per (kind, m, control, p):
 - the growth rate of the matrix width, as the least-squares slope of
   log2(max_cols_to_solution) against N.
 
-It exits non-zero if a repeated system disagrees with itself or a planted
-solution was lost: either is a bug, not data.
+It exits non-zero if a repeated system disagrees with itself, a planted
+solution was lost, or the two engines (`f4_fp` and `f4_fp_tower`) disagree on
+whether a system has a solution: each is a bug, not data. Their solving
+degrees are compared and printed, not enforced: a different degree is data.
 
 Runs that hit the budget are reported, and excluded from the fits: their
 degree is a lower bound, never a value.
@@ -56,12 +58,39 @@ DETERMINISTIC = (
 STOP_COMPARABLE = ("solving_degree_max", "max_cols_to_solution")
 
 
-def system_key(r):
+def engine(r):
+    """Rows written before the tower engine existed are all `f4_fp`'s."""
+    return r.get("engine", "f4_fp")
+
+
+def instance_key(r):
+    """The system itself, whichever engine measured it."""
     return (
         r["p"], r["kind"], r["m"], r["control"], r["t"], r["g"], r["target"],
         r["target_index"], r["x_r"], r["curve"]["a"], r["curve"]["b"],
         json.dumps(r["tower"], sort_keys=True),
     )
+
+
+def default_bound(r):
+    """The example's degree bound without `--cap`: `n + d + 6`, or `2d + 8`
+    for the naive control."""
+    d = max(r["input_degrees"])
+    return 2 * d + 8 if r["control"] == "naive" else r["n_vars"] + d + 6
+
+
+def capped(r):
+    """A run with a degree bound below the default: a confirmation run (note
+    section 11.4), which is expected to stop at the bound and is not a
+    measurement of D."""
+    bound = r.get("max_degree_bound")
+    return bound is not None and bound < default_bound(r)
+
+
+def system_key(r):
+    """One measurement: a system, the engine that measured it, and the
+    degree bound it ran under."""
+    return instance_key(r) + (engine(r), r.get("max_degree_bound"))
 
 
 def load(paths, report=True):
@@ -185,6 +214,60 @@ def final_plateau(by_n, key):
     return start, ns[-1], med[-1]
 
 
+def a1_reading(by_n, key):
+    """Amendment A1 of the note (section 10.8), as section 11.6 adopted it for
+    round 2: H1a if the final plateau is longer than 10 in N; H0 if D rises at
+    least every 4 in N over the upper half of the range, read as a rate (the
+    least-squares slope over the upper half is at least 1/4, the rate of
+    section 5.2's H0 threshold); inconclusive otherwise."""
+    ns = sorted(by_n)
+    lo_n, hi_n, _ = final_plateau(by_n, key)
+    if hi_n - lo_n > 10:
+        return f"H1a (final plateau L = {hi_n - lo_n} > 10)"
+    up = upper_half_slope(by_n, key)
+    if up is None or up[0] is None:
+        return f"inconclusive (only {len(ns)} values of N)"
+    reading = "H0" if up[0] >= 0.25 else "inconclusive"
+    return f"{reading} (upper-half slope {up[0]:.3f} over N = {up[1]}…{up[2]}, final plateau L = {hi_n - lo_n})"
+
+
+def compare_engines(rows):
+    """Systems both engines finished: do their solving degrees agree?
+
+    Returns the number of systems on which the verdicts (refuted or not)
+    disagree. That is a bug in one engine; a different degree is data."""
+    by_instance = defaultdict(dict)
+    for r in rows:
+        if not r["timed_out"]:
+            by_instance[instance_key(r)][engine(r)] = r
+    pairs = [(v["f4_fp"], v["f4_fp_tower"]) for v in by_instance.values()
+             if "f4_fp" in v and "f4_fp_tower" in v]
+    if not pairs:
+        return 0
+    agree = [a for a, b in pairs if a["solving_degree_max"] == b["solving_degree_max"]]
+    verdicts = [a for a, b in pairs if a["inconsistent"] == b["inconsistent"]]
+    print("\n### The two engines on the same systems\n")
+    print(
+        f"{len(pairs)} systems finished by both: the solving degree agrees on "
+        f"{len(agree)}; the verdict (refuted or not) agrees on {len(verdicts)}."
+    )
+    diff = defaultdict(int)
+    for a, b in pairs:
+        if a["solving_degree_max"] != b["solving_degree_max"]:
+            diff[(a["kind"], a["m"], a["control"], a["N"], a["target"],
+                  a["solving_degree_max"], b["solving_degree_max"])] += 1
+    if diff:
+        print("\n| kind | m | control | N | target | D f4_fp | D f4_fp_tower | systems |")
+        print("|:--|--:|:--|--:|:--|--:|--:|--:|")
+        for (kind, m, control, n, target, d1, d2), c in sorted(diff.items()):
+            print(f"| {kind} | {m} | {control} | {n} | {target} | {d1} | {d2} | {c} |")
+    split = [(a, b) for a, b in pairs if a["inconsistent"] != b["inconsistent"]]
+    for a, b in split:
+        print("VERDICT MISMATCH", a["kind"], a["m"], a["control"], a["N"], a["target"],
+              a["target_index"], "f4_fp:", a["inconsistent"], "f4_fp_tower:", b["inconsistent"])
+    return len(split)
+
+
 def verdict(lo, hi):
     """The decision rule of section 5.2, on beta alone (H1 also needs the null)."""
     if lo is None:
@@ -196,15 +279,52 @@ def verdict(lo, hi):
     return "inconclusive"
 
 
+def confirmations(capped_rows, rows):
+    """The confirmation runs of note section 11.4, beside the full runs of the
+    same systems. Returns how many contradict their full run: a capped run
+    that refutes although the full run needed a step above the bound. The
+    algorithm is deterministic and the steps up to the bound are the same, so
+    that is a bug, not data."""
+    if not capped_rows:
+        return 0
+    full = {(instance_key(r), engine(r)): r for r in rows}
+    print("\n### Confirmation runs (degree bound below the default, section 11.4)\n")
+    print("| kind | m | control | p | N | target | bound | D, full run | pairs above the bound | refuted | confirms |")
+    print("|:--|--:|:--|--:|--:|:--|--:|--:|--:|:--|:--|")
+    bad = 0
+    for r in sorted(capped_rows, key=lambda r: (r["kind"], r["m"], r["control"], r["p"], r["N"], r["target_index"])):
+        f = full.get((instance_key(r), engine(r)))
+        d_full = f["solving_degree_max"] if f and not f["timed_out"] else None
+        if r["timed_out"]:
+            status = "no (timed out)"
+        elif r["inconsistent"]:
+            status = "no: refuted under the bound"
+            if d_full is not None and d_full > r["max_degree_bound"]:
+                bad += 1
+                status += " (CONTRADICTS the full run)"
+        elif r.get("staircase_at_stop") is not None:
+            status = "no (staircase stop)"
+        elif r["pairs_above_bound"] > 0:
+            status = "yes"
+        else:
+            status = "no (finished below the bound)"
+        print(f"| {r['kind']} | {r['m']} | {r['control']} | {r['p']} | {r['N']} | {r['target']} {r['target_index']} "
+              f"| {r['max_degree_bound']} | {d_full if d_full is not None else '—'} | {r['pairs_above_bound']} "
+              f"| {'yes' if r['inconsistent'] else 'no'} | {status} |")
+    return bad
+
+
 def main(paths):
     rows, mismatches = load(paths)
+    capped_rows = [r for r in rows if capped(r)]
+    rows = [r for r in rows if not capped(r)]
     groups = defaultdict(list)
     for r in rows:
         if r["control"] == "ladder":
             continue
-        groups[(r["kind"], r["m"], r["control"], r["p"])].append(r)
-    for (kind, m, control, prime), rs in sorted(groups.items()):
-        print(f"\n### {kind}, m = {m}, {control}, p = {prime}\n")
+        groups[(engine(r), r["kind"], r["m"], r["control"], r["p"])].append(r)
+    for (eng, kind, m, control, prime), rs in sorted(groups.items()):
+        print(f"\n### {kind}, m = {m}, {control}, p = {prime}, {eng}\n")
         print("| N | runs | timeouts | D (median, range) | width to solution (median) | F4 steps to solution (median) | F4 ms (median) |")
         print("|--:|--:|--:|:--|--:|--:|--:|")
         by_n = defaultdict(list)
@@ -253,10 +373,13 @@ def main(paths):
                 print(f"Slope of D over the upper half, N = {up[1]}…{up[2]}: {up[0]:.3f}.")
             lo_n, hi_n, d_last = final_plateau(fit_by_n, lambda r: r["solving_degree_max"])
             print(f"Final plateau: D = {d_last:g} over N = {lo_n}…{hi_n}, length L = {hi_n - lo_n}.")
+            print(f"A1 (section 11.6): {a1_reading(fit_by_n, lambda r: r['solving_degree_max'])}.")
             print(
                 f"log2(width) slope {wb:.3f} per unit N over the whole range"
                 + (f"; {upper_half_slope(fit_by_n, lambda r: math.log2(max(1, r['max_cols_to_solution'])))[0]:.3f} over the upper half." if up else ".")
             )
+    split_verdicts = compare_engines(rows)
+    contradicted = confirmations(capped_rows, rows)
     ladder = [r for r in rows if r["control"] == "ladder"]
     if ladder:
         print("\n### Generator-count ladder (planted targets)\n")
@@ -275,8 +398,10 @@ def main(paths):
                 print(f"| {kind} | {n} | {g} | {len(rs)} | all timed out | — |")
     bad = [r for r in rows if r.get("planted_ok") is False]
     print(f"\nPlanted-solution violations: {len(bad)} of {len(rows)} rows.")
-    # A repeat that disagrees, or a lost planted solution, is a bug, not data.
-    return 1 if mismatches or bad else 0
+    # A repeat that disagrees, a lost planted solution, two engines that
+    # disagree on whether a system has a solution, or a confirmation run that
+    # contradicts its full run: each is a bug, not data.
+    return 1 if mismatches or bad or split_verdicts or contradicted else 0
 
 
 if __name__ == "__main__":

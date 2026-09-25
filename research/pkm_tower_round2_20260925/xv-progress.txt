@@ -1,0 +1,13 @@
+2026-09-25T01:39:38Z start XV1-m2-tower-null: --kinds kummer,dickson,isogeny --m 2 --controls tower,null --max-t 9 --planted 2 --random 2 --planted-max-t 7 --budget 900 --ladder-t none
+2026-09-25T01:45:50Z end XV1-m2-tower-null exit 0
+2026-09-25T01:45:50Z start XV2-m3-tower: --kinds kummer,dickson,isogeny --m 3 --controls tower --max-t-m3 4 --planted 2 --random 2 --planted-max-t 3 --budget 900 --ladder-t none
+2026-09-25T01:46:09Z end XV2-m3-tower exit 0
+2026-09-25T01:46:09Z start XV3-m4-tower-random: --kinds kummer,isogeny --m 4 --controls tower --max-t-m4 3 --planted 0 --random 2 --budget 900 --ladder-t none
+2026-09-25T01:46:50Z end XV3-m4-tower-random exit 0
+2026-09-25T01:46:50Z start XV3b-m4-tower-planted-stop64: --kinds kummer,isogeny --m 4 --controls tower --max-t-m4 3 --planted 2 --random 0 --stop-below 64 --budget 900 --ladder-t none
+2026-09-25T01:47:31Z end XV3b-m4-tower-planted-stop64 exit 0
+2026-09-25T01:47:31Z start XV4-ladder: --kinds kummer,isogeny --m none --planted 2 --random 0 --budget 300 --ladder-t 4,6 --ladder-g 1,2,4,8,12
+2026-09-25T01:48:22Z end XV4-ladder exit 0
+2026-09-25T01:48:22Z start XV5-kummer-m2-p32: --p 3221225473 --kinds kummer --m 2 --controls tower --max-t 8 --planted 2 --random 2 --planted-max-t 7 --budget 900 --ladder-t none
+2026-09-25T01:48:30Z end XV5-kummer-m2-p32 exit 0
+2026-09-25T01:48:30Z all done

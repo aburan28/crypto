@@ -741,6 +741,70 @@ impl FrobeniusCanon {
     }
 }
 
+/// `x ↦ x^{2^t}` for every `t < n`, each applied as byte-table lookups.
+///
+/// A power of the Frobenius is `F_2`-linear, so like the change of basis
+/// in [`FrobeniusCanon`] it is a table per byte of the argument: `⌈n/8⌉`
+/// lookups and XORs, whatever `t` is, where the squaring chain it
+/// replaces costs `t` dependent squarings.  A walk that canonicalises
+/// over the Frobenius conjugates needs it to carry `y` (and `x`) to the
+/// conjugate the rotation chose; a walk that steps by `P + φ^j(P)` needs
+/// it for `φ^j` itself.
+#[derive(Clone, Debug)]
+pub struct FrobeniusPowers {
+    n: u32,
+    bytes: usize,
+    /// `tables[t·bytes + i][b]`: `(b·2^{8i})^{2^t}`.
+    tables: Vec<[u64; 256]>,
+}
+
+impl FrobeniusPowers {
+    /// Tables for every power `t < n` of the Frobenius of `field`.
+    pub fn new(field: &Gf2, n: u32) -> Self {
+        let bytes = n.div_ceil(8) as usize;
+        let mut tables = Vec::with_capacity(n as usize * bytes);
+        for t in 0..n {
+            for i in 0..bytes {
+                let basis: Vec<u64> = (0..8)
+                    .map(|j| {
+                        let bit = 8 * i + j;
+                        if bit < n as usize {
+                            field.sqr_k(1u64 << bit, t)
+                        } else {
+                            0
+                        }
+                    })
+                    .collect();
+                let mut table = [0u64; 256];
+                for (b, slot) in table.iter_mut().enumerate() {
+                    *slot = (0..8)
+                        .filter(|j| (b >> j) & 1 == 1)
+                        .fold(0u64, |acc, j| acc ^ basis[j]);
+                }
+                tables.push(table);
+            }
+        }
+        Self { n, bytes, tables }
+    }
+
+    /// `x^{2^t}`, for `t < n`.
+    #[inline]
+    pub fn apply(&self, t: u32, x: u64) -> u64 {
+        debug_assert!(t < self.n);
+        let base = t as usize * self.bytes;
+        let mut acc = 0u64;
+        for i in 0..self.bytes {
+            acc ^= self.tables[base + i][((x >> (8 * i)) & 0xff) as usize];
+        }
+        acc
+    }
+
+    /// The extension degree this was built for.
+    pub fn degree(&self) -> u32 {
+        self.n
+    }
+}
+
 /// Whether [`FrobeniusCanon::canon_many`] takes the AVX-512 path:
 /// the CPU has AVX-512F and `KIC_SCAN_SIMD=0` has not turned the scan's
 /// vector kernels off.
