@@ -325,7 +325,14 @@ bucket, same slots, same `dp/`; step 5 does not change.
 
 `campaign.json` lives in the bucket and is read by every worker at start
 and again on the 60 s heartbeat. Change `restartHours`, `uploadEvery` or
-`verify` freely. Never change `workers`, `batch`, `blockThreads`,
+`verify` freely. Raise `maxIters` freely too: checkpoints do not record it
+and a trail depends only on its seed, so a higher guard only lets trails
+finish that a lower one would have cut, and each worker adopts it when it
+next restarts its client (at most `restartHours` later). Never lower it
+below a value already used, because `merge.py --campaign` rewalks
+collisions under it and cannot replay a longer trail. `2^32` is the σ
+walk's value (`../benchmarks/max-iters/`); `ECC_CAMPAIGN_MAX_ITERS` in
+`../include/kernel.h` moves with it. Never change `workers`, `batch`, `blockThreads`,
 `minBlocks`, `curve` or `dpWeight` once any slot exists: the first four
 make every existing checkpoint unloadable (each slot would be retired and
 its in-flight work lost), the last two break the collision guarantee.

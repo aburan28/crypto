@@ -33,13 +33,18 @@ Answer: **keep the σ walk, and raise `maxIters`.**
   table walk as built costs **4.85–6.26× the σ walk per solve**.  With every
   fruitless cycle caught and escaped (a check that does not exist yet), it
   would cost **0.81–0.86×**; that figure is a projection.
-- **The σ walk's own loss.** The same guard costs the σ walk **15.6% of its
-  steps** today.  At `dpWeight = 32` a trail averages `2^28.41` steps, so
+- **The σ walk's own loss.** The same guard cost the σ walk **15.6% of its
+  steps**.  At `dpWeight = 32` a trail averages `2^28.41` steps, so
   `2^30` is only three trail lengths.  About 5% of honest trails reach the
   guard first, and they are the longest.  `maxIters = 2^32` brings that loss
-  to 0.01%.  No distinguished point has been collected
-  (`docs/ecc2k130-status/history.json` is empty), so the change costs
-  nothing now.
+  to 0.01%.  **Applied** 2026-09-25: `aws/campaign.json` sets `2^32`, and a
+  scale model of this walk measures the loss this note's model predicts
+  ([benchmarks/max-iters](benchmarks/max-iters/README.md)).  *Corrected:*
+  this bullet said no distinguished point had been collected, so the change
+  cost nothing.  It read the committed placeholder
+  `docs/ecc2k130-status/history.json`; the fleet had reported 32.8 M points
+  by 2026-09-17 (`benchmarks/dp-interval/`).  The change costs nothing
+  anyway, for the reason §9 now gives.
 
 Everything below follows `AGENTS.md`: §1 gives the boundary and unit, §2 the
 method, §3 why the walks differ, §4 the single table, §5 the fruitless
@@ -408,13 +413,16 @@ each range spans the bracket and the three paired sessions:
   Either is worth building before the table walk is reconsidered, and this
   harness, with the paired rate, is the test it must pass.
 - Independently of the walk, `maxIters = 2^30` at `dpWeight = 32` throws
-  away 15.6% of the σ campaign's steps.  `2^32` recovers them.
+  away 15.6% of the σ campaign's steps.  `2^32` recovers them (applied, §9).
 
 **Expected work of the σ walk.** On completed trails it is
 `2^60.809 × [1.070, 1.082] = 2^60.91–60.92` iterations (extrapolated
-bracket, hashed branches).  With the current guard it is ×1.185 more,
-`2^61.15–61.17`.  Bailey et al.'s planning budget `2^60.9`, quoted across
-this tree, is the first-order `2^60.809 × 1.069`, and it stands.
+bracket, hashed branches).  With the `2^30` guard it was ×1.185 more,
+`2^61.15–61.17`; with `2^32` it is ×1.00007, `2^60.91–60.92`
+([benchmarks/max-iters](benchmarks/max-iters/README.md), a model row whose
+mechanism and trail law are measured on a scale model).  Bailey et al.'s
+planning budget `2^60.9`, quoted across this tree, is the first-order
+`2^60.809 × 1.069`, and it stands.
 
 ## 7. Falsification target
 
@@ -449,24 +457,39 @@ or leaving a phase unpriced.  Result:
 | table walk `c = 1.00` against σ's `[1.070, 1.082]` | **engineering** | 6–7% fewer iterations, at the floor, not across it; a random mapping already does this |
 | table walk as built, at campaign settings: rate +9–15%, cost per solve ×4.85–6.26 | **relabelling** | the headline B/s counts the updates of trapped lanes |
 | `maxIters = 2^30` at `dpWeight = 32` discards 15.6% of σ steps | **accounting** | a cost the campaign pays that no page priced; raising the guard is the engineering fix |
+| `maxIters` `2^30` → `2^32`, applied ([benchmarks/max-iters](benchmarks/max-iters/README.md)) | **engineering** | expected work ×1.185 → ×1.00007 (model row; on a scale model at the same cap ratios the guard cuts exactly the long trails and discards 14.2% and 0.002% of trail steps against predicted 14.2% and 0.002%); walk, seeds and corpus unchanged |
 | v1 table rows → v2 (fruitless 4-cycles no longer scored as collisions) | **accounting** | a correction to this note's own emulation |
 
 None is an advance: no row moves the ratio to the floor below one.
 
 ## 9. What this changes elsewhere
 
-- `aws/campaign.json` is unchanged: `"walk": "sigma"` stays.  The
-  `maxIters` change is the campaign owner's to make, for two reasons: the
-  bucket copy is what workers read, and `maxIters` is part of the campaign
-  contract (`campaignContract` in `aws/protocol.py`), so changing it starts a
-  new corpus.  That costs nothing now and costs the corpus later, so the
-  change has the same deadline as the walk choice.  Recommended before
-  collection: `maxIters ≥ 2^32` at `dpWeight = 32`.  The witness generator
-  `src/witness.cpp` has to move with it.  It refuses a trail longer than its
-  own `--max-iters`, which defaults to `2^30`, and a cairn job's
-  `max_steps_per_walker` can lower that.  Unless both are raised, the
-  distinguished points the longer guard recovers (trails of `2^30` to `2^32`
-  steps, about 5% at `dpWeight = 32`) would be refused there.
+- `aws/campaign.json` keeps `"walk": "sigma"` and, since 2026-09-25, sets
+  `maxIters = 2^32`.  This bullet first said the change was the campaign
+  owner's because it would start a new corpus (`maxIters` is part of
+  `campaignContract` in `aws/protocol.py`) and cost nothing only because
+  nothing had been collected.  *Corrected:* neither holds for the live
+  campaign.  Its bucket copy has no `storageProtocol` (`aws/bootstrap.sh`
+  runs it as the unversioned store), so no campaign id binds `maxIters`;
+  checkpoints do not record it; and a trail is a function of its seed alone,
+  so a higher guard only lets trails finish that the lower one cut.
+  Corpus, checkpoints and seed schedule carry over, and each worker adopts
+  the value when it next restarts its client.  The bucket copy is still what
+  workers read, so the edit there is the operator's (`aws/README.md`).
+- The replay tools moved with it.  `src/witness.cpp` refused any trail past
+  `2^30` and `src/trailforest.cpp` past `2^32`, both short of what the client
+  reports, since the guard is checked only every `ECC_GUARD_PERIOD` steps.
+  Both now default to `ECC_REPLAY_MAX_ITERS` in `include/kernel.h`, the
+  campaign's cap plus that window, and `aws/test_campaign_guard.py` pins it
+  to `campaign.json`.  Two limits remain.  A cairn claim is capped by its
+  job's `max_steps_per_walker`, which the production job in the cairn
+  repository sets to `2^30`, so the trails the longer guard recovers are
+  corpus points but not yet claimable there.  And collectors with no guard
+  at all (the Modal launcher passes no `--max-iters`; the FPGA engine has
+  none) report trails of any length, which a strict merge
+  (`merge.py --campaign`) rewalks only up to the campaign's cap: the share of
+  their trails past it falls from 4.9% to 0.0006%, and for the length-biased
+  trail a collision lands on, from 20% to 0.008%, but it is not zero.
 - [ITERATION-FUNCTION.md](ITERATION-FUNCTION.md) said that choosing the
   table walk later "is a configuration change and not a code change".  That
   no longer holds: the walk needs a cycle check first.  Its §6.2 ratio

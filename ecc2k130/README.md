@@ -478,6 +478,12 @@ bitsliced arithmetic and merged into the finished lanes under a mask. No linear
 combination of `P` and `Q` is tracked in the loop: a coefficient update is a
 129-bit modular multiplication per step, which this walk cannot afford.
 
+A walk that goes `--max-iters` steps without a report is restarted the same
+way and its trail discarded. The σ walk has no fruitless cycles, so that only
+ever cuts an honest trail: the campaign's `2^32` is twelve trail lengths at
+`dpWeight` 32 and discards 0.007% of the walk's steps, where the earlier
+`2^30` discarded 15.6% ([benchmarks/max-iters](benchmarks/max-iters/README.md)).
+
 Reports are `(seed, endpoint)`. Collision resolution recomputes each walk
 counting how often each `sigma^j + 1` was applied, giving
 `endpoint = [mu](alpha_0 P + Q)` with `mu = prod_j (1 + s^j)^{n_j}`, matches the
