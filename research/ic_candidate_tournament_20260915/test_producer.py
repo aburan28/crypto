@@ -37,6 +37,18 @@ class StageEvidenceTests(unittest.TestCase):
         with self.assertRaises(InvalidEvidence):
             self.audit(report)
 
+    def test_rank_replay_reads_coefficients_after_previous_elimination(self):
+        vector = json.loads((Path(__file__).parent/'producer/testdata/n23.json').read_text())
+        report = vector['report']
+        result = audit_stages(report, report['fixture'], vector['job']['algorithm_seed'])
+        self.assertEqual(result['queries']['final_rank'], 8)
+        self.assertEqual(result['rank_events'], [[i, i, i+1] for i in range(8)])
+        # Row six needs a coefficient created by an earlier elimination. The
+        # stale-list iterator incorrectly reported this row as dependent.
+        report['diagnostics']['rank_events'][5][2] = 5
+        with self.assertRaises(InvalidEvidence):
+            audit_stages(report, report['fixture'], vector['job']['algorithm_seed'])
+
     def test_correct_relation_cannot_be_relabelled_as_another_query(self):
         report = copy.deepcopy(VECTOR['report'])
         # The group relation remains correct, but its claimed query position is

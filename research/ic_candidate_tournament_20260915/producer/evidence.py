@@ -101,7 +101,10 @@ def audit_stages(report, fixture, algorithm_seed):
         for value in row+[int(rel['a'])]:
             matrix.update(value.to_bytes(8, 'little'))
         before = len(pivots)
-        for column, value in enumerate(row):
+        for column in range(columns):
+            # Reduction replaces row; read the current coefficient rather than
+            # continuing an iterator over the row from before elimination.
+            value = row[column]
             if value == 0:
                 continue
             if column in pivots:
