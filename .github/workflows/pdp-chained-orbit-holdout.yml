@@ -1,0 +1,38 @@
+name: Chained PDP orbit holdout replay
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/pdp-chained-orbit-holdout.yml"
+      - "research/ecc2k130_pdp_chain_holdout_20260925/**"
+      - "research/ecc2k130_factor_base_pilot_20260924/run.py"
+      - "research/ecc2k130_relations/**"
+      - "research/ecc2k130_oriented_transport_20260924/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/pdp-chained-orbit-holdout.yml"
+      - "research/ecc2k130_pdp_chain_holdout_20260925/**"
+      - "research/ecc2k130_factor_base_pilot_20260924/run.py"
+      - "research/ecc2k130_relations/**"
+      - "research/ecc2k130_oriented_transport_20260924/**"
+  workflow_dispatch:
+
+jobs:
+  independent-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Replay all finite-base witnesses, certified skips and ranks
+        run: |
+          set -euo pipefail
+          base=research/ecc2k130_pdp_chain_holdout_20260925
+          python3 "$base/verify.py" "$base/receipt_projected.json"
+          python3 "$base/verify.py" "$base/receipt_raw.json"
+          python3 "$base/verify.py" "$base/receipt_mask512.json"
+          python3 "$base/verify.py" "$base/receipt_power2048.json"
+          python3 "$base/verify_prefix.py" "$base/receipt_mask512.json" "$base/receipt_power2048.json"
