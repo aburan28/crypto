@@ -6745,6 +6745,28 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-rank-holdout-20260925 -->
+<!-- BEGIN ecc2k130-rotated-beta-sweep-20260925 -->
+<section class="panel" id="ecc2k130-rotated-beta-sweep-20260925">
+  <div class="panel-head">
+    <h2>Rotated normal-beta sweep: exact n = 19 support moves at fixed base size; no beta meets the follow-up gate <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/769">PR #769</a> froze a SHA-selected four-beta sweep against merged <a href="https://github.com/aburan28/crypto/pull/767">#767</a> beta 3. Each arm has six seven-point rotated factors, seven signed projected F0 points (three nonzero sign-pair columns plus O), 117,649 labelled tuples, and the same 130,873-point subgroup. Every tuple and subgroup target was independently replayed with separate bit-serial field/group arithmetic, as were the eight unchanged #767 point labels. This is a factor-base support diagnostic, with no solver or log timing.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact projected point support including O, q = 130,873. Energy E = sum of squared tuple multiplicities; N<sup>2</sup>/E is a Cauchy&ndash;Schwarz lower bound on support, not a measured attack yield. All rows have at least 13,224 necessary misses from q &minus; 7<sup>6</sup>. Follow-up requires support at least 68,628 and E/support no worse than beta 3.</caption>
+    <thead><tr><th>Normal beta</th><th>Projected support / q</th><th>Exact misses</th><th>&Delta; vs beta 3</th><th>Tuple energy E</th><th>Effective floor N<sup>2</sup>/E</th><th>Overlap with beta 3</th><th>Fixed #767 label flips</th><th>Follow-up gate</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>3, #767 reference</td><td>62,389 / 130,873</td><td>68,484</td><td>reference</td><td>327,325</td><td>42,286.1</td><td>62,389</td><td>0 / 8</td><td>reference</td><td>unset / unset</td></tr>
+      <tr><td>338435</td><td>66,179 / 130,873</td><td>64,694</td><td>+3,790</td><td>297,425</td><td>46,537.1</td><td>31,457</td><td>5 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+      <tr><td>303097</td><td>66,203 / 130,873</td><td>64,670</td><td>+3,814</td><td>298,357</td><td>46,391.7</td><td>31,579</td><td>5 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+      <tr><td>464276</td><td>59,323 / 130,873</td><td>71,550</td><td>&minus;3,066</td><td>353,429</td><td>39,162.9</td><td>28,253</td><td>4 / 8</td><td>FAIL: support and energy</td><td>unset / unset</td></tr>
+      <tr><td>42605</td><td>64,657 / 130,873</td><td>66,216</td><td>+2,268</td><td>309,229</td><td>44,760.6</td><td>30,981</td><td>4 / 8</td><td>FAIL: support &lt; 68,628</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The largest gain is 6.11% over beta 3, below the preregistered 10% support threshold. Exact projected-energy-per-supported-target improves on three candidates, yet no candidate passes both conditions. Supported point sets have only 28,253&ndash;31,579 shared targets with beta 3, so a frozen beta-3 planted or negative label can change status under another base. Prioritize other factor-base and solver directions over more toy normal-beta tuning. There is no n = 131 transfer, ECC2K-130 speedup, rho ratio or full-cost S. Evidence: <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/RESULT.md">exact decision and operations</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/PROTOCOL.md">pre-outcome protocol</a>, <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_sweep_20260925/evidence/README.md">raw archive and replay</a>. Archive SHA-256 <code>fe84aef6a2cf7f6f4c950245c9c8e870354fb750666f5482b81f9a997d107140</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-beta-sweep-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">

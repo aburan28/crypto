@@ -1,0 +1,28 @@
+name: ECC2K-130 rotated normal-beta sweep replay
+
+on:
+  push:
+    paths:
+      - research/notes/ecc2k130/rotated_beta_sweep_20260925/**
+      - .github/workflows/ecc2k130-rotated-beta-sweep.yml
+  pull_request:
+    paths:
+      - research/notes/ecc2k130/rotated_beta_sweep_20260925/**
+      - .github/workflows/ecc2k130-rotated-beta-sweep.yml
+
+jobs:
+  archive-only-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify frozen source and selection, replay committed evidence only
+        run: |
+          if test -f research/notes/ecc2k130/rotated_beta_sweep_20260925/evidence/raw.tar.gz; then
+            python3 research/notes/ecc2k130/rotated_beta_sweep_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_beta_sweep_20260925/evidence
+          else
+            python3 research/notes/ecc2k130/rotated_beta_sweep_20260925/ci_replay.py
+          fi
