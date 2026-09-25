@@ -76,10 +76,13 @@ def verify_ic(args, points_file, points, labels):
         assert curve.scalar(curve.generator, value) == target, index
         assert value == expected, index
         recovered.append(value)
-    observations = batch.get("query_observations")
-    if observations is not None:
-        assert len(observations) == args.count
-        assert all(item["hit"] for item in observations)
+    observations = batch["query_observations"]
+    assert len(observations) == args.count
+    for index, (item, target) in enumerate(zip(observations, points)):
+        assert tuple(item["target_point"]) == target, index
+        assert item["hit"], index
+        assert item["s3_calls"] >= item["partner_roots"] >= item["indexed_partner_hits"]
+        assert item["indexed_partner_hits"] >= item["group_lift_attempts"]
     return {
         "arm": "ic", "n": 53, "count": args.count, "block": args.block,
         "raw_sha256": sha(raw_file), "points_sha256": sha(points_file),
