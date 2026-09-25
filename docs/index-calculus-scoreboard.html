@@ -7208,6 +7208,29 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-beta-portfolio-20260925 -->
+<!-- BEGIN ecc2k130-rotated-slot-placement-20260925 -->
+<section class="panel" id="ecc2k130-rotated-slot-placement-20260925">
+  <div class="panel-head">
+    <h2>Full-rank n = 19 slot placement: all six projected supports saturate <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/793">PR #793</a> froze the six positions for the one leftover normal coordinate in a 19-bit, six-slot beta-3 frame. Every arm has five 3-bit slots and one 4-bit slot, joint normal rank 19, and the same q = 130,873 subgroup. An independent bit-serial/Fermat implementation replayed all q multiplicities and the same 64 point labels for each position. The positional-support gate fails: every arm supports all q targets.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact finite toy support. N/q is a labelled-tuple capacity ratio; N²/(M2q) is a proven Cauchy support lower-bound ratio, not a hit estimate. The frozen equal-budget comparison requires the same N and per-slot signed-column budget B. Full-cost S and matched rho are unset.</caption>
+    <thead><tr><th>Fourth-bit slot</th><th class="n">B / global C</th><th class="n">N / q</th><th class="n">Exact support / q</th><th class="n">Cauchy lower bound / q</th><th class="n">64 archived-row rank / C</th><th>All-q replay</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>0 (23 &times; 13<sup>5</sup>)</td><td class="n">41 / 41</td><td class="n">65.252</td><td class="n">130,873 / 130,873</td><td class="n">98.2265%</td><td class="n">31 / 41</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>1 (19 &times; 13<sup>5</sup>)</td><td class="n">39 / 39</td><td class="n">53.904</td><td class="n">130,873 / 130,873</td><td class="n">97.9329%</td><td class="n">34 / 39</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>2 (19 &times; 13<sup>5</sup>)</td><td class="n">39 / 39</td><td class="n">53.904</td><td class="n">130,873 / 130,873</td><td class="n">97.5873%</td><td class="n">34 / 39</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>3 (19 &times; 13<sup>5</sup>)</td><td class="n">39 / 39</td><td class="n">53.904</td><td class="n">130,873 / 130,873</td><td class="n">97.9085%</td><td class="n">33 / 39</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>4 (21 &times; 13<sup>5</sup>)</td><td class="n">40 / 40</td><td class="n">59.578</td><td class="n">130,873 / 130,873</td><td class="n">97.9842%</td><td class="n">34 / 40</td><td>PASS</td><td>unset / unset</td></tr>
+      <tr><td>5 (23 &times; 13<sup>5</sup>)</td><td class="n">41 / 41</td><td class="n">65.252</td><td class="n">130,873 / 130,873</td><td class="n">98.2265%</td><td class="n">34 / 41</td><td>PASS</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>Equal-budget pairs (0,5), (1,2), (1,3) and (2,3) each have zero exact support difference, zero support symmetric difference and zero membership flips among the 64 shared targets; position 4 has no equal-budget partner. Their second moments and deterministic first-witness ranks can differ without changing support. The 72.947-second sequential run and separate 2.16&ndash;3.17 million sparse integer updates per arm are diagnostics, not attack costs. This saturated toy rung does not justify n = 131 position tuning, solver speed, an ECC2K-130 log, full S or a rho ratio. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_slot_placement_20260925/RESULT.md">Decision and exact comparisons</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_slot_placement_20260925/evidence/README.md">raw arrays and replay</a>. Archive SHA-256 <code>495e522064f440f0317640d28d812c5ef012f3dd12580a07e3b941c806b92d68</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-slot-placement-20260925 -->
 <!-- BEGIN ecc2k130-rotated-four-base-joint-rank-20260925 -->
 <section class="panel" id="ecc2k130-rotated-four-base-joint-rank-20260925">
   <div class="panel-head">
