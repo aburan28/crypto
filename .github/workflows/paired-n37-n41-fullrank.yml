@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-python@v5
         with:
@@ -32,6 +34,14 @@ jobs:
       - name: Build exact branch source
         if: env.PANEL_ARCHIVED != '1'
         run: cargo build --release --example koblitz_rank_fixture --example koblitz_rho_fixture
+      - name: Require clean source and pinned-main ancestry
+        if: env.PANEL_ARCHIVED != '1'
+        run: |
+          git rev-parse HEAD
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+          git cat-file -t 3bec69ca636cebc71f828a3035c49b8258e13f5f
+          git merge-base --is-ancestor 3bec69ca636cebc71f828a3035c49b8258e13f5f HEAD
       - name: Run n37 pilot and holdouts
         if: env.PANEL_ARCHIVED != '1'
         run: |
