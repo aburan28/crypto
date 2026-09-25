@@ -6693,6 +6693,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n131-beta3-f0-census-20260925 -->
+<!-- BEGIN ecc2k130-rotated-arity-screen-20260925 -->
+<section class="panel" id="ecc2k130-rotated-arity-screen-20260925">
+  <div class="panel-head">
+    <h2>Exact n = 131 balanced rotated-arity screen selects m10,d13 for an implicit-PDP gate <span class="chip">necessary count</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/778">PR #778</a> froze four beta-3 arms and independent full-mask replay before counting. Each of the 352,256 masks across m7/d18, m8/d16, m9/d14 and m10/d13 was independently reconstructed and checked for a rational lift and signed ±[4] projected column; 64 fixed full-group-law samples per arm passed. The tuple product over the subgroup order q is a necessary uniform-target support ceiling, not an observed PDP hit rate.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>F is the exact physical F0 point count; C is the number of distinct nonzero signed ±[4] columns. The frozen gate requires F<sup>m</sup>≥q and C≤16,384. No relation rank, solver time, full S, or rho ratio was measured.</caption>
+    <thead><tr><th>Arm</th><th>Masks</th><th>F</th><th>C</th><th>Exact F<sup>m</sup>/q</th><th>Gate</th></tr></thead>
+    <tbody>
+      <tr><td>m7,d18</td><td>262,144</td><td>261,709</td><td>130,854</td><td>0.1235552391</td><td>fail both</td></tr>
+      <tr><td>m8,d16</td><td>65,536</td><td>65,747</td><td>32,873</td><td>0.5130244782</td><td>fail both</td></tr>
+      <tr><td>m9,d14</td><td>16,384</td><td>16,743</td><td>8,371</td><td>0.1519252832</td><td>fail tuple count</td></tr>
+      <tr><td>m10,d13</td><td>8,192</td><td>7,977</td><td>3,988</td><td>1.5329446704</td><td>pass necessary screen</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The exact m6,d21 F from <a href="https://github.com/aburan28/crypto/pull/773">#773</a> gives a one-base counting ceiling of 12.4685%; even four equal-size bases cannot exceed 49.8738% by the union bound. Balanced m10 reduces C but has 1,178 raw affine-chain variables before branches/auxiliaries. A separate full-dimensional unequal-slot census, starting with five 15-bit and four 14-bit m9 slots, is the next parameter experiment; no larger-rung solver has been admitted. Producer/independent replay wall was at most 10.506/124.310 s per arm, below frozen 600/1,200 s and 256 MiB caps. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/RESULT.md">Exact result and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_arity_screen_20260925/EVIDENCE.md">raw receipt and replay</a>. Freeze SHA-256 <code>3e930522ef1102770b7a748477959a108f8656fa2aaaa0b22a17598b2856eedb</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-arity-screen-20260925 -->
 <!-- BEGIN ecc2k130-rotated-pdp-corpus-20260925 -->
 <section class="panel" id="ecc2k130-rotated-pdp-corpus-20260925">
   <div class="panel-head">
