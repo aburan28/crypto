@@ -1,18 +1,23 @@
 # Complete four-sum support versus compact extraction: fresh n=37/41 streams
 
 **Decision (Gate 1): support/representation is the next lever.** On three
-preregistered, disjoint toy-point streams, the complete elliptic-curve
-four-sum oracle and the unchanged compact S3 extractor agree on every target.
+preregistered toy panels on streams held out from #747, the complete
+elliptic-curve four-sum oracle and the unchanged compact S3 extractor
+agree on every target.
 There is no observed root-index/extractor miss on these streams. At n=37 R3,
 164/512 targets have a four-point sum in the frozen base, compared with the
-exact **uniform prime-subgroup target counting ceiling** 0.450829; the older training
-stream's extractor yield was 175/512. The ceiling counts potential unordered
+conservative **nonzero prime-subgroup target count ceiling** 0.450829;
+the older training stream's extractor yield was 175/512. The ceiling counts potential unordered
 multisets before collisions and is not the measured support probability. The
-fresh 164/512 result is 0.3203125. Replacing a root index cannot recover the
-348 targets proved absent from this particular base. Agreement on finite
+fresh 164/512 result is 0.3203125. The displayed upper bounds use
+`C(F+3,4)/(q−1)` because sampled scalars lie in `1..q−1`: the exact tuple
+counts are 103,962,600 / 7,786,983,876 / 39,301,955,070, and subgroup
+orders are 230,603,167 for n37 and 549,756,390,943 for n41. These bounds
+are conservative because different tuples can collide at one group point.
+Replacing a root index cannot recover the 348 targets proved absent from this particular base. Agreement on finite
 streams is not a proof that the extractor is globally complete.
 
-| Frozen arm | F | Exact unordered ceiling | Oracle+/extractor+ | Oracle+/extractor− | Both− | Extractor+/oracle− | Distinct four-multiset witnesses |
+| Frozen arm | F | Nonzero-target tuple ceiling | Oracle+/extractor+ | Oracle+/extractor− | Both− | Extractor+/oracle− | Distinct four-multiset witnesses |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | n37 R3, 512 targets | 222 | 0.450829 | 164 | 0 | 348 | 0 | 223 |
 | n41 R8, 512 targets | 656 | 0.014164 | 10 | 0 | 502 | 0 | 11 |
@@ -24,8 +29,8 @@ scalars are *modeled* as independent uniform subgroup draws, descriptive 95%
 Wilson intervals for the oracle membership fractions are 0.2814–0.3619,
 0.0106–0.0356 and 0.0080–0.0666 respectively. These are model-based
 sampling descriptions, not coverage proofs; in particular 10/512 at n41 R8
-may exceed its 0.014164 uniform prime-subgroup target ceiling by finite-sample fluctuation.
-The n41 R12 targets are literally the first 128 of the n41 stream used at R8,
+may exceed its 0.014164 nonzero-target counting ceiling by finite-sample
+fluctuation. The n41 R12 targets are literally the first 128 of the n41 stream used at R8,
 so the two n41 rows are not statistically independent samples.
 
 For each arm the Rust oracle materialized every unordered pair `i≤j`, retaining

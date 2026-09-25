@@ -6509,8 +6509,8 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
     </tbody>
   </table></div>
   <div class="table-scroll"><table>
-    <caption>PR #757: fresh targets disjoint from training, exact full-coordinate group-law four-sum oracle versus unchanged compact S3 extractor; n41 R12 reuses the first 128 n41 R8 targets. The ceiling counts unordered four-multisets against the selected prime subgroup order; it is necessary, not a prediction of hit rate. Both arms used the same frozen target file for each row.</caption>
-    <thead><tr><th>Curve/base</th><th class="n">F points</th><th class="n">Fresh targets</th><th class="n">Uniform prime-subgroup ceiling</th><th class="n">Oracle members</th><th class="n">Extractor hits</th><th class="n">Oracle-only</th></tr></thead>
+    <caption>PR #757: fresh targets disjoint from training, exact full-coordinate group-law four-sum oracle versus unchanged compact S3 extractor; n41 R12 reuses the first 128 n41 R8 targets. The displayed necessary ceiling is C(F+3,4)/(q−1) for the sampled nonzero scalars, where q is the selected prime subgroup order; tuple collisions can only lower support. Both arms used the same frozen target file for each row.</caption>
+    <thead><tr><th>Curve/base</th><th class="n">F points</th><th class="n">Fresh targets</th><th class="n">Nonzero-target tuple ceiling</th><th class="n">Oracle members</th><th class="n">Extractor hits</th><th class="n">Oracle-only</th></tr></thead>
     <tbody>
       <tr><td>n = 37, R = 3</td><td class="n">222</td><td class="n">512</td><td class="n">0.450829</td><td class="n">164</td><td class="n">164</td><td class="n">0</td></tr>
       <tr><td>n = 41, R = 8</td><td class="n">656</td><td class="n">512</td><td class="n">0.014164</td><td class="n">10</td><td class="n">10</td><td class="n">0</td></tr>
