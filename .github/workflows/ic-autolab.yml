@@ -41,6 +41,7 @@ jobs:
       - name: Release arithmetic and descent regressions
         run: |
           cargo test --locked --release --lib pdp_admission_ -- --test-threads=1
+          cargo test --locked --release --lib query_accounting_ -- --test-threads=1
           cargo test --locked --release --lib la_accounting_ -- --test-threads=1
           cargo test --locked --release --lib all_three_oracles_answer_every_target_identically -- --test-threads=1
           cargo test --locked --release --lib undecomposable_targets -- --test-threads=1

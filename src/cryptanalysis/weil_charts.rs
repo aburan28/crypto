@@ -69,7 +69,7 @@ struct PairTemplate {
     product_rank: usize,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct WeilSolveStats {
     pub component_pairs: usize,
     pub duplicate_pairs: usize,

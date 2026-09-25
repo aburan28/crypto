@@ -7,6 +7,7 @@ import platform
 import subprocess
 from pathlib import Path
 
+from generic_queries import verify_queries
 from identity import curve_record, factor_base_inventory, write_immutable
 from measurement import legacy_ledger
 from oracle import require, verify
@@ -56,6 +57,10 @@ def main():
                    config=dict(solver='pair_table', linear_algebra='sparse',
                                batch_trials=1, max_trials=4096, summands=3))
         jobs.append((f'factor-base-{name}', job, False))
+    for solver in SOLVERS:
+        job = copy.deepcopy(jobs[0][1])
+        job['config'].update(solver=solver, batch_trials=1, max_trials=1)
+        jobs.append((f'incomplete-{solver}', job, False))
     # This is a frozen list of test vectors, not a search over candidate winners.
     write(out / 'inputs.json', [{'test': name, 'job': job, 'profile': profile}
                                for name, job, profile in jobs], exclusive=True)
@@ -67,7 +72,7 @@ def main():
         'input_sha256': digest(out / 'inputs.json'),
         'evaluator_sha256': {name: digest(Path(__file__).with_name(name))
                              for name in ('ci_smoke.py', 'tournament.py', 'oracle.py', 'portfolio.py',
-                                          'identity.py', 'measurement.py')},
+                                          'identity.py', 'measurement.py', 'generic_queries.py')},
     }, exclusive=True)
     outcomes = []
     fixtures = {}
@@ -75,7 +80,8 @@ def main():
         directory = out / name
         directory.mkdir()
         write(directory / 'job.json', job, exclusive=True)
-        receipt = dict(test=name, status='FAILED', promotion_eligible=False,
+        expected_failure = name.startswith('incomplete-')
+        receipt = dict(test=name, status='FAILED', expected_failure=expected_failure, promotion_eligible=False,
                        end_to_end_speedup=None)
         try:
             key = (job['degree'], job['curve_a'])
@@ -93,13 +99,21 @@ def main():
             write_immutable(directory / 'curve-manifest.json', curve_record(fixture))
             process = execute([str(worker)], job, directory / 'native', 60, 8 * 1024**3, cpu)
             receipt['native_process'] = process
-            require(process['exit_code'] == 0 and process['process_status'] == 'EXITED',
-                    'native worker failed or incomplete')
+            require(process['exit_code'] == (2 if expected_failure else 0)
+                    and process['process_status'] == 'EXITED', 'unexpected native exit')
             report = read(directory / 'native/stdout.json')
-            proof = verify(report, fixture,
-                           expected_mode=job['mode'], summands=job['config']['summands'])
+            if expected_failure:
+                require(report['status'] == 'incomplete' and report['trials'] == 1,
+                        'intentional exhaustion changed')
+                require(report['solve_attempts'] == report['log_table_report']['solve_attempts'],
+                        'failed matrix attempts lost')
+                proof = None
+            else:
+                proof = verify(report, fixture,
+                               expected_mode=job['mode'], summands=job['config']['summands'])
             receipt['certificate'] = proof
             if job['mode'] == 'ic':
+                receipt['query_accounting'] = verify_queries(report, fixture, job['config']['summands'])
                 inventory = factor_base_inventory(report, fixture)
                 write_immutable(directory / 'factor-base-inventory.json', inventory)
                 receipt['factor_base_inventory'] = inventory
@@ -114,6 +128,11 @@ def main():
                         'profiled worker failed or incomplete')
                 profile_proof = verify(read(profile_dir / 'stdout.json'), fixture,
                                        expected_mode=job['mode'], summands=job['config']['summands'])
+                if job['mode'] == 'ic':
+                    profile_queries = verify_queries(read(profile_dir / 'stdout.json'), fixture,
+                                                     job['config']['summands'])
+                    require(profile_queries == receipt['query_accounting'],
+                            'native/profile query accounting differs')
                 require(profile_proof == proof, 'native/profile certificates differ')
                 intervals = parse_profiles(profile_dir)
                 expected = {'startup_and_input', 'curve_and_targets', 'final_verification',
