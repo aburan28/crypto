@@ -72,6 +72,7 @@ def child(receipt: dict, out: Path, name: str, command: list[str],
 
 
 def run(out: Path):
+    out = out.resolve()
     frozen = json.loads((HERE / "FROZEN.json").read_text())
     for key, path in (("protocol_sha256", HERE / "PROTOCOL.md"),
                       ("export_sha256", HERE / "export.py"),
@@ -129,7 +130,9 @@ def run(out: Path):
                 except (ValueError, OSError):
                     pass
         receipt["decision"] = "CENSORED" if "CENSORED" in statuses or any(
-            row["external_timeout"] for row in receipt["attempts"]) else "FAILED"
+            row["external_timeout"] or (row["exit_code"] is not None and
+                                        row["exit_code"] < 0)
+            for row in receipt["attempts"]) else "FAILED"
         receipt["error"] = repr(error)
         save(out / "receipt.json", receipt)
         manifest(out, sha(HERE / "FROZEN.json"))

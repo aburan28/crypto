@@ -11,6 +11,7 @@ import json
 import math
 import resource
 import signal
+import subprocess
 import sys
 import tarfile
 import time
@@ -18,6 +19,7 @@ from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[3]
 NOTES = HERE.parent
 DENSE = NOTES / "rotated_s3_o_branch_20260925/export.py"
 SPARSE = NOTES / "rotated_s3_sparse_cnf_20260925/export.py"
@@ -205,6 +207,13 @@ def write_cnf(dense, sparse, field, groups, stage_rows, variables, out: Path):
 
 
 def run(out: Path):
+    frozen = json.loads((HERE / "FROZEN.json").read_text())
+    check_freeze(frozen)
+    parent_check = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", frozen["required_parent_head"], "origin/main"],
+        cwd=REPO, capture_output=True, check=False)
+    if parent_check.returncode != 0:
+        raise RuntimeError("#786 exact parent head is not yet in fetched origin/main")
     started = time.perf_counter()
     cpu = time.process_time()
     out.mkdir(parents=True, exist_ok=False)
@@ -213,8 +222,6 @@ def run(out: Path):
     signal.signal(signal.SIGALRM, expired)
     signal.setitimer(signal.ITIMER_REAL, WALL_CAP)
     try:
-        frozen = json.loads((HERE / "FROZEN.json").read_text())
-        check_freeze(frozen)
         dense = module(DENSE, "n19_dense_root_source")
         sparse = module(SPARSE, "n19_sparse_block_source")
         field = dense.GF(N, POLY)
@@ -261,7 +268,7 @@ def run(out: Path):
             raise Censored("producer RSS cap")
         save(out / "result.json", result)
     except Exception as error:
-        save(out / "failure.json", {"decision": "CENSORED" if isinstance(error, Censored)
+        save(out / "failure.json", {"decision": "CENSORED" if isinstance(error, (Censored, MemoryError))
                                      else "FAILED", "error": repr(error),
                                     "wall_seconds": time.perf_counter() - started,
                                     "cpu_seconds": time.process_time() - cpu,

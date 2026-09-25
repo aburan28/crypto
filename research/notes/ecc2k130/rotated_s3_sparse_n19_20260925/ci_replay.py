@@ -5,6 +5,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
+import sys
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -82,6 +85,23 @@ def audit_archive(root: Path, frozen):
         assert (summary["signed_point_tuples"], summary["target_labels"]) == (
             verified["signed_point_tuples"], len(verified["target_rows"]))
         assert len(verified["target_rows"]) == 33
+        with tempfile.TemporaryDirectory(prefix="n19-sparse-independent-replay-") as scratch:
+            replay_path = Path(scratch) / "verify.json"
+            replay = subprocess.run(
+                [sys.executable, str(HERE / "verify.py"), "--produced",
+                 str((root / "producer").resolve()), "--out", str(replay_path)],
+                cwd=HERE.parents[3], capture_output=True, text=True,
+                check=False, timeout=frozen["caps"]["external_verify_seconds"])
+            if replay.returncode != 0 or not replay_path.is_file():
+                raise AssertionError(f"fresh independent archive replay failed: "
+                                     f"exit={replay.returncode}, stderr={replay.stderr[-1000:]}")
+            fresh = json.loads(replay_path.read_text())
+        resource_keys = {"wall_seconds", "cpu_seconds", "peak_rss_bytes"}
+        old_semantics = {key: value for key, value in verified.items()
+                         if key not in resource_keys}
+        new_semantics = {key: value for key, value in fresh.items()
+                         if key not in resource_keys}
+        assert old_semantics == new_semantics and fresh["decision"] == "PASS"
     else:
         assert receipt["decision"] in {"CENSORED", "FAILED"}
         assert len(receipt["attempts"]) <= 2

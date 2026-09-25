@@ -435,7 +435,7 @@ def run(produced_dir: Path, out: Path):
             raise Censored("independent verifier RSS cap")
         save(out, result)
     except Exception as error:
-        save(out, {"decision": "CENSORED" if isinstance(error, Censored) else "FAILED",
+        save(out, {"decision": "CENSORED" if isinstance(error, (Censored, MemoryError)) else "FAILED",
                    "error": repr(error), "wall_seconds": time.perf_counter() - started,
                    "cpu_seconds": time.process_time() - cpu,
                    "peak_rss_bytes": rss()})
