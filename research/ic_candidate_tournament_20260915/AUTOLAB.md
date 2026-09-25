@@ -173,13 +173,13 @@ across history, and preserve failed configurations as evidence.
 ## Development reference qualification
 
 `tournament.py prepare --qualification` freezes only A/A, smoke and development.
-It interleaves rho widths 1, 8 and 32 from each distinct candidate source with
+It interleaves declared rho widths from each distinct candidate source with
 all IC arms, reports actual effective widths, and keeps separate online and cold
 reference leaders. Failed smoke or incomplete development runs disqualify a
 reference. The mode creates no confirmation targets and cannot promote.
 
 The [predeclared five-cell protocol](goal_20260924/reference-qualification/PROTOCOL.md)
-uses the existing optimized-producer workflow. Dispatch `ic-producer.yml` with
+uses widths 1, 2, 4, 8, 16 and 32 through the existing optimized-producer workflow. Dispatch `ic-producer.yml` with
 `qualify_references=true`: all three producer release/control jobs must pass
 before their sealed source artifacts enter the single-host qualification job.
 `qualify_references.py` only orchestrates the existing tournament CLI. Audit the

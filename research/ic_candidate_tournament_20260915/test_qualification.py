@@ -24,6 +24,13 @@ class ReferenceQualificationTests(unittest.TestCase):
         self.assertEqual({r['binary_relative'] for r in refs[3:]},{'other/worker'})
         self.assertNotIn('rho_parallel_walks',base['config'])
 
+    def test_full_width_sweep_includes_intermediate_settings_and_rejects_duplicates(self):
+        arm=dict(id='incumbent',config={},source_manifest_sha256='a')
+        refs=qualification_references([arm],(1,2,4,8,16,32))
+        self.assertEqual([r['config']['rho_parallel_walks'] for r in refs],[1,2,4,8,16,32])
+        for widths in ((),(1,1),(0,),(257,)):
+            with self.assertRaises(InvalidEvidence):qualification_references([arm],widths)
+
     def test_named_rho_arms_do_not_require_an_ic_factor_base(self):
         data = rows(.7)
         for row in data:

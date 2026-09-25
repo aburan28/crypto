@@ -46,14 +46,15 @@ def main():
     run([sys.executable,HERE/'tournament.py','prepare','--qualification',
          '--source-root',prepared['both']/'source','--out',campaign,'--candidates',out/'candidates.json',
          '--cells','17a1,19a0,23a0,23a1,31a0','--holdout-cells','29a1',
-         '--profile','pilot','--seed','2026092541','--timeout','180','--max-processes','800',
+         '--profile','pilot','--seed','2026092541','--timeout','180','--max-processes','1400',
+         '--qualification-widths','1','2','4','8','16','32',
          '--selection-width','3','--exploration-slots','1','--comparison-kind','factor-base-policy'])
     run([sys.executable,campaign/'evaluator/tournament.py','run','--round',campaign])
     run([sys.executable,campaign/'evaluator/tournament.py','verify','--round',campaign])
     report=read(campaign/'qualification.json')
     require(report['cases']==15 and len(report['cells'])==5 and report['repetitions']==3,
             'declared qualification panel differs')
-    require(len(report['table'])==12 and report['promotion_eligible'] is False,
+    require(len(report['table'])==21 and report['promotion_eligible'] is False,
             'missing reference or invalid promotion')
     write(out/'summary.json',report,exclusive=True)
     print(json.dumps(report))

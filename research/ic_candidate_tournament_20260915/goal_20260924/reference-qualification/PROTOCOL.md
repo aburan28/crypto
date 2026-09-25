@@ -17,8 +17,8 @@ generators and actual public points are in the frozen fixtures/manifests.
 
 Use three process repetitions, one target per job, one pinned Linux amd64 CPU,
 8 GiB address-space cap, 180 seconds per child, Rust 1.94.1 with the prepared
-musl/ISA flags, and Valgrind 3.22.0. The job budget is 800 profiled/native pairs;
-the declared schedule contains 750: 30 A/A, 180 smoke and 540 development.
+musl/ISA flags, and Valgrind 3.22.0. The job budget is 1400 profiled/native pairs;
+the declared schedule contains 1290: 30 A/A, 315 smoke and 945 development.
 The workflow has a 90-minute wall limit; interruption, timeout and OOM retain
 artifacts and cannot produce a completed qualification. No automatic retry of a
 failed measured job is allowed. OS caches are uncontrolled; cold means the whole
@@ -35,9 +35,11 @@ controls run before qualification. Full scalar-field elimination remains the
 archived algorithm; its zero-prefix arithmetic is an optimization opportunity,
 not evidence that a different kernel has already been measured.
 
-Rho requested widths 1, 8 and 32 run from each distinct source snapshot: nine
+Rho requested widths 1, 2, 4, 8, 16 and 32 run from each distinct source snapshot: eighteen
 reference configurations. Preserve the actual effective widths on every cell;
 clipped widths are not independent algorithms or independent target samples.
+The intermediate widths prevent the old 1/8/32 screen from skipping a better
+small-width reference when larger requests collapse to the same effective width.
 Every reference is interleaved with IC in the same case/repetition blocks and
 randomized order. Reusable rho arithmetic/Frobenius preparation is excluded from
 its online interval. The public point, resources and target-dependent work are

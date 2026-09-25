@@ -383,7 +383,7 @@ def prepare(args):
         require(isinstance(rho_reference['config'],dict) and 'summands' in rho_reference['config'],
                 'rho config must be a complete worker configuration')
     rho_reference['configuration_sha256']=objhash(rho_reference['config'])
-    references = qualification_references(arms) if qualification else [rho_reference]
+    references = qualification_references(arms, args.qualification_widths) if qualification else [rho_reference]
     stages = QUALIFICATION_STAGES if qualification else STAGES
     cpus = sorted(os.sched_getaffinity(0))
     cpu = args.cpu if args.cpu is not None else cpus[-1]
@@ -734,11 +734,13 @@ def is_rho(arm):
     return arm['id']=='rho' or arm.get('kind')=='rho-reference'
 
 
-def qualification_references(arms):
+def qualification_references(arms, widths=(1,8,32)):
+    require(bool(widths) and len(set(widths))==len(widths) and
+            all(type(width) is int and 1<=width<=256 for width in widths), 'invalid qualification rho widths')
     references=[]
     seen=set()
     for arm in arms:
-        for width in (1,8,32):
+        for width in widths:
             source_width=(arm['source_manifest_sha256'],width)
             if source_width in seen:
                 continue
@@ -1117,7 +1119,9 @@ def main():
     p.add_argument('--candidates',type=Path)
     p.add_argument('--profile',choices=['pilot','standard'],default='pilot')
     p.add_argument('--qualification',action='store_true',
-        help='Run only A/A, smoke and development, with rho widths 1/8/32 for each source; never promote.')
+        help='Run only A/A, smoke and development with matched rho references; never promote.')
+    p.add_argument('--qualification-widths',type=int,nargs='+',default=[1,8,32],
+        help='Requested rho widths in qualification mode; the full protocol uses 1 2 4 8 16 32.')
     p.add_argument('--confirmation-cases',default='',
         help='cell=count,... raising named cells above the profile floor. Lowering is refused.')
     p.add_argument('--cells',default='13a0,17a1,19a0,23a0',
