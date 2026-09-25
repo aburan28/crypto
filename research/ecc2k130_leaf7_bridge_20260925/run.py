@@ -220,11 +220,15 @@ def main():
                "status": "STOP", "freeze_sha256": digest(HERE / "FROZEN.json"),
                "source_main_commit": spec["source_main_commit"],
                "parent_note_commit": spec["parent_note_commit"],
+               "release_main_head": spec["release_main_head"],
+               "release_gate": spec["release_gate"],
                "input_sha256": spec["input_sha256"],
                "implementation_sha256": spec["implementation_sha256"],
                "phase": phase}
     try:
         assert spec["status"] == "protocol_only_no_outcome"
+        if spec["release_main_head"] is None:
+            raise RuntimeError("parent note unmerged: post-merge re-freeze and review required before outcome")
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.setitimer(signal.ITIMER_REAL, spec["caps"]["child_wall_seconds"])
         try:
@@ -232,7 +236,9 @@ def main():
                                (spec["caps"]["child_peak_rss_bytes"],
                                 spec["caps"]["child_peak_rss_bytes"]))
         except (AttributeError, OSError, ValueError) as exc:
-            receipt["memory_limit_setup"] = f"unsupported: {type(exc).__name__}"
+            receipt["memory_limit_setup"] = f"STOP: unsupported {type(exc).__name__}"
+            raise RuntimeError("frozen 2-GiB memory cap could not be enforced") from exc
+        receipt["memory_limit_setup"] = "enforced: RLIMIT_AS"
         phase = "frozen_hashes_and_matrix"
         frozen_inputs(spec)
         receipt["matrix"] = matrix_preflight(spec)
@@ -256,7 +262,15 @@ def main():
                 == twist.add(G, twist.mul(H, 74)))
         phi0 = BinaryVeluMap.from_generator(E, twist, G, 263)
         phi1 = BinaryVeluMap.from_generator(E, twist, Gprime, 263)
+        other_generator = twist.add(G, twist.mul(H, 4))
+        phi_other = BinaryVeluMap.from_generator(E, twist, other_generator, 263)
+        coefficient_hits = [k for k in range(131)
+                            if Fpy.frobenius(phi_other.codomain.b, k) == phi1.codomain.b]
+        assert coefficient_hits == [spec["saved_kernel"]["other_orbit_frobenius_exponent"]]
         assert phi0.codomain.b != phi1.codomain.b
+        receipt["other_orbit_b"] = hex(phi_other.codomain.b)
+        receipt["model_conjugacy_exponents"] = coefficient_hits
+        receipt["other_orbit_map_role"] = "structural control only; excluded from direct second-leaf cost arm"
         cases = public_cases(E, P, Q, r, spec)
         case_data = []
         for label, T, u, v in cases:

@@ -19,6 +19,8 @@ def main() -> None:
     assert spec["schema"] == "ecc2k130-leaf7-bridge-frozen-v1"
     assert spec["status"] == "protocol_only_no_outcome"
     assert spec["parent_note_commit"] == "e5de58c8be2984139734c31acb3d8824532f1b14"
+    assert spec["release_main_head"] is None
+    assert spec["release_gate"] == "hold_parent_unmerged"
     assert spec["gate"]["no_pdp_or_dlp_claim"] is True
     for relative, expected in spec["input_sha256"].items():
         actual = sha(REPO / relative)

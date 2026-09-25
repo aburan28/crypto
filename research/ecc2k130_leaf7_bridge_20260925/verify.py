@@ -90,6 +90,12 @@ def main():
     assert twist.mul(G1, pow(155, -1, 263)) == twist.add(G, twist.mul(H, 74))
     phi0 = BinaryVeluMap.from_generator(E, twist, G, 263)
     phi1 = BinaryVeluMap.from_generator(E, twist, G1, 263)
+    other = BinaryVeluMap.from_generator(E, twist, twist.add(G, twist.mul(H, 4)), 263)
+    coefficient_hits = [k for k in range(131)
+                        if F.frobenius(other.codomain.b, k) == phi1.codomain.b]
+    assert hex(other.codomain.b) == source["other_orbit_b"]
+    assert coefficient_hits == source["model_conjugacy_exponents"] == [23]
+    assert source["other_orbit_map_role"].startswith("structural control only")
     assert hex(phi0.codomain.b) == source["leaf0_b"]
     assert hex(phi1.codomain.b) == source["leaf1_b"]
     coeffs = tuple(int(x, 16) for x in source["kernel_polynomial_low_to_high"][:3])

@@ -25,7 +25,7 @@ jobs:
           python-version: '3.12'
       - name: Pin exact freeze file
         run: |
-          echo '922a247729601406cc42e095b9b563b8bac12714d7d2be2ad6759d23a53bc6c2  research/ecc2k130_leaf7_bridge_20260925/FROZEN.json' | sha256sum -c -
+          echo '4e6894e07e6c42b7249e4bea2d85d6f3b3e8e64817de74faf2057436cad42d2c  research/ecc2k130_leaf7_bridge_20260925/FROZEN.json' | sha256sum -c -
       - name: Check source and implementation hashes only
         run: python3 research/ecc2k130_leaf7_bridge_20260925/ci_replay.py
       - name: Check Python syntax only

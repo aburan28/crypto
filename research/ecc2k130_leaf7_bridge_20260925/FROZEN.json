@@ -98,10 +98,12 @@
     "predicted_dual_composition_controls": 12
   },
   "implementation_sha256": {
-    "PROTOCOL.md": "7694fa2bd68f3959cc9a14c89e86537de2971a2799cd55f447332b889a475c7e",
+    "PROTOCOL.md": "e0f40d8e703ca0f9da01123757f81c386f1a0a6006e11932c25e7e5584b729a3",
     "cubic_velu.py": "aa774740505396c6921691f5ead6ac49e254e17eefce2baf0766fef3faec5839",
-    "run.py": "4e5a11ff780f96da49cf7038cc96bb3d3fa25d99e55d5441f78db9704d0f07a3",
-    "verify.py": "c56c6fc2fe0b6a8134edf6990c4a2e41b7290b42995f0bcc0b35673fae72deb6",
-    "ci_replay.py": "0a6a2a3474b7ab47fed88e1bff5fa8fe3af429f4842609eef6591a3533e65086"
-  }
+    "run.py": "8468ebd04c917d447391910bbcf7d8d8b12108a27175e7410068959161c6dbd4",
+    "verify.py": "584569d1a3a5111e16e660e0098278ae424d36a82710724dd20f6ab910b00627",
+    "ci_replay.py": "015d64a5757a26071fb4e42be72f0b4cd220b5f07de4cd7af95d4b1941e77489"
+  },
+  "release_main_head": null,
+  "release_gate": "hold_parent_unmerged"
 }
