@@ -3792,14 +3792,16 @@ impl PairSumTable {
             return;
         }
         if let Some(canon) = self.canon.as_ref() {
-            // A rotation has no dependency chain worth interleaving.
-            // (An eight-lane AVX-512 key was tried and measured slower:
-            // its run loop is as long as the worst of eight lanes.)
-            out.extend(
-                points
-                    .iter()
-                    .map(|p| if p.infinity { 0 } else { canon.canon(p.x) + 1 }),
-            );
+            // In bulk: `canon_in_place` is branch-free on AVX-512.  On its
+            // own it is slower than the scalar key, but inside the scan it
+            // is faster, and the pipeline with it is 26 % faster at n = 53
+            // (`FrobeniusCanon::canon_many` has the figures and what they
+            // do not explain).
+            out.extend(points.iter().map(|p| p.x));
+            canon.canon_in_place(out);
+            for (key, p) in out.iter_mut().zip(points) {
+                *key = if p.infinity { 0 } else { *key + 1 };
+            }
             return;
         }
         const LANES: usize = 8;
@@ -8856,8 +8858,8 @@ impl<'a> IndividualLogSolver<'a> {
             state = fc.add(state, stride_point);
             a = (a + stride) % self.r_u64;
         }
-        let step = vec![*g; WALKS];
         let mut advanced = Vec::with_capacity(WALKS);
+        let mut lambdas: Vec<u64> = Vec::with_capacity(WALKS);
         let mut scratch = BatchScratch::default();
         let mut keys: Vec<u64> = Vec::with_capacity(WALKS);
         while report.trials < self.opts.max_trials {
@@ -8913,10 +8915,18 @@ impl<'a> IndividualLogSolver<'a> {
                     return Some(Some(d));
                 }
             }
-            // Advance every walk by G, sharing one inversion.
+            // Advance every walk by G, sharing one inversion.  Every walk
+            // adds the same point, so this is `G + stateᵢ` over a slice:
+            // the batched kernel `add_many_lazy` (eight lanes on AVX-512)
+            // and one multiplication per walk for the ordinate.  The sums
+            // are the ones `add_pairwise` computed, so the walks, their
+            // trials and the first decomposition found do not change.
             advanced.clear();
-            fc.add_pairwise(&states, &step, &mut advanced, &mut scratch);
-            states.copy_from_slice(&advanced);
+            lambdas.clear();
+            fc.add_many_lazy(*g, &states, &mut advanced, &mut lambdas, &mut scratch);
+            for ((state, sum), &lambda) in states.iter_mut().zip(&advanced).zip(&lambdas) {
+                *state = fc.finish_lazy(*g, *sum, lambda);
+            }
             for (a, _) in coefficients.iter_mut() {
                 *a = (*a + 1) % self.r_u64;
             }

@@ -141,6 +141,7 @@ pub mod fght_snfs;
 pub(crate) mod fx_hash;
 pub mod gaudry_cubic;
 pub mod gaudry_quartic;
+pub mod gf2_elim;
 pub mod gf3m;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
@@ -237,6 +238,7 @@ pub mod visual_demos;
 pub mod visualize;
 pub mod wdsat_oracle;
 pub mod weil_charts;
+pub mod wide_groebner;
 
 pub use aut_folded_rho::{
     apply_aut, aut_folded_rho_dlp, canonical_form, AutElt, FoldedRhoOptions, FoldedRhoSolution,

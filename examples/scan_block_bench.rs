@@ -39,12 +39,31 @@ fn main() {
         chk ^= out[17].x;
     }
     let sub_ns = t.elapsed().as_nanos() as f64 / (iters * 1024) as f64;
-    let t = Instant::now();
+    // Keys are timed on fresh abscissae — `iters` distinct blocks, each
+    // keyed once — scalar and in bulk.  Neither figure is what a key costs
+    // inside a real scan: there the scalar key measured about 28 ns and
+    // the bulk one wins, the reverse of what this isolated loop shows
+    // (`FrobeniusCanon::canon_many`).
+    let mut xs: Vec<u64> = Vec::with_capacity(iters * 1024);
+    let mut t_pt = target;
     for _ in 0..iters {
-        for q in &out {
-            chk ^= canon.canon(black_box(q.x));
-        }
+        out.clear();
+        lambdas.clear();
+        fc.add_many_lazy(t_pt, &pts, &mut out, &mut lambdas, &mut scratch);
+        xs.extend(out.iter().map(|q| q.x));
+        t_pt = fc.add(t_pt, step);
     }
-    let key_ns = t.elapsed().as_nanos() as f64 / (iters * 1024) as f64;
-    println!("per point: subtraction {sub_ns:.2} ns, key {key_ns:.2} ns   (chk {chk:x})");
+    let t = Instant::now();
+    for &x in &xs {
+        chk ^= canon.canon(black_box(x));
+    }
+    let key_ns = t.elapsed().as_nanos() as f64 / xs.len() as f64;
+    let mut bulk = Vec::with_capacity(xs.len());
+    let t = Instant::now();
+    canon.canon_many(black_box(&xs), &mut bulk);
+    let bulk_ns = t.elapsed().as_nanos() as f64 / xs.len() as f64;
+    chk ^= bulk[17];
+    println!(
+        "per point: subtraction {sub_ns:.2} ns, key {key_ns:.2} ns, bulk key {bulk_ns:.2} ns   (chk {chk:x})"
+    );
 }

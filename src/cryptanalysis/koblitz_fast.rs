@@ -669,6 +669,56 @@ impl FrobeniusCanon {
         (best, best_t)
     }
 
+    /// [`Self::canon`] of every element of `xs`, appended to `out` in
+    /// order — the same values, computed in bulk.
+    ///
+    /// On AVX-512 this computes every rotation instead of searching for
+    /// the least one — `n − 1` rotate-and-min steps on sixteen keys at
+    /// once in two independent registers, with no branch that depends on
+    /// the data.  The basis change stays a scalar table walk: in a vector
+    /// it would be a gather.
+    ///
+    /// What was measured, and what was not (`n = 53`, one host):
+    /// on its own, over fresh abscissae, this is *slower* than the scalar
+    /// key — 16.6 ns against 13.4 ns a key (`examples/scan_block_bench.rs`).
+    /// Inside a decomposition scan the scalar key costs about 28 ns (scan
+    /// with and without keying), and with this one the scan falls from
+    /// 61 ns to 39–41 ns a summand and the `k0n53` pipeline from 1.43 s to
+    /// 1.05 s.  Why the scalar key is dearer in context was not
+    /// established; interference from the surrounding kernels on the
+    /// branch predictor or the micro-op cache are candidates, untested.
+    /// Use it where it has been measured to win.
+    pub fn canon_many(&self, xs: &[u64], out: &mut Vec<u64>) {
+        let start = out.len();
+        out.extend_from_slice(xs);
+        self.canon_in_place(&mut out[start..]);
+    }
+
+    /// [`Self::canon_many`] overwriting its input: every `x` becomes
+    /// [`Self::canon`]`(x)`.
+    pub fn canon_in_place(&self, xs: &mut [u64]) {
+        #[cfg(target_arch = "x86_64")]
+        if canon_simd_enabled() {
+            let mut chunks = xs.chunks_exact_mut(16);
+            for chunk in &mut chunks {
+                let mut c = [0u64; 16];
+                for (slot, &x) in c.iter_mut().zip(chunk.iter()) {
+                    *slot = self.coords(x);
+                }
+                // SAFETY: `canon_simd_enabled` checked AVX-512F.
+                let mins = unsafe { least_rotation16_avx512(&c, self.n, self.mask) };
+                chunk.copy_from_slice(&mins);
+            }
+            for x in chunks.into_remainder() {
+                *x = self.canon(*x);
+            }
+            return;
+        }
+        for x in xs {
+            *x = self.canon(*x);
+        }
+    }
+
     /// The extension degree this was built for.
     pub fn degree(&self) -> u32 {
         self.n
@@ -689,6 +739,59 @@ impl FrobeniusCanon {
     pub fn tables(&self) -> &[[u64; 256]] {
         &self.tables
     }
+}
+
+/// Whether [`FrobeniusCanon::canon_many`] takes the AVX-512 path:
+/// the CPU has AVX-512F and `KIC_SCAN_SIMD=0` has not turned the scan's
+/// vector kernels off.
+#[cfg(target_arch = "x86_64")]
+fn canon_simd_enabled() -> bool {
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ON.get_or_init(|| {
+        is_x86_feature_detected!("avx512f") && std::env::var("KIC_SCAN_SIMD").as_deref() != Ok("0")
+    })
+}
+
+/// The least cyclic rotation of each of sixteen `n`-bit words.
+///
+/// Rotation by one is `((v << 1) | (v >> (n − 1))) & mask`, one
+/// ternary-logic op after the two shifts, and the running minimum is an
+/// unsigned `vpminuq`; after `n − 1` steps every rotation has been
+/// compared.  Two registers of eight advance together so each step's
+/// latency is hidden behind the other's.
+///
+/// # Safety
+///
+/// The CPU must support AVX-512F, and `1 ≤ n ≤ 63` with
+/// `mask = 2^n − 1`.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "avx512f")]
+unsafe fn least_rotation16_avx512(c: &[u64; 16], n: u32, mask: u64) -> [u64; 16] {
+    use std::arch::x86_64::*;
+    let m = _mm512_set1_epi64(mask as i64);
+    let back = _mm_cvtsi64_si128(i64::from(n - 1));
+    let mut a = _mm512_loadu_si512(c.as_ptr().cast());
+    let mut b = _mm512_loadu_si512(c.as_ptr().add(8).cast());
+    let (mut best_a, mut best_b) = (a, b);
+    for _ in 1..n {
+        // (a << 1 | a >> (n − 1)) & mask: truth table 0xA8 is (A | B) & C.
+        a = _mm512_ternarylogic_epi64::<0xA8>(
+            _mm512_slli_epi64::<1>(a),
+            _mm512_srl_epi64(a, back),
+            m,
+        );
+        b = _mm512_ternarylogic_epi64::<0xA8>(
+            _mm512_slli_epi64::<1>(b),
+            _mm512_srl_epi64(b, back),
+            m,
+        );
+        best_a = _mm512_min_epu64(best_a, a);
+        best_b = _mm512_min_epu64(best_b, b);
+    }
+    let mut out = [0u64; 16];
+    _mm512_storeu_si512(out.as_mut_ptr().cast(), best_a);
+    _mm512_storeu_si512(out.as_mut_ptr().add(8).cast(), best_b);
+    out
 }
 
 /// Invert an `n × n` matrix over `F_2` given as its columns, returning
@@ -762,6 +865,11 @@ mod simd512 {
     impl Simd512 {
         pub(super) fn new(field: &Gf2) -> Option<Self> {
             if !(is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("vpclmulqdq")) {
+                return None;
+            }
+            // `KIC_SCAN_SIMD=0` keeps the scalar path: a same-binary
+            // control for anything this kernel is credited with.
+            if std::env::var("KIC_SCAN_SIMD").as_deref() == Ok("0") {
                 return None;
             }
             Self::for_field(field)
@@ -1089,6 +1197,29 @@ mod tests {
                     v = f.sqr(v);
                 }
                 assert_eq!(v, x, "degree {n}: the orbit did not close");
+            }
+        }
+    }
+
+    #[test]
+    fn canon_many_is_canon_elementwise() {
+        // Bulk keys must be bit-for-bit the per-element ones on whatever
+        // path the CPU takes: random words, the all-zero and all-one
+        // words, and periodic words whose rotations tie.
+        for n in NB_DEGREES {
+            let f = nb_field(n);
+            let canon = FrobeniusCanon::new(&f, n).unwrap();
+            let mask = (1u64 << n) - 1;
+            let mut rng = StdRng::seed_from_u64(0xCA40_0000 + n as u64);
+            let mut xs: Vec<u64> = (0..997).map(|_| rng.gen::<u64>() & mask).collect();
+            xs.extend([0, mask, 1, mask >> 1, 0x5555_5555_5555_5555 & mask]);
+            for len in [0usize, 1, 15, 16, 17, 33, xs.len()] {
+                let mut out = vec![7u64];
+                canon.canon_many(&xs[..len], &mut out);
+                let want: Vec<u64> = std::iter::once(7)
+                    .chain(xs[..len].iter().map(|&x| canon.canon(x)))
+                    .collect();
+                assert_eq!(out, want, "degree {n}, {len} keys");
             }
         }
     }

@@ -1385,6 +1385,41 @@ pub fn sparse_elimination_cost(
     })
 }
 
+/// The dense Macaulay matrix of one frozen decomposition system, for
+/// benchmarking an elimination kernel on the matrices the oracle really
+/// reduces: the system `build_decomposition_system` makes for `m`
+/// summands over factor-base subspace `factor_index` of `K / F_2^n`, with
+/// the target abscissa drawn from `seed`, expanded to `degree`.
+///
+/// Returns `(variables, columns, rows)`; `None` when the cell has no
+/// invariant subspace or exceeds the builder's size caps.
+pub fn decomposition_macaulay(
+    n: u32,
+    factor_index: usize,
+    m: usize,
+    degree: u32,
+    seed: u64,
+) -> Option<(usize, usize, Vec<Vec<u64>>)> {
+    use crate::cryptanalysis::koblitz_groebner::build_macaulay;
+
+    let (irr, basis) = invariant_subspace_basis(n, factor_index)?;
+    let st = FieldStructure::new(n, &irr);
+    let b = F2mElement::one(n);
+    let mut rng = StdRng::seed_from_u64(seed);
+    let x_r = F2mElement::from_biguint(&BigUint::from(rng.gen::<u64>()), n);
+    let sys = build_decomposition_system(&basis, &x_r, &b, m, &st)?;
+    let (cols, matrix) = build_macaulay(&sys.equations, sys.n_vars, degree)?;
+    Some((sys.n_vars, cols.len(), matrix))
+}
+
+/// The elimination kernel the Gröbner oracle used before
+/// [`crate::cryptanalysis::gf2_elim`], exposed as the same-binary control
+/// for it: reduced row echelon form in place, returning the rank and
+/// charging the word XORs to `word_ops`.
+pub fn rref_f2_legacy(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
+    crate::cryptanalysis::koblitz_groebner::rref_f2_legacy_counted(matrix, n_cols, word_ops)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
