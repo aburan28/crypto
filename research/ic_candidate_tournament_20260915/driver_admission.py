@@ -12,10 +12,11 @@ import tomllib
 from identity import candidate_manifest, sha256, workload_manifest, write_immutable
 from measurement import PHASES, exclusive_ledger, measured_run, report_sha256
 from oracle import require, verify
-from producer.evidence import audit_stages, check_build_identity, method_record, scientific_ledger
+from producer.evidence import audit_stages, check_build_identity, method_record, scientific_ledger, executed_policy
 from producer.timing import native_intervals
 
 EVALUATOR = ('autolab.py', 'tournament.py', 'portfolio.py', 'oracle.py', 'identity.py',
+             'campaign_rules.py', 'target_history.py',
              'measurement.py', 'driver_admission.py', 'qualification.py', 'producer/evidence.py', 'producer/timing.py')
 INPUT_LAW = ('public-hash-to-curve-cofactor-v1; independently generated fixture, '
              'one supplied public point, no planted scalar')
@@ -60,10 +61,13 @@ def make_admission(*, job, fixture, report, manifest, metadata, resources, worke
                   source_manifest_sha256=source_sha, worker_sha256=worker_sha256,
                   build=build, mode=job['mode'])
     if job['mode'] == 'ic':
+        policy = executed_policy(job['config'], metadata['preparation'].get('candidate_panel'))
+        require(report.get('implementation_policy') == policy, 'inventory executed a different candidate policy')
         method = method_record(job, fixture, manifest, source_sha,
-                               metadata['preparation']['reference'], build)
+                               metadata['preparation']['reference'], build,
+                               metadata['preparation'].get('candidate_panel'))
         candidate = candidate_manifest(fixture, report, method)
-        return dict(common, candidate=candidate, method=method)
+        return dict(common, candidate=candidate, method=method, implementation_policy=policy)
     require(job['mode'] == 'rho', 'unknown admitted algorithm')
     # Rho is a reference, never an IC candidate with fictitious PDP/LA stages.
     reference = {'curve_id': workload['record']['curve_id'], 'algorithm': 'signed-Frobenius-rho',
@@ -133,6 +137,8 @@ def run_record(admitted, *, number, host_id, status, native=None, process_wall_n
             require(proof is None or checked == proof, 'native/profile certificate differs')
             proof = checked
             if job['mode'] == 'ic':
+                require(report.get('diagnostics', {}).get('implementation_policy') == admitted.get('implementation_policy'),
+                        'native/profile candidate policy differs from admission')
                 audit = audit_stages(report, fixture, job['algorithm_seed'])
                 require(stage_audit is None or audit == stage_audit, 'native/profile stage diagnostics differ')
                 stage_audit = audit

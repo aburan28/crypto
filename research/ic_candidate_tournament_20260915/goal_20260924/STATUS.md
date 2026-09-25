@@ -6,11 +6,14 @@ Status: the archived reference panel has completed under the frozen protocol:
 `e9b540eef8775f8d0d65e24c319174d8fefa7460`. The
 [qualification report and durable evidence](reference-qualification/README.md)
 select `pairinv` for IC cold instructions and online time, `rho_incumbent_4` for
-rho cold instructions and `rho_pairinv_4` for rho online time. Exact frozen Linux
-replay is an evidence-PR merge gate; independent macOS receipt replay passed all
-1,290 jobs, with two one-ULP derived-summary differences documented in the report.
+rho cold instructions and `rho_pairinv_4` for rho online time. PR 765 merged the evidence at `c2ca50318d4b9a3dc4c259e59106f2717553da31`,
+including exact Linux replay of 22 retained evidence sets and every exported table.
+Independent macOS receipt replay passed all 1,290 jobs, with two one-ULP
+derived-summary differences documented in the report.
 No reference selection is a promotion. Zero of the three improvement rounds have
-run. The familywise protocol and cross-campaign target exclusions remain pending.
+run. The [bounded protocol](improvement/PROTOCOL.md) now fixes the nominal
+familywise rule, 5,133-point historical exclusions and the first 16-pipeline
+registry. The implementation PR must pass candidate controls before dispatch.
 Canonical admission is merged in both drivers; the earlier
 [driver controls](driver-admission/README.md) preserve their fixed-vector scope.
 Public-point input and single-target native intervals are implemented in the
@@ -134,8 +137,8 @@ did not optimize the row kernel:
 
 Inspect the current compatible `icx`/rho paths as well as restored sources.
 Freeze a cross-campaign target exclusion set and the familywise confirmation rule
-before enabling promotion. The existing admission gate intentionally leaves
-reference qualification unset. The next deliverable is the frozen familywise improvement protocol and its
+before enabling promotion. The bounded runner now binds both selected rho sources/settings and the IC
+incumbent to the accepted qualification digest. The next deliverable is its
 executed bounded rounds; more integration controls alone will not complete this goal.
 
 
@@ -144,6 +147,6 @@ ratio to the old incumbent is 0.9781 [0.9249, 1.0302], its cold instruction rati
 is 0.9845 and its cold native ratio is 1.0064. This is not a 20% gain. Larger
 requested rho widths clip to the same effective width on several cells; the
 report preserves those counts. The existing exact evaluator remains unchanged,
-and Linux archive replay checks both raw receipts and derived selection. Before
-a new round, finish source/reference binding, target-exclusion sealing and the
-familywise rule, then execute the actual diversified pipeline budget.
+and Linux archive replay checks both raw receipts and derived selection. The first-round runner validates those bindings and exclusions before preparing
+fresh targets. Execute the registered diversified pipeline budget after its
+implementation PR passes; do not infer an improvement from these controls.
