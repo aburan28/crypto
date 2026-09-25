@@ -142,6 +142,7 @@ use crate::cryptanalysis::crossbred::{
     SearchStats as CrossbredSearchStats,
 };
 use crate::cryptanalysis::ec_index_calculus::{gaussian_eliminate_mod_n, sqrt_mod_p};
+use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
@@ -2273,6 +2274,7 @@ fn decompose(
     start: usize,
 ) -> Option<Vec<usize>> {
     if m == 0 {
+        let _check = measurement::relation_check_scope();
         return if *target == BinaryPoint::Infinity {
             Some(Vec::new())
         } else {
@@ -2280,6 +2282,7 @@ fn decompose(
         };
     }
     if m == 1 {
+        let _check = measurement::relation_check_scope();
         let idx = *index_of.get(&point_key(target))?;
         return if idx >= start { Some(vec![idx]) } else { None };
     }
@@ -4141,6 +4144,7 @@ impl PairSumTable {
         m: usize,
     ) -> Option<Vec<usize>> {
         let idxs = self.decompose_fast(self.curve.lift(target), m)?;
+        let _check = measurement::relation_check_scope();
         let sum = idxs
             .iter()
             .fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &fb.points[i]));
@@ -4161,6 +4165,7 @@ impl PairSumTable {
         });
         let mut idxs = found?;
         idxs.sort_unstable();
+        let _check = measurement::relation_check_scope();
         let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
             self.curve.add(s, self.points[i])
         });
@@ -4215,6 +4220,7 @@ impl PairSumTable {
             false
         });
         let idxs = found?;
+        let _check = measurement::relation_check_scope();
         let sum = idxs.iter().fold(FastPoint::INFINITY, |s, &i| {
             self.curve.add(s, self.points[i])
         });
@@ -4611,6 +4617,7 @@ pub(crate) fn lift_candidate(
         target: &BinaryPoint,
     ) -> bool {
         if depth == xs.len() {
+            let _check = measurement::relation_check_scope();
             return acc == target;
         }
         for p in points_with_x(&kc.curve, &xs[depth]) {
@@ -8368,6 +8375,7 @@ impl<'a> RelationCollector<'a> {
         points: Option<&[u32]>,
         observe: bool,
     ) -> (Vec<CollectedRelation>, CollectionReport) {
+        let _collection = measurement::scope(Phase::Queries);
         // Aiming takes precedence over sweeping: a run that names the
         // summands it still needs has said the sweep is what it wants to
         // stop doing.
@@ -8391,12 +8399,14 @@ impl<'a> RelationCollector<'a> {
         let g = self.kc.generator();
         let end = unit.start.saturating_add(unit.count);
         let probe = |t: u64| {
+            measurement::mark(Phase::Queries);
             let a = probe_scalar(unit.seed, t, self.r_u64);
             let pdp = match (&self.fast, self.pair_table()) {
                 (Some((fc, g_fast)), Some(pair))
                     if self.opts.strategy == DecompositionStrategy::PairTable =>
                 {
                     let target = fc.mul_u64(*g_fast, a);
+                    measurement::mark(Phase::Pdp);
                     if target.infinity {
                         PdpAttempt::bare(None, PdpOutcome::Identity)
                     } else {
@@ -8415,6 +8425,7 @@ impl<'a> RelationCollector<'a> {
                         Some((fc, g_fast)) => fc.lower(fc.mul_u64(*g_fast, a)),
                         None => self.kc.mul(g, &BigUint::from(a)),
                     };
+                    measurement::mark(Phase::Pdp);
                     if target == BinaryPoint::Infinity {
                         PdpAttempt::bare(None, PdpOutcome::Identity)
                     } else {
@@ -8432,14 +8443,27 @@ impl<'a> RelationCollector<'a> {
             };
             (t, a, pdp)
         };
-        let mut collected = (unit.start..end)
-            .into_par_iter()
-            .map(probe)
-            .fold(CollectionChunk::default, |mut chunk, (t, a, pdp)| {
-                chunk.push(t, a, pdp, observe);
-                chunk
-            })
-            .reduce(CollectionChunk::default, CollectionChunk::merge);
+        // Phase boundaries remain on the session's controlling thread. The
+        // query law and output order are identical to the parallel API.
+        let mut collected = if measurement::enabled() {
+            (unit.start..end).map(probe).fold(
+                CollectionChunk::default(),
+                |mut chunk, (t, a, pdp)| {
+                    chunk.push(t, a, pdp, observe);
+                    chunk
+                },
+            )
+        } else {
+            (unit.start..end)
+                .into_par_iter()
+                .map(probe)
+                .fold(CollectionChunk::default, |mut chunk, (t, a, pdp)| {
+                    chunk.push(t, a, pdp, observe);
+                    chunk
+                })
+                .reduce(CollectionChunk::default, CollectionChunk::merge)
+        };
+        measurement::mark(Phase::Queries);
         collected.relations.sort_by_key(|r| r.trial);
         collected.attempts.sort_by_key(|r| r.trial);
         let relations = collected.relations;
@@ -8495,38 +8519,49 @@ impl<'a> RelationCollector<'a> {
         // Runs of the probe sequence this unit covers, clipped to it.
         let first_run = unit.start / PROBE_RUN;
         let last_run = end.saturating_sub(1) / PROBE_RUN;
-        let mut collected = (first_run..=last_run)
-            .into_par_iter()
-            .map(|run| {
-                let run_start = (run * PROBE_RUN).max(unit.start);
-                let run_end = ((run + 1) * PROBE_RUN).min(end);
-                let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
-                let mut point = fc.mul_u64(*g_fast, a);
-                let mut found = CollectionChunk::default();
-                // Reused across the run's trials, so the scan's four
-                // buffers are allocated once per run rather than once
-                // per probe.
-                let mut scratch = ScanScratch::default();
-                for t in run_start..run_end {
-                    let pdp = if !point.infinity && a != 0 {
-                        let scan = targets.scan(unit.seed, t, base);
-                        PdpAttempt::bare(
-                            pair.decompose_fast_scan(point, 3, scan, &mut scratch),
-                            PdpOutcome::Unresolved,
-                        )
-                    } else {
-                        PdpAttempt::bare(None, PdpOutcome::Identity)
-                    };
-                    found.push(t, a, pdp, observe);
-                    // The next trial of the run is one stride further
-                    // along, matching [`walked_probe_scalar`] without
-                    // re-deriving the run's anchor.
-                    a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
-                    point = fc.add(point, stride_point);
-                }
-                found
-            })
-            .reduce(CollectionChunk::default, CollectionChunk::merge);
+        let run_probes = |run: u64| {
+            measurement::mark(Phase::Queries);
+            let run_start = (run * PROBE_RUN).max(unit.start);
+            let run_end = ((run + 1) * PROBE_RUN).min(end);
+            let mut a = walked_probe_scalar(unit.seed, run_start, self.r_u64);
+            let mut point = fc.mul_u64(*g_fast, a);
+            let mut found = CollectionChunk::default();
+            // Reused across the run's trials, so the scan's four
+            // buffers are allocated once per run rather than once
+            // per probe.
+            let mut scratch = ScanScratch::default();
+            for t in run_start..run_end {
+                measurement::mark(Phase::Pdp);
+                let pdp = if !point.infinity && a != 0 {
+                    let scan = targets.scan(unit.seed, t, base);
+                    PdpAttempt::bare(
+                        pair.decompose_fast_scan(point, 3, scan, &mut scratch),
+                        PdpOutcome::Unresolved,
+                    )
+                } else {
+                    PdpAttempt::bare(None, PdpOutcome::Identity)
+                };
+                found.push(t, a, pdp, observe);
+                measurement::mark(Phase::Queries);
+                // The next trial of the run is one stride further
+                // along, matching [`walked_probe_scalar`] without
+                // re-deriving the run's anchor.
+                a = ((a as u128 + stride as u128) % self.r_u64.max(2) as u128) as u64;
+                point = fc.add(point, stride_point);
+            }
+            found
+        };
+        let mut collected = if measurement::enabled() {
+            (first_run..=last_run)
+                .map(run_probes)
+                .fold(CollectionChunk::default(), CollectionChunk::merge)
+        } else {
+            (first_run..=last_run)
+                .into_par_iter()
+                .map(run_probes)
+                .reduce(CollectionChunk::default, CollectionChunk::merge)
+        };
+        measurement::mark(Phase::Queries);
         collected.relations.sort_by_key(|r| r.trial);
         collected.attempts.sort_by_key(|r| r.trial);
         let relations = collected.relations;
@@ -8627,6 +8662,7 @@ impl<'a> LogSystem<'a> {
 
     /// Rewrite `[a]G = Σ P_i` as a row over the projected columns.
     fn push(&mut self, rel: &CollectedRelation) {
+        let _matrix = measurement::scope(Phase::MatrixBuild);
         let r = &self.kc.subgroup_order;
         let a = BigUint::from(rel.a);
         let relation = relation_from_decomposition_with_mode(
@@ -8651,6 +8687,7 @@ impl<'a> LogSystem<'a> {
     /// Solve with the rows so far; `Some` only for a table certified in
     /// the group.  Attempts, timing and sparse statistics go to `report`.
     fn attempt(&self, report: &mut LogTableReport) -> Option<FactorBaseLogTable> {
+        let _la = measurement::scope(Phase::RelationLa);
         report.solve_attempts += 1;
         let begin = std::time::Instant::now();
         let solution = match self.sparse_opts {
@@ -8677,6 +8714,7 @@ impl<'a> LogSystem<'a> {
         };
         report.linear_algebra_seconds += begin.elapsed().as_secs_f64();
         let table = self.table_from(solution?);
+        let _check = measurement::scope(Phase::RelationCheck);
         table.verify(self.kc).then_some(table)
     }
 
@@ -8822,6 +8860,7 @@ impl<'a> FactorBaseLogSolver<'a> {
     /// new.  A forged or duplicate relation is counted and dropped, so a
     /// remote worker cannot enter anything into the linear algebra.
     pub fn push(&mut self, relations: &[CollectedRelation]) {
+        let _check = measurement::scope(Phase::RelationCheck);
         let begin = std::time::Instant::now();
         let verdicts: Vec<bool> = relations
             .par_iter()
@@ -9038,11 +9077,13 @@ impl<'a> IndividualLogSolver<'a> {
 
     /// Draw one query and preserve the frontend's verdict, including identity queries.
     fn probe(&self, q: &BinaryPoint, q_fast: Option<FastPoint>, a: u64, b: u64) -> PdpAttempt {
+        let _query = measurement::scope(Phase::TargetQuery);
         if let (Some((fc, g)), Some(qf)) = (&self.fast, q_fast) {
             let target = fc.add(fc.mul_u64(*g, a), fc.mul_u64(qf, b));
             if target.infinity {
                 return PdpAttempt::bare(None, PdpOutcome::Identity);
             }
+            measurement::mark(Phase::TargetPdp);
             return match (self.opts.strategy, self.pair) {
                 (DecompositionStrategy::PairTable, Some(pair)) => PdpAttempt::bare(
                     pair.decompose_fast(target, self.opts.m),
@@ -9070,6 +9111,7 @@ impl<'a> IndividualLogSolver<'a> {
         if target == BinaryPoint::Infinity {
             return PdpAttempt::bare(None, PdpOutcome::Identity);
         }
+        measurement::mark(Phase::TargetPdp);
         decompose_once(
             self.kc,
             self.fb,
@@ -9089,6 +9131,7 @@ impl<'a> IndividualLogSolver<'a> {
     /// Turn a decomposition of `[a]G + [b]Q` into the logarithm, or
     /// `None` when this relation cannot give one.
     fn logarithm_from(&self, q: &BinaryPoint, idxs: &[usize], a: u64, b: u64) -> Option<BigUint> {
+        let _descent = measurement::scope(Phase::TargetDescent);
         let kc = self.kc;
         let r = &kc.subgroup_order;
         let (a, b) = (BigUint::from(a), BigUint::from(b));
@@ -9112,6 +9155,7 @@ impl<'a> IndividualLogSolver<'a> {
         let numerator = (sum + r - ha) % r;
         let hb = (&self.h * &b) % r;
         let d = (numerator * mod_inverse(&hb, r)?) % r;
+        let _replay = measurement::scope(Phase::RecoveryCheck);
         (kc.mul(kc.generator(), &d) == *q).then_some(d)
     }
 
@@ -9131,6 +9175,7 @@ impl<'a> IndividualLogSolver<'a> {
         q: &BinaryPoint,
         report: &mut IndividualLogReport,
     ) -> Option<Option<BigUint>> {
+        let _query = measurement::scope(Phase::TargetQuery);
         let (fc, g) = self.fast.as_ref()?;
         let pair = self.pair?;
         let m = self.descent_m();
@@ -9169,6 +9214,7 @@ impl<'a> IndividualLogSolver<'a> {
             // not hold yields no witness, so the reject changes nothing
             // but the time — the trials, their order and the first
             // decomposition found are the same.
+            measurement::mark(Phase::TargetPdp);
             pair.keys_of(&states, &mut keys);
             for &key in &keys {
                 pair.prefetch_key(key);
@@ -9189,6 +9235,7 @@ impl<'a> IndividualLogSolver<'a> {
                         &BigUint::from(*b),
                         &self.kc.subgroup_order,
                     ) {
+                        let _replay = measurement::scope(Phase::RecoveryCheck);
                         if self.kc.mul(self.kc.generator(), &d) == *q {
                             report.relation = Some(DescentRelation {
                                 a: *a,
@@ -9232,6 +9279,7 @@ impl<'a> IndividualLogSolver<'a> {
             // are the ones `add_pairwise` computed, so the walks, their
             // trials and the first decomposition found do not change.
             advanced.clear();
+            measurement::mark(Phase::TargetQuery);
             lambdas.clear();
             fc.add_many_lazy(*g, &states, &mut advanced, &mut lambdas, &mut scratch);
             for ((state, sum), &lambda) in states.iter_mut().zip(&advanced).zip(&lambdas) {
@@ -9262,6 +9310,7 @@ impl<'a> IndividualLogSolver<'a> {
     }
 
     fn solve_impl(&self, q: &BinaryPoint, observe: bool) -> IndividualLogReport {
+        let _query = measurement::scope(Phase::TargetQuery);
         let kc = self.kc;
         let r = &kc.subgroup_order;
         let g = kc.generator();
@@ -9285,6 +9334,7 @@ impl<'a> IndividualLogSolver<'a> {
         let q_fast = self.fast.as_ref().map(|(fc, _)| fc.lift(q));
         let mut rng = StdRng::seed_from_u64(self.opts.seed ^ 0x44_45_53_43_45_4e_54_00);
         while report.trials < self.opts.max_trials {
+            measurement::mark(Phase::TargetQuery);
             report.trials += 1;
             let a = rng.gen_range(1..self.r_u64);
             let b = rng.gen_range(1..self.r_u64);
@@ -9298,6 +9348,7 @@ impl<'a> IndividualLogSolver<'a> {
                     }
                     // Degenerate relation [a]G + [b]Q = O already yields d.
                     if let Some(d) = solve_for_d(&BigUint::from(a), &BigUint::from(b), r) {
+                        let _replay = measurement::scope(Phase::RecoveryCheck);
                         if kc.mul(g, &d) == *q {
                             report.log = Some(d.clone());
                             report.relation = Some(DescentRelation {
@@ -9312,6 +9363,7 @@ impl<'a> IndividualLogSolver<'a> {
                 }
                 None => continue,
             };
+            measurement::mark(Phase::TargetDescent);
             let a = BigUint::from(a);
             let b = BigUint::from(b);
             let relation = relation_from_decomposition_with_mode(
@@ -9337,6 +9389,7 @@ impl<'a> IndividualLogSolver<'a> {
                 continue;
             };
             let d = (numerator * hb_inv) % r;
+            measurement::mark(Phase::RecoveryCheck);
             if kc.mul(g, &d) == *q {
                 report.log = Some(d.clone());
                 report.relation = Some(DescentRelation {
@@ -12595,6 +12648,7 @@ mod tests {
             }
             // A nonzero prior value catches replacement as well as omission.
             solver.report.linear_algebra_seconds = 7.0;
+            let session = measurement::Session::begin().unwrap();
             for expected in 1..=2 {
                 assert!(solver.try_solve().is_none());
                 let report = solver.report();
@@ -12606,6 +12660,16 @@ mod tests {
                     solver.system.sparse_opts.is_some()
                 );
             }
+            let phases = session.finish().unwrap();
+            assert!(phases.phases_ns["relation_la"].is_some());
+            // Dense elimination returns a provisional zero vector, rejected
+            // by the group certificate. Sparse LA rejects uncovered columns
+            // before producing a vector. Both failed paths keep their work.
+            assert_eq!(
+                phases.phases_ns["relation_check"].is_some(),
+                solver.system.sparse_opts.is_none()
+            );
+            assert_eq!(phases.online_wall_ns, None);
         }
     }
 
@@ -12912,6 +12976,14 @@ mod tests {
         let (observed, report) = collector.collect_observed(unit);
         assert_eq!(plain, observed);
         let all = report.attempts.unwrap();
+        let session = measurement::Session::begin().unwrap();
+        let traced = collector.collect_observed(unit);
+        let phases = session.finish().unwrap();
+        assert_eq!(traced.0, plain);
+        assert_eq!(traced.1.attempts.as_ref().unwrap(), &all);
+        for phase in ["queries", "pdp", "relation_check"] {
+            assert!(phases.phases_ns[phase].is_some());
+        }
         let left = collector
             .collect_observed(RelationWorkUnit { count: 53, ..unit })
             .1
@@ -13090,6 +13162,41 @@ mod tests {
             failures += usize::from(report.log.is_none());
         }
         assert!(failures > 0);
+    }
+
+    #[test]
+    fn exclusive_descent_failure_preserves_paid_queries() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let setup = query_control_options();
+        let (table, _) = solve_factor_base_logs(&kc, &fb, &setup[0]).unwrap();
+        let opts = KoblitzIcOptions {
+            m: 2,
+            seed: 2026092554,
+            strategy: DecompositionStrategy::Groebner,
+            node_budget: 0,
+            max_trials: 8,
+            allow_direct_relation: false,
+            ..Default::default()
+        };
+        let solver = IndividualLogSolver::new(&kc, &fb, &table, &opts, None).unwrap();
+        let q = kc.mul(kc.generator(), &BigUint::from(17u32));
+        let ordinary = solver.solve_observed(&q);
+        let session = measurement::Session::begin().unwrap();
+        measurement::begin_online(Phase::TargetQuery);
+        let traced = solver.solve_observed(&q);
+        measurement::end_online();
+        let phases = session.finish().unwrap();
+        assert_eq!(ordinary.attempts, traced.attempts);
+        assert_eq!(traced.trials, 8);
+        assert!(traced.log.is_none());
+        assert!(phases.online_phases_ns["target_pdp"].is_some());
+        assert_eq!(phases.online_phases_ns["recovery_check"], None);
+        assert_eq!(
+            Some(phases.online_phases_ns.values().flatten().sum()),
+            phases.online_wall_ns
+        );
+        assert!(phases.online_wall_ns.unwrap() > 0);
     }
 
     #[test]

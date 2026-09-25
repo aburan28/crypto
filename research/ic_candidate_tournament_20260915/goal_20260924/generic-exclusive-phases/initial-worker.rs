@@ -179,7 +179,7 @@ fn run(job: &Job) -> Result<Value, String> {
     if rayon::current_num_threads() != 1 {
         return Err("exclusive phases require one Rayon thread".into());
     }
-    let session = measurement::Session::begin_strict()?;
+    let session = measurement::Session::begin()?;
     let mut report = run_inner(job)?;
     let snapshot = session.finish()?;
     // The independently defined phase endpoints are authoritative in this
@@ -644,7 +644,6 @@ mod public_input_tests {
     }
 
     #[test]
-    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
     fn exclusive_worker_preserves_all_backend_queries_and_certificates() {
         for backend in [
             "pair_table",
@@ -723,7 +722,6 @@ mod public_input_tests {
     }
 
     #[test]
-    #[ignore = "requires RAYON_NUM_THREADS=1 and an isolated test process; explicitly run in CI"]
     fn exclusive_worker_keeps_failed_preparation_unknown_and_drops_errors() {
         let mut job = supplied("ic");
         job.exclusive_phases = true;
