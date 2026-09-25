@@ -12,6 +12,10 @@ pilot (§10, 2026-09-24).
   the same way, and the plateau is too short to tell a bounded degree from a
   slowly growing one.
 - §10 says what the pilot does and does not show.
+- **Round 2 (§11, 2026-09-25)** builds the sparse, tower-aware engine
+  `f4_fp_tower` and cross-checks it against `f4_fp` on the pilot's systems.
+  It pre-registers larger sizes before running them, and discloses one system
+  measured at a new size first (`N = 20`, `D = 6`, §11.3).
 
 **Thread:** the prime regime of the index-calculus framework (`docs/ic/FRAMEWORK.md`).
 **Siblings:** `RESEARCH_IC_BOUNDARY_LEDGER.md` (the table family and its law),
@@ -1097,6 +1101,224 @@ though, so that is a prediction for Stage A to test, not a result.
   Nothing in §10 runs at these sizes. The Dickson torus case is unmeasured,
   because the pilot's prime is split. A long tower is a precondition for these
   two families, not a weakness.
+
+---
+
+## 11. Round 2, 2026-09-25: a sparse tower engine, and `N` past the pilot
+
+§§11.1–11.6 were written and committed before any round-2 cell ran; §11.3
+discloses the one measurement at a new size made before them. The results are
+added below them as §11.7 onward, and §§11.1–11.6 stay as committed. The data,
+commands and build hashes are in `research/pkm_tower_round2_20260925/`.
+
+### 11.1 The engine: `f4_fp_tower`
+
+§10.9 ranked a sparse, tower-aware F4 first. The dense `f4_fp` had run out of
+13 GB at `N = 20` (`m = 2`) and at `N = 15` (`m = 3`).
+`src/cryptanalysis/f4_fp_tower.rs` is that engine: F4 on the quotient
+`R = F_p[y, u]/(towers)` of §2.4.
+- **The tower is a rewriting rule.** A monomial is square-free in the tower
+  variables. It is stored as a 64-bit mask plus up to four exponents for the
+  chain unknowns `u`, packed into one `u128` whose integer order is grevlex. A
+  product is rewritten by `y_j² = a·y_j·y_{j+1} + b·y_{j+1} + c·y_j + d` as it
+  is formed, so the tower equations never enter a matrix.
+- **Pairs.** Critical pairs go through Gebauer–Möller (`UPDATE`). A *tower
+  pair* `(g, y_j)`, one for each tower variable of `LM(g)`, stands for the
+  S-polynomial of `g` against `y_j² − …`. It enters the matrix as the single row
+  `NF(y_j·g)`. The selection is the normal strategy, as in `f4_fp`.
+- **Elimination, in the manner of Faugère–Lachartre.**
+  - Symbolic preprocessing gives reducer rows with distinct leads, and at every
+    lcm column the shortest S-row joins them.
+  - The columns left without a reducer are then exactly the monomials without a
+    divisor.
+  - The engine reduces the reducer block to dense rows over those columns
+    (`B' = A⁻¹B`, right to left), then reduces every S-row by it in one pass
+    (`D − C·B'`), then echelonizes the residues in parallel chunks. Every pivot
+    it returns is a new leading monomial.
+- **Arithmetic.** Below `2³¹` the dense kernel reduces lazily: it subtracts a
+  multiple of `p` only when an accumulator crosses `2⁶³`. That loop vectorizes,
+  and on x86-64 it is dispatched at run time to AVX2 or AVX-512. Above `2³¹`
+  every step is reduced (Barrett).
+- **Rows are formed on demand.** A row is kept as the product that makes it (a
+  multiplier and an element) and formed again, a block at a time, when it is
+  eliminated. The memory is then the dense block `B'`, not the matrix.
+- **What it measures.** The same statistics as `f4_fp`: `solving_degree_max`,
+  the width to solution and the steps to solution. It also counts `F_p`
+  multiply-adds, the engine's own unit. Its input is the *reduced*
+  presentation of §2.2: a summation polynomial enters as its normal form in `R`.
+
+The engine has eight unit tests (`cargo test --release --lib f4_fp_tower`):
+- the grevlex keys;
+- products against a generic reduction;
+- refutation and solution counts against brute force on random Kummer blocks;
+- a free unknown eliminated like a chain link;
+- the staircase stop keeping every solution;
+- the degree bound;
+- the elimination against a plain sequential echelon on random matrices, at
+  three primes on both sides of `2³¹`;
+- every kernel against exact arithmetic.
+
+For scale only (wall clock is a practicality note, `AGENTS.md` §2): the
+pilot's Kummer `m = 2` random system at `N = 18` takes 6.2 s and 139 MB of
+memory, where `f4_fp` took 73 s (§10.2).
+
+### 11.2 Cross-check against `f4_fp` on the pilot's systems
+
+`AGENTS.md` §6 does not accept a new oracle that has not been cross-checked
+against the one it replaces, on every input of a full run. The pilot's cells
+were re-run with `--engine tower`, with the same seeds and the pilot's flags.
+These are runs `XV1`–`XV5`. Some cells were widened to every kind and control,
+but no size exceeds the pilot's largest for its `m`.
+
+The five runs cover:
+- `m = 2`: all three kinds, tower and null, `N = 2–18`, with the planted
+  targets up to `N = 14`, plus Kummer at `p = 3221225473`;
+- `m = 3`: all three kinds, `N = 6–12`;
+- `m = 4`: Kummer and isogeny, `N = 8` and 12, on random targets and on
+  planted ones with the staircase stop at 64;
+- the generator-count ladder at `N = 8` and 12.
+
+Together they took about nine minutes. Every system finished, and none lost a
+planted solution.
+
+| part | systems | finished by both engines | same `D` | same verdict |
+|:--|--:|--:|--:|--:|
+| `m = 2`, tower (both primes) | 126 | 126 | 110, and 16 at `N = 2` | 126 |
+| `m = 2`, null | 96 | 72 | 60, and 12 at `N = 2` | 72 |
+| ladder | 40 | 28 | 28 | 28 |
+| `m = 3` | 30 | 28 | 28 | 28 |
+| `m = 4` | 16 | 16 | 16 | 16 |
+
+- **The verdict agrees on every system both engines finished.** Whether a
+  system was refuted never differs between them. `analyze.py` counts 269
+  systems. It skips one more, the Kummer null at `N = 16` that `f4_fp` finished
+  only in its staircase-stop re-run (R2 of the pilot), and that system agrees as
+  well.
+- **The solving degree agrees on every one of those systems from `N = 4` up**,
+  in every kind, control and `m`, and at both primes.
+- **It differs only at `N = 2`, on 28 systems**, where the tower engine gives
+  `D = 3` and `f4_fp` gives 4. With one level, `S̄` has degree 2 in `R`, whereas
+  the raw `S₃` has degree 4, which is `f4_fp`'s floor (§10.2). From `N = 4` on,
+  the input degree no longer decides `D`. There, Kummer's and Dickson's `S̄`
+  have degree 2 in `R` and isogeny's has degree 4, against 4 for the raw `S₃`,
+  and the two engines still agree.
+- **38 systems have no `f4_fp` counterpart to compare with**:
+  - 24 are Dickson and isogeny nulls above `N = 10`, and 12 are ladder rungs at
+    `N = 8`. The pilot never ran either.
+  - Two are Kummer `m = 3` random targets at `N = 12`. The pilot's cell also
+    planted at that size, so it drew different targets. Both give `D = 6`, as
+    the pilot's did.
+- **`verify.py` confirms all 172 tower rows** against exhaustive search.
+
+The cross-check therefore reproduces every solving degree of §10.2 above `N = 2`
+with the new engine. That includes the two systems `f4_fp` could finish only
+with the staircase stop.
+
+### 11.3 What was measured before this section (a disclosure)
+
+Tuning the engine used the pilot's Kummer `m = 2` random target 0 at
+`N = 14, 16, 18`, which are systems the pilot had measured. It also used, once,
+the same cell at `N = 20` at `p₀ = 786433`. The pilot never finished a system at
+that size: its `N = 20` attempt was at `p = 3221225473` and ran out of memory.
+That system:
+- **gave `D = 6`**. F4 ran 22 steps at degrees 3–5. The degree-5 pairs thinned
+  out, to 200 and then 20 S-rows in the last two such steps, without a fall to
+  the unit. Step 23, at degree 6, had 18,305 critical and 12,030 tower pairs
+  and 33,446 columns. It gave 2,042 new elements, the lowest of degree 3, and
+  step 24, at degree 4, found `1`;
+- was re-run with a later build, the one that forms rows on demand, and its
+  step trace agrees with the first line for line.
+
+It is the only measurement at a new size before this section. It contradicts
+Conjecture 3 (`D ≤ 5` at `m = 2` for every `t`), if the engine is right at
+`N = 20`, which only this engine reaches.
+
+It shaped the cells below. At `N = 20`, `|V|² = 2^20 = 1.33·p₀`. That is the
+first size on the pilot's line where the grid is larger than the field; at
+`N = 18` it is `0.33·p₀`. PKM's own regime is `|V|^m ≈ m!·r` (§2.3), so the rise
+may come from `N` or from `|V|²/p`, and the round separates the two. It did not
+shape the decision rule, which is A1 as written in §10.8, before it.
+
+### 11.4 Cells
+
+The new prime is `p₁ = 2013265921 = 15·2^27 + 1`. Its `v₂(p₁ − 1) = 27` allows
+Kummer towers up to `t = 27`, and `p₁ < 2³¹` keeps the lazy kernel. The isogeny
+family stays at `p₀`, because the pilot's construction of an isogeny tower
+counts points naively, in `O(p)`.
+
+| cell | kind | `m` | prime | `N` | targets per `N` | control | note |
+|:--|:--|--:|:--|:--|:--|:--|:--|
+| K1 | Kummer | 2 | `p₁` | 12, 14, …, 22 | 2 random | tower | `\|V\|²/p₁ ≤ 0.002`: every system refutes with high probability |
+| K1n | Kummer | 2 | `p₁` | 12, 14, …, 20 | 2 random | null | the shape-matched null of §5.3 |
+| K0 | Kummer | 2 | `p₀` | 20 | 2 random | tower | target 0 is §11.3's system; staircase stop at 8 |
+| I0 | isogeny | 2 | `p₀` | 20 | 2 random | tower | staircase stop at 8 |
+| M4 | Kummer | 4 | `p₁` | 8, 12, 16 | 2 random | tower | `chain` |
+| M3 | Kummer | 3 | `p₁` | 9, 12, 15, 18 | 2 random | tower | `chain` |
+
+- **Budgets.** 7,200 s per system, a 14 GB address-space cap and
+  `--max-nnz 2000000000`. A system that times out, stops for size or runs out of
+  memory reports no `D`, at most a lower bound, and never "does not decompose".
+- **Fixed as in the pilot.** The degree bound is `n + d + 6`, and the seed is
+  `0x504B4D54` with the pilot's cell rule, so a cell is the same system in every
+  run.
+- **Build.** The engine and the example are as committed with this section.
+- **Order.** The cells run in the table's order, one system at a time.
+- **Check.** Every finished tower row goes through `verify.py`.
+- **Confirmation runs.** After the cells, every `m = 2` cell with a finished
+  system at `D ≥ 6` is re-run once, whole, with the degree bound at 5
+  (`--cap 5`) and otherwise the same flags. §11.6 says what those re-runs must
+  show.
+
+### 11.5 Predictions, before the runs
+
+1. **K1 at `N = 12`–18:** `D = 5` on every system, as at `p₀` and at
+   `3221225473` (§10.2).
+2. **K1 at `N = 20` and 22:** `D = 6`. That is, the rise of §11.3 is a function
+   of `N`, not of `|V|²/p`. The reading behind it is that, once `t = 10`, the
+   level window of §10.5 no longer closes at degree 5. The confidence is low:
+   the prediction rests on one system.
+3. **K0:** `D = 6` on every system that refutes, and target 0 reproduces §11.3.
+4. **K1n:** the null gives the tower's `D` at every `N` (§10.4).
+5. **I0:** `D ≥ 5`, and nothing more specific.
+6. **M4 and M3:** `D = 6` and 7 at `N = 8` and 12 for `m = 4`, and `D = 6` at
+   `N = 9` and 12 for `m = 3` (§10.2). At the new sizes (`N = 16` for `m = 4`;
+   15 and 18 for `m = 3`) there is no numerical prediction beyond `D` not
+   falling.
+
+### 11.6 Decision rule, fixed now
+
+- **A1 of §10.8, adopted as written, per cell** (kind, `m`, prime). It reports
+  the per-`N` values, the leave-one-`N`-out slopes and the length `L` of the
+  final plateau.
+  - H1a (bounded `D`) needs `L > 10`, and it gates Stage B.
+  - H0 needs an increase at least every 4 in `N` over the upper half of the
+    cell's range.
+  - Anything else is inconclusive.
+  - H1b (`D` below the null) is reported and gates nothing.
+  - §5.2's bootstrap is not computed, because it is degenerate (§10.3).
+- **What this round can reach, stated in advance.**
+  - Kummer's plateau at `m = 2` starts at `N = 12` (§10.2), so H1a needs `D`
+    constant through `N ≥ 24`, past this round's largest size. For Kummer at
+    `m = 2`, this round can therefore return H0 or inconclusive, not H1a.
+  - The same holds at `m = 3`, whose plateau starts at `N = 9` so that H1a needs
+    `N ≥ 21`, and at `m = 4`.
+- **Conjecture 3** is refuted by any finished `m = 2` tower row with `D ≥ 6`
+  that meets two conditions. `verify.py` must confirm its verdict. Its
+  confirmation run (§11.4) must confirm the degree-6 step: with the degree bound
+  at 5, the same system must end with pairs above the bound, without refuting
+  and without reaching a staircase stop.
+- **`N` or `|V|²/p`.**
+  - "`N`" holds if both K1 systems at `N = 20` have `D = 6`.
+  - "`|V|²/p`" holds if all four K1 systems at `N = 20` and 22 have `D = 5`
+    while K0's refuted systems have `D = 6`.
+  - Anything else is reported as mixed.
+- **Instrument first.** A verdict that `verify.py` contradicts voids the
+  round's reading until it is explained, as in §10.1.
+- **Inadmissible**, beyond §5.4:
+  - changing the engine, the cells, the budgets or the seeds after the first
+    round-2 run;
+  - dropping a target;
+  - re-running a system in the hope of a different answer.
 
 ---
 

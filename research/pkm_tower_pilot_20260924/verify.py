@@ -186,7 +186,7 @@ def main(paths):
                 # A system measured by two runs is checked once (see analyze.py).
                 key = (row["p"], row["kind"], row["m"], row["t"], row["target"],
                        row["target_index"], row["x_r"], row["curve"]["a"], row["curve"]["b"],
-                       json.dumps(row["tower"], sort_keys=True))
+                       json.dumps(row["tower"], sort_keys=True), row.get("engine", "f4_fp"))
                 if key in seen:
                     continue
                 seen.add(key)
@@ -202,7 +202,8 @@ def main(paths):
                 if ok:
                     agreed += 1
                 else:
-                    bad.append((path, row["kind"], row["m"], row["N"], row["target"], n, row["inconsistent"]))
+                    bad.append((path, row.get("engine", "f4_fp"), row["kind"], row["m"], row["N"],
+                                row["target"], n, row["inconsistent"]))
     print(f"checked {checked} tower rows against exhaustive search; {agreed} agree; {skipped} skipped (no V).")
     for b in bad:
         print("DISAGREE", b)

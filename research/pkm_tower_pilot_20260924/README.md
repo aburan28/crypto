@@ -28,7 +28,11 @@ Every cell draws its tower, curve and targets from the seed `0x504B4D54`
 (`1347112276`) combined with (kind, `m`, `t`, `g`). A cell is therefore the same
 system in every run that contains it. Both scripts count such a system once.
 `analyze.py` also checks that every repeat agrees on every deterministic field
-and prints any that do not.
+and prints any that do not. Rows from the sparse tower engine (round 2,
+`research/pkm_tower_round2_20260925/`) carry `"engine": "f4_fp_tower"`. The
+scripts count one system measured by both engines once per engine, and
+`analyze.py` compares the engines system by system. It fails if they disagree on
+whether a system has a solution.
 
 ## Runs
 
