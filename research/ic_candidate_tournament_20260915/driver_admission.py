@@ -104,6 +104,17 @@ def check_admission(admitted, *, job, fixture, manifest, metadata, resources, wo
     require(admitted == expected, 'changed canonical admission')
 
 
+def distinct_candidates(named_admissions):
+    """Ignored configuration flags cannot create another measured IC method."""
+    seen = set()
+    for alias, admitted in named_admissions:
+        if alias == 'aa_control' or admitted['mode'] != 'ic':
+            continue
+        identity = admitted['candidate']['record_sha256']
+        require(identity not in seen, 'duplicate admitted IC method under different aliases')
+        seen.add(identity)
+
+
 def run_record(admitted, *, number, host_id, status, native=None, process_wall_ns=None,
                profile=None, costs=None):
     """Reconstructible success/failure record; never rank a failed or partial solve."""
@@ -127,6 +138,9 @@ def run_record(admitted, *, number, host_id, status, native=None, process_wall_n
                 stage_audit = audit
             else:
                 require(report.get('rho_reusable_setup_excluded') is True, 'rho preparation interval differs')
+                require(report.get('executed_method') == {'reference': 'signed_frobenius_rho',
+                    'requested_walks': job['config'].get('rho_parallel_walks', 32)},
+                    'rho executed a different requested walk width')
         timing = native_intervals(native, process_wall_ns)
         if profile is not None:
             require(costs is not None, 'missing instruction profile')

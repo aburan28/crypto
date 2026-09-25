@@ -23,7 +23,7 @@ import threading
 
 from oracle import Curve, InvalidEvidence, require, verify
 from portfolio import retain
-from driver_admission import (EVALUATOR, check_admission, freeze_admission, producer_metadata, run_record, online_table)
+from driver_admission import (EVALUATOR, check_admission, freeze_admission, producer_metadata, run_record, online_table, distinct_candidates)
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -474,6 +474,7 @@ def prepare(args):
     admissions = {}
     for stage, stage_cases in fixtures.items():
         for case in stage_cases:
+            admitted_arms=[]
             # Admission is independent of selection; predeclare every possible arm.
             for arm in all_admission_arms:
                 if stage=='aa' and arm['id'] not in ('incumbent', 'aa_control'):
@@ -489,6 +490,8 @@ def prepare(args):
                     worker_sha256=digest(out/arm['binary_relative']), execute=lambda binary, job, directory:
                         execute([str(binary)],job,directory,limits['timeout_seconds'],limits['memory_bytes'],limits['cpu']))
                 admissions[relative] = objhash(admitted)
+                admitted_arms.append((arm['id'],admitted))
+            distinct_candidates(admitted_arms)
     c = {'schema_version':2, 'scientific_admission':True, 'reference_qualification':None, 'admissions':admissions, 'resources':resources,
         'run_aliases':[a['id'] for a in all_admission_arms],'profile':args.profile,'seed':args.seed,'created_unix':time.time(),
         'cells':[f'n{n}a{a}' for n,a in cells],'holdout_cells':[f'n{n}a{a}' for n,a in holdout],

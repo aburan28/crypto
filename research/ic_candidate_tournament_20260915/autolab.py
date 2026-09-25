@@ -23,7 +23,7 @@ import threading
 import time
 
 from oracle import Curve, InvalidEvidence, require, verify
-from driver_admission import (EVALUATOR, check_admission, freeze_admission, producer_metadata, run_record, online_table)
+from driver_admission import (EVALUATOR, check_admission, freeze_admission, producer_metadata, run_record, online_table, distinct_candidates)
 from portfolio import factorial_candidates, recombine
 from tournament import BASE_CONFIG, child_env, digest, objhash, parse_cells, read, write
 
@@ -356,12 +356,15 @@ def prepare(args):
         arms.append({'id': f'rho_w{walks}', 'mode': 'rho', 'config': dict(arms[0]['config'], rho_parallel_walks=walks),
                      'hypothesis': 'Same-target reference sensitivity; packed signed-Frobenius walk.'})
     for case in cases:
+        admitted_arms=[]
         for arm in arms:
             job = dict(copy.deepcopy(case['job']), mode=arm['mode'], config=arm['config'])
-            freeze_admission(root/'admissions'/case['id']/arm['id'], binary=root/'worker',
+            admitted=freeze_admission(root/'admissions'/case['id']/arm['id'], binary=root/'worker',
                 job=job, fixture=case['fixture'], manifest=manifest, metadata=metadata, resources=resources,
                 worker_sha256=digest(root/'worker'), execute=lambda binary, job, directory:
                     run_native(binary, job, directory, args.timeout))
+            admitted_arms.append((arm['id'],admitted))
+        distinct_candidates(admitted_arms)
     pinned = {name:digest(root/name) for name in ('worker','build.log','preparation.json','source-manifest.json')}
     pinned.update({'evaluator/'+n: digest(root/'evaluator'/n) for n in EVALUATOR})
     pinned.update({str(p.relative_to(root)):digest(p) for p in (root/'fixture_generation').rglob('*') if p.is_file()})

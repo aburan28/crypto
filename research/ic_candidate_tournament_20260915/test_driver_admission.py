@@ -5,7 +5,8 @@ from pathlib import Path
 import unittest
 import tempfile
 
-from driver_admission import make_admission, run_record, check_admission, online_table, freeze_admission
+from driver_admission import (make_admission, run_record, check_admission, online_table,
+                             freeze_admission, distinct_candidates)
 from identity import sha256
 from oracle import InvalidEvidence
 from tournament import comparison, gate
@@ -85,6 +86,14 @@ class DriverAdmissionTests(unittest.TestCase):
                 kwargs['job']['config']['linear_algebra'] = 'sparse'
             with self.subTest(change=change), self.assertRaises(InvalidEvidence):
                 make_admission(**kwargs)
+
+    def test_unused_rho_flag_cannot_create_a_new_ic_competitor(self):
+        a = make_admission(**self.kwargs)
+        self.kwargs['job']['config']['rho_parallel_walks'] = 1
+        b = make_admission(**self.kwargs)
+        with self.assertRaises(InvalidEvidence):
+            distinct_candidates([('incumbent', a), ('fake_competitor', b)])
+        distinct_candidates([('incumbent', a), ('aa_control', b)])
 
     def test_changed_canonical_admission_and_timing_fail_reconstruction(self):
         admitted = make_admission(**self.kwargs)
