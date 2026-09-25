@@ -58,7 +58,7 @@ def verify(training, point_batch):
     assert receipt["producer_stdout_sha256"] == sha(point_batch / "producer.stdout.jsonl")
     assert receipt["producer_stderr_sha256"] == sha(point_batch / "producer.stderr.txt")
     assert receipt["targets_requested"] == len(points)
-    assert len(receipt["negative_controls"]) == 2
+    assert len(receipt["negative_controls"]) == 3
     for control in receipt["negative_controls"]:
         assert control["returncode"] != 0
         stderr = point_batch / (control["case"] + ".stderr.txt")
