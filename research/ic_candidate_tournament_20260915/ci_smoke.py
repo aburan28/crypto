@@ -96,12 +96,22 @@ def main():
                 fixtures[key] = read(directory / 'fixture/stdout.json')['fixture']
             fixture = fixtures[key]
             write(directory / 'expected-fixture.json', fixture, exclusive=True)
+            job['public_targets'] = fixture['targets']
+            write(directory / 'measured-job.json', job, exclusive=True)
             write_immutable(directory / 'curve-manifest.json', curve_record(fixture))
             process = execute([str(worker)], job, directory / 'native', 60, 8 * 1024**3, cpu)
             receipt['native_process'] = process
             require(process['exit_code'] == (2 if expected_failure else 0)
                     and process['process_status'] == 'EXITED', 'unexpected native exit')
             report = read(directory / 'native/stdout.json')
+            require(report['online_timing_schema'] == 1 and
+                    report['target_input'] == 'supplied_public_point' and
+                    report['reusable_setup_excluded'] is True, 'missing public online boundary')
+            if not expected_failure:
+                require(type(report['online_wall_ns']) is int and report['online_wall_ns'] > 0
+                        and report['scalar_replay_included'] is True, 'online interval missing replay')
+            else:
+                require(report['online_wall_ns'] is None, 'preparation failure gained online time')
             if expected_failure:
                 require(report['status'] == 'incomplete' and report['trials'] == 1,
                         'intentional exhaustion changed')
@@ -126,7 +136,11 @@ def main():
                 receipt['profile_process'] = process
                 require(process['exit_code'] == 0 and process['process_status'] == 'EXITED',
                         'profiled worker failed or incomplete')
-                profile_proof = verify(read(profile_dir / 'stdout.json'), fixture,
+                profile_report = read(profile_dir / 'stdout.json')
+                if job['mode'] == 'rho':
+                    require(profile_report['field_kernel'] == report['field_kernel'],
+                            'native/profile rho arithmetic dispatch differs')
+                profile_proof = verify(profile_report, fixture,
                                        expected_mode=job['mode'], summands=job['config']['summands'])
                 if job['mode'] == 'ic':
                     profile_queries = verify_queries(read(profile_dir / 'stdout.json'), fixture,

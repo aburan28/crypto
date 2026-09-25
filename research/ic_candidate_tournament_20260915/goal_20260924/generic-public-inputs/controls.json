@@ -1,0 +1,136 @@
+{
+  "accepted_dependency_merge": "ae50b3ddf9ca583b3f532616af0741545c2d2e45",
+  "base_commit": "51f7fd7799e698d866f3cb93cf419405fd4f4c1b",
+  "classification": "accounting",
+  "cold_ms": null,
+  "comparative_online_ms": null,
+  "dependency_lock_sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+  "files": {
+    ".github/workflows/ic-autolab.yml": {
+      "bytes": 3113,
+      "sha256": "6ee1582c2c0ef5438e278287492816a8c4a620d146de571b4b4705fae8005fdc"
+    },
+    "docs/index-calculus-scoreboard.html": {
+      "bytes": 803657,
+      "sha256": "f070faef340851af356f1321ff50915d512478ac69b001f5b3a756819b48e726"
+    },
+    "examples/ic_tournament_worker.rs": {
+      "bytes": 22905,
+      "sha256": "3e5566ed10429e987c16a4087a68603b2dd3ac0b3c43a16cdc5adfafa5108102"
+    },
+    "research/ic_candidate_tournament_20260915/AUTOLAB.md": {
+      "bytes": 19545,
+      "sha256": "9ff9c6db35ea7dbe37b3db465fc7756148cc2a0ad6ffffb9b71f0262c81123b3"
+    },
+    "research/ic_candidate_tournament_20260915/ci_smoke.py": {
+      "bytes": 10856,
+      "sha256": "40643c2570e797e12f2855ba33962e9d5642d242f4294978690e6320bd6da77f"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/STATUS.md": {
+      "bytes": 12537,
+      "sha256": "c6cbbab2346f0f921e94d49e41ba6cd059a44867e5d9935a1a8f7fa60117094e"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/PROTOCOL.md": {
+      "bytes": 1991,
+      "sha256": "845006766679678753ee8979681c85f5052b416d6592ea1f89f76673501c91d0"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/RESULTS.md": {
+      "bytes": 4246,
+      "sha256": "8a06410e3ce8a34d82c87e1a6e4a944a32717d9337ab3f4eae962de89e30b617"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/clippy.log": {
+      "bytes": 3000,
+      "sha256": "a5bf5f7622079577fa4f66d7863fe7f3c4c1537ba338fd9de6300e44e3cbb2bd"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/final-tests.log": {
+      "bytes": 4219,
+      "sha256": "064cf103bb501b277a9ce772294c2b62619dfb82821f17e6f4fe5f6bc12d6d05"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/final-worker-raw.jsonl": {
+      "bytes": 165771,
+      "sha256": "cce04f481887b26fd159c0efecdba98ed98f834925451e52807a83f960001300"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/final-worker-summary.json": {
+      "bytes": 54432,
+      "sha256": "aa0122cc71f3bad6d7f3d30bdd2feb8bf80f1bfde61bac6fb611adef5d78e99a"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/final-worker.log": {
+      "bytes": 822,
+      "sha256": "f7dd66818b64c8af570f0486aba84da27bc7c8f2125e89b23c1001232843c1ec"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/fixture-a0.json": {
+      "bytes": 306,
+      "sha256": "bb6073023c0fd66f0237284925851d1c84a70197024db2cc01ecd980d7467b4c"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/fixture-a1.json": {
+      "bytes": 305,
+      "sha256": "1899b174adf8ec9d98dde747684a674be5640294aad2d8a11fe7b771efd1e792"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/fixture-job-inputs.json": {
+      "bytes": 17490,
+      "sha256": "040d43743849e6be17a45279db7f2235315a22f8fbe670eb68f4cc844fadead7"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/initial-tests.log": {
+      "bytes": 6485,
+      "sha256": "8d04429144049a442b954529e607661f420f0fc323b77c4fbf73478d195e4ce2"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/initial-worker-raw.jsonl": {
+      "bytes": 165775,
+      "sha256": "ebd6097dbd7c7d1d4e63f9fe1b409c071b84fd08d2c73f737c48733bbbdddcc5"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/initial-worker-summary.json": {
+      "bytes": 54435,
+      "sha256": "b6368d4c76fb77965b60db739fa6574646e9cbf63f0ea6afa043b73d08189798"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/initial-worker.log": {
+      "bytes": 822,
+      "sha256": "f7dd66818b64c8af570f0486aba84da27bc7c8f2125e89b23c1001232843c1ec"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/python-tests.log": {
+      "bytes": 20081,
+      "sha256": "2295c5205574f56d25b6346be60f957b2d3746427a18756d4d0e5434469dc26a"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/rho-regressions.log": {
+      "bytes": 6054,
+      "sha256": "9decaeeda3b62837695b1876085285cbb4d7cefd255893cb3e90c6338d053f9b"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/run_controls.py": {
+      "bytes": 4331,
+      "sha256": "d4ee44d5c3d219739b405e838522a2d33145541d7183b69766d564b7a6650d5c"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-public-inputs/site-tests.log": {
+      "bytes": 138,
+      "sha256": "08c0b7e3dec08ce88215f6ca4b0f99c800199b773094ebf8e96ebae3e64b1d6a"
+    },
+    "src/cryptanalysis/koblitz_index_calculus.rs": {
+      "bytes": 574425,
+      "sha256": "e91b7283df427172a0cb9b9799ba370a9d7ab0d251ed2fea42447e7c25fe2121"
+    },
+    "src/cryptanalysis/semaev_decomp.rs": {
+      "bytes": 57354,
+      "sha256": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2"
+    }
+  },
+  "host": {
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "processor": "arm",
+    "release": "25.6.0",
+    "system": "Darwin",
+    "version": "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041"
+  },
+  "operations": null,
+  "promotion_eligible": false,
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "python_tests_passed": 126,
+  "python_tests_skipped": 2,
+  "rust_tests_ignored": 3,
+  "rust_tests_passed_distinct": 44,
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "schema_version": 1,
+  "scope": "synthetic toy public-point and outer online interval correctness; no performance qualification",
+  "site_tests_passed": 39,
+  "speedup": null,
+  "worker_controls_final": 37,
+  "worker_controls_initial": 37
+}
