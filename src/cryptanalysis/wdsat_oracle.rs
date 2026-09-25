@@ -601,6 +601,80 @@ mod tests {
         assert_eq!(stats.solver_calls, 1);
         assert!(stats.refuted);
         assert!(!stats.exhausted);
+
+        // Construct model-output children from the exact frozen tiny system,
+        // then replay a valid point relation independently in the group.
+        let BinaryPoint::Affine { x: target_x, .. } = &target else {
+            panic!("planted target is infinity");
+        };
+        let sys = crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+            &fb.subspace_basis,
+            target_x,
+            &kc.curve.b,
+            2,
+            &st,
+        )
+        .expect("tiny decomposition system");
+        assert!(sys.n_vars <= 16, "mock witness search must stay tiny");
+        let limit = 1u64 << sys.n_vars;
+        let good_root = (0..limit)
+            .find(|&root| {
+                if !sys
+                    .equations
+                    .iter()
+                    .all(|equation| equation.eval(root) == 0)
+                {
+                    return false;
+                }
+                let xs: Vec<F2mElement> = (0..2)
+                    .map(|i| sys.summand_x(&fb.subspace_basis, root, i, kc.n))
+                    .collect();
+                lift_candidate(&kc, &fb, &index_of, &xs, &target).is_some()
+            })
+            .expect("planted target has a lifted system root");
+        let bad_root = (0..limit)
+            .find(|&root| {
+                sys.equations
+                    .iter()
+                    .any(|equation| equation.eval(root) != 0)
+            })
+            .expect("system has an invalid root candidate");
+        let bits = |root: u64| {
+            (0..sys.n_vars)
+                .map(|i| if (root >> i) & 1 == 1 { '1' } else { '0' })
+                .collect::<String>()
+        };
+        let valid_model = make_child(
+            "valid-model.sh",
+            &format!("#!/bin/sh\nprintf '{}\\n'\nexit 0\n", bits(good_root)),
+        );
+        let invalid_model = make_child(
+            "invalid-model.sh",
+            &format!("#!/bin/sh\nprintf '{}\\n'\nexit 0\n", bits(bad_root)),
+        );
+        let (indices, stats) =
+            wdsat_decompose(&kc, &fb, &index_of, &st, &target, 2, &options(valid_model));
+        assert_eq!(stats.solver_calls, 1);
+        assert_eq!(stats.models, 1);
+        let indices = indices.expect("mock valid model must lift");
+        let mut replay = BinaryPoint::Infinity;
+        for index in indices {
+            replay = kc.add(&replay, &fb.points[index]);
+        }
+        assert_eq!(replay, target);
+        let (indices, stats) = wdsat_decompose(
+            &kc,
+            &fb,
+            &index_of,
+            &st,
+            &target,
+            2,
+            &options(invalid_model),
+        );
+        assert!(indices.is_none());
+        assert_eq!(stats.spurious, 1);
+        assert!(stats.exhausted);
+        assert!(!stats.refuted);
         fs::remove_dir_all(dir).expect("remove mock directory");
     }
 
