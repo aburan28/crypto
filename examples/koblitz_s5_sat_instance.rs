@@ -1,10 +1,11 @@
 //! Native-XOR balanced-S5 SAT control over point-defined Koblitz bases.
 //!
-//! Four factor-base points are constrained to sum to one published synthetic
-//! target through three balanced S3 links.  All SAT models are lifted through
-//! the original curve group; no unknown, external, or production point is used.
+//! Four factor-base points are constrained through three balanced S3 links.
+//! SAT controls use published synthetic targets; the optional compact batch
+//! accepts public subgroup points without their scalar labels. All extracted
+//! witnesses are lifted through the curve group before admission.
 
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -5741,6 +5742,12 @@ fn main() {
         && std::env::var("KIC_ORBIT_LAZY_RELATIVE_SUPPORT").as_deref() == Ok("1");
     let compact_batch_only = std::env::var("KIC_ORBIT_BATCH_ONLY").as_deref() == Ok("1");
     assert!(
+        lazy_relative_support
+            || (std::env::var_os("KIC_ORBIT_TARGET_SCALARS").is_none()
+                && std::env::var_os("KIC_ORBIT_TARGET_POINTS_JSONL").is_none()),
+        "compact batch target files require KIC_ORBIT_LAZY_RELATIVE_SUPPORT=1"
+    );
+    assert!(
         !lazy_relative_support || backend == "internal",
         "KIC_ORBIT_LAZY_RELATIVE_SUPPORT requires the internal solver"
     );
@@ -5759,6 +5766,10 @@ fn main() {
     let mut compact_batch_relations: Vec<(u64, ExtractedOrbitRelation)> = Vec::new();
     let mut compact_batch_failures: Vec<u64> = Vec::new();
     let mut compact_batch_targets_requested = 0usize;
+    let mut compact_point_batch_relations: Vec<([u64; 2], ExtractedOrbitRelation)> = Vec::new();
+    let mut compact_point_batch_failures: Vec<[u64; 2]> = Vec::new();
+    let mut compact_point_batch_targets_requested = 0usize;
+    let mut compact_batch_loop_ms = 0.0f64;
     let mut compact_batch_index_build_ms = 0.0f64;
     let mut compact_batch_query_ms = 0.0f64;
     let mut compact_index_entries = 0usize;
@@ -5786,6 +5797,11 @@ fn main() {
             .into_iter()
             .map(|(left, right, relative, roots)| ((left, right, relative), roots))
             .collect::<HashMap<_, _>>();
+        assert!(
+            std::env::var("KIC_ORBIT_TARGET_SCALARS").is_err()
+                || std::env::var("KIC_ORBIT_TARGET_POINTS_JSONL").is_err(),
+            "choose scalar or point batch inputs, not both"
+        );
         if let Ok(list_path) = std::env::var("KIC_ORBIT_TARGET_SCALARS") {
             let scalars: Vec<u64> = std::fs::read_to_string(&list_path)
                 .expect("read KIC_ORBIT_TARGET_SCALARS")
@@ -5808,6 +5824,7 @@ fn main() {
             compact_batch_index_build_ms = index_started.elapsed().as_secs_f64() * 1000.0;
             compact_index_entries = index.index_entries;
             let b = curve.curve.b.raw_bits().first().copied().unwrap_or(0);
+            let loop_started = Instant::now();
             for scalar in scalars {
                 let target = curve.mul(curve.generator(), &BigUint::from(scalar));
                 let query_started = Instant::now();
@@ -5830,6 +5847,72 @@ fn main() {
                     compact_batch_failures.push(scalar);
                 }
             }
+            compact_batch_loop_ms = loop_started.elapsed().as_secs_f64() * 1000.0;
+        } else if let Ok(list_path) = std::env::var("KIC_ORBIT_TARGET_POINTS_JSONL") {
+            let targets: Vec<[u64; 2]> = std::fs::read_to_string(&list_path)
+                .expect("read KIC_ORBIT_TARGET_POINTS_JSONL")
+                .lines()
+                .filter(|line| !line.trim().is_empty())
+                .map(|line| serde_json::from_str(line).expect("point target must be [x,y]"))
+                .collect();
+            assert!(!targets.is_empty(), "point target list must not be empty");
+            compact_point_batch_targets_requested = targets.len();
+            let index_started = Instant::now();
+            let index = CompactOrbitExtractionIndex::new(
+                &curve,
+                &map,
+                regular_keys,
+                &codes,
+                &lazy_relative_field.gf,
+            );
+            compact_batch_index_build_ms = index_started.elapsed().as_secs_f64() * 1000.0;
+            compact_index_entries = index.index_entries;
+            let b = curve.curve.b.raw_bits().first().copied().unwrap_or(0);
+            let loop_started = Instant::now();
+            for coordinates in targets {
+                assert!(coordinates.iter().all(|value| *value < (1u64 << n)));
+                let target = BinaryPoint::Affine {
+                    x: F2mElement::from_biguint(&BigUint::from(coordinates[0]), n),
+                    y: F2mElement::from_biguint(&BigUint::from(coordinates[1]), n),
+                };
+                assert!(
+                    points_with_x(
+                        &curve.curve,
+                        match &target {
+                            BinaryPoint::Affine { x, .. } => x,
+                            BinaryPoint::Infinity => unreachable!(),
+                        }
+                    )
+                    .contains(&target),
+                    "point target must be on the curve"
+                );
+                assert_eq!(
+                    curve.mul(&target, &curve.subgroup_order),
+                    BinaryPoint::Infinity,
+                    "point target must belong to the prime-order subgroup"
+                );
+                let query_started = Instant::now();
+                let relation = extract_orbit_relation_with_index(
+                    &curve,
+                    &base,
+                    &target,
+                    &map,
+                    &index,
+                    &lazy_relative_field.gf,
+                    b,
+                );
+                compact_batch_query_ms += query_started.elapsed().as_secs_f64() * 1000.0;
+                if let Some(relation) = relation {
+                    assert!(
+                        lift_x_tuple(&curve, &base, &relation.codes, &target).is_some(),
+                        "point-batch relation failed group lift"
+                    );
+                    compact_point_batch_relations.push((coordinates, relation));
+                } else {
+                    compact_point_batch_failures.push(coordinates);
+                }
+            }
+            compact_batch_loop_ms = loop_started.elapsed().as_secs_f64() * 1000.0;
         } else {
             let (extracted, entries, extract_ms) = extract_orbit_relation(
                 &curve,
@@ -6250,17 +6333,25 @@ fn main() {
             force_binary(&mut encoding.solver, offset, lazy_width, value as usize);
         }
     }
+    let mut sat_solver_invocations = 0usize;
+    let mut sat_solver_ms = 0.0f64;
     let outcome = loop {
         let solve_result = if compact_batch_only {
             SolveResult::Unknown
-        } else if compact_relation.is_some() {
-            encoding.solver.solve()
-        } else if s3_root_theory || lazy_relative_support {
-            encoding
-                .solver
-                .solve_with_lazy_clauses(&trigger_variables, &mut theory)
         } else {
-            encoding.solver.solve()
+            sat_solver_invocations += 1;
+            let solver_call_started = Instant::now();
+            let result = if compact_relation.is_some() {
+                encoding.solver.solve()
+            } else if s3_root_theory || lazy_relative_support {
+                encoding
+                    .solver
+                    .solve_with_lazy_clauses(&trigger_variables, &mut theory)
+            } else {
+                encoding.solver.solve()
+            };
+            sat_solver_ms += solver_call_started.elapsed().as_secs_f64() * 1000.0;
+            result
         };
         match solve_result {
             SolveResult::Sat => {
@@ -6353,8 +6444,9 @@ fn main() {
             result => break result,
         }
     };
-    phase_restart_shots_used += 1;
-    let _ = theory;
+    if !compact_batch_only {
+        phase_restart_shots_used += 1;
+    }
     let solve_ms = solve_started.elapsed().as_secs_f64() * 1000.0;
     let exhaustive_match = direct_set
         .as_ref()
@@ -6419,7 +6511,13 @@ fn main() {
             "schema_version":"1.0",
             "task_id":task_id,
             "kind":"balanced_s5_native_xor_observation",
-            "evidence_class":if outcome==SolveResult::Unknown {"censored_operational_observation"} else {"measured_solver_observation"},
+            "evidence_class":if compact_batch_targets_requested > 0 || compact_point_batch_targets_requested > 0 {
+                "measured_compact_batch_extraction"
+            } else if outcome==SolveResult::Unknown {
+                "censored_operational_observation"
+            } else {
+                "measured_solver_observation"
+            },
             "n":n,
             "a":a,
             "eta":{"numerator":eta_numerator,"denominator":eta_denominator},
@@ -6491,11 +6589,37 @@ fn main() {
                     "regular_state_scan_ms":lazy_relative_scan_ms,
                     "root_index_build_ms":compact_batch_index_build_ms,
                     "query_ms_sum":compact_batch_query_ms,
-                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms,
-                    "sat_verification_included":true,
-                    "sat_verification_wall_ms":solve_ms,
-                    "charged_total_with_sat_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms + solve_ms
+                    "batch_loop_wall_ms":compact_batch_loop_ms,
+                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_loop_ms,
+                    "charged_total_scope":"base, regular scan, root index, and full target loop; process start/curve setup/encoding excluded",
+                    "sat_verification_included":false,
+                    "sat_verification_wall_ms":null,
+                    "charged_total_with_sat_ms":null
             }))
+            } else { None },
+            "compact_orbit_point_batch":if compact_point_batch_targets_requested > 0 {
+                Some(json!({
+                    "targets_requested":compact_point_batch_targets_requested,
+                    "targets_extracted":compact_point_batch_relations.len(),
+                    "failed_target_points":compact_point_batch_failures,
+                    "relations":compact_point_batch_relations.iter().map(|(point, relation)| json!({
+                        "target_point":point,
+                        "x_codes":relation.codes,
+                        "pinned_intermediates":relation.intermediates,
+                        "trials":relation.trials,
+                        "query_ms":relation.extract_ms
+                    })).collect::<Vec<_>>(),
+                    "index_entries":compact_index_entries,
+                    "regular_states":lazy_regular_states.len(),
+                    "regular_state_scan_ms":lazy_relative_scan_ms,
+                    "root_index_build_ms":compact_batch_index_build_ms,
+                    "query_ms_sum":compact_batch_query_ms,
+                    "batch_loop_wall_ms":compact_batch_loop_ms,
+                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_loop_ms,
+                    "charged_total_scope":"base, regular scan, root index, and full target loop; process start/curve setup/encoding excluded",
+                    "sat_verification_included":false,
+                    "sat_verification_wall_ms":null
+                }))
             } else { None },
             "final_support_clauses":encoding.final_support_clauses,
             "final_compatible_selector_pairs":encoding.final_compatible_selector_pairs,
@@ -6538,7 +6662,16 @@ fn main() {
             "factor_base_input_blake3":&factor_base_input_blake3,
             "encoding_ms":encoding_ms,
             "solve_ms":solve_ms,
-            "scope":"public synthetic balanced-S5 correctness control; no external point or key recovery"
+            "solve_ms_scope":"legacy whole solve phase including compact scan and extraction; not isolated SAT time",
+            "sat_solver_invocations":sat_solver_invocations,
+            "sat_solver_ms":sat_solver_ms,
+            "scope":if compact_point_batch_targets_requested > 0 {
+                "public subgroup point-only compact relation extraction; no target scalar supplied to the producer"
+            } else if compact_batch_targets_requested > 0 {
+                "public synthetic known-scalar compact relation batch; no unknown-target recovery"
+            } else {
+                "public synthetic balanced-S5 correctness control; no external point or key recovery"
+            }
         })
     );
 }
