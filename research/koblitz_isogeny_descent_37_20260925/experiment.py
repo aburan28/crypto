@@ -99,7 +99,7 @@ def build_isogeny(source):
     division_polynomial = source.division_polynomial(73)
     if division_polynomial % kernel_poly != 0:
         raise AssertionError("kernel polynomial does not divide the 73-division polynomial")
-    quotient_degree = (division_polynomial // kernel_poly).degree()
+    quotient_degree = int((division_polynomial // kernel_poly).degree())
     if quotient_degree != 2628:
         raise AssertionError("unexpected 73-division polynomial quotient degree")
     if source.cardinality() != 137439487532 or target.cardinality() != source.cardinality():
