@@ -102,9 +102,22 @@ def main():
     c.add_argument("--n", type=int, default=18)
     c.add_argument("--m", type=int, default=20)
     c.add_argument("--seed", type=int, default=1)
+    # Emit a system in the shared worker I/O contract (fes_io.hpp), for driving
+    # or testing the CUDA/Metal/host workers.
+    fl = sub.add_parser("file")
+    fl.add_argument("--n", type=int, default=18)
+    fl.add_argument("--m", type=int, default=20)
+    fl.add_argument("--seed", type=int, default=1)
     args = ap.parse_args()
     if args.cmd == "system":
         emit_header(args.n, args.m, args.seed)
+    elif args.cmd == "file":
+        const, lin, quad, _ = gen_system(args.n, args.m, args.seed)
+        flat = [quad[i][j] for i in range(args.n) for j in range(i + 1)]
+        print(f"{args.n} {args.m}")
+        print(const)
+        print(" ".join(str(v) for v in lin))
+        print(" ".join(str(v) for v in flat))
     else:
         const, lin, quad, _ = gen_system(args.n, args.m, args.seed)
         sols = brute_solutions(const, lin, quad, args.n)
