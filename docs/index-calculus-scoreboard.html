@@ -6853,6 +6853,26 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-s3-o-branch-20260925 -->
+<!-- BEGIN ecc2k130-n13-oaware-sat-benchmark-20260925 -->
+<section class="panel" id="ecc2k130-n13-oaware-sat-benchmark-20260925">
+  <div class="panel-head">
+    <h2>O-aware n = 13 SAT stage: all 96 cold toy queries complete; n = 131 remains unpriced <span class="chip">solver stage</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/785">PR #785</a> ran the exact #781 17.6 MB dense CNF with each of the 32 frozen #767 Q+T unit assumptions in three cold engines: CryptoMiniSat, Kissat and CaDiCaL. Each returned five SAT and 27 UNSAT branch statuses. All 15 SAT models were independently converted from chosen x values to complete rational point fibres and a signed tuple summing to the exact full point. The 81 UNSAT outputs agree with #767's complete point oracle, but no separate UNSAT proof certificate was checked. All six tiny interface smokes and 96 target children finished within the frozen 15 s/2 GiB caps with zero invalid models or timeouts.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed macOS panel. Charged portfolio wall includes source/schema/oracle preflight, one base read, 32 derived query files, cold child wall and point verification for each engine. The per-child maximum is not a portfolio cost. These are solver-stage diagnostics, not full IC operations S or matched rho.</caption>
+    <thead><tr><th>CNF engine</th><th>SAT / oracle-consistent UNSAT</th><th>32 child wall sum</th><th>Charged 32-query wall</th><th>Max child wall</th><th>Max sampled RSS</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>CryptoMiniSat 5.14.7</td><td>5 / 27</td><td>9.508 s</td><td>10.326 s</td><td>0.535 s</td><td>102.8 MB</td><td>unset / unset</td></tr>
+      <tr><td>Kissat 4.0.4</td><td>5 / 27</td><td>6.650 s</td><td>7.468 s</td><td>0.274 s</td><td>130.3 MB</td><td>unset / unset</td></tr>
+      <tr><td>CaDiCaL 3.0.1</td><td>5 / 27</td><td>10.158 s</td><td>10.977 s</td><td>0.593 s</td><td>136.4 MB</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The actual 96-child Python main wall was 27.316 s. Fixed-order first verified positive branches were T3,T0,T2,T0 for Q0&ndash;Q3; each of Q4&ndash;Q7 required all four negative branches, with charged full-Q costs retained in the analysis. Query files were reconstructed from one hash-pinned #781 base, not archived 96 times; exact commands, raw output, model witnesses, child CPU/RSS and two pre-corpus setup failures are preserved. This admits the dense n = 13 toy solver interface and supersedes #780's n = 13 input blocker, while #780's n = 19 multiword/complete-export blocker remains. One toy wall panel does not establish statistically robust engine superiority, n = 131 tractability, relation yield/rank, a Certicom log or an end-to-end rho crossover. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/analysis.json">charged Q and portfolio costs</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/README.md">raw evidence and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n13-oaware-sat-benchmark-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
