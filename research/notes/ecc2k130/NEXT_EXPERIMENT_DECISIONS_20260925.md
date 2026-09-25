@@ -1,5 +1,11 @@
 # ECC2K-130: next experimental decisions (2026-09-25)
 
+Update: the fresh four-sum oracle, n53 shared-log comparator, rotated
+support/portfolio, and recursive-S3 semantic gates described below have now
+produced evidence. Use the [current decision ladder](RESEARCH_DECISION_LADDER_20260925.md)
+for the next execution order; this note retains the original gates and their
+pre-outcome reasoning.
+
 Status: evidence-ranked execution plan. The [canonical scoreboard](../../../docs/index-calculus-scoreboard.html) remains the measurement ledger; this note states the next gates and how their outcomes change the work. It does not claim a discrete log for the public challenge.
 
 ## Current evidence and what it decides
