@@ -55,3 +55,55 @@ tournament implementation. The producer workflow runs it on Linux amd64 against
 the prepared scaled source and retains its artifacts, including failures. It
 executes native screening and the tournament's A/A and smoke stages; development,
 selection, confirmation and replay are frozen but unexecuted in this control.
+
+## Merged implementation and durable Linux replay
+
+[PR 755](https://github.com/aburan28/crypto/pull/755) merged at
+`0de6d004d81fb8c2d3e86ecef24c738d86fec853`, following successful applicable
+checks on reviewed head `04ca67fca90d2fd6f6c6dc4d4b34ff7ffac469c5`.
+The final Linux workflow passed the 100-test harness suite and release arithmetic
+controls. Its measured integration census is:
+
+| Control | Verified | Retained failures | Scope |
+|---|---:|---:|---|
+| Three optimized producer sources | 39 IC + 13 rho native/profile pairs | 0 | Public-point input, certificates, exclusive phase and online timing closure |
+| Existing native driver | 17 jobs | 1 intentional one-trial failure | Canonical admission, repeated-run identity and null failed-row costs |
+| Existing instruction tournament | 15 native/profile pairs | 0 | Six A/A pairs and nine smoke pairs |
+
+The tournament's development, selection, confirmation and replay inputs were
+prepared but those stages were not executed. These controls consume **zero
+improvement rounds** and do not qualify an incumbent or support a speedup claim.
+Repeated controls across code revisions are not new independent target samples.
+
+The [Linux history](linux-history.json) retains four successful workflow versions,
+including the initial producer bundle's omitted transitive dependency and the
+older Python 3.12 floating-point summaries. The initial bundle can be replayed
+jointly with the exact missing dependency from the same CI run's sealed native
+evaluator; its provenance is retained and none of the original artifacts were
+rewritten. Later bundles include that dependency. Integer nanosecond aggregation
+replaced floating-point process-clock summation, so the final driver artifacts
+replay identically under Python 3.11 and 3.12.
+
+[`ic-driver-linux-controls-20260925.tar.zst`](../../evidence/ic-driver-linux-controls-20260925.tar.zst)
+is the durable bundle: SHA-256
+`972f1b6e16cc9a09960fccc80ba5f64331c3d12a5a312581521c53cea53d334c`,
+9,324,450 compressed bytes, 83,113 files and 372,870,950 expanded file bytes.
+It preserves exact source, binaries, frozen evaluators, raw jobs, profiles,
+certificates, logs, failures, earlier audits and final laptop controls. Build
+caches are excluded; original compressed profile bytes are retained unchanged.
+All **28 read-only audits** passed after fresh hash-checked extraction; see
+[the replay receipt](linux-archive-validation.json). The cross-version checks in
+that receipt apply to the final native, failure and tournament driver bundles.
+
+```sh
+python3.12 research/ic_candidate_tournament_20260915/evidence/restore.py \
+  --archive ic-driver-linux-controls-20260925 --out /tmp/ic-driver-linux-replay
+python3.12 research/ic_candidate_tournament_20260915/goal_20260924/driver-admission/audit_linux_archive.py \
+  --bundle /tmp/ic-driver-linux-replay/ic-driver-linux-controls \
+  --out /tmp/ic-driver-linux-replay/audit.json --also-python311
+```
+
+The optional cross-version flag requires `python3.11` on `PATH`. Without it,
+25 audits run under Python 3.12. Replay executes the archived independent
+checkers, not new performance measurements. The archive remains in Git after
+GitHub Actions artifact retention expires.
