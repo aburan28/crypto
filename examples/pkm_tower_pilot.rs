@@ -925,6 +925,52 @@ fn raw_terms(e: &Pol) -> Vec<(Vec<u32>, u64)> {
     e.terms.iter().map(|(k, v)| (k.clone(), *v)).collect()
 }
 
+/// The process's resident memory and its peak so far, in MB, where Linux
+/// reports them.
+fn memory_mb() -> Option<(u64, u64)> {
+    let status = std::fs::read_to_string("/proc/self/status").ok()?;
+    let field = |key: &str| -> Option<u64> {
+        let line = status.lines().find(|l| l.starts_with(key))?;
+        Some(line.split_whitespace().nth(1)?.parse::<u64>().ok()? / 1024)
+    };
+    Some((field("VmRSS:")?, field("VmHWM:")?))
+}
+
+/// One line of a tower run's step trace, with the process's memory when the
+/// step ended.
+fn print_tower_step(k: usize, st: &f4_fp_tower::StepTrace) {
+    let memory = memory_mb().map_or(String::new(), |(rss, peak)| {
+        format!(", memory {rss} MB (peak {peak} MB)")
+    });
+    eprintln!(
+        "tower step {}: degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0}), B' {} entries, kept {} elements with {} entries{}",
+        k,
+        st.degree,
+        st.critical_pairs,
+        st.tower_pairs,
+        st.s_rows,
+        st.reducer_rows,
+        st.promoted_rows,
+        st.cols,
+        st.nnz,
+        st.residual_rows,
+        st.residual_cols,
+        st.fresh,
+        st.fresh_min_degree,
+        st.basis_active,
+        st.pairs_left,
+        st.ms,
+        st.ms_rows,
+        st.ms_reduce,
+        st.ms_echelon,
+        st.ms_update,
+        st.dense_entries,
+        st.basis_kept,
+        st.basis_entries,
+        memory
+    );
+}
+
 /// Run `f4_fp_tower` on a system: the tower equations become the ring's
 /// rewriting, and the other equations its input in normal form.
 #[allow(clippy::too_many_arguments)]
@@ -970,34 +1016,11 @@ fn measure_tower(
     if let Some(c) = max_nnz {
         opts = opts.with_max_nnz(c);
     }
-    let r = f4_fp_tower::f4_tower(&input, ring, &opts);
     if trace {
-        for (k, st) in r.trace.iter().enumerate() {
-            eprintln!(
-                "tower step {}: degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0})",
-                k + 1,
-                st.degree,
-                st.critical_pairs,
-                st.tower_pairs,
-                st.s_rows,
-                st.reducer_rows,
-                st.promoted_rows,
-                st.cols,
-                st.nnz,
-                st.residual_rows,
-                st.residual_cols,
-                st.fresh,
-                st.fresh_min_degree,
-                st.basis_active,
-                st.pairs_left,
-                st.ms,
-                st.ms_rows,
-                st.ms_reduce,
-                st.ms_echelon,
-                st.ms_update
-            );
-        }
+        // Each step as it ends, so that a run that dies leaves its trace.
+        opts = opts.on_step(print_tower_step);
     }
+    let r = f4_fp_tower::f4_tower(&input, ring, &opts);
     let planted_ok = sol.map(|s| !r.inconsistent && r.basis.iter().all(|f| ring.eval(f, s) == 0));
     let lms: Vec<u128> = r.basis.iter().filter_map(RPoly::lm).collect();
     let pure = |k: usize| {
