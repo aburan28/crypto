@@ -6776,6 +6776,28 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-beta-sweep-20260925 -->
+<!-- BEGIN ecc2k130-rotated-beta-portfolio-20260925 -->
+<section class="panel" id="ecc2k130-rotated-beta-portfolio-20260925">
+  <div class="panel-head">
+    <h2>Rotated beta portfolio: five fixed bases cover 96.4790% of n = 19 targets <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/775">PR #775</a> combined the complete, independently checked #767/#769 n = 19, m = 6 projected target sets at equal seven-point factors and three nonzero signed F0 columns per base. All 130,873 subgroup points, 32 membership patterns and 31 subset unions were replayed through an independent bit-serial group-index enumeration and four archived target-count arrays. The fixed order is beta 3, 338435, 303097, 464276, 42605.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Exact union support including O. The frozen support-only gate was 117,786 targets (90% of q); it first passes with four bases. Each additional base may incur separate logarithm, relation and solver costs. Full-cost S and matched rho remain unset.</caption>
+    <thead><tr><th>Fixed-order prefix</th><th class="n">Projected support / q</th><th class="n">Coverage</th><th class="n">Marginal support</th><th class="n">Exact misses</th><th>Support gate</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>3</td><td class="n">62,389 / 130,873</td><td class="n">47.6714%</td><td class="n">62,389</td><td class="n">68,484</td><td>below 90%</td><td>unset / unset</td></tr>
+      <tr><td>+ 338435</td><td class="n">97,111 / 130,873</td><td class="n">74.2025%</td><td class="n">34,722</td><td class="n">33,762</td><td>below 90%</td><td>unset / unset</td></tr>
+      <tr><td>+ 303097</td><td class="n">114,165 / 130,873</td><td class="n">87.2334%</td><td class="n">17,054</td><td class="n">16,708</td><td>below 90%</td><td>unset / unset</td></tr>
+      <tr><td>+ 464276</td><td class="n">121,851 / 130,873</td><td class="n">93.1063%</td><td class="n">7,686</td><td class="n">9,022</td><td>PASS for charged follow-up</td><td>unset / unset</td></tr>
+      <tr><td>+ 42605</td><td class="n">126,265 / 130,873</td><td class="n">96.4790%</td><td class="n">4,414</td><td class="n">4,608</td><td>PASS for charged follow-up</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>No three-base subset reaches 90%; the fixed-order four-base choice is the protocol-selected next candidate. The ideal free-membership-oracle probe count is exactly 258,849 / 130,873 = 1.977864 per target in the five-base order, not a measured solver cost. The analysis and independent replay took 1.256 / 6.274 s wall and stayed below 184 MiB high-water RSS. A charged same-Q rank, negative-PDP and point-log study on new fixed targets is required before scaling. No n = 131 support transfer, ECC2K-130 log, end-to-end S or rho speedup is claimed. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_portfolio_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_beta_portfolio_20260925/EVIDENCE.md">complete counts and replay receipt</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-beta-portfolio-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">
