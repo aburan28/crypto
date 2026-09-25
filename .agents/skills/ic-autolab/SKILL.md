@@ -28,7 +28,7 @@ not required by this repository-local runner.
 
 ## Quality and accounting first
 
-Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The optimized producer instrumentation and driver admission migration remain pending in the [goal checkpoint](../../../research/ic_candidate_tournament_20260915/goal_20260924/STATUS.md). Complete those gates before launching a new comparative campaign. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay.
+Read [the measurement contract](../../../research/ic_candidate_tournament_20260915/MEASUREMENT.md) before a new comparison. Canonical curve/candidate/workload/run records and the independent usable-base census are implemented in `identity.py`; `measurement.py` leaves incomplete scientific totals unknown. The restored optimized producers pass fixed-vector scientific admission controls; driver admission migration, comparative reference qualification and single-target online timing remain pending in the [goal checkpoint](../../../research/ic_candidate_tournament_20260915/goal_20260924/STATUS.md). Complete those gates before launching a new comparative campaign. Closed historical dump intervals are not eleven exclusive scientific phases. Preserve old sealed evaluators for historical replay.
 
 Before a rho comparison, inspect the actual reference path and run its release
 tests for reference/packed agreement, fruitless-cycle escape, charge closure,
