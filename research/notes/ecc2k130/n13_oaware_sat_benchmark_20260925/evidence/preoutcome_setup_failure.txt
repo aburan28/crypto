@@ -1,0 +1,7 @@
+Pre-outcome setup receipt, before any solver child or benchmark outcome:
+The first INPUT.json generator attempt used the `python3` shim (Python 3.9.10)
+and failed importing #767's verifier because that preexisting source uses
+`tuple[int,int] | None`, which requires Python >=3.10 without postponed
+annotation evaluation. This did not run any solver or change targets.
+The identical generator succeeded with the installed Python 3.12.8 shim.
+The frozen runner consequently requires Python 3.12.8 and psutil 7.2.2.
