@@ -44,9 +44,10 @@ def main() -> None:
     assert not evidence.exists(), "the evidence archive is write-once"
     (evidence / "runs").mkdir(parents=True)
     (evidence / "source").mkdir()
+    copy_one(HERE / "rss_smoke.json", evidence / "rss_smoke.json")
     index = {"schema_version": "1.0", "panel_names": [], "run_names": [],
              "source_sha256": {}, "uncompressed_stdout_sha256": {}}
-    for source in (HERE / "make_inputs.py", HERE / "run.py", HERE / "run_panel.py",
+    for source in (HERE / "make_inputs.py", HERE / "build.py", HERE / "run.py", HERE / "run_panel.py",
                    HERE / "verify.py", HERE / "verify_archive.py", HERE / "summarize.py",
                    HERE / "rss_smoke.py", HERE.parent / "compact_base_sweep_20260925/verify.py",
                    HERE.parent / "paired_fullrank_20260925/verify.py"):
@@ -60,6 +61,8 @@ def main() -> None:
         assert n in (37, 41) and n not in index["panel_names"]
         index["panel_names"].append(n)
         copy_one(panel_dir / "panel_summary.json", evidence / f"panel_n{n}.json")
+        for filename in ("build_receipt.json", "build.stdout.txt", "build.stderr.txt"):
+            copy_one(panel_dir / filename, evidence / f"n{n}-{filename}")
         for attempt in panel["attempts"]:
             if "run_dir" not in attempt:
                 assert attempt["status"] == "CENSORED_CURVE_WALL_BUDGET"

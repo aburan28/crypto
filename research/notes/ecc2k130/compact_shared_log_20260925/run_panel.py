@@ -9,11 +9,12 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
 import time
 
-from run import GiB, HERE, REPO, SPEC, run_one, sha, write_json
+from run import GiB, HERE, REPO, SPEC, EXECUTABLES, run_one, sha, write_json
 
 CURVE_CAP_S = 5400
 
@@ -121,18 +122,39 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--n", type=int, choices=(37, 41), required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--build-dir", type=Path, required=True)
     parser.add_argument("--host-window-confirmed", action="store_true",
                         help="assert no concurrent #754/#757 timed host measurements")
     args = parser.parse_args()
     assert args.host_window_confirmed, "wait for root's clear-host coordination"
     spec_bytes = SPEC.read_bytes()
     assert (HERE / "input_spec.json").is_file()
+    smoke_bytes = (HERE / "rss_smoke.json").read_bytes()
+    smoke = json.loads(smoke_bytes)
+    assert smoke["classification"] == "RSS_CAP_SMOKE_PASS"
+    assert smoke["normal"]["termination"] is None
+    assert smoke["capped"]["termination"] == "RSS_CAP"
+    assert smoke["platform"] == platform.platform(), "RSS smoke must run on this host"
+    build_dir = args.build_dir.resolve()
+    build_bytes = (build_dir / "build_receipt.json").read_bytes()
+    build = json.loads(build_bytes)
+    assert build["returncode"] == 0 and build["platform"] == platform.platform()
+    assert build["input_spec_sha256"] == sha(spec_bytes)
+    assert build["checkout_head"] == subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
+    assert build["cargo_lock_sha256"] == sha((REPO / "Cargo.lock").read_bytes())
+    for mode in ("compact", "rho"):
+        assert build["executable_sha256"][mode] == sha((REPO / EXECUTABLES[mode]).read_bytes())
     out = args.out.resolve()
     assert not out.is_relative_to(REPO.resolve()), "raw timed outputs must live outside the checkout"
     out.mkdir(parents=True, exist_ok=False)
+    for filename in ("build_receipt.json", "build.stdout.txt", "build.stderr.txt"):
+        shutil.copyfile(build_dir / filename, out / filename)
     started = time.monotonic()
     panel = {"schema_version": "1.0", "n": args.n,
              "input_spec_sha256": hashlib.sha256(spec_bytes).hexdigest(),
+             "rss_smoke_sha256": sha(smoke_bytes),
+             "build_receipt_sha256": sha(build_bytes),
              "checkout_head": subprocess.check_output(["git", "rev-parse", "HEAD"],
                                                       cwd=REPO, text=True).strip(),
              "host": platform.node(), "platform": platform.platform(),

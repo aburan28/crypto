@@ -30,8 +30,12 @@ def main() -> None:
     actual = {str(file.relative_to(EVIDENCE)) for file in EVIDENCE.rglob("*")
               if file.is_file() and file.name != "SHA256SUMS"}
     assert listed == actual
+    smoke = json.loads((EVIDENCE / "rss_smoke.json").read_bytes())
+    assert smoke["classification"] == "RSS_CAP_SMOKE_PASS"
+    assert smoke["normal"]["termination"] is None
+    assert smoke["capped"]["termination"] == "RSS_CAP"
     manifest = json.loads((EVIDENCE / "archive_manifest.json").read_bytes())
-    for own in ("make_inputs.py", "run.py", "run_panel.py", "verify.py", "verify_archive.py", "summarize.py",
+    for own in ("make_inputs.py", "build.py", "run.py", "run_panel.py", "verify.py", "verify_archive.py", "summarize.py",
                 "rss_smoke.py"):
         assert sha((EVIDENCE / "source" / own).read_bytes()) == sha((HERE / own).read_bytes())
     assert sha((EVIDENCE / "source/pr747_verify.py").read_bytes()) == verify.PR747_SHA
@@ -42,6 +46,13 @@ def main() -> None:
     for n in manifest["panel_names"]:
         panel = json.loads((EVIDENCE / f"panel_n{n}.json").read_bytes())
         assert panel["n"] == n
+        assert panel["rss_smoke_sha256"] == sha((EVIDENCE / "rss_smoke.json").read_bytes())
+        assert panel["build_receipt_sha256"] == sha((EVIDENCE / f"n{n}-build_receipt.json").read_bytes())
+        build = json.loads((EVIDENCE / f"n{n}-build_receipt.json").read_bytes())
+        assert build["returncode"] == 0 and build["input_spec_sha256"] == panel["input_spec_sha256"]
+        assert build["checkout_head"] == panel["checkout_head"]
+        for stream in ("stdout", "stderr"):
+            assert build[f"{stream}_sha256"] == sha((EVIDENCE / f"n{n}-build.{stream}.txt").read_bytes())
         assert panel["input_spec_sha256"] == sha((HERE / "input_spec.json").read_bytes())
         training = EVIDENCE / "runs" / f"n{n}-train"
         train_report = None
@@ -63,6 +74,9 @@ def main() -> None:
             assert sha(stdout) == manifest["uncompressed_stdout_sha256"][name]
             assert sha((run / run_manifest["input_file"]).read_bytes()) == run_manifest["input_sha256"]
             assert run_manifest["n"] == n and run_manifest["mode"] == attempt["mode"]
+            binary_key = "compact" if attempt["mode"] == "train" else attempt["mode"]
+            assert build["executable_sha256"][binary_key] == run_manifest["executable_sha256"]
+            assert run_manifest["source_commit"] == build["checkout_head"]
             assert run_manifest["source_sha256"] == manifest["source_sha256"][run_manifest["source_path"]]
             assert attempt["producer_receipt_sha256"] == sha((run / "receipt.json").read_bytes())
             if attempt["status"] == "COMPLETE" or attempt["status"] == "CENSORED_INCOMPLETE_LOGS":
