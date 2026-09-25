@@ -159,6 +159,12 @@ fn summarise(walk: &str, r: u64, runs: &[(u64, u64, RhoResult)]) -> Value {
     let verified = runs
         .iter()
         .all(|(planted, _, x)| x.verified && x.recovered == Some(*planted));
+    // Pooled over the runs: every walk started, including those lost to a
+    // cycle, the cap or the budget, so a walk that never reached a
+    // distinguished point still lengthens the mean.
+    let (steps, walks) = runs
+        .iter()
+        .fold((0u64, 0u64), |(s, w), (_, _, x)| (s + x.steps, w + x.walks));
     json!({
         "walk": walk,
         "method": runs.first().map(|(_, _, x)| x.method.clone()),
@@ -167,6 +173,9 @@ fn summarise(walk: &str, r: u64, runs: &[(u64, u64, RhoResult)]) -> Value {
         "mean_gae": mean(&|x| x.gae),
         "mean_s": mean(&|x| x.s),
         "median_s": median,
+        "steps": steps,
+        "walks": walks,
+        "mean_steps_per_walk": if walks > 0 { steps as f64 / walks as f64 } else { f64::NAN },
         "mean_s_walk": mean(&|x| x.s_walk),
         // Walk operations over the walk's own floor, √(πr/2A).
         "walk_over_own_floor": mean(&|x| x.steps_over_expected),
@@ -176,6 +185,8 @@ fn summarise(walk: &str, r: u64, runs: &[(u64, u64, RhoResult)]) -> Value {
         "counters_summed": counters,
         "per_run": runs.iter().map(|(planted, seed, x)| json!({
             "planted": planted, "seed": seed, "s": x.s, "s_walk": x.s_walk, "steps": x.steps,
+            "walks": x.walks,
+            "steps_per_walk": if x.walks > 0 { x.steps as f64 / x.walks as f64 } else { f64::NAN },
             "gae": x.gae, "verified": x.verified && x.recovered == Some(*planted),
         })).collect::<Vec<_>>(),
         "r": r,
@@ -411,7 +422,7 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
     // what a generic algorithm may use on these curves) and to the matched
     // walk on the same instance.
     let mut md = String::from(
-        "| regime | instance | log₂ r | walk | A | jumps | runs | S | S median | S walk | walk / own floor | vs floor (A=2) | vs matched | ok |\n|:--|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|\n",
+        "| regime | instance | log₂ r | walk | A | jumps | runs | S | S median | S walk | steps / walk | walk / own floor | vs floor (A=2) | vs matched | ok |\n|:--|:--|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|\n",
     );
     for inst in &instances {
         let rows = inst["walks"].as_array().cloned().unwrap_or_default();
@@ -428,7 +439,7 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
                 .as_u64()
                 .map(|j| j / w["runs"].as_u64().unwrap_or(1).max(1));
             md.push_str(&format!(
-                "| {} | {} | {:.1} | {} | {} | {} | {} | {} | {} | {} | {} | {}× | {} | {} |\n",
+                "| {} | {} | {:.1} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {}× | {} | {} |\n",
                 inst["regime"].as_str().unwrap_or("?"),
                 inst["instance"].as_str().unwrap_or("?"),
                 inst["log2_r"].as_f64().unwrap_or(0.0),
@@ -439,6 +450,7 @@ fn ladder(args: &RhoArgs, json_only: bool) -> Result<Value, String> {
                 fmt(s),
                 fmt(w["median_s"].as_f64().unwrap_or(f64::NAN)),
                 fmt(w["mean_s_walk"].as_f64().unwrap_or(f64::NAN)),
+                fmt(w["mean_steps_per_walk"].as_f64().unwrap_or(f64::NAN)),
                 fmt(w["walk_over_own_floor"].as_f64().unwrap_or(f64::NAN)),
                 fmt(s / generic_floor_s(2.0)),
                 if matched.is_finite() {
