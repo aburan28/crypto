@@ -5745,6 +5745,12 @@ fn main() {
         && std::env::var("KIC_ORBIT_LAZY_RELATIVE_SUPPORT").as_deref() == Ok("1");
     let compact_batch_only = std::env::var("KIC_ORBIT_BATCH_ONLY").as_deref() == Ok("1");
     assert!(
+        lazy_relative_support
+            || (std::env::var_os("KIC_ORBIT_TARGET_SCALARS").is_none()
+                && std::env::var_os("KIC_ORBIT_TARGET_POINTS_JSONL").is_none()),
+        "compact batch target files require KIC_ORBIT_LAZY_RELATIVE_SUPPORT=1"
+    );
+    assert!(
         !lazy_relative_support || backend == "internal",
         "KIC_ORBIT_LAZY_RELATIVE_SUPPORT requires the internal solver"
     );
