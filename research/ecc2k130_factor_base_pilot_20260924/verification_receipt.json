@@ -1,0 +1,27 @@
+{
+  "cases_checked": 2048,
+  "command": "python3 research/ecc2k130_factor_base_pilot_20260924/verify.py research/ecc2k130_factor_base_pilot_20260924/results_final.json",
+  "input_path": "research/ecc2k130_factor_base_pilot_20260924/results_final.json",
+  "input_sha256": "50d95459b97ee6c5d4b3b3559d33a71b08ac2df35b5cc1cb2abb682eb795aa07",
+  "outcomes": {
+    "descendant_native": {
+      "first_full_rank_attempt": 202,
+      "hits": 117
+    },
+    "original": {
+      "first_full_rank_attempt": 135,
+      "hits": 131
+    },
+    "pullback": {
+      "first_full_rank_attempt": 202,
+      "hits": 117
+    },
+    "transported": {
+      "first_full_rank_attempt": 135,
+      "hits": 131
+    }
+  },
+  "schema": "ecc2k130-degree7-standalone-verification-v1",
+  "status": "PASS",
+  "verifier_sha256": "7c419ccececa52aa2057779917af09a0decb85f0f53629b167825aa639f69190"
+}
