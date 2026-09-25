@@ -520,7 +520,7 @@ struct TableWalk {
     }
     // ...and after it: advance the branch while the step would be fruitless.
     static unsigned resolveTag(unsigned t, u64 hist) {
-        for (int i = 0; i < H && eccTagFruitless(t, hist); ++i)
+        for (int i = 0; i < H && eccTagFruitless(t, hist, M); ++i)
             t = eccTag((eccTagH(t) + 1) & (H - 1), eccTagK(t), eccTagEps(t));
         return t;
     }

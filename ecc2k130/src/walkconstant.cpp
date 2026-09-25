@@ -1,7 +1,7 @@
 // The iteration constant of the two walks, on the walks' own reference code.
 //
 //   walk-constant-host --n 23|41 --walk sigma|table [--dist native|uniform|ecc2k130]
-//                      [--walks W] [--trials T] [--seed S] [--threads K]
+//                      [--walks W] [--trials T] [--seed S] [--threads K] [--merge N]
 //
 // examples/ecc2k130_walk_constant.rs measures c, the factor by which a walk
 // needs more iterations than a random mapping on the classes of <sigma, -1>,
@@ -171,7 +171,7 @@ static double randomMappingRho(double n) {
 
 template <class Cfg>
 static int run(bool table, Dist dist, int walks, unsigned long long trials,
-               unsigned long long seed, int threads) {
+               unsigned long long seed, int threads, unsigned long long merges) {
     typedef Ref<Cfg> R;
     typedef typename R::Point Point;
     static_assert(Cfg::M <= 64, "the class key is one word");
@@ -213,6 +213,102 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
         while (b < H - 1 && u >= cdf[b]) ++b;
         return b;
     };
+
+    if (merges) {
+        // Two walks meet at one point carrying different pasts, as when one
+        // trail lands on another, and are stepped together: if the rule
+        // decides differently for their pasts they part, and under
+        // distinguished points the collision is lost (WALK-CONSTANT.md
+        // section 11).  Each walk first takes eight steps of its own trail.
+        if (!table) { std::fprintf(stderr, "--merge needs --walk table\n"); return 2; }
+        const int STEPS = 16;
+        std::atomic<unsigned long long> nextM(0);
+        std::mutex muM;
+        unsigned long long done = 0, parted[STEPS] = {};
+        std::vector<unsigned long long> counts(H, 0);
+        auto mworker = [&](int tid) {
+            std::mt19937_64 rng(seed * 1000003ull + (unsigned long long)tid);
+            std::uniform_int_distribution<unsigned long long> scalar(1, ellU - 1);
+            TableWalk<Cfg> *tw = new TableWalk<Cfg>(sol->walk);
+            unsigned long long myDone = 0, myParted[STEPS] = {};
+            std::vector<unsigned long long> myCounts(H, 0);
+            auto stepT = [&](const Point &pt, unsigned long long &h, unsigned long long salt, int *branch) {
+                const int hw = R::weight(pt.x);
+                unsigned raw = tw->rawTag(pt, hw);
+                if (dist == NATIVE) {
+                    *branch = eccTagH(raw);
+                    return tw->step(pt, hw, &h, nullptr, nullptr, sol->ell, sol->spow);
+                }
+                raw = eccTag(hashedBranch(R::canonical(pt.x).v[0], salt), eccTagK(raw), eccTagEps(raw));
+                *branch = eccTagH(raw);
+                const unsigned tag = TableWalk<Cfg>::resolveTag(raw, h);
+                h = eccHistPush(h, tag);
+                return R::addPtRaw(pt, tw->addend(tag));
+            };
+            while (nextM.fetch_add(1) < merges) {
+                for (int h = 0; h < H; ++h) {
+                    const Point th = R::scalarMul(sol->basis, u192_from(scalar(rng)));
+                    for (int k = 0; k < Cfg::M; ++k) tw->table[h][k] = R::frob(th, k);
+                }
+                const unsigned long long salt = rng();
+                Point a = R::scalarMul(sol->basis, u192_from(scalar(rng)));
+                Point b = R::scalarMul(sol->basis, u192_from(scalar(rng)));
+                unsigned long long ha = ECC_HIST_EMPTY, hb = ECC_HIST_EMPTY;
+                int br = 0;
+                bool bad = false;
+                for (int i = 0; i < 8 && !bad; ++i) {
+                    a = stepT(a, ha, salt, &br);
+                    b = stepT(b, hb, salt, &br);
+                    bad = a.inf || b.inf;
+                }
+                if (bad) continue;
+                b = a;
+                int at = -1;
+                for (int i = 0; i < STEPS; ++i) {
+                    const Point na = stepT(a, ha, salt, &br);
+                    myCounts[br]++;
+                    const Point nb = stepT(b, hb, salt, &br);
+                    if (!R::eq(na, nb)) { at = i; break; }
+                    if (na.inf) { bad = true; break; }
+                    a = na;
+                    b = nb;
+                }
+                if (bad) continue;
+                myDone++;
+                if (at >= 0) myParted[at]++;
+            }
+            delete tw;
+            std::lock_guard<std::mutex> g(muM);
+            done += myDone;
+            for (int i = 0; i < STEPS; ++i) parted[i] += myParted[i];
+            for (int b = 0; b < H; ++b) counts[b] += myCounts[b];
+        };
+        std::vector<std::thread> pool;
+        for (int i = 0; i < threads; ++i) pool.emplace_back(mworker, i);
+        for (auto &th : pool) th.join();
+        unsigned long long counted = 0, partedAll = 0;
+        for (int b = 0; b < H; ++b) counted += counts[b];
+        double s2 = 0;
+        for (int b = 0; b < H; ++b) s2 += std::pow((double)counts[b] / counted, 2);
+        std::string byStep;
+        for (int i = 0; i < STEPS; ++i) {
+            partedAll += parted[i];
+            byStep += (i ? "," : "") + std::to_string(parted[i]);
+        }
+        const double q = s2 / (2.0 * Cfg::M), rate = (double)partedAll / done;
+        const double se = std::sqrt(rate * (1 - rate) / done), predicted = 20 * q;
+        std::fprintf(stderr,
+                     "n = %d, device table walk, H = %d, %s branches: %llu merges, %llu parted (%.3e +- %.1e; "
+                     "predicted 20q = %.3e from q = sum p^2 / 2m = %.3e); by step [%s]\n",
+                     Cfg::M, H, distName[dist], done, partedAll, rate, se, predicted, q, byStep.c_str());
+        std::printf("{\"n\":%d,\"walk\":\"device-table\",\"branches\":%d,\"dist\":\"%s\",\"rule\":\"v2\","
+                    "\"seed\":%llu,\"merges\":%llu,\"parted\":%llu,\"parted_rate\":%.6e,\"parted_se\":%.6e,"
+                    "\"parted_by_step\":[%s],\"sum_p2\":%.6f,\"predicted\":%.6e}\n",
+                    Cfg::M, H, distName[dist], seed, done, partedAll, rate, se, byStep.c_str(), s2, predicted);
+        std::fflush(stdout);
+        delete sol;
+        return 0;
+    }
 
     std::atomic<unsigned long long> next(0);
     std::mutex mu;
@@ -336,9 +432,12 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
     const double c = mean / expected, cse = se / expected;
     const double injective = 1 / std::sqrt(1 - s2), classFrame = 1 / std::sqrt(1 - s2 / (2.0 * Cfg::M));
     const double model = table ? classFrame : injective;
-    // Fruitless cycles the rule lets through, to leading order: 4 pairwise
-    // 6-step patterns, three branches each drawn twice, (sum p^2 / 2m)^3; and
-    // 24 4-step tau-relations, one branch drawn four times, sum p^4 / (2m)^3.
+    // Fruitless cycles the rule before WALK-CONSTANT.md section 11 (v1) let
+    // through, to leading order: 4 pairwise 6-step patterns, three branches
+    // each drawn twice, (sum p^2 / 2m)^3; and 24 4-step tau-relations, one
+    // branch drawn four times, sum p^4 / (2m)^3.  Today's rule (v2) refuses
+    // both, so under it these are the counts of what it removed, and the
+    // returns seen should be none (device-v3.jsonl).
     double s4 = 0;
     for (int b = 0; b < H; ++b) s4 += std::pow((double)total.branchCounts[b] / counted, 4);
     const double twoM = 2.0 * Cfg::M;
@@ -388,7 +487,7 @@ static int run(bool table, Dist dist, int walks, unsigned long long trials,
 
 int main(int argc, char **argv) {
     int n = 23, walks = 8, threads = 4;
-    unsigned long long trials = 1000, seed = 1;
+    unsigned long long trials = 1000, seed = 1, merges = 0;
     bool table = false;
     Dist dist = NATIVE;
     for (int i = 1; i + 1 < argc; i += 2) {
@@ -405,11 +504,12 @@ int main(int argc, char **argv) {
         else if (!std::strcmp(argv[i], "--trials")) trials = std::strtoull(argv[i + 1], nullptr, 10);
         else if (!std::strcmp(argv[i], "--seed")) seed = std::strtoull(argv[i + 1], nullptr, 10);
         else if (!std::strcmp(argv[i], "--threads")) threads = std::atoi(argv[i + 1]);
+        else if (!std::strcmp(argv[i], "--merge")) merges = std::strtoull(argv[i + 1], nullptr, 10);
         else { std::fprintf(stderr, "unknown option %s\n", argv[i]); return 2; }
     }
     if (walks < 1 || threads < 1) { std::fprintf(stderr, "walks and threads must be positive\n"); return 2; }
-    if (n == 23) return run<CfgF23>(table, dist, walks, trials, seed, threads);
-    if (n == 41) return run<CfgF41>(table, dist, walks, trials, seed, threads);
+    if (n == 23) return run<CfgF23>(table, dist, walks, trials, seed, threads, merges);
+    if (n == 41) return run<CfgF41>(table, dist, walks, trials, seed, threads, merges);
     std::fprintf(stderr, "n must be 23 or 41\n");
     return 2;
 }

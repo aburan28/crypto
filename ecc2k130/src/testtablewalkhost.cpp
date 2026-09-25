@@ -53,6 +53,11 @@ int main() {
         unsigned long long hist = ECC_HIST_EMPTY;
         if (i % 4 == 1) hist = eccHistPush(ECC_HIST_EMPTY, rawTag ^ ECC_TAG_EPS);
         if (i % 8 == 2) hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, 0x0123u ^ ECC_TAG_EPS), rawTag ^ ECC_TAG_EPS), 0x0123u);
+        // The rule of WALK-CONSTANT.md section 11: undoing the fourth-last step,
+        // and closing a tau-relation with the last three.
+        if (i % 8 == 3) hist = eccHistPush(eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, rawTag ^ ECC_TAG_EPS), 0x0123u), 0x0456u), 0x0789u);
+        if (i % 8 == 5) hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, eccTagAdvanceK(rawTag, 2, 131)), eccTagAdvanceK(rawTag, 1, 131)), rawTag);
+        if (i % 8 == 6) hist = eccHistPush(eccHistPush(eccHistPush(ECC_HIST_EMPTY, eccTagAdvanceK(rawTag, 3, 131) ^ ECC_TAG_EPS), rawTag), eccTagAdvanceK(rawTag, 1, 131) ^ ECC_TAG_EPS);
 
         // device-side primitives, on the host, from the shared buffer
         const int k = twPhase(xn, hw, bytes + 4 * TW_PHASE_OFF, shared.data() + TW_INV_OFF);
@@ -85,7 +90,7 @@ int main() {
     std::printf("table walk host probe: %d points, cycle rule fired on %d\n", N, ruleFired);
     std::printf("  phase mismatches %d, pivot %d, sign %d, tag %d, addend words %d\n", badK, badPivot, badEps, badTag, badAdd);
     std::printf("  branches %d, pivot bytes %d, shared bytes %zu\n", TW_H, ECC_TABLE_PIVOT_BYTES, TW_SHARED_BYTES);
-    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= N / 4;
+    const bool ok = !badK && !badPivot && !badEps && !badTag && !badAdd && ruleFired >= 5 * N / 8;   // i % 8 in {1, 2, 3, 5, 6} must all fire
     std::printf("%s\n", ok ? "PASS" : "FAIL");
     return ok ? 0 : 1;
 }
