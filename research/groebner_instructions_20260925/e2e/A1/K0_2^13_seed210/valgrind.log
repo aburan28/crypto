@@ -1,0 +1,11 @@
+==843== Callgrind, a call-graph generating cache profiler
+==843== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==843== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==843== Command: /home/user/crypto/target/release/ic run --degree 13 --curve-a 0 --summands 3 --solver groebner --random-target --seed 210 --batch 1 --json
+==843== 
+==843== For interactive control, run 'callgrind_control -h'.
+==843== 
+==843== Events    : Ir
+==843== Collected : 413628335
+==843== 
+==843== I   refs:      413,628,335
