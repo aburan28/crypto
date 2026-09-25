@@ -6852,6 +6852,27 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-n13-oaware-sat-benchmark-20260925 -->
+<!-- BEGIN ecc2k130-s3-sparse-cnf-20260925 -->
+<section class="panel" id="ecc2k130-s3-sparse-cnf-20260925">
+  <div class="panel-head">
+    <h2>Sparse O-aware S3 CNF: exact toy paths pass at 0.40% of dense n = 13 bytes <span class="chip">engineering</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/786">PR #786</a> pins every #781 dense base/schema/path byte and checks a Sinz sequential one-hot plus allowed-output implication encoding on the identical four panels and 32 n = 13 Q+T labels plus O. The independent verifier parsed both CNFs, compared every local relation with full signed-point addition, then matched all 24,955 primary-state paths, 56,394 signed point tuples and 61 exact target assumptions. All five mutation controls rejected, including one that falsely opens an n = 13 empty-output pair. No SAT solver ran in this gate.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>One fixed dense-then-sparse cold panel; fractions are exact sparse/dense representation ratios. The three n = 13 empty-admitted-output input pairs each become a binary ban. Full ECDLP S and matched-rho ratios remain unset.</caption>
+    <thead><tr><th>Panel</th><th>Path / target counts</th><th>Variables dense → sparse</th><th>Clauses dense → sparse (ratio)</th><th>Raw CNF bytes dense → sparse (ratio)</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 2, m = 4</td><td>949 / 8</td><td>31 → 55</td><td>258 → 128 (128/258)</td><td>3,310 → 1,530 (1530/3310)</td><td>unset / unset</td></tr>
+      <tr><td>n = 3, m = 5</td><td>70 / 4</td><td>22 → 35</td><td>66 → 61 (61/66)</td><td>824 → 687 (687/824)</td><td>unset / unset</td></tr>
+      <tr><td>n = 4, m = 4</td><td>22,373 / 16</td><td>59 → 111</td><td>1,744 → 364 (364/1744)</td><td>23,102 → 4,743 (4743/23102)</td><td>unset / unset</td></tr>
+      <tr><td>n = 13, m = 5</td><td>1,563 / 33</td><td>1,263 → 2,517</td><td>1,195,344 → 4,731 (4731/1195344)</td><td>17,630,779 → 70,166 (70166/17630779)</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The n = 13 sparse clause and byte ratios are 0.3958% and 0.3980%; 1,254 auxiliaries nearly double variables. External cold child walls were dense export/replay 1.536/2.850 s and sparse export/replay 0.818/10.394 s; peak child RSS was 236,011,520/478,478,336 versus 56,311,808/72,744,960 bytes. The stronger sparse independent replay is slower, so these are representation/verifier diagnostics, not a solver speedup. The first exporter assertion failure and second archive-path audit failure remain archived; a fresh third run passed untouched archive replay under freeze SHA-256 <code>d748bc12bc67d94b8a578cd8707e8154c1b7bbe4d7dc02d943b59073bdcfabe9</code>. This admits a toy sparse semantic reference for a separate same-target SAT comparison. Explicit prefix-state enumeration has no established n = 131 scale path. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/RESULT.md">Exact decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/README.md">raw attempts, receipts and replay</a>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-s3-sparse-cnf-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
