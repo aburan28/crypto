@@ -6792,6 +6792,25 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-s3-fibre-theorem-20260925 -->
+<!-- BEGIN ecc2k130-rotated-solver-admission-20260925 -->
+<section class="panel" id="ecc2k130-rotated-solver-admission-20260925">
+  <div class="panel-head">
+    <h2>Rotated m = 5/6 solver admission: complete-instance export remains blocked <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/780">PR #780</a> checks the pinned #767 16-Q corpus, all 64 Q+T point branches, #774 affine candidates, #777 finite-fibre theorem and the currently identified S3/resultant/SAT interfaces. The four planted and four certified-negative Q labels per rung are valid reference labels, but no audited path emits a branch-complete rotated solver input. No solver was run, and no solver SAT/UNSAT verdict or speed ratio is claimed.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Static interface gate after a hash-only preregistration. Raw chain bits omit lift, exception and solver auxiliaries. Certified negatives come from the complete point oracle, not an algebraic solver. Full-DLP S and matched-rho ratios are unset.</caption>
+    <thead><tr><th>Arm</th><th>Frozen Q targets / Q+T branches</th><th>Raw S3-chain bits / generic limit</th><th>Affine paths on planted Q / negative Q</th><th>Admission blocker</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>n = 13, m = 5</td><td>8 / 32</td><td>49 / 64</td><td>2,2,2,2 / 0,0,0,0</td><td>No rotated-slot, rational-lift and O/inverse-complete exporter</td><td>unset / unset</td></tr>
+      <tr><td>n = 19, m = 6</td><td>8 / 32</td><td>88 / 64</td><td>3,1,4,2 / 0,0,0,0</td><td>Same semantics gap plus multiword capacity</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The #774 n = 13 Q+O control has three true x-mask witnesses, including one with an O prefix that affine S3 omits; the same Q also has two affine witnesses, so this is a model-set gap rather than a wrong target-level answer on the fixed corpus. #777 proves finite affine roots sound for complete rational sign fibres but does not encode the missing branch. CryptoMiniSat, msolve, Kissat, CaDiCaL and the earlier #764 WDSat fixture were inventoried; installed binaries cannot supply absent inputs. The corrected static audit took 0.186 s wall and 25,935,872-byte child high-water RSS under its 30 s/256 MiB caps; the original PATH-only inventory is retained. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_solver_admission_20260925/RESULT.md">Bounded decision and next gate</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/README.md">raw receipt and replay</a>. This is not a repository-wide impossibility result or an n = 131 solver-cost estimate.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-solver-admission-20260925 -->
 <!-- BEGIN ecc2k130-rotated-row-certificate-20260925 -->
 <section class="panel" id="ecc2k130-rotated-row-certificate-20260925">
   <div class="panel-head">
