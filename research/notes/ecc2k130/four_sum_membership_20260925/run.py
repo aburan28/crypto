@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import platform
 import resource
+import psutil
 import subprocess
 import time
 
@@ -88,23 +89,31 @@ def run(args: argparse.Namespace) -> None:
                 "command": command,
                 "environment": {k: env[k] for k in sorted(env)
                                 if k.startswith("KIC_") or k == "RAYON_NUM_THREADS"},
-                "timeout_seconds": 900, "address_space_cap_bytes": 2 * 1024**3,
+                "timeout_seconds": 900, "sampled_rss_stop_bytes": 2 * 1024**3,
+                "rss_poll_interval_ms": 50, "psutil_version": psutil.__version__,
                 "host": platform.node(), "platform": platform.platform()}
     write(out / "manifest.json", manifest)
-    def cap():
-        resource.setrlimit(resource.RLIMIT_AS, (2 * 1024**3, 2 * 1024**3))
     start = time.monotonic()
     timed_out = False
+    rss_stop = False
+    peak_sampled_rss = 0
     with (out / "producer.stdout.jsonl").open("wb") as stdout, \
          (out / "producer.stderr.txt").open("wb") as stderr:
         process = subprocess.Popen(command, cwd=REPO, env=env, stdout=stdout,
-                                   stderr=stderr, preexec_fn=cap)
+                                   stderr=stderr)
+        child = psutil.Process(process.pid)
         while True:
             pid, status, usage = os.wait4(process.pid, os.WNOHANG)
             if pid == process.pid:
                 break
-            if time.monotonic() - start >= 900:
-                timed_out = True
+            try:
+                sampled_rss = child.memory_info().rss
+                peak_sampled_rss = max(peak_sampled_rss, sampled_rss)
+            except psutil.NoSuchProcess:
+                sampled_rss = 0  # wait4 will retrieve the exited process next loop
+            if time.monotonic() - start >= 900 or sampled_rss > 2 * 1024**3:
+                timed_out = time.monotonic() - start >= 900
+                rss_stop = sampled_rss > 2 * 1024**3
                 process.kill()
                 pid, status, usage = os.wait4(process.pid, 0)
                 assert pid == process.pid
@@ -114,6 +123,7 @@ def run(args: argparse.Namespace) -> None:
     peak_rss = int(usage.ru_maxrss * (1 if platform.system() == "Darwin" else 1024))
     receipt = {"schema_version": "1.0", "mode": args.mode, "n": n, "R": r,
                "returncode": returncode, "timed_out": timed_out,
+               "sampled_rss_stop": rss_stop, "peak_sampled_rss_bytes": peak_sampled_rss,
                "wall_ms": (time.monotonic() - start) * 1000,
                "user_cpu_s": usage.ru_utime, "system_cpu_s": usage.ru_stime,
                "peak_rss_bytes": peak_rss,

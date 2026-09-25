@@ -71,9 +71,11 @@ indices and opposite-point pairs. A pair-root collision **proxy** is true
 when a finite intermediate x is produced by more than one distinct unordered
 endpoint-x pair across the full base; this does not establish which canonical
 root the producer chose. A positive target with no finite balanced partition
-can be explained by the producer's regular finite-pair restriction; a finite
-balanced witness missed by extraction points to a subsequent indexing/search
-or lifting gap, without identifying a single cause from this proxy alone.
+is compatible with the producer's regular finite-pair restriction. A finite
+balanced witness is only an algebraic diagnostic, not proof that the selected
+regular-state family admits it; a missed such witness leaves selected-state
+membership, indexing, search and lifting unresolved. The collision proxy
+cannot by itself identify a cause.
 
 Run the exact #747 compact extractor unchanged on the **same** target JSONL,
 same R/eta and frozen base source. Record its per-target verified group-lift
@@ -84,8 +86,11 @@ four-sum support. Preserve every target outcome, not merely rates.
 
 ## Budget, stops and limits
 
-Pre-allocate at most 2 GiB RSS per arm and stop each process at 900 s wall;
-run one CPU thread. Pair counts are 24,753 / 215,496 / 484,620 and full
+Stop each process when sampled RSS exceeds 2 GiB or wall reaches 900 s;
+poll RSS every 50 ms with psutil 7.2.2 on the measurement host and run one
+CPU thread. A synthetic pilot found that macOS rejected an RLIMIT_AS cap before
+exec, so the runner uses explicit RSS monitoring instead. This is a sampled
+stop rule, not a hard allocator bound. Pair counts are 24,753 / 215,496 / 484,620 and full
 unique-sum probes are bounded respectively by 12,673,536 / 110,333,952 /
 62,031,360 for the target counts above. All table setup, scans, source hash,
 binary hash, CPU/wall/RSS and timeout status enter receipts. If n41 R12 cannot
