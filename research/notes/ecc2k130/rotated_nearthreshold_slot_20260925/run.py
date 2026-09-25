@@ -37,8 +37,22 @@ def child(name: str, command: list[str], directory: Path, timeout: int) -> dict:
             "stdout_sha256": sha(stdout), "stderr_sha256": sha(stderr)}
 
 
+def check_parent_merged() -> None:
+    """Require the exact pinned #793 head in freshly fetched origin/main."""
+    repo = HERE.parents[3]
+    pinned = "6d8d1542b5513986fa0a94c0e0e7e9b1e46012c5"
+    subprocess.run(["git", "fetch", "origin", "main"], cwd=repo, check=True,
+                   timeout=90, capture_output=True)
+    result = subprocess.run(["git", "merge-base", "--is-ancestor", pinned,
+                             "refs/remotes/origin/main"], cwd=repo,
+                            timeout=30, capture_output=True)
+    if result.returncode != 0:
+        raise RuntimeError("exact frozen #793 head is not in freshly fetched origin/main")
+
+
 def main(out: Path) -> None:
     check_freeze()
+    check_parent_merged()
     assert not out.exists(), f"refusing to overwrite {out}"
     raw = out / "raw"
     raw.mkdir(parents=True)

@@ -49,7 +49,10 @@ This PR is stacked on #793's exact final head
 SHA is `ff4bd870a0c21e823fc7efa117630876118e0685da92079232c48cb2f07c5fcf`.
 **Do not run any six-sum outcome until #793 is merged, this draft's own
 hash-only exact-head CI is green, and the frozen protocol/source receive
-peer review.** A delayed parent merge is a hold, not permission to run
+peer review.** The outcome runner performs a fresh `git fetch origin main`
+and fails closed unless `git merge-base --is-ancestor` confirms that the
+exact pinned #793 head is in `origin/main`; the hash-only preflight does
+not require that merge and remains runnable before it. A delayed parent merge is a hold, not permission to run
 against an unmerged parent or to change the arms.
 
 ## Complete exact census and fixed decision
