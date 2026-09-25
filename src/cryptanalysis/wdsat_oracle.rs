@@ -144,7 +144,12 @@ pub fn parse_wdsat_model(stdout: &str, n_vars: usize) -> Option<Vec<bool>> {
     for line in stdout.lines() {
         let value = line.trim();
         if value.len() >= n_vars && value.bytes().all(|b| b == b'0' || b == b'1') {
-            return Some(value.as_bytes()[..n_vars].iter().map(|b| *b == b'1').collect());
+            return Some(
+                value.as_bytes()[..n_vars]
+                    .iter()
+                    .map(|b| *b == b'1')
+                    .collect(),
+            );
         }
     }
     None
@@ -201,7 +206,10 @@ pub fn validate_anf(anf: &str, model: &[bool]) -> bool {
         }
         let mut parity = !has_t;
         for monomial in &monomials {
-            if monomial.iter().all(|&v| model.get(v).copied().unwrap_or(false)) {
+            if monomial
+                .iter()
+                .all(|&v| model.get(v).copied().unwrap_or(false))
+            {
                 parity = !parity;
             }
         }
@@ -252,15 +260,9 @@ pub fn run_wdsat(
         fs::write(path, anf).map_err(|e| format!("write ANF {}: {e}", path.display()))?;
         path.clone()
     } else {
-        let dir = options
-            .work_dir
-            .clone()
-            .unwrap_or_else(std::env::temp_dir);
+        let dir = options.work_dir.clone().unwrap_or_else(std::env::temp_dir);
         fs::create_dir_all(&dir).map_err(|e| format!("create work dir: {e}"))?;
-        let path = dir.join(format!(
-            "wdsat-ic-{}.anf",
-            std::process::id()
-        ));
+        let path = dir.join(format!("wdsat-ic-{}.anf", std::process::id()));
         fs::write(&path, anf).map_err(|e| format!("write temp ANF: {e}"))?;
         path
     };
@@ -305,6 +307,9 @@ pub fn run_wdsat(
     if options.keep_anf.is_none() {
         let _ = fs::remove_file(&anf_path);
     }
+    if !output.status.success() {
+        return Err(format!("WDSat exited with status {}", output.status));
+    }
     Ok((
         String::from_utf8_lossy(&output.stdout).into_owned(),
         String::from_utf8_lossy(&output.stderr).into_owned(),
@@ -312,12 +317,20 @@ pub fn run_wdsat(
     ))
 }
 
+/// Upstream WDSat 61c6ff3 prints one of these lines on a completed
+/// refutation; successful empty output has no documented UNSAT meaning.
+fn has_wdsat_unsat_marker(stdout: &str) -> bool {
+    stdout
+        .lines()
+        .any(|line| matches!(line.trim(), "UNSAT" | "UNSAT on XORGAUSS init"))
+}
+
 /// Solve one Semaev decomposition instance with an external WDSat binary.
 ///
 /// Returns the same shape as [`crate::cryptanalysis::koblitz_index_calculus::sat_decompose`]:
-/// lifted factor-base indices plus solver accounting.  A completed UNSAT
-/// (no model line, process exit success) is a refutation; a timeout or
-/// capacity failure is reported as exhausted.
+/// lifted factor-base indices plus solver accounting. A successful child
+/// with an explicit upstream UNSAT marker is a refutation; empty output,
+/// nonzero exit, timeout or capacity failure is reported as exhausted.
 pub fn wdsat_decompose(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -371,11 +384,7 @@ pub fn wdsat_decompose(
     let model = match parse_wdsat_model(&stdout, sys.n_vars) {
         Some(model) => model,
         None => {
-            // WDSat prints no model line on UNSAT.
-            if stderr.to_lowercase().contains("unsat")
-                || stdout.to_lowercase().contains("unsat")
-                || stdout.trim().is_empty()
-            {
+            if has_wdsat_unsat_marker(&stdout) {
                 stats.refuted = true;
             } else {
                 stats.exhausted = true;
@@ -488,6 +497,113 @@ mod tests {
         );
     }
 
+    /// A child crash or missing status is never a proof of UNSAT. These
+    /// shell children exercise the actual process boundary without depending
+    /// on a locally built WDSat binary.
+    #[cfg(unix)]
+    #[test]
+    fn mock_child_exit_and_empty_output_are_not_refutations() {
+        use crate::cryptanalysis::koblitz_index_calculus::{
+            build_frobenius_factor_base, point_key,
+        };
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = std::env::temp_dir().join(format!(
+            "wdsat-triage-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("clock")
+                .as_nanos()
+        ));
+        fs::create_dir_all(&dir).expect("mock directory");
+        let make_child = |name: &str, body: &str| {
+            let path = dir.join(name);
+            fs::write(&path, body).expect("mock child script");
+            let mut permissions = fs::metadata(&path).expect("mock metadata").permissions();
+            permissions.set_mode(0o700);
+            fs::set_permissions(&path, permissions).expect("mock executable");
+            path
+        };
+        let empty_ok = make_child("empty-ok.sh", "#!/bin/sh\nexit 0\n");
+        let empty_failure = make_child("empty-failure.sh", "#!/bin/sh\nexit 23\n");
+        let false_unsat = make_child("false-unsat.sh", "#!/bin/sh\nprintf 'UNSAT\\n'\nexit 23\n");
+        let stderr_unsat = make_child(
+            "stderr-unsat.sh",
+            "#!/bin/sh\nprintf 'UNSAT\\n' >&2\nexit 0\n",
+        );
+        let explicit_unsat = make_child(
+            "explicit-unsat.sh",
+            "#!/bin/sh\nprintf 'UNSAT\\n'\nexit 0\n",
+        );
+        let model = make_child("model.sh", "#!/bin/sh\nprintf '01011\\n'\nexit 0\n");
+        let options = |binary: PathBuf| WdsatSolveOptions {
+            binary,
+            work_dir: Some(dir.clone()),
+            timeout: Duration::from_secs(2),
+            keep_anf: None,
+        };
+        let anf = "p cnf 5 0\n";
+        let (stdout, _, _) =
+            run_wdsat(anf, 5, &[], &options(empty_ok.clone())).expect("successful empty child");
+        assert!(stdout.is_empty());
+        assert!(!has_wdsat_unsat_marker(&stdout));
+        for binary in [&empty_failure, &false_unsat] {
+            assert!(run_wdsat(anf, 5, &[], &options(binary.clone()))
+                .expect_err("nonzero child must fail")
+                .contains("status exit status: 23"));
+        }
+        let (stdout, _, _) =
+            run_wdsat(anf, 5, &[], &options(explicit_unsat.clone())).expect("explicit UNSAT child");
+        assert!(has_wdsat_unsat_marker(&stdout));
+        assert!(has_wdsat_unsat_marker("UNSAT on XORGAUSS init\n"));
+        assert!(!has_wdsat_unsat_marker("not UNSAT\n"));
+        let (stdout, _, _) =
+            run_wdsat(anf, 5, &[], &options(model)).expect("successful model child");
+        assert_eq!(
+            parse_wdsat_model(&stdout, 5),
+            Some(vec![false, true, false, true, true])
+        );
+
+        let kc = KoblitzCurve::new(1, 7).expect("K_1/F_2^7");
+        let fb = build_frobenius_factor_base(&kc, 0).expect("factor base");
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let index_of: HashMap<_, _> = fb
+            .points
+            .iter()
+            .enumerate()
+            .map(|(i, point)| (point_key(point), i))
+            .collect();
+        let mut affine = fb
+            .points
+            .iter()
+            .filter(|point| matches!(point, BinaryPoint::Affine { .. }));
+        let target = kc.add(
+            affine.next().expect("first point"),
+            affine.next().expect("second point"),
+        );
+        for binary in [empty_ok, empty_failure, false_unsat, stderr_unsat] {
+            let (_, stats) =
+                wdsat_decompose(&kc, &fb, &index_of, &st, &target, 2, &options(binary));
+            assert_eq!(stats.solver_calls, 1);
+            assert!(stats.exhausted);
+            assert!(!stats.refuted);
+        }
+        let (_, stats) = wdsat_decompose(
+            &kc,
+            &fb,
+            &index_of,
+            &st,
+            &target,
+            2,
+            &options(explicit_unsat),
+        );
+        assert_eq!(stats.solver_calls, 1);
+        assert!(stats.refuted);
+        assert!(!stats.exhausted);
+        fs::remove_dir_all(dir).expect("remove mock directory");
+    }
+
     #[test]
     fn capacity_reads_header_and_degrees() {
         let anf = "p cnf 4 2\nx T .2 1 2 0\nx 3 4 0\n";
@@ -507,17 +623,21 @@ mod tests {
     #[test]
     #[ignore = "requires WDSAT_BINARY pointing at a capacity-sufficient wdsat_solver"]
     fn wdsat_agrees_with_native_sat_on_prime_degree() {
+        use crate::cryptanalysis::koblitz_groebner::FieldStructure;
         use crate::cryptanalysis::koblitz_index_calculus::{
             build_frobenius_factor_base, point_key, sat_decompose, KoblitzCurve,
         };
-        use crate::cryptanalysis::koblitz_groebner::FieldStructure;
         use std::collections::HashMap;
         use std::path::PathBuf;
         use std::time::Duration;
 
         let binary = std::env::var_os("WDSAT_BINARY").expect("WDSAT_BINARY unset");
         let binary = PathBuf::from(binary);
-        assert!(binary.is_file(), "WDSAT_BINARY is not a file: {}", binary.display());
+        assert!(
+            binary.is_file(),
+            "WDSAT_BINARY is not a file: {}",
+            binary.display()
+        );
 
         // n = 7 is prime; K_1 has a usable invariant factor base.
         let kc = KoblitzCurve::new(1, 7).expect("K_1/F_2^7");
@@ -552,8 +672,7 @@ mod tests {
             timeout: Duration::from_secs(5),
             keep_anf: None,
         };
-        let (wdsat, wdsat_stats) =
-            wdsat_decompose(&kc, &fb, &index_of, &st, &target, 2, &options);
+        let (wdsat, wdsat_stats) = wdsat_decompose(&kc, &fb, &index_of, &st, &target, 2, &options);
         assert!(
             wdsat.is_some(),
             "WDSat missed a planted decomposition: {wdsat_stats:?}"
