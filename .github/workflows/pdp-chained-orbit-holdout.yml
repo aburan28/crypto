@@ -36,3 +36,4 @@ jobs:
           python3 "$base/verify.py" "$base/receipt_mask512.json"
           python3 "$base/verify.py" "$base/receipt_power2048.json"
           python3 "$base/verify_prefix.py" "$base/receipt_mask512.json" "$base/receipt_power2048.json"
+          python3 "$base/verify_archives.py"
