@@ -3,16 +3,35 @@ on:
   pull_request:
     paths:
       - 'ecc2k130/**'
+      - 'src/cryptanalysis/ecc2k130_guard.rs'
+      - 'src/bin/ecc2k_guard.rs'
       - '.github/workflows/ecc2k130-certification.yml'
   push:
     branches: [main]
     paths:
       - 'ecc2k130/**'
+      - 'src/cryptanalysis/ecc2k130_guard.rs'
+      - 'src/bin/ecc2k_guard.rs'
       - '.github/workflows/ecc2k130-certification.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  # The walk's step schedule must never admit a fruitless cycle: a walk
+  # caught in one runs to maxIters and reports nothing, on the campaign's
+  # budget. `check-cycles` exits non-zero on a real hit or a degenerate step.
+  no-fruitless-cycles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.98"
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --lib ecc2k130_guard
+      - run: make -C ecc2k130 check-cycles
+
   local-software:
     runs-on: ubuntu-latest
     timeout-minutes: 15

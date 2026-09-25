@@ -304,9 +304,13 @@ check-cli:
 # equivariant, so it needs no canonical representative and has nothing for a
 # sign to feed back through -- but the arithmetic coincidence that would still
 # produce one is checkable, so check it, for every curve, on every change to the
-# step schedule.
+# step schedule.  The check is `ecc2k-guard cycles` in the root Rust crate
+# (src/cryptanalysis/ecc2k130_guard.rs); CYCLE_LENGTH is the longest cycle it
+# rules out.
+CYCLE_LENGTH ?= 24
 check-cycles:
-	cd codegen && python3 cycles.py --max-length 8
+	cargo run --release --quiet --manifest-path ../Cargo.toml --bin ecc2k-guard -- \
+	    cycles --max-length $(CYCLE_LENGTH)
 
 # SAT-based point decomposition (codegen/decomp.py, indexcalc.py).  Kept out of
 # `test` because it needs solvers the rest of the repo does not:
