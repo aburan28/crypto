@@ -1,0 +1,36 @@
+name: ECC2K130 rotated solver admission
+
+on:
+  push:
+    paths:
+      - '.github/workflows/ecc2k130-rotated-solver-admission.yml'
+      - 'research/notes/ecc2k130/rotated_solver_admission_20260925/**'
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz'
+      - 'research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/**'
+      - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/RESULT.md'
+      - 'research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/RESULT.md'
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-rotated-solver-admission.yml'
+      - 'research/notes/ecc2k130/rotated_solver_admission_20260925/**'
+      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz'
+      - 'research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/**'
+      - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/RESULT.md'
+      - 'research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/RESULT.md'
+
+jobs:
+  frozen-source-and-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen source and inherited corpus without a solver run
+        run: python3 research/notes/ecc2k130/rotated_solver_admission_20260925/ci_replay.py
+      - name: Replay committed static preflight if present
+        run: |
+          if test -f research/notes/ecc2k130/rotated_solver_admission_20260925/evidence/receipt.json; then
+            python3 research/notes/ecc2k130/rotated_solver_admission_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_solver_admission_20260925/evidence
+          fi
