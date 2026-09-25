@@ -70,11 +70,11 @@ def check_first_failure(frozen):
     return {"phases": 3, "failed_phase": "sparse_export"}
 
 
-def check_evidence(receipt_path, frozen):
+def check_evidence(receipt_path, frozen, expected_freeze_sha):
     receipt = json.loads(receipt_path.read_text())
     root = receipt_path.parent
     assert receipt["protocol"] == frozen["domain"]
-    assert receipt["freeze_sha256"] == sha(HERE / "FROZEN.json")
+    assert receipt["freeze_sha256"] == expected_freeze_sha
     assert receipt["decision"] == "PASS"
     phases = ["dense_export", "dense_replay", "sparse_export", "sparse_replay"]
     assert [row["phase"] for row in receipt["attempts"]] == phases
@@ -114,14 +114,14 @@ def check_evidence(receipt_path, frozen):
                 assert row[key] == frozen["panels"][name][file]["sha256"]
     control = sparse_verify["negative_controls"]["n13_empty_pair_clause"]
     assert control["rejection"].startswith("point-law output mismatch")
-    assert sha(root / "sparse/negative_empty_pair.cnf") == control["mutated_cnf_sha256"]
+    assert sha(root / "sparse/producer/negative_empty_pair.cnf") == control["mutated_cnf_sha256"]
     summary = json.loads((root / "summary.json").read_text())
     assert summary["decision"] == "PASS" and len(summary["panels"]) == 4
     assert sum(row["candidate_paths"] for row in summary["panels"]) == 24955
     assert sum(row["target_labels"] for row in summary["panels"]) == 61
     assert [summary["child_sha256"][phase] for phase in phases] == [sha(path) for path in outputs]
     manifest = json.loads((root / "MANIFEST.json").read_text())
-    assert manifest["freeze_sha256"] == sha(HERE / "FROZEN.json")
+    assert manifest["freeze_sha256"] == expected_freeze_sha
     expected_files = sorted(str(path.relative_to(root)) for path in root.rglob("*")
                             if path.is_file() and path.name != "MANIFEST.json")
     assert [row["path"] for row in manifest["files"]] == expected_files
@@ -140,9 +140,14 @@ def main():
     frozen = json.loads((HERE / "FROZEN.json").read_text())
     check_freeze(frozen)
     first_failure = check_first_failure(frozen)
-    evidence = check_evidence(args.evidence, frozen) if args.evidence else None
+    previous = HERE / "evidence/second_attempt/receipt.json"
+    second_attempt = (check_evidence(previous, frozen, frozen["second_attempt_freeze_sha256"])
+                      if previous.exists() else None)
+    evidence = (check_evidence(args.evidence, frozen, sha(HERE / "FROZEN.json"))
+                if args.evidence else None)
     print(json.dumps({"decision": "PASS", "freeze_sha256": sha(HERE / "FROZEN.json"),
-                      "first_failure": first_failure, "evidence": evidence}, sort_keys=True))
+                      "first_failure": first_failure, "second_attempt": second_attempt,
+                      "evidence": evidence}, sort_keys=True))
 
 
 if __name__ == "__main__":

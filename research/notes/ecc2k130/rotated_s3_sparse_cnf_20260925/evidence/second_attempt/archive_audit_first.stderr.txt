@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/private/tmp/rotated-s3-sparse-20260925/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/ci_replay.py", line 149, in <module>
+    main()
+    ~~~~^^
+  File "/private/tmp/rotated-s3-sparse-20260925/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/ci_replay.py", line 143, in main
+    evidence = check_evidence(args.evidence, frozen) if args.evidence else None
+               ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/rotated-s3-sparse-20260925/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/ci_replay.py", line 117, in check_evidence
+    assert sha(root / "sparse/negative_empty_pair.cnf") == control["mutated_cnf_sha256"]
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/rotated-s3-sparse-20260925/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/ci_replay.py", line 17, in sha
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+                          ~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_abc.py", line 625, in read_bytes
+    with self.open(mode='rb') as f:
+         ~~~~~~~~~^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/pathlib/_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/final/sparse/negative_empty_pair.cnf'

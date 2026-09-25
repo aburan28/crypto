@@ -1,6 +1,6 @@
 # Preregistered sparse O-aware recursive-S3 CNF representation gate
 
-Status: corrected protocol/source freeze after first-attempt implementation failure, with the complete first receipt preserved under `evidence/first_failure`. The initial export assertion wrongly required a nonempty admitted output for every pair. The corrected protocol, source and input hashes are frozen before the second producer/verifier attempt. This is a representation comparison against merged [#781](https://github.com/aburan28/crypto/pull/781), not a SAT timing or ECDLP-speed experiment.
+Status: final archive-replay correction frozen before the third producer/verifier attempt. The first attempt and its failed nonempty-output assertion remain under `evidence/first_failure`. The second attempt passed all four experimental children but its archive-only check exposed a `ci_replay.py` path typo for the fifth control; its complete pass receipt, initial archive-check failure, initial manifest and subsequent byte-identical packaging copy remain under `evidence/second_attempt`. The final source reads the verifier-created file at its actual `sparse/producer/negative_empty_pair.cnf` path, so a fresh runner output must pass archive replay without manual changes. This is a representation comparison against merged [#781](https://github.com/aburan28/crypto/pull/781), not a SAT timing or ECDLP-speed experiment.
 
 ## Fixed semantic input and formula
 
