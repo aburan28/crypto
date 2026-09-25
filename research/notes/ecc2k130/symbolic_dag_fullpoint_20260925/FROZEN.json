@@ -1,0 +1,29 @@
+{
+  "child_rss_cap_bytes": 536870912,
+  "child_wall_cap_seconds": 180,
+  "curve": "y^2+xy=x^3+1",
+  "domain": "k0-symbolic-dag-fullpoint-n2n3-v1",
+  "external_child_cap_seconds": 195,
+  "fields": [
+    [
+      2,
+      7
+    ],
+    [
+      3,
+      11
+    ]
+  ],
+  "freeze_utc": "2026-09-25T16:56:25.489961+00:00",
+  "model_width_formula": "7*n+3",
+  "source_main_head": "8b1e2d3734c1f30c14ce253b33094f894ab5005d",
+  "source_sha256": {
+    "PROTOCOL.md": "2f5533f4d9750f4562290d2153a716375b47561c656073275ac0370ae6f55f05",
+    "ci_replay.py": "7d9591e2641e01662ede18e8181f0c5032866969713bd7d9c8fe27d735ae1216",
+    "dag.py": "a277fb1b2f9b58ca8cc7cb33713950015f8c0446651b1d4e8657650819bcd419",
+    "produce.py": "9984214e49bd414da7bb31b5bc568fa25843b72e0a5bac92074bd215477fdc18",
+    "run.py": "3b7cb1adb9205acfeb0668c5432e29809be9eb723d1b20eccb37961f165512bd",
+    "verify.py": "15d94049fd3af8cfa2094b0a7c8649f33e643457e940a10a40da404d2e17b29f"
+  },
+  "workflow_sha256": "f18d50de3dfb3dbe1144f51ceeb71a1fdc0f923d73317d2161dbfb7da8f2e3fd"
+}
