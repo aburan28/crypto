@@ -506,13 +506,15 @@ def prepare(args):
         'cells':[f'n{n}a{a}' for n,a in cells],'holdout_cells':[f'n{n}a{a}' for n,a in holdout],
         'confirmation_cases':0 if qualification else confirmation_cases,
         'confirmation_cases_per_cell':{} if qualification else allocation,
-        'confirmation_allocation':('flat' if not extra else
+        'confirmation_allocation':('not_applicable' if qualification else 'flat' if not extra else
             'per-cell; raised at the cells whose measured spread a flat count cannot resolve, '
             'never lowered, from frozen prior rounds only; estimator and gate unchanged'),
         'unit':UNIT,'evidence_scope':'bounded public-hash ECDLP configuration tournament',
         'metric_class':'implementation_instruction_cost','family_wide_or_scaling_claim':False,
-        'equivalent_suite_reason':'Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; the final suite has '+str(confirmation_cases)+' inputs.',
-        'curve_diversity_limit':'One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.',
+        'equivalent_suite_reason':('Point-base collector/rank/descent API, not WDSat ANF/conflict protocol; independent point and scalar-field certificates. '+
+            ('Development reference qualification only; no final suite generated.' if qualification else
+             'The final suite has '+str(confirmation_cases)+' inputs.')),
+        'curve_diversity_limit':'Only the declared Koblitz curve/subgroup cells; no broad family or scaling claim.',
         'limits':limits,'repetitions':3,'confirmation_ratio':0.8,'max_cell_ratio':1.1,
         'selection_width':args.selection_width,'exploration_slots':args.exploration_slots,
         'rho_reference':rho_reference,
@@ -527,7 +529,7 @@ def prepare(args):
         'evaluator_sha256':{n:digest(evaluator/n) for n in EVALUATOR},
         'source_manifest_sha256':objhash(manifest),
         'target_count':args.targets,'workload':'one supplied public target; primary native online interval after reusable preparation through scalar replay; supplementary complete cold process','native_timings':'paired native reruns retained; no runtime claim from profiled elapsed time',
-        'target_uniqueness':'Distinct public points within each curve across A/A, smoke, development, selection and confirmation; replay intentionally repeats confirmation.',
+        'target_uniqueness':'Distinct public points within each curve across generated stages; replay, when present, intentionally repeats confirmation.',
         'pinned_files':{n:digest(out/n) for n in set(['worker','source-manifest.json','candidates.json','fixtures.json','calibration.json']+[a['binary_relative'] for a in arms+references]+[a['source_manifest_relative'] for a in arms+references])}}
     c['pinned_files'].update({str(p.relative_to(out)):digest(p) for name in ('admissions','fixture_generation')
         for p in (out/name).rglob('*') if p.is_file()})
