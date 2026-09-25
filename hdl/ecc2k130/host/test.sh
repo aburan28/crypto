@@ -15,7 +15,7 @@ echo "== selftest"
 # worker.py's command line, plus the model and a stop condition
 COMMON=(--curve 131 --steps 1024 --launches 0 --dp-file "$WORK/dp.bin" --checkpoint "$WORK/walk.ck"
         --checkpoint-every 600 --packed --device 0 --threads 192512 --dp-weight 56
-        --max-iters 1073741824 --load-max 2000000 --dp-cap 65536
+        --max-iters 4294967296 --load-max 2000000 --dp-cap 65536
         --sim --sim-engines 2 --sim-idw 4 --sim-steps 4)
 
 echo "== fresh run"

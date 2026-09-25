@@ -1,5 +1,5 @@
 {
-  "_comment": "Single source of truth for every worker. Geometry (batch, blockThreads, minBlocks, workers) must match the binary named by binaryKey and must never change while checkpoints exist: a checkpoint is only loadable into the same worker/batch shape. 16 slots over 385,024 workers is the audited RTX PRO 6000 preset and the 6,160,384 logical walks it measured at 14.1 B iterations/s. dpWeight must be identical campaign-wide or cross-worker collisions can be missed; 32 is what the live bucket runs (one report per 2^28.41 iterations, benchmarks/dp-interval), and the copy in the bucket, not this file, is what workers read. walk names the iteration function (protocol.WALKS: sigma, or table for ITERATION-FUNCTION.md's table walk); distinguished points from different walks never collide, so changing it starts a new corpus. kernelProtocol versions the client pointer (kernels/<n>.json); it is not storageProtocol and does not migrate the DP corpus. build.sh fills in binaryKey/hostBinaryKey/sourceSha256 and builds the walk named here.",
+  "_comment": "Single source of truth for every worker. Geometry (batch, blockThreads, minBlocks, workers) must match the binary named by binaryKey and must never change while checkpoints exist: a checkpoint is only loadable into the same worker/batch shape. 16 slots over 385,024 workers is the audited RTX PRO 6000 preset and the 6,160,384 logical walks it measured at 14.1 B iterations/s. dpWeight must be identical campaign-wide or cross-worker collisions can be missed; 32 is what the live bucket runs (one report per 2^28.41 iterations, benchmarks/dp-interval), and the copy in the bucket, not this file, is what workers read. walk names the iteration function (protocol.WALKS: sigma, or table for ITERATION-FUNCTION.md's table walk); distinguished points from different walks never collide, so changing it starts a new corpus. kernelProtocol versions the client pointer (kernels/<n>.json); it is not storageProtocol and does not migrate the DP corpus. maxIters is the sigma walk's guard: a walk that goes that many steps without a report is restarted and its trail discarded. 2^32 is 12 trail lengths at dpWeight 32 and discards 0.007% of the walk's steps where 2^30 discarded 15.6% (WALK-CONSTANT.md section 6, benchmarks/max-iters); the table walk traps walks in fruitless cycles and needs its own, shorter guard. Raise it freely, since checkpoints do not record it and a trail depends only on its seed; never lower it below a value already used, because merge.py rewalks collisions under it; keep ECC_CAMPAIGN_MAX_ITERS in include/kernel.h equal to it. build.sh fills in binaryKey/hostBinaryKey/sourceSha256 and builds the walk named here.",
   "curve": 131,
   "walk": "sigma",
   "storageProtocol": "ecc2k-seed-orbit-v1",
@@ -16,7 +16,7 @@
   "steps": 1024,
   "checkpointEvery": 600,
   "uploadEvery": 600,
-  "maxIters": 1073741824,
+  "maxIters": 4294967296,
   "verify": 0,
   "loadMax": 2000000,
   "dpCap": 65536,
