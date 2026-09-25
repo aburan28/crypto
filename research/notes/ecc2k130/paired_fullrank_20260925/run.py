@@ -103,11 +103,19 @@ def main():
         ],
     }
     order = ("ic", "rho") if args.seed_index % 2 == 0 else ("rho", "ic")
+    checkout_head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
+    clean = not subprocess.check_output(["git", "status", "--porcelain"], cwd=root, text=True).strip()
+    includes_main_ref = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", MAIN_REF, checkout_head],
+        cwd=root, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    ).returncode == 0
     report = {
         "schema_version": "1",
         "pinned_main_ref": MAIN_REF,
-        "checkout_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
-        "source_note": "Current-main producer and dependency overlay on a 74cf8424 checkout; rerun on an unmodified clean main checkout before making performance claims.",
+        "checkout_head": checkout_head,
+        "clean_checkout": clean,
+        "includes_pinned_main_ref": includes_main_ref,
+        "source_note": "Clean main-derived checkout" if clean and includes_main_ref else "Provisional source overlay; reproduce on clean main-derived checkout before performance claims",
         "source_sha256": {path: sha(root / path) for path in SOURCE_PATHS},
         "host": platform.platform(),
         "python": sys.version,
