@@ -13,8 +13,8 @@ phase ledger. The restored optimized producers now have a separately tested
 [scientific adapter](producer/PROTOCOL.md), with [retained admission evidence](goal_20260924/producer-admission/README.md).
 The ordinary checkout's legacy worker remains unpriced under this schema. The
 schema-3 producer adds supplied public inputs and native online intervals, with
-[local controls retained](goal_20260924/public-inputs/README.md). Driver
-admission migration, reference qualification and Linux interval validation remain prerequisites;
+[local and Linux controls independently replayed](goal_20260924/public-inputs/README.md). Driver
+admission migration and comparative reference qualification remain prerequisites;
 passing producer controls alone does not make a comparative campaign ready.
 
 ## Identity
