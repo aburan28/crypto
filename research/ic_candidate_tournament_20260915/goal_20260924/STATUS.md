@@ -78,8 +78,9 @@ scalars; a public-target adapter is required before that path joins this panel.
    `measurement.py`, `test_records.py` and `ci_smoke.py`; merged in PR 718.
 2. Optimized archived producers now export eleven exclusive phases, ordinary-query
    outcomes/rank and matrix diagnostics; 39/39 pairs independently replay. Combined
-   old labels remain unknown under the new schema. Integrate admission into both
-   development and promotion drivers before any new comparison. The public-point
+   old labels remain unknown under the new schema. Admission is now wired into
+   both drivers; the [driver control protocol](driver-admission/PROTOCOL.md)
+   covers canonical records, online timing, retained failures and frozen audit. The public-point
    and single-target native timing follow-up passes local controls, Linux
    integration and transported evidence replay. Rho reusable arithmetic/Frobenius
    preparation is excluded from its online interval and retained in cold cost.
