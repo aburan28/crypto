@@ -149,8 +149,12 @@ add observed collection/descent APIs retaining every query and native frontend
 counter, including unsuccessful terminal descents. The worker exports versioned
 query records and actual attempted matrix solves. Independent group replay and
 bounded exhaustive negative controls are separate from full scientific admission:
-query-law replay, source binding, public-target intervals and exclusive phase
-accounting remain required before a comparative result.
+query-law replay, source binding and exclusive phase
+accounting remain required before a comparative result. The
+[generic public-input controls](goal_20260924/generic-public-inputs/RESULTS.md)
+require one supplied point for measured jobs and place the outer online boundary
+after reusable IC/rho preparation through scalar replay. These intervals retain
+legacy combined instruction phases; they do not qualify generic performance.
 The [relation-LA accounting controls](goal_20260924/la-accounting/RESULTS.md)
 also preserve failed solve attempts and their diagnostics in the generic
 factor-base-log report. This repairs bookkeeping; complete scientific phase

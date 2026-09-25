@@ -6948,9 +6948,25 @@ pub fn koblitz_signed_frobenius_rho_with_progress(
     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
 ) -> KoblitzSignedRhoReport {
     match FastCurve::new(&curve.curve) {
-        Some(fc) => signed_rho_fast(&fc, curve, target, options, progress),
+        Some(fc) => signed_rho_fast(&fc, curve, target, options, progress, &mut |_| {}),
         None => koblitz_signed_frobenius_rho_reference(curve, target, options, progress),
     }
+}
+
+/// Run the packed rho path with an explicit boundary after reusable arithmetic
+/// and Frobenius preparation, before any target-dependent work. Unsupported
+/// widths return `None`; the callback receives the actual field kernel.
+pub fn koblitz_signed_frobenius_rho_with_preparation(
+    curve: &KoblitzCurve,
+    target: &BinaryPoint,
+    options: &KoblitzSignedRhoOptions,
+    ready: &mut dyn FnMut(&FastCurve),
+    progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+) -> Option<KoblitzSignedRhoReport> {
+    let fc = FastCurve::new(&curve.curve)?;
+    Some(signed_rho_fast(
+        &fc, curve, target, options, progress, ready,
+    ))
 }
 
 #[derive(Clone, Copy)]
@@ -7221,6 +7237,7 @@ fn signed_rho_fast(
     target: &BinaryPoint,
     options: &KoblitzSignedRhoOptions,
     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+    ready: &mut dyn FnMut(&FastCurve),
 ) -> KoblitzSignedRhoReport {
     assert!(options.jump_count > 0, "rho needs at least one jump");
     assert!(options.parallel_walks > 0, "rho needs at least one walk");
@@ -7248,6 +7265,7 @@ fn signed_rho_fast(
         trail_mask: rho_trail_mask(rho_expected_steps(modulus, curve.n)),
     };
     let g = fc.lift(curve.generator());
+    ready(fc);
     let q = fc.lift(target);
     let mut rng = StdRng::seed_from_u64(options.seed);
     let mut report = KoblitzSignedRhoReport {
@@ -9340,6 +9358,44 @@ impl<'a> IndividualLogSolver<'a> {
 mod tests {
     use super::*;
     use crate::cryptanalysis::koblitz_groebner::build_decomposition_system;
+
+    #[test]
+    fn rho_preparation_preserves_walk_and_charges() {
+        for a in [0, 1] {
+            let curve = KoblitzCurve::new(a, 9).unwrap();
+            let q = curve.mul(curve.generator(), &BigUint::from(17u32));
+            let options = KoblitzSignedRhoOptions {
+                seed: 2026092555,
+                ..Default::default()
+            };
+            let plain =
+                koblitz_signed_frobenius_rho_with_progress(&curve, &q, &options, &mut |_| {});
+            let mut calls = 0;
+            let prepared = koblitz_signed_frobenius_rho_with_preparation(
+                &curve,
+                &q,
+                &options,
+                &mut |fc| {
+                    calls += 1;
+                    assert_eq!(fc.n, 9);
+                    assert!(matches!(
+                        fc.field.kernel_name(),
+                        "portable" | "pclmulqdq" | "pmull"
+                    ));
+                },
+                &mut |_| {},
+            )
+            .unwrap();
+            assert_eq!(calls, 1);
+            assert!(plain.verified && prepared.verified);
+            assert_eq!(plain.recovered_log, prepared.recovered_log);
+            assert_eq!(plain.charges, prepared.charges);
+            assert_eq!(plain.iterations, prepared.iterations);
+            assert_eq!(plain.restarts_attempted, prepared.restarts_attempted);
+            assert_eq!(plain.jump_table_rebuilds, prepared.jump_table_rebuilds);
+            assert_eq!(plain.parallel_walks, prepared.parallel_walks);
+        }
+    }
 
     #[test]
     fn koblitz_mul_dispatch_matches_general_arithmetic() {

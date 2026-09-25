@@ -177,3 +177,10 @@ negative-answer replay checks accounting only; complete generic scientific
 admission still needs query-law replay, exact source/base/matrix binding and
 exclusive public-target timing. This is not an improvement round. The incumbent
 remains selected and two rounds remain under the frozen goal protocol.
+
+The [generic supplied-point follow-on](generic-public-inputs/RESULTS.md) separates
+fixture creation from measured jobs and places the outer online interval after
+reusable IC/rho preparation through independent scalar replay. Its 37 final local
+worker controls pass, including seven intended preparation failures with null
+online intervals. Combined legacy phase dumps remain unqualified for scientific
+cost comparison; full generic admission and the remaining two rounds are open.
