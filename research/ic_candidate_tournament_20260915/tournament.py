@@ -205,7 +205,7 @@ def execute(command, job, directory, timeout, memory, cpu):
 
 
 def parse_profiles(directory, *, compressed=False, phase_schema=1):
-    require(phase_schema in (1, 2), 'unknown phase schema')
+    require(phase_schema in (1, 2, 3), 'unknown phase schema')
     pattern = 'callgrind.out*.gz' if compressed else 'callgrind.out*'
     paths = sorted(Path(directory).glob(pattern))
     require(bool(paths),'missing instruction profiles')
@@ -233,16 +233,19 @@ def parse_profiles(directory, *, compressed=False, phase_schema=1):
         else:
             require(trigger.startswith('Client Request: '),'unknown profiling boundary')
             phase = trigger.removeprefix('Client Request: ')
-            if phase_schema == 2:
+            if phase_schema in (2, 3):
                 require(phase.startswith('ic_') or phase == 'reference_solve',
                         'legacy interval in scientific profile')
                 phase = phase.removeprefix('ic_')
         if phase_schema == 1:
             require(phase in PHASES,'unknown cost phase')
         else:
-            require(phase in {'setup', 'factor_base', 'precompute', 'queries', 'pdp',
+            allowed = {'setup', 'factor_base', 'precompute', 'queries', 'pdp',
                 'relation_check', 'matrix_build', 'relation_la', 'target_descent',
-                'recovery_check', 'reference_solve'}, 'unknown scientific cost phase')
+                'recovery_check', 'reference_solve'}
+            if phase_schema == 3:
+                allowed |= {'target_query', 'target_pdp', 'target_relation_check'}
+            require(phase in allowed, 'unknown scientific cost phase')
         phases[phase] = phases.get(phase,0)+total
     require(terminated==1,'missing or duplicate final interval')
     stderr = (Path(directory)/'stderr.txt').read_text()
