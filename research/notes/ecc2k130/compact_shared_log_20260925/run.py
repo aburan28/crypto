@@ -8,7 +8,7 @@ import json
 import os
 from pathlib import Path
 import platform
-import resource
+import psutil
 import subprocess
 import time
 
@@ -36,15 +36,33 @@ def write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
 
 
-def read_rss(pid: int) -> int | None:
-    """Linux current RSS; wait4's ru_maxrss remains the archival peak."""
-    try:
-        for line in Path(f"/proc/{pid}/status").read_text().splitlines():
-            if line.startswith("VmRSS:"):
-                return int(line.split()[1]) * 1024
-    except (FileNotFoundError, ProcessLookupError, PermissionError):
-        pass
-    return None
+def monitor_process(process: subprocess.Popen, started_ns: int,
+                    timeout_s: int, rss_cap_bytes: int):
+    """Poll child RSS on macOS/Linux and retain Darwin/Linux wait4 peak."""
+    child = psutil.Process(process.pid)
+    sampled_peak = 0
+    samples = 0
+    termination = None
+    while True:
+        pid, status, usage = os.wait4(process.pid, os.WNOHANG)
+        if pid:
+            break
+        elapsed_s = (time.monotonic_ns()-started_ns)/1e9
+        try:
+            current_rss = child.memory_info().rss
+            sampled_peak = max(sampled_peak, current_rss)
+            samples += 1
+        except (psutil.NoSuchProcess, psutil.ZombieProcess):
+            current_rss = None
+        if elapsed_s >= timeout_s or (current_rss is not None and current_rss >= rss_cap_bytes):
+            termination = "TIMEOUT" if elapsed_s >= timeout_s else "RSS_CAP"
+            process.kill()
+            pid, status, usage = os.wait4(process.pid, 0)
+            assert pid == process.pid
+            break
+        time.sleep(0.05)
+    wait4_peak = int(usage.ru_maxrss * (1 if platform.system() == "Darwin" else 1024))
+    return status, usage, termination, sampled_peak, wait4_peak, samples
 
 
 def run_one(mode: str, n: int, block: int | None, length: int | None,
@@ -115,31 +133,25 @@ def run_one(mode: str, n: int, block: int | None, length: int | None,
     write_json(out / "manifest.json", manifest)
     stdout, stderr = out / "producer.stdout.jsonl", out / "producer.stderr.txt"
     started = time.monotonic_ns()
-    termination = None
     with stdout.open("wb") as out_stream, stderr.open("wb") as err_stream:
         process = subprocess.Popen(command, cwd=REPO, env=env,
                                    stdout=out_stream, stderr=err_stream)
-        while True:
-            pid, status, usage = os.wait4(process.pid, os.WNOHANG)
-            if pid:
-                break
-            elapsed_s = (time.monotonic_ns()-started)/1e9
-            current_rss = read_rss(process.pid)
-            if elapsed_s >= timeout_s or (current_rss is not None and current_rss > rss_cap_bytes):
-                termination = "TIMEOUT" if elapsed_s >= timeout_s else "RSS_CAP"
-                process.kill()
-                pid, status, usage = os.wait4(process.pid, 0)
-                assert pid == process.pid
-                break
-            time.sleep(0.05)
+        status, usage, termination, sampled_peak, wait4_peak, samples = monitor_process(
+            process, started, timeout_s, rss_cap_bytes)
     wall_ms = (time.monotonic_ns()-started)/1e6
     process.returncode = os.waitstatus_to_exitcode(status)
-    peak_rss = int(usage.ru_maxrss * (1 if platform.system() == "Darwin" else 1024))
+    peak_rss = max(sampled_peak, wait4_peak)
     receipt = {"schema_version": "1.0", "returncode": process.returncode,
                "termination": termination, "timed_out": termination == "TIMEOUT",
                "rss_capped": termination == "RSS_CAP", "wall_ms": wall_ms,
                "user_cpu_s": usage.ru_utime, "system_cpu_s": usage.ru_stime,
-               "peak_rss_bytes": peak_rss, "stdout_sha256": sha(stdout.read_bytes()),
+               "peak_rss_bytes": peak_rss,
+               "sampled_peak_rss_bytes": sampled_peak,
+               "wait4_peak_rss_bytes": wait4_peak,
+               "rss_sample_count": samples,
+               "rss_monitor": "psutil.Process.memory_info().rss; 50ms poll",
+               "psutil_version": psutil.__version__,
+               "stdout_sha256": sha(stdout.read_bytes()),
                "stderr_sha256": sha(stderr.read_bytes()),
                "manifest_sha256": sha((out / "manifest.json").read_bytes())}
     write_json(out / "receipt.json", receipt)
