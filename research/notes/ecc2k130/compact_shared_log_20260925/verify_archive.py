@@ -37,7 +37,7 @@ def main() -> None:
     assert smoke["normal"]["termination"] is None
     assert smoke["capped"]["termination"] == "RSS_CAP"
     manifest = json.loads((EVIDENCE / "archive_manifest.json").read_bytes())
-    for own in ("make_inputs.py", "build.py", "run.py", "run_panel.py", "verify.py", "verify_archive.py", "summarize.py",
+    for own in ("Cargo.lock", "make_inputs.py", "build.py", "run.py", "run_panel.py", "verify.py", "verify_archive.py", "summarize.py",
                 "rss_smoke.py"):
         assert sha((EVIDENCE / "source" / own).read_bytes()) == sha((HERE / own).read_bytes())
     assert sha((EVIDENCE / "source/pr747_verify.py").read_bytes()) == verify.PR747_SHA
@@ -53,6 +53,7 @@ def main() -> None:
         build = json.loads((EVIDENCE / f"n{n}-build_receipt.json").read_bytes())
         assert build["returncode"] == 0 and build["input_spec_sha256"] == panel["input_spec_sha256"]
         assert build["checkout_head"] == panel["checkout_head"]
+        assert build["cargo_lock_sha256"] == sha((EVIDENCE / "source/Cargo.lock").read_bytes())
         for stream in ("stdout", "stderr"):
             assert build[f"{stream}_sha256"] == sha((EVIDENCE / f"n{n}-build.{stream}.txt").read_bytes())
         assert panel["input_spec_sha256"] == sha((HERE / "input_spec.json").read_bytes())

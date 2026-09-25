@@ -143,6 +143,8 @@ def main() -> None:
     assert build["checkout_head"] == subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
     assert build["cargo_lock_sha256"] == sha((REPO / "Cargo.lock").read_bytes())
+    assert build["cargo_lock_sha256"] == sha((HERE / "Cargo.lock").read_bytes())
+    assert build["cargo_toml_sha256"] == sha((REPO / "Cargo.toml").read_bytes())
     for mode in ("compact", "rho"):
         assert build["executable_sha256"][mode] == sha((REPO / EXECUTABLES[mode]).read_bytes())
     out = args.out.resolve()

@@ -48,7 +48,7 @@ def main() -> None:
     copy_one(HERE / "rss_smoke_initial.json", evidence / "rss_smoke_initial.json")
     index = {"schema_version": "1.0", "panel_names": [], "run_names": [],
              "source_sha256": {}, "uncompressed_stdout_sha256": {}}
-    for source in (HERE / "make_inputs.py", HERE / "build.py", HERE / "run.py", HERE / "run_panel.py",
+    for source in (HERE / "Cargo.lock", HERE / "make_inputs.py", HERE / "build.py", HERE / "run.py", HERE / "run_panel.py",
                    HERE / "verify.py", HERE / "verify_archive.py", HERE / "summarize.py",
                    HERE / "rss_smoke.py", HERE.parent / "compact_base_sweep_20260925/verify.py",
                    HERE.parent / "paired_fullrank_20260925/verify.py"):
