@@ -6674,6 +6674,25 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-direct-challenge-import-20260925 -->
+<!-- BEGIN ecc2k130-n131-beta3-f0-census-20260925 -->
+<section class="panel" id="ecc2k130-n131-beta3-f0-census-20260925">
+  <div class="panel-head">
+    <h2>Exact n = 131 beta-3 F0: 1,048,134 nonzero signed columns <span class="chip">accounting</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/773">PR #773</a> preregistered the m = 6,d = 21 beta-3 F0 before enumerating all 2,097,152 Gray-code masks. Independent natural-mask and polynomial-division arithmetic replay matched every row digest, lift decision and canonical ±[4] projected x key. The 64 frozen n = 131 full-group-law samples and complete n = 13/19 F0 and four-torsion controls passed. The zero mask gives the identity column; x = 1 is excluded by the normal-basis coordinates.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>C counts distinct nonzero canonical ±[4] projected point pairs, keyed by x. O is one separate zero column. The prior 2<sup>21</sup> F0-column figure was a nominal proxy; no row rank, target-support probability or S/rho cost is inferred.</caption>
+    <thead><tr><th>Exact stage</th><th>F0 masks</th><th>Liftable nonzero x, L</th><th>Physical F0 points</th><th>Nonzero ± columns, C</th><th>Repeated-column x preimages</th><th>Independent replay</th><th>Rank / S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>Gray-prefix pilot</td><td>32,768</td><td>16,707</td><td>33,415</td><td>16,707</td><td>0</td><td>all rows</td><td>unset / unset / unset</td></tr>
+      <tr><td>Full n = 131 F0</td><td>2,097,152</td><td>1,048,134</td><td>2,096,269</td><td>1,048,134</td><td>0</td><td>all 2,097,152 rows</td><td>unset / unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>All 1,048,134 nonzero columns have exactly one rational x preimage; adding O gives 1,048,135 signed columns. The nominal 2<sup>21</sup> proxy is 2.00084 times the exact nonzero signed-column count, but the physical F0 size is only 883 below 2<sup>21</sup>. This corrects cardinality accounting, not an algorithmic crossover. The full producer used 74.262 s wall, 3,145,285 field inversions in enumeration and 138,067,968 B peak RSS; independent all-mask replay used 902.264 s and 157,351,936 B. Both passed frozen caps. The next exporter/solver gate may use these exact sizes, while natural-target relations, matrix rank, actual challenge decomposition and matched rho remain unset. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/PROTOCOL.md">frozen protocol</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n131_beta3_f0_census_20260925/EVIDENCE.md">raw receipts and replay</a>. Full row SHA-256 <code>b8b03e28e783ebec12be04c82542d74448896e3a128c0a5784a77a0a688da30d</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-n131-beta3-f0-census-20260925 -->
 <!-- BEGIN ecc2k130-rotated-pdp-corpus-20260925 -->
 <section class="panel" id="ecc2k130-rotated-pdp-corpus-20260925">
   <div class="panel-head">
