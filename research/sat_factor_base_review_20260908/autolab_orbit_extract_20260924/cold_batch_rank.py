@@ -155,6 +155,8 @@ def run(args):
     else:
         (out / "base_header.jsonl").write_bytes(base)
         (out / "target_scalars.txt").write_bytes(target_bytes)
+    recorded_manifest = (json.loads((out / "manifest.json").read_text())
+                         if args.replay_only else None)
     manifest = {
         "schema_version": "1.0", "experiment": "cold_compact_orbit_rank_probe",
         "scope": "Public synthetic n=53 known-scalar targets; no unknown-target DLP or rho comparison",
@@ -162,8 +164,10 @@ def run(args):
         "subgroup_order": order, "factor_base_hash": BASE_HASH,
         "base_gzip_sha256": digest(BASE_GZ.read_bytes()),
         "base_header_sha256": digest(base), "target_schedule_sha256": digest(target_bytes),
-        "producer_source_sha256": digest(SOURCE.read_bytes()),
-        "producer_executable_sha256": digest(EXE.read_bytes()),
+        "producer_source_sha256": (recorded_manifest["producer_source_sha256"]
+                                   if args.replay_only else digest(SOURCE.read_bytes())),
+        "producer_executable_sha256": (recorded_manifest["producer_executable_sha256"]
+                                       if args.replay_only else digest(EXE.read_bytes())),
         "verifier_sha256": digest(REPLAY.read_bytes()),
         "command": [str(EXE), "53", "0", "1", "10", "natural", "1", "2000", "1", "internal"],
         "environment": {
