@@ -22,6 +22,11 @@ P1=2013265921
 run() {
   name=$1
   shift
+  # A run that ended is not repeated when the script is started again (the
+  # machine restarted during the first pass; progress.txt records it).
+  if grep -q " end $name exit" ../progress.txt 2>/dev/null; then
+    return
+  fi
   echo "$(date -u +%FT%TZ) start $name: $*" >> ../progress.txt
   "$bin" --engine tower "$@" --out "$name.jsonl" 2> "$name.log"
   rc=$?

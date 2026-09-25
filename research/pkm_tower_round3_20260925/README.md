@@ -51,6 +51,28 @@ that round 2 and its cross-check finished. Its rows and logs are in `replay/`,
 named after the round-2 files they repeat, and `progress.txt` records when each
 run started and ended. `compare_builds.py` compares them with round 2's.
 
+It ran from 08:20 to 09:04 UTC and, after a restart of the machine, from 14:11
+to 14:13 UTC on 2026-09-25. The machine restarted during the confirmation run
+`C-K1-kummer-m2-p1-t11`, which had written no row. Its partial log is kept as
+`replay/C-K1-kummer-m2-p1-t11.interrupted.log`. The script was started again,
+skipping the runs that had ended, and re-ran that one from the start.
+
+| part | round-2 files | rows | identical |
+|:--|:--|--:|--:|
+| cross-check | XV1–XV5 | 308 | 308 |
+| round 2's cells, to the sizes they finished | K1, K1n, K0, I0, M4 (`N ≤ 12`), M3 (`N ≤ 15`) | 36 | 36 |
+| confirmations | the five `C-*` cells | 10 | 10 |
+| diagnostic | D1 | 1 | 1 |
+| **total** | | **355** | **355** |
+
+Every field of every row is identical except the wall clock (`ms`, `wall_s`),
+and no round-2 row of a replayed file is missing. That includes the
+multiply-add counts, the nonzeros and the residue sizes. **106 trace steps are
+identical** on every field round 2 printed, the times aside:
+- D1 (29 steps);
+- the replayed M4 system at `N = 12`, target 0, against D1 (29);
+- K0's target 0 against both of round 2's profiling traces of it (P0, 2 × 24).
+
 ## Builds
 
 The replay and the paired runs use the example built (`cargo build --release
