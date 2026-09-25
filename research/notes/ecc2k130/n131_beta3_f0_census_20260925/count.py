@@ -72,6 +72,15 @@ def coordinates(basis: list[int]):
     return decode
 
 
+def gray_ordinal(mask: int) -> int:
+    """Invert reflected Gray code to its unique traversal ordinal."""
+    ordinal = 0
+    while mask:
+        ordinal ^= mask
+        mask >>= 1
+    return ordinal
+
+
 def setup(data: dict):
     model = next(m for m in data["models"] if m["name"] == "n131-full")
     assert (model["n"], model["m"], model["d"], model["beta"]) == (131, 6, 21, 3)
@@ -145,7 +154,9 @@ def run(data: dict, stage: str, out: Path) -> dict:
                     columns[column] = columns.get(column, 0) + 1
                     assert columns[column] <= 4, (mask, x, column, columns[column])
                     lift = 2
-                    if x < inverse_x and decode(inverse_x) is not None:
+                    inverse_mask = decode(inverse_x)
+                    if (x < inverse_x and inverse_mask is not None
+                            and gray_ordinal(inverse_mask) < limit):
                         inverse_pairs += 1
             row = f"{mask},{x},{lift},{column}\n".encode("ascii")
             row_hash.update(row)

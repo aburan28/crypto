@@ -157,29 +157,42 @@ def xor_values(values: list[int]) -> int:
     return result
 
 
-def pivot_rows(basis: list[int]) -> dict[int, int]:
-    rows: dict[int, int] = {}
-    for original in basis:
-        value = original
+def pivot_rows(basis: list[int]) -> dict[int, tuple[int, int]]:
+    rows: dict[int, tuple[int, int]] = {}
+    for index, original in enumerate(basis):
+        value, coeff = original, 1 << index
         while value:
             bit = value.bit_length() - 1
             if bit in rows:
-                value ^= rows[bit]
+                row, row_coeff = rows[bit]
+                value ^= row
+                coeff ^= row_coeff
             else:
-                rows[bit] = value
+                rows[bit] = (value, coeff)
                 break
         else:
             raise AssertionError("dependent factor basis")
     return rows
 
 
-def in_span(value: int, rows: dict[int, int]) -> bool:
+def coordinate_mask(value: int, rows: dict[int, tuple[int, int]]) -> int | None:
+    coeff = 0
     while value:
         bit = value.bit_length() - 1
         if bit not in rows:
-            return False
-        value ^= rows[bit]
-    return True
+            return None
+        row, row_coeff = rows[bit]
+        value ^= row
+        coeff ^= row_coeff
+    return coeff
+
+
+def gray_ordinal(mask: int) -> int:
+    ordinal = 0
+    while mask:
+        ordinal ^= mask
+        mask >>= 1
+    return ordinal
 
 
 def x_from_natural_mask(basis: list[int], mask: int) -> int:
@@ -462,7 +475,9 @@ def replay(input_data: dict, summary: dict) -> dict:
             liftable_nonzero_x += 1
             projected_x_counts[column] += 1
             assert inverse_x is not None
-            if x < inverse_x and in_span(inverse_x, rows):
+            inverse_mask = coordinate_mask(inverse_x, rows)
+            if (x < inverse_x and inverse_mask is not None
+                    and gray_ordinal(inverse_mask) < total):
                 inverse_pair_collisions += 1
         if (ordinal + 1) % 8192 == 0:
             assert_rss_cap()

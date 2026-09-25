@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Check independent freeze anchor
-        run: echo "3ae96fb27a4e02001c0fa87482135756bff4f4c48ea89d4b5cf8d1788b517aa5  research/notes/ecc2k130/n131_beta3_f0_census_20260925/FROZEN.json" | sha256sum --check
+        run: echo "bfb69239607652ae71ccfc52cabe939d49ae998596440270396cc08091641dd0  research/notes/ecc2k130/n131_beta3_f0_census_20260925/FROZEN.json" | sha256sum --check
       - name: Check frozen source, input and independent small/sample controls
         run: python3 research/notes/ecc2k130/n131_beta3_f0_census_20260925/ci_replay.py
       - name: Check committed raw hashes and independent-count receipt

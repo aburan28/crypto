@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
@@ -30,6 +31,16 @@ def preflight() -> dict:
     data = json.loads((HERE / "INPUT.json").read_text())
     assert data["domain"] == frozen["domain"]
     assert data["pilot_masks"] == 32768 and data["full_masks"] == 2097152
+    spec = importlib.util.spec_from_file_location("n131_f0_count", HERE / "count.py")
+    assert spec is not None and spec.loader is not None
+    producer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(producer)
+    for ordinal in range(1 << 16):
+        mask = ordinal ^ (ordinal >> 1)
+        assert producer.gray_ordinal(mask) == ordinal
+    # A partner within full V0 but outside the pilot prefix is not a pilot collision.
+    partner = 40000
+    assert producer.gray_ordinal(partner ^ (partner >> 1)) >= data["pilot_masks"]
     with tempfile.TemporaryDirectory(prefix="n131-f0-selftest-") as tmp:
         report = Path(tmp) / "selftest.json"
         result = subprocess.run([sys.executable, str(HERE / "replay.py"),
