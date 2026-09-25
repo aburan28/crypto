@@ -34,6 +34,9 @@ def main() -> None:
     for relative, expected in frozen['merged_parent_sha256'].items():
         path = ROOT / relative
         assert path.is_file() and sha(path) == expected, relative
+    for relative, expected in frozen['workflow_sha256'].items():
+        path = ROOT / relative
+        assert path.is_file() and sha(path) == expected, relative
     for relative, expected in frozen['archive_sha256'].items():
         path = ROOT / relative
         assert path.is_file() and sha(path) == expected, relative
