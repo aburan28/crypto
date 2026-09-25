@@ -47,7 +47,7 @@ def main() -> None:
     index = {"schema_version": "1.0", "panel_names": [], "run_names": [],
              "source_sha256": {}, "uncompressed_stdout_sha256": {}}
     for source in (HERE / "make_inputs.py", HERE / "run.py", HERE / "run_panel.py",
-                   HERE / "verify.py", HERE / "verify_archive.py", HERE.parent / "compact_base_sweep_20260925/verify.py",
+                   HERE / "verify.py", HERE / "verify_archive.py", HERE / "summarize.py", HERE.parent / "compact_base_sweep_20260925/verify.py",
                    HERE.parent / "paired_fullrank_20260925/verify.py"):
         copy_one(source, evidence / "source" / source.name if source.parent == HERE
                  else evidence / "source" / ("pr747_verify.py" if "compact_base_sweep" in str(source)

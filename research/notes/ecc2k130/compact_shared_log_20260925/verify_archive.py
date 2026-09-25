@@ -31,7 +31,7 @@ def main() -> None:
               if file.is_file() and file.name != "SHA256SUMS"}
     assert listed == actual
     manifest = json.loads((EVIDENCE / "archive_manifest.json").read_bytes())
-    for own in ("make_inputs.py", "run.py", "run_panel.py", "verify.py", "verify_archive.py"):
+    for own in ("make_inputs.py", "run.py", "run_panel.py", "verify.py", "verify_archive.py", "summarize.py"):
         assert sha((EVIDENCE / "source" / own).read_bytes()) == sha((HERE / own).read_bytes())
     assert sha((EVIDENCE / "source/pr747_verify.py").read_bytes()) == verify.PR747_SHA
     assert sha((EVIDENCE / "source/pr737_verify.py").read_bytes()) == verify.PR737_SHA
