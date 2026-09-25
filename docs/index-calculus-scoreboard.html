@@ -6878,6 +6878,25 @@ Regularity, end-to-end cost, and speedup remain unset. Earlier toy controls are 
   </div>
 </section>
 <!-- END ecc2k130-rotated-beta-portfolio-20260925 -->
+<!-- BEGIN ecc2k130-rotated-four-base-joint-rank-20260925 -->
+<section class="panel" id="ecc2k130-rotated-four-base-joint-rank-20260925">
+  <div class="panel-head">
+    <h2>Rotated n = 19 four-base joint rank: 12/12 columns and 58/64 archive-oracle logs <span class="chip">stage diagnostic</span></h2>
+    <p><a href="https://github.com/aburan28/crypto/pull/779">PR #779</a> froze one unconditional SHA-selected 256-training/64-point-only-holdout stream for beta 3 and #775's selected four-base portfolio. All 12 canonical signed [4]F0 columns are distinct across bases. The independent bit-serial/Fermat replay checks every selected archived first witness, exact modular rank, each solved column log and every recovered scalar by [k]H = Q before sealed labels. The preregistered semantic gate required full joint rank and at least 12 additional verified holdouts; both conditions passed.</p>
+  </div>
+  <div class="table-scroll"><table>
+    <caption>Same-Q first-archived-witness diagnostic on the n = 19 subgroup q = 130,873. Counts include misses and dependent rows. Lookup uses a complete prior archive; no implicit PDP solving or matched-rho S is measured.</caption>
+    <thead><tr><th>Fixed arm</th><th class="n">Training rows / base-Q probes</th><th class="n">Training misses</th><th class="n">Exact rank / columns</th><th class="n">Zero / dependent rows</th><th class="n">First full rank row</th><th class="n">Group-verified holdouts / 64</th><th class="n">Archive misses</th><th>Full S / rho</th></tr></thead>
+    <tbody>
+      <tr><td>beta 3</td><td class="n">113 / 256</td><td class="n">143</td><td class="n">3 / 3</td><td class="n">0 / 110</td><td class="n">3</td><td class="n">29</td><td class="n">35</td><td>unset / unset</td></tr>
+      <tr><td>3, 338435, 303097, 464276</td><td class="n">516 / 1,024</td><td class="n">508</td><td class="n">12 / 12</td><td class="n">0 / 504</td><td class="n">16</td><td class="n">58</td><td class="n">6</td><td>unset / unset</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel-head">
+    <p>The four-base archive oracle used 129 fixed-order base probes for 64 holdouts; beta 3 used 64. Training and oracle each scanned 23,927,716 uncompressed archive bytes and took 3.307/2.929 s wall; point recovery and independent replay took 0.061/2.099 s. All children exited zero under frozen 120/300 s caps; peak training RSS was 313,278,464 bytes. This passes an n = 19 semantic admission gate only. It does not price implicit S6 witness search, negative proofs, relation acquisition, n = 131 support, an ECC2K-130 challenge log, or end-to-end IC/rho cost. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/RESULT.md">Decision and limits</a>; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/rotated_four_base_joint_rank_20260925/EVIDENCE.md">frozen hashes and replay receipt</a>. Raw SHA-256 <code>00ceb79d014bd92b4ce54baa9c1923f1594532b719881af17ae44a9e1aa1fe98</code>.</p>
+  </div>
+</section>
+<!-- END ecc2k130-rotated-four-base-joint-rank-20260925 -->
 <!-- BEGIN ecc2k130-compact-shared-log-20260925 -->
 <section class="panel" id="ecc2k130-compact-shared-log-20260925">
   <div class="panel-head">
