@@ -84,7 +84,7 @@ an exact K0 point conversion and Boolean-circuit validation. Neither is
 currently the smallest **implemented** path. The affine relation above is
 the smallest specified change that reuses K0's existing coordinate model.
 
-Primary sources: [Kohel, *Addition law structure of elliptic curves*,
+Primary sources: [Kohel, *Efficient arithmetic on elliptic curves in characteristic 2*,
 2016](https://arxiv.org/abs/1601.03669), especially Theorems 6.1 and 7.2;
 [Bernstein et al., *Binary Edwards Curves*, 2008]
 (https://cr.yp.to/newelliptic/edwards2-20080611.pdf). Existing repository
