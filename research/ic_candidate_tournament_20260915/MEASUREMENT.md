@@ -13,9 +13,13 @@ phase ledger. The restored optimized producers now have a separately tested
 [scientific adapter](producer/PROTOCOL.md), with [retained admission evidence](goal_20260924/producer-admission/README.md).
 The ordinary checkout's legacy worker remains unpriced under this schema. The
 schema-3 producer adds supplied public inputs and native online intervals, with
-[local and Linux controls independently replayed](goal_20260924/public-inputs/README.md). Driver
-admission migration and comparative reference qualification remain prerequisites;
-passing producer controls alone does not make a comparative campaign ready.
+[local and Linux controls independently replayed](goal_20260924/public-inputs/README.md). Both campaign drivers now use `driver_admission.py` to freeze and reconstruct
+these canonical records. Raw process measurements stay outside canonical method
+hashes. Native screens have unknown instruction ledgers; calibrated runs require
+the complete profile checksum. Failed runs retain their admitted key, with null
+verified timing and complete costs. Rho has a separate reference ID, never an
+IC candidate label. Comparative reference qualification remains pending;
+passing admission alone cannot promote a winner.
 
 ## Identity
 

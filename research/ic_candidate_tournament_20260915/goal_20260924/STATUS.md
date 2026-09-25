@@ -1,6 +1,13 @@
 # September 24 bounded IC goal
 
-Status: optimized producer admission passed; no new performance tournament launched.
+Status: canonical admission is merged in both existing campaign drivers; no new
+performance tournament launched. [PR 755](https://github.com/aburan28/crypto/pull/755)
+merged at `0de6d004d81fb8c2d3e86ecef24c738d86fec853`. The
+[durable driver controls](driver-admission/README.md) retain 17 successful native
+jobs, one intentional failure and 15 tournament native/profile pairs in the final
+Linux run; 28 audits passed after fresh extraction of the full history. These are
+fixed integration controls, not comparative reference qualification. Zero of the
+three improvement rounds have run.
 Public-point input and single-target native intervals are implemented in the
 [follow-up controls](public-inputs/README.md); PR 748 merged at
 `4a898fcd3464b71439bd9451bd466a6ec217ddc9`, with 39/39 IC and 13/13 rho
@@ -36,6 +43,12 @@ no per-cell regression above 10%, independently certified answers for every
 target, and passing confirmation and replay. The precise allocation, estimator,
 familywise rule and panel must be sealed before the first new measured round;
 this status note does not substitute for that protocol.
+
+The current user measurement contract makes **single-target online wall time**
+the headline metric, excluding reusable preparation and fixture generation. The
+complete cold instruction/time goals above are additional acceptance gates.
+Report both boundaries explicitly; neither batch amortization nor a cheap solver
+stage substitutes for the one-target result.
 
 ## Baseline inventory, not yet fresh qualification
 
@@ -78,12 +91,14 @@ scalars; a public-target adapter is required before that path joins this panel.
    `measurement.py`, `test_records.py` and `ci_smoke.py`; merged in PR 718.
 2. Optimized archived producers now export eleven exclusive phases, ordinary-query
    outcomes/rank and matrix diagnostics; 39/39 pairs independently replay. Combined
-   old labels remain unknown under the new schema. Integrate admission into both
-   development and promotion drivers before any new comparison. The public-point
+   old labels remain unknown under the new schema. Admission is now wired into
+   both drivers; the [driver control protocol](driver-admission/PROTOCOL.md)
+   covers canonical records, online timing, retained failures and frozen audit. The public-point
    and single-target native timing follow-up passes local controls, Linux
    integration and transported evidence replay. Rho reusable arithmetic/Frobenius
    preparation is excluded from its online interval and retained in cold cost.
-3. Restore/qualify candidate IC sources and a strong matched rho reference;
+3. Complete the bounded reference-quality checks below, then qualify candidate
+   IC sources and a strong matched rho reference;
    freeze rho width and source before held-out data.
 4. Seal the panel and familywise protocol, then run bounded rounds. Keep all
    failures and source/fixture/profiler artifacts; archive them durably, update
@@ -92,3 +107,29 @@ scalars; a public-target adapter is required before that path joins this panel.
 The local development machine is macOS arm64. Calibrated measurements require
 the existing Linux amd64 / Valgrind 3.22.0 workflow; native local timings cannot
 substitute for that accounting model. No new performance result is claimed here.
+
+## Reference-quality checks before comparison
+
+Review of the prepared `scaled` source identified two concrete checks to finish
+while qualifying the references. These are code-review findings, not measured
+performance improvements:
+
+- In `examples/ic_tournament_worker.rs`, the arena region guarantees 4096-byte
+  alignment but allocation rounds only the offset for arbitrary requested
+  alignments. Harden requests above that guarantee with a system-allocator
+  fallback or correct absolute-address alignment, and exercise the release
+  allocator controls. Keep old measured source snapshots immutable.
+- In `src/cryptanalysis/koblitz_tiny_ic.rs`, `Echelon::push` performs modular
+  arithmetic across every column, including already-zero prefixes. Review
+  trailing-column reduction and bounded-modulus arithmetic against independent
+  scalar-field rank/solution checks before treating this kernel as the strongest
+  compatible reference. A faster kernel must be measured; source inspection
+  alone does not establish a gain. These small matrices do not by themselves
+  justify replacing Gaussian elimination with a large sparse solver.
+
+Inspect the current compatible `icx`/rho paths as well as restored sources.
+Freeze a cross-campaign target exclusion set and the familywise confirmation rule
+before enabling promotion. The existing admission gate intentionally leaves
+reference qualification unset. The next deliverable is a qualified comparison
+panel and executed development evidence, followed by the bounded rounds; more
+integration controls alone will not complete this goal.
