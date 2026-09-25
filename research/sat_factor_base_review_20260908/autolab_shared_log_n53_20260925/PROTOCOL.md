@@ -33,3 +33,7 @@ All files below were committed before any new measured child run. The L32 file i
 | 0 | 531320 | `680f9f7725e54ac857c2dac32aa215223abc32de51d60f19fbfad69c93574049` | `1ec6ca63fb81d6e4e07ec9d2a8e5389d02f25fb73f0fc56e3d5ccab85a59dd6f` |
 | 1 | 531321 | `f3a7de1bbcbf4f7a0f0dd5fa3908c1a7ef871802772b0405688ed1f135c6d020` | `d4cd94396d04d755e4eb6a3f4f550da329769ee6b42a1020fc95615c80c9df55` |
 | 2 | 531322 | `c4f92e7391276f1d6ded2fa711f82fef445b4a8eee0ae5449d5084ab6f1fdbdc` | `1b3d3a0d9ed59f6f5f96ec0eff80776ee00f75a47ce07e4abfeb95cbf9d61a22` |
+
+## Executable source boundary (frozen before outcomes)
+
+The paired job must descend from main merge `fc27150df3238b6863ed5618c721e7fd8b6ce403` (#747). Its exact compact producer `examples/koblitz_s5_sat_instance.rs` has SHA-256 `c2bc8b05087df69bef9593363e9d7c112e843ef16da122da50eb29ab22115f09` and emits per-query `s3_calls`, `partner_roots`, `indexed_partner_hits`, `group_lift_attempts`, and `hit` on both successful and failed queries. The runner must reject missing telemetry, record all source and binary hashes, and preserve the source boundary in its archive. The three query streams and six point files above remain byte-exactly unchanged from preregistration.
