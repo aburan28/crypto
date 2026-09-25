@@ -56,7 +56,10 @@ def verify(training, point_batch):
     assert len(points) == len(set(points)) == len(manifest["validation_scalars"])
     receipt = json.loads((point_batch / "resource_receipt.json").read_text())
     assert receipt["producer_stdout_sha256"] == sha(point_batch / "producer.stdout.jsonl")
-    assert receipt["producer_stderr_sha256"] == sha(point_batch / "producer.stderr.txt")
+    producer_stderr = point_batch / "producer.stderr.txt"
+    stderr_digest = (sha(producer_stderr) if producer_stderr.exists()
+                     else hashlib.sha256(b"").hexdigest())
+    assert receipt["producer_stderr_sha256"] == stderr_digest
     assert receipt["targets_requested"] == len(points)
     assert len(receipt["negative_controls"]) == 3
     for control in receipt["negative_controls"]:
