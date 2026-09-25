@@ -1,0 +1,6 @@
+
+thread 'main' (16825502) panicked at examples/koblitz_rho_batch_ks.rs:261:13:
+assertion `left == right` failed: rho point target must belong to the prime-order subgroup
+  left: Affine { x: 0, y: 1 }
+ right: Infinity
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
