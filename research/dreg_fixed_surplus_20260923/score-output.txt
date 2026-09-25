@@ -1,0 +1,17 @@
+| pair | S | small | values | median | large | values | median | verdict |
+|---|--:|---|---|--:|---|---|--:|---|
+| primary | -2 | n7l3 | 6 6 6 6 | 6.0 | n13l5 | — | — | not testable (n13l5: no committed draws) |
+|  | -1 | n5l2 | 5 5 5 5 | 5.0 | n11l4 | 6 6 6 6 | 6.0 | grows |
+|  | +0 | n9l3 | 6 6 6 6 | 6.0 | n15l5 | — | — | not testable (n15l5: no committed draws) |
+|  | +1 | n7l2 | 5 5 5 5 | 5.0 | n13l4 | 6 6 6 6 | 6.0 | grows |
+
+Overall, by the registered rule: inconclusive (the primary pair is not testable)
+Testable pairs other than the primary: {-1: 'grows', 0: 'not testable (n15l5: no committed draws)', 1: 'grows'}
+
+Secondary (not decided on): FFD, controls, satisfiable fraction
+  n5l2: ℓ=2 S=-1 FFD [3, 2, 3, 3] satisfiable 3/7 control {'kind': 'at_least', 'degree': 8}
+  n7l2: ℓ=2 S=+1 FFD [3, 3, 3, 3] satisfiable 1/5 control {'kind': 'resolved', 'degree': 6, 'refuted': False}
+  n7l3: ℓ=3 S=-2 FFD [2, 3, 3, 3] satisfiable 8/12 control {'kind': 'resolved', 'degree': 7, 'refuted': False}
+  n9l3: ℓ=3 S=+0 FFD [3, 3, 3, 3] satisfiable 0/4 control unfinished
+  n11l4: ℓ=4 S=-1 FFD [3, 3, 3, 3] satisfiable 2/6 control {'kind': 'at_least', 'degree': 7}
+  n13l4: ℓ=4 S=+1 FFD [3, 3, 3, 3] satisfiable 1/5 control unfinished

@@ -1,0 +1,37 @@
+name: PKM tower pilot
+on:
+  pull_request:
+    paths:
+      - 'research/pkm_tower_pilot_20260924/**'
+      - 'research/pkm_tower_round2_20260925/**'
+      - 'src/cryptanalysis/f4_fp_tower.rs'
+      - 'examples/pkm_tower_pilot.rs'
+      - '.github/workflows/pkm-tower-pilot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cross-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exhaustive counters against planted decompositions
+        run: python3 -m unittest discover -s research/pkm_tower_pilot_20260924 -p 'test_*.py' -v
+      - name: Every committed pilot tower row against exhaustive search
+        run: python3 research/pkm_tower_pilot_20260924/verify.py research/pkm_tower_pilot_20260924/runs/*.jsonl
+      - name: Every committed round-2 tower row against exhaustive search
+        run: python3 research/pkm_tower_pilot_20260924/verify.py research/pkm_tower_round2_20260925/runs/*.jsonl
+      - name: Repeats agree, no planted solution is lost, and the engines' verdicts agree
+        run: >-
+          python3 research/pkm_tower_pilot_20260924/analyze.py
+          research/pkm_tower_pilot_20260924/runs/*.jsonl
+          research/pkm_tower_round2_20260925/runs/*.jsonl
+  engine-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: The tower engine's unit tests
+        run: cargo test --release --lib f4_fp_tower

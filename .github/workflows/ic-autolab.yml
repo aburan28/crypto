@@ -1,0 +1,60 @@
+name: IC autolab integration
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'examples/ic_tournament_worker.rs'
+      - 'Cargo.toml'
+      - 'research/ic_candidate_tournament_20260915/**'
+      - 'research/sat_factor_base_review_20260908/autolab/**'
+      - '.github/workflows/ic-autolab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ic-autolab-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  linux-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ic-autolab-integration
+      - name: Install calibrated profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Freeze dependency resolution
+        run: cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+      - name: Harness and accounting regression tests
+        run: |
+          python -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_*.py' -v
+          python -m unittest discover -s research/sat_factor_base_review_20260908/autolab -p 'test_boundary_autolab.py' -v
+      - name: Release arithmetic and descent regressions
+        run: |
+          cargo test --locked --release --lib descent_
+          cargo test --locked --release --lib rho_
+          cargo build --locked --release --example ic_tournament_worker
+      - name: Complete-solve and profiler integration
+        run: |
+          python research/ic_candidate_tournament_20260915/ci_smoke.py \
+            --worker target/release/examples/ic_tournament_worker \
+            --out "$RUNNER_TEMP/ic-autolab-integration"
+      - name: Preserve evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-autolab-integration-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/ic-autolab-integration
+            Cargo.lock
+          retention-days: 30
+          if-no-files-found: warn

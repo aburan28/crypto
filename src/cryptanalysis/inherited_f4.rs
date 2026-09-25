@@ -74,10 +74,11 @@
 //! at `n = 131`, which is bounded by how many candidate tuples must be
 //! ruled out and not by how one node's matrix is reduced.
 
-use crate::cryptanalysis::fx_hash::FxMap as HashMap;
+use crate::cryptanalysis::fx_hash::{FxMap as HashMap, MaskMap};
 use crate::cryptanalysis::koblitz_groebner::{
-    all_variable_mask, build_inherited_macaulay, echelon_f2_counted, macaulay_columns,
-    macaulay_rows_monos_with_mask, monomials_up_to_mask, pack_rows, rref_f2_counted,
+    all_variable_mask, build_inherited_macaulay, build_inherited_macaulay_support_local,
+    echelon_f2_counted, macaulay_columns, macaulay_rows_monos_with_mask, monomials_up_to_mask,
+    pack_rows, rref_f2_counted,
 };
 use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
 use std::cell::RefCell;
@@ -287,6 +288,12 @@ impl ChildSystem {
         &self.system
     }
 
+    /// Whether some generator's degree dropped, so specialising a basis
+    /// into this child would insert completion rows.
+    pub fn has_dropped(&self) -> bool {
+        !self.dropped.is_empty()
+    }
+
     /// The child of a system whose generators have degrees
     /// `parent_degrees`, given `substituted[i]` — the image of the parent's
     /// `i`-th generator, zero or not.
@@ -421,7 +428,7 @@ pub struct ReducedBasis {
     columns: Vec<u64>,
     /// Monomial → column, built only when a row has to be packed from
     /// monomials (completion), which most levels never do.
-    column_index: Option<HashMap<u64, usize>>,
+    column_index: Option<MaskMap<usize>>,
     words: usize,
     /// Layout steps since the root: `history[e]` maps epoch `e` to `e + 1`.
     /// The current epoch is `history.len()`.
@@ -442,6 +449,11 @@ pub struct ReducedBasis {
     /// that one row: every specialisation of `1` is `1`, and the solver
     /// reads nothing past it (see [`ReducedBasis::specialise_shared`]).
     refuted: bool,
+    /// Multiply each generator only by the variables in its own support,
+    /// at the root and in completion rows, instead of by every variable
+    /// occurring in the system ([`ReducedBasis::from_system_with`]).
+    /// Inherited by every basis specialised from this one.
+    support_local: bool,
 }
 
 impl ReducedBasis {
@@ -457,6 +469,26 @@ impl ReducedBasis {
         n_vars: usize,
         degree: u32,
     ) -> Option<(Self, InheritCost)> {
+        Self::from_system_with(system, n_vars, degree, false)
+    }
+
+    /// [`ReducedBasis::from_system`] with a choice of multipliers.  With
+    /// `support_local`, generator `f` is multiplied only by monomials in the
+    /// variables of its own support, so the row space is spanned by
+    /// `{t·f : t ⊆ supp(f), deg t·f ≤ degree}` — a subspace of the
+    /// occurring-variable one, so every consequence it yields is still in
+    /// the ideal and the splitting solver still decides every target
+    /// exactly; it may read a weaker tail at a node.  The policy is kept by
+    /// every specialisation, whose completion rows follow it too.  On a
+    /// chain in the interleaved order it drops the products of the last
+    /// link by the first summands' variables, which the tail never used
+    /// (`RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md`).
+    pub fn from_system_with(
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        degree: u32,
+        support_local: bool,
+    ) -> Option<(Self, InheritCost)> {
         let system: Rc<Vec<F2BoolPoly>> =
             Rc::new(system.iter().filter(|p| !p.is_zero()).cloned().collect());
         let generator_degrees: Rc<Vec<u32>> = Rc::new(system.iter().map(poly_degree).collect());
@@ -466,13 +498,23 @@ impl ReducedBasis {
             .flat_map(|p| p.terms.iter())
             .fold(0u64, |acc, t| acc | t.mask)
             & all_variable_mask(n_vars);
-        let (columns, mut matrix) = build_inherited_macaulay(
-            system.as_slice(),
-            n_vars,
-            degree,
-            occurring,
-            quadratic_generators,
-        )?;
+        let (columns, mut matrix) = if support_local {
+            build_inherited_macaulay_support_local(
+                system.as_slice(),
+                n_vars,
+                degree,
+                occurring,
+                quadratic_generators,
+            )?
+        } else {
+            build_inherited_macaulay(
+                system.as_slice(),
+                n_vars,
+                degree,
+                occurring,
+                quadratic_generators,
+            )?
+        };
         let mut cost = InheritCost::default();
         let empty = |columns: Vec<u64>| Self {
             degree,
@@ -490,6 +532,7 @@ impl ReducedBasis {
             closure_rounds: 0,
             pending: Vec::new(),
             refuted: false,
+            support_local,
         };
         if matrix.is_empty() {
             return Some((empty(Vec::new()), cost));
@@ -559,7 +602,7 @@ impl ReducedBasis {
     }
 
     /// Monomial → current column, built on first use after a layout change.
-    fn column_index(&mut self) -> &HashMap<u64, usize> {
+    fn column_index(&mut self) -> &MaskMap<usize> {
         if self.column_index.is_none() {
             self.column_index = Some(
                 self.columns
@@ -585,7 +628,19 @@ impl ReducedBasis {
         degree: u32,
         rounds: u32,
     ) -> Option<(Self, InheritCost)> {
-        let (mut basis, mut cost) = Self::from_system(system, n_vars, degree)?;
+        Self::from_system_closed_with(system, n_vars, degree, rounds, false)
+    }
+
+    /// [`ReducedBasis::from_system_closed`] with the multiplier choice of
+    /// [`ReducedBasis::from_system_with`].
+    pub fn from_system_closed_with(
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        degree: u32,
+        rounds: u32,
+        support_local: bool,
+    ) -> Option<(Self, InheritCost)> {
+        let (mut basis, mut cost) = Self::from_system_with(system, n_vars, degree, support_local)?;
         if rounds == 0 || degree < 3 || basis.rows.is_empty() || basis.refuted {
             return Some((basis, cost));
         }
@@ -622,6 +677,12 @@ impl ReducedBasis {
         }
         basis.close(&mut cost);
         Some((basis, cost))
+    }
+
+    /// Whether this basis multiplies generators only within their supports
+    /// ([`ReducedBasis::from_system_with`]).
+    pub fn support_local(&self) -> bool {
+        self.support_local
     }
 
     /// Variables specialised away since the root, as a mask.
@@ -730,19 +791,32 @@ impl ReducedBasis {
             if staging.len() < words {
                 staging.resize(words, 0);
             }
-            let (mut lo, mut hi) = (usize::MAX, 0usize);
+            let staging = &mut staging[..words];
+            let mut lo = usize::MAX;
+            let mut scatter = |c: u32| {
+                if c != DELETED {
+                    let w = c as usize / 64;
+                    staging[w] ^= 1u64 << (c % 64);
+                    lo = lo.min(w);
+                }
+            };
             for (i, &word) in live.iter().enumerate() {
                 let base = (lead + i) * 64;
                 let mut bits = word;
-                while bits != 0 {
-                    let b = bits.trailing_zeros() as usize;
-                    bits &= bits - 1;
-                    let c = map[base + b];
-                    if c != DELETED {
-                        let w = c as usize / 64;
-                        staging[w] ^= 1u64 << (c % 64);
-                        lo = lo.min(w);
-                        hi = hi.max(w);
+                // A whole word of the map at once, so the lookups below
+                // need no bounds check; only a layout's last word is short.
+                if let Some(chunk) = map.get(base..base + 64) {
+                    let chunk: &[u32; 64] = chunk.try_into().expect("64 entries");
+                    while bits != 0 {
+                        let b = bits.trailing_zeros() as usize & 63;
+                        bits &= bits - 1;
+                        scatter(chunk[b]);
+                    }
+                } else {
+                    while bits != 0 {
+                        let b = bits.trailing_zeros() as usize;
+                        bits &= bits - 1;
+                        scatter(map[base + b]);
                     }
                 }
             }
@@ -750,10 +824,11 @@ impl ReducedBasis {
                 return None;
             }
             cost.specialise_word_ops += (words - lo) as u64;
-            // staging is zero outside `lo..=hi`, so its tail is the image
-            let nonzero = staging[lo..=hi].iter().any(|&w| w != 0);
-            let out = nonzero.then(|| finish(&staging[lo..words], lo));
-            staging[lo..=hi].fill(0);
+            // staging is zero below `lo`, so its tail is the image
+            let image = &mut staging[lo..];
+            let nonzero = image.iter().any(|&w| w != 0);
+            let out = nonzero.then(|| finish(image, lo));
+            image.fill(0);
             out
         })
     }
@@ -1042,6 +1117,7 @@ impl ReducedBasis {
             closure_rounds: self.closure_rounds,
             pending: Vec::new(),
             refuted: false,
+            support_local: self.support_local,
         };
         // Kept rows are renumbered; a pending fall that is kept stays pending.
         let mut is_pending = Vec::new();
@@ -1088,7 +1164,9 @@ impl ReducedBasis {
         // multipliers over the variables occurring in the specialised
         // system (the from-scratch step's own active-multiplier policy):
         // a multiplier containing a variable that occurs nowhere adds only
-        // rows `x·g` that cannot reach the linear tail.
+        // rows `x·g` that cannot reach the linear tail.  A support-local
+        // basis multiplies each dropped generator only within its own
+        // support, as its root did.
         if !dropped.is_empty() {
             let multiplier_mask = out
                 .system
@@ -1101,7 +1179,12 @@ impl ReducedBasis {
                 let p = &out.system[index];
                 let old_gap = self.degree - old_degree;
                 let new_gap = self.degree - new_degree;
-                for t in monomials_up_to_mask(multiplier_mask, new_gap) {
+                let mask = if self.support_local {
+                    multiplier_mask & p.terms.iter().fold(0u64, |acc, t| acc | t.mask)
+                } else {
+                    multiplier_mask
+                };
+                for t in monomials_up_to_mask(mask, new_gap) {
                     if t.count_ones() <= old_gap {
                         continue;
                     }
@@ -1355,7 +1438,7 @@ impl ReducedBasis {
         columns.sort_by(|a, b| {
             cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse()
         });
-        let index: HashMap<u64, usize> = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
+        let index: MaskMap<usize> = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
         let map: Vec<u32> = self.columns.iter().map(|m| index[m] as u32).collect();
         self.adopt_layout(columns, map);
     }

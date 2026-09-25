@@ -163,6 +163,18 @@ unsafe fn clmul_u64(a: u64, b: u64) -> u128 {
     ((hi as u128) << 64) | (lo as u128)
 }
 
+/// AArch64 carry-less multiply via `PMULL` (`vmull_p64`), the ARM
+/// counterpart of `pclmulqdq`.  Gated on the `aes` feature the same way
+/// `binary_ecc::f2m` gates its PMULL path, so Apple M-series and Graviton
+/// run the single-instruction product instead of the bit-serial loop.
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "aes")]
+unsafe fn clmul_u64_neon(a: u64, b: u64) -> u128 {
+    // `vmull_p64` takes two 64-bit polynomials and returns their full
+    // 128-bit carry-less product.
+    std::arch::aarch64::vmull_p64(a, b)
+}
+
 impl Gf2 {
     pub fn new(irr: &IrreduciblePoly) -> Self {
         assert!(irr.degree <= 63, "Gf2 handles n ≤ 63");
@@ -196,7 +208,9 @@ impl Gf2 {
 
         #[cfg(target_arch = "x86_64")]
         let has_clmul = std::arch::is_x86_feature_detected!("pclmulqdq");
-        #[cfg(not(target_arch = "x86_64"))]
+        #[cfg(target_arch = "aarch64")]
+        let has_clmul = std::arch::is_aarch64_feature_detected!("aes");
+        #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
         let has_clmul = false;
 
         Self {
@@ -235,6 +249,11 @@ impl Gf2 {
             // in `has_clmul` at construction.
             return unsafe { clmul_u64(a, b) };
         }
+        #[cfg(target_arch = "aarch64")]
+        if self.has_clmul {
+            // SAFETY: `has_clmul` records `is_aarch64_feature_detected!("aes")`.
+            return unsafe { clmul_u64_neon(a, b) };
+        }
         let mut w = 0u128;
         let mut aa = a as u128;
         let mut bb = b;
@@ -265,6 +284,11 @@ impl Gf2 {
             // SAFETY: guarded by the runtime feature detection recorded
             // in `has_clmul` at construction.
             return self.reduce(unsafe { clmul_u64(a, a) });
+        }
+        #[cfg(target_arch = "aarch64")]
+        if self.has_clmul {
+            // SAFETY: `has_clmul` records `is_aarch64_feature_detected!("aes")`.
+            return self.reduce(unsafe { clmul_u64_neon(a, a) });
         }
         let w = (spread32(a) as u128) | ((spread32(a >> 32) as u128) << 64);
         self.reduce(w)
@@ -982,6 +1006,41 @@ mod tests {
             let mut zeros = vec![0u64; 9];
             gf.batch_inv(&mut zeros, &mut scratch);
             assert!(zeros.iter().all(|&z| z == 0));
+        }
+    }
+
+    /// `mul`/`sqr` must equal an independent schoolbook multiply-then-reduce,
+    /// whichever carry-less path runs (x86 PCLMULQDQ, aarch64 PMULL, or the
+    /// bit-serial fallback).  This is the correctness gate for the ARM PMULL
+    /// path added for Apple-silicon / Graviton mechanical sympathy.
+    #[test]
+    fn clmul_path_matches_independent_reference() {
+        use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+        // Independent reference: carry-less product in u128, then reduce
+        // bit-by-bit modulo the irreducible (no shared table).
+        fn ref_mul(a: u64, b: u64, irr_bits: u64, n: u32) -> u64 {
+            let mut w = 0u128;
+            for i in 0..64 {
+                if (b >> i) & 1 == 1 {
+                    w ^= (a as u128) << i;
+                }
+            }
+            for i in (n..128).rev() {
+                if (w >> i) & 1 == 1 {
+                    w ^= (irr_bits as u128) << (i - n);
+                }
+            }
+            (w as u64) & ((1u64 << n) - 1)
+        }
+        let mut s = 0x1234_5678_9ABC_DEF1u64;
+        for n in [7u32, 13, 24, 41, 53, 62] {
+            let gf = Gf2::new(&find_irreducible_sparse(n).unwrap());
+            for _ in 0..2000 {
+                let a = xorshift(&mut s) & gf.mask;
+                let b = xorshift(&mut s) & gf.mask;
+                assert_eq!(gf.mul(a, b), ref_mul(a, b, gf.irr, n), "mul n={n}");
+                assert_eq!(gf.sqr(a), ref_mul(a, a, gf.irr, n), "sqr n={n}");
+            }
         }
     }
 

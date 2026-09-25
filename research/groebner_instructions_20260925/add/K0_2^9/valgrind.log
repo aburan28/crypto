@@ -1,0 +1,11 @@
+==31408== Callgrind, a call-graph generating cache profiler
+==31408== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==31408== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==31408== Command: /home/user/crypto/target/release/examples/ir_calibration add 0 9 200000
+==31408== 
+==31408== For interactive control, run 'callgrind_control -h'.
+==31408== 
+==31408== Events    : Ir
+==31408== Collected : 135974243
+==31408== 
+==31408== I   refs:      135,974,243

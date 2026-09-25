@@ -19,6 +19,19 @@ pub struct DecompositionTemplate {
     pub constant: Vec<F2BoolPoly>,
     /// coefficients[k][j] is the coefficient of target bit k in equation j.
     pub coefficients: Vec<Vec<F2BoolPoly>>,
+    /// The inputs the template was built from, so an in-process memo can
+    /// confirm a hit exactly rather than trust a hash.  Not serialised:
+    /// the shared cache keys on the full inputs already.
+    #[serde(skip)]
+    source: Option<TemplateSource>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct TemplateSource {
+    basis: Vec<Vec<u64>>,
+    b: Vec<u64>,
+    squares: Vec<u64>,
+    reduced: Vec<Vec<u64>>,
 }
 impl DecompositionTemplate {
     pub fn build(
@@ -71,7 +84,29 @@ impl DecompositionTemplate {
             prefix,
             constant,
             coefficients,
+            source: Some(TemplateSource {
+                basis: basis.iter().map(|e| e.raw_bits().to_vec()).collect(),
+                b: b.raw_bits().to_vec(),
+                squares: st.squares.clone(),
+                reduced: st.reduced.clone(),
+            }),
         })
+    }
+
+    /// Whether this template was built from exactly these inputs.
+    fn matches(&self, basis: &[F2mElement], b: &F2mElement, m: usize, st: &FieldStructure) -> bool {
+        self.m == m
+            && self.n == st.n
+            && self.source.as_ref().is_some_and(|s| {
+                s.basis.len() == basis.len()
+                    && s.basis
+                        .iter()
+                        .zip(basis)
+                        .all(|(x, e)| x.as_slice() == e.raw_bits())
+                    && s.b.as_slice() == b.raw_bits()
+                    && s.squares == st.squares
+                    && s.reduced == st.reduced
+            })
     }
     pub fn instantiate(&self, x_r: &F2mElement) -> DecompositionSystem {
         let bits = x_r.raw_bits().first().copied().unwrap_or(0);
@@ -157,6 +192,48 @@ pub fn template_key(
     let basis_bits: Vec<_> = basis.iter().map(|x| x.raw_bits()).collect();
     serde_json::to_vec(&(st, basis_bits, b.raw_bits(), m, "boolean-degrevlex-v0-high")).unwrap()
 }
+/// Templates kept per thread when no algebra cache is configured.  A
+/// decomposition run asks the same `(field, basis, b, m)` for every
+/// target, so a handful covers any caller; the list is searched
+/// linearly and the oldest entry dropped.
+const LOCAL_TEMPLATES: usize = 8;
+
+thread_local! {
+    static TEMPLATES: std::cell::RefCell<Vec<(u64, std::rc::Rc<DecompositionTemplate>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// A hash of everything a template depends on: the field's structure
+/// constants, the ordered basis, `b` and `m`.  Collisions would hand one
+/// template to another system, so the full inputs are also compared by
+/// [`DecompositionTemplate::matches`] before a hit is used.
+fn local_template_key(basis: &[F2mElement], b: &F2mElement, m: usize, st: &FieldStructure) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    st.n.hash(&mut h);
+    st.squares.hash(&mut h);
+    st.reduced.hash(&mut h);
+    for e in basis {
+        e.raw_bits().hash(&mut h);
+    }
+    b.raw_bits().hash(&mut h);
+    m.hash(&mut h);
+    h.finish()
+}
+
+/// The decomposition system for target abscissa `x_r`.  Everything but
+/// the last link is independent of the target and the last link is
+/// linear in its bits, so the system is instantiated from a
+/// [`DecompositionTemplate`] built once — `n` polynomial additions per
+/// target instead of the symbolic field arithmetic of
+/// [`build_decomposition_system`], which measured 29 % of a whole
+/// `m = 2` decomposition at `n = 23`.  The equations are identical
+/// either way (`every_target_matches_original_chain`).
+///
+/// With the algebra cache configured (`IC_PREPROCESS_CACHE`), templates
+/// go through it; otherwise a small per-thread memo holds them.
+/// `IC_TEMPLATE_MEMO=0` restores building every system from scratch, as
+/// a same-binary control.
 pub fn build_decomposition_system_reusing(
     basis: &[F2mElement],
     x_r: &F2mElement,
@@ -165,7 +242,35 @@ pub fn build_decomposition_system_reusing(
     st: &FieldStructure,
 ) -> Option<DecompositionSystem> {
     if !algebra_cache::enabled(Layer::Preprocessing) {
-        return build_decomposition_system(basis, x_r, b, m, st);
+        static MEMO_OFF: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        if *MEMO_OFF.get_or_init(|| std::env::var("IC_TEMPLATE_MEMO").as_deref() == Ok("0")) {
+            return build_decomposition_system(basis, x_r, b, m, st);
+        }
+        let key = local_template_key(basis, b, m, st);
+        let hit = TEMPLATES.with(|t| {
+            t.borrow()
+                .iter()
+                .find(|(k, tpl)| *k == key && tpl.matches(basis, b, m, st))
+                .map(|(_, tpl)| tpl.clone())
+        });
+        let template = match hit {
+            Some(t) => t,
+            None => {
+                let Some(built) = DecompositionTemplate::build(basis, b, m, st) else {
+                    return build_decomposition_system(basis, x_r, b, m, st);
+                };
+                let built = std::rc::Rc::new(built);
+                TEMPLATES.with(|t| {
+                    let mut t = t.borrow_mut();
+                    if t.len() == LOCAL_TEMPLATES {
+                        t.remove(0);
+                    }
+                    t.push((key, built.clone()));
+                });
+                built
+            }
+        };
+        return Some(template.instantiate(x_r));
     }
     let key = template_key(basis, b, m, st);
     let template: DecompositionTemplate =
@@ -228,6 +333,33 @@ mod tests {
                     build_decomposition_system(&basis, &fe(r), &fe(1), m, &st)
                         .unwrap()
                         .equations
+                );
+            }
+        }
+    }
+    #[test]
+    fn memoised_systems_match_direct_builds_on_real_curves() {
+        use crate::cryptanalysis::koblitz_index_calculus::{
+            build_frobenius_factor_base, KoblitzCurve,
+        };
+        use num_bigint::BigUint;
+        for (a, n, m) in [(0u8, 9u32, 2usize), (0, 9, 3), (1, 17, 2), (0, 13, 3)] {
+            let kc = KoblitzCurve::new(a, n).unwrap();
+            let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+            let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+            for k in 1..24u32 {
+                let x = match kc.mul(kc.generator(), &BigUint::from(1000 + 37 * k)) {
+                    crate::binary_ecc::BinaryPoint::Affine { x, .. } => x,
+                    _ => continue,
+                };
+                let direct =
+                    build_decomposition_system(&fb.subspace_basis, &x, &kc.curve.b, m, &st);
+                let reused =
+                    build_decomposition_system_reusing(&fb.subspace_basis, &x, &kc.curve.b, m, &st);
+                assert_eq!(
+                    direct.map(|s| s.equations),
+                    reused.map(|s| s.equations),
+                    "K_{a}/2^{n} m={m} k={k}"
                 );
             }
         }

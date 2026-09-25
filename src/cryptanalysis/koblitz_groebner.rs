@@ -561,6 +561,83 @@ impl DecompositionSystem {
         v.extend(std::iter::repeat_n(n as usize, self.m.saturating_sub(2)));
         v
     }
+
+    /// The **interleaved solve order** of a chain, as a permutation
+    /// `perm[old] = new` of the variables: `x₁, x₂, e₁, x₃, e₂, …, e_{m−2},
+    /// x_m` from the lowest index to the highest, each block keeping its
+    /// internal order.  The identity for `m = 2`.
+    ///
+    /// [`SplitRule::HighestFree`] splits on the highest-indexed free
+    /// variable, so under this order the solver fixes the last summand
+    /// `x_m` first.  Once it is fixed, the last link `S₃(e_{m−2}, x_m,
+    /// x_R)` is `F_2`-linear in `e_{m−2}`'s coordinates (squaring is
+    /// linear), the intermediate point is eliminated rather than split
+    /// on, and the link before it is bilinear in `(e_{m−3}, x_{m−1})` —
+    /// the same step one link further in, down to an `m = 2` system in
+    /// `x₁, x₂`.  Under the layout order the solver splits on the `n`
+    /// coordinates of `e_{m−2}` first, the least constrained unknowns in
+    /// the system (`RESEARCH_CHAIN_SPLIT_ORDER.md`).
+    pub fn interleaved_order(&self, n: u32) -> Vec<u32> {
+        let (ell, m, n) = (self.ell, self.m, n as usize);
+        let summand = |i: usize| i * ell..(i + 1) * ell;
+        let inter = |j: usize| m * ell + j * n..m * ell + (j + 1) * n;
+        let mut order: Vec<usize> = Vec::with_capacity(self.n_vars);
+        order.extend(summand(0));
+        if m >= 2 {
+            order.extend(summand(1));
+        }
+        for i in 2..m {
+            order.extend(inter(i - 2));
+            order.extend(summand(i));
+        }
+        debug_assert_eq!(order.len(), self.n_vars);
+        let mut perm = vec![0u32; self.n_vars];
+        for (new, &old) in order.iter().enumerate() {
+            perm[old] = new as u32;
+        }
+        perm
+    }
+}
+
+/// Rename the variables of `p` by `perm[old] = new`.
+pub fn permute_poly(p: &F2BoolPoly, perm: &[u32]) -> F2BoolPoly {
+    F2BoolPoly::from_monos(
+        p.terms
+            .iter()
+            .map(|t| F2BoolMono::from_mask(permute_mask(t.mask, perm)))
+            .collect(),
+        p.n_vars,
+    )
+}
+
+/// Rename the variables of a monomial or point mask by `perm[old] = new`.
+pub fn permute_mask(mask: u64, perm: &[u32]) -> u64 {
+    let mut out = 0u64;
+    let mut bits = mask;
+    while bits != 0 {
+        let v = bits.trailing_zeros() as usize;
+        bits &= bits - 1;
+        out |= 1u64 << perm[v];
+    }
+    out
+}
+
+/// The inverse of a permutation `perm[old] = new`.
+pub fn invert_permutation(perm: &[u32]) -> Vec<u32> {
+    let mut inverse = vec![0u32; perm.len()];
+    for (old, &new) in perm.iter().enumerate() {
+        inverse[new as usize] = old as u32;
+    }
+    inverse
+}
+
+/// Whether the decomposition oracle solves a chain in
+/// [`DecompositionSystem::interleaved_order`] when the solve splits on the
+/// highest free variable: yes unless `KIC_CHAIN_ORDER=layout`, the
+/// retained control that restores the layout order.
+pub fn chain_order_interleaved(split_rule: SplitRule) -> bool {
+    split_rule == SplitRule::HighestFree
+        && std::env::var("KIC_CHAIN_ORDER").as_deref() != Ok("layout")
 }
 
 /// Per-block degree of a Boolean monomial under a block partition.
@@ -622,6 +699,7 @@ pub fn matrix_f4_f2_blocked(
     blocks: &[usize],
     bounds: &[u32],
 ) -> Option<(Vec<F2BoolPoly>, u64)> {
+    let row_cap = max_f4_rows();
     if polys.is_empty() || blocks.len() != bounds.len() {
         return Some((Vec::new(), 0));
     }
@@ -666,7 +744,7 @@ pub fn matrix_f4_f2_blocked(
                 continue;
             }
             rows_monos.push(row);
-            if rows_monos.len() > max_f4_rows() {
+            if rows_monos.len() > row_cap {
                 return None;
             }
         }
@@ -771,8 +849,10 @@ fn cached_monomials_up_to_mask(variable_mask: u64, degree: u32) -> std::rc::Rc<[
     thread_local! {
         static CACHE: RefCell<HashMap<(u64, u32), Rc<[u64]>>> = RefCell::new(HashMap::new());
     }
-    let cacheable =
-        degree <= 2 && std::env::var("KIC_F4_DISABLE_SCHEDULE_CACHE").as_deref() != Ok("1");
+    static DISABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    let disabled = *DISABLED
+        .get_or_init(|| std::env::var("KIC_F4_DISABLE_SCHEDULE_CACHE").as_deref() == Ok("1"));
+    let cacheable = degree <= 2 && !disabled;
     if !cacheable {
         return monomials_up_to_mask(variable_mask, degree).into();
     }
@@ -1404,7 +1484,7 @@ pub(crate) fn f5_rows_monos_with_mask(
 
 /// Pack monomial rows as bit-rows over `cols` (descending monomial order).
 pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> {
-    let index: crate::cryptanalysis::fx_hash::FxMap<u64, usize> =
+    let index: crate::cryptanalysis::fx_hash::MaskMap<usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
     let words = cols.len().div_ceil(64).max(1);
     let pack = |monos: &Vec<u64>| {
@@ -1465,6 +1545,9 @@ fn visit_macaulay_rows(
     criterion: Option<&F5Criterion>,
     mut visit: impl FnMut(&[u64]),
 ) -> Option<usize> {
+    // Read once per build, not once per row: the cap is an environment
+    // lookup, and the loop below runs once per Macaulay row.
+    let row_cap = max_f4_rows();
     let mut count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut all: Vec<u64> = Vec::new();
@@ -1513,7 +1596,7 @@ fn visit_macaulay_rows(
                 visit(&row);
                 count += 1;
             }
-            if count > max_f4_rows() {
+            if count > row_cap {
                 return None;
             }
         }
@@ -1621,6 +1704,52 @@ pub(crate) fn build_inherited_macaulay(
     });
     let reuse_layout = override_policy.unwrap_or(quadratic_generators);
     build_inherited_macaulay_with_layout(polys, n_vars, degree, multiplier_mask, reuse_layout)
+}
+
+/// [`build_inherited_macaulay`] with **support-local multipliers**: each
+/// generator `f` is multiplied only by the monomials of degree at most
+/// `degree − deg f` in the variables of `multiplier_mask ∩ supp(f)`.  Where
+/// every generator's support already contains `multiplier_mask` — a
+/// quadratic system in all its unknowns — the rows are exactly
+/// [`build_inherited_macaulay`]'s and that path, with its layout cache, is
+/// taken, so such a root is built identically.
+pub(crate) fn build_inherited_macaulay_support_local(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    quadratic_generators: bool,
+) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    let support = |p: &F2BoolPoly| p.terms.iter().fold(0u64, |acc, t| acc | t.mask);
+    if polys.iter().all(|p| multiplier_mask & !support(p) == 0) {
+        return build_inherited_macaulay(
+            polys,
+            n_vars,
+            degree,
+            multiplier_mask,
+            quadratic_generators,
+        );
+    }
+    let mut rows_monos: Vec<Vec<u64>> = Vec::new();
+    for p in polys {
+        let rows = macaulay_rows_monos_with_mask(
+            std::slice::from_ref(p),
+            n_vars,
+            degree,
+            multiplier_mask & support(p),
+            None,
+        )?;
+        rows_monos.extend(rows);
+        if rows_monos.len() > max_f4_rows() {
+            return None;
+        }
+    }
+    if rows_monos.is_empty() {
+        return Some((Vec::new(), Vec::new()));
+    }
+    let columns = macaulay_columns(&rows_monos)?;
+    let matrix = pack_rows(&rows_monos, &columns);
+    Some((columns, matrix))
 }
 
 fn build_inherited_macaulay_with_layout(
@@ -1793,7 +1922,8 @@ fn pack_polynomials_flat_fused(
         gaps.push(Some(gap));
     }
     let mut seen = vec![false; layout.columns.len()];
-    let mut data = Vec::with_capacity(estimated_rows.min(max_f4_rows()) * words);
+    let row_cap = max_f4_rows();
+    let mut data = Vec::with_capacity(estimated_rows.min(row_cap) * words);
     let mut rows = 0usize;
     for (polynomial, gap) in polys.iter().zip(gaps) {
         let Some(gap) = gap else {
@@ -1821,7 +1951,7 @@ fn pack_polynomials_flat_fused(
             if write == 0 {
                 continue;
             }
-            if rows == max_f4_rows() {
+            if rows == row_cap {
                 return None;
             }
             let start = data.len();
@@ -1875,7 +2005,8 @@ fn pack_polynomials_nested_fused(
         gaps.push(Some(gap));
     }
     let mut seen = vec![false; layout.columns.len()];
-    let mut matrix = Vec::with_capacity(estimated_rows.min(max_f4_rows()));
+    let row_cap = max_f4_rows();
+    let mut matrix = Vec::with_capacity(estimated_rows.min(row_cap));
     let max_terms = polys
         .iter()
         .map(|polynomial| polynomial.terms.len())
@@ -1907,7 +2038,7 @@ fn pack_polynomials_nested_fused(
             if write == 0 {
                 continue;
             }
-            if matrix.len() == max_f4_rows() {
+            if matrix.len() == row_cap {
                 return None;
             }
             let mut row = vec![0u64; words];
@@ -2131,32 +2262,7 @@ impl F4ColumnIndex {
     }
 }
 
-type FastColumnMap =
-    std::collections::HashMap<u64, usize, std::hash::BuildHasherDefault<FastU64Hasher>>;
-
-#[derive(Default)]
-struct FastU64Hasher(u64);
-
-impl std::hash::Hasher for FastU64Hasher {
-    fn finish(&self) -> u64 {
-        self.0
-    }
-
-    fn write(&mut self, bytes: &[u8]) {
-        let mut value = 0xcbf29ce484222325u64;
-        for &byte in bytes {
-            value = (value ^ u64::from(byte)).wrapping_mul(0x100000001b3);
-        }
-        self.write_u64(value);
-    }
-
-    fn write_u64(&mut self, value: u64) {
-        let mut mixed = value.wrapping_add(0x9e3779b97f4a7c15);
-        mixed = (mixed ^ (mixed >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
-        mixed = (mixed ^ (mixed >> 27)).wrapping_mul(0x94d049bb133111eb);
-        self.0 = mixed ^ (mixed >> 31);
-    }
-}
+type FastColumnMap = crate::cryptanalysis::fx_hash::MaskMap<usize>;
 thread_local! {
     /// Keyed by multiplier mask, degree and whether the F5 criterion
     /// selected the rows: pruning changes which monomials occur.
@@ -2657,7 +2763,36 @@ fn suffix_kernel_forced() -> bool {
     *FORCED.get_or_init(|| std::env::var("KIC_F4_RREF_SUFFIX").as_deref() == Ok("1"))
 }
 
+/// `KIC_F4_KERNEL=legacy` keeps the reduced row echelon form on the
+/// kernels below instead of [`crate::cryptanalysis::gf2_elim`]; read
+/// once, as a same-binary control for the kernel swap.
+fn legacy_rref_kernel() -> bool {
+    static LEGACY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *LEGACY.get_or_init(|| std::env::var("KIC_F4_KERNEL").as_deref() == Ok("legacy"))
+}
+
+/// Reduced row echelon form, which is unique: whichever kernel runs, the
+/// matrix comes back the same, and only the time and the word XORs
+/// charged differ.  Matrices of at least 128 rows and 256 columns go to
+/// the Four Russians kernel of [`crate::cryptanalysis::gf2_elim`]
+/// (`gf2_elim_bench` has it 1.5–4.5× faster on the oracle's own Macaulay
+/// matrices); smaller ones stay on the column-at-a-time kernel, where a
+/// table would cost more to build than it saves.
 pub(crate) fn rref_f2_counted(matrix: &mut [Vec<u64>], n_cols: usize, word_ops: &mut u64) -> usize {
+    if !legacy_rref_kernel() && !suffix_kernel_forced() && matrix.len() >= 128 && n_cols >= 256 {
+        return crate::cryptanalysis::gf2_elim::rref_counted(matrix, n_cols, word_ops);
+    }
+    rref_f2_legacy_counted(matrix, n_cols, word_ops)
+}
+
+/// The reduced row echelon form as it was computed before
+/// [`crate::cryptanalysis::gf2_elim`]: the column-at-a-time kernel on
+/// small or wide matrices, block-width-4 Four Russians otherwise.
+pub(crate) fn rref_f2_legacy_counted(
+    matrix: &mut [Vec<u64>],
+    n_cols: usize,
+    word_ops: &mut u64,
+) -> usize {
     if suffix_kernel_forced()
         || matrix.len() < 128
         || n_cols < 256
@@ -3192,6 +3327,10 @@ pub enum SolverEngine {
     /// plus the specialisation itself, all charged in word operations.
     /// Runs best under [`SplitRule::HighestFree`], which [`SplitRule::Auto`]
     /// selects for it; `KIC_F4_INHERIT=1|0` forces or disables inheriting.
+    /// The same tree holds with linear elimination off
+    /// (`KIC_LINEAR_ELIM=0`); by default this engine also eliminates a
+    /// node's linear generators (`eliminate_linear_generators`), which
+    /// changes the tree and keeps every root.
     InheritedF4 {
         /// Highest Macaulay degree to build before splitting.
         max_degree: u32,
@@ -3205,14 +3344,23 @@ pub enum SolverEngine {
 }
 
 impl Default for SolverEngine {
-    /// Inherited matrix-F4 through degree 3.  Under the same split rule it
-    /// decides every target of the frozen Gröbner-stage ladder and its
-    /// holdout identically to `MatrixF4 { max_degree: 3 }` (the default
-    /// before it) for a fraction of the word operations; with
-    /// [`SplitRule::Auto`] it also splits on the smallest free variable —
-    /// see `research/notes/ecc2k130/RESEARCH_INHERITED_F4.md`.
-    /// `KIC_F4_INHERIT=0` restores the from-scratch engine, and with it the
-    /// historical split rule, as a retained control.
+    /// Inherited matrix-F4 through degree 3.  Under the same split rule and
+    /// with `KIC_LINEAR_ELIM=0` it decides every target of the frozen
+    /// Gröbner-stage ladder and its holdout identically to
+    /// `MatrixF4 { max_degree: 3 }` (the default before it) for a fraction
+    /// of the word operations; with [`SplitRule::Auto`] it also splits on
+    /// the smallest free variable — see
+    /// `research/notes/ecc2k130/RESEARCH_INHERITED_F4.md`.  Since
+    /// 2026-09-24 it also eliminates linear generators, and the
+    /// decomposition oracle hands it a chain in the interleaved order
+    /// (`research/notes/ecc2k130/RESEARCH_CHAIN_SPLIT_ORDER.md`): the same
+    /// decompositions found, on a different tree.  It builds every basis
+    /// with support-local multipliers
+    /// (`research/notes/ecc2k130/RESEARCH_SUPPORT_LOCAL_MULTIPLIERS.md`;
+    /// `KIC_F4_MULTIPLIERS=occurring` restores the from-scratch step's
+    /// policy).  `KIC_F4_INHERIT=0`
+    /// restores the from-scratch engine, and with it the historical split
+    /// rule and no elimination, as a retained control.
     fn default() -> Self {
         SolverEngine::InheritedF4 { max_degree: 3 }
     }
@@ -3262,11 +3410,15 @@ impl SolverEngine {
         let top = max_degree.max(base);
         // A higher-degree Macaulay matrix includes the lower-degree rows,
         // so this changes work scheduling rather than the ideal or roots.
-        let highest_only = match std::env::var("KIC_F4_MAX_DEGREE_ONLY").as_deref() {
-            Ok("1") => true,
-            Ok("0") => false,
-            _ => n_vars >= 24,
-        };
+        static HIGHEST_ONLY: std::sync::OnceLock<Option<bool>> = std::sync::OnceLock::new();
+        let forced = *HIGHEST_ONLY.get_or_init(|| {
+            match std::env::var("KIC_F4_MAX_DEGREE_ONLY").as_deref() {
+                Ok("1") => Some(true),
+                Ok("0") => Some(false),
+                _ => None,
+            }
+        });
+        let highest_only = forced.unwrap_or(n_vars >= 24);
         let first = if highest_only { top } else { base };
         Some(first..=top)
     }
@@ -3458,6 +3610,10 @@ pub struct SolveStats {
     /// Reductions at which the next Macaulay matrix exceeded the size
     /// caps (the engine then split on what it had).
     pub oversize: usize,
+    /// Variables linear elimination defined by an affine form in others
+    /// rather than fixed (`eliminate_linear_generators`); those it fixed
+    /// outright are counted as propagations.
+    pub eliminated: usize,
 }
 
 /// Reduce `system`, returning polynomials in the same ideal — either a
@@ -3607,11 +3763,18 @@ impl InheritedBases {
     /// from it by move and handed back, zeros dropped, for the solver to
     /// keep — one copy of the generators per node instead of two.  Without
     /// bases it comes back as it went in.
+    ///
+    /// Under `policy`, a child is not specialised at all when a generator's
+    /// degree dropped ([`InheritPolicy::rebuild_on_drop`]) or when it has a
+    /// linear generator the solver will eliminate
+    /// ([`InheritPolicy::linear_elimination`]): its bases come back empty and
+    /// its first reduction builds them from its own system, as a root does.
     fn specialise_owned(
         &self,
         var: u32,
         value: bool,
         substituted: Vec<F2BoolPoly>,
+        policy: InheritPolicy,
     ) -> (Self, std::rc::Rc<Vec<F2BoolPoly>>) {
         let Some(first) = self.bases.first() else {
             return (Self::default(), std::rc::Rc::new(substituted));
@@ -3619,6 +3782,12 @@ impl InheritedBases {
         let started = std::time::Instant::now();
         let mut total = InheritCost::default();
         let child = ChildSystem::from_owned(first.generator_degrees(), substituted);
+        if (policy.rebuild_on_drop && child.has_dropped())
+            || (policy.linear_elimination && child.system().iter().any(is_linear_generator))
+        {
+            f4_profile_add(|p| p.build_ns += started.elapsed().as_nanos());
+            return (Self::default(), child.system().clone());
+        }
         let bases = self
             .bases
             .iter()
@@ -3637,6 +3806,57 @@ impl InheritedBases {
             p.specialise_word_ops += total.specialise_word_ops;
         });
         (Self { bases }, child.system().clone())
+    }
+}
+
+/// How the solver treats the inherited bases at a node, resolved once per
+/// solve from the engine and the environment.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+struct InheritPolicy {
+    /// Rebuild a child's bases from its own system when a generator's
+    /// degree dropped, instead of specialising the parent's and inserting
+    /// completion rows (`KIC_F4_DROP=rebuild`; completion, the engine's
+    /// rule since it was introduced, is the default).  The rebuilt basis
+    /// is the from-scratch step's row space `V_occurring(S')`, one end of
+    /// the sandwich `ReducedBasis::specialise` completes into, so the tail
+    /// — and with it every decision the solver takes — is the same.
+    rebuild_on_drop: bool,
+    /// Eliminate linear generators by substitution before any Macaulay
+    /// work at a node (`KIC_LINEAR_ELIM=1|0`); see
+    /// [`eliminate_linear_generators`].
+    linear_elimination: bool,
+    /// Build every basis with support-local multipliers
+    /// (`KIC_F4_MULTIPLIERS=support|occurring`); see
+    /// [`ReducedBasis::from_system_with`].
+    support_local: bool,
+}
+
+impl InheritPolicy {
+    /// The policy of a solve with `engine` (already resolved): linear
+    /// elimination and support-local multipliers on under
+    /// [`SolverEngine::InheritedF4`] and off otherwise, so the from-scratch
+    /// reference (`KIC_F4_INHERIT=0`) walks the tree it always walked, and
+    /// completion on a degree drop; each can be set from the environment.
+    fn resolve(engine: SolverEngine) -> Self {
+        static OVERRIDES: std::sync::OnceLock<(bool, Option<bool>, bool)> =
+            std::sync::OnceLock::new();
+        let &(rebuild, linear, occurring) = OVERRIDES.get_or_init(|| {
+            (
+                std::env::var("KIC_F4_DROP").as_deref() == Ok("rebuild"),
+                match std::env::var("KIC_LINEAR_ELIM").as_deref() {
+                    Ok("1") => Some(true),
+                    Ok("0") => Some(false),
+                    _ => None,
+                },
+                std::env::var("KIC_F4_MULTIPLIERS").as_deref() == Ok("occurring"),
+            )
+        });
+        let inherited = matches!(engine, SolverEngine::InheritedF4 { .. });
+        Self {
+            rebuild_on_drop: inherited && rebuild,
+            linear_elimination: linear.unwrap_or(inherited),
+            support_local: inherited && !occurring,
+        }
     }
 }
 
@@ -3665,14 +3885,29 @@ fn closure_rounds() -> u32 {
 /// and counters so a solve is comparable call for call.
 fn reduce_inherited(
     system: &[F2BoolPoly],
+    canonical: bool,
     n_vars: usize,
     engine: SolverEngine,
+    support_local: bool,
     bases: &mut InheritedBases,
     stats: &mut SolveStats,
 ) -> Option<Vec<F2BoolPoly>> {
     stats.reductions += 1;
     dump_node_system(system, n_vars, engine);
-    let ladder = engine.degree_ladder(system_degree(system), n_vars)?;
+    // A canonical polynomial lists its terms highest degree first, so its
+    // degree is its first term's; otherwise scan every term.
+    let degree = if canonical {
+        debug_assert!(system.iter().all(F2BoolPoly::is_canonical));
+        system
+            .iter()
+            .filter_map(|p| p.terms.first())
+            .map(|t| t.degree())
+            .max()
+            .unwrap_or(0)
+    } else {
+        system_degree(system)
+    };
+    let ladder = engine.degree_ladder(degree, n_vars)?;
     let top = *ladder.end();
     let mut best: Option<Vec<F2BoolPoly>> = None;
     for d in ladder {
@@ -3685,7 +3920,13 @@ fn reduce_inherited(
             None => {
                 let started = std::time::Instant::now();
                 let rounds = if d == top { closure_rounds() } else { 0 };
-                match ReducedBasis::from_system_closed(system, n_vars, d, rounds) {
+                match ReducedBasis::from_system_closed_with(
+                    system,
+                    n_vars,
+                    d,
+                    rounds,
+                    support_local,
+                ) {
                     Some((basis, cost)) => {
                         let word_ops = cost.word_ops();
                         charge_word_ops(word_ops);
@@ -3734,6 +3975,162 @@ fn reduce_inherited(
     best
 }
 
+/// Is `p` a linear generator — degree one, with at least one variable?
+fn is_linear_generator(p: &F2BoolPoly) -> bool {
+    p.terms.iter().any(|t| t.mask != 0) && p.terms.iter().all(|t| t.mask.count_ones() <= 1)
+}
+
+/// What [`eliminate_linear_generators`] did to a node's system.
+enum LinearElimination {
+    /// No generator is linear.
+    Nothing,
+    /// The linear generators are inconsistent: the node is refuted.
+    Refuted,
+    /// The linear generators were solved for their pivots and substituted
+    /// away.
+    Substituted {
+        /// The remaining generators, rewritten; zeros dropped.
+        system: Vec<F2BoolPoly>,
+        /// Pivots the linear generators fix outright, `v = c`.
+        forced: Vec<(u32, bool)>,
+        /// Pivots defined by the rest, `v = Σ_{u ∈ rest} u + c`, as
+        /// `(v, rest, c)`: `rest` holds no pivot, and no variable in it is
+        /// defined by a later entry of the same call.
+        defined: Vec<(u32, u64, bool)>,
+    },
+}
+
+/// **Linear elimination at a node.**  Gauss–Jordan the node's degree-one
+/// generators, pivoting each on its largest variable (the lowest index,
+/// as a reduced Macaulay row's pivot is its largest monomial), and
+/// substitute every pivot `v := Σ rest + c` into the other generators.
+///
+/// Substituting an affine form for a variable is a ring homomorphism of
+/// the Boolean ring (an affine form is idempotent), so the rewritten
+/// system has exactly the roots of the original restricted to the affine
+/// subspace the linear generators cut out, and each root of it extends to
+/// exactly one root of the original through the definitions.  It needs no
+/// Macaulay matrix: a linear generator is already in the tail every
+/// reduction would read, so the step only acts earlier and without the
+/// products of the linear generators by every monomial of degree
+/// `D − 1` that the node's matrices would otherwise carry.  Where the
+/// forms define every pivot outright the step is propagation; where some
+/// pivot is defined by other variables it removes a variable the splitter
+/// would otherwise branch on.
+///
+/// Charged in the stage unit: one word operation per row operation of the
+/// elimination (each row is one 64-bit mask) and one per monomial the
+/// substitution writes.
+fn eliminate_linear_generators(system: &[F2BoolPoly], word_ops: &mut u64) -> LinearElimination {
+    if !system.iter().any(is_linear_generator) {
+        return LinearElimination::Nothing;
+    }
+    let mut rows: Vec<(u64, bool)> = system
+        .iter()
+        .filter(|p| is_linear_generator(p))
+        .map(|p| {
+            p.terms.iter().fold((0u64, false), |(mask, c), t| {
+                if t.mask == 0 {
+                    (mask, !c)
+                } else {
+                    (mask ^ t.mask, c)
+                }
+            })
+        })
+        .collect();
+    let mut pivots: Vec<(u32, u64, bool)> = Vec::new();
+    while let Some((mask, c)) = rows.pop() {
+        if mask == 0 {
+            if c {
+                return LinearElimination::Refuted;
+            }
+            continue;
+        }
+        let v = mask.trailing_zeros();
+        let bit = 1u64 << v;
+        for row in rows.iter_mut().filter(|row| row.0 & bit != 0) {
+            row.0 ^= mask;
+            row.1 ^= c;
+            *word_ops += 1;
+        }
+        for pivot in pivots.iter_mut().filter(|pivot| pivot.1 & bit != 0) {
+            pivot.1 ^= mask;
+            pivot.2 ^= c;
+            *word_ops += 1;
+        }
+        pivots.push((v, mask & !bit, c));
+    }
+    let n_vars = system[0].n_vars;
+    let pivot_mask = pivots.iter().fold(0u64, |acc, p| acc | (1u64 << p.0));
+    let definition = |v: u32| pivots.iter().find(|p| p.0 == v).expect("a pivot");
+    let mut expansion: Vec<u64> = Vec::new();
+    let rewritten: Vec<F2BoolPoly> = system
+        .iter()
+        .filter(|p| !is_linear_generator(p))
+        .filter_map(|p| {
+            let mut terms: Vec<u64> = Vec::with_capacity(p.terms.len());
+            for t in &p.terms {
+                let hit = t.mask & pivot_mask;
+                if hit == 0 {
+                    terms.push(t.mask);
+                    continue;
+                }
+                // t = base · Π_{v ∈ hit} (Σ rest_v + c_v), expanded one
+                // pivot at a time; every monomial written is charged.
+                expansion.clear();
+                expansion.push(t.mask & !hit);
+                let mut left = hit;
+                while left != 0 {
+                    let &(_, rest, c) = definition(left.trailing_zeros());
+                    left &= left - 1;
+                    let before = expansion.len();
+                    for k in 0..before {
+                        let base = expansion[k];
+                        let mut r = rest;
+                        while r != 0 {
+                            expansion.push(base | (1u64 << r.trailing_zeros()));
+                            r &= r - 1;
+                        }
+                    }
+                    if !c {
+                        expansion.drain(..before);
+                    }
+                    *word_ops += expansion.len() as u64;
+                }
+                terms.extend_from_slice(&expansion);
+            }
+            let q = F2BoolPoly::from_monos(
+                terms.into_iter().map(F2BoolMono::from_mask).collect(),
+                n_vars,
+            );
+            (!q.is_zero()).then_some(q)
+        })
+        .collect();
+    let (forced, defined): (Vec<_>, Vec<_>) = pivots.into_iter().partition(|p| p.1 == 0);
+    LinearElimination::Substituted {
+        system: rewritten,
+        forced: forced.into_iter().map(|(v, _, c)| (v, c)).collect(),
+        defined,
+    }
+}
+
+/// The point an assignment denotes, each eliminated variable recovered
+/// from its definition, the latest definition first (an earlier one may
+/// name a variable a later one defines, never the reverse).
+fn point_with_definitions(assignment: &[Option<bool>], defined: &[(u32, u64, bool)]) -> u64 {
+    let mut point = 0u64;
+    for (variable, value) in assignment.iter().enumerate() {
+        if *value == Some(true) {
+            point |= 1u64 << variable;
+        }
+    }
+    for &(v, rest, c) in defined.iter().rev() {
+        let value = ((point & rest).count_ones() & 1 == 1) ^ c;
+        point = (point & !(1u64 << v)) | ((value as u64) << v);
+    }
+    point
+}
+
 /// **Solve a Boolean system** by algebraic reduction plus splitting.
 ///
 /// At each node the system is reduced ([`matrix_f4_f2`] by default,
@@ -3761,12 +4158,31 @@ pub fn solve_boolean_system_filtered(
     equations: &[F2BoolPoly],
     n_vars: usize,
     opts: &SolveOptions,
+    accept: impl FnMut(u64) -> bool,
+) -> (Vec<u64>, SolveStats) {
+    let opts = opts.resolve();
+    solve_with_policy(
+        equations,
+        n_vars,
+        &opts,
+        InheritPolicy::resolve(opts.engine),
+        accept,
+    )
+}
+
+/// [`solve_boolean_system_filtered`] with resolved options and an explicit
+/// [`InheritPolicy`] — the environment is not read, so tests can run both
+/// policies side by side.
+fn solve_with_policy(
+    equations: &[F2BoolPoly],
+    n_vars: usize,
+    opts: &SolveOptions,
+    policy: InheritPolicy,
     mut accept: impl FnMut(u64) -> bool,
 ) -> (Vec<u64>, SolveStats) {
     let mut stats = SolveStats::default();
     let mut out = Vec::new();
     let mut stop = false;
-    let opts = opts.resolve();
     // Every polynomial the solve substitutes is an input equation or the
     // result of a substitution, which is canonical; so when the inputs
     // are, the order check can be done once here instead of per call.
@@ -3777,12 +4193,14 @@ pub fn solve_boolean_system_filtered(
         equations,
         vec![None; n_vars],
         n_vars,
-        &opts,
+        opts,
+        policy,
         &mut stats,
         &mut out,
         &mut accept,
         &mut stop,
         None,
+        Vec::new(),
     );
     (out, stats)
 }
@@ -3795,11 +4213,13 @@ fn solve_rec(
     mut assignment: Vec<Option<bool>>,
     n_vars: usize,
     opts: &SolveOptions,
+    policy: InheritPolicy,
     stats: &mut SolveStats,
     out: &mut Vec<u64>,
     accept: &mut impl FnMut(u64) -> bool,
     stop: &mut bool,
     parent: Option<(&InheritedBases, u32, bool)>,
+    mut defined: Vec<(u32, u64, bool)>,
 ) {
     if *stop || out.len() >= opts.max_solutions {
         return;
@@ -3807,12 +4227,7 @@ fn solve_rec(
     // A fully assigned branch needs no further Macaulay matrix. Verify the
     // complete point directly against the untouched equations.
     if assignment.iter().all(Option::is_some) {
-        let mut point = 0u64;
-        for (variable, value) in assignment.iter().enumerate() {
-            if *value == Some(true) {
-                point |= 1u64 << variable;
-            }
-        }
+        let point = point_with_definitions(&assignment, &defined);
         if original.iter().all(|equation| equation.eval(point) == 0) {
             out.push(point);
             if accept(point) {
@@ -3836,7 +4251,7 @@ fn solve_rec(
             if matches!(opts.engine, SolverEngine::InheritedF4 { .. })
                 && !system.iter().any(is_constant_one) =>
         {
-            bases.specialise_owned(var, value, system)
+            bases.specialise_owned(var, value, system, policy)
         }
         _ => (InheritedBases::default(), std::rc::Rc::new(system)),
     };
@@ -3849,8 +4264,72 @@ fn solve_rec(
             stats.infeasible_branches += 1;
             return;
         }
+        if policy.linear_elimination {
+            let mut word_ops = 0u64;
+            let elimination = eliminate_linear_generators(&system, &mut word_ops);
+            if word_ops > 0 {
+                charge_word_ops(word_ops);
+                f4_profile_add(|p| p.word_ops += word_ops);
+            }
+            match elimination {
+                LinearElimination::Nothing => {}
+                LinearElimination::Refuted => {
+                    stats.infeasible_branches += 1;
+                    return;
+                }
+                LinearElimination::Substituted {
+                    system: rewritten,
+                    forced,
+                    defined: definitions,
+                } => {
+                    for (v, val) in forced {
+                        match assignment[v as usize] {
+                            Some(existing) if existing != val => {
+                                stats.infeasible_branches += 1;
+                                return;
+                            }
+                            Some(_) => {}
+                            None => {
+                                stats.propagations += 1;
+                                assignment[v as usize] = Some(val);
+                            }
+                        }
+                    }
+                    for &(v, _, _) in &definitions {
+                        // Recovered from its definition at a leaf; the
+                        // placeholder keeps the splitter off it.
+                        stats.eliminated += 1;
+                        assignment[v as usize] = Some(false);
+                    }
+                    defined.extend(definitions);
+                    // An affine substitution is not a layout step: the
+                    // node's bases are rebuilt from the rewritten system.
+                    system = std::rc::Rc::new(rewritten);
+                    bases = InheritedBases::default();
+                    if assignment.iter().all(Option::is_some) {
+                        let point = point_with_definitions(&assignment, &defined);
+                        if original.iter().all(|equation| equation.eval(point) == 0) {
+                            out.push(point);
+                            if accept(point) {
+                                *stop = true;
+                            }
+                        }
+                        return;
+                    }
+                    continue;
+                }
+            }
+        }
         let reduced = if inherit {
-            reduce_inherited(&system, n_vars, opts.engine, &mut bases, stats)
+            reduce_inherited(
+                &system,
+                canonical,
+                n_vars,
+                opts.engine,
+                policy.support_local,
+                &mut bases,
+                stats,
+            )
         } else {
             reduce_system(&system, n_vars, opts.engine, stats)
         };
@@ -3881,7 +4360,7 @@ fn solve_rec(
                         .map(|p| substitute_in_solve(p, v, val, canonical))
                         .collect();
                     if inherit {
-                        (bases, system) = bases.specialise_owned(v, val, substituted);
+                        (bases, system) = bases.specialise_owned(v, val, substituted, policy);
                     } else {
                         system = std::rc::Rc::new(substituted);
                     }
@@ -3899,12 +4378,7 @@ fn solve_rec(
 
     match choose_split(&system, &assignment, opts.split_rule) {
         None => {
-            let mut pt = 0u64;
-            for (i, a) in assignment.iter().enumerate() {
-                if *a == Some(true) {
-                    pt |= 1 << i;
-                }
-            }
+            let pt = point_with_definitions(&assignment, &defined);
             // Verify against the untouched system before accepting.
             if original.iter().all(|e| e.eval(pt) == 0) {
                 out.push(pt);
@@ -3929,11 +4403,13 @@ fn solve_rec(
                     branch,
                     n_vars,
                     opts,
+                    policy,
                     stats,
                     out,
                     accept,
                     stop,
                     Some((&bases, free as u32, value)),
+                    defined.clone(),
                 );
                 if *stop || out.len() >= opts.max_solutions {
                     return;
@@ -3952,6 +4428,27 @@ mod tests {
 
     fn fe(v: u64, n: u32) -> F2mElement {
         F2mElement::from_biguint(&num_bigint::BigUint::from(v), n)
+    }
+
+    /// The policies under which the inherited engine must walk the
+    /// from-scratch engine's tree: linear elimination off (it changes the
+    /// tree by design), either degree-drop rule.
+    fn specialisation_policies() -> [InheritPolicy; 2] {
+        [false, true].map(|rebuild_on_drop| InheritPolicy {
+            rebuild_on_drop,
+            linear_elimination: false,
+            support_local: false,
+        })
+    }
+
+    /// Solve under an explicit policy, whatever the environment says.
+    fn solve_pinned(
+        system: &[F2BoolPoly],
+        n_vars: usize,
+        opts: &SolveOptions,
+        policy: InheritPolicy,
+    ) -> (Vec<u64>, SolveStats) {
+        solve_with_policy(system, n_vars, &opts.resolve(), policy, |_| false)
     }
 
     /// Symbolic multiplication must agree with the field's own.
@@ -4359,14 +4856,20 @@ mod tests {
                 let (mut want, want_stats) =
                     solve_boolean_system(&sys.equations, sys.n_vars, &reference);
                 want.sort_unstable();
-                for engine in engines {
+                for (engine, policy) in engines
+                    .iter()
+                    .flat_map(|&e| specialisation_policies().map(|p| (e, p)))
+                {
                     let opts = SolveOptions {
                         engine,
                         ..reference
                     };
-                    let (mut got, stats) = solve_boolean_system(&sys.equations, sys.n_vars, &opts);
+                    let (mut got, stats) = solve_pinned(&sys.equations, sys.n_vars, &opts, policy);
                     got.sort_unstable();
-                    assert_eq!(got, want, "{engine:?} m={m} x_R={raw}: roots differ");
+                    assert_eq!(
+                        got, want,
+                        "{engine:?} {policy:?} m={m} x_R={raw}: roots differ"
+                    );
                     assert_eq!(
                         (
                             stats.reductions,
@@ -4380,7 +4883,7 @@ mod tests {
                             want_stats.propagations,
                             want_stats.splits
                         ),
-                        "{engine:?} m={m} x_R={raw}: the splitting tree differs"
+                        "{engine:?} {policy:?} m={m} x_R={raw}: the splitting tree differs"
                     );
                     assert_eq!(stats.max_degree_built, want_stats.max_degree_built);
                     assert_eq!(stats.oversize, want_stats.oversize);
@@ -4487,28 +4990,314 @@ mod tests {
                     engine: SolverEngine::InheritedF4 { max_degree: 3 },
                     ..reference
                 };
-                let (mut got, stats) = solve_boolean_system(&system, n_vars, &opts);
-                got.sort_unstable();
-                assert_eq!(got, want, "trial {trial} {split_rule:?}: roots differ");
-                assert_eq!(
-                    (
-                        stats.reductions,
-                        stats.infeasible_branches,
-                        stats.propagations,
-                        stats.splits
-                    ),
-                    (
-                        want_stats.reductions,
-                        want_stats.infeasible_branches,
-                        want_stats.propagations,
-                        want_stats.splits
-                    ),
-                    "trial {trial} {split_rule:?}: the splitting tree differs"
-                );
-                assert_eq!(
-                    got, brute,
-                    "trial {trial} {split_rule:?}: roots are not the variety"
-                );
+                for policy in specialisation_policies() {
+                    let (mut got, stats) = solve_pinned(&system, n_vars, &opts, policy);
+                    got.sort_unstable();
+                    assert_eq!(
+                        got, want,
+                        "trial {trial} {split_rule:?} {policy:?}: roots differ"
+                    );
+                    assert_eq!(
+                        (
+                            stats.reductions,
+                            stats.infeasible_branches,
+                            stats.propagations,
+                            stats.splits
+                        ),
+                        (
+                            want_stats.reductions,
+                            want_stats.infeasible_branches,
+                            want_stats.propagations,
+                            want_stats.splits
+                        ),
+                        "trial {trial} {split_rule:?} {policy:?}: the splitting tree differs"
+                    );
+                    assert_eq!(
+                        got, brute,
+                        "trial {trial} {split_rule:?} {policy:?}: roots are not the variety"
+                    );
+                }
+            }
+        }
+    }
+
+    /// Linear elimination changes the tree, never the roots: on random
+    /// systems with linear generators mixed in, every engine and split
+    /// rule, with either degree-drop rule, returns exactly the variety.
+    #[test]
+    fn linear_elimination_keeps_every_root() {
+        let mut seed = 0x51ce_d00d_0bad_f00du64;
+        let mut next = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed
+        };
+        let mut eliminated = 0usize;
+        for trial in 0..80 {
+            let n_vars = 6 + (trial % 7);
+            let m = 3 + (trial % 5);
+            let system: Vec<F2BoolPoly> = (0..m)
+                .map(|k| {
+                    // Every third generator linear, the rest up to cubic.
+                    let deg = if k % 3 == 1 { 1 } else { 2 + (k % 2) as u64 };
+                    let terms = 3 + (next() % 7) as usize;
+                    let monos = (0..terms)
+                        .map(|_| {
+                            let d = (next() % (deg + 1)) as u32;
+                            let mut mask = 0u64;
+                            for _ in 0..d {
+                                mask |= 1u64 << (next() % n_vars as u64);
+                            }
+                            F2BoolMono::from_mask(mask)
+                        })
+                        .collect();
+                    F2BoolPoly::from_monos(monos, n_vars)
+                })
+                .filter(|p| !p.is_zero())
+                .collect();
+            let brute: Vec<u64> = (0..(1u64 << n_vars))
+                .filter(|pt| system.iter().all(|e| e.eval(*pt) == 0))
+                .collect();
+            for engine in [
+                SolverEngine::MatrixF4 { max_degree: 3 },
+                SolverEngine::InheritedF4 { max_degree: 3 },
+            ] {
+                for split_rule in [SplitRule::LowestFree, SplitRule::HighestFree] {
+                    for (rebuild_on_drop, support_local) in
+                        [(false, false), (true, false), (false, true), (true, true)]
+                    {
+                        let opts = SolveOptions {
+                            max_solutions: 1 << 13,
+                            engine,
+                            split_rule,
+                            ..SolveOptions::default()
+                        };
+                        let policy = InheritPolicy {
+                            rebuild_on_drop,
+                            linear_elimination: true,
+                            support_local,
+                        };
+                        let (mut got, stats) = solve_pinned(&system, n_vars, &opts, policy);
+                        got.sort_unstable();
+                        assert_eq!(
+                            got, brute,
+                            "trial {trial} {engine:?} {split_rule:?} {policy:?}: roots differ"
+                        );
+                        eliminated += stats.eliminated;
+                    }
+                }
+            }
+        }
+        // The definitions path, not just propagation, was exercised.
+        assert!(eliminated > 0, "no variable was ever defined by another");
+    }
+
+    /// Inconsistent linear generators refute; consistent ones fix or
+    /// define their pivots, and the rewritten system has the same roots.
+    #[test]
+    fn eliminate_linear_generators_refutes_and_defines() {
+        let n = 5;
+        let lin = |vars: &[u32], c: bool| {
+            let mut monos: Vec<F2BoolMono> = vars.iter().map(|&v| F2BoolMono::var(v)).collect();
+            if c {
+                monos.push(F2BoolMono::one());
+            }
+            F2BoolPoly::from_monos(monos, n)
+        };
+        let mut ops = 0u64;
+        let refuted = [lin(&[0, 1], false), lin(&[1, 2], false), lin(&[0, 2], true)];
+        assert!(matches!(
+            eliminate_linear_generators(&refuted, &mut ops),
+            LinearElimination::Refuted
+        ));
+        // x0 + x1 + x3 = 0, x1 + 1 = 0, and a quadratic in x0, x2, x4.
+        let quad = F2BoolPoly::from_monos(
+            vec![
+                F2BoolMono::from_mask(0b00101),
+                F2BoolMono::from_mask(0b10000),
+                F2BoolMono::one(),
+            ],
+            n,
+        );
+        let system = [lin(&[0, 1, 3], false), lin(&[1], true), quad.clone()];
+        let LinearElimination::Substituted {
+            system: rewritten,
+            forced,
+            defined,
+        } = eliminate_linear_generators(&system, &mut ops)
+        else {
+            panic!("expected a substitution");
+        };
+        assert_eq!(forced, vec![(1, true)]);
+        assert_eq!(defined, vec![(0, 1 << 3, true)], "x0 = x3 + 1");
+        assert!(rewritten
+            .iter()
+            .all(|p| p.terms.iter().all(|t| t.mask & 0b11 == 0)));
+        assert!(ops > 0, "the elimination is charged");
+        // Every root of the rewritten system, completed through the
+        // definitions, is a root of the original, and every root of the
+        // original arises that way.
+        let mut via: Vec<u64> = (0..(1u64 << n))
+            .filter(|pt| pt & 0b11 == 0 && rewritten.iter().all(|e| e.eval(*pt) == 0))
+            .map(|pt| {
+                // x1 forced, x0 a placeholder its definition overwrites,
+                // the free variables read from `pt`.
+                let assignment: Vec<Option<bool>> = (0..n)
+                    .map(|i| Some(if i == 1 { true } else { pt >> i & 1 == 1 }))
+                    .collect();
+                point_with_definitions(&assignment, &defined)
+            })
+            .collect();
+        via.sort_unstable();
+        via.dedup();
+        let direct: Vec<u64> = (0..(1u64 << n))
+            .filter(|pt| system.iter().all(|e| e.eval(*pt) == 0))
+            .collect();
+        assert_eq!(via, direct);
+    }
+
+    /// The interleaved order is a permutation that keeps each block
+    /// contiguous and puts the last summand at the highest indices, each
+    /// intermediate point just below the summand it closes a link with.
+    #[test]
+    fn interleaved_order_puts_the_last_summand_highest() {
+        let shape = |m: usize, ell: usize, n: usize| DecompositionSystem {
+            equations: Vec::new(),
+            n_vars: m * ell + m.saturating_sub(2) * n,
+            ell,
+            m,
+        };
+        let identity: Vec<u32> = (0..10).collect();
+        assert_eq!(shape(2, 5, 7).interleaved_order(7), identity);
+        // m = 3, ℓ = 2, n = 3: layout x1 x1 x2 x2 x3 x3 e e e.
+        let perm = shape(3, 2, 3).interleaved_order(3);
+        assert_eq!(perm, vec![0, 1, 2, 3, 7, 8, 4, 5, 6]);
+        let inverse = invert_permutation(&perm);
+        for v in 0..9u32 {
+            assert_eq!(inverse[perm[v as usize] as usize], v);
+        }
+        // m = 4, ℓ = 1, n = 2: layout x1 x2 x3 x4 e1 e1 e2 e2
+        // → x1 x2 e1 e1 x3 e2 e2 x4.
+        assert_eq!(
+            shape(4, 1, 2).interleaved_order(2),
+            vec![0, 1, 4, 7, 2, 3, 5, 6]
+        );
+        let p = F2BoolPoly::from_monos(
+            vec![F2BoolMono::from_mask(0b1_0000_0011), F2BoolMono::one()],
+            9,
+        );
+        let q = permute_poly(&p, &perm);
+        assert_eq!(permute_poly(&q, &inverse), p);
+    }
+
+    /// A chain solved in the interleaved order under the shipped policy
+    /// has exactly the roots the pre-round default finds in the layout order
+    /// (the inherited engine without linear elimination, which the pinned
+    /// same-tree tests above tie to the from-scratch engine).
+    #[test]
+    fn interleaved_chain_solve_has_the_same_roots() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base(&kc, 0)
+            .unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let basis = &fb.subspace_basis;
+        let opts = SolveOptions {
+            max_solutions: 1 << 12,
+            node_budget: 1 << 20,
+            engine: SolverEngine::InheritedF4 { max_degree: 3 },
+            split_rule: SplitRule::HighestFree,
+        };
+        let mut roots = 0usize;
+        for (m, raws) in [(3usize, vec![1u64, 23, 300]), (4, vec![1u64, 23])] {
+            for raw in raws {
+                let sys =
+                    build_decomposition_system(basis, &fe(raw, kc.n), &kc.curve.b, m, &st).unwrap();
+                let before = InheritPolicy::default();
+                let (mut want, want_stats) =
+                    solve_pinned(&sys.equations, sys.n_vars, &opts, before);
+                assert!(!want_stats.exhausted);
+                want.sort_unstable();
+                roots += want.len();
+                let perm = sys.interleaved_order(kc.n);
+                let inverse = invert_permutation(&perm);
+                let permuted: Vec<F2BoolPoly> = sys
+                    .equations
+                    .iter()
+                    .map(|e| permute_poly(e, &perm))
+                    .collect();
+                for (rebuild_on_drop, support_local) in
+                    [(false, false), (true, false), (false, true), (true, true)]
+                {
+                    let policy = InheritPolicy {
+                        rebuild_on_drop,
+                        linear_elimination: true,
+                        support_local,
+                    };
+                    let (got, stats) = solve_pinned(&permuted, sys.n_vars, &opts, policy);
+                    assert!(!stats.exhausted);
+                    let mut got: Vec<u64> =
+                        got.into_iter().map(|r| permute_mask(r, &inverse)).collect();
+                    got.sort_unstable();
+                    assert_eq!(got, want, "m={m} x_R={raw} {policy:?}: roots differ");
+                    assert!(
+                        got.iter()
+                            .all(|&r| sys.equations.iter().all(|e| e.eval(r) == 0)),
+                        "m={m} x_R={raw}: a returned point is not a root"
+                    );
+                }
+            }
+        }
+        assert!(roots > 0, "no system had a root; the comparison is vacuous");
+    }
+
+    /// Support-local multipliers build exactly the occurring-variable rows
+    /// when every generator spans every variable, and otherwise a subset
+    /// of them: every support-local row is a row of the occurring-variable
+    /// Macaulay matrix.
+    #[test]
+    fn support_local_rows_are_occurring_rows() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base(&kc, 0)
+            .unwrap();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let basis = &fb.subspace_basis;
+        for (m, raw) in [(2usize, 23u64), (3, 23), (3, 300), (4, 1)] {
+            let sys =
+                build_decomposition_system(basis, &fe(raw, kc.n), &kc.curve.b, m, &st).unwrap();
+            let occurring = occurring_vars(&sys.equations);
+            let rows = |support_local: bool| -> std::collections::BTreeSet<Vec<u64>> {
+                let (columns, matrix) = if support_local {
+                    build_inherited_macaulay_support_local(
+                        &sys.equations,
+                        sys.n_vars,
+                        3,
+                        occurring,
+                        false,
+                    )
+                } else {
+                    build_inherited_macaulay(&sys.equations, sys.n_vars, 3, occurring, false)
+                }
+                .unwrap();
+                matrix
+                    .iter()
+                    .map(|row| {
+                        (0..columns.len())
+                            .filter(|&c| row[c / 64] >> (c % 64) & 1 == 1)
+                            .map(|c| columns[c])
+                            .collect()
+                    })
+                    .collect()
+            };
+            let (local, full) = (rows(true), rows(false));
+            assert!(
+                local.is_subset(&full),
+                "m={m}: a support-local row is not a Macaulay row"
+            );
+            if m == 2 {
+                assert_eq!(local, full, "m=2: every generator spans every variable");
+            } else {
+                assert!(local.len() < full.len(), "m={m}: nothing was left out");
             }
         }
     }

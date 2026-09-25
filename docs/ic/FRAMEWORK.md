@@ -224,7 +224,55 @@ stopwatch, and the table should say which is which.
 | `work`, `work_unit` | the method's own count (`row_ops` for an elimination) |
 | `recovered`, `verified` | the logarithm found, and whether it is the planted one |
 | `total_gae`, `s` | the whole pipeline, and it over `√r` |
-| `s_over_rho` | against a counted Pollard rho on the same instance, when supplied |
+| `s_over_rho` | against the matched counted Pollard rho on the same instance, when supplied |
+
+### The rho reference
+
+`ic bench` runs the reference before any configuration, on the same
+subgroup and the same planted logarithms (`--rho-runs`, default 16),
+and every row's `s_over_rho` divides by its mean `S`.  It is the
+**matched** walk the accounting contract asks for: it uses the
+automorphisms the curve actually has, because a generic algorithm may
+use them too.
+
+| curve | `rho_reference` (prices the column) | also in the report |
+|:--|:--|:--|
+| generic prime, random binary | the negation-map walk, `A = 2` (`ic_boundary::rho_reference_negation`) | `rho_reference_plain`: the plain walk on points, `A = 1`, on the same seeds |
+| Koblitz | the cheaper, by mean `S`, of the signed-Frobenius walk (`A = 2n`) and the negation walk | the other in `rho_reference_candidates`; the plain walk |
+
+The negation walk is tuned so that its `S` is rho's and not its set-up's.
+Walk starts cost one addition each, and distinguished points come about
+every `r^{1/4}` steps. The jump table is sized to the subgroup
+(`rho_jumps_for`, calibrated in ledger §18.3). Fruitless cycles are
+handled by the Wiener–Zuccherato look-ahead and a deterministic doubling
+escape. Every operation it performs is charged, and its `counters` say
+where each one went.
+
+Through ledger §17 the column divided by the plain walk. That walk's
+`S` is mostly set-up at toy sizes: `14.8` at `r ≈ 2^{12}`, where the
+negation walk measures `2.6`. So a frozen report's `vs rho` from before
+§18 is generous to index calculus. `ic rho --reprice FILE` re-prices
+one against the matched walk. It first replays the frozen walk on the
+recorded seeds and refuses to re-price if any run differs.
+
+**A figure that solves `k` targets at once needs rho at the same `k`.**
+`ic bench` and `ic boundary` solve one target, so the single-target walk
+is their reference.  A pipeline that amortises one build over `k`
+targets and quotes its total over `k·√r` must divide by batch rho
+(Kuhn–Struik): `k` targets in sequence, jumps in `G` only, and one table
+of distinguished points, so a later target can finish on an earlier
+one's trail (`ic_boundary::rho_batch_with`).  At `k = 32` that costs
+about a fifth of one target alone (ledger §19).
+
+    ./target/release/ic rho --batch-koblitz 0/41,0/53 --batch-sizes 1,4,16,32 --batches 16
+
+The walk is generic over the classes it moves between
+(`ic_boundary::RhoClasses`): points, `{P, −P}`, and on a Koblitz curve
+the signed Frobenius classes (`SignedFrobeniusClasses`).  Those are
+canonicalised by the least normal-basis rotation, and `x` and `y` are
+carried there by table.  The count charges group operations only.  What
+a step's canonicalisation costs on top, in a batched unit, is measured
+by `examples/koblitz_reference_prices.rs`.
 
 ---
 
@@ -334,7 +382,7 @@ What ships behind it (`ic bench --list` prints each one's parameters):
 | `f4-f2` | Faugère's F4 over `F_2[v]/(v² − v)`: normal strategy, Gebauer–Möller criteria, the field products `v·g` as pairs, symbolic preprocessing, bit-packed elimination; a full reduced basis, solutions read off its linear elements ([`pq_f4_f2.rs`](../../src/cryptanalysis/pq_f4_f2.rs)) | word XORs (elimination only) | matrix size; the budget |
 | `matrix-f4` | the Koblitz oracle's hybrid: Macaulay matrices to a fixed degree (`max_degree`, default 3), propagation, splitting (`split`) | word XORs (elimination only) | `node_budget` |
 | `matrix-f5` | the same, leaving out the rows the Boolean F5 criterion predicts to reduce to zero | word XORs (elimination only) | `node_budget` |
-| `inherited-f4` | the same, children specialising their parent's reduced basis | word XORs (elimination and specialisation only) | `node_budget` |
+| `inherited-f4` | the same, children specialising their parent's reduced basis | word XORs (elimination, specialisation and linear elimination only) | `node_budget` |
 | `crossbred-f2` | Joux–Vitse: a Macaulay left kernel at degree `D`, then `2^k` bit-sliced linear solves | word operations (partial) | parameters that do not fit the system are a budget verdict |
 | `buchberger-f2` | Buchberger over the boolean ring, one pair at a time, coprime and chain criteria, closed under the field equations since 34154ed9 — the frozen rows of ledger §14–§17 were measured on the earlier pair-only engine, whose degree is an upper bound (§17.1, §17.7) | monomial operations | the budget; enumerates for solutions up to 26 unknowns |
 | `xl-f2` | XL: multiply out to degree `n_vars`, linearise | monomial operations (modelled) | declines above 10 unknowns |
@@ -640,6 +688,26 @@ worse than none:
 - **No iterative matrix.** Two eliminations ship; Wiedemann and Lanczos
   are open, and the trait is written so that a matrix-vector product is
   a legitimate `work_unit`.
+- **No algebraic oracle on prime-field curves.** The prime regime has
+  only the table oracles (`subtract`, `mitm`), whose family law is
+  `Θ(r^{1/6})` above rho. The one published algebraic mechanism is
+  Petit–Kosters–Messeng's tower factor base; its design, and the test
+  on the solver axis that decides whether to build it end to end, are in
+  [`RESEARCH_PKM_TOWER_ORACLE.md`](../../research/notes/index-calculus/RESEARCH_PKM_TOWER_ORACLE.md).
+  A pilot of that test (§10 there) found F4's solving degree nearly flat,
+  where linear growth in `N` had been pre-registered: 4–5 for `m = 2`
+  through `N = 18`, and 5–6 for `m = 3` through `N = 12`. Round 2 (§11)
+  built the sparse tower-aware F4 that extending `N` needed
+  (`src/cryptanalysis/f4_fp_tower.rs`, cross-checked against `f4_fp`). It
+  finds the degree rising again, slowly:
+  - at `m = 2`, to 6 at `N = 20` and still 6 at `N = 22`, in the Kummer and
+    isogeny families alike and at every prime tried, which refutes the
+    pilot's bounded-degree conjecture;
+  - at `m = 3`, to 7 at `N = 15`.
+
+  Whether the growth is linear or slower is open. So is `m = 4` past
+  `N = 12`, the regime that decides the oracle. It ran out of memory at
+  `N = 16`, where a diagnostic gives only `D ≥ 7`. No oracle is built.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.

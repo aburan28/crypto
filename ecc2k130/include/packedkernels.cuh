@@ -413,7 +413,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
         const bool last = step + 1 == p.steps;
         const unsigned long long now = p.iterBase + step + 1;
         const bool guard = p.maxIters && now % ECC_GUARD_PERIOD == 0;
-        P131 inv = toPolynomial131(inv131(fromPolynomial131(prod)));
+        P131 inv = invPolynomial131(prod);
         P131 next;
 #if ECC_TABLE_FUSED_PIPE
         // The slot's operands are loaded one iteration ahead, before this
@@ -458,7 +458,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
             } else {
                 lambdaPoly = mulPolynomial131(inv, w);
             }
-            const P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
+            const P131 nx = add131(add131(twSquare(lambdaPoly, twSel), lambdaPoly), dp);
             const P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
             const P131 ny = add131(add131(product, nx), y);
             store(p.x, slot, tid, p.threads, nx);
@@ -569,8 +569,8 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
                 lamA = reducePolynomial131(hbA);
                 lamB = reducePolynomial131(hbB);
             }
-            const P131 nxA = add131(add131(squarePolynomial131(lamA), lamA), dA);
-            const P131 nxB = add131(add131(squarePolynomial131(lamB), lamB), dB);
+            const P131 nxA = add131(add131(twSquare(lamA, twSel), lamA), dA);
+            const P131 nxB = add131(add131(twSquare(lamB, twSel), lamB), dB);
             uint32_t hyA[9], hyB[9];
             product131(lamA, add131(xA, nxA), hyA);
             product131(lamB, add131(xB, nxB), hyB);
@@ -809,7 +809,7 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif  // ECC_TABLE_PIPE_SELECT
         ECC_PHASE_MARK(ph1);
 #if ECC_PACKED_POLY_CHAIN
-        inv = toPolynomial131(inv131(fromPolynomial131(prod)));
+        inv = invPolynomial131(prod);
 #else
         inv = inv131(prod);
 #endif
@@ -937,7 +937,11 @@ static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denomin
 #endif
 #endif
 #if ECC_PACKED_POLY_STATE
+#if ECC_WALK_TABLE
+            P131 nx = add131(add131(twSquare(lambdaPoly, twSel), lambdaPoly), dp);
+#else
             P131 nx = add131(add131(squarePolynomial131(lambdaPoly), lambdaPoly), dp);
+#endif
             P131 product = mulPolynomial131(lambdaPoly, add131(x, nx));
             P131 ny = add131(add131(product, nx), y);
 #else

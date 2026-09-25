@@ -36,6 +36,12 @@ all gave **no** speedup over a generic factor base:
 - **point-coordinate interval FB** (`x(P) ∈ [0, B)`): the Petit–Kosters–Messeng
   divisor-set construction; audited in `research/notes/cm-isogeny/RESEARCH_PKM_CRITERION.md`.
 
+> **Scope note (2026-09-24).** PKM's published factor base is not an interval.
+> It is the zero set of a *composition* of low-degree maps, with one auxiliary
+> variable per level, and none of the three bases above tests it. Because those
+> auxiliary variables enlarge the ring, Proposition 1 below does not cover it
+> either. See `RESEARCH_PKM_TOWER_ORACLE.md` §1.3.
+
 The theoretical reason, recorded in `yokoyama_lower_bound.md`, is the
 Yokoyama–Yasuda–Takahashi–Kogure (2020) lower bound: the Gröbner solving cost is
 controlled by the **degree of regularity** `Reg ≈ md + d_S − m` of the Semaev

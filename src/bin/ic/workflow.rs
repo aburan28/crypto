@@ -1674,51 +1674,81 @@ pub fn run(args: WorkflowArgs, quiet: bool) -> Result<Value, String> {
     } else {
         IndividualLogSolver::new(&c, &fb, &table, &ic, pair.as_ref())
     };
-    for i in pending {
-        let (q, expected, target_record) = resolve_target(&c, &p.targets[i])?;
-        // Timed like the ρ baseline: the descent on the public point
-        // only, not the construction of the target.
-        let t = Instant::now();
-        let outcome = solver.as_ref().and_then(|s| s.solve(&q));
-        let (recovered, trials) = match outcome {
-            Some((d, r)) => (Some(d), r.trials),
-            None => (None, 0),
-        };
-        let verified = recovered
-            .as_ref()
-            .is_some_and(|d| c.mul(c.generator(), d) == q)
-            && expected
-                .as_ref()
-                .is_none_or(|known| recovered.as_ref() == Some(known));
-        // Replace any earlier unverified attempt for this index.
-        solutions.solutions.retain(|s| s.index != i);
-        solutions.solutions.push(Solution {
-            index: i,
-            expected: expected
-                .as_ref()
-                .map(ToString::to_string)
-                .unwrap_or_else(|| "not_constructed".into()),
-            target: Some(target_record),
-            recovered: recovered.map(|d| d.to_string()),
-            verified,
-            descent_trials: trials,
-            elapsed_seconds: t.elapsed().as_secs_f64(),
-        });
-        solutions.solutions.sort_by_key(|s| s.index);
-        if verified {
-            solved_now += 1;
-        } else {
-            failed_now += 1;
+    // Targets are independent, so they are solved in parallel.  Each
+    // one's `elapsed_seconds` is still its own descent wall, and
+    // `descent_seconds_total` sums them, so the gated end-to-end figures
+    // price the same work as a serial run; only the stage's own wall
+    // falls.  Every finished target is recorded and the state written at
+    // once, under a lock, so an interrupted batch keeps what it solved.
+    {
+        use rayon::prelude::*;
+        use std::sync::Mutex;
+        let shared = Mutex::new((&mut solutions, &mut state, &mut solved_now, &mut failed_now));
+        let failures: Vec<String> = pending
+            .par_iter()
+            .with_max_len(1)
+            .filter_map(|&i| {
+                let (q, expected, target_record) = match resolve_target(&c, &p.targets[i]) {
+                    Ok(t) => t,
+                    Err(e) => return Some(e),
+                };
+                // Timed like the ρ baseline: the descent on the public point
+                // only, not the construction of the target.
+                let t = Instant::now();
+                let outcome = solver.as_ref().and_then(|s| s.solve(&q));
+                let elapsed = t.elapsed().as_secs_f64();
+                let (recovered, trials) = match outcome {
+                    Some((d, r)) => (Some(d), r.trials),
+                    None => (None, 0),
+                };
+                let verified = recovered
+                    .as_ref()
+                    .is_some_and(|d| c.mul(c.generator(), d) == q)
+                    && expected
+                        .as_ref()
+                        .is_none_or(|known| recovered.as_ref() == Some(known));
+                let solution = Solution {
+                    index: i,
+                    expected: expected
+                        .as_ref()
+                        .map(ToString::to_string)
+                        .unwrap_or_else(|| "not_constructed".into()),
+                    target: Some(target_record),
+                    recovered: recovered.map(|d| d.to_string()),
+                    verified,
+                    descent_trials: trials,
+                    elapsed_seconds: elapsed,
+                };
+                let mut guard = shared.lock().unwrap_or_else(|e| e.into_inner());
+                let (solutions, state, solved_now, failed_now) = &mut *guard;
+                // Replace any earlier unverified attempt for this index.
+                solutions.solutions.retain(|s| s.index != i);
+                solutions.solutions.push(solution);
+                solutions.solutions.sort_by_key(|s| s.index);
+                if verified {
+                    **solved_now += 1;
+                } else {
+                    **failed_now += 1;
+                }
+                state.solved_targets = solutions.solutions.iter().filter(|s| s.verified).count();
+                if let Err(e) = write_atomic(&sol_path, &**solutions) {
+                    return Some(e);
+                }
+                if let Err(e) = write_atomic(&state_path, &**state) {
+                    return Some(e);
+                }
+                say(&format!(
+                    "      target {i}: {} ({} descent trials, {:.2}s)",
+                    if verified { "verified" } else { "FAILED" },
+                    trials,
+                    elapsed
+                ));
+                None
+            })
+            .collect();
+        if let Some(e) = failures.into_iter().next() {
+            return Err(e);
         }
-        state.solved_targets = solutions.solutions.iter().filter(|s| s.verified).count();
-        write_atomic(&sol_path, &solutions)?;
-        write_atomic(&state_path, &state)?;
-        say(&format!(
-            "      target {i}: {} ({} descent trials, {:.2}s)",
-            if verified { "verified" } else { "FAILED" },
-            trials,
-            t.elapsed().as_secs_f64()
-        ));
     }
     let all_verified = state.solved_targets == p.targets.len();
     state.solve = StageState {

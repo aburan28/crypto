@@ -1,0 +1,34 @@
+{
+  "title": "Degree-73 descent on the Koblitz curve over GF(2^37)",
+  "curve": "y^2 + x*y = x^3 + 1",
+  "field_exponent": 37,
+  "prime_degree": 73,
+  "source_group_order": 137439487532,
+  "factor_base_subgroup_order": 230603167,
+  "seeds": {
+    "development": 20260925,
+    "holdout": 7132026
+  },
+  "summands": [2, 3],
+  "targets_per_summand_count": 8,
+  "encodings": ["ordered", "canonical"],
+  "repetitions": 2,
+  "target_patterns": {
+    "2": [
+      [[0, 1], [1, 1]], [[0, 1], [1, -1]], [[0, -1], [1, 1]], [[0, -1], [1, -1]],
+      [[0, 1], [0, 1]], [[0, 1], [0, -1]], [[1, 1], [1, 1]], [[2, 1], [3, -1]]
+    ],
+    "3": [
+      [[0, 1], [1, 1], [2, 1]], [[0, 1], [1, 1], [2, -1]], [[0, -1], [1, 1], [3, 1]],
+      [[0, 1], [0, 1], [1, 1]], [[1, 1], [1, 1], [2, -1]], [[0, 1], [2, -1], [3, -1]],
+      [[0, -1], [1, -1], [2, -1]], [[3, 1], [3, 1], [3, -1]]
+    ]
+  },
+  "success_rule": "For each seed, summand count and encoding, the isogenous model must have at least 10% fewer aggregate F5 matrix-stage XORs than the source and no larger paired completion degree.",
+  "stop_conditions": [
+    "Stop if the rational degree-73 isogeny inventory is not exactly 74.",
+    "Stop if the kernel, point-count, map, homomorphism, or transported-workload checks fail.",
+    "Stop if the solver roots cannot be independently lifted and checked."
+  ],
+  "accounting_boundary": "Boolean F4/F5 matrix stage only; no full ECDLP operation conversion is defined in this experiment."
+}
