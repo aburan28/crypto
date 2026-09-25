@@ -83,6 +83,13 @@ nonzero H=`[4]P`; independent group-law replay verifies `[q]H=O`,
 Frobenius transport can use one projected F0 log-column family. Its actual
 size is not measured at n=131.
 
+A later, separate [direct-point import gate](../challenge_point_import_20260925/RESULT.md)
+found the two repository representations use **the identical polynomial and
+bit encoding**. It imported the public ECC2K-130 P and Q coordinates
+without a basis conversion and independently verified their group/Frobenius
+identities. This post-result clarification does not change this gate's
+frozen support or density measurements.
+
 For each cell, 256 identical coefficient masks transported across all `m`
 spaces passed exact Frobenius/liftability covariance. Another 16,384
 unique, disjoint nonzero masks sampled the F0 lift condition; all 81,920
